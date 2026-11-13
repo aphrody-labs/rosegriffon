@@ -1,4 +1,9 @@
-import type { CastAvailabilityStatus, CastEventKind, CastEventStatus, CastSlotRole } from "../enums/cast";
+import type {
+  CastAvailabilityStatus,
+  CastEventKind,
+  CastEventStatus,
+  CastSlotRole,
+} from "../enums/cast";
 
 import type { PageQuery, PagedList } from "./common";
 

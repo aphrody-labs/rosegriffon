@@ -14,7 +14,15 @@ import {
   formatDiscordTimestamp,
   type BotNotification,
 } from "../src/bot/index.js";
-import { FORMATIONS, encodeTeamCode, decodeTeamCode, translateEffect, GAIJI, news, bot } from "../src/index.js";
+import {
+  FORMATIONS,
+  encodeTeamCode,
+  decodeTeamCode,
+  translateEffect,
+  GAIJI,
+  news,
+  bot,
+} from "../src/index.js";
 
 describe("Azalée News Module", () => {
   test("calculates reading time accurately", () => {
@@ -26,11 +34,14 @@ describe("Azalée News Module", () => {
   });
 
   test("slugifies titles cleanly", () => {
-    expect(slugifyTitle("Mise à jour 1.2.0: Nouvelles Formations!")).toBe("mise-a-jour-1-2-0-nouvelles-formations");
+    expect(slugifyTitle("Mise à jour 1.2.0: Nouvelles Formations!")).toBe(
+      "mise-a-jour-1-2-0-nouvelles-formations",
+    );
   });
 
   test("extracts text summary without markdown symbols", () => {
-    const md = "## Title\nThis is **bold** text with [links](https://google.com).";
+    const md =
+      "## Title\nThis is **bold** text with [links](https://google.com).";
     const summary = extractSummary(md);
     expect(summary).toBe("Title This is bold text with links.");
   });
@@ -93,7 +104,9 @@ describe("Azalée News Module", () => {
     );
     expect(rss).toContain('<rss version="2.0">');
     expect(rss).toContain("<title><![CDATA[Rose Griffon News]]></title>");
-    expect(rss).toContain("<link>https://azalee.rosegriffon.fr/news/first</link>");
+    expect(rss).toContain(
+      "<link>https://azalee.rosegriffon.fr/news/first</link>",
+    );
   });
 });
 
@@ -139,7 +152,9 @@ describe("Azalée Backward Compatibility via Inagle Re-exports", () => {
   });
 
   test("re-exports team code codec from inagle", () => {
-    const encoded = encodeTeamCode("form_442", [{ slot: "field-0", charaId: "c01000010" }]);
+    const encoded = encodeTeamCode("form_442", [
+      { slot: "field-0", charaId: "c01000010" },
+    ]);
     const decoded = decodeTeamCode(encoded);
     expect(decoded.formationId).toBe("form_442");
     expect(decoded.slots[0].charaId).toBe("c01000010");

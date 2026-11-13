@@ -118,11 +118,13 @@ export interface WaitlistCandidate {
  * laisserait un trou (deux joueurs « 3e », personne « 2e »). Ici l'ordre d'arrivée est
  * la seule source de vérité, et il ne bouge jamais.
  */
-export function computeWaitlistPositions(participants: readonly WaitlistCandidate[]): Map<number, number> {
+export function computeWaitlistPositions(
+  participants: readonly WaitlistCandidate[],
+): Map<number, number> {
   const positions = new Map<number, number>();
 
   participants
-    .filter(p => p.status === ParticipantStatus.WAITLISTED)
+    .filter((p) => p.status === ParticipantStatus.WAITLISTED)
     .slice()
     .sort((a, b) => {
       const delta = a.registeredAt.getTime() - b.registeredAt.getTime();
@@ -142,7 +144,9 @@ export type SeriesMatch = {
 };
 
 export type SeriesOutcome =
-  { status: "pending" } | { status: "tie" } | { status: "decided"; winner: TeamSide; scoreT1: number; scoreT2: number };
+  | { status: "pending" }
+  | { status: "tie" }
+  | { status: "decided"; winner: TeamSide; scoreT1: number; scoreT2: number };
 
 /**
  * Résout l'issue d'une série (lobby) en fonction du format.
@@ -152,9 +156,12 @@ export type SeriesOutcome =
  *  - BO impair : premier à `ceil(n/2)` manches gagnées (les manches non validées
  *    sont ignorées tant que le seuil n'est pas atteint → `pending`).
  */
-export function computeSeriesOutcome(matchFormat: MatchFormat, matches: readonly SeriesMatch[]): SeriesOutcome {
+export function computeSeriesOutcome(
+  matchFormat: MatchFormat,
+  matches: readonly SeriesMatch[],
+): SeriesOutcome {
   if (matchFormat === MatchFormat.DOUBLE_LEG) {
-    if (matches.some(m => !m.isValidated)) return { status: "pending" };
+    if (matches.some((m) => !m.isValidated)) return { status: "pending" };
 
     let scoreT1 = 0;
     let scoreT2 = 0;
@@ -163,8 +170,10 @@ export function computeSeriesOutcome(matchFormat: MatchFormat, matches: readonly
       scoreT2 += m.scoreTeam2;
     }
 
-    if (scoreT1 > scoreT2) return { status: "decided", winner: TeamSide.TEAM_1, scoreT1, scoreT2 };
-    if (scoreT2 > scoreT1) return { status: "decided", winner: TeamSide.TEAM_2, scoreT1, scoreT2 };
+    if (scoreT1 > scoreT2)
+      return { status: "decided", winner: TeamSide.TEAM_1, scoreT1, scoreT2 };
+    if (scoreT2 > scoreT1)
+      return { status: "decided", winner: TeamSide.TEAM_2, scoreT1, scoreT2 };
 
     return { status: "tie" };
   }
@@ -179,8 +188,10 @@ export function computeSeriesOutcome(matchFormat: MatchFormat, matches: readonly
     if (m.scoreTeam2 > m.scoreTeam1) scoreT2++;
   }
 
-  if (scoreT1 >= winsNeeded) return { status: "decided", winner: TeamSide.TEAM_1, scoreT1, scoreT2 };
-  if (scoreT2 >= winsNeeded) return { status: "decided", winner: TeamSide.TEAM_2, scoreT1, scoreT2 };
+  if (scoreT1 >= winsNeeded)
+    return { status: "decided", winner: TeamSide.TEAM_1, scoreT1, scoreT2 };
+  if (scoreT2 >= winsNeeded)
+    return { status: "decided", winner: TeamSide.TEAM_2, scoreT1, scoreT2 };
 
   return { status: "pending" };
 }
@@ -194,8 +205,8 @@ export function resolveTournamentSideOutcome(
   team2: Array<{ score: number; forfeit: boolean }>,
   lobbyState: LobbyState,
 ): { winner: TeamSide | null } | null {
-  const t1Forfeit = team1.some(u => u.forfeit);
-  const t2Forfeit = team2.some(u => u.forfeit);
+  const t1Forfeit = team1.some((u) => u.forfeit);
+  const t2Forfeit = team2.some((u) => u.forfeit);
 
   if (t1Forfeit && !t2Forfeit) return { winner: TeamSide.TEAM_2 };
   if (t2Forfeit && !t1Forfeit) return { winner: TeamSide.TEAM_1 };

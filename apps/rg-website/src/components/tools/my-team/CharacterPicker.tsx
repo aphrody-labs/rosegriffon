@@ -103,97 +103,103 @@ function DraggableCharaCard({
   isSelected?: boolean;
   onTap?: (char: PickerCharacter) => void;
 }) {
-  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
-    data: {
-      character: char,
-      origin: "roster",
-      type: "player",
-    },
-    disabled: isPlaced,
-    id: `roster-${char.charaId}`,
-  });
+  const { attributes, listeners, setNodeRef, transform, isDragging } =
+    useDraggable({
+      data: {
+        character: char,
+        origin: "roster",
+        type: "player",
+      },
+      disabled: isPlaced,
+      id: `roster-${char.charaId}`,
+    });
 
   const style = {
     opacity: isDragging ? 0.3 : isPlaced ? 0.4 : 1,
     transform: CSS.Translate.toString(transform),
   };
 
-  const elSprite = char.element !== "Void" ? ELEMENT_SPRITE[char.element] : null;
+  const elSprite =
+    char.element !== "Void" ? ELEMENT_SPRITE[char.element] : null;
   const roleColor = PICKER_ROLE_COLORS[char.position] || PICKER_ROLE_COLORS.MF;
   const roleLabel = PICKER_ROLE_LABELS[char.position] || char.position;
 
   return (
     <li className="relative w-full">
       <button
-      type="button"
-      ref={setNodeRef}
-      style={style}
-      {...listeners}
-      {...attributes}
-      aria-label={`${char.name} — ${PICKER_ROLE_LABELS[char.position] || char.position}, ${char.element}, ${char.rarity}${isPlaced ? " (déjà placé)" : ""}`}
-      onClick={e => {
-        if (!isPlaced && onTap) {
-          e.preventDefault();
-          e.stopPropagation();
-          onTap(char);
-        }
-      }}
-      className={cn(
-        "relative block w-full rounded-xl overflow-hidden bg-surface-container-highest transition-all",
-        isPlaced
-          ? "cursor-not-allowed grayscale"
-          : "cursor-pointer sm:cursor-grab sm:active:cursor-grabbing hover:ring-1 hover:ring-primary/50",
-        isDragging && "z-50 ring-2 ring-primary",
-        isSelected && "ring-2 ring-primary scale-95",
-      )}
-    >
-      <div className="relative w-full aspect-square overflow-hidden">
-        <SafeImage
-          src={char.imageUrl}
-          zukanHash={char.zukanHash}
-          fallbackSrc={char.internalCode ? getCharacterImageUrl(char.internalCode) : undefined}
-          alt={char.name}
-          fill
-          sizes="(max-width: 640px) 20vw, 80px"
-          className="object-cover"
-          unoptimized
-        />
-        <div className="absolute inset-0 bg-linear-to-t from-black/80 via-transparent to-transparent" />
-
-        {/* Rarity */}
-        <div className="absolute top-0.5 left-0.5">
-          <RarityBadge rarity={char.rarity} size="xs" />
-        </div>
-
-        {/* Element + Position */}
-        <div className="absolute bottom-5 left-0.5 flex items-center gap-0.5">
-          {elSprite && <CommonSpriteIcon name={elSprite} scale={0.18} />}
-          <span
-            className="px-0.5 py-px rounded text-[6px] sm:text-[7px] font-black text-white leading-none"
-            style={{ backgroundColor: roleColor }}
-          >
-            {roleLabel}
-          </span>
-        </div>
-
-        {/* Name */}
-        <p className="absolute bottom-0 inset-x-0 px-0.5 pb-0.5 text-white font-bold text-xs sm:text-[8px] truncate drop-shadow-lg text-center">
-          {char.name}
-        </p>
-
-        {/* Placed indicator */}
-        {isPlaced && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/40">
-            <Icon name="check_circle" size={20} className="text-primary" />
-          </div>
+        type="button"
+        ref={setNodeRef}
+        style={style}
+        {...listeners}
+        {...attributes}
+        aria-label={`${char.name} — ${PICKER_ROLE_LABELS[char.position] || char.position}, ${char.element}, ${char.rarity}${isPlaced ? " (déjà placé)" : ""}`}
+        onClick={(e) => {
+          if (!isPlaced && onTap) {
+            e.preventDefault();
+            e.stopPropagation();
+            onTap(char);
+          }
+        }}
+        className={cn(
+          "relative block w-full rounded-xl overflow-hidden bg-surface-container-highest transition-all",
+          isPlaced
+            ? "cursor-not-allowed grayscale"
+            : "cursor-pointer sm:cursor-grab sm:active:cursor-grabbing hover:ring-1 hover:ring-primary/50",
+          isDragging && "z-50 ring-2 ring-primary",
+          isSelected && "ring-2 ring-primary scale-95",
         )}
-        {/* Selected indicator (tap-to-place) */}
-        {isSelected && !isPlaced && (
-          <div className="absolute inset-0 flex items-center justify-center bg-primary/25 border-2 border-primary rounded-xl">
-            <Icon name="touch_app" size={20} className="text-primary" />
+      >
+        <div className="relative w-full aspect-square overflow-hidden">
+          <SafeImage
+            src={char.imageUrl}
+            zukanHash={char.zukanHash}
+            fallbackSrc={
+              char.internalCode
+                ? getCharacterImageUrl(char.internalCode)
+                : undefined
+            }
+            alt={char.name}
+            fill
+            sizes="(max-width: 640px) 20vw, 80px"
+            className="object-cover"
+            unoptimized
+          />
+          <div className="absolute inset-0 bg-linear-to-t from-black/80 via-transparent to-transparent" />
+
+          {/* Rarity */}
+          <div className="absolute top-0.5 left-0.5">
+            <RarityBadge rarity={char.rarity} size="xs" />
           </div>
-        )}
-      </div>
+
+          {/* Element + Position */}
+          <div className="absolute bottom-5 left-0.5 flex items-center gap-0.5">
+            {elSprite && <CommonSpriteIcon name={elSprite} scale={0.18} />}
+            <span
+              className="px-0.5 py-px rounded text-[6px] sm:text-[7px] font-black text-white leading-none"
+              style={{ backgroundColor: roleColor }}
+            >
+              {roleLabel}
+            </span>
+          </div>
+
+          {/* Name */}
+          <p className="absolute bottom-0 inset-x-0 px-0.5 pb-0.5 text-white font-bold text-xs sm:text-[8px] truncate drop-shadow-lg text-center">
+            {char.name}
+          </p>
+
+          {/* Placed indicator */}
+          {isPlaced && (
+            <div className="absolute inset-0 flex items-center justify-center bg-black/40">
+              <Icon name="check_circle" size={20} className="text-primary" />
+            </div>
+          )}
+          {/* Selected indicator (tap-to-place) */}
+          {isSelected && !isPlaced && (
+            <div className="absolute inset-0 flex items-center justify-center bg-primary/25 border-2 border-primary rounded-xl">
+              <Icon name="touch_app" size={20} className="text-primary" />
+            </div>
+          )}
+        </div>
       </button>
     </li>
   );
@@ -234,7 +240,9 @@ export function CharacterPicker({
         setFilterPosition("COORD");
       } else {
         // Clear filter if it was COACH or COORD
-        setFilterPosition(prev => (prev === "COACH" || prev === "COORD" ? null : prev));
+        setFilterPosition((prev) =>
+          prev === "COACH" || prev === "COORD" ? null : prev,
+        );
       }
       setVisibleCount(PAGE_SIZE);
     }
@@ -245,36 +253,50 @@ export function CharacterPicker({
 
     if (activeSlotId) {
       if (activeSlotId.startsWith("manager-")) {
-        list = list.filter(c => c.position === "COACH");
+        list = list.filter((c) => c.position === "COACH");
       } else if (activeSlotId.startsWith("support-")) {
-        list = list.filter(c => c.position === "COORD");
+        list = list.filter((c) => c.position === "COORD");
       } else {
-        list = list.filter(c => c.position !== "COACH" && c.position !== "COORD");
+        list = list.filter(
+          (c) => c.position !== "COACH" && c.position !== "COORD",
+        );
       }
     } else {
       // By default, hide coach and coordinator from general player list unless explicitly filtered
       if (filterPosition !== "COACH" && filterPosition !== "COORD") {
-        list = list.filter(c => c.position !== "COACH" && c.position !== "COORD");
+        list = list.filter(
+          (c) => c.position !== "COACH" && c.position !== "COORD",
+        );
       }
     }
 
     if (search) {
       const q = search.toLowerCase();
-      list = list.filter(c => c.name.toLowerCase().includes(q));
+      list = list.filter((c) => c.name.toLowerCase().includes(q));
     }
     if (filterPosition) {
-      list = list.filter(c => c.position === filterPosition);
+      list = list.filter((c) => c.position === filterPosition);
     }
     if (filterElement) {
-      list = list.filter(c => c.element === filterElement);
+      list = list.filter((c) => c.element === filterElement);
     }
     if (filterRarity) {
-      list = list.filter(c => c.rarity === filterRarity);
+      list = list.filter((c) => c.rarity === filterRarity);
     }
     return list;
-  }, [characters, search, filterPosition, filterElement, filterRarity, activeSlotId]);
+  }, [
+    characters,
+    search,
+    filterPosition,
+    filterElement,
+    filterRarity,
+    activeSlotId,
+  ]);
 
-  const visible = useMemo(() => filtered.slice(0, visibleCount), [filtered, visibleCount]);
+  const visible = useMemo(
+    () => filtered.slice(0, visibleCount),
+    [filtered, visibleCount],
+  );
 
   const handleScroll = useCallback(() => {
     const el = scrollRef.current;
@@ -282,12 +304,15 @@ export function CharacterPicker({
       return;
     }
     if (el.scrollTop + el.clientHeight >= el.scrollHeight - 200) {
-      setVisibleCount(prev => Math.min(prev + PAGE_SIZE, filtered.length));
+      setVisibleCount((prev) => Math.min(prev + PAGE_SIZE, filtered.length));
     }
   }, [filtered.length]);
 
   const hasActiveFilters =
-    Boolean(filterPosition) || Boolean(filterElement) || Boolean(filterRarity) || Boolean(search);
+    Boolean(filterPosition) ||
+    Boolean(filterElement) ||
+    Boolean(filterRarity) ||
+    Boolean(search);
 
   return (
     <div className="flex flex-col h-full min-h-0">
@@ -308,7 +333,7 @@ export function CharacterPicker({
           <input
             type="search"
             value={search}
-            onChange={e => {
+            onChange={(e) => {
               setSearch(e.target.value);
               setVisibleCount(PAGE_SIZE);
             }}
@@ -322,12 +347,15 @@ export function CharacterPicker({
       {/* Filters */}
       <div className="px-3 pb-2 space-y-1.5">
         {/* Position */}
-        <fieldset className="flex flex-wrap gap-1.5" aria-label="Filtrer par position">
+        <fieldset
+          className="flex flex-wrap gap-1.5"
+          aria-label="Filtrer par position"
+        >
           {POSITIONS.map(({ value, label }) => (
             <button
               key={value}
               onClick={() => {
-                setFilterPosition(prev => (prev === value ? null : value));
+                setFilterPosition((prev) => (prev === value ? null : value));
                 setVisibleCount(PAGE_SIZE);
               }}
               aria-pressed={filterPosition === value}
@@ -338,7 +366,11 @@ export function CharacterPicker({
                   ? "text-white elevation-1"
                   : "border border-outline-variant/40 text-on-surface-variant hover:bg-on-surface/[0.06]",
               )}
-              style={filterPosition === value ? { backgroundColor: PICKER_ROLE_COLORS[value] } : undefined}
+              style={
+                filterPosition === value
+                  ? { backgroundColor: PICKER_ROLE_COLORS[value] }
+                  : undefined
+              }
             >
               {label}
             </button>
@@ -351,7 +383,7 @@ export function CharacterPicker({
             <button
               key={value}
               onClick={() => {
-                setFilterElement(prev => (prev === value ? null : value));
+                setFilterElement((prev) => (prev === value ? null : value));
                 setVisibleCount(PAGE_SIZE);
               }}
               aria-pressed={filterElement === value}
@@ -391,7 +423,7 @@ export function CharacterPicker({
             <button
               key={value}
               onClick={() => {
-                setFilterRarity(prev => (prev === value ? null : value));
+                setFilterRarity((prev) => (prev === value ? null : value));
                 setVisibleCount(PAGE_SIZE);
               }}
               className={cn(
@@ -400,7 +432,9 @@ export function CharacterPicker({
                   ? "text-white elevation-1"
                   : "border border-outline-variant/40 text-on-surface-variant hover:bg-on-surface/[0.06]",
               )}
-              style={filterRarity === value ? { backgroundColor: color } : undefined}
+              style={
+                filterRarity === value ? { backgroundColor: color } : undefined
+              }
             >
               {label}
             </button>
@@ -423,13 +457,17 @@ export function CharacterPicker({
       </div>
 
       {/* Character Grid */}
-      <div ref={scrollRef} onScroll={handleScroll} className="flex-1 min-h-0 overflow-y-auto px-3 pb-3">
+      <div
+        ref={scrollRef}
+        onScroll={handleScroll}
+        className="flex-1 min-h-0 overflow-y-auto px-3 pb-3"
+      >
         <ul
           className="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-4 gap-2"
 
           aria-label="Liste des joueurs disponibles"
         >
-          {visible.map(char => (
+          {visible.map((char) => (
             <DraggableCharaCard
               key={char.charaId}
               char={char}
@@ -441,7 +479,7 @@ export function CharacterPicker({
         </ul>
         {visibleCount < filtered.length && (
           <button
-            onClick={() => setVisibleCount(prev => prev + PAGE_SIZE)}
+            onClick={() => setVisibleCount((prev) => prev + PAGE_SIZE)}
             className="w-full mt-3 inline-flex items-center justify-center gap-1.5 min-h-11 text-sm text-on-secondary-container font-bold rounded-full bg-secondary-container hover:elevation-1 active:scale-[0.98] transition-all"
           >
             <Icon name="expand_more" size={18} />
@@ -472,7 +510,11 @@ export function CharacterPickerOverlay({ char }: { char: PickerCharacter }) {
         <SafeImage
           src={char.imageUrl}
           zukanHash={char.zukanHash}
-          fallbackSrc={char.internalCode ? getCharacterImageUrl(char.internalCode) : undefined}
+          fallbackSrc={
+            char.internalCode
+              ? getCharacterImageUrl(char.internalCode)
+              : undefined
+          }
           alt={char.name}
           fill
           sizes="80px"

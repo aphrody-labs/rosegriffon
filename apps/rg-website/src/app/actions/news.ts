@@ -18,7 +18,10 @@ export interface PatchNoteDetail extends PatchNoteSummary {
 /**
  * Récupère la liste des patch notes
  */
-export async function getPatchNotes(platform?: string, limit?: number): Promise<PatchNoteSummary[]> {
+export async function getPatchNotes(
+  platform?: string,
+  limit?: number,
+): Promise<PatchNoteSummary[]> {
   const supabase = createPostgresClient();
 
   let query = supabase
@@ -37,7 +40,7 @@ export async function getPatchNotes(platform?: string, limit?: number): Promise<
     return [];
   }
 
-  let notes: PatchNoteSummary[] = ((data as any[]) || []).map(item => ({
+  let notes: PatchNoteSummary[] = ((data as any[]) || []).map((item) => ({
     date: item.date || "",
     featured_image: item.featured_image,
     id: item.id,
@@ -48,8 +51,11 @@ export async function getPatchNotes(platform?: string, limit?: number): Promise<
 
   // Filtrer par plateforme si spécifié
   if (platform) {
-    const platformKey = platform === "ps-steam" ? ["ps4", "ps5", "steam"] : [platform];
-    notes = notes.filter(note => note.platform.some(p => platformKey.includes(p)));
+    const platformKey =
+      platform === "ps-steam" ? ["ps4", "ps5", "steam"] : [platform];
+    notes = notes.filter((note) =>
+      note.platform.some((p) => platformKey.includes(p)),
+    );
   }
 
   return notes;
@@ -58,12 +64,16 @@ export async function getPatchNotes(platform?: string, limit?: number): Promise<
 /**
  * Récupère le détail d'un patch note par son ID ou slug
  */
-export async function getPatchNoteDetail(idOrSlug: string): Promise<PatchNoteDetail | null> {
+export async function getPatchNoteDetail(
+  idOrSlug: string,
+): Promise<PatchNoteDetail | null> {
   const supabase = createPostgresClient();
 
   const { data, error } = await supabase
     .from("patch_notes")
-    .select("id, url, title, title_fr, date, featured_image, content_html, content_html_fr, platform")
+    .select(
+      "id, url, title, title_fr, date, featured_image, content_html, content_html_fr, platform",
+    )
     .eq("id", idOrSlug)
     .single();
 

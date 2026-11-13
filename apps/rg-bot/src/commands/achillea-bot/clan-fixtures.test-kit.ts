@@ -13,7 +13,12 @@ export function appartenance(role: number | null) {
     : {
         clanId: CLAN_ID,
         clanRole: role,
-        clan: { id: CLAN_ID, name: "Raimon", shortenedName: "RMN", avatarUrl: "https://cdn.test/raimon.png" },
+        clan: {
+          id: CLAN_ID,
+          name: "Raimon",
+          shortenedName: "RMN",
+          avatarUrl: "https://cdn.test/raimon.png",
+        },
       };
 }
 
@@ -54,7 +59,11 @@ function membreDto(id: string, role: number, nom: string) {
   };
 }
 
-export const MEMBRES = [membreDto(PRESIDENT, 3, "Endou"), membreDto(VICE, 2, "Kazemaru"), membreDto(MEMBRE, 0, "Kabeyama")];
+export const MEMBRES = [
+  membreDto(PRESIDENT, 3, "Endou"),
+  membreDto(VICE, 2, "Kazemaru"),
+  membreDto(MEMBRE, 0, "Kabeyama"),
+];
 
 export const INVITATION = {
   id: 9,
@@ -75,7 +84,18 @@ export function equipe(type: 0 | 1, id = 70 + type) {
     type,
     captainUserId: type === 0 ? MEMBRE : null,
     updatedAt: "2026-10-01T00:00:00.000Z",
-    members: type === 0 ? [{ linkId: 1, userId: MEMBRE, displayName: "Kabeyama", avatar: null, role: 0 }] : [],
+    members:
+      type === 0
+        ? [
+            {
+              linkId: 1,
+              userId: MEMBRE,
+              displayName: "Kabeyama",
+              avatar: null,
+              role: 0,
+            },
+          ]
+        : [],
     valid: false,
     errors: ["Il faut au moins 3 joueurs."],
   };

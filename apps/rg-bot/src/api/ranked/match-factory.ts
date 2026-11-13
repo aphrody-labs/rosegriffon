@@ -61,8 +61,12 @@ export async function createRankedMatch(
     ],
   });
 
-  const reservationA = await matchMaker.reserveSeatFor(room, { userId: a.userId });
-  const reservationB = await matchMaker.reserveSeatFor(room, { userId: b.userId });
+  const reservationA = await matchMaker.reserveSeatFor(room, {
+    userId: a.userId,
+  });
+  const reservationB = await matchMaker.reserveSeatFor(room, {
+    userId: b.userId,
+  });
 
   // Évènement `match_found` aux 2 joueurs présents dans la lobby (toast + son sur toute page du site).
   const payload = {

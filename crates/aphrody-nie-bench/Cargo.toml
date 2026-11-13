@@ -23,6 +23,10 @@ workspace = true
 [dependencies]
 aphrody-nie-formats = { workspace = true, default-features = true }
 anyhow = { workspace = true, optional = true }
-clap = { workspace = true, optional = true, features = ["derive", "color", "env"] }
+clap = { workspace = true, optional = true, features = [
+  "derive",
+  "color",
+  "env",
+] }
 serde = { workspace = true, features = ["std", "derive"] }
 thiserror = { workspace = true }

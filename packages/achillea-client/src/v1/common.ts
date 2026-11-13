@@ -27,7 +27,10 @@ import type {
   UserDTO,
   UserRef,
 } from "@rosegriffon/achillea-types/domain/user";
-import { ClanMemberDistinction, ClanMemberRole } from "@rosegriffon/achillea-types/enums/clanMemberRole";
+import {
+  ClanMemberDistinction,
+  ClanMemberRole,
+} from "@rosegriffon/achillea-types/enums/clanMemberRole";
 import { MatchMode } from "@rosegriffon/achillea-types/enums/eventEnums";
 import { UserRole } from "@rosegriffon/achillea-types/enums/userRole";
 
@@ -39,9 +42,15 @@ export const apiDateSchema = z.coerce.date();
 /** Les enums de contrat, en version runtime. */
 export const userRoleSchema = z.enum(UserRole) satisfies z.ZodType<UserRole>;
 export const matchModeSchema = z.enum(MatchMode) satisfies z.ZodType<MatchMode>;
-export const clanMemberRoleSchema = z.enum(ClanMemberRole) satisfies z.ZodType<ClanMemberRole>;
-export const clanMemberDistinctionSchema = z.enum(ClanMemberDistinction) satisfies z.ZodType<ClanMemberDistinction>;
-export const socialMediaSchema = z.enum(SocialMedia) satisfies z.ZodType<SocialMedia>;
+export const clanMemberRoleSchema = z.enum(
+  ClanMemberRole,
+) satisfies z.ZodType<ClanMemberRole>;
+export const clanMemberDistinctionSchema = z.enum(
+  ClanMemberDistinction,
+) satisfies z.ZodType<ClanMemberDistinction>;
+export const socialMediaSchema = z.enum(
+  SocialMedia,
+) satisfies z.ZodType<SocialMedia>;
 
 /**
  * Métadonnées de pagination.
@@ -67,17 +76,27 @@ export const pageSizeMetaSchema = z.object({
 }) satisfies z.ZodType<PageSizeMeta>;
 
 /** Enveloppe `{ data, meta }` des contrôleurs historiques. */
-export function paginatedSchema<T>(item: z.ZodType<T>): z.ZodType<Paginated<T>> {
+export function paginatedSchema<T>(
+  item: z.ZodType<T>,
+): z.ZodType<Paginated<T>> {
   return z.object({ data: z.array(item), meta: pageMetaSchema });
 }
 
 /** Enveloppe `{ data, total, meta }` des contrôleurs récents (casts, sanctions…). */
-export function pagedListSchema<T>(item: z.ZodType<T>): z.ZodType<PagedList<T>> {
-  return z.object({ data: z.array(item), total: z.number(), meta: pageSizeMetaSchema });
+export function pagedListSchema<T>(
+  item: z.ZodType<T>,
+): z.ZodType<PagedList<T>> {
+  return z.object({
+    data: z.array(item),
+    total: z.number(),
+    meta: pageSizeMetaSchema,
+  });
 }
 
 /** Enveloppe `{ success, data?, error? }` des contrôleurs clans / organisations. */
-export function apiEnvelopeSchema<T>(payload: z.ZodType<T>): z.ZodType<ApiEnvelope<T>> {
+export function apiEnvelopeSchema<T>(
+  payload: z.ZodType<T>,
+): z.ZodType<ApiEnvelope<T>> {
   return z.object({
     success: z.boolean(),
     data: payload.optional(),

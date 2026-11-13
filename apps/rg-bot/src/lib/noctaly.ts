@@ -67,7 +67,8 @@ export const FENETRE_OBSERVEE = Object.freeze({ requetes: 120, secondes: 60 });
  * de scie qui frôlent le 429 à chaque fenêtre. Aller moins vite est possible
  * (`--cadence=1`) et ne coûte que du temps.
  */
-export const CADENCE_DEFAUT = FENETRE_OBSERVEE.requetes / FENETRE_OBSERVEE.secondes;
+export const CADENCE_DEFAUT =
+  FENETRE_OBSERVEE.requetes / FENETRE_OBSERVEE.secondes;
 
 /**
  * Combien de requêtes on se garde en réserve avant de considérer le quota
@@ -107,7 +108,8 @@ export interface ProfilNoctaly {
  * Une seule réponse suffit alors à abandonner toute une passe. Voir
  * `CODE_MODULE_DESACTIVE`.
  */
-export type Issue = "ok" | "absent" | "module-desactive" | "refuse" | "quota" | "panne";
+export type Issue =
+  "ok" | "absent" | "module-desactive" | "refuse" | "quota" | "panne";
 
 /**
  * Le code d'erreur applicatif que rend Noctaly quand un module est éteint.
@@ -170,7 +172,9 @@ export function urlProfilNiveau(guildId: string, discordId: string): string {
  */
 /** Un entier positif, ou zéro — pour les champs annexes qu'on n'écrit pas. */
 function entier(valeur: unknown): number {
-  return typeof valeur === "number" && Number.isFinite(valeur) && valeur >= 0 ? Math.floor(valeur) : 0;
+  return typeof valeur === "number" && Number.isFinite(valeur) && valeur >= 0
+    ? Math.floor(valeur)
+    : 0;
 }
 
 export function lireProfil(brut: unknown): ProfilNoctaly | null {
@@ -179,7 +183,11 @@ export function lireProfil(brut: unknown): ProfilNoctaly | null {
   }
   const objet = brut as Record<string, unknown>;
   const xpTotale = objet.totalXp;
-  if (typeof xpTotale !== "number" || !Number.isFinite(xpTotale) || xpTotale < 0) {
+  if (
+    typeof xpTotale !== "number" ||
+    !Number.isFinite(xpTotale) ||
+    xpTotale < 0
+  ) {
     return null;
   }
   return {
@@ -214,7 +222,8 @@ export interface ProfilEconomieNoctaly {
 /** L'URL du profil d'économie, avec les trois relations optionnelles. */
 export function urlProfilEconomie(guildId: string, discordId: string): string {
   return (
-    `${BASE_API_NOCTALY}/guilds/${guildId}/users/${discordId}/eco-profile` + `?items=true&chests=true&dailyStreak=true`
+    `${BASE_API_NOCTALY}/guilds/${guildId}/users/${discordId}/eco-profile` +
+    `?items=true&chests=true&dailyStreak=true`
   );
 }
 
@@ -236,7 +245,9 @@ export function urlCoffresGuilde(guildId: string): string {
  * `null` (membre qui n'a jamais réclamé). Un profil à zéro reste un profil
  * valide — c'est `meriteEcritureEconomie` qui décide s'il vaut une ligne.
  */
-export function lireProfilEconomie(brut: unknown): ProfilEconomieNoctaly | null {
+export function lireProfilEconomie(
+  brut: unknown,
+): ProfilEconomieNoctaly | null {
   if (typeof brut !== "object" || brut === null) {
     return null;
   }
@@ -252,7 +263,10 @@ export function lireProfilEconomie(brut: unknown): ProfilEconomieNoctaly | null 
     objets: Array.isArray(objet.items) ? objet.items.length : 0,
     serieQuotidienne:
       typeof serie === "object" && serie !== null
-        ? entier((serie as Record<string, unknown>).streak ?? (serie as Record<string, unknown>).count)
+        ? entier(
+            (serie as Record<string, unknown>).streak ??
+              (serie as Record<string, unknown>).count,
+          )
         : null,
   };
 }
@@ -271,7 +285,12 @@ export function lireProfilEconomie(brut: unknown): ProfilEconomieNoctaly | null 
  * d'abord en `--essai` pour voir la distribution réelle avant d'écrire.
  */
 export function convertirMonnaie(monnaie: number, taux: number): number {
-  if (!Number.isFinite(monnaie) || monnaie <= 0 || !Number.isFinite(taux) || taux <= 0) {
+  if (
+    !Number.isFinite(monnaie) ||
+    monnaie <= 0 ||
+    !Number.isFinite(taux) ||
+    taux <= 0
+  ) {
     return 0;
   }
   return Math.floor(monnaie * taux);
@@ -293,7 +312,9 @@ export function distribution(valeurs: readonly number[]): {
   median: number;
   maximum: number;
 } {
-  const triees = valeurs.filter(valeur => valeur > 0).toSorted((a, b) => a - b);
+  const triees = valeurs
+    .filter((valeur) => valeur > 0)
+    .toSorted((a, b) => a - b);
   if (triees.length === 0) {
     return { compte: 0, maximum: 0, median: 0, total: 0 };
   }
@@ -349,10 +370,22 @@ export function lireQuota(entetes: SourceEnTetes): Quota {
  * On prend le MAXIMUM des deux et non le premier venu : si l'API dit d'attendre
  * 40 s alors que la cadence dirait 100 ms, c'est l'API qui a raison.
  */
-export function attenteAvantSuivante(quota: Quota, cadence: number = CADENCE_DEFAUT): number {
-  const parCadence = Math.ceil(1_000 / Math.max(1, Math.min(PLAFOND_DOCUMENTE, cadence)));
-  if (quota.restant !== null && quota.restant <= MARGE_QUOTA && quota.dansSecondes !== null) {
-    return Math.max(parCadence, Math.ceil(quota.dansSecondes * 1_000) + MARGE_ATTENTE_MS);
+export function attenteAvantSuivante(
+  quota: Quota,
+  cadence: number = CADENCE_DEFAUT,
+): number {
+  const parCadence = Math.ceil(
+    1_000 / Math.max(1, Math.min(PLAFOND_DOCUMENTE, cadence)),
+  );
+  if (
+    quota.restant !== null &&
+    quota.restant <= MARGE_QUOTA &&
+    quota.dansSecondes !== null
+  ) {
+    return Math.max(
+      parCadence,
+      Math.ceil(quota.dansSecondes * 1_000) + MARGE_ATTENTE_MS,
+    );
   }
   return parCadence;
 }
@@ -498,7 +531,12 @@ export const AIDE_CLE_MANQUANTE = [
 // `niveauPour()`. Leur absence ne coûte donc rien.
 
 /** Les quatre tris acceptés par la page de classement. */
-export const TRIS_CLASSEMENT = ["level", "messages", "voice", "reactions"] as const;
+export const TRIS_CLASSEMENT = [
+  "level",
+  "messages",
+  "voice",
+  "reactions",
+] as const;
 
 export type TriClassement = (typeof TRIS_CLASSEMENT)[number];
 
@@ -506,7 +544,10 @@ export type TriClassement = (typeof TRIS_CLASSEMENT)[number];
 export const SOURCE_CLASSEMENT = "classement public";
 
 /** URL de la page de classement d'une guilde. */
-export function urlClassementPublic(guildId: string, tri?: TriClassement): string {
+export function urlClassementPublic(
+  guildId: string,
+  tri?: TriClassement,
+): string {
   const base = `https://noctaly.com/fr/leaderboard/${guildId}`;
   return tri === undefined ? base : `${base}?sort=${tri}`;
 }
@@ -535,7 +576,9 @@ export interface ProfilClasse {
  */
 export function extraireFluxRsc(html: string): string {
   const morceaux: string[] = [];
-  for (const trouve of html.matchAll(/self\.__next_f\.push\(\[1,\s*"((?:[^"\\]|\\.)*)"\]\)/g)) {
+  for (const trouve of html.matchAll(
+    /self\.__next_f\.push\(\[1,\s*"((?:[^"\\]|\\.)*)"\]\)/g,
+  )) {
     try {
       morceaux.push(JSON.parse(`"${trouve[1]}"`) as string);
     } catch {
@@ -611,7 +654,11 @@ function lireEntreeClassement(brut: unknown): ProfilClasse | null {
   if (typeof discordId !== "string" || !/^\d{15,25}$/.test(discordId)) {
     return null;
   }
-  if (typeof xpTotale !== "number" || !Number.isFinite(xpTotale) || xpTotale < 0) {
+  if (
+    typeof xpTotale !== "number" ||
+    !Number.isFinite(xpTotale) ||
+    xpTotale < 0
+  ) {
     return null;
   }
   return {
@@ -657,7 +704,7 @@ export function lireClassement(html: string): ProfilClasse[] {
     return [];
   }
   return entrees
-    .map(entree => lireEntreeClassement(entree))
+    .map((entree) => lireEntreeClassement(entree))
     .filter((entree): entree is ProfilClasse => entree !== null);
 }
 
@@ -671,7 +718,9 @@ export function lireClassement(html: string): ProfilClasse[] {
  * qu'aucune valeur ne régresse. C'est la même règle que le `GREATEST` du SQL
  * d'import, appliquée un cran plus tôt.
  */
-export function fusionnerClassements(listes: readonly (readonly ProfilClasse[])[]): ProfilClasse[] {
+export function fusionnerClassements(
+  listes: readonly (readonly ProfilClasse[])[],
+): ProfilClasse[] {
   const parMembre = new Map<string, ProfilClasse>();
   for (const liste of listes) {
     for (const entree of liste) {
@@ -684,11 +733,17 @@ export function fusionnerClassements(listes: readonly (readonly ProfilClasse[])[
         avatarId: entree.avatarId ?? connu.avatarId,
         // On garde le brut de l'instantané le plus riche en XP : c'est celui
         // qui fera foi dans l'archive.
-        brut: entree.profil.xpTotale >= connu.profil.xpTotale ? entree.brut : connu.brut,
+        brut:
+          entree.profil.xpTotale >= connu.profil.xpTotale
+            ? entree.brut
+            : connu.brut,
         discordId: connu.discordId,
         profil: {
           messages: Math.max(connu.profil.messages, entree.profil.messages),
-          minutesVocal: Math.max(connu.profil.minutesVocal, entree.profil.minutesVocal),
+          minutesVocal: Math.max(
+            connu.profil.minutesVocal,
+            entree.profil.minutesVocal,
+          ),
           niveau: Math.max(connu.profil.niveau, entree.profil.niveau),
           reactions: Math.max(connu.profil.reactions, entree.profil.reactions),
           xp: 0,
@@ -699,5 +754,7 @@ export function fusionnerClassements(listes: readonly (readonly ProfilClasse[])[
       });
     }
   }
-  return [...parMembre.values()].toSorted((a, b) => b.profil.xpTotale - a.profil.xpTotale);
+  return [...parMembre.values()].toSorted(
+    (a, b) => b.profil.xpTotale - a.profil.xpTotale,
+  );
 }

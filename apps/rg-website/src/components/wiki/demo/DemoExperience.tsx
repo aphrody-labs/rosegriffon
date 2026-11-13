@@ -14,11 +14,25 @@
  * Frontière stricte : que des libs PURES/client-safe ; la scène R3F est chargée via
  * `next/dynamic { ssr:false }` et montée À LA DEMANDE (lazy).
  */
-import { Box, Download, Film, Loader2, Pause, Play, RotateCcw, Sparkles } from "lucide-react";
+import {
+  Box,
+  Download,
+  Film,
+  Loader2,
+  Pause,
+  Play,
+  RotateCcw,
+  Sparkles,
+} from "lucide-react";
 import dynamic from "next/dynamic";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { defaultCutinShots, type CutinStoryboard } from "@/lib/cutin/camera";
-import { downloadBlob, exportCutinVideo, isVideoExportSupported, type CutinAudioSource } from "@/lib/cutin/export";
+import {
+  downloadBlob,
+  exportCutinVideo,
+  isVideoExportSupported,
+  type CutinAudioSource,
+} from "@/lib/cutin/export";
 import { fetchCutinManifest } from "@/lib/cutin/listing";
 import { loadCutinStoryboard } from "@/lib/cutin/decode";
 import { createTheatreSequencer } from "@/lib/cutin/theatre-sequencer";
@@ -47,15 +61,19 @@ function SceneSkeleton(): React.JSX.Element {
 
 /** Attend la prochaine peinture (laisse React appliquer scrub/orbit off avant l'export). */
 function nextPaint(): Promise<void> {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
   });
 }
 
-export function DemoExperience({ data }: { data: DemoData }): React.JSX.Element {
+export function DemoExperience({
+  data,
+}: {
+  data: DemoData;
+}): React.JSX.Element {
   // --- Registre d'options : formes (mesh normal) + cut-ins 3D servis (mesh émissif). ---
   const options = useMemo<DemoModelOption[]>(() => {
-    const forms: DemoModelOption[] = data.forms.map(f => ({
+    const forms: DemoModelOption[] = data.forms.map((f) => ({
       id: `form:${f.code}`,
       label: f.label,
       kind: "form",
@@ -67,8 +85,8 @@ export function DemoExperience({ data }: { data: DemoData }): React.JSX.Element 
       eventIdName: null,
     }));
     const wazas: DemoModelOption[] = data.skills
-      .filter(s => s.has3d)
-      .map(s => ({
+      .filter((s) => s.has3d)
+      .map((s) => ({
         id: `waza:${s.eventIdName}`,
         label: `${s.elementName.fr} ${s.categoryName.fr}`,
         kind: "waza",
@@ -82,18 +100,26 @@ export function DemoExperience({ data }: { data: DemoData }): React.JSX.Element 
     return [...forms, ...wazas];
   }, [data.forms, data.skills]);
 
-  const optionById = useMemo(() => new Map(options.map(o => [o.id, o])), [options]);
+  const optionById = useMemo(
+    () => new Map(options.map((o) => [o.id, o])),
+    [options],
+  );
 
   // --- État scène : DEUX sélections indépendantes (joueur + technique) composées ensemble. ---
   const [mounted, setMounted] = useState(false);
-  const [playerCode, setPlayerCode] = useState<string>(data.forms[0]?.code ?? "c01001900");
+  const [playerCode, setPlayerCode] = useState<string>(
+    data.forms[0]?.code ?? "c01001900",
+  );
   const [skillEvent, setSkillEvent] = useState<string>(
-    data.skills.find(s => s.eventIdName === "ev60_00340" && s.has3d)?.eventIdName ??
-      data.skills.find(s => s.has3d)?.eventIdName ??
+    data.skills.find((s) => s.eventIdName === "ev60_00340" && s.has3d)
+      ?.eventIdName ??
+      data.skills.find((s) => s.has3d)?.eventIdName ??
       "",
   );
   // `selectedId` ne sert qu'au surlignage du sélecteur (dernière vignette cliquée).
-  const [selectedId, setSelectedId] = useState<string>(`form:${data.forms[0]?.code ?? ""}`);
+  const [selectedId, setSelectedId] = useState<string>(
+    `form:${data.forms[0]?.code ?? ""}`,
+  );
   const [storyboard, setStoryboard] = useState<CutinStoryboard | null>(null);
   const [activeTelop, setActiveTelop] = useState<string | null>(null);
 
@@ -112,11 +138,11 @@ export function DemoExperience({ data }: { data: DemoData }): React.JSX.Element 
 
   // --- Dérivés : forme (joueur) + technique (effet) couramment composés. ---
   const currentForm = useMemo(
-    () => data.forms.find(f => f.code === playerCode) ?? data.forms[0],
+    () => data.forms.find((f) => f.code === playerCode) ?? data.forms[0],
     [data.forms, playerCode],
   );
   const currentSkill = useMemo(
-    () => data.skills.find(s => s.eventIdName === skillEvent) ?? null,
+    () => data.skills.find((s) => s.eventIdName === skillEvent) ?? null,
     [data.skills, skillEvent],
   );
   const playerUrl = currentForm?.modelGlbUrl ?? "";
@@ -125,7 +151,7 @@ export function DemoExperience({ data }: { data: DemoData }): React.JSX.Element 
   // --- Chargement du storyboard caméra (clé = technique courante). ---
   useEffect(() => {
     if (!mounted) return;
-    const skill = data.skills.find(s => s.eventIdName === skillEvent) ?? null;
+    const skill = data.skills.find((s) => s.eventIdName === skillEvent) ?? null;
     if (!skill) {
       const timer = setTimeout(() => {
         setStoryboard(defaultCutinShots());
@@ -197,7 +223,8 @@ export function DemoExperience({ data }: { data: DemoData }): React.JSX.Element 
     setSkillEvent(skill.eventIdName);
     setSelectedId(`waza:${skill.eventIdName}`);
     // Remonte vers la scène pour voir le résultat.
-    if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
+    if (typeof window !== "undefined")
+      window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
 
   const resetCamera = useCallback(() => {
@@ -213,7 +240,7 @@ export function DemoExperience({ data }: { data: DemoData }): React.JSX.Element 
   }, []);
 
   const togglePlay = useCallback(() => {
-    setPlaying(p => {
+    setPlaying((p) => {
       const next = !p;
       if (next) setScrubSec(null);
       return next;
@@ -259,7 +286,8 @@ export function DemoExperience({ data }: { data: DemoData }): React.JSX.Element 
 
   const duration = storyboard?.duration ?? 0;
   const fps = storyboard?.fps ?? 60;
-  const poster = data.forms[0]?.iconUrl ?? data.forms[0]?.faceTextureUrl ?? null;
+  const poster =
+    data.forms[0]?.iconUrl ?? data.forms[0]?.faceTextureUrl ?? null;
 
   return (
     <div className="space-y-6">
@@ -268,7 +296,11 @@ export function DemoExperience({ data }: { data: DemoData }): React.JSX.Element 
         <div className="space-y-2">
           <div className="relative aspect-square w-full overflow-hidden rounded-xl bg-surface-container-high">
             {!mounted ? (
-              <button type="button" onClick={() => setMounted(true)} className="group absolute inset-0 size-full">
+              <button
+                type="button"
+                onClick={() => setMounted(true)}
+                className="group absolute inset-0 size-full"
+              >
                 {poster && (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
@@ -279,7 +311,9 @@ export function DemoExperience({ data }: { data: DemoData }): React.JSX.Element 
                 )}
                 <span className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-on-surface">
                   <Sparkles className="size-10 text-primary transition-transform group-hover:scale-110" />
-                  <span className="text-sm font-semibold">Charger la scène 3D</span>
+                  <span className="text-sm font-semibold">
+                    Charger la scène 3D
+                  </span>
                   <span className="text-xs text-on-surface-variant">
                     joueur + super-technique · caméra · export MP4
                   </span>
@@ -336,7 +370,11 @@ export function DemoExperience({ data }: { data: DemoData }): React.JSX.Element 
                   className="inline-flex size-8 items-center justify-center rounded-full bg-surface-container-high text-on-surface hover:bg-surface-container-highest"
                   title={playing ? "Pause" : "Lecture"}
                 >
-                  {playing ? <Pause className="size-4" /> : <Play className="size-4" />}
+                  {playing ? (
+                    <Pause className="size-4" />
+                  ) : (
+                    <Play className="size-4" />
+                  )}
                 </button>
                 <input
                   type="range"
@@ -344,7 +382,7 @@ export function DemoExperience({ data }: { data: DemoData }): React.JSX.Element 
                   max={duration || 1}
                   step={1 / fps}
                   value={scrubSec ?? displayPos}
-                  onChange={e => onScrub(Number(e.target.value))}
+                  onChange={(e) => onScrub(Number(e.target.value))}
                   className="h-1 flex-1 accent-primary"
                   aria-label="Position de la timeline"
                 />
@@ -357,7 +395,7 @@ export function DemoExperience({ data }: { data: DemoData }): React.JSX.Element 
               <div className="flex flex-wrap items-center gap-1.5">
                 <button
                   type="button"
-                  onClick={() => setBloom(b => !b)}
+                  onClick={() => setBloom((b) => !b)}
                   className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium ${
                     bloom
                       ? "bg-primary text-on-primary"
@@ -368,7 +406,7 @@ export function DemoExperience({ data }: { data: DemoData }): React.JSX.Element 
                 </button>
                 <button
                   type="button"
-                  onClick={() => setOrbit(o => !o)}
+                  onClick={() => setOrbit((o) => !o)}
                   className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium ${
                     orbit
                       ? "bg-primary text-on-primary"
@@ -414,8 +452,14 @@ export function DemoExperience({ data }: { data: DemoData }): React.JSX.Element 
                     className="inline-flex items-center gap-1 rounded-full bg-primary px-2.5 py-1 text-xs font-medium text-on-primary hover:opacity-90 disabled:opacity-50"
                     title="Générer la vidéo MP4 de la scène (avec voix)"
                   >
-                    {exporting ? <Loader2 className="size-3 animate-spin" /> : <Film className="size-3" />}
-                    {exporting ? `Vidéo ${Math.round(exportPct * 100)}%` : "Générer la vidéo"}
+                    {exporting ? (
+                      <Loader2 className="size-3 animate-spin" />
+                    ) : (
+                      <Film className="size-3" />
+                    )}
+                    {exporting
+                      ? `Vidéo ${Math.round(exportPct * 100)}%`
+                      : "Générer la vidéo"}
                   </button>
                 )}
               </div>
@@ -426,11 +470,18 @@ export function DemoExperience({ data }: { data: DemoData }): React.JSX.Element 
         {/* Colonne sélecteur + voix. */}
         <div className="space-y-4">
           <div className="space-y-2">
-            <h2 className="text-sm font-bold text-on-surface">Modèles ({options.length}) — joueur + technique</h2>
-            <DemoModelSelector options={options} selectedId={selectedId} onSelect={onSelect} />
+            <h2 className="text-sm font-bold text-on-surface">
+              Modèles ({options.length}) — joueur + technique
+            </h2>
+            <DemoModelSelector
+              options={options}
+              selectedId={selectedId}
+              onSelect={onSelect}
+            />
             <p className="text-[11px] text-on-surface-variant/70">
-              Joueur + sa super-technique composés dans la même scène : une vignette « forme » change le joueur, une
-              vignette « cut-in » change l'effet autour de lui.
+              Joueur + sa super-technique composés dans la même scène : une
+              vignette « forme » change le joueur, une vignette « cut-in »
+              change l'effet autour de lui.
             </p>
           </div>
           <DemoVoicePlayer forms={data.forms} />
@@ -441,7 +492,11 @@ export function DemoExperience({ data }: { data: DemoData }): React.JSX.Element 
       <DemoStatsPanel forms={data.forms} precomputed={data.precomputedStats} />
 
       {/* Techniques (changent l'effet composé dans la scène). */}
-      <DemoSkillsSection skills={data.skills} activeEventId={skillEvent || null} onPlayCutin={launchCutin} />
+      <DemoSkillsSection
+        skills={data.skills}
+        activeEventId={skillEvent || null}
+        onPlayCutin={launchCutin}
+      />
 
       {/* Textures téléchargeables. */}
       <DemoTextureGallery textures={data.textures} />

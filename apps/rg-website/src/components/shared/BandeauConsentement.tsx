@@ -6,7 +6,11 @@ import { useCallback, useEffect, useId, useState } from "react";
 import { Button } from "@rosegriffon/ui";
 
 import { useLanguage } from "@/components/providers/language-provider";
-import { type Consentement, EVENEMENT_OUVRIR, enregistrerConsentement } from "@/lib/consentement";
+import {
+  type Consentement,
+  EVENEMENT_OUVRIR,
+  enregistrerConsentement,
+} from "@/lib/consentement";
 
 /**
  * Bandeau de consentement aux traceurs. Refuser est aussi direct qu'accepter
@@ -19,7 +23,11 @@ import { type Consentement, EVENEMENT_OUVRIR, enregistrerConsentement } from "@/
  * (rendu serveur, hydratation) : le bandeau reste alors masqué, ce qui évite
  * qu'il clignote chez ceux qui ont déjà choisi.
  */
-export function BandeauConsentement({ consentement }: { consentement: Consentement | null | undefined }) {
+export function BandeauConsentement({
+  consentement,
+}: {
+  consentement: Consentement | null | undefined;
+}) {
   const { t } = useLanguage();
   const id = useId();
   const [rouvert, setRouvert] = useState(false);
@@ -43,12 +51,28 @@ export function BandeauConsentement({ consentement }: { consentement: Consenteme
     setRouvert(false);
     setDetails(false);
   }, []);
-  const toutRefuser = useCallback(() => choisir({ mesure: false, pub: false }), [choisir]);
-  const toutAccepter = useCallback(() => choisir({ mesure: true, pub: true }), [choisir]);
-  const enregistrer = useCallback(() => choisir({ mesure, pub }), [choisir, mesure, pub]);
+  const toutRefuser = useCallback(
+    () => choisir({ mesure: false, pub: false }),
+    [choisir],
+  );
+  const toutAccepter = useCallback(
+    () => choisir({ mesure: true, pub: true }),
+    [choisir],
+  );
+  const enregistrer = useCallback(
+    () => choisir({ mesure, pub }),
+    [choisir, mesure, pub],
+  );
   const personnaliser = useCallback(() => setDetails(true), []);
-  const basculerMesure = useCallback((e: React.ChangeEvent<HTMLInputElement>) => setMesure(e.currentTarget.checked), []);
-  const basculerPub = useCallback((e: React.ChangeEvent<HTMLInputElement>) => setPub(e.currentTarget.checked), []);
+  const basculerMesure = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) =>
+      setMesure(e.currentTarget.checked),
+    [],
+  );
+  const basculerPub = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => setPub(e.currentTarget.checked),
+    [],
+  );
 
   if (!rouvert && consentement !== null) return null;
 
@@ -62,7 +86,10 @@ export function BandeauConsentement({ consentement }: { consentement: Consenteme
       </h2>
       <p className="mt-1 text-sm text-on-surface-variant">
         {t("consent.body")}{" "}
-        <Link href="/legal/confidentialite" className="underline underline-offset-2 hover:text-primary">
+        <Link
+          href="/legal/confidentialite"
+          className="underline underline-offset-2 hover:text-primary"
+        >
           {t("consent.policy")}
         </Link>
       </p>

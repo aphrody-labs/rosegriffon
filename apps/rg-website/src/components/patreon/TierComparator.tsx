@@ -14,13 +14,21 @@ const TIERS: Tier[] = [
   {
     color: "#aac9d9",
     name: "Niveau Roy 🌹",
-    perks: ["Rôle Discord Roy", "Newsletter exclusive", "Mention dans le générique des chroniques"],
+    perks: [
+      "Rôle Discord Roy",
+      "Newsletter exclusive",
+      "Mention dans le générique des chroniques",
+    ],
     priceCents: 250,
   },
   {
     color: "#e54a4a",
     name: "Niveau Gaëlle 🌹",
-    perks: ["Tous les avantages Roy", "Accès en avant-première aux articles", "Vote sur les futurs sujets"],
+    perks: [
+      "Tous les avantages Roy",
+      "Accès en avant-première aux articles",
+      "Vote sur les futurs sujets",
+    ],
     priceCents: 750,
   },
   {
@@ -44,7 +52,7 @@ function formatPrice(cents: number): string {
 export function TierComparator() {
   return (
     <div className="grid gap-6 md:grid-cols-3">
-      {TIERS.map(tier => (
+      {TIERS.map((tier) => (
         <div
           key={tier.name}
           className={cn(
@@ -71,12 +79,17 @@ export function TierComparator() {
           <h3 className="text-lg font-bold text-foreground">{tier.name}</h3>
           <p className="mb-4 mt-1 text-2xl font-bold text-[#a08540] dark:text-[#c9a958]">
             {formatPrice(tier.priceCents)}
-            <span className="text-sm font-normal text-muted-foreground">/mois</span>
+            <span className="text-sm font-normal text-muted-foreground">
+              /mois
+            </span>
           </p>
           <ul className="space-y-2 text-sm text-foreground/85">
             {tier.perks.map((perk, i) => (
               <li key={i} className="flex gap-2">
-                <Check className="mt-0.5 size-4 shrink-0" style={{ color: tier.color }} />
+                <Check
+                  className="mt-0.5 size-4 shrink-0"
+                  style={{ color: tier.color }}
+                />
                 <span>{perk}</span>
               </li>
             ))}

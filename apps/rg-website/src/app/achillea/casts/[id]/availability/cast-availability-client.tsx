@@ -9,8 +9,15 @@ import { Tv, ArrowLeft, ShieldAlert, Loader2, Check } from "lucide-react";
 export default function CastAvailabilityPage({ id }: { id: string }) {
   const eventId = id;
 
-  const { user, isAuthenticated, login, isLoading: authLoading } = useAchilleaAuth();
-  const [statusValue, setStatusValue] = useState<CastAvailabilityStatus>(CastAvailabilityStatus.Available);
+  const {
+    user,
+    isAuthenticated,
+    login,
+    isLoading: authLoading,
+  } = useAchilleaAuth();
+  const [statusValue, setStatusValue] = useState<CastAvailabilityStatus>(
+    CastAvailabilityStatus.Available,
+  );
   const [note, setNote] = useState<string>("");
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [submitted, setSubmitted] = useState<boolean>(false);
@@ -90,10 +97,13 @@ export default function CastAvailabilityPage({ id }: { id: string }) {
           <span className="p-2 rounded-lg bg-tertiary/10 text-tertiary border border-tertiary/20">
             <Tv className="w-5 h-5" />
           </span>
-          <h1 className="text-2xl font-bold tracking-tight">Disponibilité Caster</h1>
+          <h1 className="text-2xl font-bold tracking-tight">
+            Disponibilité Caster
+          </h1>
         </div>
         <p className="text-sm text-muted-foreground">
-          Indiquez votre présence et créneaux pour l'évènement de cast sélectionné.
+          Indiquez votre présence et créneaux pour l'évènement de cast
+          sélectionné.
         </p>
       </div>
 
@@ -112,7 +122,10 @@ export default function CastAvailabilityPage({ id }: { id: string }) {
           </Link>
         </div>
       ) : (
-        <form onSubmit={handleSubmit} className="border border-border bg-card rounded-2xl p-6 md:p-8 space-y-6">
+        <form
+          onSubmit={handleSubmit}
+          className="border border-border bg-card rounded-2xl p-6 md:p-8 space-y-6"
+        >
           {error && (
             <div className="p-4 rounded-xl bg-destructive/10 border border-destructive/20 text-destructive text-xs font-semibold">
               {error}
@@ -130,12 +143,20 @@ export default function CastAvailabilityPage({ id }: { id: string }) {
               <select
                 id="route-availability-cast-availability-client-tsx-1"
                 value={statusValue}
-                onChange={e => setStatusValue(e.target.value as CastAvailabilityStatus)}
+                onChange={(e) =>
+                  setStatusValue(e.target.value as CastAvailabilityStatus)
+                }
                 className="w-full px-3.5 py-2.5 text-sm bg-background border border-border rounded-xl focus:outline-none focus:ring-1 focus:ring-primary"
               >
-                <option value={CastAvailabilityStatus.Available}>Disponible (prêt à caster)</option>
-                <option value={CastAvailabilityStatus.Unavailable}>Indisponible</option>
-                <option value={CastAvailabilityStatus.Maybe}>Incertain / À confirmer</option>
+                <option value={CastAvailabilityStatus.Available}>
+                  Disponible (prêt à caster)
+                </option>
+                <option value={CastAvailabilityStatus.Unavailable}>
+                  Indisponible
+                </option>
+                <option value={CastAvailabilityStatus.Maybe}>
+                  Incertain / À confirmer
+                </option>
               </select>
             </div>
 
@@ -151,7 +172,7 @@ export default function CastAvailabilityPage({ id }: { id: string }) {
                 rows={3}
                 placeholder="Ex: Dispo à partir de 15h30, préférence pour le stream secondaire..."
                 value={note}
-                onChange={e => setNote(e.target.value)}
+                onChange={(e) => setNote(e.target.value)}
                 className="w-full px-3.5 py-2.5 text-sm bg-background border border-border rounded-xl placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
               />
             </div>
@@ -163,7 +184,11 @@ export default function CastAvailabilityPage({ id }: { id: string }) {
               disabled={submitting}
               className="inline-flex items-center gap-2 px-6 py-2.5 bg-primary text-primary-foreground font-bold text-xs rounded-xl hover:bg-primary/90 transition shadow-sm"
             >
-              {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+              {submitting ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Check className="w-4 h-4" />
+              )}
               Valider ma disponibilité
             </button>
           </div>

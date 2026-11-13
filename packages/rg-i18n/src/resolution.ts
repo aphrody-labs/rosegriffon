@@ -8,7 +8,8 @@ import {
   type TextDirection,
 } from "./registry";
 
-export type LocaleSource = "route" | "profile" | "cookie" | "accept-language" | "default";
+export type LocaleSource =
+  "route" | "profile" | "cookie" | "accept-language" | "default";
 
 export interface LocaleResolutionInput {
   routeLocale?: string | null;

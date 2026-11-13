@@ -22,14 +22,18 @@ export class MemberEvents {
   async onAdd([member]: ArgsOf<"guildMemberAdd">) {
     if (!BOT_SYNC_MEMBRES) return;
     if (member.guild.id !== GUILD_ID) return;
-    await syncOneMember(member).catch(err => console.error("[guildMemberAdd] échec :", err));
+    await syncOneMember(member).catch((err) =>
+      console.error("[guildMemberAdd] échec :", err),
+    );
   }
 
   @On({ event: "guildMemberUpdate" })
   async onUpdate([_, after]: ArgsOf<"guildMemberUpdate">) {
     if (!BOT_SYNC_MEMBRES) return;
     if (after.guild.id !== GUILD_ID) return;
-    await syncOneMember(after).catch(err => console.error("[guildMemberUpdate] échec :", err));
+    await syncOneMember(after).catch((err) =>
+      console.error("[guildMemberUpdate] échec :", err),
+    );
   }
 
   @On({ event: "userUpdate" })
@@ -38,6 +42,8 @@ export class MemberEvents {
     if (!GUILD_ID) return;
     const guild = client.guilds.cache.get(GUILD_ID);
     if (!guild) return;
-    await syncOneUser(after, guild).catch(err => console.error("[userUpdate] échec :", err));
+    await syncOneUser(after, guild).catch((err) =>
+      console.error("[userUpdate] échec :", err),
+    );
   }
 }

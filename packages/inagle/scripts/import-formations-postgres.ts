@@ -5,24 +5,30 @@ import type { Database } from "@rosegriffon/db/schema";
 
 const source = process.env.INAGLE_FORMATIONS_JSON;
 if (!source) {
-  throw new Error("INAGLE_FORMATIONS_JSON is required; refusing an implicit source.");
+  throw new Error(
+    "INAGLE_FORMATIONS_JSON is required; refusing an implicit source.",
+  );
 }
 
 const input = JSON.parse(await Bun.file(resolve(source)).text()) as {
   formations?: Array<Record<string, unknown>>;
 };
-const formations = (input.formations ?? []).filter(formation => formation.valid !== false);
-if (formations.length === 0) throw new Error("No valid formations found in the explicit source.");
+const formations = (input.formations ?? []).filter(
+  (formation) => formation.valid !== false,
+);
+if (formations.length === 0)
+  throw new Error("No valid formations found in the explicit source.");
 
 const db = createInagleSql<Database>();
 const now = new Date().toISOString();
 for (let offset = 0; offset < formations.length; offset += 100) {
   const batch = formations.slice(offset, offset + 100);
-  await db.transaction().execute(async tx => {
+  await db.transaction().execute(async (tx) => {
     for (const formation of batch) {
       const id = String(formation.form_id ?? "");
       if (!id) continue;
-      const label = typeof formation.label === "string" ? formation.label : null;
+      const label =
+        typeof formation.label === "string" ? formation.label : null;
       await tx
         .insertInto("inagle_formations")
         .values({
@@ -39,7 +45,7 @@ for (let offset = 0; offset < formations.length; offset += 100) {
           updated_at: now,
           emblem_url: null,
         })
-        .onConflict(oc =>
+        .onConflict((oc) =>
           oc.column("id").doUpdateSet({
             name_fr: label,
             name_en: label,
@@ -54,5 +60,7 @@ for (let offset = 0; offset < formations.length; offset += 100) {
   });
 }
 
-console.log(`Imported ${formations.length} canonical formations into PostgreSQL.`);
+console.log(
+  `Imported ${formations.length} canonical formations into PostgreSQL.`,
+);
 await db.destroy();

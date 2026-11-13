@@ -1,6 +1,11 @@
 import "server-only";
 
-import { CATALOGUE_TACHES, decrireTache, raisonRefus, type DescriptionTache } from "@rosegriffon/types/cron";
+import {
+  CATALOGUE_TACHES,
+  decrireTache,
+  raisonRefus,
+  type DescriptionTache,
+} from "@rosegriffon/types/cron";
 
 import {
   bilanTaches,
@@ -28,7 +33,9 @@ import { getPgPool } from "@/lib/db/pg";
  * corps à la main.
  */
 
-const BASE = (process.env.CRON_API_URL ?? "http://127.0.0.1:8810/v1/cron").replace(/\/+$/, "");
+const BASE = (
+  process.env.CRON_API_URL ?? "http://127.0.0.1:8810/v1/cron"
+).replace(/\/+$/, "");
 const DELAI_MS = 5_000;
 
 export class CronIndisponibleError extends Error {
@@ -64,12 +71,17 @@ async function appeler<T>(chemin: string, init: RequestInit = {}): Promise<T> {
           ? `aucune réponse en ${DELAI_MS} ms`
           : erreur.message
         : String(erreur);
-    throw new CronIndisponibleError(`L'API des tâches planifiées est injoignable — ${raison}`);
+    throw new CronIndisponibleError(
+      `L'API des tâches planifiées est injoignable — ${raison}`,
+    );
   }
   if (!reponse.ok) {
     let detail = "";
     try {
-      const corps = (await reponse.json()) as { error?: string; message?: string };
+      const corps = (await reponse.json()) as {
+        error?: string;
+        message?: string;
+      };
       detail = corps.error ?? corps.message ?? "";
     } catch {
       // corps absent ou non JSON : le code HTTP suffit
@@ -95,7 +107,10 @@ export interface ExecutionCron extends ExecutionBrute {
  * l'exécuteur alimente. Ne lève jamais : une migration en attente donne une
  * liste vide, l'affichage le dit.
  */
-async function executionsParTache(): Promise<{ lignes: ExecutionBrute[]; disponible: boolean }> {
+async function executionsParTache(): Promise<{
+  lignes: ExecutionBrute[];
+  disponible: boolean;
+}> {
   try {
     const { rows } = await getPgPool().query<ExecutionBrute>(
       `SELECT DISTINCT ON (tache, succes) tache, demarre_le::text AS demarre_le, duree_ms, succes, erreur
@@ -122,19 +137,29 @@ export interface EtatCron {
 export async function etatDuCron(): Promise<EtatCron> {
   const [reponse, executions] = await Promise.all([
     appeler<ReponseCron>("/").then(
-      r => ({ ok: true as const, r }),
+      (r) => ({ ok: true as const, r }),
       (e: unknown) => ({ ok: false as const, e }),
     ),
     executionsParTache(),
   ]);
   const catalogue: readonly DescriptionTache[] =
-    reponse.ok && Array.isArray(reponse.r?.catalogue) && reponse.r.catalogue.length > 0
+    reponse.ok &&
+    Array.isArray(reponse.r?.catalogue) &&
+    reponse.r.catalogue.length > 0
       ? reponse.r.catalogue
       : CATALOGUE_TACHES;
-  const taches = construireTaches(catalogue, reponse.ok ? reponse.r : null, executions.lignes);
+  const taches = construireTaches(
+    catalogue,
+    reponse.ok ? reponse.r : null,
+    executions.lignes,
+  );
   return {
     joignable: reponse.ok,
-    erreur: reponse.ok ? null : reponse.e instanceof Error ? reponse.e.message : String(reponse.e),
+    erreur: reponse.ok
+      ? null
+      : reponse.e instanceof Error
+        ? reponse.e.message
+        : String(reponse.e),
     taches,
     bilan: bilanTaches(taches),
     historiqueDisponible: executions.disponible,
@@ -153,9 +178,12 @@ export interface ResultatDeclenchement {
  * L'API répond 202 et poursuit en tâche de fond : la réponse dit « démarrée »,
  * jamais « réussie » — le résultat se lit ensuite dans l'historique.
  */
-export async function declencherTache(nom: string, role: string | null | undefined): Promise<ResultatDeclenchement> {
+export async function declencherTache(
+  nom: string,
+  role: string | null | undefined,
+): Promise<ResultatDeclenchement> {
   const etat = await etatDuCron();
-  const tache = etat.taches.find(t => t.nom === nom);
+  const tache = etat.taches.find((t) => t.nom === nom);
   if (!tache) {
     return { ok: false, tache: nom, message: raisonRefus(nom) };
   }
@@ -163,11 +191,17 @@ export async function declencherTache(nom: string, role: string | null | undefin
     return {
       ok: false,
       tache: tache.nom,
-      message: tache.motifBlocage ?? `La tâche « ${tache.nom} » exige le rôle administrateur.`,
+      message:
+        tache.motifBlocage ??
+        `La tâche « ${tache.nom} » exige le rôle administrateur.`,
     };
   }
   if (!etat.joignable) {
-    return { ok: false, tache: tache.nom, message: etat.erreur ?? "API des tâches injoignable." };
+    return {
+      ok: false,
+      tache: tache.nom,
+      message: etat.erreur ?? "API des tâches injoignable.",
+    };
   }
   const decrite = decrireTache(tache.nom);
 

@@ -21,25 +21,25 @@ Rust (workspace racine, `Cargo.toml`, 56 membres) :
 
 TypeScript (fichiers .ts/.tsx hors node_modules) :
 
-| Unité | Fichiers | Rôle | Décision |
-|---|---|---|---|
-| `packages/inagle` | 303 | API de données IEVR, parseurs | Rust (`aphrody-nie-formats` + nouveau `nie-data`) |
-| `packages/azalee` | 135 | wiki IEVR : PG, index CPK, recherche, CLI | Rust (`aphrody-nie-wiki`, `aphrody-nie-pg`, `aphrody-nie-index`) |
-| `packages/inagle-cross` | 9 | schémas masterdata IE Cross | Rust (module `nie-data::cross`) |
-| `packages/ieverse` | 13 | catalogue média IE | Rust (registre média dans `nie-pkg` ecosystem) |
-| `packages/achillea-core` | 60 | Elo, classement, sanctions, licences | Rust (`achillea-core` crate, cible wasm pour le site) |
-| `packages/achillea-client` | 32 | client HTTP Achillea | Rust (client généré) ; reste TS pour le site communautaire |
-| `packages/achillea-contract` / `-types` | 14 / 37 | contrats | Restent TS (source), export JSON Schema |
-| `packages/nie-ui` / `nie-web` | 17 / 2 | UI web émulateur, bindings wasm | Rust (Dioxus), suppression des wrappers TS à terme |
-| `packages/bun-engine-formats` | 21 | formats moteur | Rust (déjà couvert par `aphrody-nie-formats`, à dédupliquer) |
-| `packages/iecode-homebrew` | 2 | toolchains DS/DSi/3DS | Rust (`nie-pkg` backends ds/3ds) |
-| `packages/filmcraft`, `hyperframes`, `remotion` | 16 | vidéo | Hors périmètre Inazuma (outils médias), inchangés |
-| `packages/rg-cron` (`tasks/ie-crawl`, `zukan-videos`, `achillea-*`) | 89 | crawl Level-5, news IE, tâches Achillea | crawl Level-5 et zukan en Rust (`nie-crawl`), tâches Achillea liées DB restent TS jusqu'à phase 4 |
-| `packages/rg-auth`, `rg-db`, `rg-types`, `rg-config`, `rg-i18n` | 94 | socle | Restent TS |
-| `packages/rg-discord-sync`, `apps/rg-bot` | 381 | Discord | Restent TS ; les 196 fichiers du bot qui touchent IE deviennent des clients HTTP de l'API, sans logique de jeu |
-| `apps/rg-website` (Next) | 1169 | site | `wiki/*` IEVR, `achillea/*`, `play/`, `save/`, `api/cpk`, `api/inazuma`, `api/save` sortent vers Rust ; communauté, news, shop, profil restent |
-| `apps/iecode-dotnet` | 962 .cs | IECODE C# (archives, crypto, NdsSharp, GameData, Gui) | Port Rust module par module ; NdsSharp alimente le backend DS |
-| `apps/cli`, `apps/mcp` | 4 | CLI/MCP TS | Remplacés par `aphrody-nie-cli` / `aphrody-nie-mcp` |
+| Unité                                                               | Fichiers | Rôle                                                  | Décision                                                                                                                                       |
+| ------------------------------------------------------------------- | -------- | ----------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| `packages/inagle`                                                   | 303      | API de données IEVR, parseurs                         | Rust (`aphrody-nie-formats` + nouveau `nie-data`)                                                                                              |
+| `packages/azalee`                                                   | 135      | wiki IEVR : PG, index CPK, recherche, CLI             | Rust (`aphrody-nie-wiki`, `aphrody-nie-pg`, `aphrody-nie-index`)                                                                               |
+| `packages/inagle-cross`                                             | 9        | schémas masterdata IE Cross                           | Rust (module `nie-data::cross`)                                                                                                                |
+| `packages/ieverse`                                                  | 13       | catalogue média IE                                    | Rust (registre média dans `nie-pkg` ecosystem)                                                                                                 |
+| `packages/achillea-core`                                            | 60       | Elo, classement, sanctions, licences                  | Rust (`achillea-core` crate, cible wasm pour le site)                                                                                          |
+| `packages/achillea-client`                                          | 32       | client HTTP Achillea                                  | Rust (client généré) ; reste TS pour le site communautaire                                                                                     |
+| `packages/achillea-contract` / `-types`                             | 14 / 37  | contrats                                              | Restent TS (source), export JSON Schema                                                                                                        |
+| `packages/nie-ui` / `nie-web`                                       | 17 / 2   | UI web émulateur, bindings wasm                       | Rust (Dioxus), suppression des wrappers TS à terme                                                                                             |
+| `packages/bun-engine-formats`                                       | 21       | formats moteur                                        | Rust (déjà couvert par `aphrody-nie-formats`, à dédupliquer)                                                                                   |
+| `packages/iecode-homebrew`                                          | 2        | toolchains DS/DSi/3DS                                 | Rust (`nie-pkg` backends ds/3ds)                                                                                                               |
+| `packages/filmcraft`, `hyperframes`, `remotion`                     | 16       | vidéo                                                 | Hors périmètre Inazuma (outils médias), inchangés                                                                                              |
+| `packages/rg-cron` (`tasks/ie-crawl`, `zukan-videos`, `achillea-*`) | 89       | crawl Level-5, news IE, tâches Achillea               | crawl Level-5 et zukan en Rust (`nie-crawl`), tâches Achillea liées DB restent TS jusqu'à phase 4                                              |
+| `packages/rg-auth`, `rg-db`, `rg-types`, `rg-config`, `rg-i18n`     | 94       | socle                                                 | Restent TS                                                                                                                                     |
+| `packages/rg-discord-sync`, `apps/rg-bot`                           | 381      | Discord                                               | Restent TS ; les 196 fichiers du bot qui touchent IE deviennent des clients HTTP de l'API, sans logique de jeu                                 |
+| `apps/rg-website` (Next)                                            | 1169     | site                                                  | `wiki/*` IEVR, `achillea/*`, `play/`, `save/`, `api/cpk`, `api/inazuma`, `api/save` sortent vers Rust ; communauté, news, shop, profil restent |
+| `apps/iecode-dotnet`                                                | 962 .cs  | IECODE C# (archives, crypto, NdsSharp, GameData, Gui) | Port Rust module par module ; NdsSharp alimente le backend DS                                                                                  |
+| `apps/cli`, `apps/mcp`                                              | 4        | CLI/MCP TS                                            | Remplacés par `aphrody-nie-cli` / `aphrody-nie-mcp`                                                                                            |
 
 Sources RE et références : `docs/lvl5.md` (cartographie outils Level-5, formats 3DS XPCK/XMTN/IMGC vs G4* d'IEVR), `docs/ie/iecode-docs/` (217 fiches), `docs/re/`, crawler Level-5 `packages/rg-cron/src/tasks/ie-crawl/level5.ts` et `level5-blog.ts`.
 

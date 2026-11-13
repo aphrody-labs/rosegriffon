@@ -110,7 +110,10 @@ const VERIFIER = drapeaux.has("--verifier");
 const POIDS_MODE = ((): PoidsMode => {
   const brut = option("--poids");
   if (brut === "un_par_personne" || brut === "par_oeuvre") return brut;
-  if (brut !== null) throw new Error(`--poids inconnu : ${brut} (attendu un_par_personne | par_oeuvre)`);
+  if (brut !== null)
+    throw new Error(
+      `--poids inconnu : ${brut} (attendu un_par_personne | par_oeuvre)`,
+    );
   return "par_oeuvre";
 })();
 
@@ -551,7 +554,11 @@ const GROUPES_MESURES: readonly GroupeMesure[] = [
       { source: "x", identifiant: "2090899354148368577" },
     ],
     creationGardee: { source: "x", identifiant: "2090899354148368577" },
-    imageMaster: { source: "discord", identifiant: "1540456574588559440", index: 0 },
+    imageMaster: {
+      source: "discord",
+      identifiant: "1540456574588559440",
+      index: 0,
+    },
     distanceMax: { dhash: 0, phash: 0, phashCentre: 0, ecartRecadrage: 0.0193 },
     motif:
       "Même dessin, la preuve la plus forte des quatre : dHash STRICTEMENT identique des deux côtés " +
@@ -582,7 +589,11 @@ const GROUPES_MESURES: readonly GroupeMesure[] = [
       { source: "x", identifiant: "2090455666267713840" },
     ],
     creationGardee: { source: "x", identifiant: "2090455666267713840" },
-    imageMaster: { source: "discord", identifiant: "1539898224503033877", index: 0 },
+    imageMaster: {
+      source: "discord",
+      identifiant: "1539898224503033877",
+      index: 0,
+    },
     distanceMax: { dhash: 2, phash: 0, phashCentre: 0, ecartRecadrage: 0.0636 },
     motif:
       "Même dessin : dHash 2, pHash 0, pHash-centre 0, écart de recadrage 0,064, définition identique " +
@@ -597,7 +608,11 @@ const GROUPES_MESURES: readonly GroupeMesure[] = [
       { source: "x", identifiant: "2091112393455632493" },
     ],
     creationGardee: { source: "x", identifiant: "2091112393455632493" },
-    imageMaster: { source: "discord", identifiant: "1540508422804471819", index: 0 },
+    imageMaster: {
+      source: "discord",
+      identifiant: "1540508422804471819",
+      index: 0,
+    },
     distanceMax: { dhash: 2, phash: 2, phashCentre: 0, ecartRecadrage: 0.0343 },
     motif:
       "Même dessin : dHash 2, pHash 2, pHash-centre 0, écart de recadrage 0,034 — et c'est le groupe " +
@@ -744,7 +759,8 @@ const FUSIONS_SUGGEREES: readonly {
     gauche: "discord:469900328758935552",
     droite: "x:JennScarlet87",
     confiance: "élevée",
-    effetSurLesComptages: "aucun — le handle a ZÉRO ligne dans `tweets` et aucune création sur la campagne",
+    effetSurLesComptages:
+      "aucun — le handle a ZÉRO ligne dans `tweets` et aucune création sur la campagne",
     indice:
       "Auto-déclaration en base : le compte Discord a publié DEUX fois (2023) un lien vers des tweets " +
       "de « JennScarlet87 ». Le rapprochement de pseudo va dans le même sens (inclusion stricte). " +
@@ -805,7 +821,10 @@ const PSEUDOS_RETENUS: Readonly<Record<string, string>> = {
  * Arbitrages OUVERTS, écrits nommément dans le JSON pour qu'on ne puisse pas les enterrer.
  * Rien n'est appliqué : le code signale et chiffre, il ne décide pas qui a une chance.
  */
-const ARBITRAGES_OUVERTS: readonly { readonly sujet: string; readonly constat: string }[] = [
+const ARBITRAGES_OUVERTS: readonly {
+  readonly sujet: string;
+  readonly constat: string;
+}[] = [
   {
     sujet: "règle 1 — « sur Twitter ou Instagram »",
     constat:
@@ -930,8 +949,20 @@ interface OeuvreConstruite {
   nbCreations: number;
   groupe: string | null;
   motifRegroupement: string | null;
-  imageMaster: { source: SourceTirage; identifiant: string; index: number; chemin: string | null } | null;
-  empreintes: { sha256: string; dhash: string; phash: string; largeur: number; hauteur: number; octets: number } | null;
+  imageMaster: {
+    source: SourceTirage;
+    identifiant: string;
+    index: number;
+    chemin: string | null;
+  } | null;
+  empreintes: {
+    sha256: string;
+    dhash: string;
+    phash: string;
+    largeur: number;
+    hauteur: number;
+    octets: number;
+  } | null;
   distanceMax: GroupeMesure["distanceMax"] | null;
   /** Renseigné seulement quand fichiers ≠ œuvres — l'arbitrage le plus lourd, jamais tu. */
   arbitrageFichiers: { nbFichiers: number; motif: string } | null;
@@ -951,9 +982,12 @@ interface ParticipantConstruit {
 }
 
 /** Identité de plateforme absorbée → clé canonique. Construite une fois, relue partout. */
-const FUSION_VERS_CANONIQUE = new Map(FUSIONS_APPLIQUEES.map(f => [f.absorbee, f.cle]));
+const FUSION_VERS_CANONIQUE = new Map(
+  FUSIONS_APPLIQUEES.map((f) => [f.absorbee, f.cle]),
+);
 
-const canoniser = (cleIdentite: string): string => FUSION_VERS_CANONIQUE.get(cleIdentite) ?? cleIdentite;
+const canoniser = (cleIdentite: string): string =>
+  FUSION_VERS_CANONIQUE.get(cleIdentite) ?? cleIdentite;
 
 /**
  * Appartenance de chaque création à un groupe mesuré. Construite une fois, et surtout
@@ -968,7 +1002,7 @@ function indexerGroupes(retenues: ReadonlyMap<string, CreationRetenue>): {
   const parCreation = new Map<string, GroupeMesure>();
   const anomalies: string[] = [];
   for (const groupe of GROUPES_MESURES) {
-    const manquantes = groupe.creations.filter(c => !retenues.has(refCle(c)));
+    const manquantes = groupe.creations.filter((c) => !retenues.has(refCle(c)));
     if (manquantes.length === groupe.creations.length) {
       // Groupe entièrement absent : la campagne n'est simplement pas celle-là.
       continue;
@@ -979,16 +1013,26 @@ function indexerGroupes(retenues: ReadonlyMap<string, CreationRetenue>): {
       );
       continue;
     }
-    if (!groupe.creations.some(c => refCle(c) === refCle(groupe.creationGardee))) {
-      anomalies.push(`groupe ${groupe.code} : la création gardée n'est pas membre du groupe`);
+    if (
+      !groupe.creations.some((c) => refCle(c) === refCle(groupe.creationGardee))
+    ) {
+      anomalies.push(
+        `groupe ${groupe.code} : la création gardée n'est pas membre du groupe`,
+      );
       continue;
     }
     // Un même auteur des deux côtés : un groupe multi-auteurs serait un soupçon de vol de
     // dessin, pas un doublon, et ne doit surtout pas retirer une chance en silence.
-    const identites = new Set(groupe.creations.map(c => retenues.get(refCle(c))?.cleIdentite ?? ""));
-    const canoniques = new Set([...identites].map(i => FUSION_VERS_CANONIQUE.get(i) ?? i));
+    const identites = new Set(
+      groupe.creations.map((c) => retenues.get(refCle(c))?.cleIdentite ?? ""),
+    );
+    const canoniques = new Set(
+      [...identites].map((i) => FUSION_VERS_CANONIQUE.get(i) ?? i),
+    );
     if (canoniques.size > 1) {
-      anomalies.push(`groupe ${groupe.code} : membres de personnes différentes (${[...canoniques].join(" / ")})`);
+      anomalies.push(
+        `groupe ${groupe.code} : membres de personnes différentes (${[...canoniques].join(" / ")})`,
+      );
       continue;
     }
     for (const c of groupe.creations) parCreation.set(refCle(c), groupe);
@@ -996,8 +1040,12 @@ function indexerGroupes(retenues: ReadonlyMap<string, CreationRetenue>): {
   return { anomalies, parCreation };
 }
 
-const empreintesParImage = new Map(IMAGES_MESUREES.map(i => [`${i.source}:${i.identifiant}#${i.index}`, i]));
-const arbitragesParCreation = new Map(ARBITRAGES_FICHIERS.map(a => [`${a.source}:${a.identifiant}`, a]));
+const empreintesParImage = new Map(
+  IMAGES_MESUREES.map((i) => [`${i.source}:${i.identifiant}#${i.index}`, i]),
+);
+const arbitragesParCreation = new Map(
+  ARBITRAGES_FICHIERS.map((a) => [`${a.source}:${a.identifiant}`, a]),
+);
 
 // ───────────────────────── Programme ─────────────────────────
 
@@ -1023,7 +1071,9 @@ if (!campagne) {
 
 // 2. Les créations, retenues ET écartées, chacune motivée par la même requête — les deux
 //    listes ne peuvent donc pas diverger.
-const lignes = (await sql.unsafe(SQL_CREATIONS, [SLUG])) as unknown as LigneCreation[];
+const lignes = (await sql.unsafe(SQL_CREATIONS, [
+  SLUG,
+])) as unknown as LigneCreation[];
 const motifsMasquage = new Map<string, string | null>(
   (
     (await sql.unsafe(SQL_MOTIFS_MASQUAGE, [SLUG])) as unknown as {
@@ -1031,7 +1081,7 @@ const motifsMasquage = new Map<string, string | null>(
       identifiant: string;
       motif_masquage: string | null;
     }[]
-  ).map(m => [`${m.source}:${m.identifiant}`, m.motif_masquage]),
+  ).map((m) => [`${m.source}:${m.identifiant}`, m.motif_masquage]),
 );
 const cheminsImages = new Map<string, string | null>(
   (
@@ -1041,7 +1091,7 @@ const cheminsImages = new Map<string, string | null>(
       index: number;
       chemin: string | null;
     }[]
-  ).map(i => [`${i.source}:${i.identifiant}#${i.index}`, i.chemin]),
+  ).map((i) => [`${i.source}:${i.identifiant}#${i.index}`, i.chemin]),
 );
 
 const retenues = new Map<string, CreationRetenue>();
@@ -1126,15 +1176,17 @@ const oeuvresEnBase = Number(
 		           where table_schema = 'public' and table_name = 'x_campagne_oeuvres'`
   )[0]?.n ?? 0,
 );
-const autoriteOeuvres = oeuvresEnBase > 0 ? "x_campagne_oeuvres" : "table mesurée du script";
+const autoriteOeuvres =
+  oeuvresEnBase > 0 ? "x_campagne_oeuvres" : "table mesurée du script";
 /** Compté seulement si la table existe ; comparé plus bas, une fois les œuvres construites. */
 const nbOeuvresEnBase =
   oeuvresEnBase > 0
     ? Number(
         (
-          (await sql.unsafe("select count(*)::int as n from public.x_campagne_oeuvres where campagne_slug = $1", [
-            SLUG,
-          ])) as unknown as { n: number }[]
+          (await sql.unsafe(
+            "select count(*)::int as n from public.x_campagne_oeuvres where campagne_slug = $1",
+            [SLUG],
+          )) as unknown as { n: number }[]
         )[0]?.n ?? 0,
       )
     : null;
@@ -1158,13 +1210,22 @@ for (const [cle, creation] of retenues) {
   }
   const master = groupe
     ? groupe.imageMaster
-    : { ...gardee, index: arbitragesParCreation.get(oeuvreId)?.imageMasterIndex ?? 0 };
-  const mesure = empreintesParImage.get(`${master.source}:${master.identifiant}#${master.index}`);
+    : {
+        ...gardee,
+        index: arbitragesParCreation.get(oeuvreId)?.imageMasterIndex ?? 0,
+      };
+  const mesure = empreintesParImage.get(
+    `${master.source}:${master.identifiant}#${master.index}`,
+  );
   if (!mesure)
-    anomalies.push(`image master sans empreinte mesurée : ${master.source}:${master.identifiant}#${master.index}`);
+    anomalies.push(
+      `image master sans empreinte mesurée : ${master.source}:${master.identifiant}#${master.index}`,
+    );
   const arbitrage = arbitragesParCreation.get(oeuvreId);
   oeuvres.set(oeuvreId, {
-    arbitrageFichiers: arbitrage ? { motif: arbitrage.motif, nbFichiers: arbitrage.nbFichiers } : null,
+    arbitrageFichiers: arbitrage
+      ? { motif: arbitrage.motif, nbFichiers: arbitrage.nbFichiers }
+      : null,
     cle: canoniser(creation.cleIdentite),
     creationGardee: gardee,
     creations: [creation],
@@ -1182,7 +1243,10 @@ for (const [cle, creation] of retenues) {
     groupe: groupe?.code ?? null,
     imageMaster: {
       ...master,
-      chemin: cheminsImages.get(`${master.source}:${master.identifiant}#${master.index}`) ?? null,
+      chemin:
+        cheminsImages.get(
+          `${master.source}:${master.identifiant}#${master.index}`,
+        ) ?? null,
     },
     motifRegroupement: groupe?.motif ?? null,
     nbCreations: 1,
@@ -1193,11 +1257,15 @@ for (const [cle, creation] of retenues) {
 for (const oeuvre of oeuvres.values()) {
   const gardee = retenues.get(refCle(oeuvre.creationGardee));
   if (!gardee) {
-    anomalies.push(`œuvre ${oeuvre.oeuvreId} : création gardée absente des créations retenues`);
+    anomalies.push(
+      `œuvre ${oeuvre.oeuvreId} : création gardée absente des créations retenues`,
+    );
     continue;
   }
   oeuvre.cle = canoniser(gardee.cleIdentite);
-  oeuvre.creations.sort((a, b) => (a.publieLe ?? "").localeCompare(b.publieLe ?? ""));
+  oeuvre.creations.sort((a, b) =>
+    (a.publieLe ?? "").localeCompare(b.publieLe ?? ""),
+  );
 }
 
 // 6. Les personnes. Une ligne par identité CANONIQUE : les identités absorbées n'en ont pas.
@@ -1225,17 +1293,22 @@ for (const creation of retenues.values()) {
     creation.cleIdentite.slice(creation.cleIdentite.indexOf(":") + 1),
   ];
   p.identifiants[`${plateforme}_id`] = valeur;
-  if (creation.auteurPseudo) p.identifiants[`${plateforme}_handle`] = creation.auteurPseudo;
+  if (creation.auteurPseudo)
+    p.identifiants[`${plateforme}_handle`] = creation.auteurPseudo;
   if (creation.publieLe) {
-    if (p.premiereLe === null || creation.publieLe < p.premiereLe) p.premiereLe = creation.publieLe;
-    if (p.derniereLe === null || creation.publieLe > p.derniereLe) p.derniereLe = creation.publieLe;
+    if (p.premiereLe === null || creation.publieLe < p.premiereLe)
+      p.premiereLe = creation.publieLe;
+    if (p.derniereLe === null || creation.publieLe > p.derniereLe)
+      p.derniereLe = creation.publieLe;
   }
   participants.set(cle, p);
 }
 for (const oeuvre of oeuvres.values()) {
   const p = participants.get(oeuvre.cle);
   if (!p) {
-    anomalies.push(`œuvre ${oeuvre.oeuvreId} rattachée à une personne absente du roster (${oeuvre.cle})`);
+    anomalies.push(
+      `œuvre ${oeuvre.oeuvreId} rattachée à une personne absente du roster (${oeuvre.cle})`,
+    );
     continue;
   }
   p.oeuvres.push(oeuvre.oeuvreId);
@@ -1251,14 +1324,16 @@ for (const p of participants.values()) {
   // que son handle technique, sinon le nom d'affichage de sa création la plus RÉCENTE — un
   // nom d'affichage change, le dernier connu est le moins faux.
   const siennes = [...retenues.values()]
-    .filter(c => canoniser(c.cleIdentite) === p.cle)
+    .filter((c) => canoniser(c.cleIdentite) === p.cle)
     .toSorted((a, b) => (a.publieLe ?? "").localeCompare(b.publieLe ?? ""));
   const derniere = siennes.at(-1);
   const arbitre = arbitragesBase.get(p.cle);
   p.pseudoAffichage =
     arbitre?.pseudo_affichage ??
     PSEUDOS_RETENUS[p.cle] ??
-    (derniere?.auteurNom || derniere?.auteurPseudo || p.cle.slice(p.cle.indexOf(":") + 1));
+    (derniere?.auteurNom ||
+      derniere?.auteurPseudo ||
+      p.cle.slice(p.cle.indexOf(":") + 1));
   // Écarter quelqu'un est une DÉCISION, jamais une sortie de script : elle ne peut venir que
   // de la table, où le CHECK `x_campagne_participants_motif_si_ineligible` interdit qu'elle
   // soit prise sans motif écrit. En l'absence de table, tout le monde concourt.
@@ -1270,21 +1345,43 @@ for (const p of participants.values()) {
 
 // 7. Poids et empreinte canonique — calculés par le NOYAU, jamais réimplémentés ici.
 const pourTirage: ParticipantTirage[] = [...participants.values()]
-  .filter(p => p.eligible)
-  .map(p => ({ cle: p.cle, nbOeuvres: p.oeuvres.length, oeuvres: [...p.oeuvres], pseudoAffichage: p.pseudoAffichage }));
-const empreinteParOeuvre = await empreinteRoster(rosterDe(pourTirage, "par_oeuvre"));
-const empreinteUnParPersonne = await empreinteRoster(rosterDe(pourTirage, "un_par_personne"));
-const empreinteCourante = POIDS_MODE === "par_oeuvre" ? empreinteParOeuvre : empreinteUnParPersonne;
+  .filter((p) => p.eligible)
+  .map((p) => ({
+    cle: p.cle,
+    nbOeuvres: p.oeuvres.length,
+    oeuvres: [...p.oeuvres],
+    pseudoAffichage: p.pseudoAffichage,
+  }));
+const empreinteParOeuvre = await empreinteRoster(
+  rosterDe(pourTirage, "par_oeuvre"),
+);
+const empreinteUnParPersonne = await empreinteRoster(
+  rosterDe(pourTirage, "un_par_personne"),
+);
+const empreinteCourante =
+  POIDS_MODE === "par_oeuvre" ? empreinteParOeuvre : empreinteUnParPersonne;
 
 // 8. Contrôles de traçabilité. Chacun protège une façon précise de se tromper.
-const sommeOeuvres = [...participants.values()].reduce((n, p) => n + p.oeuvres.length, 0);
-const sommeBrutes = [...participants.values()].reduce((n, p) => n + p.nbCreationsBrutes, 0);
+const sommeOeuvres = [...participants.values()].reduce(
+  (n, p) => n + p.oeuvres.length,
+  0,
+);
+const sommeBrutes = [...participants.values()].reduce(
+  (n, p) => n + p.nbCreationsBrutes,
+  0,
+);
 if (sommeOeuvres !== oeuvres.size)
-  anomalies.push(`Σ nb_oeuvres = ${sommeOeuvres} ≠ ${oeuvres.size} œuvres construites`);
+  anomalies.push(
+    `Σ nb_oeuvres = ${sommeOeuvres} ≠ ${oeuvres.size} œuvres construites`,
+  );
 if (sommeBrutes !== retenues.size)
-  anomalies.push(`Σ nb_creations_brutes = ${sommeBrutes} ≠ ${retenues.size} créations retenues`);
+  anomalies.push(
+    `Σ nb_creations_brutes = ${sommeBrutes} ≠ ${retenues.size} créations retenues`,
+  );
 if (retenues.size + ecartees.length !== lignes.length) {
-  anomalies.push(`${retenues.size} retenues + ${ecartees.length} écartées ≠ ${lignes.length} créations brutes`);
+  anomalies.push(
+    `${retenues.size} retenues + ${ecartees.length} écartées ≠ ${lignes.length} créations brutes`,
+  );
 }
 if (nbOeuvresEnBase !== null && nbOeuvresEnBase !== oeuvres.size) {
   anomalies.push(
@@ -1294,17 +1391,30 @@ if (nbOeuvresEnBase !== null && nbOeuvresEnBase !== oeuvres.size) {
 }
 // Une identité absorbée qui reprendrait une ligne, et la personne aurait deux fois ses tickets.
 for (const f of FUSIONS_APPLIQUEES) {
-  if (participants.has(f.absorbee)) anomalies.push(`identité fusionnée revenue dans le roster : ${f.absorbee}`);
-  if (arbitragesBase.size > 0 && arbitragesBase.has(f.absorbee) && !arbitragesBase.get(f.absorbee)?.fusionne_dans) {
-    anomalies.push(`${f.absorbee} a une ligne CANONIQUE en base alors que le script la fusionne dans ${f.cle}`);
+  if (participants.has(f.absorbee))
+    anomalies.push(`identité fusionnée revenue dans le roster : ${f.absorbee}`);
+  if (
+    arbitragesBase.size > 0 &&
+    arbitragesBase.has(f.absorbee) &&
+    !arbitragesBase.get(f.absorbee)?.fusionne_dans
+  ) {
+    anomalies.push(
+      `${f.absorbee} a une ligne CANONIQUE en base alors que le script la fusionne dans ${f.cle}`,
+    );
   }
-  if (![...retenues.values()].some(c => canoniser(c.cleIdentite) === f.cle) && participants.has(f.cle)) {
+  if (
+    ![...retenues.values()].some((c) => canoniser(c.cleIdentite) === f.cle) &&
+    participants.has(f.cle)
+  ) {
     anomalies.push(`clé canonique sans création retenue : ${f.cle}`);
   }
 }
 // La table des participants, quand elle existe, doit dire EXACTEMENT la même chose.
 const nbEnBase =
-  tableParticipants > 0 ? [...arbitragesBase.values()].filter(r => r.fusionne_dans === null).length : null;
+  tableParticipants > 0
+    ? [...arbitragesBase.values()].filter((r) => r.fusionne_dans === null)
+        .length
+    : null;
 if (nbEnBase !== null && nbEnBase !== participants.size) {
   anomalies.push(
     `x_campagne_participants porte ${nbEnBase} personne(s) canonique(s) contre ${participants.size} construite(s)`,
@@ -1321,19 +1431,22 @@ const clesDuRoster = [...participants.keys()];
 const clesPubliques = new Map(
   // `clePublique` est asynchrone (WebCrypto) : les 14 dérivations partent ensemble plutôt
   // qu'en file d'attente. Elles sont indépendantes, l'ordre du tableau est conservé.
-  (await Promise.all(clesDuRoster.map(cle => clePublique(SLUG, cle)))).map((pub, i) => [
-    clesDuRoster[i] as string,
-    pub,
-  ]),
+  (await Promise.all(clesDuRoster.map((cle) => clePublique(SLUG, cle)))).map(
+    (pub, i) => [clesDuRoster[i] as string, pub],
+  ),
 );
 
 const ordonnees = [...participants.values()].toSorted(
-  (a, b) => b.oeuvres.length - a.oeuvres.length || (a.premiereLe ?? "").localeCompare(b.premiereLe ?? ""),
+  (a, b) =>
+    b.oeuvres.length - a.oeuvres.length ||
+    (a.premiereLe ?? "").localeCompare(b.premiereLe ?? ""),
 );
 
 /** Toujours la clé publique dans le document committé : la clé de plateforme n'apparaît qu'en `--complet`. */
 const designer = (cle: string): Record<string, string> =>
-  COMPLET ? { cle, cle_publique: clesPubliques.get(cle) ?? "" } : { cle_publique: clesPubliques.get(cle) ?? "" };
+  COMPLET
+    ? { cle, cle_publique: clesPubliques.get(cle) ?? "" }
+    : { cle_publique: clesPubliques.get(cle) ?? "" };
 
 /**
  * Un côté de suggestion de fusion. Une clé de participant est pseudonymisée comme partout
@@ -1369,13 +1482,19 @@ const document = {
     creations_brutes: lignes.length,
     creations_ecartees: ecartees.length,
     creations_retenues: retenues.size,
-    fusions_appliquees: FUSIONS_APPLIQUEES.filter(f => participants.has(f.cle)).length,
-    identites_de_plateforme_retenues: new Set([...retenues.values()].map(c => c.cleIdentite)).size,
+    fusions_appliquees: FUSIONS_APPLIQUEES.filter((f) =>
+      participants.has(f.cle),
+    ).length,
+    identites_de_plateforme_retenues: new Set(
+      [...retenues.values()].map((c) => c.cleIdentite),
+    ).size,
     images: IMAGES_MESUREES.length,
     oeuvres: oeuvres.size,
-    oeuvres_regroupees: [...oeuvres.values()].filter(o => o.nbCreations > 1).length,
+    oeuvres_regroupees: [...oeuvres.values()].filter((o) => o.nbCreations > 1)
+      .length,
     personnes: participants.size,
-    personnes_eligibles: [...participants.values()].filter(p => p.eligible).length,
+    personnes_eligibles: [...participants.values()].filter((p) => p.eligible)
+      .length,
     poids_total: pourTirage.reduce((n, p) => n + poidsDe(p, POIDS_MODE), 0),
   },
   genere_le: new Date().toISOString(),
@@ -1383,7 +1502,10 @@ const document = {
   // L'empreinte de roster est ce que le message d'engagement publiera : elle scelle QUI
   // concourt et avec combien de tickets, AVANT que le round d'aléa public ne tombe.
   empreinte: {
-    autorite_arbitrages: tableParticipants > 0 ? "x_campagne_participants" : "table mesurée du script",
+    autorite_arbitrages:
+      tableParticipants > 0
+        ? "x_campagne_participants"
+        : "table mesurée du script",
     autorite_oeuvres: autoriteOeuvres,
     note:
       "sha256 de la sérialisation canonique à préfixe de longueur du roster (domaine RGROSTER1), " +
@@ -1395,7 +1517,7 @@ const document = {
     roster: empreinteCourante,
     un_par_personne: empreinteUnParPersonne,
   },
-  participants: ordonnees.map(p => ({
+  participants: ordonnees.map((p) => ({
     ...designer(p.cle),
     derniere_le: p.derniereLe,
     eligible: p.eligible,
@@ -1405,7 +1527,12 @@ const document = {
     nb_oeuvres: p.oeuvres.length,
     oeuvres: p.oeuvres,
     poids: poidsDe(
-      { cle: p.cle, nbOeuvres: p.oeuvres.length, oeuvres: p.oeuvres, pseudoAffichage: p.pseudoAffichage },
+      {
+        cle: p.cle,
+        nbOeuvres: p.oeuvres.length,
+        oeuvres: p.oeuvres,
+        pseudoAffichage: p.pseudoAffichage,
+      },
       POIDS_MODE,
     ),
     premiere_le: p.premiereLe,
@@ -1414,15 +1541,21 @@ const document = {
   })),
   oeuvres: [...oeuvres.values()]
     .toSorted((a, b) => a.oeuvreId.localeCompare(b.oeuvreId))
-    .map(o => ({
+    .map((o) => ({
       ...designer(o.cle),
       arbitrage_fichiers: o.arbitrageFichiers
-        ? { motif: o.arbitrageFichiers.motif, nb_fichiers: o.arbitrageFichiers.nbFichiers }
+        ? {
+            motif: o.arbitrageFichiers.motif,
+            nb_fichiers: o.arbitrageFichiers.nbFichiers,
+          }
         : null,
-      creation_gardee: { identifiant: o.creationGardee.identifiant, source: o.creationGardee.source },
+      creation_gardee: {
+        identifiant: o.creationGardee.identifiant,
+        source: o.creationGardee.source,
+      },
       // LES PUBLICATIONS QUI PORTENT L'ŒUVRE : c'est ce qui justifie le dédoublonnage.
       // Pseudos et identifiants de publication sont déjà affichés sur la galerie publique.
-      creations: o.creations.map(c => ({
+      creations: o.creations.map((c) => ({
         auteur_pseudo: c.auteurPseudo,
         identifiant: c.identifiant,
         nb_fichiers: c.nbImages,
@@ -1448,7 +1581,9 @@ const document = {
       oeuvre_id: o.oeuvreId,
     })),
   creations_ecartees: ecartees,
-  fusions_appliquees: FUSIONS_APPLIQUEES.filter(f => participants.has(f.cle)).map(f => ({
+  fusions_appliquees: FUSIONS_APPLIQUEES.filter((f) =>
+    participants.has(f.cle),
+  ).map((f) => ({
     ...designer(f.cle),
     ...(COMPLET ? { identite_absorbee: f.absorbee } : {}),
     niveau_de_preuve: f.niveau,
@@ -1458,7 +1593,7 @@ const document = {
   // participant, et la laisser en clair rouvrirait par la bande le graphe d'identités que
   // `designer()` referme partout ailleurs. Vérifié à l'exécution — sans ce passage, deux
   // snowflakes Discord ressortaient dans le fichier committé.
-  fusions_suggerees_non_appliquees: FUSIONS_SUGGEREES.map(f => ({
+  fusions_suggerees_non_appliquees: FUSIONS_SUGGEREES.map((f) => ({
     confiance: f.confiance,
     droite: designerCote(f.droite),
     effet_sur_les_comptages: f.effetSurLesComptages,
@@ -1480,7 +1615,8 @@ const document = {
 // 10. Écriture. Clés triées et indentation 2 : deux exécutions sans changement de données
 //    produisent le même fichier, donc un diff git ne montre que ce qui a vraiment bougé.
 /** La date de génération change à chaque exécution : la comparaison porte sur tout le reste. */
-const sansDate = (t: string): string => t.replace(/"genere_le": "[^"]*"/, '"genere_le": "-"');
+const sansDate = (t: string): string =>
+  t.replace(/"genere_le": "[^"]*"/, '"genere_le": "-"');
 
 function trierCles(valeur: unknown): unknown {
   if (Array.isArray(valeur)) return valeur.map(trierCles);
@@ -1489,7 +1625,7 @@ function trierCles(valeur: unknown): unknown {
     return Object.fromEntries(
       Object.keys(source)
         .toSorted()
-        .map(k => [k, trierCles(source[k])]),
+        .map((k) => [k, trierCles(source[k])]),
     );
   }
   return valeur;
@@ -1505,7 +1641,9 @@ if (VERIFIER) {
     .text()
     .catch(() => "");
   if (sansDate(surDisque) !== sansDate(contenu))
-    anomalies.push(`le fichier sur disque diffère du roster recalculé : ${chemin}`);
+    anomalies.push(
+      `le fichier sur disque diffère du roster recalculé : ${chemin}`,
+    );
   octets = surDisque.length;
 } else {
   await Bun.write(chemin, contenu);

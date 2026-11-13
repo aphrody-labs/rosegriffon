@@ -42,7 +42,17 @@ const DELAY_MS = 300;
 // ============================================================================
 
 /** 9 game keys matching the zukan appeared-works columns */
-const GAME_KEYS = ["ie1", "ie2", "ie3", "go1", "go2", "go3", "ars", "ori", "vic"] as const;
+const GAME_KEYS = [
+  "ie1",
+  "ie2",
+  "ie3",
+  "go1",
+  "go2",
+  "go3",
+  "ars",
+  "ori",
+  "vic",
+] as const;
 type GameKey = (typeof GAME_KEYS)[number];
 
 const GAME_KEY_TO_SERIES: Record<GameKey, string> = {
@@ -110,10 +120,13 @@ interface DbChar {
 // ============================================================================
 
 async function sleep(ms: number) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-async function fetchParamPage(pageNum: number, locale: string): Promise<string> {
+async function fetchParamPage(
+  pageNum: number,
+  locale: string,
+): Promise<string> {
   const cacheDir = path.join(DATA_ROOT, `chara_param_cache_${locale || "ja"}`);
   fs.mkdirSync(cacheDir, { recursive: true });
   const cachePath = path.join(cacheDir, `page-${pageNum}.html`);
@@ -149,7 +162,8 @@ function parseParamPage(html: string): ZukanEntry[] {
     if (!nameRuby) return;
 
     // Nickname
-    const nickname = $li.find(".lBox .name .nickname ruby").text().trim() || undefined;
+    const nickname =
+      $li.find(".lBox .name .nickname ruby").text().trim() || undefined;
 
     // Image hash from CloudFront
     let zukanHash: string | undefined;
@@ -214,9 +228,13 @@ function parseParamPage(html: string): ZukanEntry[] {
     const game = $li.find("dl.appearedWorks dd").text().trim() || undefined;
 
     // Description (source de vérité zukan)
-    const description = $li.find(".description").first().text().trim() || undefined;
+    const description =
+      $li.find(".description").first().text().trim() || undefined;
 
-    const stats = Object.keys(statsObj).length >= 5 ? (statsObj as ZukanEntry["stats"]) : undefined;
+    const stats =
+      Object.keys(statsObj).length >= 5
+        ? (statsObj as ZukanEntry["stats"])
+        : undefined;
 
     entries.push({
       name: nameRuby,
@@ -251,7 +269,8 @@ async function crawlParamPages(locale: string): Promise<ZukanEntry[]> {
         break;
       }
       allEntries.push(...entries);
-      if (i === 1 || i % 5 === 0) console.log(`  ${label} page ${i}: total ${allEntries.length}`);
+      if (i === 1 || i % 5 === 0)
+        console.log(`  ${label} page ${i}: total ${allEntries.length}`);
     } catch (err) {
       console.error(`  Page ${i}: error — ${err}`);
       break;
@@ -284,7 +303,8 @@ function parseListPageAppearances(html: string): ListEntry[] {
     const name = checkbox.attr("data-chara-name")?.trim() || "";
 
     // Fallback hash from image
-    const imgSrc = $tbody.find("img[src*='cloudfront.net/1/']").attr("src") || "";
+    const imgSrc =
+      $tbody.find("img[src*='cloudfront.net/1/']").attr("src") || "";
     const hashFromImg = imgSrc.match(HASH_RE)?.[1] || null;
     const finalHash = zukanHash || hashFromImg;
     if (!finalHash) return;
@@ -294,16 +314,33 @@ function parseListPageAppearances(html: string): ListEntry[] {
 
     if (colspanCell.length > 0) {
       const gameLabel = colspanCell.text().trim();
-      const key = (Object.entries(GAME_KEY_TO_SERIES) as [GameKey, string][]).find(([, v]) => {
-        if (v === "Inazuma Eleven" && gameLabel === "Inazuma Eleven") return true;
-        if (v === "Inazuma Eleven 2" && gameLabel.startsWith("Inazuma Eleven 2")) return true;
-        if (v === "Inazuma Eleven 3" && gameLabel.startsWith("Inazuma Eleven 3")) return true;
-        if (v === "Inazuma Eleven GO" && gameLabel.startsWith("Inazuma Eleven GO: Light")) return true;
-        if (v === "Chrono Stone" && gameLabel.includes("Chrono Stone")) return true;
+      const key = (
+        Object.entries(GAME_KEY_TO_SERIES) as [GameKey, string][]
+      ).find(([, v]) => {
+        if (v === "Inazuma Eleven" && gameLabel === "Inazuma Eleven")
+          return true;
+        if (
+          v === "Inazuma Eleven 2" &&
+          gameLabel.startsWith("Inazuma Eleven 2")
+        )
+          return true;
+        if (
+          v === "Inazuma Eleven 3" &&
+          gameLabel.startsWith("Inazuma Eleven 3")
+        )
+          return true;
+        if (
+          v === "Inazuma Eleven GO" &&
+          gameLabel.startsWith("Inazuma Eleven GO: Light")
+        )
+          return true;
+        if (v === "Chrono Stone" && gameLabel.includes("Chrono Stone"))
+          return true;
         if (v === "Galaxy" && gameLabel.includes("Galaxy")) return true;
         if (v === "Ares" && gameLabel.includes("Ares")) return true;
         if (v === "Orion" && gameLabel.includes("Orion")) return true;
-        if (v === "Victory Road" && gameLabel.includes("Victory Road")) return true;
+        if (v === "Victory Road" && gameLabel.includes("Victory Road"))
+          return true;
         return false;
       })?.[0];
       if (key) gameAppearances.push(key);
@@ -344,7 +381,9 @@ async function loadListAppearances(): Promise<{
     .readdirSync(cacheDir)
     .filter((f: string) => f.endsWith(".html"))
     .sort();
-  console.log(`\nParsing ${files.length} chara_list pages for game appearances...`);
+  console.log(
+    `\nParsing ${files.length} chara_list pages for game appearances...`,
+  );
 
   for (const file of files) {
     const html = fs.readFileSync(path.join(cacheDir, file), "utf-8");
@@ -368,7 +407,9 @@ async function loadListAppearances(): Promise<{
     games.sort((a, b) => GAME_KEYS.indexOf(a) - GAME_KEYS.indexOf(b));
   }
 
-  console.log(`Game appearances: ${byHash.size} hash entries, ${byName.size} unique names.`);
+  console.log(
+    `Game appearances: ${byHash.size} hash entries, ${byName.size} unique names.`,
+  );
   return { byHash, byName };
 }
 
@@ -399,8 +440,8 @@ async function main() {
     await Bun.write(jaCachePath, JSON.stringify(jaEntries, null, 2));
   }
 
-  const withHash = enEntries.filter(e => e.zukanHash).length;
-  const jaWithHash = jaEntries.filter(e => e.zukanHash).length;
+  const withHash = enEntries.filter((e) => e.zukanHash).length;
+  const jaWithHash = jaEntries.filter((e) => e.zukanHash).length;
   console.log(`\nEN entries with hash: ${withHash}/${enEntries.length}`);
   console.log(`JA entries with hash: ${jaWithHash}/${jaEntries.length}`);
 
@@ -427,11 +468,11 @@ async function main() {
   for (const e of [...jaEntries, ...enEntries]) {
     if (e.zukanHash) zukanByHash.set(e.zukanHash, e);
   }
-  const dbById = new Map(dbChars.map(c => [c.id, c]));
+  const dbById = new Map(dbChars.map((c) => [c.id, c]));
 
   // ── Index zukan EN by name ──
   const enByName = new Map<string, ZukanEntry[]>();
-  for (const e of enEntries.filter(e => e.zukanHash)) {
+  for (const e of enEntries.filter((e) => e.zukanHash)) {
     const key = e.name.trim().toLowerCase();
     if (!enByName.has(key)) enByName.set(key, []);
     enByName.get(key)!.push(e);
@@ -439,7 +480,7 @@ async function main() {
 
   // ── Index zukan JA by name ──
   const jaByName = new Map<string, ZukanEntry[]>();
-  for (const e of jaEntries.filter(e => e.zukanHash)) {
+  for (const e of jaEntries.filter((e) => e.zukanHash)) {
     const key = e.name.trim();
     if (!jaByName.has(key)) jaByName.set(key, []);
     jaByName.get(key)!.push(e);
@@ -506,8 +547,9 @@ async function main() {
   for (const [name, zukanGroup] of enByName) {
     const dbGroup = dbByNameFr.get(name);
     if (!dbGroup) continue;
-    const unassigned = dbGroup.filter(c => !assigned.has(c.id));
-    if (unassigned.length > 0) matchGroupsStrict(ctx, zukanGroup, unassigned, assigned);
+    const unassigned = dbGroup.filter((c) => !assigned.has(c.id));
+    if (unassigned.length > 0)
+      matchGroupsStrict(ctx, zukanGroup, unassigned, assigned);
   }
   console.log(`Phase B: +${assigned.size - beforeB} (total: ${assigned.size})`);
 
@@ -522,7 +564,7 @@ async function main() {
   // This prevents false positives like "Mecha-Mark" (nickname "MARK") matching DB "Mark",
   // or "Fake Victor" (nickname "Victor") matching DB "Victor".
   const enByNickname = new Map<string, ZukanEntry[]>();
-  for (const e of enEntries.filter(e => e.zukanHash && e.nickname)) {
+  for (const e of enEntries.filter((e) => e.zukanHash && e.nickname)) {
     const nick = e.nickname!.trim().toLowerCase();
     const firstWord = e.name
       .trim()
@@ -543,7 +585,9 @@ async function main() {
       assignBest(ctx, c, zukanGroup, assigned);
     }
   }
-  console.log(`Phase B1.5: +${assigned.size - beforeB15} (total: ${assigned.size})`);
+  console.log(
+    `Phase B1.5: +${assigned.size - beforeB15} (total: ${assigned.size})`,
+  );
 
   // ═══════════════════════════════════════
   // Phase B2: First-word match (zukan "Aaron Gachinsky" → DB "Aaron") strict pos+elem
@@ -553,7 +597,7 @@ async function main() {
 
   // Index zukan by first word
   const enByFirstWord = new Map<string, ZukanEntry[]>();
-  for (const e of enEntries.filter(e => e.zukanHash)) {
+  for (const e of enEntries.filter((e) => e.zukanHash)) {
     const first = e.name.trim().split(/\s+/)[0].toLowerCase();
     if (first.length >= 3) {
       if (!enByFirstWord.has(first)) enByFirstWord.set(first, []);
@@ -570,7 +614,9 @@ async function main() {
       assignBest(ctx, c, zukanGroup, assigned);
     }
   }
-  console.log(`Phase B2: +${assigned.size - beforeB2} (total: ${assigned.size})`);
+  console.log(
+    `Phase B2: +${assigned.size - beforeB2} (total: ${assigned.size})`,
+  );
 
   // ═══════════════════════════════════════
   // Phase B3: Last-word (surname) match — zukan "Cross Word Cryptix" → DB "Cross Word"
@@ -580,7 +626,7 @@ async function main() {
 
   // Index zukan by last word
   const enByLastWord = new Map<string, ZukanEntry[]>();
-  for (const e of enEntries.filter(e => e.zukanHash)) {
+  for (const e of enEntries.filter((e) => e.zukanHash)) {
     const words = e.name.trim().split(/\s+/);
     if (words.length >= 2) {
       const last = words[words.length - 1].toLowerCase();
@@ -600,21 +646,31 @@ async function main() {
     const zukanGroup = enByLastWord.get(dbLast);
     if (!zukanGroup) continue;
     const dbFirst = words[0].toLowerCase();
-    const filtered = zukanGroup.filter(z => z.name.toLowerCase().includes(dbFirst));
+    const filtered = zukanGroup.filter((z) =>
+      z.name.toLowerCase().includes(dbFirst),
+    );
     if (filtered.length > 0) {
       assignBest(ctx, c, filtered, assigned);
     }
   }
-  console.log(`Phase B3: +${assigned.size - beforeB3} (total: ${assigned.size})`);
+  console.log(
+    `Phase B3: +${assigned.size - beforeB3} (total: ${assigned.size})`,
+  );
 
   // ═══════════════════════════════════════
   // Phase B4: SKIP MixiMax — characters with × in name have no zukan page.
   // Assigning base form images to MixiMax entries causes wrong images.
   // These characters will use the fallback avatarUrl (bucket image).
   // ═══════════════════════════════════════
-  console.log("\n--- Phase B4: MixiMax skipped (no zukan pages exist for MixiMax forms) ---");
-  const mixiMaxCount = dbChars.filter(c => c.name_en && (c.name_en.includes("×") || c.name_en.includes("+"))).length;
-  console.log(`Phase B4: ${mixiMaxCount} MixiMax characters excluded from zukan matching`);
+  console.log(
+    "\n--- Phase B4: MixiMax skipped (no zukan pages exist for MixiMax forms) ---",
+  );
+  const mixiMaxCount = dbChars.filter(
+    (c) => c.name_en && (c.name_en.includes("×") || c.name_en.includes("+")),
+  ).length;
+  console.log(
+    `Phase B4: ${mixiMaxCount} MixiMax characters excluded from zukan matching`,
+  );
 
   // ═══════════════════════════════════════
   // Phase JA-A: Exact JA name match (strict pos+elem+stats)
@@ -624,11 +680,14 @@ async function main() {
   for (const [name, zukanGroup] of jaByName) {
     const dbGroup = dbByNameJa.get(name);
     if (dbGroup) {
-      const unassigned = dbGroup.filter(c => !assigned.has(c.id));
-      if (unassigned.length > 0) matchGroupsStrict(ctx, zukanGroup, unassigned, assigned);
+      const unassigned = dbGroup.filter((c) => !assigned.has(c.id));
+      if (unassigned.length > 0)
+        matchGroupsStrict(ctx, zukanGroup, unassigned, assigned);
     }
   }
-  console.log(`Phase JA-A: +${assigned.size - beforeJA} (total: ${assigned.size})`);
+  console.log(
+    `Phase JA-A: +${assigned.size - beforeJA} (total: ${assigned.size})`,
+  );
 
   // ═══════════════════════════════════════
   // Phase JA-B: JA nickname match — zukan JA nickname → DB name_ja single-word
@@ -639,7 +698,7 @@ async function main() {
   // Only index if the JA nickname appears at the start of the full JA name.
   // Prevents compound-name false positives (e.g., "飛張 益徳" nickname matching DB "飛").
   const jaByNickname = new Map<string, ZukanEntry[]>();
-  for (const e of jaEntries.filter(e => e.zukanHash && e.nickname)) {
+  for (const e of jaEntries.filter((e) => e.zukanHash && e.nickname)) {
     const nick = e.nickname!.trim();
     const fullName = e.name.trim();
     if (nick.length >= 1 && fullName.startsWith(nick)) {
@@ -659,7 +718,9 @@ async function main() {
 
     assignBest(ctx, c, zukanGroup, assigned);
   }
-  console.log(`Phase JA-B: +${assigned.size - beforeJAB} (total: ${assigned.size})`);
+  console.log(
+    `Phase JA-B: +${assigned.size - beforeJAB} (total: ${assigned.size})`,
+  );
 
   // ═══════════════════════════════════════
   // Phase JA-C: JA first-part match (before ・) — "チャオ・マオ" → zukan "チャオ マオ ..."
@@ -669,7 +730,7 @@ async function main() {
 
   // Index JA zukan by first word/part
   const jaByFirstPart = new Map<string, ZukanEntry[]>();
-  for (const e of jaEntries.filter(e => e.zukanHash)) {
+  for (const e of jaEntries.filter((e) => e.zukanHash)) {
     // JA names may use spaces or middle dots
     const parts = e.name.trim().split(/[\s・]+/);
     if (parts[0] && parts[0].length >= 2) {
@@ -688,16 +749,18 @@ async function main() {
 
     // Filter: zukan name must also contain second part of DB name
     const dbSecond = parts[1];
-    const filtered = zukanGroup.filter(z => {
+    const filtered = zukanGroup.filter((z) => {
       if (!z.zukanHash) return false;
       const zParts = z.name.trim().split(/[\s・]+/);
-      return zParts.some(p => p === dbSecond);
+      return zParts.some((p) => p === dbSecond);
     });
     if (filtered.length > 0) {
       assignBest(ctx, c, filtered, assigned);
     }
   }
-  console.log(`Phase JA-C: +${assigned.size - beforeJAC} (total: ${assigned.size})`);
+  console.log(
+    `Phase JA-C: +${assigned.size - beforeJAC} (total: ${assigned.size})`,
+  );
 
   // ═══════════════════════════════════════
   // Phase JA-R: Romaji transliteration match
@@ -722,7 +785,7 @@ async function main() {
   }
 
   const enNormIndex = new Map<string, ZukanEntry[]>();
-  for (const e of enEntries.filter(e => e.zukanHash)) {
+  for (const e of enEntries.filter((e) => e.zukanHash)) {
     const norm = normalizeForMatch(e.name);
     if (!enNormIndex.has(norm)) enNormIndex.set(norm, []);
     enNormIndex.get(norm)!.push(e);
@@ -736,7 +799,7 @@ async function main() {
   }
 
   // Convert unmatched DB chars' JA names to romaji and try matching
-  const unmatched = dbChars.filter(c => !assigned.has(c.id) && c.name_ja);
+  const unmatched = dbChars.filter((c) => !assigned.has(c.id) && c.name_ja);
   console.log(`  Converting ${unmatched.length} JA names to romaji...`);
 
   for (const c of unmatched) {
@@ -761,15 +824,17 @@ async function main() {
     if (!zukanGroup || zukanGroup.length === 0) continue;
 
     const candidates = zukanGroup
-      .filter(z => z.zukanHash)
-      .map(z => ({ z, score: matchScore(z, c) }))
-      .filter(p => p.score >= 20)
+      .filter((z) => z.zukanHash)
+      .map((z) => ({ z, score: matchScore(z, c) }))
+      .filter((p) => p.score >= 20)
       .sort((a, b) => b.score - a.score);
     if (candidates.length > 0) {
       assigned.set(c.id, candidates[0].z.zukanHash!);
     }
   }
-  console.log(`Phase JA-R: +${assigned.size - beforeJAR} (total: ${assigned.size})`);
+  console.log(
+    `Phase JA-R: +${assigned.size - beforeJAR} (total: ${assigned.size})`,
+  );
 
   // ═══════════════════════════════════════
   // Phase C: Inherit from same-name siblings (strict pos+elem+rarity)
@@ -780,7 +845,9 @@ async function main() {
   for (const c of dbChars) {
     if (assigned.has(c.id)) continue;
     // Try EN siblings, then JA siblings
-    const siblings = dbByNameEn.get(c.name_en?.trim().toLowerCase() || "") || dbByNameJa.get(c.name_ja?.trim() || "");
+    const siblings =
+      dbByNameEn.get(c.name_en?.trim().toLowerCase() || "") ||
+      dbByNameJa.get(c.name_ja?.trim() || "");
     if (siblings) {
       // Helper: check that sibling hash is not from a different era
       const sameEraOrUnknown = (s: DbChar) => {
@@ -799,7 +866,7 @@ async function main() {
       };
       const withHash =
         siblings.find(
-          s =>
+          (s) =>
             assigned.has(s.id) &&
             s.position === c.position &&
             s.element === c.element &&
@@ -808,7 +875,7 @@ async function main() {
             descOk(s),
         ) ||
         siblings.find(
-          s =>
+          (s) =>
             assigned.has(s.id) &&
             s.position === c.position &&
             s.element === c.element &&
@@ -816,7 +883,7 @@ async function main() {
             descOk(s),
         ) ||
         siblings.find(
-          s =>
+          (s) =>
             assigned.has(s.id) &&
             s.position === c.position &&
             s.element === c.element &&
@@ -836,18 +903,23 @@ async function main() {
   // Position check prevents cross-position hash assignment (ex: GK hash → MF variant)
   // MixiMax characters (× in name) are excluded to avoid wrong base form images
   // ═══════════════════════════════════════
-  console.log("\n--- Phase D: Relaxed sibling inheritance (series + position) ---");
+  console.log(
+    "\n--- Phase D: Relaxed sibling inheritance (series + position) ---",
+  );
   const beforeD = assigned.size;
 
   for (const c of dbChars) {
     if (assigned.has(c.id)) continue;
     // Skip MixiMax — no zukan page exists for them
-    if (c.name_en && (c.name_en.includes("×") || c.name_en.includes("+"))) continue;
+    if (c.name_en && (c.name_en.includes("×") || c.name_en.includes("+")))
+      continue;
     // Try EN siblings, then JA siblings
-    const siblings = dbByNameEn.get(c.name_en?.trim().toLowerCase() || "") || dbByNameJa.get(c.name_ja?.trim() || "");
+    const siblings =
+      dbByNameEn.get(c.name_en?.trim().toLowerCase() || "") ||
+      dbByNameJa.get(c.name_ja?.trim() || "");
     if (siblings) {
       const withHash = siblings.find(
-        s =>
+        (s) =>
           assigned.has(s.id) &&
           s.series &&
           c.series &&
@@ -879,7 +951,7 @@ async function main() {
 
   // Index ALL zukan entries by name+pos+elem (not just unused)
   const zukanByNamePosElem = new Map<string, ZukanEntry[]>();
-  for (const e of enEntries.filter(e => e.zukanHash)) {
+  for (const e of enEntries.filter((e) => e.zukanHash)) {
     const pos = normPos(e.position);
     const elem = normElem(e.element);
     const key = `${e.name.trim().toLowerCase()}|${pos}|${elem}`;
@@ -889,7 +961,7 @@ async function main() {
 
   // Reverse lookup: hash → zukan entry
   const zukanHashToEntry = new Map<string, ZukanEntry>();
-  for (const e of enEntries.filter(e => e.zukanHash)) {
+  for (const e of enEntries.filter((e) => e.zukanHash)) {
     zukanHashToEntry.set(e.zukanHash!, e);
   }
 
@@ -992,7 +1064,9 @@ async function main() {
       removed++;
     }
   }
-  console.log(`Validation: removed ${removed} bad assignments (total: ${assigned.size})`);
+  console.log(
+    `Validation: removed ${removed} bad assignments (total: ${assigned.size})`,
+  );
 
   // ═══════════════════════════════════════
   // Validation description — log les matches suspects
@@ -1013,8 +1087,12 @@ async function main() {
       descRejected++;
     }
   }
-  if (descRejected === 0) console.log("  Tous les matches avec description sont cohérents.");
-  else console.log(`  ${descRejected} match(es) rejetés (sim=0 entre descriptions EN).`);
+  if (descRejected === 0)
+    console.log("  Tous les matches avec description sont cohérents.");
+  else
+    console.log(
+      `  ${descRejected} match(es) rejetés (sim=0 entre descriptions EN).`,
+    );
 
   // ═══════════════════════════════════════
   // Manual overrides — applied after all phases
@@ -1031,23 +1109,29 @@ async function main() {
       await sql`UPDATE inagle_characters SET name_en = ${name} WHERE id = ${id}`;
     }
   }
-  console.log(`Manual overrides: ${Object.keys(MANUAL_OVERRIDES).length} applied`);
+  console.log(
+    `Manual overrides: ${Object.keys(MANUAL_OVERRIDES).length} applied`,
+  );
 
   // ═══════════════════════════════════════
   // Apply updates — clear stale first, then set new
   // ═══════════════════════════════════════
   console.log(`\nClearing stale zukan_hash values...`);
-  const cleared = await sql`UPDATE inagle_characters SET zukan_hash = NULL WHERE zukan_hash IS NOT NULL RETURNING id`;
-  if (cleared.length > 0) console.log(`Cleared ${cleared.length} existing zukan_hash values.`);
+  const cleared =
+    await sql`UPDATE inagle_characters SET zukan_hash = NULL WHERE zukan_hash IS NOT NULL RETURNING id`;
+  if (cleared.length > 0)
+    console.log(`Cleared ${cleared.length} existing zukan_hash values.`);
 
   // Maps hash → description par locale (source de vérité zukan)
   const descByHashEn = new Map<string, string>();
   const descByHashJa = new Map<string, string>();
   for (const e of enEntries) {
-    if (e.zukanHash && e.description) descByHashEn.set(e.zukanHash, e.description);
+    if (e.zukanHash && e.description)
+      descByHashEn.set(e.zukanHash, e.description);
   }
   for (const e of jaEntries) {
-    if (e.zukanHash && e.description) descByHashJa.set(e.zukanHash, e.description);
+    if (e.zukanHash && e.description)
+      descByHashJa.set(e.zukanHash, e.description);
   }
 
   console.log(`Applying ${assigned.size} updates...`);
@@ -1062,7 +1146,8 @@ async function main() {
       dupeSkipped++;
       continue;
     }
-    const [updated] = await sql`UPDATE inagle_characters SET zukan_hash = ${hash} WHERE id = ${id} RETURNING id`;
+    const [updated] =
+      await sql`UPDATE inagle_characters SET zukan_hash = ${hash} WHERE id = ${id} RETURNING id`;
     if (updated) {
       applied++;
       appliedHashes.add(hash);
@@ -1072,7 +1157,11 @@ async function main() {
     const zukanEntry = zukanByHash.get(hash);
     if (zukanEntry?.name) {
       const db = dbById.get(id);
-      if (db && zukanEntry.name.trim().toLowerCase() !== (db.name_en || "").trim().toLowerCase()) {
+      if (
+        db &&
+        zukanEntry.name.trim().toLowerCase() !==
+          (db.name_en || "").trim().toLowerCase()
+      ) {
         await sql`UPDATE inagle_characters SET name_en = ${zukanEntry.name.trim()} WHERE id = ${id}`;
         nameUpdated++;
       }
@@ -1085,7 +1174,9 @@ async function main() {
       descUpdated++;
     }
   }
-  console.log(`Applied ${applied} zukan_hash updates (${dupeSkipped} inherited dupes skipped).`);
+  console.log(
+    `Applied ${applied} zukan_hash updates (${dupeSkipped} inherited dupes skipped).`,
+  );
   console.log(`Updated ${nameUpdated} name_en from zukan (source de vérité).`);
   console.log(`Updated ${descUpdated} descriptions (EN/JA) from zukan.`);
 
@@ -1120,7 +1211,9 @@ async function main() {
            COUNT(*) FILTER (WHERE zukan_hash IS NULL) as without
     FROM inagle_characters
   `;
-  console.log(`\nFinal: ${stats.total} with zukan_hash, ${stats.without} without.`);
+  console.log(
+    `\nFinal: ${stats.total} with zukan_hash, ${stats.without} without.`,
+  );
 
   const [gaStats] = await sql<{ ga_count: number }[]>`
     SELECT COUNT(*) FILTER (WHERE game_appearances IS NOT NULL AND array_length(game_appearances, 1) > 0) as ga_count
@@ -1154,7 +1247,7 @@ async function main() {
   await sql.end();
 }
 
-main().catch(e => {
+main().catch((e) => {
   console.error(e);
   process.exit(1);
 });

@@ -8,7 +8,8 @@ import { createAchilleaClient } from "@/lib/achillea";
  */
 export const metadata = metadonneesAchillea({
   titre: "Classement ELO",
-  description: "Le classement des joueurs classés Achilléa en 1v1 et 2v2, recalculé à chaque match.",
+  description:
+    "Le classement des joueurs classés Achilléa en 1v1 et 2v2, recalculé à chaque match.",
   chemin: "/achillea/ranked/leaderboard",
   indexable: true,
 });

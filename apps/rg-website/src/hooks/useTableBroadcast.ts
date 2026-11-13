@@ -32,7 +32,7 @@ export function useTableBroadcast<T = Record<string, unknown>>({
   onDelete,
 }: UseTableBroadcastOptions<T>) {
   useEffect(() => {
-    return subscribeTable<T>({ filter, schema, table }, event => {
+    return subscribeTable<T>({ filter, schema, table }, (event) => {
       switch (event.eventType) {
         case "INSERT": {
           if (event.new) onInsert?.(event.new);

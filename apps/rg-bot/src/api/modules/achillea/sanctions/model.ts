@@ -22,7 +22,11 @@ export const SanctionModel = {
   list: t.Object({
     data: t.Array(sanction),
     total: t.Number(),
-    meta: t.Object({ page: t.Number(), pageSize: t.Number(), pageCount: t.Number() }),
+    meta: t.Object({
+      page: t.Number(),
+      pageSize: t.Number(),
+      pageCount: t.Number(),
+    }),
   }),
   unauthorized: t.Object({ message: t.Literal("Authentication required") }),
 };

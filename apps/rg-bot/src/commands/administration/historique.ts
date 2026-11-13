@@ -23,7 +23,11 @@
  * personnelle, et l'éphémère est exactement l'outil pour ça.
  */
 import { Discord, Slash, SlashGroup, SlashOption } from "discordx";
-import { ApplicationCommandOptionType, type ChatInputCommandInteraction, type User } from "discord.js";
+import {
+  ApplicationCommandOptionType,
+  type ChatInputCommandInteraction,
+  type User,
+} from "discord.js";
 
 import { sql } from "../../lib/db";
 import {
@@ -35,7 +39,16 @@ import {
   resumer,
   type EntreeHistorique,
 } from "../../lib/sanctions";
-import { borner, echec, fiche, ilYA, leJour, piedDeCommande, repondre, vide } from "../../lib/ui";
+import {
+  borner,
+  echec,
+  fiche,
+  ilYA,
+  leJour,
+  piedDeCommande,
+  repondre,
+  vide,
+} from "../../lib/ui";
 import { differerEnPrive, exigerDroits, messagePanne } from "../staff/garde";
 import "./racine-moderation";
 
@@ -48,8 +61,17 @@ import "./racine-moderation";
  * modération : le journal contient aussi des écritures de contenu, qui n'ont
  * rien à faire dans un dossier de membre.
  */
-async function dossierDe(discordId: string, limite: number): Promise<EntreeHistorique[]> {
-  const lignes = await sql<Array<{ action: string; details: Record<string, unknown> | null; created_at: Date }>>`
+async function dossierDe(
+  discordId: string,
+  limite: number,
+): Promise<EntreeHistorique[]> {
+  const lignes = await sql<
+    Array<{
+      action: string;
+      details: Record<string, unknown> | null;
+      created_at: Date;
+    }>
+  >`
 		SELECT action, details, created_at
 		  FROM admin_audit_log
 		 WHERE entity_id = ${discordId}
@@ -57,11 +79,15 @@ async function dossierDe(discordId: string, limite: number): Promise<EntreeHisto
 		 ORDER BY created_at DESC
 		 LIMIT ${Math.min(50, Math.max(1, Math.floor(limite)))}
 	`;
-  return lignes.map(ligne => ({
+  return lignes.map((ligne) => ({
     action: ligne.action,
     le: ligne.created_at,
-    motif: typeof ligne.details?.motif === "string" ? ligne.details.motif : null,
-    parQui: typeof ligne.details?.discord_id === "string" ? ligne.details.discord_id : null,
+    motif:
+      typeof ligne.details?.motif === "string" ? ligne.details.motif : null,
+    parQui:
+      typeof ligne.details?.discord_id === "string"
+        ? ligne.details.discord_id
+        : null,
   }));
 }
 
@@ -73,7 +99,10 @@ async function dossierDe(discordId: string, limite: number): Promise<EntreeHisto
 })
 @SlashGroup("historique", "moderation")
 export class ModerationHistoriqueCommand {
-  @Slash({ description: "Le dossier de modération d'un membre", name: "membre" })
+  @Slash({
+    description: "Le dossier de modération d'un membre",
+    name: "membre",
+  })
   async membre(
     @SlashOption({
       description: "Le membre dont tu veux voir le dossier",
@@ -125,8 +154,11 @@ export class ModerationHistoriqueCommand {
       carte.champ(
         "Décompte",
         resume.parAction
-          .filter(entree => entree.nombre > 0)
-          .map(entree => `${iconeAction(entree.action)} ${libelleAction(entree.action)} — **${entree.nombre}**`)
+          .filter((entree) => entree.nombre > 0)
+          .map(
+            (entree) =>
+              `${iconeAction(entree.action)} ${libelleAction(entree.action)} — **${entree.nombre}**`,
+          )
           .join("\n"),
       );
       carte.champ(
@@ -134,14 +166,18 @@ export class ModerationHistoriqueCommand {
         resume.recentes > 0 ? `**${resume.recentes}** entrée(s)` : "aucune",
         { enLigne: true },
       );
-      carte.champ("Dernière", resume.derniere ? ilYA(resume.derniere.le) : "—", {
-        enLigne: true,
-      });
+      carte.champ(
+        "Dernière",
+        resume.derniere ? ilYA(resume.derniere.le) : "—",
+        {
+          enLigne: true,
+        },
+      );
 
       carte.bloc(
         "Journal",
         entrees
-          .map(entree => {
+          .map((entree) => {
             const parQui = entree.parQui ? ` par <@${entree.parQui}>` : "";
             const motif = entree.motif ? ` — ${borner(entree.motif, 120)}` : "";
             return `${iconeAction(entree.action)} ${leJour(entree.le, "d")}${parQui}${motif}`;
@@ -150,12 +186,20 @@ export class ModerationHistoriqueCommand {
         4,
       );
       if (carte.tronquee) {
-        carte.champ("Journal écourté", "Le dossier ne tient pas dans un message. Réduis l'option `nombre`.");
+        carte.champ(
+          "Journal écourté",
+          "Le dossier ne tient pas dans un message. Réduis l'option `nombre`.",
+        );
       }
 
-      await interaction.editReply({ embeds: [piedDeCommande(carte.embed, interaction)] });
+      await interaction.editReply({
+        embeds: [piedDeCommande(carte.embed, interaction)],
+      });
     } catch (err) {
-      await repondre(interaction, echec("Dossier illisible", messagePanne(err)));
+      await repondre(
+        interaction,
+        echec("Dossier illisible", messagePanne(err)),
+      );
     }
   }
 
@@ -197,7 +241,10 @@ export class ModerationHistoriqueCommand {
       if (lignes.length === 0) {
         await repondre(
           interaction,
-          vide("Aucune action de modération", "Le journal ne contient encore aucune sanction. C'est plutôt bon signe."),
+          vide(
+            "Aucune action de modération",
+            "Le journal ne contient encore aucune sanction. C'est plutôt bon signe.",
+          ),
         );
         return;
       }
@@ -208,17 +255,27 @@ export class ModerationHistoriqueCommand {
       carte.bloc(
         "Journal",
         lignes
-          .map(ligne => {
-            const cible = ligne.entity_id ? `<@${ligne.entity_id}>` : "cible inconnue";
-            const parQui = typeof ligne.details?.discord_id === "string" ? ` par <@${ligne.details.discord_id}>` : "";
+          .map((ligne) => {
+            const cible = ligne.entity_id
+              ? `<@${ligne.entity_id}>`
+              : "cible inconnue";
+            const parQui =
+              typeof ligne.details?.discord_id === "string"
+                ? ` par <@${ligne.details.discord_id}>`
+                : "";
             return `${iconeAction(ligne.action)} ${cible}${parQui} · ${ilYA(ligne.created_at)}`;
           })
           .join("\n"),
         5,
       );
-      await interaction.editReply({ embeds: [piedDeCommande(carte.embed, interaction)] });
+      await interaction.editReply({
+        embeds: [piedDeCommande(carte.embed, interaction)],
+      });
     } catch (err) {
-      await repondre(interaction, echec("Journal illisible", messagePanne(err)));
+      await repondre(
+        interaction,
+        echec("Journal illisible", messagePanne(err)),
+      );
     }
   }
 }

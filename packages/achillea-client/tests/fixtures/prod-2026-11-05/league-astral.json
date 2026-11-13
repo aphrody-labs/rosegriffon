@@ -1,10 +1,7 @@
 {
   "meta": {
     "id": "astral-s1",
-    "aliases": [
-      "asytral-s1",
-      "astral"
-    ],
+    "aliases": ["asytral-s1", "astral"],
     "name": "Astral League",
     "season": "Saison 1",
     "format": "league",
@@ -30,10 +27,7 @@
         "winOvertime": 2,
         "lossOvertime": 1
       },
-      "tiebreakers": [
-        "map_diff",
-        "head_to_head"
-      ],
+      "tiebreakers": ["map_diff", "head_to_head"],
       "playoffs": {
         "teams": 4,
         "format": "double_elimination",
@@ -63,10 +57,7 @@
       "winOvertime": 2,
       "lossOvertime": 1
     },
-    "tiebreakers": [
-      "map_diff",
-      "head_to_head"
-    ],
+    "tiebreakers": ["map_diff", "head_to_head"],
     "playoffs": {
       "teams": 4,
       "format": "double_elimination",
@@ -383,9 +374,7 @@
     "players": [
       {
         "name": "Vype",
-        "teams": [
-          "GKO"
-        ],
+        "teams": ["GKO"],
         "primaryTeam": "GKO",
         "games": 9,
         "wins": 9,
@@ -402,9 +391,7 @@
       },
       {
         "name": "gamewatch",
-        "teams": [
-          "GKO"
-        ],
+        "teams": ["GKO"],
         "primaryTeam": "GKO",
         "games": 6,
         "wins": 6,
@@ -421,38 +408,14 @@
       }
     ],
     "rosters": {
-      "LMS": [
-        "Colombo",
-        "Eren"
-      ],
-      "DR": [
-        "AstroKyo",
-        "Astrokyo"
-      ],
-      "ZOO": [
-        "L'Éléphant",
-        "LaScxlopendre"
-      ],
-      "GKO": [
-        "Fen",
-        "Gamewatch"
-      ],
-      "OMP": [
-        "Carillo",
-        "Leo"
-      ],
-      "ASE": [
-        "Eternity",
-        "Flamme"
-      ],
-      "FGS": [
-        "Evo",
-        "Hakai"
-      ],
-      "KOM": [
-        "Flavira",
-        "Kappa"
-      ]
+      "LMS": ["Colombo", "Eren"],
+      "DR": ["AstroKyo", "Astrokyo"],
+      "ZOO": ["L'Éléphant", "LaScxlopendre"],
+      "GKO": ["Fen", "Gamewatch"],
+      "OMP": ["Carillo", "Leo"],
+      "ASE": ["Eternity", "Flamme"],
+      "FGS": ["Evo", "Hakai"],
+      "KOM": ["Flavira", "Kappa"]
     },
     "h2h": {
       "GKO": {

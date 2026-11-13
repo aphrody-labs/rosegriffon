@@ -6,22 +6,37 @@
  * 2. Version 100 format (typed lists) - skill_config, soccer_*, formation_*
  */
 
-import type { CfgBinDocument, CfgBinEntry, CfgBinNamedDocument, TypedDocument } from "../schemas/cfgbin.js";
+import type {
+  CfgBinDocument,
+  CfgBinEntry,
+  CfgBinNamedDocument,
+  TypedDocument,
+} from "../schemas/cfgbin.js";
 import type { NounInfo, TextInfo } from "../schemas/text.js";
 
 /**
  * Check if document is lowercase Entries format
  */
 export function isEntriesDocument(doc: unknown): doc is CfgBinDocument {
-  return typeof doc === "object" && doc !== null && "entries" in doc && Array.isArray((doc as CfgBinDocument).entries);
+  return (
+    typeof doc === "object" &&
+    doc !== null &&
+    "entries" in doc &&
+    Array.isArray((doc as CfgBinDocument).entries)
+  );
 }
 
 /**
  * Check if document is PascalCase Entries format
  */
-export function isNamedEntriesDocument(doc: unknown): doc is CfgBinNamedDocument {
+export function isNamedEntriesDocument(
+  doc: unknown,
+): doc is CfgBinNamedDocument {
   return (
-    typeof doc === "object" && doc !== null && "Entries" in doc && Array.isArray((doc as CfgBinNamedDocument).Entries)
+    typeof doc === "object" &&
+    doc !== null &&
+    "Entries" in doc &&
+    Array.isArray((doc as CfgBinNamedDocument).Entries)
   );
 }
 
@@ -48,7 +63,10 @@ export function extractTextInfo(doc: CfgBinDocument): TextInfo[] {
   for (const entry of doc.entries) {
     if (entry.name.startsWith("TEXT_INFO_BEGIN")) {
       for (const child of entry.children) {
-        if (child.name.startsWith("TEXT_INFO_") && child.variables.length >= 3) {
+        if (
+          child.name.startsWith("TEXT_INFO_") &&
+          child.variables.length >= 3
+        ) {
           const hashId = Number(child.variables[0].value);
           const index = Number(child.variables[1].value);
           const text = String(child.variables[2].value);
@@ -71,7 +89,10 @@ export function extractNounInfo(doc: CfgBinDocument): NounInfo[] {
   for (const entry of doc.entries) {
     if (entry.name.startsWith("NOUN_INFO_BEGIN")) {
       for (const child of entry.children) {
-        if (child.name.startsWith("NOUN_INFO_") && child.variables.length >= 6) {
+        if (
+          child.name.startsWith("NOUN_INFO_") &&
+          child.variables.length >= 6
+        ) {
           const hashId = Number(child.variables[0].value);
           const nameType = Number(child.variables[1].value);
           const name = String(child.variables[5].value);
@@ -89,7 +110,10 @@ export function extractNounInfo(doc: CfgBinDocument): NounInfo[] {
 /**
  * Find entry by name pattern in tree
  */
-export function findEntries(entries: CfgBinEntry[], pattern: string | RegExp): CfgBinEntry[] {
+export function findEntries(
+  entries: CfgBinEntry[],
+  pattern: string | RegExp,
+): CfgBinEntry[] {
   const results: CfgBinEntry[] = [];
   const regex = typeof pattern === "string" ? new RegExp(pattern) : pattern;
 
@@ -112,8 +136,11 @@ export function findEntries(entries: CfgBinEntry[], pattern: string | RegExp): C
 /**
  * Get typed list by name from version 100 document
  */
-export function getTypedList<T>(doc: TypedDocument, listName: string): T[] | undefined {
-  const list = doc.lists.find(l => l.name === listName);
+export function getTypedList<T>(
+  doc: TypedDocument,
+  listName: string,
+): T[] | undefined {
+  const list = doc.lists.find((l) => l.name === listName);
   return list?.values as T[] | undefined;
 }
 

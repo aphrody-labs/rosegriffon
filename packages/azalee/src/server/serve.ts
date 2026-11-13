@@ -68,7 +68,9 @@ function num(query: URLSearchParams, key: string, fallback: number): number {
 }
 
 /** Convertit les paramètres d'URL en filtres de liste du wiki. */
-function listParams(query: URLSearchParams): Record<string, string | number | undefined> {
+function listParams(
+  query: URLSearchParams,
+): Record<string, string | number | undefined> {
   const params: Record<string, string | number | undefined> = {
     page: num(query, "page", 1),
     limit: Math.min(num(query, "limit", 24), 200),
@@ -110,7 +112,8 @@ class HttpError extends Error {
 }
 
 function required<T>(value: T | null | undefined, what: string): T {
-  if (value === null || value === undefined) throw new HttpError(404, `${what} introuvable`);
+  if (value === null || value === undefined)
+    throw new HttpError(404, `${what} introuvable`);
   return value;
 }
 
@@ -148,40 +151,80 @@ route("health", async () => ({
   cpkFiles: await safeAsync(() => totalFiles(), 0),
 }));
 
-route("api/characters", ({ query }) => wikiService.getCharactersList(listParams(query) as never));
-route("api/characters/:slug", async ({ params }) => required(await resolveCharacter(params.slug), "personnage"));
-route("api/coordinators", ({ query }) => wikiService.getCoordinatorsList(listParams(query) as never));
+route("api/characters", ({ query }) =>
+  wikiService.getCharactersList(listParams(query) as never),
+);
+route("api/characters/:slug", async ({ params }) =>
+  required(await resolveCharacter(params.slug), "personnage"),
+);
+route("api/coordinators", ({ query }) =>
+  wikiService.getCoordinatorsList(listParams(query) as never),
+);
 
-route("api/skills", ({ query }) => wikiService.getSkillsList(listParams(query) as never));
-route("api/skills/:id", async ({ params }) => required(await wikiService.getSkill(params.id), "technique"));
+route("api/skills", ({ query }) =>
+  wikiService.getSkillsList(listParams(query) as never),
+);
+route("api/skills/:id", async ({ params }) =>
+  required(await wikiService.getSkill(params.id), "technique"),
+);
 
-route("api/items", ({ query }) => wikiService.getItemsList(listParams(query) as never));
-route("api/items/:id", async ({ params }) => required(await wikiService.getItem(params.id), "objet"));
+route("api/items", ({ query }) =>
+  wikiService.getItemsList(listParams(query) as never),
+);
+route("api/items/:id", async ({ params }) =>
+  required(await wikiService.getItem(params.id), "objet"),
+);
 
 route("api/auras/:type", ({ params, query }) =>
-  wikiService.getAurasList({ ...listParams(query), typeSlug: params.type } as never),
+  wikiService.getAurasList({
+    ...listParams(query),
+    typeSlug: params.type,
+  } as never),
 );
-route("api/auras/:type/:id", async ({ params }) => required(await wikiService.getAura(params.id, params.type), "aura"));
+route("api/auras/:type/:id", async ({ params }) =>
+  required(await wikiService.getAura(params.id, params.type), "aura"),
+);
 
-route("api/tactics", ({ query }) => wikiService.getTacticsList(listParams(query) as never));
-route("api/tactics/:slug", async ({ params }) => required(await wikiService.getTactic(params.slug), "tactique"));
+route("api/tactics", ({ query }) =>
+  wikiService.getTacticsList(listParams(query) as never),
+);
+route("api/tactics/:slug", async ({ params }) =>
+  required(await wikiService.getTactic(params.slug), "tactique"),
+);
 
 route("api/teams", () => getTeamsList());
-route("api/teams/:id", async ({ params }) => required(await getTeamDetail(params.id), "équipe"));
+route("api/teams/:id", async ({ params }) =>
+  required(await getTeamDetail(params.id), "équipe"),
+);
 
 route("api/shops", () => getShopsList());
-route("api/shops/:id", async ({ params }) => required(await getShop(Number.parseInt(params.id, 10)), "boutique"));
+route("api/shops/:id", async ({ params }) =>
+  required(await getShop(Number.parseInt(params.id, 10)), "boutique"),
+);
 
 route("api/quests", ({ query }) =>
-  getQuestsList({ q: query.get("q") ?? undefined, kind: query.get("kind") ?? undefined } as never),
+  getQuestsList({
+    q: query.get("q") ?? undefined,
+    kind: query.get("kind") ?? undefined,
+  } as never),
 );
-route("api/quests/:id", async ({ params }) => required(await getQuest(params.id), "quête"));
+route("api/quests/:id", async ({ params }) =>
+  required(await getQuest(params.id), "quête"),
+);
 
-route("api/coaches", ({ query }) => getCoachesList({ q: query.get("q") ?? undefined }));
-route("api/coaches/:id", async ({ params }) => required(await getCoach(Number.parseInt(params.id, 10)), "coach"));
+route("api/coaches", ({ query }) =>
+  getCoachesList({ q: query.get("q") ?? undefined }),
+);
+route("api/coaches/:id", async ({ params }) =>
+  required(await getCoach(Number.parseInt(params.id, 10)), "coach"),
+);
 
-route("api/stadiums", ({ query }) => getStadiumsList({ q: query.get("q") ?? undefined }));
-route("api/stadiums/:id", async ({ params }) => required(await getStadium(params.id), "stade"));
+route("api/stadiums", ({ query }) =>
+  getStadiumsList({ q: query.get("q") ?? undefined }),
+);
+route("api/stadiums/:id", async ({ params }) =>
+  required(await getStadium(params.id), "stade"),
+);
 
 route("api/trophies", ({ query }) =>
   getTrophiesList({
@@ -189,7 +232,9 @@ route("api/trophies", ({ query }) =>
     category: query.get("category") ?? undefined,
   } as never),
 );
-route("api/trophies/:id", async ({ params }) => required(await getTrophy(params.id), "trophée"));
+route("api/trophies/:id", async ({ params }) =>
+  required(await getTrophy(params.id), "trophée"),
+);
 
 route("api/passives", ({ query }) =>
   wikiService.getPassivesList({
@@ -199,7 +244,9 @@ route("api/passives", ({ query }) =>
     limit: Math.min(num(query, "limit", 50), 500),
   } as never),
 );
-route("api/passives/:id", async ({ params }) => required(await wikiService.getPassive(params.id), "passive"));
+route("api/passives/:id", async ({ params }) =>
+  required(await wikiService.getPassive(params.id), "passive"),
+);
 
 route("api/gallery", ({ query }) =>
   wikiService.getGalleryList({
@@ -211,22 +258,38 @@ route("api/gallery", ({ query }) =>
 );
 
 route("api/drops", () => getDropsData());
-route("api/capsules", ({ query }) => getCapsuleList({ q: query.get("q") ?? undefined } as never));
-route("api/costumes", ({ query }) => getCostumeList({ q: query.get("q") ?? undefined } as never));
+route("api/capsules", ({ query }) =>
+  getCapsuleList({ q: query.get("q") ?? undefined } as never),
+);
+route("api/costumes", ({ query }) =>
+  getCostumeList({ q: query.get("q") ?? undefined } as never),
+);
 route("api/invocation", () => getInvocationRates());
 
 route(
   "api/cpk",
   async ({ query }) =>
-    await listDirPaged(query.get("path") ?? "", Math.min(num(query, "limit", 200), 1000), num(query, "offset", 0)),
+    await listDirPaged(
+      query.get("path") ?? "",
+      Math.min(num(query, "limit", 200), 1000),
+      num(query, "offset", 0),
+    ),
 );
 route(
   "api/cpk/search",
-  async ({ query }) => await searchFiles(query.get("q") ?? "", Math.min(num(query, "limit", 200), 1000)),
+  async ({ query }) =>
+    await searchFiles(
+      query.get("q") ?? "",
+      Math.min(num(query, "limit", 200), 1000),
+    ),
 );
-route("api/cpk/file", async ({ query }) => required(await fileMeta(query.get("path") ?? ""), "fichier CPK"));
+route("api/cpk/file", async ({ query }) =>
+  required(await fileMeta(query.get("path") ?? ""), "fichier CPK"),
+);
 
-route("api/text/:hash", async ({ params }) => required(await resolveTextAll(params.hash), "texte"));
+route("api/text/:hash", async ({ params }) =>
+  required(await resolveTextAll(params.hash), "texte"),
+);
 route(
   "api/text",
   async ({ query }) =>
@@ -251,12 +314,17 @@ route("api/search", async ({ query }) => {
     wikiService.getSkillsList({ q, limit, page: 1 } as never),
     wikiService.getItemsList({ q, limit, page: 1 } as never),
   ]);
-  return { q, characters: characters.data, skills: skills.data, items: items.data };
+  return {
+    q,
+    characters: characters.data,
+    skills: skills.data,
+    items: items.data,
+  };
 });
 
 /** Liste des routes déclarées (utile pour `/` et la doc du CLI). */
 export function listRoutes(): string[] {
-  return ROUTES.map(r => `/${r.segments.join("/")}`).sort();
+  return ROUTES.map((r) => `/${r.segments.join("/")}`).sort();
 }
 
 route("", () => ({ name: "@rosegriffon/azalee", routes: listRoutes() }));
@@ -271,7 +339,9 @@ async function safeAsync<T>(fn: () => Promise<T>, fallback: T): Promise<T> {
   }
 }
 
-function match(pathSegments: string[]): { route: Route; params: Record<string, string> } | null {
+function match(
+  pathSegments: string[],
+): { route: Route; params: Record<string, string> } | null {
   let best: { route: Route; params: Record<string, string> } | null = null;
   let bestParams = Number.POSITIVE_INFINITY;
 
@@ -323,22 +393,37 @@ export async function handleAzaleeRequest(
     ...corsHeaders(options.cors ?? true),
   };
 
-  if (request.method === "OPTIONS") return new Response(null, { status: 204, headers });
+  if (request.method === "OPTIONS")
+    return new Response(null, { status: 204, headers });
   if (request.method !== "GET") {
-    return Response.json({ error: "méthode non supportée" }, { status: 405, headers });
+    return Response.json(
+      { error: "méthode non supportée" },
+      { status: 405, headers },
+    );
   }
 
   const url = new URL(request.url);
   const segments = url.pathname.split("/").filter(Boolean);
   const found = match(segments);
-  if (!found) return Response.json({ error: "route inconnue", routes: listRoutes() }, { status: 404, headers });
+  if (!found)
+    return Response.json(
+      { error: "route inconnue", routes: listRoutes() },
+      { status: 404, headers },
+    );
 
   try {
-    const body = await found.route.handler({ params: found.params, query: url.searchParams, url });
+    const body = await found.route.handler({
+      params: found.params,
+      query: url.searchParams,
+      url,
+    });
     return Response.json(body, { headers });
   } catch (error) {
     if (error instanceof HttpError) {
-      return Response.json({ error: error.message }, { status: error.status, headers });
+      return Response.json(
+        { error: error.message },
+        { status: error.status, headers },
+      );
     }
     const message = error instanceof Error ? error.message : String(error);
     return Response.json({ error: message }, { status: 500, headers });
@@ -354,11 +439,13 @@ export async function handleAzaleeRequest(
  * ```
  */
 export function createAzaleeServer(options: AzaleeServerOptions = {}) {
-  const port = options.port ?? Number.parseInt(process.env.AZALEE_PORT ?? String(DEFAULT_AZALEE_PORT), 10);
+  const port =
+    options.port ??
+    Number.parseInt(process.env.AZALEE_PORT ?? String(DEFAULT_AZALEE_PORT), 10);
   const hostname = options.hostname ?? process.env.AZALEE_HOST ?? "127.0.0.1";
   return Bun.serve({
     port,
     hostname,
-    fetch: request => handleAzaleeRequest(request, { cors: options.cors }),
+    fetch: (request) => handleAzaleeRequest(request, { cors: options.cors }),
   });
 }

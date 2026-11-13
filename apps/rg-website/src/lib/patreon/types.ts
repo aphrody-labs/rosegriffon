@@ -23,7 +23,8 @@ export const SCOPES_CREATOR = [
 
 export type OAuthIntent = "patron-link" | "creator-link" | "reactivate";
 
-export type RgSubscriptionStatus = "pending" | "reactivated" | "churned" | "grandfathered";
+export type RgSubscriptionStatus =
+  "pending" | "reactivated" | "churned" | "grandfathered";
 
 export type ResolutionMethod = "email" | "discord_id" | "manual";
 
@@ -50,7 +51,8 @@ export interface JsonApiResource<T = Record<string, unknown>> {
   relationships?: Record<
     string,
     {
-      data: { id: string; type: string } | { id: string; type: string }[] | null;
+      data:
+        { id: string; type: string } | { id: string; type: string }[] | null;
     }
   >;
 }

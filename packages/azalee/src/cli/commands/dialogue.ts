@@ -4,7 +4,14 @@ import type { Command } from "commander";
 import { createInagleSql } from "@rosegriffon/db/inagle-sql";
 import type { Database } from "@rosegriffon/db/schema";
 
-import { colors, errorMessage, getOrReadInput, reportError, restoreLogs, suppressLogs } from "../context";
+import {
+  colors,
+  errorMessage,
+  getOrReadInput,
+  reportError,
+  restoreLogs,
+  suppressLogs,
+} from "../context";
 import type { DialogueOptions } from "../types";
 
 /** Réplique retenue, telle qu'affichée / sérialisée. */
@@ -18,7 +25,9 @@ interface DialogueMatch {
 export function registerDialogueCommand(program: Command): void {
   program
     .command("dialogue [query]")
-    .description("Recherche dans les dialogues narratifs et de chronique du jeu")
+    .description(
+      "Recherche dans les dialogues narratifs et de chronique du jeu",
+    )
     .option("-s, --speaker <speaker>", "Filtre par locuteur/personnage")
     .option("-j, --json", "Format de sortie en JSON brute")
     .option("-l, --limit <limit>", "Nombre de résultats max", "10")
@@ -37,7 +46,7 @@ export function registerDialogueCommand(program: Command): void {
         const dialogueRows = await db
           .selectFrom("inagle_game_text")
           .select(["hash_id", "locale", "category", "value"])
-          .where(eb =>
+          .where((eb) =>
             eb.or([
               eb("category", "ilike", "%dialog%"),
               eb("category", "ilike", "%event%"),
@@ -46,8 +55,10 @@ export function registerDialogueCommand(program: Command): void {
               eb("category", "ilike", "%phase%"),
             ]),
           )
-          .$if(Boolean(textQ), qb => qb.where("value", "ilike", `%${textQ}%`))
-          .$if(Boolean(speakerQ), qb => qb.where("value", "ilike", `%${speakerQ}%`))
+          .$if(Boolean(textQ), (qb) => qb.where("value", "ilike", `%${textQ}%`))
+          .$if(Boolean(speakerQ), (qb) =>
+            qb.where("value", "ilike", `%${speakerQ}%`),
+          )
           .orderBy("hash_id", "asc")
           .limit(Math.max(limitVal * 3, 3))
           .execute();
@@ -75,7 +86,9 @@ export function registerDialogueCommand(program: Command): void {
             `${colors.cyan}Recherche de dialogues pour : "${textQ}"${speakerQ ? ` (par ${speakerQ})` : ""}...${colors.reset}\n`,
           );
           if (matches.length === 0) {
-            console.log(`${colors.yellow}Aucun dialogue trouvé.${colors.reset}`);
+            console.log(
+              `${colors.yellow}Aucun dialogue trouvé.${colors.reset}`,
+            );
             return;
           }
 
@@ -90,7 +103,11 @@ export function registerDialogueCommand(program: Command): void {
           }
         }
       } catch (e) {
-        reportError(options.json, errorMessage(e), `${colors.red}Erreur dialogue : ${errorMessage(e)}${colors.reset}`);
+        reportError(
+          options.json,
+          errorMessage(e),
+          `${colors.red}Erreur dialogue : ${errorMessage(e)}${colors.reset}`,
+        );
       }
     });
 }

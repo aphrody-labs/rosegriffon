@@ -1,5 +1,8 @@
 import { describe, expect, it } from "bun:test";
-import { CONFIG_SCHEMA_VERSION, isVersionedConfigDocument } from "./config-contract.js";
+import {
+  CONFIG_SCHEMA_VERSION,
+  isVersionedConfigDocument,
+} from "./config-contract.js";
 
 describe("cfg.bin JSON contract", () => {
   it("accepts the versioned exchange envelope", () => {
@@ -14,7 +17,9 @@ describe("cfg.bin JSON contract", () => {
   });
 
   it("rejects an unknown schema version", () => {
-    expect(isVersionedConfigDocument({ entries: [], schema_version: 2 })).toBe(false);
+    expect(isVersionedConfigDocument({ entries: [], schema_version: 2 })).toBe(
+      false,
+    );
   });
 
   it("keeps legacy raw entries compatible", () => {

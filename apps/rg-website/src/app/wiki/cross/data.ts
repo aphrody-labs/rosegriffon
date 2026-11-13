@@ -79,7 +79,13 @@ export interface CrossData {
     collabCopyright: string;
   };
   disclaimerFr: string;
-  introduction: { headingJa: string; headingFr: string; storyJa: string; storyFr: string; storySource: string };
+  introduction: {
+    headingJa: string;
+    headingFr: string;
+    storyJa: string;
+    storyFr: string;
+    storySource: string;
+  };
   protagonist: {
     nameJa: string;
     nameReadingJa: string;
@@ -88,9 +94,19 @@ export interface CrossData {
     descriptionFr: string;
     image: string;
   };
-  system: { headingJa: string; headingFr: string; noteFr: string; pillars: CrossPillar[] };
+  system: {
+    headingJa: string;
+    headingFr: string;
+    noteFr: string;
+    pillars: CrossPillar[];
+  };
   news: CrossNews[];
-  rewards: { headingJa: string; headingFr: string; noteFr: string; images: string[] };
+  rewards: {
+    headingJa: string;
+    headingFr: string;
+    noteFr: string;
+    images: string[];
+  };
   samuraiBlue2026: {
     titleJa: string;
     titleFr: string;
@@ -117,7 +133,11 @@ export interface CrossData {
     modes: CrossCbtMode[];
     plannedAdjustmentsFr: string[];
   };
-  movies: { headingJa: string; headingFr: string; youtube: { id: string; labelJa?: string; labelFr: string }[] };
+  movies: {
+    headingJa: string;
+    headingFr: string;
+    youtube: { id: string; labelJa?: string; labelFr: string }[];
+  };
   tweets: CrossTweet[];
   tweetsNote: string;
   links: Record<string, string | string[]>;
@@ -151,7 +171,13 @@ export interface CrossData {
     cbtProgressRanking: string;
     cbtScreenshots: string[];
     youtubeThumbs: Record<string, string>;
-    footerBanners: { youtube: string; x: string; report: string; inazuma: string; victoryRoad: string };
+    footerBanners: {
+      youtube: string;
+      x: string;
+      report: string;
+      inazuma: string;
+      victoryRoad: string;
+    };
     logoLevel5: string;
     logoAiming: string;
     rewardAchieve: string[];

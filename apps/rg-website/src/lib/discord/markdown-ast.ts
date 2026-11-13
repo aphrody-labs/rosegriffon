@@ -63,7 +63,11 @@ export type Bloc =
 /** Profondeur maximale d'imbrication du formatage (garde-fou anti-explosion). */
 const PROFONDEUR_MAX = 6;
 
-type Fabrique = (m: RegExpExecArray, ctx: ContexteMentions, profondeur: number) => NoeudInline | null;
+type Fabrique = (
+  m: RegExpExecArray,
+  ctx: ContexteMentions,
+  profondeur: number,
+) => NoeudInline | null;
 
 interface Regle {
   motif: RegExp;
@@ -86,7 +90,10 @@ function nettoyerUrlAuto(url: string): string {
 }
 
 /** Fabrique un conteneur dont le contenu est ré-analysé récursivement. */
-function conteneur(type: "gras" | "italique" | "souligne" | "barre" | "spoiler", groupe = 1): Fabrique {
+function conteneur(
+  type: "gras" | "italique" | "souligne" | "barre" | "spoiler",
+  groupe = 1,
+): Fabrique {
   return (m, ctx, profondeur) => {
     const brut = m[groupe] ?? "";
     if (brut.trim().length === 0) return null;
@@ -97,16 +104,16 @@ function conteneur(type: "gras" | "italique" | "souligne" | "barre" | "spoiler",
 const REGLES: Regle[] = [
   // Échappement `\*` — le caractère suivant est rendu littéralement.
   {
-    fabrique: m => ({ type: "texte", valeur: m[1] ?? "" }),
+    fabrique: (m) => ({ type: "texte", valeur: m[1] ?? "" }),
     motif: /\\([\\*_~`|>#[\]()@:-])/y,
   },
   // Bloc de code inline à double accent grave (autorise un accent à l'intérieur).
   {
-    fabrique: m => ({ type: "code", valeur: m[1] ?? "" }),
+    fabrique: (m) => ({ type: "code", valeur: m[1] ?? "" }),
     motif: /``([^\n]+?)``/y,
   },
   {
-    fabrique: m => ({ type: "code", valeur: m[1] ?? "" }),
+    fabrique: (m) => ({ type: "code", valeur: m[1] ?? "" }),
     motif: /`([^`\n]+)`/y,
   },
   // Gras + italique combinés.
@@ -115,7 +122,12 @@ const REGLES: Regle[] = [
       const brut = m[1] ?? "";
       if (brut.trim().length === 0) return null;
       return {
-        enfants: [{ enfants: analyserInline(brut, ctx, profondeur + 1), type: "italique" }],
+        enfants: [
+          {
+            enfants: analyserInline(brut, ctx, profondeur + 1),
+            type: "italique",
+          },
+        ],
         type: "gras",
       };
     },
@@ -129,10 +141,16 @@ const REGLES: Regle[] = [
   { fabrique: conteneur("italique"), motif: /_([^_\n]+?)_/y },
   // Emoji personnalisé `<:nom:id>` / `<a:nom:id>`.
   {
-    fabrique: m => {
+    fabrique: (m) => {
       const id = m[3] ?? "";
       const anime = m[1] === "a";
-      return { anime, id, nom: m[2] ?? "", type: "emoji", url: urlEmojiPersonnalise(id, anime) };
+      return {
+        anime,
+        id,
+        nom: m[2] ?? "",
+        type: "emoji",
+        url: urlEmojiPersonnalise(id, anime),
+      };
     },
     motif: /<(a?):([\w~-]{2,32}):(\d{15,25})>/y,
   },
@@ -140,7 +158,11 @@ const REGLES: Regle[] = [
   {
     fabrique: (m, ctx) => {
       const id = m[1] ?? "";
-      return { id, nom: ctx.utilisateurs[id] ?? "membre", type: "mention-utilisateur" };
+      return {
+        id,
+        nom: ctx.utilisateurs[id] ?? "membre",
+        type: "mention-utilisateur",
+      };
     },
     motif: /<@!?(\d{15,25})>/y,
   },
@@ -168,10 +190,14 @@ const REGLES: Regle[] = [
   },
   // Horodatage dynamique `<t:unix:R>`.
   {
-    fabrique: m => {
+    fabrique: (m) => {
       const horodatage = Number.parseInt(m[1] ?? "", 10);
       if (!Number.isFinite(horodatage)) return null;
-      return { horodatage, style: (m[2] as StyleHorodatage) ?? "f", type: "horodatage" };
+      return {
+        horodatage,
+        style: (m[2] as StyleHorodatage) ?? "f",
+        type: "horodatage",
+      };
     },
     motif: /<t:(-?\d{1,15})(?::([tTdDfFR]))?>/y,
   },
@@ -180,13 +206,17 @@ const REGLES: Regle[] = [
     fabrique: (m, ctx, profondeur) => {
       const url = (m[2] ?? "").replace(/^<|>$/g, "");
       if (!estUrlSure(url)) return null;
-      return { enfants: analyserInline(m[1] ?? "", ctx, profondeur + 1), type: "lien", url };
+      return {
+        enfants: analyserInline(m[1] ?? "", ctx, profondeur + 1),
+        type: "lien",
+        url,
+      };
     },
     motif: /\[([^\][\n]{1,200})]\((<?[^\s)]{1,2000}>?)\)/y,
   },
   // Lien encadré `<https://…>` (aperçu supprimé côté Discord).
   {
-    fabrique: m => {
+    fabrique: (m) => {
       const url = m[1] ?? "";
       if (!estUrlSure(url)) return null;
       return { enfants: [{ type: "texte", valeur: url }], type: "lien", url };
@@ -195,7 +225,7 @@ const REGLES: Regle[] = [
   },
   // Lien nu.
   {
-    fabrique: m => {
+    fabrique: (m) => {
       const url = nettoyerUrlAuto(m[0]);
       if (!estUrlSure(url)) return null;
       return { enfants: [{ type: "texte", valeur: url }], type: "lien", url };
@@ -204,7 +234,10 @@ const REGLES: Regle[] = [
   },
   // Mentions globales.
   {
-    fabrique: m => ({ type: "mention-globale", valeur: m[1] as "everyone" | "here" }),
+    fabrique: (m) => ({
+      type: "mention-globale",
+      valeur: m[1] as "everyone" | "here",
+    }),
     motif: /@(everyone|here)\b/y,
   },
 ];
@@ -305,7 +338,7 @@ function analyserLignes(segment: string, ctx: ContexteMentions): Bloc[] {
     const { elements, ordonnee } = tamponListe;
     tamponListe = null;
     blocs.push({
-      elements: elements.map(element => analyserInline(element, ctx)),
+      elements: elements.map((element) => analyserInline(element, ctx)),
       ordonnee,
       type: "liste",
     });
@@ -356,7 +389,10 @@ function analyserLignes(segment: string, ctx: ContexteMentions): Bloc[] {
     const sousTexte = MOTIF_SOUS_TEXTE.exec(ligne);
     if (sousTexte) {
       viderTout();
-      blocs.push({ enfants: analyserInline(sousTexte[1] ?? "", ctx), type: "sous-texte" });
+      blocs.push({
+        enfants: analyserInline(sousTexte[1] ?? "", ctx),
+        type: "sous-texte",
+      });
       continue;
     }
 
@@ -391,7 +427,10 @@ function analyserLignes(segment: string, ctx: ContexteMentions): Bloc[] {
  * Les blocs de code encadrés sont extraits en premier : leur contenu ne subit
  * aucune interprétation.
  */
-export function parseDiscordMarkdown(contenu: string, ctx: ContexteMentions = CONTEXTE_MENTIONS_VIDE): Bloc[] {
+export function parseDiscordMarkdown(
+  contenu: string,
+  ctx: ContexteMentions = CONTEXTE_MENTIONS_VIDE,
+): Bloc[] {
   if (typeof contenu !== "string" || contenu.trim().length === 0) return [];
 
   const texte = contenu.replaceAll("\r\n", "\n").replaceAll("\r", "\n");
@@ -431,14 +470,17 @@ export interface IdentifiantsMentionnes {
 }
 
 /** Relève les identifiants mentionnés dans un ensemble de textes. */
-export function extraireIdentifiantsMentionnes(textes: string[]): IdentifiantsMentionnes {
+export function extraireIdentifiantsMentionnes(
+  textes: string[],
+): IdentifiantsMentionnes {
   const utilisateurs = new Set<string>();
   const roles = new Set<string>();
   const salons = new Set<string>();
 
   for (const texte of textes) {
     if (typeof texte !== "string" || texte.length === 0) continue;
-    for (const m of texte.matchAll(MOTIF_ID_UTILISATEUR)) if (m[1]) utilisateurs.add(m[1]);
+    for (const m of texte.matchAll(MOTIF_ID_UTILISATEUR))
+      if (m[1]) utilisateurs.add(m[1]);
     for (const m of texte.matchAll(MOTIF_ID_ROLE)) if (m[1]) roles.add(m[1]);
     for (const m of texte.matchAll(MOTIF_ID_SALON)) if (m[1]) salons.add(m[1]);
   }
@@ -453,7 +495,7 @@ export function extraireIdentifiantsMentionnes(textes: string[]): IdentifiantsMe
 /** Concatène le texte brut d'un arbre — utile pour les tests et les résumés. */
 export function texteBrut(noeuds: NoeudInline[]): string {
   return noeuds
-    .map(noeud => {
+    .map((noeud) => {
       switch (noeud.type) {
         case "texte":
         case "code": {

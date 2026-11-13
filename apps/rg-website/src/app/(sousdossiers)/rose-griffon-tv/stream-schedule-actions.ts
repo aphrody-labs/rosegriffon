@@ -6,7 +6,15 @@ import type { StreamSchedule } from "@rosegriffon/types";
 
 const logger = createLogger("stream-schedule");
 
-const DAYS = ["Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"];
+const DAYS = [
+  "Dimanche",
+  "Lundi",
+  "Mardi",
+  "Mercredi",
+  "Jeudi",
+  "Vendredi",
+  "Samedi",
+];
 
 function isValidTimeFormat(time: unknown): boolean {
   if (typeof time !== "string") {
@@ -20,7 +28,9 @@ function isValidTimeFormat(time: unknown): boolean {
  *
  * Lecture Postgres DIRECTE (bypass le Data API PostgREST) — cf. lib/db/pg.ts.
  */
-export async function getSchedulesByDay(): Promise<Record<string, StreamSchedule[]>> {
+export async function getSchedulesByDay(): Promise<
+  Record<string, StreamSchedule[]>
+> {
   try {
     const pool = getPgPool();
 
@@ -34,14 +44,17 @@ export async function getSchedulesByDay(): Promise<Record<string, StreamSchedule
       );
       schedules = result.rows;
     } catch (error) {
-      logger.error("Erreur lors de la récupération des horaires actifs:", error);
+      logger.error(
+        "Erreur lors de la récupération des horaires actifs:",
+        error,
+      );
       return {};
     }
 
     // Grouper par jour
     const groupedByDay: Record<string, StreamSchedule[]> = {};
 
-    schedules?.forEach(schedule => {
+    schedules?.forEach((schedule) => {
       const dayIndex = schedule.day_of_week % 7; // Ensure valid index
       const dayName = DAYS[dayIndex];
 
@@ -54,7 +67,10 @@ export async function getSchedulesByDay(): Promise<Record<string, StreamSchedule
       }
 
       // Valider les formats de temps
-      if (!isValidTimeFormat(schedule.start_time) || !isValidTimeFormat(schedule.end_time)) {
+      if (
+        !isValidTimeFormat(schedule.start_time) ||
+        !isValidTimeFormat(schedule.end_time)
+      ) {
         logger.warn(`Format d'heure invalide pour ${schedule.streamer_name}`, {
           end_time: schedule.end_time,
           start_time: schedule.start_time,
@@ -64,7 +80,9 @@ export async function getSchedulesByDay(): Promise<Record<string, StreamSchedule
       groupedByDay[dayName].push(schedule as unknown as StreamSchedule);
     });
 
-    logger.debug(`${Object.keys(groupedByDay).length} jour(s) avec ${schedules?.length || 0} stream(s)`);
+    logger.debug(
+      `${Object.keys(groupedByDay).length} jour(s) avec ${schedules?.length || 0} stream(s)`,
+    );
 
     // Ajouter les "à venir"
     let comingSoon: StreamSchedule[] | undefined;
@@ -108,7 +126,10 @@ export async function getAllSchedules(): Promise<StreamSchedule[]> {
       );
       schedules = result.rows;
     } catch (error) {
-      logger.error("Erreur lors de la récupération de tous les horaires:", error);
+      logger.error(
+        "Erreur lors de la récupération de tous les horaires:",
+        error,
+      );
       return [];
     }
 

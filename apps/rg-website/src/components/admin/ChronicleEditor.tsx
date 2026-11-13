@@ -27,7 +27,9 @@ const ReactQuill = dynamic(
     return mod.default || mod;
   },
   {
-    loading: () => <div className="h-[500px] bg-muted animate-pulse rounded-md" />,
+    loading: () => (
+      <div className="h-[500px] bg-muted animate-pulse rounded-md" />
+    ),
     ssr: false,
   },
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -55,24 +57,35 @@ interface ChronicleEditorProps {
   onCancel: () => void;
 }
 
-export function ChronicleEditor({ initialData, onSave, onCancel }: ChronicleEditorProps) {
+export function ChronicleEditor({
+  initialData,
+  onSave,
+  onCancel,
+}: ChronicleEditorProps) {
   const [title, setTitle] = useState(initialData?.title || "");
   const [slug, setSlug] = useState(initialData?.slug || "");
   const [excerpt, setExcerpt] = useState(initialData?.excerpt || "");
-  const [category, setCategory] = useState(initialData?.category || "actualites");
-  const [featuredImage, setFeaturedImage] = useState(initialData?.featured_image || "");
+  const [category, setCategory] = useState(
+    initialData?.category || "actualites",
+  );
+  const [featuredImage, setFeaturedImage] = useState(
+    initialData?.featured_image || "",
+  );
   const [content, setContent] = useState(initialData?.content || "");
   const [published] = useState(initialData?.published || false);
   const [isSaving, setIsSaving] = useState(false);
   const [isPreview, setIsPreview] = useState(false);
   const [isMediaDialogOpen, setIsMediaDialogOpen] = useState(false);
-  const [isUploadingFeaturedImage, setIsUploadingFeaturedImage] = useState(false);
+  const [isUploadingFeaturedImage, setIsUploadingFeaturedImage] =
+    useState(false);
   const [errors, setErrors] = useState<string[]>([]);
   const [hasDraft, setHasDraft] = useState(false);
 
   const quillRef = useRef<QuillInstance>(null);
 
-  const draftKey = initialData?.slug ? `draft_chronicle_${initialData.slug}` : "draft_chronicle_new";
+  const draftKey = initialData?.slug
+    ? `draft_chronicle_${initialData.slug}`
+    : "draft_chronicle_new";
 
   useEffect(() => {
     const draft = localStorage.getItem(draftKey);
@@ -249,7 +262,8 @@ export function ChronicleEditor({ initialData, onSave, onCancel }: ChronicleEdit
           <AlertCircle className="size-4 text-primary" />
           <AlertDescription className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <span className="text-sm text-foreground">
-              Un brouillon non enregistré a été trouvé. Voulez-vous le restaurer ?
+              Un brouillon non enregistré a été trouvé. Voulez-vous le restaurer
+              ?
             </span>
             <div className="flex gap-2">
               <Button
@@ -327,7 +341,9 @@ export function ChronicleEditor({ initialData, onSave, onCancel }: ChronicleEdit
               className="text-xs sm:text-sm"
             >
               <Save className="size-3 sm:h-4 sm:w-4 sm:mr-2" />
-              <span className="hidden sm:inline">{isSaving && !published ? "Enregistrement…" : "Brouillon"}</span>
+              <span className="hidden sm:inline">
+                {isSaving && !published ? "Enregistrement…" : "Brouillon"}
+              </span>
               <span className="sm:hidden">Draft</span>
             </Button>
 
@@ -339,7 +355,9 @@ export function ChronicleEditor({ initialData, onSave, onCancel }: ChronicleEdit
               className="bg-linear-to-r from-rg-rose to-rg-or hover:opacity-90 text-white text-xs sm:text-sm"
             >
               <Send className="size-3 sm:h-4 sm:w-4 sm:mr-2" />
-              <span className="hidden sm:inline">{isSaving && published ? "Publication…" : "Publier"}</span>
+              <span className="hidden sm:inline">
+                {isSaving && published ? "Publication…" : "Publier"}
+              </span>
               <span className="sm:hidden">Pub</span>
             </Button>
           </div>
@@ -386,13 +404,19 @@ export function ChronicleEditor({ initialData, onSave, onCancel }: ChronicleEdit
 
           {/* Infos de publication */}
           <div className="bg-muted/30 p-3 sm:p-4 rounded-lg border space-y-2 sm:space-y-3">
-            <h3 className="font-semibold text-sm text-foreground/80">État de publication</h3>
+            <h3 className="font-semibold text-sm text-foreground/80">
+              État de publication
+            </h3>
             <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-xs sm:text-sm">
               <span className="text-muted-foreground">
-                Statut: <span className="font-medium">{published ? "🟢 Publié" : "🟡 Brouillon"}</span>
+                Statut:{" "}
+                <span className="font-medium">
+                  {published ? "🟢 Publié" : "🟡 Brouillon"}
+                </span>
               </span>
               <span className="text-muted-foreground">
-                Caractères: <span className="font-medium">{content.length}</span>
+                Caractères:{" "}
+                <span className="font-medium">{content.length}</span>
               </span>
             </div>
           </div>
@@ -401,7 +425,7 @@ export function ChronicleEditor({ initialData, onSave, onCancel }: ChronicleEdit
 
       <MediaDialog
         open={isMediaDialogOpen}
-        onOpenChange={open => {
+        onOpenChange={(open) => {
           setIsMediaDialogOpen(open);
           if (!open) {
             setIsUploadingFeaturedImage(false);

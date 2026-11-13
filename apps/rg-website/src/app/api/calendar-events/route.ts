@@ -30,7 +30,9 @@ async function calendarEventsHandler() {
     let dbEvents: EventRow[] = [];
     try {
       const pool = getPgPool();
-      const { rows } = await pool.query<EventRow>("SELECT * FROM events ORDER BY start_time ASC");
+      const { rows } = await pool.query<EventRow>(
+        "SELECT * FROM events ORDER BY start_time ASC",
+      );
       dbEvents = rows;
     } catch (error) {
       logger.error("Error fetching events from Postgres", error);
@@ -38,9 +40,11 @@ async function calendarEventsHandler() {
     }
 
     if (dbEvents.length > 0) {
-      logger.info(`${dbEvents.length} event(s) retrieved from Postgres (DB Source)`);
+      logger.info(
+        `${dbEvents.length} event(s) retrieved from Postgres (DB Source)`,
+      );
 
-      const mappedEvents: CalendarEvent[] = dbEvents.map(e => ({
+      const mappedEvents: CalendarEvent[] = dbEvents.map((e) => ({
         description: e.description,
         end: {
           dateTime: e.end_time, // Assumes ISO string stored in text column
@@ -59,7 +63,9 @@ async function calendarEventsHandler() {
     }
 
     // 2. Fallback to Google Calendar if DB is empty
-    logger.info("Postgres events empty or error, falling back to Google Calendar");
+    logger.info(
+      "Postgres events empty or error, falling back to Google Calendar",
+    );
     const events = await getCalendarEvents();
 
     // Amorçage unique : la table locale devient la source de vérité dès la
@@ -69,14 +75,14 @@ async function calendarEventsHandler() {
       try {
         const pool = getPgPool();
         const rows = events
-          .map(event => ({
+          .map((event) => ({
             description: event.description ?? null,
             endTime: event.end?.dateTime ?? event.end?.date,
             location: event.location ?? null,
             startTime: event.start?.dateTime ?? event.start?.date,
             title: event.summary ?? "Événement sans titre",
           }))
-          .filter(event => event.startTime && event.endTime);
+          .filter((event) => event.startTime && event.endTime);
 
         if (rows.length > 0) {
           await pool.query(
@@ -96,19 +102,28 @@ async function calendarEventsHandler() {
               ),
             ],
           );
-          logger.info(`${rows.length} event(s) Google préchargé(s) dans Postgres`);
+          logger.info(
+            `${rows.length} event(s) Google préchargé(s) dans Postgres`,
+          );
         }
       } catch (error) {
         // La réponse Google reste disponible : l'amorçage ne doit jamais
         // empêcher l'affichage public du calendrier.
-        logger.error("Impossible de précharger les événements dans Postgres", error);
+        logger.error(
+          "Impossible de précharger les événements dans Postgres",
+          error,
+        );
       }
     }
     logger.info(`${events.length} event(s) retrieved from Google`);
     return apiSuccess({ events });
   } catch (error) {
     logger.error("Error in calendar events API route", error);
-    return apiError("Impossible de récupérer les événements du calendrier", 500, "CALENDAR_FETCH_ERROR");
+    return apiError(
+      "Impossible de récupérer les événements du calendrier",
+      500,
+      "CALENDAR_FETCH_ERROR",
+    );
   }
 }
 

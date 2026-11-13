@@ -93,7 +93,7 @@ import {
   isValidLicenseNumber,
 } from "npm:@rosegriffon/achillea-core/licenses";
 
-Deno.serve(async req => {
+Deno.serve(async (req) => {
   const { licenseNumber, status, validUntil } = await req.json();
   if (!isValidLicenseNumber(licenseNumber)) {
     return new Response("format invalide", { status: 400 });

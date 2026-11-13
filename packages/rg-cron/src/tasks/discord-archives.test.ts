@@ -22,7 +22,11 @@
 
 import { describe, expect, test } from "bun:test";
 
-import { CATEGORIES_SUIVIES, categoriesSuivies, estSalonArchivable } from "./discord-messages.js";
+import {
+  CATEGORIES_SUIVIES,
+  categoriesSuivies,
+  estSalonArchivable,
+} from "./discord-messages.js";
 
 /** La catégorie « Archives » du serveur Rose Griffon. */
 const ARCHIVES = "1180594177063526441";
@@ -36,7 +40,9 @@ describe("registre des catégories", () => {
   });
 
   test("DISCORD_CATEGORIES_SUIVIES AJOUTE, elle ne remplace pas", () => {
-    const resolues = categoriesSuivies({ DISCORD_CATEGORIES_SUIVIES: "1084588726484729886" });
+    const resolues = categoriesSuivies({
+      DISCORD_CATEGORIES_SUIVIES: "1084588726484729886",
+    });
     expect(resolues).toContain(ARCHIVES);
     expect(resolues).toContain(ARTISTES);
   });
@@ -44,11 +50,17 @@ describe("registre des catégories", () => {
   test("une valeur qui n'est pas un flocon est ignorée plutôt qu'armée", () => {
     // Bun n'expanse pas `$VAR` dans un `.env` : la valeur littérale
     // « $DISCORD_ARCHIVES » arrive telle quelle et ne doit rien armer.
-    expect(categoriesSuivies({ DISCORD_CATEGORIES_SUIVIES: "$DISCORD_ARCHIVES, oui" })).toEqual([ARCHIVES]);
+    expect(
+      categoriesSuivies({
+        DISCORD_CATEGORIES_SUIVIES: "$DISCORD_ARCHIVES, oui",
+      }),
+    ).toEqual([ARCHIVES]);
   });
 
   test("un doublon ne produit pas deux armements", () => {
-    expect(categoriesSuivies({ DISCORD_CATEGORIES_SUIVIES: ARCHIVES })).toHaveLength(1);
+    expect(
+      categoriesSuivies({ DISCORD_CATEGORIES_SUIVIES: ARCHIVES }),
+    ).toHaveLength(1);
   });
 });
 
@@ -57,37 +69,53 @@ describe("salons archivables", () => {
 
   test("les salons textuels de la catégorie entrent en veille", () => {
     // ⚡〡inatober-rg, salon de dépôt réel des trois éditions d'Inatober.
-    expect(estSalonArchivable({ type: 0, parent_id: ARCHIVES }, categories)).toBe(true);
+    expect(
+      estSalonArchivable({ type: 0, parent_id: ARCHIVES }, categories),
+    ).toBe(true);
   });
 
   test("les salons d'annonces et les forums aussi", () => {
     // ⚡〡faq-souvenir-d-ete est un forum (type 15) de la catégorie.
-    expect(estSalonArchivable({ type: 15, parent_id: ARCHIVES }, categories)).toBe(true);
-    expect(estSalonArchivable({ type: 5, parent_id: ARCHIVES }, categories)).toBe(true);
+    expect(
+      estSalonArchivable({ type: 15, parent_id: ARCHIVES }, categories),
+    ).toBe(true);
+    expect(
+      estSalonArchivable({ type: 5, parent_id: ARCHIVES }, categories),
+    ).toBe(true);
   });
 
   test("le vocal et le stage sont écartés", () => {
     // Demander `GET /channels/{id}/messages` sur un vocal ne rend rien
     // d'exploitable ; l'inclure produirait une erreur à chaque passe.
-    expect(estSalonArchivable({ type: 2, parent_id: ARCHIVES }, categories)).toBe(false);
+    expect(
+      estSalonArchivable({ type: 2, parent_id: ARCHIVES }, categories),
+    ).toBe(false);
     // 𝐋𝐞𝐬 𝐐𝐮𝐞𝐬𝐭𝐢𝐨𝐧𝐬 𝐩𝐨𝐮𝐫 𝐑𝐆 #𝟏 est un salon de stage (type 13) de la catégorie.
-    expect(estSalonArchivable({ type: 13, parent_id: ARCHIVES }, categories)).toBe(false);
+    expect(
+      estSalonArchivable({ type: 13, parent_id: ARCHIVES }, categories),
+    ).toBe(false);
   });
 
   test("un salon textuel d'une AUTRE catégorie n'est pas armé par ce chemin", () => {
     // 🍰〡iergday vit sous « 🎨 Artistes » : il est armé parce que la campagne
     // le déclare en salon de dépôt (`armerSalonsDeDepot`), jamais parce qu'il
     // serait dans l'archive.
-    expect(estSalonArchivable({ type: 0, parent_id: ARTISTES }, categories)).toBe(false);
+    expect(
+      estSalonArchivable({ type: 0, parent_id: ARTISTES }, categories),
+    ).toBe(false);
   });
 
   test("un salon sans catégorie n'est jamais armé", () => {
-    expect(estSalonArchivable({ type: 0, parent_id: null }, categories)).toBe(false);
+    expect(estSalonArchivable({ type: 0, parent_id: null }, categories)).toBe(
+      false,
+    );
     expect(estSalonArchivable({ type: 0 }, categories)).toBe(false);
   });
 
   test("un type absent ou inconnu n'est jamais armé", () => {
     expect(estSalonArchivable({ parent_id: ARCHIVES }, categories)).toBe(false);
-    expect(estSalonArchivable({ type: 99, parent_id: ARCHIVES }, categories)).toBe(false);
+    expect(
+      estSalonArchivable({ type: 99, parent_id: ARCHIVES }, categories),
+    ).toBe(false);
   });
 });

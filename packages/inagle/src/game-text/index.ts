@@ -4,7 +4,12 @@ import { parseTextDocument } from "../parsers/text-parser.js";
 /** Direct VFS text access with an explicitly selected optional PostgreSQL adapter. */
 import type { createInagleSql } from "@rosegriffon/db/inagle-sql";
 import type { Database } from "@rosegriffon/db/schema";
-import { type GameText, type GameTextLocale, type GameTextLocalized, normalizeHashId } from "./shared";
+import {
+  type GameText,
+  type GameTextLocale,
+  type GameTextLocalized,
+  normalizeHashId,
+} from "./shared";
 
 export type { GameText, GameTextLocalized } from "./shared";
 export { normalizeHashId, pickLocale } from "./shared";
@@ -22,7 +27,8 @@ function* vfsTexts(locale: GameTextLocale): Generator<GameText> {
   for (const path of gameVfsPaths()) {
     if (!path.startsWith(prefix) || !path.endsWith(".cfg.bin")) continue;
     const category = path.slice(prefix.length).replace(/\.cfg\.bin$/, "");
-    for (const [hashId, value] of parseTextDocument(readVfsConfig(path))) yield { hashId, locale, category, value };
+    for (const [hashId, value] of parseTextDocument(readVfsConfig(path)))
+      yield { hashId, locale, category, value };
   }
 }
 
@@ -31,19 +37,31 @@ function like(value: string): string {
 }
 
 function group(
-  rows: Array<{ hash_id: string; locale: string; category: string; value: string }>,
+  rows: Array<{
+    hash_id: string;
+    locale: string;
+    category: string;
+    value: string;
+  }>,
 ): Map<string, GameTextLocalized> {
   const out = new Map<string, GameTextLocalized>();
   for (const row of rows) {
-    const entry = out.get(row.hash_id) ?? { hashId: row.hash_id, category: row.category };
-    if (row.locale === "fr" || row.locale === "en" || row.locale === "ja") entry[row.locale] = row.value;
+    const entry = out.get(row.hash_id) ?? {
+      hashId: row.hash_id,
+      category: row.category,
+    };
+    if (row.locale === "fr" || row.locale === "en" || row.locale === "ja")
+      entry[row.locale] = row.value;
     out.set(row.hash_id, entry);
   }
   return out;
 }
 
-export async function getText(hashId: string | number): Promise<GameTextLocalized | undefined> {
-  if (projectionSource() === "sqlite") return (await getTexts([hashId])).get(normalizeHashId(hashId));
+export async function getText(
+  hashId: string | number,
+): Promise<GameTextLocalized | undefined> {
+  if (projectionSource() === "sqlite")
+    return (await getTexts([hashId])).get(normalizeHashId(hashId));
   if (projectionSource() === "vfs") {
     const records = await getTexts([hashId]);
     return records.get(normalizeHashId(hashId));
@@ -67,11 +85,18 @@ export async function getTextLocale(
   return text?.[locale] ?? text?.fr ?? text?.en ?? text?.ja;
 }
 
-export async function getTexts(hashIds: Array<string | number>): Promise<Map<string, GameTextLocalized>> {
+export async function getTexts(
+  hashIds: Array<string | number>,
+): Promise<Map<string, GameTextLocalized>> {
   const keys = [...new Set(hashIds.map(normalizeHashId))];
   if (keys.length === 0) return new Map();
   if (projectionSource() === "sqlite") {
-    const rows = sqliteRows<{ hash_id: string; locale: string; category: string; value: string }>(
+    const rows = sqliteRows<{
+      hash_id: string;
+      locale: string;
+      category: string;
+      value: string;
+    }>(
       `SELECT hash_id, locale, category, value FROM inagle_game_text WHERE hash_id IN (${keys.map(() => "?").join(",")}) ORDER BY hash_id, locale`,
       keys,
     );
@@ -81,7 +106,8 @@ export async function getTexts(hashIds: Array<string | number>): Promise<Map<str
     const wanted = new Set(keys);
     const rows = [];
     for (const locale of ["fr", "en", "ja"] as const)
-      for (const row of vfsTexts(locale)) if (wanted.has(row.hashId)) rows.push({ hash_id: row.hashId, ...row });
+      for (const row of vfsTexts(locale))
+        if (wanted.has(row.hashId)) rows.push({ hash_id: row.hashId, ...row });
     return group(rows);
   }
   const rows = await (
@@ -109,7 +135,7 @@ export async function listCategory(
     );
   if (projectionSource() === "vfs")
     return [...vfsTexts(locale)]
-      .filter(row => row.category === category)
+      .filter((row) => row.category === category)
       .slice(Math.max(0, offset), Math.max(0, offset) + Math.max(0, limit));
   return (await sqlDb())
     .selectFrom("inagle_game_text")
@@ -122,7 +148,11 @@ export async function listCategory(
     .execute() as Promise<GameText[]>;
 }
 
-export async function searchText(query: string, locale: GameTextLocale = "fr", limit = 50): Promise<GameText[]> {
+export async function searchText(
+  query: string,
+  locale: GameTextLocale = "fr",
+  limit = 50,
+): Promise<GameText[]> {
   const value = query.trim();
   if (!value) return [];
   if (projectionSource() === "sqlite") {
@@ -134,7 +164,8 @@ export async function searchText(query: string, locale: GameTextLocale = "fr", l
         [locale, offset],
       );
       for (const row of page) {
-        if (row.value.toLowerCase().includes(value.toLowerCase())) results.push(row);
+        if (row.value.toLowerCase().includes(value.toLowerCase()))
+          results.push(row);
         if (results.length >= maximum) return results;
       }
       if (page.length < 5000) return results;
@@ -144,7 +175,8 @@ export async function searchText(query: string, locale: GameTextLocale = "fr", l
     const results = [];
     const maximum = Math.min(Math.max(1, limit), 500);
     for (const row of vfsTexts(locale)) {
-      if (row.value.toLowerCase().includes(value.toLowerCase())) results.push(row);
+      if (row.value.toLowerCase().includes(value.toLowerCase()))
+        results.push(row);
       if (results.length >= maximum) break;
     }
     return results;
@@ -159,24 +191,32 @@ export async function searchText(query: string, locale: GameTextLocale = "fr", l
     .execute() as Promise<GameText[]>;
 }
 
-export async function categoryStats(): Promise<Array<{ category: string; count: number }>> {
+export async function categoryStats(): Promise<
+  Array<{ category: string; count: number }>
+> {
   if (projectionSource() === "sqlite")
     return sqliteRows<{ category: string; count: number }>(
       "SELECT category, count(*) AS count FROM inagle_game_text WHERE locale = 'fr' GROUP BY category ORDER BY count DESC",
     );
   if (projectionSource() === "vfs") {
     const counts = new Map<string, number>();
-    for (const row of vfsTexts("fr")) counts.set(row.category, (counts.get(row.category) ?? 0) + 1);
-    return [...counts].map(([category, count]) => ({ category, count })).sort((a, b) => b.count - a.count);
+    for (const row of vfsTexts("fr"))
+      counts.set(row.category, (counts.get(row.category) ?? 0) + 1);
+    return [...counts]
+      .map(([category, count]) => ({ category, count }))
+      .sort((a, b) => b.count - a.count);
   }
   const rows = await (
     await sqlDb()
   )
     .selectFrom("inagle_game_text")
-    .select(eb => ["category", eb.fn.countAll<number>().as("count")])
+    .select((eb) => ["category", eb.fn.countAll<number>().as("count")])
     .where("locale", "=", "fr")
     .groupBy("category")
     .orderBy("count", "desc")
     .execute();
-  return rows.map(row => ({ category: row.category, count: Number(row.count) }));
+  return rows.map((row) => ({
+    category: row.category,
+    count: Number(row.count),
+  }));
 }

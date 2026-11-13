@@ -25,7 +25,11 @@ function parseShopId(raw: string): number | null {
   return Number.isSafeInteger(id) ? id : null;
 }
 
-export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
   const { id } = await params;
   const shopId = parseShopId(id);
   const shop = shopId === null ? null : await getShop(shopId);
@@ -33,7 +37,8 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   // Pas de boutique → pas de canonique : la page rendra un 404, ne la déclarons pas indexable.
   if (!shop) {
     return {
-      description: "Cette boutique d'Inazuma Eleven: Victory Road n'existe pas.",
+      description:
+        "Cette boutique d'Inazuma Eleven: Victory Road n'existe pas.",
       robots: { follow: true, index: false },
       title: "Boutique introuvable | Inazuma Eleven Victory Road - Azalée",
     };
@@ -58,7 +63,11 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   };
 }
 
-export default async function ShopDetailPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function ShopDetailPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const { id } = await params;
   const shopId = parseShopId(id);
   const shop = shopId === null ? null : await getShop(shopId);
@@ -71,7 +80,12 @@ export default async function ShopDetailPage({ params }: { params: Promise<{ id:
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", item: absoluteUrl(wiki("/")), name: "Accueil", position: 1 },
+      {
+        "@type": "ListItem",
+        item: absoluteUrl(wiki("/")),
+        name: "Accueil",
+        position: 1,
+      },
       {
         "@type": "ListItem",
         item: absoluteUrl(wiki("/boutique")),
@@ -84,11 +98,17 @@ export default async function ShopDetailPage({ params }: { params: Promise<{ id:
 
   return (
     <div className="w-full space-y-6">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
 
       {/* Fil d'Ariane */}
       <div className="flex items-center gap-2 text-sm text-on-surface-variant font-medium">
-        <Link href="/wiki/boutique" className="hover:text-primary transition-colors">
+        <Link
+          href="/wiki/boutique"
+          className="hover:text-primary transition-colors"
+        >
           Boutiques
         </Link>
         <span className="opacity-30">/</span>
@@ -102,8 +122,14 @@ export default async function ShopDetailPage({ params }: { params: Promise<{ id:
             <Icon name="storefront" size={28} className="text-primary" />
           </div>
           <div className="flex-1 min-w-0">
-            <h1 className="text-xl font-bold text-on-surface leading-tight">{shop.name}</h1>
-            {shop.nameJa ? <p className="text-sm text-on-surface-variant mt-0.5">{shop.nameJa}</p> : null}
+            <h1 className="text-xl font-bold text-on-surface leading-tight">
+              {shop.name}
+            </h1>
+            {shop.nameJa ? (
+              <p className="text-sm text-on-surface-variant mt-0.5">
+                {shop.nameJa}
+              </p>
+            ) : null}
             <div className="flex flex-wrap items-center gap-2 mt-3">
               <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-primary/10 text-xs font-bold text-primary">
                 <Icon name="inventory_2" size={14} />

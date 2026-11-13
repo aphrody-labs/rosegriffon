@@ -38,7 +38,8 @@ export class ReponseRanked {
   }
 
   json(valeur: unknown): this {
-    if (!this.headers.has("content-type")) this.headers.set("content-type", "application/json; charset=utf-8");
+    if (!this.headers.has("content-type"))
+      this.headers.set("content-type", "application/json; charset=utf-8");
     return this.send(JSON.stringify(valeur));
   }
 
@@ -55,8 +56,15 @@ export class ReponseRanked {
 
   versResponse(sansCorps = false): Response {
     // 204/205/304 n'admettent pas de corps (le constructeur `Response` lèverait).
-    const corpsInterdit = sansCorps || this.#status === 204 || this.#status === 205 || this.#status === 304;
-    return new Response(corpsInterdit ? null : this.#corps, { status: this.#status, headers: this.headers });
+    const corpsInterdit =
+      sansCorps ||
+      this.#status === 204 ||
+      this.#status === 205 ||
+      this.#status === 304;
+    return new Response(corpsInterdit ? null : this.#corps, {
+      status: this.#status,
+      headers: this.headers,
+    });
   }
 }
 
@@ -94,8 +102,16 @@ function segmentsDe(chemin: string): string[] {
   return chemin.replace(/\/+$/, "").split("/").slice(1);
 }
 
-function correspondre(route: Route, segments: string[]): Record<string, string> | null {
-  if (route.prefixe ? segments.length < route.segments.length : segments.length !== route.segments.length) return null;
+function correspondre(
+  route: Route,
+  segments: string[],
+): Record<string, string> | null {
+  if (
+    route.prefixe
+      ? segments.length < route.segments.length
+      : segments.length !== route.segments.length
+  )
+    return null;
   const params: Record<string, string> = {};
   for (const [i, attendu] of route.segments.entries()) {
     const recu = segments[i] ?? "";
@@ -113,33 +129,52 @@ function correspondre(route: Route, segments: string[]): Record<string, string> 
   return params;
 }
 
-function typeMedia(contentType: string | null): { type: string; charset: string | undefined } {
+function typeMedia(contentType: string | null): {
+  type: string;
+  charset: string | undefined;
+} {
   const [type = "", ...params] = (contentType ?? "").split(";");
   const charset = params
-    .map(p => p.trim().split("="))
+    .map((p) => p.trim().split("="))
     .find(([k]) => k?.toLowerCase() === "charset")?.[1]
     ?.replace(/^"|"$/g, "")
     .toLowerCase();
   return { type: type.trim().toLowerCase(), charset };
 }
 
-async function lireCorps(requete: Request, limite: number): Promise<Uint8Array> {
+async function lireCorps(
+  requete: Request,
+  limite: number,
+): Promise<Uint8Array> {
   const annonce = Number(requete.headers.get("content-length"));
-  if (Number.isFinite(annonce) && annonce > limite) throw new ErreurHttp(413, "entity.too.large");
+  if (Number.isFinite(annonce) && annonce > limite)
+    throw new ErreurHttp(413, "entity.too.large");
   const octets = new Uint8Array(await requete.arrayBuffer());
   if (octets.byteLength > limite) throw new ErreurHttp(413, "entity.too.large");
   return octets;
 }
 
 /** Corps analysé comme le faisaient `express.json` (global) puis `express.text` (route). */
-async function analyserCorps(requete: Request, options: OptionsRoute): Promise<unknown> {
-  if (requete.method === "GET" || requete.method === "HEAD" || requete.body === null) return undefined;
+async function analyserCorps(
+  requete: Request,
+  options: OptionsRoute,
+): Promise<unknown> {
+  if (
+    requete.method === "GET" ||
+    requete.method === "HEAD" ||
+    requete.body === null
+  )
+    return undefined;
   const { type, charset } = typeMedia(requete.headers.get("content-type"));
   if (type === "application/json") {
-    if (charset && !charset.startsWith("utf-")) throw new ErreurHttp(415, "charset.unsupported");
-    const texte = new TextDecoder().decode(await lireCorps(requete, LIMITE_JSON));
+    if (charset && !charset.startsWith("utf-"))
+      throw new ErreurHttp(415, "charset.unsupported");
+    const texte = new TextDecoder().decode(
+      await lireCorps(requete, LIMITE_JSON),
+    );
     if (texte.length === 0) return {};
-    if (!/^[\s]*[[{]/.test(texte)) throw new ErreurHttp(400, "entity.parse.failed");
+    if (!/^[\s]*[[{]/.test(texte))
+      throw new ErreurHttp(400, "entity.parse.failed");
     try {
       return JSON.parse(texte) as unknown;
     } catch {
@@ -149,7 +184,9 @@ async function analyserCorps(requete: Request, options: OptionsRoute): Promise<u
   if (!options.texte) return undefined;
   const octets = await lireCorps(requete, options.texte.limite);
   try {
-    return new TextDecoder((charset ?? "utf-8") as ConstructorParameters<typeof TextDecoder>[0]).decode(octets);
+    return new TextDecoder(
+      (charset ?? "utf-8") as ConstructorParameters<typeof TextDecoder>[0],
+    ).decode(octets);
   } catch {
     throw new ErreurHttp(415, "charset.unsupported");
   }
@@ -175,24 +212,47 @@ export class RouteurRanked {
 
   constructor(private readonly options: OptionsRouteur = {}) {}
 
-  #ajouter(methode: string | null, chemin: string, prefixe: boolean, args: [OptionsRoute, Gestionnaire] | [Gestionnaire]) {
+  #ajouter(
+    methode: string | null,
+    chemin: string,
+    prefixe: boolean,
+    args: [OptionsRoute, Gestionnaire] | [Gestionnaire],
+  ) {
     const [options, gestionnaire] = args.length === 2 ? args : [{}, args[0]];
-    this.#routes.push({ methode, segments: segmentsDe(chemin), prefixe, options, gestionnaire });
+    this.#routes.push({
+      methode,
+      segments: segmentsDe(chemin),
+      prefixe,
+      options,
+      gestionnaire,
+    });
   }
 
-  get(chemin: string, ...args: [OptionsRoute, Gestionnaire] | [Gestionnaire]): void {
+  get(
+    chemin: string,
+    ...args: [OptionsRoute, Gestionnaire] | [Gestionnaire]
+  ): void {
     this.#ajouter("GET", chemin, false, args);
   }
 
-  post(chemin: string, ...args: [OptionsRoute, Gestionnaire] | [Gestionnaire]): void {
+  post(
+    chemin: string,
+    ...args: [OptionsRoute, Gestionnaire] | [Gestionnaire]
+  ): void {
     this.#ajouter("POST", chemin, false, args);
   }
 
-  patch(chemin: string, ...args: [OptionsRoute, Gestionnaire] | [Gestionnaire]): void {
+  patch(
+    chemin: string,
+    ...args: [OptionsRoute, Gestionnaire] | [Gestionnaire]
+  ): void {
     this.#ajouter("PATCH", chemin, false, args);
   }
 
-  delete(chemin: string, ...args: [OptionsRoute, Gestionnaire] | [Gestionnaire]): void {
+  delete(
+    chemin: string,
+    ...args: [OptionsRoute, Gestionnaire] | [Gestionnaire]
+  ): void {
     this.#ajouter("DELETE", chemin, false, args);
   }
 
@@ -224,7 +284,11 @@ export class RouteurRanked {
           };
           this.options.preparer?.(req, res, requete);
           req.body = await analyserCorps(requete, route.options);
-        } else if (route.options.texte && req.body === undefined && !requete.bodyUsed) {
+        } else if (
+          route.options.texte &&
+          req.body === undefined &&
+          !requete.bodyUsed
+        ) {
           req.body = await analyserCorps(requete, route.options);
         }
         req.params = params;

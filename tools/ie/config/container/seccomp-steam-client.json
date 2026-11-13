@@ -483,7 +483,14 @@
       }
     },
     {
-      "names": ["arm_fadvise64_64", "arm_sync_file_range", "sync_file_range2", "breakpoint", "cacheflush", "set_tls"],
+      "names": [
+        "arm_fadvise64_64",
+        "arm_sync_file_range",
+        "sync_file_range2",
+        "breakpoint",
+        "cacheflush",
+        "set_tls"
+      ],
       "action": "SCMP_ACT_ALLOW",
       "includes": {
         "arches": ["arm", "arm64"]
@@ -504,7 +511,11 @@
       }
     },
     {
-      "names": ["s390_pci_mmio_read", "s390_pci_mmio_write", "s390_runtime_instr"],
+      "names": [
+        "s390_pci_mmio_read",
+        "s390_pci_mmio_write",
+        "s390_runtime_instr"
+      ],
       "action": "SCMP_ACT_ALLOW",
       "includes": {
         "arches": ["s390", "s390x"]
@@ -628,7 +639,14 @@
       }
     },
     {
-      "names": ["kcmp", "pidfd_getfd", "process_madvise", "process_vm_readv", "process_vm_writev", "ptrace"],
+      "names": [
+        "kcmp",
+        "pidfd_getfd",
+        "process_madvise",
+        "process_vm_readv",
+        "process_vm_writev",
+        "ptrace"
+      ],
       "action": "SCMP_ACT_ALLOW",
       "includes": {
         "caps": ["CAP_SYS_PTRACE"]
@@ -656,7 +674,12 @@
       }
     },
     {
-      "names": ["get_mempolicy", "mbind", "set_mempolicy", "set_mempolicy_home_node"],
+      "names": [
+        "get_mempolicy",
+        "mbind",
+        "set_mempolicy",
+        "set_mempolicy_home_node"
+      ],
       "action": "SCMP_ACT_ALLOW",
       "includes": {
         "caps": ["CAP_SYS_NICE"]

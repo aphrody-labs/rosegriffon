@@ -80,7 +80,10 @@ const TYPES_ARCHIVABLES = new Set([0, 5, 15]);
  * remplissent donc en une heure et demie de passes ordinaires, sans qu'aucune
  * ne soit tuée en cours de route.
  */
-const BACKFILLS_PAR_PASSE = Math.max(1, Number.parseInt(Bun.env.DISCORD_BACKFILLS_PAR_PASSE ?? "2", 10) || 2);
+const BACKFILLS_PAR_PASSE = Math.max(
+  1,
+  Number.parseInt(Bun.env.DISCORD_BACKFILLS_PAR_PASSE ?? "2", 10) || 2,
+);
 
 // ─── FORMES BRUTES DE L'API DISCORD ──────────────────────────────────────────
 
@@ -166,7 +169,9 @@ export interface StatsVeille {
  */
 async function appelDiscord<T>(chemin: string, tentative = 0): Promise<T> {
   if (!DISCORD_TOKEN) {
-    throw new Error("DISCORD_BOT_TOKEN absent : la veille des salons est impossible.");
+    throw new Error(
+      "DISCORD_BOT_TOKEN absent : la veille des salons est impossible.",
+    );
   }
 
   const reponse = await fetch(`${API_DISCORD}${chemin}`, {
@@ -180,9 +185,13 @@ async function appelDiscord<T>(chemin: string, tentative = 0): Promise<T> {
     if (tentative >= 5) {
       throw new Error(`Limite de débit Discord persistante sur ${chemin}.`);
     }
-    const corps = (await reponse.json().catch(() => ({}))) as { retry_after?: number };
+    const corps = (await reponse.json().catch(() => ({}))) as {
+      retry_after?: number;
+    };
     const attente = Math.ceil((corps.retry_after ?? 1) * 1000) + 250;
-    console.warn(`${PREFIXE} Limite de débit sur ${chemin} : attente de ${attente} ms.`);
+    console.warn(
+      `${PREFIXE} Limite de débit sur ${chemin} : attente de ${attente} ms.`,
+    );
     await Bun.sleep(attente);
     return appelDiscord<T>(chemin, tentative + 1);
   }
@@ -194,7 +203,9 @@ async function appelDiscord<T>(chemin: string, tentative = 0): Promise<T> {
 
   if (!reponse.ok) {
     const texte = await reponse.text().catch(() => "");
-    throw new Error(`Discord a répondu ${reponse.status} sur ${chemin} : ${texte.slice(0, 200)}`);
+    throw new Error(
+      `Discord a répondu ${reponse.status} sur ${chemin} : ${texte.slice(0, 200)}`,
+    );
   }
 
   return (await reponse.json()) as T;
@@ -211,7 +222,9 @@ function urlAvatarDiscord(auteur: AuteurBrut): string {
   // Avatar par défaut : depuis la fin des discriminateurs, l'index se déduit de
   // l'identifiant lui-même ; les comptes hérités gardent `discriminant % 5`.
   const herite = Boolean(auteur.discriminator) && auteur.discriminator !== "0";
-  const index = herite ? Number(auteur.discriminator) % 5 : Number((BigInt(auteur.id) >> 22n) % 6n);
+  const index = herite
+    ? Number(auteur.discriminator) % 5
+    : Number((BigInt(auteur.id) >> 22n) % 6n);
   return `https://cdn.discordapp.com/embed/avatars/${index}.png`;
 }
 
@@ -234,7 +247,7 @@ async function enregistrerMessage(
   guildId: string,
 ): Promise<"insere" | "mis_a_jour" | "inchange"> {
   const mentions = {
-    users: (brut.mentions ?? []).map(u => u.id),
+    users: (brut.mentions ?? []).map((u) => u.id),
     roles: brut.mention_roles ?? [],
     everyone: brut.mention_everyone ?? false,
   };
@@ -315,12 +328,14 @@ async function armerSalonsDepuisEnv(): Promise<void> {
 
   const identifiants = brut
     .split(",")
-    .map(valeur => valeur.trim())
+    .map((valeur) => valeur.trim())
     .filter(Boolean);
   if (identifiants.length === 0) return;
 
   if (!GUILD_ID) {
-    console.warn(`${PREFIXE} DISCORD_SALONS_SUIVIS ignoré : DISCORD_GUILD_ID n'est pas configuré.`);
+    console.warn(
+      `${PREFIXE} DISCORD_SALONS_SUIVIS ignoré : DISCORD_GUILD_ID n'est pas configuré.`,
+    );
     return;
   }
 
@@ -333,7 +348,9 @@ async function armerSalonsDepuisEnv(): Promise<void> {
 			ON CONFLICT (channel_id) DO UPDATE SET suivi = true, updated_at = now()
 		`;
   }
-  console.info(`${PREFIXE} ${identifiants.length} salon(s) armé(s) via DISCORD_SALONS_SUIVIS.`);
+  console.info(
+    `${PREFIXE} ${identifiants.length} salon(s) armé(s) via DISCORD_SALONS_SUIVIS.`,
+  );
 }
 
 /**
@@ -365,21 +382,28 @@ export async function armerSalonsDeDepot(): Promise<string[]> {
 		ON CONFLICT (channel_id) DO UPDATE SET suivi = true, updated_at = now()
 		RETURNING channel_id AS salon, (xmax = 0) AS nouveau
 	`;
-  const nouveaux = lignes.filter(ligne => ligne.nouveau).map(ligne => ligne.salon);
+  const nouveaux = lignes
+    .filter((ligne) => ligne.nouveau)
+    .map((ligne) => ligne.salon);
   if (nouveaux.length > 0) {
-    console.info(`${PREFIXE} ${nouveaux.length} salon(s) de dépôt de campagne armé(s) : ${nouveaux.join(", ")}`);
+    console.info(
+      `${PREFIXE} ${nouveaux.length} salon(s) de dépôt de campagne armé(s) : ${nouveaux.join(", ")}`,
+    );
   }
   return nouveaux;
 }
 
 /** Catégories à suivre : le registre du code, plus celles de l'environnement. */
 export function categoriesSuivies(
-  env: Record<string, string | undefined> = Bun.env as Record<string, string | undefined>,
+  env: Record<string, string | undefined> = Bun.env as Record<
+    string,
+    string | undefined
+  >,
 ): string[] {
   const supplement = (env.DISCORD_CATEGORIES_SUIVIES ?? "")
     .split(",")
-    .map(valeur => valeur.trim())
-    .filter(valeur => /^\d{15,25}$/.test(valeur));
+    .map((valeur) => valeur.trim())
+    .filter((valeur) => /^\d{15,25}$/.test(valeur));
   return [...new Set([...CATEGORIES_SUIVIES, ...supplement])];
 }
 
@@ -398,7 +422,9 @@ export function estSalonArchivable(
   if (typeof salon.type !== "number" || !TYPES_ARCHIVABLES.has(salon.type)) {
     return false;
   }
-  return Boolean(salon.parent_id) && categories.includes(salon.parent_id as string);
+  return (
+    Boolean(salon.parent_id) && categories.includes(salon.parent_id as string)
+  );
 }
 
 /**
@@ -419,8 +445,12 @@ export async function armerSalonsDeCategories(): Promise<{
     return { examines: 0, armes: [], deja: 0 };
   }
 
-  const salons = await appelDiscord<SalonBrut[]>(`/guilds/${GUILD_ID}/channels`);
-  const candidats = salons.filter(salon => estSalonArchivable(salon, categories));
+  const salons = await appelDiscord<SalonBrut[]>(
+    `/guilds/${GUILD_ID}/channels`,
+  );
+  const candidats = salons.filter((salon) =>
+    estSalonArchivable(salon, categories),
+  );
   const armes: string[] = [];
   let deja = 0;
 
@@ -502,9 +532,17 @@ interface Compteurs {
 }
 
 /** Enregistre un lot de messages bruts et met à jour les compteurs. */
-async function enregistrerLot(lot: MessageBrut[], salon: SalonSuivi, compteurs: Compteurs): Promise<void> {
+async function enregistrerLot(
+  lot: MessageBrut[],
+  salon: SalonSuivi,
+  compteurs: Compteurs,
+): Promise<void> {
   for (const brut of lot) {
-    const resultat = await enregistrerMessage(brut, salon.channel_id, salon.guild_id);
+    const resultat = await enregistrerMessage(
+      brut,
+      salon.channel_id,
+      salon.guild_id,
+    );
     if (resultat === "insere") compteurs.inseres++;
     else if (resultat === "mis_a_jour") compteurs.mis_a_jour++;
   }
@@ -516,7 +554,10 @@ function trierParAnciennete(lot: MessageBrut[]): MessageBrut[] {
 }
 
 /** Remonte tout l'historique du salon en paginant vers le passé (`before=`). */
-async function remonterHistorique(salon: SalonSuivi, compteurs: Compteurs): Promise<number> {
+async function remonterHistorique(
+  salon: SalonSuivi,
+  compteurs: Compteurs,
+): Promise<number> {
   let curseur: string | null = null;
   let pages = 0;
   let total = 0;
@@ -541,7 +582,11 @@ async function remonterHistorique(salon: SalonSuivi, compteurs: Compteurs): Prom
 }
 
 /** Rattrape les messages postés depuis `last_message_id` (`after=`). */
-async function rattraperDepuis(salon: SalonSuivi, depuis: string, compteurs: Compteurs): Promise<number> {
+async function rattraperDepuis(
+  salon: SalonSuivi,
+  depuis: string,
+  compteurs: Compteurs,
+): Promise<number> {
   let curseur = depuis;
   let pages = 0;
   let total = 0;
@@ -568,7 +613,10 @@ async function rattraperDepuis(salon: SalonSuivi, depuis: string, compteurs: Com
 }
 
 /** Recale les compteurs du salon sur l'état réel de la base. */
-async function recalerSalon(salon: SalonSuivi, backfillComplet: boolean): Promise<number> {
+async function recalerSalon(
+  salon: SalonSuivi,
+  backfillComplet: boolean,
+): Promise<number> {
   const [ligne] = await sql<Array<{ message_count: number }>>`
 		UPDATE discord_channels c SET
 			last_message_id = (
@@ -614,15 +662,25 @@ export async function runDiscordMessagesSync(): Promise<{
       // L'armement est un CONFORT (il ajoute des salons) ; la veille des
       // salons déjà suivis, elle, est la mission. Une panne Discord sur
       // `GET /guilds/{id}/channels` ne doit pas la faire échouer.
-      console.warn(`${PREFIXE} Armement des catégories impossible :`, err instanceof Error ? err.message : err);
+      console.warn(
+        `${PREFIXE} Armement des catégories impossible :`,
+        err instanceof Error ? err.message : err,
+      );
     }
     const salons = await chargerSalonsSuivis();
 
     if (salons.length === 0) {
-      console.warn(`${PREFIXE} Aucun salon suivi (discord_channels.suivi) : rien à archiver.`);
+      console.warn(
+        `${PREFIXE} Aucun salon suivi (discord_channels.suivi) : rien à archiver.`,
+      );
       return {
         success: true,
-        stats: { salons: [], inseres: 0, mis_a_jour: 0, durationMs: Date.now() - debut },
+        stats: {
+          salons: [],
+          inseres: 0,
+          mis_a_jour: 0,
+          durationMs: Date.now() - debut,
+        },
       };
     }
 
@@ -657,16 +715,27 @@ export async function runDiscordMessagesSync(): Promise<{
           budgetBackfill -= 1;
           const lus = await remonterHistorique(salon, compteurs);
           backfillComplet = true;
-          console.info(`${PREFIXE} ${salon.name} : historique remonté (${lus} messages lus).`);
+          console.info(
+            `${PREFIXE} ${salon.name} : historique remonté (${lus} messages lus).`,
+          );
         } else if (salon.last_message_id) {
-          const lus = await rattraperDepuis(salon, salon.last_message_id, compteurs);
-          if (lus > 0) console.info(`${PREFIXE} ${salon.name} : ${lus} nouveau(x) message(s).`);
+          const lus = await rattraperDepuis(
+            salon,
+            salon.last_message_id,
+            compteurs,
+          );
+          if (lus > 0)
+            console.info(
+              `${PREFIXE} ${salon.name} : ${lus} nouveau(x) message(s).`,
+            );
         }
 
         // d. Passe de tête : réactions et éditions des derniers messages déjà
         // archivés. Sans elle, un compteur de réactions ne bougerait jamais
         // entre deux messages postés.
-        const tete = await appelDiscord<MessageBrut[]>(`/channels/${salon.channel_id}/messages?limit=${TAILLE_PAGE}`);
+        const tete = await appelDiscord<MessageBrut[]>(
+          `/channels/${salon.channel_id}/messages?limit=${TAILLE_PAGE}`,
+        );
         await enregistrerLot(tete, salon, compteurs);
 
         // e. Curseur, compteur réel et horodatage.
@@ -687,7 +756,10 @@ export async function runDiscordMessagesSync(): Promise<{
         );
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
-        console.error(`${PREFIXE} Échec sur le salon ${salon.name} (${salon.channel_id}) :`, message);
+        console.error(
+          `${PREFIXE} Échec sur le salon ${salon.name} (${salon.channel_id}) :`,
+          message,
+        );
         rapport.push({
           channel_id: salon.channel_id,
           name: salon.name,
@@ -714,9 +786,13 @@ export async function runDiscordMessagesSync(): Promise<{
       durationMs: Date.now() - debut,
     };
 
-    const echecs = rapport.filter(r => r.error);
+    const echecs = rapport.filter((r) => r.error);
     if (echecs.length === rapport.length) {
-      return { success: false, error: echecs[0]?.error ?? "Tous les salons ont échoué.", stats };
+      return {
+        success: false,
+        error: echecs[0]?.error ?? "Tous les salons ont échoué.",
+        stats,
+      };
     }
     return { success: true, stats };
   } catch (err) {
@@ -735,7 +811,9 @@ export async function runDiscordMessagesBackfill(): Promise<{
   error?: string;
   stats?: StatsVeille;
 }> {
-  console.info(`${PREFIXE} Réinitialisation du curseur d'historique des salons suivis...`);
+  console.info(
+    `${PREFIXE} Réinitialisation du curseur d'historique des salons suivis...`,
+  );
   await armerSalonsDepuisEnv();
   await sql`UPDATE discord_channels SET backfill_complete = false, updated_at = now() WHERE suivi`;
   return runDiscordMessagesSync();
@@ -768,17 +846,28 @@ export interface ClientPasserelle {
   off(evenement: string, ecouteur: (...args: never[]) => unknown): unknown;
 }
 
-const rafraichissementsEnAttente = new Map<string, ReturnType<typeof setTimeout>>();
+const rafraichissementsEnAttente = new Map<
+  string,
+  ReturnType<typeof setTimeout>
+>();
 
-async function salonDuMessage(message: MessagePasserelle): Promise<string | null> {
+async function salonDuMessage(
+  message: MessagePasserelle,
+): Promise<string | null> {
   if (message.channelId) return message.channelId;
-  if (message.partial && message.fetch) return (await message.fetch().catch(() => null))?.channelId ?? null;
+  if (message.partial && message.fetch)
+    return (await message.fetch().catch(() => null))?.channelId ?? null;
   return null;
 }
 
 /** Redemande le message brut à l'API et l'écrit en base : un seul mapping message → ligne. */
-async function archiverDepuisApi(salonId: string, messageId: string): Promise<void> {
-  const brut = await appelDiscord<MessageBrut>(`/channels/${salonId}/messages/${messageId}`);
+async function archiverDepuisApi(
+  salonId: string,
+  messageId: string,
+): Promise<void> {
+  const brut = await appelDiscord<MessageBrut>(
+    `/channels/${salonId}/messages/${messageId}`,
+  );
   await enregistrerMessage(brut, salonId, brut.guild_id ?? GUILD_ID ?? "");
 }
 
@@ -789,8 +878,11 @@ function programmerRafraichissement(salonId: string, messageId: string): void {
     messageId,
     setTimeout(() => {
       rafraichissementsEnAttente.delete(messageId);
-      archiverDepuisApi(salonId, messageId).catch(err =>
-        console.error(`${PREFIXE} Réarchivage du message ${messageId} impossible :`, err),
+      archiverDepuisApi(salonId, messageId).catch((err) =>
+        console.error(
+          `${PREFIXE} Réarchivage du message ${messageId} impossible :`,
+          err,
+        ),
       );
     }, REGROUPEMENT_REACTIONS_MS),
   );
@@ -819,53 +911,74 @@ async function marquerSupprimes(identifiants: string[]): Promise<void> {
  * Les réactions n'arrivent que si le profil demande l'intent `GuildMessageReactions` ; sans lui,
  * leurs décomptes sont rattrapés par la synchro planifiée.
  */
-export function brancherVeilleMessagesTempsReel(client: ClientPasserelle): () => void {
+export function brancherVeilleMessagesTempsReel(
+  client: ClientPasserelle,
+): () => void {
   const recharger = () =>
-    chargerSalonsSuivis().catch(err => console.error(`${PREFIXE} Lecture des salons suivis impossible :`, err));
+    chargerSalonsSuivis().catch((err) =>
+      console.error(`${PREFIXE} Lecture des salons suivis impossible :`, err),
+    );
   void recharger();
   const minuteur = setInterval(recharger, RELECTURE_SALONS_MS);
   minuteur.unref?.();
 
   const surCreation = async (message: MessagePasserelle) => {
     if (!message.channelId || !estSalonSuivi(message.channelId)) return;
-    await archiverDepuisApi(message.channelId, message.id).catch(err =>
-      console.error(`${PREFIXE} Archivage du nouveau message ${message.id} impossible :`, err),
+    await archiverDepuisApi(message.channelId, message.id).catch((err) =>
+      console.error(
+        `${PREFIXE} Archivage du nouveau message ${message.id} impossible :`,
+        err,
+      ),
     );
   };
-  const surEdition = async (_ancien: MessagePasserelle, nouveau: MessagePasserelle) => {
+  const surEdition = async (
+    _ancien: MessagePasserelle,
+    nouveau: MessagePasserelle,
+  ) => {
     const salonId = await salonDuMessage(nouveau);
     if (!salonId || !estSalonSuivi(salonId)) return;
-    await archiverDepuisApi(salonId, nouveau.id).catch(err =>
-      console.error(`${PREFIXE} Mise à jour du message ${nouveau.id} impossible :`, err),
+    await archiverDepuisApi(salonId, nouveau.id).catch((err) =>
+      console.error(
+        `${PREFIXE} Mise à jour du message ${nouveau.id} impossible :`,
+        err,
+      ),
     );
   };
   const surSuppression = async (message: MessagePasserelle) => {
     if (!estSalonSuivi(await salonDuMessage(message))) return;
-    await marquerSupprimes([message.id]).catch(err =>
+    await marquerSupprimes([message.id]).catch((err) =>
       console.error(`${PREFIXE} Marquage de suppression impossible :`, err),
     );
   };
-  const surSuppressionEnMasse = async (messages: { values(): Iterable<MessagePasserelle> }) => {
+  const surSuppressionEnMasse = async (messages: {
+    values(): Iterable<MessagePasserelle>;
+  }) => {
     const identifiants: string[] = [];
     for (const message of messages.values()) {
-      if (estSalonSuivi(await salonDuMessage(message))) identifiants.push(message.id);
+      if (estSalonSuivi(await salonDuMessage(message)))
+        identifiants.push(message.id);
     }
-    await marquerSupprimes(identifiants).catch(err =>
-      console.error(`${PREFIXE} Marquage de suppression en masse impossible :`, err),
+    await marquerSupprimes(identifiants).catch((err) =>
+      console.error(
+        `${PREFIXE} Marquage de suppression en masse impossible :`,
+        err,
+      ),
     );
   };
   const surReaction = async (reaction: ReactionPasserelle) => {
     try {
       const complete = reaction.partial ? await reaction.fetch() : reaction;
       const salonId = await salonDuMessage(complete.message);
-      if (salonId && estSalonSuivi(salonId)) programmerRafraichissement(salonId, complete.message.id);
+      if (salonId && estSalonSuivi(salonId))
+        programmerRafraichissement(salonId, complete.message.id);
     } catch (err) {
       console.error(`${PREFIXE} Traitement d'une réaction impossible :`, err);
     }
   };
   const surReactionsRetirees = async (message: MessagePasserelle) => {
     const salonId = await salonDuMessage(message);
-    if (salonId && estSalonSuivi(salonId)) programmerRafraichissement(salonId, message.id);
+    if (salonId && estSalonSuivi(salonId))
+      programmerRafraichissement(salonId, message.id);
   };
 
   const ecouteurs: Array<[string, (...args: never[]) => unknown]> = [
@@ -878,12 +991,16 @@ export function brancherVeilleMessagesTempsReel(client: ClientPasserelle): () =>
     ["messageReactionRemoveAll", surReactionsRetirees],
   ];
   for (const [evenement, ecouteur] of ecouteurs) client.on(evenement, ecouteur);
-  console.info(`${PREFIXE} Veille temps réel des salons suivis branchée sur la passerelle.`);
+  console.info(
+    `${PREFIXE} Veille temps réel des salons suivis branchée sur la passerelle.`,
+  );
 
   return () => {
     clearInterval(minuteur);
-    for (const [evenement, ecouteur] of ecouteurs) client.off(evenement, ecouteur);
-    for (const attente of rafraichissementsEnAttente.values()) clearTimeout(attente);
+    for (const [evenement, ecouteur] of ecouteurs)
+      client.off(evenement, ecouteur);
+    for (const attente of rafraichissementsEnAttente.values())
+      clearTimeout(attente);
     rafraichissementsEnAttente.clear();
   };
 }

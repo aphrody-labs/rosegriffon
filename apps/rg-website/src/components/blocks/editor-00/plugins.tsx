@@ -28,7 +28,8 @@ import { ToolbarPlugin } from "@/components/editor/plugins/toolbar/toolbar-plugi
 import { IMAGE } from "@/components/editor/transformers/markdown-image-transformer";
 
 export function Plugins({ id }: { id?: string }) {
-  const [floatingAnchorElem, setFloatingAnchorElem] = useState<HTMLDivElement | null>(null);
+  const [floatingAnchorElem, setFloatingAnchorElem] =
+    useState<HTMLDivElement | null>(null);
   const [isLinkEditMode, setIsLinkEditMode] = useState<boolean>(false);
 
   const onRef = (_floatingAnchorElem: HTMLDivElement) => {
@@ -49,7 +50,10 @@ export function Plugins({ id }: { id?: string }) {
           <div className="relative flex-1 overflow-y-auto" id={id}>
             <RichTextPlugin
               contentEditable={
-                <div className="h-full min-h-[50vh] px-4 md:px-8 py-4" ref={onRef}>
+                <div
+                  className="h-full min-h-[50vh] px-4 md:px-8 py-4"
+                  ref={onRef}
+                >
                   <ContentEditable
                     className="outline-hidden min-h-full relative"
                     placeholder="Commencez à écrire..."

@@ -26,7 +26,9 @@ describe("catalogue", () => {
   // d'exécution désignent exactement les mêmes tâches.
   test("le catalogue du bot est exactement le registre d'exécution", async () => {
     const { REGISTRE_TACHES } = await import("@rosegriffon/cron");
-    expect([...TACHES_CRON].toSorted() as string[]).toEqual(Object.keys(REGISTRE_TACHES).toSorted());
+    expect([...TACHES_CRON].toSorted() as string[]).toEqual(
+      Object.keys(REGISTRE_TACHES).toSorted(),
+    );
     expect(new Set(TACHES_CRON).size).toBe(TACHES_CRON.length);
   });
 
@@ -78,9 +80,15 @@ describe("catalogue", () => {
 
 describe("normalisation", () => {
   test("les deux écritures acceptées par le démon convergent", () => {
-    expect(normaliserNomTache("discord-backfill")).toBe(normaliserNomTache("discord:backfill"));
-    expect(normaliserNomTache("x-campagnes")).toBe(normaliserNomTache("x:campagnes"));
-    expect(normaliserNomTache("SEO-LLMS-TXT")).toBe(normaliserNomTache("seo:llms-txt"));
+    expect(normaliserNomTache("discord-backfill")).toBe(
+      normaliserNomTache("discord:backfill"),
+    );
+    expect(normaliserNomTache("x-campagnes")).toBe(
+      normaliserNomTache("x:campagnes"),
+    );
+    expect(normaliserNomTache("SEO-LLMS-TXT")).toBe(
+      normaliserNomTache("seo:llms-txt"),
+    );
   });
 
   test("`github-publish` garde son tiret : ce n'est pas un espace de noms", () => {
@@ -98,8 +106,20 @@ describe("normalisation", () => {
 
 describe("niveauTache", () => {
   test("les 4 tâches destructrices sont interdites, quelle que soit l'écriture", () => {
-    expect(TACHES_INTERDITES).toEqual(["db", "crawl", "github-publish", "discord:backfill"]);
-    for (const nom of ["db", "crawl", "github-publish", "discord:backfill", "discord-backfill", "github:publish"]) {
+    expect(TACHES_INTERDITES).toEqual([
+      "db",
+      "crawl",
+      "github-publish",
+      "discord:backfill",
+    ]);
+    for (const nom of [
+      "db",
+      "crawl",
+      "github-publish",
+      "discord:backfill",
+      "discord-backfill",
+      "github:publish",
+    ]) {
       expect(niveauTache(nom)).toBe("interdit");
     }
   });
@@ -111,7 +131,14 @@ describe("niveauTache", () => {
   });
 
   test("les tâches qui écrivent en production ou consomment un quota exigent admin", () => {
-    for (const nom of ["publish", "patreon", "reminders", "cdn", "seo:indexnow", "x:campagnes"]) {
+    for (const nom of [
+      "publish",
+      "patreon",
+      "reminders",
+      "cdn",
+      "seo:indexnow",
+      "x:campagnes",
+    ]) {
       expect(niveauTache(nom)).toBe("admin-strict");
     }
   });
@@ -137,7 +164,9 @@ describe("niveauTache", () => {
 describe("raisonRefus", () => {
   test("distingue « inconnue » de « interdite »", () => {
     expect(raisonRefus("nawak")).toContain("inconnue");
-    expect(raisonRefus("db")).toContain("ne peut pas être déclenchée à distance");
+    expect(raisonRefus("db")).toContain(
+      "ne peut pas être déclenchée à distance",
+    );
     // Le motif fait partie du refus : une interdiction sans raison finit
     // toujours par être levée « parce qu'on ne sait plus pourquoi ».
     expect(raisonRefus("db")).toContain("données de jeu");
@@ -160,7 +189,9 @@ describe("suggererTaches", () => {
       expect(proposees).not.toContain(interdite);
     }
     // Discord n'affiche que 25 choix d'autocomplétion : la liste est bornée.
-    expect(proposees).toHaveLength(Math.min(25, TACHES_CRON.length - TACHES_INTERDITES.length));
+    expect(proposees).toHaveLength(
+      Math.min(25, TACHES_CRON.length - TACHES_INTERDITES.length),
+    );
   });
 
   test("une tâche au-delà des 25 premières reste atteignable en tapant son nom", () => {

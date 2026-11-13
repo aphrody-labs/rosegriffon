@@ -8,12 +8,21 @@
 
 import { z } from "zod";
 
-import type { WalletBalance, WalletHistoryPage, WalletTransaction } from "@rosegriffon/achillea-types/domain/wallet";
-import { WalletTransactionDirection, WalletTransactionType } from "@rosegriffon/achillea-types/enums/wallet";
+import type {
+  WalletBalance,
+  WalletHistoryPage,
+  WalletTransaction,
+} from "@rosegriffon/achillea-types/domain/wallet";
+import {
+  WalletTransactionDirection,
+  WalletTransactionType,
+} from "@rosegriffon/achillea-types/enums/wallet";
 
 import { AchilleaResource, type AchilleaClientResult } from "./http";
 
-export const walletTransactionTypeSchema = z.enum(WalletTransactionType) satisfies z.ZodType<WalletTransactionType>;
+export const walletTransactionTypeSchema = z.enum(
+  WalletTransactionType,
+) satisfies z.ZodType<WalletTransactionType>;
 export const walletTransactionDirectionSchema = z.enum(
   WalletTransactionDirection,
 ) satisfies z.ZodType<WalletTransactionDirection>;
@@ -50,7 +59,11 @@ export class WalletResource extends AchilleaResource {
   }
 
   /** `GET /wallet/me/history` — journal des mouvements, du plus récent au plus ancien. */
-  history(query: WalletHistoryQuery = {}): Promise<AchilleaClientResult<WalletHistoryPage>> {
-    return this.http.get("/wallet/me/history", walletHistoryPageSchema, { query });
+  history(
+    query: WalletHistoryQuery = {},
+  ): Promise<AchilleaClientResult<WalletHistoryPage>> {
+    return this.http.get("/wallet/me/history", walletHistoryPageSchema, {
+      query,
+    });
   }
 }

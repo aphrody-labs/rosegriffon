@@ -43,11 +43,26 @@ interface NewsActionsProps {
 
 const STATUS_OPTIONS = [
   { color: "text-warning", icon: FileText, label: "Brouillon", value: "draft" },
-  { color: "text-success", icon: CheckCircle, label: "Publié", value: "published" },
-  { color: "text-on-surface-variant", icon: Archive, label: "Archivé", value: "archived" },
+  {
+    color: "text-success",
+    icon: CheckCircle,
+    label: "Publié",
+    value: "published",
+  },
+  {
+    color: "text-on-surface-variant",
+    icon: Archive,
+    label: "Archivé",
+    value: "archived",
+  },
 ];
 
-export function NewsActions({ newsId, slug, pinned = false, currentStatus = "draft" }: NewsActionsProps) {
+export function NewsActions({
+  newsId,
+  slug,
+  pinned = false,
+  currentStatus = "draft",
+}: NewsActionsProps) {
   const router = useRouter();
 
   const [loading, setLoading] = useState(false);
@@ -59,12 +74,17 @@ export function NewsActions({ newsId, slug, pinned = false, currentStatus = "dra
     setLoading(true);
     try {
       const { updateArticleStatus } = await import("@/app/actions/articles");
-      const result = await updateArticleStatus(newsId, newStatus, currentStatus);
+      const result = await updateArticleStatus(
+        newsId,
+        newStatus,
+        currentStatus,
+      );
       if (result.error) {
         throw new Error(result.error);
       }
 
-      const label = STATUS_OPTIONS.find(s => s.value === newStatus)?.label || newStatus;
+      const label =
+        STATUS_OPTIONS.find((s) => s.value === newStatus)?.label || newStatus;
       toast.success(`Statut changé en « ${label} »`);
       router.refresh();
     } catch {
@@ -103,7 +123,11 @@ export function NewsActions({ newsId, slug, pinned = false, currentStatus = "dra
   };
 
   const handleDelete = async () => {
-    if (!confirm("Êtes-vous sûr de vouloir supprimer cet article ? Cette action est irréversible.")) {
+    if (
+      !confirm(
+        "Êtes-vous sûr de vouloir supprimer cet article ? Cette action est irréversible.",
+      )
+    ) {
       return;
     }
 
@@ -128,7 +152,12 @@ export function NewsActions({ newsId, slug, pinned = false, currentStatus = "dra
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="rounded-full hover:bg-surface-container-high" disabled={loading}>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="rounded-full hover:bg-surface-container-high"
+          disabled={loading}
+        >
           <MoreHorizontal className="size-5" />
         </Button>
       </DropdownMenuTrigger>
@@ -141,14 +170,27 @@ export function NewsActions({ newsId, slug, pinned = false, currentStatus = "dra
         </DropdownMenuLabel>
         <DropdownMenuSeparator className="bg-outline-variant/10" />
 
-        <DropdownMenuItem asChild className="rounded-xl focus:bg-primary/10 focus:text-primary transition-colors">
-          <Link href={`/admin/news/${newsId}`} className="cursor-pointer font-bold">
+        <DropdownMenuItem
+          asChild
+          className="rounded-xl focus:bg-primary/10 focus:text-primary transition-colors"
+        >
+          <Link
+            href={`/admin/news/${newsId}`}
+            className="cursor-pointer font-bold"
+          >
             <Edit className="mr-3 size-4" /> Modifier
           </Link>
         </DropdownMenuItem>
-        <DropdownMenuItem asChild className="rounded-xl focus:bg-primary/10 focus:text-primary transition-colors">
+        <DropdownMenuItem
+          asChild
+          className="rounded-xl focus:bg-primary/10 focus:text-primary transition-colors"
+        >
           <Link
-            href={currentStatus === "published" ? `/news/${slug}` : `/news/${slug}?preview=true`}
+            href={
+              currentStatus === "published"
+                ? `/news/${slug}`
+                : `/news/${slug}?preview=true`
+            }
             target="_blank"
             className="cursor-pointer font-bold"
           >
@@ -164,19 +206,23 @@ export function NewsActions({ newsId, slug, pinned = false, currentStatus = "dra
             <Check className="mr-3 size-4" /> Changer le statut
           </DropdownMenuSubTrigger>
           <DropdownMenuSubContent className="rounded-2xl border-none shadow-2xl p-1.5 bg-surface-container-high min-w-[160px]">
-            {STATUS_OPTIONS.map(opt => (
+            {STATUS_OPTIONS.map((opt) => (
               <DropdownMenuItem
                 key={opt.value}
                 onClick={() => handleStatusChange(opt.value)}
                 disabled={opt.value === currentStatus}
                 className={`rounded-xl transition-colors cursor-pointer font-bold ${
-                  opt.value === currentStatus ? "opacity-50" : "focus:bg-primary/10 focus:text-primary"
+                  opt.value === currentStatus
+                    ? "opacity-50"
+                    : "focus:bg-primary/10 focus:text-primary"
                 }`}
               >
                 <opt.icon className={`mr-3 size-4 ${opt.color}`} />
                 {opt.label}
                 {opt.value === currentStatus && (
-                  <span className="ml-auto text-[10px] text-on-surface-variant/60">actuel</span>
+                  <span className="ml-auto text-[10px] text-on-surface-variant/60">
+                    actuel
+                  </span>
                 )}
               </DropdownMenuItem>
             ))}
@@ -187,12 +233,15 @@ export function NewsActions({ newsId, slug, pinned = false, currentStatus = "dra
           onClick={async () => {
             setLoading(true);
             try {
-              const { toggleArticlePin } = await import("@/app/actions/articles");
+              const { toggleArticlePin } =
+                await import("@/app/actions/articles");
               const result = await toggleArticlePin(newsId, pinned);
               if (result.error) {
                 throw new Error(result.error);
               }
-              toast.success(pinned ? "Article retiré de la une" : "Article épinglé en une");
+              toast.success(
+                pinned ? "Article retiré de la une" : "Article épinglé en une",
+              );
               router.refresh();
             } catch {
               toast.error("Erreur lors de la mise à jour");
@@ -202,7 +251,11 @@ export function NewsActions({ newsId, slug, pinned = false, currentStatus = "dra
           }}
           className="rounded-xl focus:bg-primary/10 focus:text-primary transition-colors cursor-pointer font-bold"
         >
-          {pinned ? <PinOff className="mr-3 size-4" /> : <Pin className="mr-3 size-4" />}
+          {pinned ? (
+            <PinOff className="mr-3 size-4" />
+          ) : (
+            <Pin className="mr-3 size-4" />
+          )}
           {pinned ? "Retirer de la une" : "Épingler en une"}
         </DropdownMenuItem>
 
@@ -225,7 +278,8 @@ export function NewsActions({ newsId, slug, pinned = false, currentStatus = "dra
           onClick={async () => {
             setLoading(true);
             try {
-              const { duplicateArticle } = await import("@/app/actions/articles");
+              const { duplicateArticle } =
+                await import("@/app/actions/articles");
               const result = await duplicateArticle(newsId);
               if ("id" in result) {
                 toast.success("Article dupliqué");
@@ -243,8 +297,14 @@ export function NewsActions({ newsId, slug, pinned = false, currentStatus = "dra
         >
           <Copy className="mr-3 size-4" /> Dupliquer
         </DropdownMenuItem>
-        <DropdownMenuItem asChild className="rounded-xl focus:bg-primary/10 focus:text-primary transition-colors">
-          <Link href={`/admin/news/${newsId}/versions`} className="cursor-pointer font-bold">
+        <DropdownMenuItem
+          asChild
+          className="rounded-xl focus:bg-primary/10 focus:text-primary transition-colors"
+        >
+          <Link
+            href={`/admin/news/${newsId}/versions`}
+            className="cursor-pointer font-bold"
+          >
             <History className="mr-3 size-4" /> Historique
           </Link>
         </DropdownMenuItem>

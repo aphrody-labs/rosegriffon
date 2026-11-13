@@ -13,23 +13,36 @@ import { join } from "node:path";
 
 const DATA_ROOT = crawlDataPath("level5.co.jp/inazuma");
 
-async function safeGoto(page: WebCdpPage, url: string, timeout = 30000): Promise<unknown> {
+async function safeGoto(
+  page: WebCdpPage,
+  url: string,
+  timeout = 30000,
+): Promise<unknown> {
   return Promise.race([
     page.goto(url),
     new Promise((_, reject) =>
-      setTimeout(() => reject(new Error(`Navigation timeout (${timeout}ms) pour ${url}`)), timeout),
+      setTimeout(
+        () =>
+          reject(new Error(`Navigation timeout (${timeout}ms) pour ${url}`)),
+        timeout,
+      ),
     ),
   ]);
 }
 
-export async function crawlLevel5(): Promise<{ success: boolean; error?: string }> {
+export async function crawlLevel5(): Promise<{
+  success: boolean;
+  error?: string;
+}> {
   console.log("[Crawl Level5] Démarrage du crawl des actualités LEVEL-5...");
 
   let page: WebCdpPage | undefined;
   try {
     page = await WebCdpPage.connect();
 
-    console.log("[Crawl Level5] Navigation vers https://www.level5.co.jp/news/");
+    console.log(
+      "[Crawl Level5] Navigation vers https://www.level5.co.jp/news/",
+    );
     await safeGoto(page, "https://www.level5.co.jp/news/");
     await waitForSelector(page, "body", 15000).catch(() => {});
     const indexHtml = await page.content();
@@ -37,7 +50,9 @@ export async function crawlLevel5(): Promise<{ success: boolean; error?: string 
     // Liens vers les articles d'actualités (format news/YYYYMMDD/)
     const articles = extraireLevel5News(indexHtml);
 
-    console.log(`[Crawl Level5] ${articles.length} communiqués trouvés au total. Filtrage pour Inazuma Eleven...`);
+    console.log(
+      `[Crawl Level5] ${articles.length} communiqués trouvés au total. Filtrage pour Inazuma Eleven...`,
+    );
     let crawlCount = 0;
 
     for (const art of articles) {
@@ -49,7 +64,9 @@ export async function crawlLevel5(): Promise<{ success: boolean; error?: string 
         continue;
       }
 
-      console.log(`[Crawl Level5] Inspection de l'article : ${art.title} (${art.url})`);
+      console.log(
+        `[Crawl Level5] Inspection de l'article : ${art.title} (${art.url})`,
+      );
       try {
         await safeGoto(page, art.url);
         await waitForSelector(page, "body", 15000).catch(() => {});
@@ -57,14 +74,19 @@ export async function crawlLevel5(): Promise<{ success: boolean; error?: string 
 
         // On vérifie si l'article parle de Inazuma Eleven (イナズマ or Inazuma)
         const lowerHtml = detailHtml.toLowerCase();
-        const isInazumaRelated = lowerHtml.includes("イナズマ") || lowerHtml.includes("inazuma");
+        const isInazumaRelated =
+          lowerHtml.includes("イナズマ") || lowerHtml.includes("inazuma");
 
         if (!isInazumaRelated) {
-          console.log(`[Crawl Level5] Article ${art.id} non lié à Inazuma Eleven, ignoré.`);
+          console.log(
+            `[Crawl Level5] Article ${art.id} non lié à Inazuma Eleven, ignoré.`,
+          );
           continue;
         }
 
-        console.log(`[Crawl Level5] -> Sauvegarde de l'article lié à Inazuma: ${art.title}`);
+        console.log(
+          `[Crawl Level5] -> Sauvegarde de l'article lié à Inazuma: ${art.title}`,
+        );
         await mkdir(outputDir, { recursive: true });
         await writeFile(indexPath, detailHtml);
 
@@ -76,14 +98,22 @@ export async function crawlLevel5(): Promise<{ success: boolean; error?: string 
           category: "LEVEL-5 Press Release",
           language: "ja",
         };
-        await writeFile(join(outputDir, "meta.json"), JSON.stringify(meta, null, 2));
+        await writeFile(
+          join(outputDir, "meta.json"),
+          JSON.stringify(meta, null, 2),
+        );
         crawlCount++;
       } catch (err) {
-        console.error(`[Crawl Level5] Erreur lors du scraping de l'article ${art.id} :`, err);
+        console.error(
+          `[Crawl Level5] Erreur lors du scraping de l'article ${art.id} :`,
+          err,
+        );
       }
     }
 
-    console.log(`[Crawl Level5] Crawl terminé. ${crawlCount} nouveaux articles Inazuma Eleven enregistrés.`);
+    console.log(
+      `[Crawl Level5] Crawl terminé. ${crawlCount} nouveaux articles Inazuma Eleven enregistrés.`,
+    );
     return { success: true };
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : String(err);

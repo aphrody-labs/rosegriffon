@@ -16,7 +16,8 @@ export const MEDAILLE = {
     texte: "text-amber-400",
     survolTexte: "hover:text-amber-400",
     anneau: "ring-amber-400 shadow-amber-500/20",
-    carte: "border-2 border-amber-500/80 bg-gradient-to-b from-amber-500/10 via-card to-card",
+    carte:
+      "border-2 border-amber-500/80 bg-gradient-to-b from-amber-500/10 via-card to-card",
     encart: "bg-amber-500/10 border-amber-500/30 text-amber-400",
     encartDoux: "bg-amber-500/10 border border-amber-500/20",
   },
@@ -24,7 +25,8 @@ export const MEDAILLE = {
     pastille: "bg-slate-300 text-black",
     texte: "text-slate-300",
     anneau: "ring-slate-300",
-    carte: "border border-slate-700/60 bg-gradient-to-b from-slate-800/40 to-card",
+    carte:
+      "border border-slate-700/60 bg-gradient-to-b from-slate-800/40 to-card",
     encart: "bg-slate-400/10 border-slate-400/30 text-slate-300",
     encartDoux: "bg-slate-400/10 border border-slate-400/20",
   },
@@ -33,7 +35,8 @@ export const MEDAILLE = {
     pastilleClaire: "bg-amber-700 text-amber-100",
     texte: "text-amber-600",
     anneau: "ring-amber-700",
-    carte: "border border-amber-800/60 bg-gradient-to-b from-amber-950/20 to-card",
+    carte:
+      "border border-amber-800/60 bg-gradient-to-b from-amber-950/20 to-card",
     encart: "bg-amber-700/10 border-amber-700/30 text-amber-600",
     encartDoux: "bg-amber-700/10 border border-amber-700/20",
   },
@@ -43,6 +46,7 @@ export const MEDAILLE = {
 export const MARQUE = {
   twitch: "text-purple-400",
   twitchBouton: "text-purple-600 hover:text-purple-700",
-  twitchPastille: "border-purple-500/30 bg-purple-500/10 text-purple-400 hover:bg-purple-500/20",
+  twitchPastille:
+    "border-purple-500/30 bg-purple-500/10 text-purple-400 hover:bg-purple-500/20",
   youtube: "text-red-500",
 } as const;

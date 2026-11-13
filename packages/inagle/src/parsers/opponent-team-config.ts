@@ -69,7 +69,13 @@ function parseContent(content: any) {
   const practiceMatches: PracticeMatchInfo[] = [];
   const practiceMatchGames: any[] = [];
 
-  if (!content?.lists) return { opponents, matchDifficulties, practiceMatches, practiceMatchGames };
+  if (!content?.lists)
+    return {
+      opponents,
+      matchDifficulties,
+      practiceMatches,
+      practiceMatchGames,
+    };
 
   for (const list of content.lists) {
     if (list.name === "m_OpponentTeamInfoList") {
@@ -115,7 +121,9 @@ function parseContent(content: any) {
 // Loaders
 // ============================================================================
 
-export async function loadOpponentTeamConfigAsync(dataPath: string = DATA_ROOT) {
+export async function loadOpponentTeamConfigAsync(
+  dataPath: string = DATA_ROOT,
+) {
   const filename = findConfigFile("team", "opponent_team_config");
   if (!filename) return null;
 
@@ -124,7 +132,9 @@ export async function loadOpponentTeamConfigAsync(dataPath: string = DATA_ROOT) 
   return content ? parseContent(content) : null;
 }
 
-export async function buildOpponentTeamDatabase(dataPath: string = DATA_ROOT): Promise<OpponentTeamDatabase> {
+export async function buildOpponentTeamDatabase(
+  dataPath: string = DATA_ROOT,
+): Promise<OpponentTeamDatabase> {
   const result = await loadOpponentTeamConfigAsync(dataPath);
   const opponents = result?.opponents || [];
   const matchDifficulties = result?.matchDifficulties || [];

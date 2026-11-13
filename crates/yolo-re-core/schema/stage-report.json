@@ -40,7 +40,16 @@
       "description": "Stage payload: AcquireOutput, IdentifyOutput, UnpackOutput, TriageReport, LiftOutput or VerifyOutput."
     },
     "stage": {
-      "enum": ["acquire", "identify", "unpack", "analyze", "lift", "decompile", "rebuild", "verify"],
+      "enum": [
+        "acquire",
+        "identify",
+        "unpack",
+        "analyze",
+        "lift",
+        "decompile",
+        "rebuild",
+        "verify"
+      ],
       "type": "string"
     },
     "status": {
@@ -48,7 +57,15 @@
       "type": "string"
     }
   },
-  "required": ["stage", "adapter", "status", "detail", "artifacts", "metrics", "output"],
+  "required": [
+    "stage",
+    "adapter",
+    "status",
+    "detail",
+    "artifacts",
+    "metrics",
+    "output"
+  ],
   "title": "Bun OS RE pipeline stage report",
   "type": "object"
 }

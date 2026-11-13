@@ -20,7 +20,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // `/shop/panier` a été retiré : le panier est en `noindex` (état personnel,
     // vide pour un robot). Le laisser ici revenait à demander l'indexation d'une
     // page qui refuse d'être indexée.
-    ...produits.map(p => ({
+    ...produits.map((p) => ({
       changeFrequency: "monthly" as const,
       lastModified: now,
       priority: 0.7,

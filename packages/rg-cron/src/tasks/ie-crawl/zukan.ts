@@ -6,7 +6,10 @@
 
 import { cache } from "@rosegriffon/db/redis";
 import { createPostgresClient } from "@rosegriffon/db/service";
-import { buildOrderMap, crawlZukanOrderPages } from "@rosegriffon/inagle/zukan/order";
+import {
+  buildOrderMap,
+  crawlZukanOrderPages,
+} from "@rosegriffon/inagle/zukan/order";
 import { setWebCdpPageFactory } from "@rosegriffon/inagle/zukan/web-cdp";
 import { inagleSql } from "../../lib/db.js";
 import { PageWebView } from "../../lib/webview";
@@ -14,7 +17,7 @@ import { PageWebView } from "../../lib/webview";
 // Le transport CDP par défaut d'inagle est un import dynamique de
 // `@aphrody/agent-browser/cdp`, introuvable dans le binaire compilé : la page
 // headless est celle du runtime (`Bun.WebView`).
-setWebCdpPageFactory(endpoint => PageWebView.connect(endpoint));
+setWebCdpPageFactory((endpoint) => PageWebView.connect(endpoint));
 
 // Le scraper d'ordre (navigation headless + parsing cheerio des pages chara_param) est
 // unifié dans `@rosegriffon/inagle/zukan/order` (leaf, hors barrel car il
@@ -29,7 +32,9 @@ export async function crawlZukanOrder(): Promise<{
   count: number;
   error?: string;
 }> {
-  console.log("[Crawl Zukan] Démarrage du crawl de l'ordre officiel des personnages...");
+  console.log(
+    "[Crawl Zukan] Démarrage du crawl de l'ordre officiel des personnages...",
+  );
 
   const client = createPostgresClient();
 
@@ -61,16 +66,26 @@ export async function crawlZukanOrder(): Promise<{
     // propre signature — sinon un ordre inchangé masquerait un age_group/nickname
     // corrigé sur zukan (ou simplement pas encore synchronisé, cf. déploiement du
     // 1/9/2026) puisque la comparaison ci-dessous décide SEULE si on écrit en base.
-    const bioMapObj: Record<string, { a: string | null; s: string | null; n: string | null }> = {};
+    const bioMapObj: Record<
+      string,
+      { a: string | null; s: string | null; n: string | null }
+    > = {};
     for (const c of allCharacters) {
-      if (c.zukanHash) bioMapObj[c.zukanHash] = { a: c.ageGroup, s: c.schoolYear, n: c.nickname };
+      if (c.zukanHash)
+        bioMapObj[c.zukanHash] = {
+          a: c.ageGroup,
+          s: c.schoolYear,
+          n: c.nickname,
+        };
     }
     const snapshot = { bio: bioMapObj, order: orderMapObj };
 
     const cacheKey = "crawl:zukan:orders";
     const cachedSnapshot = await cache.get<typeof snapshot>(cacheKey);
 
-    const hasChanged = !cachedSnapshot || JSON.stringify(cachedSnapshot) !== JSON.stringify(snapshot);
+    const hasChanged =
+      !cachedSnapshot ||
+      JSON.stringify(cachedSnapshot) !== JSON.stringify(snapshot);
 
     if (!hasChanged) {
       console.log(
@@ -79,7 +94,9 @@ export async function crawlZukanOrder(): Promise<{
       return { success: true, count: allCharacters.length };
     }
 
-    console.log("[Crawl Zukan] Des changements ont été détectés (ordre et/ou biographie). Mise à jour de Supabase...");
+    console.log(
+      "[Crawl Zukan] Des changements ont été détectés (ordre et/ou biographie). Mise à jour de Supabase...",
+    );
 
     // Mise à jour de la table inagle_characters dans Supabase
     let updatedCount = 0;
@@ -118,7 +135,10 @@ export async function crawlZukanOrder(): Promise<{
               .eq("id", char.id);
 
             if (updateError) {
-              console.error(`[Crawl Zukan] Erreur de mise à jour pour ${char.name_en} :`, updateError.message);
+              console.error(
+                `[Crawl Zukan] Erreur de mise à jour pour ${char.name_en} :`,
+                updateError.message,
+              );
             } else {
               updatedCount++;
             }
@@ -130,7 +150,9 @@ export async function crawlZukanOrder(): Promise<{
     // Sauvegarder le nouvel instantané (ordre + biographie) dans Redis
     await cache.set(cacheKey, snapshot, 86400 * 7); // Expiration de 7 jours
 
-    console.log(`[Crawl Zukan] Base de données mise à jour. ${updatedCount} personnages synchronisés.`);
+    console.log(
+      `[Crawl Zukan] Base de données mise à jour. ${updatedCount} personnages synchronisés.`,
+    );
     return { success: true, count: allCharacters.length };
   } catch (err: any) {
     console.error("[Crawl Zukan] Erreur critique lors du crawl Zukan :", err);

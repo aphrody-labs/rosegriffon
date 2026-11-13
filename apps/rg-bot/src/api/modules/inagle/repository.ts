@@ -18,7 +18,7 @@ export class InagleRepository {
   async teams(query?: string, limit = 50) {
     try {
       const rows = (await this.wiki.teams(query, limit)) ?? [];
-      return rows.map(row => ({
+      return rows.map((row) => ({
         ...row,
         name: row.name_fr ?? row.name_en ?? row.name_ja ?? row.id,
         displayName: row.name_fr ?? row.name_en ?? row.name_ja ?? row.id,
@@ -49,10 +49,15 @@ export class InagleRepository {
   async quests(query?: string, phase?: number, limit = 50) {
     try {
       const rows = (await this.wiki.quests(query, limit, 1, phase))?.data ?? [];
-      return rows.map(row => ({
+      return rows.map((row) => ({
         ...row,
         id: row.id,
-        displayText: row.display_text ?? row.name_fr ?? row.name_en ?? row.name_ja ?? row.id,
+        displayText:
+          row.display_text ??
+          row.name_fr ??
+          row.name_en ??
+          row.name_ja ??
+          row.id,
         explain_FR: row.name_fr,
         explain_EN: row.name_en,
         explain_JA: row.name_ja,
@@ -68,7 +73,12 @@ export class InagleRepository {
       return row
         ? {
             ...row,
-            displayText: row.display_text ?? row.name_fr ?? row.name_en ?? row.name_ja ?? row.id,
+            displayText:
+              row.display_text ??
+              row.name_fr ??
+              row.name_en ??
+              row.name_ja ??
+              row.id,
             explain_FR: row.name_fr,
             explain_EN: row.name_en,
             explain_JA: row.name_ja,
@@ -81,8 +91,9 @@ export class InagleRepository {
 
   async items(query?: string, category?: string, limit = 50) {
     try {
-      const rows = (await this.wiki.items(query, limit, 1, category))?.data ?? [];
-      return rows.map(row => ({
+      const rows =
+        (await this.wiki.items(query, limit, 1, category))?.data ?? [];
+      return rows.map((row) => ({
         ...row,
         names: { fr: row.name_fr, en: row.name_en, ja: row.name_ja },
       }));
@@ -93,11 +104,19 @@ export class InagleRepository {
 
   async souls(query?: string, limit = 50) {
     try {
-      let request = this.db.selectFrom("inagle_souls").selectAll().orderBy("id", "asc").limit(limit);
+      let request = this.db
+        .selectFrom("inagle_souls")
+        .selectAll()
+        .orderBy("id", "asc")
+        .limit(limit);
       if (query) {
         const term = `%${query.toLowerCase()}%`;
-        request = request.where(eb =>
-          eb.or([eb("name_fr", "ilike", term), eb("name_en", "ilike", term), eb("name_ja", "ilike", `%${query}%`)]),
+        request = request.where((eb) =>
+          eb.or([
+            eb("name_fr", "ilike", term),
+            eb("name_en", "ilike", term),
+            eb("name_ja", "ilike", `%${query}%`),
+          ]),
         );
       }
       return await request.execute();
@@ -108,11 +127,19 @@ export class InagleRepository {
 
   async formations(query?: string, limit = 50) {
     try {
-      let request = this.db.selectFrom("inagle_formations").selectAll().orderBy("id", "asc").limit(limit);
+      let request = this.db
+        .selectFrom("inagle_formations")
+        .selectAll()
+        .orderBy("id", "asc")
+        .limit(limit);
       if (query) {
         const term = `%${query.toLowerCase()}%`;
-        request = request.where(eb =>
-          eb.or([eb("name_fr", "ilike", term), eb("name_en", "ilike", term), eb("name_ja", "ilike", `%${query}%`)]),
+        request = request.where((eb) =>
+          eb.or([
+            eb("name_fr", "ilike", term),
+            eb("name_en", "ilike", term),
+            eb("name_ja", "ilike", `%${query}%`),
+          ]),
         );
       }
       return await request.execute();
@@ -124,7 +151,11 @@ export class InagleRepository {
   async formation(id: string) {
     try {
       return (
-        (await this.db.selectFrom("inagle_formations").selectAll().where("id", "=", id).executeTakeFirst()) ?? null
+        (await this.db
+          .selectFrom("inagle_formations")
+          .selectAll()
+          .where("id", "=", id)
+          .executeTakeFirst()) ?? null
       );
     } catch {
       return null;
@@ -133,7 +164,13 @@ export class InagleRepository {
 
   async soul(id: string) {
     try {
-      return (await this.db.selectFrom("inagle_souls").selectAll().where("id", "=", id).executeTakeFirst()) ?? null;
+      return (
+        (await this.db
+          .selectFrom("inagle_souls")
+          .selectAll()
+          .where("id", "=", id)
+          .executeTakeFirst()) ?? null
+      );
     } catch {
       return null;
     }
@@ -142,7 +179,12 @@ export class InagleRepository {
   async item(id: string) {
     try {
       const row = await this.wiki.item(id);
-      return row ? { ...row, names: { fr: row.name_fr, en: row.name_en, ja: row.name_ja } } : null;
+      return row
+        ? {
+            ...row,
+            names: { fr: row.name_fr, en: row.name_en, ja: row.name_ja },
+          }
+        : null;
     } catch {
       return null;
     }
@@ -151,8 +193,11 @@ export class InagleRepository {
   async dropTable(id: string) {
     try {
       return (
-        (await this.db.selectFrom("inagle_drops_tables").selectAll().where("table_id", "=", id).executeTakeFirst()) ??
-        null
+        (await this.db
+          .selectFrom("inagle_drops_tables")
+          .selectAll()
+          .where("table_id", "=", id)
+          .executeTakeFirst()) ?? null
       );
     } catch {
       return null;
@@ -180,7 +225,11 @@ export class InagleRepository {
     try {
       const normalized = itemId.trim().toLowerCase();
       if (!normalized) return [];
-      const result = await sql<{ type: "battle" | "treasure"; id: string; map_id: string | null }>`
+      const result = await sql<{
+        type: "battle" | "treasure";
+        id: string;
+        map_id: string | null;
+      }>`
 				select 'battle'::text as type,
 				       b.battle_group_id::text as id,
 				       null::text as map_id
@@ -199,7 +248,7 @@ export class InagleRepository {
 				where lower(item) = ${normalized}
 				order by type, id
 			`.execute(this.db);
-      return result.rows.map(row => ({
+      return result.rows.map((row) => ({
         type: row.type,
         id: row.id,
         ...(row.map_id ? { mapId: row.map_id } : {}),
@@ -212,8 +261,11 @@ export class InagleRepository {
   async skillCutin(id: string) {
     try {
       return (
-        (await this.db.selectFrom("inagle_skill_cutins").selectAll().where("skill_id", "=", id).executeTakeFirst()) ??
-        null
+        (await this.db
+          .selectFrom("inagle_skill_cutins")
+          .selectAll()
+          .where("skill_id", "=", id)
+          .executeTakeFirst()) ?? null
       );
     } catch {
       return null;

@@ -12,5 +12,8 @@ export function remainingTournamentPages(meta: PageMeta): number[] {
   const limit = Math.max(1, Math.floor(meta.limit ?? 50));
   const lastPage = Math.max(page, Math.ceil(Math.max(0, meta.total) / limit));
 
-  return Array.from({ length: lastPage - page }, (_, index) => page + index + 1);
+  return Array.from(
+    { length: lastPage - page },
+    (_, index) => page + index + 1,
+  );
 }

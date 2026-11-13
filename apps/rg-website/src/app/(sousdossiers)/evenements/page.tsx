@@ -40,14 +40,17 @@ function EventSearch({
   return (
     <div className="flex w-full items-center gap-2 md:w-auto">
       <div className="relative flex-1 md:flex-initial">
-        <Search className="absolute top-1/2 left-3 size-5 -translate-y-1/2 text-muted-foreground" aria-hidden />
+        <Search
+          className="absolute top-1/2 left-3 size-5 -translate-y-1/2 text-muted-foreground"
+          aria-hidden
+        />
         <input
           type="search"
           placeholder="Rechercher…"
           aria-label={label}
           className="w-full rounded-xl border-2 border-input bg-background py-3 pr-4 pl-10 text-foreground transition-all placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30 focus-visible:outline-hidden md:w-64"
           value={value}
-          onChange={e => onChange(e.target.value)}
+          onChange={(e) => onChange(e.target.value)}
         />
       </div>
       {value && (
@@ -66,26 +69,35 @@ function EventSearch({
 
 export default function PresencesPage() {
   const { events, isLoading } = useEvents();
-  const { events: discordEvents, isLoading: isLoadingDiscord } = useDiscordEvents();
+  const { events: discordEvents, isLoading: isLoadingDiscord } =
+    useDiscordEvents();
   const [searchFilter, setSearchFilter] = useState("");
 
   // Filtrer par recherche (tous les événements)
   const filteredEvents = searchFilter
     ? events.filter(
-        event =>
+        (event) =>
           event.name.toLowerCase().includes(searchFilter.toLowerCase()) ||
           event.category.toLowerCase().includes(searchFilter.toLowerCase()),
       )
     : events;
 
   // Filtrer uniquement les événements à venir parmi les événements filtrés
-  const upcomingFilteredEvents = filteredEvents.filter(event => event.type === "upcoming" || event.type === "today");
+  const upcomingFilteredEvents = filteredEvents.filter(
+    (event) => event.type === "upcoming" || event.type === "today",
+  );
 
-  const pastFilteredEvents = filteredEvents.filter(event => event.type === "past");
+  const pastFilteredEvents = filteredEvents.filter(
+    (event) => event.type === "past",
+  );
   const hasUpcomingEvents = upcomingFilteredEvents.length > 0;
-  const primaryEvents = hasUpcomingEvents ? upcomingFilteredEvents : pastFilteredEvents;
+  const primaryEvents = hasUpcomingEvents
+    ? upcomingFilteredEvents
+    : pastFilteredEvents;
 
-  const conventionsCount = events.filter(e => e.category === "Conventions").length;
+  const conventionsCount = events.filter(
+    (e) => e.category === "Conventions",
+  ).length;
 
   // Fonction pour réinitialiser le filtre
   const resetFilter = () => setSearchFilter("");
@@ -103,7 +115,12 @@ export default function PresencesPage() {
       {/* Hero — DA Rose Griffon : marine, brique, or. Volontairement constant
 			    d'un thème à l'autre : c'est une bannière de marque, pas une surface. */}
       <PageHero
-        icon={<Calendar className="size-7 shrink-0 text-rg-or md:size-8" aria-hidden />}
+        icon={
+          <Calendar
+            className="size-7 shrink-0 text-rg-or md:size-8"
+            aria-hidden
+          />
+        }
         eyebrow={
           isLoading
             ? "Chargement du calendrier…"
@@ -113,7 +130,12 @@ export default function PresencesPage() {
         description="Retrouvez Rose Griffon lors de différents événements tout au long de l'année. Notre association participe à de nombreux évènements pour promouvoir nos activités et rencontrer notre public."
         actions={
           conventionsCount > 0 ? (
-            <Button type="button" onClick={filterConventions} variant="outline" className={heroSecondaryButtonClass}>
+            <Button
+              type="button"
+              onClick={filterConventions}
+              variant="outline"
+              className={heroSecondaryButtonClass}
+            >
               <Tag className="size-4 shrink-0" aria-hidden />
               Voir uniquement les Conventions
             </Button>
@@ -140,7 +162,10 @@ export default function PresencesPage() {
           title="Événements Discord"
           subtitle="Rejoignez-nous lors de nos événements communautaires sur Discord"
         />
-        <DiscordEventsList events={discordEvents} isLoading={isLoadingDiscord} />
+        <DiscordEventsList
+          events={discordEvents}
+          isLoading={isLoadingDiscord}
+        />
       </SectionCard>
 
       {/* Recherche UNIQUE : elle pilote les deux listes ci-dessous. Un second
@@ -150,7 +175,11 @@ export default function PresencesPage() {
         <SectionHeading
           icon={<Calendar className="size-6" aria-hidden />}
           iconClassName="bg-secondary text-secondary-foreground shadow-secondary/20"
-          title={hasUpcomingEvents ? "Prochains événements" : "Derniers événements passés"}
+          title={
+            hasUpcomingEvents
+              ? "Prochains événements"
+              : "Derniers événements passés"
+          }
           subtitle={
             searchFilter
               ? `Filtre actif : « ${searchFilter} » — ${upcomingFilteredEvents.length} à venir, ${pastFilteredEvents.length} passé(s)`
@@ -167,7 +196,11 @@ export default function PresencesPage() {
             />
           }
         />
-        <EventsList events={primaryEvents} isLoading={isLoading} isFiltered={!!searchFilter} />
+        <EventsList
+          events={primaryEvents}
+          isLoading={isLoading}
+          isFiltered={!!searchFilter}
+        />
       </SectionCard>
 
       {/* Liste des événements passés */}
@@ -178,7 +211,11 @@ export default function PresencesPage() {
             iconClassName="bg-muted text-muted-foreground shadow-foreground/5"
             title="Événements passés"
           />
-          <EventsList events={pastFilteredEvents} isLoading={isLoading} isFiltered={!!searchFilter} />
+          <EventsList
+            events={pastFilteredEvents}
+            isLoading={isLoading}
+            isFiltered={!!searchFilter}
+          />
         </SectionCard>
       )}
     </PageContainer>

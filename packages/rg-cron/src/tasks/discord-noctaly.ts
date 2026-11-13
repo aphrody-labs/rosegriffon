@@ -73,16 +73,26 @@ export async function runNoctalyImport(): Promise<ResultatImportNoctaly> {
   // Le shell de Bun résout un `bun` nu vers `process.execPath` : dans `rg-core`,
   // c'est le binaire compilé, qui redémarrerait le service au lieu d'exécuter le
   // script. Le chemin est donc explicite, et `BUN_BE_BUN=1` en fait un `bun`.
-  const proc = await $`${process.execPath} ${script}`.cwd(botDir).env(environnementBun()).nothrow().quiet();
+  const proc = await $`${process.execPath} ${script}`
+    .cwd(botDir)
+    .env(environnementBun())
+    .nothrow()
+    .quiet();
   const sortie = `${proc.stdout.toString()}${proc.stderr.toString()}`.trim();
 
   // Les dernières lignes utiles sont celles qu'un humain veut lire en premier
   // dans le journal cron — le rapport détaillé (top profils, distribution de
   // monnaie) reste disponible dans la sortie complète pour qui la consulte.
-  const dernieresLignes = sortie.split("\n").filter(Boolean).slice(-6).join(" · ");
+  const dernieresLignes = sortie
+    .split("\n")
+    .filter(Boolean)
+    .slice(-6)
+    .join(" · ");
 
   if (proc.exitCode !== 0) {
-    console.error(`[noctaly:import] échec (code ${proc.exitCode}) : ${dernieresLignes}`);
+    console.error(
+      `[noctaly:import] échec (code ${proc.exitCode}) : ${dernieresLignes}`,
+    );
     return {
       error: dernieresLignes || `code de sortie ${proc.exitCode}`,
       stats: { codeSortie: proc.exitCode, sortie },

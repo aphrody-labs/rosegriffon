@@ -26,7 +26,8 @@ const MEMBER_FIELDS = [
 ].join(",");
 
 const USER_FIELDS = "email,full_name,social_connections,thumb_url,url";
-const TIER_FIELDS = "title,amount_cents,description,discord_role_ids,patron_count,published";
+const TIER_FIELDS =
+  "title,amount_cents,description,discord_role_ids,patron_count,published";
 const ADDRESS_FIELDS = "line_1,line_2,city,state,country,postal_code,addressee";
 
 function pickIncluded<T = Record<string, unknown>>(
@@ -37,11 +38,13 @@ function pickIncluded<T = Record<string, unknown>>(
   if (!included) {
     return null;
   }
-  const found = included.find(r => r.type === type && r.id === id);
+  const found = included.find((r) => r.type === type && r.id === id);
   return (found as JsonApiResource<T>) ?? null;
 }
 
-function discordIdFromConnections(conn: PatreonUserAttrs["social_connections"]): string | null {
+function discordIdFromConnections(
+  conn: PatreonUserAttrs["social_connections"],
+): string | null {
   if (!conn) {
     return null;
   }
@@ -76,7 +79,9 @@ export async function loadCreatorTokens(): Promise<CreatorTokens> {
     const accessToken = process.env.PATREON_CREATOR_ACCESS_TOKEN;
     const refreshToken = process.env.PATREON_CREATOR_REFRESH_TOKEN;
     if (!accessToken || !refreshToken) {
-      throw new Error("No creator OAuth row and no PATREON_CREATOR_*_TOKEN env fallback");
+      throw new Error(
+        "No creator OAuth row and no PATREON_CREATOR_*_TOKEN env fallback",
+      );
     }
     return {
       accessToken,
@@ -99,7 +104,9 @@ export async function loadCreatorTokens(): Promise<CreatorTokens> {
   };
 }
 
-export async function ensureFreshAccessToken(tokens: CreatorTokens): Promise<CreatorTokens> {
+export async function ensureFreshAccessToken(
+  tokens: CreatorTokens,
+): Promise<CreatorTokens> {
   const skewMs = 60 * 1000;
   if (isTokenFresh(tokens.expiresAt, skewMs)) {
     return tokens;
@@ -202,23 +209,34 @@ export async function exportPatreonMembers(): Promise<ExportSummary> {
       const attrs = member.attributes;
       const userRel = member.relationships?.user?.data;
       const userId = userRel && !Array.isArray(userRel) ? userRel.id : null;
-      const userResource = userId ? pickIncluded<PatreonUserAttrs>(res.included, "user", userId) : null;
+      const userResource = userId
+        ? pickIncluded<PatreonUserAttrs>(res.included, "user", userId)
+        : null;
       const userAttrs = userResource?.attributes;
 
       const tierRels = member.relationships?.currently_entitled_tiers?.data;
-      const tierIds = Array.isArray(tierRels) ? tierRels.map(r => r.id) : [];
+      const tierIds = Array.isArray(tierRels) ? tierRels.map((r) => r.id) : [];
       const tierTitles = tierIds
-        .map(id => pickIncluded<PatreonTierAttrs>(res.included, "tier", id)?.attributes?.title ?? null)
+        .map(
+          (id) =>
+            pickIncluded<PatreonTierAttrs>(res.included, "tier", id)?.attributes
+              ?.title ?? null,
+        )
         .filter((t): t is string => Boolean(t));
 
       const addressRel = member.relationships?.address?.data;
-      const addressId = addressRel && !Array.isArray(addressRel) ? addressRel.id : null;
-      const addressResource = addressId ? pickIncluded<PatreonAddressAttrs>(res.included, "address", addressId) : null;
+      const addressId =
+        addressRel && !Array.isArray(addressRel) ? addressRel.id : null;
+      const addressResource = addressId
+        ? pickIncluded<PatreonAddressAttrs>(res.included, "address", addressId)
+        : null;
 
       const { error } = await supabase.from("patreon_legacy_members").upsert(
         {
           currently_entitled_cents: attrs.currently_entitled_amount_cents ?? 0,
-          discord_user_id: discordIdFromConnections(userAttrs?.social_connections),
+          discord_user_id: discordIdFromConnections(
+            userAttrs?.social_connections,
+          ),
           email: attrs.email ?? userAttrs?.email ?? null,
           full_name: attrs.full_name ?? userAttrs?.full_name ?? null,
           last_charge_date: attrs.last_charge_date ?? null,
@@ -258,20 +276,26 @@ export async function exportPatreonMembers(): Promise<ExportSummary> {
   };
 }
 
-export async function exportSingleMember(memberId: string): Promise<{ ok: boolean; member?: unknown; error?: string }> {
+export async function exportSingleMember(
+  memberId: string,
+): Promise<{ ok: boolean; member?: unknown; error?: string }> {
   try {
     let tokens = await loadCreatorTokens();
     tokens = await ensureFreshAccessToken(tokens);
 
     const supabase = createPostgresClient();
 
-    const res: JsonApiResponse<PatreonMemberAttrs> = await patreonFetch(tokens.accessToken, `/members/${memberId}`, {
-      "fields[address]": ADDRESS_FIELDS,
-      "fields[member]": MEMBER_FIELDS,
-      "fields[tier]": TIER_FIELDS,
-      "fields[user]": USER_FIELDS,
-      include: "currently_entitled_tiers,user,address",
-    });
+    const res: JsonApiResponse<PatreonMemberAttrs> = await patreonFetch(
+      tokens.accessToken,
+      `/members/${memberId}`,
+      {
+        "fields[address]": ADDRESS_FIELDS,
+        "fields[member]": MEMBER_FIELDS,
+        "fields[tier]": TIER_FIELDS,
+        "fields[user]": USER_FIELDS,
+        include: "currently_entitled_tiers,user,address",
+      },
+    );
 
     const member = Array.isArray(res.data) ? res.data[0] : res.data;
     if (!member) {
@@ -281,23 +305,34 @@ export async function exportSingleMember(memberId: string): Promise<{ ok: boolea
     const attrs = member.attributes;
     const userRel = member.relationships?.user?.data;
     const userId = userRel && !Array.isArray(userRel) ? userRel.id : null;
-    const userResource = userId ? pickIncluded<PatreonUserAttrs>(res.included, "user", userId) : null;
+    const userResource = userId
+      ? pickIncluded<PatreonUserAttrs>(res.included, "user", userId)
+      : null;
     const userAttrs = userResource?.attributes;
 
     const tierRels = member.relationships?.currently_entitled_tiers?.data;
-    const tierIds = Array.isArray(tierRels) ? tierRels.map(r => r.id) : [];
+    const tierIds = Array.isArray(tierRels) ? tierRels.map((r) => r.id) : [];
     const tierTitles = tierIds
-      .map(id => pickIncluded<PatreonTierAttrs>(res.included, "tier", id)?.attributes?.title ?? null)
+      .map(
+        (id) =>
+          pickIncluded<PatreonTierAttrs>(res.included, "tier", id)?.attributes
+            ?.title ?? null,
+      )
       .filter((t): t is string => Boolean(t));
 
     const addressRel = member.relationships?.address?.data;
-    const addressId = addressRel && !Array.isArray(addressRel) ? addressRel.id : null;
-    const addressResource = addressId ? pickIncluded<PatreonAddressAttrs>(res.included, "address", addressId) : null;
+    const addressId =
+      addressRel && !Array.isArray(addressRel) ? addressRel.id : null;
+    const addressResource = addressId
+      ? pickIncluded<PatreonAddressAttrs>(res.included, "address", addressId)
+      : null;
 
     const { error } = await supabase.from("patreon_legacy_members").upsert(
       {
         currently_entitled_cents: attrs.currently_entitled_amount_cents ?? 0,
-        discord_user_id: discordIdFromConnections(userAttrs?.social_connections),
+        discord_user_id: discordIdFromConnections(
+          userAttrs?.social_connections,
+        ),
         email: attrs.email ?? userAttrs?.email ?? null,
         full_name: attrs.full_name ?? userAttrs?.full_name ?? null,
         last_charge_date: attrs.last_charge_date ?? null,
@@ -320,30 +355,44 @@ export async function exportSingleMember(memberId: string): Promise<{ ok: boolea
     }
     return { member, ok: true };
   } catch (error) {
-    return { ok: false, error: error instanceof Error ? error.message : String(error) };
+    return {
+      ok: false,
+      error: error instanceof Error ? error.message : String(error),
+    };
   }
 }
 
 async function countTiers(): Promise<number> {
   const supabase = createPostgresClient();
-  const { count } = await supabase.from("patreon_legacy_tiers").select("*", { count: "exact", head: true });
+  const { count } = await supabase
+    .from("patreon_legacy_tiers")
+    .select("*", { count: "exact", head: true });
   return count ?? 0;
 }
 
-export async function syncTiers(accessToken: string, campaignId: string): Promise<void> {
+export async function syncTiers(
+  accessToken: string,
+  campaignId: string,
+): Promise<void> {
   const supabase = createPostgresClient();
 
-  const res = await patreonFetch<PatreonTierAttrs>(accessToken, `/campaigns/${campaignId}`, {
-    "fields[tier]": TIER_FIELDS,
-    include: "tiers",
-  });
+  const res = await patreonFetch<PatreonTierAttrs>(
+    accessToken,
+    `/campaigns/${campaignId}`,
+    {
+      "fields[tier]": TIER_FIELDS,
+      include: "tiers",
+    },
+  );
 
-  const tiers = (res.included ?? []).filter(r => r.type === "tier");
+  const tiers = (res.included ?? []).filter((r) => r.type === "tier");
   for (const tier of tiers) {
     const attrs = tier.attributes as PatreonTierAttrs;
     const title = attrs.title ?? "Untitled tier";
     const mapping = TIER_MAPPING[title];
-    const rgPriceId = mapping ? (process.env[mapping.stripePriceEnv] ?? null) : null;
+    const rgPriceId = mapping
+      ? (process.env[mapping.stripePriceEnv] ?? null)
+      : null;
     await supabase.from("patreon_legacy_tiers").upsert(
       {
         amount_cents: attrs.amount_cents ?? 0,

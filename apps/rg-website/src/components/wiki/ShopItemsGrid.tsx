@@ -4,9 +4,16 @@ import Image from "next/image";
 import Link from "@/components/shared/Link";
 import { useMemo, useState } from "react";
 import { Icon } from "@/components/ui/Icon";
-import { getItemIconUrl, PLACEHOLDERS, resolveAssetUrl } from "@rosegriffon/azalee/images";
+import {
+  getItemIconUrl,
+  PLACEHOLDERS,
+  resolveAssetUrl,
+} from "@rosegriffon/azalee/images";
 import { cn } from "@/lib/utils";
-import { SHOP_CATEGORY_FR, type ShopItem } from "@rosegriffon/azalee/wiki/shops-shared";
+import {
+  SHOP_CATEGORY_FR,
+  type ShopItem,
+} from "@rosegriffon/azalee/wiki/shops-shared";
 
 const CATEGORY_ICON: Record<string, string> = {
   accessory: "diamond",
@@ -33,8 +40,11 @@ function normalize(s: string): string {
 
 function ShopItemTile({ item }: { item: ShopItem }) {
   const [imgError, setImgError] = useState(false);
-  const resolvedSrc = resolveAssetUrl(item.icon) || (item.internalCode ? getItemIconUrl(item.internalCode) : null);
-  const hasRealImage = !!resolvedSrc && resolvedSrc !== PLACEHOLDERS.item && !imgError;
+  const resolvedSrc =
+    resolveAssetUrl(item.icon) ||
+    (item.internalCode ? getItemIconUrl(item.internalCode) : null);
+  const hasRealImage =
+    !!resolvedSrc && resolvedSrc !== PLACEHOLDERS.item && !imgError;
   const catIcon = (item.category && CATEGORY_ICON[item.category]) || "backpack";
 
   // L'objet est cliquable vers /item/[id] seulement si on a un id résolu.
@@ -52,7 +62,11 @@ function ShopItemTile({ item }: { item: ShopItem }) {
             onError={() => setImgError(true)}
           />
         ) : (
-          <Icon name={catIcon} size={20} className="text-on-surface-variant/30" />
+          <Icon
+            name={catIcon}
+            size={20}
+            className="text-on-surface-variant/30"
+          />
         )}
       </div>
       <div className="flex-1 min-w-0">
@@ -71,7 +85,9 @@ function ShopItemTile({ item }: { item: ShopItem }) {
 
   const cls = cn(
     "block rounded-xl border border-outline-variant/30 bg-surface-container-low transition-all duration-200 group",
-    item.resolved && item.id ? "hover:bg-surface-container hover:shadow-md hover:-translate-y-0.5" : "opacity-80",
+    item.resolved && item.id
+      ? "hover:bg-surface-container hover:shadow-md hover:-translate-y-0.5"
+      : "opacity-80",
   );
 
   if (item.resolved && item.id) {
@@ -100,7 +116,7 @@ export function ShopItemsGrid({ items }: { items: ShopItem[] }) {
 
   const filtered = useMemo(() => {
     const q = normalize(query.trim());
-    return items.filter(it => {
+    return items.filter((it) => {
       if (activeCat && it.category !== activeCat) return false;
       if (q && !normalize(it.name).includes(q)) return false;
       return true;
@@ -119,7 +135,7 @@ export function ShopItemsGrid({ items }: { items: ShopItem[] }) {
           <input
             type="search"
             value={query}
-            onChange={e => setQuery(e.target.value)}
+            onChange={(e) => setQuery(e.target.value)}
             placeholder="Rechercher un objet dans cette boutique…"
             className="w-full h-11 pl-10 pr-3 rounded-full bg-surface-container-low border border-outline-variant text-sm text-on-surface placeholder:text-on-surface-variant outline-none focus:border-primary transition-colors"
           />
@@ -143,7 +159,9 @@ export function ShopItemsGrid({ items }: { items: ShopItem[] }) {
               <button
                 key={category}
                 type="button"
-                onClick={() => setActiveCat(category === activeCat ? null : category)}
+                onClick={() =>
+                  setActiveCat(category === activeCat ? null : category)
+                }
                 className={cn(
                   "inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors",
                   activeCat === category
@@ -160,18 +178,24 @@ export function ShopItemsGrid({ items }: { items: ShopItem[] }) {
       </div>
 
       <div className="text-xs font-medium text-on-surface-variant px-1 uppercase tracking-wider">
-        {filtered.length.toLocaleString("fr-FR")} objet{filtered.length > 1 ? "s" : ""}
+        {filtered.length.toLocaleString("fr-FR")} objet
+        {filtered.length > 1 ? "s" : ""}
       </div>
 
       {filtered.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {filtered.map((item, i) => (
-            <ShopItemTile key={`${item.id || "na"}-${item.slotIndex}-${i}`} item={item} />
+            <ShopItemTile
+              key={`${item.id || "na"}-${item.slotIndex}-${i}`}
+              item={item}
+            />
           ))}
         </div>
       ) : (
         <div className="py-16 text-center rounded-2xl border border-outline-variant bg-surface-container-low border-dashed">
-          <p className="text-on-surface-variant italic">Aucun objet ne correspond.</p>
+          <p className="text-on-surface-variant italic">
+            Aucun objet ne correspond.
+          </p>
         </div>
       )}
     </div>

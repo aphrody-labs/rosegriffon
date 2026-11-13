@@ -18,7 +18,7 @@ export function MediaUploader({ onUploadComplete }: MediaUploaderProps) {
   const [files, setFiles] = useState<File[]>([]);
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
-    setFiles(prev => [...prev, ...acceptedFiles]);
+    setFiles((prev) => [...prev, ...acceptedFiles]);
   }, []);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -30,7 +30,7 @@ export function MediaUploader({ onUploadComplete }: MediaUploaderProps) {
   });
 
   const removeFile = (index: number) => {
-    setFiles(prev => prev.filter((_, i) => i !== index));
+    setFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleUpload = async () => {
@@ -44,7 +44,7 @@ export function MediaUploader({ onUploadComplete }: MediaUploaderProps) {
     try {
       // Vérifier que l'utilisateur est bien authentifié (via cookie de session)
 
-      const uploadPromises = files.map(async file => {
+      const uploadPromises = files.map(async (file) => {
         const fileExt = file.name.split(".").pop()?.toLowerCase();
         const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`;
         const filePath = `chronicles/${fileName}`;
@@ -56,8 +56,13 @@ export function MediaUploader({ onUploadComplete }: MediaUploaderProps) {
 
         if (error) {
           console.error("Upload error details:", error);
-          if (error.message?.includes("policy") || error.message?.includes("permission")) {
-            throw new Error("Permission refusée. Vérifiez que vous êtes admin.");
+          if (
+            error.message?.includes("policy") ||
+            error.message?.includes("permission")
+          ) {
+            throw new Error(
+              "Permission refusée. Vérifiez que vous êtes admin.",
+            );
           }
           throw error;
         }
@@ -69,7 +74,10 @@ export function MediaUploader({ onUploadComplete }: MediaUploaderProps) {
       onUploadComplete();
     } catch (error) {
       console.error("Upload error:", error);
-      const errorMessage = error instanceof Error ? error.message : "Erreur lors du téléchargement";
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Erreur lors du téléchargement";
       toast.error(errorMessage);
     } finally {
       setUploading(false);
@@ -81,7 +89,9 @@ export function MediaUploader({ onUploadComplete }: MediaUploaderProps) {
       <div
         {...getRootProps()}
         className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${
-          isDragActive ? "border-primary bg-primary/10" : "border-muted-foreground/25 hover:border-primary/50"
+          isDragActive
+            ? "border-primary bg-primary/10"
+            : "border-muted-foreground/25 hover:border-primary/50"
         }`}
       >
         <input {...getInputProps()} />
@@ -92,7 +102,9 @@ export function MediaUploader({ onUploadComplete }: MediaUploaderProps) {
           <p>
             Glissez-déposez des images ici, ou cliquez pour sélectionner
             <br />
-            <span className="text-xs text-muted-foreground">(Max 5MB par fichier)</span>
+            <span className="text-xs text-muted-foreground">
+              (Max 5MB par fichier)
+            </span>
           </p>
         )}
       </div>
@@ -101,9 +113,17 @@ export function MediaUploader({ onUploadComplete }: MediaUploaderProps) {
         <div className="space-y-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {files.map((file, index) => (
-              <div key={index} className="relative group border rounded-md p-2 bg-background">
+              <div
+                key={index}
+                className="relative group border rounded-md p-2 bg-background"
+              >
                 <div className="aspect-square relative mb-2 bg-muted rounded overflow-hidden">
-                  <Image src={URL.createObjectURL(file)} alt={file.name} fill className="object-cover" />
+                  <Image
+                    src={URL.createObjectURL(file)}
+                    alt={file.name}
+                    fill
+                    className="object-cover"
+                  />
                 </div>
                 <p className="text-xs truncate px-1">{file.name}</p>
                 <button

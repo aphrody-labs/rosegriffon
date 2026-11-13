@@ -90,7 +90,12 @@ export async function recouperComptes(): Promise<RecoupementComptes> {
   const joueursAchillea = Number(ligne?.joueurs_achillea ?? 0);
   const communs = Number(ligne?.communs ?? 0);
 
-  return { profilsRg, joueursAchillea, communs, achilleaSeuls: joueursAchillea - communs };
+  return {
+    profilsRg,
+    joueursAchillea,
+    communs,
+    achilleaSeuls: joueursAchillea - communs,
+  };
 }
 
 /** Volumes bruts d'Achilléa, pour la vue d'ensemble de `/admin`. */

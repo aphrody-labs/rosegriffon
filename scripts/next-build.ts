@@ -10,20 +10,35 @@ export function assertWorkspaceMember(root: string, app: string): void {
     member === ".." ||
     member.startsWith(`..${process.platform === "win32" ? "\\" : "/"}`)
   )
-    throw new Error("Next build must run from an app inside the Rose Griffon workspace");
+    throw new Error(
+      "Next build must run from an app inside the Rose Griffon workspace",
+    );
 }
 
-export async function assertFreshBuild(app: string, startedAt: number): Promise<void> {
+export async function assertFreshBuild(
+  app: string,
+  startedAt: number,
+): Promise<void> {
   const path = join(app, ".next", "BUILD_ID");
   const artifact = await stat(path);
-  if (!artifact.isFile() || artifact.mtimeMs < startedAt) throw new Error(`Next build output is missing or stale: ${path}`);
+  if (!artifact.isFile() || artifact.mtimeMs < startedAt)
+    throw new Error(`Next build output is missing or stale: ${path}`);
 }
 
-export async function buildNext(root: string, app: string, args: string[]): Promise<number> {
+export async function buildNext(
+  root: string,
+  app: string,
+  args: string[],
+): Promise<number> {
   await checkBunRuntime(root);
   assertWorkspaceMember(root, app);
   const sync = Bun.spawn(
-    [process.execPath, join(root, "packages/rg-assets/scripts/sync-website-public.ts"), "--to", join(app, "public")],
+    [
+      process.execPath,
+      join(root, "packages/rg-assets/scripts/sync-website-public.ts"),
+      "--to",
+      join(app, "public"),
+    ],
     { cwd: app, stdout: "inherit", stderr: "inherit" },
   );
   const syncExit = await sync.exited;
@@ -37,11 +52,20 @@ export async function buildNext(root: string, app: string, args: string[]): Prom
   const luaExit = await lua.exited;
   if (luaExit !== 0) return luaExit;
   const startedAt = Date.now();
-  const runner = (await import(Bun.resolveSync("@aphrody/next-bun/run", app))) as {
+  const runner = (await import(
+    Bun.resolveSync("@aphrody/next-bun/run", app)
+  )) as {
     runNext(args: string[], cwd: string): Promise<number>;
   };
-  const selectedBundler = args.some(arg => ["--webpack", "--turbopack", "--turbo"].includes(arg)) ? [] : ["--webpack"];
-  const exitCode = await runner.runNext(["build", ...selectedBundler, ...args], app);
+  const selectedBundler = args.some((arg) =>
+    ["--webpack", "--turbopack", "--turbo"].includes(arg),
+  )
+    ? []
+    : ["--webpack"];
+  const exitCode = await runner.runNext(
+    ["build", ...selectedBundler, ...args],
+    app,
+  );
   if (exitCode !== 0) return exitCode;
   await assertFreshBuild(app, startedAt);
   return 0;
@@ -53,6 +77,6 @@ if (import.meta.main) {
   process.exitCode = await buildNext(
     resolve(import.meta.dir, ".."),
     process.cwd(),
-    args.filter(arg => arg !== "--analyze"),
+    args.filter((arg) => arg !== "--analyze"),
   );
 }

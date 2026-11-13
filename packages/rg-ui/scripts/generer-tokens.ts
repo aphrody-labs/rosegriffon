@@ -38,11 +38,13 @@ export interface BlocCss {
 /** Charge les imports locaux au point exact de leur apparition, sans accès réseau. */
 export async function chargerCssAvecImports(
   chemin: URL,
-  lire: (chemin: URL) => Promise<string> = chemin => Bun.file(chemin).text(),
+  lire: (chemin: URL) => Promise<string> = (chemin) => Bun.file(chemin).text(),
   parents: readonly string[] = [],
 ): Promise<string> {
-  if (chemin.protocol !== "file:") throw new Error(`[tokens] source CSS non locale : ${chemin}`);
-  if (parents.includes(chemin.href)) throw new Error(`[tokens] cycle d'import CSS : ${chemin}`);
+  if (chemin.protocol !== "file:")
+    throw new Error(`[tokens] source CSS non locale : ${chemin}`);
+  if (parents.includes(chemin.href))
+    throw new Error(`[tokens] cycle d'import CSS : ${chemin}`);
   const css = (await lire(chemin)).replace(/\/\*[\s\S]*?\*\//g, "");
   const imports = /@import\s+(?:url\(\s*)?["']([^"']+)["']\s*\)?\s*([^;]*);/g;
   let sortie = "";
@@ -50,11 +52,19 @@ export async function chargerCssAvecImports(
   for (const correspondance of css.matchAll(imports)) {
     const cible = correspondance[1]!;
     if (!cible.startsWith("./") && !cible.startsWith("../"))
-      throw new Error(`[tokens] import CSS non local non pris en charge : ${cible}`);
+      throw new Error(
+        `[tokens] import CSS non local non pris en charge : ${cible}`,
+      );
     const condition = correspondance[2]!.trim();
     const couche = /^layer\(([\w.-]+)\)$/.exec(condition)?.[1];
-    if (condition && !couche) throw new Error(`[tokens] condition d'import CSS non prise en charge : ${condition}`);
-    const contenu = await chargerCssAvecImports(new URL(cible, chemin), lire, [...parents, chemin.href]);
+    if (condition && !couche)
+      throw new Error(
+        `[tokens] condition d'import CSS non prise en charge : ${condition}`,
+      );
+    const contenu = await chargerCssAvecImports(new URL(cible, chemin), lire, [
+      ...parents,
+      chemin.href,
+    ]);
     sortie += css.slice(position, correspondance.index);
     sortie += couche ? `@layer ${couche} {\n${contenu}\n}` : contenu;
     position = correspondance.index! + correspondance[0].length;
@@ -69,14 +79,20 @@ export async function chargerCssAvecImports(
  * pas générée, et n'utilise ni chaînes contenant des accolades ni `@supports`.
  */
 export function analyserBlocs(css: string): BlocCss[] {
-  const sansCommentaires = css.replace(/\/\*[\s\S]*?\*\//g, "").replace(/@import\s+["'][^"']+["']\s*;/g, "");
+  const sansCommentaires = css
+    .replace(/\/\*[\s\S]*?\*\//g, "")
+    .replace(/@import\s+["'][^"']+["']\s*;/g, "");
   const blocs: BlocCss[] = [];
   const couches = new Map<string, number>();
   // Pile des préludes ouverts, pour savoir si l'on est dans un `@layer`.
   let position = 0;
   let prelude = "";
 
-  const lire = (depuis: number, dansKeyframes: boolean, couche?: number): void => {
+  const lire = (
+    depuis: number,
+    dansKeyframes: boolean,
+    couche?: number,
+  ): void => {
     let i = depuis;
     let debutPrelude = i;
     while (i < sansCommentaires.length) {
@@ -91,13 +107,18 @@ export function analyserBlocs(css: string): BlocCss[] {
           // on descend dedans en mémorisant si l'on entre dans une animation,
           // dont les étapes `from`/`to` ne sont pas des jeux de tokens.
           const nomCouche = /^@layer\s+([\w.-]+)$/.exec(prelude)?.[1];
-          if (nomCouche && !couches.has(nomCouche)) couches.set(nomCouche, couches.size);
-          lire(i + 1, dansKeyframes || prelude.startsWith("@keyframes"), nomCouche ? couches.get(nomCouche) : couche);
+          if (nomCouche && !couches.has(nomCouche))
+            couches.set(nomCouche, couches.size);
+          lire(
+            i + 1,
+            dansKeyframes || prelude.startsWith("@keyframes"),
+            nomCouche ? couches.get(nomCouche) : couche,
+          );
         } else if (!dansKeyframes && prelude.length > 0) {
           blocs.push({
             selecteurs: prelude
               .split(",")
-              .map(s => s.trim())
+              .map((s) => s.trim())
               .filter(Boolean),
             declarations: analyserDeclarations(contenu),
             couche,
@@ -110,8 +131,12 @@ export function analyserBlocs(css: string): BlocCss[] {
       if (c === "}") return;
       if (c === ";") {
         const instruction = sansCommentaires.slice(debutPrelude, i).trim();
-        const declarationCouches = /^@layer\s+([\w.,\s-]+)$/.exec(instruction)?.[1];
-        for (const nom of declarationCouches?.split(",").map(nom => nom.trim()) ?? [])
+        const declarationCouches = /^@layer\s+([\w.,\s-]+)$/.exec(
+          instruction,
+        )?.[1];
+        for (const nom of declarationCouches
+          ?.split(",")
+          .map((nom) => nom.trim()) ?? [])
           if (!couches.has(nom)) couches.set(nom, couches.size);
         debutPrelude = i + 1;
       }
@@ -125,7 +150,10 @@ export function analyserBlocs(css: string): BlocCss[] {
 }
 
 /** Cascade d'auteur pour <html class="theme-x"> : couches, spécificité puis ordre source. */
-export function cascaderTheme(blocs: readonly BlocCss[], nom?: string): Map<string, string> {
+export function cascaderTheme(
+  blocs: readonly BlocCss[],
+  nom?: string,
+): Map<string, string> {
   const resultat = new Map<string, string>();
   const priorites = new Map<string, [number, number, number, number]>();
   for (const [ordre, bloc] of blocs.entries()) {
@@ -133,9 +161,12 @@ export function cascaderTheme(blocs: readonly BlocCss[], nom?: string): Map<stri
     for (const selecteur of bloc.selecteurs) {
       if (selecteur === ":root") specificite = Math.max(specificite, 10);
       if (selecteur === "html") specificite = Math.max(specificite, 1);
-      if (nom && selecteur === `.${nom}`) specificite = Math.max(specificite, 10);
-      if (nom && selecteur === `:root.${nom}`) specificite = Math.max(specificite, 20);
-      if (nom && selecteur === `html.${nom}`) specificite = Math.max(specificite, 11);
+      if (nom && selecteur === `.${nom}`)
+        specificite = Math.max(specificite, 10);
+      if (nom && selecteur === `:root.${nom}`)
+        specificite = Math.max(specificite, 20);
+      if (nom && selecteur === `html.${nom}`)
+        specificite = Math.max(specificite, 11);
     }
     if (specificite < 0) continue;
     for (const [cle, declaration] of bloc.declarations) {
@@ -148,8 +179,14 @@ export function cascaderTheme(blocs: readonly BlocCss[], nom?: string): Map<stri
         ordre,
       ];
       const precedente = priorites.get(cle);
-      const difference = precedente ? priorite.findIndex((valeur, index) => valeur !== precedente[index]) : -1;
-      if (precedente && (difference < 0 || priorite[difference]! < precedente[difference]!)) continue;
+      const difference = precedente
+        ? priorite.findIndex((valeur, index) => valeur !== precedente[index])
+        : -1;
+      if (
+        precedente &&
+        (difference < 0 || priorite[difference]! < precedente[difference]!)
+      )
+        continue;
       priorites.set(cle, priorite);
       resultat.set(cle, declaration.replace(/\s*!important\s*$/i, "").trim());
     }
@@ -178,7 +215,11 @@ function analyserDeclarations(corps: string): Map<string, string> {
     const nom = brute.slice(0, separateur).trim();
     if (!nom.startsWith("--")) continue;
     const valeur = brute.slice(separateur + 1).trim();
-    if (/\s*!important\s*$/i.test(sortie.get(nom) ?? "") && !/\s*!important\s*$/i.test(valeur)) continue;
+    if (
+      /\s*!important\s*$/i.test(sortie.get(nom) ?? "") &&
+      !/\s*!important\s*$/i.test(valeur)
+    )
+      continue;
     sortie.set(nom, valeur);
   }
   return sortie;
@@ -188,7 +229,9 @@ function analyserDeclarations(corps: string): Map<string, string> {
 
 /** Encodage gamma sRGB d'une composante linéaire (0-1). */
 function versSrgb(canal: number): number {
-  return canal <= 0.0031308 ? 12.92 * canal : 1.055 * canal ** (1 / 2.4) - 0.055;
+  return canal <= 0.0031308
+    ? 12.92 * canal
+    : 1.055 * canal ** (1 / 2.4) - 0.055;
 }
 
 function borner(v: number, min: number, max: number): number {
@@ -206,13 +249,19 @@ function octet(canal: number): string {
  * (matrices de Björn Ottosson). L accepte `0-1` ou un pourcentage.
  */
 export function oklchVersHex(valeur: string): string | null {
-  const correspondance = /^oklch\(\s*([^\s]+)\s+([^\s]+)\s+([^\s)]+)\s*\)$/i.exec(valeur.trim());
+  const correspondance =
+    /^oklch\(\s*([^\s]+)\s+([^\s]+)\s+([^\s)]+)\s*\)$/i.exec(valeur.trim());
   if (!correspondance) return null;
   const [, brutL, brutC, brutH] = correspondance;
-  const L = brutL!.endsWith("%") ? Number.parseFloat(brutL!) / 100 : Number.parseFloat(brutL!);
-  const C = brutC!.endsWith("%") ? (Number.parseFloat(brutC!) / 100) * 0.4 : Number.parseFloat(brutC!);
+  const L = brutL!.endsWith("%")
+    ? Number.parseFloat(brutL!) / 100
+    : Number.parseFloat(brutL!);
+  const C = brutC!.endsWith("%")
+    ? (Number.parseFloat(brutC!) / 100) * 0.4
+    : Number.parseFloat(brutC!);
   const H = Number.parseFloat(brutH!);
-  if (!Number.isFinite(L) || !Number.isFinite(C) || !Number.isFinite(H)) return null;
+  if (!Number.isFinite(L) || !Number.isFinite(C) || !Number.isFinite(H))
+    return null;
 
   const radians = (H * Math.PI) / 180;
   const a = C * Math.cos(radians);
@@ -246,10 +295,16 @@ export function normaliserCouleur(valeur: string): string {
  * Résout `var(--x)` en cascadant `local` (le bloc du thème) puis `base`
  * (`:root`). Les cycles sont coupés au bout de 12 sauts.
  */
-export function resoudreVar(valeur: string, local: Map<string, string>, base: Map<string, string>): string {
+export function resoudreVar(
+  valeur: string,
+  local: Map<string, string>,
+  base: Map<string, string>,
+): string {
   let courante = valeur;
   for (let saut = 0; saut < 12; saut++) {
-    const correspondance = /^var\(\s*(--[\w-]+)\s*(?:,\s*([^)]*))?\)$/.exec(courante.trim());
+    const correspondance = /^var\(\s*(--[\w-]+)\s*(?:,\s*([^)]*))?\)$/.exec(
+      courante.trim(),
+    );
     if (!correspondance) return courante;
     const reference = correspondance[1]!;
     const secours = correspondance[2];
@@ -277,7 +332,10 @@ export interface TokensExtraits {
   marque: Record<string, string>;
   marquesTierces: Record<string, string>;
   formes: Record<string, number>;
-  themes: Record<NomTheme, { md3: Record<string, string>; shadcn: Record<string, string> }>;
+  themes: Record<
+    NomTheme,
+    { md3: Record<string, string>; shadcn: Record<string, string> }
+  >;
 }
 
 const PREFIXE_MD3 = "--md-sys-color-";
@@ -327,34 +385,45 @@ export function extraireTokens(css: string): TokensExtraits {
 
   const theme = new Map<string, string>();
   for (const bloc of blocs) {
-    if (!bloc.selecteurs.some(s => s.startsWith("@theme"))) continue;
+    if (!bloc.selecteurs.some((s) => s.startsWith("@theme"))) continue;
     for (const [nom, valeur] of bloc.declarations) theme.set(nom, valeur);
   }
 
   const marque: Record<string, string> = {};
   for (const [nom, valeur] of racine) {
     if (!nom.startsWith(PREFIXE_MARQUE)) continue;
-    marque[versCamel(nom.slice(PREFIXE_MARQUE.length))] = normaliserCouleur(resoudreVar(valeur, racine, racine));
+    marque[versCamel(nom.slice(PREFIXE_MARQUE.length))] = normaliserCouleur(
+      resoudreVar(valeur, racine, racine),
+    );
   }
 
   const marquesTierces: Record<string, string> = {};
-  for (const nom of ["--color-discord", "--color-discord-strong", "--color-patreon", "--color-twitch"]) {
+  for (const nom of [
+    "--color-discord",
+    "--color-discord-strong",
+    "--color-patreon",
+    "--color-twitch",
+  ]) {
     const valeur = theme.get(nom);
-    if (valeur) marquesTierces[versCamel(nom.slice("--color-".length))] = normaliserCouleur(valeur);
+    if (valeur)
+      marquesTierces[versCamel(nom.slice("--color-".length))] =
+        normaliserCouleur(valeur);
   }
 
   const formes: Record<string, number> = {};
   for (const [nom, valeur] of theme) {
     if (!nom.startsWith(PREFIXE_FORME)) continue;
     const nombre = Number.parseFloat(valeur);
-    if (Number.isFinite(nombre)) formes[versCamel(nom.slice(PREFIXE_FORME.length))] = nombre;
+    if (Number.isFinite(nombre))
+      formes[versCamel(nom.slice(PREFIXE_FORME.length))] = nombre;
   }
 
   const themes = {} as TokensExtraits["themes"];
   for (const nom of NOMS_THEMES) {
-    const selections = blocs.filter(b => b.selecteurs.includes(`.${nom}`));
+    const selections = blocs.filter((b) => b.selecteurs.includes(`.${nom}`));
     const bloc = selections[0];
-    if (!bloc) throw new Error(`[tokens] thème « ${nom} » introuvable dans styles.css`);
+    if (!bloc)
+      throw new Error(`[tokens] thème « ${nom} » introuvable dans styles.css`);
     // Cascade réelle : `.theme-x` est posé sur <html>, donc `:root` s'applique
     // aussi et fournit les rôles que le thème ne redéclare pas (scrim, shadow…).
     const fusion = cascaderTheme(blocs, nom);
@@ -362,14 +431,18 @@ export function extraireTokens(css: string): TokensExtraits {
     const md3: Record<string, string> = {};
     for (const [cle, valeur] of fusion) {
       if (!cle.startsWith(PREFIXE_MD3)) continue;
-      md3[versCamel(cle.slice(PREFIXE_MD3.length))] = normaliserCouleur(resoudreVar(valeur, fusion, racine));
+      md3[versCamel(cle.slice(PREFIXE_MD3.length))] = normaliserCouleur(
+        resoudreVar(valeur, fusion, racine),
+      );
     }
 
     const shadcn: Record<string, string> = {};
     for (const role of ROLES_SHADCN) {
       const valeur = fusion.get(`--${role}`);
       if (valeur === undefined) continue;
-      shadcn[versCamel(role)] = normaliserCouleur(resoudreVar(valeur, fusion, racine));
+      shadcn[versCamel(role)] = normaliserCouleur(
+        resoudreVar(valeur, fusion, racine),
+      );
     }
 
     themes[nom] = { md3, shadcn };
@@ -380,16 +453,21 @@ export function extraireTokens(css: string): TokensExtraits {
 
 // ─── Rendu du module TypeScript ────────────────────────────────────────────
 
-function litteral(valeur: Record<string, string | number>, indentation: string): string {
+function litteral(
+  valeur: Record<string, string | number>,
+  indentation: string,
+): string {
   const lignes = Object.entries(valeur).map(([cle, v]) =>
-    typeof v === "number" ? `${indentation}\t${cle}: ${v},` : `${indentation}\t${cle}: "${v}",`,
+    typeof v === "number"
+      ? `${indentation}\t${cle}: ${v},`
+      : `${indentation}\t${cle}: "${v}",`,
   );
   return `{\n${lignes.join("\n")}\n${indentation}}`;
 }
 
 export async function rendreModule(tokens: TokensExtraits): Promise<string> {
   const themes = NOMS_THEMES.map(
-    nom =>
+    (nom) =>
       `\t"${nom}": {\n\t\tmd3: ${litteral(tokens.themes[nom].md3, "\t\t")},\n\t\tshadcn: ${litteral(
         tokens.themes[nom].shadcn,
         "\t\t",
@@ -412,7 +490,7 @@ export async function rendreModule(tokens: TokensExtraits): Promise<string> {
 
 /** Les 7 thèmes unifiés, tels que posés en classe sur \`<html>\`. */
 export const NOMS_THEMES = [
-${NOMS_THEMES.map(n => `\t"${n}",`).join("\n")}
+${NOMS_THEMES.map((n) => `\t"${n}",`).join("\n")}
 ] as const;
 
 export type NomTheme = (typeof NOMS_THEMES)[number];
@@ -468,7 +546,8 @@ export function shadcn(nom: NomTheme): RolesShadcn {
     new Response(formatter.stderr).text(),
     formatter.exited,
   ]);
-  if (code !== 0) throw new Error(`Native token formatting failed (${code}): ${error}`);
+  if (code !== 0)
+    throw new Error(`Native token formatting failed (${code}): ${error}`);
   return formatted;
 }
 

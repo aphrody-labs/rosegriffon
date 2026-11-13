@@ -28,7 +28,11 @@ import {
 } from "discord.js";
 
 import { logAdminAction } from "../../lib/audit";
-import { fusionnerReglages, manquesTickets, type ReglagesCommunaute } from "../../lib/reglages-communaute";
+import {
+  fusionnerReglages,
+  manquesTickets,
+  type ReglagesCommunaute,
+} from "../../lib/reglages-communaute";
 import {
   CATEGORIES_TICKET,
   libelleCategorieTicket,
@@ -48,11 +52,22 @@ import {
   ticketsOuverts,
 } from "../../services/tickets";
 import { construirePanneau } from "../ticket";
-import { attention, echec, fiche, ilYA, piedDeCommande, repondre, succes } from "../../lib/ui";
+import {
+  attention,
+  echec,
+  fiche,
+  ilYA,
+  piedDeCommande,
+  repondre,
+  succes,
+} from "../../lib/ui";
 import { differerEnPrive, exigerDroits, messagePanne } from "../staff/garde";
 import "./racine-gestion";
 
-const SALONS_ACCEPTES = [ChannelType.GuildText, ChannelType.GuildAnnouncement] as const;
+const SALONS_ACCEPTES = [
+  ChannelType.GuildText,
+  ChannelType.GuildAnnouncement,
+] as const;
 
 /** Résout le salon du panneau depuis les réglages, `null` s'il est absent. */
 async function salonDesReglages(
@@ -62,8 +77,12 @@ async function salonDesReglages(
   if (!reglages.tickets.salonPanneau) {
     return null;
   }
-  const salon = await interaction.client.channels.fetch(reglages.tickets.salonPanneau).catch(() => null);
-  return salon && salon.isTextBased() && !salon.isDMBased() ? (salon as GuildTextBasedChannel) : null;
+  const salon = await interaction.client.channels
+    .fetch(reglages.tickets.salonPanneau)
+    .catch(() => null);
+  return salon && salon.isTextBased() && !salon.isDMBased()
+    ? (salon as GuildTextBasedChannel)
+    : null;
 }
 
 @Discord()
@@ -74,7 +93,10 @@ async function salonDesReglages(
 })
 @SlashGroup("ticket", "gestion")
 export class GestionTicketCommand {
-  @Slash({ description: "Voir la configuration actuelle des tickets", name: "reglages" })
+  @Slash({
+    description: "Voir la configuration actuelle des tickets",
+    name: "reglages",
+  })
   async voirReglages(interaction: ChatInputCommandInteraction) {
     await differerEnPrive(interaction);
     if (!(await exigerDroits(interaction))) {
@@ -82,7 +104,10 @@ export class GestionTicketCommand {
     }
     const guildId = interaction.guildId;
     if (!guildId) {
-      await repondre(interaction, echec("Hors serveur", "Les tickets se règlent sur un serveur."));
+      await repondre(
+        interaction,
+        echec("Hors serveur", "Les tickets se règlent sur un serveur."),
+      );
       return;
     }
     try {
@@ -94,41 +119,76 @@ export class GestionTicketCommand {
         titre: "Réglages des tickets",
       });
       carte
-        .champ("Actif", reglages.tickets.actif ? "oui" : "non", { enLigne: true })
-        .champ("Mode", reglages.tickets.mode === "fil" ? "fils privés" : "salons", {
-          enLigne: true,
-        })
-        .champ("Salon du panneau", reglages.tickets.salonPanneau ? `<#${reglages.tickets.salonPanneau}>` : "—", {
+        .champ("Actif", reglages.tickets.actif ? "oui" : "non", {
           enLigne: true,
         })
         .champ(
+          "Mode",
+          reglages.tickets.mode === "fil" ? "fils privés" : "salons",
+          {
+            enLigne: true,
+          },
+        )
+        .champ(
+          "Salon du panneau",
+          reglages.tickets.salonPanneau
+            ? `<#${reglages.tickets.salonPanneau}>`
+            : "—",
+          {
+            enLigne: true,
+          },
+        )
+        .champ(
           "Salon d'historique",
-          reglages.tickets.salonHistorique ? `<#${reglages.tickets.salonHistorique}>` : "—",
+          reglages.tickets.salonHistorique
+            ? `<#${reglages.tickets.salonHistorique}>`
+            : "—",
           { enLigne: true },
         )
         .champ(
           "Catégorie Support",
-          reglages.tickets.categorieSupport ? `<#${reglages.tickets.categorieSupport}>` : "—",
+          reglages.tickets.categorieSupport
+            ? `<#${reglages.tickets.categorieSupport}>`
+            : "—",
           { enLigne: true },
         )
-        .champ("Prise en charge", reglages.tickets.rolesStaff.map(id => `<@&${id}>`).join(" ") || "—")
-        .champ("Direction (signalements)", reglages.tickets.rolesDirection.map(id => `<@&${id}>`).join(" ") || "—")
+        .champ(
+          "Prise en charge",
+          reglages.tickets.rolesStaff.map((id) => `<@&${id}>`).join(" ") || "—",
+        )
+        .champ(
+          "Direction (signalements)",
+          reglages.tickets.rolesDirection.map((id) => `<@&${id}>`).join(" ") ||
+            "—",
+        )
         .champ(
           "Catégories proposées",
           CATEGORIES_TICKET.map(
-            categorie => `${categorie.emoji} ${categorie.libelle}${categorie.sensible ? " *(direction)*" : ""}`,
+            (categorie) =>
+              `${categorie.emoji} ${categorie.libelle}${categorie.sensible ? " *(direction)*" : ""}`,
           ).join("\n"),
         );
       if (manques.length > 0) {
-        carte.champ("Il manque", manques.map(manque => `- ${manque}`).join("\n"));
+        carte.champ(
+          "Il manque",
+          manques.map((manque) => `- ${manque}`).join("\n"),
+        );
       }
-      await interaction.editReply({ embeds: [piedDeCommande(carte.embed, interaction)] });
+      await interaction.editReply({
+        embeds: [piedDeCommande(carte.embed, interaction)],
+      });
     } catch (err) {
-      await repondre(interaction, echec("Réglages illisibles", messagePanne(err)));
+      await repondre(
+        interaction,
+        echec("Réglages illisibles", messagePanne(err)),
+      );
     }
   }
 
-  @Slash({ description: "Poser un salon ou un rôle du système de tickets", name: "poser" })
+  @Slash({
+    description: "Poser un salon ou un rôle du système de tickets",
+    name: "poser",
+  })
   async poser(
     @SlashChoice({ name: "Salon du panneau", value: "salonPanneau" })
     @SlashChoice({ name: "Salon d'historique", value: "salonHistorique" })
@@ -157,12 +217,17 @@ export class GestionTicketCommand {
     }
     const guildId = interaction.guildId;
     if (!guildId) {
-      await repondre(interaction, echec("Hors serveur", "Les tickets se règlent sur un serveur."));
+      await repondre(
+        interaction,
+        echec("Hors serveur", "Les tickets se règlent sur un serveur."),
+      );
       return;
     }
     try {
       const actuels = await reglagesDe(guildId);
-      const modifies = fusionnerReglages(actuels, { tickets: { [cle]: salon.id } });
+      const modifies = fusionnerReglages(actuels, {
+        tickets: { [cle]: salon.id },
+      });
       await enregistrerReglages(guildId, modifies);
       await logAdminAction({
         action: "ticket.reglage",
@@ -172,15 +237,26 @@ export class GestionTicketCommand {
         targetId: guildId,
         targetType: "bot_reglages_guilde",
       });
-      await repondre(interaction, succes("Réglage posé", `\`${cle}\` → ${salon.toString()}`, { prive: true }));
+      await repondre(
+        interaction,
+        succes("Réglage posé", `\`${cle}\` → ${salon.toString()}`, {
+          prive: true,
+        }),
+      );
     } catch (err) {
       await repondre(interaction, echec("Réglage refusé", messagePanne(err)));
     }
   }
 
-  @Slash({ description: "Ajouter ou retirer un rôle de prise en charge", name: "role" })
+  @Slash({
+    description: "Ajouter ou retirer un rôle de prise en charge",
+    name: "role",
+  })
   async role(
-    @SlashChoice({ name: "Prise en charge (tickets ordinaires)", value: "rolesStaff" })
+    @SlashChoice({
+      name: "Prise en charge (tickets ordinaires)",
+      value: "rolesStaff",
+    })
     @SlashChoice({ name: "Direction (signalements)", value: "rolesDirection" })
     @SlashOption({
       description: "Quelle liste modifier",
@@ -214,15 +290,23 @@ export class GestionTicketCommand {
     }
     const guildId = interaction.guildId;
     if (!guildId) {
-      await repondre(interaction, echec("Hors serveur", "Les tickets se règlent sur un serveur."));
+      await repondre(
+        interaction,
+        echec("Hors serveur", "Les tickets se règlent sur un serveur."),
+      );
       return;
     }
     try {
       const actuels = await reglagesDe(guildId);
       const cle = liste === "rolesDirection" ? "rolesDirection" : "rolesStaff";
       const avant = actuels.tickets[cle];
-      const apres = action === "retirer" ? avant.filter(id => id !== role.id) : [...new Set([...avant, role.id])];
-      const modifies = fusionnerReglages(actuels, { tickets: { [cle]: apres } });
+      const apres =
+        action === "retirer"
+          ? avant.filter((id) => id !== role.id)
+          : [...new Set([...avant, role.id])];
+      const modifies = fusionnerReglages(actuels, {
+        tickets: { [cle]: apres },
+      });
       await enregistrerReglages(guildId, modifies);
 
       await logAdminAction({
@@ -239,7 +323,10 @@ export class GestionTicketCommand {
       // seule : le diagnostic signale aussi les rôles qui voient les tickets
       // sans y être habilités, et la direction en ferait partie à tort.
       const salon = await salonDesReglages(interaction, modifies);
-      const habilites = [...modifies.tickets.rolesStaff, ...modifies.tickets.rolesDirection];
+      const habilites = [
+        ...modifies.tickets.rolesStaff,
+        ...modifies.tickets.rolesDirection,
+      ];
       const diagnostic =
         salon && interaction.guild
           ? await diagnostiquerAcces(interaction.guild, salon, habilites)
@@ -251,13 +338,24 @@ export class GestionTicketCommand {
         intention: diagnostic.blocages.length > 0 ? "attention" : "succes",
         titre: "Rôle de tickets",
       });
-      carte.champ("Liste à jour", apres.map(id => `<@&${id}>`).join(" ") || "—");
+      carte.champ(
+        "Liste à jour",
+        apres.map((id) => `<@&${id}>`).join(" ") || "—",
+      );
       if (diagnostic.blocages.length > 0) {
-        carte.champ("À corriger", diagnostic.blocages.map(ligne => `- ${ligne}`).join("\n"));
+        carte.champ(
+          "À corriger",
+          diagnostic.blocages.map((ligne) => `- ${ligne}`).join("\n"),
+        );
       }
-      await interaction.editReply({ embeds: [piedDeCommande(carte.embed, interaction)] });
+      await interaction.editReply({
+        embeds: [piedDeCommande(carte.embed, interaction)],
+      });
     } catch (err) {
-      await repondre(interaction, echec("Modification refusée", messagePanne(err)));
+      await repondre(
+        interaction,
+        echec("Modification refusée", messagePanne(err)),
+      );
     }
   }
 
@@ -272,7 +370,10 @@ export class GestionTicketCommand {
     }
     const guildId = interaction.guildId;
     if (!guildId || !interaction.guild) {
-      await repondre(interaction, echec("Hors serveur", "Le diagnostic s'exécute sur un serveur."));
+      await repondre(
+        interaction,
+        echec("Hors serveur", "Le diagnostic s'exécute sur un serveur."),
+      );
       return;
     }
     try {
@@ -280,10 +381,16 @@ export class GestionTicketCommand {
       const manques = manquesTickets(reglages);
       const salon = await salonDesReglages(interaction, reglages);
 
-      const roles = [...reglages.tickets.rolesStaff, ...reglages.tickets.rolesDirection];
+      const roles = [
+        ...reglages.tickets.rolesStaff,
+        ...reglages.tickets.rolesDirection,
+      ];
       const diagnostic = salon
         ? await diagnostiquerAcces(interaction.guild, salon, roles)
-        : { avertissements: [], blocages: ["Aucun salon de panneau configuré."] };
+        : {
+            avertissements: [],
+            blocages: ["Aucun salon de panneau configuré."],
+          };
 
       const compte = await compterTickets(guildId);
       const bloque = manques.length > 0 || diagnostic.blocages.length > 0;
@@ -296,22 +403,42 @@ export class GestionTicketCommand {
         titre: "Diagnostic des tickets",
       });
       if (manques.length > 0) {
-        carte.champ("Réglages manquants", manques.map(manque => `- ${manque}`).join("\n"));
+        carte.champ(
+          "Réglages manquants",
+          manques.map((manque) => `- ${manque}`).join("\n"),
+        );
       }
       if (diagnostic.blocages.length > 0) {
-        carte.champ("Blocages", diagnostic.blocages.map(ligne => `- ${ligne}`).join("\n"));
+        carte.champ(
+          "Blocages",
+          diagnostic.blocages.map((ligne) => `- ${ligne}`).join("\n"),
+        );
       }
       if (diagnostic.avertissements.length > 0) {
-        carte.champ("À savoir", diagnostic.avertissements.map(ligne => `- ${ligne}`).join("\n"));
+        carte.champ(
+          "À savoir",
+          diagnostic.avertissements.map((ligne) => `- ${ligne}`).join("\n"),
+        );
       }
-      carte.champ("Tickets", `${compte.ouvert} en attente · ${compte.pris} pris en charge · ${compte.ferme} fermés`);
-      await interaction.editReply({ embeds: [piedDeCommande(carte.embed, interaction)] });
+      carte.champ(
+        "Tickets",
+        `${compte.ouvert} en attente · ${compte.pris} pris en charge · ${compte.ferme} fermés`,
+      );
+      await interaction.editReply({
+        embeds: [piedDeCommande(carte.embed, interaction)],
+      });
     } catch (err) {
-      await repondre(interaction, echec("Diagnostic impossible", messagePanne(err)));
+      await repondre(
+        interaction,
+        echec("Diagnostic impossible", messagePanne(err)),
+      );
     }
   }
 
-  @Slash({ description: "Publier le panneau d'ouverture de tickets", name: "panneau" })
+  @Slash({
+    description: "Publier le panneau d'ouverture de tickets",
+    name: "panneau",
+  })
   async panneau(
     @SlashOption({
       channelTypes: [...SALONS_ACCEPTES],
@@ -330,30 +457,44 @@ export class GestionTicketCommand {
     }
     const guildId = interaction.guildId;
     if (!guildId || !interaction.guild) {
-      await repondre(interaction, echec("Hors serveur", "Le panneau se publie sur un serveur."));
+      await repondre(
+        interaction,
+        echec("Hors serveur", "Le panneau se publie sur un serveur."),
+      );
       return;
     }
     try {
       const reglages = await reglagesDe(guildId);
-      const cible = salonChoisi ?? (await salonDesReglages(interaction, reglages));
+      const cible =
+        salonChoisi ?? (await salonDesReglages(interaction, reglages));
       if (!cible) {
         await repondre(
           interaction,
-          echec("Salon indéterminé", "Pose `salonPanneau` avec `/gestion ticket poser`, ou passe l'option `salon`."),
+          echec(
+            "Salon indéterminé",
+            "Pose `salonPanneau` avec `/gestion ticket poser`, ou passe l'option `salon`.",
+          ),
         );
         return;
       }
 
       // Le refus qui compte : publier un panneau qui fabrique des tickets que
       // personne ne voit est pire que ne rien publier.
-      const roles = [...reglages.tickets.rolesStaff, ...reglages.tickets.rolesDirection];
-      const diagnostic = await diagnostiquerAcces(interaction.guild, cible, roles);
+      const roles = [
+        ...reglages.tickets.rolesStaff,
+        ...reglages.tickets.rolesDirection,
+      ];
+      const diagnostic = await diagnostiquerAcces(
+        interaction.guild,
+        cible,
+        roles,
+      );
       if (diagnostic.blocages.length > 0) {
         await repondre(
           interaction,
           attention(
             "Panneau non publié",
-            `${diagnostic.blocages.map(ligne => `- ${ligne}`).join("\n")}\n\nCorrige d'abord : un panneau qui crée des tickets invisibles ne se voit qu'au premier signalement perdu.`,
+            `${diagnostic.blocages.map((ligne) => `- ${ligne}`).join("\n")}\n\nCorrige d'abord : un panneau qui crée des tickets invisibles ne se voit qu'au premier signalement perdu.`,
             { prive: true },
           ),
         );
@@ -369,13 +510,22 @@ export class GestionTicketCommand {
         targetId: message.id,
         targetType: "discord_message",
       });
-      await repondre(interaction, succes("Panneau publié", `${message.url}`, { prive: true }));
+      await repondre(
+        interaction,
+        succes("Panneau publié", `${message.url}`, { prive: true }),
+      );
     } catch (err) {
-      await repondre(interaction, echec("Publication impossible", messagePanne(err)));
+      await repondre(
+        interaction,
+        echec("Publication impossible", messagePanne(err)),
+      );
     }
   }
 
-  @Slash({ description: "Les tickets encore ouverts, avec leur âge", name: "encours" })
+  @Slash({
+    description: "Les tickets encore ouverts, avec leur âge",
+    name: "encours",
+  })
   async encours(interaction: ChatInputCommandInteraction) {
     await differerEnPrive(interaction);
     if (!(await exigerDroits(interaction))) {
@@ -383,14 +533,19 @@ export class GestionTicketCommand {
     }
     const guildId = interaction.guildId;
     if (!guildId) {
-      await repondre(interaction, echec("Hors serveur", "Les tickets vivent sur un serveur."));
+      await repondre(
+        interaction,
+        echec("Hors serveur", "Les tickets vivent sur un serveur."),
+      );
       return;
     }
     try {
       // Un fil supprimé laisse sa ligne « ouverte » : la liste du staff doit
       // montrer les tickets qui existent, pas des salons introuvables.
       const bruts = await ticketsOuverts(guildId, 25);
-      const ouverts = interaction.guild ? await reconcilierTicketsOuverts(interaction.guild, bruts) : bruts;
+      const ouverts = interaction.guild
+        ? await reconcilierTicketsOuverts(interaction.guild, bruts)
+        : bruts;
       const compte = await compterTickets(guildId);
       const fantomes = bruts.length - ouverts.length;
       const carte = fiche({
@@ -398,7 +553,7 @@ export class GestionTicketCommand {
           ouverts.length === 0
             ? "Aucun ticket en attente."
             : ouverts
-                .map(ticket =>
+                .map((ticket) =>
                   [
                     `**${referenceTicket(ticket.numero)}**`,
                     `<#${ticket.salonId}>`,
@@ -414,21 +569,27 @@ export class GestionTicketCommand {
         icone: "ticket",
         titre: `${ouverts.length} ticket(s) en cours`,
       });
-      carte.champ("Total", `${compte.ouvert} en attente · ${compte.pris} pris en charge · ${compte.ferme} fermés`);
+      carte.champ(
+        "Total",
+        `${compte.ouvert} en attente · ${compte.pris} pris en charge · ${compte.ferme} fermés`,
+      );
       if (fantomes > 0) {
         carte.champ(
           "Fermés d'office",
           `${fantomes} ticket(s) dont le fil avait été supprimé — leur auteur peut de nouveau en ouvrir un.`,
         );
       }
-      await interaction.editReply({ embeds: [piedDeCommande(carte.embed, interaction)] });
+      await interaction.editReply({
+        embeds: [piedDeCommande(carte.embed, interaction)],
+      });
     } catch (err) {
       await repondre(interaction, echec("Liste illisible", messagePanne(err)));
     }
   }
 
   @Slash({
-    description: "Fermer d'office un ticket par son numéro, depuis n'importe où",
+    description:
+      "Fermer d'office un ticket par son numéro, depuis n'importe où",
     name: "fermer",
   })
   async fermerDoffice(
@@ -458,13 +619,22 @@ export class GestionTicketCommand {
     }
     const guildId = interaction.guildId;
     if (!guildId) {
-      await repondre(interaction, echec("Hors serveur", "Les tickets vivent sur un serveur."));
+      await repondre(
+        interaction,
+        echec("Hors serveur", "Les tickets vivent sur un serveur."),
+      );
       return;
     }
     try {
       const ticket = await ticketParNumero(guildId, numero);
       if (!ticket) {
-        await repondre(interaction, attention("Inconnu", `Aucun ticket ${referenceTicket(numero)} sur ce serveur.`));
+        await repondre(
+          interaction,
+          attention(
+            "Inconnu",
+            `Aucun ticket ${referenceTicket(numero)} sur ce serveur.`,
+          ),
+        );
         return;
       }
       if (ticket.statut === "ferme") {
@@ -479,17 +649,25 @@ export class GestionTicketCommand {
       }
       const motif = motifPropre(motifBrut);
       if (!motif) {
-        await repondre(interaction, echec("Motif vide", "Toujours fermer avec un motif."));
+        await repondre(
+          interaction,
+          echec("Motif vide", "Toujours fermer avec un motif."),
+        );
         return;
       }
 
       const ferme = await fermerTicket(ticket.id, interaction.user.id, motif);
       if (!ferme) {
-        await repondre(interaction, attention("Déjà fermé", "Quelqu'un a été plus rapide."));
+        await repondre(
+          interaction,
+          attention("Déjà fermé", "Quelqu'un a été plus rapide."),
+        );
         return;
       }
 
-      const salon = await interaction.client.channels.fetch(ferme.salonId).catch(() => null);
+      const salon = await interaction.client.channels
+        .fetch(ferme.salonId)
+        .catch(() => null);
       const fil = salon?.isThread() ? salon : null;
       await publierFermeture({
         client: interaction.client,
@@ -500,12 +678,20 @@ export class GestionTicketCommand {
         urlFil: fil?.url ?? null,
       });
       if (fil) {
-        await clore(fil, `Fermé d'office par ${interaction.user.tag} — ${motif}`);
+        await clore(
+          fil,
+          `Fermé d'office par ${interaction.user.tag} — ${motif}`,
+        );
       }
       await logAdminAction({
         action: "ticket.fermeture-office",
         adminId: admin.profileId,
-        details: { auteur: ferme.auteurId, filPresent: fil !== null, motif, numero },
+        details: {
+          auteur: ferme.auteurId,
+          filPresent: fil !== null,
+          motif,
+          numero,
+        },
         discordId: interaction.user.id,
         targetId: String(ferme.id),
         targetType: "bot_tickets",
@@ -518,13 +704,18 @@ export class GestionTicketCommand {
           [
             `**Motif** ${motif}`,
             `Ouvert par <@${ferme.auteurId}> — il peut de nouveau ouvrir un ticket.`,
-            fil ? "Le fil est archivé et verrouillé." : "Son fil n'existait plus.",
+            fil
+              ? "Le fil est archivé et verrouillé."
+              : "Son fil n'existait plus.",
           ].join("\n"),
           { prive: true },
         ),
       );
     } catch (err) {
-      await repondre(interaction, echec("Fermeture impossible", messagePanne(err)));
+      await repondre(
+        interaction,
+        echec("Fermeture impossible", messagePanne(err)),
+      );
     }
   }
 }

@@ -19,14 +19,27 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 import EmotePicker from "@/components/shared/emotes/EmotePicker";
-import EmoteRenderer, { getTextWithoutEmotes, stripEmotes } from "@/components/shared/emotes/EmoteRenderer";
-import RgEmote, { RgEmoteGrid, RgEmoteLine } from "@/components/shared/emotes/RgEmote";
+import EmoteRenderer, {
+  getTextWithoutEmotes,
+  stripEmotes,
+} from "@/components/shared/emotes/EmoteRenderer";
+import RgEmote, {
+  RgEmoteGrid,
+  RgEmoteLine,
+} from "@/components/shared/emotes/RgEmote";
 
-import { useEmoteHistory, useEmoteRotation, useEmoteValidation, useEmotes } from "@/hooks/useEmotes";
+import {
+  useEmoteHistory,
+  useEmoteRotation,
+  useEmoteValidation,
+  useEmotes,
+} from "@/hooks/useEmotes";
 import type { EMOTES, Emote } from "@/lib/emotes";
 
 export default function EmotesShowcasePage() {
-  const [text, setText] = useState("Bienvenue :gaelle-salut: sur Rose Griffon :roy-evil: !");
+  const [text, setText] = useState(
+    "Bienvenue :gaelle-salut: sur Rose Griffon :roy-evil: !",
+  );
   const [selectedEmote, setSelectedEmote] = useState<Emote | null>(null);
 
   const { selectRandomEmote, getByCharacter } = useEmotes();
@@ -37,7 +50,7 @@ export default function EmotesShowcasePage() {
   const handleEmoteSelect = (emote: Emote) => {
     setSelectedEmote(emote);
     addToHistory(emote);
-    setText(prev => `${prev} :${emote.name}:`);
+    setText((prev) => `${prev} :${emote.name}:`);
     toast.success(`Emote ajoutée : ${emote.name}`);
   };
 
@@ -53,7 +66,8 @@ export default function EmotesShowcasePage() {
           <RgEmote name="gaelle-coeur" size={64} animated />
         </div>
         <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-          Explorez tous les composants et fonctionnalités du système d'emotes Rose Griffon
+          Explorez tous les composants et fonctionnalités du système d'emotes
+          Rose Griffon
         </p>
       </div>
 
@@ -70,17 +84,25 @@ export default function EmotesShowcasePage() {
           <Card>
             <CardHeader>
               <CardTitle>EmotePicker Component</CardTitle>
-              <CardDescription>Sélecteur d'emotes avec recherche et filtres</CardDescription>
+              <CardDescription>
+                Sélecteur d'emotes avec recherche et filtres
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="flex items-center gap-4">
                 <EmotePicker onSelect={handleEmoteSelect} />
                 {selectedEmote && (
                   <div className="flex items-center gap-3 p-3 bg-muted rounded-lg">
-                    <RgEmote name={selectedEmote.name as keyof typeof EMOTES} size={48} animated />
+                    <RgEmote
+                      name={selectedEmote.name as keyof typeof EMOTES}
+                      size={48}
+                      animated
+                    />
                     <div>
                       <p className="font-semibold">{selectedEmote.name}</p>
-                      <p className="text-sm text-muted-foreground">{selectedEmote.alt}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {selectedEmote.alt}
+                      </p>
                     </div>
                   </div>
                 )}
@@ -89,7 +111,11 @@ export default function EmotesShowcasePage() {
               {history.length > 0 && (
                 <div className="space-y-2">
                   <h3 className="text-sm font-medium">Récemment utilisé</h3>
-                  <RgEmoteLine emotes={history.map(e => e.name as keyof typeof EMOTES)} size={40} gap={12} />
+                  <RgEmoteLine
+                    emotes={history.map((e) => e.name as keyof typeof EMOTES)}
+                    size={40}
+                    gap={12}
+                  />
                 </div>
               )}
             </CardContent>
@@ -101,17 +127,22 @@ export default function EmotesShowcasePage() {
           <Card>
             <CardHeader>
               <CardTitle>EmoteRenderer Component</CardTitle>
-              <CardDescription>Convertit automatiquement :emote-name: en composants</CardDescription>
+              <CardDescription>
+                Convertit automatiquement :emote-name: en composants
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-2">
-                <label htmlFor="route-emotes-showcase-page-tsx-1" className="text-sm font-medium">
+                <label
+                  htmlFor="route-emotes-showcase-page-tsx-1"
+                  className="text-sm font-medium"
+                >
                   Texte avec emotes
                 </label>
                 <Textarea
                   id="route-emotes-showcase-page-tsx-1"
                   value={text}
-                  onChange={e => setText(e.target.value)}
+                  onChange={(e) => setText(e.target.value)}
                   rows={4}
                   placeholder="Tapez du texte avec des :emote-name: ..."
                 />
@@ -119,14 +150,22 @@ export default function EmotesShowcasePage() {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => setText("Bienvenue :gaelle-salut: sur Rose Griffon :roy-evil: !")}
+                    onClick={() =>
+                      setText(
+                        "Bienvenue :gaelle-salut: sur Rose Griffon :roy-evil: !",
+                      )
+                    }
                   >
                     Exemple 1
                   </Button>
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => setText("Merci :gaelle-coeur: :roy-coeur: pour votre visite :rg-funny: !")}
+                    onClick={() =>
+                      setText(
+                        "Merci :gaelle-coeur: :roy-coeur: pour votre visite :rg-funny: !",
+                      )
+                    }
                   >
                     Exemple 2
                   </Button>
@@ -137,21 +176,27 @@ export default function EmotesShowcasePage() {
 
               <div className="space-y-4">
                 <div>
-                  <h3 className="text-sm font-medium mb-2">Rendu avec emotes</h3>
+                  <h3 className="text-sm font-medium mb-2">
+                    Rendu avec emotes
+                  </h3>
                   <Card className="p-4 bg-muted/50">
                     <EmoteRenderer text={text} emoteSize={28} />
                   </Card>
                 </div>
 
                 <div>
-                  <h3 className="text-sm font-medium mb-2">Texte sans emotes (stripEmotes)</h3>
+                  <h3 className="text-sm font-medium mb-2">
+                    Texte sans emotes (stripEmotes)
+                  </h3>
                   <Card className="p-4 bg-muted/50">
                     <p className="text-sm">{stripEmotes(text)}</p>
                   </Card>
                 </div>
 
                 <div>
-                  <h3 className="text-sm font-medium mb-2">Texte pur (getTextWithoutEmotes)</h3>
+                  <h3 className="text-sm font-medium mb-2">
+                    Texte pur (getTextWithoutEmotes)
+                  </h3>
                   <Card className="p-4 bg-muted/50">
                     <p className="text-sm">{getTextWithoutEmotes(text)}</p>
                   </Card>
@@ -160,7 +205,8 @@ export default function EmotesShowcasePage() {
                 {validation.hasInvalidEmotes && (
                   <Card className="p-4 border-destructive bg-destructive/10">
                     <p className="text-sm text-destructive">
-                      <strong>Emotes invalides :</strong> {validation.invalid.join(", ")}
+                      <strong>Emotes invalides :</strong>{" "}
+                      {validation.invalid.join(", ")}
                     </p>
                   </Card>
                 )}
@@ -174,7 +220,9 @@ export default function EmotesShowcasePage() {
           <Card>
             <CardHeader>
               <CardTitle>RgEmoteGrid Component</CardTitle>
-              <CardDescription>Affiche une grille d'emotes filtrables</CardDescription>
+              <CardDescription>
+                Affiche une grille d'emotes filtrables
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <Tabs defaultValue="all">
@@ -189,7 +237,7 @@ export default function EmotesShowcasePage() {
                   <RgEmoteGrid
                     size={56}
                     columns={5}
-                    onEmoteClick={emote => {
+                    onEmoteClick={(emote) => {
                       toast.success(`Emote cliquée : ${emote.name}`);
                     }}
                   />
@@ -200,7 +248,7 @@ export default function EmotesShowcasePage() {
                     character="gaelle"
                     size={56}
                     columns={4}
-                    onEmoteClick={emote => {
+                    onEmoteClick={(emote) => {
                       toast.success(`Emote cliquée : ${emote.name}`);
                     }}
                   />
@@ -211,7 +259,7 @@ export default function EmotesShowcasePage() {
                     character="roy"
                     size={56}
                     columns={4}
-                    onEmoteClick={emote => {
+                    onEmoteClick={(emote) => {
                       toast.success(`Emote cliquée : ${emote.name}`);
                     }}
                   />
@@ -222,7 +270,7 @@ export default function EmotesShowcasePage() {
                     character="rg"
                     size={56}
                     columns={2}
-                    onEmoteClick={emote => {
+                    onEmoteClick={(emote) => {
                       toast.success(`Emote cliquée : ${emote.name}`);
                     }}
                   />
@@ -239,7 +287,9 @@ export default function EmotesShowcasePage() {
             <Card>
               <CardHeader>
                 <CardTitle>useEmoteRotation</CardTitle>
-                <CardDescription>Change automatiquement d'emote (4s)</CardDescription>
+                <CardDescription>
+                  Change automatiquement d'emote (4s)
+                </CardDescription>
               </CardHeader>
               <CardContent className="flex flex-col items-center gap-4">
                 <button
@@ -248,9 +298,15 @@ export default function EmotesShowcasePage() {
                   onClick={rotate}
                   className="cursor-pointer hover:scale-110 transition-transform"
                 >
-                  <RgEmote name={currentEmote.name as keyof typeof EMOTES} size={96} animated />
+                  <RgEmote
+                    name={currentEmote.name as keyof typeof EMOTES}
+                    size={96}
+                    animated
+                  />
                 </button>
-                <p className="text-sm text-center text-muted-foreground">{currentEmote.alt}</p>
+                <p className="text-sm text-center text-muted-foreground">
+                  {currentEmote.alt}
+                </p>
                 <Button onClick={rotate} variant="outline" size="sm">
                   Changer maintenant
                 </Button>
@@ -261,7 +317,9 @@ export default function EmotesShowcasePage() {
             <Card>
               <CardHeader>
                 <CardTitle>useEmotes</CardTitle>
-                <CardDescription>Hook principal pour manipuler les emotes</CardDescription>
+                <CardDescription>
+                  Hook principal pour manipuler les emotes
+                </CardDescription>
               </CardHeader>
               <CardContent className="flex flex-col gap-4">
                 <Button
@@ -275,18 +333,26 @@ export default function EmotesShowcasePage() {
                 </Button>
 
                 <div className="space-y-2">
-                  <p className="text-sm font-medium">Toutes les emotes de Gaëlle :</p>
+                  <p className="text-sm font-medium">
+                    Toutes les emotes de Gaëlle :
+                  </p>
                   <RgEmoteLine
-                    emotes={getByCharacter("gaelle").map(e => e.name as keyof typeof EMOTES)}
+                    emotes={getByCharacter("gaelle").map(
+                      (e) => e.name as keyof typeof EMOTES,
+                    )}
                     size={32}
                     gap={8}
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <p className="text-sm font-medium">Toutes les emotes de Roy :</p>
+                  <p className="text-sm font-medium">
+                    Toutes les emotes de Roy :
+                  </p>
                   <RgEmoteLine
-                    emotes={getByCharacter("roy").map(e => e.name as keyof typeof EMOTES)}
+                    emotes={getByCharacter("roy").map(
+                      (e) => e.name as keyof typeof EMOTES,
+                    )}
                     size={32}
                     gap={8}
                   />

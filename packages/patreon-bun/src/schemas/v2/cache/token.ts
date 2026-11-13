@@ -5,14 +5,14 @@ import type { CacheStoreBinding } from "./base";
 import { CacheStoreShared, type CacheStoreSharedOptions } from "./shared";
 
 export class CacheTokenStore<IsAsync extends boolean> extends CacheStoreShared<
-	IsAsync,
-	Oauth2StoredToken
+    IsAsync,
+    Oauth2StoredToken
 > {
-	public constructor(
-		async: IsAsync,
-		binding?: CacheStoreBinding<IsAsync, Oauth2StoredToken>,
-		options?: CacheStoreSharedOptions<{ key: string }>
-	) {
-		super(async, binding, options);
-	}
+    public constructor(
+        async: IsAsync,
+        binding?: CacheStoreBinding<IsAsync, Oauth2StoredToken>,
+        options?: CacheStoreSharedOptions<{ key: string }>,
+    ) {
+        super(async, binding, options);
+    }
 }

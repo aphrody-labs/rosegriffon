@@ -46,7 +46,9 @@ function revaliderPagesStaff(): void {
  * (`AdminLayout` → `requireAdmin` → `ADMIN_ROLES`). Un `moderator` ou un
  * `editor` accédait donc à la page puis se voyait refuser chaque action.
  */
-async function exigerAdmin(): Promise<{ ok: true } | { ok: false; message: string }> {
+async function exigerAdmin(): Promise<
+  { ok: true } | { ok: false; message: string }
+> {
   const user = await getServerUser();
   if (!user) {
     return { message: "Non authentifié", ok: false };
@@ -92,7 +94,10 @@ export async function getAllTeamMembers(): Promise<{
 
     return { data: membres, error: null };
   } catch (error) {
-    console.error("[staff] erreur inattendue à la lecture des membres :", error);
+    console.error(
+      "[staff] erreur inattendue à la lecture des membres :",
+      error,
+    );
     return { data: null, error: "Une erreur inattendue est survenue" };
   }
 }
@@ -118,7 +123,11 @@ export async function createTeamMember(input: TeamMemberInput): Promise<{
     const valeurs = { ...avecNomEquipe(analyse.data), source: SOURCE_ADMIN };
 
     const admin = createPostgresClient();
-    const { data, error } = await admin.from("team_members").insert(valeurs).select().single();
+    const { data, error } = await admin
+      .from("team_members")
+      .insert(valeurs)
+      .select()
+      .single();
 
     if (error) {
       console.error("[staff] échec de création d'un membre :", error);
@@ -130,7 +139,10 @@ export async function createTeamMember(input: TeamMemberInput): Promise<{
 
     return { data: data as TeamMember, error: null };
   } catch (error) {
-    console.error("[staff] erreur inattendue à la création d'un membre :", error);
+    console.error(
+      "[staff] erreur inattendue à la création d'un membre :",
+      error,
+    );
     return { data: null, error: "Une erreur inattendue est survenue" };
   }
 }
@@ -185,7 +197,10 @@ export async function updateTeamMember(
 
     return { data: data as TeamMember, error: null };
   } catch (error) {
-    console.error("[staff] erreur inattendue à la mise à jour d'un membre :", error);
+    console.error(
+      "[staff] erreur inattendue à la mise à jour d'un membre :",
+      error,
+    );
     return { data: null, error: "Une erreur inattendue est survenue" };
   }
 }
@@ -222,7 +237,10 @@ export async function deleteTeamMember(id: string): Promise<{
     }
 
     const admin = createPostgresClient();
-    const { error } = await admin.from("team_members").delete().eq("id", identifiant.data);
+    const { error } = await admin
+      .from("team_members")
+      .delete()
+      .eq("id", identifiant.data);
 
     if (error) {
       console.error("[staff] échec de suppression d'un membre :", error);
@@ -234,7 +252,10 @@ export async function deleteTeamMember(id: string): Promise<{
 
     return { error: null, success: true };
   } catch (error) {
-    console.error("[staff] erreur inattendue à la suppression d'un membre :", error);
+    console.error(
+      "[staff] erreur inattendue à la suppression d'un membre :",
+      error,
+    );
     return { error: "Une erreur inattendue est survenue", success: false };
   }
 }
@@ -271,11 +292,13 @@ export async function uploadTeamMemberImage(file: File): Promise<{
     const chemin = construireCheminImage(file.type, graine);
 
     const admin = createPostgresClient();
-    const { error: erreurEnvoi } = await admin.storage.from(BUCKET_IMAGES).upload(chemin, file, {
-      cacheControl: "3600",
-      contentType: file.type,
-      upsert: false,
-    });
+    const { error: erreurEnvoi } = await admin.storage
+      .from(BUCKET_IMAGES)
+      .upload(chemin, file, {
+        cacheControl: "3600",
+        contentType: file.type,
+        upsert: false,
+      });
 
     if (erreurEnvoi) {
       console.error("[staff] échec d'envoi de l'image :", erreurEnvoi);

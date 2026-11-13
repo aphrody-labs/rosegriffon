@@ -39,17 +39,24 @@ export const EntityExporters = {
 
     let md = `### ${displayName} (${type})\n\n`;
     if (entity.description || entity.descriptions) {
-      const desc = entity.description || entity.descriptions?.fr || entity.descriptions?.en;
+      const desc =
+        entity.description ||
+        entity.descriptions?.fr ||
+        entity.descriptions?.en;
       if (desc) md += `> ${desc}\n\n`;
     }
 
     const attributes = { ...entity.attributes };
 
     // Character specific
-    if (entity.position && !attributes.Position) attributes.Position = entity.position;
-    if (entity.element && !attributes.Élément) attributes.Élément = entity.element;
-    if (entity.bestRarity && !attributes.Rareté) attributes.Rareté = entity.bestRarity;
-    if (entity.teamName && !attributes.Équipe) attributes.Équipe = entity.teamName;
+    if (entity.position && !attributes.Position)
+      attributes.Position = entity.position;
+    if (entity.element && !attributes.Élément)
+      attributes.Élément = entity.element;
+    if (entity.bestRarity && !attributes.Rareté)
+      attributes.Rareté = entity.bestRarity;
+    if (entity.teamName && !attributes.Équipe)
+      attributes.Équipe = entity.teamName;
 
     if (Object.keys(attributes).length > 0) {
       md += "| Attribut | Valeur |\n| --- | --- |\n";

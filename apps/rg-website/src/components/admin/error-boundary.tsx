@@ -15,7 +15,10 @@ interface ErrorBoundaryState {
   error?: Error;
 }
 
-export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
+export class ErrorBoundary extends React.Component<
+  ErrorBoundaryProps,
+  ErrorBoundaryState
+> {
   constructor(props: ErrorBoundaryProps) {
     super(props);
     this.state = { hasError: false };
@@ -42,16 +45,22 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
               <div className="flex justify-center mb-4">
                 <AlertTriangle className="size-12 text-destructive" />
               </div>
-              <h1 className="text-2xl font-bold text-foreground mb-2">Une erreur s'est produite</h1>
+              <h1 className="text-2xl font-bold text-foreground mb-2">
+                Une erreur s'est produite
+              </h1>
               <p className="text-muted-foreground mb-4">
-                {this.state.error?.message || "Une erreur inattendue s'est produite"}
+                {this.state.error?.message ||
+                  "Une erreur inattendue s'est produite"}
               </p>
               <div className="flex gap-3 justify-center">
                 <Button onClick={this.resetError} className="gap-2">
                   <RefreshCw className="size-4" />
                   Réessayer
                 </Button>
-                <Button variant="outline" onClick={() => (window.location.href = "/admin")}>
+                <Button
+                  variant="outline"
+                  onClick={() => (window.location.href = "/admin")}
+                >
                   Retour au dashboard
                 </Button>
               </div>

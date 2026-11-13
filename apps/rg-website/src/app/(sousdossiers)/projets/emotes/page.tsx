@@ -19,7 +19,10 @@ import { useState } from "react";
 import { Toaster, toast } from "sonner";
 
 import RgEmote from "@/components/shared/emotes/RgEmote";
-import { BreadcrumbSchema, ImageObjectSchema } from "@/components/shared/StructuredData";
+import {
+  BreadcrumbSchema,
+  ImageObjectSchema,
+} from "@/components/shared/StructuredData";
 
 import { EMOTES } from "@/lib/emotes";
 import type { Emote } from "@/lib/emotes";
@@ -36,7 +39,7 @@ function EmoteGrid({ filter }: { filter?: (e: Emote) => boolean }) {
 
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-      {emotes.map(emote => (
+      {emotes.map((emote) => (
         <div
           key={emote.name}
           className="group relative flex flex-col items-center justify-between p-4 rounded-xl border border-border/50 bg-card/50 hover:bg-card hover:border-primary/20 hover:shadow-md transition-all duration-300"
@@ -106,7 +109,7 @@ export default function EmotesPage() {
           { item: "/projets/emotes", name: "Galerie d'Emotes" },
         ]}
       />
-      {Object.values(EMOTES).map(emote => (
+      {Object.values(EMOTES).map((emote) => (
         <ImageObjectSchema
           key={emote.name}
           url={absoluteUrl(emote.path)}
@@ -120,11 +123,18 @@ export default function EmotesPage() {
         <div className="flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
           <Smile className="size-5" aria-hidden />
         </div>
-        <h1 className="text-2xl font-extrabold tracking-tight min-[840px]:text-3xl">Emotes Rose Griffon</h1>
+        <h1 className="text-2xl font-extrabold tracking-tight min-[840px]:text-3xl">
+          Emotes Rose Griffon
+        </h1>
       </header>
 
       <div className="container mx-auto mt-4 max-w-7xl px-4 min-[600px]:mt-6 min-[600px]:px-6">
-        <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab} className="w-full space-y-8">
+        <Tabs
+          defaultValue="all"
+          value={activeTab}
+          onValueChange={setActiveTab}
+          className="w-full space-y-8"
+        >
           <div className="flex justify-center">
             <TabsList className="grid w-full max-w-2xl grid-cols-3 h-auto p-1">
               <TabsTrigger value="all" className="py-2">
@@ -141,13 +151,18 @@ export default function EmotesPage() {
             </TabsList>
           </div>
 
-          <TabsContent value="all" className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <TabsContent
+            value="all"
+            className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500"
+          >
             <Card className="border-none shadow-none bg-transparent">
               <CardHeader className="px-0">
                 <div className="flex items-center justify-between">
                   <div>
                     <CardTitle>Collection Complète</CardTitle>
-                    <CardDescription>{Object.keys(EMOTES).length} emotes disponibles</CardDescription>
+                    <CardDescription>
+                      {Object.keys(EMOTES).length} emotes disponibles
+                    </CardDescription>
                   </div>
                 </div>
               </CardHeader>
@@ -157,40 +172,60 @@ export default function EmotesPage() {
             </Card>
           </TabsContent>
 
-          <TabsContent value="gaelle" className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <TabsContent
+            value="gaelle"
+            className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500"
+          >
             <Card className="border-none shadow-none bg-transparent">
               <CardHeader className="px-0">
                 <div className="flex items-center gap-3">
                   <div className="p-2 bg-pink-100 dark:bg-pink-900/20 rounded-xl">
-                    <RgEmote name="gaelle-fiere" size={40} animated preventDownload />
+                    <RgEmote
+                      name="gaelle-fiere"
+                      size={40}
+                      animated
+                      preventDownload
+                    />
                   </div>
                   <div>
                     <CardTitle>Emotes de Gaëlle</CardTitle>
-                    <CardDescription>Les expressions de notre capitaine</CardDescription>
+                    <CardDescription>
+                      Les expressions de notre capitaine
+                    </CardDescription>
                   </div>
                 </div>
               </CardHeader>
               <CardContent className="px-0">
-                <EmoteGrid filter={e => e.character === "gaelle"} />
+                <EmoteGrid filter={(e) => e.character === "gaelle"} />
               </CardContent>
             </Card>
           </TabsContent>
 
-          <TabsContent value="roy" className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <TabsContent
+            value="roy"
+            className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500"
+          >
             <Card className="border-none shadow-none bg-transparent">
               <CardHeader className="px-0">
                 <div className="flex items-center gap-3">
                   <div className="p-2 bg-blue-100 dark:bg-blue-900/20 rounded-xl">
-                    <RgEmote name="roy-evil" size={40} animated preventDownload />
+                    <RgEmote
+                      name="roy-evil"
+                      size={40}
+                      animated
+                      preventDownload
+                    />
                   </div>
                   <div>
                     <CardTitle>Emotes de Roy</CardTitle>
-                    <CardDescription>Le côté obscur de la force</CardDescription>
+                    <CardDescription>
+                      Le côté obscur de la force
+                    </CardDescription>
                   </div>
                 </div>
               </CardHeader>
               <CardContent className="px-0">
-                <EmoteGrid filter={e => e.character === "roy"} />
+                <EmoteGrid filter={(e) => e.character === "roy"} />
               </CardContent>
             </Card>
           </TabsContent>

@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 import Link from "@/components/shared/Link";
 import { notFound } from "next/navigation";
-import { PASSIVE_CATEGORY_LABELS, PassiveDetailView } from "@/components/wiki/PassiveDetail";
+import {
+  PASSIVE_CATEGORY_LABELS,
+  PassiveDetailView,
+} from "@/components/wiki/PassiveDetail";
 import { wikiService } from "@/lib/wiki-service";
 import { wiki } from "@rosegriffon/app-shell";
 import { absoluteUrl } from "@/lib/site-url";
@@ -12,11 +15,17 @@ export const dynamic = "force-static";
 export const revalidate = 3600;
 export const dynamicParams = true;
 
-export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
   const { id } = await params;
   const passive = await wikiService.getPassive(id);
 
-  const name = passive ? passive.description.fr || passive.description.en || passive.string_id : "Passif";
+  const name = passive
+    ? passive.description.fr || passive.description.en || passive.string_id
+    : "Passif";
   const cleanName = name.replace(/\s*\n\s*/g, " ").trim();
   const cat = passive ? PASSIVE_CATEGORY_LABELS[passive.category] || "" : "";
   const description = `${[cleanName, cat].filter(Boolean).join(" - ")}. Passif Inazuma Eleven: Victory Road : effet, valeurs par variante, élément et rareté.`;
@@ -27,7 +36,9 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     description,
     openGraph: withDefaultOgImage({
       description,
-      images: passive?.imageUrl ? [{ alt: cleanName, url: passive.imageUrl }] : [],
+      images: passive?.imageUrl
+        ? [{ alt: cleanName, url: passive.imageUrl }]
+        : [],
       locale: "fr_FR",
       siteName: "Azalée - Inazuma Eleven Victory Road",
       title: `${cleanName} | Azalée`,
@@ -43,7 +54,11 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   };
 }
 
-export default async function PassiveDetailPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function PassiveDetailPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const { id } = await params;
   const passive = await wikiService.getPassive(id);
 
@@ -51,14 +66,20 @@ export default async function PassiveDetailPage({ params }: { params: Promise<{ 
     notFound();
   }
 
-  const passiveName = passive.description.fr || passive.description.en || passive.string_id;
+  const passiveName =
+    passive.description.fr || passive.description.en || passive.string_id;
   const cleanName = passiveName.replace(/\s*\n\s*/g, " ").trim();
 
   const breadcrumbJsonLd = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", item: absoluteUrl(wiki("/")), name: "Accueil", position: 1 },
+      {
+        "@type": "ListItem",
+        item: absoluteUrl(wiki("/")),
+        name: "Accueil",
+        position: 1,
+      },
       {
         "@type": "ListItem",
         item: absoluteUrl(wiki("/passive")),
@@ -71,15 +92,23 @@ export default async function PassiveDetailPage({ params }: { params: Promise<{ 
 
   return (
     <div className="w-full space-y-8 pb-20">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
 
       {/* Fil d'Ariane */}
       <div className="flex items-center gap-2 text-sm text-on-surface-variant font-medium">
-        <Link href="/wiki/passive" className="hover:text-primary transition-colors">
+        <Link
+          href="/wiki/passive"
+          className="hover:text-primary transition-colors"
+        >
           Passifs
         </Link>
         <span className="opacity-30">/</span>
-        <span className="text-on-surface truncate max-w-[60vw]">{cleanName}</span>
+        <span className="text-on-surface truncate max-w-[60vw]">
+          {cleanName}
+        </span>
       </div>
 
       <PassiveDetailView passive={passive} />

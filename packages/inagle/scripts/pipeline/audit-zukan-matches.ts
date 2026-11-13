@@ -53,7 +53,9 @@ async function main() {
   const zukanPath = path.resolve(__dirname, "../data/zukan/param_en.json");
   const zukanData: ZukanEntry[] = await Bun.file(zukanPath).json();
   const zukanJaPath = path.resolve(__dirname, "../data/zukan/param_ja.json");
-  const zukanJaData: ZukanEntry[] = (await Bun.file(zukanJaPath).exists()) ? await Bun.file(zukanJaPath).json() : [];
+  const zukanJaData: ZukanEntry[] = (await Bun.file(zukanJaPath).exists())
+    ? await Bun.file(zukanJaPath).json()
+    : [];
 
   // Index zukan by hash
   const zukanByHash = new Map<string, ZukanEntry[]>();
@@ -70,7 +72,9 @@ async function main() {
       zukanJaByHash.set(z.zukanHash, z);
     }
   }
-  console.log(`Zukan: ${zukanData.length} entries, ${zukanByHash.size} unique hashes`);
+  console.log(
+    `Zukan: ${zukanData.length} entries, ${zukanByHash.size} unique hashes`,
+  );
 
   // Connect to DB
   const client = createPgClient(getInagleDatabaseURL());
@@ -147,7 +151,9 @@ async function main() {
 
     // MixiMax: "arion × victor" — base is "arion"
     const isMixiMax = dbNameEn.includes("×") || dbNameEn.includes("+");
-    const dbBaseName = isMixiMax ? dbNameEn.split(/[×+]/)[0].trim().split(/\s+/)[0] : null;
+    const dbBaseName = isMixiMax
+      ? dbNameEn.split(/[×+]/)[0].trim().split(/\s+/)[0]
+      : null;
 
     const nameMatch =
       zukanName === dbNameEn ||
@@ -159,13 +165,19 @@ async function main() {
       dbNameEn.includes(zukanFirst);
 
     // Position mismatch
-    const posMismatch = z.position && db.position && normPos(z.position) !== normPos(db.position);
+    const posMismatch =
+      z.position && db.position && normPos(z.position) !== normPos(db.position);
 
     // Element mismatch (ignore for MixiMax since it can change)
-    const elemMismatch = !isMixiMax && z.element && db.element && normElem(z.element) !== normElem(db.element);
+    const elemMismatch =
+      !isMixiMax &&
+      z.element &&
+      db.element &&
+      normElem(z.element) !== normElem(db.element);
 
     // Gender mismatch
-    const zGender = z.gender === "Male" ? "M" : z.gender === "Female" ? "F" : null;
+    const zGender =
+      z.gender === "Male" ? "M" : z.gender === "Female" ? "F" : null;
     const genderMismatch = zGender && db.gender && zGender !== db.gender;
 
     // Era/series — Ares heroes are expected to have OG-era images
@@ -204,20 +216,29 @@ async function main() {
     }
 
     const reasons: string[] = [];
-    if (!nameMatch) reasons.push(`NAME: zukan="${z.name}" ≠ db="${db.name_en}"`);
-    if (posMismatch) reasons.push(`POS: zukan=${z.position} ≠ db=${db.position}`);
-    if (elemMismatch) reasons.push(`ELEM: zukan=${z.element} ≠ db=${db.element}`);
-    if (genderMismatch) reasons.push(`GENDER: zukan=${z.gender} ≠ db=${db.gender}`);
-    if (eraMismatch) reasons.push(`ERA: zukan=${zSeries}(${zEra}) ≠ db=${db.series}(${dbEra})`);
+    if (!nameMatch)
+      reasons.push(`NAME: zukan="${z.name}" ≠ db="${db.name_en}"`);
+    if (posMismatch)
+      reasons.push(`POS: zukan=${z.position} ≠ db=${db.position}`);
+    if (elemMismatch)
+      reasons.push(`ELEM: zukan=${z.element} ≠ db=${db.element}`);
+    if (genderMismatch)
+      reasons.push(`GENDER: zukan=${z.gender} ≠ db=${db.gender}`);
+    if (eraMismatch)
+      reasons.push(
+        `ERA: zukan=${zSeries}(${zEra}) ≠ db=${db.series}(${dbEra})`,
+      );
     if (statCorrelation !== undefined && statCorrelation < 0.3) {
-      reasons.push(`STATS: correlation=${statCorrelation.toFixed(2)} (very low)`);
+      reasons.push(
+        `STATS: correlation=${statCorrelation.toFixed(2)} (very low)`,
+      );
     }
 
     if (reasons.length > 0) {
       mismatches.push({
-        type: reasons.some(r => r.startsWith("NAME"))
+        type: reasons.some((r) => r.startsWith("NAME"))
           ? "NAME_MISMATCH"
-          : reasons.some(r => r.startsWith("GENDER"))
+          : reasons.some((r) => r.startsWith("GENDER"))
             ? "GENDER_MISMATCH"
             : "ATTR_MISMATCH",
         dbId: db.id,
@@ -241,10 +262,10 @@ async function main() {
   }
 
   // ── Results ──
-  const nameMM = mismatches.filter(m => m.type === "NAME_MISMATCH");
-  const genderMM = mismatches.filter(m => m.type === "GENDER_MISMATCH");
-  const attrMM = mismatches.filter(m => m.type === "ATTR_MISMATCH");
-  const staleMM = mismatches.filter(m => m.type === "STALE_HASH");
+  const nameMM = mismatches.filter((m) => m.type === "NAME_MISMATCH");
+  const genderMM = mismatches.filter((m) => m.type === "GENDER_MISMATCH");
+  const attrMM = mismatches.filter((m) => m.type === "ATTR_MISMATCH");
+  const staleMM = mismatches.filter((m) => m.type === "STALE_HASH");
 
   console.log("═══════════════════════════════════════════════════");
   console.log("              ZUKAN MISMATCH AUDIT");
@@ -255,7 +276,9 @@ async function main() {
   console.log(`  GENDER mismatches: ${genderMM.length}`);
   console.log(`  ATTR mismatches (pos/elem/era): ${attrMM.length}`);
   console.log(`  STALE hashes: ${staleMM.length}`);
-  console.log(`Match rate: ${(((rows.length - mismatches.length) / rows.length) * 100).toFixed(1)}%\n`);
+  console.log(
+    `Match rate: ${(((rows.length - mismatches.length) / rows.length) * 100).toFixed(1)}%\n`,
+  );
 
   // ── NAME MISMATCHES ── (most severe — wrong person's image!)
   console.log("═══════════════════════════════════════════════════");
@@ -269,13 +292,22 @@ async function main() {
     if (seenNamePairs.has(key)) continue;
     seenNamePairs.add(key);
     nameCount++;
-    const corr = m.statCorrelation !== undefined ? ` stats_corr=${m.statCorrelation.toFixed(2)}` : "";
-    console.log(`  DB: "${m.dbName}" (${m.dbFr}) [${m.dbPos}/${m.dbElem}] ${m.dbSeries || "?"} ${m.dbRarity}`);
-    console.log(`  → Zukan image: "${m.zukanName}" [${m.zukanPos}/${m.zukanElem}] ${m.zukanGame}${corr}`);
+    const corr =
+      m.statCorrelation !== undefined
+        ? ` stats_corr=${m.statCorrelation.toFixed(2)}`
+        : "";
+    console.log(
+      `  DB: "${m.dbName}" (${m.dbFr}) [${m.dbPos}/${m.dbElem}] ${m.dbSeries || "?"} ${m.dbRarity}`,
+    );
+    console.log(
+      `  → Zukan image: "${m.zukanName}" [${m.zukanPos}/${m.zukanElem}] ${m.zukanGame}${corr}`,
+    );
     console.log(`    ${m.reasons.join(" | ")}`);
     console.log();
   }
-  console.log(`  (${nameCount} unique name pairs, ${nameMM.length} total rows)\n`);
+  console.log(
+    `  (${nameCount} unique name pairs, ${nameMM.length} total rows)\n`,
+  );
 
   // ── GENDER MISMATCHES ──
   if (genderMM.length > 0) {
@@ -295,7 +327,9 @@ async function main() {
   }
 
   // ── POSITION MISMATCHES ──
-  const posMM = attrMM.filter(m => m.reasons.some(r => r.startsWith("POS")));
+  const posMM = attrMM.filter((m) =>
+    m.reasons.some((r) => r.startsWith("POS")),
+  );
   if (posMM.length > 0) {
     console.log("═══════════════════════════════════════════════════");
     console.log("  POSITION MISMATCHES — Same person, wrong position");
@@ -314,7 +348,9 @@ async function main() {
 
   // ── ELEMENT MISMATCHES ──
   const elemMM = attrMM.filter(
-    m => m.reasons.some(r => r.startsWith("ELEM")) && !m.reasons.some(r => r.startsWith("POS")),
+    (m) =>
+      m.reasons.some((r) => r.startsWith("ELEM")) &&
+      !m.reasons.some((r) => r.startsWith("POS")),
   );
   if (elemMM.length > 0) {
     console.log("═══════════════════════════════════════════════════");
@@ -334,7 +370,9 @@ async function main() {
 
   // ── ERA MISMATCHES ──
   const eraOnly = attrMM.filter(
-    m => m.reasons.some(r => r.startsWith("ERA")) && !m.reasons.some(r => r.startsWith("POS") || r.startsWith("ELEM")),
+    (m) =>
+      m.reasons.some((r) => r.startsWith("ERA")) &&
+      !m.reasons.some((r) => r.startsWith("POS") || r.startsWith("ELEM")),
   );
   if (eraOnly.length > 0) {
     console.log("═══════════════════════════════════════════════════");
@@ -345,13 +383,17 @@ async function main() {
       const key = `${m.dbName}|${m.dbSeries}|${m.zukanGame}`;
       if (seenEra.has(key)) continue;
       seenEra.add(key);
-      console.log(`  "${m.dbName}" [${m.dbPos}/${m.dbElem}] db_series=${m.dbSeries} → zukan_game=${m.zukanGame}`);
+      console.log(
+        `  "${m.dbName}" [${m.dbPos}/${m.dbElem}] db_series=${m.dbSeries} → zukan_game=${m.zukanGame}`,
+      );
     }
     console.log(`  (${seenEra.size} unique, ${eraOnly.length} total rows)\n`);
   }
 
   // ── LOW STAT CORRELATION (additional signal) ──
-  const lowStats = mismatches.filter(m => m.statCorrelation !== undefined && m.statCorrelation < 0.3);
+  const lowStats = mismatches.filter(
+    (m) => m.statCorrelation !== undefined && m.statCorrelation < 0.3,
+  );
   if (lowStats.length > 0) {
     console.log("═══════════════════════════════════════════════════");
     console.log("  LOW STAT CORRELATION (< 0.3) — Suspicious matches");
@@ -402,13 +444,13 @@ async function main() {
     const zJa = zukanJaByHash.get(m.hash);
 
     const dbStats = [
-      rows.find(r => r.id === m.dbId)?.stat_frappe ?? 0,
-      rows.find(r => r.id === m.dbId)?.stat_controle ?? 0,
-      rows.find(r => r.id === m.dbId)?.stat_technique ?? 0,
-      rows.find(r => r.id === m.dbId)?.stat_pression ?? 0,
-      rows.find(r => r.id === m.dbId)?.stat_physique ?? 0,
-      rows.find(r => r.id === m.dbId)?.stat_agilite ?? 0,
-      rows.find(r => r.id === m.dbId)?.stat_intelligence ?? 0,
+      rows.find((r) => r.id === m.dbId)?.stat_frappe ?? 0,
+      rows.find((r) => r.id === m.dbId)?.stat_controle ?? 0,
+      rows.find((r) => r.id === m.dbId)?.stat_technique ?? 0,
+      rows.find((r) => r.id === m.dbId)?.stat_pression ?? 0,
+      rows.find((r) => r.id === m.dbId)?.stat_physique ?? 0,
+      rows.find((r) => r.id === m.dbId)?.stat_agilite ?? 0,
+      rows.find((r) => r.id === m.dbId)?.stat_intelligence ?? 0,
     ];
     const zukanStats = z?.stats
       ? [
@@ -422,34 +464,44 @@ async function main() {
         ]
       : [0, 0, 0, 0, 0, 0, 0];
 
-    const isStatsInverted = m.statCorrelation !== undefined && m.statCorrelation < 0;
+    const isStatsInverted =
+      m.statCorrelation !== undefined && m.statCorrelation < 0;
     const problems: string[] = [];
     if (isStatsInverted)
-      problems.push(`Stats inversées (corr=${m.statCorrelation!.toFixed(2)}): DB=[${dbStats}] zukan=[${zukanStats}]`);
-    if (m.reasons.some(r => r.startsWith("ERA"))) {
-      const eraR = m.reasons.find(r => r.startsWith("ERA"));
+      problems.push(
+        `Stats inversées (corr=${m.statCorrelation!.toFixed(2)}): DB=[${dbStats}] zukan=[${zukanStats}]`,
+      );
+    if (m.reasons.some((r) => r.startsWith("ERA"))) {
+      const eraR = m.reasons.find((r) => r.startsWith("ERA"));
       if (eraR)
         problems.push(
           `Ère: DB=${m.dbSeries}(${ERAS[m.dbSeries!]}) image=${zukanGameToSeries(m.zukanGame)}(${ERAS[zukanGameToSeries(m.zukanGame) || ""]})`,
         );
     }
-    if (m.reasons.some(r => r.startsWith("NAME"))) problems.push(`Nom: DB="${m.dbName}" image="${m.zukanName}"`);
-    if (m.reasons.some(r => r.startsWith("POS"))) problems.push(`Position: DB=${m.dbPos} image=${m.zukanPos}`);
-    if (m.reasons.some(r => r.startsWith("ELEM"))) problems.push(`Élément: DB=${m.dbElem} image=${m.zukanElem}`);
+    if (m.reasons.some((r) => r.startsWith("NAME")))
+      problems.push(`Nom: DB="${m.dbName}" image="${m.zukanName}"`);
+    if (m.reasons.some((r) => r.startsWith("POS")))
+      problems.push(`Position: DB=${m.dbPos} image=${m.zukanPos}`);
+    if (m.reasons.some((r) => r.startsWith("ELEM")))
+      problems.push(`Élément: DB=${m.dbElem} image=${m.zukanElem}`);
 
     const category = isStatsInverted
       ? "stats_inverted"
-      : m.reasons.some(r => r.startsWith("ERA"))
+      : m.reasons.some((r) => r.startsWith("ERA"))
         ? "era_mismatch"
-        : m.reasons.some(r => r.startsWith("NAME"))
+        : m.reasons.some((r) => r.startsWith("NAME"))
           ? "name_mismatch"
           : "attribute_mismatch";
     const severity = isStatsInverted ? ("high" as const) : ("medium" as const);
 
     // Check for duplicate hash (same hash used by multiple different characters)
-    const sameHashRows = rows.filter(r => r.zukan_hash === m.hash && r.name_en !== m.dbName);
+    const sameHashRows = rows.filter(
+      (r) => r.zukan_hash === m.hash && r.name_en !== m.dbName,
+    );
     if (sameHashRows.length > 0) {
-      problems.push(`Hash partagé avec: ${[...new Set(sameHashRows.map(r => r.name_en))].join(", ")}`);
+      problems.push(
+        `Hash partagé avec: ${[...new Set(sameHashRows.map((r) => r.name_en))].join(", ")}`,
+      );
     }
 
     jsonIssues.push({
@@ -457,7 +509,7 @@ async function main() {
       hash: m.hash,
       dbNameEn: m.dbName,
       dbNameFr: m.dbFr,
-      dbNameJa: rows.find(r => r.id === m.dbId)?.name_ja || "",
+      dbNameJa: rows.find((r) => r.id === m.dbId)?.name_ja || "",
       dbPosition: m.dbPos,
       dbElement: m.dbElem,
       dbGender: m.dbGender,
@@ -483,7 +535,8 @@ async function main() {
   const hashToNames = new Map<string, Set<string>>();
   for (const r of rows) {
     if (!r.zukan_hash) continue;
-    if (!hashToNames.has(r.zukan_hash)) hashToNames.set(r.zukan_hash, new Set());
+    if (!hashToNames.has(r.zukan_hash))
+      hashToNames.set(r.zukan_hash, new Set());
     hashToNames.get(r.zukan_hash)!.add(r.name_en || r.name_ja);
   }
   for (const [hash, names] of hashToNames) {
@@ -491,10 +544,12 @@ async function main() {
     const z = zukanByHash.get(hash)?.[0];
     const zJa = zukanJaByHash.get(hash);
     // Only add if not already in issues
-    const alreadyReported = jsonIssues.some(i => i.hash === hash && i.category === "duplicate_hash");
+    const alreadyReported = jsonIssues.some(
+      (i) => i.hash === hash && i.category === "duplicate_hash",
+    );
     if (!alreadyReported) {
       jsonIssues.push({
-        code: rows.find(r => r.zukan_hash === hash)?.id || "",
+        code: rows.find((r) => r.zukan_hash === hash)?.id || "",
         hash,
         dbNameEn: [...names].join(" / "),
         dbNameFr: "",
@@ -521,8 +576,8 @@ async function main() {
     }
   }
 
-  const highCount = jsonIssues.filter(i => i.severity === "high").length;
-  const mediumCount = jsonIssues.filter(i => i.severity === "medium").length;
+  const highCount = jsonIssues.filter((i) => i.severity === "high").length;
+  const mediumCount = jsonIssues.filter((i) => i.severity === "medium").length;
   const auditJson = {
     metadata: {
       date: new Date().toISOString(),
@@ -537,12 +592,14 @@ async function main() {
     ? path.resolve(process.env.DATA_PATH, "zukan-audit.json")
     : path.resolve(__dirname, "../../../data/zukan-audit.json");
   await Bun.write(auditPath, JSON.stringify(auditJson, null, 2));
-  console.log(`\nJSON audit written to ${auditPath} (${jsonIssues.length} issues)`);
+  console.log(
+    `\nJSON audit written to ${auditPath} (${jsonIssues.length} issues)`,
+  );
 
   await client.end();
 }
 
-main().catch(e => {
+main().catch((e) => {
   console.error(e);
   process.exit(1);
 });

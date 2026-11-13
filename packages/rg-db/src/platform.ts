@@ -14,7 +14,10 @@
  */
 
 /** Exécute une requête paramétrée (`$1`, `$2`…) et renvoie les lignes. */
-export type SqlQuery = <T = Record<string, unknown>>(text: string, params?: unknown[]) => Promise<T[]>;
+export type SqlQuery = <T = Record<string, unknown>>(
+  text: string,
+  params?: unknown[],
+) => Promise<T[]>;
 
 // ─────────────────────────────── tables ───────────────────────────────
 
@@ -34,7 +37,10 @@ export interface PlatformTable {
  * un `count(*)`, mais la seule mesure qui reste instantanée sur les tables à
  * plusieurs millions de lignes.
  */
-export async function listTables(query: SqlQuery, schema = "public"): Promise<PlatformTable[]> {
+export async function listTables(
+  query: SqlQuery,
+  schema = "public",
+): Promise<PlatformTable[]> {
   return query<PlatformTable>(
     `select n.nspname                                        as schema,
 		        c.relname                                        as name,
@@ -60,7 +66,9 @@ export interface PlatformExtension {
   schema: string | null;
 }
 
-export async function listExtensions(query: SqlQuery): Promise<PlatformExtension[]> {
+export async function listExtensions(
+  query: SqlQuery,
+): Promise<PlatformExtension[]> {
   return query<PlatformExtension>(
     `select e.extname as name, e.extversion as version, n.nspname as schema
 		   from pg_extension e
@@ -83,7 +91,9 @@ export interface PlatformMigration {
  * La table n'existe que si des migrations ont déjà été jouées par l'outillage :
  * son absence n'est pas une erreur, on renvoie une liste vide.
  */
-export async function listMigrations(query: SqlQuery): Promise<PlatformMigration[]> {
+export async function listMigrations(
+  query: SqlQuery,
+): Promise<PlatformMigration[]> {
   const exists = await query<{ present: boolean }>(
     `select exists (
 		   select 1 from information_schema.tables
@@ -174,7 +184,8 @@ export async function getAdvisors(
     for (const r of sansPolicy) {
       findings.push({
         category: "rls_sans_policy",
-        detail: "RLS activée sans aucune policy : la table est inaccessible sauf au propriétaire et au service_role.",
+        detail:
+          "RLS activée sans aucune policy : la table est inaccessible sauf au propriétaire et au service_role.",
         level: "warning",
         object: `public.${r.name}`,
       });
@@ -189,7 +200,8 @@ export async function getAdvisors(
     for (const r of sansRls) {
       findings.push({
         category: "table_sans_rls",
-        detail: "Lisible par `anon` sans RLS : toutes les lignes sont publiques.",
+        detail:
+          "Lisible par `anon` sans RLS : toutes les lignes sont publiques.",
         level: "warning",
         object: `public.${r.name}`,
       });
@@ -204,7 +216,8 @@ export async function getAdvisors(
     for (const r of definer) {
       findings.push({
         category: "search_path_mutable",
-        detail: "Fonction `security definer` sans `search_path` figé : vecteur d'escalade de privilèges.",
+        detail:
+          "Fonction `security definer` sans `search_path` figé : vecteur d'escalade de privilèges.",
         level: "warning",
         object: `public.${r.name}()`,
       });
@@ -212,7 +225,10 @@ export async function getAdvisors(
   }
 
   if (type !== "security") {
-    const fkSansIndex = await query<{ table_name: string; constraint_name: string }>(
+    const fkSansIndex = await query<{
+      table_name: string;
+      constraint_name: string;
+    }>(
       `select c.conrelid::regclass::text as table_name, c.conname as constraint_name
 			   from pg_constraint c
 			  where c.contype = 'f' and c.connamespace = 'public'::regnamespace
@@ -232,7 +248,11 @@ export async function getAdvisors(
     }
   }
 
-  const byLevel: Record<AdvisorLevel, number> = { error: 0, info: 0, warning: 0 };
+  const byLevel: Record<AdvisorLevel, number> = {
+    error: 0,
+    info: 0,
+    warning: 0,
+  };
   for (const f of findings) {
     byLevel[f.level] += 1;
   }
@@ -248,7 +268,9 @@ export interface PlatformBucket {
   bytes: number;
 }
 
-export async function listStorageBuckets(query: SqlQuery): Promise<PlatformBucket[]> {
+export async function listStorageBuckets(
+  query: SqlQuery,
+): Promise<PlatformBucket[]> {
   const exists = await query<{ present: boolean }>(
     `select exists (
 		   select 1 from information_schema.tables
@@ -280,7 +302,9 @@ export interface PlatformDatabaseInfo {
   maxConnections: number;
 }
 
-export async function getDatabaseInfo(query: SqlQuery): Promise<PlatformDatabaseInfo> {
+export async function getDatabaseInfo(
+  query: SqlQuery,
+): Promise<PlatformDatabaseInfo> {
   const rows = await query<PlatformDatabaseInfo>(
     `select current_setting('server_version')                              as version,
 		        current_database()                                             as database,
@@ -305,7 +329,10 @@ export function formatBytes(bytes: number): string {
     return "0 o";
   }
   const units = ["o", "Ko", "Mo", "Go", "To"];
-  const i = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1);
+  const i = Math.min(
+    Math.floor(Math.log(bytes) / Math.log(1024)),
+    units.length - 1,
+  );
   const value = bytes / 1024 ** i;
   return `${value.toFixed(i === 0 ? 0 : 1).replace(".", ",")} ${units[i]}`;
 }

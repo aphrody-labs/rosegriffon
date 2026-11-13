@@ -3,10 +3,7 @@
     "key": "Fer",
     "minElo": 0,
     "maxElo": 49,
-    "gradient": [
-      "#959595",
-      "#919191"
-    ],
+    "gradient": ["#959595", "#919191"],
     "emojiId": "",
     "emojiKey": "",
     "playerCount": 11
@@ -15,10 +12,7 @@
     "key": "Bronze",
     "minElo": 50,
     "maxElo": 199,
-    "gradient": [
-      "#B17253",
-      "#8C4A34"
-    ],
+    "gradient": ["#B17253", "#8C4A34"],
     "emojiId": "",
     "emojiKey": "",
     "playerCount": 1
@@ -27,10 +21,7 @@
     "key": "Argent",
     "minElo": 200,
     "maxElo": 399,
-    "gradient": [
-      "#7FACB8",
-      "#546B71"
-    ],
+    "gradient": ["#7FACB8", "#546B71"],
     "emojiId": "",
     "emojiKey": "",
     "playerCount": 0

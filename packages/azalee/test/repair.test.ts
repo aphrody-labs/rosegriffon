@@ -40,7 +40,9 @@ test("repair rejects a managed gameplay host before creating a client and never 
   ]);
   expect(stdout).toContain("managed 0 0");
   expect(stdout).toContain("local 1 [");
-  expect(stdout).toContain('ALTER TABLE \\"inagle_characters\\" DISABLE ROW LEVEL SECURITY;');
+  expect(stdout).toContain(
+    'ALTER TABLE \\"inagle_characters\\" DISABLE ROW LEVEL SECURITY;',
+  );
   expect(stdout).not.toContain("patch_notes");
   expect(stdout).not.toContain("rose_griffon");
   expect(stderr).toContain("restricted to a loopback PostgreSQL host");

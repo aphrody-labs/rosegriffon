@@ -32,7 +32,10 @@ const debouncedSetItem = debounce((name: string, value: string) => {
     localStorage.setItem(name, value);
   } catch (error) {
     if (process.env.NODE_ENV === "development") {
-      console.error("Erreur lors de l'écriture dans le localStorage (sidebar):", error);
+      console.error(
+        "Erreur lors de l'écriture dans le localStorage (sidebar):",
+        error,
+      );
     }
   }
 }, 500);
@@ -47,7 +50,10 @@ const safeStorage = {
       return localStorage.getItem(name);
     } catch (error) {
       if (process.env.NODE_ENV === "development") {
-        console.error("Erreur lors de la lecture du localStorage (sidebar):", error);
+        console.error(
+          "Erreur lors de la lecture du localStorage (sidebar):",
+          error,
+        );
       }
       return null;
     }
@@ -58,7 +64,10 @@ const safeStorage = {
       localStorage.removeItem(name);
     } catch (error) {
       if (process.env.NODE_ENV === "development") {
-        console.error("Erreur lors de la suppression du localStorage (sidebar):", error);
+        console.error(
+          "Erreur lors de la suppression du localStorage (sidebar):",
+          error,
+        );
       }
     }
   },
@@ -72,8 +81,8 @@ export const useSidebarStore = create<SidebarStore>()(
       isHydrated: false,
       isOpen: true,
       openSections: [],
-      setHydrated: hydrated => set({ isHydrated: hydrated }),
-      setSidebarOpen: open => {
+      setHydrated: (hydrated) => set({ isHydrated: hydrated }),
+      setSidebarOpen: (open) => {
         try {
           if (typeof open !== "boolean") {
             if (process.env.NODE_ENV === "development") {
@@ -84,14 +93,17 @@ export const useSidebarStore = create<SidebarStore>()(
           set({ isOpen: open, error: null });
         } catch (error) {
           if (process.env.NODE_ENV === "development") {
-            console.error("Erreur lors du changement d'état de la sidebar:", error);
+            console.error(
+              "Erreur lors du changement d'état de la sidebar:",
+              error,
+            );
           }
           set({
             error: error instanceof Error ? error.message : "Erreur inconnue",
           });
         }
       },
-      toggleSection: section => {
+      toggleSection: (section) => {
         try {
           if (!section || typeof section !== "string") {
             if (process.env.NODE_ENV === "development") {
@@ -103,7 +115,7 @@ export const useSidebarStore = create<SidebarStore>()(
           const openSections = get().openSections;
           if (openSections.includes(section)) {
             set({
-              openSections: openSections.filter(s => s !== section),
+              openSections: openSections.filter((s) => s !== section),
               error: null,
             });
           } else {
@@ -139,17 +151,17 @@ export const useSidebarStore = create<SidebarStore>()(
       // mémorisé indéfiniment et la navigation principale semblait avoir disparu.
       // Le repli reste possible pendant la session, il ne survit simplement pas au
       // rechargement. Seules les sections dépliées sont mémorisées.
-      partialize: state => ({
+      partialize: (state) => ({
         openSections: state.openSections,
       }),
-      onRehydrateStorage: () => state => {
+      onRehydrateStorage: () => (state) => {
         if (state) {
           state.setHydrated(true);
 
           // Valider openSections après réhydratation
           if (Array.isArray(state.openSections)) {
             const validSections = state.openSections.filter(
-              section => typeof section === "string" && section.length > 0,
+              (section) => typeof section === "string" && section.length > 0,
             );
 
             if (validSections.length !== state.openSections.length) {
@@ -160,7 +172,9 @@ export const useSidebarStore = create<SidebarStore>()(
             }
           } else {
             if (process.env.NODE_ENV === "development") {
-              console.warn("openSections n'est pas un tableau, réinitialisation");
+              console.warn(
+                "openSections n'est pas un tableau, réinitialisation",
+              );
             }
             state.openSections = [];
           }

@@ -42,7 +42,11 @@ export interface ResolutionDiscord {
 }
 
 /** Résolution vide : tout retombe sur les libellés neutres. */
-export const RESOLUTION_VIDE: ResolutionDiscord = { membres: {}, roles: {}, salons: {} };
+export const RESOLUTION_VIDE: ResolutionDiscord = {
+  membres: {},
+  roles: {},
+  salons: {},
+};
 
 /*
  * ⚠ LES `RegExp` GLOBALES SONT CONSTRUITES À CHAQUE APPEL, JAMAIS PARTAGÉES.
@@ -76,9 +80,12 @@ export function collecterIdentifiantsDiscord(textes: readonly string[]): {
     // `matchAll` type ses groupes en `string | undefined` : ils sont ici garantis par la
     // forme même de l'expression, mais on préfère un filtre à une assertion — une regex
     // qu'on retouche un jour ne doit pas pouvoir glisser un `undefined` dans un Set.
-    for (const trouve of texte.matchAll(MENTION_MEMBRE())) if (trouve[1]) membres.add(trouve[1]);
-    for (const trouve of texte.matchAll(MENTION_ROLE())) if (trouve[1]) roles.add(trouve[1]);
-    for (const trouve of texte.matchAll(MENTION_SALON())) if (trouve[1]) salons.add(trouve[1]);
+    for (const trouve of texte.matchAll(MENTION_MEMBRE()))
+      if (trouve[1]) membres.add(trouve[1]);
+    for (const trouve of texte.matchAll(MENTION_ROLE()))
+      if (trouve[1]) roles.add(trouve[1]);
+    for (const trouve of texte.matchAll(MENTION_SALON()))
+      if (trouve[1]) salons.add(trouve[1]);
   }
   return { membres: [...membres], roles: [...roles], salons: [...salons] };
 }
@@ -109,21 +116,37 @@ function rendreHorodatage(secondes: number, style: string | undefined): string {
  * `@everyone` et `@here` ne sont PAS touchés : ce sont déjà des mots, et les réécrire
  * donnerait à croire que quelqu'un a été nommé.
  */
-export function resoudreMentions(texte: string, resolution: ResolutionDiscord = RESOLUTION_VIDE): string {
+export function resoudreMentions(
+  texte: string,
+  resolution: ResolutionDiscord = RESOLUTION_VIDE,
+): string {
   if (!texte) return "";
   return texte
-    .replace(MENTION_MEMBRE(), (_, id: string) => `@${resolution.membres[id] ?? "membre"}`)
-    .replace(MENTION_ROLE(), (_, id: string) => `@${resolution.roles[id] ?? "rôle"}`)
-    .replace(MENTION_SALON(), (_, id: string) => `#${resolution.salons[id] ?? "salon"}`)
-    .replace(HORODATAGE(), (brut, secondes: string, style: string | undefined) => {
-      const rendu = rendreHorodatage(Number.parseInt(secondes, 10), style);
-      return rendu || brut;
-    });
+    .replace(
+      MENTION_MEMBRE(),
+      (_, id: string) => `@${resolution.membres[id] ?? "membre"}`,
+    )
+    .replace(
+      MENTION_ROLE(),
+      (_, id: string) => `@${resolution.roles[id] ?? "rôle"}`,
+    )
+    .replace(
+      MENTION_SALON(),
+      (_, id: string) => `#${resolution.salons[id] ?? "salon"}`,
+    )
+    .replace(
+      HORODATAGE(),
+      (brut, secondes: string, style: string | undefined) => {
+        const rendu = rendreHorodatage(Number.parseInt(secondes, 10), style);
+        return rendu || brut;
+      },
+    );
 }
 
 /** Un morceau de texte Discord : du texte, ou un émoji personnalisé. */
 export type MorceauDiscord =
-  { type: "texte"; valeur: string } | { type: "emoji"; nom: string; id: string; anime: boolean };
+  | { type: "texte"; valeur: string }
+  | { type: "emoji"; nom: string; id: string; anime: boolean };
 
 /**
  * Découpe un texte en morceaux affichables.
@@ -159,8 +182,14 @@ export function decouperTexteDiscord(texte: string): MorceauDiscord[] {
  * flux JSON-LD — partout où une image n'a pas sa place et où l'identifiant brut n'aurait
  * aucun sens.
  */
-export function texteDiscordEnClair(texte: string, resolution?: ResolutionDiscord): string {
-  return resoudreMentions(texte, resolution).replace(EMOJI(), (_, __, nom: string) => `:${nom}:`);
+export function texteDiscordEnClair(
+  texte: string,
+  resolution?: ResolutionDiscord,
+): string {
+  return resoudreMentions(texte, resolution).replace(
+    EMOJI(),
+    (_, __, nom: string) => `:${nom}:`,
+  );
 }
 
 /**
@@ -183,7 +212,11 @@ export function urlEmojiDiscord(id: string, anime: boolean): string {
  * rendu ne sait rattraper. Ici, un émoji compte pour DEUX caractères — sa largeur réelle à
  * l'écran — et la coupe tombe toujours entre deux morceaux.
  */
-export function extraitTexteDiscord(texte: string, maximum = 220, resolution?: ResolutionDiscord): string {
+export function extraitTexteDiscord(
+  texte: string,
+  maximum = 220,
+  resolution?: ResolutionDiscord,
+): string {
   const resolu = resoudreMentions(texte, resolution)
     .replace(/https:\/\/t\.co\/\w+/g, "")
     .replace(/\s+\n/g, "\n")

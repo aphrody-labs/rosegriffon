@@ -15,7 +15,11 @@ import { Elysia } from "elysia";
  * already chose its own `Cache-Control` is left untouched.
  * See docs/aphrody/reference/infra/rg-free-tier-allocation.md.
  */
-const POLICIES: ReadonlyArray<{ prefix: string; maxAge: number; stale: number }> = [
+const POLICIES: ReadonlyArray<{
+  prefix: string;
+  maxAge: number;
+  stale: number;
+}> = [
   // Game mirror (Neon inagle): changes only when the mirror is republished.
   { prefix: "/v1/wiki/", maxAge: 3600, stale: 86_400 },
   { prefix: "/v1/inagle/", maxAge: 3600, stale: 86_400 },
@@ -30,22 +34,22 @@ const POLICIES: ReadonlyArray<{ prefix: string; maxAge: number; stale: number }>
 
 function policyFor(path: string) {
   if (path.endsWith("/health")) return undefined;
-  return POLICIES.find(policy => path.startsWith(policy.prefix));
+  return POLICIES.find((policy) => path.startsWith(policy.prefix));
 }
 
-export const publicCache = new Elysia({ name: "rg-public-cache" }).onAfterHandle(
-  { as: "global" },
-  ({ request, set, path, responseValue }) => {
-    if (request.method !== "GET" || request.headers.has("authorization")) return;
-    const policy = policyFor(path);
-    if (!policy) return;
-    if (typeof set.status === "number" && set.status >= 400) return;
-    const code = (responseValue as { code?: unknown } | null | undefined)?.code;
-    if (typeof code === "number" && code >= 400) return;
-    if (responseValue instanceof Response) return;
-    if (set.headers["cache-control"]) return;
+export const publicCache = new Elysia({
+  name: "rg-public-cache",
+}).onAfterHandle({ as: "global" }, ({ request, set, path, responseValue }) => {
+  if (request.method !== "GET" || request.headers.has("authorization")) return;
+  const policy = policyFor(path);
+  if (!policy) return;
+  if (typeof set.status === "number" && set.status >= 400) return;
+  const code = (responseValue as { code?: unknown } | null | undefined)?.code;
+  if (typeof code === "number" && code >= 400) return;
+  if (responseValue instanceof Response) return;
+  if (set.headers["cache-control"]) return;
 
-    set.headers["cache-control"] = "public, max-age=60";
-    set.headers["cdn-cache-control"] = `public, max-age=${policy.maxAge}, stale-while-revalidate=${policy.stale}`;
-  },
-);
+  set.headers["cache-control"] = "public, max-age=60";
+  set.headers["cdn-cache-control"] =
+    `public, max-age=${policy.maxAge}, stale-while-revalidate=${policy.stale}`;
+});

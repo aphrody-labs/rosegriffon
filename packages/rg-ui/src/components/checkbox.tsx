@@ -14,9 +14,20 @@ type CheckboxProps = Omit<
   defaultChecked?: CheckedState;
   onCheckedChange?: (checked: CheckedState) => void;
 };
-function Checkbox({ className, checked, defaultChecked, onCheckedChange, asChild, children, ...props }: CheckboxProps) {
-  const [initialMixed, setInitialMixed] = useState(defaultChecked === "indeterminate");
-  const mixed = checked === "indeterminate" || (checked === undefined && initialMixed);
+function Checkbox({
+  className,
+  checked,
+  defaultChecked,
+  onCheckedChange,
+  asChild,
+  children,
+  ...props
+}: CheckboxProps) {
+  const [initialMixed, setInitialMixed] = useState(
+    defaultChecked === "indeterminate",
+  );
+  const mixed =
+    checked === "indeterminate" || (checked === undefined && initialMixed);
   return (
     <CheckboxPrimitive.Root
       {...props}
@@ -24,7 +35,7 @@ function Checkbox({ className, checked, defaultChecked, onCheckedChange, asChild
       checked={checked === undefined ? undefined : checked === true}
       defaultChecked={defaultChecked === true}
       indeterminate={mixed}
-      onCheckedChange={next => {
+      onCheckedChange={(next) => {
         if (checked === undefined) setInitialMixed(false);
         onCheckedChange?.(next);
       }}
@@ -38,7 +49,11 @@ function Checkbox({ className, checked, defaultChecked, onCheckedChange, asChild
         data-slot="checkbox-indicator"
         className="flex items-center justify-center text-current"
       >
-        {mixed ? <Minus className="size-3.5" /> : <Check className="size-3.5" />}
+        {mixed ? (
+          <Minus className="size-3.5" />
+        ) : (
+          <Check className="size-3.5" />
+        )}
       </CheckboxPrimitive.Indicator>
     </CheckboxPrimitive.Root>
   );

@@ -3,7 +3,14 @@
   "ui": "stream",
   "envMode": "loose",
   "globalDependencies": ["bunfig.toml", "tsconfig.base.json", "package.json"],
-  "globalEnv": ["NODE_ENV", "CI", "VERCEL", "VERCEL_ENV", "NEXT_PUBLIC_*", "SUPABASE_*"],
+  "globalEnv": [
+    "NODE_ENV",
+    "CI",
+    "VERCEL",
+    "VERCEL_ENV",
+    "NEXT_PUBLIC_*",
+    "SUPABASE_*"
+  ],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],

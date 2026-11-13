@@ -8,7 +8,12 @@ export const contentController = new Elysia({ prefix: "/content" })
   .get(
     "/news/feed",
     async ({ db, query }) => {
-      return await ContentService.getNewsFeed(db, query.page, query.category, query.q);
+      return await ContentService.getNewsFeed(
+        db,
+        query.page,
+        query.category,
+        query.q,
+      );
     },
     {
       query: ContentModel.feedQuery,

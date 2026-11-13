@@ -19,7 +19,11 @@
  * rg-core). Sortie JSON sur stdout ; code 0 si `ok`, 1 si l'API a refusé ou
  * échoué, 2 pour une erreur d'usage.
  */
-import { ClientAchilleaDelegue, ConfigurationApiAchillea, type AchilleaFetch } from "@rosegriffon/bot/achillea-api";
+import {
+  ClientAchilleaDelegue,
+  ConfigurationApiAchillea,
+  type AchilleaFetch,
+} from "@rosegriffon/bot/achillea-api";
 
 export const CODE_OK = 0;
 export const CODE_ECHEC_API = 1;
@@ -60,11 +64,24 @@ export class ErreurUsage extends Error {
   }
 }
 
-const OPTIONS_A_VALEUR = new Set(["--as", "--token", "--api", "--out", "--timeout"]);
+const OPTIONS_A_VALEUR = new Set([
+  "--as",
+  "--token",
+  "--api",
+  "--out",
+  "--timeout",
+]);
 
 /** Analyse la ligne de commande (`--opt valeur`, `--opt=valeur`, `--` termine les options). */
 export function analyserArguments(argv: readonly string[]): OptionsAchillea {
-  const options: OptionsAchillea = { as: null, token: null, api: null, out: null, timeoutMs: null, positionnels: [] };
+  const options: OptionsAchillea = {
+    as: null,
+    token: null,
+    api: null,
+    out: null,
+    timeoutMs: null,
+    positionnels: [],
+  };
   let finOptions = false;
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i]!;
@@ -78,12 +95,17 @@ export function analyserArguments(argv: readonly string[]): OptionsAchillea {
     }
     const egal = arg.indexOf("=");
     const nom = egal >= 0 ? arg.slice(0, egal) : arg;
-    if (!OPTIONS_A_VALEUR.has(nom)) throw new ErreurUsage(`Option inconnue : ${nom}`);
+    if (!OPTIONS_A_VALEUR.has(nom))
+      throw new ErreurUsage(`Option inconnue : ${nom}`);
     const valeur = egal >= 0 ? arg.slice(egal + 1) : argv[++i];
-    if (valeur === undefined || valeur === "") throw new ErreurUsage(`L'option ${nom} attend une valeur.`);
+    if (valeur === undefined || valeur === "")
+      throw new ErreurUsage(`L'option ${nom} attend une valeur.`);
     switch (nom) {
       case "--as": {
-        if (!/^\d{5,25}$/u.test(valeur)) throw new ErreurUsage(`--as attend un identifiant Discord, reçu « ${valeur} ».`);
+        if (!/^\d{5,25}$/u.test(valeur))
+          throw new ErreurUsage(
+            `--as attend un identifiant Discord, reçu « ${valeur} ».`,
+          );
         options.as = valeur;
         break;
       }
@@ -95,7 +117,9 @@ export function analyserArguments(argv: readonly string[]): OptionsAchillea {
         try {
           new URL(valeur);
         } catch {
-          throw new ErreurUsage(`--api attend une URL absolue, reçu « ${valeur} ».`);
+          throw new ErreurUsage(
+            `--api attend une URL absolue, reçu « ${valeur} ».`,
+          );
         }
         options.api = valeur;
         break;
@@ -106,13 +130,17 @@ export function analyserArguments(argv: readonly string[]): OptionsAchillea {
       }
       case "--timeout": {
         const ms = Number(valeur);
-        if (!Number.isInteger(ms) || ms <= 0) throw new ErreurUsage(`--timeout attend un entier positif (ms).`);
+        if (!Number.isInteger(ms) || ms <= 0)
+          throw new ErreurUsage(`--timeout attend un entier positif (ms).`);
         options.timeoutMs = ms;
         break;
       }
     }
   }
-  if (options.as && options.token) throw new ErreurUsage("--as et --token sont exclusifs : choisis une seule identité.");
+  if (options.as && options.token)
+    throw new ErreurUsage(
+      "--as et --token sont exclusifs : choisis une seule identité.",
+    );
   return options;
 }
 
@@ -126,9 +154,16 @@ export function analyserArguments(argv: readonly string[]): OptionsAchillea {
 export function lireArgument(brut: string): unknown {
   const texte = brut.trim();
   if (/^-?\d+(\.\d+)?$/u.test(texte)) {
-    return texte.replace(/^-/u, "").replace(".", "").length <= 15 ? Number(texte) : texte;
+    return texte.replace(/^-/u, "").replace(".", "").length <= 15
+      ? Number(texte)
+      : texte;
   }
-  if (/^[[{"]/u.test(texte) || texte === "true" || texte === "false" || texte === "null") {
+  if (
+    /^[[{"]/u.test(texte) ||
+    texte === "true" ||
+    texte === "false" ||
+    texte === "null"
+  ) {
     try {
       return JSON.parse(texte);
     } catch {
@@ -148,10 +183,18 @@ type Ressource = Record<string, unknown>;
 export function ressourcesDe(client: object): Map<string, Ressource> {
   const ressources = new Map<string, Ressource>();
   for (const [nom, valeur] of Object.entries(client)) {
-    if (nom === "http" || !valeur || typeof valeur !== "object" || !("http" in valeur)) continue;
+    if (
+      nom === "http" ||
+      !valeur ||
+      typeof valeur !== "object" ||
+      !("http" in valeur)
+    )
+      continue;
     ressources.set(nom, valeur as Ressource);
   }
-  return new Map([...ressources.entries()].toSorted(([a], [b]) => a.localeCompare(b)));
+  return new Map(
+    [...ressources.entries()].toSorted(([a], [b]) => a.localeCompare(b)),
+  );
 }
 
 /** Méthodes publiques d'une ressource, dans l'ordre alphabétique. */
@@ -162,7 +205,8 @@ export function methodesDe(ressource: Ressource): string[] {
     for (const nom of Object.getOwnPropertyNames(proto)) {
       if (nom === "constructor" || nom.startsWith("_")) continue;
       const descripteur = Object.getOwnPropertyDescriptor(proto, nom);
-      if (descripteur && typeof descripteur.value === "function") methodes.add(nom);
+      if (descripteur && typeof descripteur.value === "function")
+        methodes.add(nom);
     }
     proto = Object.getPrototypeOf(proto) as object | null;
   }
@@ -176,29 +220,47 @@ function arite(ressource: Ressource, methode: string): number {
 }
 
 export type Resolution =
-  | { ok: true; ressource: string; methode: string; fn: (...args: unknown[]) => unknown; cible: Ressource }
+  | {
+      ok: true;
+      ressource: string;
+      methode: string;
+      fn: (...args: unknown[]) => unknown;
+      cible: Ressource;
+    }
   | { ok: false; message: string };
 
 /** `clans.kickMember` → fonction liée, ou message d'erreur avec suggestions. */
-export function resoudreMethode(client: object, nomComplet: string): Resolution {
+export function resoudreMethode(
+  client: object,
+  nomComplet: string,
+): Resolution {
   const [nomRessource, nomMethode, ...reste] = nomComplet.split(".");
   const ressources = ressourcesDe(client);
   if (!nomRessource || !nomMethode || reste.length > 0) {
-    return { ok: false, message: `Commande attendue sous la forme <ressource>.<méthode>, reçu « ${nomComplet} ».` };
+    return {
+      ok: false,
+      message: `Commande attendue sous la forme <ressource>.<méthode>, reçu « ${nomComplet} ».`,
+    };
   }
   const ressource = ressources.get(nomRessource);
   if (!ressource) {
-    const proches = [...ressources.keys()].filter(n => n.toLowerCase().includes(nomRessource.toLowerCase().slice(0, 3)));
+    const proches = [...ressources.keys()].filter((n) =>
+      n.toLowerCase().includes(nomRessource.toLowerCase().slice(0, 3)),
+    );
     return {
       ok: false,
       message:
         `Ressource inconnue : ${nomRessource}.` +
-        (proches.length > 0 ? ` Voulais-tu : ${proches.join(", ")} ?` : ` Ressources : ${[...ressources.keys()].join(", ")}.`),
+        (proches.length > 0
+          ? ` Voulais-tu : ${proches.join(", ")} ?`
+          : ` Ressources : ${[...ressources.keys()].join(", ")}.`),
     };
   }
   const methodes = methodesDe(ressource);
   if (!methodes.includes(nomMethode)) {
-    const proches = methodes.filter(m => m.toLowerCase().includes(nomMethode.toLowerCase()));
+    const proches = methodes.filter((m) =>
+      m.toLowerCase().includes(nomMethode.toLowerCase()),
+    );
     return {
       ok: false,
       message:
@@ -207,15 +269,27 @@ export function resoudreMethode(client: object, nomComplet: string): Resolution 
     };
   }
   const fn = ressource[nomMethode] as (...args: unknown[]) => unknown;
-  return { ok: true, ressource: nomRessource, methode: nomMethode, fn: fn.bind(ressource), cible: ressource };
+  return {
+    ok: true,
+    ressource: nomRessource,
+    methode: nomMethode,
+    fn: fn.bind(ressource),
+    cible: ressource,
+  };
 }
 
 /** Lignes de `list`, filtrées par sous-chaîne (`list clans`, `list season`). */
-export function listerMethodes(client: object, docs: Record<string, string>, filtre = ""): string[] {
+export function listerMethodes(
+  client: object,
+  docs: Record<string, string>,
+  filtre = "",
+): string[] {
   const lignes: string[] = [];
   const motif = filtre.toLowerCase();
   for (const [nom, ressource] of ressourcesDe(client)) {
-    const methodes = methodesDe(ressource).filter(m => `${nom}.${m}`.toLowerCase().includes(motif));
+    const methodes = methodesDe(ressource).filter((m) =>
+      `${nom}.${m}`.toLowerCase().includes(motif),
+    );
     if (methodes.length === 0) continue;
     lignes.push(`${nom}`);
     for (const methode of methodes) {
@@ -240,16 +314,30 @@ export interface DependancesAchillea {
 function enJson(valeur: unknown): string {
   return JSON.stringify(
     valeur,
-    (_cle, v) => (v instanceof ArrayBuffer ? { octets: v.byteLength } : typeof v === "bigint" ? v.toString() : v),
+    (_cle, v) =>
+      v instanceof ArrayBuffer
+        ? { octets: v.byteLength }
+        : typeof v === "bigint"
+          ? v.toString()
+          : v,
     2,
   );
 }
 
-function estResultat(valeur: unknown): valeur is { ok: boolean; value?: unknown } {
-  return Boolean(valeur) && typeof valeur === "object" && typeof (valeur as { ok?: unknown }).ok === "boolean";
+function estResultat(
+  valeur: unknown,
+): valeur is { ok: boolean; value?: unknown } {
+  return (
+    Boolean(valeur) &&
+    typeof valeur === "object" &&
+    typeof (valeur as { ok?: unknown }).ok === "boolean"
+  );
 }
 
-function construireClient(options: OptionsAchillea, deps: DependancesAchillea): ClientAchilleaDelegue {
+function construireClient(
+  options: OptionsAchillea,
+  deps: DependancesAchillea,
+): ClientAchilleaDelegue {
   return new ClientAchilleaDelegue({
     env: deps.env,
     ...(options.api ? { baseUrl: options.api } : {}),
@@ -262,11 +350,18 @@ function construireClient(options: OptionsAchillea, deps: DependancesAchillea): 
 
 const METHODES_HTTP = new Set(["GET", "POST", "PUT", "PATCH", "DELETE"]);
 
-async function executerBrut(client: ClientAchilleaDelegue, args: string[], options: OptionsAchillea, deps: DependancesAchillea) {
+async function executerBrut(
+  client: ClientAchilleaDelegue,
+  args: string[],
+  options: OptionsAchillea,
+  deps: DependancesAchillea,
+) {
   const [methodeBrute, chemin, corpsBrut, ...reste] = args;
   const methode = (methodeBrute ?? "").toUpperCase();
   if (!METHODES_HTTP.has(methode) || !chemin || reste.length > 0) {
-    throw new ErreurUsage("raw attend : raw <GET|POST|PUT|PATCH|DELETE> <chemin> [corps JSON]");
+    throw new ErreurUsage(
+      "raw attend : raw <GET|POST|PUT|PATCH|DELETE> <chemin> [corps JSON]",
+    );
   }
   const cheminNormalise = chemin.startsWith("/") ? chemin : `/${chemin}`;
   const corps = corpsBrut === undefined ? undefined : lireArgument(corpsBrut);
@@ -287,13 +382,21 @@ async function executerBrut(client: ClientAchilleaDelegue, args: string[], optio
   } else {
     const octets = await reponse.value.arrayBuffer();
     if (options.out) await deps.ecrireFichier(options.out, octets);
-    deps.sortie(enJson({ ok: true, value: { octets: octets.byteLength, type, fichier: options.out } }));
+    deps.sortie(
+      enJson({
+        ok: true,
+        value: { octets: octets.byteLength, type, fichier: options.out },
+      }),
+    );
   }
   return CODE_OK;
 }
 
 /** Point d'entrée testable : rend le code de sortie, n'appelle jamais `process.exit`. */
-export async function executerAchillea(argv: readonly string[], deps: DependancesAchillea): Promise<number> {
+export async function executerAchillea(
+  argv: readonly string[],
+  deps: DependancesAchillea,
+): Promise<number> {
   if (argv.includes("-h") || argv.includes("--help")) {
     deps.sortie(AIDE_ACHILLEA);
     return CODE_OK;
@@ -327,7 +430,8 @@ export async function executerAchillea(argv: readonly string[], deps: Dependance
       deps.sortie(listerMethodes(client, deps.docs, args.join(" ")).join("\n"));
       return CODE_OK;
     }
-    if (commande === "raw") return await executerBrut(client, args, options, deps);
+    if (commande === "raw")
+      return await executerBrut(client, args, options, deps);
 
     const resolution = resoudreMethode(client, commande);
     if (!resolution.ok) {
@@ -342,13 +446,20 @@ export async function executerAchillea(argv: readonly string[], deps: Dependance
       return CODE_OK;
     }
     if (!resultat.ok) {
-      const echec = resultat as Parameters<ClientAchilleaDelegue["motifEchec"]>[0];
+      const echec = resultat as Parameters<
+        ClientAchilleaDelegue["motifEchec"]
+      >[0];
       deps.sortie(enJson({ ...echec, motif: client.motifEchec(echec) }));
       return CODE_ECHEC_API;
     }
     if (resultat.value instanceof ArrayBuffer && options.out) {
       await deps.ecrireFichier(options.out, resultat.value);
-      deps.sortie(enJson({ ok: true, value: { octets: resultat.value.byteLength, fichier: options.out } }));
+      deps.sortie(
+        enJson({
+          ok: true,
+          value: { octets: resultat.value.byteLength, fichier: options.out },
+        }),
+      );
       return CODE_OK;
     }
     deps.sortie(enJson(resultat));

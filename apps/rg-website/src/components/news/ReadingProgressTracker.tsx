@@ -10,7 +10,9 @@ interface ReadingProgressTrackerProps {
 
 const THRESHOLDS = [25, 50, 75, 100];
 
-export function ReadingProgressTracker({ articleId }: ReadingProgressTrackerProps) {
+export function ReadingProgressTracker({
+  articleId,
+}: ReadingProgressTrackerProps) {
   const { user } = useAuth();
   const trackedRef = useRef<Set<number>>(new Set());
   const lastCallRef = useRef<number>(0);
@@ -23,7 +25,8 @@ export function ReadingProgressTracker({ articleId }: ReadingProgressTrackerProp
 
     const calculateProgress = (): number => {
       const scrollTop = window.scrollY;
-      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const docHeight =
+        document.documentElement.scrollHeight - window.innerHeight;
       if (docHeight <= 0) {
         return 0;
       }
@@ -59,7 +62,7 @@ export function ReadingProgressTracker({ articleId }: ReadingProgressTrackerProp
 
     if (marker) {
       observer = new IntersectionObserver(
-        entries => {
+        (entries) => {
           for (const entry of entries) {
             if (entry.isIntersecting && !trackedRef.current.has(100)) {
               trackedRef.current.add(100);

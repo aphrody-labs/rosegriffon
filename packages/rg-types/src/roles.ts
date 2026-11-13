@@ -14,7 +14,16 @@
  *  - user        : défaut, utilisateur authentifié
  *  - banned      : interdit (bot)
  */
-export const ALL_ROLES = ["admin", "superadmin", "editor", "moderator", "staff", "premium", "user", "banned"] as const;
+export const ALL_ROLES = [
+  "admin",
+  "superadmin",
+  "editor",
+  "moderator",
+  "staff",
+  "premium",
+  "user",
+  "banned",
+] as const;
 
 export type RgRole = (typeof ALL_ROLES)[number];
 
@@ -44,44 +53,72 @@ export function libelleRole(role: string | null | undefined): string {
   if (!role) {
     return LIBELLES_ROLES.user;
   }
-  return (LIBELLES_ROLES as Record<string, string>)[role] ?? LIBELLES_ROLES.user;
+  return (
+    (LIBELLES_ROLES as Record<string, string>)[role] ?? LIBELLES_ROLES.user
+  );
 }
 
 /** Roles qui peuvent accéder au dashboard editorial (azalee + website). */
-export const ADMIN_ROLES = ["admin", "superadmin", "editor", "moderator"] as const satisfies readonly RgRole[];
+export const ADMIN_ROLES = [
+  "admin",
+  "superadmin",
+  "editor",
+  "moderator",
+] as const satisfies readonly RgRole[];
 export type AdminRole = (typeof ADMIN_ROLES)[number];
 
 /** Roles qui peuvent gérer les utilisateurs (changer rôle, bannir). */
-export const USER_MANAGEMENT_ROLES = ["admin", "superadmin"] as const satisfies readonly RgRole[];
+export const USER_MANAGEMENT_ROLES = [
+  "admin",
+  "superadmin",
+] as const satisfies readonly RgRole[];
 export type UserManagementRole = (typeof USER_MANAGEMENT_ROLES)[number];
 
 /** Roles autorisés à exécuter les slash commands admin du bot Discord. */
-export const BOT_ADMIN_ROLES = ["admin", "staff"] as const satisfies readonly RgRole[];
+export const BOT_ADMIN_ROLES = [
+  "admin",
+  "staff",
+] as const satisfies readonly RgRole[];
 export type BotAdminRole = (typeof BOT_ADMIN_ROLES)[number];
 
 /** Roles "modérateurs" — accès commentaires, signalements (commun bot + web). */
-export const MODERATOR_ROLES = ["admin", "superadmin", "moderator"] as const satisfies readonly RgRole[];
+export const MODERATOR_ROLES = [
+  "admin",
+  "superadmin",
+  "moderator",
+] as const satisfies readonly RgRole[];
 export type ModeratorRole = (typeof MODERATOR_ROLES)[number];
 
 // --- Helpers --------------------------------------------------------------
 
 export function isRgRole(value: unknown): value is RgRole {
-  return typeof value === "string" && (ALL_ROLES as readonly string[]).includes(value);
+  return (
+    typeof value === "string" &&
+    (ALL_ROLES as readonly string[]).includes(value)
+  );
 }
 
-export function isAdminRole(role: string | null | undefined): role is AdminRole {
+export function isAdminRole(
+  role: string | null | undefined,
+): role is AdminRole {
   return !!role && (ADMIN_ROLES as readonly string[]).includes(role);
 }
 
-export function isUserManagementRole(role: string | null | undefined): role is UserManagementRole {
+export function isUserManagementRole(
+  role: string | null | undefined,
+): role is UserManagementRole {
   return !!role && (USER_MANAGEMENT_ROLES as readonly string[]).includes(role);
 }
 
-export function isBotAdminRole(role: string | null | undefined): role is BotAdminRole {
+export function isBotAdminRole(
+  role: string | null | undefined,
+): role is BotAdminRole {
   return !!role && (BOT_ADMIN_ROLES as readonly string[]).includes(role);
 }
 
-export function isModeratorRole(role: string | null | undefined): role is ModeratorRole {
+export function isModeratorRole(
+  role: string | null | undefined,
+): role is ModeratorRole {
   return !!role && (MODERATOR_ROLES as readonly string[]).includes(role);
 }
 

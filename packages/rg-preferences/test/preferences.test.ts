@@ -21,9 +21,19 @@ import type { ExperienceCandidate, ExperienceWhitelist } from "../src";
 
 describe("identifier guards", () => {
   test("catalogues contain unique serializable IDs", () => {
-    for (const catalogue of [THEME_IDS, LOCALE_IDS, FONT_IDS, DENSITY_IDS, CONTRAST_IDS]) {
+    for (const catalogue of [
+      THEME_IDS,
+      LOCALE_IDS,
+      FONT_IDS,
+      DENSITY_IDS,
+      CONTRAST_IDS,
+    ]) {
       expect(new Set(catalogue).size).toBe(catalogue.length);
-      expect(catalogue.every(value => typeof value === "string" && value.length > 0)).toBe(true);
+      expect(
+        catalogue.every(
+          (value) => typeof value === "string" && value.length > 0,
+        ),
+      ).toBe(true);
     }
   });
 
@@ -55,8 +65,12 @@ describe("identifier guards", () => {
 
 describe("runtime boundaries", () => {
   test("source has no framework, DOM, network, storage, or database dependency", async () => {
-    const source = await Bun.file(new URL("../src/index.ts", import.meta.url)).text();
-    const packageJson = await Bun.file(new URL("../package.json", import.meta.url)).json();
+    const source = await Bun.file(
+      new URL("../src/index.ts", import.meta.url),
+    ).text();
+    const packageJson = await Bun.file(
+      new URL("../package.json", import.meta.url),
+    ).json();
     const executableSource = source.replace(/\/\*[\s\S]*?\*\//g, "");
 
     expect(packageJson.dependencies).toBeUndefined();
@@ -172,7 +186,9 @@ describe("resolveExperience", () => {
     expect(resolved.contrast).toBe("high");
     expect(resolved.reducedMotion).toBe(false);
     expect(resolved.readingMode).toBe(true);
-    expect(Object.values(resolved.sources).every(source => source === "domain")).toBe(true);
+    expect(
+      Object.values(resolved.sources).every((source) => source === "domain"),
+    ).toBe(true);
   });
 
   test("applies deployment allowlists and falls through to an allowed layer", () => {

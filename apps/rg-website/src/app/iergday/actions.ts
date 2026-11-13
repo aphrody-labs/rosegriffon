@@ -73,7 +73,13 @@ const BUCKET = "assets";
 const MAX_DEPOTS_PAR_MEMBRE = 10;
 
 /** Formats acceptés et poids maximal — alignés sur l'envoi d'image du staff. */
-const TYPES_ACCEPTES = new Set(["image/png", "image/jpeg", "image/webp", "image/avif", "image/gif"]);
+const TYPES_ACCEPTES = new Set([
+  "image/png",
+  "image/jpeg",
+  "image/webp",
+  "image/avif",
+  "image/gif",
+]);
 const EXTENSIONS: Record<string, string> = {
   "image/avif": "avif",
   "image/gif": "gif",
@@ -85,7 +91,10 @@ const TAILLE_MAX = 8 * 1024 * 1024;
 
 const schema = z.object({
   campagne: z.string().trim().min(1),
-  permalien: z.string().trim().min(1, "Colle le lien de ta publication Instagram."),
+  permalien: z
+    .string()
+    .trim()
+    .min(1, "Colle le lien de ta publication Instagram."),
   pseudo: z.string().trim().max(60).optional(),
   legende: z.string().trim().max(2200).optional(),
 });
@@ -96,11 +105,14 @@ const schema = z.object({
  * Reçoit un `FormData` : c'est la seule forme qui transporte un fichier jusqu'à
  * une server action sans passer par une route API et un second aller-retour.
  */
-export async function deposerCreationInstagram(donnees: FormData): Promise<ResultatDepot> {
+export async function deposerCreationInstagram(
+  donnees: FormData,
+): Promise<ResultatDepot> {
   const membre = await getServerUser();
   if (!membre) {
     return {
-      error: "Connecte-toi pour déposer ta création — c'est ce qui nous permet de te l'attribuer.",
+      error:
+        "Connecte-toi pour déposer ta création — c'est ce qui nous permet de te l'attribuer.",
       success: false,
     };
   }
@@ -112,14 +124,18 @@ export async function deposerCreationInstagram(donnees: FormData): Promise<Resul
     pseudo: donnees.get("pseudo") ?? undefined,
   });
   if (!analyse.success) {
-    return { error: analyse.error.issues[0]?.message ?? "Formulaire incomplet.", success: false };
+    return {
+      error: analyse.error.issues[0]?.message ?? "Formulaire incomplet.",
+      success: false,
+    };
   }
   const v = analyse.data;
 
   const lien = analyserPermalien(v.permalien);
   if (!lien) {
     return {
-      error: "Ce lien n'est pas une publication Instagram. Attendu : instagram.com/p/… (ou /reel/…).",
+      error:
+        "Ce lien n'est pas une publication Instagram. Attendu : instagram.com/p/… (ou /reel/…).",
       success: false,
     };
   }
@@ -127,12 +143,16 @@ export async function deposerCreationInstagram(donnees: FormData): Promise<Resul
   const fichier = donnees.get("image");
   if (!(fichier instanceof File) || fichier.size === 0) {
     return {
-      error: "Ajoute l'image de ta création : Instagram ne nous laisse pas la récupérer nous-mêmes.",
+      error:
+        "Ajoute l'image de ta création : Instagram ne nous laisse pas la récupérer nous-mêmes.",
       success: false,
     };
   }
   if (!TYPES_ACCEPTES.has(fichier.type)) {
-    return { error: "Format non supporté : PNG, JPEG, WebP, AVIF ou GIF.", success: false };
+    return {
+      error: "Format non supporté : PNG, JPEG, WebP, AVIF ou GIF.",
+      success: false,
+    };
   }
   if (fichier.size > TAILLE_MAX) {
     return { error: "L'image ne doit pas dépasser 8 Mo.", success: false };
@@ -151,10 +171,16 @@ export async function deposerCreationInstagram(donnees: FormData): Promise<Resul
     );
     const campagne = campagnes[0];
     if (!campagne || !campagne.actif || !campagne.publiee) {
-      return { error: "Cette campagne n'accepte pas de dépôt.", success: false };
+      return {
+        error: "Cette campagne n'accepte pas de dépôt.",
+        success: false,
+      };
     }
     if (campagne.fin_le && new Date(campagne.fin_le) < new Date()) {
-      return { error: "Cette campagne est close : les dépôts sont terminés.", success: false };
+      return {
+        error: "Cette campagne est close : les dépôts sont terminés.",
+        success: false,
+      };
     }
 
     // Quota par membre. Compté AVANT la vérification Meta et l'envoi du
@@ -193,16 +219,24 @@ export async function deposerCreationInstagram(donnees: FormData): Promise<Resul
     const chemin = `campagnes/${campagne.slug}/instagram/${lien.shortcode}.${extension}`;
     const admin = createPostgresClient();
     if (!admin) {
-      return { error: "Service de stockage indisponible. Réessaie dans un moment.", success: false };
+      return {
+        error: "Service de stockage indisponible. Réessaie dans un moment.",
+        success: false,
+      };
     }
-    const { error: erreurEnvoi } = await admin.storage.from(BUCKET).upload(chemin, fichier, {
-      cacheControl: "3600",
-      contentType: fichier.type,
-      upsert: true,
-    });
+    const { error: erreurEnvoi } = await admin.storage
+      .from(BUCKET)
+      .upload(chemin, fichier, {
+        cacheControl: "3600",
+        contentType: fichier.type,
+        upsert: true,
+      });
     if (erreurEnvoi) {
       console.error("[iergday] envoi de l'image Instagram :", erreurEnvoi);
-      return { error: "L'image n'a pas pu être enregistrée. Réessaie.", success: false };
+      return {
+        error: "L'image n'a pas pu être enregistrée. Réessaie.",
+        success: false,
+      };
     }
 
     const hashtags = [
@@ -254,11 +288,17 @@ export async function deposerCreationInstagram(donnees: FormData): Promise<Resul
     revalidatePath("/admin/iergday");
 
     return {
-      message: verification.verdict === "publique" ? "Merci ! Ta création rejoint la galerie." : verification.message,
+      message:
+        verification.verdict === "publique"
+          ? "Merci ! Ta création rejoint la galerie."
+          : verification.message,
       success: true,
     };
   } catch (err) {
     console.error("[iergday] dépôt Instagram :", err);
-    return { error: "Le dépôt a échoué. Réessaie dans un moment.", success: false };
+    return {
+      error: "Le dépôt a échoué. Réessaie dans un moment.",
+      success: false,
+    };
   }
 }

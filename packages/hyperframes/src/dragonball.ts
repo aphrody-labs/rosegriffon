@@ -14,7 +14,10 @@ export function computeSceneTimecodes(
   startOffsetSec: number = 48.5,
   endMarginSec: number = 32.5,
 ): number[] {
-  const safeDuration = Math.max(durationSec - endMarginSec, startOffsetSec + 10);
+  const safeDuration = Math.max(
+    durationSec - endMarginSec,
+    startOffsetSec + 10,
+  );
   const usableSpan = safeDuration - startOffsetSec;
   const step = usableSpan / (count - 1);
 

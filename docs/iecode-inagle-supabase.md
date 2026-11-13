@@ -63,6 +63,7 @@ Toolkit de reverse-engineering pour IEVR. Cœur **C# .NET 10 cross-platform** (`
 ### 1.1 Lib C# `IECODE.Core/Formats` — formats Level-5 / Criware
 
 Arborescence clé (`iecode/src/IECODE.Core/`) :
+
 - `Formats/Criware/` — `UtfTable/UtfParser/UtftableParser` (@UTF), `AcbReader`, `AwbReader`, `UsmDemuxer`, et le sous-arbre **`CriFs/`** (port de CriFsLib : `CpkReader`, `AsyncCpkReader`, `Compression/CriLayla.cs`, `Encryption/{CpkDecryptionStream,CriwareCrypt,TableDecryptor,Game/P5RCrypto}`, `Utilities/Parsing/{CpkHelper,TocFinder,TocReader,TableContainerReader}`).
 - `Formats/Level5/` — `G4mdParser`, `G4mgParser`, `G4txParser`, `NxtchParser`, `G4skParser`, `G4pkParser`, `G4mtParser`, `G4raParser`, `NavmParser`, `PxclParser`, `DdsParser`, `TextureSwizzler`, `AgiParser`, `P3lipParser`, `MevbinDocument`, `FxbinParser`, et le sous-arbre **`CfgBin/`** (`CfgBin.cs` 1068 l., `Rdbn/{RdbnReader,RdbnStructures}`, `Tools/{BinaryDataReader/Writer,Crc32}`, `Encryption/CriwareCrypt`).
 - `Formats/Menu/` (`ObjbParser` 790 l., `G4pkmLayout`, `G4pkmMotion`), `Formats/Shader/DxbcReader`, `Formats/Lua/{LuaParser,LuaDisassembler,LuaModel,LuaConstants}`.
@@ -71,34 +72,34 @@ Arborescence clé (`iecode/src/IECODE.Core/`) :
 
 **Magics et offsets documentés** (extraits des parsers réels, vérifiés octet par octet) :
 
-| Format | Magic (LE u32 / octets) | Endianness | Notes header |
-| --- | --- | --- | --- |
-| CPK | `0x204B5043` `"CPK "` | mixte | suivi d'une table @UTF (CpkHeader/TOC/ETOC/ITOC), fichiers compressés CRILAYLA |
-| @UTF | `0x46545540` `"@UTF"` | **Big** | table colonne/ligne CRIWARE ; magic chiffré `0xF5F39E1F` (TableDecryptor) |
-| ACB | `"@UTF"` | Big | Audio Cue Bank (table @UTF racine) |
-| AWB | `0x32534641` `"AFS2"` | Little | header : version, offset_size, align `@0x0C` ; blocs HCA/ADX concaténés alignés |
-| CRILAYLA | `0x414C59414C495243` (8 o.) | — | LZSS ; 0x100 d'en-tête non compressé en fin de fichier ; tailles `@+8`/`@+12` |
-| G4MD | `0x444D3447` `"G4MD"` | **Big→LE au load** | RE de `nie.exe FUN_14056d530` : `SubmeshInfo@0x04`, `SubmeshCount@0x20`, `MaterialCount@0x22`, `BoneCount@0x24`, `VLayoutCount@0x26`, `IndexOffset@0x3C`, `FaceDataBase@0x5C` ; record sous-maille 0x50 o. ; stride `@+0x3E` |
-| G4MG | **aucun magic / headerless** | — | géométrie pure (offset 0 = float vertex) ; **indécodable seul**, requiert le `.g4md` compagnon de même basename |
-| G4TX | `0x58543447` `"G4TX"` | LE | header 0x60 o. ; entries 0x30 o. (NxtchOffset/Size, Width/Height), sub-entries atlas 0x18 o. |
-| NXTCH | `"NXTCH"` (5 o.) | LE | Nintendo Switch Texture Chunk ; header 44 o. ; formats BC1-BC7/RGBA8 (BC1=0x01…BC7=0x07, RGBA8=0x1F) |
-| G4SK | `0x4B533447` `"G4SK"` | LE | squelette/os (parse heuristique, offsets partiels) |
-| G4PK / G4PKM | `0x4B503447` `"G4PK"` (+`@`/`M`) | LE | conteneur pack ; variante M = menu layout |
-| G4RA | `0x41523447` `"G4RA"` (+`` ` ``) | LE | animation |
-| G4MT | `0x544D3447` `"G4MT"` | LE | matériau |
-| G4NV | `0x4D56414E` `"NAVM"` | — | navmesh |
-| PXCL | `0x4C435850` `"PXCL"` | — | collision |
-| XFSA / XPCK | `0x41534658` / `0x4B435058` | — | archives Level-5 |
-| cfg.bin (T2B) | **pas de magic** | LE | détecté par footer `01 74 32 62 [FE]` (`t2b`) dans les 32 derniers o. ; porte la quasi-totalité des données du jeu |
-| RDBN | `0x4E424452` `"RDBN"` | LE | variante moderne de cfg.bin avec magic explicite |
-| MEVBIN / FXBIN | footer `t2b` | LE | événements / effets |
-| OBJB | `0x626A626F` `"objb"` | — | menu objects |
-| DDS / DXBC | `0x20534444` / `0x43425844` | LE | texture standard / shader bytecode |
-| AGI / P3LIP | `0x4147492E` `".AGI"` / `"lip\0"` | — | |
-| LUA | `0x61754C1B` `"\x1bLua"` | — | bytecode Lua (désassemblé par LuaDisassembler) |
-| HCA | `"HCA\0"` (`0x48434100` BE, octets masqués `0x7F`) | Big | CRI audio ; chunks fmt/comp/ciph/loop ; cipher 0=none/1=static/56=key56 |
-| ADX | `0x80 0x00` | Big | décodage PCM16 natif type 0x02 implémenté |
-| USM | `0x44495243` `"CRID"` | Big | conteneur vidéo (démux @SFV/@SFA) |
+| Format         | Magic (LE u32 / octets)                            | Endianness         | Notes header                                                                                                                                                                                                                 |
+| -------------- | -------------------------------------------------- | ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| CPK            | `0x204B5043` `"CPK "`                              | mixte              | suivi d'une table @UTF (CpkHeader/TOC/ETOC/ITOC), fichiers compressés CRILAYLA                                                                                                                                               |
+| @UTF           | `0x46545540` `"@UTF"`                              | **Big**            | table colonne/ligne CRIWARE ; magic chiffré `0xF5F39E1F` (TableDecryptor)                                                                                                                                                    |
+| ACB            | `"@UTF"`                                           | Big                | Audio Cue Bank (table @UTF racine)                                                                                                                                                                                           |
+| AWB            | `0x32534641` `"AFS2"`                              | Little             | header : version, offset_size, align `@0x0C` ; blocs HCA/ADX concaténés alignés                                                                                                                                              |
+| CRILAYLA       | `0x414C59414C495243` (8 o.)                        | —                  | LZSS ; 0x100 d'en-tête non compressé en fin de fichier ; tailles `@+8`/`@+12`                                                                                                                                                |
+| G4MD           | `0x444D3447` `"G4MD"`                              | **Big→LE au load** | RE de `nie.exe FUN_14056d530` : `SubmeshInfo@0x04`, `SubmeshCount@0x20`, `MaterialCount@0x22`, `BoneCount@0x24`, `VLayoutCount@0x26`, `IndexOffset@0x3C`, `FaceDataBase@0x5C` ; record sous-maille 0x50 o. ; stride `@+0x3E` |
+| G4MG           | **aucun magic / headerless**                       | —                  | géométrie pure (offset 0 = float vertex) ; **indécodable seul**, requiert le `.g4md` compagnon de même basename                                                                                                              |
+| G4TX           | `0x58543447` `"G4TX"`                              | LE                 | header 0x60 o. ; entries 0x30 o. (NxtchOffset/Size, Width/Height), sub-entries atlas 0x18 o.                                                                                                                                 |
+| NXTCH          | `"NXTCH"` (5 o.)                                   | LE                 | Nintendo Switch Texture Chunk ; header 44 o. ; formats BC1-BC7/RGBA8 (BC1=0x01…BC7=0x07, RGBA8=0x1F)                                                                                                                         |
+| G4SK           | `0x4B533447` `"G4SK"`                              | LE                 | squelette/os (parse heuristique, offsets partiels)                                                                                                                                                                           |
+| G4PK / G4PKM   | `0x4B503447` `"G4PK"` (+`@`/`M`)                   | LE                 | conteneur pack ; variante M = menu layout                                                                                                                                                                                    |
+| G4RA           | `0x41523447` `"G4RA"` (+`` ` ``)                   | LE                 | animation                                                                                                                                                                                                                    |
+| G4MT           | `0x544D3447` `"G4MT"`                              | LE                 | matériau                                                                                                                                                                                                                     |
+| G4NV           | `0x4D56414E` `"NAVM"`                              | —                  | navmesh                                                                                                                                                                                                                      |
+| PXCL           | `0x4C435850` `"PXCL"`                              | —                  | collision                                                                                                                                                                                                                    |
+| XFSA / XPCK    | `0x41534658` / `0x4B435058`                        | —                  | archives Level-5                                                                                                                                                                                                             |
+| cfg.bin (T2B)  | **pas de magic**                                   | LE                 | détecté par footer `01 74 32 62 [FE]` (`t2b`) dans les 32 derniers o. ; porte la quasi-totalité des données du jeu                                                                                                           |
+| RDBN           | `0x4E424452` `"RDBN"`                              | LE                 | variante moderne de cfg.bin avec magic explicite                                                                                                                                                                             |
+| MEVBIN / FXBIN | footer `t2b`                                       | LE                 | événements / effets                                                                                                                                                                                                          |
+| OBJB           | `0x626A626F` `"objb"`                              | —                  | menu objects                                                                                                                                                                                                                 |
+| DDS / DXBC     | `0x20534444` / `0x43425844`                        | LE                 | texture standard / shader bytecode                                                                                                                                                                                           |
+| AGI / P3LIP    | `0x4147492E` `".AGI"` / `"lip\0"`                  | —                  |                                                                                                                                                                                                                              |
+| LUA            | `0x61754C1B` `"\x1bLua"`                           | —                  | bytecode Lua (désassemblé par LuaDisassembler)                                                                                                                                                                               |
+| HCA            | `"HCA\0"` (`0x48434100` BE, octets masqués `0x7F`) | Big                | CRI audio ; chunks fmt/comp/ciph/loop ; cipher 0=none/1=static/56=key56                                                                                                                                                      |
+| ADX            | `0x80 0x00`                                        | Big                | décodage PCM16 natif type 0x02 implémenté                                                                                                                                                                                    |
+| USM            | `0x44495243` `"CRID"`                              | Big                | conteneur vidéo (démux @SFV/@SFA)                                                                                                                                                                                            |
 
 **Crypto CRIWARE/Level-5 (constantes réelles, exploitables)** : `NativeCrypto.IEVRCriKey = 0x1717E18E` (clé XOR par défaut IEVR) ; clé dérivée par fichier via CRC32 (`Crc32Polynomial = 0xEDB88320`, init `0xFFFFFFFF`) sur le **basename** (`CalculateKeyFromFilename`) ; déchiffrement position-based seekable (`CpkDecryptionStream`). Table @UTF chiffrée : magic `0xF5F39E1F`, XOR `0x655F` × multiplicateur `0x4115` (SIMD AVX2/SSE dans `TableDecryptor`).
 
@@ -125,6 +126,7 @@ Unifie **acquire** (steam-sync : download depots + dump CPK) + **parse/serve** (
 **Capacités C# confirmées** : CPK **clair** (TOC @UTF + décompression CRILAYLA + déchiffrement XOR position-based), @UTF/ACB/AWB(AFS2), audio HCA (parsing header réel ; **décodage PCM délégué à vgmstream-cli en sous-process**, le port MDCT C# n'est pas fait) + ADX (PCM16 natif), géométrie G4MD+G4MG (positions float3, normales SNORM16 vtype=2, UV0 vtype=10/14, indices u16/u32), textures G4TX→NXTCH→DDS/PNG (BCn deswizzle), G4SK (heuristique), cfg.bin/RDBN, OBJB/PXCL/XFSA/XPCK, shaders DXBC, navmesh/collision, Lua disasm.
 
 **Gaps / NON_FAIT (iecode)** :
+
 - **CPK chiffré** : `P5RCrypto` (Persona 5 Royal, offset `0x20`, `0x400` o.) est présent mais c'est un crypto **spécifique à un autre jeu** — pas un déchiffreur CPK chiffré générique IEVR validé.
 - **HCA** : pas de codec PCM pur C# (MDCT inverse) — dépendance externe vgmstream pour le WAV.
 - **G4MG sans `.g4md`** : impossible par construction (headerless) ; `ParseMeshes` lève `NotSupportedException` explicite.
@@ -191,6 +193,7 @@ Format source : nœuds `ConfigNode { name, variables[], children[] }` issus du c
 ### 2.3 Entité Character (`src/entities/character.ts`) et mapping
 
 `loadAllCharacters()` est le join central :
+
 1. `parseAllCharaBase()` → maps charaId → {nameHash, lastNameHash, descHash, internalCode, gender, seriesId, belongTeamId}.
 2. `parseAllCharaParams()` → une entrée par variante (charaParamId).
 3. `buildAllNameMaps()` (chara_text) résout les noms localisés ; nom complet = `prénom + nom` par locale.
@@ -227,6 +230,7 @@ La séparation skills/auras est dérivée des mêmes projections SQL par `servic
 Commande `inagle push` (`registerPushCommand`). Deux adapters : `SupabaseAdapter` (API, génère un token service_role depuis `JWT_SECRET` si besoin) et `PostgresAdapter` (DB directe, upsert chunké 50, `ON CONFLICT DO UPDATE`). Garde-fous env : rejette les blobs scellés (`startsWith("eyJ2Ijo")`). Importeurs : characters, skills, items, passives, auras, teams, formations, quests, drops, gallery, costumes, opponent-teams, capsules, exp-table, growth-tables, + export story-text.
 
 Points sensibles :
+
 - **Préservation des colonnes curatées hors-pipeline** : avant `delete+reinsert`, snapshot de `sheet_data` + `zukan_order` (characters) et `sheet_data` (items), réinjectés par id pour ne pas écraser la donnée communautaire/officielle. Les movesets natifs sont fusionnés dans `sheet_data`.
 - **Séparation skills/auras** dans chara_param : l’ensemble issu de `service.skills.auraAll()` sépare les slots ; on retire aussi `0x00000002` (sentinelle). `data` JSONB porte `{...c, skills, auras}`.
 - **Auras** : les projections SQL sont la source unique ; `sheet_data.hissatsu` est conservé et consommé par `getAura`, réparti par sous-type vers les tables `inagle_*`.
@@ -244,6 +248,7 @@ Déclenché par cron : `packages/cron/src/tasks/db.ts` → `runInaglePush()` = `
 ### 2.9 Test d'intégration unifié
 
 `src/azalee-inagle-integration.test.ts` (`bun test packages/inagle/src/azalee-inagle-integration.test.ts`), timeout 120 s (parse réel ~50 cfg.bin, 6000+ persos). 5 tests, ancrés au **réel** :
+
 1. `chara_base` existe via `Bun.file` (>100 Ko, `entries`, BEG node >1000 enfants).
 2. Miroir SQLite le plus récent existe (>10 Mo).
 3. `service.characters.all()` >1000 et trouve Mark Evans + Axel Blaze par nom FR/EN.
@@ -277,30 +282,38 @@ Note : la colonne `rows` de `list_tables` est une estimation de l'optimiseur (pa
 Schéma `public`, **~95 tables**, RLS activé sur toutes. Quatre domaines : données de jeu `inagle_*` (poussées par le CLI inagle), CMS/articles, e-commerce `orders` + `patreon_*`, auth better-auth + profils/Discord.
 
 #### inagle_characters — 6 148 lignes (55 jouables `is_controllable=true`)
+
 PK `id text`. Colonnes principales : `chara_id`, `internal_code`, noms `name_fr/en/ja`, descriptions `description_fr/en/ja`, `rarity` + `rarity_code int` + `rarity_label`, `element_id int` + `element text`, `position_id int` + `position text`, `gender`, `image_url`, `series`, `slug`/`base_slug`, `team_id`, `model_id`, `zukan_hash`/`zukan_order`, `constellation`(+`_index`), `control_type`, `hero_type`, `is_primary`, `game_appearances text[]`.
 Stats à plat : `stat_frappe/controle/technique/pression/physique/agilite/intelligence` (+ `stat_total`) et la variante `stat_lv1_*`. Blobs : `sheet_data`, `stats`, `skills`, `teams`, `data` (tous `jsonb`). Index btree sur `element`, `gender`, `is_controllable`, `position`, `rarity_label`, `series`, `zukan_order`, `internal_code`, + index d'expression `(sheet_data->>'playstyle')`.
 
 #### inagle_skills — 1 002 lignes
+
 PK `id text`. `internal_code`, noms/descriptions tri-langue, `category_id int` + `category text`, `element_id int` + `element text`, `power_min/max`, `tension_cost`, `tp_cost`, `recast_time`, `foul_rate`, `partner_count`, `is_hyper bool`, `is_eldorado bool`, `evolution_type`, `growth_type`, `skill_effect_bit_flag`, `hash_id`, `has_telop bool NOT NULL` (migration `20260603185240`), `tags text[]`, médias `image_url/video_url/poster_url`, blobs `sheet_data`/`data` jsonb.
 Confirmation du piège CLAUDE.md : **`category_id` et `element_id` sont NULL sur les 1 002 lignes** (`skills_null_catid=1002`). Filtrer impérativement via les colonnes textuelles FR `category`/`element`.
 
 #### inagle_tactics — 70 lignes
+
 **PK = `name text`** (pas `id`). Colonnes : `id text` (nullable, non-PK), `internal_code`, `name_fr`/`name_ja`, descriptions tri-langue, `element_id`+`element`, `power`, `effect1/2/3`, `duration`, `cooldown`, `recast_time`, `partner_count`, `partner_ids jsonb`, `shop`, `image_url`.
 
 #### inagle_rag_chunks — 8 815 lignes (store RAG, détaillé §3.3)
+
 PK `id text`. `source_id`, `source_kind`, `title`, `url`, `lang`, `content text NOT NULL`, `content_tsv tsvector`, `embedding halfvec(1024)`, `meta jsonb NOT NULL`, `content_hash text NOT NULL`, `buildid int8`, `created_at`.
 
 #### inagle_game_assets — 40 471 lignes (annexe assets, peuplée)
+
 PK `path text`. `cpk`, `kind`, `sha256`, `size int8`, `buildid int8`, `bucket`, `exists bool NOT NULL`. Tous `exists=true`. Répartition `bucket` : `icon_chr` 36 664, `220_img` 2 389, `200_icon` 1 375, `210_minimap` 41, `movie` 2. Index btree sur `bucket` et `exists`.
 
 #### articles / news — `articles` 3 lignes
+
 PK `id uuid`, `slug` unique. `title`, `excerpt`, `content NOT NULL`, `featured_image_url`/`_alt`, `category`, `tags text[]`, `meta_title`/`meta_description`, `status`, `published_at`/`scheduled_at`, `author_id uuid`, `co_authors jsonb`, `series_id uuid`+`series_order`, `view_count`, `share_count`, `pinned`, `app text NOT NULL` (sépare website/azalee, migration `add_app_column_to_articles`), `search_vector tsvector`. Index sur `app`, `(series_id, series_order)`, `(status, published_at DESC)`.
 Écosystème CMS associé (tous 0 sauf indiqué) : `article_categories`, `article_series`, `article_comments`, `article_reactions` (2), `article_bookmarks`, `comment_reports`, `chronicles`, `patch_notes`, `topics`, `reading_history` (2), `share_tracking`, `events`, `stream_schedules`, `team_members` (129), `tweets` (3 154).
 
 #### orders (shop Stripe) — 0 ligne
+
 PK `id uuid`, `stripe_session_id NOT NULL`. Montants en centimes `amount_subtotal/discount/shipping/tax/total_cents`, `patron_discount_applied bool`, `promotion_code`, `items jsonb NOT NULL`, `status NOT NULL`, livraison `shipping_address jsonb`/`shipping_name/email/phone`, suivi `tracking_number/carrier`, jalons `paid_at/shipped_at/delivered_at/refunded_at`. Commentaire DB : miroir local des Checkout Sessions Stripe, source de vérité = Stripe. (Migrations `create_orders_table_shop_stripe_mirror` + doublon `20260517_create_orders`.)
 
 #### Tables auth (better-auth) + profils membres
+
 - `user` (33) : `id text`, `name NOT NULL`, `email NOT NULL`, `email_verified`, `image`, `two_factor_enabled` + `two_factor_secret`/`two_factor_backup_codes`. **PII** (non lue).
 - `account` (8) : liaison provider OAuth — `access_token`/`refresh_token`/`id_token`/`password` (secrets, non lus).
 - `session` (57) : `token`, `expires_at`, `ip_address`, `user_agent`.
@@ -314,16 +327,16 @@ PK `id uuid`, `stripe_session_id NOT NULL`. Montants en centimes `amount_subtota
 
 `installed_version` non-NULL = réellement activées :
 
-| Extension | Version | Schéma | Rôle |
-| --- | --- | --- | --- |
-| **vector** (pgvector) | **0.8.0** | `public` | type `vector`/`halfvec`, index ivfflat + **HNSW** (sous-tend le RAG) |
-| pg_trgm | 1.6 | `public` | similarité trigram |
-| pgcrypto | 1.3 | `extensions` | fonctions crypto |
-| uuid-ossp | 1.1 | `extensions` | génération UUID |
-| pg_stat_statements | 1.11 | `extensions` | stats requêtes |
-| supabase_vault | 0.3.1 | `vault` | secrets Supabase |
-| pgsodium | 3.1.8 | — | libsodium |
-| plpgsql | 1.0 | `pg_catalog` | PL/pgSQL |
+| Extension             | Version   | Schéma       | Rôle                                                                 |
+| --------------------- | --------- | ------------ | -------------------------------------------------------------------- |
+| **vector** (pgvector) | **0.8.0** | `public`     | type `vector`/`halfvec`, index ivfflat + **HNSW** (sous-tend le RAG) |
+| pg_trgm               | 1.6       | `public`     | similarité trigram                                                   |
+| pgcrypto              | 1.3       | `extensions` | fonctions crypto                                                     |
+| uuid-ossp             | 1.1       | `extensions` | génération UUID                                                      |
+| pg_stat_statements    | 1.11      | `extensions` | stats requêtes                                                       |
+| supabase_vault        | 0.3.1     | `vault`      | secrets Supabase                                                     |
+| pgsodium              | 3.1.8     | —            | libsodium                                                            |
+| plpgsql               | 1.0       | `pg_catalog` | PL/pgSQL                                                             |
 
 Toutes les autres (postgis, pg_cron, pgmq, pg_graphql, http, etc.) sont **disponibles mais non installées** (`installed_version=null`). À noter : **pg_cron n'est pas activé** — l'ordonnancement cron du monorepo passe par systemd (`rg-cron.service`), pas par la DB.
 
@@ -351,35 +364,35 @@ Migrations `20260603120209 unified_rag_pgvector` + `20260603185129 enable_rls_re
 
 ### 3.5 Row counts (tables clés, COUNT(*) réel)
 
-| Table | Lignes | Note |
-| --- | --- | --- |
-| inagle_game_assets | 40 471 | annexe assets (tous exists=true) |
-| inagle_rag_chunks | 8 815 | 100% embeddés halfvec(1024) + tsv |
-| inagle_characters | 6 148 | dont 55 jouables (is_controllable) |
-| tweets | 3 154 | corpus social |
-| discord_members | 2 137 | PII (non lu) |
-| inagle_items | 1 668 | |
-| inagle_skills | 1 002 | category_id/element_id = NULL partout |
-| inagle_capsules | 740 | |
-| inagle_costumes | 576 | |
-| inagle_gallery | 360 | |
-| inagle_keshins | 282 | |
-| inagle_growth_tables | 276 | |
-| inagle_teams | 208 | |
-| inagle_quests | 182 | |
-| team_members | 129 | |
-| inagle_passives | 128 | |
-| inagle_exp_table | 100 | |
-| inagle_miximax | 70 | |
-| inagle_tactics | 70 | PK = name (list_tables affiche 0 à tort) |
-| inagle_souls | 56 | |
-| user | 33 | auth, PII (non lu) |
-| session | 57 | auth, PII (non lu) |
-| inagle_auras | 9 | |
-| account | 8 | secrets OAuth (non lu) |
-| articles | 3 | CMS |
-| orders | 0 | miroir Stripe, source = Stripe |
-| profiles | 0 | PII (non lu) |
+| Table                | Lignes | Note                                     |
+| -------------------- | ------ | ---------------------------------------- |
+| inagle_game_assets   | 40 471 | annexe assets (tous exists=true)         |
+| inagle_rag_chunks    | 8 815  | 100% embeddés halfvec(1024) + tsv        |
+| inagle_characters    | 6 148  | dont 55 jouables (is_controllable)       |
+| tweets               | 3 154  | corpus social                            |
+| discord_members      | 2 137  | PII (non lu)                             |
+| inagle_items         | 1 668  |                                          |
+| inagle_skills        | 1 002  | category_id/element_id = NULL partout    |
+| inagle_capsules      | 740    |                                          |
+| inagle_costumes      | 576    |                                          |
+| inagle_gallery       | 360    |                                          |
+| inagle_keshins       | 282    |                                          |
+| inagle_growth_tables | 276    |                                          |
+| inagle_teams         | 208    |                                          |
+| inagle_quests        | 182    |                                          |
+| team_members         | 129    |                                          |
+| inagle_passives      | 128    |                                          |
+| inagle_exp_table     | 100    |                                          |
+| inagle_miximax       | 70     |                                          |
+| inagle_tactics       | 70     | PK = name (list_tables affiche 0 à tort) |
+| inagle_souls         | 56     |                                          |
+| user                 | 33     | auth, PII (non lu)                       |
+| session              | 57     | auth, PII (non lu)                       |
+| inagle_auras         | 9      |                                          |
+| account              | 8      | secrets OAuth (non lu)                   |
+| articles             | 3      | CMS                                      |
+| orders               | 0      | miroir Stripe, source = Stripe           |
+| profiles             | 0      | PII (non lu)                             |
 
 Nombreuses tables `inagle_*` vides **volontairement** (features non livrées / sources gamedata non extraites des CPK), documentées par commentaires DB datés `db-1 (2026-06-03)` : `inagle_formations`, `inagle_heroes`, `inagle_basara`, `inagle_awakenings`, `inagle_drops_tables/treasures`, etc.
 
@@ -400,6 +413,7 @@ Liens inter-étages vérifiés entre les trois audits :
 ## 5. Gaps / NON_FAIT agrégés
 
 iecode :
+
 - CPK **chiffré** IEVR : pas de déchiffreur générique validé (seul `P5RCrypto`, spécifique Persona 5 Royal, présent).
 - HCA : pas de codec PCM pur C# (MDCT inverse) → dépendance externe vgmstream-cli pour le WAV.
 - G4MG sans `.g4md` compagnon : impossible par construction (headerless), `NotSupportedException` explicite.
@@ -409,16 +423,19 @@ iecode :
 - G4MG n'expose que le 1er layout vertex si `VLayoutCount` > attributs de la 1re table (limite assumée) ; champs `Unknown*` résiduels dans G4TX/G4SK.
 
 inagle :
+
 - `rarityToGrowthRank` / `rarityCodeToName` **dupliqués** entre `stat-calculator`, `star-sign`, `chara-param`, inline cli-push — mappings non strictement identiques (incohérence préexistante, non corrigée, lecture seule).
 - Fichiers texte cfgbin-db désactivés par défaut (le parser corrompt les chaînes localisées).
 - ~159/387 auras sans hissatsu natif résoluble (228/387 résolues) — laissé `undefined`, aucune invention.
 
 Supabase :
+
 - `inagle_skills.category_id` / `element_id` = **NULL** sur 100% des lignes (filtrer via texte FR `category`/`element`).
 - Nombreuses tables `inagle_*` vides **volontairement** : `inagle_formations`, `inagle_heroes`, `inagle_basara`, `inagle_awakenings`, `inagle_drops_tables/treasures`, etc. (features non livrées / sources gamedata non extraites des CPK).
 - `inagle_rag_chunks.buildid` = NULL partout (`rag_distinct_builds=0`) : rattachement au build Steam non renseigné dans le RAG.
 
 Incertitudes signalées (non résolues par l'audit, à confirmer si besoin) :
+
 - FK applicatives exactes (better-auth / `articles` / `orders`) non extraites via `information_schema.table_constraints` — corrélations déduites du schéma.
 - Corps complet de la RPC `rag_hybrid_search` (logique RRF interne) non dumpé — seules signature et table de retour vérifiées.
 - iecode G4MG : limite 1er layout vertex assumée dans le code, non validée sur un échantillon multi-layout réel (binaires absents du VPS).

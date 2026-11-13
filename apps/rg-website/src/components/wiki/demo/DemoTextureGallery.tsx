@@ -18,17 +18,21 @@ const GROUP_LABELS: Record<DemoTexture["group"], string> = {
 export function DemoTextureGallery({ textures }: { textures: DemoTexture[] }) {
   if (textures.length === 0) return null;
   const groups = (Object.keys(GROUP_LABELS) as DemoTexture["group"][])
-    .map(g => ({ group: g, items: textures.filter(t => t.group === g) }))
-    .filter(g => g.items.length > 0);
+    .map((g) => ({ group: g, items: textures.filter((t) => t.group === g) }))
+    .filter((g) => g.items.length > 0);
 
   return (
     <section className="space-y-4">
-      <h2 className="text-fluid-headline-sm font-bold text-on-surface">Textures ({textures.length})</h2>
+      <h2 className="text-fluid-headline-sm font-bold text-on-surface">
+        Textures ({textures.length})
+      </h2>
       {groups.map(({ group, items }) => (
         <div key={group} className="space-y-2">
-          <h3 className="text-sm font-semibold text-on-surface-variant">{GROUP_LABELS[group]}</h3>
+          <h3 className="text-sm font-semibold text-on-surface-variant">
+            {GROUP_LABELS[group]}
+          </h3>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
-            {items.map(t => (
+            {items.map((t) => (
               <figure
                 key={t.url}
                 className="overflow-hidden rounded-xl border border-outline-variant/20 bg-surface-container"
@@ -43,7 +47,10 @@ export function DemoTextureGallery({ textures }: { textures: DemoTexture[] }) {
                   />
                 </div>
                 <figcaption className="flex items-center justify-between gap-1 p-2">
-                  <span className="truncate text-[11px] text-on-surface-variant" title={t.label}>
+                  <span
+                    className="truncate text-[11px] text-on-surface-variant"
+                    title={t.label}
+                  >
                     {t.label}
                   </span>
                   <a

@@ -89,7 +89,7 @@ const ACTIONS: QuickAction[] = [
 export function QuickActions() {
   return (
     <DashboardGrid title="Modules" className="lg:grid-cols-3">
-      {ACTIONS.map(action => (
+      {ACTIONS.map((action) => (
         <QuickActionCard key={action.href} {...action} />
       ))}
     </DashboardGrid>

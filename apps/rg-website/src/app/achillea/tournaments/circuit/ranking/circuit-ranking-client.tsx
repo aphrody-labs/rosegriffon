@@ -5,7 +5,15 @@ import Link from "@/components/shared/Link";
 import { createAchilleaClient } from "@/lib/achillea";
 import { UserAvatar } from "@/components/achillea/UserAvatar";
 import type { CircuitRanking } from "@rosegriffon/achillea-types";
-import { Trophy, ArrowLeft, Crown, Shield, Users, Loader2, ChevronRight } from "lucide-react";
+import {
+  Trophy,
+  ArrowLeft,
+  Crown,
+  Shield,
+  Users,
+  Loader2,
+  ChevronRight,
+} from "lucide-react";
 import { signalerException } from "@/lib/achillea/signaler";
 import { MEDAILLE } from "@/components/achillea/couleurs-donnees";
 
@@ -13,11 +21,15 @@ export default function CircuitRankingPage() {
   const [data, setData] = useState<CircuitRanking | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"players" | "clans" | "tournaments">("players");
+  const [activeTab, setActiveTab] = useState<
+    "players" | "clans" | "tournaments"
+  >("players");
   const [playerQuery, setPlayerQuery] = useState("");
   const [minimumTournaments, setMinimumTournaments] = useState(0);
   const [clanQuery, setClanQuery] = useState("");
-  const [standingsFilter, setStandingsFilter] = useState<"all" | "resolved" | "unresolved">("all");
+  const [standingsFilter, setStandingsFilter] = useState<
+    "all" | "resolved" | "unresolved"
+  >("all");
 
   useEffect(() => {
     let cancelled = false;
@@ -26,7 +38,7 @@ export default function CircuitRankingPage() {
 
     client.tournaments
       .circuitRanking()
-      .then(res => {
+      .then((res) => {
         if (cancelled) return;
         if (res.ok && res.value) {
           setData(res.value);
@@ -34,9 +46,10 @@ export default function CircuitRankingPage() {
           setError("Le classement du circuit est indisponible pour le moment.");
         }
       })
-      .catch(cause => {
+      .catch((cause) => {
         signalerException("tournaments/circuit/ranking", cause);
-        if (!cancelled) setError("Le classement du circuit est indisponible pour le moment.");
+        if (!cancelled)
+          setError("Le classement du circuit est indisponible pour le moment.");
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -52,7 +65,7 @@ export default function CircuitRankingPage() {
   const tournaments = data?.tournaments ?? [];
 
   const top3 = leaderboard.slice(0, 3);
-  const visiblePlayers = leaderboard.filter(player => {
+  const visiblePlayers = leaderboard.filter((player) => {
     const query = playerQuery.trim().toLocaleLowerCase("fr-FR");
     return (
       player.tournamentsPlayed >= minimumTournaments &&
@@ -62,11 +75,15 @@ export default function CircuitRankingPage() {
           .includes(query))
     );
   });
-  const visibleClans = clanRanking.filter(clan =>
-    `${clan.name} ${clan.shortName}`.toLocaleLowerCase("fr-FR").includes(clanQuery.trim().toLocaleLowerCase("fr-FR")),
+  const visibleClans = clanRanking.filter((clan) =>
+    `${clan.name} ${clan.shortName}`
+      .toLocaleLowerCase("fr-FR")
+      .includes(clanQuery.trim().toLocaleLowerCase("fr-FR")),
   );
   const visibleTournaments = tournaments.filter(
-    tournament => standingsFilter === "all" || tournament.standingsStatus === standingsFilter,
+    (tournament) =>
+      standingsFilter === "all" ||
+      tournament.standingsStatus === standingsFilter,
   );
 
   return (
@@ -84,10 +101,13 @@ export default function CircuitRankingPage() {
           <span className="p-2 rounded-lg bg-warning/10 text-warning border border-warning/20">
             <Trophy className="w-5 h-5" />
           </span>
-          <h1 className="text-3xl font-bold tracking-tight">Circuit Achilléa — Classement Officiel</h1>
+          <h1 className="text-3xl font-bold tracking-tight">
+            Circuit Achilléa — Classement Officiel
+          </h1>
         </div>
         <p className="text-lg text-muted-foreground">
-          Barème de points cumulés sur l'ensemble des tournois homologués de la saison compétitive.
+          Barème de points cumulés sur l'ensemble des tournois homologués de la
+          saison compétitive.
         </p>
       </div>
 
@@ -96,8 +116,12 @@ export default function CircuitRankingPage() {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 pb-2 items-end">
           {/* #2 */}
           {top3[1] && (
-            <div className={`order-2 sm:order-1 ${MEDAILLE.argent.carte} rounded-2xl p-5 text-center space-y-3 relative shadow-md backdrop-blur-md transition-transform duration-200 hover:-translate-y-1`}>
-              <span className={`absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full text-lg font-bold ${MEDAILLE.argent.pastille} shadow`}>
+            <div
+              className={`order-2 sm:order-1 ${MEDAILLE.argent.carte} rounded-2xl p-5 text-center space-y-3 relative shadow-md backdrop-blur-md transition-transform duration-200 hover:-translate-y-1`}
+            >
+              <span
+                className={`absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full text-lg font-bold ${MEDAILLE.argent.pastille} shadow`}
+              >
                 #2 Argent
               </span>
               <div className="pt-2">
@@ -114,10 +138,20 @@ export default function CircuitRankingPage() {
                 >
                   {top3[1].displayName}
                 </Link>
-                {top3[1].clan && <span className="text-lg text-muted-foreground"> [{top3[1].clan.shortName}]</span>}
-                <div className={`text-xl font-extrabold ${MEDAILLE.argent.texte} mt-1 font-mono`}>{top3[1].points} pts</div>
+                {top3[1].clan && (
+                  <span className="text-lg text-muted-foreground">
+                    {" "}
+                    [{top3[1].clan.shortName}]
+                  </span>
+                )}
+                <div
+                  className={`text-xl font-extrabold ${MEDAILLE.argent.texte} mt-1 font-mono`}
+                >
+                  {top3[1].points} pts
+                </div>
                 <div className="text-lg text-muted-foreground mt-0.5">
-                  {top3[1].wins} titre{top3[1].wins > 1 ? "s" : ""} · {top3[1].tournamentsPlayed} tournoi
+                  {top3[1].wins} titre{top3[1].wins > 1 ? "s" : ""} ·{" "}
+                  {top3[1].tournamentsPlayed} tournoi
                   {top3[1].tournamentsPlayed > 1 ? "s" : ""}
                 </div>
               </div>
@@ -126,8 +160,12 @@ export default function CircuitRankingPage() {
 
           {/* #1 Champion */}
           {top3[0] && (
-            <div className={`order-1 sm:order-2 ${MEDAILLE.or.carte} rounded-2xl p-6 text-center space-y-3 relative shadow-xl backdrop-blur-md sm:-translate-y-2 transition-transform duration-200 hover:-translate-y-3`}>
-              <div className={`absolute -top-4 left-1/2 -translate-x-1/2 flex items-center gap-1 px-3.5 py-1 rounded-full text-lg font-bold ${MEDAILLE.or.pastille} shadow-lg`}>
+            <div
+              className={`order-1 sm:order-2 ${MEDAILLE.or.carte} rounded-2xl p-6 text-center space-y-3 relative shadow-xl backdrop-blur-md sm:-translate-y-2 transition-transform duration-200 hover:-translate-y-3`}
+            >
+              <div
+                className={`absolute -top-4 left-1/2 -translate-x-1/2 flex items-center gap-1 px-3.5 py-1 rounded-full text-lg font-bold ${MEDAILLE.or.pastille} shadow-lg`}
+              >
                 <Crown className="w-3.5 h-3.5 fill-black" />
                 #1 Leader Circuit
               </div>
@@ -145,10 +183,20 @@ export default function CircuitRankingPage() {
                 >
                   {top3[0].displayName}
                 </Link>
-                {top3[0].clan && <span className="text-lg text-muted-foreground"> [{top3[0].clan.shortName}]</span>}
-                <div className={`text-2xl font-black ${MEDAILLE.or.texte} mt-1 font-mono`}>{top3[0].points} pts</div>
+                {top3[0].clan && (
+                  <span className="text-lg text-muted-foreground">
+                    {" "}
+                    [{top3[0].clan.shortName}]
+                  </span>
+                )}
+                <div
+                  className={`text-2xl font-black ${MEDAILLE.or.texte} mt-1 font-mono`}
+                >
+                  {top3[0].points} pts
+                </div>
                 <div className="text-lg text-muted-foreground mt-0.5">
-                  {top3[0].wins} titre{top3[0].wins > 1 ? "s" : ""} · {top3[0].tournamentsPlayed} tournoi
+                  {top3[0].wins} titre{top3[0].wins > 1 ? "s" : ""} ·{" "}
+                  {top3[0].tournamentsPlayed} tournoi
                   {top3[0].tournamentsPlayed > 1 ? "s" : ""}
                 </div>
               </div>
@@ -157,8 +205,12 @@ export default function CircuitRankingPage() {
 
           {/* #3 */}
           {top3[2] && (
-            <div className={`order-3 ${MEDAILLE.bronze.carte} rounded-2xl p-5 text-center space-y-3 relative shadow-md backdrop-blur-md transition-transform duration-200 hover:-translate-y-1`}>
-              <span className={`absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full text-lg font-bold ${MEDAILLE.bronze.pastilleClaire} shadow`}>
+            <div
+              className={`order-3 ${MEDAILLE.bronze.carte} rounded-2xl p-5 text-center space-y-3 relative shadow-md backdrop-blur-md transition-transform duration-200 hover:-translate-y-1`}
+            >
+              <span
+                className={`absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full text-lg font-bold ${MEDAILLE.bronze.pastilleClaire} shadow`}
+              >
                 #3 Bronze
               </span>
               <div className="pt-2">
@@ -175,10 +227,20 @@ export default function CircuitRankingPage() {
                 >
                   {top3[2].displayName}
                 </Link>
-                {top3[2].clan && <span className="text-lg text-muted-foreground"> [{top3[2].clan.shortName}]</span>}
-                <div className={`text-xl font-extrabold ${MEDAILLE.bronze.texte} mt-1 font-mono`}>{top3[2].points} pts</div>
+                {top3[2].clan && (
+                  <span className="text-lg text-muted-foreground">
+                    {" "}
+                    [{top3[2].clan.shortName}]
+                  </span>
+                )}
+                <div
+                  className={`text-xl font-extrabold ${MEDAILLE.bronze.texte} mt-1 font-mono`}
+                >
+                  {top3[2].points} pts
+                </div>
                 <div className="text-lg text-muted-foreground mt-0.5">
-                  {top3[2].wins} titre{top3[2].wins > 1 ? "s" : ""} · {top3[2].tournamentsPlayed} tournoi
+                  {top3[2].wins} titre{top3[2].wins > 1 ? "s" : ""} ·{" "}
+                  {top3[2].tournamentsPlayed} tournoi
                   {top3[2].tournamentsPlayed > 1 ? "s" : ""}
                 </div>
               </div>
@@ -236,10 +298,15 @@ export default function CircuitRankingPage() {
       {loading ? (
         <div className="py-20 text-center space-y-3">
           <Loader2 className="w-8 h-8 animate-spin mx-auto text-muted-foreground" />
-          <p className="text-lg text-muted-foreground">Chargement du classement du circuit...</p>
+          <p className="text-lg text-muted-foreground">
+            Chargement du classement du circuit...
+          </p>
         </div>
       ) : error ? (
-        <p role="alert" className="rounded-xl border border-destructive p-5 text-lg">
+        <p
+          role="alert"
+          className="rounded-xl border border-destructive p-5 text-lg"
+        >
           {error}
         </p>
       ) : (
@@ -259,7 +326,7 @@ export default function CircuitRankingPage() {
                       type="search"
                       aria-label="Rechercher un joueur ou un clan"
                       value={playerQuery}
-                      onChange={event => setPlayerQuery(event.target.value)}
+                      onChange={(event) => setPlayerQuery(event.target.value)}
                       placeholder="Nom, pseudo ou clan..."
                       className="min-h-11 rounded-xl border border-outline-variant/25 bg-surface-container-high/60 px-3 py-2 text-foreground placeholder:text-muted-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary transition-colors"
                     />
@@ -268,7 +335,9 @@ export default function CircuitRankingPage() {
                     Tournois minimum
                     <select
                       value={minimumTournaments}
-                      onChange={event => setMinimumTournaments(Number(event.target.value))}
+                      onChange={(event) =>
+                        setMinimumTournaments(Number(event.target.value))
+                      }
                       className="min-h-11 rounded-xl border border-outline-variant/25 bg-surface-container-high/60 px-3 py-2 text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary transition-colors"
                     >
                       <option value={0}>Tous</option>
@@ -277,46 +346,71 @@ export default function CircuitRankingPage() {
                       <option value={5}>5 ou plus</option>
                     </select>
                   </label>
-                  <p aria-live="polite" className="self-end text-muted-foreground">
-                    {visiblePlayers.length} joueur{visiblePlayers.length > 1 ? "s" : ""} sur {leaderboard.length}
+                  <p
+                    aria-live="polite"
+                    className="self-end text-muted-foreground"
+                  >
+                    {visiblePlayers.length} joueur
+                    {visiblePlayers.length > 1 ? "s" : ""} sur{" "}
+                    {leaderboard.length}
                   </p>
                 </div>
                 {visiblePlayers.length === 0 ? (
-                  <p className="rounded-2xl border border-outline-variant/15 bg-surface-container/60 backdrop-blur-md p-5 text-lg">Aucun joueur ne correspond aux filtres.</p>
+                  <p className="rounded-2xl border border-outline-variant/15 bg-surface-container/60 backdrop-blur-md p-5 text-lg">
+                    Aucun joueur ne correspond aux filtres.
+                  </p>
                 ) : (
                   <>
-                    <div className="grid gap-3 lg:hidden" aria-label="Classement des joueurs">
-                      {visiblePlayers.map(player => (
+                    <div
+                      className="grid gap-3 lg:hidden"
+                      aria-label="Classement des joueurs"
+                    >
+                      {visiblePlayers.map((player) => (
                         <article
                           key={player.userId}
                           className="rounded-2xl border border-outline-variant/15 bg-surface-container/60 backdrop-blur-md p-4 text-lg space-y-3 shadow-sm"
                         >
                           <div className="flex items-center justify-between gap-3">
-                            <span className="font-bold text-warning font-mono">#{leaderboard.indexOf(player) + 1}</span>
-                            <strong className="text-warning font-mono">{player.points} pts</strong>
+                            <span className="font-bold text-warning font-mono">
+                              #{leaderboard.indexOf(player) + 1}
+                            </span>
+                            <strong className="text-warning font-mono">
+                              {player.points} pts
+                            </strong>
                           </div>
                           <Link
                             href={`/achillea/users/${player.userId}`}
                             className="flex min-h-11 items-center gap-3 font-semibold text-foreground hover:text-primary transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
                           >
-                            <UserAvatar avatar={player.avatar} displayName={player.displayName} className="h-10 w-10" />
+                            <UserAvatar
+                              avatar={player.avatar}
+                              displayName={player.displayName}
+                              className="h-10 w-10"
+                            />
                             {player.displayName}
                           </Link>
                           <dl className="grid grid-cols-2 gap-2 text-muted-foreground">
                             <div>
                               <dt>Clan</dt>
-                              <dd className="text-foreground">{player.clan?.shortName ?? "—"}</dd>
+                              <dd className="text-foreground">
+                                {player.clan?.shortName ?? "—"}
+                              </dd>
                             </div>
                             <div>
                               <dt>Tournois</dt>
-                              <dd className="text-foreground">{player.tournamentsPlayed}</dd>
+                              <dd className="text-foreground">
+                                {player.tournamentsPlayed}
+                              </dd>
                             </div>
                             <div>
                               <dt>Titres</dt>
                               <dd className="text-foreground font-semibold">
                                 {player.wins > 0 ? (
                                   <span className="inline-flex items-center gap-1 font-mono text-warning">
-                                    <Trophy className="size-3.5" aria-hidden="true" />
+                                    <Trophy
+                                      className="size-3.5"
+                                      aria-hidden="true"
+                                    />
                                     {player.wins}
                                   </span>
                                 ) : (
@@ -326,15 +420,21 @@ export default function CircuitRankingPage() {
                             </div>
                             <div>
                               <dt>Podiums</dt>
-                              <dd className="text-foreground">{player.podiums}</dd>
+                              <dd className="text-foreground">
+                                {player.podiums}
+                              </dd>
                             </div>
                             <div>
                               <dt>Meilleur rang</dt>
-                              <dd className="text-foreground">{player.bestRankLabel || `#${player.bestRank}`}</dd>
+                              <dd className="text-foreground">
+                                {player.bestRankLabel || `#${player.bestRank}`}
+                              </dd>
                             </div>
                             <div>
                               <dt>Palier</dt>
-                              <dd className="text-foreground capitalize">{player.tier}</dd>
+                              <dd className="text-foreground capitalize">
+                                {player.tier}
+                              </dd>
                             </div>
                           </dl>
                         </article>
@@ -347,17 +447,24 @@ export default function CircuitRankingPage() {
                             <th className="py-3 px-4 w-16 text-center">Rang</th>
                             <th className="py-3 px-4">Joueur</th>
                             <th className="py-3 px-4 text-center">Clan</th>
-                            <th className="py-3 px-4 text-right">Points Circuit</th>
+                            <th className="py-3 px-4 text-right">
+                              Points Circuit
+                            </th>
                             <th className="py-3 px-4 text-right">Titres</th>
                             <th className="py-3 px-4 text-right">Podiums</th>
-                            <th className="py-3 px-4 text-right">Meilleur rang</th>
+                            <th className="py-3 px-4 text-right">
+                              Meilleur rang
+                            </th>
                             <th className="py-3 px-4 text-right">Palier</th>
                             <th className="py-3 px-4 text-right">Tournois</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-outline-variant/10">
-                          {visiblePlayers.map(player => (
-                            <tr key={player.userId} className="hover:bg-surface-container-high/40 transition-colors duration-150">
+                          {visiblePlayers.map((player) => (
+                            <tr
+                              key={player.userId}
+                              className="hover:bg-surface-container-high/40 transition-colors duration-150"
+                            >
                               <td className="py-3 px-4 text-center font-bold text-muted-foreground font-mono">
                                 #{leaderboard.indexOf(player) + 1}
                               </td>
@@ -380,7 +487,9 @@ export default function CircuitRankingPage() {
                                     [{player.clan.shortName}]
                                   </span>
                                 ) : (
-                                  <span className="text-muted-foreground">-</span>
+                                  <span className="text-muted-foreground">
+                                    -
+                                  </span>
                                 )}
                               </td>
                               <td className="py-3 px-4 text-right font-bold text-warning font-mono text-lg">
@@ -389,16 +498,27 @@ export default function CircuitRankingPage() {
                               <td className="py-3 px-4 text-right font-semibold text-success font-mono">
                                 {player.wins > 0 ? (
                                   <span className="inline-flex items-center justify-end gap-1.5 font-mono">
-                                    <Trophy className="size-4 text-warning inline" aria-hidden="true" />
+                                    <Trophy
+                                      className="size-4 text-warning inline"
+                                      aria-hidden="true"
+                                    />
                                     <span>{player.wins}</span>
                                   </span>
                                 ) : (
-                                  <span className="text-muted-foreground">0</span>
+                                  <span className="text-muted-foreground">
+                                    0
+                                  </span>
                                 )}
                               </td>
-                              <td className="py-3 px-4 text-right font-mono">{player.podiums}</td>
-                              <td className="py-3 px-4 text-right">{player.bestRankLabel || `#${player.bestRank}`}</td>
-                              <td className="py-3 px-4 text-right capitalize">{player.tier}</td>
+                              <td className="py-3 px-4 text-right font-mono">
+                                {player.podiums}
+                              </td>
+                              <td className="py-3 px-4 text-right">
+                                {player.bestRankLabel || `#${player.bestRank}`}
+                              </td>
+                              <td className="py-3 px-4 text-right capitalize">
+                                {player.tier}
+                              </td>
                               <td className="py-3 px-4 text-right text-muted-foreground font-mono">
                                 {player.tournamentsPlayed}
                               </td>
@@ -426,13 +546,14 @@ export default function CircuitRankingPage() {
                     type="search"
                     aria-label="Rechercher un clan"
                     value={clanQuery}
-                    onChange={event => setClanQuery(event.target.value)}
+                    onChange={(event) => setClanQuery(event.target.value)}
                     placeholder="Nom ou tag du clan..."
                     className="min-h-11 rounded-xl border border-outline-variant/25 bg-surface-container-high/60 px-3 text-foreground placeholder:text-muted-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary transition-colors"
                   />
                 </label>
                 <p aria-live="polite" className="text-lg text-muted-foreground">
-                  {visibleClans.length} clan{visibleClans.length > 1 ? "s" : ""} sur {clanRanking.length}
+                  {visibleClans.length} clan{visibleClans.length > 1 ? "s" : ""}{" "}
+                  sur {clanRanking.length}
                 </p>
                 {visibleClans.length === 0 && (
                   <p className="rounded-2xl border border-outline-variant/15 bg-surface-container/60 backdrop-blur-md p-5 text-lg">
@@ -440,11 +561,18 @@ export default function CircuitRankingPage() {
                   </p>
                 )}
                 <div className="grid gap-3 md:hidden">
-                  {visibleClans.map(clan => (
-                    <article key={clan.id} className="rounded-2xl border border-outline-variant/15 bg-surface-container/60 backdrop-blur-md p-4 text-lg shadow-sm space-y-2">
+                  {visibleClans.map((clan) => (
+                    <article
+                      key={clan.id}
+                      className="rounded-2xl border border-outline-variant/15 bg-surface-container/60 backdrop-blur-md p-4 text-lg shadow-sm space-y-2"
+                    >
                       <div className="flex justify-between gap-3">
-                        <strong className="font-mono">#{clanRanking.indexOf(clan) + 1}</strong>
-                        <strong className="text-warning font-mono">{clan.points} pts</strong>
+                        <strong className="font-mono">
+                          #{clanRanking.indexOf(clan) + 1}
+                        </strong>
+                        <strong className="text-warning font-mono">
+                          {clan.points} pts
+                        </strong>
                       </div>
                       <Link
                         href={`/achillea/clans/${clan.id}`}
@@ -461,7 +589,8 @@ export default function CircuitRankingPage() {
                         ) : (
                           "0 titre · "
                         )}
-                        {clan.players} joueur{clan.players > 1 ? "s" : ""} actif{clan.players > 1 ? "s" : ""}
+                        {clan.players} joueur{clan.players > 1 ? "s" : ""} actif
+                        {clan.players > 1 ? "s" : ""}
                       </p>
                     </article>
                   ))}
@@ -478,8 +607,11 @@ export default function CircuitRankingPage() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-outline-variant/10">
-                      {visibleClans.map(clan => (
-                        <tr key={clan.id} className="hover:bg-surface-container-high/40 transition-colors duration-150">
+                      {visibleClans.map((clan) => (
+                        <tr
+                          key={clan.id}
+                          className="hover:bg-surface-container-high/40 transition-colors duration-150"
+                        >
                           <td className="py-3 px-4 text-center font-bold text-muted-foreground font-mono">
                             #{clanRanking.indexOf(clan) + 1}
                           </td>
@@ -497,14 +629,19 @@ export default function CircuitRankingPage() {
                           <td className="py-3 px-4 text-right font-semibold text-success font-mono">
                             {clan.wins > 0 ? (
                               <span className="inline-flex items-center justify-end gap-1.5 font-mono">
-                                <Trophy className="size-4 text-warning inline" aria-hidden="true" />
+                                <Trophy
+                                  className="size-4 text-warning inline"
+                                  aria-hidden="true"
+                                />
                                 <span>{clan.wins}</span>
                               </span>
                             ) : (
                               <span className="text-muted-foreground">0</span>
                             )}
                           </td>
-                          <td className="py-3 px-4 text-right text-muted-foreground font-mono">{clan.players}</td>
+                          <td className="py-3 px-4 text-right text-muted-foreground font-mono">
+                            {clan.players}
+                          </td>
                         </tr>
                       ))}
                     </tbody>
@@ -525,7 +662,11 @@ export default function CircuitRankingPage() {
                   État du classement
                   <select
                     value={standingsFilter}
-                    onChange={event => setStandingsFilter(event.target.value as typeof standingsFilter)}
+                    onChange={(event) =>
+                      setStandingsFilter(
+                        event.target.value as typeof standingsFilter,
+                      )
+                    }
                     className="min-h-11 rounded-xl border border-outline-variant/25 bg-surface-container-high/60 px-3 text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary transition-colors"
                   >
                     <option value="all">Tous les tournois</option>
@@ -534,13 +675,17 @@ export default function CircuitRankingPage() {
                   </select>
                 </label>
                 <p aria-live="polite" className="text-lg text-muted-foreground">
-                  {visibleTournaments.length} tournoi{visibleTournaments.length > 1 ? "s" : ""} sur {tournaments.length}
+                  {visibleTournaments.length} tournoi
+                  {visibleTournaments.length > 1 ? "s" : ""} sur{" "}
+                  {tournaments.length}
                 </p>
                 {visibleTournaments.length === 0 && (
-                  <p className="rounded-2xl border border-outline-variant/15 bg-surface-container/60 backdrop-blur-md p-5 text-lg">Aucun tournoi ne correspond au filtre.</p>
+                  <p className="rounded-2xl border border-outline-variant/15 bg-surface-container/60 backdrop-blur-md p-5 text-lg">
+                    Aucun tournoi ne correspond au filtre.
+                  </p>
                 )}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {visibleTournaments.map(t => (
+                  {visibleTournaments.map((t) => (
                     <div
                       key={t.id}
                       className="border border-outline-variant/15 bg-surface-container/60 backdrop-blur-md rounded-2xl p-5 space-y-3 transition-all duration-200 hover:bg-surface-container-high/60 hover:shadow-lg hover:border-outline-variant/30 active:scale-[0.99]"
@@ -556,21 +701,30 @@ export default function CircuitRankingPage() {
                       <div className="space-y-1.5 pt-2 border-t border-outline-variant/15 text-lg">
                         {t.standingsStatus === "unresolved" && (
                           <p className="text-lg text-muted-foreground">
-                            Classement historique non résolu : aucun podium ni point attribué.
+                            Classement historique non résolu : aucun podium ni
+                            point attribué.
                           </p>
                         )}
-                        {t.podium.map(p => {
+                        {t.podium.map((p) => {
                           const medalStyle =
                             p.rank === 1
                               ? MEDAILLE.or.texte
                               : p.rank === 2
                                 ? MEDAILLE.argent.texte
                                 : MEDAILLE.bronze.texte;
-                          const rankLabel = p.rankLabel || (p.rank === 1 ? "1er" : p.rank === 2 ? "2e" : "3e");
+                          const rankLabel =
+                            p.rankLabel ||
+                            (p.rank === 1 ? "1er" : p.rank === 2 ? "2e" : "3e");
                           return (
-                            <div key={p.userId} className="flex items-center justify-between text-muted-foreground">
+                            <div
+                              key={p.userId}
+                              className="flex items-center justify-between text-muted-foreground"
+                            >
                               <span className="inline-flex items-center gap-1.5 font-medium text-foreground">
-                                <Trophy className={`size-3.5 ${medalStyle}`} aria-hidden="true" />
+                                <Trophy
+                                  className={`size-3.5 ${medalStyle}`}
+                                  aria-hidden="true"
+                                />
                                 <span>
                                   {rankLabel} : {p.displayName}
                                 </span>

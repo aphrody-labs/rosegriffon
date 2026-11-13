@@ -69,7 +69,9 @@ function parseContent(content: any) {
 // Loaders
 // ============================================================================
 
-export async function loadChangeAuraSkillConfigAsync(dataPath: string = DATA_ROOT) {
+export async function loadChangeAuraSkillConfigAsync(
+  dataPath: string = DATA_ROOT,
+) {
   const filename = findConfigFile("skill", "change_aura_skill_config");
   if (!filename) return null;
 
@@ -78,7 +80,9 @@ export async function loadChangeAuraSkillConfigAsync(dataPath: string = DATA_ROO
   return content ? parseContent(content) : null;
 }
 
-export async function buildChangeAuraSkillDatabase(dataPath: string = DATA_ROOT): Promise<ChangeAuraSkillDatabase> {
+export async function buildChangeAuraSkillDatabase(
+  dataPath: string = DATA_ROOT,
+): Promise<ChangeAuraSkillDatabase> {
   const result = await loadChangeAuraSkillConfigAsync(dataPath);
   const data = result?.data || [];
   const info = result?.info || [];
@@ -92,7 +96,9 @@ export async function buildChangeAuraSkillDatabase(dataPath: string = DATA_ROOT)
     bySkillId,
     getCharaForSkill: (skillId: string) => {
       const entry = bySkillId.get(skillId);
-      return entry && entry.charaParamId !== "0x00000000" ? entry.charaParamId : null;
+      return entry && entry.charaParamId !== "0x00000000"
+        ? entry.charaParamId
+        : null;
     },
   };
 }

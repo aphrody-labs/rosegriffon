@@ -12,7 +12,8 @@ interface CastCardProps {
 }
 
 export function CastCard({ caster, className }: CastCardProps) {
-  const avatarUrl = caster.avatar || "https://cdn.discordapp.com/embed/avatars/0.png";
+  const avatarUrl =
+    caster.avatar || "https://cdn.discordapp.com/embed/avatars/0.png";
 
   return (
     <div
@@ -21,12 +22,24 @@ export function CastCard({ caster, className }: CastCardProps) {
       }`}
     >
       <div className="relative size-20 rounded-full overflow-hidden border-2 border-outline/30 bg-surface-variant shrink-0">
-        <Image src={avatarUrl} alt={caster.displayName} fill unoptimized className="object-cover" />
+        <Image
+          src={avatarUrl}
+          alt={caster.displayName}
+          fill
+          unoptimized
+          className="object-cover"
+        />
       </div>
 
       <div className="space-y-1 w-full">
-        <h4 className="font-bold text-base text-on-surface truncate">{caster.displayName}</h4>
-        {caster.bio && <p className="text-xs text-on-surface-variant line-clamp-2">{caster.bio}</p>}
+        <h4 className="font-bold text-base text-on-surface truncate">
+          {caster.displayName}
+        </h4>
+        {caster.bio && (
+          <p className="text-xs text-on-surface-variant line-clamp-2">
+            {caster.bio}
+          </p>
+        )}
       </div>
 
       <div className="flex items-center gap-2 flex-wrap justify-center pt-1">
@@ -42,7 +55,12 @@ export function CastCard({ caster, className }: CastCardProps) {
             size="icon"
             className={`size-7 rounded-full ${MARQUE.twitchBouton}`}
           >
-            <a href={caster.twitchUrl} target="_blank" rel="noopener noreferrer" aria-label="Chaîne Twitch">
+            <a
+              href={caster.twitchUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Chaîne Twitch"
+            >
               <FaTwitch className="size-3.5" />
             </a>
           </Button>

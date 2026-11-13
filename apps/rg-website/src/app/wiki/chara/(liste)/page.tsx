@@ -1,7 +1,12 @@
 export const dynamic = "force-dynamic";
 
 import type { Metadata } from "next";
-import { buildCanonical, LIST_CANONICAL_KEYS, wikiTitle, withDefaultOgImage } from "@/lib/seo";
+import {
+  buildCanonical,
+  LIST_CANONICAL_KEYS,
+  wikiTitle,
+  withDefaultOgImage,
+} from "@/lib/seo";
 import { parseSearchParams } from "@/lib/validations";
 import { wikiService } from "@/lib/wiki-service";
 import { PlayersClient } from "../players-client";
@@ -87,7 +92,10 @@ export default async function PlayersPage({
   } = params;
 
   const pageNumber = page ? parseInt(page.toString(), 10) : 1;
-  const itemsPerPage = perPage && ALLOWED_PER_PAGE.has(Number(perPage)) ? Number(perPage) : DEFAULT_PER_PAGE;
+  const itemsPerPage =
+    perPage && ALLOWED_PER_PAGE.has(Number(perPage))
+      ? Number(perPage)
+      : DEFAULT_PER_PAGE;
 
   // Data First: Fetch paginated data from DB
   const { data: characters, total } = await wikiService.getCharactersList({
@@ -114,7 +122,11 @@ export default async function PlayersPage({
     "@context": "https://schema.org",
     "@type": "CollectionPage",
     description: `Base de données de ${total.toLocaleString("fr-FR")} joueurs Inazuma Eleven: Victory Road.`,
-    isPartOf: { "@type": "WebSite", name: "Azalée", url: absoluteUrl(wiki("/")) },
+    isPartOf: {
+      "@type": "WebSite",
+      name: "Azalée",
+      url: absoluteUrl(wiki("/")),
+    },
     mainEntity: {
       "@type": "ItemList",
       itemListElement: characters.slice(0, 10).map((c, i) => ({
@@ -132,7 +144,10 @@ export default async function PlayersPage({
 
   return (
     <div className="space-y-6">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionJsonLd) }} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionJsonLd) }}
+      />
       <WikiPageHeader
         icon="group"
         title="Personnages"

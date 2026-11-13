@@ -263,6 +263,7 @@ faute de piloter les closures qui les portent.
 ## RE anchors
 
 Knowledge base (`var/nie.sqlite`) tables:
+
 - `hash_name` — CRC32 and string hashes for Lua commands, modules and functions
 - `function` — Lua host functions and dispatch loop in `nie.exe`
 - `xref` — call-graph topology for Lua host functions
@@ -270,5 +271,6 @@ Knowledge base (`var/nie.sqlite`) tables:
 - `coverage` — Lua command interpreter coverage
 
 Key binary reference addresses:
+
 - `0x1404aadb8` — Lua host command interpreter
 - `0x1406d5840` — Core game state tick loop

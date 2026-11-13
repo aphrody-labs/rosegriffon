@@ -9,7 +9,12 @@ import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
 import { useLexicalEditable } from "@lexical/react/useLexicalEditable";
 import { useLexicalNodeSelection } from "@lexical/react/useLexicalNodeSelection";
 import { mergeRegister } from "@lexical/utils";
-import type { BaseSelection, LexicalCommand, LexicalEditor, NodeKey } from "lexical";
+import type {
+  BaseSelection,
+  LexicalCommand,
+  LexicalEditor,
+  NodeKey,
+} from "lexical";
 import {
   $getNodeByKey,
   $getSelection,
@@ -39,11 +44,12 @@ import { $isImageNode } from "@/components/editor/nodes/image-node";
 
 const imageCache = new Set();
 
-export const RIGHT_CLICK_IMAGE_COMMAND: LexicalCommand<MouseEvent> = createCommand("RIGHT_CLICK_IMAGE_COMMAND");
+export const RIGHT_CLICK_IMAGE_COMMAND: LexicalCommand<MouseEvent> =
+  createCommand("RIGHT_CLICK_IMAGE_COMMAND");
 
 function useSuspenseImage(src: string) {
   if (!imageCache.has(src)) {
-    throw new Promise(resolve => {
+    throw new Promise((resolve) => {
       const img = new globalThis.Image();
       img.src = src;
       img.onload = () => {
@@ -145,7 +151,8 @@ export default function ImageComponent({
 }): JSX.Element {
   const imageRef = useRef<null | HTMLImageElement>(null);
   const buttonRef = useRef<HTMLButtonElement | null>(null);
-  const [isSelected, setSelected, clearSelection] = useLexicalNodeSelection(nodeKey);
+  const [isSelected, setSelected, clearSelection] =
+    useLexicalNodeSelection(nodeKey);
   const [isResizing, setIsResizing] = useState<boolean>(false);
   const [editor] = useLexicalComposerContext();
   const [selection, setSelection] = useState<BaseSelection | null>(null);
@@ -160,7 +167,7 @@ export default function ImageComponent({
         const event: KeyboardEvent = payload;
         event.preventDefault();
         editor.update(() => {
-          deleteSelection.getNodes().forEach(node => {
+          deleteSelection.getNodes().forEach((node) => {
             if ($isImageNode(node)) {
               node.remove();
             }
@@ -176,14 +183,21 @@ export default function ImageComponent({
     (event: KeyboardEvent | null) => {
       const latestSelection = $getSelection();
       const buttonElem = buttonRef.current;
-      if (isSelected && $isNodeSelection(latestSelection) && latestSelection.getNodes().length === 1) {
+      if (
+        isSelected &&
+        $isNodeSelection(latestSelection) &&
+        latestSelection.getNodes().length === 1
+      ) {
         if (showCaption) {
           // Move focus into nested editor
           $setSelection(null);
           event?.preventDefault();
           caption.focus();
           return true;
-        } else if (buttonElem !== null && buttonElem !== document.activeElement) {
+        } else if (
+          buttonElem !== null &&
+          buttonElem !== document.activeElement
+        ) {
           event?.preventDefault();
           buttonElem.focus();
           return true;
@@ -196,7 +210,10 @@ export default function ImageComponent({
 
   const $onEscape = useCallback(
     (event: KeyboardEvent) => {
-      if (activeEditorRef.current === caption || buttonRef.current === event.target) {
+      if (
+        activeEditorRef.current === caption ||
+        buttonRef.current === event.target
+      ) {
         $setSelection(null);
         editor.update(() => {
           setSelected(true);
@@ -244,7 +261,10 @@ export default function ImageComponent({
           $isRangeSelection(latestSelection) &&
           latestSelection.getNodes().length === 1
         ) {
-          editor.dispatchCommand(RIGHT_CLICK_IMAGE_COMMAND, event as MouseEvent);
+          editor.dispatchCommand(
+            RIGHT_CLICK_IMAGE_COMMAND,
+            event as MouseEvent,
+          );
         }
       });
     },
@@ -268,11 +288,19 @@ export default function ImageComponent({
         },
         COMMAND_PRIORITY_LOW,
       ),
-      editor.registerCommand<MouseEvent>(CLICK_COMMAND, onClick, COMMAND_PRIORITY_LOW),
-      editor.registerCommand<MouseEvent>(RIGHT_CLICK_IMAGE_COMMAND, onClick, COMMAND_PRIORITY_LOW),
+      editor.registerCommand<MouseEvent>(
+        CLICK_COMMAND,
+        onClick,
+        COMMAND_PRIORITY_LOW,
+      ),
+      editor.registerCommand<MouseEvent>(
+        RIGHT_CLICK_IMAGE_COMMAND,
+        onClick,
+        COMMAND_PRIORITY_LOW,
+      ),
       editor.registerCommand(
         DRAGSTART_COMMAND,
-        event => {
+        (event) => {
           if (event.target === imageRef.current) {
             // TODO This is just a temporary workaround for FF to behave like other browsers.
             // Ideally, this handles drag & drop too (and all browsers).
@@ -283,10 +311,22 @@ export default function ImageComponent({
         },
         COMMAND_PRIORITY_LOW,
       ),
-      editor.registerCommand(KEY_DELETE_COMMAND, $onDelete, COMMAND_PRIORITY_LOW),
-      editor.registerCommand(KEY_BACKSPACE_COMMAND, $onDelete, COMMAND_PRIORITY_LOW),
+      editor.registerCommand(
+        KEY_DELETE_COMMAND,
+        $onDelete,
+        COMMAND_PRIORITY_LOW,
+      ),
+      editor.registerCommand(
+        KEY_BACKSPACE_COMMAND,
+        $onDelete,
+        COMMAND_PRIORITY_LOW,
+      ),
       editor.registerCommand(KEY_ENTER_COMMAND, $onEnter, COMMAND_PRIORITY_LOW),
-      editor.registerCommand(KEY_ESCAPE_COMMAND, $onEscape, COMMAND_PRIORITY_LOW),
+      editor.registerCommand(
+        KEY_ESCAPE_COMMAND,
+        $onEscape,
+        COMMAND_PRIORITY_LOW,
+      ),
     );
 
     rootElement?.addEventListener("contextmenu", onRightClick);
@@ -307,7 +347,10 @@ export default function ImageComponent({
     });
   };
 
-  const onResizeEnd = (nextWidth: "inherit" | number, nextHeight: "inherit" | number) => {
+  const onResizeEnd = (
+    nextWidth: "inherit" | number,
+    nextHeight: "inherit" | number,
+  ) => {
     // Delay hiding the resize bars for click case
     setTimeout(() => {
       setIsResizing(false);
@@ -352,7 +395,10 @@ export default function ImageComponent({
 
       {showCaption && (
         <div className="image-caption-container absolute right-0 bottom-1 left-0 m-0 block min-w-[100px] overflow-hidden border-t bg-white/90 p-0">
-          <LexicalNestedComposer initialEditor={caption} initialNodes={[RootNode, TextNode, ParagraphNode]}>
+          <LexicalNestedComposer
+            initialEditor={caption}
+            initialNodes={[RootNode, TextNode, ParagraphNode]}
+          >
             <AutoFocusPlugin />
             <HistoryPlugin />
             <RichTextPlugin

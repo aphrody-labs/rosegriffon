@@ -4,11 +4,19 @@ import { Button } from "@rosegriffon/ui";
 import { createPostgresClient } from "@rosegriffon/db/service";
 import { GenericEditorForm } from "./generic-editor-form";
 
-export default async function GenericRowPage({ params }: { params: Promise<{ table: string; id: string }> }) {
+export default async function GenericRowPage({
+  params,
+}: {
+  params: Promise<{ table: string; id: string }>;
+}) {
   const { table, id } = await params;
   const supabase = createPostgresClient();
 
-  const { data: row } = await (supabase as any).from(table).select("*").eq("id", id).single();
+  const { data: row } = await (supabase as any)
+    .from(table)
+    .select("*")
+    .eq("id", id)
+    .single();
 
   if (!row) {
     return <div>Enregistrement non trouvé.</div>;
@@ -18,7 +26,10 @@ export default async function GenericRowPage({ params }: { params: Promise<{ tab
     <div className="p-6 md:p-10 space-y-6">
       <div className="flex items-center gap-4">
         <Button asChild variant="ghost" size="icon">
-          <Link href={`/admin/database/${table}`} aria-label="Retour à la table">
+          <Link
+            href={`/admin/database/${table}`}
+            aria-label="Retour à la table"
+          >
             <ChevronLeft className="size-5" />
           </Link>
         </Button>

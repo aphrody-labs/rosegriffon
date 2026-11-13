@@ -59,7 +59,9 @@ export const DISCORD_CHANNELS = {
 export const MEDAILLE_AZALEE_ROLE_ID = DISCORD_ROLES.MEDAILLE_AZALEE;
 
 /** Helper : résout le guild ID depuis env avec fallback constant. */
-export function resolveGuildId(env: Record<string, string | undefined>): string {
+export function resolveGuildId(
+  env: Record<string, string | undefined>,
+): string {
   const fromEnv = env.GUILD_ID || env.DISCORD_GUILD_ID;
   // Filtre les valeurs qui ressemblent à $VAR non-expanded (Bun .env piège)
   if (fromEnv && !fromEnv.startsWith("$")) return fromEnv;
@@ -78,12 +80,14 @@ export function resolveGuildId(env: Record<string, string | undefined>): string 
  * y est de toute façon ajoutée par défaut. Les doublons et les valeurs
  * non-numériques sont écartés (même piège `$VAR` non substitué que ci-dessus).
  */
-export function resolveGuildIds(env: Record<string, string | undefined>): string[] {
+export function resolveGuildIds(
+  env: Record<string, string | undefined>,
+): string[] {
   const principale = resolveGuildId(env);
   const supplementaires = (env.DISCORD_EXTRA_GUILD_IDS ?? "")
     .split(",")
-    .map(v => v.trim())
-    .filter(v => /^\d{15,25}$/.test(v));
+    .map((v) => v.trim())
+    .filter((v) => /^\d{15,25}$/.test(v));
 
   // Achillea rejoint la liste par défaut le 14/8/2026 : le bot Rose Griffon y est
   // réellement présent (`GET /users/@me/guilds`), et sans cette ligne il y était en
@@ -95,7 +99,14 @@ export function resolveGuildIds(env: Record<string, string | undefined>): string
   // Lister une guilde que le bot n'a pas rejointe reste sans danger : `src/index.ts`
   // intersecte cette liste avec les guildes réellement rejointes avant d'enregistrer
   // quoi que ce soit.
-  return [...new Set([principale, AZALEE_GUILD_ID, ACHILLEA_GUILD_ID, ...supplementaires])];
+  return [
+    ...new Set([
+      principale,
+      AZALEE_GUILD_ID,
+      ACHILLEA_GUILD_ID,
+      ...supplementaires,
+    ]),
+  ];
 }
 
 /* ── LIMITES DURES DE L'API DISCORD ────────────────────────────────────────
@@ -148,7 +159,8 @@ export const COULEUR_MARQUE = 0xa14b3f;
  * si une émote est renommée ou supprimée, on ne veut pas d'un déploiement pour
  * remettre un message d'aplomb.
  */
-export const EMOTE_ANNONCE_DEFAUT = "<:RG_gaelle_hautparleur:1412136626167218286>";
+export const EMOTE_ANNONCE_DEFAUT =
+  "<:RG_gaelle_hautparleur:1412136626167218286>";
 export const EMOTE_FETE_DEFAUT = "<:RG_roy_confetti:1412136639303520380>";
 
 /**

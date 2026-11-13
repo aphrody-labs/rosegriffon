@@ -219,7 +219,8 @@ export interface PostCampagneInstagram extends BasePostCampagne {
 }
 
 /** Publication rattachée à une campagne, quelle que soit sa source. */
-export type PostCampagne = PostCampagneX | PostCampagneDiscord | PostCampagneInstagram;
+export type PostCampagne =
+  PostCampagneX | PostCampagneDiscord | PostCampagneInstagram;
 
 /**
  * Clé stable et unique d'une publication, toutes sources confondues.
@@ -249,7 +250,11 @@ export function clePost(post: PostCampagne): string {
  * honnête du « Voir sur X ». Discord refusera l'accès à qui n'est pas membre du
  * serveur (ou n'a pas le rôle qui ouvre le salon) — le libellé le dit.
  */
-export function urlMessageDiscord(guildId: string, salonId: string, messageId: string): string {
+export function urlMessageDiscord(
+  guildId: string,
+  salonId: string,
+  messageId: string,
+): string {
   return `https://discord.com/channels/${guildId}/${salonId}/${messageId}`;
 }
 
@@ -302,7 +307,11 @@ export const PAGE_MAXIMUM = 1_000_000;
  * `NaN` : tout ce qui n'est pas un entier fini retombe sur le repli, tout ce qui
  * dépasse est plafonné.
  */
-export function entierPositif(valeur: number, repli: number, maximum = PAGE_MAXIMUM): number {
+export function entierPositif(
+  valeur: number,
+  repli: number,
+  maximum = PAGE_MAXIMUM,
+): number {
   if (!Number.isFinite(valeur)) {
     return repli;
   }
@@ -369,9 +378,13 @@ export function extraireImages(media: unknown): ImageCampagne[] {
     if (item.type !== "photo") {
       continue;
     }
-    const candidats = [item.storage_url, item.url, item.previewUrl, item.preview_url, item.original_url].filter(
-      estChaineNonVide,
-    );
+    const candidats = [
+      item.storage_url,
+      item.url,
+      item.previewUrl,
+      item.preview_url,
+      item.original_url,
+    ].filter(estChaineNonVide);
     if (candidats.length === 0) {
       continue;
     }
@@ -440,7 +453,9 @@ export interface HashtagAffichable {
  * ⚠ Ne renvoie QUE `hashtags` : `hashtags_rattrapage` n'est même pas chargé par
  * `queries.ts`, et cette fonction n'a donc aucun moyen de le faire remonter.
  */
-export function hashtagsAffichables(campagne: Pick<Campagne, "hashtags" | "hashtagsAffichage">): HashtagAffichable[] {
+export function hashtagsAffichables(
+  campagne: Pick<Campagne, "hashtags" | "hashtagsAffichage">,
+): HashtagAffichable[] {
   return campagne.hashtags.map((valeur, position) => ({
     libelle: afficherHashtag(campagne.hashtagsAffichage[position] ?? valeur),
     valeur,
@@ -486,7 +501,9 @@ export function dateValide(iso: string | null | undefined): Date | null {
 }
 
 /** « 22 août 2026 », en heure de Paris. */
-export function formaterDateParis(iso: string | null | undefined): string | null {
+export function formaterDateParis(
+  iso: string | null | undefined,
+): string | null {
   const date = dateValide(iso);
   return date ? FORMAT_DATE_PARIS.format(date) : null;
 }
@@ -497,7 +514,9 @@ export function formaterDateParis(iso: string | null | undefined): string | null
  * L'espace autour du « h » suit la typographie française ; l'affiche écrit
  * « 23h59 », c'est la même minute.
  */
-export function formaterDateHeureParis(iso: string | null | undefined): string | null {
+export function formaterDateHeureParis(
+  iso: string | null | undefined,
+): string | null {
   const date = dateValide(iso);
   if (!date) {
     return null;
@@ -536,7 +555,9 @@ export function decouperDuree(millisecondes: number): DureeRestante {
  * elle reste affichée, à sa place, en entier.
  */
 export function estInterdiction(regle: string): boolean {
-  return /\b(interdit|interdite|interdits|interdites|proscrit|proscrite|prohibé|prohibée)\b/i.test(regle);
+  return /\b(interdit|interdite|interdits|interdites|proscrit|proscrite|prohibé|prohibée)\b/i.test(
+    regle,
+  );
 }
 
 /**
@@ -564,7 +585,9 @@ const RESEAUX_CONNUS = [
 
 export function reseauxHorsX(reglement: readonly string[]): string[] {
   const texte = reglement.join(" ");
-  return RESEAUX_CONNUS.filter(reseau => new RegExp(`\\b${reseau}\\b`, "i").test(texte));
+  return RESEAUX_CONNUS.filter((reseau) =>
+    new RegExp(`\\b${reseau}\\b`, "i").test(texte),
+  );
 }
 
 /**
@@ -596,7 +619,9 @@ export function etatCampagne(
 }
 
 /** Libellé français de l'état d'une campagne. */
-export function libelleEtatCampagne(etat: ReturnType<typeof etatCampagne>): string {
+export function libelleEtatCampagne(
+  etat: ReturnType<typeof etatCampagne>,
+): string {
   switch (etat) {
     case "a-venir":
       return "À venir";

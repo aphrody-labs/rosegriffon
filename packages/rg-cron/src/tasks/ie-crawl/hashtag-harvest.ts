@@ -30,9 +30,19 @@
 import { XClient, XSession, type Tweet } from "../../lib/x-natif";
 import { createBunSql } from "@rosegriffon/db/bun-sql";
 import type { SQL } from "bun";
-import { compterImages, porteUneImage, tweetToRow, type DBTweetRow, type MediaItem } from "./tweet-row";
+import {
+  compterImages,
+  porteUneImage,
+  tweetToRow,
+  type DBTweetRow,
+  type MediaItem,
+} from "./tweet-row";
 import { fermerStockage, rehebergerMediasTweet } from "./tweet-media-storage";
-import { apparierHashtag, requetesVariantes, variantesRecherche } from "./hashtag-variantes";
+import {
+  apparierHashtag,
+  requetesVariantes,
+  variantesRecherche,
+} from "./hashtag-variantes";
 import { loadXCookieHeader } from "./x-accounts";
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -167,7 +177,7 @@ interface Retenu {
 // ─────────────────────────────────────────────────────────────────────────────
 
 function dormir(ms: number): Promise<void> {
-  return new Promise(r => setTimeout(r, ms));
+  return new Promise((r) => setTimeout(r, ms));
 }
 
 /**
@@ -175,13 +185,20 @@ function dormir(ms: number): Promise<void> {
  * `setTimeout` non annulé garde la boucle d'événements Bun vivante et empêche le
  * programme de se terminer tout seul.
  */
-async function avecDelaiMax<T>(promesse: Promise<T>, ms: number, quoi: string): Promise<T> {
+async function avecDelaiMax<T>(
+  promesse: Promise<T>,
+  ms: number,
+  quoi: string,
+): Promise<T> {
   let minuteur: ReturnType<typeof setTimeout> | undefined;
   try {
     return await Promise.race([
       promesse,
       new Promise<never>((_, rejeter) => {
-        minuteur = setTimeout(() => rejeter(new Error(`${quoi} : délai dépassé`)), ms);
+        minuteur = setTimeout(
+          () => rejeter(new Error(`${quoi} : délai dépassé`)),
+          ms,
+        );
       }),
     ]);
   } finally {
@@ -225,14 +242,21 @@ export function filtresDeRequete(requete: string): string {
  * main depuis l'écran d'administration.
  */
 export function estCompteOrganisateur(
-  tweet: { username?: string | null; author?: { username?: string | null } | null },
+  tweet: {
+    username?: string | null;
+    author?: { username?: string | null } | null;
+  },
   campagne: { comptes_organisateurs?: readonly string[] | null },
 ): boolean {
   const comptes = campagne.comptes_organisateurs ?? [];
   if (comptes.length === 0) return false;
-  const pseudo = (tweet.username ?? tweet.author?.username ?? "").replace(/^@+/, "").toLowerCase();
+  const pseudo = (tweet.username ?? tweet.author?.username ?? "")
+    .replace(/^@+/, "")
+    .toLowerCase();
   if (!pseudo) return false;
-  return comptes.some(c => (c || "").replace(/^@+/, "").toLowerCase() === pseudo);
+  return comptes.some(
+    (c) => (c || "").replace(/^@+/, "").toLowerCase() === pseudo,
+  );
 }
 
 /**
@@ -246,7 +270,10 @@ export function estCompteOrganisateur(
  * d'atteindre l'écran, jamais cette fonction.
  */
 function hashtagsRecoltes(campagne: LigneCampagne): string[] {
-  return [...(campagne.hashtags ?? []), ...(campagne.hashtags_rattrapage ?? [])];
+  return [
+    ...(campagne.hashtags ?? []),
+    ...(campagne.hashtags_rattrapage ?? []),
+  ];
 }
 
 /**
@@ -269,7 +296,9 @@ function cleCurseur(requete: string, produit: Produit): string {
  * @param options `slug` pour n'en traiter qu'une, `limite` pour plafonner, `dry`
  *                pour ne rien écrire.
  */
-export async function crawlHashtagCampaigns(options: OptionsRecolte = {}): Promise<StatsRecolte> {
+export async function crawlHashtagCampaigns(
+  options: OptionsRecolte = {},
+): Promise<StatsRecolte> {
   const { slug, limite = MAX_TWEETS_PAR_CAMPAGNE, dry = false } = options;
   const sql = createBunSql();
   const details: StatsCampagne[] = [];
@@ -283,7 +312,9 @@ export async function crawlHashtagCampaigns(options: OptionsRecolte = {}): Promi
 
     if (campagnes.length === 0) {
       const quoi = slug ? `la campagne « ${slug} »` : "aucune campagne active";
-      console.log(`[Campagnes X] Rien à récolter : ${quoi} (inexistante ou inactive).`);
+      console.log(
+        `[Campagnes X] Rien à récolter : ${quoi} (inexistante ou inactive).`,
+      );
       return {
         success: true,
         campagnes: 0,
@@ -302,7 +333,9 @@ export async function crawlHashtagCampaigns(options: OptionsRecolte = {}): Promi
     // permet au backoff interne d'attendre la bonne fenêtre. Deux clients, ce
     // sont deux boucles à l'aveugle qui prennent chacune leur 429.
     const cookie = loadXCookieHeader();
-    const session = cookie ? XSession.fromCookieString(cookie) : XSession.loadOrEnv();
+    const session = cookie
+      ? XSession.fromCookieString(cookie)
+      : XSession.loadOrEnv();
     const client = new XClient(session);
 
     for (const campagne of campagnes) {
@@ -362,7 +395,9 @@ async function recolterCampagne(
   // compris : une campagne sans `requetes` doit tout de même interroger X sur ses
   // variantes, sinon le filet ne récolte rien.
   const hashtags = hashtagsRecoltes(campagne);
-  const declarees = campagne.requetes?.length ? campagne.requetes : hashtags.map(h => `#${h}`);
+  const declarees = campagne.requetes?.length
+    ? campagne.requetes
+    : hashtags.map((h) => `#${h}`);
   if ((campagne.hashtags ?? []).length === 0) {
     stats.arret = "erreur";
     stats.erreur = "campagne sans hashtag";
@@ -377,18 +412,20 @@ async function recolterCampagne(
   // base restent en tête et ne sont jamais remplacées : ce sont elles qui
   // portent la vérité éditoriale de la campagne.
   const filtres = filtresDeRequete(declarees[0] ?? "");
-  const dejaDemandees = new Set(declarees.map(r => r.toLowerCase()));
-  const variantes = hashtags.flatMap(h => variantesRecherche(h));
-  const requetesFautes = requetesVariantes(variantes, filtres).filter(r => !dejaDemandees.has(r.toLowerCase()));
+  const dejaDemandees = new Set(declarees.map((r) => r.toLowerCase()));
+  const variantes = hashtags.flatMap((h) => variantesRecherche(h));
+  const requetesFautes = requetesVariantes(variantes, filtres).filter(
+    (r) => !dejaDemandees.has(r.toLowerCase()),
+  );
   const requetes = [...declarees, ...requetesFautes];
 
   const rattrapage = campagne.hashtags_rattrapage ?? [];
   console.log(
-    `[Campagnes X] « ${campagne.titre} » (${campagne.slug}) — ${requetes.length} requête(s) × ${PRODUITS.length} produit(s), hashtags : ${(campagne.hashtags ?? []).map(h => `#${h}`).join(", ")}${rattrapage.length > 0 ? ` (+ rattrapage silencieux : ${rattrapage.map(h => `#${h}`).join(", ")})` : ""}${
+    `[Campagnes X] « ${campagne.titre} » (${campagne.slug}) — ${requetes.length} requête(s) × ${PRODUITS.length} produit(s), hashtags : ${(campagne.hashtags ?? []).map((h) => `#${h}`).join(", ")}${rattrapage.length > 0 ? ` (+ rattrapage silencieux : ${rattrapage.map((h) => `#${h}`).join(", ")})` : ""}${
       requetesFautes.length > 0
         ? ` (+ ${requetesFautes.length} requête(s) de fautes de frappe : ${variantes
             .slice(1, 6)
-            .map(v => `#${v}`)
+            .map((v) => `#${v}`)
             .join(", ")}…)`
         : ""
     }`,
@@ -402,7 +439,16 @@ async function recolterCampagne(
     for (const produit of PRODUITS) {
       if (retenus.size >= limite) break;
       stats.requetes++;
-      const resultat = await paginer(sql, client, campagne, requete, produit, retenus, limite, dry);
+      const resultat = await paginer(
+        sql,
+        client,
+        campagne,
+        requete,
+        produit,
+        retenus,
+        limite,
+        dry,
+      );
       stats.pages += resultat.pages;
       stats.recus += resultat.recus;
       // Un rate-limit sur une requête n'invalide pas les précédentes : on
@@ -413,7 +459,7 @@ async function recolterCampagne(
   }
 
   stats.avecImage = retenus.size;
-  stats.surFaute = [...retenus.values()].filter(r => r.fautes > 0).length;
+  stats.surFaute = [...retenus.values()].filter((r) => r.fautes > 0).length;
   console.log(
     `[Campagnes X] ${campagne.slug} : ${stats.recus} reçus, ${retenus.size} post(s) unique(s) avec image${stats.surFaute > 0 ? `, dont ${stats.surFaute} sur une graphie fautive du hashtag` : ""}.`,
   );
@@ -452,8 +498,10 @@ async function recolterCampagne(
     (
       (await sql`
 				select tweet_id from public.x_campagne_posts
-				 where campagne_slug = ${campagne.slug} and masque`) as Array<{ tweet_id: string }>
-    ).map(r => r.tweet_id),
+				 where campagne_slug = ${campagne.slug} and masque`) as Array<{
+        tweet_id: string;
+      }>
+    ).map((r) => r.tweet_id),
   );
 
   // 1) Conversion + ré-hébergement des images.
@@ -480,7 +528,10 @@ async function recolterCampagne(
       // intacte (voir le commentaire du `select … where masque` ci-dessus).
       ignoresMasques++;
     } else {
-      const res = await rehebergerMediasTweet(row.id, row.media as MediaItem[] | null);
+      const res = await rehebergerMediasTweet(
+        row.id,
+        row.media as MediaItem[] | null,
+      );
       row.media = res.media;
       stats.imagesRehebergees += res.rehberges;
       stats.imagesTelechargees += res.telecharges;
@@ -500,7 +551,7 @@ async function recolterCampagne(
 
   // 2) Upsert `public.tweets`.
   for (let i = 0; i < lignesTweets.length; i += LOT_ECRITURE) {
-    const lot = lignesTweets.slice(i, i + LOT_ECRITURE).map(r => ({
+    const lot = lignesTweets.slice(i, i + LOT_ECRITURE).map((r) => ({
       ...r,
       created_at: new Date(r.created_at),
       updated_at: new Date(r.updated_at),
@@ -591,7 +642,9 @@ async function paginer(
     dernier_arret: string | null;
   }>;
   let curseur: string | undefined =
-    precedent?.dernier_arret === "rate_limit" ? (precedent.curseur ?? undefined) : undefined;
+    precedent?.dernier_arret === "rate_limit"
+      ? (precedent.curseur ?? undefined)
+      : undefined;
 
   const vus = new Set<string>();
   let pages = 0;
@@ -675,12 +728,28 @@ async function paginer(
 
     // Curseur persisté après CHAQUE page : un 429 en milieu de parcours ne doit
     // pas faire perdre la progression déjà payée en quota.
-    if (!dry) await persisterCurseur(sql, campagne.slug, cle, suivant, pages, "max_pages");
+    if (!dry)
+      await persisterCurseur(
+        sql,
+        campagne.slug,
+        cle,
+        suivant,
+        pages,
+        "max_pages",
+      );
     await dormir(DELAI_ENTRE_PAGES_MS);
   }
 
   if (pages >= MAX_PAGES_PAR_REQUETE && arret === "epuise") arret = "max_pages";
-  if (!dry) await persisterCurseur(sql, campagne.slug, cle, curseur ?? null, pages, arret);
+  if (!dry)
+    await persisterCurseur(
+      sql,
+      campagne.slug,
+      cle,
+      curseur ?? null,
+      pages,
+      arret,
+    );
 
   return { pages, recus, arret };
 }
@@ -725,7 +794,8 @@ function lireOptions(argv: readonly string[]): OptionsRecolte {
   const limiteBrute = Number(valeur("--limite"));
   return {
     slug: valeur("--campagne"),
-    limite: Number.isFinite(limiteBrute) && limiteBrute > 0 ? limiteBrute : undefined,
+    limite:
+      Number.isFinite(limiteBrute) && limiteBrute > 0 ? limiteBrute : undefined,
     dry: argv.includes("--dry"),
   };
 }

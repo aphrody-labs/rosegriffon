@@ -31,7 +31,10 @@
  * mauvais endroit.
  */
 import { Discord, Slash, SlashGroup, SlashOption } from "discordx";
-import { ApplicationCommandOptionType, type ChatInputCommandInteraction } from "discord.js";
+import {
+  ApplicationCommandOptionType,
+  type ChatInputCommandInteraction,
+} from "discord.js";
 
 import { appelerCron } from "../../lib/cron-ipc";
 import { rgEmbed } from "../../lib/embeds";
@@ -47,7 +50,12 @@ import {
   listeCourte,
   type ResultatRechercheWeb,
 } from "./format";
-import { differerEnPrive, exigerDroits, expliquerRefusScrape, messagePanne } from "./garde";
+import {
+  differerEnPrive,
+  exigerDroits,
+  expliquerRefusScrape,
+  messagePanne,
+} from "./garde";
 import "./racine";
 import { echec, pied, piedTexte, repondre } from "../../lib/ui";
 
@@ -69,7 +77,10 @@ interface ReponseVerbe {
   [clef: string]: unknown;
 }
 
-async function appelerVerbe(verbe: string, charge: Record<string, unknown>): Promise<ReponseVerbe> {
+async function appelerVerbe(
+  verbe: string,
+  charge: Record<string, unknown>,
+): Promise<ReponseVerbe> {
   return await appelerCron<ReponseVerbe>(
     { cmd: verbe, ...charge },
     { timeoutMs: (DELAIS_VERBE_MS[verbe] ?? 45_000) + MARGE_IPC_MS },
@@ -90,12 +101,16 @@ function libelleMoteur(moteur: unknown): string {
 @Discord()
 @SlashGroup({
   name: "web",
-  description: "Lecture et diagnostic d'une page publique, par le démon de tâches",
+  description:
+    "Lecture et diagnostic d'une page publique, par le démon de tâches",
   root: "staff",
 })
 @SlashGroup("web", "staff")
 export class StaffWebCommand {
-  @Slash({ name: "page", description: "Rend une page publique en markdown lisible" })
+  @Slash({
+    name: "page",
+    description: "Rend une page publique en markdown lisible",
+  })
   async page(
     @SlashOption({
       name: "url",
@@ -113,21 +128,40 @@ export class StaffWebCommand {
     try {
       const reponse = await appelerVerbe("scrape.page", { url });
       if (!reponse.success) {
-        await repondre(interaction, echec("Lecture impossible", expliquerRefusScrape(reponse.code, reponse.error)));
+        await repondre(
+          interaction,
+          echec(
+            "Lecture impossible",
+            expliquerRefusScrape(reponse.code, reponse.error),
+          ),
+        );
         return;
       }
       const adresse = typeof reponse.url === "string" ? reponse.url : url;
-      const markdown = typeof reponse.markdown === "string" ? reponse.markdown : "";
+      const markdown =
+        typeof reponse.markdown === "string" ? reponse.markdown : "";
       const embed = rgEmbed()
-        .setTitle(borner(typeof reponse.titre === "string" && reponse.titre ? reponse.titre : adresse, 250))
+        .setTitle(
+          borner(
+            typeof reponse.titre === "string" && reponse.titre
+              ? reponse.titre
+              : adresse,
+            250,
+          ),
+        )
         .setURL(adresse)
         // Le markdown vient d'une page tierce : le contrat le borne déjà à
         // 3500 caractères, on garde la marge sous les 4096 de Discord.
-        .setDescription(borner(markdown, 3_900) || "*(page sans contenu textuel)*")
+        .setDescription(
+          borner(markdown, 3_900) || "*(page sans contenu textuel)*",
+        )
         .addFields(
           {
             name: "Réponse HTTP",
-            value: typeof reponse.statut === "number" ? String(reponse.statut) : "inconnue",
+            value:
+              typeof reponse.statut === "number"
+                ? String(reponse.statut)
+                : "inconnue",
             inline: true,
           },
           {
@@ -135,7 +169,9 @@ export class StaffWebCommand {
             // le poids du markdown affiché ni celui de la page avec ses
             // ressources. Le libellé doit donc le nommer.
             name: "HTML source",
-            value: formaterOctets(typeof reponse.octets === "number" ? reponse.octets : null),
+            value: formaterOctets(
+              typeof reponse.octets === "number" ? reponse.octets : null,
+            ),
             inline: true,
           },
           {
@@ -148,16 +184,24 @@ export class StaffWebCommand {
           piedTexte({
             note:
               `Rendu en ${formaterLatence(reponse.ms ?? 0)}` +
-              (reponse.tronque === true ? " · markdown tronqué à 3500 caractères" : ""),
+              (reponse.tronque === true
+                ? " · markdown tronqué à 3500 caractères"
+                : ""),
           }),
         );
       await interaction.editReply({ embeds: [embed] });
     } catch (err) {
-      await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
+      await repondre(
+        interaction,
+        echec("Le service n'a pas répondu", messagePanne(err)),
+      );
     }
   }
 
-  @Slash({ name: "google", description: "Recherche web, avec le moteur qui a réellement répondu" })
+  @Slash({
+    name: "google",
+    description: "Recherche web, avec le moteur qui a réellement répondu",
+  })
   async google(
     @SlashOption({
       name: "requete",
@@ -185,15 +229,30 @@ export class StaffWebCommand {
     try {
       const reponse = await appelerVerbe("scrape.google", { requete, limite });
       if (!reponse.success) {
-        await repondre(interaction, echec("Lecture impossible", expliquerRefusScrape(reponse.code, reponse.error)));
+        await repondre(
+          interaction,
+          echec(
+            "Lecture impossible",
+            expliquerRefusScrape(reponse.code, reponse.error),
+          ),
+        );
         return;
       }
-      const resultats = Array.isArray(reponse.resultats) ? (reponse.resultats as ResultatRechercheWeb[]) : [];
+      const resultats = Array.isArray(reponse.resultats)
+        ? (reponse.resultats as ResultatRechercheWeb[])
+        : [];
       const embed = rgEmbed()
-        .setTitle(`Recherche web — ${resultats.length} résultat${resultats.length > 1 ? "s" : ""}`)
+        .setTitle(
+          `Recherche web — ${resultats.length} résultat${resultats.length > 1 ? "s" : ""}`,
+        )
         .setDescription(
           resultats.length > 0
-            ? borner(resultats.map((resultat, rang) => ligneResultatWeb(resultat, rang + 1)).join("\n\n"), 3_900)
+            ? borner(
+                resultats
+                  .map((resultat, rang) => ligneResultatWeb(resultat, rang + 1))
+                  .join("\n\n"),
+                3_900,
+              )
             : "Aucun résultat.",
         )
         .addFields({
@@ -209,13 +268,17 @@ export class StaffWebCommand {
         );
       await interaction.editReply({ embeds: [embed] });
     } catch (err) {
-      await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
+      await repondre(
+        interaction,
+        echec("Le service n'a pas répondu", messagePanne(err)),
+      );
     }
   }
 
   @Slash({
     name: "recon",
-    description: "Diagnostic d'une page : en-têtes, technologies détectées, liens",
+    description:
+      "Diagnostic d'une page : en-têtes, technologies détectées, liens",
   })
   async recon(
     @SlashOption({
@@ -234,18 +297,34 @@ export class StaffWebCommand {
     try {
       const reponse = await appelerVerbe("scrape.recon", { url });
       if (!reponse.success) {
-        await repondre(interaction, echec("Lecture impossible", expliquerRefusScrape(reponse.code, reponse.error)));
+        await repondre(
+          interaction,
+          echec(
+            "Lecture impossible",
+            expliquerRefusScrape(reponse.code, reponse.error),
+          ),
+        );
         return;
       }
-      const adresse = typeof reponse.urlFinale === "string" ? reponse.urlFinale : url;
+      const adresse =
+        typeof reponse.urlFinale === "string" ? reponse.urlFinale : url;
       const liens = (reponse.liens ?? {}) as Record<string, unknown>;
       const embed = rgEmbed()
-        .setTitle(borner(typeof reponse.titre === "string" && reponse.titre ? reponse.titre : adresse, 250))
+        .setTitle(
+          borner(
+            typeof reponse.titre === "string" && reponse.titre
+              ? reponse.titre
+              : adresse,
+            250,
+          ),
+        )
         .setURL(adresse)
         .setDescription(
           [
             `Demandée : \`${borner(String(reponse.url ?? url), 300)}\``,
-            adresse !== reponse.url ? `Servie : \`${borner(adresse, 300)}\`` : null,
+            adresse !== reponse.url
+              ? `Servie : \`${borner(adresse, 300)}\``
+              : null,
             `Statut : **${typeof reponse.statut === "number" ? reponse.statut : "?"}** ${
               typeof reponse.statutTexte === "string" ? reponse.statutTexte : ""
             }`.trim(),
@@ -258,7 +337,9 @@ export class StaffWebCommand {
           {
             name: "Corps lu",
             value:
-              formaterOctets(typeof reponse.octets === "number" ? reponse.octets : null) +
+              formaterOctets(
+                typeof reponse.octets === "number" ? reponse.octets : null,
+              ) +
               (reponse.corpsTronque === true
                 ? "\n⚠ lecture arrêtée au plafond de 2 Mo — la taille réelle n'est pas connue"
                 : ""),
@@ -280,18 +361,24 @@ export class StaffWebCommand {
           },
         );
 
-      for (const champ of decouperEnChamps(formaterEnTetes(reponse.enTetes), 1_024, 2)) {
+      for (const champ of decouperEnChamps(
+        formaterEnTetes(reponse.enTetes),
+        1_024,
+        2,
+      )) {
         embed.addFields({ name: "En-têtes d'infrastructure", value: champ });
       }
 
-      const exemples = Array.isArray(liens.exemples) ? (liens.exemples as unknown[]) : [];
+      const exemples = Array.isArray(liens.exemples)
+        ? (liens.exemples as unknown[])
+        : [];
       if (exemples.length > 0) {
         embed.addFields({
           name: "Quelques liens",
           value: borner(
             exemples
               .filter((lien): lien is string => typeof lien === "string")
-              .map(lien => `• ${echapperMarkdown(lien)}`)
+              .map((lien) => `• ${echapperMarkdown(lien)}`)
               .join("\n"),
             1_000,
           ),
@@ -303,7 +390,10 @@ export class StaffWebCommand {
       });
       await interaction.editReply({ embeds: [embed] });
     } catch (err) {
-      await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
+      await repondre(
+        interaction,
+        echec("Le service n'a pas répondu", messagePanne(err)),
+      );
     }
   }
 }

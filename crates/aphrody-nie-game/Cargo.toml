@@ -20,7 +20,9 @@ path = "src/main.rs"
 aphrody-nie-formats = { workspace = true, features = ["textures"], default-features = true }
 # VM Lua 5.2 réelle : exécute les vrais scripts de menu du jeu pour générer le layout au runtime
 # (driver reversé OnInit/OnSetupLayer/OnOpenLayer → MenuState), comme nie.exe. API safe seulement.
-aphrody-nie-lua = { workspace = true, default-features = true, features = ["host"] }
+aphrody-nie-lua = { workspace = true, default-features = true, features = [
+  "host",
+] }
 # Modèles de données + résolveur de texte universel : résout les libellés STATIQUES de menu
 # (`TextComponent.hashes` → `menu_text`) pour l'export de layout (cf. DESIGN.md §7).
 aphrody-nie-data.workspace = true
@@ -40,7 +42,22 @@ tracing = { workspace = true }
 tracing-subscriber = { version = "0.3.20", default-features = false, features = ["fmt", "env-filter", "ansi", "tracing-log"] }
 aphrody-gpu-backend = { version = "1.4.7" }
 # The feature set the former root `aphrody-bevy` pin enabled; the root `bevy` pin is minimal ("std").
-bevy = { workspace = true, features = ["async_executor", "multi_threaded", "bevy_asset", "bevy_camera", "bevy_core_pipeline", "bevy_image", "bevy_render", "bevy_sprite", "bevy_sprite_render", "bevy_window", "bevy_winit", "default_font", "x11", "wayland"] }
+bevy = { workspace = true, features = [
+  "async_executor",
+  "multi_threaded",
+  "bevy_asset",
+  "bevy_camera",
+  "bevy_core_pipeline",
+  "bevy_image",
+  "bevy_render",
+  "bevy_sprite",
+  "bevy_sprite_render",
+  "bevy_window",
+  "bevy_winit",
+  "default_font",
+  "x11",
+  "wayland",
+] }
 pollster.workspace = true
 bytemuck = { workspace = true, features = ["derive"] }
 # Encodage PNG des captures/exports (le décodage DDS/BCn est passé dans aphrody-nie-formats).

@@ -106,7 +106,9 @@ export const PERMISSIONS_DANGEREUSES: readonly bigint[] = Object.freeze([
 /** Vrai si le bitfield porte AU MOINS une des huit permissions dangereuses. */
 export function estDangereux(permissionsDecimal: string): boolean {
   const bits = BigInt(permissionsDecimal);
-  return PERMISSIONS_DANGEREUSES.some(drapeau => (bits & drapeau) === drapeau);
+  return PERMISSIONS_DANGEREUSES.some(
+    (drapeau) => (bits & drapeau) === drapeau,
+  );
 }
 
 // ─── Catégories ──────────────────────────────────────────────────────────────
@@ -152,11 +154,12 @@ export interface ClassificationRole {
 // ─── Paliers payants « Joueur Deluxe » (Patreon/Stripe) ─────────────────────
 // Source : apps/website/src/lib/patreon/types.ts → TIER_MAPPING, vérifié le
 // 14/8/2026. `rgPlanName`/`grandfatheredCents` viennent de là, pas d'ici.
-const TIERS_PATREON: ReadonlyMap<string, { nom: string; euros: number }> = new Map([
-  ["1371177169216077864", { nom: "Niveau Roy", euros: 2.5 }],
-  ["1371176894791159819", { nom: "Niveau Gaelle", euros: 7.5 }],
-  ["1371176241213870131", { nom: "Niveau Evans", euros: 14.5 }],
-]);
+const TIERS_PATREON: ReadonlyMap<string, { nom: string; euros: number }> =
+  new Map([
+    ["1371177169216077864", { nom: "Niveau Roy", euros: 2.5 }],
+    ["1371176894791159819", { nom: "Niveau Gaelle", euros: 7.5 }],
+    ["1371176241213870131", { nom: "Niveau Evans", euros: 14.5 }],
+  ]);
 
 // ─── Ladder d'activité Noctaly (texte + vocal) ──────────────────────────────
 // Source : apps/bot/src/scripts/import-xp-tiers.ts, § « RÉCOMPENSES DE RÔLE
@@ -261,7 +264,10 @@ const NOTIFICATIONS: ReadonlySet<string> = new Set([
 
 // ─── Staff : autorité organisationnelle (Discord ou associative) ───────────
 const STAFF: ReadonlyMap<string, string> = new Map([
-  ["1072993826400124958", "Rôle d'administration suprême du serveur (permission Administrateur complète)."],
+  [
+    "1072993826400124958",
+    "Rôle d'administration suprême du serveur (permission Administrateur complète).",
+  ],
   [
     "1371547071362105374",
     "Second rôle d'administration, avec la même permission Administrateur que le rôle Administrateur principal.",
@@ -366,7 +372,10 @@ function phraseNotification(faits: FaitsRole): ClassificationRole {
   };
 }
 
-function phraseCosmetique(faits: FaitsRole, permissions: readonly string[]): ClassificationRole {
+function phraseCosmetique(
+  faits: FaitsRole,
+  permissions: readonly string[],
+): ClassificationRole {
   const detail =
     permissions.length > 0
       ? ` Porte exceptionnellement une permission réelle (${permissions.join(", ")}) malgré son usage décoratif.`
@@ -408,7 +417,10 @@ export function classifierRole(faits: FaitsRole): ClassificationRole {
 
   const palierActivite = PALIERS_ACTIVITE.get(faits.roleId);
   if (palierActivite) {
-    return { categorie: "niveau", utilite: `${palierActivite} ${faits.porteurs} porteur(s).` };
+    return {
+      categorie: "niveau",
+      utilite: `${palierActivite} ${faits.porteurs} porteur(s).`,
+    };
   }
 
   if (COSMETIQUES.has(faits.roleId)) {
@@ -421,17 +433,26 @@ export function classifierRole(faits: FaitsRole): ClassificationRole {
 
   const staff = STAFF.get(faits.roleId);
   if (staff) {
-    return { categorie: "staff", utilite: `${staff} ${faits.porteurs} porteur(s).` };
+    return {
+      categorie: "staff",
+      utilite: `${staff} ${faits.porteurs} porteur(s).`,
+    };
   }
 
   const moderation = MODERATION.get(faits.roleId);
   if (moderation) {
-    return { categorie: "moderation", utilite: `${moderation} ${faits.porteurs} porteur(s).` };
+    return {
+      categorie: "moderation",
+      utilite: `${moderation} ${faits.porteurs} porteur(s).`,
+    };
   }
 
   const acces = ACCES.get(faits.roleId);
   if (acces) {
-    return { categorie: "acces", utilite: `${acces} ${faits.porteurs} porteur(s).` };
+    return {
+      categorie: "acces",
+      utilite: `${acces} ${faits.porteurs} porteur(s).`,
+    };
   }
 
   return { categorie: null, utilite: null };

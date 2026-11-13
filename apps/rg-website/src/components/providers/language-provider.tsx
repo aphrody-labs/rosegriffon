@@ -2,7 +2,11 @@
 
 import { useResetState } from "@/hooks/use-reset-state";
 
-import { createIntlFormatters, directionForLocale, type DateValue } from "@rosegriffon/i18n";
+import {
+  createIntlFormatters,
+  directionForLocale,
+  type DateValue,
+} from "@rosegriffon/i18n";
 import type { LocaleId } from "@rosegriffon/preferences";
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
@@ -17,15 +21,26 @@ interface LanguageContextType {
   language: Language;
   setLanguage: (lang: Language) => void;
   t: (hash: string | number | undefined | null) => string;
-  formatDate: (value: DateValue, options?: Intl.DateTimeFormatOptions) => string;
-  formatNumber: (value: number | bigint, options?: Intl.NumberFormatOptions) => string;
-  formatList: (value: readonly string[], options?: Intl.ListFormatOptions) => string;
+  formatDate: (
+    value: DateValue,
+    options?: Intl.DateTimeFormatOptions,
+  ) => string;
+  formatNumber: (
+    value: number | bigint,
+    options?: Intl.NumberFormatOptions,
+  ) => string;
+  formatList: (
+    value: readonly string[],
+    options?: Intl.ListFormatOptions,
+  ) => string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   getLocalized: (obj: any, fieldPrefix?: string) => string;
   isLoading: boolean;
 }
 
-const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
+const LanguageContext = createContext<LanguageContextType | undefined>(
+  undefined,
+);
 
 const DEFAULT_LANGUAGE: Language = "fr";
 const LANGUAGE_COOKIE = "rg-locale";
@@ -77,19 +92,20 @@ export function LanguageProvider({
 
     const controller = new AbortController();
     fetch(`/locales/${language}.json`, { signal: controller.signal })
-      .then(res => {
+      .then((res) => {
         if (!res.ok) throw new Error(`Locale ${language}: HTTP ${res.status}`);
         return res.json();
       })
-      .then(data => {
+      .then((data) => {
         setDictionary({
           ...(frDictionary as Record<string, string>),
           ...(data as Record<string, string>),
         });
         setIsLoading(false);
       })
-      .catch(error => {
-        if (error instanceof DOMException && error.name === "AbortError") return;
+      .catch((error) => {
+        if (error instanceof DOMException && error.name === "AbortError")
+          return;
         console.error("Failed to load locale", error);
         setDictionary(frDictionary as Record<string, string>);
         setLanguageState(DEFAULT_LANGUAGE);

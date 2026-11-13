@@ -33,7 +33,9 @@ import { getServerUser } from "@/lib/auth-helpers";
  */
 
 /** Ce que la garde rend quand elle laisse passer, ou quand elle refuse. */
-export type Garde = { ok: true; userId: string; role: string | null } | { ok: false; message: string };
+export type Garde =
+  | { ok: true; userId: string; role: string | null }
+  | { ok: false; message: string };
 
 /**
  * Vérifie que l'appelant est bien membre du staff.

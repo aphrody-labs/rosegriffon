@@ -1,5 +1,8 @@
 import type React from "react";
-import { SPRITE_SHEET_COMMON_SRC, SPRITES_COMMON } from "@/config/sprites-common";
+import {
+  SPRITE_SHEET_COMMON_SRC,
+  SPRITES_COMMON,
+} from "@/config/sprites-common";
 import type { SpriteCommonKey } from "@/config/sprites-common";
 import { cn } from "@/lib/utils";
 import styles from "./SpriteIcon.module.css";
@@ -48,7 +51,9 @@ export const CommonSpriteIcon = ({
         width: displayW,
         ...style,
       }}
-      {...(label ? { role: "img", "aria-label": label } : { "aria-hidden": true })}
+      {...(label
+        ? { role: "img", "aria-label": label }
+        : { "aria-hidden": true })}
       {...props}
     >
       <div

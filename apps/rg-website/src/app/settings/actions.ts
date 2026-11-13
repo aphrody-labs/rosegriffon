@@ -3,12 +3,19 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
-import { badgeMerite, filtrerBadges, SchemaProfilPublic } from "@rosegriffon/types/profil";
+import {
+  badgeMerite,
+  filtrerBadges,
+  SchemaProfilPublic,
+} from "@rosegriffon/types/profil";
 import { isAdminRole } from "@rosegriffon/types/roles";
 import { createPostgresClient } from "@rosegriffon/db/service";
 
 import { getServerUser } from "@/lib/auth-helpers";
-import { PUBLIC_PROFILE_COLUMNS, type PublicProfile } from "@rosegriffon/db/profiles";
+import {
+  PUBLIC_PROFILE_COLUMNS,
+  type PublicProfile,
+} from "@rosegriffon/db/profiles";
 
 /**
  * Actions du compte.
@@ -36,7 +43,11 @@ export async function getCurrentPublicProfile(): Promise<PublicProfile | null> {
   const user = await getServerUser();
   if (!user) return null;
   const db = createPostgresClient();
-  const { data: direct } = await db.from("profiles").select(PUBLIC_PROFILE_COLUMNS).eq("id", user.id).maybeSingle();
+  const { data: direct } = await db
+    .from("profiles")
+    .select(PUBLIC_PROFILE_COLUMNS)
+    .eq("id", user.id)
+    .maybeSingle();
   return (direct as PublicProfile | null) ?? null;
 }
 
@@ -78,7 +89,8 @@ export async function updateProfile(
     console.error("[compte] mise à jour du profil impossible", error);
     return { error: "Erreur lors de la mise à jour du profil." };
   }
-  if (!updated) return { error: "Profil introuvable. Reconnecte-toi avant de réessayer." };
+  if (!updated)
+    return { error: "Profil introuvable. Reconnecte-toi avant de réessayer." };
 
   revalidatePath("/settings");
   revalidatePath(`/profil/${parsed.data.username}`);
@@ -92,14 +104,21 @@ export async function updateProfile(
  * ne fait que lui apporter ce que la base sait : le rôle du compte, son
  * mécénat, et les badges déjà posés.
  */
-async function badgesAutorises(userId: string, demandes: string[]): Promise<string[]> {
-  if (!demandes.some(badge => badgeMerite(badge))) {
+async function badgesAutorises(
+  userId: string,
+  demandes: string[],
+): Promise<string[]> {
+  if (!demandes.some((badge) => badgeMerite(badge))) {
     return [...demandes];
   }
 
   const admin = createPostgresClient();
   const [{ data: profil }, { data: mecenat }] = await Promise.all([
-    admin.from("profiles").select("role, badges").eq("id", userId).maybeSingle(),
+    admin
+      .from("profiles")
+      .select("role, badges")
+      .eq("id", userId)
+      .maybeSingle(),
     admin
       .from("patreon_memberships")
       .select("patron_status")
@@ -117,7 +136,9 @@ async function badgesAutorises(userId: string, demandes: string[]): Promise<stri
   });
 }
 
-export async function updateAddress(values: z.infer<typeof addressSchema>): Promise<{ error?: string }> {
+export async function updateAddress(
+  values: z.infer<typeof addressSchema>,
+): Promise<{ error?: string }> {
   const user = await getServerUser();
   if (!user) {
     return { error: "Session expirée — reconnecte-toi." };
@@ -139,7 +160,8 @@ export async function updateAddress(values: z.infer<typeof addressSchema>): Prom
     console.error("[compte] mise à jour de l'adresse impossible", error);
     return { error: "Erreur lors de l'enregistrement de l'adresse." };
   }
-  if (!updated) return { error: "Profil introuvable. Reconnecte-toi avant de réessayer." };
+  if (!updated)
+    return { error: "Profil introuvable. Reconnecte-toi avant de réessayer." };
 
   revalidatePath("/settings");
   return {};
@@ -152,7 +174,9 @@ export async function updateAddress(values: z.infer<typeof addressSchema>): Prom
  * précédente prenait un `userId` en paramètre, ce qui laissait n'importe quel
  * appelant réécrire l'avatar d'un autre compte.
  */
-export async function updateAvatarUrl(avatarUrl: string): Promise<{ error?: string }> {
+export async function updateAvatarUrl(
+  avatarUrl: string,
+): Promise<{ error?: string }> {
   const user = await getServerUser();
   if (!user) {
     return { error: "Session expirée — reconnecte-toi." };
@@ -161,7 +185,11 @@ export async function updateAvatarUrl(avatarUrl: string): Promise<{ error?: stri
   const admin = createPostgresClient();
   const { data: updated, error } = await admin
     .from("profiles")
-    .update({ avatar_url: avatarUrl, game_avatar: null, updated_at: new Date().toISOString() })
+    .update({
+      avatar_url: avatarUrl,
+      game_avatar: null,
+      updated_at: new Date().toISOString(),
+    })
     .eq("id", user.id)
     .select("username")
     .maybeSingle();
@@ -170,7 +198,8 @@ export async function updateAvatarUrl(avatarUrl: string): Promise<{ error?: stri
     console.error("[compte] mise à jour de l'avatar impossible", error);
     return { error: "Impossible d'enregistrer le nouvel avatar." };
   }
-  if (!updated) return { error: "Profil introuvable. Reconnecte-toi avant de réessayer." };
+  if (!updated)
+    return { error: "Profil introuvable. Reconnecte-toi avant de réessayer." };
 
   revalidatePath("/settings");
   const username = updated.username;

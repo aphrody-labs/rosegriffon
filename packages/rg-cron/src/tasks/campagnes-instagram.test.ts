@@ -20,7 +20,10 @@ const LIBRE = { masque: false, motif_masquage: null };
 /** Une ligne masquée par une PASSE PRÉCÉDENTE de cette même tâche. */
 const MASQUEE_AUTO = { masque: true, motif_masquage: MOTIF_AUTOMATIQUE };
 /** Une ligne masquée par un humain, avec son motif à lui. */
-const MASQUEE_STAFF = { masque: true, motif_masquage: "hors sujet, signalé en réunion" };
+const MASQUEE_STAFF = {
+  masque: true,
+  motif_masquage: "hors sujet, signalé en réunion",
+};
 
 describe("une panne de Meta ne retire rien", () => {
   test("`indeterminee` ne masque ni ne restaure, quel que soit l'état", () => {
@@ -69,8 +72,20 @@ describe("le motif automatique est une SIGNATURE", () => {
     // Toute la règle « on ne défait pas une décision humaine » repose sur
     // l'égalité EXACTE de ce texte. Le reformuler sans migrer les lignes
     // existantes les rendrait définitivement non restaurables.
-    expect(decisionModeration("publique", { masque: true, motif_masquage: MOTIF_AUTOMATIQUE })).toBe("restaurer");
-    expect(decisionModeration("publique", { masque: true, motif_masquage: `${MOTIF_AUTOMATIQUE} ` })).toBe("rien");
-    expect(decisionModeration("publique", { masque: true, motif_masquage: null })).toBe("rien");
+    expect(
+      decisionModeration("publique", {
+        masque: true,
+        motif_masquage: MOTIF_AUTOMATIQUE,
+      }),
+    ).toBe("restaurer");
+    expect(
+      decisionModeration("publique", {
+        masque: true,
+        motif_masquage: `${MOTIF_AUTOMATIQUE} `,
+      }),
+    ).toBe("rien");
+    expect(
+      decisionModeration("publique", { masque: true, motif_masquage: null }),
+    ).toBe("rien");
   });
 });

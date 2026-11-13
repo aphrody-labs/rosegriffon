@@ -12,9 +12,12 @@ export function WikiListSkeleton({
   aspectRatio?: "square" | "video";
 }) {
   const gridCols =
-    columns === 3 ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3" : "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4";
+    columns === 3
+      ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+      : "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4";
 
-  const aspectClass = aspectRatio === "video" ? "aspect-[16/9]" : "aspect-square";
+  const aspectClass =
+    aspectRatio === "video" ? "aspect-[16/9]" : "aspect-square";
 
   return (
     <div className="space-y-6">
@@ -29,8 +32,13 @@ export function WikiListSkeleton({
       {/* Grid skeleton */}
       <div className={`grid ${gridCols} gap-3`}>
         {Array.from({ length: 12 }).map((_, i) => (
-          <div key={i} className="rounded-2xl bg-surface-container-low overflow-hidden">
-            <Skeleton className={`w-full ${aspectClass} bg-surface-container-highest`} />
+          <div
+            key={i}
+            className="rounded-2xl bg-surface-container-low overflow-hidden"
+          >
+            <Skeleton
+              className={`w-full ${aspectClass} bg-surface-container-highest`}
+            />
             <div className="p-3 space-y-2">
               <Skeleton className="h-4 w-3/4 bg-surface-container-highest rounded-md" />
               <Skeleton className="h-3 w-1/2 bg-surface-container-highest rounded-md" />
@@ -69,7 +77,10 @@ export function WikiDetailSkeleton() {
         <Skeleton className="h-6 w-40 bg-surface-container-highest rounded-md" />
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {Array.from({ length: 4 }).map((_, i) => (
-            <Skeleton key={i} className="h-20 rounded-2xl bg-surface-container-highest" />
+            <Skeleton
+              key={i}
+              className="h-20 rounded-2xl bg-surface-container-highest"
+            />
           ))}
         </div>
       </div>
@@ -92,7 +103,10 @@ export function WikiHubSkeleton() {
       <Skeleton className="h-8 w-48 bg-surface-container-highest rounded-lg" />
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
         {Array.from({ length: 6 }).map((_, i) => (
-          <div key={i} className="flex items-center gap-4 p-4 rounded-2xl bg-surface-container-low">
+          <div
+            key={i}
+            className="flex items-center gap-4 p-4 rounded-2xl bg-surface-container-low"
+          >
             <Skeleton className="size-12 rounded-xl bg-surface-container-highest shrink-0" />
             <div className="flex-1 space-y-2">
               <Skeleton className="h-5 w-32 bg-surface-container-highest rounded-md" />
@@ -113,7 +127,10 @@ export function NewsListSkeleton() {
     <div className="space-y-4">
       <Skeleton className="h-8 w-48 bg-surface-container-highest rounded-lg" />
       {Array.from({ length: 5 }).map((_, i) => (
-        <div key={i} className="flex gap-4 p-4 rounded-2xl bg-surface-container-low">
+        <div
+          key={i}
+          className="flex gap-4 p-4 rounded-2xl bg-surface-container-low"
+        >
           <Skeleton className="w-24 h-16 rounded-xl bg-surface-container-highest shrink-0" />
           <div className="flex-1 space-y-2">
             <Skeleton className="h-5 w-3/4 bg-surface-container-highest rounded-md" />

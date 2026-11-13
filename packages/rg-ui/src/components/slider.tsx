@@ -28,7 +28,9 @@ function Slider({
   ...props
 }: SliderProps) {
   if (inverted && orientation === "vertical")
-    throw new Error("Inverted vertical sliders require an owner-supported Base UI primitive");
+    throw new Error(
+      "Inverted vertical sliders require an owner-supported Base UI primitive",
+    );
   const values = value ?? defaultValue ?? [props.min ?? 0];
   const slider = (
     <SliderPrimitive.Root
@@ -48,7 +50,10 @@ function Slider({
           data-slot="slider-track"
           className="relative h-2 w-full grow overflow-hidden rounded-full bg-secondary data-[orientation=vertical]:h-full data-[orientation=vertical]:w-2"
         >
-          <SliderPrimitive.Indicator data-slot="slider-range" className="absolute rounded-full bg-primary" />
+          <SliderPrimitive.Indicator
+            data-slot="slider-range"
+            className="absolute rounded-full bg-primary"
+          />
         </SliderPrimitive.Track>
         {values.map((_, index) => (
           <SliderPrimitive.Thumb
@@ -62,7 +67,17 @@ function Slider({
     </SliderPrimitive.Root>
   );
   return inverted || dir ? (
-    <DirectionProvider direction={inverted ? (dir === "rtl" ? "ltr" : "rtl") : dir === "rtl" ? "rtl" : "ltr"}>
+    <DirectionProvider
+      direction={
+        inverted
+          ? dir === "rtl"
+            ? "ltr"
+            : "rtl"
+          : dir === "rtl"
+            ? "rtl"
+            : "ltr"
+      }
+    >
       {slider}
     </DirectionProvider>
   ) : (

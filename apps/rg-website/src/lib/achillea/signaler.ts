@@ -39,7 +39,10 @@ export function signalerEchec(contexte: string, resultat: unknown): string {
   const echec = resultat as ResultatEchec;
   const genre = echec?.kind ?? "inconnu";
 
-  console.error(`[achillea] ${contexte} — échec (${genre})`, echec?.detail ?? echec);
+  console.error(
+    `[achillea] ${contexte} — échec (${genre})`,
+    echec?.detail ?? echec,
+  );
 
   if (genre === "unauthorized" || echec?.status === 401) {
     return "Connecte-toi pour voir ces données.";
@@ -58,7 +61,11 @@ export function signalerEchec(contexte: string, resultat: unknown): string {
   // L'API dit pourquoi (« Staff role required », « Bot Discord Achilléa
   // indisponible : … », « Clan name already taken ») : on le montre plutôt
   // qu'un message générique qui laisserait chercher ailleurs.
-  if (genre === "http" && typeof echec.message === "string" && echec.message.trim() !== "") {
+  if (
+    genre === "http" &&
+    typeof echec.message === "string" &&
+    echec.message.trim() !== ""
+  ) {
     return echec.message.trim();
   }
   if (echec?.status === 403) {

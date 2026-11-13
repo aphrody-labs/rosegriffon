@@ -83,7 +83,8 @@ export async function runIeCrawl(): Promise<ResultatCrawl> {
       : `échec : ${resultat.error ?? "inconnu"}`;
     stats[etape.nom] = detail;
     console.log(`[ie-crawl] ${etape.nom} : ${detail}`);
-    if (!resultat.success && etape.critique) echecsCritiques.push(`${etape.nom} (${resultat.error ?? "inconnu"})`);
+    if (!resultat.success && etape.critique)
+      echecsCritiques.push(`${etape.nom} (${resultat.error ?? "inconnu"})`);
   }
 
   return echecsCritiques.length === 0

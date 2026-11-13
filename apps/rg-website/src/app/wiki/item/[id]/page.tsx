@@ -12,7 +12,11 @@ export const dynamic = "force-static";
 export const revalidate = 3600;
 export const dynamicParams = true;
 
-export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
   const { id } = await params;
   const item = await wikiService.getItem(id);
 
@@ -44,7 +48,11 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   };
 }
 
-export default async function ItemDetailPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function ItemDetailPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const { id } = await params;
   const item = await wikiService.getItem(id);
 
@@ -53,13 +61,22 @@ export default async function ItemDetailPage({ params }: { params: Promise<{ id:
   }
 
   const itemName = item.names?.fr || item.names?.en || item.itemId;
-  const itemDesc = item.descriptions?.fr || (item as any).description || item.descriptions?.en || "Aucune description.";
+  const itemDesc =
+    item.descriptions?.fr ||
+    (item as any).description ||
+    item.descriptions?.en ||
+    "Aucune description.";
 
   const breadcrumbJsonLd = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", item: absoluteUrl(wiki("/")), name: "Accueil", position: 1 },
+      {
+        "@type": "ListItem",
+        item: absoluteUrl(wiki("/")),
+        name: "Accueil",
+        position: 1,
+      },
       {
         "@type": "ListItem",
         item: absoluteUrl(wiki("/item")),
@@ -72,11 +89,17 @@ export default async function ItemDetailPage({ params }: { params: Promise<{ id:
 
   return (
     <div className="w-full space-y-8">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
 
       {/* Breadcrumb */}
       <div className="flex items-center gap-2 text-sm text-on-surface-variant font-medium">
-        <Link href="/wiki/item" className="hover:text-primary transition-colors">
+        <Link
+          href="/wiki/item"
+          className="hover:text-primary transition-colors"
+        >
           Objets
         </Link>
         <span className="opacity-30">/</span>

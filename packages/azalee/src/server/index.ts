@@ -11,7 +11,11 @@ export * from "../wiki";
 export * from "../cpk";
 export * from "../cross";
 export * from "../game-text";
-export { createAzaleeServer, handleAzaleeRequest, type AzaleeServerOptions } from "./serve";
+export {
+  createAzaleeServer,
+  handleAzaleeRequest,
+  type AzaleeServerOptions,
+} from "./serve";
 export {
   createAzaleeData,
   inspectLocalData,

@@ -31,29 +31,41 @@ if (token === "") {
 const actuels = await reglagesDe(GUILD_ID);
 console.log(`salonPanneau actuel : ${actuels.tickets.salonPanneau}`);
 
-const modifies = fusionnerReglages(actuels, { tickets: { salonPanneau: SALON_REEL } });
+const modifies = fusionnerReglages(actuels, {
+  tickets: { salonPanneau: SALON_REEL },
+});
 await enregistrerReglages(GUILD_ID, modifies);
 console.log(`salonPanneau corrigé → ${SALON_REEL}`);
 
 const panneau = construirePanneau();
 const corps = {
-  components: panneau.components.map(rangee => rangee.toJSON()),
-  embeds: panneau.embeds.map(embed => embed.toJSON()),
+  components: panneau.components.map((rangee) => rangee.toJSON()),
+  embeds: panneau.embeds.map((embed) => embed.toJSON()),
 };
 
-const reponse = await fetch(`https://discord.com/api/v10/channels/${SALON_REEL}/messages`, {
-  body: JSON.stringify(corps),
-  headers: { Authorization: `Bot ${token}`, "Content-Type": "application/json" },
-  method: "POST",
-});
+const reponse = await fetch(
+  `https://discord.com/api/v10/channels/${SALON_REEL}/messages`,
+  {
+    body: JSON.stringify(corps),
+    headers: {
+      Authorization: `Bot ${token}`,
+      "Content-Type": "application/json",
+    },
+    method: "POST",
+  },
+);
 
 if (!reponse.ok) {
-  console.error(`Publication refusée (HTTP ${reponse.status}) : ${await reponse.text()}`);
+  console.error(
+    `Publication refusée (HTTP ${reponse.status}) : ${await reponse.text()}`,
+  );
   process.exit(1);
 }
 
 const message = (await reponse.json()) as { id: string; channel_id: string };
-console.log(`Panneau publié : https://discord.com/channels/${GUILD_ID}/${message.channel_id}/${message.id}`);
+console.log(
+  `Panneau publié : https://discord.com/channels/${GUILD_ID}/${message.channel_id}/${message.id}`,
+);
 
 await sql.close();
 process.exit(0);

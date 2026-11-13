@@ -27,13 +27,18 @@ interface ReactionBarProps {
 
 export function ReactionBar({ articleId, initialReactions }: ReactionBarProps) {
   const { user } = useAuth();
-  const [reactions, setReactions] = useState<Record<string, ReactionState>>(() => {
-    const state: Record<string, ReactionState> = {};
-    for (const r of REACTIONS) {
-      state[r.type] = initialReactions[r.type] ?? { count: 0, userReacted: false };
-    }
-    return state;
-  });
+  const [reactions, setReactions] = useState<Record<string, ReactionState>>(
+    () => {
+      const state: Record<string, ReactionState> = {};
+      for (const r of REACTIONS) {
+        state[r.type] = initialReactions[r.type] ?? {
+          count: 0,
+          userReacted: false,
+        };
+      }
+      return state;
+    },
+  );
   const [pending, setPending] = useState<ReactionType | null>(null);
   const [, startTransition] = useTransition();
 
@@ -51,7 +56,7 @@ export function ReactionBar({ articleId, initialReactions }: ReactionBarProps) {
     const newReacted = !current.userReacted;
 
     // Optimistic update
-    setReactions(prev => ({
+    setReactions((prev) => ({
       ...prev,
       [type]: {
         count: current.count + (newReacted ? 1 : -1),
@@ -63,7 +68,7 @@ export function ReactionBar({ articleId, initialReactions }: ReactionBarProps) {
     startTransition(async () => {
       try {
         const result = await toggleReaction(articleId, type);
-        setReactions(prev => ({
+        setReactions((prev) => ({
           ...prev,
           [type]: {
             count: result.count,
@@ -72,7 +77,7 @@ export function ReactionBar({ articleId, initialReactions }: ReactionBarProps) {
         }));
       } catch {
         // Rollback
-        setReactions(prev => ({
+        setReactions((prev) => ({
           ...prev,
           [type]: current,
         }));
@@ -85,7 +90,7 @@ export function ReactionBar({ articleId, initialReactions }: ReactionBarProps) {
 
   return (
     <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none py-0.5">
-      {REACTIONS.map(r => {
+      {REACTIONS.map((r) => {
         const state = reactions[r.type];
         const isActive = state.userReacted;
         const isLoading = pending === r.type;
@@ -109,7 +114,12 @@ export function ReactionBar({ articleId, initialReactions }: ReactionBarProps) {
           >
             <span className="text-sm leading-none">{r.emoji}</span>
             {state.count > 0 && (
-              <span className={cn("tabular-nums", isActive ? "text-on-surface" : "text-on-surface-variant/70")}>
+              <span
+                className={cn(
+                  "tabular-nums",
+                  isActive ? "text-on-surface" : "text-on-surface-variant/70",
+                )}
+              >
                 {state.count}
               </span>
             )}

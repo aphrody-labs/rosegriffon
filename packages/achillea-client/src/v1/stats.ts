@@ -8,7 +8,12 @@
 import { z } from "zod";
 
 import { AchilleaResource, type AchilleaClientResult } from "./http";
-import type { BotTotalsResponse, CommandUsageRow, DailyCountRow, UsersAndGuildsResponse } from "./pending-contracts";
+import type {
+  BotTotalsResponse,
+  CommandUsageRow,
+  DailyCountRow,
+  UsersAndGuildsResponse,
+} from "./pending-contracts";
 
 export const botTotalsResponseSchema = z.object({
   stats: z.object({
@@ -83,10 +88,16 @@ export class StatsResource extends AchilleaResource {
   }
 
   /** `GET /stats/commands/usage` — usage cumulé par jour, par famille de commande. */
-  commandsUsage(numberOfDays?: number): Promise<AchilleaClientResult<CommandUsageRow[]>> {
-    return this.http.get("/stats/commands/usage", z.array(commandUsageRowSchema), {
-      query: { numberOfDays },
-    });
+  commandsUsage(
+    numberOfDays?: number,
+  ): Promise<AchilleaClientResult<CommandUsageRow[]>> {
+    return this.http.get(
+      "/stats/commands/usage",
+      z.array(commandUsageRowSchema),
+      {
+        query: { numberOfDays },
+      },
+    );
   }
 
   /** `GET /stats/commands/top` — commandes triées par nombre d'usages. */
@@ -105,9 +116,15 @@ export class StatsResource extends AchilleaResource {
   }
 
   /** `GET /stats/usersAndGuilds` — séries quotidiennes membres / serveurs. */
-  usersAndGuilds(numberOfDays?: number): Promise<AchilleaClientResult<UsersAndGuildsResponse>> {
-    return this.http.get("/stats/usersAndGuilds", usersAndGuildsResponseSchema, {
-      query: { numberOfDays },
-    });
+  usersAndGuilds(
+    numberOfDays?: number,
+  ): Promise<AchilleaClientResult<UsersAndGuildsResponse>> {
+    return this.http.get(
+      "/stats/usersAndGuilds",
+      usersAndGuildsResponseSchema,
+      {
+        query: { numberOfDays },
+      },
+    );
   }
 }

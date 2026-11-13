@@ -53,7 +53,9 @@ export function buildFormationDatabase(_dataPath: string) {
   const byId = new Map<string, ParsedFormation>();
 
   if (!configPath) {
-    console.warn("[formation-config] No SQL/SQLite formation_config projection found.");
+    console.warn(
+      "[formation-config] No SQL/SQLite formation_config projection found.",
+    );
     return { formations, byId };
   }
 
@@ -62,12 +64,18 @@ export function buildFormationDatabase(_dataPath: string) {
   const textJa = loadTextFile("formation", "ja");
 
   try {
-    const content = loadConfigData<{ lists?: { name: string; values?: any[] }[] }>("formation", configPath);
+    const content = loadConfigData<{
+      lists?: { name: string; values?: any[] }[];
+    }>("formation", configPath);
     if (!content) return { formations, byId };
 
     if (content.lists) {
-      const infoList = content.lists.find((l: any) => l.name === "m_SoccerFormationInfoList");
-      const placementList = content.lists.find((l: any) => l.name === "m_SoccerFormPlacementInfoList");
+      const infoList = content.lists.find(
+        (l: any) => l.name === "m_SoccerFormationInfoList",
+      );
+      const placementList = content.lists.find(
+        (l: any) => l.name === "m_SoccerFormPlacementInfoList",
+      );
 
       const allPlacements: any[] = placementList?.values || [];
 
@@ -83,26 +91,31 @@ export function buildFormationDatabase(_dataPath: string) {
           const descIdHex = toHex(Number(descId));
 
           // Extract positions
-          const formPlacements = allPlacements.slice(startIdx, startIdx + count);
-          const positions: FormationPosition[] = formPlacements.map((p: any) => ({
-            positionNo: p.positionNo,
-            positionId: p.positionId,
-            passNo: p.passNo,
-            bKickoff: p.bKickoff,
-            bFollow: p.bFollow,
-            coordinates: {
-              defense: hexToFloats(p.defensePos),
-              offense: hexToFloats(p.offensePos),
-              start: hexToFloats(p.startPos),
-              ckDefenseLeft: hexToFloats(p.ckDefenseLeftPos),
-              ckDefenseRight: hexToFloats(p.ckDefenseRightPos),
-              ckOffenseLeft: hexToFloats(p.ckOffenseLeftPos),
-              ckOffenseRight: hexToFloats(p.ckOffenseRightPos),
-              pkDefense: hexToFloats(p.pkDefensePos),
-              pkOffense: hexToFloats(p.pkOffensePos),
-              bustup: hexToFloats(p.bustupPos),
-            },
-          }));
+          const formPlacements = allPlacements.slice(
+            startIdx,
+            startIdx + count,
+          );
+          const positions: FormationPosition[] = formPlacements.map(
+            (p: any) => ({
+              positionNo: p.positionNo,
+              positionId: p.positionId,
+              passNo: p.passNo,
+              bKickoff: p.bKickoff,
+              bFollow: p.bFollow,
+              coordinates: {
+                defense: hexToFloats(p.defensePos),
+                offense: hexToFloats(p.offensePos),
+                start: hexToFloats(p.startPos),
+                ckDefenseLeft: hexToFloats(p.ckDefenseLeftPos),
+                ckDefenseRight: hexToFloats(p.ckDefenseRightPos),
+                ckOffenseLeft: hexToFloats(p.ckOffenseLeftPos),
+                ckOffenseRight: hexToFloats(p.ckOffenseRightPos),
+                pkDefense: hexToFloats(p.pkDefensePos),
+                pkOffense: hexToFloats(p.pkOffensePos),
+                bustup: hexToFloats(p.bustupPos),
+              },
+            }),
+          );
 
           const formation: ParsedFormation = {
             formationId: formIdHex,

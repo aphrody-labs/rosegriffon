@@ -11,7 +11,8 @@
  */
 
 /** Famille d'un sous-fichier g4pk (cf. nie-formats). `string` = magic non listé. */
-export type G4Magic = "G4MD" | "G4MG" | "G4MT" | "G4MA" | "G4VS" | "G4SK" | string;
+export type G4Magic =
+  "G4MD" | "G4MG" | "G4MT" | "G4MA" | "G4VS" | "G4SK" | string;
 
 /**
  * Une couche = un g4pk d'effet de l'event. Décomposée du nom

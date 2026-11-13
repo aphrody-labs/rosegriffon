@@ -33,9 +33,13 @@ export type AchilleaClientFailure =
   | { ok: false; kind: "invalid_json"; detail: string; path: string }
   | { ok: false; kind: "invalid_response"; detail: string; path: string };
 
-export type AchilleaClientResult<T> = { ok: true; value: T } | AchilleaClientFailure;
+export type AchilleaClientResult<T> =
+  { ok: true; value: T } | AchilleaClientFailure;
 
-export type AchilleaFetch = (input: string | URL | Request, init?: RequestInit) => Promise<Response>;
+export type AchilleaFetch = (
+  input: string | URL | Request,
+  init?: RequestInit,
+) => Promise<Response>;
 
 /**
  * Mode d'envoi des cookies. Recopié de la lib DOM plutôt qu'importé : le
@@ -76,7 +80,8 @@ export interface AchilleaClientOptions {
 
 export type QueryPrimitive = string | number | boolean;
 
-export type QueryValue = QueryPrimitive | Date | null | undefined | readonly QueryPrimitive[];
+export type QueryValue =
+  QueryPrimitive | Date | null | undefined | readonly QueryPrimitive[];
 
 /** Paramètres de query-string : les `undefined` / `null` sont omis. */
 export type QueryParams = Readonly<Record<string, QueryValue>>;
@@ -120,10 +125,14 @@ export function encodeQuery(params?: QueryParams): string {
   for (const [key, value] of Object.entries(params)) {
     if (value === undefined || value === null) continue;
     if (Array.isArray(value)) {
-      for (const item of value as readonly QueryPrimitive[]) search.append(key, String(item));
+      for (const item of value as readonly QueryPrimitive[])
+        search.append(key, String(item));
       continue;
     }
-    search.append(key, value instanceof Date ? value.toISOString() : String(value));
+    search.append(
+      key,
+      value instanceof Date ? value.toISOString() : String(value),
+    );
   }
 
   const encoded = search.toString();
@@ -156,10 +165,14 @@ export class AchilleaHttp {
   readonly credentials: AchilleaCredentials | undefined;
   readonly defaultHeaders: Readonly<Record<string, string>>;
 
-  private readonly getAuthToken: (() => string | null | Promise<string | null>) | undefined;
+  private readonly getAuthToken:
+    (() => string | null | Promise<string | null>) | undefined;
 
   constructor(options: AchilleaClientOptions = {}) {
-    this.baseUrl = (options.baseUrl ?? DEFAULT_ACHILLEA_API_URL).replace(/\/+$/u, "");
+    this.baseUrl = (options.baseUrl ?? DEFAULT_ACHILLEA_API_URL).replace(
+      /\/+$/u,
+      "",
+    );
     this.timeoutMs = options.timeoutMs ?? DEFAULT_ACHILLEA_TIMEOUT_MS;
     // Browsers require the native fetch receiver to remain Window. Calling a
     // stored reference as this.fetch(...) otherwise throws Illegal invocation
@@ -169,7 +182,8 @@ export class AchilleaHttp {
     this.defaultHeaders = options.headers ?? {};
 
     const store = options.tokenStore;
-    this.getAuthToken = options.getAuthToken ?? (store ? () => store.getToken() : undefined);
+    this.getAuthToken =
+      options.getAuthToken ?? (store ? () => store.getToken() : undefined);
   }
 
   /** URL absolue d'une route — utile pour un `<img>`, un PDF ou une redirection OAuth. */
@@ -181,7 +195,10 @@ export class AchilleaHttp {
    * Exécute la requête et rend la `Response` brute si le statut est 2xx.
    * Ni le corps ni le type de contenu ne sont interprétés ici.
    */
-  async request(path: string, options: RequestOptions = {}): Promise<AchilleaClientResult<Response>> {
+  async request(
+    path: string,
+    options: RequestOptions = {},
+  ): Promise<AchilleaClientResult<Response>> {
     const fullPath = joinPath(path, options.query);
     const headers: Record<string, string> = {
       Accept: options.accept ?? "application/json",
@@ -207,14 +224,21 @@ export class AchilleaHttp {
         const token = await this.getAuthToken();
         if (token) headers["Authorization"] = `Bearer ${token}`;
       } catch (error) {
-        return { ok: false, kind: "unreachable", detail: errorDetail(error), path: fullPath };
+        return {
+          ok: false,
+          kind: "unreachable",
+          detail: errorDetail(error),
+          path: fullPath,
+        };
       }
     }
 
     const init: RequestInit = {
       method: options.method ?? "GET",
       headers,
-      signal: options.signal ?? AbortSignal.timeout(options.timeoutMs ?? this.timeoutMs),
+      signal:
+        options.signal ??
+        AbortSignal.timeout(options.timeoutMs ?? this.timeoutMs),
     };
     if (payload !== undefined) init.body = payload;
     if (this.credentials !== undefined) init.credentials = this.credentials;
@@ -223,7 +247,12 @@ export class AchilleaHttp {
     try {
       response = await this.fetch(`${this.baseUrl}${fullPath}`, init);
     } catch (error) {
-      return { ok: false, kind: "unreachable", detail: errorDetail(error), path: fullPath };
+      return {
+        ok: false,
+        kind: "unreachable",
+        detail: errorDetail(error),
+        path: fullPath,
+      };
     }
 
     if (!response.ok) {
@@ -277,9 +306,15 @@ export class AchilleaHttp {
   }
 
   /** Réponses `text/plain` (exposition Prometheus, statut racine de l'API). */
-  async requestText(path: string, options: RequestOptions = {}): Promise<AchilleaClientResult<string>> {
+  async requestText(
+    path: string,
+    options: RequestOptions = {},
+  ): Promise<AchilleaClientResult<string>> {
     const fullPath = joinPath(path, options.query);
-    const response = await this.request(path, { accept: "text/plain", ...options });
+    const response = await this.request(path, {
+      accept: "text/plain",
+      ...options,
+    });
     if (!response.ok) return response;
 
     try {
@@ -295,7 +330,10 @@ export class AchilleaHttp {
   }
 
   /** Réponses binaires (carte joueur PNG, affiche de clan, PDF de licence). */
-  async requestBytes(path: string, options: RequestOptions = {}): Promise<AchilleaClientResult<ArrayBuffer>> {
+  async requestBytes(
+    path: string,
+    options: RequestOptions = {},
+  ): Promise<AchilleaClientResult<ArrayBuffer>> {
     const fullPath = joinPath(path, options.query);
     const response = await this.request(path, { accept: "*/*", ...options });
     if (!response.ok) return response;
@@ -326,7 +364,11 @@ export class AchilleaHttp {
     body?: unknown,
     options: Omit<RequestOptions, "method" | "body"> = {},
   ): Promise<AchilleaClientResult<T>> {
-    return this.requestJson(path, schema, { ...options, method: "POST", body: body ?? {} });
+    return this.requestJson(path, schema, {
+      ...options,
+      method: "POST",
+      body: body ?? {},
+    });
   }
 
   put<T>(
@@ -335,7 +377,11 @@ export class AchilleaHttp {
     body?: unknown,
     options: Omit<RequestOptions, "method" | "body"> = {},
   ): Promise<AchilleaClientResult<T>> {
-    return this.requestJson(path, schema, { ...options, method: "PUT", body: body ?? {} });
+    return this.requestJson(path, schema, {
+      ...options,
+      method: "PUT",
+      body: body ?? {},
+    });
   }
 
   patch<T>(
@@ -344,7 +390,11 @@ export class AchilleaHttp {
     body?: unknown,
     options: Omit<RequestOptions, "method" | "body"> = {},
   ): Promise<AchilleaClientResult<T>> {
-    return this.requestJson(path, schema, { ...options, method: "PATCH", body: body ?? {} });
+    return this.requestJson(path, schema, {
+      ...options,
+      method: "PATCH",
+      body: body ?? {},
+    });
   }
 
   delete<T>(
@@ -381,7 +431,9 @@ async function messageErreur(response: Response): Promise<string | undefined> {
     if (!texte) return undefined;
     const corps = JSON.parse(texte) as Record<string, unknown>;
     const brut = corps.message ?? corps.error ?? corps.erreur;
-    return typeof brut === "string" && brut.trim() !== "" ? brut.trim().slice(0, 500) : undefined;
+    return typeof brut === "string" && brut.trim() !== ""
+      ? brut.trim().slice(0, 500)
+      : undefined;
   } catch {
     return undefined;
   }

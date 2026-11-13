@@ -53,7 +53,9 @@ describe("Rose Griffon site helpers", () => {
     expect(roseGriffonUrl("/news/")).toBe("https://rosegriffon.fr/news");
     expect(roseGriffonUrl("a-propos")).toBe("https://rosegriffon.fr/a-propos");
     expect(roseGriffonUrl("/")).toBe("https://rosegriffon.fr/");
-    expect(roseGriffonUrl("/api/v1/status", ROSE_GRIFFON_ORIGINS.api)).toBe("https://api.rosegriffon.fr/api/v1/status");
+    expect(roseGriffonUrl("/api/v1/status", ROSE_GRIFFON_ORIGINS.api)).toBe(
+      "https://api.rosegriffon.fr/api/v1/status",
+    );
   });
 
   test("createRoseGriffonAuthCookies creates valid cookie parameters", () => {
@@ -64,10 +66,16 @@ describe("Rose Griffon site helpers", () => {
     });
 
     expect(cookies).toHaveLength(3);
-    expect(cookies.find(c => c.name === ROSE_GRIFFON_AUTH_COOKIES.session)?.value).toBe("custom-sess-123");
-    expect(cookies.find(c => c.name === ROSE_GRIFFON_AUTH_COOKIES.csrf)?.value).toBe("custom-csrf-456");
-    expect(cookies.find(c => c.name === ROSE_GRIFFON_AUTH_COOKIES.token)?.value).toBe("custom-jwt-789");
-    expect(cookies.every(c => c.domain === "rosegriffon.fr")).toBe(true);
+    expect(
+      cookies.find((c) => c.name === ROSE_GRIFFON_AUTH_COOKIES.session)?.value,
+    ).toBe("custom-sess-123");
+    expect(
+      cookies.find((c) => c.name === ROSE_GRIFFON_AUTH_COOKIES.csrf)?.value,
+    ).toBe("custom-csrf-456");
+    expect(
+      cookies.find((c) => c.name === ROSE_GRIFFON_AUTH_COOKIES.token)?.value,
+    ).toBe("custom-jwt-789");
+    expect(cookies.every((c) => c.domain === "rosegriffon.fr")).toBe(true);
   });
 
   test("roseGriffonAuthHeaders creates bearer and csrf headers", () => {
@@ -84,12 +92,15 @@ describe("Rose Griffon site helpers", () => {
       { session: "injected-session", csrf: "injected-csrf" },
     );
 
-    const result = (await (page as unknown as CdpSend)._send("Network.getCookies", {})) as {
+    const result = (await (page as unknown as CdpSend)._send(
+      "Network.getCookies",
+      {},
+    )) as {
       cookies: Array<{ name: string; value: string }>;
     };
-    const sessionCookie = result.cookies.find(c => c.name === "rg_session");
+    const sessionCookie = result.cookies.find((c) => c.name === "rg_session");
     expect(sessionCookie?.value).toBe("injected-session");
-    const csrfCookie = result.cookies.find(c => c.name === "rg_csrf");
+    const csrfCookie = result.cookies.find((c) => c.name === "rg_csrf");
     expect(csrfCookie?.value).toBe("injected-csrf");
   });
 

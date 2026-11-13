@@ -18,7 +18,9 @@ export function buildMusicDatabase(_dataPath: string) {
   const musics: ParsedMusic[] = [];
 
   if (!configPath) {
-    console.warn("[music-config] No SQL/SQLite music_app_config projection found.");
+    console.warn(
+      "[music-config] No SQL/SQLite music_app_config projection found.",
+    );
     return { musics };
   }
 
@@ -28,11 +30,15 @@ export function buildMusicDatabase(_dataPath: string) {
   const listJa = loadTextList("music", "ja");
 
   try {
-    const entries = loadConfig("music_app", configPath).children as ConfigNode[];
+    const entries = loadConfig("music_app", configPath)
+      .children as ConfigNode[];
 
     function traverse(node: ConfigNode) {
       // MUSIC_APP_INFO_ITEM_0
-      if (node.name.startsWith("MUSIC_APP_INFO_ITEM_") && !node.name.includes("_LIST_")) {
+      if (
+        node.name.startsWith("MUSIC_APP_INFO_ITEM_") &&
+        !node.name.includes("_LIST_")
+      ) {
         const vars = node.variables;
 
         // Heuristic: Find valid text index

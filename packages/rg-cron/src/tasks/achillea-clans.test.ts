@@ -21,13 +21,21 @@ describe("achillea:clans — décision", () => {
 
   test("dissout seulement après 24 h sous la limite", () => {
     const il_y_a = (ms: number) => new Date(maintenant.getTime() - ms);
-    expect(decider({ membres: 4, depuis: il_y_a(DELAI_GRACE_MS) }, maintenant)).toBe("dissoudre");
-    expect(decider({ membres: 4, depuis: il_y_a(DELAI_GRACE_MS - 1) }, maintenant)).toBe("attendre");
-    expect(decider({ membres: 0, depuis: il_y_a(3 * DELAI_GRACE_MS) }, maintenant)).toBe("dissoudre");
+    expect(
+      decider({ membres: 4, depuis: il_y_a(DELAI_GRACE_MS) }, maintenant),
+    ).toBe("dissoudre");
+    expect(
+      decider({ membres: 4, depuis: il_y_a(DELAI_GRACE_MS - 1) }, maintenant),
+    ).toBe("attendre");
+    expect(
+      decider({ membres: 0, depuis: il_y_a(3 * DELAI_GRACE_MS) }, maintenant),
+    ).toBe("dissoudre");
   });
 
   test("un clan revenu à 5 membres est rétabli, même après l'échéance", () => {
-    expect(decider({ membres: 5, depuis: new Date(0) }, maintenant)).toBe("retablir");
+    expect(decider({ membres: 5, depuis: new Date(0) }, maintenant)).toBe(
+      "retablir",
+    );
   });
 
   test("un drapeau sans horodatage attend (le premier passage le pose)", () => {
@@ -58,10 +66,18 @@ describe("achillea:clans — effets Discord", () => {
 
   beforeEach(() => {
     appels.length = 0;
-    fetchSpy = spyOn(globalThis, "fetch").mockImplementation((async (input: string | URL | Request, init?: RequestInit) => {
+    fetchSpy = spyOn(globalThis, "fetch").mockImplementation((async (
+      input: string | URL | Request,
+      init?: RequestInit,
+    ) => {
       const url = String(input);
-      appels.push({ method: init?.method ?? "GET", url, body: init?.body ? JSON.parse(String(init.body)) : undefined });
-      if (url.endsWith("/users/@me/channels")) return Response.json({ id: "555555555555555555" });
+      appels.push({
+        method: init?.method ?? "GET",
+        url,
+        body: init?.body ? JSON.parse(String(init.body)) : undefined,
+      });
+      if (url.endsWith("/users/@me/channels"))
+        return Response.json({ id: "555555555555555555" });
       return new Response(null, { status: 204 });
     }) as typeof fetch);
   });
@@ -84,29 +100,56 @@ describe("achillea:clans — effets Discord", () => {
 
   test("supprime salon, rôle, fils, retire le rôle Président, annonce et écrit aux membres", async () => {
     await effetsDiscord("jeton-synthetique", clan, maintenant);
-    const { guildId, captainRoleId, clanAnnouncementsChannelId } = configClans();
-    const resume = appels.map(a => `${a.method} ${a.url.replace("https://discord.com/api/v10", "")}`);
+    const { guildId, captainRoleId, clanAnnouncementsChannelId } =
+      configClans();
+    const resume = appels.map(
+      (a) => `${a.method} ${a.url.replace("https://discord.com/api/v10", "")}`,
+    );
     expect(resume).toContain("DELETE /channels/222222222222222222");
-    expect(resume).toContain(`DELETE /guilds/${guildId}/roles/333333333333333333`);
-    expect(resume).toContain(`DELETE /guilds/${guildId}/members/111111111111111111/roles/${captainRoleId}`);
+    expect(resume).toContain(
+      `DELETE /guilds/${guildId}/roles/333333333333333333`,
+    );
+    expect(resume).toContain(
+      `DELETE /guilds/${guildId}/members/111111111111111111/roles/${captainRoleId}`,
+    );
     expect(resume).toContain("DELETE /channels/777777777777777777");
     expect(resume).toContain("POST /channels/444444444444444444/messages");
-    expect(resume).toContain(`POST /channels/${clanAnnouncementsChannelId}/messages`);
-    const mps = appels.filter(a => a.url.endsWith("/users/@me/channels"));
-    expect(mps.map(a => a.body.recipient_id)).toEqual(clan.membres);
-    const mp = appels.find(a => a.url.endsWith("/channels/555555555555555555/messages"));
+    expect(resume).toContain(
+      `POST /channels/${clanAnnouncementsChannelId}/messages`,
+    );
+    const mps = appels.filter((a) => a.url.endsWith("/users/@me/channels"));
+    expect(mps.map((a) => a.body.recipient_id)).toEqual(clan.membres);
+    const mp = appels.find((a) =>
+      a.url.endsWith("/channels/555555555555555555/messages"),
+    );
     expect(mp?.body.embeds[0].description).toBe(MESSAGE_DISSOLUTION);
   });
 
   test("un marqueur non Discord (donnée ancienne) n'est jamais envoyé à l'API", async () => {
-    await effetsDiscord("jeton-synthetique", { ...clan, channel_id: "", role_id: "pending:x", broadcast_channel: null, fils: [] }, maintenant);
-    expect(appels.some(a => a.url.includes("pending"))).toBe(false);
-    expect(appels.some(a => a.method === "DELETE" && a.url.endsWith("/channels/"))).toBe(false);
+    await effetsDiscord(
+      "jeton-synthetique",
+      {
+        ...clan,
+        channel_id: "",
+        role_id: "pending:x",
+        broadcast_channel: null,
+        fils: [],
+      },
+      maintenant,
+    );
+    expect(appels.some((a) => a.url.includes("pending"))).toBe(false);
+    expect(
+      appels.some((a) => a.method === "DELETE" && a.url.endsWith("/channels/")),
+    ).toBe(false);
   });
 
   test("embed d'annonce du legacy", () => {
     const embed = embedDissolution(clan, maintenant);
     expect(embed.title).toBe("Dissolution de Clan : Raimon");
-    expect(embed.fields.map(f => f.name)).toEqual(["Fondateurs", "Fondé le", "Fame accumulée"]);
+    expect(embed.fields.map((f) => f.name)).toEqual([
+      "Fondateurs",
+      "Fondé le",
+      "Fame accumulée",
+    ]);
   });
 });

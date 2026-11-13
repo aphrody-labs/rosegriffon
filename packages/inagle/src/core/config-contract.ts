@@ -44,8 +44,13 @@ export interface VersionedConfigDocument extends RawConfigFile {
 
 export type ConfigDocument = RawConfigFile | VersionedConfigDocument;
 
-export function isVersionedConfigDocument(value: unknown): value is VersionedConfigDocument {
+export function isVersionedConfigDocument(
+  value: unknown,
+): value is VersionedConfigDocument {
   if (typeof value !== "object" || value === null) return false;
   const candidate = value as Partial<VersionedConfigDocument>;
-  return candidate.schema_version === CONFIG_SCHEMA_VERSION && Array.isArray(candidate.entries);
+  return (
+    candidate.schema_version === CONFIG_SCHEMA_VERSION &&
+    Array.isArray(candidate.entries)
+  );
 }

@@ -117,7 +117,10 @@
       "reason": "RG bot commands and API adapters (consumers)"
     },
     {
-      "paths": ["packages/rg/cron/src/tasks/ie-crawl/**", "packages/rg/cron/src/tasks/zukan-videos.ts"],
+      "paths": [
+        "packages/rg/cron/src/tasks/ie-crawl/**",
+        "packages/rg/cron/src/tasks/zukan-videos.ts"
+      ],
       "reason": "RG cron orchestration that calls @rosegriffon/inagle"
     },
     {
@@ -147,7 +150,10 @@
       "reason": "VFS-derived data snapshots and game/site assets: storage unchanged (references only)"
     },
     {
-      "paths": ["apps/rg/website/data/inazuma-cross.json", "apps/rg/website/src/data/zukan-audit.json"],
+      "paths": [
+        "apps/rg/website/data/inazuma-cross.json",
+        "apps/rg/website/src/data/zukan-audit.json"
+      ],
       "reason": "Editorial crawl content and RG database audit data for the admin page"
     },
     {
@@ -161,11 +167,19 @@
       "reason": "Aphrody infra/release ownership of IECODE operations (IECODE AGENTS.md: release/deployment belongs to @aphrody/workspace)"
     },
     {
-      "paths": ["plugins/aphrody/skills/*ievr*", "plugins/aphrody/skills/nie-*", "config/ai/plugins/**"],
+      "paths": [
+        "plugins/aphrody/skills/*ievr*",
+        "plugins/aphrody/skills/nie-*",
+        "config/ai/plugins/**"
+      ],
       "reason": "Developer skills (native-integration claim); two SKILL.md fallbacks still name docs/architecture/nie/ and need a lead edit"
     },
     {
-      "paths": ["docs/migration/*iecode*", "docs/migration/*nie*", "docs/migration/source-licenses/nie/**"],
+      "paths": [
+        "docs/migration/*iecode*",
+        "docs/migration/*nie*",
+        "docs/migration/source-licenses/nie/**"
+      ],
       "reason": "Aphrody migration evidence and licence notices"
     },
     {

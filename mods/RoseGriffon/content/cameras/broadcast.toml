@@ -7,9 +7,9 @@ schema = "VRFW.match_camera/1"
 [[preset]]
 name = "broadcast"
 kind = "chase_rows"
-yaw = 90.0          # touchline
-pitch = 18.0        # degrees above the horizontal
-distance = 32.0     # metres from the look point
-fov = 40.0          # vertical field of view (retail 45)
-fixed_pitch = true  # hold the pitch instead of following the ball's depth
+yaw = 90.0 # touchline
+pitch = 18.0 # degrees above the horizontal
+distance = 32.0 # metres from the look point
+fov = 40.0 # vertical field of view (retail 45)
+fixed_pitch = true # hold the pitch instead of following the ball's depth
 option = "horizontal"

@@ -33,10 +33,9 @@ describe("découpage des choix", () => {
     // Sans cette règle, « Goldie Lemmon / Nanobana Kinako » deviendrait deux
     // choix distincts — la moitié des sondages du serveur écrit ses choix
     // ainsi, la localisation française d'un côté, la japonaise de l'autre.
-    expect(decouperChoix("Goldie Lemmon / Nanobana Kinako ; Shinohara Raika")).toEqual([
-      "Goldie Lemmon / Nanobana Kinako",
-      "Shinohara Raika",
-    ]);
+    expect(
+      decouperChoix("Goldie Lemmon / Nanobana Kinako ; Shinohara Raika"),
+    ).toEqual(["Goldie Lemmon / Nanobana Kinako", "Shinohara Raika"]);
   });
 
   test("les morceaux vides disparaissent, les espaces sont rognés", () => {
@@ -66,7 +65,9 @@ describe("emoji de tête", () => {
   });
 
   test("un emoji personnalisé rend son identifiant, pas son écriture", () => {
-    const choix = separerEmojiDeTete("<:IE_hey1:1089276504657117205> Cette émote");
+    const choix = separerEmojiDeTete(
+      "<:IE_hey1:1089276504657117205> Cette émote",
+    );
     expect(choix.emoji).toEqual({
       animated: false,
       id: "1089276504657117205",
@@ -126,7 +127,9 @@ describe("durée", () => {
 
   test("toutes les durées proposées tiennent dans les bornes de l'API", () => {
     for (const entree of DUREES_PROPOSEES) {
-      expect(entree.heures).toBeGreaterThanOrEqual(LIMITES_SONDAGE.dureeMinHeures);
+      expect(entree.heures).toBeGreaterThanOrEqual(
+        LIMITES_SONDAGE.dureeMinHeures,
+      );
       expect(entree.heures).toBeLessThanOrEqual(LIMITES_SONDAGE.dureeMaxHeures);
       expect(entree.libelle.length).toBeGreaterThan(0);
     }
@@ -136,7 +139,8 @@ describe("durée", () => {
 describe("préparation d'un sondage", () => {
   test("un sondage ordinaire passe, emojis promus", () => {
     const resultat = preparerSondage({
-      choix: "🥞 Goldie Lemmon / Nanobana Kinako ; 🌸 Shinohara Raika ; 🐰 Fei Rune",
+      choix:
+        "🥞 Goldie Lemmon / Nanobana Kinako ; 🌸 Shinohara Raika ; 🐰 Fei Rune",
       duree: "7j",
       multiple: true,
       question: "Quel personnage irait le mieux pour cette émote ?",
@@ -160,7 +164,10 @@ describe("préparation d'un sondage", () => {
   });
 
   test("au-delà de dix choix, on refuse au lieu de tronquer en silence", () => {
-    const onze = Array.from({ length: 11 }, (_, index) => `Choix ${index + 1}`).join(" ; ");
+    const onze = Array.from(
+      { length: 11 },
+      (_, index) => `Choix ${index + 1}`,
+    ).join(" ; ");
     const resultat = preparerSondage({ choix: onze, question: "Trop ?" });
     expect(resultat.ok).toBe(false);
     if (resultat.ok) return;
@@ -174,7 +181,9 @@ describe("préparation d'un sondage", () => {
     });
     expect(resultat.ok).toBe(false);
     if (resultat.ok) return;
-    expect(resultat.erreurs[0]).toContain(String(LIMITES_SONDAGE.longueurQuestion + 1));
+    expect(resultat.erreurs[0]).toContain(
+      String(LIMITES_SONDAGE.longueurQuestion + 1),
+    );
   });
 
   test("un choix trop long est abrégé, et l'abrègement est annoncé", () => {
@@ -184,20 +193,31 @@ describe("préparation d'un sondage", () => {
     });
     expect(resultat.ok).toBe(true);
     if (!resultat.ok) return;
-    expect(resultat.projet.choix[0]?.texte.length).toBeLessThanOrEqual(LIMITES_SONDAGE.longueurChoix);
+    expect(resultat.projet.choix[0]?.texte.length).toBeLessThanOrEqual(
+      LIMITES_SONDAGE.longueurChoix,
+    );
     expect(resultat.avertissements[0]).toContain("abrégé");
   });
 
   test("une durée incomprise ne bloque pas : défaut de 24 h, et on le dit", () => {
-    const resultat = preparerSondage({ choix: "Oui ; Non", duree: "3 jrs", question: "Quand ?" });
+    const resultat = preparerSondage({
+      choix: "Oui ; Non",
+      duree: "3 jrs",
+      question: "Quand ?",
+    });
     expect(resultat.ok).toBe(true);
     if (!resultat.ok) return;
-    expect(resultat.projet.duree.heures).toBe(LIMITES_SONDAGE.dureeDefautHeures);
+    expect(resultat.projet.duree.heures).toBe(
+      LIMITES_SONDAGE.dureeDefautHeures,
+    );
     expect(resultat.avertissements[0]).toContain("incomprise");
   });
 
   test("sans durée saisie, aucun avertissement", () => {
-    const resultat = preparerSondage({ choix: "Oui ; Non", question: "Quand ?" });
+    const resultat = preparerSondage({
+      choix: "Oui ; Non",
+      question: "Quand ?",
+    });
     expect(resultat.ok).toBe(true);
     if (!resultat.ok) return;
     expect(resultat.avertissements).toEqual([]);
@@ -205,14 +225,22 @@ describe("préparation d'un sondage", () => {
 
   test("la clôture se calcule sur la durée retenue", () => {
     const maintenant = new Date("2026-08-14T12:00:00.000Z");
-    const resultat = preparerSondage({ choix: "Oui ; Non", duree: "6h", question: "Quand ?" });
+    const resultat = preparerSondage({
+      choix: "Oui ; Non",
+      duree: "6h",
+      question: "Quand ?",
+    });
     expect(resultat.ok).toBe(true);
     if (!resultat.ok) return;
-    expect(clotureDe(resultat.projet, maintenant).toISOString()).toBe("2026-08-14T18:00:00.000Z");
+    expect(clotureDe(resultat.projet, maintenant).toISOString()).toBe(
+      "2026-08-14T18:00:00.000Z",
+    );
   });
 
   test("la règle de vote est dite comme sur le site", () => {
-    expect(libelleRegleDeVote({ multiple: false })).toBe("1 choix par personne");
+    expect(libelleRegleDeVote({ multiple: false })).toBe(
+      "1 choix par personne",
+    );
     expect(libelleRegleDeVote({ multiple: true })).toBe("Choix illimités");
   });
 });
@@ -220,14 +248,25 @@ describe("préparation d'un sondage", () => {
 describe("désignation d'un sondage publié", () => {
   test("un lien de message rend le salon ET le message", () => {
     expect(
-      referenceMessage("https://discord.com/channels/1400000000000000000/1155779116612714506/1400000000000000001"),
-    ).toEqual({ messageId: "1400000000000000001", salonId: "1155779116612714506" });
+      referenceMessage(
+        "https://discord.com/channels/1400000000000000000/1155779116612714506/1400000000000000001",
+      ),
+    ).toEqual({
+      messageId: "1400000000000000001",
+      salonId: "1155779116612714506",
+    });
   });
 
   test("les hôtes des différents clients sont acceptés", () => {
-    for (const hote of ["canary.discord.com", "ptb.discord.com", "discordapp.com"]) {
+    for (const hote of [
+      "canary.discord.com",
+      "ptb.discord.com",
+      "discordapp.com",
+    ]) {
       expect(
-        referenceMessage(`https://${hote}/channels/1400000000000000000/1155779116612714506/1400000000000000001`),
+        referenceMessage(
+          `https://${hote}/channels/1400000000000000000/1155779116612714506/1400000000000000001`,
+        ),
       ).not.toBeNull();
     }
   });

@@ -25,9 +25,25 @@ import {
 } from "discord.js";
 
 import { rgEmbed } from "../../lib/embeds";
-import { SERVICES, TOUS_LES_SERVICES, sonderServices, type NomService } from "../../lib/services";
-import { borner, formaterLatence, horodatageAbsolu, horodatageRelatif, ligneSonde, pastilleEtat } from "./format";
-import { APPLICATIONS_DEPLOYEES, lireEtatDeploiement, type EtatApplication } from "./deploiement";
+import {
+  SERVICES,
+  TOUS_LES_SERVICES,
+  sonderServices,
+  type NomService,
+} from "../../lib/services";
+import {
+  borner,
+  formaterLatence,
+  horodatageAbsolu,
+  horodatageRelatif,
+  ligneSonde,
+  pastilleEtat,
+} from "./format";
+import {
+  APPLICATIONS_DEPLOYEES,
+  lireEtatDeploiement,
+  type EtatApplication,
+} from "./deploiement";
 import { differerEnPrive, exigerDroits, messagePanne } from "./garde";
 import "./racine";
 import { echec, pied, repondre } from "../../lib/ui";
@@ -35,11 +51,18 @@ import { echec, pied, repondre } from "../../lib/ui";
 /** Un service inconnu ne doit pas se transformer en appel vers une base vide. */
 function resoudreService(saisie: string): NomService | null {
   const cible = saisie.trim().toLowerCase();
-  return (TOUS_LES_SERVICES.find(service => service.nom === cible)?.nom as NomService | undefined) ?? null;
+  return (
+    (TOUS_LES_SERVICES.find((service) => service.nom === cible)?.nom as
+      NomService | undefined) ?? null
+  );
 }
 
 /** Une ligne de synthèse pour une application Next. */
-function ligneApplication(etat: EtatApplication, sondeOk: boolean, latenceMs: number): string {
+function ligneApplication(
+  etat: EtatApplication,
+  sondeOk: boolean,
+  latenceMs: number,
+): string {
   const version = etat.version;
   const morceaux = [
     `${pastilleEtat(sondeOk)} **${etat.titre}** — slot \`${etat.slot ?? "?"}\``,
@@ -62,7 +85,8 @@ function ligneApplication(etat: EtatApplication, sondeOk: boolean, latenceMs: nu
 export class StaffServicesCommand {
   @Slash({
     name: "etat",
-    description: "Sonde les dix services internes en parallèle : vert/rouge, latence, unité",
+    description:
+      "Sonde les dix services internes en parallèle : vert/rouge, latence, unité",
   })
   async etat(interaction: ChatInputCommandInteraction) {
     await differerEnPrive(interaction);
@@ -71,8 +95,8 @@ export class StaffServicesCommand {
     }
     try {
       const sondes = await sonderServices();
-      const debout = sondes.filter(sonde => sonde.ok).length;
-      const tombes = sondes.filter(sonde => !sonde.ok);
+      const debout = sondes.filter((sonde) => sonde.ok).length;
+      const tombes = sondes.filter((sonde) => !sonde.ok);
 
       const embed = rgEmbed()
         .setTitle(`Services internes — ${debout}/${sondes.length} répondent`)
@@ -89,7 +113,10 @@ export class StaffServicesCommand {
           name: "À regarder en premier",
           value: borner(
             tombes
-              .map(sonde => `\`${sonde.service.unite ?? sonde.service.nom}\` — ${sonde.erreur ?? "injoignable"}`)
+              .map(
+                (sonde) =>
+                  `\`${sonde.service.unite ?? sonde.service.nom}\` — ${sonde.erreur ?? "injoignable"}`,
+              )
               .join("\n"),
             1_000,
           ),
@@ -100,11 +127,17 @@ export class StaffServicesCommand {
       });
       await interaction.editReply({ embeds: [embed] });
     } catch (err) {
-      await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
+      await repondre(
+        interaction,
+        echec("Le service n'a pas répondu", messagePanne(err)),
+      );
     }
   }
 
-  @Slash({ name: "detail", description: "Fiche d'un service : rôle, adresses, sonde brute" })
+  @Slash({
+    name: "detail",
+    description: "Fiche d'un service : rôle, adresses, sonde brute",
+  })
   async detail(
     @SlashOption({
       name: "service",
@@ -112,14 +145,21 @@ export class StaffServicesCommand {
       type: ApplicationCommandOptionType.String,
       required: true,
       autocomplete: async (interaction: AutocompleteInteraction) => {
-        const saisie = String(interaction.options.getFocused() ?? "").toLowerCase();
+        const saisie = String(
+          interaction.options.getFocused() ?? "",
+        ).toLowerCase();
         await interaction.respond(
           TOUS_LES_SERVICES.filter(
-            service =>
-              saisie.length === 0 || service.nom.includes(saisie) || service.titre.toLowerCase().includes(saisie),
+            (service) =>
+              saisie.length === 0 ||
+              service.nom.includes(saisie) ||
+              service.titre.toLowerCase().includes(saisie),
           )
             .slice(0, 25)
-            .map(service => ({ name: `${service.nom} — ${service.titre}`, value: service.nom })),
+            .map((service) => ({
+              name: `${service.nom} — ${service.titre}`,
+              value: service.nom,
+            })),
         );
       },
     })
@@ -135,7 +175,7 @@ export class StaffServicesCommand {
       await interaction.editReply({
         content:
           `Service « ${borner(service, 60)} » inconnu. Les dix noms possibles : ` +
-          TOUS_LES_SERVICES.map(s => `\`${s.nom}\``).join(", "),
+          TOUS_LES_SERVICES.map((s) => `\`${s.nom}\``).join(", "),
       });
       return;
     }
@@ -147,13 +187,21 @@ export class StaffServicesCommand {
         .setURL(description.publique)
         .setDescription(description.role)
         .addFields(
-          { name: "Identifiant", value: `\`${description.nom}\``, inline: true },
+          {
+            name: "Identifiant",
+            value: `\`${description.nom}\``,
+            inline: true,
+          },
           {
             name: "Unité systemd",
             value: description.unite ? `\`${description.unite}\`` : "*aucune*",
             inline: true,
           },
-          { name: "Latence", value: formaterLatence(sonde!.latenceMs), inline: true },
+          {
+            name: "Latence",
+            value: formaterLatence(sonde!.latenceMs),
+            inline: true,
+          },
           {
             name: "Base en boucle locale",
             value: `\`${description.base}${description.sante}\``,
@@ -168,13 +216,17 @@ export class StaffServicesCommand {
         );
       await interaction.editReply({ embeds: [embed] });
     } catch (err) {
-      await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
+      await repondre(
+        interaction,
+        echec("Le service n'a pas répondu", messagePanne(err)),
+      );
     }
   }
 
   @Slash({
     name: "deploiement",
-    description: "Version réellement servie par le wiki et le site, slot par slot",
+    description:
+      "Version réellement servie par le wiki et le site, slot par slot",
   })
   async deploiement(interaction: ChatInputCommandInteraction) {
     await differerEnPrive(interaction);
@@ -184,7 +236,11 @@ export class StaffServicesCommand {
     try {
       const [etats, sondes] = await Promise.all([
         lireEtatDeploiement(),
-        sonderServices(APPLICATIONS_DEPLOYEES.map(application => SERVICES[application.service])),
+        sonderServices(
+          APPLICATIONS_DEPLOYEES.map(
+            (application) => SERVICES[application.service],
+          ),
+        ),
       ]);
 
       const embed = rgEmbed()
@@ -194,7 +250,11 @@ export class StaffServicesCommand {
             etats
               .map((etat, rang) => {
                 const sonde = sondes[rang];
-                return ligneApplication(etat, sonde?.ok ?? false, sonde?.latenceMs ?? 0);
+                return ligneApplication(
+                  etat,
+                  sonde?.ok ?? false,
+                  sonde?.latenceMs ?? 0,
+                );
               })
               .join("\n"),
             4_000,
@@ -205,20 +265,33 @@ export class StaffServicesCommand {
         const lignes = [
           `Version : \`${etat.version?.identifiant ?? "inconnue"}\``,
           `Précédente : \`${etat.versionPrecedente?.identifiant ?? "aucune"}\``,
-          etat.commit ? `Commit : \`${etat.commit.slice(0, 12)}\` sur \`${etat.branche ?? "?"}\`` : null,
-          etat.assembleeLe ? `Assemblée : ${horodatageAbsolu(etat.assembleeLe)}` : null,
+          etat.commit
+            ? `Commit : \`${etat.commit.slice(0, 12)}\` sur \`${etat.branche ?? "?"}\``
+            : null,
+          etat.assembleeLe
+            ? `Assemblée : ${horodatageAbsolu(etat.assembleeLe)}`
+            : null,
           etat.unite ? `Unité servie : \`${etat.unite}\`` : null,
-          etat.misAJourLe ? `Bascule : ${horodatageRelatif(etat.misAJourLe)}` : null,
-          etat.previsualisation ? `⚠ Prévisualisation ouverte sur la doublure : \`${etat.previsualisation}\`` : null,
+          etat.misAJourLe
+            ? `Bascule : ${horodatageRelatif(etat.misAJourLe)}`
+            : null,
+          etat.previsualisation
+            ? `⚠ Prévisualisation ouverte sur la doublure : \`${etat.previsualisation}\``
+            : null,
           etat.incoherence ? `⚠ Incohérence : ${etat.incoherence}` : null,
-          etat.manquant.length > 0 ? `⚠ Non lisible : ${etat.manquant.map(f => `\`${f}\``).join(", ")}` : null,
+          etat.manquant.length > 0
+            ? `⚠ Non lisible : ${etat.manquant.map((f) => `\`${f}\``).join(", ")}`
+            : null,
           etat.historique[0]
             ? `Dernière action : \`${etat.historique[0].action}\` ${
                 etat.historique[0].ok ? "réussie" : "**échouée**"
               } ${horodatageRelatif(etat.historique[0].at)}`
             : null,
         ].filter((ligne): ligne is string => ligne !== null);
-        embed.addFields({ name: etat.titre, value: borner(lignes.join("\n"), 1_000) });
+        embed.addFields({
+          name: etat.titre,
+          value: borner(lignes.join("\n"), 1_000),
+        });
       }
 
       pied(embed, {
@@ -226,7 +299,10 @@ export class StaffServicesCommand {
       });
       await interaction.editReply({ embeds: [embed] });
     } catch (err) {
-      await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
+      await repondre(
+        interaction,
+        echec("Le service n'a pas répondu", messagePanne(err)),
+      );
     }
   }
 }

@@ -67,34 +67,50 @@ describe("collecterIdentifiantsDiscord", () => {
    */
   it("ne garde aucun état entre deux appels", () => {
     const texte = "<@198209347589898240> puis <@469900328758935552>";
-    expect(collecterIdentifiantsDiscord([texte])).toEqual(collecterIdentifiantsDiscord([texte]));
-    expect(collecterIdentifiantsDiscord([texte, texte]).membres).toHaveLength(2);
+    expect(collecterIdentifiantsDiscord([texte])).toEqual(
+      collecterIdentifiantsDiscord([texte]),
+    );
+    expect(collecterIdentifiantsDiscord([texte, texte]).membres).toHaveLength(
+      2,
+    );
   });
 });
 
 describe("resoudreMentions", () => {
   it("remplace un membre connu par son nom affiché", () => {
-    expect(resoudreMentions("caméo de <@198209347589898240> ici", RESOLUTION)).toBe("caméo de @RompishKaru ici");
+    expect(
+      resoudreMentions("caméo de <@198209347589898240> ici", RESOLUTION),
+    ).toBe("caméo de @RompishKaru ici");
   });
 
   it("accepte l'ancienne forme <@!id> des surnoms", () => {
-    expect(resoudreMentions("<@!469900328758935552>", RESOLUTION)).toBe("@Jenn Scarlet");
+    expect(resoudreMentions("<@!469900328758935552>", RESOLUTION)).toBe(
+      "@Jenn Scarlet",
+    );
   });
 
   it("rend un mot neutre pour un identifiant inconnu, jamais le nombre brut", () => {
-    const rendu = resoudreMentions("<@111111111111111111> et <#222222222222222222>", RESOLUTION);
+    const rendu = resoudreMentions(
+      "<@111111111111111111> et <#222222222222222222>",
+      RESOLUTION,
+    );
     expect(rendu).toBe("@membre et #salon");
     expect(rendu).not.toContain("111111111111111111");
   });
 
   it("résout rôles et salons", () => {
-    expect(resoudreMentions("<@&1152050533289443358> dans <#1537458038623965194>", RESOLUTION)).toBe(
-      "@Membre dans #🍰〡iergday",
-    );
+    expect(
+      resoudreMentions(
+        "<@&1152050533289443358> dans <#1537458038623965194>",
+        RESOLUTION,
+      ),
+    ).toBe("@Membre dans #🍰〡iergday");
   });
 
   it("laisse @everyone et @here intacts : ce sont déjà des mots", () => {
-    expect(resoudreMentions("@everyone et @here", RESOLUTION)).toBe("@everyone et @here");
+    expect(resoudreMentions("@everyone et @here", RESOLUTION)).toBe(
+      "@everyone et @here",
+    );
   });
 
   it("laisse les émojis personnalisés en place — c'est l'écran qui les rendra", () => {
@@ -116,10 +132,17 @@ describe("resoudreMentions", () => {
 
 describe("decouperTexteDiscord", () => {
   it("garde l'ordre du texte et des émojis", () => {
-    const morceaux = decouperTexteDiscord("avant <:mouahaha:1296067836388708513> après");
+    const morceaux = decouperTexteDiscord(
+      "avant <:mouahaha:1296067836388708513> après",
+    );
     expect(morceaux).toEqual([
       { type: "texte", valeur: "avant " },
-      { anime: false, id: "1296067836388708513", nom: "mouahaha", type: "emoji" },
+      {
+        anime: false,
+        id: "1296067836388708513",
+        nom: "mouahaha",
+        type: "emoji",
+      },
       { type: "texte", valeur: " après" },
     ]);
   });
@@ -141,13 +164,18 @@ describe("decouperTexteDiscord", () => {
 
 describe("texteDiscordEnClair", () => {
   it("réduit un émoji à :nom: pour les attributs alt et les métadonnées", () => {
-    expect(texteDiscordEnClair("Tarpin en retard <:RG_riccardo_crying:1147803370896228352>", RESOLUTION)).toBe(
-      "Tarpin en retard :RG_riccardo_crying:",
-    );
+    expect(
+      texteDiscordEnClair(
+        "Tarpin en retard <:RG_riccardo_crying:1147803370896228352>",
+        RESOLUTION,
+      ),
+    ).toBe("Tarpin en retard :RG_riccardo_crying:");
   });
 
   it("résout aussi les mentions", () => {
-    expect(texteDiscordEnClair("<@198209347589898240> 🐑", RESOLUTION)).toBe("@RompishKaru 🐑");
+    expect(texteDiscordEnClair("<@198209347589898240> 🐑", RESOLUTION)).toBe(
+      "@RompishKaru 🐑",
+    );
   });
 });
 
@@ -188,11 +216,15 @@ describe("extraitTexteDiscord", () => {
 
   it("résout les mentions avant de mesurer la longueur", () => {
     // La balise fait 21 caractères, le nom résolu 12 : mesurer la balise couperait à tort.
-    expect(extraitTexteDiscord("<@198209347589898240> ok", 20, RESOLUTION)).toBe("@RompishKaru ok");
+    expect(
+      extraitTexteDiscord("<@198209347589898240> ok", 20, RESOLUTION),
+    ).toBe("@RompishKaru ok");
   });
 
   it("retire les liens t.co, comme l'extrait générique", () => {
-    expect(extraitTexteDiscord("voir https://t.co/abc123 ici", 60, RESOLUTION)).toBe("voir  ici");
+    expect(
+      extraitTexteDiscord("voir https://t.co/abc123 ici", 60, RESOLUTION),
+    ).toBe("voir  ici");
   });
 });
 
@@ -203,6 +235,10 @@ describe("urlEmojiDiscord", () => {
   });
 
   it("reste sur le CDN de Discord, seul hôte autorisé par img-src pour ces images", () => {
-    expect(urlEmojiDiscord("1412136639303520380", false).startsWith("https://cdn.discordapp.com/emojis/")).toBe(true);
+    expect(
+      urlEmojiDiscord("1412136639303520380", false).startsWith(
+        "https://cdn.discordapp.com/emojis/",
+      ),
+    ).toBe(true);
   });
 });

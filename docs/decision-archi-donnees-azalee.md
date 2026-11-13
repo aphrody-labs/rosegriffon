@@ -43,6 +43,7 @@ Azalée est un wiki IEVR public, read-heavy, intégré à l'application Website.
 Source de vérité = projections PostgreSQL alimentées par Inagle. Le publisher
 `niers` ne produit qu’un artefact SQLite d’extraction/dev ; il n’existe aucun
 fallback SQLite silencieux dans le runtime.
+
 - **Rendu** : les fiches détail `/skill /item /aura /tactic /chara` sont en ISR horaire, avec les chemins restants rendus à la demande ; les listes, filtres et surfaces authentifiées restent dynamiques.
 
 Les anciens incidents Supabase restent documentés pour l’historique ; ils ne

@@ -15,14 +15,20 @@ async function generateProof() {
     { name: "inagle_items", role: "Equipment, Boots & Consumables" },
     { name: "inagle_passives", role: "Passive Abilities & Kizuna Effects" },
     { name: "inagle_costumes", role: "Uniforms, Kits & Alternate Costumes" },
-    { name: "inagle_constellations", role: "Player Constellations & Hero Trees" },
+    {
+      name: "inagle_constellations",
+      role: "Player Constellations & Hero Trees",
+    },
     { name: "inagle_keshins", role: "Fighting Spirits (Keshin)" },
     { name: "inagle_miximax", role: "Miximax Auras & Transformations" },
     { name: "inagle_souls", role: "Totems / Animal Souls" },
     { name: "inagle_teams", role: "Canonical Game Teams" },
     { name: "inagle_formations", role: "Tactical Pitch Formations" },
     { name: "inagle_tactics", role: "Team Tactics & Field Orders" },
-    { name: "inagle_special_tactics", role: "Special Tactics & Hissatsu Tactics" },
+    {
+      name: "inagle_special_tactics",
+      role: "Special Tactics & Hissatsu Tactics",
+    },
     { name: "inagle_super_tactics", role: "Super Tactics" },
     { name: "inagle_stadiums", role: "Canonical Soccer Stadiums" },
     { name: "inagle_shops", role: "In-Game Shops & Merchant Catalogs" },
@@ -35,7 +41,12 @@ async function generateProof() {
     { name: "inagle_lua_scripts", role: "Engine Lua Game Scripts" },
   ];
 
-  const results: Array<{ name: string; role: string; count: number; hash: string }> = [];
+  const results: Array<{
+    name: string;
+    role: string;
+    count: number;
+    hash: string;
+  }> = [];
   const globalHasher = crypto.createHash("sha256");
   const blakeHasher = new Bun.CryptoHasher("blake2b256");
 
@@ -47,7 +58,11 @@ async function generateProof() {
       // Compute table sample hash
       const sampleRes = await pool.query(`SELECT * FROM "${t.name}" LIMIT 20`);
       const sampleStr = JSON.stringify(sampleRes.rows);
-      const tableHash = crypto.createHash("sha256").update(sampleStr).digest("hex").slice(0, 16);
+      const tableHash = crypto
+        .createHash("sha256")
+        .update(sampleStr)
+        .digest("hex")
+        .slice(0, 16);
 
       results.push({ name: t.name, role: t.role, count, hash: tableHash });
       globalHasher.update(`${t.name}:${count}:${tableHash}`);
@@ -63,7 +78,9 @@ async function generateProof() {
   console.log("\n| Table Name | Role / Content | Count | Deterministic Hash |");
   console.log("| :--- | :--- | :--- | :--- |");
   for (const r of results) {
-    console.log(`| \`${r.name}\` | ${r.role} | **${r.count.toLocaleString("fr-FR")}** | \`${r.hash}\` |`);
+    console.log(
+      `| \`${r.name}\` | ${r.role} | **${r.count.toLocaleString("fr-FR")}** | \`${r.hash}\` |`,
+    );
   }
 
   console.log("\n--- Cryptographic Proof Verification ---");

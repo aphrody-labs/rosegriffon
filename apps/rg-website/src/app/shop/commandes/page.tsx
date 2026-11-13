@@ -45,7 +45,9 @@ async function fetchOrders(userId: string): Promise<OrderRow[]> {
   try {
     const { data, error } = await createPostgresClient()
       .from("orders")
-      .select("id, stripe_session_id, amount_total_cents, patron_discount_applied, status, created_at, items")
+      .select(
+        "id, stripe_session_id, amount_total_cents, patron_discount_applied, status, created_at, items",
+      )
       .eq("user_id", userId)
       .order("created_at", { ascending: false })
       .limit(50);
@@ -55,7 +57,10 @@ async function fetchOrders(userId: string): Promise<OrderRow[]> {
     }
     return (data ?? []) as OrderRow[];
   } catch (error) {
-    console.warn("[shop/commandes] table orders absente ou indisponible:", error);
+    console.warn(
+      "[shop/commandes] table orders absente ou indisponible:",
+      error,
+    );
     return [];
   }
 }
@@ -76,7 +81,9 @@ export default async function OrdersPage() {
             <ShoppingBag className="size-3" />
             <span>Boutique Rose Griffon</span>
           </p>
-          <h1 className="text-fluid-headline-xl font-extrabold tracking-tight text-white">Mes commandes</h1>
+          <h1 className="text-fluid-headline-xl font-extrabold tracking-tight text-white">
+            Mes commandes
+          </h1>
         </div>
         <Link
           href="/shop"
@@ -91,7 +98,7 @@ export default async function OrdersPage() {
         <EmptyOrders />
       ) : (
         <ul className="flex flex-col gap-3">
-          {orders.map(order => (
+          {orders.map((order) => (
             <li key={order.id}>
               <Link
                 href={`/shop/commandes/${order.id}`}
@@ -127,7 +134,9 @@ export default async function OrdersPage() {
                     >
                       {STATUS_LABEL[order.status] ?? order.status}
                     </span>
-                    <span className="text-2xl font-extrabold text-white">{formatEuros(order.amount_total_cents)}</span>
+                    <span className="text-2xl font-extrabold text-white">
+                      {formatEuros(order.amount_total_cents)}
+                    </span>
                   </div>
                 </div>
               </Link>
@@ -143,9 +152,12 @@ function EmptyOrders() {
   return (
     <div className="grid place-items-center rounded-3xl border-2 border-dashed border-rg-or/40 bg-rg-marine/40 px-6 py-20 text-center">
       <PackageOpen className="size-14 text-rg-or" />
-      <h2 className="mt-6 text-2xl font-extrabold text-white">Aucune commande pour le moment</h2>
+      <h2 className="mt-6 text-2xl font-extrabold text-white">
+        Aucune commande pour le moment
+      </h2>
       <p className="mt-2 max-w-md text-sm text-white/70">
-        Quand tu auras commandé, tes commandes apparaîtront ici avec le statut d'expédition et le suivi.
+        Quand tu auras commandé, tes commandes apparaîtront ici avec le statut
+        d'expédition et le suivi.
       </p>
       <Link
         href="/shop"

@@ -18,7 +18,9 @@ describe("provider OAuth URL builders", () => {
     );
     expect(url.origin).toBe("https://id.twitch.tv");
     expect(url.searchParams.get("client_id")).toBe("client&id");
-    expect(url.searchParams.get("redirect_uri")).toBe("https://api.example.test/oauth/callback?provider=twitch");
+    expect(url.searchParams.get("redirect_uri")).toBe(
+      "https://api.example.test/oauth/callback?provider=twitch",
+    );
     expect(url.searchParams.get("state")).toBe("discord:state with spaces");
   });
 
@@ -31,18 +33,26 @@ describe("provider OAuth URL builders", () => {
       }),
     );
     expect(url.origin).toBe("https://api.challonge.com");
-    expect(url.searchParams.get("scope")).toBe("me tournaments:read tournaments:write participants:write");
-    expect(url.searchParams.get("redirect_uri")).toContain("provider=challonge");
+    expect(url.searchParams.get("scope")).toBe(
+      "me tournaments:read tournaments:write participants:write",
+    );
+    expect(url.searchParams.get("redirect_uri")).toContain(
+      "provider=challonge",
+    );
   });
 
   test("parses only a Discord-bound provider state", () => {
     const token = "a".repeat(48);
-    expect(formatProviderOAuthState("123456789012345678", token)).toBe(`123456789012345678:${token}`);
+    expect(formatProviderOAuthState("123456789012345678", token)).toBe(
+      `123456789012345678:${token}`,
+    );
     expect(parseProviderOAuthState(`123456789012345678:${token}`)).toEqual({
       discordId: "123456789012345678",
       token,
     });
     expect(parseProviderOAuthState(`123:${token}`)).toBeNull();
-    expect(parseProviderOAuthState(`123456789012345678:${"z".repeat(48)}`)).toBeNull();
+    expect(
+      parseProviderOAuthState(`123456789012345678:${"z".repeat(48)}`),
+    ).toBeNull();
   });
 });

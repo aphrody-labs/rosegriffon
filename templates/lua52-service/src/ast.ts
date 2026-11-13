@@ -82,12 +82,19 @@ export function getLuaAst(filePath: string, content: string): LuaAstReport {
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i].trim();
     // Function declarations
-    const fnMatch = line.match(/^(?:local\s+)?function\s+([a-zA-Z0-9_.:]+)\s*\(/);
+    const fnMatch = line.match(
+      /^(?:local\s+)?function\s+([a-zA-Z0-9_.:]+)\s*\(/,
+    );
     if (fnMatch) {
       symbols.push({
         name: fnMatch[1],
         kind: fnMatch[1].includes(":") ? "Method" : "Function",
-        span: { start_line: i + 1, end_line: i + 1, start_col: 0, end_col: line.length },
+        span: {
+          start_line: i + 1,
+          end_line: i + 1,
+          start_col: 0,
+          end_col: line.length,
+        },
       });
     }
     // Requires
@@ -97,7 +104,12 @@ export function getLuaAst(filePath: string, content: string): LuaAstReport {
     }
     // Calls
     const callMatch = line.match(/([a-zA-Z0-9_]+)\s*\(/);
-    if (callMatch && callMatch[1] !== "function" && callMatch[1] !== "if" && callMatch[1] !== "for") {
+    if (
+      callMatch &&
+      callMatch[1] !== "function" &&
+      callMatch[1] !== "if" &&
+      callMatch[1] !== "for"
+    ) {
       calls.push({ callee: callMatch[1] });
     }
   }

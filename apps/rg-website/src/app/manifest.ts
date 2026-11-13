@@ -4,7 +4,8 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     background_color: "#ffffff",
     categories: ["gaming", "social", "entertainment"],
-    description: "Site officiel de l'association Rose Griffon, rassemblant la communauté Inazuma Eleven en France.",
+    description:
+      "Site officiel de l'association Rose Griffon, rassemblant la communauté Inazuma Eleven en France.",
     display: "standalone",
     // Trois fichiers RÉELS, générés aux dimensions annoncées. La version
     // précédente déclarait deux fois le même WebP de 1920 px en le disant

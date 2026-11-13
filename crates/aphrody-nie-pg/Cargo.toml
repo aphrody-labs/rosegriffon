@@ -12,7 +12,13 @@ workspace = true
 
 [features]
 default = []
-postgres = ["dep:tokio-postgres", "dep:tokio", "dep:futures-util", "dep:clap", "dep:anyhow"]
+postgres = [
+  "dep:tokio-postgres",
+  "dep:tokio",
+  "dep:futures-util",
+  "dep:clap",
+  "dep:anyhow",
+]
 
 [dependencies]
 aphrody-nie-formats = { workspace = true, features = ["std"] }

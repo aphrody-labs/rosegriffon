@@ -1,9 +1,24 @@
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
-import { Ban, CheckCircle2, CircleDashed, Loader2, Play, XCircle } from "lucide-react";
+import {
+  Ban,
+  CheckCircle2,
+  CircleDashed,
+  Loader2,
+  Play,
+  XCircle,
+} from "lucide-react";
 
-import { Badge, Button, Card, CardContent, CardDescription, CardHeader, CardTitle } from "@rosegriffon/ui";
+import {
+  Badge,
+  Button,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@rosegriffon/ui";
 import { FAMILLES_TACHES, type FamilleTache } from "@rosegriffon/types/cron";
 
 import { useConfirm } from "@/components/admin/confirmation-dialog";
@@ -22,7 +37,10 @@ const LIBELLES_FAMILLES: Readonly<Record<FamilleTache | "autre", string>> = {
   autre: "Registre (CLI uniquement)",
 };
 
-const ORDRE: ReadonlyArray<FamilleTache | "autre"> = [...FAMILLES_TACHES, "autre"];
+const ORDRE: ReadonlyArray<FamilleTache | "autre"> = [
+  ...FAMILLES_TACHES,
+  "autre",
+];
 
 type Retour = { statut: "ok" | "erreur"; message: string };
 
@@ -83,8 +101,11 @@ export function TableauTaches({
           headers: { "content-type": "application/json" },
           body: JSON.stringify({ tache: tache.nom }),
         });
-        const charge = (await reponse.json()) as { message?: string; error?: string };
-        setRetours(precedent => ({
+        const charge = (await reponse.json()) as {
+          message?: string;
+          error?: string;
+        };
+        setRetours((precedent) => ({
           ...precedent,
           [tache.nom]: {
             statut: reponse.ok ? "ok" : "erreur",
@@ -92,9 +113,12 @@ export function TableauTaches({
           },
         }));
       } catch (erreur) {
-        setRetours(precedent => ({
+        setRetours((precedent) => ({
           ...precedent,
-          [tache.nom]: { statut: "erreur", message: erreur instanceof Error ? erreur.message : String(erreur) },
+          [tache.nom]: {
+            statut: "erreur",
+            message: erreur instanceof Error ? erreur.message : String(erreur),
+          },
         }));
       } finally {
         setEnCours(null);
@@ -105,9 +129,10 @@ export function TableauTaches({
 
   const parFamille = useMemo(
     () =>
-      ORDRE.map(famille => ({ famille, taches: taches.filter(t => t.famille === famille) })).filter(
-        groupe => groupe.taches.length > 0,
-      ),
+      ORDRE.map((famille) => ({
+        famille,
+        taches: taches.filter((t) => t.famille === famille),
+      })).filter((groupe) => groupe.taches.length > 0),
     [taches],
   );
 
@@ -115,12 +140,16 @@ export function TableauTaches({
     <div className="space-y-8">
       {dialog}
       {parFamille.map(({ famille, taches: liste }) => (
-        <section key={famille} className="space-y-3" aria-labelledby={`famille-${famille}`}>
+        <section
+          key={famille}
+          className="space-y-3"
+          aria-labelledby={`famille-${famille}`}
+        >
           <h2 id={`famille-${famille}`} className="text-lg font-semibold">
             {LIBELLES_FAMILLES[famille]}
           </h2>
           <div className="grid gap-3 md:grid-cols-2">
-            {liste.map(tache => {
+            {liste.map((tache) => {
               const autorise = peutLancerDepuisLeSite(tache, role);
               const retour = retours[tache.nom];
               return (
@@ -128,8 +157,12 @@ export function TableauTaches({
                   <CardHeader className="pb-3">
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
-                        <CardTitle className="text-base">{tache.titre}</CardTitle>
-                        <CardDescription className="mt-1">{tache.role}</CardDescription>
+                        <CardTitle className="text-base">
+                          {tache.titre}
+                        </CardTitle>
+                        <CardDescription className="mt-1">
+                          {tache.role}
+                        </CardDescription>
                       </div>
                       {tache.motifBlocage ? (
                         <Badge variant="outline" className="shrink-0 gap-1">
@@ -147,27 +180,43 @@ export function TableauTaches({
                     <dl className="flex flex-wrap gap-x-6 gap-y-1 text-xs text-muted-foreground">
                       <div className="flex gap-1.5">
                         <dt>Nom :</dt>
-                        <dd className="font-mono text-foreground">{tache.nom}</dd>
+                        <dd className="font-mono text-foreground">
+                          {tache.nom}
+                        </dd>
                       </div>
                       <div className="flex gap-1.5">
                         <dt>Planification :</dt>
                         <dd className="font-mono text-foreground">
-                          {tache.planification === "manuel" ? "manuelle" : tache.planification}
+                          {tache.planification === "manuel"
+                            ? "manuelle"
+                            : tache.planification}
                         </dd>
                       </div>
                     </dl>
 
-                    <div className="rounded-md border border-border p-2 text-xs" aria-label="Dernière exécution">
+                    <div
+                      className="rounded-md border border-border p-2 text-xs"
+                      aria-label="Dernière exécution"
+                    >
                       {tache.dernier ? (
                         <p className="flex flex-wrap items-center gap-x-2 gap-y-1">
                           {tache.dernier.succes ? (
-                            <CheckCircle2 className="size-4 text-succes" aria-hidden />
+                            <CheckCircle2
+                              className="size-4 text-succes"
+                              aria-hidden
+                            />
                           ) : (
-                            <XCircle className="size-4 text-destructive" aria-hidden />
+                            <XCircle
+                              className="size-4 text-destructive"
+                              aria-hidden
+                            />
                           )}
-                          <span className="font-medium">{tache.dernier.succes ? "Réussie" : "Échec"}</span>
+                          <span className="font-medium">
+                            {tache.dernier.succes ? "Réussie" : "Échec"}
+                          </span>
                           <span className="text-muted-foreground">
-                            {ilYA(tache.dernier.demarre_le)} · {duree(tache.dernier.duree_ms)}
+                            {ilYA(tache.dernier.demarre_le)} ·{" "}
+                            {duree(tache.dernier.duree_ms)}
                           </span>
                         </p>
                       ) : (
@@ -179,13 +228,17 @@ export function TableauTaches({
                       {tache.dernierEchec && (
                         <p className="mt-1 text-destructive">
                           Dernier échec {ilYA(tache.dernierEchec.demarre_le)}
-                          {tache.dernierEchec.erreur ? ` : ${tache.dernierEchec.erreur.slice(0, 160)}` : ""}
+                          {tache.dernierEchec.erreur
+                            ? ` : ${tache.dernierEchec.erreur.slice(0, 160)}`
+                            : ""}
                         </p>
                       )}
                     </div>
 
                     {tache.horsServerless && (
-                      <p className="text-xs text-muted-foreground">Exige un serveur dédié : {tache.horsServerless}.</p>
+                      <p className="text-xs text-muted-foreground">
+                        Exige un serveur dédié : {tache.horsServerless}.
+                      </p>
                     )}
 
                     {tache.motifBlocage ? (
@@ -197,7 +250,9 @@ export function TableauTaches({
                         size="sm"
                         variant="outline"
                         className="min-h-11 sm:min-h-9"
-                        disabled={!autorise || !cronJoignable || enCours === tache.nom}
+                        disabled={
+                          !autorise || !cronJoignable || enCours === tache.nom
+                        }
                         onClick={() => lancer(tache)}
                         title={
                           !cronJoignable
@@ -208,7 +263,10 @@ export function TableauTaches({
                         }
                       >
                         {enCours === tache.nom ? (
-                          <Loader2 className="size-4 animate-spin" aria-hidden />
+                          <Loader2
+                            className="size-4 animate-spin"
+                            aria-hidden
+                          />
                         ) : (
                           <Play className="size-4" aria-hidden />
                         )}

@@ -85,7 +85,10 @@ export function CoachCard({
         ) : (
           <ClipboardList
             size={40}
-            className={cn("opacity-30 transition-transform duration-300 group-hover:scale-110", accent)}
+            className={cn(
+              "opacity-30 transition-transform duration-300 group-hover:scale-110",
+              accent,
+            )}
             aria-hidden="true"
           />
         )}
@@ -97,7 +100,12 @@ export function CoachCard({
       </div>
 
       <div className="flex flex-1 flex-col gap-1 p-3">
-        <span className={cn("text-[10px] font-bold uppercase tracking-wider", accent)}>
+        <span
+          className={cn(
+            "text-[10px] font-bold uppercase tracking-wider",
+            accent,
+          )}
+        >
           {roleFr}
           {playstyleFr ? ` · ${playstyleFr}` : ""}
         </span>
@@ -107,7 +115,9 @@ export function CoachCard({
 
         {stat ? (
           <div className="mt-auto flex items-center justify-between gap-2 pt-1">
-            <span className="line-clamp-1 text-xs text-on-surface-variant">{stat}</span>
+            <span className="line-clamp-1 text-xs text-on-surface-variant">
+              {stat}
+            </span>
             {buff ? (
               <span className="shrink-0 rounded-full bg-primary-container px-2 py-0.5 text-[11px] font-bold text-on-primary-container">
                 {buff}
@@ -115,7 +125,9 @@ export function CoachCard({
             ) : null}
           </div>
         ) : (
-          <span className="mt-auto pt-1 text-xs italic text-on-surface-variant/50">{elementFr ?? "—"}</span>
+          <span className="mt-auto pt-1 text-xs italic text-on-surface-variant/50">
+            {elementFr ?? "—"}
+          </span>
         )}
       </div>
     </Link>

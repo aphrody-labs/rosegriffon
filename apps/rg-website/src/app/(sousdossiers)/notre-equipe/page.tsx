@@ -84,7 +84,8 @@ interface DefinitionEquipe {
 
 const REFERENTIEL_EQUIPES: DefinitionEquipe[] = [
   {
-    badgeColor: "bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/30",
+    badgeColor:
+      "bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/30",
     borderTheme: "border-amber-400/40",
     description:
       "Les membres du bureau assurent la gouvernance, la gestion administrative, financière et légale de l'association loi 1901 Rose Griffon. Ils coordonnent les différents pôles et garantissent la vision globale du projet.",
@@ -95,7 +96,8 @@ const REFERENTIEL_EQUIPES: DefinitionEquipe[] = [
     nom: "Bureau de l'Association",
   },
   {
-    badgeColor: "bg-rose-500/10 text-rose-700 dark:text-rose-300 border-rose-500/30",
+    badgeColor:
+      "bg-rose-500/10 text-rose-700 dark:text-rose-300 border-rose-500/30",
     borderTheme: "border-rose-400/40",
     description:
       "L'équipe éditoriale et documentaire en charge du wiki Azalée. Rédacteurs, traducteurs et curateurs travaillent à documenter l'ensemble de l'univers Inazuma Eleven et du jeu Victory Road.",
@@ -106,7 +108,8 @@ const REFERENTIEL_EQUIPES: DefinitionEquipe[] = [
     nom: "Équipe Azalée",
   },
   {
-    badgeColor: "bg-violet-500/10 text-violet-700 dark:text-violet-300 border-violet-500/30",
+    badgeColor:
+      "bg-violet-500/10 text-violet-700 dark:text-violet-300 border-violet-500/30",
     borderTheme: "border-achillea-violet/40",
     description:
       "Les créateurs et arbitres de la scène e-sport Achilléa et de l'Astral League. Organisateurs de tournois, casters et techniciens animent les compétitions communautaires.",
@@ -117,7 +120,8 @@ const REFERENTIEL_EQUIPES: DefinitionEquipe[] = [
     nom: "Équipe Achilléa",
   },
   {
-    badgeColor: "bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border-indigo-500/30",
+    badgeColor:
+      "bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border-indigo-500/30",
     borderTheme: "border-indigo-400/40",
     description:
       "Les artistes visuels, concepteurs 2D/3D, storyboarders, illustrateurs et animateurs qui donnent corps à l'univers graphique et aux mascottes de Rose Griffon.",
@@ -128,7 +132,8 @@ const REFERENTIEL_EQUIPES: DefinitionEquipe[] = [
     nom: "Équipe Dessinateur",
   },
   {
-    badgeColor: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/30",
+    badgeColor:
+      "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/30",
     borderTheme: "border-emerald-400/40",
     description:
       "Les gardiens de la narration et de l'écriture. Ils tissent les intrigues, rédigent les fiches de personnages et enrichissent la mythologie de l'association.",
@@ -139,7 +144,8 @@ const REFERENTIEL_EQUIPES: DefinitionEquipe[] = [
     nom: "Équipe Lore",
   },
   {
-    badgeColor: "bg-cyan-500/10 text-cyan-700 dark:text-cyan-300 border-cyan-500/30",
+    badgeColor:
+      "bg-cyan-500/10 text-cyan-700 dark:text-cyan-300 border-cyan-500/30",
     borderTheme: "border-cyan-400/40",
     description:
       "Les développeurs et monteurs assurant l'infrastructure web, les outils interactifs et les réalisations techniques au service de la communauté.",
@@ -150,7 +156,8 @@ const REFERENTIEL_EQUIPES: DefinitionEquipe[] = [
     nom: "Équipe Production",
   },
   {
-    badgeColor: "bg-sky-500/10 text-sky-700 dark:text-sky-300 border-sky-500/30",
+    badgeColor:
+      "bg-sky-500/10 text-sky-700 dark:text-sky-300 border-sky-500/30",
     borderTheme: "border-sky-400/40",
     description:
       "L'équipe en première ligne sur nos plateformes : streamers, community managers et ambassadeurs qui partagent nos passions et animent le public.",
@@ -161,7 +168,8 @@ const REFERENTIEL_EQUIPES: DefinitionEquipe[] = [
     nom: "Équipe Réseaux",
   },
   {
-    badgeColor: "bg-teal-500/10 text-teal-700 dark:text-teal-300 border-teal-500/30",
+    badgeColor:
+      "bg-teal-500/10 text-teal-700 dark:text-teal-300 border-teal-500/30",
     borderTheme: "border-teal-400/40",
     description:
       "Un espace neutre, confidentiel et bienveillant dédié à l'écoute des membres, au règlement des litiges et au respect de la charte d'engagement.",
@@ -172,7 +180,8 @@ const REFERENTIEL_EQUIPES: DefinitionEquipe[] = [
     nom: "Cellule de Médiation",
   },
   {
-    badgeColor: "bg-gaelle-blue/10 text-gaelle-blue dark:text-gaelle-blue-light border-gaelle-blue/30",
+    badgeColor:
+      "bg-gaelle-blue/10 text-gaelle-blue dark:text-gaelle-blue-light border-gaelle-blue/30",
     borderTheme: "border-gaelle-blue/40",
     description:
       "Les membres adhérents qui participent à la vie associative, soutiennent nos initiatives et font vivre la passion d'Inazuma Eleven au quotidien.",
@@ -183,7 +192,8 @@ const REFERENTIEL_EQUIPES: DefinitionEquipe[] = [
     nom: "Membres de l'Association",
   },
   {
-    badgeColor: "bg-purple-500/10 text-purple-700 dark:text-purple-300 border-purple-500/30",
+    badgeColor:
+      "bg-purple-500/10 text-purple-700 dark:text-purple-300 border-purple-500/30",
     borderTheme: "border-purple-400/40",
     description:
       "Nos partenaires, créateurs de contenus invités et intervenants extérieurs qui enrichissent les événements de l'association.",
@@ -195,7 +205,9 @@ const REFERENTIEL_EQUIPES: DefinitionEquipe[] = [
   },
 ];
 
-async function chargerEquipes(): Promise<{ definition: DefinitionEquipe; membres: MembreStaff[] }[]> {
+async function chargerEquipes(): Promise<
+  { definition: DefinitionEquipe; membres: MembreStaff[] }[]
+> {
   try {
     const pool = getPgPool();
     const { rows } = await pool.query<MembreRaw>(
@@ -207,7 +219,7 @@ async function chargerEquipes(): Promise<{ definition: DefinitionEquipe; membres
 
     const supabaseUrl = getEnv("NEXT_PUBLIC_SUPABASE_URL");
 
-    const membresNormalises: MembreStaff[] = (rows || []).map(row => {
+    const membresNormalises: MembreStaff[] = (rows || []).map((row) => {
       let imageUrl = row.image_url || "";
       if (imageUrl.includes("{url}")) {
         imageUrl = imageUrl.replace("{url}", supabaseUrl);
@@ -217,7 +229,9 @@ async function chargerEquipes(): Promise<{ definition: DefinitionEquipe; membres
       }
       // Le logo par défaut pointait vers le bucket Storage `assets`, non recopié
       // lors de la bascule Supabase : il est servi depuis public/.
-      if (imageUrl.endsWith("/storage/v1/object/public/assets/RG_Logo_V2.5.webp")) {
+      if (
+        imageUrl.endsWith("/storage/v1/object/public/assets/RG_Logo_V2.5.webp")
+      ) {
         imageUrl = "";
       }
 
@@ -225,27 +239,36 @@ async function chargerEquipes(): Promise<{ definition: DefinitionEquipe; membres
         displayIndex: row.display_index ?? 999,
         id: row.id,
         image: imageUrl || "/RG_Logo_V2.5.webp",
-        link: row.member_link && row.member_link.startsWith("http") ? row.member_link : undefined,
+        link:
+          row.member_link && row.member_link.startsWith("http")
+            ? row.member_link
+            : undefined,
         name: row.name,
-        role: row.role && row.role.trim() !== "Staff" ? row.role.trim() : "Membre",
+        role:
+          row.role && row.role.trim() !== "Staff" ? row.role.trim() : "Membre",
         teamId: row.team_id,
         teamName: row.team_name || row.team_id,
       };
     });
 
     // Grouper par équipe dans l'ordre de REFERENTIEL_EQUIPES
-    const resultats: { definition: DefinitionEquipe; membres: MembreStaff[] }[] = [];
+    const resultats: {
+      definition: DefinitionEquipe;
+      membres: MembreStaff[];
+    }[] = [];
 
     for (const def of REFERENTIEL_EQUIPES) {
-      const membres = membresNormalises.filter(m => m.teamId === def.id);
+      const membres = membresNormalises.filter((m) => m.teamId === def.id);
       if (membres.length > 0) {
         resultats.push({ definition: def, membres });
       }
     }
 
     // Ajouter d'éventuelles équipes personnalisées non référencées
-    const teamsTraitees = new Set(REFERENTIEL_EQUIPES.map(d => d.id));
-    const orphelins = membresNormalises.filter(m => !teamsTraitees.has(m.teamId));
+    const teamsTraitees = new Set(REFERENTIEL_EQUIPES.map((d) => d.id));
+    const orphelins = membresNormalises.filter(
+      (m) => !teamsTraitees.has(m.teamId),
+    );
     if (orphelins.length > 0) {
       const groupesOrphelins = new Map<string, MembreStaff[]>();
       for (const m of orphelins) {
@@ -292,8 +315,10 @@ function obtenirMedailleBureau(
   const roleLower = role.toLowerCase();
   if (roleLower.includes("président") && !roleLower.includes("vice")) {
     return {
-      badgeBg: "bg-amber-400/15 text-amber-600 dark:text-amber-300 border-amber-400/40",
-      borderClass: "border-4 border-amber-400 shadow-[0_0_20px_rgba(251,191,36,0.45)]",
+      badgeBg:
+        "bg-amber-400/15 text-amber-600 dark:text-amber-300 border-amber-400/40",
+      borderClass:
+        "border-4 border-amber-400 shadow-[0_0_20px_rgba(251,191,36,0.45)]",
       glowStyle: "bg-amber-400/20",
       icon: Crown,
       libelle: "Médaille d'Or",
@@ -302,8 +327,10 @@ function obtenirMedailleBureau(
   }
   if (roleLower.includes("vice-président")) {
     return {
-      badgeBg: "bg-slate-300/20 text-slate-700 dark:text-slate-200 border-slate-300/50",
-      borderClass: "border-4 border-slate-300 dark:border-slate-200 shadow-[0_0_20px_rgba(203,213,225,0.4)]",
+      badgeBg:
+        "bg-slate-300/20 text-slate-700 dark:text-slate-200 border-slate-300/50",
+      borderClass:
+        "border-4 border-slate-300 dark:border-slate-200 shadow-[0_0_20px_rgba(203,213,225,0.4)]",
       glowStyle: "bg-slate-300/20",
       icon: Award,
       libelle: "Médaille d'Argent",
@@ -312,8 +339,10 @@ function obtenirMedailleBureau(
   }
   if (roleLower.includes("trésorier") || roleLower.includes("secrétaire")) {
     return {
-      badgeBg: "bg-amber-700/15 text-amber-800 dark:text-amber-300 border-amber-700/40",
-      borderClass: "border-4 border-amber-700 dark:border-amber-600 shadow-[0_0_20px_rgba(180,83,9,0.4)]",
+      badgeBg:
+        "bg-amber-700/15 text-amber-800 dark:text-amber-300 border-amber-700/40",
+      borderClass:
+        "border-4 border-amber-700 dark:border-amber-600 shadow-[0_0_20px_rgba(180,83,9,0.4)]",
       glowStyle: "bg-amber-700/20",
       icon: Medal,
       libelle: "Médaille de Bronze",
@@ -322,8 +351,10 @@ function obtenirMedailleBureau(
   }
   return index === 1
     ? {
-        badgeBg: "bg-amber-400/15 text-amber-600 dark:text-amber-300 border-amber-400/40",
-        borderClass: "border-4 border-amber-400 shadow-[0_0_20px_rgba(251,191,36,0.45)]",
+        badgeBg:
+          "bg-amber-400/15 text-amber-600 dark:text-amber-300 border-amber-400/40",
+        borderClass:
+          "border-4 border-amber-400 shadow-[0_0_20px_rgba(251,191,36,0.45)]",
         glowStyle: "bg-amber-400/20",
         icon: Crown,
         libelle: "Médaille d'Or",
@@ -331,7 +362,8 @@ function obtenirMedailleBureau(
       }
     : {
         badgeBg: "bg-primary/10 text-primary border-primary/30",
-        borderClass: "border-4 border-primary/50 shadow-[0_0_15px_rgba(59,130,246,0.3)]",
+        borderClass:
+          "border-4 border-primary/50 shadow-[0_0_15px_rgba(59,130,246,0.3)]",
         glowStyle: "bg-primary/20",
         icon: Award,
         libelle: "Médaille du Bureau",
@@ -343,8 +375,8 @@ export default async function NotreEquipePage() {
   const equipes = await chargerEquipes();
   const totalMembres = equipes.reduce((acc, eq) => acc + eq.membres.length, 0);
 
-  const tousLesMembresPourSchema = equipes.flatMap(eq =>
-    eq.membres.map(m => ({
+  const tousLesMembresPourSchema = equipes.flatMap((eq) =>
+    eq.membres.map((m) => ({
       image: m.image,
       name: m.name,
       role: `${m.role} — ${eq.definition.nom}`,
@@ -366,8 +398,12 @@ export default async function NotreEquipePage() {
             <Users className="size-5" aria-hidden />
           </div>
           <div>
-            <h1 className="text-2xl font-black tracking-tight text-foreground min-[840px]:text-3xl">Notre équipe</h1>
-            <p className="text-xs font-medium text-muted-foreground">{totalMembres} contributeurs</p>
+            <h1 className="text-2xl font-black tracking-tight text-foreground min-[840px]:text-3xl">
+              Notre équipe
+            </h1>
+            <p className="text-xs font-medium text-muted-foreground">
+              {totalMembres} contributeurs
+            </p>
           </div>
         </div>
 
@@ -413,7 +449,12 @@ export default async function NotreEquipePage() {
               <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-4 border-b border-outline-variant/15">
                 <div className="space-y-2 max-w-3xl">
                   <div className="flex items-center gap-2.5">
-                    <span className={cn("p-2 rounded-xl border", definition.badgeColor)}>
+                    <span
+                      className={cn(
+                        "p-2 rounded-xl border",
+                        definition.badgeColor,
+                      )}
+                    >
                       <IconeEquipe className="size-5" />
                     </span>
                     <div>
@@ -428,7 +469,9 @@ export default async function NotreEquipePage() {
                       </h2>
                     </div>
                   </div>
-                  <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">{definition.description}</p>
+                  <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
+                    {definition.description}
+                  </p>
                 </div>
                 <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-surface-container text-xs font-bold text-foreground border border-outline-variant/15 self-start md:self-auto shrink-0">
                   <span className="size-2 rounded-full bg-primary animate-pulse" />
@@ -448,7 +491,9 @@ export default async function NotreEquipePage() {
                 )}
               >
                 {membres.map((membre, mIdx) => {
-                  const medailleBureau = estBureau ? obtenirMedailleBureau(membre.role, membre.displayIndex) : null;
+                  const medailleBureau = estBureau
+                    ? obtenirMedailleBureau(membre.role, membre.displayIndex)
+                    : null;
 
                   const estLead =
                     !estBureau &&

@@ -15,7 +15,16 @@
  * Frontière stricte : ce module n'importe que des libs PURES/client-safe (cpk-wasm,
  * cpk/shared, lib/cutin/*) — aucun `server-only`/`bun:sqlite`.
  */
-import { Box, Download, Film, Loader2, Pause, Play, RotateCcw, Sparkles } from "lucide-react";
+import {
+  Box,
+  Download,
+  Film,
+  Loader2,
+  Pause,
+  Play,
+  RotateCcw,
+  Sparkles,
+} from "lucide-react";
 import dynamic from "next/dynamic";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { cdnOrigin } from "@rosegriffon/assets";
@@ -23,8 +32,16 @@ import CharacterModelViewer from "@/components/wiki/CharacterModelViewer";
 import { cpkAssetUrl } from "@rosegriffon/azalee/cpk/shared";
 import { downloadName } from "@rosegriffon/azalee/text/download-filename";
 import type { CutinStoryboard } from "@/lib/cutin/camera";
-import { decodeEffectLayer, loadCutinStoryboard, mainModelLayer } from "@/lib/cutin/decode";
-import { downloadBlob, exportCutinVideo, isVideoExportSupported } from "@/lib/cutin/export";
+import {
+  decodeEffectLayer,
+  loadCutinStoryboard,
+  mainModelLayer,
+} from "@/lib/cutin/decode";
+import {
+  downloadBlob,
+  exportCutinVideo,
+  isVideoExportSupported,
+} from "@/lib/cutin/export";
 import { fetchCutinManifest } from "@/lib/cutin/listing";
 import { createTheatreSequencer } from "@/lib/cutin/theatre-sequencer";
 import type { CutinGlbLayer, CutinManifest } from "@/lib/cutin/types";
@@ -56,12 +73,15 @@ type LayerStatus = "idle" | "loading" | "ready" | "none";
 
 /** Attend la prochaine peinture (laisse React appliquer scrubSec=null/orbit off avant l'export). */
 function nextPaint(): Promise<void> {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
   });
 }
 
-export function CutinViewer({ cutin, skillName }: CutinViewerProps): React.JSX.Element {
+export function CutinViewer({
+  cutin,
+  skillName,
+}: CutinViewerProps): React.JSX.Element {
   const [mounted, setMounted] = useState(false);
   const [manifest, setManifest] = useState<CutinManifest | null>(null);
   const [storyboard, setStoryboard] = useState<CutinStoryboard | null>(null);
@@ -71,7 +91,9 @@ export function CutinViewer({ cutin, skillName }: CutinViewerProps): React.JSX.E
   // Couches d'effet décodées (id → GLB) + leur statut.
   const [decoded, setDecoded] = useState<Record<string, CutinGlbLayer>>({});
   const [status, setStatus] = useState<Record<string, LayerStatus>>({});
-  const [visibility, setVisibility] = useState<Record<string, boolean>>({ main: true });
+  const [visibility, setVisibility] = useState<Record<string, boolean>>({
+    main: true,
+  });
 
   // Contrôles de scène.
   const [bloom, setBloom] = useState(true);
@@ -105,7 +127,11 @@ export function CutinViewer({ cutin, skillName }: CutinViewerProps): React.JSX.E
         setStoryboard(story);
         setMainLayer(mainModelLayer(m));
         // Effets : tous « idle » (décodables à la demande), invisibles par défaut.
-        setStatus(Object.fromEntries(m.layers.map(l => [l.id, "idle" as LayerStatus])));
+        setStatus(
+          Object.fromEntries(
+            m.layers.map((l) => [l.id, "idle" as LayerStatus]),
+          ),
+        );
       } catch (err) {
         if (err instanceof DOMException && err.name === "AbortError") return;
         setLoadError(true);
@@ -152,31 +178,31 @@ export function CutinViewer({ cutin, skillName }: CutinViewerProps): React.JSX.E
   const toggleLayer = useCallback(
     async (id: string) => {
       if (id === "main") {
-        setVisibility(v => ({ ...v, main: v.main === false }));
+        setVisibility((v) => ({ ...v, main: v.main === false }));
         return;
       }
       const st = status[id] ?? "idle";
       if (st === "ready") {
-        setVisibility(v => ({ ...v, [id]: v[id] === false }));
+        setVisibility((v) => ({ ...v, [id]: v[id] === false }));
         return;
       }
       if (st !== "idle") return; // loading / none → no-op
-      const layerDesc = manifest?.layers.find(l => l.id === id);
+      const layerDesc = manifest?.layers.find((l) => l.id === id);
       if (!layerDesc) return;
-      setStatus(s => ({ ...s, [id]: "loading" }));
+      setStatus((s) => ({ ...s, [id]: "loading" }));
       try {
         const glb = await decodeEffectLayer(layerDesc);
         if (glb) {
           blobUrlsRef.current.push(glb.blobUrl);
-          setDecoded(d => ({ ...d, [id]: glb }));
-          setStatus(s => ({ ...s, [id]: "ready" }));
-          setVisibility(v => ({ ...v, [id]: true }));
+          setDecoded((d) => ({ ...d, [id]: glb }));
+          setStatus((s) => ({ ...s, [id]: "ready" }));
+          setVisibility((v) => ({ ...v, [id]: true }));
         } else {
           // Effet pur non-géométrique (G4MT/G4MA/G4VS) : pas de mesh à monter.
-          setStatus(s => ({ ...s, [id]: "none" }));
+          setStatus((s) => ({ ...s, [id]: "none" }));
         }
       } catch {
-        setStatus(s => ({ ...s, [id]: "none" }));
+        setStatus((s) => ({ ...s, [id]: "none" }));
       }
     },
     [status, manifest],
@@ -195,7 +221,7 @@ export function CutinViewer({ cutin, skillName }: CutinViewerProps): React.JSX.E
   }, []);
 
   const togglePlay = useCallback(() => {
-    setPlaying(p => {
+    setPlaying((p) => {
       const next = !p;
       if (next) setScrubSec(null);
       return next;
@@ -257,7 +283,9 @@ export function CutinViewer({ cutin, skillName }: CutinViewerProps): React.JSX.E
         <span className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-on-surface">
           <Sparkles className="size-9 text-primary transition-transform group-hover:scale-110" />
           <span className="text-sm font-semibold">Charger la scène 3D</span>
-          <span className="text-xs text-on-surface-variant">modèle · timeline · export MP4</span>
+          <span className="text-xs text-on-surface-variant">
+            modèle · timeline · export MP4
+          </span>
         </span>
       </button>
     );
@@ -268,8 +296,13 @@ export function CutinViewer({ cutin, skillName }: CutinViewerProps): React.JSX.E
 
   // Toggles affichés : waza principal + couches d'effet de l'event.
   const toggles = [
-    { id: "main", label: "main", available: true, status: "ready" as LayerStatus },
-    ...(manifest?.layers ?? []).map(l => ({
+    {
+      id: "main",
+      label: "main",
+      available: true,
+      status: "ready" as LayerStatus,
+    },
+    ...(manifest?.layers ?? []).map((l) => ({
       id: l.id,
       label: l.plan ? `${l.subject} · ${l.plan}` : l.subject,
       available: (status[l.id] ?? "idle") !== "none",
@@ -330,7 +363,7 @@ export function CutinViewer({ cutin, skillName }: CutinViewerProps): React.JSX.E
           max={duration || 1}
           step={1 / fps}
           value={scrubSec ?? displayPos}
-          onChange={e => onScrub(Number(e.target.value))}
+          onChange={(e) => onScrub(Number(e.target.value))}
           className="h-1 flex-1 accent-primary"
           aria-label="Position de la timeline"
         />
@@ -341,8 +374,11 @@ export function CutinViewer({ cutin, skillName }: CutinViewerProps): React.JSX.E
 
       {/* Toggles de couches. */}
       <div className="flex flex-wrap gap-1.5">
-        {toggles.map(t => {
-          const visible = t.id === "main" ? visibility.main !== false : visibility[t.id] === true;
+        {toggles.map((t) => {
+          const visible =
+            t.id === "main"
+              ? visibility.main !== false
+              : visibility[t.id] === true;
           const isLoading = t.status === "loading";
           return (
             <button
@@ -350,7 +386,9 @@ export function CutinViewer({ cutin, skillName }: CutinViewerProps): React.JSX.E
               type="button"
               disabled={!t.available || isLoading}
               onClick={() => void toggleLayer(t.id)}
-              title={t.available ? t.label : `${t.label} — effet (non géométrique)`}
+              title={
+                t.available ? t.label : `${t.label} — effet (non géométrique)`
+              }
               className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium transition-colors ${
                 visible
                   ? "bg-primary text-on-primary"
@@ -369,7 +407,7 @@ export function CutinViewer({ cutin, skillName }: CutinViewerProps): React.JSX.E
       <div className="flex flex-wrap items-center gap-1.5">
         <button
           type="button"
-          onClick={() => setBloom(b => !b)}
+          onClick={() => setBloom((b) => !b)}
           className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium ${
             bloom
               ? "bg-primary text-on-primary"
@@ -380,7 +418,7 @@ export function CutinViewer({ cutin, skillName }: CutinViewerProps): React.JSX.E
         </button>
         <button
           type="button"
-          onClick={() => setOrbit(o => !o)}
+          onClick={() => setOrbit((o) => !o)}
           className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium ${
             orbit
               ? "bg-primary text-on-primary"
@@ -414,8 +452,14 @@ export function CutinViewer({ cutin, skillName }: CutinViewerProps): React.JSX.E
             className="inline-flex items-center gap-1 rounded-full bg-primary px-2.5 py-1 text-xs font-medium text-on-primary hover:opacity-90 disabled:opacity-50"
             title="Exporter le cut-in en MP4 (muet)"
           >
-            {exporting ? <Loader2 className="size-3 animate-spin" /> : <Film className="size-3" />}
-            {exporting ? `Export ${Math.round(exportPct * 100)}%` : "Exporter MP4"}
+            {exporting ? (
+              <Loader2 className="size-3 animate-spin" />
+            ) : (
+              <Film className="size-3" />
+            )}
+            {exporting
+              ? `Export ${Math.round(exportPct * 100)}%`
+              : "Exporter MP4"}
           </button>
         )}
       </div>

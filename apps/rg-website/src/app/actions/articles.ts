@@ -150,7 +150,9 @@ export async function updateArticleStatus(
 /**
  * Supprime un article.
  */
-export async function deleteArticle(articleId: string): Promise<{ error?: string }> {
+export async function deleteArticle(
+  articleId: string,
+): Promise<{ error?: string }> {
   try {
     await requireEditorOrFail();
   } catch (error) {
@@ -160,7 +162,11 @@ export async function deleteArticle(articleId: string): Promise<{ error?: string
   const supabase = createPostgresClient();
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { error } = await (supabase as any).from("articles").delete().eq("id", articleId).eq("app", APP_SCOPE);
+  const { error } = await (supabase as any)
+    .from("articles")
+    .delete()
+    .eq("id", articleId)
+    .eq("app", APP_SCOPE);
 
   if (error) {
     return { error: error.message };
@@ -172,7 +178,10 @@ export async function deleteArticle(articleId: string): Promise<{ error?: string
 /**
  * Pin/unpin un article.
  */
-export async function toggleArticlePin(articleId: string, pinned: boolean): Promise<{ error?: string }> {
+export async function toggleArticlePin(
+  articleId: string,
+  pinned: boolean,
+): Promise<{ error?: string }> {
   try {
     await requireEditorOrFail();
   } catch (error) {
@@ -206,7 +215,11 @@ export async function checkSlugAvailability(
   const supabase = createPostgresClient();
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let query = (supabase as any).from("articles").select("id, slug").eq("slug", slug).eq("app", APP_SCOPE);
+  let query = (supabase as any)
+    .from("articles")
+    .select("id, slug")
+    .eq("slug", slug)
+    .eq("app", APP_SCOPE);
 
   if (excludeId) {
     query = query.neq("id", excludeId);
@@ -252,20 +265,25 @@ export async function shareToDiscord(article: {
     color: 0xf2a93b,
     description: article.excerpt || undefined,
     footer: { text: "Azalée — Rose Griffon" },
-    image: article.featured_image_url ? { url: article.featured_image_url } : undefined,
+    image: article.featured_image_url
+      ? { url: article.featured_image_url }
+      : undefined,
     timestamp: new Date().toISOString(),
     title: article.title,
     url: articleUrl,
   };
 
-  const response = await fetch(`https://discord.com/api/v10/channels/${channelId}/messages`, {
-    body: JSON.stringify({ embeds: [embed] }),
-    headers: {
-      Authorization: `Bot ${botToken}`,
-      "Content-Type": "application/json",
+  const response = await fetch(
+    `https://discord.com/api/v10/channels/${channelId}/messages`,
+    {
+      body: JSON.stringify({ embeds: [embed] }),
+      headers: {
+        Authorization: `Bot ${botToken}`,
+        "Content-Type": "application/json",
+      },
+      method: "POST",
     },
-    method: "POST",
-  });
+  );
 
   if (!response.ok) {
     const errorText = await response.text();
@@ -279,7 +297,9 @@ export async function shareToDiscord(article: {
 /**
  * Duplique un article comme nouveau brouillon (scopé app=azalee).
  */
-export async function duplicateArticle(articleId: string): Promise<{ id: string } | { error: string }> {
+export async function duplicateArticle(
+  articleId: string,
+): Promise<{ id: string } | { error: string }> {
   try {
     await requireEditorOrFail();
   } catch (error) {
@@ -344,7 +364,9 @@ export async function duplicateArticle(articleId: string): Promise<{ id: string 
  * on reproduit directement en SQL la même agrégation que l'ancien fallback
  * client-side (tags non-null des articles publiés, comptés puis triés desc).
  */
-export async function getPopularTags(limit = 30): Promise<Array<{ tag: string; count: number }>> {
+export async function getPopularTags(
+  limit = 30,
+): Promise<Array<{ tag: string; count: number }>> {
   const pool = getPgPool();
 
   try {
@@ -358,7 +380,7 @@ export async function getPopularTags(limit = 30): Promise<Array<{ tag: string; c
       ["published", APP_SCOPE, limit],
     );
 
-    return rows.map(row => ({ count: Number(row.count), tag: row.tag }));
+    return rows.map((row) => ({ count: Number(row.count), tag: row.tag }));
   } catch (error) {
     console.error("Error fetching popular tags:", error);
     return [];
@@ -473,7 +495,8 @@ export async function getRelatedArticles(
     category: string | null;
   };
   const results = new Map<string, RelatedArticleRow>();
-  const SELECT_COLS = "id, title, slug, excerpt, featured_image_url, published_at, category";
+  const SELECT_COLS =
+    "id, title, slug, excerpt, featured_image_url, published_at, category";
 
   // 1. Par tags communs
   if (tags && tags.length > 0) {
@@ -580,7 +603,9 @@ export async function bulkUpdateArticles(
   return { count: ids.length, success: true };
 }
 
-export async function bulkDeleteArticles(ids: string[]): Promise<{ success: boolean; count: number; error?: string }> {
+export async function bulkDeleteArticles(
+  ids: string[],
+): Promise<{ success: boolean; count: number; error?: string }> {
   if (ids.length === 0) {
     return { success: false, count: 0, error: "Aucun article sélectionné" };
   }
@@ -594,7 +619,11 @@ export async function bulkDeleteArticles(ids: string[]): Promise<{ success: bool
   const supabase = createPostgresClient();
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { error } = await (supabase as any).from("articles").delete().in("id", ids).eq("app", APP_SCOPE);
+  const { error } = await (supabase as any)
+    .from("articles")
+    .delete()
+    .in("id", ids)
+    .eq("app", APP_SCOPE);
 
   if (error) {
     console.error("Bulk delete error:", error);
@@ -645,15 +674,38 @@ export async function getArticleStats(): Promise<{
     { data: topArticles },
     { data: recentArticles },
   ] = await Promise.all([
-    client.from("articles").select("*", { count: "exact", head: true }).eq("app", APP_SCOPE),
-    client.from("articles").select("*", { count: "exact", head: true }).eq("status", "published").eq("app", APP_SCOPE),
-    client.from("articles").select("*", { count: "exact", head: true }).eq("status", "draft").eq("app", APP_SCOPE),
-    client.from("articles").select("*", { count: "exact", head: true }).eq("status", "scheduled").eq("app", APP_SCOPE),
-    client.from("articles").select("*", { count: "exact", head: true }).eq("status", "archived").eq("app", APP_SCOPE),
+    client
+      .from("articles")
+      .select("*", { count: "exact", head: true })
+      .eq("app", APP_SCOPE),
+    client
+      .from("articles")
+      .select("*", { count: "exact", head: true })
+      .eq("status", "published")
+      .eq("app", APP_SCOPE),
+    client
+      .from("articles")
+      .select("*", { count: "exact", head: true })
+      .eq("status", "draft")
+      .eq("app", APP_SCOPE),
+    client
+      .from("articles")
+      .select("*", { count: "exact", head: true })
+      .eq("status", "scheduled")
+      .eq("app", APP_SCOPE),
+    client
+      .from("articles")
+      .select("*", { count: "exact", head: true })
+      .eq("status", "archived")
+      .eq("app", APP_SCOPE),
     // SUM via une lecture des seules colonnes utiles. PostgREST n'expose pas
     // D'agrégat SUM natif via supabase-js sans vue dédiée — on streame uniquement
     // View_count (4 octets/ligne) côté serveur.
-    client.from("articles").select("view_count").eq("status", "published").eq("app", APP_SCOPE),
+    client
+      .from("articles")
+      .select("view_count")
+      .eq("status", "published")
+      .eq("app", APP_SCOPE),
     client
       .from("articles")
       .select("id, title, slug, view_count")
@@ -670,10 +722,9 @@ export async function getArticleStats(): Promise<{
       .limit(10),
   ]);
 
-  const totalViews = ((viewsAgg.data as Array<{ view_count: number | null }>) || []).reduce(
-    (sum, a) => sum + (a.view_count || 0),
-    0,
-  );
+  const totalViews = (
+    (viewsAgg.data as Array<{ view_count: number | null }>) || []
+  ).reduce((sum, a) => sum + (a.view_count || 0), 0);
 
   return {
     recentArticles: recentArticles || [],
@@ -731,7 +782,10 @@ export async function createArticleVersion(
   const { error: insertErr } = await client.from("article_versions").insert({
     article_id: articleId,
     category: article.category,
-    content: typeof article.content === "object" ? JSON.stringify(article.content) : article.content,
+    content:
+      typeof article.content === "object"
+        ? JSON.stringify(article.content)
+        : article.content,
     created_by: article.author_id,
     excerpt: article.excerpt,
     featured_image_url: article.featured_image_url,
@@ -794,7 +848,11 @@ export async function getArticleVersion(versionId: string): Promise<{
   await requireEditorOrFail();
   const supabase = createPostgresClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data } = await (supabase as any).from("article_versions").select("*").eq("id", versionId).maybeSingle();
+  const { data } = await (supabase as any)
+    .from("article_versions")
+    .select("*")
+    .eq("id", versionId)
+    .maybeSingle();
 
   return data || null;
 }
@@ -823,7 +881,9 @@ export async function restoreArticleVersion(
   // Récupérer la version à restaurer en s'assurant qu'elle correspond bien à l'article
   const { data: version, error: fetchErr } = await client
     .from("article_versions")
-    .select("title, content, excerpt, category, tags, featured_image_url, meta_title, meta_description, article_id")
+    .select(
+      "title, content, excerpt, category, tags, featured_image_url, meta_title, meta_description, article_id",
+    )
     .eq("id", versionId)
     .eq("article_id", articleId)
     .maybeSingle();
@@ -863,26 +923,34 @@ async function triggerDiscordAnnouncement(article: {
   featured_image_url?: string | null;
   type: "wiki" | "website";
 }) {
-  const secret = process.env.DISCORD_ANNOUNCE_SECRET || "default-secret-key-12345";
+  const secret =
+    process.env.DISCORD_ANNOUNCE_SECRET || "default-secret-key-12345";
   try {
-    const res = await fetch(`${rgUrl(process.env, "api", "RG_API_URL")}/v1/discord/announce`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${secret}`,
+    const res = await fetch(
+      `${rgUrl(process.env, "api", "RG_API_URL")}/v1/discord/announce`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${secret}`,
+        },
+        body: JSON.stringify({
+          type: article.type,
+          title: article.title,
+          slug: article.slug,
+          excerpt: article.excerpt || "",
+          featured_image_url: article.featured_image_url || "",
+        }),
       },
-      body: JSON.stringify({
-        type: article.type,
-        title: article.title,
-        slug: article.slug,
-        excerpt: article.excerpt || "",
-        featured_image_url: article.featured_image_url || "",
-      }),
-    });
+    );
     if (!res.ok) {
-      console.warn(`[Discord Announcement] Failed to announce: ${res.status} ${await res.text()}`);
+      console.warn(
+        `[Discord Announcement] Failed to announce: ${res.status} ${await res.text()}`,
+      );
     } else {
-      console.log(`[Discord Announcement] Announcement triggered successfully for ${article.slug}`);
+      console.log(
+        `[Discord Announcement] Announcement triggered successfully for ${article.slug}`,
+      );
     }
   } catch (err) {
     console.warn("[Discord Announcement] Error triggering announcement:", err);

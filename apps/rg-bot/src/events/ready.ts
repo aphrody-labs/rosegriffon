@@ -22,7 +22,9 @@ export class ReadyEvent {
   // émis en v15 (cf. `index.ts`).
   @Once({ event: "clientReady" })
   async ready([client]: [Client]) {
-    console.log(`✓ Prêt en tant que ${client.user?.tag} — ${client.guilds.cache.size} serveur(s)`);
+    console.log(
+      `✓ Prêt en tant que ${client.user?.tag} — ${client.guilds.cache.size} serveur(s)`,
+    );
 
     if (!BOT_SYNC_MEMBRES) {
       console.log(

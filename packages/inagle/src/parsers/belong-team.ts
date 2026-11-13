@@ -46,10 +46,14 @@ export interface BelongTeamInfo {
 }
 
 /** Season codes */
-export type Season = "IE1" | "IE2" | "IE3" | "GO1" | "GO2" | "GO3" | "ARES" | "ORION" | "V";
+export type Season =
+  "IE1" | "IE2" | "IE3" | "GO1" | "GO2" | "GO3" | "ARES" | "ORION" | "V";
 
 /** Season names for display */
-export const SEASON_NAMES: Record<Season, { en: string; fr: string; ja: string }> = {
+export const SEASON_NAMES: Record<
+  Season,
+  { en: string; fr: string; ja: string }
+> = {
   IE1: { en: "IE Season 1", fr: "IE Saison 1", ja: "イナズマイレブン1" },
   IE2: { en: "IE Season 2", fr: "IE Saison 2", ja: "イナズマイレブン2" },
   IE3: { en: "IE Season 3", fr: "IE Saison 3", ja: "イナズマイレブン3" },
@@ -163,7 +167,8 @@ function parseTeamNames(locale: "fr" | "en" | "ja"): Map<number, string> {
   const filePath = join(PATHS.textRoot, locale, "team_text.cfg.bin.json");
   const names = new Map<number, string>();
 
-  if (process.env.INAGLE_DATA_SOURCE === "postgres" && !existsSync(filePath)) return names;
+  if (process.env.INAGLE_DATA_SOURCE === "postgres" && !existsSync(filePath))
+    return names;
 
   try {
     const data =
@@ -216,7 +221,9 @@ let seriesCache: Map<string, Series> | null = null;
 function loadBelongTeamInfo(): BelongTeamInfo[] {
   if (process.env.INAGLE_DATA_SOURCE !== "postgres") {
     const filename = findVfsConfig("character", "belong_team_config_");
-    const data = filename ? (readVfsConfig(`data/common/gamedata/character/${filename}`) as any) : null;
+    const data = filename
+      ? (readVfsConfig(`data/common/gamedata/character/${filename}`) as any)
+      : null;
     return data?.lists?.flatMap((list: any) => list.values ?? []) ?? [];
   }
   const filePath = join(PATHS.allGamedata, "belongTeamInfo.json");
@@ -227,7 +234,10 @@ function loadBelongTeamInfo(): BelongTeamInfo[] {
   }
 
   // Fallback to raw config
-  const rawPath = join(PATHS.character, "belong_team_config_0.00.00.cfg.bin.json");
+  const rawPath = join(
+    PATHS.character,
+    "belong_team_config_0.00.00.cfg.bin.json",
+  );
   if (existsSync(rawPath)) {
     try {
       const data = JSON.parse(readFileSync(rawPath, "utf-8"));
@@ -244,7 +254,9 @@ function loadBelongTeamInfo(): BelongTeamInfo[] {
 function loadCharaSeriesInfo(): CharaSeriesInfo[] {
   if (process.env.INAGLE_DATA_SOURCE !== "postgres") {
     const filename = findVfsConfig("character", "chara_series_config_");
-    const data = filename ? (readVfsConfig(`data/common/gamedata/character/${filename}`) as any) : null;
+    const data = filename
+      ? (readVfsConfig(`data/common/gamedata/character/${filename}`) as any)
+      : null;
     return data?.lists?.flatMap((list: any) => list.values ?? []) ?? [];
   }
   const filePath = join(PATHS.allGamedata, "charaSeriesInfo.json");
@@ -312,15 +324,25 @@ export function buildTeamMapping(): Map<string, Team> {
       },
       seasons,
       emblems: {
-        ie: raw.teamEmblemId_IE !== "0x00000000" ? raw.teamEmblemId_IE : undefined,
-        go: raw.teamEmblemId_GO !== "0x00000000" ? raw.teamEmblemId_GO : undefined,
-        aresOrion: raw.teamEmblemId_AREORI !== "0x00000000" ? raw.teamEmblemId_AREORI : undefined,
+        ie:
+          raw.teamEmblemId_IE !== "0x00000000"
+            ? raw.teamEmblemId_IE
+            : undefined,
+        go:
+          raw.teamEmblemId_GO !== "0x00000000"
+            ? raw.teamEmblemId_GO
+            : undefined,
+        aresOrion:
+          raw.teamEmblemId_AREORI !== "0x00000000"
+            ? raw.teamEmblemId_AREORI
+            : undefined,
         v: raw.teamEmblemId_V !== "0x00000000" ? raw.teamEmblemId_V : undefined,
       },
       kits: {
         ie: raw.teamKit_IE !== "0x00000000" ? raw.teamKit_IE : undefined,
         go: raw.teamKit_GO !== "0x00000000" ? raw.teamKit_GO : undefined,
-        aresOrion: raw.teamKit_AREORI !== "0x00000000" ? raw.teamKit_AREORI : undefined,
+        aresOrion:
+          raw.teamKit_AREORI !== "0x00000000" ? raw.teamKit_AREORI : undefined,
         v: raw.teamKit_V !== "0x00000000" ? raw.teamKit_V : undefined,
       },
     };
@@ -365,7 +387,9 @@ export function buildSeriesMapping(): Map<string, Series> {
  * Get all teams
  */
 export function getAllTeams(): Team[] {
-  return Array.from(buildTeamMapping().values()).sort((a, b) => a.orderType - b.orderType);
+  return Array.from(buildTeamMapping().values()).sort(
+    (a, b) => a.orderType - b.orderType,
+  );
 }
 
 /**
@@ -379,7 +403,9 @@ export function getTeamById(teamId: string): Team | undefined {
  * Get all series
  */
 export function getAllSeries(): Series[] {
-  return Array.from(buildSeriesMapping().values()).sort((a, b) => a.type - b.type);
+  return Array.from(buildSeriesMapping().values()).sort(
+    (a, b) => a.type - b.type,
+  );
 }
 
 /**
@@ -393,7 +419,7 @@ export function getSeriesById(seriesId: string): Series | undefined {
  * Get teams by season
  */
 export function getTeamsBySeason(season: Season): Team[] {
-  return getAllTeams().filter(t => t.seasons[season] !== undefined);
+  return getAllTeams().filter((t) => t.seasons[season] !== undefined);
 }
 
 /**
@@ -402,7 +428,10 @@ export function getTeamsBySeason(season: Season): Team[] {
 export function searchTeams(query: string): Team[] {
   const q = query.toLowerCase();
   return getAllTeams().filter(
-    t => t.names.fr?.toLowerCase().includes(q) || t.names.en?.toLowerCase().includes(q) || t.names.ja?.includes(query),
+    (t) =>
+      t.names.fr?.toLowerCase().includes(q) ||
+      t.names.en?.toLowerCase().includes(q) ||
+      t.names.ja?.includes(query),
   );
 }
 

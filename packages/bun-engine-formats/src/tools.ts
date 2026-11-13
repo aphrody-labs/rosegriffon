@@ -6,7 +6,10 @@ import { dirname, join, resolve } from "node:path";
 const exe = process.platform === "win32" ? ".exe" : "";
 
 function isRoot(directory: string): boolean {
-  return existsSync(join(directory, "AGENTS.md")) && existsSync(join(directory, "Cargo.toml"));
+  return (
+    existsSync(join(directory, "AGENTS.md")) &&
+    existsSync(join(directory, "Cargo.toml"))
+  );
 }
 
 function walkUp(from: string): string | undefined {
@@ -26,7 +29,7 @@ export function workspaceRoot(): string | undefined {
   if (cachedRoot !== undefined) return cachedRoot ?? undefined;
   const fromSource = resolve(import.meta.dir, "..", "..", "..");
   const found =
-    [Bun.env.RG_RE_ROOT].find(path => path && isRoot(path)) ??
+    [Bun.env.RG_RE_ROOT].find((path) => path && isRoot(path)) ??
     (isRoot(fromSource) ? fromSource : undefined) ??
     walkUp(process.cwd()) ??
     walkUp(dirname(process.execPath));
@@ -48,13 +51,21 @@ function firstFile(candidates: Array<string | undefined>): string | undefined {
 /** A MAME tool (`unidasm`, `chdman`) from YOLO_RE_USR/lib/mame, or PATH. */
 export function mameTool(name: "unidasm" | "chdman"): string | undefined {
   const usr = usrDirectory();
-  return firstFile([usr && join(usr, "lib", "mame", `${name}${exe}`)]) ?? Bun.which(name) ?? undefined;
+  return (
+    firstFile([usr && join(usr, "lib", "mame", `${name}${exe}`)]) ??
+    Bun.which(name) ??
+    undefined
+  );
 }
 
 export function llvmObjdump(): string | undefined {
   return (
     Bun.which("llvm-objdump") ??
-    firstFile([Bun.env.ProgramFiles ? join(Bun.env.ProgramFiles, "LLVM", "bin", "llvm-objdump.exe") : undefined])
+    firstFile([
+      Bun.env.ProgramFiles
+        ? join(Bun.env.ProgramFiles, "LLVM", "bin", "llvm-objdump.exe")
+        : undefined,
+    ])
   );
 }
 
@@ -69,7 +80,10 @@ export interface ToolResult {
 }
 
 /** Runs a tool with a hard timeout and captured output. */
-export async function runTool(command: string[], timeoutMs = 30_000): Promise<ToolResult> {
+export async function runTool(
+  command: string[],
+  timeoutMs = 30_000,
+): Promise<ToolResult> {
   const child = Bun.spawn(command, {
     stdin: "ignore",
     stdout: "pipe",

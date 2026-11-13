@@ -10,7 +10,11 @@ interface AnimatedCounterProps {
   className?: string;
 }
 
-export function AnimatedCounter({ value, duration = 1500, className }: AnimatedCounterProps) {
+export function AnimatedCounter({
+  value,
+  duration = 1500,
+  className,
+}: AnimatedCounterProps) {
   const [display, setDisplay] = useState(0);
   const prefersReduced = useMediaQuery("(prefers-reduced-motion: reduce)");
   const ref = useRef<HTMLSpanElement>(null);
@@ -57,7 +61,11 @@ export function AnimatedCounter({ value, duration = 1500, className }: AnimatedC
   }, [value, duration, prefersReduced]);
 
   return (
-    <span ref={ref} className={className} aria-label={`${value.toLocaleString("fr-FR")}`}>
+    <span
+      ref={ref}
+      className={className}
+      aria-label={`${value.toLocaleString("fr-FR")}`}
+    >
       {(prefersReduced ? value : display).toLocaleString("fr-FR")}
     </span>
   );

@@ -33,7 +33,12 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 /** Sources acceptées, pour ne pas laisser un paramètre libre atteindre l'API. */
-const SOURCES = new Set<SourceModeles>(["staff_picks", "recherche", "compte", "coeurs"]);
+const SOURCES = new Set<SourceModeles>([
+  "staff_picks",
+  "recherche",
+  "compte",
+  "coeurs",
+]);
 
 /** Borne le nombre d'éléments demandés à ce que l'API accepte (1 à 100). */
 function borner(brut: string | null, defaut: number): number {
@@ -45,10 +50,13 @@ function borner(brut: string | null, defaut: number): number {
 export async function GET(requete: Request): Promise<Response> {
   const url = new URL(requete.url);
   const demandee = url.searchParams.get("source") ?? "staff_picks";
-  const source = SOURCES.has(demandee as SourceModeles) ? (demandee as SourceModeles) : "staff_picks";
+  const source = SOURCES.has(demandee as SourceModeles)
+    ? (demandee as SourceModeles)
+    : "staff_picks";
   const curseur = url.searchParams.get("curseur");
   const nombre = borner(url.searchParams.get("nombre"), 24);
-  const telechargeablesSeulement = url.searchParams.get("telechargeables") === "1";
+  const telechargeablesSeulement =
+    url.searchParams.get("telechargeables") === "1";
 
   try {
     let page: PageModeles;
@@ -57,26 +65,43 @@ export async function GET(requete: Request): Promise<Response> {
       case "recherche": {
         const motCle = url.searchParams.get("q")?.trim();
         if (!motCle) {
-          return NextResponse.json({ erreur: "La recherche VRoid Hub exige un mot-clé." }, { status: 400 });
+          return NextResponse.json(
+            { erreur: "La recherche VRoid Hub exige un mot-clé." },
+            { status: 400 },
+          );
         }
-        page = await rechercherModeles({ motCle, curseur, nombre, telechargeablesSeulement });
+        page = await rechercherModeles({
+          motCle,
+          curseur,
+          nombre,
+          telechargeablesSeulement,
+        });
         break;
       }
       case "compte":
       case "coeurs": {
         const jeton = await jetonValide();
         if (!jeton) {
-          return NextResponse.json({ erreur: "Compte VRoid Hub non lié.", connexionRequise: true }, { status: 401 });
+          return NextResponse.json(
+            { erreur: "Compte VRoid Hub non lié.", connexionRequise: true },
+            { status: 401 },
+          );
         }
         if (source === "compte") {
           page = await mesModeles(jeton, { curseur, nombre });
         } else {
           const config = lireConfigVroid();
           if (!config) {
-            return NextResponse.json({ erreur: "VRoid Hub n'est pas configuré." }, { status: 503 });
+            return NextResponse.json(
+              { erreur: "VRoid Hub n'est pas configuré." },
+              { status: 503 },
+            );
           }
           // `/api/hearts` exige `application_id` en plus du jeton.
-          page = await mesCoeurs(jeton, config.applicationId, { curseur, nombre });
+          page = await mesCoeurs(jeton, config.applicationId, {
+            curseur,
+            nombre,
+          });
         }
         break;
       }
@@ -88,13 +113,24 @@ export async function GET(requete: Request): Promise<Response> {
   } catch (erreur) {
     if (estQuotaDepasse(erreur)) {
       return NextResponse.json(
-        { erreur: "Quota d'appels VRoid Hub atteint, réessayez dans quelques minutes." },
+        {
+          erreur:
+            "Quota d'appels VRoid Hub atteint, réessayez dans quelques minutes.",
+        },
         { status: 429 },
       );
     }
-    const statut = erreur instanceof ErreurVroid && erreur.statut >= 400 ? erreur.statut : 502;
+    const statut =
+      erreur instanceof ErreurVroid && erreur.statut >= 400
+        ? erreur.statut
+        : 502;
     return NextResponse.json(
-      { erreur: erreur instanceof Error ? erreur.message : "Appel VRoid Hub en échec." },
+      {
+        erreur:
+          erreur instanceof Error
+            ? erreur.message
+            : "Appel VRoid Hub en échec.",
+      },
       { status: statut },
     );
   }

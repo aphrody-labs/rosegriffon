@@ -122,8 +122,14 @@ describe("ranking", () => {
 describe("sanctions", () => {
   test("barème d'escalade 3 / 5 / 8", () => {
     expect(evaluateEscalation(2)).toBeNull();
-    expect(evaluateEscalation(3)).toEqual({ type: SanctionType.Mute, durationSec: 60 * 60 });
-    expect(evaluateEscalation(5)).toEqual({ type: SanctionType.Mute, durationSec: 24 * 60 * 60 });
+    expect(evaluateEscalation(3)).toEqual({
+      type: SanctionType.Mute,
+      durationSec: 60 * 60,
+    });
+    expect(evaluateEscalation(5)).toEqual({
+      type: SanctionType.Mute,
+      durationSec: 24 * 60 * 60,
+    });
     expect(evaluateEscalation(8)).toEqual({
       type: SanctionType.Ban,
       durationSec: 7 * 24 * 60 * 60,
@@ -210,7 +216,10 @@ describe("votes", () => {
 describe("licenses", () => {
   test("format / parse / validation ACH-YYYY-#####", () => {
     expect(formatLicenseNumber(2026, 42)).toBe("ACH-2026-00042");
-    expect(parseLicenseNumber("ACH-2026-00042")).toEqual({ year: 2026, seq: 42 });
+    expect(parseLicenseNumber("ACH-2026-00042")).toEqual({
+      year: 2026,
+      seq: 42,
+    });
     expect(parseLicenseNumber("BAD")).toBeNull();
     expect(isValidLicenseNumber("ACH-2026-00042")).toBe(true);
     expect(isValidLicenseNumber("ACH-26-42")).toBe(false);
@@ -230,14 +239,29 @@ describe("licenses", () => {
 
   test("evaluateLicenseValidity : révoquée avant expirée", () => {
     const future = Date.now() + 1000;
-    expect(evaluateLicenseValidity({ status: LicenseStatus.Active, validUntil: future })).toEqual({
+    expect(
+      evaluateLicenseValidity({
+        status: LicenseStatus.Active,
+        validUntil: future,
+      }),
+    ).toEqual({
       valid: true,
     });
-    expect(evaluateLicenseValidity({ status: LicenseStatus.Revoked, validUntil: future })).toEqual({
+    expect(
+      evaluateLicenseValidity({
+        status: LicenseStatus.Revoked,
+        validUntil: future,
+      }),
+    ).toEqual({
       valid: false,
       reason: "revoked",
     });
-    expect(evaluateLicenseValidity({ status: LicenseStatus.Active, validUntil: Date.now() - 1000 })).toEqual({
+    expect(
+      evaluateLicenseValidity({
+        status: LicenseStatus.Active,
+        validUntil: Date.now() - 1000,
+      }),
+    ).toEqual({
       valid: false,
       reason: "expired",
     });
@@ -270,7 +294,9 @@ describe("names / validation / format", () => {
   });
 
   test("formatDate / formatAchCurrency", () => {
-    expect(formatDate(new Date("2026-01-15T10:30:00Z"), "onlyDateFileName", "UTC")).toBe("2026-01-15");
+    expect(
+      formatDate(new Date("2026-01-15T10:30:00Z"), "onlyDateFileName", "UTC"),
+    ).toBe("2026-01-15");
     expect(formatAchCurrency(1500)).toContain("ACH");
   });
 });
@@ -278,7 +304,9 @@ describe("names / validation / format", () => {
 describe("access (RBAC)", () => {
   test("mapping UserRole <-> AchilleaRole", () => {
     expect(userRoleToAchilleaRole(UserRole.Moderator)).toBe(AchilleaRole.staff);
-    expect(achilleaRoleToUserRole(AchilleaRole.owner)).toBe(UserRole.SuperAdministrator);
+    expect(achilleaRoleToUserRole(AchilleaRole.owner)).toBe(
+      UserRole.SuperAdministrator,
+    );
   });
 
   test("CASL : permissions par rôle", () => {

@@ -17,9 +17,9 @@ bun run deploy:status
 
 ## Topologie
 
-| Rôle | Unité | Port |
-| --- | --- | --- |
-| slot A | `website-web.service` | 3004 |
+| Rôle   | Unité                   | Port |
+| ------ | ----------------------- | ---- |
+| slot A | `website-web.service`   | 3004 |
 | slot B | `website-web-b.service` | 3014 |
 
 Le slot inactif reçoit la nouvelle release, est sondé, puis nginx bascule le

@@ -65,7 +65,11 @@ export async function generateMetadata({
 
   return {
     alternates: {
-      canonical: buildCanonical(wiki(`/aura/${category}`), rawParams, LIST_CANONICAL_KEYS),
+      canonical: buildCanonical(
+        wiki(`/aura/${category}`),
+        rawParams,
+        LIST_CANONICAL_KEYS,
+      ),
     },
     description: `Liste complète des ${config.title.toLowerCase()}${filters.length > 0 ? ` filtrée par ${filters.join(", ")}` : ""}.`,
     title: wikiTitle(title),
@@ -73,7 +77,7 @@ export async function generateMetadata({
 }
 
 export async function generateStaticParams() {
-  return Object.keys(CATEGORIES).map(category => ({ category }));
+  return Object.keys(CATEGORIES).map((category) => ({ category }));
 }
 
 export default async function AuraCategoryPage({
@@ -107,11 +111,18 @@ export default async function AuraCategoryPage({
   return (
     <div className="w-full space-y-8">
       <div className="flex flex-col gap-2">
-        <h1 className="text-2xl sm:text-3xl font-bold font-grade-high">{config.title}</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold font-grade-high">
+          {config.title}
+        </h1>
         <p className="text-on-surface-variant">{total} résultats trouvés</p>
       </div>
 
-      <AuraList auras={auras} category={category} total={total} page={pageNumber} />
+      <AuraList
+        auras={auras}
+        category={category}
+        total={total}
+        page={pageNumber}
+      />
     </div>
   );
 }

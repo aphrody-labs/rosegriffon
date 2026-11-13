@@ -54,7 +54,16 @@ export interface SmartSearchResult extends GlobalSearchResult {
 
 /** Search context for prioritization */
 export type SearchContext =
-  "chara" | "skill" | "team" | "aura" | "passive" | "tactic" | "global" | "item" | "news" | "patchnotes";
+  | "chara"
+  | "skill"
+  | "team"
+  | "aura"
+  | "passive"
+  | "tactic"
+  | "global"
+  | "item"
+  | "news"
+  | "patchnotes";
 
 /** Search configuration */
 export interface SmartSearchConfig {
@@ -98,7 +107,10 @@ function getCacheKey(query: string, config: SmartSearchConfig): string {
 /**
  * Get cached results if valid
  */
-function getCachedResults(query: string, config: SmartSearchConfig): SmartSearchResult[] | null {
+function getCachedResults(
+  query: string,
+  config: SmartSearchConfig,
+): SmartSearchResult[] | null {
   const key = getCacheKey(query, config);
   const entry = searchCache.get(key);
 
@@ -118,7 +130,11 @@ function getCachedResults(query: string, config: SmartSearchConfig): SmartSearch
 /**
  * Cache search results
  */
-function cacheResults(query: string, config: SmartSearchConfig, results: SmartSearchResult[]): void {
+function cacheResults(
+  query: string,
+  config: SmartSearchConfig,
+  results: SmartSearchResult[],
+): void {
   const key = getCacheKey(query, config);
   searchCache.set(key, {
     results,
@@ -176,7 +192,10 @@ const CONTEXT_PRIORITY: Record<SearchContext, SearchableType[]> = {
 /**
  * Prioritize results based on search context
  */
-function prioritizeResults(results: SmartSearchResult[], context: SearchContext): SmartSearchResult[] {
+function prioritizeResults(
+  results: SmartSearchResult[],
+  context: SearchContext,
+): SmartSearchResult[] {
   const priorities = CONTEXT_PRIORITY[context];
 
   return results.toSorted((a, b) => {
@@ -202,8 +221,11 @@ function prioritizeResults(results: SmartSearchResult[], context: SearchContext)
 /**
  * Enhance search results with language detection
  */
-function enhanceResults(results: GlobalSearchResult[], query: string): SmartSearchResult[] {
-  return results.map(result => {
+function enhanceResults(
+  results: GlobalSearchResult[],
+  query: string,
+): SmartSearchResult[] {
+  return results.map((result) => {
     const enhanced: SmartSearchResult = { ...result };
 
     // Detect matched language for multilingual items
@@ -219,7 +241,10 @@ function enhanceResults(results: GlobalSearchResult[], query: string): SmartSear
           // `detectMatchedLanguage` renvoie "JP" mais la clé de l'objet est
           // `ja` : sans ce mapping, un match japonais retombait toujours sur
           // `result.name` (le nom FR) au lieu du nom japonais.
-          const langKey = matchedLang === "JP" ? "ja" : (matchedLang.toLowerCase() as "fr" | "en");
+          const langKey =
+            matchedLang === "JP"
+              ? "ja"
+              : (matchedLang.toLowerCase() as "fr" | "en");
           enhanced.matchedName = names[langKey] || result.name;
         }
       }
@@ -233,7 +258,9 @@ function enhanceResults(results: GlobalSearchResult[], query: string): SmartSear
         });
         if (matchedLang) {
           enhanced.matchedLanguage = matchedLang;
-          const langKey = `name_${matchedLang === "JP" ? "JA" : matchedLang}` as "name_FR" | "name_EN" | "name_JA";
+          const langKey =
+            `name_${matchedLang === "JP" ? "JA" : matchedLang}` as
+              "name_FR" | "name_EN" | "name_JA";
           enhanced.matchedName = (data[langKey] as string) || result.name;
         }
       }
@@ -260,7 +287,10 @@ function enhanceResults(results: GlobalSearchResult[], query: string): SmartSear
 /**
  * Generate "did you mean?" suggestions from all available names
  */
-function generateSuggestions(query: string, allResults: GlobalSearchResult[]): string | undefined {
+function generateSuggestions(
+  query: string,
+  allResults: GlobalSearchResult[],
+): string | undefined {
   // Collect all searchable names
   const allNames: string[] = [];
 
@@ -274,8 +304,11 @@ function generateSuggestions(query: string, allResults: GlobalSearchResult[]): s
       // normalise), la suggestion sortait en minuscules sans accents
       // (« l'etoffe des heros » au lieu de « L'Étoffe des Héros »).
       if (data.names && typeof data.names === "object") {
-        for (const value of Object.values(data.names as Record<string, unknown>)) {
-          if (typeof value === "string" && value.length > 0) allNames.push(value);
+        for (const value of Object.values(
+          data.names as Record<string, unknown>,
+        )) {
+          if (typeof value === "string" && value.length > 0)
+            allNames.push(value);
         }
       }
       if (typeof data.name_FR === "string") {
@@ -303,7 +336,12 @@ export async function smartSearch(
   rawResults: GlobalSearchResult[],
   config: SmartSearchConfig = {},
 ): Promise<SmartSearchResult[]> {
-  const { context = "global", limit = 20, enableSuggestions = true, minScore = 0 } = config;
+  const {
+    context = "global",
+    limit = 20,
+    enableSuggestions = true,
+    minScore = 0,
+  } = config;
 
   // Check cache first
   const cached = getCachedResults(query, config);
@@ -316,7 +354,7 @@ export async function smartSearch(
 
   // Filter by minimum score
   if (minScore > 0) {
-    results = results.filter(r => r.score >= minScore);
+    results = results.filter((r) => r.score >= minScore);
   }
 
   // Prioritize by context

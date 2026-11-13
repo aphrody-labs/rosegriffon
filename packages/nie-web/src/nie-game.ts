@@ -27,7 +27,8 @@ async function ensureWasm(): Promise<void> {
 /** Fetch d'un asset gzip + décompression streaming → octets bruts. */
 async function fetchGzipped(url: string): Promise<Uint8Array> {
   const res = await fetch(url);
-  if (!res.ok || res.body === null) throw new Error(`${url} → HTTP ${res.status}`);
+  if (!res.ok || res.body === null)
+    throw new Error(`${url} → HTTP ${res.status}`);
   const stream = res.body.pipeThrough(new DecompressionStream("gzip"));
   return new Uint8Array(await new Response(stream).arrayBuffer());
 }
@@ -53,16 +54,20 @@ export interface GameHandle {
 /** Charge le jeu wasm complet + la police réelle, et renvoie une poignée pilotable. */
 export async function loadGame(): Promise<GameHandle> {
   await ensureWasm();
-  const [cfg, g4tx] = await Promise.all([fetchGzipped(FONT_CFG_URL), fetchGzipped(FONT_G4TX_URL)]);
+  const [cfg, g4tx] = await Promise.all([
+    fetchGzipped(FONT_CFG_URL),
+    fetchGzipped(FONT_G4TX_URL),
+  ]);
   const game = new WasmGame(cfg, g4tx);
   const w = game.width;
   const h = game.height;
-  const toImage = (rgba: Uint8Array): ImageData => new ImageData(new Uint8ClampedArray(rgba), w, h);
+  const toImage = (rgba: Uint8Array): ImageData =>
+    new ImageData(new Uint8ClampedArray(rgba), w, h);
   return {
     width: w,
     height: h,
-    input: cmd => game.input(cmd),
-    update: dt => game.update(dt),
+    input: (cmd) => game.input(cmd),
+    update: (dt) => game.update(dt),
     frame: () => toImage(game.render()),
     score: () => {
       const s = game.score();

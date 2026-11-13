@@ -61,7 +61,10 @@ function WidgetDiscord({
     return (
       <div className="flex size-full items-center justify-center gap-3 p-6">
         <DiscordIcon className="size-6 text-discord" aria-hidden />
-        <Button asChild className="bg-discord-strong font-bold text-rg-sur-marine hover:brightness-90">
+        <Button
+          asChild
+          className="bg-discord-strong font-bold text-rg-sur-marine hover:brightness-90"
+        >
           <a href={lienInvitation} target="_blank" rel="noopener noreferrer">
             Rejoindre le Discord
           </a>
@@ -75,21 +78,34 @@ function WidgetDiscord({
       <div className="mb-3 flex items-center justify-between gap-3">
         <div className="flex min-w-0 items-center gap-2">
           <DiscordIcon className="size-5 shrink-0 text-discord" aria-hidden />
-          <h3 className="truncate text-base font-bold text-foreground sm:text-lg">{donnees.name}</h3>
+          <h3 className="truncate text-base font-bold text-foreground sm:text-lg">
+            {donnees.name}
+          </h3>
         </div>
-        <Button asChild size="sm" className="bg-discord-strong font-bold text-rg-sur-marine hover:brightness-90">
-          <a href={donnees.instant_invite ?? lienInvitation} target="_blank" rel="noopener noreferrer">
+        <Button
+          asChild
+          size="sm"
+          className="bg-discord-strong font-bold text-rg-sur-marine hover:brightness-90"
+        >
+          <a
+            href={donnees.instant_invite ?? lienInvitation}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             Rejoindre
           </a>
         </Button>
       </div>
 
       <p className="mb-3 text-sm text-muted-foreground">
-        <span className="font-semibold text-foreground">{donnees.presence_count}</span> membres en ligne
+        <span className="font-semibold text-foreground">
+          {donnees.presence_count}
+        </span>{" "}
+        membres en ligne
       </p>
 
       <ul className="min-h-0 grow flex flex-col gap-2 overflow-y-auto pr-1 pb-4 scrollbar-thin mask-b-from-80%">
-        {donnees.members.map(membre => (
+        {donnees.members.map((membre) => (
           <li key={membre.id} className="flex items-center gap-3">
             <div className="relative shrink-0">
               <Image
@@ -106,7 +122,9 @@ function WidgetDiscord({
                 }`}
               />
             </div>
-            <span className="truncate text-sm text-foreground">{membre.username}</span>
+            <span className="truncate text-sm text-foreground">
+              {membre.username}
+            </span>
           </li>
         ))}
       </ul>
@@ -129,7 +147,9 @@ export default function DiscordSection({
 
     const recuperer = async () => {
       try {
-        const reponse = await fetch(`https://discord.com/api/guilds/${serveur.guildId}/widget.json`);
+        const reponse = await fetch(
+          `https://discord.com/api/guilds/${serveur.guildId}/widget.json`,
+        );
         if (!reponse.ok) {
           throw new Error(`Widget Discord indisponible (${reponse.status})`);
         }
@@ -175,7 +195,12 @@ export default function DiscordSection({
           : "mx-auto h-[22rem] w-full max-w-7xl overflow-hidden rounded-2xl border border-border bg-card sm:h-[26rem]"
       }
     >
-      <WidgetDiscord donnees={donnees} chargement={chargement} erreur={erreur} lienInvitation={invitation} />
+      <WidgetDiscord
+        donnees={donnees}
+        chargement={chargement}
+        erreur={erreur}
+        lienInvitation={invitation}
+      />
     </div>
   );
 }

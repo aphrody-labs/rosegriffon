@@ -12,7 +12,15 @@ workspace = true
 
 [features]
 default = ["host"]
-host = ["dep:ignore", "dep:r2d2", "dep:redis", "dep:rusqlite", "dep:serde_json", "dep:sha2", "dep:tracing"]
+host = [
+  "dep:ignore",
+  "dep:r2d2",
+  "dep:redis",
+  "dep:rusqlite",
+  "dep:serde_json",
+  "dep:sha2",
+  "dep:tracing",
+]
 
 [dependencies]
 ignore = { version = "0.4", optional = true }

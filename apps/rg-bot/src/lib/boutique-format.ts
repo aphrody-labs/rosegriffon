@@ -33,7 +33,11 @@
  * échoue si le catalogue rétrécit, si un prix devient absurde ou si le format
  * des euros diverge de celui du site.
  */
-import { CATEGORY_LABELS, type Product, type ProductCategory } from "@rosegriffon/types/shop";
+import {
+  CATEGORY_LABELS,
+  type Product,
+  type ProductCategory,
+} from "@rosegriffon/types/shop";
 
 /** Base publique du site, où vivent les fiches produit et les images. */
 export const BASE_BOUTIQUE = "https://rosegriffon.fr";
@@ -72,16 +76,20 @@ export interface ProduitBoutique {
 }
 
 function convertir(produit: Product): ProduitBoutique {
-  const variantes: VarianteProduit[] = (produit.variants ?? []).map(variante => ({
-    id: variante.id,
-    libelle: variante.label,
-    prixCents: variante.priceCentsOverride ?? produit.priceCents,
-  }));
-  const prix = [produit.priceCents, ...variantes.map(v => v.prixCents)];
+  const variantes: VarianteProduit[] = (produit.variants ?? []).map(
+    (variante) => ({
+      id: variante.id,
+      libelle: variante.label,
+      prixCents: variante.priceCentsOverride ?? produit.priceCents,
+    }),
+  );
+  const prix = [produit.priceCents, ...variantes.map((v) => v.prixCents)];
   return {
     accroche: produit.tagline,
     categorie: produit.category ?? null,
-    categorieLibelle: produit.category ? CATEGORY_LABELS[produit.category] : "Autres",
+    categorieLibelle: produit.category
+      ? CATEGORY_LABELS[produit.category]
+      : "Autres",
     description: produit.description,
     exclusifPatreon: produit.patreonExclusive === true,
     image: produit.image,
@@ -97,10 +105,16 @@ function convertir(produit: Product): ProduitBoutique {
 }
 
 /** Le catalogue servi, trié par famille puis par prix croissant. */
-export function construireCatalogue(produits: readonly Product[]): ProduitBoutique[] {
+export function construireCatalogue(
+  produits: readonly Product[],
+): ProduitBoutique[] {
   return produits
     .map(convertir)
-    .toSorted((a, b) => a.categorieLibelle.localeCompare(b.categorieLibelle, "fr") || a.prixCents - b.prixCents);
+    .toSorted(
+      (a, b) =>
+        a.categorieLibelle.localeCompare(b.categorieLibelle, "fr") ||
+        a.prixCents - b.prixCents,
+    );
 }
 
 /**
@@ -111,10 +125,11 @@ export function construireCatalogue(produits: readonly Product[]): ProduitBoutiq
 export const CATALOGUE: readonly ProduitBoutique[] = [];
 
 /** Familles réellement présentes dans le catalogue, dans l'ordre alphabétique français. */
-export const CATEGORIES: ReadonlyArray<{ valeur: ProductCategory; libelle: string }> = [
-  ...new Set(CATALOGUE.flatMap(p => (p.categorie ? [p.categorie] : []))),
-]
-  .map(valeur => ({ libelle: CATEGORY_LABELS[valeur], valeur }))
+export const CATEGORIES: ReadonlyArray<{
+  valeur: ProductCategory;
+  libelle: string;
+}> = [...new Set(CATALOGUE.flatMap((p) => (p.categorie ? [p.categorie] : [])))]
+  .map((valeur) => ({ libelle: CATEGORY_LABELS[valeur], valeur }))
   .toSorted((a, b) => a.libelle.localeCompare(b.libelle, "fr"));
 
 /**
@@ -185,12 +200,15 @@ export function chercherProduits(
     const nom = normaliser(produit.nom);
     if (nom.startsWith(aiguille)) {
       debuts.push(produit);
-    } else if (nom.includes(aiguille) || normaliser(produit.slug).includes(aiguille)) {
+    } else if (
+      nom.includes(aiguille) ||
+      normaliser(produit.slug).includes(aiguille)
+    ) {
       milieux.push(produit);
     } else if (
       normaliser(produit.accroche).includes(aiguille) ||
       normaliser(produit.categorieLibelle).includes(aiguille) ||
-      produit.tags.some(tag => normaliser(tag).includes(aiguille))
+      produit.tags.some((tag) => normaliser(tag).includes(aiguille))
     ) {
       larges.push(produit);
     }
@@ -208,10 +226,12 @@ export function trouverProduit(
 ): ProduitBoutique | null {
   const brut = (reference ?? "").trim();
   if (brut.length === 0) return null;
-  const exact = catalogue.find(p => p.slug === brut);
+  const exact = catalogue.find((p) => p.slug === brut);
   if (exact) return exact;
   const cle = normaliser(brut);
-  const parNom = catalogue.find(p => normaliser(p.nom) === cle || normaliser(p.slug) === cle);
+  const parNom = catalogue.find(
+    (p) => normaliser(p.nom) === cle || normaliser(p.slug) === cle,
+  );
   if (parNom) return parNom;
   return chercherProduits(brut, 1, catalogue)[0] ?? null;
 }
@@ -220,7 +240,11 @@ export function trouverProduit(
 export function catalogueParCategorie(
   categorie?: string | null,
   catalogue: readonly ProduitBoutique[] = CATALOGUE,
-): Array<{ categorie: ProductCategory | null; libelle: string; produits: ProduitBoutique[] }> {
+): Array<{
+  categorie: ProductCategory | null;
+  libelle: string;
+  produits: ProduitBoutique[];
+}> {
   const filtre = categorie ? normaliser(categorie) : "";
   const groupes = new Map<ProductCategory | null, ProduitBoutique[]>();
   for (const produit of catalogue) {
@@ -285,7 +309,10 @@ function borner(texte: string, max: number): string {
  * `omises` permet à l'appelant de le dire au lieu de mentir par omission.
  */
 export function champsCatalogue(
-  groupes: ReadonlyArray<{ libelle: string; produits: readonly ProduitBoutique[] }>,
+  groupes: ReadonlyArray<{
+    libelle: string;
+    produits: readonly ProduitBoutique[];
+  }>,
   budget: number,
   base = BASE_BOUTIQUE,
 ): ChampsCatalogue {
@@ -295,7 +322,12 @@ export function champsCatalogue(
 
   for (const groupe of groupes) {
     const nom = `${groupe.libelle} (${groupe.produits.length})`;
-    const valeur = borner(groupe.produits.map(produit => ligneCatalogue(produit, base)).join("\n"), MAX_VALEUR_CHAMP);
+    const valeur = borner(
+      groupe.produits
+        .map((produit) => ligneCatalogue(produit, base))
+        .join("\n"),
+      MAX_VALEUR_CHAMP,
+    );
     const cout = nom.length + valeur.length;
     if (champs.length >= MAX_CHAMPS_EMBED || cout > reste) {
       omises += 1;
@@ -312,12 +344,17 @@ const LIBELLES_STOCK: Record<EtatStock, string> = {
   preorder: "Précommande",
 };
 
-export function libelleStock(stock: EtatStock | null | undefined): string | null {
+export function libelleStock(
+  stock: EtatStock | null | undefined,
+): string | null {
   return stock ? LIBELLES_STOCK[stock] : null;
 }
 
 /** Une ligne de liste : « [Nom](url) — 9,90 € · Édition limitée ». */
-export function ligneCatalogue(produit: ProduitBoutique, base = BASE_BOUTIQUE): string {
+export function ligneCatalogue(
+  produit: ProduitBoutique,
+  base = BASE_BOUTIQUE,
+): string {
   const details = [formaterFourchettePrix(produit), libelleStock(produit.stock)]
     .filter((v): v is string => typeof v === "string" && v.length > 0)
     .join(" · ");
@@ -342,7 +379,9 @@ export function ligneCatalogue(produit: ProduitBoutique, base = BASE_BOUTIQUE): 
  */
 export type StatutPatron = "actif" | "refuse" | "ancien" | "abonne";
 
-export function classerStatutPatron(brut: string | null | undefined): StatutPatron {
+export function classerStatutPatron(
+  brut: string | null | undefined,
+): StatutPatron {
   switch ((brut ?? "").trim().toLowerCase()) {
     case "active_patron":
       return "actif";
@@ -401,7 +440,9 @@ function nombre(valeur: number | string | null | undefined): number | null {
  * actives : un ancien soutien n'occupe plus son palier. Aucune identité n'entre
  * ni ne sort de cette fonction.
  */
-export function agregerPaliers(lignes: readonly AdhesionPatreon[]): PalierAgrege[] {
+export function agregerPaliers(
+  lignes: readonly AdhesionPatreon[],
+): PalierAgrege[] {
   const paliers = new Map<string, PalierAgrege>();
   for (const ligne of lignes) {
     if (classerStatutPatron(ligne.patron_status) !== "actif") continue;
@@ -421,13 +462,21 @@ export function agregerPaliers(lignes: readonly AdhesionPatreon[]): PalierAgrege
     }
   }
   return [...paliers.values()].toSorted(
-    (a, b) => (b.montantCents ?? 0) - (a.montantCents ?? 0) || b.soutiens - a.soutiens,
+    (a, b) =>
+      (b.montantCents ?? 0) - (a.montantCents ?? 0) || b.soutiens - a.soutiens,
   );
 }
 
 /** Décompte par statut, tous paliers confondus. */
-export function compterParStatut(lignes: readonly AdhesionPatreon[]): Record<StatutPatron, number> {
-  const total: Record<StatutPatron, number> = { abonne: 0, actif: 0, ancien: 0, refuse: 0 };
+export function compterParStatut(
+  lignes: readonly AdhesionPatreon[],
+): Record<StatutPatron, number> {
+  const total: Record<StatutPatron, number> = {
+    abonne: 0,
+    actif: 0,
+    ancien: 0,
+    refuse: 0,
+  };
   for (const ligne of lignes) {
     total[classerStatutPatron(ligne.patron_status)] += 1;
   }
@@ -443,12 +492,16 @@ export function accorderSoutiens(nombreDeSoutiens: number): string {
 /** Ligne d'un palier dans l'embed public : « **Palier** — 3 soutiens · 14,50 €/mois ». */
 export function lignePalier(palier: PalierAgrege): string {
   const montant =
-    palier.montantCents !== null && palier.montantCents > 0 ? ` · ${formaterEuros(palier.montantCents)}/mois` : "";
+    palier.montantCents !== null && palier.montantCents > 0
+      ? ` · ${formaterEuros(palier.montantCents)}/mois`
+      : "";
   return `**${palier.titre}** — ${accorderSoutiens(palier.soutiens)}${montant}`;
 }
 
 /** Cadence de prélèvement Patreon : 1 = par mois, 12 = par an. */
-export function formaterCadence(cadence: number | null | undefined): string | null {
+export function formaterCadence(
+  cadence: number | null | undefined,
+): string | null {
   if (cadence === 1) return "mensuel";
   if (cadence === 12) return "annuel";
   return null;
@@ -459,7 +512,9 @@ export function formaterCadence(cadence: number | null | undefined): string | nu
  * Le fuseau est FIXÉ à Europe/Paris : l'hôte tourne en UTC, et une date de
  * prélèvement stockée à minuit basculerait d'un jour selon la machine.
  */
-export function formaterDateFr(valeur: Date | string | null | undefined): string | null {
+export function formaterDateFr(
+  valeur: Date | string | null | undefined,
+): string | null {
   if (valeur === null || valeur === undefined || valeur === "") return null;
   const date = valeur instanceof Date ? valeur : new Date(valeur);
   if (Number.isNaN(date.getTime())) return null;
@@ -488,7 +543,9 @@ const LIBELLES_PRELEVEMENT: Record<string, string> = {
   refunded: "remboursé",
 };
 
-export function libellePrelevement(brut: string | null | undefined): string | null {
+export function libellePrelevement(
+  brut: string | null | undefined,
+): string | null {
   const valeur = (brut ?? "").trim();
   if (valeur.length === 0) return null;
   return LIBELLES_PRELEVEMENT[valeur.toLowerCase()] ?? valeur;
@@ -496,7 +553,9 @@ export function libellePrelevement(brut: string | null | undefined): string | nu
 
 /** Titres des paliers d'une adhésion, mis en forme. */
 export function paliersDeLAdhesion(ligne: AdhesionPatreon): string {
-  const titres = (ligne.tier_titles ?? []).map(t => (t ?? "").trim()).filter(t => t.length > 0);
+  const titres = (ligne.tier_titles ?? [])
+    .map((t) => (t ?? "").trim())
+    .filter((t) => t.length > 0);
   return titres.length > 0 ? titres.join(" · ") : "Aucun palier";
 }
 
@@ -506,7 +565,9 @@ export function paliersDeLAdhesion(ligne: AdhesionPatreon): string {
  * postale ne figurent dans le type `AdhesionPatreon`, donc rien de tout cela ne
  * peut fuir ici.
  */
-export function resumerAdhesion(ligne: AdhesionPatreon): Array<{ nom: string; valeur: string }> {
+export function resumerAdhesion(
+  ligne: AdhesionPatreon,
+): Array<{ nom: string; valeur: string }> {
   const champs: Array<{ nom: string; valeur: string }> = [];
   const statut = classerStatutPatron(ligne.patron_status);
   const cadence = formaterCadence(ligne.pledge_cadence);
@@ -548,7 +609,9 @@ export function resumerAdhesion(ligne: AdhesionPatreon): Array<{ nom: string; va
   if (dernier || issue) {
     champs.push({
       nom: "Dernier prélèvement",
-      valeur: [dernier, issue].filter((v): v is string => typeof v === "string").join(" · "),
+      valeur: [dernier, issue]
+        .filter((v): v is string => typeof v === "string")
+        .join(" · "),
     });
   }
   return champs;

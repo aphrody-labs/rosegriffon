@@ -78,7 +78,11 @@ export class FileInput {
     }
   }
 
-  storeDataURLToStorage(filename: string, dataURL: string, storageKey?: string) {
+  storeDataURLToStorage(
+    filename: string,
+    dataURL: string,
+    storageKey?: string,
+  ) {
     storageKey ??= this.storageKey;
     if (!storageKey) return;
     localStorage[storageKey] = filename + "," + dataURL;
@@ -92,7 +96,11 @@ export class FileInput {
     for (let i = 0; i < data_.length; i++) {
       dataString += String.fromCharCode(data_[i]!);
     }
-    this.storeDataURLToStorage(filename, "data:application/octet-stream;base64," + btoa(dataString), storageKey);
+    this.storeDataURLToStorage(
+      filename,
+      "data:application/octet-stream;base64," + btoa(dataString),
+      storageKey,
+    );
   }
 }
 
@@ -107,21 +115,34 @@ export class FileInputWithIndicator extends FileInput {
     storageKey?: string,
   ) {
     super(inputElement, loadCallback, storageKey);
-    this.labelElement = this.inputElement.nextElementSibling as HTMLLabelElement;
-    this.fileNameElement = this.labelElement.getElementsByClassName("file-name")[0] as HTMLElement;
-    this.loadIndicatorUse = this.labelElement.querySelector(".load-indicator > use") as SVGUseElement;
+    this.labelElement = this.inputElement
+      .nextElementSibling as HTMLLabelElement;
+    this.fileNameElement = this.labelElement.getElementsByClassName(
+      "file-name",
+    )[0] as HTMLElement;
+    this.loadIndicatorUse = this.labelElement.querySelector(
+      ".load-indicator > use",
+    ) as SVGUseElement;
   }
 
   override load(name: string, buffer: ArrayBuffer) {
     super.load(name, buffer);
     this.fileNameElement.textContent = name;
-    this.loadIndicatorUse.setAttributeNS("http://www.w3.org/1999/xlink", "xlink:href", "file-check.svg#icon");
+    this.loadIndicatorUse.setAttributeNS(
+      "http://www.w3.org/1999/xlink",
+      "xlink:href",
+      "file-check.svg#icon",
+    );
   }
 
   override unload(): void {
     super.unload();
     this.fileNameElement.textContent = "";
-    this.loadIndicatorUse.setAttributeNS("http://www.w3.org/1999/xlink", "xlink:href", "file-cross.svg#icon");
+    this.loadIndicatorUse.setAttributeNS(
+      "http://www.w3.org/1999/xlink",
+      "xlink:href",
+      "file-cross.svg#icon",
+    );
   }
 }
 
@@ -131,7 +152,11 @@ export class Files {
   public gameDb?: GameDbEntry[];
 
   constructor(
-    private loadFileCallback: (id: FileId, name: string, buffer: ArrayBuffer) => void,
+    private loadFileCallback: (
+      id: FileId,
+      name: string,
+      buffer: ArrayBuffer,
+    ) => void,
     gameDbLoadedCallback: () => void,
   ) {
     const input = (
@@ -173,8 +198,8 @@ export class Files {
     }
 
     fetch("resources/game_db.json")
-      .then(r => r.text())
-      .then(db => {
+      .then((r) => r.text())
+      .then((db) => {
         this.gameDb = JSON.parse(db);
         gameDbLoadedCallback();
       });
@@ -198,11 +223,16 @@ export class Files {
   }
 
   storeSaveToStorage(filename: string, data: ArrayBuffer, gameTitle: string) {
-    this.fileInputs.get(FileId.Save)!.storeToStorage(filename, data, `save-${gameTitle}`);
+    this.fileInputs
+      .get(FileId.Save)!
+      .storeToStorage(filename, data, `save-${gameTitle}`);
   }
 }
 
-export function dbLookup(db: GameDbEntry[], code: number): GameDbEntry | undefined {
+export function dbLookup(
+  db: GameDbEntry[],
+  code: number,
+): GameDbEntry | undefined {
   let start = 0;
   let end = db.length - 1;
   while (start !== end) {

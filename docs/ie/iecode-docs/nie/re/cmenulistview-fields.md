@@ -68,13 +68,13 @@ update) skips the whole easing block when it is 0, which is why
 `scripts/audit/uemu/validate_listview_scroll.py` pins it to 0 — a settled screen is the state a single-frame
 composer can reproduce.
 
-| Slot | Address                                                    | What it is                                                                              | Status                                                             |
-| ---: | ---------------------------------------------------------- | --------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
-|   58 | `0x140542840` (812 B over chained chunks)                  | page step by the visible extent, clamps, no wrap                                        | proven — `step_page`, `validate_listview_page.py` 18              |
-|   59 | `0x140542B80` (87 B in its own entry, 580 B over 3 chunks) | row step by exactly ±1 on `[+0x12C]`, clamps, no wrap                                   | proven — `step_row`, `validate_listview_scroll.py` 26             |
-|   56 | `0x140542080` (1 971 B, 7 chunks)                          | third, animated scroll path; **clamps** the selection, never steps it                   | read                                                               |
-|   60 | `0x140543760` (587 B, 5 chunks)                            | re-indexer: loops over visible cells and writes each cell's `+0x154`                    | read                                                               |
-|   73 | `0x140544BD0`                                              | cell position = `base + translation[index]` from a table of 48-byte 4×3 affine matrices | proven — `cell_position`, `validate_listview_cell_position.py` 5  |
+| Slot | Address                                                    | What it is                                                                              | Status                                                           |
+| ---: | ---------------------------------------------------------- | --------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+|   58 | `0x140542840` (812 B over chained chunks)                  | page step by the visible extent, clamps, no wrap                                        | proven — `step_page`, `validate_listview_page.py` 18             |
+|   59 | `0x140542B80` (87 B in its own entry, 580 B over 3 chunks) | row step by exactly ±1 on `[+0x12C]`, clamps, no wrap                                   | proven — `step_row`, `validate_listview_scroll.py` 26            |
+|   56 | `0x140542080` (1 971 B, 7 chunks)                          | third, animated scroll path; **clamps** the selection, never steps it                   | read                                                             |
+|   60 | `0x140543760` (587 B, 5 chunks)                            | re-indexer: loops over visible cells and writes each cell's `+0x154`                    | read                                                             |
+|   73 | `0x140544BD0`                                              | cell position = `base + translation[index]` from a table of 48-byte 4×3 affine matrices | proven — `cell_position`, `validate_listview_cell_position.py` 5 |
 
 The view clamps and never wraps (`step_row`/`step_page`), but the **cell** index wraps modulo
 `[cell+0x150]` (`cell_index`); the view does not hold a selected item, the cells hold their

@@ -21,9 +21,12 @@ export default async function TeamsPage() {
   return (
     <div className="space-y-6">
       <header className="space-y-1">
-        <h1 className="text-fluid-headline-md font-extrabold text-on-surface">Équipes</h1>
+        <h1 className="text-fluid-headline-md font-extrabold text-on-surface">
+          Équipes
+        </h1>
         <p className="text-sm text-on-surface-variant">
-          {teams.length.toLocaleString("fr-FR")} équipes recensées — emblèmes, uniformes et effectifs liés.
+          {teams.length.toLocaleString("fr-FR")} équipes recensées — emblèmes,
+          uniformes et effectifs liés.
         </p>
       </header>
 

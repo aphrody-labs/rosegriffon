@@ -14,10 +14,16 @@ import { jetonValide } from "@/lib/vroid/session";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-export async function GET(_requete: Request, { params }: { params: Promise<{ id: string }> }): Promise<Response> {
+export async function GET(
+  _requete: Request,
+  { params }: { params: Promise<{ id: string }> },
+): Promise<Response> {
   const { id } = await params;
   if (!/^\d+$/.test(id)) {
-    return NextResponse.json({ erreur: "Identifiant de modèle invalide." }, { status: 400 });
+    return NextResponse.json(
+      { erreur: "Identifiant de modèle invalide." },
+      { status: 400 },
+    );
   }
 
   try {
@@ -28,13 +34,24 @@ export async function GET(_requete: Request, { params }: { params: Promise<{ id:
   } catch (erreur) {
     if (estQuotaDepasse(erreur)) {
       return NextResponse.json(
-        { erreur: "Quota d'appels VRoid Hub atteint, réessayez dans quelques minutes." },
+        {
+          erreur:
+            "Quota d'appels VRoid Hub atteint, réessayez dans quelques minutes.",
+        },
         { status: 429 },
       );
     }
-    const statut = erreur instanceof ErreurVroid && erreur.statut >= 400 ? erreur.statut : 502;
+    const statut =
+      erreur instanceof ErreurVroid && erreur.statut >= 400
+        ? erreur.statut
+        : 502;
     return NextResponse.json(
-      { erreur: erreur instanceof Error ? erreur.message : "Appel VRoid Hub en échec." },
+      {
+        erreur:
+          erreur instanceof Error
+            ? erreur.message
+            : "Appel VRoid Hub en échec.",
+      },
       { status: statut },
     );
   }

@@ -17,61 +17,64 @@ import type { User } from "./resources/user";
 import type { Webhook } from "./resources/webhook";
 
 export enum Type {
-	Address = "address",
-	Benefit = "benefit",
-	Campaign = "campaign",
-	Client = "client",
-	Deliverable = "deliverable",
-	/** @deprecated */
-	Goal = "goal",
-	LiveAccessRule = "live-access-rule",
-	Live = "live",
-	Media = "media",
-	Member = "member",
-	Post = "post",
-	PledgeEvent = "pledge-event",
-	Tier = "tier",
-	User = "user",
-	Webhook = "webhook",
+    Address = "address",
+    Benefit = "benefit",
+    Campaign = "campaign",
+    Client = "client",
+    Deliverable = "deliverable",
+    /** @deprecated */
+    Goal = "goal",
+    LiveAccessRule = "live-access-rule",
+    Live = "live",
+    Media = "media",
+    Member = "member",
+    Post = "post",
+    PledgeEvent = "pledge-event",
+    Tier = "tier",
+    User = "user",
+    Webhook = "webhook",
 }
 
 export type ItemType = `${Type}`;
 
 export interface ItemMap {
-	address: Address;
-	benefit: Benefit;
-	campaign: Campaign;
-	client: OauthClient;
-	deliverable: Deliverable;
-	/** @deprecated */
-	goal: Goal;
-	"live-access-rule": AccessRule;
-	live: Live;
-	media: Media;
-	member: Member;
-	"pledge-event": PledgeEvent;
-	post: Post;
-	tier: Tier;
-	user: User;
-	webhook: Webhook;
+    address: Address;
+    benefit: Benefit;
+    campaign: Campaign;
+    client: OauthClient;
+    deliverable: Deliverable;
+    /** @deprecated */
+    goal: Goal;
+    "live-access-rule": AccessRule;
+    live: Live;
+    media: Media;
+    member: Member;
+    "pledge-event": PledgeEvent;
+    post: Post;
+    tier: Tier;
+    user: User;
+    webhook: Webhook;
 }
 
 export interface Item<Type extends ItemType> {
-	id: string;
-	type: Type;
+    id: string;
+    type: Type;
 }
 
 export type DataItem<Type extends ItemType, Related extends boolean = false> = {
-	data: Item<Type>;
+    data: Item<Type>;
 } & If<Related, { links: { related: string } }, unknown>;
 
-export type DataItems<Type extends ItemType, Related extends boolean = false> = {
-	data: Item<Type>[];
+export type DataItems<
+    Type extends ItemType,
+    Related extends boolean = false,
+> = {
+    data: Item<Type>[];
 } & If<Related, { links: { related: string } }, unknown>;
 
 export interface AttributeItem<
-	Type extends ItemType,
-	Attributes extends Record<string, unknown> = Record<string, never>,
+    Type extends ItemType,
+    Attributes extends Record<string, unknown> = Record<string, never>,
 > extends Item<Type> {
-	attributes: Attributes;
+    attributes: Attributes;
 }

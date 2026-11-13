@@ -22,7 +22,8 @@ export async function generateMetadata({
   const page = typeof rawParams.page === "string" ? rawParams.page : undefined;
 
   const activeCategory = category || "shoes";
-  const categoryLabel = CATEGORIES.find(t => t.value === activeCategory)?.label || "Équipements";
+  const categoryLabel =
+    CATEGORIES.find((t) => t.value === activeCategory)?.label || "Équipements";
 
   let title = `${categoryLabel} - Objets`;
   if (q) {
@@ -43,7 +44,10 @@ export async function generateMetadata({
       // `shoes`, et `/item` se canonicalisait encore vers `/item?category=shoes`.
       // C'est `category` BRUT qu'il faut passer — la catégorie par défaut ne va
       // dans l'URL canonique que si le visiteur l'a réellement demandée.
-      canonical: buildCanonical(wiki("/item"), { category, page }, ["category", "page"]),
+      canonical: buildCanonical(wiki("/item"), { category, page }, [
+        "category",
+        "page",
+      ]),
     },
     description: `Liste complète des ${categoryLabel.toLowerCase()} et objets dans Inazuma Eleven: Victory Road. Localisation, stats et effets.`,
     title: wikiTitle(title),
@@ -90,7 +94,8 @@ export default async function ItemsPage({
 
   const pageNumber = page ? Number.parseInt(page.toString(), 10) : 1;
   const activeCategory = (category as string) || "shoes";
-  const categoryLabel = CATEGORIES.find(t => t.value === activeCategory)?.label || "Équipements";
+  const categoryLabel =
+    CATEGORIES.find((t) => t.value === activeCategory)?.label || "Équipements";
 
   // Data First: Fetch paginated from DB
   const { data: items, total } = await wikiService.getItemsList({
@@ -104,7 +109,11 @@ export default async function ItemsPage({
     "@context": "https://schema.org",
     "@type": "CollectionPage",
     description: `Base de données des objets (${categoryLabel}) dans Inazuma Eleven: Victory Road.`,
-    isPartOf: { "@type": "WebSite", name: "Azalée", url: absoluteUrl(wiki("/")) },
+    isPartOf: {
+      "@type": "WebSite",
+      name: "Azalée",
+      url: absoluteUrl(wiki("/")),
+    },
     mainEntity: {
       "@type": "ItemList",
       itemListElement: items.slice(0, 10).map((item: any, i: number) => ({
@@ -122,11 +131,20 @@ export default async function ItemsPage({
 
   return (
     <div className="space-y-6">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionJsonLd) }} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionJsonLd) }}
+      />
       <h1 className="sr-only">Objets</h1>
       <div className="space-y-4">
-        <WikiSearchToolbar placeholder="Rechercher un objet..." showFilters={false} />
-        <ItemFilterBar categories={CATEGORIES} currentCategory={activeCategory} />
+        <WikiSearchToolbar
+          placeholder="Rechercher un objet..."
+          showFilters={false}
+        />
+        <ItemFilterBar
+          categories={CATEGORIES}
+          currentCategory={activeCategory}
+        />
       </div>
 
       <div className="flex items-center justify-between text-xs font-medium text-on-surface-variant px-1 uppercase tracking-wider">
@@ -144,7 +162,9 @@ export default async function ItemsPage({
                 id={item.itemId}
                 name={item.name_FR || item.names?.en || "Inconnu"}
                 category={item.category}
-                categoryLabel={CATEGORIES.find(t => t.value === item.category)?.label}
+                categoryLabel={
+                  CATEGORIES.find((t) => t.value === item.category)?.label
+                }
                 rarity={item.rarity}
                 internalCode={item.internalCode}
                 icon={item.image}
@@ -163,7 +183,11 @@ export default async function ItemsPage({
         </div>
       )}
 
-      <WikiPagination totalItems={total} itemsPerPage={ITEMS_PER_PAGE} currentPage={pageNumber} />
+      <WikiPagination
+        totalItems={total}
+        itemsPerPage={ITEMS_PER_PAGE}
+        currentPage={pageNumber}
+      />
     </div>
   );
 }

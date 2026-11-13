@@ -73,7 +73,10 @@ const AURA_MIXI_CODES = new Set(MENU_ASSETS.aura.mixi);
  * sur disque — un code absent → placeholder (le caller bascule sur telop/image_url), pas
  * un 404 forgé.
  */
-const MIXIMAX_ICON_MANIFEST = ASSET_MANIFEST.miximaxIcon as Record<string, string>;
+const MIXIMAX_ICON_MANIFEST = ASSET_MANIFEST.miximaxIcon as Record<
+  string,
+  string
+>;
 
 /**
  * Set EXHAUSTIF des codes de base `c<NNNNNNNN>` qui possèdent réellement un visage
@@ -82,7 +85,9 @@ const MIXIMAX_ICON_MANIFEST = ASSET_MANIFEST.miximaxIcon as Record<string, strin
  * `face_ban00`, non nominatif). Régénéré depuis la projection SQL CPK.
  * Sert de gate à `getCharacterFaceUrl` : placeholder pour les persos sans visage.
  */
-const CHARACTER_FACE_CODES = new Set(ASSET_MANIFEST.characterFace as readonly string[]);
+const CHARACTER_FACE_CODES = new Set(
+  ASSET_MANIFEST.characterFace as readonly string[],
+);
 
 /**
  * Set EXHAUSTIF des basenames `c<NNNNNNNN>` (et autres) qui possèdent un modèle 3D GLB
@@ -92,7 +97,9 @@ const CHARACTER_FACE_CODES = new Set(ASSET_MANIFEST.characterFace as readonly st
  * `getCharacterModelGlbUrl` pour ne monter le viewer 3D que quand le GLB existe (sinon
  * fallback image) — même garde-fou anti-404 que CHARACTER_FACE_CODES.
  */
-const CHARACTER_MODEL_CODES = new Set(ASSET_MANIFEST.characterModel as readonly string[]);
+const CHARACTER_MODEL_CODES = new Set(
+  ASSET_MANIFEST.characterModel as readonly string[],
+);
 
 /**
  * Gate des modèles 3D COMPLETS keshin (`k<NNNNNN>`) + armures (`ka<NNNNNN>NN`) réellement
@@ -103,8 +110,12 @@ const CHARACTER_MODEL_CODES = new Set(ASSET_MANIFEST.characterModel as readonly 
  * sont qu'en `.g4mg` — pas encore assemblables côté serving → exclus du gate (pas de
  * bouton 3D mort). Régénérer le manifeste quand la couche serving gagne le support g4mg.
  */
-const KESHIN_MODEL_CODES = new Set((ASSET_MANIFEST.keshinModel as { keshin: readonly string[] }).keshin);
-const ARMURE_MODEL_CODES = new Set((ASSET_MANIFEST.keshinModel as { armures: readonly string[] }).armures);
+const KESHIN_MODEL_CODES = new Set(
+  (ASSET_MANIFEST.keshinModel as { keshin: readonly string[] }).keshin,
+);
+const ARMURE_MODEL_CODES = new Set(
+  (ASSET_MANIFEST.keshinModel as { armures: readonly string[] }).armures,
+);
 
 /**
  * Set EXHAUSTIF des codes uniforme PERSONNELS `u<NNNNNNNN>` (8 chiffres) qui possèdent
@@ -122,7 +133,8 @@ const ARMURE_MODEL_CODES = new Set((ASSET_MANIFEST.keshinModel as { armures: rea
 const CHARACTER_UNIFORM_CODES = new Set<string>(MENU_ASSETS.uniformsPersonal);
 
 // Constantes globales
-export const CDN_URL = process.env.NEXT_PUBLIC_ASSET_URL || "https://azalee.rosegriffon.fr";
+export const CDN_URL =
+  process.env.NEXT_PUBLIC_ASSET_URL || "https://azalee.rosegriffon.fr";
 
 /** Racine CDN du namespace menu — décodage live des CPK par `nie-model-serve`. */
 const MENU_CDN_BASE = "https://cdn.rosegriffon.fr/dx11/menu";
@@ -148,7 +160,9 @@ function menuFileUrl(relativePath: string): string {
  */
 function menuTextureUrl(g4txPath: string, textureName: string): string {
   // Le chemin est accepté avec ou sans son extension (le manifeste objets la porte).
-  const base = g4txPath.endsWith(".g4tx") ? g4txPath.slice(0, -".g4tx".length) : g4txPath;
+  const base = g4txPath.endsWith(".g4tx")
+    ? g4txPath.slice(0, -".g4tx".length)
+    : g4txPath;
   return `${MENU_CDN_BASE}/${base}.g4tx/${textureName}.png`;
 }
 
@@ -166,12 +180,15 @@ const LEGACY_STORAGE_PREFIX = "/storage/v1/object/public/menu/";
  * famille (`eq_ac` → `icon_item05_…`) qui supposait à la fois un nom de fichier de
  * dump et un dossier — tous deux faux.
  */
-export function resolveItemIcon(internalCode: string): { g4txPath: string; textureName: string } | null {
+export function resolveItemIcon(
+  internalCode: string,
+): { g4txPath: string; textureName: string } | null {
   const entry = ITEM_IMAGE_MANIFEST.items[internalCode];
   if (entry === undefined) {
     return null;
   }
-  const [index, name] = typeof entry === "number" ? [entry, internalCode] : entry;
+  const [index, name] =
+    typeof entry === "number" ? [entry, internalCode] : entry;
   const g4txPath = ITEM_IMAGE_MANIFEST.containers[index];
   return g4txPath ? { g4txPath, textureName: name } : null;
 }
@@ -182,7 +199,9 @@ export function resolveItemIcon(internalCode: string): { g4txPath: string; textu
  * 542 emblèmes du CPK (gate anti-404).
  */
 function emblemFileUrl(name: string): string | null {
-  return EMBLEM_NAMES.has(name) ? menuFileUrl(`200_icon/01_icon_emblem/${name}`) : null;
+  return EMBLEM_NAMES.has(name)
+    ? menuFileUrl(`200_icon/01_icon_emblem/${name}`)
+    : null;
 }
 
 /**
@@ -222,15 +241,24 @@ function auraIconUrl(folder: AuraFolder, base: string): string | null {
  * réelle n'existe : mieux vaut un placeholder qu'une URL forgée en 404.
  */
 function mapLegacyMenuPath(menuPath: string): string | null {
-  const chrMatch = menuPath.match(/^200_icon\/10_icon_chr\/([^/]+)\/([^/]+?)_l(?:_[^.]+)?\.webp$/);
+  const chrMatch = menuPath.match(
+    /^200_icon\/10_icon_chr\/([^/]+)\/([^/]+?)_l(?:_[^.]+)?\.webp$/,
+  );
   if (chrMatch) {
     const folder = chrMatch[1] as string;
     const base = chrMatch[2] as string;
-    if (folder === "aura_fs" || folder === "aura_soul" || folder === "aura_mixi") {
+    if (
+      folder === "aura_fs" ||
+      folder === "aura_soul" ||
+      folder === "aura_mixi"
+    ) {
       // Même contrainte que getAuraImageUrl : le jeu n'a que les icônes « famille »
       // (numéro multiple de 10). On arrondit (`k000721` → `k000720`), sinon les
       // formes évoluées (…721/…2025) n'ont aucun fichier.
-      const auraBase = base.replace(/^([ka])(\d+)$/, (_m, p, n) => `${p}${auraFamilyBase(n)}`);
+      const auraBase = base.replace(
+        /^([ka])(\d+)$/,
+        (_m, p, n) => `${p}${auraFamilyBase(n)}`,
+      );
       return auraIconUrl(folder, auraBase);
     }
     if (folder === "face") {
@@ -241,7 +269,9 @@ function mapLegacyMenuPath(menuPath: string): string | null {
     }
     return null;
   }
-  const emMatch = menuPath.match(/^200_icon\/01_icon_emblem\/(em[0-9a-z_]+)\.webp$/i);
+  const emMatch = menuPath.match(
+    /^200_icon\/01_icon_emblem\/(em[0-9a-z_]+)\.webp$/i,
+  );
   if (emMatch) {
     // Les `emblem_url` en `0x<CRC>.webp` ne correspondent à AUCUN
     // nom d'emblème : ce CRC est celui de l'identifiant d'équipe, pas d'un fichier
@@ -264,7 +294,9 @@ function mapLegacyMenuPath(menuPath: string): string | null {
     const ref = resolveItemIcon(itemMatch[1] as string);
     return ref ? menuTextureUrl(ref.g4txPath, ref.textureName) : null;
   }
-  const telopMatch = menuPath.match(/^220_img\/telop_waza\/[a-z_]+\/([^/]+)\.webp$/);
+  const telopMatch = menuPath.match(
+    /^220_img\/telop_waza\/[a-z_]+\/([^/]+)\.webp$/,
+  );
   if (telopMatch) {
     // Le nom stocké porte un suffixe de variante du dump (`whd00030_0`) et parfois le
     // doublage (`x_x`) : on revient au code nu avant de consulter le gate. Les formes
@@ -306,13 +338,17 @@ function mapStrippedMenuPath(stripped: string): string {
  * exists, so returning the stored path would be a guaranteed 404. Any other path
  * is returned unchanged.
  */
-export function resolveLegacyMenuAsset(path: string | null | undefined): string | null {
+export function resolveLegacyMenuAsset(
+  path: string | null | undefined,
+): string | null {
   if (!path) {
     return null;
   }
   const legacyAt = path.indexOf(LEGACY_STORAGE_PREFIX);
   if (legacyAt >= 0) {
-    return mapLegacyMenuPath(path.slice(legacyAt + LEGACY_STORAGE_PREFIX.length));
+    return mapLegacyMenuPath(
+      path.slice(legacyAt + LEGACY_STORAGE_PREFIX.length),
+    );
   }
   if (path.startsWith("/menu/")) {
     return mapLegacyMenuPath(path.slice("/menu/".length));
@@ -321,7 +357,9 @@ export function resolveLegacyMenuAsset(path: string | null | undefined): string 
 }
 
 /** Resolve a potentially relative asset path to a full URL. */
-export function resolveAssetUrl(path: string | null | undefined): string | null {
+export function resolveAssetUrl(
+  path: string | null | undefined,
+): string | null {
   if (!path) {
     return null;
   }
@@ -352,7 +390,9 @@ export function resolveAssetUrl(path: string | null | undefined): string | null 
  *
  * Renvoie `null` pour un `img_path` vide → le caller bascule sur le placeholder.
  */
-export function getGalleryImageUrl(imgPath: string | undefined | null): string | null {
+export function getGalleryImageUrl(
+  imgPath: string | undefined | null,
+): string | null {
   if (!imgPath) {
     return null;
   }
@@ -417,7 +457,10 @@ export function galleryVariantUrl(
  * taille, et il sert `_2_l00` — le mauvais portrait (md5 différents, mesuré).
  */
 function characterFaceUrl(baseCode: string): string {
-  return menuTextureUrl(`${ICON_CHR_BASE}/face/${baseCode}_l`, `${baseCode}_1_l00`);
+  return menuTextureUrl(
+    `${ICON_CHR_BASE}/face/${baseCode}_l`,
+    `${baseCode}_1_l00`,
+  );
 }
 
 /**
@@ -425,7 +468,10 @@ function characterFaceUrl(baseCode: string): string {
  * 5677/5677 présents dans les CPK) : un code sans visage rend `PLACEHOLDERS.character`
  * au lieu d'une URL qui déclencherait un 404 silencieux côté `<Image onError>`.
  */
-export function getCharacterFaceUrl(charaId: string | undefined | null, _unused?: string | null): string {
+export function getCharacterFaceUrl(
+  charaId: string | undefined | null,
+  _unused?: string | null,
+): string {
   if (!charaId) {
     return PLACEHOLDERS.character;
   }
@@ -455,7 +501,9 @@ function resolveUniformCode(charaId: string | undefined | null): string | null {
   }
   // Strip suffixe de variante (_5000/_5100…) — seul le code de base a un uniforme.
   const baseCode = charaId.replace(/_\d{4}$/, "");
-  const uniformCode = baseCode.startsWith("c") ? `u${baseCode.slice(1)}` : baseCode;
+  const uniformCode = baseCode.startsWith("c")
+    ? `u${baseCode.slice(1)}`
+    : baseCode;
   return CHARACTER_UNIFORM_CODES.has(uniformCode) ? uniformCode : null;
 }
 
@@ -483,7 +531,9 @@ function uniformIconUrl(code: string): string {
  * équipe (`u<6>_<NN>_<NN>_l`, namespace DISJOINT résolu par le CRC de
  * `inagle_uniforms` → manifeste modèle) : ce chemin-là n'est pas encore câblé.
  */
-export function getCharacterUniformUrl(charaId: string | undefined | null): string {
+export function getCharacterUniformUrl(
+  charaId: string | undefined | null,
+): string {
   const uniformCode = resolveUniformCode(charaId);
   if (!uniformCode) {
     return "";
@@ -505,13 +555,20 @@ export function getCharacterUniformUrl(charaId: string | undefined | null): stri
  * ⚠ L'ancienne allowlist codée en dur ne contenait que **16** codes : elle avait été
  * établie sur un dump partiel (310 PNG) et privait 842 techniques de leur bandeau.
  */
-export function getSkillImageUrl(skillId: string | undefined | null, _unused?: string | null): string {
+export function getSkillImageUrl(
+  skillId: string | undefined | null,
+  _unused?: string | null,
+): string {
   if (!skillId) {
     return "";
   }
   // Le code peut porter un suffixe de variante (`who00060_or`, `whd00900_mm`) qui
   // existe parfois comme fichier à part entière : on tente le code tel quel d'abord.
-  return telopUrl(skillId) ?? telopUrl(skillId.replace(/_[a-z]+$/i, "")) ?? PLACEHOLDERS.skill;
+  return (
+    telopUrl(skillId) ??
+    telopUrl(skillId.replace(/_[a-z]+$/i, "")) ??
+    PLACEHOLDERS.skill
+  );
 }
 
 /**
@@ -546,7 +603,9 @@ export const getItemIconUrl = getItemImageUrl;
  * emblèmes seulement portent cette forme courte). Gate sur les noms réels : chaîne
  * vide si l'emblème n'existe pas, jamais une URL 404.
  */
-export function getEmblemImageUrl(emblemId: string | number | undefined | null): string {
+export function getEmblemImageUrl(
+  emblemId: string | number | undefined | null,
+): string {
   if (!emblemId && emblemId !== 0) {
     return "";
   }
@@ -572,7 +631,9 @@ export const getTeamEmblemUrl = getEmblemImageUrl;
  * Helpers pour les icônes UI (Genre, Élément, Rareté, Catégorie)
  */
 
-export function getGenderIconUrl(gender: number | string | undefined | null): string {
+export function getGenderIconUrl(
+  gender: number | string | undefined | null,
+): string {
   if (gender === undefined || gender === null) {
     return "";
   }
@@ -648,7 +709,9 @@ export function getSkillCategoryIconUrl(category: string | number): string {
   return `/move/${filename}.webp`;
 }
 
-export function getRarityIconUrl(rarity: string | number | undefined | null): string {
+export function getRarityIconUrl(
+  rarity: string | number | undefined | null,
+): string {
   if (rarity === undefined || rarity === null) {
     return "";
   }
@@ -741,7 +804,10 @@ function auraFamilyBase(num: string): string {
   return String(family).padStart(6, "0");
 }
 
-export function getAuraImageUrl(assetCode: string | undefined | null, _subType?: string): string {
+export function getAuraImageUrl(
+  assetCode: string | undefined | null,
+  _subType?: string,
+): string {
   if (!assetCode) {
     return "";
   }
@@ -790,7 +856,8 @@ export function getMiximaxIconUrl(iconCode: string | undefined | null): string {
   }
   // Normalise l'asset_code en retirant un éventuel suffixe de variante (`_h1`/`_b1`…).
   const key = iconCode.replace(/_[a-z0-9]+$/i, "");
-  const realIcon = MIXIMAX_ICON_MANIFEST[iconCode] ?? MIXIMAX_ICON_MANIFEST[key];
+  const realIcon =
+    MIXIMAX_ICON_MANIFEST[iconCode] ?? MIXIMAX_ICON_MANIFEST[key];
   if (!realIcon) {
     return "";
   }
@@ -865,7 +932,9 @@ export function getMiximaxImageUrl(
  * PAS de telop_waza valide pour un miximax `wmm` → on ne dérive plus rien (null) ;
  * l'icône miximax correcte vient du manifeste (`getMiximaxIconUrl`).
  */
-export function resolveAuraTelopUrl(assetCode: string | undefined | null): string | null {
+export function resolveAuraTelopUrl(
+  assetCode: string | undefined | null,
+): string | null {
   if (!assetCode) {
     return null;
   }
@@ -915,7 +984,11 @@ export function resolveAuraTelopUrl(assetCode: string | undefined | null): strin
  * étant lui aussi gaté côté UI, ce résolveur n'est plus appelé pour produire une frame
  * en prod, mais le garde-fou évite tout 404 si quelqu'un l'invoque directement.
  */
-export function getCharacterModel360Url(hash: string, frame: number, full: boolean = false): string {
+export function getCharacterModel360Url(
+  hash: string,
+  frame: number,
+  full: boolean = false,
+): string {
   if (!ZUKAN_3D_MIRROR_AVAILABLE) {
     return PLACEHOLDERS.character;
   }
@@ -940,7 +1013,9 @@ const MODEL_GLB_BASE = "https://cdn.rosegriffon.fr/model";
  * réellement exportés) : renvoie `null` si aucun modèle n'existe → le caller garde le
  * fallback image et ne monte pas le viewer 3D (évite tout 404).
  */
-export function getCharacterModelGlbUrl(code: string | undefined | null): string | null {
+export function getCharacterModelGlbUrl(
+  code: string | undefined | null,
+): string | null {
   if (!code) {
     return null;
   }
@@ -977,7 +1052,9 @@ const MODEL_FULL_VERSION = "5";
  * Fonctionne aussi pour les keshins (`k<N>`) et armures (`ka<N>`) mais sans gate
  * (le service renvoie 404 proprement si le code est inconnu).
  */
-export function getCharacterModelFullGlbUrl(code: string | undefined | null): string | null {
+export function getCharacterModelFullGlbUrl(
+  code: string | undefined | null,
+): string | null {
   if (!code) {
     return null;
   }
@@ -994,7 +1071,9 @@ export function getCharacterModelFullGlbUrl(code: string | undefined | null): st
  * le chemin de l'icône (`200_icon/10_icon_chr/aura_fs/k<NNNNNN>_l_…`) ou la colonne `data`.
  * Renvoie `null` si aucun `k<6 chiffres>` n'est trouvé.
  */
-export function extractKeshinModelCode(...sources: Array<string | null | undefined>): string | null {
+export function extractKeshinModelCode(
+  ...sources: Array<string | null | undefined>
+): string | null {
   for (const s of sources) {
     if (!s) continue;
     // `k` suivi d'exactement 6 chiffres, NON précédé d'un chiffre et NON suivi d'un
@@ -1010,7 +1089,9 @@ export function extractKeshinModelCode(...sources: Array<string | null | undefin
  * des modèles réellement servis (`KESHIN_MODEL_CODES`). Renvoie `null` si non servi
  * (keshin `.g4mg`-seul pas encore assemblable) → pas de bouton 3D mort.
  */
-export function getKeshinModelGlbUrl(code: string | undefined | null): string | null {
+export function getKeshinModelGlbUrl(
+  code: string | undefined | null,
+): string | null {
   if (!code) return null;
   const base = code.replace(/_\d+$/, "");
   if (!KESHIN_MODEL_CODES.has(base)) return null;
@@ -1021,7 +1102,9 @@ export function getKeshinModelGlbUrl(code: string | undefined | null): string | 
  * Résout l'URL du modèle 3D COMPLET d'une armure (`ka<NNNNNN>NN`), gardé sur le manifeste
  * des armures réellement servies (`ARMURE_MODEL_CODES`). Renvoie `null` si inconnue.
  */
-export function getArmureModelGlbUrl(code: string | undefined | null): string | null {
+export function getArmureModelGlbUrl(
+  code: string | undefined | null,
+): string | null {
   if (!code) return null;
   if (!ARMURE_MODEL_CODES.has(code)) return null;
   return `${MODEL_FULL_GLB_BASE}/${code}.glb?v=${MODEL_FULL_VERSION}`;
@@ -1048,21 +1131,30 @@ const MODEL_CHR_GLB_BASE = "https://cdn.rosegriffon.fr/model-chr";
 export type ChrModelSub = "waza" | "item" | "animal";
 
 const CHR_MODEL_CODES: Record<ChrModelSub, Set<string>> = {
-  animal: new Set((ASSET_MANIFEST.chrModel as { animal: readonly string[] }).animal),
+  animal: new Set(
+    (ASSET_MANIFEST.chrModel as { animal: readonly string[] }).animal,
+  ),
   item: new Set((ASSET_MANIFEST.chrModel as { item: readonly string[] }).item),
   waza: new Set((ASSET_MANIFEST.chrModel as { waza: readonly string[] }).waza),
 };
 
 /** Basename RÉEL du `.g4tx` de texture par code (relevé sur l'index CPK, cf. `getChrModelTextureUrl`). */
 const CHR_MODEL_TEXTURES =
-  (ASSET_MANIFEST.chrModel as { textures?: Record<string, Record<string, string>> }).textures ?? {};
+  (
+    ASSET_MANIFEST.chrModel as {
+      textures?: Record<string, Record<string, string>>;
+    }
+  ).textures ?? {};
 
 /**
  * Résout l'URL du modèle 3D générique d'un sous-domaine chr (`/model-chr/<sub>/<code>.glb`),
  * gardé sur le manifeste des codes réellement servis (gate anti-404). Renvoie `null` si le
  * code n'a pas de paire g4md+g4mg assemblable.
  */
-export function getChrModelGlbUrl(sub: ChrModelSub, code: string | undefined | null): string | null {
+export function getChrModelGlbUrl(
+  sub: ChrModelSub,
+  code: string | undefined | null,
+): string | null {
   if (!code) return null;
   if (!CHR_MODEL_CODES[sub]?.has(code)) return null;
   return `${MODEL_CHR_GLB_BASE}/${sub}/${code}.glb?v=${MODEL_FULL_VERSION}`;
@@ -1085,7 +1177,10 @@ export function listServedChrModelCodes(sub: ChrModelSub): string[] {
  *
  * Variantes redimensionnées via `?w=&format=webp` (cdn-variants).
  */
-export function getChrModelTextureUrl(sub: ChrModelSub, code: string | undefined | null): string | null {
+export function getChrModelTextureUrl(
+  sub: ChrModelSub,
+  code: string | undefined | null,
+): string | null {
   if (!code || !CHR_MODEL_CODES[sub]?.has(code)) return null;
   const base = CHR_MODEL_TEXTURES[sub]?.[code];
   if (!base) return null;
@@ -1107,7 +1202,11 @@ export const PLACEHOLDERS = {
  * Image Optimization Helper
  * Uses Next.js optimization endpoint
  */
-export function getOptimizedImageUrl(url: string | null | undefined, width = 640, quality = 80): string {
+export function getOptimizedImageUrl(
+  url: string | null | undefined,
+  width = 640,
+  quality = 80,
+): string {
   if (!url) {
     return "";
   }

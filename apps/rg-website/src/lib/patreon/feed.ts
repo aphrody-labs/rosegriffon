@@ -51,7 +51,9 @@ export async function getPatreonFeedForViewer(opts?: {
 
   let query = db
     .from("patreon_post_events")
-    .select("patreon_post_id, title, content_excerpt, url, published_at, is_paid, is_public")
+    .select(
+      "patreon_post_id, title, content_excerpt, url, published_at, is_paid, is_public",
+    )
     .order("published_at", { ascending: false, nullsFirst: false })
     .limit(limit);
 
@@ -64,17 +66,23 @@ export async function getPatreonFeedForViewer(opts?: {
     return { access, posts: [] };
   }
 
-  const postIds = rows.map((r: { patreon_post_id: string }) => r.patreon_post_id);
+  const postIds = rows.map(
+    (r: { patreon_post_id: string }) => r.patreon_post_id,
+  );
   const { data: imageRows } = await db
     .from("patreon_post_images")
     .select("patreon_post_id, position, storage_path, content_type")
     .in("patreon_post_id", postIds)
     .order("position", { ascending: true });
 
-  const allPaths = (imageRows ?? []).map((r: { storage_path: string }) => r.storage_path);
+  const allPaths = (imageRows ?? []).map(
+    (r: { storage_path: string }) => r.storage_path,
+  );
   const signedUrlMap = new Map<string, string>();
   if (allPaths.length > 0) {
-    const { data: signed } = await storage.from("patreon").createSignedUrls(allPaths, SIGNED_URL_TTL_SECONDS);
+    const { data: signed } = await storage
+      .from("patreon")
+      .createSignedUrls(allPaths, SIGNED_URL_TTL_SECONDS);
     for (const entry of signed ?? []) {
       if (entry.path && entry.signedUrl) {
         signedUrlMap.set(entry.path, entry.signedUrl);

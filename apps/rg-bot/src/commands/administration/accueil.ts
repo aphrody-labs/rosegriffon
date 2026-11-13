@@ -21,10 +21,22 @@ import {
 import { logAdminAction } from "../../lib/audit";
 import { renderCarteAccueil } from "../../lib/canvas/communaute";
 import { verifierAttributionAutomatique } from "../../lib/hierarchie";
-import { LIEUX_BIENVENUE, fusionnerReglages } from "../../lib/reglages-communaute";
+import {
+  LIEUX_BIENVENUE,
+  fusionnerReglages,
+} from "../../lib/reglages-communaute";
 import { enregistrerReglages, reglagesDe } from "../../services/communaute";
 import { remplirGabarit } from "../../lib/accueil-gabarit";
-import { attention, creerEmbed, echec, fiche, pied, piedDeCommande, repondre, succes } from "../../lib/ui";
+import {
+  attention,
+  creerEmbed,
+  echec,
+  fiche,
+  pied,
+  piedDeCommande,
+  repondre,
+  succes,
+} from "../../lib/ui";
 import { differerEnPrive, exigerDroits, messagePanne } from "../staff/garde";
 import "./racine-gestion";
 
@@ -36,7 +48,10 @@ import "./racine-gestion";
 })
 @SlashGroup("accueil", "gestion")
 export class GestionAccueilCommand {
-  @Slash({ description: "La configuration actuelle de l'accueil", name: "reglages" })
+  @Slash({
+    description: "La configuration actuelle de l'accueil",
+    name: "reglages",
+  })
   async voirReglages(interaction: ChatInputCommandInteraction) {
     await differerEnPrive(interaction);
     if (!(await exigerDroits(interaction))) {
@@ -44,37 +59,59 @@ export class GestionAccueilCommand {
     }
     const guildId = interaction.guildId;
     if (!guildId) {
-      await repondre(interaction, echec("Hors serveur", "L'accueil se règle sur un serveur."));
+      await repondre(
+        interaction,
+        echec("Hors serveur", "L'accueil se règle sur un serveur."),
+      );
       return;
     }
     try {
       const reglages = await reglagesDe(guildId);
       const carte = fiche({ icone: "membre", titre: "Réglages de l'accueil" });
       carte
-        .champ("Actif", reglages.accueil.actif ? "oui" : "non", { enLigne: true })
+        .champ("Actif", reglages.accueil.actif ? "oui" : "non", {
+          enLigne: true,
+        })
         .champ("Lieu", reglages.accueil.lieu, { enLigne: true })
-        .champ("Salon", reglages.accueil.salon ? `<#${reglages.accueil.salon}>` : "—", {
+        .champ(
+          "Salon",
+          reglages.accueil.salon ? `<#${reglages.accueil.salon}>` : "—",
+          {
+            enLigne: true,
+          },
+        )
+        .champ("Carte image", reglages.accueil.carte ? "jointe" : "non", {
           enLigne: true,
         })
-        .champ("Carte image", reglages.accueil.carte ? "jointe" : "non", { enLigne: true })
-        .champ("Rôle d'arrivée", reglages.accueil.roleArrivee ? `<@&${reglages.accueil.roleArrivee}>` : "aucun", {
-          enLigne: true,
-        })
+        .champ(
+          "Rôle d'arrivée",
+          reglages.accueil.roleArrivee
+            ? `<@&${reglages.accueil.roleArrivee}>`
+            : "aucun",
+          {
+            enLigne: true,
+          },
+        )
         .champ("Texte", reglages.accueil.texte ?? "*(texte par défaut du bot)*")
         .champ(
           "Jetons disponibles",
           "`{membre}` la mention · `{serveur}` le nom du serveur · `{compte}` le nombre de membres",
         );
-      await interaction.editReply({ embeds: [piedDeCommande(carte.embed, interaction)] });
+      await interaction.editReply({
+        embeds: [piedDeCommande(carte.embed, interaction)],
+      });
     } catch (err) {
-      await repondre(interaction, echec("Réglages illisibles", messagePanne(err)));
+      await repondre(
+        interaction,
+        echec("Réglages illisibles", messagePanne(err)),
+      );
     }
   }
 
   @Slash({ description: "Où souhaiter la bienvenue", name: "lieu" })
   async lieu(
     @SlashChoice(
-      ...LIEUX_BIENVENUE.map(valeur => ({
+      ...LIEUX_BIENVENUE.map((valeur) => ({
         name:
           valeur === "salon"
             ? "Dans un salon"
@@ -115,13 +152,19 @@ export class GestionAccueilCommand {
     }
     const guildId = interaction.guildId;
     if (!guildId) {
-      await repondre(interaction, echec("Hors serveur", "L'accueil se règle sur un serveur."));
+      await repondre(
+        interaction,
+        echec("Hors serveur", "L'accueil se règle sur un serveur."),
+      );
       return;
     }
     if (lieu === "salon" && !salon) {
       await repondre(
         interaction,
-        echec("Salon manquant", "Le lieu « dans un salon » a besoin d'un salon. Sans lui, rien ne serait publié."),
+        echec(
+          "Salon manquant",
+          "Le lieu « dans un salon » a besoin d'un salon. Sans lui, rien ne serait publié.",
+        ),
       );
       return;
     }
@@ -161,7 +204,8 @@ export class GestionAccueilCommand {
   @Slash({ description: "Le texte du message d'accueil", name: "texte" })
   async texte(
     @SlashOption({
-      description: "Utilise {membre}, {serveur}, {compte}. Laisse vide pour le texte par défaut.",
+      description:
+        "Utilise {membre}, {serveur}, {compte}. Laisse vide pour le texte par défaut.",
       maxLength: 1_000,
       name: "texte",
       required: false,
@@ -177,7 +221,10 @@ export class GestionAccueilCommand {
     }
     const guildId = interaction.guildId;
     if (!guildId) {
-      await repondre(interaction, echec("Hors serveur", "L'accueil se règle sur un serveur."));
+      await repondre(
+        interaction,
+        echec("Hors serveur", "L'accueil se règle sur un serveur."),
+      );
       return;
     }
     try {
@@ -225,7 +272,10 @@ export class GestionAccueilCommand {
     }
     const guildId = interaction.guildId;
     if (!guildId) {
-      await repondre(interaction, echec("Hors serveur", "L'accueil se règle sur un serveur."));
+      await repondre(
+        interaction,
+        echec("Hors serveur", "L'accueil se règle sur un serveur."),
+      );
       return;
     }
 
@@ -299,14 +349,20 @@ export class GestionAccueilCommand {
     }
     const guildId = interaction.guildId;
     if (!guildId || !interaction.guild) {
-      await repondre(interaction, echec("Hors serveur", "L'aperçu s'exécute sur un serveur."));
+      await repondre(
+        interaction,
+        echec("Hors serveur", "L'aperçu s'exécute sur un serveur."),
+      );
       return;
     }
     try {
       const reglages = await reglagesDe(guildId);
       const compte = interaction.guild.memberCount;
       const membre = interaction.member;
-      const pseudo = membre && "displayName" in membre ? membre.displayName : interaction.user.username;
+      const pseudo =
+        membre && "displayName" in membre
+          ? membre.displayName
+          : interaction.user.username;
 
       const texte = reglages.accueil.texte
         ? remplirGabarit(reglages.accueil.texte, {
@@ -327,7 +383,10 @@ export class GestionAccueilCommand {
       const fichiers: AttachmentBuilder[] = [];
       if (reglages.accueil.carte) {
         const image = await renderCarteAccueil({
-          avatarUrl: interaction.user.displayAvatarURL({ extension: "png", size: 256 }),
+          avatarUrl: interaction.user.displayAvatarURL({
+            extension: "png",
+            size: 256,
+          }),
           message: reglages.accueil.texte
             ? remplirGabarit(reglages.accueil.texte, {
                 compte,
@@ -339,7 +398,9 @@ export class GestionAccueilCommand {
           rang: compte,
           serveur: interaction.guild.name,
         });
-        fichiers.push(new AttachmentBuilder(image, { name: "apercu-bienvenue.png" }));
+        fichiers.push(
+          new AttachmentBuilder(image, { name: "apercu-bienvenue.png" }),
+        );
       }
 
       const avertissement =
@@ -355,7 +416,10 @@ export class GestionAccueilCommand {
         files: fichiers,
       });
     } catch (err) {
-      await repondre(interaction, echec("Aperçu impossible", messagePanne(err)));
+      await repondre(
+        interaction,
+        echec("Aperçu impossible", messagePanne(err)),
+      );
     }
   }
 }

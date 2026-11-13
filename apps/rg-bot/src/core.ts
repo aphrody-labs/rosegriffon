@@ -26,14 +26,20 @@ import packageJson from "../package.json" with { type: "json" };
 const argv = process.argv.slice(2);
 
 if (argv.includes("--help") || argv.includes("-h")) {
-  console.log("rg-core — Rose Griffon VPS service (Discord gateway, Colyseus ranked, model serve, cron)\n");
+  console.log(
+    "rg-core — Rose Griffon VPS service (Discord gateway, Colyseus ranked, model serve, cron)\n",
+  );
   console.log("Usage: rg-core [bot] [--help] [--version]\n");
   console.log("  (aucun)    service complet sur RG_CORE_PORT (défaut 8810)");
-  console.log("  bot        seule la passerelle Discord du profil RG_PROFIL_BOT");
+  console.log(
+    "  bot        seule la passerelle Discord du profil RG_PROFIL_BOT",
+  );
   process.exit(0);
 }
 if (argv.includes("--version") || argv.includes("-v")) {
-  console.log(`rg-core v${packageJson.version} (Bun ${Bun.version}+${Bun.revision.slice(0, 9)})`);
+  console.log(
+    `rg-core v${packageJson.version} (Bun ${Bun.version}+${Bun.revision.slice(0, 9)})`,
+  );
   process.exit(0);
 }
 
@@ -53,7 +59,11 @@ interface Superviseur {
 }
 
 /** Relance un enfant qui meurt, avec un délai exponentiel (1 s → 60 s) remis à zéro après 60 s de vie. */
-function superviser(nom: string, cmd: string[], options: { env?: Record<string, string | undefined>; cwd?: string }) {
+function superviser(
+  nom: string,
+  cmd: string[],
+  options: { env?: Record<string, string | undefined>; cwd?: string },
+) {
   const etat: EtatEnfant = {
     nom,
     pid: null,
@@ -108,13 +118,24 @@ function superviser(nom: string, cmd: string[], options: { env?: Record<string, 
 
 /** Commande qui relance ce même programme (binaire compilé ou source exécutée par Bun). */
 function commandeSoiMeme(...args: string[]): string[] {
-  const compile = import.meta.path.startsWith("/$bunfs/") || /^[A-Z]:\\~BUN\\/i.test(import.meta.path);
-  return compile ? [process.execPath, ...args] : [process.execPath, Bun.main, ...args];
+  const compile =
+    import.meta.path.startsWith("/$bunfs/") ||
+    /^[A-Z]:\\~BUN\\/i.test(import.meta.path);
+  return compile
+    ? [process.execPath, ...args]
+    : [process.execPath, Bun.main, ...args];
 }
 
 // ─── Relais HTTP ────────────────────────────────────────────────────────────
 
-const ENTETES_SAUT = ["connection", "keep-alive", "proxy-connection", "transfer-encoding", "upgrade", "host"];
+const ENTETES_SAUT = [
+  "connection",
+  "keep-alive",
+  "proxy-connection",
+  "transfer-encoding",
+  "upgrade",
+  "host",
+];
 
 const dernierEchecRelais = new Map<string, number>();
 
@@ -145,7 +166,10 @@ async function relayer(requete: Request, cible: string): Promise<Response> {
     const maintenant = Date.now();
     if (maintenant - (dernierEchecRelais.get(origine) ?? 0) > 300_000) {
       dernierEchecRelais.set(origine, maintenant);
-      console.error(`[rg-core] relais vers ${origine} en échec :`, err instanceof Error ? err.message : err);
+      console.error(
+        `[rg-core] relais vers ${origine} en échec :`,
+        err instanceof Error ? err.message : err,
+      );
     }
     return Response.json({ error: "upstream_unavailable" }, { status: 502 });
   }
@@ -155,7 +179,7 @@ function hotes(variable: string | undefined, defaut: string): Set<string> {
   return new Set(
     (variable ?? defaut)
       .split(",")
-      .map(h => h.trim().toLowerCase())
+      .map((h) => h.trim().toLowerCase())
       .filter(Boolean),
   );
 }
@@ -170,15 +194,24 @@ async function demarrerCoeur(): Promise<void> {
 
   // nie-model-serve : binaire Rust autonome (pas d'entrée FFI), relayé sur la boucle locale.
   const portModeles = Number(Bun.env.NIE_MODEL_SERVE_PORT ?? 8792);
-  const binaireModeles = Bun.env.NIE_MODEL_SERVE_BIN ?? Bun.which("aphrody-nie-model-serve");
+  const binaireModeles =
+    Bun.env.NIE_MODEL_SERVE_BIN ?? Bun.which("aphrody-nie-model-serve");
   const jeuIevr = Bun.env.NIE_GAME_DIR;
   let modeles: Superviseur | null = null;
   // `NIE_MODEL_SERVE_URL` : serveur de modèles externe (autre hôte ou service), relayé sans enfant local.
-  if (!Bun.env.NIE_MODEL_SERVE_URL && Bun.env.RG_CORE_MODELES !== "0" && binaireModeles && jeuIevr) {
+  if (
+    !Bun.env.NIE_MODEL_SERVE_URL &&
+    Bun.env.RG_CORE_MODELES !== "0" &&
+    binaireModeles &&
+    jeuIevr
+  ) {
     const args = ["--game-dir", jeuIevr, "--port", String(portModeles)];
-    if (Bun.env.NIE_MODEL_CACHE_DIR) args.push("--cache-dir", Bun.env.NIE_MODEL_CACHE_DIR);
+    if (Bun.env.NIE_MODEL_CACHE_DIR)
+      args.push("--cache-dir", Bun.env.NIE_MODEL_CACHE_DIR);
     args.push("--threads", Bun.env.NIE_MODEL_SERVE_THREADS ?? "8");
-    args.push(...(Bun.env.NIE_MODEL_SERVE_ARGS ?? "").split(/\s+/).filter(Boolean));
+    args.push(
+      ...(Bun.env.NIE_MODEL_SERVE_ARGS ?? "").split(/\s+/).filter(Boolean),
+    );
     modeles = superviser("nie-model-serve", [binaireModeles, ...args], {
       cwd: Bun.env.NIE_MODEL_SERVE_CWD,
     });
@@ -194,7 +227,11 @@ async function demarrerCoeur(): Promise<void> {
   // Passerelle Azalée : même binaire, autre profil, autre processus.
   const { PROFILS_BOT } = await import("@rosegriffon/types/bot");
   let azalee: Superviseur | null = null;
-  if (Bun.env.RG_CORE_AZALEE !== "0" && Bun.env.AZALEE_DISCORD_BOT_TOKEN && Bun.env.RG_PROFIL_BOT !== "azalee") {
+  if (
+    Bun.env.RG_CORE_AZALEE !== "0" &&
+    Bun.env.AZALEE_DISCORD_BOT_TOKEN &&
+    Bun.env.RG_PROFIL_BOT !== "azalee"
+  ) {
     azalee = superviser("bot-azalee", commandeSoiMeme("bot"), {
       env: { RG_PROFIL_BOT: "azalee" },
     });
@@ -223,9 +260,14 @@ async function demarrerCoeur(): Promise<void> {
 
   const { app } = await import("./api/server");
   const { clientActif } = await import("./lib/client-actif");
-  const hotesModeles = hotes(Bun.env.RG_CORE_MODEL_HOSTS, "cdn.rosegriffon.fr,nie.aphrody.app");
+  const hotesModeles = hotes(
+    Bun.env.RG_CORE_MODEL_HOSTS,
+    "cdn.rosegriffon.fr,nie.aphrody.app",
+  );
   const hotesBot = hotes(Bun.env.RG_CORE_BOT_HOSTS, "bot.rosegriffon.fr");
-  const origineModeles = (Bun.env.NIE_MODEL_SERVE_URL ?? `http://127.0.0.1:${portModeles}`).replace(/\/+$/, "");
+  const origineModeles = (
+    Bun.env.NIE_MODEL_SERVE_URL ?? `http://127.0.0.1:${portModeles}`
+  ).replace(/\/+$/, "");
   let planifiees: string[] = [];
 
   const sante = () => ({
@@ -239,31 +281,40 @@ async function demarrerCoeur(): Promise<void> {
       profil: Bun.env.RG_PROFIL_BOT,
       pret: clientActif()?.isReady() ?? false,
     },
-    enfants: enfants.map(e => e.etat),
+    enfants: enfants.map((e) => e.etat),
     cron: planifiees,
   });
 
-  const { demarrerRanked, definirRelaisPreuveRanked, versApiUnifieeDirecte } = await import("./api/ranked/main");
+  const { demarrerRanked, definirRelaisPreuveRanked, versApiUnifieeDirecte } =
+    await import("./api/ranked/main");
   await demarrerRanked({
     port,
     hostname,
-    api: requete => app.handle(requete),
+    api: (requete) => app.handle(requete),
     intercepter(requete, serveur) {
       const url = new URL(requete.url);
       // `?attendre=1` garde la requête ouverte jusqu'à la fin de la tâche (minutes, voire heures) :
       // sans cela, l'`idleTimeout` de Bun.serve (10 s) coupait la connexion (ECONNRESET) alors
       // que la tâche continuait. Délai désactivé pour CETTE requête seulement.
-      if (url.pathname.startsWith("/v1/cron/") && url.searchParams.get("attendre") === "1") {
+      if (
+        url.pathname.startsWith("/v1/cron/") &&
+        url.searchParams.get("attendre") === "1"
+      ) {
         serveur.timeout(requete, 0);
       }
-      const hote = (requete.headers.get("host") ?? url.host).split(":")[0]!.toLowerCase();
+      const hote = (requete.headers.get("host") ?? url.host)
+        .split(":")[0]!
+        .toLowerCase();
       if (hotesModeles.has(hote)) {
         return url.pathname === "/health"
           ? relayer(requete, `${origineModeles}/health`)
           : relayer(requete, `${origineModeles}${url.pathname}${url.search}`);
       }
       if (url.pathname.startsWith("/models/")) {
-        return relayer(requete, `${origineModeles}${url.pathname.slice("/models".length)}${url.search}`);
+        return relayer(
+          requete,
+          `${origineModeles}${url.pathname.slice("/models".length)}${url.search}`,
+        );
       }
       if (url.pathname === "/health") return Response.json(sante());
       if (url.pathname.startsWith("/v1/")) return app.handle(requete);
@@ -275,8 +326,12 @@ async function demarrerCoeur(): Promise<void> {
         // bot.rosegriffon.fr/<profil>/… → serveur d'administration loopback de ce profil.
         const [, profil = "", ...reste] = url.pathname.split("/");
         const cible = PROFILS_BOT[profil as keyof typeof PROFILS_BOT];
-        if (!cible) return Response.json({ error: "profil inconnu" }, { status: 404 });
-        return relayer(requete, `http://127.0.0.1:${cible.portAdmin}/${reste.join("/")}${url.search}`);
+        if (!cible)
+          return Response.json({ error: "profil inconnu" }, { status: 404 });
+        return relayer(
+          requete,
+          `http://127.0.0.1:${cible.portAdmin}/${reste.join("/")}${url.search}`,
+        );
       }
       return undefined;
     },
@@ -287,7 +342,8 @@ async function demarrerCoeur(): Promise<void> {
   // Preuves de litige ranked → salon des Tournament Organizers d'Achilléa, par l'API REST
   // et le jeton de l'application Achilléa. Elles passaient par la passerelle Rose Griffon
   // et une variable jamais posée : en production, aucune preuve n'était relayée.
-  const { publierSalonAchillea, salonPreuvesRanked } = await import("./lib/achillea-discord");
+  const { publierSalonAchillea, salonPreuvesRanked } =
+    await import("./lib/achillea-discord");
   definirRelaisPreuveRanked(async (lobbyId, userId, url) => {
     const envoi = await publierSalonAchillea(salonPreuvesRanked(), {
       embeds: [
@@ -301,7 +357,10 @@ async function demarrerCoeur(): Promise<void> {
         },
       ],
     });
-    if (!envoi.ok) throw new Error(`salon des preuves refusé (${envoi.statut ?? "réseau"}) : ${envoi.motif}`);
+    if (!envoi.ok)
+      throw new Error(
+        `salon des preuves refusé (${envoi.statut ?? "réseau"}) : ${envoi.motif}`,
+      );
   });
 
   // Passerelle du profil courant, en dernier : `index.ts` attend `login()`.
@@ -327,10 +386,16 @@ async function brancherPasserelle(): Promise<void> {
   const { attendreClientActif } = await import("./lib/client-actif");
   const client = await attendreClientActif();
 
-  if (Bun.env.RG_PROFIL_BOT === "rg" && Bun.env.RG_CORE_VEILLE_MESSAGES !== "0") {
-    const { brancherVeilleMessagesTempsReel } = await import("@rosegriffon/cron");
+  if (
+    Bun.env.RG_PROFIL_BOT === "rg" &&
+    Bun.env.RG_CORE_VEILLE_MESSAGES !== "0"
+  ) {
+    const { brancherVeilleMessagesTempsReel } =
+      await import("@rosegriffon/cron");
     // `ClientPasserelle` est le sous-ensemble structurel `on`/`off` que discord.js surcharge par évènement.
-    await brancherVeilleMessagesTempsReel(client as unknown as ClientPasserelle);
+    await brancherVeilleMessagesTempsReel(
+      client as unknown as ClientPasserelle,
+    );
   }
 }
 
@@ -341,34 +406,45 @@ async function brancherPasserelle(): Promise<void> {
  */
 async function planifierTaches(): Promise<string[]> {
   if (Bun.env.RG_CORE_CRON === "0") return [];
-  const { REGISTRE_TACHES, PLANIFICATIONS, lancerTache } = await import("@rosegriffon/cron");
+  const { REGISTRE_TACHES, PLANIFICATIONS, lancerTache } =
+    await import("@rosegriffon/cron");
   const { signalerCron } = await import("./lib/cron-ipc");
   const exclues = hotes(Bun.env.RG_CORE_CRON_EXCLURE, "warm");
   const planifiees: string[] = [];
   for (const nom of Object.keys(REGISTRE_TACHES)) {
-    const expression = (PLANIFICATIONS as Record<string, string | undefined>)[nom];
+    const expression = (PLANIFICATIONS as Record<string, string | undefined>)[
+      nom
+    ];
     if (!expression || expression === "manuel" || exclues.has(nom)) continue;
     try {
       Bun.cron(expression, async () => {
-        const resultat = await lancerTache(nom, { origine: "planifie" }).catch(err => ({
-          nom,
-          success: false,
-          error: err instanceof Error ? err.message : String(err),
-        }));
+        const resultat = await lancerTache(nom, { origine: "planifie" }).catch(
+          (err) => ({
+            nom,
+            success: false,
+            error: err instanceof Error ? err.message : String(err),
+          }),
+        );
         signalerCron({
           event: "task.done",
           nom,
           success: resultat.success,
           error: resultat.error,
         });
-        if (resultat.success && nom.startsWith("x")) signalerCron({ event: "tweets.signal", nom });
+        if (resultat.success && nom.startsWith("x"))
+          signalerCron({ event: "tweets.signal", nom });
       });
       planifiees.push(`${nom} ${expression}`);
     } catch (err) {
-      console.error(`[rg-core] planification « ${nom} » (${expression}) refusée :`, err);
+      console.error(
+        `[rg-core] planification « ${nom} » (${expression}) refusée :`,
+        err,
+      );
     }
   }
-  console.info(`[rg-core] ${planifiees.length} tâche(s) planifiée(s) en processus`);
+  console.info(
+    `[rg-core] ${planifiees.length} tâche(s) planifiée(s) en processus`,
+  );
   return planifiees;
 }
 

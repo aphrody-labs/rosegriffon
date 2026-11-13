@@ -25,15 +25,24 @@ export const authRequired = { message: "Authentication required" as const };
 
 export async function requireSession(headers: SessionHeaders) {
   const session = await resolveAchilleaSession(headers);
-  if (!session) return { error: status(401, authRequired), session: null } as const;
+  if (!session)
+    return { error: status(401, authRequired), session: null } as const;
   return { error: null, session } as const;
 }
 
 /** Même décision que la garde staff du back-office (`staff.ts`), sous la forme attendue par ces routes. */
-export async function requireRole(db: Kysely<Database>, headers: SessionHeaders, minimumRole: number) {
+export async function requireRole(
+  db: Kysely<Database>,
+  headers: SessionHeaders,
+  minimumRole: number,
+) {
   const garde = await staff(db, headers, minimumRole);
   if (garde.error) return { error: garde.error, session: null } as const;
-  return { error: null, session: garde.session, role: garde.actor.role } as const;
+  return {
+    error: null,
+    session: garde.session,
+    role: garde.actor.role,
+  } as const;
 }
 
 /**
@@ -41,7 +50,9 @@ export async function requireRole(db: Kysely<Database>, headers: SessionHeaders,
  * `RANKED_INTERNAL_SECRET`. Sans secret configuré, tout appel est refusé —
  * derrière le relais `/api`, l'adresse loopback n'est pas une preuve d'origine.
  */
-export function isInternalCall(headers: Record<string, string | undefined>): boolean {
+export function isInternalCall(
+  headers: Record<string, string | undefined>,
+): boolean {
   const expected = process.env.RANKED_INTERNAL_SECRET ?? "";
   const received = headers["x-internal-secret"] ?? "";
   return expected.length > 0 && safeEqual(expected, received);

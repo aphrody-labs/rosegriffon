@@ -27,7 +27,9 @@ interface TeamMemberRow {
  * @param teamId - ID of the team to fetch (e.g., "loreteam", "productionteam")
  * @returns Array of team members with their metadata and image URLs
  */
-export default async function getTeamMembers(teamId: string): Promise<TeamMemberResponse[]> {
+export default async function getTeamMembers(
+  teamId: string,
+): Promise<TeamMemberResponse[]> {
   try {
     const pool = getPgPool();
 
@@ -44,7 +46,7 @@ export default async function getTeamMembers(teamId: string): Promise<TeamMember
     // Transform database records to TeamMemberResponse format
     const supabaseUrl = getEnv("NEXT_PUBLIC_SUPABASE_URL");
 
-    return (rows || []).map(member => {
+    return (rows || []).map((member) => {
       // Fix image URLs that contain {url} placeholder or double https://
       let imageUrl = member.image_url || "";
 

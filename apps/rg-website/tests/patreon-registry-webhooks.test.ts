@@ -1,6 +1,10 @@
 import { describe, expect, test } from "bun:test";
 
-import { PatreonWebhookTrigger, parseWebhookRequest, verify } from "@rosegriffon/patreon-bun";
+import {
+  PatreonWebhookTrigger,
+  parseWebhookRequest,
+  verify,
+} from "@rosegriffon/patreon-bun";
 
 describe("webhook utilities", () => {
   describe("webhook verify", () => {
@@ -17,10 +21,16 @@ describe("webhook utilities", () => {
     test("verify signature", () => {
       expect(verify("secret", null, "testing")).toEqual(false);
       expect(verify("secret", "invalid", "testing")).toEqual(false);
-      expect(verify("secret", "A964F51F0AE9C643ACA91BFBC66F6D78", "testing")).toEqual(false);
-      expect(verify("secret", "a964f51f0ae9c643aca91bfbc66f6d80", "testing")).toEqual(false);
+      expect(
+        verify("secret", "A964F51F0AE9C643ACA91BFBC66F6D78", "testing"),
+      ).toEqual(false);
+      expect(
+        verify("secret", "a964f51f0ae9c643aca91bfbc66f6d80", "testing"),
+      ).toEqual(false);
 
-      expect(verify("secret", "a964f51f0ae9c643aca91bfbc66f6d78", "testing")).toEqual(true);
+      expect(
+        verify("secret", "a964f51f0ae9c643aca91bfbc66f6d78", "testing"),
+      ).toEqual(true);
     });
 
     test("rejects an empty secret", () => {
@@ -40,7 +50,11 @@ describe("webhook utilities", () => {
     });
 
     test("parse request", async () => {
-      const result = await parseWebhookRequest<PatreonWebhookTrigger.PostPublished>(validRequest, "secret");
+      const result =
+        await parseWebhookRequest<PatreonWebhookTrigger.PostPublished>(
+          validRequest,
+          "secret",
+        );
       expect(result.verified).toEqual(true);
       expect(result.event).toEqual(PatreonWebhookTrigger.PostPublished);
       expect(result.payload).toBeDefined();
@@ -72,7 +86,7 @@ describe("webhook utilities", () => {
               },
             }),
             "secret",
-          ).catch(err => {
+          ).catch((err) => {
             console.error(err.message);
             return err.message;
           });

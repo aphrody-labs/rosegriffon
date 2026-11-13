@@ -47,7 +47,8 @@ export default async function GenericTablePage({
 
   // Fetch all columns via one row
   const { data: sample } = await client.from(table).select("*").limit(1);
-  const allColumns = sample && sample.length > 0 ? Object.keys(sample[0]) : ["id"];
+  const allColumns =
+    sample && sample.length > 0 ? Object.keys(sample[0]) : ["id"];
 
   // Fetch Data with sort
   const { data: rows, count } = await client

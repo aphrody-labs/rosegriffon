@@ -32,15 +32,21 @@ export const UI_MESSAGES: Readonly<Record<"fr" | "en" | "ja", Messages>> = {
     "account.patreon.status.unlinked": "未連携",
     "account.patreon.action.disconnect": "連携を解除",
     "account.patreon.action.link": "Patreonと連携",
-    "account.patreon.confirmDisconnect.title": "Patreonとの連携を解除しますか？",
+    "account.patreon.confirmDisconnect.title":
+      "Patreonとの連携を解除しますか？",
     "common.action.cancel": "キャンセル",
   },
 };
 
-const catalogues: ReadonlyMap<string, Messages> = new Map(Object.entries(UI_MESSAGES));
+const catalogues: ReadonlyMap<string, Messages> = new Map(
+  Object.entries(UI_MESSAGES),
+);
 
 /** Resolve semantic UI messages with the same BCP-47 negotiation and French fallback as the host. */
-export function uiMessage(locale: string | null | undefined, key: UiMessageKey): string {
+export function uiMessage(
+  locale: string | null | undefined,
+  key: UiMessageKey,
+): string {
   for (const tag of buildFallbackChain(locale)) {
     const message = catalogues.get(tag)?.[key];
     if (message !== undefined) return message;

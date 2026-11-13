@@ -12,7 +12,13 @@ workspace = true
 
 [features]
 default = ["host"]
-host = ["dep:rusqlite", "dep:yolo-re-core", "yolo-re-core/nie", "dep:aphrody-nie-trace", "aphrody-nie-trace/host"]
+host = [
+  "dep:rusqlite",
+  "dep:yolo-re-core",
+  "yolo-re-core/nie",
+  "dep:aphrody-nie-trace",
+  "aphrody-nie-trace/host",
+]
 
 [dependencies]
 anyhow = { workspace = true }

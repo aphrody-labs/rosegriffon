@@ -49,8 +49,18 @@ import {
 import { logAdminAction } from "../../lib/audit";
 import { sql } from "../../lib/db";
 import { rgEmbed } from "../../lib/embeds";
-import { borner, echapperMarkdown, formaterDuree, horodatageRelatif } from "../staff/format";
-import { differerEnPrive, exigerDroits, messagePanne, type RgAdmin } from "../staff/garde";
+import {
+  borner,
+  echapperMarkdown,
+  formaterDuree,
+  horodatageRelatif,
+} from "../staff/format";
+import {
+  differerEnPrive,
+  exigerDroits,
+  messagePanne,
+  type RgAdmin,
+} from "../staff/garde";
 import { demanderConfirmation } from "./utilisateur";
 import {
   EQUIPES_RG,
@@ -78,7 +88,7 @@ import { echec, piedTexte, refus as accesRefuse, repondre } from "../../lib/ui";
 const SOURCE_BOT = "discord-bot";
 
 /** Les dix équipes, nommées comme la base les nomme. */
-const CHOIX_EQUIPE = EQUIPES_RG.map(equipe => ({
+const CHOIX_EQUIPE = EQUIPES_RG.map((equipe) => ({
   name: libelleEquipeRg(equipe.valeur),
   value: equipe.valeur,
 }));
@@ -114,7 +124,9 @@ async function lireMembre(id: string): Promise<MembreEquipe | null> {
  * Résout l'option `membre` : un uuid, éventuellement choisi dans
  * l'autocomplétion. Rend le membre, ou la phrase à afficher.
  */
-async function resoudreMembre(saisie: string): Promise<ResultatValidation<MembreEquipe>> {
+async function resoudreMembre(
+  saisie: string,
+): Promise<ResultatValidation<MembreEquipe>> {
   const propre = saisie.trim();
   if (!estUuid(propre)) {
     return {
@@ -143,12 +155,20 @@ async function resoudreMembre(saisie: string): Promise<ResultatValidation<Membre
  * à 100 caractères : au-delà, l'autocomplétion entière est refusée et le champ
  * reste désespérément vide.
  */
-async function proposerMembres(interaction: AutocompleteInteraction): Promise<void> {
+async function proposerMembres(
+  interaction: AutocompleteInteraction,
+): Promise<void> {
   const saisie = String(interaction.options.getFocused() ?? "").trim();
   const motif = `%${saisie}%`;
   try {
     const lignes = await sql<
-      Array<{ id: string; name: string; role: string; team_id: string; is_active: boolean | null }>
+      Array<{
+        id: string;
+        name: string;
+        role: string;
+        team_id: string;
+        is_active: boolean | null;
+      }>
     >`
 			SELECT id, name, role, team_id, is_active
 			FROM team_members
@@ -157,7 +177,7 @@ async function proposerMembres(interaction: AutocompleteInteraction): Promise<vo
 			LIMIT 25
 		`;
     await interaction.respond(
-      lignes.map(ligne => ({
+      lignes.map((ligne) => ({
         name: borner(
           `${ligne.is_active === false ? "⏸ " : ""}${ligne.name} — ${ligne.role} · ${libelleEquipeRg(ligne.team_id)}`,
           100,
@@ -232,7 +252,8 @@ export class AdministrationEquipeCommand {
     role: string,
     @SlashOption({
       name: "discord",
-      description: "Identifiant Discord — permet la reprise automatique de l'avatar",
+      description:
+        "Identifiant Discord — permet la reprise automatique de l'avatar",
       type: ApplicationCommandOptionType.String,
       required: false,
       maxLength: 20,
@@ -240,7 +261,8 @@ export class AdministrationEquipeCommand {
     discord: string | undefined,
     @SlashOption({
       name: "image",
-      description: "URL du portrait (à défaut : l'avatar Discord, via /administration equipe actualiser-photos)",
+      description:
+        "URL du portrait (à défaut : l'avatar Discord, via /administration equipe actualiser-photos)",
       type: ApplicationCommandOptionType.String,
       required: false,
       maxLength: 1000,
@@ -279,12 +301,19 @@ export class AdministrationEquipeCommand {
       validerIdentifiantDiscordFacultatif(discord),
       validerOrdreAffichage(ordre),
     ];
-    const refus = controles.find(controle => !controle.ok);
+    const refus = controles.find((controle) => !controle.ok);
     if (refus && !refus.ok) {
       await repondre(interaction, accesRefuse(refus.raison));
       return;
     }
-    const [nomValide, roleValide, imageValide, lienValide, discordValide, ordreValide] = controles as [
+    const [
+      nomValide,
+      roleValide,
+      imageValide,
+      lienValide,
+      discordValide,
+      ordreValide,
+    ] = controles as [
       ResultatValidation<string> & { ok: true },
       ResultatValidation<string> & { ok: true },
       ResultatValidation<string | null> & { ok: true },
@@ -296,7 +325,9 @@ export class AdministrationEquipeCommand {
     try {
       // `display_index` est calculé EN BASE : le lire puis l'écrire depuis le
       // bot laisserait deux ajouts simultanés se donner le même rang.
-      const lignes = await sql<Array<{ id: string; display_index: number | null }>>`
+      const lignes = await sql<
+        Array<{ id: string; display_index: number | null }>
+      >`
 				INSERT INTO team_members
 					(team_id, team_name, name, role, image_url, member_link, discord_user_id,
 					 is_active, source, display_index)
@@ -362,7 +393,10 @@ export class AdministrationEquipeCommand {
         ],
       });
     } catch (err) {
-      await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
+      await repondre(
+        interaction,
+        echec("Le service n'a pas répondu", messagePanne(err)),
+      );
     }
   }
 
@@ -479,7 +513,9 @@ export class AdministrationEquipeCommand {
           return;
         }
         imageValide = controle.valeur;
-        changements.push(`Portrait : ${controle.valeur ? "remplacé" : "effacé"}`);
+        changements.push(
+          `Portrait : ${controle.valeur ? "remplacé" : "effacé"}`,
+        );
         details.image_url = controle.valeur;
       }
 
@@ -503,12 +539,16 @@ export class AdministrationEquipeCommand {
           return;
         }
         ordreValide = controle.valeur;
-        changements.push(`Ordre : ${decrireChangement(cible.display_index, ordreValide)}`);
+        changements.push(
+          `Ordre : ${decrireChangement(cible.display_index, ordreValide)}`,
+        );
         details.display_index = ordreValide;
       }
 
       if (equipe !== undefined) {
-        changements.push(`Équipe : ${decrireChangement(libelleEquipeRg(cible.team_id), libelleEquipeRg(equipe))}`);
+        changements.push(
+          `Équipe : ${decrireChangement(libelleEquipeRg(cible.team_id), libelleEquipeRg(equipe))}`,
+        );
         details.team_id = equipe;
       }
 
@@ -547,7 +587,10 @@ export class AdministrationEquipeCommand {
           // effacé un portrait, jamais lequel — donc on ne peut pas revenir en
           // arrière, ce qui est exactement ce qu'on demande à un journal.
           avant: Object.fromEntries(
-            Object.keys(details).map(champ => [champ, (cible as unknown as Record<string, unknown>)[champ] ?? null]),
+            Object.keys(details).map((champ) => [
+              champ,
+              (cible as unknown as Record<string, unknown>)[champ] ?? null,
+            ]),
           ),
         },
       });
@@ -555,13 +598,22 @@ export class AdministrationEquipeCommand {
       await interaction.editReply({
         embeds: [
           rgEmbed()
-            .setTitle(`Membre modifié — ${borner(echapperMarkdown(cible.name), 80)}`)
+            .setTitle(
+              `Membre modifié — ${borner(echapperMarkdown(cible.name), 80)}`,
+            )
             .setDescription(borner(changements.join("\n"), 4_000))
-            .setFooter(piedTexte({ note: `Identifiant ${abregerIdentifiant(cible.id)}` })),
+            .setFooter(
+              piedTexte({
+                note: `Identifiant ${abregerIdentifiant(cible.id)}`,
+              }),
+            ),
         ],
       });
     } catch (err) {
-      await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
+      await repondre(
+        interaction,
+        echec("Le service n'a pas répondu", messagePanne(err)),
+      );
     }
   }
 
@@ -631,7 +683,10 @@ export class AdministrationEquipeCommand {
           `désormais ${actif ? "visible sur le site" : "masqué du site"}.`,
       });
     } catch (err) {
-      await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
+      await repondre(
+        interaction,
+        echec("Le service n'a pas répondu", messagePanne(err)),
+      );
     }
   }
 
@@ -698,7 +753,10 @@ export class AdministrationEquipeCommand {
         },
       });
     } catch (err) {
-      await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
+      await repondre(
+        interaction,
+        echec("Le service n'a pas répondu", messagePanne(err)),
+      );
     }
   }
 
@@ -751,7 +809,10 @@ export class AdministrationEquipeCommand {
           value: borner(
             rapport.errors
               .slice(0, 10)
-              .map(echec => `• ${echapperMarkdown(echec.name)} — ${borner(echec.reason, 80)}`)
+              .map(
+                (echec) =>
+                  `• ${echapperMarkdown(echec.name)} — ${borner(echec.reason, 80)}`,
+              )
               .join("\n"),
             1_000,
           ),
@@ -760,7 +821,10 @@ export class AdministrationEquipeCommand {
 
       await interaction.editReply({ embeds: [embed] });
     } catch (err) {
-      await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
+      await repondre(
+        interaction,
+        echec("Le service n'a pas répondu", messagePanne(err)),
+      );
     }
   }
 }

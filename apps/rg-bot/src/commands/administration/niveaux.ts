@@ -32,10 +32,28 @@ import {
 import { logAdminAction } from "../../lib/audit";
 import { sql } from "../../lib/db";
 import { NIVEAU_MAX, RANGS, xpPourAtteindre } from "../../lib/experience";
-import { filtrerRecompenses, verifierAttributionAutomatique } from "../../lib/hierarchie";
-import { LIEUX_ANNONCE, fusionnerReglages } from "../../lib/reglages-communaute";
-import { enregistrerReglages, recompensesDe, reglagesDe } from "../../services/communaute";
-import { attention, echec, entierLisible, fiche, piedDeCommande, repondre, succes } from "../../lib/ui";
+import {
+  filtrerRecompenses,
+  verifierAttributionAutomatique,
+} from "../../lib/hierarchie";
+import {
+  LIEUX_ANNONCE,
+  fusionnerReglages,
+} from "../../lib/reglages-communaute";
+import {
+  enregistrerReglages,
+  recompensesDe,
+  reglagesDe,
+} from "../../services/communaute";
+import {
+  attention,
+  echec,
+  entierLisible,
+  fiche,
+  piedDeCommande,
+  repondre,
+  succes,
+} from "../../lib/ui";
 import { differerEnPrive, exigerDroits, messagePanne } from "../staff/garde";
 import "./racine-gestion";
 
@@ -68,7 +86,10 @@ function faitsBotDe(role: Role) {
 })
 @SlashGroup("niveaux", "gestion")
 export class GestionNiveauxCommand {
-  @Slash({ description: "La configuration actuelle de la progression", name: "reglages" })
+  @Slash({
+    description: "La configuration actuelle de la progression",
+    name: "reglages",
+  })
   async voirReglages(interaction: ChatInputCommandInteraction) {
     await differerEnPrive(interaction);
     if (!(await exigerDroits(interaction))) {
@@ -76,11 +97,17 @@ export class GestionNiveauxCommand {
     }
     const guildId = interaction.guildId;
     if (!guildId) {
-      await repondre(interaction, echec("Hors serveur", "La progression se règle sur un serveur."));
+      await repondre(
+        interaction,
+        echec("Hors serveur", "La progression se règle sur un serveur."),
+      );
       return;
     }
     try {
-      const [reglages, recompenses] = await Promise.all([reglagesDe(guildId), recompensesDe(guildId)]);
+      const [reglages, recompenses] = await Promise.all([
+        reglagesDe(guildId),
+        recompensesDe(guildId),
+      ]);
       const carte = fiche({
         description:
           `Courbe du jeu : ${entierLisible(NIVEAU_MAX)} niveaux, ` +
@@ -89,38 +116,68 @@ export class GestionNiveauxCommand {
         titre: "Réglages de la progression",
       });
       carte
-        .champ("Actif", reglages.niveaux.actif ? "oui" : "non", { enLigne: true })
+        .champ("Actif", reglages.niveaux.actif ? "oui" : "non", {
+          enLigne: true,
+        })
         .champ(
           "Gain",
           `${reglages.niveaux.gain.minimum}–${reglages.niveaux.gain.maximum} XP / ${reglages.niveaux.gain.delaiSecondes} s`,
           { enLigne: true },
         )
         .champ("Annonce", reglages.niveaux.annonce, { enLigne: true })
-        .champ("Salon d'annonce", reglages.niveaux.salonAnnonce ? `<#${reglages.niveaux.salonAnnonce}>` : "—", {
-          enLigne: true,
-        })
+        .champ(
+          "Salon d'annonce",
+          reglages.niveaux.salonAnnonce
+            ? `<#${reglages.niveaux.salonAnnonce}>`
+            : "—",
+          {
+            enLigne: true,
+          },
+        )
         .champ(
           "Palier d'annonce",
-          reglages.niveaux.palierAnnonce === 1 ? "chaque niveau" : `tous les ${reglages.niveaux.palierAnnonce} niveaux`,
+          reglages.niveaux.palierAnnonce === 1
+            ? "chaque niveau"
+            : `tous les ${reglages.niveaux.palierAnnonce} niveaux`,
           { enLigne: true },
         )
-        .champ("Changements de rang", reglages.niveaux.annoncerRang ? "annoncés" : "silencieux", {
-          enLigne: true,
-        })
-        .champ("Salons exclus", reglages.niveaux.salonsExclus.map(id => `<#${id}>`).join(" ") || "aucun")
-        .champ("Rôles exclus", reglages.niveaux.rolesExclus.map(id => `<@&${id}>`).join(" ") || "aucun")
-        .champ("Rangs", RANGS.map(rang => `${rang.nom} dès ${rang.depuis}`).join(" · "));
+        .champ(
+          "Changements de rang",
+          reglages.niveaux.annoncerRang ? "annoncés" : "silencieux",
+          {
+            enLigne: true,
+          },
+        )
+        .champ(
+          "Salons exclus",
+          reglages.niveaux.salonsExclus.map((id) => `<#${id}>`).join(" ") ||
+            "aucun",
+        )
+        .champ(
+          "Rôles exclus",
+          reglages.niveaux.rolesExclus.map((id) => `<@&${id}>`).join(" ") ||
+            "aucun",
+        )
+        .champ(
+          "Rangs",
+          RANGS.map((rang) => `${rang.nom} dès ${rang.depuis}`).join(" · "),
+        );
 
       if (recompenses.length === 0) {
-        carte.champ("Récompenses", "aucune — `/gestion niveaux recompense` en ajoute");
+        carte.champ(
+          "Récompenses",
+          "aucune — `/gestion niveaux recompense` en ajoute",
+        );
       } else {
         // On dit lesquelles fonctionnent RÉELLEMENT : une ligne en base ne
         // garantit rien si le rôle est passé au-dessus du bot depuis.
         const faits = new Map(
           recompenses
-            .map(recompense => interaction.guild?.roles.cache.get(recompense.roleId))
+            .map((recompense) =>
+              interaction.guild?.roles.cache.get(recompense.roleId),
+            )
             .filter((role): role is Role => role !== undefined)
-            .map(role => [role.id, faitsDe(role)]),
+            .map((role) => [role.id, faitsDe(role)]),
         );
         const moi = interaction.guild?.members.me;
         const { bloquees, posables } = filtrerRecompenses(recompenses, faits, {
@@ -129,22 +186,40 @@ export class GestionNiveauxCommand {
         });
         carte.champ(
           "Récompenses actives",
-          posables.map(recompense => `Niveau ${recompense.niveau} → <@&${recompense.roleId}>`).join("\n") || "aucune",
+          posables
+            .map(
+              (recompense) =>
+                `Niveau ${recompense.niveau} → <@&${recompense.roleId}>`,
+            )
+            .join("\n") || "aucune",
         );
         if (bloquees.length > 0) {
           carte.champ(
             "Récompenses BLOQUÉES",
-            bloquees.map(bloquee => `Niveau ${bloquee.recompense.niveau} — ${bloquee.motif}`).join("\n"),
+            bloquees
+              .map(
+                (bloquee) =>
+                  `Niveau ${bloquee.recompense.niveau} — ${bloquee.motif}`,
+              )
+              .join("\n"),
           );
         }
       }
-      await interaction.editReply({ embeds: [piedDeCommande(carte.embed, interaction)] });
+      await interaction.editReply({
+        embeds: [piedDeCommande(carte.embed, interaction)],
+      });
     } catch (err) {
-      await repondre(interaction, echec("Réglages illisibles", messagePanne(err)));
+      await repondre(
+        interaction,
+        echec("Réglages illisibles", messagePanne(err)),
+      );
     }
   }
 
-  @Slash({ description: "Attribuer un rôle à un palier de niveau", name: "recompense" })
+  @Slash({
+    description: "Attribuer un rôle à un palier de niveau",
+    name: "recompense",
+  })
   async recompense(
     @SlashOption({
       description: "Le niveau atteint",
@@ -163,7 +238,8 @@ export class GestionNiveauxCommand {
     })
     role: Role,
     @SlashOption({
-      description: "Garder aussi les rôles des paliers précédents (non par défaut)",
+      description:
+        "Garder aussi les rôles des paliers précédents (non par défaut)",
       name: "cumulable",
       required: false,
       type: ApplicationCommandOptionType.Boolean,
@@ -178,14 +254,23 @@ export class GestionNiveauxCommand {
     }
     const guildId = interaction.guildId;
     if (!guildId) {
-      await repondre(interaction, echec("Hors serveur", "La progression se règle sur un serveur."));
+      await repondre(
+        interaction,
+        echec("Hors serveur", "La progression se règle sur un serveur."),
+      );
       return;
     }
 
     // LE VERROU. Il vient avant toute écriture, et son message dit quoi faire.
-    const verdict = verifierAttributionAutomatique(faitsDe(role), faitsBotDe(role));
+    const verdict = verifierAttributionAutomatique(
+      faitsDe(role),
+      faitsBotDe(role),
+    );
     if (!verdict.ok) {
-      await repondre(interaction, attention("Récompense refusée", verdict.motif, { prive: true }));
+      await repondre(
+        interaction,
+        attention("Récompense refusée", verdict.motif, { prive: true }),
+      );
       return;
     }
 
@@ -216,7 +301,10 @@ export class GestionNiveauxCommand {
         ),
       );
     } catch (err) {
-      await repondre(interaction, echec("Enregistrement impossible", messagePanne(err)));
+      await repondre(
+        interaction,
+        echec("Enregistrement impossible", messagePanne(err)),
+      );
     }
   }
 
@@ -240,7 +328,10 @@ export class GestionNiveauxCommand {
     }
     const guildId = interaction.guildId;
     if (!guildId) {
-      await repondre(interaction, echec("Hors serveur", "La progression se règle sur un serveur."));
+      await repondre(
+        interaction,
+        echec("Hors serveur", "La progression se règle sur un serveur."),
+      );
       return;
     }
     try {
@@ -254,9 +345,13 @@ export class GestionNiveauxCommand {
       if (lignes.length === 0) {
         await repondre(
           interaction,
-          attention("Rien à retirer", `Aucune récompense n'était posée au niveau ${niveau}.`, {
-            prive: true,
-          }),
+          attention(
+            "Rien à retirer",
+            `Aucune récompense n'était posée au niveau ${niveau}.`,
+            {
+              prive: true,
+            },
+          ),
         );
         return;
       }
@@ -277,14 +372,20 @@ export class GestionNiveauxCommand {
         ),
       );
     } catch (err) {
-      await repondre(interaction, echec("Retrait impossible", messagePanne(err)));
+      await repondre(
+        interaction,
+        echec("Retrait impossible", messagePanne(err)),
+      );
     }
   }
 
-  @Slash({ description: "Où et à quelle fréquence annoncer les montées", name: "annonce" })
+  @Slash({
+    description: "Où et à quelle fréquence annoncer les montées",
+    name: "annonce",
+  })
   async annonce(
     @SlashChoice(
-      ...LIEUX_ANNONCE.map(lieu => ({
+      ...LIEUX_ANNONCE.map((lieu) => ({
         name:
           lieu === "salon"
             ? "Dans un salon dédié"
@@ -312,7 +413,8 @@ export class GestionNiveauxCommand {
     })
     salon: GuildTextBasedChannel | undefined,
     @SlashOption({
-      description: "N'annoncer que les niveaux multiples de (5 par défaut, 1 = tous)",
+      description:
+        "N'annoncer que les niveaux multiples de (5 par défaut, 1 = tous)",
       maxValue: 100,
       minValue: 1,
       name: "palier",
@@ -329,13 +431,19 @@ export class GestionNiveauxCommand {
     }
     const guildId = interaction.guildId;
     if (!guildId) {
-      await repondre(interaction, echec("Hors serveur", "La progression se règle sur un serveur."));
+      await repondre(
+        interaction,
+        echec("Hors serveur", "La progression se règle sur un serveur."),
+      );
       return;
     }
     if (lieu === "salon" && !salon) {
       await repondre(
         interaction,
-        echec("Salon manquant", "Le lieu « salon dédié » a besoin d'un salon. Sans lui, rien ne serait annoncé."),
+        echec(
+          "Salon manquant",
+          "Le lieu « salon dédié » a besoin d'un salon. Sans lui, rien ne serait annoncé.",
+        ),
       );
       return;
     }
@@ -352,7 +460,11 @@ export class GestionNiveauxCommand {
       await logAdminAction({
         action: "niveaux.annonce",
         adminId: admin.profileId,
-        details: { lieu, palier: modifies.niveaux.palierAnnonce, salon: salon?.id },
+        details: {
+          lieu,
+          palier: modifies.niveaux.palierAnnonce,
+          salon: salon?.id,
+        },
         discordId: interaction.user.id,
         targetId: guildId,
         targetType: "bot_reglages_guilde",
@@ -374,7 +486,10 @@ export class GestionNiveauxCommand {
     }
   }
 
-  @Slash({ description: "Exclure (ou réinclure) un salon du gain d'XP", name: "salon" })
+  @Slash({
+    description: "Exclure (ou réinclure) un salon du gain d'XP",
+    name: "salon",
+  })
   async salonExclu(
     @SlashOption({
       channelTypes: [ChannelType.GuildText, ChannelType.GuildAnnouncement],
@@ -402,16 +517,21 @@ export class GestionNiveauxCommand {
     }
     const guildId = interaction.guildId;
     if (!guildId) {
-      await repondre(interaction, echec("Hors serveur", "La progression se règle sur un serveur."));
+      await repondre(
+        interaction,
+        echec("Hors serveur", "La progression se règle sur un serveur."),
+      );
       return;
     }
     try {
       const actuels = await reglagesDe(guildId);
       const exclus =
         action === "reinclure"
-          ? actuels.niveaux.salonsExclus.filter(id => id !== salon.id)
+          ? actuels.niveaux.salonsExclus.filter((id) => id !== salon.id)
           : [...new Set([...actuels.niveaux.salonsExclus, salon.id])];
-      const modifies = fusionnerReglages(actuels, { niveaux: { salonsExclus: exclus } });
+      const modifies = fusionnerReglages(actuels, {
+        niveaux: { salonsExclus: exclus },
+      });
       await enregistrerReglages(guildId, modifies);
       await logAdminAction({
         action: "niveaux.salon",

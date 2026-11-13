@@ -34,13 +34,43 @@ import { Icon } from "@/components/ui/Icon";
  * faux compte rond. Le nombre de modes vient de `data/modes.json`.
  */
 const COLLECTIONS = [
-  { path: "/gallery", label: "Illustrations", icon: "image", hint: "sélection in-game" },
-  { path: "/textures", label: "Textures", icon: "texture", hint: "54 203 fichiers" },
-  { path: "/sons", label: "Sons & voix", icon: "graphic_eq", hint: "5 512 banques" },
+  {
+    path: "/gallery",
+    label: "Illustrations",
+    icon: "image",
+    hint: "sélection in-game",
+  },
+  {
+    path: "/textures",
+    label: "Textures",
+    icon: "texture",
+    hint: "54 203 fichiers",
+  },
+  {
+    path: "/sons",
+    label: "Sons & voix",
+    icon: "graphic_eq",
+    hint: "5 512 banques",
+  },
   { path: "/videos", label: "Vidéos", icon: "movie", hint: "98 cinématiques" },
-  { path: "/modeles", label: "Modèles 3D", icon: "deployed_code", hint: "6 236 modèles" },
-  { path: "/mode", label: "Modes de jeu", icon: "stadia_controller", hint: "11 modes" },
-  { path: "/avatar", label: "Éditeur d'avatar", icon: "face", hint: "502 parts" },
+  {
+    path: "/modeles",
+    label: "Modèles 3D",
+    icon: "deployed_code",
+    hint: "6 236 modèles",
+  },
+  {
+    path: "/mode",
+    label: "Modes de jeu",
+    icon: "stadia_controller",
+    hint: "11 modes",
+  },
+  {
+    path: "/avatar",
+    label: "Éditeur d'avatar",
+    icon: "face",
+    hint: "502 parts",
+  },
 ] as const;
 
 /** Chemin d'une des collections média. */
@@ -55,13 +85,21 @@ export type MediaPath = (typeof COLLECTIONS)[number]["path"];
 export function MediaNav({ active }: { active: MediaPath }) {
   return (
     <nav aria-label="Collections média" className="flex flex-wrap gap-2">
-      {COLLECTIONS.map(c => {
+      {COLLECTIONS.map((c) => {
         const courante = c.path === active;
         const contenu = (
           <>
             <Icon name={c.icon} size={18} className="shrink-0" />
             <span className="font-medium">{c.label}</span>
-            <span className={courante ? "text-xs opacity-80" : "text-xs text-on-surface-variant"}>{c.hint}</span>
+            <span
+              className={
+                courante
+                  ? "text-xs opacity-80"
+                  : "text-xs text-on-surface-variant"
+              }
+            >
+              {c.hint}
+            </span>
           </>
         );
         return courante ? (
@@ -110,8 +148,12 @@ export function MediaHeader({
   return (
     <div className="space-y-4">
       <header className="space-y-1">
-        <h1 className="text-fluid-headline-md font-extrabold text-on-surface">{title}</h1>
-        <p className="max-w-2xl text-sm text-on-surface-variant">{description}</p>
+        <h1 className="text-fluid-headline-md font-extrabold text-on-surface">
+          {title}
+        </h1>
+        <p className="max-w-2xl text-sm text-on-surface-variant">
+          {description}
+        </p>
         {children}
       </header>
       <MediaNav active={active} />
@@ -165,10 +207,21 @@ export function MediaBack({ href, label }: { href: string; label: string }) {
  * rôle du dossier), et le code seulement en repli — relégué en petit sous le titre, jamais
  * à sa place.
  */
-export function MediaTitle({ title, code, context }: { title: string; code?: string; context?: string }) {
+export function MediaTitle({
+  title,
+  code,
+  context,
+}: {
+  title: string;
+  code?: string;
+  context?: string;
+}) {
   return (
     <span className="min-w-0">
-      <span className="block truncate text-sm font-medium text-on-surface" title={title}>
+      <span
+        className="block truncate text-sm font-medium text-on-surface"
+        title={title}
+      >
         {title}
       </span>
       {(context || code) && (
@@ -183,7 +236,13 @@ export function MediaTitle({ title, code, context }: { title: string; code?: str
 }
 
 /** Ligne de compte au-dessus d'une grille : ce qui est montré, sur quel total. */
-export function MediaCount({ left, right }: { left: React.ReactNode; right?: React.ReactNode }) {
+export function MediaCount({
+  left,
+  right,
+}: {
+  left: React.ReactNode;
+  right?: React.ReactNode;
+}) {
   return (
     <div
       className="

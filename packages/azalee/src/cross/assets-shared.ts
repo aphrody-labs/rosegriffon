@@ -21,7 +21,9 @@ export interface CrossVoiceClip {
  * @param characterCode Code du personnage (ex: "c00001001" ou format brut 1001)
  * @returns Tableau d'objets CrossVoiceClip contenant le nom de l'action/cue et son URL sur le CDN
  */
-export function getCrossCharacterVoices(characterCode: string | number | undefined | null): CrossVoiceClip[] {
+export function getCrossCharacterVoices(
+  characterCode: string | number | undefined | null,
+): CrossVoiceClip[] {
   if (!characterCode) return [];
 
   let formattedCode = characterCode.toString();
@@ -33,7 +35,7 @@ export function getCrossCharacterVoices(characterCode: string | number | undefin
   const cues = characters[formattedCode] as string[] | undefined;
   if (!cues) return [];
 
-  return cues.map(cue => {
+  return cues.map((cue) => {
     // cue est sous la forme "001_c00001001_GameStart"
     // Le fichier réel sur le CDN est "c00001001_<cue>.wav"
     const cleanCue = cue.replace(/;.*$/, "").trim(); // Nettoie les cue multiples séparés par des point-virgules
@@ -57,7 +59,9 @@ export function getCrossCharacterVoices(characterCode: string | number | undefin
  * @returns L'URL CDN absolue
  */
 export function getCrossLocalAssetUrl(relativePath: string): string {
-  const cleanPath = relativePath.startsWith("/") ? relativePath.slice(1) : relativePath;
+  const cleanPath = relativePath.startsWith("/")
+    ? relativePath.slice(1)
+    : relativePath;
   return `${CROSS_CDN_BASE}/assets-local/${cleanPath}`;
 }
 
@@ -68,11 +72,17 @@ export function getCrossLocalAssetUrl(relativePath: string): string {
  * @param address Chemin logique Addressables (ex: "Icons/Character/c00001001.png")
  * @returns L'URL CDN résolue (locale, ou distante via le fallback local en cas de sync)
  */
-export function resolveCrossAssetUrl(address: string | undefined | null): string {
+export function resolveCrossAssetUrl(
+  address: string | undefined | null,
+): string {
   if (!address) return "";
 
   // Si c'est déjà une URL absolue, on la renvoie
-  if (address.startsWith("http://") || address.startsWith("https://") || address.startsWith("/")) {
+  if (
+    address.startsWith("http://") ||
+    address.startsWith("https://") ||
+    address.startsWith("/")
+  ) {
     return address;
   }
 
@@ -120,7 +130,10 @@ export function resolveCrossAssetUrl(address: string | undefined | null): string
     ];
     if (localUiTextures.includes(baseName)) {
       // On préfère les sprites pour l'UI, sinon textures
-      if (cleanAddress.toLowerCase().includes("sprite") || cleanAddress.toLowerCase().includes("atlas")) {
+      if (
+        cleanAddress.toLowerCase().includes("sprite") ||
+        cleanAddress.toLowerCase().includes("atlas")
+      ) {
         return getCrossLocalAssetUrl(`sprites/${baseName}`);
       }
       return getCrossLocalAssetUrl(`textures/${baseName}`);

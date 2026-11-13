@@ -8,7 +8,13 @@
  */
 
 import type { ConfigNode } from "../core/config-parser.js";
-import { type Locale, loadCharaText, loadCharaTextRoma, sanitizeText, toHex } from "../core/data-loader.js";
+import {
+  type Locale,
+  loadCharaText,
+  loadCharaTextRoma,
+  sanitizeText,
+  toHex,
+} from "../core/data-loader.js";
 
 /**
  * Parsed noun (name) entry from text file
@@ -155,7 +161,9 @@ function parseRomaNode(node: ConfigNode): ParsedRomanizedName | null {
 /**
  * Build romanized name map for a locale
  */
-export function buildRomanizedMap(locale: Locale): Map<string, ParsedRomanizedName> {
+export function buildRomanizedMap(
+  locale: Locale,
+): Map<string, ParsedRomanizedName> {
   try {
     const config = loadCharaTextRoma(locale);
     const map = new Map<string, ParsedRomanizedName>();

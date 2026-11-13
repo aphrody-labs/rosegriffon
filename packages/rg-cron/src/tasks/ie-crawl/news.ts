@@ -13,17 +13,30 @@ import { existsSync } from "node:fs";
 
 const DATA_ROOT = crawlDataPath("inazuma.jp/victory-road");
 
-async function safeGoto(page: WebCdpPage, url: string, timeout = 30000): Promise<unknown> {
+async function safeGoto(
+  page: WebCdpPage,
+  url: string,
+  timeout = 30000,
+): Promise<unknown> {
   return Promise.race([
     page.goto(url),
     new Promise((_, reject) =>
-      setTimeout(() => reject(new Error(`Navigation timeout (${timeout}ms) pour ${url}`)), timeout),
+      setTimeout(
+        () =>
+          reject(new Error(`Navigation timeout (${timeout}ms) pour ${url}`)),
+        timeout,
+      ),
     ),
   ]);
 }
 
-export async function crawlNews(): Promise<{ success: boolean; error?: string }> {
-  console.log("[Crawl News] Démarrage du crawl des actualités (Topics et Patch Notes) multi-langues...");
+export async function crawlNews(): Promise<{
+  success: boolean;
+  error?: string;
+}> {
+  console.log(
+    "[Crawl News] Démarrage du crawl des actualités (Topics et Patch Notes) multi-langues...",
+  );
 
   let page: WebCdpPage | undefined;
   try {
@@ -32,7 +45,17 @@ export async function crawlNews(): Promise<{ success: boolean; error?: string }>
     // ==========================================
     // 1. CRAWL TOPICS (FR, EN, JA)
     // ==========================================
-    const topicLocales = ["fr", "en", "ja", "es", "de", "it", "zh-tw", "zh-cn", "pt-br"] as const;
+    const topicLocales = [
+      "fr",
+      "en",
+      "ja",
+      "es",
+      "de",
+      "it",
+      "zh-tw",
+      "zh-cn",
+      "pt-br",
+    ] as const;
 
     for (const locale of topicLocales) {
       const topicsDir = join(DATA_ROOT, locale, "topics");
@@ -52,7 +75,9 @@ export async function crawlNews(): Promise<{ success: boolean; error?: string }>
 
         const topicLinks = extraireTopics(topicsIndexHtml);
 
-        console.log(`[Crawl News] Topics [${locale}] : ${topicLinks.length} trouvés. Traitement des détails...`);
+        console.log(
+          `[Crawl News] Topics [${locale}] : ${topicLinks.length} trouvés. Traitement des détails...`,
+        );
 
         for (const topic of topicLinks) {
           const detailDir = join(topicsDir, topic.id);
@@ -62,7 +87,9 @@ export async function crawlNews(): Promise<{ success: boolean; error?: string }>
             continue;
           }
 
-          console.log(`[Crawl News] Scraping topic detail [${locale}]: ${topic.title} (${topic.url})`);
+          console.log(
+            `[Crawl News] Scraping topic detail [${locale}]: ${topic.title} (${topic.url})`,
+          );
           await mkdir(detailDir, { recursive: true });
 
           try {
@@ -80,13 +107,22 @@ export async function crawlNews(): Promise<{ success: boolean; error?: string }>
               category: "General",
               thumbnail: null,
             };
-            await writeFile(join(detailDir, "meta.json"), JSON.stringify(meta, null, 2));
+            await writeFile(
+              join(detailDir, "meta.json"),
+              JSON.stringify(meta, null, 2),
+            );
           } catch (err) {
-            console.error(`[Crawl News] Erreur lors du scraping de topic ${topic.id} [${locale}] :`, err);
+            console.error(
+              `[Crawl News] Erreur lors du scraping de topic ${topic.id} [${locale}] :`,
+              err,
+            );
           }
         }
       } catch (err) {
-        console.error(`[Crawl News] Erreur lors du chargement de l'index des topics [${locale}] :`, err);
+        console.error(
+          `[Crawl News] Erreur lors du chargement de l'index des topics [${locale}] :`,
+          err,
+        );
       }
     }
 
@@ -106,7 +142,9 @@ export async function crawlNews(): Promise<{ success: boolean; error?: string }>
             ? `https://www.inazuma.jp/victory-road/patchnote/${platform}/`
             : `https://www.inazuma.jp/victory-road/en/patchnote/${platform}/`;
 
-        console.log(`[Crawl News] Scraping Patch Notes index [${locale}] plateforme ${platform} : ${platformUrl}`);
+        console.log(
+          `[Crawl News] Scraping Patch Notes index [${locale}] plateforme ${platform} : ${platformUrl}`,
+        );
 
         try {
           await safeGoto(page, platformUrl);
@@ -115,8 +153,13 @@ export async function crawlNews(): Promise<{ success: boolean; error?: string }>
 
           const patchLinks = extrairePatchNotes(platformHtml);
 
-          await writeFile(join(platformDir, "index.json"), JSON.stringify(patchLinks, null, 2));
-          console.log(`[Crawl News] Platform [${locale}] ${platform} : ${patchLinks.length} patch notes trouvés.`);
+          await writeFile(
+            join(platformDir, "index.json"),
+            JSON.stringify(patchLinks, null, 2),
+          );
+          console.log(
+            `[Crawl News] Platform [${locale}] ${platform} : ${patchLinks.length} patch notes trouvés.`,
+          );
 
           for (const patch of patchLinks) {
             const patchDetailDir = join(platformDir, patch.id);
@@ -126,7 +169,9 @@ export async function crawlNews(): Promise<{ success: boolean; error?: string }>
               continue;
             }
 
-            console.log(`[Crawl News] Scraping patch note detail [${locale}]: ${patch.title} (${patch.url})`);
+            console.log(
+              `[Crawl News] Scraping patch note detail [${locale}]: ${patch.title} (${patch.url})`,
+            );
             await mkdir(patchDetailDir, { recursive: true });
 
             try {
@@ -141,24 +186,41 @@ export async function crawlNews(): Promise<{ success: boolean; error?: string }>
                 date: patch.date,
                 url: patch.url,
                 locale,
-                platform: platform === "ps-steam" ? ["ps4", "ps5", "steam"] : [platform],
+                platform:
+                  platform === "ps-steam"
+                    ? ["ps4", "ps5", "steam"]
+                    : [platform],
                 featured_image: null,
               };
-              await writeFile(join(patchDetailDir, "data.json"), JSON.stringify(data, null, 2));
+              await writeFile(
+                join(patchDetailDir, "data.json"),
+                JSON.stringify(data, null, 2),
+              );
             } catch (err) {
-              console.error(`[Crawl News] Erreur lors du scraping du patch note ${patch.id} [${locale}] :`, err);
+              console.error(
+                `[Crawl News] Erreur lors du scraping du patch note ${patch.id} [${locale}] :`,
+                err,
+              );
             }
           }
         } catch (err) {
-          console.error(`[Crawl News] Erreur de chargement pour la plateforme ${platform} [${locale}] :`, err);
+          console.error(
+            `[Crawl News] Erreur de chargement pour la plateforme ${platform} [${locale}] :`,
+            err,
+          );
         }
       }
     }
 
-    console.log("[Crawl News] Synchronisation des actualités multi-langues terminée avec succès.");
+    console.log(
+      "[Crawl News] Synchronisation des actualités multi-langues terminée avec succès.",
+    );
     return { success: true };
   } catch (err: any) {
-    console.error("[Crawl News] Erreur critique lors du crawl des actualités :", err);
+    console.error(
+      "[Crawl News] Erreur critique lors du crawl des actualités :",
+      err,
+    );
     return { success: false, error: err.message || String(err) };
   } finally {
     await page?.close().catch(() => undefined);

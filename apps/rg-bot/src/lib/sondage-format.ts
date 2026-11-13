@@ -21,7 +21,10 @@
  * ────────────────────────────────────────────────────────────────────────────
  */
 
-import { formaterNombre as formaterNombreUi, formaterPourcentage as formaterPourcentageUi } from "./ui/nombres";
+import {
+  formaterNombre as formaterNombreUi,
+  formaterPourcentage as formaterPourcentageUi,
+} from "./ui/nombres";
 import { borner, ilYA, leJour } from "./ui/texte";
 import {
   MAX_CUSTOM_ID as MAX_CUSTOM_ID_UI,
@@ -70,11 +73,17 @@ export function decimal(valeur: unknown): number | null {
 
 /** Entier groupé à la française (« 14 098 »). */
 export function formaterNombre(valeur: number | null | undefined): string {
-  return typeof valeur === "number" && Number.isFinite(valeur) ? formaterNombreUi(Math.trunc(valeur)) : "—";
+  return typeof valeur === "number" && Number.isFinite(valeur)
+    ? formaterNombreUi(Math.trunc(valeur))
+    : "—";
 }
 
 /** Accorde un nom au pluriel simple. */
-export function pluriel(n: number, singulier: string, pluriel_: string): string {
+export function pluriel(
+  n: number,
+  singulier: string,
+  pluriel_: string,
+): string {
   return n === 1 ? singulier : pluriel_;
 }
 
@@ -84,7 +93,9 @@ export function pluriel(n: number, singulier: string, pluriel_: string): string 
  * Bun.SQL rend déjà des `Date` pour les `timestamptz`, mais les mêmes fonctions
  * sont appelées sur des chaînes ISO (état de bouton, tests).
  */
-export function versDate(valeur: Date | string | null | undefined): Date | null {
+export function versDate(
+  valeur: Date | string | null | undefined,
+): Date | null {
   if (!valeur) {
     return null;
   }
@@ -93,12 +104,16 @@ export function versDate(valeur: Date | string | null | undefined): Date | null 
 }
 
 /** Horodatage relatif Discord (`<t:1234:R>`), ou `—`. */
-export function horodatageRelatif(valeur: Date | string | null | undefined): string {
+export function horodatageRelatif(
+  valeur: Date | string | null | undefined,
+): string {
   return ilYA(versDate(valeur));
 }
 
 /** Horodatage date longue Discord (`<t:1234:D>`), ou `—`. */
-export function horodatageDate(valeur: Date | string | null | undefined): string {
+export function horodatageDate(
+  valeur: Date | string | null | undefined,
+): string {
   return leJour(versDate(valeur), "D");
 }
 
@@ -136,7 +151,11 @@ export function echapperMarkdown(texte: string): string {
   const morceaux: string[] = [];
   let curseur = 0;
   EMOJI_PERSONNALISE.lastIndex = 0;
-  for (let trouve = EMOJI_PERSONNALISE.exec(texte); trouve !== null; trouve = EMOJI_PERSONNALISE.exec(texte)) {
+  for (
+    let trouve = EMOJI_PERSONNALISE.exec(texte);
+    trouve !== null;
+    trouve = EMOJI_PERSONNALISE.exec(texte)
+  ) {
     morceaux.push(echapperBrut(texte.slice(curseur, trouve.index)), trouve[0]);
     curseur = trouve.index + trouve[0].length;
   }
@@ -154,7 +173,10 @@ function echapperBrut(fragment: string): string {
  * toutes lettres, identifiant compris. On le ramène à `:IE_hey1:`, lisible.
  */
 export function texteTitre(texte: string): string {
-  return texte.replace(EMOJI_PERSONNALISE, jeton => `:${jeton.split(":")[1] ?? ""}:`);
+  return texte.replace(
+    EMOJI_PERSONNALISE,
+    (jeton) => `:${jeton.split(":")[1] ?? ""}:`,
+  );
 }
 
 // ─── Visuels republiables ───────────────────────────────────────────────────
@@ -178,7 +200,9 @@ const HOTES_INTERDITS = ["cdn.discordapp.com", "media.discordapp.net"] as const;
 export function estUrlDiscordSignee(url: string): boolean {
   try {
     const hote = new URL(url).hostname.toLowerCase();
-    return HOTES_INTERDITS.some(interdit => hote === interdit || hote.endsWith(`.${interdit}`));
+    return HOTES_INTERDITS.some(
+      (interdit) => hote === interdit || hote.endsWith(`.${interdit}`),
+    );
   } catch {
     return false;
   }
@@ -192,7 +216,10 @@ export function estUrlDiscordSignee(url: string): boolean {
  * `://` arrive ici serait une régression de la récolte, et on préfère un embed
  * sans image à un embed qui republie un lien signé.
  */
-export function urlAsset(chemin: string | null | undefined, origine: string): string | null {
+export function urlAsset(
+  chemin: string | null | undefined,
+  origine: string,
+): string | null {
   if (typeof chemin !== "string") {
     return null;
   }
@@ -330,7 +357,10 @@ function normaliserOptions(brut: unknown): OptionSondage[] {
     const item = entree as Record<string, unknown>;
     const label = typeof item.label === "string" ? item.label : "";
     options.push({
-      emoji: typeof item.emoji === "string" && item.emoji.length > 0 ? item.emoji : null,
+      emoji:
+        typeof item.emoji === "string" && item.emoji.length > 0
+          ? item.emoji
+          : null,
       label,
       percentage: decimal(item.percentage),
       position: entier(item.position) ?? options.length,
@@ -341,7 +371,10 @@ function normaliserOptions(brut: unknown): OptionSondage[] {
 }
 
 /** Ligne base → sondage rendable. `origine` sert à construire l'URL du visuel. */
-export function normaliserSondage(ligne: LigneSondage, origine: string): Sondage {
+export function normaliserSondage(
+  ligne: LigneSondage,
+  origine: string,
+): Sondage {
   const urlVisuel = urlAsset(ligne.visual_path, origine);
   const alt = ligne.visual_alt?.trim();
   return {
@@ -352,7 +385,10 @@ export function normaliserSondage(ligne: LigneSondage, origine: string): Sondage
     ended: ligne.ended === true,
     endsAt: versDate(ligne.ends_at),
     guildId: ligne.guild_id,
-    language: ligne.language === "fr" || ligne.language === "en" ? ligne.language : null,
+    language:
+      ligne.language === "fr" || ligne.language === "en"
+        ? ligne.language
+        : null,
     locked: ligne.locked === true,
     maxChoices: entier(ligne.max_choices) ?? 1,
     messageId: ligne.message_id,
@@ -361,7 +397,12 @@ export function normaliserSondage(ligne: LigneSondage, origine: string): Sondage
     provider: ligne.provider === "discord" ? "discord" : "easypoll",
     question: ligne.question,
     resultsHidden: ligne.results_hidden === true,
-    source: ligne.source === "reactions" ? "reactions" : ligne.source === "api" ? "api" : "embed",
+    source:
+      ligne.source === "reactions"
+        ? "reactions"
+        : ligne.source === "api"
+          ? "api"
+          : "embed",
     totalVoters: entier(ligne.total_voters),
     totalVotes: entier(ligne.total_votes),
     visuel: urlVisuel
@@ -388,7 +429,9 @@ export function normaliserSondage(ligne: LigneSondage, origine: string): Sondage
  */
 export type EtatSondage = "termine" | "en-cours" | "inconnu";
 
-export function etatSondage(sondage: Pick<Sondage, "ended" | "endsAt">): EtatSondage {
+export function etatSondage(
+  sondage: Pick<Sondage, "ended" | "endsAt">,
+): EtatSondage {
   if (sondage.ended) {
     return "termine";
   }
@@ -396,7 +439,9 @@ export function etatSondage(sondage: Pick<Sondage, "ended" | "endsAt">): EtatSon
 }
 
 /** « Terminé » / « En cours » / « État non publié », avec sa pastille. */
-export function libelleEtat(sondage: Pick<Sondage, "ended" | "endsAt">): string {
+export function libelleEtat(
+  sondage: Pick<Sondage, "ended" | "endsAt">,
+): string {
   switch (etatSondage(sondage)) {
     case "termine": {
       return "⚫ Terminé";
@@ -417,11 +462,13 @@ export function libelleEtat(sondage: Pick<Sondage, "ended" | "endsAt">): string 
  * être exploitées n'en a aucun : il faut alors afficher ses choix SANS barre,
  * jamais une barre à zéro qui se lirait « personne n'a voté ».
  */
-export function aDesResultats(sondage: Pick<Sondage, "totalVotes" | "options">): boolean {
+export function aDesResultats(
+  sondage: Pick<Sondage, "totalVotes" | "options">,
+): boolean {
   if (sondage.totalVotes === null) {
     return false;
   }
-  return sondage.options.some(option => option.votes !== null);
+  return sondage.options.some((option) => option.votes !== null);
 }
 
 /**
@@ -434,7 +481,10 @@ export function aDesResultats(sondage: Pick<Sondage, "totalVotes" | "options">):
  *    vaut environ la moitié du total des votes (mesuré : 67 participants pour
  *    120 votes), et diviser par lui donnerait des barres au-delà de 100 %.
  */
-export function pourcentage(option: OptionSondage, sondage: Pick<Sondage, "totalVotes">): number {
+export function pourcentage(
+  option: OptionSondage,
+  sondage: Pick<Sondage, "totalVotes">,
+): number {
   const total = sondage.totalVotes;
   if (option.votes === null || total === null || total <= 0) {
     return 0;
@@ -454,7 +504,9 @@ export function classement(sondage: Pick<Sondage, "options">): OptionSondage[] {
  * Choix en tête, uniquement s'il y a un vrai vainqueur : pas de résultats, un
  * seul choix, ou une égalité en tête ⇒ `null` (on ne couronne pas un ex æquo).
  */
-export function gagnant(sondage: Pick<Sondage, "totalVotes" | "options">): OptionSondage | null {
+export function gagnant(
+  sondage: Pick<Sondage, "totalVotes" | "options">,
+): OptionSondage | null {
   if (!aDesResultats(sondage) || sondage.options.length < 2) {
     return null;
   }
@@ -532,7 +584,9 @@ export function estEstimation(sondage: Pick<Sondage, "source">): boolean {
  * C'est l'exigence centrale de `/sondage voir` : un décompte reconstitué depuis
  * les réactions archivées ne doit jamais passer pour un résultat officiel.
  */
-export function mentionSource(sondage: Pick<Sondage, "source" | "resultsHidden">): string | null {
+export function mentionSource(
+  sondage: Pick<Sondage, "source" | "resultsHidden">,
+): string | null {
   if (estEstimation(sondage)) {
     return (
       "⚠️ **Estimation, pas un résultat officiel.** Ce sondage n'a jamais publié ses " +
@@ -556,7 +610,9 @@ export function marqueurSource(sondage: Pick<Sondage, "source">): string {
  * le nombre de participants est inconnu (cas des décomptes reconstitués — on ne
  * l'invente pas).
  */
-export function libelleParticipation(sondage: Pick<Sondage, "totalVotes" | "totalVoters">): string | null {
+export function libelleParticipation(
+  sondage: Pick<Sondage, "totalVotes" | "totalVoters">,
+): string | null {
   const votes = sondage.totalVotes;
   if (votes === null) {
     return null;
@@ -570,11 +626,15 @@ export function libelleParticipation(sondage: Pick<Sondage, "totalVotes" | "tota
 }
 
 /** Nombre de choix autorisés par personne (0 = illimité). */
-export function libelleChoixAutorises(sondage: Pick<Sondage, "maxChoices">): string {
+export function libelleChoixAutorises(
+  sondage: Pick<Sondage, "maxChoices">,
+): string {
   if (sondage.maxChoices <= 0) {
     return "Choix illimités";
   }
-  return sondage.maxChoices === 1 ? "1 choix par personne" : `${sondage.maxChoices} choix par personne`;
+  return sondage.maxChoices === 1
+    ? "1 choix par personne"
+    : `${sondage.maxChoices} choix par personne`;
 }
 
 /**
@@ -595,7 +655,10 @@ export function lienMessageSondage(sondage: Sondage): string | null {
 }
 
 /** Une ligne de la liste des sondages. */
-export function ligneListeSondage(sondage: Sondage, origineSite: string): string {
+export function ligneListeSondage(
+  sondage: Sondage,
+  origineSite: string,
+): string {
   const marqueur = marqueurSource(sondage);
   // Le libellé d'un lien masqué ne rend pas les émojis personnalisés : on les
   // ramène à leur nom (`:IE_hey1:`) plutôt que de laisser passer un jeton brut
@@ -625,10 +688,16 @@ export function ligneListeSondage(sondage: Sondage, origineSite: string): string
  */
 export type StatutSondage = "tous" | "en-cours" | "termines" | "etat-inconnu";
 
-const STATUTS: readonly StatutSondage[] = ["tous", "en-cours", "termines", "etat-inconnu"];
+const STATUTS: readonly StatutSondage[] = [
+  "tous",
+  "en-cours",
+  "termines",
+  "etat-inconnu",
+];
 
 export function normaliserStatut(valeur: unknown): StatutSondage {
-  return typeof valeur === "string" && (STATUTS as readonly string[]).includes(valeur)
+  return typeof valeur === "string" &&
+    (STATUTS as readonly string[]).includes(valeur)
     ? (valeur as StatutSondage)
     : "tous";
 }
@@ -679,9 +748,12 @@ const MS_PAR_JOUR = 86_400_000;
  * décalage d'un fuseau ferait basculer un sondage du 31 décembre d'une année à
  * l'autre selon la machine qui exécute le bot.
  */
-export function normaliserPeriode(valeur: unknown, maintenant = new Date()): Periode {
+export function normaliserPeriode(
+  valeur: unknown,
+  maintenant = new Date(),
+): Periode {
   const brut = typeof valeur === "string" ? valeur.trim() : "";
-  const relative = PERIODES_RELATIVES.find(entree => entree.cle === brut);
+  const relative = PERIODES_RELATIVES.find((entree) => entree.cle === brut);
   if (relative) {
     return {
       cle: relative.cle,
@@ -701,7 +773,12 @@ export function normaliserPeriode(valeur: unknown, maintenant = new Date()): Per
       };
     }
   }
-  return { cle: "tout", depuis: null, jusqua: null, libelle: "toutes périodes" };
+  return {
+    cle: "tout",
+    depuis: null,
+    jusqua: null,
+    libelle: "toutes périodes",
+  };
 }
 
 // ─── Campagnes ──────────────────────────────────────────────────────────────
@@ -748,7 +825,10 @@ function chaines(valeur: unknown): string[] {
   if (!Array.isArray(valeur)) {
     return [];
   }
-  return valeur.filter((entree): entree is string => typeof entree === "string" && entree.length > 0);
+  return valeur.filter(
+    (entree): entree is string =>
+      typeof entree === "string" && entree.length > 0,
+  );
 }
 
 /**
@@ -786,7 +866,10 @@ export type EtatCampagne = "a-venir" | "en-cours" | "terminee" | "indetermine";
  * RÉCOLTE tourne encore, ce qui reste vrai quelques jours après la clôture le
  * temps de rattraper les derniers posts.
  */
-export function etatCampagne(campagne: Pick<Campagne, "debutLe" | "finLe">, maintenant = new Date()): EtatCampagne {
+export function etatCampagne(
+  campagne: Pick<Campagne, "debutLe" | "finLe">,
+  maintenant = new Date(),
+): EtatCampagne {
   const instant = maintenant.getTime();
   const debut = campagne.debutLe?.getTime() ?? null;
   const fin = campagne.finLe?.getTime() ?? null;
@@ -802,7 +885,10 @@ export function etatCampagne(campagne: Pick<Campagne, "debutLe" | "finLe">, main
   return "en-cours";
 }
 
-export function libelleEtatCampagne(campagne: Pick<Campagne, "debutLe" | "finLe">, maintenant = new Date()): string {
+export function libelleEtatCampagne(
+  campagne: Pick<Campagne, "debutLe" | "finLe">,
+  maintenant = new Date(),
+): string {
   switch (etatCampagne(campagne, maintenant)) {
     case "a-venir": {
       return "🔵 À venir";
@@ -820,7 +906,9 @@ export function libelleEtatCampagne(campagne: Pick<Campagne, "debutLe" | "finLe"
 }
 
 /** Période lisible en horodatages Discord, ou `null` si aucune date connue. */
-export function periodeCampagne(campagne: Pick<Campagne, "debutLe" | "finLe">): string | null {
+export function periodeCampagne(
+  campagne: Pick<Campagne, "debutLe" | "finLe">,
+): string | null {
   if (campagne.debutLe && campagne.finLe) {
     return `du ${horodatageDate(campagne.debutLe)} au ${horodatageDate(campagne.finLe)}`;
   }
@@ -838,13 +926,21 @@ export function periodeCampagne(campagne: Pick<Campagne, "debutLe" | "finLe">): 
  * `hashtags_affichage` quand elle existe. Une liste d'affichage plus courte que
  * la liste normalisée retombe sur la forme minuscule, ce qui reste exact.
  */
-export function hashtagsAffichables(campagne: Pick<Campagne, "hashtags" | "hashtagsAffichage">): string[] {
-  return campagne.hashtags.map((tag, index) => `#${campagne.hashtagsAffichage[index] ?? tag}`);
+export function hashtagsAffichables(
+  campagne: Pick<Campagne, "hashtags" | "hashtagsAffichage">,
+): string[] {
+  return campagne.hashtags.map(
+    (tag, index) => `#${campagne.hashtagsAffichage[index] ?? tag}`,
+  );
 }
 
 /** Chemin public d'une campagne sur le site. */
-export function cheminCampagne(campagne: Pick<Campagne, "principale" | "slug">): string {
-  return campagne.principale ? "/iergday" : `/iergday?campagne=${encodeURIComponent(campagne.slug)}`;
+export function cheminCampagne(
+  campagne: Pick<Campagne, "principale" | "slug">,
+): string {
+  return campagne.principale
+    ? "/iergday"
+    : `/iergday?campagne=${encodeURIComponent(campagne.slug)}`;
 }
 
 /** Slug acceptable : ce que la base contient, rien d'autre. */
@@ -867,7 +963,9 @@ export interface StatsCampagne {
 }
 
 /** Ligne « métriques » d'un embed de campagne. */
-export function ligneMetriques(stats: Pick<StatsCampagne, "jaime" | "repartages" | "vues">): string {
+export function ligneMetriques(
+  stats: Pick<StatsCampagne, "jaime" | "repartages" | "vues">,
+): string {
   return `❤️ ${formaterNombre(stats.jaime)} · 🔁 ${formaterNombre(stats.repartages)} · 👁️ ${formaterNombre(stats.vues)}`;
 }
 
@@ -906,11 +1004,13 @@ export function noteCampagneVide(
   ];
   if (campagne.salonsDepot.length > 0) {
     morceaux.push(
-      `Les créations ont été déposées dans ${campagne.salonsDepot.map(salon => `<#${salon}>`).join(", ")}.`,
+      `Les créations ont été déposées dans ${campagne.salonsDepot.map((salon) => `<#${salon}>`).join(", ")}.`,
     );
   }
   if (campagne.collecteLe) {
-    morceaux.push(`Dernière passe de récolte ${horodatageRelatif(campagne.collecteLe)}.`);
+    morceaux.push(
+      `Dernière passe de récolte ${horodatageRelatif(campagne.collecteLe)}.`,
+    );
   }
   return morceaux.join(" ");
 }
@@ -965,10 +1065,17 @@ export function imagePost(media: unknown): string | null {
     if (item.type !== "photo") {
       continue;
     }
-    const candidats = [item.storage_url, item.url, item.preview_url, item.original_url]
-      .map(valeur => urlImageRepubliable(valeur))
+    const candidats = [
+      item.storage_url,
+      item.url,
+      item.preview_url,
+      item.original_url,
+    ]
+      .map((valeur) => urlImageRepubliable(valeur))
       .filter((valeur): valeur is string => valeur !== null);
-    const preferee = candidats.find(url => url.includes("/storage/v1/object/")) ?? candidats[0];
+    const preferee =
+      candidats.find((url) => url.includes("/storage/v1/object/")) ??
+      candidats[0];
     if (preferee) {
       return preferee;
     }
@@ -977,14 +1084,20 @@ export function imagePost(media: unknown): string | null {
 }
 
 /** Lien canonique d'un post X. */
-export function lienPost(post: Pick<PostCampagne, "tweetId" | "auteur">): string {
+export function lienPost(
+  post: Pick<PostCampagne, "tweetId" | "auteur">,
+): string {
   return `https://x.com/${post.auteur ?? "i"}/status/${post.tweetId}`;
 }
 
 /** Une ligne de la sélection de publications d'une campagne. */
 export function lignePost(post: PostCampagne): string {
-  const auteur = post.auteur ? `@${echapperMarkdown(post.auteur)}` : "*compte inconnu*";
-  const extrait = post.texte ? echapperMarkdown(couper(post.texte, 120)) : "*sans texte*";
+  const auteur = post.auteur
+    ? `@${echapperMarkdown(post.auteur)}`
+    : "*compte inconnu*";
+  const extrait = post.texte
+    ? echapperMarkdown(couper(post.texte, 120))
+    : "*sans texte*";
   return `[${auteur}](${lienPost(post)}) · ${horodatageDate(post.publieLe)}\n${extrait}`;
 }
 
@@ -1001,8 +1114,16 @@ export function nombreDePages(total: number, parPage: number): number {
 }
 
 /** Ramène une page dans les bornes réelles du jeu de résultats. */
-export function bornerPage(page: number, total: number, parPage: number): number {
-  return bornerPageUi(page, Math.trunc(total), Math.max(1, Math.trunc(parPage)));
+export function bornerPage(
+  page: number,
+  total: number,
+  parPage: number,
+): number {
+  return bornerPageUi(
+    page,
+    Math.trunc(total),
+    Math.max(1, Math.trunc(parPage)),
+  );
 }
 
 export interface EtatListeSondages {
@@ -1030,7 +1151,9 @@ export function encoderEtatSondages(etat: EtatListeSondages): string | null {
   ]);
 }
 
-export function decoderEtatSondages(customId: string): EtatListeSondages | null {
+export function decoderEtatSondages(
+  customId: string,
+): EtatListeSondages | null {
   const champs = decoderEtat(PREFIXE_BOUTON_SONDAGES, customId, 4);
   const page = pageDecodee(champs?.[0]);
   if (!champs || page === null) {
@@ -1051,10 +1174,15 @@ export interface EtatListeCampagnes {
 }
 
 export function encoderEtatCampagnes(etat: EtatListeCampagnes): string | null {
-  return encoderEtat(PREFIXE_BOUTON_CAMPAGNES, [Math.max(1, Math.trunc(etat.page)), etat.enCours ? "1" : "0"]);
+  return encoderEtat(PREFIXE_BOUTON_CAMPAGNES, [
+    Math.max(1, Math.trunc(etat.page)),
+    etat.enCours ? "1" : "0",
+  ]);
 }
 
-export function decoderEtatCampagnes(customId: string): EtatListeCampagnes | null {
+export function decoderEtatCampagnes(
+  customId: string,
+): EtatListeCampagnes | null {
   const champs = decoderEtat(PREFIXE_BOUTON_CAMPAGNES, customId, 2);
   const page = pageDecodee(champs?.[0]);
   if (!champs || page === null) {

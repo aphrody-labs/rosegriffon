@@ -62,7 +62,10 @@ class Logger {
   }
 
   error(message: string, error?: unknown) {
-    const errorData = error instanceof Error ? { message: error.message, stack: error.stack } : error;
+    const errorData =
+      error instanceof Error
+        ? { message: error.message, stack: error.stack }
+        : error;
     this.log("error", message, errorData);
   }
 
@@ -95,7 +98,9 @@ class Logger {
    * Create a child logger with nested context
    */
   child(subContext: string): Logger {
-    const fullContext = this.context ? `${this.context}:${subContext}` : subContext;
+    const fullContext = this.context
+      ? `${this.context}:${subContext}`
+      : subContext;
     return new Logger(fullContext);
   }
 

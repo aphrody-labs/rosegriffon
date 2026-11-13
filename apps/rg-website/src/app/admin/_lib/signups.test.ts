@@ -15,7 +15,7 @@ describe("buildDailySignups", () => {
     );
 
     expect(days).toHaveLength(30);
-    expect(days.find(day => day.date === "2026-09-24")?.count).toBe(1);
-    expect(days.find(day => day.date === "2026-09-25")?.count).toBe(1);
+    expect(days.find((day) => day.date === "2026-09-24")?.count).toBe(1);
+    expect(days.find((day) => day.date === "2026-09-25")?.count).toBe(1);
   });
 });

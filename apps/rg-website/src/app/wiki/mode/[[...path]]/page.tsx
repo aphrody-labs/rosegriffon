@@ -25,7 +25,12 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import type { Metadata } from "next";
 import Link from "@/components/shared/Link";
-import { MediaBack, MediaCount, MediaEmpty, MediaHeader } from "@/components/wiki/MediaShell";
+import {
+  MediaBack,
+  MediaCount,
+  MediaEmpty,
+  MediaHeader,
+} from "@/components/wiki/MediaShell";
 import { wiki } from "@rosegriffon/app-shell";
 
 export const dynamic = "force-dynamic";
@@ -60,15 +65,27 @@ type Mode = {
  * Racine des données du jeu — même convention que le reste de l'app (`DATA_PATH`), pour qu'un
  * déplacement du dump ne demande pas de toucher au code.
  */
-const CATALOGUE = path.join(process.env.DATA_PATH ?? iecodeDataPath(), "modes.json");
+const CATALOGUE = path.join(
+  process.env.DATA_PATH ?? iecodeDataPath(),
+  "modes.json",
+);
 
 /** Dossier des exports de contenu, un fichier par mode (`<slug>.json`). */
-const CONTENUS = path.join(process.env.DATA_PATH ?? iecodeDataPath(), "mode-contenu");
+const CONTENUS = path.join(
+  process.env.DATA_PATH ?? iecodeDataPath(),
+  "mode-contenu",
+);
 
 /** Le contenu des fichiers d'un mode, tel que l'exporte `niers mode contenu <slug>`. */
 type Contenu = {
   slug: string;
-  screens: { screen: string; cfg: string; octets: number; layers: string[]; focus: number }[];
+  screens: {
+    screen: string;
+    cfg: string;
+    octets: number;
+    layers: string[];
+    focus: number;
+  }[];
   objbins: {
     path: string;
     octets: number;
@@ -160,7 +177,9 @@ async function lireContenu(slug: string): Promise<Contenu | null> {
   // laisser un `../` remonter hors du dossier.
   if (!/^[a-z0-9-]+$/.test(slug)) return null;
   try {
-    return JSON.parse(await fs.readFile(path.join(CONTENUS, `${slug}.json`), "utf8")) as Contenu;
+    return JSON.parse(
+      await fs.readFile(path.join(CONTENUS, `${slug}.json`), "utf8"),
+    ) as Contenu;
   } catch {
     return null;
   }
@@ -187,7 +206,12 @@ type EcranRendu = {
  */
 async function lireEcransRendus(slug: string): Promise<EcranRendu[]> {
   if (!/^[a-z0-9-]+$/.test(slug)) return [];
-  const dossier = path.join(process.env.DATA_PATH ?? iecodeDataPath(), "mode-tex", slug, "screens");
+  const dossier = path.join(
+    process.env.DATA_PATH ?? iecodeDataPath(),
+    "mode-tex",
+    slug,
+    "screens",
+  );
   let fichiers: string[];
   try {
     fichiers = await fs.readdir(dossier);
@@ -197,17 +221,24 @@ async function lireEcransRendus(slug: string): Promise<EcranRendu[]> {
 
   const rendus = await Promise.all(
     fichiers
-      .filter(f => f.endsWith(".png"))
+      .filter((f) => f.endsWith(".png"))
       .map(async (f): Promise<EcranRendu> => {
         const screen = f.slice(0, -".png".length);
         // Le layout est le compte-rendu de ce que la composition a réellement pu poser :
         // on en dérive la richesse du rendu plutôt que de la stocker dans un manifeste
         // à maintenir en parallèle des PNG (qui se désynchroniserait au premier rendu).
         try {
-          const layout = JSON.parse(await fs.readFile(path.join(dossier, `${screen}.layout.json`), "utf8")) as {
+          const layout = JSON.parse(
+            await fs.readFile(
+              path.join(dossier, `${screen}.layout.json`),
+              "utf8",
+            ),
+          ) as {
             objects?: { sprite?: unknown; visible?: boolean }[];
           };
-          const sprites = (layout.objects ?? []).filter(o => o.sprite && o.visible).length;
+          const sprites = (layout.objects ?? []).filter(
+            (o) => o.sprite && o.visible,
+          ).length;
           return { screen, sprites };
         } catch {
           // Layout illisible : l'image existe, on la garde en fin de liste plutôt que
@@ -219,29 +250,44 @@ async function lireEcransRendus(slug: string): Promise<EcranRendu[]> {
   // Les meilleures reconstructions d'abord. Sans ce tri, l'ordre alphabétique ouvrait la
   // galerie sur les écrans `fake_vroad_*`, qui ne posent aucun sprite : le mode se présentait
   // par ses six images vides.
-  return rendus.sort((a, b) => b.sprites - a.sprites || a.screen.localeCompare(b.screen));
+  return rendus.sort(
+    (a, b) => b.sprites - a.sprites || a.screen.localeCompare(b.screen),
+  );
 }
 
-export async function generateMetadata({ params }: { params: Promise<{ path?: string[] }> }): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ path?: string[] }>;
+}): Promise<Metadata> {
   const { path: segments } = await params;
   const slug = segments?.[0];
   if (!slug) {
     return {
       alternates: { canonical: wiki("/mode") },
       title: "Modes de jeu | Azalée",
-      description: "Les modes d'Inazuma Eleven: Victory Road, et les fichiers dont ils sont faits.",
+      description:
+        "Les modes d'Inazuma Eleven: Victory Road, et les fichiers dont ils sont faits.",
     };
   }
   const modes = await lireCatalogue();
-  const mode = modes?.find(m => m.slug === slug);
+  const mode = modes?.find((m) => m.slug === slug);
   return {
-    ...(mode ? { alternates: { canonical: wiki(`/mode/${mode.slug}`) } } : { robots: { index: false } }),
-    title: mode ? `${mode.label} — mode de jeu | Azalée` : "Mode inconnu | Azalée",
+    ...(mode
+      ? { alternates: { canonical: wiki(`/mode/${mode.slug}`) } }
+      : { robots: { index: false } }),
+    title: mode
+      ? `${mode.label} — mode de jeu | Azalée`
+      : "Mode inconnu | Azalée",
     description: mode?.note ?? undefined,
   };
 }
 
-export default async function PageModes({ params }: { params: Promise<{ path?: string[] }> }) {
+export default async function PageModes({
+  params,
+}: {
+  params: Promise<{ path?: string[] }>;
+}) {
   const { path: segments } = await params;
   const slug = segments?.[0];
   const modes = await lireCatalogue();
@@ -261,7 +307,7 @@ export default async function PageModes({ params }: { params: Promise<{ path?: s
 
   // ── Fiche d'un mode ────────────────────────────────────────────────────────
   if (slug) {
-    const mode = modes.find(m => m.slug === slug);
+    const mode = modes.find((m) => m.slug === slug);
     if (!mode) {
       return (
         <div className="space-y-6">
@@ -270,17 +316,20 @@ export default async function PageModes({ params }: { params: Promise<{ path?: s
         </div>
       );
     }
-    const familles = FAMILLES.map(f => ({
+    const familles = FAMILLES.map((f) => ({
       ...f,
-      entrees: f.kind === "screen" ? mode.screens.map(s => s.screen) : (mode.assets[f.kind] ?? []),
+      entrees:
+        f.kind === "screen"
+          ? mode.screens.map((s) => s.screen)
+          : (mode.assets[f.kind] ?? []),
     }));
     const contenu = await lireContenu(mode.slug);
     const ecransRendus = await lireEcransRendus(mode.slug);
     const messagesFr = Object.entries(contenu?.messages?.fr ?? {});
-    const vignettes = (contenu?.textures ?? []).flatMap(g =>
+    const vignettes = (contenu?.textures ?? []).flatMap((g) =>
       g.textures
-        .filter(t => t.dds)
-        .map(t => ({
+        .filter((t) => t.dds)
+        .map((t) => ({
           src: `/api/mode-tex/${mode.slug}/${fichierTexture(g.path, t.nom)}`,
           nom: t.nom,
           largeur: t.largeur,
@@ -293,7 +342,9 @@ export default async function PageModes({ params }: { params: Promise<{ path?: s
       <div className="space-y-6">
         <MediaBack href={wiki("/mode")} label="Tous les modes" />
         <header className="space-y-1">
-          <h1 className="text-fluid-headline-md font-extrabold text-on-surface">{mode.label}</h1>
+          <h1 className="text-fluid-headline-md font-extrabold text-on-surface">
+            {mode.label}
+          </h1>
           {mode.labelEn || mode.labelJa ? (
             <p className="text-sm text-on-surface-variant">
               {[mode.labelEn, mode.labelJa].filter(Boolean).join(" · ")}
@@ -301,10 +352,13 @@ export default async function PageModes({ params }: { params: Promise<{ path?: s
           ) : null}
           {mode.official ? (
             <p className="text-xs text-on-surface-variant">
-              Mode énuméré par le jeu lui-même : <code>menu_text</code> porte un réglage audio à son nom.
+              Mode énuméré par le jeu lui-même : <code>menu_text</code> porte un
+              réglage audio à son nom.
             </p>
           ) : null}
-          <p className="max-w-3xl text-sm text-on-surface-variant">{mode.note}</p>
+          <p className="max-w-3xl text-sm text-on-surface-variant">
+            {mode.note}
+          </p>
         </header>
 
         <MediaCount
@@ -314,7 +368,8 @@ export default async function PageModes({ params }: { params: Promise<{ path?: s
 
         {mode.icon.region ? (
           <p className="text-sm text-on-surface-variant">
-            Icône : région <code>{mode.icon.region}</code> de l’atlas <code>{mode.icon.atlas}</code>.
+            Icône : région <code>{mode.icon.region}</code> de l’atlas{" "}
+            <code>{mode.icon.atlas}</code>.
           </p>
         ) : null}
 
@@ -322,7 +377,7 @@ export default async function PageModes({ params }: { params: Promise<{ path?: s
           const fr = mode.texts?.fr ?? [];
           // Les slots de guide de boutons (`<CMD_BACK|10>`) sont de l'UI de manette, pas des
           // libellés d'écran : on les compte à part plutôt que de les mêler aux vrais textes.
-          const libelles = fr.filter(t => !t.text.startsWith("<"));
+          const libelles = fr.filter((t) => !t.text.startsWith("<"));
           const guides = fr.length - libelles.length;
           return (
             <section className="space-y-2">
@@ -330,20 +385,27 @@ export default async function PageModes({ params }: { params: Promise<{ path?: s
                 Textes d’interface{" "}
                 <span className="font-normal text-on-surface-variant">
                   — {libelles.length} libellé{libelles.length > 1 ? "s" : ""}
-                  {guides > 0 ? ` · ${guides} guide${guides > 1 ? "s" : ""} de boutons` : ""}
+                  {guides > 0
+                    ? ` · ${guides} guide${guides > 1 ? "s" : ""} de boutons`
+                    : ""}
                 </span>
               </h2>
               {libelles.length === 0 ? (
                 <p className="text-sm text-on-surface-variant">
-                  Aucun libellé d’interface résolu pour ce mode — ses écrans ne portent pas de slot de texte connu de{" "}
-                  <code>menu_text</code>.
+                  Aucun libellé d’interface résolu pour ce mode — ses écrans ne
+                  portent pas de slot de texte connu de <code>menu_text</code>.
                 </p>
               ) : (
                 <ul className="space-y-1">
-                  {libelles.map(t => (
-                    <li key={`${t.obj}/${t.slot}`} className="text-sm text-on-surface">
+                  {libelles.map((t) => (
+                    <li
+                      key={`${t.obj}/${t.slot}`}
+                      className="text-sm text-on-surface"
+                    >
                       {t.text.replaceAll("\\n", " ")}{" "}
-                      <span className="font-mono text-xs text-on-surface-variant">{t.slot}</span>
+                      <span className="font-mono text-xs text-on-surface-variant">
+                        {t.slot}
+                      </span>
                     </li>
                   ))}
                 </ul>
@@ -359,7 +421,7 @@ export default async function PageModes({ params }: { params: Promise<{ path?: s
           // vides en tête de galerie donnaient du mode une image fausse. On les compte
           // quand même — un écran qu'on ne sait pas encore composer est une information,
           // pas quelque chose à cacher.
-          const composes = ecransRendus.filter(e => e.sprites > 0);
+          const composes = ecransRendus.filter((e) => e.sprites > 0);
           const vides = ecransRendus.length - composes.length;
           if (composes.length === 0) return null;
           const [vedette, ...suite] = composes;
@@ -386,10 +448,15 @@ export default async function PageModes({ params }: { params: Promise<{ path?: s
                 className="w-full rounded bg-surface-container"
               />
               <p className="flex items-baseline justify-between gap-2">
-                <span className="truncate font-mono text-xs text-on-surface-variant" title={e.screen}>
+                <span
+                  className="truncate font-mono text-xs text-on-surface-variant"
+                  title={e.screen}
+                >
                   {e.screen}
                 </span>
-                <span className="shrink-0 text-xs text-on-surface-variant">{e.sprites} sprites</span>
+                <span className="shrink-0 text-xs text-on-surface-variant">
+                  {e.sprites} sprites
+                </span>
               </p>
             </li>
           );
@@ -398,16 +465,19 @@ export default async function PageModes({ params }: { params: Promise<{ path?: s
               <h2 className="text-sm font-semibold text-on-surface">
                 Écrans reconstruits{" "}
                 <span className="font-normal text-on-surface-variant">
-                  — {composes.length} sur {mode.counts.screens}, composés depuis les vraies textures + le layout{" "}
-                  <code>*_setting.cfg.bin</code> + l&apos;état produit en exécutant les scripts Lua du mode dans la VM
-                  réelle. Les mieux reconstruits d&apos;abord.
+                  — {composes.length} sur {mode.counts.screens}, composés depuis
+                  les vraies textures + le layout <code>*_setting.cfg.bin</code>{" "}
+                  + l&apos;état produit en exécutant les scripts Lua du mode
+                  dans la VM réelle. Les mieux reconstruits d&apos;abord.
                 </span>
               </h2>
               <p className="max-w-3xl text-sm text-on-surface-variant">
-                Reconstruction data-driven, pas une capture vérifiée : aucune référence pixel n&apos;existe pour ce
-                mode. La position des widgets vient des points d&apos;attache déclarés par les écrans eux-mêmes (
-                <code>CMenuAttachLocator</code>) ; ce qui n&apos;en déclare pas retombe au centre du canvas, d&apos;où
-                des éléments encore empilés sur certains écrans.
+                Reconstruction data-driven, pas une capture vérifiée : aucune
+                référence pixel n&apos;existe pour ce mode. La position des
+                widgets vient des points d&apos;attache déclarés par les écrans
+                eux-mêmes (<code>CMenuAttachLocator</code>) ; ce qui n&apos;en
+                déclare pas retombe au centre du canvas, d&apos;où des éléments
+                encore empilés sur certains écrans.
                 {vides > 0
                   ? ` ${vides} autre${vides > 1 ? "s" : ""} écran${vides > 1 ? "s" : ""} du mode ne ${vides > 1 ? "posent" : "pose"} aucun sprite résoluble et ${vides > 1 ? "ne sont" : "n’est"} pas affiché${vides > 1 ? "s" : ""} ici.`
                   : ""}
@@ -420,7 +490,7 @@ export default async function PageModes({ params }: { params: Promise<{ path?: s
        "
               >
                 {carte(vedette, true)}
-                {suite.map(e => carte(e, false))}
+                {suite.map((e) => carte(e, false))}
               </ul>
             </section>
           );
@@ -431,8 +501,10 @@ export default async function PageModes({ params }: { params: Promise<{ path?: s
             <h2 className="text-sm font-semibold text-on-surface">
               Images{" "}
               <span className="font-normal text-on-surface-variant">
-                — {vignettes.length} texture{vignettes.length > 1 ? "s" : ""} décodée
-                {vignettes.length > 1 ? "s" : ""} depuis les <code>.g4tx</code> du mode
+                — {vignettes.length} texture{vignettes.length > 1 ? "s" : ""}{" "}
+                décodée
+                {vignettes.length > 1 ? "s" : ""} depuis les <code>.g4tx</code>{" "}
+                du mode
               </span>
             </h2>
             <ul
@@ -442,14 +514,18 @@ export default async function PageModes({ params }: { params: Promise<{ path?: s
         lg:grid-cols-4
       "
             >
-              {vignettes.map(v => (
-                <li key={v.src} className="space-y-1 rounded-lg border border-outline-variant p-2">
+              {vignettes.map((v) => (
+                <li
+                  key={v.src}
+                  className="space-y-1 rounded-lg border border-outline-variant p-2"
+                >
                   {/* Damier : sans lui, une texture à fond transparent est invisible. */}
                   <div
                     className="flex items-center justify-center overflow-hidden rounded"
                     style={{
                       minHeight: "5rem",
-                      backgroundImage: "repeating-conic-gradient(rgb(0 0 0 / 0.08) 0% 25%, transparent 0% 50%)",
+                      backgroundImage:
+                        "repeating-conic-gradient(rgb(0 0 0 / 0.08) 0% 25%, transparent 0% 50%)",
                       backgroundSize: "16px 16px",
                     }}
                   >
@@ -459,15 +535,22 @@ export default async function PageModes({ params }: { params: Promise<{ path?: s
                       alt={v.nom}
                       loading="lazy"
                       className="max-h-40 max-w-full"
-                      style={{ imageRendering: v.largeur <= 256 ? "pixelated" : "auto" }}
+                      style={{
+                        imageRendering: v.largeur <= 256 ? "pixelated" : "auto",
+                      }}
                     />
                   </div>
-                  <p className="truncate font-mono text-xs text-on-surface" title={v.nom}>
+                  <p
+                    className="truncate font-mono text-xs text-on-surface"
+                    title={v.nom}
+                  >
                     {v.nom}
                   </p>
                   <p className="text-xs text-on-surface-variant">
                     {v.largeur}×{v.hauteur}
-                    {v.regions.length > 1 ? ` · ${v.regions.length} régions` : ""}
+                    {v.regions.length > 1
+                      ? ` · ${v.regions.length} régions`
+                      : ""}
                   </p>
                 </li>
               ))}
@@ -480,17 +563,22 @@ export default async function PageModes({ params }: { params: Promise<{ path?: s
             <h2 className="text-sm font-semibold text-on-surface">
               Messages du mode{" "}
               <span className="font-normal text-on-surface-variant">
-                — {messagesFr.length}, résolus par CRC-32 depuis les tables du jeu
+                — {messagesFr.length}, résolus par CRC-32 depuis les tables du
+                jeu
               </span>
             </h2>
             <p className="max-w-3xl text-sm text-on-surface-variant">
-              Ces messages ne sont nommés que dans <code>nie.exe</code> ; les tables de texte n’en portent que le hash.
-              Ce sont les phrases que le mode affiche réellement en jeu.
+              Ces messages ne sont nommés que dans <code>nie.exe</code> ; les
+              tables de texte n’en portent que le hash. Ce sont les phrases que
+              le mode affiche réellement en jeu.
             </p>
             <ul className="space-y-1">
               {messagesFr.map(([cle, m]) => (
                 <li key={cle} className="text-sm text-on-surface">
-                  {texteLisible(m.texte)} <span className="font-mono text-xs text-on-surface-variant">{cle}</span>
+                  {texteLisible(m.texte)}{" "}
+                  <span className="font-mono text-xs text-on-surface-variant">
+                    {cle}
+                  </span>
                 </li>
               ))}
             </ul>
@@ -506,13 +594,14 @@ export default async function PageModes({ params }: { params: Promise<{ path?: s
               </span>
             </h2>
             <ul className="space-y-1">
-              {contenu.screens.map(s => (
+              {contenu.screens.map((s) => (
                 <li key={s.screen}>
                   <details className="rounded-lg border border-outline-variant p-2">
                     <summary className="cursor-pointer font-mono text-xs text-on-surface">
                       {s.screen}{" "}
                       <span className="text-on-surface-variant">
-                        — {s.layers.length} calques · {s.focus} focusables · {s.octets} o
+                        — {s.layers.length} calques · {s.focus} focusables ·{" "}
+                        {s.octets} o
                       </span>
                     </summary>
                     <ul
@@ -522,8 +611,12 @@ export default async function PageModes({ params }: { params: Promise<{ path?: s
             lg:grid-cols-3
           "
                     >
-                      {s.layers.map(l => (
-                        <li key={l} className="truncate font-mono text-xs text-on-surface-variant" title={l}>
+                      {s.layers.map((l) => (
+                        <li
+                          key={l}
+                          className="truncate font-mono text-xs text-on-surface-variant"
+                          title={l}
+                        >
                           {l}
                         </li>
                       ))}
@@ -540,11 +633,12 @@ export default async function PageModes({ params }: { params: Promise<{ path?: s
             <h2 className="text-sm font-semibold text-on-surface">
               Objets de menu, en détail{" "}
               <span className="font-normal text-on-surface-variant">
-                — {contenu.objbins.length} <code>.objbin</code> parsés, avec leurs composants
+                — {contenu.objbins.length} <code>.objbin</code> parsés, avec
+                leurs composants
               </span>
             </h2>
             <ul className="space-y-1">
-              {contenu.objbins.map(o => (
+              {contenu.objbins.map((o) => (
                 <li key={o.path}>
                   <details className="rounded-lg border border-outline-variant p-2">
                     <summary className="cursor-pointer font-mono text-xs text-on-surface">
@@ -555,18 +649,24 @@ export default async function PageModes({ params }: { params: Promise<{ path?: s
                     </summary>
                     <div className="mt-2 space-y-1 text-xs text-on-surface-variant">
                       {o.objet.g4pkm_path ? (
-                        <p className="truncate font-mono" title={o.objet.g4pkm_path}>
+                        <p
+                          className="truncate font-mono"
+                          title={o.objet.g4pkm_path}
+                        >
                           pack : {o.objet.g4pkm_path}
                         </p>
                       ) : null}
                       {o.objet.g4tx_path ? (
-                        <p className="truncate font-mono" title={o.objet.g4tx_path}>
+                        <p
+                          className="truncate font-mono"
+                          title={o.objet.g4tx_path}
+                        >
                           texture : {o.objet.g4tx_path}
                         </p>
                       ) : null}
                       <p className="font-mono">
                         {o.objet.components
-                          .map(c => Object.values(c)[0]?.type_name)
+                          .map((c) => Object.values(c)[0]?.type_name)
                           .filter(Boolean)
                           .join(" · ")}
                       </p>
@@ -578,23 +678,26 @@ export default async function PageModes({ params }: { params: Promise<{ path?: s
           </section>
         ) : null}
 
-        {contenu && contenu.lua.some(l => l.instructions !== undefined) ? (
+        {contenu && contenu.lua.some((l) => l.instructions !== undefined) ? (
           <section className="space-y-2">
             <h2 className="text-sm font-semibold text-on-surface">
               Scripts Lua, en détail{" "}
               <span className="font-normal text-on-surface-variant">
-                — {contenu.lua.length} scripts, désassemblés depuis le bytecode Lua 5.2 RÉEL (pas une décompilation
-                externe) via <code>nie-lua::bytecode</code>
+                — {contenu.lua.length} scripts, désassemblés depuis le bytecode
+                Lua 5.2 RÉEL (pas une décompilation externe) via{" "}
+                <code>nie-lua::bytecode</code>
               </span>
             </h2>
             <p className="max-w-3xl text-sm text-on-surface-variant">
-              Les commandes listées sont les entiers du script qui correspondent à un <code>cmdId</code> `
-              <code>funcLuaMenuCommand</code>` connu du dump de reverse — ce que le script est structurellement capable
-              d&apos;envoyer au moteur, pas une trace d&apos;exécution. `<code>?</code>` = cmdId reversé (adresse
-              connue) mais dont la sémantique n&apos;est pas encore modélisée.
+              Les commandes listées sont les entiers du script qui correspondent
+              à un <code>cmdId</code> `<code>funcLuaMenuCommand</code>` connu du
+              dump de reverse — ce que le script est structurellement capable
+              d&apos;envoyer au moteur, pas une trace d&apos;exécution. `
+              <code>?</code>` = cmdId reversé (adresse connue) mais dont la
+              sémantique n&apos;est pas encore modélisée.
             </p>
             <ul className="space-y-1">
-              {contenu.lua.map(l => {
+              {contenu.lua.map((l) => {
                 const nom = l.path.split("/").pop() ?? l.path;
                 return (
                   <li key={l.path}>
@@ -613,7 +716,7 @@ export default async function PageModes({ params }: { params: Promise<{ path?: s
                           {l.includes && l.includes.length > 0 ? (
                             <p>
                               inclut :{" "}
-                              {l.includes.map(i => (
+                              {l.includes.map((i) => (
                                 <code key={i} className="mr-1">
                                   {i}
                                 </code>
@@ -628,9 +731,10 @@ export default async function PageModes({ params }: { params: Promise<{ path?: s
                 lg:grid-cols-3
               "
                             >
-                              {l.commandes.map(c => (
+                              {l.commandes.map((c) => (
                                 <li key={c.cmdId} className="font-mono">
-                                  {c.nom ?? "?"} <span className="opacity-70">{c.cmdId}</span>
+                                  {c.nom ?? "?"}{" "}
+                                  <span className="opacity-70">{c.cmdId}</span>
                                 </li>
                               ))}
                             </ul>
@@ -646,7 +750,7 @@ export default async function PageModes({ params }: { params: Promise<{ path?: s
         ) : null}
 
         <div className="space-y-6">
-          {familles.map(f => (
+          {familles.map((f) => (
             <section key={f.kind} className="space-y-2">
               <h2 className="text-sm font-semibold text-on-surface">
                 {f.label}{" "}
@@ -655,7 +759,9 @@ export default async function PageModes({ params }: { params: Promise<{ path?: s
                 </span>
               </h2>
               {f.entrees.length === 0 ? (
-                <p className="text-sm text-on-surface-variant">Aucun fichier de cette famille pour ce mode.</p>
+                <p className="text-sm text-on-surface-variant">
+                  Aucun fichier de cette famille pour ce mode.
+                </p>
               ) : (
                 <ul
                   className="
@@ -664,8 +770,12 @@ export default async function PageModes({ params }: { params: Promise<{ path?: s
           lg:grid-cols-3
         "
                 >
-                  {f.entrees.map(e => (
-                    <li key={e} className="truncate font-mono text-xs text-on-surface-variant" title={e}>
+                  {f.entrees.map((e) => (
+                    <li
+                      key={e}
+                      className="truncate font-mono text-xs text-on-surface-variant"
+                      title={e}
+                    >
                       {e.split("/").pop()}
                     </li>
                   ))}
@@ -680,8 +790,8 @@ export default async function PageModes({ params }: { params: Promise<{ path?: s
 
   // ── Liste des modes ────────────────────────────────────────────────────────
   const total = modes.reduce((n, m) => n + m.counts.screens, 0);
-  const officiels = modes.filter(m => m.official);
-  const autres = modes.filter(m => !m.official);
+  const officiels = modes.filter((m) => m.official);
+  const autres = modes.filter((m) => !m.official);
 
   const carte = (m: Mode) => {
     const textures = m.assets.g4tx?.length ?? 0;
@@ -695,9 +805,14 @@ export default async function PageModes({ params }: { params: Promise<{ path?: s
      "
         >
           <span className="block font-semibold text-on-surface">{m.label}</span>
-          {m.labelJa ? <span className="block text-xs text-on-surface-variant">{m.labelJa}</span> : null}
+          {m.labelJa ? (
+            <span className="block text-xs text-on-surface-variant">
+              {m.labelJa}
+            </span>
+          ) : null}
           <span className="mt-1 block text-xs text-on-surface-variant">
-            {m.counts.screens} écran{m.counts.screens > 1 ? "s" : ""} · {m.counts.layers} calques · {textures} texture
+            {m.counts.screens} écran{m.counts.screens > 1 ? "s" : ""} ·{" "}
+            {m.counts.layers} calques · {textures} texture
             {textures > 1 ? "s" : ""}
           </span>
         </Link>
@@ -712,12 +827,17 @@ export default async function PageModes({ params }: { params: Promise<{ path?: s
         title="Modes de jeu"
         description="Les modes du menu principal, et les fichiers dont ils sont faits. Les comptes sont mesurés sur le VFS du jeu."
       />
-      <MediaCount left={`${modes.length} modes`} right={`${total} écrans au total`} />
+      <MediaCount
+        left={`${modes.length} modes`}
+        right={`${total} écrans au total`}
+      />
 
       <section className="space-y-2">
         <h2 className="text-sm font-semibold text-on-surface">
           Modes de jeu{" "}
-          <span className="font-normal text-on-surface-variant">— {officiels.length}, énumérés par le jeu</span>
+          <span className="font-normal text-on-surface-variant">
+            — {officiels.length}, énumérés par le jeu
+          </span>
         </h2>
         <ul
           className="

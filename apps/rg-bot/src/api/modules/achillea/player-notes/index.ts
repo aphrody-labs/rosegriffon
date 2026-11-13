@@ -18,8 +18,15 @@ async function access(
   tournamentId?: number | null,
 ) {
   const session = await resolveAchilleaSession(headers);
-  if (!session) return { error: status(401, { message: "Authentication required" as const }) };
-  const actor = await db.selectFrom("user").select("role").where("id", "=", session.id).executeTakeFirst();
+  if (!session)
+    return {
+      error: status(401, { message: "Authentication required" as const }),
+    };
+  const actor = await db
+    .selectFrom("user")
+    .select("role")
+    .where("id", "=", session.id)
+    .executeTakeFirst();
   const staff = (actor?.role ?? 0) >= 2;
   if (!staff && tournamentId !== undefined && tournamentId !== null) {
     const manager = await db
@@ -30,7 +37,12 @@ async function access(
       .executeTakeFirst();
     if (manager) return { session, staff: false };
   }
-  if (!staff) return { error: status(403, { message: "Staff or tournament organizer required" as const }) };
+  if (!staff)
+    return {
+      error: status(403, {
+        message: "Staff or tournament organizer required" as const,
+      }),
+    };
   return { session, staff: true };
 }
 
@@ -48,7 +60,9 @@ function dto(row: any) {
     id: row.id,
     target: user("target"),
     author: user("author"),
-    tournament: row.tournament_id_join ? { id: row.tournament_id_join, name: row.tournament_name } : null,
+    tournament: row.tournament_id_join
+      ? { id: row.tournament_id_join, name: row.tournament_name }
+      : null,
     category: row.category,
     severity: row.severity,
     content: row.content,
@@ -86,7 +100,10 @@ export const playerNotesController = new Elysia({ prefix: "/player-notes" })
       const auth = await access(db, headers, params.tournamentId);
       if (auth.error) return auth.error;
       const page = Math.max(1, Math.floor(params.page ?? 1));
-      const pageSize = Math.min(100, Math.max(1, Math.floor(params.pageSize ?? 50)));
+      const pageSize = Math.min(
+        100,
+        Math.max(1, Math.floor(params.pageSize ?? 50)),
+      );
       let base: any = query(db);
       let count: any = db.selectFrom("player_note as note");
       if (params.targetId) {
@@ -120,13 +137,20 @@ export const playerNotesController = new Elysia({ prefix: "/player-notes" })
           .limit(pageSize)
           .offset((page - 1) * pageSize)
           .execute(),
-        count.select(({ fn }: any) => fn.countAll().as("count")).executeTakeFirst(),
+        count
+          .select(({ fn }: any) => fn.countAll().as("count"))
+          .executeTakeFirst(),
       ]);
       const total = Number(totalRow?.count ?? 0);
       return {
         data: rows.map(dto),
         total,
-        meta: { page, pageSize, pageCount: Math.ceil(total / pageSize), isStaff: auth.staff },
+        meta: {
+          page,
+          pageSize,
+          pageCount: Math.ceil(total / pageSize),
+          isStaff: auth.staff,
+        },
       };
     },
     {
@@ -152,9 +176,18 @@ export const playerNotesController = new Elysia({ prefix: "/player-notes" })
         .select(["severity", "resolved"])
         .where("target_id", "=", userId)
         .execute();
-      const bySeverity: Record<string, number> = { info: 0, warning: 0, serious: 0 };
-      for (const row of rows) bySeverity[row.severity] = (bySeverity[row.severity] ?? 0) + 1;
-      return { total: rows.length, open: rows.filter(row => !row.resolved).length, bySeverity };
+      const bySeverity: Record<string, number> = {
+        info: 0,
+        warning: 0,
+        serious: 0,
+      };
+      for (const row of rows)
+        bySeverity[row.severity] = (bySeverity[row.severity] ?? 0) + 1;
+      return {
+        total: rows.length,
+        open: rows.filter((row) => !row.resolved).length,
+        bySeverity,
+      };
     },
     { params: t.Object({ userId: t.String() }) },
   )
@@ -164,8 +197,13 @@ export const playerNotesController = new Elysia({ prefix: "/player-notes" })
       const auth = await access(db, headers, body.tournamentId);
       if (auth.error) return auth.error;
       const content = body.content.trim();
-      if (content.length < 3) return status(400, { message: "Note content is too short" as const });
-      const target = await db.selectFrom("user").select("id").where("id", "=", body.targetId).executeTakeFirst();
+      if (content.length < 3)
+        return status(400, { message: "Note content is too short" as const });
+      const target = await db
+        .selectFrom("user")
+        .select("id")
+        .where("id", "=", body.targetId)
+        .executeTakeFirst();
       if (!target) return status(404, { message: "Player not found" as const });
       const row = await db
         .insertInto("player_note")
@@ -182,7 +220,9 @@ export const playerNotesController = new Elysia({ prefix: "/player-notes" })
         })
         .returning("id")
         .executeTakeFirstOrThrow();
-      return dto(await query(db).where("note.id", "=", row.id).executeTakeFirstOrThrow());
+      return dto(
+        await query(db).where("note.id", "=", row.id).executeTakeFirstOrThrow(),
+      );
     },
     {
       body: t.Object({
@@ -199,16 +239,27 @@ export const playerNotesController = new Elysia({ prefix: "/player-notes" })
     async ({ db, headers, params: { id }, body }) => {
       const auth = await access(db, headers);
       if (auth.error) return auth.error;
-      const note = await db.selectFrom("player_note").select(["author_id"]).where("id", "=", id).executeTakeFirst();
+      const note = await db
+        .selectFrom("player_note")
+        .select(["author_id"])
+        .where("id", "=", id)
+        .executeTakeFirst();
       if (!note) return status(404, { message: "Note not found" as const });
       if (note.author_id !== auth.session.id && !auth.staff)
         return status(403, { message: "Note ownership required" as const });
       const values: Record<string, unknown> = { updated_at: new Date() };
-      if (body.content !== undefined) values.content = body.content.trim().slice(0, 2000);
+      if (body.content !== undefined)
+        values.content = body.content.trim().slice(0, 2000);
       if (body.category !== undefined) values.category = body.category;
       if (body.severity !== undefined) values.severity = body.severity;
-      await db.updateTable("player_note").set(values).where("id", "=", id).execute();
-      return dto(await query(db).where("note.id", "=", id).executeTakeFirstOrThrow());
+      await db
+        .updateTable("player_note")
+        .set(values)
+        .where("id", "=", id)
+        .execute();
+      return dto(
+        await query(db).where("note.id", "=", id).executeTakeFirstOrThrow(),
+      );
     },
     {
       params: t.Object({ id: t.String() }),
@@ -224,8 +275,13 @@ export const playerNotesController = new Elysia({ prefix: "/player-notes" })
     async ({ db, headers, params: { id, action } }) => {
       const auth = await access(db, headers);
       if (auth.error) return auth.error;
-      if (action !== "resolve" && action !== "reopen") return status(404, { message: "Unknown action" as const });
-      const exists = await db.selectFrom("player_note").select("id").where("id", "=", id).executeTakeFirst();
+      if (action !== "resolve" && action !== "reopen")
+        return status(404, { message: "Unknown action" as const });
+      const exists = await db
+        .selectFrom("player_note")
+        .select("id")
+        .where("id", "=", id)
+        .executeTakeFirst();
       if (!exists) return status(404, { message: "Note not found" as const });
       const resolved = action === "resolve";
       await db
@@ -238,7 +294,9 @@ export const playerNotesController = new Elysia({ prefix: "/player-notes" })
         })
         .where("id", "=", id)
         .execute();
-      return dto(await query(db).where("note.id", "=", id).executeTakeFirstOrThrow());
+      return dto(
+        await query(db).where("note.id", "=", id).executeTakeFirstOrThrow(),
+      );
     },
     { params: t.Object({ id: t.String(), action: t.String() }) },
   )

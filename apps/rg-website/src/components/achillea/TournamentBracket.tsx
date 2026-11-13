@@ -62,13 +62,16 @@ export function TournamentBracket({
         avatar: p.user?.avatar,
       };
       if (p.id != null) map.set(String(p.id), info);
-      if (p.bracketParticipantId != null) map.set(String(p.bracketParticipantId), info);
+      if (p.bracketParticipantId != null)
+        map.set(String(p.bracketParticipantId), info);
     }
     return map;
   }, [participants]);
 
   const raw = bracketData as RawBracketData | null;
-  const hasRealMatches = Boolean(raw?.match && Array.isArray(raw.match) && raw.match.length > 0);
+  const hasRealMatches = Boolean(
+    raw?.match && Array.isArray(raw.match) && raw.match.length > 0,
+  );
 
   // Regroupement des matchs par Round
   const rounds = useMemo(() => {
@@ -102,14 +105,16 @@ export function TournamentBracket({
   if (!hasRealMatches || rounds.length === 0) {
     const totalSlots = Math.max(4, Math.min(64, maxSlots));
     const totalRounds = Math.ceil(Math.log2(totalSlots));
-    const simulatedRounds = Array.from({ length: totalRounds }).map((_, rIdx) => {
-      const matchesCount = totalSlots / 2 ** (rIdx + 1);
-      return {
-        roundIndex: rIdx,
-        title: getRoundTitle(rIdx, totalRounds),
-        matchesCount: Math.max(1, matchesCount),
-      };
-    });
+    const simulatedRounds = Array.from({ length: totalRounds }).map(
+      (_, rIdx) => {
+        const matchesCount = totalSlots / 2 ** (rIdx + 1);
+        return {
+          roundIndex: rIdx,
+          title: getRoundTitle(rIdx, totalRounds),
+          matchesCount: Math.max(1, matchesCount),
+        };
+      },
+    );
 
     return (
       <div className="space-y-6">
@@ -123,11 +128,15 @@ export function TournamentBracket({
                 Arbre de compétition prévisionnel
               </h4>
               <p className="text-lg text-muted-foreground mt-0.5">
-                L&apos;arbre officiel sera calculé et verrouillé par l&apos;arbitrage dès la clôture des inscriptions.
+                L&apos;arbre officiel sera calculé et verrouillé par
+                l&apos;arbitrage dès la clôture des inscriptions.
               </p>
             </div>
           </div>
-          <Badge variant="outline" className="text-lg border-warning/40 text-warning">
+          <Badge
+            variant="outline"
+            className="text-lg border-warning/40 text-warning"
+          >
             {participants.length} / {totalSlots} participants inscrits
           </Badge>
         </div>
@@ -170,7 +179,9 @@ export function TournamentBracket({
                               {p1?.user?.username || "En attente"}
                             </span>
                           </div>
-                          <span className="font-mono text-lg font-bold text-muted-foreground">-</span>
+                          <span className="font-mono text-lg font-bold text-muted-foreground">
+                            -
+                          </span>
                         </div>
 
                         <div className="border-t border-outline-variant/15" />
@@ -194,7 +205,9 @@ export function TournamentBracket({
                               {p2?.user?.username || "En attente"}
                             </span>
                           </div>
-                          <span className="font-mono text-lg font-bold text-muted-foreground">-</span>
+                          <span className="font-mono text-lg font-bold text-muted-foreground">
+                            -
+                          </span>
                         </div>
                       </div>
                     );
@@ -228,7 +241,10 @@ export function TournamentBracket({
           </div>
         </div>
 
-        <Badge variant="outline" className="border-success/40 text-success text-lg gap-1.5">
+        <Badge
+          variant="outline"
+          className="border-success/40 text-success text-lg gap-1.5"
+        >
           Matchs enregistrés
         </Badge>
       </div>
@@ -240,7 +256,10 @@ export function TournamentBracket({
             const isFinal = rIdx === rounds.length - 1;
 
             return (
-              <div key={round.roundId} className="flex-1 flex flex-col space-y-4">
+              <div
+                key={round.roundId}
+                className="flex-1 flex flex-col space-y-4"
+              >
                 <div
                   className={`text-center font-bold text-lg uppercase tracking-wider py-2 px-3 rounded-xl border shadow-xs flex items-center justify-center gap-1.5 ${
                     isFinal
@@ -253,9 +272,15 @@ export function TournamentBracket({
                 </div>
 
                 <div className="space-y-6 flex-1 flex flex-col justify-around">
-                  {round.matches.map(m => {
-                    const opp1Info = m.opponent1?.id != null ? participantMap.get(String(m.opponent1.id)) : null;
-                    const opp2Info = m.opponent2?.id != null ? participantMap.get(String(m.opponent2.id)) : null;
+                  {round.matches.map((m) => {
+                    const opp1Info =
+                      m.opponent1?.id != null
+                        ? participantMap.get(String(m.opponent1.id))
+                        : null;
+                    const opp2Info =
+                      m.opponent2?.id != null
+                        ? participantMap.get(String(m.opponent2.id))
+                        : null;
 
                     const isWon1 = m.opponent1?.result === "win";
                     const isWon2 = m.opponent2?.result === "win";
@@ -267,7 +292,9 @@ export function TournamentBracket({
                       <button
                         type="button"
                         key={m.id}
-                        onClick={onSelectMatch ? () => onSelectMatch(m.id) : undefined}
+                        onClick={
+                          onSelectMatch ? () => onSelectMatch(m.id) : undefined
+                        }
                         tabIndex={onSelectMatch ? undefined : -1}
                         aria-label={
                           onSelectMatch
@@ -275,14 +302,18 @@ export function TournamentBracket({
                             : undefined
                         }
                         className={`block w-full text-left p-3.5 min-h-11 rounded-2xl border transition-all duration-200 shadow-xs relative group focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-primary ${
-                          onSelectMatch ? "hover:border-primary/60 hover:shadow-md active:scale-[0.99]" : ""
+                          onSelectMatch
+                            ? "hover:border-primary/60 hover:shadow-md active:scale-[0.99]"
+                            : ""
                         } bg-surface-container/70 backdrop-blur-md border-outline-variant/20`}
                       >
                         <div className="space-y-2.5">
                           {/* Opponent 1 */}
                           <div
                             className={`flex items-center justify-between gap-2 text-lg p-1.5 rounded-lg transition ${
-                              isWon1 ? "bg-success/10 text-success font-bold" : "text-foreground font-medium"
+                              isWon1
+                                ? "bg-success/10 text-success font-bold"
+                                : "text-foreground font-medium"
                             }`}
                           >
                             <div className="flex items-center gap-2 truncate">
@@ -293,7 +324,9 @@ export function TournamentBracket({
                               />
                               <span className="truncate">
                                 {opp1Info?.username ||
-                                  (m.opponent1?.id != null ? `Participant #${m.opponent1.id}` : "En attente")}
+                                  (m.opponent1?.id != null
+                                    ? `Participant #${m.opponent1.id}`
+                                    : "En attente")}
                               </span>
                             </div>
                             <span className="font-mono text-lg font-bold px-1.5 py-0.5 rounded bg-surface-container-high border border-outline-variant/15">
@@ -306,7 +339,9 @@ export function TournamentBracket({
                           {/* Opponent 2 */}
                           <div
                             className={`flex items-center justify-between gap-2 text-lg p-1.5 rounded-lg transition ${
-                              isWon2 ? "bg-success/10 text-success font-bold" : "text-foreground font-medium"
+                              isWon2
+                                ? "bg-success/10 text-success font-bold"
+                                : "text-foreground font-medium"
                             }`}
                           >
                             <div className="flex items-center gap-2 truncate">
@@ -317,7 +352,9 @@ export function TournamentBracket({
                               />
                               <span className="truncate">
                                 {opp2Info?.username ||
-                                  (m.opponent2?.id != null ? `Participant #${m.opponent2.id}` : "En attente")}
+                                  (m.opponent2?.id != null
+                                    ? `Participant #${m.opponent2.id}`
+                                    : "En attente")}
                               </span>
                             </div>
                             <span className="font-mono text-lg font-bold px-1.5 py-0.5 rounded bg-surface-container-high border border-outline-variant/15">

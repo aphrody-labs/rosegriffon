@@ -6,7 +6,12 @@ describe("Rose Griffon Unified API Infrastructure Suite (Elysia + Bun)", () => {
   test("GET /health renvoie le statut opérationnel et les métriques système", async () => {
     const res = await app.handle(new Request("http://localhost/health"));
     expect(res.status).toBe(200);
-    const body = (await res.json()) as { status: string; service: string; uptime: number; timestamp: number };
+    const body = (await res.json()) as {
+      status: string;
+      service: string;
+      uptime: number;
+      timestamp: number;
+    };
     expect(body.status).toBe("ok");
     expect(body.service).toBe("rg-api");
     expect(typeof body.uptime).toBe("number");
@@ -19,8 +24,12 @@ describe("Rose Griffon Unified API Infrastructure Suite (Elysia + Bun)", () => {
       headers: { Origin: "https://rosegriffon.fr" },
     });
     const resLegit = await app.handle(reqLegit);
-    expect(resLegit.headers.get("access-control-allow-origin")).toBe("https://rosegriffon.fr");
-    expect(resLegit.headers.get("access-control-allow-credentials")).toBe("true");
+    expect(resLegit.headers.get("access-control-allow-origin")).toBe(
+      "https://rosegriffon.fr",
+    );
+    expect(resLegit.headers.get("access-control-allow-credentials")).toBe(
+      "true",
+    );
 
     // 2. Origine hostile / inconnue
     const reqEvil = new Request("http://localhost/health", {
@@ -41,8 +50,11 @@ describe("Rose Griffon Unified API Infrastructure Suite (Elysia + Bun)", () => {
     });
     const res = await app.handle(preflight);
     expect([200, 204]).toContain(res.status);
-    expect(res.headers.get("access-control-allow-origin")).toBe("https://rosegriffon.fr");
-    const allowedMethods = res.headers.get("access-control-allow-methods") ?? "";
+    expect(res.headers.get("access-control-allow-origin")).toBe(
+      "https://rosegriffon.fr",
+    );
+    const allowedMethods =
+      res.headers.get("access-control-allow-methods") ?? "";
     expect(allowedMethods).toContain("POST");
   });
 
@@ -54,7 +66,9 @@ describe("Rose Griffon Unified API Infrastructure Suite (Elysia + Bun)", () => {
   });
 
   test("Gestion uniforme des routes inexistantes (404 Not Found)", async () => {
-    const res = await app.handle(new Request("http://localhost/v1/unknown-endpoint-404"));
+    const res = await app.handle(
+      new Request("http://localhost/v1/unknown-endpoint-404"),
+    );
     expect(res.status).toBe(404);
   });
 

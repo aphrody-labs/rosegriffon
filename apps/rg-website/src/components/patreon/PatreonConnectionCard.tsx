@@ -131,7 +131,12 @@ export function PatreonConnectionCard({ isLinked, hasDiscord }: Props) {
             </div>
           </div>
           {isLinked ? (
-            <Button variant="outline" size="sm" onClick={() => setConfirmOpen(true)} disabled={busy}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setConfirmOpen(true)}
+              disabled={busy}
+            >
               <X className="mr-2 size-4" />
               {message("account.patreon.action.disconnect")}
             </Button>
@@ -142,7 +147,11 @@ export function PatreonConnectionCard({ isLinked, hasDiscord }: Props) {
               disabled={busy}
               className="bg-patreon text-white hover:bg-[#e63b46]"
             >
-              {busy ? <Loader2 className="mr-2 size-4 animate-spin" /> : <Link2 className="mr-2 size-4" />}
+              {busy ? (
+                <Loader2 className="mr-2 size-4 animate-spin" />
+              ) : (
+                <Link2 className="mr-2 size-4" />
+              )}
               {message("account.patreon.action.link")}
             </Button>
           )}
@@ -152,15 +161,20 @@ export function PatreonConnectionCard({ isLinked, hasDiscord }: Props) {
       <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>{message("account.patreon.confirmDisconnect.title")}</AlertDialogTitle>
+            <AlertDialogTitle>
+              {message("account.patreon.confirmDisconnect.title")}
+            </AlertDialogTitle>
             <AlertDialogDescription>
-              Votre tier ne sera plus synchronisé automatiquement. Vous pourrez relier le compte à tout moment.
+              Votre tier ne sera plus synchronisé automatiquement. Vous pourrez
+              relier le compte à tout moment.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={busy}>{message("common.action.cancel")}</AlertDialogCancel>
+            <AlertDialogCancel disabled={busy}>
+              {message("common.action.cancel")}
+            </AlertDialogCancel>
             <AlertDialogAction
-              onClick={e => {
+              onClick={(e) => {
                 e.preventDefault();
                 disconnect();
               }}
@@ -182,8 +196,9 @@ export function PatreonConnectionCard({ isLinked, hasDiscord }: Props) {
             </div>
             <DialogTitle>Liez votre Patreon</DialogTitle>
             <DialogDescription>
-              Votre compte Discord est déjà connecté. Reliez votre Patreon en deux clics : votre tier sera synchronisé
-              automatiquement et votre rôle Discord conservé.
+              Votre compte Discord est déjà connecté. Reliez votre Patreon en
+              deux clics : votre tier sera synchronisé automatiquement et votre
+              rôle Discord conservé.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-2 sm:gap-2">
@@ -198,7 +213,11 @@ export function PatreonConnectionCard({ isLinked, hasDiscord }: Props) {
               disabled={busy}
               className="bg-patreon text-white hover:bg-[#e63b46]"
             >
-              {busy ? <Loader2 className="mr-2 size-4 animate-spin" /> : <Link2 className="mr-2 size-4" />}
+              {busy ? (
+                <Loader2 className="mr-2 size-4 animate-spin" />
+              ) : (
+                <Link2 className="mr-2 size-4" />
+              )}
               {message("account.patreon.action.link")}
             </Button>
           </DialogFooter>

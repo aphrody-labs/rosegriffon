@@ -7,22 +7,31 @@
  * tâche n'est inventée : une tâche du registre absente du catalogue est
  * affichée telle quelle, en lecture seule.
  */
-import type { DescriptionTache, FamilleTache, NiveauTache } from "@rosegriffon/types/cron";
+import type {
+  DescriptionTache,
+  FamilleTache,
+  NiveauTache,
+} from "@rosegriffon/types/cron";
 
 /**
  * Tâches à effet financier : jamais déclenchables depuis le site, même par un
  * administrateur. Elles restent lançables en CLI sur le serveur.
  */
-export const TACHES_LECTURE_SEULE: Readonly<Record<string, string>> = Object.freeze({
-  "achillea:seasons": "Clôture des saisons et distribution des récompenses : effet financier, lancement manuel interdit.",
-  "achillea:weekly-payout": "Versement hebdomadaire : effet financier, lancement manuel interdit.",
-});
+export const TACHES_LECTURE_SEULE: Readonly<Record<string, string>> =
+  Object.freeze({
+    "achillea:seasons":
+      "Clôture des saisons et distribution des récompenses : effet financier, lancement manuel interdit.",
+    "achillea:weekly-payout":
+      "Versement hebdomadaire : effet financier, lancement manuel interdit.",
+  });
 
 /** Nom sous lequel l'historique consigne une tâche, quand il diffère du nom public. */
-export const ALIAS_HISTORIQUE: Readonly<Record<string, string>> = Object.freeze({
-  db: "db:sync",
-  discord: "discord:sync",
-});
+export const ALIAS_HISTORIQUE: Readonly<Record<string, string>> = Object.freeze(
+  {
+    db: "db:sync",
+    discord: "discord:sync",
+  },
+);
 
 export interface ExecutionBrute {
   tache: string;
@@ -65,10 +74,12 @@ export function resumerExecutions(lignes: readonly ExecutionBrute[]): {
   for (const ligne of lignes) {
     const t = Date.parse(ligne.demarre_le);
     const courante = dernieres.get(ligne.tache);
-    if (!courante || t > Date.parse(courante.demarre_le)) dernieres.set(ligne.tache, ligne);
+    if (!courante || t > Date.parse(courante.demarre_le))
+      dernieres.set(ligne.tache, ligne);
     if (!ligne.succes) {
       const echec = echecs.get(ligne.tache);
-      if (!echec || t > Date.parse(echec.demarre_le)) echecs.set(ligne.tache, ligne);
+      if (!echec || t > Date.parse(echec.demarre_le))
+        echecs.set(ligne.tache, ligne);
     }
   }
   return { dernieres, echecs };
@@ -82,10 +93,10 @@ export function construireTaches(
   const alias = { ...ALIAS_HISTORIQUE, ...reponse?.alias };
   const horsServerless = reponse?.horsServerless ?? {};
   const { dernieres, echecs } = resumerExecutions(executions);
-  const parNom = new Map(catalogue.map(t => [t.nom as string, t]));
+  const parNom = new Map(catalogue.map((t) => [t.nom as string, t]));
 
   // Ordre : catalogue d'abord, puis les tâches du registre qu'il ne décrit pas.
-  const noms = catalogue.map(t => t.nom as string);
+  const noms = catalogue.map((t) => t.nom as string);
   for (const nom of [...(reponse?.registre ?? []), ...(reponse?.tasks ?? [])]) {
     if (!noms.includes(nom)) noms.push(nom);
   }
@@ -96,12 +107,16 @@ export function construireTaches(
     const lectureSeule = TACHES_LECTURE_SEULE[nom] ?? null;
     let motifBlocage: string | null = null;
     if (lectureSeule) motifBlocage = lectureSeule;
-    else if (!decrite) motifBlocage = "Tâche absente du catalogue partagé : lançable seulement en CLI sur le serveur.";
-    else if (decrite.niveau === "interdit") motifBlocage = decrite.motifInterdiction ?? "Lancement interdit.";
+    else if (!decrite)
+      motifBlocage =
+        "Tâche absente du catalogue partagé : lançable seulement en CLI sur le serveur.";
+    else if (decrite.niveau === "interdit")
+      motifBlocage = decrite.motifInterdiction ?? "Lancement interdit.";
     return {
       nom,
       titre: decrite?.titre ?? nom,
-      role: decrite?.role ?? "Tâche du registre, non décrite au catalogue partagé.",
+      role:
+        decrite?.role ?? "Tâche du registre, non décrite au catalogue partagé.",
       planification: decrite?.planification ?? "manuel",
       famille: decrite?.famille ?? "autre",
       niveau: decrite?.niveau ?? "cli",
@@ -139,5 +154,7 @@ export function peutLancerDepuisLeSite(
   tache: Pick<TacheAdmin, "motifBlocage">,
   role: string | null | undefined,
 ): boolean {
-  return tache.motifBlocage === null && (role === "admin" || role === "superadmin");
+  return (
+    tache.motifBlocage === null && (role === "admin" || role === "superadmin")
+  );
 }

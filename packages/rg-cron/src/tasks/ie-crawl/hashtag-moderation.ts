@@ -54,8 +54,12 @@ function sql(): SQL {
 /** Résumé d'une ligne pour la sortie console. */
 function ligne(p: PostModere): string {
   const etat = p.masque ? "MASQUÉ " : p.mis_en_avant ? "À LA UNE" : "visible ";
-  const auteur = p.author_username ? `@${p.author_username}` : "(auteur inconnu)";
-  const url = p.author_username ? urlTweet(p.author_username, p.tweet_id) : p.tweet_id;
+  const auteur = p.author_username
+    ? `@${p.author_username}`
+    : "(auteur inconnu)";
+  const url = p.author_username
+    ? urlTweet(p.author_username, p.tweet_id)
+    : p.tweet_id;
   const motif = p.motif_masquage ? ` — ${p.motif_masquage}` : "";
   return `  ${etat} ${p.campagne_slug.padEnd(18)} ${auteur.padEnd(20)} ${url}${motif}`;
 }
@@ -115,7 +119,7 @@ async function fichiersDuPost(db: SQL, tweetId: string): Promise<string[]> {
 		select name from storage.objects
 		 where bucket_id = 'tweets' and name like ${`${tweetId}/%`}
 		 order by name`) as Array<{ name: string }>;
-  return lignes.map(l => l.name);
+  return lignes.map((l) => l.name);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -174,7 +178,9 @@ async function principal(argv: readonly string[]): Promise<number> {
     if (aMasquer) {
       const motif = valeur(argv, "--motif");
       if (!motif?.trim()) {
-        console.error("[Modération X] --motif est obligatoire avec --masquer (trace de la demande de retrait).");
+        console.error(
+          "[Modération X] --motif est obligatoire avec --masquer (trace de la demande de retrait).",
+        );
         return 1;
       }
       champs = { masque: true, motif: motif.trim() };
@@ -188,7 +194,9 @@ async function principal(argv: readonly string[]): Promise<number> {
 
     const touches = await changerModeration(db, cible, champs, slug);
     if (touches.length === 0) {
-      console.error(`[Modération X] Aucune publication ${cible}${slug ? ` dans la campagne ${slug}` : ""}.`);
+      console.error(
+        `[Modération X] Aucune publication ${cible}${slug ? ` dans la campagne ${slug}` : ""}.`,
+      );
       return 1;
     }
     console.log(`[Modération X] ${touches.length} ligne(s) mise(s) à jour :`);
@@ -208,7 +216,10 @@ async function principal(argv: readonly string[]): Promise<number> {
     }
     return 0;
   } catch (err) {
-    console.error("[Modération X] Échec :", err instanceof Error ? err.message : String(err));
+    console.error(
+      "[Modération X] Échec :",
+      err instanceof Error ? err.message : String(err),
+    );
     return 1;
   } finally {
     await db.end();

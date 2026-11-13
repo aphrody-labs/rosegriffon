@@ -13,7 +13,15 @@ import { PopularArticles } from "@/components/news/PopularArticles";
 import { TagCloud } from "@/components/news/TagCloud";
 import { TrendingArticles } from "@/components/news/TrendingArticles";
 import { useLanguage } from "@/components/providers/language-provider";
-import { Button, Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@rosegriffon/ui";
+import {
+  Button,
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@rosegriffon/ui";
 import { SearchBar } from "@/components/ui/search-bar";
 import { WikiPagination } from "@/components/wiki/WikiPagination";
 import { ExternalLink, Newspaper, Twitter, X } from "@/lib/icons-config";
@@ -77,7 +85,8 @@ function TweetPost({ item }: { item: FeedItem }) {
   const title = paragraphs[0]?.trim() || "";
   const excerpt = paragraphs.slice(1, 3).join(" ").trim();
   const heroImage = item.media?.[0]?.url || item.image;
-  const isThread = Array.isArray(item.threadTweets) && item.threadTweets.length > 1;
+  const isThread =
+    Array.isArray(item.threadTweets) && item.threadTweets.length > 1;
 
   return (
     <Link href={href} className="group block">
@@ -112,15 +121,27 @@ function TweetPost({ item }: { item: FeedItem }) {
             {title}
           </h3>
 
-          {excerpt && <p className="text-sm text-on-surface-variant/70 leading-relaxed line-clamp-2">{excerpt}</p>}
+          {excerpt && (
+            <p className="text-sm text-on-surface-variant/70 leading-relaxed line-clamp-2">
+              {excerpt}
+            </p>
+          )}
 
           <div className="flex items-center justify-between pt-1">
             <div className="flex items-center gap-2">
               {(() => {
-                const authorInfo = getAuthorInfo(item.author_username || item.author_id, item.author_name);
+                const authorInfo = getAuthorInfo(
+                  item.author_username || item.author_id,
+                  item.author_name,
+                );
                 return authorInfo.avatar ? (
                   <div className="size-5 rounded-full overflow-hidden relative bg-surface-container-high shrink-0">
-                    <Image src={authorInfo.avatar} alt={authorInfo.name} fill className="object-cover" />
+                    <Image
+                      src={authorInfo.avatar}
+                      alt={authorInfo.name}
+                      fill
+                      className="object-cover"
+                    />
                   </div>
                 ) : (
                   <div
@@ -132,7 +153,10 @@ function TweetPost({ item }: { item: FeedItem }) {
               })()}
               <span className="text-xs text-on-surface-variant/70 font-semibold max-w-[120px] truncate">
                 {(() => {
-                  const authorInfo = getAuthorInfo(item.author_username || item.author_id, item.author_name);
+                  const authorInfo = getAuthorInfo(
+                    item.author_username || item.author_id,
+                    item.author_name,
+                  );
                   return authorInfo.name;
                 })()}
               </span>
@@ -151,20 +175,34 @@ function TweetPost({ item }: { item: FeedItem }) {
   );
 }
 
-function EmptyState({ searchQuery, onReset }: { searchQuery?: string; onReset: () => void }) {
+function EmptyState({
+  searchQuery,
+  onReset,
+}: {
+  searchQuery?: string;
+  onReset: () => void;
+}) {
   const isSearch = Boolean(searchQuery?.trim());
   return (
     <Empty className="border-outline-variant/20 py-20">
       <EmptyHeader>
-        <EmptyMedia variant="icon" className="size-14 rounded-2xl bg-surface-container-high">
+        <EmptyMedia
+          variant="icon"
+          className="size-14 rounded-2xl bg-surface-container-high"
+        >
           <Newspaper className="size-7 text-on-surface-variant/50" />
         </EmptyMedia>
-        <EmptyTitle className="text-on-surface">{isSearch ? "Aucun résultat trouvé" : "Aucune actualité"}</EmptyTitle>
+        <EmptyTitle className="text-on-surface">
+          {isSearch ? "Aucun résultat trouvé" : "Aucune actualité"}
+        </EmptyTitle>
         <EmptyDescription>
           {isSearch ? (
             <>
-              Aucun article ne correspond à <strong className="text-on-surface">«&nbsp;{searchQuery}&nbsp;»</strong>.
-              Essayez d&apos;autres mots-clés ou parcourez les catégories.
+              Aucun article ne correspond à{" "}
+              <strong className="text-on-surface">
+                «&nbsp;{searchQuery}&nbsp;»
+              </strong>
+              . Essayez d&apos;autres mots-clés ou parcourez les catégories.
             </>
           ) : (
             "Revenez plus tard pour de nouvelles informations."
@@ -232,15 +270,24 @@ export function NewsFeedClient({
   }>;
 }) {
   const router = useRouter();
-  const featuredIds = new Set((featuredArticles || []).map(a => a.id));
-  const articles = feedItems.filter(item => item.type === "article" && !featuredIds.has(item.id));
-  const tweets = feedItems.filter(item => item.type === "tweet");
+  const featuredIds = new Set((featuredArticles || []).map((a) => a.id));
+  const articles = feedItems.filter(
+    (item) => item.type === "article" && !featuredIds.has(item.id),
+  );
+  const tweets = feedItems.filter((item) => item.type === "tweet");
   const isTweetFilter = categoryFilter === "Tweet";
   const isSearchActive = Boolean(searchQuery?.trim());
   const showFeatured =
-    currentPage === 1 && !categoryFilter && !isSearchActive && featuredArticles && featuredArticles.length > 0;
-  const totalArticleCount = feedItems.filter(item => item.type === "article").length + (featuredArticles?.length || 0);
-  const showSideSections = totalArticleCount >= 3 && currentPage === 1 && !isSearchActive;
+    currentPage === 1 &&
+    !categoryFilter &&
+    !isSearchActive &&
+    featuredArticles &&
+    featuredArticles.length > 0;
+  const totalArticleCount =
+    feedItems.filter((item) => item.type === "article").length +
+    (featuredArticles?.length || 0);
+  const showSideSections =
+    totalArticleCount >= 3 && currentPage === 1 && !isSearchActive;
 
   const handleSearch = (value: string) => {
     const trimmed = value.trim();
@@ -255,13 +302,21 @@ export function NewsFeedClient({
     <div className="w-full pb-20">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-2xl md:text-3xl font-black text-on-surface tracking-tight mb-4">Actualités</h1>
+        <h1 className="text-2xl md:text-3xl font-black text-on-surface tracking-tight mb-4">
+          Actualités
+        </h1>
         <div className="mb-4">
-          <SearchBar placeholder="Rechercher un article..." defaultValue={searchQuery} onSearch={handleSearch} />
+          <SearchBar
+            placeholder="Rechercher un article..."
+            defaultValue={searchQuery}
+            onSearch={handleSearch}
+          />
         </div>
         {isSearchActive ? (
           <div className="flex items-center gap-2 mb-2">
-            <span className="text-sm text-on-surface-variant">Résultats pour &laquo; {searchQuery} &raquo;</span>
+            <span className="text-sm text-on-surface-variant">
+              Résultats pour &laquo; {searchQuery} &raquo;
+            </span>
             <button
               onClick={() => router.push("/news")}
               className="inline-flex items-center gap-1 text-xs text-primary font-medium hover:underline"
@@ -281,14 +336,18 @@ export function NewsFeedClient({
         {showFeatured && <FeaturedHero articles={featuredArticles} />}
 
         {/* Continue Reading (personalized) — only when enough content exists */}
-        {showSideSections && continueReadingArticles && continueReadingArticles.length > 0 && (
-          <ContinueReading articles={continueReadingArticles} />
-        )}
+        {showSideSections &&
+          continueReadingArticles &&
+          continueReadingArticles.length > 0 && (
+            <ContinueReading articles={continueReadingArticles} />
+          )}
 
         {/* Trending Articles — only when enough articles exist */}
-        {showSideSections && trendingArticles && trendingArticles.length > 0 && (
-          <TrendingArticles articles={trendingArticles} />
-        )}
+        {showSideSections &&
+          trendingArticles &&
+          trendingArticles.length > 0 && (
+            <TrendingArticles articles={trendingArticles} />
+          )}
 
         {/* Popular Articles — only when enough articles exist */}
         {showSideSections && popularArticles && popularArticles.length > 0 && (
@@ -296,9 +355,10 @@ export function NewsFeedClient({
         )}
 
         {/* Tag Cloud */}
-        {popularTags && popularTags.length > 0 && currentPage === 1 && !isSearchActive && (
-          <TagCloud tags={popularTags} />
-        )}
+        {popularTags &&
+          popularTags.length > 0 &&
+          currentPage === 1 &&
+          !isSearchActive && <TagCloud tags={popularTags} />}
 
         {/* ═══ ARTICLES SECTION ═══ */}
         {!isTweetFilter && articles.length > 0 && (
@@ -310,7 +370,9 @@ export function NewsFeedClient({
                   <Newspaper className="size-4 text-on-primary-container" />
                 </div>
                 <div>
-                  <h2 className="text-sm font-bold text-on-surface">Articles</h2>
+                  <h2 className="text-sm font-bold text-on-surface">
+                    Articles
+                  </h2>
                   <p className="text-[10px] text-on-surface-variant">
                     {articles.length} article{articles.length > 1 ? "s" : ""}
                   </p>
@@ -321,7 +383,7 @@ export function NewsFeedClient({
 
             {/* Articles grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {articles.map(item => (
+              {articles.map((item) => (
                 <ArticleCard
                   key={`article-${item.id}`}
                   item={item}
@@ -366,7 +428,7 @@ export function NewsFeedClient({
 
             {/* Tweets grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {(isTweetFilter ? feedItems : tweets).map(item => (
+              {(isTweetFilter ? feedItems : tweets).map((item) => (
                 <TweetPost key={`tweet-${item.id}`} item={item} />
               ))}
             </div>
@@ -375,14 +437,21 @@ export function NewsFeedClient({
 
         {/* Empty state */}
         {feedItems.length === 0 && !showFeatured && (
-          <EmptyState searchQuery={searchQuery} onReset={() => router.push("/news")} />
+          <EmptyState
+            searchQuery={searchQuery}
+            onReset={() => router.push("/news")}
+          />
         )}
       </div>
 
       {/* Pagination */}
       {totalItems > ITEMS_PER_PAGE && (
         <div className="px-4 py-6">
-          <WikiPagination totalItems={totalItems} itemsPerPage={ITEMS_PER_PAGE} currentPage={currentPage} />
+          <WikiPagination
+            totalItems={totalItems}
+            itemsPerPage={ITEMS_PER_PAGE}
+            currentPage={currentPage}
+          />
         </div>
       )}
     </div>

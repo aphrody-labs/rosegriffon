@@ -108,7 +108,7 @@ export function AccountClient({
   const reload = () => router.refresh();
 
   const unlink = async (providerId: string) => {
-    const account = accounts.find(linked => linked.provider === providerId);
+    const account = accounts.find((linked) => linked.provider === providerId);
     if (!account) {
       throw new Error("Compte lié introuvable.");
     }
@@ -157,7 +157,9 @@ export function AccountClient({
         });
         const error = (res as { error?: { message?: string } | null })?.error;
         if (error) {
-          throw new Error(error.message ?? "Erreur lors de la liaison Patreon.");
+          throw new Error(
+            error.message ?? "Erreur lors de la liaison Patreon.",
+          );
         }
       },
       onRefresh: async () => {
@@ -200,12 +202,19 @@ export function AccountClient({
                   // Recréé quand l'avatar change côté serveur (portrait ou avatar du jeu).
                   key={avatarUrl ?? "aucun"}
                   avatarUrl={avatarUrl}
-                  extraActions={<AvatarJeuDialog avatarUrl={avatarUrl} codeActuel={gameAvatar} />}
+                  extraActions={
+                    <AvatarJeuDialog
+                      avatarUrl={avatarUrl}
+                      codeActuel={gameAvatar}
+                    />
+                  }
                   username={username}
                   role={role}
                   // Sans pseudo, la page publique n'existe pas encore : le
                   // bouton ne s'affiche pas plutôt que de mener à un 404.
-                  profileHref={username ? `/profil/${encodeURIComponent(username)}` : null}
+                  profileHref={
+                    username ? `/profil/${encodeURIComponent(username)}` : null
+                  }
                   onUpload={uploadAvatar}
                 />
               </div>
@@ -214,18 +223,25 @@ export function AccountClient({
                   values={profile}
                   profileUrlPrefix="/profil/"
                   showCosmetics
-                  onSubmit={async values => updateProfile(values)}
+                  onSubmit={async (values) => updateProfile(values)}
                 />
                 <section className="mt-6 rounded-xl border border-border bg-muted/20 p-4">
                   <h2 className="text-sm font-semibold">Espace Achilléa</h2>
                   <p className="mt-1 text-sm text-muted-foreground">
-                    Le portefeuille et la compétition utilisent ce même compte Rose Griffon.
+                    Le portefeuille et la compétition utilisent ce même compte
+                    Rose Griffon.
                   </p>
                   <div className="mt-3 flex flex-wrap gap-3 text-sm font-medium">
-                    <Link className="text-primary hover:underline" href="/achillea/wallet">
+                    <Link
+                      className="text-primary hover:underline"
+                      href="/achillea/wallet"
+                    >
                       Portefeuille ACH
                     </Link>
-                    <Link className="text-primary hover:underline" href="/achillea/ranked/leaderboard">
+                    <Link
+                      className="text-primary hover:underline"
+                      href="/achillea/ranked/leaderboard"
+                    >
                       Classement
                     </Link>
                   </div>
@@ -236,11 +252,15 @@ export function AccountClient({
           id: "profile",
         },
         {
-          content: <AccountAddressForm values={address} onSubmit={updateAddress} />,
+          content: (
+            <AccountAddressForm values={address} onSubmit={updateAddress} />
+          ),
           id: "address",
         },
         {
-          content: <AccountConnections providers={providers} accounts={accounts} />,
+          content: (
+            <AccountConnections providers={providers} accounts={accounts} />
+          ),
           id: "connections",
         },
         {
@@ -249,7 +269,7 @@ export function AccountClient({
               <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                 <AccountEmailCard
                   currentEmail={email}
-                  onChangeEmail={async newEmail => {
+                  onChangeEmail={async (newEmail) => {
                     const { error } = await authClient.changeEmail({
                       callbackURL: "/settings?tab=security",
                       newEmail,
@@ -267,16 +287,20 @@ export function AccountClient({
                   onChangement={reload}
                   actions={{
                     demarrer: async () => {
-                      const { data, error } = await authClient.twoFactor.enable({ method: "totp" });
+                      const { data, error } = await authClient.twoFactor.enable(
+                        { method: "totp" },
+                      );
                       if (error || !data || data.method !== "totp") {
-                        throw new Error(error?.message ?? "Activation impossible.");
+                        throw new Error(
+                          error?.message ?? "Activation impossible.",
+                        );
                       }
                       return {
                         backupCodes: data.backupCodes,
                         totpURI: data.totpURI,
                       };
                     },
-                    confirmer: async code => {
+                    confirmer: async (code) => {
                       const { error } = await authClient.twoFactor.verifyTotp({
                         code,
                       });
@@ -287,13 +311,19 @@ export function AccountClient({
                     desactiver: async () => {
                       const { error } = await authClient.twoFactor.disable({});
                       if (error) {
-                        throw new Error(error.message ?? "Désactivation impossible.");
+                        throw new Error(
+                          error.message ?? "Désactivation impossible.",
+                        );
                       }
                     },
                     regenererCodes: async () => {
-                      const { data, error } = await authClient.twoFactor.generateBackupCodes({});
+                      const { data, error } =
+                        await authClient.twoFactor.generateBackupCodes({});
                       if (error || !data) {
-                        throw new Error(error?.message ?? "Impossible de régénérer les codes.");
+                        throw new Error(
+                          error?.message ??
+                            "Impossible de régénérer les codes.",
+                        );
                       }
                       return data.backupCodes;
                     },
@@ -303,7 +333,7 @@ export function AccountClient({
 
               <AccountSessions
                 sessions={sessions}
-                onRevoke={async id => {
+                onRevoke={async (id) => {
                   const { error } = await revokeAccountSession(id);
                   if (error) {
                     throw new Error(error);

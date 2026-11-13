@@ -27,7 +27,7 @@ async function TeamMembersSection({
 }: TeamMembersSectionProps) {
   const response = await getTeamMembers(teamName);
   const members = response
-    .map(member => ({
+    .map((member) => ({
       name: member.metadata.memberName,
       role: member.metadata.memberRole,
       index: member.metadata.memberIndex,
@@ -42,11 +42,14 @@ async function TeamMembersSection({
         <TeamStructuredData
           pageName={title}
           url={canonicalUrl}
-          members={members.map(member => ({
+          members={members.map((member) => ({
             name: member.name,
             role: member.role || undefined,
             image: member.image || undefined,
-            sameAs: member.link && member.link.startsWith("http") ? [member.link] : undefined,
+            sameAs:
+              member.link && member.link.startsWith("http")
+                ? [member.link]
+                : undefined,
           }))}
         />
       )}
@@ -60,13 +63,17 @@ async function TeamMembersSection({
             {title}
           </h2>
         )}
-        <p className="text-lg lg:text-xl text-gray-700 dark:text-gray-300 leading-relaxed">{description}</p>
+        <p className="text-lg lg:text-xl text-gray-700 dark:text-gray-300 leading-relaxed">
+          {description}
+        </p>
         <div className="w-24 h-1 bg-linear-to-r from-gaelle-blue to-gaelle-blue-light mx-auto rounded-full" />
       </div>
 
       {members.length === 0 ? (
         <div className="text-center py-12">
-          <p className="text-gray-500 dark:text-gray-400">Aucun membre à afficher pour le moment.</p>
+          <p className="text-gray-500 dark:text-gray-400">
+            Aucun membre à afficher pour le moment.
+          </p>
         </div>
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6 lg:gap-8 mt-6">
@@ -81,7 +88,9 @@ async function TeamMembersSection({
                   <ImageWithSkeleton
                     src={member.image || "/RG_Logo_V2.5.webp"}
                     alt={
-                      member.role ? `${member.name}, ${member.role} — Rose Griffon` : `${member.name} — Rose Griffon`
+                      member.role
+                        ? `${member.name}, ${member.role} — Rose Griffon`
+                        : `${member.name} — Rose Griffon`
                     }
                     priority={member.index < 3}
                   />

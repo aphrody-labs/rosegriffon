@@ -17,7 +17,13 @@
 import { dlopen, FFIType, ptr } from "bun:ffi";
 import { existsSync } from "node:fs";
 import { dirname, resolve } from "node:path";
-import { nativeLibrary, readOwnedBytes, readOwnedJson, readOwnedString, toCString } from "@aphrody/runtime-sdk/ffi";
+import {
+  nativeLibrary,
+  readOwnedBytes,
+  readOwnedJson,
+  readOwnedString,
+  toCString,
+} from "@aphrody/runtime-sdk/ffi";
 import { resolveFormat } from "../docs/vfs-catalog.js";
 import { iecodeDataRoot, iecodePath } from "../core/roots.js";
 import {
@@ -278,7 +284,13 @@ const NIE_FFI_SYMBOL_DEFINITIONS = {
     returns: FFIType.void,
   },
   nie_cpk_extract_by_name_out: {
-    args: [FFIType.ptr, FFIType.u64, FFIType.cstring, FFIType.cstring, FFIType.ptr],
+    args: [
+      FFIType.ptr,
+      FFIType.u64,
+      FFIType.cstring,
+      FFIType.cstring,
+      FFIType.ptr,
+    ],
     returns: FFIType.void,
   },
   nie_cfgbin_probe: {
@@ -393,8 +405,13 @@ const NIE_FFI_SYMBOLS = Object.fromEntries(
 export class NativeCapabilityError extends Error {
   readonly code = "ERR_NATIVE_CAPABILITY_UNAVAILABLE";
 
-  constructor(capability: string, profile = "formats/textures/save/menu-setting/match-simulation/game-source/vfs-domain-query/wiki") {
-    super(`Native capability '${capability}' is not exported by the current ${profile} profile.`);
+  constructor(
+    capability: string,
+    profile = "formats/textures/save/menu-setting/match-simulation/game-source/vfs-domain-query/wiki",
+  ) {
+    super(
+      `Native capability '${capability}' is not exported by the current ${profile} profile.`,
+    );
     this.name = "NativeCapabilityError";
   }
 }
@@ -406,9 +423,13 @@ function requireNativeCapability(symbol: string): void {
 }
 
 /** Describes optional native features without requiring absent symbols at dlopen time. */
-export function nativeCapabilityStatus(): { profile: string; unsupported: string[] } {
+export function nativeCapabilityStatus(): {
+  profile: string;
+  unsupported: string[];
+} {
   return {
-    profile: "formats/textures/save/menu-setting/match-simulation/game-source/vfs-domain-query/wiki",
+    profile:
+      "formats/textures/save/menu-setting/match-simulation/game-source/vfs-domain-query/wiki",
     unsupported: [...UNSUPPORTED_FORMAT_PROFILE_SYMBOLS],
   };
 }
@@ -480,18 +501,28 @@ export function getNativeLibraryPath(): string | null {
 // Internal Helpers for NieBytes Buffer Transfer
 // ============================================================================
 
-export const freeNieBytes = (symbols: any) => (data: bigint, len: bigint, cap: bigint) =>
-  symbols.nie_bytes_free_fields(data, len, cap);
+export const freeNieBytes =
+  (symbols: any) => (data: bigint, len: bigint, cap: bigint) =>
+    symbols.nie_bytes_free_fields(data, len, cap);
 
-function readAndFreeNieBytes(symbols: any, slot: Uint8Array): Uint8Array | null {
+function readAndFreeNieBytes(
+  symbols: any,
+  slot: Uint8Array,
+): Uint8Array | null {
   return readOwnedBytes(slot, freeNieBytes(symbols));
 }
 
-function readAndFreeNieBytesString(symbols: any, slot: Uint8Array): string | null {
+function readAndFreeNieBytesString(
+  symbols: any,
+  slot: Uint8Array,
+): string | null {
   return readOwnedString(slot, freeNieBytes(symbols));
 }
 
-function readAndFreeNieBytesJson<T = any>(symbols: any, slot: Uint8Array): T | null {
+function readAndFreeNieBytesJson<T = any>(
+  symbols: any,
+  slot: Uint8Array,
+): T | null {
   return readOwnedJson<T>(slot, freeNieBytes(symbols));
 }
 
@@ -583,13 +614,22 @@ export function nieCpkKeyFromFilename(filename: string): number {
 /**
  * Decrypts a CPK buffer in place using CRI position-aware XOR.
  */
-export function nieDecryptCpkBlock(buffer: Uint8Array, fileOffset: number | bigint = 0, key?: number): void {
+export function nieDecryptCpkBlock(
+  buffer: Uint8Array,
+  fileOffset: number | bigint = 0,
+  key?: number,
+): void {
   if (key === undefined) {
     throw new Error("nieDecryptCpkBlock requires an explicit key");
   }
   const lib = getNativeLib();
   if (lib) {
-    lib.nie_cpk_decrypt_block(ptr(buffer), buffer.length, BigInt(fileOffset), key >>> 0);
+    lib.nie_cpk_decrypt_block(
+      ptr(buffer),
+      buffer.length,
+      BigInt(fileOffset),
+      key >>> 0,
+    );
     return;
   }
   decryptCpkBlock(buffer, key, Number(fileOffset));
@@ -646,11 +686,16 @@ export function nieProbeHeader(buffer: Uint8Array): number {
   if (lib) {
     return lib.nie_probe_header(ptr(buffer), buffer.length);
   }
-  if (buffer.length >= 8 && new TextDecoder().decode(buffer.subarray(0, 8)) === "CRILAYLA") {
+  if (
+    buffer.length >= 8 &&
+    new TextDecoder().decode(buffer.subarray(0, 8)) === "CRILAYLA"
+  ) {
     return 22;
   }
   if (buffer.length >= 4) {
-    return resolveFormat(new TextDecoder().decode(buffer.subarray(0, 4)))?.id ?? 0;
+    return (
+      resolveFormat(new TextDecoder().decode(buffer.subarray(0, 4)))?.id ?? 0
+    );
   }
   return 0;
 }
@@ -716,25 +761,42 @@ export function nieCpkProbe(buffer: Uint8Array): boolean {
   if (lib) {
     return lib.nie_cpk_probe(ptr(buffer), buffer.length) === 1;
   }
-  return buffer.length >= 4 && buffer[0] === 0x43 && buffer[1] === 0x50 && buffer[2] === 0x4b && buffer[3] === 0x20;
+  return (
+    buffer.length >= 4 &&
+    buffer[0] === 0x43 &&
+    buffer[1] === 0x50 &&
+    buffer[2] === 0x4b &&
+    buffer[3] === 0x20
+  );
 }
 
 /**
  * Parses and returns basic CPK archive header info.
  */
-export function nieCpkHeader(buffer: Uint8Array, filename = ""): NieCpkHeader | null {
+export function nieCpkHeader(
+  buffer: Uint8Array,
+  filename = "",
+): NieCpkHeader | null {
   const lib = getNativeLib();
   if (!lib) return null;
   const slot = new Uint8Array(24);
   const cName = toCString(filename);
-  lib.nie_cpk_header_json_out(ptr(buffer), buffer.length, ptr(cName), ptr(slot));
+  lib.nie_cpk_header_json_out(
+    ptr(buffer),
+    buffer.length,
+    ptr(cName),
+    ptr(slot),
+  );
   return readAndFreeNieBytesJson<NieCpkHeader>(lib, slot);
 }
 
 /**
  * Lists all file entries in a CPK buffer.
  */
-export function nieCpkList(buffer: Uint8Array, filename = ""): NieCpkArchive | null {
+export function nieCpkList(
+  buffer: Uint8Array,
+  filename = "",
+): NieCpkArchive | null {
   const lib = getNativeLib();
   if (!lib) return null;
   const slot = new Uint8Array(24);
@@ -746,25 +808,45 @@ export function nieCpkList(buffer: Uint8Array, filename = ""): NieCpkArchive | n
 /**
  * Extracts a specific entry by its index from a CPK buffer.
  */
-export function nieCpkExtractEntry(buffer: Uint8Array, entryIndex: number, filename = ""): Uint8Array | null {
+export function nieCpkExtractEntry(
+  buffer: Uint8Array,
+  entryIndex: number,
+  filename = "",
+): Uint8Array | null {
   const lib = getNativeLib();
   if (!lib) return null;
   const slot = new Uint8Array(24);
   const cName = toCString(filename);
-  lib.nie_cpk_extract_entry_out(ptr(buffer), buffer.length, ptr(cName), entryIndex, ptr(slot));
+  lib.nie_cpk_extract_entry_out(
+    ptr(buffer),
+    buffer.length,
+    ptr(cName),
+    entryIndex,
+    ptr(slot),
+  );
   return readAndFreeNieBytes(lib, slot);
 }
 
 /**
  * Extracts a file by internal path/name from a CPK buffer.
  */
-export function nieCpkExtractByName(buffer: Uint8Array, entryName: string, filename = ""): Uint8Array | null {
+export function nieCpkExtractByName(
+  buffer: Uint8Array,
+  entryName: string,
+  filename = "",
+): Uint8Array | null {
   const lib = getNativeLib();
   if (!lib) return null;
   const slot = new Uint8Array(24);
   const cName = toCString(filename);
   const cTarget = toCString(entryName);
-  lib.nie_cpk_extract_by_name_out(ptr(buffer), buffer.length, ptr(cName), ptr(cTarget), ptr(slot));
+  lib.nie_cpk_extract_by_name_out(
+    ptr(buffer),
+    buffer.length,
+    ptr(cName),
+    ptr(cTarget),
+    ptr(slot),
+  );
   return readAndFreeNieBytes(lib, slot);
 }
 
@@ -776,7 +858,13 @@ export function nieCfgBinProbe(buffer: Uint8Array): number {
   if (lib) {
     return lib.nie_cfgbin_probe(ptr(buffer), buffer.length);
   }
-  if (buffer.length >= 4 && buffer[0] === 0x52 && buffer[1] === 0x44 && buffer[2] === 0x42 && buffer[3] === 0x4e) {
+  if (
+    buffer.length >= 4 &&
+    buffer[0] === 0x52 &&
+    buffer[1] === 0x44 &&
+    buffer[2] === 0x42 &&
+    buffer[3] === 0x4e
+  ) {
     return 1;
   }
   return 0;
@@ -796,19 +884,29 @@ export function nieDecodeCfgBinJson<T = any>(buffer: Uint8Array): T | null {
 /**
  * Queries a single table in an RDBN binary file.
  */
-export function nieRdbnQueryTable<T = any>(buffer: Uint8Array, tableName: string): T | null {
+export function nieRdbnQueryTable<T = any>(
+  buffer: Uint8Array,
+  tableName: string,
+): T | null {
   const lib = getNativeLib();
   if (!lib) return null;
   const slot = new Uint8Array(24);
   const cTable = toCString(tableName);
-  lib.nie_rdbn_entry_query_json_out(ptr(buffer), buffer.length, ptr(cTable), ptr(slot));
+  lib.nie_rdbn_entry_query_json_out(
+    ptr(buffer),
+    buffer.length,
+    ptr(cTable),
+    ptr(slot),
+  );
   return readAndFreeNieBytesJson<T>(lib, slot);
 }
 
 /**
  * Decodes a menu setting cfg.bin into semantic MenuSetting JSON.
  */
-export function nieDecodeMenuSettingJson<T = any>(buffer: Uint8Array): T | null {
+export function nieDecodeMenuSettingJson<T = any>(
+  buffer: Uint8Array,
+): T | null {
   const lib = getNativeLib();
   if (!lib) return null;
   const slot = new Uint8Array(24);
@@ -824,7 +922,13 @@ export function nieG4txProbe(buffer: Uint8Array): boolean {
   if (lib) {
     return lib.nie_g4tx_probe(ptr(buffer), buffer.length) === 1;
   }
-  return buffer.length >= 4 && buffer[0] === 0x47 && buffer[1] === 0x34 && buffer[2] === 0x54 && buffer[3] === 0x58;
+  return (
+    buffer.length >= 4 &&
+    buffer[0] === 0x47 &&
+    buffer[1] === 0x34 &&
+    buffer[2] === 0x54 &&
+    buffer[3] === 0x58
+  );
 }
 
 /**
@@ -852,26 +956,42 @@ export function nieG4txToPng(buffer: Uint8Array): Uint8Array | null {
 /**
  * Decodes a named subtexture from a G4TX texture atlas to PNG bytes.
  */
-export function nieG4txSubtextureToPng(buffer: Uint8Array, subName: string): Uint8Array | null {
+export function nieG4txSubtextureToPng(
+  buffer: Uint8Array,
+  subName: string,
+): Uint8Array | null {
   const lib = getNativeLib();
   if (!lib) return null;
   const slot = new Uint8Array(24);
   const cName = toCString(subName);
-  lib.nie_g4tx_subtexture_to_png_out(ptr(buffer), buffer.length, ptr(cName), ptr(slot));
+  lib.nie_g4tx_subtexture_to_png_out(
+    ptr(buffer),
+    buffer.length,
+    ptr(cName),
+    ptr(slot),
+  );
   return readAndFreeNieBytes(lib, slot);
 }
 
 /**
  * Decodes the main texture of a G4TX container to raw RGBA8 pixels.
  */
-export function nieG4txToRgba(buffer: Uint8Array): { width: number; height: number; rgba: Uint8Array } | null {
+export function nieG4txToRgba(
+  buffer: Uint8Array,
+): { width: number; height: number; rgba: Uint8Array } | null {
   const lib = getNativeLib();
   if (!lib) return null;
   const slot = new Uint8Array(24);
   const wBuf = new Uint32Array(1);
   const hBuf = new Uint32Array(1);
 
-  const ok = lib.nie_g4tx_to_rgba_out(ptr(buffer), buffer.length, ptr(slot), ptr(wBuf), ptr(hBuf));
+  const ok = lib.nie_g4tx_to_rgba_out(
+    ptr(buffer),
+    buffer.length,
+    ptr(slot),
+    ptr(wBuf),
+    ptr(hBuf),
+  );
   if (ok !== 1) {
     return null;
   }
@@ -897,37 +1017,64 @@ export function nieSaveProbe(buffer: Uint8Array, filename: string): boolean {
 /**
  * Decrypts a Lives save file and returns full summary JSON.
  */
-export function nieSaveSummary(buffer: Uint8Array, filename: string): NieSaveSummary | null {
+export function nieSaveSummary(
+  buffer: Uint8Array,
+  filename: string,
+): NieSaveSummary | null {
   const lib = getNativeLib();
   if (!lib) return null;
   const slot = new Uint8Array(24);
   const cName = toCString(filename);
-  lib.nie_save_summary_json_out(ptr(buffer), buffer.length, ptr(cName), ptr(slot));
+  lib.nie_save_summary_json_out(
+    ptr(buffer),
+    buffer.length,
+    ptr(cName),
+    ptr(slot),
+  );
   return readAndFreeNieBytesJson<NieSaveSummary>(lib, slot);
 }
 
 /**
  * Extracts a decrypted blob from a Lives save file.
  */
-export function nieSaveExtractBlob(buffer: Uint8Array, filename: string, blobIndex: number): Uint8Array | null {
+export function nieSaveExtractBlob(
+  buffer: Uint8Array,
+  filename: string,
+  blobIndex: number,
+): Uint8Array | null {
   const lib = getNativeLib();
   if (!lib) return null;
   const slot = new Uint8Array(24);
   const cName = toCString(filename);
-  lib.nie_save_extract_blob_out(ptr(buffer), buffer.length, ptr(cName), blobIndex, ptr(slot));
+  lib.nie_save_extract_blob_out(
+    ptr(buffer),
+    buffer.length,
+    ptr(cName),
+    blobIndex,
+    ptr(slot),
+  );
   return readAndFreeNieBytes(lib, slot);
 }
 
 /**
  * Simulates a full soccer match from team setups and seed.
  */
-export function nieSimulateMatch<T = any>(homeSetup: any, awaySetup: any, seed = 0n): T | null {
+export function nieSimulateMatch<T = any>(
+  homeSetup: any,
+  awaySetup: any,
+  seed = 0n,
+): T | null {
   const lib = getNativeLib();
   if (!lib) return null;
   const slot = new Uint8Array(24);
   const cHome = toCString(JSON.stringify(homeSetup));
   const cAway = toCString(JSON.stringify(awaySetup));
-  lib.nie_match_simulate_json_out(ptr(cHome), ptr(cAway), BigInt(seed), ptr(slot));
+  lib.nie_match_simulate_json_out(
+    ptr(cHome),
+    ptr(cAway),
+    BigInt(seed),
+    ptr(slot),
+  );
   return readAndFreeNieBytesJson<T>(lib, slot);
 }
 
@@ -1030,7 +1177,9 @@ export function locateGameSource(hint?: string): {
       discovery_ms: number;
     }>(lib, slot);
     if (!resolved) {
-      throw new Error(nieGetLastError() ?? "Native game source resolution failed.");
+      throw new Error(
+        nieGetLastError() ?? "Native game source resolution failed.",
+      );
     }
     return resolved;
   }
@@ -1080,7 +1229,8 @@ export class NieVfsHandle {
   } {
     if (!this.#handle) throw new Error("Vfs handle has been disposed.");
     const path = resolveNativeLibPath();
-    if (!path) throw new Error("Native libiecode is required for VFS domain queries.");
+    if (!path)
+      throw new Error("Native libiecode is required for VFS domain queries.");
     const library = dlopen(path, {
       nie_vfs_query_json_out: {
         args: [FFIType.ptr, FFIType.ptr, FFIType.u64, FFIType.ptr],
@@ -1094,9 +1244,17 @@ export class NieVfsHandle {
     try {
       const input = new TextEncoder().encode(JSON.stringify(request));
       const slot = new Uint8Array(24);
-      library.symbols.nie_vfs_query_json_out(this.#handle, ptr(input), input.length, ptr(slot));
+      library.symbols.nie_vfs_query_json_out(
+        this.#handle,
+        ptr(input),
+        input.length,
+        ptr(slot),
+      );
       const result = readAndFreeNieBytesJson<any>(library.symbols, slot);
-      if (!result || result.error) throw new Error(result?.error ?? `Native VFS ${request.domain} query failed.`);
+      if (!result || result.error)
+        throw new Error(
+          result?.error ?? `Native VFS ${request.domain} query failed.`,
+        );
       return result;
     } finally {
       library.close();
@@ -1138,7 +1296,12 @@ export class NieVfsHandle {
   listRange(offset: number | bigint, limit: number | bigint): any[] {
     if (!this.#handle) throw new Error("Vfs handle has been disposed.");
     const slot = new Uint8Array(24);
-    this.#lib.nie_vfs_list_range_json_out(this.#handle, BigInt(offset), BigInt(limit), ptr(slot));
+    this.#lib.nie_vfs_list_range_json_out(
+      this.#handle,
+      BigInt(offset),
+      BigInt(limit),
+      ptr(slot),
+    );
     return readAndFreeNieBytesJson<any[]>(this.#lib, slot) ?? [];
   }
 

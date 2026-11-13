@@ -19,13 +19,44 @@ type Table = Record<string, unknown>;
 
 /** Clés autorisées par table du schéma v1.1 (manifest.rs). */
 const CLES: Record<string, readonly string[]> = {
-  racine: ["id", "name", "title", "logo", "color", "icons", "wallpapers", "pet", "typography", "shell", "assets"],
+  racine: [
+    "id",
+    "name",
+    "title",
+    "logo",
+    "color",
+    "icons",
+    "wallpapers",
+    "pet",
+    "typography",
+    "shell",
+    "assets",
+  ],
   title: ["product_name", "window_title_template", "ntp_heading"],
   logo: ["mark", "monochrome", "wordmark", "png", "ico"],
-  color: ["seed", "source", "variant", "contrast", "mode", "overrides", "secondary", "neutral_chroma"],
+  color: [
+    "seed",
+    "source",
+    "variant",
+    "contrast",
+    "mode",
+    "overrides",
+    "secondary",
+    "neutral_chroma",
+  ],
   secondary: ["hue", "chroma"],
   icons: ["set", "style", "weight"],
-  wallpaper: ["file", "mode", "seed", "license", "source", "attribution", "fit", "focal", "sha256"],
+  wallpaper: [
+    "file",
+    "mode",
+    "seed",
+    "license",
+    "source",
+    "attribution",
+    "fit",
+    "focal",
+    "sha256",
+  ],
   pet: ["id", "provider", "anchor", "name", "states", "files", "size"],
   typography: ["display", "body", "mono"],
   shell: ["layout", "density", "radius", "glass_blur", "motion"],
@@ -57,9 +88,14 @@ const ENUMS: Record<string, readonly string[]> = {
 };
 
 /** Racines publiques des assets (préfixes de dépôt), pour retrouver les chemins de `THEME_PACKS`. */
-const RACINES_PUBLIQUES = ["packages/rg-assets/public", "apps/rg-website/public"] as const;
+const RACINES_PUBLIQUES = [
+  "packages/rg-assets/public",
+  "apps/rg-website/public",
+] as const;
 
-export const DOSSIER_THEMES = fileURLToPath(new URL("../themes/", import.meta.url));
+export const DOSSIER_THEMES = fileURLToPath(
+  new URL("../themes/", import.meta.url),
+);
 
 function estTable(v: unknown): v is Table {
   return typeof v === "object" && v !== null && !Array.isArray(v);
@@ -73,7 +109,8 @@ function table(v: unknown, chemin: string): Table {
 function verifierCles(t: Table, schema: string, chemin: string): void {
   const permises = CLES[schema] ?? [];
   for (const cle of Object.keys(t)) {
-    if (!permises.includes(cle)) throw new Error(`${chemin}: clé inconnue "${cle}"`);
+    if (!permises.includes(cle))
+      throw new Error(`${chemin}: clé inconnue "${cle}"`);
   }
   for (const cle of REQUIS[schema] ?? []) {
     if (!(cle in t)) throw new Error(`${chemin}: clé requise absente "${cle}"`);
@@ -81,26 +118,35 @@ function verifierCles(t: Table, schema: string, chemin: string): void {
   for (const [cle, valeur] of Object.entries(t)) {
     const valeurs = ENUMS[`${schema}.${cle}`];
     if (valeurs && !valeurs.includes(String(valeur))) {
-      throw new Error(`${chemin}.${cle}: "${String(valeur)}" hors de ${valeurs.join("|")}`);
+      throw new Error(
+        `${chemin}.${cle}: "${String(valeur)}" hors de ${valeurs.join("|")}`,
+      );
     }
   }
 }
 
 function texte(t: Table, cle: string, chemin: string): string {
   const v = t[cle];
-  if (typeof v !== "string") throw new Error(`${chemin}.${cle}: chaîne attendue`);
+  if (typeof v !== "string")
+    throw new Error(`${chemin}.${cle}: chaîne attendue`);
   return v;
 }
 
 function nombre(t: Table, cle: string, chemin: string): number {
   const v = t[cle];
-  if (typeof v !== "number") throw new Error(`${chemin}.${cle}: nombre attendu`);
+  if (typeof v !== "number")
+    throw new Error(`${chemin}.${cle}: nombre attendu`);
   return v;
 }
 
 /** Teinte et chroma d'un `oklch(L C H)` (L en 0..1 ou en %, H en degrés). */
-export function oklchVersTeinteChroma(valeur: string): { hue: number; chroma: number } {
-  const m = /^oklch\(\s*([\d.]+%?)\s+([\d.]+)\s+([\d.]+)(?:deg)?\s*\)$/i.exec(valeur.trim());
+export function oklchVersTeinteChroma(valeur: string): {
+  hue: number;
+  chroma: number;
+} {
+  const m = /^oklch\(\s*([\d.]+%?)\s+([\d.]+)\s+([\d.]+)(?:deg)?\s*\)$/i.exec(
+    valeur.trim(),
+  );
   if (!m) throw new Error(`graine oklch() invalide: "${valeur}"`);
   return { hue: Number(m[3]), chroma: Number(m[2]) };
 }
@@ -114,7 +160,10 @@ export function cheminPublic(chemin: string): string {
 }
 
 /** Valide un `theme.toml` déjà analysé et le convertit au format `ThemePack`. */
-export function convertirPack(brut: unknown, chemin = "theme.toml"): { id: string; pack: ThemePack } {
+export function convertirPack(
+  brut: unknown,
+  chemin = "theme.toml",
+): { id: string; pack: ThemePack } {
   const racine = table(brut, chemin);
   verifierCles(racine, "racine", chemin);
   const id = texte(racine, "id", chemin);
@@ -127,9 +176,12 @@ export function convertirPack(brut: unknown, chemin = "theme.toml"): { id: strin
 
   const couleur = table(racine.color, `${chemin}.color`);
   verifierCles(couleur, "color", `${chemin}.color`);
-  const { hue, chroma } = oklchVersTeinteChroma(texte(couleur, "seed", `${chemin}.color`));
+  const { hue, chroma } = oklchVersTeinteChroma(
+    texte(couleur, "seed", `${chemin}.color`),
+  );
   const mode = texte(couleur, "mode", `${chemin}.color`);
-  if (mode !== "light" && mode !== "dark") throw new Error(`${chemin}.color.mode: "light" ou "dark" requis`);
+  if (mode !== "light" && mode !== "dark")
+    throw new Error(`${chemin}.color.mode: "light" ou "dark" requis`);
   const seed: ThemeSeed = { hue, chroma, mode };
   if (couleur.secondary !== undefined) {
     const s = table(couleur.secondary, `${chemin}.color.secondary`);
@@ -139,16 +191,26 @@ export function convertirPack(brut: unknown, chemin = "theme.toml"): { id: strin
       chroma: nombre(s, "chroma", `${chemin}.color.secondary`),
     };
   }
-  if (couleur.neutral_chroma !== undefined) seed.neutralChroma = nombre(couleur, "neutral_chroma", `${chemin}.color`);
+  if (couleur.neutral_chroma !== undefined)
+    seed.neutralChroma = nombre(couleur, "neutral_chroma", `${chemin}.color`);
 
   for (const cle of ["icons", "typography", "shell"] as const) {
-    verifierCles(table(racine[cle], `${chemin}.${cle}`), cle, `${chemin}.${cle}`);
+    verifierCles(
+      table(racine[cle], `${chemin}.${cle}`),
+      cle,
+      `${chemin}.${cle}`,
+    );
   }
 
   const fonds = racine.wallpapers;
-  if (!Array.isArray(fonds) || fonds.length === 0) throw new Error(`${chemin}.wallpapers: au moins un fond attendu`);
+  if (!Array.isArray(fonds) || fonds.length === 0)
+    throw new Error(`${chemin}.wallpapers: au moins un fond attendu`);
   fonds.forEach((f, i) => {
-    verifierCles(table(f, `${chemin}.wallpapers[${i}]`), "wallpaper", `${chemin}.wallpapers[${i}]`);
+    verifierCles(
+      table(f, `${chemin}.wallpapers[${i}]`),
+      "wallpaper",
+      `${chemin}.wallpapers[${i}]`,
+    );
   });
   const fond = table(fonds[0], `${chemin}.wallpapers[0]`);
 
@@ -159,20 +221,30 @@ export function convertirPack(brut: unknown, chemin = "theme.toml"): { id: strin
     const fichiers = table(p.files, `${chemin}.pet.files`);
     const emotes: Record<string, string> = {};
     for (const [etat, fichier] of Object.entries(fichiers)) {
-      if (typeof fichier !== "string") throw new Error(`${chemin}.pet.files.${etat}: chaîne attendue`);
+      if (typeof fichier !== "string")
+        throw new Error(`${chemin}.pet.files.${etat}: chaîne attendue`);
       emotes[etat] = cheminPublic(fichier);
     }
     const hello = emotes.hello;
-    if (hello === undefined) throw new Error(`${chemin}.pet.files: état "hello" requis`);
-    const sortie: { hello: string; proud?: string; surprised?: string } = { hello };
+    if (hello === undefined)
+      throw new Error(`${chemin}.pet.files: état "hello" requis`);
+    const sortie: { hello: string; proud?: string; surprised?: string } = {
+      hello,
+    };
     if (emotes.proud !== undefined) sortie.proud = emotes.proud;
     if (emotes.surprised !== undefined) sortie.surprised = emotes.surprised;
     pet = { name: texte(p, "name", `${chemin}.pet`), emotes: sortie };
   }
 
   if (racine.assets !== undefined) {
-    for (const [nom, a] of Object.entries(table(racine.assets, `${chemin}.assets`))) {
-      verifierCles(table(a, `${chemin}.assets.${nom}`), "asset", `${chemin}.assets.${nom}`);
+    for (const [nom, a] of Object.entries(
+      table(racine.assets, `${chemin}.assets`),
+    )) {
+      verifierCles(
+        table(a, `${chemin}.assets.${nom}`),
+        "asset",
+        `${chemin}.assets.${nom}`,
+      );
     }
   }
 
@@ -189,16 +261,22 @@ export function convertirPack(brut: unknown, chemin = "theme.toml"): { id: strin
 }
 
 /** Charge tous les `themes/<id>/theme.toml`, indexés par id (le dossier doit porter le même nom que `id`). */
-export async function chargerPacks(dossier: string = DOSSIER_THEMES): Promise<Record<string, ThemePack>> {
+export async function chargerPacks(
+  dossier: string = DOSSIER_THEMES,
+): Promise<Record<string, ThemePack>> {
   const resultat: Record<string, ThemePack> = {};
   const noms = readdirSync(dossier, { withFileTypes: true })
-    .filter(e => e.isDirectory())
-    .map(e => e.name)
+    .filter((e) => e.isDirectory())
+    .map((e) => e.name)
     .sort();
   for (const nom of noms) {
     const fichier = `${dossier.replace(/[\\/]$/, "")}/${nom}/theme.toml`;
-    const { id, pack } = convertirPack(Bun.TOML.parse(await Bun.file(fichier).text()), `${nom}/theme.toml`);
-    if (id !== nom) throw new Error(`${nom}/theme.toml: id "${id}" différent du dossier`);
+    const { id, pack } = convertirPack(
+      Bun.TOML.parse(await Bun.file(fichier).text()),
+      `${nom}/theme.toml`,
+    );
+    if (id !== nom)
+      throw new Error(`${nom}/theme.toml: id "${id}" différent du dossier`);
     resultat[id] = pack;
   }
   return resultat;

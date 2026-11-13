@@ -8,7 +8,12 @@
 
 import { describe, expect, test } from "bun:test";
 
-import { ParticipantStatus, SanctionType, StageType, TournamentState } from "@rosegriffon/achillea-types";
+import {
+  ParticipantStatus,
+  SanctionType,
+  StageType,
+  TournamentState,
+} from "@rosegriffon/achillea-types";
 
 import {
   achilleaApiUrl,
@@ -26,7 +31,9 @@ import {
 
 describe("contrat et règles métier dans le toolchain Next", () => {
   test("les enums du contrat sont utilisables tels quels", () => {
-    expect(StageType.single_elimination).toBe("single_elimination" as StageType);
+    expect(StageType.single_elimination).toBe(
+      "single_elimination" as StageType,
+    );
     expect(TournamentState.ONGOING).toBe("Ongoing" as TournamentState);
   });
 
@@ -43,13 +50,21 @@ describe("contrat et règles métier dans le toolchain Next", () => {
 
 describe("tonalités → shadcn/ui", () => {
   test("chaque tonalité a une variante de Badge", () => {
-    expect(badgeVariant(sanctionTypeTone(SanctionType.Ban))).toBe("destructive");
-    expect(badgeVariant(tournamentStateTone(TournamentState.ONGOING))).toBe("default");
-    expect(badgeVariant(participantStatusTone(ParticipantStatus.WAITLISTED))).toBe("outline");
+    expect(badgeVariant(sanctionTypeTone(SanctionType.Ban))).toBe(
+      "destructive",
+    );
+    expect(badgeVariant(tournamentStateTone(TournamentState.ONGOING))).toBe(
+      "default",
+    );
+    expect(
+      badgeVariant(participantStatusTone(ParticipantStatus.WAITLISTED)),
+    ).toBe("outline");
   });
 
   test("les classes Tailwind de repli sont non vides", () => {
-    expect(toneClassName(participantStatusTone(ParticipantStatus.DISQUALIFIED))).toContain("red");
+    expect(
+      toneClassName(participantStatusTone(ParticipantStatus.DISQUALIFIED)),
+    ).toContain("red");
   });
 });
 
@@ -62,9 +77,14 @@ describe("client API isomorphe", () => {
     const calls: string[] = [];
     const client = createAchilleaClient({
       baseUrl: "https://exemple.test/api",
-      fetch: input => {
+      fetch: (input) => {
         calls.push(String(input));
-        return Promise.resolve(new Response("{}", { status: 500, headers: { "content-type": "application/json" } }));
+        return Promise.resolve(
+          new Response("{}", {
+            status: 500,
+            headers: { "content-type": "application/json" },
+          }),
+        );
       },
     });
 
@@ -73,11 +93,13 @@ describe("client API isomorphe", () => {
     // Une erreur HTTP remonte en résultat typé, pas en exception : c'est ce
     // qui permet de l'afficher dans un Server Component sans try/catch.
     const anyClient = client as unknown as Record<string, unknown>;
-    const guildMethod = Object.getOwnPropertyNames(Object.getPrototypeOf(client)).find(name =>
-      name.toLowerCase().includes("guild"),
-    );
+    const guildMethod = Object.getOwnPropertyNames(
+      Object.getPrototypeOf(client),
+    ).find((name) => name.toLowerCase().includes("guild"));
     if (guildMethod && typeof anyClient[guildMethod] === "function") {
-      const result = await (anyClient[guildMethod] as (...args: unknown[]) => Promise<unknown>)("1");
+      const result = await (
+        anyClient[guildMethod] as (...args: unknown[]) => Promise<unknown>
+      )("1");
       expect(result).toMatchObject({ ok: false });
       expect(calls.length).toBeGreaterThan(0);
     }

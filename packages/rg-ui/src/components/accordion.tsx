@@ -24,7 +24,13 @@ type AccordionProps = Omit<
 > &
   Selection;
 function selectionArray(input: string | string[] | undefined) {
-  return input === undefined ? undefined : Array.isArray(input) ? input : input ? [input] : [];
+  return input === undefined
+    ? undefined
+    : Array.isArray(input)
+      ? input
+      : input
+        ? [input]
+        : [];
 }
 function Accordion({
   asChild,
@@ -50,15 +56,23 @@ function Accordion({
             details.cancel();
             return;
           }
-          (onValueChange as ((value: string) => void) | undefined)?.(next[0] ?? "");
-        } else (onValueChange as ((value: string[]) => void) | undefined)?.(next);
+          (onValueChange as ((value: string) => void) | undefined)?.(
+            next[0] ?? "",
+          );
+        } else
+          (onValueChange as ((value: string[]) => void) | undefined)?.(next);
       }}
     >
       {asChild ? undefined : children}
     </AccordionPrimitive.Root>
   );
 }
-function AccordionItem({ className, asChild, children, ...props }: PrimitiveProps<typeof AccordionPrimitive.Item>) {
+function AccordionItem({
+  className,
+  asChild,
+  children,
+  ...props
+}: PrimitiveProps<typeof AccordionPrimitive.Item>) {
   return (
     <AccordionPrimitive.Item
       data-slot="accordion-item"
@@ -112,7 +126,9 @@ function AccordionContent({
       className="data-closed:animate-accordion-up data-open:animate-accordion-down overflow-hidden text-sm"
       {...props}
     >
-      {asChild ? undefined : <div className={cn("pt-0 pb-4", className)}>{children}</div>}
+      {asChild ? undefined : (
+        <div className={cn("pt-0 pb-4", className)}>{children}</div>
+      )}
     </AccordionPrimitive.Panel>
   );
 }

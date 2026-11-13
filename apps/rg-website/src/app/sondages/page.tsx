@@ -1,4 +1,9 @@
-import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@rosegriffon/ui";
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyTitle,
+} from "@rosegriffon/ui";
 import { BarChart3 } from "lucide-react";
 import type { Metadata } from "next";
 
@@ -27,7 +32,8 @@ export const metadata: Metadata = {
   description:
     "Les sondages posés à la communauté Rose Griffon sur Discord : questions, choix, résultats détaillés et participation.",
   openGraph: withDefaultOgImage({
-    description: "Questions, choix et résultats des sondages de la communauté Rose Griffon sur Discord.",
+    description:
+      "Questions, choix et résultats des sondages de la communauté Rose Griffon sur Discord.",
     title: "Sondages de la communauté · Rose Griffon",
     type: "website",
     url: absoluteUrl("/sondages"),
@@ -93,14 +99,22 @@ export default async function PageSondages({
       ) : (
         <>
           <div className="grid gap-6 lg:grid-cols-2">
-            {sondages.map(sondage => (
-              <CarteSondage key={sondage.poll_id} contexte={contexte} sondage={sondage} />
+            {sondages.map((sondage) => (
+              <CarteSondage
+                key={sondage.poll_id}
+                contexte={contexte}
+                sondage={sondage}
+              />
             ))}
           </div>
 
           {/* `WikiPagination` ne réécrit que `page` : la recherche et le filtre
 					    d'état survivent au changement de page. */}
-          <WikiPagination currentPage={page} itemsPerPage={SONDAGES_PAR_PAGE} totalItems={total} />
+          <WikiPagination
+            currentPage={page}
+            itemsPerPage={SONDAGES_PAR_PAGE}
+            totalItems={total}
+          />
         </>
       )}
     </PageContainer>

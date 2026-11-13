@@ -22,7 +22,13 @@ import { videoLisibleNavigateur } from "@/lib/x-campagnes/video";
  * image chargée est transparente, la case garde donc sa forme et son sens sans
  * affiche (Discord n'en fournit pas) et sans décalage de mise en page.
  */
-export function VignetteVideo({ src, ariaLabel }: { src: string; ariaLabel: string }) {
+export function VignetteVideo({
+  src,
+  ariaLabel,
+}: {
+  src: string;
+  ariaLabel: string;
+}) {
   const lisible = videoLisibleNavigateur(src);
   const boite = useRef<HTMLDivElement>(null);
   const [proche, setProche] = useState(false);
@@ -33,8 +39,8 @@ export function VignetteVideo({ src, ariaLabel }: { src: string; ariaLabel: stri
       return;
     }
     const observateur = new IntersectionObserver(
-      entrees => {
-        if (entrees.some(entree => entree.isIntersecting)) {
+      (entrees) => {
+        if (entrees.some((entree) => entree.isIntersecting)) {
           setProche(true);
           observateur.disconnect();
         }
@@ -60,10 +66,10 @@ export function VignetteVideo({ src, ariaLabel }: { src: string; ariaLabel: stri
           preload="none"
           aria-label={ariaLabel}
           className="absolute inset-0 size-full object-cover transition-transform duration-500 motion-safe:group-hover:scale-105"
-          onMouseEnter={evenement => {
+          onMouseEnter={(evenement) => {
             void evenement.currentTarget.play().catch(() => {});
           }}
-          onMouseLeave={evenement => {
+          onMouseLeave={(evenement) => {
             evenement.currentTarget.pause();
             evenement.currentTarget.currentTime = 0;
           }}

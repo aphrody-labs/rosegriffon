@@ -3,16 +3,31 @@ import { Database } from "bun:sqlite";
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { categoryStats, getText, getTextLocale, getTexts, listCategory, searchText } from "./index.js";
+import {
+  categoryStats,
+  getText,
+  getTextLocale,
+  getTexts,
+  listCategory,
+  searchText,
+} from "./index.js";
 
 test("all game-text endpoints read SQLite without PostgreSQL, native VFS or loose files", async () => {
   const directory = await mkdtemp(join(tmpdir(), "inagle-text-sqlite-"));
   const path = join(directory, "mirror.sqlite");
-  const keys = ["NIE_DATA_SOURCE", "INAGLE_DATA_SOURCE", "NIE_WIKI_DB"] as const;
-  const original = Object.fromEntries(keys.map(key => [key, process.env[key]]));
+  const keys = [
+    "NIE_DATA_SOURCE",
+    "INAGLE_DATA_SOURCE",
+    "NIE_WIKI_DB",
+  ] as const;
+  const original = Object.fromEntries(
+    keys.map((key) => [key, process.env[key]]),
+  );
   try {
     const db = new Database(path);
-    db.exec("CREATE TABLE inagle_game_text(hash_id TEXT, locale TEXT, category TEXT, value TEXT)");
+    db.exec(
+      "CREATE TABLE inagle_game_text(hash_id TEXT, locale TEXT, category TEXT, value TEXT)",
+    );
     const insert = db.query("INSERT INTO inagle_game_text VALUES (?, ?, ?, ?)");
     for (const row of [
       ["0x00000001", "fr", "technical", "Épreuve 100%_"],
@@ -29,10 +44,14 @@ test("all game-text endpoints read SQLite without PostgreSQL, native VFS or loos
     expect((await getText(1))?.fr).toBe("Épreuve 100%_");
     expect(await getTextLocale(1, "ja")).toBe("Épreuve 100%_");
     expect((await getTexts([1, 1, 2])).size).toBe(2);
-    expect((await listCategory("technical", "fr", 1, 1))[0].hashId).toBe("0x00000002");
+    expect((await listCategory("technical", "fr", 1, 1))[0].hashId).toBe(
+      "0x00000002",
+    );
     expect((await searchText("éPREUVE", "fr"))[0].hashId).toBe("0x00000001");
     expect((await searchText("100%_", "fr")).length).toBe(1);
-    expect(await categoryStats()).toEqual([{ category: "technical", count: 2 }]);
+    expect(await categoryStats()).toEqual([
+      { category: "technical", count: 2 },
+    ]);
     expect(await Bun.file(path).arrayBuffer()).toEqual(before);
     const writer = new Database(path);
     writer.exec("DROP TABLE inagle_game_text");

@@ -8,10 +8,17 @@
  * « Critique » est redondant avec « Critique communautaire », pas avec
  * « Critiques des fans » ni « Autocritique ».
  */
-export function libelleRedondantAvecTitre(libelle: string | null | undefined, titre: string | null | undefined): boolean {
+export function libelleRedondantAvecTitre(
+  libelle: string | null | undefined,
+  titre: string | null | undefined,
+): boolean {
   if (!libelle || !titre) return false;
   const normaliser = (valeur: string) =>
-    valeur.normalize("NFD").replace(/\p{M}/gu, "").trim().toLocaleLowerCase("fr");
+    valeur
+      .normalize("NFD")
+      .replace(/\p{M}/gu, "")
+      .trim()
+      .toLocaleLowerCase("fr");
   const l = normaliser(libelle);
   const t = normaliser(titre);
   if (l.length === 0 || !t.startsWith(l)) return false;

@@ -53,7 +53,9 @@ export async function LatestChroniqueSection() {
               >
                 Chroniques du Bouquet
               </h2>
-              <p className="text-sm text-muted-foreground">Dernière actualité Rose Griffon</p>
+              <p className="text-sm text-muted-foreground">
+                Dernière actualité Rose Griffon
+              </p>
             </div>
           </div>
         </CardHeader>
@@ -65,7 +67,10 @@ export async function LatestChroniqueSection() {
               <div className="w-full md:w-1/3 shrink-0">
                 <div className="relative aspect-video md:aspect-auto md:h-full min-h-[200px] rounded-xl overflow-hidden shadow-lg">
                   <Image
-                    src={article.featured_image_url || "/images/placeholder-chronicle.svg"}
+                    src={
+                      article.featured_image_url ||
+                      "/images/placeholder-chronicle.svg"
+                    }
                     alt={article.title}
                     fill
                     sizes="(max-width: 768px) 100vw, 33vw"
@@ -79,7 +84,10 @@ export async function LatestChroniqueSection() {
               <div className="flex-1 space-y-4">
                 {/* Catégorie */}
                 {article.category && (
-                  <Badge variant="outline" className="border-rg-brique text-rg-brique">
+                  <Badge
+                    variant="outline"
+                    className="border-rg-brique text-rg-brique"
+                  >
                     {article.category}
                   </Badge>
                 )}
@@ -90,16 +98,30 @@ export async function LatestChroniqueSection() {
                 </h3>
 
                 {/* Extrait */}
-                {article.excerpt && <p className="text-base text-muted-foreground line-clamp-3">{article.excerpt}</p>}
+                {article.excerpt && (
+                  <p className="text-base text-muted-foreground line-clamp-3">
+                    {article.excerpt}
+                  </p>
+                )}
 
                 {/* Meta */}
                 <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
                   <div className="flex items-center gap-2">
                     <Calendar className="size-4" />
-                    <time dateTime={article.published_at || article.created_at || ""}>
-                      {format(new Date(article.published_at || article.created_at || ""), "d MMMM yyyy", {
-                        locale: fr,
-                      })}
+                    <time
+                      dateTime={
+                        article.published_at || article.created_at || ""
+                      }
+                    >
+                      {format(
+                        new Date(
+                          article.published_at || article.created_at || "",
+                        ),
+                        "d MMMM yyyy",
+                        {
+                          locale: fr,
+                        },
+                      )}
                     </time>
                   </div>
                   <div className="flex items-center gap-2">

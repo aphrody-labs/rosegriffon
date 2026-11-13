@@ -3,7 +3,11 @@ import Link from "@/components/shared/Link";
 import { createPostgresClient } from "@rosegriffon/db/service";
 import { TweetFormClient } from "./tweet-form-client";
 
-export default async function TweetEditorPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function TweetEditorPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const { id } = await params;
   const isNew = id === "new";
 
@@ -11,7 +15,11 @@ export default async function TweetEditorPage({ params }: { params: Promise<{ id
 
   if (!isNew) {
     const supabase = createPostgresClient();
-    let { data } = await supabase.from("tweets").select("*").eq("id", id).maybeSingle();
+    let { data } = await supabase
+      .from("tweets")
+      .select("*")
+      .eq("id", id)
+      .maybeSingle();
     if (!data) {
       const { data: threadTweet } = await supabase
         .from("tweets")

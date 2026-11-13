@@ -1,7 +1,15 @@
 "use client";
 
 import { useId } from "react";
-import { Button, Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, Slider } from "@rosegriffon/ui";
+import {
+  Button,
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  Slider,
+} from "@rosegriffon/ui";
 import { useCallback, useState } from "react";
 import Cropper from "react-easy-crop";
 import type { Area } from "react-easy-crop";
@@ -34,14 +42,21 @@ export default function ImageCropper({
     setCrop(crop);
   };
 
-  const onCropCompleteHandler = useCallback((_croppedArea: Area, croppedAreaPixels: Area) => {
-    setCroppedAreaPixels(croppedAreaPixels);
-  }, []);
+  const onCropCompleteHandler = useCallback(
+    (_croppedArea: Area, croppedAreaPixels: Area) => {
+      setCroppedAreaPixels(croppedAreaPixels);
+    },
+    [],
+  );
 
   const handleSave = async () => {
     if (croppedAreaPixels && imageSrc) {
       try {
-        const croppedImage = await getCroppedImg(imageSrc, croppedAreaPixels, rotation);
+        const croppedImage = await getCroppedImg(
+          imageSrc,
+          croppedAreaPixels,
+          rotation,
+        );
         if (croppedImage) {
           onCropComplete(croppedImage);
           onOpenChange(false);
@@ -56,7 +71,9 @@ export default function ImageCropper({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold text-rg-rose">Recadrer l'image</DialogTitle>
+          <DialogTitle className="text-2xl font-bold text-rg-rose">
+            Recadrer l'image
+          </DialogTitle>
         </DialogHeader>
 
         <div className="relative w-full h-[400px] bg-black/5 rounded-md overflow-hidden">
@@ -83,7 +100,7 @@ export default function ImageCropper({
               min={1}
               max={3}
               step={0.1}
-              onValueChange={v => {
+              onValueChange={(v) => {
                 const val = v[0];
                 if (val !== undefined) {
                   setZoom(val);
@@ -102,7 +119,7 @@ export default function ImageCropper({
               min={0}
               max={360}
               step={1}
-              onValueChange={v => {
+              onValueChange={(v) => {
                 const val = v[0];
                 if (val !== undefined) {
                   setRotation(val);
@@ -117,7 +134,10 @@ export default function ImageCropper({
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Annuler
           </Button>
-          <Button onClick={handleSave} className="bg-linear-to-r from-rg-rose to-rg-or hover:opacity-90 text-white">
+          <Button
+            onClick={handleSave}
+            className="bg-linear-to-r from-rg-rose to-rg-or hover:opacity-90 text-white"
+          >
             Valider
           </Button>
         </DialogFooter>

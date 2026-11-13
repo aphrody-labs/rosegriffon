@@ -47,7 +47,12 @@ function canonicalElement(el: string | undefined | null): string | undefined {
   return ELEMENT_CANONICAL[el] || el;
 }
 
-const POS_LABEL: Record<string, string> = { DF: "DEF", FW: "ATT", GK: "GAR", MF: "MIL" };
+const POS_LABEL: Record<string, string> = {
+  DF: "DEF",
+  FW: "ATT",
+  GK: "GAR",
+  MF: "MIL",
+};
 const POS_COLOR: Record<string, string> = {
   DF: "bg-blue-600",
   FW: "bg-red-600",
@@ -155,7 +160,9 @@ function resolveImageUrl(char: BaseCharacter): string {
 function getCharHref(char: BaseCharacter): string {
   const charAny = char as any;
   const variant = char.variants?.[0] as any;
-  return wiki(`/chara/${charAny.slug || variant?.slug || variant?.charaParamId || char.charaId}`);
+  return wiki(
+    `/chara/${charAny.slug || variant?.slug || variant?.charaParamId || char.charaId}`,
+  );
 }
 
 function getCharName(char: BaseCharacter): string {
@@ -279,7 +286,8 @@ function PlayerCard({
   const charAny = player as any;
   const variant = player.variants?.[0] as any;
   const position = variant?.position || charAny.position || "MF";
-  const element = canonicalElement(variant?.element || charAny.element) || "Void";
+  const element =
+    canonicalElement(variant?.element || charAny.element) || "Void";
   const rarity = charAny.bestRarity || variant?.rarity || "Normal";
   const imageUrl = resolveImageUrl(player);
   const name = getCharName(player);
@@ -304,7 +312,9 @@ function PlayerCard({
         <div className="relative w-full aspect-square overflow-hidden">
           <SafeImage
             src={imageUrl}
-            zukanHash={(player as any).zukanHash || player.variants?.[0]?.zukanHash}
+            zukanHash={
+              (player as any).zukanHash || player.variants?.[0]?.zukanHash
+            }
             fallbackSrc={getCharacterImageUrl(player.internalCode)}
             alt={name}
             fill
@@ -321,7 +331,13 @@ function PlayerCard({
 
           {/* Element + Position */}
           <div className="absolute bottom-5 sm:bottom-8 left-0.5 sm:left-1.5 flex items-center gap-0.5">
-            {elSprite && <CommonSpriteIcon name={elSprite} scale={0.2} className="sm:scale-125" />}
+            {elSprite && (
+              <CommonSpriteIcon
+                name={elSprite}
+                scale={0.2}
+                className="sm:scale-125"
+              />
+            )}
             <span
               className={cn(
                 "px-0.5 sm:px-1 py-px rounded text-[7px] sm:text-[9px] font-black text-white leading-none",
@@ -334,14 +350,16 @@ function PlayerCard({
 
           {/* Name */}
           <div className="absolute bottom-0 inset-x-0 px-1 sm:px-2 pb-0.5 sm:pb-1.5">
-            <p className="text-white font-bold text-[8px] sm:text-xs truncate drop-shadow-lg">{name}</p>
+            <p className="text-white font-bold text-[8px] sm:text-xs truncate drop-shadow-lg">
+              {name}
+            </p>
           </div>
         </div>
       </Link>
 
       {/* Lock toggle */}
       <button
-        onClick={e => {
+        onClick={(e) => {
           e.preventDefault();
           e.stopPropagation();
           onToggleLock();
@@ -370,7 +388,9 @@ function resolveCoordinatorImage(person: Coordinator): string | null {
   if (!person.image) {
     return null;
   }
-  const clean = person.image.startsWith("/") ? person.image.slice(1) : person.image;
+  const clean = person.image.startsWith("/")
+    ? person.image.slice(1)
+    : person.image;
   return `https://dxi4wb638ujep.cloudfront.net/1/${clean}.png`;
 }
 
@@ -382,15 +402,25 @@ const COORD_ELEMENT_MAP: Record<string, string> = {
   無: "Void",
 };
 
-function StaffSlot({ person, staffRole, team }: { person: Coordinator; staffRole: string; team: GeneratedTeam }) {
+function StaffSlot({
+  person,
+  staffRole,
+  team,
+}: {
+  person: Coordinator;
+  staffRole: string;
+  team: GeneratedTeam;
+}) {
   const imageUrl = resolveCoordinatorImage(person);
   const [imgError, setImgError] = useState(false);
 
-  const coordElement = canonicalElement(COORD_ELEMENT_MAP[person.element || ""] || person.element);
+  const coordElement = canonicalElement(
+    COORD_ELEMENT_MAP[person.element || ""] || person.element,
+  );
   const elSprite = coordElement ? ELEMENT_SPRITE[coordElement] : null;
 
   const players = [...team.gk, ...team.df, ...team.mf, ...team.fw];
-  const compatibility = players.filter(p => {
+  const compatibility = players.filter((p) => {
     const el = getCharElement(p);
     const ps = getCharPlaystyle(p);
     return (coordElement && el === coordElement) || ps === person.playstyle;
@@ -411,7 +441,11 @@ function StaffSlot({ person, staffRole, team }: { person: Coordinator; staffRole
               onError={() => setImgError(true)}
             />
           ) : (
-            <Icon name={staffRole === "Coach" ? "sports" : "person"} size={20} className="text-on-surface-variant" />
+            <Icon
+              name={staffRole === "Coach" ? "sports" : "person"}
+              size={20}
+              className="text-on-surface-variant"
+            />
           )}
         </div>
         <div className="min-w-0 flex-1">
@@ -432,7 +466,8 @@ function StaffSlot({ person, staffRole, team }: { person: Coordinator; staffRole
           <p className="flex justify-between">
             <span>Style :</span>
             <span className="font-semibold text-on-surface">
-              {PLAYSTYLES.find(p => p.key === person.playstyle)?.label || person.playstyle}
+              {PLAYSTYLES.find((p) => p.key === person.playstyle)?.label ||
+                person.playstyle}
             </span>
           </p>
         )}
@@ -468,14 +503,16 @@ function FormationPicker({
 
   return (
     <div>
-      <p className="type-label-medium text-on-surface-variant mb-1.5 font-bold">Formation</p>
+      <p className="type-label-medium text-on-surface-variant mb-1.5 font-bold">
+        Formation
+      </p>
 
       {/* Mobile: native select */}
       <div className="sm:hidden">
         <div className="relative">
           <select
             value={selectedIdx}
-            onChange={e => onSelect(Number(e.target.value))}
+            onChange={(e) => onSelect(Number(e.target.value))}
             className="w-full appearance-none rounded-xl bg-surface-container border border-outline-variant/15 px-3 min-h-[44px] py-2.5 pr-8 text-sm font-bold text-on-surface focus:outline-hidden focus:ring-2 focus:ring-primary/50"
           >
             {formations.map((f, i) => (
@@ -494,13 +531,18 @@ function FormationPicker({
           <span className="font-mono text-xs">{selected.layout}</span>
           <span className="inline-flex items-center gap-1">
             <span>ATT</span>
-            <span className="inline-flex items-center gap-0.5" aria-label={`Attaque ${selected.off} sur 5`}>
+            <span
+              className="inline-flex items-center gap-0.5"
+              aria-label={`Attaque ${selected.off} sur 5`}
+            >
               {Array.from({ length: 5 }, (_, idx) => (
                 <Star
                   key={`off-${idx}`}
                   className={cn(
                     "size-2.5",
-                    idx < selected.off ? "fill-amber-400 text-amber-400" : "fill-outline-variant/20 text-outline-variant/30"
+                    idx < selected.off
+                      ? "fill-amber-400 text-amber-400"
+                      : "fill-outline-variant/20 text-outline-variant/30",
                   )}
                 />
               ))}
@@ -508,13 +550,18 @@ function FormationPicker({
           </span>
           <span className="inline-flex items-center gap-1">
             <span>DEF</span>
-            <span className="inline-flex items-center gap-0.5" aria-label={`Défense ${selected.def} sur 5`}>
+            <span
+              className="inline-flex items-center gap-0.5"
+              aria-label={`Défense ${selected.def} sur 5`}
+            >
               {Array.from({ length: 5 }, (_, idx) => (
                 <Star
                   key={`def-${idx}`}
                   className={cn(
                     "size-2.5",
-                    idx < selected.def ? "fill-sky-400 text-sky-400" : "fill-outline-variant/20 text-outline-variant/30"
+                    idx < selected.def
+                      ? "fill-sky-400 text-sky-400"
+                      : "fill-outline-variant/20 text-outline-variant/30",
                   )}
                 />
               ))}
@@ -543,7 +590,10 @@ function FormationPicker({
               {isActive && <Icon name="check" size={14} />}
               <span>{f.name}</span>
               <span
-                className={cn("text-[10px] font-normal opacity-70", isActive ? "text-on-secondary-container/70" : "")}
+                className={cn(
+                  "text-[10px] font-normal opacity-70",
+                  isActive ? "text-on-secondary-container/70" : "",
+                )}
               >
                 {f.layout}
               </span>
@@ -557,7 +607,15 @@ function FormationPicker({
 
 // ---------- Stat Progress Bar Helper ----------
 
-function StatBar({ label, value, max = 150 }: { label: string; value: number; max?: number }) {
+function StatBar({
+  label,
+  value,
+  max = 150,
+}: {
+  label: string;
+  value: number;
+  max?: number;
+}) {
   const percentage = Math.min(100, Math.round((value / max) * 100));
   return (
     <div className="space-y-1">
@@ -676,7 +734,10 @@ const getTeamSynergies = (team: GeneratedTeam) => {
 
 // ---------- Main component ----------
 
-export function RandomTeamGenerator({ pools, coordinators }: RandomTeamGeneratorProps) {
+export function RandomTeamGenerator({
+  pools,
+  coordinators,
+}: RandomTeamGeneratorProps) {
   const [selectedPlaystyles, setSelectedPlaystyles] = useState<string[]>([]);
   const [selectedElement, setSelectedElement] = useState<string | undefined>();
   const [selectedGender, setSelectedGender] = useState<number | undefined>();
@@ -698,9 +759,9 @@ export function RandomTeamGenerator({ pools, coordinators }: RandomTeamGenerator
         if (s) counts.set(s, (counts.get(s) || 0) + 1);
       }
     }
-    const known = SERIES_ORDER.filter(s => counts.has(s));
+    const known = SERIES_ORDER.filter((s) => counts.has(s));
     const rest = [...counts.keys()]
-      .filter(s => !SERIES_ORDER.includes(s))
+      .filter((s) => !SERIES_ORDER.includes(s))
       .sort((a, b) => (counts.get(b) || 0) - (counts.get(a) || 0));
     return [...known, ...rest];
   }, [pools]);
@@ -712,7 +773,7 @@ export function RandomTeamGenerator({ pools, coordinators }: RandomTeamGenerator
       let filtered = arr;
 
       if (selectedPlaystyles.length > 0) {
-        const psFiltered = filtered.filter(c => {
+        const psFiltered = filtered.filter((c) => {
           const ps = getCharPlaystyle(c);
           return ps && selectedPlaystyles.includes(ps);
         });
@@ -723,28 +784,34 @@ export function RandomTeamGenerator({ pools, coordinators }: RandomTeamGenerator
 
       if (selectedElement) {
         const target = canonicalElement(selectedElement);
-        const elFiltered = filtered.filter(c => getCharElement(c) === target);
+        const elFiltered = filtered.filter((c) => getCharElement(c) === target);
         if (elFiltered.length >= minCount) {
           filtered = elFiltered;
         }
       }
 
       if (selectedGender !== undefined) {
-        const gFiltered = filtered.filter(c => getCharGender(c) === selectedGender);
+        const gFiltered = filtered.filter(
+          (c) => getCharGender(c) === selectedGender,
+        );
         if (gFiltered.length >= minCount) {
           filtered = gFiltered;
         }
       }
 
       if (selectedRarity) {
-        const rFiltered = filtered.filter(c => getCharRarity(c) === selectedRarity);
+        const rFiltered = filtered.filter(
+          (c) => getCharRarity(c) === selectedRarity,
+        );
         if (rFiltered.length >= minCount) {
           filtered = rFiltered;
         }
       }
 
       if (selectedSeries) {
-        const sFiltered = filtered.filter(c => getCharSeries(c) === selectedSeries);
+        const sFiltered = filtered.filter(
+          (c) => getCharSeries(c) === selectedSeries,
+        );
         if (sFiltered.length >= minCount) {
           filtered = sFiltered;
         }
@@ -759,14 +826,23 @@ export function RandomTeamGenerator({ pools, coordinators }: RandomTeamGenerator
       gk: filterPool(pools.gk, 1),
       mf: filterPool(pools.mf, formation.mf),
     };
-  }, [pools, selectedPlaystyles, selectedElement, selectedGender, selectedRarity, selectedSeries, formation]);
+  }, [
+    pools,
+    selectedPlaystyles,
+    selectedElement,
+    selectedGender,
+    selectedRarity,
+    selectedSeries,
+    formation,
+  ]);
 
   const generate = useCallback(
     (deterministic = false): GeneratedTeam => {
       const p = filteredPools();
       // SSR + 1er rendu client : sélection déterministe (slice) pour éviter le
       // mismatch d'hydratation (#418) dû à Math.random. On rebrasse au montage.
-      const pick = <T,>(arr: T[], n: number): T[] => (deterministic ? arr.slice(0, n) : pickRandom(arr, n));
+      const pick = <T,>(arr: T[], n: number): T[] =>
+        deterministic ? arr.slice(0, n) : pickRandom(arr, n);
       return {
         coach: pick(coordinators.coaches, 1)[0] || null,
         df: pick(p.df, formation.df),
@@ -818,13 +894,21 @@ export function RandomTeamGenerator({ pools, coordinators }: RandomTeamGenerator
         setAnimating(false);
       }, 200);
     }
-  }, [formationIdx, selectedElement, selectedPlaystyles, selectedGender, selectedRarity, selectedSeries, generate]);
+  }, [
+    formationIdx,
+    selectedElement,
+    selectedPlaystyles,
+    selectedGender,
+    selectedRarity,
+    selectedSeries,
+    generate,
+  ]);
 
   // Locked players
   const [locked, setLocked] = useState<Set<string>>(new Set());
 
   const toggleLock = useCallback((key: string) => {
-    setLocked(prev => {
+    setLocked((prev) => {
       const next = new Set(prev);
       if (next.has(key)) {
         next.delete(key);
@@ -843,9 +927,12 @@ export function RandomTeamGenerator({ pools, coordinators }: RandomTeamGenerator
     const maxTicks = 6;
 
     const interval = setInterval(() => {
-      setTeam(prev => {
+      setTeam((prev) => {
         const fresh = generate();
-        const mergePosition = (position: "gk" | "df" | "mf" | "fw", freshArr: BaseCharacter[]): BaseCharacter[] =>
+        const mergePosition = (
+          position: "gk" | "df" | "mf" | "fw",
+          freshArr: BaseCharacter[],
+        ): BaseCharacter[] =>
           freshArr.map((freshPlayer, i) => {
             const key = `${position}-${i}`;
             if (locked.has(key) && prev[position][i]) {
@@ -881,9 +968,9 @@ export function RandomTeamGenerator({ pools, coordinators }: RandomTeamGenerator
   }, []);
 
   const togglePlaystyle = (key: string) => {
-    setSelectedPlaystyles(prev => {
+    setSelectedPlaystyles((prev) => {
       if (prev.includes(key)) {
-        return prev.filter(p => p !== key);
+        return prev.filter((p) => p !== key);
       }
       if (prev.length >= 2) {
         return [prev[1], key];
@@ -910,9 +997,17 @@ export function RandomTeamGenerator({ pools, coordinators }: RandomTeamGenerator
   const hasActiveFilters = activeFilterCount > 0;
 
   // Staggered animation delay offset per row
-  const ROW_OFFSETS: Record<"gk" | "df" | "mf" | "fw", number> = { gk: 0, df: 1, mf: 5, fw: 9 };
+  const ROW_OFFSETS: Record<"gk" | "df" | "mf" | "fw", number> = {
+    gk: 0,
+    df: 1,
+    mf: 5,
+    fw: 9,
+  };
 
-  const renderRow = (position: "gk" | "df" | "mf" | "fw", players: BaseCharacter[]) =>
+  const renderRow = (
+    position: "gk" | "df" | "mf" | "fw",
+    players: BaseCharacter[],
+  ) =>
     players.map((p, i) => {
       const key = `${position}-${i}`;
       const delay = (ROW_OFFSETS[position] + i) * 40;
@@ -938,7 +1033,15 @@ export function RandomTeamGenerator({ pools, coordinators }: RandomTeamGenerator
   let maxSingleStat = 0;
   for (const p of allPlayersList) {
     const s = getPlayerStats(p);
-    const max = Math.max(s.kick, s.control, s.technique, s.pressure, s.physical, s.agility, s.intelligence);
+    const max = Math.max(
+      s.kick,
+      s.control,
+      s.technique,
+      s.pressure,
+      s.physical,
+      s.agility,
+      s.intelligence,
+    );
     if (max > maxSingleStat) {
       maxSingleStat = max;
       mvpPlayer = p;
@@ -950,13 +1053,19 @@ export function RandomTeamGenerator({ pools, coordinators }: RandomTeamGenerator
     <div className="space-y-3.5">
       {/* Element filter */}
       <div>
-        <p className="type-label-medium text-on-surface-variant mb-1.5 font-bold">Élément</p>
+        <p className="type-label-medium text-on-surface-variant mb-1.5 font-bold">
+          Élément
+        </p>
         <div className="flex flex-wrap gap-1.5">
           {ELEMENTS.map(({ value, label }) => (
             <FilterChip
               key={value}
               active={selectedElement === value}
-              onClick={() => setSelectedElement(prev => (prev === value ? undefined : value))}
+              onClick={() =>
+                setSelectedElement((prev) =>
+                  prev === value ? undefined : value,
+                )
+              }
               label={label}
               sprite={ELEMENT_SPRITE[value]}
             />
@@ -966,9 +1075,11 @@ export function RandomTeamGenerator({ pools, coordinators }: RandomTeamGenerator
 
       {/* Playstyle filter */}
       <div>
-        <p className="type-label-medium text-on-surface-variant mb-1.5 font-bold">Style de jeu (max 2)</p>
+        <p className="type-label-medium text-on-surface-variant mb-1.5 font-bold">
+          Style de jeu (max 2)
+        </p>
         <div className="flex flex-wrap gap-1.5">
-          {PLAYSTYLES.map(ps => (
+          {PLAYSTYLES.map((ps) => (
             <FilterChip
               key={ps.key}
               active={selectedPlaystyles.includes(ps.key)}
@@ -982,13 +1093,19 @@ export function RandomTeamGenerator({ pools, coordinators }: RandomTeamGenerator
 
       {/* Gender filter */}
       <div>
-        <p className="type-label-medium text-on-surface-variant mb-1.5 font-bold">Genre</p>
+        <p className="type-label-medium text-on-surface-variant mb-1.5 font-bold">
+          Genre
+        </p>
         <div className="flex flex-wrap gap-1.5">
           {GENDERS.map(({ value, label, icon }) => (
             <FilterChip
               key={value}
               active={selectedGender === value}
-              onClick={() => setSelectedGender(prev => (prev === value ? undefined : value))}
+              onClick={() =>
+                setSelectedGender((prev) =>
+                  prev === value ? undefined : value,
+                )
+              }
               label={label}
               icon={icon}
             />
@@ -998,15 +1115,21 @@ export function RandomTeamGenerator({ pools, coordinators }: RandomTeamGenerator
 
       {/* Rarity filter — RarityBadge chips */}
       <div>
-        <p className="type-label-medium text-on-surface-variant mb-1.5 font-bold">Rareté</p>
+        <p className="type-label-medium text-on-surface-variant mb-1.5 font-bold">
+          Rareté
+        </p>
         <div className="flex flex-wrap gap-1.5">
-          {RARITIES.map(rarity => {
+          {RARITIES.map((rarity) => {
             const active = selectedRarity === rarity;
             return (
               <button
                 type="button"
                 key={rarity}
-                onClick={() => setSelectedRarity(prev => (prev === rarity ? undefined : rarity))}
+                onClick={() =>
+                  setSelectedRarity((prev) =>
+                    prev === rarity ? undefined : rarity,
+                  )
+                }
                 aria-pressed={active}
                 aria-label={`Rareté ${rarity}`}
                 className={cn(
@@ -1017,7 +1140,13 @@ export function RandomTeamGenerator({ pools, coordinators }: RandomTeamGenerator
                     : "border border-outline hover:bg-on-surface/[0.08]",
                 )}
               >
-                {active && <Icon name="check" size={14} className="text-on-secondary-container" />}
+                {active && (
+                  <Icon
+                    name="check"
+                    size={14}
+                    className="text-on-secondary-container"
+                  />
+                )}
                 <RarityBadge rarity={rarity} size="xs" />
               </button>
             );
@@ -1028,13 +1157,19 @@ export function RandomTeamGenerator({ pools, coordinators }: RandomTeamGenerator
       {/* Series filter */}
       {availableSeries.length > 0 && (
         <div>
-          <p className="type-label-medium text-on-surface-variant mb-1.5 font-bold">Série</p>
+          <p className="type-label-medium text-on-surface-variant mb-1.5 font-bold">
+            Série
+          </p>
           <div className="flex flex-wrap gap-1.5">
-            {availableSeries.map(series => (
+            {availableSeries.map((series) => (
               <FilterChip
                 key={series}
                 active={selectedSeries === series}
-                onClick={() => setSelectedSeries(prev => (prev === series ? undefined : series))}
+                onClick={() =>
+                  setSelectedSeries((prev) =>
+                    prev === series ? undefined : series,
+                  )
+                }
                 label={series}
               />
             ))}
@@ -1113,7 +1248,11 @@ export function RandomTeamGenerator({ pools, coordinators }: RandomTeamGenerator
             aria-label="Régénérer l'équipe"
             className="inline-flex items-center gap-2 h-14 px-4 sm:px-5 rounded-2xl bg-primary-container text-on-primary-container font-bold text-sm shadow-md active:scale-[0.98] transition-all disabled:opacity-50 hover:bg-surface-container-highest"
           >
-            <Icon name="casino" size={20} className={cn(animating && "animate-spin")} />
+            <Icon
+              name="casino"
+              size={20}
+              className={cn(animating && "animate-spin")}
+            />
             <span className="hidden sm:inline">Régénérer</span>
           </button>
         </div>
@@ -1123,7 +1262,7 @@ export function RandomTeamGenerator({ pools, coordinators }: RandomTeamGenerator
       <FormationPicker
         formations={FORMATIONS}
         selectedIdx={formationIdx}
-        onSelect={i => {
+        onSelect={(i) => {
           setFormationIdx(i);
           setLocked(new Set());
         }}
@@ -1164,7 +1303,15 @@ export function RandomTeamGenerator({ pools, coordinators }: RandomTeamGenerator
         </div>
 
         {/* Filter body */}
-        <div className={cn("px-4 pb-4", "sm:block", filtersOpen ? "block" : "hidden")}>{filterSection}</div>
+        <div
+          className={cn(
+            "px-4 pb-4",
+            "sm:block",
+            filtersOpen ? "block" : "hidden",
+          )}
+        >
+          {filterSection}
+        </div>
       </div>
 
       {/* Main Grid: Pitch + Info Column */}
@@ -1225,7 +1372,9 @@ export function RandomTeamGenerator({ pools, coordinators }: RandomTeamGenerator
             </div>
 
             {/* GK */}
-            <div className="w-[20%] sm:w-1/6 mx-auto">{renderRow("gk", team.gk)}</div>
+            <div className="w-[20%] sm:w-1/6 mx-auto">
+              {renderRow("gk", team.gk)}
+            </div>
           </div>
         </div>
 
@@ -1241,7 +1390,10 @@ export function RandomTeamGenerator({ pools, coordinators }: RandomTeamGenerator
               <StatBar label="Contrôle" value={averageStats.control} />
               <StatBar label="Technique" value={averageStats.technique} />
               <StatBar label="Physique" value={averageStats.physical} />
-              <StatBar label="Pression (Defense)" value={averageStats.pressure} />
+              <StatBar
+                label="Pression (Defense)"
+                value={averageStats.pressure}
+              />
               <StatBar label="Agilité" value={averageStats.agility} />
               <StatBar label="Intelligence" value={averageStats.intelligence} />
             </div>
@@ -1260,19 +1412,25 @@ export function RandomTeamGenerator({ pools, coordinators }: RandomTeamGenerator
 
           {/* Synergies Panel */}
           <div className="p-4 rounded-3xl bg-surface-container border border-outline/5 space-y-4">
-            <h2 className="text-sm font-bold text-on-surface uppercase tracking-wider">Synergies d'Éléments</h2>
+            <h2 className="text-sm font-bold text-on-surface uppercase tracking-wider">
+              Synergies d'Éléments
+            </h2>
             <div className="space-y-3">
               {synergies.list.length > 0 ? (
                 <div className="flex flex-col gap-2">
-                  {synergies.list.map(syn => (
+                  {synergies.list.map((syn) => (
                     <div
                       key={syn.element}
                       className="flex items-center justify-between p-2 rounded-xl bg-surface-container-high border border-outline/5"
                     >
                       <div className="flex items-center gap-2">
-                        <CommonSpriteIcon name={ELEMENT_SPRITE[syn.element]} scale={0.25} />
+                        <CommonSpriteIcon
+                          name={ELEMENT_SPRITE[syn.element]}
+                          scale={0.25}
+                        />
                         <span className="text-xs font-bold text-on-surface">
-                          {ELEMENTS.find(el => el.value === syn.element)?.label || syn.element}
+                          {ELEMENTS.find((el) => el.value === syn.element)
+                            ?.label || syn.element}
                         </span>
                       </div>
                       <span className="text-xs font-bold text-primary">
@@ -1293,10 +1451,14 @@ export function RandomTeamGenerator({ pools, coordinators }: RandomTeamGenerator
 
       {/* Staff Section */}
       <div className="space-y-3">
-        <h2 className="text-sm font-bold text-on-surface uppercase tracking-wider px-1">Staff Technique</h2>
+        <h2 className="text-sm font-bold text-on-surface uppercase tracking-wider px-1">
+          Staff Technique
+        </h2>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          {team.coach && <StaffSlot person={team.coach} staffRole="Coach" team={team} />}
-          {team.managers.map(m => (
+          {team.coach && (
+            <StaffSlot person={team.coach} staffRole="Coach" team={team} />
+          )}
+          {team.managers.map((m) => (
             <StaffSlot key={m.id} person={m} staffRole="Manager" team={team} />
           ))}
         </div>

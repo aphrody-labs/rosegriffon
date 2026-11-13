@@ -33,7 +33,13 @@
  *    annoncer « pas de modèle » sur près des deux tiers de l'index. Le sondage
  *    retombe donc sur un `GET` dont le corps est relâché (cf. `methodeRefusee`).
  */
-import { ButtonComponent, Discord, Slash, SlashGroup, SlashOption } from "discordx";
+import {
+  ButtonComponent,
+  Discord,
+  Slash,
+  SlashGroup,
+  SlashOption,
+} from "discordx";
 import {
   ActionRowBuilder,
   ApplicationCommandOptionType,
@@ -50,7 +56,12 @@ import {
 
 import type { AzaleeRequestOptions } from "@rosegriffon/azalee/remote";
 
-import { azalee, isAzaleeNotFound, messageErreurAzalee, urlWiki } from "../lib/azalee";
+import {
+  azalee,
+  isAzaleeNotFound,
+  messageErreurAzalee,
+  urlWiki,
+} from "../lib/azalee";
 import { cached } from "../lib/cache";
 import { rgEmbed, truncate } from "../lib/embeds";
 import {
@@ -140,24 +151,46 @@ interface SqueletteDossier {
  * les fichiers : on demande donc une seule ligne de fichiers ici, et la vraie
  * tranche est demandée ensuite, une fois la découpe connue.
  */
-async function squeletteDossier(chemin: string, options?: AzaleeRequestOptions): Promise<SqueletteDossier> {
+async function squeletteDossier(
+  chemin: string,
+  options?: AzaleeRequestOptions,
+): Promise<SqueletteDossier> {
   // La clé de cache ignore `options` : c'est la MÊME donnée, seul le budget de
   // patience change selon l'appelant (commande ou autocomplétion).
   return cached(`cpk:dir:${chemin}`, TTL_INDEX_MS, async () => {
-    const listing = await azalee().cpkList({ path: chemin, limit: 1, offset: 0 }, options);
-    return { dir: listing.dir, dirs: listing.dirs, fileTotal: listing.fileTotal };
+    const listing = await azalee().cpkList(
+      { path: chemin, limit: 1, offset: 0 },
+      options,
+    );
+    return {
+      dir: listing.dir,
+      dirs: listing.dirs,
+      fileTotal: listing.fileTotal,
+    };
   });
 }
 
 /** Tranche de fichiers directs d'un dossier. */
-async function fichiersDossier(chemin: string, offset: number, limite: number): Promise<CpkFile[]> {
+async function fichiersDossier(
+  chemin: string,
+  offset: number,
+  limite: number,
+): Promise<CpkFile[]> {
   if (limite <= 0) {
     return [];
   }
-  return cached(`cpk:files:${chemin}:${offset}:${limite}`, TTL_INDEX_MS, async () => {
-    const listing = await azalee().cpkList({ path: chemin, limit: limite, offset });
-    return listing.files;
-  });
+  return cached(
+    `cpk:files:${chemin}:${offset}:${limite}`,
+    TTL_INDEX_MS,
+    async () => {
+      const listing = await azalee().cpkList({
+        path: chemin,
+        limit: limite,
+        offset,
+      });
+      return listing.files;
+    },
+  );
 }
 
 /** Résultats d'une recherche de chemin, plafonnés et mis en cache. */
@@ -178,7 +211,9 @@ async function chercherFichiers(motif: string): Promise<CpkFile[]> {
  */
 async function estUnFichier(chemin: string): Promise<boolean> {
   try {
-    await cached(`cpk:file:${chemin}`, TTL_INDEX_MS, async () => azalee().cpkFile(chemin));
+    await cached(`cpk:file:${chemin}`, TTL_INDEX_MS, async () =>
+      azalee().cpkFile(chemin),
+    );
     return true;
   } catch (err) {
     if (isAzaleeNotFound(err)) {
@@ -217,10 +252,20 @@ interface SondeContenu {
  * déjà là, et un GLB froid ou un PNG de galerie pèsent plusieurs mégaoctets
  * qu'il serait absurde de faire transiter pour afficher une taille.
  */
-async function interrogerContenu(url: string, methode: "HEAD" | "GET", delaiMs: number): Promise<SondeContenu> {
-  const reponse = await fetch(url, { method: methode, signal: AbortSignal.timeout(delaiMs) });
+async function interrogerContenu(
+  url: string,
+  methode: "HEAD" | "GET",
+  delaiMs: number,
+): Promise<SondeContenu> {
+  const reponse = await fetch(url, {
+    method: methode,
+    signal: AbortSignal.timeout(delaiMs),
+  });
   await reponse.body?.cancel().catch(() => undefined);
-  const longueur = Number.parseInt(reponse.headers.get("content-length") ?? "", 10);
+  const longueur = Number.parseInt(
+    reponse.headers.get("content-length") ?? "",
+    10,
+  );
   return {
     statut: reponse.status,
     octets: Number.isFinite(longueur) ? longueur : null,
@@ -239,11 +284,16 @@ async function interrogerContenu(url: string, methode: "HEAD" | "GET", delaiMs: 
  * (mesuré : `HEAD /model-full/c11010034.glb` → 405, `GET` → 200, 70 936 o).
  * On retombe donc sur un GET dont le corps est immédiatement relâché.
  */
-async function sonderContenu(url: string, delaiMs = DELAI_CDN_MS): Promise<SondeContenu | null> {
+async function sonderContenu(
+  url: string,
+  delaiMs = DELAI_CDN_MS,
+): Promise<SondeContenu | null> {
   try {
     return await cached(`cpk:sonde:${url}`, TTL_SONDE_MS, async () => {
       const tete = await interrogerContenu(url, "HEAD", delaiMs);
-      return methodeRefusee(tete.statut) ? await interrogerContenu(url, "GET", delaiMs) : tete;
+      return methodeRefusee(tete.statut)
+        ? await interrogerContenu(url, "GET", delaiMs)
+        : tete;
     });
   } catch {
     return null;
@@ -263,9 +313,14 @@ interface CorpsBorne {
  * que 900 caractères gaspillerait la bande passante du VPS et pourrait faire
  * expirer l'interaction. On coupe le flux dès la limite atteinte.
  */
-async function lireCorpsBorne(url: string, maxOctets: number): Promise<CorpsBorne | null> {
+async function lireCorpsBorne(
+  url: string,
+  maxOctets: number,
+): Promise<CorpsBorne | null> {
   try {
-    const reponse = await fetch(url, { signal: AbortSignal.timeout(DELAI_CDN_MS) });
+    const reponse = await fetch(url, {
+      signal: AbortSignal.timeout(DELAI_CDN_MS),
+    });
     if (!reponse.ok || !reponse.body) {
       return null;
     }
@@ -315,7 +370,10 @@ function boutonsPagination(
 }
 
 /** Construit la réponse d'une page de `/cpk parcourir`. */
-async function rendreParcours(chemin: string, offsetDemande: number): Promise<InteractionEditReplyOptions> {
+async function rendreParcours(
+  chemin: string,
+  offsetDemande: number,
+): Promise<InteractionEditReplyOptions> {
   const propre = normaliserChemin(chemin);
   const squelette = await squeletteDossier(propre);
   const total = squelette.dirs.length + squelette.fileTotal;
@@ -353,11 +411,22 @@ async function rendreParcours(chemin: string, offsetDemande: number): Promise<In
   }
 
   const offset = bornerOffset(offsetDemande, total, ENTREES_PAR_PAGE);
-  const tranche = tranchePage(squelette.dirs.length, squelette.fileTotal, offset, ENTREES_PAR_PAGE);
-  const fichiers = await fichiersDossier(propre, tranche.offsetFichiers, tranche.limiteFichiers);
+  const tranche = tranchePage(
+    squelette.dirs.length,
+    squelette.fileTotal,
+    offset,
+    ENTREES_PAR_PAGE,
+  );
+  const fichiers = await fichiersDossier(
+    propre,
+    tranche.offsetFichiers,
+    tranche.limiteFichiers,
+  );
 
   const lignes = [
-    ...squelette.dirs.slice(tranche.debutDossiers, tranche.finDossiers).map(ligneDossier),
+    ...squelette.dirs
+      .slice(tranche.debutDossiers, tranche.finDossiers)
+      .map(ligneDossier),
     ...fichiers.map(ligneFichier),
   ];
   embed.setDescription(truncate(lignes.join("\n"), 4_000));
@@ -387,7 +456,11 @@ async function rendreParcours(chemin: string, offsetDemande: number): Promise<In
     embeds: [embed],
     components: boutonsPagination(
       PREFIXE_BOUTON_PARCOURS,
-      cible => encoderParcours({ chemin: propre, offset: (cible - 1) * ENTREES_PAR_PAGE }),
+      (cible) =>
+        encoderParcours({
+          chemin: propre,
+          offset: (cible - 1) * ENTREES_PAR_PAGE,
+        }),
       page,
       pages,
     ),
@@ -397,12 +470,19 @@ async function rendreParcours(chemin: string, offsetDemande: number): Promise<In
 // ─── Rendu : recherche ──────────────────────────────────────────────────────
 
 /** Construit la réponse d'une page de `/cpk chercher`. */
-async function rendreRecherche(motif: string, offsetDemande: number): Promise<InteractionEditReplyOptions> {
+async function rendreRecherche(
+  motif: string,
+  offsetDemande: number,
+): Promise<InteractionEditReplyOptions> {
   const propre = motif.trim();
-  const embed = rgEmbed().setTitle(`🔎 Fichiers du jeu — « ${truncate(propre, 100)} »`);
+  const embed = rgEmbed().setTitle(
+    `🔎 Fichiers du jeu — « ${truncate(propre, 100)} »`,
+  );
 
   if (propre.length < MOTIF_MINIMUM) {
-    embed.setDescription(`Il faut au moins ${MOTIF_MINIMUM} caractères pour chercher dans les 250 800 chemins.`);
+    embed.setDescription(
+      `Il faut au moins ${MOTIF_MINIMUM} caractères pour chercher dans les 250 800 chemins.`,
+    );
     return { embeds: [embed], components: [] };
   }
 
@@ -419,7 +499,11 @@ async function rendreRecherche(motif: string, offsetDemande: number): Promise<In
     return { embeds: [embed], components: [] };
   }
 
-  const offset = bornerOffset(offsetDemande, resultats.length, RESULTATS_PAR_PAGE);
+  const offset = bornerOffset(
+    offsetDemande,
+    resultats.length,
+    RESULTATS_PAR_PAGE,
+  );
   const page = numeroPage(offset, RESULTATS_PAR_PAGE);
   const pages = nombreDePages(resultats.length, RESULTATS_PAR_PAGE);
 
@@ -434,7 +518,8 @@ async function rendreRecherche(motif: string, offsetDemande: number): Promise<In
   );
   embed.addFields({
     name: "Ouvrir un résultat",
-    value: "`/cpk fichier chemin:<chemin complet>` — l'autocomplétion propose les chemins.",
+    value:
+      "`/cpk fichier chemin:<chemin complet>` — l'autocomplétion propose les chemins.",
   });
   if (resultats.length >= PLAFOND_RECHERCHE) {
     // Dire la troncature : sans ça, « 200 résultats » se lit comme un total.
@@ -453,7 +538,11 @@ async function rendreRecherche(motif: string, offsetDemande: number): Promise<In
     embeds: [embed],
     components: boutonsPagination(
       PREFIXE_BOUTON_RECHERCHE,
-      cible => encoderRecherche({ motif: propre, offset: (cible - 1) * RESULTATS_PAR_PAGE }),
+      (cible) =>
+        encoderRecherche({
+          motif: propre,
+          offset: (cible - 1) * RESULTATS_PAR_PAGE,
+        }),
       page,
       pages,
     ),
@@ -463,7 +552,11 @@ async function rendreRecherche(motif: string, offsetDemande: number): Promise<In
 // ─── Rendu : fiche d'un fichier ─────────────────────────────────────────────
 
 /** Aperçu d'une texture : on ne pose l'image que si le CDN sait la décoder. */
-async function garnirImage(embed: EmbedBuilder, image: string, original: string): Promise<void> {
+async function garnirImage(
+  embed: EmbedBuilder,
+  image: string,
+  original: string,
+): Promise<void> {
   const sonde = await sonderContenu(image);
   if (sonde !== null && sonde.statut === 200) {
     embed.setImage(image);
@@ -480,12 +573,18 @@ async function garnirImage(embed: EmbedBuilder, image: string, original: string)
   }
   embed.addFields({
     name: "Aperçu",
-    value: ["Le CDN n'a pas su décoder cette texture en image.", `[Octets bruts](${original})`].join("\n"),
+    value: [
+      "Le CDN n'a pas su décoder cette texture en image.",
+      `[Octets bruts](${original})`,
+    ].join("\n"),
   });
 }
 
 /** Aperçu d'un modèle : pièce jointe si elle tient, lien sinon. */
-async function garnirModele(embed: EmbedBuilder, apercu: ApercuCpk): Promise<AttachmentBuilder | null> {
+async function garnirModele(
+  embed: EmbedBuilder,
+  apercu: ApercuCpk,
+): Promise<AttachmentBuilder | null> {
   const glb = apercu.contenu;
   const sonde = await sonderContenu(glb, DELAI_MODELE_MS);
   if (sonde === null || sonde.statut !== 200) {
@@ -509,7 +608,9 @@ async function garnirModele(embed: EmbedBuilder, apercu: ApercuCpk): Promise<Att
         name: "Modèle 3D",
         value: `glTF binaire assemblé en direct (corps + visage + uniforme texturés) — ${taille}, joint à ce message.`,
       });
-      return new AttachmentBuilder(octets, { name: nomPieceJointe(glb, "modele.glb") });
+      return new AttachmentBuilder(octets, {
+        name: nomPieceJointe(glb, "modele.glb"),
+      });
     }
   }
   embed.addFields({
@@ -545,14 +646,22 @@ async function garnirConfig(embed: EmbedBuilder, json: string): Promise<void> {
   }
 
   embed.addFields({
-    name: corps.complet ? "Extrait du décodage" : "Extrait du décodage (tronqué)",
+    name: corps.complet
+      ? "Extrait du décodage"
+      : "Extrait du décodage (tronqué)",
     value: truncate(extraitConfig(corps.texte, corps.complet), 1_020),
   });
-  embed.addFields({ name: "JSON complet", value: `[Ouvrir le décodage](${json})` });
+  embed.addFields({
+    name: "JSON complet",
+    value: `[Ouvrir le décodage](${json})`,
+  });
 }
 
 /** Télécharge un contenu en refusant tout ce qui dépasse le seuil de pièce jointe. */
-async function telechargerBorne(url: string, delaiMs = DELAI_CDN_MS): Promise<Buffer | null> {
+async function telechargerBorne(
+  url: string,
+  delaiMs = DELAI_CDN_MS,
+): Promise<Buffer | null> {
   try {
     const reponse = await fetch(url, { signal: AbortSignal.timeout(delaiMs) });
     if (!reponse.ok) {
@@ -576,9 +685,12 @@ async function repondreSuggestions(
     const choix = await produire();
     await interaction.respond(
       choix
-        .filter(c => c.value.length > 0 && c.value.length <= MAX_VALEUR_AUTOCOMPLETION)
+        .filter(
+          (c) =>
+            c.value.length > 0 && c.value.length <= MAX_VALEUR_AUTOCOMPLETION,
+        )
         .slice(0, 25)
-        .map(c => ({ name: truncate(c.name, 100), value: c.value })),
+        .map((c) => ({ name: truncate(c.name, 100), value: c.value })),
     );
   } catch {
     await interaction.respond([]);
@@ -596,13 +708,15 @@ function saisie(interaction: AutocompleteInteraction): string {
 @Discord()
 @SlashGroup({
   name: "cpk",
-  description: "Les 250 800 fichiers extraits des archives du jeu, décodés en direct",
+  description:
+    "Les 250 800 fichiers extraits des archives du jeu, décodés en direct",
 })
 @SlashGroup("cpk")
 export class CpkCommand {
   @Slash({
     name: "parcourir",
-    description: "Parcourt l'arborescence des fichiers du jeu, dossier par dossier",
+    description:
+      "Parcourt l'arborescence des fichiers du jeu, dossier par dossier",
   })
   async parcourir(
     @SlashOption({
@@ -613,10 +727,13 @@ export class CpkCommand {
       autocomplete: (interaction: AutocompleteInteraction) =>
         repondreSuggestions(interaction, async () => {
           const { parent, filtre } = decouperSaisieDossier(saisie(interaction));
-          const squelette = await squeletteDossier(parent, APPEL_AUTOCOMPLETION);
+          const squelette = await squeletteDossier(
+            parent,
+            APPEL_AUTOCOMPLETION,
+          );
           return squelette.dirs
-            .filter(dossier => correspondPrefixe(dossier.name, filtre))
-            .map(dossier => ({
+            .filter((dossier) => correspondPrefixe(dossier.name, filtre))
+            .map((dossier) => ({
               name: `${dossier.name}/ — ${entierLisible(dossier.count)} fichiers`,
               value: `${squelette.dir}/${dossier.name}`,
             }));
@@ -635,9 +752,17 @@ export class CpkCommand {
   ) {
     await interaction.deferReply();
     try {
-      await interaction.editReply(await rendreParcours(chemin ?? "", ((page ?? 1) - 1) * ENTREES_PAR_PAGE));
+      await interaction.editReply(
+        await rendreParcours(
+          chemin ?? "",
+          ((page ?? 1) - 1) * ENTREES_PAR_PAGE,
+        ),
+      );
     } catch (err) {
-      await repondre(interaction, echec("Données de jeu indisponibles", messageErreurAzalee(err)));
+      await repondre(
+        interaction,
+        echec("Données de jeu indisponibles", messageErreurAzalee(err)),
+      );
     }
   }
 
@@ -648,7 +773,8 @@ export class CpkCommand {
   async chercher(
     @SlashOption({
       name: "motif",
-      description: "Fragment de chemin, de dossier ou de nom (2 caractères minimum)",
+      description:
+        "Fragment de chemin, de dossier ou de nom (2 caractères minimum)",
       type: ApplicationCommandOptionType.String,
       required: true,
       minLength: MOTIF_MINIMUM,
@@ -666,15 +792,21 @@ export class CpkCommand {
   ) {
     await interaction.deferReply();
     try {
-      await interaction.editReply(await rendreRecherche(motif, ((page ?? 1) - 1) * RESULTATS_PAR_PAGE));
+      await interaction.editReply(
+        await rendreRecherche(motif, ((page ?? 1) - 1) * RESULTATS_PAR_PAGE),
+      );
     } catch (err) {
-      await repondre(interaction, echec("Données de jeu indisponibles", messageErreurAzalee(err)));
+      await repondre(
+        interaction,
+        echec("Données de jeu indisponibles", messageErreurAzalee(err)),
+      );
     }
   }
 
   @Slash({
     name: "fichier",
-    description: "Fiche d'un fichier du jeu : archive d'origine, type et aperçu du contenu",
+    description:
+      "Fiche d'un fichier du jeu : archive d'origine, type et aperçu du contenu",
   })
   async fichier(
     @SlashOption({
@@ -688,8 +820,11 @@ export class CpkCommand {
           if (texte.length < MOTIF_MINIMUM) {
             return [];
           }
-          const trouves = await azalee().cpkSearch({ q: texte, limit: 25 }, APPEL_AUTOCOMPLETION);
-          return trouves.map(fichier => ({
+          const trouves = await azalee().cpkSearch(
+            { q: texte, limit: 25 },
+            APPEL_AUTOCOMPLETION,
+          );
+          return trouves.map((fichier) => ({
             name: fichier.path,
             value: fichier.path,
           }));
@@ -710,9 +845,21 @@ export class CpkCommand {
         .setDescription(`\`${truncate(meta.path, 3_000)}\``);
 
       embed.addFields(
-        { name: "Type", value: `${apercu.libelle} (\`.${meta.ext}\`)`, inline: true },
-        { name: "Dossier", value: `\`${truncate(meta.dir, 1_000)}\``, inline: true },
-        { name: "Archive CPK", value: `\`${truncate(meta.cpk, 1_000)}\``, inline: false },
+        {
+          name: "Type",
+          value: `${apercu.libelle} (\`.${meta.ext}\`)`,
+          inline: true,
+        },
+        {
+          name: "Dossier",
+          value: `\`${truncate(meta.dir, 1_000)}\``,
+          inline: true,
+        },
+        {
+          name: "Archive CPK",
+          value: `\`${truncate(meta.cpk, 1_000)}\``,
+          inline: false,
+        },
       );
 
       let piece: AttachmentBuilder | null = null;
@@ -723,15 +870,23 @@ export class CpkCommand {
       } else if (apercu.configJson) {
         await garnirConfig(embed, apercu.contenu);
       } else {
-        embed.addFields({ name: "Contenu", value: truncate(liensContenu(apercu), 1_000) });
+        embed.addFields({
+          name: "Contenu",
+          value: truncate(liensContenu(apercu), 1_000),
+        });
       }
 
       const total = await totalIndexe();
       pied(embed, {
-        note: total === null ? null : `${entierLisible(total)} fichiers indexés`,
+        note:
+          total === null ? null : `${entierLisible(total)} fichiers indexés`,
       });
 
-      await interaction.editReply(piece === null ? { embeds: [embed] } : { embeds: [embed], files: [piece] });
+      await interaction.editReply(
+        piece === null
+          ? { embeds: [embed] }
+          : { embeds: [embed], files: [piece] },
+      );
     } catch (err) {
       if (isAzaleeNotFound(err)) {
         await interaction.editReply({
@@ -742,7 +897,10 @@ export class CpkCommand {
         });
         return;
       }
-      await repondre(interaction, echec("Données de jeu indisponibles", messageErreurAzalee(err)));
+      await repondre(
+        interaction,
+        echec("Données de jeu indisponibles", messageErreurAzalee(err)),
+      );
     }
   }
 
@@ -763,7 +921,9 @@ export class CpkCommand {
     }
     await interaction.deferUpdate();
     try {
-      await interaction.editReply(await rendreParcours(etat.chemin, etat.offset));
+      await interaction.editReply(
+        await rendreParcours(etat.chemin, etat.offset),
+      );
     } catch (err) {
       await interaction.followUp({
         content: `❌ ${messageErreurAzalee(err)}`,
@@ -785,7 +945,9 @@ export class CpkCommand {
     }
     await interaction.deferUpdate();
     try {
-      await interaction.editReply(await rendreRecherche(etat.motif, etat.offset));
+      await interaction.editReply(
+        await rendreRecherche(etat.motif, etat.offset),
+      );
     } catch (err) {
       await interaction.followUp({
         content: `❌ ${messageErreurAzalee(err)}`,

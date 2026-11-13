@@ -125,7 +125,7 @@ const sansEco = Bun.argv.includes("--sans-eco");
 
 /** Lit une option `--nom=valeur` numérique, ou rend le défaut. */
 function optionNombre(nom: string, defaut: number): number {
-  const argument = Bun.argv.find(valeur => valeur.startsWith(`--${nom}=`));
+  const argument = Bun.argv.find((valeur) => valeur.startsWith(`--${nom}=`));
   if (!argument) {
     return defaut;
   }
@@ -137,7 +137,10 @@ function optionNombre(nom: string, defaut: number): number {
   return valeur;
 }
 
-const cadence = Math.min(PLAFOND_DOCUMENTE, Math.max(1, optionNombre("cadence", CADENCE_DEFAUT)));
+const cadence = Math.min(
+  PLAFOND_DOCUMENTE,
+  Math.max(1, optionNombre("cadence", CADENCE_DEFAUT)),
+);
 /** 0 = on lit la monnaie et on la rapporte, mais on n'en crédite aucune. */
 const taux = optionNombre("taux", 0);
 
@@ -161,7 +164,8 @@ if (!avecApi) {
   console.warn("→ Import en mode DÉGRADÉ : classement public seul.\n");
 }
 
-const dormir = (ms: number) => new Promise(resoudre => setTimeout(resoudre, ms));
+const dormir = (ms: number) =>
+  new Promise((resoudre) => setTimeout(resoudre, ms));
 
 const bilan = bilanVide();
 let quota: Quota = { dansSecondes: null, limite: null, restant: null };
@@ -175,7 +179,9 @@ let interrompu: string | null = null;
  * donc à TOUTES les routes, y compris les deux catalogues de guilde, sans
  * qu'on ait à y penser à chaque appel.
  */
-async function interroger(url: string): Promise<{ issue: Issue; corps: unknown }> {
+async function interroger(
+  url: string,
+): Promise<{ issue: Issue; corps: unknown }> {
   await dormir(attenteAvantSuivante(quota, cadence));
   let reponse: Response;
   try {
@@ -184,7 +190,10 @@ async function interroger(url: string): Promise<{ issue: Issue; corps: unknown }
       signal: AbortSignal.timeout(15_000),
     });
   } catch (err) {
-    return { corps: err instanceof Error ? err.message : String(err), issue: "panne" };
+    return {
+      corps: err instanceof Error ? err.message : String(err),
+      issue: "panne",
+    };
   }
   quota = lireQuota(reponse.headers);
 
@@ -276,15 +285,26 @@ async function chargerPageClassement(url: string): Promise<string | null> {
  * un import ne doit pas échouer parce qu'une source d'appoint a expiré.
  */
 async function lireEnteteCookies(): Promise<string | null> {
-  const chemin = new URL("../../../../.secrets/noctaly-cookies.json", import.meta.url).pathname;
+  const chemin = new URL(
+    "../../../../.secrets/noctaly-cookies.json",
+    import.meta.url,
+  ).pathname;
   const fichier = Bun.file(chemin);
   if (!(await fichier.exists())) {
     return null;
   }
   try {
-    const jar = (await fichier.json()) as Array<{ domain: string; name: string; value: string }>;
-    const pourNoctaly = jar.filter(c => c.domain.replace(/^\./, "").endsWith("noctaly.com"));
-    return pourNoctaly.length === 0 ? null : pourNoctaly.map(c => `${c.name}=${c.value}`).join("; ");
+    const jar = (await fichier.json()) as Array<{
+      domain: string;
+      name: string;
+      value: string;
+    }>;
+    const pourNoctaly = jar.filter((c) =>
+      c.domain.replace(/^\./, "").endsWith("noctaly.com"),
+    );
+    return pourNoctaly.length === 0
+      ? null
+      : pourNoctaly.map((c) => `${c.name}=${c.value}`).join("; ");
   } catch {
     return null;
   }
@@ -299,20 +319,26 @@ async function lireEnteteCookies(): Promise<string | null> {
 //   - elles DÉSIGNENT les membres qui ont quelque chose, ce qui permet de les
 //     interroger en premier. Si le quota casse l'import à mi-parcours, ce qui
 //     est fait est ce qui comptait.
-console.log(`=== Import Noctaly ${essai ? "[--essai, rien n'est écrit] " : ""}===`);
+console.log(
+  `=== Import Noctaly ${essai ? "[--essai, rien n'est écrit] " : ""}===`,
+);
 
 const classements: ProfilClasse[][] = [];
 for (const tri of TRIS_CLASSEMENT) {
   const page = await chargerPageClassement(urlClassementPublic(GUILD_ID, tri));
   const lus = page === null ? [] : lireClassement(page);
   classements.push(lus);
-  console.log(`  classement ?sort=${tri.padEnd(9)} → ${String(lus.length).padStart(3)} profil(s)`);
+  console.log(
+    `  classement ?sort=${tri.padEnd(9)} → ${String(lus.length).padStart(3)} profil(s)`,
+  );
   // Ces pages ne comptent pas dans le quota de l'API (autre origine), mais on
   // espace quand même : c'est le site public d'un tiers.
   await dormir(600);
 }
 const classement = fusionnerClassements(classements);
-const parClassement = new Map(classement.map(entree => [entree.discordId, entree]));
+const parClassement = new Map(
+  classement.map((entree) => [entree.discordId, entree]),
+);
 console.log(
   `  → ${classement.length} membre(s) distinct(s) connus du classement` +
     (classement.length > 0
@@ -376,7 +402,7 @@ const dejaCredites = new Set(
     await sql<Array<{ discord_id: string }>>`
 			SELECT discord_id FROM bot_import_noctaly WHERE guild_id = ${GUILD_ID}
 		`
-  ).map(ligne => ligne.discord_id),
+  ).map((ligne) => ligne.discord_id),
 );
 
 // ─── Le module d'économie est-il seulement allumé ? ─────────────────────────
@@ -414,8 +440,13 @@ if (!sansEco && avecApi) {
 }
 
 /** Écrit un catalogue de guilde dans son archive. */
-async function archiverCatalogue(genre: "items" | "chests", corps: unknown): Promise<void> {
-  const compte = Array.isArray((corps as Record<string, unknown> | null)?.[genre])
+async function archiverCatalogue(
+  genre: "items" | "chests",
+  corps: unknown,
+): Promise<void> {
+  const compte = Array.isArray(
+    (corps as Record<string, unknown> | null)?.[genre],
+  )
     ? ((corps as Record<string, unknown>)[genre] as unknown[]).length
     : 0;
   console.log(`  catalogue ${genre} : ${compte} entrée(s)`);
@@ -444,7 +475,12 @@ console.log(
 );
 
 // ─── La boucle des membres ──────────────────────────────────────────────────
-const notables: Array<{ pseudo: string; xp: number; niveau: number; messages: number }> = [];
+const notables: Array<{
+  pseudo: string;
+  xp: number;
+  niveau: number;
+  messages: number;
+}> = [];
 const soldes: number[] = [];
 let parcourus = 0;
 
@@ -523,7 +559,9 @@ for (const membre of membres) {
    */
   let ecoBrut: unknown = null;
   if (ecoActive && avecApi) {
-    const ecoRep = await interroger(urlProfilEconomie(GUILD_ID, membre.discord_id));
+    const ecoRep = await interroger(
+      urlProfilEconomie(GUILD_ID, membre.discord_id),
+    );
     if (interrompu) {
       break;
     }
@@ -557,7 +595,11 @@ for (const membre of membres) {
     // une repasse en mode dégradé ne doit pas l'écraser — d'où le `null` quand
     // il n'y a rien de neuf.
     const archiveNiveau =
-      niveauRep.issue === "ok" ? niveauRep.corps : issuDuClassement ? (depuisClassement?.brut ?? null) : null;
+      niveauRep.issue === "ok"
+        ? niveauRep.corps
+        : issuDuClassement
+          ? (depuisClassement?.brut ?? null)
+          : null;
     await sql`
 			INSERT INTO bot_import_noctaly (guild_id, discord_id, profil_niveau, profil_eco)
 			VALUES (
@@ -590,7 +632,8 @@ for (const membre of membres) {
   const messages = aDuNiveau && profil ? profil.messages : 0;
   const serie = aDeLEco && eco ? (eco.serieQuotidienne ?? 0) : 0;
   // Les jetons ne se recréditent pas : `premierPassage` garde le mouvement.
-  const jetons = premierPassage && eco ? convertirMonnaie(eco.monnaie, taux) : 0;
+  const jetons =
+    premierPassage && eco ? convertirMonnaie(eco.monnaie, taux) : 0;
 
   if (aDuNiveau && profil) {
     bilan.ecrits++;
@@ -625,8 +668,13 @@ for (const membre of membres) {
   // dégradé aucune requête ne part, et la progression serait muette.
   parcourus++;
   if (parcourus % 100 === 0) {
-    const reste = quota.restant === null ? "" : ` · quota ${quota.restant}/${quota.limite ?? "?"}`;
-    console.log(`  … ${parcourus}/${membres.length} · ${bilan.ecrits} importé(s)${reste}`);
+    const reste =
+      quota.restant === null
+        ? ""
+        : ` · quota ${quota.restant}/${quota.limite ?? "?"}`;
+    console.log(
+      `  … ${parcourus}/${membres.length} · ${bilan.ecrits} importé(s)${reste}`,
+    );
   }
 }
 
@@ -654,7 +702,9 @@ if (monnaie.compte > 0) {
         `en coûte 150 :\n  relancer avec --taux=<valeur> une fois le rapport ci-dessus lu.`,
     );
   } else {
-    console.log(`  Convertie au taux ${taux} → ${convertirMonnaie(monnaie.total, taux)} jeton(s) au total.`);
+    console.log(
+      `  Convertie au taux ${taux} → ${convertirMonnaie(monnaie.total, taux)} jeton(s) au total.`,
+    );
   }
 }
 
@@ -669,7 +719,14 @@ if (interrompu) {
 }
 
 if (!essai) {
-  const [stats] = await sql<Array<{ total: number; avec_xp: number; xp_max: string; niveau_max: number }>>`
+  const [stats] = await sql<
+    Array<{
+      total: number;
+      avec_xp: number;
+      xp_max: string;
+      niveau_max: number;
+    }>
+  >`
 		SELECT count(*)::int AS total,
 		       count(*) FILTER (WHERE xp > 0)::int AS avec_xp,
 		       max(xp) AS xp_max,

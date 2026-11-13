@@ -62,8 +62,13 @@ import { LIMITES } from "./ui/theme";
 export const NUMERO_DEPART = 86;
 
 /** Prochain numéro, à partir du plus grand déjà attribué (0 si la table est vide). */
-export function prochainNumero(dernierNumero: number | null | undefined): number {
-  const dernier = typeof dernierNumero === "number" && Number.isFinite(dernierNumero) ? Math.floor(dernierNumero) : 0;
+export function prochainNumero(
+  dernierNumero: number | null | undefined,
+): number {
+  const dernier =
+    typeof dernierNumero === "number" && Number.isFinite(dernierNumero)
+      ? Math.floor(dernierNumero)
+      : 0;
   return Math.max(NUMERO_DEPART, dernier + 1);
 }
 
@@ -113,7 +118,8 @@ export interface CategorieTicket {
 export const CATEGORIES_TICKET: readonly CategorieTicket[] = Object.freeze([
   {
     cle: "aide",
-    description: "Une question sur le serveur, un souci technique, une demande d'accès.",
+    description:
+      "Une question sur le serveur, un souci technique, une demande d'accès.",
     emoji: "❓",
     libelle: "Aide",
     pourLaDirection: false,
@@ -121,7 +127,8 @@ export const CATEGORIES_TICKET: readonly CategorieTicket[] = Object.freeze([
   },
   {
     cle: "signalement",
-    description: "Signaler un comportement, un message, un conflit. Traité par la modération.",
+    description:
+      "Signaler un comportement, un message, un conflit. Traité par la modération.",
     emoji: "🛡️",
     libelle: "Signalement",
     pourLaDirection: false,
@@ -137,7 +144,8 @@ export const CATEGORIES_TICKET: readonly CategorieTicket[] = Object.freeze([
   },
   {
     cle: "wiki",
-    description: "Contribuer au wiki Azalée, signaler une donnée fausse, demander un accès.",
+    description:
+      "Contribuer au wiki Azalée, signaler une donnée fausse, demander un accès.",
     emoji: "📚",
     libelle: "Wiki Azalée",
     pourLaDirection: false,
@@ -157,7 +165,7 @@ export function categorieTicket(cle: unknown): CategorieTicket | null {
   if (typeof cle !== "string") {
     return null;
   }
-  return CATEGORIES_TICKET.find(categorie => categorie.cle === cle) ?? null;
+  return CATEGORIES_TICKET.find((categorie) => categorie.cle === cle) ?? null;
 }
 
 /** Libellé d'une catégorie ; la clé brute si elle vient d'une ligne ancienne. */
@@ -172,7 +180,10 @@ export const ETATS_TICKET = ["ouvert", "pris", "ferme"] as const;
 export type EtatTicket = (typeof ETATS_TICKET)[number];
 
 export function estEtatTicket(valeur: unknown): valeur is EtatTicket {
-  return typeof valeur === "string" && (ETATS_TICKET as readonly string[]).includes(valeur);
+  return (
+    typeof valeur === "string" &&
+    (ETATS_TICKET as readonly string[]).includes(valeur)
+  );
 }
 
 const LIBELLES_ETAT: Readonly<Record<EtatTicket, string>> = Object.freeze({
@@ -194,11 +205,12 @@ export function libelleEtatTicket(etat: string): string {
  * « Not claimed » alors que le ticket a bel et bien été traité. Une prise en
  * charge qu'on ne peut pas rendre n'est jamais prise.
  */
-const TRANSITIONS: Readonly<Record<EtatTicket, readonly EtatTicket[]>> = Object.freeze({
-  ferme: [],
-  ouvert: ["pris", "ferme"],
-  pris: ["ouvert", "ferme"],
-});
+const TRANSITIONS: Readonly<Record<EtatTicket, readonly EtatTicket[]>> =
+  Object.freeze({
+    ferme: [],
+    ouvert: ["pris", "ferme"],
+    pris: ["ouvert", "ferme"],
+  });
 
 export function transitionPermise(depuis: string, vers: string): boolean {
   if (!estEtatTicket(depuis) || !estEtatTicket(vers)) {
@@ -319,7 +331,7 @@ export function verifierOuverture(
   const categorie = categorieTicket(categorieCle);
   if (!categorie) {
     return {
-      erreur: `Catégorie inconnue. Choisis parmi : ${CATEGORIES_TICKET.map(c => c.libelle).join(", ")}.`,
+      erreur: `Catégorie inconnue. Choisis parmi : ${CATEGORIES_TICKET.map((c) => c.libelle).join(", ")}.`,
       ok: false,
     };
   }
@@ -347,14 +359,26 @@ export function verifierOuverture(
  */
 export const PREFIXE_COMPOSANT = "ticket";
 
-export type ActionTicket = "ouvrir" | "prendre" | "rendre" | "fermer" | "confirmer";
+export type ActionTicket =
+  "ouvrir" | "prendre" | "rendre" | "fermer" | "confirmer";
 
-const ACTIONS = new Set<string>(["ouvrir", "prendre", "rendre", "fermer", "confirmer"]);
+const ACTIONS = new Set<string>([
+  "ouvrir",
+  "prendre",
+  "rendre",
+  "fermer",
+  "confirmer",
+]);
 
 /** `ticket:ouvrir:signalement` — borné à la limite dure de l'API (100). */
-export function identifiantComposant(action: ActionTicket, argument?: string): string {
+export function identifiantComposant(
+  action: ActionTicket,
+  argument?: string,
+): string {
   const brut = [PREFIXE_COMPOSANT, action, argument].filter(Boolean).join(":");
-  return brut.length <= LIMITES.identifiantComposant ? brut : brut.slice(0, LIMITES.identifiantComposant);
+  return brut.length <= LIMITES.identifiantComposant
+    ? brut
+    : brut.slice(0, LIMITES.identifiantComposant);
 }
 
 export interface ComposantTicket {
@@ -375,7 +399,10 @@ export function lireComposant(identifiant: unknown): ComposantTicket | null {
   if (!ACTIONS.has(action)) {
     return null;
   }
-  return { action, argument: morceaux.length > 2 ? morceaux.slice(2).join(":") : null };
+  return {
+    action,
+    argument: morceaux.length > 2 ? morceaux.slice(2).join(":") : null,
+  };
 }
 
 // ─── Qui voit le ticket ─────────────────────────────────────────────────────
@@ -437,13 +464,19 @@ export interface Invitation {
  * tout rôle de tickets) — elle ne reçoit simplement plus la notification.
  */
 export function invitations(contexte: ContexteAcces): Invitation[] {
-  const liste: Invitation[] = [{ genre: "membre", id: contexte.auteurId, raison: "Auteur du ticket." }];
-  const habilites = contexte.pourLaDirection ? contexte.rolesDirection : [...new Set(contexte.rolesStaff)];
+  const liste: Invitation[] = [
+    { genre: "membre", id: contexte.auteurId, raison: "Auteur du ticket." },
+  ];
+  const habilites = contexte.pourLaDirection
+    ? contexte.rolesDirection
+    : [...new Set(contexte.rolesStaff)];
   for (const roleId of habilites) {
     liste.push({
       genre: "role",
       id: roleId,
-      raison: contexte.pourLaDirection ? "Ticket réservé à la direction." : "Rôle de prise en charge des tickets.",
+      raison: contexte.pourLaDirection
+        ? "Ticket réservé à la direction."
+        : "Rôle de prise en charge des tickets.",
     });
   }
   return liste;
@@ -505,7 +538,11 @@ export interface Fuites {
  * Les rôles d'intégration sont écartés : ce sont des bots, pas des lecteurs, et
  * leur retirer leur permission les casse.
  */
-export function fuitesDAcces(roles: readonly RoleObserve[], habilites: readonly string[], nomDuSalon: string): Fuites {
+export function fuitesDAcces(
+  roles: readonly RoleObserve[],
+  habilites: readonly string[],
+  nomDuSalon: string,
+): Fuites {
   const permis = new Set(habilites);
   const fuites: Fuites = { avertissements: [] };
   for (const role of roles) {

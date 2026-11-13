@@ -1,4 +1,10 @@
-import type { LobbyState, LobbyUserState, MatchFormat, MatchMode, TeamSide } from "../enums/eventEnums";
+import type {
+  LobbyState,
+  LobbyUserState,
+  MatchFormat,
+  MatchMode,
+  TeamSide,
+} from "../enums/eventEnums";
 
 export interface LobbyUserDataDTO {
   displayName: string;

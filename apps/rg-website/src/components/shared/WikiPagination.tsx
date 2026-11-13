@@ -18,7 +18,11 @@ interface WikiPaginationProps {
   currentPage: number;
 }
 
-export function WikiPagination({ totalItems, itemsPerPage, currentPage }: WikiPaginationProps) {
+export function WikiPagination({
+  totalItems,
+  itemsPerPage,
+  currentPage,
+}: WikiPaginationProps) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const totalPages = Math.ceil(totalItems / itemsPerPage);
@@ -69,7 +73,9 @@ export function WikiPagination({ totalItems, itemsPerPage, currentPage }: WikiPa
             <PaginationPrevious
               href={currentPage > 1 ? createPageUrl(currentPage - 1) : "#"}
               aria-disabled={currentPage <= 1}
-              className={currentPage <= 1 ? "pointer-events-none opacity-50" : ""}
+              className={
+                currentPage <= 1 ? "pointer-events-none opacity-50" : ""
+              }
             />
           </PaginationItem>
 
@@ -78,7 +84,10 @@ export function WikiPagination({ totalItems, itemsPerPage, currentPage }: WikiPa
               {page === "ellipsis" ? (
                 <PaginationEllipsis />
               ) : (
-                <PaginationLink href={createPageUrl(page)} isActive={page === currentPage}>
+                <PaginationLink
+                  href={createPageUrl(page)}
+                  isActive={page === currentPage}
+                >
                   {page}
                 </PaginationLink>
               )}
@@ -87,9 +96,15 @@ export function WikiPagination({ totalItems, itemsPerPage, currentPage }: WikiPa
 
           <PaginationItem>
             <PaginationNext
-              href={currentPage < totalPages ? createPageUrl(currentPage + 1) : "#"}
+              href={
+                currentPage < totalPages ? createPageUrl(currentPage + 1) : "#"
+              }
               aria-disabled={currentPage >= totalPages}
-              className={currentPage >= totalPages ? "pointer-events-none opacity-50" : ""}
+              className={
+                currentPage >= totalPages
+                  ? "pointer-events-none opacity-50"
+                  : ""
+              }
             />
           </PaginationItem>
         </PaginationContent>

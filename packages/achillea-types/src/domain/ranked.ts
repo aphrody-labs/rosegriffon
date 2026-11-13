@@ -8,7 +8,8 @@
 
 import type { MatchMode } from "../enums/eventEnums";
 
-export type MatchRoomStatus = "waiting" | "playing" | "scoring" | "disputed" | "finished";
+export type MatchRoomStatus =
+  "waiting" | "playing" | "scoring" | "disputed" | "finished";
 
 export type MatchResult = "win" | "loss" | "draw" | "forfeit";
 

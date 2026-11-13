@@ -11,9 +11,12 @@ import { useState } from "react";
 import { cdnOrigin } from "@rosegriffon/assets";
 import { Icon } from "@/components/ui/Icon";
 
-const CharacterModelViewer = dynamic(() => import("@/components/wiki/CharacterModelViewer"), {
-  ssr: false,
-});
+const CharacterModelViewer = dynamic(
+  () => import("@/components/wiki/CharacterModelViewer"),
+  {
+    ssr: false,
+  },
+);
 
 const CDN = cdnOrigin(process.env.NEXT_PUBLIC_CDN_ORIGIN);
 
@@ -39,8 +42,14 @@ export function CharaAssetsSection({
       </h2>
 
       <div>
-        <p className="text-xs text-on-surface-variant mb-1">Modèle 3D (corps + visage + uniforme)</p>
-        <CharacterModelViewer glbUrl={glbUrl} name={displayName || "personnage"} inline />
+        <p className="text-xs text-on-surface-variant mb-1">
+          Modèle 3D (corps + visage + uniforme)
+        </p>
+        <CharacterModelViewer
+          glbUrl={glbUrl}
+          name={displayName || "personnage"}
+          inline
+        />
       </div>
 
       {!voiceFailed && (

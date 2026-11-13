@@ -16,7 +16,15 @@ import {
   PaginationControls,
   StorageImage,
 } from "@rosegriffon/ui";
-import { BarChart3, Calendar, Eye, FileText, Filter, Plus, Search } from "lucide-react";
+import {
+  BarChart3,
+  Calendar,
+  Eye,
+  FileText,
+  Filter,
+  Plus,
+  Search,
+} from "lucide-react";
 import Link from "@/components/shared/Link";
 
 import { ChronicleActions } from "@/components/admin/chronicles/chronicle-actions";
@@ -52,7 +60,12 @@ export default async function ChroniquesAdminPage({
 
   const filteredChronicles = articlesRes.data;
   const { totalPages } = articlesRes.meta;
-  const { total: totalChronicles, published: publishedCount, draft: draftCount, categories } = stats;
+  const {
+    total: totalChronicles,
+    published: publishedCount,
+    draft: draftCount,
+    categories,
+  } = stats;
 
   return (
     <div className="p-3 sm:p-4 md:p-6 lg:p-8 space-y-4 sm:space-y-6 md:space-y-8">
@@ -65,7 +78,10 @@ export default async function ChroniquesAdminPage({
             size="sm"
             className="bg-linear-to-r from-rg-rose to-rg-or hover:opacity-90 text-white w-full sm:w-auto"
           >
-            <Link href="/admin/chroniques/new" className="flex items-center justify-center">
+            <Link
+              href="/admin/chroniques/new"
+              className="flex items-center justify-center"
+            >
               <Plus className="size-4 sm:mr-2" />
               <span className="hidden sm:inline">Nouvelle Chronique</span>
               <span className="sm:hidden">Nouvelle</span>
@@ -111,7 +127,12 @@ export default async function ChroniquesAdminPage({
           <form className="flex flex-col gap-3 sm:gap-4">
             <div className="relative flex-1">
               <Search className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
-              <Input placeholder="Rechercher…" className="pl-8 text-sm" name="q" defaultValue={query} />
+              <Input
+                placeholder="Rechercher…"
+                className="pl-8 text-sm"
+                name="q"
+                defaultValue={query}
+              />
             </div>
 
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
@@ -132,7 +153,7 @@ export default async function ChroniquesAdminPage({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Toutes catégories</SelectItem>
-                  {categories.map(cat => (
+                  {categories.map((cat) => (
                     <SelectItem key={cat} value={cat}>
                       {cat}
                     </SelectItem>
@@ -140,7 +161,11 @@ export default async function ChroniquesAdminPage({
                 </SelectContent>
               </Select>
 
-              <Button type="submit" variant="outline" className="w-full sm:w-auto">
+              <Button
+                type="submit"
+                variant="outline"
+                className="w-full sm:w-auto"
+              >
                 Appliquer
               </Button>
             </div>
@@ -153,9 +178,13 @@ export default async function ChroniquesAdminPage({
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-16">
             <FileText className="size-16 text-muted-foreground/30 mb-4" />
-            <h3 className="text-xl font-semibold mb-2">Aucune chronique trouvée</h3>
+            <h3 className="text-xl font-semibold mb-2">
+              Aucune chronique trouvée
+            </h3>
             <p className="text-muted-foreground mb-6">
-              {query ? "Aucun résultat pour votre recherche" : "Commencez par créer votre première chronique"}
+              {query
+                ? "Aucun résultat pour votre recherche"
+                : "Commencez par créer votre première chronique"}
             </p>
             {!query && (
               <Button asChild>
@@ -169,7 +198,7 @@ export default async function ChroniquesAdminPage({
         </Card>
       ) : (
         <div className="grid gap-4 sm:gap-5 md:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-          {filteredChronicles.map(chronicle => {
+          {filteredChronicles.map((chronicle) => {
             const isPublished = chronicle.status === "published";
             return (
               <Card
@@ -210,11 +239,14 @@ export default async function ChroniquesAdminPage({
                   <div className="flex items-center gap-1.5 sm:gap-2 text-xs text-muted-foreground">
                     <Calendar className="size-3 shrink-0" />
                     <span className="truncate">
-                      {new Date(chronicle.created_at || "").toLocaleDateString("fr-FR", {
-                        day: "numeric",
-                        month: "short",
-                        year: "numeric",
-                      })}
+                      {new Date(chronicle.created_at || "").toLocaleDateString(
+                        "fr-FR",
+                        {
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                        },
+                      )}
                     </span>
                   </div>
                   <CardTitle className="line-clamp-2 text-base sm:text-lg group-hover:text-[#B03519] transition-colors">
@@ -233,8 +265,13 @@ export default async function ChroniquesAdminPage({
                   </p>
 
                   <div className="flex items-center justify-between pt-2 border-t gap-2">
-                    <span className="text-xs text-muted-foreground truncate flex-1 min-w-0">/{chronicle.slug}</span>
-                    <ChronicleActions id={chronicle.id} published={isPublished} />
+                    <span className="text-xs text-muted-foreground truncate flex-1 min-w-0">
+                      /{chronicle.slug}
+                    </span>
+                    <ChronicleActions
+                      id={chronicle.id}
+                      published={isPublished}
+                    />
                   </div>
                 </CardContent>
               </Card>
@@ -245,7 +282,11 @@ export default async function ChroniquesAdminPage({
 
       {totalPages > 1 && (
         <div className="mt-8">
-          <PaginationControls currentPage={page} totalPages={totalPages} baseUrl="/admin/chroniques" />
+          <PaginationControls
+            currentPage={page}
+            totalPages={totalPages}
+            baseUrl="/admin/chroniques"
+          />
         </div>
       )}
     </div>

@@ -27,18 +27,25 @@ import { utilisateurDe } from "../../lib/achillea-moderation";
 import { embedSuccesLegacy } from "../../lib/achillea-legacy";
 import { attention, echapper, repondre, succes } from "../../lib/ui";
 
-export const ROLES_BOT: Readonly<Record<string, { role: UserRole; libelle: string }>> = Object.freeze({
+export const ROLES_BOT: Readonly<
+  Record<string, { role: UserRole; libelle: string }>
+> = Object.freeze({
   mod: { role: UserRole.Moderator, libelle: "bot moderator" },
   admin: { role: UserRole.Administrator, libelle: "bot admin" },
   superadmin: { role: UserRole.SuperAdministrator, libelle: "bot super admin" },
 });
 
 /** `COMMANDS.MAINTENANCE.EMBED.DESCRIPTION` de l'ancien bot, dans la langue du membre (fr par défaut). */
-export function texteMaintenance(actif: boolean, locale?: string | null): string {
+export function texteMaintenance(
+  actif: boolean,
+  locale?: string | null,
+): string {
   const etat = actif ? "on" : "off";
   if (locale?.startsWith("en")) return `Maintenance mode set to \`${etat}\`.`;
-  if (locale === "ru") return `Режим Технического Обслуживания установлен на \`${etat}\`.`;
-  if (locale === "uk") return `Режим технічних робіт встановлено на \`${etat}\`.`;
+  if (locale === "ru")
+    return `Режим Технического Обслуживания установлен на \`${etat}\`.`;
+  if (locale === "uk")
+    return `Режим технічних робіт встановлено на \`${etat}\`.`;
   return `Le mode maintenance a été définie à \`${etat}\`.`;
 }
 
@@ -57,49 +64,115 @@ function nomDe(cible: User): string {
 @SlashGroup({ name: "owner", description: "Owner scope" })
 @SlashGroup("owner")
 export class CommandeOwner {
-  @Slash({ name: "blacklist-add", description: "Ajouter un joueur à la liste noire" })
+  @Slash({
+    name: "blacklist-add",
+    description: "Ajouter un joueur à la liste noire",
+  })
   async ajouter(
-    @SlashOption({ name: "user", description: "Joueur à exclure", type: ApplicationCommandOptionType.User, required: true })
+    @SlashOption({
+      name: "user",
+      description: "Joueur à exclure",
+      type: ApplicationCommandOptionType.User,
+      required: true,
+    })
     brut: User | GuildMember,
-    @SlashOption({ name: "reason", description: "Motif", type: ApplicationCommandOptionType.String, required: true })
+    @SlashOption({
+      name: "reason",
+      description: "Motif",
+      type: ApplicationCommandOptionType.String,
+      required: true,
+    })
     raison: string,
     interaction: ChatInputCommandInteraction,
   ): Promise<void> {
     await interaction.deferReply();
     const cible = utilisateurDe(brut);
-    const entree = await appelApi(interaction, c => c.blacklist.add(cible.id, raison), "Ajout à la liste noire refusé");
+    const entree = await appelApi(
+      interaction,
+      (c) => c.blacklist.add(cible.id, raison),
+      "Ajout à la liste noire refusé",
+    );
     if (!entree) return;
-    await interaction.editReply({ embeds: [embedSuccesLegacy(`L'utilisateur ${nomDe(cible)} a été ajouté à la liste noire`)] });
+    await interaction.editReply({
+      embeds: [
+        embedSuccesLegacy(
+          `L'utilisateur ${nomDe(cible)} a été ajouté à la liste noire`,
+        ),
+      ],
+    });
   }
 
-  @Slash({ name: "blacklist-remove", description: "Retirer un joueur de la liste noire" })
+  @Slash({
+    name: "blacklist-remove",
+    description: "Retirer un joueur de la liste noire",
+  })
   async retirer(
-    @SlashOption({ name: "user", description: "Joueur à réintégrer", type: ApplicationCommandOptionType.User, required: true })
+    @SlashOption({
+      name: "user",
+      description: "Joueur à réintégrer",
+      type: ApplicationCommandOptionType.User,
+      required: true,
+    })
     brut: User | GuildMember,
-    @SlashOption({ name: "reason", description: "Motif du retrait", type: ApplicationCommandOptionType.String, required: true })
+    @SlashOption({
+      name: "reason",
+      description: "Motif du retrait",
+      type: ApplicationCommandOptionType.String,
+      required: true,
+    })
     raison: string,
     interaction: ChatInputCommandInteraction,
   ): Promise<void> {
     await interaction.deferReply();
     const cible = utilisateurDe(brut);
-    const retrait = await appelApi(interaction, c => c.blacklist.remove(cible.id), "Retrait de la liste noire refusé");
+    const retrait = await appelApi(
+      interaction,
+      (c) => c.blacklist.remove(cible.id),
+      "Retrait de la liste noire refusé",
+    );
     if (!retrait) return;
-    console.info(`[owner] ${interaction.user.id} retire ${cible.id} de la liste noire : ${raison}`);
-    await interaction.editReply({ embeds: [embedSuccesLegacy(`L'utilisateur ${nomDe(cible)} a été retiré de la liste noire`)] });
+    console.info(
+      `[owner] ${interaction.user.id} retire ${cible.id} de la liste noire : ${raison}`,
+    );
+    await interaction.editReply({
+      embeds: [
+        embedSuccesLegacy(
+          `L'utilisateur ${nomDe(cible)} a été retiré de la liste noire`,
+        ),
+      ],
+    });
   }
 
-  @Slash({ name: "bot-role", description: "Donner ou retirer un rôle du bot à un utilisateur" })
+  @Slash({
+    name: "bot-role",
+    description: "Donner ou retirer un rôle du bot à un utilisateur",
+  })
   async botRole(
     @SlashChoice({ name: "Add", value: "add" })
     @SlashChoice({ name: "Remove", value: "remove" })
-    @SlashOption({ name: "action", description: "Ajouter ou retirer", type: ApplicationCommandOptionType.String, required: true })
+    @SlashOption({
+      name: "action",
+      description: "Ajouter ou retirer",
+      type: ApplicationCommandOptionType.String,
+      required: true,
+    })
     action: string,
-    @SlashOption({ name: "user", description: "Utilisateur", type: ApplicationCommandOptionType.User, required: true })
+    @SlashOption({
+      name: "user",
+      description: "Utilisateur",
+      type: ApplicationCommandOptionType.User,
+      required: true,
+    })
     brut: User | GuildMember,
     @SlashChoice({ name: "Admin", value: "admin" })
     @SlashChoice({ name: "Mod", value: "mod" })
     @SlashChoice({ name: "Super Admin", value: "superadmin" })
-    @SlashOption({ name: "role", description: "Rôle du bot", type: ApplicationCommandOptionType.String, required: true })
+    @SlashOption({
+      name: "role",
+      description: "Rôle du bot",
+      type: ApplicationCommandOptionType.String,
+      required: true,
+    })
     role: string,
     interaction: ChatInputCommandInteraction,
   ): Promise<void> {
@@ -107,15 +180,29 @@ export class CommandeOwner {
     const cible = utilisateurDe(brut);
     const valeur = roleCible(action, role);
     if (valeur === null) {
-      await repondre(interaction, attention("Choix invalide", "Action `add`/`remove` et rôle `admin`/`mod`/`superadmin`."));
+      await repondre(
+        interaction,
+        attention(
+          "Choix invalide",
+          "Action `add`/`remove` et rôle `admin`/`mod`/`superadmin`.",
+        ),
+      );
       return;
     }
-    const resultat = await appelApi(interaction, c => c.admin.setUserRole(cible.id, valeur), "Changement de rôle refusé");
+    const resultat = await appelApi(
+      interaction,
+      (c) => c.admin.setUserRole(cible.id, valeur),
+      "Changement de rôle refusé",
+    );
     if (!resultat) return;
 
     let note = "";
     const roleDiscord = (Bun.env.ACHILLEA_ADMIN_ROLE_ID ?? "").trim();
-    if (role === "admin" && /^\d{15,25}$/u.test(roleDiscord) && interaction.guild) {
+    if (
+      role === "admin" &&
+      /^\d{15,25}$/u.test(roleDiscord) &&
+      interaction.guild
+    ) {
       try {
         const membre = await interaction.guild.members.fetch(cible.id);
         if (action === "add") await membre.roles.add(roleDiscord);
@@ -126,33 +213,67 @@ export class CommandeOwner {
     }
     const libelle = ROLES_BOT[role]?.libelle ?? role;
     // Texte de `bot-role.ts` de l'ancien bot : « X is now a bot admin ! ».
-    const embed = embedSuccesLegacy(`${nomDe(cible)} is ${action === "add" ? "now" : "no longer"} a ${libelle} !`);
+    const embed = embedSuccesLegacy(
+      `${nomDe(cible)} is ${action === "add" ? "now" : "no longer"} a ${libelle} !`,
+    );
     if (note) embed.setDescription(note.trim());
     await interaction.editReply({ embeds: [embed] });
   }
 
-  @Slash({ name: "maintenance", description: "Met le mode maintenance du bot." })
+  @Slash({
+    name: "maintenance",
+    description: "Met le mode maintenance du bot.",
+  })
   async maintenance(
-    @SlashOption({ name: "state", description: "Maintenance active ?", type: ApplicationCommandOptionType.Boolean, required: true })
+    @SlashOption({
+      name: "state",
+      description: "Maintenance active ?",
+      type: ApplicationCommandOptionType.Boolean,
+      required: true,
+    })
     etat: boolean,
     interaction: ChatInputCommandInteraction,
   ): Promise<void> {
     await interaction.deferReply({ flags: MessageFlags.Ephemeral });
-    const resultat = await appelApi(interaction, c => c.admin.setMaintenance(etat), "Maintenance non modifiée");
+    const resultat = await appelApi(
+      interaction,
+      (c) => c.admin.setMaintenance(etat),
+      "Maintenance non modifiée",
+    );
     if (!resultat) return;
-    await interaction.editReply({ embeds: [embedSuccesLegacy(texteMaintenance(resultat.maintenance, interaction.locale))] });
+    await interaction.editReply({
+      embeds: [
+        embedSuccesLegacy(
+          texteMaintenance(resultat.maintenance, interaction.locale),
+        ),
+      ],
+    });
   }
 
-  @Slash({ name: "resync-users", description: "Réindexe pseudo, nom et avatar de tous les comptes depuis Discord" })
+  @Slash({
+    name: "resync-users",
+    description:
+      "Réindexe pseudo, nom et avatar de tous les comptes depuis Discord",
+  })
   async resync(interaction: ChatInputCommandInteraction): Promise<void> {
     await interaction.deferReply({ flags: MessageFlags.Ephemeral });
-    const resultat = await appelApi(interaction, c => c.users.resyncAvatars(), "Réindexation refusée");
+    const resultat = await appelApi(
+      interaction,
+      (c) => c.users.resyncAvatars(),
+      "Réindexation refusée",
+    );
     if (!resultat) return;
     await repondre(
       interaction,
       resultat.started
-        ? succes("Réindexation lancée", "Tous les comptes sont relus depuis Discord par lots de 10 ; comptez une à deux minutes.")
-        : attention("Réindexation déjà en cours", "Un relevé tourne déjà ; relancez une fois qu'il aura fini."),
+        ? succes(
+            "Réindexation lancée",
+            "Tous les comptes sont relus depuis Discord par lots de 10 ; comptez une à deux minutes.",
+          )
+        : attention(
+            "Réindexation déjà en cours",
+            "Un relevé tourne déjà ; relancez une fois qu'il aura fini.",
+          ),
     );
   }
 }

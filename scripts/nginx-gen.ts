@@ -37,9 +37,12 @@ const catalogPath =
       ));
 
 const catalog = JSON.parse(readFileSync(catalogPath, "utf8")) as Catalog;
-const live = catalog.routes.filter(route => route.status !== "retired" && route.host.endsWith("rosegriffon.fr"));
+const live = catalog.routes.filter(
+  (route) =>
+    route.status !== "retired" && route.host.endsWith("rosegriffon.fr"),
+);
 const up = (host: string) => {
-  const route = live.find(r => r.host === host);
+  const route = live.find((r) => r.host === host);
   if (!route) throw new Error(`no live route for ${host}`);
   return `http://${route.upstream}`;
 };
@@ -48,9 +51,10 @@ const api = up("api.rosegriffon.fr");
 const achillea = up("achillea.rosegriffon.fr");
 const ranked = up("ranked.rosegriffon.fr");
 
-const names = (route: Route) => [route.host, ...(route.aliases ?? [])].join(" ");
+const names = (route: Route) =>
+  [route.host, ...(route.aliases ?? [])].join(" ");
 const tls = (host: string) => `    listen 443 ssl;
-    server_name ${names(live.find(r => r.host === host)!)};
+    server_name ${names(live.find((r) => r.host === host)!)};
     ssl_certificate /etc/letsencrypt/live/${host}/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/${host}/privkey.pem;`;
 const proxy = (target: string, indent = "        ", extra: string[] = []) =>
@@ -62,7 +66,7 @@ const proxy = (target: string, indent = "        ", extra: string[] = []) =>
     "proxy_set_header X-Forwarded-Proto https;",
     ...extra,
   ]
-    .map(line => `${indent}${line}`)
+    .map((line) => `${indent}${line}`)
     .join("\n");
 const upgrade = (target: string) =>
   [
@@ -73,7 +77,7 @@ const upgrade = (target: string) =>
     "proxy_set_header Host $host;",
     "proxy_read_timeout 3600s;",
   ]
-    .map(line => `        ${line}`)
+    .map((line) => `        ${line}`)
     .join("\n");
 const supabase = (indent = "    ") =>
   [
@@ -93,7 +97,7 @@ const nieTexture =
   "cfg|typed|tex|tex-info|audio|audio-info|video|lip|menu-render|model-full|model-chr|model-edit|model-avatar|model-map|avatar|icons|ui";
 
 export function render(): string {
-  const all = live.flatMap(route => names(route).split(" "));
+  const all = live.flatMap((route) => names(route).split(" "));
   const redirectNames = `${all.slice(0, 6).join(" ")}\n                ${all.slice(6).join(" ")}`;
   return `# RG production gateway. The service catalog owns hosts and loopback ports.
 # TLS certificates are provisioned on the VPS; no credentials live in this file.

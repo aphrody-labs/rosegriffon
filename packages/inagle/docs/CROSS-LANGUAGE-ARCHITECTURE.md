@@ -42,18 +42,19 @@
 
 ### 2.1 Rust C-ABI (`libiecode.so`)
 
-+ **Owner**: `crates/aphrody-nie-ffi`, library target `iecode`.
-- **Symbol prefix**: `nie_*`; Rust source defines each signature and sentinel.
-- **Dynamic output**: use `_out` functions with a writable `NieBytes` slot
+- **Owner**: `crates/aphrody-nie-ffi`, library target `iecode`.
+
+* **Symbol prefix**: `nie_*`; Rust source defines each signature and sentinel.
+* **Dynamic output**: use `_out` functions with a writable `NieBytes` slot
   (`ptr`, `len`, `cap`; 24 bytes on the 64-bit targets supported by this bridge).
   Copy returned bytes into JavaScript-owned memory and free the original exactly
   once with `nie_bytes_free_fields`. Never pass the struct by value through Bun.
-- **Static strings**: `nie_version` and format names are borrowed C strings and
+* **Static strings**: `nie_version` and format names are borrowed C strings and
   must not be freed. There is no `nie_free_string` symbol in this ABI.
-- **Failures**: null/empty/sentinel results depend on the called function;
+* **Failures**: null/empty/sentinel results depend on the called function;
   `nie_last_error_out` provides diagnostics. The ABI does not use a universal
   negative status-code table.
-- **Native availability**: `isNativeAvailable()` and `getNativeLoadError()` expose
+* **Native availability**: `isNativeAvailable()` and `getNativeLoadError()` expose
   loader state. Only documented pure functions have TypeScript fallbacks;
   successful fallback tests do not qualify native execution.
 

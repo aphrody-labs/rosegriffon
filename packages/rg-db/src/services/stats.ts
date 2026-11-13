@@ -31,15 +31,33 @@ export async function getDashboardStats(): Promise<DashboardStats> {
     discord_members,
   ] = await Promise.all([
     count(sql<CountRow>`SELECT COUNT(*)::int AS count FROM public.profiles`),
-    count(sql<CountRow>`SELECT COUNT(*)::int AS count FROM public.profiles WHERE updated_at >= ${yesterday}`),
-    count(sql<CountRow>`SELECT COUNT(*)::int AS count FROM public.profiles WHERE role = 'admin'`),
-    count(sql<CountRow>`SELECT COUNT(*)::int AS count FROM public.profiles WHERE role = 'banned'`),
-    count(sql<CountRow>`SELECT COUNT(*)::int AS count FROM public.articles WHERE status = 'published'`),
-    count(sql<CountRow>`SELECT COUNT(*)::int AS count FROM public.articles WHERE status = 'draft'`),
-    count(sql<CountRow>`SELECT COUNT(*)::int AS count FROM public.events WHERE end_time >= ${now}`),
-    count(sql<CountRow>`SELECT COUNT(*)::int AS count FROM public.events WHERE end_time < ${now}`),
-    count(sql<CountRow>`SELECT COUNT(*)::int AS count FROM public.team_members WHERE is_active = TRUE`),
-    count(sql<CountRow>`SELECT COUNT(*)::int AS count FROM public.discord_members WHERE is_bot = FALSE`),
+    count(
+      sql<CountRow>`SELECT COUNT(*)::int AS count FROM public.profiles WHERE updated_at >= ${yesterday}`,
+    ),
+    count(
+      sql<CountRow>`SELECT COUNT(*)::int AS count FROM public.profiles WHERE role = 'admin'`,
+    ),
+    count(
+      sql<CountRow>`SELECT COUNT(*)::int AS count FROM public.profiles WHERE role = 'banned'`,
+    ),
+    count(
+      sql<CountRow>`SELECT COUNT(*)::int AS count FROM public.articles WHERE status = 'published'`,
+    ),
+    count(
+      sql<CountRow>`SELECT COUNT(*)::int AS count FROM public.articles WHERE status = 'draft'`,
+    ),
+    count(
+      sql<CountRow>`SELECT COUNT(*)::int AS count FROM public.events WHERE end_time >= ${now}`,
+    ),
+    count(
+      sql<CountRow>`SELECT COUNT(*)::int AS count FROM public.events WHERE end_time < ${now}`,
+    ),
+    count(
+      sql<CountRow>`SELECT COUNT(*)::int AS count FROM public.team_members WHERE is_active = TRUE`,
+    ),
+    count(
+      sql<CountRow>`SELECT COUNT(*)::int AS count FROM public.discord_members WHERE is_bot = FALSE`,
+    ),
   ]);
 
   return {

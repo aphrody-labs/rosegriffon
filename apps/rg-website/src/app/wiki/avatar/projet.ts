@@ -25,13 +25,15 @@ export function nouveauProjet(avatar: EtatAvatar): Projet {
   };
 }
 
-const objet = (v: unknown): v is Record<string, unknown> => typeof v === "object" && v !== null && !Array.isArray(v);
+const objet = (v: unknown): v is Record<string, unknown> =>
+  typeof v === "object" && v !== null && !Array.isArray(v);
 const nombre = (v: unknown, min: number, max: number): v is number =>
   typeof v === "number" && Number.isFinite(v) && v >= min && v <= max;
 
 /** Valide un document local sans accepter d'URL, chemin ou code exécutable. */
 export function lireProjet(texte: string, catalogue: Catalogue): Projet {
-  if (texte.length > 100_000) throw new Error("Projet trop volumineux (100 Ko maximum).");
+  if (texte.length > 100_000)
+    throw new Error("Projet trop volumineux (100 Ko maximum).");
   const p: unknown = JSON.parse(texte);
   if (
     !objet(p) ||
@@ -50,7 +52,11 @@ export function lireProjet(texte: string, catalogue: Catalogue): Projet {
     !objet(a.champs) ||
     !nombre(a.genre, 0, 1) ||
     !Number.isInteger(a.genre) ||
-    !nombre(a.morphologie, 0, catalogue.modelesDeBase.morphologies.length - 1) ||
+    !nombre(
+      a.morphologie,
+      0,
+      catalogue.modelesDeBase.morphologies.length - 1,
+    ) ||
     !Number.isInteger(a.morphologie) ||
     !nombre(p.transformation.rotation, -180, 180) ||
     !nombre(p.transformation.echelle, 0.25, 4)
@@ -58,8 +64,14 @@ export function lireProjet(texte: string, catalogue: Catalogue): Projet {
     throw new Error("Réglages du projet invalides.");
   const choix: Record<number, string> = {};
   for (const [cle, id] of Object.entries(a.choix)) {
-    const cat = catalogue.categories.find(c => String(c.faceSettingType) === cle);
-    if (!cat || typeof id !== "string" || (id !== "" && !cat.parts.some(part => part.id === id)))
+    const cat = catalogue.categories.find(
+      (c) => String(c.faceSettingType) === cle,
+    );
+    if (
+      !cat ||
+      typeof id !== "string" ||
+      (id !== "" && !cat.parts.some((part) => part.id === id))
+    )
       throw new Error(`Pièce inconnue dans la catégorie ${cle}.`);
     choix[Number(cle)] = id;
   }
@@ -72,11 +84,14 @@ export function lireProjet(texte: string, catalogue: Catalogue): Projet {
     )
       throw new Error("Valeur numérique invalide.");
     if (cle.startsWith("couleur.")) {
-      const cat = catalogue.categories.find(c => `couleur.${c.faceSettingType}` === cle);
+      const cat = catalogue.categories.find(
+        (c) => `couleur.${c.faceSettingType}` === cle,
+      );
       if (!cat || !Number.isInteger(v) || v < -1 || v >= cat.couleurs.length)
         throw new Error("Couleur absente du catalogue.");
     }
-    if (cle === "taille" && (!Number.isInteger(v) || v < 0 || v > 14)) throw new Error("Taille hors limites.");
+    if (cle === "taille" && (!Number.isInteger(v) || v < 0 || v > 14))
+      throw new Error("Taille hors limites.");
     valeurs[cle] = v;
   }
   const champs: Record<string, string> = {};
@@ -94,25 +109,55 @@ export function lireProjet(texte: string, catalogue: Catalogue): Projet {
     format: "nie-avatar",
     version: 1,
     nom: p.nom,
-    avatar: { choix, valeurs, champs, genre: a.genre, morphologie: a.morphologie },
-    transformation: { rotation: p.transformation.rotation, echelle: p.transformation.echelle },
+    avatar: {
+      choix,
+      valeurs,
+      champs,
+      genre: a.genre,
+      morphologie: a.morphologie,
+    },
+    transformation: {
+      rotation: p.transformation.rotation,
+      echelle: p.transformation.echelle,
+    },
   };
 }
 
-export type Historique = { passes: Projet[]; present: Projet; futurs: Projet[] };
-export type ActionProjet = { type: "modifier"; projet: Projet } | { type: "annuler" | "retablir" };
+export type Historique = {
+  passes: Projet[];
+  present: Projet;
+  futurs: Projet[];
+};
+export type ActionProjet =
+  { type: "modifier"; projet: Projet } | { type: "annuler" | "retablir" };
 /** Historique borné ; une nouvelle branche invalide uniquement le rétablissement. */
 export function reduireProjet(h: Historique, action: ActionProjet): Historique {
   if (action.type === "modifier") {
     if (JSON.stringify(h.present) === JSON.stringify(action.projet)) return h;
-    return { passes: [...h.passes.slice(-49), h.present], present: action.projet, futurs: [] };
+    return {
+      passes: [...h.passes.slice(-49), h.present],
+      present: action.projet,
+      futurs: [],
+    };
   }
   if (action.type === "annuler") {
     const precedent = h.passes.at(-1);
-    return precedent ? { passes: h.passes.slice(0, -1), present: precedent, futurs: [h.present, ...h.futurs] } : h;
+    return precedent
+      ? {
+          passes: h.passes.slice(0, -1),
+          present: precedent,
+          futurs: [h.present, ...h.futurs],
+        }
+      : h;
   }
   const suivant = h.futurs[0];
-  return suivant ? { passes: [...h.passes, h.present], present: suivant, futurs: h.futurs.slice(1) } : h;
+  return suivant
+    ? {
+        passes: [...h.passes, h.present],
+        present: suivant,
+        futurs: h.futurs.slice(1),
+      }
+    : h;
 }
 
 export function telecharger(blob: Blob, nom: string): void {

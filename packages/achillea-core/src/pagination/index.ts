@@ -3,7 +3,11 @@
  * et côté client (bornes, navigation, offsets), donc calculée une seule fois.
  */
 
-import type { PageMeta, PageSizeMeta, PageQuery } from "@rosegriffon/achillea-types";
+import type {
+  PageMeta,
+  PageSizeMeta,
+  PageQuery,
+} from "@rosegriffon/achillea-types";
 
 import { toCount, toPositiveInt } from "../numbers/index";
 
@@ -11,7 +15,10 @@ export const DEFAULT_PAGE_SIZE = 20;
 export const MAX_PAGE_SIZE = 100;
 
 /** Ramène une taille de page dans `[1, MAX_PAGE_SIZE]`. */
-export function clampPageSize(size: number | undefined, fallback = DEFAULT_PAGE_SIZE): number {
+export function clampPageSize(
+  size: number | undefined,
+  fallback = DEFAULT_PAGE_SIZE,
+): number {
   const n = Number(size);
   if (!Number.isFinite(n) || n < 1) return fallback;
   return Math.min(Math.floor(n), MAX_PAGE_SIZE);
@@ -23,7 +30,11 @@ export function pageCount(total: number, pageSize: number): number {
 }
 
 /** Ramène un numéro de page dans `[1, pageCount]` (1 si la liste est vide). */
-export function clampPage(page: number | undefined, total: number, pageSize: number): number {
+export function clampPage(
+  page: number | undefined,
+  total: number,
+  pageSize: number,
+): number {
   const pages = pageCount(total, pageSize);
   const n = Number(page);
   if (!Number.isFinite(n) || n < 1) return 1;
@@ -37,7 +48,11 @@ export function pageOffset(page: number | undefined, pageSize: number): number {
 }
 
 /** Métadonnées au format `Paginated<T>` (`limit`). */
-export function buildPageMeta(page: number, limit: number, total: number): PageMeta {
+export function buildPageMeta(
+  page: number,
+  limit: number,
+  total: number,
+): PageMeta {
   const size = clampPageSize(limit);
   return {
     page: clampPage(page, total, size),
@@ -48,7 +63,11 @@ export function buildPageMeta(page: number, limit: number, total: number): PageM
 }
 
 /** Métadonnées au format `PagedList<T>` (`pageSize`). */
-export function buildPageSizeMeta(page: number, pageSize: number, total: number): PageSizeMeta {
+export function buildPageSizeMeta(
+  page: number,
+  pageSize: number,
+  total: number,
+): PageSizeMeta {
   const size = clampPageSize(pageSize);
   return {
     page: clampPage(page, total, size),
@@ -58,7 +77,11 @@ export function buildPageSizeMeta(page: number, pageSize: number, total: number)
 }
 
 /** `true` s'il existe une page suivante. */
-export function hasNextPage(page: number, total: number, pageSize: number): boolean {
+export function hasNextPage(
+  page: number,
+  total: number,
+  pageSize: number,
+): boolean {
   return clampPage(page, total, pageSize) < pageCount(total, pageSize);
 }
 
@@ -80,7 +103,11 @@ export function normalizePageQuery(query: PageQuery | undefined): {
  * Fenêtre de numéros de page à afficher autour de la page courante.
  * `[1, …, 4, 5, 6, …, 20]` se construit à partir de ce tableau.
  */
-export function pageWindow(current: number, pages: number, radius = 2): number[] {
+export function pageWindow(
+  current: number,
+  pages: number,
+  radius = 2,
+): number[] {
   const total = toCount(pages);
   if (total <= 0) return [];
 

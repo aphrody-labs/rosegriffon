@@ -3,7 +3,10 @@ import { NextResponse } from "next/server";
 
 import { requireApiPatreonCreator } from "@/lib/api-auth";
 import { getCreatorClient } from "@/lib/patreon/client";
-import { ensureFreshAccessToken, loadCreatorTokens } from "@/lib/patreon/export";
+import {
+  ensureFreshAccessToken,
+  loadCreatorTokens,
+} from "@/lib/patreon/export";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -51,16 +54,24 @@ export async function GET() {
   try {
     const client = getCreatorClient(tokens.accessToken);
     const query = QueryBuilder.webhooks.setAttributes({
-      webhook: ["uri", "triggers", "paused", "last_attempted_at", "num_consecutive_times_failed"],
+      webhook: [
+        "uri",
+        "triggers",
+        "paused",
+        "last_attempted_at",
+        "num_consecutive_times_failed",
+      ],
     });
 
     // `client.webhooks.fetchWebhooks` retourne le payload JSON:API brut.
-    const res = (await client.webhooks.fetchWebhooks(query as never)) as unknown as WebhooksPayload;
+    const res = (await client.webhooks.fetchWebhooks(
+      query as never,
+    )) as unknown as WebhooksPayload;
 
     const list = Array.isArray(res?.data) ? res.data : [];
     return NextResponse.json({
       ok: true,
-      webhooks: list.map(w => ({
+      webhooks: list.map((w) => ({
         id: w.id,
         ...w.attributes,
       })),

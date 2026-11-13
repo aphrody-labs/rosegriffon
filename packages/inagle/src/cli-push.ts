@@ -65,7 +65,7 @@ export function registerPushCommand(program: Command) {
     .description("Push Inagle data to PostgreSQL")
     .option("--env <path>", "Path to .env file", ".env")
     .option("--db-url <url>", "Postgres Connection URL")
-    .action(async options => {
+    .action(async (options) => {
       if (options.env) {
         loadEnvFile(path.resolve(process.cwd(), options.env));
       }
@@ -144,8 +144,14 @@ async function importCharacters(service: any, db: DataAdapter) {
   // puis on les réinjecte par id dans les records.
   console.log("  Préservation de sheet_data / zukan_order avant nettoyage...");
   const preserved = new Map<string, { sheet_data: any; zukan_order: any }>();
-  for (const r of await db.fetchAll("inagle_characters", "id, sheet_data, zukan_order")) {
-    preserved.set(r.id, { sheet_data: r.sheet_data ?? null, zukan_order: r.zukan_order ?? null });
+  for (const r of await db.fetchAll(
+    "inagle_characters",
+    "id, sheet_data, zukan_order",
+  )) {
+    preserved.set(r.id, {
+      sheet_data: r.sheet_data ?? null,
+      zukan_order: r.zukan_order ?? null,
+    });
   }
   console.log(`  ${preserved.size} lignes curatées snapshotées.`);
 
@@ -183,7 +189,9 @@ async function importCharacters(service: any, db: DataAdapter) {
       const bHash = b.zukanHash ? 1 : 0;
       if (aHash !== bHash) return bHash - aHash;
 
-      return String(a.internalCode || "").localeCompare(String(b.internalCode || ""));
+      return String(a.internalCode || "").localeCompare(
+        String(b.internalCode || ""),
+      );
     });
 
     const primary = variants[0];
@@ -214,9 +222,15 @@ async function importCharacters(service: any, db: DataAdapter) {
   const auraHashes = new Set<string>(
     service.skills
       .auraAll()
-      .flatMap((a: any) => [a.auraId, a.auraIdStr, a.id].filter((value): value is string => typeof value === "string")),
+      .flatMap((a: any) =>
+        [a.auraId, a.auraIdStr, a.id].filter(
+          (value): value is string => typeof value === "string",
+        ),
+      ),
   );
-  console.log(`  Loaded ${auraHashes.size} aura hashes for skill/aura separation`);
+  console.log(
+    `  Loaded ${auraHashes.size} aura hashes for skill/aura separation`,
+  );
 
   // Postgres safe batch size
   const BATCH_SIZE = 100;
@@ -228,9 +242,12 @@ async function importCharacters(service: any, db: DataAdapter) {
       const stats = c.stats?.lv99 || {};
 
       // Separate skills from auras — chara_param mixes both in the same slots
-      const rawSkills: { learnLevel: number; skillId: string }[] = c.skills || [];
-      const skills = rawSkills.filter(s => s.skillId !== "0x00000002" && !auraHashes.has(s.skillId));
-      const auras = rawSkills.filter(s => auraHashes.has(s.skillId));
+      const rawSkills: { learnLevel: number; skillId: string }[] =
+        c.skills || [];
+      const skills = rawSkills.filter(
+        (s) => s.skillId !== "0x00000002" && !auraHashes.has(s.skillId),
+      );
+      const auras = rawSkills.filter((s) => auraHashes.has(s.skillId));
 
       return {
         id: c.charaParamId,
@@ -259,7 +276,8 @@ async function importCharacters(service: any, db: DataAdapter) {
         stat_intelligence: stats.intelligence || 0,
         zukan_hash: c.zukanHash || null,
         // zukan_order : conserve l'ordre officiel curaté s'il existe, sinon parser.
-        zukan_order: preserved.get(c.charaParamId)?.zukan_order ?? c.zukanOrder ?? null,
+        zukan_order:
+          preserved.get(c.charaParamId)?.zukan_order ?? c.zukanOrder ?? null,
         // sheet_data : 100% curaté hors-pipeline → restaure le snapshot (jamais le parser), mais intègre les nouveaux movesets.
         sheet_data: (() => {
           const jsonSd = c.sheetData || {};
@@ -301,7 +319,9 @@ async function importCharacters(service: any, db: DataAdapter) {
     if (error) console.error("❌ Error batch char:", error.message || error);
     else successCount += records.length;
   }
-  console.log(`✅ Characters imported (${successCount}/${processedChars.length}).`);
+  console.log(
+    `✅ Characters imported (${successCount}/${processedChars.length}).`,
+  );
 }
 
 /** Ce qu'une ligne `inagle_skills` sait d'elle-même et que le dump du jeu ignore. */
@@ -339,7 +359,10 @@ async function importSkills(service: any, db: DataAdapter) {
   // modifiées, toutes les nuits. Un plan de site qui ment sur ses dates finit par
   // ne plus être cru — et gaspille le budget d'exploration en attendant.
   const preserved = new Map<string, PreservedSkill>();
-  for (const r of await db.fetchAll("inagle_skills", "id, video_url, poster_url, thumbnail_url, created_at")) {
+  for (const r of await db.fetchAll(
+    "inagle_skills",
+    "id, video_url, poster_url, thumbnail_url, created_at",
+  )) {
     preserved.set(String(r.id), {
       created_at: r.created_at ?? null,
       poster_url: r.poster_url ?? null,
@@ -351,7 +374,9 @@ async function importSkills(service: any, db: DataAdapter) {
     "inagle_skill_videos",
     "skill_id, position, label, video_url, poster_url, source",
   );
-  const avecZukan = [...preserved.values()].filter(p => p.video_url || p.thumbnail_url).length;
+  const avecZukan = [...preserved.values()].filter(
+    (p) => p.video_url || p.thumbnail_url,
+  ).length;
   console.log(
     `  ${preserved.size} techniques préservées (${avecZukan} enrichies zukan, ${preservedVideos.length} variantes vidéo).`,
   );
@@ -406,7 +431,9 @@ async function importSkills(service: any, db: DataAdapter) {
       partner_count: s.partnerCount || 0,
       evolution_type: s.growthSpeed || null,
       skill_effect_bit_flag: s.skillEffectBitFlag || 0,
-      tags: s.tags ? `{${s.tags.map((t: string) => `"${t.replace(/"/g, '\\"')}"`).join(",")}}` : "{}",
+      tags: s.tags
+        ? `{${s.tags.map((t: string) => `"${t.replace(/"/g, '\\"')}"`).join(",")}}`
+        : "{}",
       image_url: service.images.skillUrl(id),
       data: s,
       updated_at: new Date().toISOString(),
@@ -431,11 +458,21 @@ async function importSkills(service: any, db: DataAdapter) {
   // celles dont la technique existe encore : une technique disparue du dump ne doit
   // pas ressusciter par sa clé étrangère (l'insert échouerait, et à raison).
   const keptIds = new Set(records.map((r: { id: string }) => r.id));
-  const restorable = preservedVideos.filter((v: any) => keptIds.has(String(v.skill_id)));
+  const restorable = preservedVideos.filter((v: any) =>
+    keptIds.has(String(v.skill_id)),
+  );
   if (restorable.length > 0) {
-    const { error } = await db.upsert("inagle_skill_videos", restorable, "skill_id,position");
-    if (error) console.error("❌ Error restoring skill videos:", error.message || error);
-    else console.log(`✅ Skill videos restored (${restorable.length}/${preservedVideos.length}).`);
+    const { error } = await db.upsert(
+      "inagle_skill_videos",
+      restorable,
+      "skill_id,position",
+    );
+    if (error)
+      console.error("❌ Error restoring skill videos:", error.message || error);
+    else
+      console.log(
+        `✅ Skill videos restored (${restorable.length}/${preservedVideos.length}).`,
+      );
   }
 }
 
@@ -457,7 +494,8 @@ async function importItems(service: any, db: DataAdapter) {
   let items = service.items.allItems();
   items = items.filter((item: any) => {
     const id = item.itemId || item.id;
-    if (!id || id === "0x00000000" || id === "0x00000002" || id === "null") return false;
+    if (!id || id === "0x00000000" || id === "0x00000002" || id === "null")
+      return false;
 
     const name = item.name || "";
     if (
@@ -485,7 +523,9 @@ async function importItems(service: any, db: DataAdapter) {
   // Deduplicate items by category + normalized name (preferring records with internalCode / descriptions)
   const uniqueMap = new Map<string, any>();
   for (const item of items) {
-    const name = (getLoc(item, "fr") || getLoc(item, "en") || "").toLowerCase().trim();
+    const name = (getLoc(item, "fr") || getLoc(item, "en") || "")
+      .toLowerCase()
+      .trim();
     const key = `${item.category}_${name}`;
     const existing = uniqueMap.get(key);
     if (!existing) {
@@ -496,7 +536,10 @@ async function importItems(service: any, db: DataAdapter) {
       const existingHasDesc = !!getDesc(existing, "fr");
       const itemHasDesc = !!getDesc(item, "fr");
 
-      if ((!existingHasCode && itemHasCode) || (existingHasCode === itemHasCode && !existingHasDesc && itemHasDesc)) {
+      if (
+        (!existingHasCode && itemHasCode) ||
+        (existingHasCode === itemHasCode && !existingHasDesc && itemHasDesc)
+      ) {
         uniqueMap.set(key, item);
       }
     }
@@ -531,7 +574,8 @@ async function importItems(service: any, db: DataAdapter) {
         // shop_config/item_config (cfg.bin) — plus de dépendance au Google Sheet
         // communautaire. Garde-fou : si ce run n'a pas chargé les shops (DATA_ROOT
         // absent), retombe sur le snapshot préservé pour ne pas appauvrir la donnée.
-        sheet_data: (item?.shops ? item : (preserved.get(String(id)) ?? item)) ?? null,
+        sheet_data:
+          (item?.shops ? item : (preserved.get(String(id)) ?? item)) ?? null,
         updated_at: new Date().toISOString(),
       };
     });
@@ -560,8 +604,12 @@ async function importPassives(service: any, db: DataAdapter) {
       description_fr: getDesc(p, "fr"),
       description_en: getDesc(p, "en"),
       description_ja: getDesc(p, "ja"),
-      category: (PASSIVE_SCOPE_NAMES as any)[p.scope]?.fr || p.scope || "Inconnu",
-      boost_type: (PASSIVE_BOOST_NAMES as any)[p.boostType]?.fr || p.boostType || "Inconnu",
+      category:
+        (PASSIVE_SCOPE_NAMES as any)[p.scope]?.fr || p.scope || "Inconnu",
+      boost_type:
+        (PASSIVE_BOOST_NAMES as any)[p.boostType]?.fr ||
+        p.boostType ||
+        "Inconnu",
       effect_value: p.effectValue || 0,
       data: p,
       updated_at: new Date().toISOString(),
@@ -592,7 +640,8 @@ async function importAuras(service: any, db: DataAdapter) {
 
   for (const a of auras) {
     const name = getLoc(a, "fr");
-    const isInvalid = !name || name.includes("(was") || name.startsWith("Aura ");
+    const isInvalid =
+      !name || name.includes("(was") || name.startsWith("Aura ");
     if (isInvalid) continue;
 
     const baseRecord = {
@@ -627,12 +676,17 @@ async function importAuras(service: any, db: DataAdapter) {
     };
 
     const subType = a.subType || "Aura";
-    if (subType === "Keshin") keshins.push({ ...baseRecord, type: "Esprit Guerrier", data: a });
-    else if (subType === "Soul") souls.push({ ...baseRecord, type: "Totem", data: a });
-    else if (subType === "Awakening") awakenings.push({ ...baseRecord, type: "Éveil", data: a });
-    else if (subType === "ModeChange") modeChanges.push({ ...baseRecord, type: "Changement de mode", data: a });
+    if (subType === "Keshin")
+      keshins.push({ ...baseRecord, type: "Esprit Guerrier", data: a });
+    else if (subType === "Soul")
+      souls.push({ ...baseRecord, type: "Totem", data: a });
+    else if (subType === "Awakening")
+      awakenings.push({ ...baseRecord, type: "Éveil", data: a });
+    else if (subType === "ModeChange")
+      modeChanges.push({ ...baseRecord, type: "Changement de mode", data: a });
     else if (subType === "Aura") {
-      if (name.includes("Miximax")) miximax.push({ ...baseRecord, type: "Miximax", data: a });
+      if (name.includes("Miximax"))
+        miximax.push({ ...baseRecord, type: "Miximax", data: a });
       else {
         aurasList.push({ ...baseRecord, sub_type: "Aura" });
       }
@@ -641,11 +695,15 @@ async function importAuras(service: any, db: DataAdapter) {
 
   if (keshins.length > 0) await db.upsert("inagle_keshins", dedup(keshins));
   if (souls.length > 0) await db.upsert("inagle_souls", dedup(souls));
-  if (awakenings.length > 0) await db.upsert("inagle_awakenings", dedup(awakenings));
-  if (modeChanges.length > 0) await db.upsert("inagle_mode_changes", dedup(modeChanges));
+  if (awakenings.length > 0)
+    await db.upsert("inagle_awakenings", dedup(awakenings));
+  if (modeChanges.length > 0)
+    await db.upsert("inagle_mode_changes", dedup(modeChanges));
   if (miximax.length > 0) await db.upsert("inagle_miximax", dedup(miximax));
   if (aurasList.length > 0) await db.upsert("inagle_auras", dedup(aurasList));
-  console.log(`✅ Auras imported (${auras.length}) — ${aurasList.length} dans inagle_auras.`);
+  console.log(
+    `✅ Auras imported (${auras.length}) — ${aurasList.length} dans inagle_auras.`,
+  );
 }
 
 async function importTeams(service: any, db: DataAdapter) {
@@ -767,7 +825,9 @@ async function importDrops(service: any, db: DataAdapter) {
       await db.insert("inagle_drops_treasures", records);
     }
   } else {
-    console.log("⏭️  Drops: pas de trésors dans cette source, table conservée.");
+    console.log(
+      "⏭️  Drops: pas de trésors dans cette source, table conservée.",
+    );
   }
   console.log("✅ Drops imported.");
 }
@@ -798,7 +858,8 @@ async function importGallery(_service: any, db: DataAdapter) {
 
 async function importCostumes(_service: any, db: DataAdapter) {
   console.log("🔄 Importing Costumes...");
-  const { buildCharaCostumeDatabase } = await import("./parsers/chara-costume-config.js");
+  const { buildCharaCostumeDatabase } =
+    await import("./parsers/chara-costume-config.js");
   const costumes = await buildCharaCostumeDatabase();
 
   const records = costumes.costumes.map((c: any) => ({
@@ -825,7 +886,8 @@ async function importCostumes(_service: any, db: DataAdapter) {
 
 async function importOpponentTeams(_service: any, db: DataAdapter) {
   console.log("🔄 Importing Opponent Teams...");
-  const { buildOpponentTeamDatabase } = await import("./parsers/opponent-team-config.js");
+  const { buildOpponentTeamDatabase } =
+    await import("./parsers/opponent-team-config.js");
   const opponents = await buildOpponentTeamDatabase();
 
   const records = opponents.opponents.map((o: any) => ({
@@ -841,7 +903,8 @@ async function importOpponentTeams(_service: any, db: DataAdapter) {
 
   if (records.length > 0) {
     const { error } = await db.upsert("inagle_opponent_teams", dedup(records));
-    if (error) console.error("❌ Error opponent teams:", error.message || error);
+    if (error)
+      console.error("❌ Error opponent teams:", error.message || error);
   }
   console.log(`✅ Opponent Teams imported (${records.length}).`);
 }

@@ -37,7 +37,9 @@ async function ensureWasm(): Promise<void> {
       // l'onglet : chaque appel ultérieur rejouait la MÊME erreur, sans
       // jamais retenter le chargement.
       initPromise = null;
-      throw new Error(`Chargement du module wasm impossible (${WASM_URL}).`, { cause });
+      throw new Error(`Chargement du module wasm impossible (${WASM_URL}).`, {
+        cause,
+      });
     });
   }
   return initPromise;
@@ -62,7 +64,10 @@ export interface CpkTypedDecoded {
  * @param filename nom de fichier (dérive la clé de famille, ex. `formation_config_0.02.16.cfg.bin`).
  * @throws si le module wasm échoue à charger, ou si les octets ne sont ni RDBN ni T2B.
  */
-export async function cfgbinTyped(bytes: Uint8Array, filename: string): Promise<CpkTypedDecoded> {
+export async function cfgbinTyped(
+  bytes: Uint8Array,
+  filename: string,
+): Promise<CpkTypedDecoded> {
   await ensureWasm();
   const json = cfgbin_typed_json(bytes, filename);
   return JSON.parse(json) as CpkTypedDecoded;
@@ -123,7 +128,10 @@ export async function g4pkParse(bytes: Uint8Array): Promise<G4pkParsed> {
  *
  * @throws si le wasm échoue, ou si la paire n'est pas un modèle valide.
  */
-export async function modelToGlb(g4md: Uint8Array, g4mg: Uint8Array): Promise<Uint8Array> {
+export async function modelToGlb(
+  g4md: Uint8Array,
+  g4mg: Uint8Array,
+): Promise<Uint8Array> {
   await ensureWasm();
   return model_to_glb(g4md, g4mg);
 }
@@ -143,7 +151,9 @@ export type LuaBytecodeResume = {
  * C'est le décodeur du dépôt (`nie_lua::bytecode`), compilé **sans la VM** : `mlua` embarque Lua
  * en C, qui ne se construit pas pour wasm32, alors que le décodeur est du Rust pur.
  */
-export async function luaBytecode(bytes: Uint8Array): Promise<LuaBytecodeResume> {
+export async function luaBytecode(
+  bytes: Uint8Array,
+): Promise<LuaBytecodeResume> {
   await ensureWasm();
   return JSON.parse(lua_bytecode_json(bytes)) as LuaBytecodeResume;
 }

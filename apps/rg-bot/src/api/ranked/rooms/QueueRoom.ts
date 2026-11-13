@@ -33,13 +33,17 @@ export class QueueRoom extends Room {
 
   override onCreate(_options: any) {
     this.interval = setInterval(() => {
-      this.tryMatch().catch(err => {
+      this.tryMatch().catch((err) => {
         console.error("[ranked] QueueRoom.tryMatch failed", err);
       });
     }, 1000);
   }
 
-  override async onAuth(_client: Client, options: any, request: any): Promise<SessionUser> {
+  override async onAuth(
+    _client: Client,
+    options: any,
+    request: any,
+  ): Promise<SessionUser> {
     const auth = await authFromColyseus(options, request);
     if (auth) return auth;
     throw new Error("Non authentifié");
@@ -51,12 +55,17 @@ export class QueueRoom extends Room {
     const userRow = await getUserRow(auth.id);
     const season = await getActiveSeason();
     const baseRating = season?.config?.baseRating ?? 0;
-    const elo = await getOrCreateElo(auth.id, mode, season?.id ?? null, baseRating);
+    const elo = await getOrCreateElo(
+      auth.id,
+      mode,
+      season?.id ?? null,
+      baseRating,
+    );
 
     // Anti double-file (multi-onglets) : on retire toute entrée existante du même joueur
     // avant d'ajouter la nouvelle. Empêche en amont qu'un joueur soit candidat à
     // s'apparier contre lui-même (le tri par elo les rendrait adjacents).
-    this.waiting = this.waiting.filter(q => q.user.id !== auth.id);
+    this.waiting = this.waiting.filter((q) => q.user.id !== auth.id);
 
     this.waiting.push({
       client,
@@ -81,7 +90,9 @@ export class QueueRoom extends Room {
   }
 
   override onLeave(client: Client) {
-    this.waiting = this.waiting.filter(q => q.client.sessionId !== client.sessionId);
+    this.waiting = this.waiting.filter(
+      (q) => q.client.sessionId !== client.sessionId,
+    );
   }
 
   override onDispose() {
@@ -103,7 +114,11 @@ export class QueueRoom extends Room {
       // dynamique) à la logique pure testable `selectQueuePair`.
       list.sort((a, b) => a.elo - b.elo);
       const pair = selectQueuePair(
-        list.map(q => ({ userId: q.user.id, elo: q.elo, enqueuedAt: q.enqueuedAt })),
+        list.map((q) => ({
+          userId: q.user.id,
+          elo: q.elo,
+          enqueuedAt: q.enqueuedAt,
+        })),
         now,
         ELO_WINDOW,
       );
@@ -113,7 +128,9 @@ export class QueueRoom extends Room {
       const b = list[j];
       await this.pair(mode, a, b);
       this.waiting = this.waiting.filter(
-        q => q.client.sessionId !== a.client.sessionId && q.client.sessionId !== b.client.sessionId,
+        (q) =>
+          q.client.sessionId !== a.client.sessionId &&
+          q.client.sessionId !== b.client.sessionId,
       );
     }
   }
@@ -123,8 +140,18 @@ export class QueueRoom extends Room {
     // classé est porté par les candidats (file partitionnée par ["mode","ranked"]).
     const { reservationA, reservationB } = await createRankedMatch(
       mode,
-      { userId: a.user.id, displayName: a.displayName, avatar: a.avatar, elo: a.elo },
-      { userId: b.user.id, displayName: b.displayName, avatar: b.avatar, elo: b.elo },
+      {
+        userId: a.user.id,
+        displayName: a.displayName,
+        avatar: a.avatar,
+        elo: a.elo,
+      },
+      {
+        userId: b.user.id,
+        displayName: b.displayName,
+        avatar: b.avatar,
+        elo: b.elo,
+      },
       a.ranked,
     );
 

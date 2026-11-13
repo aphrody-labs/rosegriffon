@@ -22,6 +22,10 @@ export const metadata: Metadata = {
   title: "Événements | Rose Griffon",
 };
 
-export default function EvenementsLayout({ children }: { children: ReactNode }) {
+export default function EvenementsLayout({
+  children,
+}: {
+  children: ReactNode;
+}) {
   return children;
 }

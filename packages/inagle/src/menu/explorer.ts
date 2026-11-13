@@ -37,7 +37,10 @@ export class MenuExplorer {
 
   private isWithinBase(targetPath: string): boolean {
     const rel = relative(this.basePath, targetPath);
-    return rel === "" || (!isAbsolute(rel) && rel !== ".." && !rel.startsWith(`..${sep}`));
+    return (
+      rel === "" ||
+      (!isAbsolute(rel) && rel !== ".." && !rel.startsWith(`..${sep}`))
+    );
   }
 
   /** Resolve a request through the filesystem and reject traversal or symlink escapes. */
@@ -48,7 +51,11 @@ export class MenuExplorer {
       const realBase = realpathSync(this.basePath);
       const realTarget = realpathSync(targetPath);
       const rel = relative(realBase, realTarget);
-      if (rel !== "" && (isAbsolute(rel) || rel === ".." || rel.startsWith(`..${sep}`))) return null;
+      if (
+        rel !== "" &&
+        (isAbsolute(rel) || rel === ".." || rel.startsWith(`..${sep}`))
+      )
+        return null;
       return realTarget;
     } catch {
       return null;
@@ -86,7 +93,8 @@ export class MenuExplorer {
 
         // Construct relative path
         const childPath = join(relativePath, file).split(sep).join("/");
-        const extension = !isDir && file.includes(".") ? file.split(".").pop() : undefined;
+        const extension =
+          !isDir && file.includes(".") ? file.split(".").pop() : undefined;
 
         const entry: MenuEntry = {
           name: file,
@@ -111,7 +119,10 @@ export class MenuExplorer {
           return a.type === "directory" ? -1 : 1;
         });
     } catch (error) {
-      console.error(`[MenuExplorer] Error listing directory ${relativePath}:`, error);
+      console.error(
+        `[MenuExplorer] Error listing directory ${relativePath}:`,
+        error,
+      );
       return [];
     }
   }
@@ -123,8 +134,15 @@ export class MenuExplorer {
    */
   scan(relativePath: string = "", options: ScanOptions = {}): MenuEntry[] {
     const results: MenuEntry[] = [];
-    const { recursive = true, extensions, includeDirectories = false, maxDepth = Infinity } = options;
-    const normalizedExtensions = extensions?.map(extension => extension.replace(/^\./, "").toLowerCase());
+    const {
+      recursive = true,
+      extensions,
+      includeDirectories = false,
+      maxDepth = Infinity,
+    } = options;
+    const normalizedExtensions = extensions?.map((extension) =>
+      extension.replace(/^\./, "").toLowerCase(),
+    );
 
     const processDir = (currentPath: string, currentDepth: number) => {
       if (currentDepth > maxDepth) return;
@@ -171,9 +189,11 @@ export class MenuExplorer {
 
     if (typeof pattern === "string") {
       const lowerPattern = pattern.toLowerCase();
-      return allFiles.filter(f => f.name.toLowerCase().includes(lowerPattern));
+      return allFiles.filter((f) =>
+        f.name.toLowerCase().includes(lowerPattern),
+      );
     } else {
-      return allFiles.filter(f => {
+      return allFiles.filter((f) => {
         pattern.lastIndex = 0;
         return pattern.test(f.name);
       });

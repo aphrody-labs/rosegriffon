@@ -14,7 +14,12 @@ interface LikeButtonProps {
   compact?: boolean;
 }
 
-export function LikeButton({ articleId, initialCount, initialLiked, compact }: LikeButtonProps) {
+export function LikeButton({
+  articleId,
+  initialCount,
+  initialLiked,
+  compact,
+}: LikeButtonProps) {
   const { user } = useAuth();
   const [count, setCount] = useState(initialCount);
   const [liked, setLiked] = useState(initialLiked);
@@ -29,7 +34,7 @@ export function LikeButton({ articleId, initialCount, initialLiked, compact }: L
     // Optimistic update
     const newLiked = !liked;
     setLiked(newLiked);
-    setCount(c => c + (newLiked ? 1 : -1));
+    setCount((c) => c + (newLiked ? 1 : -1));
 
     startTransition(async () => {
       try {
@@ -39,7 +44,7 @@ export function LikeButton({ articleId, initialCount, initialLiked, compact }: L
       } catch {
         // Revert on error
         setLiked(!newLiked);
-        setCount(c => c + (newLiked ? -1 : 1));
+        setCount((c) => c + (newLiked ? -1 : 1));
         toast.error("Erreur lors de la réaction");
       }
     });
@@ -48,7 +53,7 @@ export function LikeButton({ articleId, initialCount, initialLiked, compact }: L
   if (compact) {
     return (
       <button
-        onClick={e => {
+        onClick={(e) => {
           e.preventDefault();
           e.stopPropagation();
           handleToggle();
@@ -56,7 +61,9 @@ export function LikeButton({ articleId, initialCount, initialLiked, compact }: L
         disabled={isPending}
         className={cn(
           "inline-flex items-center gap-1 text-xs transition-colors",
-          liked ? "text-destructive" : "text-on-surface-variant/50 hover:text-destructive",
+          liked
+            ? "text-destructive"
+            : "text-on-surface-variant/50 hover:text-destructive",
         )}
       >
         <Heart className={cn("size-3.5", liked && "fill-current")} />

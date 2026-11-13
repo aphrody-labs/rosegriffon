@@ -46,10 +46,16 @@ export function FiltresSondages({
       className="rounded-2xl border border-border bg-card p-4 text-card-foreground shadow-xl sm:p-6"
     >
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-        <form action="/sondages" method="get" className="flex flex-col gap-2 xs:flex-row">
+        <form
+          action="/sondages"
+          method="get"
+          className="flex flex-col gap-2 xs:flex-row"
+        >
           {/* Le statut courant suit la recherche : filtrer puis chercher ne doit
 					    pas silencieusement remettre la liste sur « Tous ». */}
-          {statut !== "tous" && <input type="hidden" name="statut" value={statut} />}
+          {statut !== "tous" && (
+            <input type="hidden" name="statut" value={statut} />
+          )}
           <label className="sr-only" htmlFor="recherche-sondage">
             Rechercher un mot dans la question
           </label>
@@ -68,8 +74,11 @@ export function FiltresSondages({
           </Button>
         </form>
 
-        <nav aria-label="Filtrer par état" className="flex flex-wrap items-center gap-2">
-          {ONGLETS.map(onglet => {
+        <nav
+          aria-label="Filtrer par état"
+          className="flex flex-wrap items-center gap-2"
+        >
+          {ONGLETS.map((onglet) => {
             const actif = onglet.statut === statut;
             return (
               <Link
@@ -95,7 +104,8 @@ export function FiltresSondages({
             <span className="font-semibold text-on-surface">
               {resultats} résultat{resultats > 1 ? "s" : ""}
             </span>{" "}
-            sur {total} sondage{total > 1 ? "s" : ""} archivé{total > 1 ? "s" : ""}
+            sur {total} sondage{total > 1 ? "s" : ""} archivé
+            {total > 1 ? "s" : ""}
           </>
         ) : (
           <>

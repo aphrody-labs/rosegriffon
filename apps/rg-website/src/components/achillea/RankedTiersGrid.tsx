@@ -18,7 +18,13 @@ const TIER_COLORS: Record<string, string> = {
   Légendaire: "#ffa910",
 };
 
-export function RankedTiersGrid({ tiers, className = "" }: { tiers: RankedTierInfo[]; className?: string }) {
+export function RankedTiersGrid({
+  tiers,
+  className = "",
+}: {
+  tiers: RankedTierInfo[];
+  className?: string;
+}) {
   return (
     <section
       aria-labelledby="ranked-tiers-title"
@@ -30,12 +36,16 @@ export function RankedTiersGrid({ tiers, className = "" }: { tiers: RankedTierIn
             <Crown className="size-3.5" />
             Progression &amp; Classement
           </div>
-          <h2 id="ranked-tiers-title" className="text-2xl sm:text-3xl font-black text-on-surface tracking-tight">
+          <h2
+            id="ranked-tiers-title"
+            className="text-2xl sm:text-3xl font-black text-on-surface tracking-tight"
+          >
             L&apos;Échelle des 11 Paliers ELO
           </h2>
           <p className="text-lg text-on-surface-variant max-w-2xl">
-            Franchissez les seuils de points d&apos;action (AP) en match classé 1v1 et 2v2 pour faire évoluer votre
-            palier et débloquer les insignes officiels.
+            Franchissez les seuils de points d&apos;action (AP) en match classé
+            1v1 et 2v2 pour faire évoluer votre palier et débloquer les insignes
+            officiels.
           </p>
         </div>
 
@@ -58,7 +68,10 @@ export function RankedTiersGrid({ tiers, className = "" }: { tiers: RankedTierIn
             const badgeUrl = rankImagePath(tier.key, "/achillea/ranks");
             const level = index + 1;
             const color = TIER_COLORS[tier.key] ?? "#959595";
-            const pointsLabel = tier.maxElo >= 9000 ? `${tier.minElo}+ AP` : `${tier.minElo} - ${tier.maxElo} AP`;
+            const pointsLabel =
+              tier.maxElo >= 9000
+                ? `${tier.minElo}+ AP`
+                : `${tier.minElo} - ${tier.maxElo} AP`;
 
             return (
               <Link
@@ -67,11 +80,20 @@ export function RankedTiersGrid({ tiers, className = "" }: { tiers: RankedTierIn
                 className="group relative flex min-h-11 flex-col items-center p-3 rounded-2xl bg-surface/80 border border-outline/20 hover:border-achillea-lime/60 hover:bg-surface hover:shadow-xl transition-all duration-300 text-center overflow-hidden focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-achillea-lime"
               >
                 {/* Subtle top indicator with tier gradient */}
-                <div className="absolute top-0 inset-x-0 h-1" style={{ backgroundColor: color }} />
+                <div
+                  className="absolute top-0 inset-x-0 h-1"
+                  style={{ backgroundColor: color }}
+                />
 
                 {/* Rank Badge Image */}
                 <div className="relative size-14 sm:size-16 my-2 group-hover:scale-110 transition-transform duration-300 drop-shadow-md">
-                  <Image src={badgeUrl} alt={`Badge Palier ${tier.key}`} fill unoptimized className="object-contain" />
+                  <Image
+                    src={badgeUrl}
+                    alt={`Badge Palier ${tier.key}`}
+                    fill
+                    unoptimized
+                    className="object-contain"
+                  />
                 </div>
 
                 {/* Tier Name */}
@@ -85,7 +107,9 @@ export function RankedTiersGrid({ tiers, className = "" }: { tiers: RankedTierIn
                 </span>
 
                 {/* Micro level indicator */}
-                <span className="text-lg uppercase tracking-wider text-on-surface-variant mt-1">Rang #{level}</span>
+                <span className="text-lg uppercase tracking-wider text-on-surface-variant mt-1">
+                  Rang #{level}
+                </span>
               </Link>
             );
           })}

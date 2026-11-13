@@ -2,7 +2,11 @@ import { Elysia, t } from "elysia";
 import { dbPlugin } from "../../../plugins/db";
 import { normalizeQuery, SuggestionService } from "./service";
 
-const rank = t.Object({ elo: t.Number(), key: t.String(), gradient: t.Array(t.String()) });
+const rank = t.Object({
+  elo: t.Number(),
+  key: t.String(),
+  gradient: t.Array(t.String()),
+});
 
 const suggestions = t.Array(
   t.Object({

@@ -24,10 +24,17 @@ export type EnTetesAuth = { authorization?: string; cookie?: string };
 export type ActeurStaff = { id: string; role: number };
 
 /** Lit l'identifiant et le rôle d'un compte ; `undefined` s'il n'existe pas. */
-export type ChargeurRole = (db: Kysely<Database>, id: string) => Promise<ActeurStaff | undefined>;
+export type ChargeurRole = (
+  db: Kysely<Database>,
+  id: string,
+) => Promise<ActeurStaff | undefined>;
 
 export const chargerRoleEnBase: ChargeurRole = (db, id) =>
-  db.selectFrom("user").select(["id", "role"]).where("id", "=", id).executeTakeFirst();
+  db
+    .selectFrom("user")
+    .select(["id", "role"])
+    .where("id", "=", id)
+    .executeTakeFirst();
 
 export async function staff(
   db: Kysely<Database>,
@@ -36,9 +43,13 @@ export async function staff(
   chargerRole: ChargeurRole = chargerRoleEnBase,
 ) {
   const session = await resolveAchilleaSession(headers);
-  if (!session) return { error: status(401, { message: "Authentication required" as const }) };
+  if (!session)
+    return {
+      error: status(401, { message: "Authentication required" as const }),
+    };
   const actor = await chargerRole(db, session.id);
-  if (!actor || actor.role < minimumRole) return { error: status(403, { message: "Staff role required" as const }) };
+  if (!actor || actor.role < minimumRole)
+    return { error: status(403, { message: "Staff role required" as const }) };
   return { session, actor };
 }
 
@@ -63,7 +74,12 @@ export async function superAdminOuJetonDev(
   if (jeton && verifyAdminBearerToken(jeton, process.env.API_ADMIN_TOKEN)) {
     return { actor: null as ActeurStaff | null };
   }
-  const auth = await staff(db, headers, ROLE_STAFF.SuperAdministrateur, chargerRole);
+  const auth = await staff(
+    db,
+    headers,
+    ROLE_STAFF.SuperAdministrateur,
+    chargerRole,
+  );
   if (auth.error) return { error: auth.error };
   return { actor: auth.actor as ActeurStaff | null };
 }

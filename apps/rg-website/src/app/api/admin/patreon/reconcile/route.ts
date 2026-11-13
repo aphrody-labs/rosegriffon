@@ -12,6 +12,9 @@ export async function POST() {
     return NextResponse.json({ ok: true, summary });
   } catch (error) {
     console.error("[admin/patreon/reconcile]", error);
-    return NextResponse.json({ ok: false, error: String(error) }, { status: 500 });
+    return NextResponse.json(
+      { ok: false, error: String(error) },
+      { status: 500 },
+    );
   }
 }

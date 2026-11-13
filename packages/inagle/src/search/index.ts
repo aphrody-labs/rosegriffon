@@ -15,5 +15,11 @@
  * ```
  */
 
-export type { GlobalSearchAPI, GlobalSearchResult, SearchableType, SearchConfig, SearchResult } from "./fuzzy.js";
+export type {
+  GlobalSearchAPI,
+  GlobalSearchResult,
+  SearchableType,
+  SearchConfig,
+  SearchResult,
+} from "./fuzzy.js";
 export { createGlobalSearch, createSearchIndex } from "./fuzzy.js";

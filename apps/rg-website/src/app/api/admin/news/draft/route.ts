@@ -45,7 +45,12 @@ import { SITE_URL } from "@/lib/site-url";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const VALID_CATEGORIES = ["announcement", "event", "critique", "community"] as const;
+const VALID_CATEGORIES = [
+  "announcement",
+  "event",
+  "critique",
+  "community",
+] as const;
 type Category = (typeof VALID_CATEGORIES)[number];
 
 const APP_SCOPE = "azalee";
@@ -183,7 +188,10 @@ function buildLexical(content: string) {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function resolveAuthorId(supabase: any, body: DraftBody): Promise<string> {
+async function resolveAuthorId(
+  supabase: any,
+  body: DraftBody,
+): Promise<string> {
   if (body.author_id) {
     return body.author_id;
   }
@@ -192,7 +200,11 @@ async function resolveAuthorId(supabase: any, body: DraftBody): Promise<string> 
     const filter = body.author_email
       ? { col: "email", val: body.author_email }
       : { col: "username", val: body.author_username! };
-    const { data, error } = await supabase.from("profiles").select("id").eq(filter.col, filter.val).maybeSingle();
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("id")
+      .eq(filter.col, filter.val)
+      .maybeSingle();
     if (error) {
       throw new Error(`Profile lookup failed: ${error.message}`);
     }
@@ -213,12 +225,17 @@ async function resolveAuthorId(supabase: any, body: DraftBody): Promise<string> 
     throw new Error(`Admin lookup failed: ${error.message}`);
   }
   if (!data?.id) {
-    throw new Error("Aucun admin/superadmin/editor/moderator trouvé — précise author_id.");
+    throw new Error(
+      "Aucun admin/superadmin/editor/moderator trouvé — précise author_id.",
+    );
   }
   return data.id as string;
 }
 
-function discordAvatarUrl(userId: string, hash: string | null | undefined): string {
+function discordAvatarUrl(
+  userId: string,
+  hash: string | null | undefined,
+): string {
   if (!hash) {
     const idx = Number((BigInt(userId) >> 22n) % 6n);
     return `https://cdn.discordapp.com/embed/avatars/${idx}.png`;
@@ -247,7 +264,9 @@ async function fetchCoAuthorsFromDiscordRole(
   const token = process.env.DISCORD_BOT_TOKEN;
   const guildId = process.env.DISCORD_GUILD_ID;
   if (!token || !guildId) {
-    throw new Error("DISCORD_BOT_TOKEN/DISCORD_GUILD_ID requis pour `discord_role_id`");
+    throw new Error(
+      "DISCORD_BOT_TOKEN/DISCORD_GUILD_ID requis pour `discord_role_id`",
+    );
   }
 
   const all: DiscordMember[] = [];
@@ -260,7 +279,9 @@ async function fetchCoAuthorsFromDiscordRole(
     }
     const res = await fetch(u, { headers: { Authorization: `Bot ${token}` } });
     if (!res.ok) {
-      throw new Error(`Discord API ${res.status}: ${(await res.text()).slice(0, 200)}`);
+      throw new Error(
+        `Discord API ${res.status}: ${(await res.text()).slice(0, 200)}`,
+      );
     }
     const batch = (await res.json()) as DiscordMember[];
     all.push(...batch);
@@ -274,17 +295,20 @@ async function fetchCoAuthorsFromDiscordRole(
     after = lastMember.user.id;
   }
 
-  const withRole = all.filter(m => m.roles?.includes(roleId));
+  const withRole = all.filter((m) => m.roles?.includes(roleId));
   if (withRole.length === 0) {
     return [];
   }
 
-  const discordIds = withRole.map(m => m.user.id);
-  const { data: profiles } = await supabase.from("profiles").select("id, discord_id").in("discord_id", discordIds);
+  const discordIds = withRole.map((m) => m.user.id);
+  const { data: profiles } = await supabase
+    .from("profiles")
+    .select("id, discord_id")
+    .in("discord_id", discordIds);
 
   const profileByDiscord = new Map<string, string>(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ((profiles ?? []) as any[]).map(p => [p.discord_id, p.id as string]),
+    ((profiles ?? []) as any[]).map((p) => [p.discord_id, p.id as string]),
   );
 
   const out: CoAuthor[] = [];
@@ -348,7 +372,10 @@ export async function POST(request: NextRequest) {
   if (auteurSession && !body.author_id) body.author_id = auteurSession;
 
   if (!body.title || typeof body.title !== "string") {
-    return NextResponse.json({ error: "Le champ `title` est requis (string)" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Le champ `title` est requis (string)" },
+      { status: 400 },
+    );
   }
 
   const category: Category = body.category ?? "community";
@@ -362,16 +389,24 @@ export async function POST(request: NextRequest) {
   }
 
   if (body.tags !== undefined && !Array.isArray(body.tags)) {
-    return NextResponse.json({ error: "`tags` doit être un tableau de strings" }, { status: 400 });
+    return NextResponse.json(
+      { error: "`tags` doit être un tableau de strings" },
+      { status: 400 },
+    );
   }
 
   try {
     const supabase = createPostgresClient();
     const authorId = await resolveAuthorId(supabase, body);
 
-    const baseSlug = body.slug ? generateSlug(body.slug) : generateSlug(body.title);
+    const baseSlug = body.slug
+      ? generateSlug(body.slug)
+      : generateSlug(body.title);
     if (!baseSlug) {
-      return NextResponse.json({ error: "Slug dérivé vide — précise `slug`" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Slug dérivé vide — précise `slug`" },
+        { status: 400 },
+      );
     }
     const slug = await ensureUniqueSlug(supabase, baseSlug);
 
@@ -380,7 +415,9 @@ export async function POST(request: NextRequest) {
     const now = new Date().toISOString();
 
     // Resolve co_authors : direct list + optional Discord role expansion
-    const coAuthors: CoAuthor[] = Array.isArray(body.co_authors) ? [...body.co_authors] : [];
+    const coAuthors: CoAuthor[] = Array.isArray(body.co_authors)
+      ? [...body.co_authors]
+      : [];
     if (body.discord_role_id) {
       const expanded = await fetchCoAuthorsFromDiscordRole(
         supabase,
@@ -388,7 +425,9 @@ export async function POST(request: NextRequest) {
         body.exclude_author_from_co ? authorId : null,
       );
       for (const c of expanded) {
-        if (!coAuthors.some(existing => existing.discord_id === c.discord_id)) {
+        if (
+          !coAuthors.some((existing) => existing.discord_id === c.discord_id)
+        ) {
           coAuthors.push(c);
         }
       }
@@ -414,10 +453,17 @@ export async function POST(request: NextRequest) {
     };
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data, error } = await (supabase as any).from("articles").insert([row]).select("id, slug").single();
+    const { data, error } = await (supabase as any)
+      .from("articles")
+      .insert([row])
+      .select("id, slug")
+      .single();
 
     if (error) {
-      return NextResponse.json({ error: `Supabase insert: ${error.message}` }, { status: 500 });
+      return NextResponse.json(
+        { error: `Supabase insert: ${error.message}` },
+        { status: 500 },
+      );
     }
 
     return NextResponse.json(

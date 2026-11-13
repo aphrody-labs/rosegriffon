@@ -30,19 +30,32 @@ export async function runAchilleaInterclans(
   fetcher: typeof fetch = fetch,
 ): Promise<ResultatInterclans> {
   const jeton = (env.API_ADMIN_TOKEN ?? "").trim();
-  if (!jeton) throw new Error("API_ADMIN_TOKEN absent : l'entretien des interclans ne peut pas être demandé à l'API.");
-  const reponse = await fetcher(`${baseApiInterne(env)}/interclans/internal/maintenance`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", Accept: "application/json", Authorization: `Bearer ${jeton}` },
-    body: JSON.stringify({ now: maintenant.toISOString() }),
-    signal: AbortSignal.timeout(60_000),
-  });
+  if (!jeton)
+    throw new Error(
+      "API_ADMIN_TOKEN absent : l'entretien des interclans ne peut pas être demandé à l'API.",
+    );
+  const reponse = await fetcher(
+    `${baseApiInterne(env)}/interclans/internal/maintenance`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        Authorization: `Bearer ${jeton}`,
+      },
+      body: JSON.stringify({ now: maintenant.toISOString() }),
+      signal: AbortSignal.timeout(60_000),
+    },
+  );
   const corps = (await reponse.json().catch(() => null)) as {
     defisExpires?: number;
     votesExpires?: number;
     message?: string;
   } | null;
-  if (!reponse.ok) throw new Error(corps?.message ?? `API des interclans : HTTP ${reponse.status}`);
+  if (!reponse.ok)
+    throw new Error(
+      corps?.message ?? `API des interclans : HTTP ${reponse.status}`,
+    );
   const resultat: ResultatInterclans = {
     success: true,
     defisExpires: Number(corps?.defisExpires ?? 0),

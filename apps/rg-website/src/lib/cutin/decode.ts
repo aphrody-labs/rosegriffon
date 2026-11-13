@@ -13,14 +13,27 @@
  * on ne décode jamais les 48 g4pk d'un coup. Client-safe (que du `fetch` + wasm).
  */
 import { g4pkParse, modelToGlb } from "@/lib/cpk-wasm";
-import { buildCutinShots, defaultCutinShots, type CutinStoryboard } from "./camera";
+import {
+  buildCutinShots,
+  defaultCutinShots,
+  type CutinStoryboard,
+} from "./camera";
 import { parseG4cm } from "./g4cm";
-import type { CutinGlbLayer, CutinLayerDescriptor, CutinManifest } from "./types";
+import type {
+  CutinGlbLayer,
+  CutinLayerDescriptor,
+  CutinManifest,
+} from "./types";
 
 /** Lit le magic 4-ASCII d'un sous-fichier à `offset` (en-tête de ressource Level-5). */
 function magicAt(bytes: Uint8Array, offset: number): string {
   if (offset + 4 > bytes.byteLength) return "";
-  return String.fromCharCode(bytes[offset], bytes[offset + 1], bytes[offset + 2], bytes[offset + 3]);
+  return String.fromCharCode(
+    bytes[offset],
+    bytes[offset + 1],
+    bytes[offset + 2],
+    bytes[offset + 3],
+  );
 }
 
 /** `true` si le sous-fichier (nom ou magic) est de la famille `g4md`/`g4mg`. */
@@ -49,8 +62,8 @@ export async function decodeEffectLayer(
   const bytes = new Uint8Array(await res.arrayBuffer());
   const parsed = await g4pkParse(bytes);
 
-  const g4md = parsed.files.find(f => isFamily(bytes, f, "g4md", "G4MD"));
-  const g4mg = parsed.files.find(f => isFamily(bytes, f, "g4mg", "G4MG"));
+  const g4md = parsed.files.find((f) => isFamily(bytes, f, "g4md", "G4MD"));
+  const g4mg = parsed.files.find((f) => isFamily(bytes, f, "g4mg", "G4MG"));
   if (!g4md || !g4mg) {
     // Effet pur non-géométrique (G4MT/G4MA/G4VS…) : pas de mesh à monter.
     return null;
@@ -89,7 +102,10 @@ export function mainModelLayer(manifest: CutinManifest): CutinGlbLayer {
  * `defaultCutinShots()` si absent ou parse échoué (les valeurs g4cm sont opaques —
  * cf. `lib/cutin/g4cm.ts`).
  */
-export async function loadCutinStoryboard(manifest: CutinManifest, signal?: AbortSignal): Promise<CutinStoryboard> {
+export async function loadCutinStoryboard(
+  manifest: CutinManifest,
+  signal?: AbortSignal,
+): Promise<CutinStoryboard> {
   if (!manifest.cameraG4cmUrl) return defaultCutinShots();
   try {
     const res = await fetch(manifest.cameraG4cmUrl, { signal });
@@ -122,6 +138,8 @@ export async function decodeLayersBounded(
       if (decoded) out.push(decoded);
     }
   }
-  await Promise.all(Array.from({ length: Math.min(limit, layers.length) }, worker));
+  await Promise.all(
+    Array.from({ length: Math.min(limit, layers.length) }, worker),
+  );
   return out;
 }

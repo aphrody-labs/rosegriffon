@@ -40,7 +40,17 @@ import {
 
 import { borner, decouper, joindre } from "./texte";
 
-export { borner, cle, decouper, echapper, ilYA, joindre, leJour, puces, rangs } from "./texte";
+export {
+  borner,
+  cle,
+  decouper,
+  echapper,
+  ilYA,
+  joindre,
+  leJour,
+  puces,
+  rangs,
+} from "./texte";
 
 // ─── Embed ──────────────────────────────────────────────────────────────────
 
@@ -82,7 +92,9 @@ export function urlValide(valeur: string | null | undefined): valeur is string {
 
 function resoudreIcone(options: OptionsEmbed): string {
   if (typeof options.icone === "string") {
-    return options.icone in ICONES ? ICONES[options.icone as NomIcone] : options.icone;
+    return options.icone in ICONES
+      ? ICONES[options.icone as NomIcone]
+      : options.icone;
   }
   return ICONE_INTENTION[options.intention ?? "marque"];
 }
@@ -95,7 +107,9 @@ function resoudreIcone(options: OptionsEmbed): string {
  * `pied()` et `piedDeCommande()` (`lib/ui/reponse.ts`).
  */
 export function creerEmbed(options: OptionsEmbed = {}): EmbedBuilder {
-  const embed = new EmbedBuilder().setColor(options.couleur ?? COULEURS[options.intention ?? "marque"]);
+  const embed = new EmbedBuilder().setColor(
+    options.couleur ?? COULEURS[options.intention ?? "marque"],
+  );
 
   const icone = resoudreIcone(options);
   if (options.titre && options.titre.trim().length > 0) {
@@ -143,13 +157,22 @@ export interface OptionsPied {
  * serveur où les deux vivent côte à côte, c'est la seule information qui
  * permette de savoir à qui redemander.
  */
-export function piedTexte(options: OptionsPied = {}): { text: string; iconURL: string } {
+export function piedTexte(options: OptionsPied = {}): {
+  text: string;
+  iconURL: string;
+} {
   const position =
-    typeof options.page === "number" && typeof options.pages === "number" && options.pages > 1 && options.page > 0
+    typeof options.page === "number" &&
+    typeof options.pages === "number" &&
+    options.pages > 1 &&
+    options.page > 0
       ? `page ${options.page}/${options.pages}`
       : null;
   return {
-    text: borner(joindre([options.note ?? null, position, MARQUE.nom, MARQUE.domaine]), LIMITES.pied),
+    text: borner(
+      joindre([options.note ?? null, position, MARQUE.nom, MARQUE.domaine]),
+      LIMITES.pied,
+    ),
     iconURL: options.icone ?? MARQUE.icone,
   };
 }
@@ -159,7 +182,10 @@ export function piedTexte(options: OptionsPied = {}): { text: string; iconURL: s
  * milieu d'une chaîne `rgEmbed().setTitle(…).setFooter(piedTexte(…))` est
  * `piedTexte`, celle-ci sert quand l'embed est déjà dans une variable.
  */
-export function pied(embed: EmbedBuilder, options: OptionsPied = {}): EmbedBuilder {
+export function pied(
+  embed: EmbedBuilder,
+  options: OptionsPied = {},
+): EmbedBuilder {
   embed.setFooter(piedTexte(options));
   return embed;
 }
@@ -192,7 +218,9 @@ export class Fiche {
     this.embed = creerEmbed(options);
     const donnees = this.embed.toJSON();
     const consomme =
-      (donnees.title?.length ?? 0) + (donnees.description?.length ?? 0) + (donnees.author?.name.length ?? 0);
+      (donnees.title?.length ?? 0) +
+      (donnees.description?.length ?? 0) +
+      (donnees.author?.name.length ?? 0);
     // Le pied n'est pas encore posé : on lui réserve sa place au pire cas
     // (note + position + marque + domaine tiennent largement sous 150).
     this.restant = BUDGET_EMBED - consomme - 150;
@@ -200,7 +228,10 @@ export class Fiche {
 
   /** Description posée après coup (quand elle dépend du nombre d'entrées trouvées). */
   description(texte: string): this {
-    const borne = borner(texte, Math.min(LIMITES.description, Math.max(0, this.restant)));
+    const borne = borner(
+      texte,
+      Math.min(LIMITES.description, Math.max(0, this.restant)),
+    );
     if (borne.length > 0) {
       this.embed.setDescription(borne);
       this.restant -= borne.length;

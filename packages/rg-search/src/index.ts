@@ -126,9 +126,10 @@ const SOURCES: readonly Source[] = [
     colonneTitre: "title",
     colonnesRecherche: ["title", "content", "excerpt"],
     domaine: "association",
-    domainePourLigne: detail => (detail === "azalee" ? "wiki" : "association"),
+    domainePourLigne: (detail) =>
+      detail === "azalee" ? "wiki" : "association",
     filtre: "status = 'published'",
-    href: cle => `/news/${cle}`,
+    href: (cle) => `/news/${cle}`,
     table: "public.articles",
     type: "article",
   },
@@ -142,7 +143,7 @@ const SOURCES: readonly Source[] = [
     table: "public.inagle_characters",
     store: "inagle",
     type: "personnage",
-    typePourLigne: detail => (detail === "BASARA" ? "basara" : "personnage"),
+    typePourLigne: (detail) => (detail === "BASARA" ? "basara" : "personnage"),
   },
   {
     colonneCle: "id",
@@ -155,17 +156,21 @@ const SOURCES: readonly Source[] = [
     type: "technique",
   },
   {
-    colonneCle: "CASE WHEN category = 'special_tactics' THEN COALESCE(internal_code, id) ELSE id END",
+    colonneCle:
+      "CASE WHEN category = 'special_tactics' THEN COALESCE(internal_code, id) ELSE id END",
     colonneTitre: "COALESCE(name_fr, name_en, name_ja)",
     colonnesRecherche: ["name_fr", "name_en", "name_ja"],
     colonneDetail: "category",
     domaine: "wiki",
     href: (cle, bases, detail) =>
-      detail === "special_tactics" ? `${bases.wiki}/tactic/${cle}` : `${bases.wiki}/item/${cle}`,
+      detail === "special_tactics"
+        ? `${bases.wiki}/tactic/${cle}`
+        : `${bases.wiki}/item/${cle}`,
     table: "public.inagle_items",
     store: "inagle",
     type: "objet",
-    typePourLigne: detail => (detail === "special_tactics" ? "tactique" : "objet"),
+    typePourLigne: (detail) =>
+      detail === "special_tactics" ? "tactique" : "objet",
   },
   {
     colonneCle: "id",
@@ -207,7 +212,8 @@ const SOURCES: readonly Source[] = [
     colonneTitre: "COALESCE(name_fr, name_en, name_ja)",
     colonnesRecherche: ["name_fr", "name_en", "name_ja"],
     domaine: "wiki" as const,
-    href: (cle: string, bases: BasesRecherche) => `${bases.wiki}/aura/${categorie}/${cle}`,
+    href: (cle: string, bases: BasesRecherche) =>
+      `${bases.wiki}/aura/${categorie}/${cle}`,
     table: `public.${table}`,
     store: "inagle" as const,
     type,
@@ -257,10 +263,12 @@ export interface LigneBrute {
 export function construireRequete(store: "rg" | "inagle" = "rg"): string {
   const branches = SOURCES.flatMap((source, index) => {
     if ((source.store ?? "rg") !== store) return [];
-    const detail = source.colonneDetail ? `${source.colonneDetail}::text` : "NULL::text";
+    const detail = source.colonneDetail
+      ? `${source.colonneDetail}::text`
+      : "NULL::text";
     const filtre = source.filtre ? ` AND ${source.filtre}` : "";
     const recherche = (source.colonnesRecherche ?? [source.colonneTitre])
-      .map(colonne => `${colonne} ILIKE $1`)
+      .map((colonne) => `${colonne} ILIKE $1`)
       .join(" OR ");
     return `(SELECT ${source.colonneCle}::text AS id, ${source.colonneTitre}::text AS titre, ${detail} AS detail, ${index}::int AS source
 			FROM ${source.table}
@@ -274,7 +282,7 @@ export function construireRequete(store: "rg" | "inagle" = "rg"): string {
 
 /** Motif `ILIKE` échappé : `%` et `_` saisis par l'utilisateur sont littéraux. */
 export function motifIlike(requete: string): string {
-  return `%${requete.replace(/[\\%_]/g, c => `\\${c}`)}%`;
+  return `%${requete.replace(/[\\%_]/g, (c) => `\\${c}`)}%`;
 }
 
 /** Met en forme une ligne brute. Rend `null` si la source est inconnue. */
@@ -294,14 +302,19 @@ export function formaterLigne(
     id: `${type}:${ligne.id}`,
     titre: ligne.titre,
     type,
-    ...(ligne.detail && ligne.detail !== "special_tactics" && source.type !== "article"
+    ...(ligne.detail &&
+    ligne.detail !== "special_tactics" &&
+    source.type !== "article"
       ? { detail: ligne.detail }
       : {}),
   };
 }
 
 /** Exécuteur SQL injecté : c'est l'appelant qui fournit sa connexion. */
-export type ExecuteurSql = (sql: string, params: unknown[]) => Promise<LigneBrute[]>;
+export type ExecuteurSql = (
+  sql: string,
+  params: unknown[],
+) => Promise<LigneBrute[]>;
 export interface ExecuteursSql {
   rg: ExecuteurSql;
   inagle: ExecuteurSql;
@@ -335,12 +348,20 @@ export async function rechercherPartout(
 
   const lignes = (
     await Promise.all([
-      executer.rg(construireRequete("rg"), [motifIlike(terme), limiteParSource]),
-      executer.inagle(construireRequete("inagle"), [motifIlike(terme), limiteParSource]),
+      executer.rg(construireRequete("rg"), [
+        motifIlike(terme),
+        limiteParSource,
+      ]),
+      executer.inagle(construireRequete("inagle"), [
+        motifIlike(terme),
+        limiteParSource,
+      ]),
     ])
   ).flat();
 
-  const resultats = lignes.map(ligne => formaterLigne(ligne, bases)).filter((r): r is ResultatRecherche => r !== null);
+  const resultats = lignes
+    .map((ligne) => formaterLigne(ligne, bases))
+    .filter((r): r is ResultatRecherche => r !== null);
 
   // Tri d'affichage : par domaine (ordre du menu), puis titre le plus court —
   // une correspondance courte est presque toujours la plus pertinente
@@ -358,8 +379,8 @@ export async function rechercherPartout(
 export function grouperParDomaine(
   resultats: ResultatRecherche[],
 ): { domaine: DomaineRecherche; resultats: ResultatRecherche[] }[] {
-  return DOMAINES_RECHERCHE.map(domaine => ({
+  return DOMAINES_RECHERCHE.map((domaine) => ({
     domaine,
-    resultats: resultats.filter(r => r.domaine === domaine),
-  })).filter(groupe => groupe.resultats.length > 0);
+    resultats: resultats.filter((r) => r.domaine === domaine),
+  })).filter((groupe) => groupe.resultats.length > 0);
 }

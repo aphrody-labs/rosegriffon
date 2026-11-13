@@ -21,22 +21,14 @@ maintainer = "nie — upstream G4 decoding by Bobi (github.com/The-RealBobi/G4_B
 type = "add-on"
 website = "https://github.com/aphrody-code/nie"
 
-tags = [
-	"Import-Export",
-	"Animation",
-	"Rigging",
-]
+tags = ["Import-Export", "Animation", "Rigging"]
 
 # Extensions are available from 4.2; the code also supports the legacy addon format
 # (the old bl_info is retained in parallel; see `__init__.py`).
 blender_version_min = "4.2.0"
 
-license = [
-	"SPDX:GPL-3.0-or-later",
-]
-copyright = [
-	"2026 Bobi",
-]
+license = ["SPDX:GPL-3.0-or-later"]
+copyright = ["2026 Bobi"]
 
 # No third-party wheels: dependencies are Python's standard library plus bpy/mathutils supplied by
 # Blender. Wiki queries run through the Rust `nie` CLI; this addon has no database or HTTP client.
@@ -56,12 +48,12 @@ network = "No network access; wiki queries use the local Rust CLI"
 # Declaring this key replaces Blender's default instead of extending it, so Git entries must be
 # listed explicitly or they will be included in the ZIP.
 paths_exclude_pattern = [
-	"__pycache__/",
-	"tests/",
-	"img/",
-	"*.pyc",
-	".git",
-	".gitattributes",
-	".gitignore",
-	"NIE_VENDORING_NOTE.md",
+  "__pycache__/",
+  "tests/",
+  "img/",
+  "*.pyc",
+  ".git",
+  ".gitattributes",
+  ".gitignore",
+  "NIE_VENDORING_NOTE.md",
 ]

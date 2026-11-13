@@ -66,9 +66,11 @@ export function TableauMembres({ page }: { page: PageMembres }) {
           <NativeSelect
             id="tri"
             value={page.tri}
-            onChange={evenement => naviguer({ page: "", tri: evenement.target.value })}
+            onChange={(evenement) =>
+              naviguer({ page: "", tri: evenement.target.value })
+            }
           >
-            {TRIS_MEMBRES.map(tri => (
+            {TRIS_MEMBRES.map((tri) => (
               <NativeSelectOption key={tri} value={tri}>
                 {LIBELLES_TRI[tri]}
               </NativeSelectOption>
@@ -76,8 +78,8 @@ export function TableauMembres({ page }: { page: PageMembres }) {
           </NativeSelect>
         </div>
         <p className="text-sm text-muted-foreground">
-          {nombre(page.total)} membre{page.total > 1 ? "s" : ""} avec de l&apos;expérience · page {page.page} sur{" "}
-          {page.pages}
+          {nombre(page.total)} membre{page.total > 1 ? "s" : ""} avec de
+          l&apos;expérience · page {page.page} sur {page.pages}
         </p>
       </div>
 
@@ -95,28 +97,48 @@ export function TableauMembres({ page }: { page: PageMembres }) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {page.lignes.map(ligne => (
+            {page.lignes.map((ligne) => (
               <TableRow key={ligne.discordId}>
-                <TableCell className="text-right font-mono text-xs text-muted-foreground">{ligne.rang}</TableCell>
+                <TableCell className="text-right font-mono text-xs text-muted-foreground">
+                  {ligne.rang}
+                </TableCell>
                 <TableCell>
                   <div className="flex items-center gap-2">
                     {ligne.avatarUrl ? (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img src={ligne.avatarUrl} alt="" className="size-6 rounded-full" loading="lazy" />
+                      <img
+                        src={ligne.avatarUrl}
+                        alt=""
+                        className="size-6 rounded-full"
+                        loading="lazy"
+                      />
                     ) : (
-                      <span className="size-6 rounded-full bg-muted" aria-hidden />
+                      <span
+                        className="size-6 rounded-full bg-muted"
+                        aria-hidden
+                      />
                     )}
-                    <span className="min-w-0 truncate font-medium">{ligne.pseudo}</span>
+                    <span className="min-w-0 truncate font-medium">
+                      {ligne.pseudo}
+                    </span>
                     {ligne.parti && (
                       <Badge variant="outline" className="shrink-0 text-xs">
                         parti
                       </Badge>
                     )}
                   </div>
-                  {ligne.titre && <p className="mt-0.5 text-xs text-muted-foreground">{ligne.titre}</p>}
+                  {ligne.titre && (
+                    <p className="mt-0.5 text-xs text-muted-foreground">
+                      {ligne.titre}
+                    </p>
+                  )}
                 </TableCell>
-                <TableCell className="text-right font-medium">{ligne.niveau}</TableCell>
-                <TableCell className="text-right font-mono text-sm">{nombre(ligne.xp)}</TableCell>
+                <TableCell className="text-right font-medium">
+                  {ligne.niveau}
+                </TableCell>
+                <TableCell className="text-right font-mono text-sm">
+                  {nombre(ligne.xp)}
+                </TableCell>
                 <TableCell className="text-right font-mono text-sm text-muted-foreground">
                   {ligne.messages === 0 ? "—" : nombre(ligne.messages)}
                 </TableCell>
@@ -148,7 +170,10 @@ export function TableauMembres({ page }: { page: PageMembres }) {
           <ChevronLeft className="size-4" aria-hidden />
           Précédent
         </Button>
-        <Link href="/admin/bot" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
+        <Link
+          href="/admin/bot"
+          className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+        >
           Retour à la vue d&apos;ensemble
         </Link>
         <Button
@@ -172,12 +197,15 @@ export function TableauMembres({ page }: { page: PageMembres }) {
         <Info className="mt-0.5 size-4 shrink-0" aria-hidden />
         <div className="space-y-1">
           <p>
-            <strong>{LIBELLES_PROVENANCE.api}</strong> et <strong>{LIBELLES_PROVENANCE.classement}</strong> : valeurs
-            exactes, relevées chez Noctaly.
+            <strong>{LIBELLES_PROVENANCE.api}</strong> et{" "}
+            <strong>{LIBELLES_PROVENANCE.classement}</strong> : valeurs exactes,
+            relevées chez Noctaly.
           </p>
           <p>
-            <strong>{LIBELLES_PROVENANCE.historique}</strong> : XP reconstituée depuis les annonces de montée de niveau
-            retrouvées dans les salons — c&apos;est le seuil du palier, donc un minimum, pas la valeur réelle.
+            <strong>{LIBELLES_PROVENANCE.historique}</strong> : XP reconstituée
+            depuis les annonces de montée de niveau retrouvées dans les salons —
+            c&apos;est le seuil du palier, donc un minimum, pas la valeur
+            réelle.
           </p>
         </div>
       </div>
@@ -194,7 +222,10 @@ const STYLES_PROVENANCE: Readonly<Record<ProvenanceXp, string>> = {
 
 function PastilleProvenance({ provenance }: { provenance: ProvenanceXp }) {
   return (
-    <Badge variant="outline" className={`text-xs ${STYLES_PROVENANCE[provenance]}`}>
+    <Badge
+      variant="outline"
+      className={`text-xs ${STYLES_PROVENANCE[provenance]}`}
+    >
       {LIBELLES_PROVENANCE[provenance]}
     </Badge>
   );

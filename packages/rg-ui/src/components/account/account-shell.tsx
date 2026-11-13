@@ -10,7 +10,10 @@ import { Button } from "../button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../tabs";
 import type { AccountTabId } from "./types";
 
-const TAB_META: Record<AccountTabId, { label: string; icon: typeof UserCircle }> = {
+const TAB_META: Record<
+  AccountTabId,
+  { label: string; icon: typeof UserCircle }
+> = {
   address: { icon: Truck, label: "Adresse" },
   connections: { icon: Link2, label: "Connexions" },
   profile: { icon: UserCircle, label: "Profil" },
@@ -34,7 +37,13 @@ interface AccountShellProps {
  * précis reste partageable et le retour navigateur fonctionne. `router.replace`
  * évite d'empiler une entrée d'historique par clic d'onglet.
  */
-export function AccountShell({ email, backHref, backLabel = "Retour", initialTab, tabs }: AccountShellProps) {
+export function AccountShell({
+  email,
+  backHref,
+  backLabel = "Retour",
+  initialTab,
+  tabs,
+}: AccountShellProps) {
   const router = useRouter();
   const pathname = usePathname();
   const [active, setActive] = useState<AccountTabId>(initialTab);
@@ -61,7 +70,11 @@ export function AccountShell({ email, backHref, backLabel = "Retour", initialTab
           <h1 className="truncate text-xl leading-tight font-bold tracking-tight text-foreground sm:text-3xl">
             Paramètres du compte
           </h1>
-          {email && <p className="truncate text-xs text-muted-foreground sm:text-sm">{email}</p>}
+          {email && (
+            <p className="truncate text-xs text-muted-foreground sm:text-sm">
+              {email}
+            </p>
+          )}
         </div>
       </header>
 
@@ -88,7 +101,11 @@ export function AccountShell({ email, backHref, backLabel = "Retour", initialTab
         </TabsList>
 
         {tabs.map(({ id, content }) => (
-          <TabsContent key={id} value={id} className="mt-4 px-4 focus-visible:outline-hidden sm:mt-6 sm:px-0">
+          <TabsContent
+            key={id}
+            value={id}
+            className="mt-4 px-4 focus-visible:outline-hidden sm:mt-6 sm:px-0"
+          >
             {content}
           </TabsContent>
         ))}

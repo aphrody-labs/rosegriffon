@@ -44,7 +44,10 @@ export async function GET(requete: Request): Promise<Response> {
   if (!code || !state || !flux) return retour(url, "/vroid", "flux-perdu");
 
   // Comparaison en temps constant pour ne rien apprendre par le temps de réponse.
-  if (state.length !== flux.state.length || !timingSafeEgal(state, flux.state)) {
+  if (
+    state.length !== flux.state.length ||
+    !timingSafeEgal(state, flux.state)
+  ) {
     return retour(url, flux.retourVers, "state-invalide");
   }
 
@@ -63,6 +66,7 @@ export async function GET(requete: Request): Promise<Response> {
 /** Compare deux chaînes de même longueur sans court-circuit. */
 function timingSafeEgal(a: string, b: string): boolean {
   let difference = 0;
-  for (let i = 0; i < a.length; i++) difference |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  for (let i = 0; i < a.length; i++)
+    difference |= a.charCodeAt(i) ^ b.charCodeAt(i);
   return difference === 0;
 }

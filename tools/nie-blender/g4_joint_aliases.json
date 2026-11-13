@@ -159,7 +159,14 @@
       "l_hand_roll_02",
       "l_elbow_sharp"
     ],
-    "l_w_1_0": ["leftwrist", "l_wrist", "wrist_l", "wrist_l_end", "mn_l_wrist", "l_hand"],
+    "l_w_1_0": [
+      "leftwrist",
+      "l_wrist",
+      "wrist_l",
+      "wrist_l_end",
+      "mn_l_wrist",
+      "l_hand"
+    ],
     "l_wph_1_0": [
       "lefthand",
       "hand_l",
@@ -235,7 +242,14 @@
       "r_hand_roll_02",
       "r_elbow_sharp"
     ],
-    "r_w_1_0": ["rightwrist", "r_wrist", "wrist_r", "wrist_r_end", "mn_r_wrist", "r_hand"],
+    "r_w_1_0": [
+      "rightwrist",
+      "r_wrist",
+      "wrist_r",
+      "wrist_r_end",
+      "mn_r_wrist",
+      "r_hand"
+    ],
     "r_wph_1_0": [
       "righthand",
       "hand_r",
@@ -1025,8 +1039,22 @@
       "right_pinky_03",
       "r_pinky_c"
     ],
-    "c_hir1_1_0": ["hair", "hair_root", "hair_000", "hairparts_root", "hairfront_root", "c_hair", "c_hir1_1_0"],
-    "c_hir2_1_0": ["hair_001", "hair_a", "hairparts_1", "bangs_1", "c_hir2_1_0"],
+    "c_hir1_1_0": [
+      "hair",
+      "hair_root",
+      "hair_000",
+      "hairparts_root",
+      "hairfront_root",
+      "c_hair",
+      "c_hir1_1_0"
+    ],
+    "c_hir2_1_0": [
+      "hair_001",
+      "hair_a",
+      "hairparts_1",
+      "bangs_1",
+      "c_hir2_1_0"
+    ],
     "c_hir2_1_1": ["hair_002", "bangs_2", "hair_a_z", "z_hair_a", "c_hir2_1_1"],
     "c_hir2_1_2": ["hair_003", "bangs_3", "c_hir2_1_2"],
     "c_hir3_1_0": ["hair_004", "hair_b", "c_hir3_1_0"],
@@ -1064,12 +1092,42 @@
       "l_twintail_02",
       "lhair2"
     ],
-    "l_hir2_1_0": ["hair_b_l", "hair2_l", "lhaira3", "l_hir2_1_0", "l_hair_a03", "l_twintail_03", "lhairb"],
-    "l_hir2_1_1": ["z_hair_b_l", "hair_b_l_z", "l_hir2_1_1", "l_hair_b01", "l_twintail_04", "lhairb1", "z_hair_b_1_l"],
+    "l_hir2_1_0": [
+      "hair_b_l",
+      "hair2_l",
+      "lhaira3",
+      "l_hir2_1_0",
+      "l_hair_a03",
+      "l_twintail_03",
+      "lhairb"
+    ],
+    "l_hir2_1_1": [
+      "z_hair_b_l",
+      "hair_b_l_z",
+      "l_hir2_1_1",
+      "l_hair_b01",
+      "l_twintail_04",
+      "lhairb1",
+      "z_hair_b_1_l"
+    ],
     "l_hir2_1_2": ["l_hir2_1_2", "l_hair_b02", "lhairb2"],
-    "l_hir3_1_0": ["hair_c_l", "hair3_l", "l_hir3_1_0", "l_hair_b03", "lhairb3", "lhairc"],
+    "l_hir3_1_0": [
+      "hair_c_l",
+      "hair3_l",
+      "l_hir3_1_0",
+      "l_hair_b03",
+      "lhairb3",
+      "lhairc"
+    ],
     "l_hir3_1_1": ["z_hair_c_l", "hair_c_l_z", "l_ribbon_a01", "l_hir3_1_1"],
-    "l_hir4_1_0": ["hair_d_l", "hair4_l", "l_ribbon_b01", "l_ribbon_b02", "l_hir4_1_0", "lhaird"],
+    "l_hir4_1_0": [
+      "hair_d_l",
+      "hair4_l",
+      "l_ribbon_b01",
+      "l_ribbon_b02",
+      "l_hir4_1_0",
+      "lhaird"
+    ],
     "r_hir1_1_0": [
       "r_hair",
       "right_hair",
@@ -1125,9 +1183,23 @@
       "z_hair_b_1_r"
     ],
     "r_hir2_1_2": ["r_hir2_1_2", "r_hair_b02", "rhairb2"],
-    "r_hir3_1_0": ["hair_c_r", "hair3_r", "r_hir3_1_0", "r_hair_b03", "rhairb3", "rhairc"],
+    "r_hir3_1_0": [
+      "hair_c_r",
+      "hair3_r",
+      "r_hir3_1_0",
+      "r_hair_b03",
+      "rhairb3",
+      "rhairc"
+    ],
     "r_hir3_1_1": ["z_hair_c_r", "hair_c_r_z", "r_ribbon_a01", "r_hir3_1_1"],
-    "r_hir4_1_0": ["hair_d_r", "hair4_r", "r_ribbon_b01", "r_ribbon_b02", "r_hir4_1_0", "rhaird"],
+    "r_hir4_1_0": [
+      "hair_d_r",
+      "hair4_r",
+      "r_ribbon_b01",
+      "r_ribbon_b02",
+      "r_hir4_1_0",
+      "rhaird"
+    ],
     "c_da_mnt_1_0": [],
     "c_da_mnt_1_1": [],
     "c_mnt_1_0": ["mantle", "cape", "mantle_00", "c_mnt_1_0"],
@@ -1136,13 +1208,43 @@
     "l_mnt_1_1": ["dj_mantle_l_01", "l_mnt_1_1"],
     "r_mnt_1_0": ["r_mantle", "right_mantle", "dj_mantle_r_00", "r_mnt_1_0"],
     "r_mnt_1_1": ["dj_mantle_r_01", "r_mnt_1_1"],
-    "l_slv2_1_0": ["l_sleeve", "left_sleeve", "l_jacket_sleeve_a", "ljacketsleeveajnt", "l_slv2_1_0"],
-    "l_slv1_1_0": ["l_sleeve_01", "l_jacket_sleeve_b", "ljacketsleevebjnt", "l_slv1_1_0"],
-    "r_slv2_1_0": ["r_sleeve", "right_sleeve", "r_jacket_sleeve_a", "rjacketsleeveajnt", "r_slv2_1_0"],
-    "r_slv1_1_0": ["r_sleeve_01", "r_jacket_sleeve_b", "rjacketsleevebjnt", "r_slv1_1_0"],
+    "l_slv2_1_0": [
+      "l_sleeve",
+      "left_sleeve",
+      "l_jacket_sleeve_a",
+      "ljacketsleeveajnt",
+      "l_slv2_1_0"
+    ],
+    "l_slv1_1_0": [
+      "l_sleeve_01",
+      "l_jacket_sleeve_b",
+      "ljacketsleevebjnt",
+      "l_slv1_1_0"
+    ],
+    "r_slv2_1_0": [
+      "r_sleeve",
+      "right_sleeve",
+      "r_jacket_sleeve_a",
+      "rjacketsleeveajnt",
+      "r_slv2_1_0"
+    ],
+    "r_slv1_1_0": [
+      "r_sleeve_01",
+      "r_jacket_sleeve_b",
+      "rjacketsleevebjnt",
+      "r_slv1_1_0"
+    ],
     "l_wng1_1_0": ["l_wing", "left_wing", "wing_l", "l_wng1_1_0"],
     "r_wng1_1_0": ["r_wing", "right_wing", "wing_r", "r_wng1_1_0"],
-    "eye_10": ["eye", "eyes", "eyeball", "l_eye", "r_eye", "left_eye", "right_eye"],
+    "eye_10": [
+      "eye",
+      "eyes",
+      "eyeball",
+      "l_eye",
+      "r_eye",
+      "left_eye",
+      "right_eye"
+    ],
     "mouth_10": ["mouth", "jaw", "lowerjaw", "jaw_base"],
     "c_sht1_1_0": [],
     "c_ball_1_0": ["ball", "ball_root", "c_ball_1_0"]

@@ -1,6 +1,7 @@
 /** Canonical work taxonomy shared by games, animation, films, manga and specials. */
 
-export type WorkKind = "game" | "anime" | "film" | "manga" | "novel" | "special";
+export type WorkKind =
+  "game" | "anime" | "film" | "manga" | "novel" | "special";
 
 /** Platforms and hardware families, kept separate from an individual release. */
 export type GamePlatform =
@@ -37,9 +38,11 @@ export type GameFamily =
   | "inazuma_eleven_cross"
   | "other";
 
-export type CanonicalMediaKind = "episode" | "film" | "game_video" | "manga_volume" | "special";
+export type CanonicalMediaKind =
+  "episode" | "film" | "game_video" | "manga_volume" | "special";
 
-export type RustRuntimeRole = "emulator" | "game_runtime" | "format_reader" | "media_player" | "catalog";
+export type RustRuntimeRole =
+  "emulator" | "game_runtime" | "format_reader" | "media_player" | "catalog";
 
 export interface RustRuntimeLink {
   /** Stable identifier for the Rust capability closest to this content. */
@@ -66,7 +69,13 @@ export interface WorkRef {
 }
 
 export interface MediaSource {
-  platform: "vfs" | "youtube" | "dailymotion" | "official_page" | "manga_publisher" | "unknown";
+  platform:
+    | "vfs"
+    | "youtube"
+    | "dailymotion"
+    | "official_page"
+    | "manga_publisher"
+    | "unknown";
   /** Stable source identifier, not a display URL. */
   id: string;
   url: string;
@@ -101,7 +110,11 @@ export function workId(value: string): string {
     .replace(/^_|_$/g, "");
 }
 
-export function mediaId(kind: CanonicalMediaKind, work: string, ordinal?: number | null): string {
+export function mediaId(
+  kind: CanonicalMediaKind,
+  work: string,
+  ordinal?: number | null,
+): string {
   const suffix = ordinal == null ? "" : `_${ordinal}`;
   return `${kind}:${workId(work)}${suffix}`;
 }

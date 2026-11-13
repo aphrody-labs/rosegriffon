@@ -60,9 +60,17 @@ export async function reconcileAll(): Promise<ReconcileSummary> {
 
     // 1. email match
     if (email) {
-      const { data: profile } = await supabase.from("profiles").select("id").eq("email", email).maybeSingle();
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("email", email)
+        .maybeSingle();
       if (profile) {
-        await reconcileLegacyMember(patreon_member_id, (profile as { id: string }).id, "email");
+        await reconcileLegacyMember(
+          patreon_member_id,
+          (profile as { id: string }).id,
+          "email",
+        );
         byEmail += 1;
         continue;
       }
@@ -76,7 +84,11 @@ export async function reconcileAll(): Promise<ReconcileSummary> {
         .eq("discord_id", discord_user_id)
         .maybeSingle();
       if (profile) {
-        await reconcileLegacyMember(patreon_member_id, (profile as { id: string }).id, "discord_id");
+        await reconcileLegacyMember(
+          patreon_member_id,
+          (profile as { id: string }).id,
+          "discord_id",
+        );
         byDiscord += 1;
         continue;
       }
@@ -99,7 +111,10 @@ export async function reconcileAll(): Promise<ReconcileSummary> {
   };
 }
 
-export async function markReactivated(userId: string, subscriptionRef?: string): Promise<number> {
+export async function markReactivated(
+  userId: string,
+  subscriptionRef?: string,
+): Promise<number> {
   const supabase = createPostgresClient();
   const { data, error } = await supabase
     .from("patreon_legacy_members")

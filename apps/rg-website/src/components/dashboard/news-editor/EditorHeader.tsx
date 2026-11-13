@@ -78,9 +78,13 @@ export function EditorHeader({
   onPublish,
   onShareOnDiscordChange,
 }: EditorHeaderProps) {
-  const currentStatus = STATUS_OPTIONS.find(s => s.value === status);
+  const currentStatus = STATUS_OPTIONS.find((s) => s.value === status);
   const isPublished = status === "published" || initialStatus === "published";
-  const previewUrl = slug ? (isPublished ? `/news/${slug}` : `/news/${slug}?preview=true`) : null;
+  const previewUrl = slug
+    ? isPublished
+      ? `/news/${slug}`
+      : `/news/${slug}?preview=true`
+    : null;
 
   // Dernier enregistrement (serveur > localStorage)
   const lastSaveTime = lastServerSave || lastAutoSave;
@@ -107,7 +111,12 @@ export function EditorHeader({
 
           <div className="hidden sm:flex items-center gap-2">
             <div className={cn("size-2 rounded-full", currentStatus?.color)} />
-            <span className={cn("text-xs font-bold uppercase tracking-wider", currentStatus?.textColor)}>
+            <span
+              className={cn(
+                "text-xs font-bold uppercase tracking-wider",
+                currentStatus?.textColor,
+              )}
+            >
               {currentStatus?.label}
             </span>
           </div>
@@ -180,7 +189,9 @@ export function EditorHeader({
             onClick={onTogglePreview}
             className={cn(
               "rounded-full h-10 sm:h-12 px-3 sm:px-4 text-xs font-medium gap-1.5",
-              showPreview ? "bg-primary/10 text-primary" : "text-on-surface-variant",
+              showPreview
+                ? "bg-primary/10 text-primary"
+                : "text-on-surface-variant",
             )}
           >
             <Eye className="size-4" />
@@ -208,9 +219,15 @@ export function EditorHeader({
             onClick={() => onShareOnDiscordChange(!shareOnDiscord)}
             className={cn(
               "rounded-full size-10 sm:size-12",
-              shareOnDiscord ? "bg-discord/10 text-discord" : "text-on-surface-variant/40",
+              shareOnDiscord
+                ? "bg-discord/10 text-discord"
+                : "text-on-surface-variant/40",
             )}
-            title={shareOnDiscord ? "Partage Discord activé" : "Partage Discord désactivé"}
+            title={
+              shareOnDiscord
+                ? "Partage Discord activé"
+                : "Partage Discord désactivé"
+            }
           >
             <MessageSquare className="size-4" />
           </Button>

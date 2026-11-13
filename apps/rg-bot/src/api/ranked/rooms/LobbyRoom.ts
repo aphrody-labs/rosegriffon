@@ -75,7 +75,11 @@ export class LobbyRoom extends Room<{ state: LobbyState }> {
    * l'API partagent désormais le processus `rg-core`, la livraison se fait donc en mémoire.
    * Best-effort : un joueur absent de la lobby ne reçoit rien. Renvoie le nombre de joueurs notifiés.
    */
-  static livrerEvenement(userIds: readonly string[], evenement: string, charge: unknown): number {
+  static livrerEvenement(
+    userIds: readonly string[],
+    evenement: string,
+    charge: unknown,
+  ): number {
     const room = LobbyRoom.current;
     if (!room) return 0;
     let livres = 0;
@@ -100,14 +104,28 @@ export class LobbyRoom extends Room<{ state: LobbyState }> {
       }
     }, 5000);
 
-    this.onMessage("invite", (client, payload: { targetUserId?: string; mode?: number; ranked?: boolean }) => {
-      this.handleInvite(client, payload);
-    });
+    this.onMessage(
+      "invite",
+      (
+        client,
+        payload: { targetUserId?: string; mode?: number; ranked?: boolean },
+      ) => {
+        this.handleInvite(client, payload);
+      },
+    );
 
     // Réponse à une invitation (accept/refus dans un seul message).
     this.onMessage(
       "invite-response",
-      (client, payload: { accept?: boolean; fromUserId?: string; mode?: number; ranked?: boolean }) => {
+      (
+        client,
+        payload: {
+          accept?: boolean;
+          fromUserId?: string;
+          mode?: number;
+          ranked?: boolean;
+        },
+      ) => {
         if (payload?.accept) {
           void this.handleAccept(client, {
             fromUserId: payload?.fromUserId,
@@ -121,9 +139,15 @@ export class LobbyRoom extends Room<{ state: LobbyState }> {
     );
 
     // Acceptation directe (alias pratique).
-    this.onMessage("accept", (client, payload: { fromUserId?: string; mode?: number; ranked?: boolean }) => {
-      void this.handleAccept(client, payload);
-    });
+    this.onMessage(
+      "accept",
+      (
+        client,
+        payload: { fromUserId?: string; mode?: number; ranked?: boolean },
+      ) => {
+        void this.handleAccept(client, payload);
+      },
+    );
 
     // Refus direct.
     this.onMessage("decline", (client, payload: { fromUserId?: string }) => {
@@ -131,7 +155,11 @@ export class LobbyRoom extends Room<{ state: LobbyState }> {
     });
   }
 
-  override async onAuth(_client: Client, options: any, request: any): Promise<SessionUser> {
+  override async onAuth(
+    _client: Client,
+    options: any,
+    request: any,
+  ): Promise<SessionUser> {
     const auth = await authFromColyseus(options, request);
     if (auth) return auth;
     throw new Error("Non authentifié");
@@ -142,7 +170,12 @@ export class LobbyRoom extends Room<{ state: LobbyState }> {
     const userRow = await getUserRow(auth.id);
     const season = await getActiveSeason();
     const baseRating = season?.config?.baseRating ?? 0;
-    const elo = await getOrCreateElo(auth.id, mode, season?.id ?? null, baseRating);
+    const elo = await getOrCreateElo(
+      auth.id,
+      mode,
+      season?.id ?? null,
+      baseRating,
+    );
 
     const displayName = userRow?.display_name ?? auth.username ?? auth.id;
     const avatar = userRow?.avatar ?? auth.avatar ?? "";
@@ -200,7 +233,10 @@ export class LobbyRoom extends Room<{ state: LobbyState }> {
     return `${fromUserId}->${toUserId}`;
   }
 
-  private handleInvite(client: Client, payload: { targetUserId?: string; mode?: number; ranked?: boolean }) {
+  private handleInvite(
+    client: Client,
+    payload: { targetUserId?: string; mode?: number; ranked?: boolean },
+  ) {
     const from = this.present.get(client.sessionId);
     if (!from) return;
     const targetUserId = String(payload?.targetUserId ?? "");
@@ -239,7 +275,10 @@ export class LobbyRoom extends Room<{ state: LobbyState }> {
     });
   }
 
-  private async handleAccept(client: Client, payload: { fromUserId?: string; mode?: number; ranked?: boolean }) {
+  private async handleAccept(
+    client: Client,
+    payload: { fromUserId?: string; mode?: number; ranked?: boolean },
+  ) {
     const invitee = this.present.get(client.sessionId);
     if (!invitee) return;
     const fromUserId = String(payload?.fromUserId ?? "");
@@ -293,7 +332,10 @@ export class LobbyRoom extends Room<{ state: LobbyState }> {
       inviter.client.send("matched", { reservation: reservationA });
       invitee.client.send("matched", { reservation: reservationB });
     } catch (err) {
-      console.error("[ranked] LobbyRoom.handleAccept createRankedMatch failed", err);
+      console.error(
+        "[ranked] LobbyRoom.handleAccept createRankedMatch failed",
+        err,
+      );
       client.send("invite-error", { reason: "internal" });
       inviter.client.send("invite-error", { reason: "internal" });
     }

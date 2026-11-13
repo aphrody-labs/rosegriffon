@@ -31,12 +31,18 @@ export async function POST(requete: NextRequest) {
   try {
     corps = (await requete.json()) as { tache?: unknown };
   } catch {
-    return NextResponse.json({ error: "Corps JSON illisible" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Corps JSON illisible" },
+      { status: 400 },
+    );
   }
 
   const nom = typeof corps.tache === "string" ? corps.tache.trim() : "";
   if (nom === "") {
-    return NextResponse.json({ error: "Nom de tâche manquant" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Nom de tâche manquant" },
+      { status: 400 },
+    );
   }
 
   const resultat = await declencherTache(nom, garde.data.role);

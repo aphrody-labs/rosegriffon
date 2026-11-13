@@ -5,14 +5,21 @@ import Image from "next/image";
 import { NextEventBanner } from "@/components/home/NextEventBanner";
 import FusionBlock from "@/components/shared/FusionBlock";
 import { RealtimeSettingsListener } from "@/components/shared/RealtimeSettingsListener";
-import { OrganizationSchema, WebsiteSchema } from "@/components/shared/StructuredData";
+import {
+  OrganizationSchema,
+  WebsiteSchema,
+} from "@/components/shared/StructuredData";
 import { getCalendarEvents } from "@/lib/api/events";
 import { getPublicSetting } from "@/lib/api/settings";
 import { SERVEURS_DISCORD } from "@/lib/discord";
 import { SITE_URL } from "@/lib/site-url";
 
-const ProjectsSection = dynamicImport(() => import("@/components/shared/ProjectsSection"));
-const DiscordSection = dynamicImport(() => import("@/components/shared/DiscordSection"));
+const ProjectsSection = dynamicImport(
+  () => import("@/components/shared/ProjectsSection"),
+);
+const DiscordSection = dynamicImport(
+  () => import("@/components/shared/DiscordSection"),
+);
 
 // ISR : HTML mis en cache, régénéré au plus toutes les 5 min en arrière-plan (et à la publication).
 // `force-static` est requis : le layout racine lit cookies()/headers() pour la langue, ce qui rendait
@@ -96,16 +103,19 @@ async function chargerDonneesAccueil() {
   const maintenant = Date.now();
   const prochain =
     events
-      .map(evenement => ({
+      .map((evenement) => ({
         ...evenement,
         debut: evenement.start?.dateTime || evenement.start?.date,
         fin: evenement.end?.dateTime || evenement.end?.date,
       }))
-      .filter(evenement => {
+      .filter((evenement) => {
         const cible = evenement.fin ?? evenement.debut;
         return cible ? new Date(cible).getTime() >= maintenant : false;
       })
-      .toSorted((a, b) => new Date(a.debut || 0).getTime() - new Date(b.debut || 0).getTime())[0] ?? null;
+      .toSorted(
+        (a, b) =>
+          new Date(a.debut || 0).getTime() - new Date(b.debut || 0).getTime(),
+      )[0] ?? null;
 
   return {
     prochain,
@@ -134,12 +144,21 @@ export default async function Home() {
           )}
 
           {/* Présentation de l'association + recherche fédérée. */}
-          <section className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8" aria-labelledby="about-heading">
+          <section
+            className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8"
+            aria-labelledby="about-heading"
+          >
             <FusionBlock isImageLeft image={data.introImage} isPriority>
               <div className="flex h-full flex-col justify-center space-y-4 py-1">
                 <div className="flex items-center gap-2">
                   <div className="relative size-8 shrink-0">
-                    <Image src="/RG_Logo_V2.5.webp" alt="Rose Griffon" fill sizes="32px" className="object-contain" />
+                    <Image
+                      src="/RG_Logo_V2.5.webp"
+                      alt="Rose Griffon"
+                      fill
+                      sizes="32px"
+                      className="object-contain"
+                    />
                   </div>
                   <span className="text-xs font-black uppercase tracking-wider text-primary">
                     Association Inazuma Eleven France
@@ -166,7 +185,7 @@ export default async function Home() {
             className="content-deferred mx-auto grid w-full max-w-7xl gap-4 px-4 sm:px-6 lg:grid-cols-2 lg:px-8"
             aria-label="Serveurs Discord"
           >
-            {SERVEURS_DISCORD.map(serveur => (
+            {SERVEURS_DISCORD.map((serveur) => (
               <DiscordSection key={serveur.cle} serveur={serveur} compact />
             ))}
           </section>

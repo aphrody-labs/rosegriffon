@@ -13,7 +13,8 @@
 import { launch } from "./cdp";
 
 const [label, ...routes] = process.argv.slice(2);
-if (!label || routes.length === 0) throw new Error("usage: parity.ts <label> <route...>");
+if (!label || routes.length === 0)
+  throw new Error("usage: parity.ts <label> <route...>");
 const LEG = process.env.LEG ?? "http://localhost:4300";
 const NEW = process.env.NEW ?? "http://localhost:3311/achillea";
 const H = Number(process.env.H ?? 1400);
@@ -23,12 +24,21 @@ const outdir = `${import.meta.dir}/../${label}`;
 const c = await launch(Number(process.env.CDP_PORT ?? 9335));
 
 async function grab(url: string, sel: string, vw: number): Promise<string> {
-  await c.send("Emulation.setDeviceMetricsOverride", { width: vw, height: 900, deviceScaleFactor: 1, mobile: false });
-  await c.send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-reduced-motion", value: "reduce" }] });
+  await c.send("Emulation.setDeviceMetricsOverride", {
+    width: vw,
+    height: 900,
+    deviceScaleFactor: 1,
+    mobile: false,
+  });
+  await c.send("Emulation.setEmulatedMedia", {
+    features: [{ name: "prefers-reduced-motion", value: "reduce" }],
+  });
   await c.send("Page.navigate", { url });
   await Bun.sleep(WAIT);
   await c.evaluate("document.fonts.ready.then(()=>1)");
-  await c.evaluate("(()=>{document.querySelectorAll('nextjs-portal').forEach(e=>e.remove());return 1})()");
+  await c.evaluate(
+    "(()=>{document.querySelectorAll('nextjs-portal').forEach(e=>e.remove());return 1})()",
+  );
   const r = await c.evaluate(
     `(()=>{const e=document.querySelector(${JSON.stringify(sel)});if(!e)return null;const b=e.getBoundingClientRect();return {x:b.left+scrollX,y:b.top+scrollY,w:b.width,h:b.height}})()`,
   );
@@ -36,7 +46,13 @@ async function grab(url: string, sel: string, vw: number): Promise<string> {
   const shot = await c.send("Page.captureScreenshot", {
     format: "png",
     captureBeyondViewport: true,
-    clip: { x: r.x, y: r.y, width: Math.min(r.w, 1440), height: Math.min(r.h, H), scale: 1 },
+    clip: {
+      x: r.x,
+      y: r.y,
+      width: Math.min(r.w, 1440),
+      height: Math.min(r.h, H),
+      scale: 1,
+    },
   });
   return shot.data as string;
 }
@@ -44,8 +60,16 @@ async function grab(url: string, sel: string, vw: number): Promise<string> {
 const results: Record<string, number> = {};
 for (const route of routes) {
   const name = route === "" ? "home" : route.replace(/[/:?=]/g, "_");
-  const a = await grab(`${LEG}/${route}`, process.env.LSEL ?? "main.outlet-wrapper", 1216);
-  const b = await grab(`${NEW}${route ? `/${route}` : ""}`, process.env.NSEL ?? ".achillea-scope", 1440);
+  const a = await grab(
+    `${LEG}/${route}`,
+    process.env.LSEL ?? "main.outlet-wrapper",
+    1216,
+  );
+  const b = await grab(
+    `${NEW}${route ? `/${route}` : ""}`,
+    process.env.NSEL ?? ".achillea-scope",
+    1440,
+  );
   await c.send("Page.navigate", { url: "about:blank" });
   await Bun.sleep(300);
   const out = await c.evaluate(`(async()=>{
@@ -71,7 +95,12 @@ for (const route of routes) {
   console.log(`${name}\t${results[name]}%`);
 }
 const file = `${outdir}/results.json`;
-const previous = (await Bun.file(file).exists()) ? await Bun.file(file).json() : {};
-await Bun.write(file, `${JSON.stringify({ ...previous, ...results }, null, 2)}\n`);
+const previous = (await Bun.file(file).exists())
+  ? await Bun.file(file).json()
+  : {};
+await Bun.write(
+  file,
+  `${JSON.stringify({ ...previous, ...results }, null, 2)}\n`,
+);
 c.close();
 process.exit(0);

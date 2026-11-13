@@ -11,7 +11,8 @@ export const metadata = {
   description:
     "Stickers, prints, badges, t-shirts et packs personnage édition limitée illustrés par les artistes de la communauté Rose Griffon.",
   openGraph: {
-    description: "Produits collector Inazuma Eleven France — packs personnage, prints A5, stickers, badges, textile.",
+    description:
+      "Produits collector Inazuma Eleven France — packs personnage, prints A5, stickers, badges, textile.",
     images: ["/RG_Logo_V2.5.webp"],
     title: "Boutique Rose Griffon",
   },
@@ -38,12 +39,19 @@ const organizationSchema = {
   url: SITE_URL,
 };
 
-export default async function ShopLayout({ children }: { children: ReactNode }) {
+export default async function ShopLayout({
+  children,
+}: {
+  children: ReactNode;
+}) {
   const cart = await getCart();
 
   return (
     <div className="relative min-h-screen bg-rg-marine text-white">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+      />
       {/* Grain overlay */}
       <div
         aria-hidden
@@ -63,11 +71,22 @@ export default async function ShopLayout({ children }: { children: ReactNode }) 
             className="group inline-flex items-center gap-3 outline-hidden focus-visible:ring-[3px] focus-visible:ring-rg-or/50 rounded-full"
           >
             <span className="relative grid size-10 place-items-center rounded-full bg-white shadow-[0_2px_0_0_rgba(0,0,0,0.5)] transition-transform motion-safe:duration-200 group-hover:rotate-12">
-              <Image src="/RG_Logo_V2.5.webp" alt="" width={26} height={26} className="size-6" aria-hidden />
+              <Image
+                src="/RG_Logo_V2.5.webp"
+                alt=""
+                width={26}
+                height={26}
+                className="size-6"
+                aria-hidden
+              />
             </span>
             <span className="flex flex-col leading-none">
-              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-rg-or">Boutique</span>
-              <span className="text-base font-extrabold text-white">Rose Griffon</span>
+              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-rg-or">
+                Boutique
+              </span>
+              <span className="text-base font-extrabold text-white">
+                Rose Griffon
+              </span>
             </span>
           </Link>
 
@@ -89,10 +108,12 @@ export default async function ShopLayout({ children }: { children: ReactNode }) 
         <div className="mx-auto max-w-7xl px-4 py-12 md:px-8">
           <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
             <div>
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-rg-or">Association Rose Griffon</p>
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-rg-or">
+                Association Rose Griffon
+              </p>
               <p className="mt-2 max-w-md text-sm text-white/70">
-                Inazuma Eleven France — illustrations originales, packs collector et goodies imprimés en France.
-                Soutiens-nous via{" "}
+                Inazuma Eleven France — illustrations originales, packs
+                collector et goodies imprimés en France. Soutiens-nous via{" "}
                 <Link
                   href="/nous-soutenir"
                   className="font-semibold text-rg-or underline decoration-rg-or decoration-2 underline-offset-4"

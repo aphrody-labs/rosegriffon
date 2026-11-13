@@ -64,10 +64,18 @@ export interface ScoreInput {
 }
 
 export function scoresAgree(home: ScoreInput, away: ScoreInput): boolean {
-  return home.submitted && away.submitted && home.myScore === away.oppScore && home.oppScore === away.myScore;
+  return (
+    home.submitted &&
+    away.submitted &&
+    home.myScore === away.oppScore &&
+    home.oppScore === away.myScore
+  );
 }
 
-export function resultLabel(myScore: number, oppScore: number): "win" | "loss" | "draw" {
+export function resultLabel(
+  myScore: number,
+  oppScore: number,
+): "win" | "loss" | "draw" {
   if (myScore === oppScore) return "draw";
   return myScore > oppScore ? "win" : "loss";
 }
@@ -79,14 +87,29 @@ export type ScoreOutcome =
   | { kind: "dispute" };
 
 /** Resolves dual score reports without inspecting storage, sockets, or Discord. */
-export function resolveScores(home: ScoreInput, away: ScoreInput, forced: boolean): ScoreOutcome {
+export function resolveScores(
+  home: ScoreInput,
+  away: ScoreInput,
+  forced: boolean,
+): ScoreOutcome {
   if (!forced && (!home.submitted || !away.submitted)) return { kind: "wait" };
-  if (scoresAgree(home, away)) return { kind: "agree", s1: home.myScore, s2: home.oppScore };
+  if (scoresAgree(home, away))
+    return { kind: "agree", s1: home.myScore, s2: home.oppScore };
   if (forced && home.submitted && !away.submitted) {
-    return { kind: "forfeit", s1: home.myScore, s2: home.oppScore, forfeitUserId: away.userId };
+    return {
+      kind: "forfeit",
+      s1: home.myScore,
+      s2: home.oppScore,
+      forfeitUserId: away.userId,
+    };
   }
   if (forced && away.submitted && !home.submitted) {
-    return { kind: "forfeit", s1: away.oppScore, s2: away.myScore, forfeitUserId: home.userId };
+    return {
+      kind: "forfeit",
+      s1: away.oppScore,
+      s2: away.myScore,
+      forfeitUserId: home.userId,
+    };
   }
   return { kind: "dispute" };
 }

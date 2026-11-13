@@ -97,8 +97,10 @@ describe("Zukan & CPK VFS Fusion Engine", () => {
         {
           label: "Shot",
           position: 0,
-          videoUrl: "https://dxi4wb638ujep.cloudfront.net/1/m/s/msb8o6v1p4w.webm",
-          posterUrl: "https://dxi4wb638ujep.cloudfront.net/1/m/s/msb8o6v1p4w.jpg",
+          videoUrl:
+            "https://dxi4wb638ujep.cloudfront.net/1/m/s/msb8o6v1p4w.webm",
+          posterUrl:
+            "https://dxi4wb638ujep.cloudfront.net/1/m/s/msb8o6v1p4w.jpg",
         },
       ],
     });
@@ -107,7 +109,9 @@ describe("Zukan & CPK VFS Fusion Engine", () => {
     expect(fused.type).toBe("Shoot");
     expect(fused.videoUrl).toContain("msb8o6v1p4w.webm");
     expect(fused.cutin).toBeDefined();
-    expect(fused.cutin?.modelG4md).toBe("data/dx11/model/cutin/ev60_00030.g4md");
+    expect(fused.cutin?.modelG4md).toBe(
+      "data/dx11/model/cutin/ev60_00030.g4md",
+    );
     expect(fused.vfsTelopPath).toBe("data/dx11/telop/ev60_00030_fr.g4tx");
     expect(fused.vfsIconPath).toBe("data/dx11/menu/010_skill/whs00030.g4tx");
   });
@@ -157,7 +161,11 @@ describe("Zukan & CPK VFS Fusion Engine", () => {
     expect(markResults[0].element).toBe("Mountain");
 
     // Filter FW Fire characters
-    const fireFw = queryFusedCharacters({ position: "FW", element: "Fire", limit: 5 });
+    const fireFw = queryFusedCharacters({
+      position: "FW",
+      element: "Fire",
+      limit: 5,
+    });
     expect(fireFw.length).toBe(5);
     for (const char of fireFw) {
       expect(char.position).toBe("FW");
@@ -165,7 +173,10 @@ describe("Zukan & CPK VFS Fusion Engine", () => {
     }
 
     // Filter by Game
-    const ie1Chars = queryFusedCharacters({ game: "Inazuma Eleven", limit: 10 });
+    const ie1Chars = queryFusedCharacters({
+      game: "Inazuma Eleven",
+      limit: 10,
+    });
     expect(ie1Chars.length).toBe(10);
     for (const char of ie1Chars) {
       expect(char.game).toBe("Inazuma Eleven");

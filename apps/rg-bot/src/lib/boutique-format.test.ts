@@ -146,14 +146,60 @@ const ADHESIONS_REELLES: AdhesionPatreon[] = [
 
 /** Produits SYNTHÉTIQUES : ils servent à éprouver la logique, pas à décrire une boutique réelle. */
 const PRODUITS_TEST: Product[] = [
-  { category: "sticker", description: "Un sticker de test.", image: "/a.webp", name: "Sticker Alpha", priceCents: 250, slug: "sticker-alpha", stockHint: "limited", tagline: "Un sticker de test.", tags: ["vinyle"] },
-  { category: "sticker", description: "Autre sticker.", image: "/b.webp", name: "Sticker Beta", priceCents: 450, slug: "sticker-beta", tagline: "Autre sticker.", tags: [] },
-  { category: "sticker", description: "Dernier sticker.", image: "/c.webp", name: "Pack Gamma", priceCents: 790, slug: "pack-gamma", tagline: "Dernier sticker.", tags: [] },
   {
-    category: "print", description: "Un print à variantes.", image: "/d.webp", name: "Print Delta", priceCents: 990, slug: "print-delta", tagline: "Print.", tags: ["papier"],
-    variants: [{ id: "v1", label: "Petit" }, { id: "v2", label: "Grand", priceCentsOverride: 2490 }],
+    category: "sticker",
+    description: "Un sticker de test.",
+    image: "/a.webp",
+    name: "Sticker Alpha",
+    priceCents: 250,
+    slug: "sticker-alpha",
+    stockHint: "limited",
+    tagline: "Un sticker de test.",
+    tags: ["vinyle"],
   },
-  { description: "Sans famille.", image: "/e.webp", name: "Objet Epsilon", priceCents: 1200, slug: "objet-epsilon", tagline: "Sans famille.", tags: [] },
+  {
+    category: "sticker",
+    description: "Autre sticker.",
+    image: "/b.webp",
+    name: "Sticker Beta",
+    priceCents: 450,
+    slug: "sticker-beta",
+    tagline: "Autre sticker.",
+    tags: [],
+  },
+  {
+    category: "sticker",
+    description: "Dernier sticker.",
+    image: "/c.webp",
+    name: "Pack Gamma",
+    priceCents: 790,
+    slug: "pack-gamma",
+    tagline: "Dernier sticker.",
+    tags: [],
+  },
+  {
+    category: "print",
+    description: "Un print à variantes.",
+    image: "/d.webp",
+    name: "Print Delta",
+    priceCents: 990,
+    slug: "print-delta",
+    tagline: "Print.",
+    tags: ["papier"],
+    variants: [
+      { id: "v1", label: "Petit" },
+      { id: "v2", label: "Grand", priceCentsOverride: 2490 },
+    ],
+  },
+  {
+    description: "Sans famille.",
+    image: "/e.webp",
+    name: "Objet Epsilon",
+    priceCents: 1200,
+    slug: "objet-epsilon",
+    tagline: "Sans famille.",
+    tags: [],
+  },
 ];
 const CATALOGUE = construireCatalogue(PRODUITS_TEST);
 
@@ -165,7 +211,7 @@ describe("catalogue", () => {
 
   test("tous les produits fournis sont repris, sans doublon de slug", () => {
     expect(CATALOGUE.length).toBe(PRODUITS_TEST.length);
-    expect(new Set(CATALOGUE.map(p => p.slug)).size).toBe(CATALOGUE.length);
+    expect(new Set(CATALOGUE.map((p) => p.slug)).size).toBe(CATALOGUE.length);
   });
 
   test("aucun produit n'a de prix, de nom ou de famille manquants", () => {
@@ -183,18 +229,24 @@ describe("catalogue", () => {
     expect(print?.prixCents).toBe(990);
     expect(print?.prixMaxCents).toBe(2490);
     expect(print?.variantes.length).toBe(2);
-    expect(espaces(formaterFourchettePrix(print as NonNullable<typeof print>))).toBe("de 9,90 € à 24,90 €");
+    expect(
+      espaces(formaterFourchettePrix(print as NonNullable<typeof print>)),
+    ).toBe("de 9,90 € à 24,90 €");
   });
 
   test("sans variante, la fourchette est un prix unique", () => {
     const sticker = trouverProduit("sticker-alpha", CATALOGUE);
-    expect(espaces(formaterFourchettePrix(sticker as NonNullable<typeof sticker>))).toBe("2,50 €");
+    expect(
+      espaces(formaterFourchettePrix(sticker as NonNullable<typeof sticker>)),
+    ).toBe("2,50 €");
   });
 
   test("les familles couvrent tout le catalogue, les produits sans famille vont dans « Autres »", () => {
     const groupes = catalogueParCategorie(undefined, CATALOGUE);
-    expect(groupes.reduce((n, g) => n + g.produits.length, 0)).toBe(CATALOGUE.length);
-    expect(groupes.map(g => g.libelle)).toContain("Autres");
+    expect(groupes.reduce((n, g) => n + g.produits.length, 0)).toBe(
+      CATALOGUE.length,
+    );
+    expect(groupes.map((g) => g.libelle)).toContain("Autres");
   });
 
   test("un filtre de famille accepte le libellé comme la valeur brute", () => {
@@ -202,7 +254,9 @@ describe("catalogue", () => {
     const parLibelle = catalogueParCategorie("Stickers", CATALOGUE);
     expect(parValeur.length).toBe(1);
     expect(parValeur[0]?.produits.length).toBe(3);
-    expect(parLibelle.map(g => g.categorie)).toEqual(parValeur.map(g => g.categorie));
+    expect(parLibelle.map((g) => g.categorie)).toEqual(
+      parValeur.map((g) => g.categorie),
+    );
   });
 
   test("une famille inconnue ne renvoie rien plutôt que tout", () => {
@@ -217,12 +271,15 @@ describe("champs de l'embed catalogue — les trois limites Discord", () => {
     const { champs, omises } = champsCatalogue(groupes, MAX_TOTAL_EMBED - 300);
     expect(omises).toBe(0);
     expect(champs.length).toBe(groupes.length);
-    expect(champs.map(c => c.nom)).toContain("Stickers (3)");
+    expect(champs.map((c) => c.nom)).toContain("Stickers (3)");
   });
 
   test("la somme des champs reste sous le budget, et chacun sous 1 024", () => {
     const { champs } = champsCatalogue(groupes, MAX_TOTAL_EMBED - 300);
-    const total = champs.reduce((n, c) => n + c.nom.length + c.valeur.length, 0);
+    const total = champs.reduce(
+      (n, c) => n + c.nom.length + c.valeur.length,
+      0,
+    );
     expect(total).toBeLessThanOrEqual(MAX_TOTAL_EMBED - 300);
     for (const champ of champs) {
       expect(champ.valeur.length).toBeLessThanOrEqual(MAX_VALEUR_CHAMP);
@@ -233,7 +290,10 @@ describe("champs de l'embed catalogue — les trois limites Discord", () => {
     const { champs, omises } = champsCatalogue(groupes, 150);
     expect(champs.length).toBeLessThan(groupes.length);
     expect(omises).toBe(groupes.length - champs.length);
-    const total = champs.reduce((n, c) => n + c.nom.length + c.valeur.length, 0);
+    const total = champs.reduce(
+      (n, c) => n + c.nom.length + c.valeur.length,
+      0,
+    );
     expect(total).toBeLessThanOrEqual(150);
   });
 
@@ -257,7 +317,10 @@ describe("champs de l'embed catalogue — les trois limites Discord", () => {
     const enorme = [
       {
         libelle: "Tout",
-        produits: Array.from({ length: 200 }, () => CATALOGUE[0] as (typeof CATALOGUE)[number]),
+        produits: Array.from(
+          { length: 200 },
+          () => CATALOGUE[0] as (typeof CATALOGUE)[number],
+        ),
       },
     ];
     const { champs } = champsCatalogue(enorme, MAX_TOTAL_EMBED);
@@ -290,7 +353,9 @@ describe("formaterEuros", () => {
   });
 
   test("le format est identique à celui de la caisse du site", () => {
-    for (const cents of [250, 290, 390, 450, 590, 790, 990, 1990, 2490, 7990, 1000]) {
+    for (const cents of [
+      250, 290, 390, 450, 590, 790, 990, 1990, 2490, 7990, 1000,
+    ]) {
       expect(formaterEuros(cents)).toBe(formatEuros(cents));
     }
   });
@@ -298,22 +363,34 @@ describe("formaterEuros", () => {
 
 describe("liens", () => {
   test("la fiche produit pointe sur le site public", () => {
-    expect(urlFicheProduit("print-a5-roy-fonteneau")).toBe(`${BASE_BOUTIQUE}/shop/print-a5-roy-fonteneau`);
+    expect(urlFicheProduit("print-a5-roy-fonteneau")).toBe(
+      `${BASE_BOUTIQUE}/shop/print-a5-roy-fonteneau`,
+    );
   });
 
   test("une image du catalogue devient une URL absolue", () => {
-    expect(urlImageProduit("/RG_roy_LC.webp")).toBe(`${BASE_BOUTIQUE}/RG_roy_LC.webp`);
-    expect(urlImageProduit("RG_roy_LC.webp")).toBe(`${BASE_BOUTIQUE}/RG_roy_LC.webp`);
+    expect(urlImageProduit("/RG_roy_LC.webp")).toBe(
+      `${BASE_BOUTIQUE}/RG_roy_LC.webp`,
+    );
+    expect(urlImageProduit("RG_roy_LC.webp")).toBe(
+      `${BASE_BOUTIQUE}/RG_roy_LC.webp`,
+    );
   });
 
   test("une image déjà absolue n'est pas préfixée deux fois", () => {
-    expect(urlImageProduit("https://cdn.rosegriffon.fr/x.webp")).toBe("https://cdn.rosegriffon.fr/x.webp");
+    expect(urlImageProduit("https://cdn.rosegriffon.fr/x.webp")).toBe(
+      "https://cdn.rosegriffon.fr/x.webp",
+    );
   });
 
   test("la ligne de liste porte le nom, le lien, le prix et le stock", () => {
     const sticker = trouverProduit("sticker-alpha", CATALOGUE);
-    const ligne = espaces(ligneCatalogue(sticker as NonNullable<typeof sticker>));
-    expect(ligne).toBe(`[Sticker Alpha](${BASE_BOUTIQUE}/shop/sticker-alpha) — 2,50 € · Édition limitée`);
+    const ligne = espaces(
+      ligneCatalogue(sticker as NonNullable<typeof sticker>),
+    );
+    expect(ligne).toBe(
+      `[Sticker Alpha](${BASE_BOUTIQUE}/shop/sticker-alpha) — 2,50 € · Édition limitée`,
+    );
   });
 
   test("les libellés de stock sont en français", () => {
@@ -325,13 +402,17 @@ describe("liens", () => {
 
 describe("recherche", () => {
   test("une saisie vide propose le début du catalogue", () => {
-    expect(chercherProduits("", 25, CATALOGUE).length).toBe(Math.min(25, CATALOGUE.length));
+    expect(chercherProduits("", 25, CATALOGUE).length).toBe(
+      Math.min(25, CATALOGUE.length),
+    );
     expect(chercherProduits(null, 3, CATALOGUE).length).toBe(3);
   });
 
   test("les accents et la casse n'empêchent pas de trouver", () => {
     expect(normaliser("Édition Limitée")).toBe("edition limitee");
-    expect(chercherProduits("GAMMA", 25, CATALOGUE)[0]?.slug).toBe("pack-gamma");
+    expect(chercherProduits("GAMMA", 25, CATALOGUE)[0]?.slug).toBe(
+      "pack-gamma",
+    );
   });
 
   test("un début de nom passe devant une correspondance interne", () => {
@@ -340,7 +421,9 @@ describe("recherche", () => {
   });
 
   test("une étiquette suffit à faire remonter un produit", () => {
-    expect(chercherProduits("papier", 25, CATALOGUE).map(p => p.slug)).toContain("print-delta");
+    expect(
+      chercherProduits("papier", 25, CATALOGUE).map((p) => p.slug),
+    ).toContain("print-delta");
   });
 
   test("le nombre de propositions reste sous la limite Discord", () => {
@@ -387,7 +470,9 @@ describe("statuts Patreon", () => {
 
   test("un statut inconnu ne casse rien : c'est un abonné", () => {
     expect(classerStatutPatron("zombie_patron")).toBe("abonne");
-    expect(libelleStatutPatron(classerStatutPatron("zombie_patron"))).toBe("Abonné sans engagement");
+    expect(libelleStatutPatron(classerStatutPatron("zombie_patron"))).toBe(
+      "Abonné sans engagement",
+    );
   });
 });
 
@@ -416,10 +501,18 @@ describe("agrégation des paliers", () => {
         tier_amounts_cents: [500],
         tier_titles: ["Bronze"],
       }),
-      adhesion({ patron_status: "active_patron", tier_amounts_cents: [2000], tier_titles: ["Or"] }),
-      adhesion({ patron_status: "active_patron", tier_amounts_cents: [2000], tier_titles: ["Or"] }),
+      adhesion({
+        patron_status: "active_patron",
+        tier_amounts_cents: [2000],
+        tier_titles: ["Or"],
+      }),
+      adhesion({
+        patron_status: "active_patron",
+        tier_amounts_cents: [2000],
+        tier_titles: ["Or"],
+      }),
     ]);
-    expect(paliers.map(p => p.titre)).toEqual(["Or", "Bronze"]);
+    expect(paliers.map((p) => p.titre)).toEqual(["Or", "Bronze"]);
     expect(paliers[0]?.soutiens).toBe(2);
   });
 
@@ -431,7 +524,7 @@ describe("agrégation des paliers", () => {
         tier_titles: ["Or", "Bonus"],
       }),
     ]);
-    expect(paliers.map(p => [p.titre, p.soutiens])).toEqual([
+    expect(paliers.map((p) => [p.titre, p.soutiens])).toEqual([
       ["Or", 1],
       ["Bonus", 1],
     ]);
@@ -451,29 +544,52 @@ describe("agrégation des paliers", () => {
   test("un palier sans titre ou une adhésion sans palier sont ignorés", () => {
     expect(
       agregerPaliers([
-        adhesion({ patron_status: "active_patron", tier_amounts_cents: [], tier_titles: [] }),
-        adhesion({ patron_status: "active_patron", tier_amounts_cents: [0], tier_titles: ["  "] }),
-        adhesion({ patron_status: "active_patron", tier_amounts_cents: null, tier_titles: null }),
+        adhesion({
+          patron_status: "active_patron",
+          tier_amounts_cents: [],
+          tier_titles: [],
+        }),
+        adhesion({
+          patron_status: "active_patron",
+          tier_amounts_cents: [0],
+          tier_titles: ["  "],
+        }),
+        adhesion({
+          patron_status: "active_patron",
+          tier_amounts_cents: null,
+          tier_titles: null,
+        }),
       ]),
     ).toEqual([]);
   });
 
   test("aucune adhésion : aucun palier, aucune exception", () => {
     expect(agregerPaliers([])).toEqual([]);
-    expect(compterParStatut([])).toEqual({ abonne: 0, actif: 0, ancien: 0, refuse: 0 });
+    expect(compterParStatut([])).toEqual({
+      abonne: 0,
+      actif: 0,
+      ancien: 0,
+      refuse: 0,
+    });
   });
 });
 
 describe("mise en forme d'un palier", () => {
   test("le montant mensuel accompagne le décompte", () => {
-    expect(espaces(lignePalier({ montantCents: 1450, soutiens: 3, titre: PALIER_EVANS }))).toBe(
-      `**${PALIER_EVANS}** — 3 soutiens · 14,50 €/mois`,
-    );
+    expect(
+      espaces(
+        lignePalier({ montantCents: 1450, soutiens: 3, titre: PALIER_EVANS }),
+      ),
+    ).toBe(`**${PALIER_EVANS}** — 3 soutiens · 14,50 €/mois`);
   });
 
   test("un palier gratuit n'affiche pas « 0 €/mois »", () => {
-    expect(lignePalier({ montantCents: 0, soutiens: 1, titre: "Free" })).toBe("**Free** — 1 soutien");
-    expect(lignePalier({ montantCents: null, soutiens: 2, titre: "Free" })).toBe("**Free** — 2 soutiens");
+    expect(lignePalier({ montantCents: 0, soutiens: 1, titre: "Free" })).toBe(
+      "**Free** — 1 soutien",
+    );
+    expect(
+      lignePalier({ montantCents: null, soutiens: 2, titre: "Free" }),
+    ).toBe("**Free** — 2 soutiens");
   });
 
   test("le pluriel des soutiens est accordé", () => {
@@ -486,7 +602,9 @@ describe("mise en forme d'un palier", () => {
 describe("dates et cadence", () => {
   test("les dates sortent en français, sans heure", () => {
     expect(formaterDateFr("2026-10-20")).toBe("20 octobre 2026");
-    expect(formaterDateFr(new Date("2025-05-11T00:00:00Z"))).toBe("11 mai 2025");
+    expect(formaterDateFr(new Date("2025-05-11T00:00:00Z"))).toBe(
+      "11 mai 2025",
+    );
   });
 
   test("une date absente ou invalide ne produit pas « Invalid Date »", () => {
@@ -517,7 +635,7 @@ describe("dates et cadence", () => {
 describe("fiche personnelle d'un soutien", () => {
   test("un soutien actif voit son palier, son engagement et ses dates", () => {
     const champs = resumerAdhesion(ADHESIONS_REELLES[0] as AdhesionPatreon);
-    const parNom = new Map(champs.map(c => [c.nom, espaces(c.valeur)]));
+    const parNom = new Map(champs.map((c) => [c.nom, espaces(c.valeur)]));
     expect(parNom.get("Statut")).toBe("Soutien actif");
     expect(parNom.get("Palier")).toBe(PALIER_EVANS);
     expect(parNom.get("Engagement en cours")).toBe("145,42 € (annuel)");
@@ -529,7 +647,9 @@ describe("fiche personnelle d'un soutien", () => {
 
   test("un prélèvement refusé n'est pas maquillé, mais ne change pas le statut", () => {
     const refuse = ADHESIONS_REELLES[3] as AdhesionPatreon;
-    const parNom = new Map(resumerAdhesion(refuse).map(c => [c.nom, espaces(c.valeur)]));
+    const parNom = new Map(
+      resumerAdhesion(refuse).map((c) => [c.nom, espaces(c.valeur)]),
+    );
     expect(parNom.get("Statut")).toBe("Ancien soutien");
     expect(parNom.get("Dernier prélèvement")).toBe("10 mars 2026 · refusé");
   });
@@ -541,7 +661,9 @@ describe("fiche personnelle d'un soutien", () => {
       patron_status: "former_patron",
       pledge_start: "2025-09-17",
     });
-    const parNom = new Map(resumerAdhesion(ancien).map(c => [c.nom, espaces(c.valeur)]));
+    const parNom = new Map(
+      resumerAdhesion(ancien).map((c) => [c.nom, espaces(c.valeur)]),
+    );
     expect(parNom.get("Statut")).toBe("Ancien soutien");
     expect(parNom.get("Palier")).toBe("Free");
     expect(parNom.has("Prochain prélèvement")).toBe(false);
@@ -550,15 +672,25 @@ describe("fiche personnelle d'un soutien", () => {
   });
 
   test("un abonné sans engagement n'affiche aucun montant", () => {
-    const parNom = new Map(resumerAdhesion(adhesion()).map(c => [c.nom, c.valeur]));
+    const parNom = new Map(
+      resumerAdhesion(adhesion()).map((c) => [c.nom, c.valeur]),
+    );
     expect(parNom.get("Statut")).toBe("Abonné sans engagement");
     expect(parNom.has("Engagement en cours")).toBe(false);
     expect(parNom.has("Soutien cumulé")).toBe(false);
   });
 
   test("essai gratuit et abonnement offert sont signalés", () => {
-    const champs = resumerAdhesion(adhesion({ is_free_trial: true, is_gifted: true, patron_status: "active_patron" }));
-    expect(champs[0]?.valeur).toBe("Soutien actif · essai gratuit · abonnement offert");
+    const champs = resumerAdhesion(
+      adhesion({
+        is_free_trial: true,
+        is_gifted: true,
+        patron_status: "active_patron",
+      }),
+    );
+    expect(champs[0]?.valeur).toBe(
+      "Soutien actif · essai gratuit · abonnement offert",
+    );
   });
 
   test("aucun champ ne peut porter une donnée personnelle", () => {
@@ -571,7 +703,11 @@ describe("fiche personnelle d'un soutien", () => {
   });
 
   test("les paliers d'une adhésion vide restent lisibles", () => {
-    expect(paliersDeLAdhesion(adhesion({ tier_titles: null }))).toBe("Aucun palier");
-    expect(paliersDeLAdhesion(adhesion({ tier_titles: ["Or", "Bonus"] }))).toBe("Or · Bonus");
+    expect(paliersDeLAdhesion(adhesion({ tier_titles: null }))).toBe(
+      "Aucun palier",
+    );
+    expect(paliersDeLAdhesion(adhesion({ tier_titles: ["Or", "Bonus"] }))).toBe(
+      "Or · Bonus",
+    );
   });
 });

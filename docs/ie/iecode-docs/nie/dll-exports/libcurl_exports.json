@@ -650,9 +650,21 @@
       "curl_multi_wait",
       "curl_multi_wakeup"
     ],
-    "Share": ["curl_share_cleanup", "curl_share_init", "curl_share_setopt", "curl_share_strerror"],
+    "Share": [
+      "curl_share_cleanup",
+      "curl_share_init",
+      "curl_share_setopt",
+      "curl_share_strerror"
+    ],
     "SList": ["curl_slist_append", "curl_slist_free_all"],
-    "URL": ["curl_url", "curl_url_cleanup", "curl_url_dup", "curl_url_get", "curl_url_set", "curl_url_strerror"],
+    "URL": [
+      "curl_url",
+      "curl_url_cleanup",
+      "curl_url_dup",
+      "curl_url_get",
+      "curl_url_set",
+      "curl_url_strerror"
+    ],
     "WebSocket": ["curl_ws_meta", "curl_ws_recv", "curl_ws_send"]
   }
 }

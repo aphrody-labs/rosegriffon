@@ -115,8 +115,18 @@ import {
 import { rgEmbed, truncate } from "../../lib/embeds";
 import { lireFiltreNotification } from "../../services/tweets";
 import { borner, echapperMarkdown, horodatageRelatif } from "../staff/format";
-import { differerEnPrive, exigerDroits, messagePanne, type RgAdmin } from "../staff/garde";
-import { analyserIdConfirmation, construireIdConfirmation, decrireChangement, urlIllustrationAbsolue } from "./valeurs";
+import {
+  differerEnPrive,
+  exigerDroits,
+  messagePanne,
+  type RgAdmin,
+} from "../staff/garde";
+import {
+  analyserIdConfirmation,
+  construireIdConfirmation,
+  decrireChangement,
+  urlIllustrationAbsolue,
+} from "./valeurs";
 import "./racine-moderation";
 import { echec, repondre } from "../../lib/ui";
 
@@ -148,13 +158,19 @@ const PERMISSIONS_TENUE: readonly bigint[] = PERMISSIONS_PAR_ACTION.salon;
  * jamais pouvoir le verrouiller, et Discord répondrait `50013` sans distinguer
  * les deux causes.
  */
-const PERMISSIONS_VERROU: readonly bigint[] = [...PERMISSIONS_PAR_ACTION.salon, ...PERMISSIONS_PAR_ACTION.role];
+const PERMISSIONS_VERROU: readonly bigint[] = [
+  ...PERMISSIONS_PAR_ACTION.salon,
+  ...PERMISSIONS_PAR_ACTION.role,
+];
 
 /** Purger : « Gérer les messages », plus de quoi LIRE l'historique à purger. */
-const PERMISSIONS_PURGE: readonly bigint[] = [...PERMISSIONS_PAR_ACTION.purger, ...PERMISSIONS_LECTURE_MESSAGES];
+const PERMISSIONS_PURGE: readonly bigint[] = [
+  ...PERMISSIONS_PAR_ACTION.purger,
+  ...PERMISSIONS_LECTURE_MESSAGES,
+];
 
 /** Les trois types de salon proposés à la création, tels que Discord les nomme. */
-const CHOIX_TYPE_SALON = TYPES_SALON_CREABLES.map(type => ({
+const CHOIX_TYPE_SALON = TYPES_SALON_CREABLES.map((type) => ({
   name: type.libelle,
   value: type.valeur,
 }));
@@ -186,11 +202,14 @@ interface Contexte {
  *
  * `GuildMemberManager.fetchMe(options?: BaseFetchOptions): Promise<GuildMember>`
  */
-async function contexteGuilde(interaction: ChatInputCommandInteraction): Promise<Contexte | null> {
+async function contexteGuilde(
+  interaction: ChatInputCommandInteraction,
+): Promise<Contexte | null> {
   const guild = interaction.guild;
   if (!guild) {
     await interaction.editReply({
-      content: "Cette commande ne s'utilise que depuis un serveur, pas en message privé.",
+      content:
+        "Cette commande ne s'utilise que depuis un serveur, pas en message privé.",
     });
     return null;
   }
@@ -199,7 +218,10 @@ async function contexteGuilde(interaction: ChatInputCommandInteraction): Promise
     try {
       moi = await guild.members.fetchMe();
     } catch (err) {
-      await repondre(interaction, echec("Le bot ne se voit pas sur ce serveur", messagePanne(err)));
+      await repondre(
+        interaction,
+        echec("Le bot ne se voit pas sur ce serveur", messagePanne(err)),
+      );
       return null;
     }
   }
@@ -223,8 +245,13 @@ function estSalonEcrit(salon: GuildBasedChannel): salon is SalonEcrit {
   );
 }
 
-function estSalonPublication(salon: GuildBasedChannel): salon is SalonPublication {
-  return salon.type === ChannelType.GuildText || salon.type === ChannelType.GuildAnnouncement;
+function estSalonPublication(
+  salon: GuildBasedChannel,
+): salon is SalonPublication {
+  return (
+    salon.type === ChannelType.GuildText ||
+    salon.type === ChannelType.GuildAnnouncement
+  );
 }
 
 /** `📣 #annonces` — le pictogramme dit le type sans faire une phrase de plus. */
@@ -243,14 +270,21 @@ function nommerSalon(salon: GuildBasedChannel): string {
  *
  * `GuildMember.permissionsIn(channel: GuildChannelResolvable): Readonly<PermissionsBitField>`
  */
-function refusPermissions(moi: GuildMember, salon: SalonGere, requises: readonly bigint[]): string | null {
-  const manquantes = manquantesParmi(moi.permissionsIn(salon).bitfield, requises);
+function refusPermissions(
+  moi: GuildMember,
+  salon: SalonGere,
+  requises: readonly bigint[],
+): string | null {
+  const manquantes = manquantesParmi(
+    moi.permissionsIn(salon).bitfield,
+    requises,
+  );
   if (manquantes.length === 0) {
     return null;
   }
   return (
     `🚫 Le bot n'a pas ce qu'il faut sur ${salon} : il lui manque ` +
-    `${manquantes.map(nom => `**${nom}**`).join(", ")}. ` +
+    `${manquantes.map((nom) => `**${nom}**`).join(", ")}. ` +
     "Ce n'est pas une permission du serveur qui manque forcément — une surcharge posée " +
     "sur ce salon peut retirer au bot ce que son rôle lui accorde ailleurs."
   );
@@ -284,8 +318,14 @@ function refusPortee(salon: SalonGere, suppression: boolean): string | null {
 }
 
 /** Motif d'audit Discord : toujours l'auteur humain, jamais « Rose Griffon » seul. */
-function raisonAudit(interaction: ChatInputCommandInteraction, motif?: string | null): string {
-  return motifAudit({ auteur: `${interaction.user.tag} (${interaction.user.id})`, motif });
+function raisonAudit(
+  interaction: ChatInputCommandInteraction,
+  motif?: string | null,
+): string {
+  return motifAudit({
+    auteur: `${interaction.user.tag} (${interaction.user.id})`,
+    motif,
+  });
 }
 
 /**
@@ -362,9 +402,13 @@ async function confirmer(
     const clic = await message.awaitMessageComponent({
       componentType: ComponentType.Button,
       time: DELAI_CONFIRMATION_MS,
-      filter: bouton => {
+      filter: (bouton) => {
         const lu = analyserIdConfirmation(bouton.customId);
-        return lu !== null && lu.graine === graine && bouton.user.id === interaction.user.id;
+        return (
+          lu !== null &&
+          lu.graine === graine &&
+          bouton.user.id === interaction.user.id
+        );
       },
     });
     // `deferUpdate` accuse réception du clic sans rien afficher : sans lui,
@@ -411,7 +455,9 @@ async function confirmer(
  * `PermissionsBitField.has(permission: PermissionResolvable, checkAdmin?: boolean): boolean`
  */
 function etatEnvoiActuel(salon: SalonGere, guild: Guild): EtatEnvoi {
-  const surcharge = salon.permissionOverwrites.cache.get(guild.roles.everyone.id);
+  const surcharge = salon.permissionOverwrites.cache.get(
+    guild.roles.everyone.id,
+  );
   if (!surcharge) {
     return lireEtatEnvoi(null);
   }
@@ -492,14 +538,21 @@ interface RecoltePurge {
  * `MessageManager.fetch(options?: FetchMessagesOptions): Promise<Collection<Snowflake, Message>>`
  * avec `FetchMessagesOptions { limit?: number; before?: Snowflake; … }`
  */
-async function recolterPourPurge(salon: SalonEcrit, voulus: number, auteur: User | null): Promise<RecoltePurge> {
+async function recolterPourPurge(
+  salon: SalonEcrit,
+  voulus: number,
+  auteur: User | null,
+): Promise<RecoltePurge> {
   const candidats: Message[] = [];
   let examines = 0;
   let epingles = 0;
   let avant: string | undefined;
 
   for (let page = 0; page < PAGES_MAX_PURGE; page += 1) {
-    const lot = await salon.messages.fetch({ limit: TAILLE_PAGE_MESSAGES, before: avant });
+    const lot = await salon.messages.fetch({
+      limit: TAILLE_PAGE_MESSAGES,
+      before: avant,
+    });
     if (lot.size === 0) {
       return { candidats, examines, epingles, tronque: false };
     }
@@ -532,19 +585,22 @@ async function recolterPourPurge(salon: SalonEcrit, voulus: number, auteur: User
 @Discord()
 @SlashGroup({
   name: "salon",
-  description: "Tenue des salons : créer, renommer, verrouiller, purger, annoncer, supprimer",
+  description:
+    "Tenue des salons : créer, renommer, verrouiller, purger, annoncer, supprimer",
   root: "moderation",
 })
 @SlashGroup("salon", "moderation")
 export class AdministrationSalonCommand {
   @Slash({
     name: "creer",
-    description: "Crée un salon textuel, vocal ou d'annonces dans une catégorie",
+    description:
+      "Crée un salon textuel, vocal ou d'annonces dans une catégorie",
   })
   async creer(
     @SlashOption({
       name: "nom",
-      description: "Nom du salon (Discord réécrit celui d'un salon textuel en minuscules-tirets)",
+      description:
+        "Nom du salon (Discord réécrit celui d'un salon textuel en minuscules-tirets)",
       type: ApplicationCommandOptionType.String,
       required: true,
       minLength: 1,
@@ -561,7 +617,8 @@ export class AdministrationSalonCommand {
     type: string,
     @SlashOption({
       name: "categorie",
-      description: "Catégorie parente (facultative : sinon le salon se pose à la racine)",
+      description:
+        "Catégorie parente (facultative : sinon le salon se pose à la racine)",
       type: ApplicationCommandOptionType.Channel,
       channelTypes: [ChannelType.GuildCategory],
       required: false,
@@ -594,7 +651,7 @@ export class AdministrationSalonCommand {
         interaction,
         echec(
           "Valeur inconnue",
-          `Type inconnu. Les trois valeurs possibles : ${TYPES_SALON_CREABLES.map(t => `\`${t.valeur}\``).join(", ")}.`,
+          `Type inconnu. Les trois valeurs possibles : ${TYPES_SALON_CREABLES.map((t) => `\`${t.valeur}\``).join(", ")}.`,
         ),
       );
       return;
@@ -603,7 +660,10 @@ export class AdministrationSalonCommand {
     // Créer se juge sur les permissions du SERVEUR quand il n'y a pas de
     // catégorie, et sur celles de la catégorie sinon : une catégorie peut
     // parfaitement refuser au bot ce que le serveur lui accorde.
-    const manquantes = manquantesParmi(moi.permissions.bitfield, PERMISSIONS_TENUE);
+    const manquantes = manquantesParmi(
+      moi.permissions.bitfield,
+      PERMISSIONS_TENUE,
+    );
     if (manquantes.length > 0) {
       await interaction.editReply({
         content: `🚫 Le bot n'a pas **${manquantes.join(", ")}** sur ce serveur : il ne peut pas créer de salon.`,
@@ -612,7 +672,13 @@ export class AdministrationSalonCommand {
     }
     if (categorie) {
       if (categorie.type !== ChannelType.GuildCategory) {
-        await repondre(interaction, echec("Salon incompatible", `${nommerSalon(categorie)} n'est pas une catégorie.`));
+        await repondre(
+          interaction,
+          echec(
+            "Salon incompatible",
+            `${nommerSalon(categorie)} n'est pas une catégorie.`,
+          ),
+        );
         return;
       }
       const refus = refusPermissions(moi, categorie, PERMISSIONS_TENUE);
@@ -622,7 +688,10 @@ export class AdministrationSalonCommand {
       }
     }
 
-    if (choix.exigeCommunaute && !guild.features.includes(GuildFeature.Community)) {
+    if (
+      choix.exigeCommunaute &&
+      !guild.features.includes(GuildFeature.Community)
+    ) {
       await interaction.editReply({
         content:
           "❌ Un salon d'annonces n'existe que sur un serveur **Communauté**, et ce serveur ne " +
@@ -643,7 +712,8 @@ export class AdministrationSalonCommand {
     }
 
     const sujetSaisi = sujet?.trim() ?? "";
-    const sujetPose = choix.accepteSujet && sujetSaisi.length > 0 ? sujetSaisi : null;
+    const sujetPose =
+      choix.accepteSujet && sujetSaisi.length > 0 ? sujetSaisi : null;
 
     try {
       // `GuildChannelManager.create<Type extends GuildChannelTypes>(
@@ -654,7 +724,10 @@ export class AdministrationSalonCommand {
         type: choix.type,
         parent: categorie?.id ?? null,
         topic: sujetPose ?? undefined,
-        reason: raisonAudit(interaction, `Création de ${choix.libelle.toLowerCase()}`),
+        reason: raisonAudit(
+          interaction,
+          `Création de ${choix.libelle.toLowerCase()}`,
+        ),
       });
 
       await logAdminAction({
@@ -702,11 +775,17 @@ export class AdministrationSalonCommand {
       }
       await interaction.editReply({ embeds: [embed] });
     } catch (err) {
-      await repondre(interaction, echec("Salon inaccessible", expliquerRefusSalon(err)));
+      await repondre(
+        interaction,
+        echec("Salon inaccessible", expliquerRefusSalon(err)),
+      );
     }
   }
 
-  @Slash({ name: "renommer", description: "Change le nom d'un salon ou d'une catégorie" })
+  @Slash({
+    name: "renommer",
+    description: "Change le nom d'un salon ou d'une catégorie",
+  })
   async renommer(
     @SlashOption({
       name: "salon",
@@ -741,7 +820,13 @@ export class AdministrationSalonCommand {
     if (!contexte) {
       return;
     }
-    const cible = await verifierSalon(interaction, contexte, salon, PERMISSIONS_TENUE, false);
+    const cible = await verifierSalon(
+      interaction,
+      contexte,
+      salon,
+      PERMISSIONS_TENUE,
+      false,
+    );
     if (!cible) {
       return;
     }
@@ -749,7 +834,9 @@ export class AdministrationSalonCommand {
     // Un salon vocal et une catégorie gardent majuscules et espaces ; un salon
     // textuel ou d'annonces est réécrit par Discord. On applique la règle du
     // type RÉEL de la cible, pas celle du type le plus fréquent.
-    const normalise = cible.type === ChannelType.GuildText || cible.type === ChannelType.GuildAnnouncement;
+    const normalise =
+      cible.type === ChannelType.GuildText ||
+      cible.type === ChannelType.GuildAnnouncement;
     const nomFinal = nomSalonEffectif(nom, {
       valeur: "textuel",
       libelle: libelleTypeSalon(cible.type),
@@ -760,7 +847,8 @@ export class AdministrationSalonCommand {
     });
     if (!nomFinal) {
       await interaction.editReply({
-        content: "❌ Ce nom ne laisse rien d'exploitable une fois normalisé par Discord.",
+        content:
+          "❌ Ce nom ne laisse rien d'exploitable une fois normalisé par Discord.",
       });
       return;
     }
@@ -774,7 +862,10 @@ export class AdministrationSalonCommand {
     const ancien = cible.name;
     try {
       // `GuildChannel.setName(name: string, reason?: string): Promise<this>`
-      const apres = await cible.setName(nomFinal, raisonAudit(interaction, `Renommage depuis « ${ancien} »`));
+      const apres = await cible.setName(
+        nomFinal,
+        raisonAudit(interaction, `Renommage depuis « ${ancien} »`),
+      );
 
       await logAdminAction({
         adminId: admin.profileId,
@@ -794,23 +885,33 @@ export class AdministrationSalonCommand {
       await interaction.editReply({
         content:
           `✏️ ${pictoTypeSalon(apres.type)} ${decrireChangement(ancien, apres.name)}` +
-          (apres.name === nom.trim() ? "" : "\nDiscord a réécrit le nom saisi."),
+          (apres.name === nom.trim()
+            ? ""
+            : "\nDiscord a réécrit le nom saisi."),
       });
     } catch (err) {
-      await repondre(interaction, echec("Salon inaccessible", expliquerRefusSalon(err)));
+      await repondre(
+        interaction,
+        echec("Salon inaccessible", expliquerRefusSalon(err)),
+      );
     }
   }
 
   @Slash({
     name: "verrouiller",
-    description: "Retire « Envoyer des messages » à @everyone, et archive l'état d'avant",
+    description:
+      "Retire « Envoyer des messages » à @everyone, et archive l'état d'avant",
   })
   async verrouiller(
     @SlashOption({
       name: "salon",
       description: "Salon à verrouiller",
       type: ApplicationCommandOptionType.Channel,
-      channelTypes: [ChannelType.GuildText, ChannelType.GuildAnnouncement, ChannelType.GuildVoice],
+      channelTypes: [
+        ChannelType.GuildText,
+        ChannelType.GuildAnnouncement,
+        ChannelType.GuildVoice,
+      ],
       required: true,
     })
     salon: GuildBasedChannel,
@@ -834,7 +935,13 @@ export class AdministrationSalonCommand {
     if (!contexte) {
       return;
     }
-    const cible = await verifierSalon(interaction, contexte, salon, PERMISSIONS_VERROU, false);
+    const cible = await verifierSalon(
+      interaction,
+      contexte,
+      salon,
+      PERMISSIONS_VERROU,
+      false,
+    );
     if (!cible) {
       return;
     }
@@ -887,8 +994,16 @@ export class AdministrationSalonCommand {
         )
         .addFields(
           { name: "Motif", value: truncate(motif, 1_000) },
-          { name: "État d'avant", value: libelleEtatEnvoi(avant), inline: true },
-          { name: "État actuel", value: libelleEtatEnvoi("refuse"), inline: true },
+          {
+            name: "État d'avant",
+            value: libelleEtatEnvoi(avant),
+            inline: true,
+          },
+          {
+            name: "État actuel",
+            value: libelleEtatEnvoi("refuse"),
+            inline: true,
+          },
           {
             name: "Réversible",
             value:
@@ -898,20 +1013,28 @@ export class AdministrationSalonCommand {
         );
       await interaction.editReply({ embeds: [embed] });
     } catch (err) {
-      await repondre(interaction, echec("Salon inaccessible", expliquerRefusSalon(err)));
+      await repondre(
+        interaction,
+        echec("Salon inaccessible", expliquerRefusSalon(err)),
+      );
     }
   }
 
   @Slash({
     name: "deverrouiller",
-    description: "Rend à @everyone exactement l'état d'envoi qu'il avait avant le verrouillage",
+    description:
+      "Rend à @everyone exactement l'état d'envoi qu'il avait avant le verrouillage",
   })
   async deverrouiller(
     @SlashOption({
       name: "salon",
       description: "Salon à déverrouiller",
       type: ApplicationCommandOptionType.Channel,
-      channelTypes: [ChannelType.GuildText, ChannelType.GuildAnnouncement, ChannelType.GuildVoice],
+      channelTypes: [
+        ChannelType.GuildText,
+        ChannelType.GuildAnnouncement,
+        ChannelType.GuildVoice,
+      ],
       required: true,
     })
     salon: GuildBasedChannel,
@@ -935,7 +1058,13 @@ export class AdministrationSalonCommand {
     if (!contexte) {
       return;
     }
-    const cible = await verifierSalon(interaction, contexte, salon, PERMISSIONS_VERROU, false);
+    const cible = await verifierSalon(
+      interaction,
+      contexte,
+      salon,
+      PERMISSIONS_VERROU,
+      false,
+    );
     if (!cible) {
       return;
     }
@@ -952,7 +1081,10 @@ export class AdministrationSalonCommand {
 
     try {
       const trace = await lireDernierVerrou(cible.id);
-      const archive = trace?.action === ACTION_VERROUILLER ? lireEtatEnvoiArchive(trace.details) : null;
+      const archive =
+        trace?.action === ACTION_VERROUILLER
+          ? lireEtatEnvoiArchive(trace.details)
+          : null;
       // Sans archive, l'héritage est le seul repli honnête : c'est l'absence
       // de surcharge, donc la permission telle que la catégorie et les rôles
       // la définissent. Remettre « autorisé » ouvrirait potentiellement plus
@@ -1007,17 +1139,27 @@ export class AdministrationSalonCommand {
       }
       await interaction.editReply({ embeds: [embed] });
     } catch (err) {
-      await repondre(interaction, echec("Salon inaccessible", expliquerRefusSalon(err)));
+      await repondre(
+        interaction,
+        echec("Salon inaccessible", expliquerRefusSalon(err)),
+      );
     }
   }
 
-  @Slash({ name: "lent", description: "Pose le mode lent d'un salon, de 0 à 6 heures" })
+  @Slash({
+    name: "lent",
+    description: "Pose le mode lent d'un salon, de 0 à 6 heures",
+  })
   async lent(
     @SlashOption({
       name: "salon",
       description: "Salon concerné",
       type: ApplicationCommandOptionType.Channel,
-      channelTypes: [ChannelType.GuildText, ChannelType.GuildAnnouncement, ChannelType.GuildVoice],
+      channelTypes: [
+        ChannelType.GuildText,
+        ChannelType.GuildAnnouncement,
+        ChannelType.GuildVoice,
+      ],
       required: true,
     })
     salon: GuildBasedChannel,
@@ -1049,14 +1191,23 @@ export class AdministrationSalonCommand {
     if (!contexte) {
       return;
     }
-    const cible = await verifierSalon(interaction, contexte, salon, PERMISSIONS_TENUE, false);
+    const cible = await verifierSalon(
+      interaction,
+      contexte,
+      salon,
+      PERMISSIONS_TENUE,
+      false,
+    );
     if (!cible) {
       return;
     }
     if (!estSalonEcrit(cible)) {
       await repondre(
         interaction,
-        echec("Salon incompatible", `Une catégorie n'a pas de mode lent : ${nommerSalon(cible)}.`),
+        echec(
+          "Salon incompatible",
+          `Une catégorie n'a pas de mode lent : ${nommerSalon(cible)}.`,
+        ),
       );
       return;
     }
@@ -1068,7 +1219,10 @@ export class AdministrationSalonCommand {
     if (lenteur === null) {
       await repondre(
         interaction,
-        echec("Valeur hors bornes", `Le mode lent va de 0 à ${MAX_LENTEUR_SECONDES} secondes (6 heures).`),
+        echec(
+          "Valeur hors bornes",
+          `Le mode lent va de 0 à ${MAX_LENTEUR_SECONDES} secondes (6 heures).`,
+        ),
       );
       return;
     }
@@ -1107,20 +1261,28 @@ export class AdministrationSalonCommand {
             : ""),
       });
     } catch (err) {
-      await repondre(interaction, echec("Salon inaccessible", expliquerRefusSalon(err)));
+      await repondre(
+        interaction,
+        echec("Salon inaccessible", expliquerRefusSalon(err)),
+      );
     }
   }
 
   @Slash({
     name: "purger",
-    description: "Supprime en masse les derniers messages d'un salon (jamais au-delà de 14 jours)",
+    description:
+      "Supprime en masse les derniers messages d'un salon (jamais au-delà de 14 jours)",
   })
   async purger(
     @SlashOption({
       name: "salon",
       description: "Salon à purger",
       type: ApplicationCommandOptionType.Channel,
-      channelTypes: [ChannelType.GuildText, ChannelType.GuildAnnouncement, ChannelType.GuildVoice],
+      channelTypes: [
+        ChannelType.GuildText,
+        ChannelType.GuildAnnouncement,
+        ChannelType.GuildVoice,
+      ],
       required: true,
     })
     salon: GuildBasedChannel,
@@ -1135,14 +1297,16 @@ export class AdministrationSalonCommand {
     nombre: number,
     @SlashOption({
       name: "auteur",
-      description: "Ne supprimer que les messages de ce membre (filtré AVANT le plafond de 100)",
+      description:
+        "Ne supprimer que les messages de ce membre (filtré AVANT le plafond de 100)",
       type: ApplicationCommandOptionType.User,
       required: false,
     })
     auteur: User | undefined,
     @SlashOption({
       name: "motif",
-      description: "Motif inscrit en base (Discord n'accepte pas de motif sur une purge)",
+      description:
+        "Motif inscrit en base (Discord n'accepte pas de motif sur une purge)",
       type: ApplicationCommandOptionType.String,
       required: false,
       maxLength: 400,
@@ -1160,19 +1324,31 @@ export class AdministrationSalonCommand {
     if (!contexte) {
       return;
     }
-    const cible = await verifierSalon(interaction, contexte, salon, PERMISSIONS_PURGE, false);
+    const cible = await verifierSalon(
+      interaction,
+      contexte,
+      salon,
+      PERMISSIONS_PURGE,
+      false,
+    );
     if (!cible) {
       return;
     }
     if (!estSalonEcrit(cible)) {
       await repondre(
         interaction,
-        echec("Salon incompatible", `Une catégorie ne porte pas de messages : ${nommerSalon(cible)}.`),
+        echec(
+          "Salon incompatible",
+          `Une catégorie ne porte pas de messages : ${nommerSalon(cible)}.`,
+        ),
       );
       return;
     }
 
-    const voulus = Math.min(Math.max(Math.trunc(nombre), 0), MAX_SUPPRESSION_MASSE);
+    const voulus = Math.min(
+      Math.max(Math.trunc(nombre), 0),
+      MAX_SUPPRESSION_MASSE,
+    );
 
     try {
       const recolte = await recolterPourPurge(cible, voulus, auteur ?? null);
@@ -1183,7 +1359,7 @@ export class AdministrationSalonCommand {
       // premiers de la liste.
       const maintenant = Date.now();
       const partition = partitionnerSuppression(
-        recolte.candidats.map(message => message.createdTimestamp),
+        recolte.candidats.map((message) => message.createdTimestamp),
         maintenant,
         nombre,
       );
@@ -1224,7 +1400,9 @@ export class AdministrationSalonCommand {
           },
           {
             name: "Plus ancien du lot",
-            value: horodatageRelatif(retenus[retenus.length - 1]?.createdAt ?? null),
+            value: horodatageRelatif(
+              retenus[retenus.length - 1]?.createdAt ?? null,
+            ),
             inline: true,
           },
           {
@@ -1235,7 +1413,13 @@ export class AdministrationSalonCommand {
               "saisi ici n'est écrit qu'en base.",
           },
         );
-      if (!(await confirmer(interaction, embed, `Supprimer ${retenus.length} messages`))) {
+      if (
+        !(await confirmer(
+          interaction,
+          embed,
+          `Supprimer ${retenus.length} messages`,
+        ))
+      ) {
         return;
       }
 
@@ -1284,7 +1468,8 @@ export class AdministrationSalonCommand {
 
   @Slash({
     name: "annoncer",
-    description: "Publie un embed signé Rose Griffon dans un salon (visible de tout le serveur)",
+    description:
+      "Publie un embed signé Rose Griffon dans un salon (visible de tout le serveur)",
   })
   async annoncer(
     @SlashOption({
@@ -1315,7 +1500,8 @@ export class AdministrationSalonCommand {
     texte: string,
     @SlashOption({
       name: "image",
-      description: "Illustration : URL https complète, ou chemin absolu du site (/rgtv/…)",
+      description:
+        "Illustration : URL https complète, ou chemin absolu du site (/rgtv/…)",
       type: ApplicationCommandOptionType.String,
       required: false,
     })
@@ -1332,12 +1518,25 @@ export class AdministrationSalonCommand {
     if (!contexte) {
       return;
     }
-    const cible = await verifierSalon(interaction, contexte, salon, PERMISSIONS_PUBLICATION, false, { tenue: false });
+    const cible = await verifierSalon(
+      interaction,
+      contexte,
+      salon,
+      PERMISSIONS_PUBLICATION,
+      false,
+      { tenue: false },
+    );
     if (!cible) {
       return;
     }
     if (!estSalonPublication(cible)) {
-      await repondre(interaction, echec("Salon incompatible", `${nommerSalon(cible)} ne peut pas recevoir d'annonce.`));
+      await repondre(
+        interaction,
+        echec(
+          "Salon incompatible",
+          `${nommerSalon(cible)} ne peut pas recevoir d'annonce.`,
+        ),
+      );
       return;
     }
 
@@ -1371,7 +1570,8 @@ export class AdministrationSalonCommand {
     // coûte moins qu'une annonce refusée en `50035`.
     if (annonce.length > 6_000) {
       await interaction.editReply({
-        content: "❌ L'annonce dépasse les 6 000 caractères qu'un embed accepte au total.",
+        content:
+          "❌ L'annonce dépasse les 6 000 caractères qu'un embed accepte au total.",
       });
       return;
     }
@@ -1405,11 +1605,17 @@ export class AdministrationSalonCommand {
         embeds: [annonce],
       });
     } catch (err) {
-      await repondre(interaction, echec("Salon inaccessible", expliquerRefusSalon(err)));
+      await repondre(
+        interaction,
+        echec("Salon inaccessible", expliquerRefusSalon(err)),
+      );
     }
   }
 
-  @Slash({ name: "supprimer", description: "Supprime définitivement un salon ou une catégorie" })
+  @Slash({
+    name: "supprimer",
+    description: "Supprime définitivement un salon ou une catégorie",
+  })
   async supprimer(
     @SlashOption({
       name: "salon",
@@ -1445,7 +1651,13 @@ export class AdministrationSalonCommand {
     if (!contexte) {
       return;
     }
-    const cible = await verifierSalon(interaction, contexte, salon, PERMISSIONS_TENUE, true);
+    const cible = await verifierSalon(
+      interaction,
+      contexte,
+      salon,
+      PERMISSIONS_TENUE,
+      true,
+    );
     if (!cible) {
       return;
     }
@@ -1456,7 +1668,11 @@ export class AdministrationSalonCommand {
     // Discord serait illisible.
     const sousLesPieds = new Set<string>([interaction.channelId]);
     const courant = interaction.channel;
-    if (courant && "parentId" in courant && typeof courant.parentId === "string") {
+    if (
+      courant &&
+      "parentId" in courant &&
+      typeof courant.parentId === "string"
+    ) {
       sousLesPieds.add(courant.parentId);
     }
     if (sousLesPieds.has(cible.id)) {
@@ -1474,7 +1690,7 @@ export class AdministrationSalonCommand {
         await interaction.editReply({
           content:
             `❌ ${nommerSalon(cible)} est **référencé par la configuration du bot** :\n` +
-            references.map(source => `• \`${source}\``).join("\n") +
+            references.map((source) => `• \`${source}\``).join("\n") +
             "\n\nLe supprimer ne casse rien tout de suite : la panne apparaîtrait au prochain " +
             "drain de la veille ou à la prochaine annonce, sous la forme d'un " +
             "`10003 Unknown Channel` que plus personne ne relierait à cette commande. " +
@@ -1483,11 +1699,15 @@ export class AdministrationSalonCommand {
         return;
       }
 
-      const enfants = cible.type === ChannelType.GuildCategory ? cible.children.cache.size : 0;
+      const enfants =
+        cible.type === ChannelType.GuildCategory
+          ? cible.children.cache.size
+          : 0;
       const embed = rgEmbed()
         .setTitle("Suppression de salon — à confirmer")
         .setDescription(
-          `${cible} — \`${cible.id}\`\n` + "Le salon et **tout son historique** disparaissent. Rien ne les rend.",
+          `${cible} — \`${cible.id}\`\n` +
+            "Le salon et **tout son historique** disparaissent. Rien ne les rend.",
         )
         .addFields(
           { name: "Type", value: libelleTypeSalon(cible.type), inline: true },
@@ -1621,8 +1841,10 @@ async function referencesConfiguration(salonId: string): Promise<string[]> {
   const filtre = await lireFiltreNotification();
   const sources: Record<string, string | null | undefined> = {
     DISCORD_NEWS_CHANNEL_ID: Bun.env.DISCORD_NEWS_CHANNEL_ID,
-    DISCORD_WIKI_ANNOUNCEMENTS_CHANNEL_ID: Bun.env.DISCORD_WIKI_ANNOUNCEMENTS_CHANNEL_ID,
-    DISCORD_WEBSITE_ANNOUNCEMENTS_CHANNEL_ID: Bun.env.DISCORD_WEBSITE_ANNOUNCEMENTS_CHANNEL_ID,
+    DISCORD_WIKI_ANNOUNCEMENTS_CHANNEL_ID:
+      Bun.env.DISCORD_WIKI_ANNOUNCEMENTS_CHANNEL_ID,
+    DISCORD_WEBSITE_ANNOUNCEMENTS_CHANNEL_ID:
+      Bun.env.DISCORD_WEBSITE_ANNOUNCEMENTS_CHANNEL_ID,
     "settings['tweets.notification'].salon": filtre.salon,
   };
   for (const [nom, valeur] of Object.entries(DISCORD_CHANNELS)) {

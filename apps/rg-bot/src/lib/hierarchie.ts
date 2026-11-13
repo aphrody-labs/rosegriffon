@@ -56,7 +56,8 @@ export interface FaitsBot {
   peutGererRoles: boolean;
 }
 
-export type Verdict = { ok: true; avertissements: string[] } | { ok: false; motif: string };
+export type Verdict =
+  { ok: true; avertissements: string[] } | { ok: false; motif: string };
 
 /**
  * Ce rôle peut-il être attribué AUTOMATIQUEMENT par le bot ?
@@ -64,16 +65,21 @@ export type Verdict = { ok: true; avertissements: string[] } | { ok: false; moti
  * C'est la seule fonction à appeler avant d'enregistrer une récompense de
  * niveau, et avant de la poser sur un membre.
  */
-export function verifierAttributionAutomatique(role: FaitsRoleVise, bot: FaitsBot): Verdict {
+export function verifierAttributionAutomatique(
+  role: FaitsRoleVise,
+  bot: FaitsBot,
+): Verdict {
   if (!bot.peutGererRoles) {
     return {
-      motif: "Le bot n'a pas la permission « Gérer les rôles » sur ce serveur : il ne peut attribuer aucun rôle.",
+      motif:
+        "Le bot n'a pas la permission « Gérer les rôles » sur ce serveur : il ne peut attribuer aucun rôle.",
       ok: false,
     };
   }
   if (role.estEveryone) {
     return {
-      motif: "`@everyone` n'est pas un rôle qui s'attribue : tout le monde l'a déjà.",
+      motif:
+        "`@everyone` n'est pas un rôle qui s'attribue : tout le monde l'a déjà.",
       ok: false,
     };
   }
@@ -152,7 +158,11 @@ export function verifierRolePriseEnCharge(role: FaitsRoleVise): Verdict {
  * personne ne peut toucher un rôle situé au niveau ou au-dessus de son propre
  * plus haut rôle. Le propriétaire du serveur y échappe.
  */
-export function peutAgirSurRole(positionMaxDuStaff: number, positionDuRole: number, estProprietaire = false): boolean {
+export function peutAgirSurRole(
+  positionMaxDuStaff: number,
+  positionDuRole: number,
+  estProprietaire = false,
+): boolean {
   return estProprietaire || positionDuRole < positionMaxDuStaff;
 }
 

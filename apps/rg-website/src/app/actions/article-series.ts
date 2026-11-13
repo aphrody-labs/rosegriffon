@@ -42,7 +42,9 @@ export interface SeriesSummary {
  * Récupère une série par son slug ainsi que tous ses articles, ordonnés par series_order.
  * Accès public.
  */
-export async function getSeries(slug: string): Promise<SeriesWithArticles | null> {
+export async function getSeries(
+  slug: string,
+): Promise<SeriesWithArticles | null> {
   const supabase = createPostgresClient();
 
   const { data: series, error } = await supabase
@@ -57,7 +59,9 @@ export async function getSeries(slug: string): Promise<SeriesWithArticles | null
 
   const { data: articles } = await supabase
     .from("articles")
-    .select("id, title, slug, excerpt, featured_image_url, category, published_at, series_order")
+    .select(
+      "id, title, slug, excerpt, featured_image_url, category, published_at, series_order",
+    )
     .eq("series_id", series.id)
     .order("series_order", { ascending: true });
 
@@ -84,7 +88,10 @@ export async function getArticleSeries(
       id: string;
       series_id: string | null;
       series_order: number | null;
-    }>("SELECT id, series_id, series_order FROM articles WHERE id = $1 LIMIT 1", [articleId]);
+    }>(
+      "SELECT id, series_id, series_order FROM articles WHERE id = $1 LIMIT 1",
+      [articleId],
+    );
 
     const article = articleRows[0];
     if (!article || !article.series_id) {
@@ -114,7 +121,7 @@ export async function getArticleSeries(
       [series.id],
     );
 
-    const currentIndex = seriesArticles.findIndex(a => a.id === articleId);
+    const currentIndex = seriesArticles.findIndex((a) => a.id === articleId);
 
     return {
       articles: seriesArticles,
@@ -133,7 +140,9 @@ export async function getArticleSeries(
  */
 export async function getAllSeries(): Promise<SeriesSummary[]> {
   const supabase = createPostgresClient();
-  const { data } = await supabase.from("article_series").select("id, title, slug, description, cover_image_url");
+  const { data } = await supabase
+    .from("article_series")
+    .select("id, title, slug, description, cover_image_url");
 
   if (!data) {
     return [];
@@ -142,7 +151,7 @@ export async function getAllSeries(): Promise<SeriesSummary[]> {
   // Récupérer le compte d'articles par série
   const counts = await Promise.all(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (data as any[]).map(async series => {
+    (data as any[]).map(async (series) => {
       const { count } = await supabase
         .from("articles")
         .select("id", { count: "exact", head: true })
@@ -151,10 +160,10 @@ export async function getAllSeries(): Promise<SeriesSummary[]> {
     }),
   );
 
-  const countMap = new Map(counts.map(c => [c.id, c.count]));
+  const countMap = new Map(counts.map((c) => [c.id, c.count]));
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return (data as any[]).map(series => ({
+  return (data as any[]).map((series) => ({
     article_count: countMap.get(series.id) || 0,
     cover_image_url: series.cover_image_url,
     description: series.description,
@@ -223,11 +232,16 @@ export async function addArticleToSeries(
  * Retire un article de sa série (series_id = null, series_order = 0).
  * Réservé aux administrateurs.
  */
-export async function removeArticleFromSeries(articleId: string): Promise<{ success: boolean }> {
+export async function removeArticleFromSeries(
+  articleId: string,
+): Promise<{ success: boolean }> {
   await requireAdmin();
 
   const supabase = createPostgresClient();
-  const { error } = await supabase.from("articles").update({ series_id: null, series_order: 0 }).eq("id", articleId);
+  const { error } = await supabase
+    .from("articles")
+    .update({ series_id: null, series_order: 0 })
+    .eq("id", articleId);
 
   if (error) {
     throw new Error(error.message);

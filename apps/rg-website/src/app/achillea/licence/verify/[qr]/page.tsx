@@ -17,7 +17,11 @@ export const metadata = metadonneesAchillea({
   indexable: false,
 });
 
-export default async function LicenceVerifyPage({ params }: { params: Promise<{ qr: string }> }) {
+export default async function LicenceVerifyPage({
+  params,
+}: {
+  params: Promise<{ qr: string }>;
+}) {
   const { qr } = await params;
   return <LicenceVerifyClient qr={qr} />;
 }

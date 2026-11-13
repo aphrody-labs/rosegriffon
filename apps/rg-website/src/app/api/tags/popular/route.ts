@@ -15,7 +15,9 @@ interface ArticleTagsRow {
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const limitRaw = Number.parseInt(searchParams.get("limit") || "15", 10);
-  const limit = Number.isFinite(limitRaw) ? Math.max(1, Math.min(limitRaw, 50)) : 15;
+  const limit = Number.isFinite(limitRaw)
+    ? Math.max(1, Math.min(limitRaw, 50))
+    : 15;
 
   let rows: ArticleTagsRow[];
   try {

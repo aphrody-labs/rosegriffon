@@ -32,8 +32,7 @@ an AI assistant should behave inside it.
 
 ## 2. Conventions agents must follow
 
-- **No AI co-author trailers in commits.** Never add `
-  or any AI fingerprint. Use `aphrody-code` + `noreply@aphrody-code.dev`.
+- **No AI co-author trailers in commits.** Never add `or any AI fingerprint. Use`aphrody-code`+`noreply@aphrody-code.dev`.
 - **No personal name leaks.** The repo owner's real first/last name and personal
   handles must never appear in source, docs, commits, or issues — anonymise to
   the default agent identity. (`scripts/scan-repo.sh` greps for hardcoded

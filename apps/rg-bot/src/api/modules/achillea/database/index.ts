@@ -11,7 +11,13 @@ import type { Database } from "@rosegriffon/db/schema";
 import { getAchilleaDatabaseUrl } from "@rosegriffon/db/achillea";
 import { dbPlugin } from "../../../plugins/db";
 import { journaliserAudit, type EntreeAudit } from "../audit";
-import { chargerRoleEnBase, ROLE_STAFF, staff, superAdminOuJetonDev, type ChargeurRole } from "../staff";
+import {
+  chargerRoleEnBase,
+  ROLE_STAFF,
+  staff,
+  superAdminOuJetonDev,
+  type ChargeurRole,
+} from "../staff";
 import {
   configurationDepuisEnv,
   EchecOutil,
@@ -27,7 +33,10 @@ import {
   type DependancesSauvegarde,
 } from "./sauvegardes";
 
-export type Journal = (db: Kysely<Database>, entree: EntreeAudit) => Promise<void>;
+export type Journal = (
+  db: Kysely<Database>,
+  entree: EntreeAudit,
+) => Promise<void>;
 
 const journalParDefaut: Journal = async (db, entree) => {
   await journaliserAudit(db, entree);
@@ -44,7 +53,8 @@ function traduireErreur(cause: unknown) {
   if (cause instanceof OutilAbsent) return status(503, { message });
   if (cause instanceof SauvegardeInconnue) return status(404, { message });
   if (cause instanceof OperationEnCours) return status(409, { message });
-  if (cause instanceof SauvegardePrealableImpossible) return status(409, { message });
+  if (cause instanceof SauvegardePrealableImpossible)
+    return status(409, { message });
   if (cause instanceof EchecOutil) return status(500, { message });
   throw cause;
 }
@@ -54,7 +64,7 @@ export function creerDatabaseController(options: OptionsDatabase = {}) {
   const journal = options.journal ?? journalParDefaut;
   const dependances = (): DependancesSauvegarde => ({
     executer: executerParDefaut,
-    trouver: binaire => Bun.which(binaire),
+    trouver: (binaire) => Bun.which(binaire),
     urlBase: getAchilleaDatabaseUrl(),
     maintenant: () => new Date(),
     ...configurationDepuisEnv(),
@@ -77,14 +87,21 @@ export function creerDatabaseController(options: OptionsDatabase = {}) {
       const schema = Number(resultat.rows[0]?.schema ?? 0);
       return {
         database: { bytes: base, pretty: formaterOctets(base) },
-        schema: { name: SCHEMA_SAUVEGARDE, bytes: schema, pretty: formaterOctets(schema) },
+        schema: {
+          name: SCHEMA_SAUVEGARDE,
+          bytes: schema,
+          pretty: formaterOctets(schema),
+        },
       };
     })
     .get("/backups", async ({ db, headers }) => {
       const auth = await superAdminOuJetonDev(db, headers, chargerRole);
       if (auth.error) return auth.error;
       const deps = dependances();
-      return { data: await listerSauvegardes(deps.repertoire), retention: deps.conservation };
+      return {
+        data: await listerSauvegardes(deps.repertoire),
+        retention: deps.conservation,
+      };
     })
     .post("/backup", async ({ db, headers }) => {
       const auth = await superAdminOuJetonDev(db, headers, chargerRole);
@@ -97,7 +114,10 @@ export function creerDatabaseController(options: OptionsDatabase = {}) {
           cibleType: "database",
           cibleId: snapshotName,
         });
-        return { message: `Sauvegarde créée : ${snapshotName}`, data: { snapshotName } };
+        return {
+          message: `Sauvegarde créée : ${snapshotName}`,
+          data: { snapshotName },
+        };
       } catch (cause) {
         return traduireErreur(cause);
       }
@@ -105,10 +125,18 @@ export function creerDatabaseController(options: OptionsDatabase = {}) {
     .post(
       "/restore",
       async ({ db, headers, body }) => {
-        const auth = await staff(db, headers, ROLE_STAFF.SuperAdministrateur, chargerRole);
+        const auth = await staff(
+          db,
+          headers,
+          ROLE_STAFF.SuperAdministrateur,
+          chargerRole,
+        );
         if (auth.error) return auth.error;
         try {
-          const { sauvegardePrealable } = await restaurer(dependances(), body.snapshotName);
+          const { sauvegardePrealable } = await restaurer(
+            dependances(),
+            body.snapshotName,
+          );
           await journal(db, {
             acteur: auth.actor.id,
             action: "database.restore",
@@ -124,7 +152,11 @@ export function creerDatabaseController(options: OptionsDatabase = {}) {
           return traduireErreur(cause);
         }
       },
-      { body: t.Object({ snapshotName: t.String({ minLength: 1, maxLength: 120 }) }) },
+      {
+        body: t.Object({
+          snapshotName: t.String({ minLength: 1, maxLength: 120 }),
+        }),
+      },
     );
 }
 

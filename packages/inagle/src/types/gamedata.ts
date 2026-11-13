@@ -133,7 +133,8 @@ export interface CharacterStarSign extends BaseGamedataEntity {
 }
 
 /** Character ID to nameHash mapping (7,148 entries) */
-export interface CharacterIdMapping extends BaseGamedataEntity, MultilingualText {
+export interface CharacterIdMapping
+  extends BaseGamedataEntity, MultilingualText {
   charaId: HashId;
   nameHash: HashId;
   starSign?: number;

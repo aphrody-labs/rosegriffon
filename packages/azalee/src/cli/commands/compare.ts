@@ -4,8 +4,20 @@ import type { Command } from "commander";
 
 import { interpolateVariantStats } from "../../game/stats-interpolation";
 import type { CharaStats } from "../../wiki/chara-stats-shared";
-import { colors, errorMessage, reportError, restoreLogs, suppressLogs } from "../context";
-import { createInagleService, getAuraHashSet, getSkillDetails, type InagleService, type SkillDetails } from "../inagle";
+import {
+  colors,
+  errorMessage,
+  reportError,
+  restoreLogs,
+  suppressLogs,
+} from "../context";
+import {
+  createInagleService,
+  getAuraHashSet,
+  getSkillDetails,
+  type InagleService,
+  type SkillDetails,
+} from "../inagle";
 import { exitUnlessRepl } from "../repl-state";
 import type { CompareOptions } from "../types";
 
@@ -34,7 +46,9 @@ const STAT_ROWS: ReadonlyArray<{ key: keyof CharaStats; label: string }> = [
 export function registerCompareCommand(program: Command): void {
   program
     .command("compare <chara1> <chara2>")
-    .description("Compare deux joueurs côte à côte (stats interpolées et moveset)")
+    .description(
+      "Compare deux joueurs côte à côte (stats interpolées et moveset)",
+    )
     .option("-l, --level <level>", "Niveau à comparer (1-99)", "99")
     .option("-j, --json", "Format de sortie en JSON brut")
     .action(async (chara1: string, chara2: string, options: CompareOptions) => {
@@ -71,7 +85,12 @@ export function registerCompareCommand(program: Command): void {
             const nameEn = c.names?.en?.toLowerCase() || "";
             const nameJa = c.names?.ja?.toLowerCase() || "";
             const slug = c.slug?.toLowerCase() || "";
-            return nameFr.includes(q) || nameEn.includes(q) || nameJa.includes(q) || slug.includes(q);
+            return (
+              nameFr.includes(q) ||
+              nameEn.includes(q) ||
+              nameJa.includes(q) ||
+              slug.includes(q)
+            );
           });
         };
 
@@ -85,7 +104,11 @@ export function registerCompareCommand(program: Command): void {
               : matches1.length === 0
                 ? `Aucun joueur trouvé pour "${chara1}".`
                 : `Aucun joueur trouvé pour "${chara2}".`;
-          reportError(options.json, errorMsg, `${colors.red}Erreur: ${errorMsg}${colors.reset}`);
+          reportError(
+            options.json,
+            errorMsg,
+            `${colors.red}Erreur: ${errorMsg}${colors.reset}`,
+          );
           return;
         }
 
@@ -97,8 +120,13 @@ export function registerCompareCommand(program: Command): void {
         const v2 = c2.variants?.[0];
 
         if (!v1 || !v2) {
-          const errorMsg = "Données de variante introuvables pour l'un des joueurs.";
-          reportError(options.json, errorMsg, `${colors.red}Erreur: ${errorMsg}${colors.reset}`);
+          const errorMsg =
+            "Données de variante introuvables pour l'un des joueurs.";
+          reportError(
+            options.json,
+            errorMsg,
+            `${colors.red}Erreur: ${errorMsg}${colors.reset}`,
+          );
           return;
         }
 
@@ -170,9 +198,15 @@ export function registerCompareCommand(program: Command): void {
           const padM = padCenter(rawMid, colWidthM);
           const padR = rawRight.padStart(colWidthR);
 
-          const coloredL = leftColor ? `${leftColor}${padL}${colors.reset}` : padL;
-          const coloredM = midColor ? `${midColor}${padM}${colors.reset}` : padM;
-          const coloredR = rightColor ? `${rightColor}${padR}${colors.reset}` : padR;
+          const coloredL = leftColor
+            ? `${leftColor}${padL}${colors.reset}`
+            : padL;
+          const coloredM = midColor
+            ? `${midColor}${padM}${colors.reset}`
+            : padM;
+          const coloredR = rightColor
+            ? `${rightColor}${padR}${colors.reset}`
+            : padR;
 
           return `│ ${coloredL} │ ${coloredM} │ ${coloredR} │`;
         };
@@ -181,7 +215,9 @@ export function registerCompareCommand(program: Command): void {
         const borderDivider = `├─${"─".repeat(colWidthL)}─┼─${"─".repeat(colWidthM)}─┼─${"─".repeat(colWidthR)}─┤`;
         const borderBottom = `└─${"─".repeat(colWidthL)}─┴─${"─".repeat(colWidthM)}─┴─${"─".repeat(colWidthR)}─┘`;
 
-        console.log(`\n${colors.cyan}=== COMPARAISON DE JOUEURS (Niveau ${level}) ===${colors.reset}`);
+        console.log(
+          `\n${colors.cyan}=== COMPARAISON DE JOUEURS (Niveau ${level}) ===${colors.reset}`,
+        );
         console.log(borderTop);
 
         const name1 = c1.names.fr || c1.names.en || c1.names.ja || c1.charaId;
@@ -228,7 +264,9 @@ export function registerCompareCommand(program: Command): void {
             showVal2 = "(▲) " + showVal2;
           }
 
-          console.log(formatRow(showVal1, label, showVal2, cL, colors.cyan, cR));
+          console.log(
+            formatRow(showVal1, label, showVal2, cL, colors.cyan, cR),
+          );
         }
 
         console.log(borderDivider);
@@ -245,18 +283,33 @@ export function registerCompareCommand(program: Command): void {
           totalCR = colors.green + colors.bold;
           showTotal2 = "(▲) " + showTotal2;
         }
-        console.log(formatRow(showTotal1, "TOTAL", showTotal2, totalCL, colors.bold + colors.yellow, totalCR));
+        console.log(
+          formatRow(
+            showTotal1,
+            "TOTAL",
+            showTotal2,
+            totalCL,
+            colors.bold + colors.yellow,
+            totalCR,
+          ),
+        );
         console.log(borderDivider);
 
         const maxMoves = Math.max(skills1.length, skills2.length);
-        console.log(formatRow("", "TECHNIQUES", "", "", colors.bold + colors.magenta));
+        console.log(
+          formatRow("", "TECHNIQUES", "", "", colors.bold + colors.magenta),
+        );
 
         for (let i = 0; i < maxMoves; i++) {
           const sk1 = skills1[i];
           const sk2 = skills2[i];
 
-          const text1 = sk1 ? `${sk1.name} (L. ${sk1.learnLevel}${sk1.power ? `, ${sk1.power}P` : ""})` : "";
-          const text2 = sk2 ? `${sk2.name} (L. ${sk2.learnLevel}${sk2.power ? `, ${sk2.power}P` : ""})` : "";
+          const text1 = sk1
+            ? `${sk1.name} (L. ${sk1.learnLevel}${sk1.power ? `, ${sk1.power}P` : ""})`
+            : "";
+          const text2 = sk2
+            ? `${sk2.name} (L. ${sk2.learnLevel}${sk2.power ? `, ${sk2.power}P` : ""})`
+            : "";
 
           console.log(formatRow(text1, `Slot ${i + 1}`, text2));
         }
@@ -278,18 +331,28 @@ export function registerCompareCommand(program: Command): void {
  * (qui ne sont pas des techniques), puis on hérite du moveset d'une variante
  * sœur si la variante courante n'en déclare aucun.
  */
-function resolveMoves(svc: InagleService, variant: any, baseChara: any): MovesetEntry[] {
+function resolveMoves(
+  svc: InagleService,
+  variant: any,
+  baseChara: any,
+): MovesetEntry[] {
   const auraHashes = getAuraHashSet(svc);
   const rawSkills = variant.skills || [];
   let skillList = rawSkills.filter(
-    (sk: any) => sk.skillId && !PHANTOM_SKILL_IDS.has(sk.skillId) && !auraHashes.has(sk.skillId),
+    (sk: any) =>
+      sk.skillId &&
+      !PHANTOM_SKILL_IDS.has(sk.skillId) &&
+      !auraHashes.has(sk.skillId),
   );
 
   if (skillList.length === 0 && baseChara.variants) {
     for (const sibling of baseChara.variants) {
       if (sibling.skills && sibling.skills.length > 0) {
         const sibSkills = sibling.skills.filter(
-          (sk: any) => sk.skillId && !PHANTOM_SKILL_IDS.has(sk.skillId) && !auraHashes.has(sk.skillId),
+          (sk: any) =>
+            sk.skillId &&
+            !PHANTOM_SKILL_IDS.has(sk.skillId) &&
+            !auraHashes.has(sk.skillId),
         );
         if (sibSkills.length > 0) {
           skillList = sibSkills;

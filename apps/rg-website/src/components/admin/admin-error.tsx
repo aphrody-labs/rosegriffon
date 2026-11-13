@@ -22,7 +22,8 @@ export function AdminError({ error, reset }: AdminErrorProps) {
       </div>
       <h2 className="text-2xl font-bold">Une erreur est survenue</h2>
       <p className="text-muted-foreground max-w-md">
-        {error.message || "Impossible de charger les données. Veuillez réessayer."}
+        {error.message ||
+          "Impossible de charger les données. Veuillez réessayer."}
       </p>
       <Button onClick={() => reset()} variant="default">
         Réessayer

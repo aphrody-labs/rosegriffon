@@ -18,7 +18,10 @@ export function sourcePlayerUrl(source: MediaSource, startSeconds = 0): string {
     return `https://www.youtube-nocookie.com/embed/${source.id}?${params}`;
   }
   if (source.platform === "dailymotion") {
-    const params = new URLSearchParams({ "queue-enable": "false", "sharing-enable": "false" });
+    const params = new URLSearchParams({
+      "queue-enable": "false",
+      "sharing-enable": "false",
+    });
     if (startSeconds > 0) params.set("start", String(Math.floor(startSeconds)));
     if (source.url.includes("/player/")) {
       params.set("video", source.id);
@@ -29,7 +32,10 @@ export function sourcePlayerUrl(source: MediaSource, startSeconds = 0): string {
   return source.url;
 }
 
-export function sourceFromEpisode(videoId: string, thumbnailUrl: string | null): MediaSource | null {
+export function sourceFromEpisode(
+  videoId: string,
+  thumbnailUrl: string | null,
+): MediaSource | null {
   if (/^[A-Za-z0-9_-]{11}$/.test(videoId)) {
     return {
       platform: "youtube",
@@ -38,13 +44,22 @@ export function sourceFromEpisode(videoId: string, thumbnailUrl: string | null):
       official: true,
     };
   }
-  const dailymotionId = thumbnailUrl?.match(/dailymotion\.com\/thumbnail\/video\/([A-Za-z0-9]+)/)?.[1];
+  const dailymotionId = thumbnailUrl?.match(
+    /dailymotion\.com\/thumbnail\/video\/([A-Za-z0-9]+)/,
+  )?.[1];
   if (dailymotionId) {
-    return { platform: "dailymotion", id: dailymotionId, url: thumbnailUrl!, official: true };
+    return {
+      platform: "dailymotion",
+      id: dailymotionId,
+      url: thumbnailUrl!,
+      official: true,
+    };
   }
   return null;
 }
 
 export function sourceIsPlayable(source: MediaSource): boolean {
-  return source.platform !== "official_page" && source.platform !== "manga_publisher";
+  return (
+    source.platform !== "official_page" && source.platform !== "manga_publisher"
+  );
 }

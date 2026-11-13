@@ -37,7 +37,9 @@ function stripNonCode(source: string): string {
 
 describe("pureté du contrat", () => {
   test("le paquet n'a aucune dépendance runtime", async () => {
-    const manifest = JSON.parse(await readFile(join(PACKAGE_ROOT, "package.json"), "utf8")) as {
+    const manifest = JSON.parse(
+      await readFile(join(PACKAGE_ROOT, "package.json"), "utf8"),
+    ) as {
       dependencies?: Record<string, string>;
     };
     expect(manifest.dependencies ?? {}).toEqual({});
@@ -47,7 +49,8 @@ describe("pureté du contrat", () => {
     const offenders: string[] = [];
     for (const file of await sourceFiles(SRC)) {
       const code = stripNonCode(await readFile(file, "utf8"));
-      if (/\bfunction\b|\bclass\b|=>/u.test(code)) offenders.push(file.slice(SRC.length + 1));
+      if (/\bfunction\b|\bclass\b|=>/u.test(code))
+        offenders.push(file.slice(SRC.length + 1));
     }
     expect(offenders).toEqual([]);
   });
@@ -64,7 +67,7 @@ describe("pureté du contrat", () => {
     const offenders: string[] = [];
     for (const file of await sourceFiles(SRC)) {
       const code = stripNonCode(await readFile(file, "utf8"));
-      if (forbidden.some(pattern => pattern.test(code))) {
+      if (forbidden.some((pattern) => pattern.test(code))) {
         offenders.push(file.slice(SRC.length + 1));
       }
     }
@@ -77,14 +80,17 @@ describe("pureté du contrat", () => {
       const code = await readFile(file, "utf8");
       for (const match of code.matchAll(/from\s+["']([^"']+)["']/gu)) {
         const specifier = match[1] as string;
-        if (!specifier.startsWith(".")) offenders.push(`${file.slice(SRC.length + 1)} → ${specifier}`);
+        if (!specifier.startsWith("."))
+          offenders.push(`${file.slice(SRC.length + 1)} → ${specifier}`);
       }
     }
     expect(offenders).toEqual([]);
   });
 
   test("chaque sous-chemin exporté existe", async () => {
-    const manifest = JSON.parse(await readFile(join(PACKAGE_ROOT, "package.json"), "utf8")) as {
+    const manifest = JSON.parse(
+      await readFile(join(PACKAGE_ROOT, "package.json"), "utf8"),
+    ) as {
       exports: Record<string, string>;
     };
     for (const target of Object.values(manifest.exports)) {

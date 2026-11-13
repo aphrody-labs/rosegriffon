@@ -11,11 +11,22 @@ import { createRoseGriffonAuth, type RoseGriffonAuthOptions } from "../factory";
 
 const ORIGIN = "https://rosegriffon.fr";
 const tables: Record<string, unknown[]> = {};
-for (const model of ["user", "session", "account", "verification", "jwks", "two_factor", "passkey"]) tables[model] = [];
+for (const model of [
+  "user",
+  "session",
+  "account",
+  "verification",
+  "jwks",
+  "two_factor",
+  "passkey",
+])
+  tables[model] = [];
 
 let lastMail = "";
 const auth = createRoseGriffonAuth({
-  database: memoryAdapter(tables) as unknown as RoseGriffonAuthOptions["database"],
+  database: memoryAdapter(
+    tables,
+  ) as unknown as RoseGriffonAuthOptions["database"],
   baseURL: ORIGIN,
   sendEmail: async ({ html }) => {
     lastMail = html;
@@ -23,7 +34,11 @@ const auth = createRoseGriffonAuth({
 });
 
 let requests = 0;
-const call = (path: string, body?: unknown, extra: { origin?: string; cookie?: string } = {}) =>
+const call = (
+  path: string,
+  body?: unknown,
+  extra: { origin?: string; cookie?: string } = {},
+) =>
   auth.handler(
     new Request(`${ORIGIN}/api/auth${path}`, {
       method: body === undefined ? "GET" : "POST",
@@ -40,20 +55,45 @@ const call = (path: string, body?: unknown, extra: { origin?: string; cookie?: s
 const email = "probe@example.test";
 const password = "probe password long enough";
 await call("/sign-up/email", { email, password, name: "Probe" });
-const link = new URL((/href="([^"]+)"/.exec(lastMail)?.[1] ?? "").replaceAll("&amp;", "&"));
+const link = new URL(
+  (/href="([^"]+)"/.exec(lastMail)?.[1] ?? "").replaceAll("&amp;", "&"),
+);
 await call(`/verify-email${link.search}`);
 const signIn = await call("/sign-in/email", { email, password });
-const sessionCookie = signIn.headers.getSetCookie().find(value => value.includes("session_token=")) ?? "";
-const google = (await (await call("/sign-in/social", { provider: "google", callbackURL: "/" })).json()) as { url: string };
+const sessionCookie =
+  signIn.headers
+    .getSetCookie()
+    .find((value) => value.includes("session_token=")) ?? "";
+const google = (await (
+  await call("/sign-in/social", { provider: "google", callbackURL: "/" })
+).json()) as { url: string };
 const cookie = sessionCookie.split(";")[0] ?? "";
-const read = async () => ((await (await call("/get-session", undefined, { cookie })).json()) as { user?: unknown } | null)?.user !== undefined;
+const read = async () =>
+  (
+    (await (await call("/get-session", undefined, { cookie })).json()) as {
+      user?: unknown;
+    } | null
+  )?.user !== undefined;
 // CSRF: a cookie-carrying POST from an untrusted origin must be refused.
-const forgedSignOut = (await call("/sign-out", {}, { cookie, origin: "https://evil.example" })).status;
+const forgedSignOut = (
+  await call("/sign-out", {}, { cookie, origin: "https://evil.example" })
+).status;
 const sessionAfterForgery = await read();
-const openRedirect = (await call("/sign-in/social", { provider: "google", callbackURL: "https://evil.example/steal" })).status;
-const signOut = await call("/sign-out", {}, { cookie, origin: "https://achillea.rosegriffon.fr" });
+const openRedirect = (
+  await call("/sign-in/social", {
+    provider: "google",
+    callbackURL: "https://evil.example/steal",
+  })
+).status;
+const signOut = await call(
+  "/sign-out",
+  {},
+  { cookie, origin: "https://achillea.rosegriffon.fr" },
+);
 const achilleaOriginSignOut = signOut.status;
-const achilleaCookieOnSignOut = signOut.headers.getSetCookie().find(value => value.startsWith("token=")) ?? "";
+const achilleaCookieOnSignOut =
+  signOut.headers.getSetCookie().find((value) => value.startsWith("token=")) ??
+  "";
 const sessionAfterSignOut = await read();
 
 process.stdout.write(

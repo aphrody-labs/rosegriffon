@@ -15,7 +15,12 @@ import {
   Users,
 } from "lucide-react";
 
-import { AdminPageHeader, DashboardGrid, RecentListCard, DashboardStatsCard as StatsCard } from "@rosegriffon/ui";
+import {
+  AdminPageHeader,
+  DashboardGrid,
+  RecentListCard,
+  DashboardStatsCard as StatsCard,
+} from "@rosegriffon/ui";
 import { createPostgresClient } from "@rosegriffon/db/service";
 
 import { etatDuCron } from "@/lib/bot/cron";
@@ -52,16 +57,37 @@ export default async function AdminDashboardPage() {
     signupsTimelineRes,
   ] = await Promise.all([
     db.from("profiles").select("id", { count: "exact", head: true }),
-    db.from("user").select("*", { count: "exact", head: true }).gt("created_at", sevenDaysAgo.toISOString()),
-    db.from("articles").select("*", { count: "exact", head: true }).eq("status", "published"),
-    db.from("articles").select("*", { count: "exact", head: true }).neq("status", "published"),
+    db
+      .from("user")
+      .select("*", { count: "exact", head: true })
+      .gt("created_at", sevenDaysAgo.toISOString()),
+    db
+      .from("articles")
+      .select("*", { count: "exact", head: true })
+      .eq("status", "published"),
+    db
+      .from("articles")
+      .select("*", { count: "exact", head: true })
+      .neq("status", "published"),
     db.from("events").select("*", { count: "exact", head: true }),
-    db.from("events").select("*", { count: "exact", head: true }).gt("start_time", nowIso),
-    db.from("session").select("id", { count: "exact", head: true }).gt("expires_at", nowIso),
-    db.from("account").select("user_id", { count: "exact", head: true }).eq("provider_id", "patreon"),
+    db
+      .from("events")
+      .select("*", { count: "exact", head: true })
+      .gt("start_time", nowIso),
+    db
+      .from("session")
+      .select("id", { count: "exact", head: true })
+      .gt("expires_at", nowIso),
+    db
+      .from("account")
+      .select("user_id", { count: "exact", head: true })
+      .eq("provider_id", "patreon"),
     // Soutien réel : palier engagé des patrons actifs, pas le simple nombre
     // de comptes reliés (un ancien patron reste relié).
-    db.from("patreon_memberships").select("currently_entitled_cents").eq("patron_status", "active_patron"),
+    db
+      .from("patreon_memberships")
+      .select("currently_entitled_cents")
+      .eq("patron_status", "active_patron"),
     // Santé de la synchronisation Discord : sans elle, le cron peut échouer
     // des jours sans que personne ne le voie.
     db
@@ -69,7 +95,11 @@ export default async function AdminDashboardPage() {
       .select("status, total_members, error_count, created_at")
       .order("created_at", { ascending: false })
       .limit(1),
-    db.from("user").select("id, created_at").order("created_at", { ascending: false }).limit(5),
+    db
+      .from("user")
+      .select("id, created_at")
+      .order("created_at", { ascending: false })
+      .limit(5),
     db
       .from("articles")
       .select("id, title, slug, status, published_at, updated_at, view_count")
@@ -96,9 +126,14 @@ export default async function AdminDashboardPage() {
   const cron = await etatDuCron();
   const tachesAffichees = [...cron.taches]
     .sort((a, b) => {
-      const echec = Number(a.dernier?.succes !== false) - Number(b.dernier?.succes !== false);
+      const echec =
+        Number(a.dernier?.succes !== false) -
+        Number(b.dernier?.succes !== false);
       if (echec !== 0) return echec;
-      return Date.parse(b.dernier?.demarre_le ?? "") - Date.parse(a.dernier?.demarre_le ?? "") || 0;
+      return (
+        Date.parse(b.dernier?.demarre_le ?? "") -
+          Date.parse(a.dernier?.demarre_le ?? "") || 0
+      );
     })
     .slice(0, 8);
 
@@ -112,8 +147,13 @@ export default async function AdminDashboardPage() {
   const patreonLinked = patreonLinkedRes.count ?? 0;
   const signupsTimeline = buildDailySignups(signupsTimelineRes.data ?? []);
 
-  const activePatrons = (activePatronsRes.data ?? []) as { currently_entitled_cents: number | null }[];
-  const monthlySupportCents = activePatrons.reduce((sum, p) => sum + (p.currently_entitled_cents ?? 0), 0);
+  const activePatrons = (activePatronsRes.data ?? []) as {
+    currently_entitled_cents: number | null;
+  }[];
+  const monthlySupportCents = activePatrons.reduce(
+    (sum, p) => sum + (p.currently_entitled_cents ?? 0),
+    0,
+  );
   const monthlySupport = new Intl.NumberFormat("fr-FR", {
     currency: "EUR",
     maximumFractionDigits: 0,
@@ -126,36 +166,46 @@ export default async function AdminDashboardPage() {
     error_count: number | null;
     created_at: string | null;
   } | null;
-  const syncOk = lastSync?.status === "success" && (lastSync.error_count ?? 0) === 0;
+  const syncOk =
+    lastSync?.status === "success" && (lastSync.error_count ?? 0) === 0;
   const syncAge = lastSync?.created_at
-    ? Math.round((now.getTime() - new Date(lastSync.created_at).getTime()) / 60_000)
+    ? Math.round(
+        (now.getTime() - new Date(lastSync.created_at).getTime()) / 60_000,
+      )
     : null;
 
-  const recentUserIds = (recentUsersRaw.data ?? []).map((u: { id: string }) => u.id);
+  const recentUserIds = (recentUsersRaw.data ?? []).map(
+    (u: { id: string }) => u.id,
+  );
   const profilesRes =
     recentUserIds.length > 0
-      ? await db.from("profiles").select("id, username, full_name, avatar_url, role").in("id", recentUserIds)
+      ? await db
+          .from("profiles")
+          .select("id, username, full_name, avatar_url, role")
+          .in("id", recentUserIds)
       : { data: [] };
 
-  const recentUsers = (recentUsersRaw.data ?? []).map((u: { id: string; created_at: string | null }) => {
-    const profile = (profilesRes.data ?? []).find(
-      (p: {
-        id: string;
-        username: string | null;
-        full_name: string | null;
-        avatar_url: string | null;
-        role: string | null;
-      }) => p.id === u.id,
-    );
-    return {
-      avatar_url: profile?.avatar_url ?? null,
-      created_at: u.created_at,
-      full_name: profile?.full_name ?? null,
-      id: u.id,
-      role: profile?.role ?? "Utilisateur",
-      username: profile?.username ?? null,
-    };
-  });
+  const recentUsers = (recentUsersRaw.data ?? []).map(
+    (u: { id: string; created_at: string | null }) => {
+      const profile = (profilesRes.data ?? []).find(
+        (p: {
+          id: string;
+          username: string | null;
+          full_name: string | null;
+          avatar_url: string | null;
+          role: string | null;
+        }) => p.id === u.id,
+      );
+      return {
+        avatar_url: profile?.avatar_url ?? null,
+        created_at: u.created_at,
+        full_name: profile?.full_name ?? null,
+        id: u.id,
+        role: profile?.role ?? "Utilisateur",
+        username: profile?.username ?? null,
+      };
+    },
+  );
 
   return (
     <div className="mx-auto max-w-7xl space-y-8 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
@@ -243,7 +293,11 @@ export default async function AdminDashboardPage() {
         <StatsCard
           title="Tâches au registre"
           value={cron.bilan.total}
-          description={cron.joignable ? "API des tâches en ligne" : "API des tâches injoignable"}
+          description={
+            cron.joignable
+              ? "API des tâches en ligne"
+              : "API des tâches injoignable"
+          }
           icon={Timer}
           href="/admin/cron"
           accent={cron.joignable ? "emerald" : "rose"}
@@ -259,7 +313,11 @@ export default async function AdminDashboardPage() {
         <StatsCard
           title="Sans exécution connue"
           value={cron.bilan.jamaisExecutees}
-          description={cron.historiqueDisponible ? "Jamais lancées ou hors historique" : "Historique illisible"}
+          description={
+            cron.historiqueDisponible
+              ? "Jamais lancées ou hors historique"
+              : "Historique illisible"
+          }
           icon={CalendarClock}
           href="/admin/cron"
           accent="amber"
@@ -272,11 +330,16 @@ export default async function AdminDashboardPage() {
           href="/admin/cron"
           icon={Timer}
           accent="bg-info/10 text-info"
-          items={tachesAffichees.map(t => ({
+          items={tachesAffichees.map((t) => ({
             date: t.dernier?.demarre_le ?? undefined,
             id: t.nom,
-            status: t.dernier ? (t.dernier.succes ? undefined : "Échec") : "Jamais exécutée",
-            subtitle: t.planification === "manuel" ? "Manuelle" : t.planification,
+            status: t.dernier
+              ? t.dernier.succes
+                ? undefined
+                : "Échec"
+              : "Jamais exécutée",
+            subtitle:
+              t.planification === "manuel" ? "Manuelle" : t.planification,
             title: t.titre,
           }))}
         />
@@ -284,7 +347,10 @@ export default async function AdminDashboardPage() {
 
       <SignupsChartLoader data={signupsTimeline} />
 
-      <section aria-labelledby="recent-title" className="grid gap-6 lg:grid-cols-2 xl:grid-cols-4">
+      <section
+        aria-labelledby="recent-title"
+        className="grid gap-6 lg:grid-cols-2 xl:grid-cols-4"
+      >
         <h2 id="recent-title" className="sr-only">
           Activité récente
         </h2>
@@ -342,7 +408,12 @@ export default async function AdminDashboardPage() {
           icon={Calendar}
           accent="bg-alerte/15 text-alerte"
           items={(upcomingEventsListRes.data ?? []).map(
-            (e: { id: string; title: string; start_time: string; location: string | null }) => ({
+            (e: {
+              id: string;
+              title: string;
+              start_time: string;
+              location: string | null;
+            }) => ({
               date: e.start_time,
               id: e.id,
               subtitle: e.location || "Lieu non précisé",
@@ -355,7 +426,7 @@ export default async function AdminDashboardPage() {
           href="https://drive.google.com/drive/my-drive"
           icon={FolderOpen}
           accent="bg-succes/10 text-succes"
-          items={driveFiles.map(file => ({
+          items={driveFiles.map((file) => ({
             date: file.modifiedTime ?? undefined,
             id: file.id,
             subtitle: describeMimeType(file.mimeType),

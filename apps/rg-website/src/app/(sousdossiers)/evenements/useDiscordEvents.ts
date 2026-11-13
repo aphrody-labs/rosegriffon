@@ -40,7 +40,9 @@ async function fetchDiscordScheduledEvents(): Promise<DiscordScheduledEvent[]> {
     const response = await fetch("/api/discord/scheduled-events");
 
     if (!response.ok) {
-      throw new Error(`Erreur lors de la récupération des événements Discord: ${response.status}`);
+      throw new Error(
+        `Erreur lors de la récupération des événements Discord: ${response.status}`,
+      );
     }
 
     const data = await response.json();

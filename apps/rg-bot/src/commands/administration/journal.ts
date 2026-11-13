@@ -51,7 +51,8 @@ import "./racine";
 @SlashGroup("journal", "administration")
 export class AdministrationJournalCommand {
   @Slash({
-    description: "Choisir le salon du journal de modération (vide = ne rien publier)",
+    description:
+      "Choisir le salon du journal de modération (vide = ne rien publier)",
     name: "salon",
   })
   async salon(
@@ -72,13 +73,22 @@ export class AdministrationJournalCommand {
     }
     const guildId = interaction.guildId;
     if (!guildId) {
-      await repondre(interaction, echec("Hors serveur", "Un journal se règle sur un serveur, pas en message privé."));
+      await repondre(
+        interaction,
+        echec(
+          "Hors serveur",
+          "Un journal se règle sur un serveur, pas en message privé.",
+        ),
+      );
       return;
     }
     try {
       const actuels = await reglagesDe(guildId);
       const modifies = fusionnerReglages(actuels, {
-        moderation: { actif: salon !== undefined, salonJournal: salon?.id ?? null },
+        moderation: {
+          actif: salon !== undefined,
+          salonJournal: salon?.id ?? null,
+        },
       });
       await enregistrerReglages(guildId, modifies);
       await logAdminAction({
@@ -110,13 +120,17 @@ export class AdministrationJournalCommand {
         cibleId: interaction.user.id,
         cibleEtiquette: interaction.user.tag,
         parQui: interaction.user.id,
-        motif: "Carte d'essai — le journal de modération vient d'être branché sur ce salon.",
+        motif:
+          "Carte d'essai — le journal de modération vient d'être branché sur ce salon.",
         precisions: [{ nom: "Essai", valeur: "aucune sanction n'a été prise" }],
       });
       await repondre(
         interaction,
         echecEssai
-          ? echec("Salon enregistré, mais rien n'a pu y être publié", echecEssai)
+          ? echec(
+              "Salon enregistré, mais rien n'a pu y être publié",
+              echecEssai,
+            )
           : succes(
               "Journal de modération branché",
               `Avertissements, exclusions et bannissements paraîtront dans ${salon.toString()}. Une carte d'essai vient d'y être posée.`,

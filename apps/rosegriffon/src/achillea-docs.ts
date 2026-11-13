@@ -14,9 +14,13 @@ import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
 /** Table propriété → classe, lue dans `client.ts` (`this.clans = new ClansResource(...)`). */
-export function proprietesDuClient(sourceClient: string): Record<string, string> {
+export function proprietesDuClient(
+  sourceClient: string,
+): Record<string, string> {
   const table: Record<string, string> = {};
-  for (const [, propriete, classe] of sourceClient.matchAll(/this\.(\w+)\s*=\s*new\s+(\w+Resource)\(/gu)) {
+  for (const [, propriete, classe] of sourceClient.matchAll(
+    /this\.(\w+)\s*=\s*new\s+(\w+Resource)\(/gu,
+  )) {
     if (propriete && classe) table[classe] = propriete;
   }
   return table;
@@ -31,12 +35,14 @@ export function docsDuSource(source: string): Record<string, string> {
     const debut = correspondance.index ?? 0;
     const fin = classes[rang + 1]?.index ?? source.length;
     const corps = source.slice(debut, fin);
-    for (const [, bloc, methode] of corps.matchAll(/\/\*\*([\s\S]*?)\*\/\s*\n\s*(?:async\s+)?(\w+)\s*[(<]/gu)) {
+    for (const [, bloc, methode] of corps.matchAll(
+      /\/\*\*([\s\S]*?)\*\/\s*\n\s*(?:async\s+)?(\w+)\s*[(<]/gu,
+    )) {
       if (!bloc || !methode || !classe) continue;
       const ligne = bloc
         .split("\n")
-        .map(l => l.replace(/^\s*\*?\s?/u, "").trim())
-        .find(l => l !== "");
+        .map((l) => l.replace(/^\s*\*?\s?/u, "").trim())
+        .find((l) => l !== "");
       if (ligne) docs[`${classe}.${methode}`] = ligne;
     }
   }
@@ -45,17 +51,26 @@ export function docsDuSource(source: string): Record<string, string> {
 
 /** MACRO : table `ressource.méthode` → ligne de doc. */
 export function docsClientAchillea(): Record<string, string> {
-  const dossier = join(import.meta.dir, "../../../packages/achillea-client/src/v1");
+  const dossier = join(
+    import.meta.dir,
+    "../../../packages/achillea-client/src/v1",
+  );
   let fichiers: string[];
   try {
-    fichiers = readdirSync(dossier).filter(f => f.endsWith(".ts") && !f.endsWith(".test.ts"));
+    fichiers = readdirSync(dossier).filter(
+      (f) => f.endsWith(".ts") && !f.endsWith(".test.ts"),
+    );
   } catch {
     return {};
   }
-  const proprietes = proprietesDuClient(readFileSync(join(dossier, "client.ts"), "utf8"));
+  const proprietes = proprietesDuClient(
+    readFileSync(join(dossier, "client.ts"), "utf8"),
+  );
   const docs: Record<string, string> = {};
   for (const fichier of fichiers) {
-    for (const [cle, ligne] of Object.entries(docsDuSource(readFileSync(join(dossier, fichier), "utf8")))) {
+    for (const [cle, ligne] of Object.entries(
+      docsDuSource(readFileSync(join(dossier, fichier), "utf8")),
+    )) {
       const [classe, methode] = cle.split(".");
       const propriete = classe ? proprietes[classe] : undefined;
       if (propriete && methode) docs[`${propriete}.${methode}`] = ligne;

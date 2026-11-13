@@ -5,7 +5,12 @@ import { useId, useEffect, useState } from "react";
 const THEMES = [
   { id: "theme-roy", label: "Roy", mode: "light", swatch: "#344E8C" },
   { id: "theme-gaelle", label: "Gaëlle", mode: "light", swatch: "#B03519" },
-  { id: "theme-azalee-light", label: "Azalée clair", mode: "light", swatch: "#F2A93B" },
+  {
+    id: "theme-azalee-light",
+    label: "Azalée clair",
+    mode: "light",
+    swatch: "#F2A93B",
+  },
   {
     id: "theme-azalee-dark",
     label: "Azalée",
@@ -28,7 +33,8 @@ export function ThemeSwitcher() {
 
   useEffect(() => {
     const root = document.documentElement.parentElement;
-    const container = document.querySelector("[data-design-system-root]") ?? root;
+    const container =
+      document.querySelector("[data-design-system-root]") ?? root;
     if (!container) {
       return;
     }
@@ -36,7 +42,10 @@ export function ThemeSwitcher() {
       container.classList.remove(t.id);
     }
     container.classList.add(active);
-    container.classList.toggle("dark", active === "theme-azalee-dark" || active === "theme-achillea");
+    container.classList.toggle(
+      "dark",
+      active === "theme-azalee-dark" || active === "theme-achillea",
+    );
   }, [active]);
 
   return (
@@ -45,13 +54,15 @@ export function ThemeSwitcher() {
       aria-label="Choisir un thème"
       className="inline-flex items-center gap-1 rounded-full border-2 border-on-surface p-1 font-mono-ds text-[11px] uppercase tracking-[0.18em]"
     >
-      {THEMES.map(t => {
+      {THEMES.map((t) => {
         const isActive = t.id === active;
         return (
           <label
             key={t.id}
             className={`group flex items-center gap-2 rounded-full px-3 py-1.5 transition-all motion-safe:duration-200 outline-hidden focus-within:ring-[3px] focus-within:ring-ring/50 ${
-              isActive ? "bg-on-surface text-surface" : "text-on-surface hover:bg-on-surface/10"
+              isActive
+                ? "bg-on-surface text-surface"
+                : "text-on-surface hover:bg-on-surface/10"
             }`}
           >
             <input

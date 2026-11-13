@@ -1,6 +1,9 @@
 import { describe, expect, test } from "bun:test";
 
-import { isTournamentOrganizer, rankImagePath } from "@rosegriffon/achillea-core";
+import {
+  isTournamentOrganizer,
+  rankImagePath,
+} from "@rosegriffon/achillea-core";
 
 import { achilleaApiUrl, createAchilleaClient } from "./client";
 
@@ -68,18 +71,26 @@ describe("isTournamentOrganizer", () => {
     expect(isTournamentOrganizer({ id: "owner-1" }, tournoi)).toBe(true);
     expect(isTournamentOrganizer({ id: "org-mgr-2" }, tournoi)).toBe(true);
     expect(isTournamentOrganizer({ id: "to-1" }, tournoi)).toBe(true);
-    expect(isTournamentOrganizer({ id: "quiconque", role: 3 }, tournoi)).toBe(true);
+    expect(isTournamentOrganizer({ id: "quiconque", role: 3 }, tournoi)).toBe(
+      true,
+    );
   });
 
   test("refuse un simple participant", () => {
-    expect(isTournamentOrganizer({ id: "intrus", role: 0 }, tournoi)).toBe(false);
-    expect(isTournamentOrganizer({ id: "intrus", role: 1 }, tournoi)).toBe(false);
+    expect(isTournamentOrganizer({ id: "intrus", role: 0 }, tournoi)).toBe(
+      false,
+    );
+    expect(isTournamentOrganizer({ id: "intrus", role: 1 }, tournoi)).toBe(
+      false,
+    );
   });
 
   test("tolère un tournoi ou une organisation absents", () => {
     expect(isTournamentOrganizer({ id: "x" }, null)).toBe(false);
     expect(isTournamentOrganizer({ id: "x" }, {})).toBe(false);
-    expect(isTournamentOrganizer({ id: "x" }, { organization: null })).toBe(false);
+    expect(isTournamentOrganizer({ id: "x" }, { organization: null })).toBe(
+      false,
+    );
   });
 });
 

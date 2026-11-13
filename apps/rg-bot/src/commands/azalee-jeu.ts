@@ -33,8 +33,18 @@
  * les types de `@rosegriffon/azalee/remote` sont dérivés des fonctions serveur
  * et exposent bien plus large que ce qu'un embed affiche.
  */
-import { ButtonComponent, Discord, Slash, SlashChoice, SlashGroup, SlashOption } from "discordx";
-import { dropCategoryLabel, dropSourceLabel } from "@rosegriffon/azalee/wiki/drops-shared";
+import {
+  ButtonComponent,
+  Discord,
+  Slash,
+  SlashChoice,
+  SlashGroup,
+  SlashOption,
+} from "discordx";
+import {
+  dropCategoryLabel,
+  dropSourceLabel,
+} from "@rosegriffon/azalee/wiki/drops-shared";
 import {
   ActionRowBuilder,
   ApplicationCommandOptionType,
@@ -47,7 +57,12 @@ import {
   MessageFlags,
 } from "discord.js";
 
-import { azalee, isAzaleeNotFound, messageErreurAzalee, urlWiki } from "../lib/azalee";
+import {
+  azalee,
+  isAzaleeNotFound,
+  messageErreurAzalee,
+  urlWiki,
+} from "../lib/azalee";
 import {
   bornerPage,
   CATEGORIES_GALERIE,
@@ -228,7 +243,10 @@ interface FicheAura {
   telopUrl?: string | null;
   assetCode?: string | null;
   subType?: string | null;
-  sheetData?: { hissatsu?: HissatsuAura | null; config?: Record<string, unknown> | null } | null;
+  sheetData?: {
+    hissatsu?: HissatsuAura | null;
+    config?: Record<string, unknown> | null;
+  } | null;
 }
 
 interface EntreeTactique {
@@ -353,7 +371,11 @@ interface Costume {
 }
 
 interface ListeCostumes extends Page<Costume> {
-  types?: Array<{ type?: number | null; label?: string | null; count?: number | null }> | null;
+  types?: Array<{
+    type?: number | null;
+    label?: string | null;
+    count?: number | null;
+  }> | null;
 }
 
 interface SigneInvocation {
@@ -383,7 +405,11 @@ interface DonneesDrops {
   counts?: Record<string, number> | null;
   categories?: string[] | null;
   beanGames?: string[] | null;
-  beans?: Array<{ team?: string | null; stat?: string | null; value?: string | null }> | null;
+  beans?: Array<{
+    team?: string | null;
+    stat?: string | null;
+    value?: string | null;
+  }> | null;
   spiritGroups?: Array<{ anyChance?: number | null }> | null;
 }
 
@@ -393,7 +419,10 @@ interface EntreeMagasin {
   nameEn?: string | null;
   nameJa?: string | null;
   itemCount?: number | null;
-  categories?: Array<{ category?: string | null; count?: number | null }> | null;
+  categories?: Array<{
+    category?: string | null;
+    count?: number | null;
+  }> | null;
 }
 
 interface FicheMagasin extends EntreeMagasin {
@@ -424,9 +453,12 @@ export async function repondreSuggestions(
     const choix = await produire();
     await interaction.respond(
       choix
-        .filter(c => c.value.length > 0)
+        .filter((c) => c.value.length > 0)
         .slice(0, 25)
-        .map(c => ({ name: truncate(c.name, 100), value: truncate(c.value, 100) })),
+        .map((c) => ({
+          name: truncate(c.name, 100),
+          value: truncate(c.value, 100),
+        })),
     );
   } catch {
     await interaction.respond([]);
@@ -495,29 +527,37 @@ export async function illustrationProuvee(
   if (!chemin) {
     return image;
   }
-  const existe = await cached<boolean>(`azalee:cpk:${chemin}`, 6 * 60 * 60_000, async () => {
-    try {
-      await azalee().cpkFile(chemin);
-      return true;
-    } catch {
-      return false;
-    }
-  });
+  const existe = await cached<boolean>(
+    `azalee:cpk:${chemin}`,
+    6 * 60 * 60_000,
+    async () => {
+      try {
+        await azalee().cpkFile(chemin);
+        return true;
+      } catch {
+        return false;
+      }
+    },
+  );
   return existe ? image : null;
 }
 
 /** Équipes du wiki, en cache court : 208 lignes, servies à chaque fiche de personnage. */
 export async function equipesConnues(): Promise<EntreeEquipe[]> {
-  return await cached<EntreeEquipe[]>("azalee:equipes", 10 * 60_000, async () => {
-    const equipes = (await azalee().teams()) as unknown as EntreeEquipe[];
-    return equipes.map(equipe => ({
-      id: equipe.id ?? null,
-      name: equipe.name ?? null,
-      nameEn: equipe.nameEn ?? null,
-      nameJa: equipe.nameJa ?? null,
-      rosterCount: equipe.rosterCount ?? null,
-    }));
-  });
+  return await cached<EntreeEquipe[]>(
+    "azalee:equipes",
+    10 * 60_000,
+    async () => {
+      const equipes = (await azalee().teams()) as unknown as EntreeEquipe[];
+      return equipes.map((equipe) => ({
+        id: equipe.id ?? null,
+        name: equipe.name ?? null,
+        nameEn: equipe.nameEn ?? null,
+        nameJa: equipe.nameJa ?? null,
+        rosterCount: equipe.rosterCount ?? null,
+      }));
+    },
+  );
 }
 
 /**
@@ -538,7 +578,7 @@ async function nomEquipe(perso: FichePerso): Promise<string | null> {
   }
   try {
     const equipes = await equipesConnues();
-    const equipe = equipes.find(e => String(e.id) === String(perso.teamId));
+    const equipe = equipes.find((e) => String(e.id) === String(perso.teamId));
     return equipe?.name ?? equipe?.nameEn ?? null;
   } catch {
     // Une jointure décorative ne fait pas échouer une fiche.
@@ -559,19 +599,28 @@ function totalStats(variante: VariantePerso): number {
   if (!stats) {
     return -1;
   }
-  return Object.values(stats).reduce<number>((somme, valeur) => somme + (typeof valeur === "number" ? valeur : 0), 0);
+  return Object.values(stats).reduce<number>(
+    (somme, valeur) => somme + (typeof valeur === "number" ? valeur : 0),
+    0,
+  );
 }
 
 /** Nom français d'une technique apprise, résolu par son identifiant hexadécimal. */
 async function nomTechnique(skillId: string): Promise<string | null> {
-  return await cached<string | null>(`azalee:skill-nom:${skillId}`, 30 * 60_000, async () => {
-    try {
-      const technique = (await azalee().skill(skillId)) as unknown as FicheTechnique;
-      return texteFr(technique.names, technique.displayName ?? "") || null;
-    } catch {
-      return null;
-    }
-  });
+  return await cached<string | null>(
+    `azalee:skill-nom:${skillId}`,
+    30 * 60_000,
+    async () => {
+      try {
+        const technique = (await azalee().skill(
+          skillId,
+        )) as unknown as FicheTechnique;
+        return texteFr(technique.names, technique.displayName ?? "") || null;
+      } catch {
+        return null;
+      }
+    },
+  );
 }
 
 // --- Tables servies EN ENTIER par l'API, donc filtrées et paginées ici ------
@@ -618,7 +667,8 @@ async function entraineursConnus(): Promise<FicheEntraineur[]> {
   return await cached<FicheEntraineur[]>(
     "azalee:entraineurs",
     10 * 60_000,
-    async () => ((await azalee().coaches()) ?? []) as unknown as FicheEntraineur[],
+    async () =>
+      ((await azalee().coaches()) ?? []) as unknown as FicheEntraineur[],
   );
 }
 
@@ -627,7 +677,8 @@ async function signesInvocation(): Promise<SigneInvocation[]> {
   return await cached<SigneInvocation[]>(
     "azalee:invocation",
     30 * 60_000,
-    async () => ((await azalee().invocation()) ?? []) as unknown as SigneInvocation[],
+    async () =>
+      ((await azalee().invocation()) ?? []) as unknown as SigneInvocation[],
   );
 }
 
@@ -676,7 +727,11 @@ const PAR_PAGE = 8;
  * dans ce cas on n'affiche AUCUN bouton plutôt que d'envoyer un composant que
  * Discord refuserait — un refus fait échouer le message entier, embed compris.
  */
-function boutonsPagination(etat: EtatListeAzalee, page: number, pages: number): Array<ActionRowBuilder<ButtonBuilder>> {
+function boutonsPagination(
+  etat: EtatListeAzalee,
+  page: number,
+  pages: number,
+): Array<ActionRowBuilder<ButtonBuilder>> {
   const idPrecedent = encoderEtatListe({ ...etat, page: page - 1 });
   const idSuivant = encoderEtatListe({ ...etat, page: page + 1 });
   if (pages <= 1 || !idPrecedent || !idSuivant) {
@@ -706,7 +761,9 @@ function boutonsPagination(etat: EtatListeAzalee, page: number, pages: number): 
 }
 
 /** Page de la galerie d'illustrations : `/api/gallery` pagine côté serveur. */
-async function rendreGalerie(etat: EtatListeAzalee): Promise<InteractionEditReplyOptions> {
+async function rendreGalerie(
+  etat: EtatListeAzalee,
+): Promise<InteractionEditReplyOptions> {
   const categorie = resoudreCategorieGalerie(etat.filtre);
   const parametres = {
     page: Math.max(1, etat.page),
@@ -714,7 +771,9 @@ async function rendreGalerie(etat: EtatListeAzalee): Promise<InteractionEditRepl
     ...(categorie ? { category: categorie } : {}),
     ...(etat.recherche ? { q: etat.recherche } : {}),
   };
-  const premier = (await azalee().gallery(parametres as never)) as unknown as Page<EntreeGalerie>;
+  const premier = (await azalee().gallery(
+    parametres as never,
+  )) as unknown as Page<EntreeGalerie>;
   const total = premier.total ?? 0;
   // Une page au-delà de la dernière ne doit pas répondre « vide » : on la
   // ramène dans les bornes et on relit.
@@ -730,7 +789,9 @@ async function rendreGalerie(etat: EtatListeAzalee): Promise<InteractionEditRepl
   const pages = nombreDePages(total, PAR_PAGE);
 
   const embed = rgEmbed()
-    .setTitle(`Galerie — ${formaterNombre(total)} illustration${total > 1 ? "s" : ""}`)
+    .setTitle(
+      `Galerie — ${formaterNombre(total)} illustration${total > 1 ? "s" : ""}`,
+    )
     .setURL(urlWiki(categorie ? `/gallery?category=${categorie}` : "/gallery"));
   const criteres = joindre([
     categorie ? libelleCategorieGalerie(categorie) : null,
@@ -747,11 +808,16 @@ async function rendreGalerie(etat: EtatListeAzalee): Promise<InteractionEditRepl
         : "La galerie ne contient aucune illustration.",
     );
   } else {
-    const lignes = entrees.map(entree => {
+    const lignes = entrees.map((entree) => {
       const lien = imageJeu(entree.image, 1600);
-      const titre = truncate(String(entree.title ?? entree.imgPath ?? "Illustration"), 70);
+      const titre = truncate(
+        String(entree.title ?? entree.imgPath ?? "Illustration"),
+        70,
+      );
       const etiquette = libelleCategorieGalerie(entree.category);
-      return lien ? `**${titre}** · ${etiquette} — [voir](${lien})` : `**${titre}** · ${etiquette}`;
+      return lien
+        ? `**${titre}** · ${etiquette} — [voir](${lien})`
+        : `**${titre}** · ${etiquette}`;
     });
     embed.setDescription(truncate(lignes.join("\n"), 3800));
     // Une seule vignette : les huit illustrations de la page coûteraient huit
@@ -766,10 +832,12 @@ async function rendreGalerie(etat: EtatListeAzalee): Promise<InteractionEditRepl
 }
 
 /** Page des taux de drop : `/api/drops` sert tout, la pagination est en mémoire. */
-async function rendreDrops(etat: EtatListeAzalee): Promise<InteractionEditReplyOptions> {
+async function rendreDrops(
+  etat: EtatListeAzalee,
+): Promise<InteractionEditReplyOptions> {
   const donnees = await donneesDrops();
   const tous = donnees.drops ?? [];
-  const filtres = tous.filter(drop => {
+  const filtres = tous.filter((drop) => {
     if (etat.filtre && drop.source !== etat.filtre) {
       return false;
     }
@@ -777,7 +845,9 @@ async function rendreDrops(etat: EtatListeAzalee): Promise<InteractionEditReplyO
       return true;
     }
     const aiguille = etat.recherche.toLowerCase();
-    return `${drop.itemName ?? ""} ${drop.itemInternalCode ?? ""}`.toLowerCase().includes(aiguille);
+    return `${drop.itemName ?? ""} ${drop.itemInternalCode ?? ""}`
+      .toLowerCase()
+      .includes(aiguille);
   });
   const page = bornerPage(etat.page, filtres.length, PAR_PAGE);
   const pages = nombreDePages(filtres.length, PAR_PAGE);
@@ -785,7 +855,9 @@ async function rendreDrops(etat: EtatListeAzalee): Promise<InteractionEditReplyO
 
   const compteurs = donnees.counts ?? {};
   const embed = rgEmbed()
-    .setTitle(`Taux de drop — ${formaterNombre(filtres.length)} lot${filtres.length > 1 ? "s" : ""}`)
+    .setTitle(
+      `Taux de drop — ${formaterNombre(filtres.length)} lot${filtres.length > 1 ? "s" : ""}`,
+    )
     .setURL(urlWiki("/drops"));
   if (etat.filtre || etat.recherche) {
     embed.setAuthor({
@@ -806,7 +878,7 @@ async function rendreDrops(etat: EtatListeAzalee): Promise<InteractionEditReplyO
       truncate(
         tranche
           .map(
-            drop =>
+            (drop) =>
               `**${truncate(String(drop.itemName ?? "?"), 60)}** — ${formaterPourcentage(
                 drop.chance,
               )} · ${dropSourceLabel(drop.source as never)} · ${dropCategoryLabel(drop.itemCategory ?? null)}`,
@@ -820,26 +892,41 @@ async function rendreDrops(etat: EtatListeAzalee): Promise<InteractionEditReplyO
   // Le reste des données de drop n'est PAS paginable (groupes d'esprits agrégés,
   // fèves d'équipe) : on en donne le décompte réel plutôt que de le taire.
   const resume = joindre([
-    typeof compteurs.concreteDrops === "number" ? `${formaterNombre(compteurs.concreteDrops)} lots concrets` : null,
-    typeof compteurs.dropSources === "number" ? `${formaterNombre(compteurs.dropSources)} sources` : null,
-    typeof compteurs.spiritGroups === "number" ? `${formaterNombre(compteurs.spiritGroups)} groupes d'esprits` : null,
-    typeof compteurs.beans === "number" ? `${formaterNombre(compteurs.beans)} fèves d'équipe` : null,
+    typeof compteurs.concreteDrops === "number"
+      ? `${formaterNombre(compteurs.concreteDrops)} lots concrets`
+      : null,
+    typeof compteurs.dropSources === "number"
+      ? `${formaterNombre(compteurs.dropSources)} sources`
+      : null,
+    typeof compteurs.spiritGroups === "number"
+      ? `${formaterNombre(compteurs.spiritGroups)} groupes d'esprits`
+      : null,
+    typeof compteurs.beans === "number"
+      ? `${formaterNombre(compteurs.beans)} fèves d'équipe`
+      : null,
   ]);
   if (resume.length > 0) {
-    embed.addFields({ name: "Ensemble des données", value: truncate(resume, 1000) });
+    embed.addFields({
+      name: "Ensemble des données",
+      value: truncate(resume, 1000),
+    });
   }
   pied(embed, { page: page, pages: pages });
   return { embeds: [embed], components: boutonsPagination(etat, page, pages) };
 }
 
 /** Page de la liste des coordinateurs : `/api/coordinators` pagine côté serveur. */
-async function rendreCoordinateurs(etat: EtatListeAzalee): Promise<InteractionEditReplyOptions> {
+async function rendreCoordinateurs(
+  etat: EtatListeAzalee,
+): Promise<InteractionEditReplyOptions> {
   const parametres = {
     page: Math.max(1, etat.page),
     limit: PAR_PAGE,
     ...(etat.recherche ? { q: etat.recherche } : {}),
   };
-  const premier = (await azalee().coordinators(parametres as never)) as unknown as Page<FichePerso>;
+  const premier = (await azalee().coordinators(
+    parametres as never,
+  )) as unknown as Page<FichePerso>;
   const total = premier.total ?? 0;
   const page = bornerPage(etat.page, total, PAR_PAGE);
   const resultat =
@@ -856,7 +943,9 @@ async function rendreCoordinateurs(etat: EtatListeAzalee): Promise<InteractionEd
     .setTitle(`Coordinateurs et managers — ${formaterNombre(total)}`)
     .setURL(urlWiki("/entraineur"));
   if (etat.recherche) {
-    embed.setAuthor({ name: truncate(`Recherche : « ${etat.recherche} »`, 200) });
+    embed.setAuthor({
+      name: truncate(`Recherche : « ${etat.recherche} »`, 200),
+    });
   }
   if (entrees.length === 0) {
     embed.setDescription("Aucun coordinateur ne correspond à cette recherche.");
@@ -864,7 +953,7 @@ async function rendreCoordinateurs(etat: EtatListeAzalee): Promise<InteractionEd
     embed.setDescription(
       truncate(
         entrees
-          .map(entree => {
+          .map((entree) => {
             const variante = entree.variants?.[0];
             const nom = `**${truncate(texteFr(entree.names), 60)}**`;
             // Sans ce garde, un coordinateur sans rôle ni élément affichait
@@ -890,7 +979,10 @@ async function rendreCoordinateurs(etat: EtatListeAzalee): Promise<InteractionEd
  * Tout l'état d'une liste tient dans l'identifiant du bouton : aucune mémoire de
  * processus, donc un redémarrage du bot ne laisse jamais de bouton mort.
  */
-const VUES_PAGINEES: Record<string, (etat: EtatListeAzalee) => Promise<InteractionEditReplyOptions>> = {
+const VUES_PAGINEES: Record<
+  string,
+  (etat: EtatListeAzalee) => Promise<InteractionEditReplyOptions>
+> = {
   galerie: rendreGalerie,
   drops: rendreDrops,
   coordinateur: rendreCoordinateurs,
@@ -905,7 +997,8 @@ const VUES_PAGINEES: Record<string, (etat: EtatListeAzalee) => Promise<Interacti
 export class AzaleeJeuCommand {
   @Slash({
     name: "perso",
-    description: "Fiche d'un personnage d'Inazuma Eleven: Victory Road : poste, élément, statistiques",
+    description:
+      "Fiche d'un personnage d'Inazuma Eleven: Victory Road : poste, élément, statistiques",
   })
   async perso(
     @SlashOption({
@@ -919,7 +1012,7 @@ export class AzaleeJeuCommand {
             q: saisie(interaction) || "a",
             limit: 25,
           } as never);
-          return (liste.data as unknown as FichePerso[]).map(perso => ({
+          return (liste.data as unknown as FichePerso[]).map((perso) => ({
             name: texteFr(perso.names),
             value: String(perso.baseSlug ?? perso.slug ?? ""),
           }));
@@ -933,7 +1026,10 @@ export class AzaleeJeuCommand {
       required: false,
       autocomplete: (interaction: AutocompleteInteraction) =>
         repondreSuggestions(interaction, async () =>
-          suggerer(RARETES_FR, saisie(interaction)).map(r => ({ name: r, value: r })),
+          suggerer(RARETES_FR, saisie(interaction)).map((r) => ({
+            name: r,
+            value: r,
+          })),
         ),
     })
     rarete: string | undefined,
@@ -942,29 +1038,41 @@ export class AzaleeJeuCommand {
     await interaction.deferReply();
     try {
       const perso = await ouvrirFiche<FichePerso>(
-        async cle => (await azalee().character(cle)) as unknown as FichePerso,
-        async texte => {
-          const liste = await azalee().characters({ q: texte, limit: 1 } as never);
+        async (cle) => (await azalee().character(cle)) as unknown as FichePerso,
+        async (texte) => {
+          const liste = await azalee().characters({
+            q: texte,
+            limit: 1,
+          } as never);
           const trouve = (liste.data as unknown as FichePerso[])[0];
-          return trouve ? String(trouve.baseSlug ?? trouve.slug ?? "") || null : null;
+          return trouve
+            ? String(trouve.baseSlug ?? trouve.slug ?? "") || null
+            : null;
         },
         nom,
       );
 
       const variantes = perso.variants ?? [];
       const rareteVoulue = resoudreRarete(rarete);
-      const candidates = rareteVoulue ? variantes.filter(v => v.rarity === rareteVoulue) : variantes;
+      const candidates = rareteVoulue
+        ? variantes.filter((v) => v.rarity === rareteVoulue)
+        : variantes;
       // À défaut de variante de la rareté demandée, on montre quand même la
       // meilleure plutôt que de répondre « rien » sur un personnage qui existe.
       const retenues = candidates.length > 0 ? candidates : variantes;
-      const meilleure = retenues.toSorted((a, b) => totalStats(b) - totalStats(a))[0] ?? ({} as VariantePerso);
+      const meilleure =
+        retenues.toSorted((a, b) => totalStats(b) - totalStats(a))[0] ??
+        ({} as VariantePerso);
       const slug = String(perso.baseSlug ?? perso.slug ?? nom);
 
       const embed = rgEmbed()
         .setTitle(texteFr(perso.names))
         .setURL(urlWiki(`/chara/${slug}`));
 
-      const resume = truncate(nettoyerTexteJeu(texteFr(perso.descriptions, "")), 400);
+      const resume = truncate(
+        nettoyerTexteJeu(texteFr(perso.descriptions, "")),
+        400,
+      );
       if (resume.length > 0) {
         embed.setDescription(resume);
       }
@@ -989,16 +1097,18 @@ export class AzaleeJeuCommand {
       }
 
       const apprises = (meilleure.skills ?? []).filter(
-        (s): s is TechniqueApprise & { skillId: string } => typeof s.skillId === "string",
+        (s): s is TechniqueApprise & { skillId: string } =>
+          typeof s.skillId === "string",
       );
       if (apprises.length > 0) {
         const noms = await Promise.all(
-          apprises.slice(0, 10).map(async technique => {
+          apprises.slice(0, 10).map(async (technique) => {
             const nomTech = await nomTechnique(technique.skillId);
             if (!nomTech) {
               return null;
             }
-            return typeof technique.learnLevel === "number" && technique.learnLevel > 0
+            return typeof technique.learnLevel === "number" &&
+              technique.learnLevel > 0
               ? `Niv. ${technique.learnLevel} — ${nomTech}`
               : nomTech;
           }),
@@ -1012,12 +1122,16 @@ export class AzaleeJeuCommand {
         }
       }
 
-      const raretes = [...new Set(variantes.map(v => v.rarity).filter(Boolean))];
+      const raretes = [
+        ...new Set(variantes.map((v) => v.rarity).filter(Boolean)),
+      ];
       const equipe = await nomEquipe(perso);
       const contexte = joindre([
         equipe ? `Équipe **${equipe}**` : null,
         perso.series ? `Série **${perso.series}**` : null,
-        perso.constellation?.names ? `Signe **${texteFr(perso.constellation.names, "?")}**` : null,
+        perso.constellation?.names
+          ? `Signe **${texteFr(perso.constellation.names, "?")}**`
+          : null,
         variantes.length > 1
           ? `${variantes.length} variantes${raretes.length > 1 ? ` (${raretes.join(", ")})` : ""}`
           : null,
@@ -1051,11 +1165,17 @@ export class AzaleeJeuCommand {
       }
       await interaction.editReply({ embeds: [embed] });
     } catch (err) {
-      await repondre(interaction, echec("Données de jeu indisponibles", messageErreurAzalee(err)));
+      await repondre(
+        interaction,
+        echec("Données de jeu indisponibles", messageErreurAzalee(err)),
+      );
     }
   }
 
-  @Slash({ name: "technique", description: "Fiche d'une technique spéciale (hissatsu)" })
+  @Slash({
+    name: "technique",
+    description: "Fiche d'une technique spéciale (hissatsu)",
+  })
   async technique(
     @SlashOption({
       name: "nom",
@@ -1066,21 +1186,34 @@ export class AzaleeJeuCommand {
         repondreSuggestions(interaction, async () => {
           // Les filtres déjà saisis restreignent les propositions — traduits
           // en libellés FRANÇAIS, seuls exploitables par la base.
-          const categorie = resoudreCategorieTechnique(interaction.options.getString("categorie"));
-          const element = resoudreElement(interaction.options.getString("element"));
+          const categorie = resoudreCategorieTechnique(
+            interaction.options.getString("categorie"),
+          );
+          const element = resoudreElement(
+            interaction.options.getString("element"),
+          );
           const liste = await azalee().skills({
             q: saisie(interaction) || undefined,
             limit: 25,
             ...(categorie ? { category: categorie } : {}),
             ...(element ? { element } : {}),
           } as never);
-          return (liste.data as unknown as FicheTechnique[]).map(technique => {
-            const etiquette = joindre([technique.categoryName?.fr, technique.elementName?.fr]);
-            return {
-              name: etiquette ? `${texteFr(technique.names)} — ${etiquette}` : texteFr(technique.names),
-              value: String(technique.skillId ?? technique.internalCode ?? ""),
-            };
-          });
+          return (liste.data as unknown as FicheTechnique[]).map(
+            (technique) => {
+              const etiquette = joindre([
+                technique.categoryName?.fr,
+                technique.elementName?.fr,
+              ]);
+              return {
+                name: etiquette
+                  ? `${texteFr(technique.names)} — ${etiquette}`
+                  : texteFr(technique.names),
+                value: String(
+                  technique.skillId ?? technique.internalCode ?? "",
+                ),
+              };
+            },
+          );
         }),
     })
     nom: string,
@@ -1091,7 +1224,10 @@ export class AzaleeJeuCommand {
       required: false,
       autocomplete: (interaction: AutocompleteInteraction) =>
         repondreSuggestions(interaction, async () =>
-          suggerer(CATEGORIES_TECHNIQUE_FR, saisie(interaction)).map(c => ({ name: c, value: c })),
+          suggerer(CATEGORIES_TECHNIQUE_FR, saisie(interaction)).map((c) => ({
+            name: c,
+            value: c,
+          })),
         ),
     })
     _categorie: string | undefined,
@@ -1102,7 +1238,10 @@ export class AzaleeJeuCommand {
       required: false,
       autocomplete: (interaction: AutocompleteInteraction) =>
         repondreSuggestions(interaction, async () =>
-          suggerer(ELEMENTS_FR, saisie(interaction)).map(e => ({ name: e, value: e })),
+          suggerer(ELEMENTS_FR, saisie(interaction)).map((e) => ({
+            name: e,
+            value: e,
+          })),
         ),
     })
     _element: string | undefined,
@@ -1111,26 +1250,41 @@ export class AzaleeJeuCommand {
     await interaction.deferReply();
     try {
       const technique = await ouvrirFiche<FicheTechnique>(
-        async cle => (await azalee().skill(cle)) as unknown as FicheTechnique,
-        async texte => {
+        async (cle) => (await azalee().skill(cle)) as unknown as FicheTechnique,
+        async (texte) => {
           const liste = await azalee().skills({ q: texte, limit: 1 } as never);
           const trouve = (liste.data as unknown as FicheTechnique[])[0];
-          return trouve ? String(trouve.skillId ?? trouve.internalCode ?? "") || null : null;
+          return trouve
+            ? String(trouve.skillId ?? trouve.internalCode ?? "") || null
+            : null;
         },
         nom,
       );
       const embed = rgEmbed()
-        .setTitle(texteFr(technique.names, technique.displayName ?? "Technique"))
-        .setURL(urlWiki(`/skill/${encodeURIComponent(String(technique.skillId ?? nom))}`));
+        .setTitle(
+          texteFr(technique.names, technique.displayName ?? "Technique"),
+        )
+        .setURL(
+          urlWiki(
+            `/skill/${encodeURIComponent(String(technique.skillId ?? nom))}`,
+          ),
+        );
 
-      const resume = truncate(nettoyerTexteJeu(texteFr(technique.descriptions, "")), 400);
+      const resume = truncate(
+        nettoyerTexteJeu(texteFr(technique.descriptions, "")),
+        400,
+      );
       if (resume.length > 0) {
         embed.setDescription(resume);
       }
 
       const nature = joindre([
-        technique.categoryName?.fr ? `Catégorie **${technique.categoryName.fr}**` : null,
-        technique.elementName?.fr ? `Élément **${technique.elementName.fr}**` : null,
+        technique.categoryName?.fr
+          ? `Catégorie **${technique.categoryName.fr}**`
+          : null,
+        technique.elementName?.fr
+          ? `Élément **${technique.elementName.fr}**`
+          : null,
         technique.skillType ? `Type \`${technique.skillType}\`` : null,
       ]);
       if (nature.length > 0) {
@@ -1139,26 +1293,40 @@ export class AzaleeJeuCommand {
 
       const chiffres = joindre([
         technique.powerRange ? `Puissance **${technique.powerRange}**` : null,
-        typeof technique.consumeTp === "number" ? `Tension **${technique.consumeTp}**` : null,
-        typeof technique.recastTime === "number" ? `Recharge **${technique.recastTime}**` : null,
-        technique.growthSpeed ? `Croissance **${technique.growthSpeed}**` : null,
+        typeof technique.consumeTp === "number"
+          ? `Tension **${technique.consumeTp}**`
+          : null,
+        typeof technique.recastTime === "number"
+          ? `Recharge **${technique.recastTime}**`
+          : null,
+        technique.growthSpeed
+          ? `Croissance **${technique.growthSpeed}**`
+          : null,
       ]);
       if (chiffres.length > 0) {
         embed.addFields({ name: "Chiffres", value: chiffres });
       }
       const boutiques = technique.shops?.fr ?? [];
       if (boutiques.length > 0) {
-        embed.addFields({ name: "En vente", value: truncate(boutiques.join(", "), 500) });
+        embed.addFields({
+          name: "En vente",
+          value: truncate(boutiques.join(", "), 500),
+        });
       }
       if (technique.videoUrl) {
-        embed.addFields({ name: "Vidéo", value: truncate(technique.videoUrl, 500) });
+        embed.addFields({
+          name: "Vidéo",
+          value: truncate(technique.videoUrl, 500),
+        });
       }
 
       // La fiche prend la couleur de son élément — c'est le repère que le wiki
       // utilise dans ses listes, et il est gratuit ici. Élément inconnu :
       // `couleurElement` rend `null` et l'embed garde la couleur du profil
       // plutôt que d'inventer une teinte.
-      const couleurTechnique = couleurElement(texteFr(technique.elementName, ""));
+      const couleurTechnique = couleurElement(
+        texteFr(technique.elementName, ""),
+      );
       if (couleurTechnique !== null) {
         embed.setColor(couleurTechnique);
       }
@@ -1171,11 +1339,17 @@ export class AzaleeJeuCommand {
       }
       await interaction.editReply({ embeds: [embed] });
     } catch (err) {
-      await repondre(interaction, echec("Données de jeu indisponibles", messageErreurAzalee(err)));
+      await repondre(
+        interaction,
+        echec("Données de jeu indisponibles", messageErreurAzalee(err)),
+      );
     }
   }
 
-  @Slash({ name: "objet", description: "Fiche d'un objet : équipement, consommable, matériau…" })
+  @Slash({
+    name: "objet",
+    description: "Fiche d'un objet : équipement, consommable, matériau…",
+  })
   async objet(
     @SlashOption({
       name: "nom",
@@ -1188,10 +1362,12 @@ export class AzaleeJeuCommand {
             q: saisie(interaction) || undefined,
             limit: 25,
           } as never);
-          return (liste.data as unknown as FicheObjet[]).map(objet => {
+          return (liste.data as unknown as FicheObjet[]).map((objet) => {
             const categorie = libelleCategorieObjet(objet.category);
             return {
-              name: categorie ? `${texteFr(objet.names)} — ${categorie}` : texteFr(objet.names),
+              name: categorie
+                ? `${texteFr(objet.names)} — ${categorie}`
+                : texteFr(objet.names),
               value: String(objet.itemId ?? ""),
             };
           });
@@ -1205,8 +1381,8 @@ export class AzaleeJeuCommand {
       // Même repli par recherche que les autres fiches : `/api/items/<id>`
       // n'accepte qu'un identifiant, or un membre tape le nom de l'objet.
       const objet = await ouvrirFiche<FicheObjet>(
-        async cle => (await azalee().item(cle)) as unknown as FicheObjet,
-        async texte => {
+        async (cle) => (await azalee().item(cle)) as unknown as FicheObjet,
+        async (texte) => {
           const liste = await azalee().items({ q: texte, limit: 1 } as never);
           const trouve = (liste.data as unknown as FicheObjet[])[0];
           return trouve ? String(trouve.itemId ?? "") || null : null;
@@ -1215,9 +1391,14 @@ export class AzaleeJeuCommand {
       );
       const embed = rgEmbed()
         .setTitle(texteFr(objet.names))
-        .setURL(urlWiki(`/item/${encodeURIComponent(String(objet.itemId ?? nom))}`));
+        .setURL(
+          urlWiki(`/item/${encodeURIComponent(String(objet.itemId ?? nom))}`),
+        );
 
-      const resume = truncate(nettoyerTexteJeu(texteFr(objet.descriptions, "")), 400);
+      const resume = truncate(
+        nettoyerTexteJeu(texteFr(objet.descriptions, "")),
+        400,
+      );
       if (resume.length > 0) {
         embed.setDescription(resume);
       }
@@ -1225,8 +1406,12 @@ export class AzaleeJeuCommand {
       const fiche = joindre([
         // L'API sert l'identifiant du jeu (`craft_obj`) : une UI française
         // affiche « Matériau ».
-        libelleCategorieObjet(objet.category) ? `Catégorie **${libelleCategorieObjet(objet.category)}**` : null,
-        typeof objet.price === "number" ? `Prix **${objet.price.toLocaleString("fr-FR")}**` : null,
+        libelleCategorieObjet(objet.category)
+          ? `Catégorie **${libelleCategorieObjet(objet.category)}**`
+          : null,
+        typeof objet.price === "number"
+          ? `Prix **${objet.price.toLocaleString("fr-FR")}**`
+          : null,
         objet.internalCode ? `Code \`${objet.internalCode}\`` : null,
       ]);
       if (fiche.length > 0) {
@@ -1243,7 +1428,10 @@ export class AzaleeJeuCommand {
       }
       const boutiques = objet.shops?.fr ?? [];
       if (boutiques.length > 0) {
-        embed.addFields({ name: "En vente", value: truncate(boutiques.join(", "), 500) });
+        embed.addFields({
+          name: "En vente",
+          value: truncate(boutiques.join(", "), 500),
+        });
       }
 
       // Les icônes d'objet sont des sous-textures d'atlas, non servies par le
@@ -1255,11 +1443,17 @@ export class AzaleeJeuCommand {
       }
       await interaction.editReply({ embeds: [embed] });
     } catch (err) {
-      await repondre(interaction, echec("Données de jeu indisponibles", messageErreurAzalee(err)));
+      await repondre(
+        interaction,
+        echec("Données de jeu indisponibles", messageErreurAzalee(err)),
+      );
     }
   }
 
-  @Slash({ name: "equipe", description: "Fiche d'une équipe : emblème, séries, effectif" })
+  @Slash({
+    name: "equipe",
+    description: "Fiche d'une équipe : emblème, séries, effectif",
+  })
   async equipe(
     @SlashOption({
       name: "nom",
@@ -1272,8 +1466,9 @@ export class AzaleeJeuCommand {
           return classerPropositions(
             equipes,
             saisie(interaction),
-            equipe => `${equipe.name ?? ""} ${equipe.nameEn ?? ""} ${equipe.nameJa ?? ""}`,
-          ).map(equipe => ({
+            (equipe) =>
+              `${equipe.name ?? ""} ${equipe.nameEn ?? ""} ${equipe.nameJa ?? ""}`,
+          ).map((equipe) => ({
             name: `${equipe.name ?? equipe.nameEn ?? "Équipe"} (${equipe.rosterCount ?? 0} joueurs)`,
             value: String(equipe.id ?? ""),
           }));
@@ -1288,12 +1483,13 @@ export class AzaleeJeuCommand {
       // que le hash de l'équipe — mesuré, `/api/teams/Raimon` répond 404 —
       // alors qu'un membre qui ignore l'autocomplétion tape « Raimon ».
       const equipe = await ouvrirFiche<FicheEquipe>(
-        async cle => (await azalee().team(cle)) as unknown as FicheEquipe,
-        async texte => {
+        async (cle) => (await azalee().team(cle)) as unknown as FicheEquipe,
+        async (texte) => {
           const [trouvee] = classerPropositions(
             await equipesConnues(),
             texte,
-            candidate => `${candidate.name ?? ""} ${candidate.nameEn ?? ""} ${candidate.nameJa ?? ""}`,
+            (candidate) =>
+              `${candidate.name ?? ""} ${candidate.nameEn ?? ""} ${candidate.nameJa ?? ""}`,
             1,
           );
           return trouvee?.id ? String(trouvee.id) : null;
@@ -1303,28 +1499,47 @@ export class AzaleeJeuCommand {
       const effectif = equipe.roster ?? [];
       const embed = rgEmbed()
         .setTitle(String(equipe.name ?? equipe.nameEn ?? "Équipe"))
-        .setURL(urlWiki(`/equipe/${encodeURIComponent(String(equipe.id ?? nom))}`));
+        .setURL(
+          urlWiki(`/equipe/${encodeURIComponent(String(equipe.id ?? nom))}`),
+        );
 
-      const resume = truncate(nettoyerTexteJeu(String(equipe.descriptionFr ?? equipe.descriptionEn ?? "")), 400);
+      const resume = truncate(
+        nettoyerTexteJeu(
+          String(equipe.descriptionFr ?? equipe.descriptionEn ?? ""),
+        ),
+        400,
+      );
       if (resume.length > 0) {
         embed.setDescription(resume);
       }
       const autresNoms = joindre([equipe.nameEn, equipe.nameJa]);
       if (autresNoms.length > 0) {
-        embed.addFields({ name: "Autres noms", value: truncate(autresNoms, 500) });
+        embed.addFields({
+          name: "Autres noms",
+          value: truncate(autresNoms, 500),
+        });
       }
       const series = Object.entries(equipe.seasons ?? {})
         .map(([clef, n]) => `${clef} (${n})`)
         .join(" · ");
       if (series.length > 0) {
-        embed.addFields({ name: "Présences par série", value: truncate(series, 500) });
+        embed.addFields({
+          name: "Présences par série",
+          value: truncate(series, 500),
+        });
       }
       if (effectif.length > 0) {
         const apercu = effectif
           .slice(0, 12)
-          .map(joueur => `${joueur.name} — ${joueur.position ?? "?"} · ${joueur.element ?? "?"}`)
+          .map(
+            (joueur) =>
+              `${joueur.name} — ${joueur.position ?? "?"} · ${joueur.element ?? "?"}`,
+          )
           .join("\n");
-        embed.addFields({ name: `Effectif (${effectif.length})`, value: truncate(apercu, 900) });
+        embed.addFields({
+          name: `Effectif (${effectif.length})`,
+          value: truncate(apercu, 900),
+        });
       }
       const embleme = await illustrationProuvee(equipe.emblemUrl, 200);
       if (embleme) {
@@ -1332,13 +1547,17 @@ export class AzaleeJeuCommand {
       }
       await interaction.editReply({ embeds: [embed] });
     } catch (err) {
-      await repondre(interaction, echec("Données de jeu indisponibles", messageErreurAzalee(err)));
+      await repondre(
+        interaction,
+        echec("Données de jeu indisponibles", messageErreurAzalee(err)),
+      );
     }
   }
 
   @Slash({
     name: "recherche",
-    description: "Cherche partout : personnages, techniques et objets d'un coup",
+    description:
+      "Cherche partout : personnages, techniques et objets d'un coup",
   })
   async recherche(
     @SlashOption({
@@ -1365,25 +1584,27 @@ export class AzaleeJeuCommand {
         {
           titre: "Personnages",
           lignes: (resultat.characters ?? []).map(
-            perso => `[${texteFr(perso.names)}](${urlWiki(`/chara/${perso.baseSlug ?? perso.slug}`)})`,
+            (perso) =>
+              `[${texteFr(perso.names)}](${urlWiki(`/chara/${perso.baseSlug ?? perso.slug}`)})`,
           ),
         },
         {
           titre: "Techniques",
           lignes: (resultat.skills ?? []).map(
-            technique =>
+            (technique) =>
               `[${texteFr(technique.names)}](${urlWiki(`/skill/${encodeURIComponent(String(technique.skillId))}`)})`,
           ),
         },
         {
           titre: "Objets",
           lignes: (resultat.items ?? []).map(
-            objet => `[${texteFr(objet.names)}](${urlWiki(`/item/${encodeURIComponent(String(objet.itemId))}`)})`,
+            (objet) =>
+              `[${texteFr(objet.names)}](${urlWiki(`/item/${encodeURIComponent(String(objet.itemId))}`)})`,
           ),
         },
       ];
 
-      const remplies = sections.filter(section => section.lignes.length > 0);
+      const remplies = sections.filter((section) => section.lignes.length > 0);
       if (remplies.length === 0) {
         await interaction.editReply({
           content: `Aucun résultat pour « ${truncate(texte, 80)} ».`,
@@ -1398,7 +1619,10 @@ export class AzaleeJeuCommand {
       }
       await interaction.editReply({ embeds: [embed] });
     } catch (err) {
-      await repondre(interaction, echec("Données de jeu indisponibles", messageErreurAzalee(err)));
+      await repondre(
+        interaction,
+        echec("Données de jeu indisponibles", messageErreurAzalee(err)),
+      );
     }
   }
 
@@ -1406,17 +1630,23 @@ export class AzaleeJeuCommand {
 
   @Slash({
     name: "aura",
-    description: "Aura : esprit guerrier, totem, Miximax, éveil ou changement de mode",
+    description:
+      "Aura : esprit guerrier, totem, Miximax, éveil ou changement de mode",
   })
   async aura(
     @SlashOption({
       name: "famille",
-      description: "Famille d'aura (esprits guerriers, totems, Miximax, éveils…)",
+      description:
+        "Famille d'aura (esprits guerriers, totems, Miximax, éveils…)",
       type: ApplicationCommandOptionType.String,
       required: true,
       autocomplete: (interaction: AutocompleteInteraction) =>
         repondreSuggestions(interaction, async () =>
-          classerPropositions([...TYPES_AURA], saisie(interaction), type => type.libelle).map(type => ({
+          classerPropositions(
+            [...TYPES_AURA],
+            saisie(interaction),
+            (type) => type.libelle,
+          ).map((type) => ({
             name: type.libelle,
             value: type.slug,
           })),
@@ -1432,7 +1662,9 @@ export class AzaleeJeuCommand {
         repondreSuggestions(interaction, async () => {
           // Un slug de famille inventé fait répondre `{"data":[],"total":0}` :
           // sans famille valide on ne propose rien plutôt qu'une liste vide.
-          const type = resoudreTypeAura(interaction.options.getString("famille"));
+          const type = resoudreTypeAura(
+            interaction.options.getString("famille"),
+          );
           if (!type) {
             return [];
           }
@@ -1440,7 +1672,7 @@ export class AzaleeJeuCommand {
             q: saisie(interaction) || undefined,
             limit: 25,
           } as never)) as unknown as Page<EntreeAura>;
-          return (liste.data ?? []).map(entree => ({
+          return (liste.data ?? []).map((entree) => ({
             name: String(entree.name ?? entree.id ?? "Aura"),
             value: String(entree.id ?? ""),
           }));
@@ -1457,7 +1689,7 @@ export class AzaleeJeuCommand {
           interaction,
           echec(
             "Valeur inconnue",
-            `Famille d'aura inconnue. Choisis parmi : ${TYPES_AURA.map(t => t.libelle).join(", ")}.`,
+            `Famille d'aura inconnue. Choisis parmi : ${TYPES_AURA.map((t) => t.libelle).join(", ")}.`,
           ),
         );
         return;
@@ -1469,12 +1701,22 @@ export class AzaleeJeuCommand {
         } as never)) as unknown as Page<EntreeAura>;
         const entrees = liste.data ?? [];
         const embed = rgEmbed()
-          .setTitle(`${libelleTypeAura(type)} — ${formaterNombre(liste.total ?? entrees.length)}`)
+          .setTitle(
+            `${libelleTypeAura(type)} — ${formaterNombre(liste.total ?? entrees.length)}`,
+          )
           .setURL(urlWiki(`/aura/${type}`));
         embed.setDescription(
           entrees.length === 0
             ? "Aucune aura dans cette famille."
-            : truncate(entrees.map(entree => `**${truncate(String(entree.name ?? "?"), 60)}**`).join(" · "), 3800),
+            : truncate(
+                entrees
+                  .map(
+                    (entree) =>
+                      `**${truncate(String(entree.name ?? "?"), 60)}**`,
+                  )
+                  .join(" · "),
+                3800,
+              ),
         );
         pied(embed, {
           note: "Relance la commande avec l'option « nom » pour ouvrir une fiche · azalee.rosegriffon.fr",
@@ -1485,8 +1727,14 @@ export class AzaleeJeuCommand {
 
       const fiche = (await azalee().aura(type, nom)) as unknown as FicheAura;
       const embed = rgEmbed()
-        .setTitle(truncate(String(fiche.displayName ?? fiche.name_FR ?? "Aura"), 200))
-        .setURL(urlWiki(`/aura/${type}/${encodeURIComponent(String(fiche.auraId ?? nom))}`));
+        .setTitle(
+          truncate(String(fiche.displayName ?? fiche.name_FR ?? "Aura"), 200),
+        )
+        .setURL(
+          urlWiki(
+            `/aura/${type}/${encodeURIComponent(String(fiche.auraId ?? nom))}`,
+          ),
+        );
 
       const resume = truncate(nettoyerTexteJeu(fiche.desc_FR ?? ""), 400);
       if (resume.length > 0) {
@@ -1504,18 +1752,30 @@ export class AzaleeJeuCommand {
       const hissatsu = fiche.sheetData?.hissatsu;
       if (hissatsu?.name) {
         const puissance =
-          typeof hissatsu.power?.min === "number" && typeof hissatsu.power?.max === "number"
+          typeof hissatsu.power?.min === "number" &&
+          typeof hissatsu.power?.max === "number"
             ? `Puissance **${hissatsu.power.min}–${hissatsu.power.max}**`
             : null;
         embed.addFields({
           name: "Technique liée",
-          value: truncate(joindre([`**${hissatsu.name}**`, hissatsu.type, hissatsu.element, puissance]), 1000),
+          value: truncate(
+            joindre([
+              `**${hissatsu.name}**`,
+              hissatsu.type,
+              hissatsu.element,
+              puissance,
+            ]),
+            1000,
+          ),
         });
       }
 
       const autresNoms = joindre([fiche.name_EN, fiche.name_JA]);
       if (autresNoms.length > 0) {
-        embed.addFields({ name: "Autres noms", value: truncate(autresNoms, 500) });
+        embed.addFields({
+          name: "Autres noms",
+          value: truncate(autresNoms, 500),
+        });
       }
 
       const icone = await illustrationProuvee(fiche.image, 200);
@@ -1528,7 +1788,10 @@ export class AzaleeJeuCommand {
       }
       await interaction.editReply({ embeds: [embed] });
     } catch (err) {
-      await repondre(interaction, echec("Données de jeu indisponibles", messageErreurAzalee(err)));
+      await repondre(
+        interaction,
+        echec("Données de jeu indisponibles", messageErreurAzalee(err)),
+      );
     }
   }
 
@@ -1550,7 +1813,7 @@ export class AzaleeJeuCommand {
             q: saisie(interaction) || undefined,
             limit: 25,
           } as never)) as unknown as Page<EntreeTactique>;
-          return (liste.data ?? []).map(tactique => ({
+          return (liste.data ?? []).map((tactique) => ({
             name: texteFr(tactique.names),
             value: String(tactique.itemId ?? ""),
           }));
@@ -1564,8 +1827,8 @@ export class AzaleeJeuCommand {
       // `/api/tactics/<clé>` accepte le code interne comme le slug (mesuré :
       // `wht30180` et `absolute-barrier` répondent 200 tous les deux).
       const tactique = await ouvrirFiche<FicheTactique>(
-        async cle => (await azalee().tactic(cle)) as unknown as FicheTactique,
-        async texte => {
+        async (cle) => (await azalee().tactic(cle)) as unknown as FicheTactique,
+        async (texte) => {
           const liste = (await azalee().tactics({
             q: texte,
             limit: 1,
@@ -1576,15 +1839,31 @@ export class AzaleeJeuCommand {
         nom,
       );
       const embed = rgEmbed()
-        .setTitle(truncate(String(tactique.name_fr ?? tactique.name ?? "Tactique"), 200))
-        .setURL(urlWiki(`/tactic/${encodeURIComponent(String(tactique.slug ?? nom))}`));
+        .setTitle(
+          truncate(
+            String(tactique.name_fr ?? tactique.name ?? "Tactique"),
+            200,
+          ),
+        )
+        .setURL(
+          urlWiki(
+            `/tactic/${encodeURIComponent(String(tactique.slug ?? nom))}`,
+          ),
+        );
 
-      const resume = truncate(nettoyerTexteJeu(tactique.description_fr ?? ""), 400);
+      const resume = truncate(
+        nettoyerTexteJeu(tactique.description_fr ?? ""),
+        400,
+      );
       if (resume.length > 0) {
         embed.setDescription(resume);
       }
 
-      const effets = [tactique.effect1, tactique.effect2, tactique.effect3].filter(
+      const effets = [
+        tactique.effect1,
+        tactique.effect2,
+        tactique.effect3,
+      ].filter(
         (e): e is string => typeof e === "string" && e.trim().length > 0,
       );
       if (effets.length > 0) {
@@ -1593,14 +1872,20 @@ export class AzaleeJeuCommand {
           // pas de colonne `effect*_fr`. On le dit plutôt que de laisser croire
           // à un oubli de traduction du bot.
           name: `Effets (${effets.length}) — non traduits dans le jeu`,
-          value: truncate(effets.map(effet => `• ${effet}`).join("\n"), 1000),
+          value: truncate(effets.map((effet) => `• ${effet}`).join("\n"), 1000),
         });
       }
 
       const chiffres = joindre([
-        typeof tactique.duration === "number" ? `Durée **${tactique.duration} s**` : null,
-        typeof tactique.cooldown === "number" ? `Recharge **${tactique.cooldown} s**` : null,
-        typeof tactique.power === "number" ? `Puissance **${tactique.power}**` : null,
+        typeof tactique.duration === "number"
+          ? `Durée **${tactique.duration} s**`
+          : null,
+        typeof tactique.cooldown === "number"
+          ? `Recharge **${tactique.cooldown} s**`
+          : null,
+        typeof tactique.power === "number"
+          ? `Puissance **${tactique.power}**`
+          : null,
         typeof tactique.partnerCount === "number" && tactique.partnerCount > 0
           ? `Partenaires **${tactique.partnerCount}**`
           : null,
@@ -1610,10 +1895,16 @@ export class AzaleeJeuCommand {
         embed.addFields({ name: "Chiffres", value: truncate(chiffres, 1000) });
       }
       if (tactique.shop) {
-        embed.addFields({ name: "En vente", value: truncate(tactique.shop, 500) });
+        embed.addFields({
+          name: "En vente",
+          value: truncate(tactique.shop, 500),
+        });
       }
       if (tactique.internalCode) {
-        embed.addFields({ name: "Code interne", value: `\`${tactique.internalCode}\`` });
+        embed.addFields({
+          name: "Code interne",
+          value: `\`${tactique.internalCode}\``,
+        });
       }
 
       const telop = await illustrationProuvee(tactique.image, 800);
@@ -1622,13 +1913,19 @@ export class AzaleeJeuCommand {
       }
       await interaction.editReply({ embeds: [embed] });
     } catch (err) {
-      await repondre(interaction, echec("Données de jeu indisponibles", messageErreurAzalee(err)));
+      await repondre(
+        interaction,
+        echec("Données de jeu indisponibles", messageErreurAzalee(err)),
+      );
     }
   }
 
   // --- Passifs -----------------------------------------------------------
 
-  @Slash({ name: "passif", description: "Fiche d'une compétence passive : effet, valeur, rareté" })
+  @Slash({
+    name: "passif",
+    description: "Fiche d'une compétence passive : effet, valeur, rareté",
+  })
   async passif(
     @SlashOption({
       name: "effet",
@@ -1641,12 +1938,16 @@ export class AzaleeJeuCommand {
             q: saisie(interaction) || undefined,
             limit: 25,
           } as never)) as unknown as Page<FichePassif>;
-          return (liste.data ?? []).map(passif => ({
+          return (liste.data ?? []).map((passif) => ({
             // Beaucoup de passifs n'ont AUCUN libellé traduit (mesuré : les
             // deux premières lignes de `/api/passives` ont `name` à null sur
             // les trois langues). L'identifiant de chaîne reste alors la
             // seule étiquette honnête.
-            name: truncate(nettoyerTexteJeu(texteFr(passif.name, "")) || String(passif.string_id ?? "Passif"), 100),
+            name: truncate(
+              nettoyerTexteJeu(texteFr(passif.name, "")) ||
+                String(passif.string_id ?? "Passif"),
+              100,
+            ),
             value: String(passif.passive_id ?? ""),
           }));
         }),
@@ -1657,8 +1958,8 @@ export class AzaleeJeuCommand {
     await interaction.deferReply();
     try {
       const passif = await ouvrirFiche<FichePassif>(
-        async cle => (await azalee().passive(cle)) as unknown as FichePassif,
-        async texte => {
+        async (cle) => (await azalee().passive(cle)) as unknown as FichePassif,
+        async (texte) => {
           const liste = (await azalee().passives({
             q: texte,
             limit: 1,
@@ -1672,20 +1973,34 @@ export class AzaleeJeuCommand {
       // Le repli d'un libellé absent passe par le japonais, qui porte des
       // annotations de lecture `[漢字/かんじ]` illisibles dans un embed.
       const libelle = nettoyerRubis(nettoyerTexteJeu(texteFr(passif.name, "")));
-      const description = nettoyerRubis(nettoyerTexteJeu(texteFr(passif.description, "")));
+      const description = nettoyerRubis(
+        nettoyerTexteJeu(texteFr(passif.description, "")),
+      );
 
       const embed = rgEmbed()
-        .setTitle(truncate(libelle || String(passif.string_id ?? "Passif"), 200))
-        .setURL(urlWiki(`/passive/${encodeURIComponent(String(passif.passive_id ?? effet))}`));
+        .setTitle(
+          truncate(libelle || String(passif.string_id ?? "Passif"), 200),
+        )
+        .setURL(
+          urlWiki(
+            `/passive/${encodeURIComponent(String(passif.passive_id ?? effet))}`,
+          ),
+        );
       if (description.length > 0 && description !== libelle) {
         embed.setDescription(truncate(description, 1000));
       } else if (libelle.length === 0) {
-        embed.setDescription("Ce passif n'a aucun libellé traduit dans les données du jeu.");
+        embed.setDescription(
+          "Ce passif n'a aucun libellé traduit dans les données du jeu.",
+        );
       }
 
       const fiche = joindre([
-        typeof passif.main_value === "number" ? `Valeur **${formaterNombre(passif.main_value)}**` : null,
-        typeof passif.rarity === "number" ? `Rareté **${passif.rarity}**` : null,
+        typeof passif.main_value === "number"
+          ? `Valeur **${formaterNombre(passif.main_value)}**`
+          : null,
+        typeof passif.rarity === "number"
+          ? `Rareté **${passif.rarity}**`
+          : null,
         passif.element_name ? `Élément \`${passif.element_name}\`` : null,
       ]);
       if (fiche.length > 0) {
@@ -1697,17 +2012,26 @@ export class AzaleeJeuCommand {
         passif.effect_id ? `Effet \`${passif.effect_id}\`` : null,
       ]);
       if (identifiants.length > 0) {
-        embed.addFields({ name: "Identifiants", value: truncate(identifiants, 1000) });
+        embed.addFields({
+          name: "Identifiants",
+          value: truncate(identifiants, 1000),
+        });
       }
       await interaction.editReply({ embeds: [embed] });
     } catch (err) {
-      await repondre(interaction, echec("Données de jeu indisponibles", messageErreurAzalee(err)));
+      await repondre(
+        interaction,
+        echec("Données de jeu indisponibles", messageErreurAzalee(err)),
+      );
     }
   }
 
   // --- Quêtes ------------------------------------------------------------
 
-  @Slash({ name: "quete", description: "Fiche d'une quête : genre, phase et illustration" })
+  @Slash({
+    name: "quete",
+    description: "Fiche d'une quête : genre, phase et illustration",
+  })
   async quete(
     @SlashOption({
       name: "titre",
@@ -1717,10 +2041,12 @@ export class AzaleeJeuCommand {
       autocomplete: (interaction: AutocompleteInteraction) =>
         repondreSuggestions(interaction, async () => {
           const genre = interaction.options.getString("genre");
-          const quetes = (await quetesConnues()).filter(quete => (genre ? quete.kind === genre : true));
-          return classerPropositions(quetes, saisie(interaction), quete =>
+          const quetes = (await quetesConnues()).filter((quete) =>
+            genre ? quete.kind === genre : true,
+          );
+          return classerPropositions(quetes, saisie(interaction), (quete) =>
             texteFr(quete.titles, quete.title ?? ""),
-          ).map(quete => ({
+          ).map((quete) => ({
             name: truncate(texteFr(quete.titles, quete.title ?? "Quête"), 100),
             value: String(quete.id ?? ""),
           }));
@@ -1740,12 +2066,12 @@ export class AzaleeJeuCommand {
     await interaction.deferReply();
     try {
       const quete = await ouvrirFiche<FicheQuete>(
-        async cle => (await azalee().quest(cle)) as unknown as FicheQuete,
-        async texte => {
+        async (cle) => (await azalee().quest(cle)) as unknown as FicheQuete,
+        async (texte) => {
           const [trouvee] = classerPropositions(
             await quetesConnues(),
             texte,
-            candidate => texteFr(candidate.titles, candidate.title ?? ""),
+            (candidate) => texteFr(candidate.titles, candidate.title ?? ""),
             1,
           );
           return trouvee?.id ? String(trouvee.id) : null;
@@ -1754,7 +2080,9 @@ export class AzaleeJeuCommand {
       );
       const embed = rgEmbed()
         .setTitle(truncate(texteFr(quete.titles, quete.title ?? "Quête"), 200))
-        .setURL(urlWiki(`/quete/${encodeURIComponent(String(quete.id ?? titre))}`));
+        .setURL(
+          urlWiki(`/quete/${encodeURIComponent(String(quete.id ?? titre))}`),
+        );
 
       const fiche = joindre([
         `Genre **${libelleGenreQuete(quete.kind)}**`,
@@ -1767,19 +2095,28 @@ export class AzaleeJeuCommand {
       }
       const autresTitres = joindre([quete.titles?.en, quete.titles?.ja]);
       if (autresTitres.length > 0) {
-        embed.addFields({ name: "Autres titres", value: truncate(autresTitres, 500) });
+        embed.addFields({
+          name: "Autres titres",
+          value: truncate(autresTitres, 500),
+        });
       }
 
       // L'API ne sert qu'un code d'image nu : on forge l'URL du CDN et on
       // vérifie dans l'index CPK que le fichier existe (45 quêtes sur 182 n'en
       // ont aucun).
-      const illustration = await illustrationProuvee(urlIllustrationQuete(quete.image), 800);
+      const illustration = await illustrationProuvee(
+        urlIllustrationQuete(quete.image),
+        800,
+      );
       if (illustration) {
         embed.setImage(illustration);
       }
       await interaction.editReply({ embeds: [embed] });
     } catch (err) {
-      await repondre(interaction, echec("Données de jeu indisponibles", messageErreurAzalee(err)));
+      await repondre(
+        interaction,
+        echec("Données de jeu indisponibles", messageErreurAzalee(err)),
+      );
     }
   }
 
@@ -1787,7 +2124,8 @@ export class AzaleeJeuCommand {
 
   @Slash({
     name: "entraineur",
-    description: "Fiche d'un entraîneur : rôle, style, bonus d'équipe et progression",
+    description:
+      "Fiche d'un entraîneur : rôle, style, bonus d'équipe et progression",
   })
   async entraineur(
     @SlashOption({
@@ -1800,9 +2138,13 @@ export class AzaleeJeuCommand {
           classerPropositions(
             await entraineursConnus(),
             saisie(interaction),
-            coach => `${coach.name ?? ""} ${coach.nameRomaji ?? ""} ${coach.nameKanji ?? ""}`,
-          ).map(coach => ({
-            name: truncate(`${coach.name ?? "Entraîneur"}${coach.roleFr ? ` — ${coach.roleFr}` : ""}`, 100),
+            (coach) =>
+              `${coach.name ?? ""} ${coach.nameRomaji ?? ""} ${coach.nameKanji ?? ""}`,
+          ).map((coach) => ({
+            name: truncate(
+              `${coach.name ?? "Entraîneur"}${coach.roleFr ? ` — ${coach.roleFr}` : ""}`,
+              100,
+            ),
             value: String(coach.id ?? ""),
           })),
         ),
@@ -1817,24 +2159,31 @@ export class AzaleeJeuCommand {
       const identifiant = Number.parseInt(nom, 10);
       let coach: FicheEntraineur | null = null;
       if (Number.isFinite(identifiant) && String(identifiant) === nom.trim()) {
-        coach = (await azalee().coach(identifiant)) as unknown as FicheEntraineur;
+        coach = (await azalee().coach(
+          identifiant,
+        )) as unknown as FicheEntraineur;
       } else {
         const [trouve] = classerPropositions(
           await entraineursConnus(),
           nom,
-          candidat => `${candidat.name ?? ""} ${candidat.nameRomaji ?? ""} ${candidat.nameKanji ?? ""}`,
+          (candidat) =>
+            `${candidat.name ?? ""} ${candidat.nameRomaji ?? ""} ${candidat.nameKanji ?? ""}`,
           1,
         );
         coach = trouve ?? null;
       }
       if (!coach) {
-        await interaction.editReply({ content: "❌ Introuvable dans le wiki." });
+        await interaction.editReply({
+          content: "❌ Introuvable dans le wiki.",
+        });
         return;
       }
 
       const embed = rgEmbed()
         .setTitle(truncate(String(coach.name ?? "Entraîneur"), 200))
-        .setURL(urlWiki(`/entraineur/${encodeURIComponent(String(coach.id ?? ""))}`));
+        .setURL(
+          urlWiki(`/entraineur/${encodeURIComponent(String(coach.id ?? ""))}`),
+        );
 
       const identite = joindre([
         coach.roleFr ? `Rôle **${coach.roleFr}**` : null,
@@ -1860,17 +2209,31 @@ export class AzaleeJeuCommand {
       }
 
       const progression = joindre([
-        coach.scaling?.coordCommon ? `Coordinateur commun **${coach.scaling.coordCommon}**` : null,
-        coach.scaling?.coordLegendary ? `Coordinateur légendaire **${coach.scaling.coordLegendary}**` : null,
-        coach.scaling?.managerCommon ? `Manager commun **${coach.scaling.managerCommon}**` : null,
-        coach.scaling?.managerLegendary ? `Manager légendaire **${coach.scaling.managerLegendary}**` : null,
+        coach.scaling?.coordCommon
+          ? `Coordinateur commun **${coach.scaling.coordCommon}**`
+          : null,
+        coach.scaling?.coordLegendary
+          ? `Coordinateur légendaire **${coach.scaling.coordLegendary}**`
+          : null,
+        coach.scaling?.managerCommon
+          ? `Manager commun **${coach.scaling.managerCommon}**`
+          : null,
+        coach.scaling?.managerLegendary
+          ? `Manager légendaire **${coach.scaling.managerLegendary}**`
+          : null,
       ]);
       if (progression.length > 0) {
-        embed.addFields({ name: "Progression", value: truncate(progression, 1000) });
+        embed.addFields({
+          name: "Progression",
+          value: truncate(progression, 1000),
+        });
       }
       const autresNoms = joindre([coach.nameRomaji, coach.nameKanji]);
       if (autresNoms.length > 0) {
-        embed.addFields({ name: "Autres noms", value: truncate(autresNoms, 500) });
+        embed.addFields({
+          name: "Autres noms",
+          value: truncate(autresNoms, 500),
+        });
       }
 
       // `image` est NULL pour les 102 entraîneurs : le visage se dérive du code
@@ -1883,13 +2246,19 @@ export class AzaleeJeuCommand {
       }
       await interaction.editReply({ embeds: [embed] });
     } catch (err) {
-      await repondre(interaction, echec("Données de jeu indisponibles", messageErreurAzalee(err)));
+      await repondre(
+        interaction,
+        echec("Données de jeu indisponibles", messageErreurAzalee(err)),
+      );
     }
   }
 
   // --- Stades ------------------------------------------------------------
 
-  @Slash({ name: "stade", description: "Fiche d'un stade, avec son visuel de terrain" })
+  @Slash({
+    name: "stade",
+    description: "Fiche d'un stade, avec son visuel de terrain",
+  })
   async stade(
     @SlashOption({
       name: "nom",
@@ -1901,8 +2270,8 @@ export class AzaleeJeuCommand {
           classerPropositions(
             await stadesConnus(),
             saisie(interaction),
-            stade => `${stade.title ?? ""} ${stade.code ?? ""}`,
-          ).map(stade => ({
+            (stade) => `${stade.title ?? ""} ${stade.code ?? ""}`,
+          ).map((stade) => ({
             name: truncate(String(stade.title ?? stade.code ?? "Stade"), 100),
             value: String(stade.id ?? ""),
           })),
@@ -1914,12 +2283,12 @@ export class AzaleeJeuCommand {
     await interaction.deferReply();
     try {
       const stade = await ouvrirFiche<FicheStade>(
-        async cle => (await azalee().stadium(cle)) as unknown as FicheStade,
-        async texte => {
+        async (cle) => (await azalee().stadium(cle)) as unknown as FicheStade,
+        async (texte) => {
           const [trouve] = classerPropositions(
             await stadesConnus(),
             texte,
-            candidat => `${candidat.title ?? ""} ${candidat.code ?? ""}`,
+            (candidat) => `${candidat.title ?? ""} ${candidat.code ?? ""}`,
             1,
           );
           return trouve?.id ? String(trouve.id) : null;
@@ -1928,10 +2297,14 @@ export class AzaleeJeuCommand {
       );
       const embed = rgEmbed()
         .setTitle(truncate(String(stade.title ?? stade.code ?? "Stade"), 200))
-        .setURL(urlWiki(`/stade/${encodeURIComponent(String(stade.id ?? nom))}`));
+        .setURL(
+          urlWiki(`/stade/${encodeURIComponent(String(stade.id ?? nom))}`),
+        );
 
       const fiche = joindre([
-        typeof stade.index === "number" ? `Position **${stade.index + 1}** sur 81` : null,
+        typeof stade.index === "number"
+          ? `Position **${stade.index + 1}** sur 81`
+          : null,
         stade.code ? `Code \`${stade.code}\`` : null,
         stade.id ? `Identifiant \`${stade.id}\`` : null,
       ]);
@@ -1947,7 +2320,10 @@ export class AzaleeJeuCommand {
       }
       await interaction.editReply({ embeds: [embed] });
     } catch (err) {
-      await repondre(interaction, echec("Données de jeu indisponibles", messageErreurAzalee(err)));
+      await repondre(
+        interaction,
+        echec("Données de jeu indisponibles", messageErreurAzalee(err)),
+      );
     }
   }
 
@@ -1966,12 +2342,15 @@ export class AzaleeJeuCommand {
       autocomplete: (interaction: AutocompleteInteraction) =>
         repondreSuggestions(interaction, async () => {
           const categorie = interaction.options.getString("categorie");
-          const succes = (await succesConnus()).filter(entree => (categorie ? entree.category === categorie : true));
+          const succes = (await succesConnus()).filter((entree) =>
+            categorie ? entree.category === categorie : true,
+          );
           return classerPropositions(
             succes,
             saisie(interaction),
-            entree => `${texteFr(entree.names, entree.name ?? "")} ${entree.desc ?? ""}`,
-          ).map(entree => ({
+            (entree) =>
+              `${texteFr(entree.names, entree.name ?? "")} ${entree.desc ?? ""}`,
+          ).map((entree) => ({
             name: truncate(texteFr(entree.names, entree.name ?? "Succès"), 100),
             value: String(entree.id ?? ""),
           }));
@@ -1991,12 +2370,13 @@ export class AzaleeJeuCommand {
     await interaction.deferReply();
     try {
       const succes = await ouvrirFiche<FicheSucces>(
-        async cle => (await azalee().trophy(cle)) as unknown as FicheSucces,
-        async texte => {
+        async (cle) => (await azalee().trophy(cle)) as unknown as FicheSucces,
+        async (texte) => {
           const [trouve] = classerPropositions(
             await succesConnus(),
             texte,
-            candidat => `${texteFr(candidat.names, candidat.name ?? "")} ${candidat.desc ?? ""}`,
+            (candidat) =>
+              `${texteFr(candidat.names, candidat.name ?? "")} ${candidat.desc ?? ""}`,
             1,
           );
           return trouve?.id ? String(trouve.id) : null;
@@ -2005,9 +2385,13 @@ export class AzaleeJeuCommand {
       );
       const embed = rgEmbed()
         .setTitle(truncate(texteFr(succes.names, succes.name ?? "Succès"), 200))
-        .setURL(urlWiki(`/succes/${encodeURIComponent(String(succes.id ?? nom))}`));
+        .setURL(
+          urlWiki(`/succes/${encodeURIComponent(String(succes.id ?? nom))}`),
+        );
 
-      const condition = nettoyerTexteJeu(texteFr(succes.descriptions, succes.desc ?? ""));
+      const condition = nettoyerTexteJeu(
+        texteFr(succes.descriptions, succes.desc ?? ""),
+      );
       if (condition.length > 0) {
         embed.setDescription(truncate(condition, 1000));
       }
@@ -2019,17 +2403,26 @@ export class AzaleeJeuCommand {
       embed.addFields({ name: "Fiche", value: truncate(fiche, 1000) });
       const autresNoms = joindre([succes.names?.en, succes.names?.ja]);
       if (autresNoms.length > 0) {
-        embed.addFields({ name: "Autres noms", value: truncate(autresNoms, 500) });
+        embed.addFields({
+          name: "Autres noms",
+          value: truncate(autresNoms, 500),
+        });
       }
       await interaction.editReply({ embeds: [embed] });
     } catch (err) {
-      await repondre(interaction, echec("Données de jeu indisponibles", messageErreurAzalee(err)));
+      await repondre(
+        interaction,
+        echec("Données de jeu indisponibles", messageErreurAzalee(err)),
+      );
     }
   }
 
   // --- Capsules ----------------------------------------------------------
 
-  @Slash({ name: "capsule", description: "Lots de capsules (gacha) : pools de tirage et contenus" })
+  @Slash({
+    name: "capsule",
+    description: "Lots de capsules (gacha) : pools de tirage et contenus",
+  })
   async capsule(
     @SlashOption({
       name: "lot",
@@ -2042,7 +2435,9 @@ export class AzaleeJeuCommand {
   ) {
     await interaction.deferReply();
     try {
-      const liste = (await azalee().capsules(lot ? ({ q: lot } as never) : undefined)) as unknown as ListeCapsules;
+      const liste = (await azalee().capsules(
+        lot ? ({ q: lot } as never) : undefined,
+      )) as unknown as ListeCapsules;
       const lots = liste.data ?? [];
       const embed = rgEmbed()
         .setTitle(
@@ -2054,14 +2449,21 @@ export class AzaleeJeuCommand {
         embed.setAuthor({ name: truncate(`Recherche : « ${lot} »`, 200) });
       }
       if (lots.length === 0) {
-        embed.setDescription(lot ? "Aucun lot ne porte ce hash." : "La table des capsules ne contient aucun lot.");
+        embed.setDescription(
+          lot
+            ? "Aucun lot ne porte ce hash."
+            : "La table des capsules ne contient aucun lot.",
+        );
       } else {
         // ⚠ `contentRef` ne résout vers AUCUNE table extraite : la
         // bibliothèque le dit explicitement (`wiki/gacha.ts`). On sert donc
         // les hachages tels quels plutôt que de leur inventer un nom d'objet.
         const lignes = lots
           .slice(0, 20)
-          .map(entree => `\`${entree.id}\` → contenu \`${entree.contentRef}\` · pool \`${entree.poolRef}\``);
+          .map(
+            (entree) =>
+              `\`${entree.id}\` → contenu \`${entree.contentRef}\` · pool \`${entree.poolRef}\``,
+          );
         embed.setDescription(truncate(lignes.join("\n"), 3800));
       }
 
@@ -2069,7 +2471,15 @@ export class AzaleeJeuCommand {
       if (pools.length > 0) {
         embed.addFields({
           name: `Pools de tirage (${pools.length})`,
-          value: truncate(pools.map(pool => `\`${pool.ref}\` — ${formaterNombre(pool.count)} lots`).join("\n"), 1000),
+          value: truncate(
+            pools
+              .map(
+                (pool) =>
+                  `\`${pool.ref}\` — ${formaterNombre(pool.count)} lots`,
+              )
+              .join("\n"),
+            1000,
+          ),
         });
       }
       pied(embed, {
@@ -2077,7 +2487,10 @@ export class AzaleeJeuCommand {
       });
       await interaction.editReply({ embeds: [embed] });
     } catch (err) {
-      await repondre(interaction, echec("Données de jeu indisponibles", messageErreurAzalee(err)));
+      await repondre(
+        interaction,
+        echec("Données de jeu indisponibles", messageErreurAzalee(err)),
+      );
     }
   }
 
@@ -2104,10 +2517,14 @@ export class AzaleeJeuCommand {
       )) as unknown as ListeCostumes;
       const costumes = liste.data ?? [];
       const embed = rgEmbed()
-        .setTitle(`Costumes — ${formaterNombre(liste.total ?? costumes.length)}`)
+        .setTitle(
+          `Costumes — ${formaterNombre(liste.total ?? costumes.length)}`,
+        )
         .setURL(urlWiki("/capsule?tab=costumes"));
       if (recherche) {
-        embed.setAuthor({ name: truncate(`Recherche : « ${recherche} »`, 200) });
+        embed.setAuthor({
+          name: truncate(`Recherche : « ${recherche} »`, 200),
+        });
       }
 
       if (costumes.length === 0) {
@@ -2115,7 +2532,10 @@ export class AzaleeJeuCommand {
       } else {
         const lignes = costumes
           .slice(0, 20)
-          .map(costume => `**#${costume.index}** · ${costume.typeLabel ?? "?"} — modèle \`${costume.modelRef}\``);
+          .map(
+            (costume) =>
+              `**#${costume.index}** · ${costume.typeLabel ?? "?"} — modèle \`${costume.modelRef}\``,
+          );
         embed.setDescription(truncate(lignes.join("\n"), 3800));
       }
 
@@ -2123,7 +2543,14 @@ export class AzaleeJeuCommand {
       if (types.length > 0) {
         embed.addFields({
           name: `Types (${types.length})`,
-          value: truncate(types.map(type => `**${type.label}** — ${formaterNombre(type.count)}`).join(" · "), 1000),
+          value: truncate(
+            types
+              .map(
+                (type) => `**${type.label}** — ${formaterNombre(type.count)}`,
+              )
+              .join(" · "),
+            1000,
+          ),
         });
       }
       pied(embed, {
@@ -2131,7 +2558,10 @@ export class AzaleeJeuCommand {
       });
       await interaction.editReply({ embeds: [embed] });
     } catch (err) {
-      await repondre(interaction, echec("Données de jeu indisponibles", messageErreurAzalee(err)));
+      await repondre(
+        interaction,
+        echec("Données de jeu indisponibles", messageErreurAzalee(err)),
+      );
     }
   }
 
@@ -2149,12 +2579,17 @@ export class AzaleeJeuCommand {
       required: false,
       autocomplete: (interaction: AutocompleteInteraction) =>
         repondreSuggestions(interaction, async () =>
-          classerPropositions(await signesInvocation(), saisie(interaction), signe => String(signe.name ?? "")).map(
-            signe => ({
-              name: truncate(`${signe.name ?? "Signe"} (${signe.totalChars ?? 0})`, 100),
-              value: String(signe.signNo ?? ""),
-            }),
-          ),
+          classerPropositions(
+            await signesInvocation(),
+            saisie(interaction),
+            (signe) => String(signe.name ?? ""),
+          ).map((signe) => ({
+            name: truncate(
+              `${signe.name ?? "Signe"} (${signe.totalChars ?? 0})`,
+              100,
+            ),
+            value: String(signe.signNo ?? ""),
+          })),
         ),
     })
     signe: string | undefined,
@@ -2171,7 +2606,7 @@ export class AzaleeJeuCommand {
           truncate(
             signes
               .map(
-                entree =>
+                (entree) =>
                   `**${entree.name ?? `Signe ${entree.signNo}`}** — ${formaterNombre(entree.totalChars)} personnages`,
               )
               .join("\n"),
@@ -2187,15 +2622,29 @@ export class AzaleeJeuCommand {
 
       const numero = Number.parseInt(signe, 10);
       const trouve =
-        signes.find(entree => entree.signNo === numero) ??
-        classerPropositions(signes, signe, entree => String(entree.name ?? ""), 1)[0];
+        signes.find((entree) => entree.signNo === numero) ??
+        classerPropositions(
+          signes,
+          signe,
+          (entree) => String(entree.name ?? ""),
+          1,
+        )[0];
       if (!trouve) {
-        await interaction.editReply({ content: "❌ Signe d'invocation inconnu." });
+        await interaction.editReply({
+          content: "❌ Signe d'invocation inconnu.",
+        });
         return;
       }
 
-      embed.setTitle(truncate(`Invocation — ${trouve.name ?? `Signe ${trouve.signNo}`}`, 200));
-      embed.setDescription(`**${formaterNombre(trouve.totalChars)}** personnages invocables sous ce signe.`);
+      embed.setTitle(
+        truncate(
+          `Invocation — ${trouve.name ?? `Signe ${trouve.signNo}`}`,
+          200,
+        ),
+      );
+      embed.setDescription(
+        `**${formaterNombre(trouve.totalChars)}** personnages invocables sous ce signe.`,
+      );
       for (const palier of trouve.tiers ?? []) {
         embed.addFields({
           name: `${palier.label ?? "Palier"} — ${formaterPourcentage(palier.ratePct)}`,
@@ -2210,13 +2659,19 @@ export class AzaleeJeuCommand {
       }
       await interaction.editReply({ embeds: [embed] });
     } catch (err) {
-      await repondre(interaction, echec("Données de jeu indisponibles", messageErreurAzalee(err)));
+      await repondre(
+        interaction,
+        echec("Données de jeu indisponibles", messageErreurAzalee(err)),
+      );
     }
   }
 
   // --- Drops -------------------------------------------------------------
 
-  @Slash({ name: "drops", description: "Taux de drop : coffres de victoire et émissions d'objet" })
+  @Slash({
+    name: "drops",
+    description: "Taux de drop : coffres de victoire et émissions d'objet",
+  })
   async drops(
     @SlashChoice(...CHOIX_SOURCE_DROP)
     @SlashOption({
@@ -2246,7 +2701,10 @@ export class AzaleeJeuCommand {
         }),
       );
     } catch (err) {
-      await repondre(interaction, echec("Données de jeu indisponibles", messageErreurAzalee(err)));
+      await repondre(
+        interaction,
+        echec("Données de jeu indisponibles", messageErreurAzalee(err)),
+      );
     }
   }
 
@@ -2267,9 +2725,13 @@ export class AzaleeJeuCommand {
           classerPropositions(
             await magasinsConnus(),
             saisie(interaction),
-            boutique => `${boutique.name ?? ""} ${boutique.nameEn ?? ""} ${boutique.nameJa ?? ""}`,
-          ).map(boutique => ({
-            name: truncate(`${boutique.name ?? "Magasin"} (${boutique.itemCount ?? 0} articles)`, 100),
+            (boutique) =>
+              `${boutique.name ?? ""} ${boutique.nameEn ?? ""} ${boutique.nameJa ?? ""}`,
+          ).map((boutique) => ({
+            name: truncate(
+              `${boutique.name ?? "Magasin"} (${boutique.itemCount ?? 0} articles)`,
+              100,
+            ),
             value: String(boutique.shopId ?? ""),
           })),
         ),
@@ -2288,7 +2750,10 @@ export class AzaleeJeuCommand {
           .setDescription(
             truncate(
               magasins
-                .map(boutique => `**${boutique.name ?? "Magasin"}** — ${formaterNombre(boutique.itemCount)} articles`)
+                .map(
+                  (boutique) =>
+                    `**${boutique.name ?? "Magasin"}** — ${formaterNombre(boutique.itemCount)} articles`,
+                )
                 .join("\n"),
               3800,
             ),
@@ -2299,27 +2764,39 @@ export class AzaleeJeuCommand {
 
       const identifiant = Number.parseInt(nom, 10);
       const reference =
-        magasins.find(boutique => boutique.shopId === identifiant) ??
+        magasins.find((boutique) => boutique.shopId === identifiant) ??
         classerPropositions(
           magasins,
           nom,
-          boutique => `${boutique.name ?? ""} ${boutique.nameEn ?? ""} ${boutique.nameJa ?? ""}`,
+          (boutique) =>
+            `${boutique.name ?? ""} ${boutique.nameEn ?? ""} ${boutique.nameJa ?? ""}`,
           1,
         )[0];
       if (!reference?.shopId) {
-        await interaction.editReply({ content: "❌ Magasin introuvable dans le wiki." });
+        await interaction.editReply({
+          content: "❌ Magasin introuvable dans le wiki.",
+        });
         return;
       }
 
-      const boutique = (await azalee().shop(reference.shopId)) as unknown as FicheMagasin;
+      const boutique = (await azalee().shop(
+        reference.shopId,
+      )) as unknown as FicheMagasin;
       const embed = rgEmbed()
         .setTitle(truncate(String(boutique.name ?? "Magasin"), 200))
-        .setURL(urlWiki(`/boutique/${encodeURIComponent(String(boutique.shopId))}`))
-        .setDescription(`**${formaterNombre(boutique.itemCount)}** articles au catalogue.`);
+        .setURL(
+          urlWiki(`/boutique/${encodeURIComponent(String(boutique.shopId))}`),
+        )
+        .setDescription(
+          `**${formaterNombre(boutique.itemCount)}** articles au catalogue.`,
+        );
 
       const autresNoms = joindre([boutique.nameEn, boutique.nameJa]);
       if (autresNoms.length > 0) {
-        embed.addFields({ name: "Autres noms", value: truncate(autresNoms, 500) });
+        embed.addFields({
+          name: "Autres noms",
+          value: truncate(autresNoms, 500),
+        });
       }
       const categories = boutique.categories ?? [];
       if (categories.length > 0) {
@@ -2328,7 +2805,7 @@ export class AzaleeJeuCommand {
           value: truncate(
             categories
               .map(
-                entree =>
+                (entree) =>
                   `${libelleCategorieObjet(entree.category) ?? entree.category} (${formaterNombre(entree.count)})`,
               )
               .join(" · "),
@@ -2338,8 +2815,8 @@ export class AzaleeJeuCommand {
       }
 
       const articles = (boutique.items ?? [])
-        .map(article => String(article.name ?? "").trim())
-        .filter(article => article.length > 0);
+        .map((article) => String(article.name ?? "").trim())
+        .filter((article) => article.length > 0);
       if (articles.length > 0) {
         // Deux champs au plus : un catalogue de 547 articles ne rentre pas
         // dans un embed, et le dépassement ferait échouer l'envoi entier.
@@ -2349,20 +2826,29 @@ export class AzaleeJeuCommand {
         });
         blocs.forEach((bloc, index) => {
           embed.addFields({
-            name: index === 0 ? `Aperçu du catalogue (${articles.length})` : "Suite",
+            name:
+              index === 0
+                ? `Aperçu du catalogue (${articles.length})`
+                : "Suite",
             value: bloc,
           });
         });
       }
       await interaction.editReply({ embeds: [embed] });
     } catch (err) {
-      await repondre(interaction, echec("Données de jeu indisponibles", messageErreurAzalee(err)));
+      await repondre(
+        interaction,
+        echec("Données de jeu indisponibles", messageErreurAzalee(err)),
+      );
     }
   }
 
   // --- Galerie -----------------------------------------------------------
 
-  @Slash({ name: "galerie", description: "Illustrations du jeu : histoire, chroniques, télops…" })
+  @Slash({
+    name: "galerie",
+    description: "Illustrations du jeu : histoire, chroniques, télops…",
+  })
   async galerie(
     @SlashOption({
       name: "categorie",
@@ -2371,12 +2857,14 @@ export class AzaleeJeuCommand {
       required: false,
       autocomplete: (interaction: AutocompleteInteraction) =>
         repondreSuggestions(interaction, async () =>
-          classerPropositions([...CATEGORIES_GALERIE], saisie(interaction), categorie => categorie.libelle).map(
-            categorie => ({
-              name: `${categorie.libelle} (${categorie.total})`,
-              value: categorie.valeur,
-            }),
-          ),
+          classerPropositions(
+            [...CATEGORIES_GALERIE],
+            saisie(interaction),
+            (categorie) => categorie.libelle,
+          ).map((categorie) => ({
+            name: `${categorie.libelle} (${categorie.total})`,
+            value: categorie.valeur,
+          })),
         ),
     })
     categorie: string | undefined,
@@ -2400,7 +2888,10 @@ export class AzaleeJeuCommand {
         }),
       );
     } catch (err) {
-      await repondre(interaction, echec("Données de jeu indisponibles", messageErreurAzalee(err)));
+      await repondre(
+        interaction,
+        echec("Données de jeu indisponibles", messageErreurAzalee(err)),
+      );
     }
   }
 
@@ -2413,7 +2904,8 @@ export class AzaleeJeuCommand {
   async coordinateur(
     @SlashOption({
       name: "nom",
-      description: "Coordinateur à détailler (laisser vide pour parcourir les 102)",
+      description:
+        "Coordinateur à détailler (laisser vide pour parcourir les 102)",
       type: ApplicationCommandOptionType.String,
       required: false,
       autocomplete: (interaction: AutocompleteInteraction) =>
@@ -2422,7 +2914,7 @@ export class AzaleeJeuCommand {
             q: saisie(interaction) || undefined,
             limit: 25,
           } as never)) as unknown as Page<FichePerso>;
-          return (liste.data ?? []).map(entree => ({
+          return (liste.data ?? []).map((entree) => ({
             name: truncate(texteFr(entree.names), 100),
             value: truncate(texteFr(entree.names), 100),
           }));
@@ -2454,7 +2946,9 @@ export class AzaleeJeuCommand {
       } as never)) as unknown as Page<FichePerso>;
       const coordinateur = (liste.data ?? [])[0];
       if (!coordinateur) {
-        await interaction.editReply({ content: "❌ Introuvable dans le wiki." });
+        await interaction.editReply({
+          content: "❌ Introuvable dans le wiki.",
+        });
         return;
       }
 
@@ -2463,29 +2957,44 @@ export class AzaleeJeuCommand {
         .setTitle(truncate(texteFr(coordinateur.names), 200))
         .setURL(urlWiki("/entraineur"));
 
-      const resume = truncate(nettoyerTexteJeu(texteFr(coordinateur.descriptions, "")), 800);
+      const resume = truncate(
+        nettoyerTexteJeu(texteFr(coordinateur.descriptions, "")),
+        800,
+      );
       if (resume.length > 0) {
         embed.setDescription(resume);
       }
       const identite = joindre([
         // `/api/coordinators` sert le rôle ET l'élément en anglais (mesuré sur
         // les 102 lignes), à la différence de `/api/characters`.
-        variante?.rarity ? `Rôle **${libelleRoleCoordinateur(variante.rarity)}**` : null,
-        variante?.element ? `Élément **${resoudreElement(variante.element) ?? variante.element}**` : null,
+        variante?.rarity
+          ? `Rôle **${libelleRoleCoordinateur(variante.rarity)}**`
+          : null,
+        variante?.element
+          ? `Élément **${resoudreElement(variante.element) ?? variante.element}**`
+          : null,
         coordinateur.series ? `Série **${coordinateur.series}**` : null,
-        coordinateur.internalCode ? `Code \`${coordinateur.internalCode}\`` : null,
+        coordinateur.internalCode
+          ? `Code \`${coordinateur.internalCode}\``
+          : null,
       ]);
       if (identite.length > 0) {
         embed.addFields({ name: "Identité", value: truncate(identite, 1000) });
       }
 
-      const portrait = await illustrationProuvee(variante?.image ?? coordinateur.image, 200);
+      const portrait = await illustrationProuvee(
+        variante?.image ?? coordinateur.image,
+        200,
+      );
       if (portrait) {
         embed.setThumbnail(portrait);
       }
       await interaction.editReply({ embeds: [embed] });
     } catch (err) {
-      await repondre(interaction, echec("Données de jeu indisponibles", messageErreurAzalee(err)));
+      await repondre(
+        interaction,
+        echec("Données de jeu indisponibles", messageErreurAzalee(err)),
+      );
     }
   }
 

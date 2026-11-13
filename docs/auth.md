@@ -21,12 +21,12 @@ ssh vps docker compose -f /srv/rosegriffon/app/compose.yaml --profile tools run 
 
 Stores (`STEAM_TOKEN_STORE`):
 
-| Kind         | Read                                     | Write on rotation                         |
-| ------------ | ---------------------------------------- | ----------------------------------------- |
-| `file`       | `$STEAM_HOME/steam-tokens.json` (0600)   | same file                                 |
-| `env`        | `STEAM_USER` + `STEAM_REFRESH_TOKEN`     | read-only, rotation is logged as a warning |
-| `cloudflare` | Workers KV value (`STEAM_TOKEN_KV_*`)    | same KV value                             |
-| `github`     | `STEAM_REFRESH_TOKEN` injected by Actions | `gh secret set` (value on stdin)         |
+| Kind         | Read                                      | Write on rotation                          |
+| ------------ | ----------------------------------------- | ------------------------------------------ |
+| `file`       | `$STEAM_HOME/steam-tokens.json` (0600)    | same file                                  |
+| `env`        | `STEAM_USER` + `STEAM_REFRESH_TOKEN`      | read-only, rotation is logged as a warning |
+| `cloudflare` | Workers KV value (`STEAM_TOKEN_KV_*`)     | same KV value                              |
+| `github`     | `STEAM_REFRESH_TOKEN` injected by Actions | `gh secret set` (value on stdin)           |
 
 Cloudflare Secrets Store values cannot be read back through the API, so the readable Cloudflare
 store is a Workers KV namespace. Copy the token once to another store:
@@ -38,12 +38,12 @@ steam-depot auth export --to cloudflare  # needs CLOUDFLARE_API_TOKEN with Worke
 
 ## Other registries
 
-| Tool       | One-time command                         | Where it persists                          |
-| ---------- | ---------------------------------------- | ------------------------------------------ |
-| GitHub     | `gh auth login`                          | OS keyring                                 |
-| Bun / npm  | `bun login` or `BUN_AUTH_TOKEN` env      | `~/.npmrc` (`//registry.npmjs.org/:_authToken`) |
-| crates.io  | `cargo login`                            | `~/.cargo/credentials.toml`                |
-| Cloudflare | `wrangler login` or `CLOUDFLARE_API_TOKEN` | `~/.wrangler/config` or the environment  |
+| Tool       | One-time command                           | Where it persists                               |
+| ---------- | ------------------------------------------ | ----------------------------------------------- |
+| GitHub     | `gh auth login`                            | OS keyring                                      |
+| Bun / npm  | `bun login` or `BUN_AUTH_TOKEN` env        | `~/.npmrc` (`//registry.npmjs.org/:_authToken`) |
+| crates.io  | `cargo login`                              | `~/.cargo/credentials.toml`                     |
+| Cloudflare | `wrangler login` or `CLOUDFLARE_API_TOKEN` | `~/.wrangler/config` or the environment         |
 
 ## GitHub Actions
 

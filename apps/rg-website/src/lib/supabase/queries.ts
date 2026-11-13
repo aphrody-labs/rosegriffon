@@ -80,7 +80,9 @@ export const getPublicArticles = async (page = 1, limit = 10) => {
     }
 
     const count = Number(rows[0]?.full_count ?? 0);
-    const data: ArticleRow[] = rows.map(({ full_count: _full_count, ...row }) => row);
+    const data: ArticleRow[] = rows.map(
+      ({ full_count: _full_count, ...row }) => row,
+    );
 
     return { count, data };
   } catch (error) {

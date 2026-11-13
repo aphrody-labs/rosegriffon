@@ -1,5 +1,8 @@
 import Link from "@/components/shared/Link";
-import { AdminPageHeader as DashboardPageHeader, Button } from "@rosegriffon/ui";
+import {
+  AdminPageHeader as DashboardPageHeader,
+  Button,
+} from "@rosegriffon/ui";
 import { createPostgresClient } from "@rosegriffon/db/service";
 import { Icon } from "@/components/ui/Icon";
 import { TweetRow } from "./tweet-row";
@@ -15,7 +18,10 @@ export default async function TweetsPage() {
   return (
     <div className="space-y-6 sm:space-y-8">
       <DashboardPageHeader
-        breadcrumbs={[{ href: "/dashboard", label: "Tableau de bord" }, { label: "Tweets" }]}
+        breadcrumbs={[
+          { href: "/dashboard", label: "Tableau de bord" },
+          { label: "Tweets" },
+        ]}
         title="Tweets"
         subtitle="Gérer le feed Twitter (X)"
         icon={<Icon name="tag" size={20} />}
@@ -34,7 +40,9 @@ export default async function TweetsPage() {
           <TweetRow key={tweet.id} tweet={tweet} />
         ))}
         {(!tweets || tweets.length === 0) && (
-          <div className="p-10 text-center text-on-surface-variant">Aucun tweet trouvé.</div>
+          <div className="p-10 text-center text-on-surface-variant">
+            Aucun tweet trouvé.
+          </div>
         )}
       </div>
     </div>

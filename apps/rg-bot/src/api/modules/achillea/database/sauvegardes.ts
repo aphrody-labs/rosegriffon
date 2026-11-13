@@ -22,10 +22,14 @@ export const REPERTOIRE_PAR_DEFAUT = "/var/backups/achillea";
 export const CONSERVATION_PAR_DEFAUT = 14;
 
 /** `achillea-20261022T101500Z.dump`, avec suffixe pour les sauvegardes d'avant restauration. */
-export const MOTIF_NOM = /^achillea-\d{8}T\d{6}Z(?:-avant-restauration)?\.dump$/;
+export const MOTIF_NOM =
+  /^achillea-\d{8}T\d{6}Z(?:-avant-restauration)?\.dump$/;
 
 export type ResultatProcessus = { code: number; stderr: string };
-export type Executeur = (commande: string[], env: Record<string, string>) => Promise<ResultatProcessus>;
+export type Executeur = (
+  commande: string[],
+  env: Record<string, string>,
+) => Promise<ResultatProcessus>;
 
 export const executerParDefaut: Executeur = async (commande, env) => {
   const processus = Bun.spawn(commande, {
@@ -34,7 +38,10 @@ export const executerParDefaut: Executeur = async (commande, env) => {
     stdout: "ignore",
     stderr: "pipe",
   });
-  const [code, stderr] = await Promise.all([processus.exited, new Response(processus.stderr).text()]);
+  const [code, stderr] = await Promise.all([
+    processus.exited,
+    new Response(processus.stderr).text(),
+  ]);
   return { code, stderr };
 };
 
@@ -48,17 +55,26 @@ export type DependancesSauvegarde = {
   maintenant: () => Date;
 };
 
-export function configurationDepuisEnv(env: Record<string, string | undefined> = Bun.env) {
-  const conservation = Math.floor(Number(env.ACHILLEA_BACKUP_KEEP ?? CONSERVATION_PAR_DEFAUT));
+export function configurationDepuisEnv(
+  env: Record<string, string | undefined> = Bun.env,
+) {
+  const conservation = Math.floor(
+    Number(env.ACHILLEA_BACKUP_KEEP ?? CONSERVATION_PAR_DEFAUT),
+  );
   return {
     repertoire: (env.ACHILLEA_BACKUP_DIR ?? "").trim() || REPERTOIRE_PAR_DEFAUT,
-    conservation: Number.isFinite(conservation) && conservation >= 1 ? conservation : CONSERVATION_PAR_DEFAUT,
+    conservation:
+      Number.isFinite(conservation) && conservation >= 1
+        ? conservation
+        : CONSERVATION_PAR_DEFAUT,
   };
 }
 
 export class OutilAbsent extends Error {
   constructor(readonly binaire: string) {
-    super(`« ${binaire} » est introuvable sur l'hôte de l'API : installe les outils clients PostgreSQL.`);
+    super(
+      `« ${binaire} » est introuvable sur l'hôte de l'API : installe les outils clients PostgreSQL.`,
+    );
   }
 }
 export class EchecOutil extends Error {}
@@ -67,21 +83,32 @@ export class OperationEnCours extends Error {}
 export class SauvegardePrealableImpossible extends Error {}
 
 export function nomSauvegarde(date: Date, avantRestauration = false): string {
-  const horodatage = date.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}Z$/, "Z");
+  const horodatage = date
+    .toISOString()
+    .replace(/[-:]/g, "")
+    .replace(/\.\d{3}Z$/, "Z");
   return `achillea-${horodatage}${avantRestauration ? "-avant-restauration" : ""}.dump`;
 }
 
 /** URL sans mot de passe + `PGPASSWORD` à part. */
-export function connexionPg(url: string): { dbname: string; env: Record<string, string> } {
+export function connexionPg(url: string): {
+  dbname: string;
+  env: Record<string, string>;
+} {
   const analyse = new URL(url);
   const motDePasse = decodeURIComponent(analyse.password);
   analyse.password = "";
-  return { dbname: analyse.toString(), env: motDePasse ? { PGPASSWORD: motDePasse } : {} };
+  return {
+    dbname: analyse.toString(),
+    env: motDePasse ? { PGPASSWORD: motDePasse } : {},
+  };
 }
 
 export type Sauvegarde = { name: string; sizeBytes: number; createdAt: string };
 
-export async function listerSauvegardes(repertoire: string): Promise<Sauvegarde[]> {
+export async function listerSauvegardes(
+  repertoire: string,
+): Promise<Sauvegarde[]> {
   let noms: string[];
   try {
     noms = await readdir(repertoire);
@@ -91,10 +118,14 @@ export async function listerSauvegardes(repertoire: string): Promise<Sauvegarde[
   }
   const archives = await Promise.all(
     noms
-      .filter(nom => MOTIF_NOM.test(nom))
-      .map(async nom => {
+      .filter((nom) => MOTIF_NOM.test(nom))
+      .map(async (nom) => {
         const infos = await stat(join(repertoire, nom));
-        return { name: nom, sizeBytes: infos.size, createdAt: infos.mtime.toISOString() };
+        return {
+          name: nom,
+          sizeBytes: infos.size,
+          createdAt: infos.mtime.toISOString(),
+        };
       }),
   );
   // Le nom porte l'horodatage UTC : l'ordre lexical est l'ordre chronologique.
@@ -119,8 +150,14 @@ export async function appliquerRotation(
 
 let operationEnCours: string | null = null;
 
-async function exclusivement<T>(nom: string, travail: () => Promise<T>): Promise<T> {
-  if (operationEnCours) throw new OperationEnCours(`Une opération est déjà en cours : ${operationEnCours}.`);
+async function exclusivement<T>(
+  nom: string,
+  travail: () => Promise<T>,
+): Promise<T> {
+  if (operationEnCours)
+    throw new OperationEnCours(
+      `Une opération est déjà en cours : ${operationEnCours}.`,
+    );
   operationEnCours = nom;
   try {
     return await travail();
@@ -129,7 +166,11 @@ async function exclusivement<T>(nom: string, travail: () => Promise<T>): Promise
   }
 }
 
-async function dump(deps: DependancesSauvegarde, avantRestauration: boolean, proteger: ReadonlySet<string>) {
+async function dump(
+  deps: DependancesSauvegarde,
+  avantRestauration: boolean,
+  proteger: ReadonlySet<string>,
+) {
   const pgDump = deps.trouver("pg_dump");
   if (!pgDump) throw new OutilAbsent("pg_dump");
   await mkdir(deps.repertoire, { recursive: true });
@@ -153,10 +194,16 @@ async function dump(deps: DependancesSauvegarde, avantRestauration: boolean, pro
   );
   if (resultat.code !== 0) {
     await unlink(partiel).catch(() => {});
-    throw new EchecOutil(`pg_dump a échoué (code ${resultat.code}) : ${resultat.stderr.trim().slice(0, 400)}`);
+    throw new EchecOutil(
+      `pg_dump a échoué (code ${resultat.code}) : ${resultat.stderr.trim().slice(0, 400)}`,
+    );
   }
   await rename(partiel, final);
-  await appliquerRotation(deps.repertoire, deps.conservation, new Set([nom, ...proteger]));
+  await appliquerRotation(
+    deps.repertoire,
+    deps.conservation,
+    new Set([nom, ...proteger]),
+  );
   return nom;
 }
 
@@ -169,11 +216,15 @@ export function sauvegarder(deps: DependancesSauvegarde): Promise<string> {
  * Restaure une archive de la liste. Rend le nom de la sauvegarde prise juste
  * avant, qui permet de revenir en arrière.
  */
-export function restaurer(deps: DependancesSauvegarde, nom: string): Promise<{ sauvegardePrealable: string }> {
+export function restaurer(
+  deps: DependancesSauvegarde,
+  nom: string,
+): Promise<{ sauvegardePrealable: string }> {
   return exclusivement("restauration", async () => {
     const archives = await listerSauvegardes(deps.repertoire);
-    const cible = archives.find(archive => archive.name === nom);
-    if (!MOTIF_NOM.test(nom) || !cible) throw new SauvegardeInconnue(`Sauvegarde « ${nom} » introuvable.`);
+    const cible = archives.find((archive) => archive.name === nom);
+    if (!MOTIF_NOM.test(nom) || !cible)
+      throw new SauvegardeInconnue(`Sauvegarde « ${nom} » introuvable.`);
     const pgRestore = deps.trouver("pg_restore");
     if (!pgRestore) throw new OutilAbsent("pg_restore");
 

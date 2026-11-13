@@ -3,14 +3,25 @@
  * Based on zukan.inazuma.jp (Inazugle)
  */
 
-export type ZukanElementType = "Wind" | "Forest" | "Fire" | "Mountain" | "Void" | "Unknown";
+export type ZukanElementType =
+  "Wind" | "Forest" | "Fire" | "Mountain" | "Void" | "Unknown";
 export type ZukanPositionType = "GK" | "DF" | "MF" | "FW";
 export type ZukanGenderType = "Male" | "Female" | "Unknown" | "Neutral";
 export type ZukanSchoolYearType = "Grade 7" | "Grade 8" | "Grade 9" | "Unknown";
 export type ZukanCharacterRole = "Player" | "Coordinator" | "Manager" | "Coach";
 
 /** 9 game keys matching the zukan appeared-works columns (order matters) */
-export const GAME_KEYS = ["ie1", "ie2", "ie3", "go1", "go2", "go3", "ars", "ori", "vic"] as const;
+export const GAME_KEYS = [
+  "ie1",
+  "ie2",
+  "ie3",
+  "go1",
+  "go2",
+  "go3",
+  "ars",
+  "ori",
+  "vic",
+] as const;
 export type GameKey = (typeof GAME_KEYS)[number];
 
 /** Map game key → Azalee series name */

@@ -26,7 +26,11 @@ import {
   typeDepuisNumero,
 } from "./achillea-clan-vues";
 
-function membre(id: string, role: number, depuis = "2026-01-01"): ClanMemberDTO {
+function membre(
+  id: string,
+  role: number,
+  depuis = "2026-01-01",
+): ClanMemberDTO {
   return {
     clanRole: role,
     distinctions: [ClanMemberDistinction.Player],
@@ -46,25 +50,41 @@ const equipe: ClanTeam = {
   updatedAt: new Date("2026-10-01"),
   members: [
     { linkId: 1, userId: "1001", displayName: "Akira", avatar: null, role: 0 },
-    { linkId: 2, userId: "1002", displayName: "Kazemaru", avatar: null, role: 0 },
+    {
+      linkId: 2,
+      userId: "1002",
+      displayName: "Kazemaru",
+      avatar: null,
+      role: 0,
+    },
     { linkId: 3, userId: "1003", displayName: "Coach", avatar: null, role: 2 },
   ],
   valid: false,
   errors: ["Il faut au moins 3 joueurs."],
 };
 
-const ids = (rangee: { toJSON(): { components: Array<{ custom_id?: string; disabled?: boolean }> } }) =>
-  rangee.toJSON().components.map(c => `${c.custom_id}${c.disabled ? " (grisé)" : ""}`);
+const ids = (rangee: {
+  toJSON(): { components: Array<{ custom_id?: string; disabled?: boolean }> };
+}) =>
+  rangee
+    .toJSON()
+    .components.map((c) => `${c.custom_id}${c.disabled ? " (grisé)" : ""}`);
 
 describe("identifiants", () => {
   test("clan_manage aller-retour", () => {
     expect(idGestion("role", "123", 2)).toBe("clan_manage:role:123:2");
-    expect(decoderIdGestion("clan_manage:role:123:2")).toEqual({ action: "role", args: ["123", "2"] });
+    expect(decoderIdGestion("clan_manage:role:123:2")).toEqual({
+      action: "role",
+      args: ["123", "2"],
+    });
     expect(decoderIdGestion("team_edit_btn:0:1")).toBeNull();
   });
 
   test("identifiants legacy des équipes conservés", () => {
-    expect(ids(rangeeMenuEquipes(42))).toEqual(["team_manager_btn:42:1", "team_manager_btn:42:2"]);
+    expect(ids(rangeeMenuEquipes(42))).toEqual([
+      "team_manager_btn:42:1",
+      "team_manager_btn:42:2",
+    ]);
     expect(ids(rangeeGestionEquipe(equipe))).toEqual([
       "team_edit_btn:0:0",
       "team_edit_btn:0:1",
@@ -104,13 +124,16 @@ describe("gestion d'un membre", () => {
   });
 
   test("menu des distinctions : identifiant legacy, valeurs = clés de l'enum", () => {
-    const json = selecteurDistinctions(membre("5", 1), 42).toJSON().components[0] as unknown as {
+    const json = selecteurDistinctions(membre("5", 1), 42).toJSON()
+      .components[0] as unknown as {
       custom_id: string;
       options: Array<{ value: string; default?: boolean }>;
     };
     expect(json.custom_id).toBe("edit_distinctions:5:42");
-    expect(json.options.find(o => o.value === "Player")?.default).toBe(true);
-    expect(distinctionsDepuisValeurs(["Player", "Staff", "Inconnue", "Artiste"])).toEqual([
+    expect(json.options.find((o) => o.value === "Player")?.default).toBe(true);
+    expect(
+      distinctionsDepuisValeurs(["Player", "Staff", "Inconnue", "Artiste"]),
+    ).toEqual([
       ClanMemberDistinction.Player,
       ClanMemberDistinction.Staff,
       ClanMemberDistinction.Artist,
@@ -118,13 +141,21 @@ describe("gestion d'un membre", () => {
   });
 
   test("tri : rôle décroissant puis arrivée la plus récente", () => {
-    const tries = trierMembres([membre("a", 1, "2026-01-01"), membre("b", 3), membre("c", 1, "2026-05-01")]);
-    expect(tries.map(m => m.user.id)).toEqual(["b", "c", "a"]);
+    const tries = trierMembres([
+      membre("a", 1, "2026-01-01"),
+      membre("b", 3),
+      membre("c", 1, "2026-05-01"),
+    ]);
+    expect(tries.map((m) => m.user.id)).toEqual(["b", "c", "a"]);
   });
 });
 
 describe("paramètres", () => {
-  const clan = { isRecruiting: true, autoAcceptMembers: false, isHidden: false };
+  const clan = {
+    isRecruiting: true,
+    autoAcceptMembers: false,
+    isHidden: false,
+  };
   test("chaque bascule inverse SON champ", () => {
     expect(patchBascule("recruiting", clan)).toEqual({ isRecruiting: false });
     expect(patchBascule("auto", clan)).toEqual({ autoAcceptMembers: true });
@@ -133,12 +164,12 @@ describe("paramètres", () => {
   });
 
   test("logo : png, jpg et jpeg seulement", () => {
-    expect([logoAccepte("image/png"), logoAccepte("image/jpeg"), logoAccepte("image/gif"), logoAccepte(null)]).toEqual([
-      true,
-      true,
-      false,
-      false,
-    ]);
+    expect([
+      logoAccepte("image/png"),
+      logoAccepte("image/jpeg"),
+      logoAccepte("image/gif"),
+      logoAccepte(null),
+    ]).toEqual([true, true, false, false]);
   });
 });
 
@@ -158,31 +189,71 @@ describe("modales d'équipe", () => {
   test("paramètres : nom et capitaine parmi les joueurs seulement", () => {
     const json = modaleParametresEquipe(equipe).toJSON() as unknown as {
       custom_id: string;
-      components: Array<{ component: { custom_id: string; options?: Array<{ value: string; default?: boolean }> } }>;
+      components: Array<{
+        component: {
+          custom_id: string;
+          options?: Array<{ value: string; default?: boolean }>;
+        };
+      }>;
     };
     expect(json.custom_id).toBe("team_settings_modal:7");
-    expect(json.components[0]?.component.custom_id).toBe("team_settings_name:7");
+    expect(json.components[0]?.component.custom_id).toBe(
+      "team_settings_name:7",
+    );
     const options = json.components[1]?.component.options ?? [];
-    expect(options.map(o => o.value)).toEqual(["1001", "1002"]);
-    expect(options.find(o => o.value === "1001")?.default).toBe(true);
+    expect(options.map((o) => o.value)).toEqual(["1001", "1002"]);
+    expect(options.find((o) => o.value === "1001")?.default).toBe(true);
   });
 });
 
 describe("parité legacy du panneau /clan manage", () => {
   const user = { id: "9", username: "Fubuki", lastInteract: null };
-  const membre = { clanRole: 1, distinctions: ["Joueur"], clanFameContributed: 0, createdAt: "2026-02-01T12:00:00.000Z", updatedAt: "2026-02-01T12:00:00.000Z", user };
-  const clan = { id: 42, shortenedName: "RMN", name: "Raimon", clanAvatarUrl: "https://cdn.test/r.png", founders: [], clanBiography: "", membersCount: 1 };
+  const membre = {
+    clanRole: 1,
+    distinctions: ["Joueur"],
+    clanFameContributed: 0,
+    createdAt: "2026-02-01T12:00:00.000Z",
+    updatedAt: "2026-02-01T12:00:00.000Z",
+    user,
+  };
+  const clan = {
+    id: 42,
+    shortenedName: "RMN",
+    name: "Raimon",
+    clanAvatarUrl: "https://cdn.test/r.png",
+    founders: [],
+    clanBiography: "",
+    membersCount: 1,
+  };
 
   test("membres : titre « - Members », description et pagination Début/Précédent/Suivant/Fin + Menu", async () => {
     const vues = await import("./achillea-clan-vues");
-    const e = vues.embedListeMembres(clan as never, [membre] as never, 1).toJSON();
+    const e = vues
+      .embedListeMembres(clan as never, [membre] as never, 1)
+      .toJSON();
     expect(e.color).toBe(0x206694);
     expect(e.title).toBe("[RMN] Raimon - Members");
-    expect(e.description).toBe("Liste des membres du clan ordonnées par rôle et ancienneté\n\n**1 Membres** - Page 1/1");
-    expect(e.fields?.map(f => f.name)).toEqual(["Membre", "Rôle", "Dernière activité"]);
-    const rangee = vues.rangeePaginationGestion("members", 1, 1).toJSON() as unknown as { components: Array<{ label: string; style: number }> };
-    expect(rangee.components.map(b => b.label)).toEqual(["Début", "Précédent", "Suivant", "Fin", "Menu"]);
-    expect(rangee.components.every(b => b.style === 1)).toBe(true);
+    expect(e.description).toBe(
+      "Liste des membres du clan ordonnées par rôle et ancienneté\n\n**1 Membres** - Page 1/1",
+    );
+    expect(e.fields?.map((f) => f.name)).toEqual([
+      "Membre",
+      "Rôle",
+      "Dernière activité",
+    ]);
+    const rangee = vues
+      .rangeePaginationGestion("members", 1, 1)
+      .toJSON() as unknown as {
+      components: Array<{ label: string; style: number }>;
+    };
+    expect(rangee.components.map((b) => b.label)).toEqual([
+      "Début",
+      "Précédent",
+      "Suivant",
+      "Fin",
+      "Menu",
+    ]);
+    expect(rangee.components.every((b) => b.style === 1)).toBe(true);
   });
 
   test("membre : « Gestion du membre », six champs, « Editer les distinctions »", async () => {
@@ -190,34 +261,68 @@ describe("parité legacy du panneau /clan manage", () => {
     const e = vues.embedMembre(membre as never).toJSON();
     expect(e.title).toBe("Fubuki - Gestion du membre");
     expect(e.description).toBe("__*Clan rejoint le 01/02/2026*__");
-    expect(e.fields?.map(f => f.name)).toEqual(["Rôle", "Distinctions", "Dernière activité", "Contributions", "Stats Interclan", "Stats Coupes des Clans"]);
-    expect(JSON.stringify(vues.rangeeGestionMembre(membre as never, 2, 42).toJSON())).toContain("Editer les distinctions");
+    expect(e.fields?.map((f) => f.name)).toEqual([
+      "Rôle",
+      "Distinctions",
+      "Dernière activité",
+      "Contributions",
+      "Stats Interclan",
+      "Stats Coupes des Clans",
+    ]);
+    expect(
+      JSON.stringify(vues.rangeeGestionMembre(membre as never, 2, 42).toJSON()),
+    ).toContain("Editer les distinctions");
   });
 
   test("invitations : liste, fiche et question de révocation de l'ancien bot", async () => {
     const vues = await import("./achillea-clan-vues");
-    const invitation = { id: 5, user, inviter: membre, distinctions: [], createdAt: "2026-11-05T12:00:00.000Z", updatedAt: "2026-11-05T12:00:00.000Z", lastNotifiedAt: "2026-11-05T12:00:00.000Z" };
+    const invitation = {
+      id: 5,
+      user,
+      inviter: membre,
+      distinctions: [],
+      createdAt: "2026-11-05T12:00:00.000Z",
+      updatedAt: "2026-11-05T12:00:00.000Z",
+      lastNotifiedAt: "2026-11-05T12:00:00.000Z",
+    };
     const liste = vues.embedListeInvitations(clan as never, [], 1).toJSON();
     expect(liste.title).toBe("[RMN] Raimon - Invites");
-    expect(liste.description).toBe("Liste des invitations émises par le clan ordonnées par ancienneté\n\n**0/100** - Page 1/1");
-    expect(liste.fields?.map(f => f.value)).toEqual(["-", "-", "-"]);
+    expect(liste.description).toBe(
+      "Liste des invitations émises par le clan ordonnées par ancienneté\n\n**0/100** - Page 1/1",
+    );
+    expect(liste.fields?.map((f) => f.value)).toEqual(["-", "-", "-"]);
     const fiche = vues.embedInvitation(invitation as never).toJSON();
     expect(fiche.title).toBe("Fubuki - Gestion de l'invitation");
-    expect(fiche.fields?.map(f => `${f.name}=${f.value}`)).toEqual([
-      "Dernière activité=—", "Elo=Non classé", "Tournois gagnés=0", "Participations Interclan=0", "Victoires Interclan=0", "Victoires Coupes des Clans=0",
+    expect(fiche.fields?.map((f) => `${f.name}=${f.value}`)).toEqual([
+      "Dernière activité=—",
+      "Elo=Non classé",
+      "Tournois gagnés=0",
+      "Participations Interclan=0",
+      "Victoires Interclan=0",
+      "Victoires Coupes des Clans=0",
     ]);
-    expect(vues.questionRevocation(invitation as never)).toBe("Voulez-vous révoquer l'invitation envoyée à Fubuki ?");
-    const confirmation = JSON.stringify(vues.rangeeConfirmationRevocation(5).toJSON());
+    expect(vues.questionRevocation(invitation as never)).toBe(
+      "Voulez-vous révoquer l'invitation envoyée à Fubuki ?",
+    );
+    const confirmation = JSON.stringify(
+      vues.rangeeConfirmationRevocation(5).toJSON(),
+    );
     expect(confirmation).toContain('"label":"Confirmer"');
     expect(confirmation).toContain('"label":"Annuler"');
   });
 
   test("modales : biographie et réseaux de l'ancien bot", async () => {
     const vues = await import("./achillea-clan-vues");
-    const bio = JSON.stringify(vues.modaleBiographie({ clanBiography: "x" }).toJSON());
+    const bio = JSON.stringify(
+      vues.modaleBiographie({ clanBiography: "x" }).toJSON(),
+    );
     expect(bio).toContain('"title":"Change Clan Biography"');
     expect(bio).toContain('"label":"Clan biography"');
-    const reseaux = JSON.stringify(vues.modaleReseaux({ xUrl: null, instagramUrl: null, tiktokUrl: null }).toJSON());
+    const reseaux = JSON.stringify(
+      vues
+        .modaleReseaux({ xUrl: null, instagramUrl: null, tiktokUrl: null })
+        .toJSON(),
+    );
     expect(reseaux).toContain('"title":"Modifier les Réseaux du Clan"');
     expect(reseaux).toContain("https://twitter.com/youraccount");
   });

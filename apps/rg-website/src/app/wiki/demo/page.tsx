@@ -11,10 +11,20 @@
 import type { Metadata } from "next";
 import { cdnOrigin } from "@rosegriffon/assets";
 import dossier from "@/data/aphrody-dossier.json";
-import { cpkAssetUrl, cpkAudioUrl, cpkThumbUrl } from "@rosegriffon/azalee/cpk/shared";
+import {
+  cpkAssetUrl,
+  cpkAudioUrl,
+  cpkThumbUrl,
+} from "@rosegriffon/azalee/cpk/shared";
 import { wikiService } from "@/lib/wiki-service";
 import { DemoExperience } from "@/components/wiki/demo/DemoExperience";
-import type { DemoData, DemoDialogue, DemoFormData, DemoSkill, DemoTexture } from "@/components/wiki/demo/types";
+import type {
+  DemoData,
+  DemoDialogue,
+  DemoFormData,
+  DemoSkill,
+  DemoTexture,
+} from "@/components/wiki/demo/types";
 import { wiki } from "@rosegriffon/app-shell";
 
 const CDN = cdnOrigin(process.env.NEXT_PUBLIC_CDN_ORIGIN);
@@ -24,7 +34,8 @@ export const metadata: Metadata = {
   description:
     "Démo 3D interactive d'Aphrodi (Byron Love Aphrody) dans Inazuma Eleven: Victory Road — modèles complets texturés des 3 ères, cut-ins jouables avec caméra scénarisée et export MP4, voix japonaise, calcul de statistiques byte-exact et galerie de textures téléchargeables.",
   openGraph: {
-    description: "Toutes les ressources 3D d'un personnage réunies : modèles, cut-ins, voix, stats et textures.",
+    description:
+      "Toutes les ressources 3D d'un personnage réunies : modèles, cut-ins, voix, stats et textures.",
     images: ["/opengraph-image"],
     locale: "fr_FR",
     siteName: "Azalée - Inazuma Eleven Victory Road",
@@ -68,7 +79,11 @@ interface DossierVariant {
   main_position: number;
   sub_position: number;
   growth_pattern: number;
-  techniques?: { info: DossierTechInfo; cutin: DossierTechCutin | null; learn_level: number }[];
+  techniques?: {
+    info: DossierTechInfo;
+    cutin: DossierTechCutin | null;
+    learn_level: number;
+  }[];
 }
 
 const d = dossier as unknown as {
@@ -77,7 +92,11 @@ const d = dossier as unknown as {
   variants: DossierVariant[];
   identity: Record<string, unknown>;
   profile: Record<string, unknown>;
-  stats: { lv1: Record<string, number>; lv50: Record<string, number>; lv99: Record<string, number> };
+  stats: {
+    lv1: Record<string, number>;
+    lv50: Record<string, number>;
+    lv99: Record<string, number>;
+  };
   references: { title: string; detail: string }[];
   dialogues: { lines?: { fr?: string; ja?: string; mentions?: boolean }[] }[];
 };
@@ -85,19 +104,22 @@ const d = dossier as unknown as {
 /** URL du telop FR d'une liste `[langue, chemin]` (repli en/1ère langue), ou `null`. */
 function telopFrUrl(pairs: string[][] | undefined): string | null {
   if (!pairs?.length) return null;
-  const chosen = pairs.find(([l]) => l === "fr") ?? pairs.find(([l]) => l === "en") ?? pairs[0];
+  const chosen =
+    pairs.find(([l]) => l === "fr") ??
+    pairs.find(([l]) => l === "en") ??
+    pairs[0];
   return chosen ? cpkAssetUrl(chosen[1]) : null;
 }
 
 /** Construit le {@link DemoData} sérialisable depuis le dossier (exécuté côté serveur). */
 async function buildDemoData(): Promise<DemoData> {
   // --- Formes : 1 entrée par ère (series), enrichie par asset + variante de même code. ---
-  const forms: DemoFormData[] = d.series.map(s => {
-    const asset = d.assets.find(a => a.code === s.code);
+  const forms: DemoFormData[] = d.series.map((s) => {
+    const asset = d.assets.find((a) => a.code === s.code);
     // Variante canonique de cette ère (préférer is_primary, sinon 1ère de même code).
     const variant =
-      d.variants.find(v => v.code === s.code && v.is_primary) ??
-      d.variants.find(v => v.code === s.code) ??
+      d.variants.find((v) => v.code === s.code && v.is_primary) ??
+      d.variants.find((v) => v.code === s.code) ??
       d.variants[0];
     return {
       code: s.code,
@@ -105,7 +127,9 @@ async function buildDemoData(): Promise<DemoData> {
       faceSubdir: s.face_subdir,
       isPrimary: variant?.is_primary ?? false,
       modelGlbUrl: `${CDN}/model-full/${s.code}.glb`,
-      voiceUrl: cpkAudioUrl(asset?.voice_acb ?? `data/common/sound_asset/ja/${s.code}.acb`),
+      voiceUrl: cpkAudioUrl(
+        asset?.voice_acb ?? `data/common/sound_asset/ja/${s.code}.acb`,
+      ),
       iconUrl: asset?.icon_g4tx ? cpkAssetUrl(asset.icon_g4tx) : null,
       faceTextureUrl: asset?.face_g4tx ? cpkAssetUrl(asset.face_g4tx) : null,
       growth: {
@@ -119,17 +143,27 @@ async function buildDemoData(): Promise<DemoData> {
   // --- Techniques : flatten des variants[].techniques, dédupliquées par skill_id_str. ---
   const featuredCodes = ["whs00340", "whs00900", "whs02900"];
   const skillCodes = new Set([
-    ...d.variants.flatMap(v => (v.techniques ?? []).map(t => t.info.skill_id_str)),
+    ...d.variants.flatMap((v) =>
+      (v.techniques ?? []).map((t) => t.info.skill_id_str),
+    ),
     ...featuredCodes,
   ]);
   const sqlEntries = await wikiService.getSkillCutins([...skillCodes]);
-  const entriesByCode = new Map(sqlEntries.map(entry => [entry.skill_id_str, entry]));
+  const entriesByCode = new Map(
+    sqlEntries.map((entry) => [entry.skill_id_str, entry]),
+  );
   const servedEvents = await wikiService.getSkillCutinAssets(
-    sqlEntries.map(entry => entry.cutin?.event_id_name).filter((event): event is string => Boolean(event)),
+    sqlEntries
+      .map((entry) => entry.cutin?.event_id_name)
+      .filter((event): event is string => Boolean(event)),
   );
   const seen = new Set<string>();
   const skills: DemoSkill[] = [];
-  const pushSkill = (info: DossierTechInfo, cutin: DossierTechCutin | null, learnLevel: number): void => {
+  const pushSkill = (
+    info: DossierTechInfo,
+    cutin: DossierTechCutin | null,
+    learnLevel: number,
+  ): void => {
     if (!info?.skill_id_str || seen.has(info.skill_id_str)) return;
     seen.add(info.skill_id_str);
     // Noms localisés via la projection SQL des cut-ins (le dossier brut n'a que des codes numériques).
@@ -154,7 +188,8 @@ async function buildDemoData(): Promise<DemoData> {
     });
   };
   for (const v of d.variants) {
-    for (const t of v.techniques ?? []) pushSkill(t.info, t.cutin, t.learn_level);
+    for (const t of v.techniques ?? [])
+      pushSkill(t.info, t.cutin, t.learn_level);
   }
   // Lignée vedette explicite (au cas où une ère manquerait dans le dossier).
   for (const code of featuredCodes) {
@@ -187,7 +222,9 @@ async function buildDemoData(): Promise<DemoData> {
       textures.push({
         label: `Visage — ${f.label}`,
         url: f.faceTextureUrl,
-        thumbUrl: cpkThumbUrl(`data/dx11/chr/_face/${f.faceSubdir}/${f.code}/${f.code}.g4tx`),
+        thumbUrl: cpkThumbUrl(
+          `data/dx11/chr/_face/${f.faceSubdir}/${f.code}/${f.code}.g4tx`,
+        ),
         group: "face",
       });
     }
@@ -195,7 +232,9 @@ async function buildDemoData(): Promise<DemoData> {
       textures.push({
         label: `Portrait — ${f.label}`,
         url: f.iconUrl,
-        thumbUrl: cpkThumbUrl(`data/dx11/menu/200_icon/10_icon_chr/face/${f.code}_l.g4tx`),
+        thumbUrl: cpkThumbUrl(
+          `data/dx11/menu/200_icon/10_icon_chr/face/${f.code}_l.g4tx`,
+        ),
         group: "icon",
       });
     }
@@ -206,7 +245,9 @@ async function buildDemoData(): Promise<DemoData> {
       textures.push({
         label: `Cut-in — ${sk.elementName.fr} ${sk.categoryName.fr}`,
         url: sk.textureUrl,
-        thumbUrl: cpkThumbUrl(`data/dx11/chr/_waza/${sk.eventIdName}/${sk.eventIdName}.g4tx`),
+        thumbUrl: cpkThumbUrl(
+          `data/dx11/chr/_waza/${sk.eventIdName}/${sk.eventIdName}.g4tx`,
+        ),
         group: "waza",
       });
     }
@@ -258,7 +299,11 @@ async function buildDemoData(): Promise<DemoData> {
     forms,
     skills,
     textures,
-    precomputedStats: { lv1: d.stats.lv1, lv50: d.stats.lv50, lv99: d.stats.lv99 },
+    precomputedStats: {
+      lv1: d.stats.lv1,
+      lv50: d.stats.lv50,
+      lv99: d.stats.lv99,
+    },
     references: d.references ?? [],
     dialogues,
   };
@@ -270,15 +315,22 @@ export default async function DemoPage() {
     <div className="w-full space-y-10">
       <header className="space-y-2">
         <p className="text-xs font-semibold uppercase tracking-wider text-primary">
-          Démo 3D · #{data.identity.zukanOrder} · {data.identity.constellationFr}
+          Démo 3D · #{data.identity.zukanOrder} ·{" "}
+          {data.identity.constellationFr}
         </p>
         <h1 className="text-fluid-headline-md font-extrabold text-on-surface">
-          {data.identity.nameFr} <span className="text-on-surface-variant">« {data.identity.epithetFr} »</span>
+          {data.identity.nameFr}{" "}
+          <span className="text-on-surface-variant">
+            « {data.identity.epithetFr} »
+          </span>
         </h1>
         <p className="max-w-3xl text-sm text-on-surface-variant">
-          {data.identity.nameJa} · {data.identity.kana} — équipe {data.identity.teamNameEn}. Toutes les ressources 3D du
-          personnage réunies : modèles complets texturés des 3 ères, cut-ins jouables (caméra scénarisée, export MP4),
-          voix japonaise, statistiques byte-exact et textures téléchargeables. Une seule scène, pilotée à la demande.
+          {data.identity.nameJa} · {data.identity.kana} — équipe{" "}
+          {data.identity.teamNameEn}. Toutes les ressources 3D du personnage
+          réunies : modèles complets texturés des 3 ères, cut-ins jouables
+          (caméra scénarisée, export MP4), voix japonaise, statistiques
+          byte-exact et textures téléchargeables. Une seule scène, pilotée à la
+          demande.
         </p>
       </header>
 
@@ -288,14 +340,18 @@ export default async function DemoPage() {
       {/* Références culturelles (RSC pur). */}
       {data.references.length > 0 && (
         <section className="space-y-3">
-          <h2 className="text-fluid-headline-sm font-bold text-on-surface">Références &amp; étymologie</h2>
+          <h2 className="text-fluid-headline-sm font-bold text-on-surface">
+            Références &amp; étymologie
+          </h2>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            {data.references.map(r => (
+            {data.references.map((r) => (
               <article
                 key={r.title}
                 className="rounded-2xl border border-outline-variant/20 bg-surface-container-low/40 p-4"
               >
-                <h3 className="mb-1 text-sm font-bold text-on-surface">{r.title}</h3>
+                <h3 className="mb-1 text-sm font-bold text-on-surface">
+                  {r.title}
+                </h3>
                 <p className="text-sm text-on-surface-variant">{r.detail}</p>
               </article>
             ))}
@@ -306,12 +362,21 @@ export default async function DemoPage() {
       {/* Dialogues (RSC pur). */}
       {data.dialogues.length > 0 && (
         <section className="space-y-3">
-          <h2 className="text-fluid-headline-sm font-bold text-on-surface">Répliques</h2>
+          <h2 className="text-fluid-headline-sm font-bold text-on-surface">
+            Répliques
+          </h2>
           <ul className="space-y-2">
-            {data.dialogues.map(line => (
-              <li key={line.lineFr} className="rounded-xl border border-outline-variant/20 bg-surface-container/60 p-3">
+            {data.dialogues.map((line) => (
+              <li
+                key={line.lineFr}
+                className="rounded-xl border border-outline-variant/20 bg-surface-container/60 p-3"
+              >
                 <p className="text-sm text-on-surface">« {line.lineFr} »</p>
-                {line.lineJa && <p className="mt-0.5 text-xs text-on-surface-variant">{line.lineJa}</p>}
+                {line.lineJa && (
+                  <p className="mt-0.5 text-xs text-on-surface-variant">
+                    {line.lineJa}
+                  </p>
+                )}
               </li>
             ))}
           </ul>

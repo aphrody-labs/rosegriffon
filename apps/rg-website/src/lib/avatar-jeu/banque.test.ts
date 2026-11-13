@@ -13,7 +13,13 @@ import {
   type LigneBanque,
 } from "./banque";
 
-const ligne = (internal_code: string, name_fr: string, series: string, name_en = "", name_ja = ""): LigneBanque => ({
+const ligne = (
+  internal_code: string,
+  name_fr: string,
+  series: string,
+  name_en = "",
+  name_ja = "",
+): LigneBanque => ({
   internal_code,
   name_fr,
   name_en,
@@ -44,13 +50,19 @@ describe("codes et URL", () => {
     expect(urlPortrait("https://cdn.rosegriffon.fr/", "c01000010", 160)).toBe(
       "https://cdn.rosegriffon.fr/dx11/menu/200_icon/10_icon_chr/face/c01000010_l.g4tx/c01000010_1_l00.png?w=160&format=webp",
     );
-    expect(() => urlPortrait("https://cdn.rosegriffon.fr", "../etc", 160)).toThrow();
+    expect(() =>
+      urlPortrait("https://cdn.rosegriffon.fr", "../etc", 160),
+    ).toThrow();
   });
 
   test("codeDepuisUrl relit l'URL enregistrée, pas une photo téléversée", () => {
     const url = urlPortrait("https://cdn.rosegriffon.fr", "c05020110", 512);
     expect(codeDepuisUrl(url)).toBe("c05020110");
-    expect(codeDepuisUrl("https://x.supabase.co/storage/v1/object/public/avatars/u/avatar-1.png")).toBeNull();
+    expect(
+      codeDepuisUrl(
+        "https://x.supabase.co/storage/v1/object/public/avatars/u/avatar-1.png",
+      ),
+    ).toBeNull();
     expect(codeDepuisUrl(null)).toBeNull();
   });
 });
@@ -59,22 +71,30 @@ describe("construireBanque", () => {
   const banque = construireBanque(LIGNES);
 
   test("dédoublonne les variantes et réunit les jeux", () => {
-    const mark = banque.filter(p => p.code === "c01000010");
+    const mark = banque.filter((p) => p.code === "c01000010");
     expect(mark).toHaveLength(1);
     expect(mark[0]?.series).toEqual(["Inazuma Eleven", "Victory Road"]);
   });
 
   test("ignore les codes étrangers et les lignes sans nom", () => {
-    expect(banque.map(p => p.code)).not.toContain("x99");
-    expect(banque.map(p => p.code)).not.toContain("c05020112");
+    expect(banque.map((p) => p.code)).not.toContain("x99");
+    expect(banque.map((p) => p.code)).not.toContain("c05020112");
   });
 
   test("tri alphabétique français", () => {
-    expect(banque.map(p => p.nom)).toEqual(["Éclair", "Fei", "Mark Evans", "Nathan Swift"]);
+    expect(banque.map((p) => p.nom)).toEqual([
+      "Éclair",
+      "Fei",
+      "Mark Evans",
+      "Nathan Swift",
+    ]);
   });
 
   test("séries comptées", () => {
-    expect(seriesDeLaBanque(banque)[0]).toEqual({ nom: "Inazuma Eleven", total: 2 });
+    expect(seriesDeLaBanque(banque)[0]).toEqual({
+      nom: "Inazuma Eleven",
+      total: 2,
+    });
   });
 });
 
@@ -88,7 +108,9 @@ describe("filtrerBanque", () => {
   });
 
   test("recherche insensible aux accents et à la casse", () => {
-    expect(filtre({ q: "eclair" }).items.map(i => i.code)).toEqual(["c05020111"]);
+    expect(filtre({ q: "eclair" }).items.map((i) => i.code)).toEqual([
+      "c05020111",
+    ]);
     expect(filtre({ q: "MARK evans" }).total).toBe(1);
   });
 
@@ -98,27 +120,41 @@ describe("filtrerBanque", () => {
   });
 
   test("filtre par jeu", () => {
-    expect(filtre({ serie: "Victory Road" }).items.map(i => i.code)).toEqual(["c01000010"]);
+    expect(filtre({ serie: "Victory Road" }).items.map((i) => i.code)).toEqual([
+      "c01000010",
+    ]);
     expect(filtre({ serie: "Galaxy" }).total).toBe(0);
   });
 
   test("exclut un personnage sans portrait réel", () => {
-    const sans = filtrerBanque(banque, parametresBanque({}), new Set(["c01000020"]));
-    expect(sans.items.map(i => i.code)).toEqual(["c01000020"]);
+    const sans = filtrerBanque(
+      banque,
+      parametresBanque({}),
+      new Set(["c01000020"]),
+    );
+    expect(sans.items.map((i) => i.code)).toEqual(["c01000020"]);
   });
 
   test("pagination bornée", () => {
     const grosse = construireBanque(
       Array.from({ length: TAILLE_PAGE * 2 + 5 }, (_, i) =>
-        ligne(`c${String(10000000 + i)}`, `Joueur ${String(i).padStart(3, "0")}`, "Victory Road"),
+        ligne(
+          `c${String(10000000 + i)}`,
+          `Joueur ${String(i).padStart(3, "0")}`,
+          "Victory Road",
+        ),
       ),
     );
-    const tous = new Set(grosse.map(p => p.code));
+    const tous = new Set(grosse.map((p) => p.code));
     const p0 = filtrerBanque(grosse, parametresBanque({}), tous);
     expect(p0.items).toHaveLength(TAILLE_PAGE);
     expect(p0.pages).toBe(3);
-    expect(filtrerBanque(grosse, parametresBanque({ page: 2 }), tous).items).toHaveLength(5);
-    expect(filtrerBanque(grosse, parametresBanque({ page: 99 }), tous).page).toBe(2);
+    expect(
+      filtrerBanque(grosse, parametresBanque({ page: 2 }), tous).items,
+    ).toHaveLength(5);
+    expect(
+      filtrerBanque(grosse, parametresBanque({ page: 99 }), tous).page,
+    ).toBe(2);
   });
 });
 

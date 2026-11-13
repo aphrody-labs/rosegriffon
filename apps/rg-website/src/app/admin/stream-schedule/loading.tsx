@@ -10,7 +10,10 @@ export default function StreamScheduleLoading() {
 
       <div className="space-y-4">
         {[...Array(5)].map((_, i) => (
-          <div key={i} className="rounded-lg border p-4 flex items-center justify-between">
+          <div
+            key={i}
+            className="rounded-lg border p-4 flex items-center justify-between"
+          >
             <div className="space-y-2">
               <Skeleton className="h-5 w-48" />
               <Skeleton className="h-4 w-32" />

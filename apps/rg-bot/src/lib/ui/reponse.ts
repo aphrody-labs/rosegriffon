@@ -45,7 +45,9 @@ import { ICONES } from "./theme";
  * membres, la question qui suit une capture d'écran est toujours la même —
  * « t'as tapé quoi pour avoir ça ? » — et la réponse doit être dans l'image.
  */
-export function cheminCommande(interaction: ChatInputCommandInteraction): string {
+export function cheminCommande(
+  interaction: ChatInputCommandInteraction,
+): string {
   const groupe = interaction.options.getSubcommandGroup(false);
   const sous = interaction.options.getSubcommand(false);
   return `/${[interaction.commandName, groupe, sous].filter(Boolean).join(" ")}`;
@@ -63,7 +65,9 @@ export function piedDeCommande(
   interaction: ChatInputCommandInteraction,
   options: Omit<OptionsPied, "note"> & { note?: string | null } = {},
 ): EmbedBuilder {
-  const note = options.note ? `${options.note} · ${cheminCommande(interaction)}` : cheminCommande(interaction);
+  const note = options.note
+    ? `${options.note} · ${cheminCommande(interaction)}`
+    : cheminCommande(interaction);
   return pied(embed, { ...options, note });
 }
 
@@ -75,15 +79,22 @@ export function piedDeCommande(
  * Idempotente : une commande qui diffère puis appelle une garde qui diffère
  * aussi ne doit pas échouer sur `InteractionAlreadyReplied`.
  */
-export async function differer(interaction: RepliableInteraction, options: { prive?: boolean } = {}): Promise<void> {
+export async function differer(
+  interaction: RepliableInteraction,
+  options: { prive?: boolean } = {},
+): Promise<void> {
   if (interaction.deferred || interaction.replied) {
     return;
   }
-  await interaction.deferReply(options.prive ? { flags: MessageFlags.Ephemeral } : {});
+  await interaction.deferReply(
+    options.prive ? { flags: MessageFlags.Ephemeral } : {},
+  );
 }
 
 /** Diffère en privé — la forme des surfaces d'exploitation. */
-export async function differerEnPrive(interaction: RepliableInteraction): Promise<void> {
+export async function differerEnPrive(
+  interaction: RepliableInteraction,
+): Promise<void> {
   await differer(interaction, { prive: true });
 }
 
@@ -113,7 +124,11 @@ function charge(
 }
 
 /** Une action a abouti. Le titre dit QUOI, la description dit l'effet observable. */
-export function succes(titre: string, description?: string, options: OptionsMessage = {}): Charge {
+export function succes(
+  titre: string,
+  description?: string,
+  options: OptionsMessage = {},
+): Charge {
   return charge("succes", titre, description, options);
 }
 
@@ -124,17 +139,29 @@ export function succes(titre: string, description?: string, options: OptionsMess
  * trace d'appel. Privée par défaut : un échec n'appartient qu'à qui l'a
  * déclenché, et l'afficher publiquement invite quatre membres à le reproduire.
  */
-export function echec(titre: string, description?: string, options: OptionsMessage = {}): Charge {
+export function echec(
+  titre: string,
+  description?: string,
+  options: OptionsMessage = {},
+): Charge {
   return charge("echec", titre, description, { prive: true, ...options });
 }
 
 /** Un résultat partiel, une donnée périmée, une limite atteinte. */
-export function attention(titre: string, description?: string, options: OptionsMessage = {}): Charge {
+export function attention(
+  titre: string,
+  description?: string,
+  options: OptionsMessage = {},
+): Charge {
   return charge("attention", titre, description, options);
 }
 
 /** Une information neutre : rappel de syntaxe, renvoi vers une autre commande. */
-export function info(titre: string, description?: string, options: OptionsMessage = {}): Charge {
+export function info(
+  titre: string,
+  description?: string,
+  options: OptionsMessage = {},
+): Charge {
   return charge("info", titre, description, options);
 }
 
@@ -144,8 +171,15 @@ export function info(titre: string, description?: string, options: OptionsMessag
  * La description doit toujours dire la SUITE (élargir la recherche, retirer un
  * filtre) : « Aucun résultat » seul laisse le membre sans prochaine action.
  */
-export function vide(titre: string, description?: string, options: OptionsMessage = {}): Charge {
-  return charge("muet", `${ICONES.vide} ${titre}`, description, { icone: "", ...options });
+export function vide(
+  titre: string,
+  description?: string,
+  options: OptionsMessage = {},
+): Charge {
+  return charge("muet", `${ICONES.vide} ${titre}`, description, {
+    icone: "",
+    ...options,
+  });
 }
 
 /**
@@ -153,7 +187,10 @@ export function vide(titre: string, description?: string, options: OptionsMessag
  * n'en a aucun, c'est dessiner la carte de ce qu'il faut obtenir.
  */
 export function refus(message: string): Charge {
-  return charge("echec", "Accès refusé", message, { prive: true, icone: ICONES.interdit });
+  return charge("echec", "Accès refusé", message, {
+    prive: true,
+    icone: ICONES.interdit,
+  });
 }
 
 // ─── Envois ─────────────────────────────────────────────────────────────────
@@ -165,7 +202,10 @@ export function refus(message: string): Charge {
  * lèverait `InteractionAlreadyReplied` et la commande mourrait en laissant le
  * membre sur « réfléchit… » pour toujours.
  */
-export async function repondre(interaction: RepliableInteraction, contenu: Charge): Promise<void> {
+export async function repondre(
+  interaction: RepliableInteraction,
+  contenu: Charge,
+): Promise<void> {
   if (interaction.deferred || interaction.replied) {
     // `flags` n'est pas modifiable après coup : une réponse déjà différée en
     // public ne peut plus devenir éphémère, et le passer ferait lever.
@@ -199,7 +239,9 @@ export async function repondreEchec(
  * `message.interaction` est déprécié en discord.js 14.26 : c'est
  * `interactionMetadata` qui porte l'auteur de la commande d'origine.
  */
-export function estAuteurDOrigine(interaction: MessageComponentInteraction): boolean {
+export function estAuteurDOrigine(
+  interaction: MessageComponentInteraction,
+): boolean {
   const origine = interaction.message.interactionMetadata?.user?.id;
   return origine === undefined || origine === interaction.user.id;
 }
@@ -212,7 +254,9 @@ export const REFUS_COMPOSANT =
  * Applique la garde d'appartenance. `true` si le clic peut être traité.
  * Le refus part en éphémère : il ne doit pas encombrer le salon.
  */
-export async function garderAuteur(interaction: MessageComponentInteraction): Promise<boolean> {
+export async function garderAuteur(
+  interaction: MessageComponentInteraction,
+): Promise<boolean> {
   if (estAuteurDOrigine(interaction)) {
     return true;
   }

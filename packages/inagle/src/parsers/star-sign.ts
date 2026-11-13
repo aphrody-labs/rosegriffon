@@ -77,7 +77,9 @@ export function loadStarSignCharaInfo(): StarSignCharaInfo[] {
     try {
       const data = JSON.parse(readFileSync(puPath, "utf-8"));
       if (data.lists) {
-        const list = data.lists.find((l: { name: string }) => l.name === "m_starSignCharaInfoList");
+        const list = data.lists.find(
+          (l: { name: string }) => l.name === "m_starSignCharaInfoList",
+        );
         if (list?.values?.length > 0) {
           return list.values as StarSignCharaInfo[];
         }
@@ -94,11 +96,16 @@ export function loadStarSignCharaInfo(): StarSignCharaInfo[] {
       const data = JSON.parse(readFileSync(legacyPath, "utf-8"));
       return data.data || [];
     } catch (e) {
-      console.warn("[star-sign] Failed to read legacy starSignCharaInfo.json:", e);
+      console.warn(
+        "[star-sign] Failed to read legacy starSignCharaInfo.json:",
+        e,
+      );
     }
   }
 
-  console.warn("[star-sign] No rarity data found — all characters will default to Normal");
+  console.warn(
+    "[star-sign] No rarity data found — all characters will default to Normal",
+  );
   return [];
 }
 
@@ -138,8 +145,12 @@ export function buildStarSignMap(): Map<string, StarSignCharaInfo> {
     }
   }
 
-  const nonNormal = [...starSignCache.values()].filter(e => e.charaRarity !== 0).length;
-  console.log(`[star-sign] Loaded ${starSignCache.size} entries (${nonNormal} non-Normal)`);
+  const nonNormal = [...starSignCache.values()].filter(
+    (e) => e.charaRarity !== 0,
+  ).length;
+  console.log(
+    `[star-sign] Loaded ${starSignCache.size} entries (${nonNormal} non-Normal)`,
+  );
 
   return starSignCache;
 }

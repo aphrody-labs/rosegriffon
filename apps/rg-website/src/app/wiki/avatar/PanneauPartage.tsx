@@ -36,7 +36,13 @@ export type PartageProps = {
   fermer: () => void;
 };
 
-export function Partage({ etat, code, codeInitial = "", restaurer, fermer }: PartageProps) {
+export function Partage({
+  etat,
+  code,
+  codeInitial = "",
+  restaurer,
+  fermer,
+}: PartageProps) {
   const dialog = useRef<HTMLDialogElement>(null);
   useEffect(() => {
     const element = dialog.current;
@@ -50,7 +56,7 @@ export function Partage({ etat, code, codeInitial = "", restaurer, fermer }: Par
   const [enCours, demarrer] = useTransition();
 
   const recharger = useCallback(() => {
-    void listerAvatars().then(r => {
+    void listerAvatars().then((r) => {
       if (r.avatars) setAvatars(r.avatars);
       if (r.error) setMessage(r.error);
     });
@@ -61,11 +67,13 @@ export function Partage({ etat, code, codeInitial = "", restaurer, fermer }: Par
   useEffect(() => {
     if (codeInitial.length === 0) return;
     demarrer(() => {
-      void ouvrirParCode(codeInitial).then(r => {
+      void ouvrirParCode(codeInitial).then((r) => {
         if (r.error) setMessage(r.error);
         else if (r.avatar) {
           restaurer(r.avatar);
-          setMessage(`Avatar « ${r.nom ?? "sans nom"} » ouvert depuis le lien.`);
+          setMessage(
+            `Avatar « ${r.nom ?? "sans nom"} » ouvert depuis le lien.`,
+          );
         }
       });
     });
@@ -81,12 +89,14 @@ export function Partage({ etat, code, codeInitial = "", restaurer, fermer }: Par
         setCopie(true);
         setTimeout(() => setCopie(false), 2000);
       })
-      .catch(() => setMessage("La copie a échoué — le code reste sélectionnable."));
+      .catch(() =>
+        setMessage("La copie a échoué — le code reste sélectionnable."),
+      );
   }, [code]);
 
   const ouvrir = useCallback(() => {
     demarrer(() => {
-      void ouvrirParCode(saisie).then(r => {
+      void ouvrirParCode(saisie).then((r) => {
         if (r.error) {
           setMessage(r.error);
           return;
@@ -101,7 +111,7 @@ export function Partage({ etat, code, codeInitial = "", restaurer, fermer }: Par
 
   const enregistrer = useCallback(() => {
     demarrer(() => {
-      void enregistrerAvatar(nom, etat, code).then(r => {
+      void enregistrerAvatar(nom, etat, code).then((r) => {
         setMessage(r.error ?? "Avatar enregistré.");
         if (!r.error) {
           setNom("");
@@ -118,12 +128,19 @@ export function Partage({ etat, code, codeInitial = "", restaurer, fermer }: Par
       onCancel={fermer}
       className="m-0 h-full w-full max-h-none max-w-none border-0 fixed inset-0 z-[2147483100] flex items-center justify-center bg-black/60 p-4"
     >
-      <button type="button" aria-label="Fermer le partage" className="absolute inset-0" onClick={fermer} />
+      <button
+        type="button"
+        aria-label="Fermer le partage"
+        className="absolute inset-0"
+        onClick={fermer}
+      />
       <div className="relative w-full max-w-lg rounded-2xl bg-white p-6 text-slate-900 shadow-2xl">
         <h2 className="mb-4 text-xl font-semibold">Sauvegarder et partager</h2>
 
         <section className="mb-5">
-          <h3 className="mb-1 text-sm font-medium text-slate-600">Le code de cet avatar</h3>
+          <h3 className="mb-1 text-sm font-medium text-slate-600">
+            Le code de cet avatar
+          </h3>
           <div className="flex items-center gap-2">
             <code className="flex-1 select-all break-all rounded-lg bg-slate-100 px-3 py-2 font-mono text-xs">
               {code ?? "indisponible"}
@@ -140,11 +157,13 @@ export function Partage({ etat, code, codeInitial = "", restaurer, fermer }: Par
         </section>
 
         <section className="mb-5">
-          <h3 className="mb-1 text-sm font-medium text-slate-600">Ouvrir un code</h3>
+          <h3 className="mb-1 text-sm font-medium text-slate-600">
+            Ouvrir un code
+          </h3>
           <div className="flex items-center gap-2">
             <input
               value={saisie}
-              onChange={e => setSaisie(e.target.value)}
+              onChange={(e) => setSaisie(e.target.value)}
               placeholder="Colle un code ici"
               className="flex-1 rounded-lg border border-slate-300 px-3 py-2 font-mono text-xs"
             />
@@ -160,11 +179,13 @@ export function Partage({ etat, code, codeInitial = "", restaurer, fermer }: Par
         </section>
 
         <section className="mb-5">
-          <h3 className="mb-1 text-sm font-medium text-slate-600">Enregistrer sous mon compte</h3>
+          <h3 className="mb-1 text-sm font-medium text-slate-600">
+            Enregistrer sous mon compte
+          </h3>
           <div className="flex items-center gap-2">
             <input
               value={nom}
-              onChange={e => setNom(e.target.value)}
+              onChange={(e) => setNom(e.target.value)}
               placeholder="Nom de l'avatar"
               maxLength={40}
               className="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm"
@@ -182,10 +203,15 @@ export function Partage({ etat, code, codeInitial = "", restaurer, fermer }: Par
 
         {avatars.length > 0 && (
           <section className="mb-4">
-            <h3 className="mb-1 text-sm font-medium text-slate-600">Mes avatars ({avatars.length})</h3>
+            <h3 className="mb-1 text-sm font-medium text-slate-600">
+              Mes avatars ({avatars.length})
+            </h3>
             <ul className="max-h-48 space-y-1 overflow-y-auto">
-              {avatars.map(a => (
-                <li key={a.id} className="flex items-center gap-2 rounded-lg bg-slate-50 px-3 py-2">
+              {avatars.map((a) => (
+                <li
+                  key={a.id}
+                  className="flex items-center gap-2 rounded-lg bg-slate-50 px-3 py-2"
+                >
                   <span className="flex-1 truncate text-sm">{a.nom}</span>
                   <button
                     type="button"
@@ -198,7 +224,7 @@ export function Partage({ etat, code, codeInitial = "", restaurer, fermer }: Par
                     type="button"
                     onClick={() =>
                       demarrer(() => {
-                        void supprimerAvatar(a.id).then(r => {
+                        void supprimerAvatar(a.id).then((r) => {
                           setMessage(r.error ?? "Avatar supprimé.");
                           recharger();
                         });
@@ -216,7 +242,11 @@ export function Partage({ etat, code, codeInitial = "", restaurer, fermer }: Par
 
         {message && <p className="mb-3 text-sm text-slate-700">{message}</p>}
 
-        <button type="button" onClick={fermer} className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
+        <button
+          type="button"
+          onClick={fermer}
+          className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+        >
           Fermer
         </button>
       </div>

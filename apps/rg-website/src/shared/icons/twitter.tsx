@@ -17,6 +17,17 @@ interface TwitterIconProps {
   className?: string;
 }
 
-export default function TwitterIcon({ width, height, className }: TwitterIconProps) {
-  return <XIcon title="X" width={width ?? 24} height={height ?? 24} className={className} />;
+export default function TwitterIcon({
+  width,
+  height,
+  className,
+}: TwitterIconProps) {
+  return (
+    <XIcon
+      title="X"
+      width={width ?? 24}
+      height={height ?? 24}
+      className={className}
+    />
+  );
 }

@@ -18,19 +18,26 @@ const HEADERS = {
 };
 
 async function fetchAll(table: string, select = "id,asset_code,image_url") {
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?select=${select}&limit=1000`, {
-    headers: HEADERS,
-  });
+  const res = await fetch(
+    `${SUPABASE_URL}/rest/v1/${table}?select=${select}&limit=1000`,
+    {
+      headers: HEADERS,
+    },
+  );
   return res.json() as Promise<any[]>;
 }
 
 async function patchRow(table: string, id: string, image_url: string) {
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?id=eq.${encodeURIComponent(id)}`, {
-    method: "PATCH",
-    headers: { ...HEADERS, Prefer: "return=minimal" },
-    body: JSON.stringify({ image_url }),
-  });
-  if (!res.ok) console.error(`PATCH ${table} ${id} →`, res.status, await res.text());
+  const res = await fetch(
+    `${SUPABASE_URL}/rest/v1/${table}?id=eq.${encodeURIComponent(id)}`,
+    {
+      method: "PATCH",
+      headers: { ...HEADERS, Prefer: "return=minimal" },
+      body: JSON.stringify({ image_url }),
+    },
+  );
+  if (!res.ok)
+    console.error(`PATCH ${table} ${id} →`, res.status, await res.text());
 }
 
 /** asset_code like wko00820 → num=820 → left=k000820, right=00820 */
@@ -75,14 +82,24 @@ async function loadBucketFiles(folder: string): Promise<Set<string>> {
   const res = await fetch(`${SUPABASE_URL}/storage/v1/object/list/menu`, {
     method: "POST",
     headers: HEADERS,
-    body: JSON.stringify({ prefix: `200_icon/10_icon_chr/${folder}`, limit: 1000 }),
+    body: JSON.stringify({
+      prefix: `200_icon/10_icon_chr/${folder}`,
+      limit: 1000,
+    }),
   });
   const files: { name: string }[] = await res.json();
-  return new Set(files.map(f => f.name));
+  return new Set(files.map((f) => f.name));
 }
 
-async function fixTable(table: string, buildImage: (row: any) => string | null, bucketFiles: Map<string, Set<string>>) {
-  const cols = table === "inagle_miximax" ? "id,asset_code,image_url,icon_code" : "id,asset_code,image_url";
+async function fixTable(
+  table: string,
+  buildImage: (row: any) => string | null,
+  bucketFiles: Map<string, Set<string>>,
+) {
+  const cols =
+    table === "inagle_miximax"
+      ? "id,asset_code,image_url,icon_code"
+      : "id,asset_code,image_url";
   const rows = await fetchAll(table, cols);
   let fixed = 0;
   let skipped = 0;
@@ -111,7 +128,9 @@ async function fixTable(table: string, buildImage: (row: any) => string | null, 
     }
   }
 
-  console.log(`${table}: ${fixed} fixés, ${skipped} ignorés, ${noFile} fichiers manquants`);
+  console.log(
+    `${table}: ${fixed} fixés, ${skipped} ignorés, ${noFile} fichiers manquants`,
+  );
 }
 
 async function main() {
@@ -133,7 +152,7 @@ async function main() {
   // Keshins standard (wko, wkk, wkd, wkt)
   await fixTable(
     "inagle_keshins",
-    row => {
+    (row) => {
       const ac = row.asset_code;
       if (!ac) return null;
       if (/^wk[okdt]/i.test(ac)) return buildFsImage(ac);
@@ -145,7 +164,7 @@ async function main() {
   // Souls
   await fixTable(
     "inagle_souls",
-    row => {
+    (row) => {
       const ac = row.asset_code;
       if (!ac) return null;
       return buildSoulImage(ac);
@@ -156,7 +175,7 @@ async function main() {
   // Miximax (via icon_code)
   await fixTable(
     "inagle_miximax",
-    row => {
+    (row) => {
       const ic = row.icon_code || deriveIconCode(row.asset_code);
       if (!ic) return null;
       return buildArmedImageFromIconCode(ic);

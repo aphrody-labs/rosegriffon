@@ -1,5 +1,9 @@
 import { createPostgresClient } from "@rosegriffon/db/service";
-import { type AccountSession, type AccountTabId, resolveAccountTab } from "@rosegriffon/ui";
+import {
+  type AccountSession,
+  type AccountTabId,
+  resolveAccountTab,
+} from "@rosegriffon/ui";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
@@ -10,9 +14,18 @@ import { AccountClient } from "./account-client";
 
 export const dynamic = "force-dynamic";
 
-const TABS: readonly AccountTabId[] = ["profile", "address", "connections", "security"];
+const TABS: readonly AccountTabId[] = [
+  "profile",
+  "address",
+  "connections",
+  "security",
+];
 
-export default async function AccountPage({ searchParams }: { searchParams: Promise<{ tab?: string }> }) {
+export default async function AccountPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ tab?: string }>;
+}) {
   const session = await getServerSession();
   if (!session?.user) {
     redirect("/login");
@@ -38,7 +51,8 @@ export default async function AccountPage({ searchParams }: { searchParams: Prom
   }
 
   const profile = (profileRow ?? {}) as Record<string, unknown>;
-  const str = (key: string) => (typeof profile[key] === "string" ? (profile[key] as string) : "");
+  const str = (key: string) =>
+    typeof profile[key] === "string" ? (profile[key] as string) : "";
 
   const { data: accountRows } = await admin
     .from("account")
@@ -50,7 +64,7 @@ export default async function AccountPage({ searchParams }: { searchParams: Prom
   let sessions: AccountSession[] = [];
   try {
     const list = await auth.api.listSessions({ headers: await headers() });
-    sessions = (list ?? []).map(s => ({
+    sessions = (list ?? []).map((s) => ({
       createdAt: new Date(s.createdAt).toISOString(),
       current: s.id === session.session.id,
       expiresAt: s.expiresAt ? new Date(s.expiresAt).toISOString() : null,
@@ -74,9 +88,13 @@ export default async function AccountPage({ searchParams }: { searchParams: Prom
       gameAvatar={str("game_avatar") || null}
       username={username || null}
       role={str("role") || null}
-      twoFactorEnabled={Boolean((user as { twoFactorEnabled?: boolean }).twoFactorEnabled)}
+      twoFactorEnabled={Boolean(
+        (user as { twoFactorEnabled?: boolean }).twoFactorEnabled,
+      )}
       profile={{
-        badges: Array.isArray(profile.badges) ? (profile.badges as string[]) : [],
+        badges: Array.isArray(profile.badges)
+          ? (profile.badges as string[])
+          : [],
         banner_position: Number(profile.banner_position ?? 50) || 50,
         poste: str("poste") || null,
         banner_url: str("banner_url"),

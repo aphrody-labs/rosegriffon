@@ -15,7 +15,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@rosegriffon/ui";
-import { ShieldAlert, ArrowLeft, Plus, RefreshCw, Loader2, CheckCircle2, Ban, Undo2 } from "lucide-react";
+import {
+  ShieldAlert,
+  ArrowLeft,
+  Plus,
+  RefreshCw,
+  Loader2,
+  CheckCircle2,
+  Ban,
+  Undo2,
+} from "lucide-react";
 
 export default function AchilleaAdminSanctionsPage() {
   const { user, isAuthenticated, isLoading: authLoading } = useAchilleaAuth();
@@ -40,7 +49,9 @@ export default function AchilleaAdminSanctionsPage() {
 
   // Revoke dialog
   const [revokeOpen, setRevokeOpen] = useState(false);
-  const [selectedSanction, setSelectedSanction] = useState<Sanction | null>(null);
+  const [selectedSanction, setSelectedSanction] = useState<Sanction | null>(
+    null,
+  );
   const [revokeReason, setRevokeReason] = useState("");
   const [revoking, setRevoking] = useState(false);
 
@@ -52,7 +63,7 @@ export default function AchilleaAdminSanctionsPage() {
         active: activeOnly ? true : undefined,
         pageSize: 50,
       })
-      .then(res => {
+      .then((res) => {
         if (res.ok && res.value?.data) {
           setSanctions(res.value.data);
         }
@@ -76,7 +87,9 @@ export default function AchilleaAdminSanctionsPage() {
     if (!targetUserId.trim()) return;
     setCreating(true);
     try {
-      const durationSec = durationMinutes ? parseInt(durationMinutes, 10) * 60 : undefined;
+      const durationSec = durationMinutes
+        ? parseInt(durationMinutes, 10) * 60
+        : undefined;
       const res = await client.sanctions.create({
         userId: targetUserId.trim(),
         guildId: targetGuildId.trim() || "0",
@@ -103,7 +116,10 @@ export default function AchilleaAdminSanctionsPage() {
     if (!selectedSanction) return;
     setRevoking(true);
     try {
-      const res = await client.sanctions.revoke(selectedSanction.id, revokeReason.trim() || undefined);
+      const res = await client.sanctions.revoke(
+        selectedSanction.id,
+        revokeReason.trim() || undefined,
+      );
       if (res.ok) {
         setRevokeOpen(false);
         setSelectedSanction(null);
@@ -132,9 +148,12 @@ export default function AchilleaAdminSanctionsPage() {
         <div className="size-16 rounded-full bg-destructive/10 text-destructive flex items-center justify-center mx-auto">
           <ShieldAlert className="size-8" />
         </div>
-        <h1 className="text-2xl font-bold">Accès Restreint aux Administrateurs</h1>
+        <h1 className="text-2xl font-bold">
+          Accès Restreint aux Administrateurs
+        </h1>
         <p className="text-sm text-muted-foreground">
-          Seuls les administrateurs et super-administrateurs peuvent gérer les sanctions globales.
+          Seuls les administrateurs et super-administrateurs peuvent gérer les
+          sanctions globales.
         </p>
         <Link href="/achillea/admins/dashboard">
           <Button variant="outline" className="mt-4">
@@ -160,10 +179,13 @@ export default function AchilleaAdminSanctionsPage() {
             <span className="p-2 rounded-xl bg-destructive/10 text-destructive border border-destructive/20">
               <ShieldAlert className="size-5" />
             </span>
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">Registre des Sanctions</h1>
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
+              Registre des Sanctions
+            </h1>
           </div>
           <p className="text-xs text-muted-foreground">
-            Avertissements, exclusions temporaires de ranked et bannissements définitifs.
+            Avertissements, exclusions temporaires de ranked et bannissements
+            définitifs.
           </p>
         </div>
 
@@ -187,7 +209,9 @@ export default function AchilleaAdminSanctionsPage() {
             disabled={refreshing}
             className="gap-2 text-xs rounded-xl"
           >
-            <RefreshCw className={`size-3.5 ${refreshing ? "animate-spin" : ""}`} />
+            <RefreshCw
+              className={`size-3.5 ${refreshing ? "animate-spin" : ""}`}
+            />
           </Button>
 
           <Button
@@ -232,15 +256,22 @@ export default function AchilleaAdminSanctionsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-outline-variant/10">
-                {sanctions.map(s => {
+                {sanctions.map((s) => {
                   const isRevoked = !!s.revokedAt;
-                  const isExpired = s.expiresAt && new Date(s.expiresAt).getTime() < clockTime;
+                  const isExpired =
+                    s.expiresAt && new Date(s.expiresAt).getTime() < clockTime;
                   const isActive = !isRevoked && !isExpired;
 
                   return (
-                    <tr key={s.id} className="hover:bg-surface-container-high/40 transition-colors duration-150">
+                    <tr
+                      key={s.id}
+                      className="hover:bg-surface-container-high/40 transition-colors duration-150"
+                    >
                       <td className="px-4 py-3 font-mono text-xs font-semibold">
-                        <Link href={`/achillea/users/${s.userId}`} className="hover:text-primary transition underline">
+                        <Link
+                          href={`/achillea/users/${s.userId}`}
+                          className="hover:text-primary transition underline"
+                        >
                           {s.userId}
                         </Link>
                       </td>
@@ -266,7 +297,9 @@ export default function AchilleaAdminSanctionsPage() {
                       </td>
                       <td className="px-4 py-3 text-xs">
                         {isRevoked ? (
-                          <span className="text-muted-foreground italic">Révoquée</span>
+                          <span className="text-muted-foreground italic">
+                            Révoquée
+                          </span>
                         ) : isExpired ? (
                           <span className="text-muted-foreground">Expirée</span>
                         ) : s.expiresAt ? (
@@ -274,7 +307,9 @@ export default function AchilleaAdminSanctionsPage() {
                             {new Date(s.expiresAt).toLocaleDateString("fr-FR")}
                           </span>
                         ) : (
-                          <span className="text-destructive font-bold">Permanente</span>
+                          <span className="text-destructive font-bold">
+                            Permanente
+                          </span>
                         )}
                       </td>
                       <td className="px-4 py-3 text-right">
@@ -311,7 +346,8 @@ export default function AchilleaAdminSanctionsPage() {
               Émettre une Sanction
             </DialogTitle>
             <DialogDescription>
-              La sanction sera enregistrée au registre public et appliquée immédiatement.
+              La sanction sera enregistrée au registre public et appliquée
+              immédiatement.
             </DialogDescription>
           </DialogHeader>
 
@@ -324,7 +360,7 @@ export default function AchilleaAdminSanctionsPage() {
                 id="userId"
                 type="text"
                 value={targetUserId}
-                onChange={e => setTargetUserId(e.target.value)}
+                onChange={(e) => setTargetUserId(e.target.value)}
                 placeholder="ex: 123456789012345678"
                 className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm font-mono"
               />
@@ -337,12 +373,14 @@ export default function AchilleaAdminSanctionsPage() {
               <select
                 id="sanctionType"
                 value={sanctionType}
-                onChange={e => setSanctionType(e.target.value)}
+                onChange={(e) => setSanctionType(e.target.value)}
                 className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
               >
                 <option value="warn">Avertissement (Warn)</option>
                 <option value="mute">Mute temporaire</option>
-                <option value="ranked_ban">Bannissement du Ladder Ranked</option>
+                <option value="ranked_ban">
+                  Bannissement du Ladder Ranked
+                </option>
                 <option value="ban">Bannissement Global</option>
               </select>
             </div>
@@ -355,7 +393,7 @@ export default function AchilleaAdminSanctionsPage() {
                 id="duration"
                 type="number"
                 value={durationMinutes}
-                onChange={e => setDurationMinutes(e.target.value)}
+                onChange={(e) => setDurationMinutes(e.target.value)}
                 placeholder="ex: 1440 pour 24 heures"
                 className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
               />
@@ -369,7 +407,7 @@ export default function AchilleaAdminSanctionsPage() {
                 id="reason"
                 rows={3}
                 value={reason}
-                onChange={e => setReason(e.target.value)}
+                onChange={(e) => setReason(e.target.value)}
                 placeholder="Préciser l'infraction constatée..."
                 className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
               />
@@ -377,7 +415,11 @@ export default function AchilleaAdminSanctionsPage() {
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setCreateOpen(false)} disabled={creating}>
+            <Button
+              variant="outline"
+              onClick={() => setCreateOpen(false)}
+              disabled={creating}
+            >
               Annuler
             </Button>
             <Button
@@ -397,13 +439,18 @@ export default function AchilleaAdminSanctionsPage() {
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Révoquer la Sanction</DialogTitle>
-            <DialogDescription>L&apos;utilisateur recouvrera ses droits d&apos;accès immédiatement.</DialogDescription>
+            <DialogDescription>
+              L&apos;utilisateur recouvrera ses droits d&apos;accès
+              immédiatement.
+            </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-3 py-2 text-sm">
             <p className="text-xs text-muted-foreground">
               Sanction #{selectedSanction?.id} sur le compte{" "}
-              <span className="font-mono text-foreground font-semibold">{selectedSanction?.userId}</span>
+              <span className="font-mono text-foreground font-semibold">
+                {selectedSanction?.userId}
+              </span>
             </p>
 
             <div className="space-y-1.5">
@@ -414,7 +461,7 @@ export default function AchilleaAdminSanctionsPage() {
                 id="revokeReason"
                 rows={3}
                 value={revokeReason}
-                onChange={e => setRevokeReason(e.target.value)}
+                onChange={(e) => setRevokeReason(e.target.value)}
                 placeholder="ex: Appel accepté, erreur d'identification..."
                 className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
               />
@@ -422,10 +469,18 @@ export default function AchilleaAdminSanctionsPage() {
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setRevokeOpen(false)} disabled={revoking}>
+            <Button
+              variant="outline"
+              onClick={() => setRevokeOpen(false)}
+              disabled={revoking}
+            >
               Annuler
             </Button>
-            <Button onClick={handleRevokeSanction} disabled={revoking} className="gap-2">
+            <Button
+              onClick={handleRevokeSanction}
+              disabled={revoking}
+              className="gap-2"
+            >
               {revoking && <Loader2 className="size-4 animate-spin" />}
               Lever la sanction
             </Button>

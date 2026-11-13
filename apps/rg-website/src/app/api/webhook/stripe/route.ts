@@ -30,7 +30,10 @@ export async function POST(req: NextRequest) {
     console.error(
       "[stripe-webhook] STRIPE_WEBHOOK_SECRET mal formé (attendu whsec_…) — variable d'environnement à corriger",
     );
-    return NextResponse.json({ error: "Webhook secret misconfigured" }, { status: 503 });
+    return NextResponse.json(
+      { error: "Webhook secret misconfigured" },
+      { status: 503 },
+    );
   }
 
   const sig = req.headers.get("stripe-signature");
@@ -60,9 +63,12 @@ export async function POST(req: NextRequest) {
         let dbSync: "ok" | "skipped" | "failed" = "skipped";
         const supabase = createPostgresClient();
         if (!supabase) {
-          console.error("[stripe-webhook] no admin supabase client — order NOT mirrored", {
-            session_id: session.id,
-          });
+          console.error(
+            "[stripe-webhook] no admin supabase client — order NOT mirrored",
+            {
+              session_id: session.id,
+            },
+          );
         } else {
           type OrderItem = {
             label: string | null;
@@ -74,12 +80,18 @@ export async function POST(req: NextRequest) {
           };
           let items: OrderItem[] = [];
           try {
-            const lineItems = await stripe.checkout.sessions.listLineItems(session.id, {
-              expand: ["data.price.product"],
-            });
-            items = lineItems.data.map(item => {
+            const lineItems = await stripe.checkout.sessions.listLineItems(
+              session.id,
+              {
+                expand: ["data.price.product"],
+              },
+            );
+            items = lineItems.data.map((item) => {
               const product = item.price?.product;
-              const isProduct = typeof product === "object" && product && !("deleted" in product);
+              const isProduct =
+                typeof product === "object" &&
+                product &&
+                !("deleted" in product);
               const meta = isProduct ? product.metadata : {};
               const images = isProduct ? product.images : [];
               return {
@@ -92,34 +104,51 @@ export async function POST(req: NextRequest) {
               };
             });
           } catch (stripeErr) {
-            console.error("[stripe-webhook] failed to fetch session line items", {
-              error: stripeErr instanceof Error ? stripeErr.message : String(stripeErr),
-              session_id: session.id,
-            });
+            console.error(
+              "[stripe-webhook] failed to fetch session line items",
+              {
+                error:
+                  stripeErr instanceof Error
+                    ? stripeErr.message
+                    : String(stripeErr),
+                session_id: session.id,
+              },
+            );
           }
 
           const { error: upsertErr } = await supabase.from("orders").upsert(
             {
-              amount_discount_cents: session.total_details?.amount_discount ?? 0,
-              amount_shipping_cents: session.total_details?.amount_shipping ?? 0,
+              amount_discount_cents:
+                session.total_details?.amount_discount ?? 0,
+              amount_shipping_cents:
+                session.total_details?.amount_shipping ?? 0,
               amount_subtotal_cents: session.amount_subtotal ?? 0,
               amount_tax_cents: session.total_details?.amount_tax ?? 0,
               amount_total_cents: session.amount_total ?? 0,
               paid_at: new Date().toISOString(),
-              patron_discount_applied: session.metadata?.patron_discount === "yes",
-              shipping_address: session.collected_information?.shipping_details?.address ?? null,
+              patron_discount_applied:
+                session.metadata?.patron_discount === "yes",
+              shipping_address:
+                session.collected_information?.shipping_details?.address ??
+                null,
               shipping_email: session.customer_details?.email ?? null,
-              shipping_name: session.collected_information?.shipping_details?.name ?? null,
+              shipping_name:
+                session.collected_information?.shipping_details?.name ?? null,
               shipping_phone: session.customer_details?.phone ?? null,
               status: "paid",
               stripe_customer_id:
-                typeof session.customer === "string" ? session.customer : (session.customer?.id ?? null),
+                typeof session.customer === "string"
+                  ? session.customer
+                  : (session.customer?.id ?? null),
               stripe_payment_intent_id:
                 typeof session.payment_intent === "string"
                   ? session.payment_intent
                   : (session.payment_intent?.id ?? null),
               stripe_session_id: session.id,
-              user_id: session.metadata?.user_id !== "anonymous" ? session.metadata?.user_id : null,
+              user_id:
+                session.metadata?.user_id !== "anonymous"
+                  ? session.metadata?.user_id
+                  : null,
               items: items,
             },
             { onConflict: "stripe_session_id" },
@@ -165,6 +194,9 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     const msg = error instanceof Error ? error.message : String(error);
     console.error("[stripe-webhook] signature verification failed:", msg);
-    return NextResponse.json({ error: `Webhook error: ${msg}` }, { status: 400 });
+    return NextResponse.json(
+      { error: `Webhook error: ${msg}` },
+      { status: 400 },
+    );
   }
 }

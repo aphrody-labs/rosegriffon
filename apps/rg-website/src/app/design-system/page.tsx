@@ -205,16 +205,24 @@ export default function DesignSystemShowcase() {
                 priority
               />
             </div>
-            <p className="text-fluid-body-lg leading-relaxed" style={{ color: "#f5e9d4" }}>
-              Catalogue vivant des 55 composants <strong style={{ color: RG_OR }}>@rosegriffon/ui</strong>, palette{" "}
-              <strong style={{ color: RG_OR }}>MD3</strong> et 4 thèmes — Roy, Gaëlle, Azalée light & dark.
+            <p
+              className="text-fluid-body-lg leading-relaxed"
+              style={{ color: "#f5e9d4" }}
+            >
+              Catalogue vivant des 55 composants{" "}
+              <strong style={{ color: RG_OR }}>@rosegriffon/ui</strong>, palette{" "}
+              <strong style={{ color: RG_OR }}>MD3</strong> et 4 thèmes — Roy,
+              Gaëlle, Azalée light & dark.
             </p>
-            <dl className="grid grid-cols-3 gap-3 border-t-2 pt-6" style={{ borderColor: RG_OR }}>
+            <dl
+              className="grid grid-cols-3 gap-3 border-t-2 pt-6"
+              style={{ borderColor: RG_OR }}
+            >
               {[
                 { k: "Composants", v: "58" },
                 { k: "Tokens", v: "212" },
                 { k: "Thèmes", v: "4" },
-              ].map(stat => (
+              ].map((stat) => (
                 <div key={stat.k}>
                   <dd
                     className="text-fluid-headline-xl leading-none"
@@ -227,7 +235,10 @@ export default function DesignSystemShowcase() {
                   >
                     {stat.v}
                   </dd>
-                  <dt className="mt-1 text-[10px] uppercase tracking-[0.22em]" style={{ color: "#f5e9d4" }}>
+                  <dt
+                    className="mt-1 text-[10px] uppercase tracking-[0.22em]"
+                    style={{ color: "#f5e9d4" }}
+                  >
                     {stat.k}
                   </dt>
                 </div>
@@ -286,7 +297,7 @@ export default function DesignSystemShowcase() {
           <SectionLabel kicker="01 · Color" title="★ PALETTE ★" />
 
           <div className="mt-14 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            {M3_COLORS.map(c => (
+            {M3_COLORS.map((c) => (
               <div
                 key={c.name}
                 className={`${c.bg} ${c.text} group flex aspect-[5/3] flex-col justify-between p-5 rounded-[12px]`}
@@ -330,7 +341,7 @@ export default function DesignSystemShowcase() {
               boxShadow: HARD_SHADOW,
             }}
           >
-            {M3_SURFACES.map(s => (
+            {M3_SURFACES.map((s) => (
               <div
                 key={s.name}
                 className={`${s.bg} flex aspect-square flex-col items-center justify-center p-3 text-center text-on-surface`}
@@ -348,7 +359,10 @@ export default function DesignSystemShowcase() {
       </section>
 
       {/* ────────────────────────────────────────────── TYPESCALE */}
-      <section className="relative z-10" style={{ backgroundColor: RG_MARINE, borderTop: `2px solid ${RG_OR}` }}>
+      <section
+        className="relative z-10"
+        style={{ backgroundColor: RG_MARINE, borderTop: `2px solid ${RG_OR}` }}
+      >
         <div className="mx-auto max-w-[1440px] px-6 py-24 md:px-12">
           <SectionLabel kicker="02 · Type" title="TYPOGRAPHIE" />
 
@@ -379,13 +393,16 @@ export default function DesignSystemShowcase() {
               boxShadow: HARD_SHADOW,
             }}
           >
-            {TYPESCALE.map(t => (
+            {TYPESCALE.map((t) => (
               <li
                 key={t.cls}
                 className="group grid grid-cols-12 items-baseline gap-4 px-5 py-4 transition-colors motion-safe:duration-200 hover:bg-white/5"
                 style={{ borderColor: `${RG_OR}40` }}
               >
-                <span className={`${t.cls} col-span-12 truncate md:col-span-7`} style={{ color: "#fffdf5" }}>
+                <span
+                  className={`${t.cls} col-span-12 truncate md:col-span-7`}
+                  style={{ color: "#fffdf5" }}
+                >
                   Quelle est ta couleur ?
                 </span>
                 <span
@@ -624,12 +641,18 @@ export default function DesignSystemShowcase() {
       </section>
 
       {/* ────────────────────────────────────────────── SHAPE */}
-      <section className="relative z-10" style={{ backgroundColor: RG_MARINE, borderTop: `2px solid ${RG_OR}` }}>
+      <section
+        className="relative z-10"
+        style={{ backgroundColor: RG_MARINE, borderTop: `2px solid ${RG_OR}` }}
+      >
         <div className="mx-auto max-w-[1440px] px-6 py-24 md:px-12">
           <SectionLabel kicker="04 · Shape" title="CORNER SCALE" />
           <div className="mt-12 grid grid-cols-2 gap-4 sm:grid-cols-4 lg:grid-cols-7">
-            {SHAPE_SCALE.map(s => (
-              <div key={s.name} className="group flex flex-col items-center gap-3">
+            {SHAPE_SCALE.map((s) => (
+              <div
+                key={s.name}
+                className="group flex flex-col items-center gap-3"
+              >
                 <div
                   className="grid aspect-square w-full place-items-center transition-transform motion-safe:duration-200 group-hover:-translate-y-1 group-hover:rotate-3"
                   style={{
@@ -689,16 +712,19 @@ export default function DesignSystemShowcase() {
                 ★ Durations
               </h3>
               <div className="space-y-2">
-                {MOTION_DURATIONS.map(row => (
+                {MOTION_DURATIONS.map((row) => (
                   <div
                     key={row.tier}
                     className="flex items-center gap-3 text-[11px]"
                     style={{ fontFamily: "var(--font-cartoon-ds), sans-serif" }}
                   >
-                    <span className="w-20 uppercase tracking-[0.16em]" style={{ color: RG_OR }}>
+                    <span
+                      className="w-20 uppercase tracking-[0.16em]"
+                      style={{ color: RG_OR }}
+                    >
                       {row.tier}
                     </span>
-                    {row.values.map(ms => (
+                    {row.values.map((ms) => (
                       <span
                         key={ms}
                         className="flex-1 rounded-md px-2 py-3 text-center"
@@ -749,7 +775,7 @@ export default function DesignSystemShowcase() {
                     dur: "var(--md-sys-motion-duration-long2)",
                     name: "emphasized-decel",
                   },
-                ].map(e => (
+                ].map((e) => (
                   <div
                     key={e.name}
                     className="group relative flex items-center justify-between overflow-hidden rounded-md px-4 py-3"
@@ -769,7 +795,11 @@ export default function DesignSystemShowcase() {
                       >
                         {e.name}
                       </span>
-                      <span style={{ color: "#f5e9d4", fontFamily: "monospace" }}>{e.curve}</span>
+                      <span
+                        style={{ color: "#f5e9d4", fontFamily: "monospace" }}
+                      >
+                        {e.curve}
+                      </span>
                     </div>
                     <span
                       className="block size-4 rounded-full motion-safe:group-hover:translate-x-24"
@@ -790,7 +820,10 @@ export default function DesignSystemShowcase() {
       </section>
 
       {/* ────────────────────────────────────────────── ELEVATION */}
-      <section className="relative z-10" style={{ backgroundColor: RG_MARINE, borderTop: `2px solid ${RG_OR}` }}>
+      <section
+        className="relative z-10"
+        style={{ backgroundColor: RG_MARINE, borderTop: `2px solid ${RG_OR}` }}
+      >
         <div className="mx-auto max-w-[1440px] px-6 py-24 md:px-12">
           <SectionLabel kicker="06 · Elevation" title="6 LEVELS" />
           <div className="mt-12 grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-6">
@@ -862,10 +895,14 @@ export default function DesignSystemShowcase() {
               >
                 Avatars chibi · style maison
               </p>
-              <p className="mt-3 text-fluid-body-md" style={{ color: "#f5e9d4" }}>
-                Toute l&apos;identité RG repose sur des mascots illustrés à la main (Roy, Gaëlle, Mark, Achillea…). Le
-                design system étend ce langage aux composants : bordures dorées 2px, dropshadows durs, palette marine /
-                or / brique.
+              <p
+                className="mt-3 text-fluid-body-md"
+                style={{ color: "#f5e9d4" }}
+              >
+                Toute l&apos;identité RG repose sur des mascots illustrés à la
+                main (Roy, Gaëlle, Mark, Achillea…). Le design system étend ce
+                langage aux composants : bordures dorées 2px, dropshadows durs,
+                palette marine / or / brique.
               </p>
             </div>
           </div>
@@ -873,7 +910,10 @@ export default function DesignSystemShowcase() {
       </section>
 
       {/* ────────────────────────────────────────────── FOOTER */}
-      <footer className="relative z-10" style={{ backgroundColor: "#080f24", borderTop: `2px solid ${RG_OR}` }}>
+      <footer
+        className="relative z-10"
+        style={{ backgroundColor: "#080f24", borderTop: `2px solid ${RG_OR}` }}
+      >
         <div className="mx-auto max-w-[1440px] px-6 py-16 md:px-12">
           <div className="flex flex-col items-center gap-8 text-center">
             <Link
@@ -970,7 +1010,13 @@ function SectionLabel({ kicker, title }: { kicker: string; title: string }) {
   );
 }
 
-function ComponentTile({ title, children }: { title: string; children: React.ReactNode }) {
+function ComponentTile({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) {
   return (
     <div className="flex flex-col gap-4">
       <span

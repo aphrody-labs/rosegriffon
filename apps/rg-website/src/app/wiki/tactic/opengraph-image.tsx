@@ -11,7 +11,8 @@ export default async function Image() {
   return new ImageResponse(
     <div
       style={{
-        background: "linear-gradient(135deg, #1A120D 0%, #2D1F14 50%, #1A120D 100%)",
+        background:
+          "linear-gradient(135deg, #1A120D 0%, #2D1F14 50%, #1A120D 100%)",
         color: "white",
         display: "flex",
         fontFamily: "sans-serif",
@@ -102,7 +103,7 @@ export default async function Image() {
             { label: "Duree", value: "Variable" },
             { label: "Cooldown", value: "Par match" },
             { label: "Effets", value: "Boost/Debuff" },
-          ].map(p => (
+          ].map((p) => (
             <div
               key={p.label}
               style={{
@@ -128,7 +129,16 @@ export default async function Image() {
               >
                 {p.label}
               </div>
-              <div style={{ color: ACCENT, display: "flex", fontSize: 16, fontWeight: 800 }}>{p.value}</div>
+              <div
+                style={{
+                  color: ACCENT,
+                  display: "flex",
+                  fontSize: 16,
+                  fontWeight: 800,
+                }}
+              >
+                {p.value}
+              </div>
             </div>
           ))}
         </div>
@@ -223,9 +233,26 @@ export default async function Image() {
           position: "absolute",
         }}
       >
-        <img src={getOgLogoDataUri()} width={28} height={28} style={{ borderRadius: 7 }} alt="Logo Azalée" />
-        <div style={{ color: "#F2A93B", display: "flex", fontSize: 14, fontWeight: 700 }}>rosegriffon.fr/wiki</div>
-        <div style={{ color: "#6D5E50", display: "flex", fontSize: 12 }}>Inazuma Eleven: Victory Road</div>
+        <img
+          src={getOgLogoDataUri()}
+          width={28}
+          height={28}
+          style={{ borderRadius: 7 }}
+          alt="Logo Azalée"
+        />
+        <div
+          style={{
+            color: "#F2A93B",
+            display: "flex",
+            fontSize: 14,
+            fontWeight: 700,
+          }}
+        >
+          rosegriffon.fr/wiki
+        </div>
+        <div style={{ color: "#6D5E50", display: "flex", fontSize: 12 }}>
+          Inazuma Eleven: Victory Road
+        </div>
       </div>
     </div>,
     { ...size },

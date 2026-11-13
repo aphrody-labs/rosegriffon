@@ -84,7 +84,11 @@ export function GalleryCard({
           />
         ) : (
           <div className="flex size-full items-center justify-center">
-            <Icon name={categoryIcon} size={40} className="text-on-surface-variant/25" />
+            <Icon
+              name={categoryIcon}
+              size={40}
+              className="text-on-surface-variant/25"
+            />
           </div>
         )}
         {categoryLabel && (

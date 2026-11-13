@@ -39,17 +39,20 @@ describe("Inagle Native FFI (bun:ffi)", () => {
     }
   });
 
-  it.skipIf(!isNativeAvailable())("retrieves build info and capability manifest", () => {
-    const info = nieBuildInfo();
-    expect(info).not.toBeNull();
-    expect(info?.product).toBe("iecode");
-    expect(Array.isArray(info?.capabilities)).toBe(true);
-    expect(info?.capabilities).toContain("crc32");
-    expect(info?.capabilities).toContain("cpk");
-    expect(info?.capabilities).toContain("crilayla");
-    expect(info?.capabilities).toContain("cfgbin");
-    expect(info?.capabilities).toContain("g4tx");
-  });
+  it.skipIf(!isNativeAvailable())(
+    "retrieves build info and capability manifest",
+    () => {
+      const info = nieBuildInfo();
+      expect(info).not.toBeNull();
+      expect(info?.product).toBe("iecode");
+      expect(Array.isArray(info?.capabilities)).toBe(true);
+      expect(info?.capabilities).toContain("crc32");
+      expect(info?.capabilities).toContain("cpk");
+      expect(info?.capabilities).toContain("crilayla");
+      expect(info?.capabilities).toContain("cfgbin");
+      expect(info?.capabilities).toContain("g4tx");
+    },
+  );
 
   describe("CRC32", () => {
     it("computes IEEE 802.3 Level-5 CRC32 vectors byte-exactly", () => {
@@ -80,7 +83,9 @@ describe("Inagle Native FFI (bun:ffi)", () => {
     });
 
     it("performs position-aware XOR decryption involution", () => {
-      const original = new Uint8Array([0x43, 0x50, 0x4b, 0x20, 0x12, 0x34, 0x56, 0x78]);
+      const original = new Uint8Array([
+        0x43, 0x50, 0x4b, 0x20, 0x12, 0x34, 0x56, 0x78,
+      ]);
       const buffer = new Uint8Array(original);
       const key = nieCpkKeyFromFilename("test_archive.cpk");
 
@@ -98,22 +103,30 @@ describe("Inagle Native FFI (bun:ffi)", () => {
       }
     });
 
-    it.skipIf(!isNativeAvailable())("compresses and decompresses CRILAYLA round-trip", () => {
-      for (const length of [256, 257, 400]) {
-        const sample = Uint8Array.from({ length }, (_, i) => (i * 7 + 13) & 0xff);
-        const compressed = nieCompressCrilayla(sample);
-        expect(compressed).not.toBeNull();
-        expect(nieIsCrilayla(compressed!)).toBe(true);
-        const decompressed = nieDecompressCrilayla(compressed!);
-        expect(decompressed).not.toBeNull();
-        expect(decompressed!).toEqual(sample);
-      }
-    });
+    it.skipIf(!isNativeAvailable())(
+      "compresses and decompresses CRILAYLA round-trip",
+      () => {
+        for (const length of [256, 257, 400]) {
+          const sample = Uint8Array.from(
+            { length },
+            (_, i) => (i * 7 + 13) & 0xff,
+          );
+          const compressed = nieCompressCrilayla(sample);
+          expect(compressed).not.toBeNull();
+          expect(nieIsCrilayla(compressed!)).toBe(true);
+          const decompressed = nieDecompressCrilayla(compressed!);
+          expect(decompressed).not.toBeNull();
+          expect(decompressed!).toEqual(sample);
+        }
+      },
+    );
   });
 
   describe("Format Probing", () => {
     it("identifies format signatures correctly", () => {
-      const cpkBuffer = new Uint8Array([0x43, 0x50, 0x4b, 0x20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+      const cpkBuffer = new Uint8Array([
+        0x43, 0x50, 0x4b, 0x20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      ]);
       expect(nieCpkProbe(cpkBuffer)).toBe(true);
       expect(nieProbeHeader(cpkBuffer)).toBe(14); // 14 = CPK
       expect(nieFormatName(14)).toBe("CPK");

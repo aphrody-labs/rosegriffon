@@ -22,7 +22,11 @@ interface ProfileIdentityProps {
  * Restent les liens sortants et le bouton d'édition : ce sont des ACTIONS, pas
  * de l'identité.
  */
-export function ProfileIdentity({ website, twitterHandle, isOwnProfile }: ProfileIdentityProps) {
+export function ProfileIdentity({
+  website,
+  twitterHandle,
+  isOwnProfile,
+}: ProfileIdentityProps) {
   const lienSite = lienSuivable(website);
   // Le champ accepte « @pseudo », « pseudo » ou l'URL complète du profil.
   const twitter = twitterHandle
@@ -36,7 +40,10 @@ export function ProfileIdentity({ website, twitterHandle, isOwnProfile }: Profil
   }
 
   return (
-    <section aria-label="Liens du profil" className="mt-4 mb-8 flex flex-wrap items-center gap-x-4 gap-y-2">
+    <section
+      aria-label="Liens du profil"
+      className="mt-4 mb-8 flex flex-wrap items-center gap-x-4 gap-y-2"
+    >
       {lienSite && (
         <a
           href={lienSite}
@@ -61,7 +68,12 @@ export function ProfileIdentity({ website, twitterHandle, isOwnProfile }: Profil
       )}
 
       {isOwnProfile && (
-        <Button asChild variant="outline" size="sm" className="ml-auto h-9 gap-1.5">
+        <Button
+          asChild
+          variant="outline"
+          size="sm"
+          className="ml-auto h-9 gap-1.5"
+        >
           <Link href="/settings">
             <Edit className="size-3.5" aria-hidden="true" />
             Modifier mon profil
@@ -85,7 +97,9 @@ function lienSuivable(valeur: string | null): string | null {
   }
   try {
     const url = new URL(valeur);
-    return url.protocol === "http:" || url.protocol === "https:" ? valeur : null;
+    return url.protocol === "http:" || url.protocol === "https:"
+      ? valeur
+      : null;
   } catch {
     return null;
   }

@@ -16,7 +16,15 @@
  * (`clan_leave_confirm:<clanId>`, `clan_infos_page:<page>`…), traités quel que
  * soit le délai et quel que soit le processus.
  */
-import { ButtonComponent, Discord, ModalComponent, SelectMenuComponent, Slash, SlashGroup, SlashOption } from "discordx";
+import {
+  ButtonComponent,
+  Discord,
+  ModalComponent,
+  SelectMenuComponent,
+  Slash,
+  SlashGroup,
+  SlashOption,
+} from "discordx";
 import {
   ActionRowBuilder,
   ApplicationCommandOptionType,
@@ -40,7 +48,10 @@ import {
 import { ClanMemberRole } from "@rosegriffon/achillea-core/enums";
 import type { AchilleaClientResult } from "@rosegriffon/achillea-client";
 
-import { ConfigurationApiAchillea, type ClientAchilleaDelegue } from "../../lib/achillea-api";
+import {
+  ConfigurationApiAchillea,
+  type ClientAchilleaDelegue,
+} from "../../lib/achillea-api";
 import { clientDe } from "../../lib/achillea-ui";
 import {
   boutonPostuler,
@@ -65,8 +76,16 @@ export const PHRASE_TRANSFERT = "Je confirme";
 /** Rangée Confirmer / Annuler d'une action à état (legacy `buildConfirmCancelButtons`). */
 export function boutonsConfirmation(idConfirmer: string) {
   return new ActionRowBuilder<ButtonBuilder>().addComponents(
-    new ButtonBuilder().setLabel("Confirmer").setStyle(ButtonStyle.Success).setCustomId(idConfirmer).setEmoji("✅"),
-    new ButtonBuilder().setLabel("Annuler").setStyle(ButtonStyle.Danger).setCustomId("clan_action_cancel").setEmoji("✖️"),
+    new ButtonBuilder()
+      .setLabel("Confirmer")
+      .setStyle(ButtonStyle.Success)
+      .setCustomId(idConfirmer)
+      .setEmoji("✅"),
+    new ButtonBuilder()
+      .setLabel("Annuler")
+      .setStyle(ButtonStyle.Danger)
+      .setCustomId("clan_action_cancel")
+      .setEmoji("✖️"),
   );
 }
 
@@ -81,15 +100,24 @@ export function modaleTransfert(cibleId: string) {
   return new ModalBuilder()
     .setTitle("Validez votre action")
     .setCustomId(`clan_transfer_modal:${cibleId}`)
-    .addLabelComponents(new LabelBuilder().setLabel("Réécrivez le message ci-dessous").setTextInputComponent(saisie));
+    .addLabelComponents(
+      new LabelBuilder()
+        .setLabel("Réécrivez le message ci-dessous")
+        .setTextInputComponent(saisie),
+    );
 }
 
-type Interactif = ChatInputCommandInteraction | ButtonInteraction | StringSelectMenuInteraction;
+type Interactif =
+  ChatInputCommandInteraction | ButtonInteraction | StringSelectMenuInteraction;
 
 /** Embed seul, sans texte ni composant, dans la réponse (différée ou non). */
-async function afficher(interaction: RepliableInteraction, embed: EmbedBuilder): Promise<void> {
+async function afficher(
+  interaction: RepliableInteraction,
+  embed: EmbedBuilder,
+): Promise<void> {
   const charge = { content: "", components: [], embeds: [embed] };
-  if (interaction.deferred || interaction.replied) await interaction.editReply(charge);
+  if (interaction.deferred || interaction.replied)
+    await interaction.editReply(charge);
   else await interaction.reply({ ...charge, flags: MessageFlags.Ephemeral });
 }
 
@@ -114,7 +142,10 @@ async function appelClan<T>(
   }
   const resultat = await appel(client);
   if (resultat.ok) return resultat.value;
-  const motif = si404 && resultat.kind === "http" && resultat.status === 404 ? si404 : client.motifEchec(resultat);
+  const motif =
+    si404 && resultat.kind === "http" && resultat.status === 404
+      ? si404
+      : client.motifEchec(resultat);
   await afficher(interaction, embedErreurLegacy(motif));
   return null;
 }
@@ -122,23 +153,42 @@ async function appelClan<T>(
 /** Auteur des embeds de l'ancien bot : celui qui a lancé la commande. */
 function auteurDe(interaction: { user: User }): AuteurEmbed {
   const u = interaction.user as User & { displayAvatarURL?: () => string };
-  return { nom: u.displayName ?? u.username, avatar: typeof u.displayAvatarURL === "function" ? u.displayAvatarURL() : null };
+  return {
+    nom: u.displayName ?? u.username,
+    avatar:
+      typeof u.displayAvatarURL === "function" ? u.displayAvatarURL() : null,
+  };
 }
 
 /** Page `page` de l'annuaire, rendue dans la réponse (déjà différée). */
-async function afficherListe(interaction: Interactif, page: number): Promise<void> {
-  const liste = await appelClan(interaction, c => c.clans.list({ page, pagination: CLANS_PAR_PAGE }));
+async function afficherListe(
+  interaction: Interactif,
+  page: number,
+): Promise<void> {
+  const liste = await appelClan(interaction, (c) =>
+    c.clans.list({ page, pagination: CLANS_PAR_PAGE }),
+  );
   if (!liste) return;
   const total = liste.meta.total ?? liste.data.length;
   const pages = Math.ceil(total / CLANS_PAR_PAGE);
   const courante = Math.min(Math.max(1, page), Math.max(1, pages));
-  const composants: Array<ActionRowBuilder<ButtonBuilder> | ReturnType<typeof selecteurClans>> = [rangeePaginationClans(courante, pages)];
+  const composants: Array<
+    ActionRowBuilder<ButtonBuilder> | ReturnType<typeof selecteurClans>
+  > = [rangeePaginationClans(courante, pages)];
   if (liste.data.length > 0) composants.push(selecteurClans(liste.data));
-  await interaction.editReply({ embeds: [embedListeClans(liste.data, courante, pages, auteurDe(interaction))], components: composants as never });
+  await interaction.editReply({
+    embeds: [
+      embedListeClans(liste.data, courante, pages, auteurDe(interaction)),
+    ],
+    components: composants as never,
+  });
 }
 
 /** Fondateurs du clan (absents de la fiche) ; une lecture manquée laisse la liste vide. */
-async function fondateursDe(interaction: Interactif, clanId: number): Promise<string[]> {
+async function fondateursDe(
+  interaction: Interactif,
+  clanId: number,
+): Promise<string[]> {
   try {
     const resultat = await clientDe(interaction).clans.get(clanId);
     return resultat.ok ? resultat.value.founders : [];
@@ -151,26 +201,45 @@ async function fondateursDe(interaction: Interactif, clanId: number): Promise<st
  * Fiche d'un clan (par id ou sigle). Par sigle : bouton « Postuler » (grisé hors
  * recrutement), aucun pour un clan dissous. Depuis l'annuaire : « Retour » seul.
  */
-async function afficherFiche(interaction: Interactif, ref: string | number, depuisAnnuaire: boolean): Promise<void> {
+async function afficherFiche(
+  interaction: Interactif,
+  ref: string | number,
+  depuisAnnuaire: boolean,
+): Promise<void> {
   const si404 = depuisAnnuaire
     ? "Le Clan sélectionné n'existe pas ou n'est pas actif."
     : `Le Clan recherché avec le sigle ${ref} n'existe pas.`;
-  const clan = await appelClan(interaction, c => c.clans.fiche(ref), si404);
+  const clan = await appelClan(interaction, (c) => c.clans.fiche(ref), si404);
   if (!clan) return;
   if (depuisAnnuaire && clan.isDisbanded) {
     await afficher(interaction, embedErreurLegacy(si404));
     return;
   }
-  const boutons: ButtonBuilder[] = depuisAnnuaire ? [boutonRetourClans()] : clan.isDisbanded ? [] : [boutonPostuler(clan.id, !clan.isRecruiting)];
+  const boutons: ButtonBuilder[] = depuisAnnuaire
+    ? [boutonRetourClans()]
+    : clan.isDisbanded
+      ? []
+      : [boutonPostuler(clan.id, !clan.isRecruiting)];
   await interaction.editReply({
-    embeds: [embedFicheClan(clan, auteurDe(interaction), await fondateursDe(interaction, clan.id))],
-    components: boutons.length > 0 ? [new ActionRowBuilder<ButtonBuilder>().addComponents(...boutons)] : [],
+    embeds: [
+      embedFicheClan(
+        clan,
+        auteurDe(interaction),
+        await fondateursDe(interaction, clan.id),
+      ),
+    ],
+    components:
+      boutons.length > 0
+        ? [new ActionRowBuilder<ButtonBuilder>().addComponents(...boutons)]
+        : [],
   });
 }
 
 /** Clan actuel (actif) de l'auteur, avec son rôle — lu dans sa carrière (garde `ClanEnabled`). */
 async function clanActuel(interaction: Interactif) {
-  const carriere = await appelClan(interaction, c => c.clans.history(interaction.user.id));
+  const carriere = await appelClan(interaction, (c) =>
+    c.clans.history(interaction.user.id),
+  );
   if (!carriere) return null;
   const actuel = carriere.current.at(-1) ?? null;
   if (!actuel) {
@@ -181,7 +250,10 @@ async function clanActuel(interaction: Interactif) {
 }
 
 /** Nom affiché d'un utilisateur, lu chez Discord ; la mention à défaut. */
-async function nomDe(interaction: ModalSubmitInteraction, id: string): Promise<string> {
+async function nomDe(
+  interaction: ModalSubmitInteraction,
+  id: string,
+): Promise<string> {
   try {
     const u = await interaction.client.users.fetch(id);
     return escapeMarkdown(u.displayName ?? u.username);
@@ -216,7 +288,10 @@ export class ClanCommandes {
   @ButtonComponent({ id: /^clan_infos_page:\d+(?::[a-z]+)?$/ })
   async page(interaction: ButtonInteraction): Promise<void> {
     await interaction.deferUpdate();
-    await afficherListe(interaction, Number(segments(interaction.customId)[0] ?? 1));
+    await afficherListe(
+      interaction,
+      Number(segments(interaction.customId)[0] ?? 1),
+    );
   }
 
   @SelectMenuComponent({ id: "clanSelector" })
@@ -240,17 +315,26 @@ export class ClanCommandes {
   ): Promise<void> {
     await interaction.deferReply({ flags: MessageFlags.Ephemeral });
     // Garde `NoClan` de l'ancien bot : une adhésion active interdit de postuler.
-    const carriere = await appelClan(interaction, c => c.clans.history(interaction.user.id));
+    const carriere = await appelClan(interaction, (c) =>
+      c.clans.history(interaction.user.id),
+    );
     if (!carriere) return;
     if (carriere.current.length > 0) {
       await afficher(interaction, embedRefusLegacy(REFUS_LEGACY.dejaEnClan));
       return;
     }
     const sigleNormalise = sigle.trim().toUpperCase();
-    const clan = await appelClan(interaction, c => c.clans.fiche(sigleNormalise), `Clan with short name ${sigleNormalise} doesn't exist`);
+    const clan = await appelClan(
+      interaction,
+      (c) => c.clans.fiche(sigleNormalise),
+      `Clan with short name ${sigleNormalise} doesn't exist`,
+    );
     if (!clan) return;
     if (clan.isDisbanded || !clan.isRecruiting) {
-      await afficher(interaction, embedErreurLegacy("This Clan is not currently recruiting !"));
+      await afficher(
+        interaction,
+        embedErreurLegacy("This Clan is not currently recruiting !"),
+      );
       return;
     }
     await interaction.editReply({
@@ -259,7 +343,10 @@ export class ClanCommandes {
     });
   }
 
-  @Slash({ name: "invite-member", description: "Invitez un joueur dans votre Clan" })
+  @Slash({
+    name: "invite-member",
+    description: "Invitez un joueur dans votre Clan",
+  })
   async inviteMember(
     @SlashOption({
       name: "user",
@@ -278,11 +365,15 @@ export class ClanCommandes {
       return;
     }
     if (cible.bot) {
-      await afficher(interaction, embedErreurLegacy("On n'invite pas un bot dans un Clan."));
+      await afficher(
+        interaction,
+        embedErreurLegacy("On n'invite pas un bot dans un Clan."),
+      );
       return;
     }
     await interaction.editReply({
-      content: "Sélectionnez les distinctions à proposer à l'utilisateur à inviter:",
+      content:
+        "Sélectionnez les distinctions à proposer à l'utilisateur à inviter:",
       components: [selecteurDistinctions("invite", cible.id)],
     });
   }
@@ -293,7 +384,10 @@ export class ClanCommandes {
     const actuel = await clanActuel(interaction);
     if (!actuel) return;
     if (actuel.role === ClanMemberRole.Captain) {
-      await afficher(interaction, embedErreurLegacy("Le Président ne peut pas quitter son Clan !"));
+      await afficher(
+        interaction,
+        embedErreurLegacy("Le Président ne peut pas quitter son Clan !"),
+      );
       return;
     }
     await interaction.editReply({
@@ -306,9 +400,12 @@ export class ClanCommandes {
   async confirmerDepart(interaction: ButtonInteraction): Promise<void> {
     await interaction.deferUpdate();
     const clanId = Number(segments(interaction.customId)[0]);
-    const issue = await appelClan(interaction, c => c.clans.leave(clanId));
+    const issue = await appelClan(interaction, (c) => c.clans.leave(clanId));
     if (!issue) return;
-    await afficher(interaction, embedSuccesLegacy(`Vous avez quitté le Clan ${issue.clanName} !`));
+    await afficher(
+      interaction,
+      embedSuccesLegacy(`Vous avez quitté le Clan ${issue.clanName} !`),
+    );
   }
 
   @Slash({ name: "disband", description: "Disband your Clan" })
@@ -326,10 +423,17 @@ export class ClanCommandes {
     let cible: { id: number; nom: string };
     if (sigle && sigle.trim() !== "") {
       const ref = sigle.trim();
-      const clan = await appelClan(interaction, c => c.clans.fiche(ref), `Le Clan recherché avec le sigle ${ref} n'existe pas.`);
+      const clan = await appelClan(
+        interaction,
+        (c) => c.clans.fiche(ref),
+        `Le Clan recherché avec le sigle ${ref} n'existe pas.`,
+      );
       if (!clan) return;
       if (clan.isDisbanded) {
-        await afficher(interaction, embedErreurLegacy(`Le Clan ${clan.name} est déjà dissous.`));
+        await afficher(
+          interaction,
+          embedErreurLegacy(`Le Clan ${clan.name} est déjà dissous.`),
+        );
         return;
       }
       cible = { id: clan.id, nom: clan.name };
@@ -352,9 +456,14 @@ export class ClanCommandes {
   async confirmerDissolution(interaction: ButtonInteraction): Promise<void> {
     await interaction.deferUpdate();
     const clanId = Number(segments(interaction.customId)[0]);
-    const issue = await appelClan(interaction, c => c.clans.disband(clanId));
+    const issue = await appelClan(interaction, (c) => c.clans.disband(clanId));
     if (!issue) return;
-    await afficher(interaction, embedSuccesLegacy(`Clan ${issue.clanName} has been disbanded successfully !`));
+    await afficher(
+      interaction,
+      embedSuccesLegacy(
+        `Clan ${issue.clanName} has been disbanded successfully !`,
+      ),
+    );
   }
 
   /** « Annuler » : l'ancien bot supprimait la demande de confirmation. */
@@ -364,7 +473,10 @@ export class ClanCommandes {
     await interaction.deleteReply();
   }
 
-  @Slash({ name: "transfer-ownership", description: "Permet de transférer la présidence du Clan à un autre membre" })
+  @Slash({
+    name: "transfer-ownership",
+    description: "Permet de transférer la présidence du Clan à un autre membre",
+  })
   async transferOwnership(
     @SlashOption({
       name: "member",
@@ -377,7 +489,12 @@ export class ClanCommandes {
   ): Promise<void> {
     if (membre.id === interaction.user.id) {
       await interaction.deferReply({ flags: MessageFlags.Ephemeral });
-      await afficher(interaction, embedErreurLegacy("Vous ne pouvez pas vous choisir comme cible de l'action !"));
+      await afficher(
+        interaction,
+        embedErreurLegacy(
+          "Vous ne pouvez pas vous choisir comme cible de l'action !",
+        ),
+      );
       return;
     }
     // La modale doit partir dans les trois secondes : la vérification d'appartenance
@@ -388,18 +505,33 @@ export class ClanCommandes {
   @ModalComponent({ id: /^clan_transfer_modal:\d+$/ })
   async validerTransfert(interaction: ModalSubmitInteraction): Promise<void> {
     await interaction.deferReply({ flags: MessageFlags.Ephemeral });
-    if (interaction.fields.getTextInputValue("userInput") !== PHRASE_TRANSFERT) {
-      await afficher(interaction, embedErreurLegacy("La validation a échoué !"));
+    if (
+      interaction.fields.getTextInputValue("userInput") !== PHRASE_TRANSFERT
+    ) {
+      await afficher(
+        interaction,
+        embedErreurLegacy("La validation a échoué !"),
+      );
       return;
     }
     const cibleId = segments(interaction.customId)[0]!;
-    const issue = await appelClan(interaction, c => c.clans.transferOwnership(cibleId));
+    const issue = await appelClan(interaction, (c) =>
+      c.clans.transferOwnership(cibleId),
+    );
     if (!issue) return;
     // Ancien texte : « … est est maintenant … » ; seul le doublon est corrigé.
-    await afficher(interaction, embedSuccesLegacy(`${await nomDe(interaction, cibleId)} est maintenant le nouveau Président de votre Clan`));
+    await afficher(
+      interaction,
+      embedSuccesLegacy(
+        `${await nomDe(interaction, cibleId)} est maintenant le nouveau Président de votre Clan`,
+      ),
+    );
   }
 
-  @Slash({ name: "poster", description: "Génère l'affiche officielle d'un clan" })
+  @Slash({
+    name: "poster",
+    description: "Génère l'affiche officielle d'un clan",
+  })
   async poster(
     @SlashOption({
       name: "sigle",
@@ -413,24 +545,45 @@ export class ClanCommandes {
     await interaction.deferReply({ flags: MessageFlags.Ephemeral });
     let cible: { id: number; nom: string; sigle: string };
     if (sigle && sigle.trim() !== "") {
-      const clan = await appelClan(interaction, c => c.clans.fiche(sigle.trim()), `Le Clan avec le sigle "${sigle}" n'existe pas.`);
+      const clan = await appelClan(
+        interaction,
+        (c) => c.clans.fiche(sigle.trim()),
+        `Le Clan avec le sigle "${sigle}" n'existe pas.`,
+      );
       if (!clan) return;
       cible = { id: clan.id, nom: clan.name, sigle: clan.shortName };
     } else {
-      const carriere = await appelClan(interaction, c => c.clans.history(interaction.user.id));
+      const carriere = await appelClan(interaction, (c) =>
+        c.clans.history(interaction.user.id),
+      );
       if (!carriere) return;
       const actuel = carriere.current.at(-1);
       if (!actuel) {
-        await afficher(interaction, embedErreurLegacy("Vous n'êtes pas membre d'un Clan. Précisez un sigle."));
+        await afficher(
+          interaction,
+          embedErreurLegacy(
+            "Vous n'êtes pas membre d'un Clan. Précisez un sigle.",
+          ),
+        );
         return;
       }
-      cible = { id: actuel.clanId, nom: actuel.clanName, sigle: actuel.shortName };
+      cible = {
+        id: actuel.clanId,
+        nom: actuel.clanName,
+        sigle: actuel.shortName,
+      };
     }
-    const octets = await appelClan(interaction, c => c.clans.poster(cible.id));
+    const octets = await appelClan(interaction, (c) =>
+      c.clans.poster(cible.id),
+    );
     if (!octets) return;
     await interaction.editReply({
       content: `Affiche officielle du Clan **${cible.nom}** [${cible.sigle}]`,
-      files: [new AttachmentBuilder(Buffer.from(octets), { name: `clan-${cible.id}-poster.png` })],
+      files: [
+        new AttachmentBuilder(Buffer.from(octets), {
+          name: `clan-${cible.id}-poster.png`,
+        }),
+      ],
     });
   }
 }

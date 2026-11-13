@@ -18,7 +18,12 @@
 import type { Metadata } from "next";
 import Link from "@/components/shared/Link";
 import { wiki } from "@rosegriffon/app-shell";
-import { MediaBack, MediaCount, MediaEmpty, MediaHeader } from "@/components/wiki/MediaShell";
+import {
+  MediaBack,
+  MediaCount,
+  MediaEmpty,
+  MediaHeader,
+} from "@/components/wiki/MediaShell";
 import InlineModelViewer from "@/components/wiki/InlineModelViewer";
 import { SafeImage } from "@/components/ui/SafeImage";
 import { ModelToolbar, type ModelView } from "@/components/wiki/ModelToolbar";
@@ -32,7 +37,10 @@ import {
   modelTextureDir,
   type ModelFamily,
 } from "@rosegriffon/azalee/cpk/models";
-import { type ChrModelSub, getChrModelTextureUrl } from "@rosegriffon/azalee/images";
+import {
+  type ChrModelSub,
+  getChrModelTextureUrl,
+} from "@rosegriffon/azalee/images";
 import { filtrer, type ModelEntry, modelesDe } from "@/lib/cpk/model-corpus";
 
 export const dynamic = "force-dynamic";
@@ -70,7 +78,8 @@ const ROLE_EXT: Record<string, string> = {
  * C'est un BONUS, jamais un filtre : un modèle sans texture connue reste listé et visualisable.
  */
 function textureDe(famille: ModelFamily, code: string): string | null {
-  if (famille !== "waza" && famille !== "item" && famille !== "animal") return null;
+  if (famille !== "waza" && famille !== "item" && famille !== "animal")
+    return null;
   return getChrModelTextureUrl(famille satisfies ChrModelSub, code);
 }
 
@@ -81,13 +90,21 @@ function poids(o: number): string {
   return `${(o / (1024 * 1024)).toFixed(1)} Mio`;
 }
 
-export async function generateMetadata({ params }: { params: Promise<{ path?: string[] }> }): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ path?: string[] }>;
+}): Promise<Metadata> {
   const { path } = await params;
   const [famille, code] = path ?? [];
   const def = famille ? modelFamily(famille) : undefined;
-  const titre = code ? `${code} — ${def?.label ?? ""}` : (def?.label ?? "Tous les modèles");
+  const titre = code
+    ? `${code} — ${def?.label ?? ""}`
+    : (def?.label ?? "Tous les modèles");
   return {
-    alternates: { canonical: wiki(`/modeles${path?.length ? `/${path.join("/")}` : ""}`) },
+    alternates: {
+      canonical: wiki(`/modeles${path?.length ? `/${path.join("/")}` : ""}`),
+    },
     description: `Modèles 3D d'Inazuma Eleven: Victory Road assemblés live depuis les fichiers du jeu — ${titre}.`,
     title: `Modèles 3D — ${titre} | Azalée`,
   };
@@ -101,7 +118,7 @@ export default async function ModelesPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const [{ path }, sp] = await Promise.all([params, searchParams]);
-  const segments = (path ?? []).filter(s => s !== ".." && s !== ".");
+  const segments = (path ?? []).filter((s) => s !== ".." && s !== ".");
   const [familleId, code] = segments;
   const def = familleId ? modelFamily(familleId) : undefined;
 
@@ -116,7 +133,8 @@ export default async function ModelesPage({
 
   if (def && code) return <Fiche famille={def.id} code={code} />;
   if (def) {
-    const pageParam = typeof sp.page === "string" ? Number.parseInt(sp.page, 10) : 1;
+    const pageParam =
+      typeof sp.page === "string" ? Number.parseInt(sp.page, 10) : 1;
     const page = Number.isFinite(pageParam) && pageParam > 0 ? pageParam : 1;
     const q = typeof sp.q === "string" ? sp.q : "";
     const view: ModelView = sp.view === "list" ? "list" : "grid";
@@ -126,7 +144,13 @@ export default async function ModelesPage({
 }
 
 /** En-tête commun aux trois vues. */
-function EnTete({ titre, description }: { titre: string; description?: string }) {
+function EnTete({
+  titre,
+  description,
+}: {
+  titre: string;
+  description?: string;
+}) {
   return (
     <MediaHeader
       title={titre}
@@ -141,7 +165,9 @@ function EnTete({ titre, description }: { titre: string; description?: string })
 
 /** Vue d'accueil : les familles et leur volume. */
 async function Familles() {
-  const comptes = await Promise.all(MODEL_FAMILIES.map(async f => (await modelesDe(f.id)).length));
+  const comptes = await Promise.all(
+    MODEL_FAMILIES.map(async (f) => (await modelesDe(f.id)).length),
+  );
   const total = comptes.reduce((a, b) => a + b, 0);
 
   return (
@@ -161,7 +187,9 @@ async function Familles() {
                   {(comptes[i] ?? 0).toLocaleString("fr")}
                 </span>
               </span>
-              <span className="mt-0.5 block text-xs text-on-surface-variant">{f.hint}</span>
+              <span className="mt-0.5 block text-xs text-on-surface-variant">
+                {f.hint}
+              </span>
             </Link>
           </li>
         ))}
@@ -212,11 +240,18 @@ function Carte({ famille, m }: { famille: ModelFamily; m: ModelEntry }) {
       </Link>
       <div className="flex items-center gap-2 border-t border-outline-variant/20 px-2.5 py-2">
         <Link href={modelHref(famille, m.code)} className="min-w-0 flex-1">
-          <span className="block truncate text-sm text-on-surface" title={titre}>
+          <span
+            className="block truncate text-sm text-on-surface"
+            title={titre}
+          >
             {titre}
           </span>
-          <span className="block truncate text-[11px] text-on-surface-variant" title={m.variantLabel}>
-            {m.variantLabel || (m.name && <span className="font-mono">{m.code}</span>)}
+          <span
+            className="block truncate text-[11px] text-on-surface-variant"
+            title={m.variantLabel}
+          >
+            {m.variantLabel ||
+              (m.name && <span className="font-mono">{m.code}</span>)}
             {m.name && m.files ? " · " : null}
             {m.files ? `${m.files} fichier${m.files > 1 ? "s" : ""}` : null}
           </span>
@@ -281,7 +316,9 @@ function Ligne({ famille, m }: { famille: ModelFamily; m: ModelEntry }) {
           glb
         </a>
       ) : (
-        <span className="shrink-0 text-[11px] text-on-surface-variant">Version Zukan illustrée</span>
+        <span className="shrink-0 text-[11px] text-on-surface-variant">
+          Version Zukan illustrée
+        </span>
       )}
       {tex && (
         <a
@@ -298,7 +335,17 @@ function Ligne({ famille, m }: { famille: ModelFamily; m: ModelEntry }) {
 }
 
 /** Galerie paginée d'une famille — grille 3D ou liste, filtrable. */
-async function Grille({ famille, page, q, view }: { famille: ModelFamily; page: number; q: string; view: ModelView }) {
+async function Grille({
+  famille,
+  page,
+  q,
+  view,
+}: {
+  famille: ModelFamily;
+  page: number;
+  q: string;
+  view: ModelView;
+}) {
   const def = modelFamily(famille);
   const tous = await modelesDe(famille);
   const trouves = filtrer(tous, q);
@@ -321,12 +368,15 @@ async function Grille({ famille, page, q, view }: { famille: ModelFamily; page: 
 
   return (
     <div className="w-full space-y-5">
-      <EnTete titre={`Modèles 3D — ${def?.label ?? famille}`} description={def?.hint} />
+      <EnTete
+        titre={`Modèles 3D — ${def?.label ?? famille}`}
+        description={def?.hint}
+      />
 
       <MediaBack href="/wiki/modeles" label="Toutes les familles" />
 
       <nav className="flex flex-wrap gap-2">
-        {MODEL_FAMILIES.filter(f => f.id !== famille).map(f => (
+        {MODEL_FAMILIES.filter((f) => f.id !== famille).map((f) => (
           <Link
             key={f.id}
             href={`/wiki/modeles/${f.id}`}
@@ -340,10 +390,14 @@ async function Grille({ famille, page, q, view }: { famille: ModelFamily; page: 
       <ModelToolbar base={`/modeles/${famille}`} q={q} view={view} />
 
       {tous.length === 0 ? (
-        <MediaEmpty>Aucun modèle listé pour cette famille — la source est momentanément injoignable.</MediaEmpty>
+        <MediaEmpty>
+          Aucun modèle listé pour cette famille — la source est momentanément
+          injoignable.
+        </MediaEmpty>
       ) : trouves.length === 0 ? (
         <MediaEmpty>
-          Aucun modèle ne correspond à « {q} » parmi les {tous.length.toLocaleString("fr")} de cette famille.
+          Aucun modèle ne correspond à « {q} » parmi les{" "}
+          {tous.length.toLocaleString("fr")} de cette famille.
         </MediaEmpty>
       ) : (
         <>
@@ -358,13 +412,13 @@ async function Grille({ famille, page, q, view }: { famille: ModelFamily; page: 
 
           {view === "grid" ? (
             <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
-              {tranche.map(m => (
+              {tranche.map((m) => (
                 <Carte key={m.code} famille={famille} m={m} />
               ))}
             </ul>
           ) : (
             <ul className="overflow-hidden rounded-2xl border border-outline-variant bg-surface-container-low">
-              {tranche.map(m => (
+              {tranche.map((m) => (
                 <Ligne key={m.code} famille={famille} m={m} />
               ))}
             </ul>
@@ -400,7 +454,13 @@ async function Grille({ famille, page, q, view }: { famille: ModelFamily; page: 
 }
 
 /** Fiche d'un modèle : le 3D assemblé, puis ses textures. */
-async function Fiche({ famille, code }: { famille: ModelFamily; code: string }) {
+async function Fiche({
+  famille,
+  code,
+}: {
+  famille: ModelFamily;
+  code: string;
+}) {
   const def = modelFamily(famille);
   const texDir = modelTextureDir(famille, code);
   // Dossier des pièces du modèle. `null` pour un personnage, dont le corps, le visage et
@@ -411,8 +471,8 @@ async function Fiche({ famille, code }: { famille: ModelFamily; code: string }) 
     texDir ? lsOrNull(texDir, 200) : Promise.resolve(null),
     srcDir ? lsOrNull(srcDir, 100) : Promise.resolve(null),
   ]);
-  const entree = tous.find(m => m.code === code);
-  const g4tx = (listeTex?.files ?? []).filter(f => f.ext === "g4tx");
+  const entree = tous.find((m) => m.code === code);
+  const g4tx = (listeTex?.files ?? []).filter((f) => f.ext === "g4tx");
   const pieces = listeSrc?.files ?? [];
   const octets = pieces.reduce((s, f) => s + (f.size ?? 0), 0);
 
@@ -427,7 +487,10 @@ async function Fiche({ famille, code }: { famille: ModelFamily; code: string }) 
         }
       />
 
-      <MediaBack href={`/wiki/modeles/${famille}`} label={`Retour — ${def?.label ?? famille}`} />
+      <MediaBack
+        href={`/wiki/modeles/${famille}`}
+        label={`Retour — ${def?.label ?? famille}`}
+      />
 
       <nav className="flex flex-wrap items-center gap-1 text-sm text-on-surface-variant">
         <Link href="/wiki/modeles" className="hover:text-primary">
@@ -444,7 +507,10 @@ async function Fiche({ famille, code }: { famille: ModelFamily; code: string }) 
             <span aria-hidden className="mx-1">
               ·
             </span>
-            <Link href={`/wiki/chara/${entree.slug}`} className="text-primary hover:underline">
+            <Link
+              href={`/wiki/chara/${entree.slug}`}
+              className="text-primary hover:underline"
+            >
               Fiche du personnage
             </Link>
           </>
@@ -465,12 +531,17 @@ async function Fiche({ famille, code }: { famille: ModelFamily; code: string }) 
             sizes="100vw"
           />
         ) : (
-          <InlineModelViewer glbUrl={modelGlbUrl(famille, code)} name={entree?.name ?? code} />
+          <InlineModelViewer
+            glbUrl={modelGlbUrl(famille, code)}
+            name={entree?.name ?? code}
+          />
         )}
       </div>
 
       <section className="rounded-2xl border border-outline-variant bg-surface-container-low p-4">
-        <h2 className="mb-2 text-sm font-medium text-on-surface">Télécharger</h2>
+        <h2 className="mb-2 text-sm font-medium text-on-surface">
+          Télécharger
+        </h2>
         {!entree?.previewOnly ? (
           <a
             href={modelGlbUrl(famille, code)}
@@ -480,7 +551,9 @@ async function Fiche({ famille, code }: { famille: ModelFamily; code: string }) 
             <span className="font-medium uppercase">glb</span>
           </a>
         ) : (
-          <span className="text-xs text-on-surface-variant">Aucun GLB : rendu officiel Zukan uniquement.</span>
+          <span className="text-xs text-on-surface-variant">
+            Aucun GLB : rendu officiel Zukan uniquement.
+          </span>
         )}
         <p className="mt-2 text-xs text-on-surface-variant">
           glTF binaire — maillage, squelette et textures dans un seul fichier.
@@ -492,23 +565,35 @@ async function Fiche({ famille, code }: { famille: ModelFamily; code: string }) 
 			    textures, et ce que tout cela pèse. */}
       {pieces.length > 0 && (
         <section className="rounded-2xl border border-outline-variant bg-surface-container-low p-4">
-          <h2 className="mb-1 text-sm font-medium text-on-surface">Fichiers d'origine</h2>
+          <h2 className="mb-1 text-sm font-medium text-on-surface">
+            Fichiers d'origine
+          </h2>
           <p className="mb-3 text-xs text-on-surface-variant">
-            {pieces.length} fichier{pieces.length > 1 ? "s" : ""} · {poids(octets)} ·{" "}
-            <span className="font-mono">{srcDir}</span>
+            {pieces.length} fichier{pieces.length > 1 ? "s" : ""} ·{" "}
+            {poids(octets)} · <span className="font-mono">{srcDir}</span>
             {listeSrc?.role && <> — {listeSrc.role.role}</>}
           </p>
           <ul className="divide-y divide-outline-variant/20">
-            {pieces.map(f => (
-              <li key={f.path} className="flex items-center gap-3 py-1.5 text-xs">
+            {pieces.map((f) => (
+              <li
+                key={f.path}
+                className="flex items-center gap-3 py-1.5 text-xs"
+              >
                 <span className="w-16 shrink-0 rounded-full bg-surface-container px-2 py-0.5 text-center font-mono text-[10px] uppercase text-on-surface-variant">
                   {f.ext}
                 </span>
-                <span className="min-w-0 flex-1 truncate text-on-surface" title={f.name}>
+                <span
+                  className="min-w-0 flex-1 truncate text-on-surface"
+                  title={f.name}
+                >
                   {f.name}
                 </span>
-                <span className="hidden shrink-0 text-on-surface-variant sm:block">{ROLE_EXT[f.ext] ?? "—"}</span>
-                <span className="w-20 shrink-0 text-right tabular-nums text-on-surface-variant">{poids(f.size)}</span>
+                <span className="hidden shrink-0 text-on-surface-variant sm:block">
+                  {ROLE_EXT[f.ext] ?? "—"}
+                </span>
+                <span className="w-20 shrink-0 text-right tabular-nums text-on-surface-variant">
+                  {poids(f.size)}
+                </span>
               </li>
             ))}
           </ul>
@@ -517,9 +602,11 @@ async function Fiche({ famille, code }: { famille: ModelFamily; code: string }) 
 
       {g4tx.length > 0 && (
         <>
-          <MediaCount left={`${g4tx.length.toLocaleString("fr")} fichier${g4tx.length > 1 ? "s" : ""} de texture`} />
+          <MediaCount
+            left={`${g4tx.length.toLocaleString("fr")} fichier${g4tx.length > 1 ? "s" : ""} de texture`}
+          />
           <ul className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-6">
-            {g4tx.map(t => (
+            {g4tx.map((t) => (
               <li key={t.path}>
                 <Link
                   href={`/wiki/textures/${t.path.replace(/^data\/dx11\//, "")}`}

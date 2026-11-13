@@ -1,6 +1,14 @@
 "use client";
 
-import { ArrowLeft, CircleUser, Home, LayoutDashboard, Menu, Settings, User } from "lucide-react";
+import {
+  ArrowLeft,
+  CircleUser,
+  Home,
+  LayoutDashboard,
+  Menu,
+  Settings,
+  User,
+} from "lucide-react";
 import Image from "next/image";
 import Link from "@rosegriffon/ui/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -75,7 +83,10 @@ const DEFAULT_TITLE_MAP: Record<string, string> = {
   "/a-propos": "À propos",
 };
 
-export function resolvePageTitle(pathname: string, titleMap = DEFAULT_TITLE_MAP): string {
+export function resolvePageTitle(
+  pathname: string,
+  titleMap = DEFAULT_TITLE_MAP,
+): string {
   if (pathname === "/" || pathname === "") {
     return "";
   }
@@ -119,7 +130,9 @@ export function MobileHeader({
 
   const isHome = pathname === "/" || pathname === homeHref;
   const title = resolvePageTitle(pathname, titleMap);
-  const loginHref = pathname.startsWith("/achillea") ? `/login?redirect=${encodeURIComponent(pathname)}` : "/login";
+  const loginHref = pathname.startsWith("/achillea")
+    ? `/login?redirect=${encodeURIComponent(pathname)}`
+    : "/login";
 
   const publicProfileHref =
     accountHref && accountHref !== "/settings"
@@ -147,14 +160,28 @@ export function MobileHeader({
         // Sous ~440 px les actions (accueil, langue, thème, compte) occupent déjà
         // la largeur : le nom passe en texte accessible pour ne pas pousser le
         // bouton compte hors de l'écran.
-        <Link href={homeHref} aria-label={appName} className="flex min-w-0 items-center gap-1.5 ml-1">
+        <Link
+          href={homeHref}
+          aria-label={appName}
+          className="flex min-w-0 items-center gap-1.5 ml-1"
+        >
           <div className="relative size-7 shrink-0">
-            <Image src={logoSrc} fill sizes="28px" alt="" className="object-contain" />
+            <Image
+              src={logoSrc}
+              fill
+              sizes="28px"
+              alt=""
+              className="object-contain"
+            />
           </div>
-          <span className="type-title-large text-sidebar-foreground truncate max-[439px]:sr-only">{appName}</span>
+          <span className="type-title-large text-sidebar-foreground truncate max-[439px]:sr-only">
+            {appName}
+          </span>
         </Link>
       ) : (
-        <span className="type-title-large text-sidebar-foreground truncate min-w-0 ml-1">{title}</span>
+        <span className="type-title-large text-sidebar-foreground truncate min-w-0 ml-1">
+          {title}
+        </span>
       )}
 
       <div className="flex-1 min-w-0" />
@@ -184,7 +211,9 @@ export function MobileHeader({
 
         {notificationsSlot}
 
-        {themeToggleSlot ?? <ThemeToggle className="size-12 !text-sidebar-foreground hover:!bg-sidebar-accent" />}
+        {themeToggleSlot ?? (
+          <ThemeToggle className="size-12 !text-sidebar-foreground hover:!bg-sidebar-accent" />
+        )}
 
         {showSettings && (
           <Link
@@ -202,8 +231,16 @@ export function MobileHeader({
             <button
               className="size-12 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden shrink-0 active:scale-95 transition-transform"
               onClick={() => router.push(publicProfileHref)}
-              aria-label={profile?.username ? `Profil public de ${profile.username}` : "Profil public"}
-              title={profile?.username ? `Profil public de ${profile.username}` : "Profil public"}
+              aria-label={
+                profile?.username
+                  ? `Profil public de ${profile.username}`
+                  : "Profil public"
+              }
+              title={
+                profile?.username
+                  ? `Profil public de ${profile.username}`
+                  : "Profil public"
+              }
             >
               {profile?.avatar_url ? (
                 <Image
@@ -261,8 +298,11 @@ export function DesktopTopBar({
   const { toggleSidebar, open } = useSidebar();
   const title = resolvePageTitle(pathname, titleMap);
   const isHome = pathname === "/" || pathname === homeHref;
-  const loginHref = pathname.startsWith("/achillea") ? `/login?redirect=${encodeURIComponent(pathname)}` : "/login";
-  const goBack = () => (window.history.length > 1 ? router.back() : router.push(homeHref));
+  const loginHref = pathname.startsWith("/achillea")
+    ? `/login?redirect=${encodeURIComponent(pathname)}`
+    : "/login";
+  const goBack = () =>
+    window.history.length > 1 ? router.back() : router.push(homeHref);
 
   const publicProfileHref =
     accountHref && accountHref !== "/settings"
@@ -309,7 +349,13 @@ export function DesktopTopBar({
         </Link>
         <Link href={homeHref} className="flex items-center gap-2 group px-2">
           <div className="relative size-7 shrink-0 transition-transform group-hover:scale-105">
-            <Image src={logoSrc} fill sizes="28px" alt={appName} className="object-contain" />
+            <Image
+              src={logoSrc}
+              fill
+              sizes="28px"
+              alt={appName}
+              className="object-contain"
+            />
           </div>
           <span className="font-expressive-title text-xl text-sidebar-foreground transition-all duration-500 group-hover:font-width-expanded">
             {appName}
@@ -352,7 +398,9 @@ export function DesktopTopBar({
 
         {notificationsSlot}
 
-        {themeToggleSlot ?? <ThemeToggle className="!text-sidebar-foreground hover:!bg-sidebar-accent" />}
+        {themeToggleSlot ?? (
+          <ThemeToggle className="!text-sidebar-foreground hover:!bg-sidebar-accent" />
+        )}
 
         {showSettings && (
           <Link
@@ -371,8 +419,16 @@ export function DesktopTopBar({
               type="button"
               className="size-9 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden transition-all duration-200 cursor-pointer hover:ring-2 hover:ring-primary/20 active:scale-95"
               onClick={() => router.push(publicProfileHref)}
-              aria-label={profile?.username ? `Profil public de ${profile.username}` : "Profil public"}
-              title={profile?.username ? `Profil public de ${profile.username}` : "Profil public"}
+              aria-label={
+                profile?.username
+                  ? `Profil public de ${profile.username}`
+                  : "Profil public"
+              }
+              title={
+                profile?.username
+                  ? `Profil public de ${profile.username}`
+                  : "Profil public"
+              }
             >
               {profile?.avatar_url ? (
                 <Image

@@ -48,14 +48,14 @@ export const SOURCE_DISCORD = "discord-sync";
 function texteFacultatif() {
   return z
     .union([z.string(), z.number(), z.null()])
-    .transform(valeur => (valeur === null ? "" : String(valeur).trim()))
-    .transform(valeur => (valeur === "" ? null : valeur));
+    .transform((valeur) => (valeur === null ? "" : String(valeur).trim()))
+    .transform((valeur) => (valeur === "" ? null : valeur));
 }
 
 const baseOrdre = z
   .union([z.string(), z.number(), z.null()])
-  .transform(valeur => (valeur === null ? "" : String(valeur).trim()))
-  .transform(valeur => (valeur === "" ? null : Number(valeur)))
+  .transform((valeur) => (valeur === null ? "" : String(valeur).trim()))
+  .transform((valeur) => (valeur === "" ? null : Number(valeur)))
   .pipe(
     z.union([
       z.null(),
@@ -69,7 +69,15 @@ const baseOrdre = z
   );
 
 const baseIdDiscord = texteFacultatif().pipe(
-  z.union([z.null(), z.string().regex(/^\d{17,20}$/, "L'identifiant Discord doit être composé de 17 à 20 chiffres.")]),
+  z.union([
+    z.null(),
+    z
+      .string()
+      .regex(
+        /^\d{17,20}$/,
+        "L'identifiant Discord doit être composé de 17 à 20 chiffres.",
+      ),
+  ]),
 );
 
 const baseLien = texteFacultatif().pipe(
@@ -79,7 +87,8 @@ const baseLien = texteFacultatif().pipe(
       .url({ message: "Le lien doit être une URL complète (https://…)." })
       .max(500, "Le lien est trop long.")
       .refine(
-        valeur => valeur.startsWith("https://") || valeur.startsWith("http://"),
+        (valeur) =>
+          valeur.startsWith("https://") || valeur.startsWith("http://"),
         "Le lien doit commencer par http:// ou https://",
       ),
   ]),
@@ -92,7 +101,8 @@ const baseImage = texteFacultatif().pipe(
       .string()
       .max(1000, "L'URL de l'image est trop longue.")
       .refine(
-        valeur => valeur.startsWith("https://") || valeur.startsWith("http://"),
+        (valeur) =>
+          valeur.startsWith("https://") || valeur.startsWith("http://"),
         "L'URL de l'image doit commencer par http:// ou https://",
       ),
   ]),
@@ -110,7 +120,9 @@ const baseRole = z
   .min(1, "Le rôle est obligatoire.")
   .max(80, "Le rôle ne doit pas dépasser 80 caractères.");
 
-const baseEquipe = z.enum(IDS_EQUIPES, { message: "Sélectionnez une équipe valide." });
+const baseEquipe = z.enum(IDS_EQUIPES, {
+  message: "Sélectionnez une équipe valide.",
+});
 
 /**
  * Schéma complet d'un membre — utilisé à la création.
@@ -171,7 +183,9 @@ export const schemaMiseAJourMembre = z.object({
   team_id: baseEquipe.optional(),
 });
 
-export const schemaIdentifiant = z.uuid({ message: "Identifiant de membre invalide." });
+export const schemaIdentifiant = z.uuid({
+  message: "Identifiant de membre invalide.",
+});
 
 /**
  * Ajoute `team_name` dérivé de `team_id`.
@@ -180,7 +194,9 @@ export const schemaIdentifiant = z.uuid({ message: "Identifiant de membre invali
  * main de l'appelant a produit 30 lignes à NULL et deux libellés concurrents
  * pour `assoteam`. Toute écriture passe donc par cette dérivation.
  */
-export function avecNomEquipe<T extends { team_id?: string }>(valeurs: T): T & { team_name?: string } {
+export function avecNomEquipe<T extends { team_id?: string }>(
+  valeurs: T,
+): T & { team_name?: string } {
   if (!valeurs.team_id) {
     return valeurs;
   }
@@ -212,7 +228,8 @@ export function validerFichierImage(fichier: {
 }): { ok: true } | { ok: false; message: string } {
   if (!(fichier.type in EXTENSIONS_PAR_TYPE)) {
     return {
-      message: "Format d'image non supporté : utilisez PNG, JPEG, WebP, AVIF ou GIF.",
+      message:
+        "Format d'image non supporté : utilisez PNG, JPEG, WebP, AVIF ou GIF.",
       ok: false,
     };
   }
@@ -233,7 +250,10 @@ export function validerFichierImage(fichier: {
  * injecter des séparateurs dans le chemin. L'extension vient désormais du type
  * MIME, jamais du nom fourni par le navigateur.
  */
-export function construireCheminImage(typeMime: string, graine: string): string {
+export function construireCheminImage(
+  typeMime: string,
+  graine: string,
+): string {
   const extension = EXTENSIONS_PAR_TYPE[typeMime] ?? "bin";
   const jeton = graine.replace(/[^a-z0-9]/gi, "").slice(0, 24) || "image";
   return `${DOSSIER_IMAGES}/${jeton}.${extension}`;
@@ -242,7 +262,9 @@ export function construireCheminImage(typeMime: string, graine: string): string 
 const ORIGINE_PUBLIQUE_PAR_DEFAUT = SITE_URL;
 
 /** Une origine de boucle locale ou privée n'est jamais joignable par un navigateur. */
-function estOrigineJoignable(valeur: string | undefined | null): valeur is string {
+function estOrigineJoignable(
+  valeur: string | undefined | null,
+): valeur is string {
   if (!valeur || !valeur.startsWith("http")) {
     return false;
   }
@@ -252,10 +274,19 @@ function estOrigineJoignable(valeur: string | undefined | null): valeur is strin
   } catch {
     return false;
   }
-  if (hote === "localhost" || hote === "0.0.0.0" || hote === "::1" || hote.endsWith(".local")) {
+  if (
+    hote === "localhost" ||
+    hote === "0.0.0.0" ||
+    hote === "::1" ||
+    hote.endsWith(".local")
+  ) {
     return false;
   }
-  if (hote.startsWith("127.") || hote.startsWith("10.") || hote.startsWith("192.168.")) {
+  if (
+    hote.startsWith("127.") ||
+    hote.startsWith("10.") ||
+    hote.startsWith("192.168.")
+  ) {
     return false;
   }
   return !/^172\.(1[6-9]|2\d|3[01])\./.test(hote);
@@ -270,8 +301,11 @@ function estOrigineJoignable(valeur: string | undefined | null): valeur is strin
  * `images.remotePatterns`, ce qui faisait planter `next/image`. On reconstruit
  * l'URL sur la première origine réellement publique.
  */
-export function construireUrlPubliqueAsset(chemin: string, origines: Array<string | undefined | null> = []): string {
-  const origine = origines.find(candidate => estOrigineJoignable(candidate));
+export function construireUrlPubliqueAsset(
+  chemin: string,
+  origines: Array<string | undefined | null> = [],
+): string {
+  const origine = origines.find((candidate) => estOrigineJoignable(candidate));
   const base = (origine ?? ORIGINE_PUBLIQUE_PAR_DEFAUT).replace(/\/+$/, "");
   const cheminPropre = chemin.replace(/^\/+/, "");
   return `${base}/storage/v1/object/public/${BUCKET_IMAGES}/${cheminPropre}`;
@@ -301,6 +335,9 @@ export function comparerMembres(a: MembreTriable, b: MembreTriable): number {
 }
 
 /** Tri alphabétique, utilisé par le bouton A-Z de l'administration. */
-export function comparerMembresParNom(a: MembreTriable, b: MembreTriable): number {
+export function comparerMembresParNom(
+  a: MembreTriable,
+  b: MembreTriable,
+): number {
   return a.name.localeCompare(b.name, "fr");
 }

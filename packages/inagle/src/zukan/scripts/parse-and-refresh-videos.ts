@@ -53,7 +53,9 @@ async function main() {
   console.log(`Parsed a total of ${uniqueSkills.length} unique skills.`);
 
   fs.writeFileSync(destFile, JSON.stringify(uniqueSkills, null, 2), "utf-8");
-  console.log(`Successfully wrote ${uniqueSkills.length} skills to ${destFile}`);
+  console.log(
+    `Successfully wrote ${uniqueSkills.length} skills to ${destFile}`,
+  );
 }
 
 main().catch(console.error);

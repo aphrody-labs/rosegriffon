@@ -39,7 +39,8 @@ export function CommentForm({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const isReply = Boolean(parentId);
-  const defaultPlaceholder = placeholder ?? (isReply ? "Écrire une réponse…" : "Écrire un commentaire…");
+  const defaultPlaceholder =
+    placeholder ?? (isReply ? "Écrire une réponse…" : "Écrire un commentaire…");
   const remaining = MAX_LENGTH - content.length;
   const isOverLimit = remaining < 0;
   const isEmpty = content.trim().length === 0;
@@ -70,7 +71,11 @@ export function CommentForm({
 
     startTransition(async () => {
       try {
-        const comment = await createComment(articleId, content.trim(), parentId);
+        const comment = await createComment(
+          articleId,
+          content.trim(),
+          parentId,
+        );
         setContent("");
         if (textareaRef.current) {
           textareaRef.current.style.height = "auto";
@@ -78,7 +83,10 @@ export function CommentForm({
         onSubmit(comment);
         toast.success(isReply ? "Réponse publiée" : "Commentaire publié");
       } catch (error) {
-        const message = error instanceof Error ? error.message : "Erreur lors de la publication";
+        const message =
+          error instanceof Error
+            ? error.message
+            : "Erreur lors de la publication";
         toast.error(message);
       }
     });
@@ -91,7 +99,10 @@ export function CommentForm({
           <User className="size-4 text-on-surface-variant/50" />
         </div>
         <p className="text-sm text-on-surface-variant">
-          <Link href="/login" className="text-primary font-medium hover:underline underline-offset-2">
+          <Link
+            href="/login"
+            className="text-primary font-medium hover:underline underline-offset-2"
+          >
             Connectez-vous
           </Link>{" "}
           pour commenter.
@@ -122,7 +133,11 @@ export function CommentForm({
 
       {/* Zone de saisie */}
       <div className="flex-1 space-y-2">
-        {displayName && <p className="text-xs font-medium text-on-surface-variant">{displayName}</p>}
+        {displayName && (
+          <p className="text-xs font-medium text-on-surface-variant">
+            {displayName}
+          </p>
+        )}
 
         <div
           className={cn(

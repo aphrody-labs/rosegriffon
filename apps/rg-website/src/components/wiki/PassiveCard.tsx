@@ -79,7 +79,8 @@ export interface CoordinatorPassiveData {
 // ── Translations ──
 
 export const REQUIREMENT_FR: Record<string, string> = {
-  "After a substitution, for the player who comes on (15s)": "Après remplacement, joueur entrant (15s)",
+  "After a substitution, for the player who comes on (15s)":
+    "Après remplacement, joueur entrant (15s)",
   "For nearby players": "Joueurs à proximité",
   "For players of different elements": "Joueurs d'éléments différents",
   "For players of different positions": "Joueurs de positions différentes",
@@ -90,14 +91,18 @@ export const REQUIREMENT_FR: Record<string, string> = {
   "For the second half": "En seconde mi-temps",
   "Non-Conditional": "Sans condition",
   "On Dash knockback": "Lors d'un plaquage en sprint",
-  "On gaining possession (excluding catches) (15s)": "Récupération du ballon (hors arrêts) (15s)",
-  "On gaining possession(excluding catches) (15s)": "Récupération du ballon (hors arrêts) (15s)",
+  "On gaining possession (excluding catches) (15s)":
+    "Récupération du ballon (hors arrêts) (15s)",
+  "On gaining possession(excluding catches) (15s)":
+    "Récupération du ballon (hors arrêts) (15s)",
   "On the opposition's half of the pitch": "Sur la moitié de terrain adverse",
   "On your half of the pitch": "Sur votre moitié de terrain",
   "Until you incur a foul": "Tant que vous ne commettez pas de faute",
   "Upon being subbed in (15s)": "Après remplacement (15s)",
-  "When a player of a different element is nearby": "Joueur d'élément différent à proximité",
-  "When a player of the same element is nearby": "Joueur du même élément à proximité",
+  "When a player of a different element is nearby":
+    "Joueur d'élément différent à proximité",
+  "When a player of the same element is nearby":
+    "Joueur du même élément à proximité",
   "When at +15% or higher Breach Rate": "Taux de brèche +15% ou plus",
   "When at 100% Tension": "Tension à 100%",
   "When at 15% of higher Breach Rate": "Taux de brèche +15% ou plus",
@@ -107,11 +112,13 @@ export const REQUIREMENT_FR: Record<string, string> = {
   "When at 50% or higher tension": "Tension à 50% ou plus",
   "When losing a Scramble": "En perdant une mêlée",
   "When making a pass": "En faisant une passe",
-  "When opposition passes the ball out during Focus Battle": "L'adversaire passe le ballon lors d'un affrontement",
+  "When opposition passes the ball out during Focus Battle":
+    "L'adversaire passe le ballon lors d'un affrontement",
   "When outside the zone": "Hors de la zone",
   "When the opposition commits a foul": "Quand l'adversaire commet une faute",
   "When tied or behind in goals": "Score à égalité ou en retard",
-  "When winning a Focus or Scramble Battle": "En remportant un affrontement ou une mêlée",
+  "When winning a Focus or Scramble Battle":
+    "En remportant un affrontement ou une mêlée",
 };
 
 export const STAT_FR: Record<string, string> = {
@@ -200,7 +207,8 @@ export function PlayerPassiveCard({ passive }: { passive: PlayerPassiveData }) {
   const statFr = STAT_FR[passive.stat] || passive.stat;
   const playstyleFr = PLAYSTYLE_FR[passive.playstyle] || null;
   const playstyleSprite = PLAYSTYLE_SPRITES[passive.playstyle] || null;
-  const playstyleColor = PLAYSTYLE_COLORS[passive.playstyle] || "text-on-surface-variant";
+  const playstyleColor =
+    PLAYSTYLE_COLORS[passive.playstyle] || "text-on-surface-variant";
 
   const rarities = [
     { key: "legendary", values: passive.legendary },
@@ -215,7 +223,9 @@ export function PlayerPassiveCard({ passive }: { passive: PlayerPassiveData }) {
       {/* Header: stat + playstyle */}
       <div className="flex items-start justify-between gap-2">
         <div>
-          <h3 className="font-bold text-sm text-on-surface leading-tight">{statFr}</h3>
+          <h3 className="font-bold text-sm text-on-surface leading-tight">
+            {statFr}
+          </h3>
           <p className="text-xs text-on-surface-variant mt-0.5">{reqFr}</p>
         </div>
         {playstyleFr && (
@@ -225,7 +235,9 @@ export function PlayerPassiveCard({ passive }: { passive: PlayerPassiveData }) {
               playstyleColor,
             )}
           >
-            {playstyleSprite && <CommonSpriteIcon name={playstyleSprite} scale={0.2} />}
+            {playstyleSprite && (
+              <CommonSpriteIcon name={playstyleSprite} scale={0.2} />
+            )}
             {playstyleFr}
           </span>
         )}
@@ -237,7 +249,10 @@ export function PlayerPassiveCard({ passive }: { passive: PlayerPassiveData }) {
           if (!values.low && !values.high) {
             return null;
           }
-          const display = values.low === values.high ? values.low : `${values.low} ~ ${values.high}`;
+          const display =
+            values.low === values.high
+              ? values.low
+              : `${values.low} ~ ${values.high}`;
           return (
             <div key={key} className="flex items-center gap-2">
               <span
@@ -248,7 +263,9 @@ export function PlayerPassiveCard({ passive }: { passive: PlayerPassiveData }) {
               >
                 {RARITY_LABELS[key]}
               </span>
-              <span className="text-xs font-mono font-bold text-on-surface flex-1">{display}</span>
+              <span className="text-xs font-mono font-bold text-on-surface flex-1">
+                {display}
+              </span>
             </div>
           );
         })}
@@ -266,14 +283,18 @@ export function CustomPassiveCard({ passive }: { passive: CustomPassiveData }) {
   return (
     <div className="rounded-2xl border border-outline-variant/30 bg-surface-container-low hover:bg-surface-container transition-colors p-4 space-y-2">
       <div>
-        <h3 className="font-bold text-sm text-on-surface leading-tight">{statFr}</h3>
+        <h3 className="font-bold text-sm text-on-surface leading-tight">
+          {statFr}
+        </h3>
         <p className="text-xs text-on-surface-variant mt-0.5">{reqFr}</p>
       </div>
       <div className="flex items-center gap-2">
         <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-tertiary/20 text-tertiary">
           Bonus
         </span>
-        <span className="text-sm font-mono font-bold text-on-surface">{passive.buff}</span>
+        <span className="text-sm font-mono font-bold text-on-surface">
+          {passive.buff}
+        </span>
       </div>
     </div>
   );
@@ -287,8 +308,10 @@ const ELEMENT_COLORS: Record<string, string> = {
   // d'un écran à l'autre — le vent y était bleu ici, vert ailleurs.
   fire: "bg-element-feu/15 text-element-feu border-element-feu/40",
   forest: "bg-element-foret/15 text-element-foret border-element-foret/40",
-  mountain: "bg-element-montagne/15 text-element-montagne border-element-montagne/40",
-  neutral: "bg-outline-variant/20 text-on-surface-variant border-outline-variant/40",
+  mountain:
+    "bg-element-montagne/15 text-element-montagne border-element-montagne/40",
+  neutral:
+    "bg-outline-variant/20 text-on-surface-variant border-outline-variant/40",
   wind: "bg-element-vent/15 text-element-vent border-element-vent/40",
 };
 
@@ -321,12 +344,20 @@ function instancePrefix(stringId: string): string {
  * Carte affichant une famille de passifs nie-data (128 familles, ~1-32 instances chacune).
  * Affiche le texte FR résolu de la première instance + toutes les valeurs.
  */
-export function NierPassiveFamilyCard({ family }: { family: NierPassiveFamily }) {
+export function NierPassiveFamilyCard({
+  family,
+}: {
+  family: NierPassiveFamily;
+}) {
   const { instances } = family;
   if (instances.length === 0) return null;
 
   const representative = instances[0];
-  const textFr = representative.description.fr ?? representative.description.en ?? representative.description.ja ?? "";
+  const textFr =
+    representative.description.fr ??
+    representative.description.en ??
+    representative.description.ja ??
+    "";
   const elementName = representative.element_name;
   const elementColor = ELEMENT_COLORS[elementName] ?? ELEMENT_COLORS.neutral;
   const elementLabel = ELEMENT_LABELS[elementName] ?? elementName;
@@ -365,16 +396,20 @@ export function NierPassiveFamilyCard({ family }: { family: NierPassiveFamily })
       <div className="space-y-2">
         {[...byPrefix.entries()].map(([prefix, insts]) => (
           <div key={prefix}>
-            <div className="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant mb-1">{prefix}</div>
+            <div className="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant mb-1">
+              {prefix}
+            </div>
             <div className="flex flex-wrap gap-1">
-              {insts.map(inst => (
+              {insts.map((inst) => (
                 <Link
                   key={inst.string_id}
                   href={`/wiki/passive/${inst.passive_id}`}
                   className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-surface-container-highest text-xs font-mono text-on-surface hover:bg-primary/15 hover:text-primary transition-colors"
                   title={inst.string_id}
                 >
-                  {inst.main_value !== null ? `+${inst.main_value}%` : inst.string_id}
+                  {inst.main_value !== null
+                    ? `+${inst.main_value}%`
+                    : inst.string_id}
                 </Link>
               ))}
             </div>
@@ -383,7 +418,9 @@ export function NierPassiveFamilyCard({ family }: { family: NierPassiveFamily })
       </div>
 
       {/* string_id de référence */}
-      <div className="text-[10px] text-on-surface-variant/50 font-mono truncate">{representative.string_id}</div>
+      <div className="text-[10px] text-on-surface-variant/50 font-mono truncate">
+        {representative.string_id}
+      </div>
     </div>
   );
 }
@@ -395,7 +432,9 @@ export function NierTeamPassiveCard({ passive }: { passive: NierTeamPassive }) {
 
   return (
     <div className="rounded-2xl border border-outline-variant/30 bg-surface-container-low hover:bg-surface-container transition-colors p-4 space-y-2">
-      <p className="text-sm font-semibold text-on-surface leading-snug">{text}</p>
+      <p className="text-sm font-semibold text-on-surface leading-snug">
+        {text}
+      </p>
       <div className="flex items-center gap-2">
         <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-blue-500/15 text-blue-600">
           Équipe
@@ -410,11 +449,16 @@ export function NierTeamPassiveCard({ passive }: { passive: NierTeamPassive }) {
 
 // ── Coordinator Passive Card ──
 
-export function CoordinatorPassiveCard({ passive }: { passive: CoordinatorPassiveData }) {
+export function CoordinatorPassiveCard({
+  passive,
+}: {
+  passive: CoordinatorPassiveData;
+}) {
   const reqFr = REQUIREMENT_FR[passive.requirement] || passive.requirement;
   const statFr = STAT_FR[passive.stat] || passive.stat;
   const playstyleFr = PLAYSTYLE_FR[passive.playstyle] || null;
-  const playstyleColor = PLAYSTYLE_COLORS[passive.playstyle] || "text-on-surface-variant";
+  const playstyleColor =
+    PLAYSTYLE_COLORS[passive.playstyle] || "text-on-surface-variant";
   const playstyleSprite = PLAYSTYLE_SPRITES[passive.playstyle] || null;
 
   const roles = [
@@ -423,7 +467,11 @@ export function CoordinatorPassiveCard({ passive }: { passive: CoordinatorPassiv
       label: "Manager (L)",
       value: passive.managerLegendary,
     },
-    { color: "bg-slate-500/20 text-slate-600", label: "Manager (C)", value: passive.managerCommon },
+    {
+      color: "bg-slate-500/20 text-slate-600",
+      label: "Manager (C)",
+      value: passive.managerCommon,
+    },
     {
       color: "bg-purple-500/20 text-purple-600",
       label: "Coord. (L)",
@@ -434,13 +482,15 @@ export function CoordinatorPassiveCard({ passive }: { passive: CoordinatorPassiv
       label: "Coord. (C)",
       value: passive.coordinatorCommon,
     },
-  ].filter(r => r.value);
+  ].filter((r) => r.value);
 
   return (
     <div className="rounded-2xl border border-outline-variant/30 bg-surface-container-low hover:bg-surface-container transition-colors p-4 space-y-3">
       <div className="flex items-start justify-between gap-2">
         <div>
-          <h3 className="font-bold text-sm text-on-surface leading-tight">{statFr}</h3>
+          <h3 className="font-bold text-sm text-on-surface leading-tight">
+            {statFr}
+          </h3>
           <p className="text-xs text-on-surface-variant mt-0.5">{reqFr}</p>
         </div>
         {playstyleFr && (
@@ -450,7 +500,9 @@ export function CoordinatorPassiveCard({ passive }: { passive: CoordinatorPassiv
               playstyleColor,
             )}
           >
-            {playstyleSprite && <CommonSpriteIcon name={playstyleSprite} scale={0.2} />}
+            {playstyleSprite && (
+              <CommonSpriteIcon name={playstyleSprite} scale={0.2} />
+            )}
             {playstyleFr}
           </span>
         )}
@@ -466,7 +518,9 @@ export function CoordinatorPassiveCard({ passive }: { passive: CoordinatorPassiv
             >
               {label}
             </span>
-            <span className="text-xs font-mono font-bold text-on-surface">{value}</span>
+            <span className="text-xs font-mono font-bold text-on-surface">
+              {value}
+            </span>
           </div>
         ))}
       </div>

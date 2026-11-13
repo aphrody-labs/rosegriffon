@@ -14,12 +14,22 @@ import { toast } from "sonner";
 
 import { listerAvatars, type Sauvegarde } from "@/app/wiki/avatar/actions";
 
-import { enregistrerAvatarJeu, resoudreCode, type ApercuCode } from "../avatar-jeu-actions";
+import {
+  enregistrerAvatarJeu,
+  resoudreCode,
+  type ApercuCode,
+} from "../avatar-jeu-actions";
 import { ApercuAvatar, type ApercuAvatarHandle } from "./ApercuAvatar";
 
 const COTE_INSTANTANE = 512;
 
-export function AvatarCode({ codeActuel, onSaved }: { codeActuel: string | null; onSaved: () => void }) {
+export function AvatarCode({
+  codeActuel,
+  onSaved,
+}: {
+  codeActuel: string | null;
+  onSaved: () => void;
+}) {
   const idCode = useId();
   const idErreur = useId();
   const [saisie, setSaisie] = useState(codeActuel ?? "");
@@ -34,10 +44,10 @@ export function AvatarCode({ codeActuel, onSaved }: { codeActuel: string | null;
   useEffect(() => {
     let annule = false;
     void listerAvatars()
-      .then(r => {
+      .then((r) => {
         if (annule) return;
         if (r.error) setErreurListe(r.error);
-        setSauvegardes((r.avatars ?? []).filter(a => a.code));
+        setSauvegardes((r.avatars ?? []).filter((a) => a.code));
       })
       .catch(() => {
         if (!annule) {
@@ -54,7 +64,9 @@ export function AvatarCode({ codeActuel, onSaved }: { codeActuel: string | null;
     setVerification(true);
     setErreur(null);
     setApercu(null);
-    const r = await resoudreCode(texte).catch(() => ({ error: "Le service de rendu est injoignable." }));
+    const r = await resoudreCode(texte).catch(() => ({
+      error: "Le service de rendu est injoignable.",
+    }));
     setVerification(false);
     if ("error" in r) setErreur(r.error);
     else setApercu(r);
@@ -67,7 +79,10 @@ export function AvatarCode({ codeActuel, onSaved }: { codeActuel: string | null;
       const image = await handle.current.capturer(COTE_INSTANTANE);
       const formulaire = new FormData();
       formulaire.set("code", apercu.code);
-      formulaire.set("image", new File([image], "avatar.png", { type: "image/png" }));
+      formulaire.set(
+        "image",
+        new File([image], "avatar.png", { type: "image/png" }),
+      );
       const r = await enregistrerAvatarJeu(formulaire);
       if (r.error) {
         toast.error(r.error);
@@ -76,7 +91,9 @@ export function AvatarCode({ codeActuel, onSaved }: { codeActuel: string | null;
       toast.success("Avatar du jeu enregistré.");
       onSaved();
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Enregistrement impossible.");
+      toast.error(
+        e instanceof Error ? e.message : "Enregistrement impossible.",
+      );
     } finally {
       setEnvoi(false);
     }
@@ -91,7 +108,7 @@ export function AvatarCode({ codeActuel, onSaved }: { codeActuel: string | null;
         <Textarea
           id={idCode}
           value={saisie}
-          onChange={e => {
+          onChange={(e) => {
             setSaisie(e.target.value);
             setApercu(null);
             setErreur(null);
@@ -111,13 +128,20 @@ export function AvatarCode({ codeActuel, onSaved }: { codeActuel: string | null;
             {erreur}
           </p>
         )}
-        <Button className="h-11" disabled={verification || saisie.trim().length === 0} onClick={() => verifier(saisie)}>
+        <Button
+          className="h-11"
+          disabled={verification || saisie.trim().length === 0}
+          onClick={() => verifier(saisie)}
+        >
           {verification && <Loader2 className="animate-spin" aria-hidden />}
           Vérifier et afficher
         </Button>
       </div>
 
-      <section aria-labelledby={`${idCode}-mes`} className="flex flex-col gap-2">
+      <section
+        aria-labelledby={`${idCode}-mes`}
+        className="flex flex-col gap-2"
+      >
         <h3 id={`${idCode}-mes`} className="text-sm font-medium">
           Mes avatars de l&apos;atelier
         </h3>
@@ -135,7 +159,7 @@ export function AvatarCode({ codeActuel, onSaved }: { codeActuel: string | null;
           </p>
         ) : (
           <ul className="flex flex-col gap-1">
-            {sauvegardes.map(s => (
+            {sauvegardes.map((s) => (
               <li key={s.id}>
                 <button
                   type="button"
@@ -146,7 +170,9 @@ export function AvatarCode({ codeActuel, onSaved }: { codeActuel: string | null;
                   }}
                 >
                   <span className="truncate">{s.nom}</span>
-                  <span className="shrink-0 text-xs text-muted-foreground">Afficher</span>
+                  <span className="shrink-0 text-xs text-muted-foreground">
+                    Afficher
+                  </span>
                 </button>
               </li>
             ))}
@@ -155,16 +181,23 @@ export function AvatarCode({ codeActuel, onSaved }: { codeActuel: string | null;
       </section>
 
       {apercu && (
-        <section aria-label="Aperçu de l'avatar" className="flex flex-col gap-3">
+        <section
+          aria-label="Aperçu de l'avatar"
+          className="flex flex-col gap-3"
+        >
           <ApercuAvatar url={apercu.apercu} handleRef={handle} />
           {!apercu.complet && (
             <p className="text-xs text-muted-foreground">
-              Ce code ne porte que les pièces et la morphologie ; couleurs et curseurs viennent d&apos;un avatar
-              enregistré dans l&apos;atelier.
+              Ce code ne porte que les pièces et la morphologie ; couleurs et
+              curseurs viennent d&apos;un avatar enregistré dans l&apos;atelier.
             </p>
           )}
           <div className="sticky bottom-0 bg-background/95 py-2 backdrop-blur">
-            <Button className="h-11 w-full" disabled={envoi} onClick={enregistrer}>
+            <Button
+              className="h-11 w-full"
+              disabled={envoi}
+              onClick={enregistrer}
+            >
               {envoi && <Loader2 className="animate-spin" aria-hidden />}
               Utiliser comme avatar
             </Button>

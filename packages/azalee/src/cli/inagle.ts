@@ -22,7 +22,11 @@ export function getAuraHashSet(svc: InagleService): Set<string> {
   return new Set(
     svc.skills
       .auraAll()
-      .flatMap((a: any) => [a.auraId, a.auraIdStr, a.id].filter((value): value is string => typeof value === "string")),
+      .flatMap((a: any) =>
+        [a.auraId, a.auraIdStr, a.id].filter(
+          (value): value is string => typeof value === "string",
+        ),
+      ),
   );
 }
 
@@ -68,16 +72,22 @@ interface SkillLike {
 }
 
 /** Résout un identifiant dans les trois familles, dans l'ordre historique. */
-function lookupSkill(svc: InagleService, skillId: string): SkillLike | undefined {
-  return (svc.skills.get(skillId) || svc.skills.passiveGet(skillId) || svc.skills.auraGet(skillId)) as
-    SkillLike | undefined;
+function lookupSkill(
+  svc: InagleService,
+  skillId: string,
+): SkillLike | undefined {
+  return (svc.skills.get(skillId) ||
+    svc.skills.passiveGet(skillId) ||
+    svc.skills.auraGet(skillId)) as SkillLike | undefined;
 }
 
 /** Nom affichable d'une technique à partir de son identifiant. */
 export function getSkillName(svc: InagleService, skillId: string): string {
   if (!skillId) return "N/A";
   const s = lookupSkill(svc, skillId);
-  return s ? s.displayName || s.name_FR || s.name_EN || s.name_JA || skillId : skillId;
+  return s
+    ? s.displayName || s.name_FR || s.name_EN || s.name_JA || skillId
+    : skillId;
 }
 
 /** Détail d'une technique (nom, puissance, coût, élément, catégorie). */
@@ -90,7 +100,10 @@ export interface SkillDetails {
   category?: string;
 }
 
-export function getSkillDetails(svc: InagleService, skillId: string): SkillDetails {
+export function getSkillDetails(
+  svc: InagleService,
+  skillId: string,
+): SkillDetails {
   const s = lookupSkill(svc, skillId);
   if (!s) return { id: skillId, name: skillId };
   return {
@@ -113,7 +126,10 @@ function tableToKind(table: string): string {
  * des projections SQL d'inagle. Renvoie `[]` si le miroir est
  * absent — une aura manquante ne doit jamais faire échouer une fiche.
  */
-export function getAurasForChara(charaId: string, charaParamId: string): ResolvedAura[] {
+export function getAurasForChara(
+  charaId: string,
+  charaParamId: string,
+): ResolvedAura[] {
   const dbPath = getSqlitePath();
   if (!dbPath) return [];
 
@@ -130,7 +146,9 @@ export function getAurasForChara(charaId: string, charaParamId: string): Resolve
     for (const row of rows) {
       if (row.data) {
         try {
-          const dataObj = JSON.parse(row.data) as { auras?: Array<{ skillId?: string }> };
+          const dataObj = JSON.parse(row.data) as {
+            auras?: Array<{ skillId?: string }>;
+          };
           const dbAuras = dataObj.auras || [];
           for (const a of dbAuras) {
             if (a.skillId) hexIds.add(a.skillId.toLowerCase());
@@ -141,16 +159,25 @@ export function getAurasForChara(charaId: string, charaParamId: string): Resolve
 
     // 2. Projections SQL des auras : le payload JSONB/SQLite est interrogé,
     // mais aucun fichier JSON n'est utilisé comme source runtime.
-    for (const table of ["inagle_auras", "inagle_keshins", "inagle_souls", "inagle_miximax"] as const) {
+    for (const table of [
+      "inagle_auras",
+      "inagle_keshins",
+      "inagle_souls",
+      "inagle_miximax",
+    ] as const) {
       const auraRows = db
-        .query(`SELECT id, data FROM ${table} WHERE lower(json_extract(data, '$.ownerCharaParamId')) IN (?, ?)`)
+        .query(
+          `SELECT id, data FROM ${table} WHERE lower(json_extract(data, '$.ownerCharaParamId')) IN (?, ?)`,
+        )
         .all(charaId.toLowerCase(), charaParamId.toLowerCase()) as Array<{
         id: string;
         data?: string | null;
       }>;
       for (const row of auraRows) {
         try {
-          const payload = row.data ? (JSON.parse(row.data) as Record<string, unknown>) : {};
+          const payload = row.data
+            ? (JSON.parse(row.data) as Record<string, unknown>)
+            : {};
           const skillId = payload.skillId ?? payload.id ?? row.id;
           if (skillId) hexIds.add(String(skillId).toLowerCase());
         } catch {
@@ -171,7 +198,9 @@ export function getAurasForChara(charaId: string, charaParamId: string): Resolve
 
         const placeHolders = possibleIds.map(() => "?").join(",");
         const auraRows = db
-          .query(`SELECT id, name_fr, name_en, name_ja FROM ${t.table} WHERE id IN (${placeHolders})`)
+          .query(
+            `SELECT id, name_fr, name_en, name_ja FROM ${t.table} WHERE id IN (${placeHolders})`,
+          )
           .all(...possibleIds) as AuraRow[];
 
         if (auraRows && auraRows.length > 0) {
@@ -210,7 +239,9 @@ export function getAuraMetadataFromDb(auraId: string): ResolvedAura | null {
       const placeHolders = possibleIds.map(() => "?").join(",");
 
       const auraRows = db
-        .query(`SELECT id, name_fr, name_en, name_ja FROM ${t.table} WHERE id IN (${placeHolders})`)
+        .query(
+          `SELECT id, name_fr, name_en, name_ja FROM ${t.table} WHERE id IN (${placeHolders})`,
+        )
         .all(...possibleIds) as AuraRow[];
 
       if (auraRows && auraRows.length > 0) {

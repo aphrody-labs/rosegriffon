@@ -116,7 +116,13 @@ export function Sprite({
 }) {
   return (
     // eslint-disable-next-line @next/next/no-img-element
-    <img src={`${cdn}${src}`} alt="" aria-hidden className={className} style={style} />
+    <img
+      src={`${cdn}${src}`}
+      alt=""
+      aria-hidden
+      className={className}
+      style={style}
+    />
   );
 }
 
@@ -147,8 +153,14 @@ export function TxtGaiji({
     ${className ?? ""}
   `}
     >
-      {l.gaiji.map(g => (
-        <Sprite key={g} cdn={cdn} src={`${FONT}/${g}.png`} style={{ height: h }} className="w-auto" />
+      {l.gaiji.map((g) => (
+        <Sprite
+          key={g}
+          cdn={cdn}
+          src={`${FONT}/${g}.png`}
+          style={{ height: h }}
+          className="w-auto"
+        />
       ))}
       <Txt t={l.libelle} cdn={cdn} couleur={couleur} h={h} />
     </span>
@@ -156,11 +168,22 @@ export function TxtGaiji({
 }
 
 /** Titre de section du panneau : le filet bleu vertical du jeu, puis le libellé. */
-export function Titre({ cdn, t, gaiji }: { cdn: string; t: string; gaiji?: string[] }) {
+export function Titre({
+  cdn,
+  t,
+  gaiji,
+}: {
+  cdn: string;
+  t: string;
+  gaiji?: string[];
+}) {
   if (!t) return null;
   return (
     <span className="mb-[0.5%] mt-[1.2%] flex shrink-0 items-center gap-[0.6vw]">
-      <span className="inline-block shrink-0" style={{ width: "0.22vw", height: "1.2vw", background: `#${BLEU}` }} />
+      <span
+        className="inline-block shrink-0"
+        style={{ width: "0.22vw", height: "1.2vw", background: `#${BLEU}` }}
+      />
       <TxtGaiji l={{ libelle: t, gaiji: gaiji ?? [] }} cdn={cdn} h="1.15vw" />
     </span>
   );
@@ -196,10 +219,22 @@ export function Vignette({
     >
       <Sprite
         cdn={cdn}
-        src={choisie ? `${A01}/avatar01_17/preset_list01_ol.png` : `${A01}/avatar01_17/preset_list01.png`}
+        src={
+          choisie
+            ? `${A01}/avatar01_17/preset_list01_ol.png`
+            : `${A01}/avatar01_17/preset_list01.png`
+        }
         className="absolute inset-0 size-full"
       />
-      {numero && <Txt t={numero} cdn={cdn} couleur={GRIS} h="26%" className="absolute left-[8%] top-[-16%]" />}
+      {numero && (
+        <Txt
+          t={numero}
+          cdn={cdn}
+          couleur={GRIS}
+          h="26%"
+          className="absolute left-[8%] top-[-16%]"
+        />
+      )}
       {image ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img
@@ -212,7 +247,11 @@ export function Vignette({
           className="relative size-[86%] object-contain"
         />
       ) : (
-        <Sprite cdn={cdn} src={`${A01}/avatar01_17/icon_none02.png`} className="relative w-[52%]" />
+        <Sprite
+          cdn={cdn}
+          src={`${A01}/avatar01_17/icon_none02.png`}
+          className="relative w-[52%]"
+        />
       )}
       {choisie && (
         <>
@@ -221,7 +260,10 @@ export function Vignette({
             src={`${A01}/avatar01_17/edit_check01.png`}
             className="absolute right-[2%] top-[-14%] w-[30%]"
           />
-          <Curseur cdn={cdn} className="absolute left-[-22%] top-[26%] h-[46%]" />
+          <Curseur
+            cdn={cdn}
+            className="absolute left-[-22%] top-[26%] h-[46%]"
+          />
         </>
       )}
     </button>
@@ -229,7 +271,13 @@ export function Vignette({
 }
 
 /** Le curseur vert du jeu, qui marque l'élément sous la main du joueur. */
-export function Curseur({ cdn, className }: { cdn: string; className?: string }) {
+export function Curseur({
+  cdn,
+  className,
+}: {
+  cdn: string;
+  className?: string;
+}) {
   return (
     <Sprite
       cdn={cdn}
@@ -281,18 +329,30 @@ export function Barre({
   return (
     <div className="flex w-full items-center gap-[3%]">
       <div className="relative flex h-[2.1vw] grow items-center">
-        <Sprite cdn={cdn} src={`${A01}/avatar01_13/edit_bar_base02_on.png`} className="absolute inset-0 size-full" />
+        <Sprite
+          cdn={cdn}
+          src={`${A01}/avatar01_13/edit_bar_base02_on.png`}
+          className="absolute inset-0 size-full"
+        />
         <button
           type="button"
           aria-label="Diminuer"
           onClick={() => onChange(Math.max(0, valeur - 1))}
           className="relative ml-[3%] h-[62%]"
         >
-          <Sprite cdn={cdn} src={`${A01}/avatar01_13/edit_bar_icon${bouts[0]}_on.png`} className="h-full w-auto" />
+          <Sprite
+            cdn={cdn}
+            src={`${A01}/avatar01_13/edit_bar_icon${bouts[0]}_on.png`}
+            className="h-full w-auto"
+          />
         </button>
         <div className="relative mx-[3%] h-[26%] grow">
           {degrade ? (
-            <Sprite cdn={cdn} src={`${A01}/avatar01_13/edit_bar_color01.png`} className="absolute inset-0 size-full" />
+            <Sprite
+              cdn={cdn}
+              src={`${A01}/avatar01_13/edit_bar_color01.png`}
+              className="absolute inset-0 size-full"
+            />
           ) : (
             <>
               <Sprite
@@ -301,7 +361,12 @@ export function Barre({
                 className="absolute inset-0 size-full"
                 style={pisteFond ? { opacity: 0 } : undefined}
               />
-              {pisteFond && <span className="absolute inset-0 rounded-full" style={{ background: pisteFond }} />}
+              {pisteFond && (
+                <span
+                  className="absolute inset-0 rounded-full"
+                  style={{ background: pisteFond }}
+                />
+              )}
               <Sprite
                 cdn={cdn}
                 src={`${A01}/avatar01_13/edit_bar_gauge01_on.png`}
@@ -323,7 +388,7 @@ export function Barre({
             min={0}
             max={max}
             value={valeur}
-            onChange={e => onChange(Number(e.target.value))}
+            onChange={(e) => onChange(Number(e.target.value))}
             className="absolute inset-0 size-full cursor-pointer opacity-0"
             aria-label="Valeur"
           />
@@ -334,7 +399,11 @@ export function Barre({
           onClick={() => onChange(Math.min(max, valeur + 1))}
           className="relative mr-[3%] h-[62%]"
         >
-          <Sprite cdn={cdn} src={`${A01}/avatar01_13/edit_bar_icon${bouts[1]}_on.png`} className="h-full w-auto" />
+          <Sprite
+            cdn={cdn}
+            src={`${A01}/avatar01_13/edit_bar_icon${bouts[1]}_on.png`}
+            className="h-full w-auto"
+          />
         </button>
       </div>
       <Txt t={String(valeur)} cdn={cdn} h="1.5vw" className="w-[8%] shrink-0" />
@@ -367,27 +436,64 @@ export function Ligne({
   teinte?: string | null;
 }) {
   return (
-    <button type="button" onClick={onClick} className="relative mb-[1.5%] flex h-[3.1vw] w-full shrink-0 items-center">
+    <button
+      type="button"
+      onClick={onClick}
+      className="relative mb-[1.5%] flex h-[3.1vw] w-full shrink-0 items-center"
+    >
       <Sprite
         cdn={cdn}
-        src={choisie ? `${A01}/avatar01_26/type_icon_list01_l_on.png` : `${A01}/avatar01_21/type_icon_list02_l.png`}
+        src={
+          choisie
+            ? `${A01}/avatar01_26/type_icon_list01_l_on.png`
+            : `${A01}/avatar01_21/type_icon_list02_l.png`
+        }
         className="absolute inset-0 size-full"
       />
-      {icone && <Sprite cdn={cdn} src={icone} className="relative ml-[6%] h-[56%] w-auto" />}
+      {icone && (
+        <Sprite
+          cdn={cdn}
+          src={icone}
+          className="relative ml-[6%] h-[56%] w-auto"
+        />
+      )}
       <span className="relative ml-auto mr-[8%] flex h-[76%] items-center">
-        {numero && <Txt t={numero} cdn={cdn} couleur={GRIS} h="34%" className="mr-[-1.4vw] mt-[-1vw]" />}
+        {numero && (
+          <Txt
+            t={numero}
+            cdn={cdn}
+            couleur={GRIS}
+            h="34%"
+            className="mr-[-1.4vw] mt-[-1vw]"
+          />
+        )}
         {teinte !== undefined ? (
           <span className="relative flex size-[2.2vw] items-center justify-center">
-            <Sprite cdn={cdn} src={`${A01}/avatar01_21/icon_item_color01.png`} className="absolute inset-0 size-full" />
+            <Sprite
+              cdn={cdn}
+              src={`${A01}/avatar01_21/icon_item_color01.png`}
+              className="absolute inset-0 size-full"
+            />
             {teinte ? (
-              <span className="relative size-[62%] rounded-[0.15vw]" style={{ background: teinte }} />
+              <span
+                className="relative size-[62%] rounded-[0.15vw]"
+                style={{ background: teinte }}
+              />
             ) : (
-              <Sprite cdn={cdn} src={`${A01}/avatar01_17/icon_none02.png`} className="relative w-[62%]" />
+              <Sprite
+                cdn={cdn}
+                src={`${A01}/avatar01_17/icon_none02.png`}
+                className="relative w-[62%]"
+              />
             )}
           </span>
         ) : (
           <span className="relative flex size-[2.4vw] items-center justify-center">
-            <Sprite cdn={cdn} src={`${A01}/avatar01_17/preset_list01.png`} className="absolute inset-0 size-full" />
+            <Sprite
+              cdn={cdn}
+              src={`${A01}/avatar01_17/preset_list01.png`}
+              className="absolute inset-0 size-full"
+            />
             {image ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
@@ -400,7 +506,11 @@ export function Ligne({
                 className="relative size-[84%] object-contain"
               />
             ) : (
-              <Sprite cdn={cdn} src={`${A01}/avatar01_17/icon_none02.png`} className="relative w-[56%]" />
+              <Sprite
+                cdn={cdn}
+                src={`${A01}/avatar01_17/icon_none02.png`}
+                className="relative w-[56%]"
+              />
             )}
           </span>
         )}
@@ -414,11 +524,23 @@ export function Ligne({
  * précédée de son pictogramme : `gaiji_system01` pour l'information, `gaiji_system02` (triangle
  * rouge) pour l'avertissement.
  */
-export function Note({ cdn, texte, alerte = false }: { cdn: string; texte: string; alerte?: boolean }) {
+export function Note({
+  cdn,
+  texte,
+  alerte = false,
+}: {
+  cdn: string;
+  texte: string;
+  alerte?: boolean;
+}) {
   if (!texte) return null;
   return (
     <div className="relative mt-auto flex shrink-0 items-center gap-[3%] px-[4%] py-[2.5%]">
-      <Sprite cdn={cdn} src={`${A01}/avatar01_45/memo_base01.png`} className="absolute inset-0 size-full" />
+      <Sprite
+        cdn={cdn}
+        src={`${A01}/avatar01_45/memo_base01.png`}
+        className="absolute inset-0 size-full"
+      />
       <Sprite
         cdn={cdn}
         src={`${FONT}/${alerte ? "gaiji_system02" : "gaiji_system01"}.png`}
@@ -426,7 +548,13 @@ export function Note({ cdn, texte, alerte = false }: { cdn: string; texte: strin
       />
       <span className="relative flex grow flex-col items-center gap-[0.15vw]">
         {texte.split("\n").map((ligne, i) => (
-          <Txt key={i} t={ligne} cdn={cdn} couleur={alerte ? ROUGE : BLEU} h="1.05vw" />
+          <Txt
+            key={i}
+            t={ligne}
+            cdn={cdn}
+            couleur={alerte ? ROUGE : BLEU}
+            h="1.05vw"
+          />
         ))}
       </span>
     </div>
@@ -454,7 +582,11 @@ export function Pagination({
         onClick={() => setPage((page - 1 + pages) % pages)}
         className="absolute left-[-1%] top-1/2 -translate-y-1/2"
       >
-        <Sprite cdn={cdn} src={`${A01}/avatar01_11/arrow01_l.png`} className="h-[1.7vw] w-auto" />
+        <Sprite
+          cdn={cdn}
+          src={`${A01}/avatar01_11/arrow01_l.png`}
+          className="h-[1.7vw] w-auto"
+        />
       </button>
       <button
         type="button"
@@ -462,7 +594,11 @@ export function Pagination({
         onClick={() => setPage((page + 1) % pages)}
         className="absolute right-[-1%] top-1/2 -translate-y-1/2"
       >
-        <Sprite cdn={cdn} src={`${A01}/avatar01_11/arrow01_r.png`} className="h-[1.7vw] w-auto" />
+        <Sprite
+          cdn={cdn}
+          src={`${A01}/avatar01_11/arrow01_r.png`}
+          className="h-[1.7vw] w-auto"
+        />
       </button>
     </>
   );

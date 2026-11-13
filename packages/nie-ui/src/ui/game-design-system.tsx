@@ -144,7 +144,10 @@ export function GameImmersiveBackground({
 
   return (
     <div
-      className={cn("relative w-full overflow-hidden text-slate-100", className)}
+      className={cn(
+        "relative w-full overflow-hidden text-slate-100",
+        className,
+      )}
       style={{ background: backgrounds[variant] }}
     >
       {/* Stadium Floodlight Accents */}

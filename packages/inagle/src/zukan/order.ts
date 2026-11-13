@@ -51,17 +51,29 @@ export interface CrawlZukanOrderOptions {
   log?: (msg: string) => void;
 }
 
-async function safeGoto(page: WebCdpPage, url: string, timeout = 30000): Promise<void> {
+async function safeGoto(
+  page: WebCdpPage,
+  url: string,
+  timeout = 30000,
+): Promise<void> {
   let timer: ReturnType<typeof setTimeout> | undefined;
   try {
     const response = await Promise.race([
       page.goto(url),
       new Promise<never>((_, reject) => {
-        timer = setTimeout(() => reject(new Error(`Navigation timeout (${timeout}ms): ${url}`)), timeout);
+        timer = setTimeout(
+          () => reject(new Error(`Navigation timeout (${timeout}ms): ${url}`)),
+          timeout,
+        );
       }),
     ]);
-    if (response.ok === false || (typeof response.status === "number" && response.status >= 400)) {
-      throw new Error(`Navigation failed: HTTP ${response.status ?? "unknown"} (${url})`);
+    if (
+      response.ok === false ||
+      (typeof response.status === "number" && response.status >= 400)
+    ) {
+      throw new Error(
+        `Navigation failed: HTTP ${response.status ?? "unknown"} (${url})`,
+      );
     }
   } finally {
     clearTimeout(timer);
@@ -76,10 +88,17 @@ async function safeGoto(page: WebCdpPage, url: string, timeout = 30000): Promise
  * page bound. Partial results are never returned after a page error.
  * Database/Redis writes remain owned by the caller.
  */
-export async function crawlZukanOrderPages(opts: CrawlZukanOrderOptions = {}): Promise<ZukanOrderCharacter[]> {
+export async function crawlZukanOrderPages(
+  opts: CrawlZukanOrderOptions = {},
+): Promise<ZukanOrderCharacter[]> {
   const perPage = opts.perPage ?? ZUKAN_ORDER_PER_PAGE;
   const maxPages = opts.maxPages ?? ZUKAN_ORDER_MAX_PAGES;
-  if (!Number.isSafeInteger(perPage) || perPage < 1 || !Number.isSafeInteger(maxPages) || maxPages < 1) {
+  if (
+    !Number.isSafeInteger(perPage) ||
+    perPage < 1 ||
+    !Number.isSafeInteger(maxPages) ||
+    maxPages < 1
+  ) {
     throw new Error("perPage and maxPages must be positive safe integers");
   }
   const log = opts.log ?? ((m: string) => console.log(m));
@@ -101,9 +120,11 @@ export async function crawlZukanOrderPages(opts: CrawlZukanOrderOptions = {}): P
         try {
           let retries = 24; // 24 * 250ms = 6s max
           while (retries > 0) {
-            const count = await page.evaluate<number>('document.querySelectorAll("ul.charaListBox > li").length');
+            const count = await page.evaluate<number>(
+              'document.querySelectorAll("ul.charaListBox > li").length',
+            );
             if (count > 2) break;
-            await new Promise(r => setTimeout(r, 250));
+            await new Promise((r) => setTimeout(r, 250));
             retries--;
           }
         } catch (error) {
@@ -115,7 +136,8 @@ export async function crawlZukanOrderPages(opts: CrawlZukanOrderOptions = {}): P
 
         const listItems = $("ul.charaListBox > li");
         if (listItems.length === 0) {
-          if (pageNum === 1) throw new Error("The first character page is empty");
+          if (pageNum === 1)
+            throw new Error("The first character page is empty");
           complete = true;
           log(`[Crawl Zukan] Page ${pageNum} vide. Fin du crawl.`);
           break;
@@ -123,21 +145,36 @@ export async function crawlZukanOrderPages(opts: CrawlZukanOrderOptions = {}): P
 
         listItems.each((_i, el) => {
           const img = $(el).find("img[src*='cloudfront']").first();
-          const source = $(el).find("source[srcset*='cloudfront.net/1/']").first();
+          const source = $(el)
+            .find("source[srcset*='cloudfront.net/1/']")
+            .first();
           const src = img.attr("src") || source.attr("srcset") || "";
           const hashMatch = src.match(ZUKAN_HASH_RE);
           const zukanHash = (hashMatch && hashMatch[1]) || null;
 
           const name = img.attr("alt")?.trim() || "?";
-          const position = $(el).find("dl:has(dt:contains('Position')) dd p").text().trim() || "?";
-          const element = $(el).find("dl:has(dt:contains('Element')) dd p").text().trim() || "?";
+          const position =
+            $(el).find("dl:has(dt:contains('Position')) dd p").text().trim() ||
+            "?";
+          const element =
+            $(el).find("dl:has(dt:contains('Element')) dd p").text().trim() ||
+            "?";
           const game = $(el).find("dl.appearedWorks dd").text().trim() || "?";
           // `.basic` porte Age Group / School Year / Gender / Character Role — déjà présents
           // dans la même page (SSR, pas besoin d'un crawl séparé de chara_list/chara_param
           // en détail). Seuls Age Group/School Year/le surnom manquaient à l'appel.
-          const nickname = $(el).find(".lBox .name .nickname").text().trim() || null;
-          const ageGroup = $(el).find(".basic dl:has(dt:contains('Age Group')) dd").text().trim() || null;
-          const schoolYear = $(el).find(".basic dl:has(dt:contains('School Year')) dd").text().trim() || null;
+          const nickname =
+            $(el).find(".lBox .name .nickname").text().trim() || null;
+          const ageGroup =
+            $(el)
+              .find(".basic dl:has(dt:contains('Age Group')) dd")
+              .text()
+              .trim() || null;
+          const schoolYear =
+            $(el)
+              .find(".basic dl:has(dt:contains('School Year')) dd")
+              .text()
+              .trim() || null;
 
           allCharacters.push({
             id: zukanHash || `chara-${globalIndex}`,
@@ -154,22 +191,30 @@ export async function crawlZukanOrderPages(opts: CrawlZukanOrderOptions = {}): P
           globalIndex++;
         });
 
-        log(`[Crawl Zukan] Page ${pageNum} : ${listItems.length} personnages trouvés.`);
+        log(
+          `[Crawl Zukan] Page ${pageNum} : ${listItems.length} personnages trouvés.`,
+        );
         if (listItems.length < perPage) {
           complete = true;
           break;
         }
       } catch (err) {
-        throw new Error(`Zukan order crawl failed on page ${pageNum}; partial results were discarded`, {
-          cause: err,
-        });
+        throw new Error(
+          `Zukan order crawl failed on page ${pageNum}; partial results were discarded`,
+          {
+            cause: err,
+          },
+        );
       }
     }
   } finally {
     await page.close();
   }
 
-  if (!complete) throw new Error(`Zukan order crawl reached maxPages=${maxPages} before completion`);
+  if (!complete)
+    throw new Error(
+      `Zukan order crawl reached maxPages=${maxPages} before completion`,
+    );
   return allCharacters;
 }
 
@@ -177,7 +222,9 @@ export async function crawlZukanOrderPages(opts: CrawlZukanOrderOptions = {}): P
  * Construit la map `zukanHash → order` à partir d'une liste de personnages
  * ordonnés. Pur (aucune dépendance) — réutilisable par les crawlers statiques.
  */
-export function buildOrderMap(characters: { zukanHash: string | null; order: number }[]): Record<string, number> {
+export function buildOrderMap(
+  characters: { zukanHash: string | null; order: number }[],
+): Record<string, number> {
   const orderMap: Record<string, number> = {};
   for (const char of characters) {
     if (char.zukanHash) orderMap[char.zukanHash] = char.order;

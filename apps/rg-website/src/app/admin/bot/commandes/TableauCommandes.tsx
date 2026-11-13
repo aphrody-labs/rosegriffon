@@ -15,7 +15,11 @@ import {
   TableHeader,
   TableRow,
 } from "@rosegriffon/ui";
-import { PROFILS_BOT, type CommandeBot, type NomProfilBot } from "@rosegriffon/types/bot";
+import {
+  PROFILS_BOT,
+  type CommandeBot,
+  type NomProfilBot,
+} from "@rosegriffon/types/bot";
 
 /**
  * Le catalogue des slash commands, filtrable.
@@ -29,11 +33,13 @@ import { PROFILS_BOT, type CommandeBot, type NomProfilBot } from "@rosegriffon/t
 export function TableauCommandes({ commandes }: { commandes: CommandeBot[] }) {
   const [recherche, setRecherche] = useState("");
   const [profil, setProfil] = useState<NomProfilBot | "tous">("tous");
-  const [portee, setPortee] = useState<"toutes" | "publiques" | "reservees">("toutes");
+  const [portee, setPortee] = useState<"toutes" | "publiques" | "reservees">(
+    "toutes",
+  );
 
   const filtrees = useMemo(() => {
     const aiguille = recherche.trim().toLowerCase();
-    return commandes.filter(commande => {
+    return commandes.filter((commande) => {
       if (profil !== "tous" && commande.profil !== profil) {
         return false;
       }
@@ -46,7 +52,10 @@ export function TableauCommandes({ commandes }: { commandes: CommandeBot[] }) {
       if (aiguille === "") {
         return true;
       }
-      return commande.chemin.toLowerCase().includes(aiguille) || commande.description.toLowerCase().includes(aiguille);
+      return (
+        commande.chemin.toLowerCase().includes(aiguille) ||
+        commande.description.toLowerCase().includes(aiguille)
+      );
     });
   }, [commandes, recherche, profil, portee]);
 
@@ -61,7 +70,9 @@ export function TableauCommandes({ commandes }: { commandes: CommandeBot[] }) {
         groupes.set(commande.racine, [commande]);
       }
     }
-    return [...groupes.entries()].sort((a, b) => a[0].localeCompare(b[0], "fr"));
+    return [...groupes.entries()].sort((a, b) =>
+      a[0].localeCompare(b[0], "fr"),
+    );
   }, [filtrees]);
 
   return (
@@ -76,32 +87,45 @@ export function TableauCommandes({ commandes }: { commandes: CommandeBot[] }) {
             className="pl-9"
             placeholder="Chercher une commande ou une description…"
             value={recherche}
-            onChange={evenement => setRecherche(evenement.target.value)}
+            onChange={(evenement) => setRecherche(evenement.target.value)}
             aria-label="Filtrer les commandes"
           />
         </div>
         <NativeSelect
           value={profil}
-          onChange={evenement => setProfil(evenement.target.value as NomProfilBot | "tous")}
+          onChange={(evenement) =>
+            setProfil(evenement.target.value as NomProfilBot | "tous")
+          }
           aria-label="Filtrer par profil"
         >
           <NativeSelectOption value="tous">Les deux bots</NativeSelectOption>
-          <NativeSelectOption value="rg">{PROFILS_BOT.rg.titre}</NativeSelectOption>
-          <NativeSelectOption value="azalee">{PROFILS_BOT.azalee.titre}</NativeSelectOption>
+          <NativeSelectOption value="rg">
+            {PROFILS_BOT.rg.titre}
+          </NativeSelectOption>
+          <NativeSelectOption value="azalee">
+            {PROFILS_BOT.azalee.titre}
+          </NativeSelectOption>
         </NativeSelect>
         <NativeSelect
           value={portee}
-          onChange={evenement => setPortee(evenement.target.value as "toutes" | "publiques" | "reservees")}
+          onChange={(evenement) =>
+            setPortee(
+              evenement.target.value as "toutes" | "publiques" | "reservees",
+            )
+          }
           aria-label="Filtrer par portée"
         >
           <NativeSelectOption value="toutes">Toutes portées</NativeSelectOption>
           <NativeSelectOption value="publiques">Publiques</NativeSelectOption>
-          <NativeSelectOption value="reservees">Réservées au staff</NativeSelectOption>
+          <NativeSelectOption value="reservees">
+            Réservées au staff
+          </NativeSelectOption>
         </NativeSelect>
       </div>
 
       <p className="text-sm text-muted-foreground">
-        {filtrees.length} commande{filtrees.length > 1 ? "s" : ""} sur {commandes.length}.
+        {filtrees.length} commande{filtrees.length > 1 ? "s" : ""} sur{" "}
+        {commandes.length}.
       </p>
 
       <div className="space-y-6">
@@ -127,16 +151,22 @@ export function TableauCommandes({ commandes }: { commandes: CommandeBot[] }) {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {liste.map(commande => (
+                  {liste.map((commande) => (
                     <TableRow key={`${commande.profil}:${commande.chemin}`}>
-                      <TableCell className="font-mono text-xs">/{commande.chemin}</TableCell>
-                      <TableCell className="text-sm">{commande.description}</TableCell>
+                      <TableCell className="font-mono text-xs">
+                        /{commande.chemin}
+                      </TableCell>
+                      <TableCell className="text-sm">
+                        {commande.description}
+                      </TableCell>
                       <TableCell>
                         {commande.options.length === 0 ? (
-                          <span className="text-xs text-muted-foreground">—</span>
+                          <span className="text-xs text-muted-foreground">
+                            —
+                          </span>
                         ) : (
                           <div className="flex flex-wrap gap-1">
-                            {commande.options.map(option => (
+                            {commande.options.map((option) => (
                               <Badge
                                 key={option.nom}
                                 variant={option.requise ? "default" : "outline"}
@@ -156,7 +186,10 @@ export function TableauCommandes({ commandes }: { commandes: CommandeBot[] }) {
                         >
                           <span
                             className="size-2 rounded-full"
-                            style={{ backgroundColor: PROFILS_BOT[commande.profil].couleurHex }}
+                            style={{
+                              backgroundColor:
+                                PROFILS_BOT[commande.profil].couleurHex,
+                            }}
                             aria-hidden
                           />
                           {PROFILS_BOT[commande.profil].titre}

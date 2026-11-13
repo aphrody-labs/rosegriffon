@@ -46,7 +46,9 @@ export interface TheatreSequencerOptions {
  * Le canvas R3F doit être en `frameloop="never"` pendant l'export (à rétablir ensuite). La durée à
  * exporter = `sequence.length` (en secondes).
  */
-export function createTheatreSequencer(options: TheatreSequencerOptions): (timeSec: number) => void {
+export function createTheatreSequencer(
+  options: TheatreSequencerOptions,
+): (timeSec: number) => void {
   const { sequence, r3f, onBeforeRender } = options;
   const { gl, scene, camera, advance } = r3f;
 

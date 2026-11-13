@@ -17,7 +17,13 @@
  * `lib/tweets-format.ts`, qui est pur et couvert par ses propres tests. Ce
  * fichier ne fait que du câblage Discord.
  */
-import { ButtonComponent, Discord, Slash, SlashGroup, SlashOption } from "discordx";
+import {
+  ButtonComponent,
+  Discord,
+  Slash,
+  SlashGroup,
+  SlashOption,
+} from "discordx";
 import {
   ActionRowBuilder,
   ApplicationCommandOptionType,
@@ -56,7 +62,12 @@ import {
   type LigneTweet,
   type EtatListeTweets,
 } from "../lib/tweets-format";
-import { auteursConnus, categoriesConnues, listerTweets, lireTweet } from "../services/tweets";
+import {
+  auteursConnus,
+  categoriesConnues,
+  listerTweets,
+  lireTweet,
+} from "../services/tweets";
 import { resoudreSalon } from "../services/tweetsNotifier";
 import { pied, rangeePagination } from "../lib/ui";
 
@@ -74,11 +85,16 @@ const MAX_IMAGES = 4;
  * service, et le membre reçoit une phrase utile. Ne lève jamais — un `editReply`
  * qui échoue à son tour ne doit pas remonter en exception non capturée.
  */
-async function repondreErreur(interaction: ChatInputCommandInteraction, contexte: string, err: unknown): Promise<void> {
+async function repondreErreur(
+  interaction: ChatInputCommandInteraction,
+  contexte: string,
+  err: unknown,
+): Promise<void> {
   console.error(`[x] ${contexte} :`, err);
   try {
     await interaction.editReply({
-      content: "❌ L'archive des posts est momentanément illisible. Réessaie dans un instant.",
+      content:
+        "❌ L'archive des posts est momentanément illisible. Réessaie dans un instant.",
       embeds: [],
       components: [],
     });
@@ -88,7 +104,9 @@ async function repondreErreur(interaction: ChatInputCommandInteraction, contexte
 }
 
 /** Construit la réponse (embed + boutons) d'une page de liste. */
-async function rendrePage(etat: EtatListeTweets): Promise<InteractionEditReplyOptions> {
+async function rendrePage(
+  etat: EtatListeTweets,
+): Promise<InteractionEditReplyOptions> {
   const premier = await listerTweets({
     auteur: etat.auteur,
     categorie: etat.categorie,
@@ -120,7 +138,9 @@ async function rendrePage(etat: EtatListeTweets): Promise<InteractionEditReplyOp
   const pages = nombreDePages(resultat.total, PAR_PAGE);
 
   const embed = rgEmbed()
-    .setTitle(`Archive X — ${resultat.total.toLocaleString("fr-FR")} post${resultat.total > 1 ? "s" : ""}`)
+    .setTitle(
+      `Archive X — ${resultat.total.toLocaleString("fr-FR")} post${resultat.total > 1 ? "s" : ""}`,
+    )
     .setURL("https://rosegriffon.fr/iergday");
   if (criteres.length > 0) {
     embed.setAuthor({ name: `Filtres : ${truncate(criteres, 200)}` });
@@ -134,7 +154,9 @@ async function rendrePage(etat: EtatListeTweets): Promise<InteractionEditReplyOp
         : "L'archive ne contient aucun post.",
     );
   } else {
-    embed.setDescription(resultat.lignes.map(tweet => ligneListe(tweet)).join("\n\n"));
+    embed.setDescription(
+      resultat.lignes.map((tweet) => ligneListe(tweet)).join("\n\n"),
+    );
   }
   // Le pied est posé dans les deux cas : « page 1/1 » sur une liste vide reste
   // une information, et son absence donnait deux rendus différents pour rien.
@@ -146,7 +168,7 @@ async function rendrePage(etat: EtatListeTweets): Promise<InteractionEditReplyOp
     prefixe: PREFIXE_BOUTON_TWEETS,
     page,
     pages,
-    identifiant: cible => encoderEtatListe({ ...etat, page: cible }),
+    identifiant: (cible) => encoderEtatListe({ ...etat, page: cible }),
   });
   return { embeds: [embed], components: composants };
 }
@@ -167,11 +189,15 @@ export const ANNONCEURS_AUTORISES: ReadonlySet<string> = new Set([
 @Discord()
 @SlashGroup({
   name: "x",
-  description: "Archive des posts X récoltés par la veille : parcours et consultation",
+  description:
+    "Archive des posts X récoltés par la veille : parcours et consultation",
 })
 @SlashGroup("x")
 export class XCommand {
-  @Slash({ name: "liste", description: "Parcourt l'archive des posts X, avec filtres et pages" })
+  @Slash({
+    name: "liste",
+    description: "Parcourt l'archive des posts X, avec filtres et pages",
+  })
   async liste(
     @SlashOption({
       name: "compte",
@@ -180,13 +206,15 @@ export class XCommand {
       required: false,
       autocomplete: async (interaction: AutocompleteInteraction) => {
         try {
-          const saisie = String(interaction.options.getFocused() ?? "").toLowerCase();
+          const saisie = String(
+            interaction.options.getFocused() ?? "",
+          ).toLowerCase();
           const auteurs = await auteursConnus();
           await interaction.respond(
             auteurs
-              .filter(a => a.toLowerCase().includes(saisie))
+              .filter((a) => a.toLowerCase().includes(saisie))
               .slice(0, 25)
-              .map(a => ({ name: `@${a}`, value: a })),
+              .map((a) => ({ name: `@${a}`, value: a })),
           );
         } catch (err) {
           console.error("[x] autocomplétion des comptes :", err);
@@ -202,13 +230,15 @@ export class XCommand {
       required: false,
       autocomplete: async (interaction: AutocompleteInteraction) => {
         try {
-          const saisie = String(interaction.options.getFocused() ?? "").toLowerCase();
+          const saisie = String(
+            interaction.options.getFocused() ?? "",
+          ).toLowerCase();
           const categories = await categoriesConnues();
           await interaction.respond(
             categories
-              .filter(c => c.toLowerCase().includes(saisie))
+              .filter((c) => c.toLowerCase().includes(saisie))
               .slice(0, 25)
-              .map(c => ({ name: c, value: c })),
+              .map((c) => ({ name: c, value: c })),
           );
         } catch (err) {
           console.error("[x] autocomplétion des catégories :", err);
@@ -270,13 +300,17 @@ export class XCommand {
     } catch (err) {
       console.error("[x] pagination :", err);
       await interaction.followUp({
-        content: "❌ L'archive des posts est momentanément illisible. Réessaie dans un instant.",
+        content:
+          "❌ L'archive des posts est momentanément illisible. Réessaie dans un instant.",
         flags: MessageFlags.Ephemeral,
       });
     }
   }
 
-  @Slash({ name: "voir", description: "Affiche un post archivé : images, traduction et portée" })
+  @Slash({
+    name: "voir",
+    description: "Affiche un post archivé : images, traduction et portée",
+  })
   async voir(
     @SlashOption({
       name: "post",
@@ -294,9 +328,13 @@ export class XCommand {
             parPage: 10,
           });
           await interaction.respond(
-            resultat.lignes.map(tweet => {
-              const auteur = tweet.author_username ? `@${tweet.author_username}` : "compte inconnu";
-              const extrait = texteSansLienMedia(tweet.translation) || texteSansLienMedia(tweet.text);
+            resultat.lignes.map((tweet) => {
+              const auteur = tweet.author_username
+                ? `@${tweet.author_username}`
+                : "compte inconnu";
+              const extrait =
+                texteSansLienMedia(tweet.translation) ||
+                texteSansLienMedia(tweet.text);
               // 100 caractères est la borne DURE d'un libellé de proposition.
               return {
                 name: couper(`${auteur} · ${extrait || "(sans texte)"}`, 100),
@@ -326,7 +364,9 @@ export class XCommand {
         return;
       }
 
-      const auteur = tweet.author_username ? `@${tweet.author_username}` : "Post X";
+      const auteur = tweet.author_username
+        ? `@${tweet.author_username}`
+        : "Post X";
       const images = imagesTweet(tweet.media);
       // 126 posts de l'archive n'ont pour tout texte que leur `https://t.co/…`,
       // que `texteSansLienMedia` retire : `corpsTweet` rend alors la chaîne
@@ -341,7 +381,12 @@ export class XCommand {
             ? `*Ce post n'a pas de texte : il ne porte que ${images.length > 1 ? "ses images" : "son image"}.*`
             : "*Ce post n'a pas de texte.*";
       const embed = rgEmbed()
-        .setTitle(truncate(tweet.author_name ? `${tweet.author_name} (${auteur})` : auteur, 256))
+        .setTitle(
+          truncate(
+            tweet.author_name ? `${tweet.author_name} (${auteur})` : auteur,
+            256,
+          ),
+        )
         .setURL(urlTweet(tweet))
         .setDescription(description);
 
@@ -352,7 +397,11 @@ export class XCommand {
       if (metriques) {
         embed.addFields({ name: "Portée", value: truncate(metriques, 1_024) });
       }
-      embed.addFields({ name: "Publié", value: horodatageDiscord(tweet), inline: true });
+      embed.addFields({
+        name: "Publié",
+        value: horodatageDiscord(tweet),
+        inline: true,
+      });
       if (tweet.category) {
         embed.addFields({
           name: "Catégorie",
@@ -375,7 +424,9 @@ export class XCommand {
       // lieu (client trop ancien).
       const compagnons = images
         .slice(1, MAX_IMAGES)
-        .map(image => new EmbedBuilder().setURL(urlTweet(tweet)).setImage(image.url));
+        .map((image) =>
+          new EmbedBuilder().setURL(urlTweet(tweet)).setImage(image.url),
+        );
       if (images.length > MAX_IMAGES) {
         embed.addFields({
           name: "Images",
@@ -407,7 +458,8 @@ export class XCommand {
    */
   @Slash({
     name: "annoncer",
-    description: "Récolter le dernier post d'un compte et l'annoncer maintenant (réservé)",
+    description:
+      "Récolter le dernier post d'un compte et l'annoncer maintenant (réservé)",
   })
   async annoncer(
     @SlashOption({
@@ -436,7 +488,10 @@ export class XCommand {
       await requireRgAdmin(interaction.user.id);
     } catch (err) {
       await interaction.editReply({
-        content: err instanceof NotAdminError ? `⛔ ${err.message}` : "⛔ Droits insuffisants.",
+        content:
+          err instanceof NotAdminError
+            ? `⛔ ${err.message}`
+            : "⛔ Droits insuffisants.",
       });
       return;
     }
@@ -444,7 +499,8 @@ export class XCommand {
     const annonce = PROFIL_ANNONCEUR.annoncePosts;
     if (!annonce || annonce.salon.length === 0) {
       await interaction.editReply({
-        content: "Ce bot n'a pas de salon d'annonce dans son registre de profils : il n'y a nulle part où publier.",
+        content:
+          "Ce bot n'a pas de salon d'annonce dans son registre de profils : il n'y a nulle part où publier.",
       });
       return;
     }
@@ -456,7 +512,12 @@ export class XCommand {
       const reponse = await appelerCron<{
         success: boolean;
         error?: string;
-        posts?: Array<{ id: string; texte?: string; date?: string; url?: string }>;
+        posts?: Array<{
+          id: string;
+          texte?: string;
+          date?: string;
+          url?: string;
+        }>;
       }>({ cmd: "x.posts", pseudo, limite: 1 }, { timeoutMs: 50_000 });
 
       if (!reponse.success) {
@@ -468,11 +529,16 @@ export class XCommand {
 
       const post = reponse.posts?.[0];
       if (!post) {
-        await interaction.editReply({ content: `Aucun post trouvé pour @${pseudo}.` });
+        await interaction.editReply({
+          content: `Aucun post trouvé pour @${pseudo}.`,
+        });
         return;
       }
 
-      const { salon, raison } = await resoudreSalon(interaction.client, annonce.salon);
+      const { salon, raison } = await resoudreSalon(
+        interaction.client,
+        annonce.salon,
+      );
       if (!salon) {
         await interaction.editReply({
           content: `Salon d'annonce \`${annonce.salon}\` injoignable : ${raison ?? "le bot doit y voir et y écrire"}.`,
@@ -491,7 +557,11 @@ export class XCommand {
         return;
       }
 
-      const ligne = { id: post.id, author_username: pseudo, text: post.texte ?? "" } as LigneTweet;
+      const ligne = {
+        id: post.id,
+        author_username: pseudo,
+        text: post.texte ?? "",
+      } as LigneTweet;
       await salon.send({ content: messageAnnonce(ligne) });
       if (annonce.roleMention) {
         await salon.send({

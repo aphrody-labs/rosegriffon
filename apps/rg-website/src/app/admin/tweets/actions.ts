@@ -58,11 +58,16 @@ export async function saveTweet(data: TweetFormValues) {
 
   let error;
   if (parsed.data.id) {
-    ({ error } = await adminDb.from("tweets").update(payload).eq("id", parsed.data.id));
+    ({ error } = await adminDb
+      .from("tweets")
+      .update(payload)
+      .eq("id", parsed.data.id));
   } else {
     // Create new
     const id = Date.now().toString(); // Simple ID generation
-    ({ error } = await adminDb.from("tweets").insert([{ ...payload, created_at: new Date().toISOString(), id }]));
+    ({ error } = await adminDb
+      .from("tweets")
+      .insert([{ ...payload, created_at: new Date().toISOString(), id }]));
   }
 
   if (error) {

@@ -14,7 +14,11 @@
 import { z } from "zod";
 
 import { pageMetaSchema } from "./common";
-import { AchilleaResource, encodePathSegment, type AchilleaClientResult } from "./http";
+import {
+  AchilleaResource,
+  encodePathSegment,
+  type AchilleaClientResult,
+} from "./http";
 import type {
   AdminAuditRow,
   AdminGuildRow,
@@ -45,8 +49,15 @@ import type {
 
 export const adminOpsOverviewSchema = z.object({
   users: z.object({ total: z.number(), staff: z.number() }),
-  wallet: z.object({ wallets: z.number(), totalBalance: z.number(), txToday: z.number() }),
-  moderation: z.object({ sanctionsActive: z.number(), licensesActive: z.number() }),
+  wallet: z.object({
+    wallets: z.number(),
+    totalBalance: z.number(),
+    txToday: z.number(),
+  }),
+  moderation: z.object({
+    sanctionsActive: z.number(),
+    licensesActive: z.number(),
+  }),
   community: z.object({
     tournamentsOngoing: z.number(),
     clansPending: z.number(),
@@ -153,7 +164,9 @@ export const auditChainVerificationSchema = z.object({
   total: z.number(),
 });
 
-export type AuditChainVerification = z.infer<typeof auditChainVerificationSchema>;
+export type AuditChainVerification = z.infer<
+  typeof auditChainVerificationSchema
+>;
 
 export const adminMetricsSummarySchema = z.object({
   counters: z.record(z.string(), z.number()),
@@ -290,13 +303,22 @@ export class AdminResource extends AchilleaResource {
   }
 
   /** `GET /admin/ops/users` — comptes en base, paginés et recherchables. */
-  users(query: AdminUsersQuery = {}): Promise<AchilleaClientResult<AdminUsersPage>> {
+  users(
+    query: AdminUsersQuery = {},
+  ): Promise<AchilleaClientResult<AdminUsersPage>> {
     return this.http.get("/admin/ops/users", adminUsersPageSchema, { query });
   }
 
   /** `POST /admin/ops/users/:id/role` — change le rôle d'un compte (Admin+). */
-  setUserRole(id: string, role: number): Promise<AchilleaClientResult<AdminRoleUpdateResult>> {
-    return this.http.post(`/admin/ops/users/${encodePathSegment(id)}/role`, adminRoleUpdateResultSchema, { role });
+  setUserRole(
+    id: string,
+    role: number,
+  ): Promise<AchilleaClientResult<AdminRoleUpdateResult>> {
+    return this.http.post(
+      `/admin/ops/users/${encodePathSegment(id)}/role`,
+      adminRoleUpdateResultSchema,
+      { role },
+    );
   }
 
   /** `GET /admin/ops/wallets` — plus gros soldes et derniers mouvements. */
@@ -312,10 +334,14 @@ export class AdminResource extends AchilleaResource {
     amount: number,
     reason?: string,
   ): Promise<AchilleaClientResult<AdminWalletAdjustResult>> {
-    return this.http.post(`/admin/ops/wallets/${encodePathSegment(userId)}/adjust`, adminWalletAdjustResultSchema, {
-      amount,
-      reason,
-    });
+    return this.http.post(
+      `/admin/ops/wallets/${encodePathSegment(userId)}/adjust`,
+      adminWalletAdjustResultSchema,
+      {
+        amount,
+        reason,
+      },
+    );
   }
 
   /** `GET /admin/ops/health` — santé bot et hôte, via le cookie staff. */
@@ -324,56 +350,87 @@ export class AdminResource extends AchilleaResource {
   }
 
   /** `POST /admin/ops/maintenance` — bascule le mode maintenance (SuperAdmin). */
-  setMaintenance(maintenance: boolean): Promise<AchilleaClientResult<MaintenanceResponse>> {
+  setMaintenance(
+    maintenance: boolean,
+  ): Promise<AchilleaClientResult<MaintenanceResponse>> {
     return this.http.post("/admin/ops/maintenance", maintenanceResponseSchema, {
       maintenance,
     });
   }
 
   /** `GET /admin/ops/audit` — dernières entrées du journal d'audit (Admin+). */
-  audit(limit?: number): Promise<AchilleaClientResult<{ data: AdminAuditRow[] }>> {
-    return this.http.get("/admin/ops/audit", z.object({ data: z.array(adminAuditRowSchema) }), { query: { limit } });
+  audit(
+    limit?: number,
+  ): Promise<AchilleaClientResult<{ data: AdminAuditRow[] }>> {
+    return this.http.get(
+      "/admin/ops/audit",
+      z.object({ data: z.array(adminAuditRowSchema) }),
+      { query: { limit } },
+    );
   }
 
   /** `GET /admin/ops/audit/verify` — relit la chaîne signée du journal (SuperAdmin). */
   verifyAudit(): Promise<AchilleaClientResult<AuditChainVerification>> {
-    return this.http.get("/admin/ops/audit/verify", auditChainVerificationSchema);
+    return this.http.get(
+      "/admin/ops/audit/verify",
+      auditChainVerificationSchema,
+    );
   }
 
   /** `GET /admin/ops/metrics-summary` — compteurs Prometheus agrégés en JSON. */
   metricsSummary(): Promise<AchilleaClientResult<AdminMetricsSummary>> {
-    return this.http.get("/admin/ops/metrics-summary", adminMetricsSummarySchema);
+    return this.http.get(
+      "/admin/ops/metrics-summary",
+      adminMetricsSummarySchema,
+    );
   }
 
   /** `GET /admin/ops/guilds` — serveurs Discord où le bot est présent. */
   guilds(): Promise<AchilleaClientResult<{ data: AdminGuildRow[] }>> {
-    return this.http.get("/admin/ops/guilds", z.object({ data: z.array(adminGuildRowSchema) }));
+    return this.http.get(
+      "/admin/ops/guilds",
+      z.object({ data: z.array(adminGuildRowSchema) }),
+    );
   }
 
   /** `GET /admin/ops/guilds/:id/invite` — invitation ponctuelle (Admin+). */
   guildInvite(id: string): Promise<AchilleaClientResult<AdminInviteResponse>> {
-    return this.http.get(`/admin/ops/guilds/${encodePathSegment(id)}/invite`, adminInviteResponseSchema);
+    return this.http.get(
+      `/admin/ops/guilds/${encodePathSegment(id)}/invite`,
+      adminInviteResponseSchema,
+    );
   }
 
   /** `GET /admin/ops/commands` — commandes slash enregistrées (lecture seule). */
   commands(): Promise<AchilleaClientResult<{ data: unknown[] }>> {
-    return this.http.get("/admin/ops/commands", z.object({ data: z.array(z.unknown()) }));
+    return this.http.get(
+      "/admin/ops/commands",
+      z.object({ data: z.array(z.unknown()) }),
+    );
   }
 
   /** `GET /admin/ops/logs` — dernières lignes de log du process (SuperAdmin). */
   logs(): Promise<AchilleaClientResult<{ data: string[] }>> {
-    return this.http.get("/admin/ops/logs", z.object({ data: z.array(z.string()) }));
+    return this.http.get(
+      "/admin/ops/logs",
+      z.object({ data: z.array(z.string()) }),
+    );
   }
 
   // ── /admin/db ─────────────────────────────────────────────────────────────
 
   /** `GET /admin/db/tables` — tables publiques et volumétrie estimée. */
   dbTables(): Promise<AchilleaClientResult<{ data: DbTableRow[] }>> {
-    return this.http.get("/admin/db/tables", z.object({ data: z.array(dbTableRowSchema) }));
+    return this.http.get(
+      "/admin/db/tables",
+      z.object({ data: z.array(dbTableRowSchema) }),
+    );
   }
 
   /** `GET /admin/db/tables/:table/columns` — métadonnées de colonnes. */
-  dbColumns(table: string): Promise<AchilleaClientResult<{ data: DbColumn[] }>> {
+  dbColumns(
+    table: string,
+  ): Promise<AchilleaClientResult<{ data: DbColumn[] }>> {
     return this.http.get(
       `/admin/db/tables/${encodePathSegment(table)}/columns`,
       z.object({ data: z.array(dbColumnSchema) }),
@@ -381,15 +438,29 @@ export class AdminResource extends AchilleaResource {
   }
 
   /** `GET /admin/db/tables/:table/rows` — lignes paginées et triables. */
-  dbRows(table: string, query: DbRowsQuery = {}): Promise<AchilleaClientResult<DbRowsPage>> {
-    return this.http.get(`/admin/db/tables/${encodePathSegment(table)}/rows`, dbRowsPageSchema, {
-      query,
-    });
+  dbRows(
+    table: string,
+    query: DbRowsQuery = {},
+  ): Promise<AchilleaClientResult<DbRowsPage>> {
+    return this.http.get(
+      `/admin/db/tables/${encodePathSegment(table)}/rows`,
+      dbRowsPageSchema,
+      {
+        query,
+      },
+    );
   }
 
   /** `POST /admin/db/tables/:table/rows` — insertion (colonnes filtrées côté API). */
-  dbInsertRow(table: string, values: Record<string, unknown>): Promise<AchilleaClientResult<DbMutationResult>> {
-    return this.http.post(`/admin/db/tables/${encodePathSegment(table)}/rows`, dbMutationResultSchema, { values });
+  dbInsertRow(
+    table: string,
+    values: Record<string, unknown>,
+  ): Promise<AchilleaClientResult<DbMutationResult>> {
+    return this.http.post(
+      `/admin/db/tables/${encodePathSegment(table)}/rows`,
+      dbMutationResultSchema,
+      { values },
+    );
   }
 
   /** `PATCH /admin/db/tables/:table/rows` — mise à jour par clé primaire complète. */
@@ -398,12 +469,23 @@ export class AdminResource extends AchilleaResource {
     pk: Record<string, unknown>,
     values: Record<string, unknown>,
   ): Promise<AchilleaClientResult<DbMutationResult>> {
-    return this.http.patch(`/admin/db/tables/${encodePathSegment(table)}/rows`, dbMutationResultSchema, { pk, values });
+    return this.http.patch(
+      `/admin/db/tables/${encodePathSegment(table)}/rows`,
+      dbMutationResultSchema,
+      { pk, values },
+    );
   }
 
   /** `DELETE /admin/db/tables/:table/rows` — suppression par clé primaire complète. */
-  dbDeleteRow(table: string, pk: Record<string, unknown>): Promise<AchilleaClientResult<DbMutationResult>> {
-    return this.http.delete(`/admin/db/tables/${encodePathSegment(table)}/rows`, dbMutationResultSchema, { pk });
+  dbDeleteRow(
+    table: string,
+    pk: Record<string, unknown>,
+  ): Promise<AchilleaClientResult<DbMutationResult>> {
+    return this.http.delete(
+      `/admin/db/tables/${encodePathSegment(table)}/rows`,
+      dbMutationResultSchema,
+      { pk },
+    );
   }
 
   /** `POST /admin/db/query` — console SQL en lecture seule (désactivée en production). */
@@ -415,7 +497,10 @@ export class AdminResource extends AchilleaResource {
 
   /** `GET /bot/info` — identité du bot et de son propriétaire. */
   botInfo(): Promise<AchilleaClientResult<{ user: unknown; owner: unknown }>> {
-    return this.http.get("/bot/info", z.object({ user: z.unknown(), owner: z.unknown() }));
+    return this.http.get(
+      "/bot/info",
+      z.object({ user: z.unknown(), owner: z.unknown() }),
+    );
   }
 
   /** `GET /bot/commands` — définitions JSON des commandes d'application. */
@@ -430,11 +515,16 @@ export class AdminResource extends AchilleaResource {
 
   /** `GET /bot/guilds/:id` — un serveur, côté Discord et côté base. */
   botGuild(id: string): Promise<AchilleaClientResult<DiscordAndDatabase>> {
-    return this.http.get(`/bot/guilds/${encodePathSegment(id)}`, discordAndDatabaseSchema);
+    return this.http.get(
+      `/bot/guilds/${encodePathSegment(id)}`,
+      discordAndDatabaseSchema,
+    );
   }
 
   /** `DELETE /bot/guilds/:id` — fait quitter le serveur au bot. */
-  botLeaveGuild(id: string): Promise<AchilleaClientResult<{ success: boolean; message: string }>> {
+  botLeaveGuild(
+    id: string,
+  ): Promise<AchilleaClientResult<{ success: boolean; message: string }>> {
     return this.http.delete(
       `/bot/guilds/${encodePathSegment(id)}`,
       z.object({ success: z.boolean(), message: z.string() }),
@@ -443,7 +533,10 @@ export class AdminResource extends AchilleaResource {
 
   /** `GET /bot/guilds/:id/invite` — invitation créée par le bot. */
   botGuildInvite(id: string): Promise<AchilleaClientResult<unknown>> {
-    return this.http.get(`/bot/guilds/${encodePathSegment(id)}/invite`, z.unknown());
+    return this.http.get(
+      `/bot/guilds/${encodePathSegment(id)}/invite`,
+      z.unknown(),
+    );
   }
 
   /** `GET /bot/users` — membres connus, côté Discord et côté base. */
@@ -453,7 +546,10 @@ export class AdminResource extends AchilleaResource {
 
   /** `GET /bot/users/:id` — un membre, côté Discord et côté base. */
   botUser(id: string): Promise<AchilleaClientResult<DiscordAndDatabase>> {
-    return this.http.get(`/bot/users/${encodePathSegment(id)}`, discordAndDatabaseSchema);
+    return this.http.get(
+      `/bot/users/${encodePathSegment(id)}`,
+      discordAndDatabaseSchema,
+    );
   }
 
   /**
@@ -473,8 +569,12 @@ export class AdminResource extends AchilleaResource {
   }
 
   /** `POST /bot/maintenance` — bascule le mode maintenance. */
-  setBotMaintenance(maintenance: boolean): Promise<AchilleaClientResult<MaintenanceResponse>> {
-    return this.http.post("/bot/maintenance", maintenanceResponseSchema, { maintenance });
+  setBotMaintenance(
+    maintenance: boolean,
+  ): Promise<AchilleaClientResult<MaintenanceResponse>> {
+    return this.http.post("/bot/maintenance", maintenanceResponseSchema, {
+      maintenance,
+    });
   }
 
   /** `GET /bot/devs` — identifiants des développeurs déclarés. */
@@ -542,8 +642,12 @@ export class AdminResource extends AchilleaResource {
   }
 
   /** `POST /database/restore` — restaure une sauvegarde existante. */
-  restoreBackup(snapshotName: string): Promise<AchilleaClientResult<DatabaseBackupResult>> {
-    return this.http.post("/database/restore", databaseBackupResultSchema, { snapshotName });
+  restoreBackup(
+    snapshotName: string,
+  ): Promise<AchilleaClientResult<DatabaseBackupResult>> {
+    return this.http.post("/database/restore", databaseBackupResultSchema, {
+      snapshotName,
+    });
   }
 
   /** `GET /database/backups` — sauvegardes disponibles. */
@@ -562,7 +666,10 @@ export class AdminResource extends AchilleaResource {
    * `POST /proxy/upload` — dépôt d'image, dédupliqué par hash côté API.
    * Le champ multipart attendu s'appelle `file`.
    */
-  uploadImage(file: Blob, fileName = "upload"): Promise<AchilleaClientResult<UploadedImage>> {
+  uploadImage(
+    file: Blob,
+    fileName = "upload",
+  ): Promise<AchilleaClientResult<UploadedImage>> {
     const form = new FormData();
     form.append("file", file, fileName);
     return this.http.requestJson("/proxy/upload", uploadedImageSchema, {
@@ -573,7 +680,10 @@ export class AdminResource extends AchilleaResource {
 
   /** `GET /proxy/delete/:id` — supprime une image déposée. */
   deleteImage(id: string): Promise<AchilleaClientResult<{ success: boolean }>> {
-    return this.http.get(`/proxy/delete/${encodePathSegment(id)}`, z.object({ success: z.boolean() }));
+    return this.http.get(
+      `/proxy/delete/${encodePathSegment(id)}`,
+      z.object({ success: z.boolean() }),
+    );
   }
 
   /**
@@ -585,11 +695,16 @@ export class AdminResource extends AchilleaResource {
     signature: string,
     timestamp: string,
   ): Promise<AchilleaClientResult<ModerationSyncResult>> {
-    return this.http.post("/moderation/sync", moderationSyncResultSchema, body, {
-      headers: {
-        [MODERATION_SIGNATURE_HEADER]: signature,
-        [MODERATION_TIMESTAMP_HEADER]: timestamp,
+    return this.http.post(
+      "/moderation/sync",
+      moderationSyncResultSchema,
+      body,
+      {
+        headers: {
+          [MODERATION_SIGNATURE_HEADER]: signature,
+          [MODERATION_TIMESTAMP_HEADER]: timestamp,
+        },
       },
-    });
+    );
   }
 }

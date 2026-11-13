@@ -88,11 +88,16 @@ export function loadGamedataFile(filePath: string): ParsedEntry[] {
 /**
  * Discover all gamedata files in a category
  */
-export function discoverCategoryFiles(category: string, dataPath: string = DATA_ROOT): GamedataFileInfo[] {
+export function discoverCategoryFiles(
+  category: string,
+  dataPath: string = DATA_ROOT,
+): GamedataFileInfo[] {
   const categoryDir = join(dataPath, "common", "gamedata", category);
   if (!existsSync(categoryDir)) return [];
 
-  const files = readdirSync(categoryDir).filter(f => f.endsWith(".cfg.bin.json"));
+  const files = readdirSync(categoryDir).filter((f) =>
+    f.endsWith(".cfg.bin.json"),
+  );
   const results: GamedataFileInfo[] = [];
 
   for (const file of files) {
@@ -124,11 +129,13 @@ export function discoverCategoryFiles(category: string, dataPath: string = DATA_
 /**
  * Discover all gamedata categories
  */
-export function discoverGamedataCategories(dataPath: string = DATA_ROOT): string[] {
+export function discoverGamedataCategories(
+  dataPath: string = DATA_ROOT,
+): string[] {
   const gamedataDir = join(dataPath, "common", "gamedata");
   if (!existsSync(gamedataDir)) return [];
 
-  return readdirSync(gamedataDir).filter(f => {
+  return readdirSync(gamedataDir).filter((f) => {
     const stat = statSync(join(gamedataDir, f));
     return stat.isDirectory();
   });
@@ -182,11 +189,15 @@ export interface UniversalGamedataDatabase {
 /**
  * Build gamedata discovery database (lazy loading)
  */
-export function buildUniversalGamedataDatabase(dataPath: string = DATA_ROOT): UniversalGamedataDatabase {
+export function buildUniversalGamedataDatabase(
+  dataPath: string = DATA_ROOT,
+): UniversalGamedataDatabase {
   console.log("[UniversalGamedata] Discovering gamedata files...");
   const { categories, files, byCategory } = discoverAllGamedata(dataPath);
 
-  console.log(`[UniversalGamedata] Found ${categories.length} categories, ${files.length} files`);
+  console.log(
+    `[UniversalGamedata] Found ${categories.length} categories, ${files.length} files`,
+  );
 
   let totalEntries = 0;
   for (const file of files) {
@@ -222,7 +233,7 @@ export function loadFromDatabase(
   const categoryFiles = db.byCategory.get(category);
   if (!categoryFiles) return undefined;
 
-  const info = categoryFiles.find(f => f.name === name);
+  const info = categoryFiles.find((f) => f.name === name);
   if (!info) return undefined;
 
   // Load and cache
@@ -320,7 +331,8 @@ export function createUniversalGamedataAPI(dataPath: string = DATA_ROOT) {
     allFiles: () => db.files,
 
     /** Load a specific file */
-    load: (category: string, name: string) => loadFromDatabase(db, category, name),
+    load: (category: string, name: string) =>
+      loadFromDatabase(db, category, name),
 
     /** Load by full name pattern */
     loadByPattern: (category: string, pattern: RegExp) => {
@@ -345,14 +357,17 @@ export function createUniversalGamedataAPI(dataPath: string = DATA_ROOT) {
     },
 
     /** Find files by name pattern */
-    findFiles: (pattern: RegExp) => db.files.filter(f => pattern.test(f.name)),
+    findFiles: (pattern: RegExp) =>
+      db.files.filter((f) => pattern.test(f.name)),
 
     /** Get category summary */
     categorySummary: () =>
-      db.categories.map(cat => ({
+      db.categories.map((cat) => ({
         name: cat,
         files: db.byCategory.get(cat)?.length || 0,
-        entries: db.byCategory.get(cat)?.reduce((sum, f) => sum + f.entryCount, 0) || 0,
+        entries:
+          db.byCategory.get(cat)?.reduce((sum, f) => sum + f.entryCount, 0) ||
+          0,
       })),
 
     /** Raw database access */
@@ -360,4 +375,6 @@ export function createUniversalGamedataAPI(dataPath: string = DATA_ROOT) {
   };
 }
 
-export type UniversalGamedataAPI = ReturnType<typeof createUniversalGamedataAPI>;
+export type UniversalGamedataAPI = ReturnType<
+  typeof createUniversalGamedataAPI
+>;

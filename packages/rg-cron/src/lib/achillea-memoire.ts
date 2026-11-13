@@ -25,11 +25,13 @@ export interface MemoireAchillea {
 
 export const memoireAchillea: MemoireAchillea = {
   async lire(cle) {
-    const lignes = await sql<Array<{ value: string }>>`SELECT value FROM achillea.data WHERE key = ${cle} LIMIT 1`;
+    const lignes = await sql<
+      Array<{ value: string }>
+    >`SELECT value FROM achillea.data WHERE key = ${cle} LIMIT 1`;
     return lignes[0]?.value ?? null;
   },
   async ecrire(cle, valeur) {
-    await sql.begin(async tx => {
+    await sql.begin(async (tx) => {
       await tx`SET LOCAL ROLE service_role`;
       await tx`
         INSERT INTO achillea.data (key, created_at, updated_at, value)
@@ -40,7 +42,10 @@ export const memoireAchillea: MemoireAchillea = {
 };
 
 /** Lit une valeur JSON ; `null` si absente ou illisible (jamais d'exception sur une donnée corrompue). */
-export async function lireJson<T>(memoire: MemoireAchillea, cle: string): Promise<T | null> {
+export async function lireJson<T>(
+  memoire: MemoireAchillea,
+  cle: string,
+): Promise<T | null> {
   const brut = await memoire.lire(cle);
   if (brut === null || brut === "") return null;
   try {
@@ -50,6 +55,10 @@ export async function lireJson<T>(memoire: MemoireAchillea, cle: string): Promis
   }
 }
 
-export function ecrireJson(memoire: MemoireAchillea, cle: string, valeur: unknown): Promise<void> {
+export function ecrireJson(
+  memoire: MemoireAchillea,
+  cle: string,
+  valeur: unknown,
+): Promise<void> {
   return memoire.ecrire(cle, JSON.stringify(valeur));
 }

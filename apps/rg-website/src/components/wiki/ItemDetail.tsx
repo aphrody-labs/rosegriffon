@@ -1,7 +1,16 @@
 "use client";
 
 import type { Item } from "@rosegriffon/inagle";
-import { ArrowRightLeft, Backpack, Coins, Layers, MapPin, ShoppingBag, Star, Store } from "lucide-react";
+import {
+  ArrowRightLeft,
+  Backpack,
+  Coins,
+  Layers,
+  MapPin,
+  ShoppingBag,
+  Star,
+  Store,
+} from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
 import { Icon } from "@/components/ui/Icon";
@@ -88,13 +97,16 @@ export function ItemDetail({ item, itemName, itemDesc }: ItemDetailProps) {
   // Pas de <img> cassé : une URL placeholder (`/ievr.webp`) ou une erreur runtime bascule
   // sur l'icône Backpack (les items « important » `gd120002..091` n'ont pas d'icône réelle
   // dans le CPK ; le `onError` couvre tout 404 résiduel).
-  const hasRealImage = !!resolvedSrc && resolvedSrc !== PLACEHOLDERS.item && !imgError;
+  const hasRealImage =
+    !!resolvedSrc && resolvedSrc !== PLACEHOLDERS.item && !imgError;
 
   const nameJA = item.names?.ja;
   const nameEN = item.names?.en;
   const descJA = item.descriptions?.ja || (item as any).description_JA;
   const { rarity } = item as any;
-  const rarityLabel = rarity ? RARITY_LABELS[String(rarity)] || String(rarity) : null;
+  const rarityLabel = rarity
+    ? RARITY_LABELS[String(rarity)] || String(rarity)
+    : null;
   const { price } = item as any;
   const sheetData = (item as any).sheetData as CommunitySheetData | null;
   const exchangeRecipes = (item as any).exchangeRecipes as Array<{
@@ -103,11 +115,20 @@ export function ItemDetail({ item, itemName, itemDesc }: ItemDetailProps) {
   }> | null;
   // Catégorie : libellé FR + icône (le brut `shoes`/`emblem` ne s'affiche pas).
   const categoryKey = String(item.category);
-  const categoryInfo = CATEGORY_LABELS[categoryKey] || { icon: "backpack", label: categoryKey };
+  const categoryInfo = CATEGORY_LABELS[categoryKey] || {
+    icon: "backpack",
+    label: categoryKey,
+  };
   // Bonus de stats RÉELS décodés (kick +6, control +5, …). Source : parser + bonus-db.
   const bonuses = (item as any).bonuses as Record<string, number> | null;
-  const bonusEntries = bonuses ? Object.entries(bonuses).filter(([, v]) => typeof v === "number" && v !== 0) : [];
-  const maxBonus = bonusEntries.length ? Math.max(...bonusEntries.map(([, v]) => Math.abs(v))) : 0;
+  const bonusEntries = bonuses
+    ? Object.entries(bonuses).filter(
+        ([, v]) => typeof v === "number" && v !== 0,
+      )
+    : [];
+  const maxBonus = bonusEntries.length
+    ? Math.max(...bonusEntries.map(([, v]) => Math.abs(v)))
+    : 0;
   const { maxStack } = item as any;
   // La description peut désormais être renseignée (lue depuis item_text via le descId).
   const hasDesc = itemDesc && itemDesc !== "Aucune description.";
@@ -134,8 +155,16 @@ export function ItemDetail({ item, itemName, itemDesc }: ItemDetailProps) {
               />
             ) : (
               <>
-                <Backpack size={96} className="text-on-surface-variant/20 sm:hidden" aria-hidden="true" />
-                <Backpack size={128} className="text-on-surface-variant/20 hidden sm:block" aria-hidden="true" />
+                <Backpack
+                  size={96}
+                  className="text-on-surface-variant/20 sm:hidden"
+                  aria-hidden="true"
+                />
+                <Backpack
+                  size={128}
+                  className="text-on-surface-variant/20 hidden sm:block"
+                  aria-hidden="true"
+                />
               </>
             )}
           </div>
@@ -143,13 +172,21 @@ export function ItemDetail({ item, itemName, itemDesc }: ItemDetailProps) {
           {/* Badges */}
           <div className="flex flex-wrap justify-center gap-3">
             <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-surface-container-highest border border-outline-variant/10">
-              <Icon name={categoryInfo.icon} size={16} className="text-on-surface-variant shrink-0" />
-              <span className="text-sm font-bold text-on-surface uppercase tracking-wider">{categoryInfo.label}</span>
+              <Icon
+                name={categoryInfo.icon}
+                size={16}
+                className="text-on-surface-variant shrink-0"
+              />
+              <span className="text-sm font-bold text-on-surface uppercase tracking-wider">
+                {categoryInfo.label}
+              </span>
             </div>
             {rarityLabel && (
               <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20">
                 <Star size={18} className="text-primary" aria-hidden="true" />
-                <span className="text-sm font-bold text-primary uppercase tracking-wider">{rarityLabel}</span>
+                <span className="text-sm font-bold text-primary uppercase tracking-wider">
+                  {rarityLabel}
+                </span>
               </div>
             )}
           </div>
@@ -165,7 +202,9 @@ export function ItemDetail({ item, itemName, itemDesc }: ItemDetailProps) {
             {(nameEN || nameJA) && (
               <div className="flex flex-wrap gap-x-4 gap-y-1 mb-4">
                 {nameEN && nameEN !== itemName && (
-                  <span className="text-sm text-on-surface-variant/70 italic">{nameEN}</span>
+                  <span className="text-sm text-on-surface-variant/70 italic">
+                    {nameEN}
+                  </span>
                 )}
                 {nameJA && (
                   <span className="text-sm text-on-surface-variant/50 font-light">
@@ -205,21 +244,31 @@ export function ItemDetail({ item, itemName, itemDesc }: ItemDetailProps) {
                 {bonusEntries
                   .toSorted(([, a], [, b]) => Math.abs(b) - Math.abs(a))
                   .map(([key, value]) => {
-                    const info = BONUS_LABELS[key] || { icon: "bar_chart", label: key };
-                    const pct = maxBonus > 0 ? (Math.abs(value) / maxBonus) * 100 : 0;
+                    const info = BONUS_LABELS[key] || {
+                      icon: "bar_chart",
+                      label: key,
+                    };
+                    const pct =
+                      maxBonus > 0 ? (Math.abs(value) / maxBonus) * 100 : 0;
                     const positive = value > 0;
                     return (
                       <div
                         key={key}
                         className="flex items-center gap-3 px-3 py-2 rounded-xl bg-surface-container-high border border-outline-variant/10"
                       >
-                        <Icon name={info.icon} size={18} className="text-primary shrink-0" />
+                        <Icon
+                          name={info.icon}
+                          size={18}
+                          className="text-primary shrink-0"
+                        />
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between mb-1">
                             <span className="text-[10px] font-bold text-on-surface-variant uppercase opacity-60">
                               {info.label}
                             </span>
-                            <span className={`text-sm font-black ${positive ? "text-primary" : "text-error"}`}>
+                            <span
+                              className={`text-sm font-black ${positive ? "text-primary" : "text-error"}`}
+                            >
                               {positive ? "+" : ""}
                               {value}
                             </span>
@@ -242,15 +291,27 @@ export function ItemDetail({ item, itemName, itemDesc }: ItemDetailProps) {
           <div className="flex flex-wrap items-center gap-4">
             {price != null && price > 0 && (
               <div className="flex items-center gap-2">
-                <Coins size={18} className="text-on-surface-variant" aria-hidden="true" />
-                <span className="text-sm font-bold text-on-surface">{price.toLocaleString("fr-FR")}</span>
+                <Coins
+                  size={18}
+                  className="text-on-surface-variant"
+                  aria-hidden="true"
+                />
+                <span className="text-sm font-bold text-on-surface">
+                  {price.toLocaleString("fr-FR")}
+                </span>
                 <span className="text-xs text-on-surface-variant">Points</span>
               </div>
             )}
             {maxStack != null && maxStack > 1 && maxStack < 99999 && (
               <div className="flex items-center gap-2">
-                <Layers size={18} className="text-on-surface-variant" aria-hidden="true" />
-                <span className="text-sm font-bold text-on-surface">{maxStack.toLocaleString("fr-FR")}</span>
+                <Layers
+                  size={18}
+                  className="text-on-surface-variant"
+                  aria-hidden="true"
+                />
+                <span className="text-sm font-bold text-on-surface">
+                  {maxStack.toLocaleString("fr-FR")}
+                </span>
                 <span className="text-xs text-on-surface-variant">max</span>
               </div>
             )}
@@ -259,15 +320,24 @@ export function ItemDetail({ item, itemName, itemDesc }: ItemDetailProps) {
           {/* Location from community data — skip if already in shops.fr */}
           {sheetData?.location &&
             (() => {
-              const translatedLocation = LOCATION_FR[sheetData.location] || sheetData.location;
-              const existingShops = (item.shops?.fr || []).map((s: string) => s.toLowerCase());
+              const translatedLocation =
+                LOCATION_FR[sheetData.location] || sheetData.location;
+              const existingShops = (item.shops?.fr || []).map((s: string) =>
+                s.toLowerCase(),
+              );
               if (existingShops.includes(translatedLocation.toLowerCase())) {
                 return null;
               }
               return (
                 <div className="flex items-center gap-2">
-                  <MapPin size={18} className="text-on-surface-variant" aria-hidden="true" />
-                  <span className="text-sm font-medium text-on-surface">{translatedLocation}</span>
+                  <MapPin
+                    size={18}
+                    className="text-on-surface-variant"
+                    aria-hidden="true"
+                  />
+                  <span className="text-sm font-medium text-on-surface">
+                    {translatedLocation}
+                  </span>
                 </div>
               );
             })()}
@@ -277,8 +347,10 @@ export function ItemDetail({ item, itemName, itemDesc }: ItemDetailProps) {
 					    `stat1/stat2` non interprétables qu'on ne doit pas afficher). */}
           {bonusEntries.length === 0 &&
             sheetData?.stats &&
-            Object.keys(sheetData.stats).some(k => k in STAT_LABELS) &&
-            Object.entries(sheetData.stats).some(([k, v]) => k in STAT_LABELS && v > 0) && (
+            Object.keys(sheetData.stats).some((k) => k in STAT_LABELS) &&
+            Object.entries(sheetData.stats).some(
+              ([k, v]) => k in STAT_LABELS && v > 0,
+            ) && (
               <div>
                 <span className="text-[10px] font-bold text-on-surface-variant uppercase block mb-3 opacity-60">
                   Statistiques
@@ -288,20 +360,29 @@ export function ItemDetail({ item, itemName, itemDesc }: ItemDetailProps) {
                     if (!value || value === 0 || !(key in STAT_LABELS)) {
                       return null;
                     }
-                    const info = STAT_LABELS[key] || { icon: "bar_chart", label: key };
+                    const info = STAT_LABELS[key] || {
+                      icon: "bar_chart",
+                      label: key,
+                    };
                     const pct = Math.min(100, (value / STAT_MAX) * 100);
                     return (
                       <div
                         key={key}
                         className="flex items-center gap-3 px-3 py-2 rounded-xl bg-surface-container-high border border-outline-variant/10"
                       >
-                        <Icon name={info.icon} size={18} className="text-primary shrink-0" />
+                        <Icon
+                          name={info.icon}
+                          size={18}
+                          className="text-primary shrink-0"
+                        />
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between mb-1">
                             <span className="text-[10px] font-bold text-on-surface-variant uppercase opacity-60">
                               {info.label}
                             </span>
-                            <span className="text-sm font-black text-on-surface">{value}</span>
+                            <span className="text-sm font-black text-on-surface">
+                              {value}
+                            </span>
                           </div>
                           <div className="h-1.5 rounded-full bg-outline-variant/20 overflow-hidden">
                             <div
@@ -328,9 +409,16 @@ export function ItemDetail({ item, itemName, itemDesc }: ItemDetailProps) {
           </h2>
           <div className="space-y-3">
             {exchangeRecipes.map((recipe, i) => (
-              <div key={i} className="p-3 rounded-xl bg-surface-container-low border border-outline-variant/10">
+              <div
+                key={i}
+                className="p-3 rounded-xl bg-surface-container-low border border-outline-variant/10"
+              >
                 <div className="flex items-center gap-2 mb-2">
-                  <ShoppingBag size={16} className="text-on-surface-variant shrink-0" aria-hidden="true" />
+                  <ShoppingBag
+                    size={16}
+                    className="text-on-surface-variant shrink-0"
+                    aria-hidden="true"
+                  />
                   <span className="text-xs font-bold text-on-surface-variant uppercase tracking-wide">
                     {recipe.shop}
                   </span>
@@ -341,7 +429,9 @@ export function ItemDetail({ item, itemName, itemDesc }: ItemDetailProps) {
                       key={j}
                       className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-primary/10 text-primary text-xs font-bold border border-primary/20"
                     >
-                      <span className="text-on-surface font-black">{cost.quantity}x</span>
+                      <span className="text-on-surface font-black">
+                        {cost.quantity}x
+                      </span>
                       {cost.name}
                     </span>
                   ))}
@@ -362,7 +452,11 @@ export function ItemDetail({ item, itemName, itemDesc }: ItemDetailProps) {
                 key={i}
                 className="flex items-center gap-3 p-3 rounded-xl bg-surface-container-low hover:bg-surface-container-high transition-colors"
               >
-                <ShoppingBag size={24} className="text-on-surface-variant" aria-hidden="true" />
+                <ShoppingBag
+                  size={24}
+                  className="text-on-surface-variant"
+                  aria-hidden="true"
+                />
                 <span className="font-medium text-sm">{shop}</span>
               </div>
             ))}

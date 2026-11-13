@@ -4,7 +4,11 @@ import { ButtonComponent, Discord } from "discordx";
 
 import { PROFIL_ANNONCEUR } from "../lib/config";
 import { messageAnnonce, messagePing, urlTweet } from "../lib/tweets-format";
-import { decoderValidation, texteCarteTranchee, PREFIXE_VALIDATION } from "../lib/validation-annonce";
+import {
+  decoderValidation,
+  texteCarteTranchee,
+  PREFIXE_VALIDATION,
+} from "../lib/validation-annonce";
 import { lireTweet } from "../services/tweets";
 import { resoudreSalon } from "../services/tweetsNotifier";
 import { ANNONCEURS_AUTORISES } from "./x";
@@ -38,7 +42,8 @@ export class ValidationAnnonce {
     const etat = decoderValidation(interaction.customId);
     if (!etat) {
       await interaction.reply({
-        content: "Ce bouton n'est plus lisible. Relance la récolte pour obtenir une carte fraîche.",
+        content:
+          "Ce bouton n'est plus lisible. Relance la récolte pour obtenir une carte fraîche.",
         flags: MessageFlags.Ephemeral,
       });
       return;
@@ -55,7 +60,8 @@ export class ValidationAnnonce {
     const annonce = PROFIL_ANNONCEUR.annoncePosts;
     if (!annonce) {
       await interaction.reply({
-        content: "Ce bot n'a pas de salon d'annonce dans son registre : il n'y a nulle part où publier.",
+        content:
+          "Ce bot n'a pas de salon d'annonce dans son registre : il n'y a nulle part où publier.",
         flags: MessageFlags.Ephemeral,
       });
       return;
@@ -71,7 +77,9 @@ export class ValidationAnnonce {
 
     const tweet = await lireTweet(etat.tweetId);
     const auteur = tweet?.author_username ?? "inconnu";
-    const url = tweet ? urlTweet(tweet) : `https://x.com/i/status/${etat.tweetId}`;
+    const url = tweet
+      ? urlTweet(tweet)
+      : `https://x.com/i/status/${etat.tweetId}`;
 
     if (etat.decision === "non") {
       await interaction.editReply({
@@ -100,7 +108,10 @@ export class ValidationAnnonce {
       return;
     }
 
-    const { salon, raison } = await resoudreSalon(interaction.client, annonce.salon);
+    const { salon, raison } = await resoudreSalon(
+      interaction.client,
+      annonce.salon,
+    );
     if (!salon) {
       await interaction.editReply({
         content: texteCarteTranchee({

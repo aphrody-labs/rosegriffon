@@ -10,7 +10,11 @@ import {
 import { RG_GUILD_ID } from "@rosegriffon/types/discord";
 
 import { requireApiAdmin } from "@/lib/api-auth";
-import { enregistrerReglagesGuilde, lireReglagesGuilde, remplacerReglagesGuilde } from "@/lib/bot/reglages";
+import {
+  enregistrerReglagesGuilde,
+  lireReglagesGuilde,
+  remplacerReglagesGuilde,
+} from "@/lib/bot/reglages";
 import { logAdminAction } from "@/lib/admin-logger";
 
 export const dynamic = "force-dynamic";
@@ -34,12 +38,19 @@ export async function GET(requete: NextRequest) {
   }
   const guildId = guildeDemandee(requete);
   if (!guildId) {
-    return NextResponse.json({ error: "Identifiant de guilde invalide" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Identifiant de guilde invalide" },
+      { status: 400 },
+    );
   }
 
   const etat = await lireReglagesGuilde(guildId);
   return NextResponse.json(
-    { ...etat, manques: manquesParSection(etat.reglages), defauts: REGLAGES_DEFAUT },
+    {
+      ...etat,
+      manques: manquesParSection(etat.reglages),
+      defauts: REGLAGES_DEFAUT,
+    },
     { headers: { "cache-control": "private, no-store" } },
   );
 }
@@ -65,14 +76,20 @@ export async function PATCH(requete: NextRequest) {
   }
   const guildId = guildeDemandee(requete);
   if (!guildId) {
-    return NextResponse.json({ error: "Identifiant de guilde invalide" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Identifiant de guilde invalide" },
+      { status: 400 },
+    );
   }
 
   let corps: unknown;
   try {
     corps = await requete.json();
   } catch {
-    return NextResponse.json({ error: "Corps JSON illisible" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Corps JSON illisible" },
+      { status: 400 },
+    );
   }
 
   const analyse = SchemaModificationReglages.safeParse(corps);
@@ -80,7 +97,7 @@ export async function PATCH(requete: NextRequest) {
     return NextResponse.json(
       {
         error: "Réglages refusés",
-        details: analyse.error.issues.map(probleme => ({
+        details: analyse.error.issues.map((probleme) => ({
           champ: probleme.path.join("."),
           message: probleme.message,
         })),
@@ -90,22 +107,35 @@ export async function PATCH(requete: NextRequest) {
   }
 
   if (Object.keys(analyse.data).length === 0) {
-    return NextResponse.json({ error: "Aucune modification fournie" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Aucune modification fournie" },
+      { status: 400 },
+    );
   }
 
   try {
-    const resultat = await enregistrerReglagesGuilde(guildId, analyse.data as ModificationReglages);
-    await logAdminAction("bot.reglages.modifier", "bot_reglages_guilde", guildId, {
-      sections: Object.keys(analyse.data),
-      profilsPrevenus: resultat.profilsPrevenus,
-    });
+    const resultat = await enregistrerReglagesGuilde(
+      guildId,
+      analyse.data as ModificationReglages,
+    );
+    await logAdminAction(
+      "bot.reglages.modifier",
+      "bot_reglages_guilde",
+      guildId,
+      {
+        sections: Object.keys(analyse.data),
+        profilsPrevenus: resultat.profilsPrevenus,
+      },
+    );
     return NextResponse.json({
       ...resultat,
       manques: manquesParSection(resultat.reglages),
     });
   } catch (erreur) {
     return NextResponse.json(
-      { error: erreur instanceof Error ? erreur.message : "Écriture impossible" },
+      {
+        error: erreur instanceof Error ? erreur.message : "Écriture impossible",
+      },
       { status: 500 },
     );
   }
@@ -125,18 +155,32 @@ export async function DELETE(requete: NextRequest) {
   }
   if (garde.data.role !== "admin") {
     return NextResponse.json(
-      { error: "Rétablir les défauts efface tous les réglages : réservé au rôle admin." },
+      {
+        error:
+          "Rétablir les défauts efface tous les réglages : réservé au rôle admin.",
+      },
       { status: 403 },
     );
   }
   const guildId = guildeDemandee(requete);
   if (!guildId) {
-    return NextResponse.json({ error: "Identifiant de guilde invalide" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Identifiant de guilde invalide" },
+      { status: 400 },
+    );
   }
 
   const resultat = await remplacerReglagesGuilde(guildId, REGLAGES_DEFAUT);
-  await logAdminAction("bot.reglages.reinitialiser", "bot_reglages_guilde", guildId, {
-    profilsPrevenus: resultat.profilsPrevenus,
+  await logAdminAction(
+    "bot.reglages.reinitialiser",
+    "bot_reglages_guilde",
+    guildId,
+    {
+      profilsPrevenus: resultat.profilsPrevenus,
+    },
+  );
+  return NextResponse.json({
+    ...resultat,
+    manques: manquesParSection(resultat.reglages),
   });
-  return NextResponse.json({ ...resultat, manques: manquesParSection(resultat.reglages) });
 }

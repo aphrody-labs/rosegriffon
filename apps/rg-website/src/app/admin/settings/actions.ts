@@ -42,7 +42,9 @@ export async function updateSetting(
     return { message: `Erreur lors de la mise à jour: ${error.message}` };
   }
 
-  await logAdminAction("update", "settings", parsed.key, { description: updateData.description });
+  await logAdminAction("update", "settings", parsed.key, {
+    description: updateData.description,
+  });
 
   revalidatePath("/admin/settings");
   revalidatePath("/"); // Revalidate home page as well

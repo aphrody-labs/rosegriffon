@@ -60,7 +60,8 @@ export const RawSkillElement = {
   Wind: 3,
   Earth: 4,
 } as const;
-export type RawSkillElement = (typeof RawSkillElement)[keyof typeof RawSkillElement];
+export type RawSkillElement =
+  (typeof RawSkillElement)[keyof typeof RawSkillElement];
 
 /**
  * Skill category enum
@@ -71,7 +72,8 @@ export const RawSkillCategory = {
   Block: 3,
   Catch: 4,
 } as const;
-export type RawSkillCategory = (typeof RawSkillCategory)[keyof typeof RawSkillCategory];
+export type RawSkillCategory =
+  (typeof RawSkillCategory)[keyof typeof RawSkillCategory];
 
 /**
  * Full skill_config document structure

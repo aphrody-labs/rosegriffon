@@ -16,16 +16,34 @@ export function CharacterFilters({ teams = [] }: CharacterFiltersProps) {
     <div className="flex flex-col gap-4 pb-6 px-1">
       {/* Element */}
       <section className="space-y-2">
-        <h4 className="text-xs font-bold text-primary uppercase tracking-wider">{t("wiki.filters.element")}</h4>
+        <h4 className="text-xs font-bold text-primary uppercase tracking-wider">
+          {t("wiki.filters.element")}
+        </h4>
         <FilterChips
           paramName="element"
           className="flex flex-wrap gap-1.5"
           hideLabel
           options={[
-            { commonSprite: "fire", label: t("wiki.elements.fire"), value: "Fire" },
-            { commonSprite: "wind", label: t("wiki.elements.wind"), value: "Wind" },
-            { commonSprite: "forest", label: t("wiki.elements.forest"), value: "Forest" },
-            { commonSprite: "mountain", label: t("wiki.elements.mountain"), value: "Mountain" },
+            {
+              commonSprite: "fire",
+              label: t("wiki.elements.fire"),
+              value: "Fire",
+            },
+            {
+              commonSprite: "wind",
+              label: t("wiki.elements.wind"),
+              value: "Wind",
+            },
+            {
+              commonSprite: "forest",
+              label: t("wiki.elements.forest"),
+              value: "Forest",
+            },
+            {
+              commonSprite: "mountain",
+              label: t("wiki.elements.mountain"),
+              value: "Mountain",
+            },
           ]}
         />
       </section>
@@ -34,7 +52,9 @@ export function CharacterFilters({ teams = [] }: CharacterFiltersProps) {
 
       {/* Position */}
       <section className="space-y-2">
-        <h4 className="text-xs font-bold text-primary uppercase tracking-wider">{t("wiki.filters.position")}</h4>
+        <h4 className="text-xs font-bold text-primary uppercase tracking-wider">
+          {t("wiki.filters.position")}
+        </h4>
         <FilterChips
           paramName="position"
           className="flex flex-wrap gap-1.5"
@@ -68,14 +88,20 @@ export function CharacterFilters({ teams = [] }: CharacterFiltersProps) {
 
       {/* Gender */}
       <section className="space-y-2">
-        <h4 className="text-xs font-bold text-primary uppercase tracking-wider">{t("wiki.filters.gender")}</h4>
+        <h4 className="text-xs font-bold text-primary uppercase tracking-wider">
+          {t("wiki.filters.gender")}
+        </h4>
         <FilterChips
           paramName="gender"
           className="flex flex-wrap gap-1.5"
           hideLabel
           options={[
             { commonSprite: "boy", label: t("wiki.genders.male"), value: "1" },
-            { commonSprite: "girl", label: t("wiki.genders.female"), value: "2" },
+            {
+              commonSprite: "girl",
+              label: t("wiki.genders.female"),
+              value: "2",
+            },
           ]}
         />
       </section>
@@ -84,16 +110,30 @@ export function CharacterFilters({ teams = [] }: CharacterFiltersProps) {
 
       {/* Playstyle */}
       <section className="space-y-2">
-        <h4 className="text-xs font-bold text-primary uppercase tracking-wider">{t("wiki.filters.playstyle")}</h4>
+        <h4 className="text-xs font-bold text-primary uppercase tracking-wider">
+          {t("wiki.filters.playstyle")}
+        </h4>
         <FilterChips
           paramName="playstyle"
           className="flex flex-wrap gap-1.5"
           hideLabel
           options={[
             { commonSprite: "justice", label: "Justice", value: "Justice" },
-            { commonSprite: "lien", label: t("wiki.playstyles.bond"), value: "Bond" },
-            { commonSprite: "contre", label: t("wiki.playstyles.counter"), value: "Counter" },
-            { commonSprite: "breche", label: t("wiki.playstyles.breach"), value: "Breach" },
+            {
+              commonSprite: "lien",
+              label: t("wiki.playstyles.bond"),
+              value: "Bond",
+            },
+            {
+              commonSprite: "contre",
+              label: t("wiki.playstyles.counter"),
+              value: "Counter",
+            },
+            {
+              commonSprite: "breche",
+              label: t("wiki.playstyles.breach"),
+              value: "Breach",
+            },
             {
               commonSprite: "jeu_violent",
               label: t("wiki.playstyles.rough_play"),
@@ -110,14 +150,19 @@ export function CharacterFilters({ teams = [] }: CharacterFiltersProps) {
 			    8 valeurs réelles mesurées en base après crawl (le zukan-wide catalogue
 			    en a d'autres, mais seules celles-ci apparaissent sur nos personnages). */}
       <section className="space-y-2">
-        <h4 className="text-xs font-bold text-primary uppercase tracking-wider">{t("wiki.filters.age_group")}</h4>
+        <h4 className="text-xs font-bold text-primary uppercase tracking-wider">
+          {t("wiki.filters.age_group")}
+        </h4>
         <FilterChips
           paramName="ageGroup"
           className="flex flex-wrap gap-1.5"
           options={[
             { label: t("wiki.age_groups.child"), value: "Child" },
             { label: t("wiki.age_groups.elementary"), value: "Elementary" },
-            { label: t("wiki.age_groups.middle_school"), value: "Middle School" },
+            {
+              label: t("wiki.age_groups.middle_school"),
+              value: "Middle School",
+            },
             { label: t("wiki.age_groups.high_school"), value: "High School" },
             { label: t("wiki.age_groups.college"), value: "College" },
             { label: t("wiki.age_groups.adult"), value: "Adult" },
@@ -131,7 +176,9 @@ export function CharacterFilters({ teams = [] }: CharacterFiltersProps) {
 
       {/* School Year — valeurs du filtre officiel Zukan. */}
       <section className="space-y-2">
-        <h4 className="text-xs font-bold text-primary uppercase tracking-wider">Année scolaire</h4>
+        <h4 className="text-xs font-bold text-primary uppercase tracking-wider">
+          Année scolaire
+        </h4>
         <FilterChips
           paramName="schoolYear"
           className="flex flex-wrap gap-1.5"
@@ -147,7 +194,9 @@ export function CharacterFilters({ teams = [] }: CharacterFiltersProps) {
 
       {/* Rarity */}
       <section className="space-y-2">
-        <h4 className="text-xs font-bold text-primary uppercase tracking-wider">{t("wiki.filters.rarity")}</h4>
+        <h4 className="text-xs font-bold text-primary uppercase tracking-wider">
+          {t("wiki.filters.rarity")}
+        </h4>
         <RarityFilterChips />
       </section>
 
@@ -155,7 +204,9 @@ export function CharacterFilters({ teams = [] }: CharacterFiltersProps) {
 
       {/* Role */}
       <section className="space-y-2">
-        <h4 className="text-xs font-bold text-primary uppercase tracking-wider">Rôle</h4>
+        <h4 className="text-xs font-bold text-primary uppercase tracking-wider">
+          Rôle
+        </h4>
         <FilterChips
           paramName="role"
           className="flex flex-wrap gap-1.5"
@@ -170,7 +221,9 @@ export function CharacterFilters({ teams = [] }: CharacterFiltersProps) {
 
       {/* Series */}
       <section className="space-y-2">
-        <h4 className="text-xs font-bold text-primary uppercase tracking-wider">Série</h4>
+        <h4 className="text-xs font-bold text-primary uppercase tracking-wider">
+          Série
+        </h4>
         <FilterChips
           paramName="series"
           className="flex flex-wrap gap-1.5"
@@ -193,7 +246,9 @@ export function CharacterFilters({ teams = [] }: CharacterFiltersProps) {
           <hr className="border-outline-variant/20" />
           {/* Team Filter */}
           <section className="space-y-2">
-            <h4 className="text-xs font-bold text-primary uppercase tracking-wider">{t("wiki.filters.team")}</h4>
+            <h4 className="text-xs font-bold text-primary uppercase tracking-wider">
+              {t("wiki.filters.team")}
+            </h4>
             <TeamFilter teams={teams} />
           </section>
         </>

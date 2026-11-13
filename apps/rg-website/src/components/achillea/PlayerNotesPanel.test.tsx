@@ -1,7 +1,16 @@
 import { afterEach, expect, spyOn, test } from "bun:test";
-import { act, cleanup, fireEvent, render, waitFor } from "@testing-library/react";
+import {
+  act,
+  cleanup,
+  fireEvent,
+  render,
+  waitFor,
+} from "@testing-library/react";
 import type { PlayerNote } from "@rosegriffon/achillea-types/domain/player-note";
-import { PlayerNoteCategory, PlayerNoteSeverity } from "@rosegriffon/achillea-types/enums/eventEnums";
+import {
+  PlayerNoteCategory,
+  PlayerNoteSeverity,
+} from "@rosegriffon/achillea-types/enums/eventEnums";
 import { PlayerNotesPanel } from "./PlayerNotesPanel";
 
 afterEach(cleanup);
@@ -69,7 +78,9 @@ test("does not apply a late tournament A response after tournament B", async () 
 test("settles an outstanding request safely after unmount", async () => {
   const pending = Promise.withResolvers<Response>();
   const fetch = spyOn(globalThis, "fetch").mockImplementation(
-    Object.assign(() => pending.promise, { preconnect: globalThis.fetch.preconnect }),
+    Object.assign(() => pending.promise, {
+      preconnect: globalThis.fetch.preconnect,
+    }),
   );
   const errors = spyOn(console, "error");
   try {
@@ -96,7 +107,8 @@ test("keeps the newest overlapping refresh for the same tournament", async () =>
   const fetch = spyOn(globalThis, "fetch").mockImplementation(
     Object.assign(
       (input: Parameters<typeof globalThis.fetch>[0]) => {
-        if (String(input).endsWith("/resolve")) return Promise.resolve(Response.json(note("seed")));
+        if (String(input).endsWith("/resolve"))
+          return Promise.resolve(Response.json(note("seed")));
         if (++lists === 1) return Promise.resolve(response("seed"));
         const request = refreshes.shift();
         if (!request) throw new Error("Unexpected extra API request");

@@ -11,7 +11,13 @@ import type { FiltreFil } from "./comptes";
 import { avecDelai } from "./memo";
 import { decoderCurseur, encoderCurseur, fusionner } from "./normalisation";
 import type { CurseursParReseau } from "./normalisation";
-import type { FilUnifie, PageSource, ProfilFeed, SourceFeed, StatutSource } from "./types";
+import type {
+  FilUnifie,
+  PageSource,
+  ProfilFeed,
+  SourceFeed,
+  StatutSource,
+} from "./types";
 import { cleProfil } from "./types";
 
 const DELAI_SOURCE_MS = 35_000;
@@ -25,45 +31,56 @@ export async function composerFil(
   const comptes = comptesDuFiltre(filtre);
   const curseurs: CurseursParReseau | null = decoderCurseur(curseur);
   // Page suivante : seules les sources qui ont encore une suite sont relues.
-  const actives = sources.filter(s => comptes.some(c => c.reseau === s.reseau) && (!curseurs || curseurs[s.reseau]));
+  const actives = sources.filter(
+    (s) =>
+      comptes.some((c) => c.reseau === s.reseau) &&
+      (!curseurs || curseurs[s.reseau]),
+  );
 
   const resultats = await Promise.all(
-    actives.map(async (source): Promise<{ source: SourceFeed; page: PageSource }> => {
-      try {
-        const page = await avecDelai(
-          source.lire({ comptes: comptes.filter(c => c.reseau === source.reseau), curseur: curseurs?.[source.reseau] }),
-          DELAI_SOURCE_MS,
-          `source ${source.reseau}`,
-        );
-        return { source, page };
-      } catch {
-        // Une source qui échoue ne casse pas les autres.
-        return {
-          source,
-          page: {
-            posts: [],
-            profils: [],
-            statut: {
-              reseau: source.reseau,
-              etat: "indisponible",
-              message: "Cette source ne répond pas pour le moment.",
+    actives.map(
+      async (source): Promise<{ source: SourceFeed; page: PageSource }> => {
+        try {
+          const page = await avecDelai(
+            source.lire({
+              comptes: comptes.filter((c) => c.reseau === source.reseau),
+              curseur: curseurs?.[source.reseau],
+            }),
+            DELAI_SOURCE_MS,
+            `source ${source.reseau}`,
+          );
+          return { source, page };
+        } catch {
+          // Une source qui échoue ne casse pas les autres.
+          return {
+            source,
+            page: {
+              posts: [],
+              profils: [],
+              statut: {
+                reseau: source.reseau,
+                etat: "indisponible",
+                message: "Cette source ne répond pas pour le moment.",
+              },
             },
-          },
-        };
-      }
-    }),
+          };
+        }
+      },
+    ),
   );
 
   const profils: Record<string, ProfilFeed> = {};
-  for (const { page } of resultats) for (const p of page.profils) profils[cleProfil(p.reseau, p.pseudo)] = p;
+  for (const { page } of resultats)
+    for (const p of page.profils) profils[cleProfil(p.reseau, p.pseudo)] = p;
 
   const suite: CurseursParReseau = {};
-  for (const { source, page } of resultats) if (page.curseur) suite[source.reseau] = page.curseur;
+  for (const { source, page } of resultats)
+    if (page.curseur) suite[source.reseau] = page.curseur;
 
-  const statuts: StatutSource[] = resultats.map(r => r.page.statut);
+  const statuts: StatutSource[] = resultats.map((r) => r.page.statut);
   return {
     posts: fusionner(
-      resultats.map(r => r.page.posts),
+      resultats.map((r) => r.page.posts),
       MAX_PAR_LECTURE,
     ),
     profils,

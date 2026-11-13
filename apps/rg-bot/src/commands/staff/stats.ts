@@ -85,7 +85,10 @@ async function statsDiscord(): Promise<StatsDiscord> {
 })
 @SlashGroup("stats", "staff")
 export class StaffStatsCommand {
-  @Slash({ name: "site", description: "Profils, articles, événements et équipe de rosegriffon.fr" })
+  @Slash({
+    name: "site",
+    description: "Profils, articles, événements et équipe de rosegriffon.fr",
+  })
   async site(interaction: ChatInputCommandInteraction) {
     await differerEnPrive(interaction);
     const admin = await exigerDroits(interaction);
@@ -132,13 +135,17 @@ export class StaffStatsCommand {
         );
       await interaction.editReply({ embeds: [embed] });
     } catch (err) {
-      await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
+      await repondre(
+        interaction,
+        echec("Le service n'a pas répondu", messagePanne(err)),
+      );
     }
   }
 
   @Slash({
     name: "discord",
-    description: "Membres, salons, messages et sondages du serveur (décomptes agrégés)",
+    description:
+      "Membres, salons, messages et sondages du serveur (décomptes agrégés)",
   })
   async discord(interaction: ChatInputCommandInteraction) {
     await differerEnPrive(interaction);
@@ -149,7 +156,9 @@ export class StaffStatsCommand {
       const stats = await statsDiscord();
       const embed = rgEmbed()
         .setTitle("Serveur Discord — état des compteurs")
-        .setDescription(`Dernière synchronisation des messages : ${horodatageRelatif(stats.dernier_sync)}.`)
+        .setDescription(
+          `Dernière synchronisation des messages : ${horodatageRelatif(stats.dernier_sync)}.`,
+        )
         .addFields(
           {
             name: "Membres",
@@ -193,7 +202,10 @@ export class StaffStatsCommand {
         );
       await interaction.editReply({ embeds: [embed] });
     } catch (err) {
-      await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
+      await repondre(
+        interaction,
+        echec("Le service n'a pas répondu", messagePanne(err)),
+      );
     }
   }
 }

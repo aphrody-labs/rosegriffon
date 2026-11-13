@@ -74,9 +74,9 @@ The patching is supported by using [TypeScript module augmentation](https://www.
 import "@rosegriffon/patreon-bun";
 
 declare module "@rosegriffon/patreon-bun" {
-	interface CustomTypeOptions {
-		social_connections: Record<string, { url: string; user_id: string } | null>;
-	}
+  interface CustomTypeOptions {
+    social_connections: Record<string, { url: string; user_id: string } | null>;
+  }
 }
 ```
 

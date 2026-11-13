@@ -2,7 +2,10 @@ import { BreadcrumbSchema } from "@/components/shared/StructuredData";
 
 import { RgtvPageClient } from "./_components/RgtvPageClient";
 import { checkStreamerPermission } from "./actions";
-import { getGoogleCalendarSchedulesByDay, isGoogleCalendarConfigured } from "./google-calendar-actions";
+import {
+  getGoogleCalendarSchedulesByDay,
+  isGoogleCalendarConfigured,
+} from "./google-calendar-actions";
 import { getSchedulesByDay } from "./stream-schedule-actions";
 
 export const dynamic = "force-dynamic";
@@ -25,7 +28,10 @@ export default async function RoseGriffonTvPage() {
         scheduleByDay = await getGoogleCalendarSchedulesByDay();
         // Console.log("✅ Planning chargé depuis Google Calendar");
       } catch (gcalError) {
-        console.warn("⚠️ Google Calendar échoué, fallback sur Supabase", gcalError);
+        console.warn(
+          "⚠️ Google Calendar échoué, fallback sur Supabase",
+          gcalError,
+        );
         // Fallback sur Supabase
         scheduleByDay = await getSchedulesByDay();
       }
@@ -50,7 +56,11 @@ export default async function RoseGriffonTvPage() {
           { item: "/rose-griffon-tv", name: "Rose Griffon TV" },
         ]}
       />
-      <RgtvPageClient scheduleByDay={scheduleByDay} scheduleError={scheduleError} isStreamer={isStreamer} />
+      <RgtvPageClient
+        scheduleByDay={scheduleByDay}
+        scheduleError={scheduleError}
+        isStreamer={isStreamer}
+      />
     </>
   );
 }

@@ -892,7 +892,13 @@
           "name": "file_size",
           "description": "Total length minus 8"
         },
-        { "offsetHex": "0x08", "offsetDec": 8, "type": "uint32_le", "name": "format", "description": "ASCII 'WAVE'" }
+        {
+          "offsetHex": "0x08",
+          "offsetDec": 8,
+          "type": "uint32_le",
+          "name": "format",
+          "description": "ASCII 'WAVE'"
+        }
       ],
       "crossLanguageTypes": {
         "rust": "aphrody_nie_formats::cri_audio::Wav",

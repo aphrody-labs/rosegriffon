@@ -6,7 +6,13 @@
 import type { XProfil, XTweet } from "./live";
 import { sansCaracteresIllisibles } from "../unicode";
 import { RESEAUX } from "./comptes";
-import type { CompteSource, MediaFeed, PostFeed, ProfilFeed, Reseau } from "./types";
+import type {
+  CompteSource,
+  MediaFeed,
+  PostFeed,
+  ProfilFeed,
+  Reseau,
+} from "./types";
 
 // ── X ───────────────────────────────────────────────────────────────────────
 
@@ -23,19 +29,25 @@ export function postDepuisTweet(t: XTweet, compte?: CompteSource): PostFeed {
     id: `x:${t.id}`,
     idOrigine: t.id,
     reseau: "x",
-    auteur: { pseudo, nom: sansCaracteresIllisibles(t.author.name), lien: `https://x.com/${pseudo}` },
+    auteur: {
+      pseudo,
+      nom: sansCaracteresIllisibles(t.author.name),
+      lien: `https://x.com/${pseudo}`,
+    },
     // La CLI X livre parfois un U+FFFD (octets déjà invalides en amont, irréparables ici).
     texte: sansCaracteresIllisibles(t.text),
     medias: (t.media ?? [])
-      .filter(m => m.url || m.preview_url)
-      .map(m => ({
+      .filter((m) => m.url || m.preview_url)
+      .map((m) => ({
         type: typeMediaX(m.type),
         url: m.url,
         apercu: m.preview_url,
         largeur: m.width,
         hauteur: m.height,
       })),
-    date: Number.isNaN(date.getTime()) ? new Date(0).toISOString() : date.toISOString(),
+    date: Number.isNaN(date.getTime())
+      ? new Date(0).toISOString()
+      : date.toISOString(),
     metriques: {
       reponses: t.reply_count,
       partages: (t.retweet_count ?? 0) + (t.quote_count ?? 0),
@@ -70,7 +82,10 @@ export function profilDepuisX(p: XProfil): ProfilFeed {
 // ── Fil unifié ──────────────────────────────────────────────────────────────
 
 /** Fusionne des listes : dédoublonnage par identifiant, du plus récent au plus ancien. */
-export function fusionner(listes: readonly (readonly PostFeed[])[], max = Infinity): PostFeed[] {
+export function fusionner(
+  listes: readonly (readonly PostFeed[])[],
+  max = Infinity,
+): PostFeed[] {
   const vus = new Set<string>();
   const posts: PostFeed[] = [];
   for (const liste of listes)
@@ -79,23 +94,35 @@ export function fusionner(listes: readonly (readonly PostFeed[])[], max = Infini
       vus.add(post.id);
       posts.push(post);
     }
-  return posts.sort((a, b) => b.date.localeCompare(a.date) || b.id.localeCompare(a.id)).slice(0, max);
+  return posts
+    .sort((a, b) => b.date.localeCompare(a.date) || b.id.localeCompare(a.id))
+    .slice(0, max);
 }
 
 /** Curseur composite : un curseur opaque par réseau, en base64url. */
 export type CurseursParReseau = Partial<Record<Reseau, string>>;
 
-export function encoderCurseur(curseurs: CurseursParReseau): string | undefined {
+export function encoderCurseur(
+  curseurs: CurseursParReseau,
+): string | undefined {
   const utiles: CurseursParReseau = {};
-  for (const reseau of RESEAUX) if (curseurs[reseau]) utiles[reseau] = curseurs[reseau];
-  return Object.keys(utiles).length > 0 ? Buffer.from(JSON.stringify(utiles)).toString("base64url") : undefined;
+  for (const reseau of RESEAUX)
+    if (curseurs[reseau]) utiles[reseau] = curseurs[reseau];
+  return Object.keys(utiles).length > 0
+    ? Buffer.from(JSON.stringify(utiles)).toString("base64url")
+    : undefined;
 }
 
-export function decoderCurseur(brut: string | undefined): CurseursParReseau | null {
+export function decoderCurseur(
+  brut: string | undefined,
+): CurseursParReseau | null {
   if (!brut || brut.length > 4000) return null;
   try {
-    const valeur: unknown = JSON.parse(Buffer.from(brut, "base64url").toString("utf8"));
-    if (!valeur || typeof valeur !== "object" || Array.isArray(valeur)) return null;
+    const valeur: unknown = JSON.parse(
+      Buffer.from(brut, "base64url").toString("utf8"),
+    );
+    if (!valeur || typeof valeur !== "object" || Array.isArray(valeur))
+      return null;
     const sortie: CurseursParReseau = {};
     for (const reseau of RESEAUX) {
       const v = (valeur as Record<string, unknown>)[reseau];

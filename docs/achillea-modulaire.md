@@ -29,12 +29,12 @@ consomme, et aucune des trois premières couches ne sait qu'Angular existe.
 
 ## Ce que chaque couche a le droit de contenir
 
-| Paquet     | Contient                                                        | Interdit                                                     |
-| ---------- | --------------------------------------------------------------- | ------------------------------------------------------------ |
-| `types`    | `interface`, `type`, `enum`                                       | fonction, classe, `=>`, toute dépendance, tout import runtime  |
-| `core`     | fonctions pures, tables de constantes                             | `node:*`, `bun:*`, `window`, `document`, `process.env`, DI, ORM |
-| `client`   | accès HTTP `fetch` + schémas de validation                        | Angular, React, RxJS, `window`, `server-only`                  |
-| `contract` | extraction + génération                                           | —                                                              |
+| Paquet     | Contient                                   | Interdit                                                        |
+| ---------- | ------------------------------------------ | --------------------------------------------------------------- |
+| `types`    | `interface`, `type`, `enum`                | fonction, classe, `=>`, toute dépendance, tout import runtime   |
+| `core`     | fonctions pures, tables de constantes      | `node:*`, `bun:*`, `window`, `document`, `process.env`, DI, ORM |
+| `client`   | accès HTTP `fetch` + schémas de validation | Angular, React, RxJS, `window`, `server-only`                   |
+| `contract` | extraction + génération                    | —                                                               |
 
 Ces règles ne sont pas déclaratives : elles sont **tenues par des tests**.
 
@@ -57,14 +57,14 @@ volontairement la source, on vérifie que le test tombe. Un test incapable
 d'échouer ne protège rien ; c'est exactement ce qui était arrivé au hook
 `bun.lock`, dont le garde ne s'est jamais déclenché pendant des mois.
 
-| Famille | Fichier | Ce qu'elle interdit |
-| --- | --- | --- |
-| Exhaustivité | `core/tests/exhaustivity.test.ts` | Un membre d'enum sans libellé, un enum entier oublié, deux membres au même libellé, un `switch` dont tous les `case` tombent dans le `default` |
-| Robustesse | `core/tests/robustness.test.ts` | Un `NaN`, un `Infinity`, un négatif ou un `null` qui traverse une fonction de domaine et finit à l'écran |
-| Portabilité | `core/tests/portability.test.ts` | Un `node:`, `bun:`, `@angular/`, `window` glissé dans le métier |
-| Pureté | `types/test/purity.test.ts` | Une fonction, une dépendance ou un libellé dans le contrat |
-| Solidité du généré | `contract/tests/soundness.test.ts` | Une collision de noms après conversion, un mot réservé non échappé, un type référencé mais jamais déclaré |
-| Invariants de surface | `client/tests/invariants.test.ts` | Une URL malformée, une méthode qui n'émet aucune requête, une exception sur un 500 |
+| Famille               | Fichier                            | Ce qu'elle interdit                                                                                                                            |
+| --------------------- | ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| Exhaustivité          | `core/tests/exhaustivity.test.ts`  | Un membre d'enum sans libellé, un enum entier oublié, deux membres au même libellé, un `switch` dont tous les `case` tombent dans le `default` |
+| Robustesse            | `core/tests/robustness.test.ts`    | Un `NaN`, un `Infinity`, un négatif ou un `null` qui traverse une fonction de domaine et finit à l'écran                                       |
+| Portabilité           | `core/tests/portability.test.ts`   | Un `node:`, `bun:`, `@angular/`, `window` glissé dans le métier                                                                                |
+| Pureté                | `types/test/purity.test.ts`        | Une fonction, une dépendance ou un libellé dans le contrat                                                                                     |
+| Solidité du généré    | `contract/tests/soundness.test.ts` | Une collision de noms après conversion, un mot réservé non échappé, un type référencé mais jamais déclaré                                      |
+| Invariants de surface | `client/tests/invariants.test.ts`  | Une URL malformée, une méthode qui n'émet aucune requête, une exception sur un 500                                                             |
 
 Les propriétés sont préférées aux cas : `winRate` n'est pas testé sur trois
 valeurs mais sur la propriété « reste dans `[0, 1]` pour toute entrée », ce qui
@@ -82,12 +82,12 @@ tient en une phrase — `Number()` seul ne borne rien, `Number(null)` vaut `0`.
 `packages/achillea-contract` lit les sources de `achillea-types` (AST
 TypeScript) et régénère à chaque build :
 
-| Fichier                | Cible                          |
-| ---------------------- | ------------------------------ |
-| `achillea.schema.json` | JSON Schema 2020-12            |
+| Fichier                | Cible                                      |
+| ---------------------- | ------------------------------------------ |
+| `achillea.schema.json` | JSON Schema 2020-12                        |
 | `achillea.rs`          | Rust + `serde` (vérifié par `cargo check`) |
-| `Achillea.swift`       | Swift `Codable`                |
-| `Achillea.kt`          | Kotlin `kotlinx.serialization` |
+| `Achillea.swift`       | Swift `Codable`                            |
+| `Achillea.kt`          | Kotlin `kotlinx.serialization`             |
 
 ```bash
 bun --filter @rosegriffon/achillea-contract generate   # régénère
@@ -144,9 +144,12 @@ L'authentification passe par `credentials` (cookie de session) ou
 Le métier dit « ceci est grave », jamais « ceci est rouge » :
 
 ```ts
-import { sanctionTypeTone, TONE_TO_SHADCN_BADGE } from "@rosegriffon/achillea-core";
+import {
+  sanctionTypeTone,
+  TONE_TO_SHADCN_BADGE,
+} from "@rosegriffon/achillea-core";
 
-sanctionTypeTone(SanctionType.Ban);                     // "danger"
+sanctionTypeTone(SanctionType.Ban); // "danger"
 TONE_TO_SHADCN_BADGE[sanctionTypeTone(SanctionType.Ban)]; // "destructive"
 ```
 
@@ -163,23 +166,27 @@ TypeScript, comme les autres workspaces).
 
 ```tsx
 // Server Component
-import { createAchilleaClient, stageTypeLabel, badgeVariant, tournamentStateTone }
-	from "@/lib/achillea";
+import {
+  createAchilleaClient,
+  stageTypeLabel,
+  badgeVariant,
+  tournamentStateTone,
+} from "@/lib/achillea";
 import { Badge } from "@rosegriffon/ui";
 
 export default async function Page() {
-	const client = createAchilleaClient();
-	const result = await client.tournaments.list();
-	if (!result.ok) return <p>Achilléa est injoignable.</p>;
+  const client = createAchilleaClient();
+  const result = await client.tournaments.list();
+  if (!result.ok) return <p>Achilléa est injoignable.</p>;
 
-	return result.value.data.map((tournoi) => (
-		<article key={tournoi.id}>
-			<h2>{tournoi.name}</h2>
-			<Badge variant={badgeVariant(tournamentStateTone(tournoi.internalState))}>
-				{stageTypeLabel(tournoi.tournamentType)}
-			</Badge>
-		</article>
-	));
+  return result.value.data.map((tournoi) => (
+    <article key={tournoi.id}>
+      <h2>{tournoi.name}</h2>
+      <Badge variant={badgeVariant(tournamentStateTone(tournoi.internalState))}>
+        {stageTypeLabel(tournoi.tournamentType)}
+      </Badge>
+    </article>
+  ));
 }
 ```
 

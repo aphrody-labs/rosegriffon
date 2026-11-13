@@ -11,7 +11,14 @@ import { SQL } from "bun";
 import { drizzle as drizzleSqlite } from "drizzle-orm/bun-sqlite";
 import { drizzle as drizzlePg } from "drizzle-orm/bun-sql";
 import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
-import { boolean, integer as pgInteger, jsonb, pgTable, text as pgText, timestamp } from "drizzle-orm/pg-core";
+import {
+  boolean,
+  integer as pgInteger,
+  jsonb,
+  pgTable,
+  text as pgText,
+  timestamp,
+} from "drizzle-orm/pg-core";
 
 // ============================================================================
 // CANONICAL SQLITE DRIZZLE SCHEMAS (for var/mirror.sqlite & memory)
@@ -316,7 +323,9 @@ export function createDrizzlePg(sqlOrUrl?: SQL | string) {
   const client =
     typeof sqlOrUrl === "object" && sqlOrUrl !== null
       ? sqlOrUrl
-      : new SQL({ url: typeof sqlOrUrl === "string" ? sqlOrUrl : ownedPostgresUrl() });
+      : new SQL({
+          url: typeof sqlOrUrl === "string" ? sqlOrUrl : ownedPostgresUrl(),
+        });
   return drizzlePg(client, {
     schema: {
       characters: pgCharacters,

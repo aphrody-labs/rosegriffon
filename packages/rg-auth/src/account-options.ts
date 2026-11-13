@@ -23,7 +23,9 @@ export interface AccountEmailMessage {
   html: string;
 }
 
-export type AccountEmailSender = (message: AccountEmailMessage) => Promise<unknown> | unknown;
+export type AccountEmailSender = (
+  message: AccountEmailMessage,
+) => Promise<unknown> | unknown;
 
 export interface AccountOptionsInput {
   /** Nom affiché dans les courriels (« Azalée », « Rose Griffon »). */
@@ -88,7 +90,11 @@ function template(options: {
  * l'objet hérité de `...commonAuthOptions`, il emporterait donc la table de
  * correspondance des colonnes.
  */
-export function createAccountOptions({ appName, sendEmail, executerSql }: AccountOptionsInput) {
+export function createAccountOptions({
+  appName,
+  sendEmail,
+  executerSql,
+}: AccountOptionsInput) {
   return {
     changeEmail: {
       enabled: true,
@@ -159,19 +165,37 @@ export function createAccountOptions({ appName, sendEmail, executerSql }: Accoun
           // `profiles.id` est un uuid : un identifiant Better Auth qui n'en
           // est pas un ne correspond à aucune ligne, et le cast lèverait.
           if (UUID.test(utilisateur.id)) {
-            await executerSql("delete from public.profiles where id = $1::uuid", [utilisateur.id]);
-            await executerSql("delete from auth.users where id = $1::uuid", [utilisateur.id]);
+            await executerSql(
+              "delete from public.profiles where id = $1::uuid",
+              [utilisateur.id],
+            );
+            await executerSql("delete from auth.users where id = $1::uuid", [
+              utilisateur.id,
+            ]);
           } else if (utilisateur.email) {
             // Repli : les comptes anciens ont un identifiant textuel, mais
             // l'adresse reste la même des deux côtés.
-            await executerSql("delete from public.profiles where email = $1", [utilisateur.email]);
-            await executerSql("delete from auth.users where email = $1", [utilisateur.email]);
+            await executerSql("delete from public.profiles where email = $1", [
+              utilisateur.email,
+            ]);
+            await executerSql("delete from auth.users where email = $1", [
+              utilisateur.email,
+            ]);
           }
         } catch (erreur) {
-          console.error("[compte] effacement des données personnelles incomplet", erreur);
+          console.error(
+            "[compte] effacement des données personnelles incomplet",
+            erreur,
+          );
         }
       },
-      sendDeleteAccountVerification: async ({ user, url }: { user: { email: string }; url: string }) => {
+      sendDeleteAccountVerification: async ({
+        user,
+        url,
+      }: {
+        user: { email: string };
+        url: string;
+      }) => {
         await sendEmail({
           html: template({
             appName,

@@ -80,7 +80,9 @@ export function ImportSheetForm() {
       <Card className="rounded-[24px] border border-outline-variant/20 bg-surface-container-lowest shadow-sm">
         <CardHeader>
           <CardTitle>Importer un Tableau</CardTitle>
-          <CardDescription>Transformez un tableur en article de données.</CardDescription>
+          <CardDescription>
+            Transformez un tableur en article de données.
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="sheet" className="w-full">
@@ -96,13 +98,18 @@ export function ImportSheetForm() {
                   id="sheetId"
                   placeholder="1BxiMvs0XRA5nFMdKbBdB_..."
                   value={sheetId}
-                  onChange={e => setSheetId(e.target.value)}
+                  onChange={(e) => setSheetId(e.target.value)}
                 />
                 <p className="text-sm text-on-surface-variant">
-                  Le document doit être <strong>public</strong> (ou accessible par la clé API).
+                  Le document doit être <strong>public</strong> (ou accessible
+                  par la clé API).
                 </p>
               </div>
-              <Button onClick={handleSheetImport} disabled={loading} className="w-full rounded-full">
+              <Button
+                onClick={handleSheetImport}
+                disabled={loading}
+                className="w-full rounded-full"
+              >
                 {loading ? "Importation…" : "Importer le Sheet"}
               </Button>
             </TabsContent>
@@ -114,7 +121,7 @@ export function ImportSheetForm() {
                   id="csvTitle"
                   placeholder="Ex: Statistiques des joueurs"
                   value={csvTitle}
-                  onChange={e => setCsvTitle(e.target.value)}
+                  onChange={(e) => setCsvTitle(e.target.value)}
                 />
               </div>
               <div className="space-y-2">
@@ -124,10 +131,14 @@ export function ImportSheetForm() {
                   placeholder="Nom,Position,Élément&#10;Evans,GK,Terre&#10;Axel,FW,Feu"
                   className="min-h-[200px] font-mono text-xs"
                   value={csvContent}
-                  onChange={e => setCsvContent(e.target.value)}
+                  onChange={(e) => setCsvContent(e.target.value)}
                 />
               </div>
-              <Button onClick={handleCsvImport} disabled={loading} className="w-full rounded-full">
+              <Button
+                onClick={handleCsvImport}
+                disabled={loading}
+                className="w-full rounded-full"
+              >
                 {loading ? "Importation…" : "Convertir le CSV"}
               </Button>
             </TabsContent>

@@ -114,11 +114,15 @@ describe("formaterOctets", () => {
 
 describe("horodatages Discord", () => {
   test("produit la balise relative avec l'instant en secondes", () => {
-    expect(horodatageRelatif("2026-08-13T00:34:03.769Z")).toBe("<t:1786581243:R>");
+    expect(horodatageRelatif("2026-08-13T00:34:03.769Z")).toBe(
+      "<t:1786581243:R>",
+    );
   });
 
   test("produit la balise absolue", () => {
-    expect(horodatageAbsolu(new Date("2026-08-13T00:34:03.769Z"))).toBe("<t:1786581243:f>");
+    expect(horodatageAbsolu(new Date("2026-08-13T00:34:03.769Z"))).toBe(
+      "<t:1786581243:f>",
+    );
   });
 
   test("une date illisible ne fabrique jamais « maintenant »", () => {
@@ -130,17 +134,25 @@ describe("horodatages Discord", () => {
 
 describe("analyserRelease", () => {
   test("décompose l'identifiant réel du slot azalee", () => {
-    const version = analyserRelease("2026-08-13T00-34-03-769-Va8uc-iExl92JKgLHQVQ0");
+    const version = analyserRelease(
+      "2026-08-13T00-34-03-769-Va8uc-iExl92JKgLHQVQ0",
+    );
     expect(version?.buildId).toBe("Va8uc-iExl92JKgLHQVQ0");
-    expect(version?.assembleeLe?.toISOString()).toBe("2026-08-13T00:34:03.769Z");
+    expect(version?.assembleeLe?.toISOString()).toBe(
+      "2026-08-13T00:34:03.769Z",
+    );
   });
 
   test("garde le tiret initial du BUILD_ID du site (double tiret réel)", () => {
     // Relevé dans /home/ubuntu/rg-releases/website/state.json : le BUILD_ID de
     // Next commence par un tiret. Découper sur le dernier « - » le tronquerait.
-    const version = analyserRelease("2026-08-13T04-30-50-225--vqFzJdyvSX8PnQUwsi1a");
+    const version = analyserRelease(
+      "2026-08-13T04-30-50-225--vqFzJdyvSX8PnQUwsi1a",
+    );
     expect(version?.buildId).toBe("-vqFzJdyvSX8PnQUwsi1a");
-    expect(version?.assembleeLe?.toISOString()).toBe("2026-08-13T04:30:50.225Z");
+    expect(version?.assembleeLe?.toISOString()).toBe(
+      "2026-08-13T04:30:50.225Z",
+    );
   });
 
   test("un identifiant hors format reste affichable, sans date inventée", () => {
@@ -189,11 +201,16 @@ describe("ligneSonde", () => {
 
 describe("decouperEnChamps", () => {
   test("un texte court tient dans un seul champ", () => {
-    expect(decouperEnChamps("une ligne\ndeux lignes", 1_024)).toEqual(["une ligne\ndeux lignes"]);
+    expect(decouperEnChamps("une ligne\ndeux lignes", 1_024)).toEqual([
+      "une ligne\ndeux lignes",
+    ]);
   });
 
   test("coupe sur les sauts de ligne et respecte la limite dure", () => {
-    const texte = Array.from({ length: 40 }, (_, i) => `ligne ${i} ${"x".repeat(40)}`).join("\n");
+    const texte = Array.from(
+      { length: 40 },
+      (_, i) => `ligne ${i} ${"x".repeat(40)}`,
+    ).join("\n");
     const champs = decouperEnChamps(texte, 200, 10);
     expect(champs.length).toBeGreaterThan(1);
     for (const champ of champs) {
@@ -209,7 +226,9 @@ describe("decouperEnChamps", () => {
   });
 
   test("le nombre de champs est plafonné", () => {
-    const texte = Array.from({ length: 200 }, (_, i) => `ligne ${i}`).join("\n");
+    const texte = Array.from({ length: 200 }, (_, i) => `ligne ${i}`).join(
+      "\n",
+    );
     expect(decouperEnChamps(texte, 40, 3)).toHaveLength(3);
   });
 });
@@ -251,11 +270,15 @@ describe("borner", () => {
 
 describe("echapperMarkdown", () => {
   test("neutralise un faux lien injecté par une page distante", () => {
-    expect(echapperMarkdown("[clique](https://mechant.example)")).toBe("\\[clique\\]\\(https://mechant.example\\)");
+    expect(echapperMarkdown("[clique](https://mechant.example)")).toBe(
+      "\\[clique\\]\\(https://mechant.example\\)",
+    );
   });
 
   test("neutralise gras, italique et code", () => {
-    expect(echapperMarkdown("**gras** _italique_ `code`")).toBe("\\*\\*gras\\*\\* \\_italique\\_ \\`code\\`");
+    expect(echapperMarkdown("**gras** _italique_ `code`")).toBe(
+      "\\*\\*gras\\*\\* \\_italique\\_ \\`code\\`",
+    );
   });
 });
 
@@ -270,12 +293,16 @@ describe("ligneResultatWeb", () => {
       2,
     );
     expect(ligne).toContain("**2.**");
-    expect(ligne).toContain("(https://store.steampowered.com/app/2799860/INAZUMA_ELEVEN_Victory_Road/)");
+    expect(ligne).toContain(
+      "(https://store.steampowered.com/app/2799860/INAZUMA_ELEVEN_Victory_Road/)",
+    );
     expect(ligne).toContain("Relive past Inazuma Eleven matches");
   });
 
   test("sans titre, l'URL sert de libellé", () => {
-    expect(ligneResultatWeb({ url: "https://exemple.fr" }, 1)).toBe("**1.** [https://exemple.fr](https://exemple.fr)");
+    expect(ligneResultatWeb({ url: "https://exemple.fr" }, 1)).toBe(
+      "**1.** [https://exemple.fr](https://exemple.fr)",
+    );
   });
 });
 
@@ -296,13 +323,17 @@ describe("lignePostX et formaterPortee", () => {
 
   test("compose auteur, lien, date relative et portée", () => {
     const ligne = lignePostX(POST_REEL);
-    expect(ligne).toContain("[@inazuma_project](https://x.com/inazuma_project/status/2087460043658821924)");
+    expect(ligne).toContain(
+      "[@inazuma_project](https://x.com/inazuma_project/status/2087460043658821924)",
+    );
     expect(ligne).toContain("<t:1786524232:R>");
     expect(ligne.replace(/\s+/g, " ")).toContain("❤ 1 085");
   });
 
   test("un post sans texte le dit au lieu d'afficher une ligne vide", () => {
-    expect(lignePostX({ auteur: "essai", texte: "" })).toContain("*(sans texte)*");
+    expect(lignePostX({ auteur: "essai", texte: "" })).toContain(
+      "*(sans texte)*",
+    );
   });
 
   test("les compteurs absents ne sont pas affichés à zéro", () => {
@@ -315,7 +346,9 @@ describe("normaliserPseudoX", () => {
   test("accepte les écritures réelles d'un même compte", () => {
     expect(normaliserPseudoX("inazuma_project")).toBe("inazuma_project");
     expect(normaliserPseudoX("@inazuma_project")).toBe("inazuma_project");
-    expect(normaliserPseudoX(" https://x.com/inazuma_project/status/2087 ")).toBe("inazuma_project");
+    expect(
+      normaliserPseudoX(" https://x.com/inazuma_project/status/2087 "),
+    ).toBe("inazuma_project");
   });
 
   test("refuse ce qui ne peut pas être un pseudo X", () => {
@@ -336,7 +369,10 @@ describe("trierPostsParDate", () => {
       { id: "2074045952747548797", date: "2026-07-06T08:21:03.000Z" },
       { id: "2087460043658821924", date: "2026-08-12T08:43:52.000Z" },
     ]);
-    expect(trie.map(post => post.id)).toEqual(["2087460043658821924", "2074045952747548797"]);
+    expect(trie.map((post) => post.id)).toEqual([
+      "2087460043658821924",
+      "2074045952747548797",
+    ]);
   });
 
   test("une date absente ou illisible ne passe pas pour la plus récente", () => {
@@ -346,7 +382,7 @@ describe("trierPostsParDate", () => {
       { id: "illisible", date: "hier" },
     ]);
     expect(trie[0]?.id).toBe("recent");
-    expect(trie.map(post => post.id)).toHaveLength(3);
+    expect(trie.map((post) => post.id)).toHaveLength(3);
   });
 
   test("ne modifie pas le tableau reçu", () => {
@@ -355,7 +391,7 @@ describe("trierPostsParDate", () => {
       { id: "b", date: "2026-08-12T08:43:52.000Z" },
     ];
     trierPostsParDate(source);
-    expect(source.map(post => post.id)).toEqual(["a", "b"]);
+    expect(source.map((post) => post.id)).toEqual(["a", "b"]);
   });
 });
 
@@ -405,7 +441,16 @@ describe("formaterEnTetes", () => {
 
 describe("listeCourte", () => {
   test("rend les technologies réelles de inazuma.jp", () => {
-    expect(listeCourte(["Google Fonts", "Google Tag Manager", "HSTS", "jQuery", "OpenResty", "Swiper"])).toBe(
+    expect(
+      listeCourte([
+        "Google Fonts",
+        "Google Tag Manager",
+        "HSTS",
+        "jQuery",
+        "OpenResty",
+        "Swiper",
+      ]),
+    ).toBe(
       "Google Fonts · Google Tag Manager · HSTS · jQuery · OpenResty · Swiper",
     );
   });

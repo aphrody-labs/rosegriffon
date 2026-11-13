@@ -351,7 +351,7 @@ L'équilibrage IEVR consacre un bonus de dégâts et d'efficacité de **+20%** e
 | **Utilisez vos coéquipiers comme un club de golf             |
 | pour un trou-en-un qui renverse le cours du jeu.**           | 味方の選手をクラブに見立てて振り抜く                        |
 | 一発逆転ホールインワンショット。                             | Swing your teammates like a club for a                      |
-| measured, hole-in-one strike.                           | `0xB1108189`                                                |
+| measured, hole-in-one strike.                                | `0xB1108189`                                                |
 | **Un Tir fatal en duo dévastateur,                           |
 | qui martèle les buts sous                                    |
 | une pluie de frappes implacables.**                          | ２人なら　百烈ショットの威力も２倍？                        |
@@ -882,21 +882,21 @@ L'analyse des 53 publications officielles archivées dans `/home/ubuntu/niers/da
 
 | Date (UTC) | Auteur       | Type   | Contenu de la Publication                                                                                      | Métriques |
 | ---------- | ------------ | ------ | -------------------------------------------------------------------------------------------------------------- | --------- |
-| 2026-03-31 | `@Azalee_IE` | Thread | La mise a jour 5.0.0 d'Inazuma Eleven Victory Road ajoutant le DLC Rising Bond est desormais disponible sur... | ️ 2,930  |  842 |
-| 2026-03-31 | `@Azalee_IE` | Post   | [DLC Rising Bond] Plus de 4 500 joueurs du mode Chronicle sont desormais deblocables avec leurs constellati... | ️ 1,850  |  412 |
-| 2026-04-15 | `@Azalee_IE` | Thread | [Tournoi Mondial Inazuma] LEVEL-5 annonce les dates officielles des qualifications regionales Europe & Fran... | ️ 2,100  |  620 |
-| 2026-05-02 | `@Azalee_IE` | Post   | Equilibrage : Les techniques divines d'Aphrodi (God Knows & Heaven's Time) beneficient d'une revision de co... | ️ 1,940  |  530 |
-| 2026-05-20 | `@Azalee_IE` | Post   | Stats Azalee : Le bot Discord Azalee franchit le cap des 150 000 requetes de fiches joueurs et glossaire de... | ️ 1,420  |  290 |
-| 2026-06-07 | `@Azalee_IE` | Post   | [Patch Note IEVR] Mise a jour de maintenance v1.6.0 - Stabilite du Rollback Netcode et synchronisation VFS ... | ️ 490    |  150 |
-| 2026-06-08 | `@Azalee_IE` | Post   | [Patch Note IEVR] Mise a jour de maintenance v1.7.0 - Stabilite du Rollback Netcode et synchronisation VFS ... | ️ 505    |  155 |
-| 2026-06-09 | `@Azalee_IE` | Post   | [Patch Note IEVR] Mise a jour de maintenance v1.8.0 - Stabilite du Rollback Netcode et synchronisation VFS ... | ️ 520    |  160 |
-| 2026-06-10 | `@Azalee_IE` | Post   | [Patch Note IEVR] Mise a jour de maintenance v1.9.0 - Stabilite du Rollback Netcode et synchronisation VFS ... | ️ 535    |  165 |
-| 2026-06-11 | `@Azalee_IE` | Thread | [Patch Note IEVR] Mise a jour de maintenance v2.0.0 - Stabilite du Rollback Netcode et synchronisation VFS ... | ️ 550    |  170 |
-| 2026-06-12 | `@Azalee_IE` | Post   | [Patch Note IEVR] Mise a jour de maintenance v2.1.0 - Stabilite du Rollback Netcode et synchronisation VFS ... | ️ 565    |  175 |
-| 2026-06-13 | `@Azalee_IE` | Post   | [Patch Note IEVR] Mise a jour de maintenance v2.2.0 - Stabilite du Rollback Netcode et synchronisation VFS ... | ️ 580    |  180 |
-| 2026-06-14 | `@Azalee_IE` | Post   | [Patch Note IEVR] Mise a jour de maintenance v2.3.0 - Stabilite du Rollback Netcode et synchronisation VFS ... | ️ 595    |  185 |
-| 2026-06-15 | `@Azalee_IE` | Post   | [Patch Note IEVR] Mise a jour de maintenance v2.4.0 - Stabilite du Rollback Netcode et synchronisation VFS ... | ️ 610    |  190 |
-| 2026-06-16 | `@Azalee_IE` | Thread | [Patch Note IEVR] Mise a jour de maintenance v2.5.0 - Stabilite du Rollback Netcode et synchronisation VFS ... | ️ 625    |  195 |
+| 2026-03-31 | `@Azalee_IE` | Thread | La mise a jour 5.0.0 d'Inazuma Eleven Victory Road ajoutant le DLC Rising Bond est desormais disponible sur... | ️ 2,930    | 842 |
+| 2026-03-31 | `@Azalee_IE` | Post   | [DLC Rising Bond] Plus de 4 500 joueurs du mode Chronicle sont desormais deblocables avec leurs constellati... | ️ 1,850    | 412 |
+| 2026-04-15 | `@Azalee_IE` | Thread | [Tournoi Mondial Inazuma] LEVEL-5 annonce les dates officielles des qualifications regionales Europe & Fran... | ️ 2,100    | 620 |
+| 2026-05-02 | `@Azalee_IE` | Post   | Equilibrage : Les techniques divines d'Aphrodi (God Knows & Heaven's Time) beneficient d'une revision de co... | ️ 1,940    | 530 |
+| 2026-05-20 | `@Azalee_IE` | Post   | Stats Azalee : Le bot Discord Azalee franchit le cap des 150 000 requetes de fiches joueurs et glossaire de... | ️ 1,420    | 290 |
+| 2026-06-07 | `@Azalee_IE` | Post   | [Patch Note IEVR] Mise a jour de maintenance v1.6.0 - Stabilite du Rollback Netcode et synchronisation VFS ... | ️ 490      | 150 |
+| 2026-06-08 | `@Azalee_IE` | Post   | [Patch Note IEVR] Mise a jour de maintenance v1.7.0 - Stabilite du Rollback Netcode et synchronisation VFS ... | ️ 505      | 155 |
+| 2026-06-09 | `@Azalee_IE` | Post   | [Patch Note IEVR] Mise a jour de maintenance v1.8.0 - Stabilite du Rollback Netcode et synchronisation VFS ... | ️ 520      | 160 |
+| 2026-06-10 | `@Azalee_IE` | Post   | [Patch Note IEVR] Mise a jour de maintenance v1.9.0 - Stabilite du Rollback Netcode et synchronisation VFS ... | ️ 535      | 165 |
+| 2026-06-11 | `@Azalee_IE` | Thread | [Patch Note IEVR] Mise a jour de maintenance v2.0.0 - Stabilite du Rollback Netcode et synchronisation VFS ... | ️ 550      | 170 |
+| 2026-06-12 | `@Azalee_IE` | Post   | [Patch Note IEVR] Mise a jour de maintenance v2.1.0 - Stabilite du Rollback Netcode et synchronisation VFS ... | ️ 565      | 175 |
+| 2026-06-13 | `@Azalee_IE` | Post   | [Patch Note IEVR] Mise a jour de maintenance v2.2.0 - Stabilite du Rollback Netcode et synchronisation VFS ... | ️ 580      | 180 |
+| 2026-06-14 | `@Azalee_IE` | Post   | [Patch Note IEVR] Mise a jour de maintenance v2.3.0 - Stabilite du Rollback Netcode et synchronisation VFS ... | ️ 595      | 185 |
+| 2026-06-15 | `@Azalee_IE` | Post   | [Patch Note IEVR] Mise a jour de maintenance v2.4.0 - Stabilite du Rollback Netcode et synchronisation VFS ... | ️ 610      | 190 |
+| 2026-06-16 | `@Azalee_IE` | Thread | [Patch Note IEVR] Mise a jour de maintenance v2.5.0 - Stabilite du Rollback Netcode et synchronisation VFS ... | ️ 625      | 195 |
 
 ---
 

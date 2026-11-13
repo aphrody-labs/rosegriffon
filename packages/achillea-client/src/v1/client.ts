@@ -14,7 +14,11 @@ import { ClanTeamsResource } from "./clan-teams";
 import { ClansResource } from "./clans";
 import { InterclansResource } from "./interclans";
 import { GuildsResource } from "./guilds";
-import { AchilleaHttp, type AchilleaClientOptions, type AchilleaFetch } from "./http";
+import {
+  AchilleaHttp,
+  type AchilleaClientOptions,
+  type AchilleaFetch,
+} from "./http";
 import { LeaguesResource } from "./leagues";
 import { LicensesResource } from "./licenses";
 import { NotificationsResource } from "./notifications";
@@ -90,6 +94,8 @@ export class AchilleaClient {
   }
 }
 
-export function createAchilleaClient(options: AchilleaClientOptions = {}): AchilleaClient {
+export function createAchilleaClient(
+  options: AchilleaClientOptions = {},
+): AchilleaClient {
   return new AchilleaClient(options);
 }

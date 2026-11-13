@@ -24,7 +24,11 @@ export const COMPTES = [
   { handle: "rose_griffon", nom: "Rose Griffon", groupe: "Rose Griffon" },
   { handle: "Achillea_IE", nom: "Achilléa", groupe: "Rose Griffon" },
   { handle: "Azalee_IE", nom: "Azalée", groupe: "Rose Griffon" },
-  { handle: "inazuma_project", nom: "Inazuma Eleven · JP", groupe: "Inazuma Eleven" },
+  {
+    handle: "inazuma_project",
+    nom: "Inazuma Eleven · JP",
+    groupe: "Inazuma Eleven",
+  },
   { handle: "inazuma_cross", nom: "Cross · JP", groupe: "Inazuma Eleven" },
   { handle: "inazumaSD_L5", nom: "SD · JP", groupe: "Inazuma Eleven" },
   { handle: "InazumaSeries", nom: "Series · EN", groupe: "Inazuma Eleven" },
@@ -36,21 +40,45 @@ export const COMPTES = [
 
 export type CompteX = (typeof COMPTES)[number]["handle"];
 
-export const COMPTES_X: readonly CompteX[] = COMPTES.map(c => c.handle);
+export const COMPTES_X: readonly CompteX[] = COMPTES.map((c) => c.handle);
 
-export const GROUPES: readonly Groupe[] = ["Rose Griffon", "Inazuma Eleven", "LEVEL-5"];
+export const GROUPES: readonly Groupe[] = [
+  "Rose Griffon",
+  "Inazuma Eleven",
+  "LEVEL-5",
+];
 
-export const RESEAUX: readonly Reseau[] = ["x", "instagram", "tiktok", "youtube"];
+export const RESEAUX: readonly Reseau[] = [
+  "x",
+  "instagram",
+  "tiktok",
+  "youtube",
+];
 
 /** Libellé et couleur de marque du réseau (la seule couleur brute admise : celle du logo). */
-export const MARQUES: Record<Reseau, { nom: string; couleur: string; lien: (pseudo: string) => string }> = {
-  x: { nom: "X", couleur: "#000000", lien: p => `https://x.com/${p}` },
-  instagram: { nom: "Instagram", couleur: "#E4405F", lien: p => `https://www.instagram.com/${p}/` },
-  tiktok: { nom: "TikTok", couleur: "#FE2C55", lien: p => `https://www.tiktok.com/@${p}` },
-  youtube: { nom: "YouTube", couleur: "#FF0000", lien: p => `https://www.youtube.com/@${p}` },
+export const MARQUES: Record<
+  Reseau,
+  { nom: string; couleur: string; lien: (pseudo: string) => string }
+> = {
+  x: { nom: "X", couleur: "#000000", lien: (p) => `https://x.com/${p}` },
+  instagram: {
+    nom: "Instagram",
+    couleur: "#E4405F",
+    lien: (p) => `https://www.instagram.com/${p}/`,
+  },
+  tiktok: {
+    nom: "TikTok",
+    couleur: "#FE2C55",
+    lien: (p) => `https://www.tiktok.com/@${p}`,
+  },
+  youtube: {
+    nom: "YouTube",
+    couleur: "#FF0000",
+    lien: (p) => `https://www.youtube.com/@${p}`,
+  },
 };
 
-export const COMPTES_SOURCE_X: readonly CompteSource[] = COMPTES.map(c => ({
+export const COMPTES_SOURCE_X: readonly CompteSource[] = COMPTES.map((c) => ({
   reseau: "x",
   pseudo: c.handle,
   nom: c.nom,
@@ -58,24 +86,56 @@ export const COMPTES_SOURCE_X: readonly CompteSource[] = COMPTES.map(c => ({
 }));
 
 export const COMPTES_SOURCE_INSTAGRAM: readonly CompteSource[] = [
-  { reseau: "instagram", pseudo: "rose_griffonfr", nom: "Rose Griffon", groupe: "Rose Griffon" },
-  { reseau: "instagram", pseudo: "azaleefr", nom: "Azalée", groupe: "Rose Griffon" },
+  {
+    reseau: "instagram",
+    pseudo: "rose_griffonfr",
+    nom: "Rose Griffon",
+    groupe: "Rose Griffon",
+  },
+  {
+    reseau: "instagram",
+    pseudo: "azaleefr",
+    nom: "Azalée",
+    groupe: "Rose Griffon",
+  },
 ];
 
 export const COMPTES_SOURCE_TIKTOK: readonly CompteSource[] = [
-  { reseau: "tiktok", pseudo: "rose_griffon", nom: "Rose Griffon", groupe: "Rose Griffon" },
+  {
+    reseau: "tiktok",
+    pseudo: "rose_griffon",
+    nom: "Rose Griffon",
+    groupe: "Rose Griffon",
+  },
 ];
 
 /** `pseudo` = identifiant de chaîne (`UC…`), `nom` = nom affiché ; le flux RSS est public. */
 export const COMPTES_SOURCE_YOUTUBE: readonly CompteSource[] = [
-  { reseau: "youtube", pseudo: "UCleqt3V_yTgxY6XLZeEFV8g", nom: "Rose Griffon TV", groupe: "Rose Griffon" },
-  { reseau: "youtube", pseudo: "UCh2FiAYaOfuvwTaBVs7CpFw", nom: "Achilléa", groupe: "Rose Griffon" },
-  { reseau: "youtube", pseudo: "UClfhcLqicImW9Se7NKaFADQ", nom: "LEVEL5ch", groupe: "LEVEL-5" },
+  {
+    reseau: "youtube",
+    pseudo: "UCleqt3V_yTgxY6XLZeEFV8g",
+    nom: "Rose Griffon TV",
+    groupe: "Rose Griffon",
+  },
+  {
+    reseau: "youtube",
+    pseudo: "UCh2FiAYaOfuvwTaBVs7CpFw",
+    nom: "Achilléa",
+    groupe: "Rose Griffon",
+  },
+  {
+    reseau: "youtube",
+    pseudo: "UClfhcLqicImW9Se7NKaFADQ",
+    nom: "LEVEL5ch",
+    groupe: "LEVEL-5",
+  },
 ];
 
 /** Lien public d'un compte (YouTube : la chaîne par identifiant). */
 export function lienCompte(c: Pick<CompteSource, "reseau" | "pseudo">): string {
-  return c.reseau === "youtube" ? `https://www.youtube.com/channel/${c.pseudo}` : MARQUES[c.reseau].lien(c.pseudo);
+  return c.reseau === "youtube"
+    ? `https://www.youtube.com/channel/${c.pseudo}`
+    : MARQUES[c.reseau].lien(c.pseudo);
 }
 
 export const TOUS_LES_COMPTES: readonly CompteSource[] = [
@@ -93,7 +153,12 @@ export function estCompteX(valeur: string): valeur is CompteX {
 }
 
 export function estReseau(valeur: string | null | undefined): valeur is Reseau {
-  return valeur === "x" || valeur === "instagram" || valeur === "tiktok" || valeur === "youtube";
+  return (
+    valeur === "x" ||
+    valeur === "instagram" ||
+    valeur === "tiktok" ||
+    valeur === "youtube"
+  );
 }
 
 export function estGroupe(valeur: string | null | undefined): valeur is Groupe {
@@ -111,7 +176,7 @@ export interface FiltreFil {
 export function comptesDuFiltre(filtre: FiltreFil): CompteSource[] {
   const cible = filtre.compte?.toLowerCase();
   return TOUS_LES_COMPTES.filter(
-    c =>
+    (c) =>
       (!filtre.reseau || c.reseau === filtre.reseau) &&
       (!filtre.groupe || c.groupe === filtre.groupe) &&
       (!cible || c.pseudo.toLowerCase() === cible),
@@ -119,11 +184,17 @@ export function comptesDuFiltre(filtre: FiltreFil): CompteSource[] {
 }
 
 /** Lit le filtre depuis des paramètres d'URL ; toute valeur inconnue est ignorée (jamais d'erreur). */
-export function lireFiltre(parametres: { get(nom: string): string | null }): FiltreFil {
+export function lireFiltre(parametres: {
+  get(nom: string): string | null;
+}): FiltreFil {
   const reseau = parametres.get("reseau");
   const groupe = parametres.get("groupe");
   const compte = parametres.get("compte");
-  const connu = compte ? TOUS_LES_COMPTES.find(c => c.pseudo.toLowerCase() === compte.toLowerCase()) : undefined;
+  const connu = compte
+    ? TOUS_LES_COMPTES.find(
+        (c) => c.pseudo.toLowerCase() === compte.toLowerCase(),
+      )
+    : undefined;
   return {
     reseau: estReseau(reseau) ? reseau : undefined,
     groupe: estGroupe(groupe) ? groupe : undefined,

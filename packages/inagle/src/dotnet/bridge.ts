@@ -16,7 +16,9 @@ export interface DotnetBridgeOptions {
  * Creates an instance of IDotnetBridge, automatically selecting NativeAOT FFI
  * when available or gracefully falling back to pure TypeScript implementation.
  */
-export function createDotnetBridge(options?: DotnetBridgeOptions): IDotnetBridge {
+export function createDotnetBridge(
+  options?: DotnetBridgeOptions,
+): IDotnetBridge {
   if (options?.preferFallback) {
     return new FallbackDotnetBridge();
   }

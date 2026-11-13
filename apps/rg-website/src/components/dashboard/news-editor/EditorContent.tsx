@@ -8,7 +8,10 @@ interface EditorContentProps {
   onContentChange: (content: SerializedEditorState) => void;
 }
 
-export function EditorContent({ content, onContentChange }: EditorContentProps) {
+export function EditorContent({
+  content,
+  onContentChange,
+}: EditorContentProps) {
   return (
     <Editor
       id="news-content-editor"

@@ -1,10 +1,22 @@
 "use client";
 
-import { Button, Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Textarea } from "@rosegriffon/ui";
+import {
+  Button,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  Textarea,
+} from "@rosegriffon/ui";
 import { Copy, Dices, Loader2 } from "lucide-react";
 import { useState, useTransition } from "react";
 
-import { effectuerTirage, engagerTirage, publierTirage } from "../admin/iergday/actions-tirage";
+import {
+  effectuerTirage,
+  engagerTirage,
+  publierTirage,
+} from "../admin/iergday/actions-tirage";
 
 /*
  * Le tirage au sort, sur la page PUBLIQUE : un seul gros bouton rond, au centre.
@@ -67,7 +79,10 @@ export interface EtatTirage {
  * manipulation qui resterait, une fois la graine rendue imprévisible.
  */
 const NB_GAGNANTS = 2;
-const LOTS = ["Le tome 1 du manga Victory Road", "Un badge Roy et un badge Gaëlle"] as const;
+const LOTS = [
+  "Le tome 1 du manga Victory Road",
+  "Un badge Roy et un badge Gaëlle",
+] as const;
 const POIDS_MODE = "un_par_personne" as const;
 
 /*
@@ -97,7 +112,13 @@ const ROND =
   "disabled:opacity-60 disabled:active:translate-y-0 " +
   "disabled:active:shadow-[0_4px_0_0_rgba(0,0,0,0.5)]";
 
-export function TirageAdmin({ slug, etat }: { slug: string; etat: EtatTirage }) {
+export function TirageAdmin({
+  slug,
+  etat,
+}: {
+  slug: string;
+  etat: EtatTirage;
+}) {
   const [enCours, demarrer] = useTransition();
   const [erreur, setErreur] = useState<string | null>(null);
   /*
@@ -142,7 +163,9 @@ export function TirageAdmin({ slug, etat }: { slug: string; etat: EtatTirage }) 
       setCopie(true);
       setTimeout(() => setCopie(false), 2500);
     } catch {
-      setErreur("Copie refusée par le navigateur — sélectionnez le texte à la main.");
+      setErreur(
+        "Copie refusée par le navigateur — sélectionnez le texte à la main.",
+      );
     }
   };
 
@@ -178,7 +201,9 @@ export function TirageAdmin({ slug, etat }: { slug: string; etat: EtatTirage }) 
             actif: true,
           } as const);
 
-  const roundPrevu = etat.engagement?.roundTombeAMs ? new Date(etat.engagement.roundTombeAMs) : null;
+  const roundPrevu = etat.engagement?.roundTombeAMs
+    ? new Date(etat.engagement.roundTombeAMs)
+    : null;
 
   return (
     <div className="flex flex-col items-center gap-3 py-2">
@@ -189,7 +214,11 @@ export function TirageAdmin({ slug, etat }: { slug: string; etat: EtatTirage }) 
         disabled={enCours || !etape.actif || !etape.agir}
         aria-label={`${etape.libelle} — ${etat.nbParticipants} participants, ${NB_GAGNANTS} gagnants`}
       >
-        {enCours ? <Loader2 className="size-8 animate-spin" aria-hidden /> : <Dices className="size-8" aria-hidden />}
+        {enCours ? (
+          <Loader2 className="size-8 animate-spin" aria-hidden />
+        ) : (
+          <Dices className="size-8" aria-hidden />
+        )}
         <span>{etape.libelle}</span>
       </Button>
 
@@ -198,7 +227,10 @@ export function TirageAdmin({ slug, etat }: { slug: string; etat: EtatTirage }) 
        * quelque chose. `aria-live` : le résultat d'une action doit atteindre
        * un lecteur d'écran, qui ne verra pas le libellé du bouton changer.
        */}
-      <p aria-live="polite" className="min-h-5 text-center text-xs text-on-surface-variant">
+      <p
+        aria-live="polite"
+        className="min-h-5 text-center text-xs text-on-surface-variant"
+      >
         {erreur ? (
           <span className="text-destructive">{erreur}</span>
         ) : etat.engagement && !etat.engagement.pret && roundPrevu ? (
@@ -219,7 +251,11 @@ export function TirageAdmin({ slug, etat }: { slug: string; etat: EtatTirage }) 
       </p>
 
       {texteEngagement && !dialogueOuvert && (
-        <Button variant="ghost" size="sm" onClick={() => setDialogueOuvert(true)}>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setDialogueOuvert(true)}
+        >
           Revoir le texte d&apos;engagement
         </Button>
       )}
@@ -229,8 +265,8 @@ export function TirageAdmin({ slug, etat }: { slug: string; etat: EtatTirage }) 
           <DialogHeader>
             <DialogTitle>À publier dans Discord AVANT de tirer</DialogTitle>
             <DialogDescription>
-              Ce texte gèle la liste et annonce le tour de hasard visé. Publié après le tirage, il ne prouverait plus
-              rien.
+              Ce texte gèle la liste et annonce le tour de hasard visé. Publié
+              après le tirage, il ne prouverait plus rien.
             </DialogDescription>
           </DialogHeader>
           <Textarea

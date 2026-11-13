@@ -15,14 +15,30 @@ import type {
   PlayerNoteListResponse,
   PlayerNotePerson,
 } from "@rosegriffon/achillea-types/domain/player-note";
-import { PlayerNoteCategory, PlayerNoteSeverity } from "@rosegriffon/achillea-types/enums/eventEnums";
+import {
+  PlayerNoteCategory,
+  PlayerNoteSeverity,
+} from "@rosegriffon/achillea-types/enums/eventEnums";
 
 import { successResponseSchema } from "./common";
-import { AchilleaResource, encodePathSegment, type AchilleaClientResult, type QueryParams } from "./http";
-import type { PlayerNoteFiltersExtra, PlayerNoteSummary, SuccessResponse } from "./pending-contracts";
+import {
+  AchilleaResource,
+  encodePathSegment,
+  type AchilleaClientResult,
+  type QueryParams,
+} from "./http";
+import type {
+  PlayerNoteFiltersExtra,
+  PlayerNoteSummary,
+  SuccessResponse,
+} from "./pending-contracts";
 
-export const playerNoteCategorySchema = z.enum(PlayerNoteCategory) satisfies z.ZodType<PlayerNoteCategory>;
-export const playerNoteSeveritySchema = z.enum(PlayerNoteSeverity) satisfies z.ZodType<PlayerNoteSeverity>;
+export const playerNoteCategorySchema = z.enum(
+  PlayerNoteCategory,
+) satisfies z.ZodType<PlayerNoteCategory>;
+export const playerNoteSeveritySchema = z.enum(
+  PlayerNoteSeverity,
+) satisfies z.ZodType<PlayerNoteSeverity>;
 
 export const playerNotePersonSchema = z.object({
   id: z.string(),
@@ -70,7 +86,10 @@ export const playerNoteSummarySchema = z.object({
 
 /** Champs modifiables par `PUT /player-notes/:id`. */
 export type UpdatePlayerNotePayload = Partial<
-  Pick<CreatePlayerNotePayload, "category" | "severity" | "content" | "tournamentId">
+  Pick<
+    CreatePlayerNotePayload,
+    "category" | "severity" | "content" | "tournamentId"
+  >
 >;
 
 /** Filtres complets acceptés par `GET /player-notes` (recherche plein texte comprise). */
@@ -79,7 +98,9 @@ export type PlayerNoteQuery = PlayerNoteFilters & PlayerNoteFiltersExtra;
 /** 7 routes. */
 export class PlayerNotesResource extends AchilleaResource {
   /** `GET /player-notes` — liste filtrée ; un organisateur doit passer `tournamentId`. */
-  list(query: PlayerNoteQuery = {}): Promise<AchilleaClientResult<PlayerNoteListResponse>> {
+  list(
+    query: PlayerNoteQuery = {},
+  ): Promise<AchilleaClientResult<PlayerNoteListResponse>> {
     return this.http.get("/player-notes", playerNoteListResponseSchema, {
       query: query as QueryParams,
     });
@@ -87,31 +108,52 @@ export class PlayerNotesResource extends AchilleaResource {
 
   /** `GET /player-notes/summary/:userId` — compteurs pour une fiche joueur. */
   summary(userId: string): Promise<AchilleaClientResult<PlayerNoteSummary>> {
-    return this.http.get(`/player-notes/summary/${encodePathSegment(userId)}`, playerNoteSummarySchema);
+    return this.http.get(
+      `/player-notes/summary/${encodePathSegment(userId)}`,
+      playerNoteSummarySchema,
+    );
   }
 
   /** `POST /player-notes` — consigne une observation sur un joueur. */
-  create(payload: CreatePlayerNotePayload): Promise<AchilleaClientResult<PlayerNote>> {
+  create(
+    payload: CreatePlayerNotePayload,
+  ): Promise<AchilleaClientResult<PlayerNote>> {
     return this.http.post("/player-notes", playerNoteSchema, payload);
   }
 
   /** `PUT /player-notes/:id` — modifie une note existante. */
-  update(id: string, patch: UpdatePlayerNotePayload): Promise<AchilleaClientResult<PlayerNote>> {
-    return this.http.put(`/player-notes/${encodePathSegment(id)}`, playerNoteSchema, patch);
+  update(
+    id: string,
+    patch: UpdatePlayerNotePayload,
+  ): Promise<AchilleaClientResult<PlayerNote>> {
+    return this.http.put(
+      `/player-notes/${encodePathSegment(id)}`,
+      playerNoteSchema,
+      patch,
+    );
   }
 
   /** `POST /player-notes/:id/resolve` — marque la note comme traitée. */
   resolve(id: string): Promise<AchilleaClientResult<PlayerNote>> {
-    return this.http.post(`/player-notes/${encodePathSegment(id)}/resolve`, playerNoteSchema);
+    return this.http.post(
+      `/player-notes/${encodePathSegment(id)}/resolve`,
+      playerNoteSchema,
+    );
   }
 
   /** `POST /player-notes/:id/reopen` — rouvre une note traitée. */
   reopen(id: string): Promise<AchilleaClientResult<PlayerNote>> {
-    return this.http.post(`/player-notes/${encodePathSegment(id)}/reopen`, playerNoteSchema);
+    return this.http.post(
+      `/player-notes/${encodePathSegment(id)}/reopen`,
+      playerNoteSchema,
+    );
   }
 
   /** `DELETE /player-notes/:id` — supprime une note. */
   remove(id: string): Promise<AchilleaClientResult<SuccessResponse>> {
-    return this.http.delete(`/player-notes/${encodePathSegment(id)}`, successResponseSchema);
+    return this.http.delete(
+      `/player-notes/${encodePathSegment(id)}`,
+      successResponseSchema,
+    );
   }
 }

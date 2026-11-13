@@ -30,7 +30,13 @@ import { ResultatsSondage } from "./ResultatsSondage";
 /** Options montrées sur une carte de liste ; le détail les affiche toutes. */
 const OPTIONS_VISIBLES = 5;
 
-export function CarteSondage({ sondage, contexte }: { sondage: Sondage; contexte: ContexteMentions }) {
+export function CarteSondage({
+  sondage,
+  contexte,
+}: {
+  sondage: Sondage;
+  contexte: ContexteMentions;
+}) {
   const publieLe = new Date(sondage.created_at);
   const participation = libelleParticipation(sondage);
   const resume = resumeQuestion(sondage.question, 70);
@@ -41,9 +47,15 @@ export function CarteSondage({ sondage, contexte }: { sondage: Sondage; contexte
     <Card className="flex flex-col gap-0 overflow-hidden rounded-[24px] border-outline-variant/10 bg-surface-container-low p-0 py-0 transition-transform duration-300 hover:-translate-y-1">
       <header className="flex flex-col gap-3 p-5 sm:p-6">
         <div className="flex flex-wrap items-center gap-2">
-          <Badge variant={varianteBadgeEtat(sondage)}>{libelleEtat(sondage)}</Badge>
-          {sondage.source === "reactions" && <Badge variant="outline">Décompte reconstitué</Badge>}
-          {sondage.provider === "discord" && <Badge variant="outline">Sondage Discord</Badge>}
+          <Badge variant={varianteBadgeEtat(sondage)}>
+            {libelleEtat(sondage)}
+          </Badge>
+          {sondage.source === "reactions" && (
+            <Badge variant="outline">Décompte reconstitué</Badge>
+          )}
+          {sondage.provider === "discord" && (
+            <Badge variant="outline">Sondage Discord</Badge>
+          )}
         </div>
         {/* AUCUN `lang` ICI. `discord_polls.language` est la langue d'INTERFACE
 				    de l'encart EasyPoll (déduite de ses en-têtes « Choices »/« Choix »),
@@ -80,7 +92,10 @@ export function CarteSondage({ sondage, contexte }: { sondage: Sondage; contexte
              * accessible qui rattache l'image à sa question — c'est neutre, et
              * c'est vrai.
              */
-            alt={sondage.visuel.alt ?? `Visuel du sondage : ${resumeQuestion(sondage.question, 80)}`}
+            alt={
+              sondage.visuel.alt ??
+              `Visuel du sondage : ${resumeQuestion(sondage.question, 80)}`
+            }
             width={sondage.visuel.width ?? 1200}
             height={sondage.visuel.height ?? 900}
             sizes="(max-width: 1024px) 100vw, 50vw"
@@ -91,7 +106,8 @@ export function CarteSondage({ sondage, contexte }: { sondage: Sondage; contexte
 					    une question qui renvoie au « visuel ci-dessus » n'avait, sur la
 					    liste, aucune légende ni aucun texte alternatif. */}
           <figcaption className="mt-2 text-sm text-on-surface-variant">
-            {sondage.visuel.alt ?? "Visuel publié dans le salon avec ce sondage."}
+            {sondage.visuel.alt ??
+              "Visuel publié dans le salon avec ce sondage."}
           </figcaption>
         </figure>
       )}
@@ -122,7 +138,9 @@ export function CarteSondage({ sondage, contexte }: { sondage: Sondage; contexte
           <span>{libelleChoixAutorises(sondage)}</span>
           <span className="inline-flex items-center gap-1.5">
             <CalendarDays className="size-4 shrink-0" aria-hidden />
-            <time dateTime={sondage.created_at}>{format(publieLe, "d MMMM yyyy", { locale: fr })}</time>
+            <time dateTime={sondage.created_at}>
+              {format(publieLe, "d MMMM yyyy", { locale: fr })}
+            </time>
           </span>
         </div>
         <Link

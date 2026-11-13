@@ -21,12 +21,18 @@ export const SALON_TO_DEFAUT = "1436378680153608203";
 /** Anti-rafale : un même joueur ne déclenche qu'une alerte par fenêtre. */
 export const FENETRE_ALERTE_MS = 2 * 60 * 1000;
 
-function lire(env: Record<string, string | undefined>, cle: string, defaut: string): string {
+function lire(
+  env: Record<string, string | undefined>,
+  cle: string,
+  defaut: string,
+): string {
   const v = (env[cle] ?? "").trim();
   return /^\d{15,25}$/u.test(v) ? v : defaut;
 }
 
-export function salonsAideRanked(env: Record<string, string | undefined> = Bun.env): { vocal: string; to: string } {
+export function salonsAideRanked(
+  env: Record<string, string | undefined> = Bun.env,
+): { vocal: string; to: string } {
   return {
     vocal: lire(env, "ACHILLEA_HELP_RANKED_VOICE_ID", VOCAL_AIDE_RANKED_DEFAUT),
     to: lire(env, "ACHILLEA_TO_CHANNEL_ID", SALON_TO_DEFAUT),
@@ -34,7 +40,11 @@ export function salonsAideRanked(env: Record<string, string | undefined> = Bun.e
 }
 
 /** Vrai pour une ENTRÉE dans le vocal d'aide (ni un départ, ni un mute, ni un déplacement interne). */
-export function estEntreeDansAide(avant: string | null, apres: string | null, vocal: string): boolean {
+export function estEntreeDansAide(
+  avant: string | null,
+  apres: string | null,
+  vocal: string,
+): boolean {
   return apres === vocal && avant !== vocal;
 }
 
@@ -45,11 +55,16 @@ export function messageAlerte(membreId: string): string {
 const dernieresAlertes = new Map<string, number>();
 
 /** Décide d'alerter (et mémorise), en tenant compte de l'anti-rafale. */
-export function doitAlerter(membreId: string, maintenant = Date.now()): boolean {
+export function doitAlerter(
+  membreId: string,
+  maintenant = Date.now(),
+): boolean {
   const derniere = dernieresAlertes.get(membreId);
-  if (derniere !== undefined && maintenant - derniere < FENETRE_ALERTE_MS) return false;
+  if (derniere !== undefined && maintenant - derniere < FENETRE_ALERTE_MS)
+    return false;
   dernieresAlertes.set(membreId, maintenant);
-  for (const [id, t] of dernieresAlertes) if (maintenant - t > FENETRE_ALERTE_MS) dernieresAlertes.delete(id);
+  for (const [id, t] of dernieresAlertes)
+    if (maintenant - t > FENETRE_ALERTE_MS) dernieresAlertes.delete(id);
   return true;
 }
 
@@ -67,11 +82,21 @@ export class EvenementAideRanked {
     if (!doitAlerter(apres.id)) return;
     const salon = await apres.client.channels.fetch(to).catch(() => null);
     if (!salon || !salon.isSendable()) {
-      console.warn(`[achillea/aide-ranked] salon des TO ${to} introuvable ou non inscriptible.`);
+      console.warn(
+        `[achillea/aide-ranked] salon des TO ${to} introuvable ou non inscriptible.`,
+      );
       return;
     }
     await salon
-      .send({ content: messageAlerte(apres.id), allowedMentions: { users: [apres.id] } })
-      .catch((err: unknown) => console.error("[achillea/aide-ranked] alerte TO :", err instanceof Error ? err.message : err));
+      .send({
+        content: messageAlerte(apres.id),
+        allowedMentions: { users: [apres.id] },
+      })
+      .catch((err: unknown) =>
+        console.error(
+          "[achillea/aide-ranked] alerte TO :",
+          err instanceof Error ? err.message : err,
+        ),
+      );
   }
 }

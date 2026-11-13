@@ -20,7 +20,10 @@
 
 import { mkdir, writeFile } from "node:fs/promises";
 import { dirname } from "node:path";
-import { syncSiteTelemetryAggregates, type SiteTelemetryAggregate } from "@rosegriffon/discord-sync";
+import {
+  syncSiteTelemetryAggregates,
+  type SiteTelemetryAggregate,
+} from "@rosegriffon/discord-sync";
 
 /** Où la page de statistiques du site va lire le résultat. */
 export const CHEMIN_CACHE = "/var/lib/rg/achillea-audience.json";
@@ -80,7 +83,7 @@ function centile(triees: number[], part: number): number {
 function normaliserChemin(chemin: string): string {
   return chemin
     .split("/")
-    .map(s => {
+    .map((s) => {
       if (!s) return s;
       if (/^\d+$/.test(s)) return ":n";
       if (/^[0-9a-f]{8,}$/i.test(s)) return ":id";
@@ -112,7 +115,9 @@ export async function collecterAudienceAchillea(): Promise<{
   const code = await proc.exited;
   if (code !== 0) {
     const erreur = await new Response(proc.stderr).text();
-    throw new Error(`lecture du journal impossible (code ${code}) : ${erreur.trim().slice(0, 200)}`);
+    throw new Error(
+      `lecture du journal impossible (code ${code}) : ${erreur.trim().slice(0, 200)}`,
+    );
   }
 
   const debut = Date.now() - FENETRE_HEURES * 3600_000;
@@ -134,11 +139,20 @@ export async function collecterAudienceAchillea(): Promise<{
       Number.isFinite(instantSite) &&
       instantSite >= debut
     ) {
-      const windowStart = new Date(Math.floor(instantSite / 3600_000) * 3600_000).toISOString();
+      const windowStart = new Date(
+        Math.floor(instantSite / 3600_000) * 3600_000,
+      ).toISOString();
       const key = `${host}\t${windowStart}`;
       let bucket = siteHours.get(key);
       if (!bucket) {
-        bucket = { host, windowStart, requests: 0, bytes: 0, errors4xx: 0, errors5xx: 0 };
+        bucket = {
+          host,
+          windowStart,
+          requests: 0,
+          bytes: 0,
+          errors4xx: 0,
+          errors5xx: 0,
+        };
         siteHours.set(key, bucket);
       }
       bucket.requests++;
@@ -203,8 +217,19 @@ export async function collecterAudienceAchillea(): Promise<{
   });
 
   await mkdir(dirname(CHEMIN_CACHE), { recursive: true });
-  await writeFile(CHEMIN_CACHE, JSON.stringify({ collecteLe: new Date().toISOString(), domaines }, null, "\t"), "utf8");
-  await syncSiteTelemetryAggregates([...siteHours.values()], lignesVues < MAX_LIGNES);
+  await writeFile(
+    CHEMIN_CACHE,
+    JSON.stringify(
+      { collecteLe: new Date().toISOString(), domaines },
+      null,
+      "\t",
+    ),
+    "utf8",
+  );
+  await syncSiteTelemetryAggregates(
+    [...siteHours.values()],
+    lignesVues < MAX_LIGNES,
+  );
 
   return {
     domaines: domaines.length,

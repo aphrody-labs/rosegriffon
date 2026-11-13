@@ -258,7 +258,8 @@ Stack : Next.js, React, Bun, TypeScript. Données : Inazuma Eleven: Victory Road
  * d'IA (Gemini, etc.) acceptent — certains rejettent/mal-gèrent le `text/plain` de `llm.txt`.
  */
 function llmsToHtml(md: string, title: string): string {
-  const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  const esc = (s: string) =>
+    s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
   const linkify = (s: string) =>
     esc(s)
       .replace(/\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g, '<a href="$2">$1</a>')
@@ -298,8 +299,13 @@ function llmsToHtml(md: string, title: string): string {
   return `<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${esc(title)}</title><meta name="robots" content="index, follow"><style>body{max-width:48rem;margin:2rem auto;padding:0 1rem;font-family:system-ui,sans-serif;line-height:1.6}a{color:#0c1730}blockquote{border-left:3px solid #d4af37;margin:0;padding-left:1rem;color:#555}</style></head><body>\n${out.join("\n")}\n</body></html>\n`;
 }
 
-export async function runSeoLlmsTxt(): Promise<{ success: boolean; error?: string }> {
-  console.log("[SEO llms.txt] Génération des fichiers llms.txt / llm.txt / .md / .html…");
+export async function runSeoLlmsTxt(): Promise<{
+  success: boolean;
+  error?: string;
+}> {
+  console.log(
+    "[SEO llms.txt] Génération des fichiers llms.txt / llm.txt / .md / .html…",
+  );
   try {
     const websiteIndex = websiteLlms();
     const azaleeIndex = azaleeLlms();
@@ -333,7 +339,9 @@ export async function runSeoLlmsTxt(): Promise<{ success: boolean; error?: strin
       console.log(`[SEO llms.txt] Écrit : ${path} (${content.length} octets)`);
     }
 
-    console.log(`[SEO llms.txt] ${targets.length} fichiers générés avec succès.`);
+    console.log(
+      `[SEO llms.txt] ${targets.length} fichiers générés avec succès.`,
+    );
     return { success: true };
   } catch (err: any) {
     console.error("[SEO llms.txt] Erreur lors de la génération :", err);

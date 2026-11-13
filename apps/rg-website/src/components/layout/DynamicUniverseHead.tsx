@@ -68,11 +68,17 @@ export function DynamicUniverseHead() {
 
     // 1. Mise à jour dynamique de la favicon et de l'icône tactile
     const updateFavicon = () => {
-      const iconSelectors = ['link[rel="icon"]', 'link[rel="shortcut icon"]', 'link[rel="alternate icon"]'];
-      const existingIcons = document.querySelectorAll<HTMLLinkElement>(iconSelectors.join(","));
+      const iconSelectors = [
+        'link[rel="icon"]',
+        'link[rel="shortcut icon"]',
+        'link[rel="alternate icon"]',
+      ];
+      const existingIcons = document.querySelectorAll<HTMLLinkElement>(
+        iconSelectors.join(","),
+      );
 
       if (existingIcons.length > 0) {
-        existingIcons.forEach(el => {
+        existingIcons.forEach((el) => {
           el.href = config.favicon;
           el.type = config.faviconType;
         });
@@ -84,7 +90,9 @@ export function DynamicUniverseHead() {
         document.head.appendChild(link);
       }
 
-      let appleLink = document.querySelector<HTMLLinkElement>('link[rel="apple-touch-icon"]');
+      let appleLink = document.querySelector<HTMLLinkElement>(
+        'link[rel="apple-touch-icon"]',
+      );
       if (!appleLink) {
         appleLink = document.createElement("link");
         appleLink.rel = "apple-touch-icon";
@@ -96,7 +104,9 @@ export function DynamicUniverseHead() {
     // 2. Mise à jour dynamique du SEO et métadonnées d'onglet
     const updateMeta = () => {
       // Theme-color (barre d'adresse Safari iOS & Chrome Android)
-      let themeMeta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
+      let themeMeta = document.querySelector<HTMLMetaElement>(
+        'meta[name="theme-color"]',
+      );
       if (!themeMeta) {
         themeMeta = document.createElement("meta");
         themeMeta.name = "theme-color";
@@ -105,7 +115,9 @@ export function DynamicUniverseHead() {
       themeMeta.content = config.themeColor;
 
       // OG Site Name
-      let ogSite = document.querySelector<HTMLMetaElement>('meta[property="og:site_name"]');
+      let ogSite = document.querySelector<HTMLMetaElement>(
+        'meta[property="og:site_name"]',
+      );
       if (!ogSite) {
         ogSite = document.createElement("meta");
         ogSite.setAttribute("property", "og:site_name");

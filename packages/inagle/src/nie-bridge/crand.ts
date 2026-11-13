@@ -44,7 +44,8 @@ export class PureCrand {
 
   #generate(): void {
     for (let i = 0; i < N; i++) {
-      const y = (this.#mt[i] & UPPER_MASK) | (this.#mt[(i + 1) % N] & LOWER_MASK);
+      const y =
+        (this.#mt[i] & UPPER_MASK) | (this.#mt[(i + 1) % N] & LOWER_MASK);
       let next = this.#mt[(i + M) % N] ^ (y >>> 1);
       if ((y & 1) !== 0) {
         next ^= MATRIX_A;

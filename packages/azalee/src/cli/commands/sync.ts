@@ -9,8 +9,13 @@ import type { SyncOptions } from "../types";
 export function registerSyncCommand(program: Command): void {
   program
     .command("sync")
-    .description("Synchronise les fichiers locaux de données avec la base PostgreSQL locale")
-    .option("-p, --push", "Pousse les données Inagle locales vers PostgreSQL (inagle push)")
+    .description(
+      "Synchronise les fichiers locaux de données avec la base PostgreSQL locale",
+    )
+    .option(
+      "-p, --push",
+      "Pousse les données Inagle locales vers PostgreSQL (inagle push)",
+    )
     .action(async (options: SyncOptions) => {
       if (options.push) {
         console.log(
@@ -23,7 +28,9 @@ export function registerSyncCommand(program: Command): void {
         const code = await proc.exited;
         exitUnlessRepl(code);
       } else {
-        console.log(`${colors.yellow}Veuillez spécifier l'option: --push.${colors.reset}`);
+        console.log(
+          `${colors.yellow}Veuillez spécifier l'option: --push.${colors.reset}`,
+        );
       }
     });
 }

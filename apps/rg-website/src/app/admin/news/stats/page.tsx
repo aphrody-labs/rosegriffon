@@ -14,10 +14,16 @@ export const metadata = {
 };
 
 export default async function NewsStatsPage() {
-  const [stats, categoryData] = await Promise.all([getArticleStats(), getCategoryBreakdown()]);
+  const [stats, categoryData] = await Promise.all([
+    getArticleStats(),
+    getCategoryBreakdown(),
+  ]);
 
   // Calculate avg views per article
-  const avgViews = stats.totalPublished > 0 ? Math.round(stats.totalViews / stats.totalPublished) : 0;
+  const avgViews =
+    stats.totalPublished > 0
+      ? Math.round(stats.totalViews / stats.totalPublished)
+      : 0;
 
   return (
     <div className="space-y-8">
@@ -55,7 +61,11 @@ export default async function NewsStatsPage() {
         />
         <DashboardMetricCard
           label="Taux publication"
-          value={stats.totalArticles > 0 ? `${Math.round((stats.totalPublished / stats.totalArticles) * 100)}%` : "—"}
+          value={
+            stats.totalArticles > 0
+              ? `${Math.round((stats.totalPublished / stats.totalArticles) * 100)}%`
+              : "—"
+          }
           icon={<Icon name="publish" size={20} />}
           accentColor="bg-warning/15 text-warning"
           description={`${stats.totalDrafts} brouillon${stats.totalDrafts !== 1 ? "s" : ""} en attente`}
@@ -72,18 +82,22 @@ export default async function NewsStatsPage() {
             </h2>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-            {categoryData.map(cat => (
+            {categoryData.map((cat) => (
               <div
                 key={cat.category}
                 className="flex items-center gap-3 p-3 rounded-2xl bg-surface-container-low border border-outline-variant/10"
               >
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-on-surface truncate">{cat.category}</p>
+                  <p className="text-sm font-medium text-on-surface truncate">
+                    {cat.category}
+                  </p>
                   <p className="text-xs text-on-surface-variant/60">
                     {cat.count} article{cat.count !== 1 ? "s" : ""}
                   </p>
                 </div>
-                <span className="text-lg font-bold text-on-surface-variant/40">{cat.count}</span>
+                <span className="text-lg font-bold text-on-surface-variant/40">
+                  {cat.count}
+                </span>
               </div>
             ))}
           </div>
@@ -116,14 +130,19 @@ export default async function NewsStatsPage() {
                 <span className="flex-1 text-sm text-on-surface group-hover:text-primary transition-colors truncate">
                   {article.title}
                 </span>
-                <Badge variant="outline" className="shrink-0 rounded-lg text-[10px]">
+                <Badge
+                  variant="outline"
+                  className="shrink-0 rounded-lg text-[10px]"
+                >
                   <Eye className="size-3 mr-1" />
                   {article.view_count.toLocaleString("fr-FR")}
                 </Badge>
               </Link>
             ))}
             {stats.topArticles.length === 0 && (
-              <p className="text-sm text-on-surface-variant py-4 text-center">Aucun article publié</p>
+              <p className="text-sm text-on-surface-variant py-4 text-center">
+                Aucun article publié
+              </p>
             )}
           </div>
         </div>
@@ -137,7 +156,7 @@ export default async function NewsStatsPage() {
             </h2>
           </div>
           <div className="space-y-1">
-            {stats.recentArticles.map(article => (
+            {stats.recentArticles.map((article) => (
               <Link
                 key={article.id}
                 href={`/news/${article.slug}`}
@@ -152,16 +171,21 @@ export default async function NewsStatsPage() {
                     {article.view_count.toLocaleString("fr-FR")}
                   </Badge>
                   <span className="text-[10px] text-on-surface-variant">
-                    {new Date(article.published_at).toLocaleDateString("fr-FR", {
-                      day: "numeric",
-                      month: "short",
-                    })}
+                    {new Date(article.published_at).toLocaleDateString(
+                      "fr-FR",
+                      {
+                        day: "numeric",
+                        month: "short",
+                      },
+                    )}
                   </span>
                 </div>
               </Link>
             ))}
             {stats.recentArticles.length === 0 && (
-              <p className="text-sm text-on-surface-variant py-4 text-center">Aucun article publié</p>
+              <p className="text-sm text-on-surface-variant py-4 text-center">
+                Aucun article publié
+              </p>
             )}
           </div>
         </div>
@@ -170,7 +194,9 @@ export default async function NewsStatsPage() {
   );
 }
 
-async function getCategoryBreakdown(): Promise<Array<{ category: string; count: number }>> {
+async function getCategoryBreakdown(): Promise<
+  Array<{ category: string; count: number }>
+> {
   const supabase = createPostgresClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data } = await supabase
@@ -191,5 +217,7 @@ async function getCategoryBreakdown(): Promise<Array<{ category: string; count: 
     counts.set(cat, (counts.get(cat) || 0) + 1);
   }
 
-  return [...counts.entries()].map(([category, count]) => ({ category, count })).toSorted((a, b) => b.count - a.count);
+  return [...counts.entries()]
+    .map(([category, count]) => ({ category, count }))
+    .toSorted((a, b) => b.count - a.count);
 }

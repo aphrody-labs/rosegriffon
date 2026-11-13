@@ -21,7 +21,14 @@ import {
 import { Check, Copy, Link2, Loader2 } from "lucide-react";
 import { signalerEchec } from "@/lib/achillea/signaler";
 import type { AdminGuildRow } from "@rosegriffon/achillea-types/domain/admin";
-import { BoutonActualiser, Chargement, Erreur, Vide, useClientAchillea, useLecture } from "./etat";
+import {
+  BoutonActualiser,
+  Chargement,
+  Erreur,
+  Vide,
+  useClientAchillea,
+  useLecture,
+} from "./etat";
 
 /** Nom d'une commande slash, quelle que soit la forme renvoyée par `/admin/ops/commands`. */
 function nomCommande(commande: unknown): string | null {
@@ -40,9 +47,16 @@ function nomCommande(commande: unknown): string | null {
 export function GuildsTab() {
   const client = useClientAchillea();
   const serveurs = useLecture("admin/ops/guilds", () => client.admin.guilds());
-  const commandes = useLecture("admin/ops/commands", () => client.admin.commands());
-  const [invitationEnCours, setInvitationEnCours] = useState<string | null>(null);
-  const [invitation, setInvitation] = useState<{ guild: AdminGuildRow; url: string } | null>(null);
+  const commandes = useLecture("admin/ops/commands", () =>
+    client.admin.commands(),
+  );
+  const [invitationEnCours, setInvitationEnCours] = useState<string | null>(
+    null,
+  );
+  const [invitation, setInvitation] = useState<{
+    guild: AdminGuildRow;
+    url: string;
+  } | null>(null);
   const [erreurInvitation, setErreurInvitation] = useState<string | null>(null);
   const [copie, setCopie] = useState<"ok" | "echec" | null>(null);
 
@@ -54,7 +68,8 @@ export function GuildsTab() {
     try {
       const resultat = await client.admin.guildInvite(guild.id);
       if (resultat.ok) setInvitation({ guild, url: resultat.value.url });
-      else setErreurInvitation(signalerEchec("admin/ops/guilds/invite", resultat));
+      else
+        setErreurInvitation(signalerEchec("admin/ops/guilds/invite", resultat));
     } finally {
       setInvitationEnCours(null);
     }
@@ -71,15 +86,21 @@ export function GuildsTab() {
   };
 
   const liste = serveurs.donnees?.data ?? [];
-  const nomsCommandes = (commandes.donnees?.data ?? []).map(nomCommande).filter((nom): nom is string => !!nom);
+  const nomsCommandes = (commandes.donnees?.data ?? [])
+    .map(nomCommande)
+    .filter((nom): nom is string => !!nom);
 
   return (
     <div className="space-y-6">
       <Card className="border-border/60">
         <CardHeader className="flex flex-row items-center justify-between gap-4">
           <div className="space-y-1">
-            <CardTitle className="text-base">Serveurs Discord ({liste.length})</CardTitle>
-            <p className="text-xs text-muted-foreground">Serveurs où le bot est présent (cache de la passerelle).</p>
+            <CardTitle className="text-base">
+              Serveurs Discord ({liste.length})
+            </CardTitle>
+            <p className="text-xs text-muted-foreground">
+              Serveurs où le bot est présent (cache de la passerelle).
+            </p>
           </div>
           <BoutonActualiser
             enCours={serveurs.chargement}
@@ -90,7 +111,12 @@ export function GuildsTab() {
           />
         </CardHeader>
         <CardContent className="space-y-4">
-          {serveurs.erreur && <Erreur message={serveurs.erreur} onReessayer={serveurs.recharger} />}
+          {serveurs.erreur && (
+            <Erreur
+              message={serveurs.erreur}
+              onReessayer={serveurs.recharger}
+            />
+          )}
           {serveurs.chargement && !serveurs.donnees ? (
             <Chargement />
           ) : liste.length === 0 && !serveurs.erreur ? (
@@ -109,19 +135,27 @@ export function GuildsTab() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {liste.map(guild => (
+                  {liste.map((guild) => (
                     <TableRow key={guild.id}>
                       <TableCell>
                         <span className="flex items-center gap-2">
                           <Avatar className="size-7">
-                            {guild.iconURL && <AvatarImage src={guild.iconURL} alt="" />}
-                            <AvatarFallback className="text-xs">{guild.name.slice(0, 2)}</AvatarFallback>
+                            {guild.iconURL && (
+                              <AvatarImage src={guild.iconURL} alt="" />
+                            )}
+                            <AvatarFallback className="text-xs">
+                              {guild.name.slice(0, 2)}
+                            </AvatarFallback>
                           </Avatar>
                           <span className="font-medium">{guild.name}</span>
                         </span>
                       </TableCell>
-                      <TableCell className="text-right font-mono">{guild.memberCount}</TableCell>
-                      <TableCell className="font-mono text-xs text-muted-foreground">{guild.ownerId}</TableCell>
+                      <TableCell className="text-right font-mono">
+                        {guild.memberCount}
+                      </TableCell>
+                      <TableCell className="font-mono text-xs text-muted-foreground">
+                        {guild.ownerId}
+                      </TableCell>
                       <TableCell className="text-right">
                         <Button
                           variant="ghost"
@@ -131,7 +165,10 @@ export function GuildsTab() {
                           aria-label={`Créer une invitation pour ${guild.name}`}
                         >
                           {invitationEnCours === guild.id ? (
-                            <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+                            <Loader2
+                              className="size-4 animate-spin"
+                              aria-hidden="true"
+                            />
                           ) : (
                             <Link2 className="size-4" aria-hidden="true" />
                           )}
@@ -145,12 +182,21 @@ export function GuildsTab() {
             )
           )}
 
-          {erreurInvitation && <Erreur message={`Invitation impossible : ${erreurInvitation}`} />}
+          {erreurInvitation && (
+            <Erreur message={`Invitation impossible : ${erreurInvitation}`} />
+          )}
           {invitation && (
             <div className="flex flex-col gap-2 rounded-xl border border-success/40 bg-success/10 p-3 text-sm sm:flex-row sm:items-center">
-              <Check className="size-4 shrink-0 text-success" aria-hidden="true" />
-              <span className="sr-only">Invitation pour {invitation.guild.name} :</span>
-              <code className="flex-1 truncate select-all">{invitation.url}</code>
+              <Check
+                className="size-4 shrink-0 text-success"
+                aria-hidden="true"
+              />
+              <span className="sr-only">
+                Invitation pour {invitation.guild.name} :
+              </span>
+              <code className="flex-1 truncate select-all">
+                {invitation.url}
+              </code>
               <Button
                 variant="outline"
                 className="min-h-11 gap-2"
@@ -160,8 +206,15 @@ export function GuildsTab() {
                 <Copy className="size-4" aria-hidden="true" />
                 Copier
               </Button>
-              <span aria-live="polite" className="text-xs text-muted-foreground">
-                {copie === "ok" ? "Copié." : copie === "echec" ? "Copie impossible : sélectionne le lien." : ""}
+              <span
+                aria-live="polite"
+                className="text-xs text-muted-foreground"
+              >
+                {copie === "ok"
+                  ? "Copié."
+                  : copie === "echec"
+                    ? "Copie impossible : sélectionne le lien."
+                    : ""}
               </span>
             </div>
           )}
@@ -170,17 +223,24 @@ export function GuildsTab() {
 
       <Card className="border-border/60">
         <CardHeader>
-          <CardTitle className="text-base">Commandes ({nomsCommandes.length})</CardTitle>
+          <CardTitle className="text-base">
+            Commandes ({nomsCommandes.length})
+          </CardTitle>
         </CardHeader>
         <CardContent>
-          {commandes.erreur && <Erreur message={commandes.erreur} onReessayer={commandes.recharger} />}
+          {commandes.erreur && (
+            <Erreur
+              message={commandes.erreur}
+              onReessayer={commandes.recharger}
+            />
+          )}
           {commandes.chargement && !commandes.donnees ? (
             <Chargement lignes={1} />
           ) : nomsCommandes.length === 0 && !commandes.erreur ? (
             <Vide message="Aucune commande enregistrée." />
           ) : (
             <ul className="flex flex-wrap gap-2">
-              {nomsCommandes.map(nom => (
+              {nomsCommandes.map((nom) => (
                 <li key={nom}>
                   <Badge variant="secondary">/{nom}</Badge>
                 </li>

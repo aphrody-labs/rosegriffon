@@ -2,27 +2,48 @@
 /* eslint-disable no-await-in-loop -- Release gates and remote mutations are deliberately ordered. */
 
 import { createWriteStream } from "node:fs";
-import { chmod, copyFile, mkdir, readlink, rename, rm, stat, symlink, appendFile } from "node:fs/promises";
+import {
+  chmod,
+  copyFile,
+  mkdir,
+  readlink,
+  rename,
+  rm,
+  stat,
+  symlink,
+  appendFile,
+} from "node:fs/promises";
 import { once } from "node:events";
 
 /** Fail-fast whole-repository release pipeline. Remote mutation requires --deploy. */
-type StageName = "lint" | "typecheck" | "tests" | "rust-clippy" | "build" | "release" | "deploy" | "live-validation";
+type StageName =
+  | "lint"
+  | "typecheck"
+  | "tests"
+  | "rust-clippy"
+  | "build"
+  | "release"
+  | "deploy"
+  | "live-validation";
 type Command = { argv: string[]; cwd?: string; env?: Record<string, string> };
 type Stage = { name: StageName; commands: Command[]; remote?: boolean };
 
 const args = Bun.argv.slice(2);
 const deployEnabled = args.includes("--deploy");
 const dryRun = args.includes("--dry-run");
-const valueOf = (prefix: string) => args.find(arg => arg.startsWith(`${prefix}=`))?.slice(prefix.length + 1);
+const valueOf = (prefix: string) =>
+  args.find((arg) => arg.startsWith(`${prefix}=`))?.slice(prefix.length + 1);
 const from = valueOf("--from") as StageName | undefined;
 const only = valueOf("--only") as StageName | undefined;
-const commitMessage = valueOf("--message") ?? "chore(release): publish verified repository state";
+const commitMessage =
+  valueOf("--message") ?? "chore(release): publish verified repository state";
 const repositoryRoot = process.cwd();
 /**
  * aphrody-infra owns the units and the vhost that run nie (moved from `deploy/` on
  * 2026-09-23). Preflight compares the installed files against that checkout.
  */
-const infraRoot = process.env.APHRODY_INFRA_ROOT || `${repositoryRoot}/../aphrody-infra`;
+const infraRoot =
+  process.env.APHRODY_INFRA_ROOT || `${repositoryRoot}/../aphrody-infra`;
 const runId = `${new Date().toISOString().replaceAll(":", "-").replaceAll(".", "-")}-${process.pid}`;
 const logDirectory = `${repositoryRoot}/var/log/releases/${runId}`;
 const summaryLog = `${logDirectory}/summary.log`;
@@ -49,7 +70,15 @@ const stages: Stage[] = [
       { argv: ["bun", "run", "typecheck"] },
       { argv: ["cargo", "check", "--workspace", "--tests", "--locked"] },
       {
-        argv: ["cargo", "check", "-p", "aphrody-nie-wasm", "--target", "wasm32-unknown-unknown", "--locked"],
+        argv: [
+          "cargo",
+          "check",
+          "-p",
+          "aphrody-nie-wasm",
+          "--target",
+          "wasm32-unknown-unknown",
+          "--locked",
+        ],
       },
     ],
   },
@@ -81,7 +110,18 @@ const stages: Stage[] = [
     name: "rust-clippy",
     commands: [
       {
-        argv: ["cargo", "clippy", "--workspace", "--lib", "--bins", "--tests", "--locked", "--", "-D", "warnings"],
+        argv: [
+          "cargo",
+          "clippy",
+          "--workspace",
+          "--lib",
+          "--bins",
+          "--tests",
+          "--locked",
+          "--",
+          "-D",
+          "warnings",
+        ],
       },
       {
         argv: [
@@ -124,20 +164,48 @@ const stages: Stage[] = [
       },
       // The Bun bindings load the native FFI library from the checkout during the
       // TypeScript project build; keep that library in the canonical release target too.
-      { argv: ["cargo", "build", "--release", "--locked", "-p", "aphrody-nie-ffi"] },
+      {
+        argv: [
+          "cargo",
+          "build",
+          "--release",
+          "--locked",
+          "-p",
+          "aphrody-nie-ffi",
+        ],
+      },
       {
         argv: ["bun", "run", "--cwd", "apps/nie-web", "build:wasm"],
         env: { NIE_WASM_PUBLIC_OUTPUT: "<STAGE>/wasm/nie_wasm_bg.wasm" },
       },
       {
-        argv: ["bunx", "vite", "build", "apps/nie-web", "--outDir", "<STAGE>/bundle", "--emptyOutDir"],
+        argv: [
+          "bunx",
+          "vite",
+          "build",
+          "apps/nie-web",
+          "--outDir",
+          "<STAGE>/bundle",
+          "--emptyOutDir",
+        ],
       },
       {
-        argv: ["cp", "<STAGE>/wasm/nie_wasm_bg.wasm", "<STAGE>/bundle/static/game/nie_wasm_bg.wasm"],
+        argv: [
+          "cp",
+          "<STAGE>/wasm/nie_wasm_bg.wasm",
+          "<STAGE>/bundle/static/game/nie_wasm_bg.wasm",
+        ],
       },
-      { argv: ["bun", "apps/nie-web/scripts/precompress.ts", "<STAGE>/bundle"] },
       {
-        argv: ["bash", "scripts/upstream/nie/e2e-site.sh", "--no-build", "--vfs=200"],
+        argv: ["bun", "apps/nie-web/scripts/precompress.ts", "<STAGE>/bundle"],
+      },
+      {
+        argv: [
+          "bash",
+          "scripts/upstream/nie/e2e-site.sh",
+          "--no-build",
+          "--vfs=200",
+        ],
         env: {
           NIE_SITE_BINARY: "<STAGE>/target/release/nie-site",
           NIE_SITE_STATIC_DIR: "<STAGE>/bundle",
@@ -145,7 +213,11 @@ const stages: Stage[] = [
       },
     ],
   },
-  { name: "release", remote: true, commands: [{ argv: ["git", "push", "origin", "main"] }] },
+  {
+    name: "release",
+    remote: true,
+    commands: [{ argv: ["git", "push", "origin", "main"] }],
+  },
   // This checked blue/green wrapper is the repository's deployment contract. It deploys
   // The maintained site from the already-built local artefact; other services require their own owners.
   { name: "deploy", remote: true, commands: [] },
@@ -153,7 +225,7 @@ const stages: Stage[] = [
 ];
 
 const usage = `Usage: bun run release:all [--dry-run] [--deploy] [--message=<commit message>] [--from=<stage> | --only=<stage>]
-Stages: ${stages.map(stage => stage.name).join(", ")}
+Stages: ${stages.map((stage) => stage.name).join(", ")}
 Default: run through build only. --deploy additionally pushes main, deploys, and validates live.
 `;
 
@@ -162,7 +234,7 @@ if (args.includes("--help")) {
   process.exit(0);
 }
 const unknown = args.filter(
-  arg =>
+  (arg) =>
     arg !== "--deploy" &&
     arg !== "--dry-run" &&
     !arg.startsWith("--from=") &&
@@ -175,32 +247,40 @@ if (unknown.length || (from && only)) {
   );
   process.exit(2);
 }
-const names = new Set(stages.map(stage => stage.name));
+const names = new Set(stages.map((stage) => stage.name));
 if ((from && !names.has(from)) || (only && !names.has(only))) {
   process.stderr.write(`Unknown stage.\n${usage}`);
   process.exit(2);
 }
 if (
   !deployEnabled &&
-  ((only && stages.find(stage => stage.name === only)?.remote) ||
-    (from && stages.findIndex(stage => stage.name === from) > 4))
+  ((only && stages.find((stage) => stage.name === only)?.remote) ||
+    (from && stages.findIndex((stage) => stage.name === from) > 4))
 ) {
   throw new Error("Remote stages require explicit --deploy.");
 }
 if (deployEnabled && (from || only))
-  throw new Error("--deploy requires the complete immutable pipeline; --from/--only are local-only.");
+  throw new Error(
+    "--deploy requires the complete immutable pipeline; --from/--only are local-only.",
+  );
 
 const selected = stages.filter((stage, index) => {
   if (!deployEnabled && stage.remote) return false;
   if (only) return stage.name === only;
-  if (from) return index >= stages.findIndex(candidate => candidate.name === from);
+  if (from)
+    return index >= stages.findIndex((candidate) => candidate.name === from);
   return true;
 });
-const quote = (part: string) => (/^[A-Za-z0-9_./:=@-]+$/.test(part) ? part : JSON.stringify(part));
+const quote = (part: string) =>
+  /^[A-Za-z0-9_./:=@-]+$/.test(part) ? part : JSON.stringify(part);
 const commandText = (command: Command) => command.argv.map(quote).join(" ");
-const elapsed = (start: number) => `${((performance.now() - start) / 1000).toFixed(1)}s`;
+const elapsed = (start: number) =>
+  `${((performance.now() - start) / 1000).toFixed(1)}s`;
 const redact = (value: string) =>
-  value.replace(/(authorization|token|secret|password|api[_-]?key)(\s*[:=]\s*)([^\s]+)/giu, "$1$2[REDACTED]");
+  value.replace(
+    /(authorization|token|secret|password|api[_-]?key)(\s*[:=]\s*)([^\s]+)/giu,
+    "$1$2[REDACTED]",
+  );
 
 async function capture(argv: string[]): Promise<string> {
   commandIndex += 1;
@@ -211,19 +291,37 @@ async function capture(argv: string[]): Promise<string> {
     new Response(process.stderr).text(),
     process.exited,
   ]);
-  await Bun.write(logPath, redact(`$ ${argv.map(quote).join(" ")}\n${stdout}${stderr}\n[exit ${code}]\n`));
+  await Bun.write(
+    logPath,
+    redact(
+      `$ ${argv.map(quote).join(" ")}\n${stdout}${stderr}\n[exit ${code}]\n`,
+    ),
+  );
   await chmod(logPath, 0o600);
-  if (code !== 0) throw new Error(`${argv.map(quote).join(" ")} failed (${code}); log: ${logPath}`);
+  if (code !== 0)
+    throw new Error(
+      `${argv.map(quote).join(" ")} failed (${code}); log: ${logPath}`,
+    );
   return stdout.trim();
 }
 
 async function requireReleaseState(): Promise<string> {
   const branch = await capture(["git", "branch", "--show-current"]);
-  if (branch !== "main") throw new Error(`Release requires branch main, found ${branch || "detached HEAD"}.`);
+  if (branch !== "main")
+    throw new Error(
+      `Release requires branch main, found ${branch || "detached HEAD"}.`,
+    );
   await capture(["git", "fetch", "origin", "main"]);
   const baseCommit = await capture(["git", "rev-parse", "HEAD"]);
-  const ancestry = Bun.spawnSync(["git", "merge-base", "--is-ancestor", "origin/main", baseCommit]);
-  if (ancestry.exitCode !== 0) throw new Error("Local main is behind or diverged from origin/main.");
+  const ancestry = Bun.spawnSync([
+    "git",
+    "merge-base",
+    "--is-ancestor",
+    "origin/main",
+    baseCommit,
+  ]);
+  if (ancestry.exitCode !== 0)
+    throw new Error("Local main is behind or diverged from origin/main.");
   if (deployEnabled) {
     initialIndexTree = await capture(["git", "write-tree"]);
     await capture(["git", "add", "-A"]);
@@ -235,8 +333,14 @@ async function requireReleaseState(): Promise<string> {
       throw new Error("Candidate changed while staging.");
     }
   } else {
-    const dirty = await capture(["git", "status", "--porcelain", "--untracked-files=all"]);
-    if (dirty) throw new Error("Local release verification requires a clean worktree.");
+    const dirty = await capture([
+      "git",
+      "status",
+      "--porcelain",
+      "--untracked-files=all",
+    ]);
+    if (dirty)
+      throw new Error("Local release verification requires a clean worktree.");
     candidateTree = await capture(["git", "rev-parse", "HEAD^{tree}"]);
   }
   return baseCommit;
@@ -247,31 +351,62 @@ async function commandExit(argv: string[]): Promise<number> {
 }
 
 async function preflightProduction(): Promise<void> {
-  for (const command of ["bun", "cargo", "git", "curl", "sha256sum", "sudo", "systemctl"]) {
+  for (const command of [
+    "bun",
+    "cargo",
+    "git",
+    "curl",
+    "sha256sum",
+    "sudo",
+    "systemctl",
+  ]) {
     if ((await commandExit(["sh", "-c", `command -v ${command}`])) !== 0)
       throw new Error(`Required command ${command} is unavailable.`);
   }
-  const diskLine = (await capture(["df", "-Pk", repositoryRoot])).trim().split("\n").at(-1)?.trim().split(/\s+/u);
+  const diskLine = (await capture(["df", "-Pk", repositoryRoot]))
+    .trim()
+    .split("\n")
+    .at(-1)
+    ?.trim()
+    .split(/\s+/u);
   const availableGiB = Number(diskLine?.[3] ?? 0) / 1024 / 1024;
   const minimumDiskGiB = Number(process.env.NIE_RELEASE_MIN_DISK_GIB ?? 15);
   if (availableGiB < minimumDiskGiB)
-    throw new Error(`Release needs ${minimumDiskGiB} GiB free; only ${availableGiB.toFixed(1)} GiB is available.`);
+    throw new Error(
+      `Release needs ${minimumDiskGiB} GiB free; only ${availableGiB.toFixed(1)} GiB is available.`,
+    );
   const memory = await Bun.file("/proc/meminfo").text();
-  const availableMemoryMiB = Number(memory.match(/^MemAvailable:\s+(\d+)/mu)?.[1] ?? 0) / 1024;
-  const minimumMemoryMiB = Number(process.env.NIE_RELEASE_MIN_MEMORY_MIB ?? 6144);
+  const availableMemoryMiB =
+    Number(memory.match(/^MemAvailable:\s+(\d+)/mu)?.[1] ?? 0) / 1024;
+  const minimumMemoryMiB = Number(
+    process.env.NIE_RELEASE_MIN_MEMORY_MIB ?? 6144,
+  );
   if (availableMemoryMiB < minimumMemoryMiB)
     throw new Error(
       `Release needs ${minimumMemoryMiB} MiB available memory; only ${availableMemoryMiB.toFixed(0)} MiB is available.`,
     );
   for (const [source, installed] of [
-    [`${infraRoot}/systemd/nie-site.service`, "/etc/systemd/system/nie-site.service"],
-    [`${infraRoot}/systemd/aphrody-nie-model-serve.service`, "/etc/systemd/system/aphrody-nie-model-serve.service"],
-    [`${infraRoot}/nginx/aphrody/aphrody.com.conf`, "/etc/nginx/conf.d/aphrody.com.conf"],
+    [
+      `${infraRoot}/systemd/nie-site.service`,
+      "/etc/systemd/system/nie-site.service",
+    ],
+    [
+      `${infraRoot}/systemd/aphrody-nie-model-serve.service`,
+      "/etc/systemd/system/aphrody-nie-model-serve.service",
+    ],
+    [
+      `${infraRoot}/nginx/aphrody/aphrody.com.conf`,
+      "/etc/nginx/conf.d/aphrody.com.conf",
+    ],
   ] as const) {
     if (!(await Bun.file(source).exists()))
-      throw new Error(`${source} is missing; set APHRODY_INFRA_ROOT to the aphrody-infra checkout.`);
+      throw new Error(
+        `${source} is missing; set APHRODY_INFRA_ROOT to the aphrody-infra checkout.`,
+      );
     if ((await commandExit(["cmp", "-s", source, installed])) !== 0)
-      throw new Error(`Installed production configuration drifts from ${source}.`);
+      throw new Error(
+        `Installed production configuration drifts from ${source}.`,
+      );
   }
   await runCommand({ argv: ["sudo", "nginx", "-t"] });
   for (const unit of ["aphrody-nie-model-serve.service", "nie-site.service"]) {
@@ -279,7 +414,8 @@ async function preflightProduction(): Promise<void> {
       throw new Error(`${unit} is not active before deployment.`);
   }
   for (const lock of ["/home/ubuntu/rg-releases/website/deploy.lock"]) {
-    if (await Bun.file(lock).exists()) throw new Error(`Another deployment owns ${lock}.`);
+    if (await Bun.file(lock).exists())
+      throw new Error(`Another deployment owns ${lock}.`);
   }
   process.stdout.write(
     `    preflight: ${availableGiB.toFixed(1)} GiB disk, ${availableMemoryMiB.toFixed(0)} MiB memory, installed config exact\n`,
@@ -292,16 +428,23 @@ async function assertImmutable(commit: string): Promise<void> {
     capture(["git", "diff", "--name-only"]),
     capture(["git", "ls-files", "--others", "--exclude-standard"]),
   ]);
-  if (current !== commit || unstaged || untracked) throw new Error("Checkout changed during the release pipeline.");
+  if (current !== commit || unstaged || untracked)
+    throw new Error("Checkout changed during the release pipeline.");
   if (candidateTree && (await capture(["git", "write-tree"])) !== candidateTree)
     throw new Error("Staged release tree changed during the release pipeline.");
 }
 
 async function prepareReleaseArtifacts(): Promise<void> {
   await mkdir(`${releaseStage}/bin`, { recursive: true });
-  for (const binary of ["nie", "aphrody-nie-mcp", "nie-site", "aphrody-nie-model-serve"]) {
+  for (const binary of [
+    "nie",
+    "aphrody-nie-mcp",
+    "nie-site",
+    "aphrody-nie-model-serve",
+  ]) {
     const source = `${releaseStage}/target/release/${binary}`;
-    if (!(await Bun.file(source).exists())) throw new Error(`Missing release artifact ${source}`);
+    if (!(await Bun.file(source).exists()))
+      throw new Error(`Missing release artifact ${source}`);
     await copyFile(source, `${releaseStage}/bin/${binary}`);
     await chmod(`${releaseStage}/bin/${binary}`, 0o755);
   }
@@ -317,8 +460,18 @@ async function snapshotRollbackArtifacts(): Promise<void> {
     ["nie-site.service", "nie-site"],
   ] as const;
   for (const [unit, binary] of serviceBinaries) {
-    const pid = await capture(["systemctl", "show", unit, "-p", "MainPID", "--value"]);
-    if (!pid || pid === "0") throw new Error(`${unit} has no running executable to preserve for rollback.`);
+    const pid = await capture([
+      "systemctl",
+      "show",
+      unit,
+      "-p",
+      "MainPID",
+      "--value",
+    ]);
+    if (!pid || pid === "0")
+      throw new Error(
+        `${unit} has no running executable to preserve for rollback.`,
+      );
     await copyFile(`/proc/${pid}/exe`, `${rollback}/${binary}`);
     await chmod(`${rollback}/${binary}`, 0o755);
   }
@@ -326,7 +479,8 @@ async function snapshotRollbackArtifacts(): Promise<void> {
   // process to copy from, so retain the current checked-out artifacts explicitly.
   for (const binary of ["nie", "aphrody-nie-mcp"]) {
     const source = `target/release/${binary}`;
-    if (!(await Bun.file(source).exists())) throw new Error(`Missing rollback artifact ${source}.`);
+    if (!(await Bun.file(source).exists()))
+      throw new Error(`Missing rollback artifact ${source}.`);
     await copyFile(source, `${rollback}/${binary}`);
     await chmod(`${rollback}/${binary}`, 0o755);
   }
@@ -336,7 +490,10 @@ async function sha256(path: string): Promise<string> {
   return (await capture(["sha256sum", path])).split(/\s+/u)[0];
 }
 
-async function writeReleaseManifest(commit: string, summaries: { stage: StageName; seconds: string }[]): Promise<void> {
+async function writeReleaseManifest(
+  commit: string,
+  summaries: { stage: StageName; seconds: string }[],
+): Promise<void> {
   const paths = [
     "bin/nie",
     "bin/aphrody-nie-mcp",
@@ -348,8 +505,13 @@ async function writeReleaseManifest(commit: string, summaries: { stage: StageNam
   const artifacts = [];
   for (const path of paths) {
     const absolute = `${releaseStage}/${path}`;
-    if (!(await Bun.file(absolute).exists())) throw new Error(`Missing release artifact ${absolute}`);
-    artifacts.push({ path, bytes: (await stat(absolute)).size, sha256: await sha256(absolute) });
+    if (!(await Bun.file(absolute).exists()))
+      throw new Error(`Missing release artifact ${absolute}`);
+    artifacts.push({
+      path,
+      bytes: (await stat(absolute)).size,
+      sha256: await sha256(absolute),
+    });
   }
   await Bun.write(
     `${releaseStage}/manifest.json`,
@@ -378,25 +540,35 @@ async function finishReleaseManifest(
 ): Promise<void> {
   const releasedPath = `${repositoryRoot}/var/releases/${commit}/manifest.json`;
   const stagedPath = `${releaseStage}/manifest.json`;
-  const path = (await Bun.file(releasedPath).exists()) ? releasedPath : stagedPath;
+  const path = (await Bun.file(releasedPath).exists())
+    ? releasedPath
+    : stagedPath;
   if (!(await Bun.file(path).exists())) return;
   const manifest = object(JSON.parse(await Bun.file(path).text()));
   manifest.state = state;
   manifest.completedAt = new Date().toISOString();
   manifest.gates = summaries;
   manifest.logs = logDirectory;
-  if (error) manifest.failure = error instanceof Error ? error.message : String(error);
+  if (error)
+    manifest.failure = error instanceof Error ? error.message : String(error);
   await Bun.write(path, `${JSON.stringify(manifest, null, 2)}\n`);
 }
 
 type JsonObject = Record<string, unknown>;
 const object = (value: unknown): JsonObject => {
-  if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error("Expected a JSON object.");
+  if (!value || typeof value !== "object" || Array.isArray(value))
+    throw new Error("Expected a JSON object.");
   return value as JsonObject;
 };
 
-async function fetchResponse(url: string, options: RequestInit = {}): Promise<Response> {
-  const response = await fetch(url, { ...options, signal: AbortSignal.timeout(30_000) });
+async function fetchResponse(
+  url: string,
+  options: RequestInit = {},
+): Promise<Response> {
+  const response = await fetch(url, {
+    ...options,
+    signal: AbortSignal.timeout(30_000),
+  });
   if (!response.ok) throw new Error(`${url} returned ${response.status}`);
   return response;
 }
@@ -413,11 +585,19 @@ function validateSiteHealth(value: unknown): void {
     capabilities.gisement !== true ||
     capabilities.anime !== true
   ) {
-    throw new Error("Site health lacks a ready bundle, content VFS, or warmed database.");
+    throw new Error(
+      "Site health lacks a ready bundle, content VFS, or warmed database.",
+    );
   }
   const views = root.vues;
-  if (!Array.isArray(views) || views.length < 4 || views.some(entry => Number(object(entry).total) < 1)) {
-    throw new Error("Site health lacks populated texture/model/sound/video views.");
+  if (
+    !Array.isArray(views) ||
+    views.length < 4 ||
+    views.some((entry) => Number(object(entry).total) < 1)
+  ) {
+    throw new Error(
+      "Site health lacks populated texture/model/sound/video views.",
+    );
   }
 }
 
@@ -431,9 +611,14 @@ function validateSiteHealth(value: unknown): void {
 async function validateLive(): Promise<void> {
   const base = "https://nie.aphrody.com";
   const liveness = object(await (await fetchResponse(`${base}/health`)).json());
-  if (liveness.etat !== "ok") throw new Error("Public /health does not report etat=ok.");
-  validateSiteHealth(await (await fetchResponse(`${base}/api/v1/health`)).json());
-  const icons = object(await (await fetchResponse(`${base}/api/v1/icons`)).json());
+  if (liveness.etat !== "ok")
+    throw new Error("Public /health does not report etat=ok.");
+  validateSiteHealth(
+    await (await fetchResponse(`${base}/api/v1/health`)).json(),
+  );
+  const icons = object(
+    await (await fetchResponse(`${base}/api/v1/icons`)).json(),
+  );
   const iconResults = object(icons.results);
   if (
     Number(icons.total_indexed) < 1 ||
@@ -442,15 +627,25 @@ async function validateLive(): Promise<void> {
     iconResults.elements.length < 1
   )
     throw new Error("Icon catalogue is empty or malformed.");
-  const modes = object(await (await fetchResponse(`${base}/api/v1/modes`)).json());
+  const modes = object(
+    await (await fetchResponse(`${base}/api/v1/modes`)).json(),
+  );
   const modeResults = object(modes.results);
-  if (Number(modes.total_modes) < 1 || !Array.isArray(modeResults.elements) || modeResults.elements.length < 1)
+  if (
+    Number(modes.total_modes) < 1 ||
+    !Array.isArray(modeResults.elements) ||
+    modeResults.elements.length < 1
+  )
     throw new Error("Mode catalogue is empty or malformed.");
   const modelHealth = await (await fetchResponse(`${base}/cdn/health`)).text();
-  if (modelHealth.trim() !== "ok") throw new Error("Public model backend (/cdn/health) payload is not ok.");
+  if (modelHealth.trim() !== "ok")
+    throw new Error("Public model backend (/cdn/health) payload is not ok.");
   const root = await fetch(`${base}/`, { signal: AbortSignal.timeout(30_000) });
   await root.body?.cancel();
-  if (root.status !== 404) throw new Error(`${base}/ returned ${root.status}; the backend-only vhost must answer 404.`);
+  if (root.status !== 404)
+    throw new Error(
+      `${base}/ returned ${root.status}; the backend-only vhost must answer 404.`,
+    );
   process.stdout.write(
     `    ✓ /health, API/VFS, ${icons.total_indexed} icons, ${modes.total_modes} modes, /cdn model backend, / = 404
 `,
@@ -464,7 +659,11 @@ async function atomicCopy(source: string, destination: string): Promise<void> {
   await rename(temporary, destination);
 }
 
-async function waitFor(url: string, validate: (body: string) => void, timeoutMs = 120_000): Promise<void> {
+async function waitFor(
+  url: string,
+  validate: (body: string) => void,
+  timeoutMs = 120_000,
+): Promise<void> {
   const deadline = Date.now() + timeoutMs;
   let lastError = "no response";
   while (Date.now() < deadline) {
@@ -485,43 +684,101 @@ async function waitFor(url: string, validate: (body: string) => void, timeoutMs 
 async function deployProduction(commit: string): Promise<void> {
   const release = `${repositoryRoot}/var/releases/${commit}`;
   if (await Bun.file(`${release}/manifest.json`).exists())
-    throw new Error(`${release} already exists; refusing to overwrite an immutable release.`);
+    throw new Error(
+      `${release} already exists; refusing to overwrite an immutable release.`,
+    );
   const previousBundle = await readlink("apps/nie-web/dist").catch(() => "");
-  if (!previousBundle) throw new Error("apps/nie-web/dist is not a release symlink; refusing a non-atomic deployment.");
+  if (!previousBundle)
+    throw new Error(
+      "apps/nie-web/dist is not a release symlink; refusing a non-atomic deployment.",
+    );
   const rollback = `${release}/rollback`;
   await rename(releaseStage, release);
-  for (const binary of ["nie", "aphrody-nie-mcp", "nie-site", "aphrody-nie-model-serve"])
-    if (!(await Bun.file(`${rollback}/${binary}`).exists())) throw new Error(`Rollback artifact ${binary} is missing.`);
-  await Bun.write(`${release}/rollback.json`, `${JSON.stringify({ previousBundle }, null, 2)}\n`);
+  for (const binary of [
+    "nie",
+    "aphrody-nie-mcp",
+    "nie-site",
+    "aphrody-nie-model-serve",
+  ])
+    if (!(await Bun.file(`${rollback}/${binary}`).exists()))
+      throw new Error(`Rollback artifact ${binary} is missing.`);
+  await Bun.write(
+    `${release}/rollback.json`,
+    `${JSON.stringify({ previousBundle }, null, 2)}\n`,
+  );
   const oldPids = new Map<string, string>();
   for (const unit of ["aphrody-nie-model-serve.service", "nie-site.service"])
-    oldPids.set(unit, await capture(["systemctl", "show", unit, "-p", "MainPID", "--value"]));
+    oldPids.set(
+      unit,
+      await capture(["systemctl", "show", unit, "-p", "MainPID", "--value"]),
+    );
   try {
     const nextLink = "apps/nie-web/dist.release-next";
     await rm(nextLink, { force: true });
     await symlink(`${release}/bundle`, nextLink);
     await rename(nextLink, "apps/nie-web/dist");
-    for (const binary of ["nie", "aphrody-nie-mcp", "nie-site", "aphrody-nie-model-serve"]) {
+    for (const binary of [
+      "nie",
+      "aphrody-nie-mcp",
+      "nie-site",
+      "aphrody-nie-model-serve",
+    ]) {
       await atomicCopy(`${release}/bin/${binary}`, `target/release/${binary}`);
-      if ((await sha256(`${release}/bin/${binary}`)) !== (await sha256(`target/release/${binary}`)))
+      if (
+        (await sha256(`${release}/bin/${binary}`)) !==
+        (await sha256(`target/release/${binary}`))
+      )
         throw new Error(`${binary} changed during atomic publication.`);
     }
     await runCommand({ argv: ["target/release/nie", "--version"] }, commit);
     await runCommand({ argv: ["target/release/nie", "mcp", "--help"] }, commit);
-    await runCommand({ argv: ["sudo", "systemctl", "restart", "aphrody-nie-model-serve.service"] }, commit);
-    await waitFor("http://127.0.0.1:8790/health", body => {
-      if (body.trim() !== "ok") throw new Error("model health payload is not ok");
+    await runCommand(
+      {
+        argv: [
+          "sudo",
+          "systemctl",
+          "restart",
+          "aphrody-nie-model-serve.service",
+        ],
+      },
+      commit,
+    );
+    await waitFor("http://127.0.0.1:8790/health", (body) => {
+      if (body.trim() !== "ok")
+        throw new Error("model health payload is not ok");
     });
-    await runCommand({ argv: ["sudo", "systemctl", "restart", "nie-site.service"] }, commit);
-    await waitFor("http://127.0.0.1:8085/api/v1/health", body => validateSiteHealth(JSON.parse(body)));
-    for (const unit of ["aphrody-nie-model-serve.service", "nie-site.service"]) {
-      if ((await commandExit(["systemctl", "is-active", "--quiet", unit])) !== 0)
+    await runCommand(
+      { argv: ["sudo", "systemctl", "restart", "nie-site.service"] },
+      commit,
+    );
+    await waitFor("http://127.0.0.1:8085/api/v1/health", (body) =>
+      validateSiteHealth(JSON.parse(body)),
+    );
+    for (const unit of [
+      "aphrody-nie-model-serve.service",
+      "nie-site.service",
+    ]) {
+      if (
+        (await commandExit(["systemctl", "is-active", "--quiet", unit])) !== 0
+      )
         throw new Error(`${unit} is inactive after restart.`);
-      const newPid = await capture(["systemctl", "show", unit, "-p", "MainPID", "--value"]);
+      const newPid = await capture([
+        "systemctl",
+        "show",
+        unit,
+        "-p",
+        "MainPID",
+        "--value",
+      ]);
       if (!newPid || newPid === "0" || newPid === oldPids.get(unit))
         throw new Error(`${unit} did not start a new process.`);
-      const binary = unit.startsWith("nie-model") ? "aphrody-nie-model-serve" : "nie-site";
-      if ((await sha256(`/proc/${newPid}/exe`)) !== (await sha256(`${release}/bin/${binary}`)))
+      const binary = unit.startsWith("nie-model")
+        ? "aphrody-nie-model-serve"
+        : "nie-site";
+      if (
+        (await sha256(`/proc/${newPid}/exe`)) !==
+        (await sha256(`${release}/bin/${binary}`))
+      )
         throw new Error(`${unit} is not running the released artifact.`);
     }
   } catch (error) {
@@ -533,25 +790,43 @@ async function deployProduction(commit: string): Promise<void> {
 async function rollbackProduction(commit: string): Promise<void> {
   const release = `${repositoryRoot}/var/releases/${commit}`;
   const rollback = `${release}/rollback`;
-  const rollbackState = object(JSON.parse(await Bun.file(`${release}/rollback.json`).text()));
+  const rollbackState = object(
+    JSON.parse(await Bun.file(`${release}/rollback.json`).text()),
+  );
   const previousBundle = String(rollbackState.previousBundle ?? "");
   if (!previousBundle) throw new Error("Rollback bundle target is missing.");
   const rollbackLink = "apps/nie-web/dist.release-rollback";
   await rm(rollbackLink, { force: true });
   await symlink(previousBundle, rollbackLink);
   await rename(rollbackLink, "apps/nie-web/dist");
-  for (const binary of ["nie", "aphrody-nie-mcp", "nie-site", "aphrody-nie-model-serve"]) {
+  for (const binary of [
+    "nie",
+    "aphrody-nie-mcp",
+    "nie-site",
+    "aphrody-nie-model-serve",
+  ]) {
     if (await Bun.file(`${rollback}/${binary}`).exists())
       await atomicCopy(`${rollback}/${binary}`, `target/release/${binary}`);
   }
   await runCommand(
-    { argv: ["sudo", "systemctl", "restart", "aphrody-nie-model-serve.service", "nie-site.service"] },
+    {
+      argv: [
+        "sudo",
+        "systemctl",
+        "restart",
+        "aphrody-nie-model-serve.service",
+        "nie-site.service",
+      ],
+    },
     commit,
   );
-  await waitFor("http://127.0.0.1:8790/health", body => {
-    if (body.trim() !== "ok") throw new Error("rolled-back model health payload is not ok");
+  await waitFor("http://127.0.0.1:8790/health", (body) => {
+    if (body.trim() !== "ok")
+      throw new Error("rolled-back model health payload is not ok");
   });
-  await waitFor("http://127.0.0.1:8085/api/v1/health", body => validateSiteHealth(JSON.parse(body)));
+  await waitFor("http://127.0.0.1:8085/api/v1/health", (body) =>
+    validateSiteHealth(JSON.parse(body)),
+  );
 }
 
 const stageSlug = (stage: string) => stage.replaceAll("-", "_");
@@ -591,14 +866,20 @@ async function pipeToLog(
   }
 }
 
-async function runCommand(command: Command, releaseCommit?: string): Promise<void> {
+async function runCommand(
+  command: Command,
+  releaseCommit?: string,
+): Promise<void> {
   const expanded = {
     ...command,
-    argv: command.argv.map(part => part.replaceAll("<STAGE>", releaseStage)),
+    argv: command.argv.map((part) => part.replaceAll("<STAGE>", releaseStage)),
     env:
       command.env &&
       Object.fromEntries(
-        Object.entries(command.env).map(([key, value]) => [key, value.replaceAll("<STAGE>", releaseStage)]),
+        Object.entries(command.env).map(([key, value]) => [
+          key,
+          value.replaceAll("<STAGE>", releaseStage),
+        ]),
       ),
   };
   commandIndex += 1;
@@ -630,7 +911,10 @@ async function runCommand(command: Command, releaseCommit?: string): Promise<voi
   ]);
   log.end();
   await once(log, "finish");
-  if (code !== 0) throw new Error(`${commandText(expanded)} exited with ${code}; log: ${logPath}`);
+  if (code !== 0)
+    throw new Error(
+      `${commandText(expanded)} exited with ${code}; log: ${logPath}`,
+    );
 }
 
 const pipelineStart = performance.now();
@@ -640,11 +924,15 @@ const lockPath = "/tmp/nie-release-all.lock";
 let failure: unknown;
 try {
   await mkdir(logDirectory, { recursive: true });
-  await Bun.write(summaryLog, `run=${runId}\nmode=${deployEnabled ? "deploy" : "local"}\ndryRun=${dryRun}\n`);
+  await Bun.write(
+    summaryLog,
+    `run=${runId}\nmode=${deployEnabled ? "deploy" : "local"}\ndryRun=${dryRun}\n`,
+  );
   await chmod(summaryLog, 0o600);
   if (!dryRun) {
     const lock = Bun.spawnSync(["mkdir", lockPath]);
-    if (lock.exitCode !== 0) throw new Error(`Another release owns ${lockPath}`);
+    if (lock.exitCode !== 0)
+      throw new Error(`Another release owns ${lockPath}`);
     releaseCommit = await requireReleaseState();
     releaseStage = `${repositoryRoot}/var/releases/${candidateTree ?? releaseCommit}.staging`;
     await rm(releaseStage, { recursive: true, force: true });
@@ -663,19 +951,40 @@ try {
     if (!dryRun && releaseCommit) await assertImmutable(releaseCommit);
     if (stage.name === "release" && !dryRun) {
       await capture(["git", "fetch", "origin", "main"]);
-      const ancestry = Bun.spawnSync(["git", "merge-base", "--is-ancestor", "origin/main", releaseCommit!]);
+      const ancestry = Bun.spawnSync([
+        "git",
+        "merge-base",
+        "--is-ancestor",
+        "origin/main",
+        releaseCommit!,
+      ]);
       if (ancestry.exitCode !== 0)
-        throw new Error("origin/main is not an ancestor of the tested commit; refusing a divergent push.");
+        throw new Error(
+          "origin/main is not an ancestor of the tested commit; refusing a divergent push.",
+        );
       const staged = Bun.spawnSync(["git", "diff", "--cached", "--quiet"]);
-      if (staged.exitCode !== 0) await runCommand({ argv: ["git", "commit", "-m", commitMessage] }, releaseCommit);
+      if (staged.exitCode !== 0)
+        await runCommand(
+          { argv: ["git", "commit", "-m", commitMessage] },
+          releaseCommit,
+        );
       releaseCommit = await capture(["git", "rev-parse", "HEAD"]);
       releaseCommitted = true;
-      if (candidateTree && (await capture(["git", "rev-parse", "HEAD^{tree}"])) !== candidateTree)
-        throw new Error("Committed tree differs from the tested candidate tree.");
+      if (
+        candidateTree &&
+        (await capture(["git", "rev-parse", "HEAD^{tree}"])) !== candidateTree
+      )
+        throw new Error(
+          "Committed tree differs from the tested candidate tree.",
+        );
       await writeReleaseManifest(releaseCommit, summaries);
     }
     if (stage.name === "deploy") {
-      if (!dryRun && (!releaseCommit || !(await Bun.file(`${releaseStage}/manifest.json`).exists())))
+      if (
+        !dryRun &&
+        (!releaseCommit ||
+          !(await Bun.file(`${releaseStage}/manifest.json`).exists()))
+      )
         throw new Error("Missing immutable release manifest.");
       if (dryRun)
         process.stdout.write(
@@ -683,7 +992,10 @@ try {
         );
       else await deployProduction(releaseCommit!);
     } else if (stage.name === "live-validation") {
-      if (dryRun) process.stdout.write("    validate JSON health, icons, modes, and site health payloads\n");
+      if (dryRun)
+        process.stdout.write(
+          "    validate JSON health, icons, modes, and site health payloads\n",
+        );
       else {
         try {
           await validateLive();
@@ -693,19 +1005,27 @@ try {
         }
       }
     } else {
-      for (const command of stage.commands) await runCommand(command, releaseCommit);
+      for (const command of stage.commands)
+        await runCommand(command, releaseCommit);
       if (stage.name === "build" && !dryRun) await prepareReleaseArtifacts();
     }
     if (stage.name === "release" && !dryRun) {
       const local = await capture(["git", "rev-parse", "HEAD"]);
       const remote = await capture(["git", "rev-parse", "origin/main"]);
       if (local !== releaseCommit || remote !== releaseCommit)
-        throw new Error(`Exact-commit guard failed: expected ${releaseCommit}, local=${local}, origin/main=${remote}`);
+        throw new Error(
+          `Exact-commit guard failed: expected ${releaseCommit}, local=${local}, origin/main=${remote}`,
+        );
     }
-    if ((stage.name === "deploy" || stage.name === "live-validation") && !dryRun) {
+    if (
+      (stage.name === "deploy" || stage.name === "live-validation") &&
+      !dryRun
+    ) {
       const current = await capture(["git", "rev-parse", "HEAD"]);
       if (!releaseCommit || current !== releaseCommit)
-        throw new Error("Checkout changed after push; refusing non-exact deployment.");
+        throw new Error(
+          "Checkout changed after push; refusing non-exact deployment.",
+        );
     }
     if (!dryRun && releaseCommit) await assertImmutable(releaseCommit);
     const seconds = elapsed(start);
@@ -722,7 +1042,12 @@ try {
     `${new Date().toISOString()} FAIL ${error instanceof Error ? error.message : String(error)}\n`,
   ).catch(() => undefined);
   if (deployEnabled && releaseCommit)
-    await finishReleaseManifest(releaseCommit, "failed", summaries, error).catch(() => undefined);
+    await finishReleaseManifest(
+      releaseCommit,
+      "failed",
+      summaries,
+      error,
+    ).catch(() => undefined);
 } finally {
   if (deployEnabled && !releaseCommitted && initialIndexTree) {
     Bun.spawnSync(["git", "read-tree", initialIndexTree]);
@@ -733,7 +1058,9 @@ try {
 if (failure) {
   process.exitCode = 1;
 } else {
-  if (deployEnabled && releaseCommit) await finishReleaseManifest(releaseCommit, "validated", summaries);
+  if (deployEnabled && releaseCommit)
+    await finishReleaseManifest(releaseCommit, "validated", summaries);
   await logSummary(`COMPLETE ${elapsed(pipelineStart)} logs=${logDirectory}`);
-  for (const summary of summaries) process.stdout.write(`  ${summary.stage.padEnd(16)} ${summary.seconds}\n`);
+  for (const summary of summaries)
+    process.stdout.write(`  ${summary.stage.padEnd(16)} ${summary.seconds}\n`);
 }

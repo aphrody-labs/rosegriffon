@@ -91,7 +91,8 @@ export class ImageNode extends DecoratorNode<JSX.Element> {
   }
 
   static importJSON(serializedNode: SerializedImageNode): ImageNode {
-    const { altText, height, width, maxWidth, caption, src, showCaption } = serializedNode;
+    const { altText, height, width, maxWidth, caption, src, showCaption } =
+      serializedNode;
     const node = $createImageNode({
       altText,
       height,
@@ -166,7 +167,10 @@ export class ImageNode extends DecoratorNode<JSX.Element> {
     };
   }
 
-  setWidthAndHeight(width: "inherit" | number, height: "inherit" | number): void {
+  setWidthAndHeight(
+    width: "inherit" | number,
+    height: "inherit" | number,
+  ): void {
     const writable = this.getWritable();
     writable.__width = width;
     writable.__height = height;
@@ -233,10 +237,22 @@ export function $createImageNode({
   key,
 }: ImagePayload): ImageNode {
   return $applyNodeReplacement(
-    new ImageNode(src, altText, maxWidth, width, height, showCaption, caption, captionsEnabled, key),
+    new ImageNode(
+      src,
+      altText,
+      maxWidth,
+      width,
+      height,
+      showCaption,
+      caption,
+      captionsEnabled,
+      key,
+    ),
   );
 }
 
-export function $isImageNode(node: LexicalNode | null | undefined): node is ImageNode {
+export function $isImageNode(
+  node: LexicalNode | null | undefined,
+): node is ImageNode {
   return node instanceof ImageNode;
 }

@@ -16,7 +16,11 @@ const SIZES = {
   sm: 16,
 };
 
-export function ElementIcon({ element, size = "md", className }: ElementIconProps) {
+export function ElementIcon({
+  element,
+  size = "md",
+  className,
+}: ElementIconProps) {
   const px = SIZES[size];
   const iconUrl = getSkillIconUrl(element);
 
@@ -26,10 +30,19 @@ export function ElementIcon({ element, size = "md", className }: ElementIconProp
 
   return (
     <div
-      className={cn("relative inline-flex items-center justify-center", className)}
+      className={cn(
+        "relative inline-flex items-center justify-center",
+        className,
+      )}
       style={{ height: px, width: px }}
     >
-      <Image src={iconUrl} alt={element} width={px} height={px} className="object-contain" />
+      <Image
+        src={iconUrl}
+        alt={element}
+        width={px}
+        height={px}
+        className="object-contain"
+      />
     </div>
   );
 }

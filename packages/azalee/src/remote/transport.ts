@@ -22,7 +22,8 @@ export const AZALEE_DEFAULT_API_URL = "https://api.rosegriffon.fr/v1/azalee";
 export const AZALEE_SIDECAR_API_URL = "http://127.0.0.1:3010";
 
 /** En-tête d'identification par défaut (ignoré par les navigateurs, honoré par Bun/Node/Tauri). */
-export const AZALEE_USER_AGENT = "@rosegriffon/azalee (+https://azalee.rosegriffon.fr)";
+export const AZALEE_USER_AGENT =
+  "@rosegriffon/azalee (+https://azalee.rosegriffon.fr)";
 
 /**
  * Transport bas niveau : `Request` → `Response`. Par défaut le `fetch` global,
@@ -78,7 +79,9 @@ export const AZALEE_CLIENT_DEFAULTS = {
  * bundler).
  */
 export function readEnv(name: string): string | undefined {
-  const host = globalThis as { process?: { env?: Record<string, string | undefined> } };
+  const host = globalThis as {
+    process?: { env?: Record<string, string | undefined> };
+  };
   return host.process?.env?.[name];
 }
 
@@ -116,14 +119,20 @@ export function buildQuery(params?: Record<string, AzaleeQueryValue>): string {
  * ancien embarqué par Tauri sous Linux) : on retombe sur un `AbortController`
  * relayant le premier signal déclenché.
  */
-function linkSignals(timeoutMs: number, external?: AbortSignal): { signal: AbortSignal; dispose: () => void } {
+function linkSignals(
+  timeoutMs: number,
+  external?: AbortSignal,
+): { signal: AbortSignal; dispose: () => void } {
   const timeout = AbortSignal.timeout(timeoutMs);
   if (!external) return { signal: timeout, dispose: () => {} };
 
   // `AbortSignal.any` est une méthode STATIQUE qui construit via `new this` :
   // la détacher de son porteur produit « undefined is not a constructor ».
-  const holder = AbortSignal as unknown as { any?: (signals: AbortSignal[]) => AbortSignal };
-  if (typeof holder.any === "function") return { signal: holder.any([timeout, external]), dispose: () => {} };
+  const holder = AbortSignal as unknown as {
+    any?: (signals: AbortSignal[]) => AbortSignal;
+  };
+  if (typeof holder.any === "function")
+    return { signal: holder.any([timeout, external]), dispose: () => {} };
 
   const controller = new AbortController();
   const relay = (source: AbortSignal) => () => controller.abort(source.reason);
@@ -192,14 +201,18 @@ function abortKind(
 }
 
 /** Décode le corps d'une réponse en échec, sans jamais rejeter. */
-async function readErrorBody(response: Response): Promise<{ detail?: string; body?: unknown }> {
+async function readErrorBody(
+  response: Response,
+): Promise<{ detail?: string; body?: unknown }> {
   try {
     const text = await response.text();
     if (!text) return {};
     try {
       const parsed: unknown = JSON.parse(text);
       const detail =
-        typeof parsed === "object" && parsed !== null && typeof (parsed as { error?: unknown }).error === "string"
+        typeof parsed === "object" &&
+        parsed !== null &&
+        typeof (parsed as { error?: unknown }).error === "string"
           ? (parsed as { error: string }).error
           : undefined;
       return detail === undefined ? { body: parsed } : { detail, body: parsed };
@@ -232,13 +245,20 @@ export interface AzaleeTransportContext {
  * `OPTIONS`. Ajouter un en-tête personnalisé en déclencherait un, que la
  * réponse `Access-Control-Allow-Headers: Content-Type` de `serve.ts` refuserait.
  */
-export function createTransportContext(options: AzaleeClientOptions = {}): AzaleeTransportContext {
+export function createTransportContext(
+  options: AzaleeClientOptions = {},
+): AzaleeTransportContext {
   const baseUrl = resolveAzaleeApiUrl(options.baseUrl);
   const fetchImpl = options.fetch ?? globalThis.fetch;
-  const transport: AzaleeTransport = options.transport ?? (request => fetchImpl(request));
+  const transport: AzaleeTransport =
+    options.transport ?? ((request) => fetchImpl(request));
 
-  const headers: Record<string, string> = { Accept: "application/json", ...options.headers };
-  const userAgent = options.userAgent === undefined ? AZALEE_USER_AGENT : options.userAgent;
+  const headers: Record<string, string> = {
+    Accept: "application/json",
+    ...options.headers,
+  };
+  const userAgent =
+    options.userAgent === undefined ? AZALEE_USER_AGENT : options.userAgent;
   if (userAgent !== null) headers["User-Agent"] = userAgent;
 
   const context: AzaleeTransportContext = {
@@ -248,7 +268,8 @@ export function createTransportContext(options: AzaleeClientOptions = {}): Azale
     timeoutMs: options.timeoutMs ?? AZALEE_CLIENT_DEFAULTS.timeoutMs,
     attempts: Math.max(1, options.attempts ?? AZALEE_CLIENT_DEFAULTS.attempts),
     retryDelayMs: options.retryDelayMs ?? AZALEE_CLIENT_DEFAULTS.retryDelayMs,
-    maxRetryDelayMs: options.maxRetryDelayMs ?? AZALEE_CLIENT_DEFAULTS.maxRetryDelayMs,
+    maxRetryDelayMs:
+      options.maxRetryDelayMs ?? AZALEE_CLIENT_DEFAULTS.maxRetryDelayMs,
   };
   if (options.signal) context.signal = options.signal;
   return context;
@@ -261,9 +282,14 @@ async function attemptOnce(
   options: AzaleeRequestOptions,
 ): Promise<Response> {
   const external = options.signal ?? context.signal;
-  const { signal, dispose } = linkSignals(options.timeoutMs ?? context.timeoutMs, external);
+  const { signal, dispose } = linkSignals(
+    options.timeoutMs ?? context.timeoutMs,
+    external,
+  );
   try {
-    return await context.transport(new Request(url, { method: "GET", headers: context.headers, signal }));
+    return await context.transport(
+      new Request(url, { method: "GET", headers: context.headers, signal }),
+    );
   } catch (cause) {
     const kind = abortKind(signal, external);
     const message =
@@ -299,9 +325,14 @@ export async function requestJson<T>(
 
   for (let attempt = 0; attempt < attempts; attempt++) {
     if (attempt > 0) {
-      const delay = serverDelayMs ?? backoffMs(attempt - 1, context.retryDelayMs, context.maxRetryDelayMs);
+      const delay =
+        serverDelayMs ??
+        backoffMs(attempt - 1, context.retryDelayMs, context.maxRetryDelayMs);
       serverDelayMs = null;
-      await sleep(Math.min(delay, context.maxRetryDelayMs), options.signal ?? context.signal);
+      await sleep(
+        Math.min(delay, context.maxRetryDelayMs),
+        options.signal ?? context.signal,
+      );
     }
 
     let response: Response;
@@ -316,13 +347,16 @@ export async function requestJson<T>(
     if (!response.ok) {
       serverDelayMs = retryAfterMs(response);
       const { detail, body } = await readErrorBody(response);
-      const error = new AzaleeRemoteError(detail ?? `HTTP ${response.status} sur ${url}`, {
-        kind: "http",
-        status: response.status,
-        url,
-        ...(detail === undefined ? {} : { detail }),
-        ...(body === undefined ? {} : { body }),
-      });
+      const error = new AzaleeRemoteError(
+        detail ?? `HTTP ${response.status} sur ${url}`,
+        {
+          kind: "http",
+          status: response.status,
+          url,
+          ...(detail === undefined ? {} : { detail }),
+          ...(body === undefined ? {} : { body }),
+        },
+      );
       lastError = error;
       if (isAzaleeRetriable(error) && attempt < attempts - 1) continue;
       throw error;

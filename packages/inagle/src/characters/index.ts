@@ -2,4 +2,8 @@
 
 export * from "./comparison-engine.js";
 
-export type { CharacterDatabase, UnifiedCharacter, UnifiedCharacterVariant } from "./types.js";
+export type {
+  CharacterDatabase,
+  UnifiedCharacter,
+  UnifiedCharacterVariant,
+} from "./types.js";

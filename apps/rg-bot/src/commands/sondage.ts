@@ -29,7 +29,14 @@
  * cette jointure doit figurer EXPLICITEMENT dans chaque requête, sinon le bot
  * publierait des sondages qu'un visiteur du site ne verrait pas.
  */
-import { ButtonComponent, Discord, Slash, SlashChoice, SlashGroup, SlashOption } from "discordx";
+import {
+  ButtonComponent,
+  Discord,
+  Slash,
+  SlashChoice,
+  SlashGroup,
+  SlashOption,
+} from "discordx";
 import {
   ActionRowBuilder,
   ApplicationCommandOptionType,
@@ -130,7 +137,10 @@ async function listerSondages(etat: EtatListeSondages): Promise<PageSondages> {
   const statut = normaliserStatut(etat.statut);
   const periode = normaliserPeriode(etat.periode);
   const brut = etat.recherche?.trim() ?? "";
-  const motif = brut.length > 0 ? `%${brut.slice(0, 120).replace(/[\\%_]/g, "\\$&")}%` : null;
+  const motif =
+    brut.length > 0
+      ? `%${brut.slice(0, 120).replace(/[\\%_]/g, "\\$&")}%`
+      : null;
   const page = Math.max(1, Math.trunc(etat.page));
   const decalage = (page - 1) * PAR_PAGE;
 
@@ -164,7 +174,7 @@ async function listerSondages(etat: EtatListeSondages): Promise<PageSondages> {
 
   return {
     page,
-    sondages: lignes.map(ligne => normaliserSondage(ligne, RG_BASE_URL)),
+    sondages: lignes.map((ligne) => normaliserSondage(ligne, RG_BASE_URL)),
     total: total?.total ?? 0,
   };
 }
@@ -194,12 +204,14 @@ async function anneesConnues(): Promise<number[]> {
 			JOIN public.discord_channels c ON c.channel_id = p.channel_id AND c.suivi = true
 			ORDER BY an DESC
 		`;
-    return lignes.map(ligne => ligne.an);
+    return lignes.map((ligne) => ligne.an);
   });
 }
 
 /** Questions connues — alimente l'autocomplétion de `/sondage voir`. */
-async function questionsConnues(): Promise<Array<{ poll_id: string; question: string }>> {
+async function questionsConnues(): Promise<
+  Array<{ poll_id: string; question: string }>
+> {
   return cached("sondages:questions", TTL_QUESTIONS_MS, async () => {
     return sql<Array<{ poll_id: string; question: string }>>`
 			SELECT p.poll_id, p.question
@@ -212,12 +224,15 @@ async function questionsConnues(): Promise<Array<{ poll_id: string; question: st
 }
 
 /** Construit la réponse (embed + boutons) d'une page de liste. */
-async function rendrePage(etat: EtatListeSondages): Promise<InteractionEditReplyOptions> {
+async function rendrePage(
+  etat: EtatListeSondages,
+): Promise<InteractionEditReplyOptions> {
   const premier = await listerSondages(etat);
   // Une page demandée au-delà de la dernière ne doit pas répondre « vide » :
   // on la ramène dans les bornes et on relit.
   const page = bornerPage(etat.page, premier.total, PAR_PAGE);
-  const resultat = page === premier.page ? premier : await listerSondages({ ...etat, page });
+  const resultat =
+    page === premier.page ? premier : await listerSondages({ ...etat, page });
 
   const periode = normaliserPeriode(etat.periode);
   const statut = normaliserStatut(etat.statut);
@@ -242,8 +257,12 @@ async function rendrePage(etat: EtatListeSondages): Promise<InteractionEditReply
   if (resultat.sondages.length === 0) {
     embed.setDescription("Aucun sondage ne correspond à ces filtres.");
   } else {
-    const corps = resultat.sondages.map(sondage => ligneListeSondage(sondage, RG_BASE_URL)).join("\n\n");
-    const estimations = resultat.sondages.filter(sondage => sondage.source === "reactions").length;
+    const corps = resultat.sondages
+      .map((sondage) => ligneListeSondage(sondage, RG_BASE_URL))
+      .join("\n\n");
+    const estimations = resultat.sondages.filter(
+      (sondage) => sondage.source === "reactions",
+    ).length;
     const note =
       estimations > 0
         ? `\n\n≈ ${estimations} ${estimations === 1 ? "décompte est une estimation" : "décomptes sont des estimations"} reconstituée${estimations === 1 ? "" : "s"} depuis les réactions archivées, pas un résultat officiel.`
@@ -292,15 +311,19 @@ function rendreSondage(sondage: Sondage): InteractionEditReplyOptions {
   const ordonnes = classement(sondage);
   const montres = ordonnes.slice(0, CHOIX_MAX);
   const reste = ordonnes.length - montres.length;
-  const lignes = montres.map(option => ligneResultat(option, sondage));
+  const lignes = montres.map((option) => ligneResultat(option, sondage));
   if (reste > 0) {
-    lignes.push(`*… et ${reste} autre${reste === 1 ? "" : "s"} choix, à voir sur le site.*`);
+    lignes.push(
+      `*… et ${reste} autre${reste === 1 ? "" : "s"} choix, à voir sur le site.*`,
+    );
   }
   const mention = mentionSource(sondage);
   const corps = [
     lignes.join("\n"),
     mention,
-    aDesResultats(sondage) ? null : "*Ce sondage n'a jamais publié de décompte : aucun chiffre ne peut être affiché.*",
+    aDesResultats(sondage)
+      ? null
+      : "*Ce sondage n'a jamais publié de décompte : aucun chiffre ne peut être affiché.*",
   ]
     .filter((valeur): valeur is string => valeur !== null)
     .join("\n\n");
@@ -313,7 +336,11 @@ function rendreSondage(sondage: Sondage): InteractionEditReplyOptions {
       name: "Participation",
       value: libelleParticipation(sondage) ?? "non publiée",
     },
-    { inline: true, name: "Règle de vote", value: libelleChoixAutorises(sondage) },
+    {
+      inline: true,
+      name: "Règle de vote",
+      value: libelleChoixAutorises(sondage),
+    },
   );
 
   const meneur = gagnant(sondage);
@@ -339,7 +366,11 @@ function rendreSondage(sondage: Sondage): InteractionEditReplyOptions {
   if (lien) {
     contexte.push(`[Message d'origine](${lien})`);
   }
-  embed.addFields({ inline: false, name: "Contexte", value: truncate(contexte.join(" · "), 1024) });
+  embed.addFields({
+    inline: false,
+    name: "Contexte",
+    value: truncate(contexte.join(" · "), 1024),
+  });
 
   if (sondage.visuel) {
     embed.setImage(sondage.visuel.url);
@@ -358,7 +389,8 @@ function rendreSondage(sondage: Sondage): InteractionEditReplyOptions {
 @SlashGroup("sondage")
 export class SondageCommand {
   @Slash({
-    description: "Parcourt les sondages du serveur, filtrables par état et par période",
+    description:
+      "Parcourt les sondages du serveur, filtrables par état et par période",
     name: "liste",
   })
   async liste(
@@ -378,18 +410,22 @@ export class SondageCommand {
     @SlashOption({
       autocomplete: async (interaction: AutocompleteInteraction) => {
         try {
-          const saisie = String(interaction.options.getFocused() ?? "").toLowerCase();
+          const saisie = String(
+            interaction.options.getFocused() ?? "",
+          ).toLowerCase();
           const annees = await anneesConnues();
           const propositions = [
             { name: "Toutes périodes", value: "tout" },
-            ...PERIODES_RELATIVES.map(entree => ({
+            ...PERIODES_RELATIVES.map((entree) => ({
               name: entree.libelle,
               value: entree.cle,
             })),
-            ...annees.map(an => ({ name: `Année ${an}`, value: String(an) })),
+            ...annees.map((an) => ({ name: `Année ${an}`, value: String(an) })),
           ];
           await interaction.respond(
-            propositions.filter(entree => entree.name.toLowerCase().includes(saisie)).slice(0, 25),
+            propositions
+              .filter((entree) => entree.name.toLowerCase().includes(saisie))
+              .slice(0, 25),
           );
         } catch {
           await interaction.respond([]);
@@ -435,7 +471,10 @@ export class SondageCommand {
     } catch (err) {
       await repondre(
         interaction,
-        echec("Lecture des sondages impossible", err instanceof Error ? err.message : String(err)),
+        echec(
+          "Lecture des sondages impossible",
+          err instanceof Error ? err.message : String(err),
+        ),
       );
     }
   }
@@ -467,20 +506,27 @@ export class SondageCommand {
   }
 
   @Slash({
-    description: "Affiche un sondage : question, choix, barres de résultat et total",
+    description:
+      "Affiche un sondage : question, choix, barres de résultat et total",
     name: "voir",
   })
   async voir(
     @SlashOption({
       autocomplete: async (interaction: AutocompleteInteraction) => {
         try {
-          const saisie = String(interaction.options.getFocused() ?? "").toLowerCase();
+          const saisie = String(
+            interaction.options.getFocused() ?? "",
+          ).toLowerCase();
           const questions = await questionsConnues();
           await interaction.respond(
             questions
-              .filter(entree => entree.question.toLowerCase().includes(saisie) || entree.poll_id.startsWith(saisie))
+              .filter(
+                (entree) =>
+                  entree.question.toLowerCase().includes(saisie) ||
+                  entree.poll_id.startsWith(saisie),
+              )
               .slice(0, 25)
-              .map(entree => ({
+              .map((entree) => ({
                 name: couper(entree.question, 100),
                 value: entree.poll_id,
               })),
@@ -510,7 +556,10 @@ export class SondageCommand {
     } catch (err) {
       await repondre(
         interaction,
-        echec("Lecture du sondage impossible", err instanceof Error ? err.message : String(err)),
+        echec(
+          "Lecture du sondage impossible",
+          err instanceof Error ? err.message : String(err),
+        ),
       );
     }
   }

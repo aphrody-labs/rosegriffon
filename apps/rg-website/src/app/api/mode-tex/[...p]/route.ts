@@ -15,12 +15,18 @@ import path from "node:path";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-export async function GET(_req: Request, { params }: { params: Promise<{ p?: string[] }> }): Promise<Response> {
+export async function GET(
+  _req: Request,
+  { params }: { params: Promise<{ p?: string[] }> },
+): Promise<Response> {
   const { p } = await params;
   let RACINE: string;
   try {
-    RACINE = path.resolve(path.join(process.env.DATA_PATH ?? iecodeDataPath(), "mode-tex"));
-    if (!(await fs.stat(RACINE)).isDirectory()) throw new Error("Texture source is unavailable");
+    RACINE = path.resolve(
+      path.join(process.env.DATA_PATH ?? iecodeDataPath(), "mode-tex"),
+    );
+    if (!(await fs.stat(RACINE)).isDirectory())
+      throw new Error("Texture source is unavailable");
   } catch {
     return new Response("texture source unavailable", { status: 503 });
   }

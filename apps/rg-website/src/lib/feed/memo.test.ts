@@ -23,7 +23,7 @@ describe("memo", () => {
     let appels = 0;
     let liberer = () => {};
     const lent = () =>
-      new Promise<number>(resoudre => {
+      new Promise<number>((resoudre) => {
         appels++;
         liberer = () => resoudre(appels);
       });
@@ -48,12 +48,15 @@ describe("memo", () => {
     setSystemTime(t0 + PERIME_MAX_MS + 1);
     expect(await memo("c", 1000, () => Promise.resolve("neuve"))).toBe("neuve");
     setSystemTime(t0 + 2 * PERIME_MAX_MS + 2);
-    expect(await memo<string>("c", 1000, () => Promise.reject(new Error("panne")))).toBe("neuve");
+    expect(
+      await memo<string>("c", 1000, () => Promise.reject(new Error("panne"))),
+    ).toBe("neuve");
   });
 
   test("appels simultanés : un seul producteur", async () => {
     let appels = 0;
-    const f = () => new Promise<number>(r => setTimeout(() => r(++appels), 5));
+    const f = () =>
+      new Promise<number>((r) => setTimeout(() => r(++appels), 5));
     const [x, y] = await Promise.all([memo("d", 1000, f), memo("d", 1000, f)]);
     expect([x, y, appels]).toEqual([1, 1, 1]);
   });

@@ -1,6 +1,10 @@
 import Image from "next/image";
 import Link from "@/components/shared/Link";
-import type { ParticipantDTO, Tournament, TournamentListItem } from "@rosegriffon/achillea-types";
+import type {
+  ParticipantDTO,
+  Tournament,
+  TournamentListItem,
+} from "@rosegriffon/achillea-types";
 import { TournamentState } from "@rosegriffon/achillea-types";
 import {
   stageTypeLabel,
@@ -9,7 +13,10 @@ import {
 } from "@rosegriffon/achillea-core";
 import { Badge } from "@rosegriffon/ui";
 import { badgeVariant } from "@/lib/achillea";
-import { RecentTournamentsList, RecentTournamentsNote } from "./RecentTournaments";
+import {
+  RecentTournamentsList,
+  RecentTournamentsNote,
+} from "./RecentTournaments";
 import {
   ArrowRight,
   Calendar,
@@ -116,7 +123,10 @@ export function HeroSection({
             <div className="achillea-home__section-head">
               <div className="flex items-center gap-3">
                 {isLive ? (
-                  <Radio className="size-5 text-destructive/80" aria-hidden="true" />
+                  <Radio
+                    className="size-5 text-destructive/80"
+                    aria-hidden="true"
+                  />
                 ) : (
                   <Trophy
                     className="size-5 text-achillea-lime"
@@ -242,7 +252,9 @@ export function HeroSection({
                 Consulter le calendrier <ArrowRight aria-hidden="true" />
               </Link>
             </section>
-            {recent.length > 0 && <RecentTournamentsList tournaments={recent} />}
+            {recent.length > 0 && (
+              <RecentTournamentsList tournaments={recent} />
+            )}
           </div>
         )}
 

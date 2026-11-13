@@ -72,7 +72,12 @@
         "path": "data/common/gamedata/character/chara_scale_0.11.12.cfg.bin",
         "bytes": 150705,
         "matching_rows": 1,
-        "values": { "field": 0.9799999595, "menu": 0, "menuLooksFirst": 0.9799999595, "rpgBattle": 0.9799999595 }
+        "values": {
+          "field": 0.9799999595,
+          "menu": 0,
+          "menuLooksFirst": 0.9799999595,
+          "rpgBattle": 0.9799999595
+        }
       },
       {
         "table": "chara_model",
@@ -132,19 +137,41 @@
       "mode_change_layout_engine_type": "gmdMenuObj",
       "mode_change_layout_components": 3,
       "mode_change_image_dimensions": "1728x352",
-      "mode_change_locales": ["de", "en", "es", "fr", "it", "ja", "pt", "zh_hans", "zh_hant"]
+      "mode_change_locales": [
+        "de",
+        "en",
+        "es",
+        "fr",
+        "it",
+        "ja",
+        "pt",
+        "zh_hans",
+        "zh_hant"
+      ]
     }
   },
   "live_service_probes": {
-    "model_serve_health": { "url": "http://127.0.0.1:8790/health", "http_status": 200, "body_bytes": 2 },
+    "model_serve_health": {
+      "url": "http://127.0.0.1:8790/health",
+      "http_status": 200,
+      "body_bytes": 2
+    },
     "reference_model_glb": {
       "endpoint": "/model-full/c02023290.glb",
       "http_status": 200,
       "bytes": 2543164,
       "format": "GLB"
     },
-    "reference_g4md": { "endpoint": "/raw/.../c02023290.g4md", "http_status": 200, "bytes": 2664 },
-    "reference_g4mg": { "endpoint": "/raw/.../c02023290.g4mg", "http_status": 200, "bytes": 141696 },
+    "reference_g4md": {
+      "endpoint": "/raw/.../c02023290.g4md",
+      "http_status": 200,
+      "bytes": 2664
+    },
+    "reference_g4mg": {
+      "endpoint": "/raw/.../c02023290.g4mg",
+      "http_status": 200,
+      "bytes": 141696
+    },
     "decoded_reference_texture": {
       "endpoint": "/tex/.../c02023290.png",
       "http_status": 200,
@@ -155,7 +182,10 @@
       "vfs_search": ["c99019010", "c99019020", "astro"],
       "result": "no matches",
       "model_full": { "c99019010": 404, "c99019020": 404 },
-      "example_target_g4md": { "path": "data/common/chr/_face/01_IE1/c99019010/c99019010.g4md", "http_status": 404 }
+      "example_target_g4md": {
+        "path": "data/common/chr/_face/01_IE1/c99019010/c99019010.g4md",
+        "http_status": 404
+      }
     },
     "nie_game_mcp": {
       "available": false,
@@ -184,9 +214,22 @@
     "rust_nie_mem_windows": {
       "binary": "target/release/nie-mem.exe",
       "backend": "OpenProcess/ReadProcessMemory/VirtualQueryEx",
-      "find_pid": { "command": "nie-mem find-pid nie.exe", "pid": 17768, "exit_code": 0 },
-      "maps": { "command": "nie-mem maps --pid 17768 --module nie.exe", "regions": 0, "bytes": 0, "exit_code": 0 },
-      "base": { "command": "nie-mem base --pid 17768 --module nie.exe", "result": "module not found", "exit_code": 1 },
+      "find_pid": {
+        "command": "nie-mem find-pid nie.exe",
+        "pid": 17768,
+        "exit_code": 0
+      },
+      "maps": {
+        "command": "nie-mem maps --pid 17768 --module nie.exe",
+        "regions": 0,
+        "bytes": 0,
+        "exit_code": 0
+      },
+      "base": {
+        "command": "nie-mem base --pid 17768 --module nie.exe",
+        "result": "module not found",
+        "exit_code": 1
+      },
       "read": {
         "command": "nie-mem read 0x140000000 --pid 17768 --len 16",
         "result": "OpenProcess failed",
@@ -194,7 +237,12 @@
         "meaning": "ERROR_ACCESS_DENIED",
         "exit_code": 1
       },
-      "scan": { "pattern": "str:c02023290", "all_regions": true, "hits": 0, "reason": "no readable regions" }
+      "scan": {
+        "pattern": "str:c02023290",
+        "all_regions": true,
+        "hits": 0,
+        "reason": "no readable regions"
+      }
     },
     "windows_access_mask_matrix": {
       "tested_masks": ["0x0010", "0x0410", "0x1010", "0x1410"],

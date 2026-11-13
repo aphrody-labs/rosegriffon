@@ -29,16 +29,29 @@
  * et n'a pas à se déclencher depuis un salon.
  */
 import { Discord, Slash, SlashGroup, SlashOption } from "discordx";
-import { ApplicationCommandOptionType, type ChatInputCommandInteraction, type User } from "discord.js";
+import {
+  ApplicationCommandOptionType,
+  type ChatInputCommandInteraction,
+  type User,
+} from "discord.js";
 
 import { logAdminAction } from "../../lib/audit";
 import { sql } from "../../lib/db";
 import { rgEmbed } from "../../lib/embeds";
 import { syncOneMember, syncOneUser } from "../../services/syncMembers";
 import { litteralTexteArray } from "../../services/tweets";
-import { borner, formaterDuree, formaterNombre, horodatageRelatif } from "../staff/format";
+import {
+  borner,
+  formaterDuree,
+  formaterNombre,
+  horodatageRelatif,
+} from "../staff/format";
 import { differerEnPrive, exigerDroits, messagePanne } from "../staff/garde";
-import { comparerMembres, departSuspect, type EtatMembreEnBase } from "./valeurs";
+import {
+  comparerMembres,
+  departSuspect,
+  type EtatMembreEnBase,
+} from "./valeurs";
 import "./racine";
 import { echec, piedTexte, repondre } from "../../lib/ui";
 
@@ -47,7 +60,10 @@ async function lireEtatEnBase(): Promise<EtatMembreEnBase[]> {
   const lignes = await sql<Array<{ discord_id: string; parti: boolean }>>`
 		SELECT discord_id, left_at IS NOT NULL AS parti FROM public.discord_members
 	`;
-  return lignes.map(ligne => ({ discordId: ligne.discord_id, parti: ligne.parti }));
+  return lignes.map((ligne) => ({
+    discordId: ligne.discord_id,
+    parti: ligne.parti,
+  }));
 }
 
 /**
@@ -84,12 +100,14 @@ async function marquerPartis(identifiants: readonly string[]): Promise<number> {
 export class AdministrationSynchroniserCommand {
   @Slash({
     name: "membres",
-    description: "Balaie tout le serveur : arrivées, mises à jour, retours, départs (rôle admin)",
+    description:
+      "Balaie tout le serveur : arrivées, mises à jour, retours, départs (rôle admin)",
   })
   async membres(
     @SlashOption({
       name: "departs",
-      description: "Marquer partis les membres absents du serveur (oui par défaut)",
+      description:
+        "Marquer partis les membres absents du serveur (oui par défaut)",
       type: ApplicationCommandOptionType.Boolean,
       required: false,
     })
@@ -113,7 +131,8 @@ export class AdministrationSynchroniserCommand {
     const serveur = interaction.guild;
     if (!serveur) {
       await interaction.editReply({
-        content: "Commande utilisable seulement depuis un serveur, pas en message privé.",
+        content:
+          "Commande utilisable seulement depuis un serveur, pas en message privé.",
       });
       return;
     }
@@ -144,7 +163,7 @@ export class AdministrationSynchroniserCommand {
       }
 
       // ── Départs ──────────────────────────────────────────────────────────
-      const presentsEnBase = enBase.filter(ligne => !ligne.parti).length;
+      const presentsEnBase = enBase.filter((ligne) => !ligne.parti).length;
       const suspect = departSuspect(resume.partis.length, presentsEnBase);
       let partisMarques = 0;
       let noteDeparts: string;
@@ -189,9 +208,21 @@ export class AdministrationSynchroniserCommand {
           ].join("\n"),
         )
         .addFields(
-          { name: "Arrivées", value: formaterNombre(resume.ajoutes.length), inline: true },
-          { name: "Mises à jour", value: formaterNombre(resume.misAJour), inline: true },
-          { name: "Retours", value: formaterNombre(resume.revenus.length), inline: true },
+          {
+            name: "Arrivées",
+            value: formaterNombre(resume.ajoutes.length),
+            inline: true,
+          },
+          {
+            name: "Mises à jour",
+            value: formaterNombre(resume.misAJour),
+            inline: true,
+          },
+          {
+            name: "Retours",
+            value: formaterNombre(resume.revenus.length),
+            inline: true,
+          },
           { name: "Départs", value: noteDeparts },
         )
         .setFooter(
@@ -206,7 +237,10 @@ export class AdministrationSynchroniserCommand {
           value: borner(
             echecs
               .slice(0, 5)
-              .map(echec => `\`${echec.identifiant}\` — ${borner(echec.raison, 120)}`)
+              .map(
+                (echec) =>
+                  `\`${echec.identifiant}\` — ${borner(echec.raison, 120)}`,
+              )
               .join("\n"),
             1_000,
           ),
@@ -214,13 +248,17 @@ export class AdministrationSynchroniserCommand {
       }
       await interaction.editReply({ embeds: [embed] });
     } catch (err) {
-      await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
+      await repondre(
+        interaction,
+        echec("Le service n'a pas répondu", messagePanne(err)),
+      );
     }
   }
 
   @Slash({
     name: "membre",
-    description: "Resynchronise une seule personne, sans balayer tout le serveur",
+    description:
+      "Resynchronise une seule personne, sans balayer tout le serveur",
   })
   async membre(
     @SlashOption({
@@ -241,7 +279,8 @@ export class AdministrationSynchroniserCommand {
     const serveur = interaction.guild;
     if (!serveur) {
       await interaction.editReply({
-        content: "Commande utilisable seulement depuis un serveur, pas en message privé.",
+        content:
+          "Commande utilisable seulement depuis un serveur, pas en message privé.",
       });
       return;
     }
@@ -315,7 +354,9 @@ export class AdministrationSynchroniserCommand {
               },
               {
                 name: "Présence",
-                value: ligne.left_at ? `parti ${horodatageRelatif(ligne.left_at)}` : "présent sur le serveur",
+                value: ligne.left_at
+                  ? `parti ${horodatageRelatif(ligne.left_at)}`
+                  : "présent sur le serveur",
                 inline: true,
               },
               {
@@ -323,12 +364,19 @@ export class AdministrationSynchroniserCommand {
                 value: horodatageRelatif(ligne.updated_at),
                 inline: true,
               },
-              { name: "Compte de robot", value: ligne.is_bot ? "oui" : "non", inline: true },
+              {
+                name: "Compte de robot",
+                value: ligne.is_bot ? "oui" : "non",
+                inline: true,
+              },
             ),
         ],
       });
     } catch (err) {
-      await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
+      await repondre(
+        interaction,
+        echec("Le service n'a pas répondu", messagePanne(err)),
+      );
     }
   }
 }

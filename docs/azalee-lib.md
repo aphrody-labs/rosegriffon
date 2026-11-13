@@ -33,39 +33,39 @@ est fusionné dans `apps/website` (voir [azalee.md](azalee.md)). Le tableau ci-d
 reste la référence des chemins **d'origine** (`apps/azalee/...`, aujourd'hui disparus)
 vers leur destination actuelle dans `packages/azalee`.
 
-| Ancien chemin | Nouveau chemin |
-| --- | --- |
-| `bin/azalee.ts` | `packages/azalee/src/cli.ts` |
-| `apps/azalee/lib/wiki-service.ts` | `packages/azalee/src/wiki/service.ts` |
-| `apps/azalee/lib/wiki/{teams,shops,quests,coaches,stadiums,drops,gacha,trophies,invocation,chara-stats,game-text}.ts` | `packages/azalee/src/wiki/*.ts` |
-| `apps/azalee/lib/wiki/*-shared.ts` | `packages/azalee/src/wiki/*-shared.ts` |
-| `apps/azalee/lib/cpk/{index,materialize,shared,tree}.ts` | `packages/azalee/src/cpk/*.ts` |
-| `apps/azalee/lib/game-text/{index,materialize,shared,format}.ts` | `packages/azalee/src/game-text/*.ts` |
-| `apps/azalee/lib/cross/{catalog,data,data-shared,assets-shared}.ts` | `packages/azalee/src/cross/*.ts` |
-| `apps/azalee/src/lib/images/{index,utils}.ts` | `packages/azalee/src/images/*.ts` |
-| `apps/azalee/src/lib/images/utils.test.ts` | `packages/azalee/test/images.test.ts` |
-| `apps/azalee/lib/search/**` + `apps/azalee/lib/search-utils.ts` | `packages/azalee/src/search/**` (`search-utils.ts` → `utils.ts`) |
-| `apps/azalee/lib/{translations,format-description,japanese-romaji,download-filename,aura-translations}.ts` | `packages/azalee/src/text/*.ts` |
-| `apps/azalee/lib/gaiji-shared.ts` | `packages/azalee/src/text/gaiji.ts` |
-| `apps/azalee/lib/{formations,gender,roster-resolver,skills-cutin,team-rules,team-types,team-emblem-map}.ts` | `packages/azalee/src/game/*.ts` |
-| `apps/azalee/lib/supabase/sqlite-client.ts` | `packages/azalee/src/db/sqlite-client.ts` |
-| `apps/azalee/data/*.json` (22 fichiers, dont `cross/`) | `packages/azalee/src/data/**` |
-| `apps/azalee/scripts/build-*.ts` (8 générateurs de manifestes) | `packages/azalee/scripts/` |
+| Ancien chemin                                                                                                         | Nouveau chemin                                                   |
+| --------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| `bin/azalee.ts`                                                                                                       | `packages/azalee/src/cli.ts`                                     |
+| `apps/azalee/lib/wiki-service.ts`                                                                                     | `packages/azalee/src/wiki/service.ts`                            |
+| `apps/azalee/lib/wiki/{teams,shops,quests,coaches,stadiums,drops,gacha,trophies,invocation,chara-stats,game-text}.ts` | `packages/azalee/src/wiki/*.ts`                                  |
+| `apps/azalee/lib/wiki/*-shared.ts`                                                                                    | `packages/azalee/src/wiki/*-shared.ts`                           |
+| `apps/azalee/lib/cpk/{index,materialize,shared,tree}.ts`                                                              | `packages/azalee/src/cpk/*.ts`                                   |
+| `apps/azalee/lib/game-text/{index,materialize,shared,format}.ts`                                                      | `packages/azalee/src/game-text/*.ts`                             |
+| `apps/azalee/lib/cross/{catalog,data,data-shared,assets-shared}.ts`                                                   | `packages/azalee/src/cross/*.ts`                                 |
+| `apps/azalee/src/lib/images/{index,utils}.ts`                                                                         | `packages/azalee/src/images/*.ts`                                |
+| `apps/azalee/src/lib/images/utils.test.ts`                                                                            | `packages/azalee/test/images.test.ts`                            |
+| `apps/azalee/lib/search/**` + `apps/azalee/lib/search-utils.ts`                                                       | `packages/azalee/src/search/**` (`search-utils.ts` → `utils.ts`) |
+| `apps/azalee/lib/{translations,format-description,japanese-romaji,download-filename,aura-translations}.ts`            | `packages/azalee/src/text/*.ts`                                  |
+| `apps/azalee/lib/gaiji-shared.ts`                                                                                     | `packages/azalee/src/text/gaiji.ts`                              |
+| `apps/azalee/lib/{formations,gender,roster-resolver,skills-cutin,team-rules,team-types,team-emblem-map}.ts`           | `packages/azalee/src/game/*.ts`                                  |
+| `apps/azalee/lib/supabase/sqlite-client.ts`                                                                           | `packages/azalee/src/db/sqlite-client.ts`                        |
+| `apps/azalee/data/*.json` (22 fichiers, dont `cross/`)                                                                | `packages/azalee/src/data/**`                                    |
+| `apps/azalee/scripts/build-*.ts` (8 générateurs de manifestes)                                                        | `packages/azalee/scripts/`                                       |
 
 Modules **créés** par l'extraction, sans équivalent antérieur :
 
-| Nouveau fichier | Rôle |
-| --- | --- |
-| `src/index.ts` | Racine client-safe (agrège `game`, `images`, `search`, `text` + les types `*-shared`) |
-| `src/config.ts` | Résolution des artefacts runtime (`dataDir`, miroir, cache) — remplace les chemins relatifs implicites |
-| `src/db/provider.ts` | Point d'injection unique (`setDatabaseProvider`) — remplace l'import direct du client Supabase de l'app |
-| `src/db/index.ts` | Surface données agrégée |
-| `src/net.ts` | `fetchJson` avec cache TTL de processus — remplace `fetch(url, { next: { revalidate } })` |
-| `src/server/index.ts` | Surface serveur agrégée |
-| `src/server/serve.ts` | API HTTP headless (41 routes JSON, `Bun.serve`) |
-| `scripts/build-standalone.ts` | Compile le CLI en binaire autonome (`bun build --compile`) |
-| `types/workspace-shims.d.ts` | Shims de types `@rosegriffon/db` pour le build de publication (TS6059) |
-| `test/config.test.ts` | Couverture de la résolution d'artefacts sur les vrais artefacts machine |
+| Nouveau fichier               | Rôle                                                                                                    |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------- |
+| `src/index.ts`                | Racine client-safe (agrège `game`, `images`, `search`, `text` + les types `*-shared`)                   |
+| `src/config.ts`               | Résolution des artefacts runtime (`dataDir`, miroir, cache) — remplace les chemins relatifs implicites  |
+| `src/db/provider.ts`          | Point d'injection unique (`setDatabaseProvider`) — remplace l'import direct du client Supabase de l'app |
+| `src/db/index.ts`             | Surface données agrégée                                                                                 |
+| `src/net.ts`                  | `fetchJson` avec cache TTL de processus — remplace `fetch(url, { next: { revalidate } })`               |
+| `src/server/index.ts`         | Surface serveur agrégée                                                                                 |
+| `src/server/serve.ts`         | API HTTP headless (41 routes JSON, `Bun.serve`)                                                         |
+| `scripts/build-standalone.ts` | Compile le CLI en binaire autonome (`bun build --compile`)                                              |
+| `types/workspace-shims.d.ts`  | Shims de types `@rosegriffon/db` pour le build de publication (TS6059)                                  |
+| `test/config.test.ts`         | Couverture de la résolution d'artefacts sur les vrais artefacts machine                                 |
 
 Ce qui **reste dans l'app** : tout ce qui est spécifiquement Next ou spécifiquement
 web — authentification (`lib/auth*.ts`), Supabase côté requête (`lib/supabase/`),

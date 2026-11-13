@@ -5,7 +5,8 @@ import sharp from "sharp";
 const __filename = import.meta.path;
 const __dirname = path.dirname(__filename);
 
-const DATA_ROOT = process.env.DATA_PATH ?? path.resolve(__dirname, "../../../data");
+const DATA_ROOT =
+  process.env.DATA_PATH ?? path.resolve(__dirname, "../../../data");
 const SOURCE_DIR = path.resolve(DATA_ROOT, "zukan_images");
 const DEST_DIR = path.resolve(DATA_ROOT, "zukan_images_webp");
 
@@ -24,7 +25,10 @@ async function convertImages() {
       if (entry.isDirectory()) {
         await scanDir(fullPath, baseDir);
       } else if (entry.isFile() && entry.name.endsWith(".png")) {
-        const destPath = path.join(DEST_DIR, relativePath.replace(".png", ".webp"));
+        const destPath = path.join(
+          DEST_DIR,
+          relativePath.replace(".png", ".webp"),
+        );
         const destDir = path.dirname(destPath);
 
         if (!fs.existsSync(destDir)) {

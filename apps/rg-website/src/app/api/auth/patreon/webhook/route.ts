@@ -3,7 +3,10 @@ import { createPostgresClient } from "@rosegriffon/db/service";
 import { NextResponse } from "next/server";
 
 import { processPatreonEvent } from "@/lib/patreon/webhooks";
-import type { PatreonTrigger, PatreonWebhookPayload } from "@/lib/patreon/webhooks";
+import type {
+  PatreonTrigger,
+  PatreonWebhookPayload,
+} from "@/lib/patreon/webhooks";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";

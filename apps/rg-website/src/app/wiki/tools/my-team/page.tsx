@@ -30,25 +30,26 @@ export default async function MyTeamPage() {
   const session = await getServerSession();
   const isAuthenticated = Boolean(session?.user);
 
-  const [{ data: rawChars }, { data: rawCoords }, formations] = await Promise.all([
-    wikiService.getCharactersList({
-      limit: 6000,
-      page: 1,
-      status: "all",
-    }),
-    wikiService.getCoordinatorsList({
-      limit: 200,
-      status: "all",
-    }),
-    wikiService.getFormations(),
-  ]);
+  const [{ data: rawChars }, { data: rawCoords }, formations] =
+    await Promise.all([
+      wikiService.getCharactersList({
+        limit: 6000,
+        page: 1,
+        status: "all",
+      }),
+      wikiService.getCoordinatorsList({
+        limit: 200,
+        status: "all",
+      }),
+      wikiService.getFormations(),
+    ]);
 
   // Group variants and deduplicate
   const grouped = wikiService.groupVariants(rawChars);
 
   // Map players to picker-friendly format
   const mappedPlayers: PickerCharacter[] = grouped
-    .map(char => {
+    .map((char) => {
       const variant = char.variants?.[0] as any;
       const name = char.names?.fr || char.names?.en || char.names?.ja || "?";
       const position = variant?.position || "MF";
@@ -82,7 +83,7 @@ export default async function MyTeamPage() {
           : undefined,
       };
     })
-    .filter(c => c.imageUrl);
+    .filter((c) => c.imageUrl);
 
   // Map coordinators to picker-friendly format
   const mappedCoords: PickerCharacter[] = rawCoords.map((c: any) => {
@@ -90,7 +91,10 @@ export default async function MyTeamPage() {
     return {
       charaId: c.charaId,
       element: "Void",
-      imageUrl: c.image_url || c.image || "https://dxi4wb638ujep.cloudfront.net/1/k/c/b/cb88nfolkwe.png",
+      imageUrl:
+        c.image_url ||
+        c.image ||
+        "https://dxi4wb638ujep.cloudfront.net/1/k/c/b/cb88nfolkwe.png",
       name: c.names?.fr || c.names?.en || "?",
       position: isCoord ? "COORD" : "COACH",
       rarity: c.bestRarity || "Coach",

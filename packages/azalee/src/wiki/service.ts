@@ -20,7 +20,11 @@ import {
 } from "../images";
 import { getTeamsList } from "./teams";
 import { SHOP_FR, TACTIC_FR, tacticSlug } from "../text/translations";
-import { LEGACY_FORMATIONS, type Formation, type PositionCoord } from "../game/formations";
+import {
+  LEGACY_FORMATIONS,
+  type Formation,
+  type PositionCoord,
+} from "../game/formations";
 import type { SkillCutinEntry } from "../game/skills-cutin";
 
 type SqlFormationRow = SqlDatabase["inagle_formations"];
@@ -181,10 +185,12 @@ function sqlFormationToClient(row: SqlFormationRow): Formation | null {
       index: position.positionNo ?? position.position_no ?? index,
       top: Math.max(1, Math.min(46, 43.75 * Number(y) + 2)),
       left: Math.max(1, Math.min(80, 40 + Number(x) * 47)),
-      role: (roleSet.has(position.role ?? "") ? position.role : "MF") as PositionCoord["role"],
+      role: (roleSet.has(position.role ?? "")
+        ? position.role
+        : "MF") as PositionCoord["role"],
     };
   });
-  if (positions.some(position => position === null)) return null;
+  if (positions.some((position) => position === null)) return null;
   return {
     id: `g_${row.id}`,
     label: row.name_fr ?? row.name_en ?? row.name_ja ?? "Formation",
@@ -280,7 +286,11 @@ function galleryVariants(image: string | null): {
  * du `img_path` de la table SQL `inagle_gallery`. Les chemins d'assets sont
  * servis live par le CDN ; aucune liste JSON n'est une source runtime.
  */
-export const GALLERY_CATEGORIES: ReadonlyArray<{ value: string; label: string; icon: string }> = [
+export const GALLERY_CATEGORIES: ReadonlyArray<{
+  value: string;
+  label: string;
+  icon: string;
+}> = [
   { value: "story", label: "Histoire", icon: "menu_book" },
   { value: "chronicle", label: "Chroniques", icon: "history_edu" },
   { value: "special", label: "Spéciales", icon: "star" },
@@ -294,7 +304,7 @@ export const GALLERY_CATEGORIES: ReadonlyArray<{ value: string; label: string; i
   { value: "telop_waza", label: "Techniques", icon: "bolt" },
 ];
 
-const GALLERY_CATEGORY_VALUES = new Set(GALLERY_CATEGORIES.map(c => c.value));
+const GALLERY_CATEGORY_VALUES = new Set(GALLERY_CATEGORIES.map((c) => c.value));
 
 /** Catégorie d'un `img_path` (2e token `img_<cat>_…`), `other` par défaut. */
 function galleryCategoryOf(imgPath: string | undefined | null): string {
@@ -310,7 +320,7 @@ function galleryCategoryOf(imgPath: string | undefined | null): string {
  */
 function galleryTitleOf(imgPath: string): string {
   const cleaned = imgPath.replace(/^img_/, "").replaceAll("_", " ").trim();
-  return cleaned.replace(/\b\w/g, c => c.toUpperCase()) || imgPath;
+  return cleaned.replace(/\b\w/g, (c) => c.toUpperCase()) || imgPath;
 }
 
 function galleryRowToItem(row: any): GalleryItem {
@@ -418,7 +428,8 @@ function isPlaceholderSpecialTactic(row: any): boolean {
 /** Forme « détail » (cf. getTactic) depuis une ligne `inagle_tactics`, complétée par le superset. */
 function tacticDetailFromTactics(match: any, special: any | null): any {
   // Ne complète QUE si le champ historique est absent (préserve ex. l'élément accentué « Néant »).
-  const fill = (tVal: any, sVal: any) => (tVal === null || tVal === undefined ? (sVal ?? null) : tVal);
+  const fill = (tVal: any, sVal: any) =>
+    tVal === null || tVal === undefined ? (sVal ?? null) : tVal;
   const img = resolveAssetUrl(match.image_url) || null;
   return {
     slug: tacticSlug(match.name),
@@ -526,15 +537,21 @@ export const wikiService = {
     if (codes.length === 0) return [];
     try {
       const db = createInagleSql<SqlDatabase>();
-      const rows = await db.selectFrom("inagle_skill_cutins").select("data").where("skill_id", "in", codes).execute();
-      return rows.map(row => row.data as unknown as SkillCutinEntry);
+      const rows = await db
+        .selectFrom("inagle_skill_cutins")
+        .select("data")
+        .where("skill_id", "in", codes)
+        .execute();
+      return rows.map((row) => row.data as unknown as SkillCutinEntry);
     } catch {
       return [];
     }
   },
 
   /** CDN gate for cut-in models, also sourced from PostgreSQL. */
-  async hasSkillCutinAssets(eventIdName: string | null | undefined): Promise<boolean> {
+  async hasSkillCutinAssets(
+    eventIdName: string | null | undefined,
+  ): Promise<boolean> {
     if (!eventIdName) return false;
     try {
       const db = createInagleSql<SqlDatabase>();
@@ -558,7 +575,7 @@ export const wikiService = {
         .select("event_id_name")
         .where("event_id_name", "in", eventIds)
         .execute();
-      return new Set(rows.map(row => row.event_id_name));
+      return new Set(rows.map((row) => row.event_id_name));
     } catch {
       return new Set();
     }
@@ -572,9 +589,13 @@ export const wikiService = {
   async getFormations(): Promise<Formation[]> {
     try {
       const db = createInagleSql<SqlDatabase>();
-      const rows = await db.selectFrom("inagle_formations").selectAll().orderBy("id", "asc").execute();
+      const rows = await db
+        .selectFrom("inagle_formations")
+        .selectAll()
+        .orderBy("id", "asc")
+        .execute();
       const game = rows
-        .map(row => sqlFormationToClient(row as SqlFormationRow))
+        .map((row) => sqlFormationToClient(row as SqlFormationRow))
         .filter((formation): formation is Formation => formation !== null);
       return [...LEGACY_FORMATIONS, ...game];
     } catch {
@@ -583,7 +604,9 @@ export const wikiService = {
   },
 
   /** Get all distinct constellations for a character (by name — heroes appear in multiple constellations via different chara_ids) */
-  async _getHeroConstellations(row: any): Promise<Array<{ name: string; index: number }>> {
+  async _getHeroConstellations(
+    row: any,
+  ): Promise<Array<{ name: string; index: number }>> {
     const name = row?.name_en;
     if (!name) return [];
     const db = createInagleSql<SqlDatabase>();
@@ -677,7 +700,12 @@ export const wikiService = {
       const row = await db
         .selectFrom(table)
         .select(["id", "name_en", "name_fr", "sub_type"])
-        .where(eb => eb.or([eb("name_en", "ilike", pattern), eb("name_fr", "ilike", pattern)]))
+        .where((eb) =>
+          eb.or([
+            eb("name_en", "ilike", pattern),
+            eb("name_fr", "ilike", pattern),
+          ]),
+        )
         .limit(1)
         .executeTakeFirst();
       if (row)
@@ -693,7 +721,9 @@ export const wikiService = {
     const exact = await db
       .selectFrom("inagle_auras")
       .select(["id", "name_en", "name_fr", "sub_type"])
-      .where(eb => eb.or([eb("name_en", "=", name), eb("name_fr", "=", name)]))
+      .where((eb) =>
+        eb.or([eb("name_en", "=", name), eb("name_fr", "=", name)]),
+      )
       .limit(1)
       .executeTakeFirst();
     if (exact)
@@ -729,7 +759,7 @@ export const wikiService = {
 
   async getAllTeams(): Promise<Array<{ id: string; name: string }>> {
     const teams = await getTeamsList();
-    return teams.map(team => ({
+    return teams.map((team) => ({
       id: team.id,
       name: team.name,
       name_ja: team.nameJa,
@@ -760,7 +790,9 @@ export const wikiService = {
     const charData = await db
       .selectFrom("inagle_characters")
       .select("data")
-      .where(eb => eb.or([eb("chara_id", "=", charaId), eb("id", "=", charaParamId)]))
+      .where((eb) =>
+        eb.or([eb("chara_id", "=", charaId), eb("id", "=", charaParamId)]),
+      )
       .executeTakeFirst();
 
     if (charData) {
@@ -773,13 +805,28 @@ export const wikiService = {
     // 2. SQL projection: imported aura rows carry their owner and skill ids in data.
     // inagle_auras is a normalized catalog without a `data` column or an
     // owner ID. Only the three owned aura tables carry this projection.
-    for (const table of ["inagle_keshins", "inagle_souls", "inagle_miximax"] as const) {
-      const auraRows = await db.selectFrom(table).select(["id", "data"]).execute();
+    for (const table of [
+      "inagle_keshins",
+      "inagle_souls",
+      "inagle_miximax",
+    ] as const) {
+      const auraRows = await db
+        .selectFrom(table)
+        .select(["id", "data"])
+        .execute();
       for (const row of auraRows) {
-        const payload: any = row.data && typeof row.data === "object" ? row.data : {};
-        const owner = String(payload.ownerCharaParamId ?? payload.charaParamId ?? "").toLowerCase();
-        if (owner === charaId.toLowerCase() || owner === charaParamId.toLowerCase()) {
-          supabaseHexIds.add(String(payload.skillId ?? payload.id ?? row.id).toLowerCase());
+        const payload: any =
+          row.data && typeof row.data === "object" ? row.data : {};
+        const owner = String(
+          payload.ownerCharaParamId ?? payload.charaParamId ?? "",
+        ).toLowerCase();
+        if (
+          owner === charaId.toLowerCase() ||
+          owner === charaParamId.toLowerCase()
+        ) {
+          supabaseHexIds.add(
+            String(payload.skillId ?? payload.id ?? row.id).toLowerCase(),
+          );
         }
       }
     }
@@ -825,20 +872,40 @@ export const wikiService = {
           // résolue via asset_code, fallback image_url DB.
           const resolvedImageUrl =
             t.slug === "miximax"
-              ? getMiximaxImageUrl((a as any).icon_code, a.asset_code, a.image_url)
-              : getAuraImageUrl(a.asset_code, sd.subType) || resolveAssetUrl(a.image_url);
+              ? getMiximaxImageUrl(
+                  (a as any).icon_code,
+                  a.asset_code,
+                  a.image_url,
+                )
+              : getAuraImageUrl(a.asset_code, sd.subType) ||
+                resolveAssetUrl(a.image_url);
           results.push({
             id: a.id,
-            name: a.name_fr || a.name_en || a.name_ja || sd.displayName || sd.name_FR || sd.name_EN || "Inconnu",
+            name:
+              a.name_fr ||
+              a.name_en ||
+              a.name_ja ||
+              sd.displayName ||
+              sd.name_FR ||
+              sd.name_EN ||
+              "Inconnu",
             type: t.table.replace("inagle_", "").replace("s", ""),
             categorySlug: t.slug,
             imageUrl: resolvedImageUrl,
             assetCode: a.asset_code,
             subType: t.table.replace("inagle_", "").replace("s", ""),
-            element: ElementNames[a.element_id as keyof typeof ElementNames] || undefined,
+            element:
+              ElementNames[a.element_id as keyof typeof ElementNames] ||
+              undefined,
             sheetData: sd,
-            passiveEffect: sd.passiveEffect || sd.passive || a.description_fr || sd.desc_FR || undefined,
-            hissatsuName: sd.hissatsu?.name || sd.sheetData?.hissatsu?.name || undefined,
+            passiveEffect:
+              sd.passiveEffect ||
+              sd.passive ||
+              a.description_fr ||
+              sd.desc_FR ||
+              undefined,
+            hissatsuName:
+              sd.hissatsu?.name || sd.sheetData?.hissatsu?.name || undefined,
           });
           break; // Found it in this table, move to the next hexId
         }
@@ -866,17 +933,19 @@ export const wikiService = {
 
     // For "éveil", also search in inagle_auras (generic auras used as awakenings)
     const tablesToSearch: AuraTableName[] =
-      typeSlug === "eveil" ? [table as AuraTableName, "inagle_auras"] : [table as AuraTableName];
+      typeSlug === "eveil"
+        ? [table as AuraTableName, "inagle_auras"]
+        : [table as AuraTableName];
 
     // Try match by ID or asset_code across all candidate tables in parallel.
     // sanitizeFilter : `id` vient d'un param d'URL → éviter l'injection de filtre
     // PostgREST (virgules/points/parenthèses casseraient le .or()).
     const searchResults = await Promise.all(
-      tablesToSearch.map(tableName =>
+      tablesToSearch.map((tableName) =>
         db
           .selectFrom(tableName)
           .selectAll()
-          .where(eb => eb.or([eb("id", "=", id), eb("asset_code", "=", id)]))
+          .where((eb) => eb.or([eb("id", "=", id), eb("asset_code", "=", id)]))
           .limit(1)
           .executeTakeFirst(),
       ),
@@ -886,7 +955,9 @@ export const wikiService = {
     if (!row) return undefined;
 
     const a = row as any;
-    const elementInfo = ElementNames[a.element_id as keyof typeof ElementNames] || ElementNames[0];
+    const elementInfo =
+      ElementNames[a.element_id as keyof typeof ElementNames] ||
+      ElementNames[0];
     const sd = normalizeAuraSheetData(a.sheet_data) || {};
 
     // Fetch linked skill video and owner in parallel
@@ -900,9 +971,13 @@ export const wikiService = {
     // Le lien aura→technique (skillId1/skillId2) vit dans `config`, présent soit dans
     // sheet_data (injecté par cli-push) soit dans la colonne `data` (AuraSkill complet).
     const config = rawSd.config || (a.data as any)?.config || {};
-    const possibleSkillIds = [config.skillId1, config.skillId2].filter((sid: string) => sid && sid !== "0x00000000");
+    const possibleSkillIds = [config.skillId1, config.skillId2].filter(
+      (sid: string) => sid && sid !== "0x00000000",
+    );
 
-    const parallelPromises: Array<Promise<{ type: "skill" | "owner"; data: any }>> = [];
+    const parallelPromises: Array<
+      Promise<{ type: "skill" | "owner"; data: any }>
+    > = [];
 
     // Push skill queries
     if (a.skill_id) {
@@ -912,7 +987,7 @@ export const wikiService = {
           .select(["video_url", "internal_code", "name_fr", "name_en"])
           .where("id", "=", a.skill_id)
           .executeTakeFirst()
-          .then(data => ({ type: "skill" as const, data })),
+          .then((data) => ({ type: "skill" as const, data })),
       );
     }
     for (const sid of possibleSkillIds) {
@@ -920,10 +995,15 @@ export const wikiService = {
         db
           .selectFrom("inagle_skills")
           .select(["video_url", "internal_code", "name_fr", "name_en"])
-          .where(eb => eb.or([sql<boolean>`data->>'skillID' = ${sid}`, sql<boolean>`sheet_data->>'skillID' = ${sid}`]))
+          .where((eb) =>
+            eb.or([
+              sql<boolean>`data->>'skillID' = ${sid}`,
+              sql<boolean>`sheet_data->>'skillID' = ${sid}`,
+            ]),
+          )
           .limit(1)
           .executeTakeFirst()
-          .then(data => ({ type: "skill" as const, data })),
+          .then((data) => ({ type: "skill" as const, data })),
       );
     }
 
@@ -936,7 +1016,7 @@ export const wikiService = {
           .select(["name_fr", "name_en", "slug", "base_slug"])
           .where("id", "=", ownerCharaId)
           .executeTakeFirst()
-          .then(data => ({ type: "owner" as const, data })),
+          .then((data) => ({ type: "owner" as const, data })),
       );
     }
 
@@ -944,9 +1024,13 @@ export const wikiService = {
       const results = await Promise.all(parallelPromises);
 
       // Process skill results
-      const skillResults = results.filter((r: any) => r.type === "skill" && r.data).map((r: any) => r.data);
-      const foundSkill = skillResults.find(s => s && (s.name_fr || s.name_en));
-      const fallbackSkill = skillResults.find(s => s);
+      const skillResults = results
+        .filter((r: any) => r.type === "skill" && r.data)
+        .map((r: any) => r.data);
+      const foundSkill = skillResults.find(
+        (s) => s && (s.name_fr || s.name_en),
+      );
+      const fallbackSkill = skillResults.find((s) => s);
       const targetSkill = foundSkill || fallbackSkill;
       if (targetSkill) {
         skillVideoUrl = targetSkill.video_url;
@@ -955,17 +1039,29 @@ export const wikiService = {
       }
 
       // Process owner result
-      const ownerResult = results.find(r => r.type === "owner" && r.data)?.data;
+      const ownerResult = results.find(
+        (r) => r.type === "owner" && r.data,
+      )?.data;
       if (ownerResult) {
         ownerName = ownerResult.name_fr || ownerResult.name_en || undefined;
-        ownerSlug = ownerResult.base_slug || ownerResult.slug || ownerCharaId || undefined;
+        ownerSlug =
+          ownerResult.base_slug ||
+          ownerResult.slug ||
+          ownerCharaId ||
+          undefined;
       }
     }
 
     return {
       auraId: a.id,
       auraIdStr: a.id,
-      displayName: a.name_fr || a.name_en || sd.displayName || sd.name_FR || sd.name_EN || "Inconnu",
+      displayName:
+        a.name_fr ||
+        a.name_en ||
+        sd.displayName ||
+        sd.name_FR ||
+        sd.name_EN ||
+        "Inconnu",
       name_FR: a.name_fr || sd.name_FR,
       name_EN: a.name_en || sd.name_EN,
       name_JA: a.name_ja || sd.name_JA,
@@ -1014,7 +1110,9 @@ export const wikiService = {
           ? getKeshinModelGlbUrl(
               extractKeshinModelCode(
                 a.image_url,
-                typeof a.data === "string" ? a.data : JSON.stringify(a.data ?? ""),
+                typeof a.data === "string"
+                  ? a.data
+                  : JSON.stringify(a.data ?? ""),
                 sd.image,
               ),
             )
@@ -1033,7 +1131,10 @@ export const wikiService = {
     armures: Array<{ code: string; name: string; glbUrl: string }>;
   }> {
     const db = createInagleSql<WikiSqlDatabase>();
-    const rows = await db.selectFrom("inagle_keshins").select(["name_fr", "name_en", "image_url", "data"]).execute();
+    const rows = await db
+      .selectFrom("inagle_keshins")
+      .select(["name_fr", "name_en", "image_url", "data"])
+      .execute();
 
     // Index code keshin (`k<NNNNNN>`) -> nom FR, extrait icône/data.
     const nameByCode = new Map<string, string>();
@@ -1044,13 +1145,15 @@ export const wikiService = {
       if (code && name && !nameByCode.has(code)) nameByCode.set(code, name);
     }
 
-    const keshin = listServedKeshinCodes().flatMap(code => {
+    const keshin = listServedKeshinCodes().flatMap((code) => {
       const glbUrl = getKeshinModelGlbUrl(code);
-      return glbUrl ? [{ code, glbUrl, name: nameByCode.get(code) || code }] : [];
+      return glbUrl
+        ? [{ code, glbUrl, name: nameByCode.get(code) || code }]
+        : [];
     });
 
     // Armure `ka00<GG>01` -> keshin `k00<GG>0` (groupe). Fallback : code armure.
-    const armures = listServedArmureCodes().flatMap(code => {
+    const armures = listServedArmureCodes().flatMap((code) => {
       const glbUrl = getArmureModelGlbUrl(code);
       if (!glbUrl) return [];
       const grp = code.match(/^ka(\d{2})(\d{2})\d{2}$/);
@@ -1062,7 +1165,9 @@ export const wikiService = {
     return { armures, keshin };
   },
 
-  async getAurasList(params: ListParams & { typeSlug: string }): Promise<ListResult<any>> {
+  async getAurasList(
+    params: ListParams & { typeSlug: string },
+  ): Promise<ListResult<any>> {
     const db = createInagleSql<WikiSqlDatabase>();
     const page = params.page || 1;
     const limit = params.limit || 50;
@@ -1103,10 +1208,11 @@ export const wikiService = {
             "description_fr",
             "sub_type",
           ]);
-        if (dedupe(table)) query = query.distinctOn("name_fr").orderBy("name_fr").orderBy("id");
+        if (dedupe(table))
+          query = query.distinctOn("name_fr").orderBy("name_fr").orderBy("id");
         if (params.q) {
           const pattern = `%${params.q}%`;
-          query = query.where(eb =>
+          query = query.where((eb) =>
             eb.or([
               eb("name_fr", "ilike", pattern),
               eb("name_en", "ilike", pattern),
@@ -1122,21 +1228,34 @@ export const wikiService = {
         return query.orderBy("name_fr", "asc").limit(2000).execute();
       };
 
-      const [awakenings, auras] = await Promise.all([buildQuery("inagle_awakenings"), buildQuery("inagle_auras")]);
+      const [awakenings, auras] = await Promise.all([
+        buildQuery("inagle_awakenings"),
+        buildQuery("inagle_auras"),
+      ]);
 
       const combined = [...awakenings, ...auras];
-      combined.sort((a: any, b: any) => (a.name_fr || "").localeCompare(b.name_fr || "", "fr"));
+      combined.sort((a: any, b: any) =>
+        (a.name_fr || "").localeCompare(b.name_fr || "", "fr"),
+      );
       const total = combined.length;
       const paged = combined.slice(from, to + 1);
 
-      const results = (paged as unknown as DbAura[]).map(a => {
-        const elementInfo = ElementNames[a.element_id as keyof typeof ElementNames] || ElementNames[0];
+      const results = (paged as unknown as DbAura[]).map((a) => {
+        const elementInfo =
+          ElementNames[a.element_id as keyof typeof ElementNames] ||
+          ElementNames[0];
         const sd = (a.sheet_data || {}) as any;
         const assetCode = (a as any).asset_code || sd.assetCode || null;
         return {
           id: a.id,
           auraId: a.id,
-          name: a.name_fr || a.name_en || sd.displayName || sd.name_FR || sd.name_EN || "Inconnu",
+          name:
+            a.name_fr ||
+            a.name_en ||
+            sd.displayName ||
+            sd.name_FR ||
+            sd.name_EN ||
+            "Inconnu",
           passive: a.description_fr || sd.desc_FR,
           hissatsu_name: sd?.hissatsu?.name || sd?.sheetData?.hissatsu?.name,
           element: elementInfo.en,
@@ -1170,17 +1289,20 @@ export const wikiService = {
         "sub_type",
         ...(view === "inagle_miximax" ? (["icon_code"] as const) : []),
       ]);
-    if (dedupe(view)) query = query.distinctOn("name_fr").orderBy("name_fr").orderBy("id");
+    if (dedupe(view))
+      query = query.distinctOn("name_fr").orderBy("name_fr").orderBy("id");
 
     // Filter out Keshin Armed (wa*) and Link Transformations (wkt*) from Keshin list to avoid duplicates
     if (view === "inagle_keshins") {
-      query = query.where("asset_code", "not ilike", "wa%").where("asset_code", "not ilike", "wkt%");
+      query = query
+        .where("asset_code", "not ilike", "wa%")
+        .where("asset_code", "not ilike", "wkt%");
     }
 
     if (params.q) {
       const pattern = `%${params.q}%`;
       // Search in both DB columns and sheet_data names (some auras only have names in sheet_data)
-      query = query.where(eb =>
+      query = query.where((eb) =>
         eb.or([
           eb("name_fr", "ilike", pattern),
           eb("name_en", "ilike", pattern),
@@ -1199,8 +1321,10 @@ export const wikiService = {
     const count = data.length;
     const pagedData = data.slice(from, to + 1);
 
-    const results = (pagedData as unknown as DbAura[]).map(a => {
-      const elementInfo = ElementNames[a.element_id as keyof typeof ElementNames] || ElementNames[0];
+    const results = (pagedData as unknown as DbAura[]).map((a) => {
+      const elementInfo =
+        ElementNames[a.element_id as keyof typeof ElementNames] ||
+        ElementNames[0];
       const sd = (a.sheet_data || {}) as any;
       // asset_code n'est pas présent dans toutes les views (ex: inagle_souls_clean)
       // — fallback vers sheet_data.assetCode
@@ -1208,7 +1332,13 @@ export const wikiService = {
       return {
         id: a.id, // auraId
         auraId: a.id,
-        name: a.name_fr || a.name_en || sd.displayName || sd.name_FR || sd.name_EN || "Inconnu",
+        name:
+          a.name_fr ||
+          a.name_en ||
+          sd.displayName ||
+          sd.name_FR ||
+          sd.name_EN ||
+          "Inconnu",
         passive: a.description_fr || sd.desc_FR,
         hissatsu_name: sd?.hissatsu?.name || sd?.sheetData?.hissatsu?.name,
         element: elementInfo.en,
@@ -1239,7 +1369,11 @@ export const wikiService = {
 
   async getCharacter(id: string): Promise<BaseCharacter | undefined> {
     const db = createInagleSql<SqlDatabase>();
-    const row = await db.selectFrom("inagle_characters").selectAll().where("id", "=", id).executeTakeFirst();
+    const row = await db
+      .selectFrom("inagle_characters")
+      .selectAll()
+      .where("id", "=", id)
+      .executeTakeFirst();
     if (!row) return undefined;
 
     // Fetch all variants sharing this base_slug (or chara_id if base_slug is null)
@@ -1249,23 +1383,31 @@ export const wikiService = {
     } else {
       query = query.where("chara_id", "=", row.chara_id);
     }
-    const rows = await query.orderBy("zukan_order", "asc").orderBy("id", "asc").execute();
+    const rows = await query
+      .orderBy("zukan_order", "asc")
+      .orderBy("id", "asc")
+      .execute();
 
     const allRows = rows.length > 0 ? rows : [row];
-    const mapped = allRows.map(r => this.mapDbCharacterToBase(r)!).filter(Boolean);
+    const mapped = allRows
+      .map((r) => this.mapDbCharacterToBase(r)!)
+      .filter(Boolean);
     const base = this.groupVariants(mapped)[0];
 
     if (base) {
       await this._inheritConstellation(base, row);
       if ((row as any)?.rarity_label === "Héros") {
-        (base as any).heroConstellations = await this._getHeroConstellations(row);
+        (base as any).heroConstellations =
+          await this._getHeroConstellations(row);
       }
     }
     return base;
   },
 
   /** Fetch character by base_slug (name_en + internal_code) — returns best variant as BaseCharacter */
-  async getCharacterByBaseSlug(baseSlug: string): Promise<BaseCharacter | undefined> {
+  async getCharacterByBaseSlug(
+    baseSlug: string,
+  ): Promise<BaseCharacter | undefined> {
     const db = createInagleSql<SqlDatabase>();
     // Fetch all variants sharing this base_slug, ordered by age ASC (youngest first)
     const rows = await db
@@ -1277,14 +1419,17 @@ export const wikiService = {
       .execute();
     if (rows.length === 0) return undefined;
 
-    const mapped = rows.map(r => this.mapDbCharacterToBase(r)!).filter(Boolean);
+    const mapped = rows
+      .map((r) => this.mapDbCharacterToBase(r)!)
+      .filter(Boolean);
     const base = this.groupVariants(mapped)[0];
 
     if (base) {
       const mainRow = rows[0];
       await this._inheritConstellation(base, mainRow);
       if (mainRow?.rarity_label === "Héros") {
-        (base as any).heroConstellations = await this._getHeroConstellations(mainRow);
+        (base as any).heroConstellations =
+          await this._getHeroConstellations(mainRow);
       }
     }
     return base;
@@ -1292,7 +1437,11 @@ export const wikiService = {
 
   async getCharacterBySlug(slug: string): Promise<BaseCharacter | undefined> {
     const db = createInagleSql<SqlDatabase>();
-    const row = await db.selectFrom("inagle_characters").selectAll().where("slug", "=", slug).executeTakeFirst();
+    const row = await db
+      .selectFrom("inagle_characters")
+      .selectAll()
+      .where("slug", "=", slug)
+      .executeTakeFirst();
     if (!row) return undefined;
 
     // Fetch all variants sharing this base_slug (or chara_id if base_slug is null)
@@ -1302,16 +1451,22 @@ export const wikiService = {
     } else {
       query = query.where("chara_id", "=", row.chara_id);
     }
-    const rows = await query.orderBy("zukan_order", "asc").orderBy("id", "asc").execute();
+    const rows = await query
+      .orderBy("zukan_order", "asc")
+      .orderBy("id", "asc")
+      .execute();
 
     const allRows = rows.length > 0 ? rows : [row];
-    const mapped = allRows.map(r => this.mapDbCharacterToBase(r)!).filter(Boolean);
+    const mapped = allRows
+      .map((r) => this.mapDbCharacterToBase(r)!)
+      .filter(Boolean);
     const base = this.groupVariants(mapped)[0];
 
     if (base) {
       await this._inheritConstellation(base, row);
       if ((row as any)?.rarity_label === "Héros") {
-        (base as any).heroConstellations = await this._getHeroConstellations(row);
+        (base as any).heroConstellations =
+          await this._getHeroConstellations(row);
       }
     }
     return base;
@@ -1364,7 +1519,10 @@ export const wikiService = {
     } else {
       query = query.where("chara_id", "=", charaId);
     }
-    const data = await query.orderBy("zukan_order", "asc").orderBy("id", "asc").execute();
+    const data = await query
+      .orderBy("zukan_order", "asc")
+      .orderBy("id", "asc")
+      .execute();
     const groupByZukanVersion = baseSlug?.startsWith("shawn-froste") ?? false;
     // Sort within groups: prefer versions with zukan_hash, then highest stat_frappe
     // This ensures dedup picks the most enriched version as canonical
@@ -1431,8 +1589,14 @@ export const wikiService = {
     return results;
   },
 
-  async getCharactersList(params: ListParams): Promise<ListResult<BaseCharacter>> {
-    if (params.position === "COACH" || params.role === "Coordinator" || params.role === "Coach") {
+  async getCharactersList(
+    params: ListParams,
+  ): Promise<ListResult<BaseCharacter>> {
+    if (
+      params.position === "COACH" ||
+      params.role === "Coordinator" ||
+      params.role === "Coach"
+    ) {
       return this.getCoordinatorsList(params);
     }
 
@@ -1444,7 +1608,9 @@ export const wikiService = {
 
     if (params.q) {
       const pattern = `%${params.q}%`;
-      predicates.push(sql<boolean>`(name_fr ilike ${pattern} or name_en ilike ${pattern})`);
+      predicates.push(
+        sql<boolean>`(name_fr ilike ${pattern} or name_en ilike ${pattern})`,
+      );
     }
     if (params.element) {
       // Filter by exact text code ("Fire", "Wind"). DB columns are in French.
@@ -1489,7 +1655,9 @@ export const wikiService = {
       // Use parameterized .eq() for team_id and separate JSONB containment
       // (avoid string-interpolating values with quotes into the filter)
       const safeTeam = params.team;
-      predicates.push(sql<boolean>`(team_id = ${safeTeam} or teams @> ${JSON.stringify([{ id: safeTeam }])}::jsonb)`);
+      predicates.push(
+        sql<boolean>`(team_id = ${safeTeam} or teams @> ${JSON.stringify([{ id: safeTeam }])}::jsonb)`,
+      );
     }
     if (params.gender) {
       // FilterChips: "1" = male, "2" = female; DB column: "M" / "F"
@@ -1500,9 +1668,13 @@ export const wikiService = {
     if (params.playstyle) {
       // "Freedom" (Orion) = "Breach" (Victory Road) — meme style de jeu
       if (params.playstyle === "Breach") {
-        predicates.push(sql<boolean>`sheet_data->>'playstyle' in ('Breach', 'Freedom')`);
+        predicates.push(
+          sql<boolean>`sheet_data->>'playstyle' in ('Breach', 'Freedom')`,
+        );
       } else {
-        predicates.push(sql<boolean>`sheet_data->>'playstyle' = ${params.playstyle}`);
+        predicates.push(
+          sql<boolean>`sheet_data->>'playstyle' = ${params.playstyle}`,
+        );
       }
     }
     if (params.status !== "all") {
@@ -1511,7 +1683,9 @@ export const wikiService = {
       // Sans la clause zukan_order, les persos emblématiques sans sheet_data
       // (Mark Evans #0, etc.) disparaissaient → la liste ne commençait plus
       // au #0 du zukan. On ne masque désormais que les entrées hors-zukan.
-      predicates.push(sql<boolean>`(sheet_data is not null or is_controllable = true or zukan_order is not null)`);
+      predicates.push(
+        sql<boolean>`(sheet_data is not null or is_controllable = true or zukan_order is not null)`,
+      );
     }
     if (params.status === "jouable") {
       predicates.push(sql<boolean>`is_controllable = true`);
@@ -1549,10 +1723,10 @@ export const wikiService = {
           .execute(),
         db
           .selectFrom("inagle_characters")
-          .select(eb => eb.fn.countAll<number>().as("count"))
+          .select((eb) => eb.fn.countAll<number>().as("count"))
           .where(where)
           .executeTakeFirst()
-          .then(row => Number(row?.count ?? 0)),
+          .then((row) => Number(row?.count ?? 0)),
       ]);
     } catch (error) {
       console.error("Error fetching characters:", error);
@@ -1560,7 +1734,9 @@ export const wikiService = {
     }
 
     // Map to BaseCharacter — chaque variante est une carte distincte (pas de groupement)
-    const mapped = (data as any[]).map(char => this.mapDbCharacterToBase(char)!).filter(Boolean);
+    const mapped = (data as any[])
+      .map((char) => this.mapDbCharacterToBase(char)!)
+      .filter(Boolean);
 
     // Regrouper les variantes de rareté d'un même personnage (Normal + Héros = 1 carte)
     const deduped = this.groupVariants(mapped);
@@ -1589,12 +1765,16 @@ export const wikiService = {
       .execute();
     // DB "Manager" + "Coach" = coachs in-game, DB "Coordinator" = manageuses
     return {
-      coaches: rows.filter((r: any) => r.role === "Manager" || r.role === "Coach"),
+      coaches: rows.filter(
+        (r: any) => r.role === "Manager" || r.role === "Coach",
+      ),
       managers: rows.filter((r: any) => r.role === "Coordinator"),
     };
   },
 
-  async getCoordinatorsList(params: ListParams): Promise<ListResult<BaseCharacter>> {
+  async getCoordinatorsList(
+    params: ListParams,
+  ): Promise<ListResult<BaseCharacter>> {
     const db = createInagleSql<WikiSqlDatabase>();
     const page = params.page || 1;
     const limit = params.limit || 50;
@@ -1603,7 +1783,9 @@ export const wikiService = {
 
     if (params.q) {
       const q = `%${params.q}%`;
-      predicates.push(sql<boolean>`(name_localised ilike ${q} or name_romaji ilike ${q})`);
+      predicates.push(
+        sql<boolean>`(name_localised ilike ${q} or name_romaji ilike ${q})`,
+      );
     }
 
     if (params.role === "Coordinator") {
@@ -1640,7 +1822,7 @@ export const wikiService = {
           .execute(),
         db
           .selectFrom("inagle_coordinators")
-          .select(eb => eb.fn.countAll<number>().as("count"))
+          .select((eb) => eb.fn.countAll<number>().as("count"))
           .where(where)
           .executeTakeFirst(),
       ]);
@@ -1708,7 +1890,7 @@ export const wikiService = {
         59: "k/7/t/7t_zufp1hd0",
         60: "k/k/7/k7o456ppquc",
       };
-      const results = data.map(c => {
+      const results = data.map((c) => {
         const revMap: Record<string, string> = {
           風: "Wind",
           林: "Forest",
@@ -1718,11 +1900,17 @@ export const wikiService = {
         };
         const elEn = revMap[c.element ?? ""] || "Void";
         const zukanHash = COORD_ZUKAN[c.id] || undefined;
-        const imageUrl = zukanHash ? `https://dxi4wb638ujep.cloudfront.net/1/${zukanHash}.png` : null;
+        const imageUrl = zukanHash
+          ? `https://dxi4wb638ujep.cloudfront.net/1/${zukanHash}.png`
+          : null;
         return {
           charaId: `coord_${c.id}`,
           internalCode: `COORD_${c.id}`,
-          names: { fr: c.name_localised, en: c.name_localised, ja: c.name_kanji },
+          names: {
+            fr: c.name_localised,
+            en: c.name_localised,
+            ja: c.name_kanji,
+          },
           gender: c.gender === "女" ? 1 : 0,
           variants: [
             {
@@ -1769,13 +1957,23 @@ export const wikiService = {
     // ... existing getItem ...
     const db = createInagleSql<SqlDatabase>();
     // Try exact match on ID first (hex), then internal_code/name if needed
-    let row = await db.selectFrom("inagle_items").selectAll().where("id", "=", id).executeTakeFirst();
+    let row = await db
+      .selectFrom("inagle_items")
+      .selectAll()
+      .where("id", "=", id)
+      .executeTakeFirst();
 
     if (!row) {
       const fallbackRow = await db
         .selectFrom("inagle_items")
         .selectAll()
-        .where(eb => eb.or([eb("internal_code", "=", id), eb("name_en", "=", id), eb("name_fr", "=", id)]))
+        .where((eb) =>
+          eb.or([
+            eb("internal_code", "=", id),
+            eb("name_en", "=", id),
+            eb("name_fr", "=", id),
+          ]),
+        )
         .limit(1)
         .executeTakeFirst();
       row = fallbackRow;
@@ -1788,9 +1986,21 @@ export const wikiService = {
       // natifs même si sheet_data est un snapshot communautaire plus ancien.
       const parsed = ((row as any).data || {}) as any;
       const community = sd.sheetData || {};
-      const descFr = item.description_fr || sd.descriptions?.fr || parsed.descriptions?.fr || null;
-      const descEn = item.description_en || sd.descriptions?.en || parsed.descriptions?.en || null;
-      const descJa = item.description_ja || sd.descriptions?.ja || parsed.descriptions?.ja || null;
+      const descFr =
+        item.description_fr ||
+        sd.descriptions?.fr ||
+        parsed.descriptions?.fr ||
+        null;
+      const descEn =
+        item.description_en ||
+        sd.descriptions?.en ||
+        parsed.descriptions?.en ||
+        null;
+      const descJa =
+        item.description_ja ||
+        sd.descriptions?.ja ||
+        parsed.descriptions?.ja ||
+        null;
       // Bonus de stats RÉELS (kick +6, …) — natifs parser, jamais les codes bruts stat1/stat2.
       const bonuses =
         sd.bonuses && Object.keys(sd.bonuses).length
@@ -1801,7 +2011,8 @@ export const wikiService = {
       const maxStack = sd.maxStack ?? parsed.maxStack ?? null;
       return {
         itemId: item.id,
-        internalCode: item.internal_code || sd.internalCode || parsed.internalCode,
+        internalCode:
+          item.internal_code || sd.internalCode || parsed.internalCode,
         names: {
           fr: item.name_fr,
           en: item.name_en,
@@ -1847,7 +2058,12 @@ export const wikiService = {
     if (params.q) {
       const pattern = `%${sanitizeFilter(params.q)}%`;
       const condition = (builder: typeof query) =>
-        builder.where(eb => eb.or([eb("name_fr", "ilike", pattern), eb("name_en", "ilike", pattern)]));
+        builder.where((eb) =>
+          eb.or([
+            eb("name_fr", "ilike", pattern),
+            eb("name_en", "ilike", pattern),
+          ]),
+        );
       query = condition(query);
       countQuery = condition(countQuery);
     }
@@ -1858,11 +2074,18 @@ export const wikiService = {
 
     try {
       const [data, countRow] = await Promise.all([
-        query.selectAll().orderBy("id", "asc").limit(limit).offset(from).execute(),
-        countQuery.select(eb => eb.fn.countAll<number>().as("count")).executeTakeFirst(),
+        query
+          .selectAll()
+          .orderBy("id", "asc")
+          .limit(limit)
+          .offset(from)
+          .execute(),
+        countQuery
+          .select((eb) => eb.fn.countAll<number>().as("count"))
+          .executeTakeFirst(),
       ]);
       const count = Number(countRow?.count ?? 0);
-      const results = (data as unknown as DbItem[]).map(item => {
+      const results = (data as unknown as DbItem[]).map((item) => {
         const sd = (item.sheet_data || {}) as any;
         const parsed = ((item as any).data || {}) as any;
         const community = sd.sheetData || {};
@@ -1907,12 +2130,12 @@ export const wikiService = {
         .selectAll()
         .where("id", "=", skillId)
         .execute()
-        .then(data => ({ data })),
+        .then((data) => ({ data })),
       db
         .selectFrom("inagle_override_skills")
         .selectAll()
         .execute()
-        .then(data => ({ data })),
+        .then((data) => ({ data })),
     ]);
 
     if (!allOverrides) return directMatch || [];
@@ -1925,7 +2148,9 @@ export const wikiService = {
         if (override.id === skillId) return false; // already in directMatch
         const conditions = override.conditions as any[];
         if (!conditions) return false;
-        return conditions.some((c: any) => c.required_skills?.some((rs: any) => rs.skill_id === skillId));
+        return conditions.some((c: any) =>
+          c.required_skills?.some((rs: any) => rs.skill_id === skillId),
+        );
       }),
     ].filter((row: any) => {
       if (seen.has(row.id)) return false;
@@ -1970,13 +2195,13 @@ export const wikiService = {
       if (playstyles && playstyles.length > 0) {
         query = query.where(
           sql<boolean>`sheet_data->>'playstyle' in (${sql.join(
-            playstyles.map(p => sql`${p}`),
+            playstyles.map((p) => sql`${p}`),
             sql`, `,
           )})`,
         );
       }
       const data = await query.limit(limit).execute();
-      return data.map(c => this.mapDbCharacterToBase(c)!).filter(Boolean);
+      return data.map((c) => this.mapDbCharacterToBase(c)!).filter(Boolean);
     };
     const [gk, df, mf, fw] = await Promise.all([
       fetchPool("GK", 200),
@@ -1992,11 +2217,20 @@ export const wikiService = {
     const row = await db
       .selectFrom("inagle_skills")
       .selectAll()
-      .where(eb =>
+      .where((eb) =>
         eb.or(
           id.startsWith("0x")
-            ? [eb("id", "=", id), sql<boolean>`data->>'skillID' = ${id}`, sql<boolean>`sheet_data->>'skillID' = ${id}`]
-            : [eb("id", "=", id), eb("internal_code", "=", id), eb("name_en", "=", id), eb("name_fr", "=", id)],
+            ? [
+                eb("id", "=", id),
+                sql<boolean>`data->>'skillID' = ${id}`,
+                sql<boolean>`sheet_data->>'skillID' = ${id}`,
+              ]
+            : [
+                eb("id", "=", id),
+                eb("internal_code", "=", id),
+                eb("name_en", "=", id),
+                eb("name_fr", "=", id),
+              ],
         ),
       )
       .limit(1)
@@ -2004,26 +2238,41 @@ export const wikiService = {
 
     if (row) {
       const h = row as unknown as DbSkill;
-      const elementMap: Record<string, { en: string; ja: string; fr: string }> = {
-        Feu: { en: "Fire", ja: "火", fr: "Feu" },
-        Vent: { en: "Wind", ja: "風", fr: "Vent" },
-        Forêt: { en: "Forest", ja: "林", fr: "Forêt" },
-        Montagne: { en: "Mountain", ja: "山", fr: "Montagne" },
-        Néant: { en: "Void", ja: "無", fr: "Néant" },
-        Aucun: { en: "Void", ja: "無", fr: "Néant" },
-      };
-      const categoryMap: Record<string, { en: string; ja: string; fr: string }> = {
+      const elementMap: Record<string, { en: string; ja: string; fr: string }> =
+        {
+          Feu: { en: "Fire", ja: "火", fr: "Feu" },
+          Vent: { en: "Wind", ja: "風", fr: "Vent" },
+          Forêt: { en: "Forest", ja: "林", fr: "Forêt" },
+          Montagne: { en: "Mountain", ja: "山", fr: "Montagne" },
+          Néant: { en: "Void", ja: "無", fr: "Néant" },
+          Aucun: { en: "Void", ja: "無", fr: "Néant" },
+        };
+      const categoryMap: Record<
+        string,
+        { en: string; ja: string; fr: string }
+      > = {
         Tir: { en: "Shoot", ja: "シュート", fr: "Tir" },
         Dribble: { en: "Dribble", ja: "ドリブル", fr: "Dribble" },
         Défense: { en: "Block", ja: "ブロック", fr: "Défense" },
         Arrêt: { en: "Catch", ja: "キャッチ", fr: "Arrêt" },
       };
-      const elementInfo = elementMap[h.element || ""] || { en: "Void", ja: "無", fr: "Néant" };
-      const categoryInfo = categoryMap[h.category || ""] || { en: "None", ja: "なし", fr: "Aucun" };
+      const elementInfo = elementMap[h.element || ""] || {
+        en: "Void",
+        ja: "無",
+        fr: "Néant",
+      };
+      const categoryInfo = categoryMap[h.category || ""] || {
+        en: "None",
+        ja: "なし",
+        fr: "Aucun",
+      };
       // La surface complète inagle (shops, foulRate, tags, recastTime…) vit dans la
       // colonne `data` ; `sheet_data` ne porte que les overrides communautaires (souvent
       // vide pour les hissatsu wh*/rh*). On fusionne les deux, sheet_data prioritaire.
-      const sd = { ...((h as any).data as any), ...(h.sheet_data as any) } as any;
+      const sd = {
+        ...((h as any).data as any),
+        ...(h.sheet_data as any),
+      } as any;
 
       return {
         // Spread all inagle fields from data + sheet_data (foulRate, tags, shops, etc.)
@@ -2080,7 +2329,9 @@ export const wikiService = {
 
     if (params.q) {
       const pattern = `%${params.q}%`;
-      predicates.push(sql<boolean>`(name_fr ilike ${pattern} or name_en ilike ${pattern})`);
+      predicates.push(
+        sql<boolean>`(name_fr ilike ${pattern} or name_en ilike ${pattern})`,
+      );
     }
     if (params.element) {
       // element column stores values like 'Feu', 'Vent', 'Forêt', 'Montagne', 'Néant', 'Aucun'
@@ -2092,7 +2343,8 @@ export const wikiService = {
         mountain: "Montagne",
         void: "Néant",
       };
-      const searchElem = elementMap[params.element.toLowerCase()] || params.element;
+      const searchElem =
+        elementMap[params.element.toLowerCase()] || params.element;
       predicates.push(sql<boolean>`element = ${searchElem}`);
     }
     if (params.category) {
@@ -2104,17 +2356,22 @@ export const wikiService = {
         dribble: "Dribble",
         catch: "Arrêt",
       };
-      const searchCat = categoryMap[params.category.toLowerCase()] || params.category;
+      const searchCat =
+        categoryMap[params.category.toLowerCase()] || params.category;
       predicates.push(sql<boolean>`category = ${searchCat}`);
     }
     if (params.has_video) {
       predicates.push(sql<boolean>`video_url is not null`);
     }
     if (params.power_min) {
-      predicates.push(sql<boolean>`power_max >= ${parseInt(params.power_min, 10)}`);
+      predicates.push(
+        sql<boolean>`power_max >= ${parseInt(params.power_min, 10)}`,
+      );
     }
     if (params.power_max) {
-      predicates.push(sql<boolean>`power_max <= ${parseInt(params.power_max, 10)}`);
+      predicates.push(
+        sql<boolean>`power_max <= ${parseInt(params.power_max, 10)}`,
+      );
     }
     if (!params.show_aura) {
       predicates.push(sql<boolean>`is_hyper = false`);
@@ -2123,7 +2380,10 @@ export const wikiService = {
     // Overdrive filter: only show required skills for overdrive combinations
     // inagle_override_skills uses hex IDs; inagle_skills stores the hex ID in sheet_data->>'skillID'
     if (params.overdrive) {
-      const overrides = await db.selectFrom("inagle_override_skills").select("conditions").execute();
+      const overrides = await db
+        .selectFrom("inagle_override_skills")
+        .select("conditions")
+        .execute();
       const hexIds = new Set<string>();
       for (const o of overrides) {
         for (const c of (o.conditions as any[]) || []) {
@@ -2135,7 +2395,7 @@ export const wikiService = {
       if (hexIds.size > 0) {
         predicates.push(
           sql<boolean>`data->>'skillID' in (${sql.join(
-            [...hexIds].map(id => sql`${id}`),
+            [...hexIds].map((id) => sql`${id}`),
             sql`, `,
           )})`,
         );
@@ -2158,11 +2418,16 @@ export const wikiService = {
     try {
       const [data, countRow] = await Promise.all([
         query.selectAll().limit(limit).offset(from).execute(),
-        countQuery.select(eb => eb.fn.countAll<number>().as("count")).executeTakeFirst(),
+        countQuery
+          .select((eb) => eb.fn.countAll<number>().as("count"))
+          .executeTakeFirst(),
       ]);
       const count = Number(countRow?.count ?? 0);
-      const results = (data as unknown as DbSkill[]).map(h => {
-        const elementMap: Record<string, { en: string; ja: string; fr: string }> = {
+      const results = (data as unknown as DbSkill[]).map((h) => {
+        const elementMap: Record<
+          string,
+          { en: string; ja: string; fr: string }
+        > = {
           Feu: { en: "Fire", ja: "火", fr: "Feu" },
           Vent: { en: "Wind", ja: "風", fr: "Vent" },
           Forêt: { en: "Forest", ja: "林", fr: "Forêt" },
@@ -2170,13 +2435,20 @@ export const wikiService = {
           Néant: { en: "Void", ja: "無", fr: "Néant" },
           Aucun: { en: "Void", ja: "無", fr: "Néant" },
         };
-        const categoryMap: Record<string, { en: string; ja: string; fr: string }> = {
+        const categoryMap: Record<
+          string,
+          { en: string; ja: string; fr: string }
+        > = {
           Tir: { en: "Shoot", ja: "シュート", fr: "Tir" },
           Dribble: { en: "Dribble", ja: "ドリブル", fr: "Dribble" },
           Défense: { en: "Block", ja: "ブロック", fr: "Défense" },
           Arrêt: { en: "Catch", ja: "キャッチ", fr: "Arrêt" },
         };
-        const elementInfo = elementMap[h.element || ""] || { en: "Void", ja: "無", fr: "Néant" };
+        const elementInfo = elementMap[h.element || ""] || {
+          en: "Void",
+          ja: "無",
+          fr: "Néant",
+        };
         const categoryInfo = categoryMap[h.category || ""] || {
           en: "None",
           ja: "なし",
@@ -2246,13 +2518,17 @@ export const wikiService = {
       db.selectFrom("inagle_tactics").selectAll().execute(),
       db.selectFrom("inagle_special_tactics").selectAll().execute(),
     ]);
-    const matchT = allT.find(t => tacticSlug(t.name) === slug);
+    const matchT = allT.find((t) => tacticSlug(t.name) === slug);
     if (matchT) {
-      const special = allS.find((s: any) => s.internal_code === matchT.internal_code);
+      const special = allS.find(
+        (s: any) => s.internal_code === matchT.internal_code,
+      );
       return tacticDetailFromTactics(matchT, special);
     }
     const matchS = allS.find(
-      (s: any) => !isPlaceholderSpecialTactic(s) && tacticSlug(s.name_en || s.name_fr || s.internal_code) === slug,
+      (s: any) =>
+        !isPlaceholderSpecialTactic(s) &&
+        tacticSlug(s.name_en || s.name_fr || s.internal_code) === slug,
     );
     if (matchS) return specialTacticToDetail(matchS);
     return null;
@@ -2272,13 +2548,18 @@ export const wikiService = {
       db.selectFrom("inagle_tactics").selectAll().execute(),
       db.selectFrom("inagle_special_tactics").selectAll().execute(),
     ]);
-    const knownCodes = new Set(tactics.map(t => t.internal_code).filter(Boolean));
+    const knownCodes = new Set(
+      tactics.map((t) => t.internal_code).filter(Boolean),
+    );
     const extras = specialRows.filter(
-      s => s.internal_code && !knownCodes.has(s.internal_code) && !isPlaceholderSpecialTactic(s),
+      (s) =>
+        s.internal_code &&
+        !knownCodes.has(s.internal_code) &&
+        !isPlaceholderSpecialTactic(s),
     );
 
     let merged: any[] = [
-      ...tactics.map(t => ({
+      ...tactics.map((t) => ({
         itemId: t.internal_code || tacticSlug(t.name),
         internalCode: t.internal_code || "TACTIC",
         names: {
@@ -2303,20 +2584,22 @@ export const wikiService = {
         },
         shops: t.shop ? [t.shop] : [],
       })),
-      ...extras.map(s => specialTacticToListItem(s)),
+      ...extras.map((s) => specialTacticToListItem(s)),
     ];
 
     // Recherche texte en mémoire (parité avec l'ancien filtre serveur name/name_fr).
     if (params.q) {
       const q = params.q.toLowerCase();
-      merged = merged.filter(it => {
+      merged = merged.filter((it) => {
         const en = String(it.names?.en || "").toLowerCase();
         const fr = String(it.name_FR || it.names?.fr || "").toLowerCase();
         return en.includes(q) || fr.includes(q);
       });
     }
 
-    merged.sort((a, b) => String(a.names?.en || "").localeCompare(String(b.names?.en || "")));
+    merged.sort((a, b) =>
+      String(a.names?.en || "").localeCompare(String(b.names?.en || "")),
+    );
 
     const total = merged.length;
     const pageItems = merged.slice(from, to + 1);
@@ -2344,7 +2627,9 @@ export const wikiService = {
         existing.isBasara = existing.isBasara || char.isBasara;
         existing.constellation = existing.constellation || char.constellation;
         existing.wikiSections =
-          existing.wikiSections && existing.wikiSections.length > 0 ? existing.wikiSections : char.wikiSections;
+          existing.wikiSections && existing.wikiSections.length > 0
+            ? existing.wikiSections
+            : char.wikiSections;
       } else {
         grouped.set(key, char);
       }
@@ -2372,7 +2657,9 @@ export const wikiService = {
           seenVariants.add(vKey);
           dedupedVariants.push(v);
         } else {
-          const idx = dedupedVariants.findIndex((x: any) => variantKey(x) === vKey);
+          const idx = dedupedVariants.findIndex(
+            (x: any) => variantKey(x) === vKey,
+          );
           if (idx === -1) {
             continue;
           }
@@ -2380,11 +2667,21 @@ export const wikiService = {
             sheetData?: unknown;
             skills?: unknown[];
           };
-          const candidate = v as unknown as { sheetData?: unknown; skills?: unknown[] };
-          const currentSkills = Array.isArray(current.skills) ? current.skills.length : 0;
-          const candidateSkills = Array.isArray(candidate.skills) ? candidate.skills.length : 0;
+          const candidate = v as unknown as {
+            sheetData?: unknown;
+            skills?: unknown[];
+          };
+          const currentSkills = Array.isArray(current.skills)
+            ? current.skills.length
+            : 0;
+          const candidateSkills = Array.isArray(candidate.skills)
+            ? candidate.skills.length
+            : 0;
           // Préférer la variante avec sheetData, sinon celle avec le plus de skills
-          if ((!current.sheetData && candidate.sheetData) || candidateSkills > currentSkills) {
+          if (
+            (!current.sheetData && candidate.sheetData) ||
+            candidateSkills > currentSkills
+          ) {
             dedupedVariants[idx] = v;
           }
         }
@@ -2392,11 +2689,19 @@ export const wikiService = {
 
       // Sort variants by age (youngest first: zukanOrder ASC, charaParamId ASC)
       dedupedVariants.sort((a: any, b: any) => {
-        const orderA = a.zukanOrder !== undefined && a.zukanOrder !== null ? a.zukanOrder : 999999;
-        const orderB = b.zukanOrder !== undefined && b.zukanOrder !== null ? b.zukanOrder : 999999;
+        const orderA =
+          a.zukanOrder !== undefined && a.zukanOrder !== null
+            ? a.zukanOrder
+            : 999999;
+        const orderB =
+          b.zukanOrder !== undefined && b.zukanOrder !== null
+            ? b.zukanOrder
+            : 999999;
         if (orderA !== orderB) return orderA - orderB;
-        const idA = typeof a.charaParamId === "string" ? parseInt(a.charaParamId, 16) : 0;
-        const idB = typeof b.charaParamId === "string" ? parseInt(b.charaParamId, 16) : 0;
+        const idA =
+          typeof a.charaParamId === "string" ? parseInt(a.charaParamId, 16) : 0;
+        const idB =
+          typeof b.charaParamId === "string" ? parseInt(b.charaParamId, 16) : 0;
         return idA - idB;
       });
 
@@ -2440,8 +2745,12 @@ export const wikiService = {
       const skillIdRaw = s.skillId;
       // Detect reversed mapping: if skillId is a small number (< 100 decimal from hex)
       // and learnLevel is a large number, they're swapped
-      const skillIdNum = typeof skillIdRaw === "string" ? parseInt(skillIdRaw, 16) : skillIdRaw;
-      const learnNum = typeof learnLevelRaw === "number" ? learnLevelRaw : parseInt(learnLevelRaw, 10);
+      const skillIdNum =
+        typeof skillIdRaw === "string" ? parseInt(skillIdRaw, 16) : skillIdRaw;
+      const learnNum =
+        typeof learnLevelRaw === "number"
+          ? learnLevelRaw
+          : parseInt(learnLevelRaw, 10);
       if (skillIdNum < 1000 && Math.abs(learnNum) > 1000000) {
         // Swapped: learnLevel is actually the skill hash, skillId is the learn level
         const hexSkillId = `0x${(learnNum >>> 0).toString(16).toUpperCase().padStart(8, "0")}`;
@@ -2469,7 +2778,9 @@ export const wikiService = {
     // For Héros with unique codes, use base character code for face icon fallback
     const originalCode = char.internal_code || char.id;
     const isHero = char.rarity_label === "Héros";
-    const faceCode = isHero ? HERO_BASE_CODES[originalCode] || originalCode : originalCode;
+    const faceCode = isHero
+      ? HERO_BASE_CODES[originalCode] || originalCode
+      : originalCode;
 
     // Stats lv1: colonnes scalaires stat_lv1_* (la colonne jsonb `stats` est DEPRECATED, cf db-6).
     const hasLv1 = char.stat_lv1_frappe != null;
@@ -2525,7 +2836,12 @@ export const wikiService = {
       elementRaw: 0,
       rarity: char.rarity_label || "Normal",
       rarityCode,
-      stats: { lv99: statsLv99, lv1: statsLv1, lv30: statsLv30, lv50: statsLv50 },
+      stats: {
+        lv99: statsLv99,
+        lv1: statsLv1,
+        lv30: statsLv30,
+        lv50: statsLv50,
+      },
       skills: skills,
       image: imageUrl,
       sheetData: char.sheet_data,
@@ -2604,7 +2920,10 @@ export const wikiService = {
     let countQuery = db.selectFrom("inagle_gallery");
 
     // Catégorie = préfixe `img_<category>_` du `img_path` (filtre serveur via LIKE).
-    if (params.category && GALLERY_CATEGORIES.some(c => c.value === params.category)) {
+    if (
+      params.category &&
+      GALLERY_CATEGORIES.some((c) => c.value === params.category)
+    ) {
       const pattern = `img_${sanitizeFilter(params.category)}_%`;
       query = query.where("img_path", "ilike", pattern);
       countQuery = countQuery.where("img_path", "ilike", pattern);
@@ -2617,11 +2936,23 @@ export const wikiService = {
 
     try {
       const [data, countRow] = await Promise.all([
-        query.selectAll().orderBy("flg_no", "asc").limit(limit).offset(from).execute(),
-        countQuery.select(eb => eb.fn.countAll<number>().as("count")).executeTakeFirst(),
+        query
+          .selectAll()
+          .orderBy("flg_no", "asc")
+          .limit(limit)
+          .offset(from)
+          .execute(),
+        countQuery
+          .select((eb) => eb.fn.countAll<number>().as("count"))
+          .executeTakeFirst(),
       ]);
-      const results = data.map(row => galleryRowToItem(row));
-      return { data: results, total: Number(countRow?.count ?? 0), page, limit };
+      const results = data.map((row) => galleryRowToItem(row));
+      return {
+        data: results,
+        total: Number(countRow?.count ?? 0),
+        page,
+        limit,
+      };
     } catch (error) {
       console.error("Error fetching gallery:", error);
       return { data: [], total: 0, page, limit };
@@ -2631,7 +2962,10 @@ export const wikiService = {
   /** Compte les illustrations par catégorie (pour les chips de filtre). */
   async getGalleryCategoryCounts(): Promise<Record<string, number>> {
     const db = createInagleSql<SqlDatabase>();
-    const data = await db.selectFrom("inagle_gallery").select("img_path").execute();
+    const data = await db
+      .selectFrom("inagle_gallery")
+      .select("img_path")
+      .execute();
     const counts: Record<string, number> = { all: 0 };
     for (const row of data) {
       counts.all += 1;
@@ -2672,18 +3006,24 @@ export const wikiService = {
    * Les données sont lues depuis la projection SQL `inagle_passives`, alimentée par
    * l'import Inagle ; aucune sortie JSON n'est utilisée comme repli runtime.
    */
-  async getPassivesList(params: PassiveListParams = {}): Promise<ListResult<PassiveListItem>> {
+  async getPassivesList(
+    params: PassiveListParams = {},
+  ): Promise<ListResult<PassiveListItem>> {
     const page = params.page || 1;
     const limit = params.limit || 60;
     const all = await loadPassiveRows();
 
     const qNorm = params.q ? normalizePassiveText(params.q) : "";
-    let filtered = all.filter(p => {
+    let filtered = all.filter((p) => {
       if (params.element && p.element_name !== params.element) return false;
-      if (params.rarity && String(p.rarity) !== String(params.rarity)) return false;
-      if (params.category && passiveCategory(p.string_id) !== params.category) return false;
+      if (params.rarity && String(p.rarity) !== String(params.rarity))
+        return false;
+      if (params.category && passiveCategory(p.string_id) !== params.category)
+        return false;
       if (qNorm) {
-        const hay = normalizePassiveText(`${p.name.fr ?? ""} ${p.name.en ?? ""} ${p.name.ja ?? ""} ${p.string_id}`);
+        const hay = normalizePassiveText(
+          `${p.name.fr ?? ""} ${p.name.en ?? ""} ${p.name.ja ?? ""} ${p.string_id}`,
+        );
         if (!hay.includes(qNorm)) return false;
       }
       return true;
@@ -2719,12 +3059,14 @@ export const wikiService = {
    */
   async getPassive(id: string): Promise<PassiveDetail | undefined> {
     const instances = await loadPassiveRows();
-    const inst = instances.find(p => p.passive_id === id || p.string_id === id);
+    const inst = instances.find(
+      (p) => p.passive_id === id || p.string_id === id,
+    );
     if (!inst) return undefined;
 
     // Toutes les instances partageant le même effet (courbe de valeurs).
     const family = instances
-      .filter(p => p.effect_id === inst.effect_id)
+      .filter((p) => p.effect_id === inst.effect_id)
       .sort((a, b) => (a.main_value ?? 0) - (b.main_value ?? 0));
 
     let imageUrl: string | null = null;
@@ -2754,9 +3096,13 @@ export const wikiService = {
   async getTeamPassives(): Promise<PassiveTeamItem[]> {
     try {
       const db = createInagleSql<WikiSqlDatabase>();
-      const data = await db.selectFrom("inagle_manager_passives").selectAll().execute();
-      return data.map(row => {
-        const raw: any = row.data && typeof row.data === "object" ? row.data : row;
+      const data = await db
+        .selectFrom("inagle_manager_passives")
+        .selectAll()
+        .execute();
+      return data.map((row) => {
+        const raw: any =
+          row.data && typeof row.data === "object" ? row.data : row;
         return {
           team_passive_id: String(raw.team_passive_id ?? raw.id ?? row.id),
           effect_id: String(raw.effect_id ?? raw.effectId ?? ""),
@@ -2790,20 +3136,27 @@ export const wikiService = {
         coordinatorPassives: [],
       };
       for (const row of data as Array<{ kind?: string; data?: unknown }>) {
-        if (row.kind === "player") result.playerPassives.push(row.data as PlayerPassiveSheet);
-        if (row.kind === "custom") result.customPassives.push(row.data as CustomPassiveSheet);
-        if (row.kind === "coordinator") result.coordinatorPassives.push(row.data as CoordinatorPassiveSheet);
+        if (row.kind === "player")
+          result.playerPassives.push(row.data as PlayerPassiveSheet);
+        if (row.kind === "custom")
+          result.customPassives.push(row.data as CustomPassiveSheet);
+        if (row.kind === "coordinator")
+          result.coordinatorPassives.push(row.data as CoordinatorPassiveSheet);
       }
       return result;
     } catch {
-      return { playerPassives: [], customPassives: [], coordinatorPassives: [] };
+      return {
+        playerPassives: [],
+        customPassives: [],
+        coordinatorPassives: [],
+      };
     }
   },
 
   /** Une famille de passifs par effect_id (toutes les valeurs partageant l'effet). */
   async getPassiveFamily(effectId: string): Promise<PassiveListItem[]> {
     return (await loadPassiveRows())
-      .filter(p => p.effect_id === effectId)
+      .filter((p) => p.effect_id === effectId)
       .sort((a, b) => (a.main_value ?? 0) - (b.main_value ?? 0));
   },
 };
@@ -2902,7 +3255,9 @@ function passiveRowToItem(row: any): PassiveListItem {
   };
   return {
     passive_id: String(raw.passiveIdStr ?? raw.passive_id ?? row.id),
-    string_id: String(raw.stringId ?? raw.string_id ?? raw.passiveIdStr ?? row.id),
+    string_id: String(
+      raw.stringId ?? raw.string_id ?? raw.passiveIdStr ?? row.id,
+    ),
     effect_id: String(raw.effectId ?? raw.effect_id ?? row.effect_id ?? ""),
     rarity: Number(raw.rarity ?? row.rarity ?? 0),
     element: Number(raw.element ?? row.element ?? 0),
@@ -2925,7 +3280,10 @@ async function loadPassiveRows(): Promise<PassiveListItem[]> {
     passiveCache = (async () => {
       try {
         const db = createInagleSql<SqlDatabase>();
-        const data = await db.selectFrom("inagle_passives").selectAll().execute();
+        const data = await db
+          .selectFrom("inagle_passives")
+          .selectAll()
+          .execute();
         return data.map(passiveRowToItem);
       } catch {
         return [];

@@ -152,7 +152,11 @@ function bitsVersHex(bits: readonly number[]): string {
  * compression, et deux images redimensionnées différemment donnent la même empreinte.
  */
 async function dhash(sharp: SharpModule, octets: Uint8Array): Promise<string> {
-  const brut = await sharp(octets).grayscale().resize(9, 8, { fit: "fill" }).raw().toBuffer();
+  const brut = await sharp(octets)
+    .grayscale()
+    .resize(9, 8, { fit: "fill" })
+    .raw()
+    .toBuffer();
   const bits: number[] = [];
   for (let y = 0; y < 8; y++) {
     for (let x = 0; x < 8; x++) {
@@ -174,7 +178,11 @@ async function dhash(sharp: SharpModule, octets: Uint8Array): Promise<string> {
  */
 async function phash(sharp: SharpModule, octets: Uint8Array): Promise<string> {
   const cote = 32;
-  const brut = await sharp(octets).grayscale().resize(cote, cote, { fit: "fill" }).raw().toBuffer();
+  const brut = await sharp(octets)
+    .grayscale()
+    .resize(cote, cote, { fit: "fill" })
+    .raw()
+    .toBuffer();
 
   const cosinus: number[][] = [];
   for (let u = 0; u < cote; u++) {
@@ -201,7 +209,11 @@ async function phash(sharp: SharpModule, octets: Uint8Array): Promise<string> {
 
   const sansContinu = coefficients.slice(1).sort((a, b) => a - b);
   const seuil = (sansContinu[30] + sansContinu[31]) / 2;
-  return bitsVersHex(coefficients.map((valeur, position) => (position === 0 ? 0 : valeur > seuil ? 1 : 0)));
+  return bitsVersHex(
+    coefficients.map((valeur, position) =>
+      position === 0 ? 0 : valeur > seuil ? 1 : 0,
+    ),
+  );
 }
 
 /** Distance de Hamming entre deux empreintes hexadécimales de même longueur. */
@@ -211,7 +223,8 @@ export function distance(a: string | null, b: string | null): number | null {
   }
   let total = 0;
   for (let position = 0; position < a.length; position++) {
-    let reste = Number.parseInt(a[position], 16) ^ Number.parseInt(b[position], 16);
+    let reste =
+      Number.parseInt(a[position], 16) ^ Number.parseInt(b[position], 16);
     while (reste) {
       total += reste & 1;
       reste >>= 1;
@@ -279,11 +292,15 @@ function tableau(valeur: unknown): unknown[] {
 }
 
 function texte(valeur: unknown): string | null {
-  return typeof valeur === "string" && valeur.trim().length > 0 ? valeur.trim() : null;
+  return typeof valeur === "string" && valeur.trim().length > 0
+    ? valeur.trim()
+    : null;
 }
 
 function nombre(valeur: unknown): number | null {
-  return typeof valeur === "number" && Number.isFinite(valeur) ? Math.trunc(valeur) : null;
+  return typeof valeur === "number" && Number.isFinite(valeur)
+    ? Math.trunc(valeur)
+    : null;
 }
 
 /** Les fichiers d'une création Discord ou Instagram (même forme de stockage). */
@@ -295,7 +312,10 @@ function fichiersDepuisImages(brut: unknown): FichierCreation[] {
     const item = entree as Record<string, unknown>;
     const cheminBucket = texte(item.chemin);
     const typeMime = texte(item.type_mime) ?? "";
-    const kind = texte(item.kind) === "video" || typeMime.startsWith("video/") ? "video" : "image";
+    const kind =
+      texte(item.kind) === "video" || typeMime.startsWith("video/")
+        ? "video"
+        : "image";
     fichiers.push({
       chemin: cheminBucket ? cheminDisque(cheminBucket) : null,
       cheminBucket,
@@ -319,7 +339,8 @@ function fichiersDepuisTweet(brut: unknown): FichierCreation[] {
     const item = entree as Record<string, unknown>;
     if (texte(item.type) !== "photo") continue;
     const stockage = texte(item.storage_url);
-    const origine = texte(item.original_url) ?? texte(item.url) ?? texte(item.preview_url);
+    const origine =
+      texte(item.original_url) ?? texte(item.url) ?? texte(item.preview_url);
     fichiers.push({
       chemin: stockage ? cheminDisque(stockage) : null,
       cheminBucket: stockage,
@@ -328,14 +349,20 @@ function fichiersDepuisTweet(brut: unknown): FichierCreation[] {
       kind: "image",
       largeurAnnoncee: nombre(item.width),
       // `?name=orig` : X sert la variante « medium » (1200 px) sans ce suffixe.
-      url: origine ? (origine.includes("?name=") ? origine : `${origine}?name=orig`) : null,
+      url: origine
+        ? origine.includes("?name=")
+          ? origine
+          : `${origine}?name=orig`
+        : null,
     });
     index++;
   }
   return fichiers;
 }
 
-async function lireOctets(fichier: FichierCreation): Promise<Uint8Array | null> {
+async function lireOctets(
+  fichier: FichierCreation,
+): Promise<Uint8Array | null> {
   if (fichier.chemin) {
     const surDisque = Bun.file(fichier.chemin);
     if (await surDisque.exists()) {
@@ -351,7 +378,10 @@ async function lireOctets(fichier: FichierCreation): Promise<Uint8Array | null> 
   return null;
 }
 
-async function mesurer(sharp: SharpModule, fichier: FichierCreation): Promise<Mesure | null> {
+async function mesurer(
+  sharp: SharpModule,
+  fichier: FichierCreation,
+): Promise<Mesure | null> {
   const octets = await lireOctets(fichier);
   if (!octets) return null;
 
@@ -412,8 +442,10 @@ if (!URL_BASE) throw new Error("DATABASE_URL manquant");
 const sql = createBunSql({ url: URL_BASE });
 const sharp = await chargerSharp();
 
-const creations = (await sql.unsafe(SQL_CREATIONS, [SLUG])) as unknown as LigneCreation[];
-const retenues = creations.filter(creation => creation.motif_ecart === null);
+const creations = (await sql.unsafe(SQL_CREATIONS, [
+  SLUG,
+])) as unknown as LigneCreation[];
+const retenues = creations.filter((creation) => creation.motif_ecart === null);
 const oeuvres = (await sql`
 	select oeuvre_id, cle, creations, sha256, dhash, phash
 	  from public.x_campagne_oeuvres
@@ -428,7 +460,10 @@ for (const oeuvre of oeuvres) {
   }
 }
 
-const aTraiter = retenues.filter(creation => TOUT || !couvertes.has(`${creation.source}:${creation.identifiant}`));
+const aTraiter = retenues.filter(
+  (creation) =>
+    TOUT || !couvertes.has(`${creation.source}:${creation.identifiant}`),
+);
 
 console.log(
   `empreintes campagne=${SLUG} retenues=${retenues.length} couvertes=${couvertes.size} ` +
@@ -444,20 +479,25 @@ if (aTraiter.length === 0) {
 /** Les fichiers d'une création, quelle qu'en soit la source. */
 async function fichiersDe(creation: LigneCreation): Promise<FichierCreation[]> {
   if (creation.source === "x") {
-    const lignes = (await sql`select media from public.tweets where id = ${creation.identifiant}`) as Array<{
-      media: unknown;
-    }>;
+    const lignes =
+      (await sql`select media from public.tweets where id = ${creation.identifiant}`) as Array<{
+        media: unknown;
+      }>;
     return fichiersDepuisTweet(lignes[0]?.media);
   }
   if (creation.source === "discord") {
     const lignes = (await sql`
 			select images from public.campagne_creations_discord
-			 where campagne_slug = ${SLUG} and message_id = ${creation.identifiant}`) as Array<{ images: unknown }>;
+			 where campagne_slug = ${SLUG} and message_id = ${creation.identifiant}`) as Array<{
+      images: unknown;
+    }>;
     return fichiersDepuisImages(lignes[0]?.images);
   }
   const lignes = (await sql`
 		select images from public.campagne_creations_instagram
-		 where campagne_slug = ${SLUG} and shortcode = ${creation.identifiant}`) as Array<{ images: unknown }>;
+		 where campagne_slug = ${SLUG} and shortcode = ${creation.identifiant}`) as Array<{
+    images: unknown;
+  }>;
   return fichiersDepuisImages(lignes[0]?.images);
 }
 
@@ -479,17 +519,23 @@ for (const creation of aTraiter) {
   for (const fichier of fichiers) {
     const mesure = await mesurer(sharp, fichier);
     if (mesure) mesures.push(mesure);
-    else illisibles.push(`${creation.source}:${creation.identifiant}#${fichier.index}`);
+    else
+      illisibles.push(
+        `${creation.source}:${creation.identifiant}#${fichier.index}`,
+      );
   }
   if (mesures.length === 0) {
-    console.warn(`illisible ${creation.source}:${creation.identifiant} — aucun fichier mesurable, ignoree`);
+    console.warn(
+      `illisible ${creation.source}:${creation.identifiant} — aucun fichier mesurable, ignoree`,
+    );
     continue;
   }
 
   // Le master est le fichier le mieux défini de la création : c'est lui qu'on sert en pleine
   // résolution, et lui dont l'empreinte représente l'œuvre.
   const master = mesures.reduce((meilleur, mesure) =>
-    (mesure.largeur ?? 0) * (mesure.hauteur ?? 0) > (meilleur.largeur ?? 0) * (meilleur.hauteur ?? 0)
+    (mesure.largeur ?? 0) * (mesure.hauteur ?? 0) >
+    (meilleur.largeur ?? 0) * (meilleur.hauteur ?? 0)
       ? mesure
       : meilleur,
   );
@@ -514,9 +560,18 @@ for (const creation of aTraiter) {
   candidates.push({ creation, master, mesures, preuve, rattachement });
 
   const proches = oeuvres
-    .map(oeuvre => ({ dd: distance(oeuvre.dhash, master.dhash), dp: distance(oeuvre.phash, master.phash), oeuvre }))
+    .map((oeuvre) => ({
+      dd: distance(oeuvre.dhash, master.dhash),
+      dp: distance(oeuvre.phash, master.phash),
+      oeuvre,
+    }))
     .filter(
-      item => item.dd !== null && item.dp !== null && item.dd <= 8 && item.dp <= 8 && item.oeuvre !== rattachement,
+      (item) =>
+        item.dd !== null &&
+        item.dp !== null &&
+        item.dd <= 8 &&
+        item.dp <= 8 &&
+        item.oeuvre !== rattachement,
     );
   for (const proche of proches) {
     console.warn(
@@ -534,23 +589,29 @@ for (const creation of aTraiter) {
 }
 
 if (illisibles.length > 0) {
-  console.warn(`fichiers illisibles=${illisibles.length} : ${illisibles.join(", ")}`);
+  console.warn(
+    `fichiers illisibles=${illisibles.length} : ${illisibles.join(", ")}`,
+  );
 }
 
 // Les identités doivent PRÉEXISTER : la clé étrangère de `x_campagne_oeuvres` l'exige, et créer
 // un participant ici court-circuiterait la reconstruction du roster, seul endroit qui sait fusionner
 // deux identités d'une même personne.
 const clesRequises = [
-  ...new Set(candidates.filter(c => !c.rattachement).map(c => c.creation.cle_identite ?? "")),
+  ...new Set(
+    candidates
+      .filter((c) => !c.rattachement)
+      .map((c) => c.creation.cle_identite ?? ""),
+  ),
 ].filter(Boolean);
 const connues = new Set(
   (
     (await sql`
 			select cle from public.x_campagne_participants
 			 where campagne_slug = ${SLUG}`) as Array<{ cle: string }>
-  ).map(ligne => ligne.cle),
+  ).map((ligne) => ligne.cle),
 );
-const manquantes = clesRequises.filter(cle => !connues.has(cle));
+const manquantes = clesRequises.filter((cle) => !connues.has(cle));
 if (manquantes.length > 0 && !DRY) {
   console.error(
     `ARRET : ${manquantes.length} identite(s) absente(s) de x_campagne_participants : ${manquantes.join(", ")}.\n` +
@@ -562,8 +623,8 @@ if (manquantes.length > 0 && !DRY) {
 
 if (DRY) {
   console.log(
-    `simulation : ${candidates.filter(c => !c.rattachement).length} oeuvre(s) seraient creee(s), ` +
-      `${candidates.filter(c => c.rattachement).length} rattachee(s) a une oeuvre existante. Rien ecrit.`,
+    `simulation : ${candidates.filter((c) => !c.rattachement).length} oeuvre(s) seraient creee(s), ` +
+      `${candidates.filter((c) => c.rattachement).length} rattachee(s) a une oeuvre existante. Rien ecrit.`,
   );
   process.exit(0);
 }
@@ -589,8 +650,12 @@ for (const candidate of candidates) {
   if (candidate.rattachement) {
     // Rattachement à une œuvre existante : on n'ajoute QUE la création à sa liste, sans toucher
     // ni au master, ni au motif, ni à la création gardée — ces choix-là ont été arbitrés.
-    const liste = tableau(candidate.rattachement.creations) as Array<Record<string, unknown>>;
-    if (liste.some(entree => texte(entree.identifiant) === creation.identifiant)) {
+    const liste = tableau(candidate.rattachement.creations) as Array<
+      Record<string, unknown>
+    >;
+    if (
+      liste.some((entree) => texte(entree.identifiant) === creation.identifiant)
+    ) {
       // Déjà dans la liste : ne jamais l'y remettre. Une publication comptée deux fois dans
       // une œuvre, c'est `nb_creations` faussé et un ticket qui apparaît de nulle part.
       continue;
@@ -637,5 +702,7 @@ console.log(
   `ecrit campagne=${SLUG} oeuvres_creees=${creees} creations_rattachees=${rattachees} ` +
     `oeuvres_total=${oeuvres.length + creees}`,
 );
-console.log("reconstruire le roster (/admin/iergday) pour mettre les compteurs des participants a jour");
+console.log(
+  "reconstruire le roster (/admin/iergday) pour mettre les compteurs des participants a jour",
+);
 process.exit(0);

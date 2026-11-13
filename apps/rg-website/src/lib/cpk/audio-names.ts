@@ -49,7 +49,10 @@ export function ownerIndex(): Promise<Map<string, BankOwner>> {
   _index ??= (async () => {
     const index = new Map<string, BankOwner>();
     try {
-      const rows = await selectInagle<CharaRow>("inagle_characters", "internal_code,name_fr,name_en,name_ja,slug");
+      const rows = await selectInagle<CharaRow>(
+        "inagle_characters",
+        "internal_code,name_fr,name_en,name_ja,slug",
+      );
       for (const row of rows) {
         const code = row.internal_code?.split("_")[0]?.toLowerCase();
         if (!code) continue;
@@ -57,7 +60,11 @@ export function ownerIndex(): Promise<Map<string, BankOwner>> {
         if (!name) continue;
         // Première variante rencontrée : les variantes d'un personnage partagent son nom.
         if (!index.has(code)) {
-          index.set(code, { name, slug: row.slug, internalCode: row.internal_code ?? code });
+          index.set(code, {
+            name,
+            slug: row.slug,
+            internalCode: row.internal_code ?? code,
+          });
         }
       }
     } catch {
@@ -69,7 +76,10 @@ export function ownerIndex(): Promise<Map<string, BankOwner>> {
 }
 
 /** Le personnage que sonorise une banque, ou `null` si ce n'est pas une banque de voix connue. */
-export function bankOwner(index: Map<string, BankOwner>, path: string): BankOwner | null {
+export function bankOwner(
+  index: Map<string, BankOwner>,
+  path: string,
+): BankOwner | null {
   const code = voiceBankCharacterCode(path);
   return code ? (index.get(code) ?? null) : null;
 }

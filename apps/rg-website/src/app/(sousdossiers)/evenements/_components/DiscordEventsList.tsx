@@ -25,7 +25,9 @@ function DiscordEventsList({ events, isLoading }: DiscordEventsListProps) {
   if (events.length === 0) {
     return (
       <div className="py-8 text-center">
-        <p className="text-muted-foreground">Aucun événement Discord programmé pour le moment.</p>
+        <p className="text-muted-foreground">
+          Aucun événement Discord programmé pour le moment.
+        </p>
       </div>
     );
   }
@@ -39,7 +41,7 @@ function DiscordEventsList({ events, isLoading }: DiscordEventsListProps) {
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-      {sortedEvents.map(event => (
+      {sortedEvents.map((event) => (
         <DiscordEventCard key={event.id} event={event} />
       ))}
     </div>
@@ -52,7 +54,9 @@ function DiscordEventCard({ event }: { event: DiscordScheduledEvent }) {
 
   // Formater les dates
   const startDate = new Date(event.scheduledStartTime);
-  const endDate = event.scheduledEndTime ? new Date(event.scheduledEndTime) : null;
+  const endDate = event.scheduledEndTime
+    ? new Date(event.scheduledEndTime)
+    : null;
 
   const formatDate = (date: Date) =>
     date.toLocaleDateString("fr-FR", {
@@ -94,10 +98,16 @@ function DiscordEventCard({ event }: { event: DiscordScheduledEvent }) {
       )}
 
       {/* Titre */}
-      <h3 className="text-xl font-bold text-foreground mb-3 pr-24">{event.name}</h3>
+      <h3 className="text-xl font-bold text-foreground mb-3 pr-24">
+        {event.name}
+      </h3>
 
       {/* Description */}
-      {event.description && <p className="text-sm text-muted-foreground mb-4 line-clamp-3">{event.description}</p>}
+      {event.description && (
+        <p className="text-sm text-muted-foreground mb-4 line-clamp-3">
+          {event.description}
+        </p>
+      )}
 
       {/* Informations */}
       <div className="space-y-2 text-sm">
@@ -151,7 +161,9 @@ function DiscordEventCard({ event }: { event: DiscordScheduledEvent }) {
                 />
               </div>
             )}
-            <span className="text-xs text-muted-foreground">Créé par {event.creator.username}</span>
+            <span className="text-xs text-muted-foreground">
+              Créé par {event.creator.username}
+            </span>
           </div>
         </div>
       )}

@@ -30,7 +30,10 @@ interface CharacterSheetWithLevelProps {
   prevCharacterId?: string;
   nextCharacterId?: string;
   sheetData?: SheetData;
-  constellation?: { index: number; names: { fr?: string; en?: string; ja?: string } };
+  constellation?: {
+    index: number;
+    names: { fr?: string; en?: string; ja?: string };
+  };
   heroConstellations?: Array<{ name: string; index: number }>;
   forms?: Array<{
     id: string;
@@ -96,10 +99,22 @@ export function CharacterSheetWithLevel({
 }: CharacterSheetWithLevelProps) {
   const { getLocalized, language } = useLanguage();
 
-  const displayName = names ? getLocalized({ name_EN: names.en, name_FR: names.fr, name_JA: names.ja }, "name") : name;
+  const displayName = names
+    ? getLocalized(
+        { name_EN: names.en, name_FR: names.fr, name_JA: names.ja },
+        "name",
+      )
+    : name;
 
   const rawDesc = descriptions
-    ? getLocalized({ desc_EN: descriptions.en, desc_FR: descriptions.fr, desc_JA: descriptions.ja }, "desc")
+    ? getLocalized(
+        {
+          desc_EN: descriptions.en,
+          desc_FR: descriptions.fr,
+          desc_JA: descriptions.ja,
+        },
+        "desc",
+      )
     : description;
 
   const displayDesc = formatDescription(rawDesc, language);
@@ -123,8 +138,12 @@ export function CharacterSheetWithLevel({
         teamName={teamName}
         teamId={teamId}
         gender={gender}
-        prevCharacterHref={prevCharacterId ? wiki(`/chara/${prevCharacterId}`) : undefined}
-        nextCharacterHref={nextCharacterId ? wiki(`/chara/${nextCharacterId}`) : undefined}
+        prevCharacterHref={
+          prevCharacterId ? wiki(`/chara/${prevCharacterId}`) : undefined
+        }
+        nextCharacterHref={
+          nextCharacterId ? wiki(`/chara/${nextCharacterId}`) : undefined
+        }
         sheetData={sheetData}
         constellation={constellation}
         heroConstellations={heroConstellations}

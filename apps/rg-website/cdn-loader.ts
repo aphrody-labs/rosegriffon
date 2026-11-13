@@ -18,7 +18,10 @@ import type { ImageLoaderProps } from "next/image";
  */
 export function discordSized(src: string, width: number): string {
   const url = new URL(src);
-  const size = Math.min(4096, Math.max(16, 2 ** Math.ceil(Math.log2(Math.max(1, width)))));
+  const size = Math.min(
+    4096,
+    Math.max(16, 2 ** Math.ceil(Math.log2(Math.max(1, width)))),
+  );
   if (url.pathname.endsWith(".gif")) {
     url.pathname = url.pathname.replace(/\.gif$/u, ".webp");
     url.searchParams.set("animated", "true");
@@ -27,7 +30,11 @@ export function discordSized(src: string, width: number): string {
   return url.toString();
 }
 
-export default function cdnLoader({ src, width, quality }: ImageLoaderProps): string {
+export default function cdnLoader({
+  src,
+  width,
+  quality,
+}: ImageLoaderProps): string {
   if (src.startsWith("https://cdn.discordapp.com/")) {
     return discordSized(src, width);
   }

@@ -21,7 +21,8 @@ export default async function Image() {
   return new ImageResponse(
     <div
       style={{
-        background: "linear-gradient(135deg, #1A120D 0%, #2D1F14 50%, #1A120D 100%)",
+        background:
+          "linear-gradient(135deg, #1A120D 0%, #2D1F14 50%, #1A120D 100%)",
         color: "white",
         display: "flex",
         fontFamily: "sans-serif",
@@ -108,8 +109,10 @@ export default async function Image() {
         </div>
 
         {/* Playstyle pills */}
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginTop: 12 }}>
-          {PLAYSTYLES.map(p => (
+        <div
+          style={{ display: "flex", flexWrap: "wrap", gap: 10, marginTop: 12 }}
+        >
+          {PLAYSTYLES.map((p) => (
             <div
               key={p.label}
               style={{
@@ -120,7 +123,16 @@ export default async function Image() {
                 padding: "6px 16px",
               }}
             >
-              <div style={{ color: p.color, display: "flex", fontSize: 13, fontWeight: 700 }}>{p.label}</div>
+              <div
+                style={{
+                  color: p.color,
+                  display: "flex",
+                  fontSize: 13,
+                  fontWeight: 700,
+                }}
+              >
+                {p.label}
+              </div>
             </div>
           ))}
         </div>
@@ -138,10 +150,18 @@ export default async function Image() {
         }}
       >
         {[
-          { color: "#AB47BC", desc: "Boost conditionnel de stats", name: "Talent Joueur" },
-          { color: "#29B6F6", desc: "Bonus personnalisé", name: "Talent Perso." },
+          {
+            color: "#AB47BC",
+            desc: "Boost conditionnel de stats",
+            name: "Talent Joueur",
+          },
+          {
+            color: "#29B6F6",
+            desc: "Bonus personnalisé",
+            name: "Talent Perso.",
+          },
           { color: "#66BB6A", desc: "Bonus d'équipe", name: "Coordinateur" },
-        ].map(card => (
+        ].map((card) => (
           <div
             key={card.name}
             style={{
@@ -154,8 +174,19 @@ export default async function Image() {
               padding: "14px 18px",
             }}
           >
-            <div style={{ color: card.color, display: "flex", fontSize: 14, fontWeight: 800 }}>{card.name}</div>
-            <div style={{ color: "#8A7A6D", display: "flex", fontSize: 12 }}>{card.desc}</div>
+            <div
+              style={{
+                color: card.color,
+                display: "flex",
+                fontSize: 14,
+                fontWeight: 800,
+              }}
+            >
+              {card.name}
+            </div>
+            <div style={{ color: "#8A7A6D", display: "flex", fontSize: 12 }}>
+              {card.desc}
+            </div>
           </div>
         ))}
       </div>
@@ -171,9 +202,26 @@ export default async function Image() {
           position: "absolute",
         }}
       >
-        <img src={getOgLogoDataUri()} width={28} height={28} style={{ borderRadius: 7 }} alt="Logo Azalée" />
-        <div style={{ color: "#F2A93B", display: "flex", fontSize: 14, fontWeight: 700 }}>rosegriffon.fr/wiki</div>
-        <div style={{ color: "#6D5E50", display: "flex", fontSize: 12 }}>Inazuma Eleven: Victory Road</div>
+        <img
+          src={getOgLogoDataUri()}
+          width={28}
+          height={28}
+          style={{ borderRadius: 7 }}
+          alt="Logo Azalée"
+        />
+        <div
+          style={{
+            color: "#F2A93B",
+            display: "flex",
+            fontSize: 14,
+            fontWeight: 700,
+          }}
+        >
+          rosegriffon.fr/wiki
+        </div>
+        <div style={{ color: "#6D5E50", display: "flex", fontSize: 12 }}>
+          Inazuma Eleven: Victory Road
+        </div>
       </div>
     </div>,
     { ...size },

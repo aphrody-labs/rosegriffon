@@ -125,7 +125,10 @@ export type Catalogue = {
    *
    * C'est la source de tous les textes de l'interface : aucun libellé n'est écrit à la main.
    */
-  panneaux: { nom: string; libelles: { hash: string; libelle: string; gaiji: string[] }[] }[];
+  panneaux: {
+    nom: string;
+    libelles: { hash: string; libelle: string; gaiji: string[] }[];
+  }[];
   /**
    * Les sept axes du radar de statistiques, dans l'ordre du dessin (frappe en haut, puis sens
    * horaire). Les libellés viennent de `menu_text` comme les autres ; leur appartenance à cet
@@ -141,9 +144,20 @@ export type Catalogue = {
     modeles: string[];
     libelle: string | null;
   }[];
-  voix: { banque: string; genre: number; personnalite: number; ton: number; itemNo: number }[];
+  voix: {
+    banque: string;
+    genre: number;
+    personnalite: number;
+    ton: number;
+    itemNo: number;
+  }[];
   /** Personnalités — `libelle` vient de `menu_text`, la table de texte du jeu. */
-  personnalites: { type: number; presentation: number; texte: string; libelle: string | null }[];
+  personnalites: {
+    type: number;
+    presentation: number;
+    texte: string;
+    libelle: string | null;
+  }[];
   tenues: { id: number; hash: string; morphologies: number[] }[];
   curseurs: { partsType: number; params: Curseur[] }[];
   modelesDeBase: {
@@ -192,7 +206,12 @@ export type LayoutObjet = {
     anchorY?: number;
     rot?: number;
   } | null;
-  sprite?: { w: number; h: number; pngUrl: string; logicalPath?: string } | null;
+  sprite?: {
+    w: number;
+    h: number;
+    pngUrl: string;
+    logicalPath?: string;
+  } | null;
   text?: unknown;
 };
 

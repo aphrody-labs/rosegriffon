@@ -1,4 +1,9 @@
-import { DEFAULT_LOCALE_REGISTRY, canonicalizeLocaleTag, matchLocale, type LocaleRegistry } from "./registry";
+import {
+  DEFAULT_LOCALE_REGISTRY,
+  canonicalizeLocaleTag,
+  matchLocale,
+  type LocaleRegistry,
+} from "./registry";
 
 export interface LanguagePreference {
   /** Tag BCP-47 canonique, ou `*`. */
@@ -13,12 +18,14 @@ const Q_VALUE = /^(?:0(?:\.\d{0,3})?|1(?:\.0{0,3})?)$/;
 
 function parseQuality(parameters: readonly string[]): number | null {
   const qualityParameters = parameters
-    .map(parameter => parameter.trim())
-    .filter(parameter => /^q\s*=/i.test(parameter));
+    .map((parameter) => parameter.trim())
+    .filter((parameter) => /^q\s*=/i.test(parameter));
   if (qualityParameters.length === 0) return 1;
   if (qualityParameters.length > 1) return null;
 
-  const raw = qualityParameters[0]?.slice(qualityParameters[0].indexOf("=") + 1).trim() ?? "";
+  const raw =
+    qualityParameters[0]?.slice(qualityParameters[0].indexOf("=") + 1).trim() ??
+    "";
   if (!Q_VALUE.test(raw)) return null;
   return Number(raw);
 }
@@ -27,24 +34,35 @@ function parseQuality(parameters: readonly string[]): number | null {
  * Analyse un en-tête `Accept-Language` sans lever sur les fragments invalides.
  * Les doublons sont fusionnés en conservant leur meilleur poids.
  */
-export function parseAcceptLanguage(header: string | null | undefined): readonly LanguagePreference[] {
+export function parseAcceptLanguage(
+  header: string | null | undefined,
+): readonly LanguagePreference[] {
   if (!header) return Object.freeze([]);
 
   const preferences = new Map<string, LanguagePreference>();
   for (const [position, rawEntry] of header.split(",").entries()) {
     const [rawRange = "", ...parameters] = rawEntry.split(";");
     const trimmedRange = rawRange.trim();
-    const range = trimmedRange === "*" ? "*" : canonicalizeLocaleTag(trimmedRange);
+    const range =
+      trimmedRange === "*" ? "*" : canonicalizeLocaleTag(trimmedRange);
     const quality = parseQuality(parameters);
     if (!range || quality === null) continue;
 
     const existing = preferences.get(range);
-    if (!existing || quality > existing.quality || (quality === existing.quality && position < existing.position)) {
+    if (
+      !existing ||
+      quality > existing.quality ||
+      (quality === existing.quality && position < existing.position)
+    ) {
       preferences.set(range, Object.freeze({ position, quality, range }));
     }
   }
 
-  return Object.freeze([...preferences.values()].toSorted((a, b) => b.quality - a.quality || a.position - b.position));
+  return Object.freeze(
+    [...preferences.values()].toSorted(
+      (a, b) => b.quality - a.quality || a.position - b.position,
+    ),
+  );
 }
 
 interface WeightedLocale {
@@ -75,7 +93,8 @@ export function negotiateAcceptLanguage(
     if (
       !existing ||
       preference.quality > existing.quality ||
-      (preference.quality === existing.quality && preference.position < existing.position)
+      (preference.quality === existing.quality &&
+        preference.position < existing.position)
     ) {
       explicit.set(definition.tag, {
         locale: definition.tag,
@@ -101,9 +120,12 @@ export function negotiateAcceptLanguage(
 
   return (
     candidates
-      .filter(candidate => candidate.quality > 0)
+      .filter((candidate) => candidate.quality > 0)
       .toSorted(
-        (a, b) => b.quality - a.quality || a.position - b.position || a.registryPosition - b.registryPosition,
+        (a, b) =>
+          b.quality - a.quality ||
+          a.position - b.position ||
+          a.registryPosition - b.registryPosition,
       )[0]?.locale ?? null
   );
 }

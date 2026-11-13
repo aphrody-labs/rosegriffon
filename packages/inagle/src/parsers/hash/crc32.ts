@@ -6,7 +6,10 @@
  * Uses the standard CRC32 polynomial (0xEDB88320).
  */
 
-import { CRC32_POLYNOMIAL, computeLevel5Crc32 } from "../../nie-bridge/contracts.js";
+import {
+  CRC32_POLYNOMIAL,
+  computeLevel5Crc32,
+} from "../../nie-bridge/contracts.js";
 
 export { CRC32_POLYNOMIAL };
 

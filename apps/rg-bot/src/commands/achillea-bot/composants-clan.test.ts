@@ -5,11 +5,22 @@
 import { afterEach, describe, expect, test } from "bun:test";
 import { MetadataStorage } from "discordx";
 
-import { fausseInteraction, installerApi, type Gestionnaire } from "../../../test/achillea-kit";
-import { carriereFactice, ficheFactice } from "../../../test/achillea-clans-fixtures";
+import {
+  fausseInteraction,
+  installerApi,
+  type Gestionnaire,
+} from "../../../test/achillea-kit";
+import {
+  carriereFactice,
+  ficheFactice,
+} from "../../../test/achillea-clans-fixtures";
 import { ClanMemberRole } from "@rosegriffon/achillea-core/enums";
 
-import { ComposantsClan, messageVoteApres, refusGarde } from "./composants-clan";
+import {
+  ComposantsClan,
+  messageVoteApres,
+  refusGarde,
+} from "./composants-clan";
 
 const JOUEUR = "222222222222222222";
 
@@ -29,7 +40,9 @@ const c = new ComposantsClan();
 
 /** Le message public a-t-il été réécrit (hors simple retrait des boutons) ? */
 function messageReecrit(i: ReturnType<typeof fausseInteraction>): boolean {
-  return i.envois.some(e => e.via === "editReply" && JSON.stringify(e.charge).includes("embeds"));
+  return i.envois.some(
+    (e) => e.via === "editReply" && JSON.stringify(e.charge).includes("embeds"),
+  );
 }
 
 describe("identifiants de l'ancien bot", () => {
@@ -49,26 +62,42 @@ describe("identifiants de l'ancien bot", () => {
       "/^get_clan_history:.+/",
       "dismiss-message",
     ];
-    const declares = [...MetadataStorage.instance.buttonComponents, ...MetadataStorage.instance.selectMenuComponents]
-      .filter(composant => composant.classRef === ComposantsClan)
-      .map(composant => String(composant.id));
+    const declares = [
+      ...MetadataStorage.instance.buttonComponents,
+      ...MetadataStorage.instance.selectMenuComponents,
+    ]
+      .filter((composant) => composant.classRef === ComposantsClan)
+      .map((composant) => String(composant.id));
     for (const id of attendus) expect(declares).toContain(id);
   });
 });
 
 describe("candidatures", () => {
   test("accepter : appel par identifiant, boutons retirés", async () => {
-    const appels = api({ "POST /clans/applications/accept": { success: true } });
+    const appels = api({
+      "POST /clans/applications/accept": { success: true },
+    });
     const i = fausseInteraction({ customId: "confirm_application:17" });
     await c.accepterCandidature(i as never);
-    expect(appels[0]).toMatchObject({ chemin: "/clans/applications/accept", corps: { id: 17 } });
+    expect(appels[0]).toMatchObject({
+      chemin: "/clans/applications/accept",
+      corps: { id: 17 },
+    });
     // L'ancien bot n'envoyait aucun message privé : seul le message public change.
-    expect(i.envois.some(e => e.via === "followUp")).toBe(false);
+    expect(i.envois.some((e) => e.via === "followUp")).toBe(false);
     expect(i.texte()).toContain('"components":[]');
   });
 
   test("accepter sans droit : réponse privée, message intact", async () => {
-    api({ "POST /clans/applications/accept": [403, { success: false, error: "Vous n'avez pas les droits pour effectuer cette action" }] });
+    api({
+      "POST /clans/applications/accept": [
+        403,
+        {
+          success: false,
+          error: "Vous n'avez pas les droits pour effectuer cette action",
+        },
+      ],
+    });
     const i = fausseInteraction({ customId: "confirm_application:17" });
     await c.accepterCandidature(i as never);
     expect(i.envois.at(-1)?.via).toBe("followUp");
@@ -77,42 +106,71 @@ describe("candidatures", () => {
   });
 
   test("refuser : nominal et refus", async () => {
-    const appels = api({ "POST /clans/applications/reject": { success: true } });
+    const appels = api({
+      "POST /clans/applications/reject": { success: true },
+    });
     const i = fausseInteraction({ customId: "refuse_application:17" });
     await c.refuserCandidature(i as never);
     expect(appels[0]?.chemin).toBe("/clans/applications/reject");
     expect(i.texte()).toContain("Candidature refusée");
     restaurer?.();
-    api({ "POST /clans/applications/reject": [404, { success: false, error: "Candidature introuvable." }] });
+    api({
+      "POST /clans/applications/reject": [
+        404,
+        { success: false, error: "Candidature introuvable." },
+      ],
+    });
     const j = fausseInteraction({ customId: "refuse_application:17" });
     await c.refuserCandidature(j as never);
     expect(j.texte()).toContain("Candidature introuvable");
   });
 
   test("init_application ouvre le menu, refuse un clan fermé", async () => {
-    api({ "GET /clans/history/:userId": carriereFactice(null), "GET /clans/fiche/:ref": ficheFactice() });
+    api({
+      "GET /clans/history/:userId": carriereFactice(null),
+      "GET /clans/fiche/:ref": ficheFactice(),
+    });
     const i = fausseInteraction({ customId: "init_application:42" });
     await c.ouvrirCandidature(i as never);
     expect(i.texte()).toContain("apply_distinctions:42");
-    expect(i.texte()).toContain("Sélectionnez vos distinctions avant de postuler à [PSG] Paris Griffon :");
+    expect(i.texte()).toContain(
+      "Sélectionnez vos distinctions avant de postuler à [PSG] Paris Griffon :",
+    );
     restaurer?.();
-    api({ "GET /clans/history/:userId": carriereFactice(null), "GET /clans/fiche/:ref": ficheFactice({ isRecruiting: false }) });
+    api({
+      "GET /clans/history/:userId": carriereFactice(null),
+      "GET /clans/fiche/:ref": ficheFactice({ isRecruiting: false }),
+    });
     const j = fausseInteraction({ customId: "init_application:42" });
     await c.ouvrirCandidature(j as never);
     expect(j.texte()).toContain("❌ Ce Clan ne recrute pas pour le moment !");
   });
 
   test("gardes de l'ancien bot : NoClan, ClanEnabled, ClanRole", () => {
-    expect(refusGarde({ role: ClanMemberRole.Member }, null)).toBe("You are already in a Clan !");
-    expect(refusGarde(undefined, ClanMemberRole.SubCaptain)).toBe("Vous ne faites pas partie d'un Clan.");
-    expect(refusGarde({ role: ClanMemberRole.Member }, ClanMemberRole.SubCaptain)).toBe("You do not have permission to run this command.");
-    expect(refusGarde({ role: ClanMemberRole.SubCaptain }, ClanMemberRole.SubCaptain)).toBeNull();
+    expect(refusGarde({ role: ClanMemberRole.Member }, null)).toBe(
+      "You are already in a Clan !",
+    );
+    expect(refusGarde(undefined, ClanMemberRole.SubCaptain)).toBe(
+      "Vous ne faites pas partie d'un Clan.",
+    );
+    expect(
+      refusGarde({ role: ClanMemberRole.Member }, ClanMemberRole.SubCaptain),
+    ).toBe("You do not have permission to run this command.");
+    expect(
+      refusGarde(
+        { role: ClanMemberRole.SubCaptain },
+        ClanMemberRole.SubCaptain,
+      ),
+    ).toBeNull();
     expect(refusGarde(undefined, null)).toBeNull();
   });
 
   test("apply_distinctions demande confirmation avec les clés choisies", async () => {
     api({ "GET /clans/fiche/:ref": ficheFactice() });
-    const i = fausseInteraction({ customId: "apply_distinctions:42", valeurs: ["Player", "Staff"] });
+    const i = fausseInteraction({
+      customId: "apply_distinctions:42",
+      valeurs: ["Player", "Staff"],
+    });
     await c.choisirDistinctionsCandidature(i as never);
     expect(i.texte()).toContain("create_application:42:Player|Staff");
     expect(i.texte()).toContain("cancel_application:42");
@@ -120,13 +178,25 @@ describe("candidatures", () => {
   });
 
   test("create_application envoie les distinctions, rend le refus de l'API", async () => {
-    const appels = api({ "POST /clans/applications/create": { success: true, autojoin: false } });
-    const i = fausseInteraction({ customId: "create_application:42:Player|Staff" });
+    const appels = api({
+      "POST /clans/applications/create": { success: true, autojoin: false },
+    });
+    const i = fausseInteraction({
+      customId: "create_application:42:Player|Staff",
+    });
     await c.envoyerCandidature(i as never);
-    expect(appels[0]?.corps).toEqual({ clanId: 42, distinctions: ["Joueur", "Staff"] });
+    expect(appels[0]?.corps).toEqual({
+      clanId: 42,
+      distinctions: ["Joueur", "Staff"],
+    });
     expect(i.texte()).toContain("candidature a été envoyée");
     restaurer?.();
-    api({ "POST /clans/applications/create": [400, { success: false, error: "Vous faites déjà partie d'un Clan." }] });
+    api({
+      "POST /clans/applications/create": [
+        400,
+        { success: false, error: "Vous faites déjà partie d'un Clan." },
+      ],
+    });
     const j = fausseInteraction({ customId: "create_application:42:Player" });
     await c.envoyerCandidature(j as never);
     expect(j.texte()).toContain("déjà partie d'un Clan");
@@ -141,15 +211,29 @@ describe("candidatures", () => {
 
 describe("invitations", () => {
   test("confirm_invite : l'invité rejoint", async () => {
-    const appels = api({ "POST /clans/invites/accept": { success: true, clanId: 42, clanName: "Paris Griffon" } });
+    const appels = api({
+      "POST /clans/invites/accept": {
+        success: true,
+        clanId: 42,
+        clanName: "Paris Griffon",
+      },
+    });
     const i = fausseInteraction({ customId: "confirm_invite:5" });
     await c.accepterInvitation(i as never);
-    expect(appels[0]).toMatchObject({ chemin: "/clans/invites/accept", corps: { id: 5 } });
+    expect(appels[0]).toMatchObject({
+      chemin: "/clans/invites/accept",
+      corps: { id: 5 },
+    });
     expect(i.texte()).toContain("Vous avez rejoint le Clan Paris Griffon");
   });
 
   test("confirm_invite par un autre joueur : refus privé", async () => {
-    api({ "POST /clans/invites/accept": [403, { success: false, error: "Cette invitation ne vous est pas adressée." }] });
+    api({
+      "POST /clans/invites/accept": [
+        403,
+        { success: false, error: "Cette invitation ne vous est pas adressée." },
+      ],
+    });
     const i = fausseInteraction({ customId: "confirm_invite:5" });
     await c.accepterInvitation(i as never);
     expect(i.envois.at(-1)?.via).toBe("followUp");
@@ -157,37 +241,68 @@ describe("invitations", () => {
   });
 
   test("cancel_invite : refus de l'invitation", async () => {
-    const appels = api({ "POST /clans/invites/decline": { success: true, clanName: "Paris Griffon" } });
+    const appels = api({
+      "POST /clans/invites/decline": {
+        success: true,
+        clanName: "Paris Griffon",
+      },
+    });
     const i = fausseInteraction({ customId: "cancel_invite:5" });
     await c.refuserInvitation(i as never);
     expect(appels[0]?.chemin).toBe("/clans/invites/decline");
     expect(i.texte()).toContain("refusée");
     restaurer?.();
-    api({ "POST /clans/invites/decline": [404, { success: false, error: "Cette invitation n'existe plus." }] });
+    api({
+      "POST /clans/invites/decline": [
+        404,
+        { success: false, error: "Cette invitation n'existe plus." },
+      ],
+    });
     const j = fausseInteraction({ customId: "cancel_invite:5" });
     await c.refuserInvitation(j as never);
     expect(j.texte()).toContain("n'existe plus");
   });
 
   test("init_invite ouvre le menu, invite_distinctions invite", async () => {
-    api({ "GET /clans/history/:userId": carriereFactice(ClanMemberRole.SubCaptain) });
+    api({
+      "GET /clans/history/:userId": carriereFactice(ClanMemberRole.SubCaptain),
+    });
     const i = fausseInteraction({ customId: `init_invite:${JOUEUR}` });
     await c.ouvrirInvitation(i as never);
     expect(i.texte()).toContain(`invite_distinctions:${JOUEUR}`);
-    expect(i.texte()).toContain("Sélectionnez les distinctions à proposer à l'utilisateur à inviter:");
+    expect(i.texte()).toContain(
+      "Sélectionnez les distinctions à proposer à l'utilisateur à inviter:",
+    );
     restaurer?.();
 
     const appels = api({ "POST /clans/invites/create": { success: true } });
-    const j = fausseInteraction({ customId: `invite_distinctions:${JOUEUR}`, valeurs: ["Player"] });
+    const j = fausseInteraction({
+      customId: `invite_distinctions:${JOUEUR}`,
+      valeurs: ["Player"],
+    });
     await c.choisirDistinctionsInvitation(j as never);
-    expect(appels[0]?.corps).toEqual({ userId: JOUEUR, distinctions: ["Joueur"] });
+    expect(appels[0]?.corps).toEqual({
+      userId: JOUEUR,
+      distinctions: ["Joueur"],
+    });
     // Comme l'ancien bot : le menu disparaît, l'invitation part dans son fil.
     expect(j.texte()).toContain("supprime");
   });
 
   test("invite_distinctions sans droit : motif de l'API", async () => {
-    api({ "POST /clans/invites/create": [403, { success: false, error: "Vous n'avez pas les droits pour effectuer cette action" }] });
-    const j = fausseInteraction({ customId: `invite_distinctions:${JOUEUR}`, valeurs: ["Player"] });
+    api({
+      "POST /clans/invites/create": [
+        403,
+        {
+          success: false,
+          error: "Vous n'avez pas les droits pour effectuer cette action",
+        },
+      ],
+    });
+    const j = fausseInteraction({
+      customId: `invite_distinctions:${JOUEUR}`,
+      valeurs: ["Player"],
+    });
     await c.choisirDistinctionsInvitation(j as never);
     expect(j.texte()).toContain("pas les droits");
   });
@@ -211,15 +326,28 @@ describe("votes", () => {
   test("vote:approve : décompte mis à jour et réponse privée", async () => {
     const appels = api({ "POST /clans/votes/:id": vote() });
     const i = fausseInteraction({ customId: "vote:approve:9" });
-    i.message.embeds = [{ title: "[PSG] Paris Griffon - Clan foundation", fields: [{ name: "Votes", value: "0 / 4" }] }];
+    i.message.embeds = [
+      {
+        title: "[PSG] Paris Griffon - Clan foundation",
+        fields: [{ name: "Votes", value: "0 / 4" }],
+      },
+    ];
     await c.voter(i as never);
-    expect(appels[0]).toMatchObject({ chemin: "/clans/votes/9", corps: { approve: true } });
+    expect(appels[0]).toMatchObject({
+      chemin: "/clans/votes/9",
+      corps: { approve: true },
+    });
     expect(i.texte()).toContain("1 / 4");
     expect(i.texte()).toContain("Vous avez rejoint");
   });
 
   test("vote d'un non-éligible : refus privé, message intact", async () => {
-    api({ "POST /clans/votes/:id": [403, { success: false, error: "Vous n'êtes pas éligible pour ce vote." }] });
+    api({
+      "POST /clans/votes/:id": [
+        403,
+        { success: false, error: "Vous n'êtes pas éligible pour ce vote." },
+      ],
+    });
     const i = fausseInteraction({ customId: "vote:reject:9" });
     await c.voter(i as never);
     expect(i.texte()).toContain("pas éligible");
@@ -227,7 +355,10 @@ describe("votes", () => {
   });
 
   test("proposition close : boutons retirés, issue affichée", () => {
-    const charge = messageVoteApres([], vote({ status: "APPROVED", approvals: 3 }) as never);
+    const charge = messageVoteApres(
+      [],
+      vote({ status: "APPROVED", approvals: 3 }) as never,
+    );
     expect(charge.components).toEqual([]);
     expect(JSON.stringify(charge.embeds[0]!.toJSON())).toContain("Approuvée");
   });
@@ -238,7 +369,13 @@ describe("divers", () => {
     api({ "GET /clans/history/:userId": carriereFactice(1) });
     const i = fausseInteraction({
       customId: `get_clan_history:${JOUEUR}`,
-      client: { users: { fetch: async () => ({ displayAvatarURL: () => "https://cdn.example/a.png" }) } },
+      client: {
+        users: {
+          fetch: async () => ({
+            displayAvatarURL: () => "https://cdn.example/a.png",
+          }),
+        },
+      },
     });
     await c.carriere(i as never);
     expect(i.texte()).toContain("Carrière");
@@ -246,7 +383,12 @@ describe("divers", () => {
   });
 
   test("get_clan_history d'un inconnu : motif", async () => {
-    api({ "GET /clans/history/:userId": [404, { success: false, error: "Ce joueur n'a pas de compte Achilléa." }] });
+    api({
+      "GET /clans/history/:userId": [
+        404,
+        { success: false, error: "Ce joueur n'a pas de compte Achilléa." },
+      ],
+    });
     const i = fausseInteraction({ customId: `get_clan_history:${JOUEUR}` });
     await c.carriere(i as never);
     expect(i.texte()).toContain("pas de compte Achilléa");

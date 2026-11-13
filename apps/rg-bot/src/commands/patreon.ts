@@ -100,7 +100,10 @@ async function lireEtat(): Promise<EtatPatreon> {
 
   let derniere = 0;
   for (const ligne of lignes) {
-    const date = ligne.fetched_at instanceof Date ? ligne.fetched_at : new Date(ligne.fetched_at ?? "");
+    const date =
+      ligne.fetched_at instanceof Date
+        ? ligne.fetched_at
+        : new Date(ligne.fetched_at ?? "");
     const temps = date.getTime();
     if (Number.isFinite(temps) && temps > derniere) derniere = temps;
   }
@@ -115,13 +118,15 @@ async function lireEtat(): Promise<EtatPatreon> {
 
 @Discord()
 @SlashGroup({
-  description: "Le soutien Patreon à Rose Griffon : paliers, décomptes et statut personnel",
+  description:
+    "Le soutien Patreon à Rose Griffon : paliers, décomptes et statut personnel",
   name: "patreon",
 })
 @SlashGroup("patreon")
 export class CommandesPatreon {
   @Slash({
-    description: "Combien de soutiens par palier, agrégé — aucune identité n'est affichée",
+    description:
+      "Combien de soutiens par palier, agrégé — aucune identité n'est affichée",
     name: "etat",
   })
   async etat(interaction: ChatInputCommandInteraction): Promise<void> {
@@ -132,7 +137,8 @@ export class CommandesPatreon {
       etat = await cached("boutique:patreon:etat", TTL_ETAT_MS, lireEtat);
     } catch {
       await interaction.editReply({
-        content: "❌ Impossible de lire les soutiens Patreon pour le moment. Réessaie plus tard.",
+        content:
+          "❌ Impossible de lire les soutiens Patreon pour le moment. Réessaie plus tard.",
       });
       return;
     }
@@ -145,7 +151,9 @@ export class CommandesPatreon {
     const embed = rgEmbed()
       .setTitle("Soutien Patreon — Rose Griffon")
       .setURL(URL_PATREON)
-      .setDescription(truncate(`${resume} Rejoindre : ${URL_PATREON}`, MAX_DESCRIPTION));
+      .setDescription(
+        truncate(`${resume} Rejoindre : ${URL_PATREON}`, MAX_DESCRIPTION),
+      );
 
     embed.addFields({
       name: "Paliers actifs",
@@ -153,7 +161,7 @@ export class CommandesPatreon {
         etat.paliers.length > 0
           ? etat.paliers
               .slice(0, MAX_CHAMPS)
-              .map(palier => lignePalier(palier))
+              .map((palier) => lignePalier(palier))
               .join("\n")
           : "Aucun soutien actif pour l'instant.",
         MAX_VALEUR_CHAMP,
@@ -165,7 +173,9 @@ export class CommandesPatreon {
       value: truncate(
         [
           `Soutiens actifs : **${etat.statuts.actif}**`,
-          etat.statuts.refuse > 0 ? `Paiements refusés : **${etat.statuts.refuse}**` : null,
+          etat.statuts.refuse > 0
+            ? `Paiements refusés : **${etat.statuts.refuse}**`
+            : null,
           `Anciens soutiens : **${etat.statuts.ancien}**`,
           `Abonnés sans engagement : **${etat.statuts.abonne}**`,
           `Total suivi : **${etat.total}**`,
@@ -222,7 +232,8 @@ export class CommandesPatreon {
       adhesion = lignes[0];
     } catch {
       await interaction.editReply({
-        content: "❌ Impossible de lire ton soutien Patreon pour le moment. Réessaie plus tard.",
+        content:
+          "❌ Impossible de lire ton soutien Patreon pour le moment. Réessaie plus tard.",
       });
       return;
     }

@@ -33,7 +33,10 @@ export async function GET(requete: NextRequest) {
   const brut = (requete.nextUrl.searchParams.get("guild") ?? "").trim();
   const guildId = brut === "" ? RG_GUILD_ID : brut;
   if (!FLOCON.test(guildId)) {
-    return NextResponse.json({ error: "Identifiant de guilde invalide" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Identifiant de guilde invalide" },
+      { status: 400 },
+    );
   }
 
   const annuaire = await annuaireGuilde(guildId);

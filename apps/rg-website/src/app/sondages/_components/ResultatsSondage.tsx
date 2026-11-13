@@ -56,11 +56,16 @@ function LigneOption({
           }`}
         >
           {rang !== undefined && (
-            <span className="shrink-0 tabular-nums text-on-surface-variant" aria-hidden>
+            <span
+              className="shrink-0 tabular-nums text-on-surface-variant"
+              aria-hidden
+            >
               {rang}.
             </span>
           )}
-          {enTete && <Trophy className="size-4 shrink-0 text-rg-or" aria-hidden />}
+          {enTete && (
+            <Trophy className="size-4 shrink-0 text-rg-or" aria-hidden />
+          )}
           <span className="min-w-0 break-words">
             <TexteDiscordInline contenu={libelle} contexte={contexte} />
           </span>
@@ -82,7 +87,10 @@ function LigneOption({
         aria-label={`Part des votes pour « ${resumeQuestion(option.label, 60)} »`}
         className="sr-only"
       />
-      <div aria-hidden="true" className="h-2.5 w-full overflow-hidden rounded-full bg-surface-container-highest">
+      <div
+        aria-hidden="true"
+        className="h-2.5 w-full overflow-hidden rounded-full bg-surface-container-highest"
+      >
         {/* Seule valeur dynamique de tout le bloc : une largeur, donc une donnée.
 				    Aucune couleur n'est calculée, elles viennent toutes des tokens. */}
         <div
@@ -92,7 +100,11 @@ function LigneOption({
       </div>
       {/* Une fois le classement appliqué, l'ordre de l'encart d'origine n'est
 			    plus lisible : on le rappelle pour qu'on puisse s'y retrouver. */}
-      {rang !== undefined && <p className="text-xs text-on-surface-variant/80">Choix nº {option.position + 1}</p>}
+      {rang !== undefined && (
+        <p className="text-xs text-on-surface-variant/80">
+          Choix nº {option.position + 1}
+        </p>
+      )}
     </li>
   );
 }
@@ -116,7 +128,7 @@ function ChoixSansResultat({
         Résultats masqués : le bot ne les publie pas tant que le sondage tourne.
       </p>
       <ul className="space-y-2">
-        {affiches.map(option => (
+        {affiches.map((option) => (
           <li
             key={option.position}
             className="flex items-baseline gap-2 break-words text-fluid-body-md text-on-surface"
@@ -125,7 +137,10 @@ function ChoixSansResultat({
               •
             </span>
             <span className="min-w-0 break-words">
-              <TexteDiscordInline contenu={libelleAvecEmoji(option)} contexte={contexte} />
+              <TexteDiscordInline
+                contenu={libelleAvecEmoji(option)}
+                contexte={contexte}
+              />
             </span>
           </li>
         ))}
@@ -166,21 +181,35 @@ export function ResultatsSondage({
 }: ResultatsSondageProps) {
   if (sondage.options.length === 0) {
     return (
-      <p className="text-fluid-body-md text-on-surface-variant">Les choix de ce sondage n'ont pas été archivés.</p>
+      <p className="text-fluid-body-md text-on-surface-variant">
+        Les choix de ce sondage n'ont pas été archivés.
+      </p>
     );
   }
 
   // Une barre à 0 % se lirait « personne n'a voté » : quand le décompte n'existe
   // pas, on n'en dessine aucune.
   if (!aDesResultats(sondage)) {
-    return <ChoixSansResultat sondage={sondage} contexte={contexte} limite={limite} />;
+    return (
+      <ChoixSansResultat
+        sondage={sondage}
+        contexte={contexte}
+        limite={limite}
+      />
+    );
   }
 
   if (sondage.total_votes === 0) {
     return (
       <div className="space-y-3">
-        <p className="text-fluid-body-md text-on-surface-variant">Aucun vote enregistré.</p>
-        <ChoixSansResultat sondage={sondage} contexte={contexte} limite={limite} />
+        <p className="text-fluid-body-md text-on-surface-variant">
+          Aucun vote enregistré.
+        </p>
+        <ChoixSansResultat
+          sondage={sondage}
+          contexte={contexte}
+          limite={limite}
+        />
       </div>
     );
   }
@@ -193,7 +222,12 @@ export function ResultatsSondage({
     return (
       <div className="space-y-2">
         <p className="break-words text-fluid-body-md text-on-surface">
-          {seule && <TexteDiscordInline contenu={libelleAvecEmoji(seule)} contexte={contexte} />}
+          {seule && (
+            <TexteDiscordInline
+              contenu={libelleAvecEmoji(seule)}
+              contexte={contexte}
+            />
+          )}
         </p>
         <p className="text-fluid-body-md font-semibold text-on-surface">
           {votes} participation{votes > 1 ? "s" : ""}

@@ -38,7 +38,13 @@ export const clanCycleController = new Elysia({ prefix: "/clans" })
     "/fiche/:ref",
     async ({ db, params }) => {
       const fiche = await ClanCycleService.fiche(db, params.ref);
-      return fiche ?? status(404, { success: false as const, error: `Aucun Clan ne correspond à « ${params.ref} ».` });
+      return (
+        fiche ??
+        status(404, {
+          success: false as const,
+          error: `Aucun Clan ne correspond à « ${params.ref} ».`,
+        })
+      );
     },
     { params: t.Object({ ref: t.String({ minLength: 1, maxLength: 40 }) }) },
   )
@@ -46,7 +52,13 @@ export const clanCycleController = new Elysia({ prefix: "/clans" })
     "/history/:userId",
     async ({ db, params }) => {
       const carriere = await ClanCycleService.carriere(db, params.userId);
-      return carriere ?? status(404, { success: false as const, error: "Ce joueur n'a pas de compte Achilléa." });
+      return (
+        carriere ??
+        status(404, {
+          success: false as const,
+          error: "Ce joueur n'a pas de compte Achilléa.",
+        })
+      );
     },
     { params: t.Object({ userId: identifiantDiscord }) },
   )
@@ -55,8 +67,18 @@ export const clanCycleController = new Elysia({ prefix: "/clans" })
     async ({ db, headers, body }) => {
       const session = await resolveAchilleaSession(headers);
       if (!session) return status(401, nonAuthentifie);
-      const issue = await ClanCycleService.quitter(db, session.id, body?.clanId ?? null);
-      return issue.ok ? { success: true as const, clanId: issue.clanId, clanName: issue.clanName } : refus(issue);
+      const issue = await ClanCycleService.quitter(
+        db,
+        session.id,
+        body?.clanId ?? null,
+      );
+      return issue.ok
+        ? {
+            success: true as const,
+            clanId: issue.clanId,
+            clanName: issue.clanName,
+          }
+        : refus(issue);
     },
     { body: t.Optional(t.Object({ clanId: t.Optional(t.Numeric()) })) },
   )
@@ -66,7 +88,13 @@ export const clanCycleController = new Elysia({ prefix: "/clans" })
       const session = await resolveAchilleaSession(headers);
       if (!session) return status(401, nonAuthentifie);
       const issue = await ClanCycleService.dissoudre(db, session.id, params.id);
-      return issue.ok ? { success: true as const, clanId: issue.clanId, clanName: issue.clanName } : refus(issue);
+      return issue.ok
+        ? {
+            success: true as const,
+            clanId: issue.clanId,
+            clanName: issue.clanName,
+          }
+        : refus(issue);
     },
     { params: t.Object({ id: t.Numeric() }) },
   )
@@ -75,8 +103,18 @@ export const clanCycleController = new Elysia({ prefix: "/clans" })
     async ({ db, headers, body }) => {
       const session = await resolveAchilleaSession(headers);
       if (!session) return status(401, nonAuthentifie);
-      const issue = await ClanCycleService.transferer(db, session.id, body.userId);
-      return issue.ok ? { success: true as const, clanId: issue.clanId, clanName: issue.clanName } : refus(issue);
+      const issue = await ClanCycleService.transferer(
+        db,
+        session.id,
+        body.userId,
+      );
+      return issue.ok
+        ? {
+            success: true as const,
+            clanId: issue.clanId,
+            clanName: issue.clanName,
+          }
+        : refus(issue);
     },
     { body: t.Object({ userId: identifiantDiscord }) },
   )
@@ -85,8 +123,18 @@ export const clanCycleController = new Elysia({ prefix: "/clans" })
     async ({ db, headers, body }) => {
       const session = await resolveAchilleaSession(headers);
       if (!session) return status(401, nonAuthentifie);
-      const issue = await ClanCycleService.accepterInvitation(db, session.id, body.id);
-      return issue.ok ? { success: true as const, clanId: issue.clanId, clanName: issue.clanName } : refus(issue);
+      const issue = await ClanCycleService.accepterInvitation(
+        db,
+        session.id,
+        body.id,
+      );
+      return issue.ok
+        ? {
+            success: true as const,
+            clanId: issue.clanId,
+            clanName: issue.clanName,
+          }
+        : refus(issue);
     },
     { body: t.Object({ id: t.Numeric() }) },
   )
@@ -95,8 +143,14 @@ export const clanCycleController = new Elysia({ prefix: "/clans" })
     async ({ db, headers, body }) => {
       const session = await resolveAchilleaSession(headers);
       if (!session) return status(401, nonAuthentifie);
-      const issue = await ClanCycleService.refuserInvitation(db, session.id, body.id);
-      return issue.ok ? { success: true as const, clanName: issue.clanName } : refus(issue);
+      const issue = await ClanCycleService.refuserInvitation(
+        db,
+        session.id,
+        body.id,
+      );
+      return issue.ok
+        ? { success: true as const, clanName: issue.clanName }
+        : refus(issue);
     },
     { body: t.Object({ id: t.Numeric() }) },
   )
@@ -116,15 +170,30 @@ export const clanCycleController = new Elysia({ prefix: "/clans" })
       const { closes } = await ClanCycleService.expirerVotes(db, maintenant);
       return { success: true as const, closes };
     },
-    { body: t.Optional(t.Object({ now: t.Optional(t.String({ maxLength: 40 })) })) },
+    {
+      body: t.Optional(
+        t.Object({ now: t.Optional(t.String({ maxLength: 40 })) }),
+      ),
+    },
   )
   .post(
     "/votes/:id",
     async ({ db, headers, params, body }) => {
       const session = await resolveAchilleaSession(headers);
       if (!session) return status(401, nonAuthentifie);
-      const issue = await ClanCycleService.voter(db, session.id, params.id, body.approve, developpeurs());
-      return issue.ok ? { success: true as const, ...issue.resultat } : refus(issue);
+      const issue = await ClanCycleService.voter(
+        db,
+        session.id,
+        params.id,
+        body.approve,
+        developpeurs(),
+      );
+      return issue.ok
+        ? { success: true as const, ...issue.resultat }
+        : refus(issue);
     },
-    { params: t.Object({ id: t.Numeric() }), body: t.Object({ approve: t.Boolean() }) },
+    {
+      params: t.Object({ id: t.Numeric() }),
+      body: t.Object({ approve: t.Boolean() }),
+    },
   );

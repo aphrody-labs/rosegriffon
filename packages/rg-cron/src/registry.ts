@@ -25,10 +25,19 @@
  * les articles programmés ne charge ni le navigateur CDP ni le client X.
  */
 
-import { CATALOGUE_TACHES, normaliserNomTache, PLANIFICATIONS, TACHES_CRON } from "@rosegriffon/types/cron";
+import {
+  CATALOGUE_TACHES,
+  normaliserNomTache,
+  PLANIFICATIONS,
+  TACHES_CRON,
+} from "@rosegriffon/types/cron";
 import { signalerDecisionAlerte } from "./lib/alertes-cron.js";
 import { signalerErreurSql } from "./lib/db.js";
-import { decisionDepuisHistorique, type OrigineExecution, type ResultatExecution } from "./lib/executions.js";
+import {
+  decisionDepuisHistorique,
+  type OrigineExecution,
+  type ResultatExecution,
+} from "./lib/executions.js";
 import {
   echecsConsecutifsAvant,
   enregistrerExecutionEnBase,
@@ -60,130 +69,255 @@ export interface DefinitionTache {
 
 /** Slug optionnel, ignoré s'il ressemble à une option de ligne de commande. */
 function slug(options: OptionsTache): { slug?: string } {
-  return options.argument && !options.argument.startsWith("-") ? { slug: options.argument } : {};
+  return options.argument && !options.argument.startsWith("-")
+    ? { slug: options.argument }
+    : {};
 }
 
-export const REGISTRE_TACHES: Readonly<Record<string, DefinitionTache>> = Object.freeze({
-  db: {
-    executer: () => import("./tasks/db").then(m => m.runInaglePush()),
-    historique: "db:sync",
-    // `db:sync` vide puis réécrit `inagle_skills` : `zukan:videos` doit passer après.
-    ensuite: ["zukan:videos"],
-    horsServerless: "lance la CLI d'Inagle (`src/cli.ts push`) sur les fichiers du jeu (disque local)",
-  },
-  "zukan:videos": { executer: () => import("./tasks/zukan-videos").then(m => m.rafraichirVideosTechniques()) },
-  cdn: {
-    executer: () => import("./tasks/cdn").then(m => m.syncCdnAssets()),
-    horsServerless: "copie les assets vers le disque statique du CDN (`CDN_STATIC_ROOT`)",
-  },
-  crawl: {
-    executer: () => import("./tasks/ie-crawl").then(m => m.runIeCrawl()),
-    horsServerless: "pilote un navigateur headless (`Bun.WebView`) et écrit ses corpus sur disque",
-  },
-  "website:qa": {
-    executer: () => import("./tasks/ie-crawl/website-qa").then(m => m.runWebsiteQa()),
-    horsServerless: "pilote un navigateur headless (`Bun.WebView`) et écrit son rapport sur disque",
-  },
-  publish: { executer: () => import("./tasks/api").then(m => m.triggerPublishScheduled()) },
-  "github-publish": { executer: () => import("./tasks/api").then(m => m.triggerGithubPublishWorkflow()) },
-  patreon: { executer: () => import("./tasks/api").then(m => m.triggerPatreonRefresh()) },
-  reminders: {
-    executer: options => import("./tasks/api").then(m => m.triggerPatreonReminders(options.argument || "announce")),
-  },
-  warm: { executer: () => import("./tasks/api").then(m => m.warmCaches()) },
-  discord: {
-    executer: () => import("./tasks/discord").then(m => m.runDiscordSync()),
-    historique: "discord:sync",
-    // La projection recopie ce que la collecte vient d'écrire : l'ordre compte.
-    ensuite: ["sync:achillea"],
-  },
-  "discord:scan": { executer: () => import("./tasks/discord").then(m => m.runDiscordChannelScan()) },
-  "discord:messages": { executer: () => import("./tasks/discord-messages").then(m => m.runDiscordMessagesSync()) },
-  "discord:backfill": { executer: () => import("./tasks/discord-messages").then(m => m.runDiscordMessagesBackfill()) },
-  "discord:archives": {
-    executer: async () => {
-      const m = await import("./tasks/discord-messages");
-      const categories = await m.armerSalonsDeCategories();
-      const depots = await m.armerSalonsDeDepot();
-      return {
-        success: true,
-        stats: {
-          salonsExamines: categories.examines,
-          salonsArmes: categories.armes,
-          salonsDejaSuivis: categories.deja,
-          salonsDepotArmes: depots,
-        },
-      };
+export const REGISTRE_TACHES: Readonly<Record<string, DefinitionTache>> =
+  Object.freeze({
+    db: {
+      executer: () => import("./tasks/db").then((m) => m.runInaglePush()),
+      historique: "db:sync",
+      // `db:sync` vide puis réécrit `inagle_skills` : `zukan:videos` doit passer après.
+      ensuite: ["zukan:videos"],
+      horsServerless:
+        "lance la CLI d'Inagle (`src/cli.ts push`) sur les fichiers du jeu (disque local)",
     },
-  },
-  "discord:polls": { executer: () => import("./tasks/discord-polls").then(m => m.runDiscordPollsImport()) },
-  "noctaly:import": {
-    executer: () => import("./tasks/discord-noctaly").then(m => m.runNoctalyImport()),
-    horsServerless: "lance le script d'import du bot en sous-processus (`Bun.spawn`)",
-  },
-  x: {
-    // UNIQUEMENT le dernier post d'`@Azalee_IE` : c'est lui qui alimente l'annonce Discord.
-    executer: () =>
-      import("./tasks/ie-crawl/twitter").then(m => m.crawlTwitter({ comptes: ["Azalee_IE"], parCompte: 1 })),
-  },
-  "x-search": { executer: () => import("./tasks/ie-crawl/harvest-search").then(m => m.crawlTwitterSearch()) },
-  "x:campagnes": {
-    executer: options => import("./tasks/ie-crawl/hashtag-harvest").then(m => m.crawlHashtagCampaigns(slug(options))),
-  },
-  "campagnes:discord": {
-    executer: options => import("./tasks/campagnes-discord").then(m => m.recolterCreationsDiscord(slug(options))),
-  },
-  "campagnes:instagram": {
-    executer: options => import("./tasks/campagnes-instagram").then(m => m.revaliderCreationsInstagram(slug(options))),
-  },
-  "feed:sync": {
-    executer: options =>
-      import("./tasks/feed-sync").then(m => m.synchroniserFeed({ reseau: slug(options).slug })),
-    horsServerless: "ouvre Chrome (`Bun.WebView`) et écrit les vignettes sur le disque des médias",
-  },
-  "campagnes:relais": {
-    executer: options => import("./tasks/campagnes-relais-discord").then(m => m.relayerCampagnesDiscord(slug(options))),
-  },
-  "seo:indexnow": { executer: () => import("./tasks/seo/indexnow").then(m => m.runSeoIndexNow()) },
-  "seo:llms-txt": {
-    executer: () => import("./tasks/seo/llms-txt").then(m => m.runSeoLlmsTxt()),
-    horsServerless: "écrit les fichiers llms.txt dans le répertoire partagé servi par nginx",
-  },
-  "stats:achillea": {
-    executer: () => import("./tasks/stats/achillea").then(m => m.collecterAudienceAchillea()),
-    horsServerless: "lit le journal nginx local (`/var/log/nginx/rg-stats.log`) et écrit un cache sur disque",
-  },
-  "sync:achillea": { executer: () => import("./tasks/achillea-sync").then(m => m.runAchilleaSync()) },
-  "achillea:casts": { executer: () => import("./tasks/achillea-casts").then(m => m.runAchilleaCastReminders()) },
-  "achillea:guildes": { executer: () => import("./tasks/achillea-guildes").then(m => m.runAchilleaGuildes()) },
-  "achillea:seasons": { executer: () => import("./tasks/achillea-seasons").then(m => m.runAchilleaSeasonRollover()) },
-  "achillea:clans": { executer: () => import("./tasks/achillea-clans").then(m => m.runAchilleaClans()) },
-  "achillea:weekly-payout": {
-    executer: () => import("./tasks/achillea-weekly-payout").then(m => m.runAchilleaWeeklyPayout()),
-  },
-  // Équivalents des travaux de l'ancien bot Achilléa (BullMQ `SanctionJobs`/`ClanJobs`,
-  // `@Schedule` `CastReminders`/`PhaseTransitions`, minuteurs des intégrations ranked).
-  "achillea:sanctions": { executer: () => import("./tasks/achillea-sanctions").then(m => m.runAchilleaSanctions()) },
-  "achillea:tournois-phases": {
-    executer: () => import("./tasks/achillea-tournois-phases").then(m => m.runAchilleaTournoisPhases()),
-  },
-  "achillea:interclans": {
-    executer: () => import("./tasks/achillea-interclans").then(m => m.runAchilleaInterclans()),
-  },
-  "achillea:votes": { executer: () => import("./tasks/achillea-votes").then(m => m.runAchilleaVotes()) },
-  "achillea:classement-annonce": {
-    executer: () => import("./tasks/achillea-ranked").then(m => m.runAchilleaClassementAnnonce()),
-  },
-  "achillea:ranked-file": { executer: () => import("./tasks/achillea-ranked").then(m => m.runAchilleaRankedFile()) },
-  "achillea:ranked-promotions": {
-    executer: () => import("./tasks/achillea-ranked").then(m => m.runAchilleaRankedPromotions()),
-  },
-});
+    "zukan:videos": {
+      executer: () =>
+        import("./tasks/zukan-videos").then((m) =>
+          m.rafraichirVideosTechniques(),
+        ),
+    },
+    cdn: {
+      executer: () => import("./tasks/cdn").then((m) => m.syncCdnAssets()),
+      horsServerless:
+        "copie les assets vers le disque statique du CDN (`CDN_STATIC_ROOT`)",
+    },
+    crawl: {
+      executer: () => import("./tasks/ie-crawl").then((m) => m.runIeCrawl()),
+      horsServerless:
+        "pilote un navigateur headless (`Bun.WebView`) et écrit ses corpus sur disque",
+    },
+    "website:qa": {
+      executer: () =>
+        import("./tasks/ie-crawl/website-qa").then((m) => m.runWebsiteQa()),
+      horsServerless:
+        "pilote un navigateur headless (`Bun.WebView`) et écrit son rapport sur disque",
+    },
+    publish: {
+      executer: () =>
+        import("./tasks/api").then((m) => m.triggerPublishScheduled()),
+    },
+    "github-publish": {
+      executer: () =>
+        import("./tasks/api").then((m) => m.triggerGithubPublishWorkflow()),
+    },
+    patreon: {
+      executer: () =>
+        import("./tasks/api").then((m) => m.triggerPatreonRefresh()),
+    },
+    reminders: {
+      executer: (options) =>
+        import("./tasks/api").then((m) =>
+          m.triggerPatreonReminders(options.argument || "announce"),
+        ),
+    },
+    warm: { executer: () => import("./tasks/api").then((m) => m.warmCaches()) },
+    discord: {
+      executer: () => import("./tasks/discord").then((m) => m.runDiscordSync()),
+      historique: "discord:sync",
+      // La projection recopie ce que la collecte vient d'écrire : l'ordre compte.
+      ensuite: ["sync:achillea"],
+    },
+    "discord:scan": {
+      executer: () =>
+        import("./tasks/discord").then((m) => m.runDiscordChannelScan()),
+    },
+    "discord:messages": {
+      executer: () =>
+        import("./tasks/discord-messages").then((m) =>
+          m.runDiscordMessagesSync(),
+        ),
+    },
+    "discord:backfill": {
+      executer: () =>
+        import("./tasks/discord-messages").then((m) =>
+          m.runDiscordMessagesBackfill(),
+        ),
+    },
+    "discord:archives": {
+      executer: async () => {
+        const m = await import("./tasks/discord-messages");
+        const categories = await m.armerSalonsDeCategories();
+        const depots = await m.armerSalonsDeDepot();
+        return {
+          success: true,
+          stats: {
+            salonsExamines: categories.examines,
+            salonsArmes: categories.armes,
+            salonsDejaSuivis: categories.deja,
+            salonsDepotArmes: depots,
+          },
+        };
+      },
+    },
+    "discord:polls": {
+      executer: () =>
+        import("./tasks/discord-polls").then((m) => m.runDiscordPollsImport()),
+    },
+    "noctaly:import": {
+      executer: () =>
+        import("./tasks/discord-noctaly").then((m) => m.runNoctalyImport()),
+      horsServerless:
+        "lance le script d'import du bot en sous-processus (`Bun.spawn`)",
+    },
+    x: {
+      // UNIQUEMENT le dernier post d'`@Azalee_IE` : c'est lui qui alimente l'annonce Discord.
+      executer: () =>
+        import("./tasks/ie-crawl/twitter").then((m) =>
+          m.crawlTwitter({ comptes: ["Azalee_IE"], parCompte: 1 }),
+        ),
+    },
+    "x-search": {
+      executer: () =>
+        import("./tasks/ie-crawl/harvest-search").then((m) =>
+          m.crawlTwitterSearch(),
+        ),
+    },
+    "x:campagnes": {
+      executer: (options) =>
+        import("./tasks/ie-crawl/hashtag-harvest").then((m) =>
+          m.crawlHashtagCampaigns(slug(options)),
+        ),
+    },
+    "campagnes:discord": {
+      executer: (options) =>
+        import("./tasks/campagnes-discord").then((m) =>
+          m.recolterCreationsDiscord(slug(options)),
+        ),
+    },
+    "campagnes:instagram": {
+      executer: (options) =>
+        import("./tasks/campagnes-instagram").then((m) =>
+          m.revaliderCreationsInstagram(slug(options)),
+        ),
+    },
+    "feed:sync": {
+      executer: (options) =>
+        import("./tasks/feed-sync").then((m) =>
+          m.synchroniserFeed({ reseau: slug(options).slug }),
+        ),
+      horsServerless:
+        "ouvre Chrome (`Bun.WebView`) et écrit les vignettes sur le disque des médias",
+    },
+    "campagnes:relais": {
+      executer: (options) =>
+        import("./tasks/campagnes-relais-discord").then((m) =>
+          m.relayerCampagnesDiscord(slug(options)),
+        ),
+    },
+    "seo:indexnow": {
+      executer: () =>
+        import("./tasks/seo/indexnow").then((m) => m.runSeoIndexNow()),
+    },
+    "seo:llms-txt": {
+      executer: () =>
+        import("./tasks/seo/llms-txt").then((m) => m.runSeoLlmsTxt()),
+      horsServerless:
+        "écrit les fichiers llms.txt dans le répertoire partagé servi par nginx",
+    },
+    "stats:achillea": {
+      executer: () =>
+        import("./tasks/stats/achillea").then((m) =>
+          m.collecterAudienceAchillea(),
+        ),
+      horsServerless:
+        "lit le journal nginx local (`/var/log/nginx/rg-stats.log`) et écrit un cache sur disque",
+    },
+    "sync:achillea": {
+      executer: () =>
+        import("./tasks/achillea-sync").then((m) => m.runAchilleaSync()),
+    },
+    "achillea:casts": {
+      executer: () =>
+        import("./tasks/achillea-casts").then((m) =>
+          m.runAchilleaCastReminders(),
+        ),
+    },
+    "achillea:guildes": {
+      executer: () =>
+        import("./tasks/achillea-guildes").then((m) => m.runAchilleaGuildes()),
+    },
+    "achillea:seasons": {
+      executer: () =>
+        import("./tasks/achillea-seasons").then((m) =>
+          m.runAchilleaSeasonRollover(),
+        ),
+    },
+    "achillea:clans": {
+      executer: () =>
+        import("./tasks/achillea-clans").then((m) => m.runAchilleaClans()),
+    },
+    "achillea:weekly-payout": {
+      executer: () =>
+        import("./tasks/achillea-weekly-payout").then((m) =>
+          m.runAchilleaWeeklyPayout(),
+        ),
+    },
+    // Équivalents des travaux de l'ancien bot Achilléa (BullMQ `SanctionJobs`/`ClanJobs`,
+    // `@Schedule` `CastReminders`/`PhaseTransitions`, minuteurs des intégrations ranked).
+    "achillea:sanctions": {
+      executer: () =>
+        import("./tasks/achillea-sanctions").then((m) =>
+          m.runAchilleaSanctions(),
+        ),
+    },
+    "achillea:tournois-phases": {
+      executer: () =>
+        import("./tasks/achillea-tournois-phases").then((m) =>
+          m.runAchilleaTournoisPhases(),
+        ),
+    },
+    "achillea:interclans": {
+      executer: () =>
+        import("./tasks/achillea-interclans").then((m) =>
+          m.runAchilleaInterclans(),
+        ),
+    },
+    "achillea:votes": {
+      executer: () =>
+        import("./tasks/achillea-votes").then((m) => m.runAchilleaVotes()),
+    },
+    "achillea:classement-annonce": {
+      executer: () =>
+        import("./tasks/achillea-ranked").then((m) =>
+          m.runAchilleaClassementAnnonce(),
+        ),
+    },
+    "achillea:ranked-file": {
+      executer: () =>
+        import("./tasks/achillea-ranked").then((m) =>
+          m.runAchilleaRankedFile(),
+        ),
+    },
+    "achillea:ranked-promotions": {
+      executer: () =>
+        import("./tasks/achillea-ranked").then((m) =>
+          m.runAchilleaRankedPromotions(),
+        ),
+    },
+  });
 
-const PAR_NOM_NORMALISE = new Map(Object.keys(REGISTRE_TACHES).map(nom => [normaliserNomTache(nom), nom]));
+const PAR_NOM_NORMALISE = new Map(
+  Object.keys(REGISTRE_TACHES).map((nom) => [normaliserNomTache(nom), nom]),
+);
 
 /** Nom canonique du registre (`discord-messages` → `discord:messages`), ou `null`. */
-export function resoudreNomTache(nom: string | null | undefined): string | null {
+export function resoudreNomTache(
+  nom: string | null | undefined,
+): string | null {
   if (!nom) return null;
   return PAR_NOM_NORMALISE.get(normaliserNomTache(nom)) ?? null;
 }
@@ -225,7 +359,9 @@ function delaiMaximalTache(nom: string): number {
 /** Levée quand une tâche dépasse son délai maximal. */
 class ErreurDelaiDepasse extends Error {
   constructor(nom: string, delaiMs: number) {
-    super(`Délai maximal dépassé (${Math.round(delaiMs / 1000)} s) pour la tâche « ${nom} ».`);
+    super(
+      `Délai maximal dépassé (${Math.round(delaiMs / 1000)} s) pour la tâche « ${nom} ».`,
+    );
     this.name = "ErreurDelaiDepasse";
   }
 }
@@ -248,7 +384,10 @@ export interface ResultatTache {
  */
 async function consignerExecution(resultat: ResultatExecution): Promise<void> {
   try {
-    const echecsPrecedents = await echecsConsecutifsAvant(resultat.nom, resultat.debutLe);
+    const echecsPrecedents = await echecsConsecutifsAvant(
+      resultat.nom,
+      resultat.debutLe,
+    );
     await enregistrerExecutionEnBase(resultat);
     const decision = decisionDepuisHistorique(resultat, echecsPrecedents);
     if (decision.type !== "aucune") await signalerDecisionAlerte(decision);
@@ -267,7 +406,10 @@ export async function executeTask(
   origine: OrigineExecution = "planifie",
   echeance = Number.POSITIVE_INFINITY,
 ): Promise<ResultatTache> {
-  const delaiMs = Math.max(1000, Math.min(delaiMaximalTache(nom), echeance - Date.now()));
+  const delaiMs = Math.max(
+    1000,
+    Math.min(delaiMaximalTache(nom), echeance - Date.now()),
+  );
   const jeton = await prendreBail(nom, delaiMs);
   if (jeton === null) {
     const message = `La tâche « ${nom} » tourne déjà : lancement ignoré.`;
@@ -283,13 +425,26 @@ export async function executeTask(
 
   try {
     const expiration = new Promise<never>((_, rejeter) => {
-      minuteur = setTimeout(() => rejeter(new ErreurDelaiDepasse(nom, delaiMs)), delaiMs);
+      minuteur = setTimeout(
+        () => rejeter(new ErreurDelaiDepasse(nom, delaiMs)),
+        delaiMs,
+      );
     });
     const res = await Promise.race([fn(), expiration]);
-    const succes = res && typeof res === "object" && "success" in res ? Boolean(res.success) : true;
-    const brut = res && typeof res === "object" && "error" in res ? res.error : undefined;
-    const erreur = brut === undefined || brut === null ? undefined : String(brut);
-    resultat = { nom, success: succes, error: succes ? undefined : erreur, dureeMs: Date.now() - debut };
+    const succes =
+      res && typeof res === "object" && "success" in res
+        ? Boolean(res.success)
+        : true;
+    const brut =
+      res && typeof res === "object" && "error" in res ? res.error : undefined;
+    const erreur =
+      brut === undefined || brut === null ? undefined : String(brut);
+    resultat = {
+      nom,
+      success: succes,
+      error: succes ? undefined : erreur,
+      dureeMs: Date.now() - debut,
+    };
   } catch (err) {
     expiree = err instanceof ErreurDelaiDepasse;
     resultat = {
@@ -298,14 +453,22 @@ export async function executeTask(
       error: err instanceof Error ? err.message : String(err),
       dureeMs: Date.now() - debut,
     };
-    console.error(`[Cron Runner] Erreur critique lors de la tâche : ${nom} :`, err);
+    console.error(
+      `[Cron Runner] Erreur critique lors de la tâche : ${nom} :`,
+      err,
+    );
   } finally {
     clearTimeout(minuteur);
   }
 
-  if (resultat.success) console.log(`[Cron Runner] Tâche complétée avec succès : ${nom} en ${resultat.dureeMs}ms`);
+  if (resultat.success)
+    console.log(
+      `[Cron Runner] Tâche complétée avec succès : ${nom} en ${resultat.dureeMs}ms`,
+    );
   else {
-    console.error(`[Cron Runner] Échec de la tâche : ${nom} en ${resultat.dureeMs}ms : ${resultat.error}`);
+    console.error(
+      `[Cron Runner] Échec de la tâche : ${nom} en ${resultat.dureeMs}ms : ${resultat.error}`,
+    );
     // La tâche a pu rencontrer le pool empoisonné après le bail : la suivante repartira sur un pool neuf.
     signalerErreurSql(resultat.error);
   }
@@ -331,10 +494,19 @@ export async function executeTask(
  */
 export async function lancerTache(
   nomBrut: string,
-  options: { origine?: OrigineExecution; echeance?: number; argument?: string } = {},
+  options: {
+    origine?: OrigineExecution;
+    echeance?: number;
+    argument?: string;
+  } = {},
 ): Promise<ResultatTache> {
   const nom = resoudreNomTache(nomBrut);
-  if (!nom) return { nom: nomBrut, success: false, error: `Tâche « ${nomBrut} » inconnue.` };
+  if (!nom)
+    return {
+      nom: nomBrut,
+      success: false,
+      error: `Tâche « ${nomBrut} » inconnue.`,
+    };
   const definition = REGISTRE_TACHES[nom]!;
   const echeance = options.echeance ?? Number.POSITIVE_INFINITY;
   const resultat = await executeTask(
@@ -346,7 +518,9 @@ export async function lancerTache(
   if (resultat.success && definition.ensuite?.length) {
     resultat.suites = [];
     for (const suite of definition.ensuite) {
-      resultat.suites.push(await lancerTache(suite, { origine: options.origine, echeance }));
+      resultat.suites.push(
+        await lancerTache(suite, { origine: options.origine, echeance }),
+      );
     }
   }
   return resultat;

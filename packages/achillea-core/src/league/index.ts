@@ -81,7 +81,9 @@ export interface LeagueFixture {
  * - `matchday` est 1-indexé.
  * - Ordre des journées stable pour un même ordre d'entrée de `teamIds`.
  */
-export function generateSingleRoundRobin(teamIds: readonly string[]): LeagueFixture[] {
+export function generateSingleRoundRobin(
+  teamIds: readonly string[],
+): LeagueFixture[] {
   const teams = [...teamIds];
   if (teams.length < 2) return [];
 
@@ -121,10 +123,12 @@ export function generateSingleRoundRobin(teamIds: readonly string[]): LeagueFixt
 /**
  * Double round-robin (aller-retour) : chaque paire joue 2 fois (domicile/extérieur).
  */
-export function generateDoubleRoundRobin(teamIds: readonly string[]): LeagueFixture[] {
+export function generateDoubleRoundRobin(
+  teamIds: readonly string[],
+): LeagueFixture[] {
   const first = generateSingleRoundRobin(teamIds);
   const maxDay = first.reduce((m, f) => Math.max(m, f.matchday), 0);
-  const returnLeg = first.map(f => ({
+  const returnLeg = first.map((f) => ({
     matchday: f.matchday + maxDay,
     homeId: f.awayId,
     awayId: f.homeId,
@@ -146,9 +150,15 @@ export function matchWinnerId(m: LeagueMatchResult): string | null {
  * Head-to-head : +1 si `a` a battu `b`, -1 si `b` a battu `a`, 0 sinon.
  * (Astral League — confrontation directe, après points + diff score.)
  */
-export function headToHead(aId: string, bId: string, results: readonly LeagueMatchResult[]): number {
+export function headToHead(
+  aId: string,
+  bId: string,
+  results: readonly LeagueMatchResult[],
+): number {
   for (const m of results) {
-    const pair = (m.homeId === aId && m.awayId === bId) || (m.homeId === bId && m.awayId === aId);
+    const pair =
+      (m.homeId === aId && m.awayId === bId) ||
+      (m.homeId === bId && m.awayId === aId);
     if (!pair) continue;
     const w = matchWinnerId(m);
     if (w === aId) return 1;
@@ -244,7 +254,12 @@ function emptyStanding(teamId: string): LeagueStanding {
   };
 }
 
-function applyWin(winner: LeagueStanding, loser: LeagueStanding, overtime: boolean, config: LeaguePointsConfig): void {
+function applyWin(
+  winner: LeagueStanding,
+  loser: LeagueStanding,
+  overtime: boolean,
+  config: LeaguePointsConfig,
+): void {
   if (overtime) {
     winner.winsOt += 1;
     loser.lossesOt += 1;

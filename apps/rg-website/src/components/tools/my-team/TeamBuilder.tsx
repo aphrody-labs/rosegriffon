@@ -11,7 +11,11 @@ import {
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
-import type { CollisionDetection, DragEndEvent, DragStartEvent } from "@dnd-kit/core";
+import type {
+  CollisionDetection,
+  DragEndEvent,
+  DragStartEvent,
+} from "@dnd-kit/core";
 import { sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import Image from "next/image";
 import Link from "@/components/shared/Link";
@@ -21,7 +25,11 @@ import { deleteTeam, saveTeam, updateTeam } from "@/app/actions/teams";
 import { Icon } from "@/components/ui/Icon";
 import { ROLE_COLORS } from "@rosegriffon/azalee/game/formations";
 import type { Formation } from "@rosegriffon/azalee/game/formations";
-import type { SavedTeam, TeamData, TeamMember } from "@rosegriffon/azalee/game/team-types";
+import type {
+  SavedTeam,
+  TeamData,
+  TeamMember,
+} from "@rosegriffon/azalee/game/team-types";
 import { cn } from "@/lib/utils";
 import { CharacterPicker, CharacterPickerOverlay } from "./CharacterPicker";
 import type { PickerCharacter } from "./CharacterPicker";
@@ -44,7 +52,7 @@ type DragData =
 
 /* ── Collision ────────────────────────────────────────────── */
 
-const customCollision: CollisionDetection = args => {
+const customCollision: CollisionDetection = (args) => {
   const pointer = pointerWithin(args);
   if (pointer.length > 0) {
     return pointer;
@@ -72,9 +80,16 @@ function loadFromLocalStorage(): {
   }
 }
 
-function saveToLocalStorage(formationIdx: number, members: Record<string, TeamMember>, teamName: string) {
+function saveToLocalStorage(
+  formationIdx: number,
+  members: Record<string, TeamMember>,
+  teamName: string,
+) {
   try {
-    localStorage.setItem(LS_KEY, JSON.stringify({ formationIdx, members, teamName }));
+    localStorage.setItem(
+      LS_KEY,
+      JSON.stringify({ formationIdx, members, teamName }),
+    );
   } catch {
     /* Quota */
   }
@@ -82,7 +97,10 @@ function saveToLocalStorage(formationIdx: number, members: Record<string, TeamMe
 
 /* ── URL share encoding ───────────────────────────────────── */
 
-function encodeTeamToURL(formationId: string, members: Record<string, TeamMember>): string {
+function encodeTeamToURL(
+  formationId: string,
+  members: Record<string, TeamMember>,
+): string {
   const parts = [formationId];
   for (const m of Object.values(members)) {
     parts.push(`${m.slot}:${m.charaId}`);
@@ -99,12 +117,12 @@ function decodeTeamFromURL(
     const decoded = atob(encoded);
     const parts = decoded.split("|");
     const formationId = parts[0];
-    const formationIdx = formations.findIndex(f => f.id === formationId);
+    const formationIdx = formations.findIndex((f) => f.id === formationId);
     if (formationIdx === -1) {
       return null;
     }
 
-    const charMap = new Map(characters.map(c => [c.charaId, c]));
+    const charMap = new Map(characters.map((c) => [c.charaId, c]));
     const members: Record<string, TeamMember> = {};
 
     for (let i = 1; i < parts.length; i++) {
@@ -188,9 +206,25 @@ function FormationMiniPreview({ formation }: { formation: Formation }) {
         strokeOpacity="0.15"
         strokeWidth="1"
       />
-      <line x1="1" y1="44" x2="49" y2="44" stroke="currentColor" strokeOpacity="0.1" strokeWidth="0.5" />
-      <circle cx="25" cy="44" r="6" fill="none" stroke="currentColor" strokeOpacity="0.1" strokeWidth="0.5" />
-      {formation.positions.map(p => (
+      <line
+        x1="1"
+        y1="44"
+        x2="49"
+        y2="44"
+        stroke="currentColor"
+        strokeOpacity="0.1"
+        strokeWidth="0.5"
+      />
+      <circle
+        cx="25"
+        cy="44"
+        r="6"
+        fill="none"
+        stroke="currentColor"
+        strokeOpacity="0.1"
+        strokeWidth="0.5"
+      />
+      {formation.positions.map((p) => (
         <circle
           key={p.index}
           cx={(p.left / 100) * 42 + 4 + 4}
@@ -213,7 +247,12 @@ interface TeamBuilderProps {
   isAuthenticated?: boolean;
 }
 
-export function TeamBuilder({ characters, formations, initialTeam, isAuthenticated }: TeamBuilderProps) {
+export function TeamBuilder({
+  characters,
+  formations,
+  initialTeam,
+  isAuthenticated,
+}: TeamBuilderProps) {
   // ── Init from URL > initialTeam > localStorage ─────
   const [formationIdx, setFormationIdx] = useState(() => {
     if (typeof window !== "undefined") {
@@ -227,7 +266,9 @@ export function TeamBuilder({ characters, formations, initialTeam, isAuthenticat
       }
     }
     if (initialTeam) {
-      const idx = formations.findIndex(f => f.id === initialTeam.formation_id);
+      const idx = formations.findIndex(
+        (f) => f.id === initialTeam.formation_id,
+      );
       return Math.max(idx, 0);
     }
     const ls = loadFromLocalStorage();
@@ -270,16 +311,20 @@ export function TeamBuilder({ characters, formations, initialTeam, isAuthenticat
   const [teamId, setTeamId] = useState(initialTeam?.id || null);
   const [saving, setSaving] = useState(false);
   const [activeDrag, setActiveDrag] = useState<DragData | null>(null);
-  const [mobilePanel, setMobilePanel] = useState<"field" | "roster" | "stats">("field");
+  const [mobilePanel, setMobilePanel] = useState<"field" | "roster" | "stats">(
+    "field",
+  );
   const [selectedCharaId, setSelectedCharaId] = useState<string | null>(null);
-  const [selectedMemberSlot, setSelectedMemberSlot] = useState<string | null>(null);
+  const [selectedMemberSlot, setSelectedMemberSlot] = useState<string | null>(
+    null,
+  );
   const [level, setLevel] = useState(99);
   const [activeSlotId, setActiveSlotId] = useState<string | null>(null);
 
   // ── Undo history ───────────────────────────────────
   const [history, setHistory] = useState<Array<Record<string, TeamMember>>>([]);
   const pushHistory = useCallback((state: Record<string, TeamMember>) => {
-    setHistory(prev => [...prev.slice(-19), state]);
+    setHistory((prev) => [...prev.slice(-19), state]);
   }, []);
 
   // Get element synergies — `links` drives the glowing connection lines on the pitch.
@@ -293,7 +338,7 @@ export function TeamBuilder({ characters, formations, initialTeam, isAuthenticat
       const targetSlot = selectedMemberSlot || activeSlotId;
       if (targetSlot) {
         pushHistory({ ...members });
-        setMembers(prev => ({
+        setMembers((prev) => ({
           ...prev,
           [targetSlot]: {
             charaId: char.charaId,
@@ -313,7 +358,9 @@ export function TeamBuilder({ characters, formations, initialTeam, isAuthenticat
         setActiveSlotId(null);
         setSelectedMemberSlot(null);
       } else {
-        setSelectedCharaId(prev => (prev === char.charaId ? null : char.charaId));
+        setSelectedCharaId((prev) =>
+          prev === char.charaId ? null : char.charaId,
+        );
       }
       setMobilePanel("field");
     },
@@ -323,10 +370,10 @@ export function TeamBuilder({ characters, formations, initialTeam, isAuthenticat
   const handleSlotTap = useCallback(
     (slotId: string) => {
       if (selectedCharaId) {
-        const char = characters.find(c => c.charaId === selectedCharaId);
+        const char = characters.find((c) => c.charaId === selectedCharaId);
         if (char) {
           pushHistory({ ...members });
-          setMembers(prev => ({
+          setMembers((prev) => ({
             ...prev,
             [slotId]: {
               charaId: char.charaId,
@@ -346,7 +393,7 @@ export function TeamBuilder({ characters, formations, initialTeam, isAuthenticat
           return;
         }
       }
-      setActiveSlotId(prev => (prev === slotId ? null : slotId));
+      setActiveSlotId((prev) => (prev === slotId ? null : slotId));
       setSelectedMemberSlot(null);
       setMobilePanel("roster");
     },
@@ -354,7 +401,7 @@ export function TeamBuilder({ characters, formations, initialTeam, isAuthenticat
   );
 
   const undo = useCallback(() => {
-    setHistory(prev => {
+    setHistory((prev) => {
       if (prev.length === 0) {
         return prev;
       }
@@ -380,7 +427,9 @@ export function TeamBuilder({ characters, formations, initialTeam, isAuthenticat
   const fieldRef = useRef<HTMLDivElement>(null);
 
   // ── Auto-save to localStorage ──────────────────────
-  const saveTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const saveTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(
+    undefined,
+  );
   useEffect(() => {
     clearTimeout(saveTimerRef.current);
     saveTimerRef.current = setTimeout(() => {
@@ -402,7 +451,10 @@ export function TeamBuilder({ characters, formations, initialTeam, isAuthenticat
   const sensors = useSensors(pointerSensor, touchSensor, keyboardSensor);
 
   // ── Placed IDs ─────────────────────────────────────
-  const placedIds = useMemo(() => new Set(Object.values(members).map(m => m.charaId)), [members]);
+  const placedIds = useMemo(
+    () => new Set(Object.values(members).map((m) => m.charaId)),
+    [members],
+  );
 
   // ── Drag handlers ──────────────────────────────────
   const handleDragStart = useCallback((event: DragStartEvent) => {
@@ -428,7 +480,7 @@ export function TeamBuilder({ characters, formations, initialTeam, isAuthenticat
 
       if (dragData.origin === "roster" && "character" in dragData) {
         const char = dragData.character;
-        setMembers(prev => ({
+        setMembers((prev) => ({
           ...prev,
           [dropId]: {
             charaId: char.charaId,
@@ -444,12 +496,15 @@ export function TeamBuilder({ characters, formations, initialTeam, isAuthenticat
         }));
       }
 
-      if ((dragData.origin === "field" || dragData.origin === "bench") && "member" in dragData) {
+      if (
+        (dragData.origin === "field" || dragData.origin === "bench") &&
+        "member" in dragData
+      ) {
         const fromSlot = dragData.slotId;
         if (fromSlot === dropId) {
           return;
         }
-        setMembers(prev => {
+        setMembers((prev) => {
           const next = { ...prev };
           const from = prev[fromSlot];
           const to = prev[dropId];
@@ -472,14 +527,14 @@ export function TeamBuilder({ characters, formations, initialTeam, isAuthenticat
 
   // ── Member click (open detail panel) ────────────────
   const handleMemberClick = useCallback((slot: string) => {
-    setSelectedMemberSlot(prev => (prev === slot ? null : slot));
+    setSelectedMemberSlot((prev) => (prev === slot ? null : slot));
   }, []);
 
   // ── Remove ─────────────────────────────────────────
   const handleRemoveMember = useCallback(
     (slot: string) => {
       pushHistory({ ...members });
-      setMembers(prev => {
+      setMembers((prev) => {
         const n = { ...prev };
         delete n[slot];
         return n;
@@ -502,7 +557,7 @@ export function TeamBuilder({ characters, formations, initialTeam, isAuthenticat
     (idx: number) => {
       pushHistory({ ...members });
       setFormationIdx(idx);
-      setMembers(prev => {
+      setMembers((prev) => {
         const next: Record<string, TeamMember> = {};
         for (const [slot, member] of Object.entries(prev)) {
           if (!slot.startsWith("field-")) {
@@ -518,13 +573,15 @@ export function TeamBuilder({ characters, formations, initialTeam, isAuthenticat
   // ── Auto-fill ──────────────────────────────────────
   const handleAutoFill = useCallback(() => {
     pushHistory({ ...members });
-    const placed = new Set(Object.values(members).map(m => m.charaId));
-    const available = characters.filter(c => !placed.has(c.charaId));
+    const placed = new Set(Object.values(members).map((m) => m.charaId));
+    const available = characters.filter((c) => !placed.has(c.charaId));
 
     // Sort by rarity (best first)
-    available.sort((a, b) => (RARITY_SCORE[b.rarity] || 0) - (RARITY_SCORE[a.rarity] || 0));
+    available.sort(
+      (a, b) => (RARITY_SCORE[b.rarity] || 0) - (RARITY_SCORE[a.rarity] || 0),
+    );
 
-    setMembers(prev => {
+    setMembers((prev) => {
       const next = { ...prev };
       const usedNow = new Set(placed);
 
@@ -534,7 +591,9 @@ export function TeamBuilder({ characters, formations, initialTeam, isAuthenticat
         if (next[slotId]) {
           continue;
         }
-        const match = available.find(c => c.position === pos.role && !usedNow.has(c.charaId));
+        const match = available.find(
+          (c) => c.position === pos.role && !usedNow.has(c.charaId),
+        );
         if (match) {
           next[slotId] = {
             charaId: match.charaId,
@@ -559,7 +618,7 @@ export function TeamBuilder({ characters, formations, initialTeam, isAuthenticat
         if (next[slotId]) {
           continue;
         }
-        const match = available.find(c => !usedNow.has(c.charaId));
+        const match = available.find((c) => !usedNow.has(c.charaId));
         if (match) {
           next[slotId] = {
             charaId: match.charaId,
@@ -643,7 +702,7 @@ export function TeamBuilder({ characters, formations, initialTeam, isAuthenticat
       const dataUrl = await toPng(fieldRef.current, {
         backgroundColor: "#064e3b",
         cacheBust: true,
-        filter: node => !node.classList?.contains("no-export"),
+        filter: (node) => !node.classList?.contains("no-export"),
         pixelRatio: 3,
       });
       const link = document.createElement("a");
@@ -685,7 +744,7 @@ export function TeamBuilder({ characters, formations, initialTeam, isAuthenticat
               <input
                 type="text"
                 value={teamName}
-                onChange={e => setTeamName(e.target.value)}
+                onChange={(e) => setTeamName(e.target.value)}
                 placeholder="Nom de l'équipe..."
                 aria-label="Nom de l'équipe"
                 className="w-full bg-transparent font-[BradBunR] text-2xl sm:text-3xl md:text-4xl text-on-surface tracking-wide border-none focus:outline-hidden placeholder:text-on-surface-variant/30"
@@ -699,7 +758,9 @@ export function TeamBuilder({ characters, formations, initialTeam, isAuthenticat
                 className="inline-flex items-center gap-2 h-11 sm:h-12 px-5 sm:px-6 rounded-2xl bg-primary text-on-primary font-bold text-sm elevation-2 hover:elevation-3 active:scale-[0.97] transition-all disabled:opacity-50 shrink-0"
               >
                 <Icon name={teamId ? "save" : "add"} size={18} />
-                <span className="hidden sm:inline">{teamId ? "Sauvegarder" : "Créer"}</span>
+                <span className="hidden sm:inline">
+                  {teamId ? "Sauvegarder" : "Créer"}
+                </span>
               </button>
             )}
           </div>
@@ -744,7 +805,12 @@ export function TeamBuilder({ characters, formations, initialTeam, isAuthenticat
                 title="Exporter en image"
                 label="Exporter l'équipe en image PNG"
               />
-              <IconAction onClick={handleShare} icon="share" title="Partager" label="Copier le lien de partage" />
+              <IconAction
+                onClick={handleShare}
+                icon="share"
+                title="Partager"
+                label="Copier le lien de partage"
+              />
               {teamId && (
                 <IconAction
                   onClick={handleDelete}
@@ -761,7 +827,9 @@ export function TeamBuilder({ characters, formations, initialTeam, isAuthenticat
         {/* Selected character banner */}
         {selectedCharaId &&
           (() => {
-            const selChar = characters.find(c => c.charaId === selectedCharaId);
+            const selChar = characters.find(
+              (c) => c.charaId === selectedCharaId,
+            );
             return (
               <div className="flex items-center gap-3 p-2.5 rounded-2xl bg-primary-container/90 backdrop-blur-sm elevation-2">
                 {selChar && (
@@ -777,7 +845,9 @@ export function TeamBuilder({ characters, formations, initialTeam, isAuthenticat
                   </div>
                 )}
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-bold text-on-primary-container truncate">{selChar?.name || "Joueur"}</p>
+                  <p className="text-sm font-bold text-on-primary-container truncate">
+                    {selChar?.name || "Joueur"}
+                  </p>
                   <p className="text-[10px] text-on-primary-container/70 flex items-center gap-1">
                     <Icon name="touch_app" size={12} />
                     Touchez un emplacement
@@ -800,7 +870,10 @@ export function TeamBuilder({ characters, formations, initialTeam, isAuthenticat
             <Icon name="info" size={16} className="shrink-0" />
             <span>
               Sauvegarde locale —{" "}
-              <Link href="/login?redirect=/tools/my-team" className="text-primary font-bold hover:underline">
+              <Link
+                href="/login?redirect=/tools/my-team"
+                className="text-primary font-bold hover:underline"
+              >
                 connectez-vous
               </Link>{" "}
               pour sauvegarder en ligne.
@@ -853,7 +926,7 @@ export function TeamBuilder({ characters, formations, initialTeam, isAuthenticat
           <div className="flex items-center gap-2.5">
             <button
               type="button"
-              onClick={() => setLevel(l => Math.max(1, l - 1))}
+              onClick={() => setLevel((l) => Math.max(1, l - 1))}
               aria-label="Diminuer le niveau"
               className="inline-flex items-center justify-center size-9 shrink-0 rounded-full bg-surface-container-highest text-on-surface-variant state-layer active:scale-90 transition-transform text-lg font-black leading-none"
             >
@@ -864,13 +937,13 @@ export function TeamBuilder({ characters, formations, initialTeam, isAuthenticat
               min="1"
               max="99"
               value={level}
-              onChange={e => setLevel(parseInt(e.target.value, 10))}
+              onChange={(e) => setLevel(parseInt(e.target.value, 10))}
               className="flex-1 h-2 bg-outline/20 rounded-full appearance-none cursor-pointer accent-primary focus:outline-hidden focus-visible:ring-2 focus-visible:ring-primary/40"
               aria-label="Niveau de l'équipe"
             />
             <button
               type="button"
-              onClick={() => setLevel(l => Math.min(99, l + 1))}
+              onClick={() => setLevel((l) => Math.min(99, l + 1))}
               aria-label="Augmenter le niveau"
               className="inline-flex items-center justify-center size-9 shrink-0 rounded-full bg-surface-container-highest text-on-surface-variant state-layer active:scale-90 transition-transform"
             >
@@ -887,7 +960,8 @@ export function TeamBuilder({ characters, formations, initialTeam, isAuthenticat
         >
           {/* Animated pill indicator */}
           {(() => {
-            const tabIndex = mobilePanel === "field" ? 0 : mobilePanel === "roster" ? 1 : 2;
+            const tabIndex =
+              mobilePanel === "field" ? 0 : mobilePanel === "roster" ? 1 : 2;
             return (
               <div
                 className="absolute top-1 bottom-1 rounded-full bg-primary elevation-1 transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)]"
@@ -899,10 +973,25 @@ export function TeamBuilder({ characters, formations, initialTeam, isAuthenticat
             );
           })()}
           {[
-            { icon: "stadium", key: "field" as const, label: "Terrain", count: 0 },
-            { icon: "group", key: "roster" as const, label: "Joueurs", count: memberCount },
-            { icon: "analytics", key: "stats" as const, label: "Stats", count: 0 },
-          ].map(tab => {
+            {
+              icon: "stadium",
+              key: "field" as const,
+              label: "Terrain",
+              count: 0,
+            },
+            {
+              icon: "group",
+              key: "roster" as const,
+              label: "Joueurs",
+              count: memberCount,
+            },
+            {
+              icon: "analytics",
+              key: "stats" as const,
+              label: "Stats",
+              count: 0,
+            },
+          ].map((tab) => {
             const isActive = mobilePanel === tab.key;
             return (
               <button
@@ -922,7 +1011,9 @@ export function TeamBuilder({ characters, formations, initialTeam, isAuthenticat
                   <span
                     className={cn(
                       "inline-flex items-center justify-center min-w-4 h-4 px-1 rounded-full text-[9px] font-black tabular-nums",
-                      isActive ? "bg-on-primary/25 text-on-primary" : "bg-primary/15 text-primary",
+                      isActive
+                        ? "bg-on-primary/25 text-on-primary"
+                        : "bg-primary/15 text-primary",
                     )}
                   >
                     {tab.count}
@@ -975,7 +1066,11 @@ export function TeamBuilder({ characters, formations, initialTeam, isAuthenticat
 
             {/* Stats (desktop only — mobile has own tab) */}
             <div className="hidden lg:block">
-              <TeamStats members={members} formation={formation} level={level} />
+              <TeamStats
+                members={members}
+                formation={formation}
+                level={level}
+              />
             </div>
           </div>
 
@@ -1000,7 +1095,11 @@ export function TeamBuilder({ characters, formations, initialTeam, isAuthenticat
           {/* Mobile stats tab */}
           {mobilePanel === "stats" && (
             <div className="w-full lg:hidden space-y-3">
-              <TeamStats members={members} formation={formation} level={level} />
+              <TeamStats
+                members={members}
+                formation={formation}
+                level={level}
+              />
               {/* Mobile action cards */}
               <div className="grid grid-cols-2 gap-2.5">
                 <button
@@ -1026,9 +1125,11 @@ export function TeamBuilder({ characters, formations, initialTeam, isAuthenticat
         {activeDrag?.origin === "roster" && "character" in activeDrag && (
           <CharacterPickerOverlay char={activeDrag.character} />
         )}
-        {activeDrag && (activeDrag.origin === "field" || activeDrag.origin === "bench") && "member" in activeDrag && (
-          <PlayerSlotOverlay member={activeDrag.member} />
-        )}
+        {activeDrag &&
+          (activeDrag.origin === "field" || activeDrag.origin === "bench") &&
+          "member" in activeDrag && (
+            <PlayerSlotOverlay member={activeDrag.member} />
+          )}
       </DragOverlay>
     </DndContext>
   );

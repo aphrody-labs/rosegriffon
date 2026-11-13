@@ -7,7 +7,8 @@ import WalletClient from "./wallet-client";
  */
 export const metadata = metadonneesAchillea({
   titre: "Mon portefeuille",
-  description: "Solde d'Achilléa Points, historique des transactions et récompenses de tournoi.",
+  description:
+    "Solde d'Achilléa Points, historique des transactions et récompenses de tournoi.",
   chemin: "/achillea/wallet",
   indexable: false,
 });

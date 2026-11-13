@@ -17,7 +17,10 @@ export default async function SettingsPage() {
     (item: { description?: string | null; key: string; value: unknown }) => ({
       description: item.description || undefined,
       key: item.key,
-      value: typeof item.value === "string" ? item.value : JSON.stringify(item.value || ""),
+      value:
+        typeof item.value === "string"
+          ? item.value
+          : JSON.stringify(item.value || ""),
     }),
   );
 

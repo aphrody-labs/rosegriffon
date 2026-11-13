@@ -27,7 +27,10 @@ export interface OpenApiInfo {
 export interface OpenApiServer {
   url: string;
   description?: string;
-  variables?: Record<string, { default: string; description?: string; enum?: string[] }>;
+  variables?: Record<
+    string,
+    { default: string; description?: string; enum?: string[] }
+  >;
 }
 
 export interface OpenApiParameter {
@@ -83,7 +86,8 @@ export interface OpenApiPathItem {
 }
 
 export interface OpenApiSchema {
-  type?: "string" | "number" | "integer" | "boolean" | "array" | "object" | "null";
+  type?:
+    "string" | "number" | "integer" | "boolean" | "array" | "object" | "null";
   format?: string;
   title?: string;
   description?: string;
@@ -118,7 +122,8 @@ export interface OpenApiDocument {
 // 2. VFS (Virtual File System) Architecture Models
 // ============================================================================
 
-export type VfsStorageMode = "cpk-pack" | "loose-file" | "remote-stream" | "sqlite-mirror";
+export type VfsStorageMode =
+  "cpk-pack" | "loose-file" | "remote-stream" | "sqlite-mirror";
 
 export interface VfsFormatDescriptor {
   id: number;
@@ -127,7 +132,15 @@ export interface VfsFormatDescriptor {
   extension: string;
   description: string;
   isBigEndian: boolean;
-  category: "texture" | "model" | "config" | "audio" | "video" | "container" | "script" | "system";
+  category:
+    | "texture"
+    | "model"
+    | "config"
+    | "audio"
+    | "video"
+    | "container"
+    | "script"
+    | "system";
   encryptionSupported: boolean;
   compressionSupported: boolean;
 }
@@ -168,7 +181,15 @@ export interface NieMemoryOffset {
   symbol: string;
   addressHex: string;
   runtimePc: bigint;
-  subsystem: "game-loop" | "controller" | "render" | "vfs" | "audio" | "crypto" | "prng" | "lua";
+  subsystem:
+    | "game-loop"
+    | "controller"
+    | "render"
+    | "vfs"
+    | "audio"
+    | "crypto"
+    | "prng"
+    | "lua";
   description: string;
   callingConvention?: string;
   signature?: string;
@@ -200,7 +221,10 @@ export interface NieReMap {
   cryptoConstants: NieCryptoConstant[];
   criticalOffsets: NieMemoryOffset[];
   rttiClasses: NieRttiClass[];
-  memoryStructures: Record<string, { sizeHex: string; description: string; fields: Record<string, string> }>;
+  memoryStructures: Record<
+    string,
+    { sizeHex: string; description: string; fields: Record<string, string> }
+  >;
 }
 
 // ============================================================================

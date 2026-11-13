@@ -7,7 +7,11 @@
  * - Variables with type (Int, Float, String, List) and value
  */
 
-import type { ConfigFile, ConfigNode, ConfigVariable } from "./config-contract.js";
+import type {
+  ConfigFile,
+  ConfigNode,
+  ConfigVariable,
+} from "./config-contract.js";
 
 export {
   CONFIG_SCHEMA_VERSION,
@@ -97,7 +101,7 @@ export function getNodesByName(config: ConfigFile, name: string): ConfigNode[] {
  * Extract all variables from a node as an array of typed values
  */
 export function extractVariables(node: ConfigNode): (string | number)[] {
-  return node.variables.map(v => {
+  return node.variables.map((v) => {
     switch (v.type) {
       case "Int":
         return parseIntVar(v);

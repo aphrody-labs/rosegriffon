@@ -1,7 +1,15 @@
 import { sql, type Kysely } from "kysely";
 import type { Database } from "@rosegriffon/db/schema";
-import { cpkAssetKind, cpkAssetUrl, cpkThumbUrl, normalizeDir } from "@rosegriffon/azalee/cpk/shared";
-import { normalizeHashId, type GameTextLocale } from "@rosegriffon/azalee/game-text/shared";
+import {
+  cpkAssetKind,
+  cpkAssetUrl,
+  cpkThumbUrl,
+  normalizeDir,
+} from "@rosegriffon/azalee/cpk/shared";
+import {
+  normalizeHashId,
+  type GameTextLocale,
+} from "@rosegriffon/azalee/game-text/shared";
 
 type Row = Record<string, unknown>;
 
@@ -17,7 +25,9 @@ export class WikiSqlRepository {
     extraWhere: ReturnType<typeof sql> = sql.raw("true"),
   ) {
     const offset = Math.max(0, page - 1) * limit;
-    const needle = query?.trim() ? `%${query.trim().replaceAll("%", "\\%")}%` : null;
+    const needle = query?.trim()
+      ? `%${query.trim().replaceAll("%", "\\%")}%`
+      : null;
     try {
       const textWhere = needle
         ? sql`(name_fr ilike ${needle} escape '\\' or name_en ilike ${needle} escape '\\' or name_ja ilike ${needle} escape '\\')`
@@ -29,8 +39,16 @@ export class WikiSqlRepository {
         );
       const count = await sql<{
         count: string;
-      }>`select count(*)::text as count from public.${sql.raw(table)} ${where}`.execute(this.db);
-      return { data: result.rows, count: Number(count.rows[0]?.count ?? 0), page, limit, source: "postgres" as const };
+      }>`select count(*)::text as count from public.${sql.raw(table)} ${where}`.execute(
+        this.db,
+      );
+      return {
+        data: result.rows,
+        count: Number(count.rows[0]?.count ?? 0),
+        page,
+        limit,
+        source: "postgres" as const,
+      };
     } catch {
       return null;
     }
@@ -83,7 +101,11 @@ export class WikiSqlRepository {
   private async one(table: string, where: ReturnType<typeof sql>) {
     try {
       return (
-        (await sql<Row>`select * from public.${sql.raw(table)} where ${where} limit 1`.execute(this.db)).rows[0] ?? null
+        (
+          await sql<Row>`select * from public.${sql.raw(table)} where ${where} limit 1`.execute(
+            this.db,
+          )
+        ).rows[0] ?? null
       );
     } catch {
       return null;
@@ -92,11 +114,19 @@ export class WikiSqlRepository {
 
   async teams(query?: string, limit = 500) {
     try {
-      let request = this.db.selectFrom("inagle_teams").selectAll().orderBy("name_fr", "asc").limit(limit);
+      let request = this.db
+        .selectFrom("inagle_teams")
+        .selectAll()
+        .orderBy("name_fr", "asc")
+        .limit(limit);
       if (query?.trim()) {
         const term = `%${query.trim()}%`;
-        request = request.where(eb =>
-          eb.or([eb("name_fr", "ilike", term), eb("name_en", "ilike", term), eb("name_ja", "ilike", term)]),
+        request = request.where((eb) =>
+          eb.or([
+            eb("name_fr", "ilike", term),
+            eb("name_en", "ilike", term),
+            eb("name_ja", "ilike", term),
+          ]),
         );
       }
       return await request.execute();
@@ -111,19 +141,32 @@ export class WikiSqlRepository {
 
   async drops() {
     try {
-      return (await sql<Row>`select * from public.inagle_drops order by id asc`.execute(this.db)).rows;
+      return (
+        await sql<Row>`select * from public.inagle_drops order by id asc`.execute(
+          this.db,
+        )
+      ).rows;
     } catch {
       return null;
     }
   }
 
-  async crossCatalog(query: string | undefined, type: string | undefined, limit = 50, page = 1) {
+  async crossCatalog(
+    query: string | undefined,
+    type: string | undefined,
+    limit = 50,
+    page = 1,
+  ) {
     const safeLimit = Math.min(Math.max(limit, 1), 200);
     const offset = Math.max(0, page - 1) * safeLimit;
-    const needle = query?.trim() ? `%${query.trim().replaceAll("%", "\\%")}%` : null;
+    const needle = query?.trim()
+      ? `%${query.trim().replaceAll("%", "\\%")}%`
+      : null;
     try {
       const filters = [
-        needle ? sql`(key ilike ${needle} escape '\\' or bundle ilike ${needle} escape '\\')` : sql`true`,
+        needle
+          ? sql`(key ilike ${needle} escape '\\' or bundle ilike ${needle} escape '\\')`
+          : sql`true`,
         type?.trim() ? sql`type = ${type.trim()}` : sql`true`,
       ];
       const where = sql.join(filters, sql` and `);
@@ -131,7 +174,9 @@ export class WikiSqlRepository {
         sql<Row>`select guid, key, type, bundle, size, n_deps, deps from public.inagle_cross_catalog where ${where} order by key asc limit ${safeLimit} offset ${offset}`.execute(
           this.db,
         ),
-        sql<{ count: string }>`select count(*)::text as count from public.inagle_cross_catalog where ${where}`.execute(
+        sql<{
+          count: string;
+        }>`select count(*)::text as count from public.inagle_cross_catalog where ${where}`.execute(
           this.db,
         ),
       ]);
@@ -171,7 +216,14 @@ export class WikiSqlRepository {
           await sql<Row>`select top as name, count(*)::int as count from public.inagle_cpk_index group by top order by top`.execute(
             this.db,
           );
-        return { dir: "data", dirs: rows.rows, files: [], fileTotal: 0, fileOffset: 0, source: "postgres" as const };
+        return {
+          dir: "data",
+          dirs: rows.rows,
+          files: [],
+          fileTotal: 0,
+          fileOffset: 0,
+          source: "postgres" as const,
+        };
       }
       const prefix = `${dir}/`;
       const [dirs, files, total] = await Promise.all([
@@ -181,20 +233,29 @@ export class WikiSqlRepository {
         sql<Row>`select name, ext, cpk, path from public.inagle_cpk_index where dir = ${dir} order by name limit ${safeLimit} offset ${safeOffset}`.execute(
           this.db,
         ),
-        sql<{ count: string }>`select count(*)::text as count from public.inagle_cpk_index where dir = ${dir}`.execute(
+        sql<{
+          count: string;
+        }>`select count(*)::text as count from public.inagle_cpk_index where dir = ${dir}`.execute(
           this.db,
         ),
       ]);
       return {
         dir,
-        dirs: dirs.rows.filter(row => String(row.name ?? "").length > 0),
+        dirs: dirs.rows.filter((row) => String(row.name ?? "").length > 0),
         files: files.rows,
         fileTotal: Number(total.rows[0]?.count ?? 0),
         fileOffset: safeOffset,
         source: "postgres" as const,
       };
     } catch {
-      return { dir, dirs: [], files: [], fileTotal: 0, fileOffset: safeOffset, source: "postgres" as const };
+      return {
+        dir,
+        dirs: [],
+        files: [],
+        fileTotal: 0,
+        fileOffset: safeOffset,
+        source: "postgres" as const,
+      };
     }
   }
 
@@ -244,7 +305,11 @@ export class WikiSqlRepository {
     }
   }
 
-  async gameTextSearch(query: string, locale: GameTextLocale = "fr", limit = 50) {
+  async gameTextSearch(
+    query: string,
+    locale: GameTextLocale = "fr",
+    limit = 50,
+  ) {
     const needle = query.trim();
     if (!needle) return [];
     try {
@@ -288,8 +353,11 @@ export class WikiSqlRepository {
     ]);
     if (!allowed.has(table)) return null;
     try {
-      return (await sql<Row>`select * from public.${sql.raw(table)} order by ${sql.raw(orderBy)} asc`.execute(this.db))
-        .rows;
+      return (
+        await sql<Row>`select * from public.${sql.raw(table)} order by ${sql.raw(orderBy)} asc`.execute(
+          this.db,
+        )
+      ).rows;
     } catch {
       return null;
     }
@@ -315,8 +383,11 @@ export class WikiSqlRepository {
     const key = table === "inagle_shops" ? "shop_id" : "id";
     try {
       return (
-        (await sql<Row>`select * from public.${sql.raw(table)} where ${sql.raw(key)} = ${id} limit 1`.execute(this.db))
-          .rows[0] ?? null
+        (
+          await sql<Row>`select * from public.${sql.raw(table)} where ${sql.raw(key)} = ${id} limit 1`.execute(
+            this.db,
+          )
+        ).rows[0] ?? null
       );
     } catch {
       return null;

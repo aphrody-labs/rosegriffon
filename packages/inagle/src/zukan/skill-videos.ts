@@ -14,7 +14,10 @@ export const ZUKAN_SKILL_PAGES = 2;
 
 const ZUKAN_ORIGIN = "https://zukan.inazuma.jp";
 
-export function zukanSkillPageUrl(locale: ZukanSkillLocale, page: number): string {
+export function zukanSkillPageUrl(
+  locale: ZukanSkillLocale,
+  page: number,
+): string {
   return `${ZUKAN_ORIGIN}/${locale}/skill/?per_page=${ZUKAN_SKILL_PER_PAGE}&page=${page}`;
 }
 
@@ -34,15 +37,24 @@ export function normalizeSkillName(name: string): string {
 }
 
 /** Récupère et parse une page de techniques. */
-export async function fetchZukanSkillPage(locale: ZukanSkillLocale, page: number): Promise<ZukanSkill[]> {
+export async function fetchZukanSkillPage(
+  locale: ZukanSkillLocale,
+  page: number,
+): Promise<ZukanSkill[]> {
   const url = zukanSkillPageUrl(locale, page);
   const service = await createZukanWebService();
-  const html = await zukanResponseHtml(service, url, `zukan ${locale} page ${page}`);
+  const html = await zukanResponseHtml(
+    service,
+    url,
+    `zukan ${locale} page ${page}`,
+  );
   return parseSkillListHtml(html);
 }
 
 /** Récupère TOUT le catalogue de techniques d'une locale (2 requêtes). */
-export async function fetchZukanSkills(locale: ZukanSkillLocale): Promise<ZukanSkill[]> {
+export async function fetchZukanSkills(
+  locale: ZukanSkillLocale,
+): Promise<ZukanSkill[]> {
   const skills: ZukanSkill[] = [];
   for (let page = 1; page <= ZUKAN_SKILL_PAGES; page++) {
     skills.push(...(await fetchZukanSkillPage(locale, page)));
@@ -66,14 +78,18 @@ export interface ZukanSkillIndex {
  * EN↔JA se fait dessus (mesuré 895/895), pas sur un ordre de page supposé.
  */
 export async function fetchZukanSkillIndex(): Promise<ZukanSkillIndex> {
-  const [en, ja] = await Promise.all([fetchZukanSkills("en"), fetchZukanSkills("ja")]);
+  const [en, ja] = await Promise.all([
+    fetchZukanSkills("en"),
+    fetchZukanSkills("ja"),
+  ]);
 
   const byNameEn = new Map<string, ZukanSkill>();
   const byVideo = new Map<string, ZukanSkill>();
   for (const skill of en) {
     const key = normalizeSkillName(skill.name);
     if (key && !byNameEn.has(key)) byNameEn.set(key, skill);
-    if (skill.videoUrl && !byVideo.has(skill.videoUrl)) byVideo.set(skill.videoUrl, skill);
+    if (skill.videoUrl && !byVideo.has(skill.videoUrl))
+      byVideo.set(skill.videoUrl, skill);
   }
 
   const byNameJa = new Map<string, ZukanSkill>();

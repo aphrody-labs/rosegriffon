@@ -2,7 +2,11 @@
 import type { ComponentProps } from "react";
 import { Slot } from "../lib/render";
 import { cn } from "../lib/utils";
-function Label({ className, asChild, ...props }: ComponentProps<"label"> & { asChild?: boolean }) {
+function Label({
+  className,
+  asChild,
+  ...props
+}: ComponentProps<"label"> & { asChild?: boolean }) {
   const Component = asChild ? Slot : "label";
   return (
     <Component

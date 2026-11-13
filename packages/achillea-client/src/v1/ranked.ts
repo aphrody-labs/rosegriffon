@@ -33,7 +33,11 @@ import type {
 import type { MatchMode } from "@rosegriffon/achillea-types/enums/eventEnums";
 
 import { matchModeSchema, okResponseSchema } from "./common";
-import { AchilleaResource, encodePathSegment, type AchilleaClientResult } from "./http";
+import {
+  AchilleaResource,
+  encodePathSegment,
+  type AchilleaClientResult,
+} from "./http";
 import type {
   RankedAdminValidateResult,
   RankedChallengeAccepted,
@@ -209,7 +213,11 @@ export const rankedSeasonConfigSchema = z.object({
   decayRate: z.number(),
 }) satisfies z.ZodType<RankedSeasonConfig>;
 
-const DEFAULT_SEASON_CONFIG: RankedSeasonConfig = { kFactor: 32, baseRating: 0, decayRate: 0 };
+const DEFAULT_SEASON_CONFIG: RankedSeasonConfig = {
+  kFactor: 32,
+  baseRating: 0,
+  decayRate: 0,
+};
 
 /**
  * Les routes `/admin/seasons` renvoient la ligne SQL brute (snake_case) —
@@ -225,7 +233,7 @@ export const rankedAdminSeasonSchema = z
     config: rankedSeasonConfigSchema.nullable(),
     player_count: z.number(),
   })
-  .transform(row => ({
+  .transform((row) => ({
     id: row.id,
     name: row.name,
     state: row.state,
@@ -280,63 +288,105 @@ export class RankedResource extends AchilleaResource {
 
   /** `GET /ranked/me` — profil Elo du compte connecté pour un mode. */
   me(mode?: MatchMode | number): Promise<AchilleaClientResult<RankedProfile>> {
-    return this.http.get("/ranked/me", rankedProfileSchema, { query: { mode } });
+    return this.http.get("/ranked/me", rankedProfileSchema, {
+      query: { mode },
+    });
   }
 
   /** `GET /ranked/tiers` — paliers de la saison active et effectifs. */
-  tiers(mode?: MatchMode | number): Promise<AchilleaClientResult<RankedTierInfo[]>> {
-    return this.http.get("/ranked/tiers", z.array(rankedTierInfoSchema), { query: { mode } });
+  tiers(
+    mode?: MatchMode | number,
+  ): Promise<AchilleaClientResult<RankedTierInfo[]>> {
+    return this.http.get("/ranked/tiers", z.array(rankedTierInfoSchema), {
+      query: { mode },
+    });
   }
 
   /** `GET /ranked/leaderboard` — classement live de la saison active. */
-  leaderboard(query: RankedLeaderboardQuery = {}): Promise<AchilleaClientResult<LeaderboardPage>> {
+  leaderboard(
+    query: RankedLeaderboardQuery = {},
+  ): Promise<AchilleaClientResult<LeaderboardPage>> {
     return this.http.get("/ranked/leaderboard", leaderboardPageSchema, {
       query,
     });
   }
 
   /** `POST /ranked/challenge` — crée un lien de défi partageable. */
-  createChallenge(payload: CreateChallengePayload = {}): Promise<AchilleaClientResult<RankedChallengeLink>> {
-    return this.http.post("/ranked/challenge", rankedChallengeLinkSchema, payload);
+  createChallenge(
+    payload: CreateChallengePayload = {},
+  ): Promise<AchilleaClientResult<RankedChallengeLink>> {
+    return this.http.post(
+      "/ranked/challenge",
+      rankedChallengeLinkSchema,
+      payload,
+    );
   }
 
   /** `GET /ranked/challenge/:code` — aperçu d'un défi reçu. */
-  getChallenge(code: string): Promise<AchilleaClientResult<RankedChallengePreview>> {
-    return this.http.get(`/ranked/challenge/${encodePathSegment(code)}`, rankedChallengePreviewSchema);
+  getChallenge(
+    code: string,
+  ): Promise<AchilleaClientResult<RankedChallengePreview>> {
+    return this.http.get(
+      `/ranked/challenge/${encodePathSegment(code)}`,
+      rankedChallengePreviewSchema,
+    );
   }
 
   /** `POST /ranked/challenge/:code/accept` — accepte un défi et crée le match. */
-  acceptChallenge(code: string): Promise<AchilleaClientResult<RankedChallengeAccepted>> {
-    return this.http.post(`/ranked/challenge/${encodePathSegment(code)}/accept`, rankedChallengeAcceptedSchema);
+  acceptChallenge(
+    code: string,
+  ): Promise<AchilleaClientResult<RankedChallengeAccepted>> {
+    return this.http.post(
+      `/ranked/challenge/${encodePathSegment(code)}/accept`,
+      rankedChallengeAcceptedSchema,
+    );
   }
 
   /** `DELETE /ranked/challenge/:code` — l'inviteur annule son défi en attente. */
-  cancelChallenge(code: string): Promise<AchilleaClientResult<{ ok: boolean }>> {
-    return this.http.delete(`/ranked/challenge/${encodePathSegment(code)}`, okResponseSchema);
+  cancelChallenge(
+    code: string,
+  ): Promise<AchilleaClientResult<{ ok: boolean }>> {
+    return this.http.delete(
+      `/ranked/challenge/${encodePathSegment(code)}`,
+      okResponseSchema,
+    );
   }
 
   /**
    * `POST /ranked/:lobbyId/dispute` — dépose la capture de preuve d'un litige.
    * Le corps est la capture encodée en data-URL base64, envoyée en `text/plain`.
    */
-  uploadDisputeProof(lobbyId: number, dataUrl: string): Promise<AchilleaClientResult<RankedProofUploaded>> {
-    return this.http.requestJson(`/ranked/${encodePathSegment(lobbyId)}/dispute`, rankedProofUploadedSchema, {
-      method: "POST",
-      rawBody: dataUrl,
-      contentType: "text/plain",
-    });
+  uploadDisputeProof(
+    lobbyId: number,
+    dataUrl: string,
+  ): Promise<AchilleaClientResult<RankedProofUploaded>> {
+    return this.http.requestJson(
+      `/ranked/${encodePathSegment(lobbyId)}/dispute`,
+      rankedProofUploadedSchema,
+      {
+        method: "POST",
+        rawBody: dataUrl,
+        contentType: "text/plain",
+      },
+    );
   }
 
   // ── Administration ────────────────────────────────────────────────────────
 
   /** `GET /admin/lobbies/disputes` — matchs contestés en attente d'arbitrage. */
   adminDisputes(): Promise<AchilleaClientResult<RankedAdminDispute[]>> {
-    return this.http.get("/admin/lobbies/disputes", z.array(rankedAdminDisputeSchema));
+    return this.http.get(
+      "/admin/lobbies/disputes",
+      z.array(rankedAdminDisputeSchema),
+    );
   }
 
   /** `GET /admin/lobbies/active` — matchs en cours et leur état live. */
   adminActiveMatches(): Promise<AchilleaClientResult<RankedActiveMatch[]>> {
-    return this.http.get("/admin/lobbies/active", z.array(rankedActiveMatchSchema));
+    return this.http.get(
+      "/admin/lobbies/active",
+      z.array(rankedActiveMatchSchema),
+    );
   }
 
   /** `POST /admin/lobbies/:id/validate` — l'arbitre tranche un litige. */
@@ -352,8 +402,13 @@ export class RankedResource extends AchilleaResource {
   }
 
   /** `POST /admin/lobbies/:id/cancel` — annule le match, sans aucun effet Elo. */
-  adminCancelLobby(lobbyId: number): Promise<AchilleaClientResult<{ ok: boolean }>> {
-    return this.http.post(`/admin/lobbies/${encodePathSegment(lobbyId)}/cancel`, okResponseSchema);
+  adminCancelLobby(
+    lobbyId: number,
+  ): Promise<AchilleaClientResult<{ ok: boolean }>> {
+    return this.http.post(
+      `/admin/lobbies/${encodePathSegment(lobbyId)}/cancel`,
+      okResponseSchema,
+    );
   }
 
   /** `GET /admin/ranked/overview` — compteurs synthétiques du ranked. */
@@ -362,10 +417,16 @@ export class RankedResource extends AchilleaResource {
   }
 
   /** `GET /admin/ranked/telemetry` — journal du flux des matchs. */
-  adminTelemetry(query: RankedTelemetryQuery = {}): Promise<AchilleaClientResult<RankedMatchEvent[]>> {
-    return this.http.get("/admin/ranked/telemetry", z.array(rankedMatchEventSchema), {
-      query,
-    });
+  adminTelemetry(
+    query: RankedTelemetryQuery = {},
+  ): Promise<AchilleaClientResult<RankedMatchEvent[]>> {
+    return this.http.get(
+      "/admin/ranked/telemetry",
+      z.array(rankedMatchEventSchema),
+      {
+        query,
+      },
+    );
   }
 
   /** `GET /admin/seasons` — saisons, de la plus récente à la plus ancienne. */
@@ -374,7 +435,9 @@ export class RankedResource extends AchilleaResource {
   }
 
   /** `POST /admin/seasons` — crée une saison à l'état `Upcoming`. */
-  adminCreateSeason(payload: RankedSeasonInput): Promise<AchilleaClientResult<RankedAdminSeason>> {
+  adminCreateSeason(
+    payload: RankedSeasonInput,
+  ): Promise<AchilleaClientResult<RankedAdminSeason>> {
     return this.http.post("/admin/seasons", rankedAdminSeasonSchema, payload);
   }
 
@@ -383,16 +446,30 @@ export class RankedResource extends AchilleaResource {
     id: string,
     patch: Partial<RankedSeasonInput> & { state?: RankedAdminSeason["state"] },
   ): Promise<AchilleaClientResult<RankedAdminSeason>> {
-    return this.http.patch(`/admin/seasons/${encodePathSegment(id)}`, rankedAdminSeasonSchema, patch);
+    return this.http.patch(
+      `/admin/seasons/${encodePathSegment(id)}`,
+      rankedAdminSeasonSchema,
+      patch,
+    );
   }
 
   /** `POST /admin/seasons/:id/activate` — active la saison et clôt la précédente. */
-  adminActivateSeason(id: string): Promise<AchilleaClientResult<RankedAdminSeason>> {
-    return this.http.post(`/admin/seasons/${encodePathSegment(id)}/activate`, rankedAdminSeasonSchema);
+  adminActivateSeason(
+    id: string,
+  ): Promise<AchilleaClientResult<RankedAdminSeason>> {
+    return this.http.post(
+      `/admin/seasons/${encodePathSegment(id)}/activate`,
+      rankedAdminSeasonSchema,
+    );
   }
 
   /** `POST /admin/seasons/:id/reset` — remet le ladder à la note de base. */
-  adminResetLadder(id: string): Promise<AchilleaClientResult<RankedLadderResetResult>> {
-    return this.http.post(`/admin/seasons/${encodePathSegment(id)}/reset`, rankedLadderResetResultSchema);
+  adminResetLadder(
+    id: string,
+  ): Promise<AchilleaClientResult<RankedLadderResetResult>> {
+    return this.http.post(
+      `/admin/seasons/${encodePathSegment(id)}/reset`,
+      rankedLadderResetResultSchema,
+    );
   }
 }

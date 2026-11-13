@@ -606,30 +606,12 @@
             "model_g4mg": "data/common/chr/_waza/techo0010/techo0010.g4mg",
             "sound_cfg": "data/common/event_cfg/snd/techo0010_snd.cfg.bin",
             "telop_by_lang": [
-              [
-                "de",
-                "data/dx11/menu/220_img/telop_waza/de/rho10010.g4tx"
-              ],
-              [
-                "en",
-                "data/dx11/menu/220_img/telop_waza/en/rho10010.g4tx"
-              ],
-              [
-                "es",
-                "data/dx11/menu/220_img/telop_waza/es/rho10010.g4tx"
-              ],
-              [
-                "fr",
-                "data/dx11/menu/220_img/telop_waza/fr/rho10010.g4tx"
-              ],
-              [
-                "it",
-                "data/dx11/menu/220_img/telop_waza/it/rho10010.g4tx"
-              ],
-              [
-                "pt",
-                "data/dx11/menu/220_img/telop_waza/pt/rho10010.g4tx"
-              ],
+              ["de", "data/dx11/menu/220_img/telop_waza/de/rho10010.g4tx"],
+              ["en", "data/dx11/menu/220_img/telop_waza/en/rho10010.g4tx"],
+              ["es", "data/dx11/menu/220_img/telop_waza/es/rho10010.g4tx"],
+              ["fr", "data/dx11/menu/220_img/telop_waza/fr/rho10010.g4tx"],
+              ["it", "data/dx11/menu/220_img/telop_waza/it/rho10010.g4tx"],
+              ["pt", "data/dx11/menu/220_img/telop_waza/pt/rho10010.g4tx"],
               [
                 "zh_hans",
                 "data/dx11/menu/220_img/telop_waza/zh_hans/rho10010.g4tx"
@@ -681,30 +663,12 @@
             "model_g4mg": "data/common/chr/_waza/ev60_00340/ev60_00340.g4mg",
             "sound_cfg": "data/common/event_cfg/snd/ev60_00340_snd.cfg.bin",
             "telop_by_lang": [
-              [
-                "de",
-                "data/dx11/menu/220_img/telop_waza/de/whs00340.g4tx"
-              ],
-              [
-                "en",
-                "data/dx11/menu/220_img/telop_waza/en/whs00340.g4tx"
-              ],
-              [
-                "es",
-                "data/dx11/menu/220_img/telop_waza/es/whs00340.g4tx"
-              ],
-              [
-                "fr",
-                "data/dx11/menu/220_img/telop_waza/fr/whs00340.g4tx"
-              ],
-              [
-                "it",
-                "data/dx11/menu/220_img/telop_waza/it/whs00340.g4tx"
-              ],
-              [
-                "pt",
-                "data/dx11/menu/220_img/telop_waza/pt/whs00340.g4tx"
-              ],
+              ["de", "data/dx11/menu/220_img/telop_waza/de/whs00340.g4tx"],
+              ["en", "data/dx11/menu/220_img/telop_waza/en/whs00340.g4tx"],
+              ["es", "data/dx11/menu/220_img/telop_waza/es/whs00340.g4tx"],
+              ["fr", "data/dx11/menu/220_img/telop_waza/fr/whs00340.g4tx"],
+              ["it", "data/dx11/menu/220_img/telop_waza/it/whs00340.g4tx"],
+              ["pt", "data/dx11/menu/220_img/telop_waza/pt/whs00340.g4tx"],
               [
                 "zh_hans",
                 "data/dx11/menu/220_img/telop_waza/zh_hans/whs00340.g4tx"
@@ -756,30 +720,12 @@
             "model_g4mg": "data/common/chr/_waza/ev61_00200/ev61_00200.g4mg",
             "sound_cfg": "data/common/event_cfg/snd/ev61_00200_snd.cfg.bin",
             "telop_by_lang": [
-              [
-                "de",
-                "data/dx11/menu/220_img/telop_waza/de/who00200.g4tx"
-              ],
-              [
-                "en",
-                "data/dx11/menu/220_img/telop_waza/en/who00200.g4tx"
-              ],
-              [
-                "es",
-                "data/dx11/menu/220_img/telop_waza/es/who00200.g4tx"
-              ],
-              [
-                "fr",
-                "data/dx11/menu/220_img/telop_waza/fr/who00200.g4tx"
-              ],
-              [
-                "it",
-                "data/dx11/menu/220_img/telop_waza/it/who00200.g4tx"
-              ],
-              [
-                "pt",
-                "data/dx11/menu/220_img/telop_waza/pt/who00200.g4tx"
-              ],
+              ["de", "data/dx11/menu/220_img/telop_waza/de/who00200.g4tx"],
+              ["en", "data/dx11/menu/220_img/telop_waza/en/who00200.g4tx"],
+              ["es", "data/dx11/menu/220_img/telop_waza/es/who00200.g4tx"],
+              ["fr", "data/dx11/menu/220_img/telop_waza/fr/who00200.g4tx"],
+              ["it", "data/dx11/menu/220_img/telop_waza/it/who00200.g4tx"],
+              ["pt", "data/dx11/menu/220_img/telop_waza/pt/who00200.g4tx"],
               [
                 "zh_hans",
                 "data/dx11/menu/220_img/telop_waza/zh_hans/who00200.g4tx"
@@ -831,30 +777,12 @@
             "model_g4mg": "data/common/chr/_waza/ev60_00900/ev60_00900.g4mg",
             "sound_cfg": "data/common/event_cfg/snd/ev60_00900_snd.cfg.bin",
             "telop_by_lang": [
-              [
-                "de",
-                "data/dx11/menu/220_img/telop_waza/de/whs00900.g4tx"
-              ],
-              [
-                "en",
-                "data/dx11/menu/220_img/telop_waza/en/whs00900.g4tx"
-              ],
-              [
-                "es",
-                "data/dx11/menu/220_img/telop_waza/es/whs00900.g4tx"
-              ],
-              [
-                "fr",
-                "data/dx11/menu/220_img/telop_waza/fr/whs00900.g4tx"
-              ],
-              [
-                "it",
-                "data/dx11/menu/220_img/telop_waza/it/whs00900.g4tx"
-              ],
-              [
-                "pt",
-                "data/dx11/menu/220_img/telop_waza/pt/whs00900.g4tx"
-              ],
+              ["de", "data/dx11/menu/220_img/telop_waza/de/whs00900.g4tx"],
+              ["en", "data/dx11/menu/220_img/telop_waza/en/whs00900.g4tx"],
+              ["es", "data/dx11/menu/220_img/telop_waza/es/whs00900.g4tx"],
+              ["fr", "data/dx11/menu/220_img/telop_waza/fr/whs00900.g4tx"],
+              ["it", "data/dx11/menu/220_img/telop_waza/it/whs00900.g4tx"],
+              ["pt", "data/dx11/menu/220_img/telop_waza/pt/whs00900.g4tx"],
               [
                 "zh_hans",
                 "data/dx11/menu/220_img/telop_waza/zh_hans/whs00900.g4tx"
@@ -906,30 +834,12 @@
             "model_g4mg": "data/common/chr/_waza/ev60_01250/ev60_01250.g4mg",
             "sound_cfg": "data/common/event_cfg/snd/ev60_01250_snd.cfg.bin",
             "telop_by_lang": [
-              [
-                "de",
-                "data/dx11/menu/220_img/telop_waza/de/whs01250.g4tx"
-              ],
-              [
-                "en",
-                "data/dx11/menu/220_img/telop_waza/en/whs01250.g4tx"
-              ],
-              [
-                "es",
-                "data/dx11/menu/220_img/telop_waza/es/whs01250.g4tx"
-              ],
-              [
-                "fr",
-                "data/dx11/menu/220_img/telop_waza/fr/whs01250.g4tx"
-              ],
-              [
-                "it",
-                "data/dx11/menu/220_img/telop_waza/it/whs01250.g4tx"
-              ],
-              [
-                "pt",
-                "data/dx11/menu/220_img/telop_waza/pt/whs01250.g4tx"
-              ],
+              ["de", "data/dx11/menu/220_img/telop_waza/de/whs01250.g4tx"],
+              ["en", "data/dx11/menu/220_img/telop_waza/en/whs01250.g4tx"],
+              ["es", "data/dx11/menu/220_img/telop_waza/es/whs01250.g4tx"],
+              ["fr", "data/dx11/menu/220_img/telop_waza/fr/whs01250.g4tx"],
+              ["it", "data/dx11/menu/220_img/telop_waza/it/whs01250.g4tx"],
+              ["pt", "data/dx11/menu/220_img/telop_waza/pt/whs01250.g4tx"],
               [
                 "zh_hans",
                 "data/dx11/menu/220_img/telop_waza/zh_hans/whs01250.g4tx"
@@ -981,30 +891,12 @@
             "model_g4mg": "data/common/chr/_waza/ev60_00310/ev60_00310.g4mg",
             "sound_cfg": "data/common/event_cfg/snd/ev60_00310_snd.cfg.bin",
             "telop_by_lang": [
-              [
-                "de",
-                "data/dx11/menu/220_img/telop_waza/de/whs00310.g4tx"
-              ],
-              [
-                "en",
-                "data/dx11/menu/220_img/telop_waza/en/whs00310.g4tx"
-              ],
-              [
-                "es",
-                "data/dx11/menu/220_img/telop_waza/es/whs00310.g4tx"
-              ],
-              [
-                "fr",
-                "data/dx11/menu/220_img/telop_waza/fr/whs00310.g4tx"
-              ],
-              [
-                "it",
-                "data/dx11/menu/220_img/telop_waza/it/whs00310.g4tx"
-              ],
-              [
-                "pt",
-                "data/dx11/menu/220_img/telop_waza/pt/whs00310.g4tx"
-              ],
+              ["de", "data/dx11/menu/220_img/telop_waza/de/whs00310.g4tx"],
+              ["en", "data/dx11/menu/220_img/telop_waza/en/whs00310.g4tx"],
+              ["es", "data/dx11/menu/220_img/telop_waza/es/whs00310.g4tx"],
+              ["fr", "data/dx11/menu/220_img/telop_waza/fr/whs00310.g4tx"],
+              ["it", "data/dx11/menu/220_img/telop_waza/it/whs00310.g4tx"],
+              ["pt", "data/dx11/menu/220_img/telop_waza/pt/whs00310.g4tx"],
               [
                 "zh_hans",
                 "data/dx11/menu/220_img/telop_waza/zh_hans/whs00310.g4tx"
@@ -1056,30 +948,12 @@
             "model_g4mg": "data/common/chr/_waza/ev60_01080/ev60_01080.g4mg",
             "sound_cfg": "data/common/event_cfg/snd/ev60_01080_snd.cfg.bin",
             "telop_by_lang": [
-              [
-                "de",
-                "data/dx11/menu/220_img/telop_waza/de/whs01080.g4tx"
-              ],
-              [
-                "en",
-                "data/dx11/menu/220_img/telop_waza/en/whs01080.g4tx"
-              ],
-              [
-                "es",
-                "data/dx11/menu/220_img/telop_waza/es/whs01080.g4tx"
-              ],
-              [
-                "fr",
-                "data/dx11/menu/220_img/telop_waza/fr/whs01080.g4tx"
-              ],
-              [
-                "it",
-                "data/dx11/menu/220_img/telop_waza/it/whs01080.g4tx"
-              ],
-              [
-                "pt",
-                "data/dx11/menu/220_img/telop_waza/pt/whs01080.g4tx"
-              ],
+              ["de", "data/dx11/menu/220_img/telop_waza/de/whs01080.g4tx"],
+              ["en", "data/dx11/menu/220_img/telop_waza/en/whs01080.g4tx"],
+              ["es", "data/dx11/menu/220_img/telop_waza/es/whs01080.g4tx"],
+              ["fr", "data/dx11/menu/220_img/telop_waza/fr/whs01080.g4tx"],
+              ["it", "data/dx11/menu/220_img/telop_waza/it/whs01080.g4tx"],
+              ["pt", "data/dx11/menu/220_img/telop_waza/pt/whs01080.g4tx"],
               [
                 "zh_hans",
                 "data/dx11/menu/220_img/telop_waza/zh_hans/whs01080.g4tx"
@@ -1188,30 +1062,12 @@
             "model_g4mg": "data/common/chr/_waza/techo0010/techo0010.g4mg",
             "sound_cfg": "data/common/event_cfg/snd/techo0010_snd.cfg.bin",
             "telop_by_lang": [
-              [
-                "de",
-                "data/dx11/menu/220_img/telop_waza/de/rho10010.g4tx"
-              ],
-              [
-                "en",
-                "data/dx11/menu/220_img/telop_waza/en/rho10010.g4tx"
-              ],
-              [
-                "es",
-                "data/dx11/menu/220_img/telop_waza/es/rho10010.g4tx"
-              ],
-              [
-                "fr",
-                "data/dx11/menu/220_img/telop_waza/fr/rho10010.g4tx"
-              ],
-              [
-                "it",
-                "data/dx11/menu/220_img/telop_waza/it/rho10010.g4tx"
-              ],
-              [
-                "pt",
-                "data/dx11/menu/220_img/telop_waza/pt/rho10010.g4tx"
-              ],
+              ["de", "data/dx11/menu/220_img/telop_waza/de/rho10010.g4tx"],
+              ["en", "data/dx11/menu/220_img/telop_waza/en/rho10010.g4tx"],
+              ["es", "data/dx11/menu/220_img/telop_waza/es/rho10010.g4tx"],
+              ["fr", "data/dx11/menu/220_img/telop_waza/fr/rho10010.g4tx"],
+              ["it", "data/dx11/menu/220_img/telop_waza/it/rho10010.g4tx"],
+              ["pt", "data/dx11/menu/220_img/telop_waza/pt/rho10010.g4tx"],
               [
                 "zh_hans",
                 "data/dx11/menu/220_img/telop_waza/zh_hans/rho10010.g4tx"
@@ -1263,30 +1119,12 @@
             "model_g4mg": "data/common/chr/_waza/ev60_00340/ev60_00340.g4mg",
             "sound_cfg": "data/common/event_cfg/snd/ev60_00340_snd.cfg.bin",
             "telop_by_lang": [
-              [
-                "de",
-                "data/dx11/menu/220_img/telop_waza/de/whs00340.g4tx"
-              ],
-              [
-                "en",
-                "data/dx11/menu/220_img/telop_waza/en/whs00340.g4tx"
-              ],
-              [
-                "es",
-                "data/dx11/menu/220_img/telop_waza/es/whs00340.g4tx"
-              ],
-              [
-                "fr",
-                "data/dx11/menu/220_img/telop_waza/fr/whs00340.g4tx"
-              ],
-              [
-                "it",
-                "data/dx11/menu/220_img/telop_waza/it/whs00340.g4tx"
-              ],
-              [
-                "pt",
-                "data/dx11/menu/220_img/telop_waza/pt/whs00340.g4tx"
-              ],
+              ["de", "data/dx11/menu/220_img/telop_waza/de/whs00340.g4tx"],
+              ["en", "data/dx11/menu/220_img/telop_waza/en/whs00340.g4tx"],
+              ["es", "data/dx11/menu/220_img/telop_waza/es/whs00340.g4tx"],
+              ["fr", "data/dx11/menu/220_img/telop_waza/fr/whs00340.g4tx"],
+              ["it", "data/dx11/menu/220_img/telop_waza/it/whs00340.g4tx"],
+              ["pt", "data/dx11/menu/220_img/telop_waza/pt/whs00340.g4tx"],
               [
                 "zh_hans",
                 "data/dx11/menu/220_img/telop_waza/zh_hans/whs00340.g4tx"
@@ -1338,30 +1176,12 @@
             "model_g4mg": "data/common/chr/_waza/ev61_00200/ev61_00200.g4mg",
             "sound_cfg": "data/common/event_cfg/snd/ev61_00200_snd.cfg.bin",
             "telop_by_lang": [
-              [
-                "de",
-                "data/dx11/menu/220_img/telop_waza/de/who00200.g4tx"
-              ],
-              [
-                "en",
-                "data/dx11/menu/220_img/telop_waza/en/who00200.g4tx"
-              ],
-              [
-                "es",
-                "data/dx11/menu/220_img/telop_waza/es/who00200.g4tx"
-              ],
-              [
-                "fr",
-                "data/dx11/menu/220_img/telop_waza/fr/who00200.g4tx"
-              ],
-              [
-                "it",
-                "data/dx11/menu/220_img/telop_waza/it/who00200.g4tx"
-              ],
-              [
-                "pt",
-                "data/dx11/menu/220_img/telop_waza/pt/who00200.g4tx"
-              ],
+              ["de", "data/dx11/menu/220_img/telop_waza/de/who00200.g4tx"],
+              ["en", "data/dx11/menu/220_img/telop_waza/en/who00200.g4tx"],
+              ["es", "data/dx11/menu/220_img/telop_waza/es/who00200.g4tx"],
+              ["fr", "data/dx11/menu/220_img/telop_waza/fr/who00200.g4tx"],
+              ["it", "data/dx11/menu/220_img/telop_waza/it/who00200.g4tx"],
+              ["pt", "data/dx11/menu/220_img/telop_waza/pt/who00200.g4tx"],
               [
                 "zh_hans",
                 "data/dx11/menu/220_img/telop_waza/zh_hans/who00200.g4tx"
@@ -1413,30 +1233,12 @@
             "model_g4mg": "data/common/chr/_waza/ev60_00900/ev60_00900.g4mg",
             "sound_cfg": "data/common/event_cfg/snd/ev60_00900_snd.cfg.bin",
             "telop_by_lang": [
-              [
-                "de",
-                "data/dx11/menu/220_img/telop_waza/de/whs00900.g4tx"
-              ],
-              [
-                "en",
-                "data/dx11/menu/220_img/telop_waza/en/whs00900.g4tx"
-              ],
-              [
-                "es",
-                "data/dx11/menu/220_img/telop_waza/es/whs00900.g4tx"
-              ],
-              [
-                "fr",
-                "data/dx11/menu/220_img/telop_waza/fr/whs00900.g4tx"
-              ],
-              [
-                "it",
-                "data/dx11/menu/220_img/telop_waza/it/whs00900.g4tx"
-              ],
-              [
-                "pt",
-                "data/dx11/menu/220_img/telop_waza/pt/whs00900.g4tx"
-              ],
+              ["de", "data/dx11/menu/220_img/telop_waza/de/whs00900.g4tx"],
+              ["en", "data/dx11/menu/220_img/telop_waza/en/whs00900.g4tx"],
+              ["es", "data/dx11/menu/220_img/telop_waza/es/whs00900.g4tx"],
+              ["fr", "data/dx11/menu/220_img/telop_waza/fr/whs00900.g4tx"],
+              ["it", "data/dx11/menu/220_img/telop_waza/it/whs00900.g4tx"],
+              ["pt", "data/dx11/menu/220_img/telop_waza/pt/whs00900.g4tx"],
               [
                 "zh_hans",
                 "data/dx11/menu/220_img/telop_waza/zh_hans/whs00900.g4tx"
@@ -1488,30 +1290,12 @@
             "model_g4mg": "data/common/chr/_waza/ev60_01250/ev60_01250.g4mg",
             "sound_cfg": "data/common/event_cfg/snd/ev60_01250_snd.cfg.bin",
             "telop_by_lang": [
-              [
-                "de",
-                "data/dx11/menu/220_img/telop_waza/de/whs01250.g4tx"
-              ],
-              [
-                "en",
-                "data/dx11/menu/220_img/telop_waza/en/whs01250.g4tx"
-              ],
-              [
-                "es",
-                "data/dx11/menu/220_img/telop_waza/es/whs01250.g4tx"
-              ],
-              [
-                "fr",
-                "data/dx11/menu/220_img/telop_waza/fr/whs01250.g4tx"
-              ],
-              [
-                "it",
-                "data/dx11/menu/220_img/telop_waza/it/whs01250.g4tx"
-              ],
-              [
-                "pt",
-                "data/dx11/menu/220_img/telop_waza/pt/whs01250.g4tx"
-              ],
+              ["de", "data/dx11/menu/220_img/telop_waza/de/whs01250.g4tx"],
+              ["en", "data/dx11/menu/220_img/telop_waza/en/whs01250.g4tx"],
+              ["es", "data/dx11/menu/220_img/telop_waza/es/whs01250.g4tx"],
+              ["fr", "data/dx11/menu/220_img/telop_waza/fr/whs01250.g4tx"],
+              ["it", "data/dx11/menu/220_img/telop_waza/it/whs01250.g4tx"],
+              ["pt", "data/dx11/menu/220_img/telop_waza/pt/whs01250.g4tx"],
               [
                 "zh_hans",
                 "data/dx11/menu/220_img/telop_waza/zh_hans/whs01250.g4tx"
@@ -1563,30 +1347,12 @@
             "model_g4mg": "data/common/chr/_waza/ev60_01080/ev60_01080.g4mg",
             "sound_cfg": "data/common/event_cfg/snd/ev60_01080_snd.cfg.bin",
             "telop_by_lang": [
-              [
-                "de",
-                "data/dx11/menu/220_img/telop_waza/de/whs01080.g4tx"
-              ],
-              [
-                "en",
-                "data/dx11/menu/220_img/telop_waza/en/whs01080.g4tx"
-              ],
-              [
-                "es",
-                "data/dx11/menu/220_img/telop_waza/es/whs01080.g4tx"
-              ],
-              [
-                "fr",
-                "data/dx11/menu/220_img/telop_waza/fr/whs01080.g4tx"
-              ],
-              [
-                "it",
-                "data/dx11/menu/220_img/telop_waza/it/whs01080.g4tx"
-              ],
-              [
-                "pt",
-                "data/dx11/menu/220_img/telop_waza/pt/whs01080.g4tx"
-              ],
+              ["de", "data/dx11/menu/220_img/telop_waza/de/whs01080.g4tx"],
+              ["en", "data/dx11/menu/220_img/telop_waza/en/whs01080.g4tx"],
+              ["es", "data/dx11/menu/220_img/telop_waza/es/whs01080.g4tx"],
+              ["fr", "data/dx11/menu/220_img/telop_waza/fr/whs01080.g4tx"],
+              ["it", "data/dx11/menu/220_img/telop_waza/it/whs01080.g4tx"],
+              ["pt", "data/dx11/menu/220_img/telop_waza/pt/whs01080.g4tx"],
               [
                 "zh_hans",
                 "data/dx11/menu/220_img/telop_waza/zh_hans/whs01080.g4tx"
@@ -1638,30 +1404,12 @@
             "model_g4mg": "data/common/chr/_waza/ev60_00310/ev60_00310.g4mg",
             "sound_cfg": "data/common/event_cfg/snd/ev60_00310_snd.cfg.bin",
             "telop_by_lang": [
-              [
-                "de",
-                "data/dx11/menu/220_img/telop_waza/de/whs00310.g4tx"
-              ],
-              [
-                "en",
-                "data/dx11/menu/220_img/telop_waza/en/whs00310.g4tx"
-              ],
-              [
-                "es",
-                "data/dx11/menu/220_img/telop_waza/es/whs00310.g4tx"
-              ],
-              [
-                "fr",
-                "data/dx11/menu/220_img/telop_waza/fr/whs00310.g4tx"
-              ],
-              [
-                "it",
-                "data/dx11/menu/220_img/telop_waza/it/whs00310.g4tx"
-              ],
-              [
-                "pt",
-                "data/dx11/menu/220_img/telop_waza/pt/whs00310.g4tx"
-              ],
+              ["de", "data/dx11/menu/220_img/telop_waza/de/whs00310.g4tx"],
+              ["en", "data/dx11/menu/220_img/telop_waza/en/whs00310.g4tx"],
+              ["es", "data/dx11/menu/220_img/telop_waza/es/whs00310.g4tx"],
+              ["fr", "data/dx11/menu/220_img/telop_waza/fr/whs00310.g4tx"],
+              ["it", "data/dx11/menu/220_img/telop_waza/it/whs00310.g4tx"],
+              ["pt", "data/dx11/menu/220_img/telop_waza/pt/whs00310.g4tx"],
               [
                 "zh_hans",
                 "data/dx11/menu/220_img/telop_waza/zh_hans/whs00310.g4tx"
@@ -1770,30 +1518,12 @@
             "model_g4mg": "data/common/chr/_waza/techo0040/techo0040.g4mg",
             "sound_cfg": "data/common/event_cfg/snd/techo0040_snd.cfg.bin",
             "telop_by_lang": [
-              [
-                "de",
-                "data/dx11/menu/220_img/telop_waza/de/rho10040.g4tx"
-              ],
-              [
-                "en",
-                "data/dx11/menu/220_img/telop_waza/en/rho10040.g4tx"
-              ],
-              [
-                "es",
-                "data/dx11/menu/220_img/telop_waza/es/rho10040.g4tx"
-              ],
-              [
-                "fr",
-                "data/dx11/menu/220_img/telop_waza/fr/rho10040.g4tx"
-              ],
-              [
-                "it",
-                "data/dx11/menu/220_img/telop_waza/it/rho10040.g4tx"
-              ],
-              [
-                "pt",
-                "data/dx11/menu/220_img/telop_waza/pt/rho10040.g4tx"
-              ],
+              ["de", "data/dx11/menu/220_img/telop_waza/de/rho10040.g4tx"],
+              ["en", "data/dx11/menu/220_img/telop_waza/en/rho10040.g4tx"],
+              ["es", "data/dx11/menu/220_img/telop_waza/es/rho10040.g4tx"],
+              ["fr", "data/dx11/menu/220_img/telop_waza/fr/rho10040.g4tx"],
+              ["it", "data/dx11/menu/220_img/telop_waza/it/rho10040.g4tx"],
+              ["pt", "data/dx11/menu/220_img/telop_waza/pt/rho10040.g4tx"],
               [
                 "zh_hans",
                 "data/dx11/menu/220_img/telop_waza/zh_hans/rho10040.g4tx"
@@ -1845,30 +1575,12 @@
             "model_g4mg": "data/common/chr/_waza/ev60_02900/ev60_02900.g4mg",
             "sound_cfg": "data/common/event_cfg/snd/ev60_02900_snd.cfg.bin",
             "telop_by_lang": [
-              [
-                "de",
-                "data/dx11/menu/220_img/telop_waza/de/whs02900.g4tx"
-              ],
-              [
-                "en",
-                "data/dx11/menu/220_img/telop_waza/en/whs02900.g4tx"
-              ],
-              [
-                "es",
-                "data/dx11/menu/220_img/telop_waza/es/whs02900.g4tx"
-              ],
-              [
-                "fr",
-                "data/dx11/menu/220_img/telop_waza/fr/whs02900.g4tx"
-              ],
-              [
-                "it",
-                "data/dx11/menu/220_img/telop_waza/it/whs02900.g4tx"
-              ],
-              [
-                "pt",
-                "data/dx11/menu/220_img/telop_waza/pt/whs02900.g4tx"
-              ],
+              ["de", "data/dx11/menu/220_img/telop_waza/de/whs02900.g4tx"],
+              ["en", "data/dx11/menu/220_img/telop_waza/en/whs02900.g4tx"],
+              ["es", "data/dx11/menu/220_img/telop_waza/es/whs02900.g4tx"],
+              ["fr", "data/dx11/menu/220_img/telop_waza/fr/whs02900.g4tx"],
+              ["it", "data/dx11/menu/220_img/telop_waza/it/whs02900.g4tx"],
+              ["pt", "data/dx11/menu/220_img/telop_waza/pt/whs02900.g4tx"],
               [
                 "zh_hans",
                 "data/dx11/menu/220_img/telop_waza/zh_hans/whs02900.g4tx"
@@ -1920,30 +1632,12 @@
             "model_g4mg": "data/common/chr/_waza/ev61_00200/ev61_00200.g4mg",
             "sound_cfg": "data/common/event_cfg/snd/ev61_00200_snd.cfg.bin",
             "telop_by_lang": [
-              [
-                "de",
-                "data/dx11/menu/220_img/telop_waza/de/who00200.g4tx"
-              ],
-              [
-                "en",
-                "data/dx11/menu/220_img/telop_waza/en/who00200.g4tx"
-              ],
-              [
-                "es",
-                "data/dx11/menu/220_img/telop_waza/es/who00200.g4tx"
-              ],
-              [
-                "fr",
-                "data/dx11/menu/220_img/telop_waza/fr/who00200.g4tx"
-              ],
-              [
-                "it",
-                "data/dx11/menu/220_img/telop_waza/it/who00200.g4tx"
-              ],
-              [
-                "pt",
-                "data/dx11/menu/220_img/telop_waza/pt/who00200.g4tx"
-              ],
+              ["de", "data/dx11/menu/220_img/telop_waza/de/who00200.g4tx"],
+              ["en", "data/dx11/menu/220_img/telop_waza/en/who00200.g4tx"],
+              ["es", "data/dx11/menu/220_img/telop_waza/es/who00200.g4tx"],
+              ["fr", "data/dx11/menu/220_img/telop_waza/fr/who00200.g4tx"],
+              ["it", "data/dx11/menu/220_img/telop_waza/it/who00200.g4tx"],
+              ["pt", "data/dx11/menu/220_img/telop_waza/pt/who00200.g4tx"],
               [
                 "zh_hans",
                 "data/dx11/menu/220_img/telop_waza/zh_hans/who00200.g4tx"
@@ -1995,30 +1689,12 @@
             "model_g4mg": "data/common/chr/_waza/ev60_00340/ev60_00340.g4mg",
             "sound_cfg": "data/common/event_cfg/snd/ev60_00340_snd.cfg.bin",
             "telop_by_lang": [
-              [
-                "de",
-                "data/dx11/menu/220_img/telop_waza/de/whs00340.g4tx"
-              ],
-              [
-                "en",
-                "data/dx11/menu/220_img/telop_waza/en/whs00340.g4tx"
-              ],
-              [
-                "es",
-                "data/dx11/menu/220_img/telop_waza/es/whs00340.g4tx"
-              ],
-              [
-                "fr",
-                "data/dx11/menu/220_img/telop_waza/fr/whs00340.g4tx"
-              ],
-              [
-                "it",
-                "data/dx11/menu/220_img/telop_waza/it/whs00340.g4tx"
-              ],
-              [
-                "pt",
-                "data/dx11/menu/220_img/telop_waza/pt/whs00340.g4tx"
-              ],
+              ["de", "data/dx11/menu/220_img/telop_waza/de/whs00340.g4tx"],
+              ["en", "data/dx11/menu/220_img/telop_waza/en/whs00340.g4tx"],
+              ["es", "data/dx11/menu/220_img/telop_waza/es/whs00340.g4tx"],
+              ["fr", "data/dx11/menu/220_img/telop_waza/fr/whs00340.g4tx"],
+              ["it", "data/dx11/menu/220_img/telop_waza/it/whs00340.g4tx"],
+              ["pt", "data/dx11/menu/220_img/telop_waza/pt/whs00340.g4tx"],
               [
                 "zh_hans",
                 "data/dx11/menu/220_img/telop_waza/zh_hans/whs00340.g4tx"
@@ -2070,30 +1746,12 @@
             "model_g4mg": "data/common/chr/_waza/ev62_00190_1/ev62_00190_1.g4mg",
             "sound_cfg": "data/common/event_cfg/snd/ev62_00190_1_snd.cfg.bin",
             "telop_by_lang": [
-              [
-                "de",
-                "data/dx11/menu/220_img/telop_waza/de/whd00190.g4tx"
-              ],
-              [
-                "en",
-                "data/dx11/menu/220_img/telop_waza/en/whd00190.g4tx"
-              ],
-              [
-                "es",
-                "data/dx11/menu/220_img/telop_waza/es/whd00190.g4tx"
-              ],
-              [
-                "fr",
-                "data/dx11/menu/220_img/telop_waza/fr/whd00190.g4tx"
-              ],
-              [
-                "it",
-                "data/dx11/menu/220_img/telop_waza/it/whd00190.g4tx"
-              ],
-              [
-                "pt",
-                "data/dx11/menu/220_img/telop_waza/pt/whd00190.g4tx"
-              ],
+              ["de", "data/dx11/menu/220_img/telop_waza/de/whd00190.g4tx"],
+              ["en", "data/dx11/menu/220_img/telop_waza/en/whd00190.g4tx"],
+              ["es", "data/dx11/menu/220_img/telop_waza/es/whd00190.g4tx"],
+              ["fr", "data/dx11/menu/220_img/telop_waza/fr/whd00190.g4tx"],
+              ["it", "data/dx11/menu/220_img/telop_waza/it/whd00190.g4tx"],
+              ["pt", "data/dx11/menu/220_img/telop_waza/pt/whd00190.g4tx"],
               [
                 "zh_hans",
                 "data/dx11/menu/220_img/telop_waza/zh_hans/whd00190.g4tx"
@@ -2145,30 +1803,12 @@
             "model_g4mg": "data/common/chr/_waza/ev60_00340/ev60_00340.g4mg",
             "sound_cfg": "data/common/event_cfg/snd/ev60_00340_snd.cfg.bin",
             "telop_by_lang": [
-              [
-                "de",
-                "data/dx11/menu/220_img/telop_waza/de/whs00340.g4tx"
-              ],
-              [
-                "en",
-                "data/dx11/menu/220_img/telop_waza/en/whs00340.g4tx"
-              ],
-              [
-                "es",
-                "data/dx11/menu/220_img/telop_waza/es/whs00340.g4tx"
-              ],
-              [
-                "fr",
-                "data/dx11/menu/220_img/telop_waza/fr/whs00340.g4tx"
-              ],
-              [
-                "it",
-                "data/dx11/menu/220_img/telop_waza/it/whs00340.g4tx"
-              ],
-              [
-                "pt",
-                "data/dx11/menu/220_img/telop_waza/pt/whs00340.g4tx"
-              ],
+              ["de", "data/dx11/menu/220_img/telop_waza/de/whs00340.g4tx"],
+              ["en", "data/dx11/menu/220_img/telop_waza/en/whs00340.g4tx"],
+              ["es", "data/dx11/menu/220_img/telop_waza/es/whs00340.g4tx"],
+              ["fr", "data/dx11/menu/220_img/telop_waza/fr/whs00340.g4tx"],
+              ["it", "data/dx11/menu/220_img/telop_waza/it/whs00340.g4tx"],
+              ["pt", "data/dx11/menu/220_img/telop_waza/pt/whs00340.g4tx"],
               [
                 "zh_hans",
                 "data/dx11/menu/220_img/telop_waza/zh_hans/whs00340.g4tx"
@@ -2220,30 +1860,12 @@
             "model_g4mg": "data/common/chr/_waza/ev60_00900/ev60_00900.g4mg",
             "sound_cfg": "data/common/event_cfg/snd/ev60_00900_snd.cfg.bin",
             "telop_by_lang": [
-              [
-                "de",
-                "data/dx11/menu/220_img/telop_waza/de/whs00900.g4tx"
-              ],
-              [
-                "en",
-                "data/dx11/menu/220_img/telop_waza/en/whs00900.g4tx"
-              ],
-              [
-                "es",
-                "data/dx11/menu/220_img/telop_waza/es/whs00900.g4tx"
-              ],
-              [
-                "fr",
-                "data/dx11/menu/220_img/telop_waza/fr/whs00900.g4tx"
-              ],
-              [
-                "it",
-                "data/dx11/menu/220_img/telop_waza/it/whs00900.g4tx"
-              ],
-              [
-                "pt",
-                "data/dx11/menu/220_img/telop_waza/pt/whs00900.g4tx"
-              ],
+              ["de", "data/dx11/menu/220_img/telop_waza/de/whs00900.g4tx"],
+              ["en", "data/dx11/menu/220_img/telop_waza/en/whs00900.g4tx"],
+              ["es", "data/dx11/menu/220_img/telop_waza/es/whs00900.g4tx"],
+              ["fr", "data/dx11/menu/220_img/telop_waza/fr/whs00900.g4tx"],
+              ["it", "data/dx11/menu/220_img/telop_waza/it/whs00900.g4tx"],
+              ["pt", "data/dx11/menu/220_img/telop_waza/pt/whs00900.g4tx"],
               [
                 "zh_hans",
                 "data/dx11/menu/220_img/telop_waza/zh_hans/whs00900.g4tx"
@@ -2309,30 +1931,12 @@
             "model_g4mg": "data/common/chr/_waza/techo0010/techo0010.g4mg",
             "sound_cfg": "data/common/event_cfg/snd/techo0010_snd.cfg.bin",
             "telop_by_lang": [
-              [
-                "de",
-                "data/dx11/menu/220_img/telop_waza/de/rho10010.g4tx"
-              ],
-              [
-                "en",
-                "data/dx11/menu/220_img/telop_waza/en/rho10010.g4tx"
-              ],
-              [
-                "es",
-                "data/dx11/menu/220_img/telop_waza/es/rho10010.g4tx"
-              ],
-              [
-                "fr",
-                "data/dx11/menu/220_img/telop_waza/fr/rho10010.g4tx"
-              ],
-              [
-                "it",
-                "data/dx11/menu/220_img/telop_waza/it/rho10010.g4tx"
-              ],
-              [
-                "pt",
-                "data/dx11/menu/220_img/telop_waza/pt/rho10010.g4tx"
-              ],
+              ["de", "data/dx11/menu/220_img/telop_waza/de/rho10010.g4tx"],
+              ["en", "data/dx11/menu/220_img/telop_waza/en/rho10010.g4tx"],
+              ["es", "data/dx11/menu/220_img/telop_waza/es/rho10010.g4tx"],
+              ["fr", "data/dx11/menu/220_img/telop_waza/fr/rho10010.g4tx"],
+              ["it", "data/dx11/menu/220_img/telop_waza/it/rho10010.g4tx"],
+              ["pt", "data/dx11/menu/220_img/telop_waza/pt/rho10010.g4tx"],
               [
                 "zh_hans",
                 "data/dx11/menu/220_img/telop_waza/zh_hans/rho10010.g4tx"
@@ -2384,30 +1988,12 @@
             "model_g4mg": "data/common/chr/_waza/ev60_00340/ev60_00340.g4mg",
             "sound_cfg": "data/common/event_cfg/snd/ev60_00340_snd.cfg.bin",
             "telop_by_lang": [
-              [
-                "de",
-                "data/dx11/menu/220_img/telop_waza/de/whs00340.g4tx"
-              ],
-              [
-                "en",
-                "data/dx11/menu/220_img/telop_waza/en/whs00340.g4tx"
-              ],
-              [
-                "es",
-                "data/dx11/menu/220_img/telop_waza/es/whs00340.g4tx"
-              ],
-              [
-                "fr",
-                "data/dx11/menu/220_img/telop_waza/fr/whs00340.g4tx"
-              ],
-              [
-                "it",
-                "data/dx11/menu/220_img/telop_waza/it/whs00340.g4tx"
-              ],
-              [
-                "pt",
-                "data/dx11/menu/220_img/telop_waza/pt/whs00340.g4tx"
-              ],
+              ["de", "data/dx11/menu/220_img/telop_waza/de/whs00340.g4tx"],
+              ["en", "data/dx11/menu/220_img/telop_waza/en/whs00340.g4tx"],
+              ["es", "data/dx11/menu/220_img/telop_waza/es/whs00340.g4tx"],
+              ["fr", "data/dx11/menu/220_img/telop_waza/fr/whs00340.g4tx"],
+              ["it", "data/dx11/menu/220_img/telop_waza/it/whs00340.g4tx"],
+              ["pt", "data/dx11/menu/220_img/telop_waza/pt/whs00340.g4tx"],
               [
                 "zh_hans",
                 "data/dx11/menu/220_img/telop_waza/zh_hans/whs00340.g4tx"
@@ -2459,30 +2045,12 @@
             "model_g4mg": "data/common/chr/_waza/ev61_00200/ev61_00200.g4mg",
             "sound_cfg": "data/common/event_cfg/snd/ev61_00200_snd.cfg.bin",
             "telop_by_lang": [
-              [
-                "de",
-                "data/dx11/menu/220_img/telop_waza/de/who00200.g4tx"
-              ],
-              [
-                "en",
-                "data/dx11/menu/220_img/telop_waza/en/who00200.g4tx"
-              ],
-              [
-                "es",
-                "data/dx11/menu/220_img/telop_waza/es/who00200.g4tx"
-              ],
-              [
-                "fr",
-                "data/dx11/menu/220_img/telop_waza/fr/who00200.g4tx"
-              ],
-              [
-                "it",
-                "data/dx11/menu/220_img/telop_waza/it/who00200.g4tx"
-              ],
-              [
-                "pt",
-                "data/dx11/menu/220_img/telop_waza/pt/who00200.g4tx"
-              ],
+              ["de", "data/dx11/menu/220_img/telop_waza/de/who00200.g4tx"],
+              ["en", "data/dx11/menu/220_img/telop_waza/en/who00200.g4tx"],
+              ["es", "data/dx11/menu/220_img/telop_waza/es/who00200.g4tx"],
+              ["fr", "data/dx11/menu/220_img/telop_waza/fr/who00200.g4tx"],
+              ["it", "data/dx11/menu/220_img/telop_waza/it/who00200.g4tx"],
+              ["pt", "data/dx11/menu/220_img/telop_waza/pt/who00200.g4tx"],
               [
                 "zh_hans",
                 "data/dx11/menu/220_img/telop_waza/zh_hans/who00200.g4tx"
@@ -2534,30 +2102,12 @@
             "model_g4mg": "data/common/chr/_waza/ev60_00900/ev60_00900.g4mg",
             "sound_cfg": "data/common/event_cfg/snd/ev60_00900_snd.cfg.bin",
             "telop_by_lang": [
-              [
-                "de",
-                "data/dx11/menu/220_img/telop_waza/de/whs00900.g4tx"
-              ],
-              [
-                "en",
-                "data/dx11/menu/220_img/telop_waza/en/whs00900.g4tx"
-              ],
-              [
-                "es",
-                "data/dx11/menu/220_img/telop_waza/es/whs00900.g4tx"
-              ],
-              [
-                "fr",
-                "data/dx11/menu/220_img/telop_waza/fr/whs00900.g4tx"
-              ],
-              [
-                "it",
-                "data/dx11/menu/220_img/telop_waza/it/whs00900.g4tx"
-              ],
-              [
-                "pt",
-                "data/dx11/menu/220_img/telop_waza/pt/whs00900.g4tx"
-              ],
+              ["de", "data/dx11/menu/220_img/telop_waza/de/whs00900.g4tx"],
+              ["en", "data/dx11/menu/220_img/telop_waza/en/whs00900.g4tx"],
+              ["es", "data/dx11/menu/220_img/telop_waza/es/whs00900.g4tx"],
+              ["fr", "data/dx11/menu/220_img/telop_waza/fr/whs00900.g4tx"],
+              ["it", "data/dx11/menu/220_img/telop_waza/it/whs00900.g4tx"],
+              ["pt", "data/dx11/menu/220_img/telop_waza/pt/whs00900.g4tx"],
               [
                 "zh_hans",
                 "data/dx11/menu/220_img/telop_waza/zh_hans/whs00900.g4tx"
@@ -2609,30 +2159,12 @@
             "model_g4mg": "data/common/chr/_waza/ev60_01250/ev60_01250.g4mg",
             "sound_cfg": "data/common/event_cfg/snd/ev60_01250_snd.cfg.bin",
             "telop_by_lang": [
-              [
-                "de",
-                "data/dx11/menu/220_img/telop_waza/de/whs01250.g4tx"
-              ],
-              [
-                "en",
-                "data/dx11/menu/220_img/telop_waza/en/whs01250.g4tx"
-              ],
-              [
-                "es",
-                "data/dx11/menu/220_img/telop_waza/es/whs01250.g4tx"
-              ],
-              [
-                "fr",
-                "data/dx11/menu/220_img/telop_waza/fr/whs01250.g4tx"
-              ],
-              [
-                "it",
-                "data/dx11/menu/220_img/telop_waza/it/whs01250.g4tx"
-              ],
-              [
-                "pt",
-                "data/dx11/menu/220_img/telop_waza/pt/whs01250.g4tx"
-              ],
+              ["de", "data/dx11/menu/220_img/telop_waza/de/whs01250.g4tx"],
+              ["en", "data/dx11/menu/220_img/telop_waza/en/whs01250.g4tx"],
+              ["es", "data/dx11/menu/220_img/telop_waza/es/whs01250.g4tx"],
+              ["fr", "data/dx11/menu/220_img/telop_waza/fr/whs01250.g4tx"],
+              ["it", "data/dx11/menu/220_img/telop_waza/it/whs01250.g4tx"],
+              ["pt", "data/dx11/menu/220_img/telop_waza/pt/whs01250.g4tx"],
               [
                 "zh_hans",
                 "data/dx11/menu/220_img/telop_waza/zh_hans/whs01250.g4tx"
@@ -2684,30 +2216,12 @@
             "model_g4mg": "data/common/chr/_waza/ev60_00340/ev60_00340.g4mg",
             "sound_cfg": "data/common/event_cfg/snd/ev60_00340_snd.cfg.bin",
             "telop_by_lang": [
-              [
-                "de",
-                "data/dx11/menu/220_img/telop_waza/de/whs00340.g4tx"
-              ],
-              [
-                "en",
-                "data/dx11/menu/220_img/telop_waza/en/whs00340.g4tx"
-              ],
-              [
-                "es",
-                "data/dx11/menu/220_img/telop_waza/es/whs00340.g4tx"
-              ],
-              [
-                "fr",
-                "data/dx11/menu/220_img/telop_waza/fr/whs00340.g4tx"
-              ],
-              [
-                "it",
-                "data/dx11/menu/220_img/telop_waza/it/whs00340.g4tx"
-              ],
-              [
-                "pt",
-                "data/dx11/menu/220_img/telop_waza/pt/whs00340.g4tx"
-              ],
+              ["de", "data/dx11/menu/220_img/telop_waza/de/whs00340.g4tx"],
+              ["en", "data/dx11/menu/220_img/telop_waza/en/whs00340.g4tx"],
+              ["es", "data/dx11/menu/220_img/telop_waza/es/whs00340.g4tx"],
+              ["fr", "data/dx11/menu/220_img/telop_waza/fr/whs00340.g4tx"],
+              ["it", "data/dx11/menu/220_img/telop_waza/it/whs00340.g4tx"],
+              ["pt", "data/dx11/menu/220_img/telop_waza/pt/whs00340.g4tx"],
               [
                 "zh_hans",
                 "data/dx11/menu/220_img/telop_waza/zh_hans/whs00340.g4tx"
@@ -2759,30 +2273,12 @@
             "model_g4mg": "data/common/chr/_waza/ev60_00900/ev60_00900.g4mg",
             "sound_cfg": "data/common/event_cfg/snd/ev60_00900_snd.cfg.bin",
             "telop_by_lang": [
-              [
-                "de",
-                "data/dx11/menu/220_img/telop_waza/de/whs00900.g4tx"
-              ],
-              [
-                "en",
-                "data/dx11/menu/220_img/telop_waza/en/whs00900.g4tx"
-              ],
-              [
-                "es",
-                "data/dx11/menu/220_img/telop_waza/es/whs00900.g4tx"
-              ],
-              [
-                "fr",
-                "data/dx11/menu/220_img/telop_waza/fr/whs00900.g4tx"
-              ],
-              [
-                "it",
-                "data/dx11/menu/220_img/telop_waza/it/whs00900.g4tx"
-              ],
-              [
-                "pt",
-                "data/dx11/menu/220_img/telop_waza/pt/whs00900.g4tx"
-              ],
+              ["de", "data/dx11/menu/220_img/telop_waza/de/whs00900.g4tx"],
+              ["en", "data/dx11/menu/220_img/telop_waza/en/whs00900.g4tx"],
+              ["es", "data/dx11/menu/220_img/telop_waza/es/whs00900.g4tx"],
+              ["fr", "data/dx11/menu/220_img/telop_waza/fr/whs00900.g4tx"],
+              ["it", "data/dx11/menu/220_img/telop_waza/it/whs00900.g4tx"],
+              ["pt", "data/dx11/menu/220_img/telop_waza/pt/whs00900.g4tx"],
               [
                 "zh_hans",
                 "data/dx11/menu/220_img/telop_waza/zh_hans/whs00900.g4tx"
@@ -2834,30 +2330,12 @@
             "model_g4mg": "data/common/chr/_waza/ev60_01250/ev60_01250.g4mg",
             "sound_cfg": "data/common/event_cfg/snd/ev60_01250_snd.cfg.bin",
             "telop_by_lang": [
-              [
-                "de",
-                "data/dx11/menu/220_img/telop_waza/de/whs01250.g4tx"
-              ],
-              [
-                "en",
-                "data/dx11/menu/220_img/telop_waza/en/whs01250.g4tx"
-              ],
-              [
-                "es",
-                "data/dx11/menu/220_img/telop_waza/es/whs01250.g4tx"
-              ],
-              [
-                "fr",
-                "data/dx11/menu/220_img/telop_waza/fr/whs01250.g4tx"
-              ],
-              [
-                "it",
-                "data/dx11/menu/220_img/telop_waza/it/whs01250.g4tx"
-              ],
-              [
-                "pt",
-                "data/dx11/menu/220_img/telop_waza/pt/whs01250.g4tx"
-              ],
+              ["de", "data/dx11/menu/220_img/telop_waza/de/whs01250.g4tx"],
+              ["en", "data/dx11/menu/220_img/telop_waza/en/whs01250.g4tx"],
+              ["es", "data/dx11/menu/220_img/telop_waza/es/whs01250.g4tx"],
+              ["fr", "data/dx11/menu/220_img/telop_waza/fr/whs01250.g4tx"],
+              ["it", "data/dx11/menu/220_img/telop_waza/it/whs01250.g4tx"],
+              ["pt", "data/dx11/menu/220_img/telop_waza/pt/whs01250.g4tx"],
               [
                 "zh_hans",
                 "data/dx11/menu/220_img/telop_waza/zh_hans/whs01250.g4tx"
@@ -2909,30 +2387,12 @@
             "model_g4mg": "data/common/chr/_waza/ev60_00340/ev60_00340.g4mg",
             "sound_cfg": "data/common/event_cfg/snd/ev60_00340_snd.cfg.bin",
             "telop_by_lang": [
-              [
-                "de",
-                "data/dx11/menu/220_img/telop_waza/de/whs00340.g4tx"
-              ],
-              [
-                "en",
-                "data/dx11/menu/220_img/telop_waza/en/whs00340.g4tx"
-              ],
-              [
-                "es",
-                "data/dx11/menu/220_img/telop_waza/es/whs00340.g4tx"
-              ],
-              [
-                "fr",
-                "data/dx11/menu/220_img/telop_waza/fr/whs00340.g4tx"
-              ],
-              [
-                "it",
-                "data/dx11/menu/220_img/telop_waza/it/whs00340.g4tx"
-              ],
-              [
-                "pt",
-                "data/dx11/menu/220_img/telop_waza/pt/whs00340.g4tx"
-              ],
+              ["de", "data/dx11/menu/220_img/telop_waza/de/whs00340.g4tx"],
+              ["en", "data/dx11/menu/220_img/telop_waza/en/whs00340.g4tx"],
+              ["es", "data/dx11/menu/220_img/telop_waza/es/whs00340.g4tx"],
+              ["fr", "data/dx11/menu/220_img/telop_waza/fr/whs00340.g4tx"],
+              ["it", "data/dx11/menu/220_img/telop_waza/it/whs00340.g4tx"],
+              ["pt", "data/dx11/menu/220_img/telop_waza/pt/whs00340.g4tx"],
               [
                 "zh_hans",
                 "data/dx11/menu/220_img/telop_waza/zh_hans/whs00340.g4tx"
@@ -2998,30 +2458,12 @@
             "model_g4mg": "data/common/chr/_waza/ev60_00340/ev60_00340.g4mg",
             "sound_cfg": "data/common/event_cfg/snd/ev60_00340_snd.cfg.bin",
             "telop_by_lang": [
-              [
-                "de",
-                "data/dx11/menu/220_img/telop_waza/de/whs00340.g4tx"
-              ],
-              [
-                "en",
-                "data/dx11/menu/220_img/telop_waza/en/whs00340.g4tx"
-              ],
-              [
-                "es",
-                "data/dx11/menu/220_img/telop_waza/es/whs00340.g4tx"
-              ],
-              [
-                "fr",
-                "data/dx11/menu/220_img/telop_waza/fr/whs00340.g4tx"
-              ],
-              [
-                "it",
-                "data/dx11/menu/220_img/telop_waza/it/whs00340.g4tx"
-              ],
-              [
-                "pt",
-                "data/dx11/menu/220_img/telop_waza/pt/whs00340.g4tx"
-              ],
+              ["de", "data/dx11/menu/220_img/telop_waza/de/whs00340.g4tx"],
+              ["en", "data/dx11/menu/220_img/telop_waza/en/whs00340.g4tx"],
+              ["es", "data/dx11/menu/220_img/telop_waza/es/whs00340.g4tx"],
+              ["fr", "data/dx11/menu/220_img/telop_waza/fr/whs00340.g4tx"],
+              ["it", "data/dx11/menu/220_img/telop_waza/it/whs00340.g4tx"],
+              ["pt", "data/dx11/menu/220_img/telop_waza/pt/whs00340.g4tx"],
               [
                 "zh_hans",
                 "data/dx11/menu/220_img/telop_waza/zh_hans/whs00340.g4tx"
@@ -3073,30 +2515,12 @@
             "model_g4mg": "data/common/chr/_waza/ev61_00200/ev61_00200.g4mg",
             "sound_cfg": "data/common/event_cfg/snd/ev61_00200_snd.cfg.bin",
             "telop_by_lang": [
-              [
-                "de",
-                "data/dx11/menu/220_img/telop_waza/de/who00200.g4tx"
-              ],
-              [
-                "en",
-                "data/dx11/menu/220_img/telop_waza/en/who00200.g4tx"
-              ],
-              [
-                "es",
-                "data/dx11/menu/220_img/telop_waza/es/who00200.g4tx"
-              ],
-              [
-                "fr",
-                "data/dx11/menu/220_img/telop_waza/fr/who00200.g4tx"
-              ],
-              [
-                "it",
-                "data/dx11/menu/220_img/telop_waza/it/who00200.g4tx"
-              ],
-              [
-                "pt",
-                "data/dx11/menu/220_img/telop_waza/pt/who00200.g4tx"
-              ],
+              ["de", "data/dx11/menu/220_img/telop_waza/de/who00200.g4tx"],
+              ["en", "data/dx11/menu/220_img/telop_waza/en/who00200.g4tx"],
+              ["es", "data/dx11/menu/220_img/telop_waza/es/who00200.g4tx"],
+              ["fr", "data/dx11/menu/220_img/telop_waza/fr/who00200.g4tx"],
+              ["it", "data/dx11/menu/220_img/telop_waza/it/who00200.g4tx"],
+              ["pt", "data/dx11/menu/220_img/telop_waza/pt/who00200.g4tx"],
               [
                 "zh_hans",
                 "data/dx11/menu/220_img/telop_waza/zh_hans/who00200.g4tx"
@@ -3184,30 +2608,12 @@
             "model_g4mg": "data/common/chr/_waza/ev61_00200/ev61_00200.g4mg",
             "sound_cfg": "data/common/event_cfg/snd/ev61_00200_snd.cfg.bin",
             "telop_by_lang": [
-              [
-                "de",
-                "data/dx11/menu/220_img/telop_waza/de/who00200.g4tx"
-              ],
-              [
-                "en",
-                "data/dx11/menu/220_img/telop_waza/en/who00200.g4tx"
-              ],
-              [
-                "es",
-                "data/dx11/menu/220_img/telop_waza/es/who00200.g4tx"
-              ],
-              [
-                "fr",
-                "data/dx11/menu/220_img/telop_waza/fr/who00200.g4tx"
-              ],
-              [
-                "it",
-                "data/dx11/menu/220_img/telop_waza/it/who00200.g4tx"
-              ],
-              [
-                "pt",
-                "data/dx11/menu/220_img/telop_waza/pt/who00200.g4tx"
-              ],
+              ["de", "data/dx11/menu/220_img/telop_waza/de/who00200.g4tx"],
+              ["en", "data/dx11/menu/220_img/telop_waza/en/who00200.g4tx"],
+              ["es", "data/dx11/menu/220_img/telop_waza/es/who00200.g4tx"],
+              ["fr", "data/dx11/menu/220_img/telop_waza/fr/who00200.g4tx"],
+              ["it", "data/dx11/menu/220_img/telop_waza/it/who00200.g4tx"],
+              ["pt", "data/dx11/menu/220_img/telop_waza/pt/who00200.g4tx"],
               [
                 "zh_hans",
                 "data/dx11/menu/220_img/telop_waza/zh_hans/who00200.g4tx"
@@ -3259,30 +2665,12 @@
             "model_g4mg": "data/common/chr/_waza/ev60_01250/ev60_01250.g4mg",
             "sound_cfg": "data/common/event_cfg/snd/ev60_01250_snd.cfg.bin",
             "telop_by_lang": [
-              [
-                "de",
-                "data/dx11/menu/220_img/telop_waza/de/whs01250.g4tx"
-              ],
-              [
-                "en",
-                "data/dx11/menu/220_img/telop_waza/en/whs01250.g4tx"
-              ],
-              [
-                "es",
-                "data/dx11/menu/220_img/telop_waza/es/whs01250.g4tx"
-              ],
-              [
-                "fr",
-                "data/dx11/menu/220_img/telop_waza/fr/whs01250.g4tx"
-              ],
-              [
-                "it",
-                "data/dx11/menu/220_img/telop_waza/it/whs01250.g4tx"
-              ],
-              [
-                "pt",
-                "data/dx11/menu/220_img/telop_waza/pt/whs01250.g4tx"
-              ],
+              ["de", "data/dx11/menu/220_img/telop_waza/de/whs01250.g4tx"],
+              ["en", "data/dx11/menu/220_img/telop_waza/en/whs01250.g4tx"],
+              ["es", "data/dx11/menu/220_img/telop_waza/es/whs01250.g4tx"],
+              ["fr", "data/dx11/menu/220_img/telop_waza/fr/whs01250.g4tx"],
+              ["it", "data/dx11/menu/220_img/telop_waza/it/whs01250.g4tx"],
+              ["pt", "data/dx11/menu/220_img/telop_waza/pt/whs01250.g4tx"],
               [
                 "zh_hans",
                 "data/dx11/menu/220_img/telop_waza/zh_hans/whs01250.g4tx"
@@ -3334,30 +2722,12 @@
             "model_g4mg": "data/common/chr/_waza/ev60_01250/ev60_01250.g4mg",
             "sound_cfg": "data/common/event_cfg/snd/ev60_01250_snd.cfg.bin",
             "telop_by_lang": [
-              [
-                "de",
-                "data/dx11/menu/220_img/telop_waza/de/whs01250.g4tx"
-              ],
-              [
-                "en",
-                "data/dx11/menu/220_img/telop_waza/en/whs01250.g4tx"
-              ],
-              [
-                "es",
-                "data/dx11/menu/220_img/telop_waza/es/whs01250.g4tx"
-              ],
-              [
-                "fr",
-                "data/dx11/menu/220_img/telop_waza/fr/whs01250.g4tx"
-              ],
-              [
-                "it",
-                "data/dx11/menu/220_img/telop_waza/it/whs01250.g4tx"
-              ],
-              [
-                "pt",
-                "data/dx11/menu/220_img/telop_waza/pt/whs01250.g4tx"
-              ],
+              ["de", "data/dx11/menu/220_img/telop_waza/de/whs01250.g4tx"],
+              ["en", "data/dx11/menu/220_img/telop_waza/en/whs01250.g4tx"],
+              ["es", "data/dx11/menu/220_img/telop_waza/es/whs01250.g4tx"],
+              ["fr", "data/dx11/menu/220_img/telop_waza/fr/whs01250.g4tx"],
+              ["it", "data/dx11/menu/220_img/telop_waza/it/whs01250.g4tx"],
+              ["pt", "data/dx11/menu/220_img/telop_waza/pt/whs01250.g4tx"],
               [
                 "zh_hans",
                 "data/dx11/menu/220_img/telop_waza/zh_hans/whs01250.g4tx"
@@ -3409,30 +2779,12 @@
             "model_g4mg": "data/common/chr/_waza/ev61_00200/ev61_00200.g4mg",
             "sound_cfg": "data/common/event_cfg/snd/ev61_00200_snd.cfg.bin",
             "telop_by_lang": [
-              [
-                "de",
-                "data/dx11/menu/220_img/telop_waza/de/who00200.g4tx"
-              ],
-              [
-                "en",
-                "data/dx11/menu/220_img/telop_waza/en/who00200.g4tx"
-              ],
-              [
-                "es",
-                "data/dx11/menu/220_img/telop_waza/es/who00200.g4tx"
-              ],
-              [
-                "fr",
-                "data/dx11/menu/220_img/telop_waza/fr/who00200.g4tx"
-              ],
-              [
-                "it",
-                "data/dx11/menu/220_img/telop_waza/it/who00200.g4tx"
-              ],
-              [
-                "pt",
-                "data/dx11/menu/220_img/telop_waza/pt/who00200.g4tx"
-              ],
+              ["de", "data/dx11/menu/220_img/telop_waza/de/who00200.g4tx"],
+              ["en", "data/dx11/menu/220_img/telop_waza/en/who00200.g4tx"],
+              ["es", "data/dx11/menu/220_img/telop_waza/es/who00200.g4tx"],
+              ["fr", "data/dx11/menu/220_img/telop_waza/fr/who00200.g4tx"],
+              ["it", "data/dx11/menu/220_img/telop_waza/it/who00200.g4tx"],
+              ["pt", "data/dx11/menu/220_img/telop_waza/pt/who00200.g4tx"],
               [
                 "zh_hans",
                 "data/dx11/menu/220_img/telop_waza/zh_hans/who00200.g4tx"
@@ -3520,30 +2872,12 @@
             "model_g4mg": "data/common/chr/_waza/ev61_00200/ev61_00200.g4mg",
             "sound_cfg": "data/common/event_cfg/snd/ev61_00200_snd.cfg.bin",
             "telop_by_lang": [
-              [
-                "de",
-                "data/dx11/menu/220_img/telop_waza/de/who00200.g4tx"
-              ],
-              [
-                "en",
-                "data/dx11/menu/220_img/telop_waza/en/who00200.g4tx"
-              ],
-              [
-                "es",
-                "data/dx11/menu/220_img/telop_waza/es/who00200.g4tx"
-              ],
-              [
-                "fr",
-                "data/dx11/menu/220_img/telop_waza/fr/who00200.g4tx"
-              ],
-              [
-                "it",
-                "data/dx11/menu/220_img/telop_waza/it/who00200.g4tx"
-              ],
-              [
-                "pt",
-                "data/dx11/menu/220_img/telop_waza/pt/who00200.g4tx"
-              ],
+              ["de", "data/dx11/menu/220_img/telop_waza/de/who00200.g4tx"],
+              ["en", "data/dx11/menu/220_img/telop_waza/en/who00200.g4tx"],
+              ["es", "data/dx11/menu/220_img/telop_waza/es/who00200.g4tx"],
+              ["fr", "data/dx11/menu/220_img/telop_waza/fr/who00200.g4tx"],
+              ["it", "data/dx11/menu/220_img/telop_waza/it/who00200.g4tx"],
+              ["pt", "data/dx11/menu/220_img/telop_waza/pt/who00200.g4tx"],
               [
                 "zh_hans",
                 "data/dx11/menu/220_img/telop_waza/zh_hans/who00200.g4tx"
@@ -3595,30 +2929,12 @@
             "model_g4mg": "data/common/chr/_waza/ev60_01250/ev60_01250.g4mg",
             "sound_cfg": "data/common/event_cfg/snd/ev60_01250_snd.cfg.bin",
             "telop_by_lang": [
-              [
-                "de",
-                "data/dx11/menu/220_img/telop_waza/de/whs01250.g4tx"
-              ],
-              [
-                "en",
-                "data/dx11/menu/220_img/telop_waza/en/whs01250.g4tx"
-              ],
-              [
-                "es",
-                "data/dx11/menu/220_img/telop_waza/es/whs01250.g4tx"
-              ],
-              [
-                "fr",
-                "data/dx11/menu/220_img/telop_waza/fr/whs01250.g4tx"
-              ],
-              [
-                "it",
-                "data/dx11/menu/220_img/telop_waza/it/whs01250.g4tx"
-              ],
-              [
-                "pt",
-                "data/dx11/menu/220_img/telop_waza/pt/whs01250.g4tx"
-              ],
+              ["de", "data/dx11/menu/220_img/telop_waza/de/whs01250.g4tx"],
+              ["en", "data/dx11/menu/220_img/telop_waza/en/whs01250.g4tx"],
+              ["es", "data/dx11/menu/220_img/telop_waza/es/whs01250.g4tx"],
+              ["fr", "data/dx11/menu/220_img/telop_waza/fr/whs01250.g4tx"],
+              ["it", "data/dx11/menu/220_img/telop_waza/it/whs01250.g4tx"],
+              ["pt", "data/dx11/menu/220_img/telop_waza/pt/whs01250.g4tx"],
               [
                 "zh_hans",
                 "data/dx11/menu/220_img/telop_waza/zh_hans/whs01250.g4tx"
@@ -3670,30 +2986,12 @@
             "model_g4mg": "data/common/chr/_waza/ev60_01250/ev60_01250.g4mg",
             "sound_cfg": "data/common/event_cfg/snd/ev60_01250_snd.cfg.bin",
             "telop_by_lang": [
-              [
-                "de",
-                "data/dx11/menu/220_img/telop_waza/de/whs01250.g4tx"
-              ],
-              [
-                "en",
-                "data/dx11/menu/220_img/telop_waza/en/whs01250.g4tx"
-              ],
-              [
-                "es",
-                "data/dx11/menu/220_img/telop_waza/es/whs01250.g4tx"
-              ],
-              [
-                "fr",
-                "data/dx11/menu/220_img/telop_waza/fr/whs01250.g4tx"
-              ],
-              [
-                "it",
-                "data/dx11/menu/220_img/telop_waza/it/whs01250.g4tx"
-              ],
-              [
-                "pt",
-                "data/dx11/menu/220_img/telop_waza/pt/whs01250.g4tx"
-              ],
+              ["de", "data/dx11/menu/220_img/telop_waza/de/whs01250.g4tx"],
+              ["en", "data/dx11/menu/220_img/telop_waza/en/whs01250.g4tx"],
+              ["es", "data/dx11/menu/220_img/telop_waza/es/whs01250.g4tx"],
+              ["fr", "data/dx11/menu/220_img/telop_waza/fr/whs01250.g4tx"],
+              ["it", "data/dx11/menu/220_img/telop_waza/it/whs01250.g4tx"],
+              ["pt", "data/dx11/menu/220_img/telop_waza/pt/whs01250.g4tx"],
               [
                 "zh_hans",
                 "data/dx11/menu/220_img/telop_waza/zh_hans/whs01250.g4tx"
@@ -3745,30 +3043,12 @@
             "model_g4mg": "data/common/chr/_waza/ev61_00200/ev61_00200.g4mg",
             "sound_cfg": "data/common/event_cfg/snd/ev61_00200_snd.cfg.bin",
             "telop_by_lang": [
-              [
-                "de",
-                "data/dx11/menu/220_img/telop_waza/de/who00200.g4tx"
-              ],
-              [
-                "en",
-                "data/dx11/menu/220_img/telop_waza/en/who00200.g4tx"
-              ],
-              [
-                "es",
-                "data/dx11/menu/220_img/telop_waza/es/who00200.g4tx"
-              ],
-              [
-                "fr",
-                "data/dx11/menu/220_img/telop_waza/fr/who00200.g4tx"
-              ],
-              [
-                "it",
-                "data/dx11/menu/220_img/telop_waza/it/who00200.g4tx"
-              ],
-              [
-                "pt",
-                "data/dx11/menu/220_img/telop_waza/pt/who00200.g4tx"
-              ],
+              ["de", "data/dx11/menu/220_img/telop_waza/de/who00200.g4tx"],
+              ["en", "data/dx11/menu/220_img/telop_waza/en/who00200.g4tx"],
+              ["es", "data/dx11/menu/220_img/telop_waza/es/who00200.g4tx"],
+              ["fr", "data/dx11/menu/220_img/telop_waza/fr/who00200.g4tx"],
+              ["it", "data/dx11/menu/220_img/telop_waza/it/who00200.g4tx"],
+              ["pt", "data/dx11/menu/220_img/telop_waza/pt/who00200.g4tx"],
               [
                 "zh_hans",
                 "data/dx11/menu/220_img/telop_waza/zh_hans/who00200.g4tx"
@@ -3877,30 +3157,12 @@
             "model_g4mg": "data/common/chr/_waza/ev61_00200/ev61_00200.g4mg",
             "sound_cfg": "data/common/event_cfg/snd/ev61_00200_snd.cfg.bin",
             "telop_by_lang": [
-              [
-                "de",
-                "data/dx11/menu/220_img/telop_waza/de/who00200.g4tx"
-              ],
-              [
-                "en",
-                "data/dx11/menu/220_img/telop_waza/en/who00200.g4tx"
-              ],
-              [
-                "es",
-                "data/dx11/menu/220_img/telop_waza/es/who00200.g4tx"
-              ],
-              [
-                "fr",
-                "data/dx11/menu/220_img/telop_waza/fr/who00200.g4tx"
-              ],
-              [
-                "it",
-                "data/dx11/menu/220_img/telop_waza/it/who00200.g4tx"
-              ],
-              [
-                "pt",
-                "data/dx11/menu/220_img/telop_waza/pt/who00200.g4tx"
-              ],
+              ["de", "data/dx11/menu/220_img/telop_waza/de/who00200.g4tx"],
+              ["en", "data/dx11/menu/220_img/telop_waza/en/who00200.g4tx"],
+              ["es", "data/dx11/menu/220_img/telop_waza/es/who00200.g4tx"],
+              ["fr", "data/dx11/menu/220_img/telop_waza/fr/who00200.g4tx"],
+              ["it", "data/dx11/menu/220_img/telop_waza/it/who00200.g4tx"],
+              ["pt", "data/dx11/menu/220_img/telop_waza/pt/who00200.g4tx"],
               [
                 "zh_hans",
                 "data/dx11/menu/220_img/telop_waza/zh_hans/who00200.g4tx"
@@ -3952,30 +3214,12 @@
             "model_g4mg": "data/common/chr/_waza/ev60_01250/ev60_01250.g4mg",
             "sound_cfg": "data/common/event_cfg/snd/ev60_01250_snd.cfg.bin",
             "telop_by_lang": [
-              [
-                "de",
-                "data/dx11/menu/220_img/telop_waza/de/whs01250.g4tx"
-              ],
-              [
-                "en",
-                "data/dx11/menu/220_img/telop_waza/en/whs01250.g4tx"
-              ],
-              [
-                "es",
-                "data/dx11/menu/220_img/telop_waza/es/whs01250.g4tx"
-              ],
-              [
-                "fr",
-                "data/dx11/menu/220_img/telop_waza/fr/whs01250.g4tx"
-              ],
-              [
-                "it",
-                "data/dx11/menu/220_img/telop_waza/it/whs01250.g4tx"
-              ],
-              [
-                "pt",
-                "data/dx11/menu/220_img/telop_waza/pt/whs01250.g4tx"
-              ],
+              ["de", "data/dx11/menu/220_img/telop_waza/de/whs01250.g4tx"],
+              ["en", "data/dx11/menu/220_img/telop_waza/en/whs01250.g4tx"],
+              ["es", "data/dx11/menu/220_img/telop_waza/es/whs01250.g4tx"],
+              ["fr", "data/dx11/menu/220_img/telop_waza/fr/whs01250.g4tx"],
+              ["it", "data/dx11/menu/220_img/telop_waza/it/whs01250.g4tx"],
+              ["pt", "data/dx11/menu/220_img/telop_waza/pt/whs01250.g4tx"],
               [
                 "zh_hans",
                 "data/dx11/menu/220_img/telop_waza/zh_hans/whs01250.g4tx"
@@ -4027,30 +3271,12 @@
             "model_g4mg": "data/common/chr/_waza/ev60_01250/ev60_01250.g4mg",
             "sound_cfg": "data/common/event_cfg/snd/ev60_01250_snd.cfg.bin",
             "telop_by_lang": [
-              [
-                "de",
-                "data/dx11/menu/220_img/telop_waza/de/whs01250.g4tx"
-              ],
-              [
-                "en",
-                "data/dx11/menu/220_img/telop_waza/en/whs01250.g4tx"
-              ],
-              [
-                "es",
-                "data/dx11/menu/220_img/telop_waza/es/whs01250.g4tx"
-              ],
-              [
-                "fr",
-                "data/dx11/menu/220_img/telop_waza/fr/whs01250.g4tx"
-              ],
-              [
-                "it",
-                "data/dx11/menu/220_img/telop_waza/it/whs01250.g4tx"
-              ],
-              [
-                "pt",
-                "data/dx11/menu/220_img/telop_waza/pt/whs01250.g4tx"
-              ],
+              ["de", "data/dx11/menu/220_img/telop_waza/de/whs01250.g4tx"],
+              ["en", "data/dx11/menu/220_img/telop_waza/en/whs01250.g4tx"],
+              ["es", "data/dx11/menu/220_img/telop_waza/es/whs01250.g4tx"],
+              ["fr", "data/dx11/menu/220_img/telop_waza/fr/whs01250.g4tx"],
+              ["it", "data/dx11/menu/220_img/telop_waza/it/whs01250.g4tx"],
+              ["pt", "data/dx11/menu/220_img/telop_waza/pt/whs01250.g4tx"],
               [
                 "zh_hans",
                 "data/dx11/menu/220_img/telop_waza/zh_hans/whs01250.g4tx"
@@ -4102,30 +3328,12 @@
             "model_g4mg": "data/common/chr/_waza/ev61_00200/ev61_00200.g4mg",
             "sound_cfg": "data/common/event_cfg/snd/ev61_00200_snd.cfg.bin",
             "telop_by_lang": [
-              [
-                "de",
-                "data/dx11/menu/220_img/telop_waza/de/who00200.g4tx"
-              ],
-              [
-                "en",
-                "data/dx11/menu/220_img/telop_waza/en/who00200.g4tx"
-              ],
-              [
-                "es",
-                "data/dx11/menu/220_img/telop_waza/es/who00200.g4tx"
-              ],
-              [
-                "fr",
-                "data/dx11/menu/220_img/telop_waza/fr/who00200.g4tx"
-              ],
-              [
-                "it",
-                "data/dx11/menu/220_img/telop_waza/it/who00200.g4tx"
-              ],
-              [
-                "pt",
-                "data/dx11/menu/220_img/telop_waza/pt/who00200.g4tx"
-              ],
+              ["de", "data/dx11/menu/220_img/telop_waza/de/who00200.g4tx"],
+              ["en", "data/dx11/menu/220_img/telop_waza/en/who00200.g4tx"],
+              ["es", "data/dx11/menu/220_img/telop_waza/es/who00200.g4tx"],
+              ["fr", "data/dx11/menu/220_img/telop_waza/fr/who00200.g4tx"],
+              ["it", "data/dx11/menu/220_img/telop_waza/it/who00200.g4tx"],
+              ["pt", "data/dx11/menu/220_img/telop_waza/pt/who00200.g4tx"],
               [
                 "zh_hans",
                 "data/dx11/menu/220_img/telop_waza/zh_hans/who00200.g4tx"
@@ -4177,30 +3385,12 @@
             "model_g4mg": "data/common/chr/_waza/ev60_01250/ev60_01250.g4mg",
             "sound_cfg": "data/common/event_cfg/snd/ev60_01250_snd.cfg.bin",
             "telop_by_lang": [
-              [
-                "de",
-                "data/dx11/menu/220_img/telop_waza/de/whs01250.g4tx"
-              ],
-              [
-                "en",
-                "data/dx11/menu/220_img/telop_waza/en/whs01250.g4tx"
-              ],
-              [
-                "es",
-                "data/dx11/menu/220_img/telop_waza/es/whs01250.g4tx"
-              ],
-              [
-                "fr",
-                "data/dx11/menu/220_img/telop_waza/fr/whs01250.g4tx"
-              ],
-              [
-                "it",
-                "data/dx11/menu/220_img/telop_waza/it/whs01250.g4tx"
-              ],
-              [
-                "pt",
-                "data/dx11/menu/220_img/telop_waza/pt/whs01250.g4tx"
-              ],
+              ["de", "data/dx11/menu/220_img/telop_waza/de/whs01250.g4tx"],
+              ["en", "data/dx11/menu/220_img/telop_waza/en/whs01250.g4tx"],
+              ["es", "data/dx11/menu/220_img/telop_waza/es/whs01250.g4tx"],
+              ["fr", "data/dx11/menu/220_img/telop_waza/fr/whs01250.g4tx"],
+              ["it", "data/dx11/menu/220_img/telop_waza/it/whs01250.g4tx"],
+              ["pt", "data/dx11/menu/220_img/telop_waza/pt/whs01250.g4tx"],
               [
                 "zh_hans",
                 "data/dx11/menu/220_img/telop_waza/zh_hans/whs01250.g4tx"
@@ -4252,30 +3442,12 @@
             "model_g4mg": "data/common/chr/_waza/ev60_01250/ev60_01250.g4mg",
             "sound_cfg": "data/common/event_cfg/snd/ev60_01250_snd.cfg.bin",
             "telop_by_lang": [
-              [
-                "de",
-                "data/dx11/menu/220_img/telop_waza/de/whs01250.g4tx"
-              ],
-              [
-                "en",
-                "data/dx11/menu/220_img/telop_waza/en/whs01250.g4tx"
-              ],
-              [
-                "es",
-                "data/dx11/menu/220_img/telop_waza/es/whs01250.g4tx"
-              ],
-              [
-                "fr",
-                "data/dx11/menu/220_img/telop_waza/fr/whs01250.g4tx"
-              ],
-              [
-                "it",
-                "data/dx11/menu/220_img/telop_waza/it/whs01250.g4tx"
-              ],
-              [
-                "pt",
-                "data/dx11/menu/220_img/telop_waza/pt/whs01250.g4tx"
-              ],
+              ["de", "data/dx11/menu/220_img/telop_waza/de/whs01250.g4tx"],
+              ["en", "data/dx11/menu/220_img/telop_waza/en/whs01250.g4tx"],
+              ["es", "data/dx11/menu/220_img/telop_waza/es/whs01250.g4tx"],
+              ["fr", "data/dx11/menu/220_img/telop_waza/fr/whs01250.g4tx"],
+              ["it", "data/dx11/menu/220_img/telop_waza/it/whs01250.g4tx"],
+              ["pt", "data/dx11/menu/220_img/telop_waza/pt/whs01250.g4tx"],
               [
                 "zh_hans",
                 "data/dx11/menu/220_img/telop_waza/zh_hans/whs01250.g4tx"

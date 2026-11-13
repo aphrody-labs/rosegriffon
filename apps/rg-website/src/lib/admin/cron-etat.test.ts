@@ -9,7 +9,10 @@ import {
   type ExecutionBrute,
 } from "./cron-etat";
 
-const decrire = (nom: string, niveau: DescriptionTache["niveau"] = "admin"): DescriptionTache =>
+const decrire = (
+  nom: string,
+  niveau: DescriptionTache["niveau"] = "admin",
+): DescriptionTache =>
   ({
     nom,
     titre: `T ${nom}`,
@@ -21,7 +24,11 @@ const decrire = (nom: string, niveau: DescriptionTache["niveau"] = "admin"): Des
     dureeIndicative: null,
   }) as unknown as DescriptionTache;
 
-const ex = (tache: string, demarre_le: string, succes: boolean): ExecutionBrute => ({
+const ex = (
+  tache: string,
+  demarre_le: string,
+  succes: boolean,
+): ExecutionBrute => ({
   tache,
   demarre_le,
   duree_ms: 10,
@@ -50,33 +57,58 @@ describe("construireTaches", () => {
   ];
 
   test("alias d'historique : db est consignée sous db:sync", () => {
-    const t = construireTaches(catalogue, null, [ex("db:sync", "2026-10-17T02:00:00Z", true)]);
-    expect(t.find(x => x.nom === "db")?.dernier?.succes).toBe(true);
+    const t = construireTaches(catalogue, null, [
+      ex("db:sync", "2026-10-17T02:00:00Z", true),
+    ]);
+    expect(t.find((x) => x.nom === "db")?.dernier?.succes).toBe(true);
   });
 
   test("tâches du registre absentes du catalogue : ajoutées, lecture seule", () => {
-    const t = construireTaches(catalogue, { registre: ["warm", "x", "x-search"] }, []);
-    expect(t.map(x => x.nom)).toEqual(["db", "warm", "achillea:weekly-payout", "achillea:seasons", "x", "x-search"]);
-    expect(t.find(x => x.nom === "x")).toMatchObject({ niveau: "cli", famille: "autre" });
-    expect(t.find(x => x.nom === "x")?.motifBlocage).toContain("CLI");
+    const t = construireTaches(
+      catalogue,
+      { registre: ["warm", "x", "x-search"] },
+      [],
+    );
+    expect(t.map((x) => x.nom)).toEqual([
+      "db",
+      "warm",
+      "achillea:weekly-payout",
+      "achillea:seasons",
+      "x",
+      "x-search",
+    ]);
+    expect(t.find((x) => x.nom === "x")).toMatchObject({
+      niveau: "cli",
+      famille: "autre",
+    });
+    expect(t.find((x) => x.nom === "x")?.motifBlocage).toContain("CLI");
   });
 
   test("achillea:seasons et weekly-payout ne sont jamais lançables, même par un admin", () => {
     const t = construireTaches(catalogue, null, []);
     for (const nom of ["achillea:seasons", "achillea:weekly-payout"]) {
-      const tache = t.find(x => x.nom === nom)!;
+      const tache = t.find((x) => x.nom === nom)!;
       expect(tache.motifBlocage).toContain("financier");
       expect(peutLancerDepuisLeSite(tache, "admin")).toBe(false);
     }
   });
 
   test("tâche interdite du catalogue : motif repris", () => {
-    expect(construireTaches(catalogue, null, []).find(x => x.nom === "db")?.motifBlocage).toBe("dangereux");
+    expect(
+      construireTaches(catalogue, null, []).find((x) => x.nom === "db")
+        ?.motifBlocage,
+    ).toBe("dangereux");
   });
 
   test("hors serverless repris de la réponse de l'API", () => {
-    const t = construireTaches(catalogue, { horsServerless: { warm: "disque local" } }, []);
-    expect(t.find(x => x.nom === "warm")?.horsServerless).toBe("disque local");
+    const t = construireTaches(
+      catalogue,
+      { horsServerless: { warm: "disque local" } },
+      [],
+    );
+    expect(t.find((x) => x.nom === "warm")?.horsServerless).toBe(
+      "disque local",
+    );
   });
 });
 
@@ -92,10 +124,19 @@ describe("peutLancerDepuisLeSite", () => {
 
 describe("bilanTaches", () => {
   test("compte réussies, échecs et jamais exécutées", () => {
-    const t = construireTaches([decrire("a"), decrire("b"), decrire("c")], null, [
-      ex("a", "2026-10-17T10:00:00Z", true),
-      ex("b", "2026-10-17T10:00:00Z", false),
-    ]);
-    expect(bilanTaches(t)).toEqual({ total: 3, enEchec: 1, jamaisExecutees: 1, reussies: 1 });
+    const t = construireTaches(
+      [decrire("a"), decrire("b"), decrire("c")],
+      null,
+      [
+        ex("a", "2026-10-17T10:00:00Z", true),
+        ex("b", "2026-10-17T10:00:00Z", false),
+      ],
+    );
+    expect(bilanTaches(t)).toEqual({
+      total: 3,
+      enEchec: 1,
+      jamaisExecutees: 1,
+      reussies: 1,
+    });
   });
 });

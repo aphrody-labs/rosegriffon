@@ -32,7 +32,9 @@ export function formatLicenseNumber(year: number, seq: number): string {
 }
 
 /** Décompose un numéro de licence en `{ year, seq }`, ou `null` s'il est invalide. */
-export function parseLicenseNumber(licenseNumber: string): { year: number; seq: number } | null {
+export function parseLicenseNumber(
+  licenseNumber: string,
+): { year: number; seq: number } | null {
   const match = LICENSE_NUMBER_REGEX.exec(licenseNumber);
   if (!match) return null;
   return { year: Number(match[1]), seq: Number(match[2]) };
@@ -88,7 +90,8 @@ export function evaluateLicenseValidity(
   license: LicenseValidityInput,
   now: number = Date.now(),
 ): { valid: boolean; reason?: LicenseInvalidReason } {
-  if (license.status === LicenseStatus.Revoked) return { valid: false, reason: "revoked" };
+  if (license.status === LicenseStatus.Revoked)
+    return { valid: false, reason: "revoked" };
 
   const validUntilMs = toEpochMs(license.validUntil);
   if (validUntilMs <= now || license.status === LicenseStatus.Expired) {
@@ -103,17 +106,28 @@ export function evaluateLicenseValidity(
  * Utile pour des QR codes auto-vérifiables (sans aller-retour DB) ou des
  * webhooks signés. Renvoie une signature hexadécimale.
  */
-export async function signHmacSha256(payload: string, secret: string): Promise<string> {
+export async function signHmacSha256(
+  payload: string,
+  secret: string,
+): Promise<string> {
   const enc = new TextEncoder();
-  const key = await crypto.subtle.importKey("raw", enc.encode(secret), { name: "HMAC", hash: "SHA-256" }, false, [
-    "sign",
-  ]);
+  const key = await crypto.subtle.importKey(
+    "raw",
+    enc.encode(secret),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"],
+  );
   const sig = await crypto.subtle.sign("HMAC", key, enc.encode(payload));
   return bytesToHex(new Uint8Array(sig));
 }
 
 /** Vérifie une signature HMAC-SHA256 hexadécimale (comparaison à temps constant). */
-export async function verifyHmacSha256(payload: string, signature: string, secret: string): Promise<boolean> {
+export async function verifyHmacSha256(
+  payload: string,
+  signature: string,
+  secret: string,
+): Promise<boolean> {
   const expected = await signHmacSha256(payload, secret);
   return safeEqual(expected, signature);
 }

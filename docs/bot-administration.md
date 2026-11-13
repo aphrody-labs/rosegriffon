@@ -12,13 +12,13 @@ site, et **quatre pages** sous `/admin`.
 
 ## Ce que ça remplace
 
-| Avant | Maintenant |
-| --- | --- |
-| Réglages éditables seulement par slash command | `/admin/bot/reglages` — les six sections, avec des noms de salons au lieu de flocons |
-| Aucune vue de l'état du bot | `/admin/bot` — passerelle, latence, serveurs, mémoire, commandes |
-| Aucun inventaire des slash commands hors du code | `/admin/bot/commandes` — lu dans les processus, filtrable |
-| Classement visible seulement dans Discord, dix lignes à la fois | `/admin/bot/membres` — 283 profils, 4 tris, provenance de chaque XP |
-| Tâches cron déclenchables depuis Discord seulement | `/admin/cron` — catalogue, planification, déclenchement |
+| Avant                                                           | Maintenant                                                                           |
+| --------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| Réglages éditables seulement par slash command                  | `/admin/bot/reglages` — les six sections, avec des noms de salons au lieu de flocons |
+| Aucune vue de l'état du bot                                     | `/admin/bot` — passerelle, latence, serveurs, mémoire, commandes                     |
+| Aucun inventaire des slash commands hors du code                | `/admin/bot/commandes` — lu dans les processus, filtrable                            |
+| Classement visible seulement dans Discord, dix lignes à la fois | `/admin/bot/membres` — 283 profils, 4 tris, provenance de chaque XP                  |
+| Tâches cron déclenchables depuis Discord seulement              | `/admin/cron` — catalogue, planification, déclenchement                              |
 
 ---
 
@@ -55,7 +55,7 @@ différence n'est pas cosmétique.
 
 ```ts
 // Avec .partial() — les défauts sont matérialisés :
-SchemaNiveaux.partial().parse({ actif: false })
+SchemaNiveaux.partial().parse({ actif: false });
 // → { actif: false, annonce: "aucune", salonAnnonce: null, palierAnnonce: 5, … }
 ```
 
@@ -102,22 +102,22 @@ CI, avec le nom manquant dans le message.
 `apps/bot/src/lib/serveur-admin.ts`, démarré après `clientReady`, sur
 `127.0.0.1` uniquement.
 
-| Profil | Port | Unité |
-| --- | --- | --- |
-| `rg` | 3007 | `rg-bot.service` |
+| Profil | Port | Unité            |
+| ------ | ---- | ---------------- |
+| `rg`   | 3007 | `rg-bot.service` |
 
 Surchargeable par `BOT_ADMIN_PORT` (poste de développement).
 
 ### Routes
 
-| Route | Rôle |
-| --- | --- |
-| `GET /sante` | Sonde ouverte : `{ ok, profil, pret, uptimeSecondes }` |
-| `GET /etat` | Passerelle, latence, guildes servies et **absentes**, commandes, mémoire |
-| `GET /commandes` | L'arbre `discordx` aplati — chemin, description, options typées |
-| `GET /guildes/:id/salons` | Salons textuels, annonces, forums et catégories |
-| `GET /guildes/:id/roles` | Rôles hors `@everyone`, du plus haut au plus bas |
-| `POST /reglages/:id/invalider` | Vide le cache de réglages (seule route non idempotente) |
+| Route                          | Rôle                                                                     |
+| ------------------------------ | ------------------------------------------------------------------------ |
+| `GET /sante`                   | Sonde ouverte : `{ ok, profil, pret, uptimeSecondes }`                   |
+| `GET /etat`                    | Passerelle, latence, guildes servies et **absentes**, commandes, mémoire |
+| `GET /commandes`               | L'arbre `discordx` aplati — chemin, description, options typées          |
+| `GET /guildes/:id/salons`      | Salons textuels, annonces, forums et catégories                          |
+| `GET /guildes/:id/roles`       | Rôles hors `@everyone`, du plus haut au plus bas                         |
+| `POST /reglages/:id/invalider` | Vide le cache de réglages (seule route non idempotente)                  |
 
 ### Trois règles, trois raisons
 
@@ -151,16 +151,16 @@ site : ce sont des données, elles ont une table.
 
 Toutes les routes sont gardées par `requireApiAdmin()` (rôle `admin` ou `staff`).
 
-| Route | Méthode | Effet |
-| --- | --- | --- |
-| `/api/admin/bot/etat` | `GET` | État des deux bots + de l'ordonnanceur |
-| `/api/admin/bot/commandes` | `GET` | Catalogue fusionné des deux profils |
-| `/api/admin/bot/annuaire?guild=` | `GET` | Salons et rôles, pour peupler les sélecteurs |
-| `/api/admin/bot/reglages?guild=` | `GET` | Document courant + manques par section |
-| `/api/admin/bot/reglages?guild=` | `PATCH` | Modification **partielle** |
-| `/api/admin/bot/reglages?guild=` | `DELETE` | Rétablit les défauts — rôle `admin` **strict** |
-| `/api/admin/cron` | `GET` | État du démon, catalogue, télémétrie Discord |
-| `/api/admin/cron/lancer` | `POST` | Déclenche une tâche, après vérification du rôle |
+| Route                            | Méthode  | Effet                                           |
+| -------------------------------- | -------- | ----------------------------------------------- |
+| `/api/admin/bot/etat`            | `GET`    | État des deux bots + de l'ordonnanceur          |
+| `/api/admin/bot/commandes`       | `GET`    | Catalogue fusionné des deux profils             |
+| `/api/admin/bot/annuaire?guild=` | `GET`    | Salons et rôles, pour peupler les sélecteurs    |
+| `/api/admin/bot/reglages?guild=` | `GET`    | Document courant + manques par section          |
+| `/api/admin/bot/reglages?guild=` | `PATCH`  | Modification **partielle**                      |
+| `/api/admin/bot/reglages?guild=` | `DELETE` | Rétablit les défauts — rôle `admin` **strict**  |
+| `/api/admin/cron`                | `GET`    | État du démon, catalogue, télémétrie Discord    |
+| `/api/admin/cron/lancer`         | `POST`   | Déclenche une tâche, après vérification du rôle |
 
 ### Pourquoi `PATCH` et jamais `PUT`
 
@@ -187,13 +187,13 @@ empêché personne de poster la requête à la main.
 
 ## Les pages
 
-| Chemin | Contenu |
-| --- | --- |
-| `/admin/bot` | Les deux profils (identité, uptime, latence, serveurs, mémoire), les compteurs de communauté, et ce qu'il reste à configurer |
-| `/admin/bot/membres` | Classement paginé : 4 tris, rang calculé en SQL, **provenance de chaque XP** |
-| `/admin/bot/reglages` | Les six sections, un bouton d’enregistrement chacune |
-| `/admin/bot/commandes` | Catalogue filtrable par texte, profil et portée |
-| `/admin/cron` | Les 22 tâches par famille, avec leur planification et leur bouton |
+| Chemin                 | Contenu                                                                                                                      |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `/admin/bot`           | Les deux profils (identité, uptime, latence, serveurs, mémoire), les compteurs de communauté, et ce qu'il reste à configurer |
+| `/admin/bot/membres`   | Classement paginé : 4 tris, rang calculé en SQL, **provenance de chaque XP**                                                 |
+| `/admin/bot/reglages`  | Les six sections, un bouton d’enregistrement chacune                                                                         |
+| `/admin/bot/commandes` | Catalogue filtrable par texte, profil et portée                                                                              |
+| `/admin/cron`          | Les 22 tâches par famille, avec leur planification et leur bouton                                                            |
 
 ### `/admin/bot/membres` — la provenance est une donnée
 
@@ -208,7 +208,7 @@ d'API porte `totalXp`, l'entrée de classement porte `userID`, et l'absence
 d'archive signale l'historique. Voir `couvertureImport()` et `provenanceDe()`
 dans `apps/website/src/lib/bot/membres.ts`.
 
- **Coupure serveur / client obligatoire.** `lib/bot/membres.ts` porte
+**Coupure serveur / client obligatoire.** `lib/bot/membres.ts` porte
 `import "server-only"` (il ouvre le pool Postgres) ; le tableau est un îlot
 `"use client"` qui a besoin des mêmes libellés et des mêmes types. Ceux-ci
 vivent donc dans `lib/bot/membres-shared.ts`, que l'îlot importe DIRECTEMENT.

@@ -24,7 +24,12 @@ export function lireConsentement(maintenant = Date.now()): Consentement | null {
     const brut = localStorage.getItem(CLE);
     if (!brut) return null;
     const c = JSON.parse(brut) as Partial<Consentement>;
-    if (typeof c.mesure !== "boolean" || typeof c.pub !== "boolean" || typeof c.le !== "number") return null;
+    if (
+      typeof c.mesure !== "boolean" ||
+      typeof c.pub !== "boolean" ||
+      typeof c.le !== "number"
+    )
+      return null;
     if (maintenant - c.le > DUREE_MS) return null;
     return { mesure: c.mesure, pub: c.pub, le: c.le };
   } catch {
@@ -32,7 +37,10 @@ export function lireConsentement(maintenant = Date.now()): Consentement | null {
   }
 }
 
-export function enregistrerConsentement(choix: { mesure: boolean; pub: boolean }): Consentement {
+export function enregistrerConsentement(choix: {
+  mesure: boolean;
+  pub: boolean;
+}): Consentement {
   const c = { ...choix, le: Date.now() };
   try {
     localStorage.setItem(CLE, JSON.stringify(c));
@@ -69,12 +77,14 @@ export function instantaneConsentement(): Consentement | null {
   } catch {
     brut = null;
   }
-  if (!dernier || dernier.brut !== brut) dernier = { brut, valeur: lireConsentement() };
+  if (!dernier || dernier.brut !== brut)
+    dernier = { brut, valeur: lireConsentement() };
   return dernier.valeur;
 }
 
 /** Côté serveur, le choix est inconnu : ni bandeau ni traceur au premier rendu. */
-export const instantaneServeur = (): Consentement | null | undefined => undefined;
+export const instantaneServeur = (): Consentement | null | undefined =>
+  undefined;
 
 export function ouvrirReglagesConsentement() {
   dispatchEvent(new Event(EVENEMENT_OUVRIR));

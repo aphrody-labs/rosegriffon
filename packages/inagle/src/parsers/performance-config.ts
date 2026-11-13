@@ -80,7 +80,9 @@ function parseContent(content: any): ParsedPerformance[] {
 // Loaders
 // ============================================================================
 
-export async function loadPerformanceConfigAsync(dataPath: string = DATA_ROOT): Promise<ParsedPerformance[] | null> {
+export async function loadPerformanceConfigAsync(
+  dataPath: string = DATA_ROOT,
+): Promise<ParsedPerformance[] | null> {
   const filename = findConfigFile("soccer", "soccer_performance_config");
   if (!filename) return null;
 
@@ -89,7 +91,9 @@ export async function loadPerformanceConfigAsync(dataPath: string = DATA_ROOT): 
   return content ? parseContent(content) : null;
 }
 
-export async function buildPerformanceDatabase(dataPath: string = DATA_ROOT): Promise<PerformanceDatabase> {
+export async function buildPerformanceDatabase(
+  dataPath: string = DATA_ROOT,
+): Promise<PerformanceDatabase> {
   const performances = (await loadPerformanceConfigAsync(dataPath)) || [];
   const byId = new Map<string, ParsedPerformance>();
   for (const p of performances) byId.set(p.performanceId, p);

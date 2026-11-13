@@ -1,21 +1,31 @@
 import type { Kysely } from "kysely";
 import type { Database } from "@rosegriffon/db/schema";
-import { normalizeNames, resolveDiscordAvatarUrl } from "@rosegriffon/achillea-core";
+import {
+  normalizeNames,
+  resolveDiscordAvatarUrl,
+} from "@rosegriffon/achillea-core";
 import { COUNTRIES } from "@rosegriffon/achillea-core/reference";
 import type { ClanDTO } from "./model";
 
 /** Codes pays acceptés pour l'origine et les langues d'un clan (référentiel partagé). */
-export const CODES_PAYS_CLAN: ReadonlySet<string> = new Set(COUNTRIES.map(pays => pays.code));
+export const CODES_PAYS_CLAN: ReadonlySet<string> = new Set(
+  COUNTRIES.map((pays) => pays.code),
+);
 
 /**
  * Valide origine et langues : codes du référentiel, dédoublonnés, au moins une
  * langue. Rend le message d'erreur, ou `null` si tout est valide.
  */
-export function erreurPaysClan(patch: { origin?: string; languages?: string[] }): string | null {
-  if (patch.origin !== undefined && !CODES_PAYS_CLAN.has(patch.origin)) return "Origine inconnue.";
+export function erreurPaysClan(patch: {
+  origin?: string;
+  languages?: string[];
+}): string | null {
+  if (patch.origin !== undefined && !CODES_PAYS_CLAN.has(patch.origin))
+    return "Origine inconnue.";
   if (patch.languages !== undefined) {
     if (patch.languages.length === 0) return "Choisis au moins une langue.";
-    if (patch.languages.some(code => !CODES_PAYS_CLAN.has(code))) return "Langue inconnue.";
+    if (patch.languages.some((code) => !CODES_PAYS_CLAN.has(code)))
+      return "Langue inconnue.";
   }
   return null;
 }
@@ -39,7 +49,10 @@ type ClanUpdate = {
   languages?: string[];
 };
 
-function socialUrl(value: string, platform: "x" | "instagram" | "tiktok"): string | null {
+function socialUrl(
+  value: string,
+  platform: "x" | "instagram" | "tiktok",
+): string | null {
   try {
     const parsed = new URL(value);
     const host = parsed.hostname.replace(/^www\./, "");
@@ -47,7 +60,10 @@ function socialUrl(value: string, platform: "x" | "instagram" | "tiktok"): strin
     if (parts.length < 1) return null;
     let username = parts[0];
     if (!username) return null;
-    const matches = platform === "x" ? host === "x.com" || host === "twitter.com" : host === `${platform}.com`;
+    const matches =
+      platform === "x"
+        ? host === "x.com" || host === "twitter.com"
+        : host === `${platform}.com`;
     if (!matches) return null;
     if (platform === "tiktok") username = username.replace(/^@/, "");
     if (!/^[\w.-]{1,30}$/.test(username)) return null;
@@ -63,7 +79,13 @@ function socialUrl(value: string, platform: "x" | "instagram" | "tiktok"): strin
 
 export abstract class ClanService {
   private static user(
-    row: { id: string; display_name: string; username: string | null; avatar: string | null; role: number },
+    row: {
+      id: string;
+      display_name: string;
+      username: string | null;
+      avatar: string | null;
+      role: number;
+    },
     clanId: number | null,
   ) {
     return {
@@ -82,7 +104,12 @@ export abstract class ClanService {
       .select(["clan_id", "role"])
       .where("user_id", "=", actorId)
       .executeTakeFirst();
-    if (!membership) return { ok: false as const, status: 403 as const, message: "Vous n'êtes pas dans un clan" };
+    if (!membership)
+      return {
+        ok: false as const,
+        status: 403 as const,
+        message: "Vous n'êtes pas dans un clan",
+      };
     if (Number(membership.role) < CLAN_MANAGER_ROLE) {
       return {
         ok: false as const,
@@ -95,7 +122,11 @@ export abstract class ClanService {
 
   private static async clanProjection(db: Kysely<Database>, clanId: number) {
     const [clan, experience, captain, count] = await Promise.all([
-      db.selectFrom("clan").selectAll().where("id", "=", clanId).executeTakeFirstOrThrow(),
+      db
+        .selectFrom("clan")
+        .selectAll()
+        .where("id", "=", clanId)
+        .executeTakeFirstOrThrow(),
       db
         .selectFrom("clan_experience")
         .select(["current_level", "total_xp"])
@@ -136,7 +167,10 @@ export abstract class ClanService {
       createdAt: clan.created_at,
       languages: clan.languages ?? [],
       origin: clan.origin ?? "",
-      experience: { currentLevel: Number(experience?.current_level ?? 0), totalXp: Number(experience?.total_xp ?? 0) },
+      experience: {
+        currentLevel: Number(experience?.current_level ?? 0),
+        totalXp: Number(experience?.total_xp ?? 0),
+      },
       membersCount: Number(count.count),
       president: captain
         ? this.user(captain, clanId)
@@ -152,16 +186,20 @@ export abstract class ClanService {
   }
 
   private static async users(db: Kysely<Database>, ids: string[]) {
-    if (ids.length === 0) return new Map<string, ReturnType<typeof ClanService.user>>();
+    if (ids.length === 0)
+      return new Map<string, ReturnType<typeof ClanService.user>>();
     const rows = await db
       .selectFrom("user")
       .select(["id", "display_name", "username", "avatar", "role"])
       .where("id", "in", [...new Set(ids)])
       .execute();
-    return new Map(rows.map(row => [row.id, ClanService.user(row, null)]));
+    return new Map(rows.map((row) => [row.id, ClanService.user(row, null)]));
   }
 
-  public static async listInvitesForManager(db: Kysely<Database>, actorId: string) {
+  public static async listInvitesForManager(
+    db: Kysely<Database>,
+    actorId: string,
+  ) {
     const access = await ClanService.managedClanId(db, actorId);
     if (!access.ok) return access;
     const invitations = await db
@@ -170,12 +208,14 @@ export abstract class ClanService {
       .where("clan_id", "=", access.clanId)
       .orderBy("created_at", "asc")
       .execute();
-    const inviterIds = [...new Set(invitations.map(invite => invite.inviter_id))];
+    const inviterIds = [
+      ...new Set(invitations.map((invite) => invite.inviter_id)),
+    ];
     const [clan, users, members, histories] = await Promise.all([
       ClanService.clanProjection(db, access.clanId),
       ClanService.users(
         db,
-        invitations.flatMap(invite => [invite.user_id, invite.inviter_id]),
+        invitations.flatMap((invite) => [invite.user_id, invite.inviter_id]),
       ),
       inviterIds.length
         ? db
@@ -195,16 +235,21 @@ export abstract class ClanService {
             .execute()
         : [],
     ]);
-    const memberByUser = new Map(members.map(member => [member.user_id, member]));
+    const memberByUser = new Map(
+      members.map((member) => [member.user_id, member]),
+    );
     const historyByUser = new Map<string, (typeof histories)[number]>();
     for (const history of histories)
-      if (!historyByUser.has(history.user_id)) historyByUser.set(history.user_id, history);
+      if (!historyByUser.has(history.user_id))
+        historyByUser.set(history.user_id, history);
     return {
       ok: true as const,
-      data: invitations.flatMap(invite => {
+      data: invitations.flatMap((invite) => {
         const target = users.get(invite.user_id);
         const inviter = users.get(invite.inviter_id);
-        const membership = memberByUser.get(invite.inviter_id) ?? historyByUser.get(invite.inviter_id);
+        const membership =
+          memberByUser.get(invite.inviter_id) ??
+          historyByUser.get(invite.inviter_id);
         if (!target || !inviter || !membership) return [];
         return [
           {
@@ -213,8 +258,13 @@ export abstract class ClanService {
             clan,
             inviter: {
               clanRole: Number(membership.role),
-              distinctions: "distinctions" in membership ? (membership.distinctions ?? []) : [],
-              clanFameContributed: Number(membership.clan_fame_contributed ?? 0),
+              distinctions:
+                "distinctions" in membership
+                  ? (membership.distinctions ?? [])
+                  : [],
+              clanFameContributed: Number(
+                membership.clan_fame_contributed ?? 0,
+              ),
               createdAt: membership.created_at,
               updatedAt: membership.updated_at,
               user: { ...inviter, clanId: access.clanId },
@@ -230,7 +280,10 @@ export abstract class ClanService {
     };
   }
 
-  public static async listApplicationsForManager(db: Kysely<Database>, actorId: string) {
+  public static async listApplicationsForManager(
+    db: Kysely<Database>,
+    actorId: string,
+  ) {
     const access = await ClanService.managedClanId(db, actorId);
     if (!access.ok) return access;
     const applications = await db
@@ -243,12 +296,12 @@ export abstract class ClanService {
       ClanService.clanProjection(db, access.clanId),
       ClanService.users(
         db,
-        applications.map(application => application.user_id),
+        applications.map((application) => application.user_id),
       ),
     ]);
     return {
       ok: true as const,
-      data: applications.flatMap(application => {
+      data: applications.flatMap((application) => {
         const user = users.get(application.user_id);
         return user
           ? [
@@ -267,12 +320,18 @@ export abstract class ClanService {
   }
 
   private static graphemeCount(value: string): number {
-    return Array.from(new Intl.Segmenter(undefined, { granularity: "grapheme" }).segment(value)).length;
+    return Array.from(
+      new Intl.Segmenter(undefined, { granularity: "grapheme" }).segment(value),
+    ).length;
   }
 
   public static async validateName(db: Kysely<Database>, name: string) {
     const normalizedName = normalizeNames(name);
-    if (this.graphemeCount(name) < 3 || this.graphemeCount(name) > 30 || !normalizedName) {
+    if (
+      this.graphemeCount(name) < 3 ||
+      this.graphemeCount(name) > 30 ||
+      !normalizedName
+    ) {
       return { valid: false as const, code: "INVALID_NAME" as const };
     }
     const duplicate = await db
@@ -280,10 +339,15 @@ export abstract class ClanService {
       .select("id")
       .where("normalized_name", "=", normalizedName)
       .executeTakeFirst();
-    return duplicate ? { valid: false as const, code: "NAME_TAKEN" as const } : { valid: true as const };
+    return duplicate
+      ? { valid: false as const, code: "NAME_TAKEN" as const }
+      : { valid: true as const };
   }
 
-  public static async validateShortName(db: Kysely<Database>, shortName: string) {
+  public static async validateShortName(
+    db: Kysely<Database>,
+    shortName: string,
+  ) {
     const normalizedShortName = normalizeNames(shortName);
     if (
       this.graphemeCount(shortName) < 2 ||
@@ -298,15 +362,37 @@ export abstract class ClanService {
       .select("id")
       .where("normalized_short_name", "=", normalizedShortName)
       .executeTakeFirst();
-    return duplicate ? { valid: false as const, code: "SHORTNAME_TAKEN" as const } : { valid: true as const };
+    return duplicate
+      ? { valid: false as const, code: "SHORTNAME_TAKEN" as const }
+      : { valid: true as const };
   }
 
-  public static async update(db: Kysely<Database>, clanId: number, actorId: string, patch: ClanUpdate) {
-    const result = await db.transaction().execute(async trx => {
-      const actor = await trx.selectFrom("user").select("role").where("id", "=", actorId).executeTakeFirst();
-      if (!actor) return { ok: false as const, status: 401, message: "Authentication required" };
-      const clan = await trx.selectFrom("clan").selectAll().where("id", "=", clanId).forUpdate().executeTakeFirst();
-      if (!clan) return { ok: false as const, status: 404, message: "Clan not found" };
+  public static async update(
+    db: Kysely<Database>,
+    clanId: number,
+    actorId: string,
+    patch: ClanUpdate,
+  ) {
+    const result = await db.transaction().execute(async (trx) => {
+      const actor = await trx
+        .selectFrom("user")
+        .select("role")
+        .where("id", "=", actorId)
+        .executeTakeFirst();
+      if (!actor)
+        return {
+          ok: false as const,
+          status: 401,
+          message: "Authentication required",
+        };
+      const clan = await trx
+        .selectFrom("clan")
+        .selectAll()
+        .where("id", "=", clanId)
+        .forUpdate()
+        .executeTakeFirst();
+      if (!clan)
+        return { ok: false as const, status: 404, message: "Clan not found" };
       const membership = await trx
         .selectFrom("clan_member")
         .select("role")
@@ -315,13 +401,22 @@ export abstract class ClanService {
         .executeTakeFirst();
       const isAdmin = Number(actor.role ?? 0) >= 2;
       if (!isAdmin && (!membership || Number(membership.role) < 3))
-        return { ok: false as const, status: 403, message: "Reserved for clan captain or administrator" };
+        return {
+          ok: false as const,
+          status: 403,
+          message: "Reserved for clan captain or administrator",
+        };
       if (!isAdmin && patch.isInactive !== undefined)
-        return { ok: false as const, status: 403, message: "Only administrators can change inactivity" };
+        return {
+          ok: false as const,
+          status: 403,
+          message: "Only administrators can change inactivity",
+        };
       // Masquer reste ouvert au Président (bouton « Clan caché » de `/clan manage` dans
       // l'ancien bot) ; seule l'inactivité est une décision d'administration.
       const erreurPays = erreurPaysClan(patch);
-      if (erreurPays) return { ok: false as const, status: 400, message: erreurPays };
+      if (erreurPays)
+        return { ok: false as const, status: 400, message: erreurPays };
 
       let name = clan.name;
       let normalizedName = clan.normalized_name;
@@ -332,15 +427,23 @@ export abstract class ClanService {
             ok: false as const,
             status: 400,
             message:
-              validation.code === "NAME_TAKEN" ? "Ce nom de clan est déjà pris." : "Nom invalide (3 à 30 caractères).",
+              validation.code === "NAME_TAKEN"
+                ? "Ce nom de clan est déjà pris."
+                : "Nom invalide (3 à 30 caractères).",
           };
         name = patch.name;
         normalizedName = normalizeNames(patch.name);
       }
       let shortenedName = clan.shortened_name;
       let normalizedShortName = clan.normalized_short_name;
-      if (patch.shortenedName !== undefined && patch.shortenedName !== clan.shortened_name) {
-        const validation = await this.validateShortName(trx, patch.shortenedName);
+      if (
+        patch.shortenedName !== undefined &&
+        patch.shortenedName !== clan.shortened_name
+      ) {
+        const validation = await this.validateShortName(
+          trx,
+          patch.shortenedName,
+        );
         if (!validation.valid)
           return {
             ok: false as const,
@@ -353,11 +456,22 @@ export abstract class ClanService {
         shortenedName = patch.shortenedName;
         normalizedShortName = normalizeNames(patch.shortenedName);
       }
-      if (patch.clanBiography !== undefined && patch.clanBiography.length > 1500)
-        return { ok: false as const, status: 400, message: "Biographie trop longue (1500 caractères max)." };
+      if (
+        patch.clanBiography !== undefined &&
+        patch.clanBiography.length > 1500
+      )
+        return {
+          ok: false as const,
+          status: 400,
+          message: "Biographie trop longue (1500 caractères max).",
+        };
       let avatarUrl = clan.clan_avatar_url;
-      if (patch.clanAvatarUrl !== undefined && patch.clanAvatarUrl !== clan.clan_avatar_url) {
-        if (!patch.clanAvatarUrl) return { ok: false as const, status: 400, message: "Logo invalide." };
+      if (
+        patch.clanAvatarUrl !== undefined &&
+        patch.clanAvatarUrl !== clan.clan_avatar_url
+      ) {
+        if (!patch.clanAvatarUrl)
+          return { ok: false as const, status: 400, message: "Logo invalide." };
         const duplicate = await trx
           .selectFrom("clan")
           .select("id")
@@ -365,7 +479,11 @@ export abstract class ClanService {
           .where("id", "!=", clanId)
           .executeTakeFirst();
         if (duplicate)
-          return { ok: false as const, status: 400, message: "Cette image est déjà utilisée par un autre clan." };
+          return {
+            ok: false as const,
+            status: 400,
+            message: "Cette image est déjà utilisée par un autre clan.",
+          };
         avatarUrl = patch.clanAvatarUrl;
       }
       const social = (
@@ -377,7 +495,10 @@ export abstract class ClanService {
         const input = value ?? "";
         if (!input.trim()) return null;
         const canonical = socialUrl(input, platform);
-        if (!canonical) throw new Error(`Lien ${platform === "x" ? "X/Twitter" : platform} invalide.`);
+        if (!canonical)
+          throw new Error(
+            `Lien ${platform === "x" ? "X/Twitter" : platform} invalide.`,
+          );
         return canonical;
       };
       let xUrl: string | null;
@@ -385,13 +506,18 @@ export abstract class ClanService {
       let tiktokUrl: string | null;
       try {
         xUrl = social(patch.xUrl, "x", clan.x_url);
-        instagramUrl = social(patch.instagramUrl, "instagram", clan.instagram_url);
+        instagramUrl = social(
+          patch.instagramUrl,
+          "instagram",
+          clan.instagram_url,
+        );
         tiktokUrl = social(patch.tiktokUrl, "tiktok", clan.tiktok_url);
       } catch (error) {
         return {
           ok: false as const,
           status: 400,
-          message: error instanceof Error ? error.message : "Lien social invalide.",
+          message:
+            error instanceof Error ? error.message : "Lien social invalide.",
         };
       }
       const updated = await trx
@@ -407,11 +533,14 @@ export abstract class ClanService {
           instagram_url: instagramUrl,
           tiktok_url: tiktokUrl,
           is_recruiting: patch.isRecruiting ?? clan.is_recruiting,
-          auto_accept_members: patch.autoAcceptMembers ?? clan.auto_accept_members,
+          auto_accept_members:
+            patch.autoAcceptMembers ?? clan.auto_accept_members,
           is_hidden: patch.isHidden ?? clan.is_hidden,
           is_inactive: patch.isInactive ?? clan.is_inactive,
           origin: patch.origin ?? clan.origin,
-          languages: patch.languages ? [...new Set(patch.languages)] : clan.languages,
+          languages: patch.languages
+            ? [...new Set(patch.languages)]
+            : clan.languages,
           updated_at: new Date(),
         })
         .where("id", "=", clanId)
@@ -441,7 +570,11 @@ export abstract class ClanService {
     page = 1,
     pageSize = 50,
   ): Promise<{ data: ClanDTO[]; count: number }> {
-    const base = db.selectFrom("clan").selectAll().where("is_disbanded", "=", false).where("is_hidden", "=", false);
+    const base = db
+      .selectFrom("clan")
+      .selectAll()
+      .where("is_disbanded", "=", false)
+      .where("is_hidden", "=", false);
     const [rows, countRow] = await Promise.all([
       base
         .orderBy("clan_fame", "desc")
@@ -456,7 +589,7 @@ export abstract class ClanService {
         .executeTakeFirst(),
     ]);
 
-    const data: ClanDTO[] = rows.map(r => ({
+    const data: ClanDTO[] = rows.map((r) => ({
       id: r.id,
       name: r.name,
       shortName: r.shortened_name,
@@ -483,11 +616,17 @@ export abstract class ClanService {
     const page = Math.max(1, Math.floor(options.page ?? 1));
     const limit = Math.min(50, Math.max(1, Math.floor(options.pageSize ?? 25)));
     let base = db.selectFrom("clan").where("is_disbanded", "=", false);
-    if (options.state !== undefined) base = base.where("state", "=", options.state);
+    if (options.state !== undefined)
+      base = base.where("state", "=", options.state);
     const terme = options.q?.trim();
     if (terme) {
       const motif = `%${terme}%`;
-      base = base.where(eb => eb.or([eb("name", "ilike", motif), eb("shortened_name", "ilike", motif)]));
+      base = base.where((eb) =>
+        eb.or([
+          eb("name", "ilike", motif),
+          eb("shortened_name", "ilike", motif),
+        ]),
+      );
     }
     const [ids, compte] = await Promise.all([
       base
@@ -497,14 +636,24 @@ export abstract class ClanService {
         .limit(limit)
         .offset((page - 1) * limit)
         .execute(),
-      base.select(({ fn }) => fn.countAll<number>().as("count")).executeTakeFirst(),
+      base
+        .select(({ fn }) => fn.countAll<number>().as("count"))
+        .executeTakeFirst(),
     ]);
-    const data = await Promise.all(ids.map(row => ClanService.clanProjection(db, row.id)));
+    const data = await Promise.all(
+      ids.map((row) => ClanService.clanProjection(db, row.id)),
+    );
     const total = Number(compte?.count ?? 0);
-    return { data, meta: { page, limit, total, pageCount: Math.ceil(total / limit) } };
+    return {
+      data,
+      meta: { page, limit, total, pageCount: Math.ceil(total / limit) },
+    };
   }
 
-  public static async findById(db: Kysely<Database>, id: number): Promise<ClanDTO | null> {
+  public static async findById(
+    db: Kysely<Database>,
+    id: number,
+  ): Promise<ClanDTO | null> {
     const r = await db
       .selectFrom("clan")
       .selectAll()

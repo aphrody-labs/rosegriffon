@@ -8,6 +8,11 @@
  * visiteurs : jamais une lecture qui dépend de la session.
  * Voir docs/aphrody/reference/infra/rg-free-tier-allocation.md.
  */
-export function cachePublic(maxAge: number, stale = maxAge * 10): Record<string, string> {
-  return { "Cache-Control": `public, s-maxage=${maxAge}, stale-while-revalidate=${stale}` };
+export function cachePublic(
+  maxAge: number,
+  stale = maxAge * 10,
+): Record<string, string> {
+  return {
+    "Cache-Control": `public, s-maxage=${maxAge}, stale-while-revalidate=${stale}`,
+  };
 }

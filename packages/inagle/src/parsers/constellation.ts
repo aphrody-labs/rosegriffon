@@ -73,8 +73,14 @@ export interface ConstellationMapping {
 // ============================================================================
 
 /** Parse players_universe_text for constellation names */
-function parseConstellationNames(locale: "fr" | "en" | "ja"): Map<number, string> {
-  const filePath = join(PATHS.textRoot, locale, "players_universe_text.cfg.bin.json");
+function parseConstellationNames(
+  locale: "fr" | "en" | "ja",
+): Map<number, string> {
+  const filePath = join(
+    PATHS.textRoot,
+    locale,
+    "players_universe_text.cfg.bin.json",
+  );
   const names = new Map<number, string>();
 
   if (!existsSync(filePath)) {
@@ -151,7 +157,10 @@ function loadPlayersUniverseLists(): Map<string, any[]> {
   const map = new Map<string, any[]>();
   const filePath =
     resolveGameDataFile("players_universe", "players_universe_config") ||
-    join(PATHS.playersUniverse, "players_universe_config_1.03.59.00.cfg.bin.json");
+    join(
+      PATHS.playersUniverse,
+      "players_universe_config_1.03.59.00.cfg.bin.json",
+    );
   if (existsSync(filePath)) {
     try {
       const data = JSON.parse(readFileSync(filePath, "utf-8"));
@@ -194,16 +203,22 @@ function loadStarInfo(): StarInfo[] {
 
 /** Load rarity rate info (90 entries) */
 function loadRarityRateInfo(): StarSignRarityRateInfo[] {
-  const fromConfig = loadPlayersUniverseLists().get("m_starSignRarityRateInfoList");
+  const fromConfig = loadPlayersUniverseLists().get(
+    "m_starSignRarityRateInfoList",
+  );
   if (fromConfig?.length) return fromConfig as StarSignRarityRateInfo[];
-  return loadLegacyAllGamedata<StarSignRarityRateInfo>("starSignRarityRateInfo.json");
+  return loadLegacyAllGamedata<StarSignRarityRateInfo>(
+    "starSignRarityRateInfo.json",
+  );
 }
 
 /** Load character info (5010 entries) */
 function loadCharaInfo(): Array<{ charaParamId: string }> {
   const fromConfig = loadPlayersUniverseLists().get("m_starSignCharaInfoList");
   if (fromConfig?.length) return fromConfig as Array<{ charaParamId: string }>;
-  return loadLegacyAllGamedata<{ charaParamId: string }>("starSignCharaInfo.json");
+  return loadLegacyAllGamedata<{ charaParamId: string }>(
+    "starSignCharaInfo.json",
+  );
 }
 
 // ============================================================================
@@ -261,7 +276,11 @@ export function buildConstellationMapping(): ConstellationMapping {
     const names = resolvedNames[i];
 
     // Each constellation has 3 rarity entries (indices i*3, i*3+1, i*3+2)
-    const rarityEntries = [rarityRateList[i * 3], rarityRateList[i * 3 + 1], rarityRateList[i * 3 + 2]].filter(Boolean);
+    const rarityEntries = [
+      rarityRateList[i * 3],
+      rarityRateList[i * 3 + 1],
+      rarityRateList[i * 3 + 2],
+    ].filter(Boolean);
 
     // Collect all character IDs for this constellation
     const characterIds: string[] = [];
@@ -312,7 +331,9 @@ export function getAllConstellations(): Constellation[] {
 /**
  * Get constellation for a character by param ID
  */
-export function getConstellationForCharacter(charaParamId: string): Constellation | undefined {
+export function getConstellationForCharacter(
+  charaParamId: string,
+): Constellation | undefined {
   const mapping = buildConstellationMapping();
   const index = mapping.byCharacterId.get(charaParamId);
   if (index === undefined) return undefined;
@@ -322,24 +343,33 @@ export function getConstellationForCharacter(charaParamId: string): Constellatio
 /**
  * Get constellation by index (0-29)
  */
-export function getConstellationByIndex(index: number): Constellation | undefined {
+export function getConstellationByIndex(
+  index: number,
+): Constellation | undefined {
   return buildConstellationMapping().constellations[index];
 }
 
 /**
  * Get constellation by name (searches FR, EN, JA)
  */
-export function getConstellationByName(name: string): Constellation | undefined {
+export function getConstellationByName(
+  name: string,
+): Constellation | undefined {
   const q = name.toLowerCase();
   return buildConstellationMapping().constellations.find(
-    c => c.names.fr?.toLowerCase().includes(q) || c.names.en?.toLowerCase().includes(q) || c.names.ja?.includes(name),
+    (c) =>
+      c.names.fr?.toLowerCase().includes(q) ||
+      c.names.en?.toLowerCase().includes(q) ||
+      c.names.ja?.includes(name),
   );
 }
 
 /**
  * Get all character IDs in a constellation
  */
-export function getCharacterIdsInConstellation(constellationIndex: number): string[] {
+export function getCharacterIdsInConstellation(
+  constellationIndex: number,
+): string[] {
   const constellation = getConstellationByIndex(constellationIndex);
   return constellation?.characterIds || [];
 }

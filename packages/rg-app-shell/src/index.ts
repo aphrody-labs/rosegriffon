@@ -37,7 +37,14 @@ export {
   type CheminWiki,
 } from "./config/routes";
 
-export { BUDGET_CHROME_MOBILE, coutChromeMobile, decalageHaut, HAUTEURS, PLANS, rem } from "./config/metriques";
+export {
+  BUDGET_CHROME_MOBILE,
+  coutChromeMobile,
+  decalageHaut,
+  HAUTEURS,
+  PLANS,
+  rem,
+} from "./config/metriques";
 
 // Icons & Translations
 export { iconMap, type IconName, type LucideIcon } from "./lib/icons";
@@ -45,14 +52,23 @@ export { DICTIONNAIRE_NAV_FR, traduireNav } from "./lib/translations";
 
 // Shared Chrome Components
 export { Footer, AzaleeFooter, type FooterProps } from "./components/Footer";
-export { NavigationRail, AzaleeNavigationRail, type NavigationRailProps } from "./components/NavigationRail";
+export {
+  NavigationRail,
+  AzaleeNavigationRail,
+  type NavigationRailProps,
+} from "./components/NavigationRail";
 export {
   MobileBottomNav,
   MaterialBottomNav,
   MobileBottomNavigation,
   type MobileBottomNavProps,
 } from "./components/MobileBottomNav";
-export { AppSidebar, WikiSidebar, SidebarUniverseHeader, type AppSidebarProps } from "./components/AppSidebar";
+export {
+  AppSidebar,
+  WikiSidebar,
+  SidebarUniverseHeader,
+  type AppSidebarProps,
+} from "./components/AppSidebar";
 export {
   TopAppBar,
   DesktopTopBar,
@@ -62,7 +78,20 @@ export {
   type TopAppBarProps,
   type UserProfile,
 } from "./components/TopAppBar";
-export { ThemeToggle, DEFAULT_THEMES, type ThemeOption } from "./components/ThemeToggle";
-export { ThemeTuner, CURSEURS as THEME_TUNER_SLIDERS } from "./components/ThemeTuner";
-export { UnifiedSearchBar, type UnifiedSearchBarProps } from "./components/UnifiedSearchBar";
-export { UniverseSwitch, type UniverseSwitchProps } from "./components/UniverseSwitch";
+export {
+  ThemeToggle,
+  DEFAULT_THEMES,
+  type ThemeOption,
+} from "./components/ThemeToggle";
+export {
+  ThemeTuner,
+  CURSEURS as THEME_TUNER_SLIDERS,
+} from "./components/ThemeTuner";
+export {
+  UnifiedSearchBar,
+  type UnifiedSearchBarProps,
+} from "./components/UnifiedSearchBar";
+export {
+  UniverseSwitch,
+  type UniverseSwitchProps,
+} from "./components/UniverseSwitch";

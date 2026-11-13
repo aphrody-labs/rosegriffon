@@ -1,11 +1,25 @@
 "use client";
 
-import { Button, Card, CardContent, CardFooter, CardHeader, CardTitle, Input, Textarea, Label } from "@rosegriffon/ui";
+import {
+  Button,
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+  Input,
+  Textarea,
+  Label,
+} from "@rosegriffon/ui";
 import { useRouter } from "next/navigation";
 import { useActionState, useState } from "react";
 import { toast } from "sonner";
 
-import { createEvent, deleteEvent, updateEvent } from "@/app/admin/events/actions";
+import {
+  createEvent,
+  deleteEvent,
+  updateEvent,
+} from "@/app/admin/events/actions";
 import { ConfirmationDialog } from "@/components/admin/confirmation-dialog";
 
 import { Loader2, Trash2 } from "@/lib/icons-config";
@@ -22,7 +36,8 @@ const initialState: { message: string; errors?: Record<string, string[]> } = {
 };
 
 export function EventForm({ event, isEditing = false }: EventFormProps) {
-  const action = isEditing && event?.id ? updateEvent.bind(null, event.id) : createEvent;
+  const action =
+    isEditing && event?.id ? updateEvent.bind(null, event.id) : createEvent;
   const [state, formAction, isPending] = useActionState(action, initialState);
 
   // Helper to format date for datetime-local input
@@ -31,7 +46,9 @@ export function EventForm({ event, isEditing = false }: EventFormProps) {
       return "";
     }
     const date = new Date(dateString);
-    return new Date(date.getTime() - date.getTimezoneOffset() * 60_000).toISOString().slice(0, 16);
+    return new Date(date.getTime() - date.getTimezoneOffset() * 60_000)
+      .toISOString()
+      .slice(0, 16);
   };
 
   const router = useRouter();
@@ -64,14 +81,24 @@ export function EventForm({ event, isEditing = false }: EventFormProps) {
     <>
       <Card className="w-full max-w-2xl mx-auto">
         <CardHeader>
-          <CardTitle>{isEditing ? "Modifier l'événement" : "Créer un événement"}</CardTitle>
+          <CardTitle>
+            {isEditing ? "Modifier l'événement" : "Créer un événement"}
+          </CardTitle>
         </CardHeader>
         <form action={formAction}>
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="title">Titre</Label>
-              <Input id="title" name="title" defaultValue={event?.title} placeholder="Titre de l'événement" required />
-              {state?.errors?.title && <p className="text-sm text-destructive">{state.errors.title}</p>}
+              <Input
+                id="title"
+                name="title"
+                defaultValue={event?.title}
+                placeholder="Titre de l'événement"
+                required
+              />
+              {state?.errors?.title && (
+                <p className="text-sm text-destructive">{state.errors.title}</p>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -83,7 +110,11 @@ export function EventForm({ event, isEditing = false }: EventFormProps) {
                 placeholder="Description détaillée…"
                 rows={5}
               />
-              {state?.errors?.description && <p className="text-sm text-destructive">{state.errors.description}</p>}
+              {state?.errors?.description && (
+                <p className="text-sm text-destructive">
+                  {state.errors.description}
+                </p>
+              )}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -96,13 +127,26 @@ export function EventForm({ event, isEditing = false }: EventFormProps) {
                   defaultValue={formatDate(event?.start_time)}
                   required
                 />
-                {state?.errors?.start_time && <p className="text-sm text-destructive">{state.errors.start_time}</p>}
+                {state?.errors?.start_time && (
+                  <p className="text-sm text-destructive">
+                    {state.errors.start_time}
+                  </p>
+                )}
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="end_time">Date de fin (optionnel)</Label>
-                <Input id="end_time" name="end_time" type="datetime-local" defaultValue={formatDate(event?.end_time)} />
-                {state?.errors?.end_time && <p className="text-sm text-destructive">{state.errors.end_time}</p>}
+                <Input
+                  id="end_time"
+                  name="end_time"
+                  type="datetime-local"
+                  defaultValue={formatDate(event?.end_time)}
+                />
+                {state?.errors?.end_time && (
+                  <p className="text-sm text-destructive">
+                    {state.errors.end_time}
+                  </p>
+                )}
               </div>
             </div>
 

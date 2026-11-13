@@ -7,7 +7,8 @@ import ClanCreateClient from "./clan-create-client";
  */
 export const metadata = metadonneesAchillea({
   titre: "Créer un clan",
-  description: "Fonder un clan compétitif Achilléa sur Inazuma Eleven: Victory Road.",
+  description:
+    "Fonder un clan compétitif Achilléa sur Inazuma Eleven: Victory Road.",
   chemin: "/achillea/clans/create",
   indexable: false,
 });

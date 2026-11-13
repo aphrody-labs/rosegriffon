@@ -77,8 +77,10 @@ h1 {
 
   & when (@blur = true) {
     transition:
-      filter var(--md-sys-motion-duration-medium4) var(--md-sys-motion-easing-emphasized-decelerate),
-      transform var(--md-sys-motion-duration-medium4) var(--md-sys-motion-easing-emphasized-decelerate);
+      filter var(--md-sys-motion-duration-medium4)
+        var(--md-sys-motion-easing-emphasized-decelerate),
+      transform var(--md-sys-motion-duration-medium4)
+        var(--md-sys-motion-easing-emphasized-decelerate);
     filter: blur(0);
     body.paused & {
       filter: blur(1em);
@@ -86,17 +88,21 @@ h1 {
   }
 
   & when (@blur = false) {
-    transition: transform var(--md-sys-motion-duration-medium4) var(--md-sys-motion-easing-emphasized-decelerate);
+    transition: transform var(--md-sys-motion-duration-medium4)
+      var(--md-sys-motion-easing-emphasized-decelerate);
   }
 
   @media (prefers-reduced-motion: reduce) {
-    transition: filter var(--md-sys-motion-duration-medium4) var(--md-sys-motion-easing-standard);
+    transition: filter var(--md-sys-motion-duration-medium4)
+      var(--md-sys-motion-easing-standard);
     body.paused & {
       transform: none;
     }
   }
 
-  @media (prefers-reduced-transparency: reduce), (prefers-contrast: more), (forced-colors: active) {
+  @media (prefers-reduced-transparency: reduce),
+    (prefers-contrast: more),
+    (forced-colors: active) {
     body.paused & {
       filter: none;
     }

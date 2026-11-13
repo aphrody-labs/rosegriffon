@@ -15,7 +15,7 @@ export default function ChargementCampagne() {
       <div className="space-y-6">
         <Skeleton className="h-10 w-64 rounded-full" />
         <ul className="grid list-none grid-cols-1 gap-4 p-0 xs:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {Array.from({ length: 8 }, (_, index) => index).map(index => (
+          {Array.from({ length: 8 }, (_, index) => index).map((index) => (
             <li key={`squelette-${index}`}>
               <Skeleton className="aspect-4/5 w-full rounded-[24px]" />
             </li>

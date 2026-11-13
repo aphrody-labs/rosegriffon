@@ -29,16 +29,34 @@ export async function runAchilleaVotes(
   fetcher: typeof fetch = fetch,
 ): Promise<ResultatVotes> {
   const jeton = (env.API_ADMIN_TOKEN ?? "").trim();
-  if (!jeton) throw new Error("API_ADMIN_TOKEN absent : la clôture des votes ne peut pas être demandée à l'API.");
-  const reponse = await fetcher(`${baseApiInterne(env)}/clans/internal/votes/expire`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", Accept: "application/json", Authorization: `Bearer ${jeton}` },
-    body: JSON.stringify({ now: maintenant.toISOString() }),
-    signal: AbortSignal.timeout(60_000),
-  });
-  const corps = (await reponse.json().catch(() => null)) as { closes?: number; message?: string } | null;
-  if (!reponse.ok) throw new Error(corps?.message ?? `API des votes : HTTP ${reponse.status}`);
-  const resultat: ResultatVotes = { success: true, closes: Number(corps?.closes ?? 0) };
-  if (resultat.closes > 0) console.info(`[achillea:votes] ${resultat.closes} vote(s) échu(s) clos.`);
+  if (!jeton)
+    throw new Error(
+      "API_ADMIN_TOKEN absent : la clôture des votes ne peut pas être demandée à l'API.",
+    );
+  const reponse = await fetcher(
+    `${baseApiInterne(env)}/clans/internal/votes/expire`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        Authorization: `Bearer ${jeton}`,
+      },
+      body: JSON.stringify({ now: maintenant.toISOString() }),
+      signal: AbortSignal.timeout(60_000),
+    },
+  );
+  const corps = (await reponse.json().catch(() => null)) as {
+    closes?: number;
+    message?: string;
+  } | null;
+  if (!reponse.ok)
+    throw new Error(corps?.message ?? `API des votes : HTTP ${reponse.status}`);
+  const resultat: ResultatVotes = {
+    success: true,
+    closes: Number(corps?.closes ?? 0),
+  };
+  if (resultat.closes > 0)
+    console.info(`[achillea:votes] ${resultat.closes} vote(s) échu(s) clos.`);
   return resultat;
 }

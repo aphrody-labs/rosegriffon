@@ -16,7 +16,16 @@ import { dirname, extname, join, relative, resolve } from "node:path";
 import ts from "@typescript/typescript6";
 
 const ROOT = resolve(import.meta.dir, "..");
-const SOURCE_EXTENSIONS = new Set([".ts", ".tsx", ".mts", ".cts", ".js", ".jsx", ".mjs", ".cjs"]);
+const SOURCE_EXTENSIONS = new Set([
+  ".ts",
+  ".tsx",
+  ".mts",
+  ".cts",
+  ".js",
+  ".jsx",
+  ".mjs",
+  ".cjs",
+]);
 const RESOLUTION_EXTENSIONS = [
   ".ts",
   ".tsx",
@@ -52,7 +61,9 @@ const IGNORED_DIRECTORY_NAMES = new Set([
   "out-tsc",
   "vendor",
 ]);
-const BUILTINS = new Set(builtinModules.flatMap(name => [name, name.replace(/^node:/, "")]));
+const BUILTINS = new Set(
+  builtinModules.flatMap((name) => [name, name.replace(/^node:/, "")]),
+);
 
 type JsonObject = Record<string, unknown>;
 type Workspace = {
@@ -72,16 +83,29 @@ type Miss = ImportReference & {
 };
 
 function declaresDependency(manifest: JsonObject, name: string): boolean {
-  return ["dependencies", "devDependencies", "peerDependencies", "optionalDependencies"].some(field => {
+  return [
+    "dependencies",
+    "devDependencies",
+    "peerDependencies",
+    "optionalDependencies",
+  ].some((field) => {
     const dependencies = manifest[field];
-    return dependencies !== null && typeof dependencies === "object" && name in dependencies;
+    return (
+      dependencies !== null &&
+      typeof dependencies === "object" &&
+      name in dependencies
+    );
   });
 }
 
 function runGit(args: string[]): string[] {
-  const result = Bun.spawnSync(["git", "-C", ROOT, ...args], { stdout: "pipe", stderr: "pipe" });
+  const result = Bun.spawnSync(["git", "-C", ROOT, ...args], {
+    stdout: "pipe",
+    stderr: "pipe",
+  });
   if (result.exitCode !== 0) {
-    const message = result.stderr.toString().trim() || `git ${args.join(" ")} failed`;
+    const message =
+      result.stderr.toString().trim() || `git ${args.join(" ")} failed`;
     throw new Error(message);
   }
   return result.stdout.toString().split("\0").filter(Boolean);
@@ -90,7 +114,9 @@ function runGit(args: string[]): string[] {
 function readJson(path: string): JsonObject {
   const result = ts.readConfigFile(path, ts.sys.readFile);
   if (result.error) {
-    throw new Error(ts.flattenDiagnosticMessageText(result.error.messageText, "\n"));
+    throw new Error(
+      ts.flattenDiagnosticMessageText(result.error.messageText, "\n"),
+    );
   }
   return result.config as JsonObject;
 }
@@ -117,13 +143,19 @@ function globPatternToRegExp(pattern: string): RegExp {
 
 function workspacePatterns(manifest: JsonObject): string[] {
   const value = manifest.workspaces;
-  const configuredPackages = value && typeof value === "object" ? (value as JsonObject).packages : undefined;
+  const configuredPackages =
+    value && typeof value === "object"
+      ? (value as JsonObject).packages
+      : undefined;
   const patterns: unknown[] = Array.isArray(value)
     ? value
     : Array.isArray(configuredPackages)
       ? configuredPackages
       : [];
-  return patterns.filter((entry): entry is string => typeof entry === "string" && !entry.startsWith("!"));
+  return patterns.filter(
+    (entry): entry is string =>
+      typeof entry === "string" && !entry.startsWith("!"),
+  );
 }
 
 function discoverWorkspaces(files: string[]): Workspace[] {
@@ -134,9 +166,10 @@ function discoverWorkspaces(files: string[]): Workspace[] {
   for (const file of files) {
     if (!file.endsWith("/package.json")) continue;
     const dir = file.slice(0, -"/package.json".length);
-    if (!matchers.some(matcher => matcher.test(dir))) continue;
+    if (!matchers.some((matcher) => matcher.test(dir))) continue;
     const manifest = readJson(join(ROOT, file));
-    if (typeof manifest.name !== "string" || manifest.name.length === 0) continue;
+    if (typeof manifest.name !== "string" || manifest.name.length === 0)
+      continue;
     workspaces.push({ dir, name: manifest.name, manifest });
   }
 
@@ -144,11 +177,15 @@ function discoverWorkspaces(files: string[]): Workspace[] {
 }
 
 function hasIgnoredDirectory(path: string): boolean {
-  return path.split("/").some(part => IGNORED_DIRECTORY_NAMES.has(part));
+  return path.split("/").some((part) => IGNORED_DIRECTORY_NAMES.has(part));
 }
 
 function isSourceFile(path: string): boolean {
-  return !path.endsWith(".d.ts") && SOURCE_EXTENSIONS.has(extname(path)) && !hasIgnoredDirectory(path);
+  return (
+    !path.endsWith(".d.ts") &&
+    SOURCE_EXTENSIONS.has(extname(path)) &&
+    !hasIgnoredDirectory(path)
+  );
 }
 
 function isFile(path: string): boolean {
@@ -188,7 +225,8 @@ function resolvesAsFile(input: string): boolean {
     ".cjs": [".cts", ".ts"],
   };
   for (const sourceExtension of sourceAlternatives[runtimeExtension] ?? []) {
-    if (isFile(path.slice(0, -runtimeExtension.length) + sourceExtension)) return true;
+    if (isFile(path.slice(0, -runtimeExtension.length) + sourceExtension))
+      return true;
   }
 
   if (isDirectory(path)) {
@@ -199,20 +237,29 @@ function resolvesAsFile(input: string): boolean {
     if (isFile(manifestPath)) {
       const manifest = readJson(manifestPath);
       for (const field of ["types", "module", "main"] as const) {
-        if (typeof manifest[field] === "string" && resolvesAsFile(join(path, manifest[field]))) return true;
+        if (
+          typeof manifest[field] === "string" &&
+          resolvesAsFile(join(path, manifest[field]))
+        )
+          return true;
       }
     }
   }
   return false;
 }
 
-function configForWorkspace(workspaceDir: string | null, configs: Map<string, Config>): Config {
+function configForWorkspace(
+  workspaceDir: string | null,
+  configs: Map<string, Config>,
+): Config {
   const key = workspaceDir ?? ".";
   const cached = configs.get(key);
   if (cached) return cached;
 
   const workspaceConfig = join(ROOT, key, "tsconfig.json");
-  const configPath = existsSync(workspaceConfig) ? workspaceConfig : join(ROOT, "tsconfig.json");
+  const configPath = existsSync(workspaceConfig)
+    ? workspaceConfig
+    : join(ROOT, "tsconfig.json");
   const parsedFile = ts.readConfigFile(configPath, ts.sys.readFile);
   if (parsedFile.error) {
     throw new Error(
@@ -220,12 +267,22 @@ function configForWorkspace(workspaceDir: string | null, configs: Map<string, Co
     );
   }
   const configDir = dirname(configPath);
-  const parsed = ts.parseJsonConfigFileContent(parsedFile.config, ts.sys, configDir);
+  const parsed = ts.parseJsonConfigFileContent(
+    parsedFile.config,
+    ts.sys,
+    configDir,
+  );
   const pathsBase =
     parsed.options.baseUrl ??
-    ((parsed.options as ts.CompilerOptions & { pathsBasePath?: string }).pathsBasePath || configDir);
+    ((parsed.options as ts.CompilerOptions & { pathsBasePath?: string })
+      .pathsBasePath ||
+      configDir);
   const config = {
-    cache: ts.createModuleResolutionCache(configDir, fileName => fileName, parsed.options),
+    cache: ts.createModuleResolutionCache(
+      configDir,
+      (fileName) => fileName,
+      parsed.options,
+    ),
     options: parsed.options,
     pathsBase,
   };
@@ -233,27 +290,41 @@ function configForWorkspace(workspaceDir: string | null, configs: Map<string, Co
   return config;
 }
 
-function workspaceForFile(file: string, workspacesBySpecificity: Workspace[]): Workspace | undefined {
-  return workspacesBySpecificity.find(workspace => file === workspace.dir || file.startsWith(`${workspace.dir}/`));
+function workspaceForFile(
+  file: string,
+  workspacesBySpecificity: Workspace[],
+): Workspace | undefined {
+  return workspacesBySpecificity.find(
+    (workspace) =>
+      file === workspace.dir || file.startsWith(`${workspace.dir}/`),
+  );
 }
 
 function aliasTargets(specifier: string, config: Config): string[] | null {
   const paths = config.options.paths;
   if (!paths) return null;
 
-  const matches: Array<{ captured: string; pattern: string; targets: string[] }> = [];
+  const matches: Array<{
+    captured: string;
+    pattern: string;
+    targets: string[];
+  }> = [];
   for (const [pattern, targets] of Object.entries(paths)) {
     if (!targets) continue;
     const star = pattern.indexOf("*");
     if (star === -1) {
-      if (specifier === pattern) matches.push({ captured: "", pattern, targets });
+      if (specifier === pattern)
+        matches.push({ captured: "", pattern, targets });
       continue;
     }
     const prefix = pattern.slice(0, star);
     const suffix = pattern.slice(star + 1);
     if (specifier.startsWith(prefix) && specifier.endsWith(suffix)) {
       matches.push({
-        captured: specifier.slice(prefix.length, specifier.length - suffix.length),
+        captured: specifier.slice(
+          prefix.length,
+          specifier.length - suffix.length,
+        ),
         pattern,
         targets,
       });
@@ -265,23 +336,33 @@ function aliasTargets(specifier: string, config: Config): string[] | null {
     const leftExact = left.pattern.includes("*") ? 0 : 1;
     const rightExact = right.pattern.includes("*") ? 0 : 1;
     return (
-      rightExact - leftExact || right.pattern.length - left.pattern.length || left.pattern.localeCompare(right.pattern)
+      rightExact - leftExact ||
+      right.pattern.length - left.pattern.length ||
+      left.pattern.localeCompare(right.pattern)
     );
   });
   const selected = matches[0];
-  return selected.targets.map(target => resolve(config.pathsBase, target.replaceAll("*", selected.captured)));
+  return selected.targets.map((target) =>
+    resolve(config.pathsBase, target.replaceAll("*", selected.captured)),
+  );
 }
 
 function collectExportTargets(value: unknown, wildcard: string): string[] {
   if (typeof value === "string") return [value.replaceAll("*", wildcard)];
-  if (Array.isArray(value)) return value.flatMap(entry => collectExportTargets(entry, wildcard));
+  if (Array.isArray(value))
+    return value.flatMap((entry) => collectExportTargets(entry, wildcard));
   if (value && typeof value === "object") {
-    return Object.values(value as JsonObject).flatMap(entry => collectExportTargets(entry, wildcard));
+    return Object.values(value as JsonObject).flatMap((entry) =>
+      collectExportTargets(entry, wildcard),
+    );
   }
   return [];
 }
 
-function exportTargets(exportsField: unknown, subpath: string): string[] | null {
+function exportTargets(
+  exportsField: unknown,
+  subpath: string,
+): string[] | null {
   if (exportsField === undefined) return null;
   if (typeof exportsField === "string" || Array.isArray(exportsField)) {
     return subpath === "." ? collectExportTargets(exportsField, "") : [];
@@ -290,23 +371,35 @@ function exportTargets(exportsField: unknown, subpath: string): string[] | null 
 
   const exportsObject = exportsField as JsonObject;
   const keys = Object.keys(exportsObject);
-  if (!keys.some(key => key.startsWith("."))) {
+  if (!keys.some((key) => key.startsWith("."))) {
     return subpath === "." ? collectExportTargets(exportsObject, "") : [];
   }
-  if (subpath in exportsObject) return collectExportTargets(exportsObject[subpath], "");
+  if (subpath in exportsObject)
+    return collectExportTargets(exportsObject[subpath], "");
 
   const wildcardMatches = keys
-    .filter(key => key.includes("*"))
-    .map(key => {
+    .filter((key) => key.includes("*"))
+    .map((key) => {
       const star = key.indexOf("*");
       const prefix = key.slice(0, star);
       const suffix = key.slice(star + 1);
       return subpath.startsWith(prefix) && subpath.endsWith(suffix)
-        ? { captured: subpath.slice(prefix.length, subpath.length - suffix.length), key }
+        ? {
+            captured: subpath.slice(
+              prefix.length,
+              subpath.length - suffix.length,
+            ),
+            key,
+          }
         : null;
     })
-    .filter((match): match is { captured: string; key: string } => match !== null)
-    .sort((left, right) => right.key.length - left.key.length || left.key.localeCompare(right.key));
+    .filter(
+      (match): match is { captured: string; key: string } => match !== null,
+    )
+    .sort(
+      (left, right) =>
+        right.key.length - left.key.length || left.key.localeCompare(right.key),
+    );
   if (wildcardMatches.length === 0) return [];
   const selected = wildcardMatches[0];
   return collectExportTargets(exportsObject[selected.key], selected.captured);
@@ -321,13 +414,16 @@ function generatedTargetHasSource(packageDir: string, target: string): boolean {
   return resolvesAsFile(join(packageDir, withoutRuntime));
 }
 
-function resolveWorkspaceImport(specifier: string, workspace: Workspace): boolean {
+function resolveWorkspaceImport(
+  specifier: string,
+  workspace: Workspace,
+): boolean {
   const suffix = specifier.slice(workspace.name.length);
   const subpath = suffix.length === 0 ? "." : `.${suffix}`;
   const targets = exportTargets(workspace.manifest.exports, subpath);
   if (targets !== null) {
     return targets.some(
-      target =>
+      (target) =>
         target.startsWith("./") &&
         (resolvesAsFile(join(ROOT, workspace.dir, target)) ||
           generatedTargetHasSource(join(ROOT, workspace.dir), target)),
@@ -342,10 +438,15 @@ function resolveWorkspaceImport(specifier: string, workspace: Workspace): boolea
   }
   for (const field of ["types", "module", "main"] as const) {
     const target = workspace.manifest[field];
-    if (typeof target === "string" && resolvesAsFile(join(ROOT, workspace.dir, target))) return true;
+    if (
+      typeof target === "string" &&
+      resolvesAsFile(join(ROOT, workspace.dir, target))
+    )
+      return true;
   }
   return (
-    resolvesAsFile(join(ROOT, workspace.dir, "src", "index")) || resolvesAsFile(join(ROOT, workspace.dir, "index"))
+    resolvesAsFile(join(ROOT, workspace.dir, "src", "index")) ||
+    resolvesAsFile(join(ROOT, workspace.dir, "index"))
   );
 }
 
@@ -354,7 +455,10 @@ function packageName(specifier: string): string {
   return specifier.startsWith("@") ? parts.slice(0, 2).join("/") : parts[0];
 }
 
-function externalPackageExists(specifier: string, fromDirectory: string): boolean {
+function externalPackageExists(
+  specifier: string,
+  fromDirectory: string,
+): boolean {
   const name = packageName(specifier);
   let directory = fromDirectory;
   for (;;) {
@@ -378,14 +482,33 @@ function isBuiltinOrProtocol(specifier: string): boolean {
 
 const ignoredTargetCache = new Map<string, boolean>();
 function isIgnoredTarget(path: string): boolean {
-  const repoRelative = relative(ROOT, withoutQueryOrHash(path)).split("\\").join("/");
-  if (repoRelative === "" || repoRelative === ".." || repoRelative.startsWith("../")) return false;
+  const repoRelative = relative(ROOT, withoutQueryOrHash(path))
+    .split("\\")
+    .join("/");
+  if (
+    repoRelative === "" ||
+    repoRelative === ".." ||
+    repoRelative.startsWith("../")
+  )
+    return false;
   const cached = ignoredTargetCache.get(repoRelative);
   if (cached !== undefined) return cached;
-  const result = Bun.spawnSync(["git", "-C", ROOT, "check-ignore", "--quiet", "--no-index", "--", repoRelative], {
-    stderr: "ignore",
-    stdout: "ignore",
-  });
+  const result = Bun.spawnSync(
+    [
+      "git",
+      "-C",
+      ROOT,
+      "check-ignore",
+      "--quiet",
+      "--no-index",
+      "--",
+      repoRelative,
+    ],
+    {
+      stderr: "ignore",
+      stdout: "ignore",
+    },
+  );
   const ignored = result.exitCode === 0;
   ignoredTargetCache.set(repoRelative, ignored);
   return ignored;
@@ -406,11 +529,19 @@ function collectImports(source: string, file: string): ImportReference[] {
         return ts.ScriptKind.TS;
     }
   })();
-  const sourceFile = ts.createSourceFile(file, source, ts.ScriptTarget.Latest, true, scriptKind);
+  const sourceFile = ts.createSourceFile(
+    file,
+    source,
+    ts.ScriptTarget.Latest,
+    true,
+    scriptKind,
+  );
   const imports: ImportReference[] = [];
 
   const add = (literal: ts.StringLiteralLike): void => {
-    const line = sourceFile.getLineAndCharacterOfPosition(literal.getStart(sourceFile)).line + 1;
+    const line =
+      sourceFile.getLineAndCharacterOfPosition(literal.getStart(sourceFile))
+        .line + 1;
     imports.push({ line, specifier: literal.text });
   };
   const visit = (node: ts.Node): void => {
@@ -428,34 +559,65 @@ function collectImports(source: string, file: string): ImportReference[] {
     ) {
       add(node.moduleReference.expression);
     } else if (ts.isCallExpression(node)) {
-      const isDynamicImport = node.expression.kind === ts.SyntaxKind.ImportKeyword;
-      const isRequire = ts.isIdentifier(node.expression) && node.expression.text === "require";
+      const isDynamicImport =
+        node.expression.kind === ts.SyntaxKind.ImportKeyword;
+      const isRequire =
+        ts.isIdentifier(node.expression) && node.expression.text === "require";
       const argument = node.arguments[0];
-      if ((isDynamicImport || isRequire) && argument && ts.isStringLiteralLike(argument)) add(argument);
+      if (
+        (isDynamicImport || isRequire) &&
+        argument &&
+        ts.isStringLiteralLike(argument)
+      )
+        add(argument);
     } else if (ts.isImportTypeNode(node)) {
       const argument = node.argument;
-      if (ts.isLiteralTypeNode(argument) && ts.isStringLiteralLike(argument.literal)) add(argument.literal);
+      if (
+        ts.isLiteralTypeNode(argument) &&
+        ts.isStringLiteralLike(argument.literal)
+      )
+        add(argument.literal);
     }
     ts.forEachChild(node, visit);
   };
   visit(sourceFile);
-  return imports.sort((left, right) => left.line - right.line || left.specifier.localeCompare(right.specifier));
+  return imports.sort(
+    (left, right) =>
+      left.line - right.line || left.specifier.localeCompare(right.specifier),
+  );
 }
 
-function typescriptResolves(specifier: string, containingFile: string, config: Config): boolean {
-  const resolved = ts.resolveModuleName(specifier, containingFile, config.options, ts.sys, config.cache).resolvedModule;
+function typescriptResolves(
+  specifier: string,
+  containingFile: string,
+  config: Config,
+): boolean {
+  const resolved = ts.resolveModuleName(
+    specifier,
+    containingFile,
+    config.options,
+    ts.sys,
+    config.cache,
+  ).resolvedModule;
   return resolved !== undefined;
 }
 
-const allFiles = runGit(["ls-files", "--cached", "--others", "--exclude-standard", "-z"]).sort((a, b) =>
-  a.localeCompare(b),
-);
+const allFiles = runGit([
+  "ls-files",
+  "--cached",
+  "--others",
+  "--exclude-standard",
+  "-z",
+]).sort((a, b) => a.localeCompare(b));
 const trackedFiles = new Set(runGit(["ls-files", "--cached", "-z"]));
 const workspaces = discoverWorkspaces(allFiles);
 const workspacesBySpecificity = [...workspaces].sort(
-  (left, right) => right.dir.length - left.dir.length || left.dir.localeCompare(right.dir),
+  (left, right) =>
+    right.dir.length - left.dir.length || left.dir.localeCompare(right.dir),
 );
-const workspaceByName = new Map(workspaces.map(workspace => [workspace.name, workspace]));
+const workspaceByName = new Map(
+  workspaces.map((workspace) => [workspace.name, workspace]),
+);
 const configs = new Map<string, Config>();
 const errors: Miss[] = [];
 const warnings: Miss[] = [];
@@ -498,12 +660,20 @@ for (const file of sourceFiles) {
     if (specifier.startsWith(".")) {
       kind = "relative";
       const target = resolve(dirname(absoluteFile), specifier);
-      valid = resolvesAsFile(target) || typescriptResolves(specifier, absoluteFile, config) || isIgnoredTarget(target);
+      valid =
+        resolvesAsFile(target) ||
+        typescriptResolves(specifier, absoluteFile, config) ||
+        isIgnoredTarget(target);
     } else if (aliases !== null || internalWorkspace) {
       kind = aliases !== null ? "alias" : "workspace";
       valid =
-        (aliases?.some(target => resolvesAsFile(target) || isIgnoredTarget(target)) ?? false) ||
-        (internalWorkspace ? resolveWorkspaceImport(specifier, internalWorkspace) : false);
+        (aliases?.some(
+          (target) => resolvesAsFile(target) || isIgnoredTarget(target),
+        ) ??
+          false) ||
+        (internalWorkspace
+          ? resolveWorkspaceImport(specifier, internalWorkspace)
+          : false);
     } else {
       kind = "external";
       valid = externalPackageExists(specifier, dirname(absoluteFile));
@@ -517,11 +687,15 @@ for (const file of sourceFiles) {
 }
 
 const byLocation = (left: Miss, right: Miss): number =>
-  left.file.localeCompare(right.file) || left.line - right.line || left.specifier.localeCompare(right.specifier);
+  left.file.localeCompare(right.file) ||
+  left.line - right.line ||
+  left.specifier.localeCompare(right.specifier);
 errors.sort(byLocation);
 warnings.sort(byLocation);
 
-const trackedSourceCount = sourceFiles.filter(file => trackedFiles.has(file)).length;
+const trackedSourceCount = sourceFiles.filter((file) =>
+  trackedFiles.has(file),
+).length;
 console.log(
   `Imports checked: ${importCount} in ${sourceFiles.length} source files ` +
     `(${trackedSourceCount} tracked, ${sourceFiles.length - trackedSourceCount} new non-ignored).`,
@@ -537,24 +711,32 @@ if (warnings.length > 0) {
   console.log(
     `\nWarning: ${warnings.length} unresolved external import(s) across ${counts.size} package(s), non-blocking:`,
   );
-  for (const [name, count] of [...counts].sort(([left], [right]) => left.localeCompare(right))) {
+  for (const [name, count] of [...counts].sort(([left], [right]) =>
+    left.localeCompare(right),
+  )) {
     console.log(`  ${name}: ${count}`);
   }
   if (process.env.CHECK_IMPORTS_VERBOSE === "1") {
     console.log("\nExternal import locations:");
     for (const warning of warnings) {
-      console.log(`  ${warning.file}:${warning.line} -> "${warning.specifier}"`);
+      console.log(
+        `  ${warning.file}:${warning.line} -> "${warning.specifier}"`,
+      );
     }
   }
 }
 
 if (errors.length === 0) {
-  console.log("\nOK: every internal import resolves and workspace dependencies are declared.");
+  console.log(
+    "\nOK: every internal import resolves and workspace dependencies are declared.",
+  );
   process.exit(0);
 }
 
 console.error(`\nERROR: ${errors.length} unresolved internal import(s):`);
 for (const error of errors) {
-  console.error(`  ${error.file}:${error.line} [${error.kind}] -> "${error.specifier}"`);
+  console.error(
+    `  ${error.file}:${error.line} [${error.kind}] -> "${error.specifier}"`,
+  );
 }
 process.exit(1);

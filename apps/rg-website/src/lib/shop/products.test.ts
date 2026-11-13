@@ -35,7 +35,9 @@ describe("getVariantPrice", () => {
   });
 
   it("renvoie le prix de base pour un produit sans variantes", () => {
-    expect(getVariantPrice({ ...produit, variants: undefined }, "grand")).toBe(990);
+    expect(getVariantPrice({ ...produit, variants: undefined }, "grand")).toBe(
+      990,
+    );
   });
 });
 

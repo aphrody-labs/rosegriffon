@@ -4,7 +4,8 @@ import { wikiService } from "@/lib/wiki-service";
 import { SITE_URL } from "@/lib/site-url";
 
 const SUPABASE_URL =
-  process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_URL.startsWith("http")
+  process.env.NEXT_PUBLIC_SUPABASE_URL &&
+  process.env.NEXT_PUBLIC_SUPABASE_URL.startsWith("http")
     ? process.env.NEXT_PUBLIC_SUPABASE_URL
     : SITE_URL;
 
@@ -33,7 +34,11 @@ const ELEMENT_COLORS: Record<string, string> = {
   Wind: "#43A047",
 };
 
-export default async function Image({ params }: { params: Promise<{ id: string }> }) {
+export default async function Image({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const { id } = await params;
   const skill = await wikiService.getSkill(id);
 
@@ -59,7 +64,8 @@ export default async function Image({ params }: { params: Promise<{ id: string }
   }
 
   const name = skill.name_FR || skill.name_EN || skill.displayName || "???";
-  const category = skill.categoryName?.fr || skill.categoryName?.en || "Special";
+  const category =
+    skill.categoryName?.fr || skill.categoryName?.en || "Special";
   const element = skill.elementName?.en || "Void";
   const elementFr = skill.elementName?.fr || "";
   const power = skill.power_min
@@ -74,7 +80,8 @@ export default async function Image({ params }: { params: Promise<{ id: string }
   return new ImageResponse(
     <div
       style={{
-        background: "linear-gradient(135deg, #1A120D 0%, #2D1F14 50%, #1A120D 100%)",
+        background:
+          "linear-gradient(135deg, #1A120D 0%, #2D1F14 50%, #1A120D 100%)",
         color: "white",
         display: "flex",
         fontFamily: "sans-serif",
@@ -159,7 +166,10 @@ export default async function Image({ params }: { params: Promise<{ id: string }
               strokeLinecap="round"
               strokeLinejoin="round"
             >
-              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" fill={elementColor} />
+              <polygon
+                points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"
+                fill={elementColor}
+              />
             </svg>
           </div>
         )}

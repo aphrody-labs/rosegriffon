@@ -35,7 +35,10 @@ export type TuneStore = Partial<Record<ThemeId, StoredTune>>;
 
 interface Contexte {
   storage?: Pick<Storage, "getItem" | "setItem" | "removeItem"> | null;
-  root?: { classList: { contains(c: string): boolean }; style: Pick<CSSStyleDeclaration, "setProperty" | "removeProperty"> } | null;
+  root?: {
+    classList: { contains(c: string): boolean };
+    style: Pick<CSSStyleDeclaration, "setProperty" | "removeProperty">;
+  } | null;
 }
 
 function stockage(ctx?: Contexte) {
@@ -56,15 +59,24 @@ const estTheme = (id: string): id is ThemeId => Object.hasOwn(THEME_PACKS, id);
 
 export function readTuneStore(ctx?: Contexte): TuneStore {
   try {
-    const brut = JSON.parse(stockage(ctx)?.getItem(TUNE_STORAGE_KEY) ?? "{}") as unknown;
+    const brut = JSON.parse(
+      stockage(ctx)?.getItem(TUNE_STORAGE_KEY) ?? "{}",
+    ) as unknown;
     if (!brut || typeof brut !== "object") return {};
     const sortie: TuneStore = {};
-    for (const [id, valeur] of Object.entries(brut as Record<string, unknown>)) {
+    for (const [id, valeur] of Object.entries(
+      brut as Record<string, unknown>,
+    )) {
       if (!estTheme(id) || !valeur || typeof valeur !== "object") continue;
-      const a = clampAdjustments((valeur as { a?: Partial<ThemeAdjustments> }).a);
+      const a = clampAdjustments(
+        (valeur as { a?: Partial<ThemeAdjustments> }).a,
+      );
       // `v` est recalculé plutôt que relu : une valeur stockée ne peut pas
       // injecter autre chose qu'une couleur du moteur.
-      sortie[id] = { a, v: roleVariables(computeRoles(THEME_PACKS[id].seed, a)) };
+      sortie[id] = {
+        a,
+        v: roleVariables(computeRoles(THEME_PACKS[id].seed, a)),
+      };
     }
     return sortie;
   } catch {
@@ -92,18 +104,26 @@ export function subscribeThemeTune(rappel: () => void): () => void {
   const surStockage = (e: StorageEvent) => {
     if (e.key === TUNE_STORAGE_KEY) rappel();
   };
-  if (typeof window !== "undefined") window.addEventListener("storage", surStockage);
+  if (typeof window !== "undefined")
+    window.addEventListener("storage", surStockage);
   return () => {
     auditeurs.delete(rappel);
-    if (typeof window !== "undefined") window.removeEventListener("storage", surStockage);
+    if (typeof window !== "undefined")
+      window.removeEventListener("storage", surStockage);
   };
 }
 
 /** Enregistre (ou efface, s'ils sont neutres) les réglages d'un thème, puis les applique. */
-export function setThemeTune(id: ThemeId, adjustments: Partial<ThemeAdjustments>, ctx?: Contexte): StoredTune | null {
+export function setThemeTune(
+  id: ThemeId,
+  adjustments: Partial<ThemeAdjustments>,
+  ctx?: Contexte,
+): StoredTune | null {
   const a = clampAdjustments(adjustments);
   const store = readTuneStore(ctx);
-  const entree = isDefaultAdjustments(a) ? null : { a, v: roleVariables(computeRoles(THEME_PACKS[id].seed, a)) };
+  const entree = isDefaultAdjustments(a)
+    ? null
+    : { a, v: roleVariables(computeRoles(THEME_PACKS[id].seed, a)) };
   if (entree) store[id] = entree;
   else delete store[id];
   try {
@@ -123,9 +143,15 @@ export function resetThemeTune(id: ThemeId, ctx?: Contexte): void {
   setThemeTune(id, DEFAULT_ADJUSTMENTS, ctx);
 }
 
-function appliquer(r: NonNullable<Contexte["root"]>, entree: StoredTune | null | undefined) {
-  for (const role of ROLE_NAMES) r.style.removeProperty(`${ROLE_PREFIX}${role}`);
-  if (entree) for (const [nom, valeur] of Object.entries(entree.v)) r.style.setProperty(nom, valeur);
+function appliquer(
+  r: NonNullable<Contexte["root"]>,
+  entree: StoredTune | null | undefined,
+) {
+  for (const role of ROLE_NAMES)
+    r.style.removeProperty(`${ROLE_PREFIX}${role}`);
+  if (entree)
+    for (const [nom, valeur] of Object.entries(entree.v))
+      r.style.setProperty(nom, valeur);
 }
 
 /** Pose sur `<html>` les rôles réglés du thème actif (ou retire ceux d'un thème précédent). */

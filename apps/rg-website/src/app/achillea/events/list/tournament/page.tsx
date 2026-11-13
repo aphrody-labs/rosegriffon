@@ -10,7 +10,8 @@ import TournamentsClient from "@/app/achillea/tournaments/tournaments-client";
  */
 export const metadata = metadonneesAchillea({
   titre: "Tournois",
-  description: "Tous les tournois Achilléa : préinscriptions ouvertes, rencontres en cours et éditions terminées.",
+  description:
+    "Tous les tournois Achilléa : préinscriptions ouvertes, rencontres en cours et éditions terminées.",
   chemin: "/achillea/tournaments",
 });
 

@@ -5,18 +5,27 @@ import { createInagleSql, type Insertable } from "@rosegriffon/db/inagle-sql";
 import type { Database } from "@rosegriffon/db/schema";
 import { webAppPath } from "../src/core/roots.ts";
 
-const sourceCandidates = [process.env.CPK_INDEX_PATH, webAppPath("data", "cpk-index.ndjson.gz")].filter(
-  (v): v is string => Boolean(v),
-);
-const source = sourceCandidates.find(v => existsSync(v));
-if (!source) throw new Error("Index CPK introuvable: fournissez CPK_INDEX_PATH.");
+const sourceCandidates = [
+  process.env.CPK_INDEX_PATH,
+  webAppPath("data", "cpk-index.ndjson.gz"),
+].filter((v): v is string => Boolean(v));
+const source = sourceCandidates.find((v) => existsSync(v));
+if (!source)
+  throw new Error("Index CPK introuvable: fournissez CPK_INDEX_PATH.");
 
 const rowsByPath = new Map<string, Insertable<Database["inagle_cpk_index"]>>();
-for (const line of gunzipSync(readFileSync(source)).toString("utf8").split("\n")) {
+for (const line of gunzipSync(readFileSync(source))
+  .toString("utf8")
+  .split("\n")) {
   if (!line) continue;
   try {
     const entry = JSON.parse(line) as unknown;
-    if (!Array.isArray(entry) || entry.length !== 2 || typeof entry[0] !== "string" || typeof entry[1] !== "string")
+    if (
+      !Array.isArray(entry) ||
+      entry.length !== 2 ||
+      typeof entry[0] !== "string" ||
+      typeof entry[1] !== "string"
+    )
       continue;
     const [path, cpk] = entry;
     const segments = path.split("/");
@@ -41,14 +50,14 @@ for (const line of gunzipSync(readFileSync(source)).toString("utf8").split("\n")
 
 const rows = [...rowsByPath.values()];
 const db = createInagleSql<Database>();
-await db.transaction().execute(async tx => {
+await db.transaction().execute(async (tx) => {
   for (let offset = 0; offset < rows.length; offset += 1000) {
     const batch = rows.slice(offset, offset + 1000);
     await tx
       .insertInto("inagle_cpk_index")
       .values(batch)
-      .onConflict(oc =>
-        oc.column("path").doUpdateSet(eb => ({
+      .onConflict((oc) =>
+        oc.column("path").doUpdateSet((eb) => ({
           top: eb.ref("excluded.top"),
           sub: eb.ref("excluded.sub"),
           dir: eb.ref("excluded.dir"),

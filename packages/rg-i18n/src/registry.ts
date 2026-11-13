@@ -45,19 +45,27 @@ function requireCanonicalTag(tag: string): string {
   return canonical;
 }
 
-function exactDefinition(registry: LocaleRegistry, canonicalTag: string): LocaleDefinition | undefined {
-  return registry.locales.find(locale => locale.tag === canonicalTag || locale.aliases?.includes(canonicalTag));
+function exactDefinition(
+  registry: LocaleRegistry,
+  canonicalTag: string,
+): LocaleDefinition | undefined {
+  return registry.locales.find(
+    (locale) =>
+      locale.tag === canonicalTag || locale.aliases?.includes(canonicalTag),
+  );
 }
 
 function assertAcyclicFallbacks(locales: readonly LocaleDefinition[]): void {
-  const byTag = new Map(locales.map(locale => [locale.tag, locale]));
+  const byTag = new Map(locales.map((locale) => [locale.tag, locale]));
   const visited = new Set<string>();
   const active = new Set<string>();
 
   const visit = (tag: string): void => {
     if (visited.has(tag)) return;
     if (active.has(tag)) {
-      throw new RangeError(`Cycle dans les replis de locales autour de ${JSON.stringify(tag)}`);
+      throw new RangeError(
+        `Cycle dans les replis de locales autour de ${JSON.stringify(tag)}`,
+      );
     }
 
     active.add(tag);
@@ -75,13 +83,15 @@ function assertAcyclicFallbacks(locales: readonly LocaleDefinition[]): void {
  * Les tags, alias et replis sont canonicalisés une seule fois. Toute ambiguïté
  * (doublon, alias partagé, repli absent ou cycle) est refusée au démarrage.
  */
-export function createLocaleRegistry(options: LocaleRegistryOptions): LocaleRegistry {
+export function createLocaleRegistry(
+  options: LocaleRegistryOptions,
+): LocaleRegistry {
   if (options.locales.length === 0) {
     throw new RangeError("Le registre doit déclarer au moins une locale");
   }
 
   const identifiers = new Set<string>();
-  const locales = options.locales.map(input => {
+  const locales = options.locales.map((input) => {
     if (input.direction !== "ltr" && input.direction !== "rtl") {
       throw new RangeError(
         `Direction de locale invalide pour ${JSON.stringify(input.tag)} : ${JSON.stringify(input.direction)}`,
@@ -89,12 +99,18 @@ export function createLocaleRegistry(options: LocaleRegistryOptions): LocaleRegi
     }
 
     const tag = requireCanonicalTag(input.tag);
-    const aliases = [...new Set((input.aliases ?? []).map(requireCanonicalTag))];
-    const fallbacks = [...new Set((input.fallbacks ?? []).map(requireCanonicalTag))];
+    const aliases = [
+      ...new Set((input.aliases ?? []).map(requireCanonicalTag)),
+    ];
+    const fallbacks = [
+      ...new Set((input.fallbacks ?? []).map(requireCanonicalTag)),
+    ];
 
     for (const identifier of [tag, ...aliases]) {
       if (identifiers.has(identifier)) {
-        throw new RangeError(`Locale ou alias déclaré plusieurs fois : ${JSON.stringify(identifier)}`);
+        throw new RangeError(
+          `Locale ou alias déclaré plusieurs fois : ${JSON.stringify(identifier)}`,
+        );
       }
       identifiers.add(identifier);
     }
@@ -108,15 +124,19 @@ export function createLocaleRegistry(options: LocaleRegistryOptions): LocaleRegi
   });
 
   const defaultLocale = requireCanonicalTag(options.defaultLocale);
-  const canonicalTags = new Set(locales.map(locale => locale.tag));
+  const canonicalTags = new Set(locales.map((locale) => locale.tag));
   if (!canonicalTags.has(defaultLocale)) {
-    throw new RangeError(`La locale par défaut n'est pas déclarée : ${JSON.stringify(defaultLocale)}`);
+    throw new RangeError(
+      `La locale par défaut n'est pas déclarée : ${JSON.stringify(defaultLocale)}`,
+    );
   }
 
   for (const locale of locales) {
     for (const fallback of locale.fallbacks ?? []) {
       if (!canonicalTags.has(fallback)) {
-        throw new RangeError(`Repli ${JSON.stringify(fallback)} absent du registre pour ${JSON.stringify(locale.tag)}`);
+        throw new RangeError(
+          `Repli ${JSON.stringify(fallback)} absent du registre pour ${JSON.stringify(locale.tag)}`,
+        );
       }
     }
   }
@@ -163,7 +183,9 @@ export function matchLocale(
   for (const candidate of candidates.toReversed()) {
     const prefix = `${candidate}-`;
     const regional = registry.locales.find(
-      definition => definition.tag.startsWith(prefix) || definition.aliases?.some(alias => alias.startsWith(prefix)),
+      (definition) =>
+        definition.tag.startsWith(prefix) ||
+        definition.aliases?.some((alias) => alias.startsWith(prefix)),
     );
     if (regional) return regional;
   }
@@ -179,10 +201,14 @@ export function isLocaleSupported(
 }
 
 /** Rend la locale par défaut validée, et refuse un registre construit manuellement invalide. */
-export function getDefaultLocaleDefinition(registry: LocaleRegistry = DEFAULT_LOCALE_REGISTRY): LocaleDefinition {
+export function getDefaultLocaleDefinition(
+  registry: LocaleRegistry = DEFAULT_LOCALE_REGISTRY,
+): LocaleDefinition {
   const definition = exactDefinition(registry, registry.defaultLocale);
   if (!definition) {
-    throw new RangeError(`La locale par défaut n'est pas déclarée : ${JSON.stringify(registry.defaultLocale)}`);
+    throw new RangeError(
+      `La locale par défaut n'est pas déclarée : ${JSON.stringify(registry.defaultLocale)}`,
+    );
   }
   return definition;
 }
@@ -191,10 +217,14 @@ export function directionForLocale(
   locale: string | null | undefined,
   registry: LocaleRegistry = DEFAULT_LOCALE_REGISTRY,
 ): TextDirection {
-  return (matchLocale(locale, registry) ?? getDefaultLocaleDefinition(registry)).direction;
+  return (matchLocale(locale, registry) ?? getDefaultLocaleDefinition(registry))
+    .direction;
 }
 
-function exactParent(tag: string, registry: LocaleRegistry): LocaleDefinition | undefined {
+function exactParent(
+  tag: string,
+  registry: LocaleRegistry,
+): LocaleDefinition | undefined {
   let current = new Intl.Locale(tag).baseName;
   while (current.includes("-")) {
     current = current.slice(0, current.lastIndexOf("-"));
@@ -209,7 +239,8 @@ export function buildFallbackChain(
   locale: string | null | undefined,
   registry: LocaleRegistry = DEFAULT_LOCALE_REGISTRY,
 ): readonly string[] {
-  const start = matchLocale(locale, registry) ?? getDefaultLocaleDefinition(registry);
+  const start =
+    matchLocale(locale, registry) ?? getDefaultLocaleDefinition(registry);
   const chain: string[] = [];
   const visited = new Set<string>();
 

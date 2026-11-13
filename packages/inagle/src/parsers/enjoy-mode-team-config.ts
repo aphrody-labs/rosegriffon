@@ -93,17 +93,25 @@ function parseEntries(entries: ConfigNode[]): ParsedEnjoyModeTeam[] {
 // Loaders
 // ============================================================================
 
-export async function loadEnjoyModeTeamConfigAsync(dataPath: string = DATA_ROOT) {
+export async function loadEnjoyModeTeamConfigAsync(
+  dataPath: string = DATA_ROOT,
+) {
   // Résolution version-agnostique (repli sur le chemin versionné historique si introuvable)
   const path =
     resolveGameDataFile("team", "enjoy_mode_team_config") ??
-    join(dataPath, "common/gamedata/team", "enjoy_mode_team_config_1.04.02.00.cfg.bin.json");
+    join(
+      dataPath,
+      "common/gamedata/team",
+      "enjoy_mode_team_config_1.04.02.00.cfg.bin.json",
+    );
   const content = await loadJsonAsync<{ entries: ConfigNode[] }>(path);
   if (!content?.entries) return null;
   return parseEntries(content.entries);
 }
 
-export async function buildEnjoyModeTeamDatabase(dataPath: string = DATA_ROOT): Promise<EnjoyModeTeamDatabase> {
+export async function buildEnjoyModeTeamDatabase(
+  dataPath: string = DATA_ROOT,
+): Promise<EnjoyModeTeamDatabase> {
   const teams = (await loadEnjoyModeTeamConfigAsync(dataPath)) || [];
   const byTeamId = new Map<string, ParsedEnjoyModeTeam>();
   for (const t of teams) byTeamId.set(t.teamId, t);

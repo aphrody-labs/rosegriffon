@@ -9,7 +9,10 @@
  * - API health check probe with latency timing and timeout handling.
  */
 
-import type { PwCookieParam, PlaywrightBrowserContext } from "@aphrody/bun-web/testing/next";
+import type {
+  PwCookieParam,
+  PlaywrightBrowserContext,
+} from "@aphrody/bun-web/testing/next";
 
 /** Canonical origins for Rose Griffon domains. */
 export const ROSE_GRIFFON_ORIGINS = {
@@ -57,7 +60,10 @@ export const ROSE_GRIFFON_AUTH_COOKIES = {
  * Builds a canonical Rose Griffon URL for `path`.
  * Enforces no trailing slashes on non-root paths according to the Aphrody SEO specification.
  */
-export function roseGriffonUrl(path: string, origin: string = ROSE_GRIFFON_ORIGINS.site): string {
+export function roseGriffonUrl(
+  path: string,
+  origin: string = ROSE_GRIFFON_ORIGINS.site,
+): string {
   const cleanOrigin = origin.replace(/\/+$/, "");
   let cleanPath = path.startsWith("/") ? path : `/${path}`;
   if (cleanPath.length > 1 && cleanPath.endsWith("/")) {
@@ -77,7 +83,9 @@ export interface RoseGriffonAuthOptions {
 /**
  * Creates Playwright-compatible cookie parameters for Rose Griffon authentication.
  */
-export function createRoseGriffonAuthCookies(opts: RoseGriffonAuthOptions = {}): PwCookieParam[] {
+export function createRoseGriffonAuthCookies(
+  opts: RoseGriffonAuthOptions = {},
+): PwCookieParam[] {
   const domain = opts.domain ?? "rosegriffon.fr";
   const path = opts.path ?? "/";
   const cookies: PwCookieParam[] = [
@@ -124,7 +132,10 @@ export function roseGriffonAuthHeaders(
 /**
  * Injects Rose Griffon authentication cookies into a test page or browser context.
  */
-export async function injectRoseGriffonAuth(target: unknown, options: RoseGriffonAuthOptions = {}): Promise<void> {
+export async function injectRoseGriffonAuth(
+  target: unknown,
+  options: RoseGriffonAuthOptions = {},
+): Promise<void> {
   const cookies = createRoseGriffonAuthCookies(options);
   if (
     typeof target === "object" &&
@@ -151,7 +162,9 @@ export async function injectRoseGriffonAuth(target: unknown, options: RoseGriffo
     "_cdp" in target &&
     typeof (target as { _cdp: { _send: unknown } })._cdp?._send === "function"
   ) {
-    const send = (target as { _cdp: { _send: (m: string, p: unknown) => Promise<unknown> } })._cdp;
+    const send = (
+      target as { _cdp: { _send: (m: string, p: unknown) => Promise<unknown> } }
+    )._cdp;
     await send._send("Network.setCookies", { cookies });
     return;
   }
@@ -160,7 +173,10 @@ export async function injectRoseGriffonAuth(target: unknown, options: RoseGriffo
   );
 }
 
-export type FetchLike = (input: string | URL | Request, init?: RequestInit) => Promise<Response>;
+export type FetchLike = (
+  input: string | URL | Request,
+  init?: RequestInit,
+) => Promise<Response>;
 
 export interface CheckRoseGriffonApiOptions {
   apiOrigin?: string;
@@ -184,7 +200,10 @@ export interface RoseGriffonApiHealthResult {
 export async function checkRoseGriffonApiHealth(
   opts: CheckRoseGriffonApiOptions = {},
 ): Promise<RoseGriffonApiHealthResult> {
-  const origin = (opts.apiOrigin ?? ROSE_GRIFFON_ORIGINS.api).replace(/\/+$/, "");
+  const origin = (opts.apiOrigin ?? ROSE_GRIFFON_ORIGINS.api).replace(
+    /\/+$/,
+    "",
+  );
   const endpoint = opts.endpoint ?? "/health";
   const url = `${origin}${endpoint.startsWith("/") ? endpoint : `/${endpoint}`}`;
   const fetcher = opts.fetch ?? globalThis.fetch;

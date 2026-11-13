@@ -102,12 +102,12 @@ export function AudioPlayer({
       <audio
         ref={ref}
         preload="metadata"
-        onLoadedMetadata={e => {
+        onLoadedMetadata={(e) => {
           const d = e.currentTarget.duration;
           if (Number.isFinite(d) && d > 0) setDuree(d);
           setChargement(false);
         }}
-        onTimeUpdate={e => setPosition(e.currentTarget.currentTime)}
+        onTimeUpdate={(e) => setPosition(e.currentTarget.currentTime)}
         onEnded={() => setJoue(false)}
         onError={() => {
           setChargement(false);
@@ -147,7 +147,9 @@ export function AudioPlayer({
         )}
 
         <span className="min-w-0 flex-1">
-          <span className="block truncate text-sm font-medium text-on-surface">{piste.label}</span>
+          <span className="block truncate text-sm font-medium text-on-surface">
+            {piste.label}
+          </span>
           <span className="block truncate text-[11px] text-on-surface-variant">
             {piste.banque}
             {chargement && " · décodage…"}
@@ -158,7 +160,7 @@ export function AudioPlayer({
             max={total > 0 ? total : 1}
             step={0.01}
             value={Math.min(position, total || 0)}
-            onChange={e => chercher(Number(e.target.value))}
+            onChange={(e) => chercher(Number(e.target.value))}
             aria-label="Position dans la piste"
             className="mt-1 h-1 w-full cursor-pointer appearance-none rounded-full bg-outline-variant accent-primary"
           />

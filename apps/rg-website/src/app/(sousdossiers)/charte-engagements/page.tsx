@@ -1,9 +1,21 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@rosegriffon/ui";
 import type { Metadata } from "next";
 
-import { PageContainer, PageHero, SectionCard, SectionHeading } from "@/components/shared/PageShell";
+import {
+  PageContainer,
+  PageHero,
+  SectionCard,
+  SectionHeading,
+} from "@/components/shared/PageShell";
 import { BreadcrumbSchema } from "@/components/shared/StructuredData";
-import { Award, Eye, Handshake, Palette, Scale, Users } from "@/lib/icons-config";
+import {
+  Award,
+  Eye,
+  Handshake,
+  Palette,
+  Scale,
+  Users,
+} from "@/lib/icons-config";
 import { absoluteUrl } from "@/lib/site-url";
 import { withDefaultOgImage } from "@/lib/seo";
 
@@ -20,7 +32,8 @@ export const metadata: Metadata = {
   },
   openGraph: withDefaultOgImage({
     title: "Charte d'engagements · Rose Griffon",
-    description: "Les cinq engagements que Rose Griffon, Achilléa et Azalée tiennent dans toutes leurs activités.",
+    description:
+      "Les cinq engagements que Rose Griffon, Achilléa et Azalée tiennent dans toutes leurs activités.",
     url: absoluteUrl("/charte-engagements"),
     type: "website",
   }),
@@ -67,7 +80,8 @@ const REFUS_PARTENARIAT = [
     id: "nsfw",
     content: (
       <>
-        Tolèrent un salon <strong className="font-bold">NSFW</strong> ou équivalent.
+        Tolèrent un salon <strong className="font-bold">NSFW</strong> ou
+        équivalent.
       </>
     ),
   },
@@ -75,9 +89,9 @@ const REFUS_PARTENARIAT = [
     id: "moderation",
     content: (
       <>
-        Ont une <strong className="font-bold">modération laxiste</strong> face aux{" "}
-        <strong className="font-bold">discriminations</strong>, <strong className="font-bold">agressions</strong> ou
-        autres cas d&apos;
+        Ont une <strong className="font-bold">modération laxiste</strong> face
+        aux <strong className="font-bold">discriminations</strong>,{" "}
+        <strong className="font-bold">agressions</strong> ou autres cas d&apos;
         <strong className="font-bold">abus</strong>.
       </>
     ),
@@ -86,8 +100,9 @@ const REFUS_PARTENARIAT = [
     id: "outils",
     content: (
       <>
-        Utilisent des outils liés à des personnes reconnues comme <strong className="font-bold">nuisibles</strong> pour
-        certaines <strong className="font-bold">communautés</strong>.
+        Utilisent des outils liés à des personnes reconnues comme{" "}
+        <strong className="font-bold">nuisibles</strong> pour certaines{" "}
+        <strong className="font-bold">communautés</strong>.
       </>
     ),
   },
@@ -95,7 +110,8 @@ const REFUS_PARTENARIAT = [
     id: "ia",
     content: (
       <>
-        Dépendent fortement d&apos;<strong className="font-bold">IA générative artistique</strong>.
+        Dépendent fortement d&apos;
+        <strong className="font-bold">IA générative artistique</strong>.
       </>
     ),
   },
@@ -112,7 +128,9 @@ export default function CharteEngagementsPage() {
       />
 
       <PageHero
-        icon={<Scale className="size-7 shrink-0 text-rg-or md:size-8" aria-hidden />}
+        icon={
+          <Scale className="size-7 shrink-0 text-rg-or md:size-8" aria-hidden />
+        }
         eyebrow="Rose Griffon · Achilléa · Azalée"
         title="Charte d'engagements"
         description="Cinq engagements que nous tenons dans toutes nos activités et productions — et quatre critères qui nous font refuser un partenariat."
@@ -128,7 +146,7 @@ export default function CharteEngagementsPage() {
           subtitle="Applicables à Rose Griffon, Achilléa et Azalée, sans exception."
         />
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-          {ENGAGEMENTS.map(engagement => (
+          {ENGAGEMENTS.map((engagement) => (
             <Card
               key={engagement.title}
               className="border-l-8 border-l-primary shadow-lg transition-shadow hover:shadow-xl"
@@ -138,11 +156,15 @@ export default function CharteEngagementsPage() {
                   <div className="shrink-0 rounded-xl bg-primary/10 p-2.5 text-primary">
                     <engagement.icon className="size-6" aria-hidden />
                   </div>
-                  <CardTitle className="text-fluid-headline-md leading-tight">{engagement.title}</CardTitle>
+                  <CardTitle className="text-fluid-headline-md leading-tight">
+                    {engagement.title}
+                  </CardTitle>
                 </div>
               </CardHeader>
               <CardContent>
-                <p className="text-fluid-body-md text-muted-foreground">{engagement.text}</p>
+                <p className="text-fluid-body-md text-muted-foreground">
+                  {engagement.text}
+                </p>
               </CardContent>
             </Card>
           ))}
@@ -169,7 +191,9 @@ export default function CharteEngagementsPage() {
               >
                 {index + 1}
               </span>
-              <p className="text-fluid-body-md text-foreground">{critere.content}</p>
+              <p className="text-fluid-body-md text-foreground">
+                {critere.content}
+              </p>
             </li>
           ))}
         </ol>

@@ -2,10 +2,22 @@
   "schema": "nie.oc.native-vfs/v1",
   "source_reference": "data/ref/afubuki/meta/manifest.json",
   "identity_contract": "data/oc/afubuki/game/identity.json",
-  "default_roles": ["default_avatar", "primary_character", "nie_soul", "steam_persona"],
+  "default_roles": [
+    "default_avatar",
+    "primary_character",
+    "nie_soul",
+    "steam_persona"
+  ],
   "characters": {
     "byron": ["c01001900", "c05026590", "c07080010"],
-    "shawn": ["c02023290", "c02023370", "c02023380", "c05024700", "c07090010", "c11902360"]
+    "shawn": [
+      "c02023290",
+      "c02023370",
+      "c02023380",
+      "c05024700",
+      "c07090010",
+      "c11902360"
+    ]
   },
   "miximax": {
     "slug": "afubuki",

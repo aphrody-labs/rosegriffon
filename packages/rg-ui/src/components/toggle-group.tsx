@@ -34,7 +34,10 @@ function ToggleGroup({
   loop,
   rovingFocus = true,
   ...props
-}: Omit<PrimitiveProps<typeof ToggleGroupPrimitive>, "value" | "defaultValue" | "onValueChange" | "multiple"> &
+}: Omit<
+  PrimitiveProps<typeof ToggleGroupPrimitive>,
+  "value" | "defaultValue" | "onValueChange" | "multiple"
+> &
   (
     | {
         type: "single";
@@ -48,7 +51,9 @@ function ToggleGroup({
         defaultValue?: string[];
         onValueChange?: (value: string[]) => void;
       }
-  ) & { loop?: boolean; rovingFocus?: boolean } & VariantProps<typeof toggleVariants> & {
+  ) & { loop?: boolean; rovingFocus?: boolean } & VariantProps<
+    typeof toggleVariants
+  > & {
     spacing?: number;
   }) {
   const contextValue = React.useMemo(
@@ -61,7 +66,15 @@ function ToggleGroup({
         data-slot="toggle-group"
         render={childRender(asChild, children)}
         multiple={type === "multiple"}
-        value={value === undefined ? undefined : Array.isArray(value) ? value : value ? [value] : []}
+        value={
+          value === undefined
+            ? undefined
+            : Array.isArray(value)
+              ? value
+              : value
+                ? [value]
+                : []
+        }
         defaultValue={
           defaultValue === undefined
             ? undefined
@@ -73,8 +86,12 @@ function ToggleGroup({
         }
         loopFocus={loop}
         onValueChange={(next: string[]) => {
-          if (type === "single") (onValueChange as ((value: string) => void) | undefined)?.(next[0] ?? "");
-          else (onValueChange as ((value: string[]) => void) | undefined)?.(next);
+          if (type === "single")
+            (onValueChange as ((value: string) => void) | undefined)?.(
+              next[0] ?? "",
+            );
+          else
+            (onValueChange as ((value: string[]) => void) | undefined)?.(next);
         }}
         data-variant={variant}
         data-size={size}
@@ -100,16 +117,19 @@ function ToggleGroupItem({
   variant,
   size,
   ...props
-}: PrimitiveProps<typeof TogglePrimitive> & { value: string } & VariantProps<typeof toggleVariants>) {
+}: PrimitiveProps<typeof TogglePrimitive> & { value: string } & VariantProps<
+    typeof toggleVariants
+  >) {
   const context = React.useContext(ToggleGroupContext);
 
   return (
     <TogglePrimitive
       data-slot="toggle-group-item"
       tabIndex={context.rovingFocus === false ? 0 : undefined}
-      onKeyDown={event => {
+      onKeyDown={(event) => {
         onKeyDown?.(event);
-        if (context.rovingFocus === false && event.key.startsWith("Arrow")) event.stopPropagation();
+        if (context.rovingFocus === false && event.key.startsWith("Arrow"))
+          event.stopPropagation();
       }}
       render={childRender(asChild, children)}
       data-variant={context.variant || variant}

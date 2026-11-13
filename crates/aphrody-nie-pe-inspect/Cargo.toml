@@ -12,7 +12,14 @@ workspace = true
 
 [dependencies]
 bun-re = { package = "yolo-re-core", path = "../yolo-re-core", version = "1.4.8", default-features = false }
-goblin = { version = "0.10", default-features = false, features = ["std", "endian_fd", "pe32", "pe64", "elf32", "elf64"] }
+goblin = { version = "0.10", default-features = false, features = [
+  "std",
+  "endian_fd",
+  "pe32",
+  "pe64",
+  "elf32",
+  "elf64",
+] }
 serde = { workspace = true, features = ["std", "derive"] }
 serde_json = { workspace = true }
 anyhow = { workspace = true }

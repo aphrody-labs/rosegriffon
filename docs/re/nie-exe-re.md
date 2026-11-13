@@ -17,15 +17,15 @@
 
 ## 2. Cryptographic Constants & Polynomials
 
-| Constant Name               | Hexadecimal  | Integer      | Status      | Algorithmic Usage                                                                                          |
-| --------------------------- | ------------ | ------------ | ----------- | ---------------------------------------------------------------------------------------------------------- |
-| `VIOLA_FIXED_KEY`           | `0x1717E18E` | `387441038`  |  Verified | Fixed CRI XOR encryption key for cpk_list.cfg.bin and standalone Level-5 packages (discovered by Viola).   |
-| `LEVEL5_CRC32_POLYNOMIAL`   | `0xEDB88320` | `3988292384` |  Verified | Standard IEEE 802.3 reflected CRC32 polynomial for RDBN hash dictionaries and CPK filename key derivation. |
-| `CRI_ENCRYPTED_TABLE_MAGIC` | `0xF5F39E1F` | `4126383647` |  Verified | Magic header sentinel indicating an encrypted CRI @UTF table block.                                        |
-| `LIVES_SAVE_HEADER_MAGIC`   | `0x9DCE66C3` | `2647549635` |  Verified | Sentinel u32 LE placed at offset 0x00 of decrypted Lives save containers (002AB8F4-*).                     |
-| `LIVES_SAVE_CONST2`         | `0x2EC3031F` | `784532255`  |  Verified | Constant u32 LE at offset 0x08 of decrypted Lives save header (bytes: 1F 03 C3 2E).                        |
-| `LIVES_BLOB_MAGIC`          | `0xEEFF`     | `61183`      |  Verified | Big-endian u16 sentinel starting every concatenated payload blob in Lives saves.                           |
-| `STEAM_APP_ID`              | `0x2AB8F4`   | `2799860`    |  Verified | Official Steam App ID for Inazuma Eleven: Victory Road (hexadecimal prefix for save files: 002AB8F4).      |
+| Constant Name               | Hexadecimal  | Integer      | Status   | Algorithmic Usage                                                                                          |
+| --------------------------- | ------------ | ------------ | -------- | ---------------------------------------------------------------------------------------------------------- |
+| `VIOLA_FIXED_KEY`           | `0x1717E18E` | `387441038`  | Verified | Fixed CRI XOR encryption key for cpk_list.cfg.bin and standalone Level-5 packages (discovered by Viola).   |
+| `LEVEL5_CRC32_POLYNOMIAL`   | `0xEDB88320` | `3988292384` | Verified | Standard IEEE 802.3 reflected CRC32 polynomial for RDBN hash dictionaries and CPK filename key derivation. |
+| `CRI_ENCRYPTED_TABLE_MAGIC` | `0xF5F39E1F` | `4126383647` | Verified | Magic header sentinel indicating an encrypted CRI @UTF table block.                                        |
+| `LIVES_SAVE_HEADER_MAGIC`   | `0x9DCE66C3` | `2647549635` | Verified | Sentinel u32 LE placed at offset 0x00 of decrypted Lives save containers (002AB8F4-*).                     |
+| `LIVES_SAVE_CONST2`         | `0x2EC3031F` | `784532255`  | Verified | Constant u32 LE at offset 0x08 of decrypted Lives save header (bytes: 1F 03 C3 2E).                        |
+| `LIVES_BLOB_MAGIC`          | `0xEEFF`     | `61183`      | Verified | Big-endian u16 sentinel starting every concatenated payload blob in Lives saves.                           |
+| `STEAM_APP_ID`              | `0x2AB8F4`   | `2799860`    | Verified | Official Steam App ID for Inazuma Eleven: Victory Road (hexadecimal prefix for save files: 002AB8F4).      |
 
 ---
 

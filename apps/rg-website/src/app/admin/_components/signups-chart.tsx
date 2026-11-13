@@ -29,7 +29,10 @@ const config = {
 
 export function SignupsChart({ data }: { data: SignupPoint[] }) {
   const total = data.reduce((sum, d) => sum + d.count, 0);
-  const peak = data.reduce((max, d) => (d.count > max.count ? d : max), data[0] ?? { count: 0, date: "" });
+  const peak = data.reduce(
+    (max, d) => (d.count > max.count ? d : max),
+    data[0] ?? { count: 0, date: "" },
+  );
 
   return (
     <Card>
@@ -38,17 +41,32 @@ export function SignupsChart({ data }: { data: SignupPoint[] }) {
           <CardTitle className="text-base">Inscriptions sur 30 jours</CardTitle>
           <p className="text-xs text-muted-foreground">
             {total} nouveaux comptes
-            {peak.count > 0 && ` · pic le ${format(new Date(peak.date), "d MMM", { locale: fr })} (${peak.count})`}
+            {peak.count > 0 &&
+              ` · pic le ${format(new Date(peak.date), "d MMM", { locale: fr })} (${peak.count})`}
           </p>
         </div>
       </CardHeader>
       <CardContent className="pl-2">
-        <ChartContainer config={config} className="h-[160px] w-full sm:h-[220px]">
-          <AreaChart data={data} margin={{ bottom: 0, left: 12, right: 12, top: 8 }}>
+        <ChartContainer
+          config={config}
+          className="h-[160px] w-full sm:h-[220px]"
+        >
+          <AreaChart
+            data={data}
+            margin={{ bottom: 0, left: 12, right: 12, top: 8 }}
+          >
             <defs>
               <linearGradient id="signupsGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="var(--color-count)" stopOpacity={0.4} />
-                <stop offset="95%" stopColor="var(--color-count)" stopOpacity={0.05} />
+                <stop
+                  offset="5%"
+                  stopColor="var(--color-count)"
+                  stopOpacity={0.4}
+                />
+                <stop
+                  offset="95%"
+                  stopColor="var(--color-count)"
+                  stopOpacity={0.05}
+                />
               </linearGradient>
             </defs>
             <CartesianGrid vertical={false} strokeDasharray="3 3" />
@@ -57,17 +75,26 @@ export function SignupsChart({ data }: { data: SignupPoint[] }) {
               tickLine={false}
               axisLine={false}
               tickMargin={8}
-              tickFormatter={(value: string) => format(new Date(value), "d MMM", { locale: fr })}
+              tickFormatter={(value: string) =>
+                format(new Date(value), "d MMM", { locale: fr })
+              }
               minTickGap={32}
             />
-            <YAxis tickLine={false} axisLine={false} allowDecimals={false} width={28} />
+            <YAxis
+              tickLine={false}
+              axisLine={false}
+              allowDecimals={false}
+              width={28}
+            />
             <ChartTooltip
               cursor={false}
               content={
                 <ChartTooltipContent
                   labelFormatter={(_, payload) => {
                     const raw = payload?.[0]?.payload?.date;
-                    return raw ? format(new Date(raw), "EEEE d MMMM", { locale: fr }) : "";
+                    return raw
+                      ? format(new Date(raw), "EEEE d MMMM", { locale: fr })
+                      : "";
                   }}
                 />
               }

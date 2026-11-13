@@ -25,14 +25,22 @@ const HOME_URL = "https://www.inazuma.jp/victory-road/fr/";
 // --- Scraper ---
 
 export async function scrapeTopicList(): Promise<TopicSummary[]> {
-  console.log(`[Scraper] Fetching topics list from: ${BASE_URL}/ and ${HOME_URL}`);
+  console.log(
+    `[Scraper] Fetching topics list from: ${BASE_URL}/ and ${HOME_URL}`,
+  );
 
   try {
     const topics: TopicSummary[] = [];
 
     // helper function to avoid duplicates and push
     const addTopic = (topic: TopicSummary) => {
-      if (!topic.id || topics.find(t => t.id === topic.id) || topic.id === "fr" || topic.id === "topics") return;
+      if (
+        !topic.id ||
+        topics.find((t) => t.id === topic.id) ||
+        topic.id === "fr" ||
+        topic.id === "topics"
+      )
+        return;
       topics.push(topic);
     };
 
@@ -50,7 +58,9 @@ export async function scrapeTopicList(): Promise<TopicSummary[]> {
 
         if (!href || !title) return;
 
-        const absoluteUrl = href.startsWith("http") ? href : new URL(href, HOME_URL).toString();
+        const absoluteUrl = href.startsWith("http")
+          ? href
+          : new URL(href, HOME_URL).toString();
 
         const id = absoluteUrl.split("/").filter(Boolean).pop() || "";
 
@@ -58,7 +68,9 @@ export async function scrapeTopicList(): Promise<TopicSummary[]> {
         if (img.length) {
           const src = img.attr("src");
           if (src) {
-            thumbnail = src.startsWith("http") ? src : new URL(src, HOME_URL).toString();
+            thumbnail = src.startsWith("http")
+              ? src
+              : new URL(src, HOME_URL).toString();
           }
         }
 
@@ -90,7 +102,9 @@ export async function scrapeTopicList(): Promise<TopicSummary[]> {
 
         if (!href || !title) return;
 
-        const absoluteUrl = href.startsWith("http") ? href : new URL(href, `${BASE_URL}/`).toString();
+        const absoluteUrl = href.startsWith("http")
+          ? href
+          : new URL(href, `${BASE_URL}/`).toString();
 
         const id = absoluteUrl.split("/").filter(Boolean).pop() || "";
 
@@ -120,7 +134,9 @@ export async function scrapeTopicList(): Promise<TopicSummary[]> {
       if (!href) return;
 
       if (href.includes("/topics/") && !href.endsWith("/topics/")) {
-        const absoluteUrl = href.startsWith("http") ? href : `https://www.inazuma.jp${href}`;
+        const absoluteUrl = href.startsWith("http")
+          ? href
+          : `https://www.inazuma.jp${href}`;
         const id = absoluteUrl.split("/").filter(Boolean).pop() || "";
 
         const fullText = $(el).text().trim();

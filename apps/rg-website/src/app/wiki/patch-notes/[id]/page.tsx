@@ -7,7 +7,11 @@ import { wiki } from "@rosegriffon/app-shell";
 export const dynamic = "force-static";
 export const revalidate = 3600;
 
-export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
   const { id } = await params;
   const note = await getPatchNoteDetail(id);
   const title = note?.title || "Patch Note";
@@ -18,7 +22,11 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   };
 }
 
-export default async function PatchNoteDetailPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function PatchNoteDetailPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const { id } = await params;
   const note = await getPatchNoteDetail(id);
 

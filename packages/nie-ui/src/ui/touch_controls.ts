@@ -125,7 +125,9 @@ export class Control {
     public readonly element: HTMLElement,
     layoutData: ControlLayoutData = {},
   ) {
-    this.interactionElement = element.getElementsByClassName("interaction")[0] as HTMLElement;
+    this.interactionElement = element.getElementsByClassName(
+      "interaction",
+    )[0] as HTMLElement;
 
     this.halfWidth_ = this.element.clientWidth * 0.5;
     this.halfHeight_ = this.element.clientHeight * 0.5;
@@ -148,7 +150,9 @@ export class Button extends Control {
     layoutData: ControlLayoutData = {},
   ) {
     super(element);
-    this.button = element.getElementsByTagName("button")[0] as HTMLButtonElement;
+    this.button = element.getElementsByTagName(
+      "button",
+    )[0] as HTMLButtonElement;
     this.layoutData = layoutData;
   }
 }
@@ -222,7 +226,14 @@ export class TouchControls {
     layoutData: ControlsLayoutData = {},
   ) {
     function button(key: ButtonKey, bit: number): [ButtonKey, Button] {
-      return [key, new Button(document.getElementById(`btn-${key}`)!, bit, layoutData[key])];
+      return [
+        key,
+        new Button(
+          document.getElementById(`btn-${key}`)!,
+          bit,
+          layoutData[key],
+        ),
+      ];
     }
 
     this.buttons = new Map([
@@ -238,7 +249,11 @@ export class TouchControls {
 
     this.dpad = new Dpad(document.getElementById("dpad")!, layoutData.dpad);
 
-    this.pause = new Button(document.getElementById(`btn-pause`)!, 0, layoutData.pause);
+    this.pause = new Button(
+      document.getElementById(`btn-pause`)!,
+      0,
+      layoutData.pause,
+    );
   }
 
   resetTouches() {
@@ -316,22 +331,26 @@ export class TouchControls {
     const height = document.body.clientHeight;
 
     const aspectRatio = width / height;
-    const baseY = (aspectRatio < 5 / 4 ? 0.4 : aspectRatio < 4 / 3 ? 0.3 : 0.1) * height;
+    const baseY =
+      (aspectRatio < 5 / 4 ? 0.4 : aspectRatio < 4 / 3 ? 0.3 : 0.1) * height;
 
     const a = this.buttons.get("a")!;
     const b = this.buttons.get("b")!;
     const x = this.buttons.get("x")!;
     const y = this.buttons.get("y")!;
 
-    const faceButtonsAvgHalfWidth = (a.halfWidth + b.halfWidth + x.halfWidth + y.halfWidth) / 4;
-    const faceButtonsAvgHalfHeight = (a.halfHeight + b.halfHeight + x.halfHeight + y.halfHeight) / 4;
+    const faceButtonsAvgHalfWidth =
+      (a.halfWidth + b.halfWidth + x.halfWidth + y.halfWidth) / 4;
+    const faceButtonsAvgHalfHeight =
+      (a.halfHeight + b.halfHeight + x.halfHeight + y.halfHeight) / 4;
 
     const l = this.buttons.get("l")!;
     const r = this.buttons.get("r")!;
     const start = this.buttons.get("start")!;
     const select = this.buttons.get("select")!;
 
-    const pauseInteractionRadius = this.pause.halfWidth * this.pause.interactionScale;
+    const pauseInteractionRadius =
+      this.pause.halfWidth * this.pause.interactionScale;
 
     const centerX = 0.5 * width;
 
@@ -339,14 +358,16 @@ export class TouchControls {
     const faceButtonsLeft = width - (6 * faceButtonsAvgHalfWidth + 2 * margin);
 
     const startX = centerX + pauseInteractionRadius + start.halfWidth + margin;
-    const selectX = centerX - (pauseInteractionRadius + select.halfWidth + margin);
+    const selectX =
+      centerX - (pauseInteractionRadius + select.halfWidth + margin);
 
     const startRight = startX - start.halfWidth;
     const selectLeft = selectX - select.halfWidth;
 
     const dpadFaceButtonsBase =
       dpadRight >= selectLeft || faceButtonsLeft <= startRight
-        ? height - (2 * Math.max(start.halfHeight, select.halfHeight) + 2 * margin)
+        ? height -
+          (2 * Math.max(start.halfHeight, select.halfHeight) + 2 * margin)
         : height - margin;
 
     return {
@@ -395,7 +416,10 @@ export class TouchControls {
         y:
           height -
           ((this.element.classList.contains("touch")
-            ? Math.max(this.pause.halfHeight, (start.halfHeight + select.halfHeight) / 2)
+            ? Math.max(
+                this.pause.halfHeight,
+                (start.halfHeight + select.halfHeight) / 2,
+              )
             : this.pause.halfHeight) +
             margin),
       },

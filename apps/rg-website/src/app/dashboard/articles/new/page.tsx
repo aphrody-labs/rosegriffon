@@ -1,6 +1,12 @@
 export const dynamic = "force-dynamic";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@rosegriffon/ui";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@rosegriffon/ui";
 import Link from "@/components/shared/Link";
 import { redirect } from "next/navigation";
 import { createPostgresClient } from "@rosegriffon/db/service";
@@ -19,7 +25,10 @@ export default async function NewArticlePage() {
   const supabase = createPostgresClient();
 
   // Récupérer les catégories
-  const { data: categoriesData } = await supabase.from("article_categories").select("*").order("name");
+  const { data: categoriesData } = await supabase
+    .from("article_categories")
+    .select("*")
+    .order("name");
 
   const categories = categoriesData || [];
 
@@ -55,7 +64,9 @@ export default async function NewArticlePage() {
         <Card className="shadow-lg">
           <CardHeader>
             <CardTitle>Éditeur de chronique</CardTitle>
-            <CardDescription>Rédigez une nouvelle entrée du journal de bord Rose Griffon</CardDescription>
+            <CardDescription>
+              Rédigez une nouvelle entrée du journal de bord Rose Griffon
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <ArticleEditor categories={categories} userId={user.id} />
@@ -73,25 +84,29 @@ export default async function NewArticlePage() {
               <li className="flex items-start gap-2">
                 <span className="text-blue-500 mt-1">•</span>
                 <span>
-                  <strong>Titre :</strong> Clair et accrocheur (50-60 caractères idéal)
+                  <strong>Titre :</strong> Clair et accrocheur (50-60 caractères
+                  idéal)
                 </span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-blue-500 mt-1">•</span>
                 <span>
-                  <strong>Extrait :</strong> Résumé en 1-2 phrases (150 caractères max)
+                  <strong>Extrait :</strong> Résumé en 1-2 phrases (150
+                  caractères max)
                 </span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-blue-500 mt-1">•</span>
                 <span>
-                  <strong>Image :</strong> Format recommandé 1200x630px (ratio 16:9)
+                  <strong>Image :</strong> Format recommandé 1200x630px (ratio
+                  16:9)
                 </span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-blue-500 mt-1">•</span>
                 <span>
-                  <strong>Contenu :</strong> Structurez avec des sous-titres (H2, H3)
+                  <strong>Contenu :</strong> Structurez avec des sous-titres
+                  (H2, H3)
                 </span>
               </li>
             </ul>

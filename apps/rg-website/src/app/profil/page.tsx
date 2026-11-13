@@ -16,7 +16,11 @@ export default async function ProfilPage() {
     redirect("/login?redirect=/profil");
   }
 
-  const { data: profile } = await supabase.from("profiles").select("username").eq("id", user.id).single();
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("username")
+    .eq("id", user.id)
+    .single();
 
   if (profile?.username) {
     redirect(`/profil/${encodeURIComponent(profile.username)}`);

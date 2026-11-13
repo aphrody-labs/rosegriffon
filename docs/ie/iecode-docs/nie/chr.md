@@ -69,12 +69,12 @@ Modèle complet d'un joueur = **CORPS + VISAGE + UNIFORME** (+ textures, + skinn
    Sources cfg.bin : `chara_base_*.cfg.bin.json` (CHARA_BASE_INFO), `chara_model_*.cfg.bin.json`
    (CHARA_MODEL_INFO + CHARA_BODY_INFO).
 2. **Visage** : `dx11/model/<internalCode>.glb` (GLB pré-converti, 98 % directs) ; sinon le g4md
-   `common/chr/_face/<ère>/<code>/<code>.g4md`.  l'`internalCode` désigne la **TÊTE**, pas le corps.
+   `common/chr/_face/<ère>/<code>/<code>.g4md`. l'`internalCode` désigne la **TÊTE**, pas le corps.
 3. **Uniforme** : `series → season_key (ie/go/v) → inagle_teams.kits[season] = kit_id →
 uniform_config.m_UniformInfoList[kit_id] → uniformFielderModelIdCrc` (ou `…Keeper…` si poste GK)
    → CRC qui résout dans les CPK `common/chr/_uniform/` via `model-crc-manifest.ndjson`.
    `inagle_uniforms` (384, col `models` = JSON shoes/glove/uniform CRC par poste), `inagle_teams` (208, `kits`).
-    le CRC = identifiant **CRI ResourceManager**, pas un CRC32 de chemin → résolution finale via le manifeste.
+   le CRC = identifiant **CRI ResourceManager**, pas un CRC32 de chemin → résolution finale via le manifeste.
 4. **Keshin** (100) / **Armures** (89) : modèles `_keshin`/`_armd` propres, à exposer comme `Model` générique.
 
 ## 6. Couverture perso ↔ assets

@@ -31,18 +31,30 @@ export interface VoteTally {
  * @returns Le nouveau {@link ProposalStatus} (APPROVED / REJECTED / EXPIRED),
  *   ou `null` si la proposition doit rester en attente.
  */
-export function evaluateProposalOutcome(tally: VoteTally): ProposalStatus | null {
-  const { approvals, rejections, totalEligible, minParticipationRatio, strategy } = tally;
+export function evaluateProposalOutcome(
+  tally: VoteTally,
+): ProposalStatus | null {
+  const {
+    approvals,
+    rejections,
+    totalEligible,
+    minParticipationRatio,
+    strategy,
+  } = tally;
 
   const votesCount = approvals + rejections;
-  const requiredParticipation = Math.ceil(totalEligible * minParticipationRatio);
+  const requiredParticipation = Math.ceil(
+    totalEligible * minParticipationRatio,
+  );
   const remainingPossibleVotes = totalEligible - votesCount;
-  const expiredUnderQuorum = Boolean(tally.expired) && votesCount < requiredParticipation;
+  const expiredUnderQuorum =
+    Boolean(tally.expired) && votesCount < requiredParticipation;
 
   // UNANIMOUS : un seul refus rejette ; approbation seulement si tous ont voté pour.
   if (strategy === VotingStrategy.UNANIMOUS) {
     if (rejections > 0) return ProposalStatus.REJECTED;
-    if (votesCount === totalEligible && approvals === totalEligible) return ProposalStatus.APPROVED;
+    if (votesCount === totalEligible && approvals === totalEligible)
+      return ProposalStatus.APPROVED;
     if (expiredUnderQuorum) return ProposalStatus.EXPIRED;
     return null;
   }
@@ -59,7 +71,10 @@ export function evaluateProposalOutcome(tally: VoteTally): ProposalStatus | null
 
       if (approvals + remainingPossibleVotes < supermajorityTotal) {
         rejected = true;
-      } else if (approvals >= supermajorityThreshold && votesCount >= requiredParticipation) {
+      } else if (
+        approvals >= supermajorityThreshold &&
+        votesCount >= requiredParticipation
+      ) {
         approved = true;
       }
       break;

@@ -21,11 +21,27 @@ import {
   TableHeader,
   TableRow,
 } from "@rosegriffon/ui";
-import { ExternalLink, Info, Loader2, Pause, Pencil, Play, Save } from "lucide-react";
+import {
+  ExternalLink,
+  Info,
+  Loader2,
+  Pause,
+  Pencil,
+  Play,
+  Save,
+} from "lucide-react";
 import { signalerEchec } from "@/lib/achillea/signaler";
 import type { ClanDTO } from "@rosegriffon/achillea-types/domain/clan";
 import { ClanState } from "@rosegriffon/achillea-types/enums/clanState";
-import { BoutonActualiser, Chargement, Erreur, Vide, formaterDate, useClientAchillea, useLecture } from "./etat";
+import {
+  BoutonActualiser,
+  Chargement,
+  Erreur,
+  Vide,
+  formaterDate,
+  useClientAchillea,
+  useLecture,
+} from "./etat";
 import { ROLE_ADMIN } from "./visibilite";
 import { EditionClanDialog } from "./clan-edition-dialog";
 
@@ -34,7 +50,9 @@ function IdentiteClan({ clan }: { clan: ClanDTO }) {
     <span className="flex items-center gap-2">
       <Avatar className="size-7">
         {clan.clanAvatarUrl && <AvatarImage src={clan.clanAvatarUrl} alt="" />}
-        <AvatarFallback className="text-xs">{clan.shortenedName.slice(0, 2)}</AvatarFallback>
+        <AvatarFallback className="text-xs">
+          {clan.shortenedName.slice(0, 2)}
+        </AvatarFallback>
       </Avatar>
       <span className="font-medium">{clan.name}</span>
     </span>
@@ -43,11 +61,15 @@ function IdentiteClan({ clan }: { clan: ClanDTO }) {
 
 function LimitesEffectif({ peutModifier }: { peutModifier: boolean }) {
   const client = useClientAchillea();
-  const limites = useLecture("clans/member-limits", () => client.clans.memberLimits());
+  const limites = useLecture("clans/member-limits", () =>
+    client.clans.memberLimits(),
+  );
   const [joueurs, setJoueurs] = useState<string | null>(null);
   const [staff, setStaff] = useState<string | null>(null);
   const [enregistrement, setEnregistrement] = useState(false);
-  const [message, setMessage] = useState<{ ok: boolean; texte: string } | null>(null);
+  const [message, setMessage] = useState<{ ok: boolean; texte: string } | null>(
+    null,
+  );
 
   const valeurJoueurs = joueurs ?? String(limites.donnees?.playerLimit ?? "");
   const valeurStaff = staff ?? String(limites.donnees?.staffLimit ?? "");
@@ -56,14 +78,25 @@ function LimitesEffectif({ peutModifier }: { peutModifier: boolean }) {
     event.preventDefault();
     const playerLimit = Number(valeurJoueurs);
     const staffLimit = Number(valeurStaff);
-    if (!Number.isInteger(playerLimit) || !Number.isInteger(staffLimit) || playerLimit < 1 || staffLimit < 1) {
-      setMessage({ ok: false, texte: "Les deux limites doivent être des entiers positifs." });
+    if (
+      !Number.isInteger(playerLimit) ||
+      !Number.isInteger(staffLimit) ||
+      playerLimit < 1 ||
+      staffLimit < 1
+    ) {
+      setMessage({
+        ok: false,
+        texte: "Les deux limites doivent être des entiers positifs.",
+      });
       return;
     }
     setEnregistrement(true);
     setMessage(null);
     try {
-      const resultat = await client.clans.updateMemberLimits({ playerLimit, staffLimit });
+      const resultat = await client.clans.updateMemberLimits({
+        playerLimit,
+        staffLimit,
+      });
       if (resultat.ok) {
         setJoueurs(null);
         setStaff(null);
@@ -72,7 +105,11 @@ function LimitesEffectif({ peutModifier }: { peutModifier: boolean }) {
           ok: true,
           texte: `Effectifs mis à jour : ${resultat.value.playerLimit} joueurs, ${resultat.value.staffLimit} staff.`,
         });
-      } else setMessage({ ok: false, texte: signalerEchec("clans/member-limits", resultat) });
+      } else
+        setMessage({
+          ok: false,
+          texte: signalerEchec("clans/member-limits", resultat),
+        });
     } finally {
       setEnregistrement(false);
     }
@@ -81,18 +118,25 @@ function LimitesEffectif({ peutModifier }: { peutModifier: boolean }) {
   return (
     <Card className="border-border/60">
       <CardHeader>
-        <CardTitle className="text-base">Limites d&apos;effectif par clan</CardTitle>
+        <CardTitle className="text-base">
+          Limites d&apos;effectif par clan
+        </CardTitle>
         <p className="text-xs text-muted-foreground">
           Plafonds appliqués aux invitations, candidatures et recrutements.
           {peutModifier ? "" : " Modification réservée aux administrateurs."}
         </p>
       </CardHeader>
       <CardContent className="space-y-3">
-        {limites.erreur && <Erreur message={limites.erreur} onReessayer={limites.recharger} />}
+        {limites.erreur && (
+          <Erreur message={limites.erreur} onReessayer={limites.recharger} />
+        )}
         {limites.chargement && !limites.donnees ? (
           <Chargement lignes={1} />
         ) : (
-          <form className="flex flex-wrap items-end gap-4" onSubmit={event => void enregistrer(event)}>
+          <form
+            className="flex flex-wrap items-end gap-4"
+            onSubmit={(event) => void enregistrer(event)}
+          >
             <div className="space-y-1">
               <Label htmlFor="clan-limite-joueurs">Joueurs max</Label>
               <Input
@@ -101,7 +145,7 @@ function LimitesEffectif({ peutModifier }: { peutModifier: boolean }) {
                 min={1}
                 value={valeurJoueurs}
                 disabled={!peutModifier}
-                onChange={event => setJoueurs(event.target.value)}
+                onChange={(event) => setJoueurs(event.target.value)}
                 className="min-h-11 w-32"
               />
             </div>
@@ -113,12 +157,16 @@ function LimitesEffectif({ peutModifier }: { peutModifier: boolean }) {
                 min={1}
                 value={valeurStaff}
                 disabled={!peutModifier}
-                onChange={event => setStaff(event.target.value)}
+                onChange={(event) => setStaff(event.target.value)}
                 className="min-h-11 w-32"
               />
             </div>
             {peutModifier && (
-              <Button type="submit" className="min-h-11 gap-2" disabled={enregistrement}>
+              <Button
+                type="submit"
+                className="min-h-11 gap-2"
+                disabled={enregistrement}
+              >
                 {enregistrement ? (
                   <Loader2 className="size-4 animate-spin" aria-hidden="true" />
                 ) : (
@@ -130,7 +178,9 @@ function LimitesEffectif({ peutModifier }: { peutModifier: boolean }) {
           </form>
         )}
         {message && (
-          <output className={`block text-sm ${message.ok ? "text-success" : "text-destructive"}`}>
+          <output
+            className={`block text-sm ${message.ok ? "text-success" : "text-destructive"}`}
+          >
             {message.texte}
           </output>
         )}
@@ -147,10 +197,18 @@ export function ClansTab({ role }: { role: number }) {
   const client = useClientAchillea();
   const estAdmin = role >= ROLE_ADMIN;
   const enAttente = useLecture("admin/clans?state=1", () =>
-    client.clans.adminList({ state: ClanState.PendingReview, page: 1, pageSize: 50 }),
+    client.clans.adminList({
+      state: ClanState.PendingReview,
+      page: 1,
+      pageSize: 50,
+    }),
   );
   const actifs = useLecture("admin/clans?state=2", () =>
-    client.clans.adminList({ state: ClanState.Approved, page: 1, pageSize: 50 }),
+    client.clans.adminList({
+      state: ClanState.Approved,
+      page: 1,
+      pageSize: 50,
+    }),
   );
   const [bascule, setBascule] = useState<number | null>(null);
   const [inactifs, setInactifs] = useState<Record<number, boolean>>({});
@@ -163,9 +221,16 @@ export function ClansTab({ role }: { role: number }) {
     setBascule(clan.id);
     setErreurBascule(null);
     try {
-      const resultat = await client.clans.update(clan.id, { isInactive: suivant });
-      if (resultat.ok && resultat.value.success) setInactifs(courant => ({ ...courant, [clan.id]: suivant }));
-      else if (resultat.ok) setErreurBascule(resultat.value.error ?? "Impossible de mettre à jour le statut du clan.");
+      const resultat = await client.clans.update(clan.id, {
+        isInactive: suivant,
+      });
+      if (resultat.ok && resultat.value.success)
+        setInactifs((courant) => ({ ...courant, [clan.id]: suivant }));
+      else if (resultat.ok)
+        setErreurBascule(
+          resultat.value.error ??
+            "Impossible de mettre à jour le statut du clan.",
+        );
       else setErreurBascule(signalerEchec("clans/update", resultat));
     } finally {
       setBascule(null);
@@ -179,19 +244,27 @@ export function ClansTab({ role }: { role: number }) {
     <div className="space-y-6">
       <p className="flex items-start gap-2 rounded-xl border border-border/60 bg-muted/20 p-3 text-sm text-muted-foreground">
         <Info className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
-        La création d&apos;un clan est approuvée automatiquement dès que tous les fondateurs l&apos;ont rejoint. La
-        liste « en revue » ne contient que les cas bloqués (incident technique).
+        La création d&apos;un clan est approuvée automatiquement dès que tous
+        les fondateurs l&apos;ont rejoint. La liste « en revue » ne contient que
+        les cas bloqués (incident technique).
       </p>
 
       <LimitesEffectif peutModifier={estAdmin} />
 
       <Card className="border-border/60">
         <CardHeader className="flex flex-row items-center justify-between gap-4">
-          <CardTitle className="text-base">Clans actifs ({actifs.donnees?.meta.total ?? listeActifs.length})</CardTitle>
-          <BoutonActualiser enCours={actifs.chargement} onClick={actifs.recharger} />
+          <CardTitle className="text-base">
+            Clans actifs ({actifs.donnees?.meta.total ?? listeActifs.length})
+          </CardTitle>
+          <BoutonActualiser
+            enCours={actifs.chargement}
+            onClick={actifs.recharger}
+          />
         </CardHeader>
         <CardContent className="space-y-4">
-          {actifs.erreur && <Erreur message={actifs.erreur} onReessayer={actifs.recharger} />}
+          {actifs.erreur && (
+            <Erreur message={actifs.erreur} onReessayer={actifs.recharger} />
+          )}
           {erreurBascule && <Erreur message={erreurBascule} />}
           {confirmation && (
             <output className="block text-sm text-success">
@@ -216,24 +289,40 @@ export function ClansTab({ role }: { role: number }) {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {listeActifs.map(clan => {
+                  {listeActifs.map((clan) => {
                     const inactif = inactifs[clan.id] ?? clan.isInactive;
                     return (
                       <TableRow key={clan.id}>
                         <TableCell>
                           <IdentiteClan clan={clan} />
                         </TableCell>
-                        <TableCell className="font-mono">{clan.shortenedName}</TableCell>
+                        <TableCell className="font-mono">
+                          {clan.shortenedName}
+                        </TableCell>
                         <TableCell>
                           <span className="flex flex-wrap gap-1">
-                            <Badge variant={inactif ? "warning" : "success"}>{inactif ? "Inactif" : "Actif"}</Badge>
-                            {clan.isHidden && <Badge variant="outline">Masqué</Badge>}
+                            <Badge variant={inactif ? "warning" : "success"}>
+                              {inactif ? "Inactif" : "Actif"}
+                            </Badge>
+                            {clan.isHidden && (
+                              <Badge variant="outline">Masqué</Badge>
+                            )}
                           </span>
                         </TableCell>
                         <TableCell className="whitespace-nowrap text-right">
-                          <Button asChild variant="ghost" className="min-h-11 gap-2">
-                            <Link href={`/achillea/clans/${clan.id}`} aria-label={`Fiche du clan ${clan.name}`}>
-                              <ExternalLink className="size-4" aria-hidden="true" />
+                          <Button
+                            asChild
+                            variant="ghost"
+                            className="min-h-11 gap-2"
+                          >
+                            <Link
+                              href={`/achillea/clans/${clan.id}`}
+                              aria-label={`Fiche du clan ${clan.name}`}
+                            >
+                              <ExternalLink
+                                className="size-4"
+                                aria-hidden="true"
+                              />
                               Fiche
                             </Link>
                           </Button>
@@ -259,7 +348,10 @@ export function ClansTab({ role }: { role: number }) {
                               onClick={() => void basculerInactif(clan)}
                             >
                               {bascule === clan.id ? (
-                                <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+                                <Loader2
+                                  className="size-4 animate-spin"
+                                  aria-hidden="true"
+                                />
                               ) : inactif ? (
                                 <Play className="size-4" aria-hidden="true" />
                               ) : (
@@ -282,12 +374,21 @@ export function ClansTab({ role }: { role: number }) {
       <Card className="border-border/60">
         <CardHeader className="flex flex-row items-center justify-between gap-4">
           <CardTitle className="text-base">
-            Clans en revue ({enAttente.donnees?.meta.total ?? listeAttente.length})
+            Clans en revue (
+            {enAttente.donnees?.meta.total ?? listeAttente.length})
           </CardTitle>
-          <BoutonActualiser enCours={enAttente.chargement} onClick={enAttente.recharger} />
+          <BoutonActualiser
+            enCours={enAttente.chargement}
+            onClick={enAttente.recharger}
+          />
         </CardHeader>
         <CardContent className="space-y-4">
-          {enAttente.erreur && <Erreur message={enAttente.erreur} onReessayer={enAttente.recharger} />}
+          {enAttente.erreur && (
+            <Erreur
+              message={enAttente.erreur}
+              onReessayer={enAttente.recharger}
+            />
+          )}
           {enAttente.chargement && !enAttente.donnees ? (
             <Chargement lignes={2} />
           ) : listeAttente.length === 0 && !enAttente.erreur ? (
@@ -304,14 +405,20 @@ export function ClansTab({ role }: { role: number }) {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {listeAttente.map(clan => (
+                  {listeAttente.map((clan) => (
                     <TableRow key={clan.id}>
                       <TableCell>
                         <IdentiteClan clan={clan} />
                       </TableCell>
-                      <TableCell className="font-mono">{clan.shortenedName}</TableCell>
-                      <TableCell className="text-right font-mono">{clan.founders.length}</TableCell>
-                      <TableCell className="whitespace-nowrap text-xs">{formaterDate(clan.createdAt)}</TableCell>
+                      <TableCell className="font-mono">
+                        {clan.shortenedName}
+                      </TableCell>
+                      <TableCell className="text-right font-mono">
+                        {clan.founders.length}
+                      </TableCell>
+                      <TableCell className="whitespace-nowrap text-xs">
+                        {formaterDate(clan.createdAt)}
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -325,7 +432,7 @@ export function ClansTab({ role }: { role: number }) {
         clan={edition}
         estAdmin={estAdmin}
         onFermer={() => setEdition(null)}
-        onEnregistre={nom => {
+        onEnregistre={(nom) => {
           setEdition(null);
           setInactifs({});
           setConfirmation(`${nom} mis à jour.`);

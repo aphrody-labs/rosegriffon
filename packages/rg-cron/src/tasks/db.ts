@@ -45,26 +45,46 @@ const RACINE_JEU = process.env.NIERS_ROOT ?? checkoutRoot("iecode");
 /** Paquet `@rosegriffon/inagle` du dépôt du jeu (disposition à plat, ou `packages/rg/`). */
 function dossierInagle(): string {
   const aPlat = join(RACINE_JEU, "packages", "inagle");
-  return existsSync(aPlat) ? aPlat : join(RACINE_JEU, "packages", "rg", "inagle");
+  return existsSync(aPlat)
+    ? aPlat
+    : join(RACINE_JEU, "packages", "rg", "inagle");
 }
 
 /**
  * Exécute la commande de push d'Inagle pour synchroniser la base de données
  * PostgreSQL avec les fichiers de données du jeu les plus récents.
  */
-export async function runInaglePush(): Promise<{ success: boolean; error?: string }> {
-  console.log("[Cron DB] Démarrage de la synchronisation Inagle avec la base de données...");
+export async function runInaglePush(): Promise<{
+  success: boolean;
+  error?: string;
+}> {
+  console.log(
+    "[Cron DB] Démarrage de la synchronisation Inagle avec la base de données...",
+  );
   try {
-    const sortie = await $`${BUN} src/cli.ts push`.cwd(dossierInagle()).env(environnementBun());
+    const sortie = await $`${BUN} src/cli.ts push`
+      .cwd(dossierInagle())
+      .env(environnementBun());
     // La CLI attrape son erreur fatale, la journalise et sort en 0 : seul son
     // message de fin atteste que TOUTES les tables ont été poussées.
-    const lignes = `${sortie.stdout.toString()}\n${sortie.stderr.toString()}`.split("\n");
-    if (!lignes.some(ligne => ligne.includes("Data push completed successfully"))) {
-      const fatale = lignes.find(ligne => ligne.includes("Fatal error during push")) ?? "";
-      const cause = lignes.find(ligne => /^\s*\w*Error:/.test(ligne)) ?? "";
-      const motif = [fatale, cause].filter(Boolean).join(" — ").trim() || "message de fin absent";
+    const lignes =
+      `${sortie.stdout.toString()}\n${sortie.stderr.toString()}`.split("\n");
+    if (
+      !lignes.some((ligne) =>
+        ligne.includes("Data push completed successfully"),
+      )
+    ) {
+      const fatale =
+        lignes.find((ligne) => ligne.includes("Fatal error during push")) ?? "";
+      const cause = lignes.find((ligne) => /^\s*\w*Error:/.test(ligne)) ?? "";
+      const motif =
+        [fatale, cause].filter(Boolean).join(" — ").trim() ||
+        "message de fin absent";
       console.error(`[Cron DB] Push Inagle interrompu : ${motif}`);
-      return { success: false, error: `push Inagle interrompu sans code d'erreur : ${motif}` };
+      return {
+        success: false,
+        error: `push Inagle interrompu sans code d'erreur : ${motif}`,
+      };
     }
     console.log("[Cron DB] Synchronisation réussie.");
     return { success: true };
@@ -83,11 +103,17 @@ export async function runInaglePush(): Promise<{ success: boolean; error?: strin
  */
 function describeShellError(err: unknown): string {
   if (typeof err !== "object" || err === null) return String(err);
-  const shell = err as { exitCode?: number; stderr?: { toString(): string }; message?: string };
+  const shell = err as {
+    exitCode?: number;
+    stderr?: { toString(): string };
+    message?: string;
+  };
   const base = shell.message ?? String(err);
   const details: string[] = [];
   if (shell.exitCode === 127) {
-    details.push("commande introuvable — vérifier le PATH du service (le binaire Bun n'y est pas par défaut)");
+    details.push(
+      "commande introuvable — vérifier le PATH du service (le binaire Bun n'y est pas par défaut)",
+    );
   }
   const stderr = shell.stderr?.toString().trim();
   if (stderr) details.push(stderr.slice(0, 500));

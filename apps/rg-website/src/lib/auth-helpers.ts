@@ -12,7 +12,9 @@ import { createPostgresClient } from "@rosegriffon/db/service";
 /**
  * Récupère la session Better Auth côté serveur (avec cache React par requête).
  */
-export const getServerSession = cache(async () => auth.api.getSession({ headers: await headers() }));
+export const getServerSession = cache(async () =>
+  auth.api.getSession({ headers: await headers() }),
+);
 
 /**
  * Récupère l'utilisateur authentifié ou null.
@@ -101,13 +103,19 @@ export async function requireAdminOrFail() {
 /**
  * True if the user with the given Discord ID owns the Médaille Azalée role.
  */
-export async function hasMedailleAzaleeRole(discordId: string | null | undefined): Promise<boolean> {
+export async function hasMedailleAzaleeRole(
+  discordId: string | null | undefined,
+): Promise<boolean> {
   if (!discordId) {
     return false;
   }
   const db = createPostgresClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data } = (await (db as any).from("discord_members").select("roles").eq("discord_id", discordId).single()) as {
+  const { data } = (await (db as any)
+    .from("discord_members")
+    .select("roles")
+    .eq("discord_id", discordId)
+    .single()) as {
     data: { roles: unknown } | null;
   };
 

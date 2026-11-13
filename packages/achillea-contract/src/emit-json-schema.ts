@@ -6,7 +6,13 @@
  * Swift, du Kotlin, du Go ou du C#.
  */
 
-import { indexDeclarations, type IrContract, type IrDeclaration, type IrField, type IrType } from "./ir";
+import {
+  indexDeclarations,
+  type IrContract,
+  type IrDeclaration,
+  type IrField,
+  type IrType,
+} from "./ir";
 
 export interface JsonSchemaDocument {
   $schema: string;
@@ -65,12 +71,12 @@ function typeToSchema(type: IrType): Record<string, unknown> {
 }
 
 function unionToSchema(members: readonly IrType[]): Record<string, unknown> {
-  const nullable = members.some(member => member.kind === "null");
-  const rest = members.filter(member => member.kind !== "null");
+  const nullable = members.some((member) => member.kind === "null");
+  const rest = members.filter((member) => member.kind !== "null");
 
   // Union de littéraux de même type → `enum`, bien plus lisible qu'un `anyOf`.
-  if (rest.length > 0 && rest.every(member => member.kind === "literal")) {
-    const values = rest.map(member => (member as { value: unknown }).value);
+  if (rest.length > 0 && rest.every((member) => member.kind === "literal")) {
+    const values = rest.map((member) => (member as { value: unknown }).value);
     return nullable ? { enum: [...values, null] } : { enum: values };
   }
 
@@ -79,7 +85,7 @@ function unionToSchema(members: readonly IrType[]): Record<string, unknown> {
     return nullable ? { anyOf: [single, { type: "null" }] } : single;
   }
 
-  const anyOf = rest.map(member => typeToSchema(member));
+  const anyOf = rest.map((member) => typeToSchema(member));
   if (nullable) anyOf.push({ type: "null" });
   return { anyOf };
 }
@@ -90,7 +96,9 @@ function objectToSchema(fields: readonly IrField[]): Record<string, unknown> {
 
   for (const field of fields) {
     const schema = typeToSchema(field.type);
-    properties[field.name] = field.doc ? { ...schema, description: field.doc } : schema;
+    properties[field.name] = field.doc
+      ? { ...schema, description: field.doc }
+      : schema;
     if (!field.optional) required.push(field.name);
   }
 
@@ -104,7 +112,9 @@ function literalKeys(type: IrType | undefined): Set<string> {
   if (!type) return new Set();
   const members = type.kind === "union" ? type.of : [type];
   return new Set(
-    members.filter(member => member.kind === "literal").map(member => String((member as { value: unknown }).value)),
+    members
+      .filter((member) => member.kind === "literal")
+      .map((member) => String((member as { value: unknown }).value)),
   );
 }
 
@@ -130,8 +140,8 @@ function inheritedFields(
     const fields = resolveFields(target, byName, seen);
     const selected = literalKeys(keys);
     return parent.name === "Omit"
-      ? fields.filter(field => !selected.has(field.name))
-      : fields.filter(field => selected.has(field.name));
+      ? fields.filter((field) => !selected.has(field.name))
+      : fields.filter((field) => selected.has(field.name));
   }
 
   const target = byName.get(parent.name);
@@ -148,23 +158,31 @@ export function resolveFields(
   if (seen.has(decl.name)) return [];
   seen.add(decl.name);
 
-  const inherited = decl.extends.flatMap(parent => inheritedFields(parent, byName, seen));
+  const inherited = decl.extends.flatMap((parent) =>
+    inheritedFields(parent, byName, seen),
+  );
 
   // Un champ redéclaré dans l'enfant écrase celui du parent.
   const merged = new Map<string, IrField>();
-  for (const field of [...inherited, ...decl.fields]) merged.set(field.name, field);
+  for (const field of [...inherited, ...decl.fields])
+    merged.set(field.name, field);
   return [...merged.values()];
 }
 
-function declarationToSchema(decl: IrDeclaration, byName: ReadonlyMap<string, IrDeclaration>): Record<string, unknown> {
-  const base: Record<string, unknown> = decl.doc ? { description: decl.doc } : {};
+function declarationToSchema(
+  decl: IrDeclaration,
+  byName: ReadonlyMap<string, IrDeclaration>,
+): Record<string, unknown> {
+  const base: Record<string, unknown> = decl.doc
+    ? { description: decl.doc }
+    : {};
 
   if (decl.kind === "enum") {
     return {
       ...base,
       type: decl.valueType,
-      enum: decl.members.map(member => member.value),
-      "x-enum-varnames": decl.members.map(member => member.name),
+      enum: decl.members.map((member) => member.value),
+      "x-enum-varnames": decl.members.map((member) => member.name),
     };
   }
 

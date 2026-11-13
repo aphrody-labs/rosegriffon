@@ -1,6 +1,10 @@
 import { sql, type Kysely, type Selectable } from "kysely";
 import type { Database, LicenseTable } from "@rosegriffon/db/schema";
-import { formatLicenseNumber, generateQrSecret, LICENSE_VALIDITY_MS } from "@rosegriffon/achillea-core/licenses";
+import {
+  formatLicenseNumber,
+  generateQrSecret,
+  LICENSE_VALIDITY_MS,
+} from "@rosegriffon/achillea-core/licenses";
 import { LicenseStatus } from "@rosegriffon/achillea-core/enums";
 import { resolveDiscordAvatarUrl } from "@rosegriffon/achillea-core/identity";
 import { journaliserAudit } from "../audit";
@@ -10,7 +14,10 @@ type LicenseRow = Selectable<LicenseTable>;
 
 /** Base publique des routes Achilléa (relais `/api` de `rg-core`), pour `pdf_url`. */
 export function publicApiBase(): string {
-  return rgUrl(process.env, "rankedApi", "ACHILLEA_PUBLIC_API_URL").replace(/\/+$/, "");
+  return rgUrl(process.env, "rankedApi", "ACHILLEA_PUBLIC_API_URL").replace(
+    /\/+$/,
+    "",
+  );
 }
 
 export function toLicenseDto(row: LicenseRow) {
@@ -36,12 +43,24 @@ export abstract class LicenseService {
    * transactionnel : deux émissions simultanées ne tirent plus le même numéro
    * (le legacy comptait sans verrou).
    */
-  static async issue(db: Kysely<Database>, userId: string, actorId: string, now = new Date()) {
-    return db.transaction().execute(async trx => {
-      const user = await trx.selectFrom("user").select("id").where("id", "=", userId).executeTakeFirst();
-      if (!user) throw new LicenseUserNotFoundError(`Utilisateur ${userId} introuvable`);
+  static async issue(
+    db: Kysely<Database>,
+    userId: string,
+    actorId: string,
+    now = new Date(),
+  ) {
+    return db.transaction().execute(async (trx) => {
+      const user = await trx
+        .selectFrom("user")
+        .select("id")
+        .where("id", "=", userId)
+        .executeTakeFirst();
+      if (!user)
+        throw new LicenseUserNotFoundError(`Utilisateur ${userId} introuvable`);
       const year = now.getUTCFullYear();
-      await sql`SELECT pg_advisory_xact_lock(hashtext(${`achillea-license-${year}`}))`.execute(trx);
+      await sql`SELECT pg_advisory_xact_lock(hashtext(${`achillea-license-${year}`}))`.execute(
+        trx,
+      );
       const count = await trx
         .selectFrom("license")
         .select(({ fn }) => fn.countAll<string>().as("count"))
@@ -63,7 +82,10 @@ export abstract class LicenseService {
         .executeTakeFirstOrThrow();
       const row = await trx
         .updateTable("license")
-        .set({ pdf_url: `${publicApiBase()}/licenses/${inserted.id}.pdf`, updated_at: now })
+        .set({
+          pdf_url: `${publicApiBase()}/licenses/${inserted.id}.pdf`,
+          updated_at: now,
+        })
         .where("id", "=", inserted.id)
         .returningAll()
         .executeTakeFirstOrThrow();
@@ -72,14 +94,18 @@ export abstract class LicenseService {
         action: "license.issue",
         cibleType: "license",
         cibleId: row.id,
-        charge: { userId, licenseNumber: row.license_number, validUntil: row.valid_until.toISOString() },
+        charge: {
+          userId,
+          licenseNumber: row.license_number,
+          validUntil: row.valid_until.toISOString(),
+        },
       });
       return toLicenseDto(row);
     });
   }
 
   static async revoke(db: Kysely<Database>, id: string, actorId: string) {
-    return db.transaction().execute(async trx => {
+    return db.transaction().execute(async (trx) => {
       const row = await trx
         .updateTable("license")
         .set({ status: LicenseStatus.Revoked, updated_at: new Date() })
@@ -117,7 +143,9 @@ export abstract class LicenseService {
       .where("license.id", "=", id)
       .executeTakeFirst();
     if (!row) return null;
-    const expired = row.status === LicenseStatus.Active && row.valid_until.getTime() <= Date.now();
+    const expired =
+      row.status === LicenseStatus.Active &&
+      row.valid_until.getTime() <= Date.now();
     return {
       licenseNumber: row.license_number,
       qrSecret: row.qr_secret,
@@ -126,7 +154,10 @@ export abstract class LicenseService {
       status: expired ? LicenseStatus.Expired : row.status,
       holder: {
         displayName: row.display_name || row.username || `User#${row.user_id}`,
-        avatar: resolveDiscordAvatarUrl(row.user_id, row.avatar, 256).replace(/\.(webp|gif)\?/, ".png?"),
+        avatar: resolveDiscordAvatarUrl(row.user_id, row.avatar, 256).replace(
+          /\.(webp|gif)\?/,
+          ".png?",
+        ),
       },
     };
   }
@@ -190,7 +221,10 @@ export abstract class LicenseService {
       valid: true as const,
       licenseNumber: row.license_number,
       validUntil: row.valid_until.toISOString(),
-      holder: { displayName: row.display_name || row.username || "Inconnu", avatar: row.avatar },
+      holder: {
+        displayName: row.display_name || row.username || "Inconnu",
+        avatar: row.avatar,
+      },
     };
   }
 }

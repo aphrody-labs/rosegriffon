@@ -51,7 +51,10 @@ const COOKIE = achilleaSessionCookieAttributes();
 export async function POST() {
   const internalToken = process.env.API_ADMIN_TOKEN;
   if (!internalToken) {
-    return NextResponse.json({ error: "passerelle_non_configuree" }, { status: 503 });
+    return NextResponse.json(
+      { error: "passerelle_non_configuree" },
+      { status: 503 },
+    );
   }
 
   const session = await getServerSession();
@@ -67,7 +70,10 @@ export async function POST() {
     ).replace(/\/$/, "");
     const exchange = await fetch(`${apiUrl}/v1/auth/session/exchange`, {
       method: "POST",
-      headers: { authorization: `Bearer ${internalToken}`, "content-type": "application/json" },
+      headers: {
+        authorization: `Bearer ${internalToken}`,
+        "content-type": "application/json",
+      },
       body: JSON.stringify({ betterAuthUserId: session.user.id }),
       cache: "no-store",
     });
@@ -78,10 +84,17 @@ export async function POST() {
         return NextResponse.json({ error: "discord_non_lie" }, { status: 409 });
       }
       console.error("[achillea/session] API exchange failed", exchange.status);
-      return NextResponse.json({ error: "api_unifiee_indisponible" }, { status: 503 });
+      return NextResponse.json(
+        { error: "api_unifiee_indisponible" },
+        { status: 503 },
+      );
     }
-    const payload = (await exchange.json()) as { token?: string; user?: { id: string | null } };
-    if (!payload.token) return NextResponse.json({ error: "session_invalide" }, { status: 503 });
+    const payload = (await exchange.json()) as {
+      token?: string;
+      user?: { id: string | null };
+    };
+    if (!payload.token)
+      return NextResponse.json({ error: "session_invalide" }, { status: 503 });
 
     const magasin = await cookies();
     magasin.set(ACHILLEA_SESSION_COOKIE_NAME, payload.token, {
@@ -92,7 +105,10 @@ export async function POST() {
     return NextResponse.json(payload.user ?? { id: null });
   } catch (error) {
     console.error("[achillea/session] Erreur session Achilléa:", error);
-    return NextResponse.json({ error: "base_de_donnees_indisponible" }, { status: 503 });
+    return NextResponse.json(
+      { error: "base_de_donnees_indisponible" },
+      { status: 503 },
+    );
   }
 }
 

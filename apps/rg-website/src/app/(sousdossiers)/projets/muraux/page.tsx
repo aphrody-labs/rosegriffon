@@ -3,7 +3,10 @@ import Image from "next/image";
 import Link from "@/components/shared/Link";
 
 import RgEmote from "@/components/shared/emotes/RgEmote";
-import { BreadcrumbSchema, ImageObjectSchema } from "@/components/shared/StructuredData";
+import {
+  BreadcrumbSchema,
+  ImageObjectSchema,
+} from "@/components/shared/StructuredData";
 
 import { ExternalLink, Info, Users } from "@/lib/icons-config";
 import { absoluteUrl } from "@/lib/site-url";
@@ -68,13 +71,20 @@ export default function MurauxPage() {
                 </h1>
               </div>
               <p className="text-base sm:text-lg md:text-xl text-[var(--md-sys-color-on-surface-variant)] max-w-3xl">
-                Découvrez les initiatives créatives qui rassemblent la communauté Rose Griffon
+                Découvrez les initiatives créatives qui rassemblent la
+                communauté Rose Griffon
               </p>
 
               {/* Cartes Muraux compactes */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-6">
                 {murals.map((mural, index) => (
-                  <Link key={index} href={mural.href} target="_blank" rel="noopener noreferrer" className="group block">
+                  <Link
+                    key={index}
+                    href={mural.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group block"
+                  >
                     <Card className="overflow-hidden bg-[var(--md-sys-color-surface-container-low)] border border-[var(--md-sys-color-outline-variant)] hover:border-[var(--md-sys-color-primary)] hover:bg-[var(--md-sys-color-surface-container)] transition-all duration-300 hover:shadow-[var(--md-ref-elevation-2)] h-full">
                       {/* Image Container */}
                       <div className="relative overflow-hidden bg-linear-to-br from-[var(--md-sys-color-surface-container)] to-[var(--md-sys-color-surface-container-high)] aspect-video">
@@ -95,7 +105,11 @@ export default function MurauxPage() {
                         {/* Emote Badge */}
                         <div className="absolute top-2 left-2">
                           <div className="bg-[var(--md-sys-color-surface)] rounded-full size-8 flex items-center justify-center shadow-lg">
-                            <RgEmote name={index === 0 ? "roy-coeur" : "gaelle-coeur"} size={28} animated />
+                            <RgEmote
+                              name={index === 0 ? "roy-coeur" : "gaelle-coeur"}
+                              size={28}
+                              animated
+                            />
                           </div>
                         </div>
 
@@ -129,19 +143,23 @@ export default function MurauxPage() {
                   <div className="text-blue-600 dark:text-blue-400 shrink-0">
                     <Info className="size-5" />
                   </div>
-                  <h2 className="text-base font-bold text-blue-900 dark:text-blue-100">Mise à jour</h2>
+                  <h2 className="text-base font-bold text-blue-900 dark:text-blue-100">
+                    Mise à jour
+                  </h2>
                 </div>
                 <div className="space-y-3 text-sm leading-relaxed text-blue-800 dark:text-blue-200">
                   <p>Chère communauté,</p>
                   <p>
-                    La politique du mural des artistes Rose Griffon a été ajustée : Désormais, une attention
-                    particulière et un discernement accru seront appliqués lors de la modération des contenus{" "}
-                    <strong>jugés</strong> ambigus.
+                    La politique du mural des artistes Rose Griffon a été
+                    ajustée : Désormais, une attention particulière et un
+                    discernement accru seront appliqués lors de la modération
+                    des contenus <strong>jugés</strong> ambigus.
                   </p>
                   <p>
-                    Notre objectif reste le même : « protéger, défendre et aider les artistes et leur liberté de
-                    création » tout en garantissant un environnement sûr et respectueux de la sensibilité de chaque
-                    membre.
+                    Notre objectif reste le même : « protéger, défendre et aider
+                    les artistes et leur liberté de création » tout en
+                    garantissant un environnement sûr et respectueux de la
+                    sensibilité de chaque membre.
                   </p>
                   <p className="flex items-center gap-2 text-sm">
                     Merci de faire vivre cet écosystème créatif avec nous.
@@ -155,25 +173,41 @@ export default function MurauxPage() {
           <div className="space-y-4 sm:space-y-5 text-sm sm:text-base md:text-lg text-[var(--md-sys-color-on-surface)] leading-relaxed max-w-5xl">
             <p>
               <span className="font-bold text-base sm:text-lg md:text-xl text-[var(--md-sys-color-primary)]">
-                Rose Griffon valorise et encourage la créativité collective à travers une série d&apos;initiatives
-                conçues pour faire vivre l&apos;imaginaire des fans.
+                Rose Griffon valorise et encourage la créativité collective à
+                travers une série d&apos;initiatives conçues pour faire vivre
+                l&apos;imaginaire des fans.
               </span>
             </p>
             <p className="flex items-start gap-2">
               <span>
-                Nos deux <span className="font-semibold text-[var(--md-sys-color-primary)]">Muraux communautaires</span>{" "}
-                rassemblent des dizaines de créations originales et d&apos;histoires développées autour des personnages
-                inventés par la communauté (OC), formant un véritable univers alternatif d&apos;Inazuma Eleven. Cette
-                dynamique est enrichie par nos concours réguliers — <span className="font-semibold">InazumaRG</span>,{" "}
+                Nos deux{" "}
+                <span className="font-semibold text-[var(--md-sys-color-primary)]">
+                  Muraux communautaires
+                </span>{" "}
+                rassemblent des dizaines de créations originales et
+                d&apos;histoires développées autour des personnages inventés par
+                la communauté (OC), formant un véritable univers alternatif
+                d&apos;Inazuma Eleven. Cette dynamique est enrichie par nos
+                concours réguliers —{" "}
+                <span className="font-semibold">InazumaRG</span>,{" "}
                 <span className="font-semibold">InazumaSona</span> ou encore{" "}
-                <span className="font-semibold">La Route du Sacre</span> — qui invitent chacun à inventer, scénariser ou
-                illustrer sa propre vision d&apos;Inazuma.
+                <span className="font-semibold">La Route du Sacre</span> — qui
+                invitent chacun à inventer, scénariser ou illustrer sa propre
+                vision d&apos;Inazuma.
               </span>
-              <RgEmote name="gaelle-coeur" size={28} animated className="shrink-0 mt-1" />
+              <RgEmote
+                name="gaelle-coeur"
+                size={28}
+                animated
+                className="shrink-0 mt-1"
+              />
             </p>
             <p>
               Enfin, via l&apos;onglet{" "}
-              <span className="font-semibold text-[var(--md-sys-color-primary)]">Vitrine Projet</span> sur notre{" "}
+              <span className="font-semibold text-[var(--md-sys-color-primary)]">
+                Vitrine Projet
+              </span>{" "}
+              sur notre{" "}
               <Link
                 href="https://discord.gg/sVc3r87g"
                 target="_blank"
@@ -182,8 +216,9 @@ export default function MurauxPage() {
               >
                 Discord
               </Link>
-              , chaque membre peut proposer son projet personnel, partager ses avancées et bénéficier du soutien actif
-              de la communauté pour le faire évoluer.
+              , chaque membre peut proposer son projet personnel, partager ses
+              avancées et bénéficier du soutien actif de la communauté pour le
+              faire évoluer.
             </p>
           </div>
         </div>
@@ -198,7 +233,8 @@ export default function MurauxPage() {
             </h3>
           </div>
           <p className="text-sm sm:text-base md:text-lg text-[var(--md-sys-color-on-secondary-container)] max-w-2xl mx-auto">
-            Rejoignez notre communauté Discord et découvrez comment vous pouvez contribuer à nos projets collaboratifs.
+            Rejoignez notre communauté Discord et découvrez comment vous pouvez
+            contribuer à nos projets collaboratifs.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center pt-2 sm:pt-4">
             <Button

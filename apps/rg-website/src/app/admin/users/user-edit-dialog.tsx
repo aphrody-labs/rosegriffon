@@ -93,7 +93,9 @@ export function UserEditDialog({ user }: UserEditDialogProps) {
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Modifier l'utilisateur</DialogTitle>
-          <DialogDescription>Modifier les informations de {user.email}</DialogDescription>
+          <DialogDescription>
+            Modifier les informations de {user.email}
+          </DialogDescription>
         </DialogHeader>
 
         <Form {...form}>
@@ -118,7 +120,10 @@ export function UserEditDialog({ user }: UserEditDialogProps) {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Rôle</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Sélectionner un rôle" />
@@ -137,7 +142,11 @@ export function UserEditDialog({ user }: UserEditDialogProps) {
             />
 
             <div className="flex justify-end gap-2">
-              <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setOpen(false)}
+              >
                 Annuler
               </Button>
               <Button type="submit" disabled={form.formState.isSubmitting}>

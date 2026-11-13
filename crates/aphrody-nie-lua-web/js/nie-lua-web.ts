@@ -39,7 +39,9 @@ function utf8Decode(bytes: Uint8Array): string {
 }
 
 /** Instantiates the module and returns a small, memory-safe wrapper over its C ABI. */
-export async function createLuaRuntime(wasmBytes: BufferSource): Promise<LuaRuntime> {
+export async function createLuaRuntime(
+  wasmBytes: BufferSource,
+): Promise<LuaRuntime> {
   let memory: WebAssembly.Memory;
   let table: WebAssembly.Table;
 
@@ -54,12 +56,18 @@ export async function createLuaRuntime(wasmBytes: BufferSource): Promise<LuaRunt
       try {
         return fn(...args);
       } catch (error) {
-        console.error(`[aphrody-nie-lua-web makeInvoke ${signature}] fn table index=${index}, args=${args} caught:`, error);
+        console.error(
+          `[aphrody-nie-lua-web makeInvoke ${signature}] fn table index=${index}, args=${args} caught:`,
+          error,
+        );
         if (typeof error === "number") throw error; // a real wasm trap / abort code
         // Signal "exception thrown, no JS-visible match" back into C via the imported hook.
         // Le typage de `exports` est `ExportValue`, qui n'est pas appelable : ce hook EST une
         // fonction exportée, et c'est à l'appelant de le dire, pas au typage de le deviner.
-        (instance.exports.__cxa_find_matching_catch_3 as ((code: number) => void) | undefined)?.(0);
+        (
+          instance.exports.__cxa_find_matching_catch_3 as
+            ((code: number) => void) | undefined
+        )?.(0);
         throw error;
       }
     };
@@ -87,7 +95,12 @@ export async function createLuaRuntime(wasmBytes: BufferSource): Promise<LuaRunt
       fd_close: () => 0,
       fd_seek: () => 0,
       fd_read: () => 0,
-      fd_write: (fd: number, iovPtr: number, iovCount: number, writtenPtr: number) => {
+      fd_write: (
+        fd: number,
+        iovPtr: number,
+        iovCount: number,
+        writtenPtr: number,
+      ) => {
         // Only stdout/stderr are ever written by the vendored Lua C runtime (print/error
         // paths); mirror them to the host console so a script's own `print()` is not silent.
         const view = new DataView(memory.buffer);
@@ -101,14 +114,25 @@ export async function createLuaRuntime(wasmBytes: BufferSource): Promise<LuaRunt
           written += len;
         }
         if (text.length > 0) {
-          (fd === 2 ? console.error : console.log)(`[aphrody-nie-lua-web fd${fd}]`, text);
+          (fd === 2 ? console.error : console.log)(
+            `[aphrody-nie-lua-web fd${fd}]`,
+            text,
+          );
         }
         view.setUint32(writtenPtr, written, true);
         return 0;
       },
-      clock_time_get: (_clockId: number, _precision: bigint, resultPtr: number) => {
+      clock_time_get: (
+        _clockId: number,
+        _precision: bigint,
+        resultPtr: number,
+      ) => {
         const view = new DataView(memory.buffer);
-        view.setBigUint64(resultPtr, BigInt(Math.round(Date.now() * 1_000_000)), true);
+        view.setBigUint64(
+          resultPtr,
+          BigInt(Math.round(Date.now() * 1_000_000)),
+          true,
+        );
         return 0;
       },
       random_get: (ptr: number, len: number) => {
@@ -131,7 +155,11 @@ export async function createLuaRuntime(wasmBytes: BufferSource): Promise<LuaRunt
     nie_lua_web_alloc(len: number): number;
     nie_lua_web_dealloc(ptr: number, len: number): void;
     nie_lua_web_free_string(ptr: number): void;
-    nie_lua_web_load_script(pathPtr: number, dataPtr: number, len: number): void;
+    nie_lua_web_load_script(
+      pathPtr: number,
+      dataPtr: number,
+      len: number,
+    ): void;
     nie_lua_web_replay(screenPtr: number, requestPtr: number): number;
     __cxa_find_matching_catch_3?(a: number): number;
   };
@@ -164,11 +192,15 @@ export async function createLuaRuntime(wasmBytes: BufferSource): Promise<LuaRunt
     },
     loadText(lines) {
       const { ptr, len } = writeCString(JSON.stringify(lines));
-      (instance.exports as { nie_lua_web_load_text(p: number): void }).nie_lua_web_load_text(ptr);
+      (
+        instance.exports as { nie_lua_web_load_text(p: number): void }
+      ).nie_lua_web_load_text(ptr);
       exportsFn.nie_lua_web_dealloc(ptr, len);
     },
     clearScripts() {
-      (instance.exports as { nie_lua_web_clear_scripts(): void }).nie_lua_web_clear_scripts();
+      (
+        instance.exports as { nie_lua_web_clear_scripts(): void }
+      ).nie_lua_web_clear_scripts();
     },
     replay(screen, requestJson) {
       const { ptr: screenPtr, len: screenLen } = writeCString(screen);

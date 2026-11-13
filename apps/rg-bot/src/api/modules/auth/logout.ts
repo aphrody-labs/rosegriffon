@@ -14,18 +14,29 @@ export const ACHILLEA_SESSION_COOKIE_DOMAIN = ".rosegriffon.fr";
  * `X-Forwarded-Host`) : relayée en processus par `rg-core`, l'URL peut être
  * locale alors que le navigateur parle à `ranked.rosegriffon.fr`.
  */
-export function achilleaSessionClearCookie(request: Request, nodeEnv = process.env.NODE_ENV): string {
+export function achilleaSessionClearCookie(
+  request: Request,
+  nodeEnv = process.env.NODE_ENV,
+): string {
   const hostOf = (value: string | null) => {
     if (!value) return "";
     try {
-      return new URL(value.includes("://") ? value : `https://${value}`).hostname;
+      return new URL(value.includes("://") ? value : `https://${value}`)
+        .hostname;
     } catch {
       return "";
     }
   };
-  const hosts = [request.url, request.headers.get("origin"), request.headers.get("x-forwarded-host")].map(hostOf);
+  const hosts = [
+    request.url,
+    request.headers.get("origin"),
+    request.headers.get("x-forwarded-host"),
+  ].map(hostOf);
   const production =
-    nodeEnv === "production" || hosts.some(host => host === "rosegriffon.fr" || host.endsWith(".rosegriffon.fr"));
+    nodeEnv === "production" ||
+    hosts.some(
+      (host) => host === "rosegriffon.fr" || host.endsWith(".rosegriffon.fr"),
+    );
   return [
     `${ACHILLEA_SESSION_COOKIE_NAME}=`,
     ...(production ? [`Domain=${ACHILLEA_SESSION_COOKIE_DOMAIN}`] : []),

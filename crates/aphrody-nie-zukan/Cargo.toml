@@ -29,7 +29,11 @@ rusqlite = { workspace = true, optional = true }
 tracing = { workspace = true }
 # Shared HTTP transport, retries and host pacing (crates.io).
 aphrody-web-crawl = { version = "1.0.0", optional = true }
-clap = { version = "4.5.58", optional = true, features = ["derive", "color", "env"] }
+clap = { version = "4.5.58", optional = true, features = [
+  "derive",
+  "color",
+  "env",
+] }
 tracing-subscriber = { version = "0.3.20", default-features = false, features = ["fmt", "env-filter", "ansi", "tracing-log"], optional = true }
 
 [[bin]]

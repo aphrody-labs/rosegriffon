@@ -67,15 +67,23 @@ export const TABLES_LISIBLES: ReadonlySet<string> = new Set([
  * contourne la comptabilité (portefeuilles et transactions passent par
  * `/admin/ops/wallets/:id/adjust`, qui journalise).
  */
-export const TABLES_PROTEGEES: ReadonlySet<string> = new Set(["audit_log", "wallet", "transaction"]);
-
-/** Colonnes dont la valeur ne sort jamais de l'API et ne s'écrit jamais ici. */
-export const COLONNES_SECRETES: ReadonlyMap<string, ReadonlySet<string>> = new Map([
-  ["license", new Set(["qr_secret"])],
+export const TABLES_PROTEGEES: ReadonlySet<string> = new Set([
+  "audit_log",
+  "wallet",
+  "transaction",
 ]);
 
+/** Colonnes dont la valeur ne sort jamais de l'API et ne s'écrit jamais ici. */
+export const COLONNES_SECRETES: ReadonlyMap<
+  string,
+  ReadonlySet<string>
+> = new Map([["license", new Set(["qr_secret"])]]);
+
 /** Colonnes lisibles mais non modifiables par l'éditeur générique. */
-export const COLONNES_FIGEES: ReadonlyMap<string, ReadonlySet<string>> = new Map([["user", new Set(["role"])]]);
+export const COLONNES_FIGEES: ReadonlyMap<
+  string,
+  ReadonlySet<string>
+> = new Map([["user", new Set(["role"])]]);
 
 export const VALEUR_MASQUEE = "[masqué]" as const;
 
@@ -109,11 +117,15 @@ export function colonneSecrete(table: string, colonne: string): boolean {
 }
 
 /** Remplace les valeurs secrètes d'une ligne lue. */
-export function masquerLigne(table: string, ligne: Record<string, unknown>): Record<string, unknown> {
+export function masquerLigne(
+  table: string,
+  ligne: Record<string, unknown>,
+): Record<string, unknown> {
   const secretes = COLONNES_SECRETES.get(table);
   if (!secretes) return ligne;
   const copie = { ...ligne };
-  for (const colonne of secretes) if (colonne in copie) copie[colonne] = VALEUR_MASQUEE;
+  for (const colonne of secretes)
+    if (colonne in copie) copie[colonne] = VALEUR_MASQUEE;
   return copie;
 }
 
@@ -130,7 +142,8 @@ export function valeursEcrivables(
   const figees = COLONNES_FIGEES.get(table);
   const sortie: Record<string, unknown> = {};
   for (const [cle, valeur] of Object.entries(valeurs ?? {})) {
-    if (!connues.has(cle) || colonneSecrete(table, cle) || figees?.has(cle)) continue;
+    if (!connues.has(cle) || colonneSecrete(table, cle) || figees?.has(cle))
+      continue;
     sortie[cle] = valeur;
   }
   return sortie;
@@ -144,13 +157,20 @@ export function clePrimaire(
   if (colonnesCle.length === 0) return null;
   const sortie: Record<string, unknown> = {};
   for (const colonne of colonnesCle) {
-    if (!pk || !(colonne in pk) || pk[colonne] === undefined || pk[colonne] === null) return null;
+    if (
+      !pk ||
+      !(colonne in pk) ||
+      pk[colonne] === undefined ||
+      pk[colonne] === null
+    )
+      return null;
     sortie[colonne] = pk[colonne];
   }
   return sortie;
 }
 
-export type VerdictRequete = { ok: true; sql: string } | { ok: false; message: string };
+export type VerdictRequete =
+  { ok: true; sql: string } | { ok: false; message: string };
 
 /**
  * Motifs refusés avant même d'interroger Postgres. Le plan est vérifié ensuite
@@ -159,17 +179,38 @@ export type VerdictRequete = { ok: true; sql: string } | { ok: false; message: s
  * dans une transaction READ ONLY), accès fichiers, réglages de session.
  */
 const MOTIFS_INTERDITS: readonly { motif: RegExp; raison: string }[] = [
-  { motif: /\bpg_\w*/i, raison: "les objets et fonctions système (pg_*) sont interdits" },
-  { motif: /\binformation_schema\b/i, raison: "information_schema est interdit" },
-  { motif: /\b(dblink\w*|lo_\w+|set_config|current_setting)\b/i, raison: "fonction interdite" },
+  {
+    motif: /\bpg_\w*/i,
+    raison: "les objets et fonctions système (pg_*) sont interdits",
+  },
+  {
+    motif: /\binformation_schema\b/i,
+    raison: "information_schema est interdit",
+  },
+  {
+    motif: /\b(dblink\w*|lo_\w+|set_config|current_setting)\b/i,
+    raison: "fonction interdite",
+  },
   // Fonctions qui exécutent une requête passée en chaîne : elles contourneraient
   // la vérification du plan.
-  { motif: /\b(\w*_to_xml\w*|ts_stat|ts_rewrite)\b/i, raison: "fonction exécutant une sous-requête textuelle" },
+  {
+    motif: /\b(\w*_to_xml\w*|ts_stat|ts_rewrite)\b/i,
+    raison: "fonction exécutant une sous-requête textuelle",
+  },
   // Appel qualifié `schema.fonction(` : seules les fonctions de `pg_catalog` et
   // `achillea` (chemin de recherche de la transaction) sont atteignables.
-  { motif: /\b\w+\s*\.\s*\w+\s*\(/, raison: "appel de fonction qualifié par un schéma" },
-  { motif: /\bU&/i, raison: "les identifiants Unicode échappés sont interdits" },
-  { motif: /\b(user_connection|oauth_csrf)\b/i, raison: "table de jetons OAuth" },
+  {
+    motif: /\b\w+\s*\.\s*\w+\s*\(/,
+    raison: "appel de fonction qualifié par un schéma",
+  },
+  {
+    motif: /\bU&/i,
+    raison: "les identifiants Unicode échappés sont interdits",
+  },
+  {
+    motif: /\b(user_connection|oauth_csrf)\b/i,
+    raison: "table de jetons OAuth",
+  },
 ];
 
 /**
@@ -178,32 +219,51 @@ const MOTIFS_INTERDITS: readonly { motif: RegExp; raison: string }[] = [
  * (point-virgule final retiré).
  */
 export function validerRequeteLecture(brute: unknown): VerdictRequete {
-  if (typeof brute !== "string" || !brute.trim()) return { ok: false, message: "Requête vide." };
+  if (typeof brute !== "string" || !brute.trim())
+    return { ok: false, message: "Requête vide." };
   if (brute.length > LONGUEUR_REQUETE_MAX)
-    return { ok: false, message: `Requête trop longue (${LONGUEUR_REQUETE_MAX} caractères au plus).` };
+    return {
+      ok: false,
+      message: `Requête trop longue (${LONGUEUR_REQUETE_MAX} caractères au plus).`,
+    };
   const sql = brute.trim().replace(/;+\s*$/, "");
   if (sql.includes(";"))
-    return { ok: false, message: "Une seule instruction à la fois (pas de `;` en milieu de requête)." };
-  if (sql.includes("\u0000")) return { ok: false, message: "Caractère nul interdit." };
+    return {
+      ok: false,
+      message:
+        "Une seule instruction à la fois (pas de `;` en milieu de requête).",
+    };
+  if (sql.includes("\u0000"))
+    return { ok: false, message: "Caractère nul interdit." };
   if (!/^(select|with)\s/i.test(sql))
-    return { ok: false, message: "Lecture seule : la requête doit commencer par SELECT ou WITH." };
+    return {
+      ok: false,
+      message: "Lecture seule : la requête doit commencer par SELECT ou WITH.",
+    };
   // Les guillemets doubles ne doivent pas permettre de masquer un nom interdit.
   const normalisee = sql.replaceAll('"', "");
   for (const { motif, raison } of MOTIFS_INTERDITS) {
-    if (motif.test(normalisee)) return { ok: false, message: `Requête refusée : ${raison}.` };
+    if (motif.test(normalisee))
+      return { ok: false, message: `Requête refusée : ${raison}.` };
   }
   return { ok: true, sql };
 }
 
 /** Enveloppe la requête validée pour plafonner le nombre de lignes. */
-export function envelopperAvecLimite(sql: string, limite = LIGNES_REQUETE_MAX): string {
+export function envelopperAvecLimite(
+  sql: string,
+  limite = LIGNES_REQUETE_MAX,
+): string {
   return `SELECT * FROM (\n${sql}\n) AS console_lecture LIMIT ${Math.max(1, Math.floor(limite))}`;
 }
 
 export type RelationPlan = { schema: string | null; relation: string };
 
 /** Relations et fonctions lues par un plan `EXPLAIN (VERBOSE, FORMAT JSON)`. */
-export function relationsDuPlan(plan: unknown): { relations: RelationPlan[]; fonctions: RelationPlan[] } {
+export function relationsDuPlan(plan: unknown): {
+  relations: RelationPlan[];
+  fonctions: RelationPlan[];
+} {
   const relations: RelationPlan[] = [];
   const fonctions: RelationPlan[] = [];
   const visiter = (noeud: unknown) => {
@@ -214,9 +274,12 @@ export function relationsDuPlan(plan: unknown): { relations: RelationPlan[]; fon
     if (!noeud || typeof noeud !== "object") return;
     const objet = noeud as Record<string, unknown>;
     const schema = typeof objet.Schema === "string" ? objet.Schema : null;
-    if (typeof objet["Relation Name"] === "string") relations.push({ schema, relation: objet["Relation Name"] });
-    if (typeof objet["Function Name"] === "string") fonctions.push({ schema, relation: objet["Function Name"] });
-    for (const valeur of Object.values(objet)) if (valeur && typeof valeur === "object") visiter(valeur);
+    if (typeof objet["Relation Name"] === "string")
+      relations.push({ schema, relation: objet["Relation Name"] });
+    if (typeof objet["Function Name"] === "string")
+      fonctions.push({ schema, relation: objet["Function Name"] });
+    for (const valeur of Object.values(objet))
+      if (valeur && typeof valeur === "object") visiter(valeur);
   };
   visiter(plan);
   return { relations, fonctions };
@@ -241,12 +304,22 @@ const FONCTIONS_ENSEMBLE_AUTORISEES: ReadonlySet<string> = new Set([
 export function verifierPlan(plan: unknown): VerdictRequete | { ok: true } {
   const { relations, fonctions } = relationsDuPlan(plan);
   for (const { schema, relation } of relations) {
-    if (schema !== SCHEMA_ACHILLEA || !tableAutorisee(relation) || COLONNES_SECRETES.has(relation))
-      return { ok: false, message: `Requête refusée : la relation « ${schema ?? "?"}.${relation} » est hors liste blanche.` };
+    if (
+      schema !== SCHEMA_ACHILLEA ||
+      !tableAutorisee(relation) ||
+      COLONNES_SECRETES.has(relation)
+    )
+      return {
+        ok: false,
+        message: `Requête refusée : la relation « ${schema ?? "?"}.${relation} » est hors liste blanche.`,
+      };
   }
   for (const { schema, relation } of fonctions) {
     if (schema !== "pg_catalog" || !FONCTIONS_ENSEMBLE_AUTORISEES.has(relation))
-      return { ok: false, message: `Requête refusée : la fonction « ${relation} » n'est pas autorisée.` };
+      return {
+        ok: false,
+        message: `Requête refusée : la fonction « ${relation} » n'est pas autorisée.`,
+      };
   }
   return { ok: true };
 }
@@ -255,7 +328,9 @@ export function verifierPlan(plan: unknown): VerdictRequete | { ok: true } {
  * La console SQL libre reste fermée en production, comme dans le legacy, sauf
  * ouverture explicite (`ACHILLEA_ADMIN_SQL_CONSOLE=1`).
  */
-export function consoleSqlOuverte(env: Record<string, string | undefined> = process.env): boolean {
+export function consoleSqlOuverte(
+  env: Record<string, string | undefined> = process.env,
+): boolean {
   if (env.ACHILLEA_ADMIN_SQL_CONSOLE === "1") return true;
   return env.NODE_ENV !== "production";
 }

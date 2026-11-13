@@ -31,9 +31,20 @@ import { type ArgsOf, Discord, On } from "discordx";
 import type { GuildMember, Message, TextBasedChannel } from "discord.js";
 
 import { formaterJetons } from "../lib/kizuna";
-import { gainDeMessage, meriteAnnonce, prochainRang, rangDe } from "../lib/experience";
+import {
+  gainDeMessage,
+  meriteAnnonce,
+  prochainRang,
+  rangDe,
+} from "../lib/experience";
 import { filtrerRecompenses, type FaitsRoleVise } from "../lib/hierarchie";
-import { ajouterExperience, consommerDelai, recompensesDe, reglagesDe, rolesPourNiveau } from "../services/communaute";
+import {
+  ajouterExperience,
+  consommerDelai,
+  recompensesDe,
+  reglagesDe,
+  rolesPourNiveau,
+} from "../services/communaute";
 import { creerEmbed, entierLisible, pied } from "../lib/ui";
 
 /**
@@ -55,11 +66,14 @@ function messageComptable(message: Message): boolean {
 }
 
 /** Le membre porte-t-il un rôle exclu du gain ? */
-function porteUnRoleExclu(membre: GuildMember | null, exclus: readonly string[]): boolean {
+function porteUnRoleExclu(
+  membre: GuildMember | null,
+  exclus: readonly string[],
+): boolean {
   if (!membre || exclus.length === 0) {
     return false;
   }
-  return exclus.some(roleId => membre.roles.cache.has(roleId));
+  return exclus.some((roleId) => membre.roles.cache.has(roleId));
 }
 
 /**
@@ -69,7 +83,11 @@ function porteUnRoleExclu(membre: GuildMember | null, exclus: readonly string[])
  * le droit de poser un rôle et pas un autre (hiérarchie Discord), et une seule
  * erreur ne doit pas empêcher les autres paliers d'être appliqués.
  */
-async function appliquerRoles(membre: GuildMember, niveau: number, guildId: string): Promise<string[]> {
+async function appliquerRoles(
+  membre: GuildMember,
+  niveau: number,
+  guildId: string,
+): Promise<string[]> {
   const recompenses = await recompensesDe(guildId);
   if (recompenses.length === 0) {
     return [];
@@ -103,7 +121,9 @@ async function appliquerRoles(membre: GuildMember, niveau: number, guildId: stri
   };
   const { bloquees, posables } = filtrerRecompenses(recompenses, faits, bot);
   for (const bloquee of bloquees) {
-    console.warn(`[xp] récompense niveau ${bloquee.recompense.niveau} NON appliquée : ${bloquee.motif}`);
+    console.warn(
+      `[xp] récompense niveau ${bloquee.recompense.niveau} NON appliquée : ${bloquee.motif}`,
+    );
   }
   if (posables.length === 0) {
     return [];
@@ -178,9 +198,15 @@ async function annoncer(
   const embed = creerEmbed({
     description: [
       `${message.author.toString()} passe **niveau ${niveau}** — rang ${rang.nom}.`,
-      jetonsOfferts > 0 ? `${formaterJetons(jetonsOfferts)} en récompense.` : null,
-      rolesPoses.length > 0 ? `Nouveau rôle : ${rolesPoses.map(id => `<@&${id}>`).join(", ")}.` : null,
-      suivant ? `Prochain rang : ${suivant.nom} au niveau ${entierLisible(suivant.depuis)}.` : null,
+      jetonsOfferts > 0
+        ? `${formaterJetons(jetonsOfferts)} en récompense.`
+        : null,
+      rolesPoses.length > 0
+        ? `Nouveau rôle : ${rolesPoses.map((id) => `<@&${id}>`).join(", ")}.`
+        : null,
+      suivant
+        ? `Prochain rang : ${suivant.nom} au niveau ${entierLisible(suivant.depuis)}.`
+        : null,
     ]
       .filter(Boolean)
       .join("\n"),
@@ -209,7 +235,10 @@ async function annoncer(
   } catch (err) {
     // Un membre qui ferme ses messages privés, un salon supprimé : ce n'est pas
     // une raison de perdre l'XP qui vient d'être écrite.
-    console.warn("[xp] annonce impossible :", err instanceof Error ? err.message : err);
+    console.warn(
+      "[xp] annonce impossible :",
+      err instanceof Error ? err.message : err,
+    );
   }
 }
 
@@ -231,7 +260,9 @@ export class ExperienceEvents {
       }
       // Un fil hérite de l'exclusion de son salon parent : exclure
       // `🤖〡bots` sans exclure ses fils laisserait la porte grande ouverte.
-      const parentId = message.channel.isThread() ? message.channel.parentId : null;
+      const parentId = message.channel.isThread()
+        ? message.channel.parentId
+        : null;
       if (parentId && reglages.niveaux.salonsExclus.includes(parentId)) {
         return;
       }
@@ -241,23 +272,44 @@ export class ExperienceEvents {
 
       // LE FILTRE. Tout ce qui suit ne s'exécute qu'une fois par minute et par
       // membre ; tout ce qui précède s'exécute sur chaque message du serveur.
-      if (!(await consommerDelai(guildId, message.author.id, reglages.niveaux.gain.delaiSecondes))) {
+      if (
+        !(await consommerDelai(
+          guildId,
+          message.author.id,
+          reglages.niveaux.gain.delaiSecondes,
+        ))
+      ) {
         return;
       }
 
       const gain = gainDeMessage(reglages.niveaux.gain);
-      const resultat = await ajouterExperience(guildId, message.author.id, gain);
+      const resultat = await ajouterExperience(
+        guildId,
+        message.author.id,
+        gain,
+      );
       if (resultat.franchis.length === 0) {
         return;
       }
 
       const membre = message.member;
-      const rolesPoses = membre ? await appliquerRoles(membre, resultat.niveauApres, guildId) : [];
-      await annoncer(message, resultat.niveauAvant, resultat.niveauApres, resultat.jetonsOfferts, rolesPoses);
+      const rolesPoses = membre
+        ? await appliquerRoles(membre, resultat.niveauApres, guildId)
+        : [];
+      await annoncer(
+        message,
+        resultat.niveauAvant,
+        resultat.niveauApres,
+        resultat.jetonsOfferts,
+        rolesPoses,
+      );
     } catch (err) {
       // Ce gestionnaire tourne sur chaque message : une exception qui remonte
       // jusqu'à la passerelle couperait le bot pour tout le monde.
-      console.error("[xp] échec du gain :", err instanceof Error ? (err.stack ?? err.message) : err);
+      console.error(
+        "[xp] échec du gain :",
+        err instanceof Error ? (err.stack ?? err.message) : err,
+      );
     }
   }
 }

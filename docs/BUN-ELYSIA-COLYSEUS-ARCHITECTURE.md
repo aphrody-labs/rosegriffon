@@ -1,4 +1,5 @@
 <!-- SPDX-License-Identifier: Apache-2.0 -->
+
 # Référence d'Architecture : Architecture Unifiée Bun, ElysiaJS & Colyseus pour Rose Griffon
 
 Ce document décrit l'architecture de référence et les patterns techniques adoptés pour le backend unifié Rose Griffon / Achilléa sous Bun 1.4.2.
@@ -25,53 +26,58 @@ Ce document décrit l'architecture de référence et les patterns techniques ado
 ## 2. Patterns d'Implémentation ElysiaJS
 
 ### 2.1. Contrôleur Typé Déclaratif
+
 ```typescript
 import { Elysia, t } from "elysia";
 import { dbPlugin } from "../../../plugins/db";
 
 export const tournamentController = new Elysia({ prefix: "/tournaments" })
   .use(dbPlugin)
-  .get("/", async ({ db, query }) => {
-    return await db.selectFrom("tournament").selectAll().execute();
-  }, {
-    query: t.Object({
-      status: t.Optional(t.String()),
-      limit: t.Optional(t.Numeric({ default: 20 }))
-    }),
-    response: {
-      200: t.Array(t.Any()),
-      400: t.Object({ error: t.String() })
-    }
-  });
+  .get(
+    "/",
+    async ({ db, query }) => {
+      return await db.selectFrom("tournament").selectAll().execute();
+    },
+    {
+      query: t.Object({
+        status: t.Optional(t.String()),
+        limit: t.Optional(t.Numeric({ default: 20 })),
+      }),
+      response: {
+        200: t.Array(t.Any()),
+        400: t.Object({ error: t.String() }),
+      },
+    },
+  );
 ```
 
 ### 2.2. WebSockets Natifs Haute Performance (`app.ws`)
+
 ```typescript
 import { Elysia, t } from "elysia";
 
-export const notificationWs = new Elysia()
-  .ws("/v1/achillea/ws", {
-    body: t.Object({
-      type: t.String(),
-      payload: t.Optional(t.Any())
-    }),
-    open(ws) {
-      const user = ws.data.user;
-      if (user) {
-        ws.subscribe(`user:${user.id}`);
-        console.info(`[ws] User connected: ${user.id}`);
-      }
-    },
-    message(ws, { type, payload }) {
-      // Traitement des messages entrants
-    },
-    close(ws) {
-      const user = ws.data.user;
-      if (user) {
-        ws.unsubscribe(`user:${user.id}`);
-      }
+export const notificationWs = new Elysia().ws("/v1/achillea/ws", {
+  body: t.Object({
+    type: t.String(),
+    payload: t.Optional(t.Any()),
+  }),
+  open(ws) {
+    const user = ws.data.user;
+    if (user) {
+      ws.subscribe(`user:${user.id}`);
+      console.info(`[ws] User connected: ${user.id}`);
     }
-  });
+  },
+  message(ws, { type, payload }) {
+    // Traitement des messages entrants
+  },
+  close(ws) {
+    const user = ws.data.user;
+    if (user) {
+      ws.unsubscribe(`user:${user.id}`);
+    }
+  },
+});
 ```
 
 ---
@@ -93,7 +99,7 @@ export const gameServer = defineServer({
     queue: defineRoom(QueueRoom).filterBy(["mode", "ranked"]),
     match: defineRoom(MatchRoom),
     lobby: defineRoom(LobbyRoom),
-  }
+  },
 });
 ```
 

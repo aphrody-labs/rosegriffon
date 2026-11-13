@@ -31,7 +31,12 @@ import {
 
 import { logAdminAction } from "../../lib/audit";
 import { appelerCron } from "../../lib/cron-ipc";
-import { niveauTache, raisonRefus, resoudreTache, suggererTaches } from "../../lib/cron-taches";
+import {
+  niveauTache,
+  raisonRefus,
+  resoudreTache,
+  suggererTaches,
+} from "../../lib/cron-taches";
 import { sql } from "../../lib/db";
 import { rgEmbed } from "../../lib/embeds";
 import { resoudreSalon } from "../../services/tweetsNotifier";
@@ -65,7 +70,10 @@ interface ArticleAnnoncable {
  * `extrait`, `image`) : cinq occasions de publier un lien mort dans un salon
  * public, alors que la ligne existe en base.
  */
-const APPLICATIONS: Record<string, { origine: string; chemin: string; titre: string }> = {
+const APPLICATIONS: Record<
+  string,
+  { origine: string; chemin: string; titre: string }
+> = {
   azalee: {
     origine: "https://azalee.rosegriffon.fr",
     chemin: "/news/",
@@ -81,18 +89,24 @@ const APPLICATIONS: Record<string, { origine: string; chemin: string; titre: str
 /** Salon d'annonces attendu pour une application, sinon le salon d'actualités commun. */
 function salonParDefaut(app: string): string | null {
   const dedie =
-    app === "azalee" ? Bun.env.DISCORD_WIKI_ANNOUNCEMENTS_CHANNEL_ID : Bun.env.DISCORD_WEBSITE_ANNOUNCEMENTS_CHANNEL_ID;
+    app === "azalee"
+      ? Bun.env.DISCORD_WIKI_ANNOUNCEMENTS_CHANNEL_ID
+      : Bun.env.DISCORD_WEBSITE_ANNOUNCEMENTS_CHANNEL_ID;
   return dedie ?? Bun.env.DISCORD_NEWS_CHANNEL_ID ?? null;
 }
 
 /** Propositions : les articles publiés, les plus récents d'abord. */
-async function suggererArticles(interaction: AutocompleteInteraction): Promise<void> {
+async function suggererArticles(
+  interaction: AutocompleteInteraction,
+): Promise<void> {
   const saisie = String(interaction.options.getFocused() ?? "")
     .trim()
     .toLowerCase();
   try {
     const motif = saisie.length > 0 ? `%${saisie}%` : null;
-    const lignes = await sql<Array<{ slug: string; title: string; app: string }>>`
+    const lignes = await sql<
+      Array<{ slug: string; title: string; app: string }>
+    >`
 			SELECT slug, title, app
 			FROM public.articles
 			WHERE status = 'published'
@@ -101,7 +115,7 @@ async function suggererArticles(interaction: AutocompleteInteraction): Promise<v
 			LIMIT 25
 		`;
     await interaction.respond(
-      lignes.map(ligne => ({
+      lignes.map((ligne) => ({
         name: borner(`${ligne.app} — ${ligne.title}`, 100),
         value: ligne.slug,
       })),
@@ -123,7 +137,8 @@ async function suggererArticles(interaction: AutocompleteInteraction): Promise<v
 export class AdministrationCronCommand {
   @Slash({
     name: "lancer",
-    description: "Déclenche une tâche du démon (le niveau requis dépend de la tâche)",
+    description:
+      "Déclenche une tâche du démon (le niveau requis dépend de la tâche)",
   })
   async lancer(
     @SlashOption({
@@ -137,7 +152,7 @@ export class AdministrationCronCommand {
         await interaction.respond(
           suggererTaches(String(interaction.options.getFocused() ?? ""), {
             exclureInterdites: true,
-          }).map(nom => ({ name: nom, value: nom })),
+          }).map((nom) => ({ name: nom, value: nom })),
         );
       },
     })
@@ -160,7 +175,9 @@ export class AdministrationCronCommand {
     // exige `admin`. On revérifie donc, strictement cette fois, quand la tâche
     // l'impose — la première vérification ne prouvait que « admin ou staff ».
     const admin =
-      niveau === "admin-strict" ? await exigerDroits(interaction, { strict: true }) : await exigerDroits(interaction);
+      niveau === "admin-strict"
+        ? await exigerDroits(interaction, { strict: true })
+        : await exigerDroits(interaction);
     if (!admin) {
       return;
     }
@@ -177,7 +194,11 @@ export class AdministrationCronCommand {
     });
 
     try {
-      const reponse = await appelerCron<{ success: boolean; error?: string; code?: string }>({
+      const reponse = await appelerCron<{
+        success: boolean;
+        error?: string;
+        code?: string;
+      }>({
         cmd: "task.run",
         nom,
         discordId: admin.discordId,
@@ -186,7 +207,10 @@ export class AdministrationCronCommand {
       if (!reponse.success) {
         await repondre(
           interaction,
-          echec("La commande a échoué", borner(reponse.error ?? "Refusé par le démon.", 1_500)),
+          echec(
+            "La commande a échoué",
+            borner(reponse.error ?? "Refusé par le démon.", 1_500),
+          ),
         );
         return;
       }
@@ -196,7 +220,10 @@ export class AdministrationCronCommand {
           `fond : le verdict n'arrive qu'à la fin, et se relit avec \`/staff cron statut ${nom}\`.`,
       });
     } catch (err) {
-      await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
+      await repondre(
+        interaction,
+        echec("Le service n'a pas répondu", messagePanne(err)),
+      );
     }
   }
 
@@ -213,7 +240,8 @@ export class AdministrationCronCommand {
     // Un VERBE : la commande publie maintenant, elle ne règle pas un
     // comportement (cf. la convention de nommage, `docs/bot-commandes.md`).
     name: "annoncer",
-    description: "Publie l'annonce d'un article publié dans le salon dédié (rôle admin)",
+    description:
+      "Publie l'annonce d'un article publié dans le salon dédié (rôle admin)",
   })
   async annonce(
     @SlashOption({
@@ -226,7 +254,8 @@ export class AdministrationCronCommand {
     article: string,
     @SlashOption({
       name: "salon",
-      description: "Salon de destination (par défaut : le salon d'annonces de l'application)",
+      description:
+        "Salon de destination (par défaut : le salon d'annonces de l'application)",
       type: ApplicationCommandOptionType.Channel,
       channelTypes: [ChannelType.GuildText, ChannelType.GuildAnnouncement],
       required: false,
@@ -315,11 +344,17 @@ export class AdministrationCronCommand {
       }
       // Vérifie que le bot peut RÉELLEMENT y écrire : une variable
       // d'environnement définie ne dit rien de ses droits sur le salon.
-      const { salon: destination, raison } = await resoudreSalon(interaction.client, salonId);
+      const { salon: destination, raison } = await resoudreSalon(
+        interaction.client,
+        salonId,
+      );
       if (!destination) {
         await repondre(
           interaction,
-          echec("Rien n'a été fait", `Rien n'a été publié. ${borner(raison ?? "Salon injoignable.", 1_500)}`),
+          echec(
+            "Rien n'a été fait",
+            `Rien n'a été publié. ${borner(raison ?? "Salon injoignable.", 1_500)}`,
+          ),
         );
         return;
       }
@@ -333,9 +368,16 @@ export class AdministrationCronCommand {
         embed.setDescription(borner(ligne.excerpt, 1_000));
       }
       if (ligne.category) {
-        embed.addFields({ name: "Rubrique", value: borner(ligne.category, 200), inline: true });
+        embed.addFields({
+          name: "Rubrique",
+          value: borner(ligne.category, 200),
+          inline: true,
+        });
       }
-      const illustration = urlIllustrationAbsolue(ligne.featured_image_url, application.origine);
+      const illustration = urlIllustrationAbsolue(
+        ligne.featured_image_url,
+        application.origine,
+      );
       if (illustration) {
         embed.setImage(illustration);
       }
@@ -362,7 +404,10 @@ export class AdministrationCronCommand {
         content: `✓ Annonce publiée dans <#${salonId}> — ${message.url}`,
       });
     } catch (err) {
-      await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
+      await repondre(
+        interaction,
+        echec("Le service n'a pas répondu", messagePanne(err)),
+      );
     }
   }
 }

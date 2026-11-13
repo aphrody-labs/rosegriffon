@@ -11,7 +11,8 @@ const RECORDED = {
     {
       id: 32,
       name: "Summer Kama Club",
-      description: "Tournoi Inazuma Eleven Victory Road de 32 joueurs, organisé par le serveur Discord Kama Club.",
+      description:
+        "Tournoi Inazuma Eleven Victory Road de 32 joueurs, organisé par le serveur Discord Kama Club.",
       type: "TOURNAMENT",
       status: "Finished",
       createdAt: "2026-07-23T19:06:45.367Z",
@@ -20,7 +21,8 @@ const RECORDED = {
     {
       id: 23,
       name: "La Coupe d'Ilion #6",
-      description: "La coupe d'Ilion est un tournoi organisé 2 fois par semaines avec 32 joueurs.",
+      description:
+        "La coupe d'Ilion est un tournoi organisé 2 fois par semaines avec 32 joueurs.",
       type: "TOURNAMENT",
       status: "Finished",
       createdAt: "2026-02-25T16:27:06.428Z",
@@ -29,7 +31,8 @@ const RECORDED = {
     {
       id: 22,
       name: "La Coupe d'Ilion #5",
-      description: "La coupe d'Ilion est un tournoi organisé 2 fois par semaines avec 32 joueurs.",
+      description:
+        "La coupe d'Ilion est un tournoi organisé 2 fois par semaines avec 32 joueurs.",
       type: "TOURNAMENT",
       status: "Finished",
       createdAt: "2026-02-23T18:34:16.915Z",
@@ -43,9 +46,12 @@ function clientReturning(body: unknown, status = 200) {
   const urls: string[] = [];
   const client = createAchilleaClient({
     baseUrl: "https://ranked.example/api",
-    fetch: async input => {
+    fetch: async (input) => {
       urls.push(String(input instanceof Request ? input.url : input));
-      return new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json" } });
+      return new Response(JSON.stringify(body), {
+        status,
+        headers: { "content-type": "application/json" },
+      });
     },
   });
   return { client, urls };
@@ -55,7 +61,7 @@ describe("tournois récents de l'accueil Achilléa", () => {
   test("lit les tournois terminés de l'API et valide la forme réelle", async () => {
     const { client, urls } = clientReturning(RECORDED);
     const recent = await loadRecentTournaments(client);
-    expect(recent.map(item => [item.id, item.name, item.status])).toEqual([
+    expect(recent.map((item) => [item.id, item.name, item.status])).toEqual([
       [32, "Summer Kama Club", "Finished"],
       [23, "La Coupe d'Ilion #6", "Finished"],
       [22, "La Coupe d'Ilion #5", "Finished"],

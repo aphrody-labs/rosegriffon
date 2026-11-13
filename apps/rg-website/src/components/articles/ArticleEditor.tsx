@@ -17,7 +17,10 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 import { Eye, Loader2, Save } from "@/lib/icons-config";
-import { createChronicle, updateChronicle } from "@/app/admin/chroniques/actions";
+import {
+  createChronicle,
+  updateChronicle,
+} from "@/app/admin/chroniques/actions";
 import type { ArticleInput } from "@/app/admin/chroniques/schema";
 
 interface ArticleEditorProps {
@@ -42,7 +45,11 @@ interface ArticleEditorProps {
   };
 }
 
-export function ArticleEditor({ categories, userId, initialData }: ArticleEditorProps) {
+export function ArticleEditor({
+  categories,
+  userId,
+  initialData,
+}: ArticleEditorProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -86,15 +93,24 @@ export function ArticleEditor({ categories, userId, initialData }: ArticleEditor
       const result = initialData?.id
         ? await updateChronicle(initialData.id, articleData as ArticleInput)
         : await createChronicle(articleData as ArticleInput);
-      if (!result.success) throw new Error(result.error || "Erreur lors de l'enregistrement");
+      if (!result.success)
+        throw new Error(result.error || "Erreur lors de l'enregistrement");
 
-      toast.success(status === "published" ? "Chronique publiée avec succès !" : "Brouillon enregistré !");
+      toast.success(
+        status === "published"
+          ? "Chronique publiée avec succès !"
+          : "Brouillon enregistré !",
+      );
 
       router.push("/dashboard/articles");
       router.refresh();
     } catch (error) {
       console.error("Error saving article:", error);
-      toast.error(error instanceof Error ? error.message : "Erreur lors de l'enregistrement de la chronique");
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Erreur lors de l'enregistrement de la chronique",
+      );
     } finally {
       setIsLoading(false);
     }
@@ -110,24 +126,36 @@ export function ArticleEditor({ categories, userId, initialData }: ArticleEditor
           id="title"
           placeholder="Un titre accrocheur pour votre chronique..."
           value={formData.title}
-          onChange={e => setFormData({ ...formData, title: e.target.value })}
+          onChange={(e) => setFormData({ ...formData, title: e.target.value })}
           maxLength={255}
           required
         />
-        <p className="text-xs text-gray-500">{formData.title.length}/255 caractères</p>
+        <p className="text-xs text-gray-500">
+          {formData.title.length}/255 caractères
+        </p>
       </div>
 
       <div className="space-y-2">
         <Label htmlFor="category">Catégorie</Label>
-        <Select value={formData.category} onValueChange={value => setFormData({ ...formData, category: value })}>
+        <Select
+          value={formData.category}
+          onValueChange={(value) =>
+            setFormData({ ...formData, category: value })
+          }
+        >
           <SelectTrigger>
             <SelectValue placeholder="Sélectionner une catégorie" />
           </SelectTrigger>
           <SelectContent>
-            {categories.map(cat => (
+            {categories.map((cat) => (
               <SelectItem key={cat.id} value={cat.slug}>
                 <div className="flex items-center gap-2">
-                  {cat.color && <div className="size-3 rounded-full" style={{ backgroundColor: cat.color }} />}
+                  {cat.color && (
+                    <div
+                      className="size-3 rounded-full"
+                      style={{ backgroundColor: cat.color }}
+                    />
+                  )}
                   {cat.name}
                 </div>
               </SelectItem>
@@ -142,11 +170,15 @@ export function ArticleEditor({ categories, userId, initialData }: ArticleEditor
           id="excerpt"
           placeholder="Un court résumé de votre chronique (1-2 phrases)..."
           value={formData.excerpt}
-          onChange={e => setFormData({ ...formData, excerpt: e.target.value })}
+          onChange={(e) =>
+            setFormData({ ...formData, excerpt: e.target.value })
+          }
           rows={2}
           maxLength={300}
         />
-        <p className="text-xs text-gray-500">{formData.excerpt.length}/300 caractères</p>
+        <p className="text-xs text-gray-500">
+          {formData.excerpt.length}/300 caractères
+        </p>
       </div>
 
       <div className="space-y-2">
@@ -156,7 +188,9 @@ export function ArticleEditor({ categories, userId, initialData }: ArticleEditor
           type="url"
           placeholder="https://exemple.com/image.jpg"
           value={formData.featured_image_url}
-          onChange={e => setFormData({ ...formData, featured_image_url: e.target.value })}
+          onChange={(e) =>
+            setFormData({ ...formData, featured_image_url: e.target.value })
+          }
         />
         {formData.featured_image_url && (
           <div className="mt-2 rounded-lg overflow-hidden border relative h-48">
@@ -165,7 +199,7 @@ export function ArticleEditor({ categories, userId, initialData }: ArticleEditor
               alt="Aperçu"
               fill
               className="object-cover"
-              onError={e => {
+              onError={(e) => {
                 // Note: onError on next/image is different, usually handled by state
                 // For simplicity in this refactor, we might need a state to hide it if it fails
                 // But next/image doesn't support style.display = none directly on the component easily
@@ -188,7 +222,9 @@ export function ArticleEditor({ categories, userId, initialData }: ArticleEditor
           id="content"
           placeholder="Rédigez votre chronique ici... (Markdown supporté)"
           value={formData.content}
-          onChange={e => setFormData({ ...formData, content: e.target.value })}
+          onChange={(e) =>
+            setFormData({ ...formData, content: e.target.value })
+          }
           rows={15}
           className="font-mono text-sm"
           required
@@ -203,12 +239,25 @@ export function ArticleEditor({ categories, userId, initialData }: ArticleEditor
           disabled={isLoading}
           className="flex-1"
         >
-          {isLoading ? <Loader2 className="size-4 mr-2 animate-spin" /> : <Save className="size-4 mr-2" />}
+          {isLoading ? (
+            <Loader2 className="size-4 mr-2 animate-spin" />
+          ) : (
+            <Save className="size-4 mr-2" />
+          )}
           Enregistrer en brouillon
         </Button>
 
-        <Button type="button" onClick={() => handleSubmit("published")} disabled={isLoading} className="flex-1">
-          {isLoading ? <Loader2 className="size-4 mr-2 animate-spin" /> : <Eye className="size-4 mr-2" />}
+        <Button
+          type="button"
+          onClick={() => handleSubmit("published")}
+          disabled={isLoading}
+          className="flex-1"
+        >
+          {isLoading ? (
+            <Loader2 className="size-4 mr-2 animate-spin" />
+          ) : (
+            <Eye className="size-4 mr-2" />
+          )}
           Publier la chronique
         </Button>
       </div>

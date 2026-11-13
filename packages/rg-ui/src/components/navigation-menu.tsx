@@ -5,7 +5,11 @@ import * as React from "react";
 import { cva } from "class-variance-authority";
 import { ChevronDownIcon } from "lucide-react";
 import { cn } from "../lib/utils";
-import { childRender, rendersNativeButton, type PrimitiveProps } from "../lib/render";
+import {
+  childRender,
+  rendersNativeButton,
+  type PrimitiveProps,
+} from "../lib/render";
 
 const ViewportMode = React.createContext(true);
 
@@ -20,7 +24,10 @@ function NavigationMenu({
       <Primitive.Root
         data-slot="navigation-menu"
         data-viewport={viewport}
-        className={cn("group/navigation-menu relative flex max-w-max flex-1 items-center justify-center", className)}
+        className={cn(
+          "group/navigation-menu relative flex max-w-max flex-1 items-center justify-center",
+          className,
+        )}
         {...props}
       >
         {children}
@@ -30,18 +37,33 @@ function NavigationMenu({
   );
 }
 
-function NavigationMenuList({ className, ...props }: PrimitiveProps<typeof Primitive.List>) {
+function NavigationMenuList({
+  className,
+  ...props
+}: PrimitiveProps<typeof Primitive.List>) {
   return (
     <Primitive.List
       data-slot="navigation-menu-list"
-      className={cn("group flex flex-1 list-none items-center justify-center gap-1", className)}
+      className={cn(
+        "group flex flex-1 list-none items-center justify-center gap-1",
+        className,
+      )}
       {...props}
     />
   );
 }
 
-function NavigationMenuItem({ className, ...props }: PrimitiveProps<typeof Primitive.Item>) {
-  return <Primitive.Item data-slot="navigation-menu-item" className={cn("relative", className)} {...props} />;
+function NavigationMenuItem({
+  className,
+  ...props
+}: PrimitiveProps<typeof Primitive.Item>) {
+  return (
+    <Primitive.Item
+      data-slot="navigation-menu-item"
+      className={cn("relative", className)}
+      {...props}
+    />
+  );
 }
 
 const navigationMenuTriggerStyle = cva(
@@ -80,7 +102,10 @@ function NavigationMenuTrigger({
   );
 }
 
-function NavigationMenuContent({ className, ...props }: PrimitiveProps<typeof Primitive.Content>) {
+function NavigationMenuContent({
+  className,
+  ...props
+}: PrimitiveProps<typeof Primitive.Content>) {
   return (
     <Primitive.Content
       data-slot="navigation-menu-content"
@@ -93,13 +118,24 @@ function NavigationMenuContent({ className, ...props }: PrimitiveProps<typeof Pr
   );
 }
 
-function NavigationMenuViewport({ className, ...props }: PrimitiveProps<typeof Primitive.Viewport>) {
+function NavigationMenuViewport({
+  className,
+  ...props
+}: PrimitiveProps<typeof Primitive.Viewport>) {
   const viewport = React.useContext(ViewportMode);
   return (
     <Primitive.Portal>
-      <Primitive.Positioner className="z-50" sideOffset={6} align={viewport ? "center" : "start"}>
+      <Primitive.Positioner
+        className="z-50"
+        sideOffset={6}
+        align={viewport ? "center" : "start"}
+      >
         <Primitive.Popup className="origin-(--transform-origin) h-(--popup-height) w-(--popup-width) overflow-hidden rounded-md border bg-popover text-popover-foreground shadow data-[closed]:animate-out data-[closed]:zoom-out-95 data-[open]:animate-in data-[open]:zoom-in-95">
-          <Primitive.Viewport data-slot="navigation-menu-viewport" className={cn("relative", className)} {...props} />
+          <Primitive.Viewport
+            data-slot="navigation-menu-viewport"
+            className={cn("relative", className)}
+            {...props}
+          />
         </Primitive.Popup>
       </Primitive.Positioner>
     </Primitive.Portal>
@@ -130,11 +166,17 @@ function NavigationMenuLink({
   );
 }
 
-function NavigationMenuIndicator({ className, ...props }: PrimitiveProps<typeof Primitive.Arrow>) {
+function NavigationMenuIndicator({
+  className,
+  ...props
+}: PrimitiveProps<typeof Primitive.Arrow>) {
   return (
     <Primitive.Arrow
       data-slot="navigation-menu-indicator"
-      className={cn("flex h-1.5 items-end justify-center overflow-hidden", className)}
+      className={cn(
+        "flex h-1.5 items-end justify-center overflow-hidden",
+        className,
+      )}
       {...props}
     >
       <div className="relative top-[60%] size-2 rotate-45 rounded-tl-sm bg-border shadow-md" />

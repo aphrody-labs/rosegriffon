@@ -30,7 +30,8 @@ describe("motif ILIKE", () => {
 });
 
 describe("requête d'union", () => {
-  const sql = construireRequete("rg") + "\nUNION ALL\n" + construireRequete("inagle");
+  const sql =
+    construireRequete("rg") + "\nUNION ALL\n" + construireRequete("inagle");
 
   test("the two store unions retain all three presentation domains", () => {
     expect(sql).toContain("public.articles");
@@ -91,8 +92,12 @@ describe("mise en forme", () => {
   });
 
   test("préfixe l'URL par la base du domaine", () => {
-    expect(formaterLigne(ligne("1", "axel-blaze"), BASES_PAR_DEFAUT)?.href).toBe("/wiki/chara/axel-blaze");
-    expect(formaterLigne(ligne("4"), BASES_PAR_DEFAUT)?.href).toBe("/achillea/clans/42");
+    expect(
+      formaterLigne(ligne("1", "axel-blaze"), BASES_PAR_DEFAUT)?.href,
+    ).toBe("/wiki/chara/axel-blaze");
+    expect(formaterLigne(ligne("4"), BASES_PAR_DEFAUT)?.href).toBe(
+      "/achillea/clans/42",
+    );
   });
 
   test("suit des bases différentes sans réécriture", () => {
@@ -114,27 +119,52 @@ describe("mise en forme", () => {
   });
 
   test("distingue BASARA et tactique avec des liens Wiki réels", () => {
-    expect(formaterLigne({ ...ligne("1", "mark"), detail: "BASARA" }, BASES_PAR_DEFAUT)).toMatchObject({
+    expect(
+      formaterLigne(
+        { ...ligne("1", "mark"), detail: "BASARA" },
+        BASES_PAR_DEFAUT,
+      ),
+    ).toMatchObject({
       href: "/wiki/chara/mark",
       type: "basara",
     });
-    expect(formaterLigne({ ...ligne("3", "wht0001"), detail: "special_tactics" }, BASES_PAR_DEFAUT)).toMatchObject({
+    expect(
+      formaterLigne(
+        { ...ligne("3", "wht0001"), detail: "special_tactics" },
+        BASES_PAR_DEFAUT,
+      ),
+    ).toMatchObject({
       href: "/wiki/tactic/wht0001",
       type: "tactique",
     });
-    expect(formaterLigne({ ...ligne("3", "item01"), detail: "consume" }, BASES_PAR_DEFAUT)).toMatchObject({
+    expect(
+      formaterLigne(
+        { ...ligne("3", "item01"), detail: "consume" },
+        BASES_PAR_DEFAUT,
+      ),
+    ).toMatchObject({
       href: "/wiki/item/item01",
       type: "objet",
     });
   });
 
   test("classe les actualités Azalée dans Wiki sans relire articles", () => {
-    expect(formaterLigne({ ...ligne("0", "azalee-news"), detail: "azalee" }, BASES_PAR_DEFAUT)).toMatchObject({
+    expect(
+      formaterLigne(
+        { ...ligne("0", "azalee-news"), detail: "azalee" },
+        BASES_PAR_DEFAUT,
+      ),
+    ).toMatchObject({
       domaine: "wiki",
       href: "/news/azalee-news",
       type: "article",
     });
-    expect(formaterLigne({ ...ligne("0", "rg-news"), detail: "website" }, BASES_PAR_DEFAUT)).toMatchObject({
+    expect(
+      formaterLigne(
+        { ...ligne("0", "rg-news"), detail: "website" },
+        BASES_PAR_DEFAUT,
+      ),
+    ).toMatchObject({
       domaine: "association",
       href: "/news/rg-news",
     });
@@ -152,7 +182,10 @@ describe("mise en forme", () => {
       ["14", "patchnote", "/wiki/patch-notes/42"],
     ] as const;
     for (const [source, type, href] of chemins) {
-      expect(formaterLigne(ligne(source), BASES_PAR_DEFAUT)).toMatchObject({ type, href });
+      expect(formaterLigne(ligne(source), BASES_PAR_DEFAUT)).toMatchObject({
+        type,
+        href,
+      });
       expect(LIBELLES_TYPES_RECHERCHE[type].length).toBeGreaterThan(0);
     }
   });
@@ -160,27 +193,36 @@ describe("mise en forme", () => {
 
 describe("recherche complète", () => {
   const lignes: LigneBrute[] = [
-    { detail: null, id: "c1", source: "1", titre: "Axel Blaze édition limitée" },
+    {
+      detail: null,
+      id: "c1",
+      source: "1",
+      titre: "Axel Blaze édition limitée",
+    },
     { detail: null, id: "c2", source: "1", titre: "Axel" },
     { detail: null, id: "k1", source: "4", titre: "Axel Corp" },
     { detail: null, id: "a1", source: "0", titre: "Axel revient" },
   ];
   const executer = {
-    rg: async () => lignes.filter(row => row.source !== "1"),
-    inagle: async () => lignes.filter(row => row.source === "1"),
+    rg: async () => lignes.filter((row) => row.source !== "1"),
+    inagle: async () => lignes.filter((row) => row.source === "1"),
   };
 
   test("isolates store SQL, preserves global source indices, and sorts combined results", async () => {
-    const queries: Array<{ store: string; sql: string; parameters: unknown[] }> = [];
+    const queries: Array<{
+      store: string;
+      sql: string;
+      parameters: unknown[];
+    }> = [];
     const result = await rechercherPartout(
       {
         rg: async (sql, parameters) => {
           queries.push({ store: "rg", sql, parameters });
-          return lignes.filter(row => row.source !== "1");
+          return lignes.filter((row) => row.source !== "1");
         },
         inagle: async (sql, parameters) => {
           queries.push({ store: "inagle", sql, parameters });
-          return lignes.filter(row => row.source === "1");
+          return lignes.filter((row) => row.source === "1");
         },
       },
       "  axel%  ",
@@ -194,11 +236,15 @@ describe("recherche complète", () => {
     expect(queries[1]?.sql).not.toContain("public.articles");
     expect(queries[1]?.sql).not.toContain("achillea.");
     expect(queries[1]?.sql).toContain("1::int AS source");
-    expect(queries.map(query => query.parameters)).toEqual([
+    expect(queries.map((query) => query.parameters)).toEqual([
       ["%axel\\%%", 3],
       ["%axel\\%%", 3],
     ]);
-    expect(result.map(row => row.id)).toEqual(["article:a1", "personnage:c2", "personnage:c1"]);
+    expect(result.map((row) => row.id)).toEqual([
+      "article:a1",
+      "personnage:c2",
+      "personnage:c1",
+    ]);
   });
 
   test("a Neon failure remains a failed combined search instead of a partial success", async () => {
@@ -221,7 +267,9 @@ describe("recherche complète", () => {
       appele = true;
       return [];
     };
-    expect(await rechercherPartout({ rg: espion, inagle: espion }, "a")).toEqual([]);
+    expect(
+      await rechercherPartout({ rg: espion, inagle: espion }, "a"),
+    ).toEqual([]);
     expect(appele).toBe(false);
     expect(LONGUEUR_MINIMALE).toBe(2);
   });
@@ -232,7 +280,12 @@ describe("recherche complète", () => {
 
   test("trie par domaine puis par titre le plus court", async () => {
     const resultats = await rechercherPartout(executer, "axel");
-    expect(resultats.map(r => r.domaine)).toEqual(["association", "wiki", "wiki", "esport"]);
+    expect(resultats.map((r) => r.domaine)).toEqual([
+      "association",
+      "wiki",
+      "wiki",
+      "esport",
+    ]);
     // Au sein du wiki, la correspondance courte passe devant.
     expect(resultats[1]?.titre).toBe("Axel");
   });
@@ -241,19 +294,27 @@ describe("recherche complète", () => {
     const casse = async () => {
       throw new Error('relation "achillea.clan" does not exist');
     };
-    expect(rechercherPartout({ rg: casse, inagle: async () => [] }, "axel")).rejects.toThrow(
-      'relation "achillea.clan" does not exist',
-    );
+    expect(
+      rechercherPartout({ rg: casse, inagle: async () => [] }, "axel"),
+    ).rejects.toThrow('relation "achillea.clan" does not exist');
   });
 
   test("respecte la limite totale", async () => {
-    const resultats = await rechercherPartout(executer, "axel", { limiteTotale: 2 });
+    const resultats = await rechercherPartout(executer, "axel", {
+      limiteTotale: 2,
+    });
     expect(resultats).toHaveLength(2);
   });
 
   test("groupe par domaine en omettant les domaines vides", async () => {
-    const groupes = grouperParDomaine(await rechercherPartout(executer, "axel"));
-    expect(groupes.map(g => g.domaine)).toEqual(["association", "wiki", "esport"]);
+    const groupes = grouperParDomaine(
+      await rechercherPartout(executer, "axel"),
+    );
+    expect(groupes.map((g) => g.domaine)).toEqual([
+      "association",
+      "wiki",
+      "esport",
+    ]);
     expect(groupes[1]?.resultats).toHaveLength(2);
   });
 });

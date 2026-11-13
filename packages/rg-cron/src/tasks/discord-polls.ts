@@ -51,7 +51,10 @@
 
 import { sql } from "../lib/db.js";
 import { appelDiscordOuNull } from "../lib/discord-rest.js";
-import { telechargerPieceJointeDiscord, televerserObjet } from "../lib/storage-assets.js";
+import {
+  telechargerPieceJointeDiscord,
+  televerserObjet,
+} from "../lib/storage-assets.js";
 import { DISCORD_TOKEN } from "../lib/discord.js";
 
 const PREFIXE = "[Cron Sondages]";
@@ -184,8 +187,16 @@ export interface PieceJointeBrute {
 }
 
 export interface EncartBrut {
-  thumbnail?: { url?: string; width?: number | null; height?: number | null } | null;
-  image?: { url?: string; width?: number | null; height?: number | null } | null;
+  thumbnail?: {
+    url?: string;
+    width?: number | null;
+    height?: number | null;
+  } | null;
+  image?: {
+    url?: string;
+    width?: number | null;
+    height?: number | null;
+  } | null;
 }
 
 export interface MessageHumainAvecMedia {
@@ -210,14 +221,17 @@ type RoleSection = "question" | "choix" | "resultats" | "parametres";
  * corpus : ni « Résultat actuel », ni « Current Result » — un sondage en cours
  * ne publie tout simplement rien.
  */
-const EN_TETES: Record<string, { role: RoleSection; langue: "fr" | "en" | null }> = {
+const EN_TETES: Record<
+  string,
+  { role: RoleSection; langue: "fr" | "en" | null }
+> = {
   Question: { role: "question", langue: null },
   Choices: { role: "choix", langue: "en" },
   Choix: { role: "choix", langue: "fr" },
   "Final Result": { role: "resultats", langue: "en" },
   "Résultat final": { role: "resultats", langue: "fr" },
   Settings: { role: "parametres", langue: "en" },
-  "Paramètres": { role: "parametres", langue: "fr" },
+  Paramètres: { role: "parametres", langue: "fr" },
 };
 
 /**
@@ -225,7 +239,8 @@ const EN_TETES: Record<string, { role: RoleSection; langue: "fr" | "en" | null }
  * L'ancrage est indispensable — un libellé de choix qui contiendrait
  * « **Choices** » au fil du texte ne doit pas ouvrir une section.
  */
-const RE_SECTIONS = /^\*\*(Question|Choices|Choix|Final Result|Résultat final|Settings|Paramètres)\*\*[ \t]*$/gm;
+const RE_SECTIONS =
+  /^\*\*(Question|Choices|Choix|Final Result|Résultat final|Settings|Paramètres)\*\*[ \t]*$/gm;
 
 /** Pied d'encart : c'est LUI qui identifie un sondage, jamais l'id du bot. */
 const RE_ID = /^(?:Poll ID:|ID du sondage :)\s*([0-9a-f]{6,})$/;
@@ -252,12 +267,14 @@ const RE_RES_V2 = /\|\s*([\d.]+)%\s*\((\d+)\)$/u;
 /** `77 users voted` — un nombre de VOTANTS, surtout pas de votes. */
 const RE_TOT_V1 = /^(\d+)\s+users?\s+voted$/u;
 /** `*128 votes from 77 users*` / `*120 votes de 67 utilisateurs*`. */
-const RE_TOT_V2 = /^\*(\d+)\s+votes?\s+(?:from|de)\s+(\d+)\s+(?:users?|utilisateurs?)\*$/u;
+const RE_TOT_V2 =
+  /^\*(\d+)\s+votes?\s+(?:from|de)\s+(\d+)\s+(?:users?|utilisateurs?)\*$/u;
 
 /** Clôture : `<t:UNIX:R>` est un horodatage Discord relatif. */
 const RE_FIN = /(?:Poll already ended|Sondage déjà terminé)\s*\(<t:(\d+):R>\)/u;
 /** Choix illimités (`max_choices = 0`). */
-const RE_ILLIM = /(?::infinity:|<a?:infinity:\d+>)\s*(?:Unlimited choices|Choix illimités)/iu;
+const RE_ILLIM =
+  /(?::infinity:|<a?:infinity:\d+>)\s*(?:Unlimited choices|Choix illimités)/iu;
 /** Chiffre littéral : `<:choices:…> 3 allowed choices` / `3 choix autorisés`. */
 const RE_CHOIX_N = /(?:^|>\s*)(\d+)\s+(?:allowed choices?|choix autorisés?)$/u;
 /**
@@ -265,7 +282,8 @@ const RE_CHOIX_N = /(?:^|>\s*)(\d+)\s+(?:allowed choices?|choix autorisés?)$/u;
  * choices`. La seconde forme est celle qui fait échouer un parseur naïf : le
  * nombre est dans le NOM de l'emoji, pas dans le texte de la ligne.
  */
-const RE_CHOIX_MOT = /^(?::([a-z]+):|<a?:([a-z]+):\d+>)\s+(?:allowed choices?|choix autorisés?)$/u;
+const RE_CHOIX_MOT =
+  /^(?::([a-z]+):|<a?:([a-z]+):\d+>)\s+(?:allowed choices?|choix autorisés?)$/u;
 /** Verrouillage. */
 const RE_VERROU = /(?:No other votes allowed|Aucun autre vote autorisé)/u;
 
@@ -286,7 +304,8 @@ const MOTS_NOMBRES: Record<string, number> = {
 /** Découpe la description en sections nommées, sans supposer leur ordre. */
 function decouperSections(description: string): Map<RoleSection, string> {
   const sections = new Map<RoleSection, string>();
-  const marqueurs: Array<{ role: RoleSection; debut: number; fin: number }> = [];
+  const marqueurs: Array<{ role: RoleSection; debut: number; fin: number }> =
+    [];
 
   RE_SECTIONS.lastIndex = 0;
   let trouve: RegExpExecArray | null = RE_SECTIONS.exec(description);
@@ -304,7 +323,10 @@ function decouperSections(description: string): Map<RoleSection, string> {
 
   for (const [index, marqueur] of marqueurs.entries()) {
     const finContenu = marqueurs[index + 1]?.debut ?? description.length;
-    const contenu = description.slice(marqueur.fin, finContenu).replace(/^\n+/, "").replace(/\n+$/, "");
+    const contenu = description
+      .slice(marqueur.fin, finContenu)
+      .replace(/^\n+/, "")
+      .replace(/\n+$/, "");
     // Première occurrence gagnante : un encart n'a jamais deux fois la même
     // section, et si cela arrivait, la première est celle du bot.
     if (!sections.has(marqueur.role)) sections.set(marqueur.role, contenu);
@@ -328,7 +350,7 @@ function deduireLangue(description: string): "fr" | "en" {
 /** Lignes non vides d'une section. */
 function lignesUtiles(section: string | undefined): string[] {
   if (!section) return [];
-  return section.split("\n").filter(ligne => ligne.trim().length > 0);
+  return section.split("\n").filter((ligne) => ligne.trim().length > 0);
 }
 
 /** Sépare l'emoji de tête du reste de la ligne. */
@@ -348,7 +370,12 @@ interface LigneResultat {
 function analyserParametres(
   lignes: string[],
   avertissements: string[],
-): { ended: boolean; ends_at: Date | null; locked: boolean; max_choices: number } {
+): {
+  ended: boolean;
+  ends_at: Date | null;
+  locked: boolean;
+  max_choices: number;
+} {
   let ended = false;
   let ends_at: Date | null = null;
   let locked = false;
@@ -389,7 +416,9 @@ function analyserParametres(
     }
 
     if (!reconnue) {
-      avertissements.push(`ligne de paramètre non reconnue: ${nettoyee.slice(0, 80)}`);
+      avertissements.push(
+        `ligne de paramètre non reconnue: ${nettoyee.slice(0, 80)}`,
+      );
     }
   }
 
@@ -407,7 +436,11 @@ function analyserParametres(
 function analyserResultats(
   lignes: string[],
   avertissements: string[],
-): { resultats: LigneResultat[]; total_votes: number | null; total_voters: number | null } {
+): {
+  resultats: LigneResultat[];
+  total_votes: number | null;
+  total_voters: number | null;
+} {
   const resultats: LigneResultat[] = [];
   let total_votes: number | null = null;
   let total_voters: number | null = null;
@@ -452,7 +485,9 @@ function analyserResultats(
       continue;
     }
 
-    avertissements.push(`ligne résultat non reconnue: ${nettoyee.slice(0, 80)}`);
+    avertissements.push(
+      `ligne résultat non reconnue: ${nettoyee.slice(0, 80)}`,
+    );
   }
 
   return { resultats, total_votes, total_voters };
@@ -498,7 +533,8 @@ export function parseEasyPollEmbed(
   const options: OptionExtraite[] = lignesChoix.map((ligne, position) => {
     const { emoji, reste } = separerEmoji(ligne);
     if (!emoji) avertissements.push(`choix ${position} sans emoji`);
-    if (reste.length === 0) avertissements.push(`libellé de choix vide en ${position}`);
+    if (reste.length === 0)
+      avertissements.push(`libellé de choix vide en ${position}`);
     return { position, emoji, label: reste, votes: null, pourcentage: null };
   });
 
@@ -509,11 +545,16 @@ export function parseEasyPollEmbed(
 
   if (sectionResultats !== undefined) {
     results_hidden = false;
-    const analyse = analyserResultats(lignesUtiles(sectionResultats), avertissements);
+    const analyse = analyserResultats(
+      lignesUtiles(sectionResultats),
+      avertissements,
+    );
     total_voters = analyse.total_voters;
 
     if (analyse.resultats.length !== options.length) {
-      avertissements.push(`${analyse.resultats.length} ligne(s) de résultat pour ${options.length} choix`);
+      avertissements.push(
+        `${analyse.resultats.length} ligne(s) de résultat pour ${options.length} choix`,
+      );
     }
 
     let somme = 0;
@@ -540,7 +581,10 @@ export function parseEasyPollEmbed(
     }
   }
 
-  const parametres = analyserParametres(lignesUtiles(sections.get("parametres")), avertissements);
+  const parametres = analyserParametres(
+    lignesUtiles(sections.get("parametres")),
+    avertissements,
+  );
 
   return {
     poll_id: identifiant[1]!,
@@ -576,9 +620,15 @@ interface PollNatif {
   question?: { text?: string | null } | null;
   answers?: Array<{
     answer_id?: number;
-    poll_media?: { text?: string | null; emoji?: { id?: string | null; name?: string | null } | null } | null;
+    poll_media?: {
+      text?: string | null;
+      emoji?: { id?: string | null; name?: string | null } | null;
+    } | null;
   }> | null;
-  results?: { is_finalized?: boolean; answer_counts?: Array<{ id?: number; count?: number }> } | null;
+  results?: {
+    is_finalized?: boolean;
+    answer_counts?: Array<{ id?: number; count?: number }>;
+  } | null;
   expiry?: string | null;
   allow_multiselect?: boolean;
 }
@@ -606,19 +656,26 @@ export function parseSondageNatif(
   const question = natif.question?.text?.trim();
   if (!question) return refuser("sondage natif sans question");
 
-  const reponses = [...(natif.answers ?? [])].sort((a, b) => (a.answer_id ?? 0) - (b.answer_id ?? 0));
+  const reponses = [...(natif.answers ?? [])].sort(
+    (a, b) => (a.answer_id ?? 0) - (b.answer_id ?? 0),
+  );
   if (reponses.length === 0) return refuser("sondage natif sans choix");
 
   const decomptes = new Map<number, number>();
   for (const compte of natif.results?.answer_counts ?? []) {
-    if (typeof compte.id === "number") decomptes.set(compte.id, compte.count ?? 0);
+    if (typeof compte.id === "number")
+      decomptes.set(compte.id, compte.count ?? 0);
   }
   const results_hidden = !natif.results;
 
   const options: OptionExtraite[] = reponses.map((reponse, position) => {
     const emojiBrut = reponse.poll_media?.emoji ?? null;
-    const emoji = emojiBrut?.id ? `<:${emojiBrut.name ?? ""}:${emojiBrut.id}>` : (emojiBrut?.name ?? null);
-    const votes = results_hidden ? null : (decomptes.get(reponse.answer_id ?? -1) ?? 0);
+    const emoji = emojiBrut?.id
+      ? `<:${emojiBrut.name ?? ""}:${emojiBrut.id}>`
+      : (emojiBrut?.name ?? null);
+    const votes = results_hidden
+      ? null
+      : (decomptes.get(reponse.answer_id ?? -1) ?? 0);
     return {
       position,
       emoji,
@@ -628,12 +685,15 @@ export function parseSondageNatif(
     };
   });
 
-  const total_votes = results_hidden ? null : options.reduce((somme, option) => somme + (option.votes ?? 0), 0);
+  const total_votes = results_hidden
+    ? null
+    : options.reduce((somme, option) => somme + (option.votes ?? 0), 0);
 
   // Pourcentages recalculés ici : Discord ne les publie pas.
   if (total_votes && total_votes > 0) {
     for (const option of options) {
-      option.pourcentage = Math.round(((option.votes ?? 0) / total_votes) * 10000) / 100;
+      option.pourcentage =
+        Math.round(((option.votes ?? 0) / total_votes) * 10000) / 100;
     }
   }
 
@@ -674,7 +734,9 @@ export function parseSondageNatif(
 
 /** Clé de comparaison d'une réaction, au même format que `option.emoji`. */
 function cleReaction(reaction: ReactionBrute): string {
-  return reaction.emoji.id ? `<:${reaction.emoji.name}:${reaction.emoji.id}>` : reaction.emoji.name;
+  return reaction.emoji.id
+    ? `<:${reaction.emoji.name}:${reaction.emoji.id}>`
+    : reaction.emoji.name;
 }
 
 /**
@@ -692,11 +754,16 @@ function cleReaction(reaction: ReactionBrute): string {
  *
  * Rend le sondage INCHANGÉ si l'un des quatre refuse.
  */
-export function appliquerVotesDepuisReactions(sondage: SondageExtrait, reactions: ReactionBrute[]): SondageExtrait {
+export function appliquerVotesDepuisReactions(
+  sondage: SondageExtrait,
+  reactions: ReactionBrute[],
+): SondageExtrait {
   if (!sondage.results_hidden) return sondage;
   if (sondage.provider !== "easypoll") return sondage;
-  if (sondage.created_at.getTime() >= FIN_ERE_REACTIONS.getTime()) return sondage;
-  if (reactions.length !== sondage.options.length || reactions.length === 0) return sondage;
+  if (sondage.created_at.getTime() >= FIN_ERE_REACTIONS.getTime())
+    return sondage;
+  if (reactions.length !== sondage.options.length || reactions.length === 0)
+    return sondage;
 
   for (const [rang, reaction] of reactions.entries()) {
     if (cleReaction(reaction) !== sondage.options[rang]?.emoji) return sondage;
@@ -705,7 +772,7 @@ export function appliquerVotesDepuisReactions(sondage: SondageExtrait, reactions
   // `count - 1` : EasyPoll amorce chaque choix de sa propre réaction. Étalonné
   // sur les quinze sondages qui ont à la fois des résultats publiés et des
   // réactions alignées : exact sur 65 options / 70, écart borné à [-1, +2].
-  const votes = reactions.map(reaction => Math.max(reaction.count - 1, 0));
+  const votes = reactions.map((reaction) => Math.max(reaction.count - 1, 0));
   const total = votes.reduce((somme, valeur) => somme + valeur, 0);
 
   return {
@@ -721,7 +788,8 @@ export function appliquerVotesDepuisReactions(sondage: SondageExtrait, reactions
     options: sondage.options.map((option, rang) => ({
       ...option,
       votes: votes[rang] ?? 0,
-      pourcentage: total > 0 ? Math.round(((votes[rang] ?? 0) / total) * 10000) / 100 : 0,
+      pourcentage:
+        total > 0 ? Math.round(((votes[rang] ?? 0) / total) * 10000) / 100 : 0,
     })),
     raw: {
       reconstitution: "reactions",
@@ -733,14 +801,19 @@ export function appliquerVotesDepuisReactions(sondage: SondageExtrait, reactions
     // d'une ère d'encart inconnue. Mélangées, elle en noyait le signal — 25
     // entrées sur 51 sondages, pour un rapport censé rester vide.
     avertissements: sondage.avertissements,
-    notes: [...sondage.notes, "décompte reconstitué depuis les réactions (± 1 vote)"],
+    notes: [
+      ...sondage.notes,
+      "décompte reconstitué depuis les réactions (± 1 vote)",
+    ],
   };
 }
 
 // ─── VISUEL RATTACHÉ ─────────────────────────────────────────────────────────
 
 /** Médias exploitables d'un message humain, dans leur ordre d'apparition. */
-function mediasDuMessage(message: MessageHumainAvecMedia): Array<Omit<VisuelRattache, "message_id" | "ecart_s">> {
+function mediasDuMessage(
+  message: MessageHumainAvecMedia,
+): Array<Omit<VisuelRattache, "message_id" | "ecart_s">> {
   const medias: Array<Omit<VisuelRattache, "message_id" | "ecart_s">> = [];
 
   for (const piece of message.attachments ?? []) {
@@ -980,7 +1053,9 @@ function extraireUuid(composants: unknown): string | null {
   if (typeof composants !== "object") return null;
   const noeud = composants as { custom_id?: unknown; components?: unknown };
   if (typeof noeud.custom_id === "string") {
-    const trouve = /^polls\/([0-9a-f-]{36})\/participants$/.exec(noeud.custom_id);
+    const trouve = /^polls\/([0-9a-f-]{36})\/participants$/.exec(
+      noeud.custom_id,
+    );
     if (trouve) return trouve[1]!;
   }
   return extraireUuid(noeud.components);
@@ -999,10 +1074,20 @@ async function televerserVisuel(
   chemin: string,
   visuel: VisuelRattache,
 ): Promise<{ ok: boolean; motif?: string }> {
-  const fichier = await telechargerPieceJointeDiscord(salonId, visuel.url, TAILLE_VISUEL_MAX, visuel.content_type);
+  const fichier = await telechargerPieceJointeDiscord(
+    salonId,
+    visuel.url,
+    TAILLE_VISUEL_MAX,
+    visuel.content_type,
+  );
   if (!fichier.ok) return { ok: false, motif: fichier.motif };
 
-  return televerserObjet(BUCKET_VISUELS, chemin, fichier.octets, fichier.typeMime);
+  return televerserObjet(
+    BUCKET_VISUELS,
+    chemin,
+    fichier.octets,
+    fichier.typeMime,
+  );
 }
 
 /** Écrit un sondage et ses choix. Une transaction par sondage. */
@@ -1017,7 +1102,7 @@ async function enregistrerSondage(
     alt: string | null;
   } | null,
 ): Promise<"insere" | "mis_a_jour" | "inchange"> {
-  return sql.begin(async tx => {
+  return sql.begin(async (tx) => {
     const lignes = await tx<Array<{ insere: boolean }>>`
 			INSERT INTO discord_polls (
 				poll_id, uuid, provider, source, message_id, channel_id, guild_id,
@@ -1218,19 +1303,23 @@ export async function runDiscordPollsImport(
 					 ORDER BY m.created_at
 				`;
 
-        const humains: MessageHumainAvecMedia[] = messagesMedia.map(ligne => ({
-          message_id: ligne.message_id,
-          created_at: versDate(ligne.created_at),
-          content: ligne.content ?? "",
-          attachments: ligne.attachments ?? [],
-          embeds: ligne.embeds ?? [],
-        }));
+        const humains: MessageHumainAvecMedia[] = messagesMedia.map(
+          (ligne) => ({
+            message_id: ligne.message_id,
+            created_at: versDate(ligne.created_at),
+            content: ligne.content ?? "",
+            attachments: ligne.attachments ?? [],
+            embeds: ligne.embeds ?? [],
+          }),
+        );
 
         const existantes = await sql<LigneExistante[]>`
 					SELECT poll_id, creator_id, uuid, command, visual_path
 					  FROM discord_polls WHERE channel_id = ${salon.channel_id}
 				`;
-        const dejaEnBase = new Map(existantes.map(ligne => [ligne.poll_id, ligne]));
+        const dejaEnBase = new Map(
+          existantes.map((ligne) => [ligne.poll_id, ligne]),
+        );
 
         for (const ligne of candidats) {
           stats.analyses++;
@@ -1250,7 +1339,12 @@ export async function runDiscordPollsImport(
           const journal: JournalDeRejet = {};
           let sondage = ligne.poll
             ? parseSondageNatif(ligne.poll, message, journal)
-            : parseEasyPollEmbed(ligne.description, ligne.footer, message, journal);
+            : parseEasyPollEmbed(
+                ligne.description,
+                ligne.footer,
+                message,
+                journal,
+              );
 
           if (!sondage) {
             stats.ignores++;
@@ -1278,15 +1372,23 @@ export async function runDiscordPollsImport(
           // pour rien : EasyPoll RETIRE le bouton « Participants » des vieux
           // encarts, l'UUID absent aujourd'hui ne réapparaîtra jamais. Le
           // `COALESCE` de l'upsert protège de toute façon ce qui est déjà là.
-          if (avecDiscord && sondage.provider === "easypoll" && !existante?.creator_id) {
+          if (
+            avecDiscord &&
+            sondage.provider === "easypoll" &&
+            !existante?.creator_id
+          ) {
             const brut = await appelDiscordOuNull<MessageApiDiscord>(
               `/channels/${sondage.channel_id}/messages/${sondage.message_id}`,
             );
             const meta = brut?.interaction_metadata ?? brut?.interaction;
             if (meta) {
-              const utilisateur = typeof meta.user === "object" ? meta.user : null;
+              const utilisateur =
+                typeof meta.user === "object" ? meta.user : null;
               sondage.creator_id = meta.user_id ?? utilisateur?.id ?? null;
-              sondage.creator_username = (typeof meta.user === "string" ? meta.user : utilisateur?.username) ?? null;
+              sondage.creator_username =
+                (typeof meta.user === "string"
+                  ? meta.user
+                  : utilisateur?.username) ?? null;
               sondage.command = meta.name ?? null;
               if (sondage.creator_id) stats.createurs_enrichis++;
             }
@@ -1314,13 +1416,19 @@ export async function runDiscordPollsImport(
               // Déjà recopié au même chemin déterministe : rien à refaire.
               cheminFinal = chemin;
             } else if (avecVisuels && !dry) {
-              const envoi = await televerserVisuel(sondage.channel_id, chemin, visuel);
+              const envoi = await televerserVisuel(
+                sondage.channel_id,
+                chemin,
+                visuel,
+              );
               if (envoi.ok) {
                 cheminFinal = chemin;
                 stats.visuels_televerses++;
               } else {
                 stats.visuels_echecs++;
-                sondage.avertissements.push(`visuel non recopié: ${envoi.motif ?? "?"}`);
+                sondage.avertissements.push(
+                  `visuel non recopié: ${envoi.motif ?? "?"}`,
+                );
               }
             }
 
@@ -1361,13 +1469,18 @@ export async function runDiscordPollsImport(
             `${PREFIXE} ${salon.name} : ${stats.avertissements.length} sondage(s) avec avertissement — ` +
               stats.avertissements
                 .slice(0, 5)
-                .map(entree => `${entree.poll_id}: ${entree.motifs.join(" / ")}`)
+                .map(
+                  (entree) => `${entree.poll_id}: ${entree.motifs.join(" / ")}`,
+                )
                 .join(" | "),
           );
         }
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
-        console.error(`${PREFIXE} Échec sur le salon ${salon.name} (${salon.channel_id}) :`, message);
+        console.error(
+          `${PREFIXE} Échec sur le salon ${salon.name} (${salon.channel_id}) :`,
+          message,
+        );
         stats.error = message;
       }
 
@@ -1385,9 +1498,13 @@ export async function runDiscordPollsImport(
       durationMs: Date.now() - debut,
     };
 
-    const echecs = rapport.filter(salon => salon.error);
+    const echecs = rapport.filter((salon) => salon.error);
     if (echecs.length === rapport.length) {
-      return { success: false, error: echecs[0]?.error ?? "Tous les salons ont échoué.", stats };
+      return {
+        success: false,
+        error: echecs[0]?.error ?? "Tous les salons ont échoué.",
+        stats,
+      };
     }
     return { success: true, stats };
   } catch (err) {

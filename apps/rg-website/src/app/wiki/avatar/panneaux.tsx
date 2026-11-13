@@ -15,8 +15,22 @@
 
 import { useMemo } from "react";
 
-import { BUILDS, ELEMENTS, H, MORPHOLOGIES, PERSONNALITES_VOIX, TYPES_VOIX, type Libelle } from "./libelles";
-import { COULEUR_MAX, CURSEUR_MAX, RUBRIQUES_VISAGE, SECTIONS_HABITS, type Section } from "./structure";
+import {
+  BUILDS,
+  ELEMENTS,
+  H,
+  MORPHOLOGIES,
+  PERSONNALITES_VOIX,
+  TYPES_VOIX,
+  type Libelle,
+} from "./libelles";
+import {
+  COULEUR_MAX,
+  CURSEUR_MAX,
+  RUBRIQUES_VISAGE,
+  SECTIONS_HABITS,
+  type Section,
+} from "./structure";
 import {
   A01,
   Barre,
@@ -64,9 +78,12 @@ export type Contexte = {
 };
 
 /** Retrouve une catégorie du catalogue par son `faceSettingType`. */
-function categorie(catalogue: Catalogue, type: number | undefined): Categorie | undefined {
+function categorie(
+  catalogue: Catalogue,
+  type: number | undefined,
+): Categorie | undefined {
   if (type === undefined) return undefined;
-  return catalogue.categories.find(c => c.faceSettingType === type);
+  return catalogue.categories.find((c) => c.faceSettingType === type);
 }
 
 /** Une grille de vignettes paginée, avec ses chevrons et ses badges de touche. */
@@ -105,7 +122,12 @@ function Grille({
           />
         ))}
       </div>
-      <Pagination cdn={ctx.cdn} page={page} pages={pages} setPage={n => ctx.setPage(cle, n)} />
+      <Pagination
+        cdn={ctx.cdn}
+        page={page}
+        pages={pages}
+        setPage={(n) => ctx.setPage(cle, n)}
+      />
       {pages > 1 && (
         <>
           <Sprite
@@ -131,7 +153,15 @@ function Grille({
  * et le nom des écrans `color_preset_list_10x4` / `_12x5` / `_13x5`). Les pastilles n'ont pas de
  * teinte : leur valeur RVB n'est dans aucun fichier lu à ce jour.
  */
-function Couleur({ ctx, cat, cle }: { ctx: Contexte; cat: Categorie; cle: string }) {
+function Couleur({
+  ctx,
+  cat,
+  cle,
+}: {
+  ctx: Contexte;
+  cat: Categorie;
+  cle: string;
+}) {
   const g = cat.grillePalette;
   const h = ctx.valeurs[`${cle}.h`] ?? 0;
   const s = ctx.valeurs[`${cle}.s`] ?? 0;
@@ -140,8 +170,15 @@ function Couleur({ ctx, cat, cle }: { ctx: Contexte; cat: Categorie; cle: string
   return (
     <>
       <span className="mb-[1%] mt-[1%] flex shrink-0 items-center justify-center gap-[6%]">
-        <Sprite cdn={ctx.cdn} src={`${A01}/avatar01_10/edit_win_icon04.png`} className="h-[2.4vw] w-auto" />
-        <span className="size-[2.4vw] rounded-[0.2vw] border border-[#C9D6E2]" style={{ background: teinte }} />
+        <Sprite
+          cdn={ctx.cdn}
+          src={`${A01}/avatar01_10/edit_win_icon04.png`}
+          className="h-[2.4vw] w-auto"
+        />
+        <span
+          className="size-[2.4vw] rounded-[0.2vw] border border-[#C9D6E2]"
+          style={{ background: teinte }}
+        />
       </span>
       <Titre cdn={ctx.cdn} t={ctx.txt(H.prereglageCouleur)} />
       {g && (
@@ -153,7 +190,9 @@ function Couleur({ ctx, cat, cle }: { ctx: Contexte; cat: Categorie; cle: string
           />
           <div
             className="relative grid gap-[1.5%] p-[1.5%]"
-            style={{ gridTemplateColumns: `repeat(${g.colonnes}, minmax(0, 1fr))` }}
+            style={{
+              gridTemplateColumns: `repeat(${g.colonnes}, minmax(0, 1fr))`,
+            }}
           >
             {cat.couleurs.map((c, i) => (
               <button
@@ -188,7 +227,7 @@ function Couleur({ ctx, cat, cle }: { ctx: Contexte; cat: Categorie; cle: string
           bouts={BOUTS.couleur}
           valeur={h}
           max={COULEUR_MAX}
-          onChange={n => ctx.setValeur(`${cle}.h`, n)}
+          onChange={(n) => ctx.setValeur(`${cle}.h`, n)}
           degrade
         />
         <Barre
@@ -196,7 +235,7 @@ function Couleur({ ctx, cat, cle }: { ctx: Contexte; cat: Categorie; cle: string
           bouts={BOUTS.couleur}
           valeur={s}
           max={COULEUR_MAX}
-          onChange={n => ctx.setValeur(`${cle}.s`, n)}
+          onChange={(n) => ctx.setValeur(`${cle}.s`, n)}
           pisteFond={`linear-gradient(90deg, #9AA6B2, hsl(${(h / (COULEUR_MAX + 1)) * 360} 100% 50%))`}
         />
         <Barre
@@ -204,7 +243,7 @@ function Couleur({ ctx, cat, cle }: { ctx: Contexte; cat: Categorie; cle: string
           bouts={BOUTS.couleur}
           valeur={v}
           max={COULEUR_MAX}
-          onChange={n => ctx.setValeur(`${cle}.v`, n)}
+          onChange={(n) => ctx.setValeur(`${cle}.v`, n)}
           pisteFond="linear-gradient(90deg, #000, #fff)"
         />
       </div>
@@ -213,15 +252,23 @@ function Couleur({ ctx, cat, cle }: { ctx: Contexte; cat: Categorie; cle: string
 }
 
 /** Une section de rubrique : grille, curseurs, palette ou lignes de sélecteur. */
-function SectionRendue({ ctx, s, cle }: { ctx: Contexte; s: Section; cle: string }) {
+function SectionRendue({
+  ctx,
+  s,
+  cle,
+}: {
+  ctx: Contexte;
+  s: Section;
+  cle: string;
+}) {
   const cat = categorie(ctx.catalogue, s.categorie ?? s.couleurDe);
 
   if (s.lignes) {
     return (
       <>
-        {s.lignes.map(l => {
+        {s.lignes.map((l) => {
           const c = categorie(ctx.catalogue, l.categorie);
-          const choisi = c?.parts.find(p => p.id === ctx.choix[l.categorie]);
+          const choisi = c?.parts.find((p) => p.id === ctx.choix[l.categorie]);
           const ouverte = ctx.ligneOuverte === l.hash;
           return (
             <div key={l.hash} className="shrink-0">
@@ -235,9 +282,22 @@ function SectionRendue({ ctx, s, cle }: { ctx: Contexte; s: Section; cle: string
                 onClick={() => ctx.setLigneOuverte(ouverte ? null : l.hash)}
               />
               {l.couleurDe !== undefined && (
-                <Ligne cdn={ctx.cdn} icone={`${A01}/avatar01_21/icon_item_color01.png`} choisie={false} teinte={null} />
+                <Ligne
+                  cdn={ctx.cdn}
+                  icone={`${A01}/avatar01_21/icon_item_color01.png`}
+                  choisie={false}
+                  teinte={null}
+                />
               )}
-              {ouverte && c && <Grille ctx={ctx} cle={`${cle}.${l.hash}`} cat={c} colonnes={6} lignes={2} />}
+              {ouverte && c && (
+                <Grille
+                  ctx={ctx}
+                  cle={`${cle}.${l.hash}`}
+                  cat={c}
+                  colonnes={6}
+                  lignes={2}
+                />
+              )}
             </div>
           );
         })}
@@ -256,7 +316,13 @@ function SectionRendue({ ctx, s, cle }: { ctx: Contexte; s: Section; cle: string
 
   return (
     <>
-      {s.hash && <Titre cdn={ctx.cdn} t={ctx.txt(s.hash)} gaiji={ctx.lib(s.hash)?.gaiji} />}
+      {s.hash && (
+        <Titre
+          cdn={ctx.cdn}
+          t={ctx.txt(s.hash)}
+          gaiji={ctx.lib(s.hash)?.gaiji}
+        />
+      )}
       {s.grille && cat && (
         <Grille
           ctx={ctx}
@@ -275,7 +341,7 @@ function SectionRendue({ ctx, s, cle }: { ctx: Contexte; s: Section; cle: string
               bouts={BOUTS[r.bouts]}
               valeur={ctx.valeurs[`${cle}.r${i}`] ?? 7}
               max={CURSEUR_MAX}
-              onChange={n => ctx.setValeur(`${cle}.r${i}`, n)}
+              onChange={(n) => ctx.setValeur(`${cle}.r${i}`, n)}
             />
           ))}
         </div>
@@ -286,7 +352,8 @@ function SectionRendue({ ctx, s, cle }: { ctx: Contexte; s: Section; cle: string
 
 /** Onglet « Visage et coupe de cheveux » : le panneau de la rubrique ouverte. */
 export function PanVisage({ ctx }: { ctx: Contexte }) {
-  const r = RUBRIQUES_VISAGE[Math.min(ctx.rubrique, RUBRIQUES_VISAGE.length - 1)];
+  const r =
+    RUBRIQUES_VISAGE[Math.min(ctx.rubrique, RUBRIQUES_VISAGE.length - 1)];
   if (!r) return null;
   return (
     <>
@@ -310,10 +377,14 @@ export function PanStyle({ ctx }: { ctx: Contexte }) {
     <>
       <Titre cdn={ctx.cdn} t={ctx.txt(H.ongletStyle)} />
       <span className="mb-[3%] flex shrink-0 justify-center">
-        <Txt t={ctx.txt(hashes[ctx.genre] ?? H.masculin)} cdn={ctx.cdn} h="1.35vw" />
+        <Txt
+          t={ctx.txt(hashes[ctx.genre] ?? H.masculin)}
+          cdn={ctx.cdn}
+          h="1.35vw"
+        />
       </span>
       <div className="grid shrink-0 grid-cols-2 gap-[8%] px-[8%]">
-        {[0, 1].map(g => (
+        {[0, 1].map((g) => (
           <button
             key={g}
             type="button"
@@ -350,7 +421,12 @@ export function PanStyle({ ctx }: { ctx: Contexte }) {
                 className="absolute right-[2%] top-[-8%] w-[24%]"
               />
             )}
-            {ctx.genre === g && <Curseur cdn={ctx.cdn} className="absolute left-[-14%] top-[40%] h-[22%]" />}
+            {ctx.genre === g && (
+              <Curseur
+                cdn={ctx.cdn}
+                className="absolute left-[-14%] top-[40%] h-[22%]"
+              />
+            )}
           </button>
         ))}
       </div>
@@ -370,10 +446,13 @@ export function PanPhysionomie({ ctx }: { ctx: Contexte }) {
   // genre qui les départage. Les proposer toutes deux offrait un cran qui ne changeait rien au
   // modèle. On masque donc celle que le genre courant rend redondante.
   const redondante = ctx.genre === 1 ? 0 : 1;
-  const visibles = MORPHOLOGIES.map((_, i) => i).filter(i => i !== redondante);
+  const visibles = MORPHOLOGIES.map((_, i) => i).filter(
+    (i) => i !== redondante,
+  );
   const n = visibles.length;
   const rangVisible = Math.max(0, visibles.indexOf(ctx.morphologie));
-  const allerA = (d: number) => ctx.setMorphologie(visibles[(rangVisible + d + n) % n] ?? 0);
+  const allerA = (d: number) =>
+    ctx.setMorphologie(visibles[(rangVisible + d + n) % n] ?? 0);
   return (
     <>
       <Titre cdn={ctx.cdn} t={ctx.txt(H.ongletPhysionomie)} />
@@ -384,9 +463,13 @@ export function PanPhysionomie({ ctx }: { ctx: Contexte }) {
           onClick={() => allerA(-1)}
           className="absolute left-[0%]"
         >
-          <Sprite cdn={ctx.cdn} src={`${A01}/avatar01_11/arrow01_l.png`} className="h-[1.7vw] w-auto" />
+          <Sprite
+            cdn={ctx.cdn}
+            src={`${A01}/avatar01_11/arrow01_l.png`}
+            className="h-[1.7vw] w-auto"
+          />
         </button>
-        {[-1, 0, 1].map(d => {
+        {[-1, 0, 1].map((d) => {
           const i = visibles[(rangVisible + d + n) % n] ?? 0;
           // La série d'icônes commence à **01** : `icon_body_type00` n'existe dans aucun
           // atlas commun. Le nom se trouve bien dans `15_icon_common2/fr`, mais il y
@@ -420,7 +503,11 @@ export function PanPhysionomie({ ctx }: { ctx: Contexte }) {
           onClick={() => allerA(1)}
           className="absolute right-[0%]"
         >
-          <Sprite cdn={ctx.cdn} src={`${A01}/avatar01_11/arrow01_r.png`} className="h-[1.7vw] w-auto" />
+          <Sprite
+            cdn={ctx.cdn}
+            src={`${A01}/avatar01_11/arrow01_r.png`}
+            className="h-[1.7vw] w-auto"
+          />
         </button>
       </div>
       <Titre cdn={ctx.cdn} t={ctx.txt(H.taille)} />
@@ -429,7 +516,7 @@ export function PanPhysionomie({ ctx }: { ctx: Contexte }) {
         bouts={BOUTS.moinsPlus}
         valeur={ctx.valeurs["taille"] ?? 7}
         max={CURSEUR_MAX}
-        onChange={v => ctx.setValeur("taille", v)}
+        onChange={(v) => ctx.setValeur("taille", v)}
       />
       {ctx.genre === 1 && (
         <>
@@ -439,7 +526,7 @@ export function PanPhysionomie({ ctx }: { ctx: Contexte }) {
             bouts={BOUTS.moinsPlus}
             valeur={ctx.valeurs["poitrine"] ?? 7}
             max={CURSEUR_MAX}
-            onChange={v => ctx.setValeur("poitrine", v)}
+            onChange={(v) => ctx.setValeur("poitrine", v)}
           />
         </>
       )}
@@ -483,7 +570,9 @@ export function PanStatsBase({ ctx }: { ctx: Contexte }) {
             <Sprite
               cdn={ctx.cdn}
               src={
-                element === i ? `${A01}/avatar01_41/cmd_type_list01_ol.png` : `${A01}/avatar01_41/cmd_type_list01.png`
+                element === i
+                  ? `${A01}/avatar01_41/cmd_type_list01_ol.png`
+                  : `${A01}/avatar01_41/cmd_type_list01.png`
               }
               className="absolute inset-0 size-full"
             />
@@ -494,7 +583,12 @@ export function PanStatsBase({ ctx }: { ctx: Contexte }) {
             />
             {element === i && (
               <>
-                <Txt t={ctx.txt(h)} cdn={ctx.cdn} h="0.95vw" className="relative mb-[6%]" />
+                <Txt
+                  t={ctx.txt(h)}
+                  cdn={ctx.cdn}
+                  h="0.95vw"
+                  className="relative mb-[6%]"
+                />
                 <Sprite
                   cdn={ctx.cdn}
                   src={`${A01}/avatar01_17/edit_check01.png`}
@@ -521,7 +615,9 @@ export function PanStatsBase({ ctx }: { ctx: Contexte }) {
             <Sprite
               cdn={ctx.cdn}
               src={
-                build === i ? `${A01}/avatar01_26/category_btn_on_l.png` : `${A01}/avatar01_26/category_btn_off_l.png`
+                build === i
+                  ? `${A01}/avatar01_26/category_btn_on_l.png`
+                  : `${A01}/avatar01_26/category_btn_off_l.png`
               }
               className="absolute inset-0 size-full"
             />
@@ -557,14 +653,31 @@ export function CentreStats({ ctx }: { ctx: Contexte }) {
     <div className="flex size-full flex-col gap-[3%]">
       {/* Bandeau d'élément */}
       <div className="relative flex h-[9%] shrink-0 items-center gap-[4%] px-[4%]">
-        <Sprite cdn={ctx.cdn} src={`${A01}/avatar01_05/param_plate01.png`} className="absolute inset-0 size-full" />
-        <Sprite cdn={ctx.cdn} src={`${ICN}/icon_cmd_on_type0${element + 1}.png`} className="relative h-[70%] w-auto" />
-        <Txt t={ctx.txt(ELEMENTS[element] ?? "")} cdn={ctx.cdn} h="46%" className="relative" />
+        <Sprite
+          cdn={ctx.cdn}
+          src={`${A01}/avatar01_05/param_plate01.png`}
+          className="absolute inset-0 size-full"
+        />
+        <Sprite
+          cdn={ctx.cdn}
+          src={`${ICN}/icon_cmd_on_type0${element + 1}.png`}
+          className="relative h-[70%] w-auto"
+        />
+        <Txt
+          t={ctx.txt(ELEMENTS[element] ?? "")}
+          cdn={ctx.cdn}
+          h="46%"
+          className="relative"
+        />
       </div>
 
       {/* Radar : les sept axes nommés, valeurs inconnues */}
       <div className="relative grow">
-        <Sprite cdn={ctx.cdn} src={`${A01}/avatar01_10/status_frame01.png`} className="absolute inset-0 size-full" />
+        <Sprite
+          cdn={ctx.cdn}
+          src={`${A01}/avatar01_10/status_frame01.png`}
+          className="absolute inset-0 size-full"
+        />
         <div className="relative size-full">
           {axes.map((a, i) => {
             const angle = (i / axes.length) * 2 * Math.PI - Math.PI / 2;
@@ -576,14 +689,22 @@ export function CentreStats({ ctx }: { ctx: Contexte }) {
                 className="absolute flex -translate-x-1/2 -translate-y-1/2 flex-col items-center"
                 style={{ left: `${x}%`, top: `${y}%` }}
               >
-                <Sprite cdn={ctx.cdn} src={`${A01}/avatar01_10/status_blank01.png`} className="h-[1.1vw] w-auto" />
+                <Sprite
+                  cdn={ctx.cdn}
+                  src={`${A01}/avatar01_10/status_blank01.png`}
+                  className="h-[1.1vw] w-auto"
+                />
                 <Txt t={a.libelle} cdn={ctx.cdn} couleur={GRIS} h="0.85vw" />
               </span>
             );
           })}
           {/* Le treillis du radar : les axes seuls, sans surface — une surface affirmerait des
 					    valeurs que rien ne fournit. */}
-          <svg viewBox="0 0 100 100" className="absolute inset-0 size-full" aria-hidden>
+          <svg
+            viewBox="0 0 100 100"
+            className="absolute inset-0 size-full"
+            aria-hidden
+          >
             {axes.map((a, i) => {
               const angle = (i / axes.length) * 2 * Math.PI - Math.PI / 2;
               return (
@@ -615,11 +736,25 @@ export function CentreStats({ ctx }: { ctx: Contexte }) {
 
       {/* Techniques à apprendre : les emplacements du jeu, valeurs inconnues */}
       <div className="relative h-[30%] shrink-0 px-[4%] py-[2%]">
-        <Sprite cdn={ctx.cdn} src={`${A01}/avatar01_05/waza_plate01.png`} className="absolute inset-0 size-full" />
+        <Sprite
+          cdn={ctx.cdn}
+          src={`${A01}/avatar01_05/waza_plate01.png`}
+          className="absolute inset-0 size-full"
+        />
         <div className="relative flex size-full flex-col justify-start gap-[4%]">
-          <Txt t={ctx.txt(H.techniquesAApprendre)} cdn={ctx.cdn} couleur={GRIS} h="14%" />
-          {[0, 1, 2].map(i => (
-            <Sprite key={i} cdn={ctx.cdn} src={`${A01}/avatar01_10/status_blank02.png`} className="h-[20%] w-full" />
+          <Txt
+            t={ctx.txt(H.techniquesAApprendre)}
+            cdn={ctx.cdn}
+            couleur={GRIS}
+            h="14%"
+          />
+          {[0, 1, 2].map((i) => (
+            <Sprite
+              key={i}
+              cdn={ctx.cdn}
+              src={`${A01}/avatar01_10/status_blank02.png`}
+              className="h-[20%] w-full"
+            />
           ))}
         </div>
       </div>
@@ -642,11 +777,17 @@ function Positions({ ctx, cle }: { ctx: Contexte; cle: string }) {
           <Sprite
             cdn={ctx.cdn}
             src={
-              choisie === i ? `${A01}/avatar01_30/category_btn_on_m.png` : `${A01}/avatar01_30/category_btn_off_m.png`
+              choisie === i
+                ? `${A01}/avatar01_30/category_btn_on_m.png`
+                : `${A01}/avatar01_30/category_btn_off_m.png`
             }
             className="absolute inset-0 size-full"
           />
-          <Sprite cdn={ctx.cdn} src={`${ICN2}/icon_cmd_position0${n}.png`} className="relative h-[1.5vw] w-auto" />
+          <Sprite
+            cdn={ctx.cdn}
+            src={`${ICN2}/icon_cmd_position0${n}.png`}
+            className="relative h-[1.5vw] w-auto"
+          />
         </button>
       ))}
     </div>
@@ -666,7 +807,9 @@ export function PanPersonnalite({ ctx }: { ctx: Contexte }) {
             <Titre cdn={ctx.cdn} t={ctx.txt(h)} />
             <button
               type="button"
-              onClick={() => ctx.setValeur(`perso${k}`, (i + 1) % Math.max(1, liste.length))}
+              onClick={() =>
+                ctx.setValeur(`perso${k}`, (i + 1) % Math.max(1, liste.length))
+              }
               className="relative flex h-[2.6vw] w-full items-center justify-center"
             >
               <Sprite
@@ -681,7 +824,12 @@ export function PanPersonnalite({ ctx }: { ctx: Contexte }) {
                 h="1vw"
                 className="relative mr-[2%]"
               />
-              <Txt t={p?.libelle ?? ""} cdn={ctx.cdn} h="1.15vw" className="relative" />
+              <Txt
+                t={p?.libelle ?? ""}
+                cdn={ctx.cdn}
+                h="1.15vw"
+                className="relative"
+              />
             </button>
           </div>
         );
@@ -711,18 +859,27 @@ export function PanVoix({
   const banque = useMemo(() => {
     const v = ctx.catalogue.voix ?? [];
     return (
-      v.find(b => b.genre === ctx.genre && b.personnalite === perso && b.ton === ton) ??
-      v.find(b => b.genre === ctx.genre && b.personnalite === perso) ??
+      v.find(
+        (b) =>
+          b.genre === ctx.genre && b.personnalite === perso && b.ton === ton,
+      ) ??
+      v.find((b) => b.genre === ctx.genre && b.personnalite === perso) ??
       v[0]
     );
   }, [ctx.catalogue.voix, ctx.genre, perso, ton]);
 
   const champs = [
-    { hash: H.ongletStyle, texte: ctx.txt([H.masculin, H.feminin][ctx.genre] ?? H.masculin) },
+    {
+      hash: H.ongletStyle,
+      texte: ctx.txt([H.masculin, H.feminin][ctx.genre] ?? H.masculin),
+    },
     {
       hash: H.personnalite,
-      texte: ctx.txt(PERSONNALITES_VOIX[perso % PERSONNALITES_VOIX.length] ?? ""),
-      suivant: () => ctx.setValeur("voixPerso", (perso + 1) % PERSONNALITES_VOIX.length),
+      texte: ctx.txt(
+        PERSONNALITES_VOIX[perso % PERSONNALITES_VOIX.length] ?? "",
+      ),
+      suivant: () =>
+        ctx.setValeur("voixPerso", (perso + 1) % PERSONNALITES_VOIX.length),
     },
     {
       hash: H.type,
@@ -733,7 +890,7 @@ export function PanVoix({
 
   return (
     <>
-      {champs.map(c => (
+      {champs.map((c) => (
         <div key={c.hash} className="shrink-0">
           <Titre cdn={ctx.cdn} t={ctx.txt(c.hash)} />
           <button
@@ -792,7 +949,7 @@ export function PanNom({
   ];
   return (
     <>
-      {liste.map(c => (
+      {liste.map((c) => (
         <div key={c.cle} className="shrink-0">
           <Titre cdn={ctx.cdn} t={ctx.txt(c.hash)} />
           <div className="relative flex h-[2.9vw] w-full items-center">
@@ -803,7 +960,7 @@ export function PanNom({
             />
             <input
               value={champs[c.cle] ?? ""}
-              onChange={e => setChamp(c.cle, e.target.value)}
+              onChange={(e) => setChamp(c.cle, e.target.value)}
               inputMode={c.numerique ? "numeric" : "text"}
               maxLength={c.numerique ? 2 : 16}
               className="relative size-full bg-transparent text-center text-[1.15vw] text-[#047AFF] outline-none"

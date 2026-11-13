@@ -50,7 +50,11 @@ const TTL_PROFIL_MS = 600_000;
 const DELAI_MS = 25_000;
 
 function binaire(): string {
-  return process.env.APHRODY_BIN || Bun.which("aphrody") || join(homedir(), ".local", "bin", "aphrody");
+  return (
+    process.env.APHRODY_BIN ||
+    Bun.which("aphrody") ||
+    join(homedir(), ".local", "bin", "aphrody")
+  );
 }
 
 async function lancer<T>(args: string[]): Promise<T> {
@@ -66,7 +70,10 @@ async function lancer<T>(args: string[]): Promise<T> {
     new Response(proc.stderr).text(),
     proc.exited,
   ]);
-  if (code !== 0) throw new Error(`aphrody x ${args[0]} : ${(erreur || sortie).trim().slice(-200)}`);
+  if (code !== 0)
+    throw new Error(
+      `aphrody x ${args[0]} : ${(erreur || sortie).trim().slice(-200)}`,
+    );
   return JSON.parse(sortie) as T;
 }
 
@@ -81,7 +88,11 @@ interface ProfilBrut {
         is_blue_verified?: boolean;
         profile_bio?: {
           description?: string;
-          entities?: { url?: { urls?: Array<{ display_url?: string; expanded_url?: string }> } };
+          entities?: {
+            url?: {
+              urls?: Array<{ display_url?: string; expanded_url?: string }>;
+            };
+          };
         };
         relationship_counts?: { followers?: number; following?: number };
         tweet_counts?: { tweets?: number };
@@ -92,7 +103,14 @@ interface ProfilBrut {
 
 /** Le profil complet vient de l'opération GraphQL `UserByScreenName` (avatar, bannière, compteurs). */
 async function lireProfilBrut(compte: string): Promise<XProfil> {
-  const brut = await lancer<ProfilBrut>(["graphql", "UserByScreenName", "--var", `screen_name=${compte}`, "--var", "withSafetyModeUserFields=true"]);
+  const brut = await lancer<ProfilBrut>([
+    "graphql",
+    "UserByScreenName",
+    "--var",
+    `screen_name=${compte}`,
+    "--var",
+    "withSafetyModeUserFields=true",
+  ]);
   const r = brut.data?.user?.result;
   if (!r?.rest_id) throw new Error(`profil X introuvable : ${compte}`);
   const lien = r.profile_bio?.entities?.url?.urls?.[0];
@@ -103,7 +121,12 @@ async function lireProfilBrut(compte: string): Promise<XProfil> {
     avatar: r.avatar?.image_url?.replace("_normal", "_400x400"),
     banner: r.banner?.image_url ? `${r.banner.image_url}/1500x500` : undefined,
     description: r.profile_bio?.description,
-    site: lien?.expanded_url ? { affichage: lien.display_url ?? lien.expanded_url, url: lien.expanded_url } : undefined,
+    site: lien?.expanded_url
+      ? {
+          affichage: lien.display_url ?? lien.expanded_url,
+          url: lien.expanded_url,
+        }
+      : undefined,
     followers: r.relationship_counts?.followers,
     following: r.relationship_counts?.following,
     posts: r.tweet_counts?.tweets,
@@ -129,8 +152,10 @@ export function lireProfil(compte: string): Promise<XProfil> {
   if (echec !== undefined && Date.now() - echec < TTL_ECHEC_PROFIL_MS) {
     return Promise.reject(new Error(`profil X indisponible : ${compte}`));
   }
-  return memo(`profil:${compte}`, TTL_PROFIL_MS, () => lireProfilBrut(compte)).then(
-    profil => {
+  return memo(`profil:${compte}`, TTL_PROFIL_MS, () =>
+    lireProfilBrut(compte),
+  ).then(
+    (profil) => {
       echecsProfil.delete(compte);
       return profil;
     },
@@ -158,20 +183,40 @@ function optionCurseur(curseur?: string): string[] {
 }
 
 /** Une page de posts d'un compte (le pseudo doit venir de la liste fermée `COMPTES`). */
-export function lirePostsCompte(compte: string, nombre: number, curseur?: string): Promise<PageXPosts> {
+export function lirePostsCompte(
+  compte: string,
+  nombre: number,
+  curseur?: string,
+): Promise<PageXPosts> {
   const n = Math.min(Math.max(1, nombre), 30);
   return memo(`posts:${compte}:${n}:${curseur ?? ""}`, TTL_MS, () =>
-    lancer<PageXPosts>(["user-tweets", compte, "-n", String(n), ...optionCurseur(curseur)]),
+    lancer<PageXPosts>([
+      "user-tweets",
+      compte,
+      "-n",
+      String(n),
+      ...optionCurseur(curseur),
+    ]),
   );
 }
 
 /** Recherche « Latest » sur X ; la requête est bornée et ne peut pas devenir une option. */
-export function chercher(requete: string, nombre = 20, curseur?: string): Promise<PageXPosts> {
+export function chercher(
+  requete: string,
+  nombre = 20,
+  curseur?: string,
+): Promise<PageXPosts> {
   const q = requete.trim().slice(0, 200);
   if (!q || q.startsWith("-")) return Promise.resolve({ tweets: [] });
   const n = Math.min(Math.max(1, nombre), 40);
   return memo(`q:${q}:${n}:${curseur ?? ""}`, TTL_MS, () =>
-    lancer<PageXPosts>(["search", q, "-n", String(n), ...optionCurseur(curseur)]),
+    lancer<PageXPosts>([
+      "search",
+      q,
+      "-n",
+      String(n),
+      ...optionCurseur(curseur),
+    ]),
   );
 }
 

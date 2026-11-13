@@ -85,7 +85,10 @@ export function buildImageIndex(forceRebuild = false): ImageIndex {
     ];
 
     for (const target of targets) {
-      const files = explorer.scan(target, { recursive: true, extensions: ["webp", "png"] });
+      const files = explorer.scan(target, {
+        recursive: true,
+        extensions: ["webp", "png"],
+      });
       allFiles.push(...files);
     }
   }
@@ -160,7 +163,10 @@ export function buildImageIndex(forceRebuild = false): ImageIndex {
       index.classes.set(baseName, path);
     }
     // 6. Common
-    else if (path.includes("15_icon_common") || path.includes("00_icon_commn")) {
+    else if (
+      path.includes("15_icon_common") ||
+      path.includes("00_icon_commn")
+    ) {
       const baseName = name.replace(/\.(webp|png)$/, "");
       index.common.set(baseName, path);
     }
@@ -174,9 +180,12 @@ export function buildImageIndex(forceRebuild = false): ImageIndex {
 /**
  * Rewrite official Zukan/CloudFront URLs to our internal CDN
  */
-export function rewriteZukanUrl(url: string | undefined | null): string | undefined {
+export function rewriteZukanUrl(
+  url: string | undefined | null,
+): string | undefined {
   if (!url) return undefined;
-  if (!url.includes("cloudfront.net") && !url.includes("zukan.inazuma.jp")) return url;
+  if (!url.includes("cloudfront.net") && !url.includes("zukan.inazuma.jp"))
+    return url;
 
   // Extract path after domain
   let path = url.replace(/https?:\/\/[^/]+/, "");
@@ -196,7 +205,10 @@ export function rewriteZukanUrl(url: string | undefined | null): string | undefi
 // Image API Factory
 // ============================================================================
 
-export function createImageAPI(options?: { baseUrl?: string; useRawPaths?: boolean }) {
+export function createImageAPI(options?: {
+  baseUrl?: string;
+  useRawPaths?: boolean;
+}) {
   const baseUrl = options?.baseUrl || "";
   const _useRawPaths = options?.useRawPaths || false;
 
@@ -206,8 +218,13 @@ export function createImageAPI(options?: { baseUrl?: string; useRawPaths?: boole
     if (relativePath.startsWith("http")) return relativePath;
 
     // Ensure path is consistent with Supabase Storage public URL
-    const cleanPath = relativePath.startsWith("/") ? relativePath.slice(1) : relativePath;
-    return `${baseUrl}/storage/v1/object/public/menu/${cleanPath}`.replace(/([^:]\/)\/+/g, "$1");
+    const cleanPath = relativePath.startsWith("/")
+      ? relativePath.slice(1)
+      : relativePath;
+    return `${baseUrl}/storage/v1/object/public/menu/${cleanPath}`.replace(
+      /([^:]\/)\/+/g,
+      "$1",
+    );
   };
 
   return {
@@ -237,38 +254,60 @@ export function createImageAPI(options?: { baseUrl?: string; useRawPaths?: boole
       // Fallback: Deterministic path
       return `200_icon/10_icon_chr/face/${charaIdStr}_l_${charaIdStr}_1_l00.webp`;
     },
-    faceUrl: (charaIdStr: string) => formatUrl(buildImageIndex().faces.get(charaIdStr)),
+    faceUrl: (charaIdStr: string) =>
+      formatUrl(buildImageIndex().faces.get(charaIdStr)),
 
     uniform: (charaIdStr: string) =>
-      buildImageIndex().uniforms.get(charaIdStr) || `200_icon/10_icon_chr/uniform/${charaIdStr}_0.webp`,
+      buildImageIndex().uniforms.get(charaIdStr) ||
+      `200_icon/10_icon_chr/uniform/${charaIdStr}_0.webp`,
     uniformUrl: (charaIdStr: string) =>
-      formatUrl(buildImageIndex().uniforms.get(charaIdStr) || `200_icon/10_icon_chr/uniform/${charaIdStr}_0.webp`),
+      formatUrl(
+        buildImageIndex().uniforms.get(charaIdStr) ||
+          `200_icon/10_icon_chr/uniform/${charaIdStr}_0.webp`,
+      ),
 
     // === Skills ===
     skill: (skillIdStr: string) =>
-      buildImageIndex().skills.get(skillIdStr) || `220_img/telop_waza/fr/${skillIdStr}_0.webp`,
+      buildImageIndex().skills.get(skillIdStr) ||
+      `220_img/telop_waza/fr/${skillIdStr}_0.webp`,
     skillUrl: (skillIdStr: string) =>
-      formatUrl(buildImageIndex().skills.get(skillIdStr) || `220_img/telop_waza/fr/${skillIdStr}_0.webp`),
+      formatUrl(
+        buildImageIndex().skills.get(skillIdStr) ||
+          `220_img/telop_waza/fr/${skillIdStr}_0.webp`,
+      ),
 
     // === Auras ===
     aura: (auraIdStr: string) => buildImageIndex().auras.get(auraIdStr),
-    auraUrl: (auraIdStr: string) => formatUrl(buildImageIndex().auras.get(auraIdStr)),
+    auraUrl: (auraIdStr: string) =>
+      formatUrl(buildImageIndex().auras.get(auraIdStr)),
 
     // === Items ===
-    item: (itemIdStr: string) => buildImageIndex().items.get(itemIdStr) || `200_icon/02_icon_item/${itemIdStr}.webp`,
+    item: (itemIdStr: string) =>
+      buildImageIndex().items.get(itemIdStr) ||
+      `200_icon/02_icon_item/${itemIdStr}.webp`,
     itemUrl: (itemIdStr: string) =>
-      formatUrl(buildImageIndex().items.get(itemIdStr) || `200_icon/02_icon_item/${itemIdStr}.webp`),
+      formatUrl(
+        buildImageIndex().items.get(itemIdStr) ||
+          `200_icon/02_icon_item/${itemIdStr}.webp`,
+      ),
 
     // === Emblems ===
-    emblem: (emblemId: string) => buildImageIndex().emblems.get(emblemId) || `200_icon/01_icon_emblem/${emblemId}.webp`,
+    emblem: (emblemId: string) =>
+      buildImageIndex().emblems.get(emblemId) ||
+      `200_icon/01_icon_emblem/${emblemId}.webp`,
     emblemUrl: (emblemId: string) =>
-      formatUrl(buildImageIndex().emblems.get(emblemId) || `200_icon/01_icon_emblem/${emblemId}.webp`),
+      formatUrl(
+        buildImageIndex().emblems.get(emblemId) ||
+          `200_icon/01_icon_emblem/${emblemId}.webp`,
+      ),
 
     // === Classes & Common ===
     class: (classId: string) => buildImageIndex().classes.get(classId),
-    classUrl: (classId: string) => formatUrl(buildImageIndex().classes.get(classId)),
+    classUrl: (classId: string) =>
+      formatUrl(buildImageIndex().classes.get(classId)),
     common: (commonId: string) => buildImageIndex().common.get(commonId),
-    commonUrl: (commonId: string) => formatUrl(buildImageIndex().common.get(commonId)),
+    commonUrl: (commonId: string) =>
+      formatUrl(buildImageIndex().common.get(commonId)),
 
     /** Get full index */
     index: () => buildImageIndex(),

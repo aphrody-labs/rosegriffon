@@ -18,11 +18,17 @@ export class Lua52VM {
     this.environment = this.createDefaultEnvironment(customEnv);
   }
 
-  private createDefaultEnvironment(customEnv: Record<string, any>): Record<string, any> {
+  private createDefaultEnvironment(
+    customEnv: Record<string, any>,
+  ): Record<string, any> {
     const env: Record<string, any> = {
       _VERSION: "Lua 5.2",
       print: (...args: any[]) => {
-        const msg = args.map((a) => (typeof a === "object" && a !== null ? JSON.stringify(a) : String(a))).join("\t");
+        const msg = args
+          .map((a) =>
+            typeof a === "object" && a !== null ? JSON.stringify(a) : String(a),
+          )
+          .join("\t");
         this.outputLogs.push(msg);
       },
       type: (v: any) => {
@@ -54,7 +60,8 @@ export class Lua52VM {
           return [false, err?.message || String(err)];
         }
       },
-      rawlen: (v: any) => (Array.isArray(v) ? v.length : typeof v === "string" ? v.length : 0),
+      rawlen: (v: any) =>
+        Array.isArray(v) ? v.length : typeof v === "string" ? v.length : 0,
       rawget: (t: any, k: any) => t?.[k],
       rawset: (t: any, k: any, v: any) => {
         if (t) t[k] = v;
@@ -77,7 +84,8 @@ export class Lua52VM {
         let i = 1;
         return [
           () => {
-            if (t[i] === undefined && t[i - 1] === undefined) return [null, null];
+            if (t[i] === undefined && t[i - 1] === undefined)
+              return [null, null];
             const val = t[i] !== undefined ? t[i] : t[i - 1];
             const curr = i++;
             return [curr, val];
@@ -148,7 +156,7 @@ export class Lua52VM {
           return t;
         },
         unpack: (t: any, i = 1, j?: number) => {
-          const end = j ?? (t?.n ?? (Array.isArray(t) ? t.length : 0));
+          const end = j ?? t?.n ?? (Array.isArray(t) ? t.length : 0);
           const arr: any[] = [];
           for (let idx = i; idx <= end; idx++) {
             arr.push(t[idx] !== undefined ? t[idx] : t[idx - 1]);
@@ -169,7 +177,7 @@ export class Lua52VM {
         remove: (t: any, pos?: number) => {
           if (!t) return undefined;
           if (Array.isArray(t)) return t.pop();
-          const p = pos ?? (t.n ?? 0);
+          const p = pos ?? t.n ?? 0;
           const v = t[p];
           delete t[p];
           if (t.n) t.n--;
@@ -181,14 +189,23 @@ export class Lua52VM {
         },
       },
       bit32: {
-        band: (...args: number[]) => args.reduce((a, b) => (a & b) >>> 0, 0xffffffff),
+        band: (...args: number[]) =>
+          args.reduce((a, b) => (a & b) >>> 0, 0xffffffff),
         bor: (...args: number[]) => args.reduce((a, b) => (a | b) >>> 0, 0),
         bxor: (...args: number[]) => args.reduce((a, b) => (a ^ b) >>> 0, 0),
         bnot: (a: number) => ~a >>> 0,
-        lshift: (a: number, disp: number) => (disp > 31 || disp < -31 ? 0 : (a << disp) >>> 0),
-        rshift: (a: number, disp: number) => (disp > 31 || disp < -31 ? 0 : (a >>> disp) >>> 0),
-        arshift: (a: number, disp: number) => (disp > 31 || disp < -31 ? (a < 0 ? 0xffffffff : 0) : (a >> disp) >>> 0),
-        btest: (...args: number[]) => (args.reduce((a, b) => (a & b) >>> 0, 0xffffffff)) !== 0,
+        lshift: (a: number, disp: number) =>
+          disp > 31 || disp < -31 ? 0 : (a << disp) >>> 0,
+        rshift: (a: number, disp: number) =>
+          disp > 31 || disp < -31 ? 0 : (a >>> disp) >>> 0,
+        arshift: (a: number, disp: number) =>
+          disp > 31 || disp < -31
+            ? a < 0
+              ? 0xffffffff
+              : 0
+            : (a >> disp) >>> 0,
+        btest: (...args: number[]) =>
+          args.reduce((a, b) => (a & b) >>> 0, 0xffffffff) !== 0,
         lrotate: (x: number, disp: number) => {
           const d = disp & 31;
           return ((x << d) | (x >>> (32 - d))) >>> 0;
@@ -244,8 +261,14 @@ export class Lua52VM {
 
     // 7. Local var declarations & anonymous functions
     code = code.replace(/\bfunction\s*\(([^)]*)\)/g, "function($1) {");
-    code = code.replace(/\blocal\s+function\s+([A-Za-z_][A-Za-z0-9_]*)\s*\(([^)]*)\)/g, "function $1($2) {");
-    code = code.replace(/\bfunction\s+([A-Za-z_][A-Za-z0-9_]*(?:[.:][A-Za-z_][A-Za-z0-9_]*)?)\s*\(([^)]*)\)/g, "function $1($2) {");
+    code = code.replace(
+      /\blocal\s+function\s+([A-Za-z_][A-Za-z0-9_]*)\s*\(([^)]*)\)/g,
+      "function $1($2) {",
+    );
+    code = code.replace(
+      /\bfunction\s+([A-Za-z_][A-Za-z0-9_]*(?:[.:][A-Za-z_][A-Za-z0-9_]*)?)\s*\(([^)]*)\)/g,
+      "function $1($2) {",
+    );
     code = code.replace(/\blocal\s+/g, "let ");
 
     return code;
@@ -259,7 +282,10 @@ export class Lua52VM {
       if (trimmed.startsWith("return ")) {
         const expr = trimmed.slice(7).trim();
         const transpiledExpr = this.transpileLuaToJs(expr);
-        const fn = new Function("_ENV", `with(_ENV) { return (${transpiledExpr}); }`);
+        const fn = new Function(
+          "_ENV",
+          `with(_ENV) { return (${transpiledExpr}); }`,
+        );
         const val = fn(this.environment);
         return {
           success: true,

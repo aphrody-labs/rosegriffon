@@ -44,7 +44,10 @@ interface Props {
   peutReinitialiser: boolean;
 }
 
-type EtatSection = { statut: "repos" | "envoi" | "ok" | "erreur"; message: string | null };
+type EtatSection = {
+  statut: "repos" | "envoi" | "ok" | "erreur";
+  message: string | null;
+};
 
 const REPOS: EtatSection = { statut: "repos", message: null };
 
@@ -61,7 +64,14 @@ const REPOS: EtatSection = { statut: "repos", message: null };
  * Chaque section envoie donc un `PATCH` qui ne porte QUE sa propre section, et
  * le serveur fusionne. On ne peut pas écraser ce qu'on n'a pas touché.
  */
-export function FormulaireReglages({ guildId, initiaux, salons, roles, erreurAnnuaire, peutReinitialiser }: Props) {
+export function FormulaireReglages({
+  guildId,
+  initiaux,
+  salons,
+  roles,
+  erreurAnnuaire,
+  peutReinitialiser,
+}: Props) {
   const [reglages, setReglages] = useState<ReglagesCommunaute>(initiaux);
   const [etats, setEtats] = useState<Record<string, EtatSection>>({});
   const [reinitialisation, demarrerReinitialisation] = useTransition();
@@ -69,24 +79,39 @@ export function FormulaireReglages({ guildId, initiaux, salons, roles, erreurAnn
   const manques = useMemo(() => manquesParSection(reglages), [reglages]);
 
   const optionsSalons = useMemo(
-    () => salons.filter(s => !s.categorie).map(s => ({ label: `#${s.nom}`, value: s.id })),
+    () =>
+      salons
+        .filter((s) => !s.categorie)
+        .map((s) => ({ label: `#${s.nom}`, value: s.id })),
     [salons],
   );
   const optionsCategories = useMemo(
-    () => salons.filter(s => s.categorie).map(s => ({ label: s.nom, value: s.id })),
+    () =>
+      salons
+        .filter((s) => s.categorie)
+        .map((s) => ({ label: s.nom, value: s.id })),
     [salons],
   );
-  const optionsRoles = useMemo(() => roles.map(r => ({ label: `@${r.nom}`, value: r.id })), [roles]);
+  const optionsRoles = useMemo(
+    () => roles.map((r) => ({ label: `@${r.nom}`, value: r.id })),
+    [roles],
+  );
 
   const enregistrer = useCallback(
     async (section: SectionReglages, patch: ModificationReglages) => {
-      setEtats(etat => ({ ...etat, [section]: { statut: "envoi", message: null } }));
+      setEtats((etat) => ({
+        ...etat,
+        [section]: { statut: "envoi", message: null },
+      }));
       try {
-        const reponse = await fetch(`/api/admin/bot/reglages?guild=${encodeURIComponent(guildId)}`, {
-          method: "PATCH",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify(patch),
-        });
+        const reponse = await fetch(
+          `/api/admin/bot/reglages?guild=${encodeURIComponent(guildId)}`,
+          {
+            method: "PATCH",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify(patch),
+          },
+        );
         const charge = (await reponse.json()) as {
           reglages?: ReglagesCommunaute;
           error?: string;
@@ -94,14 +119,16 @@ export function FormulaireReglages({ guildId, initiaux, salons, roles, erreurAnn
           profilsPrevenus?: string[];
         };
         if (!reponse.ok) {
-          const detail = charge.details?.map(d => `${d.champ} : ${d.message}`).join(" · ");
+          const detail = charge.details
+            ?.map((d) => `${d.champ} : ${d.message}`)
+            .join(" · ");
           throw new Error(detail || charge.error || `HTTP ${reponse.status}`);
         }
         if (charge.reglages) {
           setReglages(charge.reglages);
         }
         const prevenus = charge.profilsPrevenus ?? [];
-        setEtats(etat => ({
+        setEtats((etat) => ({
           ...etat,
           [section]: {
             statut: "ok",
@@ -114,7 +141,7 @@ export function FormulaireReglages({ guildId, initiaux, salons, roles, erreurAnn
           },
         }));
       } catch (erreur) {
-        setEtats(etat => ({
+        setEtats((etat) => ({
           ...etat,
           [section]: {
             statut: "erreur",
@@ -128,11 +155,16 @@ export function FormulaireReglages({ guildId, initiaux, salons, roles, erreurAnn
 
   const reinitialiser = useCallback(() => {
     demarrerReinitialisation(async () => {
-      const reponse = await fetch(`/api/admin/bot/reglages?guild=${encodeURIComponent(guildId)}`, {
-        method: "DELETE",
-      });
+      const reponse = await fetch(
+        `/api/admin/bot/reglages?guild=${encodeURIComponent(guildId)}`,
+        {
+          method: "DELETE",
+        },
+      );
       if (reponse.ok) {
-        const charge = (await reponse.json()) as { reglages: ReglagesCommunaute };
+        const charge = (await reponse.json()) as {
+          reglages: ReglagesCommunaute;
+        };
         setReglages(charge.reglages);
         setEtats({});
       }
@@ -149,9 +181,10 @@ export function FormulaireReglages({ guildId, initiaux, salons, roles, erreurAnn
               Annuaire indisponible
             </CardTitle>
             <CardDescription>
-              Aucun bot n&apos;a pu fournir la liste des salons et des rôles ({erreurAnnuaire}). Les sélecteurs sont
-              vides : démarre un des deux services plutôt que de saisir des identifiants à la main — un flocon de
-              dix-huit chiffres ne se relit pas.
+              Aucun bot n&apos;a pu fournir la liste des salons et des rôles (
+              {erreurAnnuaire}). Les sélecteurs sont vides : démarre un des deux
+              services plutôt que de saisir des identifiants à la main — un
+              flocon de dix-huit chiffres ne se relit pas.
             </CardDescription>
           </CardHeader>
         </Card>
@@ -182,7 +215,9 @@ export function FormulaireReglages({ guildId, initiaux, salons, roles, erreurAnn
           libelle="Système de niveaux actif"
           aide="Coupé, aucun message ne rapporte d'expérience."
           valeur={reglages.niveaux.actif}
-          onChange={actif => setReglages(r => ({ ...r, niveaux: { ...r.niveaux, actif } }))}
+          onChange={(actif) =>
+            setReglages((r) => ({ ...r, niveaux: { ...r.niveaux, actif } }))
+          }
         />
 
         <div className="grid gap-4 sm:grid-cols-2">
@@ -195,17 +230,18 @@ export function FormulaireReglages({ guildId, initiaux, salons, roles, erreurAnn
               id="niveaux-annonce"
               className="w-full"
               value={reglages.niveaux.annonce}
-              onChange={evenement =>
-                setReglages(r => ({
+              onChange={(evenement) =>
+                setReglages((r) => ({
                   ...r,
                   niveaux: {
                     ...r.niveaux,
-                    annonce: evenement.target.value as (typeof LIEUX_ANNONCE)[number],
+                    annonce: evenement.target
+                      .value as (typeof LIEUX_ANNONCE)[number],
                   },
                 }))
               }
             >
-              {LIEUX_ANNONCE.map(lieu => (
+              {LIEUX_ANNONCE.map((lieu) => (
                 <NativeSelectOption key={lieu} value={lieu}>
                   {LIBELLES_LIEU_ANNONCE[lieu]}
                 </NativeSelectOption>
@@ -219,7 +255,12 @@ export function FormulaireReglages({ guildId, initiaux, salons, roles, erreurAnn
                 id="niveaux-salon"
                 options={optionsSalons}
                 valeur={reglages.niveaux.salonAnnonce}
-                onChange={salonAnnonce => setReglages(r => ({ ...r, niveaux: { ...r.niveaux, salonAnnonce } }))}
+                onChange={(salonAnnonce) =>
+                  setReglages((r) => ({
+                    ...r,
+                    niveaux: { ...r.niveaux, salonAnnonce },
+                  }))
+                }
               />
             </Champ>
           )}
@@ -235,8 +276,8 @@ export function FormulaireReglages({ guildId, initiaux, salons, roles, erreurAnn
               min={1}
               max={100}
               value={reglages.niveaux.palierAnnonce}
-              onChange={evenement =>
-                setReglages(r => ({
+              onChange={(evenement) =>
+                setReglages((r) => ({
                   ...r,
                   niveaux: {
                     ...r.niveaux,
@@ -253,7 +294,12 @@ export function FormulaireReglages({ guildId, initiaux, salons, roles, erreurAnn
           libelle="Annoncer aussi les changements de rang"
           aide="Normal → Expérimenté → Héros → BASARA : trois fois dans une vie de membre."
           valeur={reglages.niveaux.annoncerRang}
-          onChange={annoncerRang => setReglages(r => ({ ...r, niveaux: { ...r.niveaux, annoncerRang } }))}
+          onChange={(annoncerRang) =>
+            setReglages((r) => ({
+              ...r,
+              niveaux: { ...r.niveaux, annoncerRang },
+            }))
+          }
         />
 
         <div className="grid gap-4 sm:grid-cols-3">
@@ -264,12 +310,15 @@ export function FormulaireReglages({ guildId, initiaux, salons, roles, erreurAnn
               min={0}
               max={1000}
               value={reglages.niveaux.gain.minimum}
-              onChange={evenement =>
-                setReglages(r => ({
+              onChange={(evenement) =>
+                setReglages((r) => ({
                   ...r,
                   niveaux: {
                     ...r.niveaux,
-                    gain: { ...r.niveaux.gain, minimum: Number(evenement.target.value) || 0 },
+                    gain: {
+                      ...r.niveaux.gain,
+                      minimum: Number(evenement.target.value) || 0,
+                    },
                   },
                 }))
               }
@@ -282,12 +331,15 @@ export function FormulaireReglages({ guildId, initiaux, salons, roles, erreurAnn
               min={0}
               max={1000}
               value={reglages.niveaux.gain.maximum}
-              onChange={evenement =>
-                setReglages(r => ({
+              onChange={(evenement) =>
+                setReglages((r) => ({
                   ...r,
                   niveaux: {
                     ...r.niveaux,
-                    gain: { ...r.niveaux.gain, maximum: Number(evenement.target.value) || 0 },
+                    gain: {
+                      ...r.niveaux.gain,
+                      maximum: Number(evenement.target.value) || 0,
+                    },
                   },
                 }))
               }
@@ -304,8 +356,8 @@ export function FormulaireReglages({ guildId, initiaux, salons, roles, erreurAnn
               min={0}
               max={3600}
               value={reglages.niveaux.gain.delaiSecondes}
-              onChange={evenement =>
-                setReglages(r => ({
+              onChange={(evenement) =>
+                setReglages((r) => ({
                   ...r,
                   niveaux: {
                     ...r.niveaux,
@@ -328,16 +380,29 @@ export function FormulaireReglages({ guildId, initiaux, salons, roles, erreurAnn
           <MultiSelect
             options={optionsSalons}
             selected={reglages.niveaux.salonsExclus}
-            onChange={salonsExclus => setReglages(r => ({ ...r, niveaux: { ...r.niveaux, salonsExclus } }))}
+            onChange={(salonsExclus) =>
+              setReglages((r) => ({
+                ...r,
+                niveaux: { ...r.niveaux, salonsExclus },
+              }))
+            }
             placeholder="Aucun salon exclu"
           />
         </Champ>
 
-        <Champ id="niveaux-roles-exclus" libelle="Rôles qui ne gagnent pas d'expérience">
+        <Champ
+          id="niveaux-roles-exclus"
+          libelle="Rôles qui ne gagnent pas d'expérience"
+        >
           <MultiSelect
             options={optionsRoles}
             selected={reglages.niveaux.rolesExclus}
-            onChange={rolesExclus => setReglages(r => ({ ...r, niveaux: { ...r.niveaux, rolesExclus } }))}
+            onChange={(rolesExclus) =>
+              setReglages((r) => ({
+                ...r,
+                niveaux: { ...r.niveaux, rolesExclus },
+              }))
+            }
             placeholder="Aucun rôle exclu"
           />
         </Champ>
@@ -366,7 +431,9 @@ export function FormulaireReglages({ guildId, initiaux, salons, roles, erreurAnn
           id="tickets-actif"
           libelle="Tickets d'assistance actifs"
           valeur={reglages.tickets.actif}
-          onChange={actif => setReglages(r => ({ ...r, tickets: { ...r.tickets, actif } }))}
+          onChange={(actif) =>
+            setReglages((r) => ({ ...r, tickets: { ...r.tickets, actif } }))
+          }
         />
 
         <div className="grid gap-4 sm:grid-cols-2">
@@ -379,15 +446,20 @@ export function FormulaireReglages({ guildId, initiaux, salons, roles, erreurAnn
               id="tickets-mode"
               className="w-full"
               value={reglages.tickets.mode}
-              onChange={evenement =>
-                setReglages(r => ({
+              onChange={(evenement) =>
+                setReglages((r) => ({
                   ...r,
-                  tickets: { ...r.tickets, mode: evenement.target.value as "fil" | "salon" },
+                  tickets: {
+                    ...r.tickets,
+                    mode: evenement.target.value as "fil" | "salon",
+                  },
                 }))
               }
             >
               <NativeSelectOption value="fil">Fil privé</NativeSelectOption>
-              <NativeSelectOption value="salon">Salon dans une catégorie</NativeSelectOption>
+              <NativeSelectOption value="salon">
+                Salon dans une catégorie
+              </NativeSelectOption>
             </NativeSelect>
           </Champ>
 
@@ -396,16 +468,29 @@ export function FormulaireReglages({ guildId, initiaux, salons, roles, erreurAnn
               id="tickets-panneau"
               options={optionsSalons}
               valeur={reglages.tickets.salonPanneau}
-              onChange={salonPanneau => setReglages(r => ({ ...r, tickets: { ...r.tickets, salonPanneau } }))}
+              onChange={(salonPanneau) =>
+                setReglages((r) => ({
+                  ...r,
+                  tickets: { ...r.tickets, salonPanneau },
+                }))
+              }
             />
           </Champ>
 
-          <Champ id="tickets-historique" libelle="Salon d'historique des fermetures">
+          <Champ
+            id="tickets-historique"
+            libelle="Salon d'historique des fermetures"
+          >
             <SelecteurSalon
               id="tickets-historique"
               options={optionsSalons}
               valeur={reglages.tickets.salonHistorique}
-              onChange={salonHistorique => setReglages(r => ({ ...r, tickets: { ...r.tickets, salonHistorique } }))}
+              onChange={(salonHistorique) =>
+                setReglages((r) => ({
+                  ...r,
+                  tickets: { ...r.tickets, salonHistorique },
+                }))
+              }
             />
           </Champ>
 
@@ -415,17 +500,31 @@ export function FormulaireReglages({ guildId, initiaux, salons, roles, erreurAnn
                 id="tickets-categorie"
                 options={optionsCategories}
                 valeur={reglages.tickets.categorieSupport}
-                onChange={categorieSupport => setReglages(r => ({ ...r, tickets: { ...r.tickets, categorieSupport } }))}
+                onChange={(categorieSupport) =>
+                  setReglages((r) => ({
+                    ...r,
+                    tickets: { ...r.tickets, categorieSupport },
+                  }))
+                }
               />
             </Champ>
           )}
         </div>
 
-        <Champ id="tickets-staff" libelle="Rôles de prise en charge" aide="Ils voient les tickets ordinaires.">
+        <Champ
+          id="tickets-staff"
+          libelle="Rôles de prise en charge"
+          aide="Ils voient les tickets ordinaires."
+        >
           <MultiSelect
             options={optionsRoles}
             selected={reglages.tickets.rolesStaff}
-            onChange={rolesStaff => setReglages(r => ({ ...r, tickets: { ...r.tickets, rolesStaff } }))}
+            onChange={(rolesStaff) =>
+              setReglages((r) => ({
+                ...r,
+                tickets: { ...r.tickets, rolesStaff },
+              }))
+            }
             placeholder="Aucun rôle"
           />
         </Champ>
@@ -438,7 +537,12 @@ export function FormulaireReglages({ guildId, initiaux, salons, roles, erreurAnn
           <MultiSelect
             options={optionsRoles}
             selected={reglages.tickets.rolesDirection}
-            onChange={rolesDirection => setReglages(r => ({ ...r, tickets: { ...r.tickets, rolesDirection } }))}
+            onChange={(rolesDirection) =>
+              setReglages((r) => ({
+                ...r,
+                tickets: { ...r.tickets, rolesDirection },
+              }))
+            }
             placeholder="Aucun rôle"
           />
         </Champ>
@@ -463,7 +567,12 @@ export function FormulaireReglages({ guildId, initiaux, salons, roles, erreurAnn
           libelle="Publier les sanctions dans un salon"
           aide="Coupé, les sanctions restent consignées dans admin_audit_log — elles ne sont simplement plus publiées."
           valeur={reglages.moderation.actif}
-          onChange={actif => setReglages(r => ({ ...r, moderation: { ...r.moderation, actif } }))}
+          onChange={(actif) =>
+            setReglages((r) => ({
+              ...r,
+              moderation: { ...r.moderation, actif },
+            }))
+          }
         />
         <Champ
           id="moderation-salon"
@@ -474,7 +583,12 @@ export function FormulaireReglages({ guildId, initiaux, salons, roles, erreurAnn
             id="moderation-salon"
             options={optionsSalons}
             valeur={reglages.moderation.salonJournal}
-            onChange={salonJournal => setReglages(r => ({ ...r, moderation: { ...r.moderation, salonJournal } }))}
+            onChange={(salonJournal) =>
+              setReglages((r) => ({
+                ...r,
+                moderation: { ...r.moderation, salonJournal },
+              }))
+            }
           />
         </Champ>
       </SectionCarte>
@@ -501,7 +615,9 @@ export function FormulaireReglages({ guildId, initiaux, salons, roles, erreurAnn
           id="accueil-actif"
           libelle="Message de bienvenue actif"
           valeur={reglages.accueil.actif}
-          onChange={actif => setReglages(r => ({ ...r, accueil: { ...r.accueil, actif } }))}
+          onChange={(actif) =>
+            setReglages((r) => ({ ...r, accueil: { ...r.accueil, actif } }))
+          }
         />
 
         <div className="grid gap-4 sm:grid-cols-2">
@@ -510,17 +626,18 @@ export function FormulaireReglages({ guildId, initiaux, salons, roles, erreurAnn
               id="accueil-lieu"
               className="w-full"
               value={reglages.accueil.lieu}
-              onChange={evenement =>
-                setReglages(r => ({
+              onChange={(evenement) =>
+                setReglages((r) => ({
                   ...r,
                   accueil: {
                     ...r.accueil,
-                    lieu: evenement.target.value as (typeof LIEUX_BIENVENUE)[number],
+                    lieu: evenement.target
+                      .value as (typeof LIEUX_BIENVENUE)[number],
                   },
                 }))
               }
             >
-              {LIEUX_BIENVENUE.map(lieu => (
+              {LIEUX_BIENVENUE.map((lieu) => (
                 <NativeSelectOption key={lieu} value={lieu}>
                   {LIBELLES_LIEU_BIENVENUE[lieu]}
                 </NativeSelectOption>
@@ -534,7 +651,12 @@ export function FormulaireReglages({ guildId, initiaux, salons, roles, erreurAnn
                 id="accueil-salon"
                 options={optionsSalons}
                 valeur={reglages.accueil.salon}
-                onChange={salon => setReglages(r => ({ ...r, accueil: { ...r.accueil, salon } }))}
+                onChange={(salon) =>
+                  setReglages((r) => ({
+                    ...r,
+                    accueil: { ...r.accueil, salon },
+                  }))
+                }
               />
             </Champ>
           )}
@@ -548,7 +670,12 @@ export function FormulaireReglages({ guildId, initiaux, salons, roles, erreurAnn
               id="accueil-role"
               options={optionsRoles}
               valeur={reglages.accueil.roleArrivee}
-              onChange={roleArrivee => setReglages(r => ({ ...r, accueil: { ...r.accueil, roleArrivee } }))}
+              onChange={(roleArrivee) =>
+                setReglages((r) => ({
+                  ...r,
+                  accueil: { ...r.accueil, roleArrivee },
+                }))
+              }
               videLibelle="Aucun rôle"
             />
           </Champ>
@@ -564,12 +691,15 @@ export function FormulaireReglages({ guildId, initiaux, salons, roles, erreurAnn
             rows={3}
             maxLength={1000}
             value={reglages.accueil.texte ?? ""}
-            onChange={evenement =>
-              setReglages(r => ({
+            onChange={(evenement) =>
+              setReglages((r) => ({
                 ...r,
                 accueil: {
                   ...r.accueil,
-                  texte: evenement.target.value.trim() === "" ? null : evenement.target.value,
+                  texte:
+                    evenement.target.value.trim() === ""
+                      ? null
+                      : evenement.target.value,
                 },
               }))
             }
@@ -580,7 +710,9 @@ export function FormulaireReglages({ guildId, initiaux, salons, roles, erreurAnn
           id="accueil-carte"
           libelle="Joindre la carte image d'accueil"
           valeur={reglages.accueil.carte}
-          onChange={carte => setReglages(r => ({ ...r, accueil: { ...r.accueil, carte } }))}
+          onChange={(carte) =>
+            setReglages((r) => ({ ...r, accueil: { ...r.accueil, carte } }))
+          }
         />
       </SectionCarte>
 
@@ -602,7 +734,12 @@ export function FormulaireReglages({ guildId, initiaux, salons, roles, erreurAnn
           id="suggestions-actif"
           libelle="Boîte à suggestions ouverte"
           valeur={reglages.suggestions.actif}
-          onChange={actif => setReglages(r => ({ ...r, suggestions: { ...r.suggestions, actif } }))}
+          onChange={(actif) =>
+            setReglages((r) => ({
+              ...r,
+              suggestions: { ...r.suggestions, actif },
+            }))
+          }
         />
         <Champ
           id="suggestions-salon"
@@ -613,7 +750,12 @@ export function FormulaireReglages({ guildId, initiaux, salons, roles, erreurAnn
             id="suggestions-salon"
             options={optionsSalons}
             valeur={reglages.suggestions.salon}
-            onChange={salon => setReglages(r => ({ ...r, suggestions: { ...r.suggestions, salon } }))}
+            onChange={(salon) =>
+              setReglages((r) => ({
+                ...r,
+                suggestions: { ...r.suggestions, salon },
+              }))
+            }
           />
         </Champ>
       </SectionCarte>
@@ -636,7 +778,9 @@ export function FormulaireReglages({ guildId, initiaux, salons, roles, erreurAnn
           id="kizuna-actif"
           libelle="Monnaie de communauté active"
           valeur={reglages.kizuna.actif}
-          onChange={actif => setReglages(r => ({ ...r, kizuna: { ...r.kizuna, actif } }))}
+          onChange={(actif) =>
+            setReglages((r) => ({ ...r, kizuna: { ...r.kizuna, actif } }))
+          }
         />
         <Champ
           id="kizuna-salon"
@@ -647,7 +791,12 @@ export function FormulaireReglages({ guildId, initiaux, salons, roles, erreurAnn
             id="kizuna-salon"
             options={optionsSalons}
             valeur={reglages.kizuna.salonAnnonce}
-            onChange={salonAnnonce => setReglages(r => ({ ...r, kizuna: { ...r.kizuna, salonAnnonce } }))}
+            onChange={(salonAnnonce) =>
+              setReglages((r) => ({
+                ...r,
+                kizuna: { ...r.kizuna, salonAnnonce },
+              }))
+            }
           />
         </Champ>
       </SectionCarte>
@@ -657,12 +806,17 @@ export function FormulaireReglages({ guildId, initiaux, salons, roles, erreurAnn
           <CardHeader>
             <CardTitle className="text-base">Rétablir les défauts</CardTitle>
             <CardDescription>
-              Efface TOUS les réglages de ce serveur : salons, rôles de prise en charge, exclusions d&apos;expérience.
-              Le bot repart de zéro et ne publie plus nulle part.
+              Efface TOUS les réglages de ce serveur : salons, rôles de prise en
+              charge, exclusions d&apos;expérience. Le bot repart de zéro et ne
+              publie plus nulle part.
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button variant="destructive" onClick={reinitialiser} disabled={reinitialisation}>
+            <Button
+              variant="destructive"
+              onClick={reinitialiser}
+              disabled={reinitialisation}
+            >
               {reinitialisation ? (
                 <Loader2 className="size-4 animate-spin" aria-hidden />
               ) : (
@@ -701,14 +855,21 @@ function SectionCarte({
             <CardTitle className="flex items-center gap-2 text-base">
               {libelle.titre}
               {manques.length > 0 && (
-                <Badge variant="outline" className="border-alerte/50 text-alerte">
+                <Badge
+                  variant="outline"
+                  className="border-alerte/50 text-alerte"
+                >
                   à configurer
                 </Badge>
               )}
             </CardTitle>
             <CardDescription className="mt-1">{libelle.role}</CardDescription>
           </div>
-          <Button size="sm" onClick={onEnregistrer} disabled={etat.statut === "envoi"}>
+          <Button
+            size="sm"
+            onClick={onEnregistrer}
+            disabled={etat.statut === "envoi"}
+          >
             {etat.statut === "envoi" ? (
               <Loader2 className="size-4 animate-spin" aria-hidden />
             ) : etat.statut === "ok" ? (
@@ -726,7 +887,10 @@ function SectionCarte({
           </p>
         )}
         {etat.message && (
-          <p role={etat.statut === "erreur" ? "alert" : "status"} className={`mt-2 text-xs ${etat.statut === "erreur" ? "text-destructive" : "text-succes"}`}>
+          <p
+            role={etat.statut === "erreur" ? "alert" : "status"}
+            className={`mt-2 text-xs ${etat.statut === "erreur" ? "text-destructive" : "text-succes"}`}
+          >
             {etat.message}
           </p>
         )}
@@ -808,10 +972,12 @@ function SelecteurSalon({
       id={id}
       className="w-full"
       value={valeur ?? ""}
-      onChange={evenement => onChange(evenement.target.value === "" ? null : evenement.target.value)}
+      onChange={(evenement) =>
+        onChange(evenement.target.value === "" ? null : evenement.target.value)
+      }
     >
       <NativeSelectOption value="">{videLibelle}</NativeSelectOption>
-      {options.map(option => (
+      {options.map((option) => (
         <NativeSelectOption key={option.value} value={option.value}>
           {option.label}
         </NativeSelectOption>

@@ -23,10 +23,14 @@ import {
   WalletTransactionDirection,
 } from "@rosegriffon/achillea-types";
 
-export type Tone = "success" | "warn" | "info" | "danger" | "secondary" | "contrast";
+export type Tone =
+  "success" | "warn" | "info" | "danger" | "secondary" | "contrast";
 
 /** Variante `shadcn/ui` `<Badge>` la plus proche d'un `Tone`. */
-export const TONE_TO_SHADCN_BADGE: Record<Tone, "default" | "secondary" | "destructive" | "outline"> = {
+export const TONE_TO_SHADCN_BADGE: Record<
+  Tone,
+  "default" | "secondary" | "destructive" | "outline"
+> = {
   success: "default",
   warn: "outline",
   info: "secondary",
@@ -92,7 +96,9 @@ export function castEventStatusTone(status: CastEventStatus): Tone {
   }
 }
 
-export function castAvailabilityStatusTone(status: CastAvailabilityStatus): Tone {
+export function castAvailabilityStatusTone(
+  status: CastAvailabilityStatus,
+): Tone {
   switch (status) {
     case CastAvailabilityStatus.Available:
       return "success";
@@ -160,6 +166,8 @@ export function organizationStateTone(state: OrganizationState): Tone {
   }
 }
 
-export function walletDirectionTone(direction: WalletTransactionDirection): Tone {
+export function walletDirectionTone(
+  direction: WalletTransactionDirection,
+): Tone {
   return direction === WalletTransactionDirection.In ? "success" : "danger";
 }

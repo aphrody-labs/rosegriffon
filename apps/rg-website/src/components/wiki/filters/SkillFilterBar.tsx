@@ -72,7 +72,11 @@ export function SkillFilterBar({
   );
 
   const updateFilters = useCallback(
-    (key: "type" | "element" | "has_video" | "show_aura" | "overdrive" | "sort", value: string) => {
+    (
+      key:
+        "type" | "element" | "has_video" | "show_aura" | "overdrive" | "sort",
+      value: string,
+    ) => {
       const params = new URLSearchParams(searchParams.toString());
       const current = params.get(key) || "";
 
@@ -114,7 +118,8 @@ export function SkillFilterBar({
     [router, searchParams],
   );
 
-  const isPowerFiltered = powerRange[0] > POWER_MIN || powerRange[1] < POWER_MAX;
+  const isPowerFiltered =
+    powerRange[0] > POWER_MIN || powerRange[1] < POWER_MAX;
 
   const resetPower = useCallback(() => {
     setPowerRange([POWER_MIN, POWER_MAX]);
@@ -129,7 +134,7 @@ export function SkillFilterBar({
     <div className="space-y-4">
       {/* Category Chips */}
       <div className="flex flex-wrap gap-2">
-        {categories.map(f => {
+        {categories.map((f) => {
           const isActive = currentCategory === f.value;
           return (
             <button
@@ -145,7 +150,13 @@ export function SkillFilterBar({
             >
               {f.imageIcon ? (
                 <div className="relative size-5">
-                  <Image src={f.imageIcon} alt="" fill className="object-contain" sizes="20px" />
+                  <Image
+                    src={f.imageIcon}
+                    alt=""
+                    fill
+                    className="object-contain"
+                    sizes="20px"
+                  />
                 </div>
               ) : f.sprite ? (
                 <SpriteIcon name={f.sprite} scale={0.4} className="-my-2" />
@@ -235,7 +246,7 @@ export function SkillFilterBar({
 
         {/* Element Chips */}
         <div className="flex flex-wrap justify-end gap-2">
-          {elements.map(f => {
+          {elements.map((f) => {
             const isActive = currentElement === f.value;
             return (
               <button
@@ -253,7 +264,13 @@ export function SkillFilterBar({
                   <CommonSpriteIcon name={f.commonSprite} scale={0.28} />
                 ) : f.imageIcon ? (
                   <div className="relative size-4">
-                    <Image src={f.imageIcon} alt="" fill className="object-contain" sizes="16px" />
+                    <Image
+                      src={f.imageIcon}
+                      alt=""
+                      fill
+                      className="object-contain"
+                      sizes="16px"
+                    />
                   </div>
                 ) : f.icon ? (
                   <Icon name={f.icon} size={18} />
@@ -281,11 +298,13 @@ export function SkillFilterBar({
             min={POWER_MIN}
             max={POWER_MAX}
             step={5}
-            onValueChange={v => setPowerRange(v as [number, number])}
+            onValueChange={(v) => setPowerRange(v as [number, number])}
             onValueCommit={commitPowerRange}
             className="flex-1"
           />
-          <span className="text-xs font-mono font-bold text-on-surface-variant tabular-nums w-8">{powerRange[1]}</span>
+          <span className="text-xs font-mono font-bold text-on-surface-variant tabular-nums w-8">
+            {powerRange[1]}
+          </span>
         </div>
 
         {isPowerFiltered && (

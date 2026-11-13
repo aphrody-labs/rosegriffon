@@ -9,13 +9,22 @@
  */
 
 import { Button } from "@rosegriffon/ui/button";
-import { useEffect, useImperativeHandle, useRef, useState, type Ref } from "react";
+import {
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+  type Ref,
+} from "react";
 
 import { loadModelViewer } from "@/lib/model-viewer-loader";
 
 type Vecteur = { x: number; y: number; z: number };
 type Viewer = HTMLElement & {
-  toBlob: (options?: { mimeType?: string; idealAspect?: boolean }) => Promise<Blob>;
+  toBlob: (options?: {
+    mimeType?: string;
+    idealAspect?: boolean;
+  }) => Promise<Blob>;
   getDimensions: () => Vecteur;
   getBoundingBoxCenter: () => Vecteur;
   updateComplete: Promise<boolean>;
@@ -37,11 +46,19 @@ export function distanceCamera(hauteur: number, champDeg = CHAMP_DEG): number {
   return hauteur / 2 / Math.tan((champDeg * Math.PI) / 360);
 }
 
-export function ApercuAvatar({ url, handleRef }: { url: string; handleRef: Ref<ApercuAvatarHandle> }) {
+export function ApercuAvatar({
+  url,
+  handleRef,
+}: {
+  url: string;
+  handleRef: Ref<ApercuAvatarHandle>;
+}) {
   const hote = useRef<HTMLDivElement>(null);
   const viewer = useRef<Viewer | null>(null);
   const [instance, setInstance] = useState<Viewer | null>(null);
-  const [etat, setEtat] = useState<"chargement" | "pret" | "erreur">("chargement");
+  const [etat, setEtat] = useState<"chargement" | "pret" | "erreur">(
+    "chargement",
+  );
   const [essai, setEssai] = useState(0);
 
   useImperativeHandle(
@@ -49,9 +66,13 @@ export function ApercuAvatar({ url, handleRef }: { url: string; handleRef: Ref<A
     () => ({
       async capturer(cote: number) {
         const mv = viewer.current;
-        if (!mv || typeof mv.toBlob !== "function") throw new Error("Aperçu indisponible.");
+        if (!mv || typeof mv.toBlob !== "function")
+          throw new Error("Aperçu indisponible.");
         await mv.updateComplete;
-        const brut = await mv.toBlob({ mimeType: "image/png", idealAspect: false });
+        const brut = await mv.toBlob({
+          mimeType: "image/png",
+          idealAspect: false,
+        });
         // Recadrage carré centré puis mise à l'échelle : l'image du profil est un carré.
         const bitmap = await createImageBitmap(brut);
         const source = Math.min(bitmap.width, bitmap.height);
@@ -72,7 +93,10 @@ export function ApercuAvatar({ url, handleRef }: { url: string; handleRef: Ref<A
         );
         bitmap.close();
         return await new Promise<Blob>((resolve, reject) =>
-          toile.toBlob(b => (b ? resolve(b) : reject(new Error("Capture impossible."))), "image/png"),
+          toile.toBlob(
+            (b) => (b ? resolve(b) : reject(new Error("Capture impossible."))),
+            "image/png",
+          ),
         );
       },
     }),
@@ -104,8 +128,14 @@ export function ApercuAvatar({ url, handleRef }: { url: string; handleRef: Ref<A
           const taille = mv.getDimensions();
           const centre = mv.getBoundingBoxCenter();
           const bas = centre.y - taille.y / 2;
-          mv.setAttribute("camera-target", `${centre.x}m ${bas + taille.y * VISEE}m ${centre.z}m`);
-          mv.setAttribute("camera-orbit", `0deg 85deg ${distanceCamera(taille.y * FENETRE)}m`);
+          mv.setAttribute(
+            "camera-target",
+            `${centre.x}m ${bas + taille.y * VISEE}m ${centre.z}m`,
+          );
+          mv.setAttribute(
+            "camera-orbit",
+            `0deg 85deg ${distanceCamera(taille.y * FENETRE)}m`,
+          );
           setEtat("pret");
         });
         mv.addEventListener("error", () => setEtat("erreur"));
@@ -132,13 +162,21 @@ export function ApercuAvatar({ url, handleRef }: { url: string; handleRef: Ref<A
         data-pret={instance ? etat : "chargement"}
         className="relative aspect-square w-full max-w-72 overflow-hidden rounded-2xl border border-border bg-muted"
       />
-      <output className="block text-sm text-muted-foreground" aria-live="polite">
+      <output
+        className="block text-sm text-muted-foreground"
+        aria-live="polite"
+      >
         {etat === "chargement" && "Assemblage du modèle 3D…"}
-        {etat === "pret" && "Fais pivoter le modèle : l'avatar enregistré est la vue affichée."}
+        {etat === "pret" &&
+          "Fais pivoter le modèle : l'avatar enregistré est la vue affichée."}
         {etat === "erreur" && "Assemblage 3D indisponible."}
       </output>
       {etat === "erreur" && (
-        <Button variant="outline" className="h-11" onClick={() => setEssai(n => n + 1)}>
+        <Button
+          variant="outline"
+          className="h-11"
+          onClick={() => setEssai((n) => n + 1)}
+        >
           Réessayer
         </Button>
       )}

@@ -72,7 +72,8 @@ export async function analyzeCSource(filePath: string): Promise<CSourceData> {
   const hexPattern = /0x[0-9a-fA-F]+/g;
   const decPattern = /\b(\d{5,10})\b/g; // 5-10 digit numbers (likely hash IDs)
   const stringPattern = /"([^"\\]|\\.)*"/g;
-  const funcPattern = /^(?:void|int|uint|char|float|double|undefined\d*|longlong|ulonglong)\s+(\w+)\s*\(/;
+  const funcPattern =
+    /^(?:void|int|uint|char|float|double|undefined\d*|longlong|ulonglong)\s+(\w+)\s*\(/;
   const identPattern = /\b([A-Z][A-Z0-9_]{3,})\b/g; // UPPERCASE_CONSTANTS
 
   for await (const line of rl) {
@@ -201,7 +202,10 @@ export async function analyzeJsonFile(filePath: string): Promise<JsonData> {
 /**
  * Recursively find all JSON files in a directory
  */
-export async function findJsonFiles(dir: string, maxFiles = 1000): Promise<string[]> {
+export async function findJsonFiles(
+  dir: string,
+  maxFiles = 1000,
+): Promise<string[]> {
   const files: string[] = [];
 
   async function walk(currentDir: string): Promise<void> {
@@ -230,11 +234,17 @@ export async function findJsonFiles(dir: string, maxFiles = 1000): Promise<strin
  * Find matches between JSON data and C source
  * Optimized to avoid O(n²) loops
  */
-export function findMatches(jsonDataList: JsonData[], cData: CSourceData): MatchResult[] {
+export function findMatches(
+  jsonDataList: JsonData[],
+  cData: CSourceData,
+): MatchResult[] {
   const matches: MatchResult[] = [];
 
   // Pre-build normalized lookup maps for faster matching
-  const normalizedFunctions = new Map<string, { name: string; lines: number[] }[]>();
+  const normalizedFunctions = new Map<
+    string,
+    { name: string; lines: number[] }[]
+  >();
   for (const [funcName, lines] of cData.functionNames) {
     const normalized = funcName.toLowerCase().replace(/[^a-z0-9]/g, "");
     if (normalized.length > 4) {
@@ -245,7 +255,10 @@ export function findMatches(jsonDataList: JsonData[], cData: CSourceData): Match
     }
   }
 
-  const normalizedIdentifiers = new Map<string, { name: string; lines: number[] }[]>();
+  const normalizedIdentifiers = new Map<
+    string,
+    { name: string; lines: number[] }[]
+  >();
   for (const [ident, lines] of cData.identifiers) {
     const normalized = ident.toLowerCase().replace(/[^a-z0-9]/g, "");
     if (normalized.length > 5) {
@@ -355,7 +368,11 @@ export function findMatches(jsonDataList: JsonData[], cData: CSourceData): Match
 /**
  * Get a specific line from a large file
  */
-export async function getLineFromFile(filePath: string, lineNumber: number, context = 2): Promise<string> {
+export async function getLineFromFile(
+  filePath: string,
+  lineNumber: number,
+  context = 2,
+): Promise<string> {
   const fileStream = createReadStream(filePath, { encoding: "utf8" });
   const rl = createInterface({
     input: fileStream,
@@ -397,7 +414,9 @@ export async function runMatchWorkflow(options: {
 
   onProgress?.("Analyzing C source file...");
   const cData = await analyzeCSource(cSourcePath);
-  onProgress?.(`Found ${cData.hexConstants.size} hex constants, ${cData.functionNames.size} functions`);
+  onProgress?.(
+    `Found ${cData.hexConstants.size} hex constants, ${cData.functionNames.size} functions`,
+  );
 
   onProgress?.("Finding JSON files...");
   const jsonFiles = await findJsonFiles(jsonDir, maxJsonFiles);

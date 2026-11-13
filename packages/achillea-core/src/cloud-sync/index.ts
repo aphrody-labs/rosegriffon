@@ -43,18 +43,22 @@ export interface CloudConflictReport {
 export function resolveCloudConflict(
   localMeta: SaveSlotMetadata,
   remoteMeta: SaveSlotMetadata,
-  hasActiveServerCompetitiveLock = false
+  hasActiveServerCompetitiveLock = false,
 ): CloudConflictReport {
   if (hasActiveServerCompetitiveLock) {
     return {
       decision: "ServerCompetitiveLock",
-      reason: "Account is currently in an active Achilléa Ranked match. Cloud sync is locked until match completion.",
+      reason:
+        "Account is currently in an active Achilléa Ranked match. Cloud sync is locked until match completion.",
       localTimestamp: localMeta.lastSavedAt,
       remoteTimestamp: remoteMeta.lastSavedAt,
     };
   }
 
-  if (localMeta.checksumSha256 && localMeta.checksumSha256 === remoteMeta.checksumSha256) {
+  if (
+    localMeta.checksumSha256 &&
+    localMeta.checksumSha256 === remoteMeta.checksumSha256
+  ) {
     return {
       decision: "IdenticalNoAction",
       reason: "Local and cloud saves are identical byte-for-byte.",
@@ -74,7 +78,8 @@ export function resolveCloudConflict(
 
   return {
     decision: "LocalOverwritesCloud",
-    reason: "Local save has a newer timestamp or progressive local offline progress.",
+    reason:
+      "Local save has a newer timestamp or progressive local offline progress.",
     localTimestamp: localMeta.lastSavedAt,
     remoteTimestamp: remoteMeta.lastSavedAt,
   };
@@ -106,7 +111,7 @@ export interface RankedRosterValidationResult {
  */
 export function validateRankedRosterLegal(
   teamLevel: number,
-  roster: PlayerRosterMember[]
+  roster: PlayerRosterMember[],
 ): RankedRosterValidationResult {
   const violations: string[] = [];
 
@@ -115,30 +120,48 @@ export function validateRankedRosterLegal(
   }
 
   if (roster.length < 11 || roster.length > 16) {
-    violations.push(`Roster size ${roster.length} is invalid (must have 11-16 players).`);
+    violations.push(
+      `Roster size ${roster.length} is invalid (must have 11-16 players).`,
+    );
   }
 
   const seenCharIds = new Set<number>();
 
   for (const member of roster) {
     if (seenCharIds.has(member.characterId)) {
-      violations.push(`Duplicate character ID ${member.characterId} detected in team roster.`);
+      violations.push(
+        `Duplicate character ID ${member.characterId} detected in team roster.`,
+      );
     }
     seenCharIds.add(member.characterId);
 
     if (member.level < 1 || member.level > 99) {
-      violations.push(`Character ${member.characterId} has illegal level ${member.level}.`);
+      violations.push(
+        `Character ${member.characterId} has illegal level ${member.level}.`,
+      );
     }
 
     // Individual stat sanity checks (max legal stat in Victory Road is 999 with gear/training)
     const { kick, body, control, guard, speed, stamina, guts } = member.stats;
-    if (kick > 999 || body > 999 || control > 999 || guard > 999 || speed > 999 || stamina > 999 || guts > 999) {
-      violations.push(`Character ${member.characterId} has stat overflow exceeding competitive limit 999.`);
+    if (
+      kick > 999 ||
+      body > 999 ||
+      control > 999 ||
+      guard > 999 ||
+      speed > 999 ||
+      stamina > 999 ||
+      guts > 999
+    ) {
+      violations.push(
+        `Character ${member.characterId} has stat overflow exceeding competitive limit 999.`,
+      );
     }
 
     // Maximum 6 equipped skills/hissatsus per player
     if (member.equippedSkills.length > 6) {
-      violations.push(`Character ${member.characterId} has ${member.equippedSkills.length} skills (max 6 allowed).`);
+      violations.push(
+        `Character ${member.characterId} has ${member.equippedSkills.length} skills (max 6 allowed).`,
+      );
     }
   }
 

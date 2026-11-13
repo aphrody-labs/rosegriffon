@@ -43,11 +43,33 @@ export default {
   "Soccer.AppReviewDialog": ["Path", "YesButton", "CloseButtons"],
   "Soccer.AppReviewService": ["ReviewRequestInterval"],
   "Soccer.BadgeClearOnResume": ["instance"],
-  "Soccer.BattleInterruption": ["value__", "None", "HighlightRequested", "EntrustRequested", "RetireRequested"],
-  "Soccer.BattleNextAction": ["value__", "FinishSuccessfully", "Cancel", "Entrust", "Next", "Retry"],
-  "Soccer.ConnectionBoardStageContext": ["<SelectedArea>k__BackingField", "<SelectedStage>k__BackingField"],
-  "Soccer.EventConnectionBoardStageContext": ["<SelectedArea>k__BackingField", "<SelectedStage>k__BackingField"],
-  "Soccer.ExtraCupGroup": ["<Master>k__BackingField", "<RawExtraCupGroup>k__BackingField"],
+  "Soccer.BattleInterruption": [
+    "value__",
+    "None",
+    "HighlightRequested",
+    "EntrustRequested",
+    "RetireRequested",
+  ],
+  "Soccer.BattleNextAction": [
+    "value__",
+    "FinishSuccessfully",
+    "Cancel",
+    "Entrust",
+    "Next",
+    "Retry",
+  ],
+  "Soccer.ConnectionBoardStageContext": [
+    "<SelectedArea>k__BackingField",
+    "<SelectedStage>k__BackingField",
+  ],
+  "Soccer.EventConnectionBoardStageContext": [
+    "<SelectedArea>k__BackingField",
+    "<SelectedStage>k__BackingField",
+  ],
+  "Soccer.ExtraCupGroup": [
+    "<Master>k__BackingField",
+    "<RawExtraCupGroup>k__BackingField",
+  ],
   "Soccer.ExtraCupStageContext": [
     "<SelectedGroup>k__BackingField",
     "<SelectedStage>k__BackingField",
@@ -75,8 +97,16 @@ export default {
     "<EntrustAvailable>k__BackingField",
   ],
   "Soccer.InalinkBattleStageContext": ["<SelectedThread>k__BackingField"],
-  "Soccer.PvpStageContext": ["<Season>k__BackingField", "<MatchingSlot>k__BackingField"],
-  "Soccer.InitialActionType": ["value__", "None", "AutoStart", "AutoStartWithoutConfirmation"],
+  "Soccer.PvpStageContext": [
+    "<Season>k__BackingField",
+    "<MatchingSlot>k__BackingField",
+  ],
+  "Soccer.InitialActionType": [
+    "value__",
+    "None",
+    "AutoStart",
+    "AutoStartWithoutConfirmation",
+  ],
   "Soccer.StoryBoardStageContext`3": [
     "<SelectedArea>k__BackingField",
     "<SelectedStage>k__BackingField",
@@ -108,7 +138,10 @@ export default {
     "<TargetPlayerVM>k__BackingField",
     "<TrajectoryEffectSettingTable>k__BackingField",
   ],
-  "Soccer.BattleCamera": ["cinemachineCamera", "<ActivenessSwitcher>k__BackingField"],
+  "Soccer.BattleCamera": [
+    "cinemachineCamera",
+    "<ActivenessSwitcher>k__BackingField",
+  ],
   "Soccer.BattleCameraSwitcher": [
     "KickOffCamera",
     "BallFollowCameraRoot",
@@ -127,7 +160,13 @@ export default {
     "<DefaultBallFollowCameraFovTable>k__BackingField",
     "<EnableBallFollowCameraSwitching>k__BackingField",
   ],
-  "Soccer.BattleFieldVM": ["CameraSwitcher", "Width", "Height", "<TileSize>k__BackingField", "locationDeltaCalculator"],
+  "Soccer.BattleFieldVM": [
+    "CameraSwitcher",
+    "Width",
+    "Height",
+    "<TileSize>k__BackingField",
+    "locationDeltaCalculator",
+  ],
   "Soccer.BattleMoveSoundPlayback": [
     "<NeedTimeStretch>k__BackingField",
     "<BoundSources>k__BackingField",
@@ -135,7 +174,10 @@ export default {
     "<SoundTrackBindings>k__BackingField",
     "AISACParameterKey",
   ],
-  "Soccer.BattlePlayerAndBallVisibilitySwitcher": ["<PlayerVMRepository>k__BackingField", "<Ball>k__BackingField"],
+  "Soccer.BattlePlayerAndBallVisibilitySwitcher": [
+    "<PlayerVMRepository>k__BackingField",
+    "<Ball>k__BackingField",
+  ],
   "Soccer.BattlePlayerDriver": [
     "DrivingParameter",
     "<CanBackwardRunning>k__BackingField",
@@ -250,7 +292,11 @@ export default {
     "<SingleExecutionLock>k__BackingField",
     "<OpenReq>k__BackingField",
   ],
-  "Soccer.BattleSuperiorityVM": ["PossessionSuperiorityRate", "ScoreSuperiorityRate", "SuperiorityGaugeVM"],
+  "Soccer.BattleSuperiorityVM": [
+    "PossessionSuperiorityRate",
+    "ScoreSuperiorityRate",
+    "SuperiorityGaugeVM",
+  ],
   "Soccer.BattleTimelines": [
     "KeeperSuccessTimelineName",
     "KeeperFailureTimelineName",
@@ -294,8 +340,15 @@ export default {
     "<EffectiveRangeEffectSettingTable>k__BackingField",
   ],
   "Soccer.EntrustYesNoDialog": ["YesButton"],
-  "Soccer.FacilityScaleChanger": ["scaleMultiplier", "scaleChangeTargets", "defaultScaleTable"],
-  "Soccer.FacilitySwitcher": ["FacilityScaleChanger", "<FacilityTables>k__BackingField"],
+  "Soccer.FacilityScaleChanger": [
+    "scaleMultiplier",
+    "scaleChangeTargets",
+    "defaultScaleTable",
+  ],
+  "Soccer.FacilitySwitcher": [
+    "FacilityScaleChanger",
+    "<FacilityTables>k__BackingField",
+  ],
   "Soccer.InBattleSkitPlayer": ["SkitReference", "InBattleUI", "BallVM"],
   "Soccer.InBattleSkitTriggerQueue": ["<SkitTriggerQueue>k__BackingField"],
   "Soccer.BattlePlayerVMRepository": ["players"],
@@ -319,9 +372,18 @@ export default {
     "<PhaseActionVoicePlayer>k__BackingField",
     "<InBattleSkitTriggerQueue>k__BackingField",
   ],
-  "Soccer.SkippablePresenter": ["<InitiallySkipped>k__BackingField", "<Skipped>k__BackingField"],
+  "Soccer.SkippablePresenter": [
+    "<InitiallySkipped>k__BackingField",
+    "<Skipped>k__BackingField",
+  ],
   "Soccer.PhaseActionVoicePlayer": ["<VoicePlayer>k__BackingField"],
-  "Soccer.PrologueTutorialPageVM": ["PageOpenRequestStore", "TutorialModel", "SkitReference", "Wipe", "Canvas"],
+  "Soccer.PrologueTutorialPageVM": [
+    "PageOpenRequestStore",
+    "TutorialModel",
+    "SkitReference",
+    "Wipe",
+    "Canvas",
+  ],
   "Soccer.SimpleTimeline": ["Timeline"],
   "Soccer.SoccerBattleResult": [
     "<Battle>k__BackingField",
@@ -372,7 +434,10 @@ export default {
     "<SpeakerId>k__BackingField",
   ],
   "Soccer.TimelineActorDefinition": ["Players", "Allies", "Opponents"],
-  "Soccer.GachaTimelineActorDefinition": ["<ActiveVariantNames>k__BackingField", "<GachaBallAnimators>k__BackingField"],
+  "Soccer.GachaTimelineActorDefinition": [
+    "<ActiveVariantNames>k__BackingField",
+    "<GachaBallAnimators>k__BackingField",
+  ],
   "Soccer.SoccerTimeline": [
     "TimelineNameSuffixRegex",
     "<Name>k__BackingField",
@@ -408,8 +473,14 @@ export default {
   ],
   "Soccer.SoccerTimelineVoicePlayer": ["<VoicePlayer>k__BackingField"],
   "Soccer.SpecialMoveNameSprites": ["<NameToSprite>k__BackingField"],
-  "Soccer.TimeScaledSoundPool": ["<VoicePool>k__BackingField", "<Playback>k__BackingField"],
-  "Soccer.MoveNameMixer": ["<Clip>k__BackingField", "<MoveNameVM>k__BackingField"],
+  "Soccer.TimeScaledSoundPool": [
+    "<VoicePool>k__BackingField",
+    "<Playback>k__BackingField",
+  ],
+  "Soccer.MoveNameMixer": [
+    "<Clip>k__BackingField",
+    "<MoveNameVM>k__BackingField",
+  ],
   "Soccer.SoccerTimelineNotificationMixer": [
     "<Clips>k__BackingField",
     "<ActiveClips>k__BackingField",
@@ -420,7 +491,11 @@ export default {
     "<OnGoalReceivedNotification>k__BackingField",
     "<OnPlayerVoiceNotificationReceived>k__BackingField",
   ],
-  "Soccer.PlayerVoiceNotificationClip": ["VoiceDefinition", "MoveTypes", "NonMoveTypes"],
+  "Soccer.PlayerVoiceNotificationClip": [
+    "VoiceDefinition",
+    "MoveTypes",
+    "NonMoveTypes",
+  ],
   "Soccer.RendererGroup": ["renderers"],
   "Soccer.ShadowHider": ["controlTargets"],
   "Soccer.ShadowHiderClip": ["<TargetIds>k__BackingField"],
@@ -452,7 +527,11 @@ export default {
   ],
   "Soccer.CooldownGaugeStepVM": ["Filled", "Empty", "Reduced", "Unavailable"],
   "Soccer.CooldownGaugeVM": ["StepTemplate", "<Steps>k__BackingField"],
-  "Soccer.FrameSplitCooldownGauge": ["BorderTemplate", "<Borders>k__BackingField", "GaugeImage"],
+  "Soccer.FrameSplitCooldownGauge": [
+    "BorderTemplate",
+    "<Borders>k__BackingField",
+    "GaugeImage",
+  ],
   "Soccer.GoalVM": [
     "ATimeline",
     "BTimeline",
@@ -489,7 +568,9 @@ export default {
     "RowTemplate",
     "<Rows>k__BackingField",
   ],
-  "Soccer.InBattlePassiveToastPassiveActivationView": ["PassiveEffectIconTemplate"],
+  "Soccer.InBattlePassiveToastPassiveActivationView": [
+    "PassiveEffectIconTemplate",
+  ],
   "Soccer.InBattlePassiveToastVM": [
     "ToastInterval",
     "AItemVMTemplate",
@@ -526,7 +607,14 @@ export default {
     "<OnHighlightRequest>k__BackingField",
     "<IsHighlighting>k__BackingField",
   ],
-  "Soccer.KickOffVM": ["ATimeline", "BTimeline", "ATeamEmblemIcon", "BTeamEmblemIcon", "FirstHalf", "SecondHalf"],
+  "Soccer.KickOffVM": [
+    "ATimeline",
+    "BTimeline",
+    "ATeamEmblemIcon",
+    "BTeamEmblemIcon",
+    "FirstHalf",
+    "SecondHalf",
+  ],
   "Soccer.TeamCard": [
     "UserNameText",
     "UserNameRoot",
@@ -545,7 +633,13 @@ export default {
     "OutGameCharacter3DStudio",
     "Team3DCharacterPositionOffset",
   ],
-  "Soccer.MatchCardsVM": ["PvpModel", "LoggedInUserModel", "LoggedInUserService", "ATeam", "BTeam"],
+  "Soccer.MatchCardsVM": [
+    "PvpModel",
+    "LoggedInUserModel",
+    "LoggedInUserService",
+    "ATeam",
+    "BTeam",
+  ],
   "Soccer.MatchPowerPlayer": [
     "<Move>k__BackingField",
     "<Critical>k__BackingField",
@@ -579,8 +673,19 @@ export default {
     "<TipArea>k__BackingField",
     "<Sequence>k__BackingField",
   ],
-  "Soccer.MatchPowerVM": ["APlayerVM", "BPlayerVM", "AutoHideDelay", "<Cts>k__BackingField"],
-  "Soccer.MoveNameVM": ["Animator", "Image", "StartTimeOffset", "FinishTimeOffset", "ShownParam"],
+  "Soccer.MatchPowerVM": [
+    "APlayerVM",
+    "BPlayerVM",
+    "AutoHideDelay",
+    "<Cts>k__BackingField",
+  ],
+  "Soccer.MoveNameVM": [
+    "Animator",
+    "Image",
+    "StartTimeOffset",
+    "FinishTimeOffset",
+    "ShownParam",
+  ],
   "Soccer.MoveSelectItemVM": [
     "Button",
     "ElementIcons",
@@ -618,7 +723,10 @@ export default {
     "<IsInitialized>k__BackingField",
   ],
   "Soccer.MoveSelectorPassiveEffectListItemVM": ["Icon", "Text"],
-  "Soccer.MoveSelectorPassiveEffectListVM": ["ItemVMTemplate", "<ItemVMs>k__BackingField"],
+  "Soccer.MoveSelectorPassiveEffectListVM": [
+    "ItemVMTemplate",
+    "<ItemVMs>k__BackingField",
+  ],
   "Soccer.MoveSelectorPassiveSummaryItemVM": [
     "<Type>k__BackingField",
     "<Count>k__BackingField",
@@ -701,7 +809,11 @@ export default {
     "SourceDirectorIcon",
     "<Passive>k__BackingField",
   ],
-  "Soccer.MoveSelectorSourcePassiveListVM": ["PassiveDetailVM", "ItemVMTemplate", "<ItemVMs>k__BackingField"],
+  "Soccer.MoveSelectorSourcePassiveListVM": [
+    "PassiveDetailVM",
+    "ItemVMTemplate",
+    "<ItemVMs>k__BackingField",
+  ],
   "Soccer.MoveSelectorVM": [
     "TitleText",
     "ATeamPlayerVM",
@@ -718,9 +830,23 @@ export default {
   ],
   "Soccer.ObjectBasedGauge": ["StepTemplate", "<Steps>k__BackingField"],
   "Soccer.ObjectBasedGaugeStep": ["On", "Off"],
-  "Soccer.PassiveEffectIcon": ["Icon", "<Type>k__BackingField", "<IsBuff>k__BackingField"],
-  "Soccer.PowerCompetitionVM": ["ATeamWinTimeline", "BTeamWinTimeline", "ATeamNameImage", "BTeamNameImage"],
-  "Soccer.SoccerBattleCommentaryCutInItemVM": ["CutInRoot", "CharacterImage", "SpeechText", "CutInPlayer"],
+  "Soccer.PassiveEffectIcon": [
+    "Icon",
+    "<Type>k__BackingField",
+    "<IsBuff>k__BackingField",
+  ],
+  "Soccer.PowerCompetitionVM": [
+    "ATeamWinTimeline",
+    "BTeamWinTimeline",
+    "ATeamNameImage",
+    "BTeamNameImage",
+  ],
+  "Soccer.SoccerBattleCommentaryCutInItemVM": [
+    "CutInRoot",
+    "CharacterImage",
+    "SpeechText",
+    "CutInPlayer",
+  ],
   "Soccer.SoccerBattleCutInVM": [
     "ATeamCutInItems",
     "BTeamCutInItems",
@@ -906,7 +1032,11 @@ export default {
     "<LastLevel>k__BackingField",
     "<OpenRequest>k__BackingField",
   ],
-  "Soccer.PurchasedBonusPass": ["<Master>k__BackingField", "<ProductMaster>k__BackingField", "<Raw>k__BackingField"],
+  "Soccer.PurchasedBonusPass": [
+    "<Master>k__BackingField",
+    "<ProductMaster>k__BackingField",
+    "<Raw>k__BackingField",
+  ],
   "Soccer.BonusPass": [
     "<Master>k__BackingField",
     "<ProductMaster>k__BackingField",
@@ -923,11 +1053,24 @@ export default {
     "<EntrypointError>k__BackingField",
     "<CurrentCatalogStatus>k__BackingField",
   ],
-  "Soccer.BootApp": ["LoggedInUserService", "PageOpenRequestStore", "SplashScreenAnimator"],
-  "Soccer.BootErrorDialog": ["Animator", "ShowDuration", "HideDuration", "CloseButton"],
+  "Soccer.BootApp": [
+    "LoggedInUserService",
+    "PageOpenRequestStore",
+    "SplashScreenAnimator",
+  ],
+  "Soccer.BootErrorDialog": [
+    "Animator",
+    "ShowDuration",
+    "HideDuration",
+    "CloseButton",
+  ],
   "Soccer.BuildConfig": ["AssetBaseUri", "BuildTarget", "instance"],
   "Soccer.ClearCache": ["PageOpenRequestStore"],
-  "Soccer.BaseBonePart": ["<BaseBone>k__BackingField", "<BoneMap>k__BackingField", "<LookAtIK>k__BackingField"],
+  "Soccer.BaseBonePart": [
+    "<BaseBone>k__BackingField",
+    "<BoneMap>k__BackingField",
+    "<LookAtIK>k__BackingField",
+  ],
   "Soccer.CharacterComponentCollector": [
     "animator",
     "emotionController",
@@ -943,7 +1086,15 @@ export default {
     "LargeOrMuscular",
     "Protagonist",
   ],
-  "Soccer.CharacterLocatorByShape": ["Average", "Small", "Fat", "Tall", "TallAndMuscular", "Muscular", "Large"],
+  "Soccer.CharacterLocatorByShape": [
+    "Average",
+    "Small",
+    "Fat",
+    "Tall",
+    "TallAndMuscular",
+    "Muscular",
+    "Large",
+  ],
   "Soccer.CharacterMaterialChanger": [
     "SkinColor",
     "UniformNumber",
@@ -969,9 +1120,20 @@ export default {
     "PerMaterialCharacterLightingParam",
   ],
   "Soccer.CharacterModelBuilder": ["CharacterModelRootPath"],
-  "Soccer.CharacterPart": ["<Output>k__BackingField", "<BoneRoot>k__BackingField"],
+  "Soccer.CharacterPart": [
+    "<Output>k__BackingField",
+    "<BoneRoot>k__BackingField",
+  ],
   "Soccer.CharacterShapeCorrectionController": ["Correctors"],
-  "Soccer.CharacterSkinCategory": ["value__", "Unknown", "Face", "Hair", "UpperBody", "LowerBody", "Foot"],
+  "Soccer.CharacterSkinCategory": [
+    "value__",
+    "Unknown",
+    "Face",
+    "Hair",
+    "UpperBody",
+    "LowerBody",
+    "Foot",
+  ],
   "Soccer.CharacterSkinColor": [
     "skinColor",
     "headSubColors",
@@ -981,7 +1143,12 @@ export default {
     "lowerBodySubColors",
     "footSubColors",
   ],
-  "Soccer.CharacterTransparencyController": ["Transparency", "TransparencyParam", "renderers", "propertyBlocks"],
+  "Soccer.CharacterTransparencyController": [
+    "Transparency",
+    "TransparencyParam",
+    "renderers",
+    "propertyBlocks",
+  ],
   "Soccer.EmotionController": [
     "MainTexParam",
     "OCMapParam",
@@ -1010,8 +1177,15 @@ export default {
     "<NextBlinkStartsAt>k__BackingField",
   ],
   "Soccer.FacePart": ["<CharacterMaterialChanger>k__BackingField"],
-  "Soccer.FullBodyModelArgs": ["<MasterData>k__BackingField", "<AnimatorType>k__BackingField"],
-  "Soccer.LookAtController": ["LookAtIK", "directionWeightCurve", "distanceWeightCurve"],
+  "Soccer.FullBodyModelArgs": [
+    "<MasterData>k__BackingField",
+    "<AnimatorType>k__BackingField",
+  ],
+  "Soccer.LookAtController": [
+    "LookAtIK",
+    "directionWeightCurve",
+    "distanceWeightCurve",
+  ],
   "Soccer.UniformNameTexture": [
     "MaskTexParam",
     "Atlas",
@@ -1023,7 +1197,10 @@ export default {
     "TextureHeight",
   ],
   "Soccer.UniformNumberPart": ["Renderer"],
-  "Soccer.UniformPart": ["<NormalCollar>k__BackingField", "<StandingCollar>k__BackingField"],
+  "Soccer.UniformPart": [
+    "<NormalCollar>k__BackingField",
+    "<StandingCollar>k__BackingField",
+  ],
   "Soccer.ChatChannel": [
     "MaxMessages",
     "<Descriptor>k__BackingField",
@@ -1053,7 +1230,12 @@ export default {
     "<Cts>k__BackingField",
   ],
   "Soccer.SystemChannel": ["Payloads"],
-  "Soccer.BlockListItemVM": ["TeamEmblemIcon", "NameText", "UnblockButton", "<User>k__BackingField"],
+  "Soccer.BlockListItemVM": [
+    "TeamEmblemIcon",
+    "NameText",
+    "UnblockButton",
+    "<User>k__BackingField",
+  ],
   "Soccer.BlockListVM": [
     "ChatModel",
     "ItemVMTemplate",
@@ -1134,7 +1316,10 @@ export default {
     "OpenReq",
     "<IsInitialized>k__BackingField",
   ],
-  "Soccer.ChatWorldChannelSelectorChannel": ["<ChannelNumber>k__BackingField", "Toggle"],
+  "Soccer.ChatWorldChannelSelectorChannel": [
+    "<ChannelNumber>k__BackingField",
+    "Toggle",
+  ],
   "Soccer.ChatWorldChannelSelectorVM": [
     "LoggedInUserModel",
     "ChatModel",
@@ -1146,7 +1331,10 @@ export default {
     "<OnChannelSelected>k__BackingField",
     "<IsInitialized>k__BackingField",
   ],
-  "Soccer.ChatMessageVM": ["<Payload>k__BackingField", "<OnUserAction>k__BackingField"],
+  "Soccer.ChatMessageVM": [
+    "<Payload>k__BackingField",
+    "<OnUserAction>k__BackingField",
+  ],
   "Soccer.ChatMessageUserAction": [
     "value__",
     "ClickPlayerIcon",
@@ -1156,8 +1344,19 @@ export default {
     "ClickStamp",
     "LongHoldStamp",
   ],
-  "Soccer.ChatStampMessageVM": ["Icon", "ProfileButton", "NameText", "StampImage", "StampButton", "SentAtText"],
-  "Soccer.ChatSystemMessageVM": ["MessageText", "MessageLocalizeEvent", "SentAtText"],
+  "Soccer.ChatStampMessageVM": [
+    "Icon",
+    "ProfileButton",
+    "NameText",
+    "StampImage",
+    "StampButton",
+    "SentAtText",
+  ],
+  "Soccer.ChatSystemMessageVM": [
+    "MessageText",
+    "MessageLocalizeEvent",
+    "SentAtText",
+  ],
   "Soccer.ChatTextMessageVM": [
     "Icon",
     "ProfileButton",
@@ -1395,7 +1594,10 @@ export default {
     "<ItemMaster>k__BackingField",
     "cts",
   ],
-  "Soccer.ClubHouseDecorationLocatorDropTarget": ["View", "<Locator>k__BackingField"],
+  "Soccer.ClubHouseDecorationLocatorDropTarget": [
+    "View",
+    "<Locator>k__BackingField",
+  ],
   "Soccer.ClubHouseDecorationTelopView": [
     "DisplayDuration",
     "Telop",
@@ -1447,7 +1649,11 @@ export default {
     "onTabChanged",
     "onNewBadgeRefresh",
   ],
-  "Soccer.ClubHouseDragAndDropDetector": ["isDragging", "dragSubject", "releaseSubject"],
+  "Soccer.ClubHouseDragAndDropDetector": [
+    "isDragging",
+    "dragSubject",
+    "releaseSubject",
+  ],
   "Soccer.LocatorBoundsSetting": ["Type", "Bounds"],
   "Soccer.LocatorCharacterSetting": ["Center", "Size"],
   "Soccer.ClubHouseLocatorSettings": ["Decorations", "MemberCharacter"],
@@ -1460,7 +1666,11 @@ export default {
     "MembersRoot",
     "MemberLocators",
   ],
-  "Soccer.ClubHouseMemberLocator": ["AnimatorState", "<BoundsCenter>k__BackingField", "<BoundsSize>k__BackingField"],
+  "Soccer.ClubHouseMemberLocator": [
+    "AnimatorState",
+    "<BoundsCenter>k__BackingField",
+    "<BoundsSize>k__BackingField",
+  ],
   "Soccer.ClubHousePageVM": [
     "LoggedInUserModel",
     "WipeManager",
@@ -1491,7 +1701,14 @@ export default {
     "<Decoration>k__BackingField",
     "onNewItemsChanged",
   ],
-  "Soccer.CharacterElementImageIcon": ["Image", "None", "Wind", "Forest", "Fire", "Mountain"],
+  "Soccer.CharacterElementImageIcon": [
+    "Image",
+    "None",
+    "Wind",
+    "Forest",
+    "Fire",
+    "Mountain",
+  ],
   "Soccer.CharacterIconImage": ["Size"],
   "Soccer.CharacterIconView": [
     "Button",
@@ -1542,7 +1759,12 @@ export default {
     "UIAnimator",
     "CharacterTagListDialogTagViewTemplate",
   ],
-  "Soccer.CharacterTagListVM": ["TagVMTemplate", "TagListButton", "TagListDialogVM", "<TagVMs>k__BackingField"],
+  "Soccer.CharacterTagListVM": [
+    "TagVMTemplate",
+    "TagListButton",
+    "TagListDialogVM",
+    "<TagVMs>k__BackingField",
+  ],
   "Soccer.CharacterTagVM": ["TagIcon", "NameText", "<Master>k__BackingField"],
   "Soccer.ClubMemberSelectMemberVM": [
     "CharacterIconView",
@@ -1670,12 +1892,27 @@ export default {
     "EffectSwitcher",
     "<Passive>k__BackingField",
   ],
-  "Soccer.PreferredAreaRegionView": ["BackgroundImage", "OverlayImage", "CharacterMarker", "RankImage"],
-  "Soccer.PreferredAreaVM": ["Regions", "RankColors", "RankSubColors", "RankImages"],
+  "Soccer.PreferredAreaRegionView": [
+    "BackgroundImage",
+    "OverlayImage",
+    "CharacterMarker",
+    "RankImage",
+  ],
+  "Soccer.PreferredAreaVM": [
+    "Regions",
+    "RankColors",
+    "RankSubColors",
+    "RankImages",
+  ],
   "Soccer.TagIconView": ["Icon", "<Cts>k__BackingField"],
   "Soccer.UISwitcherByAwakeningTier": ["ObjectsPerTier"],
   "Soccer.UISwitcherByElement": ["None", "Wind", "Forest", "Fire", "Mountain"],
-  "Soccer.UISwitcherByGrade": ["NoGradeObject", "Grade1Object", "Grade2Object", "Grade3Object"],
+  "Soccer.UISwitcherByGrade": [
+    "NoGradeObject",
+    "Grade1Object",
+    "Grade2Object",
+    "Grade3Object",
+  ],
   "Soccer.UISwitcherByMoveCategory": ["Shoot", "Dribble", "Block", "Keeper"],
   "Soccer.UISwitcherByPosition": ["FW", "MF", "DF", "GK"],
   "Soccer.ErrorDialog": [
@@ -1693,7 +1930,12 @@ export default {
     "UIAnimator",
     "StoreUrl",
   ],
-  "Soccer.LoadingMask": ["Path", "LoadingText", "DefaultMessageString", "disposed"],
+  "Soccer.LoadingMask": [
+    "Path",
+    "LoadingText",
+    "DefaultMessageString",
+    "disposed",
+  ],
   "Soccer.MessageDialog": ["Path", "MessageText"],
   "Soccer.RequiredDiamondDialog": ["PageOpenRequestStore", "Path"],
   "Soccer.SimpleConfirmationDialog`1": ["CloseButtons"],
@@ -1706,7 +1948,13 @@ export default {
   "Soccer.SimpleYesNoDialog`1": ["YesButtons", "NoButtons", "CancelButtons"],
   "Soccer.StaticYesNoDialog": ["AgreeToggle"],
   "Soccer.YesNoAnswer": ["value__", "Cancel", "Yes", "No"],
-  "Soccer.YesNoDialog": ["Path", "MessageText", "TitleText", "YesButtonText", "NoButtonText"],
+  "Soccer.YesNoDialog": [
+    "Path",
+    "MessageText",
+    "TitleText",
+    "YesButtonText",
+    "NoButtonText",
+  ],
   "Soccer.AuthService": ["StoreService", "authenticationService"],
   "Soccer.ClubMember": [
     "<Master>k__BackingField",
@@ -1724,8 +1972,13 @@ export default {
     "<GrowthMaster>k__BackingField",
     "<ClubMemberCode>k__BackingField",
   ],
-  "Soccer.ClubMemberLevelAcquisitionSpecialMove": ["<LevelAcquisitionMaster>k__BackingField"],
-  "Soccer.ClubMemberManualSpecialMove": ["<ManualMaster>k__BackingField", "<RawManualSpecialMove>k__BackingField"],
+  "Soccer.ClubMemberLevelAcquisitionSpecialMove": [
+    "<LevelAcquisitionMaster>k__BackingField",
+  ],
+  "Soccer.ClubMemberManualSpecialMove": [
+    "<ManualMaster>k__BackingField",
+    "<RawManualSpecialMove>k__BackingField",
+  ],
   "Soccer.Director": ["<Master>k__BackingField", "<Raw>k__BackingField"],
   "Soccer.Formation": [
     "<DeckCode>k__BackingField",
@@ -1819,10 +2072,17 @@ export default {
   ],
   "Soccer.ServerStatusModel": ["LoggedInUserModel", "NetworkModel"],
   "Soccer.SoccerBattleModel": ["LoggedInUserModel", "NetworkModel"],
-  "Soccer.TrainingProgram": ["<Raw>k__BackingField", "<InstantTrainingCarryOvers>k__BackingField"],
+  "Soccer.TrainingProgram": [
+    "<Raw>k__BackingField",
+    "<InstantTrainingCarryOvers>k__BackingField",
+  ],
   "Soccer.UserDeviceModel": ["deviceInfo"],
   "Soccer.FixedHorizontalFieldOfView": ["Camera", "HorizontalFieldOfView"],
-  "Soccer.MainWindowAdjuster": ["WindowRect", "Model", "<Canvas>k__BackingField"],
+  "Soccer.MainWindowAdjuster": [
+    "WindowRect",
+    "Model",
+    "<Canvas>k__BackingField",
+  ],
   "Soccer.MainWindowAdjusterModel": [
     "PrefsKey",
     "DefaultHeight",
@@ -1831,9 +2091,18 @@ export default {
     "<MainWindowHeight>k__BackingField",
   ],
   "Soccer.AspectClampLetterBox": ["Model", "targetCamera"],
-  "Soccer.AspectClampModel": ["TallestAspectRatioRatio", "WidestAspectRatioRatio", "DefaultRect"],
+  "Soccer.AspectClampModel": [
+    "TallestAspectRatioRatio",
+    "WidestAspectRatioRatio",
+    "DefaultRect",
+  ],
   "Soccer.AspectClampUGUI": ["Model", "rectTransform"],
-  "Soccer.ConstraintData": ["TargetName", "PositionConstraint", "AimConstraint", "ParentConstraint"],
+  "Soccer.ConstraintData": [
+    "TargetName",
+    "PositionConstraint",
+    "AimConstraint",
+    "ParentConstraint",
+  ],
   "Soccer.ConstraintReconnector": [
     "PlayableDirector",
     "SearchTopobj",
@@ -1865,7 +2134,10 @@ export default {
     "TriggerIconTagTemplate",
     "triggerIconViews",
   ],
-  "Soccer.DirectorDetailFormationView": ["FormationSlotViews", "FormationNameText"],
+  "Soccer.DirectorDetailFormationView": [
+    "FormationSlotViews",
+    "FormationNameText",
+  ],
   "Soccer.DirectorDetailLevelUpEffectVM": [
     "Animator",
     "LevelText",
@@ -1968,7 +2240,11 @@ export default {
     "<LevelTextFormat>k__BackingField",
     "<IsInitialized>k__BackingField",
   ],
-  "Soccer.FixedDirectorVM": ["LoggedInUserModel", "View", "<Director>k__BackingField"],
+  "Soccer.FixedDirectorVM": [
+    "LoggedInUserModel",
+    "View",
+    "<Director>k__BackingField",
+  ],
   "Soccer.PassiveEffectView": [
     "PassiveEnabledUIs",
     "PassiveDisabledUIs",
@@ -1977,7 +2253,12 @@ export default {
     "PassiveEffectIconTemplate",
     "PassiveIcons",
   ],
-  "Soccer.SoccerBattleDirectorView": ["MiniFormationVM", "Frame", "Button", "<IsInitialized>k__BackingField"],
+  "Soccer.SoccerBattleDirectorView": [
+    "MiniFormationVM",
+    "Frame",
+    "Button",
+    "<IsInitialized>k__BackingField",
+  ],
   "Soccer.Equipment": [
     "<Slot>k__BackingField",
     "<Position>k__BackingField",
@@ -2088,8 +2369,21 @@ export default {
     "<SingleExecutionLock>k__BackingField",
     "<CloseCompletionSource>k__BackingField",
   ],
-  "Soccer.EquipmentDetailDialogVM": ["LoggedInUserModel", "UILayerManager", "DetailView", "PositionUI", "CloseButton"],
-  "Soccer.EquipmentDetailView": ["Icon", "KickText", "TechniqueText", "BlockText", "CatchText", "SpeedText"],
+  "Soccer.EquipmentDetailDialogVM": [
+    "LoggedInUserModel",
+    "UILayerManager",
+    "DetailView",
+    "PositionUI",
+    "CloseButton",
+  ],
+  "Soccer.EquipmentDetailView": [
+    "Icon",
+    "KickText",
+    "TechniqueText",
+    "BlockText",
+    "CatchText",
+    "SpeedText",
+  ],
   "Soccer.EquipmentDismantleOrGradeUpResultVM": [
     "UILayerManager",
     "CloseButtons",
@@ -2112,8 +2406,18 @@ export default {
     "<GrantIcons>k__BackingField",
     "<OnDismantleComplete>k__BackingField",
   ],
-  "Soccer.EquipmentFooterGroup": ["CraftFooter", "TargetPlayerFooter", "<CurrentState>k__BackingField"],
-  "Soccer.EquipmentFooterVM": ["UILayerManager", "Animator", "CloseButton", "FooterGroup", "Open"],
+  "Soccer.EquipmentFooterGroup": [
+    "CraftFooter",
+    "TargetPlayerFooter",
+    "<CurrentState>k__BackingField",
+  ],
+  "Soccer.EquipmentFooterVM": [
+    "UILayerManager",
+    "Animator",
+    "CloseButton",
+    "FooterGroup",
+    "Open",
+  ],
   "Soccer.EquipmentLevelUpToastView": [
     "UIConfig",
     "KickValueText",
@@ -2203,7 +2507,10 @@ export default {
     "PageToggleTemplate",
     "<SlideIndex>k__BackingField",
   ],
-  "Soccer.EventMasterWithSchedule": ["<EventMaster>k__BackingField", "<Schedule>k__BackingField"],
+  "Soccer.EventMasterWithSchedule": [
+    "<EventMaster>k__BackingField",
+    "<Schedule>k__BackingField",
+  ],
   "Soccer.EventPeriodView": ["PeriodText", "LocalizedStringEvent", "timeArgs"],
   "Soccer.EventProgressVM": [
     "EventStoryModel",
@@ -2221,8 +2528,15 @@ export default {
     "<Events>k__BackingField",
     "buttonDirection",
   ],
-  "Soccer.EventTopBackgroundView": ["<Cts>k__BackingField", "<Handle>k__BackingField"],
-  "Soccer.EventTopStoryBanner": ["Button", "StageOnlyObject", "StageAndStoryObject"],
+  "Soccer.EventTopBackgroundView": [
+    "<Cts>k__BackingField",
+    "<Handle>k__BackingField",
+  ],
+  "Soccer.EventTopStoryBanner": [
+    "Button",
+    "StageOnlyObject",
+    "StageAndStoryObject",
+  ],
   "Soccer.EventTopVM": [
     "MissionModel",
     "PageOpenRequestStore",
@@ -2367,8 +2681,20 @@ export default {
   ],
   "Soccer.ExtraCupStageRoadMapVM": ["NodeVMs"],
   "Soccer.FirebaseService": ["app", "<FcmToken>k__BackingField"],
-  "Soccer.LocalPushNotification": ["GroupId", "GroupName", "ChannelId", "ChannelName", "Description"],
-  "Soccer.BattlePlayMode": ["value__", "Manual", "Auto", "Highlight", "Entrust"],
+  "Soccer.LocalPushNotification": [
+    "GroupId",
+    "GroupName",
+    "ChannelId",
+    "ChannelName",
+    "Description",
+  ],
+  "Soccer.BattlePlayMode": [
+    "value__",
+    "Manual",
+    "Auto",
+    "Highlight",
+    "Entrust",
+  ],
   "Soccer.FormationPlayer": [
     "<Type>k__BackingField",
     "<ClubMember>k__BackingField",
@@ -2424,7 +2750,12 @@ export default {
     "DuplicatedNumberMessage",
     "<ItemVMs>k__BackingField",
   ],
-  "Soccer.FormationDetailUniformSelectItemVM": ["ItemIcon", "Button", "SelectionFrame", "<TeamUniform>k__BackingField"],
+  "Soccer.FormationDetailUniformSelectItemVM": [
+    "ItemIcon",
+    "Button",
+    "SelectionFrame",
+    "<TeamUniform>k__BackingField",
+  ],
   "Soccer.FormationDetailUniformSelectVM": [
     "LoggedInUserModel",
     "LoopScrollRect",
@@ -2535,7 +2866,11 @@ export default {
     "<SingleExecutionLock>k__BackingField",
     "<OpenReq>k__BackingField",
   ],
-  "Soccer.FormationEditorPvpStageSummaryVM": ["OpponentRatingText", "OpponentRankNameText", "OpponentRankEmblem"],
+  "Soccer.FormationEditorPvpStageSummaryVM": [
+    "OpponentRatingText",
+    "OpponentRankNameText",
+    "OpponentRankEmblem",
+  ],
   "Soccer.FormationEditorStageSummaryVM": [
     "TitleText",
     "StageEffectText",
@@ -2549,14 +2884,26 @@ export default {
     "<RewardIcons>k__BackingField",
     "<IsDefaultClearCondition>k__BackingField",
   ],
-  "Soccer.FormationEditorTeamEmblemVM": ["AllyTeamEmblemIcon", "OpponentTeamEmblemIcon"],
-  "Soccer.FormationEditorTeamPowerVM": ["AllyTeamPowerGauge", "AllyTeamPowerText", "OpponentTeamPowerText"],
+  "Soccer.FormationEditorTeamEmblemVM": [
+    "AllyTeamEmblemIcon",
+    "OpponentTeamEmblemIcon",
+  ],
+  "Soccer.FormationEditorTeamPowerVM": [
+    "AllyTeamPowerGauge",
+    "AllyTeamPowerText",
+    "OpponentTeamPowerText",
+  ],
   "Soccer.FormationEditorValidationResult": [
     "<RequiredCharacterSatisfied>k__BackingField",
     "<RequiredTagSatisfied>k__BackingField",
     "<HasFullMember>k__BackingField",
   ],
-  "Soccer.FormationEffectSlotStatus": ["value__", "HasNoCondition", "ConditionNotSatisfied", "ConditionSatisfied"],
+  "Soccer.FormationEffectSlotStatus": [
+    "value__",
+    "HasNoCondition",
+    "ConditionNotSatisfied",
+    "ConditionSatisfied",
+  ],
   "Soccer.FormationSlotVM": [
     "LoggedInUserModel",
     "CharacterIcon",
@@ -2610,7 +2957,13 @@ export default {
     "<TeamDefinition>k__BackingField",
     "<Team>k__BackingField",
   ],
-  "Soccer.OmakaseElementSelector": ["ElementToggleGroup", "Wind", "Forest", "Fire", "Mountain"],
+  "Soccer.OmakaseElementSelector": [
+    "ElementToggleGroup",
+    "Wind",
+    "Forest",
+    "Fire",
+    "Mountain",
+  ],
   "Soccer.OmakaseFormationVM": [
     "UILayerManager",
     "LoggedInUserModel",
@@ -2672,8 +3025,15 @@ export default {
     "<OnSwipe>k__BackingField",
     "<RootRect>k__BackingField",
   ],
-  "Soccer.UISwitcherByFormationEffectSlotStatus": ["HasNoCondition", "ConditionNotSatisfied", "ConditionSatisfied"],
-  "Soccer.CodeGachaMachineCounterType": ["<Code>k__BackingField", "<Type>k__BackingField"],
+  "Soccer.UISwitcherByFormationEffectSlotStatus": [
+    "HasNoCondition",
+    "ConditionNotSatisfied",
+    "ConditionSatisfied",
+  ],
+  "Soccer.CodeGachaMachineCounterType": [
+    "<Code>k__BackingField",
+    "<Type>k__BackingField",
+  ],
   "Soccer.GachaModel": [
     "NetworkModel",
     "ServerStatusModel",
@@ -2706,7 +3066,11 @@ export default {
     "<OneSideFantomCount>k__BackingField",
     "<Cells>k__BackingField",
   ],
-  "Soccer.CarouselIndicatorGroup": ["Carousel", "ToggleTemplate", "<Toggles>k__BackingField"],
+  "Soccer.CarouselIndicatorGroup": [
+    "Carousel",
+    "ToggleTemplate",
+    "<Toggles>k__BackingField",
+  ],
   "Soccer.GachaBackgroundCutscenePlayerVM": [
     "Wipe",
     "CharacterInfoStartTime",
@@ -2827,7 +3191,11 @@ export default {
     "CancelButton",
     "<SingleExecutionLock>k__BackingField",
   ],
-  "Soccer.GachaWishlistSlotVM": ["View", "<CharacterItemMaster>k__BackingField", "<IsInitialized>k__BackingField"],
+  "Soccer.GachaWishlistSlotVM": [
+    "View",
+    "<CharacterItemMaster>k__BackingField",
+    "<IsInitialized>k__BackingField",
+  ],
   "Soccer.GachaWishlistVM": [
     "LoggedInUserModel",
     "GachaModel",
@@ -2909,7 +3277,11 @@ export default {
     "Rate10Text",
     "RatePityText",
   ],
-  "Soccer.GachaEntryRateTableVM": ["PityColumnHeaderText", "GroupVMTemplate", "<GroupVMs>k__BackingField"],
+  "Soccer.GachaEntryRateTableVM": [
+    "PityColumnHeaderText",
+    "GroupVMTemplate",
+    "<GroupVMs>k__BackingField",
+  ],
   "Soccer.GachaRateDialogVM": [
     "MachineNameText",
     "PityCautionText",
@@ -2919,9 +3291,23 @@ export default {
     "EntryRateTableVMPity",
     "EntryRateTableVMNoPity",
   ],
-  "Soccer.GachaRateTableGradeLabel": ["GradeText", "GradeLocalizeEvent", "WishlistString", "ItemString"],
-  "Soccer.GachaGradeRateTableRowVM": ["GradeLabel", "Rate1To9Text", "Rate10Text", "RatePityText"],
-  "Soccer.GachaGradeRateTableVM": ["PityColumnHeaderText", "RowVMTemplate", "<RowVMs>k__BackingField"],
+  "Soccer.GachaRateTableGradeLabel": [
+    "GradeText",
+    "GradeLocalizeEvent",
+    "WishlistString",
+    "ItemString",
+  ],
+  "Soccer.GachaGradeRateTableRowVM": [
+    "GradeLabel",
+    "Rate1To9Text",
+    "Rate10Text",
+    "RatePityText",
+  ],
+  "Soccer.GachaGradeRateTableVM": [
+    "PityColumnHeaderText",
+    "RowVMTemplate",
+    "<RowVMs>k__BackingField",
+  ],
   "Soccer.GachaDrawPresentationVM": [
     "WipeManager",
     "MainCanvasGroup",
@@ -2947,7 +3333,11 @@ export default {
     "<SkipAll>k__BackingField",
     "<StopTimelineOnSkip>k__BackingField",
   ],
-  "Soccer.GachaPresentationVariation": ["VariationName", "TrackNamesToActivate", "ObjectsToActivate"],
+  "Soccer.GachaPresentationVariation": [
+    "VariationName",
+    "TrackNamesToActivate",
+    "ObjectsToActivate",
+  ],
   "Soccer.GachaProductObtainPresentationVM": [
     "CharacterElementUIs",
     "CharacterPreferredPositionUIs",
@@ -2965,7 +3355,12 @@ export default {
   "Soccer.Guild": ["<Raw>k__BackingField", "<Exp>k__BackingField"],
   "Soccer.GuildEmblemDefinition": ["Font", "LayerFixedColors"],
   "Soccer.GuildEmblemUserColorSettings": ["UserColors"],
-  "Soccer.GuildManageService": ["LoggedInUserModel", "GuildModel", "NetworkModel", "ChatModel"],
+  "Soccer.GuildManageService": [
+    "LoggedInUserModel",
+    "GuildModel",
+    "NetworkModel",
+    "ChatModel",
+  ],
   "Soccer.GuildModel": [
     "<LoggedInUserModel>k__BackingField",
     "NetworkModel",
@@ -2982,7 +3377,11 @@ export default {
     "<GuildMemberExtraCupProgresses>k__BackingField",
     "<GuildMemberExtraCupProgressExpiresAt>k__BackingField",
   ],
-  "Soccer.GuildContributionAwardMemberView": ["GuildModel", "YesterdayContributionText", "MemberView"],
+  "Soccer.GuildContributionAwardMemberView": [
+    "GuildModel",
+    "YesterdayContributionText",
+    "MemberView",
+  ],
   "Soccer.GuildContributionAwardVM": ["AwardMemberViews"],
   "Soccer.GuildWeeklyContributionRewardListItemVM": [
     "ContributionRangeText",
@@ -3019,7 +3418,11 @@ export default {
     "<SelectedSymbol>k__BackingField",
     "<SelectedSymbolColor>k__BackingField",
   ],
-  "Soccer.GuildEmblemEditorPaletteVM": ["toggle", "Image", "<Index>k__BackingField"],
+  "Soccer.GuildEmblemEditorPaletteVM": [
+    "toggle",
+    "Image",
+    "<Index>k__BackingField",
+  ],
   "Soccer.GuildEmblemEditorPartSelectorVM": [
     "UserColorSettings",
     "IsFrame",
@@ -3064,9 +3467,22 @@ export default {
     "<Cts>k__BackingField",
     "<Initialized>k__BackingField",
   ],
-  "Soccer.GuildEmblemVM": ["FrameVM", "SymbolVM", "<Emblem>k__BackingField", "<Cts>k__BackingField"],
-  "Soccer.GuildEntryFormConfirmationDialog": ["EntryFormView", "TitleText", "MessageText"],
-  "Soccer.GuildEntryFormYesNoDialog": ["EntryFormView", "TitleText", "MessageText"],
+  "Soccer.GuildEmblemVM": [
+    "FrameVM",
+    "SymbolVM",
+    "<Emblem>k__BackingField",
+    "<Cts>k__BackingField",
+  ],
+  "Soccer.GuildEntryFormConfirmationDialog": [
+    "EntryFormView",
+    "TitleText",
+    "MessageText",
+  ],
+  "Soccer.GuildEntryFormYesNoDialog": [
+    "EntryFormView",
+    "TitleText",
+    "MessageText",
+  ],
   "Soccer.PendingGuildEntryFormItemVM": [
     "EntryFormView",
     "AcceptButton",
@@ -3244,9 +3660,23 @@ export default {
     "EmblemEditorVM",
     "<Rank>k__BackingField",
   ],
-  "Soccer.GuildVM": ["PageOpenRequestStore", "GuildModel", "LoggedInUserModel", "MyGuildVM", "GuildFinderVM"],
-  "Soccer.GuildMemberConfirmationDialog": ["MemberView", "TitleText", "MessageText"],
-  "Soccer.GuildMemberListItemVM": ["MemberView", "Button", "<Member>k__BackingField"],
+  "Soccer.GuildVM": [
+    "PageOpenRequestStore",
+    "GuildModel",
+    "LoggedInUserModel",
+    "MyGuildVM",
+    "GuildFinderVM",
+  ],
+  "Soccer.GuildMemberConfirmationDialog": [
+    "MemberView",
+    "TitleText",
+    "MessageText",
+  ],
+  "Soccer.GuildMemberListItemVM": [
+    "MemberView",
+    "Button",
+    "<Member>k__BackingField",
+  ],
   "Soccer.GuildMemberListVM": [
     "PageOpenRequestStore",
     "GuildModel",
@@ -3276,7 +3706,12 @@ export default {
     "ViceLeaderObjects",
     "MemberObjects",
   ],
-  "Soccer.GuildMemberYesNoDialog": ["MemberView", "TitleText", "MessageText", "CautionText"],
+  "Soccer.GuildMemberYesNoDialog": [
+    "MemberView",
+    "TitleText",
+    "MessageText",
+    "CautionText",
+  ],
   "Soccer.ManageGuildMemberVM": [
     "PageOpenRequestStore",
     "UILayerManager",
@@ -3325,7 +3760,12 @@ export default {
     "DisbandButton",
   ],
   "Soccer.GuildRankListItemVM": ["Button", "RankText", "DescriptionText"],
-  "Soccer.GuildRankListPane": ["GuildModel", "ItemVMTemplate", "LoopScrollRect", "<LoopScrollBuilder>k__BackingField"],
+  "Soccer.GuildRankListPane": [
+    "GuildModel",
+    "ItemVMTemplate",
+    "LoopScrollRect",
+    "<LoopScrollBuilder>k__BackingField",
+  ],
   "Soccer.MyGuildMainOperationPane": [
     "RankingButton",
     "MissionButton",
@@ -3377,7 +3817,12 @@ export default {
     "<CurrentPane>k__BackingField",
     "<OpenReq>k__BackingField",
   ],
-  "Soccer.BeginnerMissionButton": ["LoggedInUserModel", "MissionModel", "PageOpenRequestStore", "Button"],
+  "Soccer.BeginnerMissionButton": [
+    "LoggedInUserModel",
+    "MissionModel",
+    "PageOpenRequestStore",
+    "Button",
+  ],
   "Soccer.BeginnerMissionListVM": [
     "LoggedInUserModel",
     "MissionModel",
@@ -3396,9 +3841,22 @@ export default {
   ],
   "Soccer.BeginnerMissionTab": ["TabText", "Toggle", "RewardBadge"],
   "Soccer.HelpButtonVM": ["WebpageModel", "Button", "Page"],
-  "Soccer.HideHomeUIButton": ["Button", "HideRoot", "MenuRoot", "RestoreButton"],
-  "Soccer.HomeButtonVM": ["PageOpenRequestStore", "Button", "WipeManager", "UseWipe"],
-  "Soccer.HomeClubTotalPowerVM": ["LoggedInUserModel", "ClubTotalPowerLocalizeStringEvent"],
+  "Soccer.HideHomeUIButton": [
+    "Button",
+    "HideRoot",
+    "MenuRoot",
+    "RestoreButton",
+  ],
+  "Soccer.HomeButtonVM": [
+    "PageOpenRequestStore",
+    "Button",
+    "WipeManager",
+    "UseWipe",
+  ],
+  "Soccer.HomeClubTotalPowerVM": [
+    "LoggedInUserModel",
+    "ClubTotalPowerLocalizeStringEvent",
+  ],
   "Soccer.HomeFooterVM": [
     "Wipe",
     "LoggedInUserModel",
@@ -3505,7 +3963,12 @@ export default {
     "ScoutButtonForTutorial",
     "ClubHallButtonForTutorial",
   ],
-  "Soccer.HomeWalletVM": ["LoggedInUserModel", "WalletVM", "StoreButton", "PageOpenRequestStore"],
+  "Soccer.HomeWalletVM": [
+    "LoggedInUserModel",
+    "WalletVM",
+    "StoreButton",
+    "PageOpenRequestStore",
+  ],
   "Soccer.MenuVM": [
     "PageOpenRequestStore",
     "UIAnimator",
@@ -3562,7 +4025,12 @@ export default {
     "<IsUnlocked>k__BackingField",
     "<UnlockConditionMaster>k__BackingField",
   ],
-  "Soccer.InaboardEventBannerView": ["Button", "LeftBannerImage", "RightBannerImage", "eventMaster"],
+  "Soccer.InaboardEventBannerView": [
+    "Button",
+    "LeftBannerImage",
+    "RightBannerImage",
+    "eventMaster",
+  ],
   "Soccer.InaboardPickUpItems": [
     "MainStoryPickUpItems",
     "RaidPickUpItems",
@@ -3590,7 +4058,12 @@ export default {
     "Wipe",
     "<OpenReq>k__BackingField",
   ],
-  "Soccer.InalinkMessageConfig": ["BaseDelayMs", "DelayPerCharacterMs", "MaxDelayMs", "ScrollDuration"],
+  "Soccer.InalinkMessageConfig": [
+    "BaseDelayMs",
+    "DelayPerCharacterMs",
+    "MaxDelayMs",
+    "ScrollDuration",
+  ],
   "Soccer.ScenarioNameReplacer": ["UserNamePlaceholder", "TeamNamePlaceholder"],
   "Soccer.InalinkChoiceStore": ["ChoiceKeyPrefix"],
   "Soccer.InalinkViewer": ["MessageListView", "ThreadCode"],
@@ -3653,7 +4126,11 @@ export default {
     "callStartTime",
     "isCallActive",
   ],
-  "Soccer.InalinkChoiceChooserView": ["ChoiceViewTemplate", "<ChoiceVMs>k__BackingField", "onScrollRequested"],
+  "Soccer.InalinkChoiceChooserView": [
+    "ChoiceViewTemplate",
+    "<ChoiceVMs>k__BackingField",
+    "onScrollRequested",
+  ],
   "Soccer.InalinkChoiceView": ["ChoiceText", "Button"],
   "Soccer.InalinkDetailDialogView": [
     "Icon",
@@ -3666,7 +4143,11 @@ export default {
     "ItemIconTemplate",
     "itemIcons",
   ],
-  "Soccer.InalinkFinishedChoiceMessageView": ["MessageText", "<Message>k__BackingField", "<Master>k__BackingField"],
+  "Soccer.InalinkFinishedChoiceMessageView": [
+    "MessageText",
+    "<Message>k__BackingField",
+    "<Master>k__BackingField",
+  ],
   "Soccer.InalinkGroupListVM": [
     "InalinkModel",
     "GroupVMTemplate",
@@ -3741,7 +4222,11 @@ export default {
     "NotificationSoundPlayRequest",
     "<ThreadQueue>k__BackingField",
   ],
-  "Soccer.InalinkPictureHistoryView": ["CloseButton", "PictureThumbnailViewTemplate", "<ChildViews>k__BackingField"],
+  "Soccer.InalinkPictureHistoryView": [
+    "CloseButton",
+    "PictureThumbnailViewTemplate",
+    "<ChildViews>k__BackingField",
+  ],
   "Soccer.InalinkPictureThumbnailView": [
     "BigPictureReference",
     "Image",
@@ -3759,7 +4244,12 @@ export default {
     "SkitReference",
     "WipeManager",
   ],
-  "Soccer.InalinkSortDialogView": ["SmartToggleGroup", "CloseButton", "selectedOption", "onSortOptionSelected"],
+  "Soccer.InalinkSortDialogView": [
+    "SmartToggleGroup",
+    "CloseButton",
+    "selectedOption",
+    "onSortOptionSelected",
+  ],
   "Soccer.InalinkSortType": ["value__", "Latest", "Unread", "Trust"],
   "Soccer.InalinkSpeechMessageView": [
     "LoggedInUserModel",
@@ -3781,7 +4271,12 @@ export default {
     "<Master>k__BackingField",
   ],
   "Soccer.InalinkSystemMessageView": ["Text"],
-  "Soccer.InalinkTabGroupVM": ["ToggleGroup", "PersonalBadge", "EventBadge", "selectedTab"],
+  "Soccer.InalinkTabGroupVM": [
+    "ToggleGroup",
+    "PersonalBadge",
+    "EventBadge",
+    "selectedTab",
+  ],
   "Soccer.InalinkVM": [
     "LoggedInUserModel",
     "WipeManager",
@@ -3798,7 +4293,12 @@ export default {
     "<ObtainedRewardsDialog>k__BackingField",
     "<OpenReq>k__BackingField",
   ],
-  "Soccer.InalinkVoiceMessageView": ["PlayButton", "MessageText", "message", "playbackCts"],
+  "Soccer.InalinkVoiceMessageView": [
+    "PlayButton",
+    "MessageText",
+    "message",
+    "playbackCts",
+  ],
   "Soccer.ConsumableItemDetailDialog": [
     "LoggedInUserModel",
     "TrainingModel",
@@ -3830,7 +4330,11 @@ export default {
     "quantity",
     "requireQuantityForDrawOne",
   ],
-  "Soccer.FocusTrainingRewardView": ["LevelText", "ItemIcon", "PerHourStringEvent"],
+  "Soccer.FocusTrainingRewardView": [
+    "LevelText",
+    "ItemIcon",
+    "PerHourStringEvent",
+  ],
   "Soccer.InventoryFilterVM": [
     "UILayerManager",
     "ItemTypeToggleGroup",
@@ -3838,8 +4342,22 @@ export default {
     "CloseButtons",
     "selectedItemCategory",
   ],
-  "Soccer.InventoryItemCategory": ["value__", "All", "LevelUp", "Token", "Present", "Equipment"],
-  "Soccer.InventoryItemView": ["ItemIcon", "LockRoot", "LockText", "LockMessageFormat", "Button", "Badge"],
+  "Soccer.InventoryItemCategory": [
+    "value__",
+    "All",
+    "LevelUp",
+    "Token",
+    "Present",
+    "Equipment",
+  ],
+  "Soccer.InventoryItemView": [
+    "ItemIcon",
+    "LockRoot",
+    "LockText",
+    "LockMessageFormat",
+    "Button",
+    "Badge",
+  ],
   "Soccer.InventoryPage": [
     "PageOpenRequestStore",
     "LoggedInUserModel",
@@ -3862,7 +4380,10 @@ export default {
     "<LoopScrollBuilder>k__BackingField",
     "<FilterCategory>k__BackingField",
   ],
-  "Soccer.CurrencyIconImage": ["InitWithVirtualCurrencyType", "VirtualCurrencyType"],
+  "Soccer.CurrencyIconImage": [
+    "InitWithVirtualCurrencyType",
+    "VirtualCurrencyType",
+  ],
   "Soccer.ItemDetailDialog": [
     "Path",
     "LoggedInUserModel",
@@ -3969,7 +4490,10 @@ export default {
     "<UserLocalStorages>k__BackingField",
     "<CurrentUser>k__BackingField",
   ],
-  "Soccer.ThreadCodeAndMessageIndex": ["<ThreadCode>k__BackingField", "<MessageIndex>k__BackingField"],
+  "Soccer.ThreadCodeAndMessageIndex": [
+    "<ThreadCode>k__BackingField",
+    "<MessageIndex>k__BackingField",
+  ],
   "Soccer.UserLocalStorage": [
     "<UserId>k__BackingField",
     "<InalinkThreadCodeToReadMessageIndex>k__BackingField",
@@ -4023,7 +4547,11 @@ export default {
   ],
   "Soccer.ValueTupleSource": ["m_Formatter"],
   "Soccer.LoginBonus": ["<Raw>k__BackingField", "<Master>k__BackingField"],
-  "Soccer.LoginBonusModel": ["NetworkModel", "<LoggedInUserModel>k__BackingField", "<CodeToLoginBonus>k__BackingField"],
+  "Soccer.LoginBonusModel": [
+    "NetworkModel",
+    "<LoggedInUserModel>k__BackingField",
+    "<CodeToLoginBonus>k__BackingField",
+  ],
   "Soccer.LoginBonusBannerView": [
     "LoggedInUserModel",
     "BannerImageLoader",
@@ -4235,7 +4763,11 @@ export default {
     "<Items>k__BackingField",
     "<CurrentShowPassive>k__BackingField",
   ],
-  "Soccer.AwakeningPassiveListItem": ["AwakingTierSwitcher", "Passive", "LearnedSwitch"],
+  "Soccer.AwakeningPassiveListItem": [
+    "AwakingTierSwitcher",
+    "Passive",
+    "LearnedSwitch",
+  ],
   "Soccer.ClubMemberWithLevelUpSimulation": [
     "<LoggedInUserModel>k__BackingField",
     "<Member>k__BackingField",
@@ -4247,8 +4779,16 @@ export default {
     "<IsRegular>k__BackingField",
     "<MaxAllowedLevelBasedOnGap>k__BackingField",
   ],
-  "Soccer.LevelUpItems": ["<Exps>k__BackingField", "<Coins>k__BackingField", "<Points>k__BackingField"],
-  "Soccer.MemberAffinityButtonVM": ["TutorialModel", "AffinityButton", "AffinityBadge"],
+  "Soccer.LevelUpItems": [
+    "<Exps>k__BackingField",
+    "<Coins>k__BackingField",
+    "<Points>k__BackingField",
+  ],
+  "Soccer.MemberAffinityButtonVM": [
+    "TutorialModel",
+    "AffinityButton",
+    "AffinityBadge",
+  ],
   "Soccer.MemberAwakenButtonVM": [
     "LoggedInUserModel",
     "RequiredItemIconTemplate",
@@ -4290,7 +4830,10 @@ export default {
     "affinityGaugeCts",
     "<OnAffinityItemGifted>k__BackingField",
   ],
-  "Soccer.MemberDetailAwakenDialogArgs": ["<Member>k__BackingField", "<PageOpenRequestFactory>k__BackingField"],
+  "Soccer.MemberDetailAwakenDialogArgs": [
+    "<Member>k__BackingField",
+    "<PageOpenRequestFactory>k__BackingField",
+  ],
   "Soccer.MemberDetailAwakenDialogVM": [
     "LoggedInUserModel",
     "LoggedInUserService",
@@ -4404,7 +4947,15 @@ export default {
     "<CharacterVoicePlayer>k__BackingField",
     "<PlayerVoiceId>k__BackingField",
   ],
-  "Soccer.MemberDetailParameterGrowthForEffectVM": ["TotalPower", "Kick", "Technique", "Block", "Catch", "Speed", "TP"],
+  "Soccer.MemberDetailParameterGrowthForEffectVM": [
+    "TotalPower",
+    "Kick",
+    "Technique",
+    "Block",
+    "Catch",
+    "Speed",
+    "TP",
+  ],
   "Soccer.MemberDetailParameterVM": [
     "KickText",
     "TechniqueText",
@@ -4414,7 +4965,11 @@ export default {
     "MaxTPText",
     "PreferredAreaVM",
   ],
-  "Soccer.MemberDetailPassiveDetailDialogVM": ["UILayerManager", "DetailVM", "CloseButton"],
+  "Soccer.MemberDetailPassiveDetailDialogVM": [
+    "UILayerManager",
+    "DetailVM",
+    "CloseButton",
+  ],
   "Soccer.MemberDetailPassiveDetailVM": [
     "LevelText",
     "LevelFormat",
@@ -4473,7 +5028,11 @@ export default {
     "BeforePassiveVM",
     "PassiveVM",
   ],
-  "Soccer.MemberDetailSpecialMoveDetailDialogVM": ["UILayerManager", "DetailVM", "CloseButton"],
+  "Soccer.MemberDetailSpecialMoveDetailDialogVM": [
+    "UILayerManager",
+    "DetailVM",
+    "CloseButton",
+  ],
   "Soccer.MemberDetailSpecialMoveDetailVM": [
     "ElementMatchBadge",
     "LevelText",
@@ -4546,7 +5105,13 @@ export default {
     "<OnLearn>k__BackingField",
     "<OnLevelUp>k__BackingField",
   ],
-  "Soccer.MemberDetailStatusDetailVM": ["UIAnimator", "ParameterVM", "PassiveListVM", "BackgroundVM", "CloseButton"],
+  "Soccer.MemberDetailStatusDetailVM": [
+    "UIAnimator",
+    "ParameterVM",
+    "PassiveListVM",
+    "BackgroundVM",
+    "CloseButton",
+  ],
   "Soccer.MemberGrowthComparisonView": [
     "BeforeCharacterIcon",
     "AfterCharacterIcon",
@@ -4593,7 +5158,11 @@ export default {
     "MaxLevelRoot",
     "<CurrentMember>k__BackingField",
   ],
-  "Soccer.ModifierPassiveFinalizeYesNoDialog": ["Result", "Detail", "<CurrentShowPassive>k__BackingField"],
+  "Soccer.ModifierPassiveFinalizeYesNoDialog": [
+    "Result",
+    "Detail",
+    "<CurrentShowPassive>k__BackingField",
+  ],
   "Soccer.ModifierPassiveListDialog": [
     "Detail",
     "PassiveTemplate",
@@ -4635,7 +5204,11 @@ export default {
     "Detail",
     "<CurrentShowParams>k__BackingField",
   ],
-  "Soccer.ObtainedAffinityRewardsDialogView": ["FromRankText", "ToRankText", "ObtainedRewardsDialogView"],
+  "Soccer.ObtainedAffinityRewardsDialogView": [
+    "FromRankText",
+    "ToRankText",
+    "ObtainedRewardsDialogView",
+  ],
   "Soccer.OutGameCharacter3DStudioCameraPose": [
     "value__",
     "Front",
@@ -4655,7 +5228,14 @@ export default {
     "cameraViewToCameraTransform",
     "<IsInitialized>k__BackingField",
   ],
-  "Soccer.OutGameCharacterAnimationHash": ["Stand", "Grow", "RaidFW", "RaidGK", "MatchCardA", "MatchCardB"],
+  "Soccer.OutGameCharacterAnimationHash": [
+    "Stand",
+    "Grow",
+    "RaidFW",
+    "RaidGK",
+    "MatchCardA",
+    "MatchCardB",
+  ],
   "Soccer.OutGameCharacter3DStudioVM": [
     "CharacterLocator",
     "Camera",
@@ -4666,8 +5246,18 @@ export default {
     "<StandingPoint>k__BackingField",
     "<RenderTex>k__BackingField",
   ],
-  "Soccer.OutGameCharacterPlayerVM": ["RootAnimator", "<Animator>k__BackingField", "<Master>k__BackingField"],
-  "Soccer.CharacterInformationView": ["IconImage", "SubNameText", "NameText", "ElementUIs", "PositionUIs"],
+  "Soccer.OutGameCharacterPlayerVM": [
+    "RootAnimator",
+    "<Animator>k__BackingField",
+    "<Master>k__BackingField",
+  ],
+  "Soccer.CharacterInformationView": [
+    "IconImage",
+    "SubNameText",
+    "NameText",
+    "ElementUIs",
+    "PositionUIs",
+  ],
   "Soccer.SpecialMoveLearnConfirmationVM": [
     "UILayerManager",
     "CharacterInformation",
@@ -4740,8 +5330,17 @@ export default {
     "UIAnimator",
     "<SingleExecutionLock>k__BackingField",
   ],
-  "Soccer.Mission": ["<Master>k__BackingField", "rawProgress", "rawCompletedMission", "dependMission"],
-  "Soccer.MissionGroup": ["<Master>k__BackingField", "<Missions>k__BackingField", "rawPointRewardProgress"],
+  "Soccer.Mission": [
+    "<Master>k__BackingField",
+    "rawProgress",
+    "rawCompletedMission",
+    "dependMission",
+  ],
+  "Soccer.MissionGroup": [
+    "<Master>k__BackingField",
+    "<Missions>k__BackingField",
+    "rawPointRewardProgress",
+  ],
   "Soccer.MissionModel": [
     "NetworkModel",
     "<LoggedInUserModel>k__BackingField",
@@ -4772,7 +5371,12 @@ export default {
     "EventStory",
     "EventConnectionBoard",
   ],
-  "Soccer.EventMissionListVM": ["LogoImage", "BannerImage", "PeriodView", "<OpenReq>k__BackingField"],
+  "Soccer.EventMissionListVM": [
+    "LogoImage",
+    "BannerImage",
+    "PeriodView",
+    "<OpenReq>k__BackingField",
+  ],
   "Soccer.MissionGroupHeaderView": [
     "SubTitle",
     "MissionRemainingTime",
@@ -4791,8 +5395,17 @@ export default {
     "GlowEffect",
     "ObtainedObject",
   ],
-  "Soccer.MissionGroupPointRewardsView": ["PointBar", "RewardViews", "<MissionGroup>k__BackingField"],
-  "Soccer.MissionGroupTab": ["TabName", "Toggle", "Badge", "<GroupProperty>k__BackingField"],
+  "Soccer.MissionGroupPointRewardsView": [
+    "PointBar",
+    "RewardViews",
+    "<MissionGroup>k__BackingField",
+  ],
+  "Soccer.MissionGroupTab": [
+    "TabName",
+    "Toggle",
+    "Badge",
+    "<GroupProperty>k__BackingField",
+  ],
   "Soccer.MissionItemView": [
     "TutorialModel",
     "ConditionText",
@@ -4855,7 +5468,14 @@ export default {
     "<webReq>5__2",
     "<>u__1",
   ],
-  "<DownloadMasterDataAsync>d__36": ["<>1__state", "<>t__builder", "<>4__this", "masterDataHost", "ct", "<>u__1"],
+  "<DownloadMasterDataAsync>d__36": [
+    "<>1__state",
+    "<>t__builder",
+    "<>4__this",
+    "masterDataHost",
+    "ct",
+    "<>u__1",
+  ],
   "Soccer.NetworkModel": [
     "AuthService",
     "Env",
@@ -4870,7 +5490,13 @@ export default {
     "RetryIntervalMultiplier",
   ],
   "Soccer.AuthenticationType": ["value__", "Mock", "Firebase"],
-  "Soccer.ServerEnv": ["name", "serverUrl", "chatUrl", "authenticationType", "googleOauthWebClientId"],
+  "Soccer.ServerEnv": [
+    "name",
+    "serverUrl",
+    "chatUrl",
+    "authenticationType",
+    "googleOauthWebClientId",
+  ],
   "Soccer.ServerEnvDefinition": [
     "<Name>k__BackingField",
     "<ServerUrl>k__BackingField",
@@ -4879,7 +5505,11 @@ export default {
     "<GoogleOauthClientId>k__BackingField",
     "Envs",
   ],
-  "Soccer.ObtainedRewardsDialogItemView": ["GetEffectAnimator", "ItemIcon", "ItemGetEffectAnimationHash"],
+  "Soccer.ObtainedRewardsDialogItemView": [
+    "GetEffectAnimator",
+    "ItemIcon",
+    "ItemGetEffectAnimationHash",
+  ],
   "Soccer.ObtainedRewardsDialogView": [
     "UILayerManager",
     "DefaultDialogUIAnimator",
@@ -4908,7 +5538,11 @@ export default {
     "itemViews",
     "<AnimationCts>k__BackingField",
   ],
-  "Soccer.Offer": ["<Master>k__BackingField", "<RawOffer>k__BackingField", "<IsRead>k__BackingField"],
+  "Soccer.Offer": [
+    "<Master>k__BackingField",
+    "<RawOffer>k__BackingField",
+    "<IsRead>k__BackingField",
+  ],
   "Soccer.OfferModel": [
     "NetworkModel",
     "StoreService",
@@ -4951,7 +5585,12 @@ export default {
     "<Offer>k__BackingField",
     "<RemainingTimeArguments>k__BackingField",
   ],
-  "Soccer.OfferListVM": ["OfferModel", "LoggedInUserModel", "ItemVMTemplate", "<ItemVMs>k__BackingField"],
+  "Soccer.OfferListVM": [
+    "OfferModel",
+    "LoggedInUserModel",
+    "ItemVMTemplate",
+    "<ItemVMs>k__BackingField",
+  ],
   "Soccer.OfferStepVM": [
     "OfferModel",
     "ItemVMTemplate",
@@ -4997,8 +5636,14 @@ export default {
     "<Replay>k__BackingField",
     "<DebugPlaywrightBook>k__BackingField",
   ],
-  "Soccer.BattlePassOpenRequest": ["<BackRequest>k__BackingField", "<CurrentPageBackParams>k__BackingField"],
-  "Soccer.BeginnerMissionOpenRequest": ["<BackRequest>k__BackingField", "<FocusMission>k__BackingField"],
+  "Soccer.BattlePassOpenRequest": [
+    "<BackRequest>k__BackingField",
+    "<CurrentPageBackParams>k__BackingField",
+  ],
+  "Soccer.BeginnerMissionOpenRequest": [
+    "<BackRequest>k__BackingField",
+    "<FocusMission>k__BackingField",
+  ],
   "Soccer.CacheClearSceneOpenRequest": ["<BackRequest>k__BackingField"],
   "Soccer.ClubHallOpenRequest": [
     "<BackRequest>k__BackingField",
@@ -5014,7 +5659,10 @@ export default {
     "<ViewParams>k__BackingField",
   ],
   "Soccer.ClubHouseOpenRequest": ["<BackRequest>k__BackingField"],
-  "Soccer.ConnectionBoardOpenRequest": ["<BackRequest>k__BackingField", "<Context>k__BackingField"],
+  "Soccer.ConnectionBoardOpenRequest": [
+    "<BackRequest>k__BackingField",
+    "<Context>k__BackingField",
+  ],
   "Soccer.EventConnectionBoardOpenRequest": [
     "<BackRequest>k__BackingField",
     "<Context>k__BackingField",
@@ -5030,8 +5678,14 @@ export default {
     "<Context>k__BackingField",
     "<ChapterCode>k__BackingField",
   ],
-  "Soccer.EventTopOpenRequest": ["<BackRequest>k__BackingField", "<EventCode>k__BackingField"],
-  "Soccer.ExtraCupOpenRequest": ["<BackRequest>k__BackingField", "<Context>k__BackingField"],
+  "Soccer.EventTopOpenRequest": [
+    "<BackRequest>k__BackingField",
+    "<EventCode>k__BackingField",
+  ],
+  "Soccer.ExtraCupOpenRequest": [
+    "<BackRequest>k__BackingField",
+    "<Context>k__BackingField",
+  ],
   "Soccer.FormationEditorOpenRequest": [
     "<BackRequest>k__BackingField",
     "<Context>k__BackingField",
@@ -5048,7 +5702,10 @@ export default {
     "<SelectedMember>k__BackingField",
     "<Scroll>k__BackingField",
   ],
-  "Soccer.GachaOpenRequest": ["<BackRequest>k__BackingField", "<GachaMachineCode>k__BackingField"],
+  "Soccer.GachaOpenRequest": [
+    "<BackRequest>k__BackingField",
+    "<GachaMachineCode>k__BackingField",
+  ],
   "Soccer.GuildOpenRequest": [
     "<BackRequest>k__BackingField",
     "<MissionContext>k__BackingField",
@@ -5059,23 +5716,45 @@ export default {
   ],
   "Soccer.HomeSceneOpenRequest": ["<BackRequest>k__BackingField"],
   "Soccer.InaboardOpenRequest": ["<BackRequest>k__BackingField"],
-  "Soccer.InalinkOpenRequest": ["<BackRequest>k__BackingField", "<BattleContext>k__BackingField"],
+  "Soccer.InalinkOpenRequest": [
+    "<BackRequest>k__BackingField",
+    "<BattleContext>k__BackingField",
+  ],
   "Soccer.InventoryOpenRequest": ["<BackRequest>k__BackingField"],
   "Soccer.LoginBonusOpenRequest": ["<BackRequest>k__BackingField"],
   "Soccer.MailBoxOpenRequest": ["<BackRequest>k__BackingField"],
-  "Soccer.MainStoryOpenRequest": ["<BackRequest>k__BackingField", "<Context>k__BackingField"],
+  "Soccer.MainStoryOpenRequest": [
+    "<BackRequest>k__BackingField",
+    "<Context>k__BackingField",
+  ],
   "Soccer.MenuOpenRequest": ["<BackRequest>k__BackingField"],
-  "Soccer.MissionOpenRequest": ["<BackRequest>k__BackingField", "<Context>k__BackingField"],
-  "Soccer.MissionContext": ["<OpenGroup>k__BackingField", "<FocusMission>k__BackingField"],
-  "Soccer.NewsOpenRequest": ["<ScenePath>k__BackingField", "<BackRequest>k__BackingField"],
-  "Soccer.NewsOpenRequestForTitle": ["<ScenePath>k__BackingField", "<BackRequest>k__BackingField"],
+  "Soccer.MissionOpenRequest": [
+    "<BackRequest>k__BackingField",
+    "<Context>k__BackingField",
+  ],
+  "Soccer.MissionContext": [
+    "<OpenGroup>k__BackingField",
+    "<FocusMission>k__BackingField",
+  ],
+  "Soccer.NewsOpenRequest": [
+    "<ScenePath>k__BackingField",
+    "<BackRequest>k__BackingField",
+  ],
+  "Soccer.NewsOpenRequestForTitle": [
+    "<ScenePath>k__BackingField",
+    "<BackRequest>k__BackingField",
+  ],
   "Soccer.OptionOpenRequest": [
     "<BackRequest>k__BackingField",
     "<InitialTab>k__BackingField",
     "<ShowLegalInformation>k__BackingField",
   ],
   "Soccer.PageOpenRequest": ["<ScenePath>k__BackingField"],
-  "Soccer.PageOpenRequestStore": ["UILayerManager", "<Req>k__BackingField", "lastScenePath"],
+  "Soccer.PageOpenRequestStore": [
+    "UILayerManager",
+    "<Req>k__BackingField",
+    "lastScenePath",
+  ],
   "Soccer.PrologueTutorialOpenRequest": ["<BackRequest>k__BackingField"],
   "Soccer.PvpOpenRequest": [
     "<BackRequest>k__BackingField",
@@ -5096,12 +5775,21 @@ export default {
     "<RaidResult>k__BackingField",
     "<EntityOperationRes>k__BackingField",
   ],
-  "Soccer.ShopOpenRequest": ["<BackRequest>k__BackingField", "<FirstViewCategory>k__BackingField"],
-  "Soccer.StoreOpenRequest": ["<BackRequest>k__BackingField", "<StartCategory>k__BackingField"],
+  "Soccer.ShopOpenRequest": [
+    "<BackRequest>k__BackingField",
+    "<FirstViewCategory>k__BackingField",
+  ],
+  "Soccer.StoreOpenRequest": [
+    "<BackRequest>k__BackingField",
+    "<StartCategory>k__BackingField",
+  ],
   "Soccer.TitleSceneOpenRequest": ["<BackRequest>k__BackingField"],
   "Soccer.TrainingStageOpenRequest": ["<BackRequest>k__BackingField"],
   "Soccer.UserInvitationOpenRequest": ["<BackRequest>k__BackingField"],
-  "Soccer.UserProfileOpenRequest": ["<BackRequest>k__BackingField", "<UserId>k__BackingField"],
+  "Soccer.UserProfileOpenRequest": [
+    "<BackRequest>k__BackingField",
+    "<UserId>k__BackingField",
+  ],
   "Soccer.WorldOpenRequest": ["<BackRequest>k__BackingField"],
   "Soccer.AccountLinkAndRestoreVM": [
     "NetworkModel",
@@ -5123,7 +5811,12 @@ export default {
     "AccountLinkingInProgressMessage",
     "<IsInitialized>k__BackingField",
   ],
-  "Soccer.AccountProviderSelectorVM": ["GoogleButton", "AppleButton", "L5Button", "CloseButton"],
+  "Soccer.AccountProviderSelectorVM": [
+    "GoogleButton",
+    "AppleButton",
+    "L5Button",
+    "CloseButton",
+  ],
   "Soccer.ExternalAccountYesNoDialog": ["AgreeToggle", "Message"],
   "Soccer.OverwriteAccountOnRestoreYesNoDialog": [
     "LoggedInUserIdText",
@@ -5190,8 +5883,14 @@ export default {
   ],
   "Soccer.PlatformServicesManager": ["platformService"],
   "Soccer.PvpDailyAttemptCount": ["<UsedTotalCount>k__BackingField"],
-  "Soccer.PvpHistory": ["<RawHistory>k__BackingField", "<Replay>k__BackingField"],
-  "Soccer.PvpMatchingSlot": ["<RawSlot>k__BackingField", "<TeamDefinition>k__BackingField"],
+  "Soccer.PvpHistory": [
+    "<RawHistory>k__BackingField",
+    "<Replay>k__BackingField",
+  ],
+  "Soccer.PvpMatchingSlot": [
+    "<RawSlot>k__BackingField",
+    "<TeamDefinition>k__BackingField",
+  ],
   "Soccer.PvpModel": [
     "LoggedInUserModel",
     "NetworkModel",
@@ -5249,7 +5948,13 @@ export default {
     "<SingleExecutionLock>k__BackingField",
     "<Tcs>k__BackingField",
   ],
-  "Soccer.PvpPageVM": ["WipeManager", "PageOpenRequestStore", "LoggedInUserModel", "TopVM", "<OpenReq>k__BackingField"],
+  "Soccer.PvpPageVM": [
+    "WipeManager",
+    "PageOpenRequestStore",
+    "LoggedInUserModel",
+    "TopVM",
+    "<OpenReq>k__BackingField",
+  ],
   "Soccer.PvpRankRewardListItemVM": [
     "RankNameText",
     "RankEmblem",
@@ -5264,7 +5969,11 @@ export default {
     "<LoopScrollBuilder>k__BackingField",
     "<RankingRewards>k__BackingField",
   ],
-  "Soccer.PvpRankingRewardListItemVM": ["RankingRankRangeText", "RewardIconTemplate", "<ItemIcons>k__BackingField"],
+  "Soccer.PvpRankingRewardListItemVM": [
+    "RankingRankRangeText",
+    "RewardIconTemplate",
+    "<ItemIcons>k__BackingField",
+  ],
   "Soccer.PvpRankingVM": [
     "LoggedInUserModel",
     "GuildModel",
@@ -5437,7 +6146,11 @@ export default {
     "<Master>k__BackingField",
     "<SpeakerId>k__BackingField",
   ],
-  "Soccer.RaidResultRewardRoadMapNodeVM": ["CanvasGroup", "ScoreText", "Cleared"],
+  "Soccer.RaidResultRewardRoadMapNodeVM": [
+    "CanvasGroup",
+    "ScoreText",
+    "Cleared",
+  ],
   "Soccer.RaidResultVM": [
     "WipeManager",
     "RaidResultAnimator",
@@ -5479,7 +6192,10 @@ export default {
     "DelayedGaugeAnimationCurve",
     "BreakAnimationDuration",
   ],
-  "Soccer.RaidDailyScore": ["<GroupInCycle>k__BackingField", "<RawDailyScore>k__BackingField"],
+  "Soccer.RaidDailyScore": [
+    "<GroupInCycle>k__BackingField",
+    "<RawDailyScore>k__BackingField",
+  ],
   "Soccer.RaidGroup": [
     "<LastMembers>k__BackingField",
     "<RawRaidGroup>k__BackingField",
@@ -5538,7 +6254,11 @@ export default {
     "StageEffectDescriptionText",
     "recommendedCharacterIcons",
   ],
-  "Soccer.RaidFormationMemberVM": ["CharacterIconView", "RaidMemberRecommendUI", "<ClubMember>k__BackingField"],
+  "Soccer.RaidFormationMemberVM": [
+    "CharacterIconView",
+    "RaidMemberRecommendUI",
+    "<ClubMember>k__BackingField",
+  ],
   "Soccer.RaidPageVM": [
     "PageOpenRequestStore",
     "LoggedInUserModel",
@@ -5653,9 +6373,29 @@ export default {
     "<RaidMaster>k__BackingField",
     "<OpenedAt>k__BackingField",
   ],
-  "Soccer.UISwitcherByRaidDifficulty": ["Beginner", "Normal", "Hard", "VeryHard", "Hell", "Endless"],
-  "Soccer.RecommendLevel": ["value__", "Minus2", "Minus1", "Neutral", "Plus1", "Plus2"],
-  "Soccer.UISwitcherByRaidMemberRecommend": ["Minus2", "Minus1", "Neutral", "Plus1", "Plus2"],
+  "Soccer.UISwitcherByRaidDifficulty": [
+    "Beginner",
+    "Normal",
+    "Hard",
+    "VeryHard",
+    "Hell",
+    "Endless",
+  ],
+  "Soccer.RecommendLevel": [
+    "value__",
+    "Minus2",
+    "Minus1",
+    "Neutral",
+    "Plus1",
+    "Plus2",
+  ],
+  "Soccer.UISwitcherByRaidMemberRecommend": [
+    "Minus2",
+    "Minus1",
+    "Neutral",
+    "Plus1",
+    "Plus2",
+  ],
   "Soccer.ExtraCupModel": [
     "LoggedInUserModel",
     "NetworkModel",
@@ -5693,7 +6433,10 @@ export default {
     "u_charaShadowColor0",
     "u_charaShadowColor1",
   ],
-  "Soccer.CharacterLightingParametersStore": ["constantBufferMap", "<DefaultParameter>k__BackingField"],
+  "Soccer.CharacterLightingParametersStore": [
+    "constantBufferMap",
+    "<DefaultParameter>k__BackingField",
+  ],
   "Soccer.CharacterShaderParamsContainer": ["Parameters"],
   "Soccer.SetCharacterLightingParameterRenderPass": [
     "passName",
@@ -5701,7 +6444,10 @@ export default {
     "currentParameter",
     "parametersStore",
   ],
-  "Soccer.SetCharacterLightingParameterRendererFeature": ["DefaultCharacterLightingParameters", "pass"],
+  "Soccer.SetCharacterLightingParameterRendererFeature": [
+    "DefaultCharacterLightingParameters",
+    "pass",
+  ],
   "Soccer.ClearBackBufferRendererFeature": ["pass"],
   "Soccer.CopyPseudoBackBufferPass": ["blitMaterial"],
   "Soccer.CopyPseudoBackBufferRendererFeature": ["BlitShader", "copyPass"],
@@ -5773,12 +6519,34 @@ export default {
     "pass",
     "blitMaterial",
   ],
-  "Soccer.PostProcessOutlineRenderPass": ["DepthNormalsTex", "renderOutlineMaterial"],
+  "Soccer.PostProcessOutlineRenderPass": [
+    "DepthNormalsTex",
+    "renderOutlineMaterial",
+  ],
   "Soccer.PostProcessOutlineRendererFeature": ["OutlineShader", "pass"],
-  "Soccer.SampleAfterTransparentRenderFeature": ["BlitShader", "samplePass", "drawPass"],
-  "Soccer.SampleAfterTransparentRenderPass": ["CameraTransparentTexturePropertyId", "material", "blitShader"],
-  "Soccer.ScreenSpaceObjectRenderPass": ["passName", "layerMask", "renderScale", "blitMaterial"],
-  "Soccer.ScreenSpaceObjectRendererFeature": ["layerMask", "renderScale", "blitShader", "pass", "blitMaterial"],
+  "Soccer.SampleAfterTransparentRenderFeature": [
+    "BlitShader",
+    "samplePass",
+    "drawPass",
+  ],
+  "Soccer.SampleAfterTransparentRenderPass": [
+    "CameraTransparentTexturePropertyId",
+    "material",
+    "blitShader",
+  ],
+  "Soccer.ScreenSpaceObjectRenderPass": [
+    "passName",
+    "layerMask",
+    "renderScale",
+    "blitMaterial",
+  ],
+  "Soccer.ScreenSpaceObjectRendererFeature": [
+    "layerMask",
+    "renderScale",
+    "blitShader",
+    "pass",
+    "blitMaterial",
+  ],
   "Soccer.RequiredItemLinkVM": [
     "<ItemMasterWithQuantities>k__BackingField",
     "<GameContentType>k__BackingField",
@@ -5793,12 +6561,20 @@ export default {
     "gameContentType",
   ],
   "Soccer.RequiredItemVM": ["ItemIcon", "QuantityText", "CurrentQuantityText"],
-  "Soccer.RequiredMaterial": ["<ItemMasterWithQuantity>k__BackingField", "<CurrentQuantity>k__BackingField"],
+  "Soccer.RequiredMaterial": [
+    "<ItemMasterWithQuantity>k__BackingField",
+    "<CurrentQuantity>k__BackingField",
+  ],
   "Soccer.RequiredMaterialsDialogArgs": [
     "<RequiredMaterials>k__BackingField",
     "<PageOpenRequestFactory>k__BackingField",
   ],
-  "Soccer.RequiredMaterialsDialogVM": ["LoggedInUserModel", "CloseButtons", "RequiredMaterialsVM", "Path"],
+  "Soccer.RequiredMaterialsDialogVM": [
+    "LoggedInUserModel",
+    "CloseButtons",
+    "RequiredMaterialsVM",
+    "Path",
+  ],
   "Soccer.RequiredMaterialsVM": [
     "TutorialModel",
     "Wipe",
@@ -5811,7 +6587,11 @@ export default {
     "<disposables>k__BackingField",
     "MaxRequiredMaterials",
   ],
-  "Soccer.InputSerialCodeDialog": ["InputField", "DecideButton", "CancelButton"],
+  "Soccer.InputSerialCodeDialog": [
+    "InputField",
+    "DecideButton",
+    "CancelButton",
+  ],
   "Soccer.SerialCodeModel": [
     "NetworkModel",
     "LoggedInUserModel",
@@ -5826,8 +6606,15 @@ export default {
     "<CandidateMaster>k__BackingField",
     "<CharacterItemMaster>k__BackingField",
   ],
-  "Soccer.PurchaseRestrictShopItem": ["<Master>k__BackingField", "<Raw>k__BackingField"],
-  "Soccer.ShopService": ["NetworkModel", "LoggedInUserModel", "DiamondWalletService"],
+  "Soccer.PurchaseRestrictShopItem": [
+    "<Master>k__BackingField",
+    "<Raw>k__BackingField",
+  ],
+  "Soccer.ShopService": [
+    "NetworkModel",
+    "LoggedInUserModel",
+    "DiamondWalletService",
+  ],
   "Soccer.ConfirmItemConsumptionDialog": [
     "LoggedInUserModel",
     "ItemTextTemplate",
@@ -5854,7 +6641,13 @@ export default {
     "InstantTrainingCountBeforePaidObject",
     "InstantTrainingCountAfterPaidObject",
   ],
-  "Soccer.ShopCategoryVM": ["Toggle", "TutorialModel", "NameTextEvents", "IconLoaders", "<Master>k__BackingField"],
+  "Soccer.ShopCategoryVM": [
+    "Toggle",
+    "TutorialModel",
+    "NameTextEvents",
+    "IconLoaders",
+    "<Master>k__BackingField",
+  ],
   "Soccer.ShopConvertExcessSoulsDialogVM": [
     "LoggedInUserModel",
     "ShopService",
@@ -6000,7 +6793,11 @@ export default {
     "RequiredQuantityColorInsufficient",
     "resetTime",
   ],
-  "Soccer.ShopPurchaseResultView": ["ItemIconTemplate", "ItemIconAnimationProxy", "<ItemIcons>k__BackingField"],
+  "Soccer.ShopPurchaseResultView": [
+    "ItemIconTemplate",
+    "ItemIconAnimationProxy",
+    "<ItemIcons>k__BackingField",
+  ],
   "Soccer.AgeValidator": ["MaxAcceptableAge", "MinAcceptableAge"],
   "Soccer.AimingLinkError": ["<Message>k__BackingField"],
   "Soccer.DummyLinkServiceProvider": ["<NetworkModel>k__BackingField"],
@@ -6010,7 +6807,10 @@ export default {
     "<LoggedInUserModel>k__BackingField",
     "<L5iDModel>k__BackingField",
   ],
-  "Soccer.PurchaseRestrictStoreProduct": ["<Master>k__BackingField", "<Raw>k__BackingField"],
+  "Soccer.PurchaseRestrictStoreProduct": [
+    "<Master>k__BackingField",
+    "<Raw>k__BackingField",
+  ],
   "Soccer.StorePrice": [
     "<PaymentMethod>k__BackingField",
     "ItemMaster",
@@ -6067,8 +6867,17 @@ export default {
     "InvalidAgeInputMessageString",
     "Path",
   ],
-  "Soccer.ParentalConsentDialogVM": ["ConfirmToggle", "ConfirmButton", "CancelButtons", "Path"],
-  "Soccer.StoreCategoryItemVM": ["NameText", "Button", "<Category>k__BackingField"],
+  "Soccer.ParentalConsentDialogVM": [
+    "ConfirmToggle",
+    "ConfirmButton",
+    "CancelButtons",
+    "Path",
+  ],
+  "Soccer.StoreCategoryItemVM": [
+    "NameText",
+    "Button",
+    "<Category>k__BackingField",
+  ],
   "Soccer.BonusPassStoreContentVM": [
     "StoreService",
     "NormalPassVMTemplate",
@@ -6076,8 +6885,14 @@ export default {
     "<PassVMs>k__BackingField",
     "ConfirmItemConsumptionDialog",
   ],
-  "Soccer.ChargeStoreContentVM": ["StoreSimpleProductBannerViewTemplate", "StoreSimpleProductCardViewTemplate"],
-  "Soccer.LimitedTimeStoreContentVM": ["StoreSimpleProductBannerViewTemplate", "StoreSimpleProductCardViewTemplate"],
+  "Soccer.ChargeStoreContentVM": [
+    "StoreSimpleProductBannerViewTemplate",
+    "StoreSimpleProductCardViewTemplate",
+  ],
+  "Soccer.LimitedTimeStoreContentVM": [
+    "StoreSimpleProductBannerViewTemplate",
+    "StoreSimpleProductCardViewTemplate",
+  ],
   "Soccer.RegularlyRestockedStoreContentVM": [
     "DailyProductBannerViewTemplate",
     "DailyProductCardViewTemplate",
@@ -6086,8 +6901,16 @@ export default {
     "MonthlyProductBannerViewTemplate",
     "MonthlyProductCardViewTemplate",
   ],
-  "Soccer.SimpleStoreContentVM": ["StoreService", "ConfirmItemConsumptionDialog", "storeProductViews", "disposables"],
-  "Soccer.SpecialSaleStoreContentVM": ["StoreSimpleProductBannerViewTemplate", "StoreSimpleProductCardViewTemplate"],
+  "Soccer.SimpleStoreContentVM": [
+    "StoreService",
+    "ConfirmItemConsumptionDialog",
+    "storeProductViews",
+    "disposables",
+  ],
+  "Soccer.SpecialSaleStoreContentVM": [
+    "StoreSimpleProductBannerViewTemplate",
+    "StoreSimpleProductCardViewTemplate",
+  ],
   "Soccer.StoreContentBase": [
     "SmartToggle",
     "TabBadge",
@@ -6179,7 +7002,10 @@ export default {
     "ProductNameText",
     "<ProductItemIcons>k__BackingField",
   ],
-  "Soccer.StorePurchaseDialogParams": ["<StoreProduct>k__BackingField", "<Offer>k__BackingField"],
+  "Soccer.StorePurchaseDialogParams": [
+    "<StoreProduct>k__BackingField",
+    "<Offer>k__BackingField",
+  ],
   "Soccer.StorePurchaseDialogVM": [
     "LoggedInUserModel",
     "WebpageModel",
@@ -6219,7 +7045,10 @@ export default {
     "<Areas>k__BackingField",
     "<Stages>k__BackingField",
   ],
-  "Soccer.StoryBoardStage`2": ["<Master>k__BackingField", "<RawStage>k__BackingField"],
+  "Soccer.StoryBoardStage`2": [
+    "<Master>k__BackingField",
+    "<RawStage>k__BackingField",
+  ],
   "Soccer.StoryBoardAreaState": ["<UnlockedShown>k__BackingField"],
   "Soccer.StoryBoardStageState": [
     "<StageClearShown>k__BackingField",
@@ -6311,8 +7140,18 @@ export default {
     "<Master>k__BackingField",
     "<NextStageVMToLine>k__BackingField",
   ],
-  "Soccer.ConnectionBoardStageVMStoreBase`4": ["StageVMTemplate", "AreaCode", "<CodeToStageVM>k__BackingField"],
-  "Soccer.StoryBoardMapLine": ["Slider", "Graphics", "LockedColor", "UnlockedColor", "rect"],
+  "Soccer.ConnectionBoardStageVMStoreBase`4": [
+    "StageVMTemplate",
+    "AreaCode",
+    "<CodeToStageVM>k__BackingField",
+  ],
+  "Soccer.StoryBoardMapLine": [
+    "Slider",
+    "Graphics",
+    "LockedColor",
+    "UnlockedColor",
+    "rect",
+  ],
   "Soccer.StoryBoardMapVM": [
     "StagePlaceholders",
     "PlaceholderRoot",
@@ -6323,7 +7162,10 @@ export default {
     "currentStageMarkerTransform",
   ],
   "Soccer.StoryBoardPlayerVM": ["Animator", "showId", "defaultId", "hiddenId"],
-  "Soccer.StoryBoardRequirementDialog": ["MessageTextTemplate", "<MessageTexts>k__BackingField"],
+  "Soccer.StoryBoardRequirementDialog": [
+    "MessageTextTemplate",
+    "<MessageTexts>k__BackingField",
+  ],
   "Soccer.StoryBoardStagePlaceholder": ["StageCode", "Rect"],
   "Soccer.StoryBoardStageSelectVMBase`9": [
     "LoggedInUserModel",
@@ -6395,7 +7237,11 @@ export default {
     "<Master>k__BackingField",
     "<NextStageVMToLine>k__BackingField",
   ],
-  "Soccer.StoryStageVMStoreBase`4": ["StageVMTemplate", "AreaCode", "<CodeToStageVM>k__BackingField"],
+  "Soccer.StoryStageVMStoreBase`4": [
+    "StageVMTemplate",
+    "AreaCode",
+    "<CodeToStageVM>k__BackingField",
+  ],
   "Soccer.ConnectionBoardStage": [
     "<LoggedInUserModel>k__BackingField",
     "<ConnectionBoardModel>k__BackingField",
@@ -6413,7 +7259,10 @@ export default {
     "View",
     "<Area>k__BackingField",
   ],
-  "Soccer.ConnectionBoardAreaSelectorVM": ["LoggedInUserModel", "ConnectionBoardModel"],
+  "Soccer.ConnectionBoardAreaSelectorVM": [
+    "LoggedInUserModel",
+    "ConnectionBoardModel",
+  ],
   "Soccer.ConnectionBoardPageVM": [
     "ConnectionBoardModel",
     "PageOpenRequestStore",
@@ -6438,7 +7287,11 @@ export default {
     "SkipButton",
     "cts",
   ],
-  "Soccer.ConnectionBoardStageSelectVM": ["ConnectionBoardModel", "AreaSelectorVM", "RequiredMainStoryStageMessage"],
+  "Soccer.ConnectionBoardStageSelectVM": [
+    "ConnectionBoardModel",
+    "AreaSelectorVM",
+    "RequiredMainStoryStageMessage",
+  ],
   "Soccer.ConnectionBoardStageVMStore": ["ConnectionBoardModel"],
   "Soccer.EventConnectionBoardStage": [
     "<LoggedInUserModel>k__BackingField",
@@ -6455,7 +7308,10 @@ export default {
     "View",
     "<Area>k__BackingField",
   ],
-  "Soccer.EventConnectionBoardAreaSelectorVM": ["LoggedInUserModel", "EventConnectionBoardModel"],
+  "Soccer.EventConnectionBoardAreaSelectorVM": [
+    "LoggedInUserModel",
+    "EventConnectionBoardModel",
+  ],
   "Soccer.EventConnectionBoardPageVM": [
     "EventConnectionBoardModel",
     "PageOpenRequestStore",
@@ -6463,7 +7319,11 @@ export default {
     "<Context>k__BackingField",
     "<OpenReq>k__BackingField",
   ],
-  "Soccer.EventConnectionBoardStageSelectVM": ["EventConnectionBoardModel", "AreaSelectorVM", "LogoImage"],
+  "Soccer.EventConnectionBoardStageSelectVM": [
+    "EventConnectionBoardModel",
+    "AreaSelectorVM",
+    "LogoImage",
+  ],
   "Soccer.EventConnectionBoardStageVMStore": ["EventConnectionBoardModel"],
   "Soccer.EventStoryStage": [
     "<EventStoryModel>k__BackingField",
@@ -6487,7 +7347,12 @@ export default {
     "<Context>k__BackingField",
     "<OpenReq>k__BackingField",
   ],
-  "Soccer.EventStoryStageSelectVM": ["EventStoryModel", "AreaSelectorVM", "GoToHomeButtonForTutorial", "LogoImage"],
+  "Soccer.EventStoryStageSelectVM": [
+    "EventStoryModel",
+    "AreaSelectorVM",
+    "GoToHomeButtonForTutorial",
+    "LogoImage",
+  ],
   "Soccer.EventStoryStageVMStore": ["EventStoryModel"],
   "Soccer.MainStoryStage": [
     "<MainStoryModel>k__BackingField",
@@ -6496,7 +7361,12 @@ export default {
     "<CachedIsUnlocked>k__BackingField",
     "<AreAllDependingStagesClearedShown>k__BackingField",
   ],
-  "Soccer.MainStoryAreaListItemVM": ["LoggedInUserModel", "MainStoryModel", "View", "<Area>k__BackingField"],
+  "Soccer.MainStoryAreaListItemVM": [
+    "LoggedInUserModel",
+    "MainStoryModel",
+    "View",
+    "<Area>k__BackingField",
+  ],
   "Soccer.MainStoryAreaSelectorVM": ["LoggedInUserModel", "MainStoryModel"],
   "Soccer.MainStoryPageVM": [
     "MainStoryModel",
@@ -6506,8 +7376,16 @@ export default {
     "<Context>k__BackingField",
     "<OpenReq>k__BackingField",
   ],
-  "Soccer.ContentUnlockNotification": ["AnimationDuration", "UnlockedContentText"],
-  "Soccer.MainStoryAreaOpenEffectVM": ["Animator", "PlayWaitSeconds", "AreaNumberEvent", "AreaNameTexts"],
+  "Soccer.ContentUnlockNotification": [
+    "AnimationDuration",
+    "UnlockedContentText",
+  ],
+  "Soccer.MainStoryAreaOpenEffectVM": [
+    "Animator",
+    "PlayWaitSeconds",
+    "AreaNumberEvent",
+    "AreaNameTexts",
+  ],
   "Soccer.MainStoryStageSelectVM": [
     "MainStoryModel",
     "TutorialModel",
@@ -6689,8 +7567,19 @@ export default {
     "TrainingResultVM",
     "LeftSideVerticalLine",
   ],
-  "Soccer.InstantTrainingLargeButtonVM": ["FreeBadges", "PaidBadge", "FreeBadgeText", "PaidBadgeText", "CheckMarkRoot"],
-  "Soccer.InstantTrainingSmallButtonVM": ["FreeBadge", "PaidBadge", "PaidBadgeText", "CheckMarkRoot"],
+  "Soccer.InstantTrainingLargeButtonVM": [
+    "FreeBadges",
+    "PaidBadge",
+    "FreeBadgeText",
+    "PaidBadgeText",
+    "CheckMarkRoot",
+  ],
+  "Soccer.InstantTrainingSmallButtonVM": [
+    "FreeBadge",
+    "PaidBadge",
+    "PaidBadgeText",
+    "CheckMarkRoot",
+  ],
   "Soccer.TrainingResultVM": [
     "LoggedInUserModel",
     "TutorialModel",
@@ -6850,7 +7739,12 @@ export default {
     "<CurrentLocked>k__BackingField",
     "<MainStoryStageMasterToUnlockForMessage>k__BackingField",
   ],
-  "Soccer.ContentLockedToastVM": ["Path", "<LastToastVM>k__BackingField", "MessageEvent", "ShowDuration"],
+  "Soccer.ContentLockedToastVM": [
+    "Path",
+    "<LastToastVM>k__BackingField",
+    "MessageEvent",
+    "ShowDuration",
+  ],
   "Soccer.GoToUnlockedContentDialogVM": [
     "LoggedInUserModel",
     "PageOpenRequestStore",
@@ -6965,7 +7859,13 @@ export default {
   ],
   "Soccer.InputValidator": ["InputField"],
   "Soccer.IntegerImage": ["Image", "NumberSprites"],
-  "Soccer.IntegerSlider": ["Slider", "DisplayText", "PlusButton", "MinusButton", "onValueChanged"],
+  "Soccer.IntegerSlider": [
+    "Slider",
+    "DisplayText",
+    "PlusButton",
+    "MinusButton",
+    "onValueChanged",
+  ],
   "Soccer.MultiTemplateLoopScrollBuilder`2": [
     "<LoopScrollRect>k__BackingField",
     "<Data>k__BackingField",
@@ -6977,7 +7877,11 @@ export default {
     "<IsInfinite>k__BackingField",
   ],
   "Soccer.OverlayUI": ["<Instance>k__BackingField", "TapGuard"],
-  "Soccer.RemainingTimeView": ["TimeLimitText", "RemainingTimeLocalizeEvent", "remainingTimeArgs"],
+  "Soccer.RemainingTimeView": [
+    "TimeLimitText",
+    "RemainingTimeLocalizeEvent",
+    "remainingTimeArgs",
+  ],
   "Soccer.SafeAreaBounds": [
     "ControlEdges",
     "TopOffsetFallbackValue",
@@ -7080,7 +7984,11 @@ export default {
     "<CurrentState>k__BackingField",
   ],
   "Soccer.SmartToggleGroup": ["m_AllowSwitchOff", "m_Toggles"],
-  "Soccer.SmartButtonCanvasGroupTarget": ["<InitialAlphas>k__BackingField", "CanvasGroups", "Appearance"],
+  "Soccer.SmartButtonCanvasGroupTarget": [
+    "<InitialAlphas>k__BackingField",
+    "CanvasGroups",
+    "Appearance",
+  ],
   "Soccer.SmartButtonGraphicTarget": ["Graphics", "Appearance"],
   "Soccer.SmartButtonOnOffTarget": ["Objects", "Appearance"],
   "Soccer.SmartButtonPositionAndScaleTarget": [
@@ -7091,10 +7999,29 @@ export default {
     "<DestroyCancellationToken>k__BackingField",
     "<Cts>k__BackingField",
   ],
-  "Soccer.SmartButtonState": ["value__", "Undefined", "Normal", "EnabledPressed", "DisabledPressed", "Disabled"],
-  "Soccer.TapEffect": ["TapEffectPrefab", "MaxPoolSize", "tapEffectPoolArray", "currentPoolIndex"],
-  "Soccer.TapGuard": ["<GuardCount>k__BackingField", "<Initialized>k__BackingField"],
-  "Soccer.TextScrollPattern": ["value__", "AppearFromRight", "InitiallyVisibleSeamlessLoop"],
+  "Soccer.SmartButtonState": [
+    "value__",
+    "Undefined",
+    "Normal",
+    "EnabledPressed",
+    "DisabledPressed",
+    "Disabled",
+  ],
+  "Soccer.TapEffect": [
+    "TapEffectPrefab",
+    "MaxPoolSize",
+    "tapEffectPoolArray",
+    "currentPoolIndex",
+  ],
+  "Soccer.TapGuard": [
+    "<GuardCount>k__BackingField",
+    "<Initialized>k__BackingField",
+  ],
+  "Soccer.TextScrollPattern": [
+    "value__",
+    "AppearFromRight",
+    "InitiallyVisibleSeamlessLoop",
+  ],
   "Soccer.TextScroller": [
     "Text",
     "BannerRect",
@@ -7134,7 +8061,10 @@ export default {
     "ObtainedRewardsCountForDebug",
   ],
   "Soccer.UIConfigBase": ["UIDebugEnabledPrefsKey"],
-  "Soccer.NestedCanvasLayerSynchronizer": ["<Disposables>k__BackingField", "<Canvas>k__BackingField"],
+  "Soccer.NestedCanvasLayerSynchronizer": [
+    "<Disposables>k__BackingField",
+    "<Canvas>k__BackingField",
+  ],
   "Soccer.UILayer": [
     "ReferenceWidth",
     "ReferenceHeight",
@@ -7210,7 +8140,13 @@ export default {
     "<SingleExecutionLock>k__BackingField",
     "<IsInitialized>k__BackingField",
   ],
-  "Soccer.FavoriteMemberIcon": ["IconImage", "SelectionFrame", "EquippingFrame", "Button", "characterMaster"],
+  "Soccer.FavoriteMemberIcon": [
+    "IconImage",
+    "SelectionFrame",
+    "EquippingFrame",
+    "Button",
+    "characterMaster",
+  ],
   "Soccer.HonoraryTitleIcon": [
     "TitleText",
     "TitleTextLocalizeEvent",
@@ -7322,7 +8258,11 @@ export default {
     "PvpRankingText",
     "MyRankEmblem",
   ],
-  "Soccer.UserProfileRaidRangingView": ["TodayText", "YesterdayText", "DayBeforeYesterdayText"],
+  "Soccer.UserProfileRaidRangingView": [
+    "TodayText",
+    "YesterdayText",
+    "DayBeforeYesterdayText",
+  ],
   "Soccer.UserProfileRegularMembersView": ["MemberVMs"],
   "Soccer.UserProfileView": [
     "PageOpenRequestStore",
@@ -7375,7 +8315,10 @@ export default {
     "<PvPRating>k__BackingField",
   ],
   "Soccer.BehaviourActivenessSource": ["value__", "Subscene", "BattleCamera"],
-  "Soccer.BehaviourActivenessSwitcher": ["<Behaviour>k__BackingField", "<SourceToIsActive>k__BackingField"],
+  "Soccer.BehaviourActivenessSwitcher": [
+    "<Behaviour>k__BackingField",
+    "<SourceToIsActive>k__BackingField",
+  ],
   "Soccer.ButtonThrottle": [
     "ThrottleTimeSec",
     "<Clicked>k__BackingField",
@@ -7387,7 +8330,11 @@ export default {
   "Soccer.EditorDebugModel": ["EditorLogInString", "EditorLogInErrorString"],
   "Soccer.PrefabCenterSetup": ["TargetRenderer"],
   "Soccer.SingleExecutionLock": ["<LastSource>k__BackingField"],
-  "Soccer.WalletItemVM": ["LoggedInUserModel", "ItemIcon", "<ItemMaster>k__BackingField"],
+  "Soccer.WalletItemVM": [
+    "LoggedInUserModel",
+    "ItemIcon",
+    "<ItemMaster>k__BackingField",
+  ],
   "Soccer.WalletVM": [
     "LoggedInUserModel",
     "WalletItemVMTemplate",
@@ -7518,10 +8465,24 @@ export default {
     "BonusPass_Period",
     "BonusPass_Other",
   ],
-  "Soccer.LoginNewsDialogVM": ["WebpageModel", "WebViewPrefab", "CloseButtons", "Path"],
+  "Soccer.LoginNewsDialogVM": [
+    "WebpageModel",
+    "WebViewPrefab",
+    "CloseButtons",
+    "Path",
+  ],
   "Soccer.SimpleWebViewDialog": ["TitleText", "WebViewPrefab", "WebViewParent"],
-  "Soccer.SimpleWebViewPage`1": ["WebpageModel", "PageOpenRequestStore", "WebViewPrefabInstance", "CloseButtons"],
-  "Soccer.WebViewHook": ["PageOpenRequestStore", "WebViewPrefabInstance", "WebpageModel"],
+  "Soccer.SimpleWebViewPage`1": [
+    "WebpageModel",
+    "PageOpenRequestStore",
+    "WebViewPrefabInstance",
+    "CloseButtons",
+  ],
+  "Soccer.WebViewHook": [
+    "PageOpenRequestStore",
+    "WebViewPrefabInstance",
+    "WebpageModel",
+  ],
   "Soccer.WebpageModel": [
     "NetworkModel",
     "Faq",
@@ -7545,7 +8506,15 @@ export default {
     "importantNewsFeed",
     "isLoadingUnreadNews",
   ],
-  "Soccer.WipeLayer": ["value__", "Training", "Main", "Battle", "Overlay", "GachaPresentation", "GachaBackground"],
+  "Soccer.WipeLayer": [
+    "value__",
+    "Training",
+    "Main",
+    "Battle",
+    "Overlay",
+    "GachaPresentation",
+    "GachaBackground",
+  ],
   "Soccer.WipeLayerVM": ["Manager", "Layer", "Wipes"],
   "Soccer.WipeManager": [
     "EnableBackgroundHighLoadingPriority",
@@ -7558,7 +8527,15 @@ export default {
     "ShowDebugLog",
     "onSubsequentTrigger",
   ],
-  "Soccer.WipeType": ["value__", "Fade", "WhiteFade", "BlackFade", "BackgroundFade", "Simple", "Battle"],
+  "Soccer.WipeType": [
+    "value__",
+    "Fade",
+    "WhiteFade",
+    "BlackFade",
+    "BackgroundFade",
+    "Simple",
+    "Battle",
+  ],
   "Soccer.WipeVM": [
     "Animator",
     "Type",
@@ -7569,8 +8546,17 @@ export default {
     "ShownState",
     "<Cts>k__BackingField",
   ],
-  "Soccer.MyProfileGameUserVM": ["GameUserNameText", "WorldIdText", "Button", "<User>k__BackingField"],
-  "Soccer.MyProfileWorldVM": ["WorldIdText", "Button", "<WorldGroup>k__BackingField"],
+  "Soccer.MyProfileGameUserVM": [
+    "GameUserNameText",
+    "WorldIdText",
+    "Button",
+    "<User>k__BackingField",
+  ],
+  "Soccer.MyProfileWorldVM": [
+    "WorldIdText",
+    "Button",
+    "<WorldGroup>k__BackingField",
+  ],
   "Soccer.WorldSelectListItemVM": ["WorldIdText", "Button"],
   "Soccer.WorldSelectVM": [
     "RangeSize",
@@ -7583,7 +8569,12 @@ export default {
     "CloseButtons",
     "ConfirmationMessage",
   ],
-  "Soccer.WorldSelectWorldRangeVM": ["Toggle", "Label", "TitleString", "<Worlds>k__BackingField"],
+  "Soccer.WorldSelectWorldRangeVM": [
+    "Toggle",
+    "Label",
+    "TitleString",
+    "<Worlds>k__BackingField",
+  ],
   "Soccer.Editor.StaffIconGeneratorModelVM": ["<Animator>k__BackingField"],
   "Soccer.Sound.BgmPlayer": [
     "SituationBgmSettings",
@@ -7594,9 +8585,18 @@ export default {
     "<CurrentSituationPlayRequest>k__BackingField",
     "<TaskQueue>k__BackingField",
   ],
-  "Soccer.Sound.CharacterVoicePlayer": ["<VoiceEmitterTable>k__BackingField", "<VoiceAcbAssetTable>k__BackingField"],
-  "Soccer.Sound.SingleSoundEmitterTable": ["<PlayingSoundEmitterTable>k__BackingField", "<Enabled>k__BackingField"],
-  "Soccer.Sound.SoundAssetAddressableKeyResolver": ["MoveSECueSheetNamePattern", "CharacterVoiceCueSheetNamePattern"],
+  "Soccer.Sound.CharacterVoicePlayer": [
+    "<VoiceEmitterTable>k__BackingField",
+    "<VoiceAcbAssetTable>k__BackingField",
+  ],
+  "Soccer.Sound.SingleSoundEmitterTable": [
+    "<PlayingSoundEmitterTable>k__BackingField",
+    "<Enabled>k__BackingField",
+  ],
+  "Soccer.Sound.SoundAssetAddressableKeyResolver": [
+    "MoveSECueSheetNamePattern",
+    "CharacterVoiceCueSheetNamePattern",
+  ],
   "Soccer.Sound.SoundEmitter": ["Source", "DestroyWhenStopped", "OnStopped"],
   "Soccer.Sound.SoundPlayManager": [
     "AcfAssetReference",
@@ -7615,10 +8615,23 @@ export default {
     "DelaySeconds",
     "<PlayingSoundCancellationTokenSource>k__BackingField",
   ],
-  "Soccer.Sound.UISoundProfile": ["ClickSoundSettings", "UIAnimatorSoundSettings", "CommonPlayRequests"],
+  "Soccer.Sound.UISoundProfile": [
+    "ClickSoundSettings",
+    "UIAnimatorSoundSettings",
+    "CommonPlayRequests",
+  ],
   "Soccer.Sound.UnityObjectEventSoundPlayer": ["EventType", "PlayRequest"],
-  "Soccer.Skit.SkitAnimationType": ["value__", "Transition", "Manpu", "Particle"],
-  "Soccer.Skit.SkitAnimation": ["<Label>k__BackingField", "<Type>k__BackingField", "<AssetPath>k__BackingField"],
+  "Soccer.Skit.SkitAnimationType": [
+    "value__",
+    "Transition",
+    "Manpu",
+    "Particle",
+  ],
+  "Soccer.Skit.SkitAnimation": [
+    "<Label>k__BackingField",
+    "<Type>k__BackingField",
+    "<AssetPath>k__BackingField",
+  ],
   "Soccer.Skit.SkitCharacter": [
     "<Label>k__BackingField",
     "<Name>k__BackingField",
@@ -7654,9 +8667,17 @@ export default {
     "<TransformName>k__BackingField",
     "<BackgroundBlur>k__BackingField",
   ],
-  "Soccer.Skit.SkitSound": ["<Label>k__BackingField", "<CueSheetName>k__BackingField", "<CueName>k__BackingField"],
+  "Soccer.Skit.SkitSound": [
+    "<Label>k__BackingField",
+    "<CueSheetName>k__BackingField",
+    "<CueName>k__BackingField",
+  ],
   "Soccer.Skit.SkitTextureType": ["value__", "Item", "Bg"],
-  "Soccer.Skit.SkitTexture": ["<Label>k__BackingField", "<Type>k__BackingField", "<AssetPath>k__BackingField"],
+  "Soccer.Skit.SkitTexture": [
+    "<Label>k__BackingField",
+    "<Type>k__BackingField",
+    "<AssetPath>k__BackingField",
+  ],
   "Soccer.Skit.SkitVoice": [
     "<Label>k__BackingField",
     "<CueSheetName>k__BackingField",
@@ -7685,8 +8706,18 @@ export default {
   ],
   "Soccer.Skit.SkitAnimationVM": ["prefabs", "activeAnimations"],
   "Soccer.Skit.CameraEffectType": ["value__", "Sepia", "ScanLine"],
-  "Soccer.Skit.SepiaEffectSettings": ["Saturation", "PostExposure", "ColorFilter", "Contrast"],
-  "Soccer.Skit.SkitCameraEffectVM": ["PostProcessingVolume", "ScanLineVolume", "SepiaSettings", "colorAdjustments"],
+  "Soccer.Skit.SepiaEffectSettings": [
+    "Saturation",
+    "PostExposure",
+    "ColorFilter",
+    "Contrast",
+  ],
+  "Soccer.Skit.SkitCameraEffectVM": [
+    "PostProcessingVolume",
+    "ScanLineVolume",
+    "SepiaSettings",
+    "colorAdjustments",
+  ],
   "Soccer.Skit.SkitEnvironmentManager": ["trainingVM"],
   "Soccer.Skit.SkitFader": ["FadePanel"],
   "Soccer.Skit.SkitItemVM": ["Image", "<Sprites>k__BackingField"],
@@ -7699,7 +8730,12 @@ export default {
     "ScrollRect",
     "skitLogs",
   ],
-  "Soccer.Skit.SkitManpuVM": ["Canvas", "SkitCamera", "prefabs", "activeManpus"],
+  "Soccer.Skit.SkitManpuVM": [
+    "Canvas",
+    "SkitCamera",
+    "prefabs",
+    "activeManpus",
+  ],
   "Soccer.Skit.SkitMessageView": [
     "SpeakerText",
     "MessageText",
@@ -7723,7 +8759,13 @@ export default {
     "IdleMotion",
     "overrideController",
   ],
-  "Soccer.Skit.SkitSceneTitleVM": ["CanvasGroup", "TitleText", "FadeInDuration", "DisplayDuration", "FadeOutDuration"],
+  "Soccer.Skit.SkitSceneTitleVM": [
+    "CanvasGroup",
+    "TitleText",
+    "FadeInDuration",
+    "DisplayDuration",
+    "FadeOutDuration",
+  ],
   "Soccer.Skit.SkitSelectionButton": [
     "Animator",
     "Button",
@@ -7784,8 +8826,17 @@ export default {
     "currentVoiceTaskSource",
   ],
   "Soccer.Skit.SkitValidationException": ["<LineNumber>k__BackingField"],
-  "Soccer.Skit.SkitViewer": ["SkitVM", "SkitPathPlayerPrefsKey", "cancellationTokenSource"],
-  "Soccer.Skit.SpeechLogText": ["MessageText", "BigText", "MonologueText", "SpeechButton"],
+  "Soccer.Skit.SkitViewer": [
+    "SkitVM",
+    "SkitPathPlayerPrefsKey",
+    "cancellationTokenSource",
+  ],
+  "Soccer.Skit.SpeechLogText": [
+    "MessageText",
+    "BigText",
+    "MonologueText",
+    "SpeechButton",
+  ],
   "Soccer.Skit.SpeechLogVM": [
     "NameText",
     "CharacterIcon",
@@ -7800,7 +8851,10 @@ export default {
     "<MotionLabel>k__BackingField",
     "TypeName",
   ],
-  "Soccer.Skit.Commands.HideCharacter": ["<CharacterLabel>k__BackingField", "TypeName"],
+  "Soccer.Skit.Commands.HideCharacter": [
+    "<CharacterLabel>k__BackingField",
+    "TypeName",
+  ],
   "Soccer.Skit.Commands.Message": [
     "<Name>k__BackingField",
     "<CharacterLabel>k__BackingField",
@@ -7813,27 +8867,73 @@ export default {
     "<IsLipSync>k__BackingField",
     "TypeName",
   ],
-  "Soccer.Skit.Commands.PlayMotion": ["<CharacterLabel>k__BackingField", "<Name>k__BackingField", "TypeName"],
-  "Soccer.Skit.Commands.PlayFacial": ["<CharacterLabel>k__BackingField", "<Name>k__BackingField", "TypeName"],
-  "Soccer.Skit.Commands.ShowBackground": ["<TextureLabel>k__BackingField", "TypeName"],
+  "Soccer.Skit.Commands.PlayMotion": [
+    "<CharacterLabel>k__BackingField",
+    "<Name>k__BackingField",
+    "TypeName",
+  ],
+  "Soccer.Skit.Commands.PlayFacial": [
+    "<CharacterLabel>k__BackingField",
+    "<Name>k__BackingField",
+    "TypeName",
+  ],
+  "Soccer.Skit.Commands.ShowBackground": [
+    "<TextureLabel>k__BackingField",
+    "TypeName",
+  ],
   "Soccer.Skit.Commands.HideBackground": ["TypeName"],
-  "Soccer.Skit.Commands.Choice": ["<Text>k__BackingField", "<JumpLabel>k__BackingField", "TypeName"],
+  "Soccer.Skit.Commands.Choice": [
+    "<Text>k__BackingField",
+    "<JumpLabel>k__BackingField",
+    "TypeName",
+  ],
   "Soccer.Skit.Commands.Jump": ["<Label>k__BackingField", "TypeName"],
-  "Soccer.Skit.Commands.FadeIn": ["<Duration>k__BackingField", "<Color>k__BackingField", "TypeName"],
-  "Soccer.Skit.Commands.FadeOut": ["<Duration>k__BackingField", "<Color>k__BackingField", "TypeName"],
-  "Soccer.Skit.Commands.ChangeBackgroundColor": ["<Color>k__BackingField", "TypeName"],
-  "Soccer.Skit.Commands.ShowItem": ["<TextureLabel>k__BackingField", "<Duration>k__BackingField", "TypeName"],
+  "Soccer.Skit.Commands.FadeIn": [
+    "<Duration>k__BackingField",
+    "<Color>k__BackingField",
+    "TypeName",
+  ],
+  "Soccer.Skit.Commands.FadeOut": [
+    "<Duration>k__BackingField",
+    "<Color>k__BackingField",
+    "TypeName",
+  ],
+  "Soccer.Skit.Commands.ChangeBackgroundColor": [
+    "<Color>k__BackingField",
+    "TypeName",
+  ],
+  "Soccer.Skit.Commands.ShowItem": [
+    "<TextureLabel>k__BackingField",
+    "<Duration>k__BackingField",
+    "TypeName",
+  ],
   "Soccer.Skit.Commands.HideItem": ["<Duration>k__BackingField", "TypeName"],
-  "Soccer.Skit.Commands.ShowManpu": ["<CharacterLabel>k__BackingField", "<AnimationLabel>k__BackingField", "TypeName"],
-  "Soccer.Skit.Commands.HideManpu": ["<CharacterLabel>k__BackingField", "TypeName"],
+  "Soccer.Skit.Commands.ShowManpu": [
+    "<CharacterLabel>k__BackingField",
+    "<AnimationLabel>k__BackingField",
+    "TypeName",
+  ],
+  "Soccer.Skit.Commands.HideManpu": [
+    "<CharacterLabel>k__BackingField",
+    "TypeName",
+  ],
   "Soccer.Skit.Commands.Wait": ["<Duration>k__BackingField", "TypeName"],
   "Soccer.Skit.Commands.NoOperation": ["TypeName"],
   "Soccer.Skit.Commands.PlayBGM": ["<SoundLabel>k__BackingField", "TypeName"],
   "Soccer.Skit.Commands.StopBGM": ["TypeName"],
   "Soccer.Skit.Commands.PlaySE": ["<SoundLabel>k__BackingField", "TypeName"],
-  "Soccer.Skit.Commands.PlayAnimation": ["<AnimationLabel>k__BackingField", "TypeName"],
-  "Soccer.Skit.Commands.PlayTimeline": ["<TimelineName>k__BackingField", "TypeName"],
-  "Soccer.Skit.Commands.ShowCameraEffect": ["<EffectType>k__BackingField", "TypeName"],
+  "Soccer.Skit.Commands.PlayAnimation": [
+    "<AnimationLabel>k__BackingField",
+    "TypeName",
+  ],
+  "Soccer.Skit.Commands.PlayTimeline": [
+    "<TimelineName>k__BackingField",
+    "TypeName",
+  ],
+  "Soccer.Skit.Commands.ShowCameraEffect": [
+    "<EffectType>k__BackingField",
+    "TypeName",
+  ],
   "Soccer.Skit.Commands.HideCameraEffect": ["TypeName"],
   "Soccer.Skit.Commands.ShowSceneTitle": ["<Text>k__BackingField", "TypeName"],
   "Soccer.Skit.Commands.Shake": [
@@ -7843,8 +8943,13 @@ export default {
     "<Duration>k__BackingField",
     "TypeName",
   ],
-  "Soccer.GraphicsOption.GraphicsOptionInitializer": ["GraphicsOptionPresetTableAssetPath"],
-  "Soccer.GraphicsOption.GraphicsOptionManager": ["ScreenSize", "isPostProcessingEnabled"],
+  "Soccer.GraphicsOption.GraphicsOptionInitializer": [
+    "GraphicsOptionPresetTableAssetPath",
+  ],
+  "Soccer.GraphicsOption.GraphicsOptionManager": [
+    "ScreenSize",
+    "isPostProcessingEnabled",
+  ],
   "Soccer.GraphicsOption.GraphicsOptionModel": [
     "GraphicsQuality",
     "RenderScale",
@@ -7863,7 +8968,11 @@ export default {
     "IOSMemoryPresetTable",
     "FallBackQuality",
   ],
-  "Soccer.GraphicsOption.PseudoBackBuffer": ["scale", "msaaSampleCount", "RenderTexture"],
+  "Soccer.GraphicsOption.PseudoBackBuffer": [
+    "scale",
+    "msaaSampleCount",
+    "RenderTexture",
+  ],
   "Soccer.GraphicsOption.ScreenSize": ["currentScale"],
   "Soccer.GraphicsOption.ShadowSettingsTable": ["ShadowSettings"],
   "Soccer.GraphicsOption.Android.AndroidInfo": ["DefaultString"],
@@ -7935,7 +9044,10 @@ export default {
     "UnlockSelectedConnectionBoardStageButton",
     "SortedAreas",
   ],
-  "Soccer.DebugTool.DebugConsumedSerialCodeVM": ["SerialCodeText", "CopyButton"],
+  "Soccer.DebugTool.DebugConsumedSerialCodeVM": [
+    "SerialCodeText",
+    "CopyButton",
+  ],
   "Soccer.DebugTool.DebugContentFeatureLockVM": [
     "LoggedInUserModel",
     "NetworkModel",
@@ -8031,7 +9143,11 @@ export default {
     "<ItemType>k__BackingField",
     "<IsPaidDiamond>k__BackingField",
   ],
-  "Soccer.DebugTool.DebugOfferVM": ["NetworkModel", "LoggedInUserModel", "CreateAllOffersButton"],
+  "Soccer.DebugTool.DebugOfferVM": [
+    "NetworkModel",
+    "LoggedInUserModel",
+    "CreateAllOffersButton",
+  ],
   "Soccer.DebugTool.DebugPvpVM": [
     "PvpModel",
     "LoggedInUserModel",
@@ -8075,7 +9191,10 @@ export default {
     "AlwaysShowAgeInputDialogPrefsKey",
     "AlwaysShowParentalConsentDialogPrefsKey",
   ],
-  "Soccer.DebugTool.DebugStoryBoardVM": ["ResetMainStoryStageState", "ResetConnectionBoardStageState"],
+  "Soccer.DebugTool.DebugStoryBoardVM": [
+    "ResetMainStoryStageState",
+    "ResetConnectionBoardStageState",
+  ],
   "Soccer.DebugTool.DebugStoryVM": [
     "LoggedInUserModel",
     "NetworkModel",
@@ -8146,7 +9265,10 @@ export default {
     "propertyBlock",
     "cachedRendererGroup",
   ],
-  "Soccer.CutScene.CharacterLightSeparator": ["UseCharacterLightDirection", "CharacterLightDirection"],
+  "Soccer.CutScene.CharacterLightSeparator": [
+    "UseCharacterLightDirection",
+    "CharacterLightDirection",
+  ],
   "Soccer.CutScene.MainLightRedirector": ["mainLight", "initialRotation"],
   "Soccer.Battle.BattleResultGoalVM": [
     "ATeamUIs",
@@ -8171,9 +9293,26 @@ export default {
     "CommentText",
     "MVPBadge",
   ],
-  "Soccer.Battle.BattleResultRewardRoadMapNodeVM": ["CanvasGroup", "LevelText", "SpecialRewardBadge"],
-  "Soccer.Battle.BattleResultRewardRoadMapVM": ["Animator", "WalkTrigger", "CharacterStartNodeIndex", "NodeVMs"],
-  "Soccer.Battle.BattleResultStatisticsGaugeVM": ["AText", "BText", "TextFormat", "ASlider", "BSlider", "AWin", "BWin"],
+  "Soccer.Battle.BattleResultRewardRoadMapNodeVM": [
+    "CanvasGroup",
+    "LevelText",
+    "SpecialRewardBadge",
+  ],
+  "Soccer.Battle.BattleResultRewardRoadMapVM": [
+    "Animator",
+    "WalkTrigger",
+    "CharacterStartNodeIndex",
+    "NodeVMs",
+  ],
+  "Soccer.Battle.BattleResultStatisticsGaugeVM": [
+    "AText",
+    "BText",
+    "TextFormat",
+    "ASlider",
+    "BSlider",
+    "AWin",
+    "BWin",
+  ],
   "Soccer.Battle.BattleResultStatisticsVM": [
     "AScore",
     "BScore",
@@ -8285,7 +9424,11 @@ export default {
     "<Message>k__BackingField",
     "<LocalizedString>k__BackingField",
   ],
-  "Soccer.Auth.GoogleAccountService": ["<Auth>k__BackingField", "<Provider>k__BackingField", "googleSignedInUserData"],
+  "Soccer.Auth.GoogleAccountService": [
+    "<Auth>k__BackingField",
+    "<Provider>k__BackingField",
+    "googleSignedInUserData",
+  ],
   "Soccer.Auth.ExternalAccountType": ["value__", "Google", "Apple", "L5iD"],
   "Soccer.Auth.ProviderUserData": ["ProviderUserName"],
   "Soccer.Auth.FirebaseAuthenticationService": [
@@ -8311,10 +9454,17 @@ export default {
     "<Profile>k__BackingField",
     "<CanSendMessage>k__BackingField",
   ],
-  "Soccer.ChatUserProfile": ["<Name>k__BackingField", "<IconCode>k__BackingField"],
+  "Soccer.ChatUserProfile": [
+    "<Name>k__BackingField",
+    "<IconCode>k__BackingField",
+  ],
   "Soccer.Defer": ["action"],
   "Soccer.ThreadSafeRandom": ["RandomForSeed", "localRandom"],
-  "Soccer.Battle.RaidPlayer": ["<RaidTeam>k__BackingField", "<Position>k__BackingField", "<Slot>k__BackingField"],
+  "Soccer.Battle.RaidPlayer": [
+    "<RaidTeam>k__BackingField",
+    "<Position>k__BackingField",
+    "<Slot>k__BackingField",
+  ],
   "Soccer.Battle.RaidTeam": [
     "<TeamId>k__BackingField",
     "<Players>k__BackingField",
@@ -8327,7 +9477,14 @@ export default {
     "<VictoryCondition>k__BackingField",
     "None",
   ],
-  "Soccer.Battle.BattleLogType": ["value__", "Info", "Error", "Commentary", "AITrace", "Passive"],
+  "Soccer.Battle.BattleLogType": [
+    "value__",
+    "Info",
+    "Error",
+    "Commentary",
+    "AITrace",
+    "Passive",
+  ],
   "Soccer.Battle.BattleLogFilter": [
     "value__",
     "None",
@@ -8350,14 +9507,20 @@ export default {
     "Default",
   ],
   "Soccer.Battle.MoveContext": ["<PlaywrightMove>k__BackingField"],
-  "Soccer.Battle.ShootMoveContext": ["<Shooter>k__BackingField", "<Keeper>k__BackingField"],
+  "Soccer.Battle.ShootMoveContext": [
+    "<Shooter>k__BackingField",
+    "<Keeper>k__BackingField",
+  ],
   "Soccer.Battle.ShootChainMoveContext": [
     "<Shooter>k__BackingField",
     "<LastShootMove>k__BackingField",
     "<Keeper>k__BackingField",
     "<CurrentTotalShootPower>k__BackingField",
   ],
-  "Soccer.Battle.DribbleMoveContext": ["<Dribbler>k__BackingField", "<Blocker>k__BackingField"],
+  "Soccer.Battle.DribbleMoveContext": [
+    "<Dribbler>k__BackingField",
+    "<Blocker>k__BackingField",
+  ],
   "Soccer.Battle.DribbleBlockMoveContext": [
     "<Dribbler>k__BackingField",
     "<DribbleMove>k__BackingField",
@@ -8387,7 +9550,10 @@ export default {
     "<PlayerCode>k__BackingField",
     "<MoveCode>k__BackingField",
   ],
-  "Soccer.Battle.PlayerReference": ["<TeamId>k__BackingField", "<Slot>k__BackingField"],
+  "Soccer.Battle.PlayerReference": [
+    "<TeamId>k__BackingField",
+    "<Slot>k__BackingField",
+  ],
   "Soccer.Battle.SoccerBattle": [
     "RandomHistory",
     "MaxShootChainLength",
@@ -8425,7 +9591,12 @@ export default {
     "<StartingPassiveActivationsPerSourceList>k__BackingField",
     "<OpponentUserId>k__BackingField",
   ],
-  "Soccer.Battle.AttackPhaseAction": ["value__", "Undefined", "Dribble", "Shoot"],
+  "Soccer.Battle.AttackPhaseAction": [
+    "value__",
+    "Undefined",
+    "Dribble",
+    "Shoot",
+  ],
   "Soccer.Battle.BattleFormat": ["value__", "Normal", "SoccerBattle"],
   "Soccer.Battle.FieldTerrain": [
     "MinForward",
@@ -8440,7 +9611,13 @@ export default {
   ],
   "Soccer.Battle.Location": ["TeamId", "Right", "Forward", "FieldTerrain"],
   "Soccer.Battle.LocationDelta": ["Right", "Forward"],
-  "Soccer.Battle.TacticalArea": ["value__", "AllyArea", "OpponentArea", "AllyPenaltyArea", "OpponentPenaltyArea"],
+  "Soccer.Battle.TacticalArea": [
+    "value__",
+    "AllyArea",
+    "OpponentArea",
+    "AllyPenaltyArea",
+    "OpponentPenaltyArea",
+  ],
   "Soccer.Battle.MoveSelection": [
     "<TeamId>k__BackingField",
     "<PlayerIndex>k__BackingField",
@@ -8470,7 +9647,10 @@ export default {
     "<HasRaidChainBonus>k__BackingField",
     "<MoveElementMatchesLastElementInChain>k__BackingField",
   ],
-  "Soccer.Battle.MovePowerCalculator": ["<Move>k__BackingField", "<Owner>k__BackingField"],
+  "Soccer.Battle.MovePowerCalculator": [
+    "<Move>k__BackingField",
+    "<Owner>k__BackingField",
+  ],
   "Soccer.Battle.PlayerPowerCalculator": ["<Owner>k__BackingField"],
   "Soccer.Battle.Blackboard": [
     "<Self>k__BackingField",
@@ -8486,8 +9666,14 @@ export default {
   ],
   "Soccer.Battle.BallOwnerCondition": ["<Type>k__BackingField"],
   "Soccer.Battle.CompositeCondition": ["<Conditions>k__BackingField"],
-  "Soccer.Battle.DribblePhaseResultCondition": ["<DribblerIsAlly>k__BackingField", "<DribbleSucceeded>k__BackingField"],
-  "Soccer.Battle.PassPhaseResultCondition": ["<PasserIsAlly>k__BackingField", "<PassSucceeded>k__BackingField"],
+  "Soccer.Battle.DribblePhaseResultCondition": [
+    "<DribblerIsAlly>k__BackingField",
+    "<DribbleSucceeded>k__BackingField",
+  ],
+  "Soccer.Battle.PassPhaseResultCondition": [
+    "<PasserIsAlly>k__BackingField",
+    "<PassSucceeded>k__BackingField",
+  ],
   "Soccer.Battle.PlayerExists": [
     "<TargetIsAlly>k__BackingField",
     "<DistanceUpperLimit>k__BackingField",
@@ -8507,7 +9693,10 @@ export default {
     "<RemainingTurns>k__BackingField",
     "<Equality>k__BackingField",
   ],
-  "Soccer.Battle.ScoreDifferenceCondition": ["<LowerLimit>k__BackingField", "<UpperLimit>k__BackingField"],
+  "Soccer.Battle.ScoreDifferenceCondition": [
+    "<LowerLimit>k__BackingField",
+    "<UpperLimit>k__BackingField",
+  ],
   "Soccer.Battle.ShootRangeCondition": ["canReach"],
   "Soccer.Battle.SpecialMoveAvailableCondition": ["MoveType"],
   "Soccer.Battle.VerticalDistanceFromInitialLocationCondition": [
@@ -8525,11 +9714,23 @@ export default {
     "<DistanceLimit>k__BackingField",
     "<ForwardLimit>k__BackingField",
   ],
-  "Soccer.Battle.ChooseMove": ["<PriorityRules>k__BackingField", "<UseFoundMove>k__BackingField"],
+  "Soccer.Battle.ChooseMove": [
+    "<PriorityRules>k__BackingField",
+    "<UseFoundMove>k__BackingField",
+  ],
   "Soccer.Battle.ChoosePassTarget": ["<Type>k__BackingField"],
-  "Soccer.Battle.Operation`1": ["<CompositeCondition>k__BackingField", "<Instruction>k__BackingField"],
-  "Soccer.Battle.OperationJson": ["<Conditions>k__BackingField", "<Instruction>k__BackingField"],
-  "Soccer.Battle.OperationList`1": ["<Code>k__BackingField", "<Operations>k__BackingField"],
+  "Soccer.Battle.Operation`1": [
+    "<CompositeCondition>k__BackingField",
+    "<Instruction>k__BackingField",
+  ],
+  "Soccer.Battle.OperationJson": [
+    "<Conditions>k__BackingField",
+    "<Instruction>k__BackingField",
+  ],
+  "Soccer.Battle.OperationList`1": [
+    "<Code>k__BackingField",
+    "<Operations>k__BackingField",
+  ],
   "Soccer.Battle.OperationPlanner": ["<SoccerBattle>k__BackingField"],
   "Soccer.Battle.OperationProfile": [
     "<ChoosePassTargetOperationInPassPhase>k__BackingField",
@@ -8570,8 +9771,14 @@ export default {
     "Additional",
     "Modifier",
   ],
-  "Soccer.Battle.PassiveActivationsPerSource": ["<PassiveSource>k__BackingField", "<Activations>k__BackingField"],
-  "Soccer.Battle.PassiveActivation": ["<Passive>k__BackingField", "<Triggers>k__BackingField"],
+  "Soccer.Battle.PassiveActivationsPerSource": [
+    "<PassiveSource>k__BackingField",
+    "<Activations>k__BackingField",
+  ],
+  "Soccer.Battle.PassiveActivation": [
+    "<Passive>k__BackingField",
+    "<Triggers>k__BackingField",
+  ],
   "Soccer.Battle.StatusEffectManager": [
     "<Owner>k__BackingField",
     "<AllPlayers>k__BackingField",
@@ -8580,9 +9787,14 @@ export default {
     "<NoGroupStatusEffects>k__BackingField",
     "<StatusEffectsToRemove>k__BackingField",
   ],
-  "Soccer.Battle.AttackPhaseStartResult": ["<AttackPhaseAction>k__BackingField", "<BallOwner>k__BackingField"],
+  "Soccer.Battle.AttackPhaseStartResult": [
+    "<AttackPhaseAction>k__BackingField",
+    "<BallOwner>k__BackingField",
+  ],
   "Soccer.Battle.BeforeMoveSelectResult": ["<MoveContext>k__BackingField"],
-  "Soccer.Battle.BeforeShootBlockMoveSelectResult": ["<AllFutureBlockerCandidates>k__BackingField"],
+  "Soccer.Battle.BeforeShootBlockMoveSelectResult": [
+    "<AllFutureBlockerCandidates>k__BackingField",
+  ],
   "Soccer.Battle.AfterFoulResult": ["<BallOwnerAfterFoul>k__BackingField"],
   "Soccer.Battle.DribbleBlockResult": [
     "<BlockSucceeded>k__BackingField",
@@ -8595,10 +9807,21 @@ export default {
     "<DribblerOriginalTP>k__BackingField",
     "<BlockerOriginalTP>k__BackingField",
   ],
-  "Soccer.Battle.DribblePhaseResult": ["<DribbleMove>k__BackingField", "<StunnedPlayers>k__BackingField"],
-  "Soccer.Battle.GoalKeeperPassResult": ["<Passer>k__BackingField", "<PassTarget>k__BackingField"],
-  "Soccer.Battle.GoalKeeperPunchResult": ["<Passer>k__BackingField", "<PassTarget>k__BackingField"],
-  "Soccer.Battle.HighlightSceneSelection": ["<OrderedHighlightScenes>k__BackingField"],
+  "Soccer.Battle.DribblePhaseResult": [
+    "<DribbleMove>k__BackingField",
+    "<StunnedPlayers>k__BackingField",
+  ],
+  "Soccer.Battle.GoalKeeperPassResult": [
+    "<Passer>k__BackingField",
+    "<PassTarget>k__BackingField",
+  ],
+  "Soccer.Battle.GoalKeeperPunchResult": [
+    "<Passer>k__BackingField",
+    "<PassTarget>k__BackingField",
+  ],
+  "Soccer.Battle.HighlightSceneSelection": [
+    "<OrderedHighlightScenes>k__BackingField",
+  ],
   "Soccer.Battle.KickOffPhaseResult": [
     "<Team>k__BackingField",
     "<IsGameFirstOrSideChange>k__BackingField",
@@ -8693,8 +9916,15 @@ export default {
     "<FormationEffectPassive>k__BackingField",
     "<Definition>k__BackingField",
   ],
-  "Soccer.Battle.DirectorDefinition": ["<Code>k__BackingField", "<Level>k__BackingField"],
-  "Soccer.Battle.EmptyTeam": ["<TeamId>k__BackingField", "<Players>k__BackingField", "<UserName>k__BackingField"],
+  "Soccer.Battle.DirectorDefinition": [
+    "<Code>k__BackingField",
+    "<Level>k__BackingField",
+  ],
+  "Soccer.Battle.EmptyTeam": [
+    "<TeamId>k__BackingField",
+    "<Players>k__BackingField",
+    "<UserName>k__BackingField",
+  ],
   "Soccer.Battle.Player": [
     "<Definition>k__BackingField",
     "<Team>k__BackingField",
@@ -8720,8 +9950,14 @@ export default {
     "<StatusEffects>k__BackingField",
     "<Passives>k__BackingField",
   ],
-  "Soccer.Battle.PassiveMasterWithSource": ["<Master>k__BackingField", "<Source>k__BackingField"],
-  "Soccer.Battle.SpecialMoveGrowthWithSource": ["<Growth>k__BackingField", "<Source>k__BackingField"],
+  "Soccer.Battle.PassiveMasterWithSource": [
+    "<Master>k__BackingField",
+    "<Source>k__BackingField",
+  ],
+  "Soccer.Battle.SpecialMoveGrowthWithSource": [
+    "<Growth>k__BackingField",
+    "<Source>k__BackingField",
+  ],
   "Soccer.Battle.PlayerDefinition": [
     "<Code>k__BackingField",
     "<Level>k__BackingField",
@@ -8776,7 +10012,10 @@ export default {
     "<SuccessShootBlockCount>k__BackingField",
     "<CommandBattleWinCount>k__BackingField",
   ],
-  "Soccer.Battle.ScoreCounter": ["<FirstHalf>k__BackingField", "<SecondHalf>k__BackingField"],
+  "Soccer.Battle.ScoreCounter": [
+    "<FirstHalf>k__BackingField",
+    "<SecondHalf>k__BackingField",
+  ],
   "Soccer.Battle.TeamDefinition": [
     "<BattleFormat>k__BackingField",
     "<Profile>k__BackingField",
@@ -8785,24 +10024,55 @@ export default {
     "<TeamUniformCode>k__BackingField",
   ],
   "Soccer.Battle.TeamId": ["value__", "A", "B"],
-  "Soccer.Battle.TeamStatistics": ["<Team>k__BackingField", "<BallPossessionTurnCount>k__BackingField"],
+  "Soccer.Battle.TeamStatistics": [
+    "<Team>k__BackingField",
+    "<BallPossessionTurnCount>k__BackingField",
+  ],
   "Soccer.Battle.StatusEffect.Contexts.TurnStart": ["<Turn>k__BackingField"],
   "Soccer.Battle.StatusEffect.Contexts.AfterGoal": ["<Shoots>k__BackingField"],
-  "Soccer.Battle.StatusEffect.Contexts.AfterShootBlock": ["<Shoots>k__BackingField"],
-  "Soccer.Battle.StatusEffect.Contexts.AfterShootBlockMove": ["<Blocker>k__BackingField", "<Success>k__BackingField"],
-  "Soccer.Battle.StatusEffect.Contexts.AfterDribbleMove": ["<Dribbler>k__BackingField", "<Success>k__BackingField"],
-  "Soccer.Battle.StatusEffect.Contexts.AfterDribbleBlockMove": ["<Blocker>k__BackingField", "<Success>k__BackingField"],
-  "Soccer.Battle.StatusEffect.Contexts.AfterKeeperMove": ["<Keeper>k__BackingField", "<Success>k__BackingField"],
-  "Soccer.Battle.StatusEffect.Contexts.AfterPassed": ["<Passer>k__BackingField"],
-  "Soccer.Battle.StatusEffect.Contexts.AfterPassReceived": ["<PassReceiver>k__BackingField"],
-  "Soccer.Battle.StatusEffect.Contexts.AfterPassCut": ["<PassCutter>k__BackingField"],
-  "Soccer.Battle.StatusEffect.Contexts.BeforeShootChain": ["<Shooter>k__BackingField"],
+  "Soccer.Battle.StatusEffect.Contexts.AfterShootBlock": [
+    "<Shoots>k__BackingField",
+  ],
+  "Soccer.Battle.StatusEffect.Contexts.AfterShootBlockMove": [
+    "<Blocker>k__BackingField",
+    "<Success>k__BackingField",
+  ],
+  "Soccer.Battle.StatusEffect.Contexts.AfterDribbleMove": [
+    "<Dribbler>k__BackingField",
+    "<Success>k__BackingField",
+  ],
+  "Soccer.Battle.StatusEffect.Contexts.AfterDribbleBlockMove": [
+    "<Blocker>k__BackingField",
+    "<Success>k__BackingField",
+  ],
+  "Soccer.Battle.StatusEffect.Contexts.AfterKeeperMove": [
+    "<Keeper>k__BackingField",
+    "<Success>k__BackingField",
+  ],
+  "Soccer.Battle.StatusEffect.Contexts.AfterPassed": [
+    "<Passer>k__BackingField",
+  ],
+  "Soccer.Battle.StatusEffect.Contexts.AfterPassReceived": [
+    "<PassReceiver>k__BackingField",
+  ],
+  "Soccer.Battle.StatusEffect.Contexts.AfterPassCut": [
+    "<PassCutter>k__BackingField",
+  ],
+  "Soccer.Battle.StatusEffect.Contexts.BeforeShootChain": [
+    "<Shooter>k__BackingField",
+  ],
   "Soccer.Battle.StatusEffect.Contexts.AfterMoveUse": ["<Move>k__BackingField"],
-  "Soccer.Battle.StatusEffect.Contexts.AfterCritical": ["<Player>k__BackingField"],
+  "Soccer.Battle.StatusEffect.Contexts.AfterCritical": [
+    "<Player>k__BackingField",
+  ],
   "Soccer.Battle.StatusEffect.Contexts.AfterMoved": ["<Player>k__BackingField"],
   "Soccer.Battle.StatusEffect.Conditions.None": ["Key", "Type"],
   "Soccer.Battle.StatusEffect.Conditions.BattleStart": ["Key", "Type"],
-  "Soccer.Battle.StatusEffect.Conditions.TurnStart": ["<Turn>k__BackingField", "Key", "Type"],
+  "Soccer.Battle.StatusEffect.Conditions.TurnStart": [
+    "<Turn>k__BackingField",
+    "Key",
+    "Type",
+  ],
   "Soccer.Battle.StatusEffect.Conditions.PlayerCountOnBattleStart": [
     "<TargetPlayer>k__BackingField",
     "<Min>k__BackingField",
@@ -8816,8 +10086,16 @@ export default {
     "Key",
     "Type",
   ],
-  "Soccer.Battle.StatusEffect.Conditions.AfterGoal": ["<TargetShooter>k__BackingField", "Key", "Type"],
-  "Soccer.Battle.StatusEffect.Conditions.AfterShootBlocked": ["<TargetShooter>k__BackingField", "Key", "Type"],
+  "Soccer.Battle.StatusEffect.Conditions.AfterGoal": [
+    "<TargetShooter>k__BackingField",
+    "Key",
+    "Type",
+  ],
+  "Soccer.Battle.StatusEffect.Conditions.AfterShootBlocked": [
+    "<TargetShooter>k__BackingField",
+    "Key",
+    "Type",
+  ],
   "Soccer.Battle.StatusEffect.Conditions.AfterShootBlockMove": [
     "<TargetBlocker>k__BackingField",
     "<Success>k__BackingField",
@@ -8842,9 +10120,21 @@ export default {
     "Key",
     "Type",
   ],
-  "Soccer.Battle.StatusEffect.Conditions.AfterPassed": ["<TargetPasser>k__BackingField", "Key", "Type"],
-  "Soccer.Battle.StatusEffect.Conditions.AfterPassReceived": ["<TargetPassReceiver>k__BackingField", "Key", "Type"],
-  "Soccer.Battle.StatusEffect.Conditions.AfterPassCut": ["<TargetPassCutter>k__BackingField", "Key", "Type"],
+  "Soccer.Battle.StatusEffect.Conditions.AfterPassed": [
+    "<TargetPasser>k__BackingField",
+    "Key",
+    "Type",
+  ],
+  "Soccer.Battle.StatusEffect.Conditions.AfterPassReceived": [
+    "<TargetPassReceiver>k__BackingField",
+    "Key",
+    "Type",
+  ],
+  "Soccer.Battle.StatusEffect.Conditions.AfterPassCut": [
+    "<TargetPassCutter>k__BackingField",
+    "Key",
+    "Type",
+  ],
   "Soccer.Battle.StatusEffect.Conditions.BeforeShootChain": [
     "<TargetShooter>k__BackingField",
     "Key",
@@ -8866,10 +10156,24 @@ export default {
     "Key",
     "Type",
   ],
-  "Soccer.Battle.StatusEffect.Conditions.AfterCritical": ["<TargetPlayer>k__BackingField", "Key", "Type"],
-  "Soccer.Battle.StatusEffect.Conditions.InsideAreaAfterMoved": ["<TargetArea>k__BackingField", "Key", "Type"],
-  "Soccer.Battle.StatusEffect.Conditions.OutsideAreaAfterMoved": ["<TargetArea>k__BackingField", "Key", "Type"],
-  "Soccer.Battle.StatusEffect.Conditions.ConditionParamAttribute": ["<Name>k__BackingField"],
+  "Soccer.Battle.StatusEffect.Conditions.AfterCritical": [
+    "<TargetPlayer>k__BackingField",
+    "Key",
+    "Type",
+  ],
+  "Soccer.Battle.StatusEffect.Conditions.InsideAreaAfterMoved": [
+    "<TargetArea>k__BackingField",
+    "Key",
+    "Type",
+  ],
+  "Soccer.Battle.StatusEffect.Conditions.OutsideAreaAfterMoved": [
+    "<TargetArea>k__BackingField",
+    "Key",
+    "Type",
+  ],
+  "Soccer.Battle.StatusEffect.Conditions.ConditionParamAttribute": [
+    "<Name>k__BackingField",
+  ],
   "Soccer.Battle.StatusEffects.StatusEffect": [
     "<Master>k__BackingField",
     "<EndCondition>k__BackingField",
@@ -8909,10 +10213,19 @@ export default {
     "<Dribbler>k__BackingField",
     "<DribbleSucceeded>k__BackingField",
   ],
-  "Soccer.Battle.OperationContext.PassPhaseContext": ["<Passer>k__BackingField", "<PassSucceeded>k__BackingField"],
-  "Soccer.Battle.Playwright.KickOff": ["<KickOffPlayer>k__BackingField", "<PassTarget>k__BackingField"],
+  "Soccer.Battle.OperationContext.PassPhaseContext": [
+    "<Passer>k__BackingField",
+    "<PassSucceeded>k__BackingField",
+  ],
+  "Soccer.Battle.Playwright.KickOff": [
+    "<KickOffPlayer>k__BackingField",
+    "<PassTarget>k__BackingField",
+  ],
   "Soccer.Battle.Playwright.Pass": ["<PassAction>k__BackingField"],
-  "Soccer.Battle.Playwright.Dribble": ["<DribbleMove>k__BackingField", "<BlockMove>k__BackingField"],
+  "Soccer.Battle.Playwright.Dribble": [
+    "<DribbleMove>k__BackingField",
+    "<BlockMove>k__BackingField",
+  ],
   "Soccer.Battle.Playwright.Shoot": [
     "<Shoots>k__BackingField",
     "<ShootBlocks>k__BackingField",
@@ -8951,7 +10264,10 @@ export default {
     "<EquipmentLevel>k__BackingField",
     "<PlayerOverrides>k__BackingField",
   ],
-  "Soccer.Battle.Playwright.PlaywrightPlayerOverride": ["<CharacterCode>k__BackingField", "<Level>k__BackingField"],
+  "Soccer.Battle.Playwright.PlaywrightPlayerOverride": [
+    "<CharacterCode>k__BackingField",
+    "<Level>k__BackingField",
+  ],
   "Soccer.Shared.ApiReferenceAttribute": [
     "<Category>k__BackingField",
     "<Endpoint>k__BackingField",
@@ -8996,12 +10312,20 @@ export default {
     "<FieldTerrain>k__BackingField",
   ],
   "Soccer.Shared.StageBattleReservationDetail": ["<StageCode>k__BackingField"],
-  "Soccer.Shared.PvpReservationDetail": ["<OpponentUserId>k__BackingField", "<FieldCode>k__BackingField"],
-  "Soccer.Shared.PlaywrightReservationDetail": ["<StartSituation>k__BackingField"],
+  "Soccer.Shared.PvpReservationDetail": [
+    "<OpponentUserId>k__BackingField",
+    "<FieldCode>k__BackingField",
+  ],
+  "Soccer.Shared.PlaywrightReservationDetail": [
+    "<StartSituation>k__BackingField",
+  ],
   "Soccer.Shared.BattleResult": ["value__", "Victory", "Defeat", "Draw"],
   "Soccer.Shared.MoveSource": ["value__", "Normal", "Growth", "Manual"],
   "Soccer.Shared.MoveType": ["value__", "Shoot", "Dribble", "Block", "Keeper"],
-  "Soccer.Shared.StartBattleReq": ["<Code>k__BackingField", "<FormationDeckCode>k__BackingField"],
+  "Soccer.Shared.StartBattleReq": [
+    "<Code>k__BackingField",
+    "<FormationDeckCode>k__BackingField",
+  ],
   "Soccer.Shared.FinishBattleReq": [
     "<ExpectedResult>k__BackingField",
     "<ExpectedAScore>k__BackingField",
@@ -9016,7 +10340,11 @@ export default {
     "<Index>k__BackingField",
     "<BattlePassMissionCodes>k__BackingField",
   ],
-  "Soccer.Shared.ObtainBattlePassRewardReq": ["ConstPath", "<BattlePassCode>k__BackingField", "<Index>k__BackingField"],
+  "Soccer.Shared.ObtainBattlePassRewardReq": [
+    "ConstPath",
+    "<BattlePassCode>k__BackingField",
+    "<Index>k__BackingField",
+  ],
   "Soccer.Shared.PurchasePremiumBattlePassReq": [
     "ConstPath",
     "<BattlePassCode>k__BackingField",
@@ -9031,7 +10359,10 @@ export default {
     "<Index>k__BackingField",
     "<Consumption>k__BackingField",
   ],
-  "Soccer.Shared.ObtainBonusPassTodayRewardsReq": ["ConstPath", "<BonusPassCode>k__BackingField"],
+  "Soccer.Shared.ObtainBonusPassTodayRewardsReq": [
+    "ConstPath",
+    "<BonusPassCode>k__BackingField",
+  ],
   "Soccer.Shared.GetChatTokenReq": ["ConstPath"],
   "Soccer.Shared.GetChatTokenRes": ["<Token>k__BackingField"],
   "Soccer.Shared.GetChatSystemMessagesReq": ["ConstPath"],
@@ -9044,19 +10375,42 @@ export default {
     "<StampCode>k__BackingField",
   ],
   "Soccer.Shared.GetBlockingUsersReq": ["ConstPath"],
-  "Soccer.Shared.GetBlockingUsersRes": ["<BlockingUserProfiles>k__BackingField"],
+  "Soccer.Shared.GetBlockingUsersRes": [
+    "<BlockingUserProfiles>k__BackingField",
+  ],
   "Soccer.Shared.BlockUserReq": ["ConstPath", "<UserIdToBlock>k__BackingField"],
-  "Soccer.Shared.UnblockUserReq": ["ConstPath", "<UserIdToUnblock>k__BackingField"],
-  "Soccer.Shared.ClubHouseDecorationIndexKey": ["<SlotType>k__BackingField", "<Segment>k__BackingField"],
+  "Soccer.Shared.UnblockUserReq": [
+    "ConstPath",
+    "<UserIdToUnblock>k__BackingField",
+  ],
+  "Soccer.Shared.ClubHouseDecorationIndexKey": [
+    "<SlotType>k__BackingField",
+    "<Segment>k__BackingField",
+  ],
   "Soccer.Shared.ClubHouseDecorationSlotKey": [
     "<SlotType>k__BackingField",
     "<Segment>k__BackingField",
     "<SlotIndex>k__BackingField",
   ],
-  "Soccer.Shared.ClubHouseDecorationSlot": ["<SlotKey>k__BackingField", "<ItemCode>k__BackingField"],
-  "Soccer.Shared.ClubHouseDecorationJson": ["<Slots>k__BackingField", "<SerializeSlots>k__BackingField"],
-  "Soccer.Shared.ClubHouseDecorationSlotType": ["value__", "StuffedToy", "Trophy", "WallArt", "Carpet"],
-  "Soccer.Shared.DecorateClubHouseReq": ["ConstPath", "<ClubHouseDecoration>k__BackingField"],
+  "Soccer.Shared.ClubHouseDecorationSlot": [
+    "<SlotKey>k__BackingField",
+    "<ItemCode>k__BackingField",
+  ],
+  "Soccer.Shared.ClubHouseDecorationJson": [
+    "<Slots>k__BackingField",
+    "<SerializeSlots>k__BackingField",
+  ],
+  "Soccer.Shared.ClubHouseDecorationSlotType": [
+    "value__",
+    "StuffedToy",
+    "Trophy",
+    "WallArt",
+    "Carpet",
+  ],
+  "Soccer.Shared.DecorateClubHouseReq": [
+    "ConstPath",
+    "<ClubHouseDecoration>k__BackingField",
+  ],
   "Soccer.Shared.GetClubHouseReq": ["ConstPath"],
   "Soccer.Shared.GetClubHouseRes": ["<ClubHouse>k__BackingField"],
   "Soccer.Shared.CharacterPosition": ["value__", "FW", "MF", "DF", "GK"],
@@ -9073,17 +10427,35 @@ export default {
     "<Formation>k__BackingField",
     "<FixedPlayerStageCode>k__BackingField",
   ],
-  "Soccer.Shared.ClubMemberLearnReq": ["ConstPath", "<ClubMemberCode>k__BackingField", "<ItemCode>k__BackingField"],
-  "Soccer.Shared.ClubMemberAwakenReq": ["ConstPath", "<ClubMemberCode>k__BackingField"],
+  "Soccer.Shared.ClubMemberLearnReq": [
+    "ConstPath",
+    "<ClubMemberCode>k__BackingField",
+    "<ItemCode>k__BackingField",
+  ],
+  "Soccer.Shared.ClubMemberAwakenReq": [
+    "ConstPath",
+    "<ClubMemberCode>k__BackingField",
+  ],
   "Soccer.Shared.ClubMemberSpecialMoveLevelUpReq": [
     "ConstPath",
     "<ClubMemberCode>k__BackingField",
     "<SpecialMoveCode>k__BackingField",
     "<DestLevel>k__BackingField",
   ],
-  "Soccer.Shared.ObtainAffinityRewardsReq": ["ConstPath", "<ClubMemberCode>k__BackingField"],
-  "Soccer.Shared.GiftAffinityItemsReq": ["ConstPath", "<ClubMemberCode>k__BackingField", "<Items>k__BackingField"],
-  "Soccer.Shared.DrawMemberReq": ["ConstPath", "<CharacterizeItemCode>k__BackingField", "<DrawTimes>k__BackingField"],
+  "Soccer.Shared.ObtainAffinityRewardsReq": [
+    "ConstPath",
+    "<ClubMemberCode>k__BackingField",
+  ],
+  "Soccer.Shared.GiftAffinityItemsReq": [
+    "ConstPath",
+    "<ClubMemberCode>k__BackingField",
+    "<Items>k__BackingField",
+  ],
+  "Soccer.Shared.DrawMemberReq": [
+    "ConstPath",
+    "<CharacterizeItemCode>k__BackingField",
+    "<DrawTimes>k__BackingField",
+  ],
   "Soccer.Shared.RerollModifierPassivesReq": [
     "ConstPath",
     "<ClubMemberCode>k__BackingField",
@@ -9098,9 +10470,18 @@ export default {
   ],
   "Soccer.Shared.StartConnectionBoardBattleReq": ["ConstPath"],
   "Soccer.Shared.FinishConnectionBoardBattleReq": ["ConstPath"],
-  "Soccer.Shared.ObtainConnectionBoardRewardReq": ["ConstPath", "<Code>k__BackingField"],
-  "Soccer.Shared.ReadConnectionBoardScenarioReq": ["ConstPath", "<Code>k__BackingField"],
-  "Soccer.Shared.UnlockConnectionBoardRouteLockReq": ["ConstPath", "<Code>k__BackingField"],
+  "Soccer.Shared.ObtainConnectionBoardRewardReq": [
+    "ConstPath",
+    "<Code>k__BackingField",
+  ],
+  "Soccer.Shared.ReadConnectionBoardScenarioReq": [
+    "ConstPath",
+    "<Code>k__BackingField",
+  ],
+  "Soccer.Shared.UnlockConnectionBoardRouteLockReq": [
+    "ConstPath",
+    "<Code>k__BackingField",
+  ],
   "Soccer.Shared.GameContentType": [
     "value__",
     "None",
@@ -9128,9 +10509,19 @@ export default {
     "Store",
   ],
   "Soccer.Shared.ConnectionError": ["<Message>k__BackingField"],
-  "Soccer.Shared.HttpError": ["<StatusCode>k__BackingField", "<Message>k__BackingField"],
-  "Soccer.Shared.APIError": ["<ErrorCode>k__BackingField", "<Message>k__BackingField", "<Details>k__BackingField"],
-  "Soccer.Shared.LocalServerInvalidError": ["<Message>k__BackingField", "<Details>k__BackingField"],
+  "Soccer.Shared.HttpError": [
+    "<StatusCode>k__BackingField",
+    "<Message>k__BackingField",
+  ],
+  "Soccer.Shared.APIError": [
+    "<ErrorCode>k__BackingField",
+    "<Message>k__BackingField",
+    "<Details>k__BackingField",
+  ],
+  "Soccer.Shared.LocalServerInvalidError": [
+    "<Message>k__BackingField",
+    "<Details>k__BackingField",
+  ],
   "Soccer.Shared.SoccerJsonOptions": ["converters", "<Default>k__BackingField"],
   "Soccer.Shared.HttpVerb": ["value__", "Get", "Post"],
   "Soccer.Shared.ItemChangeReasonType": [
@@ -9185,44 +10576,101 @@ export default {
     "ClearEventStoryStage",
     "ClearEventConnectionBoardStage",
   ],
-  "Soccer.Shared.ItemChangeReason": ["<Type>k__BackingField", "<Code>k__BackingField"],
-  "Soccer.Shared.ReasonForObtainBattlePassRewards": ["<BattlePassCode>k__BackingField"],
-  "Soccer.Shared.ReasonForPurchasePremiumBattlePass": ["<BattlePassCode>k__BackingField"],
-  "Soccer.Shared.ReasonForPurchaseBattlePassLevel": ["<BattlePassCode>k__BackingField"],
-  "Soccer.Shared.ReasonForObtainBonusPassRewards": ["<BonusPassCode>k__BackingField"],
+  "Soccer.Shared.ItemChangeReason": [
+    "<Type>k__BackingField",
+    "<Code>k__BackingField",
+  ],
+  "Soccer.Shared.ReasonForObtainBattlePassRewards": [
+    "<BattlePassCode>k__BackingField",
+  ],
+  "Soccer.Shared.ReasonForPurchasePremiumBattlePass": [
+    "<BattlePassCode>k__BackingField",
+  ],
+  "Soccer.Shared.ReasonForPurchaseBattlePassLevel": [
+    "<BattlePassCode>k__BackingField",
+  ],
+  "Soccer.Shared.ReasonForObtainBonusPassRewards": [
+    "<BonusPassCode>k__BackingField",
+  ],
   "Soccer.Shared.ReasonForLearnManualMove": ["<ClubMemberCode>k__BackingField"],
-  "Soccer.Shared.ReasonForAwakenClubMember": ["<ClubMemberCode>k__BackingField"],
-  "Soccer.Shared.ReasonForLevelUpSpecialMove": ["<ClubMemberCode>k__BackingField"],
-  "Soccer.Shared.ReasonForObtainAffinityRewards": ["<ClubMemberCode>k__BackingField"],
-  "Soccer.Shared.ReasonForGiftAffinityItem": ["<ClubMemberCode>k__BackingField"],
-  "Soccer.Shared.ReasonForRerollModifierPassive": ["<ClubMemberCode>k__BackingField"],
-  "Soccer.Shared.ReasonForClearConnectionBoardStage": ["<StageCode>k__BackingField"],
+  "Soccer.Shared.ReasonForAwakenClubMember": [
+    "<ClubMemberCode>k__BackingField",
+  ],
+  "Soccer.Shared.ReasonForLevelUpSpecialMove": [
+    "<ClubMemberCode>k__BackingField",
+  ],
+  "Soccer.Shared.ReasonForObtainAffinityRewards": [
+    "<ClubMemberCode>k__BackingField",
+  ],
+  "Soccer.Shared.ReasonForGiftAffinityItem": [
+    "<ClubMemberCode>k__BackingField",
+  ],
+  "Soccer.Shared.ReasonForRerollModifierPassive": [
+    "<ClubMemberCode>k__BackingField",
+  ],
+  "Soccer.Shared.ReasonForClearConnectionBoardStage": [
+    "<StageCode>k__BackingField",
+  ],
   "Soccer.Shared.ReasonForLevelUpDirector": ["<DirectorCode>k__BackingField"],
   "Soccer.Shared.ReasonForClearExtraCupStage": ["<StageCode>k__BackingField"],
   "Soccer.Shared.ReasonForDrawGacha": ["<GachaMachineCode>k__BackingField"],
-  "Soccer.Shared.ReasonForClearInalinkThread": ["<InalinkThreadCode>k__BackingField"],
-  "Soccer.Shared.ReasonForObtainL5iDPointStatusRewards": ["<StatusCode>k__BackingField"],
-  "Soccer.Shared.ReasonForObtainLoginBonusRewards": ["<LoginBonusCode>k__BackingField"],
+  "Soccer.Shared.ReasonForClearInalinkThread": [
+    "<InalinkThreadCode>k__BackingField",
+  ],
+  "Soccer.Shared.ReasonForObtainL5iDPointStatusRewards": [
+    "<StatusCode>k__BackingField",
+  ],
+  "Soccer.Shared.ReasonForObtainLoginBonusRewards": [
+    "<LoginBonusCode>k__BackingField",
+  ],
   "Soccer.Shared.ReasonForClearMainStoryStage": ["<StageCode>k__BackingField"],
-  "Soccer.Shared.ReasonForCompleteMissions": ["<MissionGroupCode>k__BackingField"],
-  "Soccer.Shared.ReasonForObtainMissionPointRewards": ["<PointCode>k__BackingField"],
-  "Soccer.Shared.ReasonForPurchaseOfferStep": ["<OfferStepCode>k__BackingField"],
+  "Soccer.Shared.ReasonForCompleteMissions": [
+    "<MissionGroupCode>k__BackingField",
+  ],
+  "Soccer.Shared.ReasonForObtainMissionPointRewards": [
+    "<PointCode>k__BackingField",
+  ],
+  "Soccer.Shared.ReasonForPurchaseOfferStep": [
+    "<OfferStepCode>k__BackingField",
+  ],
   "Soccer.Shared.ReasonForAttemptPvp": ["<PvpSeasonCode>k__BackingField"],
   "Soccer.Shared.ReasonForFinishPvp": ["<PvpSeasonCode>k__BackingField"],
-  "Soccer.Shared.ReasonForObtainRaidRewards": ["<RaidGroupCode>k__BackingField"],
+  "Soccer.Shared.ReasonForObtainRaidRewards": [
+    "<RaidGroupCode>k__BackingField",
+  ],
   "Soccer.Shared.ReasonForFinishRaid": ["<RaidGroupCode>k__BackingField"],
-  "Soccer.Shared.ReasonForPurchaseShopProduct": ["<ProductCode>k__BackingField"],
-  "Soccer.Shared.ReasonForPurchaseStoreProduct": ["<ProductCode>k__BackingField"],
-  "Soccer.Shared.ReasonForPurchaseStoreExchangeProduct": ["<ProductCode>k__BackingField"],
+  "Soccer.Shared.ReasonForPurchaseShopProduct": [
+    "<ProductCode>k__BackingField",
+  ],
+  "Soccer.Shared.ReasonForPurchaseStoreProduct": [
+    "<ProductCode>k__BackingField",
+  ],
+  "Soccer.Shared.ReasonForPurchaseStoreExchangeProduct": [
+    "<ProductCode>k__BackingField",
+  ],
   "Soccer.Shared.ReasonForClearEventStoryStage": ["<StageCode>k__BackingField"],
-  "Soccer.Shared.ReasonForClearEventConnectionBoardStage": ["<StageCode>k__BackingField"],
-  "Soccer.Shared.ItemCodeWithQuantity": ["<ItemCode>k__BackingField", "<Quantity>k__BackingField"],
+  "Soccer.Shared.ReasonForClearEventConnectionBoardStage": [
+    "<StageCode>k__BackingField",
+  ],
+  "Soccer.Shared.ItemCodeWithQuantity": [
+    "<ItemCode>k__BackingField",
+    "<Quantity>k__BackingField",
+  ],
   "Soccer.Shared.MessageSignature": ["KeyResponseHeader", "SaltResponseHeader"],
-  "Soccer.Shared.Req": ["<ContentFeatureType>k__BackingField", "<ContentFeatureCode>k__BackingField"],
+  "Soccer.Shared.Req": [
+    "<ContentFeatureType>k__BackingField",
+    "<ContentFeatureCode>k__BackingField",
+  ],
   "Soccer.Shared.VirtualCurrency": ["value__", "Point", "Coin", "Exp"],
   "Soccer.Shared.VirtualCurrencyParser": ["Shared"],
-  "Soccer.Shared.DebugChangeDirectorLevelsReq": ["ConstPath", "<DirectorCodeAndLevels>k__BackingField"],
-  "Soccer.Shared.DebugChangeLevelSynchronizerSlotLevelsReq": ["ConstPath", "<Slots>k__BackingField"],
+  "Soccer.Shared.DebugChangeDirectorLevelsReq": [
+    "ConstPath",
+    "<DirectorCodeAndLevels>k__BackingField",
+  ],
+  "Soccer.Shared.DebugChangeLevelSynchronizerSlotLevelsReq": [
+    "ConstPath",
+    "<Slots>k__BackingField",
+  ],
   "Soccer.Shared.DebugObtainItemsReq": [
     "ConstPath",
     "<ItemType>k__BackingField",
@@ -9230,39 +10678,96 @@ export default {
     "<Quantity>k__BackingField",
   ],
   "Soccer.Shared.DebugUnlockAllMainStoryStagesReq": ["ConstPath"],
-  "Soccer.Shared.DebugChangeTrainingStageLevelReq": ["ConstPath", "<Level>k__BackingField"],
+  "Soccer.Shared.DebugChangeTrainingStageLevelReq": [
+    "ConstPath",
+    "<Level>k__BackingField",
+  ],
   "Soccer.Shared.DebugGetUsersReq": ["ConstPath"],
-  "Soccer.Shared.DebugUser": ["<Id>k__BackingField", "<Name>k__BackingField", "<Token>k__BackingField"],
+  "Soccer.Shared.DebugUser": [
+    "<Id>k__BackingField",
+    "<Name>k__BackingField",
+    "<Token>k__BackingField",
+  ],
   "Soccer.Shared.DebugGetUsersRes": ["<Users>k__BackingField"],
-  "Soccer.Shared.DebugRewindLoggedInAtReq": ["ConstPath", "<RewindTime>k__BackingField"],
-  "Soccer.Shared.DebugProgressAllLoginBonusesReq": ["ConstPath", "<DayCountOffset>k__BackingField"],
+  "Soccer.Shared.DebugRewindLoggedInAtReq": [
+    "ConstPath",
+    "<RewindTime>k__BackingField",
+  ],
+  "Soccer.Shared.DebugProgressAllLoginBonusesReq": [
+    "ConstPath",
+    "<DayCountOffset>k__BackingField",
+  ],
   "Soccer.Shared.DebugFinishTutorialReq": ["ConstPath"],
-  "Soccer.Shared.DebugUnlockMainStoryStageReq": ["ConstPath", "<StageCode>k__BackingField"],
-  "Soccer.Shared.DebugChangeRaidAttemptCountReq": ["ConstPath", "<AttemptCount>k__BackingField"],
-  "Soccer.Shared.DebugChangeAllAffinityReq": ["ConstPath", "<Affinity>k__BackingField"],
-  "Soccer.Shared.DebugChangeAllAwakeningReq": ["ConstPath", "<Awakening>k__BackingField"],
-  "Soccer.Shared.DebugChangePvpRatingReq": ["ConstPath", "<Rating>k__BackingField"],
-  "Soccer.Shared.DebugChangePvpRerollCountReq": ["ConstPath", "<RerollCount>k__BackingField"],
-  "Soccer.Shared.DebugChangeGuildResourceReq": ["ConstPath", "<Quantity>k__BackingField"],
-  "Soccer.Shared.DebugUnlockExtraCupStageReq": ["ConstPath", "<StageCode>k__BackingField"],
+  "Soccer.Shared.DebugUnlockMainStoryStageReq": [
+    "ConstPath",
+    "<StageCode>k__BackingField",
+  ],
+  "Soccer.Shared.DebugChangeRaidAttemptCountReq": [
+    "ConstPath",
+    "<AttemptCount>k__BackingField",
+  ],
+  "Soccer.Shared.DebugChangeAllAffinityReq": [
+    "ConstPath",
+    "<Affinity>k__BackingField",
+  ],
+  "Soccer.Shared.DebugChangeAllAwakeningReq": [
+    "ConstPath",
+    "<Awakening>k__BackingField",
+  ],
+  "Soccer.Shared.DebugChangePvpRatingReq": [
+    "ConstPath",
+    "<Rating>k__BackingField",
+  ],
+  "Soccer.Shared.DebugChangePvpRerollCountReq": [
+    "ConstPath",
+    "<RerollCount>k__BackingField",
+  ],
+  "Soccer.Shared.DebugChangeGuildResourceReq": [
+    "ConstPath",
+    "<Quantity>k__BackingField",
+  ],
+  "Soccer.Shared.DebugUnlockExtraCupStageReq": [
+    "ConstPath",
+    "<StageCode>k__BackingField",
+  ],
   "Soccer.Shared.DebugUnlockAllExtraCupStageReq": ["ConstPath"],
   "Soccer.Shared.DebugSatisfyAllDailyGuildMissionsReq": ["ConstPath"],
-  "Soccer.Shared.DebugUnlockConnectionBoardStageReq": ["ConstPath", "<StageCode>k__BackingField"],
+  "Soccer.Shared.DebugUnlockConnectionBoardStageReq": [
+    "ConstPath",
+    "<StageCode>k__BackingField",
+  ],
   "Soccer.Shared.DebugUnlockAllConnectionBoardStageReq": ["ConstPath"],
-  "Soccer.Shared.DebugRemoveSerialCodeConsumptionReq": ["ConstPath", "<SerialCode>k__BackingField"],
+  "Soccer.Shared.DebugRemoveSerialCodeConsumptionReq": [
+    "ConstPath",
+    "<SerialCode>k__BackingField",
+  ],
   "Soccer.Shared.DebugGetAllSerialCodeConsumptionsReq": ["ConstPath"],
-  "Soccer.Shared.DebugGetAllSerialCodeConsumptionsRes": ["<ConsumedSerialCodes>k__BackingField"],
+  "Soccer.Shared.DebugGetAllSerialCodeConsumptionsRes": [
+    "<ConsumedSerialCodes>k__BackingField",
+  ],
   "Soccer.Shared.DebugDeliverDebugMailsReq": ["ConstPath"],
   "Soccer.Shared.DebugChangeBattlePassLevelReq": [
     "ConstPath",
     "<BattlePassCode>k__BackingField",
     "<Level>k__BackingField",
   ],
-  "Soccer.Shared.DebugChangeBattlePassPremiumReq": ["ConstPath", "<BattlePassCode>k__BackingField"],
-  "Soccer.Shared.DebugActivateBonusPassReq": ["ConstPath", "<BonusPassCode>k__BackingField"],
-  "Soccer.Shared.DebugUpdateL5iDStatusPointReq": ["ConstPath", "<Point>k__BackingField"],
+  "Soccer.Shared.DebugChangeBattlePassPremiumReq": [
+    "ConstPath",
+    "<BattlePassCode>k__BackingField",
+  ],
+  "Soccer.Shared.DebugActivateBonusPassReq": [
+    "ConstPath",
+    "<BonusPassCode>k__BackingField",
+  ],
+  "Soccer.Shared.DebugUpdateL5iDStatusPointReq": [
+    "ConstPath",
+    "<Point>k__BackingField",
+  ],
   "Soccer.Shared.DebugResetL5iDLastRewardsObtainedReq": ["ConstPath"],
-  "Soccer.Shared.DebugStorePurchaseReq": ["ConstPath", "<ProductId>k__BackingField"],
+  "Soccer.Shared.DebugStorePurchaseReq": [
+    "ConstPath",
+    "<ProductId>k__BackingField",
+  ],
   "Soccer.Shared.DebugStorePurchaseRes": [
     "<ProductId>k__BackingField",
     "<GameInfo>k__BackingField",
@@ -9270,19 +10775,50 @@ export default {
     "<Balance>k__BackingField",
     "<IsAlreadyDelivered>k__BackingField",
   ],
-  "Soccer.Shared.DebugLinkConsumeReq": ["ConstPath", "<ConsumptionId>k__BackingField"],
+  "Soccer.Shared.DebugLinkConsumeReq": [
+    "ConstPath",
+    "<ConsumptionId>k__BackingField",
+  ],
   "Soccer.Shared.DebugLinkConsumeRes": ["<AlreadyConsumed>k__BackingField"],
-  "Soccer.Shared.DebugCreateOffersReq": ["ConstPath", "<OfferCodes>k__BackingField"],
+  "Soccer.Shared.DebugCreateOffersReq": [
+    "ConstPath",
+    "<OfferCodes>k__BackingField",
+  ],
   "Soccer.Shared.DebugBanMyselfReq": ["ConstPath", "<EndsAt>k__BackingField"],
-  "Soccer.Shared.DebugUpdateLocalGachaContentFeatureLockReq": ["ConstPath", "<LockedGachaCodes>k__BackingField"],
-  "Soccer.Shared.DebugUnlockAllEventStoryStagesReq": ["ConstPath", "<EventCode>k__BackingField"],
-  "Soccer.Shared.DebugUnlockEventStoryStagesReq": ["ConstPath", "<StageCode>k__BackingField"],
-  "Soccer.Shared.DebugUnlockAllEventConnectionBoardStagesReq": ["ConstPath", "<EventCode>k__BackingField"],
-  "Soccer.Shared.DebugUnlockEventConnectionBoardStagesReq": ["ConstPath", "<StageCode>k__BackingField"],
+  "Soccer.Shared.DebugUpdateLocalGachaContentFeatureLockReq": [
+    "ConstPath",
+    "<LockedGachaCodes>k__BackingField",
+  ],
+  "Soccer.Shared.DebugUnlockAllEventStoryStagesReq": [
+    "ConstPath",
+    "<EventCode>k__BackingField",
+  ],
+  "Soccer.Shared.DebugUnlockEventStoryStagesReq": [
+    "ConstPath",
+    "<StageCode>k__BackingField",
+  ],
+  "Soccer.Shared.DebugUnlockAllEventConnectionBoardStagesReq": [
+    "ConstPath",
+    "<EventCode>k__BackingField",
+  ],
+  "Soccer.Shared.DebugUnlockEventConnectionBoardStagesReq": [
+    "ConstPath",
+    "<StageCode>k__BackingField",
+  ],
   "Soccer.Shared.DiamondPaymentType": ["value__", "PaidOnly", "Mixed"],
-  "Soccer.Shared.DiamondConsumption": ["<Free>k__BackingField", "<Paid>k__BackingField", "<Zero>k__BackingField"],
-  "Soccer.Shared.DiamondPayment": ["<Type>k__BackingField", "<Quantity>k__BackingField"],
-  "Soccer.Shared.DiamondWallet": ["<Free>k__BackingField", "<Paid>k__BackingField"],
+  "Soccer.Shared.DiamondConsumption": [
+    "<Free>k__BackingField",
+    "<Paid>k__BackingField",
+    "<Zero>k__BackingField",
+  ],
+  "Soccer.Shared.DiamondPayment": [
+    "<Type>k__BackingField",
+    "<Quantity>k__BackingField",
+  ],
+  "Soccer.Shared.DiamondWallet": [
+    "<Free>k__BackingField",
+    "<Paid>k__BackingField",
+  ],
   "Soccer.Shared.GetDiamondWalletReq": ["ConstPath"],
   "Soccer.Shared.GetDiamondWalletRes": ["<DiamondWallet>k__BackingField"],
   "Soccer.Shared.GetPaidDiamondConsumptionIdsReq": ["ConstPath"],
@@ -9290,10 +10826,22 @@ export default {
     "<MustBeConsumedId>k__BackingField",
     "<MustBeCanceledId>k__BackingField",
   ],
-  "Soccer.Shared.FinalizePaidDiamondConsumptionReq": ["ConstPath", "<ConsumptionId>k__BackingField"],
-  "Soccer.Shared.FinalizePaidDiamondConsumptionRes": ["<AlreadyConsumed>k__BackingField"],
-  "Soccer.Shared.CancelPaidDiamondConsumptionReq": ["ConstPath", "<ConsumptionId>k__BackingField"],
-  "Soccer.Shared.DirectorLevelUpReq": ["ConstPath", "<DirectorCode>k__BackingField", "<DestLevel>k__BackingField"],
+  "Soccer.Shared.FinalizePaidDiamondConsumptionReq": [
+    "ConstPath",
+    "<ConsumptionId>k__BackingField",
+  ],
+  "Soccer.Shared.FinalizePaidDiamondConsumptionRes": [
+    "<AlreadyConsumed>k__BackingField",
+  ],
+  "Soccer.Shared.CancelPaidDiamondConsumptionReq": [
+    "ConstPath",
+    "<ConsumptionId>k__BackingField",
+  ],
+  "Soccer.Shared.DirectorLevelUpReq": [
+    "ConstPath",
+    "<DirectorCode>k__BackingField",
+    "<DestLevel>k__BackingField",
+  ],
   "Soccer.Shared.BattlePass": [
     "<UserId>k__BackingField",
     "<Code>k__BackingField",
@@ -9325,7 +10873,10 @@ export default {
     "<StartsAt>k__BackingField",
     "<EndsAt>k__BackingField",
   ],
-  "Soccer.Shared.ClubHouse": ["<UserId>k__BackingField", "<DecorationJson>k__BackingField"],
+  "Soccer.Shared.ClubHouse": [
+    "<UserId>k__BackingField",
+    "<DecorationJson>k__BackingField",
+  ],
   "Soccer.Shared.ClubMember": [
     "<UserId>k__BackingField",
     "<Code>k__BackingField",
@@ -9356,7 +10907,11 @@ export default {
     "<MailId>k__BackingField",
     "<Status>k__BackingField",
   ],
-  "Soccer.Shared.Director": ["<UserId>k__BackingField", "<Code>k__BackingField", "<Level>k__BackingField"],
+  "Soccer.Shared.Director": [
+    "<UserId>k__BackingField",
+    "<Code>k__BackingField",
+    "<Level>k__BackingField",
+  ],
   "Soccer.Shared.Equipment": [
     "<UserId>k__BackingField",
     "<Position>k__BackingField",
@@ -9369,7 +10924,11 @@ export default {
     "<ClearedStageCount>k__BackingField",
     "<FormationJson>k__BackingField",
   ],
-  "Soccer.Shared.Formation": ["<UserId>k__BackingField", "<Slot>k__BackingField", "<FormationJson>k__BackingField"],
+  "Soccer.Shared.Formation": [
+    "<UserId>k__BackingField",
+    "<Slot>k__BackingField",
+    "<FormationJson>k__BackingField",
+  ],
   "Soccer.Shared.GachaMachineCounter": [
     "<UserId>k__BackingField",
     "<GachaMachineCode>k__BackingField",
@@ -9408,7 +10967,11 @@ export default {
     "<MemberLastLoggedInAt>k__BackingField",
     "<CreatedAt>k__BackingField",
   ],
-  "Soccer.Shared.GuildEntryForm": ["<GuildId>k__BackingField", "<UserId>k__BackingField", "<CreatedAt>k__BackingField"],
+  "Soccer.Shared.GuildEntryForm": [
+    "<GuildId>k__BackingField",
+    "<UserId>k__BackingField",
+    "<CreatedAt>k__BackingField",
+  ],
   "Soccer.Shared.GuildMemberContribution": [
     "<GuildId>k__BackingField",
     "<UserId>k__BackingField",
@@ -9418,7 +10981,11 @@ export default {
     "<LastContributedAt>k__BackingField",
     "<ContributionRewardObtainedAt>k__BackingField",
   ],
-  "Soccer.Shared.GuildMembership": ["<GuildId>k__BackingField", "<UserId>k__BackingField", "<Role>k__BackingField"],
+  "Soccer.Shared.GuildMembership": [
+    "<GuildId>k__BackingField",
+    "<UserId>k__BackingField",
+    "<Role>k__BackingField",
+  ],
   "Soccer.Shared.GuildResource": [
     "<GuildId>k__BackingField",
     "<Type>k__BackingField",
@@ -9442,7 +11009,10 @@ export default {
     "<RemainingFreeTrainingCount>k__BackingField",
     "<RemainingPaidTrainingCount>k__BackingField",
   ],
-  "Soccer.Shared.Invitation": ["<UserId>k__BackingField", "<InvitedAt>k__BackingField"],
+  "Soccer.Shared.Invitation": [
+    "<UserId>k__BackingField",
+    "<InvitedAt>k__BackingField",
+  ],
   "Soccer.Shared.Item": [
     "<UserId>k__BackingField",
     "<Code>k__BackingField",
@@ -9468,7 +11038,10 @@ export default {
     "<RewardsObtainedDayCount>k__BackingField",
     "<LastLoggedInAt>k__BackingField",
   ],
-  "Soccer.Shared.MainTutorial": ["<UserId>k__BackingField", "<Progress>k__BackingField"],
+  "Soccer.Shared.MainTutorial": [
+    "<UserId>k__BackingField",
+    "<Progress>k__BackingField",
+  ],
   "Soccer.Shared.MissionPointRewardProgress": [
     "<UserId>k__BackingField",
     "<Code>k__BackingField",
@@ -9586,7 +11159,11 @@ export default {
     "<AttemptCount>k__BackingField",
     "<LastAttemptedAt>k__BackingField",
   ],
-  "Soccer.Shared.ReadContentTutorial": ["<UserId>k__BackingField", "<Code>k__BackingField", "<Version>k__BackingField"],
+  "Soccer.Shared.ReadContentTutorial": [
+    "<UserId>k__BackingField",
+    "<Code>k__BackingField",
+    "<Version>k__BackingField",
+  ],
   "Soccer.Shared.ShopPurchaseRestriction": [
     "<UserId>k__BackingField",
     "<ShopItemCode>k__BackingField",
@@ -9623,8 +11200,14 @@ export default {
     "<CreatedAt>k__BackingField",
     "<Status>k__BackingField",
   ],
-  "Soccer.Shared.UserBan": ["<UserId>k__BackingField", "<EndsAt>k__BackingField"],
-  "Soccer.Shared.UserBlock": ["<BlockerUserId>k__BackingField", "<BlockedUserId>k__BackingField"],
+  "Soccer.Shared.UserBan": [
+    "<UserId>k__BackingField",
+    "<EndsAt>k__BackingField",
+  ],
+  "Soccer.Shared.UserBlock": [
+    "<BlockerUserId>k__BackingField",
+    "<BlockedUserId>k__BackingField",
+  ],
   "Soccer.Shared.UserProfile": [
     "<UserId>k__BackingField",
     "<Name>k__BackingField",
@@ -9653,17 +11236,48 @@ export default {
     "<Extra>k__BackingField",
     "<RemainingPaidDiamondQuantity>k__BackingField",
   ],
-  "Soccer.Shared.EntityOperationType": ["value__", "Detached", "Unchanged", "Deleted", "Modified", "Added"],
-  "Soccer.Shared.AppPlatform": ["value__", "Unknown", "iOS", "Android", "Windows", "OSX", "Editor"],
-  "Soccer.Shared.EntrypointStatus": ["value__", "Ok", "NeedToUpdateApp", "UnderMaintenance", "Invalid"],
-  "Soccer.Shared.GetCurrentEntrypointReq": ["ConstPath", "<AppPlatform>k__BackingField", "<AppVersion>k__BackingField"],
+  "Soccer.Shared.EntityOperationType": [
+    "value__",
+    "Detached",
+    "Unchanged",
+    "Deleted",
+    "Modified",
+    "Added",
+  ],
+  "Soccer.Shared.AppPlatform": [
+    "value__",
+    "Unknown",
+    "iOS",
+    "Android",
+    "Windows",
+    "OSX",
+    "Editor",
+  ],
+  "Soccer.Shared.EntrypointStatus": [
+    "value__",
+    "Ok",
+    "NeedToUpdateApp",
+    "UnderMaintenance",
+    "Invalid",
+  ],
+  "Soccer.Shared.GetCurrentEntrypointReq": [
+    "ConstPath",
+    "<AppPlatform>k__BackingField",
+    "<AppVersion>k__BackingField",
+  ],
   "Soccer.Shared.GetCurrentEntrypointRes": [
     "<Status>k__BackingField",
     "<UnderMaintenanceDetail>k__BackingField",
     "<Current>k__BackingField",
   ],
-  "Soccer.Shared.Confirmation": ["<UpdatedAt>k__BackingField", "<Uri>k__BackingField"],
-  "Soccer.Shared.UnderMaintenanceDetail": ["<Message>k__BackingField", "<BeginsAt>k__BackingField"],
+  "Soccer.Shared.Confirmation": [
+    "<UpdatedAt>k__BackingField",
+    "<Uri>k__BackingField",
+  ],
+  "Soccer.Shared.UnderMaintenanceDetail": [
+    "<Message>k__BackingField",
+    "<BeginsAt>k__BackingField",
+  ],
   "Soccer.Shared.EntrypointCurrent": [
     "<AssetUri>k__BackingField",
     "<TermOfService>k__BackingField",
@@ -9673,24 +11287,56 @@ export default {
     "<InAppReview>k__BackingField",
     "<AimingLinkSettings>k__BackingField",
   ],
-  "Soccer.Shared.AimingLinkSettings": ["<AccessToken>k__BackingField", "<BaseUrl>k__BackingField"],
+  "Soccer.Shared.AimingLinkSettings": [
+    "<AccessToken>k__BackingField",
+    "<BaseUrl>k__BackingField",
+  ],
   "Soccer.Shared.LevelUpEquipmentsReq": ["ConstPath"],
   "Soccer.Shared.DismantleEquipmentsReq": ["ConstPath"],
-  "Soccer.Shared.CraftEquipmentReq": ["ConstPath", "<EquipmentCode>k__BackingField"],
+  "Soccer.Shared.CraftEquipmentReq": [
+    "ConstPath",
+    "<EquipmentCode>k__BackingField",
+  ],
   "Soccer.Shared.GradeUpEquipmentCraftingMaterialsReq": ["ConstPath"],
-  "Soccer.Shared.GradeUpOrDismantleResult": ["<Granted>k__BackingField", "<Consumed>k__BackingField"],
-  "Soccer.Shared.OpenRandomEquipmentBoxReq": ["ConstPath", "<Items>k__BackingField"],
+  "Soccer.Shared.GradeUpOrDismantleResult": [
+    "<Granted>k__BackingField",
+    "<Consumed>k__BackingField",
+  ],
+  "Soccer.Shared.OpenRandomEquipmentBoxReq": [
+    "ConstPath",
+    "<Items>k__BackingField",
+  ],
   "Soccer.Shared.CompleteEventMissionsReq": [
     "ConstPath",
     "<EventCode>k__BackingField",
     "<MissionCodes>k__BackingField",
   ],
-  "Soccer.Shared.StartEventStoryBattleReq": ["ConstPath", "<EventCode>k__BackingField"],
-  "Soccer.Shared.FinishEventStoryBattleReq": ["ConstPath", "<EventCode>k__BackingField"],
-  "Soccer.Shared.ObtainEventStoryRewardReq": ["ConstPath", "<EventCode>k__BackingField", "<Code>k__BackingField"],
-  "Soccer.Shared.ReadEventStoryScenarioReq": ["ConstPath", "<EventCode>k__BackingField", "<Code>k__BackingField"],
-  "Soccer.Shared.StartEventConnectionBoardBattleReq": ["ConstPath", "<EventCode>k__BackingField"],
-  "Soccer.Shared.FinishEventConnectionBoardBattleReq": ["ConstPath", "<EventCode>k__BackingField"],
+  "Soccer.Shared.StartEventStoryBattleReq": [
+    "ConstPath",
+    "<EventCode>k__BackingField",
+  ],
+  "Soccer.Shared.FinishEventStoryBattleReq": [
+    "ConstPath",
+    "<EventCode>k__BackingField",
+  ],
+  "Soccer.Shared.ObtainEventStoryRewardReq": [
+    "ConstPath",
+    "<EventCode>k__BackingField",
+    "<Code>k__BackingField",
+  ],
+  "Soccer.Shared.ReadEventStoryScenarioReq": [
+    "ConstPath",
+    "<EventCode>k__BackingField",
+    "<Code>k__BackingField",
+  ],
+  "Soccer.Shared.StartEventConnectionBoardBattleReq": [
+    "ConstPath",
+    "<EventCode>k__BackingField",
+  ],
+  "Soccer.Shared.FinishEventConnectionBoardBattleReq": [
+    "ConstPath",
+    "<EventCode>k__BackingField",
+  ],
   "Soccer.Shared.ObtainEventConnectionBoardRewardReq": [
     "ConstPath",
     "<EventCode>k__BackingField",
@@ -9713,14 +11359,25 @@ export default {
   ],
   "Soccer.Shared.StartExtraCupReq": ["ConstPath"],
   "Soccer.Shared.FinishExtraCupReq": ["ConstPath"],
-  "Soccer.Shared.GetExtraCupHistoriesReq": ["ConstPath", "<ExtraCupStageCode>k__BackingField"],
+  "Soccer.Shared.GetExtraCupHistoriesReq": [
+    "ConstPath",
+    "<ExtraCupStageCode>k__BackingField",
+  ],
   "Soccer.Shared.GetExtraCupHistoriesRes": ["<Histories>k__BackingField"],
-  "Soccer.Shared.GachaMachineCounterType": ["value__", "Unknown", "MaxDrawCountLimit", "Pity", "OncePerDay"],
+  "Soccer.Shared.GachaMachineCounterType": [
+    "value__",
+    "Unknown",
+    "MaxDrawCountLimit",
+    "Pity",
+    "OncePerDay",
+  ],
   "Soccer.Shared.GachaDrawForBaseDiamondPrice": [
     "<DrawForDiamondCount>k__BackingField",
     "<PaidDiamondsToPay>k__BackingField",
   ],
-  "Soccer.Shared.GachaDrawForBaseTicketPrice": ["<DrawForTicketCount>k__BackingField"],
+  "Soccer.Shared.GachaDrawForBaseTicketPrice": [
+    "<DrawForTicketCount>k__BackingField",
+  ],
   "Soccer.Shared.GachaPendingResultJson": ["<Entries>k__BackingField"],
   "Soccer.Shared.GachaResult": [
     "<ChangeByGacha>k__BackingField",
@@ -9740,10 +11397,20 @@ export default {
     "<IsNewCharacter>k__BackingField",
     "<IsPickup>k__BackingField",
   ],
-  "Soccer.Shared.SetWishlistReq": ["ConstPath", "<WishlistCode>k__BackingField", "<CharacterItemCodes>k__BackingField"],
+  "Soccer.Shared.SetWishlistReq": [
+    "ConstPath",
+    "<WishlistCode>k__BackingField",
+    "<CharacterItemCodes>k__BackingField",
+  ],
   "Soccer.Shared.DrawRetryableTutorialGachaReq": ["ConstPath"],
-  "Soccer.Shared.FinalizeRetryableTutorialGachaReq": ["ConstPath", "<DrawnAt>k__BackingField"],
-  "Soccer.Shared.GameContentFeatureLock": ["<ReleaseVersion>k__BackingField", "<Features>k__BackingField"],
+  "Soccer.Shared.FinalizeRetryableTutorialGachaReq": [
+    "ConstPath",
+    "<DrawnAt>k__BackingField",
+  ],
+  "Soccer.Shared.GameContentFeatureLock": [
+    "<ReleaseVersion>k__BackingField",
+    "<Features>k__BackingField",
+  ],
   "Soccer.Shared.GameContentFeatureType": [
     "value__",
     "None",
@@ -9763,7 +11430,9 @@ export default {
     "StoreExchangeShop",
   ],
   "Soccer.Shared.GetGameContentFeatureLockReq": ["ConstPath"],
-  "Soccer.Shared.GetGameContentFeatureLockRes": ["<GameContentFeatureLock>k__BackingField"],
+  "Soccer.Shared.GetGameContentFeatureLockRes": [
+    "<GameContentFeatureLock>k__BackingField",
+  ],
   "Soccer.Shared.GuildEmblem": [
     "<Frame>k__BackingField",
     "<FrameColorIndex>k__BackingField",
@@ -9771,16 +11440,40 @@ export default {
     "<SymbolColorIndex>k__BackingField",
   ],
   "Soccer.Shared.GuildStatus": ["value__", "Active", "Disbanded"],
-  "Soccer.Shared.GuildEntryRule": ["value__", "AutoAccept", "ManualAccept", "Closed"],
-  "Soccer.Shared.GuildPlayStylePolicy": ["value__", "FreePlay", "CasualPlay", "HardcorePlay"],
-  "Soccer.Shared.GuildCommunicationPolicy": ["value__", "CasualInteraction", "FriendlyInteraction", "SilentAllowed"],
-  "Soccer.Shared.GuildMemberRequirementPolicy": ["value__", "OpenToAll", "CompetitivePreferred"],
+  "Soccer.Shared.GuildEntryRule": [
+    "value__",
+    "AutoAccept",
+    "ManualAccept",
+    "Closed",
+  ],
+  "Soccer.Shared.GuildPlayStylePolicy": [
+    "value__",
+    "FreePlay",
+    "CasualPlay",
+    "HardcorePlay",
+  ],
+  "Soccer.Shared.GuildCommunicationPolicy": [
+    "value__",
+    "CasualInteraction",
+    "FriendlyInteraction",
+    "SilentAllowed",
+  ],
+  "Soccer.Shared.GuildMemberRequirementPolicy": [
+    "value__",
+    "OpenToAll",
+    "CompetitivePreferred",
+  ],
   "Soccer.Shared.GuildMember": [
     "<Profile>k__BackingField",
     "<Membership>k__BackingField",
     "<Contributions>k__BackingField",
   ],
-  "Soccer.Shared.GuildMemberRole": ["value__", "Member", "Leader", "ViceLeader"],
+  "Soccer.Shared.GuildMemberRole": [
+    "value__",
+    "Member",
+    "Leader",
+    "ViceLeader",
+  ],
   "Soccer.Shared.GuildOperation": [
     "value__",
     "Disband",
@@ -9799,7 +11492,12 @@ export default {
     "<EmblemFrameColorIndex>k__BackingField",
     "<EmblemSymbolColorIndex>k__BackingField",
   ],
-  "Soccer.Shared.GuildRelationStatus": ["value__", "NotRelated", "Joined", "JoinPending"],
+  "Soccer.Shared.GuildRelationStatus": [
+    "value__",
+    "NotRelated",
+    "Joined",
+    "JoinPending",
+  ],
   "Soccer.Shared.GuildResourceType": ["value__", "Exp", "GvEPoint"],
   "Soccer.Shared.GuildSettings": [
     "<Name>k__BackingField",
@@ -9812,15 +11510,33 @@ export default {
     "<EmblemSymbolCode>k__BackingField",
     "<EmblemSymbolColorIndex>k__BackingField",
   ],
-  "Soccer.Shared.GuildWithExp": ["<Guild>k__BackingField", "<Exp>k__BackingField"],
+  "Soccer.Shared.GuildWithExp": [
+    "<Guild>k__BackingField",
+    "<Exp>k__BackingField",
+  ],
   "Soccer.Shared.GetPendingGuildEntryFormsReq": ["ConstPath"],
   "Soccer.Shared.GetPendingGuildEntryFormsRes": ["<EntryForms>k__BackingField"],
   "Soccer.Shared.DisbandGuildReq": ["ConstPath"],
-  "Soccer.Shared.AcceptGuildEntryFormReq": ["ConstPath", "<UserIdToAccept>k__BackingField"],
-  "Soccer.Shared.RejectGuildEntryFormReq": ["ConstPath", "<UserIdToReject>k__BackingField"],
-  "Soccer.Shared.KickGuildMemberReq": ["ConstPath", "<UserIdToKick>k__BackingField"],
-  "Soccer.Shared.UpdateGuildSettingsReq": ["ConstPath", "<Settings>k__BackingField"],
-  "Soccer.Shared.UpdateGuildAnnouncementReq": ["ConstPath", "<Announcement>k__BackingField"],
+  "Soccer.Shared.AcceptGuildEntryFormReq": [
+    "ConstPath",
+    "<UserIdToAccept>k__BackingField",
+  ],
+  "Soccer.Shared.RejectGuildEntryFormReq": [
+    "ConstPath",
+    "<UserIdToReject>k__BackingField",
+  ],
+  "Soccer.Shared.KickGuildMemberReq": [
+    "ConstPath",
+    "<UserIdToKick>k__BackingField",
+  ],
+  "Soccer.Shared.UpdateGuildSettingsReq": [
+    "ConstPath",
+    "<Settings>k__BackingField",
+  ],
+  "Soccer.Shared.UpdateGuildAnnouncementReq": [
+    "ConstPath",
+    "<Announcement>k__BackingField",
+  ],
   "Soccer.Shared.UpdateGuildMemberRoleReq": [
     "ConstPath",
     "<UserIdToUpdateRole>k__BackingField",
@@ -9832,9 +11548,15 @@ export default {
     "<Resources>k__BackingField",
     "<Members>k__BackingField",
   ],
-  "Soccer.Shared.PendingGuildEntryForm": ["<Profile>k__BackingField", "<EntryForm>k__BackingField"],
+  "Soccer.Shared.PendingGuildEntryForm": [
+    "<Profile>k__BackingField",
+    "<EntryForm>k__BackingField",
+  ],
   "Soccer.Shared.GuildMeReq": ["ConstPath"],
-  "Soccer.Shared.GuildMeRes": ["<MyGuild>k__BackingField", "<IsLeaderAbsent>k__BackingField"],
+  "Soccer.Shared.GuildMeRes": [
+    "<MyGuild>k__BackingField",
+    "<IsLeaderAbsent>k__BackingField",
+  ],
   "Soccer.Shared.UpdateGuildMemberLastLoggedInAtReq": ["ConstPath"],
   "Soccer.Shared.ReplaceAbsentGuildLeaderReq": ["ConstPath"],
   "Soccer.Shared.GetGuildsReq": [
@@ -9852,15 +11574,35 @@ export default {
     "<MemberCountFilterIndex>k__BackingField",
   ],
   "Soccer.Shared.GetGuildMemberTrainingLevelsReq": ["ConstPath"],
-  "Soccer.Shared.GetGuildMemberTrainingLevelsRes": ["<TrainingLevels>k__BackingField"],
+  "Soccer.Shared.GetGuildMemberTrainingLevelsRes": [
+    "<TrainingLevels>k__BackingField",
+  ],
   "Soccer.Shared.GetGuildMemberExtraCupProgressesReq": ["ConstPath"],
-  "Soccer.Shared.GetGuildMemberExtraCupProgressesRes": ["<ExtraCupProgresses>k__BackingField"],
-  "Soccer.Shared.CreateGuildReq": ["ConstPath", "<Settings>k__BackingField", "<Consumption>k__BackingField"],
-  "Soccer.Shared.SendGuildEntryFormReq": ["ConstPath", "<GuildId>k__BackingField"],
-  "Soccer.Shared.CancelGuildEntryFormReq": ["ConstPath", "<GuildId>k__BackingField"],
+  "Soccer.Shared.GetGuildMemberExtraCupProgressesRes": [
+    "<ExtraCupProgresses>k__BackingField",
+  ],
+  "Soccer.Shared.CreateGuildReq": [
+    "ConstPath",
+    "<Settings>k__BackingField",
+    "<Consumption>k__BackingField",
+  ],
+  "Soccer.Shared.SendGuildEntryFormReq": [
+    "ConstPath",
+    "<GuildId>k__BackingField",
+  ],
+  "Soccer.Shared.CancelGuildEntryFormReq": [
+    "ConstPath",
+    "<GuildId>k__BackingField",
+  ],
   "Soccer.Shared.LeaveGuildReq": ["ConstPath"],
-  "Soccer.Shared.CompleteGuildMissionsReq": ["ConstPath", "<MissionCodes>k__BackingField"],
-  "Soccer.Shared.CompleteGuildMissionsRes": ["<Resources>k__BackingField", "<Member>k__BackingField"],
+  "Soccer.Shared.CompleteGuildMissionsReq": [
+    "ConstPath",
+    "<MissionCodes>k__BackingField",
+  ],
+  "Soccer.Shared.CompleteGuildMissionsRes": [
+    "<Resources>k__BackingField",
+    "<Member>k__BackingField",
+  ],
   "Soccer.Shared.ObtainWeeklyContributionRewardReq": ["ConstPath"],
   "Soccer.Shared.GetGuildFeedListReq": ["ConstPath"],
   "Soccer.Shared.GetGuildFeedListRes": ["<Feeds>k__BackingField"],
@@ -9871,11 +11613,17 @@ export default {
     "<Choices>k__BackingField",
   ],
   "Soccer.Shared.StartInalinkBattleReq": ["ConstPath"],
-  "Soccer.Shared.FinishInalinkBattleReq": ["ConstPath", "<Choices>k__BackingField"],
+  "Soccer.Shared.FinishInalinkBattleReq": [
+    "ConstPath",
+    "<Choices>k__BackingField",
+  ],
   "Soccer.Shared.InvitationUserType": ["value__", "Inviter", "Invitee"],
   "Soccer.Shared.GetInviteCodeReq": ["ConstPath"],
   "Soccer.Shared.GetInviteCodeRes": ["<InviteCode>k__BackingField"],
-  "Soccer.Shared.RedeemInviteCodeReq": ["ConstPath", "<InviteCode>k__BackingField"],
+  "Soccer.Shared.RedeemInviteCodeReq": [
+    "ConstPath",
+    "<InviteCode>k__BackingField",
+  ],
   "Soccer.Shared.GetInvitationStatusReq": ["ConstPath"],
   "Soccer.Shared.GetInvitationStatusRes": ["<HasInviterReward>k__BackingField"],
   "Soccer.Shared.ObtainInvitationRewardsReq": ["ConstPath"],
@@ -9896,7 +11644,10 @@ export default {
     "<ReasonCode>k__BackingField",
     "<CreatedAt>k__BackingField",
   ],
-  "Soccer.Shared.GetItemLedgerEntriesReq": ["ConstPath", "<Page>k__BackingField"],
+  "Soccer.Shared.GetItemLedgerEntriesReq": [
+    "ConstPath",
+    "<Page>k__BackingField",
+  ],
   "Soccer.Shared.GetItemLedgerEntriesRes": ["<Entries>k__BackingField"],
   "Soccer.Shared.ItemLedgerPage": [
     "<Type>k__BackingField",
@@ -9923,22 +11674,51 @@ export default {
   "Soccer.Shared.SyncL5iDStatusRes": ["<PointStatus>k__BackingField"],
   "Soccer.Shared.ObtainL5iDPointStatusRewardsReq": ["ConstPath"],
   "Soccer.Shared.GetSendPendingReceiptOrderIdsToL5iDReq": ["ConstPath"],
-  "Soccer.Shared.GetSendPendingReceiptOrderIdsToL5iDRes": ["<OrderIds>k__BackingField"],
-  "Soccer.Shared.SendReceiptToL5iDReq": ["ConstPath", "<OrderId>k__BackingField"],
-  "Soccer.Shared.RetrieveL5iDUserDataReq": ["ConstPath", "<AccessToken>k__BackingField"],
+  "Soccer.Shared.GetSendPendingReceiptOrderIdsToL5iDRes": [
+    "<OrderIds>k__BackingField",
+  ],
+  "Soccer.Shared.SendReceiptToL5iDReq": [
+    "ConstPath",
+    "<OrderId>k__BackingField",
+  ],
+  "Soccer.Shared.RetrieveL5iDUserDataReq": [
+    "ConstPath",
+    "<AccessToken>k__BackingField",
+  ],
   "Soccer.Shared.RetrieveL5iDUserDataRes": [
     "<UserId>k__BackingField",
     "<UserName>k__BackingField",
     "<LastLoggedInAt>k__BackingField",
     "<CustomToken>k__BackingField",
   ],
-  "Soccer.Shared.LinkL5iDUserReq": ["ConstPath", "<AccessToken>k__BackingField"],
+  "Soccer.Shared.LinkL5iDUserReq": [
+    "ConstPath",
+    "<AccessToken>k__BackingField",
+  ],
   "Soccer.Shared.ClubMemberLevels": ["<MemberCodeToLevel>k__BackingField"],
-  "Soccer.Shared.LevelSynchronizerLevelUpReq": ["ConstPath", "<Slot>k__BackingField", "<LevelUpCount>k__BackingField"],
-  "Soccer.Shared.LevelSynchronizerSetSlotsReq": ["ConstPath", "<LevelSynchronizerSlot>k__BackingField"],
-  "Soccer.Shared.LocalizationKey": ["Separator", "<Table>k__BackingField", "<Key>k__BackingField"],
-  "Soccer.Shared.ObtainLoginBonusRewardsReq": ["ConstPath", "<LoginBonusCode>k__BackingField"],
-  "Soccer.Shared.MailDestination": ["value__", "SingleUser", "SegmentedByUserCreatedAt"],
+  "Soccer.Shared.LevelSynchronizerLevelUpReq": [
+    "ConstPath",
+    "<Slot>k__BackingField",
+    "<LevelUpCount>k__BackingField",
+  ],
+  "Soccer.Shared.LevelSynchronizerSetSlotsReq": [
+    "ConstPath",
+    "<LevelSynchronizerSlot>k__BackingField",
+  ],
+  "Soccer.Shared.LocalizationKey": [
+    "Separator",
+    "<Table>k__BackingField",
+    "<Key>k__BackingField",
+  ],
+  "Soccer.Shared.ObtainLoginBonusRewardsReq": [
+    "ConstPath",
+    "<LoginBonusCode>k__BackingField",
+  ],
+  "Soccer.Shared.MailDestination": [
+    "value__",
+    "SingleUser",
+    "SegmentedByUserCreatedAt",
+  ],
   "Soccer.Shared.MailStatus": ["value__", "Delivered", "Read", "Deleted"],
   "Soccer.Shared.MailWithContent": [
     "<Id>k__BackingField",
@@ -9951,12 +11731,21 @@ export default {
   ],
   "Soccer.Shared.GetMailsReq": ["ConstPath", "<IncludeBody>k__BackingField"],
   "Soccer.Shared.GetMailsRes": ["<Mails>k__BackingField"],
-  "Soccer.Shared.ReadMailsAndObtainRewardsReq": ["ConstPath", "<MailIds>k__BackingField"],
+  "Soccer.Shared.ReadMailsAndObtainRewardsReq": [
+    "ConstPath",
+    "<MailIds>k__BackingField",
+  ],
   "Soccer.Shared.DeleteMailsReq": ["ConstPath", "<MailIds>k__BackingField"],
   "Soccer.Shared.StartMainStoryBattleReq": ["ConstPath"],
   "Soccer.Shared.FinishMainStoryBattleReq": ["ConstPath"],
-  "Soccer.Shared.ObtainMainStoryRewardReq": ["ConstPath", "<Code>k__BackingField"],
-  "Soccer.Shared.ReadMainStoryScenarioReq": ["ConstPath", "<Code>k__BackingField"],
+  "Soccer.Shared.ObtainMainStoryRewardReq": [
+    "ConstPath",
+    "<Code>k__BackingField",
+  ],
+  "Soccer.Shared.ReadMainStoryScenarioReq": [
+    "ConstPath",
+    "<Code>k__BackingField",
+  ],
   "Soccer.Shared.GetMandatoryNewsReq": ["ConstPath"],
   "Soccer.Shared.GetMandatoryNewsRes": ["<Items>k__BackingField"],
   "Soccer.Shared.MandatoryNewsItem": [
@@ -10052,7 +11841,10 @@ export default {
     "<InAppProduct>k__BackingField",
     "<ExternalProduct>k__BackingField",
   ],
-  "Soccer.Shared.CharacterAndAffinity": ["<Character>k__BackingField", "<AffinityRank>k__BackingField"],
+  "Soccer.Shared.CharacterAndAffinity": [
+    "<Character>k__BackingField",
+    "<AffinityRank>k__BackingField",
+  ],
   "Soccer.Shared.CharacterAnimatorType": [
     "value__",
     "None",
@@ -10072,7 +11864,14 @@ export default {
   ],
   "Soccer.Shared.CharacterChestSize": ["value__", "Medium", "Small", "Large"],
   "Soccer.Shared.CharacterChestSizeParser": ["Shared"],
-  "Soccer.Shared.CharacterElement": ["value__", "None", "Wind", "Forest", "Fire", "Mountain"],
+  "Soccer.Shared.CharacterElement": [
+    "value__",
+    "None",
+    "Wind",
+    "Forest",
+    "Fire",
+    "Mountain",
+  ],
   "Soccer.Shared.ElementStrength": ["value__", "Weak", "Normal", "Strong"],
   "Soccer.Shared.CharacterElementParser": ["Shared"],
   "Soccer.Shared.CharacterGender": ["value__", "Unspecified", "Male", "Female"],
@@ -10176,7 +11975,13 @@ export default {
     "<FaceCodeOverride>k__BackingField",
     "<Variation>k__BackingField",
   ],
-  "Soccer.Shared.CharacterPersonality": ["value__", "Daring", "Cool", "Cheerful", "Elegant"],
+  "Soccer.Shared.CharacterPersonality": [
+    "value__",
+    "Daring",
+    "Cool",
+    "Cheerful",
+    "Elegant",
+  ],
   "Soccer.Shared.CharacterPersonalityParser": ["Shared"],
   "Soccer.Shared.CharacterShape": [
     "value__",
@@ -10201,7 +12006,14 @@ export default {
     "FemaleLargeThickNeck",
   ],
   "Soccer.Shared.CharacterShapeParser": ["Shared"],
-  "Soccer.Shared.CharacterStandingPoint": ["value__", "Average", "Small", "Tall", "Large", "Protagonist"],
+  "Soccer.Shared.CharacterStandingPoint": [
+    "value__",
+    "Average",
+    "Small",
+    "Tall",
+    "Large",
+    "Protagonist",
+  ],
   "Soccer.Shared.CharacterStandingPointParser": ["Shared"],
   "Soccer.Shared.CharacterTagMaster": [
     "MasterFileName",
@@ -10216,7 +12028,11 @@ export default {
     "<GoalAppealTimelineNames>k__BackingField",
     "<GachaItemPresentationTimelineName>k__BackingField",
   ],
-  "Soccer.Shared.ChatStampMaster": ["MasterFileName", "<Code>k__BackingField", "<AssetName>k__BackingField"],
+  "Soccer.Shared.ChatStampMaster": [
+    "MasterFileName",
+    "<Code>k__BackingField",
+    "<AssetName>k__BackingField",
+  ],
   "Soccer.Shared.ClubHouseDecorationSlotTypeMaster": [
     "MasterFileName",
     "<IndexKey>k__BackingField",
@@ -10235,10 +12051,23 @@ export default {
     "<SoccerBattleDFOperationProfileCode>k__BackingField",
     "<SoccerBattleGKOperationProfileCode>k__BackingField",
   ],
-  "Soccer.Shared.CodeAffinityRank": ["<Code>k__BackingField", "<AffinityRank>k__BackingField"],
-  "Soccer.Shared.CodeAndBattleFormat": ["<Code>k__BackingField", "<BattleFormat>k__BackingField"],
-  "Soccer.Shared.CodeLevel": ["<Code>k__BackingField", "<Level>k__BackingField"],
-  "Soccer.Shared.CommentaryMaster": ["MasterFileName", "<Code>k__BackingField", "<AppearanceName>k__BackingField"],
+  "Soccer.Shared.CodeAffinityRank": [
+    "<Code>k__BackingField",
+    "<AffinityRank>k__BackingField",
+  ],
+  "Soccer.Shared.CodeAndBattleFormat": [
+    "<Code>k__BackingField",
+    "<BattleFormat>k__BackingField",
+  ],
+  "Soccer.Shared.CodeLevel": [
+    "<Code>k__BackingField",
+    "<Level>k__BackingField",
+  ],
+  "Soccer.Shared.CommentaryMaster": [
+    "MasterFileName",
+    "<Code>k__BackingField",
+    "<AppearanceName>k__BackingField",
+  ],
   "Soccer.Shared.ConnectionBoardAreaMaster": [
     "MasterFileName",
     "<RequiredConnectionBoardStageToUnlock>k__BackingField",
@@ -10285,7 +12114,10 @@ export default {
     "<TeamUniform>k__BackingField",
     "<TeamEmblem>k__BackingField",
   ],
-  "Soccer.Shared.EnemyTeamSetting": ["<Master>k__BackingField", "<EquipmentLevel>k__BackingField"],
+  "Soccer.Shared.EnemyTeamSetting": [
+    "<Master>k__BackingField",
+    "<EquipmentLevel>k__BackingField",
+  ],
   "Soccer.Shared.EquipmentCraftingMaster": [
     "<EquipmentLevel>k__BackingField",
     "<ItemMasterWithQuantities>k__BackingField",
@@ -10349,7 +12181,10 @@ export default {
     "<Areas>k__BackingField",
     "<Event>k__BackingField",
   ],
-  "Soccer.Shared.EventStoryStageMaster": ["MasterFileName", "<Area>k__BackingField"],
+  "Soccer.Shared.EventStoryStageMaster": [
+    "MasterFileName",
+    "<Area>k__BackingField",
+  ],
   "Soccer.Shared.ExpTableLevelMaster": [
     "MasterFileName",
     "<RequiredExpToNext>k__BackingField",
@@ -10401,7 +12236,11 @@ export default {
     "SoccerBattleTerrainCode",
   ],
   "Soccer.Shared.FileSourceMasterLoader": ["Gate"],
-  "Soccer.Shared.FixedDropTableMaster": ["MasterFileName", "<Code>k__BackingField", "<Items>k__BackingField"],
+  "Soccer.Shared.FixedDropTableMaster": [
+    "MasterFileName",
+    "<Code>k__BackingField",
+    "<Items>k__BackingField",
+  ],
   "Soccer.Shared.FixedPlayerMaster": [
     "MasterFileName",
     "<Code>k__BackingField",
@@ -10692,15 +12531,25 @@ export default {
     "<ForceClickButton>k__BackingField",
     "<HighlightingObject>k__BackingField",
   ],
-  "Soccer.Shared.InvitationRewardMaster": ["MasterFileName", "<UserType>k__BackingField", "<Reward>k__BackingField"],
+  "Soccer.Shared.InvitationRewardMaster": [
+    "MasterFileName",
+    "<UserType>k__BackingField",
+    "<Reward>k__BackingField",
+  ],
   "Soccer.Shared.AffinityItemMaster": [
     "MasterFileName",
     "<BasePoint>k__BackingField",
     "<SpecialTag>k__BackingField",
     "<BonusPoint>k__BackingField",
   ],
-  "Soccer.Shared.CharacterItemMaster": ["MasterFileName", "<CharacterMaster>k__BackingField"],
-  "Soccer.Shared.CharacterSoulItemMaster": ["MasterFileName", "<CharacterMaster>k__BackingField"],
+  "Soccer.Shared.CharacterItemMaster": [
+    "MasterFileName",
+    "<CharacterMaster>k__BackingField",
+  ],
+  "Soccer.Shared.CharacterSoulItemMaster": [
+    "MasterFileName",
+    "<CharacterMaster>k__BackingField",
+  ],
   "Soccer.Shared.CharacterizeItemMaster": [
     "MasterFileName",
     "<RequireQuantityForDrawOne>k__BackingField",
@@ -10719,7 +12568,10 @@ export default {
     "<Paid>k__BackingField",
     "<Free>k__BackingField",
   ],
-  "Soccer.Shared.DirectorItemMasterWithLevel": ["<Director>k__BackingField", "<Level>k__BackingField"],
+  "Soccer.Shared.DirectorItemMasterWithLevel": [
+    "<Director>k__BackingField",
+    "<Level>k__BackingField",
+  ],
   "Soccer.Shared.DirectorItemMaster": [
     "MasterFileName",
     "GrowthMasterFileName",
@@ -10733,7 +12585,10 @@ export default {
     "<NormalDirectorCodes>k__BackingField",
   ],
   "Soccer.Shared.DirectorLevelUpMaterialItemMaster": ["MasterFileName"],
-  "Soccer.Shared.ElementAwakenItemMaster": ["MasterFileName", "<Element>k__BackingField"],
+  "Soccer.Shared.ElementAwakenItemMaster": [
+    "MasterFileName",
+    "<Element>k__BackingField",
+  ],
   "Soccer.Shared.EquipmentMaterialQuantityChange": [
     "<Master>k__BackingField",
     "<Original>k__BackingField",
@@ -10764,7 +12619,15 @@ export default {
     "<DismantlingMaster>k__BackingField",
     "<CraftingMaster>k__BackingField",
   ],
-  "Soccer.Shared.EquipmentSlot": ["value__", "Shoes", "Misanga", "ShinGuards", "Wristband", "Gloves", "Pendant"],
+  "Soccer.Shared.EquipmentSlot": [
+    "value__",
+    "Shoes",
+    "Misanga",
+    "ShinGuards",
+    "Wristband",
+    "Gloves",
+    "Pendant",
+  ],
   "Soccer.Shared.EquipmentSlotParser": ["Shared"],
   "Soccer.Shared.FocusedTrainingTicketItemMaster": [
     "MasterFileName",
@@ -10774,8 +12637,12 @@ export default {
   ],
   "Soccer.Shared.FormationEffectCondition": ["<Any>k__BackingField"],
   "Soccer.Shared.FormationEffectTagCondition": ["<Tags>k__BackingField"],
-  "Soccer.Shared.FormationEffectPreferredPositionCondition": ["<PreferredPositions>k__BackingField"],
-  "Soccer.Shared.FormationEffectElementCondition": ["<Elements>k__BackingField"],
+  "Soccer.Shared.FormationEffectPreferredPositionCondition": [
+    "<PreferredPositions>k__BackingField",
+  ],
+  "Soccer.Shared.FormationEffectElementCondition": [
+    "<Elements>k__BackingField",
+  ],
   "Soccer.Shared.FormationMaster": [
     "<BattleFormatToSlotCount>k__BackingField",
     "<SlotCountToBattleFormat>k__BackingField",
@@ -10800,7 +12667,15 @@ export default {
     "<FormationEffectCondition>k__BackingField",
   ],
   "Soccer.Shared.GachaTicketItemMaster": ["MasterFileName"],
-  "Soccer.Shared.HonoraryTitleCategory": ["value__", "Affinity", "Awakening", "PvP", "Story", "Event", "Normal"],
+  "Soccer.Shared.HonoraryTitleCategory": [
+    "value__",
+    "Affinity",
+    "Awakening",
+    "PvP",
+    "Story",
+    "Event",
+    "Normal",
+  ],
   "Soccer.Shared.HonoraryTitleItemMaster": [
     "MasterFileName",
     "<Category>k__BackingField",
@@ -10808,7 +12683,14 @@ export default {
     "<BackgroundAssetName>k__BackingField",
     "<LabelKey>k__BackingField",
   ],
-  "Soccer.Shared.HonoraryTitleTextType": ["value__", "Normal", "Rainbow", "Gold", "Silver", "Bronze"],
+  "Soccer.Shared.HonoraryTitleTextType": [
+    "value__",
+    "Normal",
+    "Rainbow",
+    "Gold",
+    "Silver",
+    "Bronze",
+  ],
   "Soccer.Shared.HonoraryTitleTextTypeParser": ["Shared"],
   "Soccer.Shared.ItemAcquisitionMaster": [
     "MasterFileName",
@@ -10817,7 +12699,10 @@ export default {
     "<Content2>k__BackingField",
     "<Content3>k__BackingField",
   ],
-  "Soccer.Shared.ItemMasterWithQuantity": ["<Master>k__BackingField", "<Quantity>k__BackingField"],
+  "Soccer.Shared.ItemMasterWithQuantity": [
+    "<Master>k__BackingField",
+    "<Quantity>k__BackingField",
+  ],
   "Soccer.Shared.ItemMasterWithQuantityAndWeight": [
     "<Master>k__BackingField",
     "<Quantity>k__BackingField",
@@ -10876,14 +12761,20 @@ export default {
     "RewardMinimumGuaranteeLevel",
   ],
   "Soccer.Shared.SpecialMoveLevelUpMaterialItemMaster": ["MasterFileName"],
-  "Soccer.Shared.SpecialMoveManualMaster": ["MasterFileName", "<SpecialMoveMaster>k__BackingField"],
+  "Soccer.Shared.SpecialMoveManualMaster": [
+    "MasterFileName",
+    "<SpecialMoveMaster>k__BackingField",
+  ],
   "Soccer.Shared.TeamUniformItemMaster": [
     "MasterFileName",
     "<FPModelSet>k__BackingField",
     "<GKModelSet>k__BackingField",
   ],
   "Soccer.Shared.TokenItemMaster": ["MasterFileName"],
-  "Soccer.Shared.VirtualCurrencyItemMaster": ["MasterFileName", "<VirtualCurrency>k__BackingField"],
+  "Soccer.Shared.VirtualCurrencyItemMaster": [
+    "MasterFileName",
+    "<VirtualCurrency>k__BackingField",
+  ],
   "Soccer.Shared.L5iDPointStatusRewardMaster": [
     "MasterFileName",
     "<Code>k__BackingField",
@@ -10919,7 +12810,11 @@ export default {
     "<Times>k__BackingField",
     "<Probability>k__BackingField",
   ],
-  "Soccer.Shared.LotteryDropTableMaster": ["MasterFileName", "<Code>k__BackingField", "<Items>k__BackingField"],
+  "Soccer.Shared.LotteryDropTableMaster": [
+    "MasterFileName",
+    "<Code>k__BackingField",
+    "<Items>k__BackingField",
+  ],
   "Soccer.Shared.MVPTitleMaster": [
     "MasterFileName",
     "<Position>k__BackingField",
@@ -10927,7 +12822,10 @@ export default {
     "<MaxContributionPoint>k__BackingField",
     "<Title>k__BackingField",
   ],
-  "Soccer.Shared.MainStoryAreaMaster": ["MasterFileName", "<FirstArea>k__BackingField"],
+  "Soccer.Shared.MainStoryAreaMaster": [
+    "MasterFileName",
+    "<FirstArea>k__BackingField",
+  ],
   "Soccer.Shared.MainStoryChapterMaster": [
     "MasterFileName",
     "<Code>k__BackingField",
@@ -10953,7 +12851,12 @@ export default {
     "<PostParseFinished>k__BackingField",
     "<MissingReported>k__BackingField",
   ],
-  "Soccer.Shared.MasterDataProtector": ["KeySize", "BlockSize", "Mode", "Padding"],
+  "Soccer.Shared.MasterDataProtector": [
+    "KeySize",
+    "BlockSize",
+    "Mode",
+    "Padding",
+  ],
   "Soccer.Shared.MasterModel": [
     "<Loaded>k__BackingField",
     "Parameter",
@@ -11107,14 +13010,20 @@ export default {
     "RankInCountConditionTypes",
     "<RankInCountConditionTypeToSpecifiedRanks>k__BackingField",
   ],
-  "Soccer.Shared.BattlePassMissionGroupMaster": ["MasterFileName", "<BattlePass>k__BackingField"],
+  "Soccer.Shared.BattlePassMissionGroupMaster": [
+    "MasterFileName",
+    "<BattlePass>k__BackingField",
+  ],
   "Soccer.Shared.BattlePassMissionMaster": [
     "MasterFileName",
     "<Group>k__BackingField",
     "<BattlePassPoints>k__BackingField",
     "<Condition>k__BackingField",
   ],
-  "Soccer.Shared.BeginnerMissionGroupMaster": ["MasterFileName", "<PointMaster>k__BackingField"],
+  "Soccer.Shared.BeginnerMissionGroupMaster": [
+    "MasterFileName",
+    "<PointMaster>k__BackingField",
+  ],
   "Soccer.Shared.BeginnerMissionMaster": [
     "MasterFileName",
     "<Group>k__BackingField",
@@ -11179,8 +13088,19 @@ export default {
     "SpecifiedRaidRankInCount",
     "SpecifiedPvPRankInCount",
   ],
-  "Soccer.Shared.MissionGroupMaster": ["MasterFileName", "<PointMaster>k__BackingField"],
-  "Soccer.Shared.MissionGroupType": ["value__", "Normal", "Guild", "Beginner", "BattlePass", "Offer", "Event"],
+  "Soccer.Shared.MissionGroupMaster": [
+    "MasterFileName",
+    "<PointMaster>k__BackingField",
+  ],
+  "Soccer.Shared.MissionGroupType": [
+    "value__",
+    "Normal",
+    "Guild",
+    "Beginner",
+    "BattlePass",
+    "Offer",
+    "Event",
+  ],
   "Soccer.Shared.MissionMaster": [
     "MasterFileName",
     "<Group>k__BackingField",
@@ -11207,7 +13127,10 @@ export default {
     "<Condition>k__BackingField",
     "<OfferMaster>k__BackingField",
   ],
-  "Soccer.Shared.ModifierPassiveWithWeight": ["<Master>k__BackingField", "<Weight>k__BackingField"],
+  "Soccer.Shared.ModifierPassiveWithWeight": [
+    "<Master>k__BackingField",
+    "<Weight>k__BackingField",
+  ],
   "Soccer.Shared.ModifierPassiveLotteryTableMaster": [
     "MasterFileName",
     "<Code>k__BackingField",
@@ -11239,8 +13162,12 @@ export default {
     "<Steps>k__BackingField",
     "<Order>k__BackingField",
   ],
-  "Soccer.Shared.OfferComplimentaryStepMaster": ["<ComplimentaryItems>k__BackingField"],
-  "Soccer.Shared.OfferNonComplimentaryStepMaster": ["<LinkProduct>k__BackingField"],
+  "Soccer.Shared.OfferComplimentaryStepMaster": [
+    "<ComplimentaryItems>k__BackingField",
+  ],
+  "Soccer.Shared.OfferNonComplimentaryStepMaster": [
+    "<LinkProduct>k__BackingField",
+  ],
   "Soccer.Shared.OfferStepMaster": [
     "MasterFileName",
     "<Offer>k__BackingField",
@@ -11293,7 +13220,10 @@ export default {
   ],
   "Soccer.Shared.DateAsDaysFromUnixEpochParser": ["Shared"],
   "Soccer.Shared.UtcDayOfWeekParser": ["Shared"],
-  "Soccer.Shared.JstDayOfWeekAfterMasterFirstLoadParser": ["Shared", "<JstToUtcDayOfWeekOffset>k__BackingField"],
+  "Soccer.Shared.JstDayOfWeekAfterMasterFirstLoadParser": [
+    "Shared",
+    "<JstToUtcDayOfWeekOffset>k__BackingField",
+  ],
   "Soccer.Shared.JSTDateTimeOffsetParser": ["Shared"],
   "Soccer.Shared.LocalizationKeyParser": ["Shared"],
   "Soccer.Shared.PermyriadFloatParser": ["Shared"],
@@ -11312,17 +13242,30 @@ export default {
   ],
   "Soccer.Shared.PassiveRank": ["value__", "S", "A", "B"],
   "Soccer.Shared.PassiveRankParser": ["Shared"],
-  "Soccer.Shared.PassiveSourceType": ["value__", "Unknown", "Player", "Director", "FormationEffect", "Field"],
+  "Soccer.Shared.PassiveSourceType": [
+    "value__",
+    "Unknown",
+    "Player",
+    "Director",
+    "FormationEffect",
+    "Field",
+  ],
   "Soccer.Shared.PassiveSource": ["<Type>k__BackingField"],
   "Soccer.Shared.PassiveSourcePlayer": ["<Player>k__BackingField"],
-  "Soccer.Shared.PassiveSourceDirector": ["<Team>k__BackingField", "<Director>k__BackingField"],
+  "Soccer.Shared.PassiveSourceDirector": [
+    "<Team>k__BackingField",
+    "<Director>k__BackingField",
+  ],
   "Soccer.Shared.PassiveSourceFormationEffect": [
     "<Team>k__BackingField",
     "<Director>k__BackingField",
     "<Formation>k__BackingField",
   ],
   "Soccer.Shared.PassiveSourceField": ["<Field>k__BackingField"],
-  "Soccer.Shared.PassiveRankLevel": ["<PassiveRank>k__BackingField", "<Level>k__BackingField"],
+  "Soccer.Shared.PassiveRankLevel": [
+    "<PassiveRank>k__BackingField",
+    "<Level>k__BackingField",
+  ],
   "Soccer.Shared.PassiveTotalPowerAdditionMaster": [
     "MasterFileName",
     "<PassiveRank>k__BackingField",
@@ -11337,8 +13280,16 @@ export default {
     "<TargetPlayer>k__BackingField",
     "<AllowMultipleEffects>k__BackingField",
   ],
-  "Soccer.Shared.PlaywrightBookMaster": ["MasterFileName", "<Code>k__BackingField", "<Script>k__BackingField"],
-  "Soccer.Shared.PreferredAreaRankMaster": ["MasterFileName", "<Rank>k__BackingField", "<Multiplier>k__BackingField"],
+  "Soccer.Shared.PlaywrightBookMaster": [
+    "MasterFileName",
+    "<Code>k__BackingField",
+    "<Script>k__BackingField",
+  ],
+  "Soccer.Shared.PreferredAreaRankMaster": [
+    "MasterFileName",
+    "<Rank>k__BackingField",
+    "<Multiplier>k__BackingField",
+  ],
   "Soccer.Shared.PvPMatchingSlotMaster": [
     "MasterFileName",
     "<Code>k__BackingField",
@@ -11352,7 +13303,11 @@ export default {
     "<Rating>k__BackingField",
     "<EquipmentLevel>k__BackingField",
   ],
-  "Soccer.Shared.PvpPlacementMaster": ["MasterFileName", "<AttemptCount>k__BackingField", "<NpcTeams>k__BackingField"],
+  "Soccer.Shared.PvpPlacementMaster": [
+    "MasterFileName",
+    "<AttemptCount>k__BackingField",
+    "<NpcTeams>k__BackingField",
+  ],
   "Soccer.Shared.PvpRankMaster": [
     "MasterFileName",
     "<Code>k__BackingField",
@@ -11370,7 +13325,10 @@ export default {
     "<Prev>k__BackingField",
     "<Next>k__BackingField",
   ],
-  "Soccer.Shared.PvpSeasonFieldOverride": ["<Field>k__BackingField", "<StartsAt>k__BackingField"],
+  "Soccer.Shared.PvpSeasonFieldOverride": [
+    "<Field>k__BackingField",
+    "<StartsAt>k__BackingField",
+  ],
   "Soccer.Shared.PvpSeasonMaster": [
     "MasterFileName",
     "<Code>k__BackingField",
@@ -11389,7 +13347,11 @@ export default {
     "<Reward>k__BackingField",
     "<Next>k__BackingField",
   ],
-  "Soccer.Shared.RaidCycleMaster": ["MasterFileName", "<Code>k__BackingField", "<Groups>k__BackingField"],
+  "Soccer.Shared.RaidCycleMaster": [
+    "MasterFileName",
+    "<Code>k__BackingField",
+    "<Groups>k__BackingField",
+  ],
   "Soccer.Shared.RaidDifficultyMaster": [
     "MasterFileName",
     "<Code>k__BackingField",
@@ -11427,10 +13389,23 @@ export default {
     "<LowestRank>k__BackingField",
     "<Reward>k__BackingField",
   ],
-  "Soccer.Shared.RaidScoreRewardMaster": ["MasterFileName", "<Score>k__BackingField", "<Reward>k__BackingField"],
+  "Soccer.Shared.RaidScoreRewardMaster": [
+    "MasterFileName",
+    "<Score>k__BackingField",
+    "<Reward>k__BackingField",
+  ],
   "Soccer.Shared.RaidType": ["value__", "Shoot", "Block"],
-  "Soccer.Shared.RenewIntervalType": ["value__", "None", "Daily", "Weekly", "Monthly"],
-  "Soccer.Shared.ScheduleContentKey": ["<Type>k__BackingField", "<Code>k__BackingField"],
+  "Soccer.Shared.RenewIntervalType": [
+    "value__",
+    "None",
+    "Daily",
+    "Weekly",
+    "Monthly",
+  ],
+  "Soccer.Shared.ScheduleContentKey": [
+    "<Type>k__BackingField",
+    "<Code>k__BackingField",
+  ],
   "Soccer.Shared.BaseScheduleMaster": [
     "MasterFileName",
     "<Code>k__BackingField",
@@ -11443,9 +13418,17 @@ export default {
     "<RewardReceivablePeriodEndsAt>k__BackingField",
     "<PremiumPurchasablePeriodEndsAt>k__BackingField",
   ],
-  "Soccer.Shared.EventScheduleMaster": ["<CanPurchaseFromShopUntil>k__BackingField"],
-  "Soccer.Shared.ScriptRecordJson": ["<Type>k__BackingField", "<Args>k__BackingField"],
-  "Soccer.Shared.ShapeCode": ["<Shape>k__BackingField", "<Code>k__BackingField"],
+  "Soccer.Shared.EventScheduleMaster": [
+    "<CanPurchaseFromShopUntil>k__BackingField",
+  ],
+  "Soccer.Shared.ScriptRecordJson": [
+    "<Type>k__BackingField",
+    "<Args>k__BackingField",
+  ],
+  "Soccer.Shared.ShapeCode": [
+    "<Shape>k__BackingField",
+    "<Code>k__BackingField",
+  ],
   "Soccer.Shared.ShapeModelVariationMaster": [
     "MasterFileName",
     "<Shape>k__BackingField",
@@ -11547,7 +13530,10 @@ export default {
     "<MainPlayerCharacterCode>k__BackingField",
     "<PartnerCharacterCodes>k__BackingField",
   ],
-  "Soccer.Shared.MoveSourceLevel": ["<MoveSource>k__BackingField", "<Level>k__BackingField"],
+  "Soccer.Shared.MoveSourceLevel": [
+    "<MoveSource>k__BackingField",
+    "<Level>k__BackingField",
+  ],
   "Soccer.Shared.SpecialMoveTotalPowerAdditionMaster": [
     "MasterFileName",
     "<MoveSource>k__BackingField",
@@ -11575,8 +13561,18 @@ export default {
     "<DefaultUniformNumber>k__BackingField",
     "<NameOnUniformKey>k__BackingField",
   ],
-  "Soccer.Shared.StaffModelSetType": ["value__", "Other", "Character", "Director"],
-  "Soccer.Shared.StageHighlightAvailability": ["value__", "Available", "AvailableAfterClear", "Unavailable"],
+  "Soccer.Shared.StaffModelSetType": [
+    "value__",
+    "Other",
+    "Character",
+    "Director",
+  ],
+  "Soccer.Shared.StageHighlightAvailability": [
+    "value__",
+    "Available",
+    "AvailableAfterClear",
+    "Unavailable",
+  ],
   "Soccer.Shared.StageMasterParseResult": [
     "<Code>k__BackingField",
     "<Name>k__BackingField",
@@ -11635,7 +13631,11 @@ export default {
     "<Group>k__BackingField",
     "<GrowthTable>k__BackingField",
   ],
-  "Soccer.Shared.StoreCategoryMaster": ["MasterFileName", "<Category>k__BackingField", "<NameKey>k__BackingField"],
+  "Soccer.Shared.StoreCategoryMaster": [
+    "MasterFileName",
+    "<Category>k__BackingField",
+    "<NameKey>k__BackingField",
+  ],
   "Soccer.Shared.StoreItemTableMaster": [
     "<Empty>k__BackingField",
     "MasterFileName",
@@ -11681,8 +13681,20 @@ export default {
     "<ViewType>k__BackingField",
     "<HasSchedule>k__BackingField",
   ],
-  "Soccer.Shared.StoreProductViewType": ["value__", "Card", "Banner", "BonusPassNormal", "BonusPassPremium", "None"],
-  "Soccer.Shared.StoreRightsTargetType": ["value__", "None", "BonusPass", "OfferStep"],
+  "Soccer.Shared.StoreProductViewType": [
+    "value__",
+    "Card",
+    "Banner",
+    "BonusPassNormal",
+    "BonusPassPremium",
+    "None",
+  ],
+  "Soccer.Shared.StoreRightsTargetType": [
+    "value__",
+    "None",
+    "BonusPass",
+    "OfferStep",
+  ],
   "Soccer.Shared.StoryBoardAreaMaster`3": [
     "<Code>k__BackingField",
     "<Name>k__BackingField",
@@ -11706,7 +13718,13 @@ export default {
     "<FixedDirector>k__BackingField",
     "<FixedPlayers>k__BackingField",
   ],
-  "Soccer.Shared.StoryBoardStageType": ["value__", "Battle", "Scenario", "Reward", "RouteLock"],
+  "Soccer.Shared.StoryBoardStageType": [
+    "value__",
+    "Battle",
+    "Scenario",
+    "Reward",
+    "RouteLock",
+  ],
   "Soccer.Shared.TrainingShowcaseMaster": [
     "MasterFileName",
     "<Code>k__BackingField",
@@ -11737,36 +13755,78 @@ export default {
     "<MergeHistories>k__BackingField",
   ],
   "Soccer.Shared.MissionCondition": ["<Required>k__BackingField"],
-  "Soccer.Shared.SpecifiedStoryClearCountCondition": ["<StageMaster>k__BackingField"],
-  "Soccer.Shared.SpecifiedTrainingStageClearCountCondition": ["<Master>k__BackingField"],
-  "Soccer.Shared.SpecifiedExtraCupClearCountCondition": ["<Master>k__BackingField"],
+  "Soccer.Shared.SpecifiedStoryClearCountCondition": [
+    "<StageMaster>k__BackingField",
+  ],
+  "Soccer.Shared.SpecifiedTrainingStageClearCountCondition": [
+    "<Master>k__BackingField",
+  ],
+  "Soccer.Shared.SpecifiedExtraCupClearCountCondition": [
+    "<Master>k__BackingField",
+  ],
   "Soccer.Shared.SpecifiedRaidClearCountCondition": ["<Master>k__BackingField"],
   "Soccer.Shared.SpecifiedRaidGroupScoreCondition": ["<Master>k__BackingField"],
-  "Soccer.Shared.SpecifiedConnectionBoardStageClearCountCondition": ["<Master>k__BackingField"],
-  "Soccer.Shared.SpecifiedTagClubMemberCountCondition": ["<Master>k__BackingField"],
-  "Soccer.Shared.SpecifiedAwakeningClubMemberCountCondition": ["<Master>k__BackingField"],
-  "Soccer.Shared.SpecifiedClubMemberAwakeningCountCondition": ["<Master>k__BackingField"],
-  "Soccer.Shared.SpecifiedPositionEquipmentAverageLevelCondition": ["<Position>k__BackingField"],
+  "Soccer.Shared.SpecifiedConnectionBoardStageClearCountCondition": [
+    "<Master>k__BackingField",
+  ],
+  "Soccer.Shared.SpecifiedTagClubMemberCountCondition": [
+    "<Master>k__BackingField",
+  ],
+  "Soccer.Shared.SpecifiedAwakeningClubMemberCountCondition": [
+    "<Master>k__BackingField",
+  ],
+  "Soccer.Shared.SpecifiedClubMemberAwakeningCountCondition": [
+    "<Master>k__BackingField",
+  ],
+  "Soccer.Shared.SpecifiedPositionEquipmentAverageLevelCondition": [
+    "<Position>k__BackingField",
+  ],
   "Soccer.Shared.PvPRankCondition": ["<Master>k__BackingField"],
-  "Soccer.Shared.SpecifiedClubMemberBattleStartCountCondition": ["<Master>k__BackingField"],
-  "Soccer.Shared.SpecifiedClubMemberAffinityRankCondition": ["<Master>k__BackingField"],
-  "Soccer.Shared.SpecifiedEventStoryStageClearCountCondition": ["<StageMaster>k__BackingField"],
-  "Soccer.Shared.SpecifiedEventConnectionBoardStageClearCountCondition": ["<StageMaster>k__BackingField"],
-  "Soccer.Shared.SpecifiedItemObtainCountCondition": ["<Master>k__BackingField"],
-  "Soccer.Shared.SpecifiedSpecialMoveLevelReachCountCondition": ["<Level>k__BackingField"],
-  "Soccer.Shared.SpecifiedMissionGroupMissionCompleteCountCondition": ["<Master>k__BackingField"],
+  "Soccer.Shared.SpecifiedClubMemberBattleStartCountCondition": [
+    "<Master>k__BackingField",
+  ],
+  "Soccer.Shared.SpecifiedClubMemberAffinityRankCondition": [
+    "<Master>k__BackingField",
+  ],
+  "Soccer.Shared.SpecifiedEventStoryStageClearCountCondition": [
+    "<StageMaster>k__BackingField",
+  ],
+  "Soccer.Shared.SpecifiedEventConnectionBoardStageClearCountCondition": [
+    "<StageMaster>k__BackingField",
+  ],
+  "Soccer.Shared.SpecifiedItemObtainCountCondition": [
+    "<Master>k__BackingField",
+  ],
+  "Soccer.Shared.SpecifiedSpecialMoveLevelReachCountCondition": [
+    "<Level>k__BackingField",
+  ],
+  "Soccer.Shared.SpecifiedMissionGroupMissionCompleteCountCondition": [
+    "<Master>k__BackingField",
+  ],
   "Soccer.Shared.SpecifiedRaidRankInCountCondition": ["<Rank>k__BackingField"],
   "Soccer.Shared.SpecifiedPvPRankInCountCondition": ["<Rank>k__BackingField"],
-  "Soccer.Shared.SpecifiedDayLoginCountCondition": ["<DayCountFromEpoch>k__BackingField"],
-  "Soccer.Shared.SpecifiedDayOfWeekLoginCountCondition": ["<DayOfWeek>k__BackingField"],
+  "Soccer.Shared.SpecifiedDayLoginCountCondition": [
+    "<DayCountFromEpoch>k__BackingField",
+  ],
+  "Soccer.Shared.SpecifiedDayOfWeekLoginCountCondition": [
+    "<DayOfWeek>k__BackingField",
+  ],
   "Soccer.Shared.MissionGroupingKey": [
     "<GroupCode>k__BackingField",
     "<ConditionType>k__BackingField",
     "<ConditionParameter>k__BackingField",
   ],
-  "Soccer.Shared.MissionConditionKey": ["<ConditionType>k__BackingField", "<ConditionParameter>k__BackingField"],
-  "Soccer.Shared.CompleteMissionsReq": ["ConstPath", "<MissionCodes>k__BackingField"],
-  "Soccer.Shared.CompleteMissionsRes": ["<ObtainedMissionPointRewardChanges>k__BackingField"],
+  "Soccer.Shared.MissionConditionKey": [
+    "<ConditionType>k__BackingField",
+    "<ConditionParameter>k__BackingField",
+  ],
+  "Soccer.Shared.CompleteMissionsReq": [
+    "ConstPath",
+    "<MissionCodes>k__BackingField",
+  ],
+  "Soccer.Shared.CompleteMissionsRes": [
+    "<ObtainedMissionPointRewardChanges>k__BackingField",
+  ],
   "Soccer.Shared.ObtainedMissionPointRewardChange": [
     "<PointCode>k__BackingField",
     "<PrevCount>k__BackingField",
@@ -11774,26 +13834,42 @@ export default {
   ],
   "Soccer.Shared.TrySyncLoginCountMissionProgressReq": ["ConstPath"],
   "Soccer.Shared.UpdateAccountLinkCountMissionProgressReq": ["ConstPath"],
-  "Soccer.Shared.CompleteBeginnerMissionsReq": ["ConstPath", "<MissionCodes>k__BackingField"],
+  "Soccer.Shared.CompleteBeginnerMissionsReq": [
+    "ConstPath",
+    "<MissionCodes>k__BackingField",
+  ],
   "Soccer.Shared.CreateOffersReq": [
     "ConstPath",
     "<OfferMissionCodes>k__BackingField",
     "<OfferCodesToFinishPending>k__BackingField",
   ],
-  "Soccer.Shared.PurchaseComplimentaryOfferStepReq": ["ConstPath", "<OfferStepCode>k__BackingField"],
+  "Soccer.Shared.PurchaseComplimentaryOfferStepReq": [
+    "ConstPath",
+    "<OfferStepCode>k__BackingField",
+  ],
   "Soccer.Shared.AttemptPvpReq": ["ConstPath", "<Consumption>k__BackingField"],
   "Soccer.Shared.AttemptPvpRes": ["<MyRankingEntry>k__BackingField"],
   "Soccer.Shared.RerollPvpMatchingReq": ["ConstPath"],
   "Soccer.Shared.GiveUpPvpMatchingReq": ["ConstPath"],
-  "Soccer.Shared.FinishPvpReq": ["ConstPath", "<Slot>k__BackingField", "<FormationDeckCode>k__BackingField"],
-  "Soccer.Shared.PvpMeReq": ["ConstPath", "<NeedsSeasonRewards>k__BackingField"],
+  "Soccer.Shared.FinishPvpReq": [
+    "ConstPath",
+    "<Slot>k__BackingField",
+    "<FormationDeckCode>k__BackingField",
+  ],
+  "Soccer.Shared.PvpMeReq": [
+    "ConstPath",
+    "<NeedsSeasonRewards>k__BackingField",
+  ],
   "Soccer.Shared.PvpMeRes": [
     "<DailyRewards>k__BackingField",
     "<WeeklyReward>k__BackingField",
     "<SeasonReward>k__BackingField",
     "<MyRankingEntry>k__BackingField",
   ],
-  "Soccer.Shared.PvpDailyRewards": ["<RankCode>k__BackingField", "<Count>k__BackingField"],
+  "Soccer.Shared.PvpDailyRewards": [
+    "<RankCode>k__BackingField",
+    "<Count>k__BackingField",
+  ],
   "Soccer.Shared.PvpWeeklyReward": ["<RankCode>k__BackingField"],
   "Soccer.Shared.PvpSeasonReward": [
     "<SeasonCode>k__BackingField",
@@ -11801,10 +13877,15 @@ export default {
     "<MyRankingEntry>k__BackingField",
   ],
   "Soccer.Shared.SyncPvpRatingOnRankingWithDatabaseReq": ["ConstPath"],
-  "Soccer.Shared.SyncPvpRatingOnRankingWithDatabaseRes": ["<MyRankingEntry>k__BackingField"],
+  "Soccer.Shared.SyncPvpRatingOnRankingWithDatabaseRes": [
+    "<MyRankingEntry>k__BackingField",
+  ],
   "Soccer.Shared.GetPvpHistoriesReq": ["ConstPath"],
   "Soccer.Shared.GetPvpHistoriesRes": ["<PvpHistories>k__BackingField"],
-  "Soccer.Shared.RaidGroupInCycleKey": ["<CycleCode>k__BackingField", "<DayIndex>k__BackingField"],
+  "Soccer.Shared.RaidGroupInCycleKey": [
+    "<CycleCode>k__BackingField",
+    "<DayIndex>k__BackingField",
+  ],
   "Soccer.Shared.RaidGroupInCycle": [
     "<Cycle>k__BackingField",
     "<DayIndex>k__BackingField",
@@ -11825,18 +13906,37 @@ export default {
     "<RaidCode>k__BackingField",
     "<CharacterCodes>k__BackingField",
   ],
-  "Soccer.Shared.FinishRaidRes": ["<CycleCode>k__BackingField", "<DayIndex>k__BackingField", "<Result>k__BackingField"],
+  "Soccer.Shared.FinishRaidRes": [
+    "<CycleCode>k__BackingField",
+    "<DayIndex>k__BackingField",
+    "<Result>k__BackingField",
+  ],
   "Soccer.Shared.RaidRankingReward": [
     "<GroupInCycleKey>k__BackingField",
     "<MyRankingEntry>k__BackingField",
     "<Rewards>k__BackingField",
   ],
-  "Soccer.Shared.RaidMeRes": ["<RaidRankingRewards>k__BackingField", "<MyRankingEntry>k__BackingField"],
-  "Soccer.Shared.RaidMeReq": ["ConstPath", "<GroupInCycleKey>k__BackingField", "<NeedObtainReward>k__BackingField"],
+  "Soccer.Shared.RaidMeRes": [
+    "<RaidRankingRewards>k__BackingField",
+    "<MyRankingEntry>k__BackingField",
+  ],
+  "Soccer.Shared.RaidMeReq": [
+    "ConstPath",
+    "<GroupInCycleKey>k__BackingField",
+    "<NeedObtainReward>k__BackingField",
+  ],
   "Soccer.Shared.SyncRaidScoreOnRankingWithDatabaseReq": ["ConstPath"],
-  "Soccer.Shared.SyncRaidScoreOnRankingWithDatabaseRes": ["<MyRankingEntry>k__BackingField"],
-  "Soccer.Shared.MyRankingEntry": ["<Rank>k__BackingField", "<TimeAttachedScore>k__BackingField"],
-  "Soccer.Shared.RankingExactRank": ["<ZeroOriginRank>k__BackingField", "<OneOriginRank>k__BackingField"],
+  "Soccer.Shared.SyncRaidScoreOnRankingWithDatabaseRes": [
+    "<MyRankingEntry>k__BackingField",
+  ],
+  "Soccer.Shared.MyRankingEntry": [
+    "<Rank>k__BackingField",
+    "<TimeAttachedScore>k__BackingField",
+  ],
+  "Soccer.Shared.RankingExactRank": [
+    "<ZeroOriginRank>k__BackingField",
+    "<OneOriginRank>k__BackingField",
+  ],
   "Soccer.Shared.RankingPercentile": ["<Percentile>k__BackingField"],
   "Soccer.Shared.RankingUser": [
     "<UserId>k__BackingField",
@@ -11844,18 +13944,33 @@ export default {
     "<Score>k__BackingField",
     "<Profile>k__BackingField",
   ],
-  "Soccer.Shared.GetRaidRankingReq": ["ConstPath", "<GroupInCycleKey>k__BackingField"],
-  "Soccer.Shared.GetRaidRankingRes": ["<RankingUsers>k__BackingField", "<MyRankingEntry>k__BackingField"],
+  "Soccer.Shared.GetRaidRankingReq": [
+    "ConstPath",
+    "<GroupInCycleKey>k__BackingField",
+  ],
+  "Soccer.Shared.GetRaidRankingRes": [
+    "<RankingUsers>k__BackingField",
+    "<MyRankingEntry>k__BackingField",
+  ],
   "Soccer.Shared.GetPvpRatingRankingReq": ["ConstPath"],
-  "Soccer.Shared.GetPvpRatingRankingRes": ["<RankingUsers>k__BackingField", "<MyRankingEntry>k__BackingField"],
+  "Soccer.Shared.GetPvpRatingRankingRes": [
+    "<RankingUsers>k__BackingField",
+    "<MyRankingEntry>k__BackingField",
+  ],
   "Soccer.Shared.GetYesterdayGuildContributionRankingReq": ["ConstPath"],
   "Soccer.Shared.GetYesterdayGuildContributionRankingRes": [
     "<RankingUsers>k__BackingField",
     "<MyRankingEntry>k__BackingField",
   ],
   "Soccer.Shared.GetClubTotalPowerRankingReq": ["ConstPath"],
-  "Soccer.Shared.GetClubTotalPowerRankingRes": ["<RankingUsers>k__BackingField", "<MyRankingEntry>k__BackingField"],
-  "Soccer.Shared.Period": ["<BeginsAt>k__BackingField", "<EndsAt>k__BackingField"],
+  "Soccer.Shared.GetClubTotalPowerRankingRes": [
+    "<RankingUsers>k__BackingField",
+    "<MyRankingEntry>k__BackingField",
+  ],
+  "Soccer.Shared.Period": [
+    "<BeginsAt>k__BackingField",
+    "<EndsAt>k__BackingField",
+  ],
   "Soccer.Shared.ScheduleTargetType": [
     "value__",
     "Gacha",
@@ -11868,12 +13983,17 @@ export default {
     "ShopCategory",
   ],
   "Soccer.Shared.GetSerialCodeInputRestrictionStatusReq": ["ConstPath"],
-  "Soccer.Shared.GetSerialCodeInputRestrictionStatusRes": ["<RestrictionStatus>k__BackingField"],
+  "Soccer.Shared.GetSerialCodeInputRestrictionStatusRes": [
+    "<RestrictionStatus>k__BackingField",
+  ],
   "Soccer.Shared.SerialCodeInputRestrictionStatus": [
     "<Restricted>k__BackingField",
     "<RestrictionEndsAt>k__BackingField",
   ],
-  "Soccer.Shared.ObtainSerialCodeRewardsReq": ["ConstPath", "<SerialCode>k__BackingField"],
+  "Soccer.Shared.ObtainSerialCodeRewardsReq": [
+    "ConstPath",
+    "<SerialCode>k__BackingField",
+  ],
   "Soccer.Shared.ObtainSerialCodeRewardsRes": [
     "<ErrorCode>k__BackingField",
     "<RestrictionStatus>k__BackingField",
@@ -11889,8 +14009,15 @@ export default {
     "<ClubMembers>k__BackingField",
     "<Directors>k__BackingField",
   ],
-  "Soccer.Shared.PurchaseReq": ["ConstPath", "<Items>k__BackingField", "<Consumption>k__BackingField"],
-  "Soccer.Shared.CurrencyChange": ["<After>k__BackingField", "<Change>k__BackingField"],
+  "Soccer.Shared.PurchaseReq": [
+    "ConstPath",
+    "<Items>k__BackingField",
+    "<Consumption>k__BackingField",
+  ],
+  "Soccer.Shared.CurrencyChange": [
+    "<After>k__BackingField",
+    "<Change>k__BackingField",
+  ],
   "Soccer.Shared.ClubMemberChange": [
     "<Member>k__BackingField",
     "<Code>k__BackingField",
@@ -11899,24 +14026,50 @@ export default {
     "<AddedSpecialMoveCodes>k__BackingField",
     "<RemovedSpecialMoveCodes>k__BackingField",
   ],
-  "Soccer.Shared.DirectorChange": ["<Director>k__BackingField", "<Code>k__BackingField"],
+  "Soccer.Shared.DirectorChange": [
+    "<Director>k__BackingField",
+    "<Code>k__BackingField",
+  ],
   "Soccer.Shared.LevelSynchronizerSlotChange": [
     "<LevelSynchronizerSlot>k__BackingField",
     "<LevelChange>k__BackingField",
     "<ClubMemberCodeChange>k__BackingField",
   ],
-  "Soccer.Shared.ShopItemCodeWithQuantity": ["<ItemCode>k__BackingField", "<Quantity>k__BackingField"],
-  "Soccer.Shared.ShopItemMasterWithQuantity": ["<Master>k__BackingField", "<Quantity>k__BackingField"],
-  "Soccer.Shared.PaymentMethod": ["value__", "None", "AppStore", "GooglePlay", "ExtSbps", "Free", "Dummy"],
-  "Soccer.Shared.RegisterLinkCredentialsReq": ["ConstPath", "<LinkSessionToken>k__BackingField"],
+  "Soccer.Shared.ShopItemCodeWithQuantity": [
+    "<ItemCode>k__BackingField",
+    "<Quantity>k__BackingField",
+  ],
+  "Soccer.Shared.ShopItemMasterWithQuantity": [
+    "<Master>k__BackingField",
+    "<Quantity>k__BackingField",
+  ],
+  "Soccer.Shared.PaymentMethod": [
+    "value__",
+    "None",
+    "AppStore",
+    "GooglePlay",
+    "ExtSbps",
+    "Free",
+    "Dummy",
+  ],
+  "Soccer.Shared.RegisterLinkCredentialsReq": [
+    "ConstPath",
+    "<LinkSessionToken>k__BackingField",
+  ],
   "Soccer.Shared.PurchaseExchangeProductReq": [
     "ConstPath",
     "<ProductCode>k__BackingField",
     "<Quantity>k__BackingField",
     "<Consumption>k__BackingField",
   ],
-  "Soccer.Shared.PurchaseFreeOfChargeProductReq": ["ConstPath", "<ProductCode>k__BackingField"],
-  "Soccer.Shared.BattleTypeAndStageCode": ["<Type>k__BackingField", "<StageCode>k__BackingField"],
+  "Soccer.Shared.PurchaseFreeOfChargeProductReq": [
+    "ConstPath",
+    "<ProductCode>k__BackingField",
+  ],
+  "Soccer.Shared.BattleTypeAndStageCode": [
+    "<Type>k__BackingField",
+    "<StageCode>k__BackingField",
+  ],
   "Soccer.Shared.StringValidator": ["LineSeparatorRegex"],
   "Soccer.Shared.SoccerDateOnly": ["Year", "Month", "Day"],
   "Soccer.Shared.SoccerDateOnlyParser": ["Shared"],
@@ -11925,22 +14078,38 @@ export default {
   "Soccer.Shared.SoccerTimeOnly": ["Hour", "Minute", "Second"],
   "Soccer.Shared.SoccerTimeOnlyParser": ["Shared"],
   "Soccer.Shared.ObtainTrainingRewardsReq": ["ConstPath"],
-  "Soccer.Shared.ObtainInstantTrainingRewardsReq": ["ConstPath", "<Consumption>k__BackingField"],
+  "Soccer.Shared.ObtainInstantTrainingRewardsReq": [
+    "ConstPath",
+    "<Consumption>k__BackingField",
+  ],
   "Soccer.Shared.ObtainInstantTrainingCarryOverRewardsReq": [
     "ConstPath",
     "<CarryOvers>k__BackingField",
     "<Consumption>k__BackingField",
   ],
-  "Soccer.Shared.CarryOver": ["<ObtainedAt>k__BackingField", "<Count>k__BackingField"],
+  "Soccer.Shared.CarryOver": [
+    "<ObtainedAt>k__BackingField",
+    "<Count>k__BackingField",
+  ],
   "Soccer.Shared.ObtainTrainingStageRewardsReq": ["ConstPath"],
-  "Soccer.Shared.ObtainFocusedTrainingRewardsReq": ["ConstPath", "<FocusedTrainingTicket>k__BackingField"],
+  "Soccer.Shared.ObtainFocusedTrainingRewardsReq": [
+    "ConstPath",
+    "<FocusedTrainingTicket>k__BackingField",
+  ],
   "Soccer.Shared.TrainingResult": [
     "<TrainingStageLevels>k__BackingField",
     "<TrainingDuration>k__BackingField",
     "<Reward>k__BackingField",
   ],
-  "Soccer.Shared.UpdateMainTutorialProgressReq": ["ConstPath", "<Progress>k__BackingField"],
-  "Soccer.Shared.ReadContentTutorialReq": ["ConstPath", "<TutorialCode>k__BackingField", "<Version>k__BackingField"],
+  "Soccer.Shared.UpdateMainTutorialProgressReq": [
+    "ConstPath",
+    "<Progress>k__BackingField",
+  ],
+  "Soccer.Shared.ReadContentTutorialReq": [
+    "ConstPath",
+    "<TutorialCode>k__BackingField",
+    "<Version>k__BackingField",
+  ],
   "Soccer.Shared.TutorialProgress": [
     "value__",
     "NotStarted",
@@ -11950,17 +14119,26 @@ export default {
     "ClubHallFinished",
     "TrainingRewardObtained",
   ],
-  "Soccer.Shared.TutorialProgressExtensions": ["<Progresses>k__BackingField", "<IndexMap>k__BackingField"],
+  "Soccer.Shared.TutorialProgressExtensions": [
+    "<Progresses>k__BackingField",
+    "<IndexMap>k__BackingField",
+  ],
   "Soccer.Shared.CreateUserReq": [
     "ConstPath",
     "<UserName>k__BackingField",
     "<DeviceInfo>k__BackingField",
     "<WorldId>k__BackingField",
   ],
-  "Soccer.Shared.CreateUserRes": ["<CustomToken>k__BackingField", "<SignInError>k__BackingField"],
+  "Soccer.Shared.CreateUserRes": [
+    "<CustomToken>k__BackingField",
+    "<SignInError>k__BackingField",
+  ],
   "Soccer.Shared.LogInReq": ["ConstPath", "<DeviceInfo>k__BackingField"],
   "Soccer.Shared.LogInRes": ["<HasLinkCredential>k__BackingField"],
-  "Soccer.Shared.UpdateDeviceInfoReq": ["ConstPath", "<DeviceInfo>k__BackingField"],
+  "Soccer.Shared.UpdateDeviceInfoReq": [
+    "ConstPath",
+    "<DeviceInfo>k__BackingField",
+  ],
   "Soccer.Shared.FirebaseSignInRes": [
     "<IdToken>k__BackingField",
     "<RefreshToken>k__BackingField",
@@ -11985,8 +14163,18 @@ export default {
     "<AppPlatform>k__BackingField",
     "<AdjustDeviceId>k__BackingField",
   ],
-  "Soccer.Shared.UserStatus": ["value__", "Active", "DeletedBySelf", "PermanentlyDeleted"],
-  "Soccer.Shared.PopulationStatus": ["value__", "BelowSoftLimit", "BelowHardLimit", "NoSpace"],
+  "Soccer.Shared.UserStatus": [
+    "value__",
+    "Active",
+    "DeletedBySelf",
+    "PermanentlyDeleted",
+  ],
+  "Soccer.Shared.PopulationStatus": [
+    "value__",
+    "BelowSoftLimit",
+    "BelowHardLimit",
+    "NoSpace",
+  ],
   "Soccer.Shared.WorldPopulation": [
     "<WorldGroupId>k__BackingField",
     "<Status>k__BackingField",
@@ -11998,14 +14186,31 @@ export default {
     "<DayBeforeYesterday>k__BackingField",
   ],
   "Soccer.Shared.UpdateNameReq": ["ConstPath", "<NewName>k__BackingField"],
-  "Soccer.Shared.UpdateAnnouncementReq": ["ConstPath", "<NewAnnouncement>k__BackingField"],
-  "Soccer.Shared.UpdateFavoriteCharacterReq": ["ConstPath", "<FavoriteCharacterCode>k__BackingField"],
-  "Soccer.Shared.UpdateProfileIconReq": ["ConstPath", "<ProfileIconCode>k__BackingField"],
-  "Soccer.Shared.UpdateHonoraryTitleReq": ["ConstPath", "<HonoraryTitleCode>k__BackingField"],
+  "Soccer.Shared.UpdateAnnouncementReq": [
+    "ConstPath",
+    "<NewAnnouncement>k__BackingField",
+  ],
+  "Soccer.Shared.UpdateFavoriteCharacterReq": [
+    "ConstPath",
+    "<FavoriteCharacterCode>k__BackingField",
+  ],
+  "Soccer.Shared.UpdateProfileIconReq": [
+    "ConstPath",
+    "<ProfileIconCode>k__BackingField",
+  ],
+  "Soccer.Shared.UpdateHonoraryTitleReq": [
+    "ConstPath",
+    "<HonoraryTitleCode>k__BackingField",
+  ],
   "Soccer.Shared.UpdateClubTotalPowerReq": ["ConstPath"],
   "Soccer.Shared.SyncClubTotalPowerRankingWithRedisReq": ["ConstPath"],
-  "Soccer.Shared.SyncClubTotalPowerRankingWithRedisRes": ["<MyRankingEntry>k__BackingField"],
-  "Soccer.Shared.GetOtherUserProfileReq": ["ConstPath", "<UserId>k__BackingField"],
+  "Soccer.Shared.SyncClubTotalPowerRankingWithRedisRes": [
+    "<MyRankingEntry>k__BackingField",
+  ],
+  "Soccer.Shared.GetOtherUserProfileReq": [
+    "ConstPath",
+    "<UserId>k__BackingField",
+  ],
   "Soccer.Shared.GetOtherUserProfileRes": [
     "<UserProfile>k__BackingField",
     "<WorldId>k__BackingField",
@@ -12023,7 +14228,10 @@ export default {
     "<PvPRating>k__BackingField",
   ],
   "Soccer.Shared.GetMyProfileRankReq": ["ConstPath"],
-  "Soccer.Shared.GetMyProfileRankRes": ["<RaidRankHistory>k__BackingField", "<PvPRank>k__BackingField"],
+  "Soccer.Shared.GetMyProfileRankRes": [
+    "<RaidRankHistory>k__BackingField",
+    "<PvPRank>k__BackingField",
+  ],
   "Soccer.Shared.UpdateTeamNameReq": ["ConstPath", "<NewName>k__BackingField"],
   "Soccer.Shared.GetMyProfileReq": ["ConstPath"],
   "Soccer.Shared.GetMyProfileRes": [
@@ -12038,7 +14246,10 @@ export default {
     "<HonoraryTitleCode>k__BackingField",
     "<FavoriteCharacterCode>k__BackingField",
   ],
-  "Soccer.Shared.TrainingLevel": ["<UserId>k__BackingField", "<Level>k__BackingField"],
+  "Soccer.Shared.TrainingLevel": [
+    "<UserId>k__BackingField",
+    "<Level>k__BackingField",
+  ],
   "Soccer.Shared.ExtraCupProgress": [
     "<UserId>k__BackingField",
     "<GroupCode>k__BackingField",
@@ -12092,7 +14303,10 @@ export default {
     "<ObtainedInvitationRewardLogs>k__BackingField",
     "<HasLinkCredential>k__BackingField",
   ],
-  "Soccer.Shared.GetUserSnapshotByLinkProductsReq": ["ConstPath", "<LinkProductCodes>k__BackingField"],
+  "Soccer.Shared.GetUserSnapshotByLinkProductsReq": [
+    "ConstPath",
+    "<LinkProductCodes>k__BackingField",
+  ],
   "Soccer.Shared.GetUserSnapshotByLinkProductsRes": [
     "<Items>k__BackingField",
     "<ClubMembers>k__BackingField",
@@ -12100,7 +14314,13 @@ export default {
     "<Offers>k__BackingField",
   ],
   "Soccer.Shared.BaseConverter": ["BaseChars"],
-  "Soccer.Shared.CircularList`1": ["InvalidIndex", "buffer", "head", "tail", "<Count>k__BackingField"],
+  "Soccer.Shared.CircularList`1": [
+    "InvalidIndex",
+    "buffer",
+    "head",
+    "tail",
+    "<Count>k__BackingField",
+  ],
   "Soccer.Shared.ProjectRootFinder": ["ProjectRootFilename"],
   "Soccer.Shared.SlidingWindowWithoutPartitionRateLimiter": [
     "acquisitions",
@@ -12124,7 +14344,10 @@ export default {
     "<Cell>k__BackingField",
     "<Exception>k__BackingField",
   ],
-  "Soccer.Shared.RowMissingError": ["<Document>k__BackingField", "<RowIndex>k__BackingField"],
+  "Soccer.Shared.RowMissingError": [
+    "<Document>k__BackingField",
+    "<RowIndex>k__BackingField",
+  ],
   "Soccer.Shared.CellMissingError": [
     "<Row>k__BackingField",
     "<RowIndex>k__BackingField",
@@ -12153,7 +14376,10 @@ export default {
     "<ErrorCollector>k__BackingField",
     "<Rows>k__BackingField",
   ],
-  "Soccer.Shared.TsvHeader": ["<NameToIndex>k__BackingField", "<ListNameToIndices>k__BackingField"],
+  "Soccer.Shared.TsvHeader": [
+    "<NameToIndex>k__BackingField",
+    "<ListNameToIndices>k__BackingField",
+  ],
   "Soccer.Shared.TsvKeyValueDocument": [
     "<Document>k__BackingField",
     "<KeyToRow>k__BackingField",
@@ -12262,14 +14488,32 @@ export default {
     "_serializedATN",
     "_ATN",
   ],
-  "Soccer.Shared.StatusEffectParsers.TargetPlayer.SpecificTag": ["<TagLabel>k__BackingField"],
-  "Soccer.Shared.StatusEffectParsers.TargetPlayer.SpecificPreferredPosition": ["<Position>k__BackingField"],
-  "Soccer.Shared.StatusEffectParsers.TargetPlayer.SpecificPosition": ["<Position>k__BackingField"],
-  "Soccer.Shared.StatusEffectParsers.TargetPlayer.SpecificElement": ["<Element>k__BackingField"],
-  "Soccer.Shared.StatusEffectParsers.TargetPlayer.SpecificCharacter": ["<Code>k__BackingField"],
-  "Soccer.Shared.StatusEffectParsers.TargetPlayer.And": ["<A>k__BackingField", "<B>k__BackingField"],
-  "Soccer.Shared.StatusEffectParsers.TargetPlayer.Or": ["<A>k__BackingField", "<B>k__BackingField"],
-  "Soccer.Shared.StatusEffectParsers.TargetPlayer.TargetPlayerListener": ["<Stack>k__BackingField"],
+  "Soccer.Shared.StatusEffectParsers.TargetPlayer.SpecificTag": [
+    "<TagLabel>k__BackingField",
+  ],
+  "Soccer.Shared.StatusEffectParsers.TargetPlayer.SpecificPreferredPosition": [
+    "<Position>k__BackingField",
+  ],
+  "Soccer.Shared.StatusEffectParsers.TargetPlayer.SpecificPosition": [
+    "<Position>k__BackingField",
+  ],
+  "Soccer.Shared.StatusEffectParsers.TargetPlayer.SpecificElement": [
+    "<Element>k__BackingField",
+  ],
+  "Soccer.Shared.StatusEffectParsers.TargetPlayer.SpecificCharacter": [
+    "<Code>k__BackingField",
+  ],
+  "Soccer.Shared.StatusEffectParsers.TargetPlayer.And": [
+    "<A>k__BackingField",
+    "<B>k__BackingField",
+  ],
+  "Soccer.Shared.StatusEffectParsers.TargetPlayer.Or": [
+    "<A>k__BackingField",
+    "<B>k__BackingField",
+  ],
+  "Soccer.Shared.StatusEffectParsers.TargetPlayer.TargetPlayerListener": [
+    "<Stack>k__BackingField",
+  ],
   "Soccer.Shared.StatusEffectParsers.TargetMove.TargetMoveLexer": [
     "decisionToDFA",
     "sharedContextCache",
@@ -12324,17 +14568,41 @@ export default {
     "_serializedATN",
     "_ATN",
   ],
-  "Soccer.Shared.StatusEffectParsers.TargetMove.SpecificCategory": ["<Category>k__BackingField"],
-  "Soccer.Shared.StatusEffectParsers.TargetMove.SpecificMove": ["<Code>k__BackingField"],
-  "Soccer.Shared.StatusEffectParsers.TargetMove.SpecificElement": ["<Element>k__BackingField"],
-  "Soccer.Shared.StatusEffectParsers.TargetMove.SpecificType": ["<Source>k__BackingField"],
-  "Soccer.Shared.StatusEffectParsers.TargetMove.And": ["<A>k__BackingField", "<B>k__BackingField"],
-  "Soccer.Shared.StatusEffectParsers.TargetMove.Or": ["<A>k__BackingField", "<B>k__BackingField"],
-  "Soccer.Shared.StatusEffectParsers.TargetMove.TargetMoveListener": ["<Stack>k__BackingField"],
+  "Soccer.Shared.StatusEffectParsers.TargetMove.SpecificCategory": [
+    "<Category>k__BackingField",
+  ],
+  "Soccer.Shared.StatusEffectParsers.TargetMove.SpecificMove": [
+    "<Code>k__BackingField",
+  ],
+  "Soccer.Shared.StatusEffectParsers.TargetMove.SpecificElement": [
+    "<Element>k__BackingField",
+  ],
+  "Soccer.Shared.StatusEffectParsers.TargetMove.SpecificType": [
+    "<Source>k__BackingField",
+  ],
+  "Soccer.Shared.StatusEffectParsers.TargetMove.And": [
+    "<A>k__BackingField",
+    "<B>k__BackingField",
+  ],
+  "Soccer.Shared.StatusEffectParsers.TargetMove.Or": [
+    "<A>k__BackingField",
+    "<B>k__BackingField",
+  ],
+  "Soccer.Shared.StatusEffectParsers.TargetMove.TargetMoveListener": [
+    "<Stack>k__BackingField",
+  ],
   "Soccer.Shared.Sound.SoundPlayRequest": ["CueSheetName", "CueName"],
-  "Soccer.Shared.LoadTest.LoadTestScenarioRecorder": ["<Current>k__BackingField", "<Writer>k__BackingField"],
-  "Soccer.Shared.LoadTest.Tasks.LoadTestTask": ["<StartedAt>k__BackingField", "<FinishedAt>k__BackingField"],
-  "Soccer.Shared.LoadTest.Tasks.SendChatPayloadTask": ["<Payload>k__BackingField"],
+  "Soccer.Shared.LoadTest.LoadTestScenarioRecorder": [
+    "<Current>k__BackingField",
+    "<Writer>k__BackingField",
+  ],
+  "Soccer.Shared.LoadTest.Tasks.LoadTestTask": [
+    "<StartedAt>k__BackingField",
+    "<FinishedAt>k__BackingField",
+  ],
+  "Soccer.Shared.LoadTest.Tasks.SendChatPayloadTask": [
+    "<Payload>k__BackingField",
+  ],
   "Soccer.Shared.LoadTest.Tasks.SendHttpRequestTask": [
     "<Req>k__BackingField",
     "<ResType>k__BackingField",
@@ -12414,8 +14682,12 @@ export default {
     "<RequestingWorldChannelNumber>k__BackingField",
   ],
   "Soccer.Shared.Chat.LogInSC": ["<CanSendMessage>k__BackingField"],
-  "Soccer.Shared.Chat.SwitchWorldChannelCS": ["<WorldChannelNumber>k__BackingField"],
-  "Soccer.Shared.Chat.SwitchWorldChannelErrorSC": ["<WorldChannelNumber>k__BackingField"],
+  "Soccer.Shared.Chat.SwitchWorldChannelCS": [
+    "<WorldChannelNumber>k__BackingField",
+  ],
+  "Soccer.Shared.Chat.SwitchWorldChannelErrorSC": [
+    "<WorldChannelNumber>k__BackingField",
+  ],
   "Soccer.Shared.Chat.JoinChannelSC": ["<Logs>k__BackingField"],
   "Soccer.Shared.Chat.SendUserMessageCS": [
     "<Channel>k__BackingField",
@@ -12430,7 +14702,10 @@ export default {
     "<StampCode>k__BackingField",
     "<SentAt>k__BackingField",
   ],
-  "Soccer.Shared.Chat.GetUserMessagesCS": ["<Channel>k__BackingField", "<From>k__BackingField"],
+  "Soccer.Shared.Chat.GetUserMessagesCS": [
+    "<Channel>k__BackingField",
+    "<From>k__BackingField",
+  ],
   "Soccer.Shared.Chat.GetUserMessagesSC": ["<Messages>k__BackingField"],
   "Soccer.Shared.Chat.LeaveChannelFromAPI": ["<UserId>k__BackingField"],
   "Soccer.Shared.Chat.JoinGuildMemberFeedFromAPI": [
@@ -12456,7 +14731,9 @@ export default {
     "<StageCode>k__BackingField",
   ],
   "Soccer.Shared.Chat.RankUpGuildFeedFromAPI": ["<RankCode>k__BackingField"],
-  "Soccer.Shared.Chat.UnlockGvEStageFeedFromAPI": ["<StageCode>k__BackingField"],
+  "Soccer.Shared.Chat.UnlockGvEStageFeedFromAPI": [
+    "<StageCode>k__BackingField",
+  ],
   "Soccer.Shared.Chat.ClearGvEStageFeedAPI": ["<StageCode>k__BackingField"],
   "Soccer.Shared.Chat.ReachMaxAffinityFeedFromAPI": [
     "<GuildMemberId>k__BackingField",
@@ -12474,7 +14751,10 @@ export default {
     "<Text>k__BackingField",
     "<EndsAt>k__BackingField",
   ],
-  "Soccer.Shared.Chat.NotifyUserBanFromAdmin": ["<UserId>k__BackingField", "<EndsAt>k__BackingField"],
+  "Soccer.Shared.Chat.NotifyUserBanFromAdmin": [
+    "<UserId>k__BackingField",
+    "<EndsAt>k__BackingField",
+  ],
   "Soccer.Shared.Chat.ChatServerErrorType": ["value__", "Unknown"],
   "Soccer.Shared.Chat.ErrorSC": ["<Error>k__BackingField"],
   "Soccer.Shared.Chat.ChatServerChannelErrorType": [

@@ -13,33 +13,34 @@ import type { WebhookPayload } from "../../../payloads/v2/webhook";
  * @returns whether the signature is valid for the associated body
  */
 export function verify(secret: string, signature: string | null, body: string) {
-	if (typeof secret !== "string" || secret.length === 0) throw new Error("No secret found");
+    if (typeof secret !== "string" || secret.length === 0)
+        throw new Error("No secret found");
 
-	if (signature === null || !/^[a-f0-9]{32}$/.test(signature)) return false;
-	const expected = createHmac("md5", secret).update(body).digest();
-	return timingSafeEqual(expected, Buffer.from(signature, "hex"));
+    if (signature === null || !/^[a-f0-9]{32}$/.test(signature)) return false;
+    const expected = createHmac("md5", secret).update(body).digest();
+    return timingSafeEqual(expected, Buffer.from(signature, "hex"));
 }
 
 // eslint-disable-next-line jsdoc/require-jsdoc
 async function parseRequestBody(
-	request:
-		| Pick<Request, "headers" | "body" | "clone">
-		| Pick<Request, "headers" | "text">
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		| (import("http").IncomingMessage & { body: any })
+    request:
+        | Pick<Request, "headers" | "body" | "clone">
+        | Pick<Request, "headers" | "text">
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        | (import("http").IncomingMessage & { body: any }),
 ): Promise<string> {
-	return "clone" in request && typeof request.clone === "function"
-		? await request.clone().text()
-		: // TODO: do not this
-			"text" in request && typeof request.text === "function"
-			? await request.text()
-			: "body" in request
-				? typeof request.body === "string"
-					? request.body
-					: JSON.stringify(request["body"])
-				: (() => {
-						throw new Error("No request body found");
-					})();
+    return "clone" in request && typeof request.clone === "function"
+        ? await request.clone().text()
+        : // TODO: do not this
+          "text" in request && typeof request.text === "function"
+          ? await request.text()
+          : "body" in request
+            ? typeof request.body === "string"
+                ? request.body
+                : JSON.stringify(request["body"])
+            : (() => {
+                  throw new Error("No request body found");
+              })();
 }
 
 /**
@@ -59,37 +60,37 @@ async function parseRequestBody(
  * - cloudflare-webhook: for usage with the Node.js Web API on cloudflare workers
  */
 export async function parseWebhookRequest<
-	Trigger extends PatreonWebhookTrigger = PatreonWebhookTrigger,
+    Trigger extends PatreonWebhookTrigger = PatreonWebhookTrigger,
 >(
-	request:
-		| Pick<Request, "headers" | "body" | "clone">
-		| Pick<Request, "headers" | "text">
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		| (import("http").IncomingMessage & { body: any }),
-	secret: string
+    request:
+        | Pick<Request, "headers" | "body" | "clone">
+        | Pick<Request, "headers" | "text">
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        | (import("http").IncomingMessage & { body: any }),
+    secret: string,
 ): Promise<
-	| { verified: false; event: undefined; payload: undefined }
-	| { verified: true; event: Trigger; payload: WebhookPayload<Trigger> }
+    | { verified: false; event: undefined; payload: undefined }
+    | { verified: true; event: Trigger; payload: WebhookPayload<Trigger> }
 > {
-	const body = await parseRequestBody(request);
-	const headers = WebhookClient.getWebhookHeaders(request.headers);
+    const body = await parseRequestBody(request);
+    const headers = WebhookClient.getWebhookHeaders(request.headers);
 
-	const verified = verify(secret, headers.signature, body);
-	if (!verified) {
-		return {
-			verified,
-			event: undefined,
-			payload: undefined,
-		};
-	}
+    const verified = verify(secret, headers.signature, body);
+    if (!verified) {
+        return {
+            verified,
+            event: undefined,
+            payload: undefined,
+        };
+    }
 
-	if (headers.event == null) {
-		throw new Error("failed to get event header from request for webhooks");
-	}
+    if (headers.event == null) {
+        throw new Error("failed to get event header from request for webhooks");
+    }
 
-	return {
-		event: <Trigger>headers.event,
-		payload: JSON.parse(body) as WebhookPayload<Trigger>,
-		verified: <const>true,
-	};
+    return {
+        event: <Trigger>headers.event,
+        payload: JSON.parse(body) as WebhookPayload<Trigger>,
+        verified: <const>true,
+    };
 }

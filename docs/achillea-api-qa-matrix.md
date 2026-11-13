@@ -4,24 +4,24 @@
 
 ## Niveaux de preuve
 
-| Statut | Sens |
-| --- | --- |
-| `SOURCE_ONLY` | Route trouvée dans le code ; aucun appel authentifié concluant. |
-| `PUBLIC_LIVE` | Appel public de production observé ; ne valide pas la session ni les écritures. |
-| `AUTH_LIVE` | Appel avec une vraie session Better Auth et résultat vérifié. |
-| `BLOCKED_LOCAL_DB` | Test local essayé mais base locale indisponible. |
-| `FAIL` | Réponse observée qui contredit le contrat. |
+| Statut             | Sens                                                                            |
+| ------------------ | ------------------------------------------------------------------------------- |
+| `SOURCE_ONLY`      | Route trouvée dans le code ; aucun appel authentifié concluant.                 |
+| `PUBLIC_LIVE`      | Appel public de production observé ; ne valide pas la session ni les écritures. |
+| `AUTH_LIVE`        | Appel avec une vraie session Better Auth et résultat vérifié.                   |
+| `BLOCKED_LOCAL_DB` | Test local essayé mais base locale indisponible.                                |
+| `FAIL`             | Réponse observée qui contredit le contrat.                                      |
 
 Le CSV donne `SOURCE_ONLY` à chaque route par défaut. Ne promouvoir un statut qu'avec date, environnement, identité de test non sensible, requête expurgée, code HTTP, assertion et référence de trace. Ne jamais stocker un cookie, jeton, secret QR, corps personnel ou clé API.
 
 ## Vérifications effectuées
 
-| Surface | Environnement | Résultat | Limite |
-| --- | --- | --- | --- |
-| `GET /api/ranked/leaderboard?mode=2&page=0&pageSize=3` | `ranked.rosegriffon.fr`, public | HTTP 200, `total=12`, trois entrées observées | Pas de session ; ne prouve pas le filtre Elo ajouté dans le checkout. |
-| `GET /v1/achillea/ranked/leaderboard` via `app.handle` | local, `.env` | HTTP 500, `ECONNREFUSED 127.0.0.1:5432` | La base locale n'écoute pas ; test de projection impossible. |
-| `bun run test --test-name-pattern ranked` | local, `apps/api` | 6 passent, 2 lectures leaderboard échouent avec 500 | Même panne de connexion DB ; aucune validation authentifiée complète. |
-| `bun run type-check` | local, `apps/api` et `packages/achillea-client` | succès | Contrôle statique uniquement. |
+| Surface                                                | Environnement                                   | Résultat                                            | Limite                                                                |
+| ------------------------------------------------------ | ----------------------------------------------- | --------------------------------------------------- | --------------------------------------------------------------------- |
+| `GET /api/ranked/leaderboard?mode=2&page=0&pageSize=3` | `ranked.rosegriffon.fr`, public                 | HTTP 200, `total=12`, trois entrées observées       | Pas de session ; ne prouve pas le filtre Elo ajouté dans le checkout. |
+| `GET /v1/achillea/ranked/leaderboard` via `app.handle` | local, `.env`                                   | HTTP 500, `ECONNREFUSED 127.0.0.1:5432`             | La base locale n'écoute pas ; test de projection impossible.          |
+| `bun run test --test-name-pattern ranked`              | local, `apps/api`                               | 6 passent, 2 lectures leaderboard échouent avec 500 | Même panne de connexion DB ; aucune validation authentifiée complète. |
+| `bun run type-check`                                   | local, `apps/api` et `packages/achillea-client` | succès                                              | Contrôle statique uniquement.                                         |
 
 ## Campagne authentifiée encore requise
 

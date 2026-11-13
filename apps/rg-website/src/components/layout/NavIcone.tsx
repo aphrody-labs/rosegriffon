@@ -31,7 +31,13 @@ export function NavIcone(item: NavItem): React.ReactNode {
   if (item.imageUrl) {
     return (
       <span className="relative block size-full">
-        <Image src={item.imageUrl} alt="" fill sizes="24px" className="object-contain" />
+        <Image
+          src={item.imageUrl}
+          alt=""
+          fill
+          sizes="24px"
+          className="object-contain"
+        />
       </span>
     );
   }
@@ -40,7 +46,13 @@ export function NavIcone(item: NavItem): React.ReactNode {
   if (emote) {
     return (
       <span className="relative block size-full">
-        <Image src={emote.path} alt="" fill sizes="24px" className="object-contain" />
+        <Image
+          src={emote.path}
+          alt=""
+          fill
+          sizes="24px"
+          className="object-contain"
+        />
       </span>
     );
   }
@@ -54,7 +66,12 @@ export function NavIcone(item: NavItem): React.ReactNode {
   if (item.commonSprite) {
     // `scale` et non `size` : les cellules de l'atlas commun font 48 à 92 px,
     // et 0.25 les ramène toutes dans la boîte de 20 px du menu.
-    return <CommonSpriteIcon name={item.commonSprite as SpriteCommonKey} scale={0.25} />;
+    return (
+      <CommonSpriteIcon
+        name={item.commonSprite as SpriteCommonKey}
+        scale={0.25}
+      />
+    );
   }
 
   return null;

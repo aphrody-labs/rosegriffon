@@ -71,23 +71,29 @@ describe("API Route /api/email/inbound", () => {
       };
 
       // Sans secret -> 401
-      const reqUnauthorized = new NextRequest("http://localhost:3000/api/email/inbound", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+      const reqUnauthorized = new NextRequest(
+        "http://localhost:3000/api/email/inbound",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        },
+      );
       const resUnauthorized = await POST(reqUnauthorized);
       expect(resUnauthorized.status).toBe(401);
 
       // Avec secret dans le header Authorization -> 200
-      const reqAuthorized = new NextRequest("http://localhost:3000/api/email/inbound", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer super-secret-key-123",
+      const reqAuthorized = new NextRequest(
+        "http://localhost:3000/api/email/inbound",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer super-secret-key-123",
+          },
+          body: JSON.stringify(payload),
         },
-        body: JSON.stringify(payload),
-      });
+      );
       const resAuthorized = await POST(reqAuthorized);
       expect(resAuthorized.status).toBe(200);
     } finally {

@@ -40,7 +40,9 @@ const num = (value: number | string | null | undefined): number => {
 };
 
 /** Tournois : pas de notion de clan, « wins/losses » = bilan personnel. */
-export function toTournamentStats(row: CompetitionRow | undefined): CompetitionStats {
+export function toTournamentStats(
+  row: CompetitionRow | undefined,
+): CompetitionStats {
   const personalWins = num(row?.personal_wins);
   const personalLosses = num(row?.personal_losses);
   const personalDraws = num(row?.personal_draws);
@@ -58,7 +60,9 @@ export function toTournamentStats(row: CompetitionRow | undefined): CompetitionS
   };
 }
 
-export function toInterclanStats(row: CompetitionRow | undefined): CompetitionStats {
+export function toInterclanStats(
+  row: CompetitionRow | undefined,
+): CompetitionStats {
   return {
     total: num(row?.total),
     wins: num(row?.wins),
@@ -73,7 +77,10 @@ export function toInterclanStats(row: CompetitionRow | undefined): CompetitionSt
   };
 }
 
-export async function tournamentStats(db: Kysely<Database>, userId: string): Promise<CompetitionStats> {
+export async function tournamentStats(
+  db: Kysely<Database>,
+  userId: string,
+): Promise<CompetitionStats> {
   const result = await sql<CompetitionRow>`
 		with matches as (
 			select l.id as lobby_id, l.event_id, me.score as my_score, opp.score as opp_score,
@@ -99,7 +106,10 @@ export async function tournamentStats(db: Kysely<Database>, userId: string): Pro
   return toTournamentStats(result.rows[0]);
 }
 
-export async function interclanStats(db: Kysely<Database>, userId: string): Promise<CompetitionStats> {
+export async function interclanStats(
+  db: Kysely<Database>,
+  userId: string,
+): Promise<CompetitionStats> {
   const validated = ETAT.RESULTAT_VALIDE;
   const result = await sql<CompetitionRow>`
 		with clan_results as (

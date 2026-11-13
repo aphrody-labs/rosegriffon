@@ -28,7 +28,12 @@ export interface Rect {
 }
 
 export namespace Rect {
-  export function fromParts(bottom: number, left: number, width: number, height: number) {
+  export function fromParts(
+    bottom: number,
+    left: number,
+    width: number,
+    height: number,
+  ) {
     return {
       bottom,
       height,
@@ -85,7 +90,9 @@ export class Input {
   ) {
     this.controls = document.getElementById("controls")!;
     this.pauseButtonContainer = document.getElementById("btn-pause")!;
-    this.pauseButton = this.pauseButtonContainer.getElementsByTagName("button")[0] as HTMLButtonElement;
+    this.pauseButton = this.pauseButtonContainer.getElementsByTagName(
+      "button",
+    )[0] as HTMLButtonElement;
 
     this.mouseDownCallback = this.mouseDown.bind(this);
     this.mouseMoveCallback = this.mouseMove.bind(this);
@@ -98,10 +105,10 @@ export class Input {
     this.prevInput = 0;
     this.pressedKeys = 0;
 
-    document.body.addEventListener("keydown", e => {
+    document.body.addEventListener("keydown", (e) => {
       this.pressedKeys |= keyToInputBit[e.key] ?? 0;
     });
-    document.body.addEventListener("keyup", e => {
+    document.body.addEventListener("keyup", (e) => {
       this.pressedKeys &= ~(keyToInputBit[e.key] ?? 0);
     });
 
@@ -135,10 +142,16 @@ export class Input {
       this.touchControls = new TouchControls(this.controls);
       this.touchControls.layoutData = this.touchControls.defaultLayout; // TODO: Remove
 
-      this.touchControls.pause.interactionElement.addEventListener("click", this.pauseCallback);
+      this.touchControls.pause.interactionElement.addEventListener(
+        "click",
+        this.pauseCallback,
+      );
     } else {
       if (this.touchControls) {
-        this.touchControls.pause.interactionElement.removeEventListener("click", this.pauseCallback);
+        this.touchControls.pause.interactionElement.removeEventListener(
+          "click",
+          this.pauseCallback,
+        );
 
         delete this.touchControls;
       }
@@ -151,7 +164,8 @@ export class Input {
     this.touches.set(id, {
       area: this.touchControls?.containTouch(x, y)
         ? TouchArea.Controls
-        : !limitTouchesToBottomScreenRect || (this.botScreenRect && Rect.contains(this.botScreenRect, x, y))
+        : !limitTouchesToBottomScreenRect ||
+            (this.botScreenRect && Rect.contains(this.botScreenRect, x, y))
           ? TouchArea.BottomScreen
           : TouchArea.None,
       startX: x,
@@ -220,7 +234,10 @@ export class Input {
     let botScreenTouchSumY = 0;
 
     for (const touch of this.touches.values()) {
-      if (touch.area === TouchArea.None && Rect.contains(botScreenRect, touch.x, touch.y)) {
+      if (
+        touch.area === TouchArea.None &&
+        Rect.contains(botScreenRect, touch.x, touch.y)
+      ) {
         touch.area = TouchArea.BottomScreen;
       }
       if (touch.area !== TouchArea.BottomScreen) {
@@ -228,7 +245,11 @@ export class Input {
       }
       const x = touch.x - botScreenCenterX;
       const y = touch.y - botScreenCenterY;
-      const scale = Math.min(Math.abs(botScreenHalfWidth / x), Math.abs(botScreenHalfHeight / y), 1);
+      const scale = Math.min(
+        Math.abs(botScreenHalfWidth / x),
+        Math.abs(botScreenHalfHeight / y),
+        1,
+      );
       botScreenTouchSumX += botScreenHalfWidth + x * scale;
       botScreenTouchSumY += botScreenHalfHeight + y * scale;
       botScreenTouches++;
@@ -236,11 +257,25 @@ export class Input {
 
     const touchPos: [number, number] | null = botScreenTouches
       ? [
-          Math.min(Math.floor((botScreenTouchSumX * 4096) / (botScreenTouches * botScreenRect.width)), 4095),
-          Math.min(Math.floor((botScreenTouchSumY * 3072) / (botScreenTouches * botScreenRect.height)), 3071),
+          Math.min(
+            Math.floor(
+              (botScreenTouchSumX * 4096) /
+                (botScreenTouches * botScreenRect.width),
+            ),
+            4095,
+          ),
+          Math.min(
+            Math.floor(
+              (botScreenTouchSumY * 3072) /
+                (botScreenTouches * botScreenRect.height),
+            ),
+            3071,
+          ),
         ]
       : null;
-    const touchPosChanged = touchPos?.[0] !== this.botScreenTouchX || touchPos?.[1] !== this.botScreenTouchY;
+    const touchPosChanged =
+      touchPos?.[0] !== this.botScreenTouchX ||
+      touchPos?.[1] !== this.botScreenTouchY;
     this.botScreenRect = Object.assign({}, botScreenRect);
     this.botScreenTouchX = touchPos?.[0];
     this.botScreenTouchY = touchPos?.[1];

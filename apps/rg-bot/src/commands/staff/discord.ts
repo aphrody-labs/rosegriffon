@@ -29,7 +29,13 @@
  * passerelle). Ce qui exigerait `MessageContent` ou `GuildPresences` n'est PAS
  * implémenté à moitié : ça n'est pas implémenté du tout.
  */
-import { ButtonComponent, Discord, Slash, SlashGroup, SlashOption } from "discordx";
+import {
+  ButtonComponent,
+  Discord,
+  Slash,
+  SlashGroup,
+  SlashOption,
+} from "discordx";
 import {
   ActionRowBuilder,
   ApplicationCommandOptionType,
@@ -126,7 +132,9 @@ const TTL_MEMBRES_MS = 300_000;
  * échoué », ce qui envoie chercher une panne là où il n'y a qu'un mauvais
  * endroit.
  */
-async function serveurDeLInteraction(interaction: ChatInputCommandInteraction): Promise<Guild | null> {
+async function serveurDeLInteraction(
+  interaction: ChatInputCommandInteraction,
+): Promise<Guild | null> {
   if (!interaction.guild) {
     await interaction.editReply({
       content:
@@ -172,27 +180,38 @@ interface ResumeMembres {
  * seconde.
  */
 async function resumeMembres(guild: Guild): Promise<ResumeMembres> {
-  return await cached(`staff:discord:membres:${guild.id}`, TTL_MEMBRES_MS, async () => {
-    const membres = await guild.members.fetch();
-    const parRole: Record<string, number> = {};
-    const positionsHautes: Record<string, number> = {};
-    let bots = 0;
-    for (const membre of membres.values()) {
-      if (membre.user.bot) {
-        bots += 1;
+  return await cached(
+    `staff:discord:membres:${guild.id}`,
+    TTL_MEMBRES_MS,
+    async () => {
+      const membres = await guild.members.fetch();
+      const parRole: Record<string, number> = {};
+      const positionsHautes: Record<string, number> = {};
+      let bots = 0;
+      for (const membre of membres.values()) {
+        if (membre.user.bot) {
+          bots += 1;
+        }
+        for (const identifiant of membre.roles.cache.keys()) {
+          parRole[identifiant] = (parRole[identifiant] ?? 0) + 1;
+        }
+        const position = String(membre.roles.highest.position);
+        positionsHautes[position] = (positionsHautes[position] ?? 0) + 1;
       }
-      for (const identifiant of membre.roles.cache.keys()) {
-        parRole[identifiant] = (parRole[identifiant] ?? 0) + 1;
-      }
-      const position = String(membre.roles.highest.position);
-      positionsHautes[position] = (positionsHautes[position] ?? 0) + 1;
-    }
-    return { total: membres.size, bots, parRole, positionsHautes } satisfies ResumeMembres;
-  });
+      return {
+        total: membres.size,
+        bots,
+        parRole,
+        positionsHautes,
+      } satisfies ResumeMembres;
+    },
+  );
 }
 
 /** Ré-étale l'histogramme des positions, pour le passer au compteur pur et testé. */
-function* positionsDepuisHistogramme(histogramme: Record<string, number>): Generator<number> {
+function* positionsDepuisHistogramme(
+  histogramme: Record<string, number>,
+): Generator<number> {
   for (const [position, nombre] of Object.entries(histogramme)) {
     for (let rang = 0; rang < nombre; rang += 1) {
       yield Number(position);
@@ -209,12 +228,17 @@ function ligneRole(role: Role, membres: number): string {
   const effectif = `${formaterNombre(membres)} membre${membres > 1 ? "s" : ""}`;
   const gere = role.managed ? " · *géré par une intégration*" : "";
   const detail =
-    pouvoirs.length > 0 ? `\n   └ ${borner(pouvoirs.join(" · "), 240)}` : "\n   └ *aucune permission sensible*";
+    pouvoirs.length > 0
+      ? `\n   └ ${borner(pouvoirs.join(" · "), 240)}`
+      : "\n   └ *aucune permission sensible*";
   return `${tete} — ${effectif}${gere}${detail}`;
 }
 
 /** Une ligne de bannissement : le pseudo, l'identifiant, le motif. Rien d'autre. */
-function ligneBannissement(banni: { user: { username: string; id: string }; reason?: string | null }): string {
+function ligneBannissement(banni: {
+  user: { username: string; id: string };
+  reason?: string | null;
+}): string {
   const motif = banni.reason?.trim();
   return (
     `**${echapperMarkdown(borner(banni.user.username, 60))}** — \`${banni.user.id}\`\n` +
@@ -237,7 +261,9 @@ function ligneInvitation(invitation: {
   channel: { name?: string | null } | null;
 }): string {
   const usages = `${formaterNombre(invitation.uses ?? 0)}${
-    invitation.maxUses && invitation.maxUses > 0 ? ` / ${formaterNombre(invitation.maxUses)}` : ""
+    invitation.maxUses && invitation.maxUses > 0
+      ? ` / ${formaterNombre(invitation.maxUses)}`
+      : ""
   }`;
   const auteur = invitation.inviter
     ? `**${echapperMarkdown(borner(invitation.inviter.username, 40))}**`
@@ -304,20 +330,34 @@ function boutonsDePage(
 }
 
 /** Réponse commune : un embed d'explication, sans boutons. */
-function reponseSimple(titre: string, description: string): InteractionEditReplyOptions {
+function reponseSimple(
+  titre: string,
+  description: string,
+): InteractionEditReplyOptions {
   return {
-    embeds: [rgEmbed().setTitle(titre).setDescription(borner(description, 4_000))],
+    embeds: [
+      rgEmbed().setTitle(titre).setDescription(borner(description, 4_000)),
+    ],
     components: [],
   };
 }
 
 // ─── Rendu des trois listes paginées ────────────────────────────────────────
 
-async function rendreRoles(guild: Guild, page: number, graine: string): Promise<InteractionEditReplyOptions> {
-  const [roles, membres] = await Promise.all([guild.roles.fetch(), resumeMembres(guild)]);
+async function rendreRoles(
+  guild: Guild,
+  page: number,
+  graine: string,
+): Promise<InteractionEditReplyOptions> {
+  const [roles, membres] = await Promise.all([
+    guild.roles.fetch(),
+    resumeMembres(guild),
+  ]);
   // Du plus haut au plus bas : c'est l'ordre de la hiérarchie, donc celui qui
   // décide qui peut modérer qui. `@everyone` (position 0) ferme la liste.
-  const ordonnes = [...roles.values()].toSorted((a, b) => b.position - a.position);
+  const ordonnes = [...roles.values()].toSorted(
+    (a, b) => b.position - a.position,
+  );
   const pages = nombreDePagesInspection(ordonnes.length);
   const courante = bornerPageInspection(page, ordonnes.length);
   const tranche = trancheInspection(ordonnes, courante);
@@ -326,7 +366,11 @@ async function rendreRoles(guild: Guild, page: number, graine: string): Promise<
     .setTitle(`${TITRES_VUE.roles} — ${formaterNombre(ordonnes.length)}`)
     .setDescription(
       tranche.length > 0
-        ? assemblerPageInspection(tranche.map(role => ligneRole(role, membres.parRole[role.id] ?? 0)))
+        ? assemblerPageInspection(
+            tranche.map((role) =>
+              ligneRole(role, membres.parRole[role.id] ?? 0),
+            ),
+          )
         : "Ce serveur n'a aucun rôle.",
     )
     .setFooter(
@@ -335,10 +379,17 @@ async function rendreRoles(guild: Guild, page: number, graine: string): Promise<
       }),
     );
 
-  return { embeds: [embed], components: boutonsDePage("roles", courante, pages, graine) };
+  return {
+    embeds: [embed],
+    components: boutonsDePage("roles", courante, pages, graine),
+  };
 }
 
-async function rendreBannissements(guild: Guild, page: number, graine: string): Promise<InteractionEditReplyOptions> {
+async function rendreBannissements(
+  guild: Guild,
+  page: number,
+  graine: string,
+): Promise<InteractionEditReplyOptions> {
   const bot = await membreBot(guild);
   const manquantes = permissionsManquantes(bot.permissions, "bannir");
   if (manquantes.length > 0) {
@@ -371,14 +422,28 @@ async function rendreBannissements(guild: Guild, page: number, graine: string): 
         "la liste affichée n'est plus complète. Passe par un export si le besoin est réel.",
     });
   }
-  pied(embed, { page: courante, pages: pages, note: "lu en direct, aucun cache" });
+  pied(embed, {
+    page: courante,
+    pages: pages,
+    note: "lu en direct, aucun cache",
+  });
 
-  return { embeds: [embed], components: boutonsDePage("bannissements", courante, pages, graine) };
+  return {
+    embeds: [embed],
+    components: boutonsDePage("bannissements", courante, pages, graine),
+  };
 }
 
-async function rendreInvitations(guild: Guild, page: number, graine: string): Promise<InteractionEditReplyOptions> {
+async function rendreInvitations(
+  guild: Guild,
+  page: number,
+  graine: string,
+): Promise<InteractionEditReplyOptions> {
   const bot = await membreBot(guild);
-  const manquantes = manquantesParmi(bot.permissions, PERMISSIONS_LECTURE_INVITATIONS);
+  const manquantes = manquantesParmi(
+    bot.permissions,
+    PERMISSIONS_LECTURE_INVITATIONS,
+  );
   if (manquantes.length > 0) {
     return reponseSimple(
       TITRES_VUE.invitations,
@@ -391,11 +456,16 @@ async function rendreInvitations(guild: Guild, page: number, graine: string): Pr
   const invitations = await guild.invites.fetch();
   // De la plus utilisée à la moins utilisée : une invitation à 900 usages est
   // une porte d'entrée, une invitation à 0 est un oubli.
-  const liste = [...invitations.values()].toSorted((a, b) => (b.uses ?? 0) - (a.uses ?? 0));
+  const liste = [...invitations.values()].toSorted(
+    (a, b) => (b.uses ?? 0) - (a.uses ?? 0),
+  );
   const pages = nombreDePagesInspection(liste.length);
   const courante = bornerPageInspection(page, liste.length);
   const tranche = trancheInspection(liste, courante);
-  const usagesCumules = liste.reduce((total, invitation) => total + (invitation.uses ?? 0), 0);
+  const usagesCumules = liste.reduce(
+    (total, invitation) => total + (invitation.uses ?? 0),
+    0,
+  );
 
   const embed = rgEmbed()
     .setTitle(`${TITRES_VUE.invitations} — ${formaterNombre(liste.length)}`)
@@ -410,7 +480,10 @@ async function rendreInvitations(guild: Guild, page: number, graine: string): Pr
       }),
     );
 
-  return { embeds: [embed], components: boutonsDePage("invitations", courante, pages, graine) };
+  return {
+    embeds: [embed],
+    components: boutonsDePage("invitations", courante, pages, graine),
+  };
 }
 
 /** Aiguillage unique : la commande et les boutons rendent EXACTEMENT la même chose. */
@@ -433,14 +506,16 @@ async function rendreListe(
 @Discord()
 @SlashGroup({
   name: "discord",
-  description: "État vivant du serveur Discord : rôles, salons, bannis, invitations, journal",
+  description:
+    "État vivant du serveur Discord : rôles, salons, bannis, invitations, journal",
   root: "staff",
 })
 @SlashGroup("discord", "staff")
 export class StaffDiscordCommand {
   @Slash({
     name: "serveur",
-    description: "Fiche du serveur : membres, salons, rôles, boosts, fonctionnalités, création",
+    description:
+      "Fiche du serveur : membres, salons, rôles, boosts, fonctionnalités, création",
   })
   async serveur(interaction: ChatInputCommandInteraction) {
     await differerEnPrive(interaction);
@@ -455,22 +530,28 @@ export class StaffDiscordCommand {
       // Quatre lectures indépendantes : les enchaîner tripleraient l'attente
       // pour rien. Les caches de la passerelle ne suffisent pas — les émojis
       // et les autocollants n'y sont peuplés que si le bot les a vus passer.
-      const [proprietaire, salons, roles, emojis, autocollants] = await Promise.all([
-        guild.fetchOwner(),
-        guild.channels.fetch(),
-        guild.roles.fetch(),
-        guild.emojis.fetch(),
-        guild.stickers.fetch(),
-      ]);
+      const [proprietaire, salons, roles, emojis, autocollants] =
+        await Promise.all([
+          guild.fetchOwner(),
+          guild.channels.fetch(),
+          guild.roles.fetch(),
+          guild.emojis.fetch(),
+          guild.stickers.fetch(),
+        ]);
 
-      const reels = [...salons.values()].filter((salon): salon is NonThreadGuildBasedChannel => salon !== null);
+      const reels = [...salons.values()].filter(
+        (salon): salon is NonThreadGuildBasedChannel => salon !== null,
+      );
       const parType = new Map<number, number>();
       for (const salon of reels) {
         parType.set(salon.type, (parType.get(salon.type) ?? 0) + 1);
       }
       const repartitionSalons = [...parType.entries()]
         .toSorted((a, b) => b[1] - a[1])
-        .map(([type, nombre]) => `${pictoTypeSalon(type)} ${libelleTypeSalon(type)} : ${nombre}`)
+        .map(
+          ([type, nombre]) =>
+            `${pictoTypeSalon(type)} ${libelleTypeSalon(type)} : ${nombre}`,
+        )
         .join("\n");
 
       const embed = rgEmbed()
@@ -496,7 +577,9 @@ export class StaffDiscordCommand {
             name: "Membres à l'instant",
             value:
               `**${formaterNombre(guild.memberCount)}**` +
-              (guild.maximumMembers ? `\nplafond ${formaterNombre(guild.maximumMembers)}` : ""),
+              (guild.maximumMembers
+                ? `\nplafond ${formaterNombre(guild.maximumMembers)}`
+                : ""),
             inline: true,
           },
           {
@@ -513,7 +596,10 @@ export class StaffDiscordCommand {
           },
           {
             name: `Salons (${formaterNombre(reels.length)})`,
-            value: borner(repartitionSalons.length > 0 ? repartitionSalons : "*aucun*", 1_000),
+            value: borner(
+              repartitionSalons.length > 0 ? repartitionSalons : "*aucun*",
+              1_000,
+            ),
             inline: true,
           },
           {
@@ -526,16 +612,24 @@ export class StaffDiscordCommand {
             value:
               `Vérification : ${libelleNiveauVerification(guild.verificationLevel)}\n` +
               `Langue : \`${guild.preferredLocale}\`` +
-              (guild.vanityURLCode ? `\nURL : \`discord.gg/${guild.vanityURLCode}\`` : ""),
+              (guild.vanityURLCode
+                ? `\nURL : \`discord.gg/${guild.vanityURLCode}\``
+                : ""),
             inline: true,
           },
           {
             name: "Salons particuliers",
             value:
               [
-                guild.rulesChannelId ? `Règles : <#${guild.rulesChannelId}>` : null,
-                guild.systemChannelId ? `Système : <#${guild.systemChannelId}>` : null,
-                guild.publicUpdatesChannelId ? `Alertes Discord : <#${guild.publicUpdatesChannelId}>` : null,
+                guild.rulesChannelId
+                  ? `Règles : <#${guild.rulesChannelId}>`
+                  : null,
+                guild.systemChannelId
+                  ? `Système : <#${guild.systemChannelId}>`
+                  : null,
+                guild.publicUpdatesChannelId
+                  ? `Alertes Discord : <#${guild.publicUpdatesChannelId}>`
+                  : null,
                 guild.afkChannelId
                   ? `Inactivité : <#${guild.afkChannelId}> après ${dureeLisible(guild.afkTimeout * 1000)}`
                   : null,
@@ -546,7 +640,9 @@ export class StaffDiscordCommand {
           {
             name: `Fonctionnalités (${guild.features.length})`,
             value: listeCourte(
-              guild.features.map(libelleFonctionnaliteGuilde).toSorted((a, b) => a.localeCompare(b, "fr")),
+              guild.features
+                .map(libelleFonctionnaliteGuilde)
+                .toSorted((a, b) => a.localeCompare(b, "fr")),
               40,
               1_000,
               "*aucune*",
@@ -563,13 +659,17 @@ export class StaffDiscordCommand {
       });
       await interaction.editReply({ embeds: [embed] });
     } catch (err) {
-      await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
+      await repondre(
+        interaction,
+        echec("Le service n'a pas répondu", messagePanne(err)),
+      );
     }
   }
 
   @Slash({
     name: "roles",
-    description: "Les rôles, leur rang dans la hiérarchie, leur effectif et ce qu'ils permettent",
+    description:
+      "Les rôles, leur rang dans la hiérarchie, leur effectif et ce qu'ils permettent",
   })
   async roles(
     @SlashOption({
@@ -591,9 +691,14 @@ export class StaffDiscordCommand {
       return;
     }
     try {
-      await interaction.editReply(await rendreRoles(guild, page ?? 1, interaction.user.id));
+      await interaction.editReply(
+        await rendreRoles(guild, page ?? 1, interaction.user.id),
+      );
     } catch (err) {
-      await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
+      await repondre(
+        interaction,
+        echec("Le service n'a pas répondu", messagePanne(err)),
+      );
     }
   }
 
@@ -604,22 +709,34 @@ export class StaffDiscordCommand {
   async salons(
     @SlashOption({
       name: "categorie",
-      description: "Ne montrer qu'une catégorie (utile quand l'arbre est trop long)",
+      description:
+        "Ne montrer qu'une catégorie (utile quand l'arbre est trop long)",
       type: ApplicationCommandOptionType.String,
       required: false,
       autocomplete: async (interaction: AutocompleteInteraction) => {
         try {
-          const saisie = String(interaction.options.getFocused() ?? "").toLowerCase();
+          const saisie = String(
+            interaction.options.getFocused() ?? "",
+          ).toLowerCase();
           const categories = interaction.guild
-            ? [...interaction.guild.channels.cache.values()].filter(salon => salon.type === ChannelType.GuildCategory)
+            ? [...interaction.guild.channels.cache.values()].filter(
+                (salon) => salon.type === ChannelType.GuildCategory,
+              )
             : [];
           await interaction.respond(
             categories
-              .filter(salon => saisie.length === 0 || salon.name.toLowerCase().includes(saisie))
+              .filter(
+                (salon) =>
+                  saisie.length === 0 ||
+                  salon.name.toLowerCase().includes(saisie),
+              )
               .toSorted((a, b) => a.rawPosition - b.rawPosition)
               // 25 est la borne DURE du nombre de propositions.
               .slice(0, 25)
-              .map(salon => ({ name: borner(salon.name, 100), value: salon.id })),
+              .map((salon) => ({
+                name: borner(salon.name, 100),
+                value: salon.id,
+              })),
           );
         } catch (err) {
           console.error("[staff discord] autocomplétion des catégories :", err);
@@ -643,9 +760,12 @@ export class StaffDiscordCommand {
         (salon): salon is NonThreadGuildBasedChannel => salon !== null,
       );
       const categories = salons
-        .filter(salon => salon.type === ChannelType.GuildCategory)
+        .filter((salon) => salon.type === ChannelType.GuildCategory)
         .toSorted((a, b) => a.rawPosition - b.rawPosition);
-      const retenues = categorie === undefined ? categories : categories.filter(salon => salon.id === categorie);
+      const retenues =
+        categorie === undefined
+          ? categories
+          : categories.filter((salon) => salon.id === categorie);
 
       if (categorie !== undefined && retenues.length === 0) {
         await interaction.editReply({
@@ -658,7 +778,11 @@ export class StaffDiscordCommand {
 
       const enfants = (parentId: string | null) =>
         salons
-          .filter(salon => salon.type !== ChannelType.GuildCategory && salon.parentId === parentId)
+          .filter(
+            (salon) =>
+              salon.type !== ChannelType.GuildCategory &&
+              salon.parentId === parentId,
+          )
           .toSorted((a, b) => a.rawPosition - b.rawPosition);
 
       const blocs: string[] = [];
@@ -667,7 +791,12 @@ export class StaffDiscordCommand {
       if (orphelins.length > 0) {
         blocs.push(
           `**Hors catégorie**\n` +
-            orphelins.map(salon => `${pictoTypeSalon(salon.type)} ${echapperMarkdown(salon.name)}`).join("\n"),
+            orphelins
+              .map(
+                (salon) =>
+                  `${pictoTypeSalon(salon.type)} ${echapperMarkdown(salon.name)}`,
+              )
+              .join("\n"),
         );
       }
       for (const laCategorie of retenues) {
@@ -675,7 +804,12 @@ export class StaffDiscordCommand {
         blocs.push(
           `**${pictoTypeSalon(laCategorie.type)} ${echapperMarkdown(borner(laCategorie.name, 60))}** — ${dedans.length}\n` +
             (dedans.length > 0
-              ? dedans.map(salon => `   ${pictoTypeSalon(salon.type)} ${echapperMarkdown(salon.name)}`).join("\n")
+              ? dedans
+                  .map(
+                    (salon) =>
+                      `   ${pictoTypeSalon(salon.type)} ${echapperMarkdown(salon.name)}`,
+                  )
+                  .join("\n")
               : "   *catégorie vide*"),
         );
       }
@@ -691,7 +825,12 @@ export class StaffDiscordCommand {
             ? `Arborescence — ${formaterNombre(salons.length)} salons`
             : `Catégorie ${borner(retenues[0]!.name, 100)}`,
         )
-        .setDescription(borner(arbre.length > 0 ? arbre : "Ce serveur n'a aucun salon.", 4_000))
+        .setDescription(
+          borner(
+            arbre.length > 0 ? arbre : "Ce serveur n'a aucun salon.",
+            4_000,
+          ),
+        )
         .setFooter(
           piedTexte({
             note: tronque
@@ -701,7 +840,10 @@ export class StaffDiscordCommand {
         );
       await interaction.editReply({ embeds: [embed] });
     } catch (err) {
-      await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
+      await repondre(
+        interaction,
+        echec("Le service n'a pas répondu", messagePanne(err)),
+      );
     }
   }
 
@@ -729,9 +871,14 @@ export class StaffDiscordCommand {
       return;
     }
     try {
-      await interaction.editReply(await rendreBannissements(guild, page ?? 1, interaction.user.id));
+      await interaction.editReply(
+        await rendreBannissements(guild, page ?? 1, interaction.user.id),
+      );
     } catch (err) {
-      await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
+      await repondre(
+        interaction,
+        echec("Le service n'a pas répondu", messagePanne(err)),
+      );
     }
   }
 
@@ -759,15 +906,21 @@ export class StaffDiscordCommand {
       return;
     }
     try {
-      await interaction.editReply(await rendreInvitations(guild, page ?? 1, interaction.user.id));
+      await interaction.editReply(
+        await rendreInvitations(guild, page ?? 1, interaction.user.id),
+      );
     } catch (err) {
-      await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
+      await repondre(
+        interaction,
+        echec("Le service n'a pas répondu", messagePanne(err)),
+      );
     }
   }
 
   @Slash({
     name: "journal",
-    description: "Les dernières entrées du journal d'audit Discord (25 au maximum)",
+    description:
+      "Les dernières entrées du journal d'audit Discord (25 au maximum)",
   })
   async journal(interaction: ChatInputCommandInteraction) {
     await differerEnPrive(interaction);
@@ -788,9 +941,11 @@ export class StaffDiscordCommand {
         return;
       }
 
-      const journal = await guild.fetchAuditLogs({ limit: MAX_ENTREES_JOURNAL });
+      const journal = await guild.fetchAuditLogs({
+        limit: MAX_ENTREES_JOURNAL,
+      });
       const entrees = [...journal.entries.values()];
-      const lignes = entrees.map(entree => {
+      const lignes = entrees.map((entree) => {
         // Aucune donnée personnelle au-delà du pseudo et de l'identifiant :
         // ni e-mail, ni adresse, ni contenu de message. `changes` porte parfois
         // des valeurs sensibles (un pseudo précédent, un sujet de salon) — on
@@ -800,7 +955,10 @@ export class StaffDiscordCommand {
           : "*auteur inconnu*";
         const cible = entree.targetId ? ` → \`${entree.targetId}\`` : "";
         const motif = entree.reason?.trim();
-        const detail = motif && motif.length > 0 ? `\n   └ ${echapperMarkdown(borner(motif, 160))}` : "";
+        const detail =
+          motif && motif.length > 0
+            ? `\n   └ ${echapperMarkdown(borner(motif, 160))}`
+            : "";
         return `${libelleEvenementAudit(entree.action)} · ${auteur}${cible} · ${horodatageRelatif(entree.createdAt)}${detail}`;
       });
 
@@ -818,13 +976,17 @@ export class StaffDiscordCommand {
         );
       await interaction.editReply({ embeds: [embed] });
     } catch (err) {
-      await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
+      await repondre(
+        interaction,
+        echec("Le service n'a pas répondu", messagePanne(err)),
+      );
     }
   }
 
   @Slash({
     name: "permissions",
-    description: "DIAGNOSTIC : ce que le bot peut réellement faire ici, action par action",
+    description:
+      "DIAGNOSTIC : ce que le bot peut réellement faire ici, action par action",
   })
   async permissions(interaction: ChatInputCommandInteraction) {
     await differerEnPrive(interaction);
@@ -837,17 +999,26 @@ export class StaffDiscordCommand {
     }
     try {
       const bot = await membreBot(guild);
-      const [roles, membres] = await Promise.all([guild.roles.fetch(), resumeMembres(guild)]);
+      const [roles, membres] = await Promise.all([
+        guild.roles.fetch(),
+        resumeMembres(guild),
+      ]);
       const positionBot = bot.roles.highest.position;
-      const horsDePortee = compterHorsDePortee(positionsDepuisHistogramme(membres.positionsHautes), positionBot);
+      const horsDePortee = compterHorsDePortee(
+        positionsDepuisHistogramme(membres.positionsHautes),
+        positionBot,
+      );
       // Les rôles STRICTEMENT au-dessus : ce sont eux qu'il faut redescendre (ou
       // au-dessus desquels remonter le bot) pour élargir sa portée.
       const rolesAuDessus = [...roles.values()]
-        .filter(role => role.position >= positionBot && role.id !== bot.roles.highest.id)
+        .filter(
+          (role) =>
+            role.position >= positionBot && role.id !== bot.roles.highest.id,
+        )
         .toSorted((a, b) => b.position - a.position);
 
       const diagnostic = diagnostiquerActions(bot.permissions);
-      const possibles = diagnostic.filter(ligne => ligne.possible).length;
+      const possibles = diagnostic.filter((ligne) => ligne.possible).length;
 
       const embed = rgEmbed()
         .setTitle(`Pouvoirs du bot sur ${borner(guild.name, 120)}`)
@@ -856,9 +1027,11 @@ export class StaffDiscordCommand {
             `**${possibles}/${diagnostic.length}** familles d'actions sont réellement exécutables.\n` +
               diagnostic
                 .map(
-                  ligne =>
+                  (ligne) =>
                     `${pastilleEtat(ligne.possible)} ${ligne.libelle}` +
-                    (ligne.possible ? "" : `\n   └ il manque **${ligne.manquantes.join("**, **")}**`),
+                    (ligne.possible
+                      ? ""
+                      : `\n   └ il manque **${ligne.manquantes.join("**, **")}**`),
                 )
                 .join("\n"),
             4_000,
@@ -874,7 +1047,9 @@ export class StaffDiscordCommand {
           },
           {
             name: "Hors de portée",
-            value: `**${formaterNombre(horsDePortee)}** membre(s)\n` + `sur ${formaterNombre(membres.total)}`,
+            value:
+              `**${formaterNombre(horsDePortee)}** membre(s)\n` +
+              `sur ${formaterNombre(membres.total)}`,
             inline: true,
           },
           {
@@ -885,7 +1060,7 @@ export class StaffDiscordCommand {
           {
             name: `Rôles au niveau du bot ou au-dessus (${rolesAuDessus.length})`,
             value: listeCourte(
-              rolesAuDessus.map(role => `${role.name} (#${role.position})`),
+              rolesAuDessus.map((role) => `${role.name} (#${role.position})`),
               15,
               1_000,
               "*aucun — le bot domine toute la hiérarchie*",
@@ -893,15 +1068,25 @@ export class StaffDiscordCommand {
           },
           {
             name: "Permissions sensibles réellement portées",
-            value: listeCourte(permissionsSensibles(bot.permissions), 20, 1_000, "*aucune*"),
+            value: listeCourte(
+              permissionsSensibles(bot.permissions),
+              20,
+              1_000,
+              "*aucune*",
+            ),
           },
           {
             name: "Lectures particulières",
             value: (() => {
-              const manque = manquantesParmi(bot.permissions, PERMISSIONS_LECTURE_INVITATIONS);
+              const manque = manquantesParmi(
+                bot.permissions,
+                PERMISSIONS_LECTURE_INVITATIONS,
+              );
               return (
                 `${pastilleEtat(manque.length === 0)} Lister les invitations du serveur` +
-                (manque.length === 0 ? "" : `\n   └ il manque **${manque.join("**, **")}**`)
+                (manque.length === 0
+                  ? ""
+                  : `\n   └ il manque **${manque.join("**, **")}**`)
               );
             })(),
           },
@@ -913,7 +1098,10 @@ export class StaffDiscordCommand {
         );
       await interaction.editReply({ embeds: [embed] });
     } catch (err) {
-      await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
+      await repondre(
+        interaction,
+        echec("Le service n'a pas répondu", messagePanne(err)),
+      );
     }
   }
 
@@ -939,7 +1127,8 @@ export class StaffDiscordCommand {
     }
     if (etat.graine !== interaction.user.id) {
       await interaction.reply({
-        content: "Cette liste a été demandée par quelqu'un d'autre. Lance la tienne avec `/staff discord`.",
+        content:
+          "Cette liste a été demandée par quelqu'un d'autre. Lance la tienne avec `/staff discord`.",
         flags: MessageFlags.Ephemeral,
       });
       return;
@@ -968,7 +1157,9 @@ export class StaffDiscordCommand {
 
     await interaction.deferUpdate();
     try {
-      await interaction.editReply(await rendreListe(interaction.guild, etat.vue, etat.page, etat.graine));
+      await interaction.editReply(
+        await rendreListe(interaction.guild, etat.vue, etat.page, etat.graine),
+      );
     } catch (err) {
       console.error("[staff discord] pagination :", err);
       await interaction.followUp({

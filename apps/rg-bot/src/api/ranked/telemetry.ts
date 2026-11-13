@@ -67,7 +67,10 @@ export async function logMatchEvent(evt: MatchEventInput): Promise<void> {
 			)
 		`;
   } catch (err) {
-    console.error("[ranked] logMatchEvent failed:", (err as Error)?.message ?? err);
+    console.error(
+      "[ranked] logMatchEvent failed:",
+      (err as Error)?.message ?? err,
+    );
   }
 }
 

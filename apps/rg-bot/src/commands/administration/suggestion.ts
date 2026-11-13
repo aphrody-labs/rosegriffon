@@ -34,8 +34,23 @@ import {
   type EtatSuggestion,
 } from "../../lib/suggestions";
 import { enregistrerReglages, reglagesDe } from "../../services/communaute";
-import { COLONNES_SUGGESTION, composerSuggestion, lireScore, suggestionParNumero, versSuggestion } from "../suggestion";
-import { attention, echec, fiche, ilYA, piedDeCommande, repondre, succes, vide } from "../../lib/ui";
+import {
+  COLONNES_SUGGESTION,
+  composerSuggestion,
+  lireScore,
+  suggestionParNumero,
+  versSuggestion,
+} from "../suggestion";
+import {
+  attention,
+  echec,
+  fiche,
+  ilYA,
+  piedDeCommande,
+  repondre,
+  succes,
+  vide,
+} from "../../lib/ui";
 import { differerEnPrive, exigerDroits, messagePanne } from "../staff/garde";
 import "./racine-gestion";
 
@@ -47,7 +62,10 @@ import "./racine-gestion";
 })
 @SlashGroup("suggestion", "gestion")
 export class GestionSuggestionCommand {
-  @Slash({ description: "Le salon où atterrissent les suggestions", name: "salon" })
+  @Slash({
+    description: "Le salon où atterrissent les suggestions",
+    name: "salon",
+  })
   async salon(
     @SlashOption({
       channelTypes: [ChannelType.GuildText],
@@ -66,7 +84,10 @@ export class GestionSuggestionCommand {
     }
     const guildId = interaction.guildId;
     if (!guildId) {
-      await repondre(interaction, echec("Hors serveur", "La boîte s'ouvre sur un serveur."));
+      await repondre(
+        interaction,
+        echec("Hors serveur", "La boîte s'ouvre sur un serveur."),
+      );
       return;
     }
     try {
@@ -120,7 +141,8 @@ export class GestionSuggestionCommand {
     })
     decision: string,
     @SlashOption({
-      description: "Pourquoi — obligatoire, et lu par l'auteur de la suggestion",
+      description:
+        "Pourquoi — obligatoire, et lu par l'auteur de la suggestion",
       maxLength: 500,
       minLength: 3,
       name: "motif",
@@ -137,7 +159,10 @@ export class GestionSuggestionCommand {
     }
     const guildId = interaction.guildId;
     if (!guildId) {
-      await repondre(interaction, echec("Hors serveur", "Les suggestions vivent sur un serveur."));
+      await repondre(
+        interaction,
+        echec("Hors serveur", "Les suggestions vivent sur un serveur."),
+      );
       return;
     }
     try {
@@ -145,20 +170,33 @@ export class GestionSuggestionCommand {
       if (!suggestion) {
         await repondre(
           interaction,
-          echec("Suggestion introuvable", `Aucune suggestion ne porte le numéro ${referenceSuggestion(numero)}.`),
+          echec(
+            "Suggestion introuvable",
+            `Aucune suggestion ne porte le numéro ${referenceSuggestion(numero)}.`,
+          ),
         );
         return;
       }
       if (!transitionSuggestionPermise(suggestion.statut, decision)) {
         await repondre(
           interaction,
-          attention("Décision impossible", refusTransitionSuggestion(suggestion.statut, decision), { prive: true }),
+          attention(
+            "Décision impossible",
+            refusTransitionSuggestion(suggestion.statut, decision),
+            { prive: true },
+          ),
         );
         return;
       }
       const motif = motifSuggestionPropre(motifBrut);
       if (!motif) {
-        await repondre(interaction, echec("Motif vide", "Dis pourquoi : l'auteur de la suggestion le lira."));
+        await repondre(
+          interaction,
+          echec(
+            "Motif vide",
+            "Dis pourquoi : l'auteur de la suggestion le lira.",
+          ),
+        );
         return;
       }
 
@@ -169,7 +207,9 @@ export class GestionSuggestionCommand {
 				 WHERE id = ${suggestion.id}
 				RETURNING ${COLONNES_SUGGESTION}
 			`;
-      const apres = ligne ? versSuggestion(ligne as never) : { ...suggestion, motif, statut: decision };
+      const apres = ligne
+        ? versSuggestion(ligne as never)
+        : { ...suggestion, motif, statut: decision };
 
       // On réécrit le message d'origine, avec le score figé au moment de la
       // décision : le vote s'arrête là, et la trace reste lisible.
@@ -179,10 +219,14 @@ export class GestionSuggestionCommand {
           const salon = (await interaction.client.channels
             .fetch(apres.salonId)
             .catch(() => null)) as TextBasedChannel | null;
-          const message = salon ? await salon.messages.fetch(apres.messageId) : null;
+          const message = salon
+            ? await salon.messages.fetch(apres.messageId)
+            : null;
           if (message) {
             resultat = libelleScore(lireScore(message));
-            await message.edit({ embeds: [composerSuggestion(apres, { resultat })] });
+            await message.edit({
+              embeds: [composerSuggestion(apres, { resultat })],
+            });
             if (decision !== "ouverte") {
               // Les réactions partent : la suggestion est tranchée, continuer à
               // voter n'a plus de sens et laisse croire le contraire.
@@ -210,7 +254,7 @@ export class GestionSuggestionCommand {
       // le prévenir dans le salon ferait un second message pour rien.
       await interaction.client.users
         .fetch(apres.auteurId)
-        .then(async auteur =>
+        .then(async (auteur) =>
           auteur.send({
             embeds: [composerSuggestion(apres, { resultat })],
           }),
@@ -232,11 +276,17 @@ export class GestionSuggestionCommand {
         ),
       );
     } catch (err) {
-      await repondre(interaction, echec("Décision impossible", messagePanne(err)));
+      await repondre(
+        interaction,
+        echec("Décision impossible", messagePanne(err)),
+      );
     }
   }
 
-  @Slash({ description: "Toutes les suggestions, tranchées ou non", name: "liste" })
+  @Slash({
+    description: "Toutes les suggestions, tranchées ou non",
+    name: "liste",
+  })
   async liste(
     @SlashChoice({ name: "En vote", value: "ouverte" })
     @SlashChoice({ name: "Retenues", value: "acceptee" })
@@ -257,7 +307,10 @@ export class GestionSuggestionCommand {
     }
     const guildId = interaction.guildId;
     if (!guildId) {
-      await repondre(interaction, echec("Hors serveur", "Les suggestions vivent sur un serveur."));
+      await repondre(
+        interaction,
+        echec("Hors serveur", "Les suggestions vivent sur un serveur."),
+      );
       return;
     }
     try {
@@ -273,22 +326,32 @@ export class GestionSuggestionCommand {
 					 ORDER BY cree_le DESC LIMIT 20
 				`;
       if (lignes.length === 0) {
-        await repondre(interaction, vide("Aucune suggestion", "La boîte est vide pour ce filtre."));
+        await repondre(
+          interaction,
+          vide("Aucune suggestion", "La boîte est vide pour ce filtre."),
+        );
         return;
       }
-      const carte = fiche({ icone: "sondage", titre: `${lignes.length} suggestion(s)` });
+      const carte = fiche({
+        icone: "sondage",
+        titre: `${lignes.length} suggestion(s)`,
+      });
       carte.bloc(
         "Liste",
         (lignes as never[])
-          .map(brut => {
+          .map((brut) => {
             const suggestion = versSuggestion(brut);
-            const titre = (suggestion.texte.split("\n")[0] ?? suggestion.texte).slice(0, 60);
+            const titre = (
+              suggestion.texte.split("\n")[0] ?? suggestion.texte
+            ).slice(0, 60);
             return `**${referenceSuggestion(suggestion.numero)}** ${titre} · <@${suggestion.auteurId}> · ${ilYA(suggestion.creeLe)}`;
           })
           .join("\n"),
         5,
       );
-      await interaction.editReply({ embeds: [piedDeCommande(carte.embed, interaction)] });
+      await interaction.editReply({
+        embeds: [piedDeCommande(carte.embed, interaction)],
+      });
     } catch (err) {
       await repondre(interaction, echec("Liste illisible", messagePanne(err)));
     }

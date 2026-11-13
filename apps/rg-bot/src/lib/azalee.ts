@@ -39,10 +39,12 @@ import {
  * API Azalée en loopback. 3010 est déjà pris par un autre service du VPS : le
  * défaut local est 8800 sous `/v1/azalee`.
  */
-export const URL_API_AZALEE = Bun.env.AZALEE_API_URL ?? "http://127.0.0.1:8800/v1/azalee";
+export const URL_API_AZALEE =
+  Bun.env.AZALEE_API_URL ?? "http://127.0.0.1:8800/v1/azalee";
 
 /** Base publique du wiki, pour les liens des embeds. */
-export const URL_WIKI_AZALEE = Bun.env.AZALEE_URL ?? "https://azalee.rosegriffon.fr";
+export const URL_WIKI_AZALEE =
+  Bun.env.AZALEE_URL ?? "https://azalee.rosegriffon.fr";
 
 let client: AzaleeClient | null = null;
 
@@ -94,12 +96,16 @@ export function corrigerNomDouble(url: string): string {
  * L'API renvoie parfois un chemin local de repli (`/ievr.webp`) quand aucun
  * visuel n'existe : le poser dans un embed produirait une image cassée.
  */
-export function illustrationAbsolue(url: string | null | undefined): string | null {
+export function illustrationAbsolue(
+  url: string | null | undefined,
+): string | null {
   if (typeof url !== "string") {
     return null;
   }
   const propre = url.trim();
-  return propre.startsWith("https://") || propre.startsWith("http://") ? corrigerNomDouble(propre) : null;
+  return propre.startsWith("https://") || propre.startsWith("http://")
+    ? corrigerNomDouble(propre)
+    : null;
 }
 
 /** Message d'erreur lisible pour un salon, sans pile d'appels. */

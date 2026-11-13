@@ -47,7 +47,10 @@ function resolveDataRoot(): string {
 }
 
 /** Same-origin assets by default; a remote mirror requires explicit configuration. */
-export const CDN_URL = (process.env.NEXT_PUBLIC_ASSET_URL ?? "").replace(/\/+$/, "");
+export const CDN_URL = (process.env.NEXT_PUBLIC_ASSET_URL ?? "").replace(
+  /\/+$/,
+  "",
+);
 
 /**
  * Data paths relative to dump/data folder
@@ -150,7 +153,8 @@ export const FILES = {
   skillConfigV4: "skill_config_4.00.17.00.cfg.bin.json",
   skillConfigV5: "skill_config_5.00.07.00.cfg.bin.json",
   passiveSkillConfigV5: "passive_skill_config_5.00.07.00.cfg.bin.json",
-  passiveSkillRarityTable: "passive_skill_rarity_table_config_4.00.14.00.cfg.bin.json",
+  passiveSkillRarityTable:
+    "passive_skill_rarity_table_config_4.00.14.00.cfg.bin.json",
   overrideSkillConfig: "override_skill_config_3.00.21.00.cfg.bin.json",
   teamBuildConfig: "team_build_config_5.00.23.cfg.bin.json",
   specialTacticsConfig: "special_tactics_config_1.04.09.10.cfg.bin.json",
@@ -218,7 +222,7 @@ function versionSegments(filename: string): number[] {
   // Capture le dernier groupe `_<chiffres séparés par des points>` avant l'extension
   const m = filename.match(/_(\d+(?:\.\d+)*)\.cfg\.bin/);
   if (!m) return [];
-  return m[1].split(".").map(s => Number.parseInt(s, 10));
+  return m[1].split(".").map((s) => Number.parseInt(s, 10));
 }
 
 /** Tri numérique de versions (segment par segment), -1 / 0 / 1. */
@@ -245,7 +249,10 @@ function compareVersions(a: string, b: string): number {
  * @param baseName Préfixe sans version ni extension (ex. "aura_skill_config").
  * @returns Chemin absolu du fichier, ou `null` si aucun fichier trouvé.
  */
-export function resolveGameDataFile(relDir: string, baseName: string): string | null {
+export function resolveGameDataFile(
+  relDir: string,
+  baseName: string,
+): string | null {
   const dir = join(PATHS.gamedata, relDir);
   // N'accepte que `<baseName>_<version numérique>.cfg.bin.json` afin d'éviter les
   // collisions de préfixe (ex. "chara_param" ne doit PAS capter
@@ -257,7 +264,7 @@ export function resolveGameDataFile(relDir: string, baseName: string): string | 
         cwd: dir,
         onlyFiles: true,
       }),
-    ].filter(f => versionedRe.test(f));
+    ].filter((f) => versionedRe.test(f));
     if (matches.length > 0) {
       matches.sort(compareVersions);
       return join(dir, matches[matches.length - 1]);

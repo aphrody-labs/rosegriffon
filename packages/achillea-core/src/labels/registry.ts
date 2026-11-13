@@ -60,7 +60,9 @@ export type LabelTable = Record<string | number, string>;
  */
 export function enumValues(enumeration: EnumLike): Array<string | number> {
   const values = Object.values(enumeration);
-  const numeric = values.filter((value): value is number => typeof value === "number");
+  const numeric = values.filter(
+    (value): value is number => typeof value === "number",
+  );
   return numeric.length > 0 ? numeric : values;
 }
 

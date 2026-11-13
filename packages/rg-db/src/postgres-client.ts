@@ -4,7 +4,10 @@ import { getSupabaseServiceRoleKey, getSupabaseUrl } from "./env";
 import type { Database } from "./schema";
 
 type SqlExecutor = {
-  executeQuery: (query: { sql: string; parameters: readonly unknown[] }) => Promise<{ rows: unknown[] }>;
+  executeQuery: (query: {
+    sql: string;
+    parameters: readonly unknown[];
+  }) => Promise<{ rows: unknown[] }>;
 };
 
 type QueryError = Error & { code?: string };
@@ -12,15 +15,19 @@ type Result = { data: any; error: QueryError | null; count: number | null };
 type Mutation = "insert" | "update" | "delete" | "upsert";
 
 function identifier(value: string): string {
-  const jsonPath = value.match(/^([a-zA-Z_][a-zA-Z0-9_]*)->>([a-zA-Z_][a-zA-Z0-9_]*)$/);
+  const jsonPath = value.match(
+    /^([a-zA-Z_][a-zA-Z0-9_]*)->>([a-zA-Z_][a-zA-Z0-9_]*)$/,
+  );
   if (jsonPath) return `"${jsonPath[1]}"->>'${jsonPath[2]}'`;
-  if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(value)) throw new Error(`Invalid SQL identifier: ${value}`);
+  if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(value))
+    throw new Error(`Invalid SQL identifier: ${value}`);
   return `"${value}"`;
 }
 
 function projection(value: string): string {
   if (value === "*") return "*";
-  if (!/^[a-zA-Z0-9_ *,.'()\-:>]+$/.test(value)) throw new Error("Invalid SQL projection");
+  if (!/^[a-zA-Z0-9_ *,.'()\-:>]+$/.test(value))
+    throw new Error("Invalid SQL projection");
   return value;
 }
 
@@ -75,7 +82,9 @@ export class PostgresQueryBuilder implements PromiseLike<Result> {
   private condition(column: string, operator: string, value: unknown) {
     const col = identifier(column);
     this.where.push(
-      value === null ? `${col} IS ${operator === "=" ? "" : "NOT "}NULL` : `${col} ${operator} ${this.value(value)}`,
+      value === null
+        ? `${col} IS ${operator === "=" ? "" : "NOT "}NULL`
+        : `${col} ${operator} ${this.value(value)}`,
     );
     return this;
   }
@@ -98,8 +107,14 @@ export class PostgresQueryBuilder implements PromiseLike<Result> {
     return this.condition(column, "<=", value);
   }
   is(column: string, operator: "null" | "true" | "false", value: unknown) {
-    if (operator === "null") this.where.push(`${identifier(column)} IS ${value === null ? "NULL" : "NOT NULL"}`);
-    else this.where.push(`${identifier(column)} IS ${operator === "true" ? "TRUE" : "FALSE"}`);
+    if (operator === "null")
+      this.where.push(
+        `${identifier(column)} IS ${value === null ? "NULL" : "NOT NULL"}`,
+      );
+    else
+      this.where.push(
+        `${identifier(column)} IS ${operator === "true" ? "TRUE" : "FALSE"}`,
+      );
     return this;
   }
   ilike(column: string, value: string) {
@@ -108,8 +123,11 @@ export class PostgresQueryBuilder implements PromiseLike<Result> {
   }
   textSearch(column: string, query: string, options?: { config?: string }) {
     const config = options?.config ?? "simple";
-    if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(config)) throw new Error("Invalid text search config");
-    this.where.push(`${identifier(column)} @@ to_tsquery(${this.value(config)}, ${this.value(query)})`);
+    if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(config))
+      throw new Error("Invalid text search config");
+    this.where.push(
+      `${identifier(column)} @@ to_tsquery(${this.value(config)}, ${this.value(query)})`,
+    );
     return this;
   }
   like(column: string, value: string) {
@@ -118,29 +136,38 @@ export class PostgresQueryBuilder implements PromiseLike<Result> {
   }
   in(column: string, values: unknown[]) {
     this.where.push(
-      values.length ? `${identifier(column)} IN (${values.map(value => this.value(value)).join(", ")})` : "FALSE",
+      values.length
+        ? `${identifier(column)} IN (${values.map((value) => this.value(value)).join(", ")})`
+        : "FALSE",
     );
     return this;
   }
   not(column: string, operator: "is" | "like" | "ilike", value: unknown) {
     if (operator === "is") {
-      this.where.push(`${identifier(column)} IS ${value === null ? "NOT NULL" : "NOT " + String(value).toUpperCase()}`);
+      this.where.push(
+        `${identifier(column)} IS ${value === null ? "NOT NULL" : "NOT " + String(value).toUpperCase()}`,
+      );
       return this;
     }
-    this.where.push(`${identifier(column)} NOT ${operator.toUpperCase()} ${this.value(value)}`);
+    this.where.push(
+      `${identifier(column)} NOT ${operator.toUpperCase()} ${this.value(value)}`,
+    );
     return this;
   }
   or(expression: string) {
-    const parts = expression.split(",").map(part => {
+    const parts = expression.split(",").map((part) => {
       const tokens = part.split(".");
       const [column, operator, value] = tokens;
       if (!column || !operator) throw new Error(`Invalid OR filter: ${part}`);
-      if (operator === "is" && value === "null") return `${identifier(column)} IS NULL`;
-      if (operator === "not" && value === "null") return `${identifier(column)} IS NOT NULL`;
+      if (operator === "is" && value === "null")
+        return `${identifier(column)} IS NULL`;
+      if (operator === "not" && value === "null")
+        return `${identifier(column)} IS NOT NULL`;
       if (operator === "not" && value === "is" && tokens[3] === "null") {
         return `${identifier(column)} IS NOT NULL`;
       }
-      if (operator === "eq") return `${identifier(column)} = ${this.value(value ?? "")}`;
+      if (operator === "eq")
+        return `${identifier(column)} = ${this.value(value ?? "")}`;
       if (operator === "like" || operator === "ilike")
         return `${identifier(column)} ${operator.toUpperCase()} ${this.value(value ?? "")}`;
       throw new Error(`Unsupported OR operator: ${operator}`);
@@ -148,7 +175,10 @@ export class PostgresQueryBuilder implements PromiseLike<Result> {
     this.where.push(`(${parts.join(" OR ")})`);
     return this;
   }
-  order(column: string, options?: { ascending?: boolean; nullsFirst?: boolean }) {
+  order(
+    column: string,
+    options?: { ascending?: boolean; nullsFirst?: boolean },
+  ) {
     this.ordering.push(
       `${identifier(column)} ${options?.ascending === false ? "DESC" : "ASC"}${options?.nullsFirst === undefined ? "" : options.nullsFirst ? " NULLS FIRST" : " NULLS LAST"}`,
     );
@@ -186,34 +216,56 @@ export class PostgresQueryBuilder implements PromiseLike<Result> {
       return `DELETE FROM ${identifier(this.table)}${this.whereSql()} RETURNING ${this.projectionSql}`;
     }
     const values = Array.isArray(this.payload) ? this.payload : [this.payload];
-    if (!values.length || !values.every(value => value && typeof value === "object"))
+    if (
+      !values.length ||
+      !values.every((value) => value && typeof value === "object")
+    )
       throw new Error("SQL mutation payload must contain objects");
     const rows = values as Array<Record<string, unknown>>;
-    const columns = [...new Set(rows.flatMap(row => Object.keys(row)))];
+    const columns = [...new Set(rows.flatMap((row) => Object.keys(row)))];
     if (!columns.length) throw new Error("SQL mutation payload is empty");
     const quoted = columns.map(identifier).join(", ");
-    const tuples = rows.map(row => `(${columns.map(column => this.value(row[column] ?? null)).join(", ")})`).join(", ");
+    const tuples = rows
+      .map(
+        (row) =>
+          `(${columns.map((column) => this.value(row[column] ?? null)).join(", ")})`,
+      )
+      .join(", ");
     if (this.mutation === "insert")
       return `INSERT INTO ${identifier(this.table)} (${quoted}) VALUES ${tuples} RETURNING ${this.projectionSql}`;
     if (this.mutation === "upsert") {
-      const conflict = (this.conflict ?? "id").split(",").map(identifier).join(", ");
+      const conflict = (this.conflict ?? "id")
+        .split(",")
+        .map(identifier)
+        .join(", ");
       const updates = columns
-        .filter(column => !this.conflict?.split(",").includes(column))
-        .map(column => `${identifier(column)} = EXCLUDED.${identifier(column)}`)
+        .filter((column) => !this.conflict?.split(",").includes(column))
+        .map(
+          (column) => `${identifier(column)} = EXCLUDED.${identifier(column)}`,
+        )
         .join(", ");
       return `INSERT INTO ${identifier(this.table)} (${quoted}) VALUES ${tuples} ON CONFLICT (${conflict}) DO ${updates ? `UPDATE SET ${updates}` : "NOTHING"} RETURNING ${this.projectionSql}`;
     }
     if (this.mutation === "update") {
       // `tuples` above already appended payload values after the filter
       // values. Rebuild the parameter list in SQL order: SET, then WHERE.
-      const whereParams = this.params.slice(0, this.params.length - columns.length);
+      const whereParams = this.params.slice(
+        0,
+        this.params.length - columns.length,
+      );
       this.params.length = 0;
       const assignments = columns
-        .map(column => `${identifier(column)} = ${this.value(rows[0]![column] ?? null)}`)
+        .map(
+          (column) =>
+            `${identifier(column)} = ${this.value(rows[0]![column] ?? null)}`,
+        )
         .join(", ");
       const offsetWhere = columns.length;
       this.params.push(...whereParams);
-      const where = this.whereSql().replace(/\$(\d+)/g, (_match, index: string) => `$${Number(index) + offsetWhere}`);
+      const where = this.whereSql().replace(
+        /\$(\d+)/g,
+        (_match, index: string) => `$${Number(index) + offsetWhere}`,
+      );
       return `UPDATE ${identifier(this.table)} SET ${assignments}${where} RETURNING ${this.projectionSql}`;
     }
     return `DELETE FROM ${identifier(this.table)}${this.whereSql()} RETURNING ${this.projectionSql}`;
@@ -225,7 +277,10 @@ export class PostgresQueryBuilder implements PromiseLike<Result> {
       const query = this.mutation
         ? this.mutationSql()
         : `SELECT ${this.projectionSql} FROM ${table}${this.whereSql()}${this.ordering.length ? ` ORDER BY ${this.ordering.join(", ")}` : ""}${this.pagingSql()}`;
-      const result = await this.db.executeQuery({ sql: query, parameters: this.params });
+      const result = await this.db.executeQuery({
+        sql: query,
+        parameters: this.params,
+      });
       const rows = result.rows as any[];
       const countResult =
         this.countRequested && !this.mutation
@@ -234,10 +289,20 @@ export class PostgresQueryBuilder implements PromiseLike<Result> {
               parameters: this.params,
             })
           : null;
-      const count = countResult ? Number((countResult.rows as any[])[0]?.count ?? 0) : null;
+      const count = countResult
+        ? Number((countResult.rows as any[])[0]?.count ?? 0)
+        : null;
       if (this.mode === "single" && rows.length !== 1)
-        return { data: null, error: new Error("Expected exactly one row"), count };
-      return { data: this.mode === "many" ? rows : (rows[0] ?? null), error: null, count };
+        return {
+          data: null,
+          error: new Error("Expected exactly one row"),
+          count,
+        };
+      return {
+        data: this.mode === "many" ? rows : (rows[0] ?? null),
+        error: null,
+        count,
+      };
     } catch (cause) {
       return {
         data: null,
@@ -257,14 +322,20 @@ export class PostgresQueryBuilder implements PromiseLike<Result> {
 }
 
 export function createPostgresClient(connectionString?: string) {
-  const rg = () => createAchilleaSql<Database>(connectionString ? { url: connectionString } : {});
+  const rg = () =>
+    createAchilleaSql<Database>(
+      connectionString ? { url: connectionString } : {},
+    );
   const inagle = () => createInagleSql<Database>();
-  const dbFor = (table: string) => (table.startsWith("inagle_") ? inagle() : rg());
+  const dbFor = (table: string) =>
+    table.startsWith("inagle_") ? inagle() : rg();
   const baseUrl = getSupabaseUrl().replace(/\/$/, "");
   const serviceKey = getSupabaseServiceRoleKey();
   const headers = () => ({
     apikey: serviceKey ?? "",
-    ...(serviceKey?.split(".").length === 3 ? { Authorization: `Bearer ${serviceKey}` } : {}),
+    ...(serviceKey?.split(".").length === 3
+      ? { Authorization: `Bearer ${serviceKey}` }
+      : {}),
   });
   const storage = {
     from: (bucket: string) => ({
@@ -272,22 +343,28 @@ export function createPostgresClient(connectionString?: string) {
         data: {
           publicUrl: `${baseUrl}/storage/v1/object/public/${encodeURIComponent(bucket)}/${path
             .split("/")
-            .map(segment => encodeURIComponent(segment))
+            .map((segment) => encodeURIComponent(segment))
             .join("/")}`,
         },
       }),
       list: async (prefix?: string, options: Record<string, unknown> = {}) => {
         try {
-          const response = await fetch(`${baseUrl}/storage/v1/object/list/${encodeURIComponent(bucket)}`, {
-            method: "POST",
-            headers: { ...headers(), "content-type": "application/json" },
-            body: JSON.stringify({ prefix: prefix ?? "", ...options }),
-          });
+          const response = await fetch(
+            `${baseUrl}/storage/v1/object/list/${encodeURIComponent(bucket)}`,
+            {
+              method: "POST",
+              headers: { ...headers(), "content-type": "application/json" },
+              body: JSON.stringify({ prefix: prefix ?? "", ...options }),
+            },
+          );
           return response.ok
             ? { data: await response.json(), error: null }
             : { data: null, error: new Error(await response.text()) };
         } catch (cause) {
-          return { data: null, error: cause instanceof Error ? cause : new Error(String(cause)) };
+          return {
+            data: null,
+            error: cause instanceof Error ? cause : new Error(String(cause)),
+          };
         }
       },
       createSignedUrl: async (path: string, expiresIn: number) => {
@@ -295,7 +372,7 @@ export function createPostgresClient(connectionString?: string) {
           const response = await fetch(
             `${baseUrl}/storage/v1/object/sign/${encodeURIComponent(bucket)}/${path
               .split("/")
-              .map(segment => encodeURIComponent(segment))
+              .map((segment) => encodeURIComponent(segment))
               .join("/")}`,
             {
               method: "POST",
@@ -303,63 +380,88 @@ export function createPostgresClient(connectionString?: string) {
               body: JSON.stringify({ expiresIn }),
             },
           );
-          if (!response.ok) return { data: null, error: new Error(await response.text()) };
-          const payload = (await response.json()) as { signedURL?: string; signedUrl?: string };
+          if (!response.ok)
+            return { data: null, error: new Error(await response.text()) };
+          const payload = (await response.json()) as {
+            signedURL?: string;
+            signedUrl?: string;
+          };
           const pathUrl = payload.signedURL ?? payload.signedUrl;
           return {
             data: pathUrl
               ? {
-                  signedUrl: pathUrl.startsWith("http") ? pathUrl : `${baseUrl}/storage/v1${pathUrl}`,
+                  signedUrl: pathUrl.startsWith("http")
+                    ? pathUrl
+                    : `${baseUrl}/storage/v1${pathUrl}`,
                 }
               : null,
             error: pathUrl ? null : new Error("Storage returned no signed URL"),
           };
         } catch (cause) {
-          return { data: null, error: cause instanceof Error ? cause : new Error(String(cause)) };
+          return {
+            data: null,
+            error: cause instanceof Error ? cause : new Error(String(cause)),
+          };
         }
       },
       createSignedUrls: async (paths: string[], expiresIn: number) => {
         const results = await Promise.all(
-          paths.map(async path => ({
+          paths.map(async (path) => ({
             path,
             ...(await storage.from(bucket).createSignedUrl(path, expiresIn)),
           })),
         );
-        const failed = results.find(result => result.error);
+        const failed = results.find((result) => result.error);
         return failed
           ? { data: null, error: failed.error }
           : {
-              data: results.map(({ path, data }) => ({ path, signedUrl: data?.signedUrl ?? "" })),
+              data: results.map(({ path, data }) => ({
+                path,
+                signedUrl: data?.signedUrl ?? "",
+              })),
               error: null,
             };
       },
       upload: async (
         path: string,
         body: unknown,
-        options?: { contentType?: string; cacheControl?: string; upsert?: boolean },
+        options?: {
+          contentType?: string;
+          cacheControl?: string;
+          upsert?: boolean;
+        },
       ) => {
-        if (!baseUrl || !serviceKey) return { data: null, error: new Error("Storage credentials are not configured") };
+        if (!baseUrl || !serviceKey)
+          return {
+            data: null,
+            error: new Error("Storage credentials are not configured"),
+          };
         try {
           const response = await fetch(
             `${baseUrl}/storage/v1/object/${encodeURIComponent(bucket)}/${path
               .split("/")
-              .map(segment => encodeURIComponent(segment))
+              .map((segment) => encodeURIComponent(segment))
               .join("/")}`,
             {
               method: "POST",
               headers: {
                 apikey: serviceKey,
                 Authorization: `Bearer ${serviceKey}`,
-                "Content-Type": options?.contentType ?? "application/octet-stream",
+                "Content-Type":
+                  options?.contentType ?? "application/octet-stream",
                 ...(options?.upsert ? { "x-upsert": "true" } : {}),
               },
               body: body as any,
             },
           );
-          if (!response.ok) return { data: null, error: new Error(await response.text()) };
+          if (!response.ok)
+            return { data: null, error: new Error(await response.text()) };
           return { data: await response.json(), error: null };
         } catch (cause) {
-          return { data: null, error: cause instanceof Error ? cause : new Error(String(cause)) };
+          return {
+            data: null,
+            error: cause instanceof Error ? cause : new Error(String(cause)),
+          };
         }
       },
       remove: async (paths: string[]) => {
@@ -368,18 +470,21 @@ export function createPostgresClient(connectionString?: string) {
             const response = await fetch(
               `${baseUrl}/storage/v1/object/${encodeURIComponent(bucket)}/${path
                 .split("/")
-                .map(segment => encodeURIComponent(segment))
+                .map((segment) => encodeURIComponent(segment))
                 .join("/")}`,
               {
                 method: "DELETE",
                 headers: headers(),
               },
             );
-            if (!response.ok) return { error: new Error(await response.text()) };
+            if (!response.ok)
+              return { error: new Error(await response.text()) };
           }
           return { error: null };
         } catch (cause) {
-          return { error: cause instanceof Error ? cause : new Error(String(cause)) };
+          return {
+            error: cause instanceof Error ? cause : new Error(String(cause)),
+          };
         }
       },
     }),
@@ -405,16 +510,21 @@ export function createPostgresClient(connectionString?: string) {
   return {
     from: (table: string): any =>
       new PostgresQueryBuilder(
-        { executeQuery: query => (dbFor(table) as unknown as SqlExecutor).executeQuery(query) },
+        {
+          executeQuery: (query) =>
+            (dbFor(table) as unknown as SqlExecutor).executeQuery(query),
+        },
         table,
       ),
     rpc: async (name: string, args: Record<string, unknown> = {}) => {
       const fn = identifier(name);
       const keys: string[] = Object.keys(args);
-      const result = await (dbFor(name) as unknown as SqlExecutor).executeQuery({
-        sql: `SELECT * FROM ${fn}(${keys.map((key: string) => `"${key.replace(/"/g, '""')}" => $${keys.indexOf(key) + 1}`).join(", ")})`,
-        parameters: keys.map(key => args[key]),
-      });
+      const result = await (dbFor(name) as unknown as SqlExecutor).executeQuery(
+        {
+          sql: `SELECT * FROM ${fn}(${keys.map((key: string) => `"${key.replace(/"/g, '""')}" => $${keys.indexOf(key) + 1}`).join(", ")})`,
+          parameters: keys.map((key) => args[key]),
+        },
+      );
       return { data: result.rows, error: null };
     },
     storage,

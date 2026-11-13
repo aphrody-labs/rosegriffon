@@ -29,7 +29,6 @@ Install the package with Bun:
 bun add @rosegriffon/patreon-bun
 ```
 
-
 ## Examples
 
 To get started you can see one of the examples:

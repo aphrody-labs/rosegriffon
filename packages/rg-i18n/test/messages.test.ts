@@ -6,10 +6,14 @@ describe("semantic UI catalogue", () => {
   test("all supported locales provide the same seven meaningful messages", () => {
     const keys = Object.keys(UI_MESSAGES.fr).sort();
     expect(keys).toHaveLength(7);
-    expect(Object.keys(UI_MESSAGES).sort()).toEqual(DEFAULT_LOCALE_REGISTRY.locales.map(locale => locale.tag).sort());
+    expect(Object.keys(UI_MESSAGES).sort()).toEqual(
+      DEFAULT_LOCALE_REGISTRY.locales.map((locale) => locale.tag).sort(),
+    );
     for (const dictionary of Object.values(UI_MESSAGES)) {
       expect(Object.keys(dictionary).sort()).toEqual(keys);
-      expect(Object.values(dictionary).every(value => value.trim().length > 0)).toBe(true);
+      expect(
+        Object.values(dictionary).every((value) => value.trim().length > 0),
+      ).toBe(true);
     }
   });
 
@@ -27,7 +31,9 @@ describe("semantic UI catalogue", () => {
 
   test("resolves English and Japanese regional tags through the canonical registry", () => {
     expect(uiMessage("en-GB", "account.patreon.title")).toBe("Patreon account");
-    expect(uiMessage("ja-JP", "account.patreon.action.disconnect")).toBe("連携を解除");
+    expect(uiMessage("ja-JP", "account.patreon.action.disconnect")).toBe(
+      "連携を解除",
+    );
     expect(uiMessage("en", "common.action.cancel")).toBe("Cancel");
   });
 

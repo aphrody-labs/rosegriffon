@@ -19,7 +19,11 @@ describe("Achillea Purpose-Bound Tokens - Cryptographic Integrity & Anti-Tamperi
   test("jeton de session valide se vérifie avec succès et restitue l'identité", async () => {
     const now = 1770000000;
     const token = signAchilleaSessionToken(
-      { id: "discord_user_123", username: "EndouMamoru", avatar: "avatar_hash_456" },
+      {
+        id: "discord_user_123",
+        username: "EndouMamoru",
+        avatar: "avatar_hash_456",
+      },
       SECRET,
       now,
       3600,
@@ -40,35 +44,66 @@ describe("Achillea Purpose-Bound Tokens - Cryptographic Integrity & Anti-Tamperi
 
     // Alter signature
     const badSigToken = `${h}.${p}.${(s ?? "").slice(0, -2)}xx`;
-    expect(await verifyAchilleaSessionToken(badSigToken, SECRET, now)).toBeNull();
+    expect(
+      await verifyAchilleaSessionToken(badSigToken, SECRET, now),
+    ).toBeNull();
 
     // Verify with incorrect secret
-    expect(await verifyAchilleaSessionToken(token, WRONG_SECRET, now)).toBeNull();
+    expect(
+      await verifyAchilleaSessionToken(token, WRONG_SECRET, now),
+    ).toBeNull();
   });
 
   test("rejette un jeton expiré (validation du temps exp)", async () => {
     const now = 1770000000;
     const ttl = 300; // 5 minutes
-    const token = signAchilleaSessionToken({ id: "user_time" }, SECRET, now, ttl);
+    const token = signAchilleaSessionToken(
+      { id: "user_time" },
+      SECRET,
+      now,
+      ttl,
+    );
 
     // Right before expiry
-    expect(await verifyAchilleaSessionToken(token, SECRET, now + 299)).not.toBeNull();
+    expect(
+      await verifyAchilleaSessionToken(token, SECRET, now + 299),
+    ).not.toBeNull();
     // Exactly at or after expiry
-    expect(await verifyAchilleaSessionToken(token, SECRET, now + 300)).toBeNull();
-    expect(await verifyAchilleaSessionToken(token, SECRET, now + 5000)).toBeNull();
+    expect(
+      await verifyAchilleaSessionToken(token, SECRET, now + 300),
+    ).toBeNull();
+    expect(
+      await verifyAchilleaSessionToken(token, SECRET, now + 5000),
+    ).toBeNull();
   });
 
   test("étanchéité stricte des usages (Confusion d'audience session vs realtime)", async () => {
     const now = 1770000000;
-    const realtimeToken = signAchilleaRealtimeToken({ id: "player_colyseus" }, SECRET, now);
-    const sessionToken = signAchilleaSessionToken({ id: "player_web" }, SECRET, now);
+    const realtimeToken = signAchilleaRealtimeToken(
+      { id: "player_colyseus" },
+      SECRET,
+      now,
+    );
+    const sessionToken = signAchilleaSessionToken(
+      { id: "player_web" },
+      SECRET,
+      now,
+    );
 
     // A realtime token MUST NOT be accepted as a web session token
-    const asSession = await verifyAchilleaSessionToken(realtimeToken, SECRET, now);
+    const asSession = await verifyAchilleaSessionToken(
+      realtimeToken,
+      SECRET,
+      now,
+    );
     expect(asSession).toBeNull();
 
     // A session token MUST NOT be accepted as a realtime token
-    const asRealtime = await verifyAchilleaRealtimeToken(sessionToken, SECRET, now);
+    const asRealtime = await verifyAchilleaRealtimeToken(
+      sessionToken,
+      SECRET,
+      now,
+    );
     expect(asRealtime).toBeNull();
   });
 
@@ -87,19 +122,25 @@ describe("Achillea Purpose-Bound Tokens - Cryptographic Integrity & Anti-Tamperi
     ).toString("base64url");
 
     // Attack 1: alg: none
-    const headerNone = Buffer.from(JSON.stringify({ alg: "none", typ: "JWT" })).toString("base64url");
+    const headerNone = Buffer.from(
+      JSON.stringify({ alg: "none", typ: "JWT" }),
+    ).toString("base64url");
     const tokenNone = `${headerNone}.${payload}.`;
     expect(await verifyAchilleaSessionToken(tokenNone, SECRET, now)).toBeNull();
 
     // Attack 2: alg: HS512
-    const header512 = Buffer.from(JSON.stringify({ alg: "HS512", typ: "JWT" })).toString("base64url");
+    const header512 = Buffer.from(
+      JSON.stringify({ alg: "HS512", typ: "JWT" }),
+    ).toString("base64url");
     const token512 = `${header512}.${payload}.fakesignature`;
     expect(await verifyAchilleaSessionToken(token512, SECRET, now)).toBeNull();
   });
 
   test("exige la concordance stricte entre id et sub", async () => {
     const now = 1770000000;
-    const header = Buffer.from(JSON.stringify({ alg: "HS256", typ: "JWT" })).toString("base64url");
+    const header = Buffer.from(
+      JSON.stringify({ alg: "HS256", typ: "JWT" }),
+    ).toString("base64url");
     const payload = Buffer.from(
       JSON.stringify({
         id: "victim_user",
@@ -144,7 +185,9 @@ describe("Sécurité des Redirections (safeReturnUrl)", () => {
   test("autorise les chemins relatifs internes légitimes", () => {
     expect(safeReturnUrl("/")).toBe("/");
     expect(safeReturnUrl("/achillea/tournois")).toBe("/achillea/tournois");
-    expect(safeReturnUrl("/wiki/characters?search=Gouenji#stats")).toBe("/wiki/characters?search=Gouenji#stats");
+    expect(safeReturnUrl("/wiki/characters?search=Gouenji#stats")).toBe(
+      "/wiki/characters?search=Gouenji#stats",
+    );
   });
 
   test("rejette les redirections ouvertes externes (Open Redirect Protection)", () => {
@@ -158,7 +201,9 @@ describe("Sécurité des Redirections (safeReturnUrl)", () => {
 
   test("rejette les protocoles dangereux (javascript:, data:, vbscript:)", () => {
     expect(safeReturnUrl("javascript:alert(1)")).toBe("/achillea");
-    expect(safeReturnUrl("data:text/html,<script>alert(1)</script>")).toBe("/achillea");
+    expect(safeReturnUrl("data:text/html,<script>alert(1)</script>")).toBe(
+      "/achillea",
+    );
   });
 
   test("rejette les caractères de contrôle et tentatives de saut de ligne (CRLF)", () => {
@@ -167,7 +212,9 @@ describe("Sécurité des Redirections (safeReturnUrl)", () => {
   });
 
   test("respecte le fallback personnalisé", () => {
-    expect(safeReturnUrl("https://evil.com", "/fallback-destination")).toBe("/fallback-destination");
+    expect(safeReturnUrl("https://evil.com", "/fallback-destination")).toBe(
+      "/fallback-destination",
+    );
   });
 });
 

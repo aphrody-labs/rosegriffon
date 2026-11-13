@@ -3,7 +3,11 @@ import "server-only";
 import "@/lib/azalee-runtime";
 
 import { createPostgresClient } from "@rosegriffon/db/service";
-import { buildExpTableData, type ExpLevelEntry, type ExpTableData } from "./exp-table-shared";
+import {
+  buildExpTableData,
+  type ExpLevelEntry,
+  type ExpTableData,
+} from "./exp-table-shared";
 
 /**
  * Table d'expérience des joueurs — accès données (serveur uniquement).
@@ -36,7 +40,9 @@ interface ExpTableRow {
  */
 export async function getExpTable(): Promise<ExpTableData> {
   const db = createPostgresClient();
-  const { data, error } = await db.from("inagle_exp_table").select("level, need_exp");
+  const { data, error } = await db
+    .from("inagle_exp_table")
+    .select("level, need_exp");
 
   if (error || !data) {
     return buildExpTableData([]);

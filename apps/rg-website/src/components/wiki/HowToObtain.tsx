@@ -65,7 +65,9 @@ export function HowToObtain({
       >
         <div className="flex items-center gap-2">
           <Info size={20} className="text-amber-900" aria-hidden="true" />
-          <h3 className="text-sm font-bold text-amber-900 uppercase tracking-wide">Comment l&apos;obtenir</h3>
+          <h3 className="text-sm font-bold text-amber-900 uppercase tracking-wide">
+            Comment l&apos;obtenir
+          </h3>
         </div>
         <ChevronDown
           size={20}
@@ -79,26 +81,43 @@ export function HowToObtain({
       {isExpanded && (
         <div className="bg-white dark:bg-slate-900 border border-t-0 border-slate-200 dark:border-slate-700 rounded-b-xl p-4 space-y-4">
           {/* Player Universe Section */}
-          {(constellation || (heroConstellations && heroConstellations.length > 0)) && (
+          {(constellation ||
+            (heroConstellations && heroConstellations.length > 0)) && (
             <div className="space-y-2">
               <div className="flex items-center gap-2">
-                <Sparkles size={18} className="text-purple-500" aria-hidden="true" />
-                <h4 className="text-sm font-semibold text-slate-700 dark:text-slate-300">Univers du joueur</h4>
+                <Sparkles
+                  size={18}
+                  className="text-purple-500"
+                  aria-hidden="true"
+                />
+                <h4 className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                  Univers du joueur
+                </h4>
               </div>
               <div className="ml-7 flex flex-wrap gap-2">
                 {heroConstellations && heroConstellations.length > 0 ? (
-                  heroConstellations.map(hc => (
+                  heroConstellations.map((hc) => (
                     <div
                       key={hc.name}
                       className="inline-flex items-center gap-2 px-3 py-1.5 bg-linear-to-r from-purple-100 to-indigo-100 dark:from-purple-900/30 dark:to-indigo-900/30 rounded-full border border-purple-200 dark:border-purple-700"
                     >
-                      <Pin size={14} className="text-purple-500" aria-hidden="true" />
-                      <span className="text-sm font-medium text-purple-700 dark:text-purple-300">{hc.name}</span>
+                      <Pin
+                        size={14}
+                        className="text-purple-500"
+                        aria-hidden="true"
+                      />
+                      <span className="text-sm font-medium text-purple-700 dark:text-purple-300">
+                        {hc.name}
+                      </span>
                     </div>
                   ))
                 ) : constellation ? (
                   <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-linear-to-r from-purple-100 to-indigo-100 dark:from-purple-900/30 dark:to-indigo-900/30 rounded-full border border-purple-200 dark:border-purple-700">
-                    <Pin size={14} className="text-purple-500" aria-hidden="true" />
+                    <Pin
+                      size={14}
+                      className="text-purple-500"
+                      aria-hidden="true"
+                    />
                     <span className="text-sm font-medium text-purple-700 dark:text-purple-300">
                       {constellation.names.fr ||
                         constellation.names.en ||
@@ -112,7 +131,9 @@ export function HowToObtain({
           )}
 
           {/* Spirit Exchange Section */}
-          {hasSpiritExchange && <SpiritExchangeSection entries={spiritExchange!} />}
+          {hasSpiritExchange && (
+            <SpiritExchangeSection entries={spiritExchange!} />
+          )}
 
           {/* Additional Sources */}
           {sources.map((source, idx) => (
@@ -121,7 +142,9 @@ export function HowToObtain({
 
           {/* Empty state for characters without constellation */}
           {!constellation && !hasSpiritExchange && sources.length === 0 && (
-            <p className="text-sm text-slate-500 dark:text-slate-400 italic">Methode d&apos;acquisition inconnue</p>
+            <p className="text-sm text-slate-500 dark:text-slate-400 italic">
+              Methode d&apos;acquisition inconnue
+            </p>
           )}
         </div>
       )}
@@ -157,8 +180,14 @@ function SourceSection({ source }: SourceSectionProps) {
         className="flex items-center gap-2 w-full text-left"
         disabled={!source.details?.length}
       >
-        <Icon name={icons[source.type]} size={18} className={colors[source.type]} />
-        <h4 className="text-sm font-semibold text-slate-700 dark:text-slate-300 flex-1">{source.name}</h4>
+        <Icon
+          name={icons[source.type]}
+          size={18}
+          className={colors[source.type]}
+        />
+        <h4 className="text-sm font-semibold text-slate-700 dark:text-slate-300 flex-1">
+          {source.name}
+        </h4>
         {source.details && source.details.length > 0 && (
           <ChevronDown
             size={18}
@@ -172,7 +201,10 @@ function SourceSection({ source }: SourceSectionProps) {
       {isOpen && source.details && (
         <ul className="ml-7 space-y-1">
           {source.details.map((detail, i) => (
-            <li key={i} className="text-sm text-slate-600 dark:text-slate-400 flex items-center gap-2">
+            <li
+              key={i}
+              className="text-sm text-slate-600 dark:text-slate-400 flex items-center gap-2"
+            >
               <span className="w-1.5 h-1.5 rounded-full bg-slate-300 dark:bg-slate-600" />
               {detail}
             </li>
@@ -183,7 +215,10 @@ function SourceSection({ source }: SourceSectionProps) {
   );
 }
 
-const TIER_STYLES: Record<string, { bg: string; text: string; border: string }> = {
+const TIER_STYLES: Record<
+  string,
+  { bg: string; text: string; border: string }
+> = {
   BASARA: {
     bg: "bg-red-100 dark:bg-red-900/30",
     border: "border-red-200 dark:border-red-700",
@@ -216,7 +251,11 @@ const TIER_STYLES: Record<string, { bg: string; text: string; border: string }> 
   },
 };
 
-function SpiritExchangeSection({ entries }: { entries: SpiritExchangeEntry[] }) {
+function SpiritExchangeSection({
+  entries,
+}: {
+  entries: SpiritExchangeEntry[];
+}) {
   // Group by shop
   const byShop = new Map<string, SpiritExchangeEntry[]>();
   for (const entry of entries) {
@@ -236,9 +275,15 @@ function SpiritExchangeSection({ entries }: { entries: SpiritExchangeEntry[] }) 
               {isBasara ? (
                 <Flame size={18} className="text-red-500" aria-hidden="true" />
               ) : (
-                <Ghost size={18} className="text-indigo-500" aria-hidden="true" />
+                <Ghost
+                  size={18}
+                  className="text-indigo-500"
+                  aria-hidden="true"
+                />
               )}
-              <h4 className="text-sm font-semibold text-slate-700 dark:text-slate-300">{shop}</h4>
+              <h4 className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                {shop}
+              </h4>
             </div>
             <div className="ml-7 flex flex-wrap gap-2">
               {shopEntries.map((entry, i) => {
@@ -254,7 +299,9 @@ function SpiritExchangeSection({ entries }: { entries: SpiritExchangeEntry[] }) 
                     )}
                   >
                     <span>{entry.tier}</span>
-                    <span className="opacity-60">{entry.cost > 0 ? `\u00D7${entry.cost} esprits` : ""}</span>
+                    <span className="opacity-60">
+                      {entry.cost > 0 ? `\u00D7${entry.cost} esprits` : ""}
+                    </span>
                   </div>
                 );
               })}

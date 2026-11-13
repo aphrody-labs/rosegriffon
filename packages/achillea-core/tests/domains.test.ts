@@ -89,7 +89,10 @@ describe("elo — cas limites & helpers non couverts", () => {
   });
 
   test("applyEloUpdate : application normale et clamp à 0", () => {
-    expect(applyEloUpdate(1000, 20)).toEqual({ newElo: 1020, clampedDelta: 20 });
+    expect(applyEloUpdate(1000, 20)).toEqual({
+      newElo: 1020,
+      clampedDelta: 20,
+    });
     // Delta négatif au-delà du rating : borné à 0, clampedDelta recalculé.
     expect(applyEloUpdate(10, -50)).toEqual({ newElo: 0, clampedDelta: -10 });
     // Pile à zéro reste à zéro.
@@ -145,7 +148,7 @@ describe("ranking — bornes inclusives & hors barème", () => {
 
 describe("sanctions — barème d'escalade complet", () => {
   test("ESCALATION_TIERS : trié du plus sévère au moins sévère", () => {
-    expect(ESCALATION_TIERS.map(t => t.threshold)).toEqual([8, 5, 3]);
+    expect(ESCALATION_TIERS.map((t) => t.threshold)).toEqual([8, 5, 3]);
     expect(ESCALATION_TIERS[0]?.decision.type).toBe(SanctionType.Ban);
   });
 
@@ -155,9 +158,18 @@ describe("sanctions — barème d'escalade complet", () => {
   });
 
   test("evaluateEscalation : palier le plus élevé atteint l'emporte", () => {
-    expect(evaluateEscalation(3)).toEqual({ type: SanctionType.Mute, durationSec: 3600 });
-    expect(evaluateEscalation(4)).toEqual({ type: SanctionType.Mute, durationSec: 3600 });
-    expect(evaluateEscalation(6)).toEqual({ type: SanctionType.Mute, durationSec: 86400 });
+    expect(evaluateEscalation(3)).toEqual({
+      type: SanctionType.Mute,
+      durationSec: 3600,
+    });
+    expect(evaluateEscalation(4)).toEqual({
+      type: SanctionType.Mute,
+      durationSec: 3600,
+    });
+    expect(evaluateEscalation(6)).toEqual({
+      type: SanctionType.Mute,
+      durationSec: 86400,
+    });
     expect(evaluateEscalation(10)).toEqual({
       type: SanctionType.Ban,
       durationSec: 7 * 86400,
@@ -310,8 +322,12 @@ describe("format — Intl portable", () => {
     expect(formatDate(d, "onlyDate", "UTC")).toBe("15/01/2026");
     expect(formatDate(d, "onlyDateFileName", "UTC")).toBe("2026-01-15");
     // Accepte aussi un timestamp / une string ISO.
-    expect(formatDate(d.getTime(), "onlyDateFileName", "UTC")).toBe("2026-01-15");
-    expect(formatDate("2026-01-15T10:30:45Z", "onlyDate", "UTC")).toBe("15/01/2026");
+    expect(formatDate(d.getTime(), "onlyDateFileName", "UTC")).toBe(
+      "2026-01-15",
+    );
+    expect(formatDate("2026-01-15T10:30:45Z", "onlyDate", "UTC")).toBe(
+      "15/01/2026",
+    );
   });
 });
 
@@ -375,21 +391,41 @@ describe("licenses — format / validité / crypto", () => {
   test("evaluateLicenseValidity : ordre révoquée > expirée > active", () => {
     const future = Date.now() + 60_000;
     const past = Date.now() - 60_000;
-    expect(evaluateLicenseValidity({ status: LicenseStatus.Active, validUntil: future })).toEqual({
+    expect(
+      evaluateLicenseValidity({
+        status: LicenseStatus.Active,
+        validUntil: future,
+      }),
+    ).toEqual({
       valid: true,
     });
     // Révoquée même si validUntil futur.
-    expect(evaluateLicenseValidity({ status: LicenseStatus.Revoked, validUntil: future })).toEqual({
+    expect(
+      evaluateLicenseValidity({
+        status: LicenseStatus.Revoked,
+        validUntil: future,
+      }),
+    ).toEqual({
       valid: false,
       reason: "revoked",
     });
     // Active mais date dépassée → expirée.
-    expect(evaluateLicenseValidity({ status: LicenseStatus.Active, validUntil: past })).toEqual({
+    expect(
+      evaluateLicenseValidity({
+        status: LicenseStatus.Active,
+        validUntil: past,
+      }),
+    ).toEqual({
       valid: false,
       reason: "expired",
     });
     // Statut Expired → expirée même si date future.
-    expect(evaluateLicenseValidity({ status: LicenseStatus.Expired, validUntil: future })).toEqual({
+    expect(
+      evaluateLicenseValidity({
+        status: LicenseStatus.Expired,
+        validUntil: future,
+      }),
+    ).toEqual({
       valid: false,
       reason: "expired",
     });
@@ -398,11 +434,17 @@ describe("licenses — format / validité / crypto", () => {
   test("evaluateLicenseValidity : accepte Date / ISO string et respecte `now`", () => {
     const fixedNow = 1_000_000_000_000;
     expect(
-      evaluateLicenseValidity({ status: LicenseStatus.Active, validUntil: new Date(fixedNow + 1000) }, fixedNow),
+      evaluateLicenseValidity(
+        { status: LicenseStatus.Active, validUntil: new Date(fixedNow + 1000) },
+        fixedNow,
+      ),
     ).toEqual({ valid: true });
     expect(
       evaluateLicenseValidity(
-        { status: LicenseStatus.Active, validUntil: new Date(fixedNow + 1000).toISOString() },
+        {
+          status: LicenseStatus.Active,
+          validUntil: new Date(fixedNow + 1000).toISOString(),
+        },
         fixedNow + 5000,
       ),
     ).toEqual({ valid: false, reason: "expired" });
@@ -428,11 +470,17 @@ describe("licenses — format / validité / crypto", () => {
     const sig2 = await signHmacSha256("ACH-2026-00042", "secret-clef");
     expect(sig1).toBe(sig2);
     expect(sig1).toMatch(/^[0-9a-f]{64}$/);
-    expect(await verifyHmacSha256("ACH-2026-00042", sig1, "secret-clef")).toBe(true);
+    expect(await verifyHmacSha256("ACH-2026-00042", sig1, "secret-clef")).toBe(
+      true,
+    );
     // Mauvais secret.
-    expect(await verifyHmacSha256("ACH-2026-00042", sig1, "mauvais-secret")).toBe(false);
+    expect(
+      await verifyHmacSha256("ACH-2026-00042", sig1, "mauvais-secret"),
+    ).toBe(false);
     // Payload altéré.
-    expect(await verifyHmacSha256("ACH-2026-00043", sig1, "secret-clef")).toBe(false);
+    expect(await verifyHmacSha256("ACH-2026-00043", sig1, "secret-clef")).toBe(
+      false,
+    );
   });
 });
 
@@ -440,13 +488,21 @@ describe("access — RBAC CASL & mapping de rôles", () => {
   test("mapping UserRole <-> AchilleaRole (round-trip complet)", () => {
     expect(userRoleToAchilleaRole(UserRole.User)).toBe(AchilleaRole.member);
     expect(userRoleToAchilleaRole(UserRole.Moderator)).toBe(AchilleaRole.staff);
-    expect(userRoleToAchilleaRole(UserRole.Administrator)).toBe(AchilleaRole.admin);
-    expect(userRoleToAchilleaRole(UserRole.SuperAdministrator)).toBe(AchilleaRole.owner);
+    expect(userRoleToAchilleaRole(UserRole.Administrator)).toBe(
+      AchilleaRole.admin,
+    );
+    expect(userRoleToAchilleaRole(UserRole.SuperAdministrator)).toBe(
+      AchilleaRole.owner,
+    );
 
     expect(achilleaRoleToUserRole(AchilleaRole.member)).toBe(UserRole.User);
     expect(achilleaRoleToUserRole(AchilleaRole.staff)).toBe(UserRole.Moderator);
-    expect(achilleaRoleToUserRole(AchilleaRole.admin)).toBe(UserRole.Administrator);
-    expect(achilleaRoleToUserRole(AchilleaRole.owner)).toBe(UserRole.SuperAdministrator);
+    expect(achilleaRoleToUserRole(AchilleaRole.admin)).toBe(
+      UserRole.Administrator,
+    );
+    expect(achilleaRoleToUserRole(AchilleaRole.owner)).toBe(
+      UserRole.SuperAdministrator,
+    );
   });
 
   test("member : peut voir, ne peut ni modérer ni gérer", () => {
@@ -471,7 +527,12 @@ describe("access — RBAC CASL & mapping de rôles", () => {
     expect(admin.can("manage", "Tournament")).toBe(true);
     expect(admin.can("manage", "User")).toBe(true);
     // Ne peut pas gérer un user dont le rôle est owner.
-    expect(admin.can("manage", { __caslSubjectType__: "User", role: "owner" } as never)).toBe(false);
+    expect(
+      admin.can("manage", {
+        __caslSubjectType__: "User",
+        role: "owner",
+      } as never),
+    ).toBe(false);
   });
 
   test("owner : manage all", () => {

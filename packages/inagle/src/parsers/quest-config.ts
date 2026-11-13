@@ -4,7 +4,12 @@
  */
 
 import type { ConfigNode } from "../core/config-parser.js";
-import { findConfigFile, loadConfig, type Locale, toHex } from "../core/data-loader.js";
+import {
+  findConfigFile,
+  loadConfig,
+  type Locale,
+  toHex,
+} from "../core/data-loader.js";
 import { loadTextFile } from "./text-parser.js";
 
 /** Quest type */
@@ -48,7 +53,8 @@ function parseQuestNode(node: ConfigNode): ParsedQuest | null {
 
   // [1] = phase/chapter
   const phaseVar = vars[1];
-  const phase = phaseVar?.type === "Int" ? Number.parseInt(phaseVar.value, 10) : 0;
+  const phase =
+    phaseVar?.type === "Int" ? Number.parseInt(phaseVar.value, 10) : 0;
 
   // [2] = type
   const typeVar = vars[2];

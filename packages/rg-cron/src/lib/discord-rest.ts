@@ -33,7 +33,10 @@ const TENTATIVES_429 = 5;
 const TENTATIVES_5XX = 3;
 
 /** En-têtes d'un appel authentifié en tant que bot. */
-function entetes(supplementaires?: Record<string, string>, jeton: string | undefined = DISCORD_TOKEN): Record<string, string> {
+function entetes(
+  supplementaires?: Record<string, string>,
+  jeton: string | undefined = DISCORD_TOKEN,
+): Record<string, string> {
   if (!jeton) {
     throw new Error(
       "DISCORD_BOT_TOKEN absent : aucun appel REST Discord n'est possible. " +
@@ -57,18 +60,28 @@ function entetes(supplementaires?: Record<string, string>, jeton: string | undef
  * `jeton` remplace celui du bot Rose Griffon : le bot Achilléa est une autre
  * application, présente sur d'autres serveurs (`tasks/achillea-guildes.ts`).
  */
-export async function appelDiscord<T>(chemin: string, tentative = 0, jeton: string | undefined = DISCORD_TOKEN): Promise<T> {
-  const reponse = await fetch(`${API_DISCORD}${chemin}`, { headers: entetes(undefined, jeton) });
+export async function appelDiscord<T>(
+  chemin: string,
+  tentative = 0,
+  jeton: string | undefined = DISCORD_TOKEN,
+): Promise<T> {
+  const reponse = await fetch(`${API_DISCORD}${chemin}`, {
+    headers: entetes(undefined, jeton),
+  });
 
   if (reponse.status === 429) {
     if (tentative >= TENTATIVES_429) {
       throw new Error(`Limite de débit Discord persistante sur ${chemin}.`);
     }
-    const corps = (await reponse.json().catch(() => ({}))) as { retry_after?: number };
+    const corps = (await reponse.json().catch(() => ({}))) as {
+      retry_after?: number;
+    };
     // `retry_after` est en secondes (décimales) ; la marge de 250 ms évite de
     // se faire refuser une seconde fois pour quelques millisecondes.
     const attente = Math.ceil((corps.retry_after ?? 1) * 1000) + 250;
-    console.warn(`[Discord REST] Limite de débit sur ${chemin} : attente de ${attente} ms.`);
+    console.warn(
+      `[Discord REST] Limite de débit sur ${chemin} : attente de ${attente} ms.`,
+    );
     await Bun.sleep(attente);
     return appelDiscord<T>(chemin, tentative + 1, jeton);
   }
@@ -80,7 +93,9 @@ export async function appelDiscord<T>(chemin: string, tentative = 0, jeton: stri
 
   if (!reponse.ok) {
     const texte = await reponse.text().catch(() => "");
-    throw new Error(`Discord a répondu ${reponse.status} sur ${chemin} : ${texte.slice(0, 200)}`);
+    throw new Error(
+      `Discord a répondu ${reponse.status} sur ${chemin} : ${texte.slice(0, 200)}`,
+    );
   }
 
   return (await reponse.json()) as T;
@@ -93,7 +108,10 @@ export async function appelDiscord<T>(chemin: string, tentative = 0, jeton: stri
  * doivent pas interrompre un enrichissement facultatif — la donnée reste
  * simplement absente, ce que le reste du code sait déjà représenter par `null`.
  */
-export async function appelDiscordOuNull<T>(chemin: string, jeton: string | undefined = DISCORD_TOKEN): Promise<T | null> {
+export async function appelDiscordOuNull<T>(
+  chemin: string,
+  jeton: string | undefined = DISCORD_TOKEN,
+): Promise<T | null> {
   try {
     return await appelDiscord<T>(chemin, 0, jeton);
   } catch (err) {
@@ -144,7 +162,9 @@ export async function publierMessageDiscord(
     });
 
     if (reponse.status === 429 && tentative < TENTATIVES_429) {
-      const corps = (await reponse.json().catch(() => ({}))) as { retry_after?: number };
+      const corps = (await reponse.json().catch(() => ({}))) as {
+        retry_after?: number;
+      };
       const attente = Math.ceil((corps.retry_after ?? 1) * 1000) + 250;
       await Bun.sleep(attente);
       return publierMessageDiscord(salonId, charge, tentative + 1);
@@ -157,13 +177,18 @@ export async function publierMessageDiscord(
 
     if (!reponse.ok) {
       const texte = await reponse.text().catch(() => "");
-      console.warn(`[Discord REST] publication refusée dans ${salonId} : ${reponse.status} ${texte.slice(0, 200)}`);
+      console.warn(
+        `[Discord REST] publication refusée dans ${salonId} : ${reponse.status} ${texte.slice(0, 200)}`,
+      );
       return null;
     }
 
     return (await reponse.json()) as { id: string };
   } catch (err) {
-    console.warn(`[Discord REST] publication impossible dans ${salonId} :`, err instanceof Error ? err.message : err);
+    console.warn(
+      `[Discord REST] publication impossible dans ${salonId} :`,
+      err instanceof Error ? err.message : err,
+    );
     return null;
   }
 }
@@ -180,7 +205,9 @@ export async function publierMessageDiscord(
  * par le salon n'existe pas et répond 404, ce qui laissait toutes les pièces
  * jointes de plus de 24 h « périmées et non re-signables », run après run.
  */
-export async function resignerPiecesJointes(urls: string[]): Promise<string[] | null> {
+export async function resignerPiecesJointes(
+  urls: string[],
+): Promise<string[] | null> {
   if (urls.length === 0) return [];
   try {
     const reponse = await fetch(`${API_DISCORD}/attachments/refresh-urls`, {
@@ -189,8 +216,10 @@ export async function resignerPiecesJointes(urls: string[]): Promise<string[] | 
       body: JSON.stringify({ attachment_urls: urls }),
     });
     if (!reponse.ok) return null;
-    const corps = (await reponse.json()) as { refreshed_urls?: Array<{ refreshed: string }> };
-    return (corps.refreshed_urls ?? []).map(entree => entree.refreshed);
+    const corps = (await reponse.json()) as {
+      refreshed_urls?: Array<{ refreshed: string }>;
+    };
+    return (corps.refreshed_urls ?? []).map((entree) => entree.refreshed);
   } catch {
     return null;
   }

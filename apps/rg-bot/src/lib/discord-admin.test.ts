@@ -146,9 +146,13 @@ describe("dureeLisible", () => {
 
 describe("motifAudit", () => {
   test("nomme toujours l'auteur humain", () => {
-    expect(motifAudit({ auteur: "yoyo", motif: "spam répété" })).toBe("spam répété — demandé par yoyo");
+    expect(motifAudit({ auteur: "yoyo", motif: "spam répété" })).toBe(
+      "spam répété — demandé par yoyo",
+    );
     expect(motifAudit({ auteur: "yoyo" })).toBe("Demandé par yoyo");
-    expect(motifAudit({ auteur: "yoyo", motif: "   " })).toBe("Demandé par yoyo");
+    expect(motifAudit({ auteur: "yoyo", motif: "   " })).toBe(
+      "Demandé par yoyo",
+    );
   });
 
   test("borne à la limite de l'en-tête d'audit", () => {
@@ -172,18 +176,34 @@ describe("empechementHierarchie", () => {
   });
 
   test("refuse un rôle supérieur ou égal", () => {
-    expect(empechementHierarchie({ ...base, positionCible: 11 })).toBe("role-superieur");
-    expect(empechementHierarchie({ ...base, positionCible: 10 })).toBe("role-egal");
+    expect(empechementHierarchie({ ...base, positionCible: 11 })).toBe(
+      "role-superieur",
+    );
+    expect(empechementHierarchie({ ...base, positionCible: 10 })).toBe(
+      "role-egal",
+    );
   });
 
   test("refuse le propriétaire, soi-même et le bot", () => {
-    expect(empechementHierarchie({ ...base, cibleProprietaire: true })).toBe("proprietaire");
-    expect(empechementHierarchie({ ...base, cibleEstAuteur: true })).toBe("soi-meme");
-    expect(empechementHierarchie({ ...base, cibleEstBot: true })).toBe("le-bot");
+    expect(empechementHierarchie({ ...base, cibleProprietaire: true })).toBe(
+      "proprietaire",
+    );
+    expect(empechementHierarchie({ ...base, cibleEstAuteur: true })).toBe(
+      "soi-meme",
+    );
+    expect(empechementHierarchie({ ...base, cibleEstBot: true })).toBe(
+      "le-bot",
+    );
   });
 
   test("chaque empêchement a une explication non vide", () => {
-    for (const cas of ["soi-meme", "le-bot", "proprietaire", "role-superieur", "role-egal"] as const) {
+    for (const cas of [
+      "soi-meme",
+      "le-bot",
+      "proprietaire",
+      "role-superieur",
+      "role-egal",
+    ] as const) {
       expect(expliquerEmpechement(cas).length).toBeGreaterThan(20);
     }
   });
@@ -199,12 +219,18 @@ describe("permissionsManquantes", () => {
 
   test("nomme en clair ce qui manque", () => {
     const lecteur = new PermissionsBitField(PermissionFlagsBits.ViewChannel);
-    expect(permissionsManquantes(lecteur, "bannir")).toEqual(["Bannir des membres"]);
-    expect(permissionsManquantes(lecteur, "exclure")).toEqual(["Exclure temporairement des membres"]);
+    expect(permissionsManquantes(lecteur, "bannir")).toEqual([
+      "Bannir des membres",
+    ]);
+    expect(permissionsManquantes(lecteur, "exclure")).toEqual([
+      "Exclure temporairement des membres",
+    ]);
   });
 
   test("ne réclame pas une permission déjà détenue", () => {
-    expect(permissionsManquantes(PermissionFlagsBits.BanMembers, "bannir")).toEqual([]);
+    expect(
+      permissionsManquantes(PermissionFlagsBits.BanMembers, "bannir"),
+    ).toEqual([]);
   });
 });
 
@@ -264,13 +290,23 @@ describe("expliquerCodeDiscord", () => {
   test("traduit les refus que la modération croise vraiment", () => {
     // Les valeurs numériques viennent de l'énumération de `discord-api-types`,
     // jamais d'un nombre écrit de mémoire : c'est elle qui fait foi.
-    expect(expliquerCodeDiscord(RESTJSONErrorCodes.UnknownMember)).toContain("membre du serveur");
-    expect(expliquerCodeDiscord(RESTJSONErrorCodes.UnknownBan)).toContain("Aucun bannissement");
-    expect(expliquerCodeDiscord(RESTJSONErrorCodes.MissingPermissions)).toContain("hiérarchie");
-    expect(expliquerCodeDiscord(RESTJSONErrorCodes.CannotSendMessagesToThisUser)).toContain("messages privés");
-    expect(expliquerCodeDiscord(RESTJSONErrorCodes.CannotSendMessagesToThisUserDueToHavingNoMutualGuilds)).toContain(
-      "messages privés",
+    expect(expliquerCodeDiscord(RESTJSONErrorCodes.UnknownMember)).toContain(
+      "membre du serveur",
     );
+    expect(expliquerCodeDiscord(RESTJSONErrorCodes.UnknownBan)).toContain(
+      "Aucun bannissement",
+    );
+    expect(
+      expliquerCodeDiscord(RESTJSONErrorCodes.MissingPermissions),
+    ).toContain("hiérarchie");
+    expect(
+      expliquerCodeDiscord(RESTJSONErrorCodes.CannotSendMessagesToThisUser),
+    ).toContain("messages privés");
+    expect(
+      expliquerCodeDiscord(
+        RESTJSONErrorCodes.CannotSendMessagesToThisUserDueToHavingNoMutualGuilds,
+      ),
+    ).toContain("messages privés");
   });
 
   test("rend null sur un code inconnu plutôt qu'une traduction inventée", () => {
@@ -291,11 +327,21 @@ describe("codeErreurDiscord", () => {
   });
 
   test("distingue « pas sur le serveur » de « pas banni »", () => {
-    expect(estMembreAbsent({ code: RESTJSONErrorCodes.UnknownMember })).toBe(true);
-    expect(estMembreAbsent({ code: RESTJSONErrorCodes.UnknownUser })).toBe(true);
-    expect(estMembreAbsent({ code: RESTJSONErrorCodes.UnknownBan })).toBe(false);
-    expect(estBannissementInexistant({ code: RESTJSONErrorCodes.UnknownBan })).toBe(true);
-    expect(estBannissementInexistant({ code: RESTJSONErrorCodes.UnknownMember })).toBe(false);
+    expect(estMembreAbsent({ code: RESTJSONErrorCodes.UnknownMember })).toBe(
+      true,
+    );
+    expect(estMembreAbsent({ code: RESTJSONErrorCodes.UnknownUser })).toBe(
+      true,
+    );
+    expect(estMembreAbsent({ code: RESTJSONErrorCodes.UnknownBan })).toBe(
+      false,
+    );
+    expect(
+      estBannissementInexistant({ code: RESTJSONErrorCodes.UnknownBan }),
+    ).toBe(true);
+    expect(
+      estBannissementInexistant({ code: RESTJSONErrorCodes.UnknownMember }),
+    ).toBe(false);
   });
 });
 
@@ -303,7 +349,9 @@ describe("secondesPurgeBannissement", () => {
   test("convertit les jours en secondes comme l'API les attend", () => {
     expect(secondesPurgeBannissement(0)).toBe(0);
     expect(secondesPurgeBannissement(1)).toBe(86_400);
-    expect(secondesPurgeBannissement(MAX_JOURS_PURGE_BANNISSEMENT)).toBe(604_800);
+    expect(secondesPurgeBannissement(MAX_JOURS_PURGE_BANNISSEMENT)).toBe(
+      604_800,
+    );
   });
 
   test("refuse hors bornes plutôt que d'écrêter en silence", () => {
@@ -343,7 +391,12 @@ describe("messageSanctionPrivee", () => {
   });
 
   test("dit explicitement qu'un avertissement n'est pas une sanction", () => {
-    expect(messageSanctionPrivee({ sanction: "avertissement", serveur: "Rose Griffon" })).toContain("Aucune sanction");
+    expect(
+      messageSanctionPrivee({
+        sanction: "avertissement",
+        serveur: "Rose Griffon",
+      }),
+    ).toContain("Aucune sanction");
   });
 
   test("ne dépasse jamais la limite d'un message Discord", () => {
@@ -356,19 +409,29 @@ describe("messageSanctionPrivee", () => {
   });
 
   test("assume l'absence de motif au lieu de laisser un blanc", () => {
-    expect(messageSanctionPrivee({ sanction: "expulsion", serveur: "Rose Griffon", motif: "   " })).toContain(
-      "Aucun motif",
-    );
+    expect(
+      messageSanctionPrivee({
+        sanction: "expulsion",
+        serveur: "Rose Griffon",
+        motif: "   ",
+      }),
+    ).toContain("Aucun motif");
   });
 });
 
 describe("empechementMessagePrive", () => {
   test("ne retient que ce qui n'a aucun sens, quelle que soit la hiérarchie", () => {
-    expect(empechementMessagePrive({ cibleEstAuteur: true, cibleEstBot: false })).toBe("soi-meme");
-    expect(empechementMessagePrive({ cibleEstAuteur: false, cibleEstBot: true })).toBe("le-bot");
+    expect(
+      empechementMessagePrive({ cibleEstAuteur: true, cibleEstBot: false }),
+    ).toBe("soi-meme");
+    expect(
+      empechementMessagePrive({ cibleEstAuteur: false, cibleEstBot: true }),
+    ).toBe("le-bot");
     // Un avertissement n'exerce aucun pouvoir Discord : avertir quelqu'un dont
     // le rôle est au-dessus de celui du bot reste parfaitement légitime.
-    expect(empechementMessagePrive({ cibleEstAuteur: false, cibleEstBot: false })).toBeNull();
+    expect(
+      empechementMessagePrive({ cibleEstAuteur: false, cibleEstBot: false }),
+    ).toBeNull();
   });
 });
 
@@ -380,8 +443,12 @@ describe("filtrerBannis", () => {
   ];
 
   test("cherche sur le nom ET sur l'identifiant collé", () => {
-    expect(filtrerBannis(bannis, "spam").map(p => p.value)).toEqual(["111111111111111111"]);
-    expect(filtrerBannis(bannis, "222222222222222222").map(p => p.value)).toEqual(["222222222222222222"]);
+    expect(filtrerBannis(bannis, "spam").map((p) => p.value)).toEqual([
+      "111111111111111111",
+    ]);
+    expect(
+      filtrerBannis(bannis, "222222222222222222").map((p) => p.value),
+    ).toEqual(["222222222222222222"]);
     expect(filtrerBannis(bannis, "").length).toBe(3);
   });
 
@@ -420,11 +487,17 @@ describe("nomPermissionFr", () => {
   test("complète la table de modération sans la recopier", () => {
     // Déjà connue de `nomPermission` : la valeur doit venir de LÀ, pas d'un
     // doublon, sinon les deux libellés divergent à la première correction.
-    expect(nomPermissionFr(PermissionFlagsBits.BanMembers)).toBe("Bannir des membres");
+    expect(nomPermissionFr(PermissionFlagsBits.BanMembers)).toBe(
+      "Bannir des membres",
+    );
     // Absente de la table de modération : sans ce complément, l'affichage
     // disait « Permission 32 », ce qui n'aide pas à cliquer au bon endroit.
-    expect(nomPermissionFr(PermissionFlagsBits.ManageGuild)).toBe("Gérer le serveur");
-    expect(nomPermissionFr(PermissionFlagsBits.ManageWebhooks)).toBe("Gérer les webhooks");
+    expect(nomPermissionFr(PermissionFlagsBits.ManageGuild)).toBe(
+      "Gérer le serveur",
+    );
+    expect(nomPermissionFr(PermissionFlagsBits.ManageWebhooks)).toBe(
+      "Gérer les webhooks",
+    );
   });
 
   test("ne rend jamais une chaîne vide, même sur un drapeau inconnu", () => {
@@ -440,11 +513,18 @@ describe("manquantesParmi", () => {
 
   test("nomme ce qui manque pour lire les invitations", () => {
     const lecteur = new PermissionsBitField(PermissionFlagsBits.ViewChannel);
-    expect(manquantesParmi(lecteur, PERMISSIONS_LECTURE_INVITATIONS)).toEqual(["Gérer le serveur"]);
+    expect(manquantesParmi(lecteur, PERMISSIONS_LECTURE_INVITATIONS)).toEqual([
+      "Gérer le serveur",
+    ]);
   });
 
   test("ne réclame pas une permission déjà détenue", () => {
-    expect(manquantesParmi(PermissionFlagsBits.ManageGuild, PERMISSIONS_LECTURE_INVITATIONS)).toEqual([]);
+    expect(
+      manquantesParmi(
+        PermissionFlagsBits.ManageGuild,
+        PERMISSIONS_LECTURE_INVITATIONS,
+      ),
+    ).toEqual([]);
   });
 });
 
@@ -453,7 +533,9 @@ describe("permissionsSensibles", () => {
     // On décrit ce qu'un rôle accorde LITTÉRALEMENT : prétendre qu'un rôle
     // administrateur porte aussi les quatorze autres ferait croire qu'on peut
     // lui en retirer une pour le brider.
-    expect(permissionsSensibles(PermissionFlagsBits.Administrator)).toEqual(["Administrateur"]);
+    expect(permissionsSensibles(PermissionFlagsBits.Administrator)).toEqual([
+      "Administrateur",
+    ]);
   });
 
   test("liste les seules permissions qui sont une décision", () => {
@@ -462,7 +544,10 @@ describe("permissionsSensibles", () => {
       PermissionFlagsBits.ManageRoles |
       // Confort : ne doit PAS ressortir, sinon la ligne qui compte se noie.
       PermissionFlagsBits.AddReactions;
-    expect(permissionsSensibles(new PermissionsBitField(bits))).toEqual(["Gérer les rôles", "Bannir des membres"]);
+    expect(permissionsSensibles(new PermissionsBitField(bits))).toEqual([
+      "Gérer les rôles",
+      "Bannir des membres",
+    ]);
   });
 
   test("un rôle sans pouvoir ne rend rien", () => {
@@ -473,21 +558,25 @@ describe("permissionsSensibles", () => {
 describe("diagnostiquerActions", () => {
   test("couvre TOUTES les actions déclarées, sans en oublier une", () => {
     const diagnostic = diagnostiquerActions(PermissionFlagsBits.Administrator);
-    expect(diagnostic.map(ligne => String(ligne.action)).toSorted()).toEqual(
+    expect(diagnostic.map((ligne) => String(ligne.action)).toSorted()).toEqual(
       Object.keys(PERMISSIONS_PAR_ACTION).toSorted(),
     );
-    expect(diagnostic.every(ligne => ligne.possible)).toBe(true);
-    expect(diagnostic.every(ligne => ligne.libelle.length > 0)).toBe(true);
+    expect(diagnostic.every((ligne) => ligne.possible)).toBe(true);
+    expect(diagnostic.every((ligne) => ligne.libelle.length > 0)).toBe(true);
   });
 
   test("dit action par action CE QUI manque", () => {
-    const partiel = new PermissionsBitField(PermissionFlagsBits.BanMembers | PermissionFlagsBits.ViewAuditLog);
+    const partiel = new PermissionsBitField(
+      PermissionFlagsBits.BanMembers | PermissionFlagsBits.ViewAuditLog,
+    );
     const diagnostic = diagnostiquerActions(partiel);
-    const parAction = new Map(diagnostic.map(ligne => [ligne.action, ligne]));
+    const parAction = new Map(diagnostic.map((ligne) => [ligne.action, ligne]));
     expect(parAction.get("bannir")?.possible).toBe(true);
     expect(parAction.get("journal")?.possible).toBe(true);
     expect(parAction.get("expulser")?.possible).toBe(false);
-    expect(parAction.get("expulser")?.manquantes).toEqual(["Expulser des membres"]);
+    expect(parAction.get("expulser")?.manquantes).toEqual([
+      "Expulser des membres",
+    ]);
   });
 });
 
@@ -506,8 +595,12 @@ describe("compterHorsDePortee", () => {
 
 describe("traduction des types Discord", () => {
   test("les entrées d'audit sortent en français, jamais en entier brut", () => {
-    expect(libelleEvenementAudit(AuditLogEvent.MemberBanAdd)).toBe("Membre banni");
-    expect(libelleEvenementAudit(AuditLogEvent.MemberRoleUpdate)).toBe("Rôles d'un membre modifiés");
+    expect(libelleEvenementAudit(AuditLogEvent.MemberBanAdd)).toBe(
+      "Membre banni",
+    );
+    expect(libelleEvenementAudit(AuditLogEvent.MemberRoleUpdate)).toBe(
+      "Rôles d'un membre modifiés",
+    );
     // Discord ajoute des types sans prévenir : le repli doit nommer l'entier
     // plutôt que d'afficher un champ vide (un embed à champ vide est REFUSÉ).
     expect(libelleEvenementAudit(9_999)).toBe("Action Discord n° 9999");
@@ -532,16 +625,24 @@ describe("traduction des types Discord", () => {
     expect(libelleNiveauBoost(GuildPremiumTier.None)).toBe("Aucun palier");
     expect(libelleNiveauBoost(GuildPremiumTier.Tier3)).toBe("Palier 3");
     expect(libelleNiveauBoost(42)).toBe("Palier n° 42");
-    expect(libelleNiveauVerification(GuildVerificationLevel.None)).toBe("Aucune");
-    expect(libelleNiveauVerification(GuildVerificationLevel.VeryHigh)).toContain("Très élevée");
+    expect(libelleNiveauVerification(GuildVerificationLevel.None)).toBe(
+      "Aucune",
+    );
+    expect(
+      libelleNiveauVerification(GuildVerificationLevel.VeryHigh),
+    ).toContain("Très élevée");
     expect(libelleNiveauVerification(42)).toBe("Niveau n° 42");
   });
 
   test("les fonctionnalités de serveur cessent d'être des majuscules illisibles", () => {
-    expect(libelleFonctionnaliteGuilde("COMMUNITY")).toBe("Serveur communautaire");
+    expect(libelleFonctionnaliteGuilde("COMMUNITY")).toBe(
+      "Serveur communautaire",
+    );
     expect(libelleFonctionnaliteGuilde("ANIMATED_ICON")).toBe("Icône animée");
     // Repli sur une fonctionnalité que Discord vient d'ajouter.
-    expect(libelleFonctionnaliteGuilde("NEW_SHINY_THING")).toBe("New shiny thing");
+    expect(libelleFonctionnaliteGuilde("NEW_SHINY_THING")).toBe(
+      "New shiny thing",
+    );
     expect(libelleFonctionnaliteGuilde("")).toBe("");
   });
 });
@@ -564,14 +665,20 @@ describe("pagination de l'inspection", () => {
   test("la tranche suit la page bornée", () => {
     const elements = Array.from({ length: 60 }, (_, rang) => rang);
     expect(trancheInspection(elements, 1)).toHaveLength(25);
-    expect(trancheInspection(elements, 3)).toEqual([50, 51, 52, 53, 54, 55, 56, 57, 58, 59]);
+    expect(trancheInspection(elements, 3)).toEqual([
+      50, 51, 52, 53, 54, 55, 56, 57, 58, 59,
+    ]);
     // Page au-delà de la dernière : on rend la dernière, pas un tableau vide.
     expect(trancheInspection(elements, 99)[0]).toBe(50);
     expect(trancheInspection([], 1)).toEqual([]);
   });
 
   test("l'état d'un bouton fait l'aller-retour", () => {
-    const etat = { vue: "bannissements", page: 3, graine: "123456789012345678" };
+    const etat = {
+      vue: "bannissements",
+      page: 3,
+      graine: "123456789012345678",
+    };
     const id = construireIdPageInspection(etat);
     expect(id).toBe("rgdisc|bannissements|3|123456789012345678");
     expect(analyserIdPageInspection(id)).toEqual(etat);
@@ -588,9 +695,17 @@ describe("pagination de l'inspection", () => {
   test("rend null plutôt que de faire refuser le message entier", () => {
     // 100 caractères est la borne DURE d'un `custom_id` : au-delà, c'est le
     // message COMPLET que Discord rejette, pas seulement le bouton.
-    expect(construireIdPageInspection({ vue: "x".repeat(120), page: 1, graine: "42" })).toBeNull();
+    expect(
+      construireIdPageInspection({
+        vue: "x".repeat(120),
+        page: 1,
+        graine: "42",
+      }),
+    ).toBeNull();
     // Un séparateur dans une valeur casserait le découpage à la relecture.
-    expect(construireIdPageInspection({ vue: "a|b", page: 1, graine: "42" })).toBeNull();
+    expect(
+      construireIdPageInspection({ vue: "a|b", page: 1, graine: "42" }),
+    ).toBeNull();
   });
 });
 
@@ -620,7 +735,7 @@ describe("palette des rôles", () => {
       expect(choix.name.length).toBeLessThanOrEqual(100);
       expect(choix.value.length).toBeGreaterThan(0);
     }
-    const valeurs = new Set(CHOIX_COULEUR_ROLE.map(choix => choix.value));
+    const valeurs = new Set(CHOIX_COULEUR_ROLE.map((choix) => choix.value));
     expect(valeurs.size).toBe(CHOIX_COULEUR_ROLE.length);
   });
 
@@ -640,7 +755,9 @@ describe("normaliserNomRole", () => {
     // Discord ne retouche PAS un nom de rôle, contrairement à un nom de salon :
     // « Équipe Azalée » doit ressortir tel quel, pas en « equipe-azalee ».
     expect(normaliserNomRole("  Équipe Azalée  ")).toBe("Équipe Azalée");
-    expect(normaliserNomRole("Staff\n\nRose   Griffon")).toBe("Staff Rose Griffon");
+    expect(normaliserNomRole("Staff\n\nRose   Griffon")).toBe(
+      "Staff Rose Griffon",
+    );
   });
 
   test("refuse le vide, le trop long et les deux mentions générales", () => {
@@ -670,22 +787,36 @@ describe("empechementRole", () => {
   });
 
   test("la hiérarchie se joue sur le rang du RÔLE, pas sur celui du membre", () => {
-    expect(empechementRole({ ...base, positionRole: 11 })).toBe("role-superieur");
+    expect(empechementRole({ ...base, positionRole: 11 })).toBe(
+      "role-superieur",
+    );
     expect(empechementRole({ ...base, positionRole: 10 })).toBe("role-egal");
     expect(empechementRole({ ...base, positionRole: 9 })).toBeNull();
   });
 
   test("écarte @everyone, les rôles d'intégration, celui du bot et l'administration", () => {
     expect(empechementRole({ ...base, estEveryone: true })).toBe("everyone");
-    expect(empechementRole({ ...base, gereParIntegration: true })).toBe("gere-par-integration");
-    expect(empechementRole({ ...base, estRoleDuBot: true })).toBe("role-du-bot");
-    expect(empechementRole({ ...base, porteAdministration: true })).toBe("administration");
+    expect(empechementRole({ ...base, gereParIntegration: true })).toBe(
+      "gere-par-integration",
+    );
+    expect(empechementRole({ ...base, estRoleDuBot: true })).toBe(
+      "role-du-bot",
+    );
+    expect(empechementRole({ ...base, porteAdministration: true })).toBe(
+      "administration",
+    );
   });
 
   test("le rôle du bot se dit AVANT « géré par une intégration »", () => {
     // Le rôle d'un bot est presque toujours `managed` : sans cet ordre, le
     // refus le plus fréquent s'expliquerait par la cause la moins parlante.
-    expect(empechementRole({ ...base, estRoleDuBot: true, gereParIntegration: true })).toBe("role-du-bot");
+    expect(
+      empechementRole({
+        ...base,
+        estRoleDuBot: true,
+        gereParIntegration: true,
+      }),
+    ).toBe("role-du-bot");
   });
 
   test("chaque empêchement a une explication qui dit quoi faire", () => {
@@ -722,7 +853,11 @@ describe("planifierMasse", () => {
   });
 
   test("un ensemble vide ne planifie ni lot ni pause", () => {
-    expect(planifierMasse(0)).toMatchObject({ lots: 0, dureeMinimaleMs: 0, aTraiter: 0 });
+    expect(planifierMasse(0)).toMatchObject({
+      lots: 0,
+      dureeMinimaleMs: 0,
+      aTraiter: 0,
+    });
     expect(planifierMasse(-5).aTraiter).toBe(0);
     expect(planifierMasse(Number.NaN).aTraiter).toBe(0);
   });
@@ -801,14 +936,22 @@ describe("exigeRoleAdminRg", () => {
     expect(exigeRoleAdminRg(PermissionFlagsBits.ManageRoles)).toBe(true);
     expect(exigeRoleAdminRg(PermissionFlagsBits.ManageGuild)).toBe(true);
     expect(exigeRoleAdminRg(PermissionFlagsBits.ManageWebhooks)).toBe(true);
-    expect(exigeRoleAdminRg(new PermissionsBitField(PermissionFlagsBits.AddReactions))).toBe(false);
+    expect(
+      exigeRoleAdminRg(
+        new PermissionsBitField(PermissionFlagsBits.AddReactions),
+      ),
+    ).toBe(false);
   });
 });
 
 describe("extraireIdentifiantRole", () => {
   test("accepte un flocon nu comme une mention collée", () => {
-    expect(extraireIdentifiantRole("123456789012345678")).toBe("123456789012345678");
-    expect(extraireIdentifiantRole("  <@&123456789012345678>  ")).toBe("123456789012345678");
+    expect(extraireIdentifiantRole("123456789012345678")).toBe(
+      "123456789012345678",
+    );
+    expect(extraireIdentifiantRole("  <@&123456789012345678>  ")).toBe(
+      "123456789012345678",
+    );
   });
 
   test("refuse un nom de rôle plutôt que d'agir sur un homonyme", () => {
@@ -836,13 +979,15 @@ describe("types de salon créables", () => {
   });
 
   test("seul le salon d'annonces exige une Communauté", () => {
-    const exigeants = TYPES_SALON_CREABLES.filter(type => type.exigeCommunaute);
-    expect(exigeants.map(type => type.valeur)).toEqual(["annonce"]);
+    const exigeants = TYPES_SALON_CREABLES.filter(
+      (type) => type.exigeCommunaute,
+    );
+    expect(exigeants.map((type) => type.valeur)).toEqual(["annonce"]);
   });
 
   test("le vocal est le seul dont Discord ne réécrit pas le nom", () => {
-    const preserves = TYPES_SALON_CREABLES.filter(type => !type.nomNormalise);
-    expect(preserves.map(type => type.valeur)).toEqual(["vocal"]);
+    const preserves = TYPES_SALON_CREABLES.filter((type) => !type.nomNormalise);
+    expect(preserves.map((type) => type.valeur)).toEqual(["vocal"]);
   });
 });
 
@@ -853,12 +998,18 @@ describe("nomSalonEffectif", () => {
   test("annonce le nom que Discord va réellement poser", () => {
     // Le salon créé s'appellera « salon-des-annonces » : afficher la saisie
     // ferait croire à un bug de nommage à la première relecture.
-    expect(nomSalonEffectif("Salon des Annonces", textuel)).toBe("salon-des-annonces");
-    expect(nomSalonEffectif("  Équipe Azalée  ", textuel)).toBe("equipe-azalee");
+    expect(nomSalonEffectif("Salon des Annonces", textuel)).toBe(
+      "salon-des-annonces",
+    );
+    expect(nomSalonEffectif("  Équipe Azalée  ", textuel)).toBe(
+      "equipe-azalee",
+    );
   });
 
   test("laisse un salon vocal garder ses majuscules et ses espaces", () => {
-    expect(nomSalonEffectif("  Salon Vocal Test  ", vocal)).toBe("Salon Vocal Test");
+    expect(nomSalonEffectif("  Salon Vocal Test  ", vocal)).toBe(
+      "Salon Vocal Test",
+    );
     expect(nomSalonEffectif("é".repeat(150), vocal)!.length).toBe(100);
   });
 
@@ -898,7 +1049,9 @@ describe("état d'envoi d'un salon", () => {
 
   test("relit l'état archivé dans la trace d'audit, et rien d'autre", () => {
     expect(lireEtatEnvoiArchive({ envoyer_avant: "herite" })).toBe("herite");
-    expect(lireEtatEnvoiArchive({ envoyer_avant: "autorise", motif: "spam" })).toBe("autorise");
+    expect(
+      lireEtatEnvoiArchive({ envoyer_avant: "autorise", motif: "spam" }),
+    ).toBe("autorise");
     expect(lireEtatEnvoiArchive({ envoyer_avant: "peut-être" })).toBeNull();
     expect(lireEtatEnvoiArchive({})).toBeNull();
     expect(lireEtatEnvoiArchive(null)).toBeNull();
@@ -958,8 +1111,13 @@ describe("referencesSalon", () => {
       "settings['tweets.notification'].salon": "222",
       DISCORD_WIKI_ANNOUNCEMENTS_CHANNEL_ID: undefined,
     };
-    expect(referencesSalon("111", sources)).toEqual(["DISCORD_NEWS_CHANNEL_ID", "DISCORD_CHANNELS.ANNONCES"]);
-    expect(referencesSalon("222", sources)).toEqual(["settings['tweets.notification'].salon"]);
+    expect(referencesSalon("111", sources)).toEqual([
+      "DISCORD_NEWS_CHANNEL_ID",
+      "DISCORD_CHANNELS.ANNONCES",
+    ]);
+    expect(referencesSalon("222", sources)).toEqual([
+      "settings['tweets.notification'].salon",
+    ]);
     expect(referencesSalon("333", sources)).toEqual([]);
   });
 
@@ -1006,7 +1164,9 @@ describe("assemblerPageInspection", () => {
   test("ne dépasse jamais le budget de plus de deux caractères par ligne refermée", () => {
     const lignes = Array.from({ length: 25 }, () => `**${"y".repeat(400)}`);
     const assemble = assemblerPageInspection(lignes);
-    expect(assemble.length).toBeLessThanOrEqual(BUDGET_DESCRIPTION_INSPECTION + 2 * 25);
+    expect(assemble.length).toBeLessThanOrEqual(
+      BUDGET_DESCRIPTION_INSPECTION + 2 * 25,
+    );
     expect(assemble.length).toBeLessThanOrEqual(4_096);
   });
 
@@ -1021,7 +1181,10 @@ describe("raccourcirLigneInspection", () => {
   });
 
   test("referme un gras coupé au milieu, sinon toute la liste part en gras", () => {
-    const coupe = raccourcirLigneInspection(`**${"a".repeat(50)}** — reste`, 20);
+    const coupe = raccourcirLigneInspection(
+      `**${"a".repeat(50)}** — reste`,
+      20,
+    );
     expect(coupe.endsWith("**")).toBe(true);
     expect((coupe.match(/\*\*/g) ?? []).length % 2).toBe(0);
   });

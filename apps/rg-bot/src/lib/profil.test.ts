@@ -17,7 +17,11 @@ import { describe, expect, test } from "bun:test";
 import { fileURLToPath } from "node:url";
 import { GatewayIntentBits } from "discord.js";
 
-import { ACHILLEA_GUILD_ID, AZALEE_GUILD_ID, RG_GUILD_ID } from "@rosegriffon/types/discord";
+import {
+  ACHILLEA_GUILD_ID,
+  AZALEE_GUILD_ID,
+  RG_GUILD_ID,
+} from "@rosegriffon/types/discord";
 
 import {
   NOMS_PROFILS,
@@ -75,8 +79,12 @@ describe("profilDemande", () => {
   test("une valeur inconnue LÈVE au lieu de retomber sur rg", () => {
     // Le repli silencieux démarrerait un second bot Rose Griffon avec le jeton
     // du premier : chaque interaction traitée deux fois, et rien pour le dire.
-    expect(() => profilDemande({ [VARIABLE_PROFIL]: "azalée" })).toThrow(/n'est pas un profil connu/);
-    expect(() => profilDemande({ [VARIABLE_PROFIL]: "azale" })).toThrow(/Valeurs acceptées : rg, azalee/);
+    expect(() => profilDemande({ [VARIABLE_PROFIL]: "azalée" })).toThrow(
+      /n'est pas un profil connu/,
+    );
+    expect(() => profilDemande({ [VARIABLE_PROFIL]: "azale" })).toThrow(
+      /Valeurs acceptées : rg, azalee/,
+    );
   });
 
   test("estNomProfil ne reconnaît que les deux profils", () => {
@@ -93,18 +101,31 @@ describe("profilDemande", () => {
 
 describe("jetonDuProfil", () => {
   test("rg lit DISCORD_BOT_TOKEN, puis DISCORD_TOKEN — l'ordre historique", () => {
-    expect(jetonDuProfil(PROFILS.rg, { DISCORD_BOT_TOKEN: "jeton-rg" })).toBe("jeton-rg");
-    expect(jetonDuProfil(PROFILS.rg, { DISCORD_TOKEN: "ancien-nom" })).toBe("ancien-nom");
-    expect(jetonDuProfil(PROFILS.rg, { DISCORD_BOT_TOKEN: "prioritaire", DISCORD_TOKEN: "ancien-nom" })).toBe(
-      "prioritaire",
+    expect(jetonDuProfil(PROFILS.rg, { DISCORD_BOT_TOKEN: "jeton-rg" })).toBe(
+      "jeton-rg",
     );
+    expect(jetonDuProfil(PROFILS.rg, { DISCORD_TOKEN: "ancien-nom" })).toBe(
+      "ancien-nom",
+    );
+    expect(
+      jetonDuProfil(PROFILS.rg, {
+        DISCORD_BOT_TOKEN: "prioritaire",
+        DISCORD_TOKEN: "ancien-nom",
+      }),
+    ).toBe("prioritaire");
   });
 
   test("azalee n'accepte QUE sa propre variable", () => {
-    expect(jetonDuProfil(PROFILS.azalee, { AZALEE_DISCORD_BOT_TOKEN: "jeton-azalee" })).toBe("jeton-azalee");
+    expect(
+      jetonDuProfil(PROFILS.azalee, {
+        AZALEE_DISCORD_BOT_TOKEN: "jeton-azalee",
+      }),
+    ).toBe("jeton-azalee");
     // Le jeton de Rose Griffon ne doit jamais servir de repli : deux processus
     // sur la même identité Discord répondent deux fois à chaque interaction.
-    expect(() => jetonDuProfil(PROFILS.azalee, { DISCORD_BOT_TOKEN: "jeton-rg" })).toThrow(/AZALEE_DISCORD_BOT_TOKEN/);
+    expect(() =>
+      jetonDuProfil(PROFILS.azalee, { DISCORD_BOT_TOKEN: "jeton-rg" }),
+    ).toThrow(/AZALEE_DISCORD_BOT_TOKEN/);
   });
 
   test("un jeton absent dit QUOI faire, et où", () => {
@@ -122,12 +143,16 @@ describe("jetonDuProfil", () => {
   });
 
   test("un secret scellé et un $VAR non substitué sont refusés par leur nom", () => {
-    expect(() => jetonDuProfil(PROFILS.azalee, { AZALEE_DISCORD_BOT_TOKEN: "eyJ2IjoxLCJrIjoi…" })).toThrow(
-      /secret SCELLÉ/,
-    );
-    expect(() => jetonDuProfil(PROFILS.azalee, { AZALEE_DISCORD_BOT_TOKEN: "$DISCORD_BOT_TOKEN" })).toThrow(
-      /non substituée/,
-    );
+    expect(() =>
+      jetonDuProfil(PROFILS.azalee, {
+        AZALEE_DISCORD_BOT_TOKEN: "eyJ2IjoxLCJrIjoi…",
+      }),
+    ).toThrow(/secret SCELLÉ/);
+    expect(() =>
+      jetonDuProfil(PROFILS.azalee, {
+        AZALEE_DISCORD_BOT_TOKEN: "$DISCORD_BOT_TOKEN",
+      }),
+    ).toThrow(/non substituée/);
   });
 });
 
@@ -165,7 +190,9 @@ describe("guildes", () => {
     expect(PROFILS.rg.intents).toContain(GatewayIntentBits.Guilds);
     expect(PROFILS.rg.intents).toContain(GatewayIntentBits.GuildMembers);
     expect(PROFILS.azalee.intents).toEqual([GatewayIntentBits.Guilds]);
-    expect(PROFILS.azalee.intents).not.toContain(GatewayIntentBits.GuildMembers);
+    expect(PROFILS.azalee.intents).not.toContain(
+      GatewayIntentBits.GuildMembers,
+    );
   });
 
   test("rg garde la résolution par l'environnement (comportement d'avant)", () => {
@@ -188,8 +215,14 @@ describe("guildes", () => {
       DISCORD_GUILD_ID: RG_GUILD_ID,
       DISCORD_EXTRA_GUILD_IDS: "111111111111111111",
     };
-    expect(guildesDuProfil(PROFILS.azalee, env)).toEqual([RG_GUILD_ID, AZALEE_GUILD_ID, ACHILLEA_GUILD_ID]);
-    expect(guildesDuProfil(PROFILS.azalee, env)).not.toContain("111111111111111111");
+    expect(guildesDuProfil(PROFILS.azalee, env)).toEqual([
+      RG_GUILD_ID,
+      AZALEE_GUILD_ID,
+      ACHILLEA_GUILD_ID,
+    ]);
+    expect(guildesDuProfil(PROFILS.azalee, env)).not.toContain(
+      "111111111111111111",
+    );
   });
 });
 
@@ -209,18 +242,26 @@ describe("annonce des posts X", () => {
     const creationGuildeAzalee = instantDuFlocon(AZALEE_GUILD_ID);
     const creationSalon = instantDuFlocon(salon as string);
     expect(creationSalon - creationGuildeAzalee).toBeLessThan(10 * 60_000);
-    expect(new Date(creationGuildeAzalee).toISOString()).toBe("2025-03-12T23:37:54.435Z");
-    expect(new Date(creationSalon).toISOString()).toBe("2025-03-12T23:45:13.224Z");
+    expect(new Date(creationGuildeAzalee).toISOString()).toBe(
+      "2025-03-12T23:37:54.435Z",
+    );
+    expect(new Date(creationSalon).toISOString()).toBe(
+      "2025-03-12T23:45:13.224Z",
+    );
   });
 
   test("l'environnement peut déplacer le salon sans déploiement", () => {
-    expect(salonAnnonceDuProfil(PROFILS.azalee, { AZALEE_DISCORD_NEWS_CHANNEL_ID: "222222222222222222" })).toBe(
-      "222222222222222222",
-    );
+    expect(
+      salonAnnonceDuProfil(PROFILS.azalee, {
+        AZALEE_DISCORD_NEWS_CHANNEL_ID: "222222222222222222",
+      }),
+    ).toBe("222222222222222222");
     // Une valeur qui n'est pas un flocon (nom de salon, $VAR) est ignorée.
-    expect(salonAnnonceDuProfil(PROFILS.azalee, { AZALEE_DISCORD_NEWS_CHANNEL_ID: "#annonces" })).toBe(
-      "1349528692086276148",
-    );
+    expect(
+      salonAnnonceDuProfil(PROFILS.azalee, {
+        AZALEE_DISCORD_NEWS_CHANNEL_ID: "#annonces",
+      }),
+    ).toBe("1349528692086276148");
   });
 
   test("rg n'annonce RIEN, même si un salon traîne dans l'environnement", () => {
@@ -229,7 +270,11 @@ describe("annonce des posts X", () => {
     // deux partagent le réglage `settings['tweets.notification']`.
     expect(PROFILS.rg.annoncePosts).toBeNull();
     expect(salonAnnonceDuProfil(PROFILS.rg, {})).toBeNull();
-    expect(salonAnnonceDuProfil(PROFILS.rg, { DISCORD_NEWS_CHANNEL_ID: "333333333333333333" })).toBeNull();
+    expect(
+      salonAnnonceDuProfil(PROFILS.rg, {
+        DISCORD_NEWS_CHANNEL_ID: "333333333333333333",
+      }),
+    ).toBeNull();
   });
 
   test("le registre s'assemble en `ProfilAnnonceur` sans rien réécrire", () => {
@@ -263,9 +308,13 @@ describe("annonce des posts X", () => {
     // curseur devra être DIFFÉRENT, sinon le premier qui publie prive l'autre
     // serveur du post.
     expect(PROFILS.azalee.annoncePosts?.curseur).toBe("azalee");
-    const annonceurs = Object.values(PROFILS).filter(p => p.annoncePosts !== null);
-    expect(annonceurs.map(p => p.nom)).toEqual(["azalee"]);
-    expect(new Set(annonceurs.map(p => p.annoncePosts?.curseur)).size).toBe(annonceurs.length);
+    const annonceurs = Object.values(PROFILS).filter(
+      (p) => p.annoncePosts !== null,
+    );
+    expect(annonceurs.map((p) => p.nom)).toEqual(["azalee"]);
+    expect(new Set(annonceurs.map((p) => p.annoncePosts?.curseur)).size).toBe(
+      annonceurs.length,
+    );
   });
 });
 
@@ -281,22 +330,32 @@ describe("marque", () => {
   test("couleurDeMarque rend l'entier attendu par discord.js", () => {
     expect(couleurDeMarque("#a14b3f")).toBe(0xa1_4b_3f);
     expect(couleurDeMarque("#F89C5A")).toBe(0xf8_9c_5a);
-    expect(() => couleurDeMarque("orange")).toThrow(/couleur de marque invalide/);
+    expect(() => couleurDeMarque("orange")).toThrow(
+      /couleur de marque invalide/,
+    );
   });
 
   test("les deux profils ne partagent PAS la variable d'URL de base", () => {
     // `infra/systemd/rg-bot.service` pose `WEBSITE_URL=https://rosegriffon.fr`
     // et les deux services lisent le même `.env` racine : une variable commune
     // ferait pointer les liens du bot Azalée vers le site principal.
-    expect(PROFILS.rg.marque.variableUrlBase).not.toBe(PROFILS.azalee.marque.variableUrlBase);
+    expect(PROFILS.rg.marque.variableUrlBase).not.toBe(
+      PROFILS.azalee.marque.variableUrlBase,
+    );
     const env: EnvLisible = { WEBSITE_URL: "https://rosegriffon.fr" };
     expect(urlBaseDuProfil(PROFILS.rg, env)).toBe("https://rosegriffon.fr");
-    expect(urlBaseDuProfil(PROFILS.azalee, env)).toBe("https://azalee.rosegriffon.fr");
-    expect(urlBaseDuProfil(PROFILS.azalee, { AZALEE_WEBSITE_URL: "http://127.0.0.1:3003" })).toBe(
-      "http://127.0.0.1:3003",
+    expect(urlBaseDuProfil(PROFILS.azalee, env)).toBe(
+      "https://azalee.rosegriffon.fr",
     );
+    expect(
+      urlBaseDuProfil(PROFILS.azalee, {
+        AZALEE_WEBSITE_URL: "http://127.0.0.1:3003",
+      }),
+    ).toBe("http://127.0.0.1:3003");
     // Un `$VAR` non substitué ne doit pas devenir une URL.
-    expect(urlBaseDuProfil(PROFILS.rg, { WEBSITE_URL: "$NEXT_PUBLIC_URL" })).toBe("https://rosegriffon.fr");
+    expect(
+      urlBaseDuProfil(PROFILS.rg, { WEBSITE_URL: "$NEXT_PUBLIC_URL" }),
+    ).toBe("https://rosegriffon.fr");
   });
 });
 
@@ -353,7 +412,11 @@ function commandesRacines(source: string): string[] {
 
 /** Sources des modules d'un profil, lues en parallèle. */
 function sourcesDuProfil(nom: NomProfil): Promise<string[]> {
-  return Promise.all(PROFILS[nom].modules.map(chemin => Bun.file(fichierDuModule(chemin)).text()));
+  return Promise.all(
+    PROFILS[nom].modules.map((chemin) =>
+      Bun.file(fichierDuModule(chemin)).text(),
+    ),
+  );
 }
 
 async function commandesDuProfil(nom: NomProfil): Promise<Set<string>> {
@@ -368,39 +431,51 @@ async function commandesDuProfil(nom: NomProfil): Promise<Set<string>> {
 
 describe("modules de commandes", () => {
   test("chaque module listé existe RÉELLEMENT sur le disque", async () => {
-    const chemins = NOMS_PROFILS.flatMap(nom => [...PROFILS[nom].modules]);
+    const chemins = NOMS_PROFILS.flatMap((nom) => [...PROFILS[nom].modules]);
     const presences = await Promise.all(
-      chemins.map(async chemin => {
+      chemins.map(async (chemin) => {
         const existe = await Bun.file(fichierDuModule(chemin)).exists();
         return `${chemin} → ${existe ? "présent" : "ABSENT"}`;
       }),
     );
-    expect(presences).toEqual(chemins.map(chemin => `${chemin} → présent`));
+    expect(presences).toEqual(chemins.map((chemin) => `${chemin} → présent`));
   });
 
   test("chaque module listé déclare bien des commandes (@Discord)", async () => {
-    const parProfil = await Promise.all(NOMS_PROFILS.map(nom => sourcesDuProfil(nom)));
+    const parProfil = await Promise.all(
+      NOMS_PROFILS.map((nom) => sourcesDuProfil(nom)),
+    );
     for (const [rang, nom] of NOMS_PROFILS.entries()) {
       const chemins = PROFILS[nom].modules;
       const sources = parProfil[rang] ?? [];
-      const constats = sources.map((source, index) => `${chemins[index]}:${source.includes("@Discord()")}`);
-      expect(constats).toEqual(chemins.map(chemin => `${chemin}:true`));
+      const constats = sources.map(
+        (source, index) => `${chemins[index]}:${source.includes("@Discord()")}`,
+      );
+      expect(constats).toEqual(chemins.map((chemin) => `${chemin}:true`));
     }
   });
 
   test("aucun module n'est chargé par les deux profils", () => {
     const rg = new Set<string>(PROFILS.rg.modules);
-    const communs = PROFILS.azalee.modules.filter(chemin => rg.has(chemin));
+    const communs = PROFILS.azalee.modules.filter((chemin) => rg.has(chemin));
     expect(communs).toEqual([]);
   });
 
   test("achillea : modules propres, et aucune racine en commun avec azalee", async () => {
     // Le bot Azalée publie GLOBALEMENT : ses commandes apparaissent aussi sur le
     // serveur Achilléa. Une racine commune y serait indiscernable pour le joueur.
-    const autres = new Set<string>([...PROFILS.rg.modules, ...PROFILS.azalee.modules]);
-    expect(PROFILS.achillea.modules.filter(chemin => autres.has(chemin))).toEqual([]);
+    const autres = new Set<string>([
+      ...PROFILS.rg.modules,
+      ...PROFILS.azalee.modules,
+    ]);
+    expect(
+      PROFILS.achillea.modules.filter((chemin) => autres.has(chemin)),
+    ).toEqual([]);
 
-    const [achillea, azalee] = await Promise.all([commandesDuProfil("achillea"), commandesDuProfil("azalee")]);
+    const [achillea, azalee] = await Promise.all([
+      commandesDuProfil("achillea"),
+      commandesDuProfil("azalee"),
+    ]);
     // Les quatorze racines de l'ancien bot, plus le groupe d'administration.
     for (const racine of [
       "player",
@@ -421,15 +496,21 @@ describe("modules de commandes", () => {
     ]) {
       expect(`${racine}:${achillea.has(racine)}`).toBe(`${racine}:true`);
     }
-    expect([...achillea].filter(commande => azalee.has(commande)).toSorted()).toEqual([]);
+    expect(
+      [...achillea].filter((commande) => azalee.has(commande)).toSorted(),
+    ).toEqual([]);
   });
 
   test("le groupe /clan est déclaré AVANT les modules qui l'étendent", () => {
     const ordre = PROFILS.achillea.modules as readonly string[];
     const declaration = ordre.indexOf("commands/achillea-bot/clan.ts");
     expect(declaration).toBeGreaterThanOrEqual(0);
-    expect(ordre.indexOf("commands/achillea-bot/clan-gestion.ts")).toBeGreaterThan(declaration);
-    expect(ordre.indexOf("commands/achillea-bot/clan-equipes.ts")).toBeGreaterThan(declaration);
+    expect(
+      ordre.indexOf("commands/achillea-bot/clan-gestion.ts"),
+    ).toBeGreaterThan(declaration);
+    expect(
+      ordre.indexOf("commands/achillea-bot/clan-equipes.ts"),
+    ).toBeGreaterThan(declaration);
   });
 
   test("chaque module de profil a son chargeur statique (compilation --compile)", async () => {
@@ -437,23 +518,32 @@ describe("modules de commandes", () => {
     // calculé que `bun build --compile` ne peut pas résoudre : le module manque
     // au binaire et le bot meurt au démarrage, en production seulement.
     const { MODULE_LOADERS } = await import("../modules");
-    const manquants = NOMS_PROFILS.flatMap(nom => [...PROFILS[nom].modules]).filter(chemin => !(chemin in MODULE_LOADERS));
+    const manquants = NOMS_PROFILS.flatMap((nom) => [
+      ...PROFILS[nom].modules,
+    ]).filter((chemin) => !(chemin in MODULE_LOADERS));
     expect(manquants).toEqual([]);
   });
 
   test("achillea demande les états vocaux pour l'alerte du vocal d'aide ranked", () => {
-    expect(PROFILS.achillea.intents).toContain(GatewayIntentBits.GuildVoiceStates);
+    expect(PROFILS.achillea.intents).toContain(
+      GatewayIntentBits.GuildVoiceStates,
+    );
   });
 
   test("les deux profils ne se disputent AUCUN nom de commande", async () => {
-    const [rg, azalee] = await Promise.all([commandesDuProfil("rg"), commandesDuProfil("azalee")]);
+    const [rg, azalee] = await Promise.all([
+      commandesDuProfil("rg"),
+      commandesDuProfil("azalee"),
+    ]);
 
     // Ni l'une ni l'autre ne doit être vide : un ensemble vide rendrait la
     // disjonction vraie sans rien prouver (par exemple si l'extraction cassait).
     expect(rg.size).toBeGreaterThan(5);
     expect(azalee.size).toBeGreaterThan(3);
 
-    const collisions = [...azalee].filter(commande => rg.has(commande)).toSorted();
+    const collisions = [...azalee]
+      .filter((commande) => rg.has(commande))
+      .toSorted();
     expect(collisions).toEqual([]);
   });
 
@@ -494,12 +584,18 @@ describe("modules de commandes", () => {
     // quelqu'un d'autre. Un module à décorateur que personne n'importe ne
     // produit aucune erreur — la commande n'existe simplement jamais sur
     // Discord, et rien ne le dit. On part donc du disque, pas du registre.
-    const listes = new Set<string>(NOMS_PROFILS.flatMap(nom => [...PROFILS[nom].modules]));
+    const listes = new Set<string>(
+      NOMS_PROFILS.flatMap((nom) => [...PROFILS[nom].modules]),
+    );
     const glob = new Bun.Glob("commands/**/*.ts");
     const orphelins: string[] = [];
     for await (const relatif of glob.scan({ cwd: fileURLToPath(RACINE_SRC) })) {
       const chemin = relatif.replaceAll("\\", "/");
-      if (chemin.endsWith(".test.ts") || listes.has(chemin) || MODULES_OBSOLETES.has(chemin)) {
+      if (
+        chemin.endsWith(".test.ts") ||
+        listes.has(chemin) ||
+        MODULES_OBSOLETES.has(chemin)
+      ) {
         continue;
       }
       const source = await Bun.file(fichierDuModule(chemin)).text();
@@ -511,7 +607,10 @@ describe("modules de commandes", () => {
   });
 
   test("les commandes attendues sont bien du bon côté", async () => {
-    const [rg, azalee] = await Promise.all([commandesDuProfil("rg"), commandesDuProfil("azalee")]);
+    const [rg, azalee] = await Promise.all([
+      commandesDuProfil("rg"),
+      commandesDuProfil("azalee"),
+    ]);
 
     // Le wiki et le jeu, et RIEN d'autre. `/article` a rejoint le bot Rose
     // Griffon le 14/8/2026 : il lit les articles des DEUX sites, et son pendant
@@ -551,17 +650,22 @@ describe("modules de commandes", () => {
     // liste d'autocomplétion, le membre n'a aucun moyen de savoir laquelle il
     // déclenche — c'est la raison d'être de la disjonction, et elle ne se voit
     // pas en lisant les deux listes de modules côte à côte.
-    const [rg, azalee] = await Promise.all([commandesDuProfil("rg"), commandesDuProfil("azalee")]);
-    const communes = [...rg].filter(commande => azalee.has(commande));
+    const [rg, azalee] = await Promise.all([
+      commandesDuProfil("rg"),
+      commandesDuProfil("azalee"),
+    ]);
+    const communes = [...rg].filter((commande) => azalee.has(commande));
     expect(communes.toSorted()).toEqual([]);
   });
 });
 
 describe("le registre est la seule source des identifiants", () => {
   test("aucun identifiant de guilde ou de salon n'est écrit en dur ailleurs", async () => {
-    const identifiants = [RG_GUILD_ID, AZALEE_GUILD_ID, PROFILS.azalee.annoncePosts?.salonId ?? ""].filter(
-      valeur => valeur !== "",
-    );
+    const identifiants = [
+      RG_GUILD_ID,
+      AZALEE_GUILD_ID,
+      PROFILS.azalee.annoncePosts?.salonId ?? "",
+    ].filter((valeur) => valeur !== "");
 
     const glob = new Bun.Glob("**/*.ts");
     const fautifs: string[] = [];

@@ -386,10 +386,10 @@ dit « module introuvable » — le message accuse le module quand le privilège
 
 ### Ré-ancrage du catalogue `aphrody-nie-trace`
 
-Le catalogue était **0  / 22 drift / 4 introuvable** : ses `rva` de référence venaient d'un autre
+Le catalogue était **0 / 22 drift / 4 introuvable** : ses `rva` de référence venaient d'un autre
 build. Les AOB, eux, étaient bons — ils tombaient sur un site unique, à une `rva` simplement
 différente. Ré-ancrage en scannant le **fichier** (pas la mémoire : pas d'élévation, pas d'ASLR,
-reproductible), puis validation live → **20  / 0 drift / 4 introuvable**.
+reproductible), puis validation live → **20 / 0 drift / 4 introuvable**.
 
 Les `rva` trouvées par scan statique coïncident **exactement** avec celles du scan live : les deux
 voies se confirment. Discipline conservée — un AOB à hits multiples (`free-buy-shop`, 2 hits) ou
@@ -398,7 +398,7 @@ introuvable (`special-move-type`) repasse à `rva: None` : on ne devine pas une 
 ### Portail `just preuves` — état mesuré le 2026-09-07
 
 Le portail uemu est actuellement **hors service sur cet environnement** :
-`just preuves` rend **0  / 47  / 0 ⧗**, et chacune des 47 validations termine avec
+`just preuves` rend **0 / 47 / 0 ⧗**, et chacune des 47 validations termine avec
 `exit=127` (`validate_affine_compose` jusqu'à `validate_variant_set_int`). Ce code indique que
 l'exécutable ou le lanceur de preuve n'est pas disponible ; il ne s'agit pas d'un écart de valeur
 du portage. La commande de reprise reste `just preuves` (ou `just preuves <motif>` pour une famille).

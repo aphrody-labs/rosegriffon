@@ -59,7 +59,15 @@ export function compareVariants(
   const positionChanged = baseVariant.position !== variant.position;
 
   // Compare stats (lv99)
-  const statsKeys = ["kick", "control", "technique", "physical", "pressure", "agility", "intelligence"] as const;
+  const statsKeys = [
+    "kick",
+    "control",
+    "technique",
+    "physical",
+    "pressure",
+    "agility",
+    "intelligence",
+  ] as const;
   const statChanges: StatComparison[] = [];
   let totalStatDiff = 0;
   let allBetterOrEqual = true;
@@ -88,8 +96,8 @@ export function compareVariants(
 
   // Compare movesets (skills)
   const getSkillName = (id: string) => skillsMap.get(id) || id;
-  const baseSkills = new Set((baseVariant.skills || []).map(s => s.skillId));
-  const varSkills = new Set((variant.skills || []).map(s => s.skillId));
+  const baseSkills = new Set((baseVariant.skills || []).map((s) => s.skillId));
+  const varSkills = new Set((variant.skills || []).map((s) => s.skillId));
 
   const addedSkills: string[] = [];
   const removedSkills: string[] = [];
@@ -107,7 +115,8 @@ export function compareVariants(
   }
 
   // Determine classification
-  let classification: VariantComparisonResult["classification"] = "Tactical Variation";
+  let classification: VariantComparisonResult["classification"] =
+    "Tactical Variation";
   const details: string[] = [];
 
   if (elementChanged && positionChanged) {
@@ -117,20 +126,28 @@ export function compareVariants(
     );
   } else if (positionChanged) {
     classification = "Position Shift";
-    details.push(`Changement de poste de jeu : ${baseVariant.position} ➔ ${variant.position}`);
+    details.push(
+      `Changement de poste de jeu : ${baseVariant.position} ➔ ${variant.position}`,
+    );
   } else if (elementChanged) {
     classification = "Element Shift";
-    details.push(`Changement d'élément élémentaire : ${baseVariant.element} ➔ ${variant.element}`);
+    details.push(
+      `Changement d'élément élémentaire : ${baseVariant.element} ➔ ${variant.element}`,
+    );
   } else if (allBetterOrEqual && atLeastOneBetter) {
     classification = "Pure Upgrade";
     details.push("Amélioration pure des statistiques globales");
   } else {
     classification = "Tactical Variation";
-    details.push("Variante tactique avec ajustement de moveset et stats équilibrées");
+    details.push(
+      "Variante tactique avec ajustement de moveset et stats équilibrées",
+    );
   }
 
   if (totalStatDiff !== 0) {
-    details.push(`Différence totale de statistiques de ${totalStatDiff > 0 ? "+" : ""}${totalStatDiff}`);
+    details.push(
+      `Différence totale de statistiques de ${totalStatDiff > 0 ? "+" : ""}${totalStatDiff}`,
+    );
   }
 
   if (addedSkills.length > 0) {
@@ -164,5 +181,7 @@ export function analyzeCharacterVariants(
 
   // Assume variants are pre-sorted youngest first (variants[0] is the base)
   const baseVariant = baseChar.variants[0];
-  return baseChar.variants.map(v => compareVariants(baseVariant, v, skillsMap));
+  return baseChar.variants.map((v) =>
+    compareVariants(baseVariant, v, skillsMap),
+  );
 }

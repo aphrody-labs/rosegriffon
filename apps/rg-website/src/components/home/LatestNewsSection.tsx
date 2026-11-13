@@ -33,7 +33,12 @@ interface Tweet {
   created_at: string;
   author_username: string;
   author_name: string;
-  media: Array<{ url: string; preview_url?: string; video_url?: string; type?: string }>;
+  media: Array<{
+    url: string;
+    preview_url?: string;
+    video_url?: string;
+    type?: string;
+  }>;
 }
 
 interface LatestNewsSectionProps {
@@ -104,19 +109,33 @@ function AuthorInfo({
       ) : (
         <div
           className={`rounded-full flex items-center justify-center font-bold ${
-            isLight ? "size-5 bg-white/20 text-white text-[8px]" : "size-6 bg-primary/20 text-primary text-[10px]"
+            isLight
+              ? "size-5 bg-white/20 text-white text-[8px]"
+              : "size-6 bg-primary/20 text-primary text-[10px]"
           }`}
         >
           RG
         </div>
       )}
-      <span className={`text-xs font-medium ${isLight ? "text-white/70" : "text-on-surface-variant"}`}>
+      <span
+        className={`text-xs font-medium ${isLight ? "text-white/70" : "text-on-surface-variant"}`}
+      >
         {author?.full_name || "Rose Griffon"}
       </span>
       {timeAgo && (
         <>
-          <span className={isLight ? "text-white/30" : "text-on-surface-variant/30 mx-1"}>·</span>
-          <span className={`text-xs ${isLight ? "text-white/50" : "text-on-surface-variant/60"}`}>{timeAgo}</span>
+          <span
+            className={
+              isLight ? "text-white/30" : "text-on-surface-variant/30 mx-1"
+            }
+          >
+            ·
+          </span>
+          <span
+            className={`text-xs ${isLight ? "text-white/50" : "text-on-surface-variant/60"}`}
+          >
+            {timeAgo}
+          </span>
         </>
       )}
     </div>
@@ -139,7 +158,13 @@ function SectionHeader({ size }: { size: "sm" | "lg" }) {
   );
 }
 
-function MobileCarouselDots({ count, activeIndex }: { count: number; activeIndex: number }) {
+function MobileCarouselDots({
+  count,
+  activeIndex,
+}: {
+  count: number;
+  activeIndex: number;
+}) {
   return (
     <div className="flex justify-center gap-1.5 mt-4">
       {Array.from({ length: count }, (_, i) => (
@@ -154,12 +179,20 @@ function MobileCarouselDots({ count, activeIndex }: { count: number; activeIndex
   );
 }
 
-function TweetCard({ tweet, variant }: { tweet: Tweet; variant: "chip" | "full" }) {
+function TweetCard({
+  tweet,
+  variant,
+}: {
+  tweet: Tweet;
+  variant: "chip" | "full";
+}) {
   const timeAgo = formatDistanceToNow(new Date(tweet.created_at), {
     addSuffix: true,
     locale: fr,
   });
-  const paragraphs = (tweet.translation || tweet.text || "").split(/\n\n+/).filter(Boolean);
+  const paragraphs = (tweet.translation || tweet.text || "")
+    .split(/\n\n+/)
+    .filter(Boolean);
   const title = paragraphs[0]?.trim() || "";
   const excerpt = paragraphs.slice(1, 3).join(" ").trim();
   const heroImage = tweet.media?.[0]?.preview_url || tweet.media?.[0]?.url;
@@ -174,11 +207,23 @@ function TweetCard({ tweet, variant }: { tweet: Tweet; variant: "chip" | "full" 
       >
         {heroImage ? (
           <div className="size-10 rounded-lg overflow-hidden relative bg-surface-container-high shrink-0">
-            <Image src={heroImage} alt="" fill sizes="40px" className="object-cover" />
+            <Image
+              src={heroImage}
+              alt=""
+              fill
+              sizes="40px"
+              className="object-cover"
+            />
           </div>
         ) : authorInfo.avatar ? (
           <div className="size-7 rounded-full overflow-hidden relative bg-surface-container-high shrink-0">
-            <Image src={authorInfo.avatar} alt={authorInfo.name} fill sizes="28px" className="object-cover" />
+            <Image
+              src={authorInfo.avatar}
+              alt={authorInfo.name}
+              fill
+              sizes="28px"
+              className="object-cover"
+            />
           </div>
         ) : (
           <div
@@ -188,8 +233,12 @@ function TweetCard({ tweet, variant }: { tweet: Tweet; variant: "chip" | "full" 
           </div>
         )}
         <div className="min-w-0">
-          <p className="text-xs font-semibold text-on-surface leading-snug line-clamp-2">{title}</p>
-          <span className="text-[10px] text-on-surface-variant/50 mt-1 block">{timeAgo}</span>
+          <p className="text-xs font-semibold text-on-surface leading-snug line-clamp-2">
+            {title}
+          </p>
+          <span className="text-[10px] text-on-surface-variant/50 mt-1 block">
+            {timeAgo}
+          </span>
         </div>
       </Link>
     );
@@ -213,7 +262,11 @@ function TweetCard({ tweet, variant }: { tweet: Tweet; variant: "chip" | "full" 
         </div>
       ) : (
         <div className="relative aspect-[16/9] bg-linear-to-br from-twitter/10 via-surface-container to-primary/5 flex items-center justify-center">
-          <svg className="size-10 text-twitter/20" viewBox="0 0 24 24" fill="currentColor">
+          <svg
+            className="size-10 text-twitter/20"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+          >
             <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
           </svg>
         </div>
@@ -231,13 +284,20 @@ function TweetCard({ tweet, variant }: { tweet: Tweet; variant: "chip" | "full" 
           {title}
         </h3>
         {excerpt && (
-          <p className="text-sm text-on-surface-variant/70 leading-relaxed line-clamp-2 mb-3 flex-1">{excerpt}</p>
+          <p className="text-sm text-on-surface-variant/70 leading-relaxed line-clamp-2 mb-3 flex-1">
+            {excerpt}
+          </p>
         )}
         <div className="flex items-center justify-between mt-auto pt-2 border-t border-outline-variant/10">
           <div className="flex items-center gap-2">
             {authorInfo.avatar ? (
               <div className="size-5 rounded-full overflow-hidden relative bg-surface-container-high shrink-0">
-                <Image src={authorInfo.avatar} alt={authorInfo.name} fill className="object-cover" />
+                <Image
+                  src={authorInfo.avatar}
+                  alt={authorInfo.name}
+                  fill
+                  className="object-cover"
+                />
               </div>
             ) : (
               <div
@@ -249,11 +309,17 @@ function TweetCard({ tweet, variant }: { tweet: Tweet; variant: "chip" | "full" 
             <span className="text-[11px] text-on-surface-variant/70 font-semibold max-w-[100px] truncate">
               {authorInfo.name}
             </span>
-            <span className="text-[11px] text-on-surface-variant/50">{timeAgo}</span>
+            <span className="text-[11px] text-on-surface-variant/50">
+              {timeAgo}
+            </span>
           </div>
           <span className="inline-flex items-center gap-1 text-[11px] text-twitter/60 font-medium group-hover:text-twitter transition-colors">
             Lire
-            <ArrowRight size={12} aria-hidden="true" className="transition-transform group-hover:translate-x-0.5" />
+            <ArrowRight
+              size={12}
+              aria-hidden="true"
+              className="transition-transform group-hover:translate-x-0.5"
+            />
           </span>
         </div>
       </div>
@@ -261,7 +327,10 @@ function TweetCard({ tweet, variant }: { tweet: Tweet; variant: "chip" | "full" 
   );
 }
 
-export function LatestNewsSection({ articles, tweets = [] }: LatestNewsSectionProps) {
+export function LatestNewsSection({
+  articles,
+  tweets = [],
+}: LatestNewsSectionProps) {
   const hasArticles = articles && articles.length > 0;
   const hasTweets = tweets && tweets.length > 0;
   const [activeSlide, setActiveSlide] = useState(0);
@@ -275,7 +344,7 @@ export function LatestNewsSection({ articles, tweets = [] }: LatestNewsSectionPr
 
     const cards = container.querySelectorAll("[data-slide]");
     const observer = new IntersectionObserver(
-      entries => {
+      (entries) => {
         for (const entry of entries) {
           if (entry.isIntersecting) {
             const idx = Number((entry.target as HTMLElement).dataset.slide);
@@ -288,7 +357,7 @@ export function LatestNewsSection({ articles, tweets = [] }: LatestNewsSectionPr
       { root: container, threshold: 0.6 },
     );
 
-    cards.forEach(card => observer.observe(card));
+    cards.forEach((card) => observer.observe(card));
     return () => observer.disconnect();
   }, [hasArticles]);
 
@@ -302,7 +371,10 @@ export function LatestNewsSection({ articles, tweets = [] }: LatestNewsSectionPr
       <div className="md:hidden">
         <div className="flex items-center justify-between mb-4 px-0">
           <SectionHeader size="sm" />
-          <Link href="/news" className="inline-flex min-h-11 items-center px-2 -mr-2 text-xs font-bold text-primary hover:underline">
+          <Link
+            href="/news"
+            className="inline-flex min-h-11 items-center px-2 -mr-2 text-xs font-bold text-primary hover:underline"
+          >
             Voir tout
           </Link>
         </div>
@@ -326,7 +398,10 @@ export function LatestNewsSection({ articles, tweets = [] }: LatestNewsSectionPr
                 >
                   <div className="relative aspect-[16/10]">
                     <Image
-                      src={item.featured_image_url || "/images/placeholder-news.svg"}
+                      src={
+                        item.featured_image_url ||
+                        "/images/placeholder-news.svg"
+                      }
                       alt={item.title}
                       fill
                       className="object-cover"
@@ -334,21 +409,32 @@ export function LatestNewsSection({ articles, tweets = [] }: LatestNewsSectionPr
                     />
                     <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/30 to-transparent" />
                     <div className="absolute top-3 left-3">
-                      <CategoryBadge category={item.category} title={item.title} variant="overlay" />
+                      <CategoryBadge
+                        category={item.category}
+                        title={item.title}
+                        variant="overlay"
+                      />
                     </div>
                     <div className="absolute bottom-0 left-0 right-0 p-4">
                       <h3 className="text-base font-bold text-white leading-snug line-clamp-2 drop-shadow-lg">
                         {item.title}
                       </h3>
                       <div className="mt-2">
-                        <AuthorInfo author={item.author} publishedAt={item.published_at} variant="light" />
+                        <AuthorInfo
+                          author={item.author}
+                          publishedAt={item.published_at}
+                          variant="light"
+                        />
                       </div>
                     </div>
                   </div>
                 </Link>
               ))}
             </section>
-            <MobileCarouselDots count={articles.length} activeIndex={activeSlide} />
+            <MobileCarouselDots
+              count={articles.length}
+              activeIndex={activeSlide}
+            />
           </>
         )}
 
@@ -356,10 +442,12 @@ export function LatestNewsSection({ articles, tweets = [] }: LatestNewsSectionPr
           <div className={hasArticles ? "mt-5" : ""}>
             <div className="flex items-center gap-1.5 mb-3 px-0">
               <AtSign size={14} aria-hidden="true" className="text-twitter" />
-              <span className="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider">@Azalee_IE</span>
+              <span className="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider">
+                @Azalee_IE
+              </span>
             </div>
             <div className="flex overflow-x-auto gap-2.5 -mx-4 px-4 scrollbar-hide">
-              {tweets.slice(0, 4).map(tweet => (
+              {tweets.slice(0, 4).map((tweet) => (
                 <TweetCard key={tweet.id} tweet={tweet} variant="chip" />
               ))}
             </div>
@@ -383,7 +471,7 @@ export function LatestNewsSection({ articles, tweets = [] }: LatestNewsSectionPr
 
           {hasArticles && (
             <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
-              {articles.map(item => (
+              {articles.map((item) => (
                 <Link
                   key={item.id}
                   href={`/news/${item.slug}`}
@@ -391,7 +479,10 @@ export function LatestNewsSection({ articles, tweets = [] }: LatestNewsSectionPr
                 >
                   <div className="relative aspect-[16/8] overflow-hidden min-[1200px]:aspect-[16/7]">
                     <Image
-                      src={item.featured_image_url || "/images/placeholder-news.svg"}
+                      src={
+                        item.featured_image_url ||
+                        "/images/placeholder-news.svg"
+                      }
                       alt={item.title}
                       fill
                       className="object-cover transition-transform duration-700 group-hover:scale-105"
@@ -399,7 +490,11 @@ export function LatestNewsSection({ articles, tweets = [] }: LatestNewsSectionPr
                     />
                     <div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent opacity-60 group-hover:opacity-40 transition-opacity" />
                     <div className="absolute top-3 left-3">
-                      <CategoryBadge category={item.category} title={item.title} variant="card" />
+                      <CategoryBadge
+                        category={item.category}
+                        title={item.title}
+                        variant="card"
+                      />
                     </div>
                   </div>
                   <div className="flex flex-1 flex-col p-4">
@@ -407,7 +502,11 @@ export function LatestNewsSection({ articles, tweets = [] }: LatestNewsSectionPr
                       {item.title}
                     </h3>
                     <div className="mt-auto border-t border-outline-variant/10 pt-3">
-                      <AuthorInfo author={item.author} publishedAt={item.published_at} variant="dark" />
+                      <AuthorInfo
+                        author={item.author}
+                        publishedAt={item.published_at}
+                        variant="dark"
+                      />
                     </div>
                   </div>
                 </Link>
@@ -416,17 +515,27 @@ export function LatestNewsSection({ articles, tweets = [] }: LatestNewsSectionPr
           )}
 
           {hasTweets && (
-            <div className={hasArticles ? "mt-5 border-t border-outline-variant/20 pt-5" : ""}>
+            <div
+              className={
+                hasArticles
+                  ? "mt-5 border-t border-outline-variant/20 pt-5"
+                  : ""
+              }
+            >
               {hasArticles && (
                 <div className="mb-3 flex items-center gap-2">
-                  <AtSign size={18} aria-hidden="true" className="text-twitter" />
+                  <AtSign
+                    size={18}
+                    aria-hidden="true"
+                    className="text-twitter"
+                  />
                   <h3 className="text-sm font-bold text-on-surface-variant uppercase tracking-wider">
                     Derniers tweets @Azalee_IE
                   </h3>
                 </div>
               )}
               <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-hide">
-                {tweets.slice(0, hasArticles ? 3 : 6).map(tweet => (
+                {tweets.slice(0, hasArticles ? 3 : 6).map((tweet) => (
                   <TweetCard key={tweet.id} tweet={tweet} variant="chip" />
                 ))}
               </div>

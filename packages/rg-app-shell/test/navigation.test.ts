@@ -96,8 +96,12 @@ describe("navigation de la source unique Website", () => {
     // Deux accordéons qui mènent au même endroit, c'est un choix à faire là
     // où il n'y a rien à choisir — le défaut qui a fusionné « Vie de la
     // communauté » et « L'association ».
-    const parCategorie = itemsDeNavigation().map(groupe => new Set(cheminsCliquables(groupe.children ?? [])));
-    const doublons = [...parCategorie[0]!].filter(chemin => parCategorie.slice(1).some(autre => autre.has(chemin)));
+    const parCategorie = itemsDeNavigation().map(
+      (groupe) => new Set(cheminsCliquables(groupe.children ?? [])),
+    );
+    const doublons = [...parCategorie[0]!].filter((chemin) =>
+      parCategorie.slice(1).some((autre) => autre.has(chemin)),
+    );
     expect(doublons).toEqual([]);
   });
 });
@@ -106,7 +110,7 @@ describe("cheminsCliquables", () => {
   test("exclut les entêtes de groupe, qui ne pointent nulle part", () => {
     const nav = itemsDeNavigation();
     const chemins = cheminsCliquables(nav);
-    for (const groupe of parcourirNav(nav).filter(i => i.groupOnly)) {
+    for (const groupe of parcourirNav(nav).filter((i) => i.groupOnly)) {
       expect(chemins).not.toContain(groupe.path);
     }
   });
@@ -122,10 +126,12 @@ describe("cheminsCliquables", () => {
 
 describe("visibilité des destinations Achilléa", () => {
   test("retire récursivement les espaces réservés sans cacher les lectures publiques", () => {
-    const esport = construireNavigationUnifiee().find(groupe => groupe.domaine === "esport")?.item;
+    const esport = construireNavigationUnifiee().find(
+      (groupe) => groupe.domaine === "esport",
+    )?.item;
     expect(esport).toBeDefined();
 
-    const publicNav = filtrerNavigation([esport!], item => !item.access);
+    const publicNav = filtrerNavigation([esport!], (item) => !item.access);
     const paths = cheminsCliquables(publicNav);
     expect(paths).toContain("/achillea/ranked/leaderboard");
     expect(paths).toContain("/achillea/ranked/tiers");
@@ -137,8 +143,10 @@ describe("visibilité des destinations Achilléa", () => {
   });
 
   test("conserve les destinations d'un modérateur sans exposer celles d'un administrateur", () => {
-    const esport = construireNavigationUnifiee().find(groupe => groupe.domaine === "esport")?.item;
-    const moderatorNav = filtrerNavigation([esport!], item => {
+    const esport = construireNavigationUnifiee().find(
+      (groupe) => groupe.domaine === "esport",
+    )?.item;
+    const moderatorNav = filtrerNavigation([esport!], (item) => {
       const access = item.access;
       return !access || (access.minimumAchilleaRole ?? 0) <= 1;
     });
@@ -160,10 +168,12 @@ describe("dictionnaire de navigation", () => {
     const groupes = construireNavigationUnifiee();
     const libelles = groupes.flatMap(({ item }) => [
       item.label,
-      ...parcourirNav(item.children ?? []).map(enfant => enfant.label),
+      ...parcourirNav(item.children ?? []).map((enfant) => enfant.label),
     ]);
 
-    const manquants = [...new Set(libelles)].filter(cle => !(cle in DICTIONNAIRE_NAV_FR));
+    const manquants = [...new Set(libelles)].filter(
+      (cle) => !(cle in DICTIONNAIRE_NAV_FR),
+    );
     expect(manquants).toEqual([]);
   });
 });
@@ -176,16 +186,24 @@ describe("dictionnaire de navigation", () => {
  */
 describe("sélecteur de thème", () => {
   test("propose les cinq thèmes officiels dans l'ordre du catalogue", () => {
-    expect(DEFAULT_THEMES.map(t => t.id)).toEqual(["roy", "gaelle", "azalee-light", "azalee-dark", "achillea"]);
+    expect(DEFAULT_THEMES.map((t) => t.id)).toEqual([
+      "roy",
+      "gaelle",
+      "azalee-light",
+      "azalee-dark",
+      "achillea",
+    ]);
     expect(
-      DEFAULT_THEMES.map(t => t.id)
+      DEFAULT_THEMES.map((t) => t.id)
         .sort()
         .join(","),
     ).toBe(Object.keys(THEMES).sort().join(","));
   });
 
   test("chaque option utilise le visuel officiel et un libellé distinct", () => {
-    expect(new Set(DEFAULT_THEMES.map(t => t.label)).size).toBe(DEFAULT_THEMES.length);
+    expect(new Set(DEFAULT_THEMES.map((t) => t.label)).size).toBe(
+      DEFAULT_THEMES.length,
+    );
     for (const theme of DEFAULT_THEMES) {
       expect(theme.image).toBe(THEMES[theme.id].icon);
       expect(theme.label.length).toBeGreaterThan(0);
@@ -197,7 +215,13 @@ describe("construireMobileNavUnifiee", () => {
   test("produit exactement 5 onglets pour website", () => {
     const items = construireMobileNavUnifiee();
     expect(items).toHaveLength(5);
-    expect(items.map(i => i.icon)).toEqual(["home", "menu_book", "sports_esports", "search", "settings"]);
+    expect(items.map((i) => i.icon)).toEqual([
+      "home",
+      "menu_book",
+      "sports_esports",
+      "search",
+      "settings",
+    ]);
   });
 
   test("chaque onglet mène à un chemin valide", () => {

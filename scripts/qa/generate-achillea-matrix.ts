@@ -5,7 +5,7 @@ const root = process.cwd();
 const web = join(root, "apps/rg-website/src/app/achillea");
 const api = join(root, "apps/api/src/modules/achillea");
 const walk = (dir: string): string[] =>
-  readdirSync(dir, { withFileTypes: true }).flatMap(entry => {
+  readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
     const path = join(dir, entry.name);
     return entry.isDirectory() ? walk(path) : [path];
   });
@@ -29,7 +29,7 @@ const lines = [
   "|---|---|---|---|---|---|",
 ];
 for (const page of walk(web)
-  .filter(path => path.endsWith("page.tsx"))
+  .filter((path) => path.endsWith("page.tsx"))
   .sort()) {
   const route =
     "/achillea" +
@@ -39,8 +39,8 @@ for (const page of walk(web)
       .replace(/^page\.tsx$/, "")
       .replace(/^([^/])/, "/$1");
   const text = readdirSync(join(page, ".."))
-    .filter(name => name.endsWith(".tsx"))
-    .map(name => readFileSync(join(page, "..", name), "utf8"))
+    .filter((name) => name.endsWith(".tsx"))
+    .map((name) => readFileSync(join(page, "..", name), "utf8"))
     .join("\n");
   const controls = [
     ["boutons", /<button\b/g],
@@ -52,9 +52,12 @@ for (const page of walk(web)
   const counts =
     controls
       .map(([name, pattern]) => `${[...text.matchAll(pattern)].length} ${name}`)
-      .filter(value => !value.startsWith("0 "))
-      .join(", ") || "composants importés ou page statique : inspecter les composants liés";
-  lines.push(`| \`${route}\` | \`${rel(page)}\`; ${counts} | À tester | À tester | À tester si applicable | — |`);
+      .filter((value) => !value.startsWith("0 "))
+      .join(", ") ||
+    "composants importés ou page statique : inspecter les composants liés";
+  lines.push(
+    `| \`${route}\` | \`${rel(page)}\`; ${counts} | À tester | À tester | À tester si applicable | — |`,
+  );
 }
 lines.push(
   "",
@@ -66,17 +69,21 @@ lines.push(
   "|---|---|---|---|---|",
 );
 for (const source of walk(web)
-  .filter(path => path.endsWith(".tsx"))
+  .filter((path) => path.endsWith(".tsx"))
   .sort()) {
   const content = readFileSync(source, "utf8");
-  for (const match of content.matchAll(/<(button|input|select|textarea|form|Link)\b/g)) {
+  for (const match of content.matchAll(
+    /<(button|input|select|textarea|form|Link)\b/g,
+  )) {
     const line = content.slice(0, match.index).split("\n").length;
     const snippet = content
       .slice(match.index, match.index + 240)
       .replace(/\s+/g, " ")
       .replaceAll("|", "\\|")
       .replaceAll("`", "'");
-    lines.push(`| ${match[1]} | \`${rel(source)}:${line}\` | \`${snippet}\` | À tester | — |`);
+    lines.push(
+      `| ${match[1]} | \`${rel(source)}:${line}\` | \`${snippet}\` | À tester | — |`,
+    );
   }
 }
 lines.push(
@@ -89,12 +96,14 @@ lines.push(
   "|---|---|---|---|---|---|",
 );
 for (const source of walk(api)
-  .filter(path => path.endsWith("index.ts") || path.endsWith("admin.ts"))
+  .filter((path) => path.endsWith("index.ts") || path.endsWith("admin.ts"))
   .sort()) {
   const content = readFileSync(source, "utf8");
   const prefix = content.match(/new Elysia\(\{\s*prefix:\s*"([^"]+)"/)?.[1];
   if (!prefix || source === join(api, "index.ts")) continue;
-  for (const match of content.matchAll(/\.(get|post|put|patch|delete)\s*\(\s*["']([^"']+)["']/g)) {
+  for (const match of content.matchAll(
+    /\.(get|post|put|patch|delete)\s*\(\s*["']([^"']+)["']/g,
+  )) {
     const [method, path] = [match[1]!.toUpperCase(), match[2]!];
     const line = content.slice(0, match.index).split("\n").length;
     lines.push(

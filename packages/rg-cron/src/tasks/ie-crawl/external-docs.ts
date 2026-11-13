@@ -21,8 +21,13 @@ function fetchReference(url: string): Promise<Response> {
  * Récupère les documentations de référence sur Markdown et Bun.markdown
  * pour les intégrer au monorepo et au RAG/LLM.
  */
-export async function crawlExternalDocs(): Promise<{ success: boolean; error?: string }> {
-  console.log("[Crawl External Docs] Récupération de awesome-markdown & bun-markdown...");
+export async function crawlExternalDocs(): Promise<{
+  success: boolean;
+  error?: string;
+}> {
+  console.log(
+    "[Crawl External Docs] Récupération de awesome-markdown & bun-markdown...",
+  );
 
   try {
     await mkdir(REFERENCE_DIR, { recursive: true });
@@ -31,7 +36,9 @@ export async function crawlExternalDocs(): Promise<{ success: boolean; error?: s
       "https://raw.githubusercontent.com/mundimark/awesome-markdown/master/README.md",
     );
     if (!awesomeRes.ok) {
-      throw new Error(`Failed to fetch awesome-markdown (status ${awesomeRes.status})`);
+      throw new Error(
+        `Failed to fetch awesome-markdown (status ${awesomeRes.status})`,
+      );
     }
     let awesomeContent = await awesomeRes.text();
 
@@ -49,13 +56,22 @@ status: "stable"
 ---
 
 `;
-    await writeFile(join(REFERENCE_DIR, "awesome-markdown.md"), awesomeFrontmatter + awesomeContent);
-    console.log("[Crawl External Docs] Fichier awesome-markdown.md enregistré.");
+    await writeFile(
+      join(REFERENCE_DIR, "awesome-markdown.md"),
+      awesomeFrontmatter + awesomeContent,
+    );
+    console.log(
+      "[Crawl External Docs] Fichier awesome-markdown.md enregistré.",
+    );
 
     // 2. Fetch Bun markdown docs (MDX)
-    const bunRes = await fetchReference("https://raw.githubusercontent.com/oven-sh/bun/main/docs/runtime/markdown.mdx");
+    const bunRes = await fetchReference(
+      "https://raw.githubusercontent.com/oven-sh/bun/main/docs/runtime/markdown.mdx",
+    );
     if (!bunRes.ok) {
-      throw new Error(`Failed to fetch Bun markdown docs (status ${bunRes.status})`);
+      throw new Error(
+        `Failed to fetch Bun markdown docs (status ${bunRes.status})`,
+      );
     }
     let bunContent = await bunRes.text();
 
@@ -80,7 +96,10 @@ status: "stable"
           parsed += '\nstatus: "stable"';
         }
         // Remplacer le titre générique par un titre plus explicite
-        parsed = parsed.replace(/^title:\s*["']?Markdown["']?/m, 'title: "Bun Markdown Runtime API"');
+        parsed = parsed.replace(
+          /^title:\s*["']?Markdown["']?/m,
+          'title: "Bun Markdown Runtime API"',
+        );
         return `---\n${parsed.trim()}\n---`;
       });
     }
@@ -104,16 +123,26 @@ status: "stable"
 ---
 
 `;
-        await writeFile(join(REFERENCE_DIR, "better-auth-readme.md"), frontmatter + content);
-        console.log("[Crawl External Docs] Fichier better-auth-readme.md enregistré.");
+        await writeFile(
+          join(REFERENCE_DIR, "better-auth-readme.md"),
+          frontmatter + content,
+        );
+        console.log(
+          "[Crawl External Docs] Fichier better-auth-readme.md enregistré.",
+        );
       }
     } catch (err) {
-      console.warn("[Crawl External Docs] Failed to fetch Better Auth README:", err);
+      console.warn(
+        "[Crawl External Docs] Failed to fetch Better Auth README:",
+        err,
+      );
     }
 
     // 4. Fetch Better Auth Session Management
     try {
-      console.log("[Crawl External Docs] Fetching Better Auth Session Management...");
+      console.log(
+        "[Crawl External Docs] Fetching Better Auth Session Management...",
+      );
       const baSessionRes = await fetchReference(
         "https://raw.githubusercontent.com/better-auth/better-auth/main/docs/content/docs/concepts/session-management.mdx",
       );
@@ -127,17 +156,27 @@ status: "stable"
 ---
 
 `;
-        await writeFile(join(REFERENCE_DIR, "better-auth-session.md"), frontmatter + content);
-        console.log("[Crawl External Docs] Fichier better-auth-session.md enregistré.");
+        await writeFile(
+          join(REFERENCE_DIR, "better-auth-session.md"),
+          frontmatter + content,
+        );
+        console.log(
+          "[Crawl External Docs] Fichier better-auth-session.md enregistré.",
+        );
       }
     } catch (err) {
-      console.warn("[Crawl External Docs] Failed to fetch Better Auth Session:", err);
+      console.warn(
+        "[Crawl External Docs] Failed to fetch Better Auth Session:",
+        err,
+      );
     }
 
     // 5. Fetch Inazuma Index README
     try {
       console.log("[Crawl External Docs] Fetching Inazuma Index README...");
-      const indexRes = await fetchReference("https://raw.githubusercontent.com/realt0w/inazuma-index/main/README.md");
+      const indexRes = await fetchReference(
+        "https://raw.githubusercontent.com/realt0w/inazuma-index/main/README.md",
+      );
       if (indexRes.ok) {
         const content = await indexRes.text();
         const frontmatter = `---
@@ -148,17 +187,27 @@ status: "stable"
 ---
 
 `;
-        await writeFile(join(REFERENCE_DIR, "inazuma-index-readme.md"), frontmatter + content);
-        console.log("[Crawl External Docs] Fichier inazuma-index-readme.md enregistré.");
+        await writeFile(
+          join(REFERENCE_DIR, "inazuma-index-readme.md"),
+          frontmatter + content,
+        );
+        console.log(
+          "[Crawl External Docs] Fichier inazuma-index-readme.md enregistré.",
+        );
       }
     } catch (err) {
-      console.warn("[Crawl External Docs] Failed to fetch Inazuma Index README:", err);
+      console.warn(
+        "[Crawl External Docs] Failed to fetch Inazuma Index README:",
+        err,
+      );
     }
 
     // 6. Fetch Secteur V README
     try {
       console.log("[Crawl External Docs] Fetching Secteur V README...");
-      const secteurRes = await fetchReference("https://raw.githubusercontent.com/killian1307/secteur-v/main/README.md");
+      const secteurRes = await fetchReference(
+        "https://raw.githubusercontent.com/killian1307/secteur-v/main/README.md",
+      );
       if (secteurRes.ok) {
         const content = await secteurRes.text();
         const frontmatter = `---
@@ -169,17 +218,27 @@ status: "stable"
 ---
 
 `;
-        await writeFile(join(REFERENCE_DIR, "secteur-v-readme.md"), frontmatter + content);
-        console.log("[Crawl External Docs] Fichier secteur-v-readme.md enregistré.");
+        await writeFile(
+          join(REFERENCE_DIR, "secteur-v-readme.md"),
+          frontmatter + content,
+        );
+        console.log(
+          "[Crawl External Docs] Fichier secteur-v-readme.md enregistré.",
+        );
       }
     } catch (err) {
-      console.warn("[Crawl External Docs] Failed to fetch Secteur V README:", err);
+      console.warn(
+        "[Crawl External Docs] Failed to fetch Secteur V README:",
+        err,
+      );
     }
 
     // 8. Fetch Turborepo README
     try {
       console.log("[Crawl External Docs] Fetching Turborepo README...");
-      const turboRes = await fetchReference("https://raw.githubusercontent.com/vercel/turborepo/main/README.md");
+      const turboRes = await fetchReference(
+        "https://raw.githubusercontent.com/vercel/turborepo/main/README.md",
+      );
       if (turboRes.ok) {
         const content = await turboRes.text();
         const frontmatter = `---
@@ -190,11 +249,19 @@ status: "stable"
 ---
 
 `;
-        await writeFile(join(REFERENCE_DIR, "turborepo-readme.md"), frontmatter + content);
-        console.log("[Crawl External Docs] Fichier turborepo-readme.md enregistré.");
+        await writeFile(
+          join(REFERENCE_DIR, "turborepo-readme.md"),
+          frontmatter + content,
+        );
+        console.log(
+          "[Crawl External Docs] Fichier turborepo-readme.md enregistré.",
+        );
       }
     } catch (err) {
-      console.warn("[Crawl External Docs] Failed to fetch Turborepo README:", err);
+      console.warn(
+        "[Crawl External Docs] Failed to fetch Turborepo README:",
+        err,
+      );
     }
 
     // 9. Fetch Discord.js README
@@ -213,11 +280,19 @@ status: "stable"
 ---
 
 `;
-        await writeFile(join(REFERENCE_DIR, "discordjs-readme.md"), frontmatter + content);
-        console.log("[Crawl External Docs] Fichier discordjs-readme.md enregistré.");
+        await writeFile(
+          join(REFERENCE_DIR, "discordjs-readme.md"),
+          frontmatter + content,
+        );
+        console.log(
+          "[Crawl External Docs] Fichier discordjs-readme.md enregistré.",
+        );
       }
     } catch (err) {
-      console.warn("[Crawl External Docs] Failed to fetch Discord.js README:", err);
+      console.warn(
+        "[Crawl External Docs] Failed to fetch Discord.js README:",
+        err,
+      );
     }
 
     return { success: true };

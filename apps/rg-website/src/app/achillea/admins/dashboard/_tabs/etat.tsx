@@ -5,7 +5,10 @@ import { Button, Skeleton } from "@rosegriffon/ui";
 import { AlertTriangle, Inbox, RefreshCw } from "lucide-react";
 import { createAchilleaClient } from "@/lib/achillea";
 import { signalerEchec, signalerException } from "@/lib/achillea/signaler";
-import type { AchilleaClient, AchilleaClientResult } from "@rosegriffon/achillea-client";
+import type {
+  AchilleaClient,
+  AchilleaClientResult,
+} from "@rosegriffon/achillea-client";
 
 /** Client Achilléa avec cookie de session, stable sur la vie du composant. */
 export function useClientAchillea(): AchilleaClient {
@@ -20,7 +23,13 @@ export function useClientAchillea(): AchilleaClient {
  * bouton « Réessayer ».
  */
 
-export function Chargement({ lignes = 3, libelle = "Chargement…" }: { lignes?: number; libelle?: string }) {
+export function Chargement({
+  lignes = 3,
+  libelle = "Chargement…",
+}: {
+  lignes?: number;
+  libelle?: string;
+}) {
   return (
     <div aria-live="polite" aria-busy="true" className="space-y-3">
       <span className="sr-only">{libelle}</span>
@@ -40,7 +49,13 @@ export function Vide({ message }: { message: string }) {
   );
 }
 
-export function Erreur({ message, onReessayer }: { message: string; onReessayer?: () => void }) {
+export function Erreur({
+  message,
+  onReessayer,
+}: {
+  message: string;
+  onReessayer?: () => void;
+}) {
   return (
     <div
       role="alert"
@@ -51,7 +66,11 @@ export function Erreur({ message, onReessayer }: { message: string; onReessayer?
         {message}
       </span>
       {onReessayer && (
-        <Button variant="outline" onClick={onReessayer} className="min-h-11 gap-2">
+        <Button
+          variant="outline"
+          onClick={onReessayer}
+          className="min-h-11 gap-2"
+        >
           <RefreshCw className="size-4" aria-hidden="true" />
           Réessayer
         </Button>
@@ -61,10 +80,24 @@ export function Erreur({ message, onReessayer }: { message: string; onReessayer?
 }
 
 /** Bouton « Actualiser » commun aux en-têtes d'onglet. */
-export function BoutonActualiser({ onClick, enCours }: { onClick: () => void; enCours: boolean }) {
+export function BoutonActualiser({
+  onClick,
+  enCours,
+}: {
+  onClick: () => void;
+  enCours: boolean;
+}) {
   return (
-    <Button variant="outline" onClick={onClick} disabled={enCours} className="min-h-11 gap-2">
-      <RefreshCw className={`size-4 ${enCours ? "animate-spin" : ""}`} aria-hidden="true" />
+    <Button
+      variant="outline"
+      onClick={onClick}
+      disabled={enCours}
+      className="min-h-11 gap-2"
+    >
+      <RefreshCw
+        className={`size-4 ${enCours ? "animate-spin" : ""}`}
+        aria-hidden="true"
+      />
       Actualiser
     </Button>
   );
@@ -77,11 +110,19 @@ export function BoutonActualiser({ onClick, enCours }: { onClick: () => void; en
  * injoignable : on le dit tel quel plutôt que d'afficher des zéros ou un
  * « service indisponible » qui laisserait chercher une panne de l'API.
  */
-export function messageEchecLecture(contexte: string, resultat: AchilleaClientResult<unknown>): string {
+export function messageEchecLecture(
+  contexte: string,
+  resultat: AchilleaClientResult<unknown>,
+): string {
   const message = signalerEchec(contexte, resultat);
   // `signalerEchec` montre déjà le texte de l'API (« Bot Discord Achilléa
   // indisponible : … ») ; le texte propre au 503 ne sert que s'il n'y en a pas.
-  if (!resultat.ok && resultat.kind === "http" && resultat.status === 503 && !resultat.message?.trim())
+  if (
+    !resultat.ok &&
+    resultat.kind === "http" &&
+    resultat.status === 503 &&
+    !resultat.message?.trim()
+  )
     return "Le bot Discord Achilléa est injoignable : ces mesures viennent de lui.";
   return message;
 }
@@ -100,7 +141,10 @@ export interface Lecture<T> {
  * est ignorée : un rafraîchissement périodique ne peut pas écraser un état
  * plus frais par un plus ancien.
  */
-export function useLecture<T>(contexte: string, lire: () => Promise<AchilleaClientResult<T>>): Lecture<T> {
+export function useLecture<T>(
+  contexte: string,
+  lire: () => Promise<AchilleaClientResult<T>>,
+): Lecture<T> {
   const [donnees, setDonnees] = useState<T | null>(null);
   const [chargement, setChargement] = useState(true);
   const [erreur, setErreur] = useState<string | null>(null);
@@ -113,26 +157,30 @@ export function useLecture<T>(contexte: string, lire: () => Promise<AchilleaClie
 
   // Les mises à jour d'état n'arrivent qu'à la résolution de la lecture : l'effet initial
   // n'appelle donc aucun `setState` de façon synchrone (`chargement` part déjà à vrai).
-  const lancer = useCallback((courante: number) => {
-    lireRef
-      .current()
-      .then(resultat => {
-        if (courante !== generation.current) return;
-        if (resultat.ok) {
-          setDonnees(resultat.value);
-          setErreur(null);
-        } else {
-          setDonnees(null);
-          setErreur(messageEchecLecture(contexte, resultat));
-        }
-      })
-      .catch(cause => {
-        if (courante === generation.current) setErreur(signalerException(contexte, cause));
-      })
-      .finally(() => {
-        if (courante === generation.current) setChargement(false);
-      });
-  }, [contexte]);
+  const lancer = useCallback(
+    (courante: number) => {
+      lireRef
+        .current()
+        .then((resultat) => {
+          if (courante !== generation.current) return;
+          if (resultat.ok) {
+            setDonnees(resultat.value);
+            setErreur(null);
+          } else {
+            setDonnees(null);
+            setErreur(messageEchecLecture(contexte, resultat));
+          }
+        })
+        .catch((cause) => {
+          if (courante === generation.current)
+            setErreur(signalerException(contexte, cause));
+        })
+        .finally(() => {
+          if (courante === generation.current) setChargement(false);
+        });
+    },
+    [contexte],
+  );
 
   const recharger = useCallback(() => {
     setChargement(true);
@@ -154,5 +202,8 @@ export function formaterDate(valeur: string | Date | null | undefined): string {
   if (!valeur) return "—";
   const date = valeur instanceof Date ? valeur : new Date(valeur);
   if (Number.isNaN(date.getTime())) return "—";
-  return date.toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" });
+  return date.toLocaleString("fr-FR", {
+    dateStyle: "short",
+    timeStyle: "short",
+  });
 }

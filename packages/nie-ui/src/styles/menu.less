@@ -9,7 +9,11 @@
 
 // An on-role state layer composited over its container (hover 0.08, focus/pressed 0.10).
 .state-layer(@on; @container; @opacity) {
-  background-color: color-mix(in srgb, var(@on) calc(var(@opacity) * 100%), var(@container));
+  background-color: color-mix(
+    in srgb,
+    var(@on) calc(var(@opacity) * 100%),
+    var(@container)
+  );
 }
 
 .row() {
@@ -66,11 +70,19 @@
   }
 
   & when (@blur = true) {
-    background-color: color-mix(in oklab, var(--md-sys-color-surface-container) @blurred-bg-opacity, transparent);
+    background-color: color-mix(
+      in oklab,
+      var(--md-sys-color-surface-container) @blurred-bg-opacity,
+      transparent
+    );
   }
 
   & when (@blur = false) {
-    background-color: color-mix(in oklab, var(--md-sys-color-surface-container) @normal-bg-opacity, transparent);
+    background-color: color-mix(
+      in oklab,
+      var(--md-sys-color-surface-container) @normal-bg-opacity,
+      transparent
+    );
   }
 
   @media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
@@ -277,11 +289,23 @@
 
   input[type="checkbox"]:not(:enabled) + label {
     cursor: default;
-    border-color: color-mix(in srgb, var(--md-sys-color-on-surface) 12%, transparent);
-    background-color: color-mix(in srgb, var(--md-sys-color-on-surface) 12%, transparent);
+    border-color: color-mix(
+      in srgb,
+      var(--md-sys-color-on-surface) 12%,
+      transparent
+    );
+    background-color: color-mix(
+      in srgb,
+      var(--md-sys-color-on-surface) 12%,
+      transparent
+    );
 
     &::after {
-      background-color: color-mix(in srgb, var(--md-sys-color-on-surface) 38%, transparent);
+      background-color: color-mix(
+        in srgb,
+        var(--md-sys-color-on-surface) 38%,
+        transparent
+      );
     }
   }
 }

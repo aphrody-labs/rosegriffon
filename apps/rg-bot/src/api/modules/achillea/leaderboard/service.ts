@@ -49,8 +49,11 @@ export abstract class LeaderboardService {
     let query = db.selectFrom(ranked).selectAll();
     const normalizedSearch = search.trim();
     if (normalizedSearch)
-      query = query.where(eb =>
-        eb.or([eb("username", "ilike", `%${normalizedSearch}%`), eb("display_name", "ilike", `%${normalizedSearch}%`)]),
+      query = query.where((eb) =>
+        eb.or([
+          eb("username", "ilike", `%${normalizedSearch}%`),
+          eb("display_name", "ilike", `%${normalizedSearch}%`),
+        ]),
       );
     if (minElo !== undefined) query = query.where("elo", ">=", minElo);
     if (maxElo !== undefined) query = query.where("elo", "<=", maxElo);
@@ -72,17 +75,19 @@ export abstract class LeaderboardService {
         ? countQuery.where("ue.season_id", "is", null)
         : countQuery.where("ue.season_id", "=", seasonId);
     if (normalizedSearch)
-      countQuery = countQuery.where(eb =>
+      countQuery = countQuery.where((eb) =>
         eb.or([
           eb("u.username", "ilike", `%${normalizedSearch}%`),
           eb("u.display_name", "ilike", `%${normalizedSearch}%`),
         ]),
       );
-    if (minElo !== undefined) countQuery = countQuery.where("ue.elo", ">=", minElo);
-    if (maxElo !== undefined) countQuery = countQuery.where("ue.elo", "<=", maxElo);
+    if (minElo !== undefined)
+      countQuery = countQuery.where("ue.elo", ">=", minElo);
+    if (maxElo !== undefined)
+      countQuery = countQuery.where("ue.elo", "<=", maxElo);
     const count = await countQuery.executeTakeFirst();
     return {
-      data: rows.map(row => {
+      data: rows.map((row) => {
         let fallbackAvatar = "https://cdn.discordapp.com/embed/avatars/0.png";
         try {
           fallbackAvatar = `https://cdn.discordapp.com/embed/avatars/${(BigInt(row.user_id) >> 22n) % 6n}.png`;
@@ -115,7 +120,16 @@ export abstract class LeaderboardService {
     maxElo?: number,
   ) {
     const season = await this.activeSeason(db);
-    return this.findTop(db, mode, season?.id ?? null, limit, offset, search, minElo, maxElo);
+    return this.findTop(
+      db,
+      mode,
+      season?.id ?? null,
+      limit,
+      offset,
+      search,
+      minElo,
+      maxElo,
+    );
   }
 
   /** Canonical 11-tier projection used by both the website and ranked client. */
@@ -126,13 +140,16 @@ export abstract class LeaderboardService {
       .selectFrom("rank")
       .selectAll("rank")
       .select(sql<number>`count(ue.user_id)`.as("player_count"))
-      .leftJoin("user_elo as ue", join => {
+      .leftJoin("user_elo as ue", (join) => {
         let clause = join
           .onRef("ue.elo", ">=", "rank.min_elo")
           .onRef("ue.elo", "<=", "rank.max_elo")
           .on("ue.mode", "=", mode)
           .on("ue.games_played", ">", 0);
-        clause = seasonId === null ? clause.on("ue.season_id", "is", null) : clause.on("ue.season_id", "=", seasonId);
+        clause =
+          seasonId === null
+            ? clause.on("ue.season_id", "is", null)
+            : clause.on("ue.season_id", "=", seasonId);
         return clause;
       })
       .groupBy([
@@ -146,7 +163,7 @@ export abstract class LeaderboardService {
       ])
       .orderBy("rank.min_elo", "asc")
       .execute();
-    return rows.map(row => ({
+    return rows.map((row) => ({
       key: row.key,
       minElo: row.min_elo,
       maxElo: row.max_elo,
@@ -161,10 +178,21 @@ export abstract class LeaderboardService {
   static async findProfile(db: Kysely<Database>, userId: string, mode: number) {
     const season = await this.activeSeason(db);
     const seasonId = season?.id ?? null;
-    const baseRating = Number((season?.config as { baseRating?: number } | null)?.baseRating ?? 0);
+    const baseRating = Number(
+      (season?.config as { baseRating?: number } | null)?.baseRating ?? 0,
+    );
     const storedElo = await db
       .selectFrom("user_elo")
-      .select(["user_id", "mode", "season_id", "elo", "peak_rating", "games_played", "wins", "losses"])
+      .select([
+        "user_id",
+        "mode",
+        "season_id",
+        "elo",
+        "peak_rating",
+        "games_played",
+        "wins",
+        "losses",
+      ])
       .where("user_id", "=", userId)
       .where("mode", "=", mode)
       .executeTakeFirst();
@@ -178,12 +206,20 @@ export abstract class LeaderboardService {
       wins: 0,
       losses: 0,
     };
-    const ranks = await db.selectFrom("rank").selectAll().orderBy("min_elo", "asc").execute();
+    const ranks = await db
+      .selectFrom("rank")
+      .selectAll()
+      .orderBy("min_elo", "asc")
+      .execute();
     const isRanked = Number(elo.games_played) > 0;
     const tier = isRanked
       ? eloToTier(
           Number(elo.elo),
-          ranks.map(rank => ({ ...rank, minElo: rank.min_elo, maxElo: rank.max_elo })),
+          ranks.map((rank) => ({
+            ...rank,
+            minElo: rank.min_elo,
+            maxElo: rank.max_elo,
+          })),
         )
       : null;
     let rankQuery = db
@@ -208,7 +244,8 @@ export abstract class LeaderboardService {
       isRanked ? rankQuery.executeTakeFirst() : Promise.resolve(undefined),
       totalQuery.executeTakeFirst(),
     ]);
-    const globalRank = !isRanked || rankRow?.rank == null ? null : Number(rankRow.rank);
+    const globalRank =
+      !isRanked || rankRow?.rank == null ? null : Number(rankRow.rank);
     const totalPlayers = Number(totalRows?.total ?? 0);
     return {
       userId: elo.user_id,

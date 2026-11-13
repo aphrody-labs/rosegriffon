@@ -30,7 +30,10 @@ const DUREE_MS = 10 * 60_000;
 const ENTREES_MAX = 64;
 const memoire = new Map<string, { depuis: number; valeur: Promise<unknown> }>();
 
-function enCache<A extends unknown[], R>(nom: string, lire: (...args: A) => Promise<R>): (...args: A) => Promise<R> {
+function enCache<A extends unknown[], R>(
+  nom: string,
+  lire: (...args: A) => Promise<R>,
+): (...args: A) => Promise<R> {
   return (...args: A) => {
     const cle = `${nom}:${JSON.stringify(args)}`;
     const trouve = memoire.get(cle);
@@ -42,7 +45,8 @@ function enCache<A extends unknown[], R>(nom: string, lire: (...args: A) => Prom
     const valeur = lire(...args);
     memoire.set(cle, { depuis: Date.now(), valeur });
     valeur.catch(() => memoire.delete(cle));
-    while (memoire.size > ENTREES_MAX) memoire.delete(memoire.keys().next().value as string);
+    while (memoire.size > ENTREES_MAX)
+      memoire.delete(memoire.keys().next().value as string);
     return valeur;
   };
 }
@@ -50,9 +54,18 @@ function enCache<A extends unknown[], R>(nom: string, lire: (...args: A) => Prom
 export const wikiService: typeof service = {
   ...service,
   getAurasList: enCache("auras", service.getAurasList.bind(service)),
-  getCharactersList: enCache("characters", service.getCharactersList.bind(service)),
-  getCoordinatorsList: enCache("coordinators", service.getCoordinatorsList.bind(service)),
-  getGalleryCategoryCounts: enCache("gallery-counts", service.getGalleryCategoryCounts.bind(service)),
+  getCharactersList: enCache(
+    "characters",
+    service.getCharactersList.bind(service),
+  ),
+  getCoordinatorsList: enCache(
+    "coordinators",
+    service.getCoordinatorsList.bind(service),
+  ),
+  getGalleryCategoryCounts: enCache(
+    "gallery-counts",
+    service.getGalleryCategoryCounts.bind(service),
+  ),
   getGalleryList: enCache("gallery", service.getGalleryList.bind(service)),
   getItemsList: enCache("items", service.getItemsList.bind(service)),
   getPassivesList: enCache("passives", service.getPassivesList.bind(service)),

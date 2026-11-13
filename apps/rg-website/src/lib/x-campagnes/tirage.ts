@@ -200,10 +200,14 @@ export function hex(octets: Uint8Array): string {
 /** Lève sur longueur impaire ou caractère hors `[0-9a-f]` — un hexa douteux est un bug, pas une donnée. */
 export function depuisHex(hexa: string): Uint8Array {
   if (hexa.length % 2 !== 0) {
-    throw new Error(`Hexadécimal de longueur impaire (${hexa.length}) : impossible à décoder en octets.`);
+    throw new Error(
+      `Hexadécimal de longueur impaire (${hexa.length}) : impossible à décoder en octets.`,
+    );
   }
   if (!/^[0-9a-f]*$/.test(hexa)) {
-    throw new Error("Hexadécimal invalide : seuls les chiffres 0-9 et les lettres a-f minuscules sont acceptés.");
+    throw new Error(
+      "Hexadécimal invalide : seuls les chiffres 0-9 et les lettres a-f minuscules sont acceptés.",
+    );
   }
   const octets = new Uint8Array(hexa.length / 2);
   for (let i = 0; i < octets.length; i += 1) {
@@ -255,7 +259,9 @@ export function comparerOctets(a: Uint8Array, b: Uint8Array): number {
 /** Entier 32 bits non signé, gros-boutiste. Le SEUL encodage d'entier du module. */
 export function u32be(valeur: number): Uint8Array {
   if (!Number.isInteger(valeur) || valeur < 0 || valeur > 0xff_ff_ff_ff) {
-    throw new Error(`u32be attend un entier de 0 à 4294967295, reçu ${String(valeur)}.`);
+    throw new Error(
+      `u32be attend un entier de 0 à 4294967295, reçu ${String(valeur)}.`,
+    );
   }
   const octets = new Uint8Array(4);
   new DataView(octets.buffer).setUint32(0, valeur, false);
@@ -283,7 +289,10 @@ function exigerSubtle(): SubtleCrypto {
 
 /** SHA-256, 32 octets. Asynchrone : WebCrypto n'offre aucune variante synchrone. */
 export async function sha256(message: Uint8Array): Promise<Uint8Array> {
-  const condensat = await exigerSubtle().digest("SHA-256", message as BufferSource);
+  const condensat = await exigerSubtle().digest(
+    "SHA-256",
+    message as BufferSource,
+  );
   return new Uint8Array(condensat);
 }
 
@@ -322,7 +331,10 @@ export async function sha256Hex(message: Uint8Array): Promise<string> {
  * a aucun. La possibilité est notée ; l'échanger contre de la simplicité serait
  * un mauvais marché ici.
  */
-export async function hmacSha256(cle: Uint8Array, message: Uint8Array): Promise<Uint8Array> {
+export async function hmacSha256(
+  cle: Uint8Array,
+  message: Uint8Array,
+): Promise<Uint8Array> {
   if (cle.length === 0) {
     // WebCrypto refuse une clé HMAC vide. Le dire ici plutôt que de laisser
     // remonter un `OperationError` sans contexte.
@@ -335,7 +347,11 @@ export async function hmacSha256(cle: Uint8Array, message: Uint8Array): Promise<
     false,
     ["sign"],
   );
-  const signature = await exigerSubtle().sign("HMAC", cleImportee, message as BufferSource);
+  const signature = await exigerSubtle().sign(
+    "HMAC",
+    cleImportee,
+    message as BufferSource,
+  );
   return new Uint8Array(signature);
 }
 
@@ -392,7 +408,9 @@ export function serialiserChamps(champs: readonly string[]): Uint8Array {
  * deux empreintes différentes, et l'engagement publié ne se recalculerait plus.
  */
 export function trierRoster(entrees: readonly EntreeRoster[]): EntreeRoster[] {
-  return entrees.toSorted((a, b) => comparerOctets(octetsUtf8(a.cle), octetsUtf8(b.cle)));
+  return entrees.toSorted((a, b) =>
+    comparerOctets(octetsUtf8(a.cle), octetsUtf8(b.cle)),
+  );
 }
 
 /**
@@ -412,10 +430,15 @@ export function trierRoster(entrees: readonly EntreeRoster[]): EntreeRoster[] {
  */
 export function serialiserRoster(entrees: readonly EntreeRoster[]): Uint8Array {
   if (entrees.length > MAX_ENTREES) {
-    throw new Error(`Roster de ${entrees.length} entrées : plafond ${MAX_ENTREES}.`);
+    throw new Error(
+      `Roster de ${entrees.length} entrées : plafond ${MAX_ENTREES}.`,
+    );
   }
   const triees = trierRoster(entrees);
-  const morceaux: Uint8Array[] = [octetsUtf8(DOMAINE_ROSTER), u32be(triees.length)];
+  const morceaux: Uint8Array[] = [
+    octetsUtf8(DOMAINE_ROSTER),
+    u32be(triees.length),
+  ];
   const vues = new Set<string>();
   for (const entree of triees) {
     const cleNfc = entree.cle.normalize("NFC");
@@ -423,10 +446,16 @@ export function serialiserRoster(entrees: readonly EntreeRoster[]): Uint8Array {
       throw new Error("Clé de participant vide dans le roster.");
     }
     if (vues.has(cleNfc)) {
-      throw new Error(`Clé de participant en double dans le roster : ${cleNfc}`);
+      throw new Error(
+        `Clé de participant en double dans le roster : ${cleNfc}`,
+      );
     }
     vues.add(cleNfc);
-    if (!Number.isInteger(entree.poids) || entree.poids < 1 || entree.poids > MAX_POIDS) {
+    if (
+      !Number.isInteger(entree.poids) ||
+      entree.poids < 1 ||
+      entree.poids > MAX_POIDS
+    ) {
       throw new Error(
         `Poids invalide pour ${cleNfc} : ${String(entree.poids)} (attendu un entier de 1 à ${MAX_POIDS}).`,
       );
@@ -438,7 +467,9 @@ export function serialiserRoster(entrees: readonly EntreeRoster[]): Uint8Array {
 }
 
 /** Empreinte du roster, 64 hexa. C'est elle qui entre dans la graine. */
-export async function empreinteRoster(entrees: readonly EntreeRoster[]): Promise<string> {
+export async function empreinteRoster(
+  entrees: readonly EntreeRoster[],
+): Promise<string> {
   return sha256Hex(serialiserRoster(entrees));
 }
 
@@ -459,7 +490,10 @@ export async function empreinteRoster(entrees: readonly EntreeRoster[]): Promise
  * gelée par le trigger d'immuabilité, et `effectuerTirage` REFUSE de tirer si
  * elle ne se recalcule pas à l'identique.
  */
-export function serialiserEngagement(engagement: Engagement, empreinteParticipants: string): Uint8Array {
+export function serialiserEngagement(
+  engagement: Engagement,
+  empreinteParticipants: string,
+): Uint8Array {
   return concat(
     octetsUtf8(DOMAINE_ENGAGEMENT),
     serialiserChamps([
@@ -477,7 +511,9 @@ export function serialiserEngagement(engagement: Engagement, empreinteParticipan
 }
 
 /** Empreinte d'engagement, 64 hexa. Recalcule l'empreinte de roster au passage. */
-export async function empreinteEngagement(engagement: Engagement): Promise<string> {
+export async function empreinteEngagement(
+  engagement: Engagement,
+): Promise<string> {
   const empreinteParticipants = await empreinteRoster(engagement.entrees);
   return sha256Hex(serialiserEngagement(engagement, empreinteParticipants));
 }
@@ -499,8 +535,13 @@ export async function empreinteEngagement(engagement: Engagement): Promise<strin
  * poids et son rang. Le sel est le slug de campagne, ce qui empêche de recouper
  * deux campagnes entre elles.
  */
-export async function clePublique(campagneSlug: string, cle: string): Promise<string> {
-  const condensat = await sha256Hex(serialiserChamps([DOMAINE_CLE_PUBLIQUE, campagneSlug, cle]));
+export async function clePublique(
+  campagneSlug: string,
+  cle: string,
+): Promise<string> {
+  const condensat = await sha256Hex(
+    serialiserChamps([DOMAINE_CLE_PUBLIQUE, campagneSlug, cle]),
+  );
   return condensat.slice(0, 16);
 }
 
@@ -543,15 +584,27 @@ export const DRAND_QUICKNET = {
  * moindre divergence (`""` contre `"locale"`) ferait échouer la vérification
  * d'un tirage pourtant honnête, et on chercherait longtemps.
  */
-export const BALISE_LOCALE = { chaine: "", reseau: "locale", round: 0 } as const;
+export const BALISE_LOCALE = {
+  chaine: "",
+  reseau: "locale",
+  round: 0,
+} as const;
 
 /** Round drand couvrant un instant donné. L'instant est un PARAMÈTRE : ce module n'a pas d'horloge. */
-export function roundPour(instantMs: number, genesisSec: number, periodeSec: number): number {
+export function roundPour(
+  instantMs: number,
+  genesisSec: number,
+  periodeSec: number,
+): number {
   return Math.floor((instantMs / 1000 - genesisSec) / periodeSec) + 1;
 }
 
 /** Instant (ms) auquel un round tombe — sert au compte à rebours et à la garde « pas encore ». */
-export function instantDuRound(round: number, genesisSec: number, periodeSec: number): number {
+export function instantDuRound(
+  round: number,
+  genesisSec: number,
+  periodeSec: number,
+): number {
   return (genesisSec + (round - 1) * periodeSec) * 1000;
 }
 
@@ -567,14 +620,21 @@ export function instantDuRound(round: number, genesisSec: number, periodeSec: nu
  * L'empreinte du roster est concaténée pour que deux campagnes qui viseraient le
  * même round n'aient pas la même graine.
  */
-export async function graineDepuisBalise(signatureHex: string, empreinteParticipants: string): Promise<string> {
-  return sha256Hex(concat(depuisHex(signatureHex), depuisHex(empreinteParticipants)));
+export async function graineDepuisBalise(
+  signatureHex: string,
+  empreinteParticipants: string,
+): Promise<string> {
+  return sha256Hex(
+    concat(depuisHex(signatureHex), depuisHex(empreinteParticipants)),
+  );
 }
 
 /** Graine de répétition, depuis 32 octets fournis par l'appelant (jamais tirés ici). */
 export function graineLocaleDepuis(octets: Uint8Array): string {
   if (octets.length !== 32) {
-    throw new Error(`Graine locale de ${octets.length} octets : 32 sont exigés.`);
+    throw new Error(
+      `Graine locale de ${octets.length} octets : 32 sont exigés.`,
+    );
   }
   return hex(octets);
 }
@@ -592,7 +652,10 @@ export function estGrainePubliable(origine: GraineOrigine): boolean {
 /* ── DÉRIVATION DE u ───────────────────────────────────────────────────────── */
 
 /** Empreinte d'un participant : `HMAC(graine, cle)`. Voir le sens des arguments sur `hmacSha256`. */
-export async function empreinteParticipant(graineHex: string, cle: string): Promise<Uint8Array> {
+export async function empreinteParticipant(
+  graineHex: string,
+  cle: string,
+): Promise<Uint8Array> {
   return hmacSha256(depuisHex(graineHex), octetsUtf8(cle));
 }
 
@@ -606,9 +669,15 @@ export async function empreinteParticipant(graineHex: string, cle: string): Prom
  */
 export function kDepuisEmpreinte(empreinte: Uint8Array): number {
   if (empreinte.length < 8) {
-    throw new Error(`Empreinte de ${empreinte.length} octets : au moins 8 sont nécessaires.`);
+    throw new Error(
+      `Empreinte de ${empreinte.length} octets : au moins 8 sont nécessaires.`,
+    );
   }
-  const vue = new DataView(empreinte.buffer, empreinte.byteOffset, empreinte.byteLength);
+  const vue = new DataView(
+    empreinte.buffer,
+    empreinte.byteOffset,
+    empreinte.byteLength,
+  );
   const haut = vue.getUint32(0, false) >>> 6; // 26 bits de tête
   const bas = vue.getUint32(4, false) >>> 6; // 26 bits suivants
   return haut * 67_108_864 + bas; // 52 bits : 0 ≤ k < 2^52
@@ -730,7 +799,10 @@ export function comparerEntrees(a: EntreeCalculee, b: EntreeCalculee): number {
  * La formulation juste, celle qui doit figurer partout : « chaque œuvre est un
  * ticket, tirés un par un sans remise ».
  */
-export function poidsDe(participant: ParticipantTirage, mode: PoidsMode): number {
+export function poidsDe(
+  participant: ParticipantTirage,
+  mode: PoidsMode,
+): number {
   if (mode === "un_par_personne") {
     return 1;
   }
@@ -742,8 +814,11 @@ export function poidsDe(participant: ParticipantTirage, mode: PoidsMode): number
 }
 
 /** Le roster réduit à (clé, poids), prêt à être haché. */
-export function rosterDe(participants: readonly ParticipantTirage[], mode: PoidsMode): EntreeRoster[] {
-  return participants.map(participant => ({
+export function rosterDe(
+  participants: readonly ParticipantTirage[],
+  mode: PoidsMode,
+): EntreeRoster[] {
+  return participants.map((participant) => ({
     cle: participant.cle,
     poids: poidsDe(participant, mode),
   }));
@@ -764,11 +839,18 @@ export function rosterDe(participants: readonly ParticipantTirage[], mode: Poids
  * en accord sur 10^6 valeurs ; on garde la forme entière, qui n'a pas d'arrondi
  * à expliquer.
  */
-export async function tirerOeuvre(graineHex: string, cle: string, oeuvres: readonly string[]): Promise<string | null> {
+export async function tirerOeuvre(
+  graineHex: string,
+  cle: string,
+  oeuvres: readonly string[],
+): Promise<string | null> {
   if (oeuvres.length === 0) {
     return null;
   }
-  const empreinte = await hmacSha256(depuisHex(graineHex), serialiserChamps([DOMAINE_OEUVRE, cle]));
+  const empreinte = await hmacSha256(
+    depuisHex(graineHex),
+    serialiserChamps([DOMAINE_OEUVRE, cle]),
+  );
   const k = BigInt(kDepuisEmpreinte(empreinte));
   const index = Number((k * BigInt(oeuvres.length)) >> 52n);
   return oeuvres[index] ?? null;
@@ -791,10 +873,14 @@ export async function executerTirage(
     throw new Error("Tirage impossible : le roster est vide.");
   }
   if (!Number.isInteger(parametres.nbGagnants) || parametres.nbGagnants < 1) {
-    throw new Error(`Nombre de gagnants invalide : ${String(parametres.nbGagnants)}.`);
+    throw new Error(
+      `Nombre de gagnants invalide : ${String(parametres.nbGagnants)}.`,
+    );
   }
   if (!/^[0-9a-f]{64}$/.test(parametres.graine)) {
-    throw new Error("Graine invalide : 64 caractères hexadécimaux minuscules sont attendus.");
+    throw new Error(
+      "Graine invalide : 64 caractères hexadécimaux minuscules sont attendus.",
+    );
   }
 
   const roster = rosterDe(participants, parametres.poidsMode);
@@ -804,8 +890,12 @@ export async function executerTirage(
   const empreinteParticipants = await empreinteRoster(roster);
   const empreinteDeLaGraine = await empreinteGraine(parametres.graine);
 
-  const parCle = new Map(participants.map(participant => [participant.cle, participant]));
-  const poidsParCle = new Map(roster.map(entree => [entree.cle, entree.poids]));
+  const parCle = new Map(
+    participants.map((participant) => [participant.cle, participant]),
+  );
+  const poidsParCle = new Map(
+    roster.map((entree) => [entree.cle, entree.poids]),
+  );
 
   // On part de l'ordre CANONIQUE, pas de l'ordre d'arrivée : le comparateur étant
   // total, le tri final en est déjà indépendant, mais partir du canonique rend les
@@ -818,9 +908,14 @@ export async function executerTirage(
     trierRoster(roster).map(async (entree): Promise<EntreeCalculee> => {
       const participant = parCle.get(entree.cle);
       if (!participant) {
-        throw new Error(`Incohérence interne : la clé ${entree.cle} n'a pas de participant.`);
+        throw new Error(
+          `Incohérence interne : la clé ${entree.cle} n'a pas de participant.`,
+        );
       }
-      const empreinte = await empreinteParticipant(parametres.graine, entree.cle);
+      const empreinte = await empreinteParticipant(
+        parametres.graine,
+        entree.cle,
+      );
       const u = uDepuisEmpreinte(empreinte);
       const poids = poidsParCle.get(entree.cle) ?? entree.poids;
       return {
@@ -854,7 +949,11 @@ export async function executerTirage(
       return {
         cle: entree.cle,
         lot: lots[i] ?? null,
-        oeuvreId: await tirerOeuvre(parametres.graine, entree.cle, entree.oeuvres),
+        oeuvreId: await tirerOeuvre(
+          parametres.graine,
+          entree.cle,
+          entree.oeuvres,
+        ),
         pseudoAffichage: entree.pseudoAffichage,
         rang: entree.rang,
       };
@@ -924,7 +1023,12 @@ export interface TirageGele {
   lots: string[];
   graineOrigine: GraineOrigine;
   publie: boolean;
-  balise: { reseau: string; chaine: string; round: number; signature: string } | null;
+  balise: {
+    reseau: string;
+    chaine: string;
+    round: number;
+    signature: string;
+  } | null;
   entrees: Array<{
     cle: string;
     pseudoAffichage: string;
@@ -953,7 +1057,10 @@ export function engagementDeTirage(gele: TirageGele): Engagement {
     baliseReseau: balise.reseau,
     baliseRound: balise.round,
     campagneSlug: gele.campagneSlug,
-    entrees: gele.entrees.map(entree => ({ cle: entree.cle, poids: entree.poids })),
+    entrees: gele.entrees.map((entree) => ({
+      cle: entree.cle,
+      poids: entree.poids,
+    })),
     lots: [...gele.lots],
     nbGagnants: gele.nbGagnants,
     poidsMode: gele.poidsMode,
@@ -982,7 +1089,9 @@ function ecartUlp(a: number, b: number): number {
   tampon[0] = b;
   const bb = bits[0] ?? 0n;
   const delta = ba > bb ? ba - bb : bb - ba;
-  return delta > 9_007_199_254_740_992n ? Number.POSITIVE_INFINITY : Number(delta);
+  return delta > 9_007_199_254_740_992n
+    ? Number.POSITIVE_INFINITY
+    : Number(delta);
 }
 
 /**
@@ -995,7 +1104,9 @@ function ecartUlp(a: number, b: number): number {
  * chaîne `<refusé: …>` qui ne peut égaler aucune empreinte valide, et qui dit à
  * l'humain ce qui a été refusé — au lieu d'un « attendu X, trouvé (vide) ».
  */
-async function empreinteOuRefus(calcul: () => Promise<string>): Promise<string> {
+async function empreinteOuRefus(
+  calcul: () => Promise<string>,
+): Promise<string> {
   try {
     return await calcul();
   } catch (erreur) {
@@ -1015,7 +1126,9 @@ async function empreinteOuRefus(calcul: () => Promise<string>): Promise<string> 
  * Ce qui est couvert, c'est ce qui décide : les clés, les poids, N, les lots, la
  * chaîne et le round visés, la graine, et l'ordre.
  */
-export async function verifierTirage(gele: TirageGele): Promise<VerdictVerification> {
+export async function verifierTirage(
+  gele: TirageGele,
+): Promise<VerdictVerification> {
   const anomalies: Anomalie[] = [];
   let controles = 0;
 
@@ -1024,7 +1137,8 @@ export async function verifierTirage(gele: TirageGele): Promise<VerdictVerificat
     anomalies.push({
       attendu: "au moins une entrée",
       code: "roster_vide",
-      explication: "Le roster gelé est vide : il n'y a rien à vérifier, donc rien à croire.",
+      explication:
+        "Le roster gelé est vide : il n'y a rien à vérifier, donc rien à croire.",
       trouve: "0",
     });
     return { anomalies, controles, valide: false };
@@ -1034,13 +1148,18 @@ export async function verifierTirage(gele: TirageGele): Promise<VerdictVerificat
   let formeValide = true;
   const vues = new Set<string>();
   for (const entree of gele.entrees) {
-    if (!Number.isInteger(entree.poids) || entree.poids < 1 || entree.poids > MAX_POIDS) {
+    if (
+      !Number.isInteger(entree.poids) ||
+      entree.poids < 1 ||
+      entree.poids > MAX_POIDS
+    ) {
       formeValide = false;
       anomalies.push({
         attendu: `un entier de 1 à ${MAX_POIDS}`,
         cle: entree.cle,
         code: "poids_invalide",
-        explication: "Un poids hors bornes fausse la proportionnalité et fait exploser le comparateur exact.",
+        explication:
+          "Un poids hors bornes fausse la proportionnalité et fait exploser le comparateur exact.",
         trouve: String(entree.poids),
       });
     }
@@ -1062,10 +1181,15 @@ export async function verifierTirage(gele: TirageGele): Promise<VerdictVerificat
     controles += 1;
   }
 
-  const roster: EntreeRoster[] = gele.entrees.map(entree => ({ cle: entree.cle, poids: entree.poids }));
+  const roster: EntreeRoster[] = gele.entrees.map((entree) => ({
+    cle: entree.cle,
+    poids: entree.poids,
+  }));
 
   // ── 2. Empreinte du roster ─────────────────────────────────────────────
-  const empreinteRecalculee = await empreinteOuRefus(() => empreinteRoster(roster));
+  const empreinteRecalculee = await empreinteOuRefus(() =>
+    empreinteRoster(roster),
+  );
   if (empreinteRecalculee === gele.empreinteParticipants) {
     controles += 1;
   } else {
@@ -1079,7 +1203,9 @@ export async function verifierTirage(gele: TirageGele): Promise<VerdictVerificat
   }
 
   // ── 3. Empreinte d'engagement (N, lots, mode, round visé) ──────────────
-  const engagementRecalcule = await empreinteOuRefus(() => empreinteEngagement(engagementDeTirage(gele)));
+  const engagementRecalcule = await empreinteOuRefus(() =>
+    empreinteEngagement(engagementDeTirage(gele)),
+  );
   if (engagementRecalcule === gele.empreinteEngagement) {
     controles += 1;
   } else {
@@ -1112,14 +1238,17 @@ export async function verifierTirage(gele: TirageGele): Promise<VerdictVerificat
   }
 
   // ── 5. Empreinte de la graine ──────────────────────────────────────────
-  const empreinteGraineRecalculee = await empreinteOuRefus(() => empreinteGraine(gele.graine));
+  const empreinteGraineRecalculee = await empreinteOuRefus(() =>
+    empreinteGraine(gele.graine),
+  );
   if (empreinteGraineRecalculee === gele.empreinteGraine) {
     controles += 1;
   } else {
     anomalies.push({
       attendu: gele.empreinteGraine,
       code: "empreinte_graine",
-      explication: "L'empreinte de graine publiée ne correspond pas à la graine : l'une des deux a été modifiée.",
+      explication:
+        "L'empreinte de graine publiée ne correspond pas à la graine : l'une des deux a été modifiée.",
       trouve: empreinteGraineRecalculee,
     });
   }
@@ -1131,7 +1260,7 @@ export async function verifierTirage(gele: TirageGele): Promise<VerdictVerificat
   // Mêmes HMAC indépendants qu'à l'exécution, donc même parallélisme. Les
   // anomalies sont poussées dans l'ordre du tableau : `Promise.all` le préserve.
   const empreintesRecalculees = await Promise.all(
-    gele.entrees.map(async entree => {
+    gele.entrees.map(async (entree) => {
       try {
         return await empreinteParticipant(gele.graine, entree.cle);
       } catch {
@@ -1235,14 +1364,19 @@ export async function verifierTirage(gele: TirageGele): Promise<VerdictVerificat
   // Les rangs doivent former exactement 1..n, sans trou ni doublon — un contrôle
   // distinct de l'ordre : deux entrées au rang 3 passeraient le test précédent si
   // l'une d'elles portait le bon.
-  const rangs = new Set(gele.entrees.map(entree => entree.rang));
-  if (rangs.size === gele.entrees.length && Math.min(...rangs) === 1 && Math.max(...rangs) === gele.entrees.length) {
+  const rangs = new Set(gele.entrees.map((entree) => entree.rang));
+  if (
+    rangs.size === gele.entrees.length &&
+    Math.min(...rangs) === 1 &&
+    Math.max(...rangs) === gele.entrees.length
+  ) {
     controles += 1;
   } else {
     anomalies.push({
       attendu: `les rangs 1 à ${gele.entrees.length}, une seule fois chacun`,
       code: "rang",
-      explication: "Les rangs gelés ne forment pas une numérotation complète : il y a un trou ou un doublon.",
+      explication:
+        "Les rangs gelés ne forment pas une numérotation complète : il y a un trou ou un doublon.",
       trouve: `${rangs.size} rangs distincts`,
     });
   }
@@ -1255,7 +1389,8 @@ export async function verifierTirage(gele: TirageGele): Promise<VerdictVerificat
     anomalies.push({
       attendu: String(nbAttendu),
       code: "nb_gagnants",
-      explication: "Le nombre de gagnants publiés ne correspond pas au nombre engagé.",
+      explication:
+        "Le nombre de gagnants publiés ne correspond pas au nombre engagé.",
       trouve: String(gele.gagnants.length),
     });
   }
@@ -1286,8 +1421,10 @@ export async function verifierTirage(gele: TirageGele): Promise<VerdictVerificat
   // ── 9. L'œuvre mise en avant a bien été TIRÉE ──────────────────────────
   let oeuvresOk = true;
   const oeuvresRecalculees = await Promise.all(
-    gele.gagnants.map(async gagnant => {
-      const entree = recalculees.find(candidate => candidate.cle === gagnant.cle);
+    gele.gagnants.map(async (gagnant) => {
+      const entree = recalculees.find(
+        (candidate) => candidate.cle === gagnant.cle,
+      );
       if (!entree) {
         return undefined;
       }

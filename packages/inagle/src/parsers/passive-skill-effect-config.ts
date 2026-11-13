@@ -77,7 +77,9 @@ function parseContent(content: any) {
 // Loaders
 // ============================================================================
 
-export async function loadPassiveSkillEffectConfigAsync(dataPath: string = DATA_ROOT) {
+export async function loadPassiveSkillEffectConfigAsync(
+  dataPath: string = DATA_ROOT,
+) {
   const filename = findConfigFile("skill", "passive_skill_effect_config");
   if (!filename) return null;
 

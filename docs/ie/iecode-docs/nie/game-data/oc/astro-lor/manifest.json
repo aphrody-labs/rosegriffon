@@ -12,7 +12,10 @@
       "Celia Hills (0xFFCE6BFF)",
       "Asta Lor (0x8DC4DA83)"
     ],
-    "linked_skills": ["who01060 (Sauve-cabri / Saute-Mouton)", "who01360 (Cabriole de la biche)"]
+    "linked_skills": [
+      "who01060 (Sauve-cabri / Saute-Mouton)",
+      "who01360 (Cabriole de la biche)"
+    ]
   },
   "gabarit": {
     "code_interne": "c02023290",

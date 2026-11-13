@@ -54,13 +54,20 @@ function toLegacyTokenShape(token: Oauth2StoredToken): PatreonTokenResponse {
  * Le `redirect_uri` est passé via les options du client (lu par la lib au
  * moment du POST `/api/oauth2/token`).
  */
-export async function exchangeCode(params: { code: string; redirectUri: string }): Promise<PatreonTokenResponse> {
+export async function exchangeCode(params: {
+  code: string;
+  redirectUri: string;
+}): Promise<PatreonTokenResponse> {
   const c = new PatreonCreatorClient({
     oauth: { ...clientCreds(), redirectUri: params.redirectUri },
   });
   const token = await c.oauth.getOauthTokenFromCode({ code: params.code });
   if (!token) {
-    throw new PatreonApiError("getOauthTokenFromCode returned undefined", 0, null);
+    throw new PatreonApiError(
+      "getOauthTokenFromCode returned undefined",
+      0,
+      null,
+    );
   }
   return toLegacyTokenShape(token);
 }
@@ -68,7 +75,9 @@ export async function exchangeCode(params: { code: string; redirectUri: string }
 /**
  * Renouvelle un access token via le refresh token stocké.
  */
-export async function refreshAccessToken(refreshToken: string): Promise<PatreonTokenResponse> {
+export async function refreshAccessToken(
+  refreshToken: string,
+): Promise<PatreonTokenResponse> {
   const c = new PatreonCreatorClient({ oauth: clientCreds() });
   const refreshed = await c.oauth.refreshToken(refreshToken);
   return toLegacyTokenShape(refreshed);
@@ -142,7 +151,11 @@ export async function patreonFetch<T = Record<string, unknown>>(
       continue;
     }
 
-    throw new PatreonApiError(`Patreon ${path} ${res.status}`, res.status, await res.text());
+    throw new PatreonApiError(
+      `Patreon ${path} ${res.status}`,
+      res.status,
+      await res.text(),
+    );
   }
   throw new PatreonApiError(`Patreon ${path} exhausted retries`, 0, null);
 }
@@ -162,7 +175,11 @@ export async function fetchIdentity(
     "fields[user]": "email,full_name,thumb_url,url,social_connections",
   };
   if (opts.withMemberships) {
-    query.include = ["memberships", "memberships.currently_entitled_tiers", "memberships.address"].join(",");
+    query.include = [
+      "memberships",
+      "memberships.currently_entitled_tiers",
+      "memberships.address",
+    ].join(",");
     query["fields[member]"] = [
       "full_name",
       "email",
@@ -217,23 +234,34 @@ export async function fetchIdentity(
  * Cette structure est ensuite consommée par le callback OAuth + le webhook
  * `members:create/update` pour upserter `patreon_memberships`.
  */
-export function parseIdentityWithMemberships(response: JsonApiResponse): ParsedIdentity {
+export function parseIdentityWithMemberships(
+  response: JsonApiResponse,
+): ParsedIdentity {
   const data = Array.isArray(response.data) ? response.data[0] : response.data;
   if (!data) {
     throw new PatreonApiError("identity returned no data", 0, null);
   }
 
   const userAttrs = data.attributes as PatreonUserAttrs;
-  const discordUserId = userAttrs.social_connections?.discord?.user_id?.toString() ?? null;
+  const discordUserId =
+    userAttrs.social_connections?.discord?.user_id?.toString() ?? null;
 
   const included = response.included ?? [];
-  const membersIncluded = included.filter(r => r.type === "member") as unknown as JsonApiResource<PatreonMemberAttrs>[];
-  const tiersIncluded = included.filter(r => r.type === "tier") as unknown as JsonApiResource<PatreonTierAttrs>[];
+  const membersIncluded = included.filter(
+    (r) => r.type === "member",
+  ) as unknown as JsonApiResource<PatreonMemberAttrs>[];
+  const tiersIncluded = included.filter(
+    (r) => r.type === "tier",
+  ) as unknown as JsonApiResource<PatreonTierAttrs>[];
   const addressesIncluded = included.filter(
-    r => r.type === "address",
+    (r) => r.type === "address",
   ) as unknown as JsonApiResource<PatreonAddressAttrs>[];
-  const tiersById = new Map<string, JsonApiResource<PatreonTierAttrs>>(tiersIncluded.map(r => [r.id, r]));
-  const addressesById = new Map<string, JsonApiResource<PatreonAddressAttrs>>(addressesIncluded.map(r => [r.id, r]));
+  const tiersById = new Map<string, JsonApiResource<PatreonTierAttrs>>(
+    tiersIncluded.map((r) => [r.id, r]),
+  );
+  const addressesById = new Map<string, JsonApiResource<PatreonAddressAttrs>>(
+    addressesIncluded.map((r) => [r.id, r]),
+  );
 
   // Filtre les memberships référencés par le user (relationships.memberships)
   const userMembershipIds = new Set<string>(
@@ -243,36 +271,49 @@ export function parseIdentityWithMemberships(response: JsonApiResponse): ParsedI
         return [];
       }
       const arr = Array.isArray(rel) ? rel : [rel];
-      return arr.map(r => r.id);
+      return arr.map((r) => r.id);
     })(),
   );
 
   const memberships: ParsedMembership[] = membersIncluded
-    .filter(m => userMembershipIds.has(m.id))
-    .map(m => {
+    .filter((m) => userMembershipIds.has(m.id))
+    .map((m) => {
       const campaignRel = m.relationships?.campaign?.data;
-      const campaignId = campaignRel && !Array.isArray(campaignRel) ? campaignRel.id : null;
+      const campaignId =
+        campaignRel && !Array.isArray(campaignRel) ? campaignRel.id : null;
 
       const tierRel = m.relationships?.currently_entitled_tiers?.data;
-      const tierRefs = Array.isArray(tierRel) ? tierRel : tierRel ? [tierRel] : [];
+      const tierRefs = Array.isArray(tierRel)
+        ? tierRel
+        : tierRel
+          ? [tierRel]
+          : [];
       const tiers = tierRefs
-        .map(ref => tiersById.get(ref.id))
+        .map((ref) => tiersById.get(ref.id))
         .filter((t): t is JsonApiResource<PatreonTierAttrs> => Boolean(t));
 
       const addressRel = m.relationships?.address?.data;
-      const addressId = addressRel && !Array.isArray(addressRel) ? addressRel.id : null;
-      const address = (addressId && addressesById.get(addressId)?.attributes) || null;
+      const addressId =
+        addressRel && !Array.isArray(addressRel) ? addressRel.id : null;
+      const address =
+        (addressId && addressesById.get(addressId)?.attributes) || null;
 
       return {
         address,
         attrs: m.attributes,
         campaignId,
-        discordRoleIds: tiers.flatMap(t => t.attributes.discord_role_ids ?? []).filter((s): s is string => Boolean(s)),
+        discordRoleIds: tiers
+          .flatMap((t) => t.attributes.discord_role_ids ?? [])
+          .filter((s): s is string => Boolean(s)),
         memberId: m.id,
-        tierAmountsCents: tiers.map(t => t.attributes.amount_cents ?? 0),
-        tierIds: tiers.map(t => t.id),
-        tierRequiresShipping: tiers.map(t => t.attributes.requires_shipping ?? false),
-        tierTitles: tiers.map(t => t.attributes.title).filter((s): s is string => Boolean(s)),
+        tierAmountsCents: tiers.map((t) => t.attributes.amount_cents ?? 0),
+        tierIds: tiers.map((t) => t.id),
+        tierRequiresShipping: tiers.map(
+          (t) => t.attributes.requires_shipping ?? false,
+        ),
+        tierTitles: tiers
+          .map((t) => t.attributes.title)
+          .filter((s): s is string => Boolean(s)),
       };
     });
 

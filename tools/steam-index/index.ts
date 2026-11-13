@@ -86,7 +86,9 @@ function storeMetadata(db: Database, d: J) {
     const lib = ins("INSERT OR REPLACE INTO libraries VALUES (?,?,?,?,?)");
     for (const l of d.libraries)
       lib.run(l.index, l.path, l.label, l.total_size ?? null, l.app_count);
-    const app = ins("INSERT OR REPLACE INTO apps VALUES (?,?,?,?,?,?,?,?,?,?,?)");
+    const app = ins(
+      "INSERT OR REPLACE INTO apps VALUES (?,?,?,?,?,?,?,?,?,?,?)",
+    );
     const dep = ins("INSERT OR REPLACE INTO app_depots VALUES (?,?,?,?)");
     for (const a of d.apps) {
       app.run(
@@ -106,7 +108,8 @@ function storeMetadata(db: Database, d: J) {
         dep.run(a.appid, Number(x.depot), x.manifest ?? null, x.size ?? null);
     }
     const dc = ins("INSERT OR REPLACE INTO depotcache VALUES (?,?,?,?)");
-    for (const x of d.depotcache) dc.run(x.path, Number(x.depot), x.gid, x.size);
+    for (const x of d.depotcache)
+      dc.run(x.path, Number(x.depot), x.gid, x.size);
     const pa = ins("INSERT OR REPLACE INTO pics_apps VALUES (?,?,?,?,?)");
     for (const x of d.appinfo?.apps ?? [])
       pa.run(x.appid, x.name ?? null, x.type ?? null, x.change, x.last_updated);
@@ -137,7 +140,9 @@ function storeMetadata(db: Database, d: J) {
     const ud = ins("INSERT OR REPLACE INTO userdata VALUES (?,?)");
     for (const u of d.userdata)
       for (const f of u.config_files) ud.run(u.account_id, f);
-    const cr = ins("INSERT OR REPLACE INTO credential_artifacts VALUES (?,?,?,?)");
+    const cr = ins(
+      "INSERT OR REPLACE INTO credential_artifacts VALUES (?,?,?,?)",
+    );
     for (const x of d.credential_artifacts)
       cr.run(x.path, x.size ?? null, x.blake3 ?? null, x.error ?? null);
     const m = ins("INSERT OR REPLACE INTO meta VALUES (?,?)");
@@ -186,7 +191,9 @@ function inventory(db: Database, apps: J[]) {
 
 async function hashPending(db: Database) {
   const pending = db
-    .query("SELECT path FROM files WHERE blake3 IS NULL AND error IS NULL ORDER BY path")
+    .query(
+      "SELECT path FROM files WHERE blake3 IS NULL AND error IS NULL ORDER BY path",
+    )
     .all() as { path: string }[];
   console.log(`hash: ${pending.length} pending`);
   if (!pending.length) return;
@@ -207,7 +214,8 @@ async function hashPending(db: Database) {
   const flush = () => {
     const now = Date.now();
     db.transaction(() => {
-      for (const r of batch) set.run(r.blake3 ?? null, r.error ?? null, now, r.path);
+      for (const r of batch)
+        set.run(r.blake3 ?? null, r.error ?? null, now, r.path);
     })();
     done += batch.length;
     batch = [];
@@ -237,9 +245,8 @@ async function hashPending(db: Database) {
 }
 
 async function vault() {
-  const { upsertEnvFileKey, DEFAULT_MONOREPO_ENV_PATH } = await import(
-    "C:/src/packages/env-kit/src/index.ts"
-  );
+  const { upsertEnvFileKey, DEFAULT_MONOREPO_ENV_PATH } =
+    await import("C:/src/packages/env-kit/src/index.ts");
   const acct = JSON.parse(await run([BIN, "account", STEAM]));
   if (!acct?.account_name || !acct?.steam_id) {
     console.log("vault: no account found in loginusers.vdf");

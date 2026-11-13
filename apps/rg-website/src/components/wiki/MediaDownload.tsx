@@ -17,7 +17,13 @@ import { exportUrl, vfsStat } from "@rosegriffon/azalee/cpk/live";
  *
  * @param awbId cue précis d'une banque audio, quand le téléchargement doit viser une piste.
  */
-export async function MediaDownload({ path, awbId }: { path: string; awbId?: number | null }) {
+export async function MediaDownload({
+  path,
+  awbId,
+}: {
+  path: string;
+  awbId?: number | null;
+}) {
   const meta = await vfsStat(path).catch(() => null);
   if (!meta) {
     return (
@@ -32,7 +38,7 @@ export async function MediaDownload({ path, awbId }: { path: string; awbId?: num
     <section className="rounded-2xl border border-outline-variant bg-surface-container-low p-4">
       <h2 className="mb-2 text-sm font-medium text-on-surface">Télécharger</h2>
       <ul className="flex flex-wrap gap-2">
-        {meta.formats.map(f => (
+        {meta.formats.map((f) => (
           <li key={f.id}>
             <a
               href={exportUrl(path, f.id, { awbId })}
@@ -44,7 +50,9 @@ export async function MediaDownload({ path, awbId }: { path: string; awbId?: num
               <span className="font-medium uppercase">{f.ext}</span>
               {/* Dire ce qui se perd est plus utile que de le taire : GIF quantifie sur
 							    256 couleurs, JPEG compresse avec perte. */}
-              {!f.sansPerte && <span className="text-on-surface-variant">avec perte</span>}
+              {!f.sansPerte && (
+                <span className="text-on-surface-variant">avec perte</span>
+              )}
             </a>
           </li>
         ))}

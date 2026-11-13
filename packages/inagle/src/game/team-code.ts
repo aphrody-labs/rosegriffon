@@ -43,8 +43,11 @@ export interface DecodedTeamCode {
  * Construit un code de partage à partir d'une formation et des emplacements
  * occupés. L'ordre des emplacements est conservé tel quel.
  */
-export function encodeTeamCode(formationId: string, slots: readonly TeamCodeSlot[]): string {
-  const parts = [formationId, ...slots.map(s => `${s.slot}:${s.charaId}`)];
+export function encodeTeamCode(
+  formationId: string,
+  slots: readonly TeamCodeSlot[],
+): string {
+  const parts = [formationId, ...slots.map((s) => `${s.slot}:${s.charaId}`)];
   return utf8ToBase64(parts.join("|"));
 }
 

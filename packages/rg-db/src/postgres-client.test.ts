@@ -6,7 +6,10 @@ function capture() {
   return {
     queries,
     executor: {
-      executeQuery: async (query: { sql: string; parameters: readonly unknown[] }) => {
+      executeQuery: async (query: {
+        sql: string;
+        parameters: readonly unknown[];
+      }) => {
         queries.push(query);
         return { rows: [{ id: "1" }] };
       },
@@ -36,15 +39,22 @@ describe("PostgresQueryBuilder", () => {
     );
 
     expect(queries[0]?.sql).not.toContain("DROP TABLE");
-    expect(queries[0]?.parameters).toEqual(["tweet-1", "a; DROP TABLE tweets;"]);
-    expect(queries[0]?.sql).toContain('ON CONFLICT ("id") DO UPDATE SET "text" = EXCLUDED."text"');
+    expect(queries[0]?.parameters).toEqual([
+      "tweet-1",
+      "a; DROP TABLE tweets;",
+    ]);
+    expect(queries[0]?.sql).toContain(
+      'ON CONFLICT ("id") DO UPDATE SET "text" = EXCLUDED."text"',
+    );
   });
 
   test("supports PostgREST null and not-null filters in OR expressions", async () => {
     const { executor, queries } = capture();
     await new PostgresQueryBuilder(executor, "inagle_characters")
       .select("id")
-      .or("sheet_data.not.is.null,is_controllable.eq.true,zukan_order.not.is.null");
+      .or(
+        "sheet_data.not.is.null,is_controllable.eq.true,zukan_order.not.is.null",
+      );
 
     expect(queries[0]?.sql).toContain('"sheet_data" IS NOT NULL');
     expect(queries[0]?.sql).toContain('"is_controllable" = $1');
@@ -53,7 +63,9 @@ describe("PostgresQueryBuilder", () => {
 
   test("maps not-is-null to IS NOT NULL", async () => {
     const { executor, queries } = capture();
-    await new PostgresQueryBuilder(executor, "profiles").select("id").not("email", "is", null);
+    await new PostgresQueryBuilder(executor, "profiles")
+      .select("id")
+      .not("email", "is", null);
 
     expect(queries[0]?.sql).toContain('"email" IS NOT NULL');
   });

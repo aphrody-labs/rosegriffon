@@ -38,7 +38,8 @@ interface DiscordScheduledEventRaw {
 
 export async function GET() {
   const token = process.env.DISCORD_BOT_TOKEN;
-  const guildId = process.env.DISCORD_GUILD_ID || process.env.NEXT_PUBLIC_DISCORD_GUILD_ID;
+  const guildId =
+    process.env.DISCORD_GUILD_ID || process.env.NEXT_PUBLIC_DISCORD_GUILD_ID;
 
   if (!token || !guildId) {
     return NextResponse.json({
@@ -49,14 +50,19 @@ export async function GET() {
   }
 
   try {
-    const res = await fetch(`https://discord.com/api/v10/guilds/${guildId}/scheduled-events?with_user_count=true`, {
-      cache: "force-cache",
-      headers: { Authorization: `Bot ${token}` },
-      next: { revalidate: DISCORD_EVENTS_REVALIDATE_SECONDS },
-    });
+    const res = await fetch(
+      `https://discord.com/api/v10/guilds/${guildId}/scheduled-events?with_user_count=true`,
+      {
+        cache: "force-cache",
+        headers: { Authorization: `Bot ${token}` },
+        next: { revalidate: DISCORD_EVENTS_REVALIDATE_SECONDS },
+      },
+    );
 
     if (!res.ok) {
-      console.warn(`[discord/scheduled-events] discord api ${res.status} ${res.statusText}`);
+      console.warn(
+        `[discord/scheduled-events] discord api ${res.status} ${res.statusText}`,
+      );
       // `reason` explicite : sans lui, une liste vide pour cause d'API en
       // erreur est indiscernable d'un serveur sans événement programmé.
       return NextResponse.json({
@@ -67,7 +73,7 @@ export async function GET() {
     }
 
     const raw = (await res.json()) as DiscordScheduledEventRaw[];
-    const events = raw.map(e => ({
+    const events = raw.map((e) => ({
       creator: e.creator
         ? {
             id: e.creator.id,
@@ -79,7 +85,9 @@ export async function GET() {
       entityMetadata: { location: e.entity_metadata?.location },
       entityType: e.entity_type,
       id: e.id,
-      image: e.image ? `https://cdn.discordapp.com/guild-events/${e.id}/${e.image}.png?size=1024` : null,
+      image: e.image
+        ? `https://cdn.discordapp.com/guild-events/${e.id}/${e.image}.png?size=1024`
+        : null,
       name: e.name,
       scheduledEndTime: e.scheduled_end_time,
       scheduledStartTime: e.scheduled_start_time,

@@ -9,16 +9,38 @@ import {
   decryptCpkBlock as fallbackDecrypt,
   isCrilayla as fallbackIsCrilayla,
 } from "../nie-bridge/index.js";
-import { FORMAT_ID_MAP, type DetectedFormat, type DotnetBridgeStatus, type IDotnetBridge } from "./types.js";
+import {
+  FORMAT_ID_MAP,
+  type DetectedFormat,
+  type DotnetBridgeStatus,
+  type IDotnetBridge,
+} from "./types.js";
 
 // Magic values read little-endian, kept in sync with IECODE.Core.FormatDetector.
 const MAGIC_FORMAT_IDS = new Map<number, number>([
-  [0x58543447, 1], [0x444d3447, 2], [0x474d3447, 3], [0x544d3447, 4],
-  [0x4b533447, 5], [0x4b503447, 6], [0x41523447, 7], [0x4147492e, 8],
-  [0x6f626a62, 9], [0x5058434c, 10], [0x4e424452, 11], [0x41534658, 12],
-  [0x4b435058, 13], [0x204b5043, 14], [0x32534641, 15], [0x00465455, 19],
-  [0x46545540, 19], [0x46544140, 20], [0x20534444, 22], [0x474e5089, 23],
-  [0x46464952, 24], [0x04034b50, 26], [0xfd2fb528, 28],
+  [0x58543447, 1],
+  [0x444d3447, 2],
+  [0x474d3447, 3],
+  [0x544d3447, 4],
+  [0x4b533447, 5],
+  [0x4b503447, 6],
+  [0x41523447, 7],
+  [0x4147492e, 8],
+  [0x6f626a62, 9],
+  [0x5058434c, 10],
+  [0x4e424452, 11],
+  [0x41534658, 12],
+  [0x4b435058, 13],
+  [0x204b5043, 14],
+  [0x32534641, 15],
+  [0x00465455, 19],
+  [0x46545540, 19],
+  [0x46544140, 20],
+  [0x20534444, 22],
+  [0x474e5089, 23],
+  [0x46464952, 24],
+  [0x04034b50, 26],
+  [0xfd2fb528, 28],
 ]);
 
 export class FallbackDotnetBridge implements IDotnetBridge {
@@ -51,11 +73,19 @@ export class FallbackDotnetBridge implements IDotnetBridge {
       formatId = 27;
     } else if (data.length >= 4) {
       const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
-      formatId = MAGIC_FORMAT_IDS.get(view.getUint32(0, true))
-        ?? MAGIC_FORMAT_IDS.get(view.getUint32(0, false))
-        ?? 0;
-      if (formatId === 0 && data.length >= 8 &&
-          data[0] === 0x4e && data[1] === 0x58 && data[2] === 0x54 && data[3] === 0x43 && data[4] === 0x48) {
+      formatId =
+        MAGIC_FORMAT_IDS.get(view.getUint32(0, true)) ??
+        MAGIC_FORMAT_IDS.get(view.getUint32(0, false)) ??
+        0;
+      if (
+        formatId === 0 &&
+        data.length >= 8 &&
+        data[0] === 0x4e &&
+        data[1] === 0x58 &&
+        data[2] === 0x54 &&
+        data[3] === 0x43 &&
+        data[4] === 0x48
+      ) {
         formatId = 25;
       }
     }
@@ -72,15 +102,18 @@ export class FallbackDotnetBridge implements IDotnetBridge {
 
   public compressCrilayla(data: Uint8Array): Uint8Array {
     if (data.length < 0x100 || data.length > 256 * 1024 * 1024) {
-      throw new RangeError("CRILAYLA input must contain between 256 and 268435456 bytes");
+      throw new RangeError(
+        "CRILAYLA input must contain between 256 and 268435456 bytes",
+      );
     }
     const rawBlockSize = Math.min(data.length, 0x100);
-    const uncompressedPayloadSize = data.length > 0x100 ? data.length - 0x100 : 0;
+    const uncompressedPayloadSize =
+      data.length > 0x100 ? data.length - 0x100 : 0;
 
     // Each payload byte is a zero literal flag followed by eight data bits.
     // Pack directly into the reversed stream rather than allocating one JS
     // number per bit (which can exhaust memory for ordinary game assets).
-    const headerOffset = Math.ceil(uncompressedPayloadSize * 9 / 8);
+    const headerOffset = Math.ceil((uncompressedPayloadSize * 9) / 8);
     const totalSize = 16 + headerOffset + 0x100;
     const out = new Uint8Array(totalSize);
 
@@ -122,7 +155,8 @@ export class FallbackDotnetBridge implements IDotnetBridge {
     // The ABI accepts uint64 values; the cipher uses the low 32 bits. Keep
     // bigint precision until after truncation, including for large file offsets.
     const abiKey = BigInt.asUintN(64, BigInt(key));
-    const numKey = abiKey === 0n ? 0x1717e18e : Number(BigInt.asUintN(32, abiKey));
+    const numKey =
+      abiKey === 0n ? 0x1717e18e : Number(BigInt.asUintN(32, abiKey));
     const numOffset = Number(BigInt.asUintN(32, BigInt(offset)));
     fallbackDecrypt(copy, numKey, numOffset);
     return copy;

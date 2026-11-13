@@ -113,7 +113,9 @@
         "byte_identical_copy": true
       },
       "producer": null,
-      "producer_candidates": ["packages/azalee/scripts/build-chr-model-manifest.ts"],
+      "producer_candidates": [
+        "packages/azalee/scripts/build-chr-model-manifest.ts"
+      ],
       "consumers": {
         "nie": [],
         "rg": ["packages/azalee/src/images/utils.ts"]
@@ -144,7 +146,10 @@
       "producer_candidates": [],
       "consumers": {
         "nie": [],
-        "rg": ["packages/azalee/src/wiki/game-text-shared.ts", "packages/azalee/src/wiki/game-text.ts"]
+        "rg": [
+          "packages/azalee/src/wiki/game-text-shared.ts",
+          "packages/azalee/src/wiki/game-text.ts"
+        ]
       },
       "regeneration": null,
       "regeneration_status": "legacy_producer_requires_port_or_provenance_review",
@@ -209,10 +214,15 @@
         "byte_identical_copy": true
       },
       "producer": null,
-      "producer_candidates": ["packages/azalee/scripts/build-menu-asset-manifest.ts"],
+      "producer_candidates": [
+        "packages/azalee/scripts/build-menu-asset-manifest.ts"
+      ],
       "consumers": {
         "nie": ["crates/nie/aphrody-nie-wiki/src/legacy_teams.rs"],
-        "rg": ["packages/azalee/src/images/utils.ts", "packages/azalee/src/wiki/teams.ts"]
+        "rg": [
+          "packages/azalee/src/images/utils.ts",
+          "packages/azalee/src/wiki/teams.ts"
+        ]
       },
       "regeneration": null,
       "regeneration_status": "legacy_producer_requires_port_or_provenance_review",
@@ -244,7 +254,10 @@
       "producer_candidates": ["apps/azalee/scripts/build-game-text-index.ts"],
       "consumers": {
         "nie": [],
-        "rg": ["packages/azalee/src/game-text/index.ts", "packages/azalee/test/game-text.test.ts"]
+        "rg": [
+          "packages/azalee/src/game-text/index.ts",
+          "packages/azalee/test/game-text.test.ts"
+        ]
       },
       "regeneration": null,
       "regeneration_status": "legacy_producer_requires_port_or_provenance_review",
@@ -312,7 +325,10 @@
       ],
       "consumers": {
         "nie": [],
-        "rg": ["packages/azalee/src/icon-index/index.ts", "packages/azalee/src/icon-index/shared.ts"]
+        "rg": [
+          "packages/azalee/src/icon-index/index.ts",
+          "packages/azalee/src/icon-index/shared.ts"
+        ]
       },
       "regeneration": null,
       "regeneration_status": "legacy_producer_requires_port_or_provenance_review",
@@ -365,7 +381,10 @@
         "byte_identical_copy": true
       },
       "producer": null,
-      "producer_candidates": ["packages/azalee/scripts/build-item-image-manifest.ts", "scripts/rag-build-edges.ts"],
+      "producer_candidates": [
+        "packages/azalee/scripts/build-item-image-manifest.ts",
+        "scripts/rag-build-edges.ts"
+      ],
       "consumers": {
         "nie": ["crates/nie/aphrody-nie-wiki/src/legacy_equipment.rs"],
         "rg": ["packages/azalee/src/images/utils.ts"]
@@ -393,10 +412,15 @@
         "byte_identical_copy": true
       },
       "producer": null,
-      "producer_candidates": ["packages/azalee/scripts/build-keshin-model-manifest.ts"],
+      "producer_candidates": [
+        "packages/azalee/scripts/build-keshin-model-manifest.ts"
+      ],
       "consumers": {
         "nie": [],
-        "rg": ["packages/azalee/src/images/utils.ts", "packages/azalee/src/wiki/service.ts"]
+        "rg": [
+          "packages/azalee/src/images/utils.ts",
+          "packages/azalee/src/wiki/service.ts"
+        ]
       },
       "regeneration": null,
       "regeneration_status": "legacy_producer_requires_port_or_provenance_review",
@@ -421,7 +445,9 @@
         "byte_identical_copy": true
       },
       "producer": null,
-      "producer_candidates": ["packages/azalee/scripts/build-menu-asset-manifest.ts"],
+      "producer_candidates": [
+        "packages/azalee/scripts/build-menu-asset-manifest.ts"
+      ],
       "consumers": {
         "nie": ["crates/nie/aphrody-nie-wiki/src/legacy_equipment.rs"],
         "rg": ["packages/azalee/src/images/utils.ts"]
@@ -449,9 +475,14 @@
         "byte_identical_copy": true
       },
       "producer": null,
-      "producer_candidates": ["packages/azalee/scripts/build-menu-gallery-manifest.ts"],
+      "producer_candidates": [
+        "packages/azalee/scripts/build-menu-gallery-manifest.ts"
+      ],
       "consumers": {
-        "nie": ["crates/nie/aphrody-nie-wiki/src/gallery.rs", "packages/inacord-ui/src/gallery/gallery.ts"],
+        "nie": [
+          "crates/nie/aphrody-nie-wiki/src/gallery.rs",
+          "packages/inacord-ui/src/gallery/gallery.ts"
+        ],
         "rg": ["packages/azalee/src/wiki/service.ts"]
       },
       "regeneration": null,
@@ -477,7 +508,10 @@
         "byte_identical_copy": true
       },
       "producer": null,
-      "producer_candidates": ["packages/azalee/scripts/build-miximax-icon-manifest.ts", "scripts/rag-build-edges.ts"],
+      "producer_candidates": [
+        "packages/azalee/scripts/build-miximax-icon-manifest.ts",
+        "scripts/rag-build-edges.ts"
+      ],
       "consumers": {
         "nie": [],
         "rg": ["packages/azalee/src/images/utils.ts"]
@@ -556,7 +590,9 @@
         "byte_identical_copy": true
       },
       "producer": null,
-      "producer_candidates": ["packages/azalee/scripts/build-skills-cutin-served.ts"],
+      "producer_candidates": [
+        "packages/azalee/scripts/build-skills-cutin-served.ts"
+      ],
       "consumers": {
         "nie": ["crates/nie/aphrody-nie-core/src/azalee/skills_cutin.rs"],
         "rg": ["packages/azalee/src/game/skills-cutin.ts"]
@@ -584,13 +620,18 @@
         "byte_identical_copy": true
       },
       "producer": "crates/nie/aphrody-nie-data/src/bin/export_skills.rs",
-      "producer_candidates": ["packages/azalee/scripts/build-skills-cutin-served.ts"],
+      "producer_candidates": [
+        "packages/azalee/scripts/build-skills-cutin-served.ts"
+      ],
       "consumers": {
         "nie": [
           "crates/nie/aphrody-nie-core/src/azalee/skills_cutin.rs",
           "crates/nie/aphrody-nie-data/src/bin/export_skills.rs"
         ],
-        "rg": ["apps/azalee/components/wiki/AphrodyDossierSection.tsx", "packages/azalee/src/game/skills-cutin.ts"]
+        "rg": [
+          "apps/azalee/components/wiki/AphrodyDossierSection.tsx",
+          "packages/azalee/src/game/skills-cutin.ts"
+        ]
       },
       "regeneration": [
         "cargo",

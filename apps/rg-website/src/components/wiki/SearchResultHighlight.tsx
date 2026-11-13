@@ -13,7 +13,11 @@ interface SearchResultHighlightProps {
   className?: string;
 }
 
-export function SearchResultHighlight({ text, query, className }: SearchResultHighlightProps) {
+export function SearchResultHighlight({
+  text,
+  query,
+  className,
+}: SearchResultHighlightProps) {
   const parts = highlightMatches(text, query);
 
   return (

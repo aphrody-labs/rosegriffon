@@ -9,15 +9,19 @@ describe("security.txt (RFC 9116)", () => {
   const champs = texte
     .trim()
     .split("\n")
-    .map(l => l.split(": ")[0]);
+    .map((l) => l.split(": ")[0]);
 
   it("has the required fields, one Expires and one Canonical", () => {
     expect(texte).toContain("Contact: mailto:contact@rosegriffon.fr\n");
-    expect(texte).toContain("Contact: https://rosegriffon.fr/a-propos/contact\n");
+    expect(texte).toContain(
+      "Contact: https://rosegriffon.fr/a-propos/contact\n",
+    );
     expect(texte).toContain("Preferred-Languages: fr, en\n");
-    expect(texte).toContain("Canonical: https://rosegriffon.fr/.well-known/security.txt\n");
-    expect(champs.filter(c => c === "Expires")).toHaveLength(1);
-    expect(champs.filter(c => c === "Canonical")).toHaveLength(1);
+    expect(texte).toContain(
+      "Canonical: https://rosegriffon.fr/.well-known/security.txt\n",
+    );
+    expect(champs.filter((c) => c === "Expires")).toHaveLength(1);
+    expect(champs.filter((c) => c === "Canonical")).toHaveLength(1);
   });
 
   it("expires one year ahead, RFC 3339 without milliseconds", () => {
@@ -26,7 +30,9 @@ describe("security.txt (RFC 9116)", () => {
 
   it("is served as text/plain UTF-8 with a future Expires", async () => {
     const reponse = GET();
-    expect(reponse.headers.get("content-type")).toBe("text/plain; charset=utf-8");
+    expect(reponse.headers.get("content-type")).toBe(
+      "text/plain; charset=utf-8",
+    );
     const corps = await reponse.text();
     const expire = Date.parse(/Expires: (.+)/.exec(corps)![1]!);
     expect(expire).toBeGreaterThan(Date.now() + 360 * 86_400_000);

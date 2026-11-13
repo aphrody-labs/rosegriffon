@@ -89,7 +89,9 @@ export function normalizeImagePath(src: string | null): string | null {
 /**
  * Parses a character list page (chara_list)
  */
-export async function parseCharacterListPage(filePath: string): Promise<ZukanCharacter[]> {
+export async function parseCharacterListPage(
+  filePath: string,
+): Promise<ZukanCharacter[]> {
   const html = await Bun.file(filePath).text();
   const $ = cheerio.load(html);
   const characters: ZukanCharacter[] = [];
@@ -119,11 +121,15 @@ export async function parseCharacterListPage(filePath: string): Promise<ZukanCha
     const picture = row.find("picture");
     let imageSource = null;
     if (picture.length) {
-      imageSource = picture.find('source[type="image/webp"]').attr("srcset") || picture.find("img").attr("src");
+      imageSource =
+        picture.find('source[type="image/webp"]').attr("srcset") ||
+        picture.find("img").attr("src");
     }
 
     if (!imageSource) {
-      imageSource = row.find('img[src*="/k/"]').attr("src") || row.find('img[src*="prd/assets"]').attr("src");
+      imageSource =
+        row.find('img[src*="/k/"]').attr("src") ||
+        row.find('img[src*="prd/assets"]').attr("src");
     }
 
     const image = normalizeImagePath(imageSource || null);
@@ -149,18 +155,35 @@ export async function parseCharacterListPage(filePath: string): Promise<ZukanCha
     if (colspanCell.length > 0) {
       // Single-game character — td colspan="9" contains the game title
       const gameLabel = colspanCell.text().trim();
-      const key = (Object.entries(GAME_TO_SERIES) as [GameKey, string][]).find(([, v]) => {
-        if (v === "Inazuma Eleven" && gameLabel === "Inazuma Eleven") return true;
-        if (v === "Inazuma Eleven 2" && gameLabel.startsWith("Inazuma Eleven 2")) return true;
-        if (v === "Inazuma Eleven 3" && gameLabel.startsWith("Inazuma Eleven 3")) return true;
-        if (v === "Inazuma Eleven GO" && gameLabel.startsWith("Inazuma Eleven GO: Light")) return true;
-        if (v === "Chrono Stone" && gameLabel.includes("Chrono Stone")) return true;
-        if (v === "Galaxy" && gameLabel.includes("Galaxy")) return true;
-        if (v === "Ares" && gameLabel.includes("Ares")) return true;
-        if (v === "Orion" && gameLabel.includes("Orion")) return true;
-        if (v === "Victory Road" && gameLabel.includes("Victory Road")) return true;
-        return false;
-      })?.[0];
+      const key = (Object.entries(GAME_TO_SERIES) as [GameKey, string][]).find(
+        ([, v]) => {
+          if (v === "Inazuma Eleven" && gameLabel === "Inazuma Eleven")
+            return true;
+          if (
+            v === "Inazuma Eleven 2" &&
+            gameLabel.startsWith("Inazuma Eleven 2")
+          )
+            return true;
+          if (
+            v === "Inazuma Eleven 3" &&
+            gameLabel.startsWith("Inazuma Eleven 3")
+          )
+            return true;
+          if (
+            v === "Inazuma Eleven GO" &&
+            gameLabel.startsWith("Inazuma Eleven GO: Light")
+          )
+            return true;
+          if (v === "Chrono Stone" && gameLabel.includes("Chrono Stone"))
+            return true;
+          if (v === "Galaxy" && gameLabel.includes("Galaxy")) return true;
+          if (v === "Ares" && gameLabel.includes("Ares")) return true;
+          if (v === "Orion" && gameLabel.includes("Orion")) return true;
+          if (v === "Victory Road" && gameLabel.includes("Victory Road"))
+            return true;
+          return false;
+        },
+      )?.[0];
       if (key) gameAppearances.push(key);
     } else {
       // Multi-game character — 9 td.appearedWorks cells with ○/×
@@ -198,7 +221,9 @@ export async function parseCharacterListPage(filePath: string): Promise<ZukanCha
 /**
  * Parses a character detail page (chara_param)
  */
-export async function parseCharacterDetailPage(filePath: string): Promise<Partial<ZukanCharacter>> {
+export async function parseCharacterDetailPage(
+  filePath: string,
+): Promise<Partial<ZukanCharacter>> {
   if (!(await Bun.file(filePath).exists())) return {};
   const html = await Bun.file(filePath).text();
   const $ = cheerio.load(html);
@@ -238,7 +263,8 @@ export async function parseCharacterDetailPage(filePath: string): Promise<Partia
     const label = $(dl).find("dt").text().trim().toLowerCase();
     const value = $(dl).find("dd").text().trim();
 
-    if (label === "position") basicInfo.position = MAPS.position[value] || value;
+    if (label === "position")
+      basicInfo.position = MAPS.position[value] || value;
     if (label === "element") basicInfo.element = MAPS.element[value] || value;
 
     // Victory Road Stats
@@ -270,7 +296,9 @@ export async function parseCharacterDetailPage(filePath: string): Promise<Partia
 /**
  * Parses a character model viewer page (chara_model_view) to get the modelId
  */
-export async function parseCharacterModelPage(filePath: string): Promise<{ modelId?: string }> {
+export async function parseCharacterModelPage(
+  filePath: string,
+): Promise<{ modelId?: string }> {
   if (!(await Bun.file(filePath).exists())) return {};
   const html = await Bun.file(filePath).text();
   const $ = cheerio.load(html);
@@ -302,7 +330,9 @@ export function parseSkillListHtml(html: string): ZukanSkill[] {
 
     // Toutes les variantes vidéo du `.btnBox` (1 ou 2), repli sur `figure.movie`.
     const btnLinks = lBox.find(".btnBox a[data-movie-url]");
-    const movieLinks = btnLinks.length ? btnLinks : lBox.find("figure.movie a[data-movie-url]");
+    const movieLinks = btnLinks.length
+      ? btnLinks
+      : lBox.find("figure.movie a[data-movie-url]");
 
     const videos: ZukanSkillVideo[] = [];
     movieLinks.each((position, a) => {
@@ -327,7 +357,9 @@ export function parseSkillListHtml(html: string): ZukanSkill[] {
     // Image/Thumbnail
     const picture = lBox.find("picture");
     const thumbnailUrl = normalizeImagePath(
-      picture.find('source[type="image/webp"]').attr("srcset") || picture.find("img").attr("src") || null,
+      picture.find('source[type="image/webp"]').attr("srcset") ||
+        picture.find("img").attr("src") ||
+        null,
     );
 
     // Description
@@ -369,7 +401,9 @@ export function parseSkillListHtml(html: string): ZukanSkill[] {
 /**
  * Parses a skill list page
  */
-export async function parseSkillListPage(filePath: string): Promise<ZukanSkill[]> {
+export async function parseSkillListPage(
+  filePath: string,
+): Promise<ZukanSkill[]> {
   return parseSkillListHtml(await Bun.file(filePath).text());
 }
 
@@ -386,11 +420,16 @@ export async function parseItemPage(filePath: string): Promise<ZukanItem[]> {
 
   $(".itemListBox > li").each((_, li) => {
     // Name is inside .detailBox > .name, not .nameBox
-    const name = $(li).find(".detailBox .name ruby").text().trim() || $(li).find(".detailBox .name").text().trim();
+    const name =
+      $(li).find(".detailBox .name ruby").text().trim() ||
+      $(li).find(".detailBox .name").text().trim();
     if (!name) return;
 
     const picture = $(li).find("figure.item picture");
-    let imageUrl = picture.find('source[type="image/webp"]').attr("srcset") || picture.find("img").attr("src") || null;
+    let imageUrl =
+      picture.find('source[type="image/webp"]').attr("srcset") ||
+      picture.find("img").attr("src") ||
+      null;
 
     imageUrl = normalizeImagePath(imageUrl);
 
@@ -410,7 +449,9 @@ export async function parseItemPage(filePath: string): Promise<ZukanItem[]> {
 /**
  * Parses a formation page
  */
-export async function parseFormationPage(filePath: string): Promise<ZukanFormation[]> {
+export async function parseFormationPage(
+  filePath: string,
+): Promise<ZukanFormation[]> {
   const html = await Bun.file(filePath).text();
   const $ = cheerio.load(html);
   const formations: ZukanFormation[] = [];

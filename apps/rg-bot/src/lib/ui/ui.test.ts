@@ -60,7 +60,9 @@ describe("bornage", () => {
   });
 
   test("échappe le markdown des textes venus de l'extérieur", () => {
-    expect(echapper("**gras** [lien](url)")).toBe("\\*\\*gras\\*\\* \\[lien\\]\\(url\\)");
+    expect(echapper("**gras** [lien](url)")).toBe(
+      "\\*\\*gras\\*\\* \\[lien\\]\\(url\\)",
+    );
   });
 
   test("joindre ignore les morceaux vides", () => {
@@ -80,7 +82,10 @@ describe("bornage", () => {
 
 describe("découpe en champs", () => {
   test("coupe sur les sauts de ligne, jamais au milieu d'une ligne courte", () => {
-    const texte = Array.from({ length: 10 }, (_, i) => `ligne ${i} ${"x".repeat(100)}`).join("\n");
+    const texte = Array.from(
+      { length: 10 },
+      (_, i) => `ligne ${i} ${"x".repeat(100)}`,
+    ).join("\n");
     const morceaux = decouper(texte, 300, 5);
     expect(morceaux.length).toBeGreaterThan(1);
     for (const morceau of morceaux) {
@@ -100,11 +105,15 @@ describe("embed", () => {
   });
 
   test("préfixe le titre de l'icône d'intention", () => {
-    expect(creerEmbed({ intention: "succes", titre: "Fait" }).toJSON().title).toBe("✅ Fait");
+    expect(
+      creerEmbed({ intention: "succes", titre: "Fait" }).toJSON().title,
+    ).toBe("✅ Fait");
   });
 
   test("accepte une icône nommée du lexique", () => {
-    expect(creerEmbed({ icone: "agenda", titre: "Semaine" }).toJSON().title).toBe("📅 Semaine");
+    expect(
+      creerEmbed({ icone: "agenda", titre: "Semaine" }).toJSON().title,
+    ).toBe("📅 Semaine");
   });
 
   test("borne le titre à la limite de l'API", () => {
@@ -114,7 +123,9 @@ describe("embed", () => {
 
   test("ignore une URL invalide au lieu de lever", () => {
     expect(() => creerEmbed({ titre: "x", url: "pas une url" })).not.toThrow();
-    expect(creerEmbed({ titre: "x", url: "pas une url" }).toJSON().url).toBeUndefined();
+    expect(
+      creerEmbed({ titre: "x", url: "pas une url" }).toJSON().url,
+    ).toBeUndefined();
     expect(urlValide("https://rosegriffon.fr")).toBe(true);
     expect(urlValide("javascript:alert(1)")).toBe(false);
   });
@@ -133,19 +144,28 @@ describe("pied de page", () => {
   });
 
   test("compose note, position et marque dans cet ordre", () => {
-    const rendu = pied(creerEmbed(), { note: "/agenda semaine", page: 2, pages: 5 }).toJSON().footer?.text;
-    expect(rendu).toBe(`/agenda semaine · page 2/5 · ${MARQUE.nom} · ${MARQUE.domaine}`);
+    const rendu = pied(creerEmbed(), {
+      note: "/agenda semaine",
+      page: 2,
+      pages: 5,
+    }).toJSON().footer?.text;
+    expect(rendu).toBe(
+      `/agenda semaine · page 2/5 · ${MARQUE.nom} · ${MARQUE.domaine}`,
+    );
   });
 
   test("tait la position sur une liste d'une seule page", () => {
-    const rendu = pied(creerEmbed(), { page: 1, pages: 1 }).toJSON().footer?.text;
+    const rendu = pied(creerEmbed(), { page: 1, pages: 1 }).toJSON().footer
+      ?.text;
     expect(rendu).not.toContain("page");
   });
 });
 
 describe("Fiche : le budget est tenu à l'ajout", () => {
   test("empile les champs tant qu'ils rentrent", () => {
-    const f = fiche({ titre: "Test" }).champ("A", "1").champ("B", "2", { enLigne: true });
+    const f = fiche({ titre: "Test" })
+      .champ("A", "1")
+      .champ("B", "2", { enLigne: true });
     expect(f.embed.toJSON().fields).toHaveLength(2);
     expect(f.tronquee).toBe(false);
   });
@@ -166,7 +186,10 @@ describe("Fiche : le budget est tenu à l'ajout", () => {
   });
 
   test("ne dépasse JAMAIS le budget total, même à coups de champs pleins", () => {
-    const f = new Fiche({ titre: "T".repeat(200), description: "D".repeat(2000) });
+    const f = new Fiche({
+      titre: "T".repeat(200),
+      description: "D".repeat(2000),
+    });
     for (let i = 0; i < 25; i++) {
       f.champ(`Champ ${i}`, "v".repeat(LIMITES.valeurChamp));
     }
@@ -175,14 +198,20 @@ describe("Fiche : le budget est tenu à l'ajout", () => {
       (rendu.title?.length ?? 0) +
       (rendu.description?.length ?? 0) +
       (rendu.footer?.text.length ?? 0) +
-      (rendu.fields ?? []).reduce((n, champ) => n + champ.name.length + champ.value.length, 0);
+      (rendu.fields ?? []).reduce(
+        (n, champ) => n + champ.name.length + champ.value.length,
+        0,
+      );
     expect(total).toBeLessThanOrEqual(LIMITES.total);
     expect(total).toBeLessThanOrEqual(BUDGET_EMBED + 150);
     expect(f.tronquee).toBe(true);
   });
 
   test("bloc découpe un texte long en plusieurs champs", () => {
-    const texte = Array.from({ length: 60 }, (_, i) => `ligne ${i} ${"y".repeat(60)}`).join("\n");
+    const texte = Array.from(
+      { length: 60 },
+      (_, i) => `ligne ${i} ${"y".repeat(60)}`,
+    ).join("\n");
     const f = new Fiche().bloc("Journal", texte, 3);
     const champs = f.embed.toJSON().fields ?? [];
     expect(champs.length).toBeGreaterThan(1);
@@ -283,18 +312,30 @@ describe("pagination : boutons", () => {
   const identifiant = (page: number) => encoderEtat("az", ["galerie", page]);
 
   test("aucune rangée sur une liste d'une seule page", () => {
-    expect(rangeePagination({ prefixe: "az", page: 1, pages: 1, identifiant })).toHaveLength(0);
+    expect(
+      rangeePagination({ prefixe: "az", page: 1, pages: 1, identifiant }),
+    ).toHaveLength(0);
   });
 
   test("trois composants sous le seuil de sauts", () => {
-    const rangees = rangeePagination({ prefixe: "az", page: 2, pages: 3, identifiant });
+    const rangees = rangeePagination({
+      prefixe: "az",
+      page: 2,
+      pages: 3,
+      identifiant,
+    });
     const composants = rangees[0]!.toJSON().components;
     expect(composants).toHaveLength(3);
     expect(composants[1]).toMatchObject({ label: "2 / 3", disabled: true });
   });
 
   test("cinq composants au milieu d'une longue liste", () => {
-    const rangees = rangeePagination({ prefixe: "az", page: 10, pages: 20, identifiant });
+    const rangees = rangeePagination({
+      prefixe: "az",
+      page: 10,
+      pages: 20,
+      identifiant,
+    });
     const composants = rangees[0]!.toJSON().components;
     expect(composants).toHaveLength(5);
     expect(composants[0]).toMatchObject({ disabled: false });
@@ -307,10 +348,20 @@ describe("pagination : boutons", () => {
     // donc portent le MÊME `customId`, et Discord refuse le message entier
     // (400 `COMPONENT_CUSTOM_ID_DUPLICATED`). `/x liste` était cassée en
     // production, sur la première page — celle que tout le monde voit.
-    const premiere = rangeePagination({ prefixe: "az", page: 1, pages: 20, identifiant });
+    const premiere = rangeePagination({
+      prefixe: "az",
+      page: 1,
+      pages: 20,
+      identifiant,
+    });
     expect(premiere[0]!.toJSON().components).toHaveLength(4);
 
-    const derniere = rangeePagination({ prefixe: "az", page: 20, pages: 20, identifiant });
+    const derniere = rangeePagination({
+      prefixe: "az",
+      page: 20,
+      pages: 20,
+      identifiant,
+    });
     expect(derniere[0]!.toJSON().components).toHaveLength(4);
   });
 
@@ -328,7 +379,14 @@ describe("pagination : boutons", () => {
 
   test("aucun bouton si l'état ne tient pas dans un customId", () => {
     const trop = () => "x".repeat(MAX_CUSTOM_ID + 1);
-    expect(rangeePagination({ prefixe: "az", page: 1, pages: 5, identifiant: () => null })).toHaveLength(0);
+    expect(
+      rangeePagination({
+        prefixe: "az",
+        page: 1,
+        pages: 5,
+        identifiant: () => null,
+      }),
+    ).toHaveLength(0);
     expect(trop()).toHaveLength(MAX_CUSTOM_ID + 1);
   });
 });
@@ -355,9 +413,11 @@ describe("aucun customId dupliqué dans une rangée", () => {
    */
 
   /** Tous les `customId` d'une rangée rendue, à plat. */
-  function identifiants(rangees: ReturnType<typeof rangeePagination>): string[] {
-    return rangees.flatMap(rangee =>
-      rangee.components.map(bouton => {
+  function identifiants(
+    rangees: ReturnType<typeof rangeePagination>,
+  ): string[] {
+    return rangees.flatMap((rangee) =>
+      rangee.components.map((bouton) => {
         const donnees = bouton.toJSON() as { custom_id?: string; url?: string };
         return donnees.custom_id ?? donnees.url ?? "";
       }),
@@ -371,13 +431,16 @@ describe("aucun customId dupliqué dans une rangée", () => {
       for (let page = 1; page <= pages; page++) {
         const ids = identifiants(
           rangeePagination({
-            identifiant: cible => encoderEtat("tw", ["liste", cible]),
+            identifiant: (cible) => encoderEtat("tw", ["liste", cible]),
             page,
             pages,
             prefixe: "tw",
           }),
         );
-        expect(new Set(ids).size, `pages=${pages} page=${page} → ${ids.join(" ")}`).toBe(ids.length);
+        expect(
+          new Set(ids).size,
+          `pages=${pages} page=${page} → ${ids.join(" ")}`,
+        ).toBe(ids.length);
       }
     }
   });
@@ -387,12 +450,14 @@ describe("aucun customId dupliqué dans une rangée", () => {
     // le garder avec un identifiant inerte laisserait un bouton qui ment sur ce
     // qu'il fait.
     const [rangee] = rangeePagination({
-      identifiant: cible => encoderEtat("tw", ["liste", cible]),
+      identifiant: (cible) => encoderEtat("tw", ["liste", cible]),
       page: 2,
       pages: 17,
       prefixe: "tw",
     });
-    const emojis = rangee!.components.map(b => (b.toJSON() as { emoji?: { name?: string } }).emoji?.name ?? "");
+    const emojis = rangee!.components.map(
+      (b) => (b.toJSON() as { emoji?: { name?: string } }).emoji?.name ?? "",
+    );
     expect(emojis).not.toContain("⏮️");
     expect(emojis).toContain("◀️");
     expect(emojis).toContain("⏭️");
@@ -400,7 +465,7 @@ describe("aucun customId dupliqué dans une rangée", () => {
 
   test("au milieu d'une longue liste, les quatre sauts et flèches coexistent", () => {
     const [rangee] = rangeePagination({
-      identifiant: cible => encoderEtat("tw", ["liste", cible]),
+      identifiant: (cible) => encoderEtat("tw", ["liste", cible]),
       page: 9,
       pages: 17,
       prefixe: "tw",

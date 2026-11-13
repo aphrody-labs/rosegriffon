@@ -52,7 +52,11 @@ export function nombreDePages(total: number, parPage: number): number {
  * pleine — et côté SQL, `page:999999999` produit un `OFFSET` que Postgres refuse
  * en bigint : la commande échouerait au lieu de montrer la dernière page.
  */
-export function bornerPage(page: number, total: number, parPage: number): number {
+export function bornerPage(
+  page: number,
+  total: number,
+  parPage: number,
+): number {
   const pages = nombreDePages(total, parPage);
   if (!Number.isFinite(page)) {
     return 1;
@@ -61,7 +65,11 @@ export function bornerPage(page: number, total: number, parPage: number): number
 }
 
 /** Tranche d'une liste déjà entièrement chargée. */
-export function tranche<T>(entrees: readonly T[], page: number, parPage: number): T[] {
+export function tranche<T>(
+  entrees: readonly T[],
+  page: number,
+  parPage: number,
+): T[] {
   const sure = bornerPage(page, entrees.length, parPage);
   const debut = (sure - 1) * parPage;
   return entrees.slice(debut, debut + parPage);
@@ -70,11 +78,15 @@ export function tranche<T>(entrees: readonly T[], page: number, parPage: number)
 // ─── État transporté par le `customId` ──────────────────────────────────────
 
 /** Retire le séparateur d'un fragment pour qu'il ne casse pas le décodage. */
-export function sansSeparateur(valeur: string | number | null | undefined): string {
+export function sansSeparateur(
+  valeur: string | number | null | undefined,
+): string {
   if (typeof valeur === "number") {
     return Number.isFinite(valeur) ? String(Math.trunc(valeur)) : "";
   }
-  return typeof valeur === "string" ? valeur.replaceAll(SEPARATEUR_ETAT, " ").trim() : "";
+  return typeof valeur === "string"
+    ? valeur.replaceAll(SEPARATEUR_ETAT, " ").trim()
+    : "";
 }
 
 /**
@@ -84,8 +96,13 @@ export function sansSeparateur(valeur: string | number | null | undefined): stri
  *                routage : un gestionnaire de bouton ne doit répondre qu'aux
  *                identifiants de SA surface.
  */
-export function encoderEtat(prefixe: string, champs: ReadonlyArray<string | number | null | undefined>): string | null {
-  const identifiant = [prefixe, ...champs.map(sansSeparateur)].join(SEPARATEUR_ETAT);
+export function encoderEtat(
+  prefixe: string,
+  champs: ReadonlyArray<string | number | null | undefined>,
+): string | null {
+  const identifiant = [prefixe, ...champs.map(sansSeparateur)].join(
+    SEPARATEUR_ETAT,
+  );
   return identifiant.length <= MAX_CUSTOM_ID ? identifiant : null;
 }
 
@@ -96,7 +113,11 @@ export function encoderEtat(prefixe: string, champs: ReadonlyArray<string | numb
  *          pas à cette surface ou n'a pas le bon nombre de champs — un état
  *          partiel produirait une page avec des filtres arbitraires.
  */
-export function decoderEtat(prefixe: string, customId: string, nombreChamps: number): string[] | null {
+export function decoderEtat(
+  prefixe: string,
+  customId: string,
+  nombreChamps: number,
+): string[] | null {
   const morceaux = customId.split(SEPARATEUR_ETAT);
   if (morceaux.length !== nombreChamps + 1 || morceaux[0] !== prefixe) {
     return null;

@@ -1,5 +1,10 @@
 import { readVfsConfig } from "./vfs-data.js";
-import { cfgbinDataSource, cfgbinDbAvailable, cfgbinDbLoadByPath, cfgbinPostgresLoadByPath } from "./cfgbin-db.js";
+import {
+  cfgbinDataSource,
+  cfgbinDbAvailable,
+  cfgbinDbLoadByPath,
+  cfgbinPostgresLoadByPath,
+} from "./cfgbin-db.js";
 
 const fileCache = new Map<string, any>();
 
@@ -16,7 +21,9 @@ function cfgbinPathFromFile(path: string): string | null {
   const normalized = path.replaceAll("\\", "/");
   const match = normalized.match(/\/common\/(gamedata|text)\/(.+)$/);
   if (!match) return null;
-  const filename = match[2]!.endsWith(".json") ? match[2]!.slice(0, -5) : match[2]!;
+  const filename = match[2]!.endsWith(".json")
+    ? match[2]!.slice(0, -5)
+    : match[2]!;
   return `data/common/${match[1]}/${filename}`;
 }
 
@@ -33,7 +40,8 @@ export async function loadJsonAsync<T>(path: string | null): Promise<T | null> {
   }
 
   const cfgbinPath = cfgbinPathFromFile(path);
-  if (cfgbinPath && cfgbinDataSource() === "vfs") return readVfsConfig(cfgbinPath) as T | null;
+  if (cfgbinPath && cfgbinDataSource() === "vfs")
+    return readVfsConfig(cfgbinPath) as T | null;
   if (cfgbinPath) {
     try {
       const data = await cfgbinPostgresLoadByPath(cfgbinPath);
@@ -43,7 +51,10 @@ export async function loadJsonAsync<T>(path: string | null): Promise<T | null> {
       // PostgreSQL is optional for extraction/dev; try the local SQL cache.
     }
     const isTextPath = cfgbinPath.includes("/text/");
-    if (cfgbinDbAvailable() && (!isTextPath || process.env.IEVR_CFGBIN_DB_TEXT === "1")) {
+    if (
+      cfgbinDbAvailable() &&
+      (!isTextPath || process.env.IEVR_CFGBIN_DB_TEXT === "1")
+    ) {
       try {
         const data = cfgbinDbLoadByPath(cfgbinPath);
         fileCache.set(path, data);
@@ -74,7 +85,10 @@ export async function loadJsonAsync<T>(path: string | null): Promise<T | null> {
 /**
  * Helper to measure execution time
  */
-export async function measureTime<T>(label: string, fn: () => Promise<T>): Promise<T> {
+export async function measureTime<T>(
+  label: string,
+  fn: () => Promise<T>,
+): Promise<T> {
   const start = performance.now();
   const result = await fn();
   const end = performance.now();

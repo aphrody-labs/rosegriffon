@@ -70,7 +70,10 @@ export function doubleEliminationRounds(participants: number): number {
 }
 
 /** Nombre de journées d'un round robin (algorithme du cercle). */
-export function roundRobinRounds(participants: number, doubleLegged = false): number {
+export function roundRobinRounds(
+  participants: number,
+  doubleLegged = false,
+): number {
   const n = toCount(participants);
   if (n <= 1) return 0;
   const rounds = n % 2 === 0 ? n - 1 : n;
@@ -78,7 +81,11 @@ export function roundRobinRounds(participants: number, doubleLegged = false): nu
 }
 
 /** Nombre total de tours pour un format donné. */
-export function stageRounds(type: StageType, participants: number, doubleLegged = false): number {
+export function stageRounds(
+  type: StageType,
+  participants: number,
+  doubleLegged = false,
+): number {
   switch (type) {
     case StageType.single_elimination:
       return singleEliminationRounds(participants);
@@ -93,7 +100,11 @@ export function stageRounds(type: StageType, participants: number, doubleLegged 
 }
 
 /** Nombre total de matchs d'un format donné. */
-export function stageMatchCount(type: StageType, participants: number, doubleLegged = false): number {
+export function stageMatchCount(
+  type: StageType,
+  participants: number,
+  doubleLegged = false,
+): number {
   const n = toCount(participants);
   if (n <= 1) return 0;
   switch (type) {
@@ -140,7 +151,10 @@ export function roundLabel(round: number, participants: number): string {
  * Nombre de manches d'un match selon son format.
  * `CUSTOM` dépend de `customChildCount`, fourni par le tournoi.
  */
-export function matchGameCount(format: MatchFormat, customChildCount?: number | null): number {
+export function matchGameCount(
+  format: MatchFormat,
+  customChildCount?: number | null,
+): number {
   switch (format) {
     case MatchFormat.BO1:
       return 1;
@@ -158,7 +172,10 @@ export function matchGameCount(format: MatchFormat, customChildCount?: number | 
 }
 
 /** Manches à gagner pour emporter le match (`DOUBLE_LEG` se joue au cumul). */
-export function gamesToWin(format: MatchFormat, customChildCount?: number | null): number {
+export function gamesToWin(
+  format: MatchFormat,
+  customChildCount?: number | null,
+): number {
   if (format === MatchFormat.DOUBLE_LEG) return 2;
   return Math.ceil(matchGameCount(format, customChildCount) / 2);
 }

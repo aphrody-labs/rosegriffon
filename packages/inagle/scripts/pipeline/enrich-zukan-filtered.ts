@@ -22,19 +22,38 @@ import { createPgClient, getInagleDatabaseURL } from "@rosegriffon/db/pg";
 const USER_AGENT =
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
 
-const GAME_KEYS = ["ie1", "ie2", "ie3", "go1", "go2", "go3", "ars", "ori", "vic"] as const;
+const GAME_KEYS = [
+  "ie1",
+  "ie2",
+  "ie3",
+  "go1",
+  "go2",
+  "go3",
+  "ars",
+  "ori",
+  "vic",
+] as const;
 type GameKey = (typeof GAME_KEYS)[number];
 
 const GAME_LABEL_TO_KEY: [GameKey, (label: string) => boolean][] = [
-  ["ie1", l => l === "Inazuma Eleven"],
-  ["ie2", l => l.startsWith("Inazuma Eleven 2")],
-  ["ie3", l => l.startsWith("Inazuma Eleven 3")],
-  ["go1", l => l.startsWith("Inazuma Eleven GO") && !l.includes("Chrono") && !l.includes("Galaxy")],
-  ["go2", l => l.includes("Chrono Stone") || l.startsWith("Inazuma Eleven GO2")],
-  ["go3", l => l.includes("Galaxy")],
-  ["ars", l => l.includes("Ares")],
-  ["ori", l => l.includes("Orion")],
-  ["vic", l => l.includes("Victory Road")],
+  ["ie1", (l) => l === "Inazuma Eleven"],
+  ["ie2", (l) => l.startsWith("Inazuma Eleven 2")],
+  ["ie3", (l) => l.startsWith("Inazuma Eleven 3")],
+  [
+    "go1",
+    (l) =>
+      l.startsWith("Inazuma Eleven GO") &&
+      !l.includes("Chrono") &&
+      !l.includes("Galaxy"),
+  ],
+  [
+    "go2",
+    (l) => l.includes("Chrono Stone") || l.startsWith("Inazuma Eleven GO2"),
+  ],
+  ["go3", (l) => l.includes("Galaxy")],
+  ["ars", (l) => l.includes("Ares")],
+  ["ori", (l) => l.includes("Orion")],
+  ["vic", (l) => l.includes("Victory Road")],
 ];
 
 // ─── Normalisation ──────────────────────────────────────────
@@ -229,11 +248,14 @@ function findBestMatch(entry: ZukanEntry, candidates: DbChar[]): DbChar | null {
 
 // ─── Merge game appearances (union) ────────────────────────
 
-function mergeAppearances(existing: string[] | null, incoming: GameKey[]): string[] {
+function mergeAppearances(
+  existing: string[] | null,
+  incoming: GameKey[],
+): string[] {
   const set = new Set<string>(existing || []);
   for (const g of incoming) set.add(g);
   // Sort in canonical order
-  return GAME_KEYS.filter(k => set.has(k));
+  return GAME_KEYS.filter((k) => set.has(k));
 }
 
 // ─── Main ───────────────────────────────────────────────────
@@ -242,9 +264,15 @@ async function main() {
   const arg = process.argv[2];
   if (!arg) {
     console.error("Usage:");
-    console.error("  bun enrich-zukan-filtered.ts <URL>          # Fetch + enrich");
-    console.error("  bun enrich-zukan-filtered.ts --dir <path>   # Parse local cache dir");
-    console.error("  bun enrich-zukan-filtered.ts --all-games    # Parse all 9 game caches");
+    console.error(
+      "  bun enrich-zukan-filtered.ts <URL>          # Fetch + enrich",
+    );
+    console.error(
+      "  bun enrich-zukan-filtered.ts --dir <path>   # Parse local cache dir",
+    );
+    console.error(
+      "  bun enrich-zukan-filtered.ts --all-games    # Parse all 9 game caches",
+    );
     process.exit(1);
   }
 
@@ -257,7 +285,17 @@ async function main() {
   if (arg === "--all-games") {
     const PACKAGE_ROOT = resolve(import.meta.dirname || ".", "../..");
     const cacheRoot = resolve(PACKAGE_ROOT, "data/zukan/audit_series_cache");
-    const games = ["ie1", "ie2", "ie3", "go1", "go2", "go3", "ares", "orion", "vr"];
+    const games = [
+      "ie1",
+      "ie2",
+      "ie3",
+      "go1",
+      "go2",
+      "go3",
+      "ares",
+      "orion",
+      "vr",
+    ];
     const { readdirSync, readFileSync } = await import("node:fs");
     for (const game of games) {
       const gameDir = resolve(cacheRoot, game);
@@ -284,7 +322,11 @@ async function main() {
       .sort();
     console.log(`Parsing ${files.length} files from ${dirPath}...`);
     for (const file of files) {
-      entries.push(...parseCharacterListHtml(readFileSync(resolve(dirPath, file), "utf-8")));
+      entries.push(
+        ...parseCharacterListHtml(
+          readFileSync(resolve(dirPath, file), "utf-8"),
+        ),
+      );
     }
   } else if (arg.startsWith("http")) {
     console.log(`Fetching ${arg} ...`);
@@ -303,7 +345,8 @@ async function main() {
     const existing = seen.get(key);
     if (existing) {
       for (const g of e.gameAppearances) {
-        if (!existing.gameAppearances.includes(g)) existing.gameAppearances.push(g);
+        if (!existing.gameAppearances.includes(g))
+          existing.gameAppearances.push(g);
       }
     } else {
       seen.set(key, e);
@@ -312,9 +355,11 @@ async function main() {
   entries = Array.from(seen.values());
 
   console.log(`\nPersonnages parses : ${entries.length} (dedup)`);
-  const withHash = entries.filter(e => e.zukanHash).length;
+  const withHash = entries.filter((e) => e.zukanHash).length;
   console.log(`  avec zukanHash : ${withHash}`);
-  console.log(`  avec gameAppearances : ${entries.filter(e => e.gameAppearances.length > 0).length}\n`);
+  console.log(
+    `  avec gameAppearances : ${entries.filter((e) => e.gameAppearances.length > 0).length}\n`,
+  );
 
   // ─── 3. Connect DB ────────────────────────────────────────
   const client = createPgClient(getInagleDatabaseURL());
@@ -426,16 +471,19 @@ async function main() {
 
     // ─── Update game_appearances (merge union) ──────────────
     if (entry.gameAppearances.length > 0) {
-      const merged = mergeAppearances(match.game_appearances, entry.gameAppearances);
+      const merged = mergeAppearances(
+        match.game_appearances,
+        entry.gameAppearances,
+      );
       const existingStr = (match.game_appearances || []).sort().join(",");
       const mergedStr = merged.sort().join(",");
 
       if (existingStr !== mergedStr) {
         if (!dryRun) {
-          const result = await client.query(`UPDATE inagle_characters SET game_appearances = $1 WHERE id = $2`, [
-            merged,
-            match.id,
-          ]);
+          const result = await client.query(
+            `UPDATE inagle_characters SET game_appearances = $1 WHERE id = $2`,
+            [merged, match.id],
+          );
           if (result.rowCount && result.rowCount > 0) gaUpdated++;
         } else {
           gaUpdated++;
@@ -446,12 +494,15 @@ async function main() {
     // ─── Update name_en (if zukan has a longer/fuller name) ──
     const dbName = (match.name_en || "").trim();
     const zukanName = entry.name.trim();
-    if (zukanName.length > dbName.length && zukanName.toLowerCase().startsWith(dbName.toLowerCase())) {
+    if (
+      zukanName.length > dbName.length &&
+      zukanName.toLowerCase().startsWith(dbName.toLowerCase())
+    ) {
       if (!dryRun) {
-        await client.query(`UPDATE inagle_characters SET name_en = $1, name_fr = $1 WHERE id = $2`, [
-          zukanName,
-          match.id,
-        ]);
+        await client.query(
+          `UPDATE inagle_characters SET name_en = $1, name_fr = $1 WHERE id = $2`,
+          [zukanName, match.id],
+        );
         nameUpdated++;
       } else {
         nameUpdated++;
@@ -459,7 +510,10 @@ async function main() {
     }
 
     // ─── Update description_en (seulement si vide) ──────────
-    if (entry.description && (!match.description_en || match.description_en.trim() === "")) {
+    if (
+      entry.description &&
+      (!match.description_en || match.description_en.trim() === "")
+    ) {
       if (!dryRun) {
         const result = await client.query(
           `UPDATE inagle_characters SET description_en = $1 WHERE id = $2 AND (description_en IS NULL OR description_en = '')`,
@@ -489,7 +543,8 @@ async function main() {
     for (const name of unmatched.slice(0, 30)) {
       console.log(`  - ${name}`);
     }
-    if (unmatched.length > 30) console.log(`  ... et ${unmatched.length - 30} autres`);
+    if (unmatched.length > 30)
+      console.log(`  ... et ${unmatched.length - 30} autres`);
   }
 
   // Stats finales
@@ -517,7 +572,7 @@ async function main() {
   console.log("\nTermine.");
 }
 
-main().catch(e => {
+main().catch((e) => {
   console.error(e);
   process.exit(1);
 });

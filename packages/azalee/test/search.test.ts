@@ -36,7 +36,9 @@ describe("fuzzy-match — distance et normalisation", () => {
     expect(levenshteinDistance("", "mark")).toBe(4);
     expect(levenshteinDistance("mark", "")).toBe(4);
     // Symétrique.
-    expect(levenshteinDistance("gouenji", "goenji")).toBe(levenshteinDistance("goenji", "gouenji"));
+    expect(levenshteinDistance("gouenji", "goenji")).toBe(
+      levenshteinDistance("goenji", "gouenji"),
+    );
   });
 
   test("similarityScore borné [0,1] et insensible à la casse", () => {
@@ -59,7 +61,12 @@ describe("fuzzy-match — distance et normalisation", () => {
   });
 
   test("findClosestMatch renvoie le meilleur candidat au-dessus du seuil", () => {
-    const candidats = ["Mark Evans", "Axel Blaze", "Jude Sharp", "Nathan Swift"];
+    const candidats = [
+      "Mark Evans",
+      "Axel Blaze",
+      "Jude Sharp",
+      "Nathan Swift",
+    ];
     const trouve = findClosestMatch("Mark Evan", candidats);
     expect(trouve?.match).toBe("Mark Evans");
     expect(trouve?.score).toBeGreaterThan(0.6);
@@ -68,7 +75,9 @@ describe("fuzzy-match — distance et normalisation", () => {
   });
 
   test("getNameVariations normalise et écarte les langues absentes", () => {
-    expect(getNameVariations({ en: "Mark Evans", fr: "Mark Evans", ja: null })).toEqual(["mark evans", "mark evans"]);
+    expect(
+      getNameVariations({ en: "Mark Evans", fr: "Mark Evans", ja: null }),
+    ).toEqual(["mark evans", "mark evans"]);
     expect(getNameVariations({})).toEqual([]);
   });
 
@@ -76,7 +85,9 @@ describe("fuzzy-match — distance et normalisation", () => {
     const names = { en: "Mark Evans", fr: "Mark Evans", ja: "円堂 守" };
     expect(detectMatchedLanguage("Mark", names)).toBe("FR");
     expect(detectMatchedLanguage("円堂", names)).toBe("JP");
-    expect(detectMatchedLanguage("Evans", { en: "Mark Evans", fr: null, ja: null })).toBe("EN");
+    expect(
+      detectMatchedLanguage("Evans", { en: "Mark Evans", fr: null, ja: null }),
+    ).toBe("EN");
     expect(detectMatchedLanguage("zzzzzzzzz", names)).toBeNull();
   });
 
@@ -86,8 +97,12 @@ describe("fuzzy-match — distance et normalisation", () => {
       { highlight: true, text: "Evans" },
     ]);
     // Terme absent ou vide → un seul segment non surligné.
-    expect(highlightMatches("Mark Evans", "")).toEqual([{ highlight: false, text: "Mark Evans" }]);
-    expect(highlightMatches("Mark Evans", "zzz")).toEqual([{ highlight: false, text: "Mark Evans" }]);
+    expect(highlightMatches("Mark Evans", "")).toEqual([
+      { highlight: false, text: "Mark Evans" },
+    ]);
+    expect(highlightMatches("Mark Evans", "zzz")).toEqual([
+      { highlight: false, text: "Mark Evans" },
+    ]);
   });
 });
 
@@ -98,7 +113,13 @@ describe("smart-search — priorisation, cache et suggestions", () => {
   /** Résultats bruts, forme réellement produite par le wiki. */
   const bruts = [
     {
-      data: { names: { en: "Inazuma Japan", fr: "Inazuma Japon", ja: "イナズマジャパン" } },
+      data: {
+        names: {
+          en: "Inazuma Japan",
+          fr: "Inazuma Japon",
+          ja: "イナズマジャパン",
+        },
+      },
       id: "0xF01BB293",
       name: "Inazuma Japon",
       score: 0.7,
@@ -112,7 +133,11 @@ describe("smart-search — priorisation, cache et suggestions", () => {
       type: "character" as const,
     },
     {
-      data: { name_EN: "Fire Tornado", name_FR: "Tornade de feu", name_JA: "ファイアトルネード" },
+      data: {
+        name_EN: "Fire Tornado",
+        name_FR: "Tornade de feu",
+        name_JA: "ファイアトルネード",
+      },
       id: "whs00010",
       name: "Tornade de feu",
       score: 0.8,
@@ -132,7 +157,7 @@ describe("smart-search — priorisation, cache et suggestions", () => {
 
   test("la langue détectée et le nom correspondant sont annotés", async () => {
     const res = await smartSearch("円堂", bruts, { context: "global" });
-    const perso = res.find(r => r.type === "character") as SmartSearchResult;
+    const perso = res.find((r) => r.type === "character") as SmartSearchResult;
     expect(perso.matchedLanguage).toBe("JP");
     expect(perso.matchedName).toBe("円堂 守");
   });
@@ -148,38 +173,64 @@ describe("smart-search — priorisation, cache et suggestions", () => {
   });
 
   test("aucun résultat → suggestion « vouliez-vous dire »", async () => {
-    expect(await smartSearch("Mark Evan", [], { enableSuggestions: true })).toHaveLength(0);
+    expect(
+      await smartSearch("Mark Evan", [], { enableSuggestions: true }),
+    ).toHaveLength(0);
     // `minScore` inatteignable → tout est filtré, la branche suggestion s'active.
-    const avecCandidats = await smartSearch("Mark Evan", bruts, { minScore: 2 });
+    const avecCandidats = await smartSearch("Mark Evan", bruts, {
+      minScore: 2,
+    });
     expect(avecCandidats[0]?.suggestion).toBe("Mark Evans");
   });
 
   test("la suggestion conserve casse et accents du nom réel", async () => {
     const accentues = [
       {
-        data: { names: { en: "Legendary Heroes", fr: "L'Étoffe des Héros", ja: "英雄の証" } },
+        data: {
+          names: {
+            en: "Legendary Heroes",
+            fr: "L'Étoffe des Héros",
+            ja: "英雄の証",
+          },
+        },
         id: "x",
         name: "L'Étoffe des Héros",
         score: 1,
         type: "team" as const,
       },
     ];
-    const res = await smartSearch("L'Étoffe des Hero", accentues, { minScore: 2 });
+    const res = await smartSearch("L'Étoffe des Hero", accentues, {
+      minScore: 2,
+    });
     // Régression : la suggestion sortait normalisée (« l'etoffe des heros »).
     expect(res[0]?.suggestion).toBe("L'Étoffe des Héros");
   });
 
   test("le cache distingue contexte, limite, minScore et suggestions", async () => {
     expect(getCacheStats().size).toBe(0);
-    const premier = await smartSearch("Mark", bruts, { context: "chara", limit: 5 });
+    const premier = await smartSearch("Mark", bruts, {
+      context: "chara",
+      limit: 5,
+    });
     expect(getCacheStats().size).toBe(1);
-    const second = await smartSearch("Mark", bruts, { context: "chara", limit: 5 });
+    const second = await smartSearch("Mark", bruts, {
+      context: "chara",
+      limit: 5,
+    });
     expect(second).toEqual(premier);
     // Chaque option qui change la sortie doit produire une entrée distincte.
     await smartSearch("Mark", bruts, { context: "skill", limit: 5 });
     await smartSearch("Mark", bruts, { context: "chara", limit: 10 });
-    await smartSearch("Mark", bruts, { context: "chara", limit: 5, minScore: 0.85 });
-    await smartSearch("Mark", bruts, { context: "chara", enableSuggestions: false, limit: 5 });
+    await smartSearch("Mark", bruts, {
+      context: "chara",
+      limit: 5,
+      minScore: 0.85,
+    });
+    await smartSearch("Mark", bruts, {
+      context: "chara",
+      enableSuggestions: false,
+      limit: 5,
+    });
     expect(getCacheStats().size).toBe(5);
     clearSearchCache();
     expect(getCacheStats().size).toBe(0);
@@ -189,49 +240,60 @@ describe("smart-search — priorisation, cache et suggestions", () => {
     // Régression : `minScore` était absent de la clé de cache → le 2e appel
     // renvoyait les résultats filtrés du 1er.
     const filtre = await smartSearch("Mark", bruts, { minScore: 2 });
-    expect(filtre.every(r => r.id === "")).toBe(true);
+    expect(filtre.every((r) => r.id === "")).toBe(true);
     const complet = await smartSearch("Mark", bruts, { minScore: 0 });
     expect(complet).toHaveLength(bruts.length);
   });
 });
 
-describe.skipIf(!hasPostgres)("smart-search sur de VRAIS personnages du miroir", () => {
-  beforeEach(() => clearSearchCache());
+describe.skipIf(!hasPostgres)(
+  "smart-search sur de VRAIS personnages du miroir",
+  () => {
+    beforeEach(() => clearSearchCache());
 
-  test("les noms réels du wiki sont annotés dans la bonne langue", async () => {
-    const liste = await wikiService.getCharactersList({ limit: 10, q: "Mark" });
-    const bruts = (liste.data as Array<Record<string, any>>).map(chara => ({
-      data: { names: chara.names },
-      id: String(chara.charaId),
-      name: String(chara.names?.fr ?? ""),
-      score: 1,
-      type: "character" as const,
-    }));
-    expect(bruts.length).toBeGreaterThan(0);
-
-    const res = await smartSearch("Mark", bruts, { context: "chara", limit: 50 });
-    expect(res.length).toBe(Math.min(bruts.length, 50));
-    for (const item of res) {
-      expect(item.type).toBe("character");
-      // Le terme vient des colonnes FR/EN → jamais détecté comme japonais.
-      expect(item.matchedLanguage).not.toBe("JP");
-    }
-  });
-
-  test("une faute de frappe sur un vrai nom produit la bonne suggestion", async () => {
-    const liste = await wikiService.getCharactersList({ limit: 1 });
-    const nomReel = String((liste.data[0] as Record<string, any>).names.fr);
-    const bruts = [
-      {
-        data: { names: (liste.data[0] as Record<string, any>).names },
-        id: "x",
-        name: nomReel,
+    test("les noms réels du wiki sont annotés dans la bonne langue", async () => {
+      const liste = await wikiService.getCharactersList({
+        limit: 10,
+        q: "Mark",
+      });
+      const bruts = (liste.data as Array<Record<string, any>>).map((chara) => ({
+        data: { names: chara.names },
+        id: String(chara.charaId),
+        name: String(chara.names?.fr ?? ""),
         score: 1,
         type: "character" as const,
-      },
-    ];
-    // `minScore` inatteignable → la branche suggestion est empruntée.
-    const res = await smartSearch(`${nomReel.slice(0, -1)}z`, bruts, { minScore: 2 });
-    expect(res[0]?.suggestion).toBe(nomReel);
-  });
-});
+      }));
+      expect(bruts.length).toBeGreaterThan(0);
+
+      const res = await smartSearch("Mark", bruts, {
+        context: "chara",
+        limit: 50,
+      });
+      expect(res.length).toBe(Math.min(bruts.length, 50));
+      for (const item of res) {
+        expect(item.type).toBe("character");
+        // Le terme vient des colonnes FR/EN → jamais détecté comme japonais.
+        expect(item.matchedLanguage).not.toBe("JP");
+      }
+    });
+
+    test("une faute de frappe sur un vrai nom produit la bonne suggestion", async () => {
+      const liste = await wikiService.getCharactersList({ limit: 1 });
+      const nomReel = String((liste.data[0] as Record<string, any>).names.fr);
+      const bruts = [
+        {
+          data: { names: (liste.data[0] as Record<string, any>).names },
+          id: "x",
+          name: nomReel,
+          score: 1,
+          type: "character" as const,
+        },
+      ];
+      // `minScore` inatteignable → la branche suggestion est empruntée.
+      const res = await smartSearch(`${nomReel.slice(0, -1)}z`, bruts, {
+        minScore: 2,
+      });
+      expect(res[0]?.suggestion).toBe(nomReel);
+    });
+  },
+);

@@ -8,7 +8,8 @@ import RankedMatchClient from "./ranked-match-client";
  */
 export const metadata = metadonneesAchillea({
   titre: "Match classé en cours",
-  description: "Salon de match classé Achilléa : composition, score et rapport de résultat.",
+  description:
+    "Salon de match classé Achilléa : composition, score et rapport de résultat.",
   chemin: "/achillea/ranked/match",
   indexable: false,
 });

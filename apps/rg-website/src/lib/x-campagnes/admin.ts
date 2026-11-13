@@ -87,7 +87,9 @@ function texte(valeur: unknown): string {
 }
 
 function tableauTexte(valeur: unknown): string[] {
-  return Array.isArray(valeur) ? valeur.filter((v): v is string => typeof v === "string") : [];
+  return Array.isArray(valeur)
+    ? valeur.filter((v): v is string => typeof v === "string")
+    : [];
 }
 
 function iso(valeur: unknown): string | null {
@@ -101,7 +103,9 @@ function iso(valeur: unknown): string | null {
  * Sans slug, on rend la campagne PRINCIPALE — c'est celle que sert `/iergday`,
  * donc celle qu'on vient administrer neuf fois sur dix.
  */
-export async function chargerCampagneAdmin(slug?: string): Promise<CampagneAdmin | null> {
+export async function chargerCampagneAdmin(
+  slug?: string,
+): Promise<CampagneAdmin | null> {
   try {
     const pool = getPgPool();
     const { rows } = await pool.query(
@@ -159,7 +163,7 @@ export async function listerCampagnesAdmin(): Promise<
 			   from public.x_campagnes
 			  order by principale desc, debut_le desc nulls last, slug`,
     );
-    return rows.map(l => ({
+    return rows.map((l) => ({
       principale: Boolean(l.principale),
       publiee: Boolean(l.publiee),
       slug: texte(l.slug),
@@ -181,16 +185,20 @@ export async function listerCampagnesAdmin(): Promise<
  * C'est pour ça que `role` accompagne chaque ligne : le même `suivi: false` est
  * une panne d'un côté et l'état attendu de l'autre.
  */
-export async function etatSalonsCampagne(campagne: CampagneAdmin): Promise<SalonSuivi[]> {
+export async function etatSalonsCampagne(
+  campagne: CampagneAdmin,
+): Promise<SalonSuivi[]> {
   const salons: Array<{ id: string; role: "depot" | "relais" }> = [
-    ...campagne.salonsDepot.map(id => ({ id, role: "depot" as const })),
-    ...(campagne.relaisSalon ? [{ id: campagne.relaisSalon, role: "relais" as const }] : []),
+    ...campagne.salonsDepot.map((id) => ({ id, role: "depot" as const })),
+    ...(campagne.relaisSalon
+      ? [{ id: campagne.relaisSalon, role: "relais" as const }]
+      : []),
   ];
   if (salons.length === 0) return [];
 
   try {
     const pool = getPgPool();
-    const ids = salons.map(s => s.id);
+    const ids = salons.map((s) => s.id);
     const { rows } = await pool.query(
       `select c.channel_id, c.name, c.suivi, c.backfill_complete, c.message_count,
 			        (select max(m.created_at) from public.discord_messages m
@@ -202,7 +210,7 @@ export async function etatSalonsCampagne(campagne: CampagneAdmin): Promise<Salon
 			  where c.channel_id = any($1::text[])`,
       [ids, campagne.slug],
     );
-    const parId = new Map(rows.map(l => [texte(l.channel_id), l]));
+    const parId = new Map(rows.map((l) => [texte(l.channel_id), l]));
 
     return salons.map(({ id, role }) => {
       const l = parId.get(id);
@@ -235,7 +243,9 @@ export async function etatSalonsCampagne(campagne: CampagneAdmin): Promise<Salon
 }
 
 /** Les compteurs de la campagne, source par source. */
-export async function bilanCampagne(campagne: CampagneAdmin): Promise<BilanCampagne> {
+export async function bilanCampagne(
+  campagne: CampagneAdmin,
+): Promise<BilanCampagne> {
   const vide: BilanCampagne = {
     collecteLe: campagne.collecteLe,
     creationsDiscord: 0,
@@ -307,7 +317,10 @@ export async function bilanCampagne(campagne: CampagneAdmin): Promise<BilanCampa
  * COLONNE à afficher, pas un filtre à appliquer. Une modération invisible ne se
  * corrige pas.
  */
-export async function listerCreationsAdmin(slug: string, limite = 40): Promise<CreationAdmin[]> {
+export async function listerCreationsAdmin(
+  slug: string,
+  limite = 40,
+): Promise<CreationAdmin[]> {
   try {
     const pool = getPgPool();
     const { rows } = await pool.query(
@@ -339,12 +352,16 @@ export async function listerCreationsAdmin(slug: string, limite = 40): Promise<C
       [slug, limite],
     );
 
-    return rows.map(l => {
-      const source = l.source === "discord" ? ("discord" as const) : ("x" as const);
+    return rows.map((l) => {
+      const source =
+        l.source === "discord" ? ("discord" as const) : ("x" as const);
       return {
         auteur: texte(l.auteur),
         hashtag: l.hashtag_trouve ?? null,
-        image: source === "x" ? premiereImageTweet(l.media) : premiereImageAsset(l.images),
+        image:
+          source === "x"
+            ? premiereImageTweet(l.media)
+            : premiereImageAsset(l.images),
         lien:
           source === "x"
             ? `https://x.com/${texte(l.pseudo) || "i"}/status/${texte(l.reference)}`
@@ -371,7 +388,11 @@ function premiereImageTweet(media: unknown): string | null {
   if (!Array.isArray(media)) return null;
   for (const item of media) {
     if (typeof item !== "object" || item === null) continue;
-    const m = item as { type?: string; storage_url?: string; media_url_https?: string };
+    const m = item as {
+      type?: string;
+      storage_url?: string;
+      media_url_https?: string;
+    };
     if (m.type && m.type !== "photo" && m.type !== "image") continue;
     const url = m.storage_url || m.media_url_https;
     if (typeof url === "string" && url.startsWith("http")) return url;

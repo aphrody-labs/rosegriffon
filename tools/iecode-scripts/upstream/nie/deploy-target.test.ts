@@ -17,17 +17,25 @@ import { expect, test } from "bun:test";
 const script = fileURLToPath(new URL("./deploy-target.ts", import.meta.url));
 
 function lister(): string {
-  const result = Bun.spawnSync(["bun", script, "--list"], { stderr: "pipe", stdout: "pipe" });
+  const result = Bun.spawnSync(["bun", script, "--list"], {
+    stderr: "pipe",
+    stdout: "pipe",
+  });
   expect(result.exitCode).toBe(0);
   return new TextDecoder().decode(result.stdout);
 }
 
 /** `  web             900s  Browser shell…` → 900 */
 function budget(listing: string, cible: string): number {
-  const ligne = listing.split("\n").find(l => l.trim().startsWith(`${cible} `));
+  const ligne = listing
+    .split("\n")
+    .find((l) => l.trim().startsWith(`${cible} `));
   expect(ligne, `aucune ligne pour la cible ${cible}`).toBeDefined();
   const secondes = /\s(\d+)s\s/u.exec(ligne as string)?.[1];
-  expect(secondes, `la ligne de ${cible} n'annonce aucun budget : ${ligne}`).toBeDefined();
+  expect(
+    secondes,
+    `la ligne de ${cible} n'annonce aucun budget : ${ligne}`,
+  ).toBeDefined();
   return Number(secondes);
 }
 
@@ -62,7 +70,10 @@ test("le budget de `web` couvre un build, pas seulement une bascule", () => {
 test("la fenêtre de retour arrière est annoncée, et reste courte", () => {
   const listing = lister();
   const fenetre = /health check (\d+)s later/u.exec(listing)?.[1];
-  expect(fenetre, `aucune fenêtre de validation annoncée :\n${listing}`).toBeDefined();
+  expect(
+    fenetre,
+    `aucune fenêtre de validation annoncée :\n${listing}`,
+  ).toBeDefined();
   expect(Number(fenetre)).toBeLessThanOrEqual(60);
   expect(Number(fenetre)).toBeLessThan(budget(listing, "web"));
 });

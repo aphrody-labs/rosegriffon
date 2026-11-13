@@ -9,7 +9,10 @@ interface ArticleViewTrackerProps {
   initialViewCount: number;
 }
 
-export function ArticleViewTracker({ articleId, initialViewCount }: ArticleViewTrackerProps) {
+export function ArticleViewTracker({
+  articleId,
+  initialViewCount,
+}: ArticleViewTrackerProps) {
   const hasTracked = useRef(false);
 
   useEffect(() => {

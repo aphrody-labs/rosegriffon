@@ -48,9 +48,12 @@ export class ErrorBoundary extends Component<Props, State> {
         <div className="flex min-h-[200px] flex-col items-center justify-center p-8">
           <div className="rounded-lg border border-red-200 bg-red-50 p-6 text-center shadow-sm dark:border-red-900 dark:bg-red-950">
             <AlertCircle className="mx-auto mb-4 size-12 text-red-500" />
-            <h2 className="mb-2 text-lg font-semibold text-red-900 dark:text-red-100">Une erreur est survenue</h2>
+            <h2 className="mb-2 text-lg font-semibold text-red-900 dark:text-red-100">
+              Une erreur est survenue
+            </h2>
             <p className="mb-4 text-sm text-red-700 dark:text-red-300">
-              {this.state.error?.message || "Une erreur inattendue s'est produite"}
+              {this.state.error?.message ||
+                "Une erreur inattendue s'est produite"}
             </p>
             <button
               onClick={() => this.setState({ error: null, hasError: false })}

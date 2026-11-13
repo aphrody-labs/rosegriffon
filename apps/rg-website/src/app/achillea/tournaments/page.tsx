@@ -9,7 +9,8 @@ import { remainingTournamentPages } from "@/lib/achillea/tournament-pagination";
  */
 export const metadata = metadonneesAchillea({
   titre: "Tournois",
-  description: "Tous les tournois Achilléa : préinscriptions ouvertes, rencontres en cours et éditions terminées.",
+  description:
+    "Tous les tournois Achilléa : préinscriptions ouvertes, rencontres en cours et éditions terminées.",
   chemin: "/achillea/tournaments",
   indexable: true,
 });
@@ -20,12 +21,22 @@ export default async function TournamentsPage() {
   if (!first.ok) return <TournamentsClient initialLoadError />;
 
   const remaining = await Promise.all(
-    remainingTournamentPages(first.value.meta).map(page => client.tournaments.list({ page, pageSize: 50 })),
+    remainingTournamentPages(first.value.meta).map((page) =>
+      client.tournaments.list({ page, pageSize: 50 }),
+    ),
   );
-  const allLoaded = remaining.every(result => result.ok);
+  const allLoaded = remaining.every((result) => result.ok);
   const tournaments = allLoaded
-    ? [...first.value.data, ...remaining.flatMap(result => (result.ok ? result.value.data : []))]
+    ? [
+        ...first.value.data,
+        ...remaining.flatMap((result) => (result.ok ? result.value.data : [])),
+      ]
     : first.value.data;
 
-  return <TournamentsClient initialTournaments={tournaments} initialLoadError={!allLoaded} />;
+  return (
+    <TournamentsClient
+      initialTournaments={tournaments}
+      initialLoadError={!allLoaded}
+    />
+  );
 }

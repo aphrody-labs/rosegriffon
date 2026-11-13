@@ -42,7 +42,10 @@ export interface ModelEntry {
 }
 
 /** Shawn est ambigu par nom : 7 cartes Zukan, 17 variantes IEVR et seulement 5 GLB VFS. */
-const SHAWN_MODELS: Record<string, { label: string; slug: string; zukanHash: string; previewOnly?: boolean }> = {
+const SHAWN_MODELS: Record<
+  string,
+  { label: string; slug: string; zukanHash: string; previewOnly?: boolean }
+> = {
   c02023290: {
     label: "IE2 · Défenseur · collège (8e année)",
     slug: "shawn-froste-0xA2957757",
@@ -92,7 +95,7 @@ export function filtrer(entrees: ModelEntry[], q: string): ModelEntry[] {
   const besoin = normaliser(q);
   if (!besoin) return entrees;
   return entrees.filter(
-    m =>
+    (m) =>
       normaliser(m.code).includes(besoin) ||
       (m.name && normaliser(m.name).includes(besoin)) ||
       (m.variantLabel && normaliser(m.variantLabel).includes(besoin)),
@@ -129,7 +132,10 @@ export function characters(): Promise<ModelEntry[]> {
   _characters ??= (async () => {
     const parCode = new Map<string, ModelEntry>();
     try {
-      const rows = await selectInagle<CharaRow>("inagle_characters", "internal_code,name_fr,name_en,name_ja,slug");
+      const rows = await selectInagle<CharaRow>(
+        "inagle_characters",
+        "internal_code,name_fr,name_en,name_ja,slug",
+      );
       for (const row of rows) {
         const code = row.internal_code?.split("_")[0];
         if (!code) continue;
@@ -149,7 +155,9 @@ export function characters(): Promise<ModelEntry[]> {
       // Miroir absent : la famille rend vide plutôt que d'échouer.
     }
     return [...parCode.values()].toSorted((a, b) =>
-      (a.name ?? a.code).localeCompare(b.name ?? b.code, "fr", { numeric: true }),
+      (a.name ?? a.code).localeCompare(b.name ?? b.code, "fr", {
+        numeric: true,
+      }),
     );
   })();
   return _characters;
@@ -171,8 +179,18 @@ function famillleVfs(famille: ModelFamily): Promise<ModelEntry[]> {
     if (!def?.vfsDir) return [];
     const listing = await lsOrNull(def.vfsDir, 0);
     return (listing?.dirs ?? [])
-      .map(d => ({ code: d.name, files: d.count ?? null, name: null, slug: null }) satisfies ModelEntry)
-      .toSorted((a, b) => a.code.localeCompare(b.code, "fr", { numeric: true }));
+      .map(
+        (d) =>
+          ({
+            code: d.name,
+            files: d.count ?? null,
+            name: null,
+            slug: null,
+          }) satisfies ModelEntry,
+      )
+      .toSorted((a, b) =>
+        a.code.localeCompare(b.code, "fr", { numeric: true }),
+      );
   })();
   _familles.set(famille, p);
   return p;

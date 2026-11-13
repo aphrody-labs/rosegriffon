@@ -2,7 +2,12 @@
 // Disc, DOL and FST layouts mirror crates/aphrody-wii-image (dvd.rs, dol.rs, rvz.rs), whose
 // decompressing reader is the canonical owner for supported RVZ payloads.
 import { BinaryView, hex, hex32, type BinarySource } from "../stream.js";
-import { parsed, type FileEntry, type ParseContext, type Section } from "../types.js";
+import {
+  parsed,
+  type FileEntry,
+  type ParseContext,
+  type Section,
+} from "../types.js";
 
 export type N64Order = "z64" | "v64" | "n64";
 
@@ -18,8 +23,10 @@ export function toZ64(bytes: Uint8Array, order: N64Order): Uint8Array {
   if (order === "z64") return bytes;
   const out = new Uint8Array(bytes.byteLength & ~3);
   for (let at = 0; at < out.byteLength; at += 4) {
-    if (order === "v64") out.set([bytes[at + 1]!, bytes[at]!, bytes[at + 3]!, bytes[at + 2]!], at);
-    else out.set([bytes[at + 3]!, bytes[at + 2]!, bytes[at + 1]!, bytes[at]!], at);
+    if (order === "v64")
+      out.set([bytes[at + 1]!, bytes[at]!, bytes[at + 3]!, bytes[at + 2]!], at);
+    else
+      out.set([bytes[at + 3]!, bytes[at + 2]!, bytes[at + 1]!, bytes[at]!], at);
   }
   return out;
 }
@@ -41,7 +48,11 @@ const cicSeed: Record<string, number> = {
 };
 
 /** Header CRC1/CRC2 over the first MiB after IPL3 (the n64crc algorithm). */
-function n64Checksum(rom: BinaryView, ipl3: BinaryView, cic: string): [number, number] | undefined {
+function n64Checksum(
+  rom: BinaryView,
+  ipl3: BinaryView,
+  cic: string,
+): [number, number] | undefined {
   const seed = cicSeed[cic];
   if (seed === undefined || rom.length < 0x100000) return undefined;
   let [t1, t2, t3, t4, t5, t6] = [seed, seed, seed, seed, seed, seed];
@@ -54,10 +65,14 @@ function n64Checksum(rom: BinaryView, ipl3: BinaryView, cic: string): [number, n
     const r = ((d << shift) | (d >>> (32 - shift))) >>> 0;
     t5 = (t5 + r) >>> 0;
     t2 = (t2 > d ? t2 ^ r : t2 ^ t6 ^ d) >>> 0;
-    t1 = (cic === "6105" ? t1 + (ipl3.u32(0x710 + ((0x1000 + at) & 0xff), "be") ^ d) : t1 + (t5 ^ d)) >>> 0;
+    t1 =
+      (cic === "6105"
+        ? t1 + (ipl3.u32(0x710 + ((0x1000 + at) & 0xff), "be") ^ d)
+        : t1 + (t5 ^ d)) >>> 0;
   }
   if (cic === "6103") return [((t6 ^ t4) + t3) >>> 0, ((t5 ^ t2) + t1) >>> 0];
-  if (cic === "6106") return [(Math.imul(t6, t4) + t3) >>> 0, (Math.imul(t5, t2) + t1) >>> 0];
+  if (cic === "6106")
+    return [(Math.imul(t6, t4) + t3) >>> 0, (Math.imul(t5, t2) + t1) >>> 0];
   return [(t6 ^ t4 ^ t3) >>> 0, (t5 ^ t2 ^ t1) >>> 0];
 }
 
@@ -70,7 +85,11 @@ export async function parseN64({ source, head }: ParseContext) {
   const swap = order === "v64" ? "16" : order === "n64" ? "32" : undefined;
   let checksum: [number, number] | undefined;
   if (cic && source.size >= 0x101000) {
-    checksum = n64Checksum(new BinaryView(toZ64(await source.read(0x1000, 0x100000), order), "be"), ipl3, cic);
+    checksum = n64Checksum(
+      new BinaryView(toZ64(await source.read(0x1000, 0x100000), order), "be"),
+      ipl3,
+      cic,
+    );
   }
   const entry = view.u32(0x08);
   return parsed({
@@ -88,7 +107,9 @@ export async function parseN64({ source, head }: ParseContext) {
       crc1: hex32(view.u32(0x10)),
       crc2: hex32(view.u32(0x14)),
       cic: cic ?? "unknown",
-      checksumValid: checksum ? checksum[0] === view.u32(0x10) && checksum[1] === view.u32(0x14) : undefined,
+      checksumValid: checksum
+        ? checksum[0] === view.u32(0x10) && checksum[1] === view.u32(0x14)
+        : undefined,
       romBytes: source.size,
     },
     sections: [
@@ -153,15 +174,21 @@ export function looksLikeDol(view: BinaryView, size: number): boolean {
   if (size < 0x100 || !view.has(0, 0x100)) return false;
   const { sections, entry } = dolLayout(view);
   const ram = (address: number) =>
-    (address >= 0x80000000 && address < 0x81800000) || (address >= 0x90000000 && address < 0x94000000);
+    (address >= 0x80000000 && address < 0x81800000) ||
+    (address >= 0x90000000 && address < 0x94000000);
   return (
-    sections.some(section => section.kind === "code") &&
+    sections.some((section) => section.kind === "code") &&
     sections.every(
-      section => section.offset >= 0x100 && section.offset + section.size <= size && ram(section.address ?? 0),
+      (section) =>
+        section.offset >= 0x100 &&
+        section.offset + section.size <= size &&
+        ram(section.address ?? 0),
     ) &&
     sections.some(
-      section =>
-        section.kind === "code" && entry >= (section.address ?? 0) && entry < (section.address ?? 0) + section.size,
+      (section) =>
+        section.kind === "code" &&
+        entry >= (section.address ?? 0) &&
+        entry < (section.address ?? 0) + section.size,
     )
   );
 }
@@ -172,11 +199,16 @@ export async function parseDol({ head, source }: ParseContext) {
     header: {
       entry: hex32(layout.entry),
       bss: { address: hex32(layout.bss.address), size: layout.bss.size },
-      textSections: layout.sections.filter(section => section.kind === "code").length,
-      dataSections: layout.sections.filter(section => section.kind === "data").length,
+      textSections: layout.sections.filter((section) => section.kind === "code")
+        .length,
+      dataSections: layout.sections.filter((section) => section.kind === "data")
+        .length,
       bytes: source.size,
     },
-    sections: [{ name: "header", offset: 0, size: 0x100, kind: "header" }, ...layout.sections],
+    sections: [
+      { name: "header", offset: 0, size: 0x100, kind: "header" },
+      ...layout.sections,
+    ],
     arch: "ppc",
     entry: layout.entry,
   });
@@ -203,14 +235,21 @@ const gcCountries = ["Japan", "USA", "Europe", "Korea"];
 export async function parseDisc({ source, head }: ParseContext) {
   const view = new BinaryView(head, "be");
   const header = discHeader(view);
-  const sections: Section[] = [{ name: "boot.bin", offset: 0, size: 0x440, kind: "header" }];
+  const sections: Section[] = [
+    { name: "boot.bin", offset: 0, size: 0x440, kind: "header" },
+  ];
   if (header.console === "Wii") {
     const table = await source.view(0x40000, 0x20, "be");
     const region = await source.view(0x4e000, 4, "be");
-    const partitions: Array<{ group: number; offset: number; type: number }> = [];
+    const partitions: Array<{ group: number; offset: number; type: number }> =
+      [];
     for (let group = 0; group < 4 && table.length >= 0x20; group++) {
       const count = table.u32(group * 8);
-      const entries = await source.view(table.u32(group * 8 + 4) * 4, Math.min(count, 64) * 8, "be");
+      const entries = await source.view(
+        table.u32(group * 8 + 4) * 4,
+        Math.min(count, 64) * 8,
+        "be",
+      );
       for (let index = 0; index + 8 <= entries.length; index += 8) {
         partitions.push({
           group,
@@ -246,7 +285,10 @@ export async function parseDisc({ source, head }: ParseContext) {
   const fst = { offset: info.u32(4), size: info.u32(8) };
   const dol = await source.view(dolOffset, 0x100, "be");
   const layout = dolLayout(dol, dolOffset);
-  const dolEnd = Math.max(dolOffset + 0x100, ...layout.sections.map(section => section.offset + section.size));
+  const dolEnd = Math.max(
+    dolOffset + 0x100,
+    ...layout.sections.map((section) => section.offset + section.size),
+  );
   sections.push(
     { name: "bi2.bin", offset: 0x440, size: 0x2000, kind: "metadata" },
     {
@@ -263,7 +305,7 @@ export async function parseDisc({ source, head }: ParseContext) {
       size: dolEnd - dolOffset,
       kind: "code",
     },
-    ...layout.sections.map(section => ({
+    ...layout.sections.map((section) => ({
       ...section,
       name: `main.dol${section.name}`,
     })),
@@ -289,8 +331,11 @@ export async function parseDisc({ source, head }: ParseContext) {
 }
 
 /** Files of a GameCube FST (aphrody-wii-image FstNode::parse with offset shift 0). */
-export async function gameCubeFiles(source: BinarySource, sections: Section[]): Promise<FileEntry[]> {
-  const fst = sections.find(section => section.name === "fst.bin");
+export async function gameCubeFiles(
+  source: BinarySource,
+  sections: Section[],
+): Promise<FileEntry[]> {
+  const fst = sections.find((section) => section.name === "fst.bin");
   if (!fst?.size) return [];
   const view = await source.view(fst.offset, fst.size, "be");
   const total = view.u32(8);
@@ -357,7 +402,12 @@ export async function parseWia({ source, head }: ParseContext) {
       ...discHeader(view, h2 + 0x10),
       container,
       version: `${version >>> 24}.${(version >>> 16) & 0xff}.${(version >>> 8) & 0xff}`,
-      discType: discType === 2 ? "Wii" : discType === 1 ? "GameCube" : `unknown (${discType})`,
+      discType:
+        discType === 2
+          ? "Wii"
+          : discType === 1
+            ? "GameCube"
+            : `unknown (${discType})`,
       compression: wiaCompression[compression] ?? `type ${compression}`,
       compressionLevel: view.i32(h2 + 8),
       chunkBytes: view.u32(h2 + 0x0c),
@@ -367,17 +417,23 @@ export async function parseWia({ source, head }: ParseContext) {
       rawDataEntries: view.u32(h2 + 0xb4),
       groups: view.u32(h2 + 0xc4),
       decompressor:
-        container === "RVZ" && (discType === 1 || discType === 2) && (compression === 0 || compression === 5)
+        container === "RVZ" &&
+        (discType === 1 || discType === 2) &&
+        (compression === 0 || compression === 5)
           ? "crates/aphrody-wii-image (Rvz::parse; rvz feature)"
           : "RVZ chunk data extraction is not implemented by this read-only parser",
     },
     sections: [
       table("header1", 0, h2),
       table("header2", h2, view.u32(0x0c)),
-      table("partitions", view.u64(h2 + 0x98), view.u32(h2 + 0x90) * view.u32(h2 + 0x94)),
+      table(
+        "partitions",
+        view.u64(h2 + 0x98),
+        view.u32(h2 + 0x90) * view.u32(h2 + 0x94),
+      ),
       table("raw-data", view.u64(h2 + 0xb8), view.u32(h2 + 0xc0)),
       table("groups", view.u64(h2 + 0xc8), view.u32(h2 + 0xd0)),
-    ].filter(section => section.size > 0 && section.offset < source.size),
+    ].filter((section) => section.size > 0 && section.offset < source.size),
     arch: "ppc",
   });
 }

@@ -11,5 +11,9 @@ description = "Offline IEVR character model catalogs and deterministic menu comp
 workspace = true
 
 [dependencies]
-aphrody-nie-formats = { workspace = true, default-features = false, features = ["std", "serde", "textures"] }
+aphrody-nie-formats = { workspace = true, default-features = false, features = [
+  "std",
+  "serde",
+  "textures",
+] }
 serde = { workspace = true, features = ["std", "derive"] }

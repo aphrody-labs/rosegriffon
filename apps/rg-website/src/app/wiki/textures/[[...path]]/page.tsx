@@ -15,7 +15,12 @@ import type { Metadata } from "next";
 import Link from "@/components/shared/Link";
 import { wiki } from "@rosegriffon/app-shell";
 import { lsOrNull, texContainer, texUrl } from "@rosegriffon/azalee/cpk/live";
-import { MediaBack, MediaCount, MediaEmpty, MediaHeader } from "@/components/wiki/MediaShell";
+import {
+  MediaBack,
+  MediaCount,
+  MediaEmpty,
+  MediaHeader,
+} from "@/components/wiki/MediaShell";
 import { itemNames } from "@/lib/cpk/media-names";
 import { MediaDownload } from "@/components/wiki/MediaDownload";
 import { cpkThumbUrl, segLabel } from "@rosegriffon/azalee/cpk/shared";
@@ -28,12 +33,23 @@ const RACINE = "data/dx11";
 /** Textures par page — borne le nombre de requêtes de vignettes qu'un rendu déclenche. */
 const PAR_PAGE = 120;
 
-export async function generateMetadata({ params }: { params: Promise<{ path?: string[] }> }): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ path?: string[] }>;
+}): Promise<Metadata> {
   const { path } = await params;
   const segments = path ?? [];
-  const titre = segments.length > 0 ? segments.map(segLabel).join(" › ") : "Toutes les textures";
+  const titre =
+    segments.length > 0
+      ? segments.map(segLabel).join(" › ")
+      : "Toutes les textures";
   return {
-    alternates: { canonical: wiki(`/textures${segments.length ? `/${segments.join("/")}` : ""}`) },
+    alternates: {
+      canonical: wiki(
+        `/textures${segments.length ? `/${segments.join("/")}` : ""}`,
+      ),
+    },
     description: `Textures d'Inazuma Eleven: Victory Road décodées depuis les fichiers du jeu — ${titre}.`,
     title: `Textures — ${titre} | Azalée`,
   };
@@ -47,7 +63,7 @@ export default async function TexturesPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const [{ path }, sp] = await Promise.all([params, searchParams]);
-  const segments = (path ?? []).filter(s => s !== ".." && s !== ".");
+  const segments = (path ?? []).filter((s) => s !== ".." && s !== ".");
   const dir = segments.length > 0 ? `${RACINE}/${segments.join("/")}` : RACINE;
 
   // Dernier segment en `.g4tx` : ce n'est pas un dossier mais un CONTENEUR, et il faut
@@ -59,7 +75,8 @@ export default async function TexturesPage({
     return <VueConteneur rel={rel} segments={segments} />;
   }
 
-  const pageParam = typeof sp.page === "string" ? Number.parseInt(sp.page, 10) : 1;
+  const pageParam =
+    typeof sp.page === "string" ? Number.parseInt(sp.page, 10) : 1;
   const page = Number.isFinite(pageParam) && pageParam > 0 ? pageParam : 1;
   const offset = (page - 1) * PAR_PAGE;
 
@@ -73,19 +90,26 @@ export default async function TexturesPage({
           active="/textures"
           description="Le corpus complet des textures du jeu, décodées en PNG à la volée et parcourues par dossier."
         />
-        <MediaEmpty>Le VFS du jeu est momentanément injoignable — les textures ne peuvent pas être listées.</MediaEmpty>
+        <MediaEmpty>
+          Le VFS du jeu est momentanément injoignable — les textures ne peuvent
+          pas être listées.
+        </MediaEmpty>
       </div>
     );
   }
 
-  const textures = listing.files.filter(f => f.ext === "g4tx");
+  const textures = listing.files.filter((f) => f.ext === "g4tx");
   const pages = Math.max(1, Math.ceil(listing.fileTotal / PAR_PAGE));
   const base = `/textures${segments.length ? `/${segments.join("/")}` : ""}`;
 
   return (
     <div className="w-full space-y-5">
       <MediaHeader
-        title={segments.length > 0 ? segLabel(segments.at(-1) ?? "Textures") : "Textures"}
+        title={
+          segments.length > 0
+            ? segLabel(segments.at(-1) ?? "Textures")
+            : "Textures"
+        }
         active="/textures"
         description="Le corpus complet des textures du jeu, décodées en PNG à la volée et parcourues par dossier."
       >
@@ -99,7 +123,10 @@ export default async function TexturesPage({
           {segments.map((seg, i) => (
             <span key={`${seg}-${i}`} className="flex items-center gap-1">
               <span aria-hidden>›</span>
-              <Link href={`/wiki/textures/${segments.slice(0, i + 1).join("/")}`} className="hover:text-primary">
+              <Link
+                href={`/wiki/textures/${segments.slice(0, i + 1).join("/")}`}
+                className="hover:text-primary"
+              >
                 {segLabel(seg)}
               </Link>
             </span>
@@ -115,20 +142,26 @@ export default async function TexturesPage({
       {segments.length > 0 && (
         <MediaBack
           href={`/wiki/textures${segments.length > 1 ? `/${segments.slice(0, -1).join("/")}` : ""}`}
-          label={segments.length > 1 ? `Retour à ${segLabel(segments.at(-2) ?? "")}` : "Retour aux textures"}
+          label={
+            segments.length > 1
+              ? `Retour à ${segLabel(segments.at(-2) ?? "")}`
+              : "Retour aux textures"
+          }
         />
       )}
 
       {listing.dirs.length > 0 && (
         <ul className="flex flex-wrap gap-2">
-          {listing.dirs.map(d => (
+          {listing.dirs.map((d) => (
             <li key={d.name}>
               <Link
                 href={`${base}/${d.name}`}
                 className="flex items-center gap-2 rounded-full border border-outline-variant bg-surface-container-low px-3 py-1.5 text-sm text-on-surface transition hover:border-primary/50 hover:bg-surface-container"
               >
                 <span>{segLabel(d.name)}</span>
-                <span className="text-xs text-on-surface-variant">{d.count.toLocaleString("fr")}</span>
+                <span className="text-xs text-on-surface-variant">
+                  {d.count.toLocaleString("fr")}
+                </span>
               </Link>
             </li>
           ))}
@@ -146,7 +179,7 @@ export default async function TexturesPage({
 
       {textures.length > 0 ? (
         <ul className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-6">
-          {textures.map(t => (
+          {textures.map((t) => (
             <li key={t.path}>
               {/* Le lien mène au CONTENEUR, pas au PNG : le fichier porte souvent des
 							    dizaines de textures nommées, que seule la vue conteneur expose. */}
@@ -177,7 +210,9 @@ export default async function TexturesPage({
         </ul>
       ) : (
         listing.dirs.length === 0 && (
-          <p className="py-16 text-center text-sm italic text-on-surface-variant">Aucune texture dans ce dossier.</p>
+          <p className="py-16 text-center text-sm italic text-on-surface-variant">
+            Aucune texture dans ce dossier.
+          </p>
         )
       )}
 
@@ -215,15 +250,25 @@ export default async function TexturesPage({
  * dans `200_icon/02_icon_item` (mesuré sur 10 conteneurs, jusqu'à 203 dans un seul fichier) :
  * s'arrêter au fichier, c'était n'en exposer qu'une sur quatre-vingts.
  */
-async function VueConteneur({ rel, segments }: { rel: string; segments: string[] }) {
-  const [conteneur, objets] = await Promise.all([texContainer(rel), itemNames()]);
+async function VueConteneur({
+  rel,
+  segments,
+}: {
+  rel: string;
+  segments: string[];
+}) {
+  const [conteneur, objets] = await Promise.all([
+    texContainer(rel),
+    itemNames(),
+  ]);
   const nom = segments.at(-1) ?? "";
   const parent = `/textures/${segments.slice(0, -1).join("/")}`;
 
   // Le nom de texture EST le code interne de l'objet dans les conteneurs d'icônes : la
   // jointure rend une grille d'objets là où il n'y avait qu'une grille de codes.
   const libelle = (n: string) => objets.get(n.toLowerCase()) ?? null;
-  const nommees = conteneur?.textures.filter(t => libelle(t.name)).length ?? 0;
+  const nommees =
+    conteneur?.textures.filter((t) => libelle(t.name)).length ?? 0;
 
   return (
     <div className="w-full space-y-5">
@@ -242,7 +287,10 @@ async function VueConteneur({ rel, segments }: { rel: string; segments: string[]
           {segments.slice(0, -1).map((seg, i) => (
             <span key={`${seg}-${i}`} className="flex items-center gap-1">
               <span aria-hidden>›</span>
-              <Link href={`/wiki/textures/${segments.slice(0, i + 1).join("/")}`} className="hover:text-primary">
+              <Link
+                href={`/wiki/textures/${segments.slice(0, i + 1).join("/")}`}
+                className="hover:text-primary"
+              >
                 {segLabel(seg)}
               </Link>
             </span>
@@ -252,7 +300,10 @@ async function VueConteneur({ rel, segments }: { rel: string; segments: string[]
         </nav>
       </MediaHeader>
 
-      <MediaBack href={parent} label={`Retour à ${segLabel(segments.at(-2) ?? "")}`} />
+      <MediaBack
+        href={parent}
+        label={`Retour à ${segLabel(segments.at(-2) ?? "")}`}
+      />
 
       <MediaDownload path={`data/dx11/${segments.join("/")}`} />
 
@@ -263,11 +314,13 @@ async function VueConteneur({ rel, segments }: { rel: string; segments: string[]
           <MediaCount
             left={`${conteneur.count.toLocaleString("fr")} texture${conteneur.count > 1 ? "s" : ""} dans ce fichier`}
             right={
-              nommees > 0 ? `${nommees.toLocaleString("fr")} rattachée${nommees > 1 ? "s" : ""} à un objet` : undefined
+              nommees > 0
+                ? `${nommees.toLocaleString("fr")} rattachée${nommees > 1 ? "s" : ""} à un objet`
+                : undefined
             }
           />
           <ul className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-6">
-            {conteneur.textures.map(t => (
+            {conteneur.textures.map((t) => (
               <li key={`${t.id}-${t.name}`}>
                 <a
                   href={texUrl(t.path)}
@@ -289,16 +342,21 @@ async function VueConteneur({ rel, segments }: { rel: string; segments: string[]
                     {/* Le nom de l'objet prime ; le code technique passe dessous. */}
                     <span
                       className={`block truncate text-[11px] group-hover:text-on-surface ${
-                        libelle(t.name) ? "font-medium text-on-surface" : "font-mono text-on-surface-variant"
+                        libelle(t.name)
+                          ? "font-medium text-on-surface"
+                          : "font-mono text-on-surface-variant"
                       }`}
                       title={libelle(t.name) ?? t.name}
                     >
                       {libelle(t.name) ?? t.name}
                     </span>
                     <span className="block truncate text-[10px] text-on-surface-variant/70">
-                      {libelle(t.name) && <span className="font-mono">{t.name} · </span>}
+                      {libelle(t.name) && (
+                        <span className="font-mono">{t.name} · </span>
+                      )}
                       {t.width}×{t.height}
-                      {t.regions > 0 && ` · ${t.regions} région${t.regions > 1 ? "s" : ""}`}
+                      {t.regions > 0 &&
+                        ` · ${t.regions} région${t.regions > 1 ? "s" : ""}`}
                     </span>
                   </span>
                 </a>

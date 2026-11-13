@@ -115,9 +115,18 @@ interface StaffRow {
 export function registerRandomTeamCommand(program: Command): void {
   program
     .command("random-team")
-    .description("Génère une équipe aléatoire complète de 11 joueurs, coach et managers")
-    .option("-f, --formation <formation>", "Configuration de la formation (ex: 4-4-2, 4-3-3, 3-5-2)", "4-4-2")
-    .option("-e, --element <element>", "Filtrer de préférence par élément (Feu, Vent, Forêt, Montagne)")
+    .description(
+      "Génère une équipe aléatoire complète de 11 joueurs, coach et managers",
+    )
+    .option(
+      "-f, --formation <formation>",
+      "Configuration de la formation (ex: 4-4-2, 4-3-3, 3-5-2)",
+      "4-4-2",
+    )
+    .option(
+      "-e, --element <element>",
+      "Filtrer de préférence par élément (Feu, Vent, Forêt, Montagne)",
+    )
     .option(
       "-p, --playstyle <playstyle>",
       "Filtrer de préférence par style (Lien, Justice, Percée, Tension, Jeu violent, Contre)",
@@ -138,11 +147,17 @@ export function registerRandomTeamCommand(program: Command): void {
 
         const db = openReadonlyDatabase(dbPath);
 
-        const elVal = options.element ? ELEMENT_ALIASES[options.element.toLowerCase()] : undefined;
-        const psVal = options.playstyle ? PLAYSTYLE_ALIASES[options.playstyle.toLowerCase()] : undefined;
+        const elVal = options.element
+          ? ELEMENT_ALIASES[options.element.toLowerCase()]
+          : undefined;
+        const psVal = options.playstyle
+          ? PLAYSTYLE_ALIASES[options.playstyle.toLowerCase()]
+          : undefined;
 
         const layout = options.formation || "4-4-2";
-        const formation = LAYOUTS.find(f => f.name === layout || f.layout === layout) || LAYOUTS[0];
+        const formation =
+          LAYOUTS.find((f) => f.name === layout || f.layout === layout) ||
+          LAYOUTS[0];
 
         function pickRandom<T>(arr: T[], n: number): T[] {
           const copy = [...arr];
@@ -159,7 +174,10 @@ export function registerRandomTeamCommand(program: Command): void {
          * style de jeu ne laisse pas assez de joueurs on le relâche, puis
          * l'élément — une équipe incomplète serait pire qu'un filtre ignoré.
          */
-        function fetchPool(position: string, requiredCount: number): PlayerRow[] {
+        function fetchPool(
+          position: string,
+          requiredCount: number,
+        ): PlayerRow[] {
           const query = `SELECT id, chara_id, internal_code, name_fr, name_en, element, position, stat_frappe, stat_controle, stat_technique, stat_pression, stat_physique, stat_agilite, stat_intelligence, sheet_data, zukan_hash FROM inagle_characters WHERE position = ? AND stat_frappe IS NOT NULL AND zukan_hash IS NOT NULL`;
           const params: string[] = [position];
 
@@ -175,7 +193,9 @@ export function registerRandomTeamCommand(program: Command): void {
             filterParams.push(psVal);
           }
 
-          let rows = db.prepare(filterQuery).all(...filterParams) as PlayerRow[];
+          let rows = db
+            .prepare(filterQuery)
+            .all(...filterParams) as PlayerRow[];
 
           if (rows.length < requiredCount && psVal) {
             let fbQuery = query;
@@ -195,9 +215,15 @@ export function registerRandomTeamCommand(program: Command): void {
         }
 
         const gk = pickRandom(fetchPool("Gardien", 1), 1);
-        const df = pickRandom(fetchPool("Défenseur", formation.df), formation.df);
+        const df = pickRandom(
+          fetchPool("Défenseur", formation.df),
+          formation.df,
+        );
         const mf = pickRandom(fetchPool("Milieu", formation.mf), formation.mf);
-        const fw = pickRandom(fetchPool("Attaquant", formation.fw), formation.fw);
+        const fw = pickRandom(
+          fetchPool("Attaquant", formation.fw),
+          formation.fw,
+        );
 
         const coachesPool = db
           .prepare(
@@ -221,10 +247,26 @@ export function registerRandomTeamCommand(program: Command): void {
           restoreLogs(true);
           const teamJson = {
             formation: formation.layout,
-            gk: gk.map(p => ({ id: p.id, name: p.name_fr || p.name_en, element: p.element })),
-            df: df.map(p => ({ id: p.id, name: p.name_fr || p.name_en, element: p.element })),
-            mf: mf.map(p => ({ id: p.id, name: p.name_fr || p.name_en, element: p.element })),
-            fw: fw.map(p => ({ id: p.id, name: p.name_fr || p.name_en, element: p.element })),
+            gk: gk.map((p) => ({
+              id: p.id,
+              name: p.name_fr || p.name_en,
+              element: p.element,
+            })),
+            df: df.map((p) => ({
+              id: p.id,
+              name: p.name_fr || p.name_en,
+              element: p.element,
+            })),
+            mf: mf.map((p) => ({
+              id: p.id,
+              name: p.name_fr || p.name_en,
+              element: p.element,
+            })),
+            fw: fw.map((p) => ({
+              id: p.id,
+              name: p.name_fr || p.name_en,
+              element: p.element,
+            })),
             coach: coach
               ? {
                   id: coach.id,
@@ -234,7 +276,7 @@ export function registerRandomTeamCommand(program: Command): void {
                   buff: coach.buff,
                 }
               : null,
-            managers: managers.map(m => ({
+            managers: managers.map((m) => ({
               id: m.id,
               name: m.name_localised || m.name_romaji,
               element: m.element,
@@ -272,7 +314,10 @@ export function registerRandomTeamCommand(program: Command): void {
 
           // `sheet_data` (JSON) prime sur les colonnes plates quand il existe.
           try {
-            const sd = typeof p.sheet_data === "string" ? JSON.parse(p.sheet_data) : p.sheet_data;
+            const sd =
+              typeof p.sheet_data === "string"
+                ? JSON.parse(p.sheet_data)
+                : p.sheet_data;
             if (sd?.stats) {
               kick = sd.stats.kick || kick;
               ctrl = sd.stats.control || ctrl;
@@ -297,7 +342,10 @@ export function registerRandomTeamCommand(program: Command): void {
 
           let ps = "Aucun";
           try {
-            const sd = typeof p.sheet_data === "string" ? JSON.parse(p.sheet_data) : p.sheet_data;
+            const sd =
+              typeof p.sheet_data === "string"
+                ? JSON.parse(p.sheet_data)
+                : p.sheet_data;
             ps = sd?.playstyle || "Aucun";
           } catch {}
           playstyleCounts[ps] = (playstyleCounts[ps] || 0) + 1;
@@ -378,7 +426,11 @@ export function registerRandomTeamCommand(program: Command): void {
           return { display, length: raw.length };
         }
 
-        function centerRowOfPlayers(players: PlayerRow[], positionCode: string, totalWidth: number = 78): string {
+        function centerRowOfPlayers(
+          players: PlayerRow[],
+          positionCode: string,
+          totalWidth: number = 78,
+        ): string {
           const n = players.length;
           if (n === 0) return "";
           const colWidth = Math.floor(totalWidth / n);
@@ -386,7 +438,11 @@ export function registerRandomTeamCommand(program: Command): void {
 
           let rowText = "";
           for (const p of players) {
-            const { display, length } = formatPlayerForPitch(p, positionCode, maxNameLen);
+            const { display, length } = formatPlayerForPitch(
+              p,
+              positionCode,
+              maxNameLen,
+            );
             const padTotal = colWidth - length;
             const padLeft = Math.floor(Math.max(0, padTotal) / 2);
             const padRight = Math.max(0, padTotal - padLeft);
@@ -410,32 +466,71 @@ export function registerRandomTeamCommand(program: Command): void {
         const padTotal = 78 - titleRaw.length;
         const padLeft = Math.floor(padTotal / 2);
         const padRight = padTotal - padLeft;
-        const titleRowText = " ".repeat(padLeft) + titleColored + " ".repeat(padRight);
+        const titleRowText =
+          " ".repeat(padLeft) + titleColored + " ".repeat(padRight);
 
-        console.log(`${colors.green}║${colors.reset}${titleRowText}${colors.green}║${colors.reset}`);
+        console.log(
+          `${colors.green}║${colors.reset}${titleRowText}${colors.green}║${colors.reset}`,
+        );
         console.log(`${colors.green}╠${"═".repeat(78)}╣${colors.reset}`);
-        console.log(`${colors.green}║${colors.reset}${" ".repeat(78)}${colors.green}║${colors.reset}`);
-        console.log(`${colors.green}║${colors.reset}${fwRowText}${colors.green}║${colors.reset}`);
-        console.log(`${colors.green}║${colors.reset}${" ".repeat(78)}${colors.green}║${colors.reset}`);
+        console.log(
+          `${colors.green}║${colors.reset}${" ".repeat(78)}${colors.green}║${colors.reset}`,
+        );
+        console.log(
+          `${colors.green}║${colors.reset}${fwRowText}${colors.green}║${colors.reset}`,
+        );
+        console.log(
+          `${colors.green}║${colors.reset}${" ".repeat(78)}${colors.green}║${colors.reset}`,
+        );
         const lineSepRaw = "─".repeat(60);
         const lineSepPad = centerText(lineSepRaw, 78);
-        console.log(`${colors.green}║${colors.reset}${lineSepPad}${colors.green}║${colors.reset}`);
-        console.log(`${colors.green}║${colors.reset}${" ".repeat(78)}${colors.green}║${colors.reset}`);
-        console.log(`${colors.green}║${colors.reset}${mfRowText}${colors.green}║${colors.reset}`);
-        console.log(`${colors.green}║${colors.reset}${" ".repeat(78)}${colors.green}║${colors.reset}`);
-        console.log(`${colors.green}║${colors.reset}${lineSepPad}${colors.green}║${colors.reset}`);
-        console.log(`${colors.green}║${colors.reset}${" ".repeat(78)}${colors.green}║${colors.reset}`);
-        console.log(`${colors.green}║${colors.reset}${dfRowText}${colors.green}║${colors.reset}`);
-        console.log(`${colors.green}║${colors.reset}${" ".repeat(78)}${colors.green}║${colors.reset}`);
-        console.log(`${colors.green}║${colors.reset}${lineSepPad}${colors.green}║${colors.reset}`);
-        console.log(`${colors.green}║${colors.reset}${" ".repeat(78)}${colors.green}║${colors.reset}`);
-        console.log(`${colors.green}║${colors.reset}${gkRowText}${colors.green}║${colors.reset}`);
-        console.log(`${colors.green}║${colors.reset}${" ".repeat(78)}${colors.green}║${colors.reset}`);
+        console.log(
+          `${colors.green}║${colors.reset}${lineSepPad}${colors.green}║${colors.reset}`,
+        );
+        console.log(
+          `${colors.green}║${colors.reset}${" ".repeat(78)}${colors.green}║${colors.reset}`,
+        );
+        console.log(
+          `${colors.green}║${colors.reset}${mfRowText}${colors.green}║${colors.reset}`,
+        );
+        console.log(
+          `${colors.green}║${colors.reset}${" ".repeat(78)}${colors.green}║${colors.reset}`,
+        );
+        console.log(
+          `${colors.green}║${colors.reset}${lineSepPad}${colors.green}║${colors.reset}`,
+        );
+        console.log(
+          `${colors.green}║${colors.reset}${" ".repeat(78)}${colors.green}║${colors.reset}`,
+        );
+        console.log(
+          `${colors.green}║${colors.reset}${dfRowText}${colors.green}║${colors.reset}`,
+        );
+        console.log(
+          `${colors.green}║${colors.reset}${" ".repeat(78)}${colors.green}║${colors.reset}`,
+        );
+        console.log(
+          `${colors.green}║${colors.reset}${lineSepPad}${colors.green}║${colors.reset}`,
+        );
+        console.log(
+          `${colors.green}║${colors.reset}${" ".repeat(78)}${colors.green}║${colors.reset}`,
+        );
+        console.log(
+          `${colors.green}║${colors.reset}${gkRowText}${colors.green}║${colors.reset}`,
+        );
+        console.log(
+          `${colors.green}║${colors.reset}${" ".repeat(78)}${colors.green}║${colors.reset}`,
+        );
         console.log(`${colors.green}╚${"═".repeat(78)}╝${colors.reset}`);
 
-        console.log(`\n${colors.bold}${colors.cyan}⚙️  CARACTÉRISTIQUES DE L'ÉQUIPE :${colors.reset}`);
-        console.log(`  · ${colors.bold}Formation :${colors.reset} ${formation.name} (${formation.layout})`);
-        console.log(`  · ${colors.bold}Moyennes de stats (Lv 99) :${colors.reset}`);
+        console.log(
+          `\n${colors.bold}${colors.cyan}⚙️  CARACTÉRISTIQUES DE L'ÉQUIPE :${colors.reset}`,
+        );
+        console.log(
+          `  · ${colors.bold}Formation :${colors.reset} ${formation.name} (${formation.layout})`,
+        );
+        console.log(
+          `  · ${colors.bold}Moyennes de stats (Lv 99) :${colors.reset}`,
+        );
         console.log(
           `      Frappe: ${colors.yellow}${statsAvg.frappe}${colors.reset} | Contrôle: ${colors.yellow}${statsAvg.controle}${colors.reset} | Technique: ${colors.yellow}${statsAvg.technique}${colors.reset}`,
         );
@@ -444,15 +539,20 @@ export function registerRandomTeamCommand(program: Command): void {
         );
 
         console.log(
-          `  · ${colors.bold}Synergies d'éléments :${colors.reset} ${synergies.length > 0 ? synergies.map(s => `${colors.green}${s}${colors.reset}`).join(", ") : "Aucune synergie active (3+ du même élément)"}`,
+          `  · ${colors.bold}Synergies d'éléments :${colors.reset} ${synergies.length > 0 ? synergies.map((s) => `${colors.green}${s}${colors.reset}`).join(", ") : "Aucune synergie active (3+ du même élément)"}`,
         );
 
-        console.log(`\n${colors.bold}${colors.cyan}👔 STAFF TECHNIQUE :${colors.reset}`);
+        console.log(
+          `\n${colors.bold}${colors.cyan}👔 STAFF TECHNIQUE :${colors.reset}`,
+        );
         if (coach) {
           console.log(
             `  · [${colors.yellow}COACH${colors.reset}] ${colors.bold}${coach.name_localised || coach.name_romaji}${colors.reset} (${coach.element} | ${coach.playstyle || "N/A"})`,
           );
-          if (coach.buff) console.log(`      Buff: ${colors.green}${coach.buff}${colors.reset}`);
+          if (coach.buff)
+            console.log(
+              `      Buff: ${colors.green}${coach.buff}${colors.reset}`,
+            );
         } else {
           console.log(`  · [${colors.yellow}COACH${colors.reset}] Aucun`);
         }

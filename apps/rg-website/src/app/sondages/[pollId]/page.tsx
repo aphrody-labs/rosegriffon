@@ -17,7 +17,12 @@ import Image from "next/image";
 import Link from "@/components/shared/Link";
 import { notFound } from "next/navigation";
 
-import { BreadcrumbSchema, PageContainer, PageHero, SectionCard } from "@/components/shared";
+import {
+  BreadcrumbSchema,
+  PageContainer,
+  PageHero,
+  SectionCard,
+} from "@/components/shared";
 import { ContenuDiscord, TexteDiscordInline } from "@/lib/discord/markdown";
 import {
   construireContexteSondages,
@@ -52,7 +57,7 @@ export async function generateStaticParams() {
   // Une cinquantaine de sondages : les pré-rendre tous coûte moins cher qu'un
   // rendu à la demande par visiteur.
   const identifiants = await listerIdentifiantsSondages();
-  return identifiants.map(pollId => ({ pollId }));
+  return identifiants.map((pollId) => ({ pollId }));
 }
 
 export async function generateMetadata({
@@ -62,14 +67,21 @@ export async function generateMetadata({
   params: Promise<{ pollId: string }>;
 }): Promise<Metadata> {
   const { pollId } = await params;
-  const sondage = estIdentifiantSondage(pollId) ? await lireSondage(pollId) : null;
+  const sondage = estIdentifiantSondage(pollId)
+    ? await lireSondage(pollId)
+    : null;
   if (!sondage) return { title: "Sondage introuvable · Rose Griffon" };
 
   // Un `<title>` ne doit contenir ni `**gras**`, ni `<:emote:id>`, ni `<@&rôle>`.
   const titre = resumeQuestion(sondage.question, 80);
-  const description = clampText(`Résultats du sondage « ${titre} » posé à la communauté Rose Griffon sur Discord.`);
+  const description = clampText(
+    `Résultats du sondage « ${titre} » posé à la communauté Rose Griffon sur Discord.`,
+  );
   // 80 caractères de question + « · Sondages · Rose Griffon » dépassaient 100 caractères.
-  const titrePage = titleWithSuffix(resumeQuestion(sondage.question, 500), " · Sondages · Rose Griffon");
+  const titrePage = titleWithSuffix(
+    resumeQuestion(sondage.question, 500),
+    " · Sondages · Rose Griffon",
+  );
   const url = absoluteUrl(`/sondages/${sondage.poll_id}`);
 
   return {
@@ -102,12 +114,18 @@ function LigneMeta({
         {icone}
         {intitule}
       </dt>
-      <dd className="text-fluid-body-md break-words text-on-surface">{children}</dd>
+      <dd className="text-fluid-body-md break-words text-on-surface">
+        {children}
+      </dd>
     </div>
   );
 }
 
-export default async function PageSondage({ params }: { params: Promise<{ pollId: string }> }) {
+export default async function PageSondage({
+  params,
+}: {
+  params: Promise<{ pollId: string }>;
+}) {
   const { pollId } = await params;
   // Identifiant hors format : 404 immédiat, sans toucher la base.
   if (!estIdentifiantSondage(pollId)) notFound();
@@ -117,7 +135,10 @@ export default async function PageSondage({ params }: { params: Promise<{ pollId
   // deux cas donnent un 404 propre plutôt qu'une page vide.
   if (!sondage) notFound();
 
-  const [contexte, voisins] = await Promise.all([construireContexteSondages([sondage]), lireVoisins(sondage.poll_id)]);
+  const [contexte, voisins] = await Promise.all([
+    construireContexteSondages([sondage]),
+    lireVoisins(sondage.poll_id),
+  ]);
 
   const resume = resumeQuestion(sondage.question, 70);
   const ordonnees = classement(sondage);
@@ -146,7 +167,10 @@ export default async function PageSondage({ params }: { params: Promise<{ pollId
         icon={<BarChart3 className="size-6 text-rg-or" aria-hidden />}
         title={
           <span>
-            <TexteDiscordInline contenu={sondage.question} contexte={contexte} />
+            <TexteDiscordInline
+              contenu={sondage.question}
+              contexte={contexte}
+            />
           </span>
         }
       />
@@ -166,7 +190,10 @@ export default async function PageSondage({ params }: { params: Promise<{ pollId
             // Même règle que sur la carte de liste : 11 des 15 questions
             // illustrées désignent l'image, un `alt` vide la rendrait
             // invisible aux lecteurs d'écran.
-            alt={sondage.visuel.alt ?? `Visuel du sondage : ${resumeQuestion(sondage.question, 80)}`}
+            alt={
+              sondage.visuel.alt ??
+              `Visuel du sondage : ${resumeQuestion(sondage.question, 80)}`
+            }
             width={sondage.visuel.width ?? 1600}
             height={sondage.visuel.height ?? 1200}
             sizes="(max-width: 1280px) 100vw, 1280px"
@@ -175,43 +202,71 @@ export default async function PageSondage({ params }: { params: Promise<{ pollId
             className="h-auto w-full rounded-3xl border border-outline-variant/20 object-cover"
           />
           <figcaption className="text-sm text-on-surface-variant">
-            {sondage.visuel.alt ?? "Visuel publié dans le salon avec ce sondage."}
+            {sondage.visuel.alt ??
+              "Visuel publié dans le salon avec ce sondage."}
           </figcaption>
         </figure>
       )}
 
       {sondage.chapo && (
         <SectionCard>
-          <h2 className="mb-2 text-fluid-headline-md font-bold text-foreground">Présentation</h2>
+          <h2 className="mb-2 text-fluid-headline-md font-bold text-foreground">
+            Présentation
+          </h2>
           <ContenuDiscord contenu={sondage.chapo} contexte={contexte} />
         </SectionCard>
       )}
 
       <div className="grid gap-6 lg:grid-cols-3">
         <SectionCard className="lg:col-span-2">
-          <h2 className="mb-4 text-fluid-headline-lg font-bold text-foreground">Résultats</h2>
+          <h2 className="mb-4 text-fluid-headline-lg font-bold text-foreground">
+            Résultats
+          </h2>
           {/* Classement par nombre de votes, vainqueur mis en avant. Le rang
 					    d'origine de chaque choix reste rappelé sous la barre. */}
-          <ResultatsSondage classe contexte={contexte} optionEnTete={enTete} options={ordonnees} sondage={sondage} />
+          <ResultatsSondage
+            classe
+            contexte={contexte}
+            optionEnTete={enTete}
+            options={ordonnees}
+            sondage={sondage}
+          />
         </SectionCard>
 
         <SectionCard>
-          <h2 className="mb-4 text-fluid-headline-md font-bold text-foreground">Paramètres du sondage</h2>
+          <h2 className="mb-4 text-fluid-headline-md font-bold text-foreground">
+            Paramètres du sondage
+          </h2>
           <dl className="space-y-3">
             <LigneMeta intitule="État">
-              <Badge variant={varianteBadgeEtat(sondage)}>{libelleEtat(sondage)}</Badge>
+              <Badge variant={varianteBadgeEtat(sondage)}>
+                {libelleEtat(sondage)}
+              </Badge>
             </LigneMeta>
-            <LigneMeta intitule="Choix autorisés">{libelleChoixAutorises(sondage)}</LigneMeta>
+            <LigneMeta intitule="Choix autorisés">
+              {libelleChoixAutorises(sondage)}
+            </LigneMeta>
             <LigneMeta
               icone={
-                sondage.locked ? <Lock className="size-4" aria-hidden /> : <LockOpen className="size-4" aria-hidden />
+                sondage.locked ? (
+                  <Lock className="size-4" aria-hidden />
+                ) : (
+                  <LockOpen className="size-4" aria-hidden />
+                )
               }
               intitule="Votes"
             >
-              {sondage.locked ? "Verrouillés — plus aucun vote possible" : "Ouverts"}
+              {sondage.locked
+                ? "Verrouillés — plus aucun vote possible"
+                : "Ouverts"}
             </LigneMeta>
-            <LigneMeta icone={<CalendarDays className="size-4" aria-hidden />} intitule="Publié le">
-              <time dateTime={sondage.created_at}>{format(publieLe, "d MMMM yyyy 'à' HH'h'mm", { locale: fr })}</time>
+            <LigneMeta
+              icone={<CalendarDays className="size-4" aria-hidden />}
+              intitule="Publié le"
+            >
+              <time dateTime={sondage.created_at}>
+                {format(publieLe, "d MMMM yyyy 'à' HH'h'mm", { locale: fr })}
+              </time>
             </LigneMeta>
             {finLe && (
               <LigneMeta
@@ -222,18 +277,26 @@ export default async function PageSondage({ params }: { params: Promise<{ pollId
                   {format(finLe, "d MMMM yyyy 'à' HH'h'mm", { locale: fr })}
                 </time>{" "}
                 <span className="text-on-surface-variant">
-                  ({formatDistanceToNow(finLe, { addSuffix: true, locale: fr })})
+                  ({formatDistanceToNow(finLe, { addSuffix: true, locale: fr })}
+                  )
                 </span>
               </LigneMeta>
             )}
             {participation && (
-              <LigneMeta icone={<Users className="size-4" aria-hidden />} intitule="Participation">
+              <LigneMeta
+                icone={<Users className="size-4" aria-hidden />}
+                intitule="Participation"
+              >
                 {participation}
               </LigneMeta>
             )}
             {/* Le créateur n'est affiché que si l'API Discord l'a réellement
 						    donné : jamais déduit d'un message voisin. */}
-            {sondage.creator_username && <LigneMeta intitule="Sondage lancé par">{sondage.creator_username}</LigneMeta>}
+            {sondage.creator_username && (
+              <LigneMeta intitule="Sondage lancé par">
+                {sondage.creator_username}
+              </LigneMeta>
+            )}
             {sondage.command && (
               <LigneMeta intitule="Commande">
                 <code className="rounded-sm border border-outline-variant/40 bg-surface-container-highest px-1.5 py-0.5 font-mono text-sm">

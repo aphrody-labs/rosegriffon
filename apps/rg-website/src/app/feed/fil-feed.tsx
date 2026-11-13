@@ -1,14 +1,30 @@
 "use client";
 
-import { ArrowUp, BadgeCheck, CalendarDays, ExternalLink, Link2 } from "lucide-react";
+import {
+  ArrowUp,
+  BadgeCheck,
+  CalendarDays,
+  ExternalLink,
+  Link2,
+} from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { lienCompte, MARQUES } from "@/lib/feed/comptes";
 import type { FiltreFil } from "@/lib/feed/comptes";
-import type { CompteSource, PostFeed, ProfilFeed, StatutSource } from "@/lib/feed/types";
+import type {
+  CompteSource,
+  PostFeed,
+  ProfilFeed,
+  StatutSource,
+} from "@/lib/feed/types";
 import { initiale } from "@/lib/unicode";
 
-import { CartePost, entier, SquelettePosts, TexteAvecLiens } from "./carte-post";
+import {
+  CartePost,
+  entier,
+  SquelettePosts,
+  TexteAvecLiens,
+} from "./carte-post";
 import { BadgeReseau } from "./marque";
 
 const INTERVALLE_MS = 30_000;
@@ -23,11 +39,17 @@ export interface PageFeed {
 
 type Ordre = "date" | "serveur";
 
-const parDate = (a: PostFeed, b: PostFeed) => b.date.localeCompare(a.date) || b.id.localeCompare(a.id);
+const parDate = (a: PostFeed, b: PostFeed) =>
+  b.date.localeCompare(a.date) || b.id.localeCompare(a.id);
 
-function fusionnerListe(actuels: PostFeed[], ajouts: PostFeed[], ordre: Ordre, enTete = false): PostFeed[] {
-  const vus = new Set(actuels.map(p => p.id));
-  const nouveaux = ajouts.filter(p => !vus.has(p.id) && vus.add(p.id));
+function fusionnerListe(
+  actuels: PostFeed[],
+  ajouts: PostFeed[],
+  ordre: Ordre,
+  enTete = false,
+): PostFeed[] {
+  const vus = new Set(actuels.map((p) => p.id));
+  const nouveaux = ajouts.filter((p) => !vus.has(p.id) && vus.add(p.id));
   if (nouveaux.length === 0) return actuels;
   const liste = enTete ? [...nouveaux, ...actuels] : [...actuels, ...nouveaux];
   return ordre === "date" ? liste.sort(parDate) : liste;
@@ -39,10 +61,19 @@ function fusionnerListe(actuels: PostFeed[], ajouts: PostFeed[], ordre: Ordre, e
  * relue toutes les 30 s ; les posts parus entre-temps arrivent d'eux-mêmes en tête si on est en
  * haut de page, sinon derrière un bouton (pas de saut de contenu pendant la lecture).
  */
-function useListe(url: string, initial: PageFeed | null, rafraichir: boolean, ordre: Ordre) {
+function useListe(
+  url: string,
+  initial: PageFeed | null,
+  rafraichir: boolean,
+  ordre: Ordre,
+) {
   const [posts, setPosts] = useState<PostFeed[]>(initial?.posts ?? []);
-  const [profils, setProfils] = useState<Record<string, ProfilFeed>>(initial?.profils ?? {});
-  const [sources, setSources] = useState<StatutSource[]>(initial?.sources ?? []);
+  const [profils, setProfils] = useState<Record<string, ProfilFeed>>(
+    initial?.profils ?? {},
+  );
+  const [sources, setSources] = useState<StatutSource[]>(
+    initial?.sources ?? [],
+  );
   const [curseur, setCurseur] = useState<string | undefined>(initial?.curseur);
   const [enAttente, setEnAttente] = useState<PostFeed[]>([]);
   const [charge, setCharge] = useState(initial !== null);
@@ -57,7 +88,10 @@ function useListe(url: string, initial: PageFeed | null, rafraichir: boolean, or
   const lire = useCallback(
     async (cur?: string): Promise<PageFeed> => {
       const sep = url.includes("?") ? "&" : "?";
-      const reponse = await fetch(`${url}${cur ? `${sep}cursor=${encodeURIComponent(cur)}` : ""}`, { cache: "no-store" });
+      const reponse = await fetch(
+        `${url}${cur ? `${sep}cursor=${encodeURIComponent(cur)}` : ""}`,
+        { cache: "no-store" },
+      );
       if (!reponse.ok) throw new Error(String(reponse.status));
       return (await reponse.json()) as PageFeed;
     },
@@ -69,8 +103,8 @@ function useListe(url: string, initial: PageFeed | null, rafraichir: boolean, or
     setChargement(true);
     try {
       const page = await lire(curseur);
-      setPosts(actuels => fusionnerListe(actuels, page.posts, ordre));
-      if (page.profils) setProfils(p => ({ ...p, ...page.profils }));
+      setPosts((actuels) => fusionnerListe(actuels, page.posts, ordre));
+      if (page.profils) setProfils((p) => ({ ...p, ...page.profils }));
       setCurseur(page.curseur);
       setErreur(false);
     } catch {
@@ -81,14 +115,14 @@ function useListe(url: string, initial: PageFeed | null, rafraichir: boolean, or
   }, [chargement, curseur, lire, ordre]);
 
   const afficherNouveaux = useCallback(() => {
-    setPosts(actuels => fusionnerListe(actuels, enAttente, ordre, true));
+    setPosts((actuels) => fusionnerListe(actuels, enAttente, ordre, true));
     setEnAttente([]);
   }, [enAttente, ordre]);
 
   useEffect(() => {
     let actif = true;
     const appliquer = (page: PageFeed, premiere: boolean) => {
-      if (page.profils) setProfils(p => ({ ...p, ...page.profils }));
+      if (page.profils) setProfils((p) => ({ ...p, ...page.profils }));
       if (page.sources) setSources(page.sources);
       if (premiere) {
         setPosts(page.posts);
@@ -96,13 +130,17 @@ function useListe(url: string, initial: PageFeed | null, rafraichir: boolean, or
         return;
       }
       const actuels = postsRef.current;
-      const plusAncien = actuels.length > 0 ? actuels[actuels.length - 1]!.date : "";
-      const vus = new Set(actuels.map(p => p.id));
+      const plusAncien =
+        actuels.length > 0 ? actuels[actuels.length - 1]!.date : "";
+      const vus = new Set(actuels.map((p) => p.id));
       // Un post plus ancien que le bas de liste appartient à la suite, pas aux nouveautés.
-      const nouveaux = page.posts.filter(p => !vus.has(p.id) && p.date > plusAncien);
+      const nouveaux = page.posts.filter(
+        (p) => !vus.has(p.id) && p.date > plusAncien,
+      );
       if (nouveaux.length === 0) return;
-      if (window.scrollY < SEUIL_DEFILEMENT) setPosts(a => fusionnerListe(a, nouveaux, ordre, true));
-      else setEnAttente(a => fusionnerListe(a, nouveaux, "date"));
+      if (window.scrollY < SEUIL_DEFILEMENT)
+        setPosts((a) => fusionnerListe(a, nouveaux, ordre, true));
+      else setEnAttente((a) => fusionnerListe(a, nouveaux, "date"));
     };
     const premiere = async () => {
       try {
@@ -137,20 +175,41 @@ function useListe(url: string, initial: PageFeed | null, rafraichir: boolean, or
   useEffect(() => {
     const noeud = sentinelle.current;
     if (!noeud || !curseur) return;
-    const observateur = new IntersectionObserver(entrees => entrees[0]?.isIntersecting && void suite(), {
-      rootMargin: "600px",
-    });
+    const observateur = new IntersectionObserver(
+      (entrees) => entrees[0]?.isIntersecting && void suite(),
+      {
+        rootMargin: "600px",
+      },
+    );
     observateur.observe(noeud);
     return () => observateur.disconnect();
   }, [curseur, suite]);
 
-  return { posts, profils, sources, curseur, enAttente, afficherNouveaux, charge, chargement, erreur, sentinelle, suite };
+  return {
+    posts,
+    profils,
+    sources,
+    curseur,
+    enAttente,
+    afficherNouveaux,
+    charge,
+    chargement,
+    erreur,
+    sentinelle,
+    suite,
+  };
 }
 
 const BOUTON =
   "inline-flex min-h-11 items-center justify-center rounded-full border border-outline-variant bg-surface-container px-5 text-sm font-medium text-on-surface hover:bg-surface-container-high";
 
-function Message({ children, alerte = false }: { children: React.ReactNode; alerte?: boolean }) {
+function Message({
+  children,
+  alerte = false,
+}: {
+  children: React.ReactNode;
+  alerte?: boolean;
+}) {
   return (
     <p
       role={alerte ? "alert" : "status"}
@@ -161,14 +220,25 @@ function Message({ children, alerte = false }: { children: React.ReactNode; aler
   );
 }
 
-function NotesSources({ sources, filtre, vide }: { sources: StatutSource[]; filtre?: FiltreFil; vide: boolean }) {
+function NotesSources({
+  sources,
+  filtre,
+  vide,
+}: {
+  sources: StatutSource[];
+  filtre?: FiltreFil;
+  vide: boolean;
+}) {
   const notes = sources.filter(
-    s => s.message && (s.etat === "indisponible" || (s.etat === "vide" && (filtre?.reseau === s.reseau || vide))),
+    (s) =>
+      s.message &&
+      (s.etat === "indisponible" ||
+        (s.etat === "vide" && (filtre?.reseau === s.reseau || vide))),
   );
   if (notes.length === 0) return null;
   return (
     <ul className="mb-3 space-y-2">
-      {notes.map(s => (
+      {notes.map((s) => (
         <li
           key={s.reseau}
           className="flex items-start gap-3 rounded-2xl border border-outline-variant bg-surface-container-low p-3 text-sm leading-5 text-on-surface-variant"
@@ -192,8 +262,25 @@ function ListePosts({
   filtre?: FiltreFil;
   messageErreur: string;
 }) {
-  const { posts, profils, sources, curseur, enAttente, afficherNouveaux, charge, chargement, erreur, sentinelle, suite } = liste;
-  if (!charge && posts.length === 0) return erreur ? <Message alerte>{messageErreur}</Message> : <SquelettePosts />;
+  const {
+    posts,
+    profils,
+    sources,
+    curseur,
+    enAttente,
+    afficherNouveaux,
+    charge,
+    chargement,
+    erreur,
+    sentinelle,
+    suite,
+  } = liste;
+  if (!charge && posts.length === 0)
+    return erreur ? (
+      <Message alerte>{messageErreur}</Message>
+    ) : (
+      <SquelettePosts />
+    );
   return (
     <div>
       {enAttente.length > 0 && (
@@ -202,16 +289,28 @@ function ListePosts({
             type="button"
             onClick={() => {
               afficherNouveaux();
-              window.scrollTo({ top: 0, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+              window.scrollTo({
+                top: 0,
+                behavior: window.matchMedia("(prefers-reduced-motion: reduce)")
+                  .matches
+                  ? "auto"
+                  : "smooth",
+              });
             }}
             className="inline-flex min-h-11 items-center gap-2 rounded-full bg-primary px-5 text-sm font-semibold text-on-primary shadow-lg"
           >
             <ArrowUp className="size-4" aria-hidden />
-            {enAttente.length > 1 ? `${enAttente.length} nouveaux posts` : "1 nouveau post"}
+            {enAttente.length > 1
+              ? `${enAttente.length} nouveaux posts`
+              : "1 nouveau post"}
           </button>
         </output>
       )}
-      <NotesSources sources={sources} filtre={filtre} vide={posts.length === 0} />
+      <NotesSources
+        sources={sources}
+        filtre={filtre}
+        vide={posts.length === 0}
+      />
       {posts.length === 0 ? (
         erreur ? (
           <Message alerte>{messageErreur}</Message>
@@ -220,7 +319,7 @@ function ListePosts({
         )
       ) : (
         <div className="space-y-3">
-          {posts.map(post => (
+          {posts.map((post) => (
             <CartePost key={post.id} post={post} profils={profils} />
           ))}
         </div>
@@ -230,7 +329,11 @@ function ListePosts({
           {chargement ? (
             <SquelettePosts nombre={1} />
           ) : (
-            <button type="button" onClick={() => void suite()} className={`${BOUTON} w-full`}>
+            <button
+              type="button"
+              onClick={() => void suite()}
+              className={`${BOUTON} w-full`}
+            >
               {erreur ? "Réessayer" : "Afficher plus de posts"}
             </button>
           )}
@@ -241,11 +344,20 @@ function ListePosts({
   );
 }
 
-function EnteteProfil({ compte, profil }: { compte: CompteSource; profil?: ProfilFeed }) {
+function EnteteProfil({
+  compte,
+  profil,
+}: {
+  compte: CompteSource;
+  profil?: ProfilFeed;
+}) {
   const marque = MARQUES[compte.reseau];
   const nom = profil?.nom ?? compte.nom;
   const rejoint = profil?.rejointLe
-    ? new Date(profil.rejointLe).toLocaleDateString("fr-FR", { month: "long", year: "numeric" })
+    ? new Date(profil.rejointLe).toLocaleDateString("fr-FR", {
+        month: "long",
+        year: "numeric",
+      })
     : null;
   return (
     <section
@@ -255,7 +367,12 @@ function EnteteProfil({ compte, profil }: { compte: CompteSource; profil?: Profi
       <div className="aspect-[3/1] w-full bg-gradient-to-br from-rg-marine to-rg-marine-clair">
         {profil?.banniere && (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={profil.banniere} alt="" referrerPolicy="no-referrer" className="size-full object-cover" />
+          <img
+            src={profil.banniere}
+            alt=""
+            referrerPolicy="no-referrer"
+            className="size-full object-cover"
+          />
         )}
       </div>
       <div className="px-4 pb-4">
@@ -290,11 +407,19 @@ function EnteteProfil({ compte, profil }: { compte: CompteSource; profil?: Profi
         </div>
         <h1 className="flex items-center gap-2 text-xl leading-6 font-extrabold text-on-surface">
           {nom}
-          {profil?.certifie && <BadgeCheck className="size-5 text-info" aria-label="Compte certifié" />}
+          {profil?.certifie && (
+            <BadgeCheck
+              className="size-5 text-info"
+              aria-label="Compte certifié"
+            />
+          )}
         </h1>
         <p className="flex items-center gap-2 text-sm text-on-surface-variant">
           <BadgeReseau reseau={compte.reseau} taille={18} />
-          {compte.reseau === "youtube" ? "Chaîne YouTube" : `@${profil?.pseudo ?? compte.pseudo}`} · {compte.groupe}
+          {compte.reseau === "youtube"
+            ? "Chaîne YouTube"
+            : `@${profil?.pseudo ?? compte.pseudo}`}{" "}
+          · {compte.groupe}
         </p>
         {profil?.bio && (
           <p className="mt-3 text-[15px] leading-6 whitespace-pre-line text-on-surface">
@@ -320,21 +445,32 @@ function EnteteProfil({ compte, profil }: { compte: CompteSource; profil?: Profi
             </span>
           )}
         </p>
-        {(profil?.abonnes != null || profil?.abonnements != null || profil?.publications != null) && (
+        {(profil?.abonnes != null ||
+          profil?.abonnements != null ||
+          profil?.publications != null) && (
           <p className="flex flex-wrap gap-x-5 gap-y-1 text-sm text-on-surface-variant">
             {profil.abonnements != null && (
               <span>
-                <b className="font-bold text-on-surface">{entier.format(profil.abonnements)}</b> abonnements
+                <b className="font-bold text-on-surface">
+                  {entier.format(profil.abonnements)}
+                </b>{" "}
+                abonnements
               </span>
             )}
             {profil.abonnes != null && (
               <span>
-                <b className="font-bold text-on-surface">{entier.format(profil.abonnes)}</b> abonnés
+                <b className="font-bold text-on-surface">
+                  {entier.format(profil.abonnes)}
+                </b>{" "}
+                abonnés
               </span>
             )}
             {profil.publications != null && (
               <span>
-                <b className="font-bold text-on-surface">{entier.format(profil.publications)}</b> publications
+                <b className="font-bold text-on-surface">
+                  {entier.format(profil.publications)}
+                </b>{" "}
+                publications
               </span>
             )}
           </p>
@@ -357,7 +493,9 @@ export function FilFeed({
   initial: PageFeed | null;
 }) {
   const liste = useListe(url, initial, true, "date");
-  const profil = compte ? liste.profils[`${compte.reseau}:${compte.pseudo.toLowerCase()}`] : undefined;
+  const profil = compte
+    ? liste.profils[`${compte.reseau}:${compte.pseudo.toLowerCase()}`]
+    : undefined;
   return (
     <>
       {compte && <EnteteProfil compte={compte} profil={profil} />}
@@ -372,8 +510,19 @@ export function FilFeed({
 }
 
 /** Résultats de recherche (posts les plus récents sur X). */
-export function ResultatsRecherche({ q, initial }: { q: string; initial: PageFeed | null }) {
-  const liste = useListe(`/api/feed/live?q=${encodeURIComponent(q)}`, initial, false, "serveur");
+export function ResultatsRecherche({
+  q,
+  initial,
+}: {
+  q: string;
+  initial: PageFeed | null;
+}) {
+  const liste = useListe(
+    `/api/feed/live?q=${encodeURIComponent(q)}`,
+    initial,
+    false,
+    "serveur",
+  );
   return (
     <ListePosts
       liste={liste}
@@ -384,8 +533,19 @@ export function ResultatsRecherche({ q, initial }: { q: string; initial: PageFee
 }
 
 /** Un post X et ses réponses. */
-export function FilThread({ id, initial }: { id: string; initial: PageFeed | null }) {
-  const liste = useListe(`/api/feed/live?thread=${id}`, initial, false, "serveur");
+export function FilThread({
+  id,
+  initial,
+}: {
+  id: string;
+  initial: PageFeed | null;
+}) {
+  const liste = useListe(
+    `/api/feed/live?thread=${id}`,
+    initial,
+    false,
+    "serveur",
+  );
   return (
     <ListePosts
       liste={liste}

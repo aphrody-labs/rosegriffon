@@ -45,7 +45,8 @@ async function sourceFiles(dir: string): Promise<string[]> {
   for (const entry of entries) {
     const full = join(dir, entry.name);
     if (entry.isDirectory()) files.push(...(await sourceFiles(full)));
-    else if (entry.name.endsWith(".ts") && !entry.name.endsWith(".test.ts")) files.push(full);
+    else if (entry.name.endsWith(".ts") && !entry.name.endsWith(".test.ts"))
+      files.push(full);
   }
   return files;
 }
@@ -69,7 +70,9 @@ describe("portabilité", () => {
   });
 
   test("les seules dépendances runtime déclarées sont universelles", async () => {
-    const manifest = JSON.parse(await readFile(join(import.meta.dir, "..", "package.json"), "utf8")) as {
+    const manifest = JSON.parse(
+      await readFile(join(import.meta.dir, "..", "package.json"), "utf8"),
+    ) as {
       dependencies?: Record<string, string>;
     };
 
@@ -81,12 +84,17 @@ describe("portabilité", () => {
   });
 
   test("chaque domaine exporté existe et expose au moins un symbole", async () => {
-    const manifest = JSON.parse(await readFile(join(import.meta.dir, "..", "package.json"), "utf8")) as {
+    const manifest = JSON.parse(
+      await readFile(join(import.meta.dir, "..", "package.json"), "utf8"),
+    ) as {
       exports: Record<string, string>;
     };
 
     for (const [subpath, target] of Object.entries(manifest.exports)) {
-      const mod = (await import(join(import.meta.dir, "..", target))) as Record<string, unknown>;
+      const mod = (await import(join(import.meta.dir, "..", target))) as Record<
+        string,
+        unknown
+      >;
       expect(Object.keys(mod).length, `${subpath} est vide`).toBeGreaterThan(0);
     }
   });

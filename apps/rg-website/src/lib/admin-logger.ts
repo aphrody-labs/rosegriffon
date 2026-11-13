@@ -21,7 +21,10 @@ export async function logAdminAction(
     // Vérifier les permissions admin/staff
     const profile = await resolveProfile(admin, user);
     if (!profile || !isAdmin(profile.role)) {
-      console.warn("[logAdminAction] Tentative non autorisée d'écriture de log par", user.id);
+      console.warn(
+        "[logAdminAction] Tentative non autorisée d'écriture de log par",
+        user.id,
+      );
       return;
     }
 

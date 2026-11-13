@@ -20,7 +20,9 @@ interface ArticleRow {
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const limitRaw = Number.parseInt(searchParams.get("limit") || "5", 10);
-  const limit = Number.isFinite(limitRaw) ? Math.max(1, Math.min(limitRaw, 50)) : 5;
+  const limit = Number.isFinite(limitRaw)
+    ? Math.max(1, Math.min(limitRaw, 50))
+    : 5;
   const category = searchParams.get("category");
 
   try {
@@ -49,7 +51,7 @@ export async function GET(request: Request) {
     // Ajouter l'URL complète pour les images et les liens
     const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || SITE_URL;
 
-    const formattedArticles = articles.map(article => ({
+    const formattedArticles = articles.map((article) => ({
       ...article,
       featured_image_full_url: article.featured_image_url
         ? article.featured_image_url.startsWith("http")
@@ -66,6 +68,9 @@ export async function GET(request: Request) {
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Erreur inconnue";
-    return NextResponse.json({ error: message, success: false }, { status: 500 });
+    return NextResponse.json(
+      { error: message, success: false },
+      { status: 500 },
+    );
   }
 }

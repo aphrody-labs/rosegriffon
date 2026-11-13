@@ -29,7 +29,9 @@ export async function resolveAchilleaSession(headers: {
   authorization?: string;
   cookie?: string;
 }): Promise<AchilleaSessionClaims | null> {
-  const token = bearer(headers.authorization) ?? readCookie(headers.cookie, ACHILLEA_SESSION_COOKIE_NAME);
+  const token =
+    bearer(headers.authorization) ??
+    readCookie(headers.cookie, ACHILLEA_SESSION_COOKIE_NAME);
   const secret = process.env.JWT_SECRET_KEY;
   return token && secret ? verifyAchilleaSessionToken(token, secret) : null;
 }

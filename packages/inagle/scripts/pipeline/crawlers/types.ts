@@ -27,7 +27,8 @@ export interface TopicDetail extends TopicSummary {
   images?: string[];
 }
 
-export type ZukanContentType = "character_list" | "skill_list" | "item_list" | "unknown";
+export type ZukanContentType =
+  "character_list" | "skill_list" | "item_list" | "unknown";
 
 export interface ZukanCharacter {
   id: string;

@@ -400,10 +400,10 @@ d'octets plutôt que par adresse), puis renseigner le champ `rust` de chaque ent
 
 | palier                | définition                                                         | état                                                                                |
 | --------------------- | ------------------------------------------------------------------ | ----------------------------------------------------------------------------------- |
-| **G0 — identité**     | le fichier produit est byte-identique à l'original                 |  tenu, testé sur le vrai binaire                                                  |
-| **G1 — recouvrement** | chaque octet appartient à une unité nommée, zéro trou              |  215 688 unités (2026-09-08), invariant testé                                     |
-| **G2 — amorçage**     | une part non nulle du binaire est produite par le dépôt            |  **74.061759 %** du fichier (2026-09-08)                                          |
-| **G3 — code**         | 50 % du `.text` produit par le dépôt                               |  **92.447995 %** (2026-09-08)                                                     |
+| **G0 — identité**     | le fichier produit est byte-identique à l'original                 | tenu, testé sur le vrai binaire                                                     |
+| **G1 — recouvrement** | chaque octet appartient à une unité nommée, zéro trou              | 215 688 unités (2026-09-08), invariant testé                                        |
+| **G2 — amorçage**     | une part non nulle du binaire est produite par le dépôt            | **74.061759 %** du fichier (2026-09-08)                                             |
+| **G3 — code**         | 50 % du `.text` produit par le dépôt                               | **92.447995 %** (2026-09-08)                                                        |
 | **G4 — sections**     | `.rdata`/`.data` produits depuis les structures, pas recopiés      | non commencé (découpage encore d'un seul tenant)                                    |
 | **G5 — disposition**  | la forge calcule ses propres adresses (édition de liens réelle)    | non commencé ; jusque-là les champs relogés viennent de la disposition de référence |
 | **G6 — total**        | 100 % du fichier produit, `nie.exe` reconstructible sans référence | horizon                                                                             |

@@ -29,7 +29,12 @@ import { pgQuery } from "@/lib/db/platform";
  * comparer des valeurs qui ne sont pas de même nature.
  */
 
-import { PAR_PAGE, type PageMembres, type ProvenanceXp, type TriMembres } from "./membres-shared";
+import {
+  PAR_PAGE,
+  type PageMembres,
+  type ProvenanceXp,
+  type TriMembres,
+} from "./membres-shared";
 
 /**
  * Réexport de commodité : une page serveur importe `classementMembres` et
@@ -139,9 +144,11 @@ export async function classementMembres(
 
   const total = Number(compte?.total ?? 0);
   return {
-    lignes: lignes.map(ligne => ({
+    lignes: lignes.map((ligne) => ({
       avatarUrl: ligne.avatar_url,
-      dernierGainLe: ligne.dernier_gain_le ? new Date(ligne.dernier_gain_le).toISOString() : null,
+      dernierGainLe: ligne.dernier_gain_le
+        ? new Date(ligne.dernier_gain_le).toISOString()
+        : null,
       discordId: ligne.discord_id,
       jetons: Number(ligne.jetons ?? 0),
       jetonsGagnes: Number(ligne.jetons_gagnes ?? 0),
@@ -175,7 +182,9 @@ export async function classementMembres(
  * profils antérieurs, ce qui reste la lecture honnête — c'est la seule XP qui
  * soit un minorant plutôt qu'une mesure.
  */
-function provenanceDe(ligne: Pick<LigneBrute, "a_api" | "a_classement">): ProvenanceXp {
+function provenanceDe(
+  ligne: Pick<LigneBrute, "a_api" | "a_classement">,
+): ProvenanceXp {
   if (ligne.a_api) {
     return "api";
   }
@@ -207,9 +216,14 @@ export interface CouvertureImport {
  * 14/8/2026, et un environnement qui n'a pas appliqué toutes les migrations ne
  * doit pas rendre la page blanche.
  */
-export async function couvertureImport(guildId: string): Promise<CouvertureImport> {
+export async function couvertureImport(
+  guildId: string,
+): Promise<CouvertureImport> {
   const [humains, profils, archives] = await Promise.all([
-    essayer<{ n: string }>("SELECT count(*) AS n FROM public.discord_members WHERE NOT is_bot AND left_at IS NULL", []),
+    essayer<{ n: string }>(
+      "SELECT count(*) AS n FROM public.discord_members WHERE NOT is_bot AND left_at IS NULL",
+      [],
+    ),
     essayer<{ n: string; xp: string; niveau: number | null }>(
       `SELECT count(*) FILTER (WHERE xp > 0) AS n,
 			        coalesce(sum(xp), 0) AS xp,
@@ -217,7 +231,12 @@ export async function couvertureImport(guildId: string): Promise<CouvertureImpor
 			   FROM public.bot_profils WHERE guild_id = $1`,
       [guildId],
     ),
-    essayer<{ n: string; api: string; classement: string; dernier: string | Date | null }>(
+    essayer<{
+      n: string;
+      api: string;
+      classement: string;
+      dernier: string | Date | null;
+    }>(
       `SELECT count(*) AS n,
 			        count(*) FILTER (WHERE profil_niveau ? 'totalXp') AS api,
 			        count(*) FILTER (WHERE profil_niveau ? 'userID') AS classement,
@@ -232,7 +251,9 @@ export async function couvertureImport(guildId: string): Promise<CouvertureImpor
     archivesApi: Number(archives?.api ?? 0),
     archivesClassement: Number(archives?.classement ?? 0),
     avecXp: Number(profils?.n ?? 0),
-    dernierImportLe: archives?.dernier ? new Date(archives.dernier).toISOString() : null,
+    dernierImportLe: archives?.dernier
+      ? new Date(archives.dernier).toISOString()
+      : null,
     humains: Number(humains?.n ?? 0),
     niveauMax: Number(profils?.niveau ?? 0),
     xpTotale: Number(profils?.xp ?? 0),
@@ -244,7 +265,10 @@ async function essayer<T>(sql: string, params: unknown[]): Promise<T | null> {
     const lignes = await pgQuery<T>(sql, params);
     return lignes[0] ?? null;
   } catch (erreur) {
-    console.warn("[bot/membres] agrégat indisponible :", erreur instanceof Error ? erreur.message : erreur);
+    console.warn(
+      "[bot/membres] agrégat indisponible :",
+      erreur instanceof Error ? erreur.message : erreur,
+    );
     return null;
   }
 }

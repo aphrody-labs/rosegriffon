@@ -24,7 +24,9 @@ describe("getAssetUrl", () => {
   });
 
   it("construit l'URL de stockage pour un chemin relatif", () => {
-    expect(getAssetUrl("logo.png")).toBe("https://test.supabase.co/storage/v1/object/public/assets/logo.png");
+    expect(getAssetUrl("logo.png")).toBe(
+      "https://test.supabase.co/storage/v1/object/public/assets/logo.png",
+    );
   });
 
   it("absorbe le slash de tête d'un chemin relatif", () => {

@@ -37,7 +37,14 @@
  * Toute la logique pure (grammaire des chemins, largeurs, codes de modèle,
  * catégories, pagination) vit dans `lib/cdn-format.ts` et y est testée.
  */
-import { ButtonComponent, Discord, Slash, SlashChoice, SlashGroup, SlashOption } from "discordx";
+import {
+  ButtonComponent,
+  Discord,
+  Slash,
+  SlashChoice,
+  SlashGroup,
+  SlashOption,
+} from "discordx";
 import {
   ActionRowBuilder,
   ApplicationCommandOptionType,
@@ -85,7 +92,12 @@ import {
   urlVariante,
 } from "../lib/cdn-format";
 import { rgEmbed, truncate } from "../lib/embeds";
-import { SERVICES, ServiceIndisponibleError, appelService, sonderServices } from "../lib/services";
+import {
+  SERVICES,
+  ServiceIndisponibleError,
+  appelService,
+  sonderServices,
+} from "../lib/services";
 import { echec, pied, repondre } from "../lib/ui";
 
 /** Base publique du CDN — `CDN_URL`, sinon `https://cdn.rosegriffon.fr`. */
@@ -123,13 +135,13 @@ const LARGEUR_APERCU: LargeurVariante = 200;
 const APPEL_AUTOCOMPLETION = { attempts: 1, timeoutMs: 1_500 } as const;
 
 /** Choix de largeur proposés par `/cdn image` — la liste fermée du service. */
-const CHOIX_LARGEUR = LARGEURS_VARIANTE.map(largeur => ({
+const CHOIX_LARGEUR = LARGEURS_VARIANTE.map((largeur) => ({
   name: `${largeur} px`,
   value: largeur as number,
 }));
 
 /** Choix de catégorie proposés par `/cdn galerie` — les douze catégories peuplées. */
-const CHOIX_CATEGORIE = CATEGORIES_GALERIE.map(categorie => ({
+const CHOIX_CATEGORIE = CATEGORIES_GALERIE.map((categorie) => ({
   name: categorie.libelle as string,
   value: categorie.valeur as string,
 }));
@@ -154,13 +166,19 @@ interface ReponseCdn {
  * lit RIEN : Discord ira la chercher lui-même depuis l'URL de l'embed, le bot
  * n'a besoin que du statut, du type et du poids annoncés.
  */
-async function lireCdn(url: string, options: { delaiMs: number; telecharger?: boolean }): Promise<ReponseCdn> {
+async function lireCdn(
+  url: string,
+  options: { delaiMs: number; telecharger?: boolean },
+): Promise<ReponseCdn> {
   const reponse = await fetch(url, {
     headers: { accept: "*/*" },
     signal: AbortSignal.timeout(options.delaiMs),
   });
   const typeMime = reponse.headers.get("content-type");
-  const annonce = Number.parseInt(reponse.headers.get("content-length") ?? "", 10);
+  const annonce = Number.parseInt(
+    reponse.headers.get("content-length") ?? "",
+    10,
+  );
   const cache = reponse.headers.get("x-cache");
 
   // Une erreur du CDN renvoie un court texte (« modèle … non disponible : … ») :
@@ -224,9 +242,9 @@ async function repondreSuggestions(
     const choix = await produire();
     await interaction.respond(
       choix
-        .filter(c => c.value.length > 0 && c.value.length <= 100)
+        .filter((c) => c.value.length > 0 && c.value.length <= 100)
         .slice(0, 25)
-        .map(c => ({ name: truncate(c.name, 100), value: c.value })),
+        .map((c) => ({ name: truncate(c.name, 100), value: c.value })),
     );
   } catch {
     await interaction.respond([]);
@@ -251,9 +269,14 @@ interface EntreeCpk {
  * seuil on part d'un préfixe réel (`220_img/`, le dossier des illustrations de
  * menu) plutôt que de rendre une liste vide.
  */
-async function suggererTextures(texte: string): Promise<Array<{ name: string; value: string }>> {
+async function suggererTextures(
+  texte: string,
+): Promise<Array<{ name: string; value: string }>> {
   const requete = texte.trim().length >= 2 ? texte.trim() : "220_img/";
-  const fichiers = (await azalee().cpkSearch({ q: requete, limit: 120 }, APPEL_AUTOCOMPLETION)) as EntreeCpk[];
+  const fichiers = (await azalee().cpkSearch(
+    { q: requete, limit: 120 },
+    APPEL_AUTOCOMPLETION,
+  )) as EntreeCpk[];
   const propositions: Array<{ name: string; value: string }> = [];
   for (const fichier of fichiers) {
     const chemin = cheminCdnDepuisCpk(fichier.path);
@@ -288,7 +311,9 @@ function nomPerso(perso: EntreePerso): string {
  * commence par `k`, puisqu'ils n'ont pas de fiche mais existent dans l'index CPK
  * (`_keshin`, 370 dossiers ; `_armd`, 281).
  */
-async function suggererCodesModele(texte: string): Promise<Array<{ name: string; value: string }>> {
+async function suggererCodesModele(
+  texte: string,
+): Promise<Array<{ name: string; value: string }>> {
   const propre = texte.trim();
 
   if (/^k/i.test(propre)) {
@@ -298,7 +323,9 @@ async function suggererCodesModele(texte: string): Promise<Array<{ name: string;
     )) as EntreeCpk[];
     const codes = new Set<string>();
     for (const fichier of fichiers) {
-      const dossier = (fichier.path ?? "").match(/chr\/_(?:keshin|armd)\/(k[a-z]?[0-9]+)\//i);
+      const dossier = (fichier.path ?? "").match(
+        /chr\/_(?:keshin|armd)\/(k[a-z]?[0-9]+)\//i,
+      );
       if (dossier?.[1]) {
         codes.add(dossier[1].toLowerCase());
       }
@@ -306,16 +333,22 @@ async function suggererCodesModele(texte: string): Promise<Array<{ name: string;
         break;
       }
     }
-    return [...codes].map(code => ({
+    return [...codes].map((code) => ({
       name: `${code} — ${code.startsWith("ka") ? "armure" : "keshin"}`,
       value: code,
     }));
   }
 
-  const liste = await azalee().characters({ q: propre || "a", limit: 25 } as never, APPEL_AUTOCOMPLETION);
+  const liste = await azalee().characters(
+    { q: propre || "a", limit: 25 } as never,
+    APPEL_AUTOCOMPLETION,
+  );
   return (liste.data as unknown as EntreePerso[])
-    .filter(perso => typeof perso.internalCode === "string" && perso.internalCode.length > 0)
-    .map(perso => ({
+    .filter(
+      (perso) =>
+        typeof perso.internalCode === "string" && perso.internalCode.length > 0,
+    )
+    .map((perso) => ({
       name: `${nomPerso(perso)} — ${perso.internalCode}`,
       value: String(perso.internalCode),
     }));
@@ -341,7 +374,10 @@ interface PageGalerie {
 }
 
 /** Une page de la galerie, en cache court : l'API relit la même page à chaque bouton. */
-async function lireGalerie(etat: EtatGalerie, page: number): Promise<PageGalerie> {
+async function lireGalerie(
+  etat: EtatGalerie,
+  page: number,
+): Promise<PageGalerie> {
   const clef = `cdn:galerie:${etat.categorie ?? "-"}:${etat.recherche ?? "-"}:${page}`;
   return await cached<PageGalerie>(clef, 5 * 60_000, async () => {
     return (await azalee().gallery({
@@ -367,12 +403,17 @@ async function rendrePageGalerie(etat: EtatGalerie): Promise<{
   const premier = await lireGalerie(etat, etat.page);
   const total = premier.total ?? 0;
   const page = bornerPage(etat.page, total, GALERIE_PAR_PAGE);
-  const resultat = page === (premier.page ?? etat.page) ? premier : await lireGalerie(etat, page);
+  const resultat =
+    page === (premier.page ?? etat.page)
+      ? premier
+      : await lireGalerie(etat, page);
   const illustrations = resultat.data ?? [];
   const pages = nombreDePages(total, GALERIE_PAR_PAGE);
 
   const entete = rgEmbed()
-    .setTitle(`Galerie du jeu — ${total.toLocaleString("fr-FR")} illustration${total > 1 ? "s" : ""}`)
+    .setTitle(
+      `Galerie du jeu — ${total.toLocaleString("fr-FR")} illustration${total > 1 ? "s" : ""}`,
+    )
     .setURL(urlWiki("/gallery"));
 
   const criteres = [
@@ -391,8 +432,13 @@ async function rendrePageGalerie(etat: EtatGalerie): Promise<{
   const embeds: EmbedBuilder[] = [entete];
   for (const illustration of illustrations) {
     const vignette = illustration.thumb ?? illustration.full ?? null;
-    const visuel = rgEmbed().setTitle(truncate(illustration.title ?? "Illustration", 200));
-    if (typeof illustration.full === "string" && illustration.full.startsWith("https://")) {
+    const visuel = rgEmbed().setTitle(
+      truncate(illustration.title ?? "Illustration", 200),
+    );
+    if (
+      typeof illustration.full === "string" &&
+      illustration.full.startsWith("https://")
+    ) {
       visuel.setURL(illustration.full);
     }
     visuel.setDescription(
@@ -432,22 +478,27 @@ async function rendrePageGalerie(etat: EtatGalerie): Promise<{
 @Discord()
 @SlashGroup({
   name: "cdn",
-  description: "Les assets du jeu servis par cdn.rosegriffon.fr : images, modèles 3D, galerie",
+  description:
+    "Les assets du jeu servis par cdn.rosegriffon.fr : images, modèles 3D, galerie",
 })
 @SlashGroup("cdn")
 export class CdnCommand {
   @Slash({
     name: "image",
-    description: "Affiche un asset du CDN en version légère (WebP redimensionné)",
+    description:
+      "Affiche un asset du CDN en version légère (WebP redimensionné)",
   })
   async image(
     @SlashOption({
       name: "chemin",
-      description: "Chemin de l'asset, URL du CDN ou chemin de l'index CPK (data/dx11/…)",
+      description:
+        "Chemin de l'asset, URL du CDN ou chemin de l'index CPK (data/dx11/…)",
       type: ApplicationCommandOptionType.String,
       required: true,
       autocomplete: (interaction: AutocompleteInteraction) =>
-        repondreSuggestions(interaction, () => suggererTextures(saisie(interaction))),
+        repondreSuggestions(interaction, () =>
+          suggererTextures(saisie(interaction)),
+        ),
     })
     chemin: string,
     // Les quatre seules largeurs de variante acceptées : toute
@@ -466,13 +517,18 @@ export class CdnCommand {
 
     const resolution = normaliserCheminAsset(chemin, CDN);
     if (!resolution.ok) {
-      await repondre(interaction, echec("La commande a échoué", resolution.raison));
+      await repondre(
+        interaction,
+        echec("La commande a échoué", resolution.raison),
+      );
       return;
     }
 
     const largeurServie = largeurAutorisee(largeur ?? LARGEUR_PLEINE);
     const urlSource = urlAsset(CDN, resolution.chemin);
-    const urlAffichee = resolution.variante ? urlVariante(CDN, resolution.chemin, largeurServie) : urlSource;
+    const urlAffichee = resolution.variante
+      ? urlVariante(CDN, resolution.chemin, largeurServie)
+      : urlSource;
 
     try {
       const reponse = await lireCdn(urlAffichee, { delaiMs: DELAI_IMAGE_MS });
@@ -487,8 +543,13 @@ export class CdnCommand {
         return;
       }
 
-      const nom = resolution.chemin.slice(resolution.chemin.lastIndexOf("/") + 1);
-      const embed = rgEmbed().setTitle(truncate(nom, 200)).setURL(urlAffichee).setImage(urlAffichee);
+      const nom = resolution.chemin.slice(
+        resolution.chemin.lastIndexOf("/") + 1,
+      );
+      const embed = rgEmbed()
+        .setTitle(truncate(nom, 200))
+        .setURL(urlAffichee)
+        .setImage(urlAffichee);
 
       embed.setDescription(
         resolution.variante
@@ -502,8 +563,8 @@ export class CdnCommand {
       });
 
       if (resolution.variante) {
-        const autres = LARGEURS_VARIANTE.filter(l => l !== largeurServie)
-          .map(l => `[${l} px](${urlVariante(CDN, resolution.chemin, l)})`)
+        const autres = LARGEURS_VARIANTE.filter((l) => l !== largeurServie)
+          .map((l) => `[${l} px](${urlVariante(CDN, resolution.chemin, l)})`)
           .join(" · ");
         embed.addFields({
           name: "Autres largeurs",
@@ -525,22 +586,29 @@ export class CdnCommand {
 
       await interaction.editReply({ embeds: [embed] });
     } catch (err) {
-      await repondre(interaction, echec("Le CDN n'a pas répondu", messageErreurReseau(err)));
+      await repondre(
+        interaction,
+        echec("Le CDN n'a pas répondu", messageErreurReseau(err)),
+      );
     }
   }
 
   @Slash({
     name: "modele",
-    description: "Récupère le modèle 3D complet d'un personnage, d'un keshin ou d'une armure",
+    description:
+      "Récupère le modèle 3D complet d'un personnage, d'un keshin ou d'une armure",
   })
   async modele(
     @SlashOption({
       name: "code",
-      description: "Code du modèle : personnage (c…), keshin (k…) ou armure (ka…)",
+      description:
+        "Code du modèle : personnage (c…), keshin (k…) ou armure (ka…)",
       type: ApplicationCommandOptionType.String,
       required: true,
       autocomplete: (interaction: AutocompleteInteraction) =>
-        repondreSuggestions(interaction, () => suggererCodesModele(saisie(interaction))),
+        repondreSuggestions(interaction, () =>
+          suggererCodesModele(saisie(interaction)),
+        ),
     })
     code: string,
     interaction: ChatInputCommandInteraction,
@@ -549,7 +617,10 @@ export class CdnCommand {
 
     const resolution = normaliserCodeModele(code);
     if ("raison" in resolution) {
-      await repondre(interaction, echec("La commande a échoué", resolution.raison));
+      await repondre(
+        interaction,
+        echec("La commande a échoué", resolution.raison),
+      );
       return;
     }
 
@@ -588,7 +659,9 @@ export class CdnCommand {
         embed.setThumbnail(apercu);
       }
 
-      const trop = (entete.octets ?? Number.POSITIVE_INFINITY) > LIMITE_PIECE_JOINTE_OCTETS;
+      const trop =
+        (entete.octets ?? Number.POSITIVE_INFINITY) >
+        LIMITE_PIECE_JOINTE_OCTETS;
       if (trop) {
         embed.addFields({
           name: "Téléchargement",
@@ -598,9 +671,18 @@ export class CdnCommand {
         return;
       }
 
-      const complet = await lireCdn(url, { delaiMs: DELAI_MODELE_MS, telecharger: true });
-      if (complet.corps === null || complet.corps.byteLength > LIMITE_PIECE_JOINTE_OCTETS) {
-        embed.addFields({ name: "Téléchargement", value: `[Ouvrir le modèle](${url})` });
+      const complet = await lireCdn(url, {
+        delaiMs: DELAI_MODELE_MS,
+        telecharger: true,
+      });
+      if (
+        complet.corps === null ||
+        complet.corps.byteLength > LIMITE_PIECE_JOINTE_OCTETS
+      ) {
+        embed.addFields({
+          name: "Téléchargement",
+          value: `[Ouvrir le modèle](${url})`,
+        });
         await interaction.editReply({ embeds: [embed] });
         return;
       }
@@ -614,7 +696,10 @@ export class CdnCommand {
       });
       await interaction.editReply({ embeds: [embed], files: [fichier] });
     } catch (err) {
-      await repondre(interaction, echec("Le CDN n'a pas répondu", messageErreurReseau(err)));
+      await repondre(
+        interaction,
+        echec("Le CDN n'a pas répondu", messageErreurReseau(err)),
+      );
     }
   }
 
@@ -628,14 +713,19 @@ export class CdnCommand {
    */
   private async apercuModele(code: string): Promise<string | null> {
     try {
-      const fichiers = (await azalee().cpkSearch({ q: code, limit: 60 })) as EntreeCpk[];
+      const fichiers = (await azalee().cpkSearch({
+        q: code,
+        limit: 60,
+      })) as EntreeCpk[];
       const chemin = choisirTextureModele(code, fichiers);
       if (!chemin) {
         return null;
       }
       const url = urlVariante(CDN, chemin, LARGEUR_APERCU);
       const reponse = await lireCdn(url, { delaiMs: DELAI_IMAGE_MS });
-      return reponse.statut === 200 && estTypeImage(reponse.typeMime) ? url : null;
+      return reponse.statut === 200 && estTypeImage(reponse.typeMime)
+        ? url
+        : null;
     } catch {
       return null;
     }
@@ -681,7 +771,10 @@ export class CdnCommand {
         }),
       );
     } catch (err) {
-      await repondre(interaction, echec("Données de jeu indisponibles", messageErreurAzalee(err)));
+      await repondre(
+        interaction,
+        echec("Données de jeu indisponibles", messageErreurAzalee(err)),
+      );
     }
   }
 
@@ -694,7 +787,10 @@ export class CdnCommand {
   async paginerGalerie(interaction: ButtonInteraction) {
     const etat = decoderEtatGalerie(interaction.customId);
     if (!etat) {
-      await interaction.reply({ content: "Pagination illisible.", flags: MessageFlags.Ephemeral });
+      await interaction.reply({
+        content: "Pagination illisible.",
+        flags: MessageFlags.Ephemeral,
+      });
       return;
     }
     await interaction.deferUpdate();
@@ -719,7 +815,10 @@ export class CdnCommand {
     } catch (err) {
       // Sans ce filet, une panne inattendue laisserait l'interaction sur
       // « réfléchit… » pendant quinze minutes, sans un mot d'explication.
-      await repondre(interaction, echec("Le CDN n'a pas répondu", messageErreurReseau(err)));
+      await repondre(
+        interaction,
+        echec("Le CDN n'a pas répondu", messageErreurReseau(err)),
+      );
     }
   }
 
@@ -762,7 +861,10 @@ export class CdnCommand {
   /** Charge de santé de `rg-cdn`, telle qu'il la renvoie. */
   private async santeCdn(): Promise<SanteCdn | null> {
     try {
-      return await appelService<SanteCdn>("cdn", "/health", { tentatives: 1, delaiMs: 3_000 });
+      return await appelService<SanteCdn>("cdn", "/health", {
+        tentatives: 1,
+        delaiMs: 3_000,
+      });
     } catch {
       return null;
     }

@@ -1,11 +1,11 @@
 import {
-	buildQuery,
-	Type,
-	type PatreonClient,
-	type GetResponsePayload,
-	type PatreonQuery,
-	type QueryRequestOptions,
-	type RelationshipMap,
+  buildQuery,
+  Type,
+  type PatreonClient,
+  type GetResponsePayload,
+  type PatreonQuery,
+  type QueryRequestOptions,
+  type RelationshipMap,
 } from "@rosegriffon/patreon-bun";
 
 /**
@@ -17,18 +17,25 @@ import {
  * @param options.query
  */
 export async function fetchOauthMemberships<
-	Attributes extends RelationshipMap<Type.User, "campaign" | "memberships">,
+  Attributes extends RelationshipMap<Type.User, "campaign" | "memberships">,
 >(
-	client: PatreonClient,
-	options: {
-		token: string;
-		attributes?: Attributes;
-		query?: QueryRequestOptions;
-	}
-): Promise<GetResponsePayload<PatreonQuery<Type.User, "memberships" | "campaign", Attributes>>> {
-	const query = buildQuery.identity(["memberships", "campaign"])(options.attributes, options.query);
+  client: PatreonClient,
+  options: {
+    token: string;
+    attributes?: Attributes;
+    query?: QueryRequestOptions;
+  },
+): Promise<
+  GetResponsePayload<
+    PatreonQuery<Type.User, "memberships" | "campaign", Attributes>
+  >
+> {
+  const query = buildQuery.identity(["memberships", "campaign"])(
+    options.attributes,
+    options.query,
+  );
 
-	return await client.fetchIdentity(query, {
-		token: options.token,
-	});
+  return await client.fetchIdentity(query, {
+    token: options.token,
+  });
 }

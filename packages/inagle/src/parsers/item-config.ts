@@ -8,7 +8,11 @@ import { projectionSource, sqliteRows } from "../sql/sqlite-query.js";
 import { join } from "node:path";
 import { loadJsonAsync } from "../core/async-loader.js";
 import type { ConfigNode } from "../core/config-parser.js";
-import { findConfigFile, findConfigFileAsync, toHex } from "../core/data-loader.js";
+import {
+  findConfigFile,
+  findConfigFileAsync,
+  toHex,
+} from "../core/data-loader.js";
 import { EntityExporters, type ExportableEntity } from "../core/exporters.js";
 import { loadTextFileAsync } from "./text-parser.js";
 
@@ -33,7 +37,8 @@ async function loadItemBonusDb(): Promise<Map<string, ItemStatBonuses>> {
             "SELECT id, data FROM inagle_items WHERE category IN ('shoes', 'misanga', 'accessory')",
           )
         : await (async () => {
-            const { createInagleSql } = await import("@rosegriffon/db/inagle-sql");
+            const { createInagleSql } =
+              await import("@rosegriffon/db/inagle-sql");
             const db = createInagleSql<Database>();
             return db
               .selectFrom("inagle_items")
@@ -42,12 +47,25 @@ async function loadItemBonusDb(): Promise<Map<string, ItemStatBonuses>> {
               .execute();
           })();
     for (const row of rows) {
-      const payload = typeof row.data === "string" ? JSON.parse(row.data) : row.data;
-      if (typeof payload !== "object" || payload === null || Array.isArray(payload)) continue;
+      const payload =
+        typeof row.data === "string" ? JSON.parse(row.data) : row.data;
+      if (
+        typeof payload !== "object" ||
+        payload === null ||
+        Array.isArray(payload)
+      )
+        continue;
       const bonuses = (payload as { bonuses?: unknown }).bonuses;
-      if (typeof bonuses !== "object" || bonuses === null || Array.isArray(bonuses)) continue;
+      if (
+        typeof bonuses !== "object" ||
+        bonuses === null ||
+        Array.isArray(bonuses)
+      )
+        continue;
       const normalized = Object.fromEntries(
-        Object.entries(bonuses).filter(([, value]) => typeof value === "number"),
+        Object.entries(bonuses).filter(
+          ([, value]) => typeof value === "number",
+        ),
       ) as ItemStatBonuses;
       if (Object.keys(normalized).length === 0) continue;
       const key = row.id.toUpperCase().replace(/^0X/, "");
@@ -87,7 +105,14 @@ export type ItemCategory =
  */
 export type ItemStatBonuses = Partial<Record<StatBonusKey, number>>;
 
-export type StatBonusKey = "kick" | "control" | "technique" | "intelligence" | "pressure" | "agility" | "physical";
+export type StatBonusKey =
+  | "kick"
+  | "control"
+  | "technique"
+  | "intelligence"
+  | "pressure"
+  | "agility"
+  | "physical";
 
 export interface ParsedItem extends ExportableEntity {
   itemId: string; // Hex
@@ -146,7 +171,9 @@ const CATEGORY_MAP: Record<string, ItemCategory> = {
   ITEM_IMPORTANT_INFO: "important",
 };
 
-export async function loadFashionItemMappingAsync(dataPath: string): Promise<Map<number, number>> {
+export async function loadFashionItemMappingAsync(
+  dataPath: string,
+): Promise<Map<number, number>> {
   const filename = await findConfigFileAsync("item", "item_config_");
   const mapping = new Map<number, number>();
 
@@ -164,7 +191,10 @@ export async function loadFashionItemMappingAsync(dataPath: string): Promise<Map
           const itemIdStr = vars[0].value;
           const uniformIdStr = vars[vars.length - 1].value;
           if (itemIdStr && uniformIdStr) {
-            mapping.set(Number.parseInt(itemIdStr, 10) >>> 0, Number.parseInt(uniformIdStr, 10) >>> 0);
+            mapping.set(
+              Number.parseInt(itemIdStr, 10) >>> 0,
+              Number.parseInt(uniformIdStr, 10) >>> 0,
+            );
           }
         }
       }
@@ -202,7 +232,10 @@ export async function buildItemDatabaseAsync(
   const configPath = join(dataPath, "common", "gamedata", "item", filename);
 
   // Charge la base de bonus décodés (synchrone, fichier statique bundlé).
-  const bonusDb = projectionSource() !== "vfs" ? await loadItemBonusDb() : new Map<string, ItemStatBonuses>();
+  const bonusDb =
+    projectionSource() !== "vfs"
+      ? await loadItemBonusDb()
+      : new Map<string, ItemStatBonuses>();
 
   // Load Texts (Parallel).
   // NOTE: il n'existe PAS de fichier `item_explain_text` dans le jeu — les
@@ -221,8 +254,18 @@ export async function buildItemDatabaseAsync(
     const content = await loadJsonAsync<any>(configPath);
 
     if (!content?.entries) {
-      console.error("[ItemParser] Invalid config structure:", content ? Object.keys(content) : "null");
-      return { items, byId, byCategory, stats, toMarkdown: () => null, toReact: () => null };
+      console.error(
+        "[ItemParser] Invalid config structure:",
+        content ? Object.keys(content) : "null",
+      );
+      return {
+        items,
+        byId,
+        byCategory,
+        stats,
+        toMarkdown: () => null,
+        toReact: () => null,
+      };
     }
 
     const entries = content.entries as ConfigNode[];
@@ -235,12 +278,14 @@ export async function buildItemDatabaseAsync(
             const itemIdInt = Number.parseInt(vars[0].value, 10) >>> 0;
             const itemIdHex = toHex(itemIdInt);
 
-            const nameIdInt = vars.length > 2 ? Number.parseInt(vars[2].value, 10) : 0;
+            const nameIdInt =
+              vars.length > 2 ? Number.parseInt(vars[2].value, 10) : 0;
             const nameIdHex = toHex(nameIdInt);
             // Clé de jointure bonus-db : nameId hex MAJUSCULE sans `0x`.
             const bonusKey = nameIdHex.toUpperCase().replace(/^0X/, "");
 
-            const descIdInt = vars.length > 3 ? Number.parseInt(vars[3].value, 10) : 0;
+            const descIdInt =
+              vars.length > 3 ? Number.parseInt(vars[3].value, 10) : 0;
             const descIdHex = toHex(descIdInt);
 
             // Names & Desc
@@ -299,7 +344,9 @@ export async function buildItemDatabaseAsync(
 
             // Bonus de stats RÉELS (relevé communautaire) — joint sur le nameId.
             // Couvre chaussures/bracelets/accessoires : kick +6, control +5, …
-            const bonuses = bonusDb.get(bonusKey) ?? bonusDb.get(itemIdHex.toUpperCase().replace(/^0X/, ""));
+            const bonuses =
+              bonusDb.get(bonusKey) ??
+              bonusDb.get(itemIdHex.toUpperCase().replace(/^0X/, ""));
             if (bonuses && Object.keys(bonuses).length > 0) {
               item.bonuses = bonuses;
               for (const entry of Object.entries(bonuses)) {
@@ -310,7 +357,10 @@ export async function buildItemDatabaseAsync(
             }
 
             // Quantité max empilable (consommables/craft : var[7]).
-            if ((category === "consume" || category === "craft_obj") && vars.length > 7) {
+            if (
+              (category === "consume" || category === "craft_obj") &&
+              vars.length > 7
+            ) {
               const stack = Number.parseInt(vars[7].value, 10);
               if (stack > 0 && stack < 1_000_000) {
                 item.maxStack = stack;

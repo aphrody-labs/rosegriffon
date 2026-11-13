@@ -5,7 +5,11 @@
  */
 
 import { crawlDataPath } from "../../lib/shared-path";
-import { WebCdpPage, waitForSelector, type NavigationResponse } from "../../lib/web-cdp";
+import {
+  WebCdpPage,
+  waitForSelector,
+  type NavigationResponse,
+} from "../../lib/web-cdp";
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 
@@ -16,11 +20,19 @@ interface RePageTarget {
   url: string;
 }
 
-async function safeGoto(page: WebCdpPage, url: string, timeout = 30000): Promise<NavigationResponse> {
+async function safeGoto(
+  page: WebCdpPage,
+  url: string,
+  timeout = 30000,
+): Promise<NavigationResponse> {
   return Promise.race([
     page.goto(url),
     new Promise<never>((_, reject) =>
-      setTimeout(() => reject(new Error(`Navigation timeout (${timeout}ms) pour ${url}`)), timeout),
+      setTimeout(
+        () =>
+          reject(new Error(`Navigation timeout (${timeout}ms) pour ${url}`)),
+        timeout,
+      ),
     ),
   ]);
 }
@@ -49,14 +61,18 @@ export async function crawlRe(): Promise<{ success: boolean; error?: string }> {
         // On vérifie le code HTTP de la réponse si disponible
         const status = response ? response.status : 200;
         if (status >= 400) {
-          console.warn(`[Crawl RE] URL non disponible (HTTP ${status}) : ${target.url}`);
+          console.warn(
+            `[Crawl RE] URL non disponible (HTTP ${status}) : ${target.url}`,
+          );
           continue;
         }
 
         await waitForSelector(page, "body", 15000).catch(() => {});
         const html = await page.content();
         if (html.length < 500) {
-          console.warn(`[Crawl RE] WebCdpPage trop courte ou vide pour ${target.lang}, abandon.`);
+          console.warn(
+            `[Crawl RE] WebCdpPage trop courte ou vide pour ${target.lang}, abandon.`,
+          );
           continue;
         }
 
@@ -71,14 +87,19 @@ export async function crawlRe(): Promise<{ success: boolean; error?: string }> {
           language: target.lang,
         };
 
-        await writeFile(join(outputDir, "meta.json"), JSON.stringify(meta, null, 2));
+        await writeFile(
+          join(outputDir, "meta.json"),
+          JSON.stringify(meta, null, 2),
+        );
         crawlCount++;
       } catch (err) {
         console.warn(`[Crawl RE] Impossible de scraper ${target.url} :`, err);
       }
     }
 
-    console.log(`[Crawl RE] Crawl terminé. ${crawlCount} langues sauvegardées.`);
+    console.log(
+      `[Crawl RE] Crawl terminé. ${crawlCount} langues sauvegardées.`,
+    );
     return { success: true };
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : String(err);

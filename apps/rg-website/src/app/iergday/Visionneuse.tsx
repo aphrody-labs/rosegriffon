@@ -1,14 +1,32 @@
 "use client";
 
-import { Dialog, DialogContent, DialogDescription, DialogTitle, cn } from "@rosegriffon/ui";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+  cn,
+} from "@rosegriffon/ui";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { ChevronLeft, ChevronRight, Download, ExternalLink, Loader2, X } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Download,
+  ExternalLink,
+  Loader2,
+  X,
+} from "lucide-react";
 import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { extraitTexteDiscord } from "@/lib/x-campagnes/discord-texte";
-import { clePost, type PostCampagne, urlMessageDiscord, urlPostX } from "@/lib/x-campagnes/types";
+import {
+  clePost,
+  type PostCampagne,
+  urlMessageDiscord,
+  urlPostX,
+} from "@/lib/x-campagnes/types";
 import { videoLisibleNavigateur } from "@/lib/x-campagnes/video";
 
 import { TexteDiscord } from "./TexteDiscord";
@@ -85,7 +103,10 @@ export interface DocumentVisionne {
 /** Adaptateur : une publication de la galerie devient un document visionnable. */
 export function documentDepuisPost(post: PostCampagne): DocumentVisionne {
   const date = post.publieLe ? new Date(post.publieLe) : null;
-  const dateLisible = date && !Number.isNaN(date.getTime()) ? format(date, "d MMMM yyyy", { locale: fr }) : null;
+  const dateLisible =
+    date && !Number.isNaN(date.getTime())
+      ? format(date, "d MMMM yyyy", { locale: fr })
+      : null;
   /*
    * ⚠ LES DEUX SOURCES NE DÉSIGNENT PAS LEURS AUTEURS DE LA MÊME FAÇON.
    * Sur X, `auteurPseudo` est le @ public, il fait partie de l'identité affichée.
@@ -99,9 +120,22 @@ export function documentDepuisPost(post: PostCampagne): DocumentVisionne {
   // qui n'existe pas.
   const surX = post.source === "x";
   const pseudoSur = surX ? `@${post.auteurPseudo}` : post.auteurNom;
-  const reseau = post.source === "x" ? "X" : post.source === "discord" ? "le serveur Discord" : "Instagram";
-  const identifiant = post.source === "x" ? post.tweetId : post.source === "discord" ? post.messageId : post.shortcode;
-  const racineNom = (surX ? post.auteurPseudo : post.auteurNom).replace(/[^\w-]+/g, "");
+  const reseau =
+    post.source === "x"
+      ? "X"
+      : post.source === "discord"
+        ? "le serveur Discord"
+        : "Instagram";
+  const identifiant =
+    post.source === "x"
+      ? post.tweetId
+      : post.source === "discord"
+        ? post.messageId
+        : post.shortcode;
+  const racineNom = (surX ? post.auteurPseudo : post.auteurNom).replace(
+    /[^\w-]+/g,
+    "",
+  );
   return {
     baseNomFichier: `${racineNom || "post"}-${identifiant}`,
     cle: clePost(post),
@@ -158,9 +192,15 @@ export function documentDepuisPost(post: PostCampagne): DocumentVisionne {
 }
 
 /** Nom de fichier proposé au téléchargement, dérivé du document et de l'index. */
-function nomFichier(documentVise: DocumentVisionne, index: number, url: string): string {
+function nomFichier(
+  documentVise: DocumentVisionne,
+  index: number,
+  url: string,
+): string {
   const extension = url.split("?")[0]?.split(".").pop()?.toLowerCase() ?? "jpg";
-  const extensionSure = /^(jpe?g|png|webp|gif|avif)$/.test(extension) ? extension : "jpg";
+  const extensionSure = /^(jpe?g|png|webp|gif|avif)$/.test(extension)
+    ? extension
+    : "jpg";
   return `${documentVise.baseNomFichier}-${index + 1}.${extensionSure}`;
 }
 
@@ -180,7 +220,10 @@ export function Visionneuse({
   const [telechargement, setTelechargement] = useState(false);
   /** Élément à re-focaliser à la fermeture (la vignette qui a ouvert la vue). */
   const declencheur = useRef<HTMLElement | null>(null);
-  const finalFocus = useCallback(() => (declencheur.current?.isConnected ? declencheur.current : true), []);
+  const finalFocus = useCallback(
+    () => (declencheur.current?.isConnected ? declencheur.current : true),
+    [],
+  );
 
   const ouverte = index !== null;
   const documentOuvert = ouverte ? documents[index] : undefined;
@@ -253,7 +296,10 @@ export function Visionneuse({
   // Conteneur non web (`.mov`) : aucun `<video>`, qui téléchargerait des mégaoctets
   // pour un cadre noir. La zone tombe sur « Média indisponible » et le bouton
   // « Télécharger » de l'en-tête sert toujours le fichier d'origine (`image`).
-  const media = image?.kind === "video" && !videoLisibleNavigateur(image.src) ? undefined : image;
+  const media =
+    image?.kind === "video" && !videoLisibleNavigateur(image.src)
+      ? undefined
+      : image;
 
   const telecharger = async () => {
     if (!image || telechargement) {
@@ -289,7 +335,7 @@ export function Visionneuse({
   return (
     <Dialog
       open={ouverte}
-      onOpenChange={ouvert => {
+      onOpenChange={(ouvert) => {
         if (!ouvert) {
           onFermer();
         }
@@ -307,18 +353,24 @@ export function Visionneuse({
         className="max-h-[95dvh] max-w-[96vw] gap-0 overflow-y-auto rounded-[24px] border-2 border-rg-or/40 bg-surface-container-lowest p-0 sm:max-w-4xl lg:max-w-5xl"
       >
         <DialogTitle className="sr-only">
-          {documentOuvert.etiquette} — {index !== null ? index + 1 : 1} sur {documents.length}
+          {documentOuvert.etiquette} — {index !== null ? index + 1 : 1} sur{" "}
+          {documents.length}
         </DialogTitle>
         <DialogDescription className="sr-only">
-          Utilisez les flèches gauche et droite pour changer de document, la touche Échap pour fermer.
+          Utilisez les flèches gauche et droite pour changer de document, la
+          touche Échap pour fermer.
         </DialogDescription>
 
         {/* Barre d'outils : identité du document à gauche, actions à droite. */}
         <div className="flex items-center justify-between gap-3 border-b border-outline-variant/40 px-4 py-3">
           <div className="flex min-w-0 flex-col">
-            <span className="truncate text-sm font-bold text-on-surface">{documentOuvert.titre}</span>
+            <span className="truncate text-sm font-bold text-on-surface">
+              {documentOuvert.titre}
+            </span>
             {documentOuvert.sousTitre && (
-              <span className="truncate text-xs text-on-surface-variant">{documentOuvert.sousTitre}</span>
+              <span className="truncate text-xs text-on-surface-variant">
+                {documentOuvert.sousTitre}
+              </span>
             )}
           </div>
           <div className="flex shrink-0 items-center gap-2">
@@ -332,7 +384,10 @@ export function Visionneuse({
               {/* `motion-safe:` — la seule animation de la page qui tournait encore
 							    sous `prefers-reduced-motion: reduce` (le reste est déjà gardé). */}
               {telechargement ? (
-                <Loader2 className="size-4 motion-safe:animate-spin" aria-hidden />
+                <Loader2
+                  className="size-4 motion-safe:animate-spin"
+                  aria-hidden
+                />
               ) : (
                 <Download className="size-4" aria-hidden />
               )}
@@ -389,7 +444,9 @@ export function Visionneuse({
               className="object-contain"
             />
           ) : (
-            <p className="text-sm text-on-surface-variant">Média indisponible.</p>
+            <p className="text-sm text-on-surface-variant">
+              Média indisponible.
+            </p>
           )}
 
           {aPrecedent && (
@@ -427,10 +484,19 @@ export function Visionneuse({
                 className={cn(
                   "relative size-16 shrink-0 overflow-hidden rounded-lg border-2 transition-colors" +
                     " focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
-                  position === indexImage ? "border-primary" : "border-outline-variant/40 hover:border-primary/60",
+                  position === indexImage
+                    ? "border-primary"
+                    : "border-outline-variant/40 hover:border-primary/60",
                 )}
               >
-                <Image src={autre.src} alt="" fill sizes="64px" quality={70} className="object-cover" />
+                <Image
+                  src={autre.src}
+                  alt=""
+                  fill
+                  sizes="64px"
+                  quality={70}
+                  className="object-cover"
+                />
               </button>
             ))}
           </div>

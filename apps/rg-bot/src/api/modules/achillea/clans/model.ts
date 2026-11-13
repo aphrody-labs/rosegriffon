@@ -61,7 +61,9 @@ export const ClanModel = {
     isHidden: t.Optional(t.Boolean()),
     isInactive: t.Optional(t.Boolean()),
     origin: t.Optional(t.String({ minLength: 2, maxLength: 8 })),
-    languages: t.Optional(t.Array(t.String({ minLength: 2, maxLength: 8 }), { maxItems: 20 })),
+    languages: t.Optional(
+      t.Array(t.String({ minLength: 2, maxLength: 8 }), { maxItems: 20 }),
+    ),
   }),
   updateResponse: t.Object({
     success: t.Literal(true),

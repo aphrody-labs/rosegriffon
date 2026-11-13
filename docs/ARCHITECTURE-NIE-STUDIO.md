@@ -80,7 +80,7 @@ L'ingestion automatisée de captures Steam et de séquences Hissatsu repose sur 
 
 1. **Extraction Sans Téléchargement (`@aphrody/hyperframes`)** :
    - `fetchByteSlice` extrait uniquement les métadonnées ISOBMFF.
-   - Accès direct aux trames clés (*keyframes*) sans rapatrier le fichier vidéo entier.
+   - Accès direct aux trames clés (_keyframes_) sans rapatrier le fichier vidéo entier.
 2. **Télémétrie Ticks & Marqueurs (`aphrody-nie-trace`)** :
    - Enregistrement synchronisé de la caméra (matrice 4x4), position du ballon (coordonnées 3D) et identifiant d'action.
 3. **Indexation Sémantique & Visuelle** :

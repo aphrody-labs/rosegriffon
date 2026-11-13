@@ -25,9 +25,15 @@ export const CLAN_B = {
 };
 
 const joueurs = (prefixe: string) =>
-  Array.from({ length: 5 }, (_, i) => ({ userId: `${prefixe}${i + 1}`.padEnd(18, "0"), displayName: `${prefixe}-${i + 1}`, position: i + 1 }));
+  Array.from({ length: 5 }, (_, i) => ({
+    userId: `${prefixe}${i + 1}`.padEnd(18, "0"),
+    displayName: `${prefixe}-${i + 1}`,
+    position: i + 1,
+  }));
 
-export function ficheInterclan(surcharge: Partial<DetailInterclan> = {}): DetailInterclan {
+export function ficheInterclan(
+  surcharge: Partial<DetailInterclan> = {},
+): DetailInterclan {
   return {
     id: 42,
     name: "AR vs BB",
@@ -43,7 +49,13 @@ export function ficheInterclan(surcharge: Partial<DetailInterclan> = {}): Detail
     clanB: CLAN_B,
     lineups: [
       { id: 1, clanId: 7, lockedIn: false, valid: true, members: joueurs("1") },
-      { id: 2, clanId: 9, lockedIn: false, valid: false, members: joueurs("2").slice(0, 3) },
+      {
+        id: 2,
+        clanId: 9,
+        lockedIn: false,
+        valid: false,
+        members: joueurs("2").slice(0, 3),
+      },
     ],
     matches: [],
     validation: null,
@@ -58,8 +70,18 @@ export function matchsEnCours() {
     id: 100 + i,
     state: i === 0 ? "Finished" : "Fresh",
     players: [
-      { userId: `1${i + 1}`.padEnd(18, "0"), displayName: `1-${i + 1}`, team: 1, score: i === 0 ? 2 : 0 },
-      { userId: `2${i + 1}`.padEnd(18, "0"), displayName: `2-${i + 1}`, team: 2, score: i === 0 ? 1 : 0 },
+      {
+        userId: `1${i + 1}`.padEnd(18, "0"),
+        displayName: `1-${i + 1}`,
+        team: 1,
+        score: i === 0 ? 2 : 0,
+      },
+      {
+        userId: `2${i + 1}`.padEnd(18, "0"),
+        displayName: `2-${i + 1}`,
+        team: 2,
+        score: i === 0 ? 1 : 0,
+      },
     ],
   }));
 }

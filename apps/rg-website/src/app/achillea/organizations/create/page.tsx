@@ -7,7 +7,8 @@ import OrganizationCreateClient from "./organization-create-client";
  */
 export const metadata = metadonneesAchillea({
   titre: "Enregistrer une organisation",
-  description: "Déclarer une organisation esport auprès d'Achilléa pour la faire accréditer.",
+  description:
+    "Déclarer une organisation esport auprès d'Achilléa pour la faire accréditer.",
   chemin: "/achillea/organizations/create",
   indexable: false,
 });

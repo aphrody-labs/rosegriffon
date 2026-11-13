@@ -70,7 +70,10 @@ export interface PreviewTournament {
  * contient une ligne par inscrit, dont 3 840 à zéro partie, et un classement
  * qui commence par des comptes à 0-0 ne classe rien.
  */
-export async function lireClassement(mode: ModeClasse = 2, limite = 5): Promise<LigneClassement[]> {
+export async function lireClassement(
+  mode: ModeClasse = 2,
+  limite = 5,
+): Promise<LigneClassement[]> {
   try {
     const pool = getPgPoolOrNull();
     if (!pool) return [];
@@ -168,7 +171,9 @@ export async function lireClansActifs(limite = 4): Promise<PreviewClan[]> {
 }
 
 /** Récupère les tournois homologués en activité ou à venir depuis Postgres. */
-export async function lireTournoisActifs(limite = 4): Promise<PreviewTournament[]> {
+export async function lireTournoisActifs(
+  limite = 4,
+): Promise<PreviewTournament[]> {
   try {
     const pool = getPgPoolOrNull();
     if (!pool) return [];

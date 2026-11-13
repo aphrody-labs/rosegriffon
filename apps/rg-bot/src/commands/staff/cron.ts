@@ -20,9 +20,20 @@ import {
 } from "discord.js";
 
 import { appelerCron } from "../../lib/cron-ipc";
-import { TACHES_CRON, niveauTache, resoudreTache, suggererTaches } from "../../lib/cron-taches";
+import {
+  TACHES_CRON,
+  niveauTache,
+  resoudreTache,
+  suggererTaches,
+} from "../../lib/cron-taches";
 import { rgEmbed } from "../../lib/embeds";
-import { blocJson, borner, formaterDuree, formaterNombre, horodatageRelatif } from "./format";
+import {
+  blocJson,
+  borner,
+  formaterDuree,
+  formaterNombre,
+  horodatageRelatif,
+} from "./format";
 import { differerEnPrive, exigerDroits, messagePanne } from "./garde";
 import "./racine";
 import { echec, piedTexte, repondre } from "../../lib/ui";
@@ -43,12 +54,19 @@ interface MetriquesCron {
 }
 
 /** Verdict d'une exécution, en une ligne. */
-function formaterExecution(derniere: DerniereExecution | null | undefined): string {
+function formaterExecution(
+  derniere: DerniereExecution | null | undefined,
+): string {
   if (!derniere?.time) {
     return "jamais exécutée depuis le dernier démarrage du démon";
   }
-  const duree = typeof derniere.durationMs === "number" ? ` en ${formaterDuree(derniere.durationMs)}` : "";
-  const verdict = derniere.success ? "succès" : `**échec** — ${borner(derniere.error ?? "?", 200)}`;
+  const duree =
+    typeof derniere.durationMs === "number"
+      ? ` en ${formaterDuree(derniere.durationMs)}`
+      : "";
+  const verdict = derniere.success
+    ? "succès"
+    : `**échec** — ${borner(derniere.error ?? "?", 200)}`;
   return `${horodatageRelatif(derniere.time)}${duree} · ${verdict}`;
 }
 
@@ -69,7 +87,8 @@ const SYMBOLES_NIVEAU: Record<string, string> = {
 export class StaffCronCommand {
   @Slash({
     name: "taches",
-    description: "Catalogue des tâches, leur planification et le niveau requis pour les lancer",
+    description:
+      "Catalogue des tâches, leur planification et le niveau requis pour les lancer",
   })
   async taches(interaction: ChatInputCommandInteraction) {
     await differerEnPrive(interaction);
@@ -85,7 +104,7 @@ export class StaffCronCommand {
       const planifications = reponse.schedules ?? {};
       const noms = reponse.taches ?? [...TACHES_CRON];
       const lignes = noms
-        .map(nom => {
+        .map((nom) => {
           const niveau = niveauTache(nom);
           return `${SYMBOLES_NIVEAU[niveau] ?? "•"} \`${nom}\` — ${planifications[nom] ?? "manuel"}`;
         })
@@ -103,25 +122,38 @@ export class StaffCronCommand {
         ],
       });
     } catch (err) {
-      await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
+      await repondre(
+        interaction,
+        echec("Le service n'a pas répondu", messagePanne(err)),
+      );
     }
   }
 
-  @Slash({ name: "metriques", description: "Compteurs d'exécution du démon depuis son démarrage" })
+  @Slash({
+    name: "metriques",
+    description: "Compteurs d'exécution du démon depuis son démarrage",
+  })
   async metriques(interaction: ChatInputCommandInteraction) {
     await differerEnPrive(interaction);
     if (!(await exigerDroits(interaction))) {
       return;
     }
     try {
-      const reponse = await appelerCron<{ success: boolean; metrics?: MetriquesCron }>({
+      const reponse = await appelerCron<{
+        success: boolean;
+        metrics?: MetriquesCron;
+      }>({
         cmd: "metrics",
       });
       const metriques = reponse.metrics ?? {};
       const dernieres = Object.entries(metriques.lastExecution ?? {})
-        .toSorted(([, a], [, b]) => String(b.time ?? "").localeCompare(String(a.time ?? "")))
+        .toSorted(([, a], [, b]) =>
+          String(b.time ?? "").localeCompare(String(a.time ?? "")),
+        )
         .slice(0, 10)
-        .map(([nom, execution]) => `\`${nom}\` — ${formaterExecution(execution)}`)
+        .map(
+          ([nom, execution]) => `\`${nom}\` — ${formaterExecution(execution)}`,
+        )
         .join("\n");
       await interaction.editReply({
         embeds: [
@@ -142,11 +174,17 @@ export class StaffCronCommand {
         ],
       });
     } catch (err) {
-      await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
+      await repondre(
+        interaction,
+        echec("Le service n'a pas répondu", messagePanne(err)),
+      );
     }
   }
 
-  @Slash({ name: "statut", description: "Dernière exécution d'une tâche : succès, durée, erreur" })
+  @Slash({
+    name: "statut",
+    description: "Dernière exécution d'une tâche : succès, durée, erreur",
+  })
   async statut(
     @SlashOption({
       name: "tache",
@@ -155,10 +193,12 @@ export class StaffCronCommand {
       required: true,
       autocomplete: async (interaction: AutocompleteInteraction) => {
         await interaction.respond(
-          suggererTaches(String(interaction.options.getFocused() ?? "")).map(nom => ({
-            name: nom,
-            value: nom,
-          })),
+          suggererTaches(String(interaction.options.getFocused() ?? "")).map(
+            (nom) => ({
+              name: nom,
+              value: nom,
+            }),
+          ),
         );
       },
     })
@@ -196,18 +236,28 @@ export class StaffCronCommand {
         ],
       });
     } catch (err) {
-      await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
+      await repondre(
+        interaction,
+        echec("Le service n'a pas répondu", messagePanne(err)),
+      );
     }
   }
 
-  @Slash({ name: "telemetrie", description: "Télémétrie Discord tenue par le démon" })
+  @Slash({
+    name: "telemetrie",
+    description: "Télémétrie Discord tenue par le démon",
+  })
   async telemetrie(interaction: ChatInputCommandInteraction) {
     await differerEnPrive(interaction);
     if (!(await exigerDroits(interaction))) {
       return;
     }
     try {
-      const reponse = await appelerCron<{ success: boolean; telemetry?: unknown; error?: string }>({
+      const reponse = await appelerCron<{
+        success: boolean;
+        telemetry?: unknown;
+        error?: string;
+      }>({
         cmd: "telemetry.discord",
       });
       if (!reponse.success) {
@@ -215,16 +265,24 @@ export class StaffCronCommand {
           interaction,
           echec(
             "La commande a échoué",
-            reponse.error ?? "Télémétrie indisponible : la passerelle du démon n'est pas prête.",
+            reponse.error ??
+              "Télémétrie indisponible : la passerelle du démon n'est pas prête.",
           ),
         );
         return;
       }
       await interaction.editReply({
-        embeds: [rgEmbed().setTitle("Télémétrie Discord (rg-cron)").setDescription(blocJson(reponse.telemetry, 3_800))],
+        embeds: [
+          rgEmbed()
+            .setTitle("Télémétrie Discord (rg-cron)")
+            .setDescription(blocJson(reponse.telemetry, 3_800)),
+        ],
       });
     } catch (err) {
-      await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
+      await repondre(
+        interaction,
+        echec("Le service n'a pas répondu", messagePanne(err)),
+      );
     }
   }
 }

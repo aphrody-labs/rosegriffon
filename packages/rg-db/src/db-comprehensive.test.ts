@@ -5,7 +5,9 @@ import { PostgresQueryBuilder } from "./postgres-client";
 type ExecutedQuery = { sql: string; parameters: readonly unknown[] };
 
 function createMockExecutor(mockRows: unknown[] = []): {
-  executor: { executeQuery: (q: ExecutedQuery) => Promise<{ rows: unknown[] }> };
+  executor: {
+    executeQuery: (q: ExecutedQuery) => Promise<{ rows: unknown[] }>;
+  };
   queries: ExecutedQuery[];
 } {
   const queries: ExecutedQuery[] = [];
@@ -24,24 +26,38 @@ describe("PostgresQueryBuilder - Sécurité et SQL Injection Resistance", () => 
   test("bloque les injections SQL sur les noms de colonnes", () => {
     const { executor } = createMockExecutor();
     const qb = new PostgresQueryBuilder(executor, "users");
-    expect(() => qb.eq("id; DROP TABLE users; --", "admin")).toThrow(/Invalid SQL identifier/);
-    expect(() => qb.order("id UNION SELECT * FROM passwords")).toThrow(/Invalid SQL identifier/);
-    expect(() => qb.or("role; DROP TABLE accounts; --.eq.admin")).toThrow(/Invalid SQL identifier/);
+    expect(() => qb.eq("id; DROP TABLE users; --", "admin")).toThrow(
+      /Invalid SQL identifier/,
+    );
+    expect(() => qb.order("id UNION SELECT * FROM passwords")).toThrow(
+      /Invalid SQL identifier/,
+    );
+    expect(() => qb.or("role; DROP TABLE accounts; --.eq.admin")).toThrow(
+      /Invalid SQL identifier/,
+    );
   });
 
   test("bloque les projections non autorisées", () => {
     const { executor } = createMockExecutor();
     const qb = new PostgresQueryBuilder(executor, "users");
-    expect(() => qb.select("id; DELETE FROM users;")).toThrow(/Invalid SQL projection/);
-    expect(() => qb.select("id, password_hash/* injected */")).toThrow(/Invalid SQL projection/);
+    expect(() => qb.select("id; DELETE FROM users;")).toThrow(
+      /Invalid SQL projection/,
+    );
+    expect(() => qb.select("id, password_hash/* injected */")).toThrow(
+      /Invalid SQL projection/,
+    );
   });
 
   test("autorise les projections légitimes et expressions d'agrégation", async () => {
     const { executor, queries } = createMockExecutor([{ total: 42 }]);
     const qb = new PostgresQueryBuilder(executor, "users");
-    await qb.select("id, count(id)::int as total, created_at").eq("active", true);
+    await qb
+      .select("id, count(id)::int as total, created_at")
+      .eq("active", true);
     expect(queries).toHaveLength(1);
-    expect(queries[0]!.sql).toContain('SELECT id, count(id)::int as total, created_at FROM "users" WHERE "active" = $1');
+    expect(queries[0]!.sql).toContain(
+      'SELECT id, count(id)::int as total, created_at FROM "users" WHERE "active" = $1',
+    );
   });
 
   test("supporte l'extraction JSON path sécurisée column->>field", async () => {
@@ -49,7 +65,7 @@ describe("PostgresQueryBuilder - Sécurité et SQL Injection Resistance", () => 
     const qb = new PostgresQueryBuilder(executor, "profiles");
     await qb.select("id").eq("metadata->>discord_id", "123456789");
     expect(queries).toHaveLength(1);
-    expect(queries[0]!.sql).toContain('"metadata"->>\'discord_id\' = $1');
+    expect(queries[0]!.sql).toContain("\"metadata\"->>'discord_id' = $1");
     expect(queries[0]!.parameters).toEqual(["123456789"]);
   });
 });
@@ -96,7 +112,9 @@ describe("PostgresQueryBuilder - Opérateurs et Syntaxe SQL", () => {
 
   test("opérateur IN avec liste non-vide et liste vide (short-circuit FALSE)", async () => {
     const { executor: ex1, queries: q1 } = createMockExecutor();
-    await new PostgresQueryBuilder(ex1, "players").select("id").in("id", ["p1", "p2", "p3"]);
+    await new PostgresQueryBuilder(ex1, "players")
+      .select("id")
+      .in("id", ["p1", "p2", "p3"]);
     expect(q1[0]!.sql).toContain('"id" IN ($1, $2, $3)');
     expect(q1[0]!.parameters).toEqual(["p1", "p2", "p3"]);
 
@@ -108,14 +126,20 @@ describe("PostgresQueryBuilder - Opérateurs et Syntaxe SQL", () => {
 
   test("recherche textuelle avec config tsquery sécurisée", async () => {
     const { executor, queries } = createMockExecutor();
-    await new PostgresQueryBuilder(executor, "articles").select("title").textSearch("content", "inazuma & victory", {
-      config: "french",
-    });
+    await new PostgresQueryBuilder(executor, "articles")
+      .select("title")
+      .textSearch("content", "inazuma & victory", {
+        config: "french",
+      });
     expect(queries[0]!.sql).toContain('"content" @@ to_tsquery($1, $2)');
     expect(queries[0]!.parameters).toEqual(["french", "inazuma & victory"]);
 
     expect(() =>
-      new PostgresQueryBuilder(executor, "articles").textSearch("content", "q", { config: "french; DROP TABLE;" }),
+      new PostgresQueryBuilder(executor, "articles").textSearch(
+        "content",
+        "q",
+        { config: "french; DROP TABLE;" },
+      ),
     ).toThrow(/Invalid text search config/);
   });
 
@@ -123,7 +147,9 @@ describe("PostgresQueryBuilder - Opérateurs et Syntaxe SQL", () => {
     const { executor, queries } = createMockExecutor();
     await new PostgresQueryBuilder(executor, "clan_members")
       .select("*")
-      .or("role.eq.admin,role.eq.owner,status.is.null,custom_title.not.is.null");
+      .or(
+        "role.eq.admin,role.eq.owner,status.is.null,custom_title.not.is.null",
+      );
 
     expect(queries[0]!.sql).toContain(
       '("role" = $1 OR "role" = $2 OR "status" IS NULL OR "custom_title" IS NOT NULL)',
@@ -134,7 +160,9 @@ describe("PostgresQueryBuilder - Opérateurs et Syntaxe SQL", () => {
 
 describe("PostgresQueryBuilder - Mutations, Upserts et Résolution", () => {
   test("génération correcte de l'instruction INSERT avec RETURNING *", async () => {
-    const { executor, queries } = createMockExecutor([{ id: "u_new", name: "Endou" }]);
+    const { executor, queries } = createMockExecutor([
+      { id: "u_new", name: "Endou" },
+    ]);
     const res = await new PostgresQueryBuilder(executor, "users").insert({
       id: "u_new",
       name: "Endou",
@@ -163,15 +191,21 @@ describe("PostgresQueryBuilder - Mutations, Upserts et Résolution", () => {
 
   test("génération correcte de l'instruction DELETE avec WHERE", async () => {
     const { executor, queries } = createMockExecutor([{ id: "session_old" }]);
-    const res = await new PostgresQueryBuilder(executor, "sessions").delete().eq("id", "session_old");
+    const res = await new PostgresQueryBuilder(executor, "sessions")
+      .delete()
+      .eq("id", "session_old");
 
     expect(res.data).toEqual([{ id: "session_old" }]);
-    expect(queries[0]!.sql).toBe('DELETE FROM "sessions" WHERE "id" = $1 RETURNING *');
+    expect(queries[0]!.sql).toBe(
+      'DELETE FROM "sessions" WHERE "id" = $1 RETURNING *',
+    );
     expect(queries[0]!.parameters).toEqual(["session_old"]);
   });
 
   test("génération correcte de l'instruction UPSERT (ON CONFLICT DO UPDATE)", async () => {
-    const { executor, queries } = createMockExecutor([{ id: "stat_1", wins: 10 }]);
+    const { executor, queries } = createMockExecutor([
+      { id: "stat_1", wins: 10 },
+    ]);
     await new PostgresQueryBuilder(executor, "stats").upsert(
       { id: "stat_1", player_id: "p1", wins: 10 },
       { onConflict: "id" },
@@ -185,19 +219,28 @@ describe("PostgresQueryBuilder - Mutations, Upserts et Résolution", () => {
 
   test("mode single retourne le premier élément ou lève une erreur si vide", async () => {
     const { executor: ex1 } = createMockExecutor([{ id: "one" }]);
-    const res1 = await new PostgresQueryBuilder(ex1, "users").select("*").eq("id", "one").single();
+    const res1 = await new PostgresQueryBuilder(ex1, "users")
+      .select("*")
+      .eq("id", "one")
+      .single();
     expect(res1.data).toEqual({ id: "one" });
     expect(res1.error).toBeNull();
 
     const { executor: ex2 } = createMockExecutor([]);
-    const res2 = await new PostgresQueryBuilder(ex2, "users").select("*").eq("id", "none").single();
+    const res2 = await new PostgresQueryBuilder(ex2, "users")
+      .select("*")
+      .eq("id", "none")
+      .single();
     expect(res2.data).toBeNull();
     expect(res2.error?.message).toContain("Expected exactly one row");
   });
 
   test("mode maybeSingle retourne null sans lever d'erreur si aucun enregistrement", async () => {
     const { executor } = createMockExecutor([]);
-    const res = await new PostgresQueryBuilder(executor, "users").select("*").eq("id", "missing").maybeSingle();
+    const res = await new PostgresQueryBuilder(executor, "users")
+      .select("*")
+      .eq("id", "missing")
+      .maybeSingle();
     expect(res.data).toBeNull();
     expect(res.error).toBeNull();
   });

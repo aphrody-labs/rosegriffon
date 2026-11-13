@@ -38,33 +38,55 @@ export interface PosterMember {
 }
 
 export interface PosterData {
-  clan: { id: number; name: string; shortenedName: string; avatarUrl: string | null; seed: string };
+  clan: {
+    id: number;
+    name: string;
+    shortenedName: string;
+    avatarUrl: string | null;
+    seed: string;
+  };
   members: PosterMember[];
   averageElo: number;
   membersCount: number;
 }
 
-export async function loadClanPosterData(db: Kysely<Database>, clanId: number): Promise<PosterData> {
+export async function loadClanPosterData(
+  db: Kysely<Database>,
+  clanId: number,
+): Promise<PosterData> {
   const clan = await db
     .selectFrom("clan")
-    .select(["id", "name", "shortened_name", "clan_avatar_url", "normalized_short_name", "normalized_name"])
+    .select([
+      "id",
+      "name",
+      "shortened_name",
+      "clan_avatar_url",
+      "normalized_short_name",
+      "normalized_name",
+    ])
     .where("id", "=", clanId)
     .executeTakeFirst();
   if (!clan) throw new ImageNotFoundError(`Clan ${clanId} introuvable`);
   const rows = await db
     .selectFrom("clan_member")
     .innerJoin("user", "user.id", "clan_member.user_id")
-    .leftJoin("user_elo", join =>
+    .leftJoin("user_elo", (join) =>
       join
         .onRef("user_elo.user_id", "=", "user.id")
         .on("user_elo.mode", "=", MatchMode.ONE_VS_ONE)
         .on("user_elo.season_id", "is", null),
     )
-    .select(["user.id", "user.display_name", "user.username", "user.avatar", "user_elo.elo"])
+    .select([
+      "user.id",
+      "user.display_name",
+      "user.username",
+      "user.avatar",
+      "user_elo.elo",
+    ])
     .where("clan_member.clan_id", "=", clanId)
     .execute();
   const members = rows
-    .map(row => {
+    .map((row) => {
       const elo = Number(row.elo ?? 0);
       const fallback = row.username || `User#${row.id}`;
       return {
@@ -85,7 +107,9 @@ export async function loadClanPosterData(db: Kysely<Database>, clanId: number): 
       seed: clan.normalized_short_name || clan.normalized_name || clan.name,
     },
     members: members.slice(0, 5),
-    averageElo: members.length ? Math.round(members.reduce((sum, m) => sum + m.elo, 0) / members.length) : 0,
+    averageElo: members.length
+      ? Math.round(members.reduce((sum, m) => sum + m.elo, 0) / members.length)
+      : 0,
     membersCount: members.length,
   };
 }
@@ -93,9 +117,13 @@ export async function loadClanPosterData(db: Kysely<Database>, clanId: number): 
 /** Couleur primaire stable dérivée du tag du clan (hash → palette des rangs). */
 export function clanColors(seed: string): [string, string] {
   let hash = 0;
-  for (let i = 0; i < seed.length; i++) hash = (hash * 31 + seed.charCodeAt(i)) >>> 0;
+  for (let i = 0; i < seed.length; i++)
+    hash = (hash * 31 + seed.charCodeAt(i)) >>> 0;
   const index = (hash % 11) + 1;
-  return [RANK_COLORS[index] ?? "#959595", RANK_COLORS[index === 11 ? 1 : index + 1] ?? "#959595"];
+  return [
+    RANK_COLORS[index] ?? "#959595",
+    RANK_COLORS[index === 11 ? 1 : index + 1] ?? "#959595",
+  ];
 }
 
 export async function renderClanPoster(
@@ -108,7 +136,10 @@ export async function renderClanPoster(
   const [primary, secondary] = clanColors(data.clan.seed);
   const [logo, avatars] = images
     ? [images.logo, images.avatars]
-    : await Promise.all([fetchImage(data.clan.avatarUrl), Promise.all(data.members.map(m => fetchImage(m.avatarUrl)))]);
+    : await Promise.all([
+        fetchImage(data.clan.avatarUrl),
+        Promise.all(data.members.map((m) => fetchImage(m.avatarUrl))),
+      ]);
 
   const bg = ctx.createLinearGradient(0, 0, 0, HEIGHT);
   bg.addColorStop(0, "#0b0b10");
@@ -138,9 +169,23 @@ export async function renderClanPoster(
   const logoSize = 280;
   const lx = (WIDTH - logoSize) / 2;
   const ly = 220;
-  drawCircleImage(ctx, logo, lx, ly, logoSize, undefined, LOGO_PLACEHOLDER_FONT_SIZE);
+  drawCircleImage(
+    ctx,
+    logo,
+    lx,
+    ly,
+    logoSize,
+    undefined,
+    LOGO_PLACEHOLDER_FONT_SIZE,
+  );
   ctx.beginPath();
-  ctx.arc(lx + logoSize / 2, ly + logoSize / 2, logoSize / 2 + 6, 0, Math.PI * 2);
+  ctx.arc(
+    lx + logoSize / 2,
+    ly + logoSize / 2,
+    logoSize / 2 + 6,
+    0,
+    Math.PI * 2,
+  );
   ctx.lineWidth = 8;
   ctx.strokeStyle = "#ffffff";
   ctx.stroke();
@@ -182,7 +227,11 @@ export async function renderClanPoster(
     ctx.fillText(truncate(member.displayName, 22), ax + size + 30, y + 50);
     ctx.fillStyle = color;
     ctx.font = `28px ${FONT_SANS}`;
-    ctx.fillText(`${RANK_NAMES[member.rankIndex]} · ${member.elo} ELO`, ax + size + 30, y + 90);
+    ctx.fillText(
+      `${RANK_NAMES[member.rankIndex]} · ${member.elo} ELO`,
+      ax + size + 30,
+      y + 90,
+    );
     ctx.font = `bold 64px ${FONT_SANS}`;
     ctx.textAlign = "right";
     ctx.fillText(`#${i + 1}`, padX + rowWidth - 32, y + (rowHeight - 14) / 2);
@@ -200,7 +249,11 @@ export async function renderClanPoster(
   ctx.textAlign = "right";
   ctx.fillStyle = "rgba(255,255,255,0.7)";
   ctx.font = `28px ${FONT_SANS}`;
-  ctx.fillText(`Généré le ${new Date().toISOString().slice(0, 10)}`, WIDTH - 80, fy + 100);
+  ctx.fillText(
+    `Généré le ${new Date().toISOString().slice(0, 10)}`,
+    WIDTH - 80,
+    fy + 100,
+  );
   ctx.fillText(websiteHost(), WIDTH - 80, fy + 50);
 
   return canvas.toBuffer("image/png");

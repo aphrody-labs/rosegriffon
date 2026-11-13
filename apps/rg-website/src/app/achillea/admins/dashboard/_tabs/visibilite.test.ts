@@ -66,7 +66,14 @@ const COMPOSANTS_EXTRAITS: ReadonlyArray<readonly [AdminTab, string]> = [
  * est testé AVANT la règle « orgs / tournois / sanctions → admin » : les
  * sanctions sont donc réservées au Super-Admin, pas à l'Admin.
  */
-const SUPER_ADMIN_SEULEMENT: AdminTab[] = ["bot-health", "guilds", "database", "audit", "wallets", "sanctions"];
+const SUPER_ADMIN_SEULEMENT: AdminTab[] = [
+  "bot-health",
+  "guilds",
+  "database",
+  "audit",
+  "wallets",
+  "sanctions",
+];
 
 /** Tout le reste est visible du staff dès le rôle Modérateur, comme dans le legacy. */
 const ROLE_ATTENDU: Record<AdminTab, number> = {
@@ -92,7 +99,11 @@ const ROLE_ATTENDU: Record<AdminTab, number> = {
 describe("visibilité des onglets du back-office", () => {
   test("chaque onglet exige exactement le rôle du legacy", () => {
     for (const groupe of GROUPES_ONGLETS)
-      for (const onglet of groupe.onglets) expect([onglet.id, onglet.roleMinimal]).toEqual([onglet.id, ROLE_ATTENDU[onglet.id]]);
+      for (const onglet of groupe.onglets)
+        expect([onglet.id, onglet.roleMinimal]).toEqual([
+          onglet.id,
+          ROLE_ATTENDU[onglet.id],
+        ]);
   });
 
   test("un membre sans rôle staff ne voit rien", () => {
@@ -102,17 +113,29 @@ describe("visibilité des onglets du back-office", () => {
 
   test("un modérateur voit les onglets staff, sans les onglets Super-Admin", () => {
     const visibles = ongletsVisibles(ROLE_MODERATEUR);
-    for (const id of ["overview", "clans", "casts", "leagues", "licenses", "ranked-active", "ranked-telemetry"] as const)
+    for (const id of [
+      "overview",
+      "clans",
+      "casts",
+      "leagues",
+      "licenses",
+      "ranked-active",
+      "ranked-telemetry",
+    ] as const)
       expect(visibles).toContain(id);
     for (const id of SUPER_ADMIN_SEULEMENT) expect(visibles).not.toContain(id);
   });
 
   test("un admin voit la même chose qu'un modérateur (aucun onglet n'est réservé au rôle 2)", () => {
-    expect(ongletsVisibles(ROLE_ADMIN)).toEqual(ongletsVisibles(ROLE_MODERATEUR));
+    expect(ongletsVisibles(ROLE_ADMIN)).toEqual(
+      ongletsVisibles(ROLE_MODERATEUR),
+    );
   });
 
   test("un super-admin voit tous les onglets", () => {
-    const tous = GROUPES_ONGLETS.flatMap(groupe => groupe.onglets.map(onglet => onglet.id));
+    const tous = GROUPES_ONGLETS.flatMap((groupe) =>
+      groupe.onglets.map((onglet) => onglet.id),
+    );
     expect(ongletsVisibles(ROLE_SUPER_ADMIN)).toEqual(tous);
     expect(new Set(tous).size).toBe(tous.length);
   });
@@ -130,22 +153,34 @@ describe("parité des onglets Angular → Next", () => {
     import.meta.dir,
     "../../../../../../../../legacy/achillea-web/src/app/views/admin-dashboard",
   );
-  const declares = new Set(GROUPES_ONGLETS.flatMap(groupe => groupe.onglets.map(onglet => onglet.id)));
+  const declares = new Set(
+    GROUPES_ONGLETS.flatMap((groupe) =>
+      groupe.onglets.map((onglet) => onglet.id),
+    ),
+  );
 
-  test.skipIf(!existsSync(dossierLegacy))("chaque dossier d'onglet legacy a son onglet Next", () => {
-    const dossiers = readdirSync(dossierLegacy, { withFileTypes: true })
-      .filter(entree => entree.isDirectory() && entree.name.endsWith("-tab"))
-      .map(entree => entree.name);
-    expect(dossiers.length).toBeGreaterThan(0);
-    for (const dossier of dossiers) {
-      const id = ONGLETS_LEGACY[dossier];
-      expect(id, `onglet legacy non mappé : ${dossier}`).toBeDefined();
-      if (id) expect(declares.has(id), `onglet Next absent : ${id}`).toBe(true);
-    }
-  });
+  test.skipIf(!existsSync(dossierLegacy))(
+    "chaque dossier d'onglet legacy a son onglet Next",
+    () => {
+      const dossiers = readdirSync(dossierLegacy, { withFileTypes: true })
+        .filter(
+          (entree) => entree.isDirectory() && entree.name.endsWith("-tab"),
+        )
+        .map((entree) => entree.name);
+      expect(dossiers.length).toBeGreaterThan(0);
+      for (const dossier of dossiers) {
+        const id = ONGLETS_LEGACY[dossier];
+        expect(id, `onglet legacy non mappé : ${dossier}`).toBeDefined();
+        if (id)
+          expect(declares.has(id), `onglet Next absent : ${id}`).toBe(true);
+      }
+    },
+  );
 
   test("chaque onglet extrait a son composant et est rendu par le routeur", async () => {
-    const routeur = await Bun.file(resolve(import.meta.dir, "../admin-dashboard-client.tsx")).text();
+    const routeur = await Bun.file(
+      resolve(import.meta.dir, "../admin-dashboard-client.tsx"),
+    ).text();
     for (const [id, fichier] of COMPOSANTS_EXTRAITS) {
       expect(existsSync(resolve(import.meta.dir, fichier)), fichier).toBe(true);
       expect(routeur).toContain(`ongletActif === "${id}"`);
@@ -155,11 +190,41 @@ describe("parité des onglets Angular → Next", () => {
 
 describe("éditeur de lignes de l'onglet base de données", () => {
   const colonnes: DbColumn[] = [
-    { name: "id", dataType: "integer", nullable: false, default: "nextval()", isPrimaryKey: true },
-    { name: "name", dataType: "text", nullable: false, default: null, isPrimaryKey: false },
-    { name: "qr_secret", dataType: "text", nullable: false, default: null, isPrimaryKey: false },
-    { name: "languages", dataType: "ARRAY", nullable: false, default: null, isPrimaryKey: false },
-    { name: "is_hidden", dataType: "boolean", nullable: false, default: "false", isPrimaryKey: false },
+    {
+      name: "id",
+      dataType: "integer",
+      nullable: false,
+      default: "nextval()",
+      isPrimaryKey: true,
+    },
+    {
+      name: "name",
+      dataType: "text",
+      nullable: false,
+      default: null,
+      isPrimaryKey: false,
+    },
+    {
+      name: "qr_secret",
+      dataType: "text",
+      nullable: false,
+      default: null,
+      isPrimaryKey: false,
+    },
+    {
+      name: "languages",
+      dataType: "ARRAY",
+      nullable: false,
+      default: null,
+      isPrimaryKey: false,
+    },
+    {
+      name: "is_hidden",
+      dataType: "boolean",
+      nullable: false,
+      default: "false",
+      isPrimaryKey: false,
+    },
   ];
 
   test("genre des colonnes", () => {
@@ -171,19 +236,36 @@ describe("éditeur de lignes de l'onglet base de données", () => {
   });
 
   test("seules les colonnes modifiées partent, jamais la clé ni une valeur masquée", () => {
-    const initiale = { id: "1", name: "A", qr_secret: VALEUR_MASQUEE, languages: '["fr"]', is_hidden: "false" };
+    const initiale = {
+      id: "1",
+      name: "A",
+      qr_secret: VALEUR_MASQUEE,
+      languages: '["fr"]',
+      is_hidden: "false",
+    };
     const courante = { ...initiale, id: "2", name: "B", is_hidden: "true" };
-    expect(valeursModifiees(colonnes, initiale, courante)).toEqual({ name: "B", is_hidden: true });
+    expect(valeursModifiees(colonnes, initiale, courante)).toEqual({
+      name: "B",
+      is_hidden: true,
+    });
   });
 
   test("un JSON invalide nomme la colonne fautive", () => {
     const initiale = { languages: "[]" };
-    expect(() => valeursModifiees(colonnes, initiale, { languages: "[" })).toThrow("languages");
+    expect(() =>
+      valeursModifiees(colonnes, initiale, { languages: "[" }),
+    ).toThrow("languages");
     expect(() => depuisSaisie("abc", "number")).toThrow();
   });
 
   test("l'insertion ignore les champs vides", () => {
-    expect(valeursInsertion(colonnes, { name: "C", languages: '["en"]', is_hidden: "" })).toEqual({
+    expect(
+      valeursInsertion(colonnes, {
+        name: "C",
+        languages: '["en"]',
+        is_hidden: "",
+      }),
+    ).toEqual({
       name: "C",
       languages: ["en"],
     });
@@ -192,11 +274,19 @@ describe("éditeur de lignes de l'onglet base de données", () => {
   test("sauvegardes : contrat, tailles et refus", () => {
     expect(
       sauvegardesSchema.safeParse({
-        data: [{ name: "achillea-1.dump", sizeBytes: 2048, createdAt: "2026-10-22T10:00:00.000Z" }],
+        data: [
+          {
+            name: "achillea-1.dump",
+            sizeBytes: 2048,
+            createdAt: "2026-10-22T10:00:00.000Z",
+          },
+        ],
         retention: 7,
       }).success,
     ).toBe(true);
-    expect(tailleBaseSchema.safeParse({ database: { bytes: 1 } }).success).toBe(false);
+    expect(tailleBaseSchema.safeParse({ database: { bytes: 1 } }).success).toBe(
+      false,
+    );
     expect(formaterOctets(512)).toBe("512 o");
     expect(formaterOctets(1536)).toBe("1,5 Kio");
     expect(messageRefusSauvegarde(409)).toContain("en cours");

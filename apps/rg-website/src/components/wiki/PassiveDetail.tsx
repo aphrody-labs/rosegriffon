@@ -43,8 +43,10 @@ const ELEMENT_COLORS: Record<string, string> = {
   // d'un écran à l'autre — le vent y était bleu ici, vert ailleurs.
   fire: "bg-element-feu/15 text-element-feu border-element-feu/40",
   forest: "bg-element-foret/15 text-element-foret border-element-foret/40",
-  mountain: "bg-element-montagne/15 text-element-montagne border-element-montagne/40",
-  neutral: "bg-outline-variant/20 text-on-surface-variant border-outline-variant/40",
+  mountain:
+    "bg-element-montagne/15 text-element-montagne border-element-montagne/40",
+  neutral:
+    "bg-outline-variant/20 text-on-surface-variant border-outline-variant/40",
   wind: "bg-element-vent/15 text-element-vent border-element-vent/40",
 };
 
@@ -79,14 +81,19 @@ export function elementColor(name: string): string {
 // ── Vue détail ──
 
 export function PassiveDetailView({ passive }: { passive: PassiveDetailData }) {
-  const textFr = passive.description.fr ?? passive.description.en ?? passive.description.ja ?? "";
+  const textFr =
+    passive.description.fr ??
+    passive.description.en ??
+    passive.description.ja ??
+    "";
   const nameJa = passive.name.ja ?? "";
   const elColor = elementColor(passive.element_name);
   const elLabel = elementLabel(passive.element_name);
-  const catLabel = PASSIVE_CATEGORY_LABELS[passive.category] ?? passive.category;
+  const catLabel =
+    PASSIVE_CATEGORY_LABELS[passive.category] ?? passive.category;
 
   // Courbe d'effets : toutes les valeurs de la famille (effet partagé).
-  const curve = passive.family.filter(f => f.main_value !== null);
+  const curve = passive.family.filter((f) => f.main_value !== null);
   const currentId = passive.passive_id;
 
   return (
@@ -106,7 +113,11 @@ export function PassiveDetailView({ passive }: { passive: PassiveDetailData }) {
               />
             ) : (
               <div className="size-24 rounded-2xl bg-primary/10 flex items-center justify-center">
-                <Sparkles size={40} className="text-primary" aria-hidden="true" />
+                <Sparkles
+                  size={40}
+                  className="text-primary"
+                  aria-hidden="true"
+                />
               </div>
             )}
           </div>
@@ -136,7 +147,10 @@ export function PassiveDetailView({ passive }: { passive: PassiveDetailData }) {
             </h1>
 
             {nameJa && (
-              <p className="text-sm text-on-surface-variant whitespace-pre-line" lang="ja">
+              <p
+                className="text-sm text-on-surface-variant whitespace-pre-line"
+                lang="ja"
+              >
                 {nameJa}
               </p>
             )}
@@ -145,7 +159,9 @@ export function PassiveDetailView({ passive }: { passive: PassiveDetailData }) {
               <span>string_id : {passive.string_id}</span>
               <span>effect_id : {passive.effect_id}</span>
               <span>passive_id : {passive.passive_id}</span>
-              {passive.buff_icon_type !== null && <span>buff_icon : {passive.buff_icon_type}</span>}
+              {passive.buff_icon_type !== null && (
+                <span>buff_icon : {passive.buff_icon_type}</span>
+              )}
             </div>
           </div>
         </div>
@@ -153,7 +169,10 @@ export function PassiveDetailView({ passive }: { passive: PassiveDetailData }) {
 
       {/* Description résolue (FR / EN / JA) */}
       <section aria-labelledby="passive-desc-heading" className="space-y-3">
-        <h2 id="passive-desc-heading" className="text-lg font-bold text-on-surface">
+        <h2
+          id="passive-desc-heading"
+          className="text-lg font-bold text-on-surface"
+        >
           Description
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -165,11 +184,16 @@ export function PassiveDetailView({ passive }: { passive: PassiveDetailData }) {
             ] as const
           ).map(([lang, txt]) =>
             txt ? (
-              <div key={lang} className="rounded-2xl border border-outline-variant/30 bg-surface-container-low p-4">
+              <div
+                key={lang}
+                className="rounded-2xl border border-outline-variant/30 bg-surface-container-low p-4"
+              >
                 <div className="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant mb-2">
                   {lang}
                 </div>
-                <p className="text-sm text-on-surface whitespace-pre-line leading-snug">{txt}</p>
+                <p className="text-sm text-on-surface whitespace-pre-line leading-snug">
+                  {txt}
+                </p>
               </div>
             ) : null,
           )}
@@ -179,31 +203,39 @@ export function PassiveDetailView({ passive }: { passive: PassiveDetailData }) {
       {/* Courbe d'effets (valeurs par instance de la famille) */}
       {curve.length > 1 && (
         <section aria-labelledby="passive-curve-heading" className="space-y-3">
-          <h2 id="passive-curve-heading" className="text-lg font-bold text-on-surface">
+          <h2
+            id="passive-curve-heading"
+            className="text-lg font-bold text-on-surface"
+          >
             Valeurs de l&apos;effet ({curve.length})
           </h2>
           <p className="text-sm text-on-surface-variant">
-            Toutes les variantes partageant cet effet, de la plus faible à la plus forte.
+            Toutes les variantes partageant cet effet, de la plus faible à la
+            plus forte.
           </p>
           <div className="overflow-x-auto rounded-2xl border border-outline-variant/30">
             <table className="w-full text-sm">
               <thead>
                 <tr className="bg-surface-container-high text-on-surface-variant">
-                  <th className="text-left font-bold px-4 py-2.5 text-xs uppercase tracking-wider">Valeur</th>
+                  <th className="text-left font-bold px-4 py-2.5 text-xs uppercase tracking-wider">
+                    Valeur
+                  </th>
                   <th className="text-left font-bold px-4 py-2.5 text-xs uppercase tracking-wider hidden md:table-cell">
                     Texte
                   </th>
                 </tr>
               </thead>
               <tbody>
-                {curve.map(f => {
+                {curve.map((f) => {
                   const isCurrent = f.passive_id === currentId;
                   return (
                     <tr
                       key={f.passive_id}
                       className={cn(
                         "border-t border-outline-variant/20",
-                        isCurrent ? "bg-primary/10" : "hover:bg-surface-container-low transition-colors",
+                        isCurrent
+                          ? "bg-primary/10"
+                          : "hover:bg-surface-container-low transition-colors",
                       )}
                     >
                       <td className="px-4 py-2.5 font-mono font-bold text-on-surface whitespace-nowrap">

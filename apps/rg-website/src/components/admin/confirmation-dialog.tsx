@@ -52,7 +52,7 @@ export function ConfirmationDialog({
   const dangerColor = danger ? "destructive" : "default";
 
   return (
-    <Dialog open={open} onOpenChange={newOpen => !newOpen && onCancel()}>
+    <Dialog open={open} onOpenChange={(newOpen) => !newOpen && onCancel()}>
       <DialogContent>
         <DialogHeader>
           <div className="flex items-center gap-2">
@@ -65,7 +65,11 @@ export function ConfirmationDialog({
         <p className="text-muted-foreground py-4">{message}</p>
 
         <DialogFooter className="gap-3">
-          <Button variant="outline" onClick={onCancel} disabled={loading || isLoading}>
+          <Button
+            variant="outline"
+            onClick={onCancel}
+            disabled={loading || isLoading}
+          >
             {cancelText}
           </Button>
           <Button
@@ -101,7 +105,7 @@ export function useConfirm(): {
 
   const confirm = useCallback((next: ConfirmOptions) => {
     setOptions(next);
-    return new Promise<boolean>(resolve => {
+    return new Promise<boolean>((resolve) => {
       resolver.current = resolve;
     });
   }, []);

@@ -64,7 +64,9 @@ export function ImageCropperDialog({
   }, [open]);
 
   const handleCropChange = React.useCallback(
-    (pixels: { x: number; y: number; width: number; height: number } | null) => {
+    (
+      pixels: { x: number; y: number; width: number; height: number } | null,
+    ) => {
       setCropArea(pixels);
     },
     [],
@@ -123,7 +125,7 @@ export function ImageCropperDialog({
       );
 
       canvas.toBlob(
-        blob => {
+        (blob) => {
           if (!blob) {
             throw new Error("Failed to create blob from canvas");
           }
@@ -146,7 +148,15 @@ export function ImageCropperDialog({
       console.error("Error processing crop:", error);
       setIsProcessing(false);
     }
-  }, [cropArea, image, outputWidth, quality, onCropComplete, handleCancel, isProcessing]);
+  }, [
+    cropArea,
+    image,
+    outputWidth,
+    quality,
+    onCropComplete,
+    handleCancel,
+    isProcessing,
+  ]);
 
   // Early return if no image
   if (!image) {
@@ -156,9 +166,15 @@ export function ImageCropperDialog({
           <DialogHeader>
             <DialogTitle>Erreur</DialogTitle>
           </DialogHeader>
-          <p className="text-sm text-muted-foreground">Aucune image à traiter</p>
+          <p className="text-sm text-muted-foreground">
+            Aucune image à traiter
+          </p>
           <DialogFooter>
-            <Button onClick={onClose} variant="outline" className="w-full sm:w-auto">
+            <Button
+              onClick={onClose}
+              variant="outline"
+              className="w-full sm:w-auto"
+            >
               Fermer
             </Button>
           </DialogFooter>
@@ -170,11 +186,13 @@ export function ImageCropperDialog({
   return (
     <>
       <canvas ref={canvasRef} className="hidden" />
-      <Dialog open={open} onOpenChange={isOpen => !isOpen && handleCancel()}>
+      <Dialog open={open} onOpenChange={(isOpen) => !isOpen && handleCancel()}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto w-[95vw] sm:w-full p-4 sm:p-6 [&_img]:max-w-full [&_img]:w-full [&_img]:h-auto">
           <DialogHeader>
             <DialogTitle>{title}</DialogTitle>
-            <DialogDescription>Ajustez le cadrage de votre image avant de continuer</DialogDescription>
+            <DialogDescription>
+              Ajustez le cadrage de votre image avant de continuer
+            </DialogDescription>
           </DialogHeader>
 
           <div className="w-full h-[300px] sm:h-[400px] md:h-[500px] flex items-center justify-center bg-muted rounded-lg overflow-hidden relative">
@@ -197,7 +215,12 @@ export function ImageCropperDialog({
 
           <DialogFooter className="flex flex-col-reverse sm:flex-row gap-2">
             {additionalButtons}
-            <Button variant="outline" onClick={handleCancel} disabled={isProcessing} className="w-full sm:w-auto">
+            <Button
+              variant="outline"
+              onClick={handleCancel}
+              disabled={isProcessing}
+              className="w-full sm:w-auto"
+            >
               Annuler
             </Button>
             <Button

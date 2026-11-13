@@ -2,7 +2,10 @@
 
 import Link from "@/components/shared/Link";
 import type { ClanMemberDTO } from "@rosegriffon/achillea-types";
-import { ClanMemberRole, ClanMemberDistinction } from "@rosegriffon/achillea-types/enums/clanMemberRole";
+import {
+  ClanMemberRole,
+  ClanMemberDistinction,
+} from "@rosegriffon/achillea-types/enums/clanMemberRole";
 import { UserAvatar } from "@/components/achillea/UserAvatar";
 import { Badge, Card, CardContent } from "@rosegriffon/ui";
 import { Crown, Shield, Users, Award } from "lucide-react";
@@ -35,16 +38,19 @@ function distinctionLabel(d: string): string {
 
 export function ClanOrgchart({ members }: ClanOrgchartProps) {
   // Group members by role in hierarchy
-  const president = members.find(m => m.clanRole === ClanMemberRole.Captain);
-  const viceCaptains = members.filter(m => m.clanRole === ClanMemberRole.SubCaptain);
+  const president = members.find((m) => m.clanRole === ClanMemberRole.Captain);
+  const viceCaptains = members.filter(
+    (m) => m.clanRole === ClanMemberRole.SubCaptain,
+  );
   const staffMembers = members.filter(
-    m =>
-      (m.distinctions?.includes(ClanMemberDistinction.Staff) || m.distinctions?.includes("Staff")) &&
+    (m) =>
+      (m.distinctions?.includes(ClanMemberDistinction.Staff) ||
+        m.distinctions?.includes("Staff")) &&
       m.clanRole !== ClanMemberRole.Captain &&
       m.clanRole !== ClanMemberRole.SubCaptain,
   );
   const players = members.filter(
-    m =>
+    (m) =>
       m.clanRole !== ClanMemberRole.Captain &&
       m.clanRole !== ClanMemberRole.SubCaptain &&
       !m.distinctions?.includes(ClanMemberDistinction.Staff) &&
@@ -79,23 +85,29 @@ export function ClanOrgchart({ members }: ClanOrgchartProps) {
                   >
                     {president.user?.username ?? "Président"}
                   </Link>
-                  <Badge variant="destructive" className="text-xs font-bold shrink-0">
+                  <Badge
+                    variant="destructive"
+                    className="text-xs font-bold shrink-0"
+                  >
                     Président
                   </Badge>
                 </div>
-                <p className="text-xs text-on-surface-variant mt-0.5">Capitaine & Fondateur</p>
-                {president.distinctions && president.distinctions.length > 0 && (
-                  <div className="flex flex-wrap gap-1 mt-2">
-                    {president.distinctions.map(d => (
-                      <span
-                        key={d}
-                        className="px-1.5 py-0.5 rounded text-xs bg-warning/10 text-warning border border-warning/20 font-medium"
-                      >
-                        {distinctionLabel(d)}
-                      </span>
-                    ))}
-                  </div>
-                )}
+                <p className="text-xs text-on-surface-variant mt-0.5">
+                  Capitaine & Fondateur
+                </p>
+                {president.distinctions &&
+                  president.distinctions.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mt-2">
+                      {president.distinctions.map((d) => (
+                        <span
+                          key={d}
+                          className="px-1.5 py-0.5 rounded text-xs bg-warning/10 text-warning border border-warning/20 font-medium"
+                        >
+                          {distinctionLabel(d)}
+                        </span>
+                      ))}
+                    </div>
+                  )}
               </div>
             </CardContent>
           </Card>
@@ -117,13 +129,18 @@ export function ClanOrgchart({ members }: ClanOrgchartProps) {
           </div>
 
           <div className="flex flex-wrap justify-center gap-4">
-            {viceCaptains.map(vp => (
+            {viceCaptains.map((vp) => (
               <Card
                 key={vp.user?.id}
                 className="w-full sm:w-72 border-primary/30 bg-surface/80 hover:border-primary/60 transition-colors shadow-md"
               >
                 <CardContent className="p-3.5 flex items-center gap-3">
-                  <UserAvatar userId={vp.user?.id} avatar={vp.user?.avatar} name={vp.user?.username} size="md" />
+                  <UserAvatar
+                    userId={vp.user?.id}
+                    avatar={vp.user?.avatar}
+                    name={vp.user?.username}
+                    size="md"
+                  />
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center justify-between gap-1">
                       <Link
@@ -136,10 +153,12 @@ export function ClanOrgchart({ members }: ClanOrgchartProps) {
                         Vice-Président
                       </Badge>
                     </div>
-                    <p className="text-xs text-on-surface-variant mt-0.5">Sous-capitaine</p>
+                    <p className="text-xs text-on-surface-variant mt-0.5">
+                      Sous-capitaine
+                    </p>
                     {vp.distinctions && vp.distinctions.length > 0 && (
                       <div className="flex flex-wrap gap-1 mt-1.5">
-                        {vp.distinctions.map(d => (
+                        {vp.distinctions.map((d) => (
                           <span
                             key={d}
                             className="px-1.5 py-0.5 rounded text-xs bg-primary/10 text-primary border border-primary/20"
@@ -168,12 +187,17 @@ export function ClanOrgchart({ members }: ClanOrgchartProps) {
           </div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {staffMembers.map(st => (
+            {staffMembers.map((st) => (
               <div
                 key={st.user?.id}
                 className="flex items-center gap-3 p-3 rounded-xl border border-primary/20 bg-surface/60 hover:border-primary/40 transition-colors"
               >
-                <UserAvatar userId={st.user?.id} avatar={st.user?.avatar} name={st.user?.username} size="md" />
+                <UserAvatar
+                  userId={st.user?.id}
+                  avatar={st.user?.avatar}
+                  name={st.user?.username}
+                  size="md"
+                />
                 <div className="min-w-0 flex-1">
                   <Link
                     href={`/achillea/users/${st.user?.id}`}
@@ -182,10 +206,13 @@ export function ClanOrgchart({ members }: ClanOrgchartProps) {
                     {st.user?.username}
                   </Link>
                   <div className="flex flex-wrap gap-1 mt-1">
-                    <Badge variant="outline" className="text-xs border-primary/30 text-primary">
+                    <Badge
+                      variant="outline"
+                      className="text-xs border-primary/30 text-primary"
+                    >
                       Staff
                     </Badge>
-                    {st.distinctions?.map(d => (
+                    {st.distinctions?.map((d) => (
                       <span
                         key={d}
                         className="px-1.5 py-0.5 rounded text-xs bg-surface-variant text-on-surface-variant"
@@ -211,13 +238,18 @@ export function ClanOrgchart({ members }: ClanOrgchartProps) {
         </div>
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-          {players.map(pl => (
+          {players.map((pl) => (
             <div
               key={pl.user?.id}
               className="flex items-center justify-between p-3 rounded-xl border border-outline/20 bg-surface/50 hover:border-outline/40 transition-colors"
             >
               <div className="flex items-center gap-2.5 min-w-0">
-                <UserAvatar userId={pl.user?.id} avatar={pl.user?.avatar} name={pl.user?.username} size="sm" />
+                <UserAvatar
+                  userId={pl.user?.id}
+                  avatar={pl.user?.avatar}
+                  name={pl.user?.username}
+                  size="sm"
+                />
                 <div className="min-w-0">
                   <Link
                     href={`/achillea/users/${pl.user?.id}`}
@@ -226,14 +258,20 @@ export function ClanOrgchart({ members }: ClanOrgchartProps) {
                     {pl.user?.username}
                   </Link>
                   <span className="text-xs text-on-surface-variant">
-                    {pl.clanRole === ClanMemberRole.Trial ? "À l'essai" : "Membre actif"}
+                    {pl.clanRole === ClanMemberRole.Trial
+                      ? "À l'essai"
+                      : "Membre actif"}
                   </span>
                 </div>
               </div>
 
               <div className="flex flex-col items-end gap-1 shrink-0">
-                {pl.distinctions?.slice(0, 1).map(d => (
-                  <Badge key={d} variant="secondary" className="text-xs font-normal">
+                {pl.distinctions?.slice(0, 1).map((d) => (
+                  <Badge
+                    key={d}
+                    variant="secondary"
+                    className="text-xs font-normal"
+                  >
                     {distinctionLabel(d)}
                   </Badge>
                 ))}

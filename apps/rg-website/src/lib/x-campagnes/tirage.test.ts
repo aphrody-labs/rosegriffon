@@ -80,7 +80,13 @@ import {
   uDepuisEmpreinte,
   verifierTirage,
 } from "./tirage";
-import type { CodeAnomalie, EntreeCalculee, ParticipantTirage, PoidsMode, TirageGele } from "./tirage";
+import type {
+  CodeAnomalie,
+  EntreeCalculee,
+  ParticipantTirage,
+  PoidsMode,
+  TirageGele,
+} from "./tirage";
 
 /* ── OUTILLAGE ─────────────────────────────────────────────────────────────── */
 
@@ -96,7 +102,9 @@ import type { CodeAnomalie, EntreeCalculee, ParticipantTirage, PoidsMode, Tirage
 function elem<T>(tableau: readonly T[], index: number): T {
   const valeur = tableau[index];
   if (valeur === undefined) {
-    throw new Error(`Index ${index} hors du tableau de ${tableau.length} éléments.`);
+    throw new Error(
+      `Index ${index} hors du tableau de ${tableau.length} éléments.`,
+    );
   }
   return valeur;
 }
@@ -105,7 +113,10 @@ function elem<T>(tableau: readonly T[], index: number): T {
  * HMAC-SHA-256 synchrone, byte-pour-byte identique à `empreinteParticipant`.
  * Licencié par `describe("équivalence des trois implémentations de HMAC")`.
  */
-function hmacRapide(graineOctets: Uint8Array, messageOctets: Uint8Array): Buffer {
+function hmacRapide(
+  graineOctets: Uint8Array,
+  messageOctets: Uint8Array,
+): Buffer {
   return createHmac("sha256", graineOctets).update(messageOctets).digest();
 }
 
@@ -154,7 +165,12 @@ const REELS: readonly ParticipantTirage[] = [
     oeuvres: ["x:2087998363211825503"],
     pseudoAffichage: "Grimnape",
   },
-  { cle: "x:2870776923", nbOeuvres: 1, oeuvres: ["x:2090513552087879823"], pseudoAffichage: "Lya" },
+  {
+    cle: "x:2870776923",
+    nbOeuvres: 1,
+    oeuvres: ["x:2090513552087879823"],
+    pseudoAffichage: "Lya",
+  },
   {
     cle: "x:1674730916139216897",
     nbOeuvres: 1,
@@ -236,7 +252,12 @@ interface Campagne {
   dansTop: number[];
 }
 
-function entreeDe(cle: string, octets: Uint8Array, poids: number, graine: Buffer): EntreeCalculee {
+function entreeDe(
+  cle: string,
+  octets: Uint8Array,
+  poids: number,
+  graine: Buffer,
+): EntreeCalculee {
   const empreinte = hmacRapide(graine, octets);
   const u = uDepuisEmpreinte(empreinte);
   return {
@@ -258,7 +279,7 @@ function campagne(
   prefixeGraine: string,
   top = 1,
 ): Campagne {
-  const octets = cles.map(cle => octetsUtf8(cle));
+  const octets = cles.map((cle) => octetsUtf8(cle));
   const position = new Map(cles.map((cle, index) => [cle, index]));
   const rang1 = Array.from({ length: cles.length }, () => 0);
   const dansTop = Array.from({ length: cles.length }, () => 0);
@@ -288,9 +309,19 @@ function campagne(
     if (top === 1) {
       // Rang 1 seul : `argmin` par le comparateur du noyau, 13 comparaisons au
       // lieu des ~40 d'un tri complet. Même comparateur, même résultat.
-      let meilleure = entreeDe(elem(cles, 0), elem(octets, 0), elem(poids, 0), graine);
+      let meilleure = entreeDe(
+        elem(cles, 0),
+        elem(octets, 0),
+        elem(poids, 0),
+        graine,
+      );
       for (let i = 1; i < cles.length; i += 1) {
-        const candidate = entreeDe(elem(cles, i), elem(octets, i), elem(poids, i), graine);
+        const candidate = entreeDe(
+          elem(cles, i),
+          elem(octets, i),
+          elem(poids, i),
+          graine,
+        );
         if (comparerEntrees(candidate, meilleure) < 0) {
           meilleure = candidate;
         }
@@ -333,14 +364,21 @@ function campagne(
  *     χ² d'ajustement, lui, le voit ; il accompagne donc systématiquement la
  *     borne 3σ, à df = 13 et p = 0,001 (seuil 34,53).
  */
-function borne3Sigma(n: number, p: number): { attendu: number; sigma: number; tolerance: number } {
+function borne3Sigma(
+  n: number,
+  p: number,
+): { attendu: number; sigma: number; tolerance: number } {
   const attendu = n * p;
   const sigma = Math.sqrt(n * p * (1 - p));
   return { attendu, sigma, tolerance: 3 * sigma };
 }
 
 /** χ² d'ajustement d'un décompte observé à des probabilités attendues. */
-function khiDeux(observes: readonly number[], probabilites: readonly number[], n: number): number {
+function khiDeux(
+  observes: readonly number[],
+  probabilites: readonly number[],
+  n: number,
+): number {
   let somme = 0;
   for (let i = 0; i < observes.length; i += 1) {
     const attendu = n * elem(probabilites, i);
@@ -370,7 +408,10 @@ describe("équivalence des trois implémentations de HMAC", () => {
       const cle = `${elem(["discord", "x", "instagram"], i % 3)}:${i}${"aé€\u{1d43b}".slice(0, i % 5)}`;
 
       const parLeNoyau = hex(await empreinteParticipant(graineHex, cle));
-      const parNode = hmacRapide(depuisHex(graineHex), octetsUtf8(cle)).toString("hex");
+      const parNode = hmacRapide(
+        depuisHex(graineHex),
+        octetsUtf8(cle),
+      ).toString("hex");
 
       const cleWeb = await globalThis.crypto.subtle.importKey(
         "raw",
@@ -380,7 +421,13 @@ describe("équivalence des trois implémentations de HMAC", () => {
         ["sign"],
       );
       const parWeb = hex(
-        new Uint8Array(await globalThis.crypto.subtle.sign("HMAC", cleWeb, octetsUtf8(cle) as BufferSource)),
+        new Uint8Array(
+          await globalThis.crypto.subtle.sign(
+            "HMAC",
+            cleWeb,
+            octetsUtf8(cle) as BufferSource,
+          ),
+        ),
       );
 
       if (parLeNoyau === parNode && parNode === parWeb) {
@@ -408,8 +455,12 @@ describe("équivalence des trois implémentations de HMAC", () => {
     for (let i = 0; i < 200; i += 1) {
       const tampon = hmacRapide(graineDe(`pool-${i}`), octetsUtf8(`cle-${i}`));
       expect(tampon.byteLength).toBe(32);
-      expect(uDepuisEmpreinte(tampon)).toBe(uDepuisEmpreinte(Uint8Array.from(tampon)));
-      expect(kDepuisEmpreinte(tampon)).toBe(kDepuisEmpreinte(Uint8Array.from(tampon)));
+      expect(uDepuisEmpreinte(tampon)).toBe(
+        uDepuisEmpreinte(Uint8Array.from(tampon)),
+      );
+      expect(kDepuisEmpreinte(tampon)).toBe(
+        kDepuisEmpreinte(Uint8Array.from(tampon)),
+      );
     }
   });
 
@@ -417,31 +468,39 @@ describe("équivalence des trois implémentations de HMAC", () => {
     // Le test d'accord de bout en bout : si la voie rapide dérivait un jour du
     // noyau, il tomberait ici, avant que les statistiques n'aient le temps de
     // mentir. On compare le classement ENTIER, pas seulement le gagnant.
-    const cles = REELS.map(participant => participant.cle);
-    const octets = cles.map(cle => octetsUtf8(cle));
-    const poids = REELS.map(participant => poidsDe(participant, "par_oeuvre"));
+    const cles = REELS.map((participant) => participant.cle);
+    const octets = cles.map((cle) => octetsUtf8(cle));
+    const poids = REELS.map((participant) =>
+      poidsDe(participant, "par_oeuvre"),
+    );
 
     for (let i = 0; i < 300; i += 1) {
       const graine = graineDe(`accord-${i}`);
       const attendu = cles
-        .map((cle, index) => entreeDe(cle, elem(octets, index), elem(poids, index), graine))
+        .map((cle, index) =>
+          entreeDe(cle, elem(octets, index), elem(poids, index), graine),
+        )
         .sort(comparerEntrees)
-        .map(entree => entree.cle);
+        .map((entree) => entree.cle);
 
       const reel = await executerTirage(REELS, {
         graine: graine.toString("hex"),
         nbGagnants: 1,
         poidsMode: "par_oeuvre",
       });
-      expect(reel.classement.map(entree => entree.cle)).toEqual(attendu);
+      expect(reel.classement.map((entree) => entree.cle)).toEqual(attendu);
     }
   }, 120_000);
 });
 
 describe("primitives", () => {
   it("reproduit les vecteurs FIPS 180-4 de SHA-256", async () => {
-    expect(await sha256Hex(new Uint8Array(0))).toBe("e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855");
-    expect(await sha256Hex(octetsUtf8("abc"))).toBe("ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad");
+    expect(await sha256Hex(new Uint8Array(0))).toBe(
+      "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    );
+    expect(await sha256Hex(octetsUtf8("abc"))).toBe(
+      "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad",
+    );
   });
 
   it("hex et depuisHex sont réciproques, et depuisHex refuse un hexa douteux", () => {
@@ -482,8 +541,18 @@ describe("primitives", () => {
     // `roundPour` et `instantDuRound` doivent être réciproques : c'est ce couple
     // qui décide si le round visé est « tombé », donc si l'on a le droit de tirer.
     for (const round of [1, 2, 1_000_000, 31_547_509]) {
-      const instant = instantDuRound(round, DRAND_QUICKNET.genesisSec, DRAND_QUICKNET.periodeSec);
-      expect(roundPour(instant, DRAND_QUICKNET.genesisSec, DRAND_QUICKNET.periodeSec)).toBe(round);
+      const instant = instantDuRound(
+        round,
+        DRAND_QUICKNET.genesisSec,
+        DRAND_QUICKNET.periodeSec,
+      );
+      expect(
+        roundPour(
+          instant,
+          DRAND_QUICKNET.genesisSec,
+          DRAND_QUICKNET.periodeSec,
+        ),
+      ).toBe(round);
     }
     expect(estGrainePubliable("balise")).toBe(true);
     expect(estGrainePubliable("locale")).toBe(false);
@@ -507,11 +576,11 @@ describe("sérialisation canonique", () => {
           rang: graineDe(`melange-${essai}-${index}`).toString("hex"),
         }))
         .sort((a, b) => (a.rang < b.rang ? -1 : 1))
-        .map(paire => paire.entree);
+        .map((paire) => paire.entree);
       expect(await empreinteRoster(melange)).toBe(reference);
     }
-    expect(trierRoster(roster).map(entree => entree.cle)).toEqual(
-      trierRoster([...roster].reverse()).map(entree => entree.cle),
+    expect(trierRoster(roster).map((entree) => entree.cle)).toEqual(
+      trierRoster([...roster].reverse()).map((entree) => entree.cle),
     );
   });
 
@@ -526,11 +595,15 @@ describe("sérialisation canonique", () => {
     expect(await empreinteRoster(cleModifiee)).not.toBe(reference);
 
     // (b) un poids, à identifiants strictement identiques
-    const poidsModifie = roster.map((entree, index) => (index === 3 ? { ...entree, poids: entree.poids + 1 } : entree));
+    const poidsModifie = roster.map((entree, index) =>
+      index === 3 ? { ...entree, poids: entree.poids + 1 } : entree,
+    );
     expect(await empreinteRoster(poidsModifie)).not.toBe(reference);
 
     // (c) un caractère invisible ajouté à une clé
-    const espaceAjoute = roster.map((entree, index) => (index === 5 ? { ...entree, cle: `${entree.cle} ` } : entree));
+    const espaceAjoute = roster.map((entree, index) =>
+      index === 5 ? { ...entree, cle: `${entree.cle} ` } : entree,
+    );
     expect(await empreinteRoster(espaceAjoute)).not.toBe(reference);
   });
 
@@ -544,13 +617,15 @@ describe("sérialisation canonique", () => {
       { cle: "p:alice", poids: 1 },
       { cle: "p:bob", poids: 3 },
     ]);
-    const uneEntree = await empreinteRoster([{ cle: "p:alice:1\np:bob", poids: 3 }]);
+    const uneEntree = await empreinteRoster([
+      { cle: "p:alice:1\np:bob", poids: 3 },
+    ]);
     expect(deuxEntrees).not.toBe(uneEntree);
 
     // La preuve que c'est bien le préfixe de longueur qui sépare les deux : la
     // sérialisation naïve, elle, les confond encore aujourd'hui.
     const naive = (entrees: ReadonlyArray<{ cle: string; poids: number }>) =>
-      entrees.map(entree => `${entree.cle}:${entree.poids}`).join("\n");
+      entrees.map((entree) => `${entree.cle}:${entree.poids}`).join("\n");
     expect(
       naive([
         { cle: "p:alice", poids: 1 },
@@ -579,7 +654,9 @@ describe("sérialisation canonique", () => {
 
   it("le format du roster commence par son étiquette de domaine", () => {
     const octets = serialiserRoster([{ cle: "x:1", poids: 1 }]);
-    expect(hex(octets.slice(0, DOMAINE_ROSTER.length))).toBe(hex(octetsUtf8(DOMAINE_ROSTER)));
+    expect(hex(octets.slice(0, DOMAINE_ROSTER.length))).toBe(
+      hex(octetsUtf8(DOMAINE_ROSTER)),
+    );
     // Longueur exacte du format v1 : 9 (domaine) + 4 (n) + 4 (len) + 3 (clé) + 4 (poids).
     expect(octets.length).toBe(24);
   });
@@ -587,8 +664,12 @@ describe("sérialisation canonique", () => {
   it("serialiserChamps ne se laisse pas contrefaire par le contenu des champs", () => {
     // Deux découpages différents du même flux de caractères doivent donner deux
     // sérialisations différentes — c'est toute la raison d'être du préfixe.
-    expect(hex(serialiserChamps(["ab", "c"]))).not.toBe(hex(serialiserChamps(["a", "bc"])));
-    expect(hex(serialiserChamps(["a", "b"]))).not.toBe(hex(serialiserChamps(["a b"])));
+    expect(hex(serialiserChamps(["ab", "c"]))).not.toBe(
+      hex(serialiserChamps(["a", "bc"])),
+    );
+    expect(hex(serialiserChamps(["a", "b"]))).not.toBe(
+      hex(serialiserChamps(["a b"])),
+    );
   });
 
   it("la clé publique pseudonymise sans perdre la vérifiabilité", async () => {
@@ -662,7 +743,9 @@ describe("dérivation de u dans l'intervalle OUVERT (0, 1)", () => {
     expect(uDepuisEmpreinte(new Uint8Array(32))).toBe(2 ** -53);
     expect(uDepuisEmpreinte(new Uint8Array(32).fill(0xff))).toBe(1 - 2 ** -53);
     expect(kDepuisEmpreinte(new Uint8Array(32))).toBe(0);
-    expect(kDepuisEmpreinte(new Uint8Array(32).fill(0xff))).toBe(4_503_599_627_370_495);
+    expect(kDepuisEmpreinte(new Uint8Array(32).fill(0xff))).toBe(
+      4_503_599_627_370_495,
+    );
     expect(() => kDepuisEmpreinte(new Uint8Array(7))).toThrow(/8/);
   });
 
@@ -684,7 +767,9 @@ describe("dérivation de u dans l'intervalle OUVERT (0, 1)", () => {
     const graine = graineDe("u-hmac");
     let hors = 0;
     for (let i = 0; i < 50_000; i += 1) {
-      const u = uDepuisEmpreinte(hmacRapide(graine, octetsUtf8(`discord:${i}`)));
+      const u = uDepuisEmpreinte(
+        hmacRapide(graine, octetsUtf8(`discord:${i}`)),
+      );
       const cle = cleDeTri(u, 1 + (i % MAX_POIDS));
       if (u <= 0 || u >= 1 || !Number.isFinite(cle) || cle <= 0) {
         hors += 1;
@@ -699,11 +784,19 @@ describe("dérivation de u dans l'intervalle OUVERT (0, 1)", () => {
 describe("déterminisme", () => {
   it("même graine et même roster rendent exactement le même résultat, 25 fois de suite", async () => {
     const graine = graineDe("determinisme").toString("hex");
-    const parametres = { graine, nbGagnants: 3, poidsMode: "par_oeuvre" as PoidsMode };
+    const parametres = {
+      graine,
+      nbGagnants: 3,
+      poidsMode: "par_oeuvre" as PoidsMode,
+    };
     const lots = ["Or", "Argent", "Bronze"];
-    const reference = JSON.stringify(await executerTirage(REELS, parametres, lots));
+    const reference = JSON.stringify(
+      await executerTirage(REELS, parametres, lots),
+    );
     for (let i = 0; i < 25; i += 1) {
-      expect(JSON.stringify(await executerTirage(REELS, parametres, lots))).toBe(reference);
+      expect(
+        JSON.stringify(await executerTirage(REELS, parametres, lots)),
+      ).toBe(reference);
     }
   }, 60_000);
 
@@ -712,10 +805,16 @@ describe("déterminisme", () => {
     // contrôlerait le tirage — et `Array.prototype.sort` étant stable depuis
     // ES2019, ce serait silencieux.
     const graine = graineDe("ordre-arrivee").toString("hex");
-    const parametres = { graine, nbGagnants: 5, poidsMode: "par_oeuvre" as PoidsMode };
+    const parametres = {
+      graine,
+      nbGagnants: 5,
+      poidsMode: "par_oeuvre" as PoidsMode,
+    };
     const droit = await executerTirage(REELS, parametres);
     const inverse = await executerTirage([...REELS].reverse(), parametres);
-    expect(inverse.classement.map(entree => entree.cle)).toEqual(droit.classement.map(entree => entree.cle));
+    expect(inverse.classement.map((entree) => entree.cle)).toEqual(
+      droit.classement.map((entree) => entree.cle),
+    );
     expect(inverse.empreinteParticipants).toBe(droit.empreinteParticipants);
     expect(inverse.gagnants).toEqual(droit.gagnants);
   });
@@ -730,7 +829,9 @@ describe("déterminisme", () => {
         poidsMode: "un_par_personne",
       });
       gagnants.add(elem(resultat.gagnants, 0).cle);
-      classements.add(resultat.classement.map(entree => entree.cle).join(">"));
+      classements.add(
+        resultat.classement.map((entree) => entree.cle).join(">"),
+      );
     }
     // Aucun classement identique sur 120 graines : 14! ordres possibles, une
     // collision serait le signe que la graine n'entre pas vraiment dans le calcul.
@@ -743,34 +844,58 @@ describe("déterminisme", () => {
     const base = graineDe("bit-flip");
     const modifiee = Buffer.from(base);
     modifiee[31] = elem([...modifiee], 31) ^ 1; // dernier bit du dernier octet
-    const parametres = { nbGagnants: 1, poidsMode: "un_par_personne" as PoidsMode };
-    const avant = await executerTirage(REELS, { ...parametres, graine: base.toString("hex") });
-    const apres = await executerTirage(REELS, { ...parametres, graine: modifiee.toString("hex") });
-    expect(apres.classement.map(entree => entree.cle)).not.toEqual(avant.classement.map(entree => entree.cle));
+    const parametres = {
+      nbGagnants: 1,
+      poidsMode: "un_par_personne" as PoidsMode,
+    };
+    const avant = await executerTirage(REELS, {
+      ...parametres,
+      graine: base.toString("hex"),
+    });
+    const apres = await executerTirage(REELS, {
+      ...parametres,
+      graine: modifiee.toString("hex"),
+    });
+    expect(apres.classement.map((entree) => entree.cle)).not.toEqual(
+      avant.classement.map((entree) => entree.cle),
+    );
     expect(apres.empreinteParticipants).toBe(avant.empreinteParticipants); // le roster, lui, n'a pas bougé
   });
 
   it("l'œuvre mise en avant est tirée, déterministe, et jamais hors de la liste", async () => {
     const graine = graineDe("oeuvre").toString("hex");
     const oeuvres = ["discord:1540301925298348062", "x:2090455666267713840"];
-    const premier = await tirerOeuvre(graine, "discord:908269053347504170", oeuvres);
+    const premier = await tirerOeuvre(
+      graine,
+      "discord:908269053347504170",
+      oeuvres,
+    );
     // `toContain` exige une chaîne : on prouve d'abord que le tirage a rendu
     // quelque chose, plutôt que de forcer le type et de perdre le diagnostic
     // le jour où il rendra `null`.
-    if (premier === null) throw new Error("tirerOeuvre a rendu null sur une liste non vide");
+    if (premier === null)
+      throw new Error("tirerOeuvre a rendu null sur une liste non vide");
     expect(oeuvres).toContain(premier);
-    expect(await tirerOeuvre(graine, "discord:908269053347504170", oeuvres)).toBe(premier);
-    expect(await tirerOeuvre(graine, "discord:908269053347504170", [])).toBeNull();
+    expect(
+      await tirerOeuvre(graine, "discord:908269053347504170", oeuvres),
+    ).toBe(premier);
+    expect(
+      await tirerOeuvre(graine, "discord:908269053347504170", []),
+    ).toBeNull();
     // Elle dépend de la personne, pas seulement de la graine : sinon ce ne serait
     // plus un tirage mais un index fixe déguisé.
     const autre = await tirerOeuvre(graine, "instagram:orphelinalius", oeuvres);
-    if (autre === null) throw new Error("tirerOeuvre a rendu null sur une liste non vide");
+    if (autre === null)
+      throw new Error("tirerOeuvre a rendu null sur une liste non vide");
     expect(oeuvres).toContain(autre);
     // Et sur 500 identifiants, les deux œuvres sortent à peu près autant : pas de
     // biais modulo, la sémantique entière `(k · n) >> 52` n'en produit aucun.
     let premieres = 0;
     for (let i = 0; i < 500; i += 1) {
-      if ((await tirerOeuvre(graine, `discord:${i}`, oeuvres)) === elem(oeuvres, 0)) {
+      if (
+        (await tirerOeuvre(graine, `discord:${i}`, oeuvres)) ===
+        elem(oeuvres, 0)
+      ) {
         premieres += 1;
       }
     }
@@ -784,7 +909,7 @@ describe("déterminisme", () => {
 describe("uniformité", () => {
   it("100 000 tirages à poids égaux : chaque personne reste dans ±3σ, et le χ² ne voit aucun biais", () => {
     const N = 100_000;
-    const cles = REELS.map(participant => participant.cle);
+    const cles = REELS.map((participant) => participant.cle);
     const poids = REELS.map(() => 1);
     const { rang1 } = campagne(cles, poids, N, "iergday-uniformite-");
 
@@ -812,7 +937,7 @@ describe("uniformité", () => {
     // quelqu'un inversait un jour les arguments de `hmacSha256`. Ce test dit à
     // quoi ressemblerait le dégât : un biais corrélé à la longueur de la clé.
     const N = 20_000;
-    const cles = REELS.map(participant => participant.cle);
+    const cles = REELS.map((participant) => participant.cle);
     const { rang1 } = campagne(
       cles,
       REELS.map(() => 1),
@@ -823,13 +948,18 @@ describe("uniformité", () => {
     for (let i = 0; i < cles.length; i += 1) {
       const longueur = elem(cles, i).length;
       const agrege = parLongueur.get(longueur) ?? { cases: 0, total: 0 };
-      parLongueur.set(longueur, { cases: agrege.cases + 1, total: agrege.total + elem(rang1, i) });
+      parLongueur.set(longueur, {
+        cases: agrege.cases + 1,
+        total: agrege.total + elem(rang1, i),
+      });
     }
     expect(parLongueur.size).toBeGreaterThan(3); // il y a bien plusieurs longueurs distinctes
     const { sigma } = borne3Sigma(N, 1 / cles.length);
     for (const agrege of parLongueur.values()) {
       const attendu = (N * agrege.cases) / cles.length;
-      expect(Math.abs(agrege.total - attendu)).toBeLessThanOrEqual(3 * sigma * Math.sqrt(agrege.cases));
+      expect(Math.abs(agrege.total - attendu)).toBeLessThanOrEqual(
+        3 * sigma * Math.sqrt(agrege.cases),
+      );
     }
   }, 120_000);
 });
@@ -889,8 +1019,10 @@ describe("pondération par les œuvres", () => {
 
   it("sur le roster RÉEL en mode par_oeuvre, Sanada et orphelinalius sont à 2 tickets sur 16", () => {
     const N = 100_000;
-    const cles = REELS.map(participant => participant.cle);
-    const poids = REELS.map(participant => poidsDe(participant, "par_oeuvre"));
+    const cles = REELS.map((participant) => participant.cle);
+    const poids = REELS.map((participant) =>
+      poidsDe(participant, "par_oeuvre"),
+    );
     const total = poids.reduce((a, b) => a + b, 0);
     expect(total).toBe(16);
 
@@ -900,7 +1032,7 @@ describe("pondération par les œuvres", () => {
     expect(
       khiDeux(
         rang1,
-        poids.map(p => p / total),
+        poids.map((p) => p / total),
         N,
       ),
     ).toBeLessThan(KHI2_DF13_P001);
@@ -919,12 +1051,29 @@ describe("pondération par les œuvres", () => {
     // Une personne sans œuvre rattachée reste une personne : le poids 0 la
     // retirerait du tirage en SILENCE, ce qu'un calcul de poids n'a pas le droit
     // de faire — écarter quelqu'un est un acte de modération avec un motif.
-    expect(poidsDe({ cle: "x:1", nbOeuvres: 0, oeuvres: [], pseudoAffichage: "" }, "par_oeuvre")).toBe(1);
+    expect(
+      poidsDe(
+        { cle: "x:1", nbOeuvres: 0, oeuvres: [], pseudoAffichage: "" },
+        "par_oeuvre",
+      ),
+    ).toBe(1);
     // Et le plafond protège le comparateur exact autant qu'il signale une donnée
     // aberrante : 999 œuvres pour une personne, c'est un dédoublonnage raté.
-    expect(poidsDe({ cle: "x:1", nbOeuvres: 999, oeuvres: [], pseudoAffichage: "" }, "par_oeuvre")).toBe(MAX_POIDS);
-    expect(rosterDe(REELS, "un_par_personne").reduce((somme, e) => somme + e.poids, 0)).toBe(14);
-    expect(rosterDe(REELS, "par_oeuvre").reduce((somme, e) => somme + e.poids, 0)).toBe(16);
+    expect(
+      poidsDe(
+        { cle: "x:1", nbOeuvres: 999, oeuvres: [], pseudoAffichage: "" },
+        "par_oeuvre",
+      ),
+    ).toBe(MAX_POIDS);
+    expect(
+      rosterDe(REELS, "un_par_personne").reduce(
+        (somme, e) => somme + e.poids,
+        0,
+      ),
+    ).toBe(14);
+    expect(
+      rosterDe(REELS, "par_oeuvre").reduce((somme, e) => somme + e.poids, 0),
+    ).toBe(16);
   });
 
   it("le comparateur exact en BigInt ne diverge jamais du comparateur flottant", () => {
@@ -937,7 +1086,12 @@ describe("pondération par les œuvres", () => {
     let antisymetrieCassee = 0;
     for (let i = 0; i < 100_000; i += 1) {
       const a = entreeDe(`x:${i}`, octetsUtf8(`x:${i}`), 1 + (i % 8), graine);
-      const b = entreeDe(`x:${i + 1}`, octetsUtf8(`x:${i + 1}`), 1 + ((i + 3) % 8), graine);
+      const b = entreeDe(
+        `x:${i + 1}`,
+        octetsUtf8(`x:${i + 1}`),
+        1 + ((i + 3) % 8),
+        graine,
+      );
       if (Math.sign(comparerEntrees(a, b)) !== Math.sign(a.cleTri - b.cleTri)) {
         desaccords += 1;
       }
@@ -957,7 +1111,16 @@ describe("pondération par les œuvres", () => {
     // trancherait, et un vérificateur écrit en Python ne trouverait pas pareil.
     const jumelle = (cle: string, empreinte: string): EntreeCalculee => {
       const u = uDepuisEmpreinte(depuisHex(empreinte));
-      return { cle, cleTri: cleDeTri(u, 1), empreinte, oeuvres: [], poids: 1, pseudoAffichage: cle, rang: 0, u };
+      return {
+        cle,
+        cleTri: cleDeTri(u, 1),
+        empreinte,
+        oeuvres: [],
+        poids: 1,
+        pseudoAffichage: cle,
+        rang: 0,
+        u,
+      };
     };
     // Mêmes 8 octets de tête (donc même u, même clé de tri), queues différentes.
     const a = jumelle("x:aaa", `${"11".repeat(8)}${"aa".repeat(24)}`);
@@ -966,8 +1129,14 @@ describe("pondération par les œuvres", () => {
     expect(a.cleTri).toBe(b.cleTri);
     expect(comparerEntrees(a, b)).toBe(-1); // "…aa" < "…bb"
     expect(comparerEntrees(b, a)).toBe(1);
-    expect([b, a].toSorted(comparerEntrees).map(e => e.cle)).toEqual(["x:aaa", "x:bbb"]);
-    expect([a, b].toSorted(comparerEntrees).map(e => e.cle)).toEqual(["x:aaa", "x:bbb"]);
+    expect([b, a].toSorted(comparerEntrees).map((e) => e.cle)).toEqual([
+      "x:aaa",
+      "x:bbb",
+    ]);
+    expect([a, b].toSorted(comparerEntrees).map((e) => e.cle)).toEqual([
+      "x:aaa",
+      "x:bbb",
+    ]);
   });
 });
 
@@ -977,9 +1146,15 @@ describe("pondération par les œuvres", () => {
 async function tirageHonnete(): Promise<TirageGele> {
   const signature = "9f".repeat(48); // 96 hexa : la forme d'une signature G1 de quicknet
   const lots = ["Print A5 dédicacé", "Sticker collector"];
-  const empreinteParticipants = await empreinteRoster(rosterDe(REELS, "par_oeuvre"));
+  const empreinteParticipants = await empreinteRoster(
+    rosterDe(REELS, "par_oeuvre"),
+  );
   const graine = await graineDepuisBalise(signature, empreinteParticipants);
-  const resultat = await executerTirage(REELS, { graine, nbGagnants: lots.length, poidsMode: "par_oeuvre" }, lots);
+  const resultat = await executerTirage(
+    REELS,
+    { graine, nbGagnants: lots.length, poidsMode: "par_oeuvre" },
+    lots,
+  );
   const gele: TirageGele = {
     balise: {
       chaine: DRAND_QUICKNET.chaine,
@@ -991,8 +1166,11 @@ async function tirageHonnete(): Promise<TirageGele> {
     empreinteEngagement: "",
     empreinteGraine: resultat.empreinteGraine,
     empreinteParticipants: resultat.empreinteParticipants,
-    entrees: resultat.classement.map(entree => ({ ...entree, oeuvres: [...entree.oeuvres] })),
-    gagnants: resultat.gagnants.map(gagnant => ({
+    entrees: resultat.classement.map((entree) => ({
+      ...entree,
+      oeuvres: [...entree.oeuvres],
+    })),
+    gagnants: resultat.gagnants.map((gagnant) => ({
       cle: gagnant.cle,
       oeuvreId: gagnant.oeuvreId,
       rang: gagnant.rang,
@@ -1005,7 +1183,9 @@ async function tirageHonnete(): Promise<TirageGele> {
     poidsMode: "par_oeuvre",
     publie: true,
   };
-  gele.empreinteEngagement = await empreinteEngagement(engagementDeTirage(gele));
+  gele.empreinteEngagement = await empreinteEngagement(
+    engagementDeTirage(gele),
+  );
   return gele;
 }
 
@@ -1026,7 +1206,9 @@ describe("verifierTirage", () => {
     gele.balise = null;
     gele.graineOrigine = "locale";
     gele.publie = false;
-    gele.empreinteEngagement = await empreinteEngagement(engagementDeTirage(gele));
+    gele.empreinteEngagement = await empreinteEngagement(
+      engagementDeTirage(gele),
+    );
     const verdict = await verifierTirage(gele);
     expect(verdict.anomalies).toEqual([]);
     expect(verdict.valide).toBe(true);
@@ -1041,25 +1223,27 @@ describe("verifierTirage", () => {
    * personne, et parce qu'un code qui se déplacerait signalerait que le contrôle
    * censé attraper cette falsification-là ne l'attrape plus.
    */
-  const mutants: ReadonlyArray<[string, (gele: TirageGele) => void, CodeAnomalie]> = [
+  const mutants: ReadonlyArray<
+    [string, (gele: TirageGele) => void, CodeAnomalie]
+  > = [
     [
       "une entrée retirée du roster",
-      gele => {
+      (gele) => {
         gele.entrees.splice(1, 1);
       },
       "empreinte_participants",
     ],
     [
       "une entrée retirée SANS trou dans les rangs (la plus difficile à voir)",
-      gele => {
+      (gele) => {
         const dernier = gele.entrees.length;
-        gele.entrees = gele.entrees.filter(entree => entree.rang !== dernier);
+        gele.entrees = gele.entrees.filter((entree) => entree.rang !== dernier);
       },
       "empreinte_participants",
     ],
     [
       "une entrée ajoutée après coup",
-      gele => {
+      (gele) => {
         gele.entrees.push({
           ...elem(gele.entrees, 0),
           cle: "x:999999999999999999",
@@ -1070,14 +1254,14 @@ describe("verifierTirage", () => {
     ],
     [
       "un poids gonflé",
-      gele => {
+      (gele) => {
         elem(gele.entrees, 0).poids = 5;
       },
       "empreinte_participants",
     ],
     [
       "deux rangs permutés",
-      gele => {
+      (gele) => {
         const premier = elem(gele.entrees, 0);
         const second = elem(gele.entrees, 1);
         const rang = premier.rang;
@@ -1088,14 +1272,14 @@ describe("verifierTirage", () => {
     ],
     [
       "la graine remplacée",
-      gele => {
+      (gele) => {
         gele.graine = "c".repeat(64);
       },
       "empreinte_graine",
     ],
     [
       "la signature drand remplacée",
-      gele => {
+      (gele) => {
         const balise = gele.balise;
         if (balise) {
           balise.signature = "d".repeat(96);
@@ -1105,49 +1289,52 @@ describe("verifierTirage", () => {
     ],
     [
       "le nombre de gagnants changé après le tirage",
-      gele => {
+      (gele) => {
         gele.nbGagnants = 5;
       },
       "empreinte_engagement",
     ],
     [
       "un lot réécrit après le tirage",
-      gele => {
+      (gele) => {
         gele.lots[0] = "Un lot bien plus intéressant";
       },
       "empreinte_engagement",
     ],
     [
       "le mode de poids réécrit après le tirage",
-      gele => {
+      (gele) => {
         gele.poidsMode = "un_par_personne";
       },
       "empreinte_engagement",
     ],
     [
       "un gagnant remplacé par quelqu'un d'autre",
-      gele => {
-        elem(gele.gagnants, 0).cle = elem(gele.entrees, gele.entrees.length - 1).cle;
+      (gele) => {
+        elem(gele.gagnants, 0).cle = elem(
+          gele.entrees,
+          gele.entrees.length - 1,
+        ).cle;
       },
       "gagnants",
     ],
     [
       "un u retouché",
-      gele => {
+      (gele) => {
         elem(gele.entrees, 0).u = 0.5;
       },
       "u",
     ],
     [
       "l'œuvre mise en avant CHOISIE au lieu d'être tirée",
-      gele => {
+      (gele) => {
         elem(gele.gagnants, 0).oeuvreId = "x:2090455666267713840";
       },
       "oeuvre_gagnante",
     ],
     [
       "un tirage de répétition publié comme s'il était une preuve",
-      gele => {
+      (gele) => {
         gele.graineOrigine = "locale";
       },
       "mode_locale_publie",
@@ -1160,7 +1347,9 @@ describe("verifierTirage", () => {
       muter(gele);
       const verdict = await verifierTirage(gele);
       expect(verdict.valide).toBe(false);
-      expect(verdict.anomalies.map(anomalie => anomalie.code)).toContain(codeAttendu);
+      expect(verdict.anomalies.map((anomalie) => anomalie.code)).toContain(
+        codeAttendu,
+      );
       // Une anomalie doit être LISIBLE : un code seul n'aide personne à
       // comprendre ce qu'on lui reproche, ni à le contester.
       for (const anomalie of verdict.anomalies) {
@@ -1198,19 +1387,31 @@ describe("verifierTirage", () => {
     gele.entrees.push({ ...premiere, rang: gele.entrees.length + 1 });
     const verdict = await verifierTirage(gele);
     expect(verdict.valide).toBe(false);
-    expect(verdict.anomalies.map(anomalie => anomalie.code)).toContain("cle_dupliquee");
-    expect(verdict.anomalies.some(anomalie => anomalie.cle === premiere.cle)).toBe(true);
+    expect(verdict.anomalies.map((anomalie) => anomalie.code)).toContain(
+      "cle_dupliquee",
+    );
+    expect(
+      verdict.anomalies.some((anomalie) => anomalie.cle === premiere.cle),
+    ).toBe(true);
   }, 30_000);
 
   it("la graine publiée est bien SHA-256(signature ‖ empreinte des participants)", async () => {
     const gele = await tirageHonnete();
     const balise = gele.balise;
     expect(balise).not.toBeNull();
-    expect(await graineDepuisBalise(balise?.signature ?? "", gele.empreinteParticipants)).toBe(gele.graine);
+    expect(
+      await graineDepuisBalise(
+        balise?.signature ?? "",
+        gele.empreinteParticipants,
+      ),
+    ).toBe(gele.graine);
     expect(await empreinteGraine(gele.graine)).toBe(gele.empreinteGraine);
     // Deux campagnes qui viseraient le MÊME round n'ont pas la même graine :
     // c'est l'empreinte du roster, concaténée, qui les sépare.
-    const autre = await graineDepuisBalise(balise?.signature ?? "", await empreinteRoster([{ cle: "x:1", poids: 1 }]));
+    const autre = await graineDepuisBalise(
+      balise?.signature ?? "",
+      await empreinteRoster([{ cle: "x:1", poids: 1 }]),
+    );
     expect(autre).not.toBe(gele.graine);
   }, 30_000);
 });
@@ -1560,7 +1761,9 @@ const POPCOUNT = Array.from({ length: 256 }, (_, octet) => {
 /** Distance de Hamming entre deux empreintes de 64 bits écrites en 16 hexa. */
 function distanceHamming(a: string, b: string): number {
   if (a.length !== b.length) {
-    throw new Error(`Empreintes de longueurs différentes : ${a.length} et ${b.length}.`);
+    throw new Error(
+      `Empreintes de longueurs différentes : ${a.length} et ${b.length}.`,
+    );
   }
   let distance = 0;
   for (let i = 0; i < a.length; i += 2) {
@@ -1571,7 +1774,8 @@ function distanceHamming(a: string, b: string): number {
   return distance;
 }
 
-const creationDe = (image: EmpreinteImage): string => `${image.source}:${image.identifiant}`;
+const creationDe = (image: EmpreinteImage): string =>
+  `${image.source}:${image.identifiant}`;
 
 interface Paire {
   a: EmpreinteImage;
@@ -1589,7 +1793,13 @@ function toutesLesPaires(): Paire[] {
       const b = elem(EMPREINTES, j);
       const dhash = distanceHamming(a.dhash, b.dhash);
       const phash = distanceHamming(a.phash, b.phash);
-      paires.push({ a, b, dhash, doublon: dhash <= SEUIL.dhash && phash <= SEUIL.phash, phash });
+      paires.push({
+        a,
+        b,
+        dhash,
+        doublon: dhash <= SEUIL.dhash && phash <= SEUIL.phash,
+        phash,
+      });
     }
   }
   return paires;
@@ -1602,12 +1812,12 @@ describe("dédoublonnage : deux publications, un seul dessin, une seule chance",
     // `distinct on (sha256)` trouverait zéro doublon et attribuerait QUATRE
     // chances de trop — à quatre personnes qui n'ont dessiné qu'une fois.
     expect(EMPREINTES.length).toBe(27);
-    expect(new Set(EMPREINTES.map(image => image.sha256)).size).toBe(27);
+    expect(new Set(EMPREINTES.map((image) => image.sha256)).size).toBe(27);
     expect(new Set(EMPREINTES.map(creationDe)).size).toBe(20);
   });
 
   it("le seuil retrouve EXACTEMENT les quatre regroupements confirmés à l'œil", () => {
-    const doublons = toutesLesPaires().filter(paire => paire.doublon);
+    const doublons = toutesLesPaires().filter((paire) => paire.doublon);
     expect(doublons.length).toBe(4);
 
     // Les quatre paires, telles qu'un humain les a confirmées — dont deux en
@@ -1620,7 +1830,11 @@ describe("dédoublonnage : deux publications, un seul dessin, une seule chance",
       ["discord:1540508422804471819", "x:2091112393455632493"], // G4 · Cieran / FujoRin
       ["discord:1540742112713379840", "x:2091195848247885914"], // G2 · kittycaillou
     ];
-    expect(doublons.map(paire => [creationDe(paire.a), creationDe(paire.b)]).toSorted()).toEqual(attendus.toSorted());
+    expect(
+      doublons
+        .map((paire) => [creationDe(paire.a), creationDe(paire.b)])
+        .toSorted(),
+    ).toEqual(attendus.toSorted());
     // Les quatre sont des cross-posts d'une même personne, jamais deux auteurs
     // différents : rien qui ressemble à un dessin volé.
     for (const paire of doublons) {
@@ -1632,27 +1846,31 @@ describe("dédoublonnage : deux publications, un seul dessin, une seule chance",
   it("le fossé entre « même dessin » et « dessins différents » est large de 14 bits", () => {
     const paires = toutesLesPaires();
     expect(paires.length).toBe(351); // C(27,2)
-    const intra = paires.filter(paire => paire.doublon);
-    const inter = paires.filter(paire => !paire.doublon);
+    const intra = paires.filter((paire) => paire.doublon);
+    const inter = paires.filter((paire) => !paire.doublon);
 
     // Mesuré : dHash intra ≤ 2, inter ≥ 17 → le seuil 8 tombe au milieu d'un
     // fossé VIDE de 14 bits. pHash : intra ≤ 2, inter ≥ 20, fossé de 17 bits.
     // Le seuil n'a donc arbitré aucun cas douteux : il n'y en avait pas.
-    expect(Math.max(...intra.map(paire => paire.dhash))).toBe(2);
-    expect(Math.min(...inter.map(paire => paire.dhash))).toBe(17);
-    expect(Math.max(...intra.map(paire => paire.phash))).toBe(2);
-    expect(Math.min(...inter.map(paire => paire.phash))).toBe(20);
+    expect(Math.max(...intra.map((paire) => paire.dhash))).toBe(2);
+    expect(Math.min(...inter.map((paire) => paire.dhash))).toBe(17);
+    expect(Math.max(...intra.map((paire) => paire.phash))).toBe(2);
+    expect(Math.min(...inter.map((paire) => paire.phash))).toBe(20);
 
     // Sur ce corpus les deux empreintes sont toujours d'accord : aucune paire ne
     // passe l'une sans l'autre. La conjonction ne coûte donc rien ici — et on la
     // garde parce qu'une seule empreinte, prise isolément, se laisse tromper.
-    const desaccords = paires.filter(paire => paire.dhash <= SEUIL.dhash !== paire.phash <= SEUIL.phash);
+    const desaccords = paires.filter(
+      (paire) => paire.dhash <= SEUIL.dhash !== paire.phash <= SEUIL.phash,
+    );
     expect(desaccords.length).toBe(0);
   });
 
   it("20 publications donnent 16 œuvres", () => {
     // Regroupement transitif sur les CRÉATIONS, pas sur les images.
-    const parent = new Map(EMPREINTES.map(image => [creationDe(image), creationDe(image)]));
+    const parent = new Map(
+      EMPREINTES.map((image) => [creationDe(image), creationDe(image)]),
+    );
     const racine = (creation: string): string => {
       let courant = creation;
       let suivant = parent.get(courant);
@@ -1662,7 +1880,9 @@ describe("dédoublonnage : deux publications, un seul dessin, une seule chance",
       }
       return courant;
     };
-    for (const paire of toutesLesPaires().filter(candidate => candidate.doublon)) {
+    for (const paire of toutesLesPaires().filter(
+      (candidate) => candidate.doublon,
+    )) {
       const a = racine(creationDe(paire.a));
       const b = racine(creationDe(paire.b));
       if (a !== b) {
@@ -1680,10 +1900,15 @@ describe("dédoublonnage : deux publications, un seul dessin, une seule chance",
     // qui a bel et bien produit autre chose.
     const imagesParCreation = new Map<string, number>();
     for (const image of EMPREINTES) {
-      imagesParCreation.set(creationDe(image), (imagesParCreation.get(creationDe(image)) ?? 0) + 1);
+      imagesParCreation.set(
+        creationDe(image),
+        (imagesParCreation.get(creationDe(image)) ?? 0) + 1,
+      );
     }
     const imagesDoublons = new Map<string, Set<number>>();
-    for (const paire of toutesLesPaires().filter(candidate => candidate.doublon)) {
+    for (const paire of toutesLesPaires().filter(
+      (candidate) => candidate.doublon,
+    )) {
       for (const cote of [paire.a, paire.b]) {
         const vues = imagesDoublons.get(creationDe(cote)) ?? new Set<number>();
         vues.add(cote.index);
@@ -1706,7 +1931,9 @@ describe("dédoublonnage : deux publications, un seul dessin, une seule chance",
     expect(imagesParCreation.get(septFichiers)).toBe(7);
     const unSeulDoublon = new Set<number>([3]);
     expect(unSeulDoublon.size).toBe(1);
-    expect(unSeulDoublon.size === imagesParCreation.get(septFichiers)).toBe(false);
+    expect(unSeulDoublon.size === imagesParCreation.get(septFichiers)).toBe(
+      false,
+    );
     // Et le cas inverse, celui du corpus : une création d'UNE image dupliquée est
     // entièrement dupliquée, donc écartée.
     const uneImage = "discord:1540456574588559440";
@@ -1723,13 +1950,17 @@ describe("dédoublonnage : deux publications, un seul dessin, une seule chance",
     // Mais un doublon recadré entre deux créations DISTINCTES passerait sous le
     // radar, et c'est pourquoi la recherche de recadrage dédiée doit tourner à
     // chaque collecte — pas seulement ce seuil.
-    const fichiers = EMPREINTES.filter(image => image.identifiant === "1540784107729064108");
+    const fichiers = EMPREINTES.filter(
+      (image) => image.identifiant === "1540784107729064108",
+    );
     expect(fichiers.length).toBe(2);
     const premier = elem(fichiers, 0);
     const second = elem(fichiers, 1);
     expect(distanceHamming(premier.dhash, second.dhash)).toBe(19);
     expect(distanceHamming(premier.phash, second.phash)).toBe(26);
-    expect(distanceHamming(premier.dhash, second.dhash)).toBeGreaterThan(SEUIL.dhash);
+    expect(distanceHamming(premier.dhash, second.dhash)).toBeGreaterThan(
+      SEUIL.dhash,
+    );
     // Même largeur, hauteurs différentes : la signature d'un recadrage vertical.
     expect(premier.largeur).toBe(second.largeur);
     expect(premier.hauteur).not.toBe(second.hauteur);
@@ -1742,25 +1973,34 @@ describe("dédoublonnage : deux publications, un seul dessin, une seule chance",
     // même tir. Les compter 7 donnerait à cette personne 7 tickets sur 22, soit
     // 32 % du tirage entier. C'est donc un humain qui a tranché « 1 œuvre »,
     // et ce test existe pour que personne ne croie que le seuil l'a fait.
-    const fichiers = EMPREINTES.filter(image => image.identifiant === "1540837023487631391");
+    const fichiers = EMPREINTES.filter(
+      (image) => image.identifiant === "1540837023487631391",
+    );
     expect(fichiers.length).toBe(7);
     let minimum = 64;
     for (let i = 0; i < fichiers.length; i += 1) {
       for (let j = i + 1; j < fichiers.length; j += 1) {
-        minimum = Math.min(minimum, distanceHamming(elem(fichiers, i).dhash, elem(fichiers, j).dhash));
+        minimum = Math.min(
+          minimum,
+          distanceHamming(elem(fichiers, i).dhash, elem(fichiers, j).dhash),
+        );
       }
     }
     expect(minimum).toBe(21);
     expect(minimum).toBeGreaterThan(SEUIL.dhash);
     // Et le roster, lui, ne lui donne qu'un ticket.
-    const thunderAce = REELS.find(participant => participant.cle === "discord:460001633053704192");
+    const thunderAce = REELS.find(
+      (participant) => participant.cle === "discord:460001633053704192",
+    );
     expect(thunderAce?.nbOeuvres).toBe(1);
     expect(poidsDe(thunderAce as ParticipantTirage, "par_oeuvre")).toBe(1);
   });
 
   it("le poids d'une personne suit ses ŒUVRES, jamais ses publications", () => {
     const roster = rosterDe(REELS, "par_oeuvre");
-    const poidsParCle = new Map(roster.map(entree => [entree.cle, entree.poids]));
+    const poidsParCle = new Map(
+      roster.map((entree) => [entree.cle, entree.poids]),
+    );
 
     // Les trois personnes qui ont publié le même dessin des deux côtés : deux
     // publications, UN ticket.
@@ -1783,7 +2023,10 @@ describe("dédoublonnage : deux publications, un seul dessin, une seule chance",
     // 16, et donnerait une chance de trop à quatre personnes qui ont simplement
     // relayé leur propre dessin. Le rang 1 de Munfurawa passerait de 6,25 % à
     // 10,0 % — au détriment de tous les autres.
-    const parPublication = Object.values(PUBLICATIONS_PAR_CLE).reduce((a, b) => a + b, 0);
+    const parPublication = Object.values(PUBLICATIONS_PAR_CLE).reduce(
+      (a, b) => a + b,
+      0,
+    );
     expect(parPublication).toBe(20);
     expect(roster.reduce((somme, entree) => somme + entree.poids, 0)).toBe(16);
     expect(1 / 16).toBeCloseTo(0.0625, 6);
@@ -1803,9 +2046,9 @@ describe("cas limites", () => {
   });
 
   it("un roster vide est refusé, pas silencieusement toléré", async () => {
-    await expect(executerTirage([], { graine, nbGagnants: 1, poidsMode: "par_oeuvre" })).rejects.toThrow(
-      /roster est vide/,
-    );
+    await expect(
+      executerTirage([], { graine, nbGagnants: 1, poidsMode: "par_oeuvre" }),
+    ).rejects.toThrow(/roster est vide/);
   });
 
   it("un seul participant : il gagne, au rang 1, avec son œuvre tirée", async () => {
@@ -1826,7 +2069,11 @@ describe("cas limites", () => {
   });
 
   it("nbGagnants > nbParticipants : tout le monde gagne, personne deux fois", async () => {
-    const participants = [un("x:1111111111"), un("x:2222222222"), un("x:3333333333")];
+    const participants = [
+      un("x:1111111111"),
+      un("x:2222222222"),
+      un("x:3333333333"),
+    ];
     const resultat = await executerTirage(participants, {
       graine,
       nbGagnants: 99,
@@ -1836,32 +2083,49 @@ describe("cas limites", () => {
     // ceci est la ceinture par-dessus les bretelles. Ce qu'il ne faut SURTOUT
     // pas, c'est 99 lignes de gagnants dont 96 vides.
     expect(resultat.gagnants.length).toBe(3);
-    expect(resultat.gagnants.map(gagnant => gagnant.rang)).toEqual([1, 2, 3]);
-    expect(new Set(resultat.gagnants.map(gagnant => gagnant.cle)).size).toBe(3);
+    expect(resultat.gagnants.map((gagnant) => gagnant.rang)).toEqual([1, 2, 3]);
+    expect(new Set(resultat.gagnants.map((gagnant) => gagnant.cle)).size).toBe(
+      3,
+    );
   });
 
   it("nbGagnants nul, négatif, fractionnaire ou NaN est refusé", async () => {
     const participants = [un("x:1111111111")];
     for (const nbGagnants of [0, -1, 1.5, Number.NaN]) {
-      await expect(executerTirage(participants, { graine, nbGagnants, poidsMode: "par_oeuvre" })).rejects.toThrow(
-        /Nombre de gagnants invalide/,
-      );
+      await expect(
+        executerTirage(participants, {
+          graine,
+          nbGagnants,
+          poidsMode: "par_oeuvre",
+        }),
+      ).rejects.toThrow(/Nombre de gagnants invalide/);
     }
   });
 
   it("un poids nul, négatif, fractionnaire ou hors plafond est refusé par la sérialisation", () => {
     for (const poids of [0, -1, 1.5, MAX_POIDS + 1, Number.NaN]) {
-      expect(() => serialiserRoster([{ cle: "x:1111111111", poids }])).toThrow(/Poids invalide/);
+      expect(() => serialiserRoster([{ cle: "x:1111111111", poids }])).toThrow(
+        /Poids invalide/,
+      );
     }
-    expect(() => serialiserRoster([{ cle: "x:1111111111", poids: 1 }])).not.toThrow();
-    expect(() => serialiserRoster([{ cle: "x:1111111111", poids: MAX_POIDS }])).not.toThrow();
+    expect(() =>
+      serialiserRoster([{ cle: "x:1111111111", poids: 1 }]),
+    ).not.toThrow();
+    expect(() =>
+      serialiserRoster([{ cle: "x:1111111111", poids: MAX_POIDS }]),
+    ).not.toThrow();
     expect(() => serialiserRoster([{ cle: "", poids: 1 }])).toThrow(/vide/);
     // ⚠ Le poids qui entre dans un tirage vient de `poidsDe`, qui borne déjà à
     // [1, 64] : un poids invalide ne peut donc PAS venir du calcul, seulement
     // d'une écriture directe en base ou d'un roster gelé retouché. C'est bien
     // à la sérialisation — le dernier passage obligé avant l'empreinte — qu'il
     // faut le refuser.
-    expect(poidsDe({ cle: "x:1", nbOeuvres: -3, oeuvres: [], pseudoAffichage: "" }, "par_oeuvre")).toBe(1);
+    expect(
+      poidsDe(
+        { cle: "x:1", nbOeuvres: -3, oeuvres: [], pseudoAffichage: "" },
+        "par_oeuvre",
+      ),
+    ).toBe(1);
   });
 
   it("des clés en double font échouer le tirage AVANT qu'un seul rang ne soit produit", async () => {
@@ -1878,9 +2142,19 @@ describe("cas limites", () => {
 
   it("une graine mal formée est refusée, majuscules comprises", async () => {
     const participants = [un("x:1111111111")];
-    for (const mauvaise of ["", "ab", "A".repeat(64), "z".repeat(64), `${graine}00`]) {
+    for (const mauvaise of [
+      "",
+      "ab",
+      "A".repeat(64),
+      "z".repeat(64),
+      `${graine}00`,
+    ]) {
       await expect(
-        executerTirage(participants, { graine: mauvaise, nbGagnants: 1, poidsMode: "par_oeuvre" }),
+        executerTirage(participants, {
+          graine: mauvaise,
+          nbGagnants: 1,
+          poidsMode: "par_oeuvre",
+        }),
       ).rejects.toThrow(/Graine invalide/);
     }
     // Une seule forme canonique en base comme dans le code : 64 hexa minuscules.
@@ -1904,7 +2178,12 @@ describe("cas limites", () => {
       rang: 0,
       u: 0,
     };
-    const petite: EntreeCalculee = { ...grosse, cle: "x:2", empreinte: "0".repeat(64), poids: 1 };
+    const petite: EntreeCalculee = {
+      ...grosse,
+      cle: "x:2",
+      empreinte: "0".repeat(64),
+      poids: 1,
+    };
     const debut = Bun.nanoseconds();
     expect(comparerEntrees(grosse, petite)).toBe(-1); // u≈1 et poids 64 devance u≈0 et poids 1
     expect((Bun.nanoseconds() - debut) / 1e6).toBeLessThan(50);
@@ -1912,7 +2191,14 @@ describe("cas limites", () => {
 
   it("une personne sans aucune œuvre reste dans le tirage, sans œuvre à mettre en avant", async () => {
     const resultat = await executerTirage(
-      [{ cle: "x:1111111111", nbOeuvres: 0, oeuvres: [], pseudoAffichage: "Sans œuvre" }],
+      [
+        {
+          cle: "x:1111111111",
+          nbOeuvres: 0,
+          oeuvres: [],
+          pseudoAffichage: "Sans œuvre",
+        },
+      ],
       { graine, nbGagnants: 1, poidsMode: "par_oeuvre" },
     );
     expect(elem(resultat.classement, 0).poids).toBe(1);
@@ -1920,28 +2206,49 @@ describe("cas limites", () => {
   });
 
   it("les lots suivent les rangs, et un classement nu est explicitement vide", async () => {
-    const participants = [un("x:1111111111"), un("x:2222222222"), un("x:3333333333")];
-    const avecLots = await executerTirage(participants, { graine, nbGagnants: 2, poidsMode: "par_oeuvre" }, [
+    const participants = [
+      un("x:1111111111"),
+      un("x:2222222222"),
+      un("x:3333333333"),
+    ];
+    const avecLots = await executerTirage(
+      participants,
+      { graine, nbGagnants: 2, poidsMode: "par_oeuvre" },
+      ["Premier lot", "Second lot"],
+    );
+    expect(avecLots.gagnants.map((gagnant) => gagnant.lot)).toEqual([
       "Premier lot",
       "Second lot",
     ]);
-    expect(avecLots.gagnants.map(gagnant => gagnant.lot)).toEqual(["Premier lot", "Second lot"]);
     const sansLot = await executerTirage(participants, {
       graine,
       nbGagnants: 2,
       poidsMode: "par_oeuvre",
     });
-    expect(sansLot.gagnants.map(gagnant => gagnant.lot)).toEqual([null, null]);
+    expect(sansLot.gagnants.map((gagnant) => gagnant.lot)).toEqual([
+      null,
+      null,
+    ]);
     // Moins de lots que de gagnants : les rangs sans lot valent `null`, jamais
     // une chaîne vide qui s'afficherait comme un lot fantôme.
-    const partiel = await executerTirage(participants, { graine, nbGagnants: 3, poidsMode: "par_oeuvre" }, [
+    const partiel = await executerTirage(
+      participants,
+      { graine, nbGagnants: 3, poidsMode: "par_oeuvre" },
+      ["Un seul lot"],
+    );
+    expect(partiel.gagnants.map((gagnant) => gagnant.lot)).toEqual([
       "Un seul lot",
+      null,
+      null,
     ]);
-    expect(partiel.gagnants.map(gagnant => gagnant.lot)).toEqual(["Un seul lot", null, null]);
   });
 
   it("les empreintes rendues par un tirage ont toutes la forme attendue", async () => {
-    const resultat = await executerTirage(REELS, { graine, nbGagnants: 2, poidsMode: "par_oeuvre" });
+    const resultat = await executerTirage(REELS, {
+      graine,
+      nbGagnants: 2,
+      poidsMode: "par_oeuvre",
+    });
     expect(resultat.empreinteParticipants).toMatch(/^[0-9a-f]{64}$/);
     expect(resultat.empreinteGraine).toMatch(/^[0-9a-f]{64}$/);
     expect(resultat.empreinteGraine).toBe(await empreinteGraine(graine));
@@ -1951,7 +2258,7 @@ describe("cas limites", () => {
       expect(entree.u).toBeLessThan(1);
       expect(entree.cleTri).toBeGreaterThan(0);
     }
-    expect(resultat.classement.map(entree => entree.rang)).toEqual(
+    expect(resultat.classement.map((entree) => entree.rang)).toEqual(
       Array.from({ length: REELS.length }, (_, i) => i + 1),
     );
     expect(hex(await sha256(new Uint8Array(0)))).toHaveLength(64);

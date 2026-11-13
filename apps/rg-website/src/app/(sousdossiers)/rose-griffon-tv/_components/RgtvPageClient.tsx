@@ -1,6 +1,15 @@
 "use client";
 
-import { Button, Card, CardContent, CardFooter, Tabs, TabsContent, TabsList, TabsTrigger } from "@rosegriffon/ui";
+import {
+  Button,
+  Card,
+  CardContent,
+  CardFooter,
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@rosegriffon/ui";
 import { motion } from "motion/react";
 import Image from "next/image";
 import Link from "@/components/shared/Link";
@@ -27,15 +36,28 @@ interface RgtvPageClientProps {
 }
 
 const TWITCH_CHANNELS: { id: TwitchChannel; label: string; url: string }[] = [
-  { id: "rose_griffontv", label: "Rose Griffon TV", url: "https://twitch.tv/rose_griffontv" },
-  { id: "achillea_ie", label: "Achilléa", url: "https://twitch.tv/achillea_ie" },
+  {
+    id: "rose_griffontv",
+    label: "Rose Griffon TV",
+    url: "https://twitch.tv/rose_griffontv",
+  },
+  {
+    id: "achillea_ie",
+    label: "Achilléa",
+    url: "https://twitch.tv/achillea_ie",
+  },
 ];
 
 export function RgtvPageClient(props: RgtvPageClientProps) {
-  const [twitchChannel, setTwitchChannel] = useState<TwitchChannel>("rose_griffontv");
+  const [twitchChannel, setTwitchChannel] =
+    useState<TwitchChannel>("rose_griffontv");
   return (
     <TwitchProvider channel={twitchChannel}>
-      <RgtvPageInner {...props} twitchChannel={twitchChannel} setTwitchChannel={setTwitchChannel} />
+      <RgtvPageInner
+        {...props}
+        twitchChannel={twitchChannel}
+        setTwitchChannel={setTwitchChannel}
+      />
     </TwitchProvider>
   );
 }
@@ -53,7 +75,8 @@ function RgtvPageInner({
   const { colors } = useTheme();
   const { data: twitchData } = useTwitch();
   const [activeTab, setActiveTab] = useState("stream");
-  const currentChannel = TWITCH_CHANNELS.find(c => c.id === twitchChannel) ?? TWITCH_CHANNELS[0];
+  const currentChannel =
+    TWITCH_CHANNELS.find((c) => c.id === twitchChannel) ?? TWITCH_CHANNELS[0];
 
   return (
     <RgtvAppShell
@@ -65,7 +88,9 @@ function RgtvPageInner({
       <div className="container mx-auto px-4 max-w-7xl">
         {/* Modern Tabs Navigation */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className={`grid w-full grid-cols-3 ${isStreamer ? "lg:grid-cols-4" : ""} mb-6`}>
+          <TabsList
+            className={`grid w-full grid-cols-3 ${isStreamer ? "lg:grid-cols-4" : ""} mb-6`}
+          >
             <TabsTrigger value="stream" className="flex items-center gap-2">
               <Radio className="size-4" />
               <span className="hidden sm:inline">Stream</span>
@@ -83,16 +108,25 @@ function RgtvPageInner({
           {/* Stream Tab */}
           <TabsContent value="stream" className="space-y-6">
             {/* Channel switcher (RGTV / Achilléa) */}
-            <div className="inline-flex rounded-lg border-2 p-1 bg-card" style={{ borderColor: `${colors.primary}30` }}>
-              {TWITCH_CHANNELS.map(c => (
+            <div
+              className="inline-flex rounded-lg border-2 p-1 bg-card"
+              style={{ borderColor: `${colors.primary}30` }}
+            >
+              {TWITCH_CHANNELS.map((c) => (
                 <button
                   key={c.id}
                   type="button"
                   onClick={() => setTwitchChannel(c.id)}
                   className={`px-4 py-2 rounded-md text-sm font-semibold transition-all ${
-                    twitchChannel === c.id ? "text-white shadow-md" : "text-muted-foreground hover:text-foreground"
+                    twitchChannel === c.id
+                      ? "text-white shadow-md"
+                      : "text-muted-foreground hover:text-foreground"
                   }`}
-                  style={twitchChannel === c.id ? { backgroundColor: colors.primary } : undefined}
+                  style={
+                    twitchChannel === c.id
+                      ? { backgroundColor: colors.primary }
+                      : undefined
+                  }
                   aria-pressed={twitchChannel === c.id}
                 >
                   <Radio className="inline-block size-4 mr-1.5 -mt-0.5" />
@@ -110,21 +144,34 @@ function RgtvPageInner({
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3 }}
                 >
-                  <Card className="border-2 overflow-hidden" style={{ borderColor: `${colors.primary}40` }}>
+                  <Card
+                    className="border-2 overflow-hidden"
+                    style={{ borderColor: `${colors.primary}40` }}
+                  >
                     <CardContent className="p-0">
                       <TwitchPlayer />
                     </CardContent>
                     {twitchData?.streamInfo && (
                       <CardFooter className="flex flex-col items-start gap-3 p-4">
-                        <h2 className="font-bold text-lg line-clamp-2">{twitchData.streamInfo.title}</h2>
+                        <h2 className="font-bold text-lg line-clamp-2">
+                          {twitchData.streamInfo.title}
+                        </h2>
                         <div className="flex items-center gap-4 text-sm">
                           <div className="flex items-center gap-2">
-                            <Users className="size-4" style={{ color: colors.primary }} />
-                            <span>{twitchData.streamInfo.viewer_count} viewers</span>
+                            <Users
+                              className="size-4"
+                              style={{ color: colors.primary }}
+                            />
+                            <span>
+                              {twitchData.streamInfo.viewer_count} viewers
+                            </span>
                           </div>
                           {twitchData.streamInfo.game_name && (
                             <div className="flex items-center gap-2">
-                              <Monitor className="size-4" style={{ color: colors.primary }} />
+                              <Monitor
+                                className="size-4"
+                                style={{ color: colors.primary }}
+                              />
                               <span>{twitchData.streamInfo.game_name}</span>
                             </div>
                           )}
@@ -132,7 +179,10 @@ function RgtvPageInner({
                         <div className="flex gap-2 w-full">
                           <Button asChild className="flex-1">
                             <Link
-                              href={currentChannel?.url ?? "https://twitch.tv/rose_griffontv"}
+                              href={
+                                currentChannel?.url ??
+                                "https://twitch.tv/rose_griffontv"
+                              }
                               target="_blank"
                               rel="noopener noreferrer"
                             >
@@ -141,7 +191,11 @@ function RgtvPageInner({
                             </Link>
                           </Button>
                           <Button asChild variant="outline" className="flex-1">
-                            <Link href="https://youtube.com/@rose-griffon" target="_blank" rel="noopener noreferrer">
+                            <Link
+                              href="https://youtube.com/@rose-griffon"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
                               <Youtube className="mr-2 size-4" />
                               YouTube
                             </Link>
@@ -169,7 +223,11 @@ function RgtvPageInner({
                       <TwitchChat channelName={twitchChannel} />
                     </TabsContent>
                     <TabsContent value="site">
-                      <CommentsSection targetId={twitchChannel} targetType="stream" className="h-[600px]" />
+                      <CommentsSection
+                        targetId={twitchChannel}
+                        targetType="stream"
+                        className="h-[600px]"
+                      />
                     </TabsContent>
                   </Tabs>
                 </motion.div>
@@ -179,14 +237,25 @@ function RgtvPageInner({
 
           {/* Planning Tab */}
           <TabsContent value="planning" className="space-y-6">
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
-              <RgtvScheduleClient scheduleByDay={scheduleByDay} error={scheduleError} />
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <RgtvScheduleClient
+                scheduleByDay={scheduleByDay}
+                error={scheduleError}
+              />
             </motion.div>
           </TabsContent>
 
           {/* Community Tab */}
           <TabsContent value="community" className="space-y-6">
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+            >
               <TwitchEnrichedInfo />
             </motion.div>
           </TabsContent>
@@ -213,7 +282,8 @@ function RgtvPageInner({
                 </h2>
               </div>
               <p className="text-sm sm:text-base md:text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto leading-relaxed">
-                Découvrez les passionnés qui font vivre la communauté Rose Griffon en direct.
+                Découvrez les passionnés qui font vivre la communauté Rose
+                Griffon en direct.
               </p>
             </div>
 
@@ -225,7 +295,7 @@ function RgtvPageInner({
                 { file: "ishido.webp", name: "Ishido" },
                 { file: "mathuze.webp", name: "Mathuze" },
                 { file: "shozuma.webp", name: "Shozuma" },
-              ].map(streamer => (
+              ].map((streamer) => (
                 <div key={streamer.name} className="group flex justify-center">
                   <div className="relative w-full aspect-square flex items-center justify-center">
                     <div className="absolute -inset-2 bg-linear-to-r from-[#345182] to-[#d63901] rounded-full opacity-0 group-hover:opacity-50 blur-2xl transition-all duration-300 group-hover:animate-pulse scale-75 group-hover:scale-100" />

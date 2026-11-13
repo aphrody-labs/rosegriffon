@@ -47,7 +47,9 @@ export interface DescriptionService {
 
 function local(port: number, variable: string): string {
   const brut = Bun.env[variable];
-  return (brut && brut.trim().length > 0 ? brut : `http://127.0.0.1:${port}`).replace(/\/+$/, "");
+  return (
+    brut && brut.trim().length > 0 ? brut : `http://127.0.0.1:${port}`
+  ).replace(/\/+$/, "");
 }
 
 function publique(variable: string, defaut: string): string {
@@ -68,7 +70,10 @@ export const SERVICES: Readonly<Record<NomService, DescriptionService>> = {
   cdn: {
     nom: "cdn",
     titre: "CDN",
-    base: publique("CDN_API_URL", publique("CDN_URL", "https://cdn.rosegriffon.fr")),
+    base: publique(
+      "CDN_API_URL",
+      publique("CDN_URL", "https://cdn.rosegriffon.fr"),
+    ),
     sante: "/health",
     publique: publique("CDN_URL", "https://cdn.rosegriffon.fr"),
     unite: null,
@@ -95,7 +100,9 @@ export const SERVICES: Readonly<Record<NomService, DescriptionService>> = {
 } as const;
 
 /** Tous les services, dans un ordre d'affichage stable. */
-export const TOUS_LES_SERVICES: readonly DescriptionService[] = Object.freeze(Object.values(SERVICES));
+export const TOUS_LES_SERVICES: readonly DescriptionService[] = Object.freeze(
+  Object.values(SERVICES),
+);
 
 /**
  * Panne d'un service interne. Porte de quoi dire à un membre ce qui se passe
@@ -145,8 +152,15 @@ function reessayable(statut: number): boolean {
   return statut >= 500 || statut === 429;
 }
 
-function construireUrl(desc: DescriptionService, chemin: string, requete: OptionsAppel["requete"]): string {
-  const url = new URL(chemin.startsWith("/") ? chemin : `/${chemin}`, `${desc.base}/`);
+function construireUrl(
+  desc: DescriptionService,
+  chemin: string,
+  requete: OptionsAppel["requete"],
+): string {
+  const url = new URL(
+    chemin.startsWith("/") ? chemin : `/${chemin}`,
+    `${desc.base}/`,
+  );
   for (const [clef, valeur] of Object.entries(requete ?? {})) {
     if (valeur !== undefined && valeur !== null) {
       url.searchParams.set(clef, String(valeur));
@@ -163,7 +177,11 @@ function construireUrl(desc: DescriptionService, chemin: string, requete: Option
  * l'expiration du jeton d'interaction, et le membre ne voit qu'un « réfléchit… »
  * éternel. Ici l'appel abandonne, et la commande peut dire pourquoi.
  */
-export async function appelService<T>(nom: NomService, chemin: string, options: OptionsAppel = {}): Promise<T> {
+export async function appelService<T>(
+  nom: NomService,
+  chemin: string,
+  options: OptionsAppel = {},
+): Promise<T> {
   const desc = SERVICES[nom];
   const url = construireUrl(desc, chemin, options.requete);
   const tentatives = Math.max(1, options.tentatives ?? TENTATIVES_DEFAUT);
@@ -189,11 +207,19 @@ export async function appelService<T>(nom: NomService, chemin: string, options: 
 
       if (!reponse.ok) {
         if (reessayable(reponse.status) && essai < tentatives) {
-          derniere = new ServiceIndisponibleError(nom, `HTTP ${reponse.status}`, reponse.status);
+          derniere = new ServiceIndisponibleError(
+            nom,
+            `HTTP ${reponse.status}`,
+            reponse.status,
+          );
           await Bun.sleep(200 * 2 ** (essai - 1));
           continue;
         }
-        throw new ServiceIndisponibleError(nom, `HTTP ${reponse.status}`, reponse.status);
+        throw new ServiceIndisponibleError(
+          nom,
+          `HTTP ${reponse.status}`,
+          reponse.status,
+        );
       }
 
       const texte = await reponse.text();
@@ -203,7 +229,10 @@ export async function appelService<T>(nom: NomService, chemin: string, options: 
       try {
         return JSON.parse(texte) as T;
       } catch {
-        throw new ServiceIndisponibleError(nom, "réponse illisible (JSON attendu)");
+        throw new ServiceIndisponibleError(
+          nom,
+          "réponse illisible (JSON attendu)",
+        );
       }
     } catch (err) {
       if (err instanceof ServiceIndisponibleError && err.statut !== undefined) {
@@ -242,7 +271,11 @@ export async function fluxService(
       signal: AbortSignal.timeout(options.delaiMs ?? DELAI_DEFAUT_MS),
     });
     if (!reponse.ok) {
-      throw new ServiceIndisponibleError(nom, `HTTP ${reponse.status}`, reponse.status);
+      throw new ServiceIndisponibleError(
+        nom,
+        `HTTP ${reponse.status}`,
+        reponse.status,
+      );
     }
     return reponse;
   } catch (err) {
@@ -327,7 +360,9 @@ function resumerSonde(texte: string): string | null {
     return null;
   }
   const parts: string[] = [];
-  for (const [clef, valeur] of Object.entries(charge as Record<string, unknown>)) {
+  for (const [clef, valeur] of Object.entries(
+    charge as Record<string, unknown>,
+  )) {
     if (clef === "ok" || parts.length >= 3) {
       continue;
     }

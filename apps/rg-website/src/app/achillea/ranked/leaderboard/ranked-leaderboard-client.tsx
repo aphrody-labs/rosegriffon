@@ -3,9 +3,19 @@
 import { useEffect, useState } from "react";
 import Link from "@/components/shared/Link";
 import { createAchilleaClient } from "@/lib/achillea";
-import type { LeaderboardPage, RankedTierInfo } from "@rosegriffon/achillea-types";
+import type {
+  LeaderboardPage,
+  RankedTierInfo,
+} from "@rosegriffon/achillea-types";
 import { UserAvatar } from "@/components/achillea/UserAvatar";
-import { Trophy, Search, Loader2, ChevronLeft, ChevronRight, ArrowLeft } from "lucide-react";
+import {
+  Trophy,
+  Search,
+  Loader2,
+  ChevronLeft,
+  ChevronRight,
+  ArrowLeft,
+} from "lucide-react";
 import { signalerException } from "@/lib/achillea/signaler";
 import { MEDAILLE } from "@/components/achillea/couleurs-donnees";
 
@@ -20,7 +30,9 @@ export default function RankedLeaderboardPage({
   const [page, setPage] = useState<number>(0);
   const pageSize = 25;
   const [data, setData] = useState<LeaderboardPage | null>(initialData ?? null);
-  const [tiers, setTiers] = useState<RankedTierInfo[] | null>(initialTiers ?? null);
+  const [tiers, setTiers] = useState<RankedTierInfo[] | null>(
+    initialTiers ?? null,
+  );
   const [loading, setLoading] = useState<boolean>(initialData == null);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [search, setSearch] = useState<string>("");
@@ -35,8 +47,14 @@ export default function RankedLeaderboardPage({
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  const [requestIdentity1, setRequestIdentity1] = useState<readonly unknown[]>([mode]);
-  if ([mode].some((value, position) => !Object.is(value, requestIdentity1[position]))) {
+  const [requestIdentity1, setRequestIdentity1] = useState<readonly unknown[]>([
+    mode,
+  ]);
+  if (
+    [mode].some(
+      (value, position) => !Object.is(value, requestIdentity1[position]),
+    )
+  ) {
     setRequestIdentity1([mode]);
     (() => {
       setTiersError(false);
@@ -47,14 +65,14 @@ export default function RankedLeaderboardPage({
 
     createAchilleaClient()
       .ranked.tiers(mode)
-      .then(result => {
+      .then((result) => {
         if (!cancelled) {
           setTiers(result.ok ? result.value : null);
           setTiersError(!result.ok);
           if (!result.ok) setTierKey("");
         }
       })
-      .catch(cause => {
+      .catch((cause) => {
         signalerException("ranked/tiers", cause);
         if (!cancelled) {
           setTiers(null);
@@ -67,7 +85,7 @@ export default function RankedLeaderboardPage({
     };
   }, [mode]);
 
-  const selectedTier = tiers?.find(tier => tier.key === tierKey);
+  const selectedTier = tiers?.find((tier) => tier.key === tierKey);
   const [requestIdentity2, setRequestIdentity2] = useState<readonly unknown[]>([
     mode,
     page,
@@ -81,7 +99,14 @@ export default function RankedLeaderboardPage({
       (value, position) => !Object.is(value, requestIdentity2[position]),
     )
   ) {
-    setRequestIdentity2([mode, page, search, tierKey, selectedTier, tiersError]);
+    setRequestIdentity2([
+      mode,
+      page,
+      search,
+      tierKey,
+      selectedTier,
+      tiersError,
+    ]);
     (() => {
       if (tierKey && !selectedTier && !tiersError) return;
       setLoading(true);
@@ -103,7 +128,7 @@ export default function RankedLeaderboardPage({
         minElo: selectedTier?.minElo,
         maxElo: selectedTier?.maxElo,
       })
-      .then(board => {
+      .then((board) => {
         if (cancelled) return;
         if (!board.ok) {
           setError("Le classement est momentanément indisponible.");
@@ -111,9 +136,10 @@ export default function RankedLeaderboardPage({
         }
         setData(board.value);
       })
-      .catch(cause => {
+      .catch((cause) => {
         signalerException("ranked/leaderboard", cause);
-        if (!cancelled) setError("Le classement est momentanément indisponible.");
+        if (!cancelled)
+          setError("Le classement est momentanément indisponible.");
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -144,10 +170,13 @@ export default function RankedLeaderboardPage({
             <span className="p-2 rounded-xl bg-warning/10 text-warning border border-warning/20">
               <Trophy className="w-5 h-5" />
             </span>
-            <h1 className="text-3xl font-bold tracking-tight">Classement Général (Leaderboard)</h1>
+            <h1 className="text-3xl font-bold tracking-tight">
+              Classement Général (Leaderboard)
+            </h1>
           </div>
           <p className="text-lg text-muted-foreground">
-            Les meilleurs joueurs classés de la saison active sur Inazuma Eleven: Victory Road.
+            Les meilleurs joueurs classés de la saison active sur Inazuma
+            Eleven: Victory Road.
           </p>
         </div>
 
@@ -202,7 +231,7 @@ export default function RankedLeaderboardPage({
             type="text"
             placeholder="Rechercher un joueur..."
             value={searchQuery}
-            onChange={e => setSearchQuery(e.target.value)}
+            onChange={(e) => setSearchQuery(e.target.value)}
             className="min-h-11 w-full pl-9 pr-3 py-2 text-lg bg-surface-container/60 border border-outline-variant/15 rounded-2xl placeholder:text-muted-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary transition-colors"
           />
         </div>
@@ -210,14 +239,14 @@ export default function RankedLeaderboardPage({
           <span className="font-semibold">Palier</span>
           <select
             value={tierKey}
-            onChange={event => {
+            onChange={(event) => {
               setTierKey(event.target.value);
               setPage(0);
             }}
             className="min-h-11 rounded-2xl border border-outline-variant/15 bg-surface-container/60 px-3 py-2 text-lg text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary transition-colors"
           >
             <option value="">Tous les paliers</option>
-            {tiers?.map(tier => (
+            {tiers?.map((tier) => (
               <option key={tier.key} value={tier.key}>
                 {tier.key} ({tier.playerCount})
               </option>
@@ -225,11 +254,14 @@ export default function RankedLeaderboardPage({
           </select>
         </label>
         {tiersError && (
-          <output className="text-lg text-warning">Paliers indisponibles. Le classement reste consultable.</output>
+          <output className="text-lg text-warning">
+            Paliers indisponibles. Le classement reste consultable.
+          </output>
         )}
 
         <div className="text-lg text-muted-foreground self-end sm:self-auto font-mono">
-          Total : <span className="font-semibold text-foreground">{total}</span> joueur
+          Total : <span className="font-semibold text-foreground">{total}</span>{" "}
+          joueur
           {total > 1 ? "s" : ""} classé{total > 1 ? "s" : ""}
         </div>
       </div>
@@ -239,15 +271,24 @@ export default function RankedLeaderboardPage({
         {loading ? (
           <div className="py-20 text-center space-y-3">
             <Loader2 className="w-8 h-8 animate-spin mx-auto text-muted-foreground" />
-            <p className="text-lg text-muted-foreground">Chargement du classement...</p>
+            <p className="text-lg text-muted-foreground">
+              Chargement du classement...
+            </p>
           </div>
         ) : error && !data ? (
-          <div role="alert" className="py-16 text-center text-destructive text-lg">
+          <div
+            role="alert"
+            className="py-16 text-center text-destructive text-lg"
+          >
             {error}
           </div>
         ) : entries.length === 0 ? (
           <output className="py-16 text-center text-muted-foreground text-lg space-y-2">
-            <p>{search || tierKey ? "Aucun joueur ne correspond aux filtres." : "Aucun joueur classé pour ce mode."}</p>
+            <p>
+              {search || tierKey
+                ? "Aucun joueur ne correspond aux filtres."
+                : "Aucun joueur classé pour ce mode."}
+            </p>
             {(search || tierKey) && (
               <button
                 type="button"
@@ -267,7 +308,8 @@ export default function RankedLeaderboardPage({
             <div className="hidden overflow-x-auto lg:block">
               <table className="w-full text-left text-lg">
                 <caption className="sr-only">
-                  Classement des joueurs en {mode === 2 ? "solo" : "duo"}, {total} joueur
+                  Classement des joueurs en {mode === 2 ? "solo" : "duo"},{" "}
+                  {total} joueur
                   {total > 1 ? "s" : ""} classé{total > 1 ? "s" : ""}
                 </caption>
                 <thead>
@@ -296,25 +338,36 @@ export default function RankedLeaderboardPage({
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-outline-variant/10">
-                  {entries.map(entry => {
+                  {entries.map((entry) => {
                     const actualRank = entry.rank;
                     return (
-                      <tr key={entry.userId} className="hover:bg-surface-container-high/40 transition-colors duration-150">
+                      <tr
+                        key={entry.userId}
+                        className="hover:bg-surface-container-high/40 transition-colors duration-150"
+                      >
                         <td className="py-3 px-4 text-center font-bold">
                           {actualRank === 1 ? (
-                            <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full ${MEDAILLE.or.pastille} text-lg font-extrabold`}>
+                            <span
+                              className={`inline-flex items-center justify-center w-6 h-6 rounded-full ${MEDAILLE.or.pastille} text-lg font-extrabold`}
+                            >
                               1
                             </span>
                           ) : actualRank === 2 ? (
-                            <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full ${MEDAILLE.argent.pastille} text-lg font-extrabold`}>
+                            <span
+                              className={`inline-flex items-center justify-center w-6 h-6 rounded-full ${MEDAILLE.argent.pastille} text-lg font-extrabold`}
+                            >
                               2
                             </span>
                           ) : actualRank === 3 ? (
-                            <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full ${MEDAILLE.bronze.pastille} text-lg font-extrabold`}>
+                            <span
+                              className={`inline-flex items-center justify-center w-6 h-6 rounded-full ${MEDAILLE.bronze.pastille} text-lg font-extrabold`}
+                            >
                               3
                             </span>
                           ) : (
-                            <span className="text-muted-foreground font-mono">#{actualRank}</span>
+                            <span className="text-muted-foreground font-mono">
+                              #{actualRank}
+                            </span>
                           )}
                         </td>
                         <td className="py-3 px-4">
@@ -322,20 +375,32 @@ export default function RankedLeaderboardPage({
                             href={`/achillea/users/${entry.userId}`}
                             className="inline-flex items-center gap-2.5 font-semibold text-foreground hover:text-primary transition"
                           >
-                            <UserAvatar avatar={entry.avatar} displayName={entry.displayName} className="w-7 h-7" />
+                            <UserAvatar
+                              avatar={entry.avatar}
+                              displayName={entry.displayName}
+                              className="w-7 h-7"
+                            />
                             <span>{entry.displayName}</span>
                           </Link>
                         </td>
                         <td className="py-3 px-4 text-center">
                           <span className="px-2 py-0.5 rounded-md bg-background border border-border text-lg font-medium">
-                            {tiers?.find(tier => entry.elo >= tier.minElo && entry.elo <= tier.maxElo)?.key ?? "—"}
+                            {tiers?.find(
+                              (tier) =>
+                                entry.elo >= tier.minElo &&
+                                entry.elo <= tier.maxElo,
+                            )?.key ?? "—"}
                           </span>
                         </td>
                         <td className="py-3 px-4 text-right font-bold text-warning font-mono text-lg">
                           {entry.elo} AP
                         </td>
-                        <td className="py-3 px-4 text-right text-muted-foreground">{entry.gamesPlayed}</td>
-                        <td className="py-3 px-4 text-right text-muted-foreground font-mono">{entry.peakRating}</td>
+                        <td className="py-3 px-4 text-right text-muted-foreground">
+                          {entry.gamesPlayed}
+                        </td>
+                        <td className="py-3 px-4 text-right text-muted-foreground font-mono">
+                          {entry.peakRating}
+                        </td>
                         <td className="py-3 px-4">
                           <Link
                             href={`/achillea/ranked/history?player=${encodeURIComponent(entry.userId)}`}
@@ -350,16 +415,25 @@ export default function RankedLeaderboardPage({
                 </tbody>
               </table>
             </div>
-            <div className="divide-y divide-border lg:hidden" aria-label="Classement des joueurs">
-              {entries.map(entry => (
+            <div
+              className="divide-y divide-border lg:hidden"
+              aria-label="Classement des joueurs"
+            >
+              {entries.map((entry) => (
                 <article key={entry.userId} className="space-y-3 p-4 text-lg">
                   <div className="flex items-center gap-3">
-                    <span className="min-w-12 font-bold text-warning">#{entry.rank}</span>
+                    <span className="min-w-12 font-bold text-warning">
+                      #{entry.rank}
+                    </span>
                     <Link
                       href={`/achillea/users/${entry.userId}`}
                       className="inline-flex min-h-11 min-w-0 items-center gap-2 font-semibold hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
                     >
-                      <UserAvatar avatar={entry.avatar} displayName={entry.displayName} className="h-8 w-8 shrink-0" />
+                      <UserAvatar
+                        avatar={entry.avatar}
+                        displayName={entry.displayName}
+                        className="h-8 w-8 shrink-0"
+                      />
                       <span className="truncate">{entry.displayName}</span>
                     </Link>
                   </div>
@@ -371,7 +445,11 @@ export default function RankedLeaderboardPage({
                     <div>
                       <dt>Palier</dt>
                       <dd className="font-semibold text-foreground">
-                        {tiers?.find(tier => entry.elo >= tier.minElo && entry.elo <= tier.maxElo)?.key ?? "—"}
+                        {tiers?.find(
+                          (tier) =>
+                            entry.elo >= tier.minElo &&
+                            entry.elo <= tier.maxElo,
+                        )?.key ?? "—"}
                       </dd>
                     </div>
                     <div>
@@ -403,7 +481,7 @@ export default function RankedLeaderboardPage({
           >
             <button
               type="button"
-              onClick={() => setPage(p => Math.max(0, p - 1))}
+              onClick={() => setPage((p) => Math.max(0, p - 1))}
               disabled={page === 0 || loading}
               className="inline-flex min-h-11 items-center gap-1 px-3 py-1.5 text-lg font-semibold rounded-md border border-border bg-card hover:bg-muted disabled:opacity-40 transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
             >
@@ -411,12 +489,16 @@ export default function RankedLeaderboardPage({
               Précédent
             </button>
             <span className="text-lg text-muted-foreground">
-              Page <span className="font-semibold text-foreground">{page + 1}</span> sur{" "}
-              <span className="font-semibold text-foreground">{totalPages}</span>
+              Page{" "}
+              <span className="font-semibold text-foreground">{page + 1}</span>{" "}
+              sur{" "}
+              <span className="font-semibold text-foreground">
+                {totalPages}
+              </span>
             </span>
             <button
               type="button"
-              onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))}
+              onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
               disabled={page >= totalPages - 1 || loading}
               className="inline-flex min-h-11 items-center gap-1 px-3 py-1.5 text-lg font-semibold rounded-md border border-border bg-card hover:bg-muted disabled:opacity-40 transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
             >

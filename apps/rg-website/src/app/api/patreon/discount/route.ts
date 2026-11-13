@@ -16,7 +16,10 @@ import { getPatronDiscount } from "@/lib/patreon/discount";
 export async function GET() {
   const user = await getServerUser();
   if (!user) {
-    return NextResponse.json({ active: false, percent: 0, reason: "not_authenticated" }, { status: 200 });
+    return NextResponse.json(
+      { active: false, percent: 0, reason: "not_authenticated" },
+      { status: 200 },
+    );
   }
   try {
     const discount = await getPatronDiscount(user.id);
@@ -25,6 +28,9 @@ export async function GET() {
     });
   } catch (error) {
     console.error("[patreon/discount] Erreur calcul remise:", error);
-    return NextResponse.json({ active: false, percent: 0, reason: "error" }, { status: 200 });
+    return NextResponse.json(
+      { active: false, percent: 0, reason: "error" },
+      { status: 200 },
+    );
   }
 }

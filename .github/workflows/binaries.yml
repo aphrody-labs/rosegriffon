@@ -24,7 +24,11 @@ jobs:
       matrix:
         include:
           - { os: ubuntu-latest, target: linux-x64, file: rg-core-linux-x64 }
-          - { os: windows-latest, target: windows-x64, file: rg-core-windows-x64.exe }
+          - {
+              os: windows-latest,
+              target: windows-x64,
+              file: rg-core-windows-x64.exe,
+            }
     env:
       NEXT_TELEMETRY_DISABLED: "1"
       # Public build-time configuration of the site (no secrets): repository variables.

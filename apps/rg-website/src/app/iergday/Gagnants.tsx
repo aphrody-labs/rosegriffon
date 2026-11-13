@@ -1,6 +1,12 @@
 "use client";
 
-import { Badge, Button, Collapsible, CollapsibleContent, CollapsibleTrigger } from "@rosegriffon/ui";
+import {
+  Badge,
+  Button,
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@rosegriffon/ui";
 import { ChevronDown, RotateCcw, Trophy } from "lucide-react";
 import { useState } from "react";
 
@@ -66,7 +72,7 @@ export function Gagnants({
 
   if (gagnants.length === 0) return null;
 
-  const parCle = new Map(posts.map(post => [clePost(post), post]));
+  const parCle = new Map(posts.map((post) => [clePost(post), post]));
 
   return (
     <section
@@ -74,7 +80,10 @@ export function Gagnants({
       className="rounded-3xl border-2 border-primary/40 bg-primary-container/20 p-4 sm:p-6"
     >
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 id="titre-gagnants" className="flex items-center gap-2 text-fluid-headline-md font-bold text-on-surface">
+        <h2
+          id="titre-gagnants"
+          className="flex items-center gap-2 text-fluid-headline-md font-bold text-on-surface"
+        >
           <Trophy className="size-6 text-primary" aria-hidden />
           {gagnants.length > 1 ? "Les gagnants" : "Le gagnant"}
         </h2>
@@ -85,8 +94,10 @@ export function Gagnants({
       </div>
 
       <ul className="mt-4 grid list-none grid-cols-1 gap-3 p-0 sm:grid-cols-2">
-        {gagnants.map(gagnant => {
-          const post = gagnant.cleCreation ? parCle.get(gagnant.cleCreation) : undefined;
+        {gagnants.map((gagnant) => {
+          const post = gagnant.cleCreation
+            ? parCle.get(gagnant.cleCreation)
+            : undefined;
           const image = post?.images[0];
           return (
             <li
@@ -102,16 +113,30 @@ export function Gagnants({
                  * même octet deux fois.
                  */
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={image.src} alt="" className="size-16 shrink-0 rounded-xl object-cover" loading="lazy" />
+                <img
+                  src={image.src}
+                  alt=""
+                  className="size-16 shrink-0 rounded-xl object-cover"
+                  loading="lazy"
+                />
               ) : (
-                <div className="size-16 shrink-0 rounded-xl bg-surface-container" aria-hidden />
+                <div
+                  className="size-16 shrink-0 rounded-xl bg-surface-container"
+                  aria-hidden
+                />
               )}
               <div className="min-w-0">
                 <Badge variant="secondary" className="mb-1">
                   Lot {gagnant.rang}
                 </Badge>
-                <p className="truncate font-bold text-on-surface">{gagnant.pseudoAffichage}</p>
-                {gagnant.lot && <p className="text-sm text-on-surface-variant">{gagnant.lot}</p>}
+                <p className="truncate font-bold text-on-surface">
+                  {gagnant.pseudoAffichage}
+                </p>
+                {gagnant.lot && (
+                  <p className="text-sm text-on-surface-variant">
+                    {gagnant.lot}
+                  </p>
+                )}
               </div>
             </li>
           );
@@ -127,10 +152,13 @@ export function Gagnants({
         </CollapsibleTrigger>
         <CollapsibleContent className="mt-3 space-y-3 text-sm text-on-surface-variant">
           <p>
-            Le tirage n&apos;a pas été fait avec un hasard choisi par Rose Griffon. Sa graine vient d&apos;un aléa
-            public produit par le réseau <strong>{preuve.reseau ?? "drand"}</strong>, dont le numéro de tour avait été
-            annoncé <strong>avant</strong> le tirage. Personne ne peut prédire la signature d&apos;un tour à venir, et
-            n&apos;importe qui peut la retélécharger pour refaire le calcul, aujourd&apos;hui comme dans dix ans.
+            Le tirage n&apos;a pas été fait avec un hasard choisi par Rose
+            Griffon. Sa graine vient d&apos;un aléa public produit par le réseau{" "}
+            <strong>{preuve.reseau ?? "drand"}</strong>, dont le numéro de tour
+            avait été annoncé <strong>avant</strong> le tirage. Personne ne peut
+            prédire la signature d&apos;un tour à venir, et n&apos;importe qui
+            peut la retélécharger pour refaire le calcul, aujourd&apos;hui comme
+            dans dix ans.
           </p>
           <dl className="space-y-2">
             {preuve.round !== null && (
@@ -143,14 +171,18 @@ export function Gagnants({
             )}
             {preuve.signature && (
               <div>
-                <dt className="font-medium text-on-surface">Signature du tour</dt>
+                <dt className="font-medium text-on-surface">
+                  Signature du tour
+                </dt>
                 <dd>
                   <Valeur>{preuve.signature}</Valeur>
                 </dd>
               </div>
             )}
             <div>
-              <dt className="font-medium text-on-surface">Empreinte de la liste des participants</dt>
+              <dt className="font-medium text-on-surface">
+                Empreinte de la liste des participants
+              </dt>
               <dd>
                 <Valeur>{preuve.empreinteParticipants}</Valeur>
               </dd>
@@ -174,7 +206,12 @@ export function Gagnants({
         </CollapsibleContent>
       </Collapsible>
 
-      <AnimationTirage posts={posts} gagnants={gagnants} ouvert={animation} onFermer={() => setAnimation(false)} />
+      <AnimationTirage
+        posts={posts}
+        gagnants={gagnants}
+        ouvert={animation}
+        onFermer={() => setAnimation(false)}
+      />
     </section>
   );
 }

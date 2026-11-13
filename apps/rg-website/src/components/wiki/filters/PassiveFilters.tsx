@@ -11,8 +11,18 @@ import { cn } from "@/lib/utils";
 
 const TYPE_OPTIONS = [
   { color: "text-blue-600", icon: "person", label: "Joueur", value: "player" },
-  { color: "text-purple-600", icon: "auto_fix_high", label: "Personnalisé", value: "custom" },
-  { color: "text-amber-600", icon: "groups", label: "Coord. / Manager", value: "coordinator" },
+  {
+    color: "text-purple-600",
+    icon: "auto_fix_high",
+    label: "Personnalisé",
+    value: "custom",
+  },
+  {
+    color: "text-amber-600",
+    icon: "groups",
+    label: "Coord. / Manager",
+    value: "coordinator",
+  },
 ] as const;
 
 const PLAYSTYLE_OPTIONS: ReadonlyArray<{
@@ -22,13 +32,38 @@ const PLAYSTYLE_OPTIONS: ReadonlyArray<{
   icon?: string;
   color: string;
 }> = [
-  { color: "text-on-surface-variant", icon: "tune", label: "Généraux", value: "" },
+  {
+    color: "text-on-surface-variant",
+    icon: "tune",
+    label: "Généraux",
+    value: "",
+  },
   { color: "text-red-500", label: "Brèche", sprite: "breche", value: "Breach" },
-  { color: "text-amber-500", label: "Tension", sprite: "tension", value: "Tension" },
-  { color: "text-blue-500", label: "Contre-attaque", sprite: "contre", value: "Counter" },
+  {
+    color: "text-amber-500",
+    label: "Tension",
+    sprite: "tension",
+    value: "Tension",
+  },
+  {
+    color: "text-blue-500",
+    label: "Contre-attaque",
+    sprite: "contre",
+    value: "Counter",
+  },
   { color: "text-pink-500", label: "Lien", sprite: "lien", value: "Bond" },
-  { color: "text-orange-500", label: "Jeu brutal", sprite: "jeu_violent", value: "Rough Play" },
-  { color: "text-emerald-500", label: "Justice", sprite: "justice", value: "Justice" },
+  {
+    color: "text-orange-500",
+    label: "Jeu brutal",
+    sprite: "jeu_violent",
+    value: "Rough Play",
+  },
+  {
+    color: "text-emerald-500",
+    label: "Justice",
+    sprite: "justice",
+    value: "Justice",
+  },
 ];
 
 const STAT_CATEGORY_OPTIONS = [
@@ -47,7 +82,10 @@ interface PassiveFiltersProps {
   playstyleCounts?: Record<string, number>;
 }
 
-export function PassiveFilters({ typeCounts, playstyleCounts }: PassiveFiltersProps) {
+export function PassiveFilters({
+  typeCounts,
+  playstyleCounts,
+}: PassiveFiltersProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -95,8 +133,11 @@ export function PassiveFilters({ typeCounts, playstyleCounts }: PassiveFiltersPr
   return (
     <search className="space-y-3" aria-label="Filtres des passifs">
       {/* Type filter */}
-      <fieldset className="flex flex-wrap gap-1.5" aria-label="Filtrer par type de passif">
-        {TYPE_OPTIONS.map(opt => {
+      <fieldset
+        className="flex flex-wrap gap-1.5"
+        aria-label="Filtrer par type de passif"
+      >
+        {TYPE_OPTIONS.map((opt) => {
           const isActive = activeType === opt.value;
           const count = typeCounts?.[opt.value];
           return (
@@ -111,17 +152,26 @@ export function PassiveFilters({ typeCounts, playstyleCounts }: PassiveFiltersPr
                   : "bg-surface-container-low text-on-surface-variant border-transparent hover:bg-surface-container-highest hover:border-primary/20",
               )}
             >
-              <Icon name={opt.icon} size={14} className={cn(isActive ? "text-primary" : opt.color)} />
+              <Icon
+                name={opt.icon}
+                size={14}
+                className={cn(isActive ? "text-primary" : opt.color)}
+              />
               {opt.label}
-              {count !== undefined && <span className="text-[9px] opacity-60 ml-0.5">({count})</span>}
+              {count !== undefined && (
+                <span className="text-[9px] opacity-60 ml-0.5">({count})</span>
+              )}
             </button>
           );
         })}
       </fieldset>
 
       {/* Playstyle filter */}
-      <fieldset className="flex flex-wrap gap-1.5" aria-label="Filtrer par style de jeu">
-        {PLAYSTYLE_OPTIONS.map(opt => {
+      <fieldset
+        className="flex flex-wrap gap-1.5"
+        aria-label="Filtrer par style de jeu"
+      >
+        {PLAYSTYLE_OPTIONS.map((opt) => {
           const isActive = activePlaystyle === opt.value;
           const count = playstyleCounts?.[opt.value];
           return (
@@ -139,10 +189,16 @@ export function PassiveFilters({ typeCounts, playstyleCounts }: PassiveFiltersPr
               {opt.sprite ? (
                 <CommonSpriteIcon name={opt.sprite} scale={0.22} />
               ) : opt.icon ? (
-                <Icon name={opt.icon} size={14} className={cn(isActive ? "text-primary" : opt.color)} />
+                <Icon
+                  name={opt.icon}
+                  size={14}
+                  className={cn(isActive ? "text-primary" : opt.color)}
+                />
               ) : null}
               {opt.label}
-              {count !== undefined && <span className="text-[9px] opacity-60 ml-0.5">({count})</span>}
+              {count !== undefined && (
+                <span className="text-[9px] opacity-60 ml-0.5">({count})</span>
+              )}
             </button>
           );
         })}
@@ -154,7 +210,7 @@ export function PassiveFilters({ typeCounts, playstyleCounts }: PassiveFiltersPr
 
         aria-label="Filtrer par catégorie de stat"
       >
-        {STAT_CATEGORY_OPTIONS.map(opt => {
+        {STAT_CATEGORY_OPTIONS.map((opt) => {
           const isActive = activeStatCat === opt.value;
           return (
             <button

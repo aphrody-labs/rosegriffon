@@ -9,18 +9,18 @@ native site uses.
 
 ## Two wasm targets, two different worlds
 
-- **`wasm32-unknown-unknown`** (`crates/nie/aphrody-nie-wasm`) hosts every *pure-Rust* part of the
+- **`wasm32-unknown-unknown`** (`crates/nie/aphrody-nie-wasm`) hosts every _pure-Rust_ part of the
   engine already in the browser: `aphrody-nie-formats` (cfg.bin, CRILAYLA, @UTF, G4TX/G4MD/G4MG/G4SK),
   the HCA/ADX audio codec, `aphrody-nie-core`/`aphrody-nie-data`/`aphrody-nie-save`, the CPU-framebuffer game
   (`aphrody-nie-app`), the local match sim (`aphrody-nie-runtime`), etc. `aphrody-nie-lua`'s pure-Rust bytecode decoder
   (`aphrody_nie_lua::bytecode`, no VM) also lives there.
-- **`wasm32-unknown-emscripten`** (this crate) is the *only* wasm target that can host the real
+- **`wasm32-unknown-emscripten`** (this crate) is the _only_ wasm target that can host the real
   Lua **VM**. `mlua-sys` compiles PUC-Rio Lua 5.2.4's C sources via the vendored `lua-src`
   crate; that C code needs libc (`setjmp`/`longjmp`, `malloc`), which only emscripten's libc
   shim provides among wasm32 targets — `lua-src` panics outright
   (`don't know how to build Lua for wasm32-unknown-unknown`) if pointed at
   `wasm32-unknown-unknown` (measured 2026-09-12, `cargo check -p aphrody-nie-game --target
-  wasm32-unknown-unknown --no-default-features`).
+wasm32-unknown-unknown --no-default-features`).
 
 The two crates never share a `.wasm` module; the browser loads `aphrody-nie-wasm`'s module for
 everything else and this crate's module for menu/scene Lua logic, bridging them via
@@ -253,10 +253,10 @@ The patched `vendor/lua-src` passes `-sSUPPORT_LONGJMP=wasm` when it compiles Lu
 is not a workaround discovered by trial: it is the rule emscripten states.
 
 - `SUPPORT_LONGJMP` takes `emscripten` (JavaScript-based), `wasm` (WebAssembly
-  exception-handling-based), `0`, or `1`. `1` is the default and means *"`wasm` if
-  `-fwasm-exceptions` is used, `emscripten` otherwise"*.
-- *"When combining C and C++ code with `-fwasm-exceptions`, you must explicitly pass
-  `-sSUPPORT_LONGJMP=wasm` at C compile time to match the C++ handling model."*
+  exception-handling-based), `0`, or `1`. `1` is the default and means _"`wasm` if
+  `-fwasm-exceptions` is used, `emscripten` otherwise"_.
+- _"When combining C and C++ code with `-fwasm-exceptions`, you must explicitly pass
+  `-sSUPPORT_LONGJMP=wasm` at C compile time to match the C++ handling model."_
   — <https://emscripten.org/docs/porting/setjmp-longjmp.html>
 
 That is exactly this crate's situation: rustc compiles the Rust half of the module with
@@ -297,12 +297,12 @@ CFLAGS_wasm32_unknown_emscripten=-fwasm-exceptions
 
 **It changes nothing**, and a second attempt ruled out the obvious explanation. Measured twice:
 
-| Attempt | Result |
-|---|---|
-| link flags only | 870,512 bytes, 5 `invoke_*`, 1 `__cxa_find_matching_catch` |
-| `cargo clean -p mlua-sys` + rebuild (55 s of real C compilation) with `CFLAGS_wasm32_unknown_emscripten=-fwasm-exceptions` | **the same 870,512 bytes, the same 5 `invoke_*`, the same 1 `__cxa_find_matching_catch`** |
-| add `-C target-feature=+exception-handling` on nightly (installed here) and rebuild again, 1 min 14 s | **again the same 870,512 bytes and the same counts** — single output file, freshly timestamped, so the rebuild is real |
-| `cargo +nightly -Z build-std=std,panic_abort` with the same flags | **the artifact finally MOVES: 867,669 bytes** (−2,843). `invoke_*` and `__cxa_find_matching_catch` still present. Run end to end against the live VFS, the replay no longer reports a foreign exception — it traps: `RuntimeError: Unreachable code should not be executed` inside `nie_lua_web_replay`, which is what `panic_abort` makes of a Rust panic |
+| Attempt                                                                                                                    | Result                                                                                                                                                                                                                                                                                                                                                     |
+| -------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| link flags only                                                                                                            | 870,512 bytes, 5 `invoke_*`, 1 `__cxa_find_matching_catch`                                                                                                                                                                                                                                                                                                 |
+| `cargo clean -p mlua-sys` + rebuild (55 s of real C compilation) with `CFLAGS_wasm32_unknown_emscripten=-fwasm-exceptions` | **the same 870,512 bytes, the same 5 `invoke_*`, the same 1 `__cxa_find_matching_catch`**                                                                                                                                                                                                                                                                  |
+| add `-C target-feature=+exception-handling` on nightly (installed here) and rebuild again, 1 min 14 s                      | **again the same 870,512 bytes and the same counts** — single output file, freshly timestamped, so the rebuild is real                                                                                                                                                                                                                                     |
+| `cargo +nightly -Z build-std=std,panic_abort` with the same flags                                                          | **the artifact finally MOVES: 867,669 bytes** (−2,843). `invoke_*` and `__cxa_find_matching_catch` still present. Run end to end against the live VFS, the replay no longer reports a foreign exception — it traps: `RuntimeError: Unreachable code should not be executed` inside `nie_lua_web_replay`, which is what `panic_abort` makes of a Rust panic |
 
 A forced recompilation of Lua's C sources that changes NOTHING in the output means the
 trampolines do not come from those sources. They come from the Rust side: `rustc` emits the
@@ -333,7 +333,7 @@ kept) and driven end to end against the live VFS, the module prints:
    `SUPPORT_LONGJMP=emscripten is not compatible with -fwasm-exceptions`.
 2. Lua's protected calls therefore unwind through the C++/wasm unwinder.
 3. `mlua` wraps its calls into Lua in `catch_unwind`.
-4. Rust's standard library on `wasm32-unknown-emscripten` uses the *emscripten* (JS) exception
+4. Rust's standard library on `wasm32-unknown-emscripten` uses the _emscripten_ (JS) exception
    ABI, so that `catch_unwind` meets a foreign exception and aborts by design.
 5. Making `rustc` emit WebAssembly exception handling instead needs `-Z emscripten-wasm-eh`,
    which **does not exist** in the nightly installed here (`rustc 1.98.0-nightly`, 2026-06-04):
@@ -479,7 +479,7 @@ Run against the live site (`127.0.0.1:8085`) for the 14 `runtime_matrix.results`
   Native: `{"genre":"introuvable","message":"Menu script unavailable"}`. wasm:
   `{"error":"script not loaded for screen: shop_menu"}`. Different shape, same root cause.
 - **The other 13 families all abort the wasm instance**: `thread '<unnamed>' (1) panicked at
-  .../panicking.rs:225:5: panic in a function that cannot unwind`, surfacing in JS as
+.../panicking.rs:225:5: panic in a function that cannot unwind`, surfacing in JS as
   `Unreachable code should not be executed`.
 
 **Diagnosed root cause** (not fixed in this pass): `mlua` registers Rust closures as Lua C

@@ -32,13 +32,22 @@ export const COULEUR_ERREUR = 0xed4245;
 export const COULEUR_AVERTISSEMENT = 0xe67e22;
 
 /** Identifiants du serveur central (valeurs de production du legacy, surchargeables). */
-export function configAchillea(env: Record<string, string | undefined> = Bun.env) {
-  const lire = (cle: string, defaut: string) => (env[cle] ?? "").trim() || defaut;
+export function configAchillea(
+  env: Record<string, string | undefined> = Bun.env,
+) {
+  const lire = (cle: string, defaut: string) =>
+    (env[cle] ?? "").trim() || defaut;
   return {
     guildId: lire("ACHILLEA_CORE_GUILD_ID", ACHILLEA_GUILD_ID),
     clanCategoryId: lire("ACHILLEA_CLAN_CATEGORY_ID", "1457486074874957917"),
-    clanInvitesForumId: lire("ACHILLEA_CLAN_INVITES_FORUM_ID", "1398801519729709128"),
-    clanAnnouncementsChannelId: lire("ACHILLEA_CLAN_ANNOUNCEMENTS_CHANNEL_ID", "1398801515694788719"),
+    clanInvitesForumId: lire(
+      "ACHILLEA_CLAN_INVITES_FORUM_ID",
+      "1398801519729709128",
+    ),
+    clanAnnouncementsChannelId: lire(
+      "ACHILLEA_CLAN_ANNOUNCEMENTS_CHANNEL_ID",
+      "1398801515694788719",
+    ),
   };
 }
 
@@ -52,9 +61,11 @@ const PERMISSIONS = {
   useApplicationCommands: 1n << 31n,
 } as const;
 
-const bits = (...values: bigint[]) => values.reduce((acc, value) => acc | value, 0n).toString();
+const bits = (...values: bigint[]) =>
+  values.reduce((acc, value) => acc | value, 0n).toString();
 
-export type ResultatRest<T> = { ok: true; data: T } | { ok: false; statut: number | null; motif: string };
+export type ResultatRest<T> =
+  { ok: true; data: T } | { ok: false; statut: number | null; motif: string };
 
 /** Appel REST Discord avec le jeton Achilléa ; ne lève jamais. */
 export async function restAchillea<T = unknown>(
@@ -64,30 +75,52 @@ export async function restAchillea<T = unknown>(
   raison?: string,
 ): Promise<ResultatRest<T>> {
   const jeton = jetonBotAchillea();
-  if (!jeton) return { ok: false, statut: null, motif: "ACHILLEA_DISCORD_BOT_TOKEN absent" };
+  if (!jeton)
+    return {
+      ok: false,
+      statut: null,
+      motif: "ACHILLEA_DISCORD_BOT_TOKEN absent",
+    };
   try {
     const headers: Record<string, string> = { Authorization: `Bot ${jeton}` };
     if (body !== undefined) headers["Content-Type"] = "application/json";
-    if (raison) headers["X-Audit-Log-Reason"] = encodeURIComponent(raison.slice(0, 400));
+    if (raison)
+      headers["X-Audit-Log-Reason"] = encodeURIComponent(raison.slice(0, 400));
     const reponse = await fetch(`${API_DISCORD}${chemin}`, {
       method,
       headers,
-      ...(body === undefined || method === "GET" ? {} : { body: JSON.stringify(body) }),
+      ...(body === undefined || method === "GET"
+        ? {}
+        : { body: JSON.stringify(body) }),
       signal: AbortSignal.timeout(15_000),
     });
     if (!reponse.ok) {
-      return { ok: false, statut: reponse.status, motif: (await reponse.text().catch(() => "")).slice(0, 200) };
+      return {
+        ok: false,
+        statut: reponse.status,
+        motif: (await reponse.text().catch(() => "")).slice(0, 200),
+      };
     }
     const texte = await reponse.text();
     return { ok: true, data: (texte ? JSON.parse(texte) : null) as T };
   } catch (err) {
-    return { ok: false, statut: null, motif: err instanceof Error ? err.message : String(err) };
+    return {
+      ok: false,
+      statut: null,
+      motif: err instanceof Error ? err.message : String(err),
+    };
   }
 }
 
 /** Consigne un échec Discord sans interrompre la mutation. */
-export function consigner(action: string, resultat: ResultatRest<unknown> | ResultatEnvoi): void {
-  if (!resultat.ok) console.warn(`[achillea/clans] ${action} : échec Discord (${resultat.statut ?? "réseau"}) ${resultat.motif}`);
+export function consigner(
+  action: string,
+  resultat: ResultatRest<unknown> | ResultatEnvoi,
+): void {
+  if (!resultat.ok)
+    console.warn(
+      `[achillea/clans] ${action} : échec Discord (${resultat.statut ?? "réseau"}) ${resultat.motif}`,
+    );
 }
 
 const mention = (userId: string) => `<@${userId}>`;
@@ -104,11 +137,25 @@ export type Joueur = { id: string; nom: string; avatar: string };
 // Embeds et composants (textes du legacy)
 // ---------------------------------------------------------------------------
 
-export const embedSucces = (message: string) => ({ color: COULEUR_SUCCES, title: `✅ ${message}` });
-export const embedErreur = (message: string) => ({ color: COULEUR_ERREUR, title: `❌ ${message}` });
-export const embedAvertissement = (message: string) => ({ color: COULEUR_AVERTISSEMENT, title: `⚠️ ${message}` });
+export const embedSucces = (message: string) => ({
+  color: COULEUR_SUCCES,
+  title: `✅ ${message}`,
+});
+export const embedErreur = (message: string) => ({
+  color: COULEUR_ERREUR,
+  title: `❌ ${message}`,
+});
+export const embedAvertissement = (message: string) => ({
+  color: COULEUR_AVERTISSEMENT,
+  title: `⚠️ ${message}`,
+});
 
-export function embedJoueur(joueur: Joueur, titre: string, couleur: number, description?: string) {
+export function embedJoueur(
+  joueur: Joueur,
+  titre: string,
+  couleur: number,
+  description?: string,
+) {
   return {
     color: couleur,
     title: `${echapper(joueur.nom)} - ${titre}`,
@@ -117,23 +164,54 @@ export function embedJoueur(joueur: Joueur, titre: string, couleur: number, desc
   };
 }
 
-function boutons(...items: Array<{ label: string; style: 3 | 4; custom_id: string; emoji?: string }>) {
+function boutons(
+  ...items: Array<{
+    label: string;
+    style: 3 | 4;
+    custom_id: string;
+    emoji?: string;
+  }>
+) {
   return {
     type: 1,
-    components: items.map(({ emoji, ...item }) => ({ type: 2, ...item, ...(emoji ? { emoji: { name: emoji } } : {}) })),
+    components: items.map(({ emoji, ...item }) => ({
+      type: 2,
+      ...item,
+      ...(emoji ? { emoji: { name: emoji } } : {}),
+    })),
   };
 }
 
 export const boutonsInvitation = (inviteId: number) =>
   boutons(
-    { label: "Confirmer", style: 3, custom_id: `confirm_invite:${inviteId}`, emoji: "✅" },
-    { label: "Refuser", style: 4, custom_id: `cancel_invite:${inviteId}`, emoji: "✖️" },
+    {
+      label: "Confirmer",
+      style: 3,
+      custom_id: `confirm_invite:${inviteId}`,
+      emoji: "✅",
+    },
+    {
+      label: "Refuser",
+      style: 4,
+      custom_id: `cancel_invite:${inviteId}`,
+      emoji: "✖️",
+    },
   );
 
 export const boutonsCandidature = (applicationId: number) =>
   boutons(
-    { label: "Accepter", style: 3, custom_id: `confirm_application:${applicationId}`, emoji: "✅" },
-    { label: "Refuser", style: 4, custom_id: `refuse_application:${applicationId}`, emoji: "✖️" },
+    {
+      label: "Accepter",
+      style: 3,
+      custom_id: `confirm_application:${applicationId}`,
+      emoji: "✅",
+    },
+    {
+      label: "Refuser",
+      style: 4,
+      custom_id: `refuse_application:${applicationId}`,
+      emoji: "✖️",
+    },
   );
 
 export const boutonsVote = (proposalId: number) =>
@@ -146,44 +224,103 @@ export const boutonsVote = (proposalId: number) =>
 // Salons d'un clan
 // ---------------------------------------------------------------------------
 
-export type ClanDiscord = { id: number; name: string; channelId: string; roleId: string; broadcastChannel: string | null };
+export type ClanDiscord = {
+  id: number;
+  name: string;
+  channelId: string;
+  roleId: string;
+  broadcastChannel: string | null;
+};
 
 /** Salon du clan sur le serveur central + salon de diffusion du serveur du clan (legacy `logOnClanChannels`). */
-export async function publierSalonsClan(clan: ClanDiscord, message: MessageAchillea, action: string) {
-  const cibles = [clan.channelId, clan.broadcastChannel].filter((id): id is string => Boolean(id && /^\d+$/.test(id)));
-  await Promise.all(cibles.map(async salon => consigner(action, await publierSalonAchillea(salon, message))));
+export async function publierSalonsClan(
+  clan: ClanDiscord,
+  message: MessageAchillea,
+  action: string,
+) {
+  const cibles = [clan.channelId, clan.broadcastChannel].filter(
+    (id): id is string => Boolean(id && /^\d+$/.test(id)),
+  );
+  await Promise.all(
+    cibles.map(async (salon) =>
+      consigner(action, await publierSalonAchillea(salon, message)),
+    ),
+  );
 }
 
 export async function annoncerClans(message: MessageAchillea, action: string) {
-  consigner(action, await publierSalonAchillea(configAchillea().clanAnnouncementsChannelId, message));
+  consigner(
+    action,
+    await publierSalonAchillea(
+      configAchillea().clanAnnouncementsChannelId,
+      message,
+    ),
+  );
 }
 
-export async function mp(userId: string, message: MessageAchillea, action: string) {
+export async function mp(
+  userId: string,
+  message: MessageAchillea,
+  action: string,
+) {
   const resultat = await envoyerMpAchillea(userId, message);
   consigner(action, resultat);
   return resultat;
 }
 
-export async function ajouterRoleClan(userId: string, roleId: string, raison: string) {
+export async function ajouterRoleClan(
+  userId: string,
+  roleId: string,
+  raison: string,
+) {
   const { guildId } = configAchillea();
-  const resultat = await restAchillea("PUT", `/guilds/${guildId}/members/${userId}/roles/${roleId}`, undefined, raison);
+  const resultat = await restAchillea(
+    "PUT",
+    `/guilds/${guildId}/members/${userId}/roles/${roleId}`,
+    undefined,
+    raison,
+  );
   consigner("ajout du rôle de clan", resultat);
   return resultat;
 }
 
-export async function retirerRoleClan(userId: string, roleId: string, raison: string) {
+export async function retirerRoleClan(
+  userId: string,
+  roleId: string,
+  raison: string,
+) {
   const { guildId } = configAchillea();
-  const resultat = await restAchillea("DELETE", `/guilds/${guildId}/members/${userId}/roles/${roleId}`, undefined, raison);
+  const resultat = await restAchillea(
+    "DELETE",
+    `/guilds/${guildId}/members/${userId}/roles/${roleId}`,
+    undefined,
+    raison,
+  );
   consigner("retrait du rôle de clan", resultat);
   return resultat;
 }
 
-export async function modifierMessage(salonId: string, messageId: string, message: MessageAchillea, action: string) {
-  consigner(action, await restAchillea("PATCH", `/channels/${salonId}/messages/${messageId}`, message));
+export async function modifierMessage(
+  salonId: string,
+  messageId: string,
+  message: MessageAchillea,
+  action: string,
+) {
+  consigner(
+    action,
+    await restAchillea(
+      "PATCH",
+      `/channels/${salonId}/messages/${messageId}`,
+      message,
+    ),
+  );
 }
 
 export async function supprimerSalon(salonId: string, raison: string) {
-  consigner("suppression de salon", await restAchillea("DELETE", `/channels/${salonId}`, undefined, raison));
+  consigner(
+    "suppression de salon",
+    await restAchillea("DELETE", `/channels/${salonId}`, undefined, raison),
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -191,11 +328,16 @@ export async function supprimerSalon(salonId: string, raison: string) {
 // ---------------------------------------------------------------------------
 
 /** Les fondateurs doivent être sur le serveur central (legacy `getUserAsGuildMember`). */
-export async function membresAbsents(ids: readonly string[]): Promise<ResultatRest<string[]>> {
+export async function membresAbsents(
+  ids: readonly string[],
+): Promise<ResultatRest<string[]>> {
   const { guildId } = configAchillea();
   const absents: string[] = [];
   for (const id of ids) {
-    const resultat = await restAchillea("GET", `/guilds/${guildId}/members/${id}`);
+    const resultat = await restAchillea(
+      "GET",
+      `/guilds/${guildId}/members/${id}`,
+    );
     if (resultat.ok) continue;
     if (resultat.statut === 404) absents.push(id);
     else return resultat;
@@ -203,7 +345,11 @@ export async function membresAbsents(ids: readonly string[]): Promise<ResultatRe
   return { ok: true, data: absents };
 }
 
-export type ProvisionClan = { roleId: string; channelId: string; emojiId: string };
+export type ProvisionClan = {
+  roleId: string;
+  channelId: string;
+  emojiId: string;
+};
 
 /**
  * Rôle mentionnable attribué au président et aux fondateurs, puis salon privé
@@ -228,7 +374,11 @@ export async function provisionnerClan(input: {
   if (!role.ok) return role;
   const bot = await restAchillea<{ id: string }>("GET", "/users/@me");
   if (!bot.ok) {
-    await annulerProvision({ roleId: role.data.id, channelId: "", emojiId: "" });
+    await annulerProvision({
+      roleId: role.data.id,
+      channelId: "",
+      emojiId: "",
+    });
     return bot;
   }
   const salon = await restAchillea<{ id: string }>(
@@ -244,38 +394,79 @@ export async function provisionnerClan(input: {
           id: guildId,
           type: 0,
           deny: bits(PERMISSIONS.viewChannel, PERMISSIONS.sendMessages),
-          allow: bits(PERMISSIONS.useApplicationCommands, PERMISSIONS.attachFiles),
+          allow: bits(
+            PERMISSIONS.useApplicationCommands,
+            PERMISSIONS.attachFiles,
+          ),
         },
-        { id: role.data.id, type: 0, allow: bits(PERMISSIONS.viewChannel, PERMISSIONS.readMessageHistory) },
+        {
+          id: role.data.id,
+          type: 0,
+          allow: bits(PERMISSIONS.viewChannel, PERMISSIONS.readMessageHistory),
+        },
         {
           id: bot.data.id,
           type: 1,
-          allow: bits(PERMISSIONS.viewChannel, PERMISSIONS.sendMessages, PERMISSIONS.manageMessages),
+          allow: bits(
+            PERMISSIONS.viewChannel,
+            PERMISSIONS.sendMessages,
+            PERMISSIONS.manageMessages,
+          ),
         },
-        { id: input.presidentId, type: 1, allow: bits(PERMISSIONS.sendMessages) },
+        {
+          id: input.presidentId,
+          type: 1,
+          allow: bits(PERMISSIONS.sendMessages),
+        },
       ],
     },
     raison,
   );
   if (!salon.ok) {
-    await annulerProvision({ roleId: role.data.id, channelId: "", emojiId: "" });
+    await annulerProvision({
+      roleId: role.data.id,
+      channelId: "",
+      emojiId: "",
+    });
     return salon;
   }
-  await ajouterRoleClan(input.presidentId, role.data.id, `Captain of the Clan ${input.name}`);
+  await ajouterRoleClan(
+    input.presidentId,
+    role.data.id,
+    `Captain of the Clan ${input.name}`,
+  );
   for (const id of input.founderIds)
-    if (id !== input.presidentId) await ajouterRoleClan(id, role.data.id, `Founder of the Clan ${input.name}`);
-  const emojiId = await televerserEmoji(input.logo, input.shortName, bot.data.id);
-  return { ok: true, data: { roleId: role.data.id, channelId: salon.data.id, emojiId } };
+    if (id !== input.presidentId)
+      await ajouterRoleClan(
+        id,
+        role.data.id,
+        `Founder of the Clan ${input.name}`,
+      );
+  const emojiId = await televerserEmoji(
+    input.logo,
+    input.shortName,
+    bot.data.id,
+  );
+  return {
+    ok: true,
+    data: { roleId: role.data.id, channelId: salon.data.id, emojiId },
+  };
 }
 
 /** Supprime ce qui a été créé sur Discord quand l'écriture en base échoue. */
 export async function annulerProvision(provision: ProvisionClan) {
   const { guildId } = configAchillea();
-  if (provision.channelId) await supprimerSalon(provision.channelId, "Création de clan annulée");
+  if (provision.channelId)
+    await supprimerSalon(provision.channelId, "Création de clan annulée");
   if (provision.roleId)
     consigner(
       "suppression du rôle",
-      await restAchillea("DELETE", `/guilds/${guildId}/roles/${provision.roleId}`, undefined, "Création de clan annulée"),
+      await restAchillea(
+        "DELETE",
+        `/guilds/${guildId}/roles/${provision.roleId}`,
+        undefined,
+        "Création de clan annulée",
+      ),
     );
 }
 
@@ -288,29 +479,44 @@ const EMOJI_MAX_OCTETS = 256 * 1024;
  * `clan.clan_emoji_id`. Le nom porte un suffixe aléatoire : deux clans au même
  * sigle normalisé ne se volent plus l'émoji.
  */
-async function televerserEmoji(logo: string, sigle: string, applicationId: string): Promise<string> {
+async function televerserEmoji(
+  logo: string,
+  sigle: string,
+  applicationId: string,
+): Promise<string> {
   try {
     const reponse = await fetch(logo, { signal: AbortSignal.timeout(10_000) });
-    const type = reponse.headers.get("content-type")?.split(";")[0]?.trim() ?? "";
+    const type =
+      reponse.headers.get("content-type")?.split(";")[0]?.trim() ?? "";
     if (!reponse.ok || !/^image\/(png|jpeg|gif|webp)$/.test(type)) {
-      console.warn(`[achillea/clans] émoji : logo illisible (${reponse.status} ${type})`);
+      console.warn(
+        `[achillea/clans] émoji : logo illisible (${reponse.status} ${type})`,
+      );
       return "";
     }
     const octets = new Uint8Array(await reponse.arrayBuffer());
     if (octets.byteLength > EMOJI_MAX_OCTETS) {
-      console.warn(`[achillea/clans] émoji : logo de ${octets.byteLength} octets, au-delà de la limite Discord`);
+      console.warn(
+        `[achillea/clans] émoji : logo de ${octets.byteLength} octets, au-delà de la limite Discord`,
+      );
       return "";
     }
     const base = sigle.replace(/[^A-Za-z0-9_]/g, "").slice(0, 20) || "clan";
     const nom = `${base}_${crypto.randomUUID().replaceAll("-", "").slice(0, 8)}`;
-    const resultat = await restAchillea<{ id: string }>("POST", `/applications/${applicationId}/emojis`, {
-      name: nom,
-      image: `data:${type};base64,${Buffer.from(octets).toString("base64")}`,
-    });
+    const resultat = await restAchillea<{ id: string }>(
+      "POST",
+      `/applications/${applicationId}/emojis`,
+      {
+        name: nom,
+        image: `data:${type};base64,${Buffer.from(octets).toString("base64")}`,
+      },
+    );
     consigner("téléversement de l'émoji", resultat);
     return resultat.ok ? resultat.data.id : "";
   } catch (err) {
-    console.warn(`[achillea/clans] émoji : ${err instanceof Error ? err.message : String(err)}`);
+    console.warn(
+      `[achillea/clans] émoji : ${err instanceof Error ? err.message : String(err)}`,
+    );
     return "";
   }
 }
@@ -318,11 +524,16 @@ async function televerserEmoji(logo: string, sigle: string, applicationId: strin
 /** Message de vote de fondation dans le salon du clan (legacy `initFoundingVoteProcedure`). */
 export function messageVoteFondation(input: {
   proposalId: number;
-  clan: { name: string; shortName: string; biography: string; avatarUrl: string };
+  clan: {
+    name: string;
+    shortName: string;
+    biography: string;
+    avatarUrl: string;
+  };
   president: Joueur;
   founderIds: readonly string[];
 }): MessageAchillea {
-  const fondateurs = input.founderIds.filter(id => id !== input.president.id);
+  const fondateurs = input.founderIds.filter((id) => id !== input.president.id);
   return {
     content: `${fondateurs.map(mention).join(", ")}\n${mention(input.president.id)} souhaite fonder le clan ${echapper(input.clan.name)} avec vous ! Acceptez-vous ?`,
     embeds: [
@@ -332,8 +543,16 @@ export function messageVoteFondation(input: {
         description: input.clan.biography || "Pas de biographie fournie",
         thumbnail: { url: input.clan.avatarUrl },
         fields: [
-          { name: "Président", value: mention(input.president.id), inline: true },
-          { name: "Fondateurs", value: input.founderIds.map(id => `- ${mention(id)}`).join("\n"), inline: true },
+          {
+            name: "Président",
+            value: mention(input.president.id),
+            inline: true,
+          },
+          {
+            name: "Fondateurs",
+            value: input.founderIds.map((id) => `- ${mention(id)}`).join("\n"),
+            inline: true,
+          },
           { name: "Votes", value: `0 / ${fondateurs.length}`, inline: true },
         ],
       },
@@ -346,7 +565,12 @@ export function messageVoteFondation(input: {
 // Messages par action
 // ---------------------------------------------------------------------------
 
-export function messageCandidature(clan: ClanDiscord, joueur: Joueur, distinctions: readonly string[], applicationId: number) {
+export function messageCandidature(
+  clan: ClanDiscord,
+  joueur: Joueur,
+  distinctions: readonly string[],
+  applicationId: number,
+) {
   return {
     content: `${mentionRole(clan.roleId)} Cet utilisateur postule en tant que **${distinctions.join(", ")}**`,
     embeds: [embedJoueur(joueur, "Candidature", COULEUR_ACHILLEA)],
@@ -354,7 +578,13 @@ export function messageCandidature(clan: ClanDiscord, joueur: Joueur, distinctio
   } satisfies MessageAchillea;
 }
 
-export function messageInvitation(clanName: string, cibleId: string, inviteurId: string, distinctions: readonly string[], inviteId: number) {
+export function messageInvitation(
+  clanName: string,
+  cibleId: string,
+  inviteurId: string,
+  distinctions: readonly string[],
+  inviteId: number,
+) {
   return {
     content: `${mention(cibleId)}, vous avez été invité à rejoindre le Clan ${echapper(clanName)} par ${mention(inviteurId)} en qualité de **${distinctions.join(", ")}**`,
     components: [boutonsInvitation(inviteId)],
@@ -362,20 +592,33 @@ export function messageInvitation(clanName: string, cibleId: string, inviteurId:
 }
 
 /** Ouvre le fil d'invitation dans le forum des invitations ; rend l'identifiant du fil. */
-export async function ouvrirFilInvitation(nomFil: string, message: MessageAchillea): Promise<string | null> {
+export async function ouvrirFilInvitation(
+  nomFil: string,
+  message: MessageAchillea,
+): Promise<string | null> {
   const { clanInvitesForumId } = configAchillea();
-  const resultat = await restAchillea<{ id: string }>("POST", `/channels/${clanInvitesForumId}/threads`, {
-    name: nomFil.slice(0, 100) || "Invitation",
-    message: { ...message, allowed_mentions: { parse: ["users"] } },
-  });
+  const resultat = await restAchillea<{ id: string }>(
+    "POST",
+    `/channels/${clanInvitesForumId}/threads`,
+    {
+      name: nomFil.slice(0, 100) || "Invitation",
+      message: { ...message, allowed_mentions: { parse: ["users"] } },
+    },
+  );
   consigner("ouverture du fil d'invitation", resultat);
   return resultat.ok ? resultat.data.id : null;
 }
 
-export function messageRole(joueur: Joueur, role: ClanMemberRole, promotion: boolean): MessageAchillea {
+export function messageRole(
+  joueur: Joueur,
+  role: ClanMemberRole,
+  promotion: boolean,
+): MessageAchillea {
   const libelle = CLAN_MEMBER_ROLE_LABELS[role];
   return {
-    ...(promotion && role < ClanMemberRole.SubCaptain ? {} : { content: mention(joueur.id) }),
+    ...(promotion && role < ClanMemberRole.SubCaptain
+      ? {}
+      : { content: mention(joueur.id) }),
     embeds: [
       embedJoueur(
         joueur,

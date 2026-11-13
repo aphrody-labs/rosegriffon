@@ -23,13 +23,13 @@ résultat déjà présent dans l'arbre existant. Les scores sont soumis par
 
 ## Probes réelles à relever
 
-| Contexte | Vérification | Preuve attendue |
-| --- | --- | --- |
-| Sans session | Ouvrir la liste, puis chaque tournoi et son onglet Bracket ; consulter circuit, classement et résumé | Réponses HTTP, arbre affiché, nombre de participants et de matchs concordants, état vide explicite si aucun bracket |
-| Session membre | Refaire les lectures, ouvrir les lobbies accessibles | Même contenu public ; identité membre visible ; aucune action organisateur offerte |
-| Session organisateur d'un tournoi de test en préparation | Comparer participants actifs, capacité, seeds et arbre ; générer seulement si aucun résultat n'existe | Identifiants de participants et de matchs persistés ; deuxième lecture identique ; aucune perte de score |
-| Session organisateur d'un tournoi commencé ou terminé | Lire l'arbre, l'historique des matchs et le résumé ; vérifier que la régénération est refusée | Scores et classements conservés ; réponse de refus sans mutation |
-| Match réel autorisé | Suivre rapport puis validation du score, relire lobby, bracket et classement | Même gagnant et mêmes scores dans les trois surfaces ; événement d'audit présent |
+| Contexte                                                 | Vérification                                                                                          | Preuve attendue                                                                                                     |
+| -------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| Sans session                                             | Ouvrir la liste, puis chaque tournoi et son onglet Bracket ; consulter circuit, classement et résumé  | Réponses HTTP, arbre affiché, nombre de participants et de matchs concordants, état vide explicite si aucun bracket |
+| Session membre                                           | Refaire les lectures, ouvrir les lobbies accessibles                                                  | Même contenu public ; identité membre visible ; aucune action organisateur offerte                                  |
+| Session organisateur d'un tournoi de test en préparation | Comparer participants actifs, capacité, seeds et arbre ; générer seulement si aucun résultat n'existe | Identifiants de participants et de matchs persistés ; deuxième lecture identique ; aucune perte de score            |
+| Session organisateur d'un tournoi commencé ou terminé    | Lire l'arbre, l'historique des matchs et le résumé ; vérifier que la régénération est refusée         | Scores et classements conservés ; réponse de refus sans mutation                                                    |
+| Match réel autorisé                                      | Suivre rapport puis validation du score, relire lobby, bracket et classement                          | Même gagnant et mêmes scores dans les trois surfaces ; événement d'audit présent                                    |
 
 Pour une comparaison DB/API, rapprocher `event.id`, `event.internal_state`,
 `event.participants_number`, `tournament_participant.status`,

@@ -1,6 +1,12 @@
 import { describe, expect, test } from "bun:test";
 
-import { AchilleaHttp, encodePathSegment, encodeQuery, joinPath, type AchilleaFetch } from "../src/v1";
+import {
+  AchilleaHttp,
+  encodePathSegment,
+  encodeQuery,
+  joinPath,
+  type AchilleaFetch,
+} from "../src/v1";
 import { z } from "zod";
 
 function jsonResponse(body: unknown, status = 200): Response {
@@ -25,11 +31,16 @@ const probeSchema = z.object({ value: z.number() });
 /** Fetch qui ne répond jamais et ne rejette que sur abandon du signal. */
 const hangingFetch: AchilleaFetch = (_input, init) =>
   new Promise((_resolve, reject) => {
-    init?.signal?.addEventListener("abort", () => reject(new Error("The operation timed out.")));
+    init?.signal?.addEventListener("abort", () =>
+      reject(new Error("The operation timed out.")),
+    );
   });
 
 /** Lit un en-tête émis, sans supposer qu'un appel a bien été enregistré. */
-function headerOf(call: { init: RequestInit | undefined } | undefined, name: string): string | undefined {
+function headerOf(
+  call: { init: RequestInit | undefined } | undefined,
+  name: string,
+): string | undefined {
   const headers = call?.init?.headers as Record<string, string> | undefined;
   return headers?.[name];
 }
@@ -55,8 +66,12 @@ describe("query-string", () => {
   });
 
   test("sérialise les dates en ISO et échappe les valeurs", () => {
-    expect(encodeQuery({ from: new Date("2026-01-02T03:04:05.000Z") })).toBe("?from=2026-01-02T03%3A04%3A05.000Z");
-    expect(encodeQuery({ q: "rose griffon & co" })).toBe("?q=rose+griffon+%26+co");
+    expect(encodeQuery({ from: new Date("2026-01-02T03:04:05.000Z") })).toBe(
+      "?from=2026-01-02T03%3A04%3A05.000Z",
+    );
+    expect(encodeQuery({ q: "rose griffon & co" })).toBe(
+      "?q=rose+griffon+%26+co",
+    );
   });
 
   test("assemble chemin et query-string", () => {
@@ -73,7 +88,10 @@ describe("query-string", () => {
 describe("construction d'URL", () => {
   test("ignore les slashs finaux de la base", () => {
     const { fetch, calls } = recordingFetch(() => jsonResponse({ value: 1 }));
-    const http = new AchilleaHttp({ baseUrl: "https://example.test/api///", fetch });
+    const http = new AchilleaHttp({
+      baseUrl: "https://example.test/api///",
+      fetch,
+    });
 
     void http.get("/ranked/me", probeSchema, { query: { mode: 2 } });
 
@@ -84,8 +102,12 @@ describe("construction d'URL", () => {
   test("expose une URL absolue pour les ressources non JSON", () => {
     const http = new AchilleaHttp({ baseUrl: "https://example.test/api" });
 
-    expect(http.url("/users/1/card.png")).toBe("https://example.test/api/users/1/card.png");
-    expect(http.url("/guilds", { page: 2 })).toBe("https://example.test/api/guilds?page=2");
+    expect(http.url("/users/1/card.png")).toBe(
+      "https://example.test/api/users/1/card.png",
+    );
+    expect(http.url("/guilds", { page: 2 })).toBe(
+      "https://example.test/api/guilds?page=2",
+    );
   });
 });
 
@@ -108,7 +130,9 @@ describe("issues de requête", () => {
   });
 
   test("succès : la valeur validée est rendue", async () => {
-    const http = new AchilleaHttp({ fetch: async () => jsonResponse({ value: 7 }) });
+    const http = new AchilleaHttp({
+      fetch: async () => jsonResponse({ value: 7 }),
+    });
 
     const result = await http.get("/probe", probeSchema);
 
@@ -134,7 +158,9 @@ describe("issues de requête", () => {
   });
 
   test("JSON illisible : échec `invalid_json`", async () => {
-    const http = new AchilleaHttp({ fetch: async () => new Response("pas du JSON") });
+    const http = new AchilleaHttp({
+      fetch: async () => new Response("pas du JSON"),
+    });
 
     const result = await http.get("/probe", probeSchema);
 
@@ -145,9 +171,13 @@ describe("issues de requête", () => {
   });
 
   test("réponse hors-schéma : échec `invalid_response` avec le chemin fautif", async () => {
-    const http = new AchilleaHttp({ fetch: async () => jsonResponse({ value: "sept" }) });
+    const http = new AchilleaHttp({
+      fetch: async () => jsonResponse({ value: "sept" }),
+    });
 
-    const result = await http.get("/probe", probeSchema, { query: { mode: 4 } });
+    const result = await http.get("/probe", probeSchema, {
+      query: { mode: 4 },
+    });
 
     expect(result).toMatchObject({
       ok: false,
@@ -189,14 +219,21 @@ describe("issues de requête", () => {
 describe("verbes et corps de requête", () => {
   test("POST / PUT / PATCH sérialisent un corps JSON", async () => {
     const { fetch, calls } = recordingFetch(() => jsonResponse({ value: 1 }));
-    const http = new AchilleaHttp({ baseUrl: "https://example.test/api", fetch });
+    const http = new AchilleaHttp({
+      baseUrl: "https://example.test/api",
+      fetch,
+    });
 
     await http.post("/a", probeSchema, { n: 1 });
     await http.put("/b", probeSchema, { n: 2 });
     await http.patch("/c", probeSchema, { n: 3 });
 
-    expect(calls.map(call => call.init?.method)).toEqual(["POST", "PUT", "PATCH"]);
-    expect(calls.map(call => call.init?.body)).toEqual([
+    expect(calls.map((call) => call.init?.method)).toEqual([
+      "POST",
+      "PUT",
+      "PATCH",
+    ]);
+    expect(calls.map((call) => call.init?.body)).toEqual([
       JSON.stringify({ n: 1 }),
       JSON.stringify({ n: 2 }),
       JSON.stringify({ n: 3 }),
@@ -246,7 +283,10 @@ describe("verbes et corps de requête", () => {
 
     const result = await http.requestText("/metrics");
 
-    expect(result).toEqual({ ok: true, value: "# HELP achillea_up\nachillea_up 1\n" });
+    expect(result).toEqual({
+      ok: true,
+      value: "# HELP achillea_up\nachillea_up 1\n",
+    });
   });
 });
 
@@ -285,8 +325,14 @@ describe("authentification", () => {
     const withCookies = recordingFetch(() => jsonResponse({ value: 1 }));
     const withoutCookies = recordingFetch(() => jsonResponse({ value: 1 }));
 
-    await new AchilleaHttp({ fetch: withCookies.fetch, credentials: "include" }).get("/probe", probeSchema);
-    await new AchilleaHttp({ fetch: withoutCookies.fetch }).get("/probe", probeSchema);
+    await new AchilleaHttp({
+      fetch: withCookies.fetch,
+      credentials: "include",
+    }).get("/probe", probeSchema);
+    await new AchilleaHttp({ fetch: withoutCookies.fetch }).get(
+      "/probe",
+      probeSchema,
+    );
 
     expect(withCookies.calls[0]?.init?.credentials).toBe("include");
     expect(withoutCookies.calls[0]?.init?.credentials).toBeUndefined();
@@ -294,9 +340,14 @@ describe("authentification", () => {
 
   test("les en-têtes par défaut et ceux de l'appel se cumulent", async () => {
     const { fetch, calls } = recordingFetch(() => jsonResponse({ value: 1 }));
-    const http = new AchilleaHttp({ fetch, headers: { "Accept-Language": "fr" } });
+    const http = new AchilleaHttp({
+      fetch,
+      headers: { "Accept-Language": "fr" },
+    });
 
-    await http.get("/probe", probeSchema, { headers: { "x-internal-secret": "chut" } });
+    await http.get("/probe", probeSchema, {
+      headers: { "x-internal-secret": "chut" },
+    });
 
     expect(headerOf(calls[0], "Accept-Language")).toBe("fr");
     expect(headerOf(calls[0], "x-internal-secret")).toBe("chut");
@@ -307,16 +358,31 @@ describe("authentification", () => {
 describe("message d'erreur de l'API", () => {
   test("lu depuis { message }, { error } ou { erreur }", async () => {
     const { AchilleaHttp } = await import("../src/v1/http");
-    for (const corps of [{ message: "Staff role required" }, { error: "Staff role required" }, { erreur: "Staff role required" }]) {
-      const http = new AchilleaHttp({ baseUrl: "http://x", fetch: (async () => Response.json(corps, { status: 403 })) });
+    for (const corps of [
+      { message: "Staff role required" },
+      { error: "Staff role required" },
+      { erreur: "Staff role required" },
+    ]) {
+      const http = new AchilleaHttp({
+        baseUrl: "http://x",
+        fetch: async () => Response.json(corps, { status: 403 }),
+      });
       const resultat = await http.request("/admin/ops/health");
-      expect(resultat).toMatchObject({ ok: false, kind: "http", status: 403, message: "Staff role required" });
+      expect(resultat).toMatchObject({
+        ok: false,
+        kind: "http",
+        status: 403,
+        message: "Staff role required",
+      });
     }
   });
 
   test("absent quand le corps n'est pas du JSON", async () => {
     const { AchilleaHttp } = await import("../src/v1/http");
-    const http = new AchilleaHttp({ baseUrl: "http://x", fetch: (async () => new Response("Bad Gateway", { status: 502 })) });
+    const http = new AchilleaHttp({
+      baseUrl: "http://x",
+      fetch: async () => new Response("Bad Gateway", { status: 502 }),
+    });
     const resultat = await http.request("/clans");
     expect(resultat.ok).toBe(false);
     expect("message" in resultat).toBe(false);

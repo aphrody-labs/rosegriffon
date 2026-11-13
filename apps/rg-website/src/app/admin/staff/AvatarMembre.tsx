@@ -65,8 +65,13 @@ export function AvatarMembre({
           className="flex size-full items-center justify-center text-on-surface-variant"
           title={enEchec ? "Photo introuvable" : "Aucune photo"}
         >
-          <UsersIcon aria-hidden="true" style={{ height: taille / 2, width: taille / 2 }} />
-          <span className="sr-only">{enEchec ? "Photo introuvable" : "Aucune photo"}</span>
+          <UsersIcon
+            aria-hidden="true"
+            style={{ height: taille / 2, width: taille / 2 }}
+          />
+          <span className="sr-only">
+            {enEchec ? "Photo introuvable" : "Aucune photo"}
+          </span>
         </div>
       )}
     </div>

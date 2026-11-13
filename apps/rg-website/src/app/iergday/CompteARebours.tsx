@@ -79,7 +79,9 @@ function Case({
       </p>
       <p className="mt-1.5 text-[0.65rem] leading-tight font-semibold tracking-wide text-rg-sur-marine/80 uppercase xs:text-xs">
         <span className="sm:hidden">{abrege}</span>
-        <span className="hidden sm:inline">{valeur !== null && valeur === 1 ? singulier : pluriel}</span>
+        <span className="hidden sm:inline">
+          {valeur !== null && valeur === 1 ? singulier : pluriel}
+        </span>
       </p>
     </div>
   );
@@ -155,11 +157,34 @@ export function CompteARebours({
 				    chaque seconde et serait insupportable à l'écoute. La phrase complète,
 				    elle, est annoncée une fois, juste en dessous. */}
         {!ecoule && (
-          <div className="mt-3 grid grid-cols-4 gap-2 sm:mt-4 sm:gap-3" aria-hidden>
-            <Case valeur={restant?.jours ?? null} singulier="jour" pluriel="jours" abrege="j" />
-            <Case valeur={restant?.heures ?? null} singulier="heure" pluriel="heures" abrege="h" />
-            <Case valeur={restant?.minutes ?? null} singulier="minute" pluriel="minutes" abrege="min" />
-            <Case valeur={restant?.secondes ?? null} singulier="seconde" pluriel="secondes" abrege="s" />
+          <div
+            className="mt-3 grid grid-cols-4 gap-2 sm:mt-4 sm:gap-3"
+            aria-hidden
+          >
+            <Case
+              valeur={restant?.jours ?? null}
+              singulier="jour"
+              pluriel="jours"
+              abrege="j"
+            />
+            <Case
+              valeur={restant?.heures ?? null}
+              singulier="heure"
+              pluriel="heures"
+              abrege="h"
+            />
+            <Case
+              valeur={restant?.minutes ?? null}
+              singulier="minute"
+              pluriel="minutes"
+              abrege="min"
+            />
+            <Case
+              valeur={restant?.secondes ?? null}
+              singulier="seconde"
+              pluriel="secondes"
+              abrege="s"
+            />
           </div>
         )}
 

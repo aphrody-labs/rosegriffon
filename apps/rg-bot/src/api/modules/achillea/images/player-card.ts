@@ -42,10 +42,13 @@ export interface PlayerCardData {
   season: string;
 }
 
-export async function loadPlayerCardData(db: Kysely<Database>, userId: string): Promise<PlayerCardData> {
+export async function loadPlayerCardData(
+  db: Kysely<Database>,
+  userId: string,
+): Promise<PlayerCardData> {
   const row = await db
     .selectFrom("user")
-    .leftJoin("user_elo", join =>
+    .leftJoin("user_elo", (join) =>
       join
         .onRef("user_elo.user_id", "=", "user.id")
         .on("user_elo.mode", "=", MatchMode.ONE_VS_ONE)
@@ -86,7 +89,10 @@ export function seasonLabel(date: Date): string {
   return `Saison ${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}`;
 }
 
-export async function renderPlayerCard(data: PlayerCardData, avatar?: Image | null): Promise<Buffer> {
+export async function renderPlayerCard(
+  data: PlayerCardData,
+  avatar?: Image | null,
+): Promise<Buffer> {
   registerAchilleaFonts();
   const canvas = createCanvas(WIDTH, HEIGHT);
   const ctx = canvas.getContext("2d");
@@ -122,7 +128,13 @@ export async function renderPlayerCard(data: PlayerCardData, avatar?: Image | nu
   const size = 360;
   const ax = (WIDTH - size) / 2;
   const ay = 220;
-  drawCircleImage(ctx, avatar === undefined ? await fetchImage(data.avatarUrl) : avatar, ax, ay, size);
+  drawCircleImage(
+    ctx,
+    avatar === undefined ? await fetchImage(data.avatarUrl) : avatar,
+    ax,
+    ay,
+    size,
+  );
   ctx.beginPath();
   ctx.arc(ax + size / 2, ay + size / 2, size / 2 + 8, 0, Math.PI * 2);
   ctx.lineWidth = 10;
@@ -168,7 +180,11 @@ export async function renderPlayerCard(data: PlayerCardData, avatar?: Image | nu
   ctx.textAlign = "left";
   ctx.fillText(`ID ${data.userId}`, 70, fy + 35);
   ctx.textAlign = "right";
-  ctx.fillText(`Généré le ${new Date().toISOString().slice(0, 10)} · ${websiteHost()}`, WIDTH - 70, fy + 35);
+  ctx.fillText(
+    `Généré le ${new Date().toISOString().slice(0, 10)} · ${websiteHost()}`,
+    WIDTH - 70,
+    fy + 35,
+  );
 
   return canvas.toBuffer("image/png");
 }

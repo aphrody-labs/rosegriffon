@@ -128,9 +128,12 @@ export function calculateSingleStat(
 // Lookup Functions (Pure)
 // ============================================================================
 
-export function findLv1Entry(tables: GrowthTables, params: CharacterGrowthParams): GrowthTableLv1Entry | undefined {
+export function findLv1Entry(
+  tables: GrowthTables,
+  params: CharacterGrowthParams,
+): GrowthTableLv1Entry | undefined {
   let entry = tables.lv1.find(
-    e =>
+    (e) =>
       e.mainPosition === params.mainPosition &&
       e.subPosition === params.subPosition &&
       e.playStyle === (params.playStyle ?? 0),
@@ -138,27 +141,38 @@ export function findLv1Entry(tables: GrowthTables, params: CharacterGrowthParams
 
   if (!entry && params.playStyle !== undefined && params.playStyle !== 0) {
     entry = tables.lv1.find(
-      e => e.mainPosition === params.mainPosition && e.subPosition === params.subPosition && e.playStyle === 0,
+      (e) =>
+        e.mainPosition === params.mainPosition &&
+        e.subPosition === params.subPosition &&
+        e.playStyle === 0,
     );
   }
 
   if (!entry && params.subPosition !== 0) {
-    entry = tables.lv1.find(e => e.mainPosition === params.mainPosition && e.subPosition === 0 && e.playStyle === 0);
+    entry = tables.lv1.find(
+      (e) =>
+        e.mainPosition === params.mainPosition &&
+        e.subPosition === 0 &&
+        e.playStyle === 0,
+    );
   }
 
   if (!entry) {
-    entry = tables.lv1.find(e => e.mainPosition === params.mainPosition);
+    entry = tables.lv1.find((e) => e.mainPosition === params.mainPosition);
   }
 
   return entry;
 }
 
-export function findLv30Entry(tables: GrowthTables, params: CharacterGrowthParams): GrowthTableLv30Entry | undefined {
+export function findLv30Entry(
+  tables: GrowthTables,
+  params: CharacterGrowthParams,
+): GrowthTableLv30Entry | undefined {
   const growthRank = rarityToGrowthRank(params.charaRank);
 
   // Try exact pattern first
   let entry = tables.lv30.find(
-    e =>
+    (e) =>
       e.mainPosition === params.mainPosition &&
       e.subPosition === params.subPosition &&
       e.growthPattern === params.growthPattern &&
@@ -168,7 +182,7 @@ export function findLv30Entry(tables: GrowthTables, params: CharacterGrowthParam
   // Fallback: growth table only has patterns 0 and 1
   if (!entry && params.growthPattern >= 2) {
     entry = tables.lv30.find(
-      e =>
+      (e) =>
         e.mainPosition === params.mainPosition &&
         e.subPosition === params.subPosition &&
         e.growthPattern === 0 &&
@@ -179,7 +193,7 @@ export function findLv30Entry(tables: GrowthTables, params: CharacterGrowthParam
   // Fallback: subPosition = 0
   if (!entry && params.subPosition !== 0) {
     entry = tables.lv30.find(
-      e =>
+      (e) =>
         e.mainPosition === params.mainPosition &&
         e.subPosition === 0 &&
         e.growthPattern === 0 &&
@@ -190,40 +204,57 @@ export function findLv30Entry(tables: GrowthTables, params: CharacterGrowthParam
   // Fallback: charaRank = 0 (Normal)
   if (!entry && growthRank !== 0) {
     entry = tables.lv30.find(
-      e => e.mainPosition === params.mainPosition && e.subPosition === 0 && e.growthPattern === 0 && e.charaRank === 0,
+      (e) =>
+        e.mainPosition === params.mainPosition &&
+        e.subPosition === 0 &&
+        e.growthPattern === 0 &&
+        e.charaRank === 0,
     );
   }
 
   if (!entry) {
-    entry = tables.lv30.find(e => e.mainPosition === params.mainPosition);
+    entry = tables.lv30.find((e) => e.mainPosition === params.mainPosition);
   }
 
   return entry;
 }
 
-export function findMainEntry(tables: GrowthTables, params: CharacterGrowthParams): GrowthTableMainEntry | undefined {
+export function findMainEntry(
+  tables: GrowthTables,
+  params: CharacterGrowthParams,
+): GrowthTableMainEntry | undefined {
   const growthRank = rarityToGrowthRank(params.charaRank);
 
   // Try exact pattern first
   let entry = tables.main.find(
-    e =>
-      e.mainPosition === params.mainPosition && e.growthPattern === params.growthPattern && e.charaRank === growthRank,
+    (e) =>
+      e.mainPosition === params.mainPosition &&
+      e.growthPattern === params.growthPattern &&
+      e.charaRank === growthRank,
   );
 
   // Fallback: growth table only has patterns 0 and 1
   if (!entry && params.growthPattern >= 2) {
     entry = tables.main.find(
-      e => e.mainPosition === params.mainPosition && e.growthPattern === 0 && e.charaRank === growthRank,
+      (e) =>
+        e.mainPosition === params.mainPosition &&
+        e.growthPattern === 0 &&
+        e.charaRank === growthRank,
     );
   }
 
   // Fallback: charaRank = 0 (Normal)
   if (!entry && growthRank !== 0) {
-    entry = tables.main.find(e => e.mainPosition === params.mainPosition && e.growthPattern === 0 && e.charaRank === 0);
+    entry = tables.main.find(
+      (e) =>
+        e.mainPosition === params.mainPosition &&
+        e.growthPattern === 0 &&
+        e.charaRank === 0,
+    );
   }
 
   if (!entry) {
-    entry = tables.main.find(e => e.mainPosition === params.mainPosition);
+    entry = tables.main.find((e) => e.mainPosition === params.mainPosition);
   }
 
   return entry;
@@ -232,7 +263,11 @@ export function findMainEntry(tables: GrowthTables, params: CharacterGrowthParam
 /**
  * Calcule toutes les stats d'un personnage à un niveau donné (Pure)
  */
-export function calculateStats(tables: GrowthTables, params: CharacterGrowthParams, level: number): StatBlock {
+export function calculateStats(
+  tables: GrowthTables,
+  params: CharacterGrowthParams,
+  level: number,
+): StatBlock {
   const lv1 = findLv1Entry(tables, params);
   const lv30 = findLv30Entry(tables, params);
   const main = findMainEntry(tables, params);
@@ -245,13 +280,55 @@ export function calculateStats(tables: GrowthTables, params: CharacterGrowthPara
   }
 
   return {
-    Kc: calculateSingleStat(level, lv1.Kc_1, lv30.Kc_30, main.Kc_50, main.Kc_99),
-    Cr: calculateSingleStat(level, lv1.Cr_1, lv30.Cr_30, main.Cr_50, main.Cr_99),
-    Tc: calculateSingleStat(level, lv1.Tc_1, lv30.Tc_30, main.Tc_50, main.Tc_99),
-    Pr: calculateSingleStat(level, lv1.Pr_1, lv30.Pr_30, main.Pr_50, main.Pr_99),
-    Ps: calculateSingleStat(level, lv1.Ps_1, lv30.Ps_30, main.Ps_50, main.Ps_99),
-    Ag: calculateSingleStat(level, lv1.Ag_1, lv30.Ag_30, main.Ag_50, main.Ag_99),
-    It: calculateSingleStat(level, lv1.It_1, lv30.It_30, main.It_50, main.It_99),
+    Kc: calculateSingleStat(
+      level,
+      lv1.Kc_1,
+      lv30.Kc_30,
+      main.Kc_50,
+      main.Kc_99,
+    ),
+    Cr: calculateSingleStat(
+      level,
+      lv1.Cr_1,
+      lv30.Cr_30,
+      main.Cr_50,
+      main.Cr_99,
+    ),
+    Tc: calculateSingleStat(
+      level,
+      lv1.Tc_1,
+      lv30.Tc_30,
+      main.Tc_50,
+      main.Tc_99,
+    ),
+    Pr: calculateSingleStat(
+      level,
+      lv1.Pr_1,
+      lv30.Pr_30,
+      main.Pr_50,
+      main.Pr_99,
+    ),
+    Ps: calculateSingleStat(
+      level,
+      lv1.Ps_1,
+      lv30.Ps_30,
+      main.Ps_50,
+      main.Ps_99,
+    ),
+    Ag: calculateSingleStat(
+      level,
+      lv1.Ag_1,
+      lv30.Ag_30,
+      main.Ag_50,
+      main.Ag_99,
+    ),
+    It: calculateSingleStat(
+      level,
+      lv1.It_1,
+      lv30.It_30,
+      main.It_50,
+      main.It_99,
+    ),
   };
 }
 
@@ -259,7 +336,9 @@ export function calculateStats(tables: GrowthTables, params: CharacterGrowthPara
  * Calcule le total des stats (force totale)
  */
 export function calculateTotalPower(stats: StatBlock): number {
-  return stats.Kc + stats.Cr + stats.Tc + stats.Pr + stats.Ps + stats.Ag + stats.It;
+  return (
+    stats.Kc + stats.Cr + stats.Tc + stats.Pr + stats.Ps + stats.Ag + stats.It
+  );
 }
 
 /**
@@ -300,12 +379,13 @@ export const RANK_LABELS: Record<number, string> = {
   5: "UR (Ultra Rare)",
 };
 
-export const STAT_LABELS: Record<keyof StatBlock, { en: string; jp: string }> = {
-  Kc: { en: "Kick", jp: "シュート" },
-  Cr: { en: "Control", jp: "ドリブル" },
-  Tc: { en: "Technique", jp: "テクニック" },
-  Pr: { en: "Power", jp: "フィジカル" },
-  Ps: { en: "Pressure", jp: "プレッシャー" },
-  Ag: { en: "Agility", jp: "スピード" },
-  It: { en: "Intelligence", jp: "インテリジェンス" },
-};
+export const STAT_LABELS: Record<keyof StatBlock, { en: string; jp: string }> =
+  {
+    Kc: { en: "Kick", jp: "シュート" },
+    Cr: { en: "Control", jp: "ドリブル" },
+    Tc: { en: "Technique", jp: "テクニック" },
+    Pr: { en: "Power", jp: "フィジカル" },
+    Ps: { en: "Pressure", jp: "プレッシャー" },
+    Ag: { en: "Agility", jp: "スピード" },
+    It: { en: "Intelligence", jp: "インテリジェンス" },
+  };

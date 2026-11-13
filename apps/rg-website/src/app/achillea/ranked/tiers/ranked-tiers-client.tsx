@@ -9,14 +9,24 @@ import type { RankedTierInfo } from "@rosegriffon/achillea-types";
 import { ArrowLeft, Layers, ScrollText, TrendingUp } from "lucide-react";
 import { signalerException } from "@/lib/achillea/signaler";
 
-export default function RankedTiersPage({ initialTiers }: { initialTiers?: RankedTierInfo[] | null }) {
+export default function RankedTiersPage({
+  initialTiers,
+}: {
+  initialTiers?: RankedTierInfo[] | null;
+}) {
   const [mode, setMode] = useState<2 | 4>(2);
   const [tiers, setTiers] = useState<RankedTierInfo[]>(initialTiers ?? []);
   const [loading, setLoading] = useState<boolean>(initialTiers == null);
   const [error, setError] = useState<string | null>(null);
 
-  const [requestIdentity1, setRequestIdentity1] = useState<readonly unknown[]>([mode]);
-  if ([mode].some((value, position) => !Object.is(value, requestIdentity1[position]))) {
+  const [requestIdentity1, setRequestIdentity1] = useState<readonly unknown[]>([
+    mode,
+  ]);
+  if (
+    [mode].some(
+      (value, position) => !Object.is(value, requestIdentity1[position]),
+    )
+  ) {
     setRequestIdentity1([mode]);
     (() => {
       setLoading(true);
@@ -30,14 +40,15 @@ export default function RankedTiersPage({ initialTiers }: { initialTiers?: Ranke
 
     client.ranked
       .tiers(mode)
-      .then(res => {
+      .then((res) => {
         if (cancelled) return;
         if (res.ok) setTiers(res.value);
         else setError("Les paliers sont momentanément indisponibles.");
       })
-      .catch(cause => {
+      .catch((cause) => {
         signalerException("ranked/tiers", cause);
-        if (!cancelled) setError("Les paliers sont momentanément indisponibles.");
+        if (!cancelled)
+          setError("Les paliers sont momentanément indisponibles.");
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -66,10 +77,13 @@ export default function RankedTiersPage({ initialTiers }: { initialTiers?: Ranke
             <span className="p-2 rounded-xl bg-primary/10 text-primary border border-primary/20">
               <Layers className="w-5 h-5" />
             </span>
-            <h1 className="text-3xl font-bold tracking-tight">Paliers Compétitifs</h1>
+            <h1 className="text-3xl font-bold tracking-tight">
+              Paliers Compétitifs
+            </h1>
           </div>
           <p className="text-lg text-muted-foreground">
-            Découvrez les 11 échelons du classement Achilléa, les seuils d'AP et la répartition des compétiteurs.
+            Découvrez les 11 échelons du classement Achilléa, les seuils d'AP et
+            la répartition des compétiteurs.
           </p>
         </div>
 
@@ -107,14 +121,20 @@ export default function RankedTiersPage({ initialTiers }: { initialTiers?: Ranke
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <TrendingUp className="w-4 h-4 text-primary" />
-            <h3 className="font-semibold text-lg">Répartition globale des joueurs</h3>
+            <h3 className="font-semibold text-lg">
+              Répartition globale des joueurs
+            </h3>
           </div>
           <span className="text-lg text-muted-foreground">
-            {totalPlayers > 0 ? `${totalPlayers} compétiteurs actifs` : "Saison active"}
+            {totalPlayers > 0
+              ? `${totalPlayers} compétiteurs actifs`
+              : "Saison active"}
           </span>
         </div>
         {loading && tiers.length === 0 ? (
-          <output className="text-lg text-muted-foreground">Chargement des paliers…</output>
+          <output className="text-lg text-muted-foreground">
+            Chargement des paliers…
+          </output>
         ) : error && tiers.length === 0 ? (
           <p role="alert" className="text-lg text-destructive">
             {error}
@@ -123,7 +143,9 @@ export default function RankedTiersPage({ initialTiers }: { initialTiers?: Ranke
           <TierDistribution tiers={tiers} />
         )}
         {error && tiers.length > 0 && (
-          <output className="text-lg text-warning">{error} Les dernières données chargées restent affichées.</output>
+          <output className="text-lg text-warning">
+            {error} Les dernières données chargées restent affichées.
+          </output>
         )}
       </div>
 
@@ -136,14 +158,19 @@ export default function RankedTiersPage({ initialTiers }: { initialTiers?: Ranke
               tier.gradient?.length >= 2
                 ? `linear-gradient(135deg, ${tier.gradient.join(", ")})`
                 : "linear-gradient(135deg, #959595, #494949)";
-            const pct = totalPlayers > 0 ? Math.round((tier.playerCount / totalPlayers) * 100) : 0;
+            const pct =
+              totalPlayers > 0
+                ? Math.round((tier.playerCount / totalPlayers) * 100)
+                : 0;
             const isTopTier = idx >= 8; // Divin, Supernova, Légendaire
 
             return (
               <div
                 key={tier.key}
                 className={`border rounded-2xl p-5 bg-surface-container/60 backdrop-blur-md relative overflow-hidden transition-all duration-200 hover:bg-surface-container-high/60 hover:shadow-lg hover:border-outline-variant/30 active:scale-[0.99] ${
-                  isTopTier ? "border-warning/40 shadow-xs" : "border-outline-variant/15"
+                  isTopTier
+                    ? "border-warning/40 shadow-xs"
+                    : "border-outline-variant/15"
                 }`}
               >
                 {isTopTier && (
@@ -166,17 +193,24 @@ export default function RankedTiersPage({ initialTiers }: { initialTiers?: Ranke
 
                   <div className="space-y-1 flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2">
-                      <h4 className="font-bold text-base truncate">{tier.key}</h4>
+                      <h4 className="font-bold text-base truncate">
+                        {tier.key}
+                      </h4>
                       <span className="text-lg font-mono font-bold text-warning">
-                        {tier.minElo} {tier.maxElo < 9000 ? `- ${tier.maxElo}` : "+"} AP
+                        {tier.minElo}{" "}
+                        {tier.maxElo < 9000 ? `- ${tier.maxElo}` : "+"} AP
                       </span>
                     </div>
 
-                    <p className="text-lg text-muted-foreground">Palier {idx + 1} sur 11</p>
+                    <p className="text-lg text-muted-foreground">
+                      Palier {idx + 1} sur 11
+                    </p>
 
                     <div className="flex items-center justify-between gap-3 text-lg pt-2 border-t border-outline-variant/15 text-muted-foreground">
                       <span>{tier.playerCount} joueurs</span>
-                      <span className="font-semibold text-foreground">{pct}% de l'effectif</span>
+                      <span className="font-semibold text-foreground">
+                        {pct}% de l'effectif
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -193,9 +227,11 @@ export default function RankedTiersPage({ initialTiers }: { initialTiers?: Ranke
           Règles du système d'AP (Achilléa Points)
         </h4>
         <p>
-          Le barème ELO utilise un coefficient K progressif et asymétrique : les premiers paliers (Fer à Or) bénéficient
-          d'un gain plus élevé (+20 AP) que de perte (-5 AP) pour encourager la progression. À partir du palier Divin,
-          les gains et pertes s'équilibrent de manière symétrique (±16 AP) à niveau égal.
+          Le barème ELO utilise un coefficient K progressif et asymétrique : les
+          premiers paliers (Fer à Or) bénéficient d'un gain plus élevé (+20 AP)
+          que de perte (-5 AP) pour encourager la progression. À partir du
+          palier Divin, les gains et pertes s'équilibrent de manière symétrique
+          (±16 AP) à niveau égal.
         </p>
       </div>
     </div>

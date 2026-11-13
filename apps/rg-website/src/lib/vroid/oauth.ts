@@ -22,14 +22,18 @@ import type { JetonVroid } from "./types";
 const LONGUEUR_VERIFIER = 64;
 
 /** Alphabet `unreserved` autorisé pour le `code_verifier` (RFC 7636 §4.1). */
-const ALPHABET_VERIFIER = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~";
+const ALPHABET_VERIFIER =
+  "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~";
 
 /** Encode un buffer en base64url **sans remplissage** (RFC 7636 §4.2). */
 export function base64url(octets: ArrayBuffer | Uint8Array): string {
   const vue = octets instanceof Uint8Array ? octets : new Uint8Array(octets);
   let binaire = "";
   for (const octet of vue) binaire += String.fromCharCode(octet);
-  return btoa(binaire).replaceAll("+", "-").replaceAll("/", "_").replaceAll("=", "");
+  return btoa(binaire)
+    .replaceAll("+", "-")
+    .replaceAll("/", "_")
+    .replaceAll("=", "");
 }
 
 /**
@@ -40,11 +44,16 @@ export function base64url(octets: ArrayBuffer | Uint8Array): string {
  */
 export function genererCodeVerifier(longueur = LONGUEUR_VERIFIER): string {
   if (longueur < 43 || longueur > 128) {
-    throw new RangeError("code_verifier : la RFC 7636 impose 43 à 128 caractères.");
+    throw new RangeError(
+      "code_verifier : la RFC 7636 impose 43 à 128 caractères.",
+    );
   }
   const octets = crypto.getRandomValues(new Uint8Array(longueur));
   // Modulo sur 64 valeurs, taille exacte de l'alphabet : pas de biais.
-  return Array.from(octets, o => ALPHABET_VERIFIER[o % ALPHABET_VERIFIER.length]).join("");
+  return Array.from(
+    octets,
+    (o) => ALPHABET_VERIFIER[o % ALPHABET_VERIFIER.length],
+  ).join("");
 }
 
 /**
@@ -54,7 +63,10 @@ export function genererCodeVerifier(longueur = LONGUEUR_VERIFIER): string {
  * @returns le `code_challenge` à envoyer à `/oauth/authorize`.
  */
 export async function genererCodeChallenge(verifier: string): Promise<string> {
-  const empreinte = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(verifier));
+  const empreinte = await crypto.subtle.digest(
+    "SHA-256",
+    new TextEncoder().encode(verifier),
+  );
   return base64url(empreinte);
 }
 
@@ -71,7 +83,11 @@ export function genererState(): string {
  * @param codeChallenge dérivé du `code_verifier` gardé côté serveur.
  * @returns l'URL absolue `https://hub.vroid.com/oauth/authorize?…`.
  */
-export function urlAutorisation(config: ConfigVroid, state: string, codeChallenge: string): string {
+export function urlAutorisation(
+  config: ConfigVroid,
+  state: string,
+  codeChallenge: string,
+): string {
   const url = new URL("/oauth/authorize", BASE_VROID);
   url.searchParams.set("response_type", "code");
   url.searchParams.set("client_id", config.applicationId);
@@ -96,7 +112,10 @@ export class ErreurOauthVroid extends Error {
 }
 
 /** Envoie un formulaire à `/oauth/*` et décode la réponse. */
-async function posterFormulaire(chemin: string, champs: Record<string, string>): Promise<Response> {
+async function posterFormulaire(
+  chemin: string,
+  champs: Record<string, string>,
+): Promise<Response> {
   return fetch(new URL(chemin, BASE_VROID), {
     method: "POST",
     headers: {
@@ -117,7 +136,11 @@ async function posterFormulaire(chemin: string, champs: Record<string, string>):
  * @param codeVerifier le `code_verifier` conservé côté serveur pour ce flux.
  * @throws {ErreurOauthVroid} si VRoid Hub refuse l'échange.
  */
-export async function echangerCode(config: ConfigVroid, code: string, codeVerifier: string): Promise<JetonVroid> {
+export async function echangerCode(
+  config: ConfigVroid,
+  code: string,
+  codeVerifier: string,
+): Promise<JetonVroid> {
   const reponse = await posterFormulaire("/oauth/token", {
     client_id: config.applicationId,
     client_secret: config.secret,
@@ -143,7 +166,10 @@ export async function echangerCode(config: ConfigVroid, code: string, codeVerifi
  * @throws {ErreurOauthVroid} si le rafraîchissement est refusé (jeton révoqué,
  *   autorisation retirée par l'internaute…).
  */
-export async function rafraichirJeton(config: ConfigVroid, refreshToken: string): Promise<JetonVroid> {
+export async function rafraichirJeton(
+  config: ConfigVroid,
+  refreshToken: string,
+): Promise<JetonVroid> {
   const reponse = await posterFormulaire("/oauth/token", {
     client_id: config.applicationId,
     client_secret: config.secret,
@@ -153,7 +179,11 @@ export async function rafraichirJeton(config: ConfigVroid, refreshToken: string)
   });
 
   if (!reponse.ok) {
-    throw new ErreurOauthVroid("Renouvellement du jeton refusé par VRoid Hub.", reponse.status, await reponse.text());
+    throw new ErreurOauthVroid(
+      "Renouvellement du jeton refusé par VRoid Hub.",
+      reponse.status,
+      await reponse.text(),
+    );
   }
   return (await reponse.json()) as JetonVroid;
 }
@@ -166,7 +196,10 @@ export async function rafraichirJeton(config: ConfigVroid, refreshToken: string)
  *
  * @returns `true` si VRoid Hub a accepté la révocation.
  */
-export async function revoquerJeton(config: ConfigVroid, accessToken: string): Promise<boolean> {
+export async function revoquerJeton(
+  config: ConfigVroid,
+  accessToken: string,
+): Promise<boolean> {
   const reponse = await fetch(new URL("/oauth/revoke", BASE_VROID), {
     method: "POST",
     headers: {

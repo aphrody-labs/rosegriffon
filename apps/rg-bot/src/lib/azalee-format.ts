@@ -33,9 +33,17 @@
  * il n'y a pas d'image ».
  */
 import { corrigerNomDouble } from "./azalee";
-import { formaterNombre as formaterNombreUi, formaterPourcentage as formaterPourcentageUi } from "./ui/nombres";
+import {
+  formaterNombre as formaterNombreUi,
+  formaterPourcentage as formaterPourcentageUi,
+} from "./ui/nombres";
 import { joindre } from "./ui/texte";
-import { normaliserLibelle, resoudreCategorieTechnique, resoudreElement, resoudrePosition } from "./ievr-labels";
+import {
+  normaliserLibelle,
+  resoudreCategorieTechnique,
+  resoudreElement,
+  resoudrePosition,
+} from "./ievr-labels";
 
 /** Champ multilingue tel que servi par l'API (`names`, `descriptions`, …). */
 export interface Multilingue {
@@ -58,7 +66,10 @@ export interface Statistiques {
 // --- Texte -----------------------------------------------------------------
 
 /** Réduit un champ multilingue à sa forme française, avec repli anglais puis japonais. */
-export function texteFr(valeur: Multilingue | null | undefined, repli = "Inconnu"): string {
+export function texteFr(
+  valeur: Multilingue | null | undefined,
+  repli = "Inconnu",
+): string {
   for (const candidat of [valeur?.fr, valeur?.en, valeur?.ja]) {
     if (typeof candidat === "string" && candidat.trim().length > 0) {
       return candidat.trim();
@@ -76,13 +87,19 @@ export function texteFr(valeur: Multilingue | null | undefined, repli = "Inconnu
  * `<VALUE>` est remplacé par la valeur réelle quand l'appelant la connaît, sinon
  * retiré — l'API expose déjà `description` avec la valeur substituée.
  */
-export function nettoyerTexteJeu(texte: string | null | undefined, valeur?: number | null): string {
+export function nettoyerTexteJeu(
+  texte: string | null | undefined,
+  valeur?: number | null,
+): string {
   if (typeof texte !== "string") {
     return "";
   }
   return texte
     .replaceAll(/\[C[A-Z0-9_]*\]/g, "")
-    .replaceAll("<VALUE>", typeof valeur === "number" ? formaterNombre(valeur) : "")
+    .replaceAll(
+      "<VALUE>",
+      typeof valeur === "number" ? formaterNombre(valeur) : "",
+    )
     .replaceAll("\\n", "\n")
     .replaceAll(/[ \t]+/g, " ")
     .replaceAll(/\n{3,}/g, "\n\n")
@@ -115,12 +132,17 @@ export function formaterNombre(valeur: number | null | undefined): string {
 }
 
 /** Pourcentage au format français (`0.4972…` → `0,5 %` pour 3 chiffres significatifs). */
-export function formaterPourcentage(valeur: number | null | undefined, decimales = 2): string {
+export function formaterPourcentage(
+  valeur: number | null | undefined,
+  decimales = 2,
+): string {
   return formaterPourcentageUi(valeur, { decimales });
 }
 
 /** Libellés français des sept statistiques, dans l'ordre d'affichage du wiki. */
-export const LIBELLES_STATS: ReadonlyArray<readonly [keyof Statistiques, string]> = [
+export const LIBELLES_STATS: ReadonlyArray<
+  readonly [keyof Statistiques, string]
+> = [
   ["kick", "Frappe"],
   ["control", "Contrôle"],
   ["technique", "Technique"],
@@ -131,7 +153,9 @@ export const LIBELLES_STATS: ReadonlyArray<readonly [keyof Statistiques, string]
 ];
 
 /** Bloc `Frappe **133** · Contrôle **146** · …`, ou `null` si aucune valeur. */
-export function ligneStats(stats: Statistiques | null | undefined): string | null {
+export function ligneStats(
+  stats: Statistiques | null | undefined,
+): string | null {
   if (!stats) {
     return null;
   }
@@ -162,7 +186,10 @@ export function decouperEnChamps(
     if (blocs.length >= maxChamps) {
       break;
     }
-    const ligne = ligneBrute.length > maxParChamp ? `${ligneBrute.slice(0, maxParChamp - 1)}…` : ligneBrute;
+    const ligne =
+      ligneBrute.length > maxParChamp
+        ? `${ligneBrute.slice(0, maxParChamp - 1)}…`
+        : ligneBrute;
     if (courant.length === 0) {
       courant = ligne;
       continue;
@@ -221,7 +248,10 @@ const PREFIXES_MORTS = ["/dx11/menu/icon_chr/"];
  * du segment `.g4tx/` qui désigne une texture nommée.
  */
 function estFormeDump(chemin: string): boolean {
-  if (chemin.startsWith("/dx11/menu/200_icon/02_icon_item/") && !chemin.includes(".g4tx/")) {
+  if (
+    chemin.startsWith("/dx11/menu/200_icon/02_icon_item/") &&
+    !chemin.includes(".g4tx/")
+  ) {
     return true;
   }
   return /\/([A-Za-z0-9]+)_\1(?:_|\.)/.test(chemin);
@@ -246,10 +276,14 @@ export function corrigerCheminIconeChr(chemin: string): string {
   if (!chemin.includes("/menu/icon_chr/")) {
     return chemin;
   }
-  const repare = chemin.replace("/menu/icon_chr/", "/menu/200_icon/10_icon_chr/");
+  const repare = chemin.replace(
+    "/menu/icon_chr/",
+    "/menu/200_icon/10_icon_chr/",
+  );
   return repare.replace(
     /\/([A-Za-z0-9]+)_l_(\1(?:_\d+)?_l\d+)(\.[A-Za-z0-9]+)$/,
-    (_tout, base: string, texture: string, extension: string) => `/${base}_l.g4tx/${texture}${extension}`,
+    (_tout, base: string, texture: string, extension: string) =>
+      `/${base}_l.g4tx/${texture}${extension}`,
   );
 }
 
@@ -263,7 +297,10 @@ export function corrigerCheminIconeChr(chemin: string): string {
  * `largeur` est indispensable sur les grandes illustrations : une planche
  * `gallery_img2` brute pèse jusqu'à 12 Mo, sa variante `w=400` ~13 Ko.
  */
-export function imageJeu(url: string | null | undefined, largeur?: 200 | 400 | 800 | 1600): string | null {
+export function imageJeu(
+  url: string | null | undefined,
+  largeur?: 200 | 400 | 800 | 1600,
+): string | null {
   if (typeof url !== "string") {
     return null;
   }
@@ -278,15 +315,22 @@ export function imageJeu(url: string | null | undefined, largeur?: 200 | 400 | 8
     return null;
   }
 
-  adresse.pathname = corrigerNomDouble(corrigerCheminIconeChr(adresse.pathname));
+  adresse.pathname = corrigerNomDouble(
+    corrigerCheminIconeChr(adresse.pathname),
+  );
 
   if (
     adresse.hostname === HOTE_CDN &&
-    (PREFIXES_MORTS.some(p => adresse.pathname.startsWith(p)) || estFormeDump(adresse.pathname))
+    (PREFIXES_MORTS.some((p) => adresse.pathname.startsWith(p)) ||
+      estFormeDump(adresse.pathname))
   ) {
     return null;
   }
-  if (largeur && adresse.hostname === HOTE_CDN && PREFIXES_VARIANTES.some(p => adresse.pathname.startsWith(p))) {
+  if (
+    largeur &&
+    adresse.hostname === HOTE_CDN &&
+    PREFIXES_VARIANTES.some((p) => adresse.pathname.startsWith(p))
+  ) {
     adresse.searchParams.set("w", String(largeur));
     adresse.searchParams.set("format", "webp");
   }
@@ -304,7 +348,9 @@ export function imageJeu(url: string | null | undefined, largeur?: 200 | 400 | 8
  * `/api/cpk/file` si le fichier source existe vraiment. Renvoie `null` pour tout
  * ce qui ne vient pas du décodage CPK.
  */
-export function cheminCpkDepuisUrl(url: string | null | undefined): string | null {
+export function cheminCpkDepuisUrl(
+  url: string | null | undefined,
+): string | null {
   if (typeof url !== "string") {
     return null;
   }
@@ -336,7 +382,9 @@ export function cheminCpkDepuisUrl(url: string | null | undefined): string | nul
  * Le suffixe de variante de statistiques (`_5000`, `_5100`…) n'existe pas côté
  * asset : seul le code de base porte un visage.
  */
-export function urlVisage(codeInterne: string | null | undefined): string | null {
+export function urlVisage(
+  codeInterne: string | null | undefined,
+): string | null {
   if (typeof codeInterne !== "string") {
     return null;
   }
@@ -389,7 +437,9 @@ export function urlModele3d(code: string | null | undefined): string | null {
  * l'index CPK et `…/story_img001_l01.png?w=800&format=webp` répond 200
  * (27 338 octets). 45 des 182 quêtes n'ont pas de code : on renvoie `null`.
  */
-export function urlIllustrationQuete(code: string | null | undefined): string | null {
+export function urlIllustrationQuete(
+  code: string | null | undefined,
+): string | null {
   if (typeof code !== "string") {
     return null;
   }
@@ -423,20 +473,26 @@ export type SlugAura = (typeof TYPES_AURA)[number]["slug"];
 
 /** Libellé français d'une famille d'aura, ou le slug brut s'il est inconnu. */
 export function libelleTypeAura(slug: string | null | undefined): string {
-  return TYPES_AURA.find(t => t.slug === slug)?.libelle ?? String(slug ?? "Aura");
+  return (
+    TYPES_AURA.find((t) => t.slug === slug)?.libelle ?? String(slug ?? "Aura")
+  );
 }
 
 /** Slug de famille valide, ou `null` — jamais une valeur qui ferait répondre du vide. */
-export function resoudreTypeAura(saisie: string | null | undefined): SlugAura | null {
+export function resoudreTypeAura(
+  saisie: string | null | undefined,
+): SlugAura | null {
   if (typeof saisie !== "string") {
     return null;
   }
   const aiguille = normaliserLibelle(saisie);
-  const parSlug = TYPES_AURA.find(t => t.slug === aiguille);
+  const parSlug = TYPES_AURA.find((t) => t.slug === aiguille);
   if (parSlug) {
     return parSlug.slug;
   }
-  const parLibelle = TYPES_AURA.find(t => normaliserLibelle(t.libelle) === aiguille);
+  const parLibelle = TYPES_AURA.find(
+    (t) => normaliserLibelle(t.libelle) === aiguille,
+  );
   return parLibelle?.slug ?? null;
 }
 
@@ -466,8 +522,13 @@ export const CATEGORIES_GALERIE = [
 ] as const;
 
 /** Libellé français d'une catégorie d'illustration, ou la valeur brute. */
-export function libelleCategorieGalerie(valeur: string | null | undefined): string {
-  return CATEGORIES_GALERIE.find(c => c.valeur === valeur)?.libelle ?? String(valeur ?? "Illustration");
+export function libelleCategorieGalerie(
+  valeur: string | null | undefined,
+): string {
+  return (
+    CATEGORIES_GALERIE.find((c) => c.valeur === valeur)?.libelle ??
+    String(valeur ?? "Illustration")
+  );
 }
 
 /**
@@ -476,12 +537,16 @@ export function libelleCategorieGalerie(valeur: string | null | undefined): stri
  * Une catégorie inventée fait répondre `{"data":[],"total":0}` : on préfère
  * ignorer le filtre plutôt que rendre une liste vide sans explication.
  */
-export function resoudreCategorieGalerie(saisie: string | null | undefined): string | null {
+export function resoudreCategorieGalerie(
+  saisie: string | null | undefined,
+): string | null {
   if (typeof saisie !== "string") {
     return null;
   }
   const aiguille = normaliserLibelle(saisie);
-  const trouvee = CATEGORIES_GALERIE.find(c => c.valeur === aiguille || normaliserLibelle(c.libelle) === aiguille);
+  const trouvee = CATEGORIES_GALERIE.find(
+    (c) => c.valeur === aiguille || normaliserLibelle(c.libelle) === aiguille,
+  );
   return trouvee?.valeur ?? null;
 }
 
@@ -503,7 +568,9 @@ export function libelleGenreQuete(kind: string | null | undefined): string {
  *
  * Valeurs réelles de `/api/trophies` (228 lignes) : `trophy` 52, `activity` 176.
  */
-export function libelleCategorieSucces(categorie: string | null | undefined): string {
+export function libelleCategorieSucces(
+  categorie: string | null | undefined,
+): string {
   if (categorie === "trophy") {
     return "Trophée";
   }
@@ -526,7 +593,9 @@ export function libelleCategorieSucces(categorie: string | null | undefined): st
  * `bun:sqlite`. « Coach » et « Manager » sont volontairement identiques en
  * français : c'est le choix du wiki, pas un oubli de traduction.
  */
-export function libelleRoleCoordinateur(role: string | null | undefined): string | null {
+export function libelleRoleCoordinateur(
+  role: string | null | undefined,
+): string | null {
   if (typeof role !== "string" || role.trim().length === 0) {
     return null;
   }
@@ -549,7 +618,11 @@ export function nombreDePages(total: number, parPage: number): number {
 }
 
 /** Ramène une page dans les bornes : une page hors limites ne doit pas répondre « vide ». */
-export function bornerPage(page: number, total: number, parPage: number): number {
+export function bornerPage(
+  page: number,
+  total: number,
+  parPage: number,
+): number {
   const pages = nombreDePages(total, parPage);
   if (!Number.isFinite(page)) {
     return 1;
@@ -663,16 +736,20 @@ export function classerPropositions<T>(
  * charte Rose Griffon (marine `#0c1730`, or `#d4af37`, brique `#a14b3f`,
  * Azalée `#F89C5A`) déclinée par élément, et non des couleurs inventées.
  */
-export const COULEURS_ELEMENT: Readonly<Record<string, number>> = Object.freeze({
-  Feu: 0xa1_4b_3f,
-  Vent: 0x5b_8f_b9,
-  Forêt: 0x4c_8b_5a,
-  Montagne: 0xd4_af_37,
-  Néant: 0x0c_17_30,
-});
+export const COULEURS_ELEMENT: Readonly<Record<string, number>> = Object.freeze(
+  {
+    Feu: 0xa1_4b_3f,
+    Vent: 0x5b_8f_b9,
+    Forêt: 0x4c_8b_5a,
+    Montagne: 0xd4_af_37,
+    Néant: 0x0c_17_30,
+  },
+);
 
 /** Couleur d'embed pour un élément, `null` si l'élément est inconnu. */
-export function couleurElement(element: string | null | undefined): number | null {
+export function couleurElement(
+  element: string | null | undefined,
+): number | null {
   const canonique = resoudreElement(element);
   return canonique ? (COULEURS_ELEMENT[canonique] ?? null) : null;
 }
@@ -698,12 +775,14 @@ export function emojiElement(element: string | null | undefined): string {
 }
 
 /** Émoji d'une catégorie de technique (tir, dribble, défense, arrêt). */
-export const EMOJIS_CATEGORIE: Readonly<Record<string, string>> = Object.freeze({
-  Tir: "⚽",
-  Dribble: "💨",
-  Défense: "🛡️",
-  Arrêt: "🧤",
-});
+export const EMOJIS_CATEGORIE: Readonly<Record<string, string>> = Object.freeze(
+  {
+    Tir: "⚽",
+    Dribble: "💨",
+    Défense: "🛡️",
+    Arrêt: "🧤",
+  },
+);
 
 export function emojiCategorie(categorie: string | null | undefined): string {
   const canonique = resoudreCategorieTechnique(categorie);
@@ -730,8 +809,13 @@ export function emojiPosition(position: string | null | undefined): string {
  * place à l'ellipse. L'émoji n'est ajouté que s'il est connu — un titre qui
  * commence par une espace orpheline est pire que pas d'émoji du tout.
  */
-export function titreFiche(nom: string, emoji?: string | null, mention?: string | null): string {
+export function titreFiche(
+  nom: string,
+  emoji?: string | null,
+  mention?: string | null,
+): string {
   const debut = emoji && emoji.length > 0 ? `${emoji} ${nom}` : nom;
-  const complet = mention && mention.length > 0 ? `${debut} — ${mention}` : debut;
+  const complet =
+    mention && mention.length > 0 ? `${debut} — ${mention}` : debut;
   return complet.length > 250 ? `${complet.slice(0, 249).trimEnd()}…` : complet;
 }

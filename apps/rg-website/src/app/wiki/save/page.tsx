@@ -38,8 +38,11 @@ export default function SavePage() {
             002AB8F4-USERDATALIVE
           </code>
           ) pour en lire le détail. La sauvegarde est déchiffrée et analysée{" "}
-          <strong className="text-on-surface">entièrement dans votre navigateur</strong> — aucun octet de la sauvegarde
-          n&apos;est envoyé sur nos serveurs. Seule la liste des identifiants de personnages transite (jamais le
+          <strong className="text-on-surface">
+            entièrement dans votre navigateur
+          </strong>{" "}
+          — aucun octet de la sauvegarde n&apos;est envoyé sur nos serveurs.
+          Seule la liste des identifiants de personnages transite (jamais le
           fichier) pour résoudre les noms du roster contre la base Azalée.
         </p>
       </header>

@@ -24,7 +24,9 @@ describe("Inagle Game & Text Consolidation", () => {
     expect(LEGACY_FORMATIONS).toBeDefined();
     expect(LEGACY_FORMATIONS.length).toBe(8);
 
-    const f442 = FORMATIONS.find(f => f.name === "4-4-2" || f.id.includes("442"));
+    const f442 = FORMATIONS.find(
+      (f) => f.name === "4-4-2" || f.id.includes("442"),
+    );
     expect(f442).toBeDefined();
     expect(f442?.positions.length).toBe(11);
   });
@@ -52,7 +54,9 @@ describe("Inagle Game & Text Consolidation", () => {
     const untranslated = translateEffect("Unknown Effect XYZ");
     expect(untranslated).toBe("Unknown Effect XYZ");
 
-    const desc = formatDescription("Inflicts <color=#ff0000>burn</color> on hit.");
+    const desc = formatDescription(
+      "Inflicts <color=#ff0000>burn</color> on hit.",
+    );
     expect(desc).toBeDefined();
   });
 

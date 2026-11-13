@@ -43,7 +43,13 @@ import { wikiService } from "@/lib/wiki-service";
  */
 export const revalidate = 3600;
 
-const AURA_CATEGORIES = ["esprits-guerriers", "totems", "miximax", "eveil", "changement-mode"] as const;
+const AURA_CATEGORIES = [
+  "esprits-guerriers",
+  "totems",
+  "miximax",
+  "eveil",
+  "changement-mode",
+] as const;
 
 /**
  * Pages de section du wiki. Chaque chemin a été vérifié un par un par `curl`
@@ -82,7 +88,7 @@ const STATIC_PAGES: Array<{
   { changeFrequency: "weekly", path: "/invocation", priority: 0.6 },
   { changeFrequency: "monthly", path: "/niveau", priority: 0.6 },
   { changeFrequency: "monthly", path: "/cross", priority: 0.5 },
-  ...AURA_CATEGORIES.map(categorie => ({
+  ...AURA_CATEGORIES.map((categorie) => ({
     changeFrequency: "weekly" as const,
     path: `/aura/${categorie}`,
     priority: 0.7,
@@ -94,7 +100,7 @@ async function idsDepuisSql(sql: string): Promise<string[]> {
   try {
     const pool = getInaglePgPool();
     const { rows } = await pool.query<{ id: string | null }>(sql);
-    return rows.map(r => r.id).filter((id): id is string => Boolean(id));
+    return rows.map((r) => r.id).filter((id): id is string => Boolean(id));
   } catch (error) {
     console.error("wiki sitemap: idsDepuisSql impossible", error);
     return [];
@@ -115,7 +121,10 @@ async function idsDepuisSql(sql: string): Promise<string[]> {
 async function personnages(baseUrl: string): Promise<MetadataRoute.Sitemap> {
   try {
     const pool = getInaglePgPool();
-    const { rows } = await pool.query<{ base_slug: string | null; updated_at: string | null }>(
+    const { rows } = await pool.query<{
+      base_slug: string | null;
+      updated_at: string | null;
+    }>(
       "SELECT base_slug, updated_at FROM inagle_characters WHERE base_slug IS NOT NULL ORDER BY updated_at DESC NULLS LAST",
     );
     const vus = new Set<string>();
@@ -152,7 +161,7 @@ async function techniques(baseUrl: string): Promise<MetadataRoute.Sitemap> {
     }>(
       "SELECT id, updated_at, created_at FROM inagle_skills WHERE id NOT LIKE '%\\_or' ESCAPE '\\' ORDER BY created_at DESC NULLS LAST",
     );
-    return rows.map(row => ({
+    return rows.map((row) => ({
       changeFrequency: "monthly" as const,
       lastModified: new Date(row.updated_at || row.created_at || Date.now()),
       priority: 0.7,
@@ -172,8 +181,10 @@ async function objets(baseUrl: string): Promise<MetadataRoute.Sitemap> {
       id: string;
       updated_at: string | null;
       created_at: string | null;
-    }>("SELECT id, updated_at, created_at FROM inagle_items ORDER BY created_at DESC NULLS LAST");
-    return rows.map(row => ({
+    }>(
+      "SELECT id, updated_at, created_at FROM inagle_items ORDER BY created_at DESC NULLS LAST",
+    );
+    return rows.map((row) => ({
       changeFrequency: "monthly" as const,
       lastModified: new Date(row.updated_at || row.created_at || Date.now()),
       priority: 0.6,
@@ -203,7 +214,8 @@ async function objets(baseUrl: string): Promise<MetadataRoute.Sitemap> {
 async function auras(baseUrl: string): Promise<MetadataRoute.Sitemap> {
   const requetes: Record<(typeof AURA_CATEGORIES)[number], string> = {
     "changement-mode": "SELECT id FROM inagle_mode_changes_clean",
-    eveil: "SELECT id FROM inagle_awakenings_clean UNION ALL SELECT id FROM inagle_auras",
+    eveil:
+      "SELECT id FROM inagle_awakenings_clean UNION ALL SELECT id FROM inagle_auras",
     "esprits-guerriers":
       "SELECT id FROM inagle_keshins_clean WHERE asset_code IS NOT NULL AND asset_code NOT ILIKE 'wa%' AND asset_code NOT ILIKE 'wkt%'",
     miximax: "SELECT id FROM inagle_miximax_clean",
@@ -243,28 +255,46 @@ async function tactiques(baseUrl: string): Promise<MetadataRoute.Sitemap> {
       pool.query<{ internal_code: string | null }>(
         "SELECT internal_code FROM inagle_tactics WHERE internal_code IS NOT NULL",
       ),
-      pool.query<{ internal_code: string | null; name_fr: string | null; name_en: string | null }>(
+      pool.query<{
+        internal_code: string | null;
+        name_fr: string | null;
+        name_en: string | null;
+      }>(
         "SELECT internal_code, name_fr, name_en FROM inagle_special_tactics WHERE internal_code IS NOT NULL",
       ),
     ]);
 
-    const isPlaceholder = (code: string, nameFr: string | null, nameEn: string | null): boolean => {
+    const isPlaceholder = (
+      code: string,
+      nameFr: string | null,
+      nameEn: string | null,
+    ): boolean => {
       if (!code || code.startsWith("test_")) return true;
-      return (nameFr ?? "").includes("必殺タクティクス") || (nameEn ?? "").includes("必殺タクティクス");
+      return (
+        (nameFr ?? "").includes("必殺タクティクス") ||
+        (nameEn ?? "").includes("必殺タクティクス")
+      );
     };
 
-    const connus = new Set(base.rows.map(r => r.internal_code).filter(Boolean));
+    const connus = new Set(
+      base.rows.map((r) => r.internal_code).filter(Boolean),
+    );
     const codes = new Set<string>();
     for (const code of connus) {
       if (code) codes.add(code);
     }
     for (const row of special.rows) {
       const code = row.internal_code;
-      if (!code || connus.has(code) || isPlaceholder(code, row.name_fr, row.name_en)) continue;
+      if (
+        !code ||
+        connus.has(code) ||
+        isPlaceholder(code, row.name_fr, row.name_en)
+      )
+        continue;
       codes.add(code);
     }
 
-    return Array.from(codes).map(id => ({
+    return Array.from(codes).map((id) => ({
       changeFrequency: "monthly" as const,
       lastModified: new Date(),
       priority: 0.6,
@@ -282,29 +312,32 @@ async function tactiques(baseUrl: string): Promise<MetadataRoute.Sitemap> {
  * quêtes, succès, capsules, boutiques. Chaque source est isolée : une table
  * indisponible ne doit pas vider le plan de site des autres.
  */
-const FAMILLES_SIMPLES: Array<{ path: string; priority: number; sql: string }> = [
-  { path: "/equipe", priority: 0.6, sql: "SELECT id FROM inagle_teams" },
-  {
-    path: "/entraineur",
-    priority: 0.5,
-    sql: "SELECT id::text AS id FROM inagle_coordinators",
-  },
-  { path: "/stade", priority: 0.5, sql: "SELECT id FROM inagle_stadiums" },
-  { path: "/quete", priority: 0.6, sql: "SELECT id FROM inagle_quests" },
-  {
-    path: "/succes",
-    priority: 0.5,
-    sql: "SELECT COALESCE(code, trophy_id) AS id FROM inagle_trophies",
-  },
-  { path: "/capsule", priority: 0.4, sql: "SELECT id FROM inagle_capsules" },
-  {
-    path: "/boutique",
-    priority: 0.5,
-    sql: "SELECT DISTINCT shop_id::text AS id FROM inagle_shops",
-  },
-];
+const FAMILLES_SIMPLES: Array<{ path: string; priority: number; sql: string }> =
+  [
+    { path: "/equipe", priority: 0.6, sql: "SELECT id FROM inagle_teams" },
+    {
+      path: "/entraineur",
+      priority: 0.5,
+      sql: "SELECT id::text AS id FROM inagle_coordinators",
+    },
+    { path: "/stade", priority: 0.5, sql: "SELECT id FROM inagle_stadiums" },
+    { path: "/quete", priority: 0.6, sql: "SELECT id FROM inagle_quests" },
+    {
+      path: "/succes",
+      priority: 0.5,
+      sql: "SELECT COALESCE(code, trophy_id) AS id FROM inagle_trophies",
+    },
+    { path: "/capsule", priority: 0.4, sql: "SELECT id FROM inagle_capsules" },
+    {
+      path: "/boutique",
+      priority: 0.5,
+      sql: "SELECT DISTINCT shop_id::text AS id FROM inagle_shops",
+    },
+  ];
 
-async function famillesSimples(baseUrl: string): Promise<MetadataRoute.Sitemap> {
+async function famillesSimples(
+  baseUrl: string,
+): Promise<MetadataRoute.Sitemap> {
   const entries: MetadataRoute.Sitemap = [];
   for (const famille of FAMILLES_SIMPLES) {
     try {
@@ -330,10 +363,13 @@ async function famillesSimples(baseUrl: string): Promise<MetadataRoute.Sitemap> 
  */
 async function passifs(baseUrl: string): Promise<MetadataRoute.Sitemap> {
   try {
-    const { data } = await wikiService.getPassivesList({ limit: 5000, page: 1 });
+    const { data } = await wikiService.getPassivesList({
+      limit: 5000,
+      page: 1,
+    });
     return data
-      .filter(p => p.passive_id)
-      .map(p => ({
+      .filter((p) => p.passive_id)
+      .map((p) => ({
         changeFrequency: "monthly" as const,
         lastModified: new Date(),
         priority: 0.5,
@@ -351,16 +387,23 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = SITE_URL;
   const lastModified = new Date();
 
-  const [personnagesUrls, techniquesUrls, objetsUrls, aurasUrls, tactiquesUrls, famillesUrls, passifsUrls] =
-    await Promise.all([
-      personnages(baseUrl),
-      techniques(baseUrl),
-      objets(baseUrl),
-      auras(baseUrl),
-      tactiques(baseUrl),
-      famillesSimples(baseUrl),
-      passifs(baseUrl),
-    ]);
+  const [
+    personnagesUrls,
+    techniquesUrls,
+    objetsUrls,
+    aurasUrls,
+    tactiquesUrls,
+    famillesUrls,
+    passifsUrls,
+  ] = await Promise.all([
+    personnages(baseUrl),
+    techniques(baseUrl),
+    objets(baseUrl),
+    auras(baseUrl),
+    tactiques(baseUrl),
+    famillesSimples(baseUrl),
+    passifs(baseUrl),
+  ]);
 
   return [
     ...STATIC_PAGES.map(({ path, priority, changeFrequency }) => ({

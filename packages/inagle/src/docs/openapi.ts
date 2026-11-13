@@ -7,7 +7,11 @@
 
 import type { OpenApiDocument, OpenApiSchema } from "./types.js";
 import { VFS_FORMATS, VFS_PACK_RULES } from "./vfs-catalog.js";
-import { NIE_CRITICAL_OFFSETS, NIE_CRYPTO_CONSTANTS, NIE_RTTI_CLASSES } from "./nie-re-map.js";
+import {
+  NIE_CRITICAL_OFFSETS,
+  NIE_CRYPTO_CONSTANTS,
+  NIE_RTTI_CLASSES,
+} from "./nie-re-map.js";
 
 /**
  * Builds the canonical OpenAPI 3.1.0 document.
@@ -27,20 +31,48 @@ export function generateOpenApiSpec(): OpenApiDocument {
         type: "string",
         description: "ASCII representation of the magic header (e.g. 'G4TX')",
       },
-      extension: { type: "string", description: "Canonical file extension (e.g. '.g4tx')" },
-      description: { type: "string", description: "Human-readable format explanation" },
-      isBigEndian: { type: "boolean", description: "True if byte order is big-endian" },
+      extension: {
+        type: "string",
+        description: "Canonical file extension (e.g. '.g4tx')",
+      },
+      description: {
+        type: "string",
+        description: "Human-readable format explanation",
+      },
+      isBigEndian: {
+        type: "boolean",
+        description: "True if byte order is big-endian",
+      },
       category: {
         type: "string",
-        enum: ["texture", "model", "config", "audio", "video", "container", "script", "system"],
+        enum: [
+          "texture",
+          "model",
+          "config",
+          "audio",
+          "video",
+          "container",
+          "script",
+          "system",
+        ],
       },
-      encryptionSupported: { type: "boolean", description: "True if format supports encryption" },
+      encryptionSupported: {
+        type: "boolean",
+        description: "True if format supports encryption",
+      },
       compressionSupported: {
         type: "boolean",
         description: "True if format supports CRILAYLA or LZSS compression",
       },
     },
-    required: ["id", "magicHex", "magicAscii", "extension", "description", "category"],
+    required: [
+      "id",
+      "magicHex",
+      "magicAscii",
+      "extension",
+      "description",
+      "category",
+    ],
   };
 
   const schemaVfsPack: OpenApiSchema = {
@@ -49,7 +81,10 @@ export function generateOpenApiSpec(): OpenApiDocument {
     description: "CRI CPK pack file mapping rule in the Victory Road VFS.",
     properties: {
       packName: { type: "string", description: "Target CPK archive filename" },
-      filenameMask: { type: "string", description: "Wildcard mask matching input files" },
+      filenameMask: {
+        type: "string",
+        description: "Wildcard mask matching input files",
+      },
       keyDerivation: {
         type: "string",
         enum: ["filename-crc32", "viola-fixed", "none"],
@@ -58,7 +93,10 @@ export function generateOpenApiSpec(): OpenApiDocument {
         type: "integer",
         description: "Mount priority order (higher numbers resolve first)",
       },
-      description: { type: "string", description: "Purpose and content of this pack" },
+      description: {
+        type: "string",
+        description: "Purpose and content of this pack",
+      },
       isCompressed: {
         type: "boolean",
         description: "Whether contained streams use CRILAYLA compression",
@@ -84,13 +122,23 @@ export function generateOpenApiSpec(): OpenApiDocument {
   const schemaMemoryOffset: OpenApiSchema = {
     type: "object",
     title: "NieMemoryOffset",
-    description: "Disassembled function entry point or memory address in nie.exe.",
+    description:
+      "Disassembled function entry point or memory address in nie.exe.",
     properties: {
       symbol: { type: "string" },
       addressHex: { type: "string" },
       subsystem: {
         type: "string",
-        enum: ["game-loop", "controller", "render", "vfs", "audio", "crypto", "prng", "lua"],
+        enum: [
+          "game-loop",
+          "controller",
+          "render",
+          "vfs",
+          "audio",
+          "crypto",
+          "prng",
+          "lua",
+        ],
       },
       description: { type: "string" },
       callingConvention: { type: "string" },
@@ -110,7 +158,13 @@ export function generateOpenApiSpec(): OpenApiDocument {
       baseClasses: { type: "array", items: { type: "string" } },
       description: { type: "string" },
     },
-    required: ["name", "namespace", "vtableOffsetHex", "baseClasses", "description"],
+    required: [
+      "name",
+      "namespace",
+      "vtableOffsetHex",
+      "baseClasses",
+      "description",
+    ],
   };
 
   const schemaCharacter: OpenApiSchema = {
@@ -118,10 +172,19 @@ export function generateOpenApiSpec(): OpenApiDocument {
     title: "Character",
     description: "Canonical Inazuma Eleven: Victory Road character entity.",
     properties: {
-      charaId: { type: "string", description: "Unique character ID (e.g. 'c01000010')" },
+      charaId: {
+        type: "string",
+        description: "Unique character ID (e.g. 'c01000010')",
+      },
       name: { type: "string", description: "Localized display name" },
-      element: { type: "integer", description: "Element ID (1=Wind, 2=Wood, 3=Fire, 4=Earth)" },
-      position: { type: "integer", description: "Position ID (1=GK, 2=DF, 3=MF, 4=FW)" },
+      element: {
+        type: "integer",
+        description: "Element ID (1=Wind, 2=Wood, 3=Fire, 4=Earth)",
+      },
+      position: {
+        type: "integer",
+        description: "Position ID (1=GK, 2=DF, 3=MF, 4=FW)",
+      },
       rarity: { type: "integer", description: "Base rarity tier (1 to 5)" },
       kick: { type: "integer" },
       dribble: { type: "integer" },
@@ -145,7 +208,10 @@ export function generateOpenApiSpec(): OpenApiDocument {
       element: { type: "integer", description: "Element affinity" },
       tpCost: { type: "integer", description: "Tension point cost" },
       power: { type: "integer", description: "Base move power rating" },
-      category: { type: "string", description: "Category (Shoot, Dribble, Block, Catch)" },
+      category: {
+        type: "string",
+        description: "Category (Shoot, Dribble, Block, Catch)",
+      },
     },
     required: ["skillId", "name", "element", "tpCost", "power"],
   };
@@ -180,29 +246,46 @@ export function generateOpenApiSpec(): OpenApiDocument {
     tags: [
       {
         name: "Characters",
-        description: "Character catalog, base stats, growth curves, and variants",
+        description:
+          "Character catalog, base stats, growth curves, and variants",
       },
-      { name: "Skills", description: "Special moves (Hissatsu), passives, and animations" },
-      { name: "Teams", description: "Team formations, kits, tactics, and emblems" },
-      { name: "Items", description: "Equipment, consumables, manuals, and spirits" },
+      {
+        name: "Skills",
+        description: "Special moves (Hissatsu), passives, and animations",
+      },
+      {
+        name: "Teams",
+        description: "Team formations, kits, tactics, and emblems",
+      },
+      {
+        name: "Items",
+        description: "Equipment, consumables, manuals, and spirits",
+      },
       {
         name: "VFS",
-        description: "Victory Road Virtual File System: CPK packs, @UTF schemas, and decompression",
+        description:
+          "Victory Road Virtual File System: CPK packs, @UTF schemas, and decompression",
       },
       {
         name: "Reverse Engineering",
-        description: "Authoritative nie.exe offsets, RTTI classes, and cryptographic constants",
+        description:
+          "Authoritative nie.exe offsets, RTTI classes, and cryptographic constants",
       },
       {
         name: "Saves",
-        description: "Lives save container encryption, decryption, and payload parsing",
+        description:
+          "Lives save container encryption, decryption, and payload parsing",
       },
-      { name: "Wiki", description: "Structured SQL query endpoints and drop tables" },
+      {
+        name: "Wiki",
+        description: "Structured SQL query endpoints and drop tables",
+      },
     ],
     paths: {
       "/api/characters": {
         summary: "List characters",
-        description: "Query characters with optional filtering by element, position, or name search.",
+        description:
+          "Query characters with optional filtering by element, position, or name search.",
         get: {
           tags: ["Characters"],
           summary: "List characters",
@@ -255,7 +338,8 @@ export function generateOpenApiSpec(): OpenApiDocument {
       },
       "/api/characters/{id}": {
         summary: "Get character by ID",
-        description: "Retrieves complete character profile including growth curve and skill tree.",
+        description:
+          "Retrieves complete character profile including growth curve and skill tree.",
         get: {
           tags: ["Characters"],
           summary: "Get character by ID",
@@ -289,7 +373,11 @@ export function generateOpenApiSpec(): OpenApiDocument {
           tags: ["Skills"],
           summary: "List skills",
           parameters: [
-            { name: "limit", in: "query", schema: { type: "integer", default: 50 } },
+            {
+              name: "limit",
+              in: "query",
+              schema: { type: "integer", default: 50 },
+            },
             { name: "category", in: "query", schema: { type: "string" } },
             { name: "element", in: "query", schema: { type: "integer" } },
           ],
@@ -298,7 +386,10 @@ export function generateOpenApiSpec(): OpenApiDocument {
               description: "List of skills",
               content: {
                 "application/json": {
-                  schema: { type: "array", items: { $ref: "#/components/schemas/Skill" } },
+                  schema: {
+                    type: "array",
+                    items: { $ref: "#/components/schemas/Skill" },
+                  },
                 },
               },
             },
@@ -310,18 +401,30 @@ export function generateOpenApiSpec(): OpenApiDocument {
         get: {
           tags: ["Skills"],
           summary: "Get skill by ID",
-          parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }],
+          parameters: [
+            {
+              name: "id",
+              in: "path",
+              required: true,
+              schema: { type: "string" },
+            },
+          ],
           responses: {
             "200": {
               description: "Skill details",
-              content: { "application/json": { schema: { $ref: "#/components/schemas/Skill" } } },
+              content: {
+                "application/json": {
+                  schema: { $ref: "#/components/schemas/Skill" },
+                },
+              },
             },
           },
         },
       },
       "/api/vfs/formats": {
         summary: "List recognized binary formats",
-        description: "Returns all 28 binary formats recognized and parsed by IECODE and NIE.",
+        description:
+          "Returns all 28 binary formats recognized and parsed by IECODE and NIE.",
         get: {
           tags: ["VFS"],
           summary: "List supported binary formats",
@@ -343,7 +446,8 @@ export function generateOpenApiSpec(): OpenApiDocument {
       },
       "/api/vfs/probe": {
         summary: "Probe binary format by magic bytes",
-        description: "Examines header bytes and returns the matching format descriptor if known.",
+        description:
+          "Examines header bytes and returns the matching format descriptor if known.",
         post: {
           tags: ["VFS"],
           summary: "Probe binary format",
@@ -358,7 +462,10 @@ export function generateOpenApiSpec(): OpenApiDocument {
                       type: "string",
                       description: "Hexadecimal magic (e.g. '0x58543447')",
                     },
-                    magicAscii: { type: "string", description: "ASCII magic header (e.g. 'G4TX')" },
+                    magicAscii: {
+                      type: "string",
+                      description: "ASCII magic header (e.g. 'G4TX')",
+                    },
                   },
                 },
               },
@@ -378,7 +485,8 @@ export function generateOpenApiSpec(): OpenApiDocument {
       },
       "/api/vfs/packs": {
         summary: "List VFS pack rules",
-        description: "Lists all CRI CPK pack routing rules, priority orders, and decryption mechanisms.",
+        description:
+          "Lists all CRI CPK pack routing rules, priority orders, and decryption mechanisms.",
         get: {
           tags: ["VFS"],
           summary: "List pack rules",
@@ -400,7 +508,8 @@ export function generateOpenApiSpec(): OpenApiDocument {
       },
       "/api/vfs/files/{path}": {
         summary: "Read file from VFS",
-        description: "Fetches a file by logical path, resolving through mounted CPKs or loose dump overlays.",
+        description:
+          "Fetches a file by logical path, resolving through mounted CPKs or loose dump overlays.",
         get: {
           tags: ["VFS"],
           summary: "Read VFS file",
@@ -410,7 +519,8 @@ export function generateOpenApiSpec(): OpenApiDocument {
               in: "path",
               required: true,
               schema: { type: "string" },
-              description: "Logical file path (e.g. data/common/chara/chara_base.cfg.bin)",
+              description:
+                "Logical file path (e.g. data/common/chara/chara_base.cfg.bin)",
             },
           ],
           responses: {
@@ -426,7 +536,8 @@ export function generateOpenApiSpec(): OpenApiDocument {
       },
       "/api/nie/re/constants": {
         summary: "Get nie.exe cryptographic constants",
-        description: "Returns verified cryptographic keys and polynomials reverse-engineered from nie.exe.",
+        description:
+          "Returns verified cryptographic keys and polynomials reverse-engineered from nie.exe.",
         get: {
           tags: ["Reverse Engineering"],
           summary: "Get crypto constants",
@@ -448,7 +559,8 @@ export function generateOpenApiSpec(): OpenApiDocument {
       },
       "/api/nie/re/offsets": {
         summary: "Get critical function offsets in nie.exe",
-        description: "Returns disassembler anchors, function boundary addresses, and signatures in nie.exe.",
+        description:
+          "Returns disassembler anchors, function boundary addresses, and signatures in nie.exe.",
         get: {
           tags: ["Reverse Engineering"],
           summary: "Get function offsets",
@@ -470,7 +582,8 @@ export function generateOpenApiSpec(): OpenApiDocument {
       },
       "/api/nie/re/rtti": {
         summary: "Get reconstructed RTTI hierarchy",
-        description: "Returns MSVC RTTI polymorphic classes and vtable offsets identified in nie.exe.",
+        description:
+          "Returns MSVC RTTI polymorphic classes and vtable offsets identified in nie.exe.",
         get: {
           tags: ["Reverse Engineering"],
           summary: "Get RTTI classes",
@@ -492,7 +605,8 @@ export function generateOpenApiSpec(): OpenApiDocument {
       },
       "/api/saves/decrypt": {
         summary: "Decrypt Lives save file",
-        description: "Decrypts a Level-5 Lives save container (002AB8F4-*) using CRC32 filename stream cipher.",
+        description:
+          "Decrypts a Level-5 Lives save container (002AB8F4-*) using CRC32 filename stream cipher.",
         post: {
           tags: ["Saves"],
           summary: "Decrypt save container",
@@ -505,7 +619,8 @@ export function generateOpenApiSpec(): OpenApiDocument {
                   properties: {
                     filename: {
                       type: "string",
-                      description: "Save container filename (e.g. 002AB8F4-USERDATALIVE)",
+                      description:
+                        "Save container filename (e.g. 002AB8F4-USERDATALIVE)",
                     },
                     payloadBase64: {
                       type: "string",
@@ -556,7 +671,11 @@ export function generateOpenApiSpec(): OpenApiDocument {
  */
 export function generateOpenApiJson(pretty = true): string {
   const spec = generateOpenApiSpec();
-  return JSON.stringify(spec, (_key, value) => (typeof value === "bigint" ? value.toString() : value), pretty ? 2 : 0);
+  return JSON.stringify(
+    spec,
+    (_key, value) => (typeof value === "bigint" ? value.toString() : value),
+    pretty ? 2 : 0,
+  );
 }
 
 /**
@@ -581,7 +700,7 @@ export function toYaml(value: unknown, indentLevel = 0): string {
     if (value.includes("\n")) {
       const lines = value
         .split("\n")
-        .map(l => `${indent}  ${l}`)
+        .map((l) => `${indent}  ${l}`)
         .join("\n");
       return `|\n${lines}`;
     }
@@ -602,7 +721,7 @@ export function toYaml(value: unknown, indentLevel = 0): string {
   if (Array.isArray(value)) {
     if (value.length === 0) return "[]";
     return value
-      .map(item => {
+      .map((item) => {
         if (typeof item === "object" && item !== null) {
           const itemYaml = toYaml(item, indentLevel + 1);
           const lines = itemYaml.split("\n");

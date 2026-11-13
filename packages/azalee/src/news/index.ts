@@ -30,7 +30,13 @@ export interface TagCloudItem extends NewsTag {
 }
 
 export type NewsCategory =
-  "announcement" | "game-update" | "guide" | "community" | "tournament" | "patch-notes" | "dev-blog";
+  | "announcement"
+  | "game-update"
+  | "guide"
+  | "community"
+  | "tournament"
+  | "patch-notes"
+  | "dev-blog";
 
 export interface Article {
   id: string;
@@ -129,36 +135,44 @@ export function extractSummary(content: string, maxLength = 160): string {
 }
 
 /** Filter and paginate feed items */
-export function filterFeed(items: Article[], filter: FeedFilter = {}): Article[] {
+export function filterFeed(
+  items: Article[],
+  filter: FeedFilter = {},
+): Article[] {
   let result = [...items];
 
   if (filter.status) {
-    result = result.filter(a => a.status === filter.status);
+    result = result.filter((a) => a.status === filter.status);
   } else {
     // Default to published only
-    result = result.filter(a => a.status === "published");
+    result = result.filter((a) => a.status === "published");
   }
 
   if (filter.category) {
-    result = result.filter(a => a.category === filter.category);
+    result = result.filter((a) => a.category === filter.category);
   }
 
   if (filter.tag) {
     const t = filter.tag.toLowerCase();
-    result = result.filter(a => a.tags.some(tag => tag.toLowerCase() === t));
+    result = result.filter((a) =>
+      a.tags.some((tag) => tag.toLowerCase() === t),
+    );
   }
 
   if (filter.searchQuery) {
     const q = filter.searchQuery.toLowerCase();
     result = result.filter(
-      a =>
+      (a) =>
         a.title.toLowerCase().includes(q) ||
         a.summary.toLowerCase().includes(q) ||
-        a.tags.some(tag => tag.toLowerCase().includes(q)),
+        a.tags.some((tag) => tag.toLowerCase().includes(q)),
     );
   }
 
-  result.sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
+  result.sort(
+    (a, b) =>
+      new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime(),
+  );
 
   const offset = filter.offset ?? 0;
   const limit = filter.limit ?? 20;
@@ -166,10 +180,13 @@ export function filterFeed(items: Article[], filter: FeedFilter = {}): Article[]
 }
 
 /** Generate standard RSS 2.0 XML from channel metadata and items */
-export function generateRssFeed(channel: FeedChannel, items: FeedItem[]): string {
+export function generateRssFeed(
+  channel: FeedChannel,
+  items: FeedItem[],
+): string {
   const itemsXml = items
     .map(
-      item => `    <item>
+      (item) => `    <item>
       <title><![CDATA[${item.title}]]></title>
       <link>${item.link}</link>
       <guid isPermaLink="${item.guid ? "false" : "true"}">${item.guid ?? item.link}</guid>

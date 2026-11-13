@@ -3,7 +3,9 @@
 import { createPostgresClient } from "@rosegriffon/db/service";
 import { getServerSession } from "@/lib/auth-helpers";
 
-export async function toggleBookmark(articleId: string): Promise<{ bookmarked: boolean }> {
+export async function toggleBookmark(
+  articleId: string,
+): Promise<{ bookmarked: boolean }> {
   const session = await getServerSession();
   if (!session?.user) {
     throw new Error("Non authentifié");
@@ -24,11 +26,15 @@ export async function toggleBookmark(articleId: string): Promise<{ bookmarked: b
     return { bookmarked: false };
   }
 
-  await supabase.from("article_bookmarks").insert({ article_id: articleId, user_id: userId });
+  await supabase
+    .from("article_bookmarks")
+    .insert({ article_id: articleId, user_id: userId });
   return { bookmarked: true };
 }
 
-export async function getBookmarkStates(articleIds: string[]): Promise<Record<string, boolean>> {
+export async function getBookmarkStates(
+  articleIds: string[],
+): Promise<Record<string, boolean>> {
   const session = await getServerSession();
   if (!session?.user || articleIds.length === 0) {
     return {};

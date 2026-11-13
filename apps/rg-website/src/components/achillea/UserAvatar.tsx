@@ -15,13 +15,24 @@ interface UserAvatarProps {
   className?: string;
 }
 
-export function UserAvatar({ userId, avatar, name, displayName, size = "md", className }: UserAvatarProps) {
+export function UserAvatar({
+  userId,
+  avatar,
+  name,
+  displayName,
+  size = "md",
+  className,
+}: UserAvatarProps) {
   const [broken, setBroken] = useState(false);
 
   const resolvedName = (name ?? displayName ?? "Joueur").trim();
   const initial = initiale(resolvedName);
   const effectiveUserId =
-    userId?.trim() || (typeof avatar === "string" ? avatar.match(/\/avatars\/(\d+)\//)?.[1] : undefined) || "0";
+    userId?.trim() ||
+    (typeof avatar === "string"
+      ? avatar.match(/\/avatars\/(\d+)\//)?.[1]
+      : undefined) ||
+    "0";
   const defaultAvatarIndex = (() => {
     try {
       return Number((BigInt(effectiveUserId) >> 22n) % 6n);

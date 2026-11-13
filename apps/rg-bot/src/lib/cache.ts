@@ -38,7 +38,7 @@ function getRedis(): RedisClient | null {
   if (client) return client;
   try {
     client = new RedisClient(REDIS_URL);
-    client.onclose = err => {
+    client.onclose = (err) => {
       if (err) {
         console.warn("[cache] redis closed:", err.message ?? err);
       }
@@ -55,7 +55,11 @@ function k(key: string): string {
   return PREFIX + key;
 }
 
-export async function cached<T>(key: string, ttlMs: number, fn: () => Promise<T>): Promise<T> {
+export async function cached<T>(
+  key: string,
+  ttlMs: number,
+  fn: () => Promise<T>,
+): Promise<T> {
   const full = k(key);
   const ttlSec = Math.max(Math.floor(ttlMs / 1000), 1);
   const redis = getRedis();
@@ -89,7 +93,7 @@ export async function cached<T>(key: string, ttlMs: number, fn: () => Promise<T>
   const serialized = JSON.stringify(value);
 
   if (redis) {
-    redis.set(full, serialized, "EX", ttlSec).catch(err => {
+    redis.set(full, serialized, "EX", ttlSec).catch((err) => {
       metrics.errors++;
       console.warn("[cache] redis.set failed for", key, ":", err);
       fallback.set(full, { value, expiresAt: Date.now() + ttlMs });
@@ -105,7 +109,7 @@ export function invalidate(key: string): void {
   fallback.delete(full);
   const redis = getRedis();
   if (redis) {
-    redis.del(full).catch(err => {
+    redis.del(full).catch((err) => {
       metrics.errors++;
       console.warn("[cache] del failed for", key, ":", err);
     });
@@ -123,15 +127,18 @@ export function invalidatePrefix(prefix: string): void {
     redis
       .send("SCAN", ["0", "MATCH", `${fullPrefix}*`, "COUNT", "200"])
       .then(async (res: unknown) => {
-        const arr = Array.isArray(res) && Array.isArray(res[1]) ? (res[1] as string[]) : [];
+        const arr =
+          Array.isArray(res) && Array.isArray(res[1])
+            ? (res[1] as string[])
+            : [];
         if (arr.length > 0) {
-          await redis.send("DEL", arr).catch(err => {
+          await redis.send("DEL", arr).catch((err) => {
             metrics.errors++;
             console.warn("[cache] del prefix batch failed:", err);
           });
         }
       })
-      .catch(err => {
+      .catch((err) => {
         metrics.errors++;
         console.warn("[cache] scan prefix failed:", err);
       });

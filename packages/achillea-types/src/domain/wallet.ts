@@ -1,4 +1,7 @@
-import type { WalletTransactionDirection, WalletTransactionType } from "../enums/wallet";
+import type {
+  WalletTransactionDirection,
+  WalletTransactionType,
+} from "../enums/wallet";
 
 /**
  * Portefeuille — un solde par utilisateur dans une devise virtuelle (ex. ACH)

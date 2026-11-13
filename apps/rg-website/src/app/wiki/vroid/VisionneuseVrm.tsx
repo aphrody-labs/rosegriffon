@@ -51,7 +51,9 @@ export function VisionneuseVrm({ modele, connecte }: VisionneuseVrmProps) {
     return <SceneVrm idModele={modele.id} nom={nom} />;
   }
 
-  const vignette = urlVignette(modele.portrait_image?.w600?.url ?? modele.portrait_image?.original?.url);
+  const vignette = urlVignette(
+    modele.portrait_image?.w600?.url ?? modele.portrait_image?.original?.url,
+  );
 
   return (
     <div className="relative aspect-square w-full overflow-hidden rounded-2xl bg-surface-container-high">
@@ -84,8 +86,9 @@ export function VisionneuseVrm({ modele, connecte }: VisionneuseVrmProps) {
           </button>
         ) : (
           <p className="text-sm text-on-surface-variant">
-            L&apos;auteur n&apos;autorise pas le téléchargement de ce modèle. Azalée n&apos;étant pas une application
-            approuvée par VRoid Hub, elle ne peut pas l&apos;afficher en 3D.
+            L&apos;auteur n&apos;autorise pas le téléchargement de ce modèle.
+            Azalée n&apos;étant pas une application approuvée par VRoid Hub,
+            elle ne peut pas l&apos;afficher en 3D.
           </p>
         )}
       </div>

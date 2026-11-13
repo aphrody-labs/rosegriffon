@@ -1,6 +1,11 @@
 "use client";
 
-import { $createLinkNode, $isAutoLinkNode, $isLinkNode, TOGGLE_LINK_COMMAND } from "@lexical/link";
+import {
+  $createLinkNode,
+  $isAutoLinkNode,
+  $isLinkNode,
+  TOGGLE_LINK_COMMAND,
+} from "@lexical/link";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import { $findMatchingParent, mergeRegister } from "@lexical/utils";
 import {
@@ -52,7 +57,9 @@ function FloatingLinkEditor({
   const inputRef = useRef<HTMLInputElement>(null);
   const [linkUrl, setLinkUrl] = useState("");
   const [editedLinkUrl, setEditedLinkUrl] = useState("https://");
-  const [lastSelection, setLastSelection] = useState<BaseSelection | null>(null);
+  const [lastSelection, setLastSelection] = useState<BaseSelection | null>(
+    null,
+  );
 
   const $updateLinkEditor = useCallback(() => {
     const selection = $getSelection();
@@ -87,7 +94,8 @@ function FloatingLinkEditor({
       rootElement?.contains(nativeSelection.anchorNode) &&
       editor.isEditable()
     ) {
-      const domRect = nativeSelection.focusNode?.parentElement?.getBoundingClientRect();
+      const domRect =
+        nativeSelection.focusNode?.parentElement?.getBoundingClientRect();
       if (domRect) {
         setFloatingElemPositionForLinkEditor(domRect, editorElem, anchorElem);
       }
@@ -172,7 +180,9 @@ function FloatingLinkEditor({
     }
   }, [isLinkEditMode]);
 
-  const monitorInputInteraction = (event: React.KeyboardEvent<HTMLInputElement>) => {
+  const monitorInputInteraction = (
+    event: React.KeyboardEvent<HTMLInputElement>,
+  ) => {
     if (event.key === "Enter") {
       event.preventDefault();
       handleLinkSubmission();
@@ -218,7 +228,7 @@ function FloatingLinkEditor({
           <Input
             ref={inputRef}
             value={editedLinkUrl}
-            onChange={event => setEditedLinkUrl(event.target.value)}
+            onChange={(event) => setEditedLinkUrl(event.target.value)}
             onKeyDown={monitorInputInteraction}
             className="grow"
             aria-label="URL du lien"
@@ -235,7 +245,12 @@ function FloatingLinkEditor({
           >
             <X className="size-4" />
           </Button>
-          <Button size="icon" onClick={handleLinkSubmission} className="shrink-0" aria-label="Confirmer le lien">
+          <Button
+            size="icon"
+            onClick={handleLinkSubmission}
+            className="shrink-0"
+            aria-label="Confirmer le lien"
+          >
             <Check className="size-4" />
           </Button>
         </div>
@@ -293,22 +308,27 @@ function useFloatingLinkEditorToolbar(
       if ($isRangeSelection(selection)) {
         const focusNode = getSelectedNode(selection);
         const focusLinkNode = $findMatchingParent(focusNode, $isLinkNode);
-        const focusAutoLinkNode = $findMatchingParent(focusNode, $isAutoLinkNode);
+        const focusAutoLinkNode = $findMatchingParent(
+          focusNode,
+          $isAutoLinkNode,
+        );
         if (!(focusLinkNode || focusAutoLinkNode)) {
           setIsLink(false);
           return;
         }
         const badNode = selection
           .getNodes()
-          .filter(node => !$isLineBreakNode(node))
-          .find(node => {
+          .filter((node) => !$isLineBreakNode(node))
+          .find((node) => {
             const linkNode = $findMatchingParent(node, $isLinkNode);
             const autoLinkNode = $findMatchingParent(node, $isAutoLinkNode);
             return (
               (focusLinkNode && !focusLinkNode.is(linkNode)) ||
               (linkNode && !linkNode.is(focusLinkNode)) ||
               (focusAutoLinkNode && !focusAutoLinkNode.is(autoLinkNode)) ||
-              (autoLinkNode && (!autoLinkNode.is(focusAutoLinkNode) || autoLinkNode.getIsUnlinked()))
+              (autoLinkNode &&
+                (!autoLinkNode.is(focusAutoLinkNode) ||
+                  autoLinkNode.getIsUnlinked()))
             );
           });
         if (!badNode) {
@@ -348,7 +368,7 @@ function useFloatingLinkEditorToolbar(
       ),
       editor.registerCommand(
         CLICK_COMMAND,
-        payload => {
+        (payload) => {
           const selection = $getSelection();
           if ($isRangeSelection(selection)) {
             const node = getSelectedNode(selection);
@@ -393,5 +413,10 @@ export function FloatingLinkEditorPlugin({
 }): JSX.Element | null {
   const [editor] = useLexicalComposerContext();
 
-  return useFloatingLinkEditorToolbar(editor, anchorElem, isLinkEditMode, setIsLinkEditMode);
+  return useFloatingLinkEditorToolbar(
+    editor,
+    anchorElem,
+    isLinkEditMode,
+    setIsLinkEditMode,
+  );
 }

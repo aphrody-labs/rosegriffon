@@ -11,35 +11,61 @@ export const MODULE_LOADERS: Record<string, () => Promise<unknown>> = {
   "commands/cpk.ts": () => import("./commands/cpk"),
   "commands/cdn.ts": () => import("./commands/cdn"),
   "commands/x.ts": () => import("./commands/x"),
-  "commands/validation-annonce.ts": () => import("./commands/validation-annonce"),
+  "commands/validation-annonce.ts": () =>
+    import("./commands/validation-annonce"),
 
   // Profil Rose Griffon
   "commands/achillea.ts": () => import("./commands/achillea"),
-  "commands/administration/racine.ts": () => import("./commands/administration/racine"),
-  "commands/administration/racine-gestion.ts": () => import("./commands/administration/racine-gestion"),
-  "commands/administration/racine-moderation.ts": () => import("./commands/administration/racine-moderation"),
-  "commands/administration/article.ts": () => import("./commands/administration/article"),
-  "commands/administration/cron.ts": () => import("./commands/administration/cron"),
-  "commands/administration/equipe.ts": () => import("./commands/administration/equipe"),
-  "commands/administration/evenement.ts": () => import("./commands/administration/evenement"),
-  "commands/administration/moderation.ts": () => import("./commands/administration/moderation"),
-  "commands/administration/multicomptes.ts": () => import("./commands/administration/multicomptes"),
-  "commands/administration/reglages.ts": () => import("./commands/administration/reglages"),
-  "commands/administration/role.ts": () => import("./commands/administration/role"),
-  "commands/administration/salon.ts": () => import("./commands/administration/salon"),
-  "commands/administration/sondage.ts": () => import("./commands/administration/sondage"),
-  "commands/administration/ticket.ts": () => import("./commands/administration/ticket"),
-  "commands/administration/niveaux.ts": () => import("./commands/administration/niveaux"),
-  "commands/administration/roles.ts": () => import("./commands/administration/roles"),
-  "commands/administration/accueil.ts": () => import("./commands/administration/accueil"),
-  "commands/administration/historique.ts": () => import("./commands/administration/historique"),
-  "commands/administration/journal.ts": () => import("./commands/administration/journal"),
-  "commands/administration/automod.ts": () => import("./commands/administration/automod"),
-  "commands/administration/suggestion.ts": () => import("./commands/administration/suggestion"),
-  "commands/administration/stream.ts": () => import("./commands/administration/stream"),
-  "commands/administration/synchroniser.ts": () => import("./commands/administration/synchroniser"),
-  "commands/administration/utilisateur.ts": () => import("./commands/administration/utilisateur"),
-  "commands/administration/veille.ts": () => import("./commands/administration/veille"),
+  "commands/administration/racine.ts": () =>
+    import("./commands/administration/racine"),
+  "commands/administration/racine-gestion.ts": () =>
+    import("./commands/administration/racine-gestion"),
+  "commands/administration/racine-moderation.ts": () =>
+    import("./commands/administration/racine-moderation"),
+  "commands/administration/article.ts": () =>
+    import("./commands/administration/article"),
+  "commands/administration/cron.ts": () =>
+    import("./commands/administration/cron"),
+  "commands/administration/equipe.ts": () =>
+    import("./commands/administration/equipe"),
+  "commands/administration/evenement.ts": () =>
+    import("./commands/administration/evenement"),
+  "commands/administration/moderation.ts": () =>
+    import("./commands/administration/moderation"),
+  "commands/administration/multicomptes.ts": () =>
+    import("./commands/administration/multicomptes"),
+  "commands/administration/reglages.ts": () =>
+    import("./commands/administration/reglages"),
+  "commands/administration/role.ts": () =>
+    import("./commands/administration/role"),
+  "commands/administration/salon.ts": () =>
+    import("./commands/administration/salon"),
+  "commands/administration/sondage.ts": () =>
+    import("./commands/administration/sondage"),
+  "commands/administration/ticket.ts": () =>
+    import("./commands/administration/ticket"),
+  "commands/administration/niveaux.ts": () =>
+    import("./commands/administration/niveaux"),
+  "commands/administration/roles.ts": () =>
+    import("./commands/administration/roles"),
+  "commands/administration/accueil.ts": () =>
+    import("./commands/administration/accueil"),
+  "commands/administration/historique.ts": () =>
+    import("./commands/administration/historique"),
+  "commands/administration/journal.ts": () =>
+    import("./commands/administration/journal"),
+  "commands/administration/automod.ts": () =>
+    import("./commands/administration/automod"),
+  "commands/administration/suggestion.ts": () =>
+    import("./commands/administration/suggestion"),
+  "commands/administration/stream.ts": () =>
+    import("./commands/administration/stream"),
+  "commands/administration/synchroniser.ts": () =>
+    import("./commands/administration/synchroniser"),
+  "commands/administration/utilisateur.ts": () =>
+    import("./commands/administration/utilisateur"),
+  "commands/administration/veille.ts": () =>
+    import("./commands/administration/veille"),
   "commands/agenda.ts": () => import("./commands/agenda"),
   "commands/article.ts": () => import("./commands/article"),
   "commands/staff/racine.ts": () => import("./commands/staff/racine"),
@@ -63,23 +89,39 @@ export const MODULE_LOADERS: Record<string, () => Promise<unknown>> = {
 
   // Profil Achilléa (`clan.ts` déclare le groupe `/clan` : il précède ses extensions)
   "commands/achillea-bot/clan.ts": () => import("./commands/achillea-bot/clan"),
-  "commands/achillea-bot/clan-gestion.ts": () => import("./commands/achillea-bot/clan-gestion"),
-  "commands/achillea-bot/clan-equipes.ts": () => import("./commands/achillea-bot/clan-equipes"),
-  "commands/achillea-bot/create-clan.ts": () => import("./commands/achillea-bot/create-clan"),
-  "commands/achillea-bot/composants-clan.ts": () => import("./commands/achillea-bot/composants-clan"),
-  "commands/achillea-bot/interclan.ts": () => import("./commands/achillea-bot/interclan"),
-  "commands/achillea-bot/composants-interclan.ts": () => import("./commands/achillea-bot/composants-interclan"),
-  "commands/achillea-bot/guild.ts": () => import("./commands/achillea-bot/guild"),
-  "commands/achillea-bot/joueur.ts": () => import("./commands/achillea-bot/joueur"),
-  "commands/achillea-bot/report.ts": () => import("./commands/achillea-bot/report"),
-  "commands/achillea-bot/sanction.ts": () => import("./commands/achillea-bot/sanction"),
-  "commands/achillea-bot/ranked-admin.ts": () => import("./commands/achillea-bot/ranked-admin"),
-  "commands/achillea-bot/owner.ts": () => import("./commands/achillea-bot/owner"),
-  "commands/achillea-bot/general.ts": () => import("./commands/achillea-bot/general"),
-  "commands/achillea-bot/matchmaker.ts": () => import("./commands/achillea-bot/matchmaker"),
-  "commands/achillea-bot/admin.ts": () => import("./commands/achillea-bot/admin"),
+  "commands/achillea-bot/clan-gestion.ts": () =>
+    import("./commands/achillea-bot/clan-gestion"),
+  "commands/achillea-bot/clan-equipes.ts": () =>
+    import("./commands/achillea-bot/clan-equipes"),
+  "commands/achillea-bot/create-clan.ts": () =>
+    import("./commands/achillea-bot/create-clan"),
+  "commands/achillea-bot/composants-clan.ts": () =>
+    import("./commands/achillea-bot/composants-clan"),
+  "commands/achillea-bot/interclan.ts": () =>
+    import("./commands/achillea-bot/interclan"),
+  "commands/achillea-bot/composants-interclan.ts": () =>
+    import("./commands/achillea-bot/composants-interclan"),
+  "commands/achillea-bot/guild.ts": () =>
+    import("./commands/achillea-bot/guild"),
+  "commands/achillea-bot/joueur.ts": () =>
+    import("./commands/achillea-bot/joueur"),
+  "commands/achillea-bot/report.ts": () =>
+    import("./commands/achillea-bot/report"),
+  "commands/achillea-bot/sanction.ts": () =>
+    import("./commands/achillea-bot/sanction"),
+  "commands/achillea-bot/ranked-admin.ts": () =>
+    import("./commands/achillea-bot/ranked-admin"),
+  "commands/achillea-bot/owner.ts": () =>
+    import("./commands/achillea-bot/owner"),
+  "commands/achillea-bot/general.ts": () =>
+    import("./commands/achillea-bot/general"),
+  "commands/achillea-bot/matchmaker.ts": () =>
+    import("./commands/achillea-bot/matchmaker"),
+  "commands/achillea-bot/admin.ts": () =>
+    import("./commands/achillea-bot/admin"),
   "events/achillea/serveurs.ts": () => import("./events/achillea/serveurs"),
-  "events/achillea/aide-ranked.ts": () => import("./events/achillea/aide-ranked"),
+  "events/achillea/aide-ranked.ts": () =>
+    import("./events/achillea/aide-ranked"),
 
   // Événements RG
   "events/ready.ts": () => import("./events/ready"),

@@ -58,7 +58,9 @@ export async function getArticles({
   if (query) {
     params.push(`%${query}%`);
     const idx = params.length;
-    conditions.push(`(title ILIKE $${idx} OR excerpt ILIKE $${idx} OR category ILIKE $${idx})`);
+    conditions.push(
+      `(title ILIKE $${idx} OR excerpt ILIKE $${idx} OR category ILIKE $${idx})`,
+    );
   }
 
   const whereClause = conditions.join(" AND ");
@@ -80,7 +82,9 @@ export async function getArticles({
 
     const [firstRow] = rows;
     const total = firstRow ? Number(firstRow.full_count) : 0;
-    const data: Article[] = rows.map(({ full_count: _full_count, ...rest }) => rest);
+    const data: Article[] = rows.map(
+      ({ full_count: _full_count, ...rest }) => rest,
+    );
 
     return {
       data,
@@ -131,9 +135,11 @@ export async function getArticleStats() {
     );
 
     const total = rows.length;
-    const published = rows.filter(a => a.status === "published").length;
-    const draft = rows.filter(a => a.status === "draft").length;
-    const categories = [...new Set(rows.map(a => a.category).filter(Boolean))] as string[];
+    const published = rows.filter((a) => a.status === "published").length;
+    const draft = rows.filter((a) => a.status === "draft").length;
+    const categories = [
+      ...new Set(rows.map((a) => a.category).filter(Boolean)),
+    ] as string[];
 
     return {
       categories,

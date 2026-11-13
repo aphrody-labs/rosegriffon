@@ -3,11 +3,11 @@ import { PatreonClient } from "@rosegriffon/patreon-bun";
 
 // Can also extend a creator or user client
 export class MyCampaignClient extends PatreonClient {
-	public campaignId: string = "<id>";
+  public campaignId: string = "<id>";
 
-	public async fetch() {
-		return await this.fetchCampaign(this.campaignId);
-	}
+  public async fetch() {
+    return await this.fetchCampaign(this.campaignId);
+  }
 }
 // #endregion custom
 
@@ -15,38 +15,38 @@ export class MyCampaignClient extends PatreonClient {
 import { PatreonCreatorClient } from "@rosegriffon/patreon-bun";
 
 declare const env: {
-	CLIENT_ID: string;
-	CLIENT_SECRET: string;
+  CLIENT_ID: string;
+  CLIENT_SECRET: string;
 };
 
 export class Patreon {
-	public client: PatreonCreatorClient<true>;
-	public campaignId: string;
+  public client: PatreonCreatorClient<true>;
+  public campaignId: string;
 
-	public constructor(campaignId: string) {
-		this.campaignId = campaignId;
+  public constructor(campaignId: string) {
+    this.campaignId = campaignId;
 
-		this.client = new PatreonCreatorClient({
-			oauth: {
-				clientId: env.CLIENT_ID,
-				clientSecret: env.CLIENT_SECRET,
-			},
-			rest: {
-				includeAllQueries: true,
-			},
-		});
-	}
+    this.client = new PatreonCreatorClient({
+      oauth: {
+        clientId: env.CLIENT_ID,
+        clientSecret: env.CLIENT_SECRET,
+      },
+      rest: {
+        includeAllQueries: true,
+      },
+    });
+  }
 
-	public async fetch() {
-		return await this.client.simplified.fetchCampaign(this.campaignId);
-	}
+  public async fetch() {
+    return await this.client.simplified.fetchCampaign(this.campaignId);
+  }
 
-	public async fetchMembers() {
-		return await this.client.simplified.fetchCampaignMembers(this.campaignId);
-	}
+  public async fetchMembers() {
+    return await this.client.simplified.fetchCampaignMembers(this.campaignId);
+  }
 
-	public async fetchPosts() {
-		return await this.client.simplified.fetchCampaignPosts(this.campaignId);
-	}
+  public async fetchPosts() {
+    return await this.client.simplified.fetchCampaignPosts(this.campaignId);
+  }
 }
 // #endregion wrapper

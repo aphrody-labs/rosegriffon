@@ -2,7 +2,12 @@
 // Headers and plaintext tables only: encrypted NCCH/NCA payloads need console keys, which are
 // never handled here (see the yolo-re 3DS and Switch analysis workflows).
 import { BinaryView, hex, hex32, type BinarySource } from "../stream.js";
-import type { FileEntry, ParseContext, ParsedImage, Section } from "../types.js";
+import type {
+  FileEntry,
+  ParseContext,
+  ParsedImage,
+  Section,
+} from "../types.js";
 
 const mediaUnit = 0x200;
 
@@ -10,12 +15,18 @@ const mediaUnit = 0x200;
 export async function ncch(
   source: BinarySource,
   base: number,
-): Promise<{ header: Record<string, unknown>; sections: Section[] } | undefined> {
+): Promise<
+  { header: Record<string, unknown>; sections: Section[] } | undefined
+> {
   const view = await source.view(base, 0x200);
   if (!view.equals(0x100, "NCCH")) return undefined;
   const flags = view.slice(0x188, 8);
   const noCrypto = (flags[7]! & 0x04) !== 0;
-  const region = (name: string, at: number, kind: Section["kind"]): Section | undefined => {
+  const region = (
+    name: string,
+    at: number,
+    kind: Section["kind"],
+  ): Section | undefined => {
     const offset = view.u32(at) * mediaUnit;
     const size = view.u32(at + 4) * mediaUnit;
     return size
@@ -59,9 +70,14 @@ export async function ncch(
   };
 }
 
-export async function parseNcsd({ source, head }: ParseContext): Promise<ParsedImage> {
+export async function parseNcsd({
+  source,
+  head,
+}: ParseContext): Promise<ParsedImage> {
   const view = new BinaryView(head);
-  const sections: Section[] = [{ name: "ncsd-header", offset: 0, size: 0x200, kind: "header" }];
+  const sections: Section[] = [
+    { name: "ncsd-header", offset: 0, size: 0x200, kind: "header" },
+  ];
   const partitions: Array<{ index: number; offset: number; size: number }> = [];
   for (let index = 0; index < 8; index++) {
     const offset = view.u32(0x120 + index * 8) * mediaUnit;
@@ -75,10 +91,12 @@ export async function parseNcsd({ source, head }: ParseContext): Promise<ParsedI
       kind: "partition",
     });
   }
-  const game = partitions[0] ? await ncch(source, partitions[0].offset) : undefined;
+  const game = partitions[0]
+    ? await ncch(source, partitions[0].offset)
+    : undefined;
   if (game)
     sections.push(
-      ...game.sections.map(section => ({
+      ...game.sections.map((section) => ({
         ...section,
         name: `partition[0].${section.name}`,
       })),
@@ -95,7 +113,9 @@ export async function parseNcsd({ source, head }: ParseContext): Promise<ParsedI
   };
 }
 
-export async function parseNcch({ source }: ParseContext): Promise<ParsedImage> {
+export async function parseNcch({
+  source,
+}: ParseContext): Promise<ParsedImage> {
   const parsed = await ncch(source, 0);
   return {
     header: parsed?.header ?? {},
@@ -105,8 +125,11 @@ export async function parseNcch({ source }: ParseContext): Promise<ParsedImage> 
 }
 
 /** ExeFS file table of an unencrypted NCCH (`.code`, `icon`, `banner`, `logo`). */
-export async function exefsFiles(source: BinarySource, sections: Section[]): Promise<FileEntry[]> {
-  const exefs = sections.find(section => section.name.endsWith("exefs"));
+export async function exefsFiles(
+  source: BinarySource,
+  sections: Section[],
+): Promise<FileEntry[]> {
+  const exefs = sections.find((section) => section.name.endsWith("exefs"));
   if (!exefs) return [];
   const view = await source.view(exefs.offset, 0xa0);
   const files: FileEntry[] = [];
@@ -124,14 +147,20 @@ export async function exefsFiles(source: BinarySource, sections: Section[]): Pro
 }
 
 /** PFS0 (NSP) or HFS0 (XCI partitions) file table at `base`. */
-export async function partitionFs(source: BinarySource, base: number): Promise<FileEntry[]> {
+export async function partitionFs(
+  source: BinarySource,
+  base: number,
+): Promise<FileEntry[]> {
   const head = await source.view(base, 0x10);
   const hashed = head.equals(0, "HFS0");
   if (!hashed && !head.equals(0, "PFS0")) return [];
   const count = head.u32(4);
   const stringBytes = head.u32(8);
   const entryBytes = hashed ? 0x40 : 0x18;
-  const table = await source.view(base + 0x10, count * entryBytes + stringBytes);
+  const table = await source.view(
+    base + 0x10,
+    count * entryBytes + stringBytes,
+  );
   const data = base + 0x10 + count * entryBytes + stringBytes;
   const files: FileEntry[] = [];
   for (let index = 0; index < count; index++) {
@@ -151,9 +180,11 @@ export async function parseNsp({ source }: ParseContext): Promise<ParsedImage> {
     header: {
       container: "PFS0",
       files: files.length,
-      contents: files.filter(file => file.path.endsWith(".nca")).length,
-      tickets: files.filter(file => file.path.endsWith(".tik")).map(file => file.path),
-      metaNca: files.find(file => file.path.endsWith(".cnmt.nca"))?.path,
+      contents: files.filter((file) => file.path.endsWith(".nca")).length,
+      tickets: files
+        .filter((file) => file.path.endsWith(".tik"))
+        .map((file) => file.path),
+      metaNca: files.find((file) => file.path.endsWith(".cnmt.nca"))?.path,
       encrypted: true,
     },
     sections: [
@@ -163,7 +194,7 @@ export async function parseNsp({ source }: ParseContext): Promise<ParsedImage> {
         size: files[0]?.offset ?? 0x10,
         kind: "header",
       },
-      ...files.map(file => ({
+      ...files.map((file) => ({
         name: file.path,
         offset: file.offset,
         size: file.size,
@@ -183,7 +214,10 @@ const xciSizes: Record<number, string> = {
   0xe2: "32 GB",
 };
 
-export async function parseXci({ source, head }: ParseContext): Promise<ParsedImage> {
+export async function parseXci({
+  source,
+  head,
+}: ParseContext): Promise<ParsedImage> {
   const view = new BinaryView(head);
   const root = view.u64(0x130);
   const partitions = await partitionFs(source, root);
@@ -196,7 +230,7 @@ export async function parseXci({ source, head }: ParseContext): Promise<ParsedIm
       secureAreaStart: view.u32(0x104) * mediaUnit,
       validDataEnd: (view.u32(0x118) + 1) * mediaUnit,
       rootHfs0: { offset: root, headerBytes: view.u64(0x138) },
-      partitions: partitions.map(partition => partition.path),
+      partitions: partitions.map((partition) => partition.path),
       encrypted: true,
     },
     sections: [
@@ -207,7 +241,7 @@ export async function parseXci({ source, head }: ParseContext): Promise<ParsedIm
         size: view.u64(0x138),
         kind: "filesystem",
       },
-      ...partitions.map(partition => ({
+      ...partitions.map((partition) => ({
         name: partition.path,
         offset: partition.offset,
         size: partition.size,
@@ -219,9 +253,16 @@ export async function parseXci({ source, head }: ParseContext): Promise<ParsedIm
 }
 
 /** Homebrew NRO: segment table, module id and the optional ASET (icon, NACP, RomFS). */
-export async function parseNro({ source, head }: ParseContext): Promise<ParsedImage> {
+export async function parseNro({
+  source,
+  head,
+}: ParseContext): Promise<ParsedImage> {
   const view = new BinaryView(head);
-  const segment = (name: string, at: number, kind: Section["kind"]): Section => ({
+  const segment = (
+    name: string,
+    at: number,
+    kind: Section["kind"],
+  ): Section => ({
     name,
     offset: view.u32(at),
     size: view.u32(at + 4),
@@ -245,9 +286,13 @@ export async function parseNro({ source, head }: ParseContext): Promise<ParsedIm
       size: aset.u64(at + 8),
       kind: "metadata",
     });
-    const parts = [part("icon", 0x08), part("nacp", 0x18), part("romfs", 0x28)].filter(section => section.size);
+    const parts = [
+      part("icon", 0x08),
+      part("nacp", 0x18),
+      part("romfs", 0x28),
+    ].filter((section) => section.size);
     sections.push(...parts);
-    const nacp = parts.find(section => section.name === "nacp");
+    const nacp = parts.find((section) => section.name === "nacp");
     const control = nacp ? await source.view(nacp.offset, 0x3070) : undefined;
     asset = {
       version: aset.u32(4),

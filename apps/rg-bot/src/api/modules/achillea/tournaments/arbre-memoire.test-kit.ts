@@ -20,14 +20,24 @@ export class ArbreMemoire implements CrudInterface {
     return lignes;
   }
 
-  private static correspond(ligne: Record<string, unknown>, filtre: Record<string, unknown>) {
-    return Object.entries(filtre).every(([cle, valeur]) => valeur === undefined || ligne[cle] === valeur);
+  private static correspond(
+    ligne: Record<string, unknown>,
+    filtre: Record<string, unknown>,
+  ) {
+    return Object.entries(filtre).every(
+      ([cle, valeur]) => valeur === undefined || ligne[cle] === valeur,
+    );
   }
 
-  async insert<T extends Table>(table: T, valeur: OmitId<DataTypes[T]> | OmitId<DataTypes[T]>[]): Promise<any> {
+  async insert<T extends Table>(
+    table: T,
+    valeur: OmitId<DataTypes[T]> | OmitId<DataTypes[T]>[],
+  ): Promise<any> {
     const liste = Array.isArray(valeur);
     const ids: number[] = [];
-    for (const entree of (liste ? valeur : [valeur]) as Array<Record<string, unknown>>) {
+    for (const entree of (liste ? valeur : [valeur]) as Array<
+      Record<string, unknown>
+    >) {
       const id = this.prochainId++;
       this.lignes(table).push(structuredClone({ ...entree, id }));
       ids.push(id);
@@ -35,13 +45,20 @@ export class ArbreMemoire implements CrudInterface {
     return liste ? true : ids[0];
   }
 
-  async select<T extends Table>(table: T, filtre?: Id | Partial<DataTypes[T]>): Promise<any> {
+  async select<T extends Table>(
+    table: T,
+    filtre?: Id | Partial<DataTypes[T]>,
+  ): Promise<any> {
     const lignes = this.lignes(table);
     if (filtre === undefined) return structuredClone(lignes);
     if (typeof filtre === "object") {
-      return structuredClone(lignes.filter(l => ArbreMemoire.correspond(l, filtre as Record<string, unknown>)));
+      return structuredClone(
+        lignes.filter((l) =>
+          ArbreMemoire.correspond(l, filtre as Record<string, unknown>),
+        ),
+      );
     }
-    return structuredClone(lignes.find(l => l.id === filtre) ?? null);
+    return structuredClone(lignes.find((l) => l.id === filtre) ?? null);
   }
 
   async update<T extends Table>(
@@ -52,15 +69,22 @@ export class ArbreMemoire implements CrudInterface {
     if (!valeur) return false;
     const cibles =
       typeof filtre === "object"
-        ? this.lignes(table).filter(l => ArbreMemoire.correspond(l, filtre as Record<string, unknown>))
-        : this.lignes(table).filter(l => l.id === filtre);
+        ? this.lignes(table).filter((l) =>
+            ArbreMemoire.correspond(l, filtre as Record<string, unknown>),
+          )
+        : this.lignes(table).filter((l) => l.id === filtre);
     for (const cible of cibles) Object.assign(cible, structuredClone(valeur));
     return cibles.length > 0;
   }
 
-  async delete<T extends Table>(table: T, filtre?: Partial<DataTypes[T]>): Promise<boolean> {
+  async delete<T extends Table>(
+    table: T,
+    filtre?: Partial<DataTypes[T]>,
+  ): Promise<boolean> {
     const restantes = this.lignes(table).filter(
-      l => filtre !== undefined && !ArbreMemoire.correspond(l, filtre as Record<string, unknown>),
+      (l) =>
+        filtre !== undefined &&
+        !ArbreMemoire.correspond(l, filtre as Record<string, unknown>),
     );
     this.tables.set(String(table), restantes);
     return true;
@@ -68,17 +92,25 @@ export class ArbreMemoire implements CrudInterface {
 }
 
 /** Arbre à élimination simple de `noms.length` joueurs dans une table de `taille` places. */
-export async function creerArbreSimple(noms: string[], taille: number, tournoiId = 1) {
+export async function creerArbreSimple(
+  noms: string[],
+  taille: number,
+  tournoiId = 1,
+) {
   const manager = new BracketsManager(new ArbreMemoire());
   const stage = await manager.create.stage({
     tournamentId: tournoiId,
     name: "Test",
     type: "single_elimination",
     seeding: noms,
-    settings: { size: taille, seedOrdering: ["inner_outer"], consolationFinal: false },
+    settings: {
+      size: taille,
+      seedOrdering: ["inner_outer"],
+      consolationFinal: false,
+    },
   });
   await manager.update.confirmSeeding(stage.id);
   const participants = (await manager.storage.select("participant")) ?? [];
-  const nomParId = new Map(participants.map(p => [Number(p.id), p.name]));
+  const nomParId = new Map(participants.map((p) => [Number(p.id), p.name]));
   return { manager, stageId: Number(stage.id), tournoiId, nomParId };
 }

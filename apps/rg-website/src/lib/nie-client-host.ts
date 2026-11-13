@@ -225,7 +225,8 @@ class AudioOut {
   }
 
   close() {
-    for (const c of [...this.sources.keys()]) this.stop(c);
+    // Deleting entries while iterating a Map is safe: the iterator stays consistent.
+    for (const c of this.sources.keys()) this.stop(c);
     void this.ctx?.close().catch(() => {});
   }
 }

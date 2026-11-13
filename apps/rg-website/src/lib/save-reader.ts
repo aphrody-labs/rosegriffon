@@ -14,7 +14,10 @@
  */
 
 // Le glue ESM `--target web` est browser-safe (pas de `require('fs')`).
-import init, { init_panic_hook, parse_save_json } from "./nie-wasm-web/nie_wasm.js";
+import init, {
+  init_panic_hook,
+  parse_save_json,
+} from "./nie-wasm-web/nie_wasm.js";
 
 // ---------------------------------------------------------------------------
 // Types du résumé (miroir de la sortie JSON de `parse_save_json`)
@@ -120,7 +123,9 @@ async function ensureWasm(): Promise<void> {
       // l'onglet : chaque appel ultérieur rejouait la MÊME erreur, sans
       // jamais retenter le chargement.
       initPromise = null;
-      throw new Error(`Chargement du module wasm impossible (${WASM_URL}).`, { cause });
+      throw new Error(`Chargement du module wasm impossible (${WASM_URL}).`, {
+        cause,
+      });
     });
   }
   return initPromise;
@@ -140,7 +145,10 @@ async function ensureWasm(): Promise<void> {
  * @throws si le module wasm échoue à charger, ou si le fichier n'est pas une
  *   save IEVR valide (mauvais magic / mauvaise clé dérivée du nom / CRC32 KO).
  */
-export async function parseSave(bytes: Uint8Array, filename: string): Promise<SaveSummary> {
+export async function parseSave(
+  bytes: Uint8Array,
+  filename: string,
+): Promise<SaveSummary> {
   await ensureWasm();
   const json = parse_save_json(bytes, filename);
   return JSON.parse(json) as SaveSummary;

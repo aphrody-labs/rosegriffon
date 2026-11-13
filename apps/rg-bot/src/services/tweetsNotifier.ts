@@ -64,7 +64,10 @@ import type { Client, EmbedBuilder, SendableChannels } from "discord.js";
 // donc PAS dans le graphe de ce module (voir l'import paresseux plus bas).
 import type { EvenementIpc } from "../lib/cron-ipc";
 import { rgEmbed } from "../lib/embeds";
-import { encoderValidation, texteCarteValidation } from "../lib/validation-annonce";
+import {
+  encoderValidation,
+  texteCarteValidation,
+} from "../lib/validation-annonce";
 import {
   corpsTweet,
   dateTweet,
@@ -148,7 +151,11 @@ export interface ProfilAnnonceur {
 }
 
 /** États dont la cause DURE : les rejournaliser à chaque tour noierait le journal. */
-const ETATS_PERSISTANTS: ReadonlySet<EtatDrain> = new Set<EtatDrain>(["sans-salon", "echec", "concurrent"]);
+const ETATS_PERSISTANTS: ReadonlySet<EtatDrain> = new Set<EtatDrain>([
+  "sans-salon",
+  "echec",
+  "concurrent",
+]);
 
 export interface TraceJournal {
   /** Ligne à écrire, ou `null` pour rester muet ce tour-ci. */
@@ -196,7 +203,9 @@ export function ligneJournal(
     return { ligne: null, empreinte: null, niveau: "info" };
   }
   return {
-    ligne: reprise ? `${base} — la cause du blocage précédent a disparu.` : base,
+    ligne: reprise
+      ? `${base} — la cause du blocage précédent a disparu.`
+      : base,
     empreinte: null,
     niveau: "info",
   };
@@ -205,14 +214,20 @@ export function ligneJournal(
 /** Embed d'un tweet : traduction en tête, lien vers l'original, image, métriques. */
 export function embedTweet(tweet: LigneTweet): EmbedBuilder {
   const lien = urlTweet(tweet);
-  const auteur = tweet.author_username ? `@${tweet.author_username}` : "compte inconnu";
+  const auteur = tweet.author_username
+    ? `@${tweet.author_username}`
+    : "compte inconnu";
   const embed = rgEmbed()
     .setAuthor({
       name: tweet.author_name ? `${tweet.author_name} (${auteur})` : auteur,
       url: `https://x.com/${tweet.author_username ?? "i"}`,
     })
     .setURL(lien)
-    .setTitle(tweet.is_thread ? `Fil de ${tweet.tweet_count ?? 1} posts` : "Nouveau post");
+    .setTitle(
+      tweet.is_thread
+        ? `Fil de ${tweet.tweet_count ?? 1} posts`
+        : "Nouveau post",
+    );
 
   const corps = corpsTweet(tweet, 1_000);
   if (corps.length > 0) {
@@ -240,7 +255,10 @@ export function embedTweet(tweet: LigneTweet): EmbedBuilder {
 }
 
 /** Embed de synthèse quand le lot dépasse `max_par_lot`. */
-export function embedResume(tweets: LigneTweet[], filtre: FiltreTweets): EmbedBuilder {
+export function embedResume(
+  tweets: LigneTweet[],
+  filtre: FiltreTweets,
+): EmbedBuilder {
   const dernier = tweets.at(-1);
   return rgEmbed()
     .setTitle("Veille X — nouveaux posts")
@@ -265,7 +283,9 @@ function journaliserRefus(salonId: string, raison: string): void {
     return;
   }
   refusParSalon.set(salonId, raison);
-  console.warn(`[tweets] ${raison} (répétition silencieuse tant que la cause dure)`);
+  console.warn(
+    `[tweets] ${raison} (répétition silencieuse tant que la cause dure)`,
+  );
 }
 
 /**
@@ -328,21 +348,33 @@ export async function resoudreSalon(
  * et le refus reste neutre — on ne colore pas en rouge un geste éditorial
  * ordinaire.
  */
-export function rangeeValidation(tweetId: string): ActionRowBuilder<ButtonBuilder>[] | null {
+export function rangeeValidation(
+  tweetId: string,
+): ActionRowBuilder<ButtonBuilder>[] | null {
   const oui = encoderValidation(tweetId, "ok");
   const non = encoderValidation(tweetId, "non");
   if (!oui || !non) return null;
   return [
     new ActionRowBuilder<ButtonBuilder>().addComponents(
-      new ButtonBuilder().setCustomId(oui).setLabel("Annoncer").setStyle(ButtonStyle.Success),
-      new ButtonBuilder().setCustomId(non).setLabel("Ignorer").setStyle(ButtonStyle.Secondary),
+      new ButtonBuilder()
+        .setCustomId(oui)
+        .setLabel("Annoncer")
+        .setStyle(ButtonStyle.Success),
+      new ButtonBuilder()
+        .setCustomId(non)
+        .setLabel("Ignorer")
+        .setStyle(ButtonStyle.Secondary),
     ),
   ];
 }
 
 export async function drainerTweets(
   client: Client,
-  options: { salonForce?: string; simulation?: boolean; annonce?: AnnoncePosts } = {},
+  options: {
+    salonForce?: string;
+    simulation?: boolean;
+    annonce?: AnnoncePosts;
+  } = {},
 ): Promise<ResultatDrain> {
   if (drainEnCours) {
     return { etat: "concurrent", candidats: 0, publies: 0 };
@@ -360,7 +392,11 @@ export async function drainerTweets(
     // bot sans couper l'autre : l'interrupteur `filtre.actif` vit dans le
     // réglage PARTAGÉ et ferait taire les deux. Une simulation reste permise —
     // on veut pouvoir vérifier ce qui SERAIT publié pendant la pause.
-    if (canal && !options.simulation && (await curseursEnPause()).includes(canal)) {
+    if (
+      canal &&
+      !options.simulation &&
+      (await curseursEnPause()).includes(canal)
+    ) {
       return {
         etat: "inactif",
         candidats: 0,
@@ -400,7 +436,9 @@ export async function drainerTweets(
     // ⚠ En simulation, AUCUNE écriture — pas même la création du curseur, qui
     // est une écriture de production : `/tweets test` affirme « le curseur n'a
     // pas bougé », cette affirmation doit rester vraie.
-    const curseur = options.simulation ? await lireCurseur(canal) : await assurerCurseur(canal);
+    const curseur = options.simulation
+      ? await lireCurseur(canal)
+      : await assurerCurseur(canal);
     if (!curseur) {
       return {
         etat: "amorce",
@@ -419,7 +457,9 @@ export async function drainerTweets(
     }
 
     const candidats = await tweetsAPublier(curseur, filtre);
-    const retenus = candidats.filter(tweet => tweetEstNotifiable(tweet, filtre));
+    const retenus = candidats.filter((tweet) =>
+      tweetEstNotifiable(tweet, filtre),
+    );
     if (candidats.length === 0) {
       return { etat: "rien", candidats: 0, publies: 0 };
     }
@@ -466,9 +506,19 @@ export async function drainerTweets(
           enforceNonce: true,
           nonce: nonceLot(dernier.id),
         });
-        await avancerCurseur(canal, attendu, borneFinale, dernier.id, retenus.length);
+        await avancerCurseur(
+          canal,
+          attendu,
+          borneFinale,
+          dernier.id,
+          retenus.length,
+        );
       }
-      return { etat: "resume", candidats: candidats.length, publies: retenus.length };
+      return {
+        etat: "resume",
+        candidats: candidats.length,
+        publies: retenus.length,
+      };
     }
 
     // ── VALIDATION HUMAINE : on PROPOSE, on ne publie pas ───────────────────
@@ -486,7 +536,8 @@ export async function drainerTweets(
     // refus arrête le drain sans rien déposer : une proposition perdue se
     // rattrape à la main (`/x annoncer`), une boucle de propositions non.
     if (annonce.salonValidation && !options.simulation) {
-      const { salon: salonValidation, raison: raisonValidation } = await resoudreSalon(client, annonce.salonValidation);
+      const { salon: salonValidation, raison: raisonValidation } =
+        await resoudreSalon(client, annonce.salonValidation);
       if (!salonValidation) {
         // On n'avance PAS le curseur : le salon de validation est
         // peut-être momentanément injoignable, et les posts doivent être
@@ -532,7 +583,11 @@ export async function drainerTweets(
         proposes += 1;
       }
 
-      return { etat: "propose", candidats: candidats.length, publies: proposes };
+      return {
+        etat: "propose",
+        candidats: candidats.length,
+        publies: proposes,
+      };
     }
 
     // ── Envoi détaillé, par TRANCHES ────────────────────────────────────────
@@ -548,7 +603,9 @@ export async function drainerTweets(
       const dernierDuLot = retenus[consommes - 1]!;
       const final = consommes >= retenus.length;
       // Le dernier lot consomme aussi les candidats filtrés qui suivent.
-      const borne = final ? borneFinale : (dateTweet(dernierDuLot) ?? borneFinale);
+      const borne = final
+        ? borneFinale
+        : (dateTweet(dernierDuLot) ?? borneFinale);
       const idBorne = final ? dernier.id : dernierDuLot.id;
 
       if (!options.simulation) {
@@ -562,7 +619,9 @@ export async function drainerTweets(
         // ni la carte de citation.
         // Un message PAR POST : deux aperçus dans un même message ne se
         // déplient pas tous les deux.
-        for (const [rang, tweet] of retenus.slice(publies, consommes).entries()) {
+        for (const [rang, tweet] of retenus
+          .slice(publies, consommes)
+          .entries()) {
           await salon.send({
             content: messageAnnonce(tweet),
             enforceNonce: true,
@@ -579,14 +638,24 @@ export async function drainerTweets(
             nonce: nonceLot(idBorne, index * 100 + 99),
           });
         }
-        const avance = await avancerCurseur(canal, attendu, borne, idBorne, lot.length);
+        const avance = await avancerCurseur(
+          canal,
+          attendu,
+          borne,
+          idBorne,
+          lot.length,
+        );
         if (!avance) {
           // Un autre drain a bougé le curseur pendant l'envoi : on s'arrête là
           // plutôt que d'écraser sa position et de tout ré-annoncer.
           console.warn(
             `[tweets:${canal}] curseur déplacé par un autre drain — arrêt après ${consommes}/${retenus.length} posts.`,
           );
-          return { etat: "concurrent", candidats: candidats.length, publies: consommes };
+          return {
+            etat: "concurrent",
+            candidats: candidats.length,
+            publies: consommes,
+          };
         }
         attendu = borne;
       }
@@ -624,9 +693,13 @@ export async function drainerTweets(
  *   `annoncePosts` = ce profil n'annonce pas : rien ne démarre, et c'est dit
  *   une seule fois.
  */
-export function demarrerNotifieurTweets(client: Client, profil?: ProfilAnnonceur): () => void {
+export function demarrerNotifieurTweets(
+  client: Client,
+  profil?: ProfilAnnonceur,
+): () => void {
   const nom = profil?.nom ?? "rg";
-  const annonce = profil === undefined ? annonceHistorique() : (profil.annoncePosts ?? null);
+  const annonce =
+    profil === undefined ? annonceHistorique() : (profil.annoncePosts ?? null);
 
   // Aucun salon d'annonce : c'est un choix de configuration valable (un profil
   // peut n'exposer que des commandes). On ne lance donc NI minuteur NI
@@ -652,7 +725,9 @@ export function demarrerNotifieurTweets(client: Client, profil?: ProfilAnnonceur
 
   console.info(
     `[tweets:${canal}] notifieur démarré pour le profil « ${nom} » — salon ${
-      annonce.salon.trim().length > 0 ? annonce.salon.trim() : "issu du réglage partagé"
+      annonce.salon.trim().length > 0
+        ? annonce.salon.trim()
+        : "issu du réglage partagé"
     }, filet toutes les ${Math.round(INTERVALLE_FILET_MS / 60_000)} min.`,
   );
 
@@ -663,7 +738,11 @@ export function demarrerNotifieurTweets(client: Client, profil?: ProfilAnnonceur
   const drainer = (origine: string): void => {
     void (async () => {
       const resultat = await drainerTweets(client, { annonce });
-      const trace = ligneJournal(resultat, { origine, canal }, empreinteJournal);
+      const trace = ligneJournal(
+        resultat,
+        { origine, canal },
+        empreinteJournal,
+      );
       empreinteJournal = trace.empreinte;
       if (trace.ligne) {
         if (trace.niveau === "warn") {
@@ -715,7 +794,9 @@ export function demarrerNotifieurTweets(client: Client, profil?: ProfilAnnonceur
     // peut avoir expiré), donc le verdict va au journal, d'où `/cron statut` le
     // relit à la demande.
     if (evenement.event === "task.done") {
-      const verdict = evenement.success ? "succès" : `échec — ${String(evenement.error ?? "?")}`;
+      const verdict = evenement.success
+        ? "succès"
+        : `échec — ${String(evenement.error ?? "?")}`;
       console.info(
         `[cron-ipc] tâche « ${String(evenement.nom)} » terminée : ${verdict} (${String(evenement.durationMs)} ms)`,
       );

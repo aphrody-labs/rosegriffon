@@ -21,12 +21,15 @@ export function useProfileBroadcast(
   useEffect(() => {
     if (!userId) return;
 
-    return subscribeTable({ filter: `id=eq.${userId}`, table: "profiles" }, payload => {
-      onProfileUpdate?.({
-        new: payload.new ?? {},
-        old: payload.old ?? undefined,
-        type: payload.eventType,
-      });
-    });
+    return subscribeTable(
+      { filter: `id=eq.${userId}`, table: "profiles" },
+      (payload) => {
+        onProfileUpdate?.({
+          new: payload.new ?? {},
+          old: payload.old ?? undefined,
+          type: payload.eventType,
+        });
+      },
+    );
   }, [userId, onProfileUpdate]);
 }

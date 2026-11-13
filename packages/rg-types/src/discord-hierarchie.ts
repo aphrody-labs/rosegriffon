@@ -36,7 +36,8 @@ export const PERMISSIONS = {
 } as const;
 
 /** Un rôle qui porte l'un de ces droits gouverne le serveur. */
-const DROITS_ADMINISTRATION = PERMISSIONS.ADMINISTRATOR | PERMISSIONS.MANAGE_GUILD;
+const DROITS_ADMINISTRATION =
+  PERMISSIONS.ADMINISTRATOR | PERMISSIONS.MANAGE_GUILD;
 
 /** Un rôle qui porte l'un de ceux-là modère, sans gouverner. */
 const DROITS_MODERATION =
@@ -125,14 +126,17 @@ export interface MembreClasse extends MembreDiscord {
  * rôles est réécrite à chaque synchronisation, un identifiant qui n'y est plus
  * désigne un rôle supprimé.
  */
-export function classerMembre(membre: MembreDiscord, rolesParId: Map<string, RoleDiscord>): MembreClasse {
+export function classerMembre(
+  membre: MembreDiscord,
+  rolesParId: Map<string, RoleDiscord>,
+): MembreClasse {
   const roles = membre.roles
-    .map(id => rolesParId.get(id))
+    .map((id) => rolesParId.get(id))
     .filter((role): role is RoleDiscord => role !== undefined)
     .sort((a, b) => b.position - a.position);
 
   const roleLePlusHaut = roles[0] ?? null;
-  const roleDeSection = roles.find(role => role.is_hoisted) ?? roleLePlusHaut;
+  const roleDeSection = roles.find((role) => role.is_hoisted) ?? roleLePlusHaut;
 
   const rang: RangDiscord = roles.some(estRoleAdministration)
     ? "administration"
@@ -167,7 +171,9 @@ export interface SectionHierarchie {
  *
  * Les sections vides sont omises — un rôle peut exister sans porteur.
  */
-export function grouperParSection(membres: MembreClasse[]): SectionHierarchie[] {
+export function grouperParSection(
+  membres: MembreClasse[],
+): SectionHierarchie[] {
   const sections = new Map<string, SectionHierarchie>();
 
   for (const membre of membres) {
@@ -180,15 +186,22 @@ export function grouperParSection(membres: MembreClasse[]): SectionHierarchie[] 
 
   for (const section of sections.values()) {
     section.membres.sort(
-      (a, b) => b.position - a.position || new Date(a.joined_at ?? 0).getTime() - new Date(b.joined_at ?? 0).getTime(),
+      (a, b) =>
+        b.position - a.position ||
+        new Date(a.joined_at ?? 0).getTime() -
+          new Date(b.joined_at ?? 0).getTime(),
     );
   }
 
-  return [...sections.values()].sort((a, b) => (b.role?.position ?? -1) - (a.role?.position ?? -1));
+  return [...sections.values()].sort(
+    (a, b) => (b.role?.position ?? -1) - (a.role?.position ?? -1),
+  );
 }
 
 /** Couleur CSS d'un rôle, ou `null` quand Discord n'en donne pas. */
-export function couleurRole(role: RoleDiscord | null | undefined): string | null {
+export function couleurRole(
+  role: RoleDiscord | null | undefined,
+): string | null {
   // `0` n'est pas noir : c'est l'absence de couleur, et le membre hérite alors
   // de la couleur du texte. Le rendre en `#000000` écrivait en noir sur fond
   // sombre.

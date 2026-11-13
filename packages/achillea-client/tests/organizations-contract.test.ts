@@ -19,13 +19,18 @@ const organization = {
 
 describe("contrat organisations déployé", () => {
   test("normalise { data, count } en page même sans meta", async () => {
-    const fetch: AchilleaFetch = async () => Response.json({ data: [], count: 0 });
-    const client = createAchilleaClient({ baseUrl: "https://api.example.test", fetch });
+    const fetch: AchilleaFetch = async () =>
+      Response.json({ data: [], count: 0 });
+    const client = createAchilleaClient({
+      baseUrl: "https://api.example.test",
+      fetch,
+    });
 
     const result = await client.organizations.list({ page: 1, pagination: 5 });
 
     expect(result.ok).toBe(true);
-    if (result.ok) expect(result.value).toEqual({ data: [], meta: { total: 0 } });
+    if (result.ok)
+      expect(result.value).toEqual({ data: [], meta: { total: 0 } });
   });
 
   test("accepte l'organisation renvoyée après création", async () => {
@@ -34,7 +39,10 @@ describe("contrat organisations déployé", () => {
       requestBody = JSON.parse(String(init?.body));
       return Response.json({ success: true, data: organization });
     };
-    const client = createAchilleaClient({ baseUrl: "https://api.example.test", fetch });
+    const client = createAchilleaClient({
+      baseUrl: "https://api.example.test",
+      fetch,
+    });
 
     const result = await client.organizations.create({
       name: organization.name,

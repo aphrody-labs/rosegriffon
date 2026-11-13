@@ -189,7 +189,11 @@ interface LigneCreationBrute {
 
 function versCreation(ligne: LigneCreationBrute): CreationExaminee {
   const source: SourceTirage =
-    ligne.source === "x" || ligne.source === "discord" || ligne.source === "instagram" ? ligne.source : "x";
+    ligne.source === "x" ||
+    ligne.source === "discord" ||
+    ligne.source === "instagram"
+      ? ligne.source
+      : "x";
   return {
     auteurNom: ligne.auteur_nom,
     auteurPseudo: ligne.auteur_pseudo,
@@ -214,20 +218,30 @@ function versCreation(ligne: LigneCreationBrute): CreationExaminee {
  * `tweets` mais n'a jamais été rattaché à `x_campagne_posts`. C'est une ceinture
  * par-dessus des bretelles, et la prochaine collecte pourrait, elle, le rattacher.
  */
-export async function listerCreationsExaminees(slug: string): Promise<CreationExaminee[]> {
+export async function listerCreationsExaminees(
+  slug: string,
+): Promise<CreationExaminee[]> {
   try {
-    const { rows } = await getPgPool().query<LigneCreationBrute>(SQL_CREATIONS, [slug]);
+    const { rows } = await getPgPool().query<LigneCreationBrute>(
+      SQL_CREATIONS,
+      [slug],
+    );
     return rows.map(versCreation);
   } catch (erreur) {
-    console.error("Erreur de lecture des créations de campagne (tirage) :", erreur);
+    console.error(
+      "Erreur de lecture des créations de campagne (tirage) :",
+      erreur,
+    );
     return [];
   }
 }
 
 /** Les seules créations qui peuvent porter un ticket. Vue filtrée de la précédente. */
-export async function listerCreationsBrutes(slug: string): Promise<CreationBrute[]> {
+export async function listerCreationsBrutes(
+  slug: string,
+): Promise<CreationBrute[]> {
   const examinees = await listerCreationsExaminees(slug);
-  return examinees.filter(creation => creation.retenue);
+  return examinees.filter((creation) => creation.retenue);
 }
 
 /* ── ŒUVRES ───────────────────────────────────────────────────────────────── */
@@ -266,7 +280,12 @@ export interface OeuvreAdmin {
    * parce que « X compte » abîmerait le dessin pour une raison administrative ;
    * créditer Discord parce que le fichier y est meilleur contredirait le règlement.
    */
-  imageMaster: { source: SourceTirage; identifiant: string; index: number; url: string } | null;
+  imageMaster: {
+    source: SourceTirage;
+    identifiant: string;
+    index: number;
+    url: string;
+  } | null;
   motifRegroupement: string | null;
 }
 
@@ -300,11 +319,15 @@ const SQL_OEUVRES = `
 	 order by o.nb_creations desc, o.oeuvre_id`;
 
 function versSource(brut: unknown): SourceTirage | null {
-  return brut === "x" || brut === "discord" || brut === "instagram" ? brut : null;
+  return brut === "x" || brut === "discord" || brut === "instagram"
+    ? brut
+    : null;
 }
 
 /** Les `(source, identifiant)` gelés dans `x_campagne_oeuvres.creations`, défensivement. */
-function creationsDOeuvre(brut: unknown): Array<{ source: SourceTirage; identifiant: string }> {
+function creationsDOeuvre(
+  brut: unknown,
+): Array<{ source: SourceTirage; identifiant: string }> {
   if (!Array.isArray(brut)) {
     return [];
   }
@@ -315,7 +338,11 @@ function creationsDOeuvre(brut: unknown): Array<{ source: SourceTirage; identifi
     }
     const objet = entree as { source?: unknown; identifiant?: unknown };
     const source = versSource(objet.source);
-    if (!source || typeof objet.identifiant !== "string" || objet.identifiant.length === 0) {
+    if (
+      !source ||
+      typeof objet.identifiant !== "string" ||
+      objet.identifiant.length === 0
+    ) {
       continue;
     }
     sorties.push({ identifiant: objet.identifiant, source });
@@ -323,18 +350,25 @@ function creationsDOeuvre(brut: unknown): Array<{ source: SourceTirage; identifi
   return sorties;
 }
 
-function versOeuvre(ligne: LigneOeuvre, brutes: Map<string, CreationBrute>): OeuvreAdmin {
+function versOeuvre(
+  ligne: LigneOeuvre,
+  brutes: Map<string, CreationBrute>,
+): OeuvreAdmin {
   const gardeeSource = versSource(ligne.creation_gardee_source) ?? "x";
   const masterSource = versSource(ligne.image_master_source);
   // `image_master_url` d'abord (fichier X ré-hébergé ailleurs), sinon le chemin
   // dans le bucket `assets`. Les deux peuvent être nuls : l'animation retombe
   // alors sur `post.images[0]`, et le CHECK `…_master_affichable` garantit qu'une
   // source déclarée s'accompagne toujours de l'un des deux.
-  const urlMaster = ligne.image_master_url ?? urlImageAsset(ligne.image_master_chemin);
+  const urlMaster =
+    ligne.image_master_url ?? urlImageAsset(ligne.image_master_chemin);
   return {
     cle: ligne.cle,
-    creationGardee: { identifiant: ligne.creation_gardee_id, source: gardeeSource },
-    creations: creationsDOeuvre(ligne.creations).map(creation => {
+    creationGardee: {
+      identifiant: ligne.creation_gardee_id,
+      source: gardeeSource,
+    },
+    creations: creationsDOeuvre(ligne.creations).map((creation) => {
       const brute = brutes.get(`${creation.source}:${creation.identifiant}`);
       return {
         auteur: brute?.auteurNom ?? brute?.auteurPseudo ?? null,
@@ -370,8 +404,13 @@ export async function listerOeuvres(slug: string): Promise<OeuvreAdmin[]> {
       getPgPool().query<LigneOeuvre>(SQL_OEUVRES, [slug]),
       listerCreationsBrutes(slug),
     ]);
-    const parCle = new Map(brutes.map(creation => [`${creation.source}:${creation.identifiant}`, creation]));
-    return rows.map(ligne => versOeuvre(ligne, parCle));
+    const parCle = new Map(
+      brutes.map((creation) => [
+        `${creation.source}:${creation.identifiant}`,
+        creation,
+      ]),
+    );
+    return rows.map((ligne) => versOeuvre(ligne, parCle));
   } catch (erreur) {
     console.error("Erreur de lecture des œuvres de campagne :", erreur);
     return [];
@@ -440,7 +479,10 @@ const SQL_PARTICIPANTS = `
 	 where p.campagne_slug = $1
 	 order by p.nb_oeuvres desc, lower(p.pseudo_affichage), p.cle`;
 
-function versParticipant(ligne: LigneParticipant, oeuvres: OeuvreAdmin[]): ParticipantAdmin {
+function versParticipant(
+  ligne: LigneParticipant,
+  oeuvres: OeuvreAdmin[],
+): ParticipantAdmin {
   const sources: SourceTirage[] = [];
   for (const brut of ligne.sources ?? []) {
     const source = versSource(brut);
@@ -454,7 +496,9 @@ function versParticipant(ligne: LigneParticipant, oeuvres: OeuvreAdmin[]): Parti
     eligible: ligne.eligible,
     fusionneDans: ligne.fusionne_dans,
     identifiants:
-      ligne.identifiants && typeof ligne.identifiants === "object" && !Array.isArray(ligne.identifiants)
+      ligne.identifiants &&
+      typeof ligne.identifiants === "object" &&
+      !Array.isArray(ligne.identifiants)
         ? (ligne.identifiants as Record<string, unknown>)
         : {},
     motifIneligible: ligne.motif_ineligible,
@@ -470,7 +514,9 @@ function versParticipant(ligne: LigneParticipant, oeuvres: OeuvreAdmin[]): Parti
 }
 
 /** Le roster complet, alias et inéligibles compris — c'est un écran d'arbitrage, pas une liste de gagnants. */
-export async function listerParticipants(slug: string): Promise<ParticipantAdmin[]> {
+export async function listerParticipants(
+  slug: string,
+): Promise<ParticipantAdmin[]> {
   try {
     const [{ rows }, oeuvres] = await Promise.all([
       getPgPool().query<LigneParticipant>(SQL_PARTICIPANTS, [slug]),
@@ -485,7 +531,9 @@ export async function listerParticipants(slug: string): Promise<ParticipantAdmin
         parCle.set(oeuvre.cle, [oeuvre]);
       }
     }
-    return rows.map(ligne => versParticipant(ligne, parCle.get(ligne.cle) ?? []));
+    return rows.map((ligne) =>
+      versParticipant(ligne, parCle.get(ligne.cle) ?? []),
+    );
   } catch (erreur) {
     console.error("Erreur de lecture des participants de campagne :", erreur);
     return [];
@@ -500,15 +548,20 @@ export async function listerParticipants(slug: string): Promise<ParticipantAdmin
  * canonique — donc l'inclure donnerait un second ticket au même humain, ce que le
  * dédoublonnage venait précisément d'éviter.
  */
-export function participantsDuTirage(participants: readonly ParticipantAdmin[]): ParticipantTirage[] {
+export function participantsDuTirage(
+  participants: readonly ParticipantAdmin[],
+): ParticipantTirage[] {
   return participants
-    .filter(participant => participant.eligible && participant.fusionneDans === null)
-    .map(participant => ({
+    .filter(
+      (participant) =>
+        participant.eligible && participant.fusionneDans === null,
+    )
+    .map((participant) => ({
       cle: participant.cle,
       nbOeuvres: participant.nbOeuvres,
       // Ordre canonique : `tirerOeuvre` indexe dans ce tableau, donc deux ordres
       // différents désigneraient deux œuvres différentes pour la même graine.
-      oeuvres: participant.oeuvres.map(oeuvre => oeuvre.oeuvreId).toSorted(),
+      oeuvres: participant.oeuvres.map((oeuvre) => oeuvre.oeuvreId).toSorted(),
       pseudoAffichage: participant.pseudoAffichage,
     }));
 }
@@ -615,10 +668,15 @@ export async function reconstruireRoster(
     listerOeuvres(slug),
     listerParticipants(slug),
   ]);
-  const retenues = examinees.filter(creation => creation.retenue);
+  const retenues = examinees.filter((creation) => creation.retenue);
 
   // Index des créations retenues, pour rattacher chaque œuvre à ses dates réelles.
-  const brutesParCle = new Map(retenues.map(creation => [`${creation.source}:${creation.identifiant}`, creation]));
+  const brutesParCle = new Map(
+    retenues.map((creation) => [
+      `${creation.source}:${creation.identifiant}`,
+      creation,
+    ]),
+  );
 
   // Toute identité déjà connue du roster, sous sa forme `<plateforme>:<id>` —
   // clé canonique ET identités absorbées. Voir l'encadré ci-dessus.
@@ -626,9 +684,11 @@ export async function reconstruireRoster(
   for (const participant of participants) {
     identitesRattachees.set(participant.cle, participant.cle);
     const ids = participant.identifiants;
-    const discordId = typeof ids.discord_id === "string" ? ids.discord_id : null;
+    const discordId =
+      typeof ids.discord_id === "string" ? ids.discord_id : null;
     const xId = typeof ids.x_id === "string" ? ids.x_id : null;
-    const instagram = typeof ids.instagram_pseudo === "string" ? ids.instagram_pseudo : null;
+    const instagram =
+      typeof ids.instagram_pseudo === "string" ? ids.instagram_pseudo : null;
     if (discordId) {
       identitesRattachees.set(`discord:${discordId}`, participant.cle);
     }
@@ -636,7 +696,10 @@ export async function reconstruireRoster(
       identitesRattachees.set(`x:${xId}`, participant.cle);
     }
     if (instagram) {
-      identitesRattachees.set(`instagram:${instagram.toLowerCase()}`, participant.cle);
+      identitesRattachees.set(
+        `instagram:${instagram.toLowerCase()}`,
+        participant.cle,
+      );
     }
   }
 
@@ -664,7 +727,9 @@ export async function reconstruireRoster(
 
   const creationsCouvertes = new Set<string>();
   for (const oeuvre of oeuvres) {
-    const participant = participants.find(candidat => candidat.cle === oeuvre.cle);
+    const participant = participants.find(
+      (candidat) => candidat.cle === oeuvre.cle,
+    );
     const etat = etatDe(oeuvre.cle, participant?.pseudoAffichage ?? oeuvre.cle);
     etat.nbOeuvres += 1;
     for (const creation of oeuvre.creations) {
@@ -708,7 +773,10 @@ export async function reconstruireRoster(
   // trancheront.
   const nouvelles = new Map<string, CreationBrute>();
   for (const creation of retenues) {
-    if (!creation.cleIdentite || identitesRattachees.has(creation.cleIdentite)) {
+    if (
+      !creation.cleIdentite ||
+      identitesRattachees.has(creation.cleIdentite)
+    ) {
       continue;
     }
     if (!nouvelles.has(creation.cleIdentite)) {
@@ -716,14 +784,16 @@ export async function reconstruireRoster(
     }
   }
 
-  const lignesVerrouillees = participants.filter(p => p.verrouille).map(p => `${p.cle} (${p.pseudoAffichage})`);
+  const lignesVerrouillees = participants
+    .filter((p) => p.verrouille)
+    .map((p) => `${p.cle} (${p.pseudoAffichage})`);
   const rapport: RapportReconstruction = {
     anomalies,
     campagneSlug: slug,
     creationsBrutes: retenues.length,
     creationsEcartees: examinees
-      .filter(creation => !creation.retenue)
-      .map(creation => ({
+      .filter((creation) => !creation.retenue)
+      .map((creation) => ({
         identifiant: `${creation.source}:${creation.identifiant}`,
         motif: creation.motifEcart ?? "motif inconnu",
       })),
@@ -752,7 +822,10 @@ export async function reconstruireRoster(
     await client.query("begin");
     // Le même verrou que l'engagement et le tirage : reconstruire pendant qu'un
     // tirage se joue changerait le roster sous les pieds du calcul.
-    await client.query("select pg_advisory_xact_lock($1::int, hashtext($2)::int)", [ESPACE_VERROU_TIRAGE, slug]);
+    await client.query(
+      "select pg_advisory_xact_lock($1::int, hashtext($2)::int)",
+      [ESPACE_VERROU_TIRAGE, slug],
+    );
 
     // Un engagement non tiré gèle le roster : `empreinte_participants` a été
     // publiée, la modifier la rendrait invérifiable. Refuser ici plutôt que de
@@ -787,7 +860,10 @@ export async function reconstruireRoster(
           cle,
           creation.auteurNom || creation.auteurPseudo || cle,
           // Objet JS BRUT : node-postgres sérialise lui-même (cf. l'en-tête).
-          { cle_lisible: creation.auteurPseudo ?? cle, origine: "reconstruction automatique" },
+          {
+            cle_lisible: creation.auteurPseudo ?? cle,
+            origine: "reconstruction automatique",
+          },
         ],
       );
     }
@@ -901,8 +977,10 @@ const BILAN_VIDE: BilanRoster = {
  * l'empreinte d'image et par une signature peinte dans l'illustration. Ce qui
  * sort d'ici est donc un point de départ, jamais une conclusion.
  */
-function suggererFusions(participants: readonly ParticipantAdmin[]): SuggestionFusion[] {
-  const canoniques = participants.filter(p => p.fusionneDans === null);
+function suggererFusions(
+  participants: readonly ParticipantAdmin[],
+): SuggestionFusion[] {
+  const canoniques = participants.filter((p) => p.fusionneDans === null);
   const suggestions: SuggestionFusion[] = [];
   for (let i = 0; i < canoniques.length; i += 1) {
     for (let j = i + 1; j < canoniques.length; j += 1) {
@@ -920,7 +998,10 @@ function suggererFusions(participants: readonly ParticipantAdmin[]): SuggestionF
         continue;
       }
       const identiques = na === nb;
-      const inclus = !identiques && (na.includes(nb) || nb.includes(na)) && Math.min(na.length, nb.length) >= 6;
+      const inclus =
+        !identiques &&
+        (na.includes(nb) || nb.includes(na)) &&
+        Math.min(na.length, nb.length) >= 6;
       if (!identiques && !inclus) {
         continue;
       }
@@ -965,14 +1046,23 @@ export async function bilanRoster(slug: string): Promise<BilanRoster> {
       listerOeuvres(slug),
       listerCreationsExaminees(slug),
     ]);
-    const retenues = examinees.filter(creation => creation.retenue);
-    const eligibles = participants.filter(p => p.eligible && p.fusionneDans === null);
+    const retenues = examinees.filter((creation) => creation.retenue);
+    const eligibles = participants.filter(
+      (p) => p.eligible && p.fusionneDans === null,
+    );
 
-    const poids = eligibles.map(p => Math.min(MAX_POIDS, Math.max(1, p.nbOeuvres)));
-    const poidsTotalParOeuvre = poids.reduce((somme, valeur) => somme + valeur, 0);
+    const poids = eligibles.map((p) =>
+      Math.min(MAX_POIDS, Math.max(1, p.nbOeuvres)),
+    );
+    const poidsTotalParOeuvre = poids.reduce(
+      (somme, valeur) => somme + valeur,
+      0,
+    );
     const poidsMax = poids.length > 0 ? Math.max(...poids) : 0;
     const poidsMin = poids.length > 0 ? Math.min(...poids) : 0;
-    const porteur = eligibles.find(p => Math.min(MAX_POIDS, Math.max(1, p.nbOeuvres)) === poidsMax);
+    const porteur = eligibles.find(
+      (p) => Math.min(MAX_POIDS, Math.max(1, p.nbOeuvres)) === poidsMax,
+    );
 
     const couvertes = new Set<string>();
     let doublons = 0;
@@ -989,7 +1079,9 @@ export async function bilanRoster(slug: string): Promise<BilanRoster> {
       // Sanada de 2 œuvres à 1 — alors que personne n'a participé en sachant qu'un
       // tirage existerait.
       if (oeuvre.creationGardee.source === "discord") {
-        const participant = participants.find(candidat => candidat.cle === oeuvre.cle);
+        const participant = participants.find(
+          (candidat) => candidat.cle === oeuvre.cle,
+        );
         regle1SansPendant.push({
           cle: oeuvre.cle,
           creation: oeuvre.oeuvreId,
@@ -998,18 +1090,21 @@ export async function bilanRoster(slug: string): Promise<BilanRoster> {
       }
     }
     const creationsSansOeuvre = retenues.filter(
-      creation => !couvertes.has(`${creation.source}:${creation.identifiant}`),
+      (creation) =>
+        !couvertes.has(`${creation.source}:${creation.identifiant}`),
     ).length;
 
     return {
-      chanceRang1ParOeuvreMax: poidsTotalParOeuvre > 0 ? poidsMax / poidsTotalParOeuvre : 0,
-      chanceRang1ParOeuvreMin: poidsTotalParOeuvre > 0 ? poidsMin / poidsTotalParOeuvre : 0,
+      chanceRang1ParOeuvreMax:
+        poidsTotalParOeuvre > 0 ? poidsMax / poidsTotalParOeuvre : 0,
+      chanceRang1ParOeuvreMin:
+        poidsTotalParOeuvre > 0 ? poidsMin / poidsTotalParOeuvre : 0,
       chanceRang1UnParPersonne: eligibles.length > 0 ? 1 / eligibles.length : 0,
       creationsBrutes: retenues.length,
       creationsSansOeuvre,
       doublonsRegroupes: doublons,
       oeuvres: oeuvres.length,
-      personnes: participants.filter(p => p.fusionneDans === null).length,
+      personnes: participants.filter((p) => p.fusionneDans === null).length,
       personnesEligibles: eligibles.length,
       poidsMax,
       poidsMaxPseudo: porteur?.pseudoAffichage ?? null,
@@ -1058,7 +1153,10 @@ export interface BaliseDrand {
  *   le réseau — le contrôle `rendu !== round` l'attraperait aussi, mais après coup
  *   et avec un message bien moins clair.
  */
-export async function recupererBalise(chaine: string, round: number): Promise<BaliseDrand> {
+export async function recupererBalise(
+  chaine: string,
+  round: number,
+): Promise<BaliseDrand> {
   if (!Number.isInteger(round) || round < 1) {
     throw new Error(
       `Round drand invalide (${String(round)}) : le premier round est le 1. ` +
@@ -1067,7 +1165,9 @@ export async function recupererBalise(chaine: string, round: number): Promise<Ba
     );
   }
   if (!/^[0-9a-f]{64}$/.test(chaine)) {
-    throw new Error("Chaîne drand invalide : 64 caractères hexadécimaux minuscules sont attendus.");
+    throw new Error(
+      "Chaîne drand invalide : 64 caractères hexadécimaux minuscules sont attendus.",
+    );
   }
   let derniere: unknown = null;
   // Une boucle de RÉESSAI est séquentielle par nature — le deuxième essai n'a de
@@ -1075,14 +1175,23 @@ export async function recupererBalise(chaine: string, round: number): Promise<Ba
   /* oxlint-disable eslint/no-await-in-loop */
   for (let essai = 0; essai < DRAND_ESSAIS; essai += 1) {
     try {
-      const reponse = await fetch(`${DRAND_QUICKNET.api}/${chaine}/public/${round}`, {
-        headers: { accept: "application/json" },
-        signal: AbortSignal.timeout(DRAND_ESSAIS_DELAI()),
-      });
+      const reponse = await fetch(
+        `${DRAND_QUICKNET.api}/${chaine}/public/${round}`,
+        {
+          headers: { accept: "application/json" },
+          signal: AbortSignal.timeout(DRAND_ESSAIS_DELAI()),
+        },
+      );
       // 425 = la réponse RÉELLE de drand pour un round futur ; 404 est gardé pour
       // les relais plus anciens ou un miroir tiers, qui répondent encore ainsi.
       if (reponse.status === 425 || reponse.status === 404) {
-        const tombeLe = new Date(instantDuRound(round, DRAND_QUICKNET.genesisSec, DRAND_QUICKNET.periodeSec));
+        const tombeLe = new Date(
+          instantDuRound(
+            round,
+            DRAND_QUICKNET.genesisSec,
+            DRAND_QUICKNET.periodeSec,
+          ),
+        );
         throw new Error(
           `Le round drand #${round} n'est pas encore publié : il tombe à ` +
             `${tombeLe.toLocaleString("fr-FR", { timeZone: "Europe/Paris" })} (heure de Paris). ` +
@@ -1090,28 +1199,53 @@ export async function recupererBalise(chaine: string, round: number): Promise<Ba
         );
       }
       if (!reponse.ok) {
-        throw new Error(`drand a répondu ${reponse.status} ${reponse.statusText}.`);
+        throw new Error(
+          `drand a répondu ${reponse.status} ${reponse.statusText}.`,
+        );
       }
-      const charge = (await reponse.json()) as { round?: unknown; signature?: unknown; randomness?: unknown };
-      const signature = typeof charge.signature === "string" ? charge.signature.toLowerCase() : "";
-      const randomness = typeof charge.randomness === "string" ? charge.randomness.toLowerCase() : "";
-      const rendu = versNombre(typeof charge.round === "number" ? charge.round : String(charge.round ?? ""));
+      const charge = (await reponse.json()) as {
+        round?: unknown;
+        signature?: unknown;
+        randomness?: unknown;
+      };
+      const signature =
+        typeof charge.signature === "string"
+          ? charge.signature.toLowerCase()
+          : "";
+      const randomness =
+        typeof charge.randomness === "string"
+          ? charge.randomness.toLowerCase()
+          : "";
+      const rendu = versNombre(
+        typeof charge.round === "number"
+          ? charge.round
+          : String(charge.round ?? ""),
+      );
       if (!/^[0-9a-f]{96}$/.test(signature)) {
-        throw new Error("Signature drand invalide : 96 caractères hexadécimaux sont attendus (48 octets, G1).");
+        throw new Error(
+          "Signature drand invalide : 96 caractères hexadécimaux sont attendus (48 octets, G1).",
+        );
       }
       if (rendu !== round) {
-        throw new Error(`drand a rendu le round ${String(rendu)} au lieu du round ${round} demandé.`);
+        throw new Error(
+          `drand a rendu le round ${String(rendu)} au lieu du round ${round} demandé.`,
+        );
       }
       const attendu = await sha256Hex(depuisHex(signature));
       if (randomness && attendu !== randomness) {
-        throw new Error("Incohérence drand : randomness ≠ SHA-256(signature). La réponse n'est pas celle du réseau.");
+        throw new Error(
+          "Incohérence drand : randomness ≠ SHA-256(signature). La réponse n'est pas celle du réseau.",
+        );
       }
       return { randomness: randomness || attendu, round, signature };
     } catch (erreur) {
       derniere = erreur;
       // Un round pas encore tombé ne se répare pas en réessayant : inutile
       // d'attendre une seconde de plus pour obtenir le même 404.
-      if (erreur instanceof Error && erreur.message.startsWith("Le round drand")) {
+      if (
+        erreur instanceof Error &&
+        erreur.message.startsWith("Le round drand")
+      ) {
         throw erreur;
       }
       if (essai < DRAND_ESSAIS - 1) {
@@ -1185,7 +1319,11 @@ function versGraineOrigine(brut: string): GraineOrigine {
 
 /** Les lots vivent dans `parametres.lots`. Lecture défensive : un jsonb peut tout contenir. */
 function lotsDe(parametres: unknown): string[] {
-  if (!parametres || typeof parametres !== "object" || Array.isArray(parametres)) {
+  if (
+    !parametres ||
+    typeof parametres !== "object" ||
+    Array.isArray(parametres)
+  ) {
     return [];
   }
   const brut = (parametres as { lots?: unknown }).lots;
@@ -1288,7 +1426,10 @@ interface LigneGagnant {
  * de valider. Passer par le pool y lirait l'état d'AVANT — donc un tirage sans
  * graine — et la vérification échouerait sur un tirage pourtant correct.
  */
-async function lireTirageGele(client: PoolClient, tirageId: string): Promise<TirageGele | null> {
+async function lireTirageGele(
+  client: PoolClient,
+  tirageId: string,
+): Promise<TirageGele | null> {
   const { rows } = await client.query<LigneTirage>(
     `select ${COLONNES_TIRAGE} from public.x_campagne_tirages t where t.id = $1`,
     [tirageId],
@@ -1314,7 +1455,10 @@ async function lireTirageGele(client: PoolClient, tirageId: string): Promise<Tir
   const round = versNombre(tirage.balise_round);
   return {
     balise:
-      tirage.graine_origine === "balise" && tirage.balise_signature && tirage.balise_chaine && round !== null
+      tirage.graine_origine === "balise" &&
+      tirage.balise_signature &&
+      tirage.balise_chaine &&
+      round !== null
         ? {
             chaine: tirage.balise_chaine,
             reseau: tirage.balise_reseau ?? DRAND_QUICKNET.reseau,
@@ -1326,7 +1470,7 @@ async function lireTirageGele(client: PoolClient, tirageId: string): Promise<Tir
     empreinteEngagement: tirage.empreinte_engagement,
     empreinteGraine: tirage.empreinte_graine,
     empreinteParticipants: tirage.empreinte_participants,
-    entrees: entrees.map(entree => ({
+    entrees: entrees.map((entree) => ({
       cle: entree.cle,
       cleTri: versNombre(entree.cle_tri) ?? 0,
       empreinte: entree.empreinte ?? "",
@@ -1336,7 +1480,7 @@ async function lireTirageGele(client: PoolClient, tirageId: string): Promise<Tir
       rang: versNombre(entree.rang) ?? 0,
       u: versNombre(entree.u) ?? 0,
     })),
-    gagnants: gagnants.map(gagnant => ({
+    gagnants: gagnants.map((gagnant) => ({
       cle: gagnant.cle,
       oeuvreId: gagnant.oeuvre_id,
       rang: versNombre(gagnant.rang) ?? 0,
@@ -1352,7 +1496,9 @@ async function lireTirageGele(client: PoolClient, tirageId: string): Promise<Tir
 }
 
 /** Le tirage gelé, prêt pour `verifierTirage()`. `null` s'il n'a pas encore eu lieu. */
-export async function chargerTirageGele(tirageId: string): Promise<TirageGele | null> {
+export async function chargerTirageGele(
+  tirageId: string,
+): Promise<TirageGele | null> {
   const client = await getPgPool().connect();
   try {
     return await lireTirageGele(client, tirageId);
@@ -1404,7 +1550,10 @@ export interface TirageComplet extends TirageResume {
   }>;
 }
 
-async function lireTirageComplet(client: PoolClient, tirageId: string): Promise<TirageComplet | null> {
+async function lireTirageComplet(
+  client: PoolClient,
+  tirageId: string,
+): Promise<TirageComplet | null> {
   const { rows } = await client.query<LigneTirage>(
     `select ${COLONNES_TIRAGE} from public.x_campagne_tirages t where t.id = $1`,
     [tirageId],
@@ -1447,7 +1596,7 @@ async function lireTirageComplet(client: PoolClient, tirageId: string): Promise<
     empreinteGraine: tirage.empreinte_graine,
     empreinteParticipants: tirage.empreinte_participants,
     engagementMessageId: tirage.engagement_message_id,
-    entrees: entrees.map(entree => ({
+    entrees: entrees.map((entree) => ({
       cle: entree.cle,
       cleTri: versNombre(entree.cle_tri),
       empreinte: entree.empreinte,
@@ -1457,7 +1606,7 @@ async function lireTirageComplet(client: PoolClient, tirageId: string): Promise<
       rang: versNombre(entree.rang),
       u: versNombre(entree.u),
     })),
-    gagnants: gagnants.map(gagnant => ({
+    gagnants: gagnants.map((gagnant) => ({
       cle: gagnant.cle,
       creation: {
         identifiant: gagnant.creation_identifiant,
@@ -1472,12 +1621,18 @@ async function lireTirageComplet(client: PoolClient, tirageId: string): Promise<
     lots: lotsDe(tirage.parametres),
     roundTombeAMs:
       tirage.graine_origine === "balise" && round !== null
-        ? instantDuRound(round, DRAND_QUICKNET.genesisSec, DRAND_QUICKNET.periodeSec)
+        ? instantDuRound(
+            round,
+            DRAND_QUICKNET.genesisSec,
+            DRAND_QUICKNET.periodeSec,
+          )
         : null,
   };
 }
 
-export async function chargerTirageComplet(tirageId: string): Promise<TirageComplet | null> {
+export async function chargerTirageComplet(
+  tirageId: string,
+): Promise<TirageComplet | null> {
   const client = await getPgPool().connect();
   try {
     return await lireTirageComplet(client, tirageId);
@@ -1490,7 +1645,9 @@ export async function chargerTirageComplet(tirageId: string): Promise<TirageComp
 }
 
 /** Le tirage le plus récent, annulé compris — ce que l'écran d'admin ouvre par défaut. */
-export async function chargerDernierTirage(slug: string): Promise<TirageComplet | null> {
+export async function chargerDernierTirage(
+  slug: string,
+): Promise<TirageComplet | null> {
   const client = await getPgPool().connect();
   try {
     const { rows } = await client.query<{ id: string }>(
@@ -1542,7 +1699,9 @@ export interface EngagementEnAttente {
  * qui peut être fausse de plusieurs minutes ; et de toute façon
  * `executerEtEnregistrer` revérifie côté base avant d'écrire quoi que ce soit.
  */
-export async function chargerEngagementEnAttente(slug: string): Promise<EngagementEnAttente | null> {
+export async function chargerEngagementEnAttente(
+  slug: string,
+): Promise<EngagementEnAttente | null> {
   try {
     const { rows } = await getPgPool().query<LigneTirage>(
       `select ${COLONNES_TIRAGE}
@@ -1560,7 +1719,11 @@ export async function chargerEngagementEnAttente(slug: string): Promise<Engageme
     const origine = versGraineOrigine(tirage.graine_origine);
     const tombeA =
       origine === "balise" && round !== null
-        ? instantDuRound(round, DRAND_QUICKNET.genesisSec, DRAND_QUICKNET.periodeSec)
+        ? instantDuRound(
+            round,
+            DRAND_QUICKNET.genesisSec,
+            DRAND_QUICKNET.periodeSec,
+          )
         : null;
     return {
       baliseChaine: tirage.balise_chaine,
@@ -1612,7 +1775,11 @@ export interface GagnantPublic {
    * la page apparie ses propres créations, l'animation reçoit de vrais
    * `PostCampagne`, et aucune règle de visibilité n'existe en double.
    */
-  creation: { source: SourceTirage; identifiant: string; cleCreation: string } | null;
+  creation: {
+    source: SourceTirage;
+    identifiant: string;
+    cleCreation: string;
+  } | null;
   oeuvreId: string | null;
   /** URL du MEILLEUR fichier de l'œuvre tirée, que l'animation préfère à `post.images[0]`. */
   imageMaster: string | null;
@@ -1631,7 +1798,13 @@ export interface TiragePublic {
   empreinteGraine: string;
   empreinteParticipants: string;
   empreinteEngagement: string;
-  balise: { reseau: string; chaine: string; round: number; signature: string; recupereeLe: string | null } | null;
+  balise: {
+    reseau: string;
+    chaine: string;
+    round: number;
+    signature: string;
+    recupereeLe: string | null;
+  } | null;
   entrees: EntreePublique[];
   gagnants: GagnantPublic[];
 }
@@ -1652,7 +1825,9 @@ export interface TiragePublic {
  * Repli `null` sur toute erreur : la page `/iergday` doit continuer d'afficher
  * l'affiche, le règlement et le mur des créations même si cette lecture échoue.
  */
-export async function chargerTiragePublie(slug: string): Promise<TiragePublic | null> {
+export async function chargerTiragePublie(
+  slug: string,
+): Promise<TiragePublic | null> {
   try {
     const pool = getPgPool();
     const { rows } = await pool.query<LigneTirage>(
@@ -1679,7 +1854,12 @@ export async function chargerTiragePublie(slug: string): Promise<TiragePublic | 
 				  order by e.rang`,
         [tirage.id],
       ),
-      pool.query<LigneGagnant & { image_master_chemin: string | null; image_master_url: string | null }>(
+      pool.query<
+        LigneGagnant & {
+          image_master_chemin: string | null;
+          image_master_url: string | null;
+        }
+      >(
         // `left join` sur l'œuvre : un gagnant sans œuvre rattachée (poids
         // minimal, aucune œuvre gelée) doit rester affiché, sans vignette.
         `select g.rang, g.cle, g.pseudo_affichage, g.creation_source, g.creation_identifiant,
@@ -1719,7 +1899,10 @@ export async function chargerTiragePublie(slug: string): Promise<TiragePublic | 
                 source,
               }
             : null,
-          imageMaster: gagnant.image_master_url ?? urlImageAsset(gagnant.image_master_chemin) ?? null,
+          imageMaster:
+            gagnant.image_master_url ??
+            urlImageAsset(gagnant.image_master_chemin) ??
+            null,
           lot: gagnant.lot,
           oeuvreId: gagnant.oeuvre_id,
           pseudoAffichage: gagnant.pseudo_affichage,
@@ -1847,8 +2030,14 @@ export const DELAI_ROUND_DEFAUT = 180;
  * y compris sur exception — `pg_advisory_lock`, lui, fuirait si la connexion
  * repartait au pool en cours d'erreur, et bloquerait tous les tirages suivants).
  */
-export async function creerEngagement(demande: DemandeEngagement, effectuePar: string): Promise<EngagementCree> {
-  const [participants, bilan] = await Promise.all([listerParticipants(demande.slug), bilanRoster(demande.slug)]);
+export async function creerEngagement(
+  demande: DemandeEngagement,
+  effectuePar: string,
+): Promise<EngagementCree> {
+  const [participants, bilan] = await Promise.all([
+    listerParticipants(demande.slug),
+    bilanRoster(demande.slug),
+  ]);
 
   if (bilan.creationsSansOeuvre > 0) {
     throw new Error(
@@ -1873,9 +2062,12 @@ export async function creerEngagement(demande: DemandeEngagement, effectuePar: s
     );
   }
 
-  const roster: EntreeRoster[] = eligibles.map(participant => ({
+  const roster: EntreeRoster[] = eligibles.map((participant) => ({
     cle: participant.cle,
-    poids: demande.poidsMode === "un_par_personne" ? 1 : Math.min(MAX_POIDS, Math.max(1, participant.nbOeuvres)),
+    poids:
+      demande.poidsMode === "un_par_personne"
+        ? 1
+        : Math.min(MAX_POIDS, Math.max(1, participant.nbOeuvres)),
   }));
   const empreinteParticipants = await empreinteRoster(roster);
 
@@ -1893,12 +2085,26 @@ export async function creerEngagement(demande: DemandeEngagement, effectuePar: s
   if (demande.graineOrigine === "balise") {
     baliseChaine = DRAND_QUICKNET.chaine;
     baliseReseau = DRAND_QUICKNET.reseau;
-    baliseRound = roundPour(Date.now() + delai * 1000, DRAND_QUICKNET.genesisSec, DRAND_QUICKNET.periodeSec);
-    while (instantDuRound(baliseRound, DRAND_QUICKNET.genesisSec, DRAND_QUICKNET.periodeSec) <= Date.now()) {
+    baliseRound = roundPour(
+      Date.now() + delai * 1000,
+      DRAND_QUICKNET.genesisSec,
+      DRAND_QUICKNET.periodeSec,
+    );
+    while (
+      instantDuRound(
+        baliseRound,
+        DRAND_QUICKNET.genesisSec,
+        DRAND_QUICKNET.periodeSec,
+      ) <= Date.now()
+    ) {
       baliseRound += 1;
     }
     roundPrevuLe = new Date(
-      instantDuRound(baliseRound, DRAND_QUICKNET.genesisSec, DRAND_QUICKNET.periodeSec),
+      instantDuRound(
+        baliseRound,
+        DRAND_QUICKNET.genesisSec,
+        DRAND_QUICKNET.periodeSec,
+      ),
     ).toISOString();
   }
 
@@ -1919,12 +2125,15 @@ export async function creerEngagement(demande: DemandeEngagement, effectuePar: s
   const client = await getPgPool().connect();
   try {
     await client.query("begin");
-    await client.query("select pg_advisory_xact_lock($1::int, hashtext($2)::int)", [
-      ESPACE_VERROU_TIRAGE,
-      demande.slug,
-    ]);
+    await client.query(
+      "select pg_advisory_xact_lock($1::int, hashtext($2)::int)",
+      [ESPACE_VERROU_TIRAGE, demande.slug],
+    );
 
-    const { rows: ouverts } = await client.query<{ numero: number; balise_round: string | number | null }>(
+    const { rows: ouverts } = await client.query<{
+      numero: number;
+      balise_round: string | number | null;
+    }>(
       `select numero, balise_round from public.x_campagne_tirages
 			  where campagne_slug = $1 and graine is null and annule_le is null
 			  limit 1`,
@@ -1976,7 +2185,9 @@ export async function creerEngagement(demande: DemandeEngagement, effectuePar: s
     // la ligne existe avant que le round visé n'existe.
     for (const participant of eligibles) {
       const poids =
-        demande.poidsMode === "un_par_personne" ? 1 : Math.min(MAX_POIDS, Math.max(1, participant.nbOeuvres));
+        demande.poidsMode === "un_par_personne"
+          ? 1
+          : Math.min(MAX_POIDS, Math.max(1, participant.nbOeuvres));
       // Une transaction est SÉQUENTIELLE par définition : un seul `PoolClient` ne peut
       // pas exécuter deux requêtes de front, et un `Promise.all` entrelacerait les
       // écritures d'une même transaction. L'`await` en boucle est ici la forme correcte.
@@ -1984,7 +2195,13 @@ export async function creerEngagement(demande: DemandeEngagement, effectuePar: s
       await client.query(
         `insert into public.x_campagne_tirage_entrees (tirage_id, cle, pseudo_affichage, poids, oeuvres)
 				 values ($1, $2, $3, $4, $5::text[])`,
-        [cree.id, participant.cle, participant.pseudoAffichage, poids, participant.oeuvres],
+        [
+          cree.id,
+          participant.cle,
+          participant.pseudoAffichage,
+          poids,
+          participant.oeuvres,
+        ],
       );
     }
 
@@ -2052,7 +2269,9 @@ async function composerTexteEngagement(entree: {
     return "Répétition — ne pas publier.";
   }
   const lignes: string[] = [];
-  lignes.push(`Engagement du tirage n°${entree.numero} — campagne « ${entree.slug} »`);
+  lignes.push(
+    `Engagement du tirage n°${entree.numero} — campagne « ${entree.slug} »`,
+  );
   lignes.push("");
   lignes.push(
     `Mode de poids : ${entree.poidsMode === "par_oeuvre" ? "une chance par ŒUVRE" : "une chance par PERSONNE"}`,
@@ -2064,16 +2283,25 @@ async function composerTexteEngagement(entree: {
       : "Lots : aucun (classement nu, explicitement vide).",
   );
   lignes.push("");
-  lignes.push(`Participants (${entree.participants.length}) — clé publique · pseudo · poids :`);
+  lignes.push(
+    `Participants (${entree.participants.length}) — clé publique · pseudo · poids :`,
+  );
   // Les clés publiques sont calculées EN PARALLÈLE : ce sont des SHA-256
   // indépendants, les enchaîner dans la boucle d'affichage sérialiserait autant
   // d'allers-retours WebCrypto pour un texte qui, lui, se compose instantanément.
   const clesPubliques = await Promise.all(
-    entree.participants.map(participant => clePublique(entree.slug, participant.cle)),
+    entree.participants.map((participant) =>
+      clePublique(entree.slug, participant.cle),
+    ),
   );
   for (const [index, participant] of entree.participants.entries()) {
-    const poids = entree.poidsMode === "un_par_personne" ? 1 : Math.max(1, participant.nbOeuvres);
-    lignes.push(`  ${clesPubliques[index] ?? "?"} · ${participant.pseudoAffichage} · ${poids}`);
+    const poids =
+      entree.poidsMode === "un_par_personne"
+        ? 1
+        : Math.max(1, participant.nbOeuvres);
+    lignes.push(
+      `  ${clesPubliques[index] ?? "?"} · ${participant.pseudoAffichage} · ${poids}`,
+    );
   }
   lignes.push("");
   lignes.push(`empreinte_participants : ${entree.empreinteParticipants}`);
@@ -2086,9 +2314,13 @@ async function composerTexteEngagement(entree: {
       `Il tombe à ${new Date(entree.roundPrevuLe).toLocaleString("fr-FR", { timeZone: "Europe/Paris" })} (heure de Paris).`,
     );
   }
-  lignes.push(`Vérification : ${DRAND_QUICKNET.api}/${entree.baliseChaine}/public/${entree.baliseRound}`);
+  lignes.push(
+    `Vérification : ${DRAND_QUICKNET.api}/${entree.baliseChaine}/public/${entree.baliseRound}`,
+  );
   lignes.push("");
-  lignes.push("Ni nous ni personne ne peut prédire la signature de ce round : elle n'existe pas encore.");
+  lignes.push(
+    "Ni nous ni personne ne peut prédire la signature de ce round : elle n'existe pas encore.",
+  );
   lignes.push("Chaque œuvre est un ticket, tirés un par un sans remise.");
   return lignes.join("\n");
 }
@@ -2132,7 +2364,10 @@ export interface ResultatEnregistre {
  * récupération de la balise et l'écriture, c'est-à-dire d'ouvrir précisément la
  * fenêtre que ce verrou existe pour fermer.
  */
-export async function executerEtEnregistrer(tirageId: string, effectuePar: string): Promise<ResultatEnregistre> {
+export async function executerEtEnregistrer(
+  tirageId: string,
+  effectuePar: string,
+): Promise<ResultatEnregistre> {
   const client = await getPgPool().connect();
   try {
     await client.query("begin");
@@ -2145,10 +2380,10 @@ export async function executerEtEnregistrer(tirageId: string, effectuePar: strin
     if (!tirage) {
       throw new Error("Tirage introuvable.");
     }
-    await client.query("select pg_advisory_xact_lock($1::int, hashtext($2)::int)", [
-      ESPACE_VERROU_TIRAGE,
-      tirage.campagne_slug,
-    ]);
+    await client.query(
+      "select pg_advisory_xact_lock($1::int, hashtext($2)::int)",
+      [ESPACE_VERROU_TIRAGE, tirage.campagne_slug],
+    );
     if (tirage.annule_le) {
       throw new Error(
         `Le tirage n°${tirage.numero} a été annulé le ${versISO(tirage.annule_le) ?? "?"} : ` +
@@ -2163,7 +2398,7 @@ export async function executerEtEnregistrer(tirageId: string, effectuePar: strin
       await client.query("commit");
       return {
         deja: true,
-        gagnants: (complet?.gagnants ?? []).map(gagnant => ({
+        gagnants: (complet?.gagnants ?? []).map((gagnant) => ({
           cle: gagnant.cle,
           lot: gagnant.lot,
           oeuvreId: gagnant.oeuvreId,
@@ -2171,7 +2406,9 @@ export async function executerEtEnregistrer(tirageId: string, effectuePar: strin
           rang: gagnant.rang,
         })),
         numero: versNombre(tirage.numero) ?? 0,
-        verdict: gele ? await verifierTirage(gele) : { anomalies: [], controles: 0, valide: false },
+        verdict: gele
+          ? await verifierTirage(gele)
+          : { anomalies: [], controles: 0, valide: false },
       };
     }
 
@@ -2185,13 +2422,13 @@ export async function executerEtEnregistrer(tirageId: string, effectuePar: strin
     if (entrees.length === 0) {
       throw new Error("Le roster gelé de ce tirage est vide : rien à tirer.");
     }
-    const participants: ParticipantTirage[] = entrees.map(entree => ({
+    const participants: ParticipantTirage[] = entrees.map((entree) => ({
       cle: entree.cle,
       nbOeuvres: (entree.oeuvres ?? []).length,
       oeuvres: (entree.oeuvres ?? []).toSorted(),
       pseudoAffichage: entree.pseudo_affichage,
     }));
-    const roster: EntreeRoster[] = entrees.map(entree => ({
+    const roster: EntreeRoster[] = entrees.map((entree) => ({
       cle: entree.cle,
       poids: versNombre(entree.poids) ?? 1,
     }));
@@ -2226,7 +2463,11 @@ export async function executerEtEnregistrer(tirageId: string, effectuePar: strin
     let graine: string;
     let signature: string | null = null;
     if (origine === "balise") {
-      const tombeA = instantDuRound(round, DRAND_QUICKNET.genesisSec, DRAND_QUICKNET.periodeSec);
+      const tombeA = instantDuRound(
+        round,
+        DRAND_QUICKNET.genesisSec,
+        DRAND_QUICKNET.periodeSec,
+      );
       if (Date.now() < tombeA) {
         throw new Error(
           `Le round drand #${round} n'est pas encore tombé : il tombe à ` +
@@ -2234,16 +2475,24 @@ export async function executerEtEnregistrer(tirageId: string, effectuePar: strin
             "Rien n'a été écrit.",
         );
       }
-      const balise = await recupererBalise(tirage.balise_chaine ?? DRAND_QUICKNET.chaine, round);
+      const balise = await recupererBalise(
+        tirage.balise_chaine ?? DRAND_QUICKNET.chaine,
+        round,
+      );
       signature = balise.signature;
-      graine = await graineDepuisBalise(balise.signature, tirage.empreinte_participants);
+      graine = await graineDepuisBalise(
+        balise.signature,
+        tirage.empreinte_participants,
+      );
     } else {
       // LE SEUL usage de `getRandomValues` de tout le dispositif, et il est
       // cantonné aux répétitions : un tirage local ne peut être ni publié ni
       // annoncé (CHECK en base), donc cette graine ne prouve jamais rien.
       const octets = new Uint8Array(32);
       crypto.getRandomValues(octets);
-      graine = Array.from(octets, octet => octet.toString(16).padStart(2, "0")).join("");
+      graine = Array.from(octets, (octet) =>
+        octet.toString(16).padStart(2, "0"),
+      ).join("");
     }
 
     const resultat = await executerTirage(
@@ -2259,7 +2508,13 @@ export async function executerEtEnregistrer(tirageId: string, effectuePar: strin
 			        balise_recuperee_le = case when $4::text is null then null else now() end,
 			        effectue_par = coalesce($5::uuid, effectue_par), effectue_le = now()
 			  where id = $1 and graine is null`,
-      [tirageId, graine, resultat.empreinteGraine, signature, effectuePar || null],
+      [
+        tirageId,
+        graine,
+        resultat.empreinteGraine,
+        signature,
+        effectuePar || null,
+      ],
     );
     if (misAJour.rowCount === 0) {
       await client.query("rollback");
@@ -2267,7 +2522,7 @@ export async function executerEtEnregistrer(tirageId: string, effectuePar: strin
       const complet = await chargerTirageComplet(tirageId);
       return {
         deja: true,
-        gagnants: (complet?.gagnants ?? []).map(gagnant => ({
+        gagnants: (complet?.gagnants ?? []).map((gagnant) => ({
           cle: gagnant.cle,
           lot: gagnant.lot,
           oeuvreId: gagnant.oeuvreId,
@@ -2275,7 +2530,9 @@ export async function executerEtEnregistrer(tirageId: string, effectuePar: strin
           rang: gagnant.rang,
         })),
         numero: versNombre(tirage.numero) ?? 0,
-        verdict: gele ? await verifierTirage(gele) : { anomalies: [], controles: 0, valide: false },
+        verdict: gele
+          ? await verifierTirage(gele)
+          : { anomalies: [], controles: 0, valide: false },
       };
     }
 
@@ -2288,7 +2545,14 @@ export async function executerEtEnregistrer(tirageId: string, effectuePar: strin
         `update public.x_campagne_tirage_entrees
 				    set u = $3, cle_tri = $4, empreinte = $5, rang = $6
 				  where tirage_id = $1 and cle = $2`,
-        [tirageId, entree.cle, entree.u, entree.cleTri, entree.empreinte, entree.rang],
+        [
+          tirageId,
+          entree.cle,
+          entree.u,
+          entree.cleTri,
+          entree.empreinte,
+          entree.rang,
+        ],
       );
     }
 
@@ -2336,19 +2600,26 @@ export async function executerEtEnregistrer(tirageId: string, effectuePar: strin
     // ── Garde 5 : il doit se vérifier lui-même ────────────────────────
     const gele = await lireTirageGele(client, tirageId);
     if (!gele) {
-      throw new Error("Le tirage vient d'être écrit mais ne se relit pas : rien n'est validé.");
+      throw new Error(
+        "Le tirage vient d'être écrit mais ne se relit pas : rien n'est validé.",
+      );
     }
     const verdict = await verifierTirage(gele);
     if (!verdict.valide) {
       await client.query("rollback");
       throw new Error(
-        `Le tirage ne se vérifie pas lui-même (${verdict.anomalies.map(a => a.code).join(", ")}) : ` +
+        `Le tirage ne se vérifie pas lui-même (${verdict.anomalies.map((a) => a.code).join(", ")}) : ` +
           "il a été entièrement annulé et RIEN n'a été écrit. Un tirage invérifiable n'existe pas.",
       );
     }
 
     await client.query("commit");
-    return { deja: false, gagnants: resultat.gagnants, numero: versNombre(tirage.numero) ?? 0, verdict };
+    return {
+      deja: false,
+      gagnants: resultat.gagnants,
+      numero: versNombre(tirage.numero) ?? 0,
+      verdict,
+    };
   } catch (erreur) {
     await client.query("rollback").catch(() => undefined);
     throw erreur;
@@ -2368,7 +2639,10 @@ export async function executerEtEnregistrer(tirageId: string, effectuePar: strin
  * contrainte Postgres brute. C'est la base qui fait foi ; ceci n'est que la
  * politesse.
  */
-export async function marquerPublie(tirageId: string, publie: boolean): Promise<void> {
+export async function marquerPublie(
+  tirageId: string,
+  publie: boolean,
+): Promise<void> {
   const client = await getPgPool().connect();
   try {
     await client.query("begin");
@@ -2382,7 +2656,9 @@ export async function marquerPublie(tirageId: string, publie: boolean): Promise<
     }
     if (publie) {
       if (!tirage.graine) {
-        throw new Error("Ce tirage n'a pas encore eu lieu : il n'y a aucun gagnant à publier.");
+        throw new Error(
+          "Ce tirage n'a pas encore eu lieu : il n'y a aucun gagnant à publier.",
+        );
       }
       if (tirage.annule_le) {
         throw new Error("Ce tirage est annulé : il ne peut pas être publié.");
@@ -2419,7 +2695,9 @@ export async function marquerPublie(tirageId: string, publie: boolean): Promise<
  * reclique — ne touche jamais le réseau : une double annonce publique est
  * irrattrapable, contrairement à un appel évité.
  */
-export async function reserverAnnonce(tirageId: string): Promise<{ libre: boolean; messageId: string | null }> {
+export async function reserverAnnonce(
+  tirageId: string,
+): Promise<{ libre: boolean; messageId: string | null }> {
   const { rows } = await getPgPool().query<{
     annonce_discord_message_id: string | null;
     publie: boolean;
@@ -2437,7 +2715,11 @@ export async function reserverAnnonce(tirageId: string): Promise<{ libre: boolea
   if (tirage.annonce_discord_message_id) {
     return { libre: false, messageId: tirage.annonce_discord_message_id };
   }
-  if (!tirage.publie || tirage.annule_le || versGraineOrigine(tirage.graine_origine) !== "balise") {
+  if (
+    !tirage.publie ||
+    tirage.annule_le ||
+    versGraineOrigine(tirage.graine_origine) !== "balise"
+  ) {
     throw new Error(
       "Annonce refusée : seul un tirage PUBLIÉ, non annulé et tiré depuis une balise publique peut être annoncé.",
     );
@@ -2451,7 +2733,11 @@ export async function reserverAnnonce(tirageId: string): Promise<{ libre: boolea
  * Un `false` n'est pas anodin : il veut dire qu'un message a peut-être été posté
  * deux fois. L'appelant doit le journaliser en `console.error`, pas l'avaler.
  */
-export async function enregistrerAnnonce(tirageId: string, salonId: string, messageId: string): Promise<boolean> {
+export async function enregistrerAnnonce(
+  tirageId: string,
+  salonId: string,
+  messageId: string,
+): Promise<boolean> {
   const resultat = await getPgPool().query(
     `update public.x_campagne_tirages
 		    set annonce_discord_message_id = $3, annonce_discord_salon_id = $2, annonce_le = now()
@@ -2473,7 +2759,9 @@ export async function enregistrerAnnonce(tirageId: string, salonId: string, mess
 export async function annuler(tirageId: string, motif: string): Promise<void> {
   const propre = motif.trim();
   if (propre.length < 10) {
-    throw new Error("Un motif d'annulation d'au moins 10 caractères est exigé (la base l'impose aussi).");
+    throw new Error(
+      "Un motif d'annulation d'au moins 10 caractères est exigé (la base l'impose aussi).",
+    );
   }
   await getPgPool().query(
     `update public.x_campagne_tirages
@@ -2484,7 +2772,9 @@ export async function annuler(tirageId: string, motif: string): Promise<void> {
 }
 
 /** Rejoue un tirage déjà écrit et rend son verdict. Lecture pure : n'écrit jamais. */
-export async function verifierTirageEnregistre(tirageId: string): Promise<VerdictVerification | null> {
+export async function verifierTirageEnregistre(
+  tirageId: string,
+): Promise<VerdictVerification | null> {
   const gele = await chargerTirageGele(tirageId);
   if (!gele) {
     return null;
@@ -2501,7 +2791,10 @@ export async function verifierTirageEnregistre(tirageId: string): Promise<Verdic
  * derrière la garde d'admin ou derrière la clause `publie` — qui en dérive la
  * forme montrable. La clé de plateforme ne sort jamais.
  */
-export async function classementPublic(slug: string, tirageId: string): Promise<EntreePublique[]> {
+export async function classementPublic(
+  slug: string,
+  tirageId: string,
+): Promise<EntreePublique[]> {
   try {
     const { rows } = await getPgPool().query<LigneEntree>(
       `select e.cle, e.pseudo_affichage, e.poids, e.oeuvres, e.u, e.cle_tri, e.empreinte, e.rang
@@ -2511,7 +2804,7 @@ export async function classementPublic(slug: string, tirageId: string): Promise<
       [tirageId],
     );
     return await Promise.all(
-      rows.map(async entree => ({
+      rows.map(async (entree) => ({
         clePublique: await clePublique(slug, entree.cle),
         poids: versNombre(entree.poids) ?? 1,
         pseudoAffichage: entree.pseudo_affichage,

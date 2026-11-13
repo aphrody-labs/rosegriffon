@@ -54,7 +54,9 @@ import {
 export type SalonAFils = TextChannel;
 
 /** Ce salon peut-il porter un fil privé ? Garde de type, utilisable côté commandes. */
-export function porteDesFils(salon: GuildTextBasedChannel | null): salon is SalonAFils {
+export function porteDesFils(
+  salon: GuildTextBasedChannel | null,
+): salon is SalonAFils {
   return salon !== null && salon.type === ChannelType.GuildText;
 }
 
@@ -144,7 +146,10 @@ export async function ticketDuSalon(salonId: string): Promise<Ticket | null> {
  * n'existe plus. Sans elle, `/ticket fermer` (qui se lance DANS le fil) laisse
  * la ligne ouverte à jamais, et son auteur muré par la garde anti-doublon.
  */
-export async function ticketParNumero(guildId: string, numero: number): Promise<Ticket | null> {
+export async function ticketParNumero(
+  guildId: string,
+  numero: number,
+): Promise<Ticket | null> {
   const lignes = await sql<LigneTicket[]>`
 		SELECT ${COLONNES} FROM bot_tickets
 		 WHERE guild_id = ${guildId} AND numero = ${numero} LIMIT 1
@@ -154,7 +159,10 @@ export async function ticketParNumero(guildId: string, numero: number): Promise<
 }
 
 /** Les tickets NON FERMÉS d'un membre. C'est la matière de la garde anti-doublon. */
-export async function ticketsOuvertsDe(guildId: string, auteurId: string): Promise<Ticket[]> {
+export async function ticketsOuvertsDe(
+  guildId: string,
+  auteurId: string,
+): Promise<Ticket[]> {
   const lignes = await sql<LigneTicket[]>`
 		SELECT ${COLONNES} FROM bot_tickets
 		 WHERE guild_id = ${guildId} AND auteur_id = ${auteurId} AND statut <> 'ferme'
@@ -164,7 +172,10 @@ export async function ticketsOuvertsDe(guildId: string, auteurId: string): Promi
 }
 
 /** Tous les tickets non fermés de la guilde, du plus ancien au plus récent. */
-export async function ticketsOuverts(guildId: string, limite = 25): Promise<Ticket[]> {
+export async function ticketsOuverts(
+  guildId: string,
+  limite = 25,
+): Promise<Ticket[]> {
   const lignes = await sql<LigneTicket[]>`
 		SELECT ${COLONNES} FROM bot_tickets
 		 WHERE guild_id = ${guildId} AND statut <> 'ferme'
@@ -175,14 +186,20 @@ export async function ticketsOuverts(guildId: string, limite = 25): Promise<Tick
 }
 
 /** Compte les tickets par état, pour la vue d'exploitation. */
-export async function compterTickets(guildId: string): Promise<{ ouvert: number; pris: number; ferme: number }> {
+export async function compterTickets(
+  guildId: string,
+): Promise<{ ouvert: number; pris: number; ferme: number }> {
   const lignes = await sql<Array<{ statut: string; total: string }>>`
 		SELECT statut, count(*)::text AS total FROM bot_tickets
 		 WHERE guild_id = ${guildId} GROUP BY statut
 	`;
   const compte = { ferme: 0, ouvert: 0, pris: 0 };
   for (const ligne of lignes) {
-    if (ligne.statut === "ouvert" || ligne.statut === "pris" || ligne.statut === "ferme") {
+    if (
+      ligne.statut === "ouvert" ||
+      ligne.statut === "pris" ||
+      ligne.statut === "ferme"
+    ) {
       compte[ligne.statut] = Number(ligne.total) || 0;
     }
   }
@@ -220,7 +237,9 @@ export interface TicketOuvert {
  * Si la création du fil échoue, la ligne est supprimée : un ticket sans fil est
  * un ticket que personne ne peut ouvrir ni fermer.
  */
-export async function ouvrirTicket(demande: DemandeOuverture): Promise<TicketOuvert> {
+export async function ouvrirTicket(
+  demande: DemandeOuverture,
+): Promise<TicketOuvert> {
   const guildId = demande.guilde.id;
 
   // Numéro : `max + 1`, jamais en dessous du seuil de reprise (86, cf.
@@ -248,7 +267,9 @@ export async function ouvrirTicket(demande: DemandeOuverture): Promise<TicketOuv
   if (!ticket) {
     throw new Error(
       `Numéro de ticket impossible à réserver après trois tentatives : ${
-        derniereErreur instanceof Error ? derniereErreur.message : String(derniereErreur)
+        derniereErreur instanceof Error
+          ? derniereErreur.message
+          : String(derniereErreur)
       }`,
     );
   }
@@ -285,7 +306,9 @@ export async function ouvrirTicket(demande: DemandeOuverture): Promise<TicketOuv
     rolesStaff: demande.rolesStaff,
   });
   const mentions = aInviter
-    .map(entree => (entree.genre === "membre" ? `<@${entree.id}>` : `<@&${entree.id}>`))
+    .map((entree) =>
+      entree.genre === "membre" ? `<@${entree.id}>` : `<@&${entree.id}>`,
+    )
     .join(" ");
 
   try {
@@ -295,7 +318,10 @@ export async function ouvrirTicket(demande: DemandeOuverture): Promise<TicketOuv
       content: mentions,
     });
   } catch (err) {
-    console.warn(`[tickets] invitation impossible sur ${fil.id} :`, err instanceof Error ? err.message : err);
+    console.warn(
+      `[tickets] invitation impossible sur ${fil.id} :`,
+      err instanceof Error ? err.message : err,
+    );
   }
 
   return { fil, ticket };
@@ -304,7 +330,10 @@ export async function ouvrirTicket(demande: DemandeOuverture): Promise<TicketOuv
 // ─── Cycle de vie ───────────────────────────────────────────────────────────
 
 /** Passe un ticket en « pris en charge ». Rend `null` si la ligne a disparu. */
-export async function prendreTicket(ticketId: number, staffId: string): Promise<Ticket | null> {
+export async function prendreTicket(
+  ticketId: number,
+  staffId: string,
+): Promise<Ticket | null> {
   const lignes = await sql<LigneTicket[]>`
 		UPDATE bot_tickets
 		   SET statut = 'pris', pris_par = ${staffId}, pris_le = NOW(), maj_le = NOW()
@@ -334,7 +363,11 @@ export async function rendreTicket(ticketId: number): Promise<Ticket | null> {
  * « on peut lire les tickets déjà fermés », et c'est ce qui remplace la
  * transcription exportée chez un tiers.
  */
-export async function fermerTicket(ticketId: number, staffId: string, motif: string): Promise<Ticket | null> {
+export async function fermerTicket(
+  ticketId: number,
+  staffId: string,
+  motif: string,
+): Promise<Ticket | null> {
   const lignes = await sql<LigneTicket[]>`
 		UPDATE bot_tickets
 		   SET statut = 'ferme', ferme_par = ${staffId}, ferme_le = NOW(),
@@ -352,7 +385,10 @@ export async function clore(fil: ThreadChannel, raison: string): Promise<void> {
     await fil.setLocked(true, raison);
     await fil.setArchived(true, raison);
   } catch (err) {
-    console.warn(`[tickets] archivage impossible du fil ${fil.id} :`, err instanceof Error ? err.message : err);
+    console.warn(
+      `[tickets] archivage impossible du fil ${fil.id} :`,
+      err instanceof Error ? err.message : err,
+    );
   }
 }
 
@@ -375,7 +411,10 @@ export const MOTIF_FIL_DISPARU = "Fil supprimé — ticket clos d'office.";
  * arrêté reste en cache tel qu'il était, et la question posée ici est justement
  * celle à laquelle le cache ne sait pas répondre.
  */
-async function filDuTicket(guilde: Guild, salonId: string): Promise<{ fil: ThreadChannel | null; disparu: boolean }> {
+async function filDuTicket(
+  guilde: Guild,
+  salonId: string,
+): Promise<{ fil: ThreadChannel | null; disparu: boolean }> {
   try {
     const salon = await guilde.channels.fetch(salonId, { force: true });
     if (!salon) {
@@ -383,7 +422,10 @@ async function filDuTicket(guilde: Guild, salonId: string): Promise<{ fil: Threa
     }
     return { disparu: false, fil: salon.isThread() ? salon : null };
   } catch (err) {
-    return { disparu: (err as { code?: unknown }).code === SALON_INCONNU, fil: null };
+    return {
+      disparu: (err as { code?: unknown }).code === SALON_INCONNU,
+      fil: null,
+    };
   }
 }
 
@@ -402,7 +444,10 @@ async function filDuTicket(guilde: Guild, salonId: string): Promise<{ fil: Threa
  * le seul moment où l'on sait qui interroger, et le coût est d'un appel par
  * ticket non fermé du membre — soit un, en pratique.
  */
-export async function reconcilierTicketsOuverts(guilde: Guild, tickets: readonly Ticket[]): Promise<Ticket[]> {
+export async function reconcilierTicketsOuverts(
+  guilde: Guild,
+  tickets: readonly Ticket[],
+): Promise<Ticket[]> {
   const vivants: Ticket[] = [];
   for (const ticket of tickets) {
     const { disparu } = await filDuTicket(guilde, ticket.salonId);
@@ -410,17 +455,21 @@ export async function reconcilierTicketsOuverts(guilde: Guild, tickets: readonly
       vivants.push(ticket);
       continue;
     }
-    const ferme = await fermerTicket(ticket.id, guilde.client.user?.id ?? ticket.auteurId, MOTIF_FIL_DISPARU).catch(
-      (err: unknown) => {
-        console.warn(
-          `[tickets] fermeture d'office impossible de ${referenceTicket(ticket.numero)} :`,
-          err instanceof Error ? err.message : err,
-        );
-        return null;
-      },
-    );
+    const ferme = await fermerTicket(
+      ticket.id,
+      guilde.client.user?.id ?? ticket.auteurId,
+      MOTIF_FIL_DISPARU,
+    ).catch((err: unknown) => {
+      console.warn(
+        `[tickets] fermeture d'office impossible de ${referenceTicket(ticket.numero)} :`,
+        err instanceof Error ? err.message : err,
+      );
+      return null;
+    });
     if (ferme) {
-      console.warn(`[tickets] ${referenceTicket(ticket.numero)} fermé d'office : fil ${ticket.salonId} supprimé.`);
+      console.warn(
+        `[tickets] ${referenceTicket(ticket.numero)} fermé d'office : fil ${ticket.salonId} supprimé.`,
+      );
     } else {
       // La ligne n'a pas pu être fermée : la compter vivante plutôt que de
       // laisser ouvrir un second ticket à chaque tentative.
@@ -463,7 +512,9 @@ export async function publierFermeture({
   if (!reglages.tickets.salonHistorique) {
     return;
   }
-  const salon = await client.channels.fetch(reglages.tickets.salonHistorique).catch(() => null);
+  const salon = await client.channels
+    .fetch(reglages.tickets.salonHistorique)
+    .catch(() => null);
   if (!salon || !salon.isTextBased() || !("send" in salon)) {
     return;
   }
@@ -475,13 +526,19 @@ export async function publierFermeture({
     url: urlFil,
   });
   carte
-    .champ("Catégorie", libelleCategorieTicket(ticket.categorie), { enLigne: true })
+    .champ("Catégorie", libelleCategorieTicket(ticket.categorie), {
+      enLigne: true,
+    })
     .champ("Ouvert par", `<@${ticket.auteurId}>`, { enLigne: true })
     .champ("Fermé par", `<@${ticket.fermePar ?? fermePar}>`, { enLigne: true })
     .champ("Ouvert le", leJour(ticket.ouvertLe, "f"), { enLigne: true })
-    .champ("Pris en charge par", ticket.prisPar ? `<@${ticket.prisPar}>` : "personne", {
-      enLigne: true,
-    })
+    .champ(
+      "Pris en charge par",
+      ticket.prisPar ? `<@${ticket.prisPar}>` : "personne",
+      {
+        enLigne: true,
+      },
+    )
     .champ("Durée", ilYA(ticket.ouvertLe), { enLigne: true })
     .champ("Motif", motif);
   if (ticket.sujet) {
@@ -492,12 +549,17 @@ export async function publierFermeture({
     .send({
       embeds: [
         pied(carte.embed, {
-          note: urlFil ? "le fil reste lisible, il n'est pas supprimé" : "le fil de ce ticket n'existe plus",
+          note: urlFil
+            ? "le fil reste lisible, il n'est pas supprimé"
+            : "le fil de ce ticket n'existe plus",
         }),
       ],
     })
     .catch((err: unknown) =>
-      console.warn("[tickets] historique non écrit :", err instanceof Error ? err.message : err),
+      console.warn(
+        "[tickets] historique non écrit :",
+        err instanceof Error ? err.message : err,
+      ),
     );
 }
 
@@ -555,9 +617,13 @@ export async function diagnostiquerAcces(
   }
 
   for (const roleId of roles) {
-    const role = guilde.roles.cache.get(roleId) ?? (await guilde.roles.fetch(roleId).catch(() => null));
+    const role =
+      guilde.roles.cache.get(roleId) ??
+      (await guilde.roles.fetch(roleId).catch(() => null));
     if (!role) {
-      avertissements.push(`Le rôle \`${roleId}\` n'existe plus sur ce serveur.`);
+      avertissements.push(
+        `Le rôle \`${roleId}\` n'existe plus sur ce serveur.`,
+      );
       continue;
     }
     const siennes = salonPanneau.permissionsFor(role);
@@ -574,20 +640,31 @@ export async function diagnostiquerAcces(
   // tickets » est précisément le cas qu'il ne faut pas manquer. La règle, elle,
   // vit dans `lib/tickets.fuitesDAcces` (pure, testée) ; ici on ne fait que
   // mesurer la permission RÉELLE sur le salon, surcharges comprises.
-  const tousLesRoles = await guilde.roles.fetch().catch(() => guilde.roles.cache);
+  const tousLesRoles = await guilde.roles
+    .fetch()
+    .catch(() => guilde.roles.cache);
   // Les porteurs ne sont comptés que si la liste des membres est vraiment en
   // cache (le bot la charge au démarrage) : un cache vide ferait passer TOUS
   // les rôles pour inhabités, et la vérification pour muette.
   const membresConnus = guilde.members.cache.size > 1;
-  const observes = tousLesRoles.map(role => ({
+  const observes = tousLesRoles.map((role) => ({
     administrateur: role.permissions.has(PermissionFlagsBits.Administrator),
-    gereLesFils: salonPanneau.permissionsFor(role)?.has(PermissionFlagsBits.ManageThreads) ?? false,
+    gereLesFils:
+      salonPanneau
+        .permissionsFor(role)
+        ?.has(PermissionFlagsBits.ManageThreads) ?? false,
     id: role.id,
     integration: role.managed,
     nom: role.toString(),
-    porteursHumains: membresConnus ? role.members.filter(m => !m.user.bot).size : null,
+    porteursHumains: membresConnus
+      ? role.members.filter((m) => !m.user.bot).size
+      : null,
   }));
-  const fuites = fuitesDAcces([...observes.values()], roles, salonPanneau.toString());
+  const fuites = fuitesDAcces(
+    [...observes.values()],
+    roles,
+    salonPanneau.toString(),
+  );
   avertissements.push(...fuites.avertissements);
 
   return { avertissements, blocages };

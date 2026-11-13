@@ -12,7 +12,12 @@ import { useResetState } from "@/hooks/use-reset-state";
  * (lv1/lv50/lv99) comme repère. Navigateur uniquement (wasm) : îlot `"use client"`.
  */
 import { useEffect, useMemo, useState } from "react";
-import { calculateStats, statCurve, type GrowthParams, type StatBlock } from "@/lib/nie-engine";
+import {
+  calculateStats,
+  statCurve,
+  type GrowthParams,
+  type StatBlock,
+} from "@/lib/nie-engine";
 import type { DemoData, DemoFormData } from "./types";
 
 /** Ordre + libellés FR des 7 stats (clés wasm) + clé du dossier pré-calculé. */
@@ -51,7 +56,9 @@ export function DemoStatsPanel({
   const [charaRank, setCharaRank] = useState(7);
   const [level, setLevel] = useState(99);
   const form = forms[formIdx] ?? forms[0];
-  const [growthPattern, setGrowthPattern] = useState(form?.growth.growthPattern ?? 0);
+  const [growthPattern, setGrowthPattern] = useState(
+    form?.growth.growthPattern ?? 0,
+  );
 
   const [block, setBlock] = useState<StatBlock | null>(null);
   const [total, setTotal] = useState(0);
@@ -68,13 +75,16 @@ export function DemoStatsPanel({
     [charaRank, growthPattern, form],
   );
 
-  const [error, setError] = useResetState(false, `${JSON.stringify(params)}:${level}`);
+  const [error, setError] = useResetState(
+    false,
+    `${JSON.stringify(params)}:${level}`,
+  );
 
   // Stats au niveau courant.
   useEffect(() => {
     let on = true;
     calculateStats(params, level)
-      .then(r => {
+      .then((r) => {
         if (!on) return;
         setBlock(r.stats);
         setTotal(r.total);
@@ -89,7 +99,7 @@ export function DemoStatsPanel({
   useEffect(() => {
     let on = true;
     statCurve(params, 1, 99)
-      .then(rows => on && setCurve(rows.map(r => r.total)))
+      .then((rows) => on && setCurve(rows.map((r) => r.total)))
       .catch(() => on && setCurve([]));
     return () => {
       on = false;
@@ -103,7 +113,9 @@ export function DemoStatsPanel({
       {/* Paramètres. */}
       <div className="space-y-3">
         <div className="space-y-1.5">
-          <p className="text-xs font-medium uppercase tracking-wider text-on-surface-variant">Forme</p>
+          <p className="text-xs font-medium uppercase tracking-wider text-on-surface-variant">
+            Forme
+          </p>
           <div className="flex flex-wrap gap-1.5">
             {forms.map((f, i) => (
               <button
@@ -122,9 +134,11 @@ export function DemoStatsPanel({
           </div>
         </div>
         <div className="space-y-1.5">
-          <p className="text-xs font-medium uppercase tracking-wider text-on-surface-variant">Rareté</p>
+          <p className="text-xs font-medium uppercase tracking-wider text-on-surface-variant">
+            Rareté
+          </p>
           <div className="flex flex-wrap gap-1.5">
-            {RARITIES.map(r => (
+            {RARITIES.map((r) => (
               <button
                 key={r.code}
                 type="button"
@@ -141,9 +155,11 @@ export function DemoStatsPanel({
           </div>
         </div>
         <div className="space-y-1.5">
-          <p className="text-xs font-medium uppercase tracking-wider text-on-surface-variant">Pattern de croissance</p>
+          <p className="text-xs font-medium uppercase tracking-wider text-on-surface-variant">
+            Pattern de croissance
+          </p>
           <div className="flex flex-wrap gap-1.5">
-            {GROWTH_PATTERNS.map(p => (
+            {GROWTH_PATTERNS.map((p) => (
               <button
                 key={p}
                 type="button"
@@ -161,15 +177,19 @@ export function DemoStatsPanel({
         </div>
         <div className="space-y-1.5">
           <div className="flex items-center justify-between">
-            <p className="text-xs font-medium uppercase tracking-wider text-on-surface-variant">Niveau</p>
-            <span className="text-sm font-bold tabular-nums text-primary">Lv {level}</span>
+            <p className="text-xs font-medium uppercase tracking-wider text-on-surface-variant">
+              Niveau
+            </p>
+            <span className="text-sm font-bold tabular-nums text-primary">
+              Lv {level}
+            </span>
           </div>
           <input
             type="range"
             min={1}
             max={99}
             value={level}
-            onChange={e => setLevel(Number(e.target.value))}
+            onChange={(e) => setLevel(Number(e.target.value))}
             className="w-full accent-primary"
             aria-label="Niveau"
           />
@@ -177,28 +197,39 @@ export function DemoStatsPanel({
       </div>
 
       {error ? (
-        <p className="p-4 text-center text-sm text-on-surface-variant">Moteur de stats indisponible (wasm).</p>
+        <p className="p-4 text-center text-sm text-on-surface-variant">
+          Moteur de stats indisponible (wasm).
+        </p>
       ) : (
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           {/* 7 stats + repère pré-calculé. */}
           <div>
             <div className="mb-3 flex items-center justify-between">
-              <h4 className="text-sm font-bold text-on-surface">Stats · Lv {level}</h4>
+              <h4 className="text-sm font-bold text-on-surface">
+                Stats · Lv {level}
+              </h4>
               <span className="text-sm text-on-surface-variant">
-                Total <span className="font-bold tabular-nums text-primary">{total}</span>
+                Total{" "}
+                <span className="font-bold tabular-nums text-primary">
+                  {total}
+                </span>
               </span>
             </div>
             <div className="space-y-2">
-              {STATS.map(s => {
+              {STATS.map((s) => {
                 const v = block?.[s.k] ?? 0;
                 const ref = precomputed.lv99[s.pre];
                 return (
                   <div key={s.k} className="flex items-center gap-3">
-                    <span className="w-24 shrink-0 text-xs text-on-surface-variant">{s.fr}</span>
+                    <span className="w-24 shrink-0 text-xs text-on-surface-variant">
+                      {s.fr}
+                    </span>
                     <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-surface-container-highest">
                       <div
                         className="h-full rounded-full bg-primary transition-all"
-                        style={{ width: `${Math.min(100, (v / MAX_STAT) * 100)}%` }}
+                        style={{
+                          width: `${Math.min(100, (v / MAX_STAT) * 100)}%`,
+                        }}
                       />
                     </div>
                     <span className="w-10 shrink-0 text-right text-sm font-medium tabular-nums text-on-surface">
@@ -223,7 +254,9 @@ export function DemoStatsPanel({
 
           {/* Courbe du total Lv1→99 (markup repris de StatCalculator.TotalCurve). */}
           <div>
-            <h4 className="mb-3 text-sm font-bold text-on-surface">Courbe du total (Lv1→99)</h4>
+            <h4 className="mb-3 text-sm font-bold text-on-surface">
+              Courbe du total (Lv1→99)
+            </h4>
             <TotalCurve curve={curve} level={level} />
           </div>
         </div>
@@ -235,7 +268,11 @@ export function DemoStatsPanel({
 /** Petit graphe SVG du total + marqueur de niveau (repris de `StatCalculator`, non exporté). */
 function TotalCurve({ curve, level }: { curve: number[]; level: number }) {
   if (curve.length < 2) {
-    return <div className="flex h-40 items-center justify-center text-xs text-on-surface-variant/60">…</div>;
+    return (
+      <div className="flex h-40 items-center justify-center text-xs text-on-surface-variant/60">
+        …
+      </div>
+    );
   }
   const W = 320;
   const H = 140;
@@ -260,7 +297,13 @@ function TotalCurve({ curve, level }: { curve: number[]; level: number }) {
 
       aria-label="Courbe du total des stats"
     >
-      <polyline points={pts} fill="none" stroke="currentColor" strokeWidth={2} className="text-primary" />
+      <polyline
+        points={pts}
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={2}
+        className="text-primary"
+      />
       <line
         x1={cx}
         y1={0}

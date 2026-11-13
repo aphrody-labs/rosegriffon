@@ -12,7 +12,14 @@ workspace = true
 
 [features]
 default = ["host"]
-host = ["dep:anyhow", "dep:base64", "dep:globset", "dep:grep-regex", "dep:grep-searcher", "dep:ignore"]
+host = [
+  "dep:anyhow",
+  "dep:base64",
+  "dep:globset",
+  "dep:grep-regex",
+  "dep:grep-searcher",
+  "dep:ignore",
+]
 
 [dependencies]
 aphrody-nie-formats = { path = "../aphrody-nie-formats", version = "1.4.8", default-features = false, features = ["std", "serde", "lua", "textures", "images", "audio-decode"] }

@@ -129,14 +129,21 @@ export class FilmCraftEngine {
           const clip = params.clip as FilmClip;
           const frame = Number(params.frame ?? 0);
           spliceFilmClip(this.project, trackId, clip, frame);
-          return { success: true, commandId, result: { inserted: clip.id, frame } };
+          return {
+            success: true,
+            commandId,
+            result: { inserted: clip.id, frame },
+          };
         }
         case "timeline.set_playhead": {
           const frame =
             params.frame != null
               ? Number(params.frame)
               : Math.round(Number(params.seconds ?? 0) * this.project.fps);
-          this.project.playheadFrame = Math.max(0, Math.min(frame, this.project.durationFrames));
+          this.project.playheadFrame = Math.max(
+            0,
+            Math.min(frame, this.project.durationFrames),
+          );
           return {
             success: true,
             commandId,
@@ -151,10 +158,18 @@ export class FilmCraftEngine {
           return { success: true, commandId, result: { trackId, muted } };
         }
         default:
-          return { success: false, commandId, error: `Unknown command ${commandId}` };
+          return {
+            success: false,
+            commandId,
+            error: `Unknown command ${commandId}`,
+          };
       }
     } catch (err: unknown) {
-      return { success: false, commandId, error: err instanceof Error ? err.message : String(err) };
+      return {
+        success: false,
+        commandId,
+        error: err instanceof Error ? err.message : String(err),
+      };
     }
   }
 
@@ -190,9 +205,11 @@ export class FilmCraftEngine {
     };
 
     const bitrate = bitratePresets[preset] ?? 6000;
-    const estimatedSizeMb = Math.round(((bitrate * durationSeconds) / 8 / 1024) * 100) / 100;
+    const estimatedSizeMb =
+      Math.round(((bitrate * durationSeconds) / 8 / 1024) * 100) / 100;
     const jobId = `job-${Date.now()}`;
-    const outputPath = options.outputPath ?? `/var/export/fc-${jobId}.${format}`;
+    const outputPath =
+      options.outputPath ?? `/var/export/fc-${jobId}.${format}`;
     const r2Url = options.r2DestinationKey
       ? `https://cdn.dragonballfr.com/exports/${options.r2DestinationKey}`
       : undefined;

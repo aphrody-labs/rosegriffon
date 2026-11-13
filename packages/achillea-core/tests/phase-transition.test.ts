@@ -1,6 +1,9 @@
 import { describe, expect, test } from "bun:test";
 
-import { phaseLobbiesAreFinished, shouldFinishTournament } from "@rosegriffon/achillea-core/tournaments";
+import {
+  phaseLobbiesAreFinished,
+  shouldFinishTournament,
+} from "@rosegriffon/achillea-core/tournaments";
 
 describe("phase transition rules", () => {
   test("requires at least one terminal lobby and no unfinished lobby", () => {

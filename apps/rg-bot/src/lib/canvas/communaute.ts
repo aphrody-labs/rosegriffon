@@ -28,7 +28,16 @@ import { createCanvas, type SKRSContext2D } from "@aphrody/canvas";
 import { entierLisible, formaterNombre } from "../ui/nombres";
 import { rangDe, type Progression } from "../experience";
 import { rareteDe } from "../collection";
-import { BORDURE_OR, ensureFonts, MARGE, MARQUE_CANVAS, OMBRE_DURE, PALETTE, POLICES, RAYONS } from "./theme";
+import {
+  BORDURE_OR,
+  ensureFonts,
+  MARGE,
+  MARQUE_CANVAS,
+  OMBRE_DURE,
+  PALETTE,
+  POLICES,
+  RAYONS,
+} from "./theme";
 import { assainir, decouperEnLignes, initiale, tronquer } from "./texte";
 import {
   dessinerFilet,
@@ -67,7 +76,11 @@ function teinte(nom: keyof typeof TEINTES): string {
  * l'exporter obligerait à en figer la signature pour six cartes qui n'ont pas
  * les mêmes besoins. Les six lignes dupliquées coûtent moins qu'un couplage.
  */
-function dessinerPied(ctx: SKRSContext2D, hauteur: number, note?: string): void {
+function dessinerPied(
+  ctx: SKRSContext2D,
+  hauteur: number,
+  note?: string,
+): void {
   const y = hauteur - HAUTEUR_PIED + 20;
   ctx.save();
   ctx.textAlign = "left";
@@ -104,15 +117,40 @@ function dessinerBarre(
   couleur: string,
 ): void {
   const borne = Number.isFinite(ratio) ? Math.min(1, Math.max(0, ratio)) : 0;
-  fillRoundedRect(ctx, x, y, largeur, hauteur, hauteur / 2, PALETTE.carteCreuse);
+  fillRoundedRect(
+    ctx,
+    x,
+    y,
+    largeur,
+    hauteur,
+    hauteur / 2,
+    PALETTE.carteCreuse,
+  );
   if (borne > 0) {
     const remplissage = Math.max(hauteur, largeur * borne);
     const degrade = ctx.createLinearGradient(x, y, x + remplissage, y);
     degrade.addColorStop(0, couleur);
     degrade.addColorStop(1, PALETTE.or);
-    fillRoundedRect(ctx, x, y, remplissage, hauteur, hauteur / 2, degrade as unknown as string);
+    fillRoundedRect(
+      ctx,
+      x,
+      y,
+      remplissage,
+      hauteur,
+      hauteur / 2,
+      degrade as unknown as string,
+    );
   }
-  strokeRoundedRect(ctx, x + 1, y + 1, largeur - 2, hauteur - 2, hauteur / 2, PALETTE.filet, 1);
+  strokeRoundedRect(
+    ctx,
+    x + 1,
+    y + 1,
+    largeur - 2,
+    hauteur - 2,
+    hauteur / 2,
+    PALETTE.filet,
+    1,
+  );
 }
 
 // ─── Carte de profil ────────────────────────────────────────────────────────
@@ -182,7 +220,12 @@ function titreCentre(
   texte: string,
   cx: number,
   y: number,
-  options: { taille: number; police: string; remplissage: string; largeurMax: number },
+  options: {
+    taille: number;
+    police: string;
+    remplissage: string;
+    largeurMax: number;
+  },
 ): void {
   ctx.save();
   ctx.font = `${options.taille}px ${options.police}`;
@@ -199,7 +242,9 @@ function titreCentre(
  * joueur fétiche et d'une ligne de collection. Une carte à hauteur fixe laisse
  * un vide chez le membre qui n'a rien, et déborde chez celui qui a tout.
  */
-export async function renderCarteProfil(donnees: DonneesCarteProfil): Promise<Buffer> {
+export async function renderCarteProfil(
+  donnees: DonneesCarteProfil,
+): Promise<Buffer> {
   ensureFonts();
 
   const pseudo = assainir(donnees.pseudo, POLICES.display) || "Membre";
@@ -219,7 +264,9 @@ export async function renderCarteProfil(donnees: DonneesCarteProfil): Promise<Bu
   await dessinerFond(ctx, L, hauteur);
 
   // ── Bandeau : la plaque de nom du jeu, ou le dégradé de repli ─────────────
-  const plaque = donnees.plaqueUrl ? await drawCoveredImage(ctx, donnees.plaqueUrl, 0, 0, L, HAUTEUR_PLAQUE) : false;
+  const plaque = donnees.plaqueUrl
+    ? await drawCoveredImage(ctx, donnees.plaqueUrl, 0, 0, L, HAUTEUR_PLAQUE)
+    : false;
   if (!plaque) {
     const degrade = ctx.createLinearGradient(0, 0, L, HAUTEUR_PLAQUE);
     degrade.addColorStop(0, PALETTE.brique);
@@ -229,7 +276,12 @@ export async function renderCarteProfil(donnees: DonneesCarteProfil): Promise<Bu
   }
   // Voile marine : une plaque du jeu est claire et chargée ; sans voile, le
   // pseudo posé dessus devient illisible sur la moitié des 54 plaques.
-  const voile = ctx.createLinearGradient(0, HAUTEUR_PLAQUE - 130, 0, HAUTEUR_PLAQUE);
+  const voile = ctx.createLinearGradient(
+    0,
+    HAUTEUR_PLAQUE - 130,
+    0,
+    HAUTEUR_PLAQUE,
+  );
   voile.addColorStop(0, "rgba(10, 21, 44, 0)");
   voile.addColorStop(1, "rgba(10, 21, 44, 0.92)");
   ctx.fillStyle = voile;
@@ -244,7 +296,9 @@ export async function renderCarteProfil(donnees: DonneesCarteProfil): Promise<Bu
   ctx.restore();
 
   // ── Panneau principal ────────────────────────────────────────────────────
-  dessinerPanneau(ctx, MARGE, yCarte, L - MARGE * 2, hauteurCarte, { rayon: RAYONS.xl });
+  dessinerPanneau(ctx, MARGE, yCarte, L - MARGE * 2, hauteurCarte, {
+    rayon: RAYONS.xl,
+  });
 
   const xInterne = MARGE + RESPIRATION;
   const largeurInterne = L - MARGE * 2 - RESPIRATION * 2;
@@ -255,11 +309,23 @@ export async function renderCarteProfil(donnees: DonneesCarteProfil): Promise<Bu
   ctx.save();
   ctx.beginPath();
   ctx.fillStyle = OMBRE_DURE.couleur;
-  ctx.arc(cxAvatar + OMBRE_DURE.x, cyAvatar + OMBRE_DURE.y, RAYON_AVATAR + 3, 0, Math.PI * 2);
+  ctx.arc(
+    cxAvatar + OMBRE_DURE.x,
+    cyAvatar + OMBRE_DURE.y,
+    RAYON_AVATAR + 3,
+    0,
+    Math.PI * 2,
+  );
   ctx.fill();
   ctx.restore();
   const avatar = donnees.avatarUrl
-    ? await drawCircularImage(ctx, donnees.avatarUrl, cxAvatar, cyAvatar, RAYON_AVATAR)
+    ? await drawCircularImage(
+        ctx,
+        donnees.avatarUrl,
+        cxAvatar,
+        cyAvatar,
+        RAYON_AVATAR,
+      )
     : false;
   if (!avatar) {
     ctx.save();
@@ -271,7 +337,11 @@ export async function renderCarteProfil(donnees: DonneesCarteProfil): Promise<Bu
     ctx.font = `${Math.round(RAYON_AVATAR * 1.05)}px ${POLICES.display}`;
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.fillText(initiale(pseudo, POLICES.display), cxAvatar, cyAvatar + RAYON_AVATAR * 0.06);
+    ctx.fillText(
+      initiale(pseudo, POLICES.display),
+      cxAvatar,
+      cyAvatar + RAYON_AVATAR * 0.06,
+    );
     ctx.textAlign = "left";
     ctx.textBaseline = "alphabetic";
     ctx.restore();
@@ -291,14 +361,20 @@ export async function renderCarteProfil(donnees: DonneesCarteProfil): Promise<Bu
   // La pastille de rang d'abord : elle borne la largeur du pseudo.
   ctx.save();
   const largeurRang = largeurPastille(ctx, rang.nom, 18, POLICES.corps);
-  dessinerPastille(ctx, L - MARGE - RESPIRATION - largeurRang, yCarte + 34, rang.nom, {
-    fond: teinte(rang.teinte),
-    hauteur: 36,
-    largeurMax: 260,
-    police: POLICES.corps,
-    taillePolice: 18,
-    texte: rang.teinte === "texteAttenue" ? PALETTE.carte : PALETTE.surOr,
-  });
+  dessinerPastille(
+    ctx,
+    L - MARGE - RESPIRATION - largeurRang,
+    yCarte + 34,
+    rang.nom,
+    {
+      fond: teinte(rang.teinte),
+      hauteur: 36,
+      largeurMax: 260,
+      police: POLICES.corps,
+      taillePolice: 18,
+      texte: rang.teinte === "texteAttenue" ? PALETTE.carte : PALETTE.surOr,
+    },
+  );
   ctx.restore();
 
   dessinerTitreCartoon(ctx, pseudo, xTexte, yCarte + 74, {
@@ -329,15 +405,31 @@ export async function renderCarteProfil(donnees: DonneesCarteProfil): Promise<Bu
     ctx.textAlign = "right";
     ctx.font = `bold 26px ${POLICES.display}`;
     ctx.fillStyle = PALETTE.or;
-    ctx.fillText(`#${entierLisible(donnees.rang)}`, L - MARGE - RESPIRATION, yBarre - 26);
+    ctx.fillText(
+      `#${entierLisible(donnees.rang)}`,
+      L - MARGE - RESPIRATION,
+      yBarre - 26,
+    );
     ctx.font = `15px ${POLICES.corps}`;
     ctx.fillStyle = PALETTE.texteAttenue;
-    ctx.fillText(`sur ${entierLisible(donnees.total)}`, L - MARGE - RESPIRATION, yBarre - 6);
+    ctx.fillText(
+      `sur ${entierLisible(donnees.total)}`,
+      L - MARGE - RESPIRATION,
+      yBarre - 6,
+    );
     ctx.textAlign = "left";
   }
   ctx.restore();
 
-  dessinerBarre(ctx, xInterne, yBarre + 8, largeurInterne, 26, p.ratio, teinte(rang.teinte));
+  dessinerBarre(
+    ctx,
+    xInterne,
+    yBarre + 8,
+    largeurInterne,
+    26,
+    p.ratio,
+    teinte(rang.teinte),
+  );
 
   ctx.save();
   ctx.font = `16px ${POLICES.corps}`;
@@ -352,7 +444,9 @@ export async function renderCarteProfil(donnees: DonneesCarteProfil): Promise<Bu
   );
   ctx.textAlign = "right";
   ctx.fillText(
-    p.auMaximum ? "niveau 100" : `${entierLisible(p.restant)} XP avant le niveau ${p.niveau + 1}`,
+    p.auMaximum
+      ? "niveau 100"
+      : `${entierLisible(p.restant)} XP avant le niveau ${p.niveau + 1}`,
     L - MARGE - RESPIRATION,
     yBarre + 58,
   );
@@ -377,7 +471,11 @@ export async function renderCarteProfil(donnees: DonneesCarteProfil): Promise<Bu
     const x = xInterne + largeurColonne * index;
     ctx.font = `14px ${POLICES.corps}`;
     ctx.fillStyle = PALETTE.texteAttenue;
-    ctx.fillText(tronquer(ctx, libelle, largeurColonne - 12), x, yChiffres + 28);
+    ctx.fillText(
+      tronquer(ctx, libelle, largeurColonne - 12),
+      x,
+      yChiffres + 28,
+    );
     ctx.font = `bold 26px ${POLICES.display}`;
     ctx.fillStyle = PALETTE.texte;
     ctx.fillText(valeur, x, yChiffres + 58);
@@ -389,13 +487,37 @@ export async function renderCarteProfil(donnees: DonneesCarteProfil): Promise<Bu
   if (donnees.favori) {
     const rarete = rareteDe(donnees.favori.rarete);
     const hauteurBloc = 96;
-    fillRoundedRect(ctx, xInterne, yBas, largeurInterne, hauteurBloc, RAYONS.md, PALETTE.carteAlt);
+    fillRoundedRect(
+      ctx,
+      xInterne,
+      yBas,
+      largeurInterne,
+      hauteurBloc,
+      RAYONS.md,
+      PALETTE.carteAlt,
+    );
     const cote = hauteurBloc - 20;
     const portrait = donnees.favori.portraitUrl
-      ? await drawCoveredImage(ctx, donnees.favori.portraitUrl, xInterne + 10, yBas + 10, cote, cote, RAYONS.sm)
+      ? await drawCoveredImage(
+          ctx,
+          donnees.favori.portraitUrl,
+          xInterne + 10,
+          yBas + 10,
+          cote,
+          cote,
+          RAYONS.sm,
+        )
       : false;
     if (!portrait) {
-      fillRoundedRect(ctx, xInterne + 10, yBas + 10, cote, cote, RAYONS.sm, PALETTE.carteCreuse);
+      fillRoundedRect(
+        ctx,
+        xInterne + 10,
+        yBas + 10,
+        cote,
+        cote,
+        RAYONS.sm,
+        PALETTE.carteCreuse,
+      );
     }
     ctx.save();
     ctx.textBaseline = "alphabetic";
@@ -405,20 +527,30 @@ export async function renderCarteProfil(donnees: DonneesCarteProfil): Promise<Bu
     ctx.font = `bold 26px ${POLICES.display}`;
     ctx.fillStyle = PALETTE.texte;
     ctx.fillText(
-      tronquer(ctx, assainir(donnees.favori.nom, POLICES.display) || "Joueur", largeurInterne - cote - 200),
+      tronquer(
+        ctx,
+        assainir(donnees.favori.nom, POLICES.display) || "Joueur",
+        largeurInterne - cote - 200,
+      ),
       xInterne + cote + 26,
       yBas + 64,
     );
     ctx.restore();
     const largeurRarete = largeurPastille(ctx, rarete.nom, 15, POLICES.corps);
-    dessinerPastille(ctx, xInterne + largeurInterne - largeurRarete - 14, yBas + hauteurBloc / 2 - 15, rarete.nom, {
-      fond: teinte(rarete.teinte),
-      hauteur: 30,
-      largeurMax: 220,
-      police: POLICES.corps,
-      taillePolice: 15,
-      texte: rarete.teinte === "texteAttenue" ? PALETTE.carte : PALETTE.surOr,
-    });
+    dessinerPastille(
+      ctx,
+      xInterne + largeurInterne - largeurRarete - 14,
+      yBas + hauteurBloc / 2 - 15,
+      rarete.nom,
+      {
+        fond: teinte(rarete.teinte),
+        hauteur: 30,
+        largeurMax: 220,
+        police: POLICES.corps,
+        taillePolice: 15,
+        texte: rarete.teinte === "texteAttenue" ? PALETTE.carte : PALETTE.surOr,
+      },
+    );
     yBas += REPERES_PROFIL.blocFavori;
   }
 
@@ -427,7 +559,11 @@ export async function renderCarteProfil(donnees: DonneesCarteProfil): Promise<Bu
     ctx.font = `15px ${POLICES.corps}`;
     ctx.fillStyle = PALETTE.texteAttenue;
     ctx.textBaseline = "alphabetic";
-    ctx.fillText(tronquer(ctx, `Collection : ${donnees.collection}`, largeurInterne), xInterne, yBas + 8);
+    ctx.fillText(
+      tronquer(ctx, `Collection : ${donnees.collection}`, largeurInterne),
+      xInterne,
+      yBas + 8,
+    );
     ctx.restore();
   }
 
@@ -467,7 +603,8 @@ export async function renderCarteClassement(
   ensureFonts();
 
   const visibles = lignes.slice(0, 10);
-  const hauteurListe = Math.max(1, visibles.length) * HAUTEUR_LIGNE + RESPIRATION * 2;
+  const hauteurListe =
+    Math.max(1, visibles.length) * HAUTEUR_LIGNE + RESPIRATION * 2;
   const hauteur = HAUTEUR_ENTETE_CLASSEMENT + hauteurListe + 24 + HAUTEUR_PIED;
 
   const canvas = createCanvas(L, hauteur);
@@ -480,12 +617,18 @@ export async function renderCarteClassement(
   ctx.font = `bold 14px ${POLICES.corps}`;
   ctx.fillStyle = PALETTE.or;
   ctx.fillText(MARQUE_CANVAS.surtitre, MARGE, 46);
-  dessinerTitreCartoon(ctx, assainir(titre, POLICES.display) || "Classement", MARGE, 100, {
-    largeurMax: L - MARGE * 2,
-    police: POLICES.display,
-    remplissage: PALETTE.surFond,
-    taille: 46,
-  });
+  dessinerTitreCartoon(
+    ctx,
+    assainir(titre, POLICES.display) || "Classement",
+    MARGE,
+    100,
+    {
+      largeurMax: L - MARGE * 2,
+      police: POLICES.display,
+      remplissage: PALETTE.surFond,
+      taille: 46,
+    },
+  );
   ctx.fillStyle = PALETTE.or;
   ctx.fillRect(MARGE, HAUTEUR_ENTETE_CLASSEMENT - 22, L - MARGE * 2, 3);
   ctx.fillStyle = PALETTE.briqueClair;
@@ -493,7 +636,9 @@ export async function renderCarteClassement(
   ctx.restore();
 
   const yListe = HAUTEUR_ENTETE_CLASSEMENT;
-  dessinerPanneau(ctx, MARGE, yListe, L - MARGE * 2, hauteurListe, { rayon: RAYONS.lg });
+  dessinerPanneau(ctx, MARGE, yListe, L - MARGE * 2, hauteurListe, {
+    rayon: RAYONS.lg,
+  });
 
   if (visibles.length === 0) {
     ctx.save();
@@ -525,7 +670,15 @@ export async function renderCarteClassement(
       // La ligne du demandeur : un liseré, jamais un aplat — un aplat sur une
       // carte claire écrase le contraste du texte qu'il est censé mettre en
       // avant.
-      fillRoundedRect(ctx, xInterne - 12, y - 4, largeurInterne + 24, hauteurLigne + 8, RAYONS.md, PALETTE.carteAlt);
+      fillRoundedRect(
+        ctx,
+        xInterne - 12,
+        y - 4,
+        largeurInterne + 24,
+        hauteurLigne + 8,
+        RAYONS.md,
+        PALETTE.carteAlt,
+      );
       strokeRoundedRect(
         ctx,
         xInterne - 12,
@@ -552,7 +705,9 @@ export async function renderCarteClassement(
     const rayon = 26;
     const cx = xInterne + 44 + 20 + rayon;
     const cy = y + hauteurLigne / 2;
-    const avatar = ligne.avatarUrl ? await drawCircularImage(ctx, ligne.avatarUrl, cx, cy, rayon) : false;
+    const avatar = ligne.avatarUrl
+      ? await drawCircularImage(ctx, ligne.avatarUrl, cx, cy, rayon)
+      : false;
     if (!avatar) {
       ctx.save();
       ctx.beginPath();
@@ -592,7 +747,11 @@ export async function renderCarteClassement(
     ctx.textAlign = "right";
     ctx.font = `bold 22px ${POLICES.display}`;
     ctx.fillStyle = PALETTE.or;
-    ctx.fillText(`${formaterNombre(ligne.xp)} ${options.unite ?? "XP"}`, xInterne + largeurInterne, cy - 4);
+    ctx.fillText(
+      `${formaterNombre(ligne.xp)} ${options.unite ?? "XP"}`,
+      xInterne + largeurInterne,
+      cy - 4,
+    );
     ctx.textAlign = "left";
     ctx.restore();
 
@@ -634,7 +793,9 @@ export interface DonneesCarteAccueil {
  * pour l'agrandir. Tout ce qui n'est pas le pseudo et l'avatar y est
  * secondaire.
  */
-export async function renderCarteAccueil(donnees: DonneesCarteAccueil): Promise<Buffer> {
+export async function renderCarteAccueil(
+  donnees: DonneesCarteAccueil,
+): Promise<Buffer> {
   ensureFonts();
 
   const largeur = L;
@@ -655,7 +816,9 @@ export async function renderCarteAccueil(donnees: DonneesCarteAccueil): Promise<
   ctx.fill();
   ctx.restore();
 
-  const avatar = donnees.avatarUrl ? await drawCircularImage(ctx, donnees.avatarUrl, cx, cy, rayon) : false;
+  const avatar = donnees.avatarUrl
+    ? await drawCircularImage(ctx, donnees.avatarUrl, cx, cy, rayon)
+    : false;
   if (!avatar) {
     ctx.save();
     ctx.beginPath();
@@ -688,7 +851,13 @@ export async function renderCarteAccueil(donnees: DonneesCarteAccueil): Promise<
   ctx.font = `bold 16px ${POLICES.corps}`;
   ctx.fillStyle = PALETTE.or;
   ctx.fillText(
-    tronquer(ctx, (assainir(donnees.serveur, POLICES.corps) || "Rose Griffon").toUpperCase(), largeurTexte),
+    tronquer(
+      ctx,
+      (
+        assainir(donnees.serveur, POLICES.corps) || "Rose Griffon"
+      ).toUpperCase(),
+      largeurTexte,
+    ),
     xTexte,
     cy - 74,
   );
@@ -706,10 +875,14 @@ export async function renderCarteAccueil(donnees: DonneesCarteAccueil): Promise<
   ctx.textBaseline = "alphabetic";
   ctx.font = `22px ${POLICES.corps}`;
   ctx.fillStyle = PALETTE.surFond;
-  const lignes = decouperEnLignes(ctx, assainir(donnees.message, POLICES.corps) || "Bienvenue parmi nous !", {
-    largeurMax: largeurTexte,
-    maxLignes: 2,
-  });
+  const lignes = decouperEnLignes(
+    ctx,
+    assainir(donnees.message, POLICES.corps) || "Bienvenue parmi nous !",
+    {
+      largeurMax: largeurTexte,
+      maxLignes: 2,
+    },
+  );
   lignes.forEach((ligne, index) => {
     ctx.fillText(ligne, xTexte, cy + 30 + index * 32);
   });
@@ -772,7 +945,8 @@ export async function renderCarteCollection(
 
   const visibles = cases.slice(0, CASES_PAR_CARTE);
   const rangees = Math.max(1, Math.ceil(visibles.length / COLONNES_COLLECTION));
-  const hauteurGrille = rangees * HAUTEUR_CASE + (rangees - 1) * GOUTTIERE + RESPIRATION * 2;
+  const hauteurGrille =
+    rangees * HAUTEUR_CASE + (rangees - 1) * GOUTTIERE + RESPIRATION * 2;
   const hauteur = HAUTEUR_ENTETE_CLASSEMENT + hauteurGrille + 24 + HAUTEUR_PIED;
 
   const canvas = createCanvas(L, hauteur);
@@ -785,12 +959,18 @@ export async function renderCarteCollection(
   ctx.font = `bold 14px ${POLICES.corps}`;
   ctx.fillStyle = PALETTE.or;
   ctx.fillText(MARQUE_CANVAS.surtitre, MARGE, 46);
-  dessinerTitreCartoon(ctx, `Collection de ${assainir(pseudo, POLICES.display) || "Membre"}`, MARGE, 100, {
-    largeurMax: L - MARGE * 2,
-    police: POLICES.display,
-    remplissage: PALETTE.surFond,
-    taille: 42,
-  });
+  dessinerTitreCartoon(
+    ctx,
+    `Collection de ${assainir(pseudo, POLICES.display) || "Membre"}`,
+    MARGE,
+    100,
+    {
+      largeurMax: L - MARGE * 2,
+      police: POLICES.display,
+      remplissage: PALETTE.surFond,
+      taille: 42,
+    },
+  );
   if (options.completion) {
     ctx.font = `18px ${POLICES.corps}`;
     ctx.fillStyle = PALETTE.or;
@@ -805,11 +985,14 @@ export async function renderCarteCollection(
   ctx.restore();
 
   const yGrille = HAUTEUR_ENTETE_CLASSEMENT;
-  dessinerPanneau(ctx, MARGE, yGrille, L - MARGE * 2, hauteurGrille, { rayon: RAYONS.lg });
+  dessinerPanneau(ctx, MARGE, yGrille, L - MARGE * 2, hauteurGrille, {
+    rayon: RAYONS.lg,
+  });
 
   // La grille est centrée dans le panneau : une dernière rangée incomplète
   // reste alignée à gauche, comme le reste, plutôt que de flotter au milieu.
-  const largeurGrille = COLONNES_COLLECTION * COTE_CASE + (COLONNES_COLLECTION - 1) * GOUTTIERE;
+  const largeurGrille =
+    COLONNES_COLLECTION * COTE_CASE + (COLONNES_COLLECTION - 1) * GOUTTIERE;
   const xGrille = MARGE + (L - MARGE * 2 - largeurGrille) / 2;
 
   for (const [index, joueur] of visibles.entries()) {
@@ -820,9 +1003,25 @@ export async function renderCarteCollection(
     const rarete = rareteDe(joueur.rarete);
     const couleur = teinte(rarete.teinte);
 
-    fillRoundedRect(ctx, x, y, COTE_CASE, COTE_CASE, RAYONS.md, PALETTE.carteAlt);
+    fillRoundedRect(
+      ctx,
+      x,
+      y,
+      COTE_CASE,
+      COTE_CASE,
+      RAYONS.md,
+      PALETTE.carteAlt,
+    );
     const dessine = joueur.portraitUrl
-      ? await drawCoveredImage(ctx, joueur.portraitUrl, x, y, COTE_CASE, COTE_CASE, RAYONS.md)
+      ? await drawCoveredImage(
+          ctx,
+          joueur.portraitUrl,
+          x,
+          y,
+          COTE_CASE,
+          COTE_CASE,
+          RAYONS.md,
+        )
       : false;
     if (!dessine) {
       ctx.save();
@@ -830,14 +1029,27 @@ export async function renderCarteCollection(
       ctx.textBaseline = "middle";
       ctx.font = `${Math.round(COTE_CASE * 0.4)}px ${POLICES.display}`;
       ctx.fillStyle = PALETTE.texteAttenue;
-      ctx.fillText(initiale(joueur.nom, POLICES.display), x + COTE_CASE / 2, y + COTE_CASE / 2);
+      ctx.fillText(
+        initiale(joueur.nom, POLICES.display),
+        x + COTE_CASE / 2,
+        y + COTE_CASE / 2,
+      );
       ctx.textAlign = "left";
       ctx.textBaseline = "alphabetic";
       ctx.restore();
     }
     // Le cadre porte la rareté : c'est la seule information qu'on lit sur une
     // grille de vingt-quatre portraits.
-    strokeRoundedRect(ctx, x + 1.5, y + 1.5, COTE_CASE - 3, COTE_CASE - 3, RAYONS.md, couleur, 3);
+    strokeRoundedRect(
+      ctx,
+      x + 1.5,
+      y + 1.5,
+      COTE_CASE - 3,
+      COTE_CASE - 3,
+      RAYONS.md,
+      couleur,
+      3,
+    );
 
     ctx.save();
     ctx.textAlign = "center";
@@ -852,7 +1064,11 @@ export async function renderCarteCollection(
     ctx.font = `13px ${POLICES.corps}`;
     ctx.fillStyle = couleur;
     ctx.fillText(
-      tronquer(ctx, joueur.element ? `${rarete.nom} · ${joueur.element}` : rarete.nom, COTE_CASE),
+      tronquer(
+        ctx,
+        joueur.element ? `${rarete.nom} · ${joueur.element}` : rarete.nom,
+        COTE_CASE,
+      ),
       x + COTE_CASE / 2,
       y + COTE_CASE + 40,
     );
@@ -885,7 +1101,9 @@ export interface DonneesCarteTirage {
  * joueur tiré — et une image large obligerait à remplir les côtés avec du vide
  * ou du bavardage.
  */
-export async function renderCarteTirage(donnees: DonneesCarteTirage): Promise<Buffer> {
+export async function renderCarteTirage(
+  donnees: DonneesCarteTirage,
+): Promise<Buffer> {
   ensureFonts();
 
   const largeur = 800;
@@ -898,7 +1116,14 @@ export async function renderCarteTirage(donnees: DonneesCarteTirage): Promise<Bu
   await dessinerFond(ctx, largeur, hauteur);
 
   // Halo de rareté : c'est la seule information qu'on lit à un mètre.
-  const halo = ctx.createRadialGradient(largeur / 2, hauteur * 0.42, 40, largeur / 2, hauteur * 0.42, largeur * 0.55);
+  const halo = ctx.createRadialGradient(
+    largeur / 2,
+    hauteur * 0.42,
+    40,
+    largeur / 2,
+    hauteur * 0.42,
+    largeur * 0.55,
+  );
   halo.addColorStop(0, couleur);
   halo.addColorStop(1, "rgba(0,0,0,0)");
   ctx.save();
@@ -911,48 +1136,98 @@ export async function renderCarteTirage(donnees: DonneesCarteTirage): Promise<Bu
   const xPortrait = (largeur - cote) / 2;
   const yPortrait = 90;
   ctx.save();
-  roundedRect(ctx, xPortrait - 6, yPortrait - 6, cote + 12, cote + 12, RAYONS.lg);
+  roundedRect(
+    ctx,
+    xPortrait - 6,
+    yPortrait - 6,
+    cote + 12,
+    cote + 12,
+    RAYONS.lg,
+  );
   ctx.fillStyle = PALETTE.carte;
   ctx.fill();
   ctx.restore();
   const portrait = donnees.portraitUrl
-    ? await drawCoveredImage(ctx, donnees.portraitUrl, xPortrait, yPortrait, cote, cote, RAYONS.md)
+    ? await drawCoveredImage(
+        ctx,
+        donnees.portraitUrl,
+        xPortrait,
+        yPortrait,
+        cote,
+        cote,
+        RAYONS.md,
+      )
     : false;
   if (!portrait) {
-    fillRoundedRect(ctx, xPortrait, yPortrait, cote, cote, RAYONS.md, PALETTE.carteCreuse);
+    fillRoundedRect(
+      ctx,
+      xPortrait,
+      yPortrait,
+      cote,
+      cote,
+      RAYONS.md,
+      PALETTE.carteCreuse,
+    );
   }
-  strokeRoundedRect(ctx, xPortrait - 6, yPortrait - 6, cote + 12, cote + 12, RAYONS.lg, couleur, 4);
+  strokeRoundedRect(
+    ctx,
+    xPortrait - 6,
+    yPortrait - 6,
+    cote + 12,
+    cote + 12,
+    RAYONS.lg,
+    couleur,
+    4,
+  );
 
   ctx.save();
   ctx.textAlign = "center";
   ctx.textBaseline = "alphabetic";
   ctx.font = `bold 15px ${POLICES.corps}`;
   ctx.fillStyle = PALETTE.or;
-  ctx.fillText(donnees.garanti ? "RECRUTEMENT GARANTI" : "RECRUTEMENT", largeur / 2, 52);
+  ctx.fillText(
+    donnees.garanti ? "RECRUTEMENT GARANTI" : "RECRUTEMENT",
+    largeur / 2,
+    52,
+  );
   ctx.restore();
 
   const largeurRarete = largeurPastille(ctx, rarete.nom, 17, POLICES.corps);
-  dessinerPastille(ctx, (largeur - largeurRarete) / 2, yPortrait + cote + 22, rarete.nom, {
-    fond: couleur,
-    hauteur: 34,
-    largeurMax: largeur - 80,
-    police: POLICES.corps,
-    taillePolice: 17,
-    texte: rarete.teinte === "texteAttenue" ? PALETTE.carte : PALETTE.surOr,
-  });
+  dessinerPastille(
+    ctx,
+    (largeur - largeurRarete) / 2,
+    yPortrait + cote + 22,
+    rarete.nom,
+    {
+      fond: couleur,
+      hauteur: 34,
+      largeurMax: largeur - 80,
+      police: POLICES.corps,
+      taillePolice: 17,
+      texte: rarete.teinte === "texteAttenue" ? PALETTE.carte : PALETTE.surOr,
+    },
+  );
 
-  titreCentre(ctx, assainir(donnees.nom, POLICES.display) || "Joueur", largeur / 2, yPortrait + cote + 108, {
-    largeurMax: largeur - 80,
-    police: POLICES.display,
-    remplissage: PALETTE.surFond,
-    taille: 40,
-  });
+  titreCentre(
+    ctx,
+    assainir(donnees.nom, POLICES.display) || "Joueur",
+    largeur / 2,
+    yPortrait + cote + 108,
+    {
+      largeurMax: largeur - 80,
+      police: POLICES.display,
+      remplissage: PALETTE.surFond,
+      taille: 40,
+    },
+  );
   ctx.save();
   ctx.textAlign = "center";
   ctx.textBaseline = "alphabetic";
   ctx.font = `18px ${POLICES.corps}`;
   ctx.fillStyle = PALETTE.or;
-  const details = [donnees.element, donnees.position].filter(Boolean).join(" · ");
+  const details = [donnees.element, donnees.position]
+    .filter(Boolean)
+    .join(" · ");
   if (details) {
     ctx.fillText(details, largeur / 2, yPortrait + cote + 140);
   }
@@ -972,7 +1247,11 @@ export async function renderCarteTirage(donnees: DonneesCarteTirage): Promise<Bu
   ctx.textAlign = "center";
   ctx.font = `14px ${POLICES.corps}`;
   ctx.fillStyle = PALETTE.or;
-  ctx.fillText(`${entierLisible(donnees.solde)} jetons Kizuna restants`, largeur / 2, hauteur - 26);
+  ctx.fillText(
+    `${entierLisible(donnees.solde)} jetons Kizuna restants`,
+    largeur / 2,
+    hauteur - 26,
+  );
   ctx.restore();
 
   return await canvas.encode("png");

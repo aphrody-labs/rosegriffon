@@ -12,22 +12,35 @@ const HEADERS = {
   "Content-Type": "application/json",
 };
 
-const TABLES = ["inagle_keshins", "inagle_souls", "inagle_awakenings", "inagle_miximax", "inagle_mode_changes"];
+const TABLES = [
+  "inagle_keshins",
+  "inagle_souls",
+  "inagle_awakenings",
+  "inagle_miximax",
+  "inagle_mode_changes",
+];
 
 async function fetchAll(table: string) {
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?select=id,name_fr,name_en,sheet_data&limit=1000`, {
-    headers: HEADERS,
-  });
+  const res = await fetch(
+    `${SUPABASE_URL}/rest/v1/${table}?select=id,name_fr,name_en,sheet_data&limit=1000`,
+    {
+      headers: HEADERS,
+    },
+  );
   return (await res.json()) as any[];
 }
 
 async function patchSheetData(table: string, id: string, sheet_data: any) {
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?id=eq.${encodeURIComponent(id)}`, {
-    method: "PATCH",
-    headers: { ...HEADERS, Prefer: "return=minimal" },
-    body: JSON.stringify({ sheet_data }),
-  });
-  if (!res.ok) console.error(`PATCH ${table} ${id}:`, res.status, await res.text());
+  const res = await fetch(
+    `${SUPABASE_URL}/rest/v1/${table}?id=eq.${encodeURIComponent(id)}`,
+    {
+      method: "PATCH",
+      headers: { ...HEADERS, Prefer: "return=minimal" },
+      body: JSON.stringify({ sheet_data }),
+    },
+  );
+  if (!res.ok)
+    console.error(`PATCH ${table} ${id}:`, res.status, await res.text());
 }
 
 function clean(s: string | undefined): string {
@@ -48,7 +61,10 @@ import path from "node:path";
 
 async function main() {
   // Charger le sheet
-  const sheetPath = path.resolve(import.meta.dir, "../../data/sheet_export.json");
+  const sheetPath = path.resolve(
+    import.meta.dir,
+    "../../data/sheet_export.json",
+  );
   const sheetFile = Bun.file(sheetPath);
   if (!(await sheetFile.exists())) {
     console.error(`Sheet export introuvable: ${sheetPath}`);
@@ -56,7 +72,7 @@ async function main() {
   }
   const sheetRaw = await sheetFile.json();
   const rows: string[][] = sheetRaw.sheets["Hyper Moves"];
-  const dataRows = rows.slice(2).filter(r => r[0]?.trim());
+  const dataRows = rows.slice(2).filter((r) => r[0]?.trim());
 
   console.log(`Sheet: ${dataRows.length} lignes`);
 
@@ -94,8 +110,10 @@ async function main() {
       return (
         en === searchClean ||
         fr === searchClean ||
-        (en.length > 3 && (en.includes(searchClean) || searchClean.includes(en))) ||
-        (fr.length > 3 && (fr.includes(searchClean) || searchClean.includes(fr)))
+        (en.length > 3 &&
+          (en.includes(searchClean) || searchClean.includes(en))) ||
+        (fr.length > 3 &&
+          (fr.includes(searchClean) || searchClean.includes(fr)))
       );
     });
 

@@ -2,7 +2,13 @@ import { describe, expect, test } from "bun:test";
 import { Database } from "bun:sqlite";
 import { existsSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
-import { createDrizzleSqlite, sqliteCharacters, sqliteSkills, sqliteTeams, eq } from "../src/sql/drizzle";
+import {
+  createDrizzleSqlite,
+  sqliteCharacters,
+  sqliteSkills,
+  sqliteTeams,
+  eq,
+} from "../src/sql/drizzle";
 
 const root = resolve(join(import.meta.dir, "../../.."));
 const mirrorPath = join(root, "var/mirror.sqlite");
@@ -31,7 +37,11 @@ describe("Drizzle ORM Bun SQLite Integration", () => {
       .run();
 
     // Query back
-    const chars = drizzle.select().from(sqliteCharacters).where(eq(sqliteCharacters.id, "chara_test_1")).all();
+    const chars = drizzle
+      .select()
+      .from(sqliteCharacters)
+      .where(eq(sqliteCharacters.id, "chara_test_1"))
+      .all();
 
     expect(chars.length).toBe(1);
     expect(chars[0].nameFr).toBe("Mark Evans");
@@ -49,7 +59,11 @@ describe("Drizzle ORM Bun SQLite Integration", () => {
       })
       .run();
 
-    const skills = drizzle.select().from(sqliteSkills).where(eq(sqliteSkills.id, "skill_test_1")).all();
+    const skills = drizzle
+      .select()
+      .from(sqliteSkills)
+      .where(eq(sqliteSkills.id, "skill_test_1"))
+      .all();
 
     expect(skills.length).toBe(1);
     expect(skills[0].nameFr).toBe("Main Céleste");
@@ -61,7 +75,9 @@ describe("Drizzle ORM Bun SQLite Integration", () => {
 
   test("queries var/mirror.sqlite if populated", () => {
     if (!existsSync(mirrorPath)) {
-      console.log("ℹ️ var/mirror.sqlite does not exist, skipping mirror verification.");
+      console.log(
+        "ℹ️ var/mirror.sqlite does not exist, skipping mirror verification.",
+      );
       return;
     }
 

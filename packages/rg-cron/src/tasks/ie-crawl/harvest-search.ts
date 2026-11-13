@@ -91,7 +91,7 @@ function isInformativeIeTweet(t: Tweet): boolean {
   if (text.startsWith("RT @")) return false; // RT purs
   const lower = text.toLowerCase();
   // Doit mentionner Inazuma Eleven d'une manière ou d'une autre.
-  if (!IE_KEYWORDS.some(k => lower.includes(k))) return false;
+  if (!IE_KEYWORDS.some((k) => lower.includes(k))) return false;
   return true;
 }
 
@@ -113,7 +113,9 @@ export async function crawlTwitterSearch(
   queries: readonly string[] = IE_SEARCH_QUERIES,
   perQuery = 40,
 ): Promise<HarvestStats> {
-  console.log(`[X Search] Harvest sur ${queries.length} requêtes (${perQuery}/req)...`);
+  console.log(
+    `[X Search] Harvest sur ${queries.length} requêtes (${perQuery}/req)...`,
+  );
 
   let session: XSession;
   const xCookie = loadXCookieHeader();
@@ -132,7 +134,9 @@ export async function crawlTwitterSearch(
     try {
       const page = await Promise.race([
         client.search(q, Math.min(perQuery, 100), undefined, "Latest"),
-        new Promise<never>((_, rej) => setTimeout(() => rej(new Error("search() timeout")), 25000)),
+        new Promise<never>((_, rej) =>
+          setTimeout(() => rej(new Error("search() timeout")), 25000),
+        ),
       ]);
       const tweets = page.tweets || [];
       fetched += tweets.length;
@@ -150,17 +154,24 @@ export async function crawlTwitterSearch(
           kept++;
         }
       }
-      console.log(`[X Search] "${q.slice(0, 48)}…" → ${tweets.length} reçus, ${kept} retenus.`);
+      console.log(
+        `[X Search] "${q.slice(0, 48)}…" → ${tweets.length} reçus, ${kept} retenus.`,
+      );
     } catch (err) {
-      console.warn(`[X Search] Requête "${q.slice(0, 48)}…" échouée :`, err instanceof Error ? err.message : err);
+      console.warn(
+        `[X Search] Requête "${q.slice(0, 48)}…" échouée :`,
+        err instanceof Error ? err.message : err,
+      );
     }
-    await new Promise(r => setTimeout(r, 800)); // throttle anti rate-limit
+    await new Promise((r) => setTimeout(r, 800)); // throttle anti rate-limit
   }
 
   const rows = Array.from(collected.values())
     .map(tweetToRow)
-    .filter(r => r.author_username);
-  console.log(`[X Search] ${rows.length} tweets uniques informatifs collectés.`);
+    .filter((r) => r.author_username);
+  console.log(
+    `[X Search] ${rows.length} tweets uniques informatifs collectés.`,
+  );
 
   if (rows.length === 0) {
     return {
@@ -174,7 +185,9 @@ export async function crawlTwitterSearch(
 
   // Upsert dans `tweets`. Idempotent par id.
   let upserted = 0;
-  const { error: upErr } = await db.from("tweets").upsert(rows, { onConflict: "id" });
+  const { error: upErr } = await db
+    .from("tweets")
+    .upsert(rows, { onConflict: "id" });
   if (upErr) {
     console.warn("[X Search] Upsert table `tweets` échoué :", upErr.message);
   } else {

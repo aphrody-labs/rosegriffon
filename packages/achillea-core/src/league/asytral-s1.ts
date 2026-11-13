@@ -63,8 +63,10 @@ export const ASYTRAL_LEAGUE_META = {
   description:
     "Championnat Inazuma Eleven Victory Road organisé par Achillea après l'Astral Cup Qualifier : " +
     "phase régulière en single round-robin (BO3) puis play-offs double élimination (BO5) pour le top 4.",
-  sourceRulesUrl: "https://docs.google.com/document/d/144jD-tQ9Bo63GqufcfsQ5hBukaW6gwBIdjSZARJyDK8",
-  sourceSheetUrl: "https://docs.google.com/spreadsheets/d/1wsPYdS0B93Hdkw6E3FOJM08-9M2rzfM62RhjoGHfBEc",
+  sourceRulesUrl:
+    "https://docs.google.com/document/d/144jD-tQ9Bo63GqufcfsQ5hBukaW6gwBIdjSZARJyDK8",
+  sourceSheetUrl:
+    "https://docs.google.com/spreadsheets/d/1wsPYdS0B93Hdkw6E3FOJM08-9M2rzfM62RhjoGHfBEc",
   teamCount: 8,
   matchdays: 7,
   playoffTeams: 4,

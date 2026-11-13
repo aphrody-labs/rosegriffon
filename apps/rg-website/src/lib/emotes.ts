@@ -171,15 +171,19 @@ export function getEmote(name: string): Emote | undefined {
 /**
  * Obtenir toutes les emotes d'un personnage
  */
-export function getEmotesByCharacter(character: "gaelle" | "roy" | "rg"): Emote[] {
-  return Object.values(EMOTES).filter(emote => emote.character === character);
+export function getEmotesByCharacter(
+  character: "gaelle" | "roy" | "rg",
+): Emote[] {
+  return Object.values(EMOTES).filter((emote) => emote.character === character);
 }
 
 /**
  * Obtenir toutes les emotes d'une catégorie
  */
-export function getEmotesByCategory(category: "reaction" | "greeting" | "emotion"): Emote[] {
-  return Object.values(EMOTES).filter(emote => emote.category === category);
+export function getEmotesByCategory(
+  category: "reaction" | "greeting" | "emotion",
+): Emote[] {
+  return Object.values(EMOTES).filter((emote) => emote.category === category);
 }
 
 /**
@@ -193,7 +197,9 @@ export function getRandomEmote(): Emote {
 /**
  * Obtenir une emote aléatoire d'un personnage
  */
-export function getRandomEmoteByCharacter(character: "gaelle" | "roy" | "rg"): Emote {
+export function getRandomEmoteByCharacter(
+  character: "gaelle" | "roy" | "rg",
+): Emote {
   const emotes = getEmotesByCharacter(character);
   return emotes[Math.floor(Math.random() * emotes.length)]!;
 }

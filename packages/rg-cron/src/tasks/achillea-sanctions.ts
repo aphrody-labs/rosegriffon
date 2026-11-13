@@ -24,7 +24,11 @@
  *      comme `CrossSyncService.pushSanction(…, "revoke")`.
  */
 import { sql } from "../lib/db.js";
-import { discordAchillea, motifEchec, type PorteDiscordAchillea } from "../lib/achillea-discord.js";
+import {
+  discordAchillea,
+  motifEchec,
+  type PorteDiscordAchillea,
+} from "../lib/achillea-discord.js";
 
 /** Révocateur consigné en base, celui de l'ancien bot. */
 export const REVOCATEUR_SYSTEME = "system";
@@ -74,7 +78,7 @@ export const depotSanctions: DepotSanctions = {
          AND expires_at <= ${maintenant}
        ORDER BY expires_at ASC
        LIMIT ${limite}`;
-    return lignes.map(l => ({
+    return lignes.map((l) => ({
       id: l.id,
       userId: l.user_id,
       guildId: l.guild_id,
@@ -88,7 +92,7 @@ export const depotSanctions: DepotSanctions = {
     }));
   },
   async revoquer(id, maintenant) {
-    return sql.begin(async tx => {
+    return sql.begin(async (tx) => {
       await tx`SET LOCAL ROLE service_role`;
       const lignes = await tx`
         UPDATE achillea.sanction
@@ -104,7 +108,12 @@ export const depotSanctions: DepotSanctions = {
 /** Appel Discord qui lève l'effet d'une sanction, ou `null` si son type n'en a pas. */
 export function effetInverse(
   sanction: Pick<SanctionEchue, "id" | "type" | "guildId" | "userId">,
-): { methode: "PATCH" | "DELETE"; chemin: string; corps?: unknown; raison: string } | null {
+): {
+  methode: "PATCH" | "DELETE";
+  chemin: string;
+  corps?: unknown;
+  raison: string;
+} | null {
   const raison = `Sanction ${sanction.id} expirée`;
   if (sanction.type === "mute")
     return {
@@ -114,7 +123,11 @@ export function effetInverse(
       raison,
     };
   if (sanction.type === "ban")
-    return { methode: "DELETE", chemin: `/guilds/${sanction.guildId}/bans/${sanction.userId}`, raison };
+    return {
+      methode: "DELETE",
+      chemin: `/guilds/${sanction.guildId}/bans/${sanction.userId}`,
+      raison,
+    };
   return null;
 }
 
@@ -128,7 +141,9 @@ export interface CibleSync {
 }
 
 /** Cibles de `ACHILLEA_CROSS_SYNC_TARGETS` (JSON) ; liste vide si absente ou illisible. */
-export function ciblesSync(env: Record<string, string | undefined> = Bun.env): CibleSync[] {
+export function ciblesSync(
+  env: Record<string, string | undefined> = Bun.env,
+): CibleSync[] {
   const brut = (env.ACHILLEA_CROSS_SYNC_TARGETS ?? "").trim();
   if (!brut) return [];
   try {
@@ -140,7 +155,8 @@ export function ciblesSync(env: Record<string, string | undefined> = Bun.env): C
         typeof c === "object" &&
         typeof (c as CibleSync).url === "string" &&
         typeof (c as CibleSync).secret === "string" &&
-        ((c as CibleSync).policy === "all" || (c as CibleSync).policy === "ban-only"),
+        ((c as CibleSync).policy === "all" ||
+          (c as CibleSync).policy === "ban-only"),
     );
   } catch {
     return [];
@@ -170,7 +186,11 @@ export function chargeSync(sanction: SanctionEchue, politique: PolitiqueSync) {
 }
 
 /** HMAC-SHA256 hexadécimal de `${horodatage}.${corps}` — signature attendue par les partenaires. */
-export async function signatureSync(horodatage: string, corps: string, secret: string): Promise<string> {
+export async function signatureSync(
+  horodatage: string,
+  corps: string,
+  secret: string,
+): Promise<string> {
   const cle = await crypto.subtle.importKey(
     "raw",
     new TextEncoder().encode(secret),
@@ -178,16 +198,26 @@ export async function signatureSync(horodatage: string, corps: string, secret: s
     false,
     ["sign"],
   );
-  const octets = await crypto.subtle.sign("HMAC", cle, new TextEncoder().encode(`${horodatage}.${corps}`));
+  const octets = await crypto.subtle.sign(
+    "HMAC",
+    cle,
+    new TextEncoder().encode(`${horodatage}.${corps}`),
+  );
   return Buffer.from(octets).toString("hex");
 }
 
 /** La politique accepte-t-elle ce type ? (`ban-only` : bannissements uniquement.) */
-export function politiqueAccepte(politique: PolitiqueSync, type: string): boolean {
+export function politiqueAccepte(
+  politique: PolitiqueSync,
+  type: string,
+): boolean {
   return politique === "all" || type === "ban" || type === "unban";
 }
 
-async function propager(sanction: SanctionEchue, cibles: readonly CibleSync[]): Promise<string[]> {
+async function propager(
+  sanction: SanctionEchue,
+  cibles: readonly CibleSync[],
+): Promise<string[]> {
   // Anti-boucle : une sanction reçue d'un partenaire (evidence[0].from) n'est pas renvoyée.
   if (sanction.evidence?.[0]?.from != null) return [];
   const echecs: string[] = [];
@@ -200,7 +230,11 @@ async function propager(sanction: SanctionEchue, cibles: readonly CibleSync[]): 
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "x-achillea-signature": await signatureSync(horodatage, corps, cible.secret),
+          "x-achillea-signature": await signatureSync(
+            horodatage,
+            corps,
+            cible.secret,
+          ),
           "x-achillea-timestamp": horodatage,
         },
         body: corps,
@@ -208,7 +242,9 @@ async function propager(sanction: SanctionEchue, cibles: readonly CibleSync[]): 
       });
       if (!reponse.ok) echecs.push(`${cible.url} : HTTP ${reponse.status}`);
     } catch (err) {
-      echecs.push(`${cible.url} : ${err instanceof Error ? err.message : String(err)}`);
+      echecs.push(
+        `${cible.url} : ${err instanceof Error ? err.message : String(err)}`,
+      );
     }
   }
   return echecs;
@@ -241,18 +277,34 @@ export async function runAchilleaSanctions(
 
     const effet = effetInverse(sanction);
     if (effet) {
-      const resultat = await discord.rest(effet.methode, effet.chemin, effet.corps, effet.raison);
+      const resultat = await discord.rest(
+        effet.methode,
+        effet.chemin,
+        effet.corps,
+        effet.raison,
+      );
       // 404 : membre parti, ban déjà levé, serveur quitté — l'effet n'existe plus, c'est le but.
       if (resultat.ok || resultat.statut === 404) effetsLeves += 1;
-      else avertissements.push(`sanction ${sanction.id} (${sanction.type}) : ${motifEchec(resultat)}`);
+      else
+        avertissements.push(
+          `sanction ${sanction.id} (${sanction.type}) : ${motifEchec(resultat)}`,
+        );
     }
-    for (const echec of await propager(sanction, cibles)) avertissements.push(`sync ${sanction.id} : ${echec}`);
+    for (const echec of await propager(sanction, cibles))
+      avertissements.push(`sync ${sanction.id} : ${echec}`);
   }
 
   if (echues.length > 0)
     console.log(
       `[achillea:sanctions] ${revoquees}/${echues.length} sanction(s) levée(s), ${effetsLeves} effet(s) Discord retiré(s)`,
     );
-  for (const avertissement of avertissements) console.warn(`[achillea:sanctions] ${avertissement}`);
-  return { success: true, echues: echues.length, revoquees, effetsLeves, avertissements };
+  for (const avertissement of avertissements)
+    console.warn(`[achillea:sanctions] ${avertissement}`);
+  return {
+    success: true,
+    echues: echues.length,
+    revoquees,
+    effetsLeves,
+    avertissements,
+  };
 }

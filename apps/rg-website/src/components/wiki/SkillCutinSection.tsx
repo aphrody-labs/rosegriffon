@@ -60,7 +60,10 @@ export function SkillCutinSection({
         <div>
           <div className="flex items-center justify-between mb-1">
             <p className="text-xs text-on-surface-variant">Telop (nom rendu)</p>
-            <DownloadChip href={telopUrl} filename={`${downloadName(skillName, "technique")}_telop.png`} />
+            <DownloadChip
+              href={telopUrl}
+              filename={`${downloadName(skillName, "technique")}_telop.png`}
+            />
           </div>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
@@ -88,8 +91,13 @@ export function SkillCutinSection({
           {textureUrl && (
             <div>
               <div className="flex items-center justify-between mb-1">
-                <p className="text-xs text-on-surface-variant">Texture (dx11/chr/_waza)</p>
-                <DownloadChip href={textureUrl} filename={`${downloadName(skillName, "technique")}.png`} />
+                <p className="text-xs text-on-surface-variant">
+                  Texture (dx11/chr/_waza)
+                </p>
+                <DownloadChip
+                  href={textureUrl}
+                  filename={`${downloadName(skillName, "technique")}.png`}
+                />
               </div>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img

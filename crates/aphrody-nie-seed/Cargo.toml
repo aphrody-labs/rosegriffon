@@ -16,7 +16,10 @@ host = ["dep:anyhow", "dep:aphrody-nie-index", "dep:rusqlite", "dep:tracing"]
 
 [dependencies]
 aphrody-nie-index = { workspace = true, optional = true, default-features = true }
-aphrody-nie-formats = { workspace = true, default-features = false, features = ["std", "serde"] }
+aphrody-nie-formats = { workspace = true, default-features = false, features = [
+  "std",
+  "serde",
+] }
 serde = { workspace = true, features = ["std", "derive"] }
 serde_json = { workspace = true }
 thiserror = { workspace = true }
@@ -25,4 +28,6 @@ tracing = { workspace = true, optional = true }
 rusqlite = { workspace = true, optional = true, features = ["bundled"] }
 
 [dev-dependencies]
-tempfile = { version = "3.27.0", default-features = false, features = ["getrandom"] }
+tempfile = { version = "3.27.0", default-features = false, features = [
+  "getrandom",
+] }

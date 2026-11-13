@@ -11,7 +11,13 @@ import type { SKRSContext2D } from "@aphrody/canvas";
 
 import { iconeDeMarque } from "../../../../lib/ui/theme";
 import { LOGO_PLACEHOLDER_FONT_SIZE } from "./clan-poster";
-import { ACHILLEA_PURPLE, drawCircleImage, RANK_COLORS, RANK_NAMES, rankFromElo } from "./render";
+import {
+  ACHILLEA_PURPLE,
+  drawCircleImage,
+  RANK_COLORS,
+  RANK_NAMES,
+  rankFromElo,
+} from "./render";
 
 /** Contexte factice qui ne retient que les polices posées. */
 function contexteEspion(): { ctx: SKRSContext2D; polices: string[] } {
@@ -30,7 +36,15 @@ describe("rendus Achilléa — parité legacy", () => {
   test("le « ? » du logo de clan absent est en 96 px, comme dans ClanPosterService", () => {
     expect(LOGO_PLACEHOLDER_FONT_SIZE).toBe(96);
     const { ctx, polices } = contexteEspion();
-    drawCircleImage(ctx, null, 400, 220, 280, undefined, LOGO_PLACEHOLDER_FONT_SIZE);
+    drawCircleImage(
+      ctx,
+      null,
+      400,
+      220,
+      280,
+      undefined,
+      LOGO_PLACEHOLDER_FONT_SIZE,
+    );
     expect(polices[0]).toStartWith("bold 96px ");
   });
 
@@ -42,17 +56,33 @@ describe("rendus Achilléa — parité legacy", () => {
 
   test("palette et paliers des rangs identiques au legacy", () => {
     expect(RANK_COLORS).toEqual([
-      "#000000", "#959595", "#B17253", "#7FACB8", "#C2AD88", "#897E8B",
-      "#88F6FF", "#2D925C", "#FF5648", "#7EDCB5", "#F010FF", "#FFA910",
+      "#000000",
+      "#959595",
+      "#B17253",
+      "#7FACB8",
+      "#C2AD88",
+      "#897E8B",
+      "#88F6FF",
+      "#2D925C",
+      "#FF5648",
+      "#7EDCB5",
+      "#F010FF",
+      "#FFA910",
     ]);
     expect(RANK_NAMES[11]).toBe("Légendaire");
-    expect([0, 49, 50, 1234, 2100, 9999].map(rankFromElo)).toEqual([1, 1, 2, 8, 11, 11]);
+    expect([0, 49, 50, 1234, 2100, 9999].map(rankFromElo)).toEqual([
+      1, 1, 2, 8, 11, 11,
+    ]);
     expect(ACHILLEA_PURPLE).toBe("#6d00ce");
   });
 
   test("les pieds Achilléa portent le casque Achilléa, pas le logo Rose Griffon", () => {
-    expect(iconeDeMarque("achillea")).toBe("https://rosegriffon.fr/achillea/achillea_ico.png");
-    expect(iconeDeMarque("rg")).toBe("https://rosegriffon.fr/RG_Logo_V2.5.webp");
+    expect(iconeDeMarque("achillea")).toBe(
+      "https://rosegriffon.fr/achillea/achillea_ico.png",
+    );
+    expect(iconeDeMarque("rg")).toBe(
+      "https://rosegriffon.fr/RG_Logo_V2.5.webp",
+    );
     expect(iconeDeMarque("inconnu")).toBe(iconeDeMarque("rg"));
   });
 });

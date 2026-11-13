@@ -101,7 +101,7 @@ export function GlobalSearch({
     const down = (e: KeyboardEvent) => {
       if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
-        setOpen(open => !open);
+        setOpen((open) => !open);
       }
     };
     document.addEventListener("keydown", down);
@@ -115,19 +115,14 @@ export function GlobalSearch({
     }
 
     if (query.length < 2) {
-
       const reset = setTimeout(() => {
-
         setResults([]);
 
         setIsSearching(false);
-
       }, 0);
 
       return () => clearTimeout(reset);
-
     }
-
 
     const pending = setTimeout(() => setIsSearching(true), 0);
 
@@ -171,8 +166,12 @@ export function GlobalSearch({
     command();
   }, []);
 
-  const groupedResults = React.useMemo(() => groupResultsByType(results), [results]);
-  const hasSuggestion = results.length === 1 && results[0].type === "suggestion";
+  const groupedResults = React.useMemo(
+    () => groupResultsByType(results),
+    [results],
+  );
+  const hasSuggestion =
+    results.length === 1 && results[0].type === "suggestion";
 
   const SearchDialog = (
     <CommandDialog
@@ -191,7 +190,11 @@ export function GlobalSearch({
         {query.length >= 2 && !isSearching && results.length === 0 && (
           <CommandEmpty>
             <div className="py-6 text-center">
-              <SearchX size={36} aria-hidden="true" className="text-[var(--md-sys-color-on-surface-variant)] mb-2" />
+              <SearchX
+                size={36}
+                aria-hidden="true"
+                className="text-[var(--md-sys-color-on-surface-variant)] mb-2"
+              />
               <p className="text-sm text-[var(--md-sys-color-on-surface-variant)]">
                 Aucun résultat pour &quot;{query}&quot;
               </p>
@@ -215,9 +218,19 @@ export function GlobalSearch({
 
         {hasSuggestion && (
           <div className="px-4 py-6 text-center">
-            <Lightbulb size={30} aria-hidden="true" className="text-[var(--md-sys-color-primary)] mb-2" />
-            <p className="text-sm text-[var(--md-sys-color-on-surface-variant)] mb-2">Vouliez-vous dire...</p>
-            <Button variant="outline" onClick={() => setQuery(results[0].title)} className="rounded-full">
+            <Lightbulb
+              size={30}
+              aria-hidden="true"
+              className="text-[var(--md-sys-color-primary)] mb-2"
+            />
+            <p className="text-sm text-[var(--md-sys-color-on-surface-variant)] mb-2">
+              Vouliez-vous dire...
+            </p>
+            <Button
+              variant="outline"
+              onClick={() => setQuery(results[0].title)}
+              className="rounded-full"
+            >
               {results[0].title}
             </Button>
           </div>
@@ -230,7 +243,7 @@ export function GlobalSearch({
               heading={TYPE_LABELS_PLURAL[type] || type}
               className="[&_[cmdk-group-heading]]:text-[var(--md-sys-color-primary)] [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:uppercase"
             >
-              {items.map(result => (
+              {items.map((result) => (
                 <CommandItem
                   key={`${result.type}-${result.id}`}
                   value={`${result.title} ${result.subtitle}`}
@@ -244,7 +257,12 @@ export function GlobalSearch({
                     "ease-[var(--md-sys-motion-easing-standard)]",
                   )}
                 >
-                  <SearchResultRow result={result} query={query} onClick={() => {}} compact />
+                  <SearchResultRow
+                    result={result}
+                    query={query}
+                    onClick={() => {}}
+                    compact
+                  />
                 </CommandItem>
               ))}
             </CommandGroup>
@@ -260,8 +278,14 @@ export function GlobalSearch({
           onClick={() => setOpen(true)}
           className="flex items-center gap-3 w-full h-12 px-5 rounded-full bg-white/10 border border-white/15 backdrop-blur-md text-white/60 hover:bg-white/15 hover:border-white/25 transition-all active:scale-[0.98]"
         >
-          <Search size={18} aria-hidden="true" className="shrink-0 text-white/50" />
-          <span className="text-sm truncate">Rechercher un joueur, une technique...</span>
+          <Search
+            size={18}
+            aria-hidden="true"
+            className="shrink-0 text-white/50"
+          />
+          <span className="text-sm truncate">
+            Rechercher un joueur, une technique...
+          </span>
           {isHero && (
             <kbd className="ml-auto pointer-events-none hidden lg:inline-flex h-6 select-none items-center gap-1 rounded-md border border-white/15 bg-white/5 px-2 font-mono text-[11px] font-medium text-white/40">
               <span className="text-xs">⌘</span>K
@@ -280,7 +304,11 @@ export function GlobalSearch({
           onClick={() => setOpen(true)}
           className="flex items-center gap-3 w-full h-full text-on-surface-variant group px-1"
         >
-          <Search size={20} aria-hidden="true" className="opacity-60 group-hover:opacity-100 transition-opacity" />
+          <Search
+            size={20}
+            aria-hidden="true"
+            className="opacity-60 group-hover:opacity-100 transition-opacity"
+          />
           <span className="flex-1 opacity-50 group-hover:opacity-80 transition-opacity text-[15px] font-normal truncate">
             Rechercher
           </span>

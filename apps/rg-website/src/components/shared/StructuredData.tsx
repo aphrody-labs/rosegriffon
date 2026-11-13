@@ -21,7 +21,13 @@ interface ImageObjectSchemaProps {
   datePublished?: string;
 }
 
-export function ImageObjectSchema({ url, name, description, author, datePublished }: ImageObjectSchemaProps) {
+export function ImageObjectSchema({
+  url,
+  name,
+  description,
+  author,
+  datePublished,
+}: ImageObjectSchemaProps) {
   const schema: WithContext<ImageObject> = {
     "@context": "https://schema.org",
     "@type": "ImageObject",
@@ -34,7 +40,12 @@ export function ImageObjectSchema({ url, name, description, author, datePublishe
     name: name,
   };
 
-  return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />;
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+    />
+  );
 }
 
 export function OrganizationSchema() {
@@ -58,7 +69,12 @@ export function OrganizationSchema() {
     url: SITE_URL,
   };
 
-  return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />;
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+    />
+  );
 }
 
 export function WebsiteSchema() {
@@ -78,7 +94,12 @@ export function WebsiteSchema() {
     url: SITE_URL,
   };
 
-  return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />;
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+    />
+  );
 }
 
 interface ArticleSchemaProps {
@@ -146,7 +167,12 @@ export function ArticleSchema({
     },
   };
 
-  return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />;
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+    />
+  );
 }
 
 interface BreadcrumbSchemaProps {
@@ -165,7 +191,12 @@ export function BreadcrumbSchema({ items }: BreadcrumbSchemaProps) {
     })),
   };
 
-  return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />;
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+    />
+  );
 }
 
 interface ProfileSchemaProps {
@@ -177,7 +208,14 @@ interface ProfileSchemaProps {
   sameAs?: string[];
 }
 
-export function ProfileSchema({ name, username, image, description, url, sameAs }: ProfileSchemaProps) {
+export function ProfileSchema({
+  name,
+  username,
+  image,
+  description,
+  url,
+  sameAs,
+}: ProfileSchemaProps) {
   const schema: WithContext<ProfilePage> = {
     "@context": "https://schema.org",
     "@type": "ProfilePage",
@@ -192,7 +230,12 @@ export function ProfileSchema({ name, username, image, description, url, sameAs 
     },
   };
 
-  return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />;
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+    />
+  );
 }
 
 interface TeamMemberSchema {
@@ -216,7 +259,11 @@ interface TeamStructuredDataProps {
  * image et `sameAs` (ses réseaux), rattaché à l'Organization Rose Griffon —
  * éligible aux rich results Google et au knowledge graph.
  */
-export function TeamStructuredData({ pageName, url, members }: TeamStructuredDataProps) {
+export function TeamStructuredData({
+  pageName,
+  url,
+  members,
+}: TeamStructuredDataProps) {
   const schema = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
@@ -235,14 +282,21 @@ export function TeamStructuredData({ pageName, url, members }: TeamStructuredDat
           name: member.name,
           ...(member.role ? { jobTitle: member.role } : {}),
           ...(member.image ? { image: member.image } : {}),
-          ...(member.sameAs && member.sameAs.length > 0 ? { sameAs: member.sameAs } : {}),
+          ...(member.sameAs && member.sameAs.length > 0
+            ? { sameAs: member.sameAs }
+            : {}),
           memberOf: { "@id": absoluteUrl("/#organization") },
         },
       })),
     },
   };
 
-  return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />;
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+    />
+  );
 }
 
 interface EventSchemaProps {
@@ -255,7 +309,15 @@ interface EventSchemaProps {
   url: string;
 }
 
-export function EventSchema({ name, description, startDate, endDate, image, location, url }: EventSchemaProps) {
+export function EventSchema({
+  name,
+  description,
+  startDate,
+  endDate,
+  image,
+  location,
+  url,
+}: EventSchemaProps) {
   const schema: WithContext<Event> = {
     "@context": "https://schema.org",
     "@type": "Event",
@@ -285,5 +347,10 @@ export function EventSchema({ name, description, startDate, endDate, image, loca
     url: url,
   };
 
-  return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />;
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+    />
+  );
 }

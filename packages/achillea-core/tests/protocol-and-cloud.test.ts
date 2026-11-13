@@ -115,7 +115,7 @@ describe("Achillea Online Protocol & Cloud Sync Suite", () => {
     const res3 = resolveCloudConflict(
       { ...localMeta, checksumSha256: "same" },
       { ...remoteMeta, checksumSha256: "same" },
-      false
+      false,
     );
     expect(res3.decision).toBe("IdenticalNoAction");
   });
@@ -151,7 +151,9 @@ describe("Achillea Online Protocol & Cloud Sync Suite", () => {
     hackedRoster[1] = { ...hackedRoster[0] };
     const check2 = validateRankedRosterLegal(50, hackedRoster);
     expect(check2.isLegal).toBeFalse();
-    expect(check2.violations.some((v) => v.includes("Duplicate character ID"))).toBeTrue();
+    expect(
+      check2.violations.some((v) => v.includes("Duplicate character ID")),
+    ).toBeTrue();
 
     // Stat overflow exploit
     const overflowRoster = [...roster];
@@ -161,6 +163,8 @@ describe("Achillea Online Protocol & Cloud Sync Suite", () => {
     };
     const check3 = validateRankedRosterLegal(50, overflowRoster);
     expect(check3.isLegal).toBeFalse();
-    expect(check3.violations.some((v) => v.includes("stat overflow"))).toBeTrue();
+    expect(
+      check3.violations.some((v) => v.includes("stat overflow")),
+    ).toBeTrue();
   });
 });

@@ -12,40 +12,40 @@ type Props = ComponentProps<typeof NextLink>;
  * Un `prefetch` explicite garde le comportement de Next.
  */
 export default function Link({
-	prefetch,
-	onMouseEnter,
-	onFocus,
-	onTouchStart,
-	...rest
+  prefetch,
+  onMouseEnter,
+  onFocus,
+  onTouchStart,
+  ...rest
 }: Props) {
-	const [active, setActive] = useState(false);
-	if (prefetch !== undefined) {
-		return (
-			<NextLink
-				prefetch={prefetch}
-				onMouseEnter={onMouseEnter}
-				onFocus={onFocus}
-				onTouchStart={onTouchStart}
-				{...rest}
-			/>
-		);
-	}
-	return (
-		<NextLink
-			{...rest}
-			prefetch={active ? null : false}
-			onMouseEnter={(e) => {
-				setActive(true);
-				onMouseEnter?.(e);
-			}}
-			onFocus={(e) => {
-				setActive(true);
-				onFocus?.(e);
-			}}
-			onTouchStart={(e) => {
-				setActive(true);
-				onTouchStart?.(e);
-			}}
-		/>
-	);
+  const [active, setActive] = useState(false);
+  if (prefetch !== undefined) {
+    return (
+      <NextLink
+        prefetch={prefetch}
+        onMouseEnter={onMouseEnter}
+        onFocus={onFocus}
+        onTouchStart={onTouchStart}
+        {...rest}
+      />
+    );
+  }
+  return (
+    <NextLink
+      {...rest}
+      prefetch={active ? null : false}
+      onMouseEnter={(e) => {
+        setActive(true);
+        onMouseEnter?.(e);
+      }}
+      onFocus={(e) => {
+        setActive(true);
+        onFocus?.(e);
+      }}
+      onTouchStart={(e) => {
+        setActive(true);
+        onTouchStart?.(e);
+      }}
+    />
+  );
 }

@@ -12,7 +12,10 @@ export async function updateZukanHash(
     await requireAdmin();
 
     const supabase = createPostgresClient();
-    const { error } = await supabase.from("inagle_characters").update({ zukan_hash: newHash }).eq("id", characterId);
+    const { error } = await supabase
+      .from("inagle_characters")
+      .update({ zukan_hash: newHash })
+      .eq("id", characterId);
 
     if (error) {
       return { error: error.message, success: false };

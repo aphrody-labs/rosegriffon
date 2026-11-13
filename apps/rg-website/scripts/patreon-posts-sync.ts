@@ -40,10 +40,13 @@ interface PostsResponse {
 
 const args = new Set(process.argv.slice(2));
 const dryRun = args.has("--dry-run");
-const limitArg = process.argv.find(a => a.startsWith("--limit="));
-const limit = limitArg ? Number.parseInt(limitArg.split("=")[1] || "0", 10) : null;
+const limitArg = process.argv.find((a) => a.startsWith("--limit="));
+const limit = limitArg
+  ? Number.parseInt(limitArg.split("=")[1] || "0", 10)
+  : null;
 
-const TOKEN = process.env.PATREON_CREATOR_ACCESS_TOKEN ?? process.env.PATREON_ACCESS_TOKEN;
+const TOKEN =
+  process.env.PATREON_CREATOR_ACCESS_TOKEN ?? process.env.PATREON_ACCESS_TOKEN;
 const CAMPAIGN_ID = process.env.PATREON_CAMPAIGN_ID;
 
 if (!TOKEN) throw new Error("PATREON_CREATOR_ACCESS_TOKEN manquant");
@@ -76,7 +79,8 @@ function absoluteUrl(path: string | null): string | null {
 
 async function fetchPage(cursor: string | null): Promise<PostsResponse> {
   const params = new URLSearchParams({
-    "fields[post]": "title,content,url,embed_url,embed_data,published_at,is_paid,is_public",
+    "fields[post]":
+      "title,content,url,embed_url,embed_data,published_at,is_paid,is_public",
     "page[size]": "20",
   });
   if (cursor) params.set("page[cursor]", cursor);
@@ -92,7 +96,7 @@ async function fetchPage(cursor: string | null): Promise<PostsResponse> {
 }
 
 async function upsertBatch(posts: PatreonPost[]): Promise<void> {
-  const rows = posts.map(p => ({
+  const rows = posts.map((p) => ({
     patreon_post_id: p.id,
     campaign_id: CAMPAIGN_ID,
     trigger: "backfill",
@@ -108,7 +112,9 @@ async function upsertBatch(posts: PatreonPost[]): Promise<void> {
   }));
 
   if (dryRun) {
-    console.log(`[dry-run] ${rows.length} rows → ${rows.map(r => r.patreon_post_id).join(", ")}`);
+    console.log(
+      `[dry-run] ${rows.length} rows → ${rows.map((r) => r.patreon_post_id).join(", ")}`,
+    );
     return;
   }
 
@@ -120,7 +126,9 @@ async function upsertBatch(posts: PatreonPost[]): Promise<void> {
 
 async function main() {
   const start = Date.now();
-  console.log(`[patreon-posts-sync] campaign=${CAMPAIGN_ID} dry=${dryRun} limit=${limit ?? "∞"}`);
+  console.log(
+    `[patreon-posts-sync] campaign=${CAMPAIGN_ID} dry=${dryRun} limit=${limit ?? "∞"}`,
+  );
 
   let cursor: string | null = null;
   let total = 0;
@@ -132,12 +140,16 @@ async function main() {
     pages += 1;
     reportedTotal = page.meta.pagination.total;
 
-    const batch = limit ? page.data.slice(0, Math.max(0, limit - total)) : page.data;
+    const batch = limit
+      ? page.data.slice(0, Math.max(0, limit - total))
+      : page.data;
     if (batch.length === 0) break;
 
     await upsertBatch(batch);
     total += batch.length;
-    console.log(`[page ${pages}] +${batch.length} → ${total}/${reportedTotal ?? "?"}`);
+    console.log(
+      `[page ${pages}] +${batch.length} → ${total}/${reportedTotal ?? "?"}`,
+    );
 
     if (limit && total >= limit) break;
     cursor = page.meta.pagination.cursors?.next ?? null;
@@ -145,7 +157,9 @@ async function main() {
   }
 
   const ms = Date.now() - start;
-  console.log(`[done] ${total} posts ${dryRun ? "scanned" : "upserted"} in ${pages} pages · ${ms}ms`);
+  console.log(
+    `[done] ${total} posts ${dryRun ? "scanned" : "upserted"} in ${pages} pages · ${ms}ms`,
+  );
 }
 
 await main();

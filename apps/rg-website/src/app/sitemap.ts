@@ -10,8 +10,11 @@ import { SITE_URL } from "@/lib/site-url";
 // le servir à la demande faisait une invocation par passage de robot.
 export const revalidate = 3600;
 
-
-type ChroniqueRow = { slug: string; updated_at: string | null; published_at: string | null };
+type ChroniqueRow = {
+  slug: string;
+  updated_at: string | null;
+  published_at: string | null;
+};
 
 /**
  * TOUS les articles publiés, les deux corpus confondus.
@@ -24,7 +27,9 @@ type ChroniqueRow = { slug: string; updated_at: string | null; published_at: str
  * dépendre de la disponibilité du Data API. Une erreur n'annule pas le plan —
  * on préfère un plan sans les articles à pas de plan du tout.
  */
-async function articlesPublies(baseUrl: string): Promise<MetadataRoute.Sitemap> {
+async function articlesPublies(
+  baseUrl: string,
+): Promise<MetadataRoute.Sitemap> {
   try {
     const pool = getPgPool();
     const { rows } = await pool.query<ChroniqueRow>(
@@ -32,10 +37,12 @@ async function articlesPublies(baseUrl: string): Promise<MetadataRoute.Sitemap> 
       ["published", ["azalee", "website"]],
     );
     return rows
-      .filter(row => row.slug)
-      .map(row => ({
+      .filter((row) => row.slug)
+      .map((row) => ({
         url: `${baseUrl}/news/${row.slug}`,
-        lastModified: new Date(row.updated_at || row.published_at || Date.now()),
+        lastModified: new Date(
+          row.updated_at || row.published_at || Date.now(),
+        ),
         changeFrequency: "monthly" as const,
         priority: 0.7,
       }));

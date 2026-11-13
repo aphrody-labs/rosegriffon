@@ -10,7 +10,11 @@ interface SkillVideoActionsProps {
   variantLabel?: string;
 }
 
-export function SkillVideoActions({ videoUrl, skillName, variantLabel }: SkillVideoActionsProps) {
+export function SkillVideoActions({
+  videoUrl,
+  skillName,
+  variantLabel,
+}: SkillVideoActionsProps) {
   const [isDownloading, setIsDownloading] = useState(false);
   const [shareConfirmed, setShareConfirmed] = useState(false);
 
@@ -62,7 +66,10 @@ export function SkillVideoActions({ videoUrl, skillName, variantLabel }: SkillVi
       document.body.removeChild(link);
       window.URL.revokeObjectURL(blobUrl);
     } catch (error) {
-      console.warn("Direct download failed (likely CORS), falling back to new tab", error);
+      console.warn(
+        "Direct download failed (likely CORS), falling back to new tab",
+        error,
+      );
       window.open(videoUrl, "_blank");
     } finally {
       setIsDownloading(false);
@@ -97,7 +104,11 @@ export function SkillVideoActions({ videoUrl, skillName, variantLabel }: SkillVi
         className="inline-flex items-center justify-center size-11 sm:size-9 rounded-full bg-surface-container-highest hover:bg-surface-container-high text-on-surface transition-colors"
         title="Partager"
       >
-        {shareConfirmed ? <span className="text-[20px]">&#10003;</span> : <Share2 size={20} aria-hidden="true" />}
+        {shareConfirmed ? (
+          <span className="text-[20px]">&#10003;</span>
+        ) : (
+          <Share2 size={20} aria-hidden="true" />
+        )}
       </button>
     </>
   );

@@ -23,7 +23,13 @@ import { COMPTES_SOURCE_TIKTOK } from "../comptes";
 import { avecDelai, memo } from "../memo";
 import { analyserVideoTiktok, postDepuisOembedTiktok } from "../normalisation";
 import type { OembedTiktok } from "../normalisation";
-import type { CompteSource, PageSource, PostFeed, ProfilFeed, SourceFeed } from "../types";
+import type {
+  CompteSource,
+  PageSource,
+  PostFeed,
+  ProfilFeed,
+  SourceFeed,
+} from "../types";
 
 import { listeEnv } from "./instagram";
 import { estFrais, lireSnapshotServeur } from "./snapshots";
@@ -36,26 +42,44 @@ const MESSAGE_VIDE = "Aucune vidéo TikTok lisible pour le moment.";
 
 function lireOembed(url: string): Promise<OembedTiktok> {
   return memo(`tt-oembed:${url}`, TTL_OEMBED_MS, async () => {
-    const reponse = await fetch(`https://www.tiktok.com/oembed?url=${encodeURIComponent(url)}`, {
-      headers: { "User-Agent": "Mozilla/5.0 (compatible; RoseGriffonFeed/1.0)" },
-      signal: AbortSignal.timeout(8000),
-    });
+    const reponse = await fetch(
+      `https://www.tiktok.com/oembed?url=${encodeURIComponent(url)}`,
+      {
+        headers: {
+          "User-Agent": "Mozilla/5.0 (compatible; RoseGriffonFeed/1.0)",
+        },
+        signal: AbortSignal.timeout(8000),
+      },
+    );
     if (!reponse.ok) throw new Error(`oEmbed TikTok ${reponse.status}`);
     return (await reponse.json()) as OembedTiktok;
   });
 }
 
-async function lireVideosListees(comptes: readonly CompteSource[]): Promise<PostFeed[]> {
-  const connus = new Map(COMPTES_SOURCE_TIKTOK.map(c => [c.pseudo.toLowerCase(), c]));
-  const choisis = new Set(comptes.map(c => c.pseudo.toLowerCase()));
+async function lireVideosListees(
+  comptes: readonly CompteSource[],
+): Promise<PostFeed[]> {
+  const connus = new Map(
+    COMPTES_SOURCE_TIKTOK.map((c) => [c.pseudo.toLowerCase(), c]),
+  );
+  const choisis = new Set(comptes.map((c) => c.pseudo.toLowerCase()));
   const videos = listeEnv(process.env.FEED_TIKTOK_VIDEOS)
-    .map(l => analyserVideoTiktok(l))
-    .filter((v): v is { pseudo: string; id: string } => !!v && choisis.has(v.pseudo.toLowerCase()))
+    .map((l) => analyserVideoTiktok(l))
+    .filter(
+      (v): v is { pseudo: string; id: string } =>
+        !!v && choisis.has(v.pseudo.toLowerCase()),
+    )
     .slice(0, MAX_VIDEOS);
   const lus = await Promise.all(
-    videos.map(v =>
+    videos.map((v) =>
       lireOembed(`https://www.tiktok.com/@${v.pseudo}/video/${v.id}`).then(
-        o => postDepuisOembedTiktok(v.pseudo, v.id, o, connus.get(v.pseudo.toLowerCase())),
+        (o) =>
+          postDepuisOembedTiktok(
+            v.pseudo,
+            v.id,
+            o,
+            connus.get(v.pseudo.toLowerCase()),
+          ),
         () => null,
       ),
     ),
@@ -67,18 +91,23 @@ export const sourceTiktok: SourceFeed = {
   reseau: "tiktok",
   comptes: COMPTES_SOURCE_TIKTOK,
   async lire({ comptes }): Promise<PageSource> {
-    if (comptes.length === 0) return { posts: [], profils: [], statut: { reseau: "tiktok", etat: "vide" } };
-    const choisis = new Set(comptes.map(c => c.pseudo));
+    if (comptes.length === 0)
+      return {
+        posts: [],
+        profils: [],
+        statut: { reseau: "tiktok", etat: "vide" },
+      };
+    const choisis = new Set(comptes.map((c) => c.pseudo));
     const snapshot = await lireSnapshotServeur("tiktok");
     let posts: PostFeed[] = [];
     let profils: ProfilFeed[] = [];
     let panne = false;
     if (estFrais(snapshot)) {
-      posts = snapshot.posts.filter(p => p.compte && choisis.has(p.compte));
-      profils = snapshot.profils.filter(p => choisis.has(p.pseudo));
+      posts = snapshot.posts.filter((p) => p.compte && choisis.has(p.compte));
+      profils = snapshot.profils.filter((p) => choisis.has(p.pseudo));
     } else {
       const lus = await Promise.allSettled(
-        comptes.map(c =>
+        comptes.map((c) =>
           avecDelai(
             memo(`tt:${c.pseudo}`, TTL_DIRECT_MS, () => lireTiktok(c)),
             20_000,
@@ -86,27 +115,41 @@ export const sourceTiktok: SourceFeed = {
           ),
         ),
       );
-      const ok = lus.flatMap(l => (l.status === "fulfilled" ? [l.value] : []));
+      const ok = lus.flatMap((l) =>
+        l.status === "fulfilled" ? [l.value] : [],
+      );
       panne = ok.length === 0;
-      posts = ok.flatMap(r => r.posts);
-      profils = ok.flatMap(r => {
+      posts = ok.flatMap((r) => r.posts);
+      profils = ok.flatMap((r) => {
         const p = r.profilPage ?? r.profil;
         return p ? [p] : [];
       });
     }
-    const listees = await avecDelai(lireVideosListees(comptes), 14_000, "TikTok (oEmbed)").catch(() => [] as PostFeed[]);
-    const vus = new Set(posts.map(p => p.id));
-    posts = [...posts, ...listees.filter(p => !vus.has(p.id))];
+    const listees = await avecDelai(
+      lireVideosListees(comptes),
+      14_000,
+      "TikTok (oEmbed)",
+    ).catch(() => [] as PostFeed[]);
+    const vus = new Set(posts.map((p) => p.id));
+    posts = [...posts, ...listees.filter((p) => !vus.has(p.id))];
     if (panne && posts.length === 0)
       return {
         posts,
         profils,
-        statut: { reseau: "tiktok", etat: "indisponible", message: "TikTok ne répond pas pour le moment." },
+        statut: {
+          reseau: "tiktok",
+          etat: "indisponible",
+          message: "TikTok ne répond pas pour le moment.",
+        },
       };
     return {
       posts,
       profils,
-      statut: { reseau: "tiktok", etat: posts.length > 0 ? "ok" : "vide", message: MESSAGE_VIDE },
+      statut: {
+        reseau: "tiktok",
+        etat: posts.length > 0 ? "ok" : "vide",
+        message: MESSAGE_VIDE,
+      },
     };
   },
 };

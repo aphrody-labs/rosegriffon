@@ -19,7 +19,10 @@ export interface BoutonLiaisonProps {
   libelle?: string;
 }
 
-export function BoutonLiaison({ retour = "/vroid", libelle = "Lier mon compte VRoid Hub" }: BoutonLiaisonProps) {
+export function BoutonLiaison({
+  retour = "/vroid",
+  libelle = "Lier mon compte VRoid Hub",
+}: BoutonLiaisonProps) {
   return (
     <form action="/api/vroid/login" method="get">
       <input name="retour" type="hidden" value={retour} />

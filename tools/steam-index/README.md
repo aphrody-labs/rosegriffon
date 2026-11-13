@@ -30,21 +30,21 @@ directories, not from `CompatToolMapping`.
 
 ## Schema
 
-| Table                  | Columns                                                                                                                     |
-| ---------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| `meta`                 | `key`, `value` (`steam_root`, `scanned_at`, `appinfo_version`, `packageinfo_version`)                                       |
-| `libraries`            | `idx`, `path` PK, `label`, `total_size`, `app_count` (from `libraryfolders.vdf`)                                            |
+| Table                  | Columns                                                                                                                                             |
+| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `meta`                 | `key`, `value` (`steam_root`, `scanned_at`, `appinfo_version`, `packageinfo_version`)                                                               |
+| `libraries`            | `idx`, `path` PK, `label`, `total_size`, `app_count` (from `libraryfolders.vdf`)                                                                    |
 | `apps`                 | `appid` PK, `name`, `installdir`, `library`, `install_path`, `exists_on_disk`, `size_on_disk`, `buildid`, `state_flags`, `last_updated`, `acf_path` |
-| `app_depots`           | `appid`, `depot`, `manifest` (gid), `size` (from `InstalledDepots` of the ACF)                                              |
-| `depotcache`           | `path` PK, `depot`, `gid`, `size` (`depotcache/<depot>_<gid>.manifest`)                                                     |
-| `pics_apps`            | `appid` PK, `name`, `type`, `change_number`, `last_updated` (`appcache/appinfo.vdf`; apps known to the client cache)        |
-| `pics_packages`        | `packageid` PK, `change_number`, `appids` JSON, `depotids` JSON (`appcache/packageinfo.vdf`)                                |
-| `workshop`             | `appid`, `item`, `size`, `timeupdated`, `manifest`, `path`, `exists_on_disk`, `library`                                     |
-| `compat_tools`         | `name`, `path` PK, `source` (`compatibilitytools.d` or `steamapps/common/Proton*`)                                          |
-| `controller_configs`   | `path` PK, `size` (`controller_config/`, `Steam Controller Configs/`, `userdata/*/241100/`)                                  |
-| `userdata`             | `account_id`, `config_file` (file names in `userdata/<id>/config` only)                                                     |
-| `credential_artifacts` | `path` PK, `size`, `blake3`, `error`                                                                                        |
-| `files`                | `path` PK, `appid`, `size`, `mtime_ms`, `blake3`, `error`, `hashed_at` (every file of every installed game)                 |
+| `app_depots`           | `appid`, `depot`, `manifest` (gid), `size` (from `InstalledDepots` of the ACF)                                                                      |
+| `depotcache`           | `path` PK, `depot`, `gid`, `size` (`depotcache/<depot>_<gid>.manifest`)                                                                             |
+| `pics_apps`            | `appid` PK, `name`, `type`, `change_number`, `last_updated` (`appcache/appinfo.vdf`; apps known to the client cache)                                |
+| `pics_packages`        | `packageid` PK, `change_number`, `appids` JSON, `depotids` JSON (`appcache/packageinfo.vdf`)                                                        |
+| `workshop`             | `appid`, `item`, `size`, `timeupdated`, `manifest`, `path`, `exists_on_disk`, `library`                                                             |
+| `compat_tools`         | `name`, `path` PK, `source` (`compatibilitytools.d` or `steamapps/common/Proton*`)                                                                  |
+| `controller_configs`   | `path` PK, `size` (`controller_config/`, `Steam Controller Configs/`, `userdata/*/241100/`)                                                         |
+| `userdata`             | `account_id`, `config_file` (file names in `userdata/<id>/config` only)                                                                             |
+| `credential_artifacts` | `path` PK, `size`, `blake3`, `error`                                                                                                                |
+| `files`                | `path` PK, `appid`, `size`, `mtime_ms`, `blake3`, `error`, `hashed_at` (every file of every installed game)                                         |
 
 Every table except `files` is rebuilt on each run. `files` is incremental.
 

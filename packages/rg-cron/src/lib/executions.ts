@@ -47,8 +47,18 @@ export interface ResultatExecution {
  */
 export type DecisionAlerte =
   | { type: "aucune" }
-  | { type: "alerte"; nom: string; echecsConsecutifs: number; erreur: string | null }
-  | { type: "retablissement"; nom: string; echecsPrecedents: number; dureeMs: number };
+  | {
+      type: "alerte";
+      nom: string;
+      echecsConsecutifs: number;
+      erreur: string | null;
+    }
+  | {
+      type: "retablissement";
+      nom: string;
+      echecsPrecedents: number;
+      dureeMs: number;
+    };
 
 /** Longueur maximale conservée d'un message d'erreur (base ET alerte). */
 export const LONGUEUR_ERREUR_MAX = 500;
@@ -62,17 +72,23 @@ export const LONGUEUR_ERREUR_MAX = 500;
  */
 export const SEUIL_ALERTE_DEFAUT = 3;
 
-export function seuilAlerte(env: Record<string, string | undefined> = Bun.env): number {
+export function seuilAlerte(
+  env: Record<string, string | undefined> = Bun.env,
+): number {
   const brut = Number.parseInt(env.CRON_ALERTE_SEUIL_ECHECS ?? "", 10);
   return Number.isFinite(brut) && brut > 0 ? brut : SEUIL_ALERTE_DEFAUT;
 }
 
 /** Tronque un message pour la base et pour Discord, en signalant la coupe. */
-export function tronquerErreur(erreur: string | undefined | null): string | null {
+export function tronquerErreur(
+  erreur: string | undefined | null,
+): string | null {
   if (!erreur) return null;
   const propre = erreur.replace(/\s+/g, " ").trim();
   if (propre.length === 0) return null;
-  return propre.length > LONGUEUR_ERREUR_MAX ? `${propre.slice(0, LONGUEUR_ERREUR_MAX - 1)}…` : propre;
+  return propre.length > LONGUEUR_ERREUR_MAX
+    ? `${propre.slice(0, LONGUEUR_ERREUR_MAX - 1)}…`
+    : propre;
 }
 
 /**
@@ -90,12 +106,22 @@ export function decisionDepuisHistorique(
 ): DecisionAlerte {
   if (resultat.succes) {
     return echecsPrecedents >= seuil
-      ? { type: "retablissement", nom: resultat.nom, echecsPrecedents, dureeMs: resultat.dureeMs }
+      ? {
+          type: "retablissement",
+          nom: resultat.nom,
+          echecsPrecedents,
+          dureeMs: resultat.dureeMs,
+        }
       : { type: "aucune" };
   }
   const echecsConsecutifs = echecsPrecedents + 1;
   return echecsConsecutifs === seuil
-    ? { type: "alerte", nom: resultat.nom, echecsConsecutifs, erreur: tronquerErreur(resultat.erreur) }
+    ? {
+        type: "alerte",
+        nom: resultat.nom,
+        echecsConsecutifs,
+        erreur: tronquerErreur(resultat.erreur),
+      }
     : { type: "aucune" };
 }
 

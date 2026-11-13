@@ -7,33 +7,52 @@ import { MenubarParts as MenubarPrimitive } from "../lib/menu";
 import { cn } from "../lib/utils";
 import type { PrimitiveProps } from "../lib/render";
 
-function Menubar({ className, ...props }: PrimitiveProps<typeof MenubarPrimitive.Root>) {
+function Menubar({
+  className,
+  ...props
+}: PrimitiveProps<typeof MenubarPrimitive.Root>) {
   return (
     <MenubarPrimitive.Root
       data-slot="menubar"
-      className={cn("flex h-9 items-center gap-1 rounded-md border bg-background p-1 shadow-xs", className)}
+      className={cn(
+        "flex h-9 items-center gap-1 rounded-md border bg-background p-1 shadow-xs",
+        className,
+      )}
       {...props}
     />
   );
 }
 
-function MenubarMenu({ ...props }: PrimitiveProps<typeof MenubarPrimitive.Menu>) {
+function MenubarMenu({
+  ...props
+}: PrimitiveProps<typeof MenubarPrimitive.Menu>) {
   return <MenubarPrimitive.Menu data-slot="menubar-menu" {...props} />;
 }
 
-function MenubarGroup({ ...props }: PrimitiveProps<typeof MenubarPrimitive.Group>) {
+function MenubarGroup({
+  ...props
+}: PrimitiveProps<typeof MenubarPrimitive.Group>) {
   return <MenubarPrimitive.Group data-slot="menubar-group" {...props} />;
 }
 
-function MenubarPortal({ ...props }: PrimitiveProps<typeof MenubarPrimitive.Portal>) {
+function MenubarPortal({
+  ...props
+}: PrimitiveProps<typeof MenubarPrimitive.Portal>) {
   return <MenubarPrimitive.Portal data-slot="menubar-portal" {...props} />;
 }
 
-function MenubarRadioGroup({ ...props }: PrimitiveProps<typeof MenubarPrimitive.RadioGroup>) {
-  return <MenubarPrimitive.RadioGroup data-slot="menubar-radio-group" {...props} />;
+function MenubarRadioGroup({
+  ...props
+}: PrimitiveProps<typeof MenubarPrimitive.RadioGroup>) {
+  return (
+    <MenubarPrimitive.RadioGroup data-slot="menubar-radio-group" {...props} />
+  );
 }
 
-function MenubarTrigger({ className, ...props }: PrimitiveProps<typeof MenubarPrimitive.Trigger>) {
+function MenubarTrigger({
+  className,
+  ...props
+}: PrimitiveProps<typeof MenubarPrimitive.Trigger>) {
   return (
     <MenubarPrimitive.Trigger
       data-slot="menubar-trigger"
@@ -119,7 +138,11 @@ function MenubarCheckboxItem({
   );
 }
 
-function MenubarRadioItem({ className, children, ...props }: PrimitiveProps<typeof MenubarPrimitive.RadioItem>) {
+function MenubarRadioItem({
+  className,
+  children,
+  ...props
+}: PrimitiveProps<typeof MenubarPrimitive.RadioItem>) {
   return (
     <MenubarPrimitive.RadioItem
       data-slot="menubar-radio-item"
@@ -150,13 +173,19 @@ function MenubarLabel({
     <div
       data-slot="menubar-label"
       data-inset={inset}
-      className={cn("px-2 py-1.5 text-sm font-medium data-[inset]:ps-8", className)}
+      className={cn(
+        "px-2 py-1.5 text-sm font-medium data-[inset]:ps-8",
+        className,
+      )}
       {...props}
     />
   );
 }
 
-function MenubarSeparator({ className, ...props }: PrimitiveProps<typeof MenubarPrimitive.Separator>) {
+function MenubarSeparator({
+  className,
+  ...props
+}: PrimitiveProps<typeof MenubarPrimitive.Separator>) {
   return (
     <MenubarPrimitive.Separator
       data-slot="menubar-separator"
@@ -166,11 +195,17 @@ function MenubarSeparator({ className, ...props }: PrimitiveProps<typeof Menubar
   );
 }
 
-function MenubarShortcut({ className, ...props }: React.ComponentProps<"span">) {
+function MenubarShortcut({
+  className,
+  ...props
+}: React.ComponentProps<"span">) {
   return (
     <span
       data-slot="menubar-shortcut"
-      className={cn("ml-auto text-xs tracking-widest text-muted-foreground", className)}
+      className={cn(
+        "ml-auto text-xs tracking-widest text-muted-foreground",
+        className,
+      )}
       {...props}
     />
   );
@@ -204,7 +239,10 @@ function MenubarSubTrigger({
   );
 }
 
-function MenubarSubContent({ className, ...props }: PrimitiveProps<typeof MenubarPrimitive.SubContent>) {
+function MenubarSubContent({
+  className,
+  ...props
+}: PrimitiveProps<typeof MenubarPrimitive.SubContent>) {
   return (
     <MenubarPrimitive.SubContent
       data-slot="menubar-sub-content"

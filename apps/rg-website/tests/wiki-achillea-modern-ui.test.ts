@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 import { describe, expect, test } from "bun:test";
-import { CRAWL_ROUTES, crawlRoute } from "../../../scripts/qa/crawl-wiki-achillea";
+import { crawlRoute } from "../../../scripts/qa/crawl-wiki-achillea";
 
 describe("Wiki & Achilléa Modern Web UI/UX Pro & Anti-Slop Suite", () => {
   const PROD_URL = "https://rosegriffon.fr";
@@ -47,7 +47,9 @@ describe("Wiki & Achilléa Modern Web UI/UX Pro & Anti-Slop Suite", () => {
     for (const route of sampledRoutes) {
       const res = await crawlRoute(PROD_URL, route);
       // Filter out official Level-5 team names like 'Les Révolutionnaires'
-      const nonLoreSlop = res.slopMatches.filter((w) => w !== "révolutionnaire" && w !== "revolutionnaire");
+      const nonLoreSlop = res.slopMatches.filter(
+        (w) => w !== "révolutionnaire" && w !== "revolutionnaire",
+      );
       expect(nonLoreSlop).toHaveLength(0);
     }
   }, 30000);

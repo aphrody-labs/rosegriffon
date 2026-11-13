@@ -37,7 +37,11 @@ async function copierDansLePressePapier(texte: string): Promise<boolean> {
   }
 }
 
-export function HashtagsCopiables({ hashtags }: { hashtags: HashtagAffichable[] }) {
+export function HashtagsCopiables({
+  hashtags,
+}: {
+  hashtags: HashtagAffichable[];
+}) {
   /** Hashtag copié à l'instant, pour la coche éphémère. */
   const [copie, setCopie] = useState<string | null>(null);
   const [echec, setEchec] = useState(false);
@@ -51,14 +55,17 @@ export function HashtagsCopiables({ hashtags }: { hashtags: HashtagAffichable[] 
     setEchec(!reussi);
     setCopie(reussi ? libelle : null);
     if (reussi) {
-      setTimeout(() => setCopie(actuel => (actuel === libelle ? null : actuel)), 2000);
+      setTimeout(
+        () => setCopie((actuel) => (actuel === libelle ? null : actuel)),
+        2000,
+      );
     }
   };
 
   return (
     <div>
       <ul className="flex list-none flex-wrap gap-2 p-0">
-        {hashtags.map(hashtag => {
+        {hashtags.map((hashtag) => {
           const copieCeluiCi = copie === hashtag.libelle;
           return (
             <li key={hashtag.valeur}>
@@ -72,7 +79,10 @@ export function HashtagsCopiables({ hashtags }: { hashtags: HashtagAffichable[] 
                 {copieCeluiCi ? (
                   <Check className="size-4 shrink-0 text-primary" aria-hidden />
                 ) : (
-                  <Copy className="size-4 shrink-0 text-primary/80" aria-hidden />
+                  <Copy
+                    className="size-4 shrink-0 text-primary/80"
+                    aria-hidden
+                  />
                 )}
               </button>
             </li>
@@ -81,7 +91,10 @@ export function HashtagsCopiables({ hashtags }: { hashtags: HashtagAffichable[] 
       </ul>
 
       {/* Un seul message, annoncé poliment : ni infobulle, ni alerte modale. */}
-      <p aria-live="polite" className="mt-1 min-h-4 text-xs text-on-surface-variant">
+      <p
+        aria-live="polite"
+        className="mt-1 min-h-4 text-xs text-on-surface-variant"
+      >
         {copie
           ? `${copie} copié dans le presse-papier.`
           : echec

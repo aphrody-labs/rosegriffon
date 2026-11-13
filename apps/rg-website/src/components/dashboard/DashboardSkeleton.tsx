@@ -5,7 +5,7 @@ export function DashboardSkeleton() {
     <div className="container mx-auto p-6 space-y-6">
       <Skeleton className="h-10 w-48" />
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {[1, 2, 3].map(i => (
+        {[1, 2, 3].map((i) => (
           <Card key={i} className="h-full">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <Skeleton className="h-4 w-24" />

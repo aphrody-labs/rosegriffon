@@ -51,20 +51,31 @@ describe("attribution automatique", () => {
   });
 
   test("`@everyone` est refusé", () => {
-    expect(verifierAttributionAutomatique(role({ estEveryone: true }), BOT).ok).toBe(false);
+    expect(
+      verifierAttributionAutomatique(role({ estEveryone: true }), BOT).ok,
+    ).toBe(false);
   });
 
   test("un rôle géré par une intégration est refusé, en disant pourquoi", () => {
-    const verdict = verifierAttributionAutomatique(role({ gereParIntegration: true }), BOT);
+    const verdict = verifierAttributionAutomatique(
+      role({ gereParIntegration: true }),
+      BOT,
+    );
     expect(verdict.ok).toBe(false);
     if (verdict.ok) return;
     expect(verdict.motif).toContain("intégration");
   });
 
   test("un rôle au niveau du bot est refusé — la hiérarchie n'est pas négociable", () => {
-    expect(verifierAttributionAutomatique(role({ position: 89 }), BOT).ok).toBe(false);
-    expect(verifierAttributionAutomatique(role({ position: 90 }), BOT).ok).toBe(false);
-    expect(verifierAttributionAutomatique(role({ position: 88 }), BOT).ok).toBe(true);
+    expect(verifierAttributionAutomatique(role({ position: 89 }), BOT).ok).toBe(
+      false,
+    );
+    expect(verifierAttributionAutomatique(role({ position: 90 }), BOT).ok).toBe(
+      false,
+    );
+    expect(verifierAttributionAutomatique(role({ position: 88 }), BOT).ok).toBe(
+      true,
+    );
   });
 
   test("la position hors de portée nomme les DEUX positions", () => {
@@ -85,7 +96,10 @@ describe("attribution automatique", () => {
       "4", // BanMembers
       "2", // KickMembers
     ]) {
-      const verdict = verifierAttributionAutomatique(role({ nom: "Équipe RG", permissions, position: 85 }), BOT);
+      const verdict = verifierAttributionAutomatique(
+        role({ nom: "Équipe RG", permissions, position: 85 }),
+        BOT,
+      );
       expect(verdict.ok).toBe(false);
     }
   });
@@ -93,7 +107,10 @@ describe("attribution automatique", () => {
   test("le refus de hiérarchie passe AVANT le refus de permissions", () => {
     // Un rôle à la fois trop haut et dangereux : la première chose à corriger
     // est la position, sans quoi remonter le bot ne changerait rien.
-    const verdict = verifierAttributionAutomatique(role({ permissions: "8", position: 93 }), BOT);
+    const verdict = verifierAttributionAutomatique(
+      role({ permissions: "8", position: 93 }),
+      BOT,
+    );
     expect(verdict.ok).toBe(false);
     if (verdict.ok) return;
     expect(verdict.motif).toContain("hiérarchie");
@@ -102,7 +119,9 @@ describe("attribution automatique", () => {
 
 describe("rôle de prise en charge", () => {
   test("un rôle de modération est un bon rôle de prise en charge", () => {
-    const verdict = verifierRolePriseEnCharge(role({ nom: "Modérateurs", permissions: "4" }));
+    const verdict = verifierRolePriseEnCharge(
+      role({ nom: "Modérateurs", permissions: "4" }),
+    );
     expect(verdict.ok).toBe(true);
     if (!verdict.ok) return;
     expect(verdict.avertissements).toEqual([]);
@@ -116,11 +135,15 @@ describe("rôle de prise en charge", () => {
   });
 
   test("`@everyone` est refusé : un ticket ne peut pas être ouvert à tous", () => {
-    expect(verifierRolePriseEnCharge(role({ estEveryone: true })).ok).toBe(false);
+    expect(verifierRolePriseEnCharge(role({ estEveryone: true })).ok).toBe(
+      false,
+    );
   });
 
   test("le rôle d'un bot est refusé : aucun humain ne le porte", () => {
-    expect(verifierRolePriseEnCharge(role({ gereParIntegration: true })).ok).toBe(false);
+    expect(
+      verifierRolePriseEnCharge(role({ gereParIntegration: true })).ok,
+    ).toBe(false);
   });
 });
 
@@ -139,7 +162,15 @@ describe("hiérarchie du staff", () => {
 describe("filtrage des récompenses déjà en base", () => {
   const faits = new Map<string, FaitsRoleVise>([
     ["bon", role({ id: "bon", position: 81 })],
-    ["dangereux", role({ id: "dangereux", nom: "Équipe RG", permissions: "8", position: 85 })],
+    [
+      "dangereux",
+      role({
+        id: "dangereux",
+        nom: "Équipe RG",
+        permissions: "8",
+        position: 85,
+      }),
+    ],
     ["trop-haut", role({ id: "trop-haut", position: 93 })],
   ]);
 
@@ -154,7 +185,7 @@ describe("filtrage des récompenses déjà en base", () => {
       faits,
       BOT,
     );
-    expect(posables.map(r => r.roleId)).toEqual(["bon"]);
+    expect(posables.map((r) => r.roleId)).toEqual(["bon"]);
     expect(bloquees).toHaveLength(3);
     for (const bloquee of bloquees) {
       expect(bloquee.motif.length).toBeGreaterThan(20);
@@ -162,11 +193,18 @@ describe("filtrage des récompenses déjà en base", () => {
   });
 
   test("un rôle supprimé du serveur est signalé, pas ignoré", () => {
-    const { bloquees } = filtrerRecompenses([{ niveau: 5, roleId: "disparu" }], faits, BOT);
+    const { bloquees } = filtrerRecompenses(
+      [{ niveau: 5, roleId: "disparu" }],
+      faits,
+      BOT,
+    );
     expect(bloquees[0]?.motif).toContain("n'existe plus");
   });
 
   test("aucune récompense : aucune ligne bloquée non plus", () => {
-    expect(filtrerRecompenses([], faits, BOT)).toEqual({ bloquees: [], posables: [] });
+    expect(filtrerRecompenses([], faits, BOT)).toEqual({
+      bloquees: [],
+      posables: [],
+    });
   });
 });

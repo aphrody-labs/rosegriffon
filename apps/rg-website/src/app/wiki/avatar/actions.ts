@@ -17,8 +17,18 @@ import { cdnOrigin } from "@rosegriffon/assets";
 
 import { getServerSession } from "@/lib/auth-helpers";
 import { createPostgresClient } from "@rosegriffon/db/service";
-import { enregistrerDansDepot, listerDansDepot, ouvrirDansDepot, supprimerDansDepot } from "./sauvegardes";
-import type { AvatarEnregistre, DepotSauvegardes, LigneSauvegarde, Sauvegarde } from "./sauvegardes";
+import {
+  enregistrerDansDepot,
+  listerDansDepot,
+  ouvrirDansDepot,
+  supprimerDansDepot,
+} from "./sauvegardes";
+import type {
+  AvatarEnregistre,
+  DepotSauvegardes,
+  LigneSauvegarde,
+  Sauvegarde,
+} from "./sauvegardes";
 
 export type { AvatarEnregistre, Sauvegarde } from "./sauvegardes";
 
@@ -45,10 +55,14 @@ const NOM_VALIDE = /^[A-Za-z0-9_]{3,64}$/;
  * @param icone nom d'icône tel que le catalogue le fournit, p. ex. `icon_ava_face05_001`.
  * @returns l'URL publique enregistrée, ou un message d'erreur affichable.
  */
-export async function definirPhotoDepuisAvatar(icone: string): Promise<{ url?: string; error?: string }> {
+export async function definirPhotoDepuisAvatar(
+  icone: string,
+): Promise<{ url?: string; error?: string }> {
   const session = await getServerSession();
   if (!session?.user) {
-    return { error: "Connecte-toi pour utiliser cet avatar comme photo de profil." };
+    return {
+      error: "Connecte-toi pour utiliser cet avatar comme photo de profil.",
+    };
   }
   if (!NOM_VALIDE.test(icone)) {
     return { error: "Vignette inconnue." };
@@ -58,7 +72,9 @@ export async function definirPhotoDepuisAvatar(icone: string): Promise<{ url?: s
   try {
     // La vignette est un fichier du jeu : elle ne change pas. `no-store` faisait re-décoder
     // l'atlas au serveur d'assets à chaque clic, pour un résultat identique.
-    const reponse = await fetch(`${CDN}/avatar/icon/${icone}.png`, { cache: "force-cache" });
+    const reponse = await fetch(`${CDN}/avatar/icon/${icone}.png`, {
+      cache: "force-cache",
+    });
     if (!reponse.ok) {
       return { error: "Cette vignette n'a pas pu être récupérée." };
     }
@@ -128,7 +144,14 @@ function creerDepot(): DepotSauvegardes {
         .order("modifie_le", { ascending: false })
         .limit(limite);
       const lignes = (data ?? []).map(
-        (r: { id: string; user_id: string; nom: string; code: string; donnees: unknown; modifie_le: string }) => ({
+        (r: {
+          id: string;
+          user_id: string;
+          nom: string;
+          code: string;
+          donnees: unknown;
+          modifie_le: string;
+        }) => ({
           id: r.id,
           userId: r.user_id,
           nom: r.nom,
@@ -158,7 +181,11 @@ function creerDepot(): DepotSauvegardes {
       return { ligne, error: error ?? undefined };
     },
     async supprimer(userId, id) {
-      const { error } = await admin.from("avatar_saves").delete().eq("id", id).eq("user_id", userId);
+      const { error } = await admin
+        .from("avatar_saves")
+        .delete()
+        .eq("id", id)
+        .eq("user_id", userId);
       return { error: error ?? undefined };
     },
   };
@@ -175,13 +202,22 @@ export async function enregistrerAvatar(
   donnees: AvatarEnregistre,
   code: string | null,
 ): Promise<{ id?: string; error?: string }> {
-  const resultat = await enregistrerDansDepot(creerDepot(), (await getServerSession())?.user?.id, nom, donnees, code);
+  const resultat = await enregistrerDansDepot(
+    creerDepot(),
+    (await getServerSession())?.user?.id,
+    nom,
+    donnees,
+    code,
+  );
   if (resultat.id) revalidatePath("/avatar");
   return resultat;
 }
 
 /** Les avatars enregistrés du compte connecté, du plus récent au plus ancien. */
-export async function listerAvatars(): Promise<{ avatars?: Sauvegarde[]; error?: string }> {
+export async function listerAvatars(): Promise<{
+  avatars?: Sauvegarde[];
+  error?: string;
+}> {
   return listerDansDepot(creerDepot(), (await getServerSession())?.user?.id);
 }
 
@@ -199,7 +235,11 @@ export async function ouvrirParCode(
 
 /** Supprime une sauvegarde du compte connecté. */
 export async function supprimerAvatar(id: string): Promise<{ error?: string }> {
-  const resultat = await supprimerDansDepot(creerDepot(), (await getServerSession())?.user?.id, id);
+  const resultat = await supprimerDansDepot(
+    creerDepot(),
+    (await getServerSession())?.user?.id,
+    id,
+  );
   if (!resultat.error) revalidatePath("/avatar");
   return resultat;
 }

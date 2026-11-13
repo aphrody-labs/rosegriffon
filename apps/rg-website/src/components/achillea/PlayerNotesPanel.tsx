@@ -6,7 +6,10 @@ import { useId } from "react";
 import { useCallback, useEffect, useRef, useState, useMemo } from "react";
 import { createAchilleaClient } from "@/lib/achillea/client";
 import type { PlayerNote } from "@rosegriffon/achillea-types/domain/player-note";
-import { PlayerNoteCategory, PlayerNoteSeverity } from "@rosegriffon/achillea-types/enums/eventEnums";
+import {
+  PlayerNoteCategory,
+  PlayerNoteSeverity,
+} from "@rosegriffon/achillea-types/enums/eventEnums";
 import {
   ShieldAlert,
   Search,
@@ -39,7 +42,10 @@ const CATEGORY_LABELS: Record<PlayerNoteCategory, string> = {
   [PlayerNoteCategory.OTHER]: "Autre",
 };
 
-const SEVERITY_CONFIG: Record<PlayerNoteSeverity, { label: string; color: string; badge: string; icon: any }> = {
+const SEVERITY_CONFIG: Record<
+  PlayerNoteSeverity,
+  { label: string; color: string; badge: string; icon: any }
+> = {
   [PlayerNoteSeverity.INFO]: {
     label: "Information",
     color: "text-primary",
@@ -81,8 +87,12 @@ export function PlayerNotesPanel({
   const [dialogOpen, setDialogOpen] = useState<boolean>(false);
   const [targetId, setTargetId] = useState<string>("");
   const [targetNameInput, setTargetNameInput] = useState<string>("");
-  const [category, setCategory] = useState<PlayerNoteCategory>(PlayerNoteCategory.BEHAVIOR);
-  const [severity, setSeverity] = useState<PlayerNoteSeverity>(PlayerNoteSeverity.INFO);
+  const [category, setCategory] = useState<PlayerNoteCategory>(
+    PlayerNoteCategory.BEHAVIOR,
+  );
+  const [severity, setSeverity] = useState<PlayerNoteSeverity>(
+    PlayerNoteSeverity.INFO,
+  );
   const [content, setContent] = useState<string>("");
   const [submitting, setSubmitting] = useState<boolean>(false);
 
@@ -96,12 +106,17 @@ export function PlayerNotesPanel({
     [],
   );
 
-  const requests = useRef<{ load: (() => Promise<void>) | null; latest: number }>({ load: null, latest: 0 });
+  const requests = useRef<{
+    load: (() => Promise<void>) | null;
+    latest: number;
+  }>({ load: null, latest: 0 });
   const loadNotes = useCallback(
     async function loadCurrentNotes(): Promise<void> {
       if (requests.current.load !== loadCurrentNotes) return;
       const request = ++requests.current.latest;
-      const isCurrent = () => requests.current.load === loadCurrentNotes && requests.current.latest === request;
+      const isCurrent = () =>
+        requests.current.load === loadCurrentNotes &&
+        requests.current.latest === request;
       try {
         const res = await client.playerNotes.list({
           tournamentId: tournamentId ?? undefined,
@@ -114,7 +129,8 @@ export function PlayerNotesPanel({
           setError(res.detail || "Impossible de charger les signalements.");
         }
       } catch {
-        if (isCurrent()) setError("Erreur de connexion avec le service des notes.");
+        if (isCurrent())
+          setError("Erreur de connexion avec le service des notes.");
       } finally {
         if (isCurrent()) setLoading(false);
       }
@@ -191,7 +207,8 @@ export function PlayerNotesPanel({
   };
 
   const handleDelete = async (noteId: string) => {
-    if (!confirm("Voulez-vous vraiment supprimer cette observation staff ?")) return;
+    if (!confirm("Voulez-vous vraiment supprimer cette observation staff ?"))
+      return;
     try {
       await client.playerNotes.remove(noteId);
       setLoading(true);
@@ -203,7 +220,7 @@ export function PlayerNotesPanel({
   };
 
   // Filtered notes
-  const filteredNotes = notes.filter(n => {
+  const filteredNotes = notes.filter((n) => {
     if (categoryFilter !== "all" && n.category !== categoryFilter) return false;
     if (severityFilter !== "all" && n.severity !== severityFilter) return false;
     if (resolvedFilter === "open" && n.resolved) return false;
@@ -211,7 +228,8 @@ export function PlayerNotesPanel({
     if (search.trim()) {
       const q = search.toLowerCase();
       const targetMatch =
-        n.target?.username?.toLowerCase().includes(q) || n.target?.displayName?.toLowerCase().includes(q);
+        n.target?.username?.toLowerCase().includes(q) ||
+        n.target?.displayName?.toLowerCase().includes(q);
       const contentMatch = n.content?.toLowerCase().includes(q);
       const authorMatch = n.author?.username?.toLowerCase().includes(q);
       if (!targetMatch && !contentMatch && !authorMatch) return false;
@@ -219,8 +237,8 @@ export function PlayerNotesPanel({
     return true;
   });
 
-  const openCount = notes.filter(n => !n.resolved).length;
-  const resolvedCount = notes.filter(n => n.resolved).length;
+  const openCount = notes.filter((n) => !n.resolved).length;
+  const resolvedCount = notes.filter((n) => n.resolved).length;
 
   return (
     <div className="border border-border bg-card rounded-2xl p-6 space-y-6">
@@ -267,7 +285,7 @@ export function PlayerNotesPanel({
             type="text"
             placeholder="Filtrer par joueur, auteur, mot-clé..."
             value={search}
-            onChange={e => setSearch(e.target.value)}
+            onChange={(e) => setSearch(e.target.value)}
             className="w-full pl-9 pr-3 py-1.5 text-xs bg-background border border-border rounded-xl focus:outline-none focus:ring-1 focus:ring-primary"
           />
         </div>
@@ -276,7 +294,7 @@ export function PlayerNotesPanel({
         <div className="flex flex-wrap items-center gap-2">
           <select
             value={categoryFilter}
-            onChange={e => setCategoryFilter(e.target.value)}
+            onChange={(e) => setCategoryFilter(e.target.value)}
             className="px-2.5 py-1.5 text-xs bg-background border border-border rounded-xl focus:outline-none focus:ring-1 focus:ring-primary"
           >
             <option value="all">Toutes catégories</option>
@@ -289,7 +307,7 @@ export function PlayerNotesPanel({
 
           <select
             value={severityFilter}
-            onChange={e => setSeverityFilter(e.target.value)}
+            onChange={(e) => setSeverityFilter(e.target.value)}
             className="px-2.5 py-1.5 text-xs bg-background border border-border rounded-xl focus:outline-none focus:ring-1 focus:ring-primary"
           >
             <option value="all">Toutes gravités</option>
@@ -300,7 +318,7 @@ export function PlayerNotesPanel({
 
           <select
             value={resolvedFilter}
-            onChange={e => setResolvedFilter(e.target.value)}
+            onChange={(e) => setResolvedFilter(e.target.value)}
             className="px-2.5 py-1.5 text-xs bg-background border border-border rounded-xl focus:outline-none focus:ring-1 focus:ring-primary"
           >
             <option value="all">Tous ({notes.length})</option>
@@ -320,17 +338,26 @@ export function PlayerNotesPanel({
       {loading ? (
         <div className="py-12 text-center space-y-2">
           <Loader2 className="w-6 h-6 animate-spin mx-auto text-muted-foreground" />
-          <p className="text-xs text-muted-foreground">Chargement des signalements…</p>
+          <p className="text-xs text-muted-foreground">
+            Chargement des signalements…
+          </p>
         </div>
       ) : filteredNotes.length === 0 ? (
         <div className="p-8 text-center border border-dashed border-border rounded-xl text-xs text-muted-foreground space-y-1">
-          <p className="font-semibold text-foreground">Aucun signalement trouvé</p>
-          <p>Toutes les observations staff ont été traitées ou correspondent aux filtres.</p>
+          <p className="font-semibold text-foreground">
+            Aucun signalement trouvé
+          </p>
+          <p>
+            Toutes les observations staff ont été traitées ou correspondent aux
+            filtres.
+          </p>
         </div>
       ) : (
         <div className="space-y-3">
-          {filteredNotes.map(note => {
-            const sev = SEVERITY_CONFIG[note.severity] ?? SEVERITY_CONFIG[PlayerNoteSeverity.INFO];
+          {filteredNotes.map((note) => {
+            const sev =
+              SEVERITY_CONFIG[note.severity] ??
+              SEVERITY_CONFIG[PlayerNoteSeverity.INFO];
             const SevIcon = sev.icon;
 
             return (
@@ -348,7 +375,11 @@ export function PlayerNotesPanel({
                       {/* Target user */}
                       <div className="flex items-center gap-1.5 font-bold text-xs text-foreground">
                         <UserIcon className="w-3.5 h-3.5 text-primary" />
-                        <span>{note.target?.displayName ?? note.target?.username ?? "Joueur inconnu"}</span>
+                        <span>
+                          {note.target?.displayName ??
+                            note.target?.username ??
+                            "Joueur inconnu"}
+                        </span>
                       </div>
 
                       {/* Category Badge */}
@@ -384,10 +415,18 @@ export function PlayerNotesPanel({
 
                     {/* Metadata (Author, Date, Tournament) */}
                     <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground pt-1">
-                      <span>Rapporté par {note.author?.username ?? "Staff"}</span>
-                      {note.tournament && <span>• Tournoi : {note.tournament.name}</span>}
-                      <span>• {new Date(note.createdAt).toLocaleString("fr-FR")}</span>
-                      {note.resolved && note.resolvedBy && <span>• Résolu par {note.resolvedBy.username}</span>}
+                      <span>
+                        Rapporté par {note.author?.username ?? "Staff"}
+                      </span>
+                      {note.tournament && (
+                        <span>• Tournoi : {note.tournament.name}</span>
+                      )}
+                      <span>
+                        • {new Date(note.createdAt).toLocaleString("fr-FR")}
+                      </span>
+                      {note.resolved && note.resolvedBy && (
+                        <span>• Résolu par {note.resolvedBy.username}</span>
+                      )}
                     </div>
                   </div>
 
@@ -396,7 +435,11 @@ export function PlayerNotesPanel({
                     <button
                       type="button"
                       onClick={() => handleToggleResolve(note)}
-                      title={note.resolved ? "Marquer non résolu" : "Marquer comme traité"}
+                      title={
+                        note.resolved
+                          ? "Marquer non résolu"
+                          : "Marquer comme traité"
+                      }
                       className={`p-1.5 rounded-lg border transition text-xs flex items-center gap-1 font-semibold ${
                         note.resolved
                           ? "border-border hover:bg-muted text-muted-foreground"
@@ -441,7 +484,9 @@ export function PlayerNotesPanel({
                 <span className="p-1.5 rounded-lg bg-primary/10 text-primary">
                   <MessageSquare className="w-4 h-4" />
                 </span>
-                <h3 className="font-bold text-sm">Nouvelle observation staff</h3>
+                <h3 className="font-bold text-sm">
+                  Nouvelle observation staff
+                </h3>
               </div>
               <button
                 type="button"
@@ -455,17 +500,20 @@ export function PlayerNotesPanel({
             <form onSubmit={handleCreate} className="space-y-4 text-xs">
               {/* Target player */}
               <div className="space-y-1">
-                <label className="font-bold text-foreground" htmlFor={`${controlId}-0`}>
+                <label
+                  className="font-bold text-foreground"
+                  htmlFor={`${controlId}-0`}
+                >
                   Joueur concerné *
                 </label>
                 {candidates.length > 0 ? (
                   <select
                     value={targetId}
-                    onChange={e => setTargetId(e.target.value)}
+                    onChange={(e) => setTargetId(e.target.value)}
                     className="w-full px-3 py-2 bg-background border border-border rounded-xl focus:outline-none focus:ring-1 focus:ring-primary text-xs"
                     id={`${controlId}-0`}
                   >
-                    {candidates.map(c => (
+                    {candidates.map((c) => (
                       <option key={c.id} value={c.id}>
                         {c.label} ({c.id})
                       </option>
@@ -476,7 +524,7 @@ export function PlayerNotesPanel({
                     type="text"
                     placeholder="Identifiant ou pseudo du joueur (ex: user_123)"
                     value={targetNameInput}
-                    onChange={e => setTargetNameInput(e.target.value)}
+                    onChange={(e) => setTargetNameInput(e.target.value)}
                     className="w-full px-3 py-2 bg-background border border-border rounded-xl focus:outline-none focus:ring-1 focus:ring-primary text-xs"
                     required
                     id={`${controlId}-0`}
@@ -486,12 +534,17 @@ export function PlayerNotesPanel({
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="font-bold text-foreground" htmlFor={`${controlId}-1`}>
+                  <label
+                    className="font-bold text-foreground"
+                    htmlFor={`${controlId}-1`}
+                  >
                     Catégorie *
                   </label>
                   <select
                     value={category}
-                    onChange={e => setCategory(e.target.value as PlayerNoteCategory)}
+                    onChange={(e) =>
+                      setCategory(e.target.value as PlayerNoteCategory)
+                    }
                     className="w-full px-3 py-2 bg-background border border-border rounded-xl focus:outline-none focus:ring-1 focus:ring-primary text-xs"
                     id={`${controlId}-1`}
                   >
@@ -504,31 +557,43 @@ export function PlayerNotesPanel({
                 </div>
 
                 <div className="space-y-1">
-                  <label className="font-bold text-foreground" htmlFor={`${controlId}-2`}>
+                  <label
+                    className="font-bold text-foreground"
+                    htmlFor={`${controlId}-2`}
+                  >
                     Niveau de gravité *
                   </label>
                   <select
                     value={severity}
-                    onChange={e => setSeverity(e.target.value as PlayerNoteSeverity)}
+                    onChange={(e) =>
+                      setSeverity(e.target.value as PlayerNoteSeverity)
+                    }
                     className="w-full px-3 py-2 bg-background border border-border rounded-xl focus:outline-none focus:ring-1 focus:ring-primary text-xs"
                     id={`${controlId}-2`}
                   >
                     <option value={PlayerNoteSeverity.INFO}>Information</option>
-                    <option value={PlayerNoteSeverity.WARNING}>Avertissement</option>
-                    <option value={PlayerNoteSeverity.SERIOUS}>Grave / Critique</option>
+                    <option value={PlayerNoteSeverity.WARNING}>
+                      Avertissement
+                    </option>
+                    <option value={PlayerNoteSeverity.SERIOUS}>
+                      Grave / Critique
+                    </option>
                   </select>
                 </div>
               </div>
 
               <div className="space-y-1">
-                <label className="font-bold text-foreground" htmlFor={`${controlId}-3`}>
+                <label
+                  className="font-bold text-foreground"
+                  htmlFor={`${controlId}-3`}
+                >
                   Observation & Détails *
                 </label>
                 <textarea
                   rows={4}
                   placeholder="Précisez le contexte du comportement, l'infraction constatée, les avertissements verbaux donnés..."
                   value={content}
-                  onChange={e => setContent(e.target.value)}
+                  onChange={(e) => setContent(e.target.value)}
                   className="w-full px-3 py-2 bg-background border border-border rounded-xl focus:outline-none focus:ring-1 focus:ring-primary text-xs leading-relaxed"
                   required
                   id={`${controlId}-3`}
@@ -548,7 +613,11 @@ export function PlayerNotesPanel({
                   disabled={submitting}
                   className="inline-flex items-center gap-1.5 px-4 py-2 bg-primary text-primary-foreground font-bold rounded-xl hover:bg-primary/90 transition shadow-sm text-xs disabled:opacity-50"
                 >
-                  {submitting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
+                  {submitting ? (
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  ) : (
+                    <Check className="w-3.5 h-3.5" />
+                  )}
                   Consigner l'observation
                 </button>
               </div>

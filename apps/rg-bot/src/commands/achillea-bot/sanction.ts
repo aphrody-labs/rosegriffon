@@ -41,9 +41,14 @@ import { COULEURS_LEGACY, finirCommeLegacy } from "../../lib/achillea-legacy";
 import { echapper, echec, fiche, repondre } from "../../lib/ui";
 
 /** Serveur Discord où appliquer l'effet, ou `null` hors serveur. */
-async function serveurDe(interaction: ChatInputCommandInteraction, guildId: string): Promise<ServeurModerable | null> {
+async function serveurDe(
+  interaction: ChatInputCommandInteraction,
+  guildId: string,
+): Promise<ServeurModerable | null> {
   try {
-    return (await interaction.client.guilds.fetch(guildId)) as unknown as ServeurModerable;
+    return (await interaction.client.guilds.fetch(
+      guildId,
+    )) as unknown as ServeurModerable;
   } catch {
     return null;
   }
@@ -55,7 +60,9 @@ async function effet(
   sanction: Sanction,
   revocation = false,
 ): Promise<string | null> {
-  const voulu = revocation ? effetDeRevocation(sanction) : effetDeSanction(sanction);
+  const voulu = revocation
+    ? effetDeRevocation(sanction)
+    : effetDeSanction(sanction);
   if (voulu.action === "aucun") return null;
   const serveur = await serveurDe(interaction, sanction.guildId);
   if (!serveur) return "le bot n'a pas accès à ce serveur";
@@ -64,7 +71,9 @@ async function effet(
       serveur,
       sanction.userId,
       voulu,
-      revocation ? `Sanction ${sanction.id} révoquée` : (sanction.reason ?? undefined),
+      revocation
+        ? `Sanction ${sanction.id} révoquée`
+        : (sanction.reason ?? undefined),
     );
     return null;
   } catch (err) {
@@ -73,17 +82,33 @@ async function effet(
 }
 
 /** Contrôles communs à toute sanction. Rend vrai si la cible est sanctionnable. */
-async function cibleValide(interaction: ChatInputCommandInteraction, cible: User, verbe: string): Promise<boolean> {
+async function cibleValide(
+  interaction: ChatInputCommandInteraction,
+  cible: User,
+  verbe: string,
+): Promise<boolean> {
   if (!interaction.guildId) {
-    await repondre(interaction, echec("Sanction impossible", "Cette commande s'utilise sur un serveur."));
+    await repondre(
+      interaction,
+      echec("Sanction impossible", "Cette commande s'utilise sur un serveur."),
+    );
     return false;
   }
   if (cible.id === interaction.user.id) {
-    await repondre(interaction, echec("Sanction impossible", "Vous ne pouvez pas vous sanctionner vous-même."));
+    await repondre(
+      interaction,
+      echec(
+        "Sanction impossible",
+        "Vous ne pouvez pas vous sanctionner vous-même.",
+      ),
+    );
     return false;
   }
   if (cible.bot) {
-    await repondre(interaction, echec("Sanction impossible", `Impossible de ${verbe} un bot.`));
+    await repondre(
+      interaction,
+      echec("Sanction impossible", `Impossible de ${verbe} un bot.`),
+    );
     return false;
   }
   return true;
@@ -94,16 +119,34 @@ function ligneUtilisateur(cible: User): string {
 }
 
 @Discord()
-@SlashGroup({ name: "sanction", description: "Gestion des sanctions de modération" })
+@SlashGroup({
+  name: "sanction",
+  description: "Gestion des sanctions de modération",
+})
 @SlashGroup("sanction")
 export class CommandeSanction {
   @Slash({ name: "warn", description: "Avertir un utilisateur" })
   async warn(
-    @SlashOption({ name: "user", description: "Utilisateur à avertir", type: ApplicationCommandOptionType.User, required: true })
+    @SlashOption({
+      name: "user",
+      description: "Utilisateur à avertir",
+      type: ApplicationCommandOptionType.User,
+      required: true,
+    })
     brut: User | GuildMember,
-    @SlashOption({ name: "reason", description: "Raison de l'avertissement", type: ApplicationCommandOptionType.String, required: true })
+    @SlashOption({
+      name: "reason",
+      description: "Raison de l'avertissement",
+      type: ApplicationCommandOptionType.String,
+      required: true,
+    })
     raison: string,
-    @SlashOption({ name: "evidence", description: "Preuve / note libre (optionnel)", type: ApplicationCommandOptionType.String, required: false })
+    @SlashOption({
+      name: "evidence",
+      description: "Preuve / note libre (optionnel)",
+      type: ApplicationCommandOptionType.String,
+      required: false,
+    })
     preuve: string | undefined,
     interaction: ChatInputCommandInteraction,
   ): Promise<void> {
@@ -114,7 +157,7 @@ export class CommandeSanction {
 
     const sanction = await appelApi(
       interaction,
-      c =>
+      (c) =>
         c.sanctions.create({
           type: SanctionType.Warn,
           userId: cible.id,
@@ -140,7 +183,7 @@ export class CommandeSanction {
     if (decision) {
       const escalade = await appelApi(
         interaction,
-        c =>
+        (c) =>
           c.sanctions.create({
             type: decision.type,
             userId: cible.id,
@@ -153,7 +196,9 @@ export class CommandeSanction {
       if (!escalade) return;
       const probleme = await effet(interaction, escalade);
       const libelle = escalade.type === "ban" ? "ban" : "mute";
-      const duree = escalade.durationSec ? ` ${formaterDureeCourte(escalade.durationSec)}` : "";
+      const duree = escalade.durationSec
+        ? ` ${formaterDureeCourte(escalade.durationSec)}`
+        : "";
       embed.addFields({
         name: "Escalade automatique",
         value:
@@ -166,11 +211,26 @@ export class CommandeSanction {
 
   @Slash({ name: "mute", description: "Rendre silencieux un utilisateur" })
   async mute(
-    @SlashOption({ name: "user", description: "Utilisateur à mute", type: ApplicationCommandOptionType.User, required: true })
+    @SlashOption({
+      name: "user",
+      description: "Utilisateur à mute",
+      type: ApplicationCommandOptionType.User,
+      required: true,
+    })
     brut: User | GuildMember,
-    @SlashOption({ name: "reason", description: "Raison", type: ApplicationCommandOptionType.String, required: true })
+    @SlashOption({
+      name: "reason",
+      description: "Raison",
+      type: ApplicationCommandOptionType.String,
+      required: true,
+    })
     raison: string,
-    @SlashOption({ name: "duration", description: "Durée (ex: 30m, 2h, 7d) — max 28j", type: ApplicationCommandOptionType.String, required: true })
+    @SlashOption({
+      name: "duration",
+      description: "Durée (ex: 30m, 2h, 7d) — max 28j",
+      type: ApplicationCommandOptionType.String,
+      required: true,
+    })
     dureeBrute: string,
     interaction: ChatInputCommandInteraction,
   ): Promise<void> {
@@ -179,11 +239,23 @@ export class CommandeSanction {
     if (!(await cibleValide(interaction, cible, "mute"))) return;
     const duree = lireDuree(dureeBrute);
     if (!duree) {
-      await repondre(interaction, echec("Durée invalide", `\`${dureeBrute}\` : exemples valides \`30m\`, \`2h\`, \`7d\`.`));
+      await repondre(
+        interaction,
+        echec(
+          "Durée invalide",
+          `\`${dureeBrute}\` : exemples valides \`30m\`, \`2h\`, \`7d\`.`,
+        ),
+      );
       return;
     }
     if (duree > DUREE_MAX_MUTE_S) {
-      await repondre(interaction, echec("Durée trop longue", "La durée maximale d'un mute Discord est de 28 jours."));
+      await repondre(
+        interaction,
+        echec(
+          "Durée trop longue",
+          "La durée maximale d'un mute Discord est de 28 jours.",
+        ),
+      );
       return;
     }
     await this.emettre(interaction, cible, SanctionType.Mute, raison, duree, {
@@ -197,9 +269,19 @@ export class CommandeSanction {
 
   @Slash({ name: "kick", description: "Expulser un utilisateur du serveur" })
   async kick(
-    @SlashOption({ name: "user", description: "Utilisateur à expulser", type: ApplicationCommandOptionType.User, required: true })
+    @SlashOption({
+      name: "user",
+      description: "Utilisateur à expulser",
+      type: ApplicationCommandOptionType.User,
+      required: true,
+    })
     brut: User | GuildMember,
-    @SlashOption({ name: "reason", description: "Raison", type: ApplicationCommandOptionType.String, required: true })
+    @SlashOption({
+      name: "reason",
+      description: "Raison",
+      type: ApplicationCommandOptionType.String,
+      required: true,
+    })
     raison: string,
     interaction: ChatInputCommandInteraction,
   ): Promise<void> {
@@ -217,11 +299,26 @@ export class CommandeSanction {
 
   @Slash({ name: "ban", description: "Bannir un utilisateur du serveur" })
   async ban(
-    @SlashOption({ name: "user", description: "Utilisateur à bannir", type: ApplicationCommandOptionType.User, required: true })
+    @SlashOption({
+      name: "user",
+      description: "Utilisateur à bannir",
+      type: ApplicationCommandOptionType.User,
+      required: true,
+    })
     brut: User | GuildMember,
-    @SlashOption({ name: "reason", description: "Raison", type: ApplicationCommandOptionType.String, required: true })
+    @SlashOption({
+      name: "reason",
+      description: "Raison",
+      type: ApplicationCommandOptionType.String,
+      required: true,
+    })
     raison: string,
-    @SlashOption({ name: "duration", description: "Durée (ex: 7d, 30d) — permanent si absent", type: ApplicationCommandOptionType.String, required: false })
+    @SlashOption({
+      name: "duration",
+      description: "Durée (ex: 7d, 30d) — permanent si absent",
+      type: ApplicationCommandOptionType.String,
+      required: false,
+    })
     dureeBrute: string | undefined,
     interaction: ChatInputCommandInteraction,
   ): Promise<void> {
@@ -232,7 +329,13 @@ export class CommandeSanction {
     if (dureeBrute) {
       duree = lireDuree(dureeBrute);
       if (!duree) {
-        await repondre(interaction, echec("Durée invalide", `\`${dureeBrute}\` : exemples valides \`7d\`, \`30d\`.`));
+        await repondre(
+          interaction,
+          echec(
+            "Durée invalide",
+            `\`${dureeBrute}\` : exemples valides \`7d\`, \`30d\`.`,
+          ),
+        );
         return;
       }
     }
@@ -245,9 +348,17 @@ export class CommandeSanction {
     });
   }
 
-  @Slash({ name: "list", description: "Lister les sanctions actives d'un utilisateur" })
+  @Slash({
+    name: "list",
+    description: "Lister les sanctions actives d'un utilisateur",
+  })
   async list(
-    @SlashOption({ name: "user", description: "Utilisateur à consulter", type: ApplicationCommandOptionType.User, required: true })
+    @SlashOption({
+      name: "user",
+      description: "Utilisateur à consulter",
+      type: ApplicationCommandOptionType.User,
+      required: true,
+    })
     brut: User | GuildMember,
     interaction: ChatInputCommandInteraction,
   ): Promise<void> {
@@ -255,43 +366,88 @@ export class CommandeSanction {
     const cible = utilisateurDe(brut);
     const page = await appelApi(
       interaction,
-      c => c.sanctions.list({ userId: cible.id, guildId: interaction.guildId ?? undefined, active: true, pageSize: 100 }),
+      (c) =>
+        c.sanctions.list({
+          userId: cible.id,
+          guildId: interaction.guildId ?? undefined,
+          active: true,
+          pageSize: 100,
+        }),
       "Sanctions illisibles",
     );
     if (!page) return;
     const sanctions = page.data;
     const titre = `${echapper(cible.username)} — Sanctions actives${sanctions.length ? ` (${sanctions.length})` : ""}`;
     if (sanctions.length === 0) {
-      const embed = finirCommeLegacy(fiche({ titre, description: "Aucune sanction active." }), COULEURS_LEGACY.vert);
+      const embed = finirCommeLegacy(
+        fiche({ titre, description: "Aucune sanction active." }),
+        COULEURS_LEGACY.vert,
+      );
       await interaction.editReply({ embeds: [embed] });
       return;
     }
     const MAX = 20;
     const vus = sanctions.slice(0, MAX);
     const liste = fiche({ titre, description: `<@${cible.id}>` })
-      .champ("Type", vus.map(s => s.type).join("\n"), { enLigne: true })
-      .champ("Raison", vus.map(s => (s.reason ? s.reason.slice(0, 40) : "—")).join("\n"), { enLigne: true })
-      .champ("Durée", vus.map(s => (s.durationSec ? formaterDureeCourte(s.durationSec) : "—")).join("\n"), { enLigne: true })
-      .champ("Expire", vus.map(s => horodatage(s.expiresAt, "R")).join("\n"), { enLigne: true })
-      .champ("ID (tronqué)", vus.map(s => `\`${s.id.slice(0, 8)}…\``).join("\n"), { enLigne: true });
+      .champ("Type", vus.map((s) => s.type).join("\n"), { enLigne: true })
+      .champ(
+        "Raison",
+        vus.map((s) => (s.reason ? s.reason.slice(0, 40) : "—")).join("\n"),
+        { enLigne: true },
+      )
+      .champ(
+        "Durée",
+        vus
+          .map((s) =>
+            s.durationSec ? formaterDureeCourte(s.durationSec) : "—",
+          )
+          .join("\n"),
+        { enLigne: true },
+      )
+      .champ(
+        "Expire",
+        vus.map((s) => horodatage(s.expiresAt, "R")).join("\n"),
+        { enLigne: true },
+      )
+      .champ(
+        "ID (tronqué)",
+        vus.map((s) => `\`${s.id.slice(0, 8)}…\``).join("\n"),
+        { enLigne: true },
+      );
     const embed = finirCommeLegacy(
       liste,
       COULEURS_LEGACY.orange,
-      sanctions.length > MAX ? `… et ${sanctions.length - MAX} autre(s) sanction(s) non affichée(s).` : null,
+      sanctions.length > MAX
+        ? `… et ${sanctions.length - MAX} autre(s) sanction(s) non affichée(s).`
+        : null,
     );
     await interaction.editReply({ embeds: [embed] });
   }
 
   @Slash({ name: "revoke", description: "Révoquer une sanction par son ID" })
   async revoke(
-    @SlashOption({ name: "id", description: "UUID de la sanction à révoquer", type: ApplicationCommandOptionType.String, required: true })
+    @SlashOption({
+      name: "id",
+      description: "UUID de la sanction à révoquer",
+      type: ApplicationCommandOptionType.String,
+      required: true,
+    })
     id: string,
-    @SlashOption({ name: "reason", description: "Raison de la révocation", type: ApplicationCommandOptionType.String, required: true })
+    @SlashOption({
+      name: "reason",
+      description: "Raison de la révocation",
+      type: ApplicationCommandOptionType.String,
+      required: true,
+    })
     raison: string,
     interaction: ChatInputCommandInteraction,
   ): Promise<void> {
     await interaction.deferReply();
-    const sanction = await appelApi(interaction, c => c.sanctions.revoke(id.trim(), raison), "Révocation refusée");
+    const sanction = await appelApi(
+      interaction,
+      (c) => c.sanctions.revoke(id.trim(), raison),
+      "Révocation refusée",
+    );
     if (!sanction) return;
     const probleme = await effet(interaction, sanction, true);
     const embed = finirCommeLegacy(
@@ -302,7 +458,11 @@ export class CommandeSanction {
         .champ("Raison de révocation", raison),
       COULEURS_LEGACY.vert,
     );
-    if (probleme) embed.addFields({ name: "Effet Discord", value: `Révoquée en base mais effet Discord échoué : ${probleme}` });
+    if (probleme)
+      embed.addFields({
+        name: "Effet Discord",
+        value: `Révoquée en base mais effet Discord échoué : ${probleme}`,
+      });
     await interaction.editReply({ embeds: [embed] });
   }
 
@@ -313,12 +473,25 @@ export class CommandeSanction {
     type: SanctionType,
     raison: string,
     duree: number | null,
-    textes: { titre: string; icone: string; echecEffet: string; couleur: number; sansExpiration: string },
+    textes: {
+      titre: string;
+      icone: string;
+      echecEffet: string;
+      couleur: number;
+      sansExpiration: string;
+    },
   ): Promise<void> {
     const guildId = interaction.guildId as string;
     const sanction = await appelApi(
       interaction,
-      c => c.sanctions.create({ type, userId: cible.id, guildId, reason: raison, durationSec: duree }),
+      (c) =>
+        c.sanctions.create({
+          type,
+          userId: cible.id,
+          guildId,
+          reason: raison,
+          durationSec: duree,
+        }),
       "Sanction refusée",
     );
     if (!sanction) return;
@@ -326,18 +499,40 @@ export class CommandeSanction {
     if (probleme) {
       await repondre(
         interaction,
-        echec("Effet Discord échoué", `Sanction enregistrée (\`${sanction.id}\`) mais ${textes.echecEffet} : ${probleme}`),
+        echec(
+          "Effet Discord échoué",
+          `Sanction enregistrée (\`${sanction.id}\`) mais ${textes.echecEffet} : ${probleme}`,
+        ),
       );
       return;
     }
-    const embed = fiche({ icone: textes.icone, titre: textes.titre })
-      .champ("Utilisateur", ligneUtilisateur(cible), { enLigne: true });
+    const embed = fiche({ icone: textes.icone, titre: textes.titre }).champ(
+      "Utilisateur",
+      ligneUtilisateur(cible),
+      { enLigne: true },
+    );
     if (type !== SanctionType.Kick)
-      embed.champ("Durée", sanction.durationSec ? formaterDureeCourte(sanction.durationSec) : "Permanent", { enLigne: true });
-    embed.champ("Raison", raison).champ("ID sanction", `\`${sanction.id}\``, { enLigne: true });
+      embed.champ(
+        "Durée",
+        sanction.durationSec
+          ? formaterDureeCourte(sanction.durationSec)
+          : "Permanent",
+        { enLigne: true },
+      );
+    embed
+      .champ("Raison", raison)
+      .champ("ID sanction", `\`${sanction.id}\``, { enLigne: true });
     if (type !== SanctionType.Kick)
-      embed.champ("Expire le", sanction.expiresAt ? horodatage(sanction.expiresAt) : textes.sansExpiration, { enLigne: true });
-    await interaction.editReply({ embeds: [finirCommeLegacy(embed, textes.couleur)] });
+      embed.champ(
+        "Expire le",
+        sanction.expiresAt
+          ? horodatage(sanction.expiresAt)
+          : textes.sansExpiration,
+        { enLigne: true },
+      );
+    await interaction.editReply({
+      embeds: [finirCommeLegacy(embed, textes.couleur)],
+    });
   }
 }
 
@@ -347,11 +542,19 @@ async function sanctionsActives(
   userId: string,
   guildId: string,
 ): Promise<Sanction[] | null> {
-  const lu = await lireApi(interaction, c =>
-    c.sanctions.list({ userId, guildId, type: SanctionType.Warn, active: true, pageSize: 100 }),
+  const lu = await lireApi(interaction, (c) =>
+    c.sanctions.list({
+      userId,
+      guildId,
+      type: SanctionType.Warn,
+      active: true,
+      pageSize: 100,
+    }),
   );
   if (!lu.ok) {
-    console.warn(`[sanction] escalade non évaluée pour ${userId} : ${lu.motif}`);
+    console.warn(
+      `[sanction] escalade non évaluée pour ${userId} : ${lu.motif}`,
+    );
     return null;
   }
   return lu.valeur.data;

@@ -19,13 +19,36 @@ const DOSSIERS = ["app/achillea", "components/achillea"];
 
 /** Familles de la palette Tailwind (assemblées pour que ce fichier ne se signale pas lui-même). */
 const FAMILLES = [
-  "emerald", "green", "lime", "teal", "rose", "red", "amber", "yellow", "orange",
-  "sky", "blue", "cyan", "indigo", "purple", "violet", "fuchsia", "pink",
-  "slate", "gray", "zinc", "neutral", "stone",
+  "emerald",
+  "green",
+  "lime",
+  "teal",
+  "rose",
+  "red",
+  "amber",
+  "yellow",
+  "orange",
+  "sky",
+  "blue",
+  "cyan",
+  "indigo",
+  "purple",
+  "violet",
+  "fuchsia",
+  "pink",
+  "slate",
+  "gray",
+  "zinc",
+  "neutral",
+  "stone",
 ];
-const PALETTE_BRUTE = new RegExp(String.raw`(?<![\w-])(?:[a-z-]+:)*[a-z]+(?:-[a-z]+)*-(?:${FAMILLES.join("|")})-\d{2,3}\b`, "g");
+const PALETTE_BRUTE = new RegExp(
+  String.raw`(?<![\w-])(?:[a-z-]+:)*[a-z]+(?:-[a-z]+)*-(?:${FAMILLES.join("|")})-\d{2,3}\b`,
+  "g",
+);
 /** Valeur arbitraire hexadécimale dans une classe : `text-[#f87171]`, `from-[#6d00ce]/30`. */
-const HEX_ARBITRAIRE = /(?<![\w-])(?:[a-z-]+:)*[a-z]+(?:-[a-z]+)*-\[#[0-9a-fA-F]{3,8}\]/g;
+const HEX_ARBITRAIRE =
+  /(?<![\w-])(?:[a-z-]+:)*[a-z]+(?:-[a-z]+)*-\[#[0-9a-fA-F]{3,8}\]/g;
 
 /**
  * Exceptions, fichier par fichier, avec leur raison.
@@ -39,13 +62,18 @@ const HEX_ARBITRAIRE = /(?<![\w-])(?:[a-z-]+:)*[a-z]+(?:-[a-z]+)*-\[#[0-9a-fA-F]
  */
 const EXCEPTIONS: Record<string, RegExp[]> = {
   "components/achillea/couleurs-donnees.ts": [/.*/],
-  "app/achillea/clans/[id]/clan-profile-client.tsx": [/^from-\[#6d00ce\]$/, /^to-\[#DFFF57\]$/],
+  "app/achillea/clans/[id]/clan-profile-client.tsx": [
+    /^from-\[#6d00ce\]$/,
+    /^to-\[#DFFF57\]$/,
+  ],
 };
 
 async function fichiersSources(): Promise<string[]> {
   const sortie: string[] = [];
   for (const dossier of DOSSIERS) {
-    for await (const relatif of new Bun.Glob("**/*.{ts,tsx}").scan(`${RACINE}/${dossier}`)) {
+    for await (const relatif of new Bun.Glob("**/*.{ts,tsx}").scan(
+      `${RACINE}/${dossier}`,
+    )) {
       const fichier = `${dossier}/${relatif.replaceAll("\\", "/")}`;
       if (!fichier.endsWith(".test.ts")) sortie.push(fichier);
     }
@@ -60,12 +88,15 @@ describe("jetons de statut dans Achilléa", () => {
     const violations: string[] = [];
     for (const fichier of fichiers) {
       const permises = EXCEPTIONS[fichier] ?? [];
-      const lignes = (await Bun.file(`${RACINE}/${fichier}`).text()).split("\n");
+      const lignes = (await Bun.file(`${RACINE}/${fichier}`).text()).split(
+        "\n",
+      );
       lignes.forEach((ligne, index) => {
         for (const motif of [PALETTE_BRUTE, HEX_ARBITRAIRE]) {
           for (const [classe] of ligne.matchAll(motif)) {
             const nue = classe.replace(/^(?:[a-z-]+:)+/, "");
-            if (!permises.some(permise => permise.test(nue))) violations.push(`${fichier}:${index + 1} ${classe}`);
+            if (!permises.some((permise) => permise.test(nue)))
+              violations.push(`${fichier}:${index + 1} ${classe}`);
           }
         }
       });
@@ -74,13 +105,31 @@ describe("jetons de statut dans Achilléa", () => {
   });
 
   it("reconnaît une palette brute et laisse passer les jetons", () => {
-    const brutes = ["text-emerald-400", "hover:bg-rose-600/20", "border-amber-500/30", "ring-slate-300", "text-[#f87171]"];
+    const brutes = [
+      "text-emerald-400",
+      "hover:bg-rose-600/20",
+      "border-amber-500/30",
+      "ring-slate-300",
+      "text-[#f87171]",
+    ];
     for (const classe of brutes) {
-      const trouve = [...classe.matchAll(PALETTE_BRUTE), ...classe.matchAll(HEX_ARBITRAIRE)];
+      const trouve = [
+        ...classe.matchAll(PALETTE_BRUTE),
+        ...classe.matchAll(HEX_ARBITRAIRE),
+      ];
       expect({ classe, trouve: trouve.length }).toEqual({ classe, trouve: 1 });
     }
-    for (const jeton of ["text-success", "bg-destructive/10", "hover:text-warning/80", "text-success-foreground", "bg-surface-container"]) {
-      expect([...jeton.matchAll(PALETTE_BRUTE), ...jeton.matchAll(HEX_ARBITRAIRE)]).toEqual([]);
+    for (const jeton of [
+      "text-success",
+      "bg-destructive/10",
+      "hover:text-warning/80",
+      "text-success-foreground",
+      "bg-surface-container",
+    ]) {
+      expect([
+        ...jeton.matchAll(PALETTE_BRUTE),
+        ...jeton.matchAll(HEX_ARBITRAIRE),
+      ]).toEqual([]);
     }
   });
 });

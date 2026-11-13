@@ -7,25 +7,34 @@
 export const COFONDATEURS_REQUIS = 4;
 
 /** Types et poids acceptés pour le logo (l'API en fait aussi un émoji Discord, 256 Ko max). */
-export const LOGO_TYPES = ["image/png", "image/jpeg", "image/gif", "image/webp"] as const;
+export const LOGO_TYPES = [
+  "image/png",
+  "image/jpeg",
+  "image/gif",
+  "image/webp",
+] as const;
 export const LOGO_MAX_OCTETS = 256 * 1024;
 
 /** Identifiants Discord saisis, dédoublonnés ; `null` si l'un n'est pas un identifiant. */
 export function lireCofondateurs(saisie: string): string[] | null {
   const ids = saisie
     .split(/[\s,;]+/)
-    .map(id => id.trim())
+    .map((id) => id.trim())
     .filter(Boolean);
-  if (ids.some(id => !/^\d{17,20}$/.test(id))) return null;
+  if (ids.some((id) => !/^\d{17,20}$/.test(id))) return null;
   return [...new Set(ids)];
 }
 
 /** Message d'erreur d'un logo choisi, `null` s'il convient. */
-export function erreurLogo(fichier: { type: string; size: number } | null): string | null {
-  if (!fichier) return "Choisis un logo pour ton clan (PNG, JPEG, GIF ou WebP).";
+export function erreurLogo(
+  fichier: { type: string; size: number } | null,
+): string | null {
+  if (!fichier)
+    return "Choisis un logo pour ton clan (PNG, JPEG, GIF ou WebP).";
   if (!(LOGO_TYPES as readonly string[]).includes(fichier.type))
     return "Le logo doit être une image PNG, JPEG, GIF ou WebP.";
-  if (fichier.size > LOGO_MAX_OCTETS) return "Le logo ne doit pas dépasser 256 Ko.";
+  if (fichier.size > LOGO_MAX_OCTETS)
+    return "Le logo ne doit pas dépasser 256 Ko.";
   return null;
 }
 
@@ -33,8 +42,12 @@ export function erreurLogo(fichier: { type: string; size: number } | null): stri
  * Échec de `POST /clans/create` traduit pour le formulaire. Le client ne relaie
  * que le statut HTTP : chaque statut de l'API correspond à une famille d'erreur.
  */
-export function messageErreurCreation(echec: { kind: string; status?: number }): string {
-  if (echec.kind !== "http") return "L'API Achilléa est injoignable. Réessaie dans un instant.";
+export function messageErreurCreation(echec: {
+  kind: string;
+  status?: number;
+}): string {
+  if (echec.kind !== "http")
+    return "L'API Achilléa est injoignable. Réessaie dans un instant.";
   switch (echec.status) {
     case 400:
       return "La demande a été refusée : vérifie que tes 4 co-fondateurs ont un compte Achilléa, sont présents sur le Discord d'Achilléa et ne sont dans aucun clan, puis le nom, le sigle et les liens.";

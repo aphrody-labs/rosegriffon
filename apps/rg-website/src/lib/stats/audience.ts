@@ -95,7 +95,9 @@ function nouvelAccumulateur(): Accumulateur {
  * caractères multi-octets coupés en deux — un pseudo accentué à cheval sur deux
  * chunks produirait sinon un caractère de remplacement.
  */
-async function* lignes(fichier: ReturnType<typeof Bun.file>): AsyncGenerator<string> {
+async function* lignes(
+  fichier: ReturnType<typeof Bun.file>,
+): AsyncGenerator<string> {
   const decodeur = new TextDecoder();
   let reste = "";
 
@@ -142,7 +144,7 @@ function meilleurs(compteur: Map<string, number>, combien: number) {
 function normaliserChemin(chemin: string): string {
   return chemin
     .split("/")
-    .map(segment => {
+    .map((segment) => {
       if (!segment) {
         return segment;
       }
@@ -210,7 +212,20 @@ export async function lireAudience(heures = 24): Promise<RapportAudience> {
         if (champs.length < 12) {
           continue;
         }
-        const [horodatage, host, , uri, statut, octets, dureeRequete, , statutCache, referent, , ip] = champs;
+        const [
+          horodatage,
+          host,
+          ,
+          uri,
+          statut,
+          octets,
+          dureeRequete,
+          ,
+          statutCache,
+          referent,
+          ,
+          ip,
+        ] = champs;
 
         const instant = Date.parse(horodatage ?? "");
         if (!Number.isFinite(instant) || instant < debut) {
@@ -280,11 +295,11 @@ export async function lireAudience(heures = 24): Promise<RapportAudience> {
         p95Ms: centile(triees, 0.95),
         requetes: acc.requetes,
         tauxCache: acc.cacheTotal > 0 ? acc.cacheHit / acc.cacheTotal : null,
-        topChemins: meilleurs(acc.chemins, 8).map(e => ({
+        topChemins: meilleurs(acc.chemins, 8).map((e) => ({
           chemin: e.cle,
           requetes: e.requetes,
         })),
-        topReferents: meilleurs(acc.referents, 5).map(e => ({
+        topReferents: meilleurs(acc.referents, 5).map((e) => ({
           referent: e.cle,
           requetes: e.requetes,
         })),
@@ -331,7 +346,7 @@ export async function lireAudienceDistante(): Promise<AudienceDistante | null> {
     };
     return {
       collecteLe: brut.collecteLe ?? "",
-      domaines: (brut.domaines ?? []).map(d => ({
+      domaines: (brut.domaines ?? []).map((d) => ({
         erreurs4xx: d.erreurs4xx ?? 0,
         erreurs5xx: d.erreurs5xx ?? 0,
         host: d.host ?? "",

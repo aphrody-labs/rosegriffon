@@ -7,7 +7,12 @@ import { createPostgresClient } from "@rosegriffon/db/service";
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
 // AVIF/HEIC dépendent des codecs de l'OS et ne se décodent pas sous Linux (Vercel).
-const ALLOWED_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/gif"]);
+const ALLOWED_TYPES = new Set([
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/gif",
+]);
 const MAX_PIXELS = 8192 * 8192;
 const STORAGE_BUCKET = "article";
 
@@ -70,7 +75,9 @@ interface CropRect {
 const MAX_DIMENSION = 16_384;
 
 function isUnsupportedFormat(error: unknown): boolean {
-  return (error as { code?: string } | null)?.code === "ERR_IMAGE_FORMAT_UNSUPPORTED";
+  return (
+    (error as { code?: string } | null)?.code === "ERR_IMAGE_FORMAT_UNSUPPORTED"
+  );
 }
 
 async function processAndUpload(
@@ -81,46 +88,74 @@ async function processAndUpload(
   const supabase = createPostgresClient();
 
   // Chaque variante part des octets source : Bun.Image décode hors du thread JS.
-  const uploads = VARIANTS.map(async variant => {
+  const uploads = VARIANTS.map(async (variant) => {
     const filename = `${filenameBase}${variant.suffix}.webp`;
     const image = new Bun.Image(input, { maxPixels: MAX_PIXELS });
-    if (crop) (image as unknown as { extract?: (c: CropRect) => void }).extract?.(crop);
+    if (crop)
+      (image as unknown as { extract?: (c: CropRect) => void }).extract?.(crop);
     const bytes = await image
-      .resize(variant.width, MAX_DIMENSION, { fit: "inside", withoutEnlargement: true })
+      .resize(variant.width, MAX_DIMENSION, {
+        fit: "inside",
+        withoutEnlargement: true,
+      })
       .webp({ quality: variant.quality })
       .bytes();
 
-    const { error } = await supabase.storage.from(STORAGE_BUCKET).upload(filename, bytes, {
-      cacheControl: "public, max-age=31536000, immutable",
-      contentType: "image/webp",
-      upsert: false,
-    });
+    const { error } = await supabase.storage
+      .from(STORAGE_BUCKET)
+      .upload(filename, bytes, {
+        cacheControl: "public, max-age=31536000, immutable",
+        contentType: "image/webp",
+        upsert: false,
+      });
 
     if (error) {
-      console.error(`Storage upload error (${variant.suffix || "full"}):`, error);
-      throw new Error(`Upload échoué pour la variante ${variant.suffix || "full"}`);
+      console.error(
+        `Storage upload error (${variant.suffix || "full"}):`,
+        error,
+      );
+      throw new Error(
+        `Upload échoué pour la variante ${variant.suffix || "full"}`,
+      );
     }
 
     return {
       height: image.height,
-      url: supabase.storage.from(STORAGE_BUCKET).getPublicUrl(filename).data.publicUrl,
+      url: supabase.storage.from(STORAGE_BUCKET).getPublicUrl(filename).data
+        .publicUrl,
       width: image.width,
     };
   });
 
   try {
     const [full, card, thumb] = await Promise.all(uploads);
-    return { cardUrl: card.url, height: full.height, thumbUrl: thumb.url, url: full.url, width: full.width };
+    return {
+      cardUrl: card.url,
+      height: full.height,
+      thumbUrl: thumb.url,
+      url: full.url,
+      width: full.width,
+    };
   } catch (error) {
     console.error("Image processing failed:", error);
-    if (isUnsupportedFormat(error)) return { error: "Format d'image non pris en charge par le serveur" };
-    return { error: error instanceof Error ? error.message : "Échec du traitement de l'image" };
+    if (isUnsupportedFormat(error))
+      return { error: "Format d'image non pris en charge par le serveur" };
+    return {
+      error:
+        error instanceof Error
+          ? error.message
+          : "Échec du traitement de l'image",
+    };
   }
 }
 
-async function readDimensions(input: Uint8Array): Promise<{ width: number; height: number } | null> {
+async function readDimensions(
+  input: Uint8Array,
+): Promise<{ width: number; height: number } | null> {
   try {
-    const { width, height } = await new Bun.Image(input, { maxPixels: MAX_PIXELS }).metadata();
+    const { width, height } = await new Bun.Image(input, {
+      maxPixels: MAX_PIXELS,
+    }).metadata();
     return width && height ? { height, width } : null;
   } catch {
     return null;
@@ -133,7 +168,9 @@ async function readDimensions(input: Uint8Array): Promise<{ width: number; heigh
  * Upload une image, génère 3 variantes (full 2400px, card 800px, thumb 400px)
  * et retourne les URLs + dimensions.
  */
-export async function uploadImage(formData: FormData): Promise<UploadResult | { error: string }> {
+export async function uploadImage(
+  formData: FormData,
+): Promise<UploadResult | { error: string }> {
   try {
     const file = formData.get("file") as File;
     if (!file) {
@@ -167,7 +204,9 @@ export async function uploadImage(formData: FormData): Promise<UploadResult | { 
  * Les valeurs de crop sont en pourcentages (0-100) des dimensions originales.
  * Génère les mêmes 3 variantes que uploadImage.
  */
-export async function uploadImageWithCrop(formData: FormData): Promise<UploadResult | { error: string }> {
+export async function uploadImageWithCrop(
+  formData: FormData,
+): Promise<UploadResult | { error: string }> {
   try {
     const file = formData.get("file") as File;
     const cropX = Number.parseFloat(formData.get("cropX") as string);
@@ -212,7 +251,12 @@ export async function uploadImageWithCrop(formData: FormData): Promise<UploadRes
     const safeWidth = Math.max(1, Math.min(width, metadata.width - safeLeft));
     const safeHeight = Math.max(1, Math.min(height, metadata.height - safeTop));
 
-    const crop = { height: safeHeight, left: safeLeft, top: safeTop, width: safeWidth };
+    const crop = {
+      height: safeHeight,
+      left: safeLeft,
+      top: safeTop,
+      width: safeWidth,
+    };
     return await processAndUpload(input, crypto.randomUUID(), crop);
   } catch (error) {
     console.error("Image crop upload failed:", error);

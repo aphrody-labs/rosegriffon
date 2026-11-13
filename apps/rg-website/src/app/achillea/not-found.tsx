@@ -19,9 +19,12 @@ export default function AchilleaNotFound() {
         </div>
 
         <div className="space-y-2">
-          <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">Page Introuvable</h1>
+          <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">
+            Page Introuvable
+          </h1>
           <p className="text-sm text-muted-foreground">
-            La page que vous cherchez n&apos;existe pas, a été déplacée ou son URL est incorrecte.
+            La page que vous cherchez n&apos;existe pas, a été déplacée ou son
+            URL est incorrecte.
           </p>
         </div>
 

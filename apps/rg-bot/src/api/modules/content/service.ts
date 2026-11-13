@@ -2,11 +2,20 @@ import type { Kysely } from "kysely";
 import type { Database } from "@rosegriffon/db/schema";
 
 export abstract class ContentService {
-  public static async getNewsFeed(db: Kysely<Database>, page = 1, category?: string, q?: string) {
+  public static async getNewsFeed(
+    db: Kysely<Database>,
+    page = 1,
+    category?: string,
+    q?: string,
+  ) {
     const limit = 12;
     const offset = (page - 1) * limit;
 
-    let query = db.selectFrom("articles").selectAll().where("status", "=", "published").where("app", "=", "azalee");
+    let query = db
+      .selectFrom("articles")
+      .selectAll()
+      .where("status", "=", "published")
+      .where("app", "=", "azalee");
 
     if (category) {
       query = query.where("category", "=", category);
@@ -23,7 +32,7 @@ export abstract class ContentService {
       .execute();
 
     const hasMore = rows.length > limit;
-    const items = (hasMore ? rows.slice(0, limit) : rows).map(r => ({
+    const items = (hasMore ? rows.slice(0, limit) : rows).map((r) => ({
       id: r.id,
       title: r.title,
       slug: r.slug,
@@ -32,7 +41,9 @@ export abstract class ContentService {
       featuredImageUrl: r.featured_image_url,
       authorId: r.author_id,
       createdAt: r.created_at ? new Date(r.created_at).toISOString() : null,
-      publishedAt: r.published_at ? new Date(r.published_at).toISOString() : null,
+      publishedAt: r.published_at
+        ? new Date(r.published_at).toISOString()
+        : null,
     }));
 
     return {
@@ -43,10 +54,14 @@ export abstract class ContentService {
   }
 
   public static async getCalendarEvents(db: Kysely<Database>) {
-    const rows = await db.selectFrom("events").selectAll().orderBy("start_time", "asc").execute();
+    const rows = await db
+      .selectFrom("events")
+      .selectAll()
+      .orderBy("start_time", "asc")
+      .execute();
 
     return {
-      events: rows.map(e => ({
+      events: rows.map((e) => ({
         id: String(e.id),
         title: e.title,
         description: e.description,

@@ -1,7 +1,10 @@
 import crypto from "node:crypto";
 import { Elysia, status, t } from "elysia";
 import { sql } from "kysely";
-import { signAchilleaRealtimeToken, signAchilleaSessionToken } from "@rosegriffon/auth/achillea-session";
+import {
+  signAchilleaRealtimeToken,
+  signAchilleaSessionToken,
+} from "@rosegriffon/auth/achillea-session";
 import {
   buildChallongeOAuthUrl,
   buildTwitchOAuthUrl,
@@ -34,9 +37,17 @@ export const authController = new Elysia({ prefix: "/auth" })
         set.status = 503;
         return { message: "Session authentication unavailable" as const };
       }
-      let identity = { id: body.id ?? "", username: body.username ?? null, avatar: body.avatar ?? null };
+      let identity = {
+        id: body.id ?? "",
+        username: body.username ?? null,
+        avatar: body.avatar ?? null,
+      };
       if (body.betterAuthUserId) {
-        const linked = await sql<{ discord_id: string; username: string | null; avatar_url: string | null }>`
+        const linked = await sql<{
+          discord_id: string;
+          username: string | null;
+          avatar_url: string | null;
+        }>`
 				select a.account_id as discord_id,
 				       coalesce(p.username, u.name) as username,
 				       coalesce(p.avatar_url, u.image) as avatar_url
@@ -51,7 +62,11 @@ export const authController = new Elysia({ prefix: "/auth" })
           set.status = 409;
           return { message: "Discord account is not linked" as const };
         }
-        identity = { id: account.discord_id, username: account.username, avatar: account.avatar_url };
+        identity = {
+          id: account.discord_id,
+          username: account.username,
+          avatar: account.avatar_url,
+        };
       }
       const displayName = identity.username?.trim() || identity.id;
       await db
@@ -70,7 +85,7 @@ export const authController = new Elysia({ prefix: "/auth" })
           bio: null,
           twitch_url: null,
         })
-        .onConflict(oc =>
+        .onConflict((oc) =>
           oc.column("id").doUpdateSet({
             updated_at: new Date(),
             last_interact: new Date(),
@@ -93,12 +108,20 @@ export const authController = new Elysia({ prefix: "/auth" })
         200: t.Object({
           token: t.String(),
           expiresIn: t.Number(),
-          user: t.Object({ id: t.String(), username: t.Nullable(t.String()), avatar: t.Nullable(t.String()) }),
+          user: t.Object({
+            id: t.String(),
+            username: t.Nullable(t.String()),
+            avatar: t.Nullable(t.String()),
+          }),
         }),
         400: t.Object({ message: t.Literal("Identity is required") }),
-        401: t.Object({ message: t.Literal("Internal authentication required") }),
+        401: t.Object({
+          message: t.Literal("Internal authentication required"),
+        }),
         409: t.Object({ message: t.Literal("Discord account is not linked") }),
-        503: t.Object({ message: t.Literal("Session authentication unavailable") }),
+        503: t.Object({
+          message: t.Literal("Session authentication unavailable"),
+        }),
       },
     },
   )
@@ -120,7 +143,14 @@ export const authController = new Elysia({ prefix: "/auth" })
     }
     const user = await db
       .selectFrom("user")
-      .select(["id", "username", "avatar", "display_name", "role", "blacklist_id"])
+      .select([
+        "id",
+        "username",
+        "avatar",
+        "display_name",
+        "role",
+        "blacklist_id",
+      ])
       .where("id", "=", session.id)
       .executeTakeFirst();
     if (!user) {
@@ -131,8 +161,13 @@ export const authController = new Elysia({ prefix: "/auth" })
     return {
       user: {
         ...session,
-        username: publicProfile?.username ?? user.username ?? session.username ?? user.display_name,
-        avatar: publicProfile?.avatar_url ?? user.avatar ?? session.avatar ?? null,
+        username:
+          publicProfile?.username ??
+          user.username ??
+          session.username ??
+          user.display_name,
+        avatar:
+          publicProfile?.avatar_url ?? user.avatar ?? session.avatar ?? null,
         displayName: publicProfile?.username ?? user.display_name,
         role: user.role,
         blacklisted: user.blacklist_id !== null,
@@ -143,13 +178,15 @@ export const authController = new Elysia({ prefix: "/auth" })
     "/realtime-token",
     async ({ db, headers, set }) => {
       const session = await resolveAchilleaSession(headers);
-      if (!session) return status(401, { message: "Authentication required" as const });
+      if (!session)
+        return status(401, { message: "Authentication required" as const });
       const user = await db
         .selectFrom("user")
         .select(["id", "username", "avatar", "display_name"])
         .where("id", "=", session.id)
         .executeTakeFirst();
-      if (!user) return status(401, { message: "Authentication required" as const });
+      if (!user)
+        return status(401, { message: "Authentication required" as const });
       const secret = process.env.JWT_SECRET_KEY;
       if (!secret) {
         set.status = 503;
@@ -159,7 +196,8 @@ export const authController = new Elysia({ prefix: "/auth" })
       const token = signAchilleaRealtimeToken(
         {
           id: user.id,
-          username: publicProfile?.username ?? user.username ?? user.display_name,
+          username:
+            publicProfile?.username ?? user.username ?? user.display_name,
           avatar: publicProfile?.avatar_url ?? user.avatar,
         },
         secret,
@@ -168,9 +206,15 @@ export const authController = new Elysia({ prefix: "/auth" })
     },
     {
       response: {
-        200: t.Object({ token: t.String(), expiresIn: t.Number(), userId: t.String() }),
+        200: t.Object({
+          token: t.String(),
+          expiresIn: t.Number(),
+          userId: t.String(),
+        }),
         401: t.Object({ message: t.Literal("Authentication required") }),
-        503: t.Object({ message: t.Literal("Realtime authentication unavailable") }),
+        503: t.Object({
+          message: t.Literal("Realtime authentication unavailable"),
+        }),
       },
     },
   )
@@ -186,9 +230,14 @@ export const authController = new Elysia({ prefix: "/auth" })
       const internal = verifyAdminToken(bearer, process.env.API_ADMIN_TOKEN);
       const session = internal ? null : await resolveAchilleaSession(headers);
       const userId = internal ? query.userId : session?.id;
-      if (!userId) return status(401, { message: "Authentication required" as const });
+      if (!userId)
+        return status(401, { message: "Authentication required" as const });
 
-      const user = await db.selectFrom("user").select("id").where("id", "=", userId).executeTakeFirst();
+      const user = await db
+        .selectFrom("user")
+        .select("id")
+        .where("id", "=", userId)
+        .executeTakeFirst();
       if (!user) return status(404, { message: "User not found" as const });
 
       const token = crypto.randomBytes(24).toString("hex");
@@ -200,12 +249,19 @@ export const authController = new Elysia({ prefix: "/auth" })
         .where("discord_id", "=", userId)
         .where("created_at", "<", new Date(Date.now() - 10 * 60 * 1000))
         .execute();
-      await db.insertInto("oauth_csrf").values({ token, discord_id: userId }).execute();
+      await db
+        .insertInto("oauth_csrf")
+        .values({ token, discord_id: userId })
+        .execute();
       const state = formatProviderOAuthState(userId, token);
       const callback = `${rgUrl(process.env, "api", "PUBLIC_API_URL")}/v1/auth/oauth/callback`;
       const url =
         provider === "twitch"
-          ? buildTwitchOAuthUrl({ callbackUrl: callback, clientId: process.env.TWITCH_CLIENT_ID ?? "", state })
+          ? buildTwitchOAuthUrl({
+              callbackUrl: callback,
+              clientId: process.env.TWITCH_CLIENT_ID ?? "",
+              state,
+            })
           : buildChallongeOAuthUrl({
               callbackUrl: callback,
               clientId:
@@ -226,7 +282,12 @@ export const authController = new Elysia({ prefix: "/auth" })
     async ({ db, query, redirect }) => {
       if (!query.provider || !query.code || !query.state)
         return status(400, { message: "OAuth parameters missing" as const });
-      const result = await ProviderOAuthService.handle(db, query.provider, query.code, query.state);
+      const result = await ProviderOAuthService.handle(
+        db,
+        query.provider,
+        query.code,
+        query.state,
+      );
       if (!result.ok) return status(result.status, { message: result.message });
       // `set.redirect` followed by `return status(302, …)`: the returned status
       // replaced the response and dropped `Location`, leaving the browser on a

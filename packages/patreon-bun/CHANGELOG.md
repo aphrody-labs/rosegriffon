@@ -43,7 +43,7 @@
 
 ## [0.17.0](https://github.com/ghostrider-05/patreon-api.ts/compare/patreon-api.ts-v0.16.1...patreon-api.ts-v0.17.0) (2025-11-27)
 
-###  BREAKING CHANGES
+### BREAKING CHANGES
 
 - **VERSION:** rename to lowercase `version`
 - refactor usage for standalone caches ([#238](https://github.com/ghostrider-05/patreon-api.ts/issues/238))
@@ -95,7 +95,7 @@
 
 ## [0.16.0](https://github.com/ghostrider-05/patreon-api.ts/compare/patreon-api.ts-v0.15.1...patreon-api.ts-v0.16.0) (2025-11-02)
 
-###  BREAKING CHANGES
+### BREAKING CHANGES
 
 - bump (recommended) node version to v22
 - **PatreonMock:** change mock handler to be async and rename body argument to text
@@ -128,7 +128,7 @@
 
 ## [0.15.0](https://github.com/ghostrider-05/patreon-api.ts/compare/patreon-api.ts-v0.14.2...patreon-api.ts-v0.15.0) (2025-08-02)
 
-###  BREAKING CHANGES
+### BREAKING CHANGES
 
 - **build:** remove sourcemaps ([#184](https://github.com/ghostrider-05/patreon-api.ts/issues/184))
 
@@ -163,7 +163,7 @@
 
 ## [0.14.0](https://github.com/ghostrider-05/patreon-api.ts/compare/patreon-api.ts-v0.13.0...patreon-api.ts-v0.14.0) (2025-05-18)
 
-###  BREAKING CHANGES
+### BREAKING CHANGES
 
 - **rest:** remove deprecated PATREON_RESPONSE_HEADERS
 - **webhooks:** remove getWebhookUserId method
@@ -186,7 +186,7 @@
 
 ## [0.13.0](https://github.com/ghostrider-05/patreon-api.ts/compare/patreon-api.ts-v0.12.3...patreon-api.ts-v0.13.0) (2025-04-26)
 
-###  BREAKING CHANGES
+### BREAKING CHANGES
 
 - remove deprecated SchemaRelationshipKeys and SchemaKeys ([#160](https://github.com/ghostrider-05/patreon-api.ts/issues/160))
 - **types:** remove deprecated schema and rest types ([#159](https://github.com/ghostrider-05/patreon-api.ts/issues/159))
@@ -232,7 +232,7 @@
 
 ## [0.12.0](https://github.com/ghostrider-05/patreon-api.ts/compare/patreon-api.ts-v0.11.0...patreon-api.ts-v0.12.0) (2025-03-28)
 
-###  BREAKING CHANGES
+### BREAKING CHANGES
 
 - **oauth:** disable token validation by default
 - **rest:** remove statusText from response event
@@ -273,7 +273,7 @@
 
 ## [0.10.0](https://github.com/ghostrider-05/patreon-api.ts/compare/patreon-api.ts-v0.9.0...patreon-api.ts-v0.10.0) (2025-02-06)
 
-###  BREAKING CHANGES
+### BREAKING CHANGES
 
 - Patreon (member) resource updates ([#120](https://github.com/ghostrider-05/patreon-api.ts/issues/120))
 
@@ -315,7 +315,7 @@
 
 ## [0.8.0](https://github.com/ghostrider-05/patreon-api.ts/compare/patreon-api.ts-v0.7.0...patreon-api.ts-v0.8.0) (2024-10-04)
 
-###  BREAKING CHANGES
+### BREAKING CHANGES
 
 - **PatreonOauthClient:** remove static fetch and paginate methods
 
@@ -368,7 +368,7 @@
 
 ## [0.6.0](https://github.com/ghostrider-05/patreon-api.ts/compare/patreon-api.ts-v0.5.0...patreon-api.ts-v0.6.0) (2024-05-10)
 
-###  BREAKING CHANGES
+### BREAKING CHANGES
 
 - removes useDefaultIncludes from query options
 - remove all deprecations ([#22](https://github.com/ghostrider-05/patreon-api.ts/issues/22))
@@ -385,7 +385,7 @@
 
 ## [0.5.0](https://github.com/ghostrider-05/patreon-api.ts/compare/patreon-api.ts-v0.4.0...patreon-api.ts-v0.5.0) (2024-05-10)
 
-###  BREAKING CHANGES
+### BREAKING CHANGES
 
 - **types:** remove `Fetch` and `Response`
 - **BasePatreonClient:** `listOauth2` returns the amount of pages
@@ -408,7 +408,7 @@
 
 ## [0.4.0](https://github.com/ghostrider-05/patreon-api.ts/compare/patreon-api.ts-v0.3.0...patreon-api.ts-v0.4.0) (2024-04-17)
 
-###  BREAKING CHANGES
+### BREAKING CHANGES
 
 - **oauth:** move options to `PatreonClientOptions.oauth`
 - **oauth:** deprecate `Oauth2FetchOptions`.`refreshOnFailed` for `retryOnFailed`
@@ -442,7 +442,7 @@
 
 ## [0.3.0](https://github.com/ghostrider-05/patreon-api.ts/compare/patreon-api.ts-v0.2.0...patreon-api.ts-v0.3.0) (2024-04-11)
 
-###  BREAKING CHANGES
+### BREAKING CHANGES
 
 - **PatreonUserClientInstance:** set token to readonly
 - **types:** narrow type of `User.social_connections` to `Record<string, string>`

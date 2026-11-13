@@ -1,4 +1,10 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@rosegriffon/ui";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@rosegriffon/ui";
 import { cn } from "@/lib/utils";
 
 interface AdminCardProps extends React.ComponentPropsWithoutRef<typeof Card> {
@@ -24,9 +30,15 @@ export function AdminCard({
           {icon}
           {title}
         </CardTitle>
-        {description && <CardDescription className="text-xs text-muted-foreground">{description}</CardDescription>}
+        {description && (
+          <CardDescription className="text-xs text-muted-foreground">
+            {description}
+          </CardDescription>
+        )}
       </CardHeader>
-      <CardContent className={cn("pt-0", contentClassName)}>{children}</CardContent>
+      <CardContent className={cn("pt-0", contentClassName)}>
+        {children}
+      </CardContent>
     </Card>
   );
 }

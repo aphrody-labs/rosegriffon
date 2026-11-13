@@ -29,7 +29,9 @@ describe("contenu vide", () => {
     expect(parseDiscordMarkdown("", CTX)).toEqual([]);
     expect(parseDiscordMarkdown("   \n\n  ", CTX)).toEqual([]);
     // Une valeur non conforme ne doit jamais faire tomber le rendu.
-    expect(parseDiscordMarkdown(undefined as unknown as string, CTX)).toEqual([]);
+    expect(parseDiscordMarkdown(undefined as unknown as string, CTX)).toEqual(
+      [],
+    );
     expect(analyserInline("", CTX)).toEqual([]);
   });
 });
@@ -37,7 +39,7 @@ describe("contenu vide", () => {
 describe("mise en forme", () => {
   it("reconnait le gras", () => {
     const noeuds = analyserInline("un **mot** fort", CTX);
-    expect(noeuds.some(n => n.type === "gras")).toBe(true);
+    expect(noeuds.some((n) => n.type === "gras")).toBe(true);
     expect(texteBrut(noeuds)).toBe("un mot fort");
   });
 
@@ -49,7 +51,9 @@ describe("mise en forme", () => {
   it("reconnait le gras italique combine", () => {
     const noeud = analyserInline("***tres fort***", CTX)[0];
     expect(noeud?.type).toBe("gras");
-    expect(noeud && "enfants" in noeud && noeud.enfants[0]?.type).toBe("italique");
+    expect(noeud && "enfants" in noeud && noeud.enfants[0]?.type).toBe(
+      "italique",
+    );
   });
 
   it("reconnait le souligne, le barre et le spoiler", () => {
@@ -66,7 +70,7 @@ describe("mise en forme", () => {
 
   it("reconnait un bloc de code avec son langage", () => {
     const blocs = parseDiscordMarkdown("avant\n```ts\nconst a = 1;\n```", CTX);
-    const code = blocs.find(bloc => bloc.type === "bloc-code");
+    const code = blocs.find((bloc) => bloc.type === "bloc-code");
     expect(code).toBeDefined();
     expect(code && code.type === "bloc-code" && code.langage).toBe("ts");
     expect(code && code.type === "bloc-code" && code.code).toBe("const a = 1;");
@@ -74,13 +78,17 @@ describe("mise en forme", () => {
 
   it("respecte l'echappement par antislash", () => {
     const noeuds = analyserInline(String.raw`\*\*pas gras\*\*`, CTX);
-    expect(noeuds.every(n => n.type === "texte")).toBe(true);
+    expect(noeuds.every((n) => n.type === "texte")).toBe(true);
     expect(texteBrut(noeuds)).toBe("**pas gras**");
   });
 
   it("decoupe titres, citations et listes", () => {
     const blocs = parseDiscordMarkdown("# Titre\n> cite\n- un\n- deux", CTX);
-    expect(blocs.map(bloc => bloc.type)).toEqual(["titre", "citation", "liste"]);
+    expect(blocs.map((bloc) => bloc.type)).toEqual([
+      "titre",
+      "citation",
+      "liste",
+    ]);
     const liste = blocs[2];
     expect(liste?.type === "liste" ? liste.elements : []).toHaveLength(2);
   });
@@ -103,7 +111,9 @@ describe("mentions", () => {
     const noeud = analyserInline("<@&222222222222222222>", CTX)[0];
     expect(noeud?.type).toBe("mention-role");
     expect(noeud && "nom" in noeud && noeud.nom).toBe("Coach");
-    expect(noeud && noeud.type === "mention-role" && noeud.couleur).toBe("#f89c5a");
+    expect(noeud && noeud.type === "mention-role" && noeud.couleur).toBe(
+      "#f89c5a",
+    );
   });
 
   it("resout une mention de salon", () => {
@@ -155,18 +165,22 @@ describe("liens", () => {
   it("accepte un lien http(s) a libelle", () => {
     const noeud = analyserInline("[le site](https://rosegriffon.fr)", CTX)[0];
     expect(noeud?.type).toBe("lien");
-    expect(noeud && noeud.type === "lien" && noeud.url).toBe("https://rosegriffon.fr");
+    expect(noeud && noeud.type === "lien" && noeud.url).toBe(
+      "https://rosegriffon.fr",
+    );
   });
 
   it("detecte un lien nu et ecarte la ponctuation finale", () => {
     const noeud = analyserInline("voir https://rosegriffon.fr/shop.", CTX)[1];
     expect(noeud?.type).toBe("lien");
-    expect(noeud && noeud.type === "lien" && noeud.url).toBe("https://rosegriffon.fr/shop");
+    expect(noeud && noeud.type === "lien" && noeud.url).toBe(
+      "https://rosegriffon.fr/shop",
+    );
   });
 
   it("REJETTE un lien javascript: et le laisse en texte brut", () => {
     const noeuds = analyserInline("[clique](javascript:alert(1))", CTX);
-    expect(noeuds.some(n => n.type === "lien")).toBe(false);
+    expect(noeuds.some((n) => n.type === "lien")).toBe(false);
     expect(texteBrut(noeuds)).toContain("javascript:alert(1)");
   });
 
@@ -177,7 +191,9 @@ describe("liens", () => {
       "[x](JavaScript:alert(1))",
       "[x](file:///etc/passwd)",
     ]) {
-      expect(analyserInline(dangereux, CTX).some(n => n.type === "lien")).toBe(false);
+      expect(
+        analyserInline(dangereux, CTX).some((n) => n.type === "lien"),
+      ).toBe(false);
     }
     expect(estUrlSure("javascript:alert(1)")).toBe(false);
     expect(estUrlSure("https://rosegriffon.fr")).toBe(true);
@@ -233,7 +249,9 @@ describe("normalisation des messages", () => {
           ],
         },
       },
-      reactions: [{ count: 4, emoji: { animated: false, id: null, name: "👍" } }],
+      reactions: [
+        { count: 4, emoji: { animated: false, id: null, name: "👍" } },
+      ],
       type: 0,
     });
 

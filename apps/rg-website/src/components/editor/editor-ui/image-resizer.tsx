@@ -73,7 +73,10 @@ export function ImageResizer({
     : editorRootElement !== null
       ? editorRootElement.getBoundingClientRect().width - 20
       : 100;
-  const maxHeightContainer = editorRootElement !== null ? editorRootElement.getBoundingClientRect().height - 20 : 100;
+  const maxHeightContainer =
+    editorRootElement !== null
+      ? editorRootElement.getBoundingClientRect().height - 20
+      : 100;
 
   const minWidth = 100;
   const minHeight = 100;
@@ -88,13 +91,29 @@ export function ImageResizer({
     const cursorDir = ew ? "ew" : ns ? "ns" : nwse ? "nwse" : "nesw";
 
     if (editorRootElement !== null) {
-      editorRootElement.style.setProperty("cursor", `${cursorDir}-resize`, "important");
+      editorRootElement.style.setProperty(
+        "cursor",
+        `${cursorDir}-resize`,
+        "important",
+      );
     }
     if (document.body !== null) {
-      document.body.style.setProperty("cursor", `${cursorDir}-resize`, "important");
-      userSelect.current.value = document.body.style.getPropertyValue("-webkit-user-select");
-      userSelect.current.priority = document.body.style.getPropertyPriority("-webkit-user-select");
-      document.body.style.setProperty("-webkit-user-select", "none", "important");
+      document.body.style.setProperty(
+        "cursor",
+        `${cursorDir}-resize`,
+        "important",
+      );
+      userSelect.current.value = document.body.style.getPropertyValue(
+        "-webkit-user-select",
+      );
+      userSelect.current.priority = document.body.style.getPropertyPriority(
+        "-webkit-user-select",
+      );
+      document.body.style.setProperty(
+        "-webkit-user-select",
+        "none",
+        "important",
+      );
     }
   };
 
@@ -104,11 +123,18 @@ export function ImageResizer({
     }
     if (document.body !== null) {
       document.body.style.setProperty("cursor", "default");
-      document.body.style.setProperty("-webkit-user-select", userSelect.current.value, userSelect.current.priority);
+      document.body.style.setProperty(
+        "-webkit-user-select",
+        userSelect.current.value,
+        userSelect.current.priority,
+      );
     }
   };
 
-  const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>, direction: number) => {
+  const handlePointerDown = (
+    event: React.PointerEvent<HTMLDivElement>,
+    direction: number,
+  ) => {
     if (!editor.isEditable()) {
       return;
     }
@@ -147,8 +173,10 @@ export function ImageResizer({
     const image = imageRef.current;
     const positioning = positioningRef.current;
 
-    const isHorizontal = positioning.direction & (Direction.east | Direction.west);
-    const isVertical = positioning.direction & (Direction.south | Direction.north);
+    const isHorizontal =
+      positioning.direction & (Direction.east | Direction.west);
+    const isVertical =
+      positioning.direction & (Direction.south | Direction.north);
 
     if (image !== null && positioning.isResizing) {
       const zoom = calculateZoomLevel(image);
@@ -157,7 +185,11 @@ export function ImageResizer({
         let diff = Math.floor(positioning.startX - event.clientX / zoom);
         diff = positioning.direction & Direction.east ? -diff : diff;
 
-        const width = clamp(positioning.startWidth + diff, minWidth, maxWidthContainer);
+        const width = clamp(
+          positioning.startWidth + diff,
+          minWidth,
+          maxWidthContainer,
+        );
 
         const height = width / positioning.ratio;
         image.style.width = `${width}px`;
@@ -168,7 +200,11 @@ export function ImageResizer({
         let diff = Math.floor(positioning.startY - event.clientY / zoom);
         diff = positioning.direction & Direction.south ? -diff : diff;
 
-        const height = clamp(positioning.startHeight + diff, minHeight, maxHeightContainer);
+        const height = clamp(
+          positioning.startHeight + diff,
+          minHeight,
+          maxHeightContainer,
+        );
 
         image.style.height = `${height}px`;
         positioning.currentHeight = height;
@@ -176,7 +212,11 @@ export function ImageResizer({
         let diff = Math.floor(positioning.startX - event.clientX / zoom);
         diff = positioning.direction & Direction.east ? -diff : diff;
 
-        const width = clamp(positioning.startWidth + diff, minWidth, maxWidthContainer);
+        const width = clamp(
+          positioning.startWidth + diff,
+          minWidth,
+          maxWidthContainer,
+        );
 
         image.style.width = `${width}px`;
         positioning.currentWidth = width;
@@ -225,49 +265,49 @@ export function ImageResizer({
       )}
       <div
         className="image-resizer image-resizer-n bg-primary absolute -top-2.5 left-1/2 size-2 -translate-x-1/2 cursor-ns-resize"
-        onPointerDown={event => {
+        onPointerDown={(event) => {
           handlePointerDown(event, Direction.north);
         }}
       />
       <div
         className="image-resizer image-resizer-ne bg-primary absolute -top-2.5 -right-2.5 size-2 cursor-nesw-resize"
-        onPointerDown={event => {
+        onPointerDown={(event) => {
           handlePointerDown(event, Direction.north | Direction.east);
         }}
       />
       <div
         className="image-resizer image-resizer-e bg-primary absolute top-1/2 -right-2.5 size-2 -translate-y-1/2 cursor-ew-resize"
-        onPointerDown={event => {
+        onPointerDown={(event) => {
           handlePointerDown(event, Direction.east);
         }}
       />
       <div
         className="image-resizer image-resizer-se bg-primary absolute -right-2.5 -bottom-2.5 size-2 cursor-nwse-resize"
-        onPointerDown={event => {
+        onPointerDown={(event) => {
           handlePointerDown(event, Direction.south | Direction.east);
         }}
       />
       <div
         className="image-resizer image-resizer-s bg-primary absolute -bottom-2.5 left-1/2 size-2 -translate-x-1/2 cursor-ns-resize"
-        onPointerDown={event => {
+        onPointerDown={(event) => {
           handlePointerDown(event, Direction.south);
         }}
       />
       <div
         className="image-resizer image-resizer-sw bg-primary absolute -bottom-2.5 -left-2.5 size-2 cursor-nesw-resize"
-        onPointerDown={event => {
+        onPointerDown={(event) => {
           handlePointerDown(event, Direction.south | Direction.west);
         }}
       />
       <div
         className="image-resizer image-resizer-w bg-primary absolute top-1/2 -left-2.5 size-2 -translate-y-1/2 cursor-ew-resize"
-        onPointerDown={event => {
+        onPointerDown={(event) => {
           handlePointerDown(event, Direction.west);
         }}
       />
       <div
         className="image-resizer image-resizer-nw bg-primary absolute -top-2.5 -left-2.5 size-2 cursor-nwse-resize"
-        onPointerDown={event => {
+        onPointerDown={(event) => {
           handlePointerDown(event, Direction.north | Direction.west);
         }}
       />

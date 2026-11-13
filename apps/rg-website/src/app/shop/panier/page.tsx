@@ -20,9 +20,12 @@ export default async function CartPage() {
     return (
       <div className="mx-auto flex min-h-[60vh] max-w-2xl flex-col items-center justify-center px-4 py-16 text-center">
         <ShoppingBag className="size-16 text-rg-or" />
-        <h1 className="mt-6 text-3xl font-extrabold text-white">Ton panier est vide</h1>
+        <h1 className="mt-6 text-3xl font-extrabold text-white">
+          Ton panier est vide
+        </h1>
         <p className="mt-3 max-w-md text-base text-white/70">
-          Pas encore d'articles. Découvre nos packs personnage édition limitée, nos prints A5 et nos stickers chibi.
+          Pas encore d'articles. Découvre nos packs personnage édition limitée,
+          nos prints A5 et nos stickers chibi.
         </p>
         <Link
           href="/shop"
@@ -48,7 +51,9 @@ export default async function CartPage() {
       </nav>
 
       <header className="mb-8 flex items-end justify-between gap-4">
-        <h1 className="text-fluid-headline-xl font-extrabold tracking-tight text-white">Mon panier</h1>
+        <h1 className="text-fluid-headline-xl font-extrabold tracking-tight text-white">
+          Mon panier
+        </h1>
         <p className="text-sm font-semibold uppercase tracking-widest text-rg-or">
           {cart.itemCount} article{cart.itemCount > 1 ? "s" : ""}
         </p>
@@ -57,7 +62,7 @@ export default async function CartPage() {
       <div className="grid gap-10 lg:grid-cols-[1fr_400px] lg:gap-12">
         <section aria-label="Articles du panier">
           <ul className="flex flex-col gap-3">
-            {cart.items.map(item => (
+            {cart.items.map((item) => (
               <CartLineItem key={item.id} item={item} />
             ))}
           </ul>
@@ -65,16 +70,24 @@ export default async function CartPage() {
 
         <aside className="lg:sticky lg:top-24 lg:self-start">
           <div className="flex flex-col gap-5 rounded-3xl border-2 border-rg-or/50 bg-rg-marine/80 p-6 shadow-[0_4px_0_0_rgba(0,0,0,0.5)]">
-            <h2 className="text-xs font-bold uppercase tracking-widest text-rg-or">Récapitulatif</h2>
+            <h2 className="text-xs font-bold uppercase tracking-widest text-rg-or">
+              Récapitulatif
+            </h2>
 
-            <Suspense fallback={<div className="h-20 animate-pulse rounded-xl bg-rg-marine/60" />}>
+            <Suspense
+              fallback={
+                <div className="h-20 animate-pulse rounded-xl bg-rg-marine/60" />
+              }
+            >
               <PatreonDiscountBanner />
             </Suspense>
 
             <dl className="space-y-2 border-t border-rg-or/20 pt-4 text-sm">
               <div className="flex items-center justify-between text-white/80">
                 <dt>Sous-total</dt>
-                <dd className="font-semibold text-white">{formatEuros(cart.subtotalCents)}</dd>
+                <dd className="font-semibold text-white">
+                  {formatEuros(cart.subtotalCents)}
+                </dd>
               </div>
               <div className="flex items-center justify-between text-white/60">
                 <dt>Livraison</dt>
@@ -90,17 +103,28 @@ export default async function CartPage() {
             </dl>
 
             <div className="flex items-end justify-between gap-3 border-t-2 border-rg-or/30 pt-4">
-              <span className="text-xs font-bold uppercase tracking-widest text-rg-or">À régler</span>
-              <span className="text-3xl font-extrabold text-white">{formatEuros(cart.subtotalCents)}</span>
+              <span className="text-xs font-bold uppercase tracking-widest text-rg-or">
+                À régler
+              </span>
+              <span className="text-3xl font-extrabold text-white">
+                {formatEuros(cart.subtotalCents)}
+              </span>
             </div>
 
             <CheckoutButton subtotalCents={cart.subtotalCents} />
 
             <ul className="grid grid-cols-2 gap-3 border-t border-rg-or/20 pt-4 text-[11px] text-white/70">
-              <TrustItem icon={<Lock className="size-3.5" />} label="Paiement sécurisé" sub="Par Stripe" />
-              <TrustItem icon={<RefreshCw className="size-3.5" />} label="Rétractation" sub="14 jours" />
+              <TrustItem
+                icon={<Lock className="size-3.5" />}
+                label="Paiement sécurisé"
+                sub="Par Stripe"
+              />
+              <TrustItem
+                icon={<RefreshCw className="size-3.5" />}
+                label="Rétractation"
+                sub="14 jours"
+              />
             </ul>
-
           </div>
         </aside>
       </div>
@@ -108,14 +132,24 @@ export default async function CartPage() {
   );
 }
 
-function TrustItem({ icon, label, sub }: { icon: React.ReactNode; label: string; sub: string }) {
+function TrustItem({
+  icon,
+  label,
+  sub,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  sub: string;
+}) {
   return (
     <li className="flex items-start gap-2">
       <span className="grid size-7 shrink-0 place-items-center rounded-full bg-rg-or/15 text-rg-or">
         {icon}
       </span>
       <span>
-        <span className="block font-bold uppercase tracking-wider text-white">{label}</span>
+        <span className="block font-bold uppercase tracking-wider text-white">
+          {label}
+        </span>
         <span className="block text-[10px] text-white/55">{sub}</span>
       </span>
     </li>

@@ -7,7 +7,8 @@ import RankedHistoryClient from "./ranked-history-client";
  */
 export const metadata = metadonneesAchillea({
   titre: "Historique des matchs classés",
-  description: "Résultats classés Achilléa, scores et variations de points match après match.",
+  description:
+    "Résultats classés Achilléa, scores et variations de points match après match.",
   chemin: "/achillea/ranked/history",
   indexable: false,
 });
@@ -15,7 +16,12 @@ export const metadata = metadonneesAchillea({
 export default async function RankedHistoryPage({
   searchParams,
 }: {
-  searchParams: Promise<{ player?: string; mode?: string; period?: string; result?: string }>;
+  searchParams: Promise<{
+    player?: string;
+    mode?: string;
+    period?: string;
+    result?: string;
+  }>;
 }) {
   const { player, mode, period, result } = await searchParams;
   return (
@@ -24,7 +30,12 @@ export default async function RankedHistoryPage({
       initialMode={mode === "2" || mode === "4" ? (Number(mode) as 2 | 4) : -1}
       initialPeriod={period === "7" || period === "30" ? Number(period) : 0}
       initialResult={
-        result === "win" || result === "loss" || result === "draw" || result === "forfeit" ? result : "all"
+        result === "win" ||
+        result === "loss" ||
+        result === "draw" ||
+        result === "forfeit"
+          ? result
+          : "all"
       }
     />
   );

@@ -7,13 +7,22 @@
  */
 
 import { resolveFields } from "./emit-json-schema";
-import { indexDeclarations, type IrContract, type IrDeclaration, type IrField, type IrType } from "./ir";
+import {
+  indexDeclarations,
+  type IrContract,
+  type IrDeclaration,
+  type IrField,
+  type IrType,
+} from "./ir";
 import { docComment, rustFieldName, toPascalCase } from "./naming";
 
 /** Type des champs `Date` : ISO 8601 en `String` par défaut. */
 const TIMESTAMP_ALIAS = "Timestamp";
 
-function rustType(type: IrType, byName: ReadonlyMap<string, IrDeclaration>): string {
+function rustType(
+  type: IrType,
+  byName: ReadonlyMap<string, IrDeclaration>,
+): string {
   switch (type.kind) {
     case "string":
       return "String";
@@ -30,18 +39,22 @@ function rustType(type: IrType, byName: ReadonlyMap<string, IrDeclaration>): str
     case "date":
       return TIMESTAMP_ALIAS;
     case "literal":
-      return typeof type.value === "string" ? "String" : typeof type.value === "number" ? "f64" : "bool";
+      return typeof type.value === "string"
+        ? "String"
+        : typeof type.value === "number"
+          ? "f64"
+          : "bool";
     case "param":
       return type.name;
     case "ref": {
       const name = toPascalCase(type.name);
       if (type.args.length === 0) return name;
-      return `${name}<${type.args.map(arg => rustType(arg, byName)).join(", ")}>`;
+      return `${name}<${type.args.map((arg) => rustType(arg, byName)).join(", ")}>`;
     }
     case "array":
       return `Vec<${rustType(type.of, byName)}>`;
     case "tuple":
-      return `(${type.of.map(t => rustType(t, byName)).join(", ")})`;
+      return `(${type.of.map((t) => rustType(t, byName)).join(", ")})`;
     case "map":
       return `std::collections::HashMap<String, ${rustType(type.value, byName)}>`;
     case "union":
@@ -55,9 +68,12 @@ function rustType(type: IrType, byName: ReadonlyMap<string, IrDeclaration>): str
   }
 }
 
-function unionType(members: readonly IrType[], byName: ReadonlyMap<string, IrDeclaration>): string {
-  const nullable = members.some(member => member.kind === "null");
-  const rest = members.filter(member => member.kind !== "null");
+function unionType(
+  members: readonly IrType[],
+  byName: ReadonlyMap<string, IrDeclaration>,
+): string {
+  const nullable = members.some((member) => member.kind === "null");
+  const rest = members.filter((member) => member.kind !== "null");
 
   if (rest.length === 0) return "Option<serde_json::Value>";
 
@@ -65,7 +81,10 @@ function unionType(members: readonly IrType[], byName: ReadonlyMap<string, IrDec
   const inner =
     rest.length === 1
       ? rustType(rest[0] as IrType, byName)
-      : rest.every(member => member.kind === "literal" && typeof member.value === "string")
+      : rest.every(
+            (member) =>
+              member.kind === "literal" && typeof member.value === "string",
+          )
         ? "String"
         : "serde_json::Value";
 
@@ -77,9 +96,13 @@ function emitEnum(decl: Extract<IrDeclaration, { kind: "enum" }>): string[] {
   lines.push(...docComment(decl.doc, "/// "));
 
   if (decl.valueType === "string") {
-    lines.push("#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]");
+    lines.push(
+      "#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]",
+    );
   } else {
-    lines.push("#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize_repr, Deserialize_repr)]");
+    lines.push(
+      "#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize_repr, Deserialize_repr)]",
+    );
     lines.push("#[repr(i64)]");
   }
 
@@ -98,7 +121,10 @@ function emitEnum(decl: Extract<IrDeclaration, { kind: "enum" }>): string[] {
   return lines;
 }
 
-function emitField(field: IrField, byName: ReadonlyMap<string, IrDeclaration>): string[] {
+function emitField(
+  field: IrField,
+  byName: ReadonlyMap<string, IrDeclaration>,
+): string[] {
   const lines = docComment(field.doc, "/// ", "\t");
   const name = rustFieldName(field.name);
   const bare = name.replace(/^r#/u, "");
@@ -108,7 +134,8 @@ function emitField(field: IrField, byName: ReadonlyMap<string, IrDeclaration>): 
   if (field.optional && !alreadyOptional) rendered = `Option<${rendered}>`;
 
   const attributes: string[] = [];
-  if (bare !== field.name) attributes.push(`rename = ${JSON.stringify(field.name)}`);
+  if (bare !== field.name)
+    attributes.push(`rename = ${JSON.stringify(field.name)}`);
   if (field.optional || alreadyOptional) {
     attributes.push("default", 'skip_serializing_if = "Option::is_none"');
   }
@@ -124,7 +151,9 @@ function genericSuffix(typeParams: readonly string[]): string {
 
 function genericBounds(typeParams: readonly string[]): string {
   if (typeParams.length === 0) return "";
-  const bounds = typeParams.map(param => `${param}: Serialize + serde::de::DeserializeOwned`);
+  const bounds = typeParams.map(
+    (param) => `${param}: Serialize + serde::de::DeserializeOwned`,
+  );
   return ` where ${bounds.join(", ")}`;
 }
 
@@ -137,7 +166,9 @@ function emitStruct(
 ): string[] {
   const lines = docComment(doc, "/// ");
   lines.push("#[derive(Debug, Clone, Serialize, Deserialize)]");
-  lines.push(`pub struct ${toPascalCase(name)}${genericSuffix(typeParams)}${genericBounds(typeParams)} {`);
+  lines.push(
+    `pub struct ${toPascalCase(name)}${genericSuffix(typeParams)}${genericBounds(typeParams)} {`,
+  );
   if (fields.length === 0) lines.push("\t// aucun champ");
   for (const field of fields) lines.push(...emitField(field, byName));
   lines.push("}");
@@ -183,8 +214,13 @@ function emitUntaggedEnum(
   byName: ReadonlyMap<string, IrDeclaration>,
 ): string[] {
   const lines = docComment(decl.doc, "/// ");
-  lines.push("#[derive(Debug, Clone, Serialize, Deserialize)]", "#[serde(untagged)]");
-  lines.push(`pub enum ${toPascalCase(decl.name)}${genericSuffix(decl.typeParams)}${genericBounds(decl.typeParams)} {`);
+  lines.push(
+    "#[derive(Debug, Clone, Serialize, Deserialize)]",
+    "#[serde(untagged)]",
+  );
+  lines.push(
+    `pub enum ${toPascalCase(decl.name)}${genericSuffix(decl.typeParams)}${genericBounds(decl.typeParams)} {`,
+  );
 
   const used = new Set<string>();
   for (const member of members) {
@@ -209,8 +245,8 @@ function emitAlias(
 ): string[] {
   // Une intersection `Base & { … }` devient une struct aplatie via `flatten`.
   if (decl.type.kind === "union") {
-    const refs = decl.type.of.filter(member => member.kind === "ref");
-    const objects = decl.type.of.filter(member => member.kind === "object");
+    const refs = decl.type.of.filter((member) => member.kind === "ref");
+    const objects = decl.type.of.filter((member) => member.kind === "object");
     if (refs.length > 0 && objects.length > 0) {
       const lines = docComment(decl.doc, "/// ");
       lines.push("#[derive(Debug, Clone, Serialize, Deserialize)]");
@@ -231,21 +267,31 @@ function emitAlias(
   }
 
   if (decl.type.kind === "object") {
-    return emitStruct(decl.name, decl.doc, decl.typeParams, decl.type.fields, byName);
+    return emitStruct(
+      decl.name,
+      decl.doc,
+      decl.typeParams,
+      decl.type.fields,
+      byName,
+    );
   }
 
   // Union hétérogène : un alias ne peut pas l'exprimer, un enum non étiqueté si.
   if (decl.type.kind === "union") {
     const members = decl.type.of;
-    const meaningful = members.filter(member => member.kind !== "null");
-    const allStringLiterals = meaningful.every(member => member.kind === "literal" && typeof member.value === "string");
+    const meaningful = members.filter((member) => member.kind !== "null");
+    const allStringLiterals = meaningful.every(
+      (member) => member.kind === "literal" && typeof member.value === "string",
+    );
     if (meaningful.length > 1 && !allStringLiterals) {
       return emitUntaggedEnum(decl, members, byName);
     }
   }
 
   const lines = docComment(decl.doc, "/// ");
-  lines.push(`pub type ${toPascalCase(decl.name)}${genericSuffix(decl.typeParams)} = ${rustType(decl.type, byName)};`);
+  lines.push(
+    `pub type ${toPascalCase(decl.name)}${genericSuffix(decl.typeParams)} = ${rustType(decl.type, byName)};`,
+  );
   return lines;
 }
 
@@ -278,7 +324,16 @@ export function emitRust(contract: IrContract): string {
     if (decl.kind === "enum") out.push(...emitEnum(decl), "");
     else if (decl.kind === "alias") out.push(...emitAlias(decl, byName), "");
     else {
-      out.push(...emitStruct(decl.name, decl.doc, decl.typeParams, resolveFields(decl, byName), byName), "");
+      out.push(
+        ...emitStruct(
+          decl.name,
+          decl.doc,
+          decl.typeParams,
+          resolveFields(decl, byName),
+          byName,
+        ),
+        "",
+      );
     }
   }
 

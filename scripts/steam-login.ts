@@ -94,12 +94,20 @@ const page = join(tmpdir(), `rg-steam-qr-${process.pid}.html`);
 process.on("exit", () => rmSync(page, { force: true }));
 // A Steam QR challenge expires after a few minutes: issue a new one until approval or the deadline
 // (RG_STEAM_QR_MINUTES, default 30). The page reloads itself, so one Chrome window follows every code.
-const deadline = Date.now() + Number(process.env.RG_STEAM_QR_MINUTES ?? 30) * 60_000;
+const deadline =
+  Date.now() + Number(process.env.RG_STEAM_QR_MINUTES ?? 30) * 60_000;
 let opened = false;
 let code = 1;
 while (Date.now() < deadline) {
   const proc = Bun.spawn(
-    ["ssh", "-o", "BatchMode=yes", "-n", host.ssh, `${compose} run --rm -T steam-depot login-qr`],
+    [
+      "ssh",
+      "-o",
+      "BatchMode=yes",
+      "-n",
+      host.ssh,
+      `${compose} run --rm -T steam-depot login-qr`,
+    ],
     { stdout: "pipe", stderr: "pipe" },
   );
   let buf = "";
@@ -120,7 +128,10 @@ while (Date.now() < deadline) {
             `<p>Steam app &gt; Steam Guard &gt; scan this code.</p></div>`,
         );
         if (!opened) {
-          Bun.spawn([CHROME, `--app=file:///${page.replaceAll("\\", "/")}`], { stdout: "ignore", stderr: "ignore" });
+          Bun.spawn([CHROME, `--app=file:///${page.replaceAll("\\", "/")}`], {
+            stdout: "ignore",
+            stderr: "ignore",
+          });
           opened = true;
           console.log("steam: QR shown in Chrome, waiting for approval");
         } else console.log("steam: QR renewed");

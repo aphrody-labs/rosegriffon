@@ -5,7 +5,11 @@
  */
 
 import { crawlDataPath } from "../../lib/shared-path";
-import { WebCdpPage, waitForSelector, type NavigationResponse } from "../../lib/web-cdp";
+import {
+  WebCdpPage,
+  waitForSelector,
+  type NavigationResponse,
+} from "../../lib/web-cdp";
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 
@@ -16,16 +20,27 @@ interface CrossPageTarget {
   url: string;
 }
 
-async function safeGoto(page: WebCdpPage, url: string, timeout = 30000): Promise<NavigationResponse> {
+async function safeGoto(
+  page: WebCdpPage,
+  url: string,
+  timeout = 30000,
+): Promise<NavigationResponse> {
   return Promise.race([
     page.goto(url),
     new Promise<never>((_, reject) =>
-      setTimeout(() => reject(new Error(`Navigation timeout (${timeout}ms) pour ${url}`)), timeout),
+      setTimeout(
+        () =>
+          reject(new Error(`Navigation timeout (${timeout}ms) pour ${url}`)),
+        timeout,
+      ),
     ),
   ]);
 }
 
-export async function crawlCross(): Promise<{ success: boolean; error?: string }> {
+export async function crawlCross(): Promise<{
+  success: boolean;
+  error?: string;
+}> {
   console.log("[Crawl Cross] Démarrage du crawl de Inazuma Eleven: Cross...");
 
   const targets: CrossPageTarget[] = [
@@ -48,14 +63,18 @@ export async function crawlCross(): Promise<{ success: boolean; error?: string }
         const response = await safeGoto(page, target.url);
         const status = response ? response.status : 200;
         if (status >= 400) {
-          console.warn(`[Crawl Cross] URL non disponible (HTTP ${status}) : ${target.url}`);
+          console.warn(
+            `[Crawl Cross] URL non disponible (HTTP ${status}) : ${target.url}`,
+          );
           continue;
         }
 
         await waitForSelector(page, "body", 15000).catch(() => {});
         const html = await page.content();
         if (html.length < 500) {
-          console.warn(`[Crawl Cross] WebCdpPage trop courte ou vide pour ${target.lang}, abandon.`);
+          console.warn(
+            `[Crawl Cross] WebCdpPage trop courte ou vide pour ${target.lang}, abandon.`,
+          );
           continue;
         }
 
@@ -70,14 +89,22 @@ export async function crawlCross(): Promise<{ success: boolean; error?: string }
           language: target.lang,
         };
 
-        await writeFile(join(outputDir, "meta.json"), JSON.stringify(meta, null, 2));
+        await writeFile(
+          join(outputDir, "meta.json"),
+          JSON.stringify(meta, null, 2),
+        );
         crawlCount++;
       } catch (err) {
-        console.warn(`[Crawl Cross] Impossible de scraper ${target.url} :`, err);
+        console.warn(
+          `[Crawl Cross] Impossible de scraper ${target.url} :`,
+          err,
+        );
       }
     }
 
-    console.log(`[Crawl Cross] Crawl terminé. ${crawlCount} langues sauvegardées.`);
+    console.log(
+      `[Crawl Cross] Crawl terminé. ${crawlCount} langues sauvegardées.`,
+    );
     return { success: true };
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : String(err);

@@ -63,13 +63,15 @@ function toCamel(prop: string): string {
   return prop.replaceAll(/-([a-z])/g, (_, c) => c.toUpperCase());
 }
 
-function parseStyle(style: string | undefined): Record<string, string> | undefined {
+function parseStyle(
+  style: string | undefined,
+): Record<string, string> | undefined {
   if (!style) {
     return undefined;
   }
   const out: Record<string, string> = {};
   for (const decl of style.split(";")) {
-    const [k, v] = decl.split(":").map(s => s.trim());
+    const [k, v] = decl.split(":").map((s) => s.trim());
     if (k && v) {
       out[toCamel(k)] = v;
     }
@@ -115,7 +117,10 @@ function renderText(node: LexicalNode, key: string | number): ReactNode {
   return <span key={key}>{el}</span>;
 }
 
-function renderChildren(children: LexicalNode[] | undefined, ctx: SlugContext): ReactNode[] {
+function renderChildren(
+  children: LexicalNode[] | undefined,
+  ctx: SlugContext,
+): ReactNode[] {
   if (!Array.isArray(children)) {
     return [];
   }
@@ -132,7 +137,11 @@ function uniqueSlug(ctx: SlugContext, base: string): string {
   return n === 0 ? base : `${base}-${n}`;
 }
 
-function renderNode(node: LexicalNode, key: string | number, ctx: SlugContext): ReactNode {
+function renderNode(
+  node: LexicalNode,
+  key: string | number,
+  ctx: SlugContext,
+): ReactNode {
   if (!node || typeof node !== "object") {
     return null;
   }
@@ -151,9 +160,13 @@ function renderNode(node: LexicalNode, key: string | number, ctx: SlugContext): 
       // Le titre de l'article est déjà l'unique <h1> de la page : un « h1 » saisi
       // dans l'éditeur est rendu en <h2>. L'id reste calculé sur la balise
       // d'origine pour rester aligné avec `extractTableOfContents`.
-      const Tag = (tag === "h1" ? "h2" : tag) as "h2" | "h3" | "h4" | "h5" | "h6";
+      const Tag = (tag === "h1" ? "h2" : tag) as
+        "h2" | "h3" | "h4" | "h5" | "h6";
       const text = extractText(node).trim();
-      const id = (tag === "h2" || tag === "h3") && text ? uniqueSlug(ctx, slugify(text)) : undefined;
+      const id =
+        (tag === "h2" || tag === "h3") && text
+          ? uniqueSlug(ctx, slugify(text))
+          : undefined;
       return (
         <Tag key={key} id={id}>
           {renderChildren(node.children, ctx)}
@@ -161,7 +174,9 @@ function renderNode(node: LexicalNode, key: string | number, ctx: SlugContext): 
       );
     }
     case "quote": {
-      return <blockquote key={key}>{renderChildren(node.children, ctx)}</blockquote>;
+      return (
+        <blockquote key={key}>{renderChildren(node.children, ctx)}</blockquote>
+      );
     }
     case "list": {
       const Tag = node.listType === "number" ? "ol" : "ul";
@@ -172,7 +187,12 @@ function renderNode(node: LexicalNode, key: string | number, ctx: SlugContext): 
     }
     case "link": {
       return (
-        <a key={key} href={node.url ?? "#"} target={node.target ?? undefined} rel={node.rel ?? "noopener noreferrer"}>
+        <a
+          key={key}
+          href={node.url ?? "#"}
+          target={node.target ?? undefined}
+          rel={node.rel ?? "noopener noreferrer"}
+        >
           {renderChildren(node.children, ctx)}
         </a>
       );
@@ -195,7 +215,9 @@ function renderNode(node: LexicalNode, key: string | number, ctx: SlugContext): 
         return null;
       }
       // eslint-disable-next-line @next/next/no-img-element
-      return <img key={key} src={src} alt={alt} loading="lazy" decoding="async" />;
+      return (
+        <img key={key} src={src} alt={alt} loading="lazy" decoding="async" />
+      );
     }
     default: {
       if (Array.isArray(node.children)) {
@@ -211,22 +233,25 @@ function renderNode(node: LexicalNode, key: string | number, ctx: SlugContext): 
  */
 function injectHeadingIds(html: string): string {
   const slugCounts = new Map<string, number>();
-  return html.replaceAll(/<(h[23])([^>]*)>(.*?)<\/h[23]>/gi, (match, tag, attrs, inner) => {
-    const text = inner.replaceAll(/<[^>]+>/g, "").trim();
-    if (!text) {
-      return match;
-    }
-    let slug = slugify(text);
-    const count = slugCounts.get(slug) || 0;
-    slugCounts.set(slug, count + 1);
-    if (count > 0) {
-      slug = `${slug}-${count}`;
-    }
-    if (/id\s*=\s*["']/i.test(attrs)) {
-      return match;
-    }
-    return `<${tag}${attrs} id="${slug}">${inner}</${tag}>`;
-  });
+  return html.replaceAll(
+    /<(h[23])([^>]*)>(.*?)<\/h[23]>/gi,
+    (match, tag, attrs, inner) => {
+      const text = inner.replaceAll(/<[^>]+>/g, "").trim();
+      if (!text) {
+        return match;
+      }
+      let slug = slugify(text);
+      const count = slugCounts.get(slug) || 0;
+      slugCounts.set(slug, count + 1);
+      if (count > 0) {
+        slug = `${slug}-${count}`;
+      }
+      if (/id\s*=\s*["']/i.test(attrs)) {
+        return match;
+      }
+      return `<${tag}${attrs} id="${slug}">${inner}</${tag}>`;
+    },
+  );
 }
 
 function isLexicalShape(content: unknown): content is SerializedEditorState {
@@ -273,7 +298,12 @@ export function LexicalRenderer({ content, className }: LexicalRendererProps) {
   }
 
   if (legacyHtml) {
-    return <div className={className} dangerouslySetInnerHTML={{ __html: injectHeadingIds(legacyHtml) }} />;
+    return (
+      <div
+        className={className}
+        dangerouslySetInnerHTML={{ __html: injectHeadingIds(legacyHtml) }}
+      />
+    );
   }
 
   return null;

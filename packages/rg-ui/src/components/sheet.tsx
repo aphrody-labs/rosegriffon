@@ -15,7 +15,9 @@ function SheetTrigger({
   asChild,
   children,
   ...props
-}: React.ComponentProps<typeof SheetPrimitive.Trigger> & { asChild?: boolean }) {
+}: React.ComponentProps<typeof SheetPrimitive.Trigger> & {
+  asChild?: boolean;
+}) {
   return (
     <SheetPrimitive.Trigger
       data-slot="sheet-trigger"
@@ -33,7 +35,11 @@ function SheetClose({
   ...props
 }: React.ComponentProps<typeof SheetPrimitive.Close> & { asChild?: boolean }) {
   return (
-    <SheetPrimitive.Close data-slot="sheet-close" {...props} render={childRender(asChild, children) ?? props.render}>
+    <SheetPrimitive.Close
+      data-slot="sheet-close"
+      {...props}
+      render={childRender(asChild, children) ?? props.render}
+    >
       {asChild ? undefined : children}
     </SheetPrimitive.Close>
   );
@@ -42,15 +48,26 @@ function SheetClose({
 function SheetPortal({
   forceMount,
   ...props
-}: React.ComponentProps<typeof SheetPrimitive.Portal> & { forceMount?: boolean }) {
-  return <SheetPrimitive.Portal data-slot="sheet-portal" {...props} keepMounted={forceMount ?? props.keepMounted} />;
+}: React.ComponentProps<typeof SheetPrimitive.Portal> & {
+  forceMount?: boolean;
+}) {
+  return (
+    <SheetPrimitive.Portal
+      data-slot="sheet-portal"
+      {...props}
+      keepMounted={forceMount ?? props.keepMounted}
+    />
+  );
 }
 
-function SheetOverlay({ className, ...props }: React.ComponentProps<typeof SheetPrimitive.Backdrop>) {
+function SheetOverlay({
+  className,
+  ...props
+}: React.ComponentProps<typeof SheetPrimitive.Backdrop>) {
   return (
     <SheetPrimitive.Backdrop
       data-slot="sheet-overlay"
-      className={state =>
+      className={(state) =>
         cn(
           "motion-safe:data-[open]:animate-in motion-safe:data-[closed]:animate-out motion-safe:data-[closed]:fade-out-0 motion-safe:data-[open]:fade-in-0 fixed inset-0 z-50 bg-scrim/50 starting:opacity-0",
           typeof className === "function" ? className(state) : className,
@@ -76,7 +93,7 @@ function SheetContent({
       <SheetOverlay />
       <SheetPrimitive.Popup
         data-slot="sheet-content"
-        className={state =>
+        className={(state) =>
           cn(
             "@container/sheet bg-background motion-safe:data-[open]:animate-in motion-safe:data-[closed]:animate-out fixed z-50 flex flex-col gap-4 shadow-lg motion-safe:transition motion-safe:ease-in-out motion-safe:data-[closed]:duration-300 motion-safe:data-[open]:duration-500",
             side === "right" &&
@@ -106,7 +123,10 @@ function SheetHeader({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="sheet-header"
-      className={cn("flex flex-col gap-1.5 p-4 @md/sheet:items-start", className)}
+      className={cn(
+        "flex flex-col gap-1.5 p-4 @md/sheet:items-start",
+        className,
+      )}
       {...props}
     />
   );
@@ -116,34 +136,58 @@ function SheetFooter({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="sheet-footer"
-      className={cn("mt-auto flex flex-col gap-2 p-4 @md/sheet:flex-row @md/sheet:justify-end", className)}
+      className={cn(
+        "mt-auto flex flex-col gap-2 p-4 @md/sheet:flex-row @md/sheet:justify-end",
+        className,
+      )}
       {...props}
     />
   );
 }
 
-function SheetTitle({ className, ...props }: React.ComponentProps<typeof SheetPrimitive.Title>) {
+function SheetTitle({
+  className,
+  ...props
+}: React.ComponentProps<typeof SheetPrimitive.Title>) {
   return (
     <SheetPrimitive.Title
       data-slot="sheet-title"
-      className={state =>
-        cn("text-foreground font-semibold", typeof className === "function" ? className(state) : className)
+      className={(state) =>
+        cn(
+          "text-foreground font-semibold",
+          typeof className === "function" ? className(state) : className,
+        )
       }
       {...props}
     />
   );
 }
 
-function SheetDescription({ className, ...props }: React.ComponentProps<typeof SheetPrimitive.Description>) {
+function SheetDescription({
+  className,
+  ...props
+}: React.ComponentProps<typeof SheetPrimitive.Description>) {
   return (
     <SheetPrimitive.Description
       data-slot="sheet-description"
-      className={state =>
-        cn("text-muted-foreground text-sm", typeof className === "function" ? className(state) : className)
+      className={(state) =>
+        cn(
+          "text-muted-foreground text-sm",
+          typeof className === "function" ? className(state) : className,
+        )
       }
       {...props}
     />
   );
 }
 
-export { Sheet, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle, SheetTrigger };
+export {
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+};

@@ -53,7 +53,11 @@
  *                                     [--limite N] [--fraicheur H] [--tout] [--dry]
  */
 
-import { permalienCanonique, verifierPublication, type VerdictPublication } from "@rosegriffon/types/instagram";
+import {
+  permalienCanonique,
+  verifierPublication,
+  type VerdictPublication,
+} from "@rosegriffon/types/instagram";
 
 import { sql } from "../lib/db.js";
 import { baseStorage } from "../lib/storage-assets.js";
@@ -72,7 +76,8 @@ const BUCKET = "assets";
  * passe de cron ne doit défaire. Ne PAS le reformuler sans migrer les lignes
  * existantes — elles cesseraient d'être restaurables.
  */
-export const MOTIF_AUTOMATIQUE = "post retiré par son auteur, ou compte passé en privé";
+export const MOTIF_AUTOMATIQUE =
+  "post retiré par son auteur, ou compte passé en privé";
 
 /** Lignes revalidées par passe. Plafond de politesse envers Meta. */
 const MAX_PAR_PASSE = 60;
@@ -167,7 +172,9 @@ export function decisionModeration(
 ): ActionModeration {
   if (verdict === "indeterminee") return "rien";
   if (verdict === "introuvable") return ligne.masque ? "rien" : "masquer";
-  return ligne.masque && ligne.motif_masquage === MOTIF_AUTOMATIQUE ? "restaurer" : "rien";
+  return ligne.masque && ligne.motif_masquage === MOTIF_AUTOMATIQUE
+    ? "restaurer"
+    : "rien";
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -204,10 +211,13 @@ async function objetPresent(chemin: string): Promise<boolean> {
   const cle = Bun.env.SUPABASE_SECRET_KEY || Bun.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!cle) return true;
   try {
-    const reponse = await fetch(`${baseStorage()}/storage/v1/object/${BUCKET}/${chemin}`, {
-      headers: { apikey: cle, authorization: `Bearer ${cle}` },
-      method: "HEAD",
-    });
+    const reponse = await fetch(
+      `${baseStorage()}/storage/v1/object/${BUCKET}/${chemin}`,
+      {
+        headers: { apikey: cle, authorization: `Bearer ${cle}` },
+        method: "HEAD",
+      },
+    );
     // 404 = l'objet n'est plus là. Tout autre échec est le nôtre, pas le sien.
     return reponse.status !== 404;
   } catch {
@@ -226,7 +236,13 @@ async function objetPresent(chemin: string): Promise<boolean> {
 export async function revaliderCreationsInstagram(
   options: OptionsRevalidationInstagram = {},
 ): Promise<StatsRevalidationInstagram> {
-  const { slug, limite = MAX_PAR_PASSE, fraicheurH = FRAICHEUR_HEURES, tout = false, dry = false } = options;
+  const {
+    slug,
+    limite = MAX_PAR_PASSE,
+    fraicheurH = FRAICHEUR_HEURES,
+    tout = false,
+    dry = false,
+  } = options;
 
   const stats: StatsRevalidationInstagram = {
     success: true,
@@ -266,7 +282,9 @@ export async function revaliderCreationsInstagram(
 
     if (lignes.length === 0) {
       const quoi = slug ? `la campagne « ${slug} »` : "aucune campagne";
-      console.log(`${PREFIXE} Rien à revalider : ${quoi} n'a de création Instagram à revoir.`);
+      console.log(
+        `${PREFIXE} Rien à revalider : ${quoi} n'a de création Instagram à revoir.`,
+      );
       return stats;
     }
 
@@ -320,9 +338,14 @@ export async function revaliderCreationsInstagram(
       }
 
       const servable = servables > 0;
-      const compteursACorriger = ligne.a_media !== servable || ligne.nb_images !== servables;
+      const compteursACorriger =
+        ligne.a_media !== servable || ligne.nb_images !== servables;
 
-      if (action === "rien" && !compteursACorriger && verification.verdict === "indeterminee") {
+      if (
+        action === "rien" &&
+        !compteursACorriger &&
+        verification.verdict === "indeterminee"
+      ) {
         await Bun.sleep(PAUSE_MS);
         continue;
       }

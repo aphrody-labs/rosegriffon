@@ -66,13 +66,19 @@ export async function loadCtrlCharaConfigAsync(dataPath: string = DATA_ROOT) {
   // Résolution version-agnostique (repli sur le chemin versionné historique si introuvable)
   const path =
     resolveGameDataFile("party", "ctrl_chara_config") ??
-    join(dataPath, "common/gamedata/party", "ctrl_chara_config_1.04.17.00.cfg.bin.json");
+    join(
+      dataPath,
+      "common/gamedata/party",
+      "ctrl_chara_config_1.04.17.00.cfg.bin.json",
+    );
   const content = await loadJsonAsync<{ entries: ConfigNode[] }>(path);
   if (!content?.entries) return null;
   return parseEntries(content.entries);
 }
 
-export async function buildCtrlCharaDatabase(dataPath: string = DATA_ROOT): Promise<CtrlCharaDatabase> {
+export async function buildCtrlCharaDatabase(
+  dataPath: string = DATA_ROOT,
+): Promise<CtrlCharaDatabase> {
   const characters = (await loadCtrlCharaConfigAsync(dataPath)) || [];
   const byParamId = new Map<string, CtrlCharaData>();
   for (const c of characters) byParamId.set(c.charaParamId, c);

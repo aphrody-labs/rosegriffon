@@ -25,7 +25,8 @@ import {
  */
 
 const CTX: ContexteAnnonce = {
-  baliseChaine: "52db9ba70e0cc0f6eaf7803dd07447a1f5477735fd3f661792ba94600c84e971",
+  baliseChaine:
+    "52db9ba70e0cc0f6eaf7803dd07447a1f5477735fd3f661792ba94600c84e971",
   baliseRound: 31_547_509,
   nbGagnants: 1,
   nbOeuvres: 16,
@@ -40,7 +41,8 @@ const CTX: ContexteAnnonce = {
 function gagnant(surcharge: Partial<GagnantAnnonce> = {}): GagnantAnnonce {
   return {
     discordId: "908269053347504170",
-    image: "https://rosegriffon.fr/storage/v1/object/public/assets/campagnes/iergday/discord/a.png",
+    image:
+      "https://rosegriffon.fr/storage/v1/object/public/assets/campagnes/iergday/discord/a.png",
     lien: "https://x.com/San_La_Vraie/status/2090455666267713840",
     lot: null,
     pseudo: "Sanada",
@@ -54,11 +56,16 @@ describe("limites dures de l'API Discord", () => {
   it("respecte les trois plafonds même avec des textes absurdement longs", () => {
     // Un pseudo est choisi par le participant, un lot est saisi par le staff :
     // ni l'un ni l'autre n'est borné à la source.
-    const charge = chargeAnnonceTirage([gagnant({ lot: "L".repeat(5000), pseudo: "P".repeat(3000) })], {
-      ...CTX,
-      titreCampagne: "T".repeat(4000),
-    });
-    const embed = (charge.embeds as Array<Record<string, never>>)[0] as unknown as {
+    const charge = chargeAnnonceTirage(
+      [gagnant({ lot: "L".repeat(5000), pseudo: "P".repeat(3000) })],
+      {
+        ...CTX,
+        titreCampagne: "T".repeat(4000),
+      },
+    );
+    const embed = (
+      charge.embeds as Array<Record<string, never>>
+    )[0] as unknown as {
       description: string;
       author?: { name: string };
       footer: { text: string };
@@ -75,7 +82,8 @@ describe("limites dures de l'API Discord", () => {
     const gagnants = Array.from({ length: 30 }, (_, i) =>
       gagnant({ discordId: null, pseudo: `Gagnant ${i + 1}`, rang: i + 1 }),
     );
-    const rangees = chargeAnnonceTirage(gagnants, { ...CTX, nbGagnants: 30 }).components as Array<{
+    const rangees = chargeAnnonceTirage(gagnants, { ...CTX, nbGagnants: 30 })
+      .components as Array<{
       components: unknown[];
     }>;
     expect(rangees.length).toBeLessThanOrEqual(5);
@@ -84,7 +92,7 @@ describe("limites dures de l'API Discord", () => {
     }
     // Au-delà du 25e bouton, Discord refuserait le message : la personne garde
     // sa ligne dans le `content`, c'est le bouton qui manque, pas le gagnant.
-    expect(rangees.flatMap(r => r.components)).toHaveLength(25);
+    expect(rangees.flatMap((r) => r.components)).toHaveLength(25);
   });
 
   it("ne pose aucune rangée quand il n'y a rien à lier", () => {
@@ -95,7 +103,10 @@ describe("limites dures de l'API Discord", () => {
 describe("mentions", () => {
   it("interdit @everyone, @here et les rôles par `parse: []`", () => {
     const charge = chargeAnnonceTirage([gagnant()], CTX);
-    const permises = charge.allowed_mentions as { parse: string[]; users?: string[] };
+    const permises = charge.allowed_mentions as {
+      parse: string[];
+      users?: string[];
+    };
     expect(permises.parse).toEqual([]);
   });
 
@@ -104,18 +115,31 @@ describe("mentions", () => {
       [
         gagnant({ discordId: "908269053347504170", rang: 1 }),
         gagnant({ discordId: null, pseudo: "Ruvi_Seiya", rang: 2 }),
-        gagnant({ discordId: "908269053347504170", pseudo: "Sanada (2)", rang: 3 }),
+        gagnant({
+          discordId: "908269053347504170",
+          pseudo: "Sanada (2)",
+          rang: 3,
+        }),
       ],
       { ...CTX, nbGagnants: 3 },
     );
-    const permises = charge.allowed_mentions as { parse: string[]; users?: string[] };
+    const permises = charge.allowed_mentions as {
+      parse: string[];
+      users?: string[];
+    };
     expect(permises.users).toEqual(["908269053347504170"]);
   });
 
   it("n'émet AUCUNE mention quand aucun gagnant n'a de flocon", () => {
     // Cinq des quatorze participants d'iergday n'existent que sur X ou Instagram.
-    const charge = chargeAnnonceTirage([gagnant({ discordId: null, pseudo: "orphelinalius" })], CTX);
-    const permises = charge.allowed_mentions as { parse: string[]; users?: string[] };
+    const charge = chargeAnnonceTirage(
+      [gagnant({ discordId: null, pseudo: "orphelinalius" })],
+      CTX,
+    );
+    const permises = charge.allowed_mentions as {
+      parse: string[];
+      users?: string[];
+    };
     expect(permises.users).toBeUndefined();
     // Et surtout : aucun `<@…>` n'est FABRIQUÉ. Un identifiant inventé pingue un
     // inconnu et lui attribue publiquement une œuvre qu'il n'a pas faite.
@@ -126,16 +150,31 @@ describe("mentions", () => {
   it("met le lien de la création même sans flocon Discord", () => {
     const lien = "https://www.instagram.com/p/DcUEDDKoTgP/";
     const charge = chargeAnnonceTirage(
-      [gagnant({ discordId: null, lien, pseudo: "orphelinalius", source: "instagram" })],
+      [
+        gagnant({
+          discordId: null,
+          lien,
+          pseudo: "orphelinalius",
+          source: "instagram",
+        }),
+      ],
       CTX,
     );
-    const rangees = charge.components as Array<{ components: Array<{ url: string }> }>;
+    const rangees = charge.components as Array<{
+      components: Array<{ url: string }>;
+    }>;
     expect(rangees[0]?.components[0]?.url).toBe(lien);
   });
 
   it("ne propage jamais un @everyone venu d'un lot ou d'un pseudo", () => {
     const charge = chargeAnnonceTirage(
-      [gagnant({ discordId: null, lot: "@everyone un print A5", pseudo: "@everyone" })],
+      [
+        gagnant({
+          discordId: null,
+          lot: "@everyone un print A5",
+          pseudo: "@everyone",
+        }),
+      ],
       { ...CTX, titreCampagne: "@here la campagne" },
     );
     const texte = JSON.stringify(charge);
@@ -146,9 +185,15 @@ describe("mentions", () => {
   });
 
   it("rend inerte une mention brute recopiée dans un libellé", () => {
-    expect(neutraliserMentions("<@908269053347504170> bravo")).toBe("@908269053347504170 bravo");
-    expect(neutraliserMentions("<@&1072993826400124958>")).toBe("@1072993826400124958");
-    expect(neutraliserMentions("<#1537458038623965194>")).toBe("#1537458038623965194");
+    expect(neutraliserMentions("<@908269053347504170> bravo")).toBe(
+      "@908269053347504170 bravo",
+    );
+    expect(neutraliserMentions("<@&1072993826400124958>")).toBe(
+      "@1072993826400124958",
+    );
+    expect(neutraliserMentions("<#1537458038623965194>")).toBe(
+      "#1537458038623965194",
+    );
   });
 });
 
@@ -158,7 +203,10 @@ describe("contenu du message", () => {
     // l'embed donnerait « Rose Griffon a envoyé un message », et le gagnant ne
     // saurait pas qu'il a gagné.
     const charge = chargeAnnonceTirage(
-      [gagnant({ lot: "Un print A5", rang: 1 }), gagnant({ discordId: null, pseudo: "Grimnape", rang: 2 })],
+      [
+        gagnant({ lot: "Un print A5", rang: 1 }),
+        gagnant({ discordId: null, pseudo: "Grimnape", rang: 2 }),
+      ],
       { ...CTX, nbGagnants: 2 },
     );
     const content = charge.content as string;
@@ -182,19 +230,29 @@ describe("contenu du message", () => {
     // annoncés par « N·w/W ». La formulation juste est celle du ticket.
     const charge = chargeAnnonceTirage([gagnant()], CTX);
     const embed = (charge.embeds as Array<{ description: string }>)[0];
-    expect(embed?.description).toContain("Chaque œuvre est un ticket, tirés un par un sans remise.");
+    expect(embed?.description).toContain(
+      "Chaque œuvre est un ticket, tirés un par un sans remise.",
+    );
     expect(JSON.stringify(charge)).not.toContain("deux fois plus de chances");
   });
 
   it("dit le round drand et le mode de poids, en clair", () => {
-    const embed = (chargeAnnonceTirage([gagnant()], CTX).embeds as Array<{ description: string }>)[0];
+    const embed = (
+      chargeAnnonceTirage([gagnant()], CTX).embeds as Array<{
+        description: string;
+      }>
+    )[0];
     expect(embed?.description).toContain("round #31547509");
     expect(embed?.description).toContain("une chance par œuvre");
     expect(embed?.description).toContain("14 participant·es · 16 œuvres");
   });
 
   it("horodate l'embed sur la publication, pas sur l'instant de l'envoi", () => {
-    const embed = (chargeAnnonceTirage([gagnant()], CTX).embeds as Array<{ timestamp: string }>)[0];
+    const embed = (
+      chargeAnnonceTirage([gagnant()], CTX).embeds as Array<{
+        timestamp: string;
+      }>
+    )[0];
     expect(embed?.timestamp).toBe("2026-08-23T12:00:00.000Z");
   });
 });
@@ -209,13 +267,24 @@ describe("images", () => {
   it("REFUSE les hôtes dont les URL expirent", () => {
     // `cdn.discordapp.com` signe ses pièces jointes pour moins de 24 h : un embed
     // qui pointe là est une image cassée dans l'archive du salon dès le lendemain.
-    expect(imageAbsolue("https://cdn.discordapp.com/attachments/1/2/a.png?ex=1&is=2&hm=3", null)).toBeNull();
-    expect(imageAbsolue("https://media.discordapp.net/attachments/1/2/a.png", null)).toBeNull();
-    expect(imageAbsolue("https://pbs.twimg.com/media/x.jpg?name=orig", null)).toBeNull();
+    expect(
+      imageAbsolue(
+        "https://cdn.discordapp.com/attachments/1/2/a.png?ex=1&is=2&hm=3",
+        null,
+      ),
+    ).toBeNull();
+    expect(
+      imageAbsolue("https://media.discordapp.net/attachments/1/2/a.png", null),
+    ).toBeNull();
+    expect(
+      imageAbsolue("https://pbs.twimg.com/media/x.jpg?name=orig", null),
+    ).toBeNull();
   });
 
   it("garde une URL absolue servie par un hôte durable", () => {
-    expect(imageAbsolue("https://cdn.rosegriffon.fr/dx11/a.png", null)).toBe("https://cdn.rosegriffon.fr/dx11/a.png");
+    expect(imageAbsolue("https://cdn.rosegriffon.fr/dx11/a.png", null)).toBe(
+      "https://cdn.rosegriffon.fr/dx11/a.png",
+    );
   });
 
   it("n'attache aucune image quand le master manque", () => {

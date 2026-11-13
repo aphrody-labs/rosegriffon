@@ -22,14 +22,19 @@ export default function AuthCodeErrorPage() {
   const error = searchParams?.get("error");
   const errorDescription = searchParams?.get("error_description");
 
-  const displayError = error || errorDescription || "Lien d'authentification invalide ou expiré";
+  const displayError =
+    error || errorDescription || "Lien d'authentification invalide ou expiré";
 
   return (
     <div className="w-full min-h-[calc(100vh-10rem)] flex items-center justify-center p-4 bg-gray-50 dark:bg-gray-900/50">
       <Card className="w-full max-w-md shadow-lg border-red-200 dark:border-red-800">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl text-red-600 dark:text-red-400">Erreur d'authentification</CardTitle>
-          <CardDescription>Une erreur s'est produite lors de la connexion</CardDescription>
+          <CardTitle className="text-2xl text-red-600 dark:text-red-400">
+            Erreur d'authentification
+          </CardTitle>
+          <CardDescription>
+            Une erreur s'est produite lors de la connexion
+          </CardDescription>
         </CardHeader>
 
         <CardContent className="space-y-6">

@@ -1,8 +1,15 @@
 import { describe, expect, test } from "bun:test";
 
-import { achilleaGuildDetailSchema, achilleaGuildPageSchema, achilleaGuildStatsSchema } from "../src/v1";
+import {
+  achilleaGuildDetailSchema,
+  achilleaGuildPageSchema,
+  achilleaGuildStatsSchema,
+} from "../src/v1";
 import { clanDtoSchema } from "../src/v1/clans";
-import { adminOpsOverviewSchema, adminWalletsResponseSchema } from "../src/v1/admin";
+import {
+  adminOpsOverviewSchema,
+  adminWalletsResponseSchema,
+} from "../src/v1/admin";
 
 const guild = {
   id: "123456789012345678",
@@ -95,8 +102,19 @@ test("accepts the unified admin overview without legacy bot telemetry", () => {
     users: { total: 3850, staff: 4 },
     wallet: { wallets: 14, totalBalance: 0, txToday: 0 },
     moderation: { sanctionsActive: 0, licensesActive: 0 },
-    community: { tournamentsOngoing: 0, clansPending: 0, orgsPending: 0, castEventsOpen: 0 },
-    ranked: { activeMatches: 0, contestedMatches: 0, finishedToday: 0, matchesToday: 0, totalPlayers: 12 },
+    community: {
+      tournamentsOngoing: 0,
+      clansPending: 0,
+      orgsPending: 0,
+      castEventsOpen: 0,
+    },
+    ranked: {
+      activeMatches: 0,
+      contestedMatches: 0,
+      finishedToday: 0,
+      matchesToday: 0,
+      totalPlayers: 12,
+    },
     audit24h: 0,
     generatedAt: "2026-09-23T00:00:00.000Z",
   });
@@ -119,5 +137,6 @@ test("preserves transaction ids serialized as strings by the unified API", () =>
     ],
   });
   expect(result.success).toBe(true);
-  if (result.success) expect(result.data.recent[0]?.id).toBe("12345678901234567890");
+  if (result.success)
+    expect(result.data.recent[0]?.id).toBe("12345678901234567890");
 });

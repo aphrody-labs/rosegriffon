@@ -55,35 +55,45 @@ const MAX_URLS_PER_SITE = 5000;
 const BATCH_SIZE = 100;
 const BATCH_DELAY_MS = 500;
 
-const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 /**
  * Récupère toutes les URLs `<loc>` d'un sitemap XML (gère les sitemap index
  * imbriqués en suivant un niveau de profondeur).
  */
-async function fetchSitemapUrls(sitemapUrl: string, depth = 0): Promise<string[]> {
+async function fetchSitemapUrls(
+  sitemapUrl: string,
+  depth = 0,
+): Promise<string[]> {
   try {
     const res = await fetch(sitemapUrl, {
       headers: { "User-Agent": "Rose-Griffon-Cron-IndexNow" },
     });
     if (!res.ok) {
-      console.error(`[SEO IndexNow] Sitemap ${sitemapUrl} a renvoyé HTTP ${res.status}`);
+      console.error(
+        `[SEO IndexNow] Sitemap ${sitemapUrl} a renvoyé HTTP ${res.status}`,
+      );
       return [];
     }
     const xml = await res.text();
     const locs = [...xml.matchAll(/<loc>\s*([^<\s]+)\s*<\/loc>/g)]
-      .map(m => (m[1] ?? "").replace(/&amp;/g, "&").trim())
-      .filter(u => u.length > 0);
+      .map((m) => (m[1] ?? "").replace(/&amp;/g, "&").trim())
+      .filter((u) => u.length > 0);
 
     // Sitemap index : les <loc> pointent vers d'autres sitemaps.
     const isIndex = /<sitemapindex/i.test(xml);
     if (isIndex && depth < 1) {
-      const nested = await Promise.all(locs.map(loc => fetchSitemapUrls(loc, depth + 1)));
+      const nested = await Promise.all(
+        locs.map((loc) => fetchSitemapUrls(loc, depth + 1)),
+      );
       return nested.flat();
     }
     return locs;
   } catch (err: any) {
-    console.error(`[SEO IndexNow] Échec de récupération du sitemap ${sitemapUrl} :`, err.message || err);
+    console.error(
+      `[SEO IndexNow] Échec de récupération du sitemap ${sitemapUrl} :`,
+      err.message || err,
+    );
     return [];
   }
 }
@@ -117,9 +127,14 @@ async function submitToIndexNow(
   return { status: res.status, ok: res.status === 200 || res.status === 202 };
 }
 
-export async function runSeoIndexNow(): Promise<{ success: boolean; error?: string }> {
+export async function runSeoIndexNow(): Promise<{
+  success: boolean;
+  error?: string;
+}> {
   const key = getIndexNowKey();
-  console.log(`[SEO IndexNow] Démarrage de la soumission IndexNow (clé : ${key.slice(0, 8)}…).`);
+  console.log(
+    `[SEO IndexNow] Démarrage de la soumission IndexNow (clé : ${key.slice(0, 8)}…).`,
+  );
 
   let anyFailure = false;
   const summary: string[] = [];
@@ -127,7 +142,9 @@ export async function runSeoIndexNow(): Promise<{ success: boolean; error?: stri
   for (const site of SITES) {
     const urls = await fetchSitemapUrls(site.sitemapUrl);
     if (urls.length === 0) {
-      console.warn(`[SEO IndexNow] Aucune URL trouvée pour ${site.name} (${site.sitemapUrl}).`);
+      console.warn(
+        `[SEO IndexNow] Aucune URL trouvée pour ${site.name} (${site.sitemapUrl}).`,
+      );
       summary.push(`${site.name}: 0 URL`);
       continue;
     }
@@ -153,10 +170,15 @@ export async function runSeoIndexNow(): Promise<{ success: boolean; error?: stri
       console.log(
         `[SEO IndexNow] ${site.name} : ${capped.length} URLs en ${batches.length} lot(s), ${okBatches}/${batches.length} OK (dernier HTTP ${lastStatus}).`,
       );
-      summary.push(`${site.name}: ${capped.length} URLs, ${okBatches}/${batches.length} lots OK (HTTP ${lastStatus})`);
+      summary.push(
+        `${site.name}: ${capped.length} URLs, ${okBatches}/${batches.length} lots OK (HTTP ${lastStatus})`,
+      );
       if (!allOk) anyFailure = true;
     } catch (err: any) {
-      console.error(`[SEO IndexNow] Erreur de soumission pour ${site.name} :`, err.message || err);
+      console.error(
+        `[SEO IndexNow] Erreur de soumission pour ${site.name} :`,
+        err.message || err,
+      );
       summary.push(`${site.name}: ERREUR ${err.message || err}`);
       anyFailure = true;
     }
@@ -164,6 +186,9 @@ export async function runSeoIndexNow(): Promise<{ success: boolean; error?: stri
 
   console.log(`[SEO IndexNow] Terminé. Résumé : ${summary.join(" | ")}`);
   return anyFailure
-    ? { success: false, error: `Au moins une soumission a échoué : ${summary.join(" | ")}` }
+    ? {
+        success: false,
+        error: `Au moins une soumission a échoué : ${summary.join(" | ")}`,
+      }
     : { success: true };
 }

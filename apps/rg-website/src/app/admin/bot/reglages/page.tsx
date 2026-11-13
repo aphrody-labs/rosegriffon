@@ -31,7 +31,10 @@ export const metadata = {
 export default async function ReglagesBotPage() {
   const { role } = await requireAdmin();
 
-  const [reglages, annuaire] = await Promise.all([lireReglagesGuilde(RG_GUILD_ID), annuaireGuilde(RG_GUILD_ID)]);
+  const [reglages, annuaire] = await Promise.all([
+    lireReglagesGuilde(RG_GUILD_ID),
+    annuaireGuilde(RG_GUILD_ID),
+  ]);
 
   return (
     <div className="mx-auto max-w-5xl space-y-8 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">

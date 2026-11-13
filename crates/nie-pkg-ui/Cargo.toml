@@ -17,5 +17,10 @@ web = ["dioxus/web", "dioxus/launch"]
 
 [dependencies]
 nie-pkg = { path = "../nie-pkg" }
-dioxus = { version = "0.7.10", default-features = false, features = ["macro", "html", "signals", "hooks"] }
+dioxus = { version = "0.7.10", default-features = false, features = [
+  "macro",
+  "html",
+  "signals",
+  "hooks",
+] }
 dioxus-ssr = { version = "0.7.10", default-features = false }

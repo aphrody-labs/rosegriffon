@@ -133,7 +133,11 @@ function tokenizeLeaves(buf: Uint8Array): Leaf[] {
     const token = buf[i];
     if (token === TOKEN_LEAF && i + 5 <= buf.length) {
       if (current) leaves.push(current);
-      current = { ns: view.getUint32(i + 1, false), value: null, compare: null };
+      current = {
+        ns: view.getUint32(i + 1, false),
+        value: null,
+        compare: null,
+      };
       i += 5;
       continue;
     }
@@ -144,7 +148,12 @@ function tokenizeLeaves(buf: Uint8Array): Leaf[] {
     }
     // Premier comparateur de la feuille uniquement (les feuilles event-flag
     // peuvent en contenir plusieurs ; seul le premier porte la semantique).
-    if (token === TOKEN_COMPARE && i + 5 <= buf.length && current && current.compare === null) {
+    if (
+      token === TOKEN_COMPARE &&
+      i + 5 <= buf.length &&
+      current &&
+      current.compare === null
+    ) {
       current.compare = view.getUint32(i + 1, false) >>> 0;
       i += 5;
       continue;
@@ -214,7 +223,8 @@ export function decodeUnlockCondition(
   else type = "always";
 
   const leafCount = (hasStory ? 1 : 0) + requiredEvents.length;
-  const op: UnlockOp = leafCount > 1 ? "and" : leafCount === 1 ? "single" : "none";
+  const op: UnlockOp =
+    leafCount > 1 ? "and" : leafCount === 1 ? "single" : "none";
 
   const result: UnlockCondition = { type, op, requiredEvents, raw };
   if (hasStory) {
@@ -233,7 +243,9 @@ export function decodeUnlockCondition(
  * Construit une map CRC32 -> event_id depuis une liste d'event ids connus.
  * Utile pour annoter les `requiredEvents` avec leur identifiant lisible.
  */
-export function buildEventCrcLookup(eventIds: Iterable<string>): Map<number, string> {
+export function buildEventCrcLookup(
+  eventIds: Iterable<string>,
+): Map<number, string> {
   const map = new Map<number, string>();
   for (const id of eventIds) {
     if (!id) continue;

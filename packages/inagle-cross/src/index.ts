@@ -43,4 +43,7 @@ export const crossExtractionStatus = status as unknown as ExtractionStatus;
  * ship duplicate copies of the same extraction manifests. */
 export const crossAudioManifest = audioManifest;
 export const crossCatalogStats = catalogStats as Record<string, unknown>;
-export const crossTypeSchema = typeSchema as unknown as Record<string, string[]>;
+export const crossTypeSchema = typeSchema as unknown as Record<
+  string,
+  string[]
+>;

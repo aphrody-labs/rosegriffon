@@ -18,7 +18,11 @@ export function bunPluginLua(options: BunPluginLuaOptions = {}) {
       // 1. Text .lua files
       build.onLoad({ filter: /\.lua$/ }, async (args: { path: string }) => {
         const file = (globalThis as any).Bun?.file(args.path);
-        const source = file ? await file.text() : await (await import("node:fs/promises")).readFile(args.path, "utf8");
+        const source = file
+          ? await file.text()
+          : await (
+              await import("node:fs/promises")
+            ).readFile(args.path, "utf8");
 
         let exportedContent = "";
 
@@ -46,25 +50,30 @@ export const rawSource = ${JSON.stringify(source)};
       });
 
       // 2. Binary compiled bytecode (.luac and Level-5 .lua.bin)
-      build.onLoad({ filter: /\.(lua\.bin|luac)$/ }, async (args: { path: string }) => {
-        const file = (globalThis as any).Bun?.file(args.path);
-        const buffer = file
-          ? new Uint8Array(await file.arrayBuffer())
-          : new Uint8Array(await (await import("node:fs/promises")).readFile(args.path));
+      build.onLoad(
+        { filter: /\.(lua\.bin|luac)$/ },
+        async (args: { path: string }) => {
+          const file = (globalThis as any).Bun?.file(args.path);
+          const buffer = file
+            ? new Uint8Array(await file.arrayBuffer())
+            : new Uint8Array(
+                await (await import("node:fs/promises")).readFile(args.path),
+              );
 
-        if (isLua52Bytecode(buffer)) {
-          const audit = auditLua52Bytecode(buffer);
+          if (isLua52Bytecode(buffer)) {
+            const audit = auditLua52Bytecode(buffer);
+            return {
+              contents: `export default ${JSON.stringify(audit)};\nexport const isLua52 = true;`,
+              loader: "js",
+            };
+          }
+
           return {
-            contents: `export default ${JSON.stringify(audit)};\nexport const isLua52 = true;`,
+            contents: `export default new Uint8Array(${JSON.stringify(Array.from(buffer))});`,
             loader: "js",
           };
-        }
-
-        return {
-          contents: `export default new Uint8Array(${JSON.stringify(Array.from(buffer))});`,
-          loader: "js",
-        };
-      });
+        },
+      );
     },
   };
 }

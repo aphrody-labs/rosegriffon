@@ -1,6 +1,15 @@
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
-import { signAchilleaRealtimeToken, signAchilleaSessionToken } from "@rosegriffon/auth/achillea-session";
-import { authFromAuthorization, authFromColyseus, authFromCookieHeader, getCookie, verifyToken } from "./auth";
+import {
+  signAchilleaRealtimeToken,
+  signAchilleaSessionToken,
+} from "@rosegriffon/auth/achillea-session";
+import {
+  authFromAuthorization,
+  authFromColyseus,
+  authFromCookieHeader,
+  getCookie,
+  verifyToken,
+} from "./auth";
 
 const secret = "ranked-auth-fixture-secret";
 const identity = { id: "42", username: "Fixture player" };
@@ -25,8 +34,12 @@ function credentials() {
 describe("ranked transport adapters consume the shared auth contract", () => {
   test("accepts the server-signed session cookie and realtime bearer", async () => {
     const { session, realtime } = credentials();
-    expect(await authFromCookieHeader(`theme=dark; token=${session}`)).toMatchObject(identity);
-    expect(await authFromAuthorization(`bEaReR ${realtime}`)).toMatchObject(identity);
+    expect(
+      await authFromCookieHeader(`theme=dark; token=${session}`),
+    ).toMatchObject(identity);
+    expect(await authFromAuthorization(`bEaReR ${realtime}`)).toMatchObject(
+      identity,
+    );
     expect(await verifyToken(realtime)).toMatchObject(identity);
   });
 
@@ -34,7 +47,9 @@ describe("ranked transport adapters consume the shared auth contract", () => {
     const { session, realtime } = credentials();
     expect(await authFromCookieHeader(`token=${realtime}`)).toBeNull();
     expect(await authFromAuthorization(`Bearer ${session}`)).toBeNull();
-    await expect(verifyToken(session)).rejects.toThrow("Invalid realtime token");
+    await expect(verifyToken(session)).rejects.toThrow(
+      "Invalid realtime token",
+    );
   });
 
   test("parses encoded cookies without confusing prefix names", () => {
@@ -45,25 +60,45 @@ describe("ranked transport adapters consume the shared auth contract", () => {
 
   test("accepts Web Headers and plain transport headers", async () => {
     const { session, realtime } = credentials();
-    expect(await authFromColyseus({}, { headers: new Headers({ cookie: `token=${session}` }) })).toMatchObject(
-      identity,
-    );
-    expect(await authFromColyseus({}, { headers: { Authorization: `Bearer ${realtime}` } })).toMatchObject(identity);
+    expect(
+      await authFromColyseus(
+        {},
+        { headers: new Headers({ cookie: `token=${session}` }) },
+      ),
+    ).toMatchObject(identity);
+    expect(
+      await authFromColyseus(
+        {},
+        { headers: { Authorization: `Bearer ${realtime}` } },
+      ),
+    ).toMatchObject(identity);
   });
 
   test("preserves context, cookie, authorization and options precedence", async () => {
     const { session, realtime } = credentials();
-    const contextToken = signAchilleaRealtimeToken({ id: "context-user" }, secret);
+    const contextToken = signAchilleaRealtimeToken(
+      { id: "context-user" },
+      secret,
+    );
     expect(
-      await authFromColyseus({ token: realtime }, { token: contextToken, headers: { cookie: `token=${session}` } }),
+      await authFromColyseus(
+        { token: realtime },
+        { token: contextToken, headers: { cookie: `token=${session}` } },
+      ),
     ).toMatchObject({ id: "context-user" });
     expect(
-      await authFromColyseus({ token: contextToken }, { token: "invalid", headers: { cookie: `token=${session}` } }),
+      await authFromColyseus(
+        { token: contextToken },
+        { token: "invalid", headers: { cookie: `token=${session}` } },
+      ),
     ).toMatchObject(identity);
     expect(
       await authFromColyseus(
         { token: realtime },
-        { token: "invalid", headers: { cookie: "token=invalid", authorization: "Bearer invalid" } },
+        {
+          token: "invalid",
+          headers: { cookie: "token=invalid", authorization: "Bearer invalid" },
+        },
       ),
     ).toMatchObject(identity);
   });
@@ -74,7 +109,12 @@ describe("ranked transport adapters consume the shared auth contract", () => {
     expect(await authFromAuthorization("Basic ignored")).toBeNull();
     expect(await authFromCookieHeader("token=invalid")).toBeNull();
     expect(await authFromColyseus(null, null)).toBeNull();
-    expect(await authFromColyseus({ token: "invalid" }, { token: 42, headers: "invalid" })).toBeNull();
+    expect(
+      await authFromColyseus(
+        { token: "invalid" },
+        { token: 42, headers: "invalid" },
+      ),
+    ).toBeNull();
   });
 
   test("fails closed when the private signing secret is not configured", async () => {

@@ -10,7 +10,11 @@ import { RarityBadge } from "@/components/ui/rarity-badge";
 import { CharacterSearchDialog } from "@/components/wiki/CharacterSearchDialog";
 import { StatHeptagon } from "@/components/wiki/StatHeptagon";
 import type { SpriteCommonKey } from "@/config/sprites-common";
-import { getCharacterImageUrl, getSkillCategoryIconUrl, getSkillElementIconUrl } from "@rosegriffon/azalee/images";
+import {
+  getCharacterImageUrl,
+  getSkillCategoryIconUrl,
+  getSkillElementIconUrl,
+} from "@rosegriffon/azalee/images";
 import { cn } from "@/lib/utils";
 import { wiki } from "@rosegriffon/app-shell";
 
@@ -77,7 +81,12 @@ const ELEMENT_GRADIENTS: Record<string, string> = {
   Wind: "from-emerald-950 via-teal-900/90 to-cyan-800/70",
 };
 
-const POS_LABEL: Record<string, string> = { DF: "DEF", FW: "ATT", GK: "GAR", MF: "MIL" };
+const POS_LABEL: Record<string, string> = {
+  DF: "DEF",
+  FW: "ATT",
+  GK: "GAR",
+  MF: "MIL",
+};
 const POS_COLOR: Record<string, string> = {
   DF: "bg-blue-600",
   FW: "bg-red-600",
@@ -99,14 +108,22 @@ const STAT_LABELS: Array<{ key: keyof CharacterStats; label: string }> = [
 
 function totalStats(stats: CharacterStats): number {
   return (
-    stats.kick + stats.control + stats.technique + stats.pressure + stats.physical + stats.agility + stats.intelligence
+    stats.kick +
+    stats.control +
+    stats.technique +
+    stats.pressure +
+    stats.physical +
+    stats.agility +
+    stats.intelligence
   );
 }
 
 /** Prioritize zukanHash (3D render) > image > face icon fallback */
 function resolveImageUrl(char: CompareCharacter): string {
   if (char.zukanHash) {
-    const cleanHash = char.zukanHash.startsWith("/") ? char.zukanHash.slice(1) : char.zukanHash;
+    const cleanHash = char.zukanHash.startsWith("/")
+      ? char.zukanHash.slice(1)
+      : char.zukanHash;
     return `https://dxi4wb638ujep.cloudfront.net/1/${cleanHash}.png`;
   }
   if (char.image) {
@@ -136,7 +153,12 @@ function CompareCard({
       className="relative group w-full rounded-xl overflow-hidden elevation-1 hover:elevation-2 transition-all cursor-pointer text-left"
     >
       {/* Image area with element gradient - compact height */}
-      <div className={cn("relative w-full h-36 sm:h-48 overflow-hidden bg-linear-to-br", gradient)}>
+      <div
+        className={cn(
+          "relative w-full h-36 sm:h-48 overflow-hidden bg-linear-to-br",
+          gradient,
+        )}
+      >
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_80%,rgba(255,255,255,0.06),transparent_60%)]" />
         <Image
           src={imageUrl}
@@ -152,7 +174,9 @@ function CompareCard({
           <div className="bg-surface-container/90 p-2 rounded-full shadow-lg">
             <Icon name="compare_arrows" size={18} className="text-primary" />
           </div>
-          <span className="text-[10px] font-bold text-white/90 drop-shadow-lg">Changer</span>
+          <span className="text-[10px] font-bold text-white/90 drop-shadow-lg">
+            Changer
+          </span>
         </div>
 
         {/* Rarity badge top-left */}
@@ -163,7 +187,9 @@ function CompareCard({
 
       {/* Info section */}
       <div className="px-2.5 py-2 sm:px-3 sm:py-2.5 bg-surface-container-low space-y-1">
-        <p className="font-bold text-xs sm:text-sm text-on-surface truncate">{char.name}</p>
+        <p className="font-bold text-xs sm:text-sm text-on-surface truncate">
+          {char.name}
+        </p>
         <div className="flex items-center gap-1 sm:gap-1.5 flex-wrap">
           {elSprite && <CommonSpriteIcon name={elSprite} scale={0.25} />}
           <span
@@ -179,7 +205,9 @@ function CompareCard({
               {char.teamName}
             </span>
           )}
-          <span className="ml-auto text-xs font-bold text-primary tabular-nums">{total}</span>
+          <span className="ml-auto text-xs font-bold text-primary tabular-nums">
+            {total}
+          </span>
         </div>
       </div>
     </button>
@@ -200,8 +228,16 @@ function EmptySlot({ side, onChoose }: { side: 1 | 2; onChoose: () => void }) {
       )}
     >
       <div className="size-14 sm:w-16 sm:h-16 rounded-full bg-primary-container flex items-center justify-center">
-        <Icon name="compare_arrows" size={28} className="text-on-primary-container sm:hidden" />
-        <Icon name="compare_arrows" size={32} className="text-on-primary-container hidden sm:block" />
+        <Icon
+          name="compare_arrows"
+          size={28}
+          className="text-on-primary-container sm:hidden"
+        />
+        <Icon
+          name="compare_arrows"
+          size={32}
+          className="text-on-primary-container hidden sm:block"
+        />
       </div>
       <span className="type-label-medium text-on-surface-variant/60 group-hover:text-primary/80 transition-colors">
         Personnage {side}
@@ -243,9 +279,13 @@ function StatComparisonBars({
       <div className="flex items-center justify-between mb-2 sm:mb-4">
         <h3 className="type-title-small text-on-surface">Statistiques</h3>
         <div className="flex items-center gap-1.5 text-[10px] sm:text-xs font-bold tabular-nums">
-          <span className="text-[var(--md-sys-color-primary)]">{wins.char1}</span>
+          <span className="text-[var(--md-sys-color-primary)]">
+            {wins.char1}
+          </span>
           <span className="text-on-surface-variant/40">-</span>
-          <span className="text-[var(--md-sys-color-tertiary)]">{wins.char2}</span>
+          <span className="text-[var(--md-sys-color-tertiary)]">
+            {wins.char2}
+          </span>
         </div>
       </div>
 
@@ -290,7 +330,9 @@ function StatComparisonBars({
                 >
                   {v1}
                 </span>
-                <span className="text-on-surface-variant/40 text-[10px] sm:text-xs">vs</span>
+                <span className="text-on-surface-variant/40 text-[10px] sm:text-xs">
+                  vs
+                </span>
                 <span
                   className={cn(
                     "font-bold w-8 sm:w-10 tabular-nums transition-colors",
@@ -320,7 +362,9 @@ function StatComparisonBars({
                 <div
                   className={cn(
                     "h-full rounded-full transition-all duration-500",
-                    delta <= 0 ? "bg-[var(--md-sys-color-primary)]" : "bg-[var(--md-sys-color-primary)]/50",
+                    delta <= 0
+                      ? "bg-[var(--md-sys-color-primary)]"
+                      : "bg-[var(--md-sys-color-primary)]/50",
                   )}
                   style={{ width: `${pct1}%` }}
                 />
@@ -329,7 +373,9 @@ function StatComparisonBars({
                 <div
                   className={cn(
                     "h-full rounded-full transition-all duration-500",
-                    delta >= 0 ? "bg-[var(--md-sys-color-tertiary)]" : "bg-[var(--md-sys-color-tertiary)]/50",
+                    delta >= 0
+                      ? "bg-[var(--md-sys-color-tertiary)]"
+                      : "bg-[var(--md-sys-color-tertiary)]/50",
                   )}
                   style={{ width: `${pct2}%` }}
                 />
@@ -340,11 +386,19 @@ function StatComparisonBars({
       })}
 
       <div className="flex items-center justify-between pt-2 sm:pt-3 border-t border-outline-variant/30">
-        <span className="text-xs sm:text-sm font-bold text-on-surface uppercase tracking-wide">Total</span>
+        <span className="text-xs sm:text-sm font-bold text-on-surface uppercase tracking-wide">
+          Total
+        </span>
         <div className="flex items-center gap-1 sm:gap-2">
-          <span className="font-bold text-on-surface tabular-nums text-xs sm:text-sm">{totalStats(stats1)}</span>
-          <span className="text-on-surface-variant text-[10px] sm:text-xs">vs</span>
-          <span className="font-bold text-on-surface tabular-nums text-xs sm:text-sm">{totalStats(stats2)}</span>
+          <span className="font-bold text-on-surface tabular-nums text-xs sm:text-sm">
+            {totalStats(stats1)}
+          </span>
+          <span className="text-on-surface-variant text-[10px] sm:text-xs">
+            vs
+          </span>
+          <span className="font-bold text-on-surface tabular-nums text-xs sm:text-sm">
+            {totalStats(stats2)}
+          </span>
           {(() => {
             const d = totalStats(stats2) - totalStats(stats1);
             return (
@@ -368,8 +422,16 @@ function StatComparisonBars({
 
 // ---------- Skill card (MovesetList style) ----------
 
-function SkillRow({ skill, isCommon }: { skill: SkillInfo; isCommon: boolean }) {
-  const catIcon = skill.category ? getSkillCategoryIconUrl(skill.category) : null;
+function SkillRow({
+  skill,
+  isCommon,
+}: {
+  skill: SkillInfo;
+  isCommon: boolean;
+}) {
+  const catIcon = skill.category
+    ? getSkillCategoryIconUrl(skill.category)
+    : null;
   const elemIcon = skill.element ? getSkillElementIconUrl(skill.element) : null;
 
   return (
@@ -386,9 +448,19 @@ function SkillRow({ skill, isCommon }: { skill: SkillInfo; isCommon: boolean }) 
       {/* Category icon */}
       <div className="w-8 sm:w-9 h-full flex items-center justify-center bg-surface-dim shrink-0">
         {catIcon ? (
-          <Image src={catIcon} alt="" width={16} height={16} className="object-contain" />
+          <Image
+            src={catIcon}
+            alt=""
+            width={16}
+            height={16}
+            className="object-contain"
+          />
         ) : skill.isPassive ? (
-          <Icon name="auto_awesome" size={15} className="text-outline-variant" />
+          <Icon
+            name="auto_awesome"
+            size={15}
+            className="text-outline-variant"
+          />
         ) : (
           <Icon name="blur_on" size={15} className="text-outline-variant" />
         )}
@@ -399,19 +471,31 @@ function SkillRow({ skill, isCommon }: { skill: SkillInfo; isCommon: boolean }) 
         <span
           className={cn(
             "text-[11px] sm:text-xs font-bold truncate block transition-colors leading-tight",
-            skill.isPassive ? "text-purple-600 dark:text-purple-400" : "text-on-surface group-hover:text-lime-600",
+            skill.isPassive
+              ? "text-purple-600 dark:text-purple-400"
+              : "text-on-surface group-hover:text-lime-600",
           )}
         >
           {skill.name}
         </span>
         {skill.isPassive && (
-          <span className="text-[7px] sm:text-[8px] font-bold text-purple-400 uppercase tracking-wider">Talent</span>
+          <span className="text-[7px] sm:text-[8px] font-bold text-purple-400 uppercase tracking-wider">
+            Talent
+          </span>
         )}
       </div>
 
       {/* Element + Power + Tension */}
       <div className="flex items-center gap-1 sm:gap-1.5 pr-1.5 sm:pr-2 shrink-0">
-        {elemIcon && <Image src={elemIcon} alt="" width={12} height={12} className="object-contain" />}
+        {elemIcon && (
+          <Image
+            src={elemIcon}
+            alt=""
+            width={12}
+            height={12}
+            className="object-contain"
+          />
+        )}
         {skill.power && !skill.isPassive && (
           <span className="text-xs sm:text-sm font-black text-lime-600 dark:text-lime-400 tabular-nums leading-none">
             {skill.power}
@@ -422,7 +506,9 @@ function SkillRow({ skill, isCommon }: { skill: SkillInfo; isCommon: boolean }) 
             {skill.tension}T
           </span>
         )}
-        {isCommon && <Icon name="link" size={11} className="text-primary shrink-0" />}
+        {isCommon && (
+          <Icon name="link" size={11} className="text-primary shrink-0" />
+        )}
       </div>
     </Link>
   );
@@ -442,19 +528,31 @@ function SkillsComparison({
   name2: string;
 }) {
   const commonSkillNames = useMemo(() => {
-    const set1 = new Set(skills1.map(s => s.name.toLowerCase()));
-    return new Set(skills2.filter(s => set1.has(s.name.toLowerCase())).map(s => s.name.toLowerCase()));
+    const set1 = new Set(skills1.map((s) => s.name.toLowerCase()));
+    return new Set(
+      skills2
+        .filter((s) => set1.has(s.name.toLowerCase()))
+        .map((s) => s.name.toLowerCase()),
+    );
   }, [skills1, skills2]);
 
   const renderSkillList = (skills: SkillInfo[], label: string) => (
     <div className="space-y-1.5 sm:space-y-2">
-      <h4 className="text-[10px] sm:text-xs font-bold text-on-surface-variant uppercase tracking-wider">{label}</h4>
+      <h4 className="text-[10px] sm:text-xs font-bold text-on-surface-variant uppercase tracking-wider">
+        {label}
+      </h4>
       {skills.length === 0 ? (
-        <p className="text-[10px] sm:text-xs text-on-surface-variant/50 italic">Aucune technique</p>
+        <p className="text-[10px] sm:text-xs text-on-surface-variant/50 italic">
+          Aucune technique
+        </p>
       ) : (
         <div className="space-y-1 sm:space-y-1.5">
           {skills.map((skill, i) => (
-            <SkillRow key={skill.id || i} skill={skill} isCommon={commonSkillNames.has(skill.name.toLowerCase())} />
+            <SkillRow
+              key={skill.id || i}
+              skill={skill}
+              isCommon={commonSkillNames.has(skill.name.toLowerCase())}
+            />
           ))}
         </div>
       )}
@@ -481,7 +579,10 @@ function SkillsComparison({
 
 // ---------- Main component ----------
 
-function interpolateStats(char: CompareCharacter | null | undefined, level: number): CharacterStats {
+function interpolateStats(
+  char: CompareCharacter | null | undefined,
+  level: number,
+): CharacterStats {
   const defaultStats = {
     kick: 0,
     control: 0,
@@ -506,14 +607,15 @@ function interpolateStats(char: CompareCharacter | null | undefined, level: numb
     statsLv1 &&
     statsLv30 &&
     statsLv50 &&
-    Object.values(statsLv30).some(v => v > 0) &&
-    Object.values(statsLv50).some(v => v > 0);
+    Object.values(statsLv30).some((v) => v > 0) &&
+    Object.values(statsLv50).some((v) => v > 0);
 
   if (!hasCompleteData) {
     const startStats = statsLv1 || stats;
     const endStats = stats;
     const t = (level - 1) / 98;
-    const lerp = (start: number, end: number) => Math.floor(start + (end - start) * t);
+    const lerp = (start: number, end: number) =>
+      Math.floor(start + (end - start) * t);
 
     return {
       kick: lerp(startStats.kick, endStats.kick),
@@ -552,7 +654,10 @@ function interpolateStats(char: CompareCharacter | null | undefined, level: numb
   };
 }
 
-export function CharacterComparator({ char1, char2 }: CharacterComparatorProps) {
+export function CharacterComparator({
+  char1,
+  char2,
+}: CharacterComparatorProps) {
   const router = useRouter();
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchTarget, setSearchTarget] = useState<1 | 2>(1);
@@ -610,16 +715,26 @@ export function CharacterComparator({ char1, char2 }: CharacterComparatorProps) 
   const bothSelected = char1 && char2;
   const anySelected = char1 || char2;
 
-  const currentStats1 = useMemo(() => interpolateStats(char1, level), [char1, level]);
-  const currentStats2 = useMemo(() => interpolateStats(char2, level), [char2, level]);
+  const currentStats1 = useMemo(
+    () => interpolateStats(char1, level),
+    [char1, level],
+  );
+  const currentStats2 = useMemo(
+    () => interpolateStats(char2, level),
+    [char2, level],
+  );
 
   return (
     <div className="w-full space-y-5 sm:space-y-8">
       {/* Header */}
       <div className="flex items-center justify-between gap-2">
         <div>
-          <h1 className="font-[BradBunR] text-xl sm:text-2xl md:text-3xl text-on-surface tracking-wide">Comparateur</h1>
-          <p className="type-body-small text-on-surface-variant mt-1">Comparez deux personnages cote a cote</p>
+          <h1 className="font-[BradBunR] text-xl sm:text-2xl md:text-3xl text-on-surface tracking-wide">
+            Comparateur
+          </h1>
+          <p className="type-body-small text-on-surface-variant mt-1">
+            Comparez deux personnages cote a cote
+          </p>
         </div>
         <div className="flex items-center gap-2 shrink-0">
           {anySelected && (
@@ -652,7 +767,11 @@ export function CharacterComparator({ char1, char2 }: CharacterComparatorProps) 
       <div className="relative grid grid-cols-2 gap-3 sm:gap-6">
         <div className="transition-all duration-300">
           {char1 ? (
-            <CompareCard char={char1} currentStats={currentStats1} onClick={() => openSearch(1)} />
+            <CompareCard
+              char={char1}
+              currentStats={currentStats1}
+              onClick={() => openSearch(1)}
+            />
           ) : (
             <EmptySlot side={1} onChoose={() => openSearch(1)} />
           )}
@@ -673,7 +792,11 @@ export function CharacterComparator({ char1, char2 }: CharacterComparatorProps) 
 
         <div className="transition-all duration-300">
           {char2 ? (
-            <CompareCard char={char2} currentStats={currentStats2} onClick={() => openSearch(2)} />
+            <CompareCard
+              char={char2}
+              currentStats={currentStats2}
+              onClick={() => openSearch(2)}
+            />
           ) : (
             <EmptySlot side={2} onChoose={() => openSearch(2)} />
           )}
@@ -686,9 +809,12 @@ export function CharacterComparator({ char1, char2 }: CharacterComparatorProps) 
           {/* Level Slider */}
           <div className="bg-surface-container rounded-2xl border border-outline-variant/10 p-5 flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-md transition-all duration-300">
             <div className="space-y-1">
-              <h3 className="type-title-small text-on-surface font-bold">Ajuster le niveau</h3>
+              <h3 className="type-title-small text-on-surface font-bold">
+                Ajuster le niveau
+              </h3>
               <p className="text-xs text-on-surface-variant/70">
-                Modifiez le niveau pour comparer les statistiques interpolées en temps réel
+                Modifiez le niveau pour comparer les statistiques interpolées en
+                temps réel
               </p>
             </div>
             <div className="flex-1 max-w-md w-full space-y-2">
@@ -703,7 +829,7 @@ export function CharacterComparator({ char1, char2 }: CharacterComparatorProps) 
                 min="1"
                 max="99"
                 value={level}
-                onChange={e => setLevel(Number(e.target.value))}
+                onChange={(e) => setLevel(Number(e.target.value))}
                 className="w-full h-1.5 bg-surface-container-highest rounded-lg appearance-none cursor-pointer accent-primary focus:outline-hidden"
               />
               <div className="flex justify-between text-[10px] text-on-surface-variant/50 font-bold">
@@ -741,18 +867,32 @@ export function CharacterComparator({ char1, char2 }: CharacterComparatorProps) 
 
           {/* Stat bars */}
           <div className="bg-surface-container rounded-2xl border border-outline-variant/10 p-4 sm:p-6 shadow-md transition-all duration-300 hover:shadow-lg">
-            <StatComparisonBars stats1={currentStats1} stats2={currentStats2} name1={char1.name} name2={char2.name} />
+            <StatComparisonBars
+              stats1={currentStats1}
+              stats2={currentStats2}
+              name1={char1.name}
+              name2={char2.name}
+            />
           </div>
 
           {/* Skills */}
           <div className="bg-surface-container rounded-2xl border border-outline-variant/10 p-4 sm:p-6 shadow-md transition-all duration-300 hover:shadow-lg">
-            <SkillsComparison skills1={char1.skills} skills2={char2.skills} name1={char1.name} name2={char2.name} />
+            <SkillsComparison
+              skills1={char1.skills}
+              skills2={char2.skills}
+              name1={char1.name}
+              name2={char2.name}
+            />
           </div>
         </div>
       )}
 
       {/* Search dialog */}
-      <CharacterSearchDialog open={searchOpen} onOpenChange={setSearchOpen} onSelect={handleSelect} />
+      <CharacterSearchDialog
+        open={searchOpen}
+        onOpenChange={setSearchOpen}
+        onSelect={handleSelect}
+      />
     </div>
   );
 }

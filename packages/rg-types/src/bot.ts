@@ -67,7 +67,7 @@ const flocon = z.string().regex(/^\d{15,25}$/, "identifiant Discord attendu");
 const flocons = z
   .array(flocon)
   .default([])
-  .transform(liste => [...new Set(liste)]);
+  .transform((liste) => [...new Set(liste)]);
 
 /**
  * Où annoncer une montée de niveau.
@@ -88,12 +88,13 @@ export const LIEUX_ANNONCE = ["salon", "place", "prive", "aucune"] as const;
 export type LieuAnnonce = (typeof LIEUX_ANNONCE)[number];
 
 /** Libellés d'interface des lieux d'annonce de niveau. */
-export const LIBELLES_LIEU_ANNONCE: Readonly<Record<LieuAnnonce, string>> = Object.freeze({
-  salon: "Dans un salon dédié",
-  place: "Dans le salon du message",
-  prive: "En message privé",
-  aucune: "Aucune annonce",
-});
+export const LIBELLES_LIEU_ANNONCE: Readonly<Record<LieuAnnonce, string>> =
+  Object.freeze({
+    salon: "Dans un salon dédié",
+    place: "Dans le salon du message",
+    prive: "En message privé",
+    aucune: "Aucune annonce",
+  });
 
 const reglagesNiveaux = z
   .object({
@@ -122,9 +123,24 @@ const reglagesNiveaux = z
     rolesExclus: flocons,
     gain: z
       .object({
-        minimum: z.number().int().min(0).max(1_000).default(GAIN_XP_DEFAUT.minimum),
-        maximum: z.number().int().min(0).max(1_000).default(GAIN_XP_DEFAUT.maximum),
-        delaiSecondes: z.number().int().min(0).max(3_600).default(GAIN_XP_DEFAUT.delaiSecondes),
+        minimum: z
+          .number()
+          .int()
+          .min(0)
+          .max(1_000)
+          .default(GAIN_XP_DEFAUT.minimum),
+        maximum: z
+          .number()
+          .int()
+          .min(0)
+          .max(1_000)
+          .default(GAIN_XP_DEFAUT.maximum),
+        delaiSecondes: z
+          .number()
+          .int()
+          .min(0)
+          .max(3_600)
+          .default(GAIN_XP_DEFAUT.delaiSecondes),
       })
       .prefault({}),
   })
@@ -164,11 +180,12 @@ export const LIEUX_BIENVENUE = ["salon", "prive", "aucune"] as const;
 export type LieuBienvenue = (typeof LIEUX_BIENVENUE)[number];
 
 /** Libellés d'interface des lieux de bienvenue. */
-export const LIBELLES_LIEU_BIENVENUE: Readonly<Record<LieuBienvenue, string>> = Object.freeze({
-  salon: "Dans un salon dédié",
-  prive: "En message privé",
-  aucune: "Aucun message",
-});
+export const LIBELLES_LIEU_BIENVENUE: Readonly<Record<LieuBienvenue, string>> =
+  Object.freeze({
+    salon: "Dans un salon dédié",
+    prive: "En message privé",
+    aucune: "Aucun message",
+  });
 
 const reglagesAccueil = z
   .object({
@@ -253,38 +270,46 @@ export const SchemaReglages = z
 export type ReglagesCommunaute = z.infer<typeof SchemaReglages>;
 
 /** Les six sections réglables, dans l'ordre d'affichage de l'interface. */
-export const SECTIONS_REGLAGES = ["niveaux", "tickets", "moderation", "accueil", "suggestions", "kizuna"] as const;
+export const SECTIONS_REGLAGES = [
+  "niveaux",
+  "tickets",
+  "moderation",
+  "accueil",
+  "suggestions",
+  "kizuna",
+] as const;
 
 export type SectionReglages = (typeof SECTIONS_REGLAGES)[number];
 
 /** Libellé et rôle de chaque section — la même phrase dans Discord et sur le site. */
-export const LIBELLES_SECTIONS: Readonly<Record<SectionReglages, { readonly titre: string; readonly role: string }>> =
-  Object.freeze({
-    niveaux: {
-      titre: "Niveaux",
-      role: "Expérience gagnée par message, annonces de montée et exclusions.",
-    },
-    tickets: {
-      titre: "Tickets",
-      role: "Panneau d'ouverture, prise en charge et historique des tickets.",
-    },
-    moderation: {
-      titre: "Modération",
-      role: "Salon où publier les avertissements, exclusions et bannissements.",
-    },
-    accueil: {
-      titre: "Accueil",
-      role: "Message de bienvenue et rôle posé à l'arrivée d'un membre.",
-    },
-    suggestions: {
-      titre: "Suggestions",
-      role: "Boîte à suggestions publique et salon de dépôt.",
-    },
-    kizuna: {
-      titre: "Jetons Kizuna",
-      role: "Monnaie de communauté et annonce des recrutements remarquables.",
-    },
-  });
+export const LIBELLES_SECTIONS: Readonly<
+  Record<SectionReglages, { readonly titre: string; readonly role: string }>
+> = Object.freeze({
+  niveaux: {
+    titre: "Niveaux",
+    role: "Expérience gagnée par message, annonces de montée et exclusions.",
+  },
+  tickets: {
+    titre: "Tickets",
+    role: "Panneau d'ouverture, prise en charge et historique des tickets.",
+  },
+  moderation: {
+    titre: "Modération",
+    role: "Salon où publier les avertissements, exclusions et bannissements.",
+  },
+  accueil: {
+    titre: "Accueil",
+    role: "Message de bienvenue et rôle posé à l'arrivée d'un membre.",
+  },
+  suggestions: {
+    titre: "Suggestions",
+    role: "Boîte à suggestions publique et salon de dépôt.",
+  },
+  kizuna: {
+    titre: "Jetons Kizuna",
+    role: "Monnaie de communauté et annonce des recrutements remarquables.",
+  },
+});
 
 /** Le document par défaut — celui d'une guilde qui n'a jamais rien réglé. */
 export const REGLAGES_DEFAUT: ReglagesCommunaute = SchemaReglages.parse({});
@@ -304,7 +329,9 @@ export function lireReglages(brut: unknown): ReglagesCommunaute {
   }
   console.warn(
     "[reglages] document illisible, retour aux défauts :",
-    resultat.error.issues.map(probleme => `${probleme.path.join(".")} ${probleme.message}`).join(" · "),
+    resultat.error.issues
+      .map((probleme) => `${probleme.path.join(".")} ${probleme.message}`)
+      .join(" · "),
   );
   return REGLAGES_DEFAUT;
 }
@@ -348,7 +375,10 @@ export type ModificationReglages = {
  * anti-spam enverrait `{ gain: { delaiSecondes: 90 } }` et remettrait la
  * fourchette d'XP à 15–25 sans que personne ne l'ait demandé.
  */
-export function fusionnerReglages(actuels: ReglagesCommunaute, modification: ModificationReglages): ReglagesCommunaute {
+export function fusionnerReglages(
+  actuels: ReglagesCommunaute,
+  modification: ModificationReglages,
+): ReglagesCommunaute {
   const { gain: gainModifie, ...niveauxModifies } = modification.niveaux ?? {};
   return validerReglages({
     accueil: { ...actuels.accueil, ...modification.accueil },
@@ -385,9 +415,13 @@ export function fusionnerReglages(actuels: ReglagesCommunaute, modification: Mod
  */
 function partielSansDefauts(objet: z.ZodObject): z.ZodObject {
   const forme: Record<string, z.ZodType> = {};
-  for (const [clef, champ] of Object.entries(objet.shape as Record<string, z.ZodType>)) {
+  for (const [clef, champ] of Object.entries(
+    objet.shape as Record<string, z.ZodType>,
+  )) {
     const nu = deballer(champ);
-    forme[clef] = (nu instanceof z.ZodObject ? partielSansDefauts(nu) : nu).optional();
+    forme[clef] = (
+      nu instanceof z.ZodObject ? partielSansDefauts(nu) : nu
+    ).optional();
   }
   return z.object(forme).strict();
 }
@@ -448,11 +482,16 @@ export function manquesTickets(reglages: ReglagesCommunaute): string[] {
   if (!reglages.tickets.salonHistorique) {
     manques.push("le salon d'historique (`salon-historique`)");
   }
-  if (reglages.tickets.rolesStaff.length === 0 && reglages.tickets.rolesDirection.length === 0) {
+  if (
+    reglages.tickets.rolesStaff.length === 0 &&
+    reglages.tickets.rolesDirection.length === 0
+  ) {
     manques.push("au moins un rôle de prise en charge (`role-staff`)");
   }
   if (reglages.tickets.mode === "salon" && !reglages.tickets.categorieSupport) {
-    manques.push("la catégorie Support (`categorie`), obligatoire en mode salon");
+    manques.push(
+      "la catégorie Support (`categorie`), obligatoire en mode salon",
+    );
   }
   return manques;
 }
@@ -463,10 +502,15 @@ export function manquesTickets(reglages: ReglagesCommunaute): string[] {
  * Une section sans manque est prête ; une section désactivée n'a aucun manque
  * (on ne réclame pas un salon d'annonce à quelqu'un qui a coupé les annonces).
  */
-export function manquesParSection(reglages: ReglagesCommunaute): Readonly<Record<SectionReglages, string[]>> {
+export function manquesParSection(
+  reglages: ReglagesCommunaute,
+): Readonly<Record<SectionReglages, string[]>> {
   const niveaux: string[] = [];
   if (reglages.niveaux.actif) {
-    if (reglages.niveaux.annonce === "salon" && !reglages.niveaux.salonAnnonce) {
+    if (
+      reglages.niveaux.annonce === "salon" &&
+      !reglages.niveaux.salonAnnonce
+    ) {
       manquePousse(niveaux, "le salon d'annonce des montées de niveau");
     }
     if (reglages.niveaux.gain.maximum < reglages.niveaux.gain.minimum) {
@@ -475,7 +519,11 @@ export function manquesParSection(reglages: ReglagesCommunaute): Readonly<Record
   }
 
   const accueil: string[] = [];
-  if (reglages.accueil.actif && reglages.accueil.lieu === "salon" && !reglages.accueil.salon) {
+  if (
+    reglages.accueil.actif &&
+    reglages.accueil.lieu === "salon" &&
+    !reglages.accueil.salon
+  ) {
     manquePousse(accueil, "le salon d'accueil");
   }
 
@@ -514,7 +562,10 @@ export type NomProfilBot = (typeof NOMS_PROFILS_BOT)[number];
 
 /** Vrai si la chaîne est un nom de profil connu. */
 export function estNomProfilBot(valeur: unknown): valeur is NomProfilBot {
-  return typeof valeur === "string" && (NOMS_PROFILS_BOT as readonly string[]).includes(valeur);
+  return (
+    typeof valeur === "string" &&
+    (NOMS_PROFILS_BOT as readonly string[]).includes(valeur)
+  );
 }
 
 /**
@@ -548,40 +599,43 @@ export interface ProfilBotPublic {
  * personne ne comprenne pourquoi le tableau de bord montre deux fois le même
  * bot.
  */
-export const PROFILS_BOT: Readonly<Record<NomProfilBot, ProfilBotPublic>> = Object.freeze({
-  rg: Object.freeze({
-    nom: "rg",
-    titre: "Rose Griffon",
-    unite: "rg-bot.service",
-    couleurHex: "#a14b3f",
-    domaine: "rosegriffon.fr",
-    portAdmin: 3007,
-    role: "communauté, modération, tickets, niveaux et administration du serveur",
-  }),
-  azalee: Object.freeze({
-    nom: "azalee",
-    titre: "Azalée",
-    unite: "azalee-bot.service",
-    couleurHex: "#F89C5A",
-    domaine: "azalee.rosegriffon.fr",
-    portAdmin: 3008,
-    role: "données du jeu, fichiers extraits, recherche sémantique et annonces X",
-  }),
-  // Enfant supervisé de `rg-core` (comme Azalée), sur le jeton de l'application
-  // Achilléa : c'est elle, et non le bot Rose Griffon, qui est invitée sur les
-  // serveurs de la communauté compétitive.
-  achillea: Object.freeze({
-    nom: "achillea",
-    titre: "Achilléa",
-    unite: "rg-core.service",
-    couleurHex: "#6d00ce",
-    domaine: "rosegriffon.fr/achillea",
-    portAdmin: 3009,
-    role: "serveurs de la communauté compétitive : clans, tournois, ranked et sanctions",
-  }),
-});
+export const PROFILS_BOT: Readonly<Record<NomProfilBot, ProfilBotPublic>> =
+  Object.freeze({
+    rg: Object.freeze({
+      nom: "rg",
+      titre: "Rose Griffon",
+      unite: "rg-bot.service",
+      couleurHex: "#a14b3f",
+      domaine: "rosegriffon.fr",
+      portAdmin: 3007,
+      role: "communauté, modération, tickets, niveaux et administration du serveur",
+    }),
+    azalee: Object.freeze({
+      nom: "azalee",
+      titre: "Azalée",
+      unite: "azalee-bot.service",
+      couleurHex: "#F89C5A",
+      domaine: "azalee.rosegriffon.fr",
+      portAdmin: 3008,
+      role: "données du jeu, fichiers extraits, recherche sémantique et annonces X",
+    }),
+    // Enfant supervisé de `rg-core` (comme Azalée), sur le jeton de l'application
+    // Achilléa : c'est elle, et non le bot Rose Griffon, qui est invitée sur les
+    // serveurs de la communauté compétitive.
+    achillea: Object.freeze({
+      nom: "achillea",
+      titre: "Achilléa",
+      unite: "rg-core.service",
+      couleurHex: "#6d00ce",
+      domaine: "rosegriffon.fr/achillea",
+      portAdmin: 3009,
+      role: "serveurs de la communauté compétitive : clans, tournois, ranked et sanctions",
+    }),
+  });
 
-export const TOUS_LES_PROFILS_BOT: readonly ProfilBotPublic[] = Object.freeze(Object.values(PROFILS_BOT));
+export const TOUS_LES_PROFILS_BOT: readonly ProfilBotPublic[] = Object.freeze(
+  Object.values(PROFILS_BOT),
+);
 
 // ─── État d'exécution, tel que le serveur d'administration du bot le rend ────
 

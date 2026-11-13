@@ -30,12 +30,20 @@ test("owned characters compose RG inventory with Neon catalog without a cross-st
     child.exited,
   ]);
   const result = JSON.parse(stdout);
-  expect(result.rows.map((row: { id: string; obtenuLe: string }) => [row.id, row.obtenuLe])).toEqual([
+  expect(
+    result.rows.map((row: { id: string; obtenuLe: string }) => [
+      row.id,
+      row.obtenuLe,
+    ]),
+  ).toEqual([
     ["a", "2026-10-10"],
     ["a", "2026-10-08"],
   ]);
   expect(result.rows[0].nom).toBe("Axel");
-  expect(result.queries.map((row: [string]) => row[0])).toEqual(["rg", "inagle"]);
+  expect(result.queries.map((row: [string]) => row[0])).toEqual([
+    "rg",
+    "inagle",
+  ]);
   expect(result.queries[0][1]).toContain("FROM bot_inventaire");
   expect(result.queries[0][1]).not.toContain("inagle_");
   expect(result.queries[1][1]).toContain("FROM inagle_characters");

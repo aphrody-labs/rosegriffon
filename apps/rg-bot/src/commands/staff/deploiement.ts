@@ -33,7 +33,9 @@ import { homePath } from "@aphrody/paths";
 import { analyserRelease, type VersionDeployee } from "./format";
 
 /** Racine des versions figées. Surchargeable pour un poste de développement. */
-export const RACINE_VERSIONS = (Bun.env.RG_RELEASES_ROOT ?? homePath("rg-releases")).replace(/\/+$/, "");
+export const RACINE_VERSIONS = (
+  Bun.env.RG_RELEASES_ROOT ?? homePath("rg-releases")
+).replace(/\/+$/, "");
 
 /**
  * L'unique application Next servie par nginx. Le wiki `/wiki` a vécu dans une
@@ -150,7 +152,9 @@ export async function lireEtatApplication(
   let live: Record<string, string> = {};
   try {
     const fichier = Bun.file(`${racine}/live.env`);
-    live = (await fichier.exists()) ? analyserLiveEnv(await fichier.text()) : {};
+    live = (await fichier.exists())
+      ? analyserLiveEnv(await fichier.text())
+      : {};
     if (Object.keys(live).length === 0) {
       manquant.push("live.env");
     }
@@ -163,7 +167,10 @@ export async function lireEtatApplication(
   const releaseServie = live.LIVE_RELEASE ?? releaseEtat;
 
   const marque = slot
-    ? ((await lireJson(`${racine}/slot-${slot}/RELEASE.json`)) as Record<string, unknown> | null)
+    ? ((await lireJson(`${racine}/slot-${slot}/RELEASE.json`)) as Record<
+        string,
+        unknown
+      > | null)
     : null;
   if (!marque) {
     manquant.push(slot ? `slot-${slot}/RELEASE.json` : "RELEASE.json");
@@ -175,13 +182,20 @@ export async function lireEtatApplication(
   let incoherence: string | null = null;
   if (releaseEtat && live.LIVE_RELEASE && releaseEtat !== live.LIVE_RELEASE) {
     incoherence = `\`state.json\` annonce \`${releaseEtat}\`, \`live.env\` sert \`${live.LIVE_RELEASE}\``;
-  } else if (texte(etat.live) && live.LIVE_SLOT && texte(etat.live) !== live.LIVE_SLOT) {
+  } else if (
+    texte(etat.live) &&
+    live.LIVE_SLOT &&
+    texte(etat.live) !== live.LIVE_SLOT
+  ) {
     incoherence = `\`state.json\` annonce le slot \`${String(etat.live)}\`, \`live.env\` sert le slot \`${live.LIVE_SLOT}\``;
   }
 
   const historique = Array.isArray(etat.history)
     ? etat.history
-        .filter((entree): entree is Record<string, unknown> => !!entree && typeof entree === "object")
+        .filter(
+          (entree): entree is Record<string, unknown> =>
+            !!entree && typeof entree === "object",
+        )
         .map((entree): ActionDeploiement => ({
           at: texte(entree.at) ?? "",
           action: texte(entree.action) ?? "?",
@@ -192,7 +206,9 @@ export async function lireEtatApplication(
     : [];
 
   const previsualisation =
-    etat.preview && typeof etat.preview === "object" ? texte((etat.preview as Record<string, unknown>).release) : null;
+    etat.preview && typeof etat.preview === "object"
+      ? texte((etat.preview as Record<string, unknown>).release)
+      : null;
 
   const port = Number.parseInt(live.LIVE_PORT ?? "", 10);
 

@@ -13,7 +13,9 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<typeof authClient.$Infer.Session.user | null>(null);
+  const [user, setUser] = useState<
+    typeof authClient.$Infer.Session.user | null
+  >(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -27,7 +29,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setIsLoading(false);
         }
       })
-      .catch(err => {
+      .catch((err) => {
         if (active) {
           setError(err ? String(err) : null);
           setIsLoading(false);

@@ -107,7 +107,11 @@ const adminNavItems: NavItem[] = [
   { href: "/admin/settings", icon: Settings, title: "Configuration" },
 ];
 
-export default function AdminSidebar({ showPatreon = false }: { showPatreon?: boolean }) {
+export default function AdminSidebar({
+  showPatreon = false,
+}: {
+  showPatreon?: boolean;
+}) {
   const pathname = usePathname();
   const wikiAdmin = [
     "/admin/database",
@@ -116,18 +120,25 @@ export default function AdminSidebar({ showPatreon = false }: { showPatreon?: bo
     "/admin/import-google-doc",
     "/admin/news",
     "/admin/tweets",
-  ].some(route => pathname === route || pathname?.startsWith(`${route}/`));
+  ].some((route) => pathname === route || pathname?.startsWith(`${route}/`));
   const achilleaAdmin = pathname === "/admin/achillea";
   return (
     <SharedAdminSidebar
       items={adminNavItems}
       title={achilleaAdmin ? "Admin Achilléa" : "Administration"}
-      subtitle={achilleaAdmin ? "E-sport" : wikiAdmin ? "Azalée" : "Rose Griffon"}
+      subtitle={
+        achilleaAdmin ? "E-sport" : wikiAdmin ? "Azalée" : "Rose Griffon"
+      }
       logo={
         wikiAdmin ? (
           <Image src="/logo.webp" alt="" width={28} height={28} />
         ) : achilleaAdmin ? (
-          <Image src="/achillea/achillea_ico.png" alt="" width={28} height={28} />
+          <Image
+            src="/achillea/achillea_ico.png"
+            alt=""
+            width={28}
+            height={28}
+          />
         ) : undefined
       }
       showCreatorItems={showPatreon}

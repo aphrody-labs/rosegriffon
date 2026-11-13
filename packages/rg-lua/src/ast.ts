@@ -9,12 +9,7 @@ export interface AstSpan {
 }
 
 export type LuaSymbolKind =
-  | "function"
-  | "method"
-  | "variable"
-  | "label"
-  | "module"
-  | "constant";
+  "function" | "method" | "variable" | "label" | "module" | "constant";
 
 export interface LuaSymbol {
   name: string;
@@ -48,7 +43,10 @@ export interface Lua52AstSummary {
   findings: LuaFinding[];
 }
 
-export function analyzeLua52Source(filePath: string, source: string): Lua52AstSummary {
+export function analyzeLua52Source(
+  filePath: string,
+  source: string,
+): Lua52AstSummary {
   const lines = source.split(/\r?\n/);
   const symbols: LuaSymbol[] = [];
   const imports: LuaImport[] = [];
@@ -89,7 +87,12 @@ export function analyzeLua52Source(filePath: string, source: string): Lua52AstSu
         name,
         kind: "label",
         isLocal: true,
-        span: { startLine: lineNum, endLine: lineNum, startCol: 1, endCol: line.length },
+        span: {
+          startLine: lineNum,
+          endLine: lineNum,
+          startCol: 1,
+          endCol: line.length,
+        },
       });
     }
 
@@ -99,19 +102,28 @@ export function analyzeLua52Source(filePath: string, source: string): Lua52AstSu
     }
 
     // 3. Local function: local function name(args)
-    const localFnMatch = trimmed.match(/^local\s+function\s+([A-Za-z_][A-Za-z0-9_]*)\s*\(([^)]*)\)/);
+    const localFnMatch = trimmed.match(
+      /^local\s+function\s+([A-Za-z_][A-Za-z0-9_]*)\s*\(([^)]*)\)/,
+    );
     if (localFnMatch) {
       symbols.push({
         name: localFnMatch[1],
         kind: "function",
         isLocal: true,
-        span: { startLine: lineNum, endLine: lineNum, startCol: 1, endCol: line.length },
+        span: {
+          startLine: lineNum,
+          endLine: lineNum,
+          startCol: 1,
+          endCol: line.length,
+        },
         signature: `local function ${localFnMatch[1]}(${localFnMatch[2]})`,
       });
     }
 
     // 4. Global function or method: function Object:method(args) or function Object.method(args)
-    const fnMatch = trimmed.match(/^function\s+([A-Za-z_][A-Za-z0-9_]*(?:[.:][A-Za-z_][A-Za-z0-9_]*)?)\s*\(([^)]*)\)/);
+    const fnMatch = trimmed.match(
+      /^function\s+([A-Za-z_][A-Za-z0-9_]*(?:[.:][A-Za-z_][A-Za-z0-9_]*)?)\s*\(([^)]*)\)/,
+    );
     if (fnMatch) {
       const fullName = fnMatch[1];
       const isMethod = fullName.includes(":");
@@ -119,19 +131,31 @@ export function analyzeLua52Source(filePath: string, source: string): Lua52AstSu
         name: fullName,
         kind: isMethod ? "method" : "function",
         isLocal: false,
-        span: { startLine: lineNum, endLine: lineNum, startCol: 1, endCol: line.length },
+        span: {
+          startLine: lineNum,
+          endLine: lineNum,
+          startCol: 1,
+          endCol: line.length,
+        },
         signature: `function ${fullName}(${fnMatch[2]})`,
       });
     }
 
     // 5. Module table declaration: local M = {} or local Module = {}
-    const modMatch = trimmed.match(/^local\s+([A-Za-z_][A-Za-z0-9_]*)\s*=\s*\{\s*\}/);
+    const modMatch = trimmed.match(
+      /^local\s+([A-Za-z_][A-Za-z0-9_]*)\s*=\s*\{\s*\}/,
+    );
     if (modMatch) {
       symbols.push({
         name: modMatch[1],
         kind: "module",
         isLocal: true,
-        span: { startLine: lineNum, endLine: lineNum, startCol: 1, endCol: line.length },
+        span: {
+          startLine: lineNum,
+          endLine: lineNum,
+          startCol: 1,
+          endCol: line.length,
+        },
       });
     }
 
@@ -142,13 +166,20 @@ export function analyzeLua52Source(filePath: string, source: string): Lua52AstSu
         name: "_ENV",
         kind: "variable",
         isLocal: true,
-        span: { startLine: lineNum, endLine: lineNum, startCol: 1, endCol: line.length },
+        span: {
+          startLine: lineNum,
+          endLine: lineNum,
+          startCol: 1,
+          endCol: line.length,
+        },
         signature: "local _ENV (Lua 5.2 lexical environment)",
       });
     }
 
     // 7. Imports: require("..."), include("..."), dofile("...")
-    const reqMatches = trimmed.matchAll(/\b(require|include|dofile|loadfile)\s*(?:\(\s*["']([^"']+)["']\s*\)|["']([^"']+)["'])/g);
+    const reqMatches = trimmed.matchAll(
+      /\b(require|include|dofile|loadfile)\s*(?:\(\s*["']([^"']+)["']\s*\)|["']([^"']+)["'])/g,
+    );
     for (const rm of reqMatches) {
       const impType = rm[1] as any;
       const modName = rm[2] || rm[3];
@@ -165,7 +196,8 @@ export function analyzeLua52Source(filePath: string, source: string): Lua52AstSu
       findings.push({
         ruleId: "LUA52-NO-SETFENV",
         severity: "error",
-        message: "setfenv() was removed in Lua 5.2; use lexical _ENV or debug.setupvalue instead.",
+        message:
+          "setfenv() was removed in Lua 5.2; use lexical _ENV or debug.setupvalue instead.",
         line: lineNum,
       });
     }
@@ -173,7 +205,8 @@ export function analyzeLua52Source(filePath: string, source: string): Lua52AstSu
       findings.push({
         ruleId: "LUA52-NO-GETFENV",
         severity: "error",
-        message: "getfenv() was removed in Lua 5.2; inspect _ENV directly or use debug.getupvalue.",
+        message:
+          "getfenv() was removed in Lua 5.2; inspect _ENV directly or use debug.getupvalue.",
         line: lineNum,
       });
     }
@@ -181,7 +214,8 @@ export function analyzeLua52Source(filePath: string, source: string): Lua52AstSu
       findings.push({
         ruleId: "LUA52-NO-MODULE",
         severity: "error",
-        message: "module() was deprecated/removed; return a local table 'return M' instead.",
+        message:
+          "module() was deprecated/removed; return a local table 'return M' instead.",
         line: lineNum,
       });
     }
@@ -189,7 +223,8 @@ export function analyzeLua52Source(filePath: string, source: string): Lua52AstSu
       findings.push({
         ruleId: "LUA52-TABLE-UNPACK",
         severity: "warn",
-        message: "Global unpack() is deprecated in Lua 5.2; use table.unpack().",
+        message:
+          "Global unpack() is deprecated in Lua 5.2; use table.unpack().",
         line: lineNum,
       });
     }

@@ -8,7 +8,8 @@
  */
 
 /** `brackets-model#StageType` — formats de bracket supportés par la lib. */
-export type BracketsStageType = "round_robin" | "single_elimination" | "double_elimination";
+export type BracketsStageType =
+  "round_robin" | "single_elimination" | "double_elimination";
 
 /** `brackets-model#SeedOrdering`. */
 export type SeedOrdering =

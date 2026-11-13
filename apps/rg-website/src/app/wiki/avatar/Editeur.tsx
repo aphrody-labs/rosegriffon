@@ -24,7 +24,10 @@ export function Editeur({
     genre: 0,
     morphologie: 0,
   });
-  const modeleUrl = useMemo(() => composerUrlAvatar(catalogue, cdn, avatar), [catalogue, cdn, avatar]);
+  const modeleUrl = useMemo(
+    () => composerUrlAvatar(catalogue, cdn, avatar),
+    [catalogue, cdn, avatar],
+  );
   return (
     <Atelier
       catalogue={catalogue}

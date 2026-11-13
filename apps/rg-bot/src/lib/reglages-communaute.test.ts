@@ -26,7 +26,9 @@ describe("document par défaut", () => {
     expect(REGLAGES_DEFAUT.niveaux.palierAnnonce).toBe(5);
     expect(REGLAGES_DEFAUT.niveaux.annoncerRang).toBe(true);
     expect(REGLAGES_DEFAUT.niveaux.gain.minimum).toBe(GAIN_DEFAUT.minimum);
-    expect(REGLAGES_DEFAUT.niveaux.gain.delaiSecondes).toBe(GAIN_DEFAUT.delaiSecondes);
+    expect(REGLAGES_DEFAUT.niveaux.gain.delaiSecondes).toBe(
+      GAIN_DEFAUT.delaiSecondes,
+    );
     expect(REGLAGES_DEFAUT.tickets.rolesStaff).toEqual([]);
     expect(REGLAGES_DEFAUT.tickets.mode).toBe("fil");
     expect(REGLAGES_DEFAUT.kizuna.actif).toBe(true);
@@ -66,16 +68,24 @@ describe("lecture d'un document de base", () => {
 describe("écriture", () => {
   test("un identifiant qui n'en est pas un est REFUSÉ à l'écriture", () => {
     // À la lecture on pardonne, à l'écriture non : l'écriture est volontaire.
-    expect(() => validerReglages({ tickets: { salonPanneau: "salon-general" } })).toThrow();
+    expect(() =>
+      validerReglages({ tickets: { salonPanneau: "salon-general" } }),
+    ).toThrow();
   });
 
   test("une fourchette de gain aberrante est refusée", () => {
-    expect(() => validerReglages({ niveaux: { gain: { minimum: -5 } } })).toThrow();
-    expect(() => validerReglages({ niveaux: { gain: { delaiSecondes: 99_999 } } })).toThrow();
+    expect(() =>
+      validerReglages({ niveaux: { gain: { minimum: -5 } } }),
+    ).toThrow();
+    expect(() =>
+      validerReglages({ niveaux: { gain: { delaiSecondes: 99_999 } } }),
+    ).toThrow();
   });
 
   test("un lieu d'annonce inconnu est refusé", () => {
-    expect(() => validerReglages({ niveaux: { annonce: "partout" } })).toThrow();
+    expect(() =>
+      validerReglages({ niveaux: { annonce: "partout" } }),
+    ).toThrow();
   });
 });
 
@@ -94,7 +104,9 @@ describe("fusion", () => {
     const avec = fusionnerReglages(REGLAGES_DEFAUT, {
       niveaux: { salonsExclus: ["1135716082972381234", "1073227462500163626"] },
     });
-    const apres = fusionnerReglages(avec, { niveaux: { salonsExclus: ["1135716082972381234"] } });
+    const apres = fusionnerReglages(avec, {
+      niveaux: { salonsExclus: ["1135716082972381234"] },
+    });
     expect(apres.niveaux.salonsExclus).toEqual(["1135716082972381234"]);
   });
 });

@@ -20,7 +20,10 @@ import type { Database } from "@rosegriffon/db/schema";
 import { currentStageMatches, rebuildTournamentBracket } from "./bracket";
 
 /** Nombre de manches d'un lobby selon son format (legacy `BracketService.getChildCount`). */
-export function nombreManches(format: string | null | undefined, personnalise?: number | null): number {
+export function nombreManches(
+  format: string | null | undefined,
+  personnalise?: number | null,
+): number {
   switch (format) {
     case "bo3":
       return 3;
@@ -63,7 +66,8 @@ export function lobbysAOuvrir(
     if (matchsCouverts.has(match.id)) continue;
     const a = match.opponent1?.id;
     const b = match.opponent2?.id;
-    if (a === null || a === undefined || b === null || b === undefined) continue;
+    if (a === null || a === undefined || b === null || b === undefined)
+      continue;
     const equipe1 = joueurParParticipant.get(Number(a));
     const equipe2 = joueurParParticipant.get(Number(b));
     if (!equipe1 || !equipe2) continue;
@@ -121,7 +125,10 @@ export async function ouvrirLobbys(
       screenshot_url: null,
       state: "Pending",
     });
-    await trx.insertInto("lobby_user").values([joueur(l.equipe1, 1), joueur(l.equipe2, 2)]).execute();
+    await trx
+      .insertInto("lobby_user")
+      .values([joueur(l.equipe1, 1), joueur(l.equipe2, 2)])
+      .execute();
     await trx
       .insertInto("lobby_match")
       .values(
@@ -151,7 +158,8 @@ export const REFUS_DEMARRAGE = {
     "Un championnat (league) n'a pas d'arbre : ajoutez-lui une phase avant de le démarrer.",
   sansArbre:
     "Impossible de démarrer le tournoi : aucun arbre n'a pu être généré (au moins deux participants actifs, dans la limite des places).",
-  sansLobby: "Impossible de démarrer le tournoi : l'arbre ne contient aucun match jouable.",
+  sansLobby:
+    "Impossible de démarrer le tournoi : l'arbre ne contient aucun match jouable.",
 } as const;
 
 export type IssueDemarrage =
@@ -171,12 +179,24 @@ export async function demarrerTournoi(
 ): Promise<IssueDemarrage> {
   const tournoi = await db
     .selectFrom("event")
-    .select(["id", "internal_state", "tournament_type", "match_format", "custom_format_child_count"])
+    .select([
+      "id",
+      "internal_state",
+      "tournament_type",
+      "match_format",
+      "custom_format_child_count",
+    ])
     .where("id", "=", tournoiId)
     .where("type", "=", "TOURNAMENT")
     .executeTakeFirst();
-  if (!tournoi) return { ok: false, status: 404, message: "Tournament not found" };
-  if (tournoi.internal_state !== "Preparing") return { ok: false, status: 400, message: REFUS_DEMARRAGE.pasEnPreparation };
+  if (!tournoi)
+    return { ok: false, status: 404, message: "Tournament not found" };
+  if (tournoi.internal_state !== "Preparing")
+    return {
+      ok: false,
+      status: 400,
+      message: REFUS_DEMARRAGE.pasEnPreparation,
+    };
 
   const phases = await db
     .selectFrom("tournament_phase")
@@ -189,10 +209,16 @@ export async function demarrerTournoi(
   // ouverte à la main, arbre supprimé), il est construit maintenant.
   let lobbys: LobbyArbre[] = [];
   if (phases.length === 0) {
-    if (tournoi.tournament_type === "league") return { ok: false, status: 400, message: REFUS_DEMARRAGE.championnat };
+    if (tournoi.tournament_type === "league")
+      return { ok: false, status: 400, message: REFUS_DEMARRAGE.championnat };
     let etape = await currentStageMatches(tournoiId);
-    if (!etape && (await rebuildTournamentBracket(db, tournoiId).catch(() => false))) etape = await currentStageMatches(tournoiId);
-    if (!etape) return { ok: false, status: 400, message: REFUS_DEMARRAGE.sansArbre };
+    if (
+      !etape &&
+      (await rebuildTournamentBracket(db, tournoiId).catch(() => false))
+    )
+      etape = await currentStageMatches(tournoiId);
+    if (!etape)
+      return { ok: false, status: 400, message: REFUS_DEMARRAGE.sansArbre };
     const [participants, existants] = await Promise.all([
       db
         .selectFrom("tournament_participant")
@@ -200,16 +226,28 @@ export async function demarrerTournoi(
         .where("tournament_id", "=", tournoiId)
         .where("bracket_participant_id", "is not", null)
         .execute(),
-      db.selectFrom("lobby").select("bracket_match_id").where("event_id", "=", tournoiId).where("event_type", "=", "TOURNAMENT").execute(),
+      db
+        .selectFrom("lobby")
+        .select("bracket_match_id")
+        .where("event_id", "=", tournoiId)
+        .where("event_type", "=", "TOURNAMENT")
+        .execute(),
     ]);
-    const joueurs = new Map(participants.map(p => [Number(p.bracket_participant_id), p.user_id]));
-    const couverts = new Set(existants.flatMap(l => (l.bracket_match_id === null ? [] : [Number(l.bracket_match_id)])));
+    const joueurs = new Map(
+      participants.map((p) => [Number(p.bracket_participant_id), p.user_id]),
+    );
+    const couverts = new Set(
+      existants.flatMap((l) =>
+        l.bracket_match_id === null ? [] : [Number(l.bracket_match_id)],
+      ),
+    );
     lobbys = lobbysAOuvrir(etape.matches, joueurs, couverts);
-    if (lobbys.length === 0 && couverts.size === 0) return { ok: false, status: 400, message: REFUS_DEMARRAGE.sansLobby };
+    if (lobbys.length === 0 && couverts.size === 0)
+      return { ok: false, status: 400, message: REFUS_DEMARRAGE.sansLobby };
   }
 
   const format = tournoi.match_format ?? "bo1";
-  const demarre = await db.transaction().execute(async trx => {
+  const demarre = await db.transaction().execute(async (trx) => {
     const bascule = await trx
       .updateTable("event")
       .set({ internal_state: "Ongoing", updated_at: maintenant })
@@ -218,10 +256,19 @@ export async function demarrerTournoi(
       .executeTakeFirst();
     // Démarrage concurrent (clic + tâche planifiée) : le premier l'emporte.
     if (Number(bascule.numUpdatedRows) === 0) return false;
-    await ouvrirLobbys(trx, { id: tournoiId, format, personnalise: tournoi.custom_format_child_count }, lobbys, maintenant);
+    await ouvrirLobbys(
+      trx,
+      {
+        id: tournoiId,
+        format,
+        personnalise: tournoi.custom_format_child_count,
+      },
+      lobbys,
+      maintenant,
+    );
     const actifs = await trx
       .selectFrom("tournament_participant")
-      .select(eb => eb.fn.countAll<number>().as("n"))
+      .select((eb) => eb.fn.countAll<number>().as("n"))
       .where("tournament_id", "=", tournoiId)
       .where("status", "=", "Active")
       .executeTakeFirst();
@@ -243,6 +290,11 @@ export async function demarrerTournoi(
       .execute();
     return true;
   });
-  if (!demarre) return { ok: false, status: 400, message: REFUS_DEMARRAGE.pasEnPreparation };
+  if (!demarre)
+    return {
+      ok: false,
+      status: 400,
+      message: REFUS_DEMARRAGE.pasEnPreparation,
+    };
   return { ok: true, phases: phases.length, lobbies: lobbys.length };
 }

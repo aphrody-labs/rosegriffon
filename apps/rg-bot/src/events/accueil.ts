@@ -24,7 +24,11 @@
  * d'audit de Discord la porte déjà.
  */
 import { type ArgsOf, Discord, On } from "discordx";
-import { AttachmentBuilder, type GuildMember, type TextBasedChannel } from "discord.js";
+import {
+  AttachmentBuilder,
+  type GuildMember,
+  type TextBasedChannel,
+} from "discord.js";
 
 import { renderCarteAccueil } from "../lib/canvas/communaute";
 import { remplirGabarit } from "../lib/accueil-gabarit";
@@ -33,10 +37,15 @@ import { reglagesDe } from "../services/communaute";
 import { creerEmbed, pied } from "../lib/ui";
 
 /** Pose le rôle d'arrivée, si et seulement si il est sûr. */
-async function poserRoleArrivee(membre: GuildMember, roleId: string): Promise<void> {
+async function poserRoleArrivee(
+  membre: GuildMember,
+  roleId: string,
+): Promise<void> {
   const role = membre.guild.roles.cache.get(roleId);
   if (!role) {
-    console.warn(`[accueil] rôle d'arrivée ${roleId} introuvable sur ${membre.guild.id}.`);
+    console.warn(
+      `[accueil] rôle d'arrivée ${roleId} introuvable sur ${membre.guild.id}.`,
+    );
     return;
   }
   const moi = membre.guild.members.me;
@@ -55,13 +64,18 @@ async function poserRoleArrivee(membre: GuildMember, roleId: string): Promise<vo
     },
   );
   if (!verdict.ok) {
-    console.warn(`[accueil] rôle d'arrivée REFUSÉ (${role.name}) : ${verdict.motif}`);
+    console.warn(
+      `[accueil] rôle d'arrivée REFUSÉ (${role.name}) : ${verdict.motif}`,
+    );
     return;
   }
   try {
     await membre.roles.add(role.id, "Rôle d'arrivée");
   } catch (err) {
-    console.warn(`[accueil] rôle d'arrivée non posé sur ${membre.id} :`, err instanceof Error ? err.message : err);
+    console.warn(
+      `[accueil] rôle d'arrivée non posé sur ${membre.id} :`,
+      err instanceof Error ? err.message : err,
+    );
   }
 }
 
@@ -117,15 +131,22 @@ export class AccueilEvents {
             rang: compte,
             serveur: membre.guild.name,
           });
-          fichiers.push(new AttachmentBuilder(image, { name: "bienvenue.png" }));
+          fichiers.push(
+            new AttachmentBuilder(image, { name: "bienvenue.png" }),
+          );
         } catch (err) {
           // Une carte qui échoue ne doit pas faire disparaître l'accueil.
-          console.warn("[accueil] carte non rendue :", err instanceof Error ? err.message : err);
+          console.warn(
+            "[accueil] carte non rendue :",
+            err instanceof Error ? err.message : err,
+          );
         }
       }
 
       if (lieu === "prive") {
-        await membre.send({ embeds: [embed], files: fichiers }).catch(() => undefined);
+        await membre
+          .send({ embeds: [embed], files: fichiers })
+          .catch(() => undefined);
         return;
       }
 
@@ -147,7 +168,10 @@ export class AccueilEvents {
         });
       }
     } catch (err) {
-      console.error("[accueil] échec :", err instanceof Error ? (err.stack ?? err.message) : err);
+      console.error(
+        "[accueil] échec :",
+        err instanceof Error ? (err.stack ?? err.message) : err,
+      );
     }
   }
 }

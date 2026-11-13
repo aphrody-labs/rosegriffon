@@ -29,7 +29,9 @@ test("store configuration keeps precedence explicit and rejects missing database
     new Response(child.stderr).text(),
     child.exited,
   ]);
-  expect(stdout.trim()).toBe("supabase.invalid neon.invalid\ntrue true\ntrue true\ntrue true");
+  expect(stdout.trim()).toBe(
+    "supabase.invalid neon.invalid\ntrue true\ntrue true\ntrue true",
+  );
   expect(stderr).toBe("");
   expect(exitCode).toBe(0);
 });

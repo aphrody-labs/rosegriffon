@@ -3,7 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { decouperTexteDiscord, urlEmojiDiscord } from "@/lib/x-campagnes/discord-texte";
+import {
+  decouperTexteDiscord,
+  urlEmojiDiscord,
+} from "@/lib/x-campagnes/discord-texte";
 
 /**
  * Rend un texte de message Discord : les émojis personnalisés en images, le reste en texte.
@@ -25,7 +28,13 @@ import { decouperTexteDiscord, urlEmojiDiscord } from "@/lib/x-campagnes/discord
  * arbre serveur qu'à l'intérieur d'un îlot `"use client"` (la galerie et la visionneuse en
  * sont deux), sans avoir à choisir un camp.
  */
-export function TexteDiscord({ texte, className }: { texte: string; className?: string }) {
+export function TexteDiscord({
+  texte,
+  className,
+}: {
+  texte: string;
+  className?: string;
+}) {
   const morceaux = decouperTexteDiscord(texte);
 
   if (morceaux.length === 0) {
@@ -33,7 +42,7 @@ export function TexteDiscord({ texte, className }: { texte: string; className?: 
   }
 
   // Aucun émoji : on rend la chaîne telle quelle plutôt qu'un `<span>` par morceau.
-  if (morceaux.every(morceau => morceau.type === "texte")) {
+  if (morceaux.every((morceau) => morceau.type === "texte")) {
     return <span className={className}>{texte}</span>;
   }
 

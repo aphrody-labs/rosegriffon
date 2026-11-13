@@ -399,7 +399,13 @@
       "area": "Steam",
       "need": "Local Steam index, Web API catalogue, libraries, VDF",
       "command": "re steam <command> [--json]",
-      "mcp": ["steam_scan", "steam_stats", "steam_sql", "steam_api_sync", "steam_classify"],
+      "mcp": [
+        "steam_scan",
+        "steam_stats",
+        "steam_sql",
+        "steam_api_sync",
+        "steam_classify"
+      ],
       "owner": "packages/bun-steam (consumed)",
       "before": "covered",
       "status": "covered",

@@ -50,20 +50,22 @@ export function registerSearchCommand(program: Command) {
     .option("-l, --limit <number>", "Limit results", "5")
     .action(async (query, options) => {
       const service = await createInagleService();
-      const results = service.search.global(query, { limit: parseInt(options.limit, 10) });
+      const results = service.search.global(query, {
+        limit: parseInt(options.limit, 10),
+      });
 
       if (results.length === 0) {
         console.log(pc.red("No results found."));
         return;
       }
 
-      const characters = results.filter(r => r.type === "character");
-      const skills = results.filter(r => r.type === "skill");
-      const items = results.filter(r => r.type === "item");
+      const characters = results.filter((r) => r.type === "character");
+      const skills = results.filter((r) => r.type === "skill");
+      const items = results.filter((r) => r.type === "item");
 
       if (characters.length > 0) {
         console.log(pc.bold(pc.blue("\nCharacters")));
-        characters.forEach(r => {
+        characters.forEach((r) => {
           const c = r.data as any;
           console.log(
             `  ${pc.bold(c.names?.fr || c.names?.en || "???")} ${pc.dim(`(${c.rarity})`)} - ${c.position} ${c.element}`,
@@ -73,7 +75,7 @@ export function registerSearchCommand(program: Command) {
 
       if (skills.length > 0) {
         console.log(pc.bold(pc.green("\nSkills")));
-        skills.forEach(r => {
+        skills.forEach((r) => {
           const s = r.data as any;
           // For GlobalSearch result 's', it might be different structure.
           // But usually it matches EnrichedSkill or similar.
@@ -86,7 +88,7 @@ export function registerSearchCommand(program: Command) {
 
       if (items.length > 0) {
         console.log(pc.bold(pc.yellow("\nItems")));
-        items.forEach(r => {
+        items.forEach((r) => {
           const i = r.data as any;
           console.log(`  ${pc.bold(i.names?.fr || i.names?.en || "???")}`);
         });
@@ -100,7 +102,7 @@ export function registerCharacterCommand(program: Command) {
     .command("character <name>")
     .alias("char")
     .description("Find a character by name")
-    .action(async name => {
+    .action(async (name) => {
       const service = await createInagleService();
       const results = service.characters.search(name, { limit: 5 });
 
@@ -111,9 +113,15 @@ export function registerCharacterCommand(program: Command) {
 
       results.forEach((char: any) => {
         console.log(pc.dim("--------------------------------"));
-        console.log(pc.bold(pc.cyan(char.names.fr || char.names.en || "Unknown Name")));
-        console.log(`ID: ${pc.dim(char.charaId)} / ParamID: ${pc.dim(char.charaParamId)}`);
-        console.log(`Rarity: ${pc.yellow(char.rarity)} (Code: ${char.rarityCode})`);
+        console.log(
+          pc.bold(pc.cyan(char.names.fr || char.names.en || "Unknown Name")),
+        );
+        console.log(
+          `ID: ${pc.dim(char.charaId)} / ParamID: ${pc.dim(char.charaParamId)}`,
+        );
+        console.log(
+          `Rarity: ${pc.yellow(char.rarity)} (Code: ${char.rarityCode})`,
+        );
         console.log(`Position: ${char.position} / Element: ${char.element}`);
 
         // Images
@@ -142,17 +150,27 @@ export function registerItemsCommand(program: Command) {
   items
     .command("list")
     .description("List items (optional filter by category)")
-    .option("-c, --category <category>", "Filter by category (e.g. shoes, consume)")
+    .option(
+      "-c, --category <category>",
+      "Filter by category (e.g. shoes, consume)",
+    )
     .option("-l, --limit <number>", "Limit results", "20")
-    .action(async options => {
+    .action(async (options) => {
       const service = await createInagleService();
       let results = service.items.allItems();
 
       if (options.category) {
         results = service.items.byCategory(options.category as any);
         if (results.length === 0) {
-          console.log(pc.red(`Invalid category or no items found for '${options.category}'.`));
-          console.log("Valid categories:", Object.keys(ITEM_CATEGORY_NAMES).join(", "));
+          console.log(
+            pc.red(
+              `Invalid category or no items found for '${options.category}'.`,
+            ),
+          );
+          console.log(
+            "Valid categories:",
+            Object.keys(ITEM_CATEGORY_NAMES).join(", "),
+          );
           return;
         }
       }
@@ -163,7 +181,9 @@ export function registerItemsCommand(program: Command) {
       results.slice(0, limit).forEach((item: any) => {
         const name = item.names?.fr || item.names?.en || "???";
         const cat = item.category;
-        console.log(`  ${pc.yellow(item.itemId)}: ${pc.bold(name)} ${pc.dim(`(${cat})`)}`);
+        console.log(
+          `  ${pc.yellow(item.itemId)}: ${pc.bold(name)} ${pc.dim(`(${cat})`)}`,
+        );
       });
 
       if (results.length > limit) {
@@ -174,7 +194,7 @@ export function registerItemsCommand(program: Command) {
   items
     .command("find <query>")
     .description("Search items by name")
-    .action(async query => {
+    .action(async (query) => {
       const service = await createInagleService();
       const results = service.items.searchItems(query);
 
@@ -188,7 +208,9 @@ export function registerItemsCommand(program: Command) {
         const desc = item.descriptions?.fr || item.descriptions?.en || "";
 
         console.log(pc.dim("--------------------------------"));
-        console.log(`${pc.bold(pc.yellow(name))} ${pc.dim(`(${item.itemId})`)}`);
+        console.log(
+          `${pc.bold(pc.yellow(name))} ${pc.dim(`(${item.itemId})`)}`,
+        );
         console.log(`Category: ${item.category}`);
         if (desc) console.log(pc.italic(desc));
 
@@ -201,12 +223,14 @@ export function registerItemsCommand(program: Command) {
 
 // === SKILLS COMMAND ===
 export function registerSkillsCommand(program: Command) {
-  const skills = program.command("skills").description("Explore skills database");
+  const skills = program
+    .command("skills")
+    .description("Explore skills database");
 
   skills
     .command("find <query>")
     .description("Search skills by name")
-    .action(async query => {
+    .action(async (query) => {
       const service = await createInagleService();
       const results = service.skills.search(query);
 
@@ -228,7 +252,9 @@ export function registerSkillsCommand(program: Command) {
         console.log(`Cost: ${cost} TP / Power: ${min}-${max}`);
 
         // Use elementName object
-        console.log(`Element: ${skill.elementName?.fr || skill.elementName?.en || "???"}`);
+        console.log(
+          `Element: ${skill.elementName?.fr || skill.elementName?.en || "???"}`,
+        );
 
         if (skill.desc_FR) console.log(pc.italic(skill.desc_FR));
 
@@ -261,7 +287,7 @@ export function registerTeamsCommand(program: Command) {
   teams
     .command("get <id>")
     .description("Get team details by ID")
-    .action(async id => {
+    .action(async (id) => {
       const service = await createInagleService();
       const team = service.teams.getTeam(id);
 
@@ -286,63 +312,87 @@ export function registerCompareCommand(program: Command) {
     .command("compare <chara1> <chara2>")
     .description("Compare two characters side-by-side (stats and attributes)")
     .option("-l, --level <number>", "Level to compare (1-99)", "99")
-    .action(async (chara1: string, chara2: string, options: { level: string }) => {
-      const service = await createInagleService();
-      const level = Math.max(1, Math.min(99, parseInt(options.level, 10) || 99));
-      if (service.source === "vfs" && level !== 99)
-        throw new Error("Native VFS comparison currently exposes level 99 UR reference stats; select --level 99.");
+    .action(
+      async (chara1: string, chara2: string, options: { level: string }) => {
+        const service = await createInagleService();
+        const level = Math.max(
+          1,
+          Math.min(99, parseInt(options.level, 10) || 99),
+        );
+        if (service.source === "vfs" && level !== 99)
+          throw new Error(
+            "Native VFS comparison currently exposes level 99 UR reference stats; select --level 99.",
+          );
 
-      const findOne = (q: string) => {
-        const found = service.characters.search(q, { limit: 1 });
-        return found.length > 0 ? found[0] : null;
-      };
+        const findOne = (q: string) => {
+          const found = service.characters.search(q, { limit: 1 });
+          return found.length > 0 ? found[0] : null;
+        };
 
-      const c1 = findOne(chara1);
-      const c2 = findOne(chara2);
+        const c1 = findOne(chara1);
+        const c2 = findOne(chara2);
 
-      if (!c1) {
-        console.log(pc.red(`Character not found: ${chara1}`));
-        return;
-      }
-      if (!c2) {
-        console.log(pc.red(`Character not found: ${chara2}`));
-        return;
-      }
-
-      const name1 = c1.names?.fr || c1.names?.en || c1.charaId;
-      const name2 = c2.names?.fr || c2.names?.en || c2.charaId;
-
-      console.log(pc.bold(pc.cyan(`\n⚡ Character Comparison (Level ${level})`)));
-      console.log(pc.dim("------------------------------------------------------------"));
-      console.log(`${pc.bold(pc.blue(name1))} vs ${pc.bold(pc.green(name2))}`);
-      console.log(
-        `Position: ${c1.position || "?"} vs ${c2.position || "?"} | Element: ${c1.element || "?"} vs ${c2.element || "?"}`,
-      );
-      console.log(`Rarity:   ${c1.rarity || "?"} vs ${c2.rarity || "?"} | ID: ${c1.charaId} vs ${c2.charaId}`);
-
-      const s1 = c1.stats?.lv99 ?? c1.stats?.lv1;
-      const s2 = c2.stats?.lv99 ?? c2.stats?.lv1;
-
-      if (s1 && s2) {
-        console.log(pc.bold("\n📈 Stats (Lv 99):"));
-        const statsKeys: Array<{ key: keyof typeof s1; label: string }> = [
-          { key: "kick", label: "Kick" },
-          { key: "control", label: "Control" },
-          { key: "technique", label: "Technique" },
-          { key: "physical", label: "Physical" },
-          { key: "agility", label: "Agility" },
-          { key: "intelligence", label: "Intelligence" },
-        ];
-
-        for (const stat of statsKeys) {
-          const v1 = Number(s1[stat.key]) || 0;
-          const v2 = Number(s2[stat.key]) || 0;
-          const diff = v1 - v2;
-          const diffStr = diff > 0 ? pc.green(` (+${diff})`) : diff < 0 ? pc.red(` (${diff})`) : pc.dim(" (=)");
-          console.log(`  ${stat.label.padEnd(14)}: ${String(v1).padStart(4)} vs ${String(v2).padEnd(4)}${diffStr}`);
+        if (!c1) {
+          console.log(pc.red(`Character not found: ${chara1}`));
+          return;
         }
-      }
-    });
+        if (!c2) {
+          console.log(pc.red(`Character not found: ${chara2}`));
+          return;
+        }
+
+        const name1 = c1.names?.fr || c1.names?.en || c1.charaId;
+        const name2 = c2.names?.fr || c2.names?.en || c2.charaId;
+
+        console.log(
+          pc.bold(pc.cyan(`\n⚡ Character Comparison (Level ${level})`)),
+        );
+        console.log(
+          pc.dim(
+            "------------------------------------------------------------",
+          ),
+        );
+        console.log(
+          `${pc.bold(pc.blue(name1))} vs ${pc.bold(pc.green(name2))}`,
+        );
+        console.log(
+          `Position: ${c1.position || "?"} vs ${c2.position || "?"} | Element: ${c1.element || "?"} vs ${c2.element || "?"}`,
+        );
+        console.log(
+          `Rarity:   ${c1.rarity || "?"} vs ${c2.rarity || "?"} | ID: ${c1.charaId} vs ${c2.charaId}`,
+        );
+
+        const s1 = c1.stats?.lv99 ?? c1.stats?.lv1;
+        const s2 = c2.stats?.lv99 ?? c2.stats?.lv1;
+
+        if (s1 && s2) {
+          console.log(pc.bold("\n📈 Stats (Lv 99):"));
+          const statsKeys: Array<{ key: keyof typeof s1; label: string }> = [
+            { key: "kick", label: "Kick" },
+            { key: "control", label: "Control" },
+            { key: "technique", label: "Technique" },
+            { key: "physical", label: "Physical" },
+            { key: "agility", label: "Agility" },
+            { key: "intelligence", label: "Intelligence" },
+          ];
+
+          for (const stat of statsKeys) {
+            const v1 = Number(s1[stat.key]) || 0;
+            const v2 = Number(s2[stat.key]) || 0;
+            const diff = v1 - v2;
+            const diffStr =
+              diff > 0
+                ? pc.green(` (+${diff})`)
+                : diff < 0
+                  ? pc.red(` (${diff})`)
+                  : pc.dim(" (=)");
+            console.log(
+              `  ${stat.label.padEnd(14)}: ${String(v1).padStart(4)} vs ${String(v2).padEnd(4)}${diffStr}`,
+            );
+          }
+        }
+      },
+    );
 }
 
 // === DIALOGUE COMMAND ===
@@ -352,31 +402,46 @@ export function registerDialogueCommand(program: Command) {
     .description("Search in game dialogues and chronicles")
     .option("-s, --speaker <speaker>", "Filter by speaker name")
     .option("-l, --limit <number>", "Limit results", "10")
-    .action(async (query?: string, options?: { speaker?: string; limit?: string }) => {
-      const limit = parseInt(options?.limit ?? "10", 10) || 10;
-      const q = query?.trim() ?? "";
-      console.log(pc.cyan(`Searching dialogues for "${q}"...`));
+    .action(
+      async (
+        query?: string,
+        options?: { speaker?: string; limit?: string },
+      ) => {
+        const limit = parseInt(options?.limit ?? "10", 10) || 10;
+        const q = query?.trim() ?? "";
+        console.log(pc.cyan(`Searching dialogues for "${q}"...`));
 
-      try {
-        const { searchText } = await import("./game-text/index.js");
-        const results = await searchText(q, "fr", limit);
-        if (results.length === 0) {
-          console.log(pc.yellow("No game texts found matching query in the selected source."));
-          return;
-        }
+        try {
+          const { searchText } = await import("./game-text/index.js");
+          const results = await searchText(q, "fr", limit);
+          if (results.length === 0) {
+            console.log(
+              pc.yellow(
+                "No game texts found matching query in the selected source.",
+              ),
+            );
+            return;
+          }
 
-        console.log(pc.bold(`\nFound ${results.length} dialogue entries:`));
-        for (const r of results) {
-          console.log(pc.dim("--------------------------------"));
-          console.log(`${pc.magenta(r.category || "dialogue")} [${pc.dim(r.hashId)}]:`);
-          console.log(`  ${pc.white(r.value)}`);
+          console.log(pc.bold(`\nFound ${results.length} dialogue entries:`));
+          for (const r of results) {
+            console.log(pc.dim("--------------------------------"));
+            console.log(
+              `${pc.magenta(r.category || "dialogue")} [${pc.dim(r.hashId)}]:`,
+            );
+            console.log(`  ${pc.white(r.value)}`);
+          }
+        } catch (err: unknown) {
+          const message = err instanceof Error ? err.message : String(err);
+          console.log(pc.dim(`Game text query failed: ${message}`));
+          console.log(
+            pc.yellow(
+              "Select the game installation with --game-dir or NIE_GAME_DIR.",
+            ),
+          );
         }
-      } catch (err: unknown) {
-        const message = err instanceof Error ? err.message : String(err);
-        console.log(pc.dim(`Game text query failed: ${message}`));
-        console.log(pc.yellow("Select the game installation with --game-dir or NIE_GAME_DIR."));
-      }
-    });
+      },
+    );
 }
 
 // === RANDOM TEAM COMMAND ===
@@ -384,8 +449,15 @@ export function registerRandomTeamCommand(program: Command) {
   program
     .command("random-team")
     .description("Generate a randomized 16-player squad")
-    .option("-f, --formation <formation>", "Tactical layout (e.g. 4-4-2, 4-3-3, 3-5-2)", "4-4-2")
-    .option("-e, --element <element>", "Filter players by element (Fire, Forest, Mountain, Wind)")
+    .option(
+      "-f, --formation <formation>",
+      "Tactical layout (e.g. 4-4-2, 4-3-3, 3-5-2)",
+      "4-4-2",
+    )
+    .option(
+      "-e, --element <element>",
+      "Filter players by element (Fire, Forest, Mountain, Wind)",
+    )
     .action(async (options: { formation?: string; element?: string }) => {
       const service = await createInagleService();
       let pool = service.characters.baseCharacters();
@@ -396,7 +468,11 @@ export function registerRandomTeamCommand(program: Command) {
       }
 
       if (pool.length < 16) {
-        console.log(pc.red(`Not enough characters in pool (${pool.length}) to form a full team.`));
+        console.log(
+          pc.red(
+            `Not enough characters in pool (${pool.length}) to form a full team.`,
+          ),
+        );
         return;
       }
 
@@ -416,11 +492,19 @@ export function registerRandomTeamCommand(program: Command) {
       const starterFW = pick(fws, 2);
 
       const starters = [...starterGK, ...starterDF, ...starterMF, ...starterFW];
-      const usedIds = new Set(starters.map(c => c.charaId));
-      const bench = shuffled.filter(c => !usedIds.has(c.charaId)).slice(0, 5);
+      const usedIds = new Set(starters.map((c) => c.charaId));
+      const bench = shuffled.filter((c) => !usedIds.has(c.charaId)).slice(0, 5);
 
-      console.log(pc.bold(pc.cyan(`\n⚽ Random Team Selection (${options.formation ?? "4-4-2"})`)));
-      console.log(pc.dim("============================================================"));
+      console.log(
+        pc.bold(
+          pc.cyan(
+            `\n⚽ Random Team Selection (${options.formation ?? "4-4-2"})`,
+          ),
+        ),
+      );
+      console.log(
+        pc.dim("============================================================"),
+      );
       console.log(pc.bold(pc.yellow("Starting XI:")));
       starters.forEach((c, idx) => {
         const name = c.names?.fr || c.names?.en || c.charaId;
@@ -441,7 +525,9 @@ export function registerRandomTeamCommand(program: Command) {
 
 // === TEAM BUILDER COMMAND ===
 export function registerTeamBuilderCommand(program: Command) {
-  const tb = program.command("team-builder").description("Team builder utilities (encode/decode codes)");
+  const tb = program
+    .command("team-builder")
+    .description("Team builder utilities (encode/decode codes)");
 
   tb.command("decode <code>")
     .description("Decode a shareable team code")
@@ -457,10 +543,12 @@ export function registerTeamBuilderCommand(program: Command) {
     });
 
   tb.command("encode <formationId> [playerSlots...]")
-    .description("Encode a squad into a shareable team code (format: slot:charaId ...)")
+    .description(
+      "Encode a squad into a shareable team code (format: slot:charaId ...)",
+    )
     .action(async (formationId: string, playerSlots: string[]) => {
       const { encodeTeamCode } = await import("./game/team-code.js");
-      const slots = playerSlots.map(ps => {
+      const slots = playerSlots.map((ps) => {
         const [slot, charaId] = ps.split(":");
         return { slot: slot || "field-0", charaId: charaId || "" };
       });

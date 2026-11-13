@@ -17,7 +17,8 @@ import { PermissionFlagsBits } from "discord.js";
 @Discord()
 @SlashGroup({
   name: "gestion",
-  description: "Contenu Rose Griffon — articles, événements, planning (réservé au staff)",
+  description:
+    "Contenu Rose Griffon — articles, événements, planning (réservé au staff)",
   defaultMemberPermissions: PermissionFlagsBits.ManageGuild,
 })
 export class RacineGestion {}

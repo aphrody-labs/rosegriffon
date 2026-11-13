@@ -1,7 +1,11 @@
 import { cn } from "@rosegriffon/ui";
 import Link from "@/components/shared/Link";
 
-import { type Campagne, etatCampagne, libelleEtatCampagne } from "@/lib/x-campagnes/types";
+import {
+  type Campagne,
+  etatCampagne,
+  libelleEtatCampagne,
+} from "@/lib/x-campagnes/types";
 
 /*
  * Sélecteur de campagne — composant SERVEUR, volontairement sans JavaScript :
@@ -11,7 +15,13 @@ import { type Campagne, etatCampagne, libelleEtatCampagne } from "@/lib/x-campag
  *
  * `page=1` n'est pas conservé : changer de campagne repart forcément du début.
  */
-export function SelecteurCampagne({ campagnes, slugActif }: { campagnes: Campagne[]; slugActif: string }) {
+export function SelecteurCampagne({
+  campagnes,
+  slugActif,
+}: {
+  campagnes: Campagne[];
+  slugActif: string;
+}) {
   if (campagnes.length < 2) {
     return null;
   }
@@ -19,12 +29,16 @@ export function SelecteurCampagne({ campagnes, slugActif }: { campagnes: Campagn
   return (
     <nav aria-label="Choisir une campagne">
       <ul className="flex list-none flex-wrap gap-2 p-0">
-        {campagnes.map(campagne => {
+        {campagnes.map((campagne) => {
           const actif = campagne.slug === slugActif;
           return (
             <li key={campagne.slug}>
               <Link
-                href={campagne.principale ? "/iergday" : `/iergday?campagne=${campagne.slug}`}
+                href={
+                  campagne.principale
+                    ? "/iergday"
+                    : `/iergday?campagne=${campagne.slug}`
+                }
                 aria-current={actif ? "page" : undefined}
                 className={cn(
                   "inline-flex min-h-11 items-center gap-2 rounded-full border-2 px-4 text-sm font-bold transition-colors",

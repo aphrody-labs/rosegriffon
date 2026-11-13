@@ -1,17 +1,30 @@
 export const dynamic = "force-static";
 export const revalidate = 3600;
 
-import { ArrowLeft, ArrowRight, Award, Info, Trophy as TrophyIcon } from "lucide-react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  Award,
+  Info,
+  Trophy as TrophyIcon,
+} from "lucide-react";
 import type { Metadata } from "next";
 import Link from "@/components/shared/Link";
 import { notFound } from "next/navigation";
 import { getTrophy, getTrophyNeighbors } from "@/lib/wiki/trophies";
-import { CATEGORY_LABELS, type Trophy } from "@rosegriffon/azalee/wiki/trophies-shared";
+import {
+  CATEGORY_LABELS,
+  type Trophy,
+} from "@rosegriffon/azalee/wiki/trophies-shared";
 import { wiki } from "@rosegriffon/app-shell";
 import { absoluteUrl } from "@/lib/site-url";
 import { wikiTitle, withDefaultOgImage } from "@/lib/seo";
 
-export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
   const { id } = await params;
   const trophy = await getTrophy(id);
   const name = trophy?.name || "Succès";
@@ -38,21 +51,37 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 function MetaRow({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div className="flex items-baseline justify-between gap-4 border-b border-outline-variant/20 py-2.5 last:border-0">
-      <span className="shrink-0 text-sm font-medium text-on-surface-variant">{label}</span>
-      <span className="text-right text-sm font-semibold text-on-surface">{value}</span>
+      <span className="shrink-0 text-sm font-medium text-on-surface-variant">
+        {label}
+      </span>
+      <span className="text-right text-sm font-semibold text-on-surface">
+        {value}
+      </span>
     </div>
   );
 }
 
 /** Carte de navigation vers un succès adjacent. */
-function NeighborLink({ trophy, dir }: { trophy: Trophy; dir: "prev" | "next" }) {
+function NeighborLink({
+  trophy,
+  dir,
+}: {
+  trophy: Trophy;
+  dir: "prev" | "next";
+}) {
   const isPrev = dir === "prev";
   return (
     <Link
       href={`/wiki/succes/${trophy.id}`}
       className="group flex min-h-12 min-w-0 flex-1 items-center gap-2 rounded-xl border border-outline-variant/30 bg-surface-container-low p-3 transition-colors hover:bg-surface-container"
     >
-      {isPrev && <ArrowLeft size={18} className="shrink-0 text-on-surface-variant" aria-hidden="true" />}
+      {isPrev && (
+        <ArrowLeft
+          size={18}
+          className="shrink-0 text-on-surface-variant"
+          aria-hidden="true"
+        />
+      )}
       <div className={isPrev ? "min-w-0" : "min-w-0 text-right"}>
         <span className="block text-[10px] font-bold uppercase tracking-wider text-on-surface-variant/60">
           {isPrev ? "Précédent" : "Suivant"}
@@ -61,12 +90,22 @@ function NeighborLink({ trophy, dir }: { trophy: Trophy; dir: "prev" | "next" })
           {trophy.name}
         </span>
       </div>
-      {!isPrev && <ArrowRight size={18} className="shrink-0 text-on-surface-variant" aria-hidden="true" />}
+      {!isPrev && (
+        <ArrowRight
+          size={18}
+          className="shrink-0 text-on-surface-variant"
+          aria-hidden="true"
+        />
+      )}
     </Link>
   );
 }
 
-export default async function TrophyDetailPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function TrophyDetailPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const { id } = await params;
   const trophy = await getTrophy(id);
 
@@ -101,11 +140,17 @@ export default async function TrophyDetailPage({ params }: { params: Promise<{ i
 
   return (
     <div className="w-full space-y-8">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
 
       {/* Fil d'Ariane */}
       <div className="flex items-center gap-2 text-sm font-medium text-on-surface-variant">
-        <Link href="/wiki/succes" className="transition-colors hover:text-primary">
+        <Link
+          href="/wiki/succes"
+          className="transition-colors hover:text-primary"
+        >
           Succès
         </Link>
         <span className="opacity-30">/</span>
@@ -136,13 +181,19 @@ export default async function TrophyDetailPage({ params }: { params: Promise<{ i
           <h1 className="mt-2 text-2xl sm:text-3xl font-extrabold leading-tight tracking-tight text-on-surface font-display">
             {trophy.name}
           </h1>
-          {trophy.desc && <p className="mt-2 text-sm text-on-surface-variant">{trophy.desc}</p>}
+          {trophy.desc && (
+            <p className="mt-2 text-sm text-on-surface-variant">
+              {trophy.desc}
+            </p>
+          )}
         </div>
       </div>
 
       {/* Nom localisé */}
       <section className="rounded-2xl border border-outline-variant/30 bg-surface-container-low p-4">
-        <h2 className="mb-3 text-sm font-bold uppercase tracking-wider text-on-surface-variant/70">Nom localisé</h2>
+        <h2 className="mb-3 text-sm font-bold uppercase tracking-wider text-on-surface-variant/70">
+          Nom localisé
+        </h2>
         <div className="space-y-2">
           {trophy.names.fr && (
             <p className="text-sm text-on-surface">
@@ -166,7 +217,9 @@ export default async function TrophyDetailPage({ params }: { params: Promise<{ i
       </section>
 
       {/* Description localisée (si fournie par le jeu) */}
-      {(trophy.descriptions.fr || trophy.descriptions.en || trophy.descriptions.ja) && (
+      {(trophy.descriptions.fr ||
+        trophy.descriptions.en ||
+        trophy.descriptions.ja) && (
         <section className="rounded-2xl border border-outline-variant/30 bg-surface-container-low p-4">
           <h2 className="mb-3 text-sm font-bold uppercase tracking-wider text-on-surface-variant/70">
             Condition / description
@@ -174,19 +227,25 @@ export default async function TrophyDetailPage({ params }: { params: Promise<{ i
           <div className="space-y-2">
             {trophy.descriptions.fr && (
               <p className="text-sm text-on-surface">
-                <span className="mr-2 font-bold text-on-surface-variant">FR</span>
+                <span className="mr-2 font-bold text-on-surface-variant">
+                  FR
+                </span>
                 {trophy.descriptions.fr}
               </p>
             )}
             {trophy.descriptions.en && (
               <p className="text-sm text-on-surface">
-                <span className="mr-2 font-bold text-on-surface-variant">EN</span>
+                <span className="mr-2 font-bold text-on-surface-variant">
+                  EN
+                </span>
                 {trophy.descriptions.en}
               </p>
             )}
             {trophy.descriptions.ja && (
               <p className="text-sm text-on-surface" lang="ja">
-                <span className="mr-2 font-bold text-on-surface-variant">JP</span>
+                <span className="mr-2 font-bold text-on-surface-variant">
+                  JP
+                </span>
                 {trophy.descriptions.ja}
               </p>
             )}
@@ -196,18 +255,28 @@ export default async function TrophyDetailPage({ params }: { params: Promise<{ i
 
       {/* Attributs */}
       <section className="rounded-2xl border border-outline-variant/30 bg-surface-container-low p-4">
-        <h2 className="mb-1 text-sm font-bold uppercase tracking-wider text-on-surface-variant/70">Détails</h2>
+        <h2 className="mb-1 text-sm font-bold uppercase tracking-wider text-on-surface-variant/70">
+          Détails
+        </h2>
         <MetaRow label="Catégorie" value={categoryLabel} />
         <MetaRow label="Groupe" value={trophy.groupLabel} />
-        <MetaRow label="Code interne" value={<code className="font-mono text-xs">{trophy.code}</code>} />
+        <MetaRow
+          label="Code interne"
+          value={<code className="font-mono text-xs">{trophy.code}</code>}
+        />
       </section>
 
       {/* Note d'honnêteté : pas de récompense/icône extraites. */}
       {!trophy.desc && (
         <div className="flex items-start gap-3 rounded-2xl border border-outline-variant/30 bg-surface-container p-4">
-          <Info size={18} className="mt-0.5 shrink-0 text-on-surface-variant" aria-hidden="true" />
+          <Info
+            size={18}
+            className="mt-0.5 shrink-0 text-on-surface-variant"
+            aria-hidden="true"
+          />
           <p className="text-sm text-on-surface-variant">
-            Le jeu ne fournit pas de texte de condition pour ce succès. Seul son nom localisé est affiché.
+            Le jeu ne fournit pas de texte de condition pour ce succès. Seul son
+            nom localisé est affiché.
           </p>
         </div>
       )}
@@ -215,8 +284,16 @@ export default async function TrophyDetailPage({ params }: { params: Promise<{ i
       {/* Navigation précédente / suivante */}
       {(prev || next) && (
         <nav className="flex gap-3">
-          {prev ? <NeighborLink trophy={prev} dir="prev" /> : <span className="flex-1" />}
-          {next ? <NeighborLink trophy={next} dir="next" /> : <span className="flex-1" />}
+          {prev ? (
+            <NeighborLink trophy={prev} dir="prev" />
+          ) : (
+            <span className="flex-1" />
+          )}
+          {next ? (
+            <NeighborLink trophy={next} dir="next" />
+          ) : (
+            <span className="flex-1" />
+          )}
         </nav>
       )}
     </div>

@@ -38,7 +38,10 @@ const QUICK_LINKS: QuickLink[] = [
 export function ProfileQuickLinks() {
   return (
     <section aria-labelledby="quick-links-title">
-      <h2 id="quick-links-title" className="mb-4 text-xl font-semibold text-foreground">
+      <h2
+        id="quick-links-title"
+        className="mb-4 text-xl font-semibold text-foreground"
+      >
         Mon espace
       </h2>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -51,7 +54,9 @@ export function ProfileQuickLinks() {
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="font-semibold text-foreground">{title}</p>
-                  <p className="mt-1 text-xs text-muted-foreground">{description}</p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    {description}
+                  </p>
                 </div>
               </CardContent>
             </Card>

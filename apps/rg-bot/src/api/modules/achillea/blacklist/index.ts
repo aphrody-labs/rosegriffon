@@ -16,7 +16,12 @@ import type { Database } from "@rosegriffon/db/schema";
 import { dbPlugin } from "../../../plugins/db";
 import { resolveAchilleaSession } from "../../auth/session";
 import { developpeurs } from "../ops";
-import { ajouterListeNoire, depotKysely, retirerListeNoire, type DepotListeNoire } from "./service";
+import {
+  ajouterListeNoire,
+  depotKysely,
+  retirerListeNoire,
+  type DepotListeNoire,
+} from "./service";
 
 const entree = t.Object({
   userId: t.String(),
@@ -41,8 +46,14 @@ export function creerControleurListeNoire(
       async ({ db, params }) => {
         const depot = depotDe(db);
         const joueur = await depot.joueur(params.userId);
-        if (!joueur) return status(404, { message: "Ce joueur n'a pas de compte Achilléa." });
-        return { userId: params.userId, entry: await depot.entree(params.userId) };
+        if (!joueur)
+          return status(404, {
+            message: "Ce joueur n'a pas de compte Achilléa.",
+          });
+        return {
+          userId: params.userId,
+          entry: await depot.entree(params.userId),
+        };
       },
       { params: identifiant },
     )
@@ -50,9 +61,18 @@ export function creerControleurListeNoire(
       "/:userId",
       async ({ db, headers, params, body }) => {
         const session = await resolveAchilleaSession(headers);
-        if (!session) return status(401, { message: "Authentication required" });
-        const issue = await ajouterListeNoire(depotDe(db), session.id, params.userId, body.reason, devs());
-        return issue.ok ? issue.valeur : status(issue.statut, { message: issue.message });
+        if (!session)
+          return status(401, { message: "Authentication required" });
+        const issue = await ajouterListeNoire(
+          depotDe(db),
+          session.id,
+          params.userId,
+          body.reason,
+          devs(),
+        );
+        return issue.ok
+          ? issue.valeur
+          : status(issue.statut, { message: issue.message });
       },
       { params: identifiant, body: t.Object({ reason: t.String() }) },
     )
@@ -60,9 +80,16 @@ export function creerControleurListeNoire(
       "/:userId",
       async ({ db, headers, params }) => {
         const session = await resolveAchilleaSession(headers);
-        if (!session) return status(401, { message: "Authentication required" });
-        const issue = await retirerListeNoire(depotDe(db), session.id, params.userId);
-        return issue.ok ? { success: true, userId: issue.valeur.userId } : status(issue.statut, { message: issue.message });
+        if (!session)
+          return status(401, { message: "Authentication required" });
+        const issue = await retirerListeNoire(
+          depotDe(db),
+          session.id,
+          params.userId,
+        );
+        return issue.ok
+          ? { success: true, userId: issue.valeur.userId }
+          : status(issue.statut, { message: issue.message });
       },
       { params: identifiant },
     );

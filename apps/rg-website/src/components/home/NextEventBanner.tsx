@@ -29,7 +29,10 @@ export function NextEventBanner({ event }: NextEventBannerProps) {
   const day = startDate.toLocaleDateString("fr-FR", { day: "numeric" });
   const month = startDate.toLocaleDateString("fr-FR", { month: "short" });
   const time = event.start.dateTime
-    ? startDate.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })
+    ? startDate.toLocaleTimeString("fr-FR", {
+        hour: "2-digit",
+        minute: "2-digit",
+      })
     : null;
 
   const isToday = new Date(now).toDateString() === startDate.toDateString();
@@ -51,7 +54,9 @@ export function NextEventBanner({ event }: NextEventBannerProps) {
               </span>
             )}
           </div>
-          <h2 className="truncate text-sm font-bold min-[600px]:text-base">{event.summary}</h2>
+          <h2 className="truncate text-sm font-bold min-[600px]:text-base">
+            {event.summary}
+          </h2>
           {event.location && (
             <span className="hidden items-center gap-1 truncate text-xs text-indigo-100 min-[600px]:flex">
               <MapPin className="size-3" aria-hidden />

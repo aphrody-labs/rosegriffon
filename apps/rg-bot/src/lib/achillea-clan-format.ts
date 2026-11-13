@@ -18,11 +18,18 @@ import {
   StringSelectMenuOptionBuilder,
 } from "discord.js";
 import type { z } from "zod";
-import type { ClanCareer, ClanFiche, clanDtoSchema } from "@rosegriffon/achillea-client";
+import type {
+  ClanCareer,
+  ClanFiche,
+  clanDtoSchema,
+} from "@rosegriffon/achillea-client";
 
 /** Clan de l'annuaire, tel que le rend `client.clans.list`. */
 export type ClanDTO = z.output<typeof clanDtoSchema>;
-import { ClanMemberDistinction, ClanMemberRole } from "@rosegriffon/achillea-core/enums";
+import {
+  ClanMemberDistinction,
+  ClanMemberRole,
+} from "@rosegriffon/achillea-core/enums";
 import { toDistinction } from "@rosegriffon/achillea-core/clans";
 
 import { borner, echapper } from "./ui";
@@ -36,10 +43,14 @@ export const COULEUR_CARRIERE = 0x206694;
 // ─── Distinctions ──────────────────────────────────────────────────────────
 
 /** Clés de distinction (`Player`, `Staff`…) — ce que portent les menus et les boutons. */
-export const CLES_DISTINCTION = Object.keys(ClanMemberDistinction) as Array<keyof typeof ClanMemberDistinction>;
+export const CLES_DISTINCTION = Object.keys(ClanMemberDistinction) as Array<
+  keyof typeof ClanMemberDistinction
+>;
 
 /** Clés ou libellés → distinctions connues, sans doublon (les inconnues sont ignorées). */
-export function distinctionsDepuis(valeurs: readonly string[]): ClanMemberDistinction[] {
+export function distinctionsDepuis(
+  valeurs: readonly string[],
+): ClanMemberDistinction[] {
   const sortie: ClanMemberDistinction[] = [];
   for (const valeur of valeurs) {
     const connue = toDistinction(valeur.trim());
@@ -52,22 +63,30 @@ export function distinctionsDepuis(valeurs: readonly string[]): ClanMemberDistin
  * Menu des distinctions (legacy `buildApplicationDistinctionSelector`).
  * `apply_distinctions:<clanId>` pour une candidature, `invite_distinctions:<joueurId>` pour une invitation.
  */
-export function selecteurDistinctions(cible: "apply" | "invite", identifiant: string | number) {
+export function selecteurDistinctions(
+  cible: "apply" | "invite",
+  identifiant: string | number,
+) {
   const menu = new StringSelectMenuBuilder()
     .setCustomId(`${cible}_distinctions:${identifiant}`)
     .setPlaceholder("Choisissez vos distinctions")
     .setMinValues(1)
     .setMaxValues(CLES_DISTINCTION.length)
     .addOptions(
-      CLES_DISTINCTION.map(cle =>
-        new StringSelectMenuOptionBuilder().setLabel(ClanMemberDistinction[cle]).setValue(cle),
+      CLES_DISTINCTION.map((cle) =>
+        new StringSelectMenuOptionBuilder()
+          .setLabel(ClanMemberDistinction[cle])
+          .setValue(cle),
       ),
     );
   return new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(menu);
 }
 
 /** Boutons Oui / Non avant l'envoi d'une candidature (legacy `buildApplicationCreationButtons`). */
-export function boutonsCreationCandidature(clanId: number | string, cles: readonly string[]) {
+export function boutonsCreationCandidature(
+  clanId: number | string,
+  cles: readonly string[],
+) {
   return new ActionRowBuilder<ButtonBuilder>().addComponents(
     new ButtonBuilder()
       .setLabel("Oui")
@@ -113,7 +132,10 @@ export function boutonCarriere(joueurId: string, desactive = false) {
 
 /** Bouton « Fermer » qui efface une réponse privée (legacy `dismiss-message`). */
 export function boutonFermer() {
-  return new ButtonBuilder().setLabel("Fermer").setStyle(ButtonStyle.Secondary).setCustomId("dismiss-message");
+  return new ButtonBuilder()
+    .setLabel("Fermer")
+    .setStyle(ButtonStyle.Secondary)
+    .setCustomId("dismiss-message");
 }
 
 /** Lit `<préfixe>:<a>[:<b>]` ; rend les segments après le préfixe. */
@@ -136,17 +158,23 @@ export const COULEURS_LEGACY = Object.freeze({
 
 /** `buildSuccessEmbed` / `followUpWithSuccessEmbed` : `✅ message`, vert, rien d'autre. */
 export function embedSuccesLegacy(message: string): EmbedBuilder {
-  return new EmbedBuilder().setColor(COULEURS_LEGACY.succes).setTitle(borner(`✅ ${message}`, 256));
+  return new EmbedBuilder()
+    .setColor(COULEURS_LEGACY.succes)
+    .setTitle(borner(`✅ ${message}`, 256));
 }
 
 /** `followUpWithErrorEmbed` : `❌ message`, `Colors.Red`. */
 export function embedErreurLegacy(message: string): EmbedBuilder {
-  return new EmbedBuilder().setColor(COULEURS_LEGACY.erreur).setTitle(borner(`❌ ${message}`, 256));
+  return new EmbedBuilder()
+    .setColor(COULEURS_LEGACY.erreur)
+    .setTitle(borner(`❌ ${message}`, 256));
 }
 
 /** Refus des gardes (`replyWithSimpleErrorEmbed` : `NoClan`, `ClanEnabled`, `ClanRole`) : `❌ message`, `0xed4245`. */
 export function embedRefusLegacy(message: string): EmbedBuilder {
-  return new EmbedBuilder().setColor(COULEURS_LEGACY.refus).setTitle(borner(`❌ ${message}`, 256));
+  return new EmbedBuilder()
+    .setColor(COULEURS_LEGACY.refus)
+    .setTitle(borner(`❌ ${message}`, 256));
 }
 
 /** Messages des gardes de l'ancien bot, mot pour mot. */
@@ -172,29 +200,42 @@ const BOUTONS_PAGE = [
  * Discord refuse deux `custom_id` identiques dans une rangée.
  */
 export function idPageClans(page: number, bouton?: string): string {
-  return bouton ? `clan_infos_page:${page}:${bouton}` : `clan_infos_page:${page}`;
+  return bouton
+    ? `clan_infos_page:${page}:${bouton}`
+    : `clan_infos_page:${page}`;
 }
 
 /** Rangée Début / Précédent / Suivant / Fin, toujours affichée (legacy `buildPaginationButtons`). */
 export function rangeePaginationClans(page: number, pages: number) {
-  const cibles = { first: 1, previous: Math.max(1, page - 1), next: Math.min(pages, page + 1), last: pages };
+  const cibles = {
+    first: 1,
+    previous: Math.max(1, page - 1),
+    next: Math.min(pages, page + 1),
+    last: pages,
+  };
   const auDebut = pages === 0 || page === 1;
   const aLaFin = pages === 0 || page === pages;
   return new ActionRowBuilder<ButtonBuilder>().addComponents(
-    BOUTONS_PAGE.map(b =>
+    BOUTONS_PAGE.map((b) =>
       new ButtonBuilder()
         .setLabel(b.libelle)
         .setStyle(ButtonStyle.Primary)
         .setCustomId(idPageClans(Math.max(1, cibles[b.cle]), b.cle))
         .setEmoji(b.emoji)
-        .setDisabled(b.cle === "first" || b.cle === "previous" ? auDebut : aLaFin),
+        .setDisabled(
+          b.cle === "first" || b.cle === "previous" ? auDebut : aLaFin,
+        ),
     ),
   );
 }
 
 /** Bouton « Retour » de l'ancien bot (`buildReturnButton`), ramené ici à l'annuaire. */
 export function boutonRetourClans(page = 1) {
-  return new ButtonBuilder().setLabel("Retour").setStyle(ButtonStyle.Primary).setCustomId(idPageClans(page)).setEmoji("↩️");
+  return new ButtonBuilder()
+    .setLabel("Retour")
+    .setStyle(ButtonStyle.Primary)
+    .setCustomId(idPageClans(page))
+    .setEmoji("↩️");
 }
 
 /** Menu de sélection des clans de la page (legacy `buildClansSelector`, `clanSelector`). */
@@ -204,11 +245,13 @@ export function selecteurClans(clans: readonly ClanDTO[]) {
       .setCustomId("clanSelector")
       .setPlaceholder("Sélectionnez un Clan")
       .addOptions(
-        clans.slice(0, 25).map(clan =>
-          new StringSelectMenuOptionBuilder()
-            .setLabel(borner(`[${clan.shortenedName}] ${clan.name}`, 100))
-            .setValue(String(clan.id)),
-        ),
+        clans
+          .slice(0, 25)
+          .map((clan) =>
+            new StringSelectMenuOptionBuilder()
+              .setLabel(borner(`[${clan.shortenedName}] ${clan.name}`, 100))
+              .setValue(String(clan.id)),
+          ),
       ),
   );
 }
@@ -219,9 +262,16 @@ export interface AuteurEmbed {
   avatar?: string | null;
 }
 
-function poserAuteur(embed: EmbedBuilder, auteur: AuteurEmbed | null | undefined): EmbedBuilder {
+function poserAuteur(
+  embed: EmbedBuilder,
+  auteur: AuteurEmbed | null | undefined,
+): EmbedBuilder {
   if (!auteur) return embed;
-  return embed.setAuthor(auteur.avatar ? { name: borner(auteur.nom, 256), iconURL: auteur.avatar } : { name: borner(auteur.nom, 256) });
+  return embed.setAuthor(
+    auteur.avatar
+      ? { name: borner(auteur.nom, 256), iconURL: auteur.avatar }
+      : { name: borner(auteur.nom, 256) },
+  );
 }
 
 /** Valeur de champ : Discord refuse une valeur vide, l'ancien bot posait alors un espace. */
@@ -239,14 +289,30 @@ export function embedListeClans(
   const embed = new EmbedBuilder()
     .setColor(COULEUR_CARRIERE)
     .setTitle("Liste des Clans")
-    .setDescription("Liste des clans en activité. Sélectionnez-en un ci-dessous pour voir ses informations détaillées.");
+    .setDescription(
+      "Liste des clans en activité. Sélectionnez-en un ci-dessous pour voir ses informations détaillées.",
+    );
   poserAuteur(embed, auteur);
   return embed.setFields(
-    { name: "Clan", value: valeurChamp(clans.map(c => c.name).join("\n")), inline: true },
-    { name: "Id", value: valeurChamp(clans.map(c => String(c.id)).join("\n")), inline: true },
+    {
+      name: "Clan",
+      value: valeurChamp(clans.map((c) => c.name).join("\n")),
+      inline: true,
+    },
+    {
+      name: "Id",
+      value: valeurChamp(clans.map((c) => String(c.id)).join("\n")),
+      inline: true,
+    },
     {
       name: "Présidence",
-      value: valeurChamp(clans.map(c => (/^\d+$/.test(c.president.id) ? `<@${c.president.id}>` : "")).join("\n")),
+      value: valeurChamp(
+        clans
+          .map((c) =>
+            /^\d+$/.test(c.president.id) ? `<@${c.president.id}>` : "",
+          )
+          .join("\n"),
+      ),
       inline: true,
     },
     { name: `Page ${page}/${pages}`, value: " ", inline: true },
@@ -266,13 +332,16 @@ export const LOGO_ACHILLEA_PNG = "https://rosegriffon.fr/achillea/achillea.png";
  * un SVG : on montre le logo d'Achilléa à la place.
  */
 export function miniatureClan(avatarUrl: string | null | undefined): string {
-  if (!avatarUrl || avatarUrl.startsWith("/achillea/default-clan-avatar.svg")) return LOGO_ACHILLEA_PNG;
-  return avatarUrl.startsWith("/") ? `https://rosegriffon.fr${avatarUrl}` : avatarUrl;
+  if (!avatarUrl || avatarUrl.startsWith("/achillea/default-clan-avatar.svg"))
+    return LOGO_ACHILLEA_PNG;
+  return avatarUrl.startsWith("/")
+    ? `https://rosegriffon.fr${avatarUrl}`
+    : avatarUrl;
 }
 
 /** Liste « - <@id> » de l'ancien bot. */
 function listeMentions(ids: readonly string[]): string {
-  return ids.map(id => `- <@${id}>\n`).join("");
+  return ids.map((id) => `- <@${id}>\n`).join("");
 }
 
 /** Préfixe `https://` manquant (legacy `formatUrl`). */
@@ -300,25 +369,50 @@ export function embedFicheClan(
   fondateurs: readonly string[] = [],
 ): EmbedBuilder {
   const embed = new EmbedBuilder().setThumbnail(miniatureClan(clan.avatarUrl));
-  if (clan.biography.trim().length > 0) embed.setDescription(borner(clan.biography, 4096));
+  if (clan.biography.trim().length > 0)
+    embed.setDescription(borner(clan.biography, 4096));
   poserAuteur(embed, auteur);
   if (clan.isDisbanded) {
     return embed
       .setColor(Colors.Red)
-      .setTitle(borner(`[${clan.shortName}] ${clan.name}\n - Clan dissout`, 256))
-      .setFields({ name: "Fondateurs", value: valeurChamp(listeMentions(fondateurs)), inline: true });
+      .setTitle(
+        borner(`[${clan.shortName}] ${clan.name}\n - Clan dissout`, 256),
+      )
+      .setFields({
+        name: "Fondateurs",
+        value: valeurChamp(listeMentions(fondateurs)),
+        inline: true,
+      });
   }
-  const vices = clan.members.filter(m => m.role === ClanMemberRole.SubCaptain).map(m => `- <@${m.id}>`);
+  const vices = clan.members
+    .filter((m) => m.role === ClanMemberRole.SubCaptain)
+    .map((m) => `- <@${m.id}>`);
   return embed
     .setColor(COULEUR_CARRIERE)
     .setTitle(borner(`[${clan.shortName}] ${clan.name}\n`, 256))
     .setFields(
-      { name: "Président", value: clan.president ? `<@${clan.president.id}>` : " ", inline: true },
-      { name: "Vice-Présidents", value: valeurChamp(vices.join("\n")), inline: true },
-      { name: "Fondateurs", value: valeurChamp(listeMentions(fondateurs)), inline: true },
+      {
+        name: "Président",
+        value: clan.president ? `<@${clan.president.id}>` : " ",
+        inline: true,
+      },
+      {
+        name: "Vice-Présidents",
+        value: valeurChamp(vices.join("\n")),
+        inline: true,
+      },
+      {
+        name: "Fondateurs",
+        value: valeurChamp(listeMentions(fondateurs)),
+        inline: true,
+      },
       { name: "Membres", value: String(clan.members.length), inline: true },
       { name: "Discord", value: clan.guildId ? "Yes" : "No", inline: true },
-      { name: "Réseaux sociaux", value: valeurChamp(lignesReseaux(clan.socials)), inline: true },
+      {
+        name: "Réseaux sociaux",
+        value: valeurChamp(lignesReseaux(clan.socials)),
+        inline: true,
+      },
     );
 }
 
@@ -330,12 +424,19 @@ export const EMOJI_SORTIE = "<:red_arrow:1436631768483627068>";
 
 /** `JJ/MM/AAAA`, heure de Paris (legacy `formatDateToSlashDate`, serveur à Paris). */
 export function dateBarree(iso: string | Date): string {
-  return new Intl.DateTimeFormat("fr-FR", { timeZone: "Europe/Paris", day: "2-digit", month: "2-digit", year: "numeric" }).format(
-    new Date(iso),
-  );
+  return new Intl.DateTimeFormat("fr-FR", {
+    timeZone: "Europe/Paris",
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  }).format(new Date(iso));
 }
 
-function nomClanAvecEmoji(clan: { shortName: string; emojiId: string; clanName: string }): string {
+function nomClanAvecEmoji(clan: {
+  shortName: string;
+  emojiId: string;
+  clanName: string;
+}): string {
   return `<:${clan.shortName.replace(/[^A-Za-z0-9_]/g, "") || "clan"}:${clan.emojiId}> ${clan.clanName}`;
 }
 
@@ -343,10 +444,21 @@ function nomClanAvecEmoji(clan: { shortName: string; emojiId: string; clanName: 
  * Carrière d'un joueur (legacy `createMemberHistoryEmbed`) : clans quittés du
  * plus récent au plus ancien (ordre de l'API), puis le clan actuel.
  */
-export function embedCarriere(carriere: ClanCareer, avatar: string | null = null): EmbedBuilder {
-  const clans = [...carriere.past.map(nomClanAvecEmoji), ...carriere.current.map(nomClanAvecEmoji)];
-  const entrees = [...carriere.past, ...carriere.current].map(c => `${EMOJI_ENTREE} ${dateBarree(c.joinedAt)}`);
-  const sorties = [...carriere.past.map(p => `${EMOJI_SORTIE} ${dateBarree(p.leftAt)}`), ...carriere.current.map(() => "-")];
+export function embedCarriere(
+  carriere: ClanCareer,
+  avatar: string | null = null,
+): EmbedBuilder {
+  const clans = [
+    ...carriere.past.map(nomClanAvecEmoji),
+    ...carriere.current.map(nomClanAvecEmoji),
+  ];
+  const entrees = [...carriere.past, ...carriere.current].map(
+    (c) => `${EMOJI_ENTREE} ${dateBarree(c.joinedAt)}`,
+  );
+  const sorties = [
+    ...carriere.past.map((p) => `${EMOJI_SORTIE} ${dateBarree(p.leftAt)}`),
+    ...carriere.current.map(() => "-"),
+  ];
   const nom = echapper(carriere.displayName);
   const embed = new EmbedBuilder()
     .setColor(COULEUR_CARRIERE)
@@ -357,7 +469,11 @@ export function embedCarriere(carriere: ClanCareer, avatar: string | null = null
   if (avatar) embed.setThumbnail(avatar);
   return embed.setFields(
     { name: "Clan", value: valeurChamp(clans.join("\n")), inline: true },
-    { name: "Rejoint le", value: valeurChamp(entrees.join("\n")), inline: true },
+    {
+      name: "Rejoint le",
+      value: valeurChamp(entrees.join("\n")),
+      inline: true,
+    },
     { name: "Quitté le", value: valeurChamp(sorties.join("\n")), inline: true },
   );
 }

@@ -21,12 +21,14 @@ async function main() {
         await waitForSelector(page, "ul.skillListBox", 15000).catch(() => {});
 
         // Wait a bit for the content to fully load/render
-        await new Promise(r => setTimeout(r, 4000));
+        await new Promise((r) => setTimeout(r, 4000));
 
         const content = await page.content();
         const filePath = join(destDir, `page-${pageNum}.html`);
         await Bun.write(filePath, content);
-        console.log(`[Scrape Skills] Successfully saved ${filePath} (${content.length} bytes)`);
+        console.log(
+          `[Scrape Skills] Successfully saved ${filePath} (${content.length} bytes)`,
+        );
       } catch (e) {
         console.error(`[Scrape Skills] Failed to scrape page ${pageNum}:`, e);
       }

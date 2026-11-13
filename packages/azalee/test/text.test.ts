@@ -41,7 +41,9 @@ describe("translations — glossaire FR", () => {
   test("translateEffect : correspondance exacte, sinon identité", () => {
     const [source, cible] = Object.entries(EFFECT_FR)[0]!;
     expect(translateEffect(source)).toBe(cible);
-    expect(translateEffect("Effet totalement inconnu")).toBe("Effet totalement inconnu");
+    expect(translateEffect("Effet totalement inconnu")).toBe(
+      "Effet totalement inconnu",
+    );
     expect(translateEffect("")).toBe("");
   });
 
@@ -71,7 +73,9 @@ describe("translations — glossaire FR", () => {
 
 describe("format-description — tags de nom + furigana", () => {
   test("résout les tags <FST:…> et retire la furigana [kanji/lecture]", () => {
-    expect(formatDescription("Salut <FST:MARK> à [雷門/らいもん]", "fr")).toBe("Salut Mark à 雷門");
+    expect(formatDescription("Salut <FST:MARK> à [雷門/らいもん]", "fr")).toBe(
+      "Salut Mark à 雷門",
+    );
   });
 
   test("préserve les sauts de ligne", () => {
@@ -135,12 +139,18 @@ describe("download-filename — nom de fichier public", () => {
 
 describe("aura-translations — effets de passives", () => {
   test("traduit conditions, portées et stats", () => {
-    expect(translatePassiveEffect("For nearby players, Own Shot AT +10")).toStartWith("Proximité : ");
-    expect(translatePassiveEffect("Team Bond Power +5")).toContain("Puissance de lien");
+    expect(
+      translatePassiveEffect("For nearby players, Own Shot AT +10"),
+    ).toStartWith("Proximité : ");
+    expect(translatePassiveEffect("Team Bond Power +5")).toContain(
+      "Puissance de lien",
+    );
   });
 
   test("un texte sans motif connu est renvoyé tel quel", () => {
-    expect(translatePassiveEffect("texte-sans-motif-connu")).toBe("texte-sans-motif-connu");
+    expect(translatePassiveEffect("texte-sans-motif-connu")).toBe(
+      "texte-sans-motif-connu",
+    );
   });
 
   test("les tables hissatsu / buff sont peuplées", () => {

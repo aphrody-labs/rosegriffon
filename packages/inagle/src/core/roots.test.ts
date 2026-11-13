@@ -12,12 +12,18 @@ async function bundledRoots(modulePath: string) {
       "import.meta.url": JSON.stringify(pathToFileURL(modulePath).href),
     },
   });
-  return import(`data:text/javascript;base64,${Buffer.from(transpiler.transformSync(source)).toString("base64")}`);
+  return import(
+    `data:text/javascript;base64,${Buffer.from(transpiler.transformSync(source)).toString("base64")}`
+  );
 }
 
 test("bundled source paths resolve to the owning checkout", async () => {
   const checkout = path.resolve(process.cwd(), "owner root % encoded");
-  const roots = await bundledRoots(path.join(checkout, "packages/inagle/src/core/roots.ts"));
+  const roots = await bundledRoots(
+    path.join(checkout, "packages/inagle/src/core/roots.ts"),
+  );
   expect(roots.iecodeRoot()).toBe(checkout);
-  expect(roots.iecodePath("target", "release")).toBe(path.join(checkout, "target", "release"));
+  expect(roots.iecodePath("target", "release")).toBe(
+    path.join(checkout, "target", "release"),
+  );
 });

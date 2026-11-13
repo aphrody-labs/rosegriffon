@@ -20,7 +20,7 @@ import { createPostgresAdapter } from "../src/push-adapter.ts";
 
 const rows = loadAllDropRates();
 
-const records = rows.map(r => ({
+const records = rows.map((r) => ({
   id: r.id,
   source: r.source,
   source_id: r.sourceId,
@@ -34,10 +34,15 @@ const bySource = records.reduce<Record<string, number>>((acc, r) => {
   acc[r.source] = (acc[r.source] ?? 0) + 1;
   return acc;
 }, {});
-console.log(`[push-drop_rates] ${records.length} lignes de taux :`, JSON.stringify(bySource));
+console.log(
+  `[push-drop_rates] ${records.length} lignes de taux :`,
+  JSON.stringify(bySource),
+);
 
 if (records.length === 0) {
-  console.error("[push-drop_rates] AUCUNE ligne — configs absents ? Abandon (rien à pousser).");
+  console.error(
+    "[push-drop_rates] AUCUNE ligne — configs absents ? Abandon (rien à pousser).",
+  );
   process.exit(1);
 }
 
@@ -49,4 +54,6 @@ if (error) {
   console.error("[push-drop_rates] échec upsert :", error);
   process.exit(1);
 }
-console.log(`[push-drop_rates] OK — ${records.length} taux poussés dans inagle_drop_rates.`);
+console.log(
+  `[push-drop_rates] OK — ${records.length} taux poussés dans inagle_drop_rates.`,
+);

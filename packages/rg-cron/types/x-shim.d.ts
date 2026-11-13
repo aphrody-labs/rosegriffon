@@ -191,12 +191,28 @@ export class XClient {
    * défaut). Un 429 renvoyé par X reste levé en `XError` (`status: 429`) :
    * l'attente ne couvre que le quota déjà connu, pas le refus en cours.
    */
-  graphqlWaiting(opName: string, variables: unknown, extraFeatures?: unknown, maxWaitMs?: number): Promise<unknown>;
+  graphqlWaiting(
+    opName: string,
+    variables: unknown,
+    extraFeatures?: unknown,
+    maxWaitMs?: number,
+  ): Promise<unknown>;
 
   /** `product` : « Latest » (chronologique) ou « Top » (engagement). */
-  search(query: string, count: number, cursor?: string, product?: string, quoteDepth?: number): Promise<TweetPage>;
+  search(
+    query: string,
+    count: number,
+    cursor?: string,
+    product?: string,
+    quoteDepth?: number,
+  ): Promise<TweetPage>;
 
-  userTweets(userId: string, count: number, cursor?: string, quoteDepth?: number): Promise<TweetPage>;
+  userTweets(
+    userId: string,
+    count: number,
+    cursor?: string,
+    quoteDepth?: number,
+  ): Promise<TweetPage>;
 
   /** Lève une `XError` si X ne renvoie pas `data.user.result`. */
   userByScreenName(handle: string): Promise<UserInfo>;
@@ -204,7 +220,11 @@ export class XClient {
 
   /** `null` quand le post est supprimé, protégé ou remplacé par une pierre tombale. */
   getTweet(tweetId: string, quoteDepth?: number): Promise<Tweet | null>;
-  thread(tweetId: string, cursor?: string, quoteDepth?: number): Promise<TweetPage>;
+  thread(
+    tweetId: string,
+    cursor?: string,
+    quoteDepth?: number,
+  ): Promise<TweetPage>;
 
   whoami(): Promise<UserInfo>;
   createTweet(text: string, replyTo?: string): Promise<TweetResult>;
@@ -230,4 +250,8 @@ export interface RadarSearchOptions {
  * `SearchTimeline` avec `querySource: "radar"` — la recherche telle que la lance
  * l'interface X Radar. Passe par `graphqlWaiting` : même comportement de quota.
  */
-export function radarSearch(client: XClient, rawQuery: string, opts?: RadarSearchOptions): Promise<TweetPage>;
+export function radarSearch(
+  client: XClient,
+  rawQuery: string,
+  opts?: RadarSearchOptions,
+): Promise<TweetPage>;

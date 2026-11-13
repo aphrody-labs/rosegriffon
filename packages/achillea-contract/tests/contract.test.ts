@@ -21,7 +21,9 @@ const byName = indexDeclarations(contract);
 describe("extraction", () => {
   test("le contrat entier est extrait sans construction non prise en charge", () => {
     expect(contract.declarations.length).toBeGreaterThan(100);
-    expect(new Set(contract.declarations.map(d => d.name)).size).toBe(contract.declarations.length);
+    expect(new Set(contract.declarations.map((d) => d.name)).size).toBe(
+      contract.declarations.length,
+    );
   });
 
   test("les enums conservent leurs valeurs de fil", () => {
@@ -29,7 +31,7 @@ describe("extraction", () => {
     expect(stageType?.kind).toBe("enum");
     if (stageType?.kind !== "enum") throw new Error("StageType manquant");
     expect(stageType.valueType).toBe("string");
-    expect(stageType.members.map(m => m.value)).toEqual([
+    expect(stageType.members.map((m) => m.value)).toEqual([
       "round_robin",
       "single_elimination",
       "double_elimination",
@@ -50,7 +52,9 @@ describe("extraction", () => {
   test("l'optionalité est fidèle", () => {
     const user = byName.get("UserDTO");
     if (user?.kind !== "interface") throw new Error("UserDTO manquant");
-    const optional = new Set(user.fields.filter(f => f.optional).map(f => f.name));
+    const optional = new Set(
+      user.fields.filter((f) => f.optional).map((f) => f.name),
+    );
     expect(optional.has("avatar")).toBe(true);
     expect(optional.has("id")).toBe(false);
     expect(optional.has("username")).toBe(false);
@@ -58,21 +62,29 @@ describe("extraction", () => {
 
   test("l'héritage d'interface est résolu", () => {
     const tournament = byName.get("Tournament");
-    if (tournament?.kind !== "interface") throw new Error("Tournament manquant");
-    expect(tournament.extends.map(e => e.name)).toEqual(["EventEntity"]);
+    if (tournament?.kind !== "interface")
+      throw new Error("Tournament manquant");
+    expect(tournament.extends.map((e) => e.name)).toEqual(["EventEntity"]);
   });
 
   test("`Date` est reconnu comme horodatage, pas comme objet libre", () => {
     const clan = byName.get("ClanDTO");
     if (clan?.kind !== "interface") throw new Error("ClanDTO manquant");
-    expect(clan.fields.find(f => f.name === "createdAt")?.type).toEqual({ kind: "date" });
+    expect(clan.fields.find((f) => f.name === "createdAt")?.type).toEqual({
+      kind: "date",
+    });
   });
 
   test("le résultat classé référence l'union complète, y compris draw", () => {
     const entry = byName.get("RankedHistoryEntry");
-    if (entry?.kind !== "interface") throw new Error("RankedHistoryEntry manquant");
-    const result = entry.fields.find(f => f.name === "result");
-    expect(result?.type).toEqual({ kind: "ref", name: "MatchResult", args: [] });
+    if (entry?.kind !== "interface")
+      throw new Error("RankedHistoryEntry manquant");
+    const result = entry.fields.find((f) => f.name === "result");
+    expect(result?.type).toEqual({
+      kind: "ref",
+      name: "MatchResult",
+      args: [],
+    });
     const matchResult = byName.get("MatchResult");
     if (matchResult?.kind !== "alias") throw new Error("MatchResult manquant");
     expect(matchResult.type).toEqual({
@@ -87,7 +99,9 @@ describe("extraction", () => {
   });
 
   test("`Exclude` résout une union de littéraux", () => {
-    const fixture = extractContract({ root: join(PACKAGE_ROOT, "tests", "fixtures", "exclude") });
+    const fixture = extractContract({
+      root: join(PACKAGE_ROOT, "tests", "fixtures", "exclude"),
+    });
     const result = indexDeclarations(fixture).get("RankedResult");
     if (result?.kind !== "alias") throw new Error("RankedResult manquant");
     expect(result.type).toEqual({
@@ -110,7 +124,10 @@ describe("JSON Schema", () => {
   });
 
   test("un enum devient une énumération de valeurs, pas d'identifiants", () => {
-    const stageType = schema.$defs["StageType"] as { enum: string[]; type: string };
+    const stageType = schema.$defs["StageType"] as {
+      enum: string[];
+      type: string;
+    };
     expect(stageType.type).toBe("string");
     expect(stageType.enum).toContain("single_elimination");
   });
@@ -125,20 +142,29 @@ describe("JSON Schema", () => {
     const clan = schema.$defs["ClanDTO"] as {
       properties: Record<string, { type?: string; format?: string }>;
     };
-    expect(clan.properties["createdAt"]).toMatchObject({ type: "string", format: "date-time" });
+    expect(clan.properties["createdAt"]).toMatchObject({
+      type: "string",
+      format: "date-time",
+    });
   });
 
   test("l'héritage est aplati dans les propriétés", () => {
-    const tournament = schema.$defs["Tournament"] as { properties: Record<string, unknown> };
+    const tournament = schema.$defs["Tournament"] as {
+      properties: Record<string, unknown>;
+    };
     // `name` vient d'`EventEntity`.
     expect(tournament.properties["name"]).toBeDefined();
     expect(tournament.properties["internalState"]).toBeDefined();
   });
 
   test("tous les $ref pointent vers une définition existante", () => {
-    const refs = [...JSON.stringify(schema).matchAll(/"#\/\$defs\/([^"]+)"/gu)].map(match => match[1] as string);
+    const refs = [
+      ...JSON.stringify(schema).matchAll(/"#\/\$defs\/([^"]+)"/gu),
+    ].map((match) => match[1] as string);
     expect(refs.length).toBeGreaterThan(50);
-    const missing = [...new Set(refs)].filter(name => !(name in schema.$defs));
+    const missing = [...new Set(refs)].filter(
+      (name) => !(name in schema.$defs),
+    );
     expect(missing).toEqual([]);
   });
 });
@@ -193,7 +219,9 @@ describe("Swift et Kotlin", () => {
   });
 
   test("le nom de package Kotlin est paramétrable", () => {
-    expect(emitKotlin(contract, "com.exemple.jeu")).toContain("package com.exemple.jeu");
+    expect(emitKotlin(contract, "com.exemple.jeu")).toContain(
+      "package com.exemple.jeu",
+    );
   });
 });
 
@@ -214,7 +242,12 @@ describe("casse", () => {
 describe("génération", () => {
   test("les quatre cibles sont produites et non vides", () => {
     const { files } = generateContract({ root: TYPES_ROOT });
-    expect(files.map(f => f.file)).toEqual(["achillea.schema.json", "achillea.rs", "Achillea.swift", "Achillea.kt"]);
+    expect(files.map((f) => f.file)).toEqual([
+      "achillea.schema.json",
+      "achillea.rs",
+      "Achillea.swift",
+      "Achillea.kt",
+    ]);
     for (const file of files) expect(file.content.length).toBeGreaterThan(1000);
   });
 
@@ -228,8 +261,12 @@ describe("génération", () => {
       ).version,
     });
     for (const { file, content } of files) {
-      const onDisk = await Bun.file(join(PACKAGE_ROOT, "generated", file)).text();
-      expect(onDisk, `${file} est périmé — lancer \`bun run generate\``).toBe(content);
+      const onDisk = await Bun.file(
+        join(PACKAGE_ROOT, "generated", file),
+      ).text();
+      expect(onDisk, `${file} est périmé — lancer \`bun run generate\``).toBe(
+        content,
+      );
     }
   });
 });
@@ -242,22 +279,30 @@ describe("héritage utilitaire et unions nommées", () => {
     // Régression : `Omit` était ignoré, et `WireTournament` ne gardait que
     // ses quatre champs propres — les trente de `Tournament` disparaissaient
     // du Rust et du JSON Schema sans le moindre avertissement.
-    const wire = schema.$defs["WireTournament"] as { properties: Record<string, unknown> };
-    const base = schema.$defs["Tournament"] as { properties: Record<string, unknown> };
+    const wire = schema.$defs["WireTournament"] as {
+      properties: Record<string, unknown>;
+    };
+    const base = schema.$defs["Tournament"] as {
+      properties: Record<string, unknown>;
+    };
 
     expect(Object.keys(wire.properties).length).toBeGreaterThan(30);
     expect(wire.properties["name"]).toBeDefined();
     expect(wire.properties["internalState"]).toBeDefined();
     // Les clés omises sont bien redéfinies, pas héritées telles quelles.
-    expect(wire.properties["organization"]).not.toEqual(base.properties["organization"]);
+    expect(wire.properties["organization"]).not.toEqual(
+      base.properties["organization"],
+    );
   });
 
   test("`Omit` hors héritage échoue bruyamment plutôt que d'être aplati", () => {
     // Le principe du paquet : ce qu'on ne sait pas traduire lève une erreur
     // localisée, au lieu de finir en `unknown` dans le fichier généré.
-    expect(() => extractContract({ root: join(PACKAGE_ROOT, "tests", "fixtures", "bad-omit") })).toThrow(
-      ContractExtractionError,
-    );
+    expect(() =>
+      extractContract({
+        root: join(PACKAGE_ROOT, "tests", "fixtures", "bad-omit"),
+      }),
+    ).toThrow(ContractExtractionError);
   });
 
   test("un triplet reste un triplet", () => {
@@ -269,7 +314,9 @@ describe("héritage utilitaire et unions nommées", () => {
     expect(detail.type).toBe("array");
     expect(detail.prefixItems).toHaveLength(3);
     expect(detail.minItems).toBe(3);
-    expect(rust).toContain("pub type TournamentDetail = (WireTournament, Vec<WireParticipant>,");
+    expect(rust).toContain(
+      "pub type TournamentDetail = (WireTournament, Vec<WireParticipant>,",
+    );
   });
 
   test("une union hétérogène devient un enum non étiqueté", () => {

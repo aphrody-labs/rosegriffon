@@ -26,22 +26,29 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "File too large" }, { status: 413 });
     }
     if (!ALLOWED_MIME.has(file.type)) {
-      return NextResponse.json({ error: "Unsupported media type" }, { status: 415 });
+      return NextResponse.json(
+        { error: "Unsupported media type" },
+        { status: 415 },
+      );
     }
 
     const buffer = await file.arrayBuffer();
 
-    const { data, error } = await db.storage.from("nostalgie-examples").upload("ogVR.jpg", new Uint8Array(buffer), {
-      contentType: file.type,
-      upsert: true,
-    });
+    const { data, error } = await db.storage
+      .from("nostalgie-examples")
+      .upload("ogVR.jpg", new Uint8Array(buffer), {
+        contentType: file.type,
+        upsert: true,
+      });
 
     if (error) {
       console.error("Upload error:", error);
       return NextResponse.json({ error: "Upload failed" }, { status: 500 });
     }
 
-    const { data: publicUrlData } = db.storage.from("nostalgie-examples").getPublicUrl("ogVR.jpg");
+    const { data: publicUrlData } = db.storage
+      .from("nostalgie-examples")
+      .getPublicUrl("ogVR.jpg");
 
     return NextResponse.json({
       path: data?.path,
@@ -50,6 +57,9 @@ export async function POST(req: NextRequest) {
     });
   } catch (error) {
     console.error("API error:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 },
+    );
   }
 }

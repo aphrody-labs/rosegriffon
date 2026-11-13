@@ -20,7 +20,10 @@ const HASHES = ZUKAN_HASHES as Record<string, string>;
 let repliSignale = false;
 
 /** `zukan_hash` en base, sinon celui de l'instantané pour cet `id`, sinon `undefined`. */
-export function zukanHashOf(row: { id?: string | null; zukan_hash?: string | null }): string | undefined {
+export function zukanHashOf(row: {
+  id?: string | null;
+  zukan_hash?: string | null;
+}): string | undefined {
   if (row.zukan_hash) return row.zukan_hash;
   const hash = row.id ? HASHES[row.id] : undefined;
   if (hash && !repliSignale) {

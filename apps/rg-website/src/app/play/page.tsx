@@ -10,7 +10,8 @@ export const metadata: Metadata = {
   alternates: { canonical: absoluteUrl("/play") },
   openGraph: withDefaultOgImage({
     title: "Jouer à Inazuma Eleven: Victory Road dans le Navigateur",
-    description: "Moteur IEVR WebAssembly 100% Rust compilé pour le navigateur.",
+    description:
+      "Moteur IEVR WebAssembly 100% Rust compilé pour le navigateur.",
     url: absoluteUrl("/play"),
     siteName: "Rose Griffon",
     locale: "fr_FR",

@@ -6,7 +6,13 @@
  * this package only validates and resolves them deterministically.
  */
 
-export const THEME_IDS = ["roy", "gaelle", "azalee-light", "azalee-dark", "achillea"] as const;
+export const THEME_IDS = [
+  "roy",
+  "gaelle",
+  "azalee-light",
+  "azalee-dark",
+  "achillea",
+] as const;
 export type ThemeId = (typeof THEME_IDS)[number];
 
 export const LOCALE_IDS = ["fr", "en", "ja"] as const;
@@ -54,7 +60,9 @@ export type UserExperiencePreferences = Readonly<Partial<ExperienceConfig>>;
  * Untrusted serialized input, for example a cookie, HTTP payload, or database
  * row. Unknown values are ignored instead of being coerced.
  */
-export type ExperienceCandidate = Readonly<Partial<Record<keyof ExperienceConfig, unknown>>>;
+export type ExperienceCandidate = Readonly<
+  Partial<Record<keyof ExperienceConfig, unknown>>
+>;
 
 export interface ExperienceWhitelist {
   readonly themes?: readonly ThemeId[];
@@ -96,8 +104,13 @@ export const DEFAULT_EXPERIENCE: Readonly<ExperienceConfig> = Object.freeze({
   theme: "roy",
 });
 
-function includes<const T extends readonly string[]>(values: T, value: unknown): value is T[number] {
-  return typeof value === "string" && (values as readonly string[]).includes(value);
+function includes<const T extends readonly string[]>(
+  values: T,
+  value: unknown,
+): value is T[number] {
+  return (
+    typeof value === "string" && (values as readonly string[]).includes(value)
+  );
 }
 
 export function isThemeId(value: unknown): value is ThemeId {
@@ -121,7 +134,12 @@ export function isContrast(value: unknown): value is Contrast {
 }
 
 export function isFontScale(value: unknown): value is number {
-  return typeof value === "number" && Number.isFinite(value) && value >= FONT_SCALE_MIN && value <= FONT_SCALE_MAX;
+  return (
+    typeof value === "number" &&
+    Number.isFinite(value) &&
+    value >= FONT_SCALE_MIN &&
+    value <= FONT_SCALE_MAX
+  );
 }
 
 type Layer = Readonly<{
@@ -137,7 +155,7 @@ function sanitizeWhitelist<T extends string>(
   if (requested === undefined) return known;
 
   const knownSet = new Set<string>(known);
-  const unique = [...new Set(requested.filter(value => knownSet.has(value)))];
+  const unique = [...new Set(requested.filter((value) => knownSet.has(value)))];
   return unique.length > 0 ? unique : [fallback];
 }
 
@@ -160,10 +178,24 @@ function firstValid<T>(
  *
  * Invalid higher-priority values never mask a valid lower-priority value.
  */
-export function resolveExperience(input: ResolveExperienceInput = {}): ResolvedExperience {
-  const allowedThemes = sanitizeWhitelist(input.whitelist?.themes, THEME_IDS, DEFAULT_EXPERIENCE.theme);
-  const allowedLocales = sanitizeWhitelist(input.whitelist?.locales, LOCALE_IDS, DEFAULT_EXPERIENCE.locale);
-  const allowedFonts = sanitizeWhitelist(input.whitelist?.fonts, FONT_IDS, DEFAULT_EXPERIENCE.font);
+export function resolveExperience(
+  input: ResolveExperienceInput = {},
+): ResolvedExperience {
+  const allowedThemes = sanitizeWhitelist(
+    input.whitelist?.themes,
+    THEME_IDS,
+    DEFAULT_EXPERIENCE.theme,
+  );
+  const allowedLocales = sanitizeWhitelist(
+    input.whitelist?.locales,
+    LOCALE_IDS,
+    DEFAULT_EXPERIENCE.locale,
+  );
+  const allowedFonts = sanitizeWhitelist(
+    input.whitelist?.fonts,
+    FONT_IDS,
+    DEFAULT_EXPERIENCE.font,
+  );
 
   const layers: readonly Layer[] = [
     { source: "user", value: input.user },
@@ -172,22 +204,28 @@ export function resolveExperience(input: ResolveExperienceInput = {}): ResolvedE
     { source: "defaults", value: input.defaults },
   ];
 
-  const fallbackTheme = allowedThemes.includes(DEFAULT_EXPERIENCE.theme) ? DEFAULT_EXPERIENCE.theme : allowedThemes[0]!;
+  const fallbackTheme = allowedThemes.includes(DEFAULT_EXPERIENCE.theme)
+    ? DEFAULT_EXPERIENCE.theme
+    : allowedThemes[0]!;
   const fallbackLocale = allowedLocales.includes(DEFAULT_EXPERIENCE.locale)
     ? DEFAULT_EXPERIENCE.locale
     : allowedLocales[0]!;
-  const fallbackFont = allowedFonts.includes(DEFAULT_EXPERIENCE.font) ? DEFAULT_EXPERIENCE.font : allowedFonts[0]!;
+  const fallbackFont = allowedFonts.includes(DEFAULT_EXPERIENCE.font)
+    ? DEFAULT_EXPERIENCE.font
+    : allowedFonts[0]!;
 
   const [theme, themeSource] = firstValid(
     "theme",
     layers,
-    (value): value is ThemeId => isThemeId(value) && allowedThemes.includes(value),
+    (value): value is ThemeId =>
+      isThemeId(value) && allowedThemes.includes(value),
     fallbackTheme,
   );
   const [locale, localeSource] = firstValid(
     "locale",
     layers,
-    (value): value is LocaleId => isLocaleId(value) && allowedLocales.includes(value),
+    (value): value is LocaleId =>
+      isLocaleId(value) && allowedLocales.includes(value),
     fallbackLocale,
   );
   const [font, fontSource] = firstValid(
@@ -196,9 +234,24 @@ export function resolveExperience(input: ResolveExperienceInput = {}): ResolvedE
     (value): value is FontId => isFontId(value) && allowedFonts.includes(value),
     fallbackFont,
   );
-  const [fontScale, fontScaleSource] = firstValid("fontScale", layers, isFontScale, DEFAULT_EXPERIENCE.fontScale);
-  const [density, densitySource] = firstValid("density", layers, isDensity, DEFAULT_EXPERIENCE.density);
-  const [contrast, contrastSource] = firstValid("contrast", layers, isContrast, DEFAULT_EXPERIENCE.contrast);
+  const [fontScale, fontScaleSource] = firstValid(
+    "fontScale",
+    layers,
+    isFontScale,
+    DEFAULT_EXPERIENCE.fontScale,
+  );
+  const [density, densitySource] = firstValid(
+    "density",
+    layers,
+    isDensity,
+    DEFAULT_EXPERIENCE.density,
+  );
+  const [contrast, contrastSource] = firstValid(
+    "contrast",
+    layers,
+    isContrast,
+    DEFAULT_EXPERIENCE.contrast,
+  );
   const [reducedMotion, reducedMotionSource] = firstValid(
     "reducedMotion",
     layers,

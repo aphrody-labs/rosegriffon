@@ -14,9 +14,16 @@ import type { PageFeed } from "../../fil-feed";
 
 export const dynamic = "force-dynamic";
 
-export const metadata = { robots: { index: false }, title: "Publication sur X" };
+export const metadata = {
+  robots: { index: false },
+  title: "Publication sur X",
+};
 
-export default async function PagePost({ params }: { params: Promise<{ id: string }> }) {
+export default async function PagePost({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const { id } = await params;
   if (!estIdPost(id)) notFound();
   let initial: PageFeed | null = null;
@@ -26,7 +33,10 @@ export default async function PagePost({ params }: { params: Promise<{ id: strin
     // Le client retente seul.
   }
   // Le post a-t-il une version traduite et éditée sur le site (table `tweets`) ?
-  const admin = await requireAdminOrFail().then(() => true, () => false);
+  const admin = await requireAdminOrFail().then(
+    () => true,
+    () => false,
+  );
   let articleExiste = false;
   try {
     // Un post seul porte son identifiant ; un thread liste ses posts dans `raw_tweets`.
@@ -64,13 +74,20 @@ export default async function PagePost({ params }: { params: Promise<{ id: strin
             href={`/news/tweet/${id}`}
             className="flex min-h-11 items-center justify-between gap-3 rounded-2xl border border-outline-variant bg-surface-container-low px-4 py-2 text-sm leading-5 hover:bg-surface-container"
           >
-            <span>Ce post a une version traduite et éditée sur Rose Griffon.</span>
+            <span>
+              Ce post a une version traduite et éditée sur Rose Griffon.
+            </span>
             <span className="shrink-0 text-primary">Lire l&apos;article</span>
           </Link>
         )}
-        {admin && initial?.posts[0] && <BoutonBrouillon post={initial.posts[0]} />}
+        {admin && initial?.posts[0] && (
+          <BoutonBrouillon post={initial.posts[0]} />
+        )}
         <FilThread id={id} initial={initial} />
-        <section aria-labelledby="discussion-rg" className="rounded-2xl border border-outline-variant bg-surface-container-low p-4">
+        <section
+          aria-labelledby="discussion-rg"
+          className="rounded-2xl border border-outline-variant bg-surface-container-low p-4"
+        >
           <h2 id="discussion-rg" className="mb-3 text-lg font-semibold">
             Discussion sur Rose Griffon
           </h2>

@@ -22,12 +22,16 @@ export class BotApiError extends Error {
   }
 }
 
-async function request<T>(path: string, init: RequestInit & { discordId?: string } = {}): Promise<T> {
+async function request<T>(
+  path: string,
+  init: RequestInit & { discordId?: string } = {},
+): Promise<T> {
   if (!TOKEN) throw new BotApiError("BOT_API_TOKEN missing", 500);
   const headers = new Headers(init.headers);
   headers.set("authorization", `Bearer ${TOKEN}`);
   if (init.discordId) headers.set("x-discord-id", init.discordId);
-  if (init.body && !headers.has("content-type")) headers.set("content-type", "application/json");
+  if (init.body && !headers.has("content-type"))
+    headers.set("content-type", "application/json");
 
   const res = await fetch(`${BASE_URL}${path}`, { ...init, headers });
   const text = await res.text();
@@ -73,10 +77,13 @@ export async function apiAuth(discordId: string): Promise<ApiProfile | null> {
   return data.profile;
 }
 
-export async function apiIdentity(discordId: string): Promise<ApiBotIdentity | null> {
-  const data = await request<{ found: boolean; identity: ApiBotIdentity | null }>(
-    `/api/bot/v1/identity?discord_id=${encodeURIComponent(discordId)}`,
-  );
+export async function apiIdentity(
+  discordId: string,
+): Promise<ApiBotIdentity | null> {
+  const data = await request<{
+    found: boolean;
+    identity: ApiBotIdentity | null;
+  }>(`/api/bot/v1/identity?discord_id=${encodeURIComponent(discordId)}`);
   return data.identity;
 }
 

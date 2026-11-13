@@ -20,7 +20,8 @@ export default async function Image() {
     <div
       style={{
         alignItems: "center",
-        background: "linear-gradient(135deg, #1A120D 0%, #2D1F14 50%, #1A120D 100%)",
+        background:
+          "linear-gradient(135deg, #1A120D 0%, #2D1F14 50%, #1A120D 100%)",
         color: "white",
         display: "flex",
         flexDirection: "column",
@@ -82,7 +83,16 @@ export default async function Image() {
         >
           Wiki Azalee
         </div>
-        <div style={{ color: "white", display: "flex", fontSize: 64, fontWeight: 900 }}>Hyper Techniques</div>
+        <div
+          style={{
+            color: "white",
+            display: "flex",
+            fontSize: 64,
+            fontWeight: 900,
+          }}
+        >
+          Hyper Techniques
+        </div>
         <div style={{ color: "#A09080", display: "flex", fontSize: 22 }}>
           Esprits Guerriers, Totems, Miximax et plus
         </div>
@@ -90,7 +100,7 @@ export default async function Image() {
 
       {/* Aura type cards */}
       <div style={{ display: "flex", gap: 16, marginTop: 24 }}>
-        {AURA_TYPES.map(a => (
+        {AURA_TYPES.map((a) => (
           <div
             key={a.label}
             style={{
@@ -142,10 +152,35 @@ export default async function Image() {
       </div>
 
       {/* Branding */}
-      <div style={{ alignItems: "center", bottom: 20, display: "flex", gap: 10, position: "absolute" }}>
-        <img src={getOgLogoDataUri()} width={28} height={28} style={{ borderRadius: 7 }} alt="Logo Azalée" />
-        <div style={{ color: "#F2A93B", display: "flex", fontSize: 14, fontWeight: 700 }}>rosegriffon.fr/wiki</div>
-        <div style={{ color: "#6D5E50", display: "flex", fontSize: 12 }}>Inazuma Eleven: Victory Road</div>
+      <div
+        style={{
+          alignItems: "center",
+          bottom: 20,
+          display: "flex",
+          gap: 10,
+          position: "absolute",
+        }}
+      >
+        <img
+          src={getOgLogoDataUri()}
+          width={28}
+          height={28}
+          style={{ borderRadius: 7 }}
+          alt="Logo Azalée"
+        />
+        <div
+          style={{
+            color: "#F2A93B",
+            display: "flex",
+            fontSize: 14,
+            fontWeight: 700,
+          }}
+        >
+          rosegriffon.fr/wiki
+        </div>
+        <div style={{ color: "#6D5E50", display: "flex", fontSize: 12 }}>
+          Inazuma Eleven: Victory Road
+        </div>
       </div>
     </div>,
     { ...size },

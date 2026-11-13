@@ -28,13 +28,14 @@ for (let i = 0; i < 256; i++) {
 // 1. calculate_power: (base * (100 + level * 2) * multiplier) / 10000
 // 2. elemental_affinity: matrix lookup (Wind=1, Fire=2, Forest=3, Mountain=4)
 const WASM_BYTECODE = new Uint8Array([
-  0, 97, 115, 109, 1, 0, 0, 0, 1, 14, 2, 96, 3, 127, 127, 127, 1, 127, 96, 2, 127, 127, 1, 127, 3,
-  3, 2, 0, 1, 7, 40, 2, 15, 99, 97, 108, 99, 117, 108, 97, 116, 101, 95, 112, 111, 119, 101, 114,
-  0, 0, 18, 101, 108, 101, 109, 101, 110, 116, 97, 108, 95, 97, 102, 102, 105, 110, 105, 116,
-  121, 0, 1, 10, 69, 2, 22, 0, 32, 0, 65, 228, 0, 32, 1, 65, 2, 108, 106, 108, 32, 2, 108, 65,
-  144, 206, 0, 109, 11, 44, 1, 1, 127, 32, 0, 32, 1, 107, 65, 4, 106, 65, 4, 111, 33, 2, 32, 2,
-  65, 1, 70, 4, 127, 65, 150, 1, 5, 32, 2, 65, 3, 70, 4, 127, 65, 198, 0, 5, 65, 228, 0, 11,
-  11, 11,
+  0, 97, 115, 109, 1, 0, 0, 0, 1, 14, 2, 96, 3, 127, 127, 127, 1, 127, 96, 2,
+  127, 127, 1, 127, 3, 3, 2, 0, 1, 7, 40, 2, 15, 99, 97, 108, 99, 117, 108, 97,
+  116, 101, 95, 112, 111, 119, 101, 114, 0, 0, 18, 101, 108, 101, 109, 101, 110,
+  116, 97, 108, 95, 97, 102, 102, 105, 110, 105, 116, 121, 0, 1, 10, 69, 2, 22,
+  0, 32, 0, 65, 228, 0, 32, 1, 65, 2, 108, 106, 108, 32, 2, 108, 65, 144, 206,
+  0, 109, 11, 44, 1, 1, 127, 32, 0, 32, 1, 107, 65, 4, 106, 65, 4, 111, 33, 2,
+  32, 2, 65, 1, 70, 4, 127, 65, 150, 1, 5, 32, 2, 65, 3, 70, 4, 127, 65, 198, 0,
+  5, 65, 228, 0, 11, 11, 11,
 ]);
 
 interface WasmExports {
@@ -46,7 +47,9 @@ let wasmInstancePromise: Promise<WebAssembly.Instance> | null = null;
 
 export async function getNieWasmInstance(): Promise<WebAssembly.Instance> {
   if (!wasmInstancePromise) {
-    wasmInstancePromise = WebAssembly.instantiate(WASM_BYTECODE).then(res => res.instance);
+    wasmInstancePromise = WebAssembly.instantiate(WASM_BYTECODE).then(
+      (res) => res.instance,
+    );
   }
   return wasmInstancePromise;
 }

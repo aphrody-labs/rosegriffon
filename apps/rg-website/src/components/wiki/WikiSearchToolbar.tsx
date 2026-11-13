@@ -55,7 +55,10 @@ export function WikiSearchToolbar({
   const finalPlaceholder = placeholder || t("search.placeholder");
 
   // Local state for input value to avoid laggy typing
-  const [query, setQuery] = useResetState(searchParams.get("q") || "", searchParams.get("q") || "");
+  const [query, setQuery] = useResetState(
+    searchParams.get("q") || "",
+    searchParams.get("q") || "",
+  );
 
   // Sync state with URL if URL changes externally (React bail-out sur set identique)
 
@@ -90,13 +93,15 @@ export function WikiSearchToolbar({
   };
 
   // Count active filters (excluding 'q' and 'page')
-  const activeFilterCount = [...searchParams.entries()].filter(([key]) => key !== "q" && key !== "page").length;
+  const activeFilterCount = [...searchParams.entries()].filter(
+    ([key]) => key !== "q" && key !== "page",
+  ).length;
 
   const isDesktop = useMediaQuery("(min-width: 768px)");
 
   const handleResetFilters = () => {
     const params = new URLSearchParams(searchParams.toString());
-    filterKeys.forEach(k => params.delete(k));
+    filterKeys.forEach((k) => params.delete(k));
     router.push(`${pathname}?${params.toString()}`);
   };
 
@@ -104,7 +109,10 @@ export function WikiSearchToolbar({
     <Button
       variant={activeFilterCount > 0 ? "secondary" : "ghost"}
       size="sm"
-      className={cn("rounded-full gap-2 px-4 transition-all h-10 md:h-9", activeFilterCount > 0 && "font-bold")}
+      className={cn(
+        "rounded-full gap-2 px-4 transition-all h-10 md:h-9",
+        activeFilterCount > 0 && "font-bold",
+      )}
     >
       {activeFilterCount > 0 ? (
         <ListFilter size={18} aria-hidden="true" />
@@ -121,7 +129,9 @@ export function WikiSearchToolbar({
   );
 
   return (
-    <div className={cn("relative group w-full", containerClassName || "max-w-sm")}>
+    <div
+      className={cn("relative group w-full", containerClassName || "max-w-sm")}
+    >
       {/* Animated Gradient Border */}
       <div className="absolute -inset-0.5 bg-linear-to-r from-[#4facfe] via-[#7367f0] to-[#9733ee] rounded-full blur opacity-0 group-focus-within:opacity-20 transition duration-500" />
 
@@ -141,7 +151,7 @@ export function WikiSearchToolbar({
         {/* Input */}
         <Input
           value={query}
-          onChange={e => setQuery(e.target.value)}
+          onChange={(e) => setQuery(e.target.value)}
           placeholder={finalPlaceholder}
           aria-label={finalPlaceholder}
           className="flex-1 bg-transparent border-none shadow-none focus-visible:ring-0 h-11 sm:h-10 text-base"
@@ -207,7 +217,10 @@ function FilterContainer({
     return (
       <Sheet>
         <SheetTrigger asChild>{filterButton}</SheetTrigger>
-        <SheetContent side="right" className="w-full sm:w-[400px] md:w-[540px] flex flex-col h-full">
+        <SheetContent
+          side="right"
+          className="w-full sm:w-[400px] md:w-[540px] flex flex-col h-full"
+        >
           <SheetHeader>
             <SheetTitle className="flex items-center gap-2 text-xl">
               <SlidersHorizontal size={24} aria-hidden="true" />
@@ -243,7 +256,9 @@ function FilterContainer({
             {title}
           </DrawerTitle>
         </DrawerHeader>
-        <ScrollArea className="flex-1 px-4 overflow-y-auto">{children}</ScrollArea>
+        <ScrollArea className="flex-1 px-4 overflow-y-auto">
+          {children}
+        </ScrollArea>
         <DrawerFooter className="pt-4 border-t border-border">
           <div className="flex w-full gap-3">
             <Button variant="ghost" onClick={onReset} className="flex-1">

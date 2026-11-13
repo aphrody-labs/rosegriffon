@@ -71,7 +71,12 @@
  */
 
 import { sql } from "../lib/db.js";
-import { objetPresent, telechargerPieceJointeDiscord, televerserObjet, urlSansSignature } from "../lib/storage-assets.js";
+import {
+  objetPresent,
+  telechargerPieceJointeDiscord,
+  televerserObjet,
+  urlSansSignature,
+} from "../lib/storage-assets.js";
 
 const PREFIXE = "[Campagnes Discord]";
 
@@ -260,12 +265,16 @@ function tableau(valeur: unknown): unknown[] {
 }
 
 function chaine(valeur: unknown): string | null {
-  return typeof valeur === "string" && valeur.trim().length > 0 ? valeur.trim() : null;
+  return typeof valeur === "string" && valeur.trim().length > 0
+    ? valeur.trim()
+    : null;
 }
 
 function entier(valeur: unknown): number | null {
-  if (typeof valeur === "number" && Number.isFinite(valeur)) return Math.trunc(valeur);
-  if (typeof valeur === "string" && /^\d+$/.test(valeur)) return Number.parseInt(valeur, 10);
+  if (typeof valeur === "number" && Number.isFinite(valeur))
+    return Math.trunc(valeur);
+  if (typeof valeur === "string" && /^\d+$/.test(valeur))
+    return Number.parseInt(valeur, 10);
   return null;
 }
 
@@ -325,7 +334,10 @@ export function extraireMedias(attachments: unknown): PieceJointeMedia[] {
  * les pièces jointes anciennes, que Discord n'a pas typées. Tout le reste
  * (`application/pdf`, archives, `.psd`) renvoie `null` et n'est pas récolté.
  */
-export function classerMedia(typeMime: string | null, nom: string): "image" | "video" | null {
+export function classerMedia(
+  typeMime: string | null,
+  nom: string,
+): "image" | "video" | null {
   if (typeMime) {
     if (typeMime.startsWith("image/")) return "image";
     if (typeMime.startsWith("video/")) return "video";
@@ -346,7 +358,10 @@ export function classerMedia(typeMime: string | null, nom: string): "image" | "v
  * montrable — un hashtag de rattrapage (coquille d'une affiche) fait bien mordre
  * le message, mais n'est jamais affiché.
  */
-export function trouverHashtag(contenu: string, hashtags: readonly string[]): string | null {
+export function trouverHashtag(
+  contenu: string,
+  hashtags: readonly string[],
+): string | null {
   const bas = (contenu || "").toLowerCase();
   for (const hashtag of hashtags) {
     if (bas.includes(`#${hashtag}`)) return hashtag;
@@ -363,7 +378,11 @@ export function trouverHashtag(contenu: string, hashtags: readonly string[]): st
  * et c'est sans risque : ce chemin ne s'active que pour un salon que la campagne
  * a explicitement déclaré comme étant le sien.
  */
-export function dansFenetre(date: Date, debut: Date | null, fin: Date | null): boolean {
+export function dansFenetre(
+  date: Date,
+  debut: Date | null,
+  fin: Date | null,
+): boolean {
   if (debut && date < debut) return false;
   if (fin && date > fin) return false;
   return true;
@@ -385,7 +404,7 @@ export function borneDepot(
   if (!fin) return null;
   const grace = new Date(fin.getTime() + DELAI_GRACE_DEPOT_MS);
   const suivante = (ouverturesParSalon.get(salon) ?? [])
-    .filter(ouverture => ouverture > fin)
+    .filter((ouverture) => ouverture > fin)
     .sort((a, b) => a.getTime() - b.getTime())[0];
   if (suivante && suivante.getTime() - 1 < grace.getTime()) {
     return new Date(suivante.getTime() - 1);
@@ -400,7 +419,11 @@ export function borneDepot(
  * couple (message, pièce jointe) est unique côté Discord : deux runs écrivent
  * donc au même endroit, et `x-upsert` fait le reste.
  */
-export function cheminMedia(slug: string, messageId: string, media: PieceJointeMedia): string {
+export function cheminMedia(
+  slug: string,
+  messageId: string,
+  media: PieceJointeMedia,
+): string {
   const extension = (media.nom.split(".").pop() ?? "").toLowerCase();
   const attendue = media.kind === "video" ? EXTENSIONS_VIDEO : EXTENSIONS_IMAGE;
   const extensionSure = attendue.test(`.${extension}`) ? extension : "bin";
@@ -417,7 +440,9 @@ export function cheminMedia(slug: string, messageId: string, media: PieceJointeM
  * @param options `slug` pour n'en traiter qu'une, `limite` pour plafonner,
  *                `dry` pour ne rien écrire.
  */
-export async function recolterCreationsDiscord(options: OptionsRecolteDiscord = {}): Promise<StatsRecolteDiscord> {
+export async function recolterCreationsDiscord(
+  options: OptionsRecolteDiscord = {},
+): Promise<StatsRecolteDiscord> {
   const { slug, limite = MAX_CREATIONS_PAR_CAMPAGNE, dry = false } = options;
   const details: StatsCampagneDiscord[] = [];
 
@@ -439,9 +464,18 @@ export async function recolterCreationsDiscord(options: OptionsRecolteDiscord = 
 		`) as LigneCampagne[];
 
     if (campagnes.length === 0) {
-      const quoi = slug ? `la campagne « ${slug} » est inconnue` : "aucune campagne en base";
+      const quoi = slug
+        ? `la campagne « ${slug} » est inconnue`
+        : "aucune campagne en base";
       console.log(`${PREFIXE} Rien à récolter : ${quoi}.`);
-      return { success: true, campagnes: 0, details: [], totalRattachements: 0, totalImages: 0, dry };
+      return {
+        success: true,
+        campagnes: 0,
+        details: [],
+        totalRattachements: 0,
+        totalImages: 0,
+        dry,
+      };
     }
 
     /*
@@ -456,7 +490,9 @@ export async function recolterCreationsDiscord(options: OptionsRecolteDiscord = 
      * Un salon d'annonces explicitement déclaré comme salon de dépôt reste, lui,
      * récolté : la déclaration prime sur l'heuristique.
      */
-    const salonsDepotDeclares = new Set(campagnes.flatMap(campagne => campagne.salons_depot ?? []));
+    const salonsDepotDeclares = new Set(
+      campagnes.flatMap((campagne) => campagne.salons_depot ?? []),
+    );
 
     /*
      * Toutes les OUVERTURES de campagne, salon par salon. C'est ce qui borne le
@@ -497,20 +533,48 @@ export async function recolterCreationsDiscord(options: OptionsRecolteDiscord = 
     );
 
     for (const campagne of campagnes) {
-      details.push(await recolterCampagne(campagne, messages, salonsDepotDeclares, ouverturesParSalon, limite, dry));
+      details.push(
+        await recolterCampagne(
+          campagne,
+          messages,
+          salonsDepotDeclares,
+          ouverturesParSalon,
+          limite,
+          dry,
+        ),
+      );
     }
 
-    const totalRattachements = details.reduce((somme, detail) => somme + detail.rattachements, 0);
-    const totalImages = details.reduce((somme, detail) => somme + detail.imagesRehebergees, 0);
-    return { success: true, campagnes: campagnes.length, details, totalRattachements, totalImages, dry };
+    const totalRattachements = details.reduce(
+      (somme, detail) => somme + detail.rattachements,
+      0,
+    );
+    const totalImages = details.reduce(
+      (somme, detail) => somme + detail.imagesRehebergees,
+      0,
+    );
+    return {
+      success: true,
+      campagnes: campagnes.length,
+      details,
+      totalRattachements,
+      totalImages,
+      dry,
+    };
   } catch (err) {
     console.error(`${PREFIXE} Échec global :`, message(err));
     return {
       success: false,
       campagnes: details.length,
       details,
-      totalRattachements: details.reduce((somme, detail) => somme + detail.rattachements, 0),
-      totalImages: details.reduce((somme, detail) => somme + detail.imagesRehebergees, 0),
+      totalRattachements: details.reduce(
+        (somme, detail) => somme + detail.rattachements,
+        0,
+      ),
+      totalImages: details.reduce(
+        (somme, detail) => somme + detail.imagesRehebergees,
+        0,
+      ),
       dry,
       error: message(err),
     };
@@ -526,7 +590,9 @@ export async function recolterCreationsDiscord(options: OptionsRecolteDiscord = 
  * diagnostic envoyait vérifier des permissions parfaitement en ordre au lieu de
  * dire la seule chose vraie : personne n'a encore rien déposé.
  */
-async function diagnostiquerSalons(salons: readonly string[]): Promise<string[]> {
+async function diagnostiquerSalons(
+  salons: readonly string[],
+): Promise<string[]> {
   // `jsonb_array_elements_text` et NON `= ANY($1::text[])` : Bun.SQL sérialise
   // un tableau JS en JSON, pas en littéral de tableau Postgres, et `ANY` échoue
   // alors sur « malformed array literal » (même piège que `marquerSupprimes`
@@ -542,9 +608,9 @@ async function diagnostiquerSalons(salons: readonly string[]): Promise<string[]>
     backfill_complete: boolean;
     message_count: number | null;
   }>;
-  const parId = new Map(etats.map(etat => [etat.channel_id, etat]));
+  const parId = new Map(etats.map((etat) => [etat.channel_id, etat]));
 
-  return salons.map(salon => {
+  return salons.map((salon) => {
     const etat = parId.get(salon);
     if (!etat) {
       return `salon de dépôt ${salon} inconnu de la veille — il sera armé à la prochaine passe de « discord:messages ».`;
@@ -584,15 +650,20 @@ async function recolterCampagne(
     salonsInaccessibles: [],
   };
 
-  const hashtags = [...(campagne.hashtags ?? []), ...(campagne.hashtags_rattrapage ?? [])];
+  const hashtags = [
+    ...(campagne.hashtags ?? []),
+    ...(campagne.hashtags_rattrapage ?? []),
+  ];
   const salonsDepot = new Set(campagne.salons_depot ?? []);
   const debut = versDate(campagne.debut_le);
   const fin = versDate(campagne.fin_le);
 
   // Salons déclarés dont AUCUN message n'est archivé : c'est le symptôme exact
   // du « Missing Access ». On le remonte tel quel plutôt que de le taire.
-  const salonsVus = new Set(messages.map(ligne => ligne.channel_id));
-  stats.salonsInaccessibles = [...salonsDepot].filter(salon => !salonsVus.has(salon));
+  const salonsVus = new Set(messages.map((ligne) => ligne.channel_id));
+  stats.salonsInaccessibles = [...salonsDepot].filter(
+    (salon) => !salonsVus.has(salon),
+  );
 
   // Ce qui a DÉJÀ été ré-hébergé : relu une fois, pour ne retélécharger aucune
   // image d'un run précédent. C'est ce qui rend la tâche rejouable à coût nul.
@@ -636,7 +707,10 @@ async function recolterCampagne(
       if (!dansFenetre(publieLe, debut, finDepot)) continue;
       parSalon = true;
       if (fin && publieLe > fin) horsDelai = true;
-    } else if (ligne.salon_type === 5 && !salonsDepotDeclares.has(ligne.channel_id)) {
+    } else if (
+      ligne.salon_type === 5 &&
+      !salonsDepotDeclares.has(ligne.channel_id)
+    ) {
       // Salon d'annonces non déclaré comme dépôt : c'est l'annonce de la
       // campagne, pas une participation (cf. le commentaire de l'appelant).
       continue;
@@ -653,7 +727,7 @@ async function recolterCampagne(
       stats,
       dry,
     );
-    const servables = rehebergees.filter(media => media.chemin !== null);
+    const servables = rehebergees.filter((media) => media.chemin !== null);
 
     /*
      * UN DÉPÔT TARDIF QU'ON NE SAIT PAS MONTRER N'EST PAS ÉCRIT.
@@ -683,7 +757,7 @@ async function recolterCampagne(
     // Compté sur TOUS les médias, pas seulement les servables : en simulation
     // aucun n'est recopié, et un compteur à zéro laisserait croire qu'aucune
     // vidéo n'a été vue.
-    if (rehebergees.some(media => media.kind === "video")) stats.avecVideo++;
+    if (rehebergees.some((media) => media.kind === "video")) stats.avecVideo++;
     if (horsDelai) stats.horsDelaiTolere++;
 
     lignes.push({
@@ -709,12 +783,16 @@ async function recolterCampagne(
   }
 
   if (lignes.length === 0) {
-    console.log(`${PREFIXE} ${campagne.slug} : aucune création Discord à ce jour. Rien écrit.`);
+    console.log(
+      `${PREFIXE} ${campagne.slug} : aucune création Discord à ce jour. Rien écrit.`,
+    );
     return stats;
   }
 
   if (dry) {
-    console.log(`${PREFIXE} ${campagne.slug} : SIMULATION — ${lignes.length} création(s) auraient été enregistrées.`);
+    console.log(
+      `${PREFIXE} ${campagne.slug} : SIMULATION — ${lignes.length} création(s) auraient été enregistrées.`,
+    );
     return stats;
   }
 
@@ -773,7 +851,9 @@ async function rehebergerMedias(
   stats: StatsCampagneDiscord,
   dry: boolean,
 ): Promise<MediaReheberge[]> {
-  const parIdentifiant = new Map(deja.map(media => [media.attachment_id, media]));
+  const parIdentifiant = new Map(
+    deja.map((media) => [media.attachment_id, media]),
+  );
   const resultat: MediaReheberge[] = [];
 
   for (const media of medias) {
@@ -790,7 +870,10 @@ async function rehebergerMedias(
     };
 
     const connue = parIdentifiant.get(media.id);
-    if (connue?.chemin && (dry || (await objetPresent(BUCKET, connue.chemin)))) {
+    if (
+      connue?.chemin &&
+      (dry || (await objetPresent(BUCKET, connue.chemin)))
+    ) {
       stats.imagesDejaLa++;
       // `kind` n'existait pas avant le 26/8/2026 : une ligne d'alors le rejoue
       // ici depuis le type MIME courant plutôt que de rester sans réponse.
@@ -820,7 +903,12 @@ async function rehebergerMedias(
       continue;
     }
 
-    const envoi = await televerserObjet(BUCKET, chemin, fichier.octets, fichier.typeMime);
+    const envoi = await televerserObjet(
+      BUCKET,
+      chemin,
+      fichier.octets,
+      fichier.typeMime,
+    );
     if (!envoi.ok) {
       stats.imagesEchouees++;
       console.warn(
@@ -850,7 +938,8 @@ function lireOptions(argv: readonly string[]): OptionsRecolteDiscord {
   const limiteBrute = Number(valeur("--limite"));
   return {
     slug: valeur("--campagne"),
-    limite: Number.isFinite(limiteBrute) && limiteBrute > 0 ? limiteBrute : undefined,
+    limite:
+      Number.isFinite(limiteBrute) && limiteBrute > 0 ? limiteBrute : undefined,
     dry: argv.includes("--dry"),
   };
 }

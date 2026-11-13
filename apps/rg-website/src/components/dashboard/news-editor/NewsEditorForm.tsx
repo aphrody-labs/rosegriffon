@@ -37,14 +37,22 @@ export function NewsEditorForm({ initialData }: NewsEditorFormProps) {
 
   // Metadata State
   const [slug, setSlug] = useState(initialData?.slug || "");
-  const [category, setCategory] = useState(initialData?.category || "announcement");
+  const [category, setCategory] = useState(
+    initialData?.category || "announcement",
+  );
   const [status, setStatus] = useState(initialData?.status || "draft");
   const [excerpt, setExcerpt] = useState(initialData?.excerpt || "");
-  const [imageUrl, setImageUrl] = useState(initialData?.featured_image_url || "");
-  const [imageAlt, setImageAlt] = useState(initialData?.featured_image_alt || "");
+  const [imageUrl, setImageUrl] = useState(
+    initialData?.featured_image_url || "",
+  );
+  const [imageAlt, setImageAlt] = useState(
+    initialData?.featured_image_alt || "",
+  );
   const [tags, setTags] = useState<string[]>(initialData?.tags || []);
   const [metaTitle, setMetaTitle] = useState(initialData?.meta_title || "");
-  const [metaDescription, setMetaDescription] = useState(initialData?.meta_description || "");
+  const [metaDescription, setMetaDescription] = useState(
+    initialData?.meta_description || "",
+  );
   const [scheduledAt, setScheduledAt] = useState(() => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const sa = (initialData as any)?.scheduled_at;
@@ -61,7 +69,9 @@ export function NewsEditorForm({ initialData }: NewsEditorFormProps) {
   const [activeTab, setActiveTab] = useState("content");
 
   // Slug validation state
-  const [slugStatus, setSlugStatus] = useState<"idle" | "checking" | "available" | "taken">("idle");
+  const [slugStatus, setSlugStatus] = useState<
+    "idle" | "checking" | "available" | "taken"
+  >("idle");
   const slugCheckTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Discord share state
@@ -72,7 +82,9 @@ export function NewsEditorForm({ initialData }: NewsEditorFormProps) {
   const readTime = estimateReadTime(wordCount);
 
   // Draft key for localStorage auto-save
-  const draftKey = initialData?.id ? `draft_news_${initialData.id}` : "draft_news_new";
+  const draftKey = initialData?.id
+    ? `draft_news_${initialData.id}`
+    : "draft_news_new";
 
   // Slug validation with debounce
   const checkSlugAvailability = async (slugToCheck: string) => {
@@ -82,7 +94,8 @@ export function NewsEditorForm({ initialData }: NewsEditorFormProps) {
     }
     setSlugStatus("checking");
     try {
-      const { checkSlugAvailability: checkSlug } = await import("@/app/actions/articles");
+      const { checkSlugAvailability: checkSlug } =
+        await import("@/app/actions/articles");
       const result = await checkSlug(slugToCheck, initialData?.id);
       setSlugStatus(result.available ? "available" : "taken");
     } catch {
@@ -97,7 +110,10 @@ export function NewsEditorForm({ initialData }: NewsEditorFormProps) {
       clearTimeout(slugCheckTimerRef.current);
     }
     if (newSlug) {
-      slugCheckTimerRef.current = setTimeout(() => checkSlugAvailability(newSlug), 500);
+      slugCheckTimerRef.current = setTimeout(
+        () => checkSlugAvailability(newSlug),
+        500,
+      );
     } else {
       setSlugStatus("idle");
     }
@@ -152,7 +168,9 @@ export function NewsEditorForm({ initialData }: NewsEditorFormProps) {
       try {
         const data = JSON.parse(saved);
         if (data.title && data.title !== title) {
-          const recover = window.confirm("Un brouillon non sauvegardé a été trouvé. Voulez-vous le récupérer ?");
+          const recover = window.confirm(
+            "Un brouillon non sauvegardé a été trouvé. Voulez-vous le récupérer ?",
+          );
           if (recover) {
             setTitle(data.title || "");
             setContent(data.content || EMPTY_CONTENT);
@@ -225,7 +243,10 @@ export function NewsEditorForm({ initialData }: NewsEditorFormProps) {
    *  - redirect: if false, stay in editor (pour "Sauvegarder et continuer")
    */
   const handleSave = useCallback(
-    async (overrideStatus?: string, options?: { silent?: boolean; redirect?: boolean }) => {
+    async (
+      overrideStatus?: string,
+      options?: { silent?: boolean; redirect?: boolean },
+    ) => {
       const { silent = false, redirect: shouldRedirect = true } = options || {};
 
       if (!title) {
@@ -298,7 +319,8 @@ export function NewsEditorForm({ initialData }: NewsEditorFormProps) {
         // Historique en cas de refonte avant 1ʳᵉ publication.
         if (initialData?.id && !silent) {
           try {
-            const { createArticleVersion } = await import("@/app/actions/articles");
+            const { createArticleVersion } =
+              await import("@/app/actions/articles");
             await createArticleVersion(initialData.id);
           } catch {
             // Version snapshot failure is not critical
@@ -351,7 +373,8 @@ export function NewsEditorForm({ initialData }: NewsEditorFormProps) {
         // Send push notifications on first publish
         if (finalStatus === "published" && !initialData?.published_at) {
           try {
-            const { sendPushToAll } = await import("@/app/actions/notifications");
+            const { sendPushToAll } =
+              await import("@/app/actions/notifications");
             await sendPushToAll(title, excerpt || "Nouvel article sur Azalée", {
               url: `/news/${finalSlug}`,
             });
@@ -369,7 +392,9 @@ export function NewsEditorForm({ initialData }: NewsEditorFormProps) {
       } catch (error: unknown) {
         console.error("Error saving news:", error);
         if (!silent) {
-          toast.error(`Erreur: ${error instanceof Error ? error.message : String(error)}`);
+          toast.error(
+            `Erreur: ${error instanceof Error ? error.message : String(error)}`,
+          );
         }
       } finally {
         setLoading(false);
@@ -489,7 +514,8 @@ export function NewsEditorForm({ initialData }: NewsEditorFormProps) {
     formData.append("cropHeight", String(cropData.height));
 
     try {
-      const { uploadImageWithCrop } = await import("@/app/actions/image-upload");
+      const { uploadImageWithCrop } =
+        await import("@/app/actions/image-upload");
       const result = await uploadImageWithCrop(formData);
       if ("url" in result) {
         setImageUrl(result.url);
@@ -601,7 +627,7 @@ export function NewsEditorForm({ initialData }: NewsEditorFormProps) {
         initialStatus={initialData?.status ?? undefined}
         activeTab={activeTab}
         shareOnDiscord={shareOnDiscord}
-        onTogglePreview={() => setShowPreview(v => !v)}
+        onTogglePreview={() => setShowPreview((v) => !v)}
         onSaveDraft={() => handleSave("draft")}
         onSaveAndContinue={() => handleSave(undefined, { redirect: false })}
         onRevertToDraft={() => {

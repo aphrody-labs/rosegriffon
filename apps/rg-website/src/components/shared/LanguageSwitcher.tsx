@@ -13,15 +13,23 @@ import {
 import { Check, Languages } from "lucide-react";
 import { useMemo } from "react";
 
-import { type Language, useLanguage } from "@/components/providers/language-provider";
+import {
+  type Language,
+  useLanguage,
+} from "@/components/providers/language-provider";
 
 const LANGUAGES = DEFAULT_LOCALE_REGISTRY.locales
   .map(({ tag }) => tag)
-  .filter((tag): tag is Language => tag === "fr" || tag === "en" || tag === "ja");
+  .filter(
+    (tag): tag is Language => tag === "fr" || tag === "en" || tag === "ja",
+  );
 
 export function LanguageSwitcher() {
   const { language, setLanguage, t } = useLanguage();
-  const displayNames = useMemo(() => new Intl.DisplayNames([language], { type: "language" }), [language]);
+  const displayNames = useMemo(
+    () => new Intl.DisplayNames([language], { type: "language" }),
+    [language],
+  );
   const currentName = displayNames.of(language) ?? language;
 
   return (
@@ -43,7 +51,7 @@ export function LanguageSwitcher() {
       <DropdownMenuContent align="end" className="min-w-48">
         <DropdownMenuLabel>{t("ui.language.label")}</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        {LANGUAGES.map(locale => {
+        {LANGUAGES.map((locale) => {
           const isActive = locale === language;
           return (
             <DropdownMenuItem
@@ -52,7 +60,9 @@ export function LanguageSwitcher() {
               aria-current={isActive ? "true" : undefined}
             >
               <span lang={locale} className="flex-1">
-                {new Intl.DisplayNames([locale], { type: "language" }).of(locale) ?? locale}
+                {new Intl.DisplayNames([locale], { type: "language" }).of(
+                  locale,
+                ) ?? locale}
               </span>
               {isActive && <Check data-icon="inline-end" aria-hidden />}
             </DropdownMenuItem>

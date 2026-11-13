@@ -10,4 +10,13 @@ export * from "../nie-bridge/index.js";
 export * from "./nie.js";
 
 // Bun-native C-ABI FFI bindings & utilities
-export { dlopen, FFIType, suffix, ptr, CString, JSCallback, CFunction, toArrayBuffer } from "bun:ffi";
+export {
+  dlopen,
+  FFIType,
+  suffix,
+  ptr,
+  CString,
+  JSCallback,
+  CFunction,
+  toArrayBuffer,
+} from "bun:ffi";

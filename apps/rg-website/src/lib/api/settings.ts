@@ -9,7 +9,10 @@ export const FEATURE_SHOW_DISCORD_EVENTS = "feature_show_discord_events";
  * début août 2026, cassant ces pages en boucle, alors que la connexion
  * Postgres directe restait fonctionnelle tout du long.
  */
-export async function getSetting<T = unknown>(key: string, defaultValue: T): Promise<T> {
+export async function getSetting<T = unknown>(
+  key: string,
+  defaultValue: T,
+): Promise<T> {
   try {
     return await fetchSetting(key, defaultValue);
   } catch (error) {
@@ -23,7 +26,10 @@ export async function getSetting<T = unknown>(key: string, defaultValue: T): Pro
  * directe n'a pas de notion de client "cookies-aware" vs "public" — les deux
  * variantes sont conservées pour préserver la signature/l'usage des appelants.
  */
-export async function getPublicSetting<T = unknown>(key: string, defaultValue: T): Promise<T> {
+export async function getPublicSetting<T = unknown>(
+  key: string,
+  defaultValue: T,
+): Promise<T> {
   try {
     return await fetchSetting(key, defaultValue);
   } catch (error) {
@@ -34,7 +40,10 @@ export async function getPublicSetting<T = unknown>(key: string, defaultValue: T
 
 async function fetchSetting<T>(key: string, defaultValue: T): Promise<T> {
   const pool = getPgPool();
-  const { rows } = await pool.query<{ value: unknown }>("SELECT value FROM settings WHERE key = $1 LIMIT 1", [key]);
+  const { rows } = await pool.query<{ value: unknown }>(
+    "SELECT value FROM settings WHERE key = $1 LIMIT 1",
+    [key],
+  );
 
   const row = rows[0];
   if (!row) {

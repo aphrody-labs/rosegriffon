@@ -1,10 +1,21 @@
 "use client";
 
-import { ArrowLeft, Flame, Hourglass, Map, Store, Timer, Zap } from "lucide-react";
+import {
+  ArrowLeft,
+  Flame,
+  Hourglass,
+  Map,
+  Store,
+  Timer,
+  Zap,
+} from "lucide-react";
 import Image from "next/image";
 import Link from "@/components/shared/Link";
 import { useState } from "react";
-import { SHOP_FR, translateEffect } from "@rosegriffon/azalee/text/translations";
+import {
+  SHOP_FR,
+  translateEffect,
+} from "@rosegriffon/azalee/text/translations";
 
 interface Tactic {
   slug: string;
@@ -33,7 +44,9 @@ interface TacticDetailProps {
 }
 
 export function TacticDetail({ tactic }: TacticDetailProps) {
-  const effects = [tactic.effect1, tactic.effect2, tactic.effect3].filter(Boolean) as string[];
+  const effects = [tactic.effect1, tactic.effect2, tactic.effect3].filter(
+    Boolean,
+  ) as string[];
   const shopFr = tactic.shop ? SHOP_FR[tactic.shop] || tactic.shop : null;
   const imageSrc = tactic.imageUrl || tactic.image;
   const [imgError, setImgError] = useState(false);
@@ -77,10 +90,14 @@ export function TacticDetail({ tactic }: TacticDetailProps) {
                 {tactic.name_fr || tactic.name}
               </h1>
               {tactic.name_fr && tactic.name_fr !== tactic.name && (
-                <p className="text-sm text-on-surface-variant mt-0.5">{tactic.name}</p>
+                <p className="text-sm text-on-surface-variant mt-0.5">
+                  {tactic.name}
+                </p>
               )}
               {tactic.name_ja && (
-                <p className="text-xs text-on-surface-variant/50 mt-0.5 font-light">{tactic.name_ja}</p>
+                <p className="text-xs text-on-surface-variant/50 mt-0.5 font-light">
+                  {tactic.name_ja}
+                </p>
               )}
               <div className="flex flex-wrap items-center gap-2 mt-2">
                 <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-tertiary/10 text-xs font-bold text-tertiary">
@@ -100,33 +117,59 @@ export function TacticDetail({ tactic }: TacticDetailProps) {
         </div>
 
         {/* Stats Row — masquée si aucune stat (sinon rangée fantôme bordée/paddée). */}
-        {((tactic.power != null && tactic.power > 0) || tactic.duration != null || tactic.cooldown != null) && (
+        {((tactic.power != null && tactic.power > 0) ||
+          tactic.duration != null ||
+          tactic.cooldown != null) && (
           <div className="px-4 sm:px-6 py-4 border-t border-outline-variant/20">
             <div className="flex flex-wrap gap-4">
               {tactic.power != null && tactic.power > 0 && (
                 <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-surface-container border border-outline-variant/20">
-                  <Flame size={20} className="text-primary" aria-hidden="true" />
+                  <Flame
+                    size={20}
+                    className="text-primary"
+                    aria-hidden="true"
+                  />
                   <div>
-                    <p className="text-[10px] uppercase tracking-wider text-on-surface-variant font-bold">Puissance</p>
-                    <p className="text-sm font-black text-on-surface">{tactic.power}</p>
+                    <p className="text-[10px] uppercase tracking-wider text-on-surface-variant font-bold">
+                      Puissance
+                    </p>
+                    <p className="text-sm font-black text-on-surface">
+                      {tactic.power}
+                    </p>
                   </div>
                 </div>
               )}
               {tactic.duration != null && (
                 <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-surface-container border border-outline-variant/20">
-                  <Timer size={20} className="text-tertiary" aria-hidden="true" />
+                  <Timer
+                    size={20}
+                    className="text-tertiary"
+                    aria-hidden="true"
+                  />
                   <div>
-                    <p className="text-[10px] uppercase tracking-wider text-on-surface-variant font-bold">Durée</p>
-                    <p className="text-sm font-black text-on-surface">{tactic.duration}s</p>
+                    <p className="text-[10px] uppercase tracking-wider text-on-surface-variant font-bold">
+                      Durée
+                    </p>
+                    <p className="text-sm font-black text-on-surface">
+                      {tactic.duration}s
+                    </p>
                   </div>
                 </div>
               )}
               {tactic.cooldown != null && (
                 <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-surface-container border border-outline-variant/20">
-                  <Hourglass size={20} className="text-error" aria-hidden="true" />
+                  <Hourglass
+                    size={20}
+                    className="text-error"
+                    aria-hidden="true"
+                  />
                   <div>
-                    <p className="text-[10px] uppercase tracking-wider text-on-surface-variant font-bold">Recharge</p>
-                    <p className="text-sm font-black text-on-surface">{tactic.cooldown}s</p>
+                    <p className="text-[10px] uppercase tracking-wider text-on-surface-variant font-bold">
+                      Recharge
+                    </p>
+                    <p className="text-sm font-black text-on-surface">
+                      {tactic.cooldown}s
+                    </p>
                   </div>
                 </div>
               )}
@@ -152,7 +195,11 @@ export function TacticDetail({ tactic }: TacticDetailProps) {
         {effects.length > 0 && (
           <div className="px-4 sm:px-6 py-4 border-t border-outline-variant/20">
             <h2 className="text-xs uppercase tracking-wider text-on-surface-variant font-bold mb-3">
-              <Zap size={16} className="inline align-middle mr-1" aria-hidden="true" />
+              <Zap
+                size={16}
+                className="inline align-middle mr-1"
+                aria-hidden="true"
+              />
               Effets
             </h2>
             <div className="space-y-2">
@@ -165,9 +212,13 @@ export function TacticDetail({ tactic }: TacticDetailProps) {
                     {i + 1}
                   </span>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-on-surface">{translateEffect(effect)}</p>
+                    <p className="text-sm font-medium text-on-surface">
+                      {translateEffect(effect)}
+                    </p>
                     {translateEffect(effect) !== effect && (
-                      <p className="text-xs text-on-surface-variant mt-0.5">{effect}</p>
+                      <p className="text-xs text-on-surface-variant mt-0.5">
+                        {effect}
+                      </p>
                     )}
                   </div>
                 </div>
@@ -180,12 +231,18 @@ export function TacticDetail({ tactic }: TacticDetailProps) {
         {shopFr && (
           <div className="px-4 sm:px-6 py-4 border-t border-outline-variant/20">
             <h2 className="text-xs uppercase tracking-wider text-on-surface-variant font-bold mb-3">
-              <Store size={16} className="inline align-middle mr-1" aria-hidden="true" />
+              <Store
+                size={16}
+                className="inline align-middle mr-1"
+                aria-hidden="true"
+              />
               Disponibilité
             </h2>
             <div className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-surface-container border border-outline-variant/20">
               <Store size={20} className="text-primary" aria-hidden="true" />
-              <span className="text-sm font-medium text-on-surface">{shopFr}</span>
+              <span className="text-sm font-medium text-on-surface">
+                {shopFr}
+              </span>
             </div>
           </div>
         )}

@@ -6,7 +6,12 @@ import { EMOTES } from "@/lib/emotes";
 import { cn } from "@/lib/utils";
 
 interface EmoteGalleryProps {
-  onSelect?: (emote: { type: "discord" | "site"; src: string; name: string; alt: string }) => void;
+  onSelect?: (emote: {
+    type: "discord" | "site";
+    src: string;
+    name: string;
+    alt: string;
+  }) => void;
   className?: string;
 }
 
@@ -19,12 +24,14 @@ export function EmoteGallery({ onSelect, className }: EmoteGalleryProps) {
           Site (Haute Qualité)
         </h4>
         <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-4">
-          {Object.values(EMOTES).map(emote => (
+          {Object.values(EMOTES).map((emote) => (
             <button
               key={emote.name}
               className={cn(
                 "aspect-square p-2 rounded-lg border border-transparent transition-all flex items-center justify-center",
-                onSelect ? "hover:border-primary hover:bg-primary/5 cursor-pointer" : "cursor-default",
+                onSelect
+                  ? "hover:border-primary hover:bg-primary/5 cursor-pointer"
+                  : "cursor-default",
               )}
               onClick={() =>
                 onSelect?.({
@@ -36,7 +43,13 @@ export function EmoteGallery({ onSelect, className }: EmoteGalleryProps) {
               }
               title={emote.alt}
             >
-              <Image src={emote.path} alt={emote.alt} width={64} height={64} className="object-contain" />
+              <Image
+                src={emote.path}
+                alt={emote.alt}
+                width={64}
+                height={64}
+                className="object-contain"
+              />
             </button>
           ))}
         </div>

@@ -29,8 +29,13 @@ import {
 
 describe("raretés", () => {
   test("l'échelle est celle du jeu, du plus commun au plus rare", () => {
-    expect(RARETES.map(rarete => rarete.nom)).toEqual(["Normal", "Expérimenté", "Héros", "BASARA"]);
-    expect(RARETES.map(rarete => rarete.code)).toEqual([0, 2, 10, 20]);
+    expect(RARETES.map((rarete) => rarete.nom)).toEqual([
+      "Normal",
+      "Expérimenté",
+      "Héros",
+      "BASARA",
+    ]);
+    expect(RARETES.map((rarete) => rarete.code)).toEqual([0, 2, 10, 20]);
   });
 
   test("le code arrive en texte depuis Postgres et doit être compris", () => {
@@ -58,7 +63,7 @@ describe("raretés", () => {
   });
 
   test("le remboursement d'un doublon croît avec la rareté", () => {
-    const montants = RARETES.map(rarete => remboursementDoublon(rarete.code));
+    const montants = RARETES.map((rarete) => remboursementDoublon(rarete.code));
     for (let index = 1; index < montants.length; index++) {
       expect(montants[index]).toBeGreaterThan(montants[index - 1] as number);
     }
@@ -90,7 +95,9 @@ describe("garantie", () => {
   test("tirer un par un ne fait pas perdre la garantie", () => {
     // C'est la raison du compteur GLOBAL : avec un compteur remis à zéro par
     // salve, neuf tirages à l'unité puis une salve donneraient deux garanties.
-    const unParUn = Array.from({ length: 10 }, (_, index) => garantieAuTirage(index)).filter(Boolean);
+    const unParUn = Array.from({ length: 10 }, (_, index) =>
+      garantieAuTirage(index),
+    ).filter(Boolean);
     expect(unParUn).toHaveLength(1);
   });
 
@@ -141,7 +148,9 @@ describe("résumé d'une collection", () => {
   test("les raretés vides restent affichées", () => {
     const resume = resumerCollection([{ objetId: "a", rarete: "0" }], 6_148);
     expect(resume.parRarete).toHaveLength(RARETES.length);
-    expect(resume.parRarete.map(entree => entree.nombre)).toEqual([1, 0, 0, 0]);
+    expect(resume.parRarete.map((entree) => entree.nombre)).toEqual([
+      1, 0, 0, 0,
+    ]);
   });
 
   test("le compte suit les raretés réelles", () => {
@@ -155,12 +164,16 @@ describe("résumé d'une collection", () => {
       6_148,
     );
     expect(resume.total).toBe(4);
-    expect(resume.parRarete.map(entree => entree.nombre)).toEqual([1, 0, 1, 2]);
+    expect(resume.parRarete.map((entree) => entree.nombre)).toEqual([
+      1, 0, 1, 2,
+    ]);
   });
 
   test("la complétion est bornée et ne divise jamais par zéro", () => {
     expect(resumerCollection([], 0).completion).toBe(0);
-    expect(resumerCollection([{ objetId: "a", rarete: 0 }], 1).completion).toBe(1);
+    expect(resumerCollection([{ objetId: "a", rarete: 0 }], 1).completion).toBe(
+      1,
+    );
   });
 
   test("la ligne de complétion se lit d'un coup d'œil", () => {

@@ -9,6 +9,10 @@ export const metadata: Metadata = {
   robots: { follow: false, index: false },
 };
 
-export default function DeuxFacteursLayout({ children }: { children: ReactNode }) {
+export default function DeuxFacteursLayout({
+  children,
+}: {
+  children: ReactNode;
+}) {
   return children;
 }

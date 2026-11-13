@@ -14,7 +14,11 @@ import {
   syncStaffPhotos,
 } from "../lib/discord.js";
 import { sql } from "../lib/db.js";
-import { listGuildMembers, syncDiscordGuildSnapshot, syncOAuthLinkMetadata } from "@rosegriffon/discord-sync";
+import {
+  listGuildMembers,
+  syncDiscordGuildSnapshot,
+  syncOAuthLinkMetadata,
+} from "@rosegriffon/discord-sync";
 
 /**
  * Synchronisation Discord — TOUS les serveurs suivis.
@@ -36,7 +40,10 @@ import { listGuildMembers, syncDiscordGuildSnapshot, syncOAuthLinkMetadata } fro
  * listé par pages de 1000 (`GET /guilds/{id}/members`), lu UNE fois, puis
  * partagé entre le miroir `discord_mirror` et les tables du site.
  */
-export async function runDiscordSync(): Promise<{ success: boolean; error?: string }> {
+export async function runDiscordSync(): Promise<{
+  success: boolean;
+  error?: string;
+}> {
   console.log("[Cron Discord] Démarrage de la synchronisation Discord...");
 
   const client = getDiscordClient();
@@ -66,7 +73,9 @@ export async function runDiscordSync(): Promise<{ success: boolean; error?: stri
         throw new Error(`serveur introuvable (${serveur.id})`);
       }
 
-      console.log(`[Cron Discord] ${serveur.nom} (${guild.id}) — inventaire des membres...`);
+      console.log(
+        `[Cron Discord] ${serveur.nom} (${guild.id}) — inventaire des membres...`,
+      );
       const membres = await listGuildMembers(guild);
       const instantane = await syncDiscordGuildSnapshot(
         guild,
@@ -87,7 +96,9 @@ export async function runDiscordSync(): Promise<{ success: boolean; error?: stri
         `[Cron Discord] ${serveur.nom} — membres : ${rapportMembres.upserted}/${rapportMembres.fetched}, ${rapportMembres.partis} parti(s) en ${rapportMembres.durationMs} ms`,
       );
       for (const e of rapportMembres.errors.slice(0, 3)) {
-        console.error(`  - ${serveur.nom} / membre ${e.discordId} : ${e.reason}`);
+        console.error(
+          `  - ${serveur.nom} / membre ${e.discordId} : ${e.reason}`,
+        );
       }
 
       totalMembres += rapportMembres.fetched;
@@ -112,7 +123,8 @@ export async function runDiscordSync(): Promise<{ success: boolean; error?: stri
   // Better Auth owns credentials. The shared bot mirror gets only stable link
   // identifiers and timestamps, including providers without a Discord guild.
   try {
-    const links = await sql`SELECT id, user_id, provider_id, account_id, created_at, updated_at FROM account`;
+    const links =
+      await sql`SELECT id, user_id, provider_id, account_id, created_at, updated_at FROM account`;
     const typedLinks = links as unknown as {
       id: string;
       user_id: string;
@@ -122,13 +134,17 @@ export async function runDiscordSync(): Promise<{ success: boolean; error?: stri
       updated_at: Date | string | null;
     }[];
     const linked = await syncOAuthLinkMetadata(
-      typedLinks.map(row => ({
+      typedLinks.map((row) => ({
         id: String(row.id),
         userId: String(row.user_id),
         providerId: String(row.provider_id),
         providerAccountId: String(row.account_id),
-        linkedAt: row.created_at ? new Date(row.created_at).toISOString() : null,
-        updatedAt: row.updated_at ? new Date(row.updated_at).toISOString() : null,
+        linkedAt: row.created_at
+          ? new Date(row.created_at).toISOString()
+          : null,
+        updatedAt: row.updated_at
+          ? new Date(row.updated_at).toISOString()
+          : null,
       })),
     );
     resume.push(`liens OAuth : ${linked}`);
@@ -155,22 +171,34 @@ export async function runDiscordSync(): Promise<{ success: boolean; error?: stri
     totalErreurs++;
   }
 
-  const message = [resume.join(" · "), ...echecs.map(e => `ÉCHEC ${e}`)].filter(Boolean).join(" | ");
+  const message = [resume.join(" · "), ...echecs.map((e) => `ÉCHEC ${e}`)]
+    .filter(Boolean)
+    .join(" | ");
 
   await sql`
 		INSERT INTO discord_sync_logs (status, total_members, updated_count, error_count, message, created_at)
 		VALUES (${echecs.length === 0 ? "success" : "error"}, ${totalMembres}, ${totalMisAJour}, ${totalErreurs}, ${message}, NOW())
-	`.catch(err => console.error("[Cron Discord] log de synchro non enregistré :", err));
+	`.catch((err) =>
+    console.error("[Cron Discord] log de synchro non enregistré :", err),
+  );
 
-  console.log(`[Cron Discord] terminé en ${Date.now() - debut.getTime()} ms — ${message}`);
+  console.log(
+    `[Cron Discord] terminé en ${Date.now() - debut.getTime()} ms — ${message}`,
+  );
 
-  return totalErreurs === 0 ? { success: true } : { success: false, error: echecs.join(" | ") };
+  return totalErreurs === 0
+    ? { success: true }
+    : { success: false, error: echecs.join(" | ") };
 }
 
 /**
  * Exécute une fonction asynchrone sur un tableau d'éléments en parallèle avec une limite de concurrence.
  */
-async function runParallelWithLimit<T, R>(items: T[], limit: number, fn: (item: T) => Promise<R>): Promise<R[]> {
+async function runParallelWithLimit<T, R>(
+  items: T[],
+  limit: number,
+  fn: (item: T) => Promise<R>,
+): Promise<R[]> {
   const results: R[] = [];
   for (let i = 0; i < items.length; i += limit) {
     const chunk = items.slice(i, i + limit);
@@ -234,44 +262,55 @@ export async function runDiscordChannelScan(): Promise<{
     const channels = await guild.channels.fetch();
     const activeThreads = await guild.channels.fetchActiveThreads();
 
-    const allChannels = [...channels.values(), ...activeThreads.threads.values()];
+    const allChannels = [
+      ...channels.values(),
+      ...activeThreads.threads.values(),
+    ];
 
     // Filtre uniquement les salons textuels
-    const textChannels = allChannels.filter(c => c && c.isTextBased());
-    console.log(`[Cron Discord] ${textChannels.length} salons textuels à scanner.`);
+    const textChannels = allChannels.filter((c) => c && c.isTextBased());
+    console.log(
+      `[Cron Discord] ${textChannels.length} salons textuels à scanner.`,
+    );
 
     // Limite de concurrence à 5 pour éviter d'être banni par le rate limit Discord
-    const results = await runParallelWithLimit(textChannels, 5, async (chan): Promise<ChannelScanResult> => {
-      const channel = chan as any;
-      try {
-        // Récupère les 50 derniers messages du salon
-        const messages = await channel.messages.fetch({ limit: 50 });
+    const results = await runParallelWithLimit(
+      textChannels,
+      5,
+      async (chan): Promise<ChannelScanResult> => {
+        const channel = chan as any;
+        try {
+          // Récupère les 50 derniers messages du salon
+          const messages = await channel.messages.fetch({ limit: 50 });
 
-        const scanData: MessageScanData[] = [...messages.values()].map(m => ({
-          id: m.id,
-          authorId: m.author.id,
-          authorTag: m.author.tag,
-          contentLength: m.content.length,
-          timestamp: m.createdAt.toISOString(),
-        }));
+          const scanData: MessageScanData[] = [...messages.values()].map(
+            (m) => ({
+              id: m.id,
+              authorId: m.author.id,
+              authorTag: m.author.tag,
+              contentLength: m.content.length,
+              timestamp: m.createdAt.toISOString(),
+            }),
+          );
 
-        return {
-          channelId: channel.id,
-          name: channel.name,
-          type: channel.type.toString(),
-          messageCount: messages.size,
-          messages: scanData,
-        };
-      } catch (err: any) {
-        return {
-          channelId: channel.id,
-          name: channel.name,
-          type: channel.type.toString(),
-          messageCount: 0,
-          error: err.message || String(err),
-        };
-      }
-    });
+          return {
+            channelId: channel.id,
+            name: channel.name,
+            type: channel.type.toString(),
+            messageCount: messages.size,
+            messages: scanData,
+          };
+        } catch (err: any) {
+          return {
+            channelId: channel.id,
+            name: channel.name,
+            type: channel.type.toString(),
+            messageCount: 0,
+            error: err.message || String(err),
+          };
+        }
+      },
+    );
 
     // Calcul des statistiques globales
     let totalMessages = 0;
@@ -285,7 +324,8 @@ export async function runDiscordChannelScan(): Promise<{
         channelMessageCount[r.name] = r.messageCount;
         for (const m of r.messages) {
           totalCharacters += m.contentLength;
-          authorMessageCount[m.authorTag] = (authorMessageCount[m.authorTag] || 0) + 1;
+          authorMessageCount[m.authorTag] =
+            (authorMessageCount[m.authorTag] || 0) + 1;
         }
       }
     }
@@ -306,7 +346,8 @@ export async function runDiscordChannelScan(): Promise<{
       totalChannelsScanned: textChannels.length,
       totalMessages,
       totalCharacters,
-      averageMessageLength: totalMessages > 0 ? Math.round(totalCharacters / totalMessages) : 0,
+      averageMessageLength:
+        totalMessages > 0 ? Math.round(totalCharacters / totalMessages) : 0,
       mostActiveAuthors,
       mostActiveChannels,
     };
@@ -317,7 +358,7 @@ export async function runDiscordChannelScan(): Promise<{
     await sql`
 			INSERT INTO discord_sync_logs (status, total_members, updated_count, error_count, message, created_at)
 			VALUES ('scan_success', ${membresAnnonces(guild)}, ${totalMessages}, 0, ${`Scan de ${textChannels.length} salons terminé. Total messages : ${totalMessages}`}, NOW())
-		`.catch(err => console.error("[Cron Discord] Échec log scan:", err));
+		`.catch((err) => console.error("[Cron Discord] Échec log scan:", err));
 
     return { success: true, stats };
   } catch (err: any) {
@@ -327,7 +368,9 @@ export async function runDiscordChannelScan(): Promise<{
     await sql`
 			INSERT INTO discord_sync_logs (status, total_members, updated_count, error_count, message, created_at)
 			VALUES ('scan_error', 0, 0, 1, ${errMsg}, NOW())
-		`.catch(dbErr => console.error("[Cron Discord] Échec log d'erreur scan:", dbErr));
+		`.catch((dbErr) =>
+      console.error("[Cron Discord] Échec log d'erreur scan:", dbErr),
+    );
 
     return { success: false, error: errMsg };
   }

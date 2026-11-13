@@ -31,7 +31,9 @@ export async function exportArticleStatsCSV(): Promise<string> {
 
   const { data: articles, error } = await client
     .from("articles")
-    .select("title, slug, status, category, view_count, share_count, published_at, created_at, id")
+    .select(
+      "title, slug, status, category, view_count, share_count, published_at, created_at, id",
+    )
     .eq("status", "published")
     .eq("app", "azalee")
     .order("view_count", { ascending: false });
@@ -49,8 +51,14 @@ export async function exportArticleStatsCSV(): Promise<string> {
 
   // Récupérer les compteurs de réactions et commentaires en parallèle
   const [{ data: reactions }, { data: comments }] = await Promise.all([
-    client.from("article_reactions").select("article_id").in("article_id", articleIds),
-    client.from("article_comments").select("article_id").in("article_id", articleIds),
+    client
+      .from("article_reactions")
+      .select("article_id")
+      .in("article_id", articleIds),
+    client
+      .from("article_comments")
+      .select("article_id")
+      .in("article_id", articleIds),
   ]);
 
   const reactionCounts = new Map<string, number>();
@@ -58,7 +66,10 @@ export async function exportArticleStatsCSV(): Promise<string> {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   for (const r of (reactions ?? []) as any[]) {
-    reactionCounts.set(r.article_id, (reactionCounts.get(r.article_id) ?? 0) + 1);
+    reactionCounts.set(
+      r.article_id,
+      (reactionCounts.get(r.article_id) ?? 0) + 1,
+    );
   }
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   for (const c of (comments ?? []) as any[]) {
@@ -115,14 +126,28 @@ export async function exportAuthorStatsCSV(): Promise<string> {
   const articleIds: string[] = articles.map((a: { id: string }) => a.id);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const authorIds: string[] = [
-    ...new Set<string>(articles.map((a: any) => a.author_id).filter((id: unknown): id is string => Boolean(id))),
+    ...new Set<string>(
+      articles
+        .map((a: any) => a.author_id)
+        .filter((id: unknown): id is string => Boolean(id)),
+    ),
   ];
 
-  const [{ data: reactions }, { data: comments }, { data: profiles }] = await Promise.all([
-    client.from("article_reactions").select("article_id").in("article_id", articleIds),
-    client.from("article_comments").select("article_id").in("article_id", articleIds),
-    client.from("profiles").select("id, username, full_name").in("id", authorIds),
-  ]);
+  const [{ data: reactions }, { data: comments }, { data: profiles }] =
+    await Promise.all([
+      client
+        .from("article_reactions")
+        .select("article_id")
+        .in("article_id", articleIds),
+      client
+        .from("article_comments")
+        .select("article_id")
+        .in("article_id", articleIds),
+      client
+        .from("profiles")
+        .select("id, username, full_name")
+        .in("id", authorIds),
+    ]);
 
   // Index article_id → author_id
   const articleAuthor = new Map<string, string>();
@@ -143,7 +168,12 @@ export async function exportAuthorStatsCSV(): Promise<string> {
   // Agréger par auteur
   const stats = new Map<
     string,
-    { article_count: number; total_views: number; total_reactions: number; total_comments: number }
+    {
+      article_count: number;
+      total_views: number;
+      total_reactions: number;
+      total_comments: number;
+    }
   >();
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -186,7 +216,8 @@ export async function exportAuthorStatsCSV(): Promise<string> {
     }
   }
 
-  const header = "author_name,article_count,total_views,total_reactions,total_comments";
+  const header =
+    "author_name,article_count,total_views,total_reactions,total_comments";
   const rows = [header];
 
   for (const [authorId, s] of stats.entries()) {
@@ -267,16 +298,23 @@ export async function getAuthorDashboard(): Promise<{
 
   const articleIds: string[] = articles.map((a: { id: string }) => a.id);
 
-  const [{ data: reactions }, { data: comments }, { data: bookmarks }] = await Promise.all([
-    client.from("article_reactions").select("article_id").in("article_id", articleIds),
-    client
-      .from("article_comments")
-      .select("id, article_id, content, created_at")
-      .in("article_id", articleIds)
-      .order("created_at", { ascending: false })
-      .limit(10),
-    client.from("article_bookmarks").select("article_id").in("article_id", articleIds),
-  ]);
+  const [{ data: reactions }, { data: comments }, { data: bookmarks }] =
+    await Promise.all([
+      client
+        .from("article_reactions")
+        .select("article_id")
+        .in("article_id", articleIds),
+      client
+        .from("article_comments")
+        .select("id, article_id, content, created_at")
+        .in("article_id", articleIds)
+        .order("created_at", { ascending: false })
+        .limit(10),
+      client
+        .from("article_bookmarks")
+        .select("article_id")
+        .in("article_id", articleIds),
+    ]);
 
   const reactionCounts = new Map<string, number>();
   const commentCounts = new Map<string, number>();
@@ -284,7 +322,10 @@ export async function getAuthorDashboard(): Promise<{
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   for (const r of (reactions ?? []) as any[]) {
-    reactionCounts.set(r.article_id, (reactionCounts.get(r.article_id) ?? 0) + 1);
+    reactionCounts.set(
+      r.article_id,
+      (reactionCounts.get(r.article_id) ?? 0) + 1,
+    );
   }
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   for (const c of (comments ?? []) as any[]) {
@@ -292,7 +333,10 @@ export async function getAuthorDashboard(): Promise<{
   }
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   for (const b of (bookmarks ?? []) as any[]) {
-    bookmarkCounts.set(b.article_id, (bookmarkCounts.get(b.article_id) ?? 0) + 1);
+    bookmarkCounts.set(
+      b.article_id,
+      (bookmarkCounts.get(b.article_id) ?? 0) + 1,
+    );
   }
 
   // Index des titres pour les commentaires récents
@@ -303,7 +347,7 @@ export async function getAuthorDashboard(): Promise<{
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const enrichedArticles = (articles as any[]).map(a => ({
+  const enrichedArticles = (articles as any[]).map((a) => ({
     bookmark_count: bookmarkCounts.get(a.id) ?? 0,
     comment_count: commentCounts.get(a.id) ?? 0,
     id: a.id,
@@ -319,11 +363,13 @@ export async function getAuthorDashboard(): Promise<{
 
   const mostPopular =
     enrichedArticles.length > 0
-      ? enrichedArticles.reduce((best, a) => (a.view_count > best.view_count ? a : best))
+      ? enrichedArticles.reduce((best, a) =>
+          a.view_count > best.view_count ? a : best,
+        )
       : null;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const latestComments = ((comments ?? []) as any[]).slice(0, 5).map(c => ({
+  const latestComments = ((comments ?? []) as any[]).slice(0, 5).map((c) => ({
     article_id: c.article_id,
     article_title: articleTitles.get(c.article_id) ?? "",
     content: c.content,

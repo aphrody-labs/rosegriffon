@@ -49,13 +49,18 @@ export function isTournamentOrganizer(
   if (ownerId && ownerId === userId) return true;
 
   const orgManagers = tournament?.organization?.managers;
-  if (orgManagers?.some(manager => manager?.user?.id === userId)) return true;
+  if (orgManagers?.some((manager) => manager?.user?.id === userId)) return true;
 
   const tournamentManagers = tournament?.managers;
-  return Boolean(tournamentManagers?.some(manager => manager?.id === userId));
+  return Boolean(tournamentManagers?.some((manager) => manager?.id === userId));
 }
 
 /** Formats éligibles au bonus AP podium (élimination uniquement). */
-export function isPlacementPrizeEligible(tournamentType: string | null | undefined): boolean {
-  return tournamentType === "single_elimination" || tournamentType === "double_elimination";
+export function isPlacementPrizeEligible(
+  tournamentType: string | null | undefined,
+): boolean {
+  return (
+    tournamentType === "single_elimination" ||
+    tournamentType === "double_elimination"
+  );
 }

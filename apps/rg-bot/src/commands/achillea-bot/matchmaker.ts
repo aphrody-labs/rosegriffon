@@ -47,7 +47,11 @@ export class BoutonsFileRanked {
   @ButtonComponent({ id: /^join_queue:.+/ })
   async rejoindre(interaction: ButtonInteraction): Promise<void> {
     await interaction.deferReply({ flags: MessageFlags.Ephemeral });
-    const defi = await appelApi(interaction, c => c.ranked.createChallenge({ ranked: true }), "Défi ranked impossible");
+    const defi = await appelApi(
+      interaction,
+      (c) => c.ranked.createChallenge({ ranked: true }),
+      "Défi ranked impossible",
+    );
     if (!defi) return;
     const charge = succes(
       "Défi classé ouvert",
@@ -61,8 +65,14 @@ export class BoutonsFileRanked {
       ...charge,
       components: [
         new ActionRowBuilder<ButtonBuilder>().addComponents(
-          boutonLien({ libelle: "File ranked du site", url: urlAchillea("/ranked") }),
-          new ButtonBuilder().setCustomId(`leave_queue:${defi.code}`).setLabel("Retirer mon défi").setStyle(ButtonStyle.Danger),
+          boutonLien({
+            libelle: "File ranked du site",
+            url: urlAchillea("/ranked"),
+          }),
+          new ButtonBuilder()
+            .setCustomId(`leave_queue:${defi.code}`)
+            .setLabel("Retirer mon défi")
+            .setStyle(ButtonStyle.Danger),
         ),
       ],
     });
@@ -82,15 +92,29 @@ export class BoutonsFileRanked {
       );
       return;
     }
-    const resultat = await appelApi(interaction, c => c.ranked.cancelChallenge(code), "Retrait du défi impossible");
+    const resultat = await appelApi(
+      interaction,
+      (c) => c.ranked.cancelChallenge(code),
+      "Retrait du défi impossible",
+    );
     if (!resultat) return;
-    await repondre(interaction, succes("Défi retiré", "Ton défi classé a été annulé ; son lien ne mène plus à aucun match."));
+    await repondre(
+      interaction,
+      succes(
+        "Défi retiré",
+        "Ton défi classé a été annulé ; son lien ne mène plus à aucun match.",
+      ),
+    );
   }
 
   @ButtonComponent({ id: /^confirm_presence:.+/ })
   async confirmerPresence(interaction: ButtonInteraction): Promise<void> {
     await interaction.deferReply({ flags: MessageFlags.Ephemeral });
-    const profil = await appelApi(interaction, c => c.ranked.me(), "Profil ranked introuvable");
+    const profil = await appelApi(
+      interaction,
+      (c) => c.ranked.me(),
+      "Profil ranked introuvable",
+    );
     if (!profil) return;
     await interaction.editReply({
       ...info(
@@ -98,7 +122,12 @@ export class BoutonsFileRanked {
         "La présence se confirme en rejoignant la salle du match sur le site : c'est elle qui vérifie que les deux joueurs sont là et lance le chronomètre.",
       ),
       components: [
-        new ActionRowBuilder<ButtonBuilder>().addComponents(boutonLien({ libelle: "Rejoindre mon match", url: urlAchillea("/ranked/match") })),
+        new ActionRowBuilder<ButtonBuilder>().addComponents(
+          boutonLien({
+            libelle: "Rejoindre mon match",
+            url: urlAchillea("/ranked/match"),
+          }),
+        ),
       ],
     });
   }

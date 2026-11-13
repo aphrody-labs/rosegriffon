@@ -24,14 +24,22 @@ export default async function BoutiquesPage() {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", item: absoluteUrl(wiki("/")), name: "Accueil", position: 1 },
+      {
+        "@type": "ListItem",
+        item: absoluteUrl(wiki("/")),
+        name: "Accueil",
+        position: 1,
+      },
       { "@type": "ListItem", name: "Boutiques", position: 2 },
     ],
   };
 
   return (
     <div className="space-y-6">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
 
       <header className="space-y-2">
         <div className="flex items-center gap-2.5">
@@ -39,8 +47,12 @@ export default async function BoutiquesPage() {
             <Icon name="storefront" size={22} className="text-primary" />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-on-surface leading-tight">Boutiques</h1>
-            <p className="text-xs text-on-surface-variant">Où acheter chaque objet du jeu</p>
+            <h1 className="text-xl font-bold text-on-surface leading-tight">
+              Boutiques
+            </h1>
+            <p className="text-xs text-on-surface-variant">
+              Où acheter chaque objet du jeu
+            </p>
           </div>
         </div>
       </header>
@@ -52,7 +64,7 @@ export default async function BoutiquesPage() {
 
       {shops.length > 0 ? (
         <FadeInStagger className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {shops.map(shop => (
+          {shops.map((shop) => (
             <FadeInItem key={shop.shopId} className="h-full">
               <ShopCard
                 shopId={shop.shopId}
@@ -67,7 +79,9 @@ export default async function BoutiquesPage() {
         </FadeInStagger>
       ) : (
         <div className="py-20 text-center rounded-[32px] border border-outline-variant bg-surface-container-low border-dashed">
-          <p className="text-on-surface-variant italic">Aucune boutique trouvée.</p>
+          <p className="text-on-surface-variant italic">
+            Aucune boutique trouvée.
+          </p>
         </div>
       )}
     </div>

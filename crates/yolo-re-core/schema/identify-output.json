@@ -31,7 +31,20 @@
       "type": "string"
     },
     "kind": {
-      "enum": ["pe", "elf", "macho", "apk", "zip", "iso", "uefi", "bios", "rom", "fdt", "compressed", "raw"],
+      "enum": [
+        "pe",
+        "elf",
+        "macho",
+        "apk",
+        "zip",
+        "iso",
+        "uefi",
+        "bios",
+        "rom",
+        "fdt",
+        "compressed",
+        "raw"
+      ],
       "type": "string"
     },
     "liftable": {
@@ -54,7 +67,16 @@
       ]
     }
   },
-  "required": ["kind", "format", "arch", "platform", "entry", "liftable", "container", "notes"],
+  "required": [
+    "kind",
+    "format",
+    "arch",
+    "platform",
+    "entry",
+    "liftable",
+    "container",
+    "notes"
+  ],
   "title": "Identify stage output",
   "type": "object"
 }

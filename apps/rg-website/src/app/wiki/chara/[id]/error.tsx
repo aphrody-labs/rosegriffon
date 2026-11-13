@@ -4,12 +4,20 @@ import { useEffect } from "react";
 import { WikiErrorState } from "@/components/wiki/WikiErrorState";
 import { wiki } from "@rosegriffon/app-shell";
 
-export default function Error({ error }: { error: Error & { digest?: string } }) {
+export default function Error({
+  error,
+}: {
+  error: Error & { digest?: string };
+}) {
   useEffect(() => {
     console.error(error);
   }, [error]);
 
   return (
-    <WikiErrorState title="Impossible de charger ce personnage" backHref={wiki("/chara")} backLabel="Retour aux personnages" />
+    <WikiErrorState
+      title="Impossible de charger ce personnage"
+      backHref={wiki("/chara")}
+      backLabel="Retour aux personnages"
+    />
   );
 }

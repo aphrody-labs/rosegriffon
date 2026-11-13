@@ -39,7 +39,11 @@
  * noms, du plus haut au plus bas comme Discord les ordonne.
  */
 import { Discord, Slash, SlashGroup, SlashOption } from "discordx";
-import { ApplicationCommandOptionType, AttachmentBuilder, type ChatInputCommandInteraction } from "discord.js";
+import {
+  ApplicationCommandOptionType,
+  AttachmentBuilder,
+  type ChatInputCommandInteraction,
+} from "discord.js";
 
 import { cached } from "../lib/cache";
 import { renderMemberList, renderProfileCard } from "../lib/canvas/cards";
@@ -85,11 +89,15 @@ const TTL_ROLES_MS = 10 * 60_000;
 
 /** Les 93 rôles du serveur, relus toutes les 10 minutes — un rôle change rarement. */
 async function indexRoles() {
-  const roles = await cached<RoleDiscord[]>("membre:roles", TTL_ROLES_MS, async () => {
-    return await sql<RoleDiscord[]>`
+  const roles = await cached<RoleDiscord[]>(
+    "membre:roles",
+    TTL_ROLES_MS,
+    async () => {
+      return await sql<RoleDiscord[]>`
 			SELECT role_id, name, position FROM discord_roles
 		`;
-  });
+    },
+  );
   return indexerRoles(roles);
 }
 
@@ -117,7 +125,9 @@ async function profilPar(cle: string): Promise<ProfilPublic | null> {
  * s'entendent répondre que le compte n'existe pas alors qu'il existe : la
  * fusion des deux moitiés doit justement servir à ça.
  */
-async function profilParPseudoDiscord(pseudo: string): Promise<ProfilPublic | null> {
+async function profilParPseudoDiscord(
+  pseudo: string,
+): Promise<ProfilPublic | null> {
   const lignes = await sql<Array<{ discord_id: string }>>`
 		SELECT discord_id FROM discord_members WHERE username = ${pseudo} LIMIT 1
 	`;
@@ -158,11 +168,15 @@ export class MembreCommand {
   // `compte` et non `profil` : `/profil` désigne désormais la carte de
   // progression d'un membre (XP, niveau, jetons Kizuna). Deux « profil » dans la
   // même liste d'autocomplétion, personne ne sait lequel il déclenche.
-  @Slash({ name: "compte", description: "Le compte d'un membre sur rosegriffon.fr" })
+  @Slash({
+    name: "compte",
+    description: "Le compte d'un membre sur rosegriffon.fr",
+  })
   async profil(
     @SlashOption({
       name: "qui",
-      description: "Pseudo du site ou de Discord, identifiant Discord, identifiant de compte",
+      description:
+        "Pseudo du site ou de Discord, identifiant Discord, identifiant de compte",
       type: ApplicationCommandOptionType.String,
       required: false,
     })
@@ -176,7 +190,8 @@ export class MembreCommand {
     try {
       // Deux passes : d'abord les clés du SITE, puis le pseudo Discord — un
       // membre tape le plus souvent le pseudo qu'il a sous les yeux.
-      const profil = (await profilPar(cle)) ?? (await profilParPseudoDiscord(cle));
+      const profil =
+        (await profilPar(cle)) ?? (await profilParPseudoDiscord(cle));
       if (!profil) {
         await interaction.editReply({
           content: qui
@@ -186,14 +201,23 @@ export class MembreCommand {
         return;
       }
 
-      const membre = profil.discord_id ? await membrePar(profil.discord_id) : null;
+      const membre = profil.discord_id
+        ? await membrePar(profil.discord_id)
+        : null;
 
       const embed = rgEmbed()
         .setTitle(truncate(profil.username || "Membre Rose Griffon", 250))
-        .setDescription(truncate(profil.bio, 1500) || "Ce compte n'a pas encore de présentation.")
+        .setDescription(
+          truncate(profil.bio, 1500) ||
+            "Ce compte n'a pas encore de présentation.",
+        )
         .addFields(
           { name: "Pseudo", value: profil.username ?? "—", inline: true },
-          { name: "Rôle sur le site", value: profil.role ?? "membre", inline: true },
+          {
+            name: "Rôle sur le site",
+            value: profil.role ?? "membre",
+            inline: true,
+          },
         );
 
       if (profil.badges && profil.badges.length > 0) {
@@ -236,7 +260,11 @@ export class MembreCommand {
         liens.push(`[@${pseudo}](https://x.com/${pseudo})`);
       }
       if (liens.length > 0) {
-        embed.addFields({ name: "Liens", value: liens.join(" · "), inline: false });
+        embed.addFields({
+          name: "Liens",
+          value: liens.join(" · "),
+          inline: false,
+        });
       }
       if (profil.claimed_at) {
         embed.addFields({
@@ -277,7 +305,10 @@ export class MembreCommand {
     }
   }
 
-  @Slash({ name: "discord", description: "La fiche d'un membre du serveur Discord" })
+  @Slash({
+    name: "discord",
+    description: "La fiche d'un membre du serveur Discord",
+  })
   async discord(
     @SlashOption({
       name: "qui",
@@ -320,7 +351,9 @@ export class MembreCommand {
           { name: "Ancienneté", value: libelleAnciennete(jours), inline: true },
           {
             name: "Boost du serveur",
-            value: membre.premium_since ? `depuis le ${dateCourte(membre.premium_since)}` : "non",
+            value: membre.premium_since
+              ? `depuis le ${dateCourte(membre.premium_since)}`
+              : "non",
             inline: true,
           },
           {
@@ -350,7 +383,10 @@ export class MembreCommand {
     }
   }
 
-  @Slash({ name: "recherche", description: "Chercher un membre par pseudo ou nom affiché" })
+  @Slash({
+    name: "recherche",
+    description: "Chercher un membre par pseudo ou nom affiché",
+  })
   async recherche(
     @SlashOption({
       name: "texte",
@@ -364,14 +400,18 @@ export class MembreCommand {
   ) {
     await interaction.deferReply();
     if (!rechercheExploitable(texte)) {
-      await interaction.editReply({ content: "Il faut au moins deux caractères pour chercher." });
+      await interaction.editReply({
+        content: "Il faut au moins deux caractères pour chercher.",
+      });
       return;
     }
     const motif = motifRecherche(texte);
     try {
       // Une seule requête, jointure comprise : le rattachement au compte site
       // est ce que la fusion apporte, il doit apparaître dès la liste.
-      const lignes = await sql<Array<LigneMembreDiscord & { profil: string | null }>>`
+      const lignes = await sql<
+        Array<LigneMembreDiscord & { profil: string | null }>
+      >`
 				SELECT d.discord_id, d.username, d.display_name, d.nickname, d.avatar_url,
 				       d.roles, d.joined_at, d.premium_since, d.left_at,
 				       p.username AS profil
@@ -391,14 +431,23 @@ export class MembreCommand {
       }
 
       const embed = rgEmbed()
-        .setTitle(`${lignes.length} membre${lignes.length > 1 ? "s" : ""} pour « ${truncate(texte.trim(), 60)} »`)
-        .setDescription(truncate(lignes.map(l => ligneMembreDiscord(l, l.profil !== null)).join("\n"), 4000));
+        .setTitle(
+          `${lignes.length} membre${lignes.length > 1 ? "s" : ""} pour « ${truncate(texte.trim(), 60)} »`,
+        )
+        .setDescription(
+          truncate(
+            lignes
+              .map((l) => ligneMembreDiscord(l, l.profil !== null))
+              .join("\n"),
+            4000,
+          ),
+        );
 
       // La carte image reprend la DA de l'ancienne `/member` (30 lignes au plus).
       let fichiers: AttachmentBuilder[] = [];
       try {
         const png = await renderMemberList(
-          lignes.map(l => ({
+          lignes.map((l) => ({
             username: l.username,
             display_name: nomAffiche(l),
             avatar_url: l.avatar_url,

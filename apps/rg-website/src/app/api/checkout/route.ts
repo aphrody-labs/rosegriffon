@@ -37,12 +37,14 @@ export async function POST(req: NextRequest) {
 
     const couponId = userId ? await getStripeCouponForUser(userId) : null;
 
-    const origin = req.headers.get("origin") ?? process.env.NEXT_PUBLIC_SITE_URL ?? SITE_URL;
+    const origin =
+      req.headers.get("origin") ?? process.env.NEXT_PUBLIC_SITE_URL ?? SITE_URL;
 
     // Idempotency key par requête — protège contre double-clic / retry réseau.
     // Inclut l'identifiant user + signature du panier pour différencier des
     // Tentatives légitimement distinctes.
-    const idempotencyKey = req.headers.get("x-idempotency-key") ?? `co_${randomUUID()}`;
+    const idempotencyKey =
+      req.headers.get("x-idempotency-key") ?? `co_${randomUUID()}`;
 
     const session = await stripe.checkout.sessions.create(
       {
@@ -57,7 +59,19 @@ export async function POST(req: NextRequest) {
         billing_address_collection: "required",
         phone_number_collection: { enabled: true },
         shipping_address_collection: {
-          allowed_countries: ["FR", "BE", "CH", "LU", "DE", "ES", "IT", "NL", "PT", "GB", "CA"],
+          allowed_countries: [
+            "FR",
+            "BE",
+            "CH",
+            "LU",
+            "DE",
+            "ES",
+            "IT",
+            "NL",
+            "PT",
+            "GB",
+            "CA",
+          ],
         },
         shipping_options: [
           {
@@ -83,7 +97,7 @@ export async function POST(req: NextRequest) {
             },
           },
         ],
-        line_items: cart.items.map(item => ({
+        line_items: cart.items.map((item) => ({
           price_data: {
             currency: "eur",
             product_data: {
@@ -93,7 +107,9 @@ export async function POST(req: NextRequest) {
                 slug: item.product.slug,
                 variantId: item.variantId ?? "default",
               },
-              name: item.variantLabel ? `${item.product.name} — ${item.variantLabel}` : item.product.name,
+              name: item.variantLabel
+                ? `${item.product.name} — ${item.variantLabel}`
+                : item.product.name,
             },
             tax_behavior: "inclusive",
             unit_amount: item.unitPriceCents,
@@ -102,7 +118,9 @@ export async function POST(req: NextRequest) {
         })),
         discounts: couponId ? [{ coupon: couponId }] : undefined,
         metadata: {
-          cart_signature: cart.items.map(i => `${i.slug}:${i.variantId ?? "_"}x${i.qty}`).join("|"),
+          cart_signature: cart.items
+            .map((i) => `${i.slug}:${i.variantId ?? "_"}x${i.qty}`)
+            .join("|"),
           patron_discount: couponId ? "yes" : "no",
           source: "rosegriffon.fr/shop",
           user_id: userId ?? "anonymous",
@@ -117,7 +135,12 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     console.error("[checkout] Erreur création session Stripe:", error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Service de paiement indisponible" },
+      {
+        error:
+          error instanceof Error
+            ? error.message
+            : "Service de paiement indisponible",
+      },
       { status: 503 },
     );
   }

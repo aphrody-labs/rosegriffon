@@ -1,5 +1,10 @@
 import { describe, expect, test } from "bun:test";
-import { fileMeta, listDirPaged, searchFiles, totalFiles } from "../src/cpk/index";
+import {
+  fileMeta,
+  listDirPaged,
+  searchFiles,
+  totalFiles,
+} from "../src/cpk/index";
 import { cpkAssetKind, normalizeDir } from "../src/cpk/shared";
 
 const hasPostgres = Boolean(

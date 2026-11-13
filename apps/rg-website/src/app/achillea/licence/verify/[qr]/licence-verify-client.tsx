@@ -5,7 +5,13 @@ import Link from "@/components/shared/Link";
 import { createAchilleaClient } from "@/lib/achillea";
 import { UserAvatar } from "@/components/achillea/UserAvatar";
 import type { LicenseVerifyResult } from "@rosegriffon/achillea-types/domain/license";
-import { ShieldAlert, ArrowLeft, Loader2, CheckCircle2, XCircle } from "lucide-react";
+import {
+  ShieldAlert,
+  ArrowLeft,
+  Loader2,
+  CheckCircle2,
+  XCircle,
+} from "lucide-react";
 
 export default function LicenseVerifyPage({ qr }: { qr: string }) {
   const qrSecret = qr;
@@ -15,8 +21,15 @@ export default function LicenseVerifyPage({ qr }: { qr: string }) {
   const [unavailable, setUnavailable] = useState(false);
   const [reload, setReload] = useState(0);
 
-  const [requestIdentity1, setRequestIdentity1] = useState<readonly unknown[]>([qrSecret, reload]);
-  if ([qrSecret, reload].some((value, position) => !Object.is(value, requestIdentity1[position]))) {
+  const [requestIdentity1, setRequestIdentity1] = useState<readonly unknown[]>([
+    qrSecret,
+    reload,
+  ]);
+  if (
+    [qrSecret, reload].some(
+      (value, position) => !Object.is(value, requestIdentity1[position]),
+    )
+  ) {
     setRequestIdentity1([qrSecret, reload]);
     (() => {
       setLoading(true);
@@ -30,7 +43,7 @@ export default function LicenseVerifyPage({ qr }: { qr: string }) {
 
     client.licenses
       .verify(qrSecret)
-      .then(res => {
+      .then((res) => {
         if (cancelled) return;
         if (res.ok && res.value) {
           setResult(res.value);
@@ -74,20 +87,26 @@ export default function LicenseVerifyPage({ qr }: { qr: string }) {
       {loading ? (
         <div className="py-12 text-center space-y-3">
           <Loader2 className="w-8 h-8 animate-spin mx-auto text-muted-foreground" />
-          <p className="text-xs text-muted-foreground">Vérification de l'empreinte de sécurité...</p>
+          <p className="text-xs text-muted-foreground">
+            Vérification de l'empreinte de sécurité...
+          </p>
         </div>
       ) : unavailable ? (
-        <div role="alert" className="border border-warning/30 bg-warning/5 rounded-3xl p-8 text-center space-y-4">
+        <div
+          role="alert"
+          className="border border-warning/30 bg-warning/5 rounded-3xl p-8 text-center space-y-4"
+        >
           <ShieldAlert className="w-14 h-14 text-warning mx-auto" />
           <div className="space-y-1">
             <h2 className="text-xl font-bold">Vérification indisponible</h2>
             <p className="text-sm text-muted-foreground">
-              Le service n’a pas pu vérifier cette licence. Son statut n’a pas pu être confirmé.
+              Le service n’a pas pu vérifier cette licence. Son statut n’a pas
+              pu être confirmé.
             </p>
           </div>
           <button
             type="button"
-            onClick={() => setReload(value => value + 1)}
+            onClick={() => setReload((value) => value + 1)}
             className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-primary-foreground font-semibold hover:bg-primary/90"
           >
             Réessayer
@@ -97,7 +116,9 @@ export default function LicenseVerifyPage({ qr }: { qr: string }) {
         <div className="border border-destructive/30 bg-destructive/5 rounded-3xl p-8 text-center space-y-4">
           <XCircle className="w-14 h-14 text-destructive mx-auto" />
           <div className="space-y-1">
-            <h2 className="text-xl font-bold text-destructive">Licence Invalide ou Introuvable</h2>
+            <h2 className="text-xl font-bold text-destructive">
+              Licence Invalide ou Introuvable
+            </h2>
             <p className="text-xs text-muted-foreground">
               {result?.reason === "expired"
                 ? "Cette licence a expiré. Le joueur doit renouveler son adhésion."
@@ -117,8 +138,12 @@ export default function LicenseVerifyPage({ qr }: { qr: string }) {
             <span className="px-3 py-0.5 rounded-full text-xs font-black bg-success text-success-foreground uppercase tracking-wider">
               Licence Homologuée
             </span>
-            <h2 className="text-2xl font-black pt-2">{result.holder?.displayName}</h2>
-            <div className="font-mono text-xs text-muted-foreground font-semibold">N° {result.licenseNumber}</div>
+            <h2 className="text-2xl font-black pt-2">
+              {result.holder?.displayName}
+            </h2>
+            <div className="font-mono text-xs text-muted-foreground font-semibold">
+              N° {result.licenseNumber}
+            </div>
           </div>
 
           {result.holder && (
@@ -131,13 +156,19 @@ export default function LicenseVerifyPage({ qr }: { qr: string }) {
 
           <div className="p-4 rounded-xl bg-background/80 border border-border text-xs space-y-2 text-left">
             <div className="flex items-center justify-between">
-              <span className="text-muted-foreground">Statut d'éligibilité :</span>
-              <span className="font-bold text-success">Autorisé en compétition</span>
+              <span className="text-muted-foreground">
+                Statut d'éligibilité :
+              </span>
+              <span className="font-bold text-success">
+                Autorisé en compétition
+              </span>
             </div>
             {result.validUntil && (
               <div className="flex items-center justify-between">
                 <span className="text-muted-foreground">Date limite :</span>
-                <span className="font-mono font-medium">{new Date(result.validUntil).toLocaleDateString("fr-FR")}</span>
+                <span className="font-mono font-medium">
+                  {new Date(result.validUntil).toLocaleDateString("fr-FR")}
+                </span>
               </div>
             )}
           </div>

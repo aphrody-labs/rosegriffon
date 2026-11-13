@@ -110,7 +110,9 @@ export interface OngoingLobbyInput {
  * finalisation, et plus seulement en cas de litige. Le lobby est ensuite mis à jour
  * (Finished / Contested) par finalizeOngoingLobby / contestOngoingLobby.
  */
-export async function createOngoingLobby(input: OngoingLobbyInput): Promise<PersistMatchOutput> {
+export async function createOngoingLobby(
+  input: OngoingLobbyInput,
+): Promise<PersistMatchOutput> {
   return await sql.begin(async (tx: any) => {
     const lobby = await tx`
 			INSERT INTO achillea.lobby (
@@ -167,8 +169,20 @@ export async function finalizeOngoingLobby(
   const ranks = await getRanks();
   const tierP1 = tierIndexForElo(input.p1.eloBefore, ranks);
   const tierP2 = tierIndexForElo(input.p2.eloBefore, ranks);
-  const dP1 = progressiveEloDelta(input.p1.eloBefore, input.p2.eloBefore, p1Win ? 1 : draw ? 0.5 : 0, tierP1, kFactor);
-  const dP2 = progressiveEloDelta(input.p2.eloBefore, input.p1.eloBefore, p2Win ? 1 : draw ? 0.5 : 0, tierP2, kFactor);
+  const dP1 = progressiveEloDelta(
+    input.p1.eloBefore,
+    input.p2.eloBefore,
+    p1Win ? 1 : draw ? 0.5 : 0,
+    tierP1,
+    kFactor,
+  );
+  const dP2 = progressiveEloDelta(
+    input.p2.eloBefore,
+    input.p1.eloBefore,
+    p2Win ? 1 : draw ? 0.5 : 0,
+    tierP2,
+    kFactor,
+  );
   const upP1 = applyEloUpdate(input.p1.eloBefore, dP1);
   const upP2 = applyEloUpdate(input.p2.eloBefore, dP2);
   const p1Forfeit = input.forfeitUserId === input.p1.userId;
@@ -177,7 +191,8 @@ export async function finalizeOngoingLobby(
   await sql.begin(async (tx: any) => {
     // Idempotence : ne ré-applique pas l'ELO si le lobby est déjà finalisé
     // (double-clic / retry réseau / timeout + saisie concurrente).
-    const cur = await tx`SELECT state FROM achillea.lobby WHERE id = ${lobbyId} FOR UPDATE`;
+    const cur =
+      await tx`SELECT state FROM achillea.lobby WHERE id = ${lobbyId} FOR UPDATE`;
     if (!cur[0] || cur[0].state === "Finished" || cur[0].state === "Canceled") {
       return;
     }
@@ -240,7 +255,8 @@ export async function contestOngoingLobby(
   input: Omit<PersistMatchInput, "adminValidated">,
 ): Promise<void> {
   await sql.begin(async (tx: any) => {
-    const cur = await tx`SELECT state FROM achillea.lobby WHERE id = ${lobbyId} FOR UPDATE`;
+    const cur =
+      await tx`SELECT state FROM achillea.lobby WHERE id = ${lobbyId} FOR UPDATE`;
     if (!cur[0] || cur[0].state === "Finished" || cur[0].state === "Canceled") {
       return;
     }
@@ -266,7 +282,11 @@ export async function contestOngoingLobby(
 }
 
 /** Enregistre l'URL de capture de preuve d'un joueur sur un lobby contesté. */
-export async function setLobbyUserScreenshot(lobbyId: number, userId: string, url: string): Promise<void> {
+export async function setLobbyUserScreenshot(
+  lobbyId: number,
+  userId: string,
+  url: string,
+): Promise<void> {
   await sql`
 		UPDATE achillea.lobby_user SET screenshot_url = ${url}, updated_at = NOW()
 		WHERE lobby_id = ${lobbyId} AND user_id = ${userId}
@@ -333,8 +353,20 @@ export async function persistAndApplyMatch(
   const ranks = await getRanks();
   const tierP1 = tierIndexForElo(input.p1.eloBefore, ranks);
   const tierP2 = tierIndexForElo(input.p2.eloBefore, ranks);
-  const dP1 = progressiveEloDelta(input.p1.eloBefore, input.p2.eloBefore, actualP1, tierP1, kFactor);
-  const dP2 = progressiveEloDelta(input.p2.eloBefore, input.p1.eloBefore, actualP2, tierP2, kFactor);
+  const dP1 = progressiveEloDelta(
+    input.p1.eloBefore,
+    input.p2.eloBefore,
+    actualP1,
+    tierP1,
+    kFactor,
+  );
+  const dP2 = progressiveEloDelta(
+    input.p2.eloBefore,
+    input.p1.eloBefore,
+    actualP2,
+    tierP2,
+    kFactor,
+  );
 
   const upP1 = applyEloUpdate(input.p1.eloBefore, dP1);
   const upP2 = applyEloUpdate(input.p2.eloBefore, dP2);
@@ -540,10 +572,18 @@ export async function listActiveLobbies(): Promise<
 
   const grouped = new Map<
     number,
-    { mode: number; createdAt: string; p1?: ActiveLobbyPlayer; p2?: ActiveLobbyPlayer }
+    {
+      mode: number;
+      createdAt: string;
+      p1?: ActiveLobbyPlayer;
+      p2?: ActiveLobbyPlayer;
+    }
   >();
   for (const r of rows) {
-    const slot = grouped.get(parseRankedId(r.lobby_id)) ?? { mode: r.mode, createdAt: r.created_at };
+    const slot = grouped.get(parseRankedId(r.lobby_id)) ?? {
+      mode: r.mode,
+      createdAt: r.created_at,
+    };
     const player: ActiveLobbyPlayer = {
       userId: r.user_id,
       displayName: r.display_name,
@@ -620,20 +660,25 @@ export async function adminResolveLobby(
   const lobbyState = await sql<Array<{ state: string }>>`
 		SELECT state FROM achillea.lobby WHERE id = ${lobbyId} LIMIT 1
 	`;
-  if (lobbyState[0]?.state === "Finished" || lobbyState[0]?.state === "Canceled") {
+  if (
+    lobbyState[0]?.state === "Finished" ||
+    lobbyState[0]?.state === "Canceled"
+  ) {
     return { applied: false, eloDelta: { p1: 0, p2: 0 } };
   }
 
   // Récupère les 2 joueurs pour calcul Elo
-  const players = await sql<Array<{ user_id: string; team: number; elo: number }>>`
+  const players = await sql<
+    Array<{ user_id: string; team: number; elo: number }>
+  >`
 		SELECT lu.user_id, lu.team, COALESCE(ue.elo, 0) AS elo
 		FROM achillea.lobby_user lu
 		LEFT JOIN achillea.user_elo ue ON ue.user_id = lu.user_id AND ue.mode = ${mode}
 		WHERE lu.lobby_id = ${lobbyId}
 		ORDER BY lu.team ASC
 	`;
-  const p1 = players.find(x => x.team === 1)!;
-  const p2 = players.find(x => x.team === 2)!;
+  const p1 = players.find((x) => x.team === 1)!;
+  const p2 = players.find((x) => x.team === 2)!;
 
   // Forfeit override : score = 0 au forfait, autre = max
   let s1 = scoreTeam1;
@@ -658,8 +703,20 @@ export async function adminResolveLobby(
   const ranks = await getRanks();
   const tierP1 = tierIndexForElo(p1.elo, ranks);
   const tierP2 = tierIndexForElo(p2.elo, ranks);
-  const dP1 = progressiveEloDelta(p1.elo, p2.elo, p1Win ? 1 : draw ? 0.5 : 0, tierP1, kFactor);
-  const dP2 = progressiveEloDelta(p2.elo, p1.elo, p2Win ? 1 : draw ? 0.5 : 0, tierP2, kFactor);
+  const dP1 = progressiveEloDelta(
+    p1.elo,
+    p2.elo,
+    p1Win ? 1 : draw ? 0.5 : 0,
+    tierP1,
+    kFactor,
+  );
+  const dP2 = progressiveEloDelta(
+    p2.elo,
+    p1.elo,
+    p2Win ? 1 : draw ? 0.5 : 0,
+    tierP2,
+    kFactor,
+  );
   const upP1 = applyEloUpdate(p1.elo, dP1);
   const upP2 = applyEloUpdate(p2.elo, dP2);
 
@@ -667,7 +724,8 @@ export async function adminResolveLobby(
   await sql.begin(async (tx: any) => {
     // Verrou + re-vérification idempotente sous transaction : si une autre validation
     // concurrente a déjà finalisé/annulé le lobby, on n'applique RIEN (anti double-ELO).
-    const cur = await tx`SELECT state FROM achillea.lobby WHERE id = ${lobbyId} FOR UPDATE`;
+    const cur =
+      await tx`SELECT state FROM achillea.lobby WHERE id = ${lobbyId} FOR UPDATE`;
     if (!cur[0] || cur[0].state === "Finished" || cur[0].state === "Canceled") {
       applied = false;
       return;
@@ -722,7 +780,9 @@ export async function adminResolveLobby(
 
   return {
     applied,
-    eloDelta: applied ? { p1: upP1.clampedDelta, p2: upP2.clampedDelta } : { p1: 0, p2: 0 },
+    eloDelta: applied
+      ? { p1: upP1.clampedDelta, p2: upP2.clampedDelta }
+      : { p1: 0, p2: 0 },
   };
 }
 
@@ -732,7 +792,9 @@ export async function adminResolveLobby(
  * en attente). Annulation plutôt que suppression : aucun risque de FK, et la trace reste
  * auditable. Renvoie le nombre de lobbies annulés.
  */
-export async function cleanupStaleOngoingLobbies(maxAgeHours = 24): Promise<number> {
+export async function cleanupStaleOngoingLobbies(
+  maxAgeHours = 24,
+): Promise<number> {
   const rows = await sql<Array<{ id: number }>>`
 		UPDATE achillea.lobby SET state = 'Canceled', updated_at = now()
 		WHERE event_type = 'RANKED' AND state = 'Ongoing' AND created_at < now() - make_interval(hours => ${maxAgeHours})

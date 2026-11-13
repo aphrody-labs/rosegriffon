@@ -8,7 +8,8 @@ import { createAchilleaClient } from "@/lib/achillea";
  */
 export const metadata = metadonneesAchillea({
   titre: "Paliers de classement",
-  description: "Les onze paliers Achilléa, de Fer à Légendaire : seuils d'ELO et répartition réelle des joueurs.",
+  description:
+    "Les onze paliers Achilléa, de Fer à Légendaire : seuils d'ELO et répartition réelle des joueurs.",
   chemin: "/achillea/ranked/tiers",
   indexable: true,
 });

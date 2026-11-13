@@ -1,5 +1,8 @@
 import type { AchilleaClient } from "@rosegriffon/achillea-client";
-import { TournamentState, type TournamentListItem } from "@rosegriffon/achillea-types";
+import {
+  TournamentState,
+  type TournamentListItem,
+} from "@rosegriffon/achillea-types";
 
 /** Nombre de tournois récents montrés sur l'accueil quand aucun n'est actif. */
 export const RECENT_TOURNAMENTS = 3;

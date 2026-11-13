@@ -44,7 +44,9 @@ function findDll(): string | null {
 
 let ffiAudit: any = null;
 
-export function auditLuaBytecode(filePath: string): LuaBytecodeAuditReport | null {
+export function auditLuaBytecode(
+  filePath: string,
+): LuaBytecodeAuditReport | null {
   const dllPath = findDll();
   if (dllPath && !ffiAudit) {
     try {

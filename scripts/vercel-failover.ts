@@ -14,7 +14,13 @@ const configDir = join(homedir(), ".config", "aphrody", "vercel");
 const authFile = join(configDir, "auth.json");
 const mode = process.argv[2] ?? "preflight";
 
-const projects = [{ app: "apps/rg-website", project: "rosegriffon-fr", domain: "rosegriffon.fr" }] as const;
+const projects = [
+  {
+    app: "apps/rg-website",
+    project: "rosegriffon-fr",
+    domain: "rosegriffon.fr",
+  },
+] as const;
 
 async function run(args: string[], allowFailure = false): Promise<string> {
   const proc = Bun.spawn(args, {
@@ -29,7 +35,9 @@ async function run(args: string[], allowFailure = false): Promise<string> {
     proc.exited,
   ]);
   if (code !== 0 && !allowFailure) {
-    throw new Error(stderr.trim() || `${args[0]} a quitté avec le code ${code}`);
+    throw new Error(
+      stderr.trim() || `${args[0]} a quitté avec le code ${code}`,
+    );
   }
   return stdout.trim();
 }
@@ -46,12 +54,21 @@ async function secureToken(): Promise<void> {
 async function preflight(): Promise<void> {
   await secureToken();
   await run(["vercel", "--version"]);
-  const identity = await run(["vercel", "whoami", "--global-config", configDir]);
+  const identity = await run([
+    "vercel",
+    "whoami",
+    "--global-config",
+    configDir,
+  ]);
   console.log(`Vercel authentifié: ${identity}`);
   for (const project of projects) {
-    console.log(`${project.domain}: frontend Next.js déployable (${project.app})`);
+    console.log(
+      `${project.domain}: frontend Next.js déployable (${project.app})`,
+    );
   }
-  console.log("VPS requis: PostgreSQL/PostgREST, Storage, Realtime SSE, CDN dynamique, RAG, MCP et bots.");
+  console.log(
+    "VPS requis: PostgreSQL/PostgREST, Storage, Realtime SSE, CDN dynamique, RAG, MCP et bots.",
+  );
 }
 
 async function deploy(): Promise<void> {
@@ -78,4 +95,5 @@ async function deploy(): Promise<void> {
 
 if (mode === "preflight") await preflight();
 else if (mode === "deploy") await deploy();
-else throw new Error("Usage: bun scripts/vercel-failover.ts [preflight|deploy]");
+else
+  throw new Error("Usage: bun scripts/vercel-failover.ts [preflight|deploy]");

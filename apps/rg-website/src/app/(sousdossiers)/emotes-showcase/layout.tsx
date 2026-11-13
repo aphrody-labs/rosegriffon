@@ -19,6 +19,10 @@ export const metadata: Metadata = {
   title: "Galerie des émotes | Rose Griffon",
 };
 
-export default function EmotesShowcaseLayout({ children }: { children: ReactNode }) {
+export default function EmotesShowcaseLayout({
+  children,
+}: {
+  children: ReactNode;
+}) {
   return children;
 }

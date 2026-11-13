@@ -7,7 +7,11 @@ import { FadeInItem, FadeInStagger } from "@/components/ui/fade-in";
 import { CapsuleCard, CostumeCard } from "@/components/wiki/GachaCard";
 import { WikiPagination } from "@/components/wiki/WikiPagination";
 import { WikiSearchToolbar } from "@/components/wiki/WikiSearchToolbar";
-import { getCapsuleList, getCostumeList, getGachaCounts } from "@/lib/wiki/gacha";
+import {
+  getCapsuleList,
+  getCostumeList,
+  getGachaCounts,
+} from "@/lib/wiki/gacha";
 import { cn } from "@/lib/utils";
 import { parseSearchParams } from "@/lib/validations";
 import { wiki } from "@rosegriffon/app-shell";
@@ -42,15 +46,33 @@ export default async function CapsulePage({
   const counts = await getGachaCounts();
 
   const poolFilter = typeof rawParams.pool === "string" ? rawParams.pool : "";
-  const rawType = typeof rawParams.type === "string" ? Number.parseInt(rawParams.type, 10) : NaN;
+  const rawType =
+    typeof rawParams.type === "string"
+      ? Number.parseInt(rawParams.type, 10)
+      : NaN;
   const typeFilter = Number.isFinite(rawType) ? rawType : undefined;
 
   const capsules =
-    tab === "capsules" ? await getCapsuleList({ limit: ITEMS_PER_PAGE, page, pool: poolFilter, q }) : null;
+    tab === "capsules"
+      ? await getCapsuleList({
+          limit: ITEMS_PER_PAGE,
+          page,
+          pool: poolFilter,
+          q,
+        })
+      : null;
   const costumes =
-    tab === "costumes" ? await getCostumeList({ limit: ITEMS_PER_PAGE, page, q, type: typeFilter }) : null;
+    tab === "costumes"
+      ? await getCostumeList({
+          limit: ITEMS_PER_PAGE,
+          page,
+          q,
+          type: typeFilter,
+        })
+      : null;
 
-  const total = tab === "capsules" ? (capsules?.total ?? 0) : (costumes?.total ?? 0);
+  const total =
+    tab === "capsules" ? (capsules?.total ?? 0) : (costumes?.total ?? 0);
 
   const tabHref = (next: Tab, extra?: Record<string, string>) => {
     const sp = new URLSearchParams();
@@ -63,7 +85,11 @@ export default async function CapsulePage({
     "@context": "https://schema.org",
     "@type": "CollectionPage",
     description: `Lots de capsules (gacha) et costumes d'Inazuma Eleven: Victory Road. pools et modèles de costumes extraits directement des données du jeu.`,
-    isPartOf: { "@type": "WebSite", name: "Azalée", url: absoluteUrl(wiki("/")) },
+    isPartOf: {
+      "@type": "WebSite",
+      name: "Azalée",
+      url: absoluteUrl(wiki("/")),
+    },
     mainEntity: {
       "@type": "ItemList",
       itemListElement: (tab === "capsules" ? capsules?.data : costumes?.data)
@@ -83,7 +109,10 @@ export default async function CapsulePage({
 
   return (
     <div className="space-y-6">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionJsonLd) }} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionJsonLd) }}
+      />
 
       {/* En-tête */}
       <div className="space-y-1">
@@ -91,7 +120,8 @@ export default async function CapsulePage({
           Capsules &amp; Costumes
         </h1>
         <p className="text-sm text-on-surface-variant">
-          Liste complète des capsules (gacha) et costumes d&apos;Inazuma Eleven: Victory Road.
+          Liste complète des capsules (gacha) et costumes d&apos;Inazuma Eleven:
+          Victory Road.
         </p>
       </div>
 
@@ -126,7 +156,11 @@ export default async function CapsulePage({
       </div>
       {/* Recherche */}
       <WikiSearchToolbar
-        placeholder={tab === "capsules" ? "Rechercher un lot (hash)..." : "Rechercher un costume (index/hash)..."}
+        placeholder={
+          tab === "capsules"
+            ? "Rechercher un lot (hash)..."
+            : "Rechercher un costume (index/hash)..."
+        }
         showFilters={false}
       />
 
@@ -156,7 +190,7 @@ export default async function CapsulePage({
               >
                 Tous les pools
               </Link>
-              {capsules.pools.map(p => (
+              {capsules.pools.map((p) => (
                 <Link
                   key={p.ref}
                   href={tabHref("capsules", { pool: p.ref })}
@@ -176,7 +210,7 @@ export default async function CapsulePage({
 
           {capsules.data.length > 0 ? (
             <FadeInStagger className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-              {capsules.data.map(prize => (
+              {capsules.data.map((prize) => (
                 <FadeInItem key={prize.id}>
                   <CapsuleCard prize={prize} />
                 </FadeInItem>
@@ -205,7 +239,7 @@ export default async function CapsulePage({
               >
                 Tous les types
               </Link>
-              {costumes.types.map(t => (
+              {costumes.types.map((t) => (
                 <Link
                   key={t.type}
                   href={tabHref("costumes", { type: String(t.type) })}
@@ -225,7 +259,7 @@ export default async function CapsulePage({
 
           {costumes.data.length > 0 ? (
             <FadeInStagger className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-              {costumes.data.map(costume => (
+              {costumes.data.map((costume) => (
                 <FadeInItem key={costume.id}>
                   <CostumeCard costume={costume} />
                 </FadeInItem>
@@ -239,15 +273,27 @@ export default async function CapsulePage({
 
       {/* Note data (transparence anti-hallucination) */}
       <div className="flex items-start gap-2 rounded-xl border border-outline-variant/30 bg-surface-container-low p-3 text-xs text-on-surface-variant">
-        <Info size={14} className="mt-0.5 shrink-0 opacity-60" aria-hidden="true" />
+        <Info
+          size={14}
+          className="mt-0.5 shrink-0 opacity-60"
+          aria-hidden="true"
+        />
         <p>
-          Données extraites directement du jeu (config gacha & modèles de costumes). Les contenus de lots et les modèles
-          sont référencés par identifiants internes (hash) ; ils sont affichés tels quels, sans interprétation inventée.
+          Données extraites directement du jeu (config gacha & modèles de
+          costumes). Les contenus de lots et les modèles sont référencés par
+          identifiants internes (hash) ; ils sont affichés tels quels, sans
+          interprétation inventée.
         </p>
       </div>
 
       {/* Pagination */}
-      {total > ITEMS_PER_PAGE && <WikiPagination currentPage={page} totalItems={total} itemsPerPage={ITEMS_PER_PAGE} />}
+      {total > ITEMS_PER_PAGE && (
+        <WikiPagination
+          currentPage={page}
+          totalItems={total}
+          itemsPerPage={ITEMS_PER_PAGE}
+        />
+      )}
     </div>
   );
 }
@@ -255,7 +301,11 @@ export default async function CapsulePage({
 function EmptyState({ label }: { label: string }) {
   return (
     <div className="text-center py-16">
-      <SearchX size={48} className="text-on-surface-variant/30 mb-4 block mx-auto" aria-hidden="true" />
+      <SearchX
+        size={48}
+        className="text-on-surface-variant/30 mb-4 block mx-auto"
+        aria-hidden="true"
+      />
       <p className="text-on-surface-variant">{label}</p>
     </div>
   );

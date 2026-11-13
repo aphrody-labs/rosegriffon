@@ -8,12 +8,20 @@ interface TierDistributionProps {
   className?: string;
 }
 
-export function TierDistribution({ tiers = [], highlightKey, className }: TierDistributionProps) {
+export function TierDistribution({
+  tiers = [],
+  highlightKey,
+  className,
+}: TierDistributionProps) {
   const total = tiers.reduce((acc, t) => acc + (t.playerCount ?? 0), 0);
-  const maxCount = Math.max(1, ...tiers.map(t => t.playerCount ?? 0));
+  const maxCount = Math.max(1, ...tiers.map((t) => t.playerCount ?? 0));
 
   if (!tiers.length)
-    return <output className="text-lg text-on-surface-variant">Répartition des paliers indisponible.</output>;
+    return (
+      <output className="text-lg text-on-surface-variant">
+        Répartition des paliers indisponible.
+      </output>
+    );
 
   const percent = (count: number) => {
     if (maxCount === 0) return 0;
@@ -34,13 +42,16 @@ export function TierDistribution({ tiers = [], highlightKey, className }: TierDi
   };
 
   return (
-    <ul className={`flex flex-col gap-3 ${className ?? ""}`} aria-label="Répartition des joueurs par palier">
+    <ul
+      className={`flex flex-col gap-3 ${className ?? ""}`}
+      aria-label="Répartition des joueurs par palier"
+    >
       {total === 0 && (
         <output className="text-lg text-on-surface-variant">
           Aucun joueur classé dans ces paliers pour le moment.
         </output>
       )}
-      {tiers.map(t => {
+      {tiers.map((t) => {
         const isMine = t.key === highlightKey;
         return (
           <li
@@ -67,7 +78,9 @@ export function TierDistribution({ tiers = [], highlightKey, className }: TierDi
             </div>
             <div className="font-mono w-28 md:w-32 text-right tabular-nums">
               {t.playerCount ?? 0}
-              <span className="opacity-60 ml-1">({percentLabel(t.playerCount ?? 0)}%)</span>
+              <span className="opacity-60 ml-1">
+                ({percentLabel(t.playerCount ?? 0)}%)
+              </span>
             </div>
           </li>
         );

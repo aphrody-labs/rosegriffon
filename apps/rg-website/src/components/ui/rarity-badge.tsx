@@ -11,10 +11,21 @@ import { cn } from "@/lib/utils";
  * EXPERIMENTE = cyan (Expérimenté)
  * NORMAL      = vert
  */
-export const RARITY_STYLES: Record<string, { text: string; bg: string; ring?: string }> = {
-  BASARA: { bg: "bg-pink-600/30", ring: "ring-1 ring-pink-400/50", text: "text-white" },
+export const RARITY_STYLES: Record<
+  string,
+  { text: string; bg: string; ring?: string }
+> = {
+  BASARA: {
+    bg: "bg-pink-600/30",
+    ring: "ring-1 ring-pink-400/50",
+    text: "text-white",
+  },
   EXPERIMENTE: { bg: "bg-cyan-400/15", text: "text-cyan-300" },
-  HERO: { bg: "bg-violet-500/20", ring: "ring-1 ring-violet-400/40", text: "text-violet-300" },
+  HERO: {
+    bg: "bg-violet-500/20",
+    ring: "ring-1 ring-violet-400/40",
+    text: "text-violet-300",
+  },
   NORMAL: { bg: "bg-green-400/15", text: "text-green-400" },
 };
 
@@ -54,7 +65,15 @@ function normalizeRarity(rarity: string): string {
     return "NORMAL";
   }
   // Numeric codes (as string)
-  if (r === "0" || r === "1" || r === "3" || r === "4" || r === "5" || r === "6" || r === "7") {
+  if (
+    r === "0" ||
+    r === "1" ||
+    r === "3" ||
+    r === "4" ||
+    r === "5" ||
+    r === "6" ||
+    r === "7"
+  ) {
     return "NORMAL";
   }
   if (r === "2") {
@@ -77,13 +96,24 @@ interface RarityBadgeProps {
   className?: string;
 }
 
-export function RarityBadge({ rarity, size = "sm", showLabel = true, className }: RarityBadgeProps) {
+export function RarityBadge({
+  rarity,
+  size = "sm",
+  showLabel = true,
+  className,
+}: RarityBadgeProps) {
   const key = normalizeRarity(rarity);
   const style = RARITY_STYLES[key] || RARITY_STYLES.NORMAL;
   const label = RARITY_LABEL[key] || RARITY_LABEL[rarity] || rarity;
 
-  const textSize = size === "xs" ? "text-[9px]" : size === "sm" ? "text-[10px]" : "text-xs";
-  const padding = size === "xs" ? "px-1.5 py-0.5" : size === "sm" ? "px-2 py-0.5" : "px-2.5 py-1";
+  const textSize =
+    size === "xs" ? "text-[9px]" : size === "sm" ? "text-[10px]" : "text-xs";
+  const padding =
+    size === "xs"
+      ? "px-1.5 py-0.5"
+      : size === "sm"
+        ? "px-2 py-0.5"
+        : "px-2.5 py-1";
 
   return (
     <span
@@ -96,7 +126,9 @@ export function RarityBadge({ rarity, size = "sm", showLabel = true, className }
         className,
       )}
     >
-      {showLabel && <span className={cn("leading-none", style.text)}>{label}</span>}
+      {showLabel && (
+        <span className={cn("leading-none", style.text)}>{label}</span>
+      )}
     </span>
   );
 }

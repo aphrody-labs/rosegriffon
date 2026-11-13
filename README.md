@@ -8,22 +8,22 @@ History is preserved from `aphrody-labs/rg`, then `aphrody-labs/iecode` and
 
 ## Layout
 
-| Path | Package | Role |
-| --- | --- | --- |
-| `apps/rg-website` | `@rosegriffon/website` | Next.js site (rosegriffon.fr) |
-| `apps/rg-bot` | `@rosegriffon/bot` | Discord gateways (profiles `rg`, `azalee`), unified Elysia API, Achillea ranked Colyseus server, `rg-core` VPS service |
-| `packages/achillea-*` | `@rosegriffon/achillea-{client,contract,core,types}` | Achillea esport domain, API contract and client |
-| `packages/azalee` | `@rosegriffon/azalee` | Azalee library and CLI |
-| `packages/nie-ui` | `@aphrody/nie-ui` | Unified NIE Studio, Save Editor, Mod Manager, 3D Chara & Emulator UI |
-| `packages/filmcraft` | `@aphrody/filmcraft` | FilmCraft NLE timeline engine, multi-track cuts and video export |
-| `packages/hyperframes` | `@aphrody/hyperframes` | Zero-download HTTP byte-range ISOBMFF parser and frame decoder |
-| `packages/remotion` | `@aphrody/remotion` | Zero-dependency React/Bun remotion timeline composition |
-| `crates/aphrody-nie-headless` | `aphrody-nie-headless` | Headless IEVR simulation, save editor, menu capture & core memory dump |
-| `packages/rg-*` | `@rosegriffon/{app-shell,assets,auth,config,cron,db,discord-sync,i18n,identity,preferences,search,types}`, `@rosegriffon/ui` (private) | shared site, data and service packages |
-| `supabase/` | — | Supabase CLI config and migrations of the `rg` project |
-| `scripts/` | — | build, deploy, operations and campaign scripts |
-| `infra/` | — | systemd units, nginx sites, cloud descriptors, VPS helper scripts |
-| `docs/` | — | architecture notes (`docs/rg/` holds the historical documentation) |
+| Path                          | Package                                                                                                                                | Role                                                                                                                   |
+| ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `apps/rg-website`             | `@rosegriffon/website`                                                                                                                 | Next.js site (rosegriffon.fr)                                                                                          |
+| `apps/rg-bot`                 | `@rosegriffon/bot`                                                                                                                     | Discord gateways (profiles `rg`, `azalee`), unified Elysia API, Achillea ranked Colyseus server, `rg-core` VPS service |
+| `packages/achillea-*`         | `@rosegriffon/achillea-{client,contract,core,types}`                                                                                   | Achillea esport domain, API contract and client                                                                        |
+| `packages/azalee`             | `@rosegriffon/azalee`                                                                                                                  | Azalee library and CLI                                                                                                 |
+| `packages/nie-ui`             | `@aphrody/nie-ui`                                                                                                                      | Unified NIE Studio, Save Editor, Mod Manager, 3D Chara & Emulator UI                                                   |
+| `packages/filmcraft`          | `@aphrody/filmcraft`                                                                                                                   | FilmCraft NLE timeline engine, multi-track cuts and video export                                                       |
+| `packages/hyperframes`        | `@aphrody/hyperframes`                                                                                                                 | Zero-download HTTP byte-range ISOBMFF parser and frame decoder                                                         |
+| `packages/remotion`           | `@aphrody/remotion`                                                                                                                    | Zero-dependency React/Bun remotion timeline composition                                                                |
+| `crates/aphrody-nie-headless` | `aphrody-nie-headless`                                                                                                                 | Headless IEVR simulation, save editor, menu capture & core memory dump                                                 |
+| `packages/rg-*`               | `@rosegriffon/{app-shell,assets,auth,config,cron,db,discord-sync,i18n,identity,preferences,search,types}`, `@rosegriffon/ui` (private) | shared site, data and service packages                                                                                 |
+| `supabase/`                   | —                                                                                                                                      | Supabase CLI config and migrations of the `rg` project                                                                 |
+| `scripts/`                    | —                                                                                                                                      | build, deploy, operations and campaign scripts                                                                         |
+| `infra/`                      | —                                                                                                                                      | systemd units, nginx sites, cloud descriptors, VPS helper scripts                                                      |
+| `docs/`                       | —                                                                                                                                      | architecture notes (`docs/rg/` holds the historical documentation)                                                     |
 
 `@rosegriffon/inagle` and `@rosegriffon/inagle-cross` (IEVR game data) are owned by
 Bun OS (`aphrody-labs/bun-distribution`, with nie and iecode) and consumed here from npm.
@@ -100,14 +100,14 @@ Inazuma Eleven: Victory Road (`nie.exe` Level-5 "Lives" engine) reverse-engineer
 
 ## Cloud topology
 
-| Surface | Host | Configuration |
-| --- | --- | --- |
-| Website | Vercel (Fluid Compute, Bun runtime), prebuilt deploys | `apps/rg-website/vercel.ts` |
-| Unified API | Vercel Function (Bun), prebuilt Build Output | `apps/rg-bot/vercel.ts`, `apps/rg-bot/src/scripts/build-vercel.ts` |
-| Postgres, Auth, Storage, Realtime | Supabase project `rg` (ref `xzwfnxzkxtcpgmtqulbh`) | `supabase/config.toml`, `supabase/migrations` |
-| Game data mirror | Neon project `inagle` (pooled endpoint, `INAGLE_DATABASE_URL`) | schema owned by `@rosegriffon/inagle` in Bun OS |
-| Long-running services | compose stack on the `prod` role host (`core`, `website`, `model-serve`, `nginx`) | `infra/hosts.toml`, `infra/services.toml`, `compose.yaml`, [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) |
-| Models | `aphrody-nie-model-serve` (Bun OS), relayed by rg-core | `NIE_MODEL_SERVE_*` |
+| Surface                           | Host                                                                              | Configuration                                                                                           |
+| --------------------------------- | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| Website                           | Vercel (Fluid Compute, Bun runtime), prebuilt deploys                             | `apps/rg-website/vercel.ts`                                                                             |
+| Unified API                       | Vercel Function (Bun), prebuilt Build Output                                      | `apps/rg-bot/vercel.ts`, `apps/rg-bot/src/scripts/build-vercel.ts`                                      |
+| Postgres, Auth, Storage, Realtime | Supabase project `rg` (ref `xzwfnxzkxtcpgmtqulbh`)                                | `supabase/config.toml`, `supabase/migrations`                                                           |
+| Game data mirror                  | Neon project `inagle` (pooled endpoint, `INAGLE_DATABASE_URL`)                    | schema owned by `@rosegriffon/inagle` in Bun OS                                                         |
+| Long-running services             | compose stack on the `prod` role host (`core`, `website`, `model-serve`, `nginx`) | `infra/hosts.toml`, `infra/services.toml`, `compose.yaml`, [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) |
+| Models                            | `aphrody-nie-model-serve` (Bun OS), relayed by rg-core                            | `NIE_MODEL_SERVE_*`                                                                                     |
 
 Supabase: `supabase link --project-ref xzwfnxzkxtcpgmtqulbh`, then `supabase db push` from the
 repository root. Gameplay reads stay on the Neon pooler; Supabase keeps the site, auth and

@@ -1,4 +1,5 @@
 <!-- SPDX-License-Identifier: MIT -->
+
 # @rosegriffon/patreon-bun
 
 Bun and ESM client for the Patreon V2 API. This fork is based on
@@ -44,11 +45,17 @@ import { parseWebhookRequest } from "@rosegriffon/patreon-bun";
 Bun.serve({
   port: 3000,
   async fetch(request) {
-    if (new URL(request.url).pathname !== "/webhook" || request.method !== "POST") {
+    if (
+      new URL(request.url).pathname !== "/webhook" ||
+      request.method !== "POST"
+    ) {
       return new Response("Not found", { status: 404 });
     }
 
-    const result = await parseWebhookRequest(request, Bun.env.PATREON_WEBHOOK_SECRET!);
+    const result = await parseWebhookRequest(
+      request,
+      Bun.env.PATREON_WEBHOOK_SECRET!,
+    );
     if (!result.verified) return new Response("Unauthorized", { status: 401 });
 
     console.log(result.event, result.payload);

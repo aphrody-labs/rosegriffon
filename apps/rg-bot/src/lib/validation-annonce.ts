@@ -42,7 +42,10 @@ export interface EtatValidation {
  * Rendre `null` plutôt que de tronquer : un identifiant coupé désignerait un
  * AUTRE post, et le clic annoncerait le mauvais tweet.
  */
-export function encoderValidation(tweetId: string, decision: DecisionAnnonce): string | null {
+export function encoderValidation(
+  tweetId: string,
+  decision: DecisionAnnonce,
+): string | null {
   // Un identifiant de tweet est numérique. Refuser tout le reste évite qu'un
   // séparateur `|` glissé dans la valeur ne décale le décodage.
   if (!/^\d{1,25}$/.test(tweetId)) return null;
@@ -67,7 +70,11 @@ export function decoderValidation(customId: string): EtatValidation | null {
  * ce qui compte est ce que le post DIT — l'aperçu déplié par Discord juste
  * en dessous le montre déjà en entier.
  */
-export function texteCarteValidation(options: { auteur: string; url: string; salonAnnonce: string }): string {
+export function texteCarteValidation(options: {
+  auteur: string;
+  url: string;
+  salonAnnonce: string;
+}): string {
   return `Nouveau post de **@${options.auteur}** — on l'annonce dans <#${options.salonAnnonce}> ?\n${options.url}`;
 }
 

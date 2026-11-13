@@ -19,7 +19,9 @@ function firstEnv(names: readonly string[]): string | undefined {
 }
 
 function moduleDir(): string {
-  return typeof import.meta.dir === "string" ? import.meta.dir : path.dirname(fileURLToPath(import.meta.url));
+  return typeof import.meta.dir === "string"
+    ? import.meta.dir
+    : path.dirname(fileURLToPath(import.meta.url));
 }
 
 /** yolo-re checkout root (`packages/inagle/src/core` → four levels up). */
@@ -34,7 +36,10 @@ export function iecodePath(...parts: string[]): string {
 
 /** Game data root (`<yolo-re>/data`), relocatable on its own. */
 export function iecodeDataRoot(): string {
-  return firstEnv(["DATA_ROOT", "DATA_PATH", "NIE_DATA_ROOT"]) ?? path.join(iecodeRoot(), "data");
+  return (
+    firstEnv(["DATA_ROOT", "DATA_PATH", "NIE_DATA_ROOT"]) ??
+    path.join(iecodeRoot(), "data")
+  );
 }
 
 /** Path inside the IECODE game data root. */
@@ -59,7 +64,9 @@ export function webAppPath(...parts: string[]): string {
 
 /** Current user's home directory, without assuming a host account name. */
 export function userHome(): string {
-  return process.env.HOME?.trim() || process.env.USERPROFILE?.trim() || homedir();
+  return (
+    process.env.HOME?.trim() || process.env.USERPROFILE?.trim() || homedir()
+  );
 }
 
 /** Monorepo root (`rosegriffon`). */
@@ -69,6 +76,8 @@ export function rgRoot(): string {
 
 /** Rose Griffon website root (`apps/rg-website`). */
 export function rgWebsiteRoot(): string {
-  return firstEnv(["RG_WEBSITE_ROOT", "WEB_APP_ROOT"]) ?? path.join(rgRoot(), "apps", "rg-website");
+  return (
+    firstEnv(["RG_WEBSITE_ROOT", "WEB_APP_ROOT"]) ??
+    path.join(rgRoot(), "apps", "rg-website")
+  );
 }
-

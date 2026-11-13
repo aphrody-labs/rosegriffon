@@ -36,7 +36,11 @@ export default function NewChroniclePage() {
         return;
       }
 
-      toast.success(data.published ? "Chronique publiée avec succès !" : "Brouillon enregistré avec succès !");
+      toast.success(
+        data.published
+          ? "Chronique publiée avec succès !"
+          : "Brouillon enregistré avec succès !",
+      );
 
       router.push("/admin/chroniques");
       router.refresh();

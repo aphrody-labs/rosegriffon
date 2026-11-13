@@ -95,7 +95,17 @@
         "role": "mode_change_card_image",
         "format": "G4TX",
         "path_template": "data/dx11/menu/220_img/telop_waza/<locale>/mode_change_<code>.g4tx",
-        "locales": ["de", "en", "es", "fr", "it", "ja", "pt", "zh_hans", "zh_hant"],
+        "locales": [
+          "de",
+          "en",
+          "es",
+          "fr",
+          "it",
+          "ja",
+          "pt",
+          "zh_hans",
+          "zh_hant"
+        ],
         "required": false,
         "expected_dimensions": "1728x352"
       }
@@ -164,7 +174,11 @@
     },
     "chara_model": {
       "format": "T2B",
-      "lists": ["CHARA_MODEL_BASE_PATH_LIST_BEG", "CHARA_MODEL_INFO_LIST_BEG", "CHARA_BODY_INFO_LIST_BEG"],
+      "lists": [
+        "CHARA_MODEL_BASE_PATH_LIST_BEG",
+        "CHARA_MODEL_INFO_LIST_BEG",
+        "CHARA_BODY_INFO_LIST_BEG"
+      ],
       "node": "CHARA_MODEL_INFO",
       "body_node": "CHARA_BODY_INFO",
       "join_rule": "CHARA_MODEL_INFO.var[10] resolves the face model; body and default clothing are resolved from the model/body fields"
@@ -203,7 +217,11 @@
         "CHARA_MOTION_PRESET_DATA_LIST_BEG",
         "CHARA_MOTION_PRESET_INFO_LIST_BEG"
       ],
-      "node_prefixes": ["CHARA_MOTION_INFO", "CHARA_MOTION_PRESET_DATA", "CHARA_MOTION_PRESET_INFO"],
+      "node_prefixes": [
+        "CHARA_MOTION_INFO",
+        "CHARA_MOTION_PRESET_DATA",
+        "CHARA_MOTION_PRESET_INFO"
+      ],
       "join_rule": "motion rows select versioned g4pk paths and preset data; they are shared by character model rows"
     },
     "chara_face": {
@@ -226,7 +244,11 @@
     },
     "chara_costume": {
       "format": "T2B",
-      "lists": ["CHARA_COSTUME_MODEL_LIST_BEG", "CHARA_COSTUME_DATA_LIST_BEG", "CHARA_COSTUME_INFO_LIST_BEG"],
+      "lists": [
+        "CHARA_COSTUME_MODEL_LIST_BEG",
+        "CHARA_COSTUME_DATA_LIST_BEG",
+        "CHARA_COSTUME_INFO_LIST_BEG"
+      ],
       "node": "CHARA_COSTUME_MODEL",
       "join_rule": "costume model IDs resolve the character's available costume entries; shared clothing geometry remains in chara_parts"
     }
@@ -310,7 +332,10 @@
           "table": "chara_name_tag",
           "format": "RDBN",
           "vfs_path": "data/common/gamedata/character/chara_name_tag_1.03.38.00.cfg.bin",
-          "node_prefixes": ["m_charaNameTagConfigList", "CHARA_NAME_TAG_CONFIG"],
+          "node_prefixes": [
+            "m_charaNameTagConfigList",
+            "CHARA_NAME_TAG_CONFIG"
+          ],
           "required": true,
           "status": "row_pending"
         },
@@ -447,7 +472,10 @@
           "table": "chara_name_tag",
           "format": "RDBN",
           "vfs_path": "data/common/gamedata/character/chara_name_tag_1.03.38.00.cfg.bin",
-          "node_prefixes": ["m_charaNameTagConfigList", "CHARA_NAME_TAG_CONFIG"],
+          "node_prefixes": [
+            "m_charaNameTagConfigList",
+            "CHARA_NAME_TAG_CONFIG"
+          ],
           "required": true,
           "status": "row_pending"
         },
@@ -526,7 +554,11 @@
       "proof": "each required table decodes, re-encodes and is accepted by the target game",
       "status": "blocked_by_target_vfs_and_game_probe"
     },
-    { "id": "assets", "proof": "G4MD/G4MG/G4TX paths exist and load for both codes", "status": "missing" },
+    {
+      "id": "assets",
+      "proof": "G4MD/G4MG/G4TX paths exist and load for both codes",
+      "status": "missing"
+    },
     {
       "id": "lua",
       "proof": "only required if a measured runtime feature references an OC script",

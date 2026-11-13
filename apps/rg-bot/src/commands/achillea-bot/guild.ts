@@ -10,7 +10,13 @@
  * n'est qu'un raccourci d'affichage : l'API revérifie la permission auprès de
  * Discord avant toute écriture.
  */
-import { ButtonComponent, Discord, ModalComponent, Slash, SlashGroup } from "discordx";
+import {
+  ButtonComponent,
+  Discord,
+  ModalComponent,
+  Slash,
+  SlashGroup,
+} from "discordx";
 import {
   ActionRowBuilder,
   ButtonBuilder,
@@ -30,7 +36,10 @@ import {
 
 import type { AchilleaGuildSettings } from "@rosegriffon/achillea-client";
 import { administreLeServeur, appelApi, lireApi } from "../../lib/achillea-ui";
-import type { ClientAchilleaDelegue, AchilleaClientResult } from "../../lib/achillea-api";
+import type {
+  ClientAchilleaDelegue,
+  AchilleaClientResult,
+} from "../../lib/achillea-api";
 import { echec, fiche, pied, refus, repondre, succes } from "../../lib/ui";
 
 /** Préfixes des `custom_id` legacy. */
@@ -59,19 +68,39 @@ export function serveurDuBouton(customId: string): string | null {
 export function embedReglages(reglages: AchilleaGuildSettings) {
   return pied(
     fiche({ titre: "Paramètres du serveur", intention: "marque", icone: "⚙️" })
-      .champ("Salon des annonces de Clan", reglages.broadcastChannel ? `<#${reglages.broadcastChannel}>` : "Aucun", {
-        enLigne: true,
-      })
-      .champ("Clan lié", reglages.clan ? `${reglages.clan.name} [${reglages.clan.shortName}]` : "Aucun", { enLigne: true })
-      .champ("Annonces Ranked", reglages.rankedEnabled ? "✅ Activées" : "❌ Désactivées", { enLigne: true }).embed,
+      .champ(
+        "Salon des annonces de Clan",
+        reglages.broadcastChannel ? `<#${reglages.broadcastChannel}>` : "Aucun",
+        {
+          enLigne: true,
+        },
+      )
+      .champ(
+        "Clan lié",
+        reglages.clan
+          ? `${reglages.clan.name} [${reglages.clan.shortName}]`
+          : "Aucun",
+        { enLigne: true },
+      )
+      .champ(
+        "Annonces Ranked",
+        reglages.rankedEnabled ? "✅ Activées" : "❌ Désactivées",
+        { enLigne: true },
+      ).embed,
   );
 }
 
 /** Rangée principale : salon, gestion des annonces, liaison du clan. */
-export function rangeeReglages(reglages: AchilleaGuildSettings): ActionRowBuilder<ButtonBuilder> {
+export function rangeeReglages(
+  reglages: AchilleaGuildSettings,
+): ActionRowBuilder<ButtonBuilder> {
   const id = reglages.guildId;
   return new ActionRowBuilder<ButtonBuilder>().addComponents(
-    new ButtonBuilder().setLabel("Annonces de Clan").setStyle(ButtonStyle.Primary).setCustomId(`${ID.salon}:${id}`).setEmoji("📢"),
+    new ButtonBuilder()
+      .setLabel("Annonces de Clan")
+      .setStyle(ButtonStyle.Primary)
+      .setCustomId(`${ID.salon}:${id}`)
+      .setEmoji("📢"),
     new ButtonBuilder()
       .setLabel("Gérer les annonces")
       .setStyle(ButtonStyle.Primary)
@@ -79,13 +108,23 @@ export function rangeeReglages(reglages: AchilleaGuildSettings): ActionRowBuilde
       .setEmoji("🔇")
       .setDisabled(reglages.broadcastChannel === null),
     reglages.clan
-      ? new ButtonBuilder().setLabel("Dissocier du Clan").setStyle(ButtonStyle.Danger).setCustomId(`${ID.delier}:${id}`).setEmoji("✖️")
-      : new ButtonBuilder().setLabel("Lier à un Clan").setStyle(ButtonStyle.Primary).setCustomId(`${ID.lier}:${id}`).setEmoji("🔗"),
+      ? new ButtonBuilder()
+          .setLabel("Dissocier du Clan")
+          .setStyle(ButtonStyle.Danger)
+          .setCustomId(`${ID.delier}:${id}`)
+          .setEmoji("✖️")
+      : new ButtonBuilder()
+          .setLabel("Lier à un Clan")
+          .setStyle(ButtonStyle.Primary)
+          .setCustomId(`${ID.lier}:${id}`)
+          .setEmoji("🔗"),
   );
 }
 
 /** Rangée de gestion des annonces : suppression du salon, bascule ranked, retour. */
-export function rangeeGestion(reglages: AchilleaGuildSettings): ActionRowBuilder<ButtonBuilder> {
+export function rangeeGestion(
+  reglages: AchilleaGuildSettings,
+): ActionRowBuilder<ButtonBuilder> {
   const id = reglages.guildId;
   return new ActionRowBuilder<ButtonBuilder>().addComponents(
     new ButtonBuilder()
@@ -95,10 +134,16 @@ export function rangeeGestion(reglages: AchilleaGuildSettings): ActionRowBuilder
       .setEmoji("🔇"),
     new ButtonBuilder()
       .setLabel("Annonces Ranked")
-      .setStyle(reglages.rankedEnabled ? ButtonStyle.Success : ButtonStyle.Danger)
+      .setStyle(
+        reglages.rankedEnabled ? ButtonStyle.Success : ButtonStyle.Danger,
+      )
       .setCustomId(`${ID.ranked}:${id}`)
       .setEmoji(reglages.rankedEnabled ? "📢" : "🔇"),
-    new ButtonBuilder().setLabel("Retour").setStyle(ButtonStyle.Primary).setCustomId(`${ID.menu}:${id}`).setEmoji("↩️"),
+    new ButtonBuilder()
+      .setLabel("Retour")
+      .setStyle(ButtonStyle.Primary)
+      .setCustomId(`${ID.menu}:${id}`)
+      .setEmoji("↩️"),
   );
 }
 
@@ -114,11 +159,17 @@ export function fenetreSalon(guildId: string): ModalBuilder {
   return new ModalBuilder()
     .setCustomId(`${ID.fenetre}:${guildId}`)
     .setTitle("Salon des annonces du Clan")
-    .addLabelComponents(new LabelBuilder().setLabel("Salon des annonces du Clan").setChannelSelectMenuComponent(selecteur));
+    .addLabelComponents(
+      new LabelBuilder()
+        .setLabel("Salon des annonces du Clan")
+        .setChannelSelectMenuComponent(selecteur),
+    );
 }
 
 /** Salon choisi dans la fenêtre : saisie libre (ancienne fenêtre) ou sélecteur. `null` = retirer. */
-export function salonChoisi(interaction: ModalSubmitInteraction): string | null {
+export function salonChoisi(
+  interaction: ModalSubmitInteraction,
+): string | null {
   try {
     const saisi = interaction.fields.getTextInputValue(CHAMP_SAISIE).trim();
     if (saisi) return saisi;
@@ -126,7 +177,10 @@ export function salonChoisi(interaction: ModalSubmitInteraction): string | null 
     // Champ absent de cette version de la fenêtre.
   }
   try {
-    const salons = interaction.fields.getSelectedChannels(CHAMP_SELECTION, false);
+    const salons = interaction.fields.getSelectedChannels(
+      CHAMP_SELECTION,
+      false,
+    );
     return salons?.first()?.id ?? null;
   } catch {
     return null;
@@ -136,14 +190,24 @@ export function salonChoisi(interaction: ModalSubmitInteraction): string | null 
 type Charge = InteractionReplyOptions & InteractionEditReplyOptions;
 
 /** Garde des boutons : serveur, permission Discord. Répond lui-même en cas de refus. */
-async function garder(interaction: ButtonInteraction | ModalSubmitInteraction): Promise<string | null> {
+async function garder(
+  interaction: ButtonInteraction | ModalSubmitInteraction,
+): Promise<string | null> {
   const guildId = serveurDuBouton(interaction.customId);
   if (!guildId || !interaction.guildId || interaction.guildId !== guildId) {
-    await interaction.reply(refus("Ce panneau ne concerne pas ce serveur. Relance `/guild settings`.") as InteractionReplyOptions);
+    await interaction.reply(
+      refus(
+        "Ce panneau ne concerne pas ce serveur. Relance `/guild settings`.",
+      ) as InteractionReplyOptions,
+    );
     return null;
   }
   if (!administreLeServeur(interaction.member as never)) {
-    await interaction.reply(refus("Tu dois être administrateur du serveur pour modifier ces réglages.") as InteractionReplyOptions);
+    await interaction.reply(
+      refus(
+        "Tu dois être administrateur du serveur pour modifier ces réglages.",
+      ) as InteractionReplyOptions,
+    );
     return null;
   }
   return guildId;
@@ -156,7 +220,9 @@ async function garder(interaction: ButtonInteraction | ModalSubmitInteraction): 
  */
 async function actionPanneau(
   interaction: ButtonInteraction | ModalSubmitInteraction,
-  appel: (client: ClientAchilleaDelegue) => Promise<AchilleaClientResult<AchilleaGuildSettings>>,
+  appel: (
+    client: ClientAchilleaDelegue,
+  ) => Promise<AchilleaClientResult<AchilleaGuildSettings>>,
   vue: "reglages" | "gestion",
   titreEchec: string,
   confirmation?: (reglages: AchilleaGuildSettings) => string,
@@ -170,9 +236,14 @@ async function actionPanneau(
   const reglages = resultat.valeur;
   await interaction.editReply({
     embeds: [embedReglages(reglages)],
-    components: [vue === "gestion" ? rangeeGestion(reglages) : rangeeReglages(reglages)],
+    components: [
+      vue === "gestion" ? rangeeGestion(reglages) : rangeeReglages(reglages),
+    ],
   });
-  if (confirmation) await interaction.followUp(succes(confirmation(reglages), undefined, { prive: true }) as Charge);
+  if (confirmation)
+    await interaction.followUp(
+      succes(confirmation(reglages), undefined, { prive: true }) as Charge,
+    );
 }
 
 @Discord()
@@ -182,18 +253,33 @@ export class GuildCommande {
   @Slash({ name: "settings", description: "Gestion du paramétrage du bot" })
   async settings(interaction: ChatInputCommandInteraction): Promise<void> {
     if (!interaction.guildId) {
-      await repondre(interaction, refus("Cette commande doit être effectuée sur un serveur."));
+      await repondre(
+        interaction,
+        refus("Cette commande doit être effectuée sur un serveur."),
+      );
       return;
     }
     if (!administreLeServeur(interaction.member as never)) {
-      await repondre(interaction, refus("Tu dois être administrateur du serveur pour utiliser cette commande."));
+      await repondre(
+        interaction,
+        refus(
+          "Tu dois être administrateur du serveur pour utiliser cette commande.",
+        ),
+      );
       return;
     }
     await interaction.deferReply({ flags: MessageFlags.Ephemeral });
     const guildId = interaction.guildId;
-    const reglages = await appelApi(interaction, c => c.guilds.settings(guildId), "Réglages indisponibles");
+    const reglages = await appelApi(
+      interaction,
+      (c) => c.guilds.settings(guildId),
+      "Réglages indisponibles",
+    );
     if (!reglages) return;
-    await interaction.editReply({ embeds: [embedReglages(reglages)], components: [rangeeReglages(reglages)] });
+    await interaction.editReply({
+      embeds: [embedReglages(reglages)],
+      components: [rangeeReglages(reglages)],
+    });
   }
 }
 
@@ -213,7 +299,7 @@ export class GuildBoutons {
     const salon = salonChoisi(interaction);
     await actionPanneau(
       interaction,
-      c => c.guilds.updateSettings(guildId, { broadcastChannel: salon }),
+      (c) => c.guilds.updateSettings(guildId, { broadcastChannel: salon }),
       "reglages",
       "Salon non modifié",
       () =>
@@ -227,8 +313,12 @@ export class GuildBoutons {
   async lier(interaction: ButtonInteraction): Promise<void> {
     const guildId = await garder(interaction);
     if (!guildId) return;
-    await actionPanneau(interaction, c => c.guilds.bindClan(guildId), "reglages", "Liaison impossible", r =>
-      `Ce serveur est désormais lié au Clan ${r.clan?.name ?? ""} !`,
+    await actionPanneau(
+      interaction,
+      (c) => c.guilds.bindClan(guildId),
+      "reglages",
+      "Liaison impossible",
+      (r) => `Ce serveur est désormais lié au Clan ${r.clan?.name ?? ""} !`,
     );
   }
 
@@ -236,8 +326,12 @@ export class GuildBoutons {
   async delier(interaction: ButtonInteraction): Promise<void> {
     const guildId = await garder(interaction);
     if (!guildId) return;
-    await actionPanneau(interaction, c => c.guilds.unbindClan(guildId), "reglages", "Dissociation impossible", () =>
-      "Ce serveur n'est plus lié à aucun Clan.",
+    await actionPanneau(
+      interaction,
+      (c) => c.guilds.unbindClan(guildId),
+      "reglages",
+      "Dissociation impossible",
+      () => "Ce serveur n'est plus lié à aucun Clan.",
     );
   }
 
@@ -245,14 +339,24 @@ export class GuildBoutons {
   async gestion(interaction: ButtonInteraction): Promise<void> {
     const guildId = await garder(interaction);
     if (!guildId) return;
-    await actionPanneau(interaction, c => c.guilds.settings(guildId), "gestion", "Réglages indisponibles");
+    await actionPanneau(
+      interaction,
+      (c) => c.guilds.settings(guildId),
+      "gestion",
+      "Réglages indisponibles",
+    );
   }
 
   @ButtonComponent({ id: /^guild_settings_menu:.+/ })
   async menu(interaction: ButtonInteraction): Promise<void> {
     const guildId = await garder(interaction);
     if (!guildId) return;
-    await actionPanneau(interaction, c => c.guilds.settings(guildId), "reglages", "Réglages indisponibles");
+    await actionPanneau(
+      interaction,
+      (c) => c.guilds.settings(guildId),
+      "reglages",
+      "Réglages indisponibles",
+    );
   }
 
   @ButtonComponent({ id: /^ranked_broadcast_toggle:.+/ })
@@ -261,15 +365,18 @@ export class GuildBoutons {
     if (!guildId) return;
     await actionPanneau(
       interaction,
-      async c => {
+      async (c) => {
         // Lire puis inverser : la bascule part de l'état en base, pas de la couleur du bouton.
         const actuel = await c.guilds.settings(guildId);
         if (!actuel.ok) return actuel;
-        return c.guilds.updateSettings(guildId, { rankedEnabled: !actuel.value.rankedEnabled });
+        return c.guilds.updateSettings(guildId, {
+          rankedEnabled: !actuel.value.rankedEnabled,
+        });
       },
       "gestion",
       "Bascule impossible",
-      r => `Les annonces de la file classée sont ${r.rankedEnabled ? "activées" : "désactivées"}.`,
+      (r) =>
+        `Les annonces de la file classée sont ${r.rankedEnabled ? "activées" : "désactivées"}.`,
     );
   }
 
@@ -279,10 +386,11 @@ export class GuildBoutons {
     if (!guildId) return;
     await actionPanneau(
       interaction,
-      c => c.guilds.updateSettings(guildId, { broadcastChannel: null }),
+      (c) => c.guilds.updateSettings(guildId, { broadcastChannel: null }),
       "reglages",
       "Suppression impossible",
-      () => "Salon d'annonce supprimé. Un éventuel lien avec un Clan a également été coupé.",
+      () =>
+        "Salon d'annonce supprimé. Un éventuel lien avec un Clan a également été coupé.",
     );
   }
 }

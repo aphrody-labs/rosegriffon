@@ -9,7 +9,16 @@ interface SearchBarProps extends React.ComponentProps<"div"> {
 }
 
 const SearchBar = React.forwardRef<HTMLDivElement, SearchBarProps>(
-  ({ className, placeholder = "Rechercher...", defaultValue, onSearch, ...props }, ref) => {
+  (
+    {
+      className,
+      placeholder = "Rechercher...",
+      defaultValue,
+      onSearch,
+      ...props
+    },
+    ref,
+  ) => {
     const timerRef = React.useRef<ReturnType<typeof setTimeout>>(null);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {

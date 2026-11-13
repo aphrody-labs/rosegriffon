@@ -8,17 +8,17 @@ If no token is given in the client options, you can use the [`token` option in t
 
 | Feature in client       | PatreonClient | PatreonOauthClient | RestClient |
 | ----------------------- | ------------- | ------------------ | ---------- |
-| Rate limit              |             |                  |          |
-| Edge rate limit         |             |                  |          |
-| Response parsing        |             |                  |          |
-| Request pagination      |             |                  |          |
-| Client token            |             |                  |          |
-| Scope validation        |             |                  |          |
-| Token validation        |             |                  |          |
-| Query response typed    |             |                  |          |
-| Response transformation |             |                  |          |
-| Default query           |             |                  |          |
-| Route methods           |             |                  |          |
+| Rate limit              |               |                    |            |
+| Edge rate limit         |               |                    |            |
+| Response parsing        |               |                    |            |
+| Request pagination      |               |                    |            |
+| Client token            |               |                    |            |
+| Scope validation        |               |                    |            |
+| Token validation        |               |                    |            |
+| Query response typed    |               |                    |            |
+| Response transformation |               |                    |            |
+| Default query           |               |                    |            |
+| Route methods           |               |                    |            |
 
 ::: code-group
 

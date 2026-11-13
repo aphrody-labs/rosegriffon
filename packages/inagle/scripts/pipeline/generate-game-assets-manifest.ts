@@ -32,8 +32,21 @@ import { homedir } from "node:os";
 
 const REPO_ROOT = iecodeRoot();
 const DUMP_ROOT =
-  process.env.DUMP_ROOT || join(homedir(), ".local", "share", "Steam", "iecode", "inazuma", "data", "dx11");
-const CROSS_REF_PATH = join(REPO_ROOT, "packages/inagle/data/asset-cross-reference.json");
+  process.env.DUMP_ROOT ||
+  join(
+    homedir(),
+    ".local",
+    "share",
+    "Steam",
+    "iecode",
+    "inazuma",
+    "data",
+    "dx11",
+  );
+const CROSS_REF_PATH = join(
+  REPO_ROOT,
+  "packages/inagle/data/asset-cross-reference.json",
+);
 const STEAM_BUILDID = 22792000; // appmanifest_2799860.acf (INAZUMA ELEVEN: Victory Road)
 const DRY = process.argv.includes("--dry");
 
@@ -77,7 +90,9 @@ function expectedLeafCode(assetPath: string): string | null {
   if (!assetPath) {
     return null;
   }
-  const cleaned = assetPath.replace(/\/<LG>\//g, "/").replace(/\.[a-z0-9]+$/i, "");
+  const cleaned = assetPath
+    .replace(/\/<LG>\//g, "/")
+    .replace(/\.[a-z0-9]+$/i, "");
   const leaf = cleaned.split("/").pop();
   return leaf || null;
 }
@@ -136,9 +151,14 @@ async function main(): Promise<void> {
   }
 
   const all = [...rows.values()];
-  const pct = expectedTotal > 0 ? ((expectedCovered / expectedTotal) * 100).toFixed(1) : "n/a";
+  const pct =
+    expectedTotal > 0
+      ? ((expectedCovered / expectedTotal) * 100).toFixed(1)
+      : "n/a";
   console.log(`Manifeste : ${all.length} fichiers réels (tous exists=true)`);
-  console.log(`Couverture cross-ref : ${expectedCovered}/${expectedTotal} assets attendus couverts (${pct}%)`);
+  console.log(
+    `Couverture cross-ref : ${expectedCovered}/${expectedTotal} assets attendus couverts (${pct}%)`,
+  );
 
   if (DRY) {
     console.log("--dry : aucune écriture DB. Échantillon :");
@@ -158,7 +178,9 @@ async function main(): Promise<void> {
     const params: unknown[] = [];
     batch.forEach((r, j) => {
       const b = j * 6;
-      values.push(`($${b + 1},$${b + 2},$${b + 3},$${b + 4},$${b + 5},$${b + 6})`);
+      values.push(
+        `($${b + 1},$${b + 2},$${b + 3},$${b + 4},$${b + 5},$${b + 6})`,
+      );
       params.push(r.path, r.bucket, r.kind, r.size, r.exists, STEAM_BUILDID);
     });
     await client.query(
@@ -182,12 +204,14 @@ async function main(): Promise<void> {
   const { rows: countRows } = await client.query(
     "SELECT count(*)::int AS n, count(*) FILTER (WHERE exists)::int AS present FROM inagle_game_assets",
   );
-  console.log(`DB : ${countRows[0].n} lignes (présents=${countRows[0].present})`);
+  console.log(
+    `DB : ${countRows[0].n} lignes (présents=${countRows[0].present})`,
+  );
   await client.end();
   console.log("== Terminé ==");
 }
 
-main().catch(err => {
+main().catch((err) => {
   console.error(err);
   process.exit(1);
 });

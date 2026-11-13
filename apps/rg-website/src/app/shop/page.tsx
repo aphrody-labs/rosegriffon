@@ -21,7 +21,9 @@ export default async function ShopIndexPage() {
 
         <aside className="min-[840px]:col-span-4">
           <Suspense
-            fallback={<div className="h-24 animate-pulse rounded-2xl border-2 border-rg-or/30 bg-rg-marine/60" />}
+            fallback={
+              <div className="h-24 animate-pulse rounded-2xl border-2 border-rg-or/30 bg-rg-marine/60" />
+            }
           >
             <PatreonDiscountBanner />
           </Suspense>
@@ -33,13 +35,14 @@ export default async function ShopIndexPage() {
           aria-label="Catalogue produits"
           className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
         >
-          {produits.map(p => (
+          {produits.map((p) => (
             <ProductCard key={p.slug} product={p} />
           ))}
         </section>
       ) : (
         <p className="mb-6 rounded-2xl border border-rg-or/30 bg-rg-marine/60 p-4 text-sm text-white/80">
-          La vente en ligne n'a pas encore ouvert : aucun produit n'est en vente pour le moment.
+          La vente en ligne n'a pas encore ouvert : aucun produit n'est en vente
+          pour le moment.
         </p>
       )}
 

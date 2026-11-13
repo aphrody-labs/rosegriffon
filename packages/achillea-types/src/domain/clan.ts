@@ -1,4 +1,7 @@
-import type { ClanMemberDistinction, ClanMemberRole } from "../enums/clanMemberRole";
+import type {
+  ClanMemberDistinction,
+  ClanMemberRole,
+} from "../enums/clanMemberRole";
 import type { ClanState } from "../enums/clanState";
 
 import type { Country } from "./common";

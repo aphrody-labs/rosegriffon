@@ -20,7 +20,12 @@ import {
 describe("registre BCP-47", () => {
   test("déclare fr, en et ja avec leur direction et leur repli", () => {
     expect(DEFAULT_LOCALE_REGISTRY.defaultLocale).toBe("fr");
-    expect(DEFAULT_LOCALE_REGISTRY.locales.map(({ tag, direction }) => ({ tag, direction }))).toEqual([
+    expect(
+      DEFAULT_LOCALE_REGISTRY.locales.map(({ tag, direction }) => ({
+        tag,
+        direction,
+      })),
+    ).toEqual([
       { direction: "ltr", tag: "fr" },
       { direction: "ltr", tag: "en" },
       { direction: "ltr", tag: "ja" },
@@ -58,11 +63,17 @@ describe("registre BCP-47", () => {
         { direction: "ltr", tag: "fr-CA" },
       ],
     });
-    expect(buildFallbackChain("fr-CA", registry)).toEqual(["fr-CA", "fr", "en"]);
+    expect(buildFallbackChain("fr-CA", registry)).toEqual([
+      "fr-CA",
+      "fr",
+      "en",
+    ]);
   });
 
   test("refuse les configurations ambiguës ou invalides", () => {
-    expect(() => createLocaleRegistry({ defaultLocale: "fr", locales: [] })).toThrow();
+    expect(() =>
+      createLocaleRegistry({ defaultLocale: "fr", locales: [] }),
+    ).toThrow();
     expect(() =>
       createLocaleRegistry({
         defaultLocale: "fr",
@@ -104,7 +115,9 @@ describe("registre BCP-47", () => {
 
 describe("Accept-Language", () => {
   test("trie les poids, canonicalise et fusionne les doublons", () => {
-    expect(parseAcceptLanguage("en-us;q=0.7, fr-FR, en-US;q=0.9, ja;q=0")).toEqual([
+    expect(
+      parseAcceptLanguage("en-us;q=0.7, fr-FR, en-US;q=0.9, ja;q=0"),
+    ).toEqual([
       { position: 1, quality: 1, range: "fr-FR" },
       { position: 2, quality: 0.9, range: "en-US" },
       { position: 3, quality: 0, range: "ja" },
@@ -136,11 +149,19 @@ describe("résolution server-first", () => {
         routeLocale: "ja-JP",
       }),
     ).toMatchObject({ locale: "ja", source: "route" });
-    expect(resolveLocale({ acceptLanguage: "fr", cookieLocale: "ja", profileLocale: "en-US" })).toMatchObject({
+    expect(
+      resolveLocale({
+        acceptLanguage: "fr",
+        cookieLocale: "ja",
+        profileLocale: "en-US",
+      }),
+    ).toMatchObject({
       locale: "en",
       source: "profile",
     });
-    expect(resolveLocale({ acceptLanguage: "fr", cookieLocale: "ja" })).toMatchObject({
+    expect(
+      resolveLocale({ acceptLanguage: "fr", cookieLocale: "ja" }),
+    ).toMatchObject({
       locale: "ja",
       source: "cookie",
     });
@@ -157,7 +178,9 @@ describe("résolution server-first", () => {
   });
 
   test("ignore une source prioritaire invalide au lieu de bloquer la suivante", () => {
-    expect(resolveLocale({ cookieLocale: "ja", profileLocale: "xx-invalid_tag" })).toMatchObject({
+    expect(
+      resolveLocale({ cookieLocale: "ja", profileLocale: "xx-invalid_tag" }),
+    ).toMatchObject({
       locale: "ja",
       source: "cookie",
     });
@@ -171,7 +194,9 @@ describe("formatteurs Intl", () => {
   const listOptions = { style: "long", type: "conjunction" } as const;
 
   test("formate date, nombre et liste dans la locale résolue", () => {
-    expect(formatDate(instant, "fr-CA", dateOptions)).toBe(new Intl.DateTimeFormat("fr", dateOptions).format(instant));
+    expect(formatDate(instant, "fr-CA", dateOptions)).toBe(
+      new Intl.DateTimeFormat("fr", dateOptions).format(instant),
+    );
     expect(formatNumber(12_345.6, "en-GB", numberOptions)).toBe(
       new Intl.NumberFormat("en", numberOptions).format(12_345.6),
     );
@@ -192,10 +217,14 @@ describe("formatteurs Intl", () => {
 
     expect(formatters.locale).toBe("ar");
     expect(formatters.direction).toBe("rtl");
-    expect(formatters.date(instant, dateOptions)).toBe(new Intl.DateTimeFormat("ar", dateOptions).format(instant));
+    expect(formatters.date(instant, dateOptions)).toBe(
+      new Intl.DateTimeFormat("ar", dateOptions).format(instant),
+    );
     expect(formatters.number(12_345.6, numberOptions)).toBe(
       new Intl.NumberFormat("ar", numberOptions).format(12_345.6),
     );
-    expect(formatters.list(["A", "B"], listOptions)).toBe(new Intl.ListFormat("ar", listOptions).format(["A", "B"]));
+    expect(formatters.list(["A", "B"], listOptions)).toBe(
+      new Intl.ListFormat("ar", listOptions).format(["A", "B"]),
+    );
   });
 });

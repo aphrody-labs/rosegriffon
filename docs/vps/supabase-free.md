@@ -11,73 +11,74 @@ Fact-checké Context7 / doc officielle Supabase · 2026-04-19
 
 ### Base de données
 
-| Ressource | Limite Free |
-|---|---|
-| Taille DB | **500 MB** (read-only au-dessus) |
-| Disk space alloué | 1 GB (mais lock à 500 MB) |
-| Connexions directes | 60 (port 5432) |
-| Connexions pooled | 200 (port 6543 PgBouncer) |
-| Extensions Postgres | Toutes supportées |
+| Ressource           | Limite Free                      |
+| ------------------- | -------------------------------- |
+| Taille DB           | **500 MB** (read-only au-dessus) |
+| Disk space alloué   | 1 GB (mais lock à 500 MB)        |
+| Connexions directes | 60 (port 5432)                   |
+| Connexions pooled   | 200 (port 6543 PgBouncer)        |
+| Extensions Postgres | Toutes supportées                |
 
 > **Au-delà de 500 MB** : la DB passe en **read-only**. Pour résoudre : soit nettoyer (`VACUUM`, archiver), soit upgrader Pro ($25/mois) avec Spend Cap désactivé pour autoscale > 8 GB.
 
 ### Bandwidth & Storage
 
-| Ressource | Limite Free |
-|---|---|
+| Ressource           | Limite Free                                  |
+| ------------------- | -------------------------------------------- |
 | **Bandwidth total** | **10 GB/mois** (5 GB cached + 5 GB uncached) |
-| Storage (buckets) | 1 GB |
-| File size max | 50 MB / fichier |
-| CDN | Global (Cloudflare) |
+| Storage (buckets)   | 1 GB                                         |
+| File size max       | 50 MB / fichier                              |
+| CDN                 | Global (Cloudflare)                          |
 
 > Le bandwidth agrège **DB + Storage + Edge Functions**. Un fichier de 1 MB téléchargé 10 000 fois = 10 GB consommés.
 
 ### Auth
 
-| Ressource | Limite Free |
-|---|---|
-| Monthly Active Users (MAU) | **50 000** |
-| Providers OAuth | Tous (Google, Discord, GitHub, etc.) |
-| Custom SMTP | Supabase SMTP partagé (rate-limited) |
-| Password recovery emails | ~3/heure par user |
+| Ressource                  | Limite Free                          |
+| -------------------------- | ------------------------------------ |
+| Monthly Active Users (MAU) | **50 000**                           |
+| Providers OAuth            | Tous (Google, Discord, GitHub, etc.) |
+| Custom SMTP                | Supabase SMTP partagé (rate-limited) |
+| Password recovery emails   | ~3/heure par user                    |
 
 ### Edge Functions
 
-| Ressource | Limite Free |
-|---|---|
-| Nombre max | **100** |
+| Ressource   | Limite Free             |
+| ----------- | ----------------------- |
+| Nombre max  | **100**                 |
 | Bundle size | 20 MB après compression |
-| Invocations | 500 000/mois |
-| Runtime | Deno |
+| Invocations | 500 000/mois            |
+| Runtime     | Deno                    |
 
 ### Realtime
 
-| Ressource | Limite Free |
-|---|---|
-| Concurrent peak connections | **~200** |
-| Messages / seconde | 100 |
-| Channels / client | 100 |
-| Payload max | 256 KB |
+| Ressource                   | Limite Free |
+| --------------------------- | ----------- |
+| Concurrent peak connections | **~200**    |
+| Messages / seconde          | 100         |
+| Channels / client           | 100         |
+| Payload max                 | 256 KB      |
 
 ### Plan management
 
-| Ressource | Limite Free |
-|---|---|
-| Projets / organisation | **2** |
-| Log retention | **7 jours** |
-| Backups | 1 / jour, 7 jours de rétention |
-| Point-in-time recovery |  (Pro uniquement) |
-| Assistance | Communauté (forum, Discord) |
+| Ressource              | Limite Free                    |
+| ---------------------- | ------------------------------ |
+| Projets / organisation | **2**                          |
+| Log retention          | **7 jours**                    |
+| Backups                | 1 / jour, 7 jours de rétention |
+| Point-in-time recovery | (Pro uniquement)               |
+| Assistance             | Communauté (forum, Discord)    |
 
 ---
 
-##  Auto-pause — critique pour la prod
+## Auto-pause — critique pour la prod
 
 > **Les projets Free sont mis en pause après 7 jours d'inactivité.**
 >
 > Source : `supabase.com/docs/guides/platform/going-into-prod#free-plan`.
 
 **Conséquences** :
+
 - Aucune requête ne répond (timeout).
 - Le réveil prend 30-90 secondes au premier hit.
 - Données préservées, pas de perte.
@@ -86,10 +87,12 @@ Fact-checké Context7 / doc officielle Supabase · 2026-04-19
 **Définition d'activité** : toute requête API (Postgres, REST, Auth, Storage, Realtime) remet le compteur à zéro.
 
 **Mitigation pour prod publique** :
+
 - Cron externe (GitHub Actions, VPS systemd timer) qui ping `/rest/v1/` tous les 6 jours.
--  Recommandé : **upgrader Pro** ($25/mois) — pas d'auto-pause.
+- Recommandé : **upgrader Pro** ($25/mois) — pas d'auto-pause.
 
 **Pour Rose Griffon** :
+
 - `website` + `azalee` en prod publique francophone → **risque réel d'auto-pause** pendant les vacances ou creux de trafic.
 - Solution actuelle VPS (Supabase Cloud même compte) : trafic régulier via le VPS évite la pause.
 
@@ -125,39 +128,40 @@ Sur Vercel Functions (serverless), chaque invocation = nouveau process Node. San
 
 ```ts
 //  SSR avec pooler
-import { createServerClient } from '@supabase/ssr'
+import { createServerClient } from "@supabase/ssr";
 // Utilise automatiquement POSTGRES_URL (port 6543)
 
 //  Prisma avec pgbouncer
 const prisma = new PrismaClient({
-  datasources: { db: { url: process.env.POSTGRES_PRISMA_URL } }
-})
+  datasources: { db: { url: process.env.POSTGRES_PRISMA_URL } },
+});
 
 //  Direct connection — épuisera les 60 slots rapidement
 const prismaDirect = new PrismaClient({
-  datasources: { db: { url: process.env.POSTGRES_URL_NON_POOLING } }
-})
+  datasources: { db: { url: process.env.POSTGRES_URL_NON_POOLING } },
+});
 ```
 
 ### Supabase SSR Next.js (App Router)
 
 ```ts
 // lib/supabase/server.ts
-import { createServerClient } from '@supabase/ssr'
-import { cookies } from 'next/headers'
+import { createServerClient } from "@supabase/ssr";
+import { cookies } from "next/headers";
 
 export async function supabaseServer() {
-  const cookieStore = await cookies()
+  const cookieStore = await cookies();
   return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
         getAll: () => cookieStore.getAll(),
-        setAll: (list) => list.forEach((c) => cookieStore.set(c.name, c.value, c.options)),
+        setAll: (list) =>
+          list.forEach((c) => cookieStore.set(c.name, c.value, c.options)),
       },
     },
-  )
+  );
 }
 ```
 
@@ -173,13 +177,14 @@ export async function supabaseServer() {
    - Option C : Vercel Blob (100 GB bandwidth sur Hobby, mais lié au projet)
 
 2. **Cache agressif côté client** :
+
    ```ts
    // Edge Function Supabase
    return new Response(data, {
      headers: {
-       'Cache-Control': 'public, max-age=31536000, immutable',
+       "Cache-Control": "public, max-age=31536000, immutable",
      },
-   })
+   });
    ```
 
 3. **Transformation images côté Supabase** :
@@ -187,11 +192,12 @@ export async function supabaseServer() {
    - Disponible sur Free avec quotas raisonnables
 
 4. **Réduire les requêtes avec `select`** :
+
    ```ts
    //  download tout
-   supabase.from('articles').select('*')
+   supabase.from("articles").select("*");
    //  colonnes nécessaires uniquement
-   supabase.from('articles').select('id, title, excerpt, cover_url')
+   supabase.from("articles").select("id, title, excerpt, cover_url");
    ```
 
 5. **Realtime seulement où nécessaire** :
@@ -212,19 +218,19 @@ export async function supabaseServer() {
 
 ### Ce qui change
 
-| Feature | Free | Pro |
-|---|---|---|
-| Auto-pause | 7 jours |  jamais |
-| DB size | 500 MB | 8 GB (autoscale) |
-| Bandwidth | 10 GB | **250 GB** |
-| Storage | 1 GB | 100 GB |
-| MAU | 50k | 100k |
-| Realtime connections | 200 | 500 |
-| Log retention | 7 jours | 7 jours (+ $10/mois pour 28j) |
-| Point-in-time recovery |  | $100/mois add-on |
-| Support | Communauté | Email (48h SLA) |
-| Compute upgrade |  (small only) | Tous tiers (Micro → 16 XL) |
-| Spend Cap |  |  (désactivable pour autoscale) |
+| Feature                | Free         | Pro                           |
+| ---------------------- | ------------ | ----------------------------- |
+| Auto-pause             | 7 jours      | jamais                        |
+| DB size                | 500 MB       | 8 GB (autoscale)              |
+| Bandwidth              | 10 GB        | **250 GB**                    |
+| Storage                | 1 GB         | 100 GB                        |
+| MAU                    | 50k          | 100k                          |
+| Realtime connections   | 200          | 500                           |
+| Log retention          | 7 jours      | 7 jours (+ $10/mois pour 28j) |
+| Point-in-time recovery |              | $100/mois add-on              |
+| Support                | Communauté   | Email (48h SLA)               |
+| Compute upgrade        | (small only) | Tous tiers (Micro → 16 XL)    |
+| Spend Cap              |              | (désactivable pour autoscale) |
 
 ### Upgrade
 
@@ -266,27 +272,29 @@ psql "$POSTGRES_URL" -c "SELECT count(*) FROM pg_stat_activity WHERE state = 'ac
 
 ### Si Free (recommandations)
 
--  Garder bucket `menu` servi par nginx VPS (évite 10 GB bandwidth)
--  Configurer un cron externe tous les 6 jours pour prévenir auto-pause :
-  ```yaml
-  # .github/workflows/supabase-keepalive.yml
-  on:
-    schedule:
-      - cron: '0 3 */6 * *'    # tous les 6 jours à 3h UTC
-  jobs:
-    ping:
-      runs-on: ubuntu-latest
-      steps:
-        - run: curl -sf -H "apikey:${{ secrets.SUPABASE_ANON_KEY }}" https://isbkaeltubqittywibeh.supabase.co/rest/v1/
-  ```
--  Surveiller bandwidth mensuel dans le dashboard (alertes email à 80%)
--  Pas d'Image Optimization Vercel (quota 1K/mois) — utiliser URLs directes `/storage/v1/object/public/menu/...`
+- Garder bucket `menu` servi par nginx VPS (évite 10 GB bandwidth)
+- Configurer un cron externe tous les 6 jours pour prévenir auto-pause :
+
+```yaml
+# .github/workflows/supabase-keepalive.yml
+on:
+  schedule:
+    - cron: "0 3 */6 * *" # tous les 6 jours à 3h UTC
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - run: curl -sf -H "apikey:${{ secrets.SUPABASE_ANON_KEY }}" https://isbkaeltubqittywibeh.supabase.co/rest/v1/
+```
+
+- Surveiller bandwidth mensuel dans le dashboard (alertes email à 80%)
+- Pas d'Image Optimization Vercel (quota 1K/mois) — utiliser URLs directes `/storage/v1/object/public/menu/...`
 
 ### Si Pro ($25/mois)
 
--  Pas d'auto-pause → migration Vercel sereine
--  250 GB bandwidth → bucket `menu` peut aller sur Supabase Storage
--  Point-in-time recovery add-on ($100/mois) si données critiques
+- Pas d'auto-pause → migration Vercel sereine
+- 250 GB bandwidth → bucket `menu` peut aller sur Supabase Storage
+- Point-in-time recovery add-on ($100/mois) si données critiques
 
 ---
 

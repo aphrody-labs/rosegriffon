@@ -22,7 +22,12 @@ export function expectedScore(playerElo: number, opponentElo: number): number {
  * @param actual Résultat réel : 1 victoire, 0.5 nul, 0 défaite.
  * @param kFactor K-factor de la saison.
  */
-export function eloDelta(playerElo: number, opponentElo: number, actual: number, kFactor: number): number {
+export function eloDelta(
+  playerElo: number,
+  opponentElo: number,
+  actual: number,
+  kFactor: number,
+): number {
   return Math.round(kFactor * (actual - expectedScore(playerElo, opponentElo)));
 }
 
@@ -75,7 +80,8 @@ const TIER_ELO_FACTORS: readonly TierEloFactors[] = [
 
 /** Facteurs (winK, lossK) du palier d'index donné (clampé aux bornes de la table). */
 export function tierEloFactors(tierIndex: number): TierEloFactors {
-  if (!Number.isFinite(tierIndex) || tierIndex <= 0) return TIER_ELO_FACTORS[0]!;
+  if (!Number.isFinite(tierIndex) || tierIndex <= 0)
+    return TIER_ELO_FACTORS[0]!;
   const i = Math.min(Math.floor(tierIndex), TIER_ELO_FACTORS.length - 1);
   return TIER_ELO_FACTORS[i] ?? TIER_ELO_FACTORS[0]!;
 }
@@ -109,7 +115,10 @@ export function progressiveEloDelta(
  *
  * @returns Nouveau rating et delta réellement appliqué (après clamp).
  */
-export function applyEloUpdate(playerElo: number, delta: number): { newElo: number; clampedDelta: number } {
+export function applyEloUpdate(
+  playerElo: number,
+  delta: number,
+): { newElo: number; clampedDelta: number } {
   const newElo = Math.max(0, playerElo + delta);
   return { newElo, clampedDelta: newElo - playerElo };
 }
@@ -167,7 +176,9 @@ export interface TournamentPlacementPrizeTable {
  * Table de prix selon la taille du tournoi (`participantsNumber` / capacité bracket).
  * Bornes inclusives sur le max de la tranche.
  */
-export function prizeTableForTournamentSize(size: number): TournamentPlacementPrizeTable {
+export function prizeTableForTournamentSize(
+  size: number,
+): TournamentPlacementPrizeTable {
   const n = Number.isFinite(size) ? Math.max(0, Math.floor(size)) : 0;
   if (n <= 8) return { first: 25, second: 12, semi: 5 };
   if (n <= 16) return { first: 35, second: 18, semi: 8 };

@@ -21,18 +21,22 @@ export default function CastsPublicPage() {
 
     client.casts
       .listCasters()
-      .then(res => {
+      .then((res) => {
         if (cancelled) return;
         if (res.ok) {
           setCasters(res.value);
         } else {
-          setLoadError("La liste des casters est temporairement indisponible. Réessaie dans quelques instants.");
+          setLoadError(
+            "La liste des casters est temporairement indisponible. Réessaie dans quelques instants.",
+          );
           signalerException("casts", new Error(`${res.kind}: ${res.detail}`));
         }
       })
       .catch((cause: unknown) => {
         if (cancelled) return;
-        setLoadError("La liste des casters est temporairement indisponible. Réessaie dans quelques instants.");
+        setLoadError(
+          "La liste des casters est temporairement indisponible. Réessaie dans quelques instants.",
+        );
         signalerException("casts", cause);
       })
       .finally(() => {
@@ -60,7 +64,9 @@ export default function CastsPublicPage() {
             <span className="p-2 rounded-lg bg-tertiary/10 text-tertiary border border-tertiary/20">
               <Tv className="w-5 h-5" />
             </span>
-            <h1 className="text-3xl font-bold tracking-tight">Casters & Régie Officiels</h1>
+            <h1 className="text-3xl font-bold tracking-tight">
+              Casters & Régie Officiels
+            </h1>
           </div>
 
           <a
@@ -74,17 +80,23 @@ export default function CastsPublicPage() {
           </a>
         </div>
         <p className="text-sm text-muted-foreground">
-          Découvrez l'équipe de commentateurs et streamers officiels d'Achilléa sur Inazuma Eleven: Victory Road.
+          Découvrez l'équipe de commentateurs et streamers officiels d'Achilléa
+          sur Inazuma Eleven: Victory Road.
         </p>
       </div>
 
       {loading ? (
         <div className="py-20 text-center space-y-3">
           <Loader2 className="w-8 h-8 animate-spin mx-auto text-muted-foreground" />
-          <p className="text-sm text-muted-foreground">Chargement des casters...</p>
+          <p className="text-sm text-muted-foreground">
+            Chargement des casters...
+          </p>
         </div>
       ) : loadError ? (
-        <div role="alert" className="border border-warning/30 bg-warning/5 rounded-2xl p-8 text-center space-y-3">
+        <div
+          role="alert"
+          className="border border-warning/30 bg-warning/5 rounded-2xl p-8 text-center space-y-3"
+        >
           <p className="text-sm text-muted-foreground">{loadError}</p>
           <button
             type="button"
@@ -100,7 +112,7 @@ export default function CastsPublicPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {casters.map(caster => (
+          {casters.map((caster) => (
             <CastCard key={caster.id} caster={caster} />
           ))}
         </div>

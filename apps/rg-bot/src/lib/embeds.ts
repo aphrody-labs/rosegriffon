@@ -51,4 +51,12 @@ export function fmtDate(d: Date | string | null): string {
   });
 }
 
-export const DAYS_FR = ["Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"];
+export const DAYS_FR = [
+  "Dimanche",
+  "Lundi",
+  "Mardi",
+  "Mercredi",
+  "Jeudi",
+  "Vendredi",
+  "Samedi",
+];

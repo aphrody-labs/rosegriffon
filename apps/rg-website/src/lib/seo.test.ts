@@ -32,13 +32,21 @@ describe("clampText", () => {
     expect(titleWithSuffix("Court", " | Azalée")).toBe("Court | Azalée");
     const base = "a ".repeat(30).trim();
     expect(titleWithSuffix(base, " | Azalée")).toBe(base);
-    expect(titleWithSuffix("mot ".repeat(40), " | Azalée").length).toBeLessThanOrEqual(TITLE_MAX);
+    expect(
+      titleWithSuffix("mot ".repeat(40), " | Azalée").length,
+    ).toBeLessThanOrEqual(TITLE_MAX);
   });
 
   it("wikiTitle falls back to the short brand for long subjects", () => {
-    expect(wikiTitle("Kevin")).toBe("Kevin | Inazuma Eleven Victory Road - Azalée");
-    expect(wikiTitle("Kevin Dragonfly Archibald Nathan")).toBe("Kevin Dragonfly Archibald Nathan | Azalée");
-    expect(wikiTitle("Raimon", "Équipes")).toBe("Raimon | Équipes - Inazuma Eleven Victory Road - Azalée");
+    expect(wikiTitle("Kevin")).toBe(
+      "Kevin | Inazuma Eleven Victory Road - Azalée",
+    );
+    expect(wikiTitle("Kevin Dragonfly Archibald Nathan")).toBe(
+      "Kevin Dragonfly Archibald Nathan | Azalée",
+    );
+    expect(wikiTitle("Raimon", "Équipes")).toBe(
+      "Raimon | Équipes - Inazuma Eleven Victory Road - Azalée",
+    );
   });
 
   it("hard-cuts a single overlong word", () => {
@@ -49,13 +57,23 @@ describe("clampText", () => {
 
 describe("withDefaultOgImage", () => {
   it("adds the default image when none is given", () => {
-    expect<unknown>(withDefaultOgImage({ title: "Événements" }).images).toEqual([DEFAULT_OG_IMAGE]);
-    expect<unknown>(withDefaultOgImage({ images: [], title: "x" }).images).toEqual([DEFAULT_OG_IMAGE]);
-    expect<unknown>(withDefaultOgImage({ images: undefined, title: "x" }).images).toEqual([DEFAULT_OG_IMAGE]);
+    expect<unknown>(withDefaultOgImage({ title: "Événements" }).images).toEqual(
+      [DEFAULT_OG_IMAGE],
+    );
+    expect<unknown>(
+      withDefaultOgImage({ images: [], title: "x" }).images,
+    ).toEqual([DEFAULT_OG_IMAGE]);
+    expect<unknown>(
+      withDefaultOgImage({ images: undefined, title: "x" }).images,
+    ).toEqual([DEFAULT_OG_IMAGE]);
   });
 
   it("keeps an explicit image and the other fields", () => {
-    const og = withDefaultOgImage({ images: [{ url: "/a.png" }], title: "x", type: "article" as const });
+    const og = withDefaultOgImage({
+      images: [{ url: "/a.png" }],
+      title: "x",
+      type: "article" as const,
+    });
     expect(og.images).toEqual([{ url: "/a.png" }]);
     expect(og.type).toBe("article");
     expect(og.title).toBe("x");
@@ -100,11 +118,17 @@ describe("poll titles (/sondages/<id>)", () => {
   it("stay within TITLE_MAX with the same construction as the page", async () => {
     const { resumeQuestion } = await import("./discord/polls-types");
     for (const q of questions) {
-      const titre = titleWithSuffix(resumeQuestion(q, 500), " · Sondages · Rose Griffon");
+      const titre = titleWithSuffix(
+        resumeQuestion(q, 500),
+        " · Sondages · Rose Griffon",
+      );
       expect(titre.length).toBeLessThanOrEqual(TITLE_MAX);
     }
-    expect(titleWithSuffix(resumeQuestion("Vice-Versa", 500), " · Sondages · Rose Griffon")).toBe(
-      "Vice-Versa · Sondages · Rose Griffon",
-    );
+    expect(
+      titleWithSuffix(
+        resumeQuestion("Vice-Versa", 500),
+        " · Sondages · Rose Griffon",
+      ),
+    ).toBe("Vice-Versa · Sondages · Rose Griffon");
   });
 });

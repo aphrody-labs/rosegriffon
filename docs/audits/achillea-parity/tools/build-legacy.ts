@@ -18,13 +18,18 @@ await $`cp -r ${repo}/legacy/achillea-web ${work}/web && cp -r ${repo}/packages/
 const types = await Bun.file(`${work}/types/package.json`).text();
 await Bun.write(
   `${work}/types/package.json`,
-  types.replace('"@rosegriffon/achillea-types"', '"@achillea/types"').replaceAll('"catalog:"', '"latest"'),
+  types
+    .replace('"@rosegriffon/achillea-types"', '"@achillea/types"')
+    .replaceAll('"catalog:"', '"latest"'),
 );
 const pkg = await Bun.file(`${work}/web/package.json`).text();
 await Bun.write(
   `${work}/web/package.json`,
   pkg
-    .replace('"@achillea/types": "workspace:*"', '"@achillea/types": "file:../types"')
+    .replace(
+      '"@achillea/types": "workspace:*"',
+      '"@achillea/types": "file:../types"',
+    )
     .replace('"typescript": "catalog:"', '"typescript": "~5.9.3"')
     .replaceAll('"catalog:"', '"latest"'),
 );
@@ -38,7 +43,9 @@ await $`bun --bun node_modules/@angular/cli/bin/ng.js build --configuration deve
 const env = await Bun.file(`${repo}/apps/rg-website/.env.local`).text();
 const read = (k: RegExp) => env.match(k)?.[1]?.replaceAll('"', "").trim() ?? "";
 const supabaseUrl = read(/^NEXT_PUBLIC_SUPABASE_URL=(.*)$/m);
-const supabaseKey = read(/^NEXT_PUBLIC_SUPABASE_(?:PUBLISHABLE|ANON)_KEY=(.*)$/m);
+const supabaseKey = read(
+  /^NEXT_PUBLIC_SUPABASE_(?:PUBLISHABLE|ANON)_KEY=(.*)$/m,
+);
 await Bun.write(
   `${work}/web/dist/achillea-web/browser/achillea-config.js`,
   `globalThis.__ACHILLEA_CONFIG__ = Object.freeze(${JSON.stringify({

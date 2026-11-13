@@ -15,25 +15,25 @@ toutes les portes qu'un collecteur pouvait emprunter.
 
 ## 2. Ce qui est mort, mesuré
 
-| Requête (sans compte) | Réponse observée |
-| --- | --- |
-| `GET /explore/tags/nature/?__a=1` | **200**, corps = `for (;;);{"__ar":1,"error":1357055,…}` — enveloppe d'erreur Meta, **zéro donnée** |
-| `GET /explore/tags/iergday/?__a=1&__d=dis` | **404**, 20 916 o de « Page Not Found » |
-| `GET /explore/tags/nature/` (HTML) | 200, 605 506 o — **0 occurrence de `window._sharedData`**, 38 des 44 `<script src>` sont des `data:` URI |
-| `GET /graphql/query/?query_hash=9b498c08…` | **401** `{"require_login":true}` — et c'est le hash qu'`instaloader` 4.15.3 emploie encore |
-| `GET /api/v1/tags/web_info/?tag_name=nature` | **302** → `/accounts/login/` |
-| `GET i.instagram.com/api/v1/tags/web_info/…` | **302** |
-| `GET /explore/tags/nature/embed/` | **404** |
+| Requête (sans compte)                        | Réponse observée                                                                                         |
+| -------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| `GET /explore/tags/nature/?__a=1`            | **200**, corps = `for (;;);{"__ar":1,"error":1357055,…}` — enveloppe d'erreur Meta, **zéro donnée**      |
+| `GET /explore/tags/iergday/?__a=1&__d=dis`   | **404**, 20 916 o de « Page Not Found »                                                                  |
+| `GET /explore/tags/nature/` (HTML)           | 200, 605 506 o — **0 occurrence de `window._sharedData`**, 38 des 44 `<script src>` sont des `data:` URI |
+| `GET /graphql/query/?query_hash=9b498c08…`   | **401** `{"require_login":true}` — et c'est le hash qu'`instaloader` 4.15.3 emploie encore               |
+| `GET /api/v1/tags/web_info/?tag_name=nature` | **302** → `/accounts/login/`                                                                             |
+| `GET i.instagram.com/api/v1/tags/web_info/…` | **302**                                                                                                  |
+| `GET /explore/tags/nature/embed/`            | **404**                                                                                                  |
 
 Et sur **le post réel de la campagne**
 (`https://www.instagram.com/rose_griffonfr/p/Db_AxXAlywQ/`) :
 
-| Requête | Réponse |
-| --- | --- |
-| la page du post | **200**, 605 523 o, `<title>Instagram</title>` — **0 `og:image`, 0 `og:description`, 0 JSON-LD, 0 `_sharedData`** |
-| `?__a=1&__d=dis` | **500**, corps `Oops, an error occurred.` |
-| `/embed/` et `/embed/captioned/` | 200, **la même coquille vide** |
-| **`graph.facebook.com/v23.0/instagram_oembed`** | **200 **, sans jeton |
+| Requête                                         | Réponse                                                                                                           |
+| ----------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| la page du post                                 | **200**, 605 523 o, `<title>Instagram</title>` — **0 `og:image`, 0 `og:description`, 0 JSON-LD, 0 `_sharedData`** |
+| `?__a=1&__d=dis`                                | **500**, corps `Oops, an error occurred.`                                                                         |
+| `/embed/` et `/embed/captioned/`                | 200, **la même coquille vide**                                                                                    |
+| **`graph.facebook.com/v23.0/instagram_oembed`** | **200 **, sans jeton                                                                                              |
 
 À un client non connecté, Instagram sert désormais **la même coquille SPA de
 ~605 Ko pour tout** — page de tag, page de post, page d'embed. Le scraping HTML
@@ -56,9 +56,9 @@ est mort **par construction**, pas par accident de sélecteur.
 `instaloader` (4.15.3, 26/07/2026) et `instagrapi` (2.18.14, 12/08/2026) sont
 vivantes, mais exigent toutes deux **une session Instagram**. Les employer avec
 `@rose_griffonfr` exposerait **le compte de l'association** à un blocage en
-pleine campagne. Le README d'`instagrapi` le dit lui-même : *« best suited for
-testing, research, and controlled internal automation »*, *« For account-owned
-business workflows, prefer official Instagram APIs »*.
+pleine campagne. Le README d'`instagrapi` le dit lui-même : _« best suited for
+testing, research, and controlled internal automation »_, _« For account-owned
+business workflows, prefer official Instagram APIs »_.
 
 > **Décision : on n'utilise ni l'un ni l'autre.** Pas avec le compte de
 > l'association, et pas avec un compte jetable non plus — un bannissement en
@@ -76,24 +76,24 @@ l'authentification »).
 2. **une Page Facebook liée** — la recherche par hashtag n'existe que dans
    « Instagram API **with Facebook Login** » ;
 3. une app Meta et un jeton d'un utilisateur ayant un rôle sur la Page ;
-4. permission `instagram_basic` + la *feature* **`Instagram Public Content
-   Access`**, qui exige **App Review ET Business Verification** — **2 à 4
+4. permission `instagram_basic` + la _feature_ **`Instagram Public Content
+Access`**, qui exige **App Review ET Business Verification** — **2 à 4
    semaines** annoncées par soumission.
 
 **Limites une fois obtenue :**
 
-| Limite | Valeur |
-| --- | --- |
-| hashtags interrogeables | **30 sur 7 jours glissants** |
-| `recent_media` | **médias des dernières 24 h seulement** |
-| pagination | `after` uniquement, ordre chronologique **non garanti** |
-| **champ `username`** | **INDISPONIBLE** sur les médias renvoyés |
-| comptes privés, Stories | exclus |
+| Limite                  | Valeur                                                  |
+| ----------------------- | ------------------------------------------------------- |
+| hashtags interrogeables | **30 sur 7 jours glissants**                            |
+| `recent_media`          | **médias des dernières 24 h seulement**                 |
+| pagination              | `after` uniquement, ordre chronologique **non garanti** |
+| **champ `username`**    | **INDISPONIBLE** sur les médias renvoyés                |
+| comptes privés, Stories | exclus                                                  |
 
 Deux de ces limites font mal ici :
 
-- **la fenêtre de 24 h** impose un cron toutes les 12 h *pendant toute la
-  campagne* — une passe ratée, et les créations sont perdues **sans rattrapage
+- **la fenêtre de 24 h** impose un cron toutes les 12 h _pendant toute la
+  campagne_ — une passe ratée, et les créations sont perdues **sans rattrapage
   possible** ;
 - **l'absence de `username`** casse l'attribution : la galerie et le relais
   affichent « par @pseudo », et l'API ne le donne pas.
@@ -119,25 +119,25 @@ légende.**
 Il ne sert donc pas à récolter. Il répond à **une** question, et il y répond de
 façon fiable et gratuite :
 
-| Réponse | Verdict |
-| --- | --- |
-| **200** | la publication existe et est **publique** |
+| Réponse                                       | Verdict                                                                |
+| --------------------------------------------- | ---------------------------------------------------------------------- |
+| **200**                                       | la publication existe et est **publique**                              |
 | **400**, `code: 24`, `error_subcode: 2207045` | « Media Not Found » : inexistante, supprimée, ou compte passé en privé |
-| 5xx, réseau coupé | **`indeterminee` — le dépôt PASSE quand même** |
+| 5xx, réseau coupé                             | **`indeterminee` — le dépôt PASSE quand même**                         |
 
->  **Une panne de Meta n'est pas un refus.** Refuser la création d'un
-> participant parce que *notre* vérification est en panne lui ferait payer une
+> **Une panne de Meta n'est pas un refus.** Refuser la création d'un
+> participant parce que _notre_ vérification est en panne lui ferait payer une
 > panne qui n'est pas la sienne. Le dépôt est accepté, et le staff tranche
 > depuis son salon de suivi.
 
 ### 4.2 Le code
 
-| Fichier | Rôle | Réseau ? |
-| --- | --- | --- |
-| `packages/types/src/instagram.ts` | analyse d'un permalien, pseudo, hashtag, **verdict**, appel oEmbed | l'appel seul |
-| `apps/website/src/app/iergday/actions.ts` | server action `deposerCreationInstagram` | oui |
-| `apps/website/src/app/iergday/DepotInstagram.tsx` | l'îlot client (formulaire replié) | non |
-| `packages/cron/src/tasks/campagnes-instagram.ts` | revalidation périodique (`campagnes:instagram`) | oui |
+| Fichier                                           | Rôle                                                               | Réseau ?     |
+| ------------------------------------------------- | ------------------------------------------------------------------ | ------------ |
+| `packages/types/src/instagram.ts`                 | analyse d'un permalien, pseudo, hashtag, **verdict**, appel oEmbed | l'appel seul |
+| `apps/website/src/app/iergday/actions.ts`         | server action `deposerCreationInstagram`                           | oui          |
+| `apps/website/src/app/iergday/DepotInstagram.tsx` | l'îlot client (formulaire replié)                                  | non          |
+| `packages/cron/src/tasks/campagnes-instagram.ts`  | revalidation périodique (`campagnes:instagram`)                    | oui          |
 
 > **Pourquoi ces règles vivent dans `@rosegriffon/types` et pas dans l'app.**
 > Deux surfaces posent la MÊME question à Meta : le site quand un membre dépose,
@@ -161,7 +161,7 @@ https://www.instagram.com/reel/Db_AxXAlywQ/
 instagram.com/p/Db_AxXAlywQ
 ```
 
-Toutes rendent le même `shortcode` et le même permalien canonique.  **`igsh` est
+Toutes rendent le même `shortcode` et le même permalien canonique. **`igsh` est
 un jeton de traçage** — il identifie le partageur, pas la publication : le garder
 stockerait une donnée de pistage, et deux membres partageant le même post
 créeraient deux lignes au lieu d'une. Il est retiré.
@@ -198,13 +198,13 @@ PRIMARY KEY (campagne_slug, shortcode)
 ```
 
 Quatre index (galerie partielle, vedette, masquées, déposant), `revoke all` **puis**
-`grant select` à `anon`/`authenticated` —  un GRANT au niveau table masque
+`grant select` à `anon`/`authenticated` — un GRANT au niveau table masque
 silencieusement tout REVOKE par colonne, l'ordre est impératif —, RLS en
 intersection (`not masque` ET campagne `publiee`), et **aucun trigger
 `rg_realtime_notify`** : il diffuserait `motif_masquage` et `soumis_par` sur un
 flux SSE non authentifié.
 
- `images[].chemin` pointe vers le bucket `assets`, **jamais** vers
+`images[].chemin` pointe vers le bucket `assets`, **jamais** vers
 `scontent.cdninstagram.com` : ces URL sont signées et expirent, exactement comme
 celles de Discord.
 
@@ -236,11 +236,11 @@ Les deux autres sources se corrigent seules : un tweet supprimé disparaît de
 du dépôt ; l'auteur peut ensuite supprimer son post ou passer son compte en
 privé, et la galerie continuerait d'afficher une carte qui mène à un 404.
 
-| Verdict oEmbed | Ligne libre | Masquée par le cron | Masquée par un humain |
-| --- | --- | --- | --- |
-| **publique** | rien | **restaurée** | **rien** |
-| **introuvable** | **masquée** | rien | rien |
-| **indeterminee** | rien | rien | rien |
+| Verdict oEmbed   | Ligne libre | Masquée par le cron | Masquée par un humain |
+| ---------------- | ----------- | ------------------- | --------------------- |
+| **publique**     | rien        | **restaurée**       | **rien**              |
+| **introuvable**  | **masquée** | rien                | rien                  |
+| **indeterminee** | rien        | rien                | rien                  |
 
 Trois règles, et chacune répare un dégât précis :
 
@@ -250,7 +250,7 @@ Trois règles, et chacune répare un dégât précis :
    en une passe, sans qu'aucune interface ne dise pourquoi.
 2. **On ne défait jamais une décision humaine.** Le masquage automatique porte
    un motif unique — `post retiré par son auteur, ou compte passé en privé` —
-   qui sert de **signature** : lui seul est restaurable.  Le reformuler sans
+   qui sert de **signature** : lui seul est restaurable. Le reformuler sans
    migrer les lignes existantes les rendrait définitivement non restaurables.
 3. **`a_media` veut dire « image servable ».** Chaque `images[].chemin` est
    contrôlé en `HEAD` dans le bucket ; si l'objet a disparu, la ligne retombe à
@@ -271,26 +271,26 @@ dans le salon de suivi comme si elle était encore en ligne.
 > accordée) livrerait du code que rien n'a jamais exercé. La tâche constate,
 > corrige le compteur, et le dit dans son journal.
 
- `masque`, `motif_masquage` et `mis_en_avant` sont **absents** de la clause
+`masque`, `motif_masquage` et `mis_en_avant` sont **absents** de la clause
 `do update` de l'upsert — même règle que les deux autres sources. Sans ça, un
 membre dont la création vient d'être retirée la ferait réapparaître en la
 redéposant.
 
 ## 5. État d'avancement
 
-| Pièce | État |
-| --- | --- |
-| Table + migration | **fait**, appliquée |
-| Colonne `verifie_le` + index d'ordre de passage | **fait**, appliquée le 14/8/2026 |
-| `@rosegriffon/types/instagram` (+ 33 tests) | **fait** |
-| Server action `deposerCreationInstagram` | **fait** |
-| Type `PostCampagneInstagram`, `clePost` | **fait** |
-| Galerie : `SELECT_POSTS` union des 3 sources | **fait**, déployé |
-| Cartes et visionneuse : branchement par source | **fait**, déployé |
-| `x_campagne_relais.source = 'instagram'` | **accepté** par le schéma |
-| Formulaire dans `/iergday` (`DepotInstagram.tsx`) | **fait**, déployé |
-| `creationsInstagram()` dans le relais | **fait** |
-| Tâche cron `campagnes:instagram` (+ 8 tests) | **fait** |
+| Pièce                                             | État                             |
+| ------------------------------------------------- | -------------------------------- |
+| Table + migration                                 | **fait**, appliquée              |
+| Colonne `verifie_le` + index d'ordre de passage   | **fait**, appliquée le 14/8/2026 |
+| `@rosegriffon/types/instagram` (+ 33 tests)       | **fait**                         |
+| Server action `deposerCreationInstagram`          | **fait**                         |
+| Type `PostCampagneInstagram`, `clePost`           | **fait**                         |
+| Galerie : `SELECT_POSTS` union des 3 sources      | **fait**, déployé                |
+| Cartes et visionneuse : branchement par source    | **fait**, déployé                |
+| `x_campagne_relais.source = 'instagram'`          | **accepté** par le schéma        |
+| Formulaire dans `/iergday` (`DepotInstagram.tsx`) | **fait**, déployé                |
+| `creationsInstagram()` dans le relais             | **fait**                         |
+| Tâche cron `campagnes:instagram` (+ 8 tests)      | **fait**                         |
 
 La chaîne est complète : un membre dépose → le lien est vérifié chez Meta →
 l'image est ré-hébergée → le staff le voit dans son salon de suivi à la passe

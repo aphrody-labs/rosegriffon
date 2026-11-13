@@ -8,7 +8,11 @@
  */
 import { lancerTache, REGISTRE_TACHES } from "./registry";
 
-export { CATALOGUE_TACHES, PLANIFICATIONS, TACHES_CRON } from "@rosegriffon/types/cron";
+export {
+  CATALOGUE_TACHES,
+  PLANIFICATIONS,
+  TACHES_CRON,
+} from "@rosegriffon/types/cron";
 export {
   executeTask,
   lancerTache,
@@ -26,18 +30,29 @@ export type { ClientPasserelle } from "./tasks/discord-messages";
  * serverless qui importe ce module ne charge ni le navigateur CDP ni l'historique.
  */
 export const historiqueExecutions = (limite?: number) =>
-  import("./lib/executions-postgres").then(m => m.historiqueRecent(limite));
+  import("./lib/executions-postgres").then((m) => m.historiqueRecent(limite));
 
 /** Veille temps réel des salons suivis, branchée sur la passerelle du processus qui la tient. */
-export const brancherVeilleMessagesTempsReel = (client: import("./tasks/discord-messages").ClientPasserelle) =>
-  import("./tasks/discord-messages").then(m => m.brancherVeilleMessagesTempsReel(client));
+export const brancherVeilleMessagesTempsReel = (
+  client: import("./tasks/discord-messages").ClientPasserelle,
+) =>
+  import("./tasks/discord-messages").then((m) =>
+    m.brancherVeilleMessagesTempsReel(client),
+  );
 
 /** Verbes de scraping (`scrape.*`, `x.*`) servis en processus par `rg-core`. */
-export const servirVerbeScrape = (verbe: string, requete: Record<string, unknown>) =>
-  import("./tasks/ie-crawl/scrape-service").then(m =>
+export const servirVerbeScrape = (
+  verbe: string,
+  requete: Record<string, unknown>,
+) =>
+  import("./tasks/ie-crawl/scrape-service").then((m) =>
     m.estVerbeScrape(verbe)
       ? m.servirVerbeScrape(verbe, requete)
-      : { success: false, error: `Commande inconnue : « ${verbe} ».`, code: "verbe_inconnu" },
+      : {
+          success: false,
+          error: `Commande inconnue : « ${verbe} ».`,
+          code: "verbe_inconnu",
+        },
   );
 
 /** Ordre de `--run all` : celui de l'ancien démon. */
@@ -76,7 +91,9 @@ async function cli(args: string[]): Promise<number> {
   const tache = indiceRun >= 0 ? args[indiceRun + 1] : undefined;
   if (!tache || args.includes("--help") || args.includes("-h")) {
     const noms = [...Object.keys(REGISTRE_TACHES), ...Object.keys(COMPOSITES)];
-    console.log(`Usage: rg-cron --run <tâche> [argument]\nTâches : ${noms.join(", ")}`);
+    console.log(
+      `Usage: rg-cron --run <tâche> [argument]\nTâches : ${noms.join(", ")}`,
+    );
     return tache ? 0 : 1;
   }
   const argument = args[indiceRun + 2];
@@ -84,7 +101,10 @@ async function cli(args: string[]): Promise<number> {
   let succes = true;
   for (const nom of suite) {
     console.log(`🏃 Exécution manuelle de la tâche : ${nom}`);
-    const resultat = await lancerTache(nom, { origine: "cli", argument: suite.length === 1 ? argument : undefined });
+    const resultat = await lancerTache(nom, {
+      origine: "cli",
+      argument: suite.length === 1 ? argument : undefined,
+    });
     if (!resultat.success) {
       succes = false;
       console.error(`❌ ${resultat.nom} : ${resultat.error ?? "échec"}`);
@@ -94,7 +114,9 @@ async function cli(args: string[]): Promise<number> {
 }
 
 /** CLI `rg-cron --run <tâche> [argument]` : exécute puis termine le processus avec son code de sortie. */
-export async function runCronCli(args: string[] = process.argv.slice(2)): Promise<never> {
+export async function runCronCli(
+  args: string[] = process.argv.slice(2),
+): Promise<never> {
   process.exit(await cli(args));
 }
 

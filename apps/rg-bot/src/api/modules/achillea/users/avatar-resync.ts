@@ -37,14 +37,20 @@ export interface ResyncResult {
 }
 
 /** `null` = compte inconnu de Discord (404) ; lève sur toute autre erreur. */
-export async function fetchDiscordUser(token: string, userId: string, attempt = 0): Promise<DiscordUser | null> {
+export async function fetchDiscordUser(
+  token: string,
+  userId: string,
+  attempt = 0,
+): Promise<DiscordUser | null> {
   const response = await fetch(`${API_DISCORD}/users/${userId}`, {
     headers: { Authorization: `Bot ${token}` },
     signal: AbortSignal.timeout(10_000),
   });
   if (response.status === 404) return null;
   if (response.status === 429 && attempt < 3) {
-    const body = (await response.json().catch(() => ({}))) as { retry_after?: number };
+    const body = (await response.json().catch(() => ({}))) as {
+      retry_after?: number;
+    };
     await Bun.sleep(Math.ceil((body.retry_after ?? 1) * 1000) + 250);
     return fetchDiscordUser(token, userId, attempt + 1);
   }
@@ -59,26 +65,40 @@ export async function resyncAvatars(
 ): Promise<ResyncResult> {
   const users = await db
     .selectFrom("user")
-    .select(["id", "avatar", "username", "display_name", "normalized_display_name"])
+    .select([
+      "id",
+      "avatar",
+      "username",
+      "display_name",
+      "normalized_display_name",
+    ])
     .execute();
   let updated = 0;
   let failed = 0;
   for (let i = 0; i < users.length; i += CHUNK) {
     const chunk = users.slice(i, i + CHUNK);
     const changes = await Promise.all(
-      chunk.map(async user => {
+      chunk.map(async (user) => {
         try {
           const discord = await fetchDiscordUser(token, user.id);
           if (!discord) {
             // Inconnu de Discord : on se contente de normaliser l'URL stockée.
             const normalized = resolveDiscordAvatarUrl(user.id, user.avatar);
-            return normalized === user.avatar ? null : { id: user.id, avatar: normalized };
+            return normalized === user.avatar
+              ? null
+              : { id: user.id, avatar: normalized };
           }
           const avatar = resolveDiscordAvatarUrl(discord.id, discord.avatar);
           // username / display_name sont NOT NULL : jamais écrasés par une valeur vide.
           const username = discord.username || user.username || "";
-          const displayName = discord.global_name || username || user.display_name;
-          if (avatar === user.avatar && username === user.username && displayName === user.display_name) return null;
+          const displayName =
+            discord.global_name || username || user.display_name;
+          if (
+            avatar === user.avatar &&
+            username === user.username &&
+            displayName === user.display_name
+          )
+            return null;
           return {
             id: user.id,
             avatar,
@@ -110,40 +130,43 @@ export function currentAvatarResync(): Promise<ResyncResult> | null {
   return running;
 }
 
-export const avatarResyncController = new Elysia({ prefix: "/users" }).use(dbPlugin).post(
-  "/resync-avatars",
-  async ({ db, headers }) => {
-    const auth = await requireRole(db, headers, ROLE_ADMINISTRATOR);
-    if (auth.error) return auth.error;
-    const token = jetonBotAchillea();
-    if (!token) return status(503, { message: "ACHILLEA_DISCORD_BOT_TOKEN absent" });
-    if (running) return { started: false };
-    await journaliserAudit(db, {
-      acteur: auth.session.id,
-      action: "user.resync_avatars",
-      cibleType: "user",
-      cibleId: null,
-    });
-    running = resyncAvatars(db, token)
-      .then(result => {
-        console.info("[resync-avatars]", result);
-        return result;
-      })
-      .catch(err => {
-        console.error("[resync-avatars]", err);
-        return { scanned: 0, updated: 0, failed: 0 };
-      })
-      .finally(() => {
-        running = null;
+export const avatarResyncController = new Elysia({ prefix: "/users" })
+  .use(dbPlugin)
+  .post(
+    "/resync-avatars",
+    async ({ db, headers }) => {
+      const auth = await requireRole(db, headers, ROLE_ADMINISTRATOR);
+      if (auth.error) return auth.error;
+      const token = jetonBotAchillea();
+      if (!token)
+        return status(503, { message: "ACHILLEA_DISCORD_BOT_TOKEN absent" });
+      if (running) return { started: false };
+      await journaliserAudit(db, {
+        acteur: auth.session.id,
+        action: "user.resync_avatars",
+        cibleType: "user",
+        cibleId: null,
       });
-    return { started: true };
-  },
-  {
-    response: {
-      200: t.Object({ started: t.Boolean() }),
-      401: t.Object({ message: t.String() }),
-      403: t.Object({ message: t.String() }),
-      503: t.Object({ message: t.String() }),
+      running = resyncAvatars(db, token)
+        .then((result) => {
+          console.info("[resync-avatars]", result);
+          return result;
+        })
+        .catch((err) => {
+          console.error("[resync-avatars]", err);
+          return { scanned: 0, updated: 0, failed: 0 };
+        })
+        .finally(() => {
+          running = null;
+        });
+      return { started: true };
     },
-  },
-);
+    {
+      response: {
+        200: t.Object({ started: t.Boolean() }),
+        401: t.Object({ message: t.String() }),
+        403: t.Object({ message: t.String() }),
+        503: t.Object({ message: t.String() }),
+      },
+    },
+  );

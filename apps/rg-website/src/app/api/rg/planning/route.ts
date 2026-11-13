@@ -23,6 +23,9 @@ export async function GET() {
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Erreur inconnue";
-    return NextResponse.json({ error: message, success: false }, { status: 500 });
+    return NextResponse.json(
+      { error: message, success: false },
+      { status: 500 },
+    );
   }
 }

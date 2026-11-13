@@ -14,16 +14,24 @@ import {
 } from "@rosegriffon/achillea-types";
 
 /** Types de mouvement qui créditent le titulaire. */
-const CREDITING_TYPES: readonly WalletTransactionType[] = [WalletTransactionType.Credit, WalletTransactionType.Payout];
+const CREDITING_TYPES: readonly WalletTransactionType[] = [
+  WalletTransactionType.Credit,
+  WalletTransactionType.Payout,
+];
 
 /**
  * Sens d'un mouvement déduit de son type, quand l'API ne l'a pas renseigné.
  * `Transfer` est ambigu par nature : il dépend du point de vue, donc on se fie
  * au `direction` servi par l'API et on ne le devine jamais.
  */
-export function inferDirection(type: WalletTransactionType): WalletTransactionDirection | null {
+export function inferDirection(
+  type: WalletTransactionType,
+): WalletTransactionDirection | null {
   if (CREDITING_TYPES.includes(type)) return WalletTransactionDirection.In;
-  if (type === WalletTransactionType.Debit || type === WalletTransactionType.Fine) {
+  if (
+    type === WalletTransactionType.Debit ||
+    type === WalletTransactionType.Fine
+  ) {
     return WalletTransactionDirection.Out;
   }
   return null;
@@ -32,7 +40,9 @@ export function inferDirection(type: WalletTransactionType): WalletTransactionDi
 /** Montant signé d'un mouvement du point de vue du titulaire. */
 export function signedAmount(transaction: WalletTransaction): number {
   const amount = Math.abs(transaction.amount);
-  return transaction.direction === WalletTransactionDirection.In ? amount : -amount;
+  return transaction.direction === WalletTransactionDirection.In
+    ? amount
+    : -amount;
 }
 
 /** Somme signée d'une liste de mouvements. */
@@ -41,7 +51,10 @@ export function netAmount(transactions: readonly WalletTransaction[]): number {
 }
 
 /** Applique une liste de mouvements à un solde de départ. */
-export function applyTransactions(opening: WalletBalance, transactions: readonly WalletTransaction[]): WalletBalance {
+export function applyTransactions(
+  opening: WalletBalance,
+  transactions: readonly WalletTransaction[],
+): WalletBalance {
   return { ...opening, balance: opening.balance + netAmount(transactions) };
 }
 
@@ -51,7 +64,9 @@ export function canAfford(balance: WalletBalance, amount: number): boolean {
 }
 
 /** Ventilation par type, pour un récapitulatif ou un graphique. */
-export function totalsByType(transactions: readonly WalletTransaction[]): Record<WalletTransactionType, number> {
+export function totalsByType(
+  transactions: readonly WalletTransaction[],
+): Record<WalletTransactionType, number> {
   const totals = {
     [WalletTransactionType.Credit]: 0,
     [WalletTransactionType.Debit]: 0,

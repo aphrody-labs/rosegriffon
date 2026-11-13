@@ -54,7 +54,8 @@ const STATUTS: readonly StatutSondage[] = ["tous", "en-cours", "termines"];
 
 /** Valide un statut venu de l'URL contre la liste blanche (défaut : « tous »). */
 export function normaliserStatut(valeur: unknown): StatutSondage {
-  return typeof valeur === "string" && (STATUTS as readonly string[]).includes(valeur)
+  return typeof valeur === "string" &&
+    (STATUTS as readonly string[]).includes(valeur)
     ? (valeur as StatutSondage)
     : "tous";
 }
@@ -128,7 +129,8 @@ interface LigneSondage {
 }
 
 function entierOuNull(valeur: unknown): number | null {
-  if (typeof valeur === "number") return Number.isFinite(valeur) ? Math.trunc(valeur) : null;
+  if (typeof valeur === "number")
+    return Number.isFinite(valeur) ? Math.trunc(valeur) : null;
   if (typeof valeur === "string" && valeur.trim().length > 0) {
     const nombre = Number(valeur);
     return Number.isFinite(nombre) ? Math.trunc(nombre) : null;
@@ -137,7 +139,8 @@ function entierOuNull(valeur: unknown): number | null {
 }
 
 function nombreOuNull(valeur: unknown): number | null {
-  if (typeof valeur === "number") return Number.isFinite(valeur) ? valeur : null;
+  if (typeof valeur === "number")
+    return Number.isFinite(valeur) ? valeur : null;
   // `numeric(5,2)` remonte en chaîne avec le pilote `pg` : « 25.80 ».
   if (typeof valeur === "string" && valeur.trim().length > 0) {
     const nombre = Number(valeur);
@@ -147,7 +150,8 @@ function nombreOuNull(valeur: unknown): number | null {
 }
 
 function isoOuNull(valeur: unknown): string | null {
-  if (valeur instanceof Date) return Number.isNaN(valeur.getTime()) ? null : valeur.toISOString();
+  if (valeur instanceof Date)
+    return Number.isNaN(valeur.getTime()) ? null : valeur.toISOString();
   if (typeof valeur === "string" && valeur.length > 0) {
     const date = new Date(valeur);
     return Number.isNaN(date.getTime()) ? null : date.toISOString();
@@ -165,7 +169,10 @@ function normaliserOptions(valeur: unknown): OptionSondage[] {
       const position = entierOuNull(ligne.position);
       if (position === null) return null;
       return {
-        emoji: typeof ligne.emoji === "string" && ligne.emoji.length > 0 ? ligne.emoji : null,
+        emoji:
+          typeof ligne.emoji === "string" && ligne.emoji.length > 0
+            ? ligne.emoji
+            : null,
         label: typeof ligne.label === "string" ? ligne.label : "",
         percentage: nombreOuNull(ligne.percentage),
         position,
@@ -198,7 +205,10 @@ function chapoUtilisable(contenu: string | null): string | null {
 function normaliserSondage(ligne: LigneSondage): Sondage {
   const visuel: VisuelSondage | null = ligne.visual_path
     ? {
-        alt: ligne.visual_alt && ligne.visual_alt.trim().length > 0 ? ligne.visual_alt : null,
+        alt:
+          ligne.visual_alt && ligne.visual_alt.trim().length > 0
+            ? ligne.visual_alt
+            : null,
         height: entierOuNull(ligne.visual_height),
         message_id: ligne.visual_message_id,
         url: urlVisuel(ligne.visual_path),
@@ -215,7 +225,10 @@ function normaliserSondage(ligne: LigneSondage): Sondage {
     ended: ligne.ended === true,
     ends_at: isoOuNull(ligne.ends_at),
     guild_id: ligne.guild_id,
-    language: ligne.language === "fr" || ligne.language === "en" ? ligne.language : null,
+    language:
+      ligne.language === "fr" || ligne.language === "en"
+        ? ligne.language
+        : null,
     locked: ligne.locked === true,
     max_choices: entierOuNull(ligne.max_choices) ?? 1,
     message_id: ligne.message_id,
@@ -224,7 +237,12 @@ function normaliserSondage(ligne: LigneSondage): Sondage {
     provider: ligne.provider === "discord" ? "discord" : "easypoll",
     question: ligne.question,
     results_hidden: ligne.results_hidden === true,
-    source: ligne.source === "reactions" ? "reactions" : ligne.source === "api" ? "api" : "embed",
+    source:
+      ligne.source === "reactions"
+        ? "reactions"
+        : ligne.source === "api"
+          ? "api"
+          : "embed",
     total_votes: entierOuNull(ligne.total_votes),
     total_voters: entierOuNull(ligne.total_voters),
     visuel,
@@ -276,9 +294,14 @@ export interface ResultatListeSondages {
  * Sondages visibles, du plus récent au plus ancien.
  * En cas de panne de base : liste vide, jamais une page en erreur.
  */
-export async function listerSondages(options: OptionsListeSondages = {}): Promise<ResultatListeSondages> {
+export async function listerSondages(
+  options: OptionsListeSondages = {},
+): Promise<ResultatListeSondages> {
   const parPage = Math.min(
-    Math.max(Math.trunc(options.parPage ?? SONDAGES_PAR_PAGE) || SONDAGES_PAR_PAGE, 1),
+    Math.max(
+      Math.trunc(options.parPage ?? SONDAGES_PAR_PAGE) || SONDAGES_PAR_PAGE,
+      1,
+    ),
     SONDAGES_PAR_PAGE_MAX,
   );
   const page = Math.max(Math.trunc(options.page ?? 1) || 1, 1);
@@ -318,7 +341,7 @@ export async function listerSondages(options: OptionsListeSondages = {}): Promis
     );
 
     return {
-      sondages: rows.map(ligne => normaliserSondage(ligne)),
+      sondages: rows.map((ligne) => normaliserSondage(ligne)),
       total: entierOuNull(rows[0]?.total) ?? 0,
     };
   } catch (error) {
@@ -397,7 +420,7 @@ export async function listerIdentifiantsSondages(): Promise<string[]> {
 			JOIN discord_channels c ON c.channel_id = p.channel_id AND c.suivi = true
 			ORDER BY p.created_at DESC`,
     );
-    return rows.map(ligne => ligne.poll_id);
+    return rows.map((ligne) => ligne.poll_id);
   } catch (error) {
     console.error("[sondages] lecture des identifiants impossible", error);
     return [];
@@ -472,11 +495,13 @@ export async function lireVoisins(pollId: string): Promise<VoisinsSondage> {
  * `mentions` des messages EasyPoll ne résout pas (elle vaut `{"roles":[]…}`), la
  * résolution passe donc forcément par la table `discord_roles`.
  */
-export async function construireContexteSondages(sondages: Sondage[]): Promise<ContexteMentions> {
+export async function construireContexteSondages(
+  sondages: Sondage[],
+): Promise<ContexteMentions> {
   if (sondages.length === 0) return CONTEXTE_MENTIONS_VIDE;
 
   const messages = sondages
-    .map(sondage =>
+    .map((sondage) =>
       normaliserMessage({
         // Un identifiant de message valide est exigé par le normaliseur ; celui
         // de l'encart fait l'affaire, à défaut celui du salon.
@@ -484,7 +509,9 @@ export async function construireContexteSondages(sondages: Sondage[]): Promise<C
         content: [
           sondage.question,
           sondage.chapo ?? "",
-          ...sondage.options.map(option => `${option.emoji ?? ""} ${option.label}`),
+          ...sondage.options.map(
+            (option) => `${option.emoji ?? ""} ${option.label}`,
+          ),
         ].join("\n"),
         message_id: sondage.message_id ?? sondage.channel_id,
       }),

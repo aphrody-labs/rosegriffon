@@ -44,7 +44,7 @@ describe("buildExpTableData", () => {
 
   test("trie par niveau croissant quel que soit l'ordre d'entrée", () => {
     const shuffled = buildExpTableData([...REAL_HEAD].reverse());
-    expect(shuffled.entries.map(e => e.level)).toEqual([1, 2, 3, 4, 5]);
+    expect(shuffled.entries.map((e) => e.level)).toEqual([1, 2, 3, 4, 5]);
     expect(shuffled.totalExp).toBe(565);
   });
 
@@ -106,7 +106,9 @@ describe("expBetweenLevels", () => {
 
   test("cumulativeExpToLevel est le cas particulier partant du niveau minimum", () => {
     for (const level of [1, 2, 3, 4, 5]) {
-      expect(cumulativeExpToLevel(table, level)).toBe(expBetweenLevels(table, table.minLevel, level));
+      expect(cumulativeExpToLevel(table, level)).toBe(
+        expBetweenLevels(table, table.minLevel, level),
+      );
     }
   });
 });
@@ -180,7 +182,11 @@ describe("levelFromExp", () => {
   });
 
   test("entrées aberrantes traitées comme zéro", () => {
-    for (const bad of [-100, Number.NaN, Number.POSITIVE_INFINITY - Number.POSITIVE_INFINITY]) {
+    for (const bad of [
+      -100,
+      Number.NaN,
+      Number.POSITIVE_INFINITY - Number.POSITIVE_INFINITY,
+    ]) {
       const r = levelFromExp(table, bad);
       expect(r.level).toBe(1);
       expect(r.expIntoLevel).toBe(0);

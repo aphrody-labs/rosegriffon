@@ -148,7 +148,10 @@ export interface BasaraDatabase {
 export const ELEMENT_NAMES = CANONICAL_ELEMENT_NAMES;
 
 /** Position name mappings */
-export const POSITION_NAMES: Record<number, { en: string; ja: string; fr: string }> = {
+export const POSITION_NAMES: Record<
+  number,
+  { en: string; ja: string; fr: string }
+> = {
   1: { en: "GK", ja: "GK", fr: "GB" },
   2: { en: "FW", ja: "FW", fr: "AV" },
   3: { en: "MF", ja: "MF", fr: "MO" },

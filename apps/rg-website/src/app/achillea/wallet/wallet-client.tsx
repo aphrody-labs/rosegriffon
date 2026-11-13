@@ -5,7 +5,16 @@ import Link from "@/components/shared/Link";
 import { formatAchCurrency } from "@/lib/achillea";
 import type { WalletBalance } from "@rosegriffon/achillea-types/domain/wallet";
 import { WalletTransactionDirection } from "@rosegriffon/achillea-types/enums/wallet";
-import { Wallet, ArrowLeft, ShieldAlert, Coins, Loader2, ArrowUpRight, ArrowDownLeft, Info } from "lucide-react";
+import {
+  Wallet,
+  ArrowLeft,
+  ShieldAlert,
+  Coins,
+  Loader2,
+  ArrowUpRight,
+  ArrowDownLeft,
+  Info,
+} from "lucide-react";
 import { signalerException } from "@/lib/achillea/signaler";
 
 type TransactionWebsite = {
@@ -17,7 +26,12 @@ type TransactionWebsite = {
   createdAt: string;
 };
 
-type EtatAcces = "verification" | "connecte" | "non_connecte" | "discord_absent" | "indisponible";
+type EtatAcces =
+  | "verification"
+  | "connecte"
+  | "non_connecte"
+  | "discord_absent"
+  | "indisponible";
 
 export default function WalletPage() {
   const [balance, setBalance] = useState<WalletBalance | null>(null);
@@ -29,7 +43,7 @@ export default function WalletPage() {
     let cancelled = false;
 
     fetch("/api/achillea/wallet", { credentials: "same-origin" })
-      .then(async reponse => {
+      .then(async (reponse) => {
         if (cancelled) return;
         if (reponse.status === 401) {
           setEtatAcces("non_connecte");
@@ -48,7 +62,7 @@ export default function WalletPage() {
         setTransactions(donnees.transactions);
         setEtatAcces("connecte");
       })
-      .catch(cause => {
+      .catch((cause) => {
         if (!cancelled) setEtatAcces("indisponible");
         signalerException("wallet", cause);
       })
@@ -102,7 +116,9 @@ export default function WalletPage() {
     return (
       <div className="max-w-md mx-auto px-4 py-20 text-center space-y-3">
         <ShieldAlert className="w-12 h-12 text-destructive mx-auto" />
-        <h2 className="text-xl font-bold">Portefeuille temporairement indisponible</h2>
+        <h2 className="text-xl font-bold">
+          Portefeuille temporairement indisponible
+        </h2>
         <p className="text-sm text-muted-foreground">
           La base Achilléa ne répond pas encore. Réessayez dans un instant.
         </p>
@@ -127,17 +143,22 @@ export default function WalletPage() {
           <span className="p-2 rounded-xl bg-warning/10 text-warning border border-warning/20">
             <Wallet className="w-5 h-5" />
           </span>
-          <h1 className="text-3xl font-bold tracking-tight">Portefeuille Virtuel (ACH)</h1>
+          <h1 className="text-3xl font-bold tracking-tight">
+            Portefeuille Virtuel (ACH)
+          </h1>
         </div>
         <p className="text-sm text-muted-foreground">
-          Consultez votre réserve d'Achilléa Points (AP/ACH), vos gains de tournois et votre relevé d'opérations.
+          Consultez votre réserve d'Achilléa Points (AP/ACH), vos gains de
+          tournois et votre relevé d'opérations.
         </p>
       </div>
 
       {loading ? (
         <div className="py-20 text-center space-y-3">
           <Loader2 className="w-8 h-8 animate-spin mx-auto text-muted-foreground" />
-          <p className="text-sm text-muted-foreground">Chargement de votre portefeuille...</p>
+          <p className="text-sm text-muted-foreground">
+            Chargement de votre portefeuille...
+          </p>
         </div>
       ) : (
         <div className="space-y-8">
@@ -153,7 +174,9 @@ export default function WalletPage() {
               <div className="text-4xl md:text-5xl font-black text-warning font-mono tracking-tight">
                 {formatAchCurrency(currentAmount)}
               </div>
-              <p className="text-xs text-muted-foreground">Crédits cumulés utilisables lors des évènements Achilléa.</p>
+              <p className="text-xs text-muted-foreground">
+                Crédits cumulés utilisables lors des évènements Achilléa.
+              </p>
             </div>
 
             <div className="p-4 rounded-xl bg-surface-container-high/70 border border-outline-variant/15 text-xs space-y-2 max-w-sm">
@@ -162,7 +185,8 @@ export default function WalletPage() {
                 Usage de la monnaie ACH
               </div>
               <p className="text-muted-foreground leading-relaxed">
-                Les points sont crédités automatiquement lors des victoires de tournois et paliers classés franchis.
+                Les points sont crédités automatiquement lors des victoires de
+                tournois et paliers classés franchis.
               </p>
             </div>
           </div>
@@ -181,8 +205,9 @@ export default function WalletPage() {
               </div>
             ) : (
               <div className="divide-y divide-outline-variant/10">
-                {transactions.map(tx => {
-                  const isCredit = tx.direction === WalletTransactionDirection.In;
+                {transactions.map((tx) => {
+                  const isCredit =
+                    tx.direction === WalletTransactionDirection.In;
                   return (
                     <div
                       key={tx.id}
@@ -196,26 +221,36 @@ export default function WalletPage() {
                               : "bg-destructive/10 text-destructive border border-destructive/20"
                           }`}
                         >
-                          {isCredit ? <ArrowDownLeft className="w-4 h-4" /> : <ArrowUpRight className="w-4 h-4" />}
+                          {isCredit ? (
+                            <ArrowDownLeft className="w-4 h-4" />
+                          ) : (
+                            <ArrowUpRight className="w-4 h-4" />
+                          )}
                         </div>
 
                         <div>
                           <div className="font-bold text-xs text-foreground">
-                            {tx.reason || (isCredit ? "Crédit de points" : "Débit")}
+                            {tx.reason ||
+                              (isCredit ? "Crédit de points" : "Débit")}
                           </div>
                           <div className="text-[10px] text-muted-foreground">
-                            {new Date(tx.createdAt).toLocaleDateString("fr-FR", {
-                              day: "numeric",
-                              month: "short",
-                              year: "numeric",
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })}
+                            {new Date(tx.createdAt).toLocaleDateString(
+                              "fr-FR",
+                              {
+                                day: "numeric",
+                                month: "short",
+                                year: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              },
+                            )}
                           </div>
                         </div>
                       </div>
 
-                      <div className={`font-mono font-bold text-sm ${isCredit ? "text-success" : "text-destructive"}`}>
+                      <div
+                        className={`font-mono font-bold text-sm ${isCredit ? "text-success" : "text-destructive"}`}
+                      >
                         {isCredit ? "+" : "-"}
                         {formatAchCurrency(tx.amount)}
                       </div>

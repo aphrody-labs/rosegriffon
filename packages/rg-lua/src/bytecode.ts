@@ -4,17 +4,54 @@
 
 export const LUA_SIGNATURE = new Uint8Array([0x1b, 0x4c, 0x75, 0x61]); // "\x1bLua"
 export const LUAC_VERSION_52 = 0x52;
-export const LUAC_TAIL_52 = new Uint8Array([0x19, 0x93, 0x0d, 0x0a, 0x1a, 0x0a]);
+export const LUAC_TAIL_52 = new Uint8Array([
+  0x19, 0x93, 0x0d, 0x0a, 0x1a, 0x0a,
+]);
 
 export const LUA_52_OPCODES = [
-  "MOVE", "LOADK", "LOADKX", "LOADBOOL", "LOADNIL", "GETUPVAL", "GETTABUP", "GETTABLE",
-  "SETTABUP", "SETUPVAL", "SETTABLE", "NEWTABLE", "SELF", "ADD", "SUB", "MUL", "DIV",
-  "MOD", "POW", "UNM", "NOT", "LEN", "CONCAT", "JMP", "EQ", "LT", "LE", "TEST", "TESTSET",
-  "CALL", "TAILCALL", "RETURN", "FORLOOP", "FORPREP", "TFORCALL", "TFORLOOP", "SETLIST",
-  "CLOSURE", "VARARG", "EXTRAARG",
+  "MOVE",
+  "LOADK",
+  "LOADKX",
+  "LOADBOOL",
+  "LOADNIL",
+  "GETUPVAL",
+  "GETTABUP",
+  "GETTABLE",
+  "SETTABUP",
+  "SETUPVAL",
+  "SETTABLE",
+  "NEWTABLE",
+  "SELF",
+  "ADD",
+  "SUB",
+  "MUL",
+  "DIV",
+  "MOD",
+  "POW",
+  "UNM",
+  "NOT",
+  "LEN",
+  "CONCAT",
+  "JMP",
+  "EQ",
+  "LT",
+  "LE",
+  "TEST",
+  "TESTSET",
+  "CALL",
+  "TAILCALL",
+  "RETURN",
+  "FORLOOP",
+  "FORPREP",
+  "TFORCALL",
+  "TFORLOOP",
+  "SETLIST",
+  "CLOSURE",
+  "VARARG",
+  "EXTRAARG",
 ] as const;
 
-export type Lua52Opcode = typeof LUA_52_OPCODES[number];
+export type Lua52Opcode = (typeof LUA_52_OPCODES)[number];
 
 export interface LuaBytecodeHeader {
   version: string;
@@ -103,7 +140,11 @@ class ByteReader {
   private littleEndian = true;
 
   constructor(private buffer: Uint8Array) {
-    this.view = new DataView(buffer.buffer, buffer.byteOffset, buffer.byteLength);
+    this.view = new DataView(
+      buffer.buffer,
+      buffer.byteOffset,
+      buffer.byteLength,
+    );
   }
 
   get pos(): number {
@@ -119,12 +160,14 @@ class ByteReader {
   }
 
   readByte(): number {
-    if (this.offset >= this.buffer.length) throw new Error("Unexpected EOF reading byte");
+    if (this.offset >= this.buffer.length)
+      throw new Error("Unexpected EOF reading byte");
     return this.buffer[this.offset++];
   }
 
   readBytes(count: number): Uint8Array {
-    if (this.offset + count > this.buffer.length) throw new Error("Unexpected EOF reading bytes");
+    if (this.offset + count > this.buffer.length)
+      throw new Error("Unexpected EOF reading bytes");
     const slice = this.buffer.subarray(this.offset, this.offset + count);
     this.offset += count;
     return slice;
@@ -173,14 +216,21 @@ class ByteReader {
     if (len === 0) return "";
     const raw = this.readBytes(len);
     // Remove trailing NUL byte if present
-    const end = raw.length > 0 && raw[raw.length - 1] === 0 ? raw.length - 1 : raw.length;
-    return new TextDecoder("utf-8", { fatal: false }).decode(raw.subarray(0, end));
+    const end =
+      raw.length > 0 && raw[raw.length - 1] === 0 ? raw.length - 1 : raw.length;
+    return new TextDecoder("utf-8", { fatal: false }).decode(
+      raw.subarray(0, end),
+    );
   }
 }
 
-export function decodeLua52Instruction(pc: number, raw: number): LuaDisassembledInstruction {
+export function decodeLua52Instruction(
+  pc: number,
+  raw: number,
+): LuaDisassembledInstruction {
   const opcodeNum = raw & 0x3f;
-  const opcode: Lua52Opcode = LUA_52_OPCODES[opcodeNum] || (`OP_${opcodeNum}` as any);
+  const opcode: Lua52Opcode =
+    LUA_52_OPCODES[opcodeNum] || (`OP_${opcodeNum}` as any);
   const a = (raw >>> 6) & 0xff;
   const c = (raw >>> 14) & 0x1ff;
   const b = (raw >>> 23) & 0x1ff;
@@ -465,7 +515,7 @@ export function auditLua52Bytecode(bytes: Uint8Array): Lua52BytecodeAudit {
 export function transcodeLua52Bytecode(
   sourceBytes: Uint8Array,
   targetIntSize = 4,
-  targetSizeTSize = 4
+  targetSizeTSize = 4,
 ): Uint8Array {
   if (!isLua52Bytecode(sourceBytes)) {
     throw new Error("Invalid Lua 5.2 chunk");
@@ -483,22 +533,63 @@ export function transcodeLua52Bytecode(
   const srcIntegral = inReader.readByte();
   inReader.readBytes(6); // tail
 
-  const out: number[] = [0x1b, 0x4c, 0x75, 0x61, 0x52, 0x00, endian, targetIntSize, targetSizeTSize, srcInstr, srcNum, srcIntegral];
+  const out: number[] = [
+    0x1b,
+    0x4c,
+    0x75,
+    0x61,
+    0x52,
+    0x00,
+    endian,
+    targetIntSize,
+    targetSizeTSize,
+    srcInstr,
+    srcNum,
+    srcIntegral,
+  ];
   out.push(...LUAC_TAIL_52);
 
   function writeInt(val: number) {
     if (targetIntSize === 4) {
-      out.push(val & 0xff, (val >>> 8) & 0xff, (val >>> 16) & 0xff, (val >>> 24) & 0xff);
+      out.push(
+        val & 0xff,
+        (val >>> 8) & 0xff,
+        (val >>> 16) & 0xff,
+        (val >>> 24) & 0xff,
+      );
     } else {
-      out.push(val & 0xff, (val >>> 8) & 0xff, (val >>> 16) & 0xff, (val >>> 24) & 0xff, 0, 0, 0, 0);
+      out.push(
+        val & 0xff,
+        (val >>> 8) & 0xff,
+        (val >>> 16) & 0xff,
+        (val >>> 24) & 0xff,
+        0,
+        0,
+        0,
+        0,
+      );
     }
   }
 
   function writeSizeT(val: number) {
     if (targetSizeTSize === 4) {
-      out.push(val & 0xff, (val >>> 8) & 0xff, (val >>> 16) & 0xff, (val >>> 24) & 0xff);
+      out.push(
+        val & 0xff,
+        (val >>> 8) & 0xff,
+        (val >>> 16) & 0xff,
+        (val >>> 24) & 0xff,
+      );
     } else {
-      out.push(val & 0xff, (val >>> 8) & 0xff, (val >>> 16) & 0xff, (val >>> 24) & 0xff, 0, 0, 0, 0);
+      out.push(
+        val & 0xff,
+        (val >>> 8) & 0xff,
+        (val >>> 16) & 0xff,
+        (val >>> 24) & 0xff,
+        0,
+        0,
+        0,
+        0,
+      );
     }
   }
 
@@ -517,7 +608,12 @@ export function transcodeLua52Bytecode(
     writeInt(codeLen);
     for (let i = 0; i < codeLen; i++) {
       const instr = inReader.readUint32();
-      out.push(instr & 0xff, (instr >>> 8) & 0xff, (instr >>> 16) & 0xff, (instr >>> 24) & 0xff);
+      out.push(
+        instr & 0xff,
+        (instr >>> 8) & 0xff,
+        (instr >>> 16) & 0xff,
+        (instr >>> 24) & 0xff,
+      );
     }
 
     // Constants

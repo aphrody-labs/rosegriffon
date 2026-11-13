@@ -2,7 +2,14 @@
 
 import type { Command } from "commander";
 
-import { colors, errorMessage, getOrReadInput, reportError, restoreLogs, suppressLogs } from "../context";
+import {
+  colors,
+  errorMessage,
+  getOrReadInput,
+  reportError,
+  restoreLogs,
+  suppressLogs,
+} from "../context";
 import { createInagleService } from "../inagle";
 import { renderItemProfile } from "../render";
 import { getActiveReadline, setPendingSelection } from "../repl-state";
@@ -11,7 +18,9 @@ import type { ItemOptions } from "../types";
 export function registerItemCommand(program: Command): void {
   program
     .command("item [query]")
-    .description("Affiche les détails d'un objet (consommable, équipement, cosmétique)")
+    .description(
+      "Affiche les détails d'un objet (consommable, équipement, cosmétique)",
+    )
     .option("-j, --json", "Format de sortie en JSON brute")
     .action(async (query: string | undefined, options: ItemOptions) => {
       suppressLogs(!!options.json);
@@ -39,7 +48,9 @@ export function registerItemCommand(program: Command): void {
             if (options.json) {
               console.log(JSON.stringify([], null, 2));
             } else {
-              console.log(`${colors.yellow}Aucun objet trouvé pour : "${inputQuery}"${colors.reset}`);
+              console.log(
+                `${colors.yellow}Aucun objet trouvé pour : "${inputQuery}"${colors.reset}`,
+              );
             }
             return;
           }
@@ -49,7 +60,10 @@ export function registerItemCommand(program: Command): void {
             if (options.json) {
               console.log(
                 JSON.stringify(
-                  matches.map((m: any) => ({ id: m.itemId, name: m.names?.fr || m.name })),
+                  matches.map((m: any) => ({
+                    id: m.itemId,
+                    name: m.names?.fr || m.name,
+                  })),
                   null,
                   2,
                 ),
@@ -57,7 +71,9 @@ export function registerItemCommand(program: Command): void {
             } else {
               const rl = getActiveReadline();
               if (rl) {
-                console.log(`${colors.yellow}Plusieurs objets correspondent à votre recherche :${colors.reset}`);
+                console.log(
+                  `${colors.yellow}Plusieurs objets correspondent à votre recherche :${colors.reset}`,
+                );
                 for (const [idx, m] of matches.entries()) {
                   console.log(
                     `  [${colors.bold}${idx + 1}${colors.reset}] ${colors.bold}${m.names?.fr || m.name}${colors.reset} (ID: ${m.itemId} | Code: ${m.internalCode})`,
@@ -69,7 +85,9 @@ export function registerItemCommand(program: Command): void {
                 );
                 rl.prompt();
               } else {
-                console.log(`${colors.yellow}Plusieurs objets correspondent à votre recherche :${colors.reset}`);
+                console.log(
+                  `${colors.yellow}Plusieurs objets correspondent à votre recherche :${colors.reset}`,
+                );
                 for (const m of matches) {
                   console.log(
                     `  - ${colors.bold}${m.names?.fr || m.name}${colors.reset} (ID: ${m.itemId} | Code: ${m.internalCode})`,
@@ -89,7 +107,11 @@ export function registerItemCommand(program: Command): void {
           console.log(renderItemProfile(item));
         }
       } catch (e) {
-        reportError(options.json, errorMessage(e), `${colors.red}Erreur item : ${errorMessage(e)}${colors.reset}`);
+        reportError(
+          options.json,
+          errorMessage(e),
+          `${colors.red}Erreur item : ${errorMessage(e)}${colors.reset}`,
+        );
       }
     });
 }

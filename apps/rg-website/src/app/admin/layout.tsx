@@ -8,7 +8,11 @@ export const metadata: Metadata = {
   robots: { follow: false, index: false },
 };
 
-export default async function AdminLayout({ children }: { children: React.ReactNode }) {
+export default async function AdminLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   await requireAdmin();
   const user = await getServerUser();
   const showPatreon = await isPatreonAdmin(user);
@@ -16,7 +20,9 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   return (
     <div className="flex min-h-screen bg-muted/30">
       <AdminSidebar showPatreon={showPatreon} />
-      <div className="flex-1 overflow-x-hidden pt-16 pb-20 lg:pt-0 lg:pb-0">{children}</div>
+      <div className="flex-1 overflow-x-hidden pt-16 pb-20 lg:pt-0 lg:pb-0">
+        {children}
+      </div>
     </div>
   );
 }

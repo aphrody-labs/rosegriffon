@@ -92,7 +92,14 @@ export const CANONICAL_GAME_FAMILIES: readonly WorkRef[] = [
     title: "Inazuma Eleven: Victory Road",
     series: "inazuma_eleven_victory_road",
     platforms: ["switch", "switch_2", "ps4", "ps5", "xbox", "pc"],
-    runtimeLinks: runtimeLinksForPlatforms(["switch", "switch_2", "ps4", "ps5", "xbox", "pc"]),
+    runtimeLinks: runtimeLinksForPlatforms([
+      "switch",
+      "switch_2",
+      "ps4",
+      "ps5",
+      "xbox",
+      "pc",
+    ]),
   },
   {
     id: "inazuma_eleven_cross",
@@ -105,18 +112,21 @@ export const CANONICAL_GAME_FAMILIES: readonly WorkRef[] = [
 ];
 
 /** Release/edition anchors. Patch numbers belong here only after a measured source is recorded. */
-export const CANONICAL_GAME_RELEASES: readonly GameRelease[] = CANONICAL_GAME_FAMILIES.flatMap(work =>
-  (work.platforms ?? []).map(platform => ({
-    id: `${work.id}:${platform}`,
-    work,
-    family: work.series ?? "other",
-    platform,
-    title: work.title,
-    acquisition: "official_purchase" as const,
-    region: null,
-  })),
-);
+export const CANONICAL_GAME_RELEASES: readonly GameRelease[] =
+  CANONICAL_GAME_FAMILIES.flatMap((work) =>
+    (work.platforms ?? []).map((platform) => ({
+      id: `${work.id}:${platform}`,
+      work,
+      family: work.series ?? "other",
+      platform,
+      title: work.title,
+      acquisition: "official_purchase" as const,
+      region: null,
+    })),
+  );
 
 export function gamesForPlatform(platform: GamePlatform): WorkRef[] {
-  return CANONICAL_GAME_FAMILIES.filter(work => work.platforms?.includes(platform));
+  return CANONICAL_GAME_FAMILIES.filter((work) =>
+    work.platforms?.includes(platform),
+  );
 }

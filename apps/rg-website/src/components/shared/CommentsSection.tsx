@@ -2,7 +2,16 @@
 
 import { useEffect, useState, useRef } from "react";
 import { usePathname } from "next/navigation";
-import { Avatar, AvatarFallback, AvatarImage, Button, Card, CardContent, Textarea, Badge } from "@rosegriffon/ui";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+  Button,
+  Card,
+  CardContent,
+  Textarea,
+  Badge,
+} from "@rosegriffon/ui";
 import { MessageSquare, Trash2, Send, ShieldAlert, Award } from "lucide-react";
 import { subscribeTable } from "@/lib/realtime";
 
@@ -42,7 +51,11 @@ interface CommentsSectionProps {
   className?: string;
 }
 
-export function CommentsSection({ targetId, targetType, className = "" }: CommentsSectionProps) {
+export function CommentsSection({
+  targetId,
+  targetType,
+  className = "",
+}: CommentsSectionProps) {
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -82,47 +95,59 @@ export function CommentsSection({ targetId, targetType, className = "" }: Commen
 
   // S'abonner aux changements en temps réel (service rg-realtime, SSE)
   useEffect(() => {
-    return subscribeTable<CommentRow>({ filter: `target_id=eq.${targetId}`, table: "comments" }, async event => {
-      if (event.eventType === "INSERT") {
-        const inserted = event.new;
-        if (!inserted || inserted.target_type !== targetType) return;
+    return subscribeTable<CommentRow>(
+      { filter: `target_id=eq.${targetId}`, table: "comments" },
+      async (event) => {
+        if (event.eventType === "INSERT") {
+          const inserted = event.new;
+          if (!inserted || inserted.target_type !== targetType) return;
 
-        // Récupérer les informations de profil de l'auteur
-        const profile = await getPublicCommentProfile(inserted.user_id);
+          // Récupérer les informations de profil de l'auteur
+          const profile = await getPublicCommentProfile(inserted.user_id);
 
-        const enriched: Comment = {
-          id: inserted.id,
-          content: inserted.content,
-          target_id: inserted.target_id,
-          target_type: inserted.target_type,
-          user_id: inserted.user_id,
-          created_at: inserted.created_at,
-          updated_at: inserted.updated_at,
-          profiles: profile as CommentProfile | null,
-        };
+          const enriched: Comment = {
+            id: inserted.id,
+            content: inserted.content,
+            target_id: inserted.target_id,
+            target_type: inserted.target_type,
+            user_id: inserted.user_id,
+            created_at: inserted.created_at,
+            updated_at: inserted.updated_at,
+            profiles: profile as CommentProfile | null,
+          };
 
-        setComments(prev => {
-          if (prev.some(c => c.id === enriched.id)) return prev;
-          return [...prev, enriched];
-        });
+          setComments((prev) => {
+            if (prev.some((c) => c.id === enriched.id)) return prev;
+            return [...prev, enriched];
+          });
 
-        // Scroller tout en bas si c'est pour un stream (tchat live)
-        if (targetType === "stream") {
-          setTimeout(() => {
-            commentsEndRef.current?.scrollIntoView({ behavior: "smooth" });
-          }, 100);
+          // Scroller tout en bas si c'est pour un stream (tchat live)
+          if (targetType === "stream") {
+            setTimeout(() => {
+              commentsEndRef.current?.scrollIntoView({ behavior: "smooth" });
+            }, 100);
+          }
+        } else if (event.eventType === "DELETE") {
+          const removed = event.old;
+          if (removed)
+            setComments((prev) => prev.filter((c) => c.id !== removed.id));
+        } else if (event.eventType === "UPDATE") {
+          const updated = event.new;
+          if (!updated) return;
+          setComments((prev) =>
+            prev.map((c) =>
+              c.id === updated.id
+                ? {
+                    ...c,
+                    content: updated.content,
+                    updated_at: updated.updated_at,
+                  }
+                : c,
+            ),
+          );
         }
-      } else if (event.eventType === "DELETE") {
-        const removed = event.old;
-        if (removed) setComments(prev => prev.filter(c => c.id !== removed.id));
-      } else if (event.eventType === "UPDATE") {
-        const updated = event.new;
-        if (!updated) return;
-        setComments(prev =>
-          prev.map(c => (c.id === updated.id ? { ...c, content: updated.content, updated_at: updated.updated_at } : c)),
-        );
-      }
-    });
+      },
+    );
   }, [targetId, targetType]);
 
   // Scroller en bas au chargement initial ou lors de nouveaux messages (pour le stream)
@@ -181,7 +206,9 @@ export function CommentsSection({ targetId, targetType, className = "" }: Commen
   const isLiveChat = targetType === "stream";
 
   return (
-    <Card className={`border-2 bg-white/90 dark:bg-gray-900/90 shadow-xl backdrop-blur-md ${className}`}>
+    <Card
+      className={`border-2 bg-white/90 dark:bg-gray-900/90 shadow-xl backdrop-blur-md ${className}`}
+    >
       <CardContent className="p-4 sm:p-6 flex flex-col h-full">
         <div className="flex items-center gap-2 mb-4 pb-3 border-b border-gray-100 dark:border-gray-800">
           <MessageSquare className="size-5 text-rg-brique" />
@@ -210,10 +237,13 @@ export function CommentsSection({ targetId, targetType, className = "" }: Commen
                 : "Aucun commentaire pour le moment. Soyez le premier à réagir !"}
             </p>
           ) : (
-            comments.map(comment => {
-              const isOwner = session?.user && session.user.id === comment.user_id;
+            comments.map((comment) => {
+              const isOwner =
+                session?.user && session.user.id === comment.user_id;
               const isAdminOrStaff =
-                session?.user && (comment.profiles?.role === "admin" || comment.profiles?.role === "staff");
+                session?.user &&
+                (comment.profiles?.role === "admin" ||
+                  comment.profiles?.role === "staff");
 
               return (
                 <div
@@ -247,22 +277,28 @@ export function CommentsSection({ targetId, targetType, className = "" }: Commen
                       )}
 
                       {/* Badges cosmétiques */}
-                      {comment.profiles?.badges && comment.profiles.badges.length > 0 && (
-                        <div className="flex gap-0.5 scale-90 origin-left">
-                          {comment.profiles.badges.slice(0, 3).map((b, idx) => (
-                            <span key={idx} title={b}>
-                              <Award className="size-3.5 text-yellow-500 fill-yellow-500/20" />
-                            </span>
-                          ))}
-                        </div>
-                      )}
+                      {comment.profiles?.badges &&
+                        comment.profiles.badges.length > 0 && (
+                          <div className="flex gap-0.5 scale-90 origin-left">
+                            {comment.profiles.badges
+                              .slice(0, 3)
+                              .map((b, idx) => (
+                                <span key={idx} title={b}>
+                                  <Award className="size-3.5 text-yellow-500 fill-yellow-500/20" />
+                                </span>
+                              ))}
+                          </div>
+                        )}
 
                       <span className="text-gray-400 text-[10px] sm:text-xs">
                         •{" "}
-                        {new Date(comment.created_at).toLocaleTimeString("fr-FR", {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
+                        {new Date(comment.created_at).toLocaleTimeString(
+                          "fr-FR",
+                          {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          },
+                        )}
                       </span>
                     </div>
 
@@ -295,12 +331,16 @@ export function CommentsSection({ targetId, targetType, className = "" }: Commen
           {session?.user ? (
             <form onSubmit={handleSubmit} className="flex gap-2 items-end">
               <Textarea
-                placeholder={isLiveChat ? "Envoyer un message..." : "Ajouter un commentaire..."}
+                placeholder={
+                  isLiveChat
+                    ? "Envoyer un message..."
+                    : "Ajouter un commentaire..."
+                }
                 value={newComment}
-                onChange={e => setNewComment(e.target.value)}
+                onChange={(e) => setNewComment(e.target.value)}
                 className="flex-1 min-h-[40px] max-h-[120px] text-sm resize-none focus-visible:ring-rg-brique bg-gray-50/50 dark:bg-gray-800/50"
                 maxLength={1000}
-                onKeyDown={e => {
+                onKeyDown={(e) => {
                   if (e.key === "Enter" && !e.shiftKey) {
                     e.preventDefault();
                     handleSubmit(e);
@@ -322,9 +362,17 @@ export function CommentsSection({ targetId, targetType, className = "" }: Commen
             </form>
           ) : (
             <div className="text-center py-4 bg-gray-50 dark:bg-gray-800/30 rounded-lg border border-dashed border-gray-200 dark:border-gray-800">
-              <p className="text-sm text-gray-500 mb-2">Connecte-toi pour participer à la discussion !</p>
-              <Button asChild size="sm" className="bg-rg-brique hover:bg-rg-brique/90 text-white">
-                <a href={`/login?redirect=${encodeURIComponent(pathname)}`}>Se connecter</a>
+              <p className="text-sm text-gray-500 mb-2">
+                Connecte-toi pour participer à la discussion !
+              </p>
+              <Button
+                asChild
+                size="sm"
+                className="bg-rg-brique hover:bg-rg-brique/90 text-white"
+              >
+                <a href={`/login?redirect=${encodeURIComponent(pathname)}`}>
+                  Se connecter
+                </a>
               </Button>
             </div>
           )}

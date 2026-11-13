@@ -6,7 +6,13 @@
  */
 
 import { resolveFields } from "./emit-json-schema";
-import { indexDeclarations, type IrContract, type IrDeclaration, type IrField, type IrType } from "./ir";
+import {
+  indexDeclarations,
+  type IrContract,
+  type IrDeclaration,
+  type IrField,
+  type IrType,
+} from "./ir";
 import { docComment, swiftFieldName } from "./naming";
 
 /**
@@ -33,7 +39,11 @@ function swiftType(type: IrType): string {
     case "date":
       return "String";
     case "literal":
-      return typeof type.value === "string" ? "String" : typeof type.value === "number" ? "Double" : "Bool";
+      return typeof type.value === "string"
+        ? "String"
+        : typeof type.value === "number"
+          ? "Double"
+          : "Bool";
     case "param":
       return type.name;
     case "ref":
@@ -56,14 +66,17 @@ function swiftType(type: IrType): string {
 }
 
 function unionType(members: readonly IrType[]): string {
-  const nullable = members.some(member => member.kind === "null");
-  const rest = members.filter(member => member.kind !== "null");
+  const nullable = members.some((member) => member.kind === "null");
+  const rest = members.filter((member) => member.kind !== "null");
   if (rest.length === 0) return "AnyCodable?";
 
   const inner =
     rest.length === 1
       ? swiftType(rest[0] as IrType)
-      : rest.every(member => member.kind === "literal" && typeof member.value === "string")
+      : rest.every(
+            (member) =>
+              member.kind === "literal" && typeof member.value === "string",
+          )
         ? "String"
         : "AnyCodable";
 
@@ -73,10 +86,15 @@ function unionType(members: readonly IrType[]): string {
 function emitEnum(decl: Extract<IrDeclaration, { kind: "enum" }>): string[] {
   const lines = docComment(decl.doc, "/// ");
   const raw = decl.valueType === "string" ? "String" : "Int";
-  lines.push(`public enum ${typeName(decl.name)}: ${raw}, Codable, Sendable, CaseIterable {`);
+  lines.push(
+    `public enum ${typeName(decl.name)}: ${raw}, Codable, Sendable, CaseIterable {`,
+  );
   for (const member of decl.members) {
     lines.push(...docComment(member.doc, "/// ", "\t"));
-    const value = typeof member.value === "string" ? JSON.stringify(member.value) : member.value;
+    const value =
+      typeof member.value === "string"
+        ? JSON.stringify(member.value)
+        : member.value;
     lines.push(`\tcase ${swiftFieldName(member.name)} = ${value}`);
   }
   lines.push("}");
@@ -90,7 +108,10 @@ function emitStruct(
   fields: readonly IrField[],
 ): string[] {
   const lines = docComment(doc, "/// ");
-  const generics = typeParams.length === 0 ? "" : `<${typeParams.map(p => `${p}: Codable`).join(", ")}>`;
+  const generics =
+    typeParams.length === 0
+      ? ""
+      : `<${typeParams.map((p) => `${p}: Codable`).join(", ")}>`;
   lines.push(`public struct ${typeName(name)}${generics}: Codable, Sendable {`);
 
   const remapped: Array<[string, string]> = [];
@@ -195,19 +216,32 @@ export function emitSwift(contract: IrContract): string {
     if (decl.kind === "enum") out.push(...emitEnum(decl), "");
     else if (decl.kind === "alias") {
       if (decl.type.kind === "object") {
-        out.push(...emitStruct(decl.name, decl.doc, decl.typeParams, decl.type.fields), "");
+        out.push(
+          ...emitStruct(decl.name, decl.doc, decl.typeParams, decl.type.fields),
+          "",
+        );
       } else if (decl.type.kind === "union") {
-        const refs = decl.type.of.filter(member => member.kind === "ref");
-        const objects = decl.type.of.filter(member => member.kind === "object");
+        const refs = decl.type.of.filter((member) => member.kind === "ref");
+        const objects = decl.type.of.filter(
+          (member) => member.kind === "object",
+        );
         if (refs.length > 0 && objects.length > 0) {
           // Swift n'a pas d'équivalent de `serde(flatten)` : on aplatit
           // les champs du parent dans la struct enfant.
-          const inherited = refs.flatMap(ref => {
+          const inherited = refs.flatMap((ref) => {
             const target = byName.get((ref as { name: string }).name);
             return target ? resolveFields(target, byName) : [];
           });
-          const own = objects.flatMap(object => (object as { fields: IrField[] }).fields);
-          out.push(...emitStruct(decl.name, decl.doc, decl.typeParams, [...inherited, ...own]), "");
+          const own = objects.flatMap(
+            (object) => (object as { fields: IrField[] }).fields,
+          );
+          out.push(
+            ...emitStruct(decl.name, decl.doc, decl.typeParams, [
+              ...inherited,
+              ...own,
+            ]),
+            "",
+          );
         } else {
           out.push(
             ...docComment(decl.doc, "/// "),
@@ -223,7 +257,15 @@ export function emitSwift(contract: IrContract): string {
         );
       }
     } else {
-      out.push(...emitStruct(decl.name, decl.doc, decl.typeParams, resolveFields(decl, byName)), "");
+      out.push(
+        ...emitStruct(
+          decl.name,
+          decl.doc,
+          decl.typeParams,
+          resolveFields(decl, byName),
+        ),
+        "",
+      );
     }
   }
 

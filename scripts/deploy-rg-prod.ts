@@ -13,7 +13,9 @@ import { join } from "node:path";
 const SSH_EXE = "C:/Program Files/OpenSSH/ssh.exe";
 const TARGET_HOST = "vps";
 
-async function runSshCommand(cmd: string): Promise<{ stdout: string; stderr: string; exitCode: number }> {
+async function runSshCommand(
+  cmd: string,
+): Promise<{ stdout: string; stderr: string; exitCode: number }> {
   const proc = Bun.spawn([SSH_EXE, TARGET_HOST, cmd], {
     stdout: "pipe",
     stderr: "pipe",
@@ -24,8 +26,13 @@ async function runSshCommand(cmd: string): Promise<{ stdout: string; stderr: str
   return { stdout: stdout.trim(), stderr: stderr.trim(), exitCode };
 }
 
-async function streamFileToRemote(localPath: string, remotePath: string): Promise<void> {
-  console.log(`[Deploy] Streaming ${localPath} -> ${TARGET_HOST}:${remotePath}...`);
+async function streamFileToRemote(
+  localPath: string,
+  remotePath: string,
+): Promise<void> {
+  console.log(
+    `[Deploy] Streaming ${localPath} -> ${TARGET_HOST}:${remotePath}...`,
+  );
   const proc = Bun.spawn([SSH_EXE, TARGET_HOST, `cat > ${remotePath}`], {
     stdin: Bun.file(localPath),
     stdout: "inherit",
@@ -33,7 +40,9 @@ async function streamFileToRemote(localPath: string, remotePath: string): Promis
   });
   const code = await proc.exited;
   if (code !== 0) {
-    throw new Error(`Failed to stream ${localPath} to ${remotePath} (exit ${code})`);
+    throw new Error(
+      `Failed to stream ${localPath} to ${remotePath} (exit ${code})`,
+    );
   }
 }
 
@@ -47,7 +56,11 @@ async function main() {
   const staticTar = "apps/rg-website/rg-static.tar.gz";
   const publicTar = "apps/rg-website/rg-public.tar.gz";
 
-  if (!existsSync(standaloneTar) || !existsSync(staticTar) || !existsSync(publicTar)) {
+  if (
+    !existsSync(standaloneTar) ||
+    !existsSync(staticTar) ||
+    !existsSync(publicTar)
+  ) {
     throw new Error("Build archives are missing. Run production build first.");
   }
 
@@ -57,7 +70,9 @@ async function main() {
   await streamFileToRemote(publicTar, "/tmp/rg-public.tar.gz");
 
   // 2. Prepare staging directory on VPS and extract
-  console.log("[Deploy] Extracting archives on VPS staging area (/home/ubuntu/apps/rg/next-new)...");
+  console.log(
+    "[Deploy] Extracting archives on VPS staging area (/home/ubuntu/apps/rg/next-new)...",
+  );
   const extractScript = `
     set -e
     cd /home/ubuntu/apps/rg
@@ -73,7 +88,9 @@ async function main() {
 
   const extractRes = await runSshCommand(extractScript);
   if (extractRes.exitCode !== 0) {
-    throw new Error(`Extraction failed on VPS:\n${extractRes.stderr}\n${extractRes.stdout}`);
+    throw new Error(
+      `Extraction failed on VPS:\n${extractRes.stderr}\n${extractRes.stdout}`,
+    );
   }
   console.log("[Deploy] Extraction successful.");
 
@@ -110,10 +127,14 @@ async function main() {
     sleep 2
     curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:3100/
   `);
-  console.log(`[Deploy] Loopback probe (127.0.0.1:3100/): HTTP ${loopbackRes.stdout}`);
+  console.log(
+    `[Deploy] Loopback probe (127.0.0.1:3100/): HTTP ${loopbackRes.stdout}`,
+  );
 
   // 5. Live public production verification
-  console.log("[Deploy] Probing live production domain (https://rosegriffon.fr)...");
+  console.log(
+    "[Deploy] Probing live production domain (https://rosegriffon.fr)...",
+  );
   const endpoints = [
     "/",
     "/wiki",
@@ -123,7 +144,8 @@ async function main() {
     "/api/health",
   ];
 
-  const results: Array<{ path: string; status: number; durationMs: number }> = [];
+  const results: Array<{ path: string; status: number; durationMs: number }> =
+    [];
 
   for (const path of endpoints) {
     const url = `https://rosegriffon.fr${path}`;
@@ -134,7 +156,9 @@ async function main() {
       });
       const durationMs = Math.round(performance.now() - t0);
       results.push({ path, status: resp.status, durationMs });
-      console.log(`  ${path.padEnd(20)} -> HTTP ${resp.status} (${durationMs}ms)`);
+      console.log(
+        `  ${path.padEnd(20)} -> HTTP ${resp.status} (${durationMs}ms)`,
+      );
     } catch (err: any) {
       console.error(`  ${path.padEnd(20)} -> FAILED (${err.message})`);
       results.push({ path, status: 0, durationMs: -1 });
@@ -152,7 +176,7 @@ async function main() {
   console.log("=============================================================");
 }
 
-main().catch(err => {
+main().catch((err) => {
   console.error("[Deploy] FATAL:", err);
   process.exit(1);
 });

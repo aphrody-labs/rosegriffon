@@ -17,7 +17,8 @@
 import { CDN_BASE } from "./shared";
 
 /** Identifiant d'une famille de modèles. */
-export type ModelFamily = "chara" | "waza" | "item" | "keshin" | "armd" | "animal";
+export type ModelFamily =
+  "chara" | "waza" | "item" | "keshin" | "armd" | "animal";
 
 /** Ce qui définit une famille : son nom, sa source, sa route d'assemblage. */
 export interface ModelFamilyDef {
@@ -90,7 +91,7 @@ export const MODEL_FAMILIES: ModelFamilyDef[] = [
 
 /** La définition d'une famille, ou `undefined` si l'identifiant est inconnu. */
 export function modelFamily(id: string): ModelFamilyDef | undefined {
-  return MODEL_FAMILIES.find(f => f.id === id);
+  return MODEL_FAMILIES.find((f) => f.id === id);
 }
 
 /**
@@ -102,14 +103,19 @@ export function modelFamily(id: string): ModelFamilyDef | undefined {
  * autrement rend un 404 « sous-domaine chr non servable ».
  */
 export function modelGlbUrl(famille: ModelFamily, code: string): string {
-  return famille === "chara" ? `${CDN_BASE}/model-full/${code}.glb` : `${CDN_BASE}/model-chr/${famille}/${code}.glb`;
+  return famille === "chara"
+    ? `${CDN_BASE}/model-full/${code}.glb`
+    : `${CDN_BASE}/model-chr/${famille}/${code}.glb`;
 }
 
 /**
  * Dossier VFS des textures d'un modèle (`.g4tx`), ou `null` pour un personnage — dont les
  * textures sont éclatées entre visage, uniforme et corps, et n'ont pas de dossier unique.
  */
-export function modelTextureDir(famille: ModelFamily, code: string): string | null {
+export function modelTextureDir(
+  famille: ModelFamily,
+  code: string,
+): string | null {
   return famille === "chara" ? null : `data/dx11/chr/_${famille}/${code}`;
 }
 

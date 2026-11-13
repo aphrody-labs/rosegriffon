@@ -10,7 +10,11 @@
 // n'apparaît nulle part dans le code du site. Les seuls chiffres publiés sont
 // des totaux non ré-identifiants.
 
-import { CONTEXTE_MENTIONS_VIDE, analyserInline, texteBrut } from "./markdown-ast";
+import {
+  CONTEXTE_MENTIONS_VIDE,
+  analyserInline,
+  texteBrut,
+} from "./markdown-ast";
 import { tronquerUnicode } from "../unicode";
 
 /**
@@ -94,7 +98,7 @@ export interface Sondage {
  */
 export function aDesResultats(sondage: Sondage): boolean {
   if (sondage.total_votes === null) return false;
-  return sondage.options.some(option => option.votes !== null);
+  return sondage.options.some((option) => option.votes !== null);
 }
 
 /**
@@ -128,7 +132,8 @@ export function classement(sondage: Sondage): OptionSondage[] {
 export function gagnant(sondage: Sondage): OptionSondage | null {
   if (!aDesResultats(sondage) || sondage.options.length < 2) return null;
   const [premier, second] = classement(sondage);
-  if (!premier || !second || premier.votes === null || premier.votes <= 0) return null;
+  if (!premier || !second || premier.votes === null || premier.votes <= 0)
+    return null;
   return premier.votes === second.votes ? null : premier;
 }
 
@@ -169,7 +174,9 @@ export function libelleEtat(sondage: Sondage): string {
  * Variante de `Badge` pour l'état : le vert (`success`) est réservé à ce qui
  * tourne VRAIMENT. Un état non publié prend une pastille neutre.
  */
-export function varianteBadgeEtat(sondage: Sondage): "secondary" | "success" | "outline" {
+export function varianteBadgeEtat(
+  sondage: Sondage,
+): "secondary" | "success" | "outline" {
   switch (etatSondage(sondage)) {
     case "termine": {
       return "secondary";
@@ -186,7 +193,9 @@ export function varianteBadgeEtat(sondage: Sondage): "secondary" | "success" | "
 /** Libellé du nombre de choix autorisés par personne (0 = illimité). */
 export function libelleChoixAutorises(sondage: Sondage): string {
   if (sondage.max_choices <= 0) return "Choix illimités";
-  return sondage.max_choices === 1 ? "1 choix par personne" : `${sondage.max_choices} choix par personne`;
+  return sondage.max_choices === 1
+    ? "1 choix par personne"
+    : `${sondage.max_choices} choix par personne`;
 }
 
 /**
@@ -234,13 +243,16 @@ export function libelleAvecEmoji(option: OptionSondage): string {
  * approximative.
  */
 export function resumeQuestion(question: string, longueurMax = 80): string {
-  const brut = texteBrut(analyserInline(question, CONTEXTE_MENTIONS_VIDE)).replace(/\s+/g, " ").trim();
+  const brut = texteBrut(analyserInline(question, CONTEXTE_MENTIONS_VIDE))
+    .replace(/\s+/g, " ")
+    .trim();
   if (brut.length <= longueurMax) return brut;
   return `${tronquerUnicode(brut, longueurMax - 1).trimEnd()}…`;
 }
 
 /** Lien vers le message d'origine, uniquement si les trois identifiants existent. */
 export function lienMessageDiscord(sondage: Sondage): string | null {
-  if (!sondage.message_id || !sondage.channel_id || !sondage.guild_id) return null;
+  if (!sondage.message_id || !sondage.channel_id || !sondage.guild_id)
+    return null;
   return `https://discord.com/channels/${sondage.guild_id}/${sondage.channel_id}/${sondage.message_id}`;
 }

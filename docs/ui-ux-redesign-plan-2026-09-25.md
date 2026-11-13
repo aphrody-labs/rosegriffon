@@ -4,15 +4,15 @@
 
 ## Constat vérifié
 
-| Surface | Observation | Conséquence |
-| --- | --- | --- |
-| `/` | Accueil Rose Griffon, deux sections principales et 21 liens relevés dans le DOM | Conserver une entrée Association identifiable, rendre ses parcours prioritaires explicites |
-| `/wiki` | Accueil Azalée : titres « Command Palette » et « Dernières actualités » répétés ; 41 liens | Nettoyer la hiérarchie des titres et distinguer recherche, actualités et exploration encyclopédique |
-| `/achillea` | Entrée e-sport, échelle des 11 paliers et écosystème compétitif ; 41 liens | Garder l'identité Achilléa, clarifier l'accès à jouer, classement, tournois et clans |
-| `/achillea/ranked/tiers` | 11 paliers et 12 compétiteurs solo ; certains libellés disent « 0 joueurs » et « 1 joueurs » ; sélecteurs Solo/Duo | Corriger pluriels et réduire la densité tout en préservant les valeurs réelles |
-| `/achillea/tournaments` | 9 tournois, navigation et filtres déjà contrôlés dans la QA | Préserver les états « classement non résolu » et les filtres, rendre les cartes et onglets lisibles au clavier et sur mobile |
-| `/admin` | En session connectée, erreur « Une erreur inattendue est survenue », React #441, digest 2926058691 | Le tableau de bord est bloquant ; diagnostiquer et corriger avant une refonte cosmétique |
-| En-tête partagé | Mélange de libellés français et anglais pour la langue ; menu latéral, menu supérieur et retour coexistent | Unifier les libellés et donner à chaque commande un rôle clair |
+| Surface                  | Observation                                                                                                        | Conséquence                                                                                                                  |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------- |
+| `/`                      | Accueil Rose Griffon, deux sections principales et 21 liens relevés dans le DOM                                    | Conserver une entrée Association identifiable, rendre ses parcours prioritaires explicites                                   |
+| `/wiki`                  | Accueil Azalée : titres « Command Palette » et « Dernières actualités » répétés ; 41 liens                         | Nettoyer la hiérarchie des titres et distinguer recherche, actualités et exploration encyclopédique                          |
+| `/achillea`              | Entrée e-sport, échelle des 11 paliers et écosystème compétitif ; 41 liens                                         | Garder l'identité Achilléa, clarifier l'accès à jouer, classement, tournois et clans                                         |
+| `/achillea/ranked/tiers` | 11 paliers et 12 compétiteurs solo ; certains libellés disent « 0 joueurs » et « 1 joueurs » ; sélecteurs Solo/Duo | Corriger pluriels et réduire la densité tout en préservant les valeurs réelles                                               |
+| `/achillea/tournaments`  | 9 tournois, navigation et filtres déjà contrôlés dans la QA                                                        | Préserver les états « classement non résolu » et les filtres, rendre les cartes et onglets lisibles au clavier et sur mobile |
+| `/admin`                 | En session connectée, erreur « Une erreur inattendue est survenue », React #441, digest 2926058691                 | Le tableau de bord est bloquant ; diagnostiquer et corriger avant une refonte cosmétique                                     |
+| En-tête partagé          | Mélange de libellés français et anglais pour la langue ; menu latéral, menu supérieur et retour coexistent         | Unifier les libellés et donner à chaque commande un rôle clair                                                               |
 
 Les précédentes vérifications ont confirmé des états historiques incomplets : quatre tournois sans classement résolu, scores et brackets partiels, absence de preuve pour des versements AP. Le design doit afficher ces incertitudes et ne jamais transformer un résultat absent en récompense ou vainqueur apparent. Le site utilise encore par défaut l'API classée legacy pour une partie du client Achilléa ; les contrats legacy et RG diffèrent notamment sur la pagination. La refonte des filtres doit attendre la vérification de la source effective de chaque vue.
 
@@ -38,15 +38,15 @@ Contrat commun : texte courant d'au moins 18 px, contraste élevé, focus fixe n
 
 ### P2 — Composants et pages métier
 
-| Zone | Travail prévu | Preuve attendue |
-| --- | --- | --- |
-| Design system | Tokens par univers, typographie, contraste, boutons, champs, tableaux/cartes, dialogues, toast, états de requête | Catalogue de composants aux largeurs 320/390/768/1440 px et zoom 200 % |
-| Association | Accueil éditorial, actualités, événements, adhésion/boutique : hiérarchie et appels à l'action | Parcours complet jusqu'à chaque action réelle, y compris erreurs et session anonyme |
-| Azalée | Recherche, résultats, fiches, comparateurs, filtres, médias 3D : densité maîtrisée et navigation par clavier | Recherche et ouverture de chaque type de fiche, états vides et données absentes |
-| Achilléa classé | Hub, paliers, leaderboard, historique, profil, solo/duo : filtres et chiffres cohérents | Comparaison UI/API pour chaque mode ; pluriels, 0 %, liens et états vides corrects |
-| Achilléa tournois | Liste, détail, sept onglets, bracket mobile, circuit, podiums et prix | Données réelles et incertitudes explicites ; aucune action de paiement déclenchée pour test |
-| Clans, casts, organisations | Cartes, organigrammes, disponibilité, formulaires et permissions | Parcours par rôle avec mutations réversibles de test |
-| Administration | Dashboard, utilisateurs, wiki, événements, Achilléa, Discord, stats, config, audit | Chaque menu et commande testé ; champs configurables issus des vrais contrats et erreurs utiles |
+| Zone                        | Travail prévu                                                                                                    | Preuve attendue                                                                                 |
+| --------------------------- | ---------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| Design system               | Tokens par univers, typographie, contraste, boutons, champs, tableaux/cartes, dialogues, toast, états de requête | Catalogue de composants aux largeurs 320/390/768/1440 px et zoom 200 %                          |
+| Association                 | Accueil éditorial, actualités, événements, adhésion/boutique : hiérarchie et appels à l'action                   | Parcours complet jusqu'à chaque action réelle, y compris erreurs et session anonyme             |
+| Azalée                      | Recherche, résultats, fiches, comparateurs, filtres, médias 3D : densité maîtrisée et navigation par clavier     | Recherche et ouverture de chaque type de fiche, états vides et données absentes                 |
+| Achilléa classé             | Hub, paliers, leaderboard, historique, profil, solo/duo : filtres et chiffres cohérents                          | Comparaison UI/API pour chaque mode ; pluriels, 0 %, liens et états vides corrects              |
+| Achilléa tournois           | Liste, détail, sept onglets, bracket mobile, circuit, podiums et prix                                            | Données réelles et incertitudes explicites ; aucune action de paiement déclenchée pour test     |
+| Clans, casts, organisations | Cartes, organigrammes, disponibilité, formulaires et permissions                                                 | Parcours par rôle avec mutations réversibles de test                                            |
+| Administration              | Dashboard, utilisateurs, wiki, événements, Achilléa, Discord, stats, config, audit                               | Chaque menu et commande testé ; champs configurables issus des vrais contrats et erreurs utiles |
 
 ### P3 — Finition et cohérence
 

@@ -83,7 +83,11 @@ function parseContent(content: any) {
     switch (list.name) {
       case "m_InacodeStampDataList":
         for (const val of values) {
-          stamps.push({ idCrc: val.idCrc, imgNameCrc: val.imgNameCrc, imgPathCrc: val.imgPathCrc });
+          stamps.push({
+            idCrc: val.idCrc,
+            imgNameCrc: val.imgNameCrc,
+            imgPathCrc: val.imgPathCrc,
+          });
         }
         break;
       case "m_InacodeAuthorNameDataList":
@@ -142,7 +146,9 @@ export async function loadInacodeConfigAsync(dataPath: string = DATA_ROOT) {
   return content ? parseContent(content) : null;
 }
 
-export async function buildInacodeDatabase(dataPath: string = DATA_ROOT): Promise<InacodeDatabase> {
+export async function buildInacodeDatabase(
+  dataPath: string = DATA_ROOT,
+): Promise<InacodeDatabase> {
   const result = await loadInacodeConfigAsync(dataPath);
   const stamps = result?.stamps || [];
   const byStampId = new Map<string, InacodeStamp>();

@@ -20,7 +20,11 @@ export async function checkRateLimit(
   const db = createPostgresClient();
 
   // Récupérer l'entrée
-  const { data: entry, error } = await db.from("rate_limits").select("*").eq("key", key).maybeSingle();
+  const { data: entry, error } = await db
+    .from("rate_limits")
+    .select("*")
+    .eq("key", key)
+    .maybeSingle();
 
   if (error) {
     console.error("Rate limit error:", error);
@@ -67,9 +71,15 @@ export async function checkRateLimit(
   };
 }
 
-export function withRateLimit(handler: (request: NextRequest) => Promise<Response>, options?: RateLimitOptions) {
+export function withRateLimit(
+  handler: (request: NextRequest) => Promise<Response>,
+  options?: RateLimitOptions,
+) {
   return async (request: NextRequest): Promise<Response> => {
-    const { allowed, remaining, resetTime } = await checkRateLimit(request, options);
+    const { allowed, remaining, resetTime } = await checkRateLimit(
+      request,
+      options,
+    );
 
     if (!allowed) {
       return new Response(
@@ -83,7 +93,9 @@ export function withRateLimit(handler: (request: NextRequest) => Promise<Respons
         {
           headers: {
             "Content-Type": "application/json",
-            "Retry-After": Math.ceil((resetTime - Date.now()) / 1000).toString(),
+            "Retry-After": Math.ceil(
+              (resetTime - Date.now()) / 1000,
+            ).toString(),
             "X-RateLimit-Limit": options?.limit.toString() || "10",
             "X-RateLimit-Remaining": remaining.toString(),
             "X-RateLimit-Reset": resetTime.toString(),
@@ -95,7 +107,10 @@ export function withRateLimit(handler: (request: NextRequest) => Promise<Respons
 
     const response = await handler(request);
 
-    response.headers.set("X-RateLimit-Limit", options?.limit.toString() || "10");
+    response.headers.set(
+      "X-RateLimit-Limit",
+      options?.limit.toString() || "10",
+    );
     response.headers.set("X-RateLimit-Remaining", remaining.toString());
     response.headers.set("X-RateLimit-Reset", resetTime.toString());
 

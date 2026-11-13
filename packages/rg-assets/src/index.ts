@@ -18,7 +18,9 @@ export function cdnOrigin(configuredOrigin?: string): string {
     throw new Error("L'origine CDN doit utiliser HTTP ou HTTPS.");
   }
   if (url.pathname !== "/" || url.search || url.hash) {
-    throw new Error("L'origine CDN ne doit contenir ni chemin, ni query string, ni fragment.");
+    throw new Error(
+      "L'origine CDN ne doit contenir ni chemin, ni query string, ni fragment.",
+    );
   }
   return url.origin;
 }
@@ -32,11 +34,20 @@ export function cdnUrl(path: string, configuredOrigin?: string): string {
 }
 
 /** Asset de marque/commun publié par `@rosegriffon/assets`. */
-export function sharedAssetUrl(path: string, configuredOrigin?: string): string {
-  return cdnUrl(`${SHARED_ASSETS_PATH}/${path.replace(/^\/+/, "")}`, configuredOrigin);
+export function sharedAssetUrl(
+  path: string,
+  configuredOrigin?: string,
+): string {
+  return cdnUrl(
+    `${SHARED_ASSETS_PATH}/${path.replace(/^\/+/, "")}`,
+    configuredOrigin,
+  );
 }
 
 /** Asset de jeu Azalée : données générées, textures, sprites et médias CPK. */
 export function gameAssetUrl(path: string, configuredOrigin?: string): string {
-  return cdnUrl(`${GAME_ASSETS_PATH}/${path.replace(/^\/+/, "")}`, configuredOrigin);
+  return cdnUrl(
+    `${GAME_ASSETS_PATH}/${path.replace(/^\/+/, "")}`,
+    configuredOrigin,
+  );
 }

@@ -3,7 +3,12 @@ import type { Database } from "@rosegriffon/db";
 /**
  * Statut d'un article/chronique.
  */
-export const ARTICLE_STATUS = ["draft", "published", "scheduled", "archived"] as const;
+export const ARTICLE_STATUS = [
+  "draft",
+  "published",
+  "scheduled",
+  "archived",
+] as const;
 export type ArticleStatus = (typeof ARTICLE_STATUS)[number];
 
 /**
@@ -21,16 +26,20 @@ export type ArticleWithStatus = Omit<Article, "status"> & {
 };
 
 /** Catégorie d'article. */
-export type ArticleCategory = Database["public"]["Tables"]["article_categories"]["Row"];
+export type ArticleCategory =
+  Database["public"]["Tables"]["article_categories"]["Row"];
 
 /** Commentaire sur un article. */
-export type ArticleComment = Database["public"]["Tables"]["article_comments"]["Row"];
+export type ArticleComment =
+  Database["public"]["Tables"]["article_comments"]["Row"];
 
 /** Réaction à un article. */
-export type ArticleReaction = Database["public"]["Tables"]["article_reactions"]["Row"];
+export type ArticleReaction =
+  Database["public"]["Tables"]["article_reactions"]["Row"];
 
 /** Série d'articles. */
-export type ArticleSeries = Database["public"]["Tables"]["article_series"]["Row"];
+export type ArticleSeries =
+  Database["public"]["Tables"]["article_series"]["Row"];
 
 /** Chronique (legacy or specific format). */
 export type Chronicle = Database["public"]["Tables"]["chronicles"]["Row"];
@@ -49,7 +58,10 @@ export interface SearchHit {
 // --- Helpers --------------------------------------------------------------
 
 export function isArticleStatus(value: unknown): value is ArticleStatus {
-  return typeof value === "string" && (ARTICLE_STATUS as readonly string[]).includes(value);
+  return (
+    typeof value === "string" &&
+    (ARTICLE_STATUS as readonly string[]).includes(value)
+  );
 }
 
 export function isPublished(article: { status: string | null }): boolean {

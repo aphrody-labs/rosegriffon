@@ -197,7 +197,11 @@ export async function chargerActivites(): Promise<Activites> {
 }
 
 /** Croise l'activité de deux comptes. `null` si l'un des deux n'en a pas assez. */
-export function croiserActivite(activites: Activites, a: string, b: string): ActiviteCroisee | null {
+export function croiserActivite(
+  activites: Activites,
+  a: string,
+  b: string,
+): ActiviteCroisee | null {
   const creneauxA = activites.creneaux.get(a);
   const creneauxB = activites.creneaux.get(b);
   if (!creneauxA || !creneauxB) {
@@ -205,7 +209,10 @@ export function croiserActivite(activites: Activites, a: string, b: string): Act
   }
   // On parcourt le plus PETIT ensemble : c'est la seule chose qui compte quand
   // un membre très actif porte plusieurs milliers de créneaux.
-  const [petit, grand] = creneauxA.size <= creneauxB.size ? [creneauxA, creneauxB] : [creneauxB, creneauxA];
+  const [petit, grand] =
+    creneauxA.size <= creneauxB.size
+      ? [creneauxA, creneauxB]
+      : [creneauxB, creneauxA];
   let communs = 0;
   for (const creneau of petit) {
     if (grand.has(creneau)) {
@@ -220,7 +227,12 @@ export function croiserActivite(activites: Activites, a: string, b: string): Act
       salonsCommuns++;
     }
   }
-  return { creneauxA: creneauxA.size, creneauxB: creneauxB.size, creneauxCommuns: communs, salonsCommuns };
+  return {
+    creneauxA: creneauxA.size,
+    creneauxB: creneauxB.size,
+    creneauxCommuns: communs,
+    salonsCommuns,
+  };
 }
 
 // ─── Verdicts du staff ──────────────────────────────────────────────────────
@@ -229,10 +241,11 @@ export const VERDICTS = ["confirme", "ecarte"] as const;
 
 export type Verdict = (typeof VERDICTS)[number];
 
-export const LIBELLES_VERDICT: Readonly<Record<Verdict, string>> = Object.freeze({
-  confirme: "Double compte confirmé",
-  ecarte: "Écarté — ce ne sont pas les mêmes",
-});
+export const LIBELLES_VERDICT: Readonly<Record<Verdict, string>> =
+  Object.freeze({
+    confirme: "Double compte confirmé",
+    ecarte: "Écarté — ce ne sont pas les mêmes",
+  });
 
 export interface LigneVerdict {
   readonly compteA: string;
@@ -244,7 +257,9 @@ export interface LigneVerdict {
 }
 
 /** Les verdicts déjà posés, indexés par paire (`clePaire`). */
-export async function verdictsDe(guildId: string): Promise<Map<string, LigneVerdict>> {
+export async function verdictsDe(
+  guildId: string,
+): Promise<Map<string, LigneVerdict>> {
   const lignes = await sql<
     Array<{
       compte_a: string;
@@ -260,7 +275,7 @@ export async function verdictsDe(guildId: string): Promise<Map<string, LigneVerd
 		 where guild_id = ${guildId}
 	`;
   return new Map(
-    lignes.map(ligne => [
+    lignes.map((ligne) => [
       clePaire(ligne.compte_a, ligne.compte_b),
       {
         compteA: ligne.compte_a,
@@ -290,7 +305,8 @@ export async function poserVerdict(entree: {
   motif?: string | null;
   parQui: string;
 }): Promise<void> {
-  const [compteA, compteB] = entree.a < entree.b ? [entree.a, entree.b] : [entree.b, entree.a];
+  const [compteA, compteB] =
+    entree.a < entree.b ? [entree.a, entree.b] : [entree.b, entree.a];
   await sql`
 		insert into bot_multicomptes_verdicts (guild_id, compte_a, compte_b, verdict, motif, par_qui)
 		values (${entree.guildId}, ${compteA}, ${compteB}, ${entree.verdict}, ${entree.motif ?? null}, ${entree.parQui})
@@ -310,7 +326,11 @@ export async function poserVerdict(entree: {
  * que le staff avait décidé ni pourquoi — or annuler la décision d'un collègue
  * est exactement ce qui doit laisser une trace.
  */
-export async function retirerVerdict(guildId: string, a: string, b: string): Promise<LigneVerdict | null> {
+export async function retirerVerdict(
+  guildId: string,
+  a: string,
+  b: string,
+): Promise<LigneVerdict | null> {
   const [compteA, compteB] = a < b ? [a, b] : [b, a];
   const lignes = await sql<
     Array<{
@@ -376,7 +396,10 @@ export function oublierPopulation(): void {
   cliche = null;
 }
 
-export async function chargerPopulation(guildId: string, options: { fraiche?: boolean } = {}): Promise<Population> {
+export async function chargerPopulation(
+  guildId: string,
+  options: { fraiche?: boolean } = {},
+): Promise<Population> {
   if (!options.fraiche && cliche && cliche.expire > Date.now()) {
     return cliche.valeur;
   }
@@ -419,8 +442,13 @@ export interface ResultatBalayage extends Balayage {
  * qu'il a examinés la semaine précédente — et un outil qui redemande sans cesse
  * la même chose finit par n'être plus lu.
  */
-export async function balayerServeur(guildId: string, options: OptionsRapprochement = {}): Promise<ResultatBalayage> {
-  const population = await chargerPopulation(guildId, { fraiche: options.fraiche });
+export async function balayerServeur(
+  guildId: string,
+  options: OptionsRapprochement = {},
+): Promise<ResultatBalayage> {
+  const population = await chargerPopulation(guildId, {
+    fraiche: options.fraiche,
+  });
 
   const limite =
     typeof options.depuisJours === "number" && options.depuisJours > 0
@@ -434,8 +462,8 @@ export async function balayerServeur(guildId: string, options: OptionsRapprochem
       ? null
       : new Set(
           population.empreintes
-            .filter(compte => (compte.arriveeLe?.getTime() ?? 0) >= limite)
-            .map(compte => compte.discordId),
+            .filter((compte) => (compte.arriveeLe?.getTime() ?? 0) >= limite)
+            .map((compte) => compte.discordId),
         );
 
   const ecartees = new Set<string>();
@@ -456,12 +484,16 @@ export async function balayerServeur(guildId: string, options: OptionsRapprochem
   const rapprochements =
     recents === null
       ? balayage.rapprochements
-      : balayage.rapprochements.filter(paire => recents.has(paire.compteA) || recents.has(paire.compteB));
+      : balayage.rapprochements.filter(
+          (paire) => recents.has(paire.compteA) || recents.has(paire.compteB),
+        );
 
   return {
     ...balayage,
     chargeeLe: population.chargeeLe,
-    empreintes: new Map(population.empreintes.map(compte => [compte.discordId, compte])),
+    empreintes: new Map(
+      population.empreintes.map((compte) => [compte.discordId, compte]),
+    ),
     rapprochements,
     verdicts: population.verdicts,
   };
@@ -482,12 +514,17 @@ export async function rapprochementsDe(
   // Le compte visé peut avoir été tranché : on demande TOUT, et on marque
   // ensuite. Masquer un verdict sur une fiche individuelle reviendrait à cacher
   // au staff la décision qu'il a lui-même prise.
-  const resultat = await balayerServeur(guildId, { ...options, avecTranchees: true });
+  const resultat = await balayerServeur(guildId, {
+    ...options,
+    avecTranchees: true,
+  });
   return {
     chargeeLe: resultat.chargeeLe,
     compte: resultat.empreintes.get(discordId) ?? null,
     empreintes: resultat.empreintes,
-    rapprochements: resultat.rapprochements.filter(paire => paire.compteA === discordId || paire.compteB === discordId),
+    rapprochements: resultat.rapprochements.filter(
+      (paire) => paire.compteA === discordId || paire.compteB === discordId,
+    ),
     verdicts: resultat.verdicts,
   };
 }

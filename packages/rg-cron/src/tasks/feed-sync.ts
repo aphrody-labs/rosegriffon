@@ -52,15 +52,30 @@ import {
   COMPTES_SOURCE_YOUTUBE,
 } from "@rosegriffon/types/feed-comptes";
 import { CHEMIN_SNAPSHOT, lireSnapshot } from "@rosegriffon/types/feed";
-import type { CompteSource, PostFeed, ProfilFeed, Reseau, SnapshotFeed, StatutSource } from "@rosegriffon/types/feed";
-import { estLimiteDebit, lireTiktok, lireYoutube } from "@rosegriffon/types/feed-lecture";
+import type {
+  CompteSource,
+  PostFeed,
+  ProfilFeed,
+  Reseau,
+  SnapshotFeed,
+  StatutSource,
+} from "@rosegriffon/types/feed";
+import {
+  estLimiteDebit,
+  lireTiktok,
+  lireYoutube,
+} from "@rosegriffon/types/feed-lecture";
 import {
   cookiesDepuisEnv,
   postDepuisGrilleInstagram,
   postsDepuisItemListTiktok,
   profilDepuisPageInstagram,
 } from "@rosegriffon/types/feed-normalisation";
-import type { ElementGrilleInstagram, ItemListTiktok, OembedInstagram } from "@rosegriffon/types/feed-normalisation";
+import type {
+  ElementGrilleInstagram,
+  ItemListTiktok,
+  OembedInstagram,
+} from "@rosegriffon/types/feed-normalisation";
 
 import {
   afficheVideo,
@@ -136,9 +151,12 @@ export interface LectureReseau extends Resultat {
   comptesEnEchec?: string[];
 }
 
-export type LecteurReseau = (precedent: SnapshotFeed | null) => Promise<LectureReseau>;
+export type LecteurReseau = (
+  precedent: SnapshotFeed | null,
+) => Promise<LectureReseau>;
 
-const message = (err: unknown): string => (err instanceof Error ? err.message : String(err));
+const message = (err: unknown): string =>
+  err instanceof Error ? err.message : String(err);
 const pause = (ms: number) => Bun.sleep(ms);
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -157,14 +175,27 @@ async function rehebergerPost(
   entetes: Record<string, string> = {},
 ): Promise<{ post: PostFeed; ecrites: number }> {
   const media = post.medias[0];
-  const source = media?.apercu ?? (media?.type === "image" ? media.url : undefined);
+  const source =
+    media?.apercu ?? (media?.type === "image" ? media.url : undefined);
   if (!media || !source) return { post, ecrites: 0 };
   // Déjà ré-hébergée à une synchronisation précédente : on garde le résultat, l'URL d'origine est périmée.
   const ancien = precedent?.medias[0];
   if (ancien?.apercu?.startsWith("/storage/")) {
-    return { post: { ...post, medias: [{ ...media, ...ancien }, ...post.medias.slice(1)] }, ecrites: 0 };
+    return {
+      post: {
+        ...post,
+        medias: [{ ...media, ...ancien }, ...post.medias.slice(1)],
+      },
+      ecrites: 0,
+    };
   }
-  const resultat = await reheberger(post.reseau, post.idOrigine, source, options, entetes);
+  const resultat = await reheberger(
+    post.reseau,
+    post.idOrigine,
+    source,
+    options,
+    entetes,
+  );
   if (!resultat) {
     // Source expirée ou illisible : mieux vaut pas de vignette qu'une vignette qui cassera.
     return { post: { ...post, medias: [] }, ecrites: 0 };
@@ -176,7 +207,10 @@ async function rehebergerPost(
     largeur: resultat.largeur ?? media.largeur,
     hauteur: resultat.hauteur ?? media.hauteur,
   };
-  return { post: { ...post, medias: [nouveau, ...post.medias.slice(1)] }, ecrites: resultat.existante ? 0 : 1 };
+  return {
+    post: { ...post, medias: [nouveau, ...post.medias.slice(1)] },
+    ecrites: resultat.existante ? 0 : 1,
+  };
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -188,7 +222,7 @@ async function lirePrecedent(reseau: Reseau): Promise<SnapshotFeed | null> {
 }
 
 function indexer(snapshot: SnapshotFeed | null): Map<string, PostFeed> {
-  return new Map((snapshot?.posts ?? []).map(p => [p.id, p]));
+  return new Map((snapshot?.posts ?? []).map((p) => [p.id, p]));
 }
 
 /**
@@ -202,15 +236,21 @@ export function conserverComptesEnEchec(
   max = MAX_POSTS,
 ): { posts: PostFeed[]; profils: ProfilFeed[] } {
   const enEchec = new Set(comptes);
-  const ids = new Set(lu.posts.map(p => p.id));
-  const repris = (precedent?.posts ?? []).filter(p => p.compte && enEchec.has(p.compte) && !ids.has(p.id));
-  const pseudos = new Set(lu.profils.map(p => p.pseudo));
+  const ids = new Set(lu.posts.map((p) => p.id));
+  const repris = (precedent?.posts ?? []).filter(
+    (p) => p.compte && enEchec.has(p.compte) && !ids.has(p.id),
+  );
+  const pseudos = new Set(lu.profils.map((p) => p.pseudo));
   const profils = [
     ...lu.profils,
-    ...(precedent?.profils ?? []).filter(p => enEchec.has(p.pseudo) && !pseudos.has(p.pseudo)),
+    ...(precedent?.profils ?? []).filter(
+      (p) => enEchec.has(p.pseudo) && !pseudos.has(p.pseudo),
+    ),
   ];
   if (repris.length === 0) return { posts: lu.posts, profils };
-  const posts = [...lu.posts, ...repris].toSorted((a, b) => b.date.localeCompare(a.date));
+  const posts = [...lu.posts, ...repris].toSorted((a, b) =>
+    b.date.localeCompare(a.date),
+  );
   return { posts: posts.slice(0, Math.max(max, lu.posts.length)), profils };
 }
 
@@ -243,22 +283,32 @@ export const ATTENTE_LIMITE_MAX_MS = 6 * 3600_000;
 export const SEUIL_ECHECS_DURABLES = 6;
 
 /** Fin de l'attente après la `limites`-ième limitation d'affilée ; `Retry-After` si plus long. */
-export function prochaineReprise(limites: number, maintenant: number, retryAfterMs?: number): number {
+export function prochaineReprise(
+  limites: number,
+  maintenant: number,
+  retryAfterMs?: number,
+): number {
   const exponentielle = ATTENTE_LIMITE_MIN_MS * 2 ** Math.max(0, limites - 1);
   const attente = Math.min(ATTENTE_LIMITE_MAX_MS, exponentielle);
-  return maintenant + Math.max(attente, Math.min(retryAfterMs ?? 0, ATTENTE_LIMITE_MAX_MS));
+  return (
+    maintenant +
+    Math.max(attente, Math.min(retryAfterMs ?? 0, ATTENTE_LIMITE_MAX_MS))
+  );
 }
 
 function lireEtats(valeur: unknown): EtatsSources {
   if (!valeur || typeof valeur !== "object") return {};
   const sortie: EtatsSources = {};
   for (const reseau of RESEAUX_SYNCHRONISES) {
-    const e = (valeur as Record<string, Partial<EtatSource> | undefined>)[reseau];
+    const e = (valeur as Record<string, Partial<EtatSource> | undefined>)[
+      reseau
+    ];
     if (!e || typeof e !== "object") continue;
     sortie[reseau] = {
       echecs: Number(e.echecs) || 0,
       limites: Number(e.limites) || 0,
-      reprendreApres: typeof e.reprendreApres === "string" ? e.reprendreApres : undefined,
+      reprendreApres:
+        typeof e.reprendreApres === "string" ? e.reprendreApres : undefined,
       motif: typeof e.motif === "string" ? e.motif : undefined,
     };
   }
@@ -269,7 +319,9 @@ function lireEtats(valeur: unknown): EtatsSources {
 let etatsMemoire: EtatsSources | null = null;
 
 async function chargerEtats(): Promise<EtatsSources> {
-  etatsMemoire ??= lireEtats(await lireJsonDisque(CHEMIN_ETAT).catch(() => null));
+  etatsMemoire ??= lireEtats(
+    await lireJsonDisque(CHEMIN_ETAT).catch(() => null),
+  );
   return etatsMemoire;
 }
 
@@ -285,18 +337,25 @@ export function oublierEtatsSources(): void {
 /** Le flux Atom répond 404/500 par intermittence : trois lectures espacées avant de conclure. */
 const LECTURE_YOUTUBE = { essais: 3, pauseMs: 2000 } as const;
 
-async function syncYoutube(precedent: SnapshotFeed | null): Promise<LectureReseau> {
+async function syncYoutube(
+  precedent: SnapshotFeed | null,
+): Promise<LectureReseau> {
   const connus = indexer(precedent);
-  const lus = await Promise.allSettled(COMPTES_SOURCE_YOUTUBE.map(c => lireYoutube(c, LECTURE_YOUTUBE)));
-  const ok = lus.flatMap(l => (l.status === "fulfilled" ? [l.value] : []));
+  const lus = await Promise.allSettled(
+    COMPTES_SOURCE_YOUTUBE.map((c) => lireYoutube(c, LECTURE_YOUTUBE)),
+  );
+  const ok = lus.flatMap((l) => (l.status === "fulfilled" ? [l.value] : []));
   const enEchec = COMPTES_SOURCE_YOUTUBE.flatMap((c, i) => {
     const l = lus[i]!;
-    return l.status === "rejected" ? [{ compte: c.pseudo, erreur: `${c.nom} : ${message(l.reason)}` }] : [];
+    return l.status === "rejected"
+      ? [{ compte: c.pseudo, erreur: `${c.nom} : ${message(l.reason)}` }]
+      : [];
   });
-  if (ok.length === 0) throw new Error(enEchec.map(e => e.erreur).join(" ; "));
+  if (ok.length === 0)
+    throw new Error(enEchec.map((e) => e.erreur).join(" ; "));
   let vignettes = 0;
   const posts: PostFeed[] = [];
-  for (const brut of ok.flatMap(r => r.posts)) {
+  for (const brut of ok.flatMap((r) => r.posts)) {
     const id = brut.idOrigine;
     const court = brut.lien.includes("/shorts/");
     // `hqdefault` (4:3) porte des bandes noires, et pour un Short la vidéo verticale au centre.
@@ -304,29 +363,46 @@ async function syncYoutube(precedent: SnapshotFeed | null): Promise<LectureResea
     // `maxresdefault` (16:9), absente de certaines : repli sur `hqdefault` recadrée.
     const candidates = court
       ? [`https://i.ytimg.com/vi/${id}/oardefault.jpg`]
-      : [`https://i.ytimg.com/vi/${id}/maxresdefault.jpg`, `https://i.ytimg.com/vi/${id}/hqdefault.jpg`];
+      : [
+          `https://i.ytimg.com/vi/${id}/maxresdefault.jpg`,
+          `https://i.ytimg.com/vi/${id}/hqdefault.jpg`,
+        ];
     const options = court ? VIGNETTE_9_16 : VIGNETTE_16_9;
-    let retenu: { post: PostFeed; ecrites: number } = { post: { ...brut, medias: [] }, ecrites: 0 };
+    let retenu: { post: PostFeed; ecrites: number } = {
+      post: { ...brut, medias: [] },
+      ecrites: 0,
+    };
     for (const url of candidates) {
       const media = { ...brut.medias[0]!, apercu: url };
-      retenu = await rehebergerPost({ ...brut, medias: [media] }, connus.get(brut.id), options);
+      retenu = await rehebergerPost(
+        { ...brut, medias: [media] },
+        connus.get(brut.id),
+        options,
+      );
       if (retenu.post.medias.length > 0) break;
     }
     vignettes += retenu.ecrites;
     // YouTube garde des vignettes stables : sans copie, on retombe sur l'URL publique d'origine.
-    posts.push(retenu.post.medias.length > 0 ? retenu.post : { ...retenu.post, medias: brut.medias });
+    posts.push(
+      retenu.post.medias.length > 0
+        ? retenu.post
+        : { ...retenu.post, medias: brut.medias },
+    );
   }
   // Une chaîne en panne garde ses vidéos de l'instantané précédent : panne ≠ vide, chaîne par chaîne.
   const fusion = conserverComptesEnEchec(
-    { posts, profils: ok.flatMap(r => (r.profil ? [r.profil] : [])) },
+    { posts, profils: ok.flatMap((r) => (r.profil ? [r.profil] : [])) },
     precedent,
-    enEchec.map(e => e.compte),
+    enEchec.map((e) => e.compte),
   );
   return {
     ...fusion,
-    statut: { reseau: "youtube", etat: fusion.posts.length > 0 ? "ok" : "vide" },
+    statut: {
+      reseau: "youtube",
+      etat: fusion.posts.length > 0 ? "ok" : "vide",
+    },
     vignettes,
-    comptesEnEchec: enEchec.map(e => e.erreur),
+    comptesEnEchec: enEchec.map((e) => e.erreur),
   };
 }
 
@@ -335,7 +411,9 @@ async function syncYoutube(precedent: SnapshotFeed | null): Promise<LectureResea
 // ─────────────────────────────────────────────────────────────────────────────
 
 /** Capte la réponse JSON `api/post/item_list` de la page du profil, avec la session fournie. */
-async function lireItemListTiktok(compte: CompteSource): Promise<{ posts: PostFeed[]; lectures: Record<string, string> } | null> {
+async function lireItemListTiktok(
+  compte: CompteSource,
+): Promise<{ posts: PostFeed[]; lectures: Record<string, string> } | null> {
   const cookies = cookiesDepuisEnv(Bun.env.FEED_TIKTOK_COOKIES, ".tiktok.com");
   if (cookies.length === 0) return null;
   const vue = ouvrirVue({ largeur: 1280, hauteur: 900 });
@@ -346,17 +424,27 @@ async function lireItemListTiktok(compte: CompteSource): Promise<{ posts: PostFe
     await vue.cdp("Network.setCookies", { cookies });
     const requetes: string[] = [];
     vue.addEventListener("Network.responseReceived", (e: Event) => {
-      const data = (e as unknown as { data: { requestId: string; response: { url: string } } }).data;
-      if (data.response.url.includes("/api/post/item_list")) requetes.push(data.requestId);
+      const data = (
+        e as unknown as {
+          data: { requestId: string; response: { url: string } };
+        }
+      ).data;
+      if (data.response.url.includes("/api/post/item_list"))
+        requetes.push(data.requestId);
     });
     await naviguer(vue, `https://www.tiktok.com/@${compte.pseudo}`);
     for (let i = 0; i < 20 && requetes.length === 0; i++) await pause(500);
     const posts: PostFeed[] = [];
     const lectures: Record<string, string> = {};
     for (const requestId of requetes) {
-      const corps = (await vue.cdp("Network.getResponseBody", { requestId })) as { body?: string };
+      const corps = (await vue.cdp("Network.getResponseBody", {
+        requestId,
+      })) as { body?: string };
       if (!corps.body) continue;
-      const lu = postsDepuisItemListTiktok(JSON.parse(corps.body) as ItemListTiktok, compte);
+      const lu = postsDepuisItemListTiktok(
+        JSON.parse(corps.body) as ItemListTiktok,
+        compte,
+      );
       posts.push(...lu.posts);
       Object.assign(lectures, lu.lectures);
     }
@@ -366,7 +454,9 @@ async function lireItemListTiktok(compte: CompteSource): Promise<{ posts: PostFe
   }
 }
 
-async function syncTiktok(precedent: SnapshotFeed | null): Promise<LectureReseau> {
+async function syncTiktok(
+  precedent: SnapshotFeed | null,
+): Promise<LectureReseau> {
   const connus = indexer(precedent);
   const compte = COMPTES_SOURCE_TIKTOK[0]!;
   // 429 : `ErreurHttp` remonte telle quelle, la tâche diffère TikTok (voir `synchroniserFeed`).
@@ -379,7 +469,8 @@ async function syncTiktok(precedent: SnapshotFeed | null): Promise<LectureReseau
   }
   const lectures = { ...embed.lectures, ...session?.lectures };
   const parId = new Map<string, PostFeed>();
-  for (const p of [...embed.posts, ...(session?.posts ?? [])]) parId.set(p.id, { ...parId.get(p.id), ...p });
+  for (const p of [...embed.posts, ...(session?.posts ?? [])])
+    parId.set(p.id, { ...parId.get(p.id), ...p });
 
   let vignettes = 0;
   const posts: PostFeed[] = [];
@@ -391,11 +482,23 @@ async function syncTiktok(precedent: SnapshotFeed | null): Promise<LectureReseau
     const duree = ancien?.medias[0]?.duree ?? post.medias[0]?.duree;
     if (duree === undefined && lectures[brut.idOrigine]) {
       try {
-        mp4 = await telechargerBorne(lectures[brut.idOrigine]!, MAX_VIDEO_OCTETS, { Referer: "https://www.tiktok.com/" });
+        mp4 = await telechargerBorne(
+          lectures[brut.idOrigine]!,
+          MAX_VIDEO_OCTETS,
+          { Referer: "https://www.tiktok.com/" },
+        );
         const m = await sonderVideo(mp4);
-        if (m && post.medias[0]) post.medias[0] = { ...post.medias[0], duree: m.duree, largeur: m.largeur, hauteur: m.hauteur };
+        if (m && post.medias[0])
+          post.medias[0] = {
+            ...post.medias[0],
+            duree: m.duree,
+            largeur: m.largeur,
+            hauteur: m.hauteur,
+          };
       } catch (err) {
-        console.warn(`${PREFIXE} MP4 TikTok ${brut.idOrigine} : ${message(err)}`);
+        console.warn(
+          `${PREFIXE} MP4 TikTok ${brut.idOrigine} : ${message(err)}`,
+        );
       }
     } else if (duree !== undefined && post.medias[0]) {
       post.medias[0] = { ...post.medias[0], duree };
@@ -410,14 +513,32 @@ async function syncTiktok(precedent: SnapshotFeed | null): Promise<LectureReseau
         const affiche = await afficheVideo(mp4, VIGNETTE_9_16);
         if (affiche) {
           const chemin = cheminVignette("tiktok", brut.idOrigine);
-          const ecrit = await televerserObjet("assets", chemin, affiche.octets.slice().buffer as ArrayBuffer, "image/webp");
+          const ecrit = await televerserObjet(
+            "assets",
+            chemin,
+            affiche.octets.slice().buffer as ArrayBuffer,
+            "image/webp",
+          );
           if (ecrit.ok) {
-            post = { ...post, medias: [{ type: "video", url: brut.lien, apercu: urlAsset(chemin), largeur: affiche.largeur, hauteur: affiche.hauteur }] };
+            post = {
+              ...post,
+              medias: [
+                {
+                  type: "video",
+                  url: brut.lien,
+                  apercu: urlAsset(chemin),
+                  largeur: affiche.largeur,
+                  hauteur: affiche.hauteur,
+                },
+              ],
+            };
             vignettes++;
           }
         }
       } catch (err) {
-        console.warn(`${PREFIXE} affiche TikTok ${brut.idOrigine} : ${message(err)}`);
+        console.warn(
+          `${PREFIXE} affiche TikTok ${brut.idOrigine} : ${message(err)}`,
+        );
       }
     }
     posts.push(post);
@@ -454,24 +575,39 @@ interface PageInstagram {
   items: ElementGrilleInstagram[];
 }
 
-async function lireOembedInstagram(code: string): Promise<OembedInstagram | null> {
+async function lireOembedInstagram(
+  code: string,
+): Promise<OembedInstagram | null> {
   const reponse = await fetch(
     `https://www.instagram.com/api/v1/oembed/?omitscript=true&url=${encodeURIComponent(`https://www.instagram.com/p/${code}/`)}`,
-    { headers: { "User-Agent": "Mozilla/5.0 (compatible; RoseGriffonFeed/1.0)" }, signal: AbortSignal.timeout(8000) },
+    {
+      headers: {
+        "User-Agent": "Mozilla/5.0 (compatible; RoseGriffonFeed/1.0)",
+      },
+      signal: AbortSignal.timeout(8000),
+    },
   ).catch(() => null);
-  return reponse?.ok ? ((await reponse.json().catch(() => null)) as OembedInstagram | null) : null;
+  return reponse?.ok
+    ? ((await reponse.json().catch(() => null)) as OembedInstagram | null)
+    : null;
 }
-
 
 /** Ouvre un onglet et y pose la session Instagram, si elle est fournie. */
 async function ouvrirPageInstagram(): Promise<PageWebView> {
   const page = await PageWebView.connect();
-  const cookies = cookiesDepuisEnv(Bun.env.FEED_INSTAGRAM_COOKIES, ".instagram.com");
-  if (cookies.length > 0) await page.addCookies(cookies as unknown as Array<Record<string, unknown>>);
+  const cookies = cookiesDepuisEnv(
+    Bun.env.FEED_INSTAGRAM_COOKIES,
+    ".instagram.com",
+  );
+  if (cookies.length > 0)
+    await page.addCookies(cookies as unknown as Array<Record<string, unknown>>);
   return page;
 }
 
-async function lireProfilInstagram(page: PageWebView, compte: CompteSource): Promise<PageInstagram> {
+async function lireProfilInstagram(
+  page: PageWebView,
+  compte: CompteSource,
+): Promise<PageInstagram> {
   await page.goto(`https://www.instagram.com/${compte.pseudo}/`);
   const vues = new Map<string, ElementGrilleInstagram>();
   let derniere: PageInstagram | null = null;
@@ -492,7 +628,9 @@ async function lireProfilInstagram(page: PageWebView, compte: CompteSource): Pro
   return { ...derniere, items: [...vues.values()] };
 }
 
-async function syncInstagram(precedent: SnapshotFeed | null): Promise<LectureReseau> {
+async function syncInstagram(
+  precedent: SnapshotFeed | null,
+): Promise<LectureReseau> {
   const connus = indexer(precedent);
   let vignettes = 0;
   const posts: PostFeed[] = [];
@@ -514,8 +652,15 @@ async function syncInstagram(precedent: SnapshotFeed | null): Promise<LectureRes
         } catch (err) {
           await page?.close().catch(() => undefined);
           page = null;
-          if (essai === 2) enEchec.push({ compte: compte.pseudo, erreur: `${compte.pseudo} : ${message(err)}` });
-          else console.warn(`${PREFIXE} Instagram ${compte.pseudo}, nouvel essai : ${message(err)}`);
+          if (essai === 2)
+            enEchec.push({
+              compte: compte.pseudo,
+              erreur: `${compte.pseudo} : ${message(err)}`,
+            });
+          else
+            console.warn(
+              `${PREFIXE} Instagram ${compte.pseudo}, nouvel essai : ${message(err)}`,
+            );
         }
       }
       if (!lu) continue;
@@ -525,14 +670,23 @@ async function syncInstagram(precedent: SnapshotFeed | null): Promise<LectureRes
         continue;
       }
       for (const el of lu.items.slice(0, MAX_POSTS)) {
-        const ancien = connus.get(`instagram:${el.href.match(/\/(?:p|reel|tv)\/([A-Za-z0-9_-]+)/)?.[1]}`);
+        const ancien = connus.get(
+          `instagram:${el.href.match(/\/(?:p|reel|tv)\/([A-Za-z0-9_-]+)/)?.[1]}`,
+        );
         // Légende : déjà connue, sinon oEmbed (une requête par nouveauté, jamais par passage).
         const code = el.href.match(/\/(?:p|reel|tv)\/([A-Za-z0-9_-]+)/)?.[1];
-        const oembed = ancien?.texte || !code ? undefined : ((await lireOembedInstagram(code)) ?? undefined);
+        const oembed =
+          ancien?.texte || !code
+            ? undefined
+            : ((await lireOembedInstagram(code)) ?? undefined);
         if (!ancien?.texte && code) await pause(300);
         const brut = postDepuisGrilleInstagram(el, compte, oembed);
         if (!brut) continue;
-        const r = await rehebergerPost({ ...brut, texte: ancien?.texte || brut.texte }, ancien, VIGNETTE_CARREE);
+        const r = await rehebergerPost(
+          { ...brut, texte: ancien?.texte || brut.texte },
+          ancien,
+          VIGNETTE_CARREE,
+        );
         vignettes += r.ecrites;
         posts.push(r.post);
       }
@@ -540,9 +694,14 @@ async function syncInstagram(precedent: SnapshotFeed | null): Promise<LectureRes
   } finally {
     await page?.close().catch(() => undefined);
   }
-  if (enEchec.length === COMPTES_SOURCE_INSTAGRAM.length) throw new Error(enEchec.map(e => e.erreur).join(" ; "));
-  const comptesEnEchec = enEchec.map(e => e.erreur);
-  if (posts.length === 0 && enEchec.length === 0 && mur === COMPTES_SOURCE_INSTAGRAM.length) {
+  if (enEchec.length === COMPTES_SOURCE_INSTAGRAM.length)
+    throw new Error(enEchec.map((e) => e.erreur).join(" ; "));
+  const comptesEnEchec = enEchec.map((e) => e.erreur);
+  if (
+    posts.length === 0 &&
+    enEchec.length === 0 &&
+    mur === COMPTES_SOURCE_INSTAGRAM.length
+  ) {
     return {
       posts: [],
       profils,
@@ -550,7 +709,8 @@ async function syncInstagram(precedent: SnapshotFeed | null): Promise<LectureRes
       statut: {
         reseau: "instagram",
         etat: "vide",
-        message: "Instagram demande une connexion pour afficher ce profil : aucune publication n'est lisible pour le moment.",
+        message:
+          "Instagram demande une connexion pour afficher ce profil : aucune publication n'est lisible pour le moment.",
       },
     };
   }
@@ -558,13 +718,16 @@ async function syncInstagram(precedent: SnapshotFeed | null): Promise<LectureRes
   const fusion = conserverComptesEnEchec(
     { posts: posts.slice(0, MAX_POSTS), profils },
     precedent,
-    enEchec.map(e => e.compte),
+    enEchec.map((e) => e.compte),
   );
   return {
     ...fusion,
     vignettes,
     comptesEnEchec,
-    statut: { reseau: "instagram", etat: fusion.posts.length > 0 ? "ok" : "vide" },
+    statut: {
+      reseau: "instagram",
+      etat: fusion.posts.length > 0 ? "ok" : "vide",
+    },
   };
 }
 
@@ -594,14 +757,17 @@ export function bilanFeedSync(
   durables: readonly string[] = [],
 ): Pick<StatsFeedSync, "success" | "partiel" | "error"> {
   const motifs = [
-    ...reseaux.flatMap(r => {
+    ...reseaux.flatMap((r) => {
       if (r.etat === "echec") return [`${r.reseau} : ${r.erreur ?? "échec"}`];
-      if (r.etat === "differe") return [`${r.reseau} : différé jusqu'à ${r.reprendreApres ?? "?"} (${r.erreur ?? "limité"})`];
-      return (r.comptesEnEchec ?? []).map(c => `${r.reseau} : ${c}`);
+      if (r.etat === "differe")
+        return [
+          `${r.reseau} : différé jusqu'à ${r.reprendreApres ?? "?"} (${r.erreur ?? "limité"})`,
+        ];
+      return (r.comptesEnEchec ?? []).map((c) => `${r.reseau} : ${c}`);
     }),
     ...durables,
   ];
-  const aboutis = reseaux.filter(r => r.etat !== "echec");
+  const aboutis = reseaux.filter((r) => r.etat !== "echec");
   return {
     success: aboutis.length > 0 && durables.length === 0,
     partiel: motifs.length > 0,
@@ -615,7 +781,7 @@ export async function synchroniserFeed(
 ): Promise<StatsFeedSync> {
   const dry = options.dry ?? false;
   const demande = options.reseau?.trim().toLowerCase();
-  const cibles = RESEAUX_SYNCHRONISES.filter(r => !demande || r === demande);
+  const cibles = RESEAUX_SYNCHRONISES.filter((r) => !demande || r === demande);
   if (cibles.length === 0)
     return {
       success: false,
@@ -628,19 +794,34 @@ export async function synchroniserFeed(
   const lecteurs = { ...LECTEURS, ...dependances.lecteurs };
   const horloge = dependances.maintenant ?? Date.now;
   // Un passage « dry » ne doit rien changer aux suivants : il travaille sur une copie de l'état.
-  const etats: EtatsSources = dry ? structuredClone(await chargerEtats()) : await chargerEtats();
+  const etats: EtatsSources = dry
+    ? structuredClone(await chargerEtats())
+    : await chargerEtats();
   const reseaux: StatsReseauFeed[] = [];
   const durables: string[] = [];
 
   for (const reseau of cibles) {
     const etat: EtatSource = etats[reseau] ?? { echecs: 0, limites: 0 };
     const maintenant = horloge();
-    const reprise = etat.reprendreApres ? Date.parse(etat.reprendreApres) : Number.NaN;
+    const reprise = etat.reprendreApres
+      ? Date.parse(etat.reprendreApres)
+      : Number.NaN;
     if (reprise > maintenant) {
       // Limitée au passage précédent : on ne la relit pas avant l'échéance (relire prolonge la limite).
-      console.warn(`${PREFIXE} ${reseau} : différé jusqu'à ${etat.reprendreApres} (${etat.motif ?? "limité"})`);
-      reseaux.push({ reseau, ok: true, etat: "differe", posts: 0, vignettes: 0, erreur: etat.motif, reprendreApres: etat.reprendreApres });
-      if (etat.limites >= SEUIL_ECHECS_DURABLES) durables.push(`${reseau} : limité ${etat.limites} fois d'affilée`);
+      console.warn(
+        `${PREFIXE} ${reseau} : différé jusqu'à ${etat.reprendreApres} (${etat.motif ?? "limité"})`,
+      );
+      reseaux.push({
+        reseau,
+        ok: true,
+        etat: "differe",
+        posts: 0,
+        vignettes: 0,
+        erreur: etat.motif,
+        reprendreApres: etat.reprendreApres,
+      });
+      if (etat.limites >= SEUIL_ECHECS_DURABLES)
+        durables.push(`${reseau} : limité ${etat.limites} fois d'affilée`);
       continue;
     }
     try {
@@ -658,7 +839,9 @@ export async function synchroniserFeed(
       const comptes = lu.comptesEnEchec ?? [];
       console.log(
         `${PREFIXE} ${reseau} : ${lu.posts.length} publications, ${lu.vignettes} vignettes écrites${dry ? " (dry)" : ""}` +
-          (comptes.length > 0 ? ` ; comptes en échec (publications précédentes gardées) : ${comptes.join(" ; ")}` : ""),
+          (comptes.length > 0
+            ? ` ; comptes en échec (publications précédentes gardées) : ${comptes.join(" ; ")}`
+            : ""),
       );
       etats[reseau] = { echecs: 0, limites: 0 };
       reseaux.push({
@@ -673,33 +856,65 @@ export async function synchroniserFeed(
       if (estLimiteDebit(err)) {
         // 429 : attendre, en doublant l'attente à chaque limitation d'affilée (`Retry-After` s'il est plus long).
         const limites = etat.limites + 1;
-        const reprendreApres = new Date(prochaineReprise(limites, maintenant, err.reessayerApresMs)).toISOString();
-        etats[reseau] = { echecs: etat.echecs, limites, reprendreApres, motif: message(err) };
-        console.warn(`${PREFIXE} ${reseau} : ${message(err)} ; différé jusqu'à ${reprendreApres} (limitation n° ${limites})`);
-        reseaux.push({ reseau, ok: true, etat: "differe", posts: 0, vignettes: 0, erreur: message(err), reprendreApres });
-        if (limites >= SEUIL_ECHECS_DURABLES) durables.push(`${reseau} : limité ${limites} fois d'affilée`);
+        const reprendreApres = new Date(
+          prochaineReprise(limites, maintenant, err.reessayerApresMs),
+        ).toISOString();
+        etats[reseau] = {
+          echecs: etat.echecs,
+          limites,
+          reprendreApres,
+          motif: message(err),
+        };
+        console.warn(
+          `${PREFIXE} ${reseau} : ${message(err)} ; différé jusqu'à ${reprendreApres} (limitation n° ${limites})`,
+        );
+        reseaux.push({
+          reseau,
+          ok: true,
+          etat: "differe",
+          posts: 0,
+          vignettes: 0,
+          erreur: message(err),
+          reprendreApres,
+        });
+        if (limites >= SEUIL_ECHECS_DURABLES)
+          durables.push(`${reseau} : limité ${limites} fois d'affilée`);
         continue;
       }
       // Panne ≠ vide : l'instantané précédent reste en place, on le consigne.
       const echecs = etat.echecs + 1;
       etats[reseau] = { echecs, limites: etat.limites, motif: message(err) };
       console.error(`${PREFIXE} ${reseau} : ${message(err)}`);
-      reseaux.push({ reseau, ok: false, etat: "echec", posts: 0, vignettes: 0, erreur: message(err) });
-      if (echecs >= SEUIL_ECHECS_DURABLES) durables.push(`${reseau} : en échec ${echecs} passages d'affilée`);
+      reseaux.push({
+        reseau,
+        ok: false,
+        etat: "echec",
+        posts: 0,
+        vignettes: 0,
+        erreur: message(err),
+      });
+      if (echecs >= SEUIL_ECHECS_DURABLES)
+        durables.push(`${reseau} : en échec ${echecs} passages d'affilée`);
     }
   }
 
   if (!dry) {
-    await ecrireJson(CHEMIN_ETAT, etats).catch(err => console.warn(`${PREFIXE} état non écrit : ${message(err)}`));
+    await ecrireJson(CHEMIN_ETAT, etats).catch((err) =>
+      console.warn(`${PREFIXE} état non écrit : ${message(err)}`),
+    );
   }
   const bilan = bilanFeedSync(reseaux, durables);
-  if (bilan.success && bilan.partiel) console.warn(`${PREFIXE} passage partiel : ${bilan.error}`);
+  if (bilan.success && bilan.partiel)
+    console.warn(`${PREFIXE} passage partiel : ${bilan.error}`);
   return { ...bilan, reseaux, dry };
 }
 
 if (import.meta.main) {
   const args = Bun.argv.slice(2);
-  const resultat = await synchroniserFeed({ reseau: args.find(a => !a.startsWith("--")), dry: args.includes("--dry") });
+  const resultat = await synchroniserFeed({
+    reseau: args.find((a) => !a.startsWith("--")),
+    dry: args.includes("--dry"),
+  });
   console.log(JSON.stringify(resultat, null, 2));
   process.exit(resultat.success ? 0 : 1);
 }

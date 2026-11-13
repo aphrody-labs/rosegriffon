@@ -91,11 +91,15 @@ describe("nie-bridge Level-5 binary contracts", () => {
 
   it("derives CRI CPK decryption keys from archive filenames matching NIE", () => {
     // Exact reference vector from aphrody-nie-formats/src/cpk.rs:55
-    const key = deriveCpkKeyFromFilename("1d08dda99e8549431c6c7b459ed8deab.cpk");
+    const key = deriveCpkKeyFromFilename(
+      "1d08dda99e8549431c6c7b459ed8deab.cpk",
+    );
     expect(key).toBe(0xbd281847);
 
     // Strips path prefixes
-    const keyFromPath = deriveCpkKeyFromFilename("data/packs/1d08dda99e8549431c6c7b459ed8deab.cpk");
+    const keyFromPath = deriveCpkKeyFromFilename(
+      "data/packs/1d08dda99e8549431c6c7b459ed8deab.cpk",
+    );
     expect(keyFromPath).toBe(0xbd281847);
   });
 
@@ -128,7 +132,9 @@ describe("nie-bridge Level-5 binary contracts", () => {
   });
 
   it("executes CRI position-XOR decryption involutively", () => {
-    const original = new Uint8Array([0x43, 0x50, 0x4b, 0x20, 0x01, 0x02, 0x03, 0x04]);
+    const original = new Uint8Array([
+      0x43, 0x50, 0x4b, 0x20, 0x01, 0x02, 0x03, 0x04,
+    ]);
     const buffer = new Uint8Array(original);
     const key = 0xbd281847;
 

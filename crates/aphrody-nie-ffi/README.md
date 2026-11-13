@@ -20,5 +20,5 @@ This upstream export remains unavailable because its owning backend registry is 
 separate `bun-engine` emulator runtime, which is outside this RE FFI profile:
 
 - `nie_emu_registry_json_out`: emulator registry from `bun-engine`.
-It is absent from the dynamic-library symbol table rather than replaced with a capability-error
-stub. The original upstream implementation and license are preserved in `src/upstream.rs`.
+  It is absent from the dynamic-library symbol table rather than replaced with a capability-error
+  stub. The original upstream implementation and license are preserved in `src/upstream.rs`.

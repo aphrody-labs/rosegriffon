@@ -40,21 +40,48 @@ describe("site telemetry", () => {
     const { sql, calls } = fakeSql();
     useDiscordMirrorSql(sql);
     const count = await syncSiteTelemetryAggregates(
-      [{ host: "rosegriffon.fr", windowStart: "2026-11-05T10:00:00Z", requests: 12, bytes: 3400, errors4xx: 1, errors5xx: 0 }],
+      [
+        {
+          host: "rosegriffon.fr",
+          windowStart: "2026-11-05T10:00:00Z",
+          requests: 12,
+          bytes: 3400,
+          errors4xx: 1,
+          errors5xx: 0,
+        },
+      ],
       false,
     );
     expect(count).toBe(1);
     expect(calls).toHaveLength(1);
     expect(calls[0]!.text).toContain("jsonb_to_recordset");
-    const payload = JSON.parse(calls[0]!.values.find(v => typeof v === "string" && v.startsWith("[")) as string);
+    const payload = JSON.parse(
+      calls[0]!.values.find(
+        (v) => typeof v === "string" && v.startsWith("["),
+      ) as string,
+    );
     expect(payload).toEqual([
-      { host: "rosegriffon.fr", window_start: "2026-11-05T10:00:00Z", requests: 12, bytes: 3400, errors_4xx: 1, errors_5xx: 0 },
+      {
+        host: "rosegriffon.fr",
+        window_start: "2026-11-05T10:00:00Z",
+        requests: 12,
+        bytes: 3400,
+        errors_4xx: 1,
+        errors_5xx: 0,
+      },
     ]);
     expect(calls[0]!.values).toContain(false);
   });
 
   test("summary coerces bigint-ish columns and normalises the timestamp", async () => {
-    const { sql } = fakeSql([{ hours: 3, requests: "42", complete: false, synced_at: "2026-11-05T10:00:00Z" }]);
+    const { sql } = fakeSql([
+      {
+        hours: 3,
+        requests: "42",
+        complete: false,
+        synced_at: "2026-11-05T10:00:00Z",
+      },
+    ]);
     useDiscordMirrorSql(sql);
     expect(await siteTelemetrySummary(24)).toEqual({
       hours: 3,
@@ -75,7 +102,10 @@ describe("guild mirror", () => {
   test("guild departure is scoped to the observing bot", async () => {
     const { sql, calls } = fakeSql();
     useDiscordMirrorSql(sql);
-    await markDiscordGuildLeft({ sourceBotId: "bot-a", profile: "achillea" }, "g1");
+    await markDiscordGuildLeft(
+      { sourceBotId: "bot-a", profile: "achillea" },
+      "g1",
+    );
     expect(calls[0]!.values).toEqual(["bot-a", "g1", "achillea"]);
   });
 
@@ -89,9 +119,14 @@ describe("guild mirror", () => {
           const size = pages.shift() ?? 0;
           const offset = afters.length * 10_000;
           const page = new Map<string, GuildMember>(
-            Array.from({ length: size }, (_, i) => [String(offset + i), {} as GuildMember]),
+            Array.from({ length: size }, (_, i) => [
+              String(offset + i),
+              {} as GuildMember,
+            ]),
           );
-          return Promise.resolve(Object.assign(page, { lastKey: () => [...page.keys()].at(-1) }));
+          return Promise.resolve(
+            Object.assign(page, { lastKey: () => [...page.keys()].at(-1) }),
+          );
         },
       },
     } as unknown as Guild;

@@ -36,13 +36,19 @@ describe("annuaire clans unifié", () => {
 
   test("traite l'avatar par défaut de l'API comme une absence d'avatar", async () => {
     const fetcher = async () =>
-      Response.json({ data: [{ ...clan, avatarUrl: "/achillea/default-clan-avatar.svg?clan=1" }], count: 1 });
+      Response.json({
+        data: [
+          { ...clan, avatarUrl: "/achillea/default-clan-avatar.svg?clan=1" },
+        ],
+        count: 1,
+      });
     const [result] = await listPublicClans(fetcher, "https://api.example.test");
     expect(result?.avatarUrl).toBe("");
   });
 
   test("rejette une réponse compacte incomplète", async () => {
-    const fetcher = async () => Response.json({ data: [{ id: 1, name: "Incomplet" }], count: 1 });
+    const fetcher = async () =>
+      Response.json({ data: [{ id: 1, name: "Incomplet" }], count: 1 });
     await expect(listPublicClans(fetcher)).rejects.toThrow("réponse invalide");
   });
 });
@@ -52,7 +58,7 @@ describe("getPublicClan", () => {
     let requestedUrl = "";
     const result = await getPublicClan(
       61,
-      async input => {
+      async (input) => {
         requestedUrl = String(input);
         return Response.json({ ...clan, id: 61 });
       },
@@ -75,6 +81,8 @@ describe("getPublicClan", () => {
   });
 
   test("rejects a response for a different clan", async () => {
-    await expect(getPublicClan(61, async () => Response.json({ ...clan, id: 62 }))).rejects.toThrow("réponse invalide");
+    await expect(
+      getPublicClan(61, async () => Response.json({ ...clan, id: 62 })),
+    ).rejects.toThrow("réponse invalide");
   });
 });

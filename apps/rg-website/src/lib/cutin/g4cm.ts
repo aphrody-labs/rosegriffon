@@ -206,8 +206,8 @@ export function parseG4cm(bytes: Uint8Array): G4cmParsed {
     t.frames = out.length ? out : null;
   }
 
-  const first = shots.length ? Math.min(...shots.map(s => s.startFrame)) : 0;
-  const last = shots.length ? Math.max(...shots.map(s => s.endFrame)) : 0;
+  const first = shots.length ? Math.min(...shots.map((s) => s.startFrame)) : 0;
+  const last = shots.length ? Math.max(...shots.map((s) => s.endFrame)) : 0;
 
   return {
     header,
@@ -220,7 +220,10 @@ export function parseG4cm(bytes: Uint8Array): G4cmParsed {
 }
 
 /** Lit les enregistrements de pistes (20 o.) jusqu'au premier mot nul ; renvoie le début du data. */
-function readTracks(view: DataView, bytes: Uint8Array): { tracks: G4cmTrack[]; dataStart: number } {
+function readTracks(
+  view: DataView,
+  bytes: Uint8Array,
+): { tracks: G4cmTrack[]; dataStart: number } {
   // La table de pistes commence après la table de chaînes + une petite table d'index.
   // Observé : début à 0x190. On scanne depuis 0x190 par pas de 20 jusqu'au mot de tête nul.
   const START = 0x190;
@@ -270,7 +273,11 @@ function findShotNames(bytes: Uint8Array, count: number): string[] {
   const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
   const names: string[] = [];
   // Recherche du 1er octet ASCII 'c' (0x63) suivi de 4 chiffres, à partir de 0x130.
-  for (let i = 0x130; i < Math.min(bytes.byteLength - 6, 0x400) && names.length < count; i++) {
+  for (
+    let i = 0x130;
+    i < Math.min(bytes.byteLength - 6, 0x400) && names.length < count;
+    i++
+  ) {
     if (
       bytes[i] === 0x63 && // 'c'
       bytes[i + 1] >= 0x30 &&
@@ -292,6 +299,9 @@ function findShotNames(bytes: Uint8Array, count: number): string[] {
  * scénarisé par plan (`buildCutinShots`). Conservé comme point d'extension si le lecteur natif
  * (nie-engine) expose un jour le décodeur de courbes.
  */
-export function decodeTrackValues(_track: G4cmTrack, _parsed: G4cmParsed): number[] | null {
+export function decodeTrackValues(
+  _track: G4cmTrack,
+  _parsed: G4cmParsed,
+): number[] | null {
   return null;
 }

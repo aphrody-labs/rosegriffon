@@ -27,7 +27,9 @@ export function RealtimeSettingsListener() {
       });
     };
     const inactif = typeof window.requestIdleCallback === "function";
-    const poignee = inactif ? window.requestIdleCallback(brancher, { timeout: 5000 }) : window.setTimeout(brancher, 3000);
+    const poignee = inactif
+      ? window.requestIdleCallback(brancher, { timeout: 5000 })
+      : window.setTimeout(brancher, 3000);
     return () => {
       annule = true;
       if (inactif) window.cancelIdleCallback(poignee);

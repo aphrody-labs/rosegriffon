@@ -5,7 +5,10 @@ export function phaseLobbiesAreFinished(
   lobbyStates: readonly string[],
   finishedStates: ReadonlySet<string> = new Set(["Finished", "Forfeited"]),
 ): boolean {
-  return lobbyStates.length > 0 && lobbyStates.every(state => finishedStates.has(state));
+  return (
+    lobbyStates.length > 0 &&
+    lobbyStates.every((state) => finishedStates.has(state))
+  );
 }
 
 /** True when the active phase is the last phase still needing completion. */
@@ -15,7 +18,11 @@ export function shouldFinishTournament(
 ): boolean {
   return (
     phases.length > 0 &&
-    phases.every(phase => phase.status === "Completed" || phase.id === activePhaseId) &&
-    !phases.some(phase => phase.status === "Active" && phase.id !== activePhaseId)
+    phases.every(
+      (phase) => phase.status === "Completed" || phase.id === activePhaseId,
+    ) &&
+    !phases.some(
+      (phase) => phase.status === "Active" && phase.id !== activePhaseId,
+    )
   );
 }

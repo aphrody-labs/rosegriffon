@@ -41,16 +41,19 @@ export type TypeEquipe = 0 | 1;
 export const ROLE_EQUIPE = { joueur: 0, remplacant: 1, coach: 2 } as const;
 export type RoleEquipe = 0 | 1 | 2;
 
-export const LIMITE_PAR_ROLE: Readonly<Record<RoleEquipe, number>> = Object.freeze({ 0: 5, 1: 2, 2: 1 });
-export const LIBELLE_ROLE_PLURIEL: Readonly<Record<RoleEquipe, string>> = Object.freeze({
-  0: "joueurs",
-  1: "remplaçants",
-  2: "coachs",
-});
-export const NOM_EQUIPE_DEFAUT: Readonly<Record<TypeEquipe, string>> = Object.freeze({
-  0: "Equipe principale",
-  1: "Equipe secondaire",
-});
+export const LIMITE_PAR_ROLE: Readonly<Record<RoleEquipe, number>> =
+  Object.freeze({ 0: 5, 1: 2, 2: 1 });
+export const LIBELLE_ROLE_PLURIEL: Readonly<Record<RoleEquipe, string>> =
+  Object.freeze({
+    0: "joueurs",
+    1: "remplaçants",
+    2: "coachs",
+  });
+export const NOM_EQUIPE_DEFAUT: Readonly<Record<TypeEquipe, string>> =
+  Object.freeze({
+    0: "Equipe principale",
+    1: "Equipe secondaire",
+  });
 
 /** Rang de clan minimal pour gérer les équipes (Vice-Président). */
 export const RANG_GESTION = 2;
@@ -86,8 +89,11 @@ export function estTypeEquipe(valeur: unknown): valeur is TypeEquipe {
 }
 
 /** Erreurs de validité d'une équipe (legacy `ClanTeam.getValidityErrors`). */
-export function erreursValidite(liens: ReadonlyArray<{ role: RoleEquipe }>): string[] {
-  const compte = (role: RoleEquipe) => liens.filter(l => l.role === role).length;
+export function erreursValidite(
+  liens: ReadonlyArray<{ role: RoleEquipe }>,
+): string[] {
+  const compte = (role: RoleEquipe) =>
+    liens.filter((l) => l.role === role).length;
   const erreurs: string[] = [];
   if (compte(0) < 3) erreurs.push("Il faut au moins 3 joueurs.");
   if (compte(1) > 2) erreurs.push("Pas plus de 2 remplaçants.");
@@ -119,22 +125,40 @@ export function planifierEffectif(input: {
   demandes: readonly string[];
   membresDuClan: ReadonlySet<string>;
   liensDuRole: ReadonlyArray<{ linkId: number; userId: string }>;
-  occupes: ReadonlyArray<{ userId: string; teamId: number; teamName: string; role: RoleEquipe }>;
+  occupes: ReadonlyArray<{
+    userId: string;
+    teamId: number;
+    teamName: string;
+    role: RoleEquipe;
+  }>;
 }): PlanEffectif {
-  const voulus = [...new Set(input.demandes.map(id => id.trim()).filter(id => id !== ""))];
-  const invalides = voulus.filter(id => !input.membresDuClan.has(id));
+  const voulus = [
+    ...new Set(input.demandes.map((id) => id.trim()).filter((id) => id !== "")),
+  ];
+  const invalides = voulus.filter((id) => !input.membresDuClan.has(id));
   if (invalides.length > 0)
-    return { ok: false, statut: 400, message: `Ces identifiants ne sont pas membres du clan : ${invalides.join(", ")}` };
+    return {
+      ok: false,
+      statut: 400,
+      message: `Ces identifiants ne sont pas membres du clan : ${invalides.join(", ")}`,
+    };
   const limite = LIMITE_PAR_ROLE[input.role];
   if (voulus.length > limite)
-    return { ok: false, statut: 400, message: `Trop de ${LIBELLE_ROLE_PLURIEL[input.role]} (limite ${limite}).` };
+    return {
+      ok: false,
+      statut: 400,
+      message: `Trop de ${LIBELLE_ROLE_PLURIEL[input.role]} (limite ${limite}).`,
+    };
 
-  const actuels = new Set(input.liensDuRole.map(l => l.userId));
-  const ajouter = voulus.filter(id => !actuels.has(id));
+  const actuels = new Set(input.liensDuRole.map((l) => l.userId));
+  const ajouter = voulus.filter((id) => !actuels.has(id));
   for (const id of ajouter) {
-    const place = input.occupes.find(o => o.userId === id);
+    const place = input.occupes.find((o) => o.userId === id);
     if (place) {
-      const ou = place.teamId === input.equipeId ? "cette équipe" : `l'équipe « ${place.teamName} »`;
+      const ou =
+        place.teamId === input.equipeId
+          ? "cette équipe"
+          : `l'équipe « ${place.teamName} »`;
       return {
         ok: false,
         statut: 409,
@@ -143,7 +167,9 @@ export function planifierEffectif(input: {
     }
   }
   const garder = new Set(voulus);
-  const retirer = input.liensDuRole.filter(l => !garder.has(l.userId)).map(l => l.linkId);
+  const retirer = input.liensDuRole
+    .filter((l) => !garder.has(l.userId))
+    .map((l) => l.linkId);
   return { ok: true, retirer, ajouter };
 }
 
@@ -156,7 +182,11 @@ export function capitaineApres(input: {
   joueursRestants: readonly number[];
   joueursAjoutes: readonly number[];
 }): number | null {
-  if (input.capitaineActuel !== null && input.joueursRestants.includes(input.capitaineActuel)) return input.capitaineActuel;
+  if (
+    input.capitaineActuel !== null &&
+    input.joueursRestants.includes(input.capitaineActuel)
+  )
+    return input.capitaineActuel;
   return input.joueursRestants[0] ?? input.joueursAjoutes[0] ?? null;
 }
 
@@ -182,17 +212,23 @@ interface LigneLien {
   avatar: string | null;
 }
 
-function versEquipe(ligne: LigneEquipe, liens: readonly LigneLien[]): EquipeClan {
+function versEquipe(
+  ligne: LigneEquipe,
+  liens: readonly LigneLien[],
+): EquipeClan {
   const membres: LienEquipe[] = liens
-    .filter(l => Number(l.team_id) === Number(ligne.id))
-    .map(l => ({
+    .filter((l) => Number(l.team_id) === Number(ligne.id))
+    .map((l) => ({
       linkId: Number(l.id),
       userId: l.member_user_id,
       displayName: l.display_name || l.username || l.member_user_id,
       avatar: l.avatar ?? null,
       role: (estRoleEquipe(Number(l.role)) ? Number(l.role) : 0) as RoleEquipe,
     }));
-  const capitaine = ligne.captain_id === null ? null : membres.find(m => m.linkId === Number(ligne.captain_id));
+  const capitaine =
+    ligne.captain_id === null
+      ? null
+      : membres.find((m) => m.linkId === Number(ligne.captain_id));
   const erreurs = erreursValidite(membres);
   return {
     id: Number(ligne.id),
@@ -207,7 +243,10 @@ function versEquipe(ligne: LigneEquipe, liens: readonly LigneLien[]): EquipeClan
   };
 }
 
-async function liensDesEquipes(db: Db, equipes: readonly number[]): Promise<LigneLien[]> {
+async function liensDesEquipes(
+  db: Db,
+  equipes: readonly number[],
+): Promise<LigneLien[]> {
   if (equipes.length === 0) return [];
   const resultat = await sql<LigneLien>`
     select ctm.id, ctm.team_id, ctm.member_user_id, ctm.role, u.display_name, u.username, u.avatar
@@ -219,18 +258,24 @@ async function liensDesEquipes(db: Db, equipes: readonly number[]): Promise<Lign
   return resultat.rows;
 }
 
-export async function equipesDuClan(db: Db, clanId: number): Promise<EquipeClan[]> {
+export async function equipesDuClan(
+  db: Db,
+  clanId: number,
+): Promise<EquipeClan[]> {
   const equipes = await sql<LigneEquipe>`
     select id, clan_id, name, type, captain_id, updated_at from clan_team where clan_id = ${clanId} order by type asc, id asc
   `.execute(db);
   const liens = await liensDesEquipes(
     db,
-    equipes.rows.map(e => Number(e.id)),
+    equipes.rows.map((e) => Number(e.id)),
   );
-  return equipes.rows.map(e => versEquipe(e, liens));
+  return equipes.rows.map((e) => versEquipe(e, liens));
 }
 
-export async function equipeParId(db: Db, equipeId: number): Promise<EquipeClan | null> {
+export async function equipeParId(
+  db: Db,
+  equipeId: number,
+): Promise<EquipeClan | null> {
   const resultat = await sql<LigneEquipe>`
     select id, clan_id, name, type, captain_id, updated_at from clan_team where id = ${equipeId}
   `.execute(db);
@@ -244,7 +289,13 @@ export async function appartenance(db: Db, userId: string) {
   return db
     .selectFrom("clan_member as cm")
     .innerJoin("clan as c", "c.id", "cm.clan_id")
-    .select(["c.id", "c.name", "c.shortened_name", "c.clan_avatar_url", "cm.role"])
+    .select([
+      "c.id",
+      "c.name",
+      "c.shortened_name",
+      "c.clan_avatar_url",
+      "cm.role",
+    ])
     .where("cm.user_id", "=", userId)
     .where("c.is_disbanded", "=", false)
     .executeTakeFirst();
@@ -253,9 +304,17 @@ export async function appartenance(db: Db, userId: string) {
 type Refus = { ok: false; statut: 403 | 404; message: string };
 
 /** Le joueur peut-il gérer les équipes de ce clan ? */
-export async function verifierGestion(db: Db, userId: string, clanId: number): Promise<{ ok: true } | Refus> {
+export async function verifierGestion(
+  db: Db,
+  userId: string,
+  clanId: number,
+): Promise<{ ok: true } | Refus> {
   const [utilisateur, membre] = await Promise.all([
-    db.selectFrom("user").select("role").where("id", "=", userId).executeTakeFirst(),
+    db
+      .selectFrom("user")
+      .select("role")
+      .where("id", "=", userId)
+      .executeTakeFirst(),
     db
       .selectFrom("clan_member")
       .select("role")
@@ -264,9 +323,19 @@ export async function verifierGestion(db: Db, userId: string, clanId: number): P
       .executeTakeFirst(),
   ]);
   if (Number(utilisateur?.role ?? 0) >= ROLE_ADMIN) return { ok: true };
-  if (!membre) return { ok: false, statut: 403, message: "Tu n'es pas membre de ce clan." };
+  if (!membre)
+    return {
+      ok: false,
+      statut: 403,
+      message: "Tu n'es pas membre de ce clan.",
+    };
   if (Number(membre.role) < RANG_GESTION)
-    return { ok: false, statut: 403, message: "Gérer les équipes est réservé au Président et aux Vice-Présidents." };
+    return {
+      ok: false,
+      statut: 403,
+      message:
+        "Gérer les équipes est réservé au Président et aux Vice-Présidents.",
+    };
   return { ok: true };
 }
 
@@ -291,7 +360,13 @@ const equipeModel = t.Object({
   valid: t.Boolean(),
   errors: t.Array(t.String()),
 });
-const erreurs = { 400: message, 401: message, 403: message, 404: message, 409: message };
+const erreurs = {
+  400: message,
+  401: message,
+  403: message,
+  404: message,
+  409: message,
+};
 const nonAuthentifie = { message: "Authentication required" };
 
 export const clanTeamsController = new Elysia({ prefix: "/clans/teams" })
@@ -321,37 +396,54 @@ export const clanTeamsController = new Elysia({ prefix: "/clans/teams" })
           clanId: t.Nullable(t.Number()),
           clanRole: t.Nullable(t.Number()),
           clan: t.Nullable(
-            t.Object({ id: t.Number(), name: t.String(), shortenedName: t.String(), avatarUrl: t.String() }),
+            t.Object({
+              id: t.Number(),
+              name: t.String(),
+              shortenedName: t.String(),
+              avatarUrl: t.String(),
+            }),
           ),
         }),
         401: message,
       },
     },
   )
-  .get("/clan/:clanId", async ({ db, params }) => equipesDuClan(db, params.clanId), {
-    params: t.Object({ clanId: t.Numeric() }),
-    response: { 200: t.Array(equipeModel) },
-  })
+  .get(
+    "/clan/:clanId",
+    async ({ db, params }) => equipesDuClan(db, params.clanId),
+    {
+      params: t.Object({ clanId: t.Numeric() }),
+      response: { 200: t.Array(equipeModel) },
+    },
+  )
   .post(
     "/",
     async ({ db, headers, body, set }) => {
       const session = await resolveAchilleaSession(headers);
       if (!session) return status(401, nonAuthentifie);
-      if (!estTypeEquipe(body.type)) return status(400, { message: "Type d'équipe invalide (0 ou 1)." });
+      if (!estTypeEquipe(body.type))
+        return status(400, { message: "Type d'équipe invalide (0 ou 1)." });
       const nom = (body.name ?? NOM_EQUIPE_DEFAUT[body.type]).trim();
-      if (!nomEquipeValide(nom)) return status(400, { message: "Le nom de l'équipe doit contenir entre 3 et 30 caractères." });
+      if (!nomEquipeValide(nom))
+        return status(400, {
+          message: "Le nom de l'équipe doit contenir entre 3 et 30 caractères.",
+        });
       const clan = await db
         .selectFrom("clan")
         .select(["id", "is_disbanded"])
         .where("id", "=", body.clanId)
         .executeTakeFirst();
-      if (!clan || clan.is_disbanded) return status(404, { message: "Clan introuvable." });
+      if (!clan || clan.is_disbanded)
+        return status(404, { message: "Clan introuvable." });
       const droit = await verifierGestion(db, session.id, body.clanId);
       if (!droit.ok) return status(droit.statut, { message: droit.message });
       const existant = await sql<{ id: number }>`
         select id from clan_team where clan_id = ${body.clanId} and type = ${body.type}
       `.execute(db);
-      if (existant.rows.length > 0) return status(409, { message: "Cette équipe existe déjà pour ce clan." });
+      if (existant.rows.length > 0)
+        return status(409, {
+          message: "Cette équipe existe déjà pour ce clan.",
+        });
       const maintenant = new Date();
       const cree = await sql<{ id: number }>`
         insert into clan_team (created_at, updated_at, clan_id, name, type, captain_id)
@@ -363,7 +455,11 @@ export const clanTeamsController = new Elysia({ prefix: "/clans/teams" })
       return equipe!;
     },
     {
-      body: t.Object({ clanId: t.Number(), type: t.Number(), name: t.Optional(t.String()) }),
+      body: t.Object({
+        clanId: t.Number(),
+        type: t.Number(),
+        name: t.Optional(t.String()),
+      }),
       response: { 201: equipeModel, ...erreurs },
     },
   )
@@ -373,14 +469,18 @@ export const clanTeamsController = new Elysia({ prefix: "/clans/teams" })
       const equipe = await equipeParId(db, params.teamId);
       return equipe ?? status(404, { message: "Équipe introuvable." });
     },
-    { params: t.Object({ teamId: t.Numeric() }), response: { 200: equipeModel, 404: message } },
+    {
+      params: t.Object({ teamId: t.Numeric() }),
+      response: { 200: equipeModel, 404: message },
+    },
   )
   .put(
     "/:teamId/roster",
     async ({ db, headers, params, body }) => {
       const session = await resolveAchilleaSession(headers);
       if (!session) return status(401, nonAuthentifie);
-      if (!estRoleEquipe(body.role)) return status(400, { message: "Rôle d'équipe invalide (0, 1 ou 2)." });
+      if (!estRoleEquipe(body.role))
+        return status(400, { message: "Rôle d'équipe invalide (0, 1 ou 2)." });
       const role = body.role;
       const equipe = await equipeParId(db, params.teamId);
       if (!equipe) return status(404, { message: "Équipe introuvable." });
@@ -388,30 +488,41 @@ export const clanTeamsController = new Elysia({ prefix: "/clans/teams" })
       if (!droit.ok) return status(droit.statut, { message: droit.message });
 
       const [membres, toutes] = await Promise.all([
-        db.selectFrom("clan_member").select("user_id").where("clan_id", "=", equipe.clanId).execute(),
+        db
+          .selectFrom("clan_member")
+          .select("user_id")
+          .where("clan_id", "=", equipe.clanId)
+          .execute(),
         equipesDuClan(db, equipe.clanId),
       ]);
-      const liensDuRole = equipe.members.filter(m => m.role === role);
-      const occupes = toutes.flatMap(e =>
+      const liensDuRole = equipe.members.filter((m) => m.role === role);
+      const occupes = toutes.flatMap((e) =>
         e.members
-          .filter(m => !(e.id === equipe.id && m.role === role))
-          .map(m => ({ userId: m.userId, teamId: e.id, teamName: e.name, role: m.role })),
+          .filter((m) => !(e.id === equipe.id && m.role === role))
+          .map((m) => ({
+            userId: m.userId,
+            teamId: e.id,
+            teamName: e.name,
+            role: m.role,
+          })),
       );
       const plan = planifierEffectif({
         role,
         equipeId: equipe.id,
         demandes: body.userIds,
-        membresDuClan: new Set(membres.map(m => m.user_id)),
+        membresDuClan: new Set(membres.map((m) => m.user_id)),
         liensDuRole,
         occupes,
       });
       if (!plan.ok) return status(plan.statut, { message: plan.message });
 
       try {
-        await db.transaction().execute(async trx => {
+        await db.transaction().execute(async (trx) => {
           const maintenant = new Date();
           if (plan.retirer.length > 0)
-            await sql`delete from clan_team_member where id in (${sql.join(plan.retirer)})`.execute(trx);
+            await sql`delete from clan_team_member where id in (${sql.join(plan.retirer)})`.execute(
+              trx,
+            );
           const ajoutes: number[] = [];
           for (const userId of plan.ajouter) {
             const insere = await sql<{ id: number }>`
@@ -422,10 +533,18 @@ export const clanTeamsController = new Elysia({ prefix: "/clans/teams" })
             `.execute(trx);
             ajoutes.push(Number(insere.rows[0]!.id));
           }
-          let capitaine = equipe.members.find(m => m.userId === equipe.captainUserId)?.linkId ?? null;
+          let capitaine =
+            equipe.members.find((m) => m.userId === equipe.captainUserId)
+              ?.linkId ?? null;
           if (role === ROLE_EQUIPE.joueur) {
-            const restants = liensDuRole.filter(l => !plan.retirer.includes(l.linkId)).map(l => l.linkId);
-            capitaine = capitaineApres({ capitaineActuel: capitaine, joueursRestants: restants, joueursAjoutes: ajoutes });
+            const restants = liensDuRole
+              .filter((l) => !plan.retirer.includes(l.linkId))
+              .map((l) => l.linkId);
+            capitaine = capitaineApres({
+              capitaineActuel: capitaine,
+              joueursRestants: restants,
+              joueursAjoutes: ajoutes,
+            });
           }
           await sql`update clan_team set captain_id = ${capitaine}, updated_at = ${maintenant} where id = ${equipe.id}`.execute(
             trx,
@@ -433,14 +552,23 @@ export const clanTeamsController = new Elysia({ prefix: "/clans/teams" })
         });
       } catch (err) {
         // Course perdue contre une autre écriture : la contrainte d'unicité a tranché.
-        console.warn("[clans/teams] effectif refusé par la base :", err instanceof Error ? err.message : err);
-        return status(409, { message: "Impossible de mettre à jour l'équipe : ce joueur est déjà utilisé." });
+        console.warn(
+          "[clans/teams] effectif refusé par la base :",
+          err instanceof Error ? err.message : err,
+        );
+        return status(409, {
+          message:
+            "Impossible de mettre à jour l'équipe : ce joueur est déjà utilisé.",
+        });
       }
       return (await equipeParId(db, equipe.id))!;
     },
     {
       params: t.Object({ teamId: t.Numeric() }),
-      body: t.Object({ role: t.Number(), userIds: t.Array(t.String(), { maxItems: 10 }) }),
+      body: t.Object({
+        role: t.Number(),
+        userIds: t.Array(t.String(), { maxItems: 10 }),
+      }),
       response: { 200: equipeModel, ...erreurs },
     },
   )
@@ -457,16 +585,32 @@ export const clanTeamsController = new Elysia({ prefix: "/clans/teams" })
       let nom = equipe.name;
       if (body.name !== undefined) {
         if (!nomEquipeValide(body.name))
-          return status(400, { message: "Le nom de l'équipe doit contenir entre 3 et 30 caractères." });
+          return status(400, {
+            message:
+              "Le nom de l'équipe doit contenir entre 3 et 30 caractères.",
+          });
         nom = body.name.trim();
       }
-      let capitaine = equipe.members.find(m => m.userId === equipe.captainUserId)?.linkId ?? null;
+      let capitaine =
+        equipe.members.find((m) => m.userId === equipe.captainUserId)?.linkId ??
+        null;
       if (body.captainUserId !== undefined && body.captainUserId !== null) {
-        const lien = equipe.members.find(m => m.role === ROLE_EQUIPE.joueur && m.userId === body.captainUserId);
-        if (!lien) return status(400, { message: "Le capitaine choisi n'est pas un joueur de cette équipe." });
+        const lien = equipe.members.find(
+          (m) =>
+            m.role === ROLE_EQUIPE.joueur && m.userId === body.captainUserId,
+        );
+        if (!lien)
+          return status(400, {
+            message: "Le capitaine choisi n'est pas un joueur de cette équipe.",
+          });
         capitaine = lien.linkId;
       }
-      if (nom === equipe.name && (capitaine ?? null) === (equipe.members.find(m => m.userId === equipe.captainUserId)?.linkId ?? null))
+      if (
+        nom === equipe.name &&
+        (capitaine ?? null) ===
+          (equipe.members.find((m) => m.userId === equipe.captainUserId)
+            ?.linkId ?? null)
+      )
         return equipe;
       await sql`update clan_team set name = ${nom}, captain_id = ${capitaine}, updated_at = ${new Date()} where id = ${equipe.id}`.execute(
         db,
@@ -475,7 +619,10 @@ export const clanTeamsController = new Elysia({ prefix: "/clans/teams" })
     },
     {
       params: t.Object({ teamId: t.Numeric() }),
-      body: t.Object({ name: t.Optional(t.String()), captainUserId: t.Optional(t.Nullable(t.String())) }),
+      body: t.Object({
+        name: t.Optional(t.String()),
+        captainUserId: t.Optional(t.Nullable(t.String())),
+      }),
       response: { 200: equipeModel, ...erreurs },
     },
   )

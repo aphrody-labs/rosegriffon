@@ -14,7 +14,10 @@ function origines() {
   };
 }
 
-export async function GET(requete: Request, { params }: Contexte): Promise<Response> {
+export async function GET(
+  requete: Request,
+  { params }: Contexte,
+): Promise<Response> {
   const { bucket, chemin } = await params;
   return relayerObjet(requete, bucket, chemin, origines());
 }

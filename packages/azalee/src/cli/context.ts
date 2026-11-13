@@ -13,7 +13,11 @@
  */
 
 import { Database } from "bun:sqlite";
-import { createBunPgClient, type BunPgClient, type BunPgQueryResult } from "@rosegriffon/db/bun-sql";
+import {
+  createBunPgClient,
+  type BunPgClient,
+  type BunPgQueryResult,
+} from "@rosegriffon/db/bun-sql";
 
 import { resolveMirrorPath } from "../config";
 
@@ -35,7 +39,9 @@ export interface AnsiPalette {
  * Couleur active : uniquement sur un vrai terminal et hors `NO_COLOR`
  * (https://no-color.org). Un pipe ou une redirection produit donc du texte nu.
  */
-export const isColorEnabled: boolean = Boolean(process.stdout.isTTY && !process.env.NO_COLOR);
+export const isColorEnabled: boolean = Boolean(
+  process.stdout.isTTY && !process.env.NO_COLOR,
+);
 
 const ansi = (code: string): string => (isColorEnabled ? code : "");
 
@@ -83,7 +89,11 @@ export function restoreLogs(json: boolean): void {
  * Émet une erreur selon le mode courant : objet `{ error }` sur stdout en
  * `--json`, ligne rouge sur stderr sinon. Restaure les logs au passage.
  */
-export function reportError(json: boolean | undefined, message: string, humanLine: string): void {
+export function reportError(
+  json: boolean | undefined,
+  message: string,
+  humanLine: string,
+): void {
   restoreLogs(Boolean(json));
   if (json) {
     console.log(JSON.stringify({ error: message }));
@@ -123,7 +133,7 @@ export function renderAsciiTable(rows: readonly TableRow[]): string {
   if (!rows || rows.length === 0) return "Aucun résultat (0 ligne).";
   const keys = Object.keys(rows[0]);
 
-  const stringifiedRows = rows.map(row => {
+  const stringifiedRows = rows.map((row) => {
     const newRow: Record<string, string> = {};
     for (const key of keys) {
       const val = row[key];
@@ -141,18 +151,31 @@ export function renderAsciiTable(rows: readonly TableRow[]): string {
     return newRow;
   });
 
-  const colWidths = keys.map(k => Math.max(k.length, ...stringifiedRows.map(r => r[k].length)));
-
-  const topBorder = "┌─" + colWidths.map(w => "─".repeat(w)).join("─┬─") + "─┐";
-  const headerLine = "│ " + keys.map((k, i) => k.padEnd(colWidths[i])).join(" │ ") + " │";
-  const midBorder = "├─" + colWidths.map(w => "─".repeat(w)).join("─┼─") + "─┤";
-  const bottomBorder = "└─" + colWidths.map(w => "─".repeat(w)).join("─┴─") + "─┘";
-
-  const formattedRows = stringifiedRows.map(
-    r => "│ " + keys.map((k, i) => r[k].padEnd(colWidths[i])).join(" │ ") + " │",
+  const colWidths = keys.map((k) =>
+    Math.max(k.length, ...stringifiedRows.map((r) => r[k].length)),
   );
 
-  return [topBorder, headerLine, midBorder, ...formattedRows, bottomBorder].join("\n");
+  const topBorder =
+    "┌─" + colWidths.map((w) => "─".repeat(w)).join("─┬─") + "─┐";
+  const headerLine =
+    "│ " + keys.map((k, i) => k.padEnd(colWidths[i])).join(" │ ") + " │";
+  const midBorder =
+    "├─" + colWidths.map((w) => "─".repeat(w)).join("─┼─") + "─┤";
+  const bottomBorder =
+    "└─" + colWidths.map((w) => "─".repeat(w)).join("─┴─") + "─┘";
+
+  const formattedRows = stringifiedRows.map(
+    (r) =>
+      "│ " + keys.map((k, i) => r[k].padEnd(colWidths[i])).join(" │ ") + " │",
+  );
+
+  return [
+    topBorder,
+    headerLine,
+    midBorder,
+    ...formattedRows,
+    bottomBorder,
+  ].join("\n");
 }
 
 // ─── Postgres (Bun.SQL) ──────────────────────────────────────────────
@@ -185,8 +208,15 @@ export function openReadonlyDatabase(dbPath: string): Database {
  * Exécute une commande et renvoie sa sortie standard. Lève avec le contenu de
  * stderr en cas de code de retour non nul.
  */
-export function runCapture(cmd: string[], options: { cwd?: string } = {}): string {
-  const res = Bun.spawnSync(cmd, { cwd: options.cwd, stdout: "pipe", stderr: "pipe" });
+export function runCapture(
+  cmd: string[],
+  options: { cwd?: string } = {},
+): string {
+  const res = Bun.spawnSync(cmd, {
+    cwd: options.cwd,
+    stdout: "pipe",
+    stderr: "pipe",
+  });
   if (res.exitCode !== 0) {
     throw new Error(res.stderr?.toString().trim() || `échec: ${cmd.join(" ")}`);
   }

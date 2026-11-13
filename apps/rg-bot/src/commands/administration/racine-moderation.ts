@@ -19,7 +19,8 @@ import { PermissionFlagsBits } from "discord.js";
 @Discord()
 @SlashGroup({
   name: "moderation",
-  description: "Modération Discord — bannir, expulser, rôles, salons (réservé au staff)",
+  description:
+    "Modération Discord — bannir, expulser, rôles, salons (réservé au staff)",
   defaultMemberPermissions: PermissionFlagsBits.ManageGuild,
 })
 export class RacineModeration {}

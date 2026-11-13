@@ -67,7 +67,10 @@ export interface EtatMatch {
 }
 
 function origineColyseus(): string {
-  return process.env["NEXT_PUBLIC_ACHILLEA_COLYSEUS_URL"] ?? "wss://ranked.rosegriffon.fr";
+  return (
+    process.env["NEXT_PUBLIC_ACHILLEA_COLYSEUS_URL"] ??
+    "wss://ranked.rosegriffon.fr"
+  );
 }
 
 type SalleMatch = {
@@ -81,7 +84,9 @@ type SalleMatch = {
 
 /** Convertit la carte de joueurs du serveur, en gardant l'ordre domicile/extérieur. */
 function lireJoueurs(state: unknown): JoueurMatch[] {
-  const carte = (state as { players?: Iterable<[unknown, Record<string, unknown>]> })?.players;
+  const carte = (
+    state as { players?: Iterable<[unknown, Record<string, unknown>]> }
+  )?.players;
   if (!carte) return [];
 
   const sortie: JoueurMatch[] = [];
@@ -137,14 +142,19 @@ export function useRankedMatch(idSalle?: string | null): EtatMatch {
   const [joueurs, setJoueurs] = useState<JoueurMatch[]>([]);
   const [messages, setMessages] = useState<MessageMatch[]>([]);
   const [resume, setResume] = useState<unknown | null>(null);
-  const [connexion, setConnexion] = useState<EtatMatch["connexion"]>("inactive");
+  const [connexion, setConnexion] =
+    useState<EtatMatch["connexion"]>("inactive");
   const [erreur, setErreur] = useState<string | null>(null);
   const salle = useRef<SalleMatch | null>(null);
 
   useEffect(() => {
     let annule = false;
 
-    const cible = idSalle ?? (typeof window === "undefined" ? null : window.localStorage.getItem(CLE_SALLE));
+    const cible =
+      idSalle ??
+      (typeof window === "undefined"
+        ? null
+        : window.localStorage.getItem(CLE_SALLE));
     if (!cible) {
       const timer = setTimeout(() => setConnexion("inactive"), 0);
       return () => clearTimeout(timer);
@@ -184,11 +194,13 @@ export function useRankedMatch(idSalle?: string | null): EtatMatch {
 
         // UN SEUL point d'entrée pour tout l'état du match : code, statut,
         // joueurs, scores, chat. Le serveur pousse, le client n'infère rien.
-        rejointe.onStateChange(state => {
+        rejointe.onStateChange((state) => {
           const brut = state as Record<string, unknown>;
           setCodeSalle(String(brut["roomCode"] ?? "") || null);
           const idLobby = Number(brut["lobbyId"] ?? 0);
-          setLobbyId(Number.isSafeInteger(idLobby) && idLobby > 0 ? idLobby : 0);
+          setLobbyId(
+            Number.isSafeInteger(idLobby) && idLobby > 0 ? idLobby : 0,
+          );
           setStatut(String(brut["status"] ?? "waiting"));
           setClasse(brut["ranked"] !== false);
           setMotifLitige(String(brut["disputeReason"] ?? ""));
@@ -196,7 +208,7 @@ export function useRankedMatch(idSalle?: string | null): EtatMatch {
           setMessages(lireMessages(state));
         });
 
-        rejointe.onMessage("matchEnded", payload => {
+        rejointe.onMessage("matchEnded", (payload) => {
           setResume(payload);
           // Match terminé : plus rien à rejoindre, et un rejoin ne rendrait
           // pas le résumé.
@@ -214,7 +226,11 @@ export function useRankedMatch(idSalle?: string | null): EtatMatch {
       } catch (cause) {
         if (annule) return;
         setConnexion("erreur");
-        setErreur(cause instanceof Error ? `Match injoignable : ${cause.message}` : "Match injoignable.");
+        setErreur(
+          cause instanceof Error
+            ? `Match injoignable : ${cause.message}`
+            : "Match injoignable.",
+        );
       }
     })();
 

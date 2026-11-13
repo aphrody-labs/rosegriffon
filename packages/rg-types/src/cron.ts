@@ -131,7 +131,8 @@ export const CATALOGUE_TACHES: readonly DescriptionTache[] = Object.freeze([
     planification: "0 2 * * *",
     famille: "donnees",
     niveau: "interdit",
-    motifInterdiction: "réécrit les données de jeu en production — une bévue de frappe ne doit pas pouvoir la lancer",
+    motifInterdiction:
+      "réécrit les données de jeu en production — une bévue de frappe ne doit pas pouvoir la lancer",
     dureeIndicative: "plusieurs minutes",
   },
   {
@@ -161,7 +162,8 @@ export const CATALOGUE_TACHES: readonly DescriptionTache[] = Object.freeze([
     planification: "manuel",
     famille: "campagnes",
     niveau: "interdit",
-    motifInterdiction: "plusieurs minutes de navigateur headless et réécriture de `inagle_characters` depuis zukan",
+    motifInterdiction:
+      "plusieurs minutes de navigateur headless et réécriture de `inagle_characters` depuis zukan",
     dureeIndicative: "plusieurs minutes",
   },
   {
@@ -191,7 +193,8 @@ export const CATALOGUE_TACHES: readonly DescriptionTache[] = Object.freeze([
     planification: "30 4 * * *",
     famille: "publication",
     niveau: "interdit",
-    motifInterdiction: "publie réellement des paquets — une publication ne se dé-publie pas",
+    motifInterdiction:
+      "publie réellement des paquets — une publication ne se dé-publie pas",
     dureeIndicative: "quelques minutes",
   },
   {
@@ -261,7 +264,8 @@ export const CATALOGUE_TACHES: readonly DescriptionTache[] = Object.freeze([
     planification: "manuel",
     famille: "discord",
     niveau: "interdit",
-    motifInterdiction: "réécrit l'historique complet en masse — irréversible et très long",
+    motifInterdiction:
+      "réécrit l'historique complet en masse — irréversible et très long",
     dureeIndicative: "des heures",
   },
   {
@@ -527,7 +531,9 @@ export const CATALOGUE_TACHES: readonly DescriptionTache[] = Object.freeze([
 ] as const satisfies readonly DescriptionTache[]);
 
 /** Index par nom canonique, pour éviter un `find` à chaque affichage. */
-const PAR_NOM = new Map<string, DescriptionTache>(CATALOGUE_TACHES.map(tache => [tache.nom, tache]));
+const PAR_NOM = new Map<string, DescriptionTache>(
+  CATALOGUE_TACHES.map((tache) => [tache.nom, tache]),
+);
 
 /**
  * Normalise un nom de tâche.
@@ -545,16 +551,22 @@ export function normaliserNomTache(nom: string): string {
 }
 
 /** Nom canonique du catalogue, ou `null` si la tâche n'existe pas. */
-export function resoudreTache(nom: string | null | undefined): TacheCron | null {
+export function resoudreTache(
+  nom: string | null | undefined,
+): TacheCron | null {
   if (!nom) {
     return null;
   }
   const cible = normaliserNomTache(nom);
-  return TACHES_CRON.find(tache => normaliserNomTache(tache) === cible) ?? null;
+  return (
+    TACHES_CRON.find((tache) => normaliserNomTache(tache) === cible) ?? null
+  );
 }
 
 /** Description complète d'une tâche, ou `null` si le nom est inconnu. */
-export function decrireTache(nom: string | null | undefined): DescriptionTache | null {
+export function decrireTache(
+  nom: string | null | undefined,
+): DescriptionTache | null {
   const canonique = resoudreTache(nom);
   return canonique ? (PAR_NOM.get(canonique) ?? null) : null;
 }
@@ -568,7 +580,10 @@ export function niveauTache(nom: string | null | undefined): NiveauTache {
 }
 
 /** Le rôle passé suffit-il à déclencher cette tâche ? */
-export function peutDeclencher(nom: string | null | undefined, role: string | null | undefined): boolean {
+export function peutDeclencher(
+  nom: string | null | undefined,
+  role: string | null | undefined,
+): boolean {
   const niveau = niveauTache(nom);
   if (niveau === "interdit") {
     return false;
@@ -581,23 +596,26 @@ export function peutDeclencher(nom: string | null | undefined, role: string | nu
 
 /** Les tâches jamais déclenchables à distance, quelle que soit la personne. */
 export const TACHES_INTERDITES: readonly TacheCron[] = Object.freeze(
-  CATALOGUE_TACHES.filter(t => t.niveau === "interdit").map(t => t.nom),
+  CATALOGUE_TACHES.filter((t) => t.niveau === "interdit").map((t) => t.nom),
 );
 
 /** Réservées au rôle `admin` strict. */
 export const TACHES_ADMIN_STRICT: readonly TacheCron[] = Object.freeze(
-  CATALOGUE_TACHES.filter(t => t.niveau === "admin-strict").map(t => t.nom),
+  CATALOGUE_TACHES.filter((t) => t.niveau === "admin-strict").map((t) => t.nom),
 );
 
 /** Ouvertes au staff : lecture, préchauffage, imports idempotents. */
 export const TACHES_ADMIN: readonly TacheCron[] = Object.freeze(
-  CATALOGUE_TACHES.filter(t => t.niveau === "admin").map(t => t.nom),
+  CATALOGUE_TACHES.filter((t) => t.niveau === "admin").map((t) => t.nom),
 );
 
 /** Planifications indexées par nom — la forme rendue par `GET /tasks`. */
-export const PLANIFICATIONS: Readonly<Record<TacheCron, string>> = Object.freeze(
-  Object.fromEntries(CATALOGUE_TACHES.map(t => [t.nom, t.planification])) as Record<TacheCron, string>,
-);
+export const PLANIFICATIONS: Readonly<Record<TacheCron, string>> =
+  Object.freeze(
+    Object.fromEntries(
+      CATALOGUE_TACHES.map((t) => [t.nom, t.planification]),
+    ) as Record<TacheCron, string>,
+  );
 
 /**
  * Propositions d'autocomplétion pour un nom de tâche.
@@ -610,11 +628,13 @@ export function suggererTaches(
   options: { exclureInterdites?: boolean } = {},
 ): string[] {
   const aiguille = normaliserNomTache(saisie ?? "");
-  return TACHES_CRON.filter(tache => {
+  return TACHES_CRON.filter((tache) => {
     if (options.exclureInterdites && niveauTache(tache) === "interdit") {
       return false;
     }
-    return aiguille.length === 0 || normaliserNomTache(tache).includes(aiguille);
+    return (
+      aiguille.length === 0 || normaliserNomTache(tache).includes(aiguille)
+    );
   }).slice(0, 25);
 }
 
@@ -651,7 +671,8 @@ export function raisonRefus(nom: string): string {
 export type EtatExecution = "succes" | "echec" | "en-cours";
 
 /** D'où venait le déclenchement. */
-export type OrigineExecution = "planification" | "manuel" | "discord" | "site" | "cli";
+export type OrigineExecution =
+  "planification" | "manuel" | "discord" | "site" | "cli";
 
 export interface ExecutionTache {
   readonly id: string;

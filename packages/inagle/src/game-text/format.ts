@@ -54,7 +54,9 @@ const RE_OPEN_KEYWORD = new RegExp(`\\[${C_KEYWORD}`, "g"); // scramble : `[CG2`
 function protectGlyphs(input: string): string {
   let out = input;
   POSITION_GLYPHS.forEach((g, i) => {
-    out = out.split(`[${g}]`).join(String.fromCodePoint(GLYPH_SENTINEL_BASE + i));
+    out = out
+      .split(`[${g}]`)
+      .join(String.fromCodePoint(GLYPH_SENTINEL_BASE + i));
   });
   return out;
 }
@@ -63,7 +65,9 @@ function protectGlyphs(input: string): string {
 function restoreGlyphs(input: string): string {
   let out = input;
   POSITION_GLYPHS.forEach((g, i) => {
-    out = out.split(String.fromCodePoint(GLYPH_SENTINEL_BASE + i)).join(`[${g}]`);
+    out = out
+      .split(String.fromCodePoint(GLYPH_SENTINEL_BASE + i))
+      .join(`[${g}]`);
   });
   return out;
 }
@@ -119,7 +123,7 @@ function normalizeWhitespace(input: string): string {
   let out = input.replace(/ {2,}/g, " ");
   out = out
     .split("\n")
-    .map(line => line.replace(/ +$/, ""))
+    .map((line) => line.replace(/ +$/, ""))
     .join("\n");
   return out;
 }

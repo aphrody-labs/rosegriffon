@@ -15,7 +15,11 @@ export const metadata: Metadata = {
  * Si l'utilisateur a déjà une session valide, on évite la confusion en le
  * renvoyant directement sur son espace.
  */
-export default async function AuthLayout({ children }: { children: React.ReactNode }) {
+export default async function AuthLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const user = await getServerUser();
   if (user) {
     redirect("/dashboard");

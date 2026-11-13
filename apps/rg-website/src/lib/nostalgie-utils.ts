@@ -5,7 +5,7 @@ export const loadImage = (src: string): Promise<HTMLImageElement> =>
   new Promise((resolve, reject) => {
     const img = new window.Image();
     img.onload = () => resolve(img);
-    img.onerror = err => reject(err);
+    img.onerror = (err) => reject(err);
     img.src = src;
   });
 
@@ -27,7 +27,7 @@ export const compressImage = async (file: File): Promise<File> => {
 export const fileToDataURL = (file: File): Promise<string> =>
   new Promise((resolve, reject) => {
     const reader = new FileReader();
-    reader.onload = e => resolve(e.target?.result as string);
+    reader.onload = (e) => resolve(e.target?.result as string);
     reader.onerror = reject;
     reader.readAsDataURL(file);
   });
@@ -64,7 +64,13 @@ export const createCollageCanvas = async ({
   const halfHeight = template.height / 2;
 
   const picaInstance = pica();
-  const resizeAndDraw = async (img: HTMLImageElement, x: number, y: number, w: number, h: number) => {
+  const resizeAndDraw = async (
+    img: HTMLImageElement,
+    x: number,
+    y: number,
+    w: number,
+    h: number,
+  ) => {
     const offscreenCanvas = document.createElement("canvas");
     offscreenCanvas.width = w;
     offscreenCanvas.height = h;
@@ -115,7 +121,8 @@ export const addWatermarkAndDownload = async ({
     const logoImage = await loadImage(logoSrc);
 
     const watermarkWidth = canvas.width * 0.1;
-    const watermarkHeight = (logoImage.height / logoImage.width) * watermarkWidth;
+    const watermarkHeight =
+      (logoImage.height / logoImage.width) * watermarkWidth;
     const margin = canvas.width * 0.02;
 
     let x: number, y: number;
@@ -148,7 +155,12 @@ export const addWatermarkAndDownload = async ({
     ctx.globalAlpha = 1;
   }
 
-  const mimeType = exportFormat === "jpg" ? "image/jpeg" : exportFormat === "png" ? "image/png" : "image/webp";
+  const mimeType =
+    exportFormat === "jpg"
+      ? "image/jpeg"
+      : exportFormat === "png"
+        ? "image/png"
+        : "image/webp";
   const extension = exportFormat;
   const watermarkedImage = canvas.toDataURL(mimeType, exportQuality);
 

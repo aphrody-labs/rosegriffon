@@ -50,7 +50,12 @@ Options:
 `;
 
 const argv = loadEnvFiles(process.argv.slice(2));
-const command = argv[0] && !argv[0].startsWith("-") ? argv[0] : argv.length === 0 ? "serve" : "";
+const command =
+  argv[0] && !argv[0].startsWith("-")
+    ? argv[0]
+    : argv.length === 0
+      ? "serve"
+      : "";
 const rest = command ? argv.slice(1) : argv;
 
 /** Gives the imported entry the argument vector it parses at module evaluation. */
@@ -65,8 +70,8 @@ if (command === "achillea") {
   const code = await executerAchillea(rest, {
     env: process.env,
     docs: docsClientAchillea(),
-    sortie: texte => console.log(texte),
-    erreur: texte => console.error(texte),
+    sortie: (texte) => console.log(texte),
+    erreur: (texte) => console.error(texte),
     ecrireFichier: async (chemin, octets) => {
       await Bun.write(chemin, octets);
     },
@@ -74,12 +79,20 @@ if (command === "achillea") {
   process.exit(code);
 }
 
-if (argv.includes("-h") || argv.includes("--help") ||(!command && argv.length > 0 && !argv.some(a => a === "-v" || a === "--version"))) {
+if (
+  argv.includes("-h") ||
+  argv.includes("--help") ||
+  (!command &&
+    argv.length > 0 &&
+    !argv.some((a) => a === "-v" || a === "--version"))
+) {
   console.log(HELP);
   process.exit(0);
 }
 if (argv.includes("-v") || argv.includes("--version")) {
-  console.log(`rosegriffon ${VERSION} (Bun ${Bun.version}+${Bun.revision.slice(0, 9)})`);
+  console.log(
+    `rosegriffon ${VERSION} (Bun ${Bun.version}+${Bun.revision.slice(0, 9)})`,
+  );
   process.exit(0);
 }
 
@@ -92,7 +105,9 @@ switch (command) {
       process.on("SIGTERM", stop);
       process.on("SIGINT", stop);
     } else {
-      console.warn("[rosegriffon] site disabled (RG_SITE=0 or no embedded/local build)");
+      console.warn(
+        "[rosegriffon] site disabled (RG_SITE=0 or no embedded/local build)",
+      );
     }
     setArgs(...rest);
     await import("reflect-metadata");

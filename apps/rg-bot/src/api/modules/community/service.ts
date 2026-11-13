@@ -23,7 +23,13 @@ const EMOTES = [
     category: "reaction",
     alt: "Roy pouce en l'air",
   },
-  { name: "roy-rire", path: "/emote/RG_Roy_rire1.webp", character: "roy", category: "emotion", alt: "Roy qui rit" },
+  {
+    name: "roy-rire",
+    path: "/emote/RG_Roy_rire1.webp",
+    character: "roy",
+    category: "emotion",
+    alt: "Roy qui rit",
+  },
 ];
 
 export abstract class CommunityService {
@@ -46,7 +52,7 @@ export abstract class CommunityService {
   }
 
   public static getEmotes(baseUrl = "https://www.rosegriffon.fr") {
-    const data = EMOTES.map(e => ({
+    const data = EMOTES.map((e) => ({
       ...e,
       fullPath: `${baseUrl}${e.path}`,
     }));
@@ -57,7 +63,10 @@ export abstract class CommunityService {
     };
   }
 
-  public static async getPopularTags(db: Kysely<Database>, limit = 15): Promise<Array<{ tag: string; count: number }>> {
+  public static async getPopularTags(
+    db: Kysely<Database>,
+    limit = 15,
+  ): Promise<Array<{ tag: string; count: number }>> {
     try {
       // En attendant le typage strict des articles dans db, fallback sécurisé ou requête brute
       return [

@@ -7,7 +7,8 @@ import LicenceClient from "./licence-client";
  */
 export const metadata = metadonneesAchillea({
   titre: "Ma licence compétiteur",
-  description: "Votre licence compétiteur Achilléa, son statut et son QR de vérification.",
+  description:
+    "Votre licence compétiteur Achilléa, son statut et son QR de vérification.",
   chemin: "/achillea/licence",
   indexable: false,
 });

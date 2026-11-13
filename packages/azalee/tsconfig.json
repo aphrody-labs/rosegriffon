@@ -9,6 +9,11 @@
     "allowImportingTsExtensions": true,
     "moduleDetection": "force"
   },
-  "include": ["src/**/*.ts", "types/**/*.d.ts", "test/**/*.ts", "scripts/**/*.ts"],
+  "include": [
+    "src/**/*.ts",
+    "types/**/*.d.ts",
+    "test/**/*.ts",
+    "scripts/**/*.ts"
+  ],
   "exclude": ["node_modules", "dist"]
 }

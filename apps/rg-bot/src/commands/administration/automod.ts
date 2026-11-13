@@ -45,7 +45,14 @@ import {
 } from "discord.js";
 
 import { logAdminAction } from "../../lib/audit";
-import { attention, echec, fiche, piedDeCommande, repondre, succes } from "../../lib/ui";
+import {
+  attention,
+  echec,
+  fiche,
+  piedDeCommande,
+  repondre,
+  succes,
+} from "../../lib/ui";
 import { differerEnPrive, exigerDroits, messagePanne } from "../staff/garde";
 import "./racine-moderation";
 
@@ -87,7 +94,7 @@ function regleDuType(
   regles: readonly AutoModerationRule[],
   type: AutoModerationRuleTriggerType,
 ): AutoModerationRule | null {
-  return regles.find(regle => regle.triggerType === type) ?? null;
+  return regles.find((regle) => regle.triggerType === type) ?? null;
 }
 
 @Discord()
@@ -98,14 +105,20 @@ function regleDuType(
 })
 @SlashGroup("automod", "moderation")
 export class ModerationAutomodCommand {
-  @Slash({ description: "L'état des règles d'auto-modération du serveur", name: "etat" })
+  @Slash({
+    description: "L'état des règles d'auto-modération du serveur",
+    name: "etat",
+  })
   async etat(interaction: ChatInputCommandInteraction) {
     await differerEnPrive(interaction);
     if (!(await exigerDroits(interaction))) {
       return;
     }
     if (!interaction.guild) {
-      await repondre(interaction, echec("Hors serveur", "L'auto-modération se règle sur un serveur."));
+      await repondre(
+        interaction,
+        echec("Hors serveur", "L'auto-modération se règle sur un serveur."),
+      );
       return;
     }
     const manque = manquePermission(interaction.guild);
@@ -126,7 +139,7 @@ export class ModerationAutomodCommand {
       });
       for (const regle of regles) {
         const actions = regle.actions
-          .map(action =>
+          .map((action) =>
             action.type === AutoModerationActionType.BlockMessage
               ? "bloque le message"
               : action.type === AutoModerationActionType.SendAlertMessage
@@ -139,13 +152,18 @@ export class ModerationAutomodCommand {
         carte.champ(
           `${regle.enabled ? "🟢" : "⚪"} ${regle.name}`,
           [
-            LIBELLES_DECLENCHEUR[regle.triggerType] ?? `type ${regle.triggerType}`,
+            LIBELLES_DECLENCHEUR[regle.triggerType] ??
+              `type ${regle.triggerType}`,
             actions || "aucune action",
-            regle.exemptRoles.size > 0 ? `${regle.exemptRoles.size} rôle(s) exemptés` : "aucune exemption de rôle",
+            regle.exemptRoles.size > 0
+              ? `${regle.exemptRoles.size} rôle(s) exemptés`
+              : "aucune exemption de rôle",
           ].join("\n"),
         );
       }
-      await interaction.editReply({ embeds: [piedDeCommande(carte.embed, interaction)] });
+      await interaction.editReply({
+        embeds: [piedDeCommande(carte.embed, interaction)],
+      });
     } catch (err) {
       await repondre(interaction, echec("État illisible", messagePanne(err)));
     }
@@ -157,7 +175,8 @@ export class ModerationAutomodCommand {
   })
   async mentions(
     @SlashOption({
-      description: "Nombre de mentions à partir duquel le message est bloqué (5 à 50)",
+      description:
+        "Nombre de mentions à partir duquel le message est bloqué (5 à 50)",
       maxValue: 50,
       minValue: 5,
       name: "maximum",
@@ -202,7 +221,10 @@ export class ModerationAutomodCommand {
     });
   }
 
-  @Slash({ description: "Activer le filtre anti-spam de Discord", name: "spam" })
+  @Slash({
+    description: "Activer le filtre anti-spam de Discord",
+    name: "spam",
+  })
   async spam(
     @SlashOption({
       channelTypes: [ChannelType.GuildText],
@@ -311,7 +333,10 @@ export class ModerationAutomodCommand {
     });
   }
 
-  @Slash({ description: "Désactiver une règle d'auto-modération", name: "couper" })
+  @Slash({
+    description: "Désactiver une règle d'auto-modération",
+    name: "couper",
+  })
   async couper(
     @SlashChoice({ name: "Mentions en masse", value: "mentions" })
     @SlashChoice({ name: "Spam", value: "spam" })
@@ -329,7 +354,10 @@ export class ModerationAutomodCommand {
     const admin = await exigerDroits(interaction);
     if (!admin || !interaction.guild) {
       if (!interaction.guild) {
-        await repondre(interaction, echec("Hors serveur", "L'auto-modération se règle sur un serveur."));
+        await repondre(
+          interaction,
+          echec("Hors serveur", "L'auto-modération se règle sur un serveur."),
+        );
       }
       return;
     }
@@ -344,7 +372,11 @@ export class ModerationAutomodCommand {
       if (!regle) {
         await repondre(
           interaction,
-          attention("Rien à couper", "Cette règle n'existe pas sur ce serveur.", { prive: true }),
+          attention(
+            "Rien à couper",
+            "Cette règle n'existe pas sur ce serveur.",
+            { prive: true },
+          ),
         );
         return;
       }
@@ -368,7 +400,10 @@ export class ModerationAutomodCommand {
         ),
       );
     } catch (err) {
-      await repondre(interaction, echec("Coupure impossible", messagePanne(err)));
+      await repondre(
+        interaction,
+        echec("Coupure impossible", messagePanne(err)),
+      );
     }
   }
 
@@ -396,7 +431,10 @@ export class ModerationAutomodCommand {
       return;
     }
     if (!interaction.guild) {
-      await repondre(interaction, echec("Hors serveur", "L'auto-modération se règle sur un serveur."));
+      await repondre(
+        interaction,
+        echec("Hors serveur", "L'auto-modération se règle sur un serveur."),
+      );
       return;
     }
     const manque = manquePermission(interaction.guild);
@@ -406,7 +444,10 @@ export class ModerationAutomodCommand {
     }
 
     try {
-      const existante = regleDuType(await reglesDe(interaction.guild), options.type);
+      const existante = regleDuType(
+        await reglesDe(interaction.guild),
+        options.type,
+      );
       const charge = options.construire();
       let regle: AutoModerationRule;
       if (existante) {
@@ -422,7 +463,11 @@ export class ModerationAutomodCommand {
       await logAdminAction({
         action: options.action,
         adminId: admin.profileId,
-        details: { ...options.details, alerte: options.alerte?.id ?? null, regle: regle.name },
+        details: {
+          ...options.details,
+          alerte: options.alerte?.id ?? null,
+          regle: regle.name,
+        },
         discordId: interaction.user.id,
         targetId: regle.id,
         targetType: "automod_rule",
@@ -434,7 +479,9 @@ export class ModerationAutomodCommand {
           existante ? "Règle mise à jour" : "Règle créée",
           [
             options.reussite,
-            options.alerte ? `Les déclenchements sont signalés dans ${options.alerte.toString()}.` : null,
+            options.alerte
+              ? `Les déclenchements sont signalés dans ${options.alerte.toString()}.`
+              : null,
             "⚠️ Les rôles à permission « Gérer le serveur » échappent nativement à l'AutoMod : Discord ne le filtre pas.",
           ]
             .filter(Boolean)
@@ -443,7 +490,10 @@ export class ModerationAutomodCommand {
         ),
       );
     } catch (err) {
-      await repondre(interaction, echec("Règle refusée par Discord", messagePanne(err)));
+      await repondre(
+        interaction,
+        echec("Règle refusée par Discord", messagePanne(err)),
+      );
     }
   }
 }

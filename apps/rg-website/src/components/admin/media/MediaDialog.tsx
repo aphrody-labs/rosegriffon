@@ -32,7 +32,11 @@ interface MediaDialogProps {
   }) => void;
 }
 
-export function MediaDialog({ open, onOpenChange, onInsert }: MediaDialogProps) {
+export function MediaDialog({
+  open,
+  onOpenChange,
+  onInsert,
+}: MediaDialogProps) {
   const [activeTab, setActiveTab] = useState("upload");
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -67,14 +71,19 @@ export function MediaDialog({ open, onOpenChange, onInsert }: MediaDialogProps) 
       const fileExt = file.name.split(".").pop()?.toLowerCase();
       const fileName = `chronicles/${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`;
 
-      const { error: uploadError } = await storage.from("assets").upload(fileName, file, {
-        cacheControl: "3600",
-        upsert: false,
-      });
+      const { error: uploadError } = await storage
+        .from("assets")
+        .upload(fileName, file, {
+          cacheControl: "3600",
+          upsert: false,
+        });
 
       if (uploadError) {
         console.error("Upload error details:", uploadError);
-        if (uploadError.message?.includes("policy") || uploadError.message?.includes("permission")) {
+        if (
+          uploadError.message?.includes("policy") ||
+          uploadError.message?.includes("permission")
+        ) {
           throw new Error("Permission refusée. Vérifiez que vous êtes admin.");
         }
         throw uploadError;
@@ -93,7 +102,10 @@ export function MediaDialog({ open, onOpenChange, onInsert }: MediaDialogProps) 
       toast.success("Image téléchargée avec succès");
     } catch (error) {
       console.error("Erreur upload:", error);
-      const errorMessage = error instanceof Error ? error.message : "Erreur lors du téléchargement";
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Erreur lors du téléchargement";
       toast.error(errorMessage);
     } finally {
       setIsUploading(false);
@@ -108,10 +120,16 @@ export function MediaDialog({ open, onOpenChange, onInsert }: MediaDialogProps) 
       <DialogContent className="sm:max-w-3xl h-[80vh] flex flex-col p-0 gap-0">
         <DialogHeader className="p-6 pb-2">
           <DialogTitle>Médiathèque</DialogTitle>
-          <DialogDescription>Gérez vos images et emotes pour les insérer dans vos chroniques.</DialogDescription>
+          <DialogDescription>
+            Gérez vos images et emotes pour les insérer dans vos chroniques.
+          </DialogDescription>
         </DialogHeader>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col min-h-0">
+        <Tabs
+          value={activeTab}
+          onValueChange={setActiveTab}
+          className="flex-1 flex flex-col min-h-0"
+        >
           <div className="px-6 border-b">
             <TabsList className="w-full justify-start bg-transparent p-0 h-auto gap-6">
               <TabsTrigger
@@ -132,10 +150,15 @@ export function MediaDialog({ open, onOpenChange, onInsert }: MediaDialogProps) 
           </div>
 
           <div className="flex-1 overflow-hidden bg-surface-container-low">
-            <TabsContent value="upload" className="h-full m-0 p-6 flex flex-col items-center justify-center">
+            <TabsContent
+              value="upload"
+              className="h-full m-0 p-6 flex flex-col items-center justify-center"
+            >
               <label
                 className={`w-full max-w-md aspect-video border-2 border-dashed border-outline-variant rounded-xl flex flex-col items-center justify-center bg-surface-container-lowest transition-colors relative ${
-                  isUploading ? "cursor-not-allowed opacity-50" : "hover:bg-surface-container cursor-pointer"
+                  isUploading
+                    ? "cursor-not-allowed opacity-50"
+                    : "hover:bg-surface-container cursor-pointer"
                 }`}
               >
                 <input
@@ -149,15 +172,21 @@ export function MediaDialog({ open, onOpenChange, onInsert }: MediaDialogProps) 
                 {isUploading ? (
                   <div className="text-center">
                     <Loader2 className="size-10 animate-spin text-rg-rose mx-auto mb-4" />
-                    <p className="text-sm text-on-surface-variant">Téléchargement en cours…</p>
+                    <p className="text-sm text-on-surface-variant">
+                      Téléchargement en cours…
+                    </p>
                   </div>
                 ) : (
                   <div className="text-center p-6">
                     <div className="size-16 bg-rg-rose/10 rounded-full flex items-center justify-center mx-auto mb-4">
                       <Upload className="size-8 text-rg-rose" />
                     </div>
-                    <h3 className="font-semibold text-lg mb-2">Cliquez pour téléverser</h3>
-                    <p className="text-sm text-on-surface-variant">PNG, JPG, WEBP jusqu&apos;à 5Mo</p>
+                    <h3 className="font-semibold text-lg mb-2">
+                      Cliquez pour téléverser
+                    </h3>
+                    <p className="text-sm text-on-surface-variant">
+                      PNG, JPG, WEBP jusqu&apos;à 5Mo
+                    </p>
                   </div>
                 )}
               </label>
@@ -166,7 +195,7 @@ export function MediaDialog({ open, onOpenChange, onInsert }: MediaDialogProps) 
             <TabsContent value="emotes" className="h-full m-0 flex flex-col">
               <ScrollArea className="flex-1 p-6">
                 <EmoteGallery
-                  onSelect={emote => {
+                  onSelect={(emote) => {
                     onInsert({
                       alt: emote.alt,
                       src: emote.src,

@@ -17,15 +17,38 @@
  * désormais ouverte, l'API portant toutes les vérifications.
  */
 import { Discord, Slash, SlashGroup, SlashOption } from "discordx";
-import { ApplicationCommandOptionType, type ChatInputCommandInteraction, type InteractionEditReplyOptions } from "discord.js";
+import {
+  ApplicationCommandOptionType,
+  type ChatInputCommandInteraction,
+  type InteractionEditReplyOptions,
+} from "discord.js";
 
-import { messagePourEtat, quand, type DetailInterclan } from "../../api/modules/achillea/interclans/messages";
+import {
+  messagePourEtat,
+  quand,
+  type DetailInterclan,
+} from "../../api/modules/achillea/interclans/messages";
 import { appelApi } from "../../lib/achillea-ui";
-import { differerEnPrive, fiche, piedDeCommande, repondre, succes, vide } from "../../lib/ui";
+import {
+  differerEnPrive,
+  fiche,
+  piedDeCommande,
+  repondre,
+  succes,
+  vide,
+} from "../../lib/ui";
 
 /** Charge Discord brute (embeds et composants JSON de l'API) acceptée par `editReply`. */
-export function chargeBrute(message: { content?: string; embeds?: unknown[]; components?: unknown[] }): InteractionEditReplyOptions {
-  return { content: message.content ?? "", embeds: message.embeds ?? [], components: message.components ?? [] } as InteractionEditReplyOptions;
+export function chargeBrute(message: {
+  content?: string;
+  embeds?: unknown[];
+  components?: unknown[];
+}): InteractionEditReplyOptions {
+  return {
+    content: message.content ?? "",
+    embeds: message.embeds ?? [],
+    components: message.components ?? [],
+  } as InteractionEditReplyOptions;
 }
 
 /** Ligne de liste : `#12 · ABC vs XYZ · <date> · état`. */
@@ -43,7 +66,10 @@ export function ligneInterclan(i: {
 @SlashGroup({ name: "interclan", description: "Gestion des interclans" })
 @SlashGroup("interclan")
 export class InterclanCommande {
-  @Slash({ name: "request", description: "Défier un clan rival (délai max. de 7 jours)" })
+  @Slash({
+    name: "request",
+    description: "Défier un clan rival (délai max. de 7 jours)",
+  })
   async request(
     @SlashOption({
       name: "sigle",
@@ -74,7 +100,12 @@ export class InterclanCommande {
     await differerEnPrive(interaction);
     const detail = await appelApi(
       interaction,
-      c => c.interclans.create({ challengedShortName: sigle, date, motif: motif ?? null }),
+      (c) =>
+        c.interclans.create({
+          challengedShortName: sigle,
+          date,
+          motif: motif ?? null,
+        }),
       "Défi impossible",
     );
     if (!detail) return;
@@ -88,7 +119,10 @@ export class InterclanCommande {
     );
   }
 
-  @Slash({ name: "liste", description: "Les interclans de ton clan (ou de tous les clans)" })
+  @Slash({
+    name: "liste",
+    description: "Les interclans de ton clan (ou de tous les clans)",
+  })
   async liste(
     @SlashOption({
       name: "tous",
@@ -100,27 +134,41 @@ export class InterclanCommande {
     interaction: ChatInputCommandInteraction,
   ) {
     await differerEnPrive(interaction);
-    const page = await appelApi(interaction, c => c.interclans.list(tous ? { limit: 20 } : { mine: true, limit: 20 }), "Liste indisponible");
+    const page = await appelApi(
+      interaction,
+      (c) =>
+        c.interclans.list(tous ? { limit: 20 } : { mine: true, limit: 20 }),
+      "Liste indisponible",
+    );
     if (!page) return;
     if (page.data.length === 0) {
       await repondre(
         interaction,
         vide(
           "Aucun interclan",
-          tous ? "Aucun clan n'a encore lancé de défi." : "Ton clan n'a aucun interclan. Lance un défi avec `/interclan request`.",
+          tous
+            ? "Aucun clan n'a encore lancé de défi."
+            : "Ton clan n'a aucun interclan. Lance un défi avec `/interclan request`.",
           { prive: true },
         ),
       );
       return;
     }
-    const embed = fiche({ titre: tous ? "Interclans" : "Interclans de ton clan", intention: "marque", icone: "🏆" })
+    const embed = fiche({
+      titre: tous ? "Interclans" : "Interclans de ton clan",
+      intention: "marque",
+      icone: "🏆",
+    })
       .description(page.data.map(ligneInterclan).join("\n"))
       .finir();
     piedDeCommande(embed, interaction, { note: "Détail : /interclan infos" });
     await interaction.editReply({ embeds: [embed] });
   }
 
-  @Slash({ name: "infos", description: "Fiche d'un interclan, avec ses actions selon l'état" })
+  @Slash({
+    name: "infos",
+    description: "Fiche d'un interclan, avec ses actions selon l'état",
+  })
   async infos(
     @SlashOption({
       name: "id",
@@ -133,7 +181,11 @@ export class InterclanCommande {
     interaction: ChatInputCommandInteraction,
   ) {
     await differerEnPrive(interaction);
-    const detail: DetailInterclan | null = await appelApi(interaction, c => c.interclans.get(id), "Interclan introuvable");
+    const detail: DetailInterclan | null = await appelApi(
+      interaction,
+      (c) => c.interclans.get(id),
+      "Interclan introuvable",
+    );
     if (!detail) return;
     await interaction.editReply(chargeBrute(messagePourEtat(detail)));
   }

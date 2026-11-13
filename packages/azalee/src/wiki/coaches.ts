@@ -172,17 +172,29 @@ function normalizeRole(role: string | null): CoachRole {
 }
 
 /** Convertit une ligne brute + son passif résolu en `Coach`. */
-function toCoach(raw: RawCoordinator, scaling: PassiveScaling | null, internalCode: string | null): Coach {
+function toCoach(
+  raw: RawCoordinator,
+  scaling: PassiveScaling | null,
+  internalCode: string | null,
+): Coach {
   const role = normalizeRole(raw.role);
   const elementKanji = cleanCell(raw.element);
   const playstyle = cleanCell(raw.playstyle);
-  const name = cleanCell(raw.name_localised) || cleanCell(raw.name_romaji) || cleanCell(raw.name_kanji) || `#${raw.id}`;
+  const name =
+    cleanCell(raw.name_localised) ||
+    cleanCell(raw.name_romaji) ||
+    cleanCell(raw.name_kanji) ||
+    `#${raw.id}`;
 
   return {
     buff: cleanCell(raw.buff),
-    elementFr: elementKanji ? (ELEMENT_KANJI_TO_FR[elementKanji] ?? null) : null,
+    elementFr: elementKanji
+      ? (ELEMENT_KANJI_TO_FR[elementKanji] ?? null)
+      : null,
     elementKanji,
-    elementKey: elementKanji ? (ELEMENT_KANJI_TO_EN[elementKanji] ?? null) : null,
+    elementKey: elementKanji
+      ? (ELEMENT_KANJI_TO_EN[elementKanji] ?? null)
+      : null,
     gender: cleanCell(raw.gender),
     id: raw.id,
     image: cleanCell(raw.image),
@@ -233,7 +245,10 @@ function indexCharacterCodes(rows: RawCharacterRef[]): Map<string, string> {
 }
 
 /** Résout le `internal_code` d'un coach via son nom localisé (sinon null). */
-function resolveInternalCode(raw: RawCoordinator, byName: Map<string, string>): string | null {
+function resolveInternalCode(
+  raw: RawCoordinator,
+  byName: Map<string, string>,
+): string | null {
   const name = raw.name_localised?.trim();
   if (!name) {
     return null;
@@ -270,25 +285,43 @@ export interface CoachListParams {
  * Liste complète des coachs (normalisée + passif résolu), filtrée en mémoire.
  * Le jeu est petit (102 lignes) → un seul SELECT * + filtrage côté serveur.
  */
-export async function getCoachesList(params: CoachListParams = {}): Promise<Coach[]> {
+export async function getCoachesList(
+  params: CoachListParams = {},
+): Promise<Coach[]> {
   const [rawCoords, rawPassives, charRows] = await Promise.all([
-    sql.selectFrom("inagle_coordinators").selectAll().orderBy("id", "asc").execute(),
+    sql
+      .selectFrom("inagle_coordinators")
+      .selectAll()
+      .orderBy("id", "asc")
+      .execute(),
     sql.selectFrom("inagle_manager_passives").selectAll().execute(),
-    sql.selectFrom("inagle_characters").select(["name_en", "internal_code"]).execute(),
+    sql
+      .selectFrom("inagle_characters")
+      .select(["name_en", "internal_code"])
+      .execute(),
   ]);
 
   const passiveIndex = indexPassives(rawPassives);
   const codeByName = indexCharacterCodes(charRows);
 
-  let coaches = rawCoords.map(raw => {
-    const scaling = raw.passive_no != null ? (passiveIndex.get(raw.passive_no) ?? null) : null;
+  let coaches = rawCoords.map((raw) => {
+    const scaling =
+      raw.passive_no != null
+        ? (passiveIndex.get(raw.passive_no) ?? null)
+        : null;
     return toCoach(raw, scaling, resolveInternalCode(raw, codeByName));
   });
 
   const q = params.q?.trim().toLowerCase();
   if (q) {
-    coaches = coaches.filter(c => {
-      const haystack = [c.name, c.nameRomaji, c.nameKanji, c.nameLocalised, c.stat]
+    coaches = coaches.filter((c) => {
+      const haystack = [
+        c.name,
+        c.nameRomaji,
+        c.nameKanji,
+        c.nameLocalised,
+        c.stat,
+      ]
         .filter(Boolean)
         .join(" ")
         .toLowerCase();
@@ -297,15 +330,15 @@ export async function getCoachesList(params: CoachListParams = {}): Promise<Coac
   }
 
   if (params.role) {
-    coaches = coaches.filter(c => c.role === params.role);
+    coaches = coaches.filter((c) => c.role === params.role);
   }
 
   if (params.element) {
-    coaches = coaches.filter(c => c.elementKey === params.element);
+    coaches = coaches.filter((c) => c.elementKey === params.element);
   }
 
   if (params.playstyle) {
-    coaches = coaches.filter(c => c.playstyle === params.playstyle);
+    coaches = coaches.filter((c) => c.playstyle === params.playstyle);
   }
 
   return coaches;
@@ -317,7 +350,11 @@ export async function getCoach(id: number): Promise<Coach | null> {
     return null;
   }
   const [raw, rawPassives] = await Promise.all([
-    sql.selectFrom("inagle_coordinators").selectAll().where("id", "=", id).executeTakeFirst(),
+    sql
+      .selectFrom("inagle_coordinators")
+      .selectAll()
+      .where("id", "=", id)
+      .executeTakeFirst(),
     sql.selectFrom("inagle_manager_passives").selectAll().execute(),
   ]);
 
@@ -325,7 +362,8 @@ export async function getCoach(id: number): Promise<Coach | null> {
     return null;
   }
   const passiveIndex = indexPassives(rawPassives);
-  const scaling = raw.passive_no != null ? (passiveIndex.get(raw.passive_no) ?? null) : null;
+  const scaling =
+    raw.passive_no != null ? (passiveIndex.get(raw.passive_no) ?? null) : null;
 
   // Résolution du portrait : 1er personnage homonyme (`name_en` = `name_localised`).
   let internalCode: string | null = null;
@@ -344,20 +382,29 @@ export async function getCoach(id: number): Promise<Coach | null> {
 }
 
 /** Options de filtre dérivées des données réelles (pour les puces de filtre). */
-export const COACH_ROLE_OPTIONS: ReadonlyArray<{ value: CoachRole; label: string }> = [
+export const COACH_ROLE_OPTIONS: ReadonlyArray<{
+  value: CoachRole;
+  label: string;
+}> = [
   { label: "Coordinateur", value: "Coordinator" },
   { label: "Manager", value: "Manager" },
   { label: "Coach", value: "Coach" },
 ];
 
-export const COACH_ELEMENT_OPTIONS: ReadonlyArray<{ value: string; label: string }> = [
+export const COACH_ELEMENT_OPTIONS: ReadonlyArray<{
+  value: string;
+  label: string;
+}> = [
   { label: "Feu", value: "fire" },
   { label: "Vent", value: "wind" },
   { label: "Forêt", value: "forest" },
   { label: "Montagne", value: "mountain" },
 ];
 
-export const COACH_PLAYSTYLE_OPTIONS: ReadonlyArray<{ value: string; label: string }> = [
+export const COACH_PLAYSTYLE_OPTIONS: ReadonlyArray<{
+  value: string;
+  label: string;
+}> = [
   { label: "Percée", value: "Breach" },
   { label: "Justice", value: "Justice" },
   { label: "Contre", value: "Counter" },

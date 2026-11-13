@@ -38,7 +38,11 @@ export interface ServiceHealth {
 }
 
 /** Passerelle Supabase Cloud du projet, sans barre oblique finale. */
-const SUPABASE_URL = (process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL ?? "").replace(/\/+$/, "");
+const SUPABASE_URL = (
+  process.env.SUPABASE_URL ??
+  process.env.NEXT_PUBLIC_SUPABASE_URL ??
+  ""
+).replace(/\/+$/, "");
 
 /**
  * Les services Supabase Cloud dont dépend la pile : Storage et Realtime.
@@ -46,7 +50,12 @@ const SUPABASE_URL = (process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABA
  * Sondés sans clé : Storage expose `/status` publiquement, et la passerelle
  * Realtime répond 401 à une requête anonyme, ce qui suffit à la dire joignable.
  */
-const SERVICES: { name: string; url: string; role: string; expect?: number[] }[] = [
+const SERVICES: {
+  name: string;
+  url: string;
+  role: string;
+  expect?: number[];
+}[] = [
   {
     name: "Storage",
     role: "Supabase Storage (/storage/v1) — index dans storage.objects",

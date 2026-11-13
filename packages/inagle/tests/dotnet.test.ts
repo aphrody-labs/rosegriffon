@@ -32,7 +32,9 @@ describe("IECODE .NET & Node-API / NativeAOT Bridge", () => {
     if (isDotnetAvailable()) {
       expect(status.mode).toBe("native-aot");
       expect(status.version).toMatch(/^\d+\.\d+\.\d+(?:[-+].*)?$/);
-      expect(status.libraryPath).toMatch(/IECODE\.Ffi\.(?:dll|so|dylib|node)$/i);
+      expect(status.libraryPath).toMatch(
+        /IECODE\.Ffi\.(?:dll|so|dylib|node)$/i,
+      );
     } else {
       expect(status.mode).toBe("fallback");
       expect(status.version).toContain("fallback");
@@ -56,14 +58,18 @@ describe("IECODE .NET & Node-API / NativeAOT Bridge", () => {
 
   test("detects formats using FormatDetector magic signatures", () => {
     // CPK header
-    const cpkHeader = new Uint8Array([0x43, 0x50, 0x4b, 0x20, 0x00, 0x00, 0x00, 0x00]);
+    const cpkHeader = new Uint8Array([
+      0x43, 0x50, 0x4b, 0x20, 0x00, 0x00, 0x00, 0x00,
+    ]);
     const cpkDetect = detectFormat(cpkHeader);
     expect(cpkDetect.format).toBe("CPK");
     expect(cpkDetect.formatId).toBe(14);
     expect(cpkDetect.extension).toBe(".cpk");
 
     // G4TX header
-    const g4txHeader = new Uint8Array([0x47, 0x34, 0x54, 0x58, 0x00, 0x00, 0x00, 0x00]);
+    const g4txHeader = new Uint8Array([
+      0x47, 0x34, 0x54, 0x58, 0x00, 0x00, 0x00, 0x00,
+    ]);
     const g4txDetect = detectFormat(g4txHeader);
     expect(g4txDetect.format).toBe("G4TX");
     expect(g4txDetect.formatId).toBe(1);
@@ -133,7 +139,9 @@ describe("IECODE .NET & Node-API / NativeAOT Bridge", () => {
   });
 
   test("performs CRI position-XOR block decryption and symmetric recovery", () => {
-    const cleartext = new Uint8Array([0x10, 0x20, 0x30, 0x40, 0x50, 0x60, 0x70, 0x80]);
+    const cleartext = new Uint8Array([
+      0x10, 0x20, 0x30, 0x40, 0x50, 0x60, 0x70, 0x80,
+    ]);
     const key = 0x1717e18en;
     const offset = 0n;
 
@@ -146,64 +154,84 @@ describe("IECODE .NET & Node-API / NativeAOT Bridge", () => {
     expect(restored).toEqual(cleartext);
   });
 
-  test.skipIf(!isDotnetAvailable())("compares NativeAOT and fallback on representative inputs", () => {
-    const native = createDotnetBridge();
-    const fallback = createDotnetBridge({ preferFallback: true });
+  test.skipIf(!isDotnetAvailable())(
+    "compares NativeAOT and fallback on representative inputs",
+    () => {
+      const native = createDotnetBridge();
+      const fallback = createDotnetBridge({ preferFallback: true });
 
-    expect(fallback.status.mode).toBe("fallback");
-    expect(native.status.mode).toBe("native-aot");
+      expect(fallback.status.mode).toBe("fallback");
+      expect(native.status.mode).toBe("native-aot");
 
-    for (const bytes of [
-      [], [1], [0x52, 0x44, 0x42, 0x4e], [0x40, 0x55, 0x54, 0x46],
-      [0x1f, 0x8b], [0x1f, 0x8b, 0x08, 0], [0x50, 0x4b, 3, 4],
-      [0x28, 0xb5, 0x2f, 0xfd], [0x4e, 0x58, 0x54, 0x43, 0x48, 0, 0, 0],
-      [0x58, 0x46, 0x53, 0x41],
-    ]) {
-      const data = Uint8Array.from(bytes);
-      expect(native.detectFormat(data)).toEqual(fallback.detectFormat(data));
-    }
-
-    // CRC32 parity
-    const payload = "test_level5_hash_agreement";
-    expect(native.computeLevel5Crc32(payload)).toBe(fallback.computeLevel5Crc32(payload));
-
-    // Decryption parity
-    const data = new Uint8Array([11, 22, 33, 44, 55, 66, 77, 88]);
-    const nativeDec = native.decryptCpkBlock(data, 0n, 0x1717e18en);
-    const fallbackDec = fallback.decryptCpkBlock(data, 0n, 0x1717e18en);
-    expect(nativeDec).toEqual(fallbackDec);
-    expect(native.decryptCpkBlock(new Uint8Array())).toEqual(new Uint8Array());
-    for (const offset of [0n, 1n, 3n, 0x100000001n, 0x20000000000001n]) {
-      for (const key of [0n, 0x1717e18en, 0x100000000n]) {
-        expect(native.decryptCpkBlock(data, offset, key)).toEqual(fallback.decryptCpkBlock(data, offset, key));
+      for (const bytes of [
+        [],
+        [1],
+        [0x52, 0x44, 0x42, 0x4e],
+        [0x40, 0x55, 0x54, 0x46],
+        [0x1f, 0x8b],
+        [0x1f, 0x8b, 0x08, 0],
+        [0x50, 0x4b, 3, 4],
+        [0x28, 0xb5, 0x2f, 0xfd],
+        [0x4e, 0x58, 0x54, 0x43, 0x48, 0, 0, 0],
+        [0x58, 0x46, 0x53, 0x41],
+      ]) {
+        const data = Uint8Array.from(bytes);
+        expect(native.detectFormat(data)).toEqual(fallback.detectFormat(data));
       }
-    }
 
-    // RDBN parity
-    const rdbnBuf = new TextEncoder().encode("RDBN" + "\0".repeat(0x50));
-    expect(native.isRdbn(rdbnBuf)).toBe(fallback.isRdbn(rdbnBuf));
-    for (const length of [4, 0x4f, 0x50]) {
-      const header = new Uint8Array(length);
-      header.set(new TextEncoder().encode("RDBN"));
-      expect(native.isRdbn(header)).toBe(fallback.isRdbn(header));
-      expect(native.isRdbn(header)).toBe(length >= 0x50);
-    }
+      // CRC32 parity
+      const payload = "test_level5_hash_agreement";
+      expect(native.computeLevel5Crc32(payload)).toBe(
+        fallback.computeLevel5Crc32(payload),
+      );
 
-    // CRILAYLA decompress parity: compress with native, decompress with fallback
-    const sample = new Uint8Array(400);
-    for (let i = 0; i < sample.length; i++) sample[i] = (i + 5) & 0xff;
+      // Decryption parity
+      const data = new Uint8Array([11, 22, 33, 44, 55, 66, 77, 88]);
+      const nativeDec = native.decryptCpkBlock(data, 0n, 0x1717e18en);
+      const fallbackDec = fallback.decryptCpkBlock(data, 0n, 0x1717e18en);
+      expect(nativeDec).toEqual(fallbackDec);
+      expect(native.decryptCpkBlock(new Uint8Array())).toEqual(
+        new Uint8Array(),
+      );
+      for (const offset of [0n, 1n, 3n, 0x100000001n, 0x20000000000001n]) {
+        for (const key of [0n, 0x1717e18en, 0x100000000n]) {
+          expect(native.decryptCpkBlock(data, offset, key)).toEqual(
+            fallback.decryptCpkBlock(data, offset, key),
+          );
+        }
+      }
 
-    const comp = native.compressCrilayla(sample);
-    expect(fallback.compressCrilayla(sample)).toEqual(comp);
-    const nativeDecomp = native.decompressCrilayla(comp);
-    const fallbackDecomp = fallback.decompressCrilayla(comp);
+      // RDBN parity
+      const rdbnBuf = new TextEncoder().encode("RDBN" + "\0".repeat(0x50));
+      expect(native.isRdbn(rdbnBuf)).toBe(fallback.isRdbn(rdbnBuf));
+      for (const length of [4, 0x4f, 0x50]) {
+        const header = new Uint8Array(length);
+        header.set(new TextEncoder().encode("RDBN"));
+        expect(native.isRdbn(header)).toBe(fallback.isRdbn(header));
+        expect(native.isRdbn(header)).toBe(length >= 0x50);
+      }
 
-    expect(nativeDecomp).toEqual(sample);
-    expect(fallbackDecomp).toEqual(sample);
-    expect(nativeDecomp).toEqual(fallbackDecomp);
-    for (let length = 256; length <= 264; length++) {
-      const bytes = Uint8Array.from({ length }, (_, i) => (i * 31 + 7) & 0xff);
-      expect(fallback.compressCrilayla(bytes)).toEqual(native.compressCrilayla(bytes));
-    }
-  });
+      // CRILAYLA decompress parity: compress with native, decompress with fallback
+      const sample = new Uint8Array(400);
+      for (let i = 0; i < sample.length; i++) sample[i] = (i + 5) & 0xff;
+
+      const comp = native.compressCrilayla(sample);
+      expect(fallback.compressCrilayla(sample)).toEqual(comp);
+      const nativeDecomp = native.decompressCrilayla(comp);
+      const fallbackDecomp = fallback.decompressCrilayla(comp);
+
+      expect(nativeDecomp).toEqual(sample);
+      expect(fallbackDecomp).toEqual(sample);
+      expect(nativeDecomp).toEqual(fallbackDecomp);
+      for (let length = 256; length <= 264; length++) {
+        const bytes = Uint8Array.from(
+          { length },
+          (_, i) => (i * 31 + 7) & 0xff,
+        );
+        expect(fallback.compressCrilayla(bytes)).toEqual(
+          native.compressCrilayla(bytes),
+        );
+      }
+    },
+  );
 });

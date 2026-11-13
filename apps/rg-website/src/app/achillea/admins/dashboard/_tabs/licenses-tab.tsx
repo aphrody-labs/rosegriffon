@@ -1,22 +1,45 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { Badge, Button, Card, CardContent, CardHeader, CardTitle, Input, Label } from "@rosegriffon/ui";
+import {
+  Badge,
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  Input,
+  Label,
+} from "@rosegriffon/ui";
 import { BadgeCheck, Ban, Loader2 } from "lucide-react";
 import { signalerEchec } from "@/lib/achillea/signaler";
 import type { License } from "@rosegriffon/achillea-types/domain/license";
 import { Erreur, formaterDate, useClientAchillea } from "./etat";
 
-function ResumeLicence({ licence, titre }: { licence: License; titre: string }) {
+function ResumeLicence({
+  licence,
+  titre,
+}: {
+  licence: License;
+  titre: string;
+}) {
   return (
-    <div className="space-y-1 rounded-xl border border-border/60 bg-muted/20 p-3 text-sm" aria-live="polite">
+    <div
+      className="space-y-1 rounded-xl border border-border/60 bg-muted/20 p-3 text-sm"
+      aria-live="polite"
+    >
       <div className="flex items-center justify-between gap-2">
         <span className="font-semibold">{titre}</span>
-        <Badge variant={licence.status === "Active" ? "success" : "destructive"}>{licence.status}</Badge>
+        <Badge
+          variant={licence.status === "Active" ? "success" : "destructive"}
+        >
+          {licence.status}
+        </Badge>
       </div>
       <p className="font-mono">{licence.licenseNumber}</p>
       <p className="text-xs text-muted-foreground">
-        Titulaire {licence.userId} · valable jusqu&apos;au {formaterDate(licence.validUntil)}
+        Titulaire {licence.userId} · valable jusqu&apos;au{" "}
+        {formaterDate(licence.validUntil)}
       </p>
     </div>
   );
@@ -30,7 +53,9 @@ export function LicensesTab() {
   const [emission, setEmission] = useState(false);
   const [revocation, setRevocation] = useState(false);
   const [derniereEmise, setDerniereEmise] = useState<License | null>(null);
-  const [derniereRevoquee, setDerniereRevoquee] = useState<License | null>(null);
+  const [derniereRevoquee, setDerniereRevoquee] = useState<License | null>(
+    null,
+  );
   const [erreurEmission, setErreurEmission] = useState<string | null>(null);
   const [erreurRevocation, setErreurRevocation] = useState<string | null>(null);
 
@@ -75,19 +100,25 @@ export function LicensesTab() {
           <CardTitle className="text-base">Émettre une licence</CardTitle>
         </CardHeader>
         <CardContent>
-          <form className="space-y-3" onSubmit={event => void emettre(event)}>
+          <form className="space-y-3" onSubmit={(event) => void emettre(event)}>
             <div className="space-y-1">
-              <Label htmlFor="licence-emission-user">Identifiant Discord du membre</Label>
+              <Label htmlFor="licence-emission-user">
+                Identifiant Discord du membre
+              </Label>
               <Input
                 id="licence-emission-user"
                 value={userId}
-                onChange={event => setUserId(event.target.value)}
+                onChange={(event) => setUserId(event.target.value)}
                 inputMode="numeric"
                 autoComplete="off"
                 className="min-h-11 font-mono"
               />
             </div>
-            <Button type="submit" className="min-h-11 w-full gap-2" disabled={emission || !userId.trim()}>
+            <Button
+              type="submit"
+              className="min-h-11 w-full gap-2"
+              disabled={emission || !userId.trim()}
+            >
               {emission ? (
                 <Loader2 className="size-4 animate-spin" aria-hidden="true" />
               ) : (
@@ -96,7 +127,12 @@ export function LicensesTab() {
               Émettre
             </Button>
             {erreurEmission && <Erreur message={erreurEmission} />}
-            {derniereEmise && <ResumeLicence licence={derniereEmise} titre="Dernière licence émise" />}
+            {derniereEmise && (
+              <ResumeLicence
+                licence={derniereEmise}
+                titre="Dernière licence émise"
+              />
+            )}
           </form>
         </CardContent>
       </Card>
@@ -106,13 +142,18 @@ export function LicensesTab() {
           <CardTitle className="text-base">Révoquer une licence</CardTitle>
         </CardHeader>
         <CardContent>
-          <form className="space-y-3" onSubmit={event => void revoquer(event)}>
+          <form
+            className="space-y-3"
+            onSubmit={(event) => void revoquer(event)}
+          >
             <div className="space-y-1">
-              <Label htmlFor="licence-revocation-id">Identifiant de la licence</Label>
+              <Label htmlFor="licence-revocation-id">
+                Identifiant de la licence
+              </Label>
               <Input
                 id="licence-revocation-id"
                 value={licenceId}
-                onChange={event => setLicenceId(event.target.value)}
+                onChange={(event) => setLicenceId(event.target.value)}
                 autoComplete="off"
                 className="min-h-11 font-mono"
               />
@@ -131,7 +172,12 @@ export function LicensesTab() {
               Révoquer
             </Button>
             {erreurRevocation && <Erreur message={erreurRevocation} />}
-            {derniereRevoquee && <ResumeLicence licence={derniereRevoquee} titre="Dernière licence révoquée" />}
+            {derniereRevoquee && (
+              <ResumeLicence
+                licence={derniereRevoquee}
+                titre="Dernière licence révoquée"
+              />
+            )}
           </form>
         </CardContent>
       </Card>

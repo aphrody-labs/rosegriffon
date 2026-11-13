@@ -2468,7 +2468,16 @@
   ],
   "rosters": {
     "LMS": ["Colombo", "Eren", "Kakuszka", "Panda", "Saikyoo", "Zerion"],
-    "DR": ["AstroKyo", "Astrokyo", "Patachoo", "Rayuki", "Rayuki (sub)", "Shinji", "Shozuma", "Thunungu"],
+    "DR": [
+      "AstroKyo",
+      "Astrokyo",
+      "Patachoo",
+      "Rayuki",
+      "Rayuki (sub)",
+      "Shinji",
+      "Shozuma",
+      "Thunungu"
+    ],
     "ZOO": [
       "L'Éléphant",
       "LaScxlopendre",
@@ -2482,9 +2491,41 @@
       "SuperMxuette",
       "l'ornythorinque"
     ],
-    "GKO": ["Fen", "Gamewatch", "Kaelith", "Lotus", "Tomus", "Vype", "Woodzy", "gamewatch"],
-    "OMP": ["Carillo", "Leo", "Master", "Oppo", "Opposing", "Sokkah", "WeezaR", "Weezar", "Zekw0n", "Zekwon"],
-    "ASE": ["Eternity", "Flamme", "Karmaxe", "R9", "Razimi", "Taiyo", "Tiabox", "Vapo", "Vince", "Yahito", "Zen"],
+    "GKO": [
+      "Fen",
+      "Gamewatch",
+      "Kaelith",
+      "Lotus",
+      "Tomus",
+      "Vype",
+      "Woodzy",
+      "gamewatch"
+    ],
+    "OMP": [
+      "Carillo",
+      "Leo",
+      "Master",
+      "Oppo",
+      "Opposing",
+      "Sokkah",
+      "WeezaR",
+      "Weezar",
+      "Zekw0n",
+      "Zekwon"
+    ],
+    "ASE": [
+      "Eternity",
+      "Flamme",
+      "Karmaxe",
+      "R9",
+      "Razimi",
+      "Taiyo",
+      "Tiabox",
+      "Vapo",
+      "Vince",
+      "Yahito",
+      "Zen"
+    ],
     "FGS": ["Evo", "Hakai", "Kazemaru", "Nathan"],
     "KOM": ["Flavira", "Kappa", "Mathiuze", "Volfe"]
   },
@@ -2583,7 +2624,13 @@
         "date": "2026-04-24",
         "home": false
       },
-      "ZOO": { "scoreFor": 2, "scoreAgainst": 0, "matchday": 6, "date": "2026-05-15", "home": true }
+      "ZOO": {
+        "scoreFor": 2,
+        "scoreAgainst": 0,
+        "matchday": 6,
+        "date": "2026-05-15",
+        "home": true
+      }
     },
     "ASE": {
       "GKO": {
@@ -2628,7 +2675,13 @@
         "date": "2026-04-17",
         "home": true
       },
-      "ZOO": { "scoreFor": 3, "scoreAgainst": 0, "matchday": 7, "date": "2026-05-22", "home": true }
+      "ZOO": {
+        "scoreFor": 3,
+        "scoreAgainst": 0,
+        "matchday": 7,
+        "date": "2026-05-22",
+        "home": true
+      }
     },
     "DR": {
       "GKO": {
@@ -2673,7 +2726,13 @@
         "date": "2026-05-15",
         "home": false
       },
-      "ZOO": { "scoreFor": 3, "scoreAgainst": 0, "matchday": 3, "date": "2026-04-24", "home": true }
+      "ZOO": {
+        "scoreFor": 3,
+        "scoreAgainst": 0,
+        "matchday": 3,
+        "date": "2026-04-24",
+        "home": true
+      }
     },
     "FGS": {
       "GKO": {
@@ -2697,7 +2756,13 @@
         "date": "2026-04-24",
         "home": false
       },
-      "DR": { "scoreFor": 2, "scoreAgainst": 1, "matchday": 7, "date": "2026-05-22", "home": true },
+      "DR": {
+        "scoreFor": 2,
+        "scoreAgainst": 1,
+        "matchday": 7,
+        "date": "2026-05-22",
+        "home": true
+      },
       "LMS": {
         "scoreFor": 2,
         "scoreAgainst": 1,
@@ -2742,7 +2807,13 @@
         "date": "2026-05-08",
         "home": true
       },
-      "DR": { "scoreFor": 0, "scoreAgainst": 3, "matchday": 1, "date": "2026-04-10", "home": true },
+      "DR": {
+        "scoreFor": 0,
+        "scoreAgainst": 3,
+        "matchday": 1,
+        "date": "2026-04-10",
+        "home": true
+      },
       "FGS": {
         "scoreFor": 1,
         "scoreAgainst": 2,
@@ -2787,7 +2858,13 @@
         "date": "2026-04-17",
         "home": false
       },
-      "DR": { "scoreFor": 1, "scoreAgainst": 2, "matchday": 6, "date": "2026-05-15", "home": true },
+      "DR": {
+        "scoreFor": 1,
+        "scoreAgainst": 2,
+        "matchday": 6,
+        "date": "2026-05-15",
+        "home": true
+      },
       "FGS": {
         "scoreFor": 1,
         "scoreAgainst": 2,
@@ -2853,7 +2930,13 @@
         "date": "2026-04-17",
         "home": true
       },
-      "KOM": { "scoreFor": 2, "scoreAgainst": 1, "matchday": 5, "date": "2026-05-08", "home": true }
+      "KOM": {
+        "scoreFor": 2,
+        "scoreAgainst": 1,
+        "matchday": 5,
+        "date": "2026-05-08",
+        "home": true
+      }
     }
   }
 }

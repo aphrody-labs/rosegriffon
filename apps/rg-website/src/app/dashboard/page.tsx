@@ -12,7 +12,11 @@ export default async function DashboardPage() {
   }
 
   const supabase = createPostgresClient();
-  const { data: profile } = await supabase.from("profiles").select("username").eq("id", user.id).maybeSingle();
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("username")
+    .eq("id", user.id)
+    .maybeSingle();
 
   const username = (profile as { username?: string } | null)?.username;
   if (username) {

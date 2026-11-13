@@ -14,16 +14,23 @@ export interface ResultatSonde {
 }
 
 /** Applique `fn` à chaque élément avec au plus `limite` appels simultanés, ordre conservé. */
-export async function executerBorne<T, R>(items: readonly T[], limite: number, fn: (item: T) => Promise<R>): Promise<R[]> {
+export async function executerBorne<T, R>(
+  items: readonly T[],
+  limite: number,
+  fn: (item: T) => Promise<R>,
+): Promise<R[]> {
   const resultats = Array.from({ length: items.length }) as R[];
   let suivant = 0;
-  const ouvriers = Array.from({ length: Math.max(1, Math.min(limite, items.length)) }, async () => {
-    while (true) {
-      const indice = suivant++;
-      if (indice >= items.length) return;
-      resultats[indice] = await fn(items[indice]!);
-    }
-  });
+  const ouvriers = Array.from(
+    { length: Math.max(1, Math.min(limite, items.length)) },
+    async () => {
+      while (true) {
+        const indice = suivant++;
+        if (indice >= items.length) return;
+        resultats[indice] = await fn(items[indice]!);
+      }
+    },
+  );
   await Promise.all(ouvriers);
   return resultats;
 }
@@ -32,7 +39,10 @@ const DUREE_CACHE_MS = 60_000;
 const DELAI_MS = 4_000;
 const cache = new Map<string, { instant: number; valeur: ResultatSonde }>();
 
-async function sonderUne(url: string, init: RequestInit): Promise<ResultatSonde> {
+async function sonderUne(
+  url: string,
+  init: RequestInit,
+): Promise<ResultatSonde> {
   const debut = performance.now();
   try {
     const reponse = await fetch(url, {
@@ -42,21 +52,32 @@ async function sonderUne(url: string, init: RequestInit): Promise<ResultatSonde>
       signal: AbortSignal.timeout(DELAI_MS),
     });
     void reponse.body?.cancel();
-    return { url, statut: reponse.status, dureeMs: Math.round(performance.now() - debut), erreur: null };
+    return {
+      url,
+      statut: reponse.status,
+      dureeMs: Math.round(performance.now() - debut),
+      erreur: null,
+    };
   } catch (erreur) {
     return {
       url,
       statut: null,
       dureeMs: Math.round(performance.now() - debut),
-      erreur: erreur instanceof Error && erreur.name === "TimeoutError" ? `aucune réponse en ${DELAI_MS} ms` : "injoignable",
+      erreur:
+        erreur instanceof Error && erreur.name === "TimeoutError"
+          ? `aucune réponse en ${DELAI_MS} ms`
+          : "injoignable",
     };
   }
 }
 
 /** Sonde des URL (GET, redirections non suivies : un 301 est un 301), 4 en parallèle, cache 60 s. */
-export async function sonder(urls: readonly string[], init: RequestInit = {}): Promise<ResultatSonde[]> {
+export async function sonder(
+  urls: readonly string[],
+  init: RequestInit = {},
+): Promise<ResultatSonde[]> {
   const maintenant = Date.now();
-  return executerBorne(urls, 4, async url => {
+  return executerBorne(urls, 4, async (url) => {
     const memo = cache.get(url);
     if (memo && maintenant - memo.instant < DUREE_CACHE_MS) return memo.valeur;
     const valeur = await sonderUne(url, init);

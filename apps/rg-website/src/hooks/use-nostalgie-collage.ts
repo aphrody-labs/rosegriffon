@@ -1,7 +1,10 @@
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
 
-import { addWatermarkAndDownload, createCollageCanvas } from "@/lib/nostalgie-utils";
+import {
+  addWatermarkAndDownload,
+  createCollageCanvas,
+} from "@/lib/nostalgie-utils";
 import { absoluteUrl } from "@/lib/site-url";
 
 export const useNostalgieCollage = () => {
@@ -9,41 +12,48 @@ export const useNostalgieCollage = () => {
   const [showFinalCropDialog, setShowFinalCropDialog] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [watermarkEnabled, setWatermarkEnabled] = useState(true);
-  const [watermarkPosition, setWatermarkPosition] = useState<"bottom-right" | "bottom-left" | "top-right" | "top-left">(
-    "bottom-right",
+  const [watermarkPosition, setWatermarkPosition] = useState<
+    "bottom-right" | "bottom-left" | "top-right" | "top-left"
+  >("bottom-right");
+  const [exportFormat, setExportFormat] = useState<"jpg" | "png" | "webp">(
+    "jpg",
   );
-  const [exportFormat, setExportFormat] = useState<"jpg" | "png" | "webp">("jpg");
   const [exportQuality, setExportQuality] = useState(0.95);
 
-  const createCollage = useCallback(async (ogImage: string, vrImage: string) => {
-    setIsProcessing(true);
-    const loadingToast = toast.loading("Création du montage en cours...");
+  const createCollage = useCallback(
+    async (ogImage: string, vrImage: string) => {
+      setIsProcessing(true);
+      const loadingToast = toast.loading("Création du montage en cours...");
 
-    try {
-      const collageDataUrl = await createCollageCanvas({
-        ogImageSrc: ogImage,
-        templateSrc: "/nostalgie.webp",
-        vrImageSrc: vrImage,
-      });
+      try {
+        const collageDataUrl = await createCollageCanvas({
+          ogImageSrc: ogImage,
+          templateSrc: "/nostalgie.webp",
+          vrImageSrc: vrImage,
+        });
 
-      setFinalImage(collageDataUrl);
-      setShowFinalCropDialog(true);
-      toast.success("Montage créé avec succès!", { id: loadingToast });
-    } catch (error) {
-      toast.error("Erreur lors de la création du montage", {
-        id: loadingToast,
-      });
-      console.error(error);
-    } finally {
-      setIsProcessing(false);
-    }
-  }, []);
+        setFinalImage(collageDataUrl);
+        setShowFinalCropDialog(true);
+        toast.success("Montage créé avec succès!", { id: loadingToast });
+      } catch (error) {
+        toast.error("Erreur lors de la création du montage", {
+          id: loadingToast,
+        });
+        console.error(error);
+      } finally {
+        setIsProcessing(false);
+      }
+    },
+    [],
+  );
 
   const handleFinalCropComplete = useCallback(
     async (croppedImage: string) => {
       setShowFinalCropDialog(false);
       const downloadToast = toast.loading(
-        watermarkEnabled ? "Ajout du filigrane et téléchargement..." : "Téléchargement en cours...",
+        watermarkEnabled
+          ? "Ajout du filigrane et téléchargement..."
+          : "Téléchargement en cours...",
       );
 
       try {

@@ -1,11 +1,19 @@
 import { couleurRole } from "@rosegriffon/types/discord-hierarchie";
 
-import { chercherMembres, lireHierarchie, type CleServeur } from "@/lib/discord/hierarchie";
+import {
+  chercherMembres,
+  lireHierarchie,
+  type CleServeur,
+} from "@/lib/discord/hierarchie";
 
 import { WikiPagination } from "@/components/shared/WikiPagination";
 
 import { GrilleMembres, TitreSection } from "./membre-carte";
-import { MEMBRES_PAR_PAGE, lirePage, trancherSections } from "./pagination-membres";
+import {
+  MEMBRES_PAR_PAGE,
+  lirePage,
+  trancherSections,
+} from "./pagination-membres";
 
 /**
  * Hiérarchie d'un serveur Discord — la vraie, celle du serveur.
@@ -33,7 +41,10 @@ export async function HierarchieServeur({
     const trouves = await chercherMembres(cle, recherche);
     return (
       <div className="flex flex-col gap-3">
-        <TitreSection titre={`Résultats pour « ${recherche} »`} effectif={trouves.length} />
+        <TitreSection
+          titre={`Résultats pour « ${recherche} »`}
+          effectif={trouves.length}
+        />
         {trouves.length > 0 ? (
           <GrilleMembres membres={trouves} compacte />
         ) : (
@@ -48,26 +59,36 @@ export async function HierarchieServeur({
   const hierarchie = await lireHierarchie(cle);
 
   if (staffSeulement) {
-    const rien = hierarchie.administration.length === 0 && hierarchie.moderation.length === 0;
+    const rien =
+      hierarchie.administration.length === 0 &&
+      hierarchie.moderation.length === 0;
     return (
       <div className="flex flex-col gap-6">
         {rien && (
           <p className="text-sm text-on-surface-variant">
-            Aucun rôle de ce serveur ne porte de permission d&apos;administration ou de modération.
+            Aucun rôle de ce serveur ne porte de permission
+            d&apos;administration ou de modération.
           </p>
         )}
         {hierarchie.administration.length > 0 && (
           <section className="flex flex-col gap-3">
-            <TitreSection titre="Administration" effectif={hierarchie.administration.length} />
+            <TitreSection
+              titre="Administration"
+              effectif={hierarchie.administration.length}
+            />
             <p className="-mt-1 text-xs text-on-surface-variant/70">
-              Membres dont un rôle porte la permission « Administrateur » ou « Gérer le serveur ».
+              Membres dont un rôle porte la permission « Administrateur » ou «
+              Gérer le serveur ».
             </p>
             <GrilleMembres membres={hierarchie.administration} />
           </section>
         )}
         {hierarchie.moderation.length > 0 && (
           <section className="flex flex-col gap-3">
-            <TitreSection titre="Modération" effectif={hierarchie.moderation.length} />
+            <TitreSection
+              titre="Modération"
+              effectif={hierarchie.moderation.length}
+            />
             <p className="-mt-1 text-xs text-on-surface-variant/70">
               Membres habilités à exclure, bannir, isoler ou gérer les messages.
             </p>
@@ -78,33 +99,50 @@ export async function HierarchieServeur({
     );
   }
 
-  const total = hierarchie.sections.reduce((somme, section) => somme + section.membres.length, 0);
+  const total = hierarchie.sections.reduce(
+    (somme, section) => somme + section.membres.length,
+    0,
+  );
   const page = lirePage(pageBrute, total);
 
   return (
     <div className="flex flex-col gap-6">
-      {trancherSections(hierarchie.sections, page).map(({ section, debut, fin }) => (
-        <section key={section.role?.role_id ?? "sans-role"} className="flex flex-col gap-3">
-          <TitreSection
-            titre={section.role?.name ?? "Membres"}
-            effectif={section.membres.length}
-            couleur={couleurRole(section.role)}
-          />
-          <GrilleMembres membres={section.membres.slice(debut, fin)} compacte />
-        </section>
-      ))}
-      <WikiPagination totalItems={total} itemsPerPage={MEMBRES_PAR_PAGE} currentPage={page} />
+      {trancherSections(hierarchie.sections, page).map(
+        ({ section, debut, fin }) => (
+          <section
+            key={section.role?.role_id ?? "sans-role"}
+            className="flex flex-col gap-3"
+          >
+            <TitreSection
+              titre={section.role?.name ?? "Membres"}
+              effectif={section.membres.length}
+              couleur={couleurRole(section.role)}
+            />
+            <GrilleMembres
+              membres={section.membres.slice(debut, fin)}
+              compacte
+            />
+          </section>
+        ),
+      )}
+      <WikiPagination
+        totalItems={total}
+        itemsPerPage={MEMBRES_PAR_PAGE}
+        currentPage={page}
+      />
     </div>
   );
 }
 
 /** Effectif et fraîcheur, sous le sélecteur de serveur. */
 export async function ResumeServeur({ cle }: { cle: CleServeur }) {
-  const { total, misAJourLe, administration, moderation } = await lireHierarchie(cle);
+  const { total, misAJourLe, administration, moderation } =
+    await lireHierarchie(cle);
 
   return (
     <p className="text-xs text-on-surface-variant/70">
-      {total.toLocaleString("fr-FR")} membres · {administration.length + moderation.length} au staff
+      {total.toLocaleString("fr-FR")} membres ·{" "}
+      {administration.length + moderation.length} au staff
       {misAJourLe && (
         <>
           {" · relevé "}

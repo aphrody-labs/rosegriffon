@@ -76,15 +76,19 @@ export interface IrContract {
 }
 
 /** Index nom → déclaration, pour la résolution pendant l'émission. */
-export function indexDeclarations(contract: IrContract): Map<string, IrDeclaration> {
-  return new Map(contract.declarations.map(decl => [decl.name, decl]));
+export function indexDeclarations(
+  contract: IrContract,
+): Map<string, IrDeclaration> {
+  return new Map(contract.declarations.map((decl) => [decl.name, decl]));
 }
 
 export function isEnum(decl: IrDeclaration | undefined): decl is IrEnum {
   return decl?.kind === "enum";
 }
 
-export function isInterface(decl: IrDeclaration | undefined): decl is IrInterface {
+export function isInterface(
+  decl: IrDeclaration | undefined,
+): decl is IrInterface {
   return decl?.kind === "interface";
 }
 

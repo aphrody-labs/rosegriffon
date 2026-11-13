@@ -12,27 +12,64 @@ import {
   resolveAssetUrl,
 } from "@rosegriffon/azalee/images";
 import { smartSearch } from "@rosegriffon/azalee/search/smart-search";
-import type { GlobalSearchResult, SearchContext } from "@rosegriffon/azalee/search/smart-search";
+import type {
+  GlobalSearchResult,
+  SearchContext,
+} from "@rosegriffon/azalee/search/smart-search";
 import { createPostgresClient } from "@rosegriffon/db/service";
-import { TACTIC_FR, translateEffect } from "@rosegriffon/azalee/text/translations";
+import {
+  TACTIC_FR,
+  translateEffect,
+} from "@rosegriffon/azalee/text/translations";
 
-const TYPE_CONFIG: Record<string, { label: string; icon: string; urlPrefix: string }> = {
+const TYPE_CONFIG: Record<
+  string,
+  { label: string; icon: string; urlPrefix: string }
+> = {
   article: { icon: "newspaper", label: "Actualité", urlPrefix: "/news" },
   aura: { icon: "auto_awesome", label: "Aura", urlPrefix: "/wiki/aura/autres" },
-  awakening: { icon: "auto_awesome", label: "Éveil", urlPrefix: "/wiki/aura/eveil" },
+  awakening: {
+    icon: "auto_awesome",
+    label: "Éveil",
+    urlPrefix: "/wiki/aura/eveil",
+  },
   basara: { icon: "person", label: "Joueur BASARA", urlPrefix: "/wiki/chara" },
-  character: { icon: "person_outline", label: "Personnage", urlPrefix: "/wiki/chara" },
+  character: {
+    icon: "person_outline",
+    label: "Personnage",
+    urlPrefix: "/wiki/chara",
+  },
   item: { icon: "inventory_2", label: "Objet", urlPrefix: "/wiki/item" },
-  keshin: { icon: "auto_awesome", label: "Esprit Guerrier", urlPrefix: "/wiki/aura/esprits-guerriers" },
-  miximax: { icon: "auto_awesome", label: "Miximax", urlPrefix: "/wiki/aura/miximax" },
+  keshin: {
+    icon: "auto_awesome",
+    label: "Esprit Guerrier",
+    urlPrefix: "/wiki/aura/esprits-guerriers",
+  },
+  miximax: {
+    icon: "auto_awesome",
+    label: "Miximax",
+    urlPrefix: "/wiki/aura/miximax",
+  },
   modechange: {
     icon: "auto_awesome",
     label: "Changement Mode",
     urlPrefix: "/wiki/aura/changement-mode",
   },
-  patchnote: { icon: "update", label: "Patch Note", urlPrefix: "/wiki/patch-notes" },
-  skill: { icon: "sports_soccer", label: "Technique", urlPrefix: "/wiki/skill" },
-  soul: { icon: "auto_awesome", label: "Totem", urlPrefix: "/wiki/aura/totems" },
+  patchnote: {
+    icon: "update",
+    label: "Patch Note",
+    urlPrefix: "/wiki/patch-notes",
+  },
+  skill: {
+    icon: "sports_soccer",
+    label: "Technique",
+    urlPrefix: "/wiki/skill",
+  },
+  soul: {
+    icon: "auto_awesome",
+    label: "Totem",
+    urlPrefix: "/wiki/aura/totems",
+  },
   tactic: { icon: "schema", label: "Tactique", urlPrefix: "/wiki/tactic" },
   tweet: { icon: "forum", label: "Tweet X", urlPrefix: "#" },
   re: { icon: "auto_fix_high", label: "IE RE (Remake)", urlPrefix: "#" },
@@ -73,7 +110,10 @@ const AURA_TABLES = [
 /**
  * Smart global search with context awareness and language detection
  */
-export async function searchGlobal(query: string, context?: SearchContext): Promise<EnhancedSearchResult[]> {
+export async function searchGlobal(
+  query: string,
+  context?: SearchContext,
+): Promise<EnhancedSearchResult[]> {
   if (!query || query.length < 2) {
     return [];
   }
@@ -86,7 +126,9 @@ export async function searchGlobal(query: string, context?: SearchContext): Prom
   // Try converting romaji input to katakana for Japanese name search
   let orFilter = `name_fr.ilike.${q},name_en.ilike.${q},name_ja.ilike.${q}`;
   const kataCandidate = toKatakana(sanitized.toLowerCase());
-  const isValidKana = kataCandidate.length > 0 && [...kataCandidate].every(c => isKana(c) || c === "ー");
+  const isValidKana =
+    kataCandidate.length > 0 &&
+    [...kataCandidate].every((c) => isKana(c) || c === "ー");
   if (isValidKana && kataCandidate !== sanitized) {
     const qKana = `%${kataCandidate}%`;
     orFilter = `name_fr.ilike.${q},name_en.ilike.${q},name_ja.ilike.${q},name_ja.ilike.${qKana}`;
@@ -107,7 +149,12 @@ export async function searchGlobal(query: string, context?: SearchContext): Prom
     try {
       const { getEmbedding, vectorStore } = require("@rosegriffon/db/redis");
       const questionEmbedding = await getEmbedding(sanitized);
-      return await vectorStore.search("inazuma-news", questionEmbedding, 10, sanitized);
+      return await vectorStore.search(
+        "inazuma-news",
+        questionEmbedding,
+        10,
+        sanitized,
+      );
     } catch (e) {
       console.warn("RAG search failed or Redis not configured:", e);
       return [];
@@ -130,7 +177,9 @@ export async function searchGlobal(query: string, context?: SearchContext): Prom
     // Items: include image/price
     (supabase as any)
       .from("inagle_items")
-      .select("id, name_fr, name_en, name_ja, image_url, category, price, sheet_data")
+      .select(
+        "id, name_fr, name_en, name_ja, image_url, category, price, sheet_data",
+      )
       .or(orFilter)
       .limit(10),
     // RAG documents
@@ -139,7 +188,9 @@ export async function searchGlobal(query: string, context?: SearchContext): Prom
     ...AURA_TABLES.map(({ table }) =>
       (supabase as any)
         .from(table)
-        .select("id, name_fr, name_en, name_ja, sub_type, asset_code, image_url")
+        .select(
+          "id, name_fr, name_en, name_ja, sub_type, asset_code, image_url",
+        )
         .or(orFilter)
         .limit(5),
     ),
@@ -153,7 +204,10 @@ export async function searchGlobal(query: string, context?: SearchContext): Prom
   // Comme le client Supabase (qui ne throw jamais, il renvoie { data: null, error }),
   // on avale les erreurs pg ici pour ne pas faire planter toute la recherche globale
   // si `articles`/`patch_notes` sont indisponibles — même résilience qu'avant.
-  const safeQuery = async <T extends QueryResultRow>(sql: string, params: unknown[]): Promise<T[]> => {
+  const safeQuery = async <T extends QueryResultRow>(
+    sql: string,
+    params: unknown[],
+  ): Promise<T[]> => {
     try {
       const { rows } = await pool.query<T>(sql, params);
       return rows;
@@ -163,7 +217,11 @@ export async function searchGlobal(query: string, context?: SearchContext): Prom
     }
   };
   const [teams, articlesRows, patchNotesRows] = await Promise.all([
-    (supabase as any).from("inagle_teams").select("id, name_fr, name_en, name_ja, sheet_data").or(orFilter).limit(8),
+    (supabase as any)
+      .from("inagle_teams")
+      .select("id, name_fr, name_en, name_ja, sheet_data")
+      .or(orFilter)
+      .limit(8),
     safeQuery<{
       id: string;
       title: string;
@@ -213,7 +271,10 @@ export async function searchGlobal(query: string, context?: SearchContext): Prom
         best = Math.max(best, 2);
       } // Prefix match
       // Word-start match (e.g. "mark" in "Endo Mark")
-      if (best < 1.5 && n.split(/[\s_-]/).some(w => w.startsWith(queryLower))) {
+      if (
+        best < 1.5 &&
+        n.split(/[\s_-]/).some((w) => w.startsWith(queryLower))
+      ) {
         best = Math.max(best, 1.5);
       }
     }
@@ -403,8 +464,12 @@ export async function searchGlobal(query: string, context?: SearchContext): Prom
   }
 
   // Transform for frontend consumption with image/rarity/element/position
-  return smartResults.map(r => {
-    const config = TYPE_CONFIG[r.type] || { icon: "help", label: "Autre", urlPrefix: "#" };
+  return smartResults.map((r) => {
+    const config = TYPE_CONFIG[r.type] || {
+      icon: "help",
+      label: "Autre",
+      urlPrefix: "#",
+    };
     const d = (r.data || {}) as Record<string, any>;
 
     let url: string;
@@ -431,10 +496,15 @@ export async function searchGlobal(query: string, context?: SearchContext): Prom
       imageUrl = d.image_url || getSkillImageUrl(d.id);
     } else if (r.type === "item" || r.type === "tactic") {
       imageUrl = d.image_url || getItemImageUrl(d.id);
-    } else if (["keshin", "soul", "miximax", "awakening", "modechange", "aura"].includes(r.type)) {
+    } else if (
+      ["keshin", "soul", "miximax", "awakening", "modechange", "aura"].includes(
+        r.type,
+      )
+    ) {
       imageUrl = getAuraImageUrl(d.asset_code) || undefined;
     } else if (r.type === "team") {
-      const emblemId = d.sheet_data?.binderTeamOrderType || d.sheet_data?.emblem;
+      const emblemId =
+        d.sheet_data?.binderTeamOrderType || d.sheet_data?.emblem;
       if (emblemId) {
         imageUrl = getEmblemImageUrl(emblemId) || undefined;
       }
@@ -502,7 +572,9 @@ export async function searchCompareCharacters(
 
     let compareOrFilter = `name_fr.ilike.${q},name_en.ilike.${q},name_ja.ilike.${q}`;
     const compareKata = toKatakana(sanitized.toLowerCase());
-    const compareValidKana = compareKata.length > 0 && [...compareKata].every(c => isKana(c) || c === "ー");
+    const compareValidKana =
+      compareKata.length > 0 &&
+      [...compareKata].every((c) => isKana(c) || c === "ー");
     if (compareValidKana && compareKata !== sanitized) {
       compareOrFilter = `name_fr.ilike.${q},name_en.ilike.${q},name_ja.ilike.${q},name_ja.ilike.%${compareKata}%`;
     }
@@ -525,13 +597,15 @@ export async function searchCompareCharacters(
     }
   }
 
-  const { data } = await dbQuery.order("stat_frappe", { ascending: false, nullsFirst: false }).limit(30);
+  const { data } = await dbQuery
+    .order("stat_frappe", { ascending: false, nullsFirst: false })
+    .limit(30);
 
   if (!data) {
     return [];
   }
 
-  return (data as any[]).map(c => {
+  return (data as any[]).map((c) => {
     const total =
       (c.stat_frappe || 0) +
       (c.stat_controle || 0) +
@@ -656,53 +730,65 @@ const PASSIVE_BOOST_FR: Record<string, string> = {
 export async function getMetaSuggestions(): Promise<MetaSuggestions> {
   const supabase = createPostgresClient();
 
-  const [playersRes, skillsRes, tacticsRes, itemsRes, passivesRes] = await Promise.all([
-    // Top 10 BASARA by total stats, prefer those with zukan_hash for 3D images
-    (supabase as any)
-      .from("inagle_characters")
-      .select(
-        "id, slug, name_fr, name_en, position, element, internal_code, zukan_hash, stat_frappe, stat_controle, stat_technique, stat_pression, stat_physique, stat_agilite, stat_intelligence",
-      )
-      .eq("rarity_label", "BASARA")
-      .not("stat_frappe", "is", null)
-      .not("zukan_hash", "is", null)
-      .order("stat_frappe", { ascending: false, nullsFirst: false })
-      .limit(12),
-    // Top 8 skills by power_max with video
-    (supabase as any)
-      .from("inagle_skills")
-      .select("id, name_fr, name_en, category_id, element_id, power_max, video_url, image_url")
-      .not("power_max", "is", null)
-      .not("video_url", "is", null)
-      .order("power_max", { ascending: false, nullsFirst: false })
-      .limit(8),
-    // 8 enriched tactics (have shop)
-    (supabase as any)
-      .from("inagle_tactics")
-      .select("name, effect1, shop")
-      .not("shop", "is", null)
-      .order("name")
-      .limit(8),
-    // Top 8 gameplay items with price (shoes, misanga, accessory, etc.)
-    (supabase as any)
-      .from("inagle_items")
-      .select("id, name_fr, name_en, category, price, image_url")
-      .not("price", "is", null)
-      .in("category", ["shoes", "misanga", "accessory", "consume", "special", "formation"])
-      .not("name_fr", "is", null)
-      .order("price", { ascending: false, nullsFirst: false })
-      .limit(8),
-    // 8 key passives with descriptions (exclude unknown/broken entries)
-    (supabase as any)
-      .from("inagle_passives")
-      .select("id, name_fr, name_en, category, boost_type, description_fr, effect_value")
-      .not("name_fr", "is", null)
-      .not("description_fr", "is", null)
-      .neq("category", "Inconnu")
-      .not("description_fr", "ilike", "%[CPASSIVE%")
-      .order("effect_value", { ascending: false, nullsFirst: false })
-      .limit(8),
-  ]);
+  const [playersRes, skillsRes, tacticsRes, itemsRes, passivesRes] =
+    await Promise.all([
+      // Top 10 BASARA by total stats, prefer those with zukan_hash for 3D images
+      (supabase as any)
+        .from("inagle_characters")
+        .select(
+          "id, slug, name_fr, name_en, position, element, internal_code, zukan_hash, stat_frappe, stat_controle, stat_technique, stat_pression, stat_physique, stat_agilite, stat_intelligence",
+        )
+        .eq("rarity_label", "BASARA")
+        .not("stat_frappe", "is", null)
+        .not("zukan_hash", "is", null)
+        .order("stat_frappe", { ascending: false, nullsFirst: false })
+        .limit(12),
+      // Top 8 skills by power_max with video
+      (supabase as any)
+        .from("inagle_skills")
+        .select(
+          "id, name_fr, name_en, category_id, element_id, power_max, video_url, image_url",
+        )
+        .not("power_max", "is", null)
+        .not("video_url", "is", null)
+        .order("power_max", { ascending: false, nullsFirst: false })
+        .limit(8),
+      // 8 enriched tactics (have shop)
+      (supabase as any)
+        .from("inagle_tactics")
+        .select("name, effect1, shop")
+        .not("shop", "is", null)
+        .order("name")
+        .limit(8),
+      // Top 8 gameplay items with price (shoes, misanga, accessory, etc.)
+      (supabase as any)
+        .from("inagle_items")
+        .select("id, name_fr, name_en, category, price, image_url")
+        .not("price", "is", null)
+        .in("category", [
+          "shoes",
+          "misanga",
+          "accessory",
+          "consume",
+          "special",
+          "formation",
+        ])
+        .not("name_fr", "is", null)
+        .order("price", { ascending: false, nullsFirst: false })
+        .limit(8),
+      // 8 key passives with descriptions (exclude unknown/broken entries)
+      (supabase as any)
+        .from("inagle_passives")
+        .select(
+          "id, name_fr, name_en, category, boost_type, description_fr, effect_value",
+        )
+        .not("name_fr", "is", null)
+        .not("description_fr", "is", null)
+        .neq("category", "Inconnu")
+        .not("description_fr", "ilike", "%[CPASSIVE%")
+        .order("effect_value", { ascending: false, nullsFirst: false })
+        .limit(8),
+    ]);
 
   // Map BASARA players — use bucket face icons (zukan 3D mirror not available)
   const players: MetaSuggestion[] = (playersRes.data || []).map((c: any) => {
@@ -769,7 +855,9 @@ export async function getMetaSuggestions(): Promise<MetaSuggestions> {
     const parts = [catFr, price].filter(Boolean);
     return {
       id: i.id,
-      imageUrl: i.image_url ? resolveAssetUrl(i.image_url) || "" : getItemImageUrl(i.id),
+      imageUrl: i.image_url
+        ? resolveAssetUrl(i.image_url) || ""
+        : getItemImageUrl(i.id),
       name: i.name_fr || i.name_en || i.id,
       slug: i.id,
       subtitle: parts.join(" · "),
@@ -780,7 +868,12 @@ export async function getMetaSuggestions(): Promise<MetaSuggestions> {
   // Map passives
   const passives: MetaSuggestion[] = (passivesRes.data || []).map((p: any) => {
     const boostFr = PASSIVE_BOOST_FR[p.boost_type] || p.boost_type || "";
-    const catFr = p.category === "Joueur" ? "Joueur" : p.category === "Équipe" ? "Équipe" : p.category || "";
+    const catFr =
+      p.category === "Joueur"
+        ? "Joueur"
+        : p.category === "Équipe"
+          ? "Équipe"
+          : p.category || "";
     const parts = [catFr, boostFr].filter(Boolean);
     return {
       id: p.id,
@@ -822,15 +915,18 @@ export async function searchRagOnly(query: string): Promise<any[]> {
         entities
           // searchGlobal injecte aussi des docs RAG internes (type "doc",
           // url file://…) non cliquables → on ne garde que les fiches wiki.
-          .filter(r => r.type !== "doc" && !String(r.url).startsWith("file:"))
+          .filter((r) => r.type !== "doc" && !String(r.url).startsWith("file:"))
           .slice(0, 12)
-          .map(r => ({
+          .map((r) => ({
             id: `wiki-${r.type}-${r.id}`,
             title: r.title,
             date: "",
             url: r.url,
             type: r.type,
-            text: r.matchedName && r.matchedName !== r.title ? `${r.subtitle} · ${r.matchedName}` : r.subtitle,
+            text:
+              r.matchedName && r.matchedName !== r.title
+                ? `${r.subtitle} · ${r.matchedName}`
+                : r.subtitle,
             score: typeof r.score === "number" ? Math.min(1, r.score / 3) : 0.6,
           }))
       );
@@ -845,7 +941,12 @@ export async function searchRagOnly(query: string): Promise<any[]> {
     try {
       const { getEmbedding, vectorStore } = require("@rosegriffon/db/redis");
       const questionEmbedding = await getEmbedding(sanitized);
-      const results = await vectorStore.search("inazuma-news", questionEmbedding, 8, sanitized);
+      const results = await vectorStore.search(
+        "inazuma-news",
+        questionEmbedding,
+        8,
+        sanitized,
+      );
       return (
         results
           // Exclut le bruit non-actionnable (docs internes, chemins file://).
@@ -856,7 +957,8 @@ export async function searchRagOnly(query: string): Promise<any[]> {
           })
           .map((r: any) => ({
             id: r.document.id,
-            title: r.document.metadata?.title || r.document.text.substring(0, 50),
+            title:
+              r.document.metadata?.title || r.document.text.substring(0, 50),
             date: r.document.metadata?.date || "",
             url: r.document.metadata?.url || "#",
             type: r.document.metadata?.type || "article",
@@ -902,5 +1004,5 @@ export async function searchRagOnly(query: string): Promise<any[]> {
   return [...ranked.values()]
     .sort((a, b) => b.rrf - a.rrf)
     .slice(0, 12)
-    .map(entry => entry.doc);
+    .map((entry) => entry.doc);
 }

@@ -33,7 +33,7 @@ const BASE_URLS: string[] = [
   "https://azalee.rosegriffon.fr/news",
 ];
 
-const URLS = BASE_URLS.map(url => {
+const URLS = BASE_URLS.map((url) => {
   if (localMode) {
     return url
       .replace("https://rosegriffon.fr", "http://localhost:3000")
@@ -57,13 +57,18 @@ interface Audit {
   issues: string[];
 }
 
-async function reconStatus(url: string): Promise<{ status: number; bytes: number }> {
+async function reconStatus(
+  url: string,
+): Promise<{ status: number; bytes: number }> {
   // bxc recon → markdown ; on en extrait le statut HTTP et la taille du corps (rendu réel).
   try {
-    const proc = Bun.spawn([BXC, "recon", url, "--profile", "http", "--plain"], {
-      stdout: "pipe",
-      stderr: "pipe",
-    });
+    const proc = Bun.spawn(
+      [BXC, "recon", url, "--profile", "http", "--plain"],
+      {
+        stdout: "pipe",
+        stderr: "pipe",
+      },
+    );
     const out = await new Response(proc.stdout).text();
     await proc.exited;
     const status = Number(out.match(/HTTP status[^0-9]*(\d{3})/i)?.[1] ?? 0);
@@ -74,9 +79,15 @@ async function reconStatus(url: string): Promise<{ status: number; bytes: number
   }
 }
 
-function parseMeta(html: string): Omit<Audit, "url" | "status" | "bytes" | "issues"> {
-  const title = html.match(/<title[^>]*>([^<]*)<\/title>/i)?.[1]?.trim() ?? null;
-  const desc = html.match(/<meta[^>]+name=["']description["'][^>]+content=["']([^"']*)["']/i)?.[1] ?? "";
+function parseMeta(
+  html: string,
+): Omit<Audit, "url" | "status" | "bytes" | "issues"> {
+  const title =
+    html.match(/<title[^>]*>([^<]*)<\/title>/i)?.[1]?.trim() ?? null;
+  const desc =
+    html.match(
+      /<meta[^>]+name=["']description["'][^>]+content=["']([^"']*)["']/i,
+    )?.[1] ?? "";
   return {
     title,
     titleLen: title?.length ?? 0,
@@ -92,7 +103,9 @@ function parseMeta(html: string): Omit<Audit, "url" | "status" | "bytes" | "issu
 async function audit(url: string): Promise<Audit> {
   const [recon, htmlRes] = await Promise.all([
     reconStatus(url),
-    fetch(url, { headers: { "user-agent": "RoseGriffon-SEO-Audit" } }).catch(() => null),
+    fetch(url, { headers: { "user-agent": "RoseGriffon-SEO-Audit" } }).catch(
+      () => null,
+    ),
   ]);
   const html = htmlRes ? await htmlRes.text().catch(() => "") : "";
   const meta = parseMeta(html);
@@ -100,9 +113,11 @@ async function audit(url: string): Promise<Audit> {
   const issues: string[] = [];
   if (status !== 200) issues.push(`statut ${status}`);
   if (!meta.title) issues.push("title absent");
-  else if (meta.titleLen < 15 || meta.titleLen > 65) issues.push(`title ${meta.titleLen} car (cible 15-65)`);
+  else if (meta.titleLen < 15 || meta.titleLen > 65)
+    issues.push(`title ${meta.titleLen} car (cible 15-65)`);
   if (meta.descLen === 0) issues.push("meta description absente");
-  else if (meta.descLen < 70 || meta.descLen > 165) issues.push(`description ${meta.descLen} car (cible 70-165)`);
+  else if (meta.descLen < 70 || meta.descLen > 165)
+    issues.push(`description ${meta.descLen} car (cible 70-165)`);
   if (!meta.canonical) issues.push("canonical absent");
   if (!meta.ogImage) issues.push("og:image absent");
   if (!meta.twitterCard) issues.push("twitter:card absent");
@@ -112,15 +127,22 @@ async function audit(url: string): Promise<Audit> {
   return { url, status, bytes: recon.bytes, ...meta, issues };
 }
 
-async function pool<T>(items: string[], fn: (x: string) => Promise<T>, n: number): Promise<T[]> {
+async function pool<T>(
+  items: string[],
+  fn: (x: string) => Promise<T>,
+  n: number,
+): Promise<T[]> {
   const out: T[] = [];
   let i = 0;
-  const workers = Array.from({ length: Math.min(n, items.length) }, async () => {
-    while (i < items.length) {
-      const idx = i++;
-      out[idx] = await fn(items[idx]);
-    }
-  });
+  const workers = Array.from(
+    { length: Math.min(n, items.length) },
+    async () => {
+      while (i < items.length) {
+        const idx = i++;
+        out[idx] = await fn(items[idx]);
+      }
+    },
+  );
   await Promise.all(workers);
   return out;
 }
@@ -136,7 +158,9 @@ if (jsonMode) {
   for (const r of results) {
     if (r.issues.length === 0) {
       ok++;
-      console.log(`  OK   ${r.url}  [${r.status}, ${(r.bytes / 1024).toFixed(0)}KB, ${r.jsonLd} JSON-LD]`);
+      console.log(
+        `  OK   ${r.url}  [${r.status}, ${(r.bytes / 1024).toFixed(0)}KB, ${r.jsonLd} JSON-LD]`,
+      );
     } else {
       console.log(`  WARN ${r.url}  [${r.status}]`);
       for (const iss of r.issues) console.log(`        - ${iss}`);

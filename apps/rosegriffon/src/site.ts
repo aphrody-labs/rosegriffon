@@ -9,8 +9,15 @@ export const SITE_SERVER = "apps/rg-website/server.js";
 
 function cacheRoot(): string {
   if (process.env.RG_CACHE_DIR) return resolve(process.env.RG_CACHE_DIR);
-  if (process.platform === "win32") return join(process.env.LOCALAPPDATA ?? join(homedir(), "AppData", "Local"), "rosegriffon");
-  return join(process.env.XDG_CACHE_HOME ?? join(homedir(), ".cache"), "rosegriffon");
+  if (process.platform === "win32")
+    return join(
+      process.env.LOCALAPPDATA ?? join(homedir(), "AppData", "Local"),
+      "rosegriffon",
+    );
+  return join(
+    process.env.XDG_CACHE_HOME ?? join(homedir(), ".cache"),
+    "rosegriffon",
+  );
 }
 
 /** Extracts the embedded standalone archive once per build hash, atomically. */
@@ -34,7 +41,8 @@ async function extractEmbedded(archive: string, hash: string): Promise<string> {
 /** Standalone tree to serve: `RG_SITE_DIR`, the embedded archive, or the local build. */
 export async function resolveSiteDir(): Promise<string | null> {
   if (process.env.RG_SITE_DIR) return resolve(process.env.RG_SITE_DIR);
-  if (SITE_ARCHIVE && SITE_HASH) return extractEmbedded(SITE_ARCHIVE, SITE_HASH);
+  if (SITE_ARCHIVE && SITE_HASH)
+    return extractEmbedded(SITE_ARCHIVE, SITE_HASH);
   const local = resolve(import.meta.dir, "../../rg-website/.next/standalone");
   return existsSync(join(local, SITE_SERVER)) ? local : null;
 }
@@ -48,7 +56,8 @@ export async function serveSite(): Promise<void> {
     );
   }
   const server = join(dir, SITE_SERVER);
-  if (!existsSync(server)) throw new Error(`Next standalone server missing: ${server}`);
+  if (!existsSync(server))
+    throw new Error(`Next standalone server missing: ${server}`);
   process.env.PORT = process.env.RG_SITE_PORT ?? process.env.PORT ?? "3100";
   process.env.HOSTNAME = process.env.RG_SITE_HOST ?? "127.0.0.1";
   process.env.NODE_ENV = "production";

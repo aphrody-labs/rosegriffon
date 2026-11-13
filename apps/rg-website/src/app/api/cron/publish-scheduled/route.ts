@@ -52,7 +52,10 @@ async function publier(req: Request) {
         // Le partage Discord n'est pas critique : un échec ne défait pas la publication.
         await fetch(`https://discord.com/api/v10/channels/${salon}/messages`, {
           method: "POST",
-          headers: { Authorization: `Bot ${jeton}`, "Content-Type": "application/json" },
+          headers: {
+            Authorization: `Bot ${jeton}`,
+            "Content-Type": "application/json",
+          },
           body: JSON.stringify({
             embeds: [
               {
@@ -60,7 +63,9 @@ async function publier(req: Request) {
                 description: article.excerpt ?? "",
                 url: `https://rosegriffon.fr/news/${article.slug}`,
                 color: 0xf2a93b,
-                image: article.featured_image_url ? { url: article.featured_image_url } : undefined,
+                image: article.featured_image_url
+                  ? { url: article.featured_image_url }
+                  : undefined,
                 footer: { text: "Azalée — Rose Griffon" },
               },
             ],
@@ -69,9 +74,15 @@ async function publier(req: Request) {
       }
     }
 
-    return NextResponse.json({ published: rows.length, articles: rows.map(({ id, title }) => ({ id, title })) });
+    return NextResponse.json({
+      published: rows.length,
+      articles: rows.map(({ id, title }) => ({ id, title })),
+    });
   } catch (error) {
-    return NextResponse.json({ error: error instanceof Error ? error.message : "Erreur interne" }, { status: 500 });
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : "Erreur interne" },
+      { status: 500 },
+    );
   }
 }
 

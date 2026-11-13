@@ -1,10 +1,20 @@
-import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle } from "@rosegriffon/ui";
+import {
+  Button,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@rosegriffon/ui";
 import type { Metadata } from "next";
 import Link from "@/components/shared/Link";
 
 import { Heart, Mail, Users } from "@/lib/icons-config";
 import { absoluteUrl } from "@/lib/site-url";
-import { BreadcrumbSchema, OrganizationSchema } from "@/components/shared/StructuredData";
+import {
+  BreadcrumbSchema,
+  OrganizationSchema,
+} from "@/components/shared/StructuredData";
 
 export const metadata: Metadata = {
   title: "À propos | Rose Griffon",
@@ -15,7 +25,8 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: "À propos | Rose Griffon",
-    description: "À propos de l'association Rose Griffon, la communauté Inazuma Eleven en France.",
+    description:
+      "À propos de l'association Rose Griffon, la communauté Inazuma Eleven en France.",
     url: absoluteUrl("/a-propos"),
     type: "website",
     images: [
@@ -42,14 +53,18 @@ export default function AProposPage() {
       />
       <OrganizationSchema />
       <div className="container mx-auto py-12 px-4">
-        <h1 className="text-4xl font-bold mb-8 text-center">À propos de Rose Griffon</h1>
+        <h1 className="text-4xl font-bold mb-8 text-center">
+          À propos de Rose Griffon
+        </h1>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <Card className="hover:shadow-lg transition-shadow">
             <CardHeader>
               <Users className="size-12 text-primary mb-4" />
               <CardTitle>Rejoindre l&apos;équipe</CardTitle>
-              <CardDescription>Devenez bénévole et participez à l&apos;aventure</CardDescription>
+              <CardDescription>
+                Devenez bénévole et participez à l&apos;aventure
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <Button asChild className="w-full">
@@ -62,7 +77,9 @@ export default function AProposPage() {
             <CardHeader>
               <Heart className="size-12 text-primary mb-4" />
               <CardTitle>Nous soutenir</CardTitle>
-              <CardDescription>Aidez l&apos;association à grandir</CardDescription>
+              <CardDescription>
+                Aidez l&apos;association à grandir
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <Button asChild className="w-full" variant="secondary">

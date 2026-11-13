@@ -6,7 +6,11 @@
  * `CLAUDE.md`. Tout ce qui est partagé serveur/client vit donc ici.
  */
 
-import { TONE_TO_SHADCN_BADGE, TONE_TO_TAILWIND, type Tone } from "@rosegriffon/achillea-core";
+import {
+  TONE_TO_SHADCN_BADGE,
+  TONE_TO_TAILWIND,
+  type Tone,
+} from "@rosegriffon/achillea-core";
 
 export type { Tone };
 

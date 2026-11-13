@@ -73,7 +73,7 @@ of the original left beside it in the Steam `remote/` directory. This is a data 
 proof: nothing in the save makes Astro Lor a playable character (section 2), and no launch of the
 game with that save has been recorded here.
 
- **Running that test is a write to the player's real save.** It works on
+**Running that test is a write to the player's real save.** It works on
 `var/save_work/002AB8F4-USERDATALIVE`, then copies the result over the Steam `remote/` file whenever
 that file exists on the host, and creates the Steam `.bak` only if none exists yet — a second run
 overwrites the live save again without refreshing the backup. Run it only on purpose.

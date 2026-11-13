@@ -8,7 +8,10 @@
           "variables": [
             { "type": "Int", "value": "1822239447" },
             { "type": "Int", "value": "0" },
-            { "type": "String", "value": "All of this...\\nis it just a joke?" },
+            {
+              "type": "String",
+              "value": "All of this...\\nis it just a joke?"
+            },
             { "type": "Int", "value": "0" }
           ]
         },
@@ -18,7 +21,10 @@
           "variables": [
             { "type": "Int", "value": "1202747668" },
             { "type": "Int", "value": "0" },
-            { "type": "String", "value": "And this message.\\nShould I believe it?" },
+            {
+              "type": "String",
+              "value": "And this message.\\nShould I believe it?"
+            },
             { "type": "Int", "value": "0" }
           ]
         },
@@ -28,7 +34,10 @@
           "variables": [
             { "type": "Int", "value": "1588283477" },
             { "type": "Int", "value": "0" },
-            { "type": "String", "value": "Hey Fubuki, how have you been?\\nSorry for going quiet for so long." },
+            {
+              "type": "String",
+              "value": "Hey Fubuki, how have you been?\\nSorry for going quiet for so long."
+            },
             { "type": "Int", "value": "0" }
           ]
         },
@@ -38,7 +47,10 @@
           "variables": [
             { "type": "Int", "value": "300605074" },
             { "type": "Int", "value": "0" },
-            { "type": "String", "value": "Feel like meeting up tonight\\non the Raimon pitch?" },
+            {
+              "type": "String",
+              "value": "Feel like meeting up tonight\\non the Raimon pitch?"
+            },
             { "type": "Int", "value": "0" }
           ]
         },
@@ -48,7 +60,10 @@
           "variables": [
             { "type": "Int", "value": "150073299" },
             { "type": "Int", "value": "0" },
-            { "type": "String", "value": "They already pulled something on me\\nI am nowhere near ready to forget." },
+            {
+              "type": "String",
+              "value": "They already pulled something on me\\nI am nowhere near ready to forget."
+            },
             { "type": "Int", "value": "0" }
           ]
         },
@@ -78,7 +93,10 @@
           "variables": [
             { "type": "Int", "value": "-1054602310" },
             { "type": "Int", "value": "0" },
-            { "type": "String", "value": "But I cannot break down,\\nnot now!" },
+            {
+              "type": "String",
+              "value": "But I cannot break down,\\nnot now!"
+            },
             { "type": "Int", "value": "0" }
           ]
         },
@@ -88,7 +106,10 @@
           "variables": [
             { "type": "Int", "value": "-666944773" },
             { "type": "Int", "value": "0" },
-            { "type": "String", "value": "Looks like I showed up\\nat the worst possible time..." },
+            {
+              "type": "String",
+              "value": "Looks like I showed up\\nat the worst possible time..."
+            },
             { "type": "Int", "value": "0" }
           ]
         },
@@ -148,7 +169,10 @@
           "variables": [
             { "type": "Int", "value": "1846811931" },
             { "type": "Int", "value": "0" },
-            { "type": "String", "value": "I am sorry...\\nfor making you wait this long." },
+            {
+              "type": "String",
+              "value": "I am sorry...\\nfor making you wait this long."
+            },
             { "type": "Int", "value": "0" }
           ]
         }

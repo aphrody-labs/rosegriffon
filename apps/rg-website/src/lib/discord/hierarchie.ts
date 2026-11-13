@@ -41,7 +41,8 @@ export const SERVEURS = [
   {
     cle: "achillea",
     guildId: "1055585286320554055",
-    invitation: "https://discord.gg/achillea-competitif-inazuma-eleven-fr-1055585286320554055",
+    invitation:
+      "https://discord.gg/achillea-competitif-inazuma-eleven-fr-1055585286320554055",
     nom: "Achilléa",
   },
 ] as const;
@@ -49,7 +50,7 @@ export const SERVEURS = [
 export type CleServeur = (typeof SERVEURS)[number]["cle"];
 
 export function serveurParCle(cle: string): (typeof SERVEURS)[number] {
-  return SERVEURS.find(serveur => serveur.cle === cle) ?? SERVEURS[0];
+  return SERVEURS.find((serveur) => serveur.cle === cle) ?? SERVEURS[0];
 }
 
 export interface HierarchieServeur {
@@ -87,7 +88,7 @@ async function lireRoles(guildId: string): Promise<Map<string, RoleDiscord>> {
 		  WHERE guild_id = $1`,
     [guildId],
   );
-  return new Map(rows.map(role => [role.role_id, role]));
+  return new Map(rows.map((role) => [role.role_id, role]));
 }
 
 /**
@@ -97,7 +98,9 @@ async function lireRoles(guildId: string): Promise<Map<string, RoleDiscord>> {
  * et se seraient retrouvés en tête du staff, devant les personnes. Les membres
  * partis aussi — c'est l'annuaire du serveur, pas son histoire.
  */
-export async function lireHierarchie(cle: CleServeur): Promise<HierarchieServeur> {
+export async function lireHierarchie(
+  cle: CleServeur,
+): Promise<HierarchieServeur> {
   const serveur = serveurParCle(cle);
   const pool = getPgPool();
 
@@ -114,19 +117,22 @@ export async function lireHierarchie(cle: CleServeur): Promise<HierarchieServeur
     ),
   ]);
 
-  const membres = rows.map(ligne => classerMembre(ligne, roles));
-  const administration = membres.filter(m => m.rang === "administration");
-  const moderation = membres.filter(m => m.rang === "moderation");
+  const membres = rows.map((ligne) => classerMembre(ligne, roles));
+  const administration = membres.filter((m) => m.rang === "administration");
+  const moderation = membres.filter((m) => m.rang === "moderation");
 
   const trierParRang = (a: MembreClasse, b: MembreClasse) =>
-    b.position - a.position || new Date(a.joined_at ?? 0).getTime() - new Date(b.joined_at ?? 0).getTime();
+    b.position - a.position ||
+    new Date(a.joined_at ?? 0).getTime() - new Date(b.joined_at ?? 0).getTime();
 
   administration.sort(trierParRang);
   moderation.sort(trierParRang);
 
   const misAJourLe = rows.reduce<string | null>(
     (plusRecent, ligne) =>
-      !ligne.updated_at || (plusRecent && plusRecent >= ligne.updated_at) ? plusRecent : ligne.updated_at,
+      !ligne.updated_at || (plusRecent && plusRecent >= ligne.updated_at)
+        ? plusRecent
+        : ligne.updated_at,
     null,
   );
 
@@ -149,7 +155,11 @@ export async function lireHierarchie(cle: CleServeur): Promise<HierarchieServeur
  * La recherche vit dans Postgres (`ILIKE`, index trigram), là où elle chargeait
  * la table entière pour filtrer en mémoire.
  */
-export async function chercherMembres(cle: CleServeur, requete: string, limite = 48): Promise<MembreClasse[]> {
+export async function chercherMembres(
+  cle: CleServeur,
+  requete: string,
+  limite = 48,
+): Promise<MembreClasse[]> {
   const serveur = serveurParCle(cle);
   const pool = getPgPool();
   const motif = `%${requete}%`;
@@ -170,5 +180,7 @@ export async function chercherMembres(cle: CleServeur, requete: string, limite =
     ),
   ]);
 
-  return rows.map(ligne => classerMembre(ligne, roles)).sort((a, b) => b.position - a.position);
+  return rows
+    .map((ligne) => classerMembre(ligne, roles))
+    .sort((a, b) => b.position - a.position);
 }

@@ -29,11 +29,11 @@ const TEAM_CONFIG: Record<string, string> = {
 async function TeamsSection() {
   const teamIds = Object.keys(TEAM_CONFIG);
   const teamsData = await Promise.all(
-    teamIds.map(async teamId => {
+    teamIds.map(async (teamId) => {
       const members = await getTeamMembers(teamId);
       return {
         name: TEAM_CONFIG[teamId] ?? teamId,
-        members: members.map(member => ({
+        members: members.map((member) => ({
           name: member.metadata.memberName,
           role: member.metadata.memberRole,
           image: member.url,
@@ -42,28 +42,39 @@ async function TeamsSection() {
       };
     }),
   );
-  const teams = teamsData.filter(team => team.members.length > 0);
+  const teams = teamsData.filter((team) => team.members.length > 0);
 
-  const allMembers = teams.flatMap(team =>
-    team.members.map(member => ({
+  const allMembers = teams.flatMap((team) =>
+    team.members.map((member) => ({
       name: member.name,
-      role: member.role === PLACEHOLDER_ROLE ? `${team.name}` : member.role || team.name,
+      role:
+        member.role === PLACEHOLDER_ROLE
+          ? `${team.name}`
+          : member.role || team.name,
       image: member.image || undefined,
-      sameAs: member.link && member.link.startsWith("http") ? [member.link] : undefined,
+      sameAs:
+        member.link && member.link.startsWith("http")
+          ? [member.link]
+          : undefined,
     })),
   );
 
   return (
     <section className="flex flex-col gap-10 lg:gap-12">
-      <TeamStructuredData pageName="Le Staff RG" url={absoluteUrl("/community")} members={allMembers} />
+      <TeamStructuredData
+        pageName="Le Staff RG"
+        url={absoluteUrl("/community")}
+        members={allMembers}
+      />
       {/* Header Section */}
       <div className="text-center lg:text-left space-y-4 max-w-4xl mx-auto lg:mx-0 animate-fade-in">
         <h1 className="text-4xl lg:text-5xl font-black bg-linear-to-r from-gaelle-blue to-gaelle-blue-light dark:from-gaelle-blue-light dark:to-gaelle-blue bg-clip-text text-transparent">
           Nos Équipes
         </h1>
         <p className="text-base lg:text-lg text-gray-600 dark:text-gray-300 leading-relaxed">
-          Découvrez les talents qui donnent vie à l&apos;univers de Rose Griffon. Notre équipe passionnée travaille
-          ensemble pour créer des histoires captivantes et des illustrations magnifiques.
+          Découvrez les talents qui donnent vie à l&apos;univers de Rose
+          Griffon. Notre équipe passionnée travaille ensemble pour créer des
+          histoires captivantes et des illustrations magnifiques.
         </p>
         <div className="w-24 h-1 bg-linear-to-r from-gaelle-blue to-gaelle-blue-light rounded-full mx-auto lg:mx-0" />
       </div>
@@ -72,7 +83,9 @@ async function TeamsSection() {
       <div className="flex flex-col gap-10 sm:gap-12 lg:gap-16">
         {teams.length === 0 ? (
           <div className="col-span-full text-center py-12">
-            <p className="text-gray-500 dark:text-gray-400">Aucune équipe à afficher pour le moment.</p>
+            <p className="text-gray-500 dark:text-gray-400">
+              Aucune équipe à afficher pour le moment.
+            </p>
           </div>
         ) : (
           teams.map((team, teamIdx) => (
@@ -98,7 +111,10 @@ async function TeamsSection() {
               {/* Team Members Grid */}
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 lg:gap-6">
                 {team.members.map((member, memberIdx) => {
-                  const displayedRole = member.role === PLACEHOLDER_ROLE ? PUBLIC_PLACEHOLDER_LABEL : member.role;
+                  const displayedRole =
+                    member.role === PLACEHOLDER_ROLE
+                      ? PUBLIC_PLACEHOLDER_LABEL
+                      : member.role;
                   const cardContent = (
                     <>
                       {/* Member Image */}
@@ -124,14 +140,22 @@ async function TeamsSection() {
 
                   const className =
                     "group flex flex-col items-center text-center gap-2 sm:gap-3 p-2 sm:p-3 lg:p-4 rounded-2xl hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-all duration-300 animate-fade-in";
-                  const style = { animationDelay: `${teamIdx * 100 + memberIdx * 50}ms` };
+                  const style = {
+                    animationDelay: `${teamIdx * 100 + memberIdx * 50}ms`,
+                  };
 
                   return member.link ? (
                     <Link
                       key={`${member.name}-${memberIdx}`}
                       href={member.link}
-                      target={member.link.startsWith("http") ? "_blank" : undefined}
-                      rel={member.link.startsWith("http") ? "noopener noreferrer" : undefined}
+                      target={
+                        member.link.startsWith("http") ? "_blank" : undefined
+                      }
+                      rel={
+                        member.link.startsWith("http")
+                          ? "noopener noreferrer"
+                          : undefined
+                      }
                       className={className}
                       style={style}
                       aria-label={`Voir ${member.name} (${displayedRole})`}
@@ -139,7 +163,11 @@ async function TeamsSection() {
                       {cardContent}
                     </Link>
                   ) : (
-                    <div key={`${member.name}-${memberIdx}`} className={className} style={style}>
+                    <div
+                      key={`${member.name}-${memberIdx}`}
+                      className={className}
+                      style={style}
+                    >
                       {cardContent}
                     </div>
                   );

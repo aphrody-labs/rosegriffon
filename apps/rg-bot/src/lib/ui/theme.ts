@@ -37,7 +37,8 @@ const PROFIL = profilActif();
  * l'icône du titre — jamais du contenu, qui doit rester lisible en noir et
  * blanc (daltonisme, thème clair, capture d'écran compressée).
  */
-export type Intention = "marque" | "succes" | "attention" | "echec" | "info" | "muet";
+export type Intention =
+  "marque" | "succes" | "attention" | "echec" | "info" | "muet";
 
 /**
  * Palette d'état.
@@ -117,14 +118,15 @@ export const ICONES = Object.freeze({
 export type NomIcone = keyof typeof ICONES;
 
 /** Icône par défaut d'une intention, quand l'appelant n'en impose pas. */
-export const ICONE_INTENTION: Readonly<Record<Intention, string>> = Object.freeze({
-  marque: "",
-  succes: ICONES.succes,
-  attention: ICONES.attention,
-  echec: ICONES.echec,
-  info: ICONES.info,
-  muet: "",
-});
+export const ICONE_INTENTION: Readonly<Record<Intention, string>> =
+  Object.freeze({
+    marque: "",
+    succes: ICONES.succes,
+    attention: ICONES.attention,
+    echec: ICONES.echec,
+    info: ICONES.info,
+    muet: "",
+  });
 
 // ─── Typographie ────────────────────────────────────────────────────────────
 

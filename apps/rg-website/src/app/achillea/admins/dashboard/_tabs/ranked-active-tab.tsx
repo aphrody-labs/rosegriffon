@@ -18,7 +18,15 @@ import {
 import { Loader2, XCircle } from "lucide-react";
 import { signalerEchec } from "@/lib/achillea/signaler";
 import type { RankedActivePlayer } from "@rosegriffon/achillea-types/domain/ranked";
-import { BoutonActualiser, Chargement, Erreur, Vide, formaterDate, useClientAchillea, useLecture } from "./etat";
+import {
+  BoutonActualiser,
+  Chargement,
+  Erreur,
+  Vide,
+  formaterDate,
+  useClientAchillea,
+  useLecture,
+} from "./etat";
 
 /** Rafraîchissement de la liste live, comme l'ancien onglet. */
 export const INTERVALLE_RAFRAICHISSEMENT_MS = 15_000;
@@ -43,7 +51,9 @@ function Joueur({ joueur }: { joueur: RankedActivePlayer }) {
 /** « Matchs en cours » — lobbies ranked `Ongoing`, rafraîchis toutes les 15 s. */
 export function RankedActiveTab() {
   const client = useClientAchillea();
-  const matchs = useLecture("admin/lobbies/active", () => client.ranked.adminActiveMatches());
+  const matchs = useLecture("admin/lobbies/active", () =>
+    client.ranked.adminActiveMatches(),
+  );
   const [annulation, setAnnulation] = useState<number | null>(null);
   const [erreurAnnulation, setErreurAnnulation] = useState<string | null>(null);
   const { recharger } = matchs;
@@ -54,7 +64,10 @@ export function RankedActiveTab() {
   }, [recharger]);
 
   const annuler = async (lobbyId: number) => {
-    if (!confirm(`Annuler le lobby #${lobbyId} ? Aucun point ne sera appliqué.`)) return;
+    if (
+      !confirm(`Annuler le lobby #${lobbyId} ? Aucun point ne sera appliqué.`)
+    )
+      return;
     setAnnulation(lobbyId);
     setErreurAnnulation(null);
     try {
@@ -72,14 +85,22 @@ export function RankedActiveTab() {
     <Card className="border-border/60">
       <CardHeader className="flex flex-row items-center justify-between gap-4">
         <div className="space-y-1">
-          <CardTitle className="text-base">Matchs en cours ({liste.length})</CardTitle>
-          <p className="text-xs text-muted-foreground">Actualisation automatique toutes les 15 secondes.</p>
+          <CardTitle className="text-base">
+            Matchs en cours ({liste.length})
+          </CardTitle>
+          <p className="text-xs text-muted-foreground">
+            Actualisation automatique toutes les 15 secondes.
+          </p>
         </div>
         <BoutonActualiser enCours={matchs.chargement} onClick={recharger} />
       </CardHeader>
       <CardContent className="space-y-4">
-        {matchs.erreur && <Erreur message={matchs.erreur} onReessayer={recharger} />}
-        {erreurAnnulation && <Erreur message={`Annulation impossible : ${erreurAnnulation}`} />}
+        {matchs.erreur && (
+          <Erreur message={matchs.erreur} onReessayer={recharger} />
+        )}
+        {erreurAnnulation && (
+          <Erreur message={`Annulation impossible : ${erreurAnnulation}`} />
+        )}
         {matchs.chargement && !matchs.donnees ? (
           <Chargement />
         ) : liste.length === 0 && !matchs.erreur ? (
@@ -101,11 +122,15 @@ export function RankedActiveTab() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {liste.map(match => (
+                {liste.map((match) => (
                   <TableRow key={match.lobbyId}>
-                    <TableCell className="font-mono">#{match.lobbyId}</TableCell>
+                    <TableCell className="font-mono">
+                      #{match.lobbyId}
+                    </TableCell>
                     <TableCell>
-                      <Badge variant="secondary">{libelleMode(match.mode)}</Badge>
+                      <Badge variant="secondary">
+                        {libelleMode(match.mode)}
+                      </Badge>
                     </TableCell>
                     <TableCell>
                       <Joueur joueur={match.player1} />
@@ -116,7 +141,9 @@ export function RankedActiveTab() {
                     <TableCell>
                       <Joueur joueur={match.player2} />
                     </TableCell>
-                    <TableCell className="whitespace-nowrap text-xs">{formaterDate(match.createdAt)}</TableCell>
+                    <TableCell className="whitespace-nowrap text-xs">
+                      {formaterDate(match.createdAt)}
+                    </TableCell>
                     <TableCell className="text-right">
                       <Button
                         variant="ghost"
@@ -126,7 +153,10 @@ export function RankedActiveTab() {
                         aria-label={`Annuler le lobby ${match.lobbyId}`}
                       >
                         {annulation === match.lobbyId ? (
-                          <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+                          <Loader2
+                            className="size-4 animate-spin"
+                            aria-hidden="true"
+                          />
                         ) : (
                           <XCircle className="size-4" aria-hidden="true" />
                         )}

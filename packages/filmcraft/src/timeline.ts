@@ -57,7 +57,9 @@ export interface CreateProjectOptions {
   metadata?: Record<string, unknown>;
 }
 
-export function createFilmProject(options: CreateProjectOptions = {}): FilmProject {
+export function createFilmProject(
+  options: CreateProjectOptions = {},
+): FilmProject {
   return {
     id: options.id ?? `fc-${Date.now()}`,
     title: options.title ?? "Dragon Ball FilmCraft Sequence",
@@ -108,7 +110,10 @@ export function createFilmProject(options: CreateProjectOptions = {}): FilmProje
   };
 }
 
-export function addFilmTrack(project: FilmProject, track: Omit<FilmTrack, "clips">): FilmTrack {
+export function addFilmTrack(
+  project: FilmProject,
+  track: Omit<FilmTrack, "clips">,
+): FilmTrack {
   const newTrack: FilmTrack = {
     ...track,
     clips: [],
@@ -126,11 +131,18 @@ export function addFilmClip(
   if (!targetTrack) {
     throw new Error(`Track with id ${clip.trackId} not found in project`);
   }
-  const id = clip.id ?? `clip-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+  const id =
+    clip.id ?? `clip-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
   const fullClip: FilmClip = {
     ...clip,
     id,
-    transform: clip.transform ?? { x: 0, y: 0, scaleX: 1, scaleY: 1, rotation: 0 },
+    transform: clip.transform ?? {
+      x: 0,
+      y: 0,
+      scaleX: 1,
+      scaleY: 1,
+      rotation: 0,
+    },
   };
   targetTrack.clips.push(fullClip);
   targetTrack.clips.sort((a, b) => a.startFrame - b.startFrame);
@@ -147,7 +159,10 @@ export function razorFilmClip(
     if (clipIndex === -1) continue;
 
     const clip = track.clips[clipIndex];
-    if (cutFrame <= clip.startFrame || cutFrame >= clip.startFrame + clip.durationFrames) {
+    if (
+      cutFrame <= clip.startFrame ||
+      cutFrame >= clip.startFrame + clip.durationFrames
+    ) {
       throw new Error(
         `Cut frame ${cutFrame} is outside clip bounds [${clip.startFrame}, ${clip.startFrame + clip.durationFrames}]`,
       );
@@ -178,7 +193,11 @@ export function razorFilmClip(
   throw new Error(`Clip ${clipId} not found in any track`);
 }
 
-export function cutFilmClip(project: FilmProject, clipId: string, ripple = false): FilmClip {
+export function cutFilmClip(
+  project: FilmProject,
+  clipId: string,
+  ripple = false,
+): FilmClip {
   for (const track of project.tracks) {
     const clipIndex = track.clips.findIndex((c) => c.id === clipId);
     if (clipIndex === -1) continue;
@@ -216,12 +235,18 @@ export function spliceFilmClip(
   track.clips.sort((a, b) => a.startFrame - b.startFrame);
 }
 
-export function getClipsAtFrame(project: FilmProject, frame: number): FilmClip[] {
+export function getClipsAtFrame(
+  project: FilmProject,
+  frame: number,
+): FilmClip[] {
   const active: FilmClip[] = [];
   for (const track of project.tracks) {
     if (track.muted) continue;
     for (const clip of track.clips) {
-      if (frame >= clip.startFrame && frame < clip.startFrame + clip.durationFrames) {
+      if (
+        frame >= clip.startFrame &&
+        frame < clip.startFrame + clip.durationFrames
+      ) {
         active.push(clip);
       }
     }

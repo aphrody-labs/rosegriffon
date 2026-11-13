@@ -43,7 +43,10 @@ export function isSafeInternalPath(value: unknown): value is string {
   }
 
   try {
-    return new URL(value, "https://achillea.invalid").origin === "https://achillea.invalid";
+    return (
+      new URL(value, "https://achillea.invalid").origin ===
+      "https://achillea.invalid"
+    );
   } catch {
     return false;
   }
@@ -57,7 +60,10 @@ export function numberAlign(value: number, align: number = 2): string {
 /**
  * Découpe un tableau en sous-tableaux de taille `chunkSize` (2 par défaut).
  */
-export function chunkArray<T>(array: readonly T[], chunkSize: number = 2): T[][] {
+export function chunkArray<T>(
+  array: readonly T[],
+  chunkSize: number = 2,
+): T[][] {
   const result: T[][] = [];
   for (let i = 0; i < array.length; i += chunkSize) {
     result.push(array.slice(i, i + chunkSize));

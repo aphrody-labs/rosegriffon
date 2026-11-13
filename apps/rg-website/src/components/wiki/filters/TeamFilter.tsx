@@ -32,7 +32,7 @@ export function TeamFilter({ teams }: TeamFilterProps) {
 
   const handleSelect = (teamId: string) => {
     setOpen(false);
-    navigate(params => {
+    navigate((params) => {
       if (params.get("team") === teamId) {
         params.delete("team");
       } else {
@@ -41,7 +41,7 @@ export function TeamFilter({ teams }: TeamFilterProps) {
     });
   };
 
-  const selectedTeam = teams.find(t => t.id === currentTeamId);
+  const selectedTeam = teams.find((t) => t.id === currentTeamId);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -59,7 +59,10 @@ export function TeamFilter({ teams }: TeamFilterProps) {
           {selectedTeam ? selectedTeam.name : "Rechercher une équipe..."}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[calc(100vw-2rem)] sm:w-[300px] p-0" align="start">
+      <PopoverContent
+        className="w-[calc(100vw-2rem)] sm:w-[300px] p-0"
+        align="start"
+      >
         <Command>
           <div className="flex items-center border-b px-3">
             <CommandInput
@@ -70,12 +73,15 @@ export function TeamFilter({ teams }: TeamFilterProps) {
           <CommandList>
             <CommandEmpty>Aucune équipe trouvée.</CommandEmpty>
             <CommandGroup className="max-h-[300px] overflow-y-auto">
-              {teams.map(team => (
+              {teams.map((team) => (
                 <CommandItem
                   key={team.id}
                   value={team.name}
                   onSelect={() => handleSelect(team.id)}
-                  className={cn(currentTeamId === team.id && "bg-surface-container-highest font-medium")}
+                  className={cn(
+                    currentTeamId === team.id &&
+                      "bg-surface-container-highest font-medium",
+                  )}
                 >
                   <span className="truncate">{team.name}</span>
                 </CommandItem>

@@ -109,14 +109,25 @@ export interface SnapshotFeed {
   statut: StatutSource;
 }
 
-export const CHEMIN_SNAPSHOT = (reseau: Reseau): string => `feed/snapshots/${reseau}.json`;
+export const CHEMIN_SNAPSHOT = (reseau: Reseau): string =>
+  `feed/snapshots/${reseau}.json`;
 
-export function lireSnapshot(valeur: unknown, reseau: Reseau): SnapshotFeed | null {
+export function lireSnapshot(
+  valeur: unknown,
+  reseau: Reseau,
+): SnapshotFeed | null {
   if (!valeur || typeof valeur !== "object") return null;
   const s = valeur as Partial<SnapshotFeed>;
-  if (s.version !== 1 || s.reseau !== reseau || !Array.isArray(s.posts) || !Array.isArray(s.profils) || !s.statut)
+  if (
+    s.version !== 1 ||
+    s.reseau !== reseau ||
+    !Array.isArray(s.posts) ||
+    !Array.isArray(s.profils) ||
+    !s.statut
+  )
     return null;
-  if (typeof s.genereLe !== "string" || Number.isNaN(Date.parse(s.genereLe))) return null;
+  if (typeof s.genereLe !== "string" || Number.isNaN(Date.parse(s.genereLe)))
+    return null;
   return s as SnapshotFeed;
 }
 
@@ -152,4 +163,5 @@ export interface SourceFeed {
   lire(parametres: ParametresLecture): Promise<PageSource>;
 }
 
-export const cleProfil = (reseau: Reseau, pseudo: string): string => `${reseau}:${pseudo.toLowerCase()}`;
+export const cleProfil = (reseau: Reseau, pseudo: string): string =>
+  `${reseau}:${pseudo.toLowerCase()}`;

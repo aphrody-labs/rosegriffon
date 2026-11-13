@@ -353,7 +353,10 @@ export default {
         value: "AwakeningTierMaterialMaster",
       },
     ],
-    relatedFiles: ["LGAマスター - グレード.tsv", "LGAマスター - 覚醒素材テーブル.tsv"],
+    relatedFiles: [
+      "LGAマスター - グレード.tsv",
+      "LGAマスター - 覚醒素材テーブル.tsv",
+    ],
   },
   CharacterMaster: {
     file: "LGAマスター - キャラクター.tsv",
@@ -1415,7 +1418,10 @@ export default {
         ref: "ProfileIconItemMaster",
       },
     ],
-    relatedFiles: ["LGAマスター - 敵チーム.tsv", "LGAマスター - 敵チームプレイヤー.tsv"],
+    relatedFiles: [
+      "LGAマスター - 敵チーム.tsv",
+      "LGAマスター - 敵チームプレイヤー.tsv",
+    ],
   },
   EventConnectionBoardAreaMaster: {
     file: "LGAマスター - イベント人脈ボードエリア.tsv",
@@ -1962,7 +1968,8 @@ export default {
   EventStoryAreaMaster: {
     file: "LGAマスター - イベントストーリーエリア.tsv",
     fullName: "Soccer.Shared.EventStoryAreaMaster",
-    extends: "StoryBoardAreaMaster<EventStoryAreaMaster, EventStoryStageMaster, EventStoryChapterMaster>",
+    extends:
+      "StoryBoardAreaMaster<EventStoryAreaMaster, EventStoryStageMaster, EventStoryChapterMaster>",
     columns: [
       {
         name: "Code",
@@ -4236,7 +4243,10 @@ export default {
         kind: "bool",
       },
     ],
-    relatedFiles: ["LGAマスター - アイテム - 監督.tsv", "LGAマスター - 監督 - 成長.tsv"],
+    relatedFiles: [
+      "LGAマスター - アイテム - 監督.tsv",
+      "LGAマスター - 監督 - 成長.tsv",
+    ],
   },
   DirectorLevelUpMaterialItemMaster: {
     file: "LGAマスター - アイテム - 監督強化素材.tsv",
@@ -4585,7 +4595,11 @@ export default {
         ref: "EquipmentCraftingMaster",
       },
     ],
-    relatedFiles: ["LGAマスター - アイテム - 装備.tsv", "LGAマスター - 装備分解.tsv", "LGAマスター - 装備制作.tsv"],
+    relatedFiles: [
+      "LGAマスター - アイテム - 装備.tsv",
+      "LGAマスター - 装備分解.tsv",
+      "LGAマスター - 装備制作.tsv",
+    ],
   },
   FocusedTrainingTicketItemMaster: {
     file: "LGAマスター - アイテム - 集中部活券.tsv",
@@ -4676,7 +4690,10 @@ export default {
         ref: "PassiveMaster",
       },
     ],
-    relatedFiles: ["LGAマスター - フォーメーション.tsv", "LGAマスター - フォーメーションスロット.tsv"],
+    relatedFiles: [
+      "LGAマスター - フォーメーション.tsv",
+      "LGAマスター - フォーメーションスロット.tsv",
+    ],
   },
   GachaTicketItemMaster: {
     file: "LGAマスター - アイテム - ガチャチケット.tsv",
@@ -5871,7 +5888,8 @@ export default {
   MainStoryAreaMaster: {
     file: "LGAマスター - メインストーリーエリア.tsv",
     fullName: "Soccer.Shared.MainStoryAreaMaster",
-    extends: "StoryBoardAreaMaster<MainStoryAreaMaster, MainStoryStageMaster, MainStoryChapterMaster>",
+    extends:
+      "StoryBoardAreaMaster<MainStoryAreaMaster, MainStoryStageMaster, MainStoryChapterMaster>",
     columns: [
       {
         name: "Code",
@@ -9400,7 +9418,10 @@ export default {
         kind: "int",
       },
     ],
-    relatedFiles: ["LGAマスター - PvPNPCチーム.tsv", "LGAマスター - PvPNPCチームプレイヤー.tsv"],
+    relatedFiles: [
+      "LGAマスター - PvPNPCチーム.tsv",
+      "LGAマスター - PvPNPCチームプレイヤー.tsv",
+    ],
   },
   PvpPlacementMaster: {
     file: "LGAマスター - PvP振り分け戦.tsv",

@@ -46,13 +46,19 @@ async function chargerPlaylists(): Promise<PlaylistAchillea[]> {
     const body = (await response.json()) as {
       items?: Array<{
         id?: string;
-        snippet?: { title?: string; description?: string; thumbnails?: Record<string, { url?: string }> };
+        snippet?: {
+          title?: string;
+          description?: string;
+          thumbnails?: Record<string, { url?: string }>;
+        };
         contentDetails?: { itemCount?: number };
       }>;
     };
-    return (body.items ?? []).flatMap(item => {
+    return (body.items ?? []).flatMap((item) => {
       if (!item.id) return [];
-      const thumbnail = item.snippet?.thumbnails?.medium?.url ?? item.snippet?.thumbnails?.default?.url;
+      const thumbnail =
+        item.snippet?.thumbnails?.medium?.url ??
+        item.snippet?.thumbnails?.default?.url;
       if (!thumbnail) return [];
       return [
         {
@@ -121,7 +127,7 @@ async function loadActiveTournaments(): Promise<{
         return {
           featured: asTournament(rows[0]),
           featuredParticipants: participants.map(
-            participant =>
+            (participant) =>
               ({
                 id: participant.id,
                 userId: participant.user_id,
@@ -129,7 +135,10 @@ async function loadActiveTournaments(): Promise<{
                 status: "registered",
                 user: {
                   id: participant.user_id,
-                  username: participant.display_name || participant.username || "Joueur",
+                  username:
+                    participant.display_name ||
+                    participant.username ||
+                    "Joueur",
                   avatar: participant.avatar ?? undefined,
                 },
               }) as unknown as ParticipantDTO,
@@ -143,17 +152,31 @@ async function loadActiveTournaments(): Promise<{
   }
 
   try {
-    const response = await createAchilleaClient().tournaments.list({ page: 1, pagination: 12 });
-    if (!response.ok) return { featured: null, featuredParticipants: [], otherActive: [] };
-    const items = response.value.data.filter(item => ACTIVE_STATES.includes(item.status ?? ""));
-    const details = await Promise.all(items.slice(0, 4).map(item => createAchilleaClient().tournaments.get(item.id)));
-    const loaded = details.flatMap(detail => (detail.ok ? [detail.value] : []));
+    const response = await createAchilleaClient().tournaments.list({
+      page: 1,
+      pagination: 12,
+    });
+    if (!response.ok)
+      return { featured: null, featuredParticipants: [], otherActive: [] };
+    const items = response.value.data.filter((item) =>
+      ACTIVE_STATES.includes(item.status ?? ""),
+    );
+    const details = await Promise.all(
+      items
+        .slice(0, 4)
+        .map((item) => createAchilleaClient().tournaments.get(item.id)),
+    );
+    const loaded = details.flatMap((detail) =>
+      detail.ok ? [detail.value] : [],
+    );
     const [primary, ...rest] = loaded;
     return primary
       ? {
           featured: primary[0] as unknown as Tournament,
           featuredParticipants: primary[1] as unknown as ParticipantDTO[],
-          otherActive: rest.map(([tournament]) => tournament as unknown as Tournament),
+          otherActive: rest.map(
+            ([tournament]) => tournament as unknown as Tournament,
+          ),
         }
       : { featured: null, featuredParticipants: [], otherActive: [] };
   } catch {
@@ -162,14 +185,17 @@ async function loadActiveTournaments(): Promise<{
 }
 
 export default async function AchilleaHomePage() {
-  const [{ featured, featuredParticipants, otherActive }, stats, playlists] = await Promise.all([
-    loadActiveTournaments(),
-    lireChiffresEsport(),
-    chargerPlaylists(),
-  ]);
+  const [{ featured, featuredParticipants, otherActive }, stats, playlists] =
+    await Promise.all([
+      loadActiveTournaments(),
+      lireChiffresEsport(),
+      chargerPlaylists(),
+    ]);
   // Sans tournoi actif, l'encart montre les derniers tournois joués plutôt
   // qu'un état vide : l'API en a, tous terminés.
-  const recent = featured ? [] : await loadRecentTournaments(createAchilleaClient());
+  const recent = featured
+    ? []
+    : await loadRecentTournaments(createAchilleaClient());
 
   return (
     <div className="achillea-home-page max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-12">
@@ -190,7 +216,10 @@ export default async function AchilleaHomePage() {
               <span className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-primary mb-1">
                 <Video className="size-4" aria-hidden="true" /> Archives Vidéos
               </span>
-              <h2 id="vods-title" className="text-2xl font-black text-on-surface tracking-tight">
+              <h2
+                id="vods-title"
+                className="text-2xl font-black text-on-surface tracking-tight"
+              >
                 Revoir les Matchs & VODs
               </h2>
             </div>
@@ -200,11 +229,12 @@ export default async function AchilleaHomePage() {
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-bold bg-surface-container-high hover:bg-surface-container-highest text-on-surface transition-all duration-150 self-start sm:self-auto"
             >
-              Chaîne Achilléa <ArrowRight className="size-4" aria-hidden="true" />
+              Chaîne Achilléa{" "}
+              <ArrowRight className="size-4" aria-hidden="true" />
             </a>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-            {playlists.map(playlist => (
+            {playlists.map((playlist) => (
               <a
                 key={playlist.id}
                 href={playlist.url}
@@ -222,7 +252,10 @@ export default async function AchilleaHomePage() {
                     className="object-cover group-hover:scale-105 transition-transform duration-300"
                   />
                   <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors flex items-center justify-center">
-                    <PlayCircle className="size-12 text-white/90 group-hover:scale-110 transition-transform drop-shadow-md" aria-hidden="true" />
+                    <PlayCircle
+                      className="size-12 text-white/90 group-hover:scale-110 transition-transform drop-shadow-md"
+                      aria-hidden="true"
+                    />
                   </div>
                   {playlist.videos !== null && (
                     <span className="absolute bottom-2 right-2 px-2 py-0.5 rounded-md bg-black/75 text-[11px] font-bold text-white font-mono backdrop-blur-xs">

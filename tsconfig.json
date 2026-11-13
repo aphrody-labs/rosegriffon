@@ -3,5 +3,10 @@
   "compilerOptions": {
     "verbatimModuleSyntax": true
   },
-  "include": ["scripts/compile.ts", "scripts/publish.ts", "scripts/bun-runtime.ts", "scripts/next-build.ts"]
+  "include": [
+    "scripts/compile.ts",
+    "scripts/publish.ts",
+    "scripts/bun-runtime.ts",
+    "scripts/next-build.ts"
+  ]
 }

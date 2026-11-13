@@ -26,7 +26,13 @@ export const tailleBaseSchema = z.object({
 export type TailleBase = z.infer<typeof tailleBaseSchema>;
 
 export const sauvegardesSchema = z.object({
-  data: z.array(z.object({ name: z.string(), sizeBytes: z.number(), createdAt: z.string() })),
+  data: z.array(
+    z.object({
+      name: z.string(),
+      sizeBytes: z.number(),
+      createdAt: z.string(),
+    }),
+  ),
   retention: z.number(),
 });
 
@@ -46,13 +52,17 @@ export function formaterOctets(octets: number): string {
 }
 
 /** Message d'un refus de sauvegarde ou de restauration, selon le contrat `/database`. */
-export function messageRefusSauvegarde(statut: number | undefined): string | null {
+export function messageRefusSauvegarde(
+  statut: number | undefined,
+): string | null {
   if (statut === 403) return "Refusé : rôle Super-Admin requis.";
   if (statut === 404) return "Archive introuvable.";
   if (statut === 409)
     return "Opération refusée : une sauvegarde ou une restauration est déjà en cours, ou la sauvegarde préalable à la restauration a échoué.";
-  if (statut === 503) return "Outils PostgreSQL (pg_dump / pg_restore) absents de la machine de l'API.";
-  if (statut === 500) return "L'outil de sauvegarde a échoué : voir les journaux de l'API.";
+  if (statut === 503)
+    return "Outils PostgreSQL (pg_dump / pg_restore) absents de la machine de l'API.";
+  if (statut === 500)
+    return "L'outil de sauvegarde a échoué : voir les journaux de l'API.";
   return null;
 }
 
@@ -67,8 +77,14 @@ export function genreColonne(dataType: string): GenreChamp {
   const type = dataType.toLowerCase();
   if (type === "boolean") return "boolean";
   // json/jsonb et tableaux Postgres (founders, languages…) : édition en JSON.
-  if (type.includes("json") || type === "array" || type.endsWith("[]")) return "json";
-  if (["int", "numeric", "real", "double", "decimal"].some(motif => type.includes(motif))) return "number";
+  if (type.includes("json") || type === "array" || type.endsWith("[]"))
+    return "json";
+  if (
+    ["int", "numeric", "real", "double", "decimal"].some((motif) =>
+      type.includes(motif),
+    )
+  )
+    return "number";
   return "text";
 }
 
@@ -107,10 +123,15 @@ export function apercuCellule(valeur: unknown): string {
 }
 
 /** Clé primaire complète d'une ligne, ou `null` si la table n'en a pas. */
-export function clePrimaire(colonnes: readonly DbColumn[], ligne: Record<string, unknown>): Record<string, unknown> | null {
-  const cles = colonnes.filter(colonne => colonne.isPrimaryKey);
+export function clePrimaire(
+  colonnes: readonly DbColumn[],
+  ligne: Record<string, unknown>,
+): Record<string, unknown> | null {
+  const cles = colonnes.filter((colonne) => colonne.isPrimaryKey);
   if (cles.length === 0) return null;
-  return Object.fromEntries(cles.map(colonne => [colonne.name, ligne[colonne.name]]));
+  return Object.fromEntries(
+    cles.map((colonne) => [colonne.name, ligne[colonne.name]]),
+  );
 }
 
 /** Valeurs d'une insertion : seuls les champs remplis partent, la base complète le reste. */
@@ -123,7 +144,10 @@ export function valeursInsertion(
     const valeur = saisie[colonne.name] ?? "";
     if (valeur === "") continue;
     try {
-      sortie[colonne.name] = depuisSaisie(valeur, genreColonne(colonne.dataType));
+      sortie[colonne.name] = depuisSaisie(
+        valeur,
+        genreColonne(colonne.dataType),
+      );
     } catch {
       throw new SyntaxError(`Valeur invalide pour « ${colonne.name} ».`);
     }
@@ -138,10 +162,13 @@ export function valeursInsertion(
  * statut : on traduit donc le statut selon le contrat de `/admin/db`.
  */
 export function messageRefusDb(statut: number | undefined): string | null {
-  if (statut === 400) return "Requête refusée : une seule instruction SELECT/WITH, sur des tables autorisées.";
-  if (statut === 403) return "Refusé : rôle Super-Admin requis, ou console SQL désactivée en production.";
+  if (statut === 400)
+    return "Requête refusée : une seule instruction SELECT/WITH, sur des tables autorisées.";
+  if (statut === 403)
+    return "Refusé : rôle Super-Admin requis, ou console SQL désactivée en production.";
   if (statut === 404) return "Table ou ligne introuvable.";
-  if (statut === 408 || statut === 504) return "Requête interrompue : délai d'exécution dépassé.";
+  if (statut === 408 || statut === 504)
+    return "Requête interrompue : délai d'exécution dépassé.";
   if (statut === 413) return "Résultat trop volumineux.";
   return null;
 }
@@ -164,7 +191,10 @@ export function valeursModifiees(
     if (valeur === (initiale[colonne.name] ?? "")) continue;
     if (valeur === VALEUR_MASQUEE) continue;
     try {
-      sortie[colonne.name] = depuisSaisie(valeur, genreColonne(colonne.dataType));
+      sortie[colonne.name] = depuisSaisie(
+        valeur,
+        genreColonne(colonne.dataType),
+      );
     } catch {
       throw new SyntaxError(`Valeur invalide pour « ${colonne.name} ».`);
     }

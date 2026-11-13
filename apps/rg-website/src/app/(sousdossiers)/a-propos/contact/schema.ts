@@ -17,7 +17,7 @@ export const contactFormSchema = z.object({
     ? z
         .instanceof(File)
         .refine(
-          file => {
+          (file) => {
             if (!file || file.size === 0) return true;
 
             const acceptedTypes = [
@@ -32,11 +32,12 @@ export const contactFormSchema = z.object({
             return acceptedTypes.includes(file.type);
           },
           {
-            message: "Format de fichier non valide. Formats acceptés: PDF, DOCX, images et TXT.",
+            message:
+              "Format de fichier non valide. Formats acceptés: PDF, DOCX, images et TXT.",
           },
         )
         .refine(
-          file => {
+          (file) => {
             if (!file || file.size === 0) return true;
             return file.size <= MAX_FILE_SIZE;
           },

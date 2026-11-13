@@ -14,7 +14,10 @@ import {
   CommandList,
   Skeleton,
 } from "@rosegriffon/ui";
-import { getSkillCategoryIconUrl, getSkillElementIconUrl } from "@rosegriffon/azalee/images";
+import {
+  getSkillCategoryIconUrl,
+  getSkillElementIconUrl,
+} from "@rosegriffon/azalee/images";
 import { cn } from "@/lib/utils";
 
 interface CharacterSearchDialogProps {
@@ -58,12 +61,20 @@ const ELEMENT_FR: Record<string, string> = {
   Wind: "Vent",
 };
 
-export function CharacterSearchDialog({ open, onOpenChange, onSelect }: CharacterSearchDialogProps) {
+export function CharacterSearchDialog({
+  open,
+  onOpenChange,
+  onSelect,
+}: CharacterSearchDialogProps) {
   const [query, setQuery] = React.useState("");
   const [results, setResults] = React.useState<CompareSearchResult[]>([]);
   const [isSearching, setIsSearching] = React.useState(false);
-  const [elementFilter, setElementFilter] = React.useState<string | undefined>();
-  const [positionFilter, setPositionFilter] = React.useState<string | undefined>();
+  const [elementFilter, setElementFilter] = React.useState<
+    string | undefined
+  >();
+  const [positionFilter, setPositionFilter] = React.useState<
+    string | undefined
+  >();
   const [rarityFilter, setRarityFilter] = React.useState<string | undefined>();
   const abortRef = React.useRef<AbortController | null>(null);
 
@@ -87,19 +98,14 @@ export function CharacterSearchDialog({ open, onOpenChange, onSelect }: Characte
     }
 
     if (!canSearch) {
-
       const reset = setTimeout(() => {
-
         setResults([]);
 
         setIsSearching(false);
-
       }, 0);
 
       return () => clearTimeout(reset);
-
     }
-
 
     const pending = setTimeout(() => setIsSearching(true), 0);
     const timer = setTimeout(
@@ -138,8 +144,11 @@ export function CharacterSearchDialog({ open, onOpenChange, onSelect }: Characte
     return () => clearTimeout(reset);
   }, [open]);
 
-  const toggleFilter = (setter: React.Dispatch<React.SetStateAction<string | undefined>>, value: string) => {
-    setter(prev => (prev === value ? undefined : value));
+  const toggleFilter = (
+    setter: React.Dispatch<React.SetStateAction<string | undefined>>,
+    value: string,
+  ) => {
+    setter((prev) => (prev === value ? undefined : value));
   };
 
   return (
@@ -149,7 +158,11 @@ export function CharacterSearchDialog({ open, onOpenChange, onSelect }: Characte
       title="Rechercher un personnage"
       description="Seuls les personnages avec stats sont affichés"
     >
-      <CommandInput placeholder="Rechercher un personnage..." value={query} onValueChange={setQuery} />
+      <CommandInput
+        placeholder="Rechercher un personnage..."
+        value={query}
+        onValueChange={setQuery}
+      />
 
       {/* Filter chips */}
       <div className="px-3 py-2 space-y-2 border-b border-[var(--md-sys-color-outline-variant)]/20">
@@ -275,9 +288,15 @@ export function CharacterSearchDialog({ open, onOpenChange, onSelect }: Characte
         {canSearch && !isSearching && results.length === 0 && (
           <CommandEmpty>
             <div className="py-6 text-center">
-              <SearchX size={36} aria-hidden="true" className="text-[var(--md-sys-color-on-surface-variant)] mb-2" />
+              <SearchX
+                size={36}
+                aria-hidden="true"
+                className="text-[var(--md-sys-color-on-surface-variant)] mb-2"
+              />
               <p className="text-sm text-[var(--md-sys-color-on-surface-variant)]">
-                {hasText ? `Aucun personnage avec stats pour "${query}"` : "Aucun personnage pour ces filtres"}
+                {hasText
+                  ? `Aucun personnage avec stats pour "${query}"`
+                  : "Aucun personnage pour ces filtres"}
               </p>
             </div>
           </CommandEmpty>
@@ -302,12 +321,15 @@ export function CharacterSearchDialog({ open, onOpenChange, onSelect }: Characte
             heading={`Personnages (${results.length})`}
             className="[&_[cmdk-group-heading]]:text-[var(--md-sys-color-primary)] [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:uppercase"
           >
-            {results.map(result => {
-              const elemIcon = result.element ? getSkillElementIconUrl(result.element) : null;
+            {results.map((result) => {
+              const elemIcon = result.element
+                ? getSkillElementIconUrl(result.element)
+                : null;
               // value unique par slug : sinon cmdk confond les versions d’un même nom
               // (Byron IE / Ares / GO → un seul item sélectionnable)
               const seriesLabel = result.series
-                ? result.series.replace(/^Inazuma Eleven\s*/i, "").trim() || result.series
+                ? result.series.replace(/^Inazuma Eleven\s*/i, "").trim() ||
+                  result.series
                 : undefined;
               return (
                 <CommandItem
@@ -340,7 +362,7 @@ export function CharacterSearchDialog({ open, onOpenChange, onSelect }: Characte
                         fill
                         className="object-contain"
                         unoptimized
-                        onError={e => {
+                        onError={(e) => {
                           (e.target as HTMLImageElement).style.display = "none";
                         }}
                       />
@@ -357,15 +379,31 @@ export function CharacterSearchDialog({ open, onOpenChange, onSelect }: Characte
                     <span className="font-medium text-sm text-[var(--md-sys-color-on-surface)] truncate block">
                       {result.name}
                       {seriesLabel && seriesLabel !== "Inazuma Eleven" && (
-                        <span className="ml-1.5 font-semibold text-[var(--md-sys-color-primary)]">({seriesLabel})</span>
+                        <span className="ml-1.5 font-semibold text-[var(--md-sys-color-primary)]">
+                          ({seriesLabel})
+                        </span>
                       )}
                     </span>
                     <div className="flex items-center gap-1.5 text-[10px] text-[var(--md-sys-color-on-surface-variant)]">
                       {result.position && (
-                        <span className="font-bold">{POSITION_FR[result.position] || result.position}</span>
+                        <span className="font-bold">
+                          {POSITION_FR[result.position] || result.position}
+                        </span>
                       )}
-                      {elemIcon && <Image src={elemIcon} alt="" width={10} height={10} className="size-2.5" />}
-                      {result.element && <span>{ELEMENT_FR[result.element] || result.element}</span>}
+                      {elemIcon && (
+                        <Image
+                          src={elemIcon}
+                          alt=""
+                          width={10}
+                          height={10}
+                          className="size-2.5"
+                        />
+                      )}
+                      {result.element && (
+                        <span>
+                          {ELEMENT_FR[result.element] || result.element}
+                        </span>
+                      )}
                       {result.rarity && result.rarity !== "Normal" && (
                         <span
                           className={cn(

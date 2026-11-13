@@ -1,7 +1,14 @@
 import { BookOpen, Newspaper, Search, Swords } from "lucide-react";
 import Link from "@/components/shared/Link";
 
-import { Button, Card, CardContent, CardHeader, CardTitle, Input } from "@rosegriffon/ui";
+import {
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  Input,
+} from "@rosegriffon/ui";
 import {
   DOMAINES_RECHERCHE,
   LIBELLES_TYPES_RECHERCHE,
@@ -28,10 +35,13 @@ const DOMAINES = {
     lien: "/achillea",
     lienLabel: "Espace E-Sport",
   },
-} as const satisfies Record<DomaineRecherche, { icon: typeof Search; label: string; lien: string; lienLabel: string }>;
+} as const satisfies Record<
+  DomaineRecherche,
+  { icon: typeof Search; label: string; lien: string; lienLabel: string }
+>;
 
 function estOnglet(value: string): value is DomaineRecherche {
-  return DOMAINES_RECHERCHE.some(domaine => domaine === value);
+  return DOMAINES_RECHERCHE.some((domaine) => domaine === value);
 }
 
 export async function SearchPageContent({
@@ -56,19 +66,24 @@ export async function SearchPageContent({
     }
   }
 
-  const groupes = DOMAINES_RECHERCHE.map(domaine => ({
+  const groupes = DOMAINES_RECHERCHE.map((domaine) => ({
     domaine,
-    resultats: resultats.filter(resultat => resultat.domaine === domaine),
+    resultats: resultats.filter((resultat) => resultat.domaine === domaine),
   }));
-  const groupesAffiches = groupes.filter(({ domaine }) => activeTab === "all" || activeTab === domaine);
+  const groupesAffiches = groupes.filter(
+    ({ domaine }) => activeTab === "all" || activeTab === domaine,
+  );
 
   return (
     <div className="container mx-auto max-w-6xl space-y-8 px-4 py-8">
       <div className="space-y-4">
         <div className="space-y-1">
-          <h1 className="font-expressive-title text-3xl font-black tracking-tight">Recherche unifiée</h1>
+          <h1 className="font-expressive-title text-3xl font-black tracking-tight">
+            Recherche unifiée
+          </h1>
           <p className="text-on-surface-variant">
-            Explorez les articles de l’association, le wiki Azalée et l’E-Sport Achilléa.
+            Explorez les articles de l’association, le wiki Azalée et l’E-Sport
+            Achilléa.
           </p>
         </div>
         <search>
@@ -87,16 +102,24 @@ export async function SearchPageContent({
         </search>
       </div>
 
-      {query.length === 1 && <p>Saisissez au moins deux caractères pour lancer la recherche.</p>}
+      {query.length === 1 && (
+        <p>Saisissez au moins deux caractères pour lancer la recherche.</p>
+      )}
       {indisponible && (
-        <p role="alert" className="rounded-xl border border-destructive p-4 text-base">
+        <p
+          role="alert"
+          className="rounded-xl border border-destructive p-4 text-base"
+        >
           La recherche est temporairement indisponible. Réessayez plus tard.
         </p>
       )}
 
       {query.length >= 2 && !indisponible && (
         <div className="space-y-6">
-          <nav aria-label="Filtrer les résultats" className="flex gap-2 overflow-x-auto border-b pb-3">
+          <nav
+            aria-label="Filtrer les résultats"
+            className="flex gap-2 overflow-x-auto border-b pb-3"
+          >
             {[
               { id: "all", label: "Tous", count: resultats.length },
               ...groupes.map(({ domaine, resultats: items }) => ({
@@ -116,7 +139,9 @@ export async function SearchPageContent({
             ))}
           </nav>
 
-          {groupesAffiches.every(({ resultats: items }) => items.length === 0) && (
+          {groupesAffiches.every(
+            ({ resultats: items }) => items.length === 0,
+          ) && (
             <output className="rounded-xl border p-6 text-center text-base">
               Aucun résultat trouvé pour « {query} » dans cet onglet.
             </output>
@@ -128,22 +153,35 @@ export async function SearchPageContent({
               const config = DOMAINES[domaine];
               const Icon = config.icon;
               return (
-                <section key={domaine} className="space-y-3" aria-label={config.label}>
+                <section
+                  key={domaine}
+                  className="space-y-3"
+                  aria-label={config.label}
+                >
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <h2 className="flex items-center gap-2 text-xl font-bold">
                       <Icon className="size-5" aria-hidden="true" />
                       {config.label} ({items.length})
                     </h2>
-                    <Link href={config.lien} className="text-primary text-base underline-offset-2 hover:underline">
+                    <Link
+                      href={config.lien}
+                      className="text-primary text-base underline-offset-2 hover:underline"
+                    >
                       {config.lienLabel} →
                     </Link>
                   </div>
                   <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                    {items.map(item => (
-                      <Link key={`${item.type}-${item.id}`} href={item.href} className="group">
+                    {items.map((item) => (
+                      <Link
+                        key={`${item.type}-${item.id}`}
+                        href={item.href}
+                        className="group"
+                      >
                         <Card className="group-hover:border-primary h-full transition-colors">
                           <CardHeader>
-                            <CardTitle className="group-hover:text-primary text-base">{item.titre}</CardTitle>
+                            <CardTitle className="group-hover:text-primary text-base">
+                              {item.titre}
+                            </CardTitle>
                           </CardHeader>
                           <CardContent className="text-on-surface-variant space-y-1 text-sm">
                             <p>{LIBELLES_TYPES_RECHERCHE[item.type]}</p>

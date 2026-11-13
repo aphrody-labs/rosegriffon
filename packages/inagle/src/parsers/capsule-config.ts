@@ -77,8 +77,12 @@ function parseEntries(entries: ConfigNode[]): CapsuleDatabase {
 
     if (entry.name.startsWith("CPSL_LOT_WEAPON_COLOR_TABLE_INFO_LIST_BEG")) {
       for (const child of children) {
-        if (!child.name.startsWith("CPSL_LOT_WEAPON_COLOR_TABLE_INFO_")) continue;
-        const tableId = child.variables.length > 0 ? toHex(parseIntVar(child.variables[0])) : "0x00000000";
+        if (!child.name.startsWith("CPSL_LOT_WEAPON_COLOR_TABLE_INFO_"))
+          continue;
+        const tableId =
+          child.variables.length > 0
+            ? toHex(parseIntVar(child.variables[0]))
+            : "0x00000000";
 
         const data: Array<{ colorType: number; weight: number }> = [];
         for (const dataList of child.children || []) {
@@ -139,13 +143,19 @@ function parseEntries(entries: ConfigNode[]): CapsuleDatabase {
 // ============================================================================
 
 export async function loadCapsuleConfigAsync(dataPath: string = DATA_ROOT) {
-  const path = join(dataPath, "common/gamedata/capsule", "capsule_config_0.00.00.cfg.bin.json");
+  const path = join(
+    dataPath,
+    "common/gamedata/capsule",
+    "capsule_config_0.00.00.cfg.bin.json",
+  );
   const content = await loadJsonAsync<{ entries: ConfigNode[] }>(path);
   if (!content?.entries) return null;
   return parseEntries(content.entries);
 }
 
-export async function buildCapsuleDatabase(dataPath: string = DATA_ROOT): Promise<CapsuleDatabase> {
+export async function buildCapsuleDatabase(
+  dataPath: string = DATA_ROOT,
+): Promise<CapsuleDatabase> {
   const result = await loadCapsuleConfigAsync(dataPath);
   return {
     weaponColorTables: result?.weaponColorTables || [],

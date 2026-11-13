@@ -3,7 +3,14 @@
 import { getServerSession } from "@/lib/auth-helpers";
 import { createPostgresClient } from "@rosegriffon/db/service";
 
-export type SharePlatform = "twitter" | "facebook" | "whatsapp" | "linkedin" | "telegram" | "copy" | "native";
+export type SharePlatform =
+  | "twitter"
+  | "facebook"
+  | "whatsapp"
+  | "linkedin"
+  | "telegram"
+  | "copy"
+  | "native";
 
 export interface ShareCounts {
   total: number;
@@ -35,7 +42,10 @@ const VALID_PLATFORMS: ReadonlySet<SharePlatform> = new Set([
  * Enregistre un partage pour un article. L'authentification est optionnelle :
  * les partages anonymes sont tracés avec user_id null.
  */
-export async function trackShare(articleId: string, platform: SharePlatform): Promise<{ success: boolean }> {
+export async function trackShare(
+  articleId: string,
+  platform: SharePlatform,
+): Promise<{ success: boolean }> {
   if (!articleId || !VALID_PLATFORMS.has(platform)) {
     return { success: false };
   }
@@ -78,7 +88,9 @@ export async function trackShare(articleId: string, platform: SharePlatform): Pr
  * mapping en conséquence (le code historique lisait `platform`/`count`, qui
  * n'existent pas, et produisait des `NaN`).
  */
-export async function getShareCounts(articleIds: string[]): Promise<Record<string, ShareCounts>> {
+export async function getShareCounts(
+  articleIds: string[],
+): Promise<Record<string, ShareCounts>> {
   if (articleIds.length === 0) {
     return {};
   }
@@ -93,9 +105,12 @@ export async function getShareCounts(articleIds: string[]): Promise<Record<strin
   }
 
   // Tentative via RPC
-  const { data: rpcData, error: rpcError } = await client.rpc("get_share_counts", {
-    p_article_ids: articleIds,
-  });
+  const { data: rpcData, error: rpcError } = await client.rpc(
+    "get_share_counts",
+    {
+      p_article_ids: articleIds,
+    },
+  );
 
   if (!rpcError && rpcData) {
     for (const row of rpcData as Array<{
@@ -107,7 +122,10 @@ export async function getShareCounts(articleIds: string[]): Promise<Record<strin
         byPlatform: {},
         total: 0,
       };
-      bucket.total = typeof row.total === "number" ? row.total : Number.parseInt(String(row.total ?? "0"), 10) || 0;
+      bucket.total =
+        typeof row.total === "number"
+          ? row.total
+          : Number.parseInt(String(row.total ?? "0"), 10) || 0;
       if (row.by_platform && typeof row.by_platform === "object") {
         for (const [platform, count] of Object.entries(row.by_platform)) {
           bucket.byPlatform[platform] = Number(count) || 0;
@@ -135,7 +153,8 @@ export async function getShareCounts(articleIds: string[]): Promise<Record<strin
         byPlatform: {},
         total: 0,
       };
-      bucket.byPlatform[row.platform] = (bucket.byPlatform[row.platform] || 0) + 1;
+      bucket.byPlatform[row.platform] =
+        (bucket.byPlatform[row.platform] || 0) + 1;
       bucket.total += 1;
       result[row.article_id] = bucket;
     }
@@ -148,7 +167,9 @@ export async function getShareCounts(articleIds: string[]): Promise<Record<strin
  * Retourne les statistiques détaillées de partage pour un article :
  * total, répartition par plateforme, et timeline des 30 derniers jours.
  */
-export async function getArticleShareStats(articleId: string): Promise<ArticleShareStats> {
+export async function getArticleShareStats(
+  articleId: string,
+): Promise<ArticleShareStats> {
   const supabase = createPostgresClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const client = supabase as any;

@@ -42,7 +42,10 @@ function toHex(value: number | string): string {
 }
 
 function extractImageName(texturePath: string): string {
-  return texturePath.replace("#/menu/220_img/", "").replace("<LG>/", "fr/").replace(".g4tx", "");
+  return texturePath
+    .replace("#/menu/220_img/", "")
+    .replace("<LG>/", "fr/")
+    .replace(".g4tx", "");
 }
 
 // ============================================================================
@@ -86,7 +89,9 @@ function parseContent(content: any): ParsedPhaseTitle[] {
 // Loaders
 // ============================================================================
 
-export async function loadPhaseTitleConfigAsync(dataPath: string = DATA_ROOT): Promise<ParsedPhaseTitle[] | null> {
+export async function loadPhaseTitleConfigAsync(
+  dataPath: string = DATA_ROOT,
+): Promise<ParsedPhaseTitle[] | null> {
   const filename = findConfigFile("phase", "phase_title_config");
   if (!filename) return null;
 
@@ -95,7 +100,9 @@ export async function loadPhaseTitleConfigAsync(dataPath: string = DATA_ROOT): P
   return content ? parseContent(content) : null;
 }
 
-export async function buildPhaseTitleDatabase(dataPath: string = DATA_ROOT): Promise<PhaseTitleDatabase> {
+export async function buildPhaseTitleDatabase(
+  dataPath: string = DATA_ROOT,
+): Promise<PhaseTitleDatabase> {
   const titles = (await loadPhaseTitleConfigAsync(dataPath)) || [];
   const byId = new Map<string, ParsedPhaseTitle>();
   for (const t of titles) byId.set(t.phaseId, t);

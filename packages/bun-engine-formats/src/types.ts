@@ -60,7 +60,15 @@ export interface Section {
   /** Load address in the guest memory map, when the format defines one. */
   address?: number | undefined;
   arch?: Arch | undefined;
-  kind: "header" | "code" | "data" | "filesystem" | "partition" | "track" | "metadata" | "padding";
+  kind:
+    | "header"
+    | "code"
+    | "data"
+    | "filesystem"
+    | "partition"
+    | "track"
+    | "metadata"
+    | "padding";
   /** Byte order of the stored data when it differs from the guest order (N64 v64/n64 dumps). */
   swap?: "16" | "32" | undefined;
 }
@@ -98,7 +106,9 @@ export interface ParseContext {
   head: Uint8Array;
 }
 
-export type FormatParser = (context: ParseContext) => Promise<ParsedImage<object>>;
+export type FormatParser = (
+  context: ParseContext,
+) => Promise<ParsedImage<object>>;
 
 export interface FileEntry {
   path: string;
@@ -107,6 +117,8 @@ export interface FileEntry {
 }
 
 /** Identity helper that keeps the inferred header type of a parser (used for typed imports). */
-export function parsed<H extends object>(image: ParsedImage<H>): ParsedImage<H> {
+export function parsed<H extends object>(
+  image: ParsedImage<H>,
+): ParsedImage<H> {
   return image;
 }

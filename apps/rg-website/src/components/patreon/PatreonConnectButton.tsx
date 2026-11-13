@@ -44,13 +44,19 @@ const LABELS: Record<Variant, string> = {
  * définis dans la config). Patreon n'accordera ces scopes que si l'utilisateur
  * connecté est bien propriétaire de la campagne.
  */
-export function PatreonConnectButton({ variant = "patron-link", redirect, className, label }: Props) {
+export function PatreonConnectButton({
+  variant = "patron-link",
+  redirect,
+  className,
+  label,
+}: Props) {
   const [loading, setLoading] = useState(false);
 
   const handleClick = async () => {
     setLoading(true);
     try {
-      const callbackURL = redirect ?? (variant === "creator-link" ? "/admin/patreon" : "/profil");
+      const callbackURL =
+        redirect ?? (variant === "creator-link" ? "/admin/patreon" : "/profil");
       const res = await authClient.signIn.social({
         callbackURL,
         provider: "patreon",
@@ -73,7 +79,10 @@ export function PatreonConnectButton({ variant = "patron-link", redirect, classN
       onClick={handleClick}
       disabled={loading}
       size="lg"
-      className={cn("gap-2 bg-[#c9a958] text-rg-marine hover:bg-[#dab86a] font-semibold", className)}
+      className={cn(
+        "gap-2 bg-[#c9a958] text-rg-marine hover:bg-[#dab86a] font-semibold",
+        className,
+      )}
     >
       {loading ? (
         <Loader2 className="size-4 animate-spin" />

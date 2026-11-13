@@ -26,7 +26,13 @@
  */
 import { sql, inagleSql } from "../lib/db";
 import { cached, invalidate } from "../lib/cache";
-import { DON, etatQuotidien, jourCivil, verifierDepense, type Motif } from "../lib/kizuna";
+import {
+  DON,
+  etatQuotidien,
+  jourCivil,
+  verifierDepense,
+  type Motif,
+} from "../lib/kizuna";
 import {
   garantieAuTirage,
   prixDePlaque,
@@ -35,8 +41,16 @@ import {
   TARIFS,
   type Categorie,
 } from "../lib/collection";
-import { GAIN_DEFAUT, niveauPour, niveauxFranchis, jetonsDeMontee } from "../lib/experience";
-import { lireReglages, type ReglagesCommunaute } from "../lib/reglages-communaute";
+import {
+  GAIN_DEFAUT,
+  niveauPour,
+  niveauxFranchis,
+  jetonsDeMontee,
+} from "../lib/experience";
+import {
+  lireReglages,
+  type ReglagesCommunaute,
+} from "../lib/reglages-communaute";
 
 // ─── Réglages ───────────────────────────────────────────────────────────────
 
@@ -63,7 +77,10 @@ export async function reglagesDe(guildId: string): Promise<ReglagesCommunaute> {
 }
 
 /** Écrit les réglages et invalide le cache — dans cet ordre. */
-export async function enregistrerReglages(guildId: string, reglages: ReglagesCommunaute): Promise<void> {
+export async function enregistrerReglages(
+  guildId: string,
+  reglages: ReglagesCommunaute,
+): Promise<void> {
   // ⚠ NE PAS `JSON.stringify(reglages)` ici : Bun.SQL encode déjà en JSON
   // toute valeur liée à un paramètre casté `::jsonb`. Stringifier avant coup
   // double l'encodage — la colonne reçoit une CHAÎNE contenant du JSON, pas
@@ -184,7 +201,10 @@ const COLONNES_PROFIL = sql`
  * (« 1 850ᵉ sur 2 075 » pour qui n'a jamais parlé) et gonflerait la base sans
  * rien apprendre.
  */
-export async function profilDe(guildId: string, discordId: string): Promise<ProfilCommunaute> {
+export async function profilDe(
+  guildId: string,
+  discordId: string,
+): Promise<ProfilCommunaute> {
   const lignes = await sql<LigneProfil[]>`
 		SELECT ${COLONNES_PROFIL} FROM bot_profils
 		WHERE guild_id = ${guildId} AND discord_id = ${discordId}
@@ -239,7 +259,11 @@ export interface LigneClassement {
 /** Une page de classement, du plus haut au plus bas. */
 export async function classement(
   guildId: string,
-  options: { critere?: "xp" | "jetons_gagnes"; limite?: number; decalage?: number } = {},
+  options: {
+    critere?: "xp" | "jetons_gagnes";
+    limite?: number;
+    decalage?: number;
+  } = {},
 ): Promise<LigneClassement[]> {
   const limite = Math.min(100, Math.max(1, Math.floor(options.limite ?? 10)));
   const decalage = Math.max(0, Math.floor(options.decalage ?? 0));
@@ -257,7 +281,7 @@ export async function classement(
 				 ORDER BY xp DESC, discord_id ASC
 				 LIMIT ${limite} OFFSET ${decalage}
 			`;
-  return lignes.map(ligne => {
+  return lignes.map((ligne) => {
     const profil = versProfil(ligne);
     return {
       discordId: profil.discordId,
@@ -310,7 +334,7 @@ export async function ajouterExperience(
   options: { jetonsParNiveau?: number } = {},
 ): Promise<GainExperience> {
   const montant = Math.max(0, Math.floor(gain));
-  return await sql.begin(async tx => {
+  return await sql.begin(async (tx) => {
     const [ligne] = await tx<Array<{ xp: string; niveau: number }>>`
 			INSERT INTO bot_profils (guild_id, discord_id, xp, niveau, messages_comptes, dernier_gain_le)
 			VALUES (${guildId}, ${discordId}, ${montant}, 1, 1, NOW())
@@ -330,7 +354,12 @@ export async function ajouterExperience(
     let jetonsOfferts = 0;
     if (franchis.length > 0) {
       jetonsOfferts = franchis.reduce(
-        (total, niveau) => total + jetonsDeMontee(niveau, options.jetonsParNiveau ?? GAIN_DEFAUT.jetonsParNiveau),
+        (total, niveau) =>
+          total +
+          jetonsDeMontee(
+            niveau,
+            options.jetonsParNiveau ?? GAIN_DEFAUT.jetonsParNiveau,
+          ),
         0,
       );
       await tx`
@@ -357,7 +386,14 @@ export async function ajouterExperience(
 			`;
     }
 
-    return { franchis, niveauApres, niveauAvant, jetonsOfferts, xpApres, xpAvant };
+    return {
+      franchis,
+      niveauApres,
+      niveauAvant,
+      jetonsOfferts,
+      xpApres,
+      xpAvant,
+    };
   });
 }
 
@@ -377,13 +413,21 @@ export async function ajouterExperience(
  * relais : le délai reste tenu à l'échelle du processus, ce qui est exactement
  * la garantie utile ici (un seul processus par bot).
  */
-export async function consommerDelai(guildId: string, discordId: string, delaiSecondes: number): Promise<boolean> {
+export async function consommerDelai(
+  guildId: string,
+  discordId: string,
+  delaiSecondes: number,
+): Promise<boolean> {
   const delai = Math.max(0, Math.floor(delaiSecondes));
   if (delai === 0) {
     return true;
   }
   const maintenant = Date.now();
-  const pose = await cached(`communaute:xp:${guildId}:${discordId}`, delai * 1_000, async () => maintenant);
+  const pose = await cached(
+    `communaute:xp:${guildId}:${discordId}`,
+    delai * 1_000,
+    async () => maintenant,
+  );
   return pose === maintenant;
 }
 
@@ -408,7 +452,7 @@ export async function mouvementKizuna(
     const profil = await profilDe(guildId, discordId);
     return profil.jetons;
   }
-  return await sql.begin(async tx => {
+  return await sql.begin(async (tx) => {
     const [ligne] = await tx<Array<{ jetons: number }>>`
 			INSERT INTO bot_profils (guild_id, discord_id, jetons, jetons_gagnes)
 			VALUES (${guildId}, ${discordId}, ${Math.max(0, montant)}, ${Math.max(0, montant)})
@@ -451,7 +495,11 @@ export async function reclamerQuotidien(
   maintenant: Date = new Date(),
 ): Promise<ResultatQuotidien> {
   const profil = await profilDe(guildId, discordId);
-  const etat = etatQuotidien(profil.dernierQuotidienLe, profil.serieQuotidienne, maintenant);
+  const etat = etatQuotidien(
+    profil.dernierQuotidienLe,
+    profil.serieQuotidienne,
+    maintenant,
+  );
   if (!etat.reclamable) {
     return {
       gain: 0,
@@ -464,7 +512,7 @@ export async function reclamerQuotidien(
   }
 
   const aujourdhui = jourCivil(maintenant);
-  return await sql.begin(async tx => {
+  return await sql.begin(async (tx) => {
     const [ligne] = await tx<Array<{ jetons: number }>>`
 			INSERT INTO bot_profils (guild_id, discord_id, jetons, jetons_gagnes,
 			                         dernier_quotidien_le, serie_quotidienne)
@@ -540,7 +588,7 @@ export async function transfererKizuna(
   montant: number,
 ): Promise<{ soldeExpediteur: number; soldeDestinataire: number }> {
   const valeur = Math.max(DON.minimum, Math.trunc(montant));
-  return await sql.begin(async tx => {
+  return await sql.begin(async (tx) => {
     const [depart] = await tx<Array<{ jetons: number }>>`
 			UPDATE bot_profils
 			   SET jetons = jetons - ${valeur}, maj_le = NOW()
@@ -564,7 +612,10 @@ export async function transfererKizuna(
 			VALUES (${guildId}, ${expediteurId}, ${-valeur}, 'don-envoye', ${destinataireId}),
 			       (${guildId}, ${destinataireId}, ${valeur}, 'don-recu', ${expediteurId})
 		`;
-    return { soldeDestinataire: arrivee?.jetons ?? valeur, soldeExpediteur: depart.jetons };
+    return {
+      soldeDestinataire: arrivee?.jetons ?? valeur,
+      soldeExpediteur: depart.jetons,
+    };
   });
 }
 
@@ -577,7 +628,11 @@ export interface LigneJournal {
 }
 
 /** Les derniers mouvements d'un membre, du plus récent au plus ancien. */
-export async function journalDe(guildId: string, discordId: string, limite = 10): Promise<LigneJournal[]> {
+export async function journalDe(
+  guildId: string,
+  discordId: string,
+  limite = 10,
+): Promise<LigneJournal[]> {
   const lignes = await sql<
     Array<{
       delta: number;
@@ -593,7 +648,7 @@ export async function journalDe(guildId: string, discordId: string, limite = 10)
 		 ORDER BY cree_le DESC, id DESC
 		 LIMIT ${Math.min(50, Math.max(1, Math.floor(limite)))}
 	`;
-  return lignes.map(ligne => ({
+  return lignes.map((ligne) => ({
     contrepartie: ligne.contrepartie,
     creeLe: ligne.cree_le,
     delta: ligne.delta,
@@ -618,12 +673,16 @@ const TTL_TOTAL_PERSOS_MS = 6 * 60 * 60_000;
 
 /** Nombre de joueurs recensés — le dénominateur de la complétion. */
 export async function totalPersonnages(): Promise<number> {
-  return await cached("communaute:persos:total", TTL_TOTAL_PERSOS_MS, async () => {
-    const [ligne] = await inagleSql<Array<{ total: string }>>`
+  return await cached(
+    "communaute:persos:total",
+    TTL_TOTAL_PERSOS_MS,
+    async () => {
+      const [ligne] = await inagleSql<Array<{ total: string }>>`
 			SELECT count(*)::text AS total FROM inagle_characters WHERE name_fr IS NOT NULL AND name_fr <> ''
 		`;
-    return nombre(ligne?.total);
-  });
+      return nombre(ligne?.total);
+    },
+  );
 }
 
 /**
@@ -638,7 +697,9 @@ export async function totalPersonnages(): Promise<number> {
  * lève `operator does not exist: text = integer`. Les comparaisons ci-dessous
  * passent donc par des chaînes.
  */
-export async function tirerPersonnage(options: { garantie?: boolean } = {}): Promise<FichePersonnage | null> {
+export async function tirerPersonnage(
+  options: { garantie?: boolean } = {},
+): Promise<FichePersonnage | null> {
   const lignes = options.garantie
     ? await inagleSql<Array<Record<string, string | null>>>`
 			SELECT id, name_fr, internal_code, rarity, element, position, slug
@@ -668,7 +729,9 @@ export async function tirerPersonnage(options: { garantie?: boolean } = {}): Pro
 }
 
 /** Les fiches de plusieurs joueurs, dans l'ordre demandé. */
-export async function fichesPersonnages(ids: readonly string[]): Promise<FichePersonnage[]> {
+export async function fichesPersonnages(
+  ids: readonly string[],
+): Promise<FichePersonnage[]> {
   if (ids.length === 0) {
     return [];
   }
@@ -677,11 +740,13 @@ export async function fichesPersonnages(ids: readonly string[]): Promise<FichePe
 		  FROM inagle_characters
 		 WHERE id = ANY(${[...ids]}::text[])
 	`;
-  const index = new Map(lignes.map(ligne => [ligne.id ?? "", ligne]));
+  const index = new Map(lignes.map((ligne) => [ligne.id ?? "", ligne]));
   return ids
-    .map(id => index.get(id))
-    .filter((ligne): ligne is Record<string, string | null> => ligne !== undefined)
-    .map(ligne => ({
+    .map((id) => index.get(id))
+    .filter(
+      (ligne): ligne is Record<string, string | null> => ligne !== undefined,
+    )
+    .map((ligne) => ({
       code: ligne.internal_code ?? null,
       element: ligne.element ?? null,
       id: ligne.id ?? "",
@@ -693,7 +758,10 @@ export async function fichesPersonnages(ids: readonly string[]): Promise<FichePe
 }
 
 /** Nombre de tirages déjà payés — la mémoire de la garantie. */
-export async function nombreTirages(guildId: string, discordId: string): Promise<number> {
+export async function nombreTirages(
+  guildId: string,
+  discordId: string,
+): Promise<number> {
   const [ligne] = await sql<Array<{ total: string }>>`
 		SELECT count(*)::text AS total
 		  FROM bot_journal_kizuna
@@ -730,7 +798,7 @@ export async function tirage(
   }
   const rarete = rareteDe(personnage.rarete);
 
-  return await sql.begin(async tx => {
+  return await sql.begin(async (tx) => {
     const [debit] = await tx<Array<{ jetons: number }>>`
 			UPDATE bot_profils SET jetons = jetons - ${prix}, maj_le = NOW()
 			 WHERE guild_id = ${guildId} AND discord_id = ${discordId} AND jetons >= ${prix}
@@ -764,12 +832,20 @@ export async function tirage(
 				VALUES (${guildId}, ${discordId}, ${rembourse}, 'remboursement', ${`doublon:${personnage.id}`})
 			`;
     }
-    return { doublon, garanti: options.garantie === true, personnage, rembourse: rembourse };
+    return {
+      doublon,
+      garanti: options.garantie === true,
+      personnage,
+      rembourse: rembourse,
+    };
   });
 }
 
 /** Le prochain tirage du membre est-il garanti ? */
-export async function prochainTirageGaranti(guildId: string, discordId: string): Promise<boolean> {
+export async function prochainTirageGaranti(
+  guildId: string,
+  discordId: string,
+): Promise<boolean> {
   return garantieAuTirage(await nombreTirages(guildId, discordId));
 }
 
@@ -786,17 +862,31 @@ export async function inventaireDe(
   categorie?: Categorie,
 ): Promise<EntreeInventaire[]> {
   const lignes = categorie
-    ? await sql<Array<{ categorie: string; objet_id: string; prix_paye: number; obtenu_le: Date }>>`
+    ? await sql<
+        Array<{
+          categorie: string;
+          objet_id: string;
+          prix_paye: number;
+          obtenu_le: Date;
+        }>
+      >`
 			SELECT categorie, objet_id, prix_paye, obtenu_le FROM bot_inventaire
 			 WHERE guild_id = ${guildId} AND discord_id = ${discordId} AND categorie = ${categorie}
 			 ORDER BY obtenu_le DESC
 		`
-    : await sql<Array<{ categorie: string; objet_id: string; prix_paye: number; obtenu_le: Date }>>`
+    : await sql<
+        Array<{
+          categorie: string;
+          objet_id: string;
+          prix_paye: number;
+          obtenu_le: Date;
+        }>
+      >`
 			SELECT categorie, objet_id, prix_paye, obtenu_le FROM bot_inventaire
 			 WHERE guild_id = ${guildId} AND discord_id = ${discordId}
 			 ORDER BY obtenu_le DESC
 		`;
-  return lignes.map(ligne => ({
+  return lignes.map((ligne) => ({
     categorie: ligne.categorie,
     objetId: ligne.objet_id,
     obtenuLe: ligne.obtenu_le,
@@ -815,9 +905,11 @@ export async function personnagesPossedes(
 		 ORDER BY obtenu_le DESC
 	`;
   const characters = new Map(
-    (await fichesPersonnages(inventory.map(row => row.objet_id))).map(character => [character.id, character]),
+    (await fichesPersonnages(inventory.map((row) => row.objet_id))).map(
+      (character) => [character.id, character],
+    ),
   );
-  return inventory.flatMap(row => {
+  return inventory.flatMap((row) => {
     const character = characters.get(row.objet_id);
     return character ? [{ ...character, obtenuLe: row.obtenu_le }] : [];
   });
@@ -846,7 +938,7 @@ export async function plaques(): Promise<FichePlaque[]> {
     >`
 			SELECT id, sort_no, image_path, name_text_id FROM inagle_nameplates ORDER BY sort_no ASC
 		`;
-    return lignes.map(ligne => ({
+    return lignes.map((ligne) => ({
       cheminImage: ligne.image_path,
       id: ligne.id,
       nomTexteId: ligne.name_text_id,
@@ -871,7 +963,7 @@ export async function acheter(
   prix: number,
 ): Promise<{ solde: number } | null> {
   const cout = Math.max(0, Math.floor(prix));
-  return await sql.begin(async tx => {
+  return await sql.begin(async (tx) => {
     const [existe] = await tx<Array<{ objet_id: string }>>`
 			SELECT objet_id FROM bot_inventaire
 			 WHERE guild_id = ${guildId} AND discord_id = ${discordId}
@@ -967,18 +1059,26 @@ export interface RecompenseNiveau {
 
 const TTL_RECOMPENSES_MS = 5 * 60_000;
 
-export async function recompensesDe(guildId: string): Promise<RecompenseNiveau[]> {
-  return await cached(`communaute:recompenses:${guildId}`, TTL_RECOMPENSES_MS, async () => {
-    const lignes = await sql<Array<{ niveau: number; role_id: string; cumulable: boolean }>>`
+export async function recompensesDe(
+  guildId: string,
+): Promise<RecompenseNiveau[]> {
+  return await cached(
+    `communaute:recompenses:${guildId}`,
+    TTL_RECOMPENSES_MS,
+    async () => {
+      const lignes = await sql<
+        Array<{ niveau: number; role_id: string; cumulable: boolean }>
+      >`
 			SELECT niveau, role_id, cumulable FROM bot_recompenses_niveau
 			 WHERE guild_id = ${guildId} ORDER BY niveau ASC
 		`;
-    return lignes.map(ligne => ({
-      cumulable: ligne.cumulable,
-      niveau: ligne.niveau,
-      roleId: ligne.role_id,
-    }));
-  });
+      return lignes.map((ligne) => ({
+        cumulable: ligne.cumulable,
+        niveau: ligne.niveau,
+        roleId: ligne.role_id,
+      }));
+    },
+  );
 }
 
 /**
@@ -998,17 +1098,22 @@ export function rolesPourNiveau(
   recompenses: readonly RecompenseNiveau[],
   niveau: number,
 ): { aPoser: string[]; aRetirer: string[] } {
-  const acquises = recompenses.filter(recompense => recompense.niveau <= niveau);
+  const acquises = recompenses.filter(
+    (recompense) => recompense.niveau <= niveau,
+  );
   if (acquises.length === 0) {
     return { aPoser: [], aRetirer: [] };
   }
   const derniere = acquises[acquises.length - 1] as RecompenseNiveau;
   if (derniere.cumulable) {
-    return { aPoser: acquises.map(recompense => recompense.roleId), aRetirer: [] };
+    return {
+      aPoser: acquises.map((recompense) => recompense.roleId),
+      aRetirer: [],
+    };
   }
   return {
     aPoser: [derniere.roleId],
-    aRetirer: acquises.slice(0, -1).map(recompense => recompense.roleId),
+    aRetirer: acquises.slice(0, -1).map((recompense) => recompense.roleId),
   };
 }
 

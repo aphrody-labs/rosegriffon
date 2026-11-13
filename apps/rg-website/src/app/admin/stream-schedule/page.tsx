@@ -14,7 +14,10 @@ export default async function StreamSchedulePage() {
 
   return (
     <div className="p-6 space-y-6">
-      <AdminPageHeader title="Planning Streams" description="Gérez le planning de la Rose Griffon TV (Twitch)." />
+      <AdminPageHeader
+        title="Planning Streams"
+        description="Gérez le planning de la Rose Griffon TV (Twitch)."
+      />
       <StreamScheduleManager initialSchedules={schedules || []} />
     </div>
   );

@@ -40,19 +40,32 @@ export interface CpkPagedListing extends CpkListing {
 
 type FileRow = { name: string; ext: string; cpk: string; path: string };
 type SubRow = { name: string; count: number };
-type IndexedFileRow = FileRow & { top: string; sub: string; dir: string; depth: number };
+type IndexedFileRow = FileRow & {
+  top: string;
+  sub: string;
+  dir: string;
+  depth: number;
+};
 const nativeIndexes = new WeakMap<NieVfsHandle, IndexedFileRow[]>();
 
 /** Project native index DTOs without duplicating archive or game-data decoding. */
-export function vfsCpkRows(vfs: Pick<NieVfsHandle, "count" | "listRange">): IndexedFileRow[] {
+export function vfsCpkRows(
+  vfs: Pick<NieVfsHandle, "count" | "listRange">,
+): IndexedFileRow[] {
   const count = Number(vfs.count());
-  if (!Number.isSafeInteger(count) || count < 0) throw new Error("Invalid native VFS entry count");
+  if (!Number.isSafeInteger(count) || count < 0)
+    throw new Error("Invalid native VFS entry count");
   const rows: IndexedFileRow[] = [];
   for (let offset = 0; offset < count; offset += 4096) {
     const page = vfs.listRange(offset, 4096);
-    if (page.length !== Math.min(4096, count - offset)) throw new Error("Native VFS index pagination ended early");
+    if (page.length !== Math.min(4096, count - offset))
+      throw new Error("Native VFS index pagination ended early");
     for (const entry of page) {
-      if (typeof entry.path !== "string" || !entry.path || typeof entry.cpk !== "string")
+      if (
+        typeof entry.path !== "string" ||
+        !entry.path ||
+        typeof entry.cpk !== "string"
+      )
         throw new Error("Invalid native VFS index metadata");
       const path = String(entry.path);
       const segments = path.split("/");
@@ -84,7 +97,12 @@ function nativeRows(): IndexedFileRow[] {
 }
 
 function files(rows: FileRow[]): CpkFile[] {
-  return rows.map(row => ({ name: row.name, ext: row.ext, cpk: row.cpk, path: row.path }));
+  return rows.map((row) => ({
+    name: row.name,
+    ext: row.ext,
+    cpk: row.cpk,
+    path: row.path,
+  }));
 }
 
 async function subdirectories(dir: string): Promise<CpkDir[]> {
@@ -99,7 +117,9 @@ async function subdirectories(dir: string): Promise<CpkDir[]> {
             : "";
       if (name) counts.set(name, (counts.get(name) ?? 0) + 1);
     }
-    return [...counts].sort(([a], [b]) => a.localeCompare(b)).map(([name, count]) => ({ name, count }));
+    return [...counts]
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([name, count]) => ({ name, count }));
   }
   if (projectionSource() === "sqlite") {
     if (!dir || dir === "data")
@@ -110,16 +130,16 @@ async function subdirectories(dir: string): Promise<CpkDir[]> {
     return sqliteRows<SubRow>(
       "SELECT CASE WHEN instr(rest, '/') > 0 THEN substr(rest, 1, instr(rest, '/') - 1) ELSE rest END AS name, count(*) AS count FROM (SELECT substr(path, ?) AS rest FROM inagle_cpk_index WHERE substr(path, 1, ?) = ? AND dir <> ?) GROUP BY name ORDER BY name",
       [prefix.length + 1, prefix.length, prefix, dir],
-    ).filter(row => row.name.length > 0);
+    ).filter((row) => row.name.length > 0);
   }
   if (!dir || dir === "data") {
     const rows = await sqlDb()
       .selectFrom("inagle_cpk_index")
-      .select(eb => ["top as name", eb.fn.countAll<number>().as("count")])
+      .select((eb) => ["top as name", eb.fn.countAll<number>().as("count")])
       .groupBy("top")
       .orderBy("top", "asc")
       .execute();
-    return rows.map(row => ({ name: row.name, count: Number(row.count) }));
+    return rows.map((row) => ({ name: row.name, count: Number(row.count) }));
   }
   const prefix = `${dir}/`;
   const rows = await sql<SubRow>`
@@ -129,7 +149,7 @@ async function subdirectories(dir: string): Promise<CpkDir[]> {
 		where path like ${`${prefix}%`} and dir <> ${dir}
 		group by 1 order by 1
 	`.execute(sqlDb());
-  return rows.rows.filter(row => row.name.length > 0);
+  return rows.rows.filter((row) => row.name.length > 0);
 }
 
 export async function listDir(dirPath: string): Promise<CpkListing> {
@@ -142,7 +162,7 @@ export async function listDir(dirPath: string): Promise<CpkListing> {
       dirs,
       files: files(
         nativeRows()
-          .filter(row => row.dir === dir)
+          .filter((row) => row.dir === dir)
           .sort((a, b) => a.name.localeCompare(b.name)),
       ),
     };
@@ -151,7 +171,10 @@ export async function listDir(dirPath: string): Promise<CpkListing> {
       dir,
       dirs,
       files: files(
-        sqliteRows<FileRow>("SELECT name, ext, cpk, path FROM inagle_cpk_index WHERE dir = ? ORDER BY name", [dir]),
+        sqliteRows<FileRow>(
+          "SELECT name, ext, cpk, path FROM inagle_cpk_index WHERE dir = ? ORDER BY name",
+          [dir],
+        ),
       ),
     };
   const rows = await sqlDb()
@@ -163,15 +186,20 @@ export async function listDir(dirPath: string): Promise<CpkListing> {
   return { dir, dirs, files: files(rows) };
 }
 
-export async function listDirPaged(dirPath: string, limit = 200, offset = 0): Promise<CpkPagedListing> {
+export async function listDirPaged(
+  dirPath: string,
+  limit = 200,
+  offset = 0,
+): Promise<CpkPagedListing> {
   const dir = normalizeDir(dirPath);
   const safeLimit = Math.min(Math.max(limit, 1), 5000);
   const safeOffset = Math.max(offset, 0);
   const dirs = await subdirectories(dir);
-  if (!dir || dir === "data") return { dir: "data", dirs, files: [], fileTotal: 0, fileOffset: 0 };
+  if (!dir || dir === "data")
+    return { dir: "data", dirs, files: [], fileTotal: 0, fileOffset: 0 };
   if (projectionSource() === "vfs") {
     const rows = nativeRows()
-      .filter(row => row.dir === dir)
+      .filter((row) => row.dir === dir)
       .sort((a, b) => a.name.localeCompare(b.name));
     return {
       dir,
@@ -182,19 +210,26 @@ export async function listDirPaged(dirPath: string, limit = 200, offset = 0): Pr
     };
   }
   if (projectionSource() === "sqlite") {
-    const total = sqliteRows<{ count: number }>("SELECT count(*) AS count FROM inagle_cpk_index WHERE dir = ?", [
-      dir,
-    ])[0];
+    const total = sqliteRows<{ count: number }>(
+      "SELECT count(*) AS count FROM inagle_cpk_index WHERE dir = ?",
+      [dir],
+    )[0];
     const rows = sqliteRows<FileRow>(
       "SELECT name, ext, cpk, path FROM inagle_cpk_index WHERE dir = ? ORDER BY name LIMIT ? OFFSET ?",
       [dir, safeLimit, safeOffset],
     );
-    return { dir, dirs, files: files(rows), fileTotal: total.count, fileOffset: safeOffset };
+    return {
+      dir,
+      dirs,
+      files: files(rows),
+      fileTotal: total.count,
+      fileOffset: safeOffset,
+    };
   }
   const [total, rows] = await Promise.all([
     sqlDb()
       .selectFrom("inagle_cpk_index")
-      .select(eb => eb.fn.countAll<number>().as("count"))
+      .select((eb) => eb.fn.countAll<number>().as("count"))
       .where("dir", "=", dir)
       .executeTakeFirstOrThrow(),
     sqlDb()
@@ -206,13 +241,19 @@ export async function listDirPaged(dirPath: string, limit = 200, offset = 0): Pr
       .offset(safeOffset)
       .execute(),
   ]);
-  return { dir, dirs, files: files(rows), fileTotal: Number(total.count), fileOffset: safeOffset };
+  return {
+    dir,
+    dirs,
+    files: files(rows),
+    fileTotal: Number(total.count),
+    fileOffset: safeOffset,
+  };
 }
 
 export async function fileMeta(filePath: string): Promise<CpkFileMeta | null> {
   const row =
     projectionSource() === "vfs"
-      ? nativeRows().find(row => row.path === normalizeDir(filePath))
+      ? nativeRows().find((row) => row.path === normalizeDir(filePath))
       : projectionSource() === "sqlite"
         ? sqliteRows<{
             path: string;
@@ -223,12 +264,22 @@ export async function fileMeta(filePath: string): Promise<CpkFileMeta | null> {
             ext: string;
             cpk: string;
             depth: number;
-          }>("SELECT path, top, sub, dir, name, ext, cpk, depth FROM inagle_cpk_index WHERE path = ?", [
-            normalizeDir(filePath),
-          ])[0]
+          }>(
+            "SELECT path, top, sub, dir, name, ext, cpk, depth FROM inagle_cpk_index WHERE path = ?",
+            [normalizeDir(filePath)],
+          )[0]
         : await sqlDb()
             .selectFrom("inagle_cpk_index")
-            .select(["path", "top", "sub", "dir", "name", "ext", "cpk", "depth"])
+            .select([
+              "path",
+              "top",
+              "sub",
+              "dir",
+              "name",
+              "ext",
+              "cpk",
+              "depth",
+            ])
             .where("path", "=", normalizeDir(filePath))
             .executeTakeFirst();
   if (!row) return null;
@@ -247,14 +298,20 @@ export async function fileMeta(filePath: string): Promise<CpkFileMeta | null> {
   };
 }
 
-export async function searchFiles(query: string, limit = 200): Promise<CpkFile[]> {
+export async function searchFiles(
+  query: string,
+  limit = 200,
+): Promise<CpkFile[]> {
   const value = query.trim();
   if (value.length < 2) return [];
   if (projectionSource() === "vfs")
     return files(
       nativeRows()
-        .filter(row => row.path.toLowerCase().includes(value.toLowerCase()))
-        .sort((a, b) => a.name.length - b.name.length || a.name.localeCompare(b.name))
+        .filter((row) => row.path.toLowerCase().includes(value.toLowerCase()))
+        .sort(
+          (a, b) =>
+            a.name.length - b.name.length || a.name.localeCompare(b.name),
+        )
         .slice(0, Math.min(Math.max(limit, 1), 1000)),
     );
   if (projectionSource() === "sqlite") {
@@ -266,7 +323,8 @@ export async function searchFiles(query: string, limit = 200): Promise<CpkFile[]
         [offset],
       );
       for (const row of page) {
-        if (row.path.toLowerCase().includes(value.toLowerCase())) results.push(row);
+        if (row.path.toLowerCase().includes(value.toLowerCase()))
+          results.push(row);
         if (results.length >= maximum) return files(results);
       }
       if (page.length < 5000) return files(results);
@@ -284,10 +342,12 @@ export async function searchFiles(query: string, limit = 200): Promise<CpkFile[]
 export async function totalFiles(): Promise<number> {
   if (projectionSource() === "vfs") return nativeRows().length;
   if (projectionSource() === "sqlite")
-    return sqliteRows<{ count: number }>("SELECT count(*) AS count FROM inagle_cpk_index")[0].count;
+    return sqliteRows<{ count: number }>(
+      "SELECT count(*) AS count FROM inagle_cpk_index",
+    )[0].count;
   const row = await sqlDb()
     .selectFrom("inagle_cpk_index")
-    .select(eb => eb.fn.countAll<number>().as("count"))
+    .select((eb) => eb.fn.countAll<number>().as("count"))
     .executeTakeFirstOrThrow();
   return Number(row.count);
 }

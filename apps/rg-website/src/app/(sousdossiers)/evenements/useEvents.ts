@@ -7,7 +7,8 @@ import type { CalendarEvent } from "@/types/api";
 
 // Types d'événements
 export type EventType = "upcoming" | "past" | "today";
-export type EventCategory = "Meet-up" | "Stand artiste RG" | "Stand associatif" | "Conventions";
+export type EventCategory =
+  "Meet-up" | "Stand artiste RG" | "Stand associatif" | "Conventions";
 
 // Interface pour les données d'événement
 export interface EventData {
@@ -31,7 +32,10 @@ function getCategoryFromDescription(description: string): EventCategory {
 
   if (lowerDesc.includes("meet-up") || lowerDesc.includes("meetup")) {
     return "Meet-up";
-  } else if (lowerDesc.includes("stand artiste") || lowerDesc.includes("artiste rg")) {
+  } else if (
+    lowerDesc.includes("stand artiste") ||
+    lowerDesc.includes("artiste rg")
+  ) {
     return "Stand artiste RG";
   } else if (lowerDesc.includes("stand associatif")) {
     return "Stand associatif";
@@ -40,7 +44,9 @@ function getCategoryFromDescription(description: string): EventCategory {
 }
 
 // Fonction pour géocoder une adresse avec Nominatim (OpenStreetMap)
-async function geocodeWithNominatim(address: string): Promise<{ lat: number; lng: number } | null> {
+async function geocodeWithNominatim(
+  address: string,
+): Promise<{ lat: number; lng: number } | null> {
   try {
     const encodedAddress = encodeURIComponent(address);
     const response = await fetch(
@@ -150,7 +156,10 @@ async function fetchGoogleCalendarEvents(): Promise<EventData[]> {
         if (event.start?.dateTime) {
           startDateFormatted = eventStart.toLocaleString("fr-FR", timeOptions);
         } else {
-          startDateFormatted = eventStart.toLocaleDateString("fr-FR", dateOptions);
+          startDateFormatted = eventStart.toLocaleDateString(
+            "fr-FR",
+            dateOptions,
+          );
         }
 
         if (event.end?.dateTime) {
@@ -173,7 +182,9 @@ async function fetchGoogleCalendarEvents(): Promise<EventData[]> {
       }
 
       // Déterminer la catégorie à partir de la description
-      const eventCategory = event.description ? getCategoryFromDescription(event.description) : "Conventions";
+      const eventCategory = event.description
+        ? getCategoryFromDescription(event.description)
+        : "Conventions";
 
       // Extraire les coordonnées de la description (format: lat:48.8566,lng:2.3522)
       let lat = 46.603_354; // Centre de la France par défaut
@@ -181,8 +192,15 @@ async function fetchGoogleCalendarEvents(): Promise<EventData[]> {
       let coordsFound = false;
 
       if (event.description) {
-        const coordsMatch = event.description.match(/lat:([\d.-]+),lng:([\d.-]+)/);
-        if (coordsMatch && coordsMatch.length >= 3 && coordsMatch[1] && coordsMatch[2]) {
+        const coordsMatch = event.description.match(
+          /lat:([\d.-]+),lng:([\d.-]+)/,
+        );
+        if (
+          coordsMatch &&
+          coordsMatch.length >= 3 &&
+          coordsMatch[1] &&
+          coordsMatch[2]
+        ) {
           lat = Number.parseFloat(coordsMatch[1]);
           lng = Number.parseFloat(coordsMatch[2]);
           coordsFound = true;
@@ -197,7 +215,8 @@ async function fetchGoogleCalendarEvents(): Promise<EventData[]> {
         endDateFormatted,
         location: event.location || "Lieu non précisé",
         name: event.summary || "Événement sans titre",
-        needsGeocoding: !coordsFound && !!event.location && event.location.trim() !== "",
+        needsGeocoding:
+          !coordsFound && !!event.location && event.location.trim() !== "",
         position: { lat, lng },
         startDate: eventStart,
         startDateFormatted,
@@ -216,7 +235,10 @@ async function fetchGoogleCalendarEvents(): Promise<EventData[]> {
  * @returns {Object} - { events: EventData[], isLoading: boolean }
  */
 export function useEvents() {
-  const [geocoded, setGeocoded] = useState<{ source: EventData[]; events: EventData[] } | null>(null);
+  const [geocoded, setGeocoded] = useState<{
+    source: EventData[];
+    events: EventData[];
+  } | null>(null);
 
   const { data, isLoading, error } = useQuery<EventData[]>({
     gcTime: 1000 * 60 * 30,
@@ -225,9 +247,10 @@ export function useEvents() {
     staleTime: 1000 * 60 * 5,
   });
 
-  const isGeocoding = !!data?.some(event => event.needsGeocoding) && geocoded?.source !== data;
+  const isGeocoding =
+    !!data?.some((event) => event.needsGeocoding) && geocoded?.source !== data;
   useEffect(() => {
-    if (!data || !data.some(event => event.needsGeocoding)) return;
+    if (!data || !data.some((event) => event.needsGeocoding)) return;
     let cancelled = false;
     const processGeocoding = async () => {
       const updated = [...data];
@@ -235,16 +258,18 @@ export function useEvents() {
       for (let i = 0; i < updated.length; i++) {
         const current = updated[i];
         if (!current?.needsGeocoding) continue;
-        if (requests > 0) await new Promise(resolve => setTimeout(resolve, 1000));
+        if (requests > 0)
+          await new Promise((resolve) => setTimeout(resolve, 1000));
         if (cancelled) return;
         const coords = await geocodeWithNominatim(current.location);
         requests++;
         if (cancelled) return;
-        if (coords) updated[i] = { ...current, needsGeocoding: false, position: coords };
+        if (coords)
+          updated[i] = { ...current, needsGeocoding: false, position: coords };
       }
       if (!cancelled) setGeocoded({ source: data, events: updated });
     };
-    void processGeocoding().catch(cause => {
+    void processGeocoding().catch((cause) => {
       if (!cancelled) {
         console.error("Failed to geocode events:", cause);
         setGeocoded({ source: data, events: data });

@@ -31,7 +31,8 @@ const XIcon = (props: React.SVGProps<SVGSVGElement>) => (
 export default function PfpGenerator() {
   const [image, setImage] = useState<string | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [selectedOverlay, setSelectedOverlay] = useState<string>("/overlay.webp");
+  const [selectedOverlay, setSelectedOverlay] =
+    useState<string>("/overlay.webp");
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -97,7 +98,10 @@ export default function PfpGenerator() {
 
         // Draw user image (cover fit)
         // Calculate scaling to cover the square
-        const scale = Math.max(canvasRef.current.width / userImg.width, canvasRef.current.height / userImg.height);
+        const scale = Math.max(
+          canvasRef.current.width / userImg.width,
+          canvasRef.current.height / userImg.height,
+        );
         const x = (canvasRef.current.width - userImg.width * scale) / 2;
         const y = (canvasRef.current.height - userImg.height * scale) / 2;
 
@@ -105,7 +109,13 @@ export default function PfpGenerator() {
         ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
 
         // Draw user image centered and scaled
-        ctx.drawImage(userImg, x, y, userImg.width * scale, userImg.height * scale);
+        ctx.drawImage(
+          userImg,
+          x,
+          y,
+          userImg.width * scale,
+          userImg.height * scale,
+        );
 
         // Draw overlay
         ctx.drawImage(overlayImg, 0, 0);
@@ -141,7 +151,9 @@ export default function PfpGenerator() {
     setIsUpdatingProfile(true);
     try {
       // 1. Convert Canvas to Blob
-      const blob = await new Promise<Blob | null>(resolve => canvasRef.current?.toBlob(resolve, "image/png"));
+      const blob = await new Promise<Blob | null>((resolve) =>
+        canvasRef.current?.toBlob(resolve, "image/png"),
+      );
       if (!blob) {
         throw new Error("Erreur lors de la génération de l'image");
       }
@@ -149,7 +161,9 @@ export default function PfpGenerator() {
       // 2. Upload to Supabase Storage
       const storage = getBrowserStorage();
       const filePath = `${user.id}/avatar.png`; // Overwrite existing avatar
-      const { error: uploadError } = await storage.from("avatars").upload(filePath, blob, { upsert: true });
+      const { error: uploadError } = await storage
+        .from("avatars")
+        .upload(filePath, blob, { upsert: true });
 
       if (uploadError) {
         throw uploadError;
@@ -180,9 +194,14 @@ export default function PfpGenerator() {
   const shareUrl = typeof window !== "undefined" ? window.location.href : "";
 
   const shareOnX = () => {
-    const text = encodeURIComponent("Je viens de personnaliser mon avatar Rose Griffon ! 🎨✨");
+    const text = encodeURIComponent(
+      "Je viens de personnaliser mon avatar Rose Griffon ! 🎨✨",
+    );
     const url = encodeURIComponent(shareUrl);
-    window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, "_blank");
+    window.open(
+      `https://twitter.com/intent/tweet?text=${text}&url=${url}`,
+      "_blank",
+    );
   };
 
   const copyLink = (platform: string) => {
@@ -208,7 +227,11 @@ export default function PfpGenerator() {
               {previewUrl ? (
                 <div className="relative rounded-full overflow-hidden shadow-2xl border-[6px] border-background ring-4 ring-primary/20 transition-transform hover:scale-105 duration-500">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={previewUrl} alt="Aperçu" className="size-64 object-cover" />
+                  <img
+                    src={previewUrl}
+                    alt="Aperçu"
+                    className="size-64 object-cover"
+                  />
                 </div>
               ) : (
                 <button
@@ -224,7 +247,9 @@ export default function PfpGenerator() {
                   />
                   <div className="relative z-10 flex flex-col items-center justify-center gap-2 bg-background/80 p-4 rounded-xl backdrop-blur-sm shadow-sm">
                     <ImageIcon className="size-8 text-primary" />
-                    <span className="text-sm font-bold text-primary">Cliquez pour ajouter</span>
+                    <span className="text-sm font-bold text-primary">
+                      Cliquez pour ajouter
+                    </span>
                   </div>
                 </button>
               )}
@@ -340,7 +365,9 @@ export default function PfpGenerator() {
           </div>
         </CardContent>
         <CardFooter className="flex flex-col gap-4 border-t border-primary/10 pt-6">
-          <span className="text-sm text-muted-foreground font-medium">Partager l'outil :</span>
+          <span className="text-sm text-muted-foreground font-medium">
+            Partager l'outil :
+          </span>
           <div className="flex gap-3">
             <Button
               variant="outline"

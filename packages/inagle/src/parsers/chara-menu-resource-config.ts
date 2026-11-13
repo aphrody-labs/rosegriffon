@@ -126,9 +126,13 @@ function parseContent(content: any): {
 
         // First Int is the resource ID
         const idVar = vars.find((v: any) => v.type === "Int");
-        const resourceId = idVar ? toHex(parseInt(idVar.value, 10)) : `INFO_${i}`;
+        const resourceId = idVar
+          ? toHex(parseInt(idVar.value, 10))
+          : `INFO_${i}`;
 
-        const isTemplate = paths.some((p: string) => p.includes("<charaID>") || p.includes("<skillID>"));
+        const isTemplate = paths.some(
+          (p: string) => p.includes("<charaID>") || p.includes("<skillID>"),
+        );
 
         const pathMap: Partial<CharaResourceTemplate> = {};
         for (let j = 0; j < Math.min(paths.length, PATH_FIELDS.length); j++) {
@@ -164,12 +168,17 @@ function parseContent(content: any): {
 export async function loadCharaMenuResourceConfigAsync(
   dataPath: string = DATA_ROOT,
 ): Promise<ReturnType<typeof parseContent> | null> {
-  const path = join(dataPath, "common/gamedata/menu/chara_menu_resource_0.00.00.cfg.bin.json");
+  const path = join(
+    dataPath,
+    "common/gamedata/menu/chara_menu_resource_0.00.00.cfg.bin.json",
+  );
   const content = await loadJsonAsync<any>(path);
   return content ? parseContent(content) : null;
 }
 
-export async function buildCharaMenuResourceDatabase(dataPath: string = DATA_ROOT): Promise<CharaMenuResourceDatabase> {
+export async function buildCharaMenuResourceDatabase(
+  dataPath: string = DATA_ROOT,
+): Promise<CharaMenuResourceDatabase> {
   const result = await loadCharaMenuResourceConfigAsync(dataPath);
   const basePath = result?.basePath || "#/menu/";
   const template = result?.template || null;

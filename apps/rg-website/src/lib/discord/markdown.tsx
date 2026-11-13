@@ -21,7 +21,10 @@ const CLASSE_MENTION =
   "rounded-sm bg-primary/12 px-1 py-px font-medium text-primary transition-colors hover:bg-primary/20";
 
 /** Met en forme un horodatage dynamique `<t:…>` selon le style demandé. */
-function formaterHorodatage(horodatage: number, style: StyleHorodatage): string {
+function formaterHorodatage(
+  horodatage: number,
+  style: StyleHorodatage,
+): string {
   const date = new Date(horodatage * 1000);
   if (Number.isNaN(date.getTime())) return "date inconnue";
   switch (style) {
@@ -146,7 +149,10 @@ function rendreNoeud(noeud: NoeudInline, cle: string): React.ReactNode {
     }
     case "mention-globale": {
       return (
-        <span key={cle} className="rounded-sm bg-tertiary/20 px-1 py-px font-semibold text-on-tertiary-container">
+        <span
+          key={cle}
+          className="rounded-sm bg-tertiary/20 px-1 py-px font-semibold text-on-tertiary-container"
+        >
           @{noeud.valeur}
         </span>
       );
@@ -167,7 +173,10 @@ function rendreNoeud(noeud: NoeudInline, cle: string): React.ReactNode {
     }
     case "horodatage": {
       return (
-        <span key={cle} className="rounded-sm bg-surface-container-highest px-1 py-px text-on-surface-variant">
+        <span
+          key={cle}
+          className="rounded-sm bg-surface-container-highest px-1 py-px text-on-surface-variant"
+        >
           {formaterHorodatage(noeud.horodatage, noeud.style)}
         </span>
       );
@@ -178,8 +187,13 @@ function rendreNoeud(noeud: NoeudInline, cle: string): React.ReactNode {
   }
 }
 
-function rendreNoeuds(noeuds: NoeudInline[], prefixe: string): React.ReactNode[] {
-  return noeuds.map((noeud, index) => rendreNoeud(noeud, `${prefixe}-${index}`));
+function rendreNoeuds(
+  noeuds: NoeudInline[],
+  prefixe: string,
+): React.ReactNode[] {
+  return noeuds.map((noeud, index) =>
+    rendreNoeud(noeud, `${prefixe}-${index}`),
+  );
 }
 
 function rendreBloc(bloc: Bloc, cle: string): React.ReactNode {
@@ -200,7 +214,10 @@ function rendreBloc(bloc: Bloc, cle: string): React.ReactNode {
       } as const;
       const Balise = bloc.niveau === 1 ? "h3" : bloc.niveau === 2 ? "h4" : "h5";
       return (
-        <Balise key={cle} className={`${classes[bloc.niveau]} font-bold break-words text-on-surface`}>
+        <Balise
+          key={cle}
+          className={`${classes[bloc.niveau]} font-bold break-words text-on-surface`}
+        >
           {rendreNoeuds(bloc.enfants, cle)}
         </Balise>
       );
@@ -214,7 +231,10 @@ function rendreBloc(bloc: Bloc, cle: string): React.ReactNode {
     }
     case "citation": {
       return (
-        <blockquote key={cle} className="border-l-4 border-primary/50 py-0.5 pl-3 break-words text-on-surface-variant">
+        <blockquote
+          key={cle}
+          className="border-l-4 border-primary/50 py-0.5 pl-3 break-words text-on-surface-variant"
+        >
           {rendreNoeuds(bloc.enfants, cle)}
         </blockquote>
       );
@@ -260,12 +280,18 @@ export interface ContenuDiscordProps {
  * Rend le contenu markdown d'un message Discord.
  * Renvoie `null` si le message n'a pas de texte (encart ou pièce jointe seuls).
  */
-export function ContenuDiscord({ contenu, contexte = CONTEXTE_MENTIONS_VIDE, className }: ContenuDiscordProps) {
+export function ContenuDiscord({
+  contenu,
+  contexte = CONTEXTE_MENTIONS_VIDE,
+  className,
+}: ContenuDiscordProps) {
   const blocs = parseDiscordMarkdown(contenu, contexte);
   if (blocs.length === 0) return null;
 
   return (
-    <div className={`space-y-2 text-fluid-body-md leading-relaxed text-on-surface ${className ?? ""}`}>
+    <div
+      className={`space-y-2 text-fluid-body-md leading-relaxed text-on-surface ${className ?? ""}`}
+    >
       {blocs.map((bloc, index) => rendreBloc(bloc, `b-${index}`))}
     </div>
   );
@@ -291,7 +317,9 @@ export function TexteDiscordInline({
         ) : bloc.type === "liste" ? (
           rendreBloc(bloc, `i-${index}`)
         ) : (
-          <span key={`i-${index}`}>{rendreNoeuds(bloc.enfants, `i-${index}`)}</span>
+          <span key={`i-${index}`}>
+            {rendreNoeuds(bloc.enfants, `i-${index}`)}
+          </span>
         ),
       )}
     </>

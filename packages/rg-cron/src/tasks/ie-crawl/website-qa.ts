@@ -96,7 +96,9 @@ async function texte(url: string): Promise<string> {
 }
 
 function nomFichier(chemin: string): string {
-  return chemin.replace(/^\//, "").replaceAll(/[^A-Za-z0-9._-]/g, "_") || "home";
+  return (
+    chemin.replace(/^\//, "").replaceAll(/[^A-Za-z0-9._-]/g, "_") || "home"
+  );
 }
 
 const SCRIPT_METADONNEES = `({
@@ -125,19 +127,27 @@ const SCRIPT_MOBILE = `({
 /** Ne garde que les dernières passes : le répertoire vit sur le disque d'état du service. */
 async function elaguer(racine: string): Promise<void> {
   const passes = (await readdir(racine, { withFileTypes: true }))
-    .filter(e => e.isDirectory() && /^\d{8}T\d{6}Z/.test(e.name))
-    .map(e => e.name)
+    .filter((e) => e.isDirectory() && /^\d{8}T\d{6}Z/.test(e.name))
+    .map((e) => e.name)
     .sort();
-  for (const ancienne of passes.slice(0, Math.max(0, passes.length - PASSES_CONSERVEES))) {
+  for (const ancienne of passes.slice(
+    0,
+    Math.max(0, passes.length - PASSES_CONSERVEES),
+  )) {
     await rm(join(racine, ancienne), { recursive: true, force: true });
   }
 }
 
 export async function runWebsiteQa(): Promise<WebsiteQaResult> {
-  const base = (Bun.env.RG_BROWSER_BASE_URL ?? "https://rosegriffon.fr").replace(/\/+$/, "");
-  const baseApi = (Bun.env.RG_BROWSER_API_BASE_URL ?? "https://api.rosegriffon.fr").replace(/\/+$/, "");
+  const base = (
+    Bun.env.RG_BROWSER_BASE_URL ?? "https://rosegriffon.fr"
+  ).replace(/\/+$/, "");
+  const baseApi = (
+    Bun.env.RG_BROWSER_API_BASE_URL ?? "https://api.rosegriffon.fr"
+  ).replace(/\/+$/, "");
   const maxPages = entier("RG_BROWSER_MAX_PAGES", 40);
-  const racine = Bun.env.RG_BROWSER_CRON_OUT_DIR ?? cronSharedPath("website-qa");
+  const racine =
+    Bun.env.RG_BROWSER_CRON_OUT_DIR ?? cronSharedPath("website-qa");
   const runId = `${new Date()
     .toISOString()
     .replaceAll(/[-:]/g, "")
@@ -151,7 +161,9 @@ export async function runWebsiteQa(): Promise<WebsiteQaResult> {
       const url = new URL(brut, `${base}/`);
       url.hash = "";
       if (url.hostname === `www.${hoteBase}`) url.hostname = hoteBase;
-      return url.hostname === hoteBase && url.protocol === "https:" ? url.href : null;
+      return url.hostname === hoteBase && url.protocol === "https:"
+        ? url.href
+        : null;
     } catch {
       return null;
     }
@@ -159,7 +171,9 @@ export async function runWebsiteQa(): Promise<WebsiteQaResult> {
 
   // 1. URLs : sitemaps déclarés dans robots.txt, la racine, puis les liens de l'accueil.
   const robots = await texte(`${base}/robots.txt`);
-  const sitemaps = [...robots.matchAll(/^\s*Sitemap:\s*(\S+)/gim)].map(m => m[1]!);
+  const sitemaps = [...robots.matchAll(/^\s*Sitemap:\s*(\S+)/gim)].map(
+    (m) => m[1]!,
+  );
   const urls = new Set<string>();
   for (const sitemap of sitemaps) {
     for (const m of (await texte(sitemap)).matchAll(/<loc>([^<]+)<\/loc>/g)) {
@@ -174,7 +188,7 @@ export async function runWebsiteQa(): Promise<WebsiteQaResult> {
   const vue = ouvrirVue();
   const pages: RapportPage[] = [];
   try {
-    vue.addEventListener("Runtime.exceptionThrown", evenement => {
+    vue.addEventListener("Runtime.exceptionThrown", (evenement) => {
       const details = (
         evenement as MessageEvent<{
           exceptionDetails?: {
@@ -183,25 +197,34 @@ export async function runWebsiteQa(): Promise<WebsiteQaResult> {
           };
         }>
       ).data?.exceptionDetails;
-      erreursPage.push(details?.exception?.description ?? details?.text ?? "exception");
+      erreursPage.push(
+        details?.exception?.description ?? details?.text ?? "exception",
+      );
     });
     try {
       await naviguer(vue, `${base}/`);
-      const liens = (await vue.evaluate(`[...document.querySelectorAll("a[href]")].map(a => a.href)`)) as string[];
+      const liens = (await vue.evaluate(
+        `[...document.querySelectorAll("a[href]")].map(a => a.href)`,
+      )) as string[];
       for (const lien of liens) {
         const url = normaliser(lien);
         if (url && urls.size < maxPages) urls.add(url);
       }
     } catch (err) {
-      console.warn("[website:qa] liens de l'accueil illisibles :", err instanceof Error ? err.message : err);
+      console.warn(
+        "[website:qa] liens de l'accueil illisibles :",
+        err instanceof Error ? err.message : err,
+      );
     }
     await vue.cdp("Runtime.enable").catch(() => undefined);
     await vue.cdp("Log.enable").catch(() => undefined);
-    vue.addEventListener("Log.entryAdded", evenement => {
-      const entree = (evenement as MessageEvent<{ entry?: { level?: string; text?: string } }>).data?.entry;
+    vue.addEventListener("Log.entryAdded", (evenement) => {
+      const entree = (
+        evenement as MessageEvent<{ entry?: { level?: string; text?: string } }>
+      ).data?.entry;
       if (entree?.level === "error") consolePage.push(entree.text ?? "erreur");
     });
-    vue.addEventListener("Runtime.consoleAPICalled", evenement => {
+    vue.addEventListener("Runtime.consoleAPICalled", (evenement) => {
       const appel = (
         evenement as MessageEvent<{
           type?: string;
@@ -209,7 +232,11 @@ export async function runWebsiteQa(): Promise<WebsiteQaResult> {
         }>
       ).data;
       if (appel?.type === "error") {
-        consolePage.push((appel.args ?? []).map(a => String(a.value ?? a.description ?? "")).join(" "));
+        consolePage.push(
+          (appel.args ?? [])
+            .map((a) => String(a.value ?? a.description ?? ""))
+            .join(" "),
+        );
       }
     });
 
@@ -238,17 +265,25 @@ export async function runWebsiteQa(): Promise<WebsiteQaResult> {
           await naviguer(vue, url);
           page.openOk = true;
           page.effectiveUrl = vue.url;
-          page.metadata = (await vue.evaluate(SCRIPT_METADONNEES)) as Record<string, unknown>;
+          page.metadata = (await vue.evaluate(SCRIPT_METADONNEES)) as Record<
+            string,
+            unknown
+          >;
           page.title = String(page.metadata.title ?? "");
           await vue.resize(390, 844);
-          page.layout = (await vue.evaluate(SCRIPT_MOBILE)) as RapportPage["layout"];
+          page.layout = (await vue.evaluate(
+            SCRIPT_MOBILE,
+          )) as RapportPage["layout"];
           await vue.resize(1440, 900);
           const capture = await vue.screenshot({
             format: "jpeg",
             quality: 60,
             encoding: "buffer",
           });
-          await Bun.write(join(dossier, `${nomFichier(new URL(url).pathname)}.jpg`), capture);
+          await Bun.write(
+            join(dossier, `${nomFichier(new URL(url).pathname)}.jpg`),
+            capture,
+          );
         } catch (err) {
           page.errors.push(err instanceof Error ? err.message : String(err));
         }
@@ -282,10 +317,14 @@ export async function runWebsiteQa(): Promise<WebsiteQaResult> {
   const enEchec = (status: number) => status < 200 || status >= 400;
   const resume = {
     pagesTotal: pages.length,
-    pagesBad: pages.filter(p => enEchec(p.status) || !p.openOk).length,
-    horizontalOverflow: pages.filter(p => p.layout.horizontalOverflow === true).length,
-    consoleOrRuntimeErrors: pages.filter(p => p.errors.length > 0 || p.console.length > 0).length,
-    apiBad: sondesApi.filter(a => a.required && enEchec(a.status)).length,
+    pagesBad: pages.filter((p) => enEchec(p.status) || !p.openOk).length,
+    horizontalOverflow: pages.filter(
+      (p) => p.layout.horizontalOverflow === true,
+    ).length,
+    consoleOrRuntimeErrors: pages.filter(
+      (p) => p.errors.length > 0 || p.console.length > 0,
+    ).length,
+    apiBad: sondesApi.filter((a) => a.required && enEchec(a.status)).length,
   };
   const echouer = (nom: string) => Bun.env[nom] === "1";
   const statut =
@@ -306,12 +345,24 @@ export async function runWebsiteQa(): Promise<WebsiteQaResult> {
   };
   const cheminRapport = join(dossier, "report.json");
   await writeFile(cheminRapport, `${JSON.stringify(rapport, null, 2)}\n`);
-  await writeFile(join(dossier, "pages.jsonl"), pages.map(p => JSON.stringify(p)).join("\n") + "\n");
-  await writeFile(join(dossier, "api.jsonl"), sondesApi.map(a => JSON.stringify(a)).join("\n") + "\n");
+  await writeFile(
+    join(dossier, "pages.jsonl"),
+    pages.map((p) => JSON.stringify(p)).join("\n") + "\n",
+  );
+  await writeFile(
+    join(dossier, "api.jsonl"),
+    sondesApi.map((a) => JSON.stringify(a)).join("\n") + "\n",
+  );
   const enDefaut = [
-    ...pages.filter(p => enEchec(p.status) || !p.openOk).map(p => `- HTTP ${p.status} ${p.url}`),
-    ...pages.filter(p => p.layout.horizontalOverflow).map(p => `- débordement mobile ${p.url}`),
-    ...sondesApi.filter(a => a.required && enEchec(a.status)).map(a => `- API HTTP ${a.status} ${a.origin}${a.path}`),
+    ...pages
+      .filter((p) => enEchec(p.status) || !p.openOk)
+      .map((p) => `- HTTP ${p.status} ${p.url}`),
+    ...pages
+      .filter((p) => p.layout.horizontalOverflow)
+      .map((p) => `- débordement mobile ${p.url}`),
+    ...sondesApi
+      .filter((a) => a.required && enEchec(a.status))
+      .map((a) => `- API HTTP ${a.status} ${a.origin}${a.path}`),
   ];
   await writeFile(
     join(dossier, "report.md"),
@@ -332,7 +383,9 @@ export async function runWebsiteQa(): Promise<WebsiteQaResult> {
   );
   await elaguer(racine).catch(() => undefined);
 
-  console.log(`[website:qa] ${statut} : ${JSON.stringify(resume)} → ${cheminRapport}`);
+  console.log(
+    `[website:qa] ${statut} : ${JSON.stringify(resume)} → ${cheminRapport}`,
+  );
   if (statut !== "ok") {
     return {
       success: false,

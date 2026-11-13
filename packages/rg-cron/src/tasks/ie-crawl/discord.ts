@@ -23,8 +23,14 @@ interface DiscordMessage {
  * Crawle les salons Discord publics pour extraire des blocs de discussion
  * et les indexer dans le RAG.
  */
-export async function crawlDiscord(): Promise<{ success: boolean; count: number; error?: string }> {
-  console.log("[Crawl Discord] Démarrage du crawl des salons Discord publics...");
+export async function crawlDiscord(): Promise<{
+  success: boolean;
+  count: number;
+  error?: string;
+}> {
+  console.log(
+    "[Crawl Discord] Démarrage du crawl des salons Discord publics...",
+  );
 
   const client = getDiscordClient();
   if (!client) {
@@ -47,9 +53,13 @@ export async function crawlDiscord(): Promise<{ success: boolean; count: number;
 
     const channels = await guild.channels.fetch();
     // Ne garder que les salons textuels
-    const textChannels = [...channels.values()].filter(c => c && c.isTextBased() && !c.isThread());
+    const textChannels = [...channels.values()].filter(
+      (c) => c && c.isTextBased() && !c.isThread(),
+    );
 
-    console.log(`[Crawl Discord] ${textChannels.length} salons textuels trouvés.`);
+    console.log(
+      `[Crawl Discord] ${textChannels.length} salons textuels trouvés.`,
+    );
     let totalBlocksSaved = 0;
 
     for (const channel of textChannels) {
@@ -66,10 +76,12 @@ export async function crawlDiscord(): Promise<{ success: boolean; count: number;
 
       try {
         // Récupérer les 100 derniers messages
-        const messagesObj = await (channel as any).messages.fetch({ limit: 100 });
+        const messagesObj = await (channel as any).messages.fetch({
+          limit: 100,
+        });
         const messagesList: DiscordMessage[] = [...messagesObj.values()]
-          .filter(m => !m.author.bot && m.content && m.content.length > 5)
-          .map(m => ({
+          .filter((m) => !m.author.bot && m.content && m.content.length > 5)
+          .map((m) => ({
             id: m.id,
             authorTag: m.author.tag,
             content: m.content,
@@ -120,11 +132,16 @@ export async function crawlDiscord(): Promise<{ success: boolean; count: number;
           totalBlocksSaved++;
         }
       } catch (chanErr) {
-        console.warn(`[Crawl Discord] Impossible de lire #${channel.name} :`, chanErr);
+        console.warn(
+          `[Crawl Discord] Impossible de lire #${channel.name} :`,
+          chanErr,
+        );
       }
     }
 
-    console.log(`[Crawl Discord] Terminé. ${totalBlocksSaved} nouveaux blocs de discussion enregistrés.`);
+    console.log(
+      `[Crawl Discord] Terminé. ${totalBlocksSaved} nouveaux blocs de discussion enregistrés.`,
+    );
     return { success: true, count: totalBlocksSaved };
   } catch (err: any) {
     const msg = err.message || String(err);

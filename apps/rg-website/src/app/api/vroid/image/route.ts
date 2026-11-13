@@ -16,7 +16,12 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 /** Types d'image acceptés en sortie — le CDN ne sert que ceux-là. */
-const TYPES_AUTORISES = new Set(["image/png", "image/jpeg", "image/webp", "image/gif"]);
+const TYPES_AUTORISES = new Set([
+  "image/png",
+  "image/jpeg",
+  "image/webp",
+  "image/gif",
+]);
 
 export async function GET(requete: Request): Promise<Response> {
   const source = new URL(requete.url).searchParams.get("url");
@@ -46,7 +51,9 @@ export async function GET(requete: Request): Promise<Response> {
   }
 
   if (!amont.ok || !amont.body) {
-    return new Response("image indisponible", { status: amont.status === 404 ? 404 : 502 });
+    return new Response("image indisponible", {
+      status: amont.status === 404 ? 404 : 502,
+    });
   }
 
   const type = amont.headers.get("content-type")?.split(";")[0]?.trim() ?? "";

@@ -13,7 +13,9 @@ interface EditChronicleClientProps {
   article: Tables<"articles">;
 }
 
-export default function EditChronicleClient({ article }: EditChronicleClientProps) {
+export default function EditChronicleClient({
+  article,
+}: EditChronicleClientProps) {
   const router = useRouter();
 
   const handleSave = async (data: {
@@ -41,7 +43,11 @@ export default function EditChronicleClient({ article }: EditChronicleClientProp
         return;
       }
 
-      toast.success(data.published ? "Chronique mise à jour et publiée !" : "Brouillon mis à jour avec succès !");
+      toast.success(
+        data.published
+          ? "Chronique mise à jour et publiée !"
+          : "Brouillon mis à jour avec succès !",
+      );
 
       router.push("/admin/chroniques");
       router.refresh();
@@ -66,9 +72,16 @@ export default function EditChronicleClient({ article }: EditChronicleClientProp
 
   return (
     <div className="container max-w-5xl py-8">
-      <AdminPageHeader title="Modifier la Chronique" description="Mettez à jour votre chronique" />
+      <AdminPageHeader
+        title="Modifier la Chronique"
+        description="Mettez à jour votre chronique"
+      />
 
-      <ChronicleEditor initialData={initialData} onSave={handleSave} onCancel={handleCancel} />
+      <ChronicleEditor
+        initialData={initialData}
+        onSave={handleSave}
+        onCancel={handleCancel}
+      />
     </div>
   );
 }

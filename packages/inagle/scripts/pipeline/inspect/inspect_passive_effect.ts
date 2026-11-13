@@ -12,7 +12,8 @@ try {
       data,
       (key, value) => {
         if (key === "entries" && Array.isArray(value)) return value.slice(0, 2);
-        if (key === "children" && Array.isArray(value)) return value.slice(0, 2);
+        if (key === "children" && Array.isArray(value))
+          return value.slice(0, 2);
         return value;
       },
       2,

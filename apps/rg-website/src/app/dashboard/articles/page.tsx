@@ -1,7 +1,24 @@
 export const dynamic = "force-dynamic";
 
-import { Badge, Button, Card, CardContent, CardDescription, CardHeader, CardTitle } from "@rosegriffon/ui";
-import { Calendar, ChevronRight, Edit, Eye, FileText, PenSquare, Plus, Trash2 } from "lucide-react";
+import {
+  Badge,
+  Button,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@rosegriffon/ui";
+import {
+  Calendar,
+  ChevronRight,
+  Edit,
+  Eye,
+  FileText,
+  PenSquare,
+  Plus,
+  Trash2,
+} from "lucide-react";
 import Image from "next/image";
 import Link from "@/components/shared/Link";
 import { redirect } from "next/navigation";
@@ -45,8 +62,8 @@ export default async function ArticlesPage() {
 
   // Statistiques
   const stats = {
-    drafts: articles.filter(a => a.status === "draft").length || 0,
-    published: articles.filter(a => a.status === "published").length || 0,
+    drafts: articles.filter((a) => a.status === "draft").length || 0,
+    published: articles.filter((a) => a.status === "published").length || 0,
     total: articles.length || 0,
     totalViews: articles.reduce((sum, a) => sum + (a.view_count || 0), 0) || 0,
   };
@@ -108,7 +125,9 @@ export default async function ArticlesPage() {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="text-xs text-gray-600 dark:text-gray-400">Total</div>
+                  <div className="text-xs text-gray-600 dark:text-gray-400">
+                    Total
+                  </div>
                   <div className="text-2xl font-bold">{stats.total}</div>
                 </div>
                 <FileText className="size-8 text-indigo-500 opacity-50" />
@@ -120,7 +139,9 @@ export default async function ArticlesPage() {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="text-xs text-gray-600 dark:text-gray-400">Publiés</div>
+                  <div className="text-xs text-gray-600 dark:text-gray-400">
+                    Publiés
+                  </div>
                   <div className="text-2xl font-bold">{stats.published}</div>
                 </div>
                 <Eye className="size-8 text-green-500 opacity-50" />
@@ -132,7 +153,9 @@ export default async function ArticlesPage() {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="text-xs text-gray-600 dark:text-gray-400">Brouillons</div>
+                  <div className="text-xs text-gray-600 dark:text-gray-400">
+                    Brouillons
+                  </div>
                   <div className="text-2xl font-bold">{stats.drafts}</div>
                 </div>
                 <Edit className="size-8 text-yellow-500 opacity-50" />
@@ -144,7 +167,9 @@ export default async function ArticlesPage() {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="text-xs text-gray-600 dark:text-gray-400">Vues totales</div>
+                  <div className="text-xs text-gray-600 dark:text-gray-400">
+                    Vues totales
+                  </div>
                   <div className="text-2xl font-bold">{stats.totalViews}</div>
                 </div>
                 <Eye className="size-8 text-purple-500 opacity-50" />
@@ -163,8 +188,8 @@ export default async function ArticlesPage() {
                   Aucune chronique pour le moment
                 </h2>
                 <p className="text-gray-600 dark:text-gray-400 mb-6">
-                  Commencez à rédiger votre première chronique et informez la communauté des dernières actualités de
-                  Rose Griffon
+                  Commencez à rédiger votre première chronique et informez la
+                  communauté des dernières actualités de Rose Griffon
                 </p>
                 <Button asChild size="lg">
                   <Link href="/dashboard/articles/new">
@@ -177,16 +202,23 @@ export default async function ArticlesPage() {
           </Card>
         ) : (
           <div className="space-y-4">
-            {articles.map(article => (
-              <Card key={article.id} className="hover:shadow-lg transition-shadow">
+            {articles.map((article) => (
+              <Card
+                key={article.id}
+                className="hover:shadow-lg transition-shadow"
+              >
                 <CardHeader>
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-2">
                         {getStatusBadge(article.status)}
-                        {article.category && <Badge variant="outline">{article.category}</Badge>}
+                        {article.category && (
+                          <Badge variant="outline">{article.category}</Badge>
+                        )}
                       </div>
-                      <CardTitle className="text-xl line-clamp-2">{article.title}</CardTitle>
+                      <CardTitle className="text-xl line-clamp-2">
+                        {article.title}
+                      </CardTitle>
                       <CardDescription className="line-clamp-2 mt-1">
                         {article.excerpt || "Pas d'extrait"}
                       </CardDescription>
@@ -194,7 +226,12 @@ export default async function ArticlesPage() {
 
                     {article.featured_image_url && (
                       <div className="hidden sm:block size-24 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800 shrink-0 relative">
-                        <Image src={article.featured_image_url} alt={article.title} fill className="object-cover" />
+                        <Image
+                          src={article.featured_image_url}
+                          alt={article.title}
+                          fill
+                          className="object-cover"
+                        />
                       </div>
                     )}
                   </div>
@@ -209,7 +246,9 @@ export default async function ArticlesPage() {
                       </div>
                       <div className="flex items-center gap-1">
                         <Calendar className="size-4" />
-                        {new Date(article.updated_at).toLocaleDateString("fr-FR")}
+                        {new Date(article.updated_at).toLocaleDateString(
+                          "fr-FR",
+                        )}
                       </div>
                     </div>
 
@@ -226,7 +265,11 @@ export default async function ArticlesPage() {
                           <Edit className="size-4" />
                         </Link>
                       </Button>
-                      <Button variant="outline" size="sm" className="text-red-500 hover:text-red-600">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="text-red-500 hover:text-red-600"
+                      >
                         <Trash2 className="size-4" />
                       </Button>
                     </div>
@@ -249,11 +292,16 @@ export default async function ArticlesPage() {
             <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
               <li className="flex items-start gap-2">
                 <span className="text-indigo-500 mt-1">•</span>
-                <span>Utilisez des titres accrocheurs pour capter l'attention</span>
+                <span>
+                  Utilisez des titres accrocheurs pour capter l'attention
+                </span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-indigo-500 mt-1">•</span>
-                <span>Ajoutez toujours une image à la une pour illustrer votre propos</span>
+                <span>
+                  Ajoutez toujours une image à la une pour illustrer votre
+                  propos
+                </span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-indigo-500 mt-1">•</span>
@@ -261,7 +309,9 @@ export default async function ArticlesPage() {
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-indigo-500 mt-1">•</span>
-                <span>Utilisez les catégories et tags pour organiser vos contenus</span>
+                <span>
+                  Utilisez les catégories et tags pour organiser vos contenus
+                </span>
               </li>
             </ul>
           </CardContent>

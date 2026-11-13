@@ -31,7 +31,9 @@ export interface SceneVrmProps {
 
 /** États de la visionneuse, dans leur ordre d'apparition. */
 type EtatScene =
-  { phase: "chargement" } | { phase: "pret"; specification: string } | { phase: "erreur"; message: string };
+  | { phase: "chargement" }
+  | { phase: "pret"; specification: string }
+  | { phase: "erreur"; message: string };
 
 /**
  * Cadre la caméra sur le modèle chargé.
@@ -39,7 +41,11 @@ type EtatScene =
  * Un VRM est à l'échelle humaine (≈ 1,5 m) mais son origine est aux pieds :
  * viser le centre de la boîte englobante évite de regarder le sol.
  */
-function cadrer(camera: THREE.PerspectiveCamera, controles: OrbitControls, objet: THREE.Object3D): void {
+function cadrer(
+  camera: THREE.PerspectiveCamera,
+  controles: OrbitControls,
+  objet: THREE.Object3D,
+): void {
   const boite = new THREE.Box3().setFromObject(objet);
   const taille = boite.getSize(new THREE.Vector3());
   const centre = boite.getCenter(new THREE.Vector3());
@@ -111,7 +117,8 @@ export default function SceneVrm({ idModele, nom }: SceneVrmProps) {
 
     const redimensionner = () => {
       if (detruit || !conteneur.clientWidth) return;
-      camera.aspect = conteneur.clientWidth / Math.max(conteneur.clientHeight, 1);
+      camera.aspect =
+        conteneur.clientWidth / Math.max(conteneur.clientHeight, 1);
       camera.updateProjectionMatrix();
       renderer.setSize(conteneur.clientWidth, conteneur.clientHeight);
     };
@@ -120,26 +127,34 @@ export default function SceneVrm({ idModele, nom }: SceneVrmProps) {
 
     (async () => {
       try {
-        const reponse = await fetch(`/api/vroid/vrm/${encodeURIComponent(idModele)}`, {
-          signal: abandon.signal,
-        });
+        const reponse = await fetch(
+          `/api/vroid/vrm/${encodeURIComponent(idModele)}`,
+          {
+            signal: abandon.signal,
+          },
+        );
 
         if (!reponse.ok) {
-          const details = (await reponse.json().catch(() => null)) as { erreur?: string } | null;
-          throw new Error(details?.erreur ?? `Chargement refusé (HTTP ${reponse.status}).`);
+          const details = (await reponse.json().catch(() => null)) as {
+            erreur?: string;
+          } | null;
+          throw new Error(
+            details?.erreur ?? `Chargement refusé (HTTP ${reponse.status}).`,
+          );
         }
 
         const octets = await reponse.arrayBuffer();
         if (detruit) return;
 
         const chargeur = new GLTFLoader();
-        chargeur.register(parser => new VRMLoaderPlugin(parser));
+        chargeur.register((parser) => new VRMLoaderPlugin(parser));
 
         const gltf = await chargeur.parseAsync(octets, "");
         if (detruit) return;
 
         const charge = gltf.userData.vrm as VRM | undefined;
-        if (!charge) throw new Error("Le fichier reçu n'est pas un modèle VRM.");
+        if (!charge)
+          throw new Error("Le fichier reçu n'est pas un modèle VRM.");
 
         vrm = charge;
 
@@ -156,14 +171,18 @@ export default function SceneVrm({ idModele, nom }: SceneVrmProps) {
 
         setEtat({
           phase: "pret",
-          specification: charge.meta.metaVersion === "0" ? "VRM 0.0" : "VRM 1.0",
+          specification:
+            charge.meta.metaVersion === "0" ? "VRM 0.0" : "VRM 1.0",
         });
         boucle();
       } catch (cause) {
         if (detruit || abandon.signal.aborted) return;
         setEtat({
           phase: "erreur",
-          message: cause instanceof Error ? cause.message : `Chargement de « ${nom} » impossible.`,
+          message:
+            cause instanceof Error
+              ? cause.message
+              : `Chargement de « ${nom} » impossible.`,
         });
       }
     })();

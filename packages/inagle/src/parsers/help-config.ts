@@ -21,7 +21,9 @@ export function buildHelpDatabase(_dataPath: string) {
   const helpItems: ParsedHelp[] = [];
 
   if (!configPath) {
-    console.warn("[help-config] No SQL/SQLite help_list_config projection found.");
+    console.warn(
+      "[help-config] No SQL/SQLite help_list_config projection found.",
+    );
     return { helpItems };
   }
 
@@ -38,7 +40,10 @@ export function buildHelpDatabase(_dataPath: string) {
       // HELP_LIST_INFO seems to be categories/structure
 
       // Try HELP_LIST_IMAGE first
-      if (node.name.startsWith("HELP_LIST_IMAGE_") && !node.name.includes("_LIST_")) {
+      if (
+        node.name.startsWith("HELP_LIST_IMAGE_") &&
+        !node.name.includes("_LIST_")
+      ) {
         const vars = node.variables;
 
         let nameIdx = -1;
@@ -47,7 +52,7 @@ export function buildHelpDatabase(_dataPath: string) {
         let idHex = "";
 
         // Look for Image String
-        const strVar = vars.find(v => v.type === "String");
+        const strVar = vars.find((v) => v.type === "String");
         if (strVar) image = strVar.value;
 
         // Heuristic: Find small integers that are valid text indices

@@ -35,13 +35,23 @@ export const HERO_UI_HIT_SELECTOR = [
  */
 export function isHeroUiTarget(target: EventTarget | null): boolean {
   if (target == null) return false;
-  const el = target instanceof Element ? target : target instanceof Node ? target.parentElement : null;
+  const el =
+    target instanceof Element
+      ? target
+      : target instanceof Node
+        ? target.parentElement
+        : null;
   if (!el) return false;
   return el.closest(HERO_UI_HIT_SELECTOR) != null;
 }
 
 /** Normalize pointer position in hero rect to [-0.5, 0.5] then apply max offset (px). */
-export function clampParallax(nx: number, ny: number, maxX = 12, maxY = 8): { x: number; y: number } {
+export function clampParallax(
+  nx: number,
+  ny: number,
+  maxX = 12,
+  maxY = 8,
+): { x: number; y: number } {
   const cx = Math.max(-0.5, Math.min(0.5, nx));
   const cy = Math.max(-0.5, Math.min(0.5, ny));
   const x = cx * -maxX || 0;
@@ -50,7 +60,11 @@ export function clampParallax(nx: number, ny: number, maxX = 12, maxY = 8): { x:
 }
 
 /** True if a new FX burst is allowed given last burst timestamp and cooldown ms. */
-export function canSpawnFx(now: number, lastSpawnAt: number, cooldownMs: number): boolean {
+export function canSpawnFx(
+  now: number,
+  lastSpawnAt: number,
+  cooldownMs: number,
+): boolean {
   if (cooldownMs <= 0) return true;
   return now - lastSpawnAt >= cooldownMs;
 }
@@ -123,7 +137,10 @@ export function createBurstParticles(
 }
 
 /** Advance particles one frame; mutates array in place and removes dead ones. */
-export function stepParticles(particles: HeroParticle[], gravity = 0.045): void {
+export function stepParticles(
+  particles: HeroParticle[],
+  gravity = 0.045,
+): void {
   for (let i = particles.length - 1; i >= 0; i--) {
     const p = particles[i]!;
     p.x += p.vx;

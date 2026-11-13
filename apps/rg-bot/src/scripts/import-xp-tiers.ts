@@ -253,16 +253,66 @@ interface EntreeClassement {
  * Lu visuellement sur l'image, chaque pseudo résolu en ID réel via l'API.
  */
 const TOP10_NOCTALY: readonly EntreeClassement[] = [
-  { pseudo: "Mioleen_", discordId: "435479810731409408", niveauNoctaly: 26, xp: 44_400 },
-  { pseudo: "Ichigo Kurosaki", discordId: "593493079911170068", niveauNoctaly: 22, xp: 28_800 },
-  { pseudo: "Inazo", discordId: "531549483067244566", niveauNoctaly: 18, xp: 15_900 },
-  { pseudo: "IceCream", discordId: "831595693986021388", niveauNoctaly: 15, xp: 10_500 },
-  { pseudo: "Rishar", discordId: "254337557272330241", niveauNoctaly: 14, xp: 9_200 },
-  { pseudo: "Yoyo", discordId: "281114294152724491", niveauNoctaly: 14, xp: 8_700 },
-  { pseudo: "Dash", discordId: "563787814483918858", niveauNoctaly: 13, xp: 7_800 },
-  { pseudo: "ploufy !!", discordId: "987039164988030976", niveauNoctaly: 12, xp: 6_900 },
-  { pseudo: "yuan yuan", discordId: "779044049374019594", niveauNoctaly: 12, xp: 6_000 },
-  { pseudo: "Pegeto", discordId: "768526829279510529", niveauNoctaly: 11, xp: 5_500 },
+  {
+    pseudo: "Mioleen_",
+    discordId: "435479810731409408",
+    niveauNoctaly: 26,
+    xp: 44_400,
+  },
+  {
+    pseudo: "Ichigo Kurosaki",
+    discordId: "593493079911170068",
+    niveauNoctaly: 22,
+    xp: 28_800,
+  },
+  {
+    pseudo: "Inazo",
+    discordId: "531549483067244566",
+    niveauNoctaly: 18,
+    xp: 15_900,
+  },
+  {
+    pseudo: "IceCream",
+    discordId: "831595693986021388",
+    niveauNoctaly: 15,
+    xp: 10_500,
+  },
+  {
+    pseudo: "Rishar",
+    discordId: "254337557272330241",
+    niveauNoctaly: 14,
+    xp: 9_200,
+  },
+  {
+    pseudo: "Yoyo",
+    discordId: "281114294152724491",
+    niveauNoctaly: 14,
+    xp: 8_700,
+  },
+  {
+    pseudo: "Dash",
+    discordId: "563787814483918858",
+    niveauNoctaly: 13,
+    xp: 7_800,
+  },
+  {
+    pseudo: "ploufy !!",
+    discordId: "987039164988030976",
+    niveauNoctaly: 12,
+    xp: 6_900,
+  },
+  {
+    pseudo: "yuan yuan",
+    discordId: "779044049374019594",
+    niveauNoctaly: 12,
+    xp: 6_000,
+  },
+  {
+    pseudo: "Pegeto",
+    discordId: "768526829279510529",
+    niveauNoctaly: 11,
+    xp: 5_500,
+  },
 ] as const;
 
 interface PalierRoleNoctaly {
@@ -985,18 +1035,22 @@ const HISTORIQUE_NOCTALY: readonly MesureHistorique[] = [
  * levé par un embed « Niveau supérieur » qui la mentionne directement dans
  * #📷〡médias — elle est donc dans `HISTORIQUE_NOCTALY`, plus ici.
  */
-const MESURES_NON_RESOLUES: ReadonlyArray<{ pseudo: string; raison: string }> = [
-  {
-    pseudo: "⼁M@∃⼁⼁",
-    raison:
-      "Pseudo à caractères Unicode décoratifs (bloc de présentation) rencontré uniquement sur une image de /leaderboard (11/3/2026) — non cherchable de façon fiable via members/search, et aucun embed de montée de niveau ne l'a mentionné directement pour lever le doute (contrairement à mimi).",
-  },
-] as const;
+const MESURES_NON_RESOLUES: ReadonlyArray<{ pseudo: string; raison: string }> =
+  [
+    {
+      pseudo: "⼁M@∃⼁⼁",
+      raison:
+        "Pseudo à caractères Unicode décoratifs (bloc de présentation) rencontré uniquement sur une image de /leaderboard (11/3/2026) — non cherchable de façon fiable via members/search, et aucun embed de montée de niveau ne l'a mentionné directement pour lever le doute (contrairement à mimi).",
+    },
+  ] as const;
 
 const essai = Bun.argv.includes("--essai");
 const sourceHistorique = Bun.argv.includes("--source=historique");
 
-function ligne(discordId: string, xp: number): { discordId: string; xp: number; niveau: number } {
+function ligne(
+  discordId: string,
+  xp: number,
+): { discordId: string; xp: number; niveau: number } {
   return { discordId, xp, niveau: niveauPour(xp) };
 }
 
@@ -1052,7 +1106,8 @@ async function importerHistorique(): Promise<number> {
   }
   if (MESURES_NON_RESOLUES.length > 0) {
     console.log("\nNon résolus (aucun ID fiable, aucune écriture) :");
-    for (const m of MESURES_NON_RESOLUES) console.log(`  ${m.pseudo} — ${m.raison}`);
+    for (const m of MESURES_NON_RESOLUES)
+      console.log(`  ${m.pseudo} — ${m.raison}`);
   }
   return ecrites;
 }
@@ -1084,16 +1139,26 @@ console.log(
     `${essai ? "[--essai, rien n'est écrit]" : ""} ===\n`,
 );
 
-console.log(sourceHistorique ? "Profils (fusion de l'historique complet) :" : "Profils (top 10 du 9/8/2026) :");
-const profilsEcrits = sourceHistorique ? await importerHistorique() : await importerProfils();
+console.log(
+  sourceHistorique
+    ? "Profils (fusion de l'historique complet) :"
+    : "Profils (top 10 du 9/8/2026) :",
+);
+const profilsEcrits = sourceHistorique
+  ? await importerHistorique()
+  : await importerProfils();
 
 console.log("\nRécompenses de rôle par palier :");
 const recompensesEcrites = await importerRecompenses();
 
-console.log(`\n${essai ? "Simulerait" : "A écrit"} ${profilsEcrits} profil(s) et ${recompensesEcrites} récompense(s).`);
+console.log(
+  `\n${essai ? "Simulerait" : "A écrit"} ${profilsEcrits} profil(s) et ${recompensesEcrites} récompense(s).`,
+);
 
 if (!essai) {
-  const [stats] = await sql<Array<{ total: number; xp_max: number; niveau_max: number }>>`
+  const [stats] = await sql<
+    Array<{ total: number; xp_max: number; niveau_max: number }>
+  >`
 		SELECT count(*)::int AS total, max(xp)::int AS xp_max, max(niveau)::int AS niveau_max
 		FROM bot_profils WHERE guild_id = ${GUILD_ID}
 	`;

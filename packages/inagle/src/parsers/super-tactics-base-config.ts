@@ -75,7 +75,8 @@ function parseEntries(entries: ConfigNode[]) {
         const vars = child.variables;
         const info: Record<string, any> = {};
         for (let i = 0; i < vars.length; i++) {
-          info[`var${i}`] = vars[i].type === "Int" ? parseIntVar(vars[i]) : vars[i].value;
+          info[`var${i}`] =
+            vars[i].type === "Int" ? parseIntVar(vars[i]) : vars[i].value;
         }
         if (vars.length > 0) info.id = toHex(parseIntVar(vars[0]));
         tactics.push(info);
@@ -89,14 +90,22 @@ function parseEntries(entries: ConfigNode[]) {
 // Loaders
 // ============================================================================
 
-export async function loadSuperTacticsBaseConfigAsync(dataPath: string = DATA_ROOT) {
-  const path = join(dataPath, "common/gamedata/skill", "super_tactics_config_0.08.86.cfg.bin.json");
+export async function loadSuperTacticsBaseConfigAsync(
+  dataPath: string = DATA_ROOT,
+) {
+  const path = join(
+    dataPath,
+    "common/gamedata/skill",
+    "super_tactics_config_0.08.86.cfg.bin.json",
+  );
   const content = await loadJsonAsync<{ entries: ConfigNode[] }>(path);
   if (!content?.entries) return null;
   return parseEntries(content.entries);
 }
 
-export async function buildSuperTacticsBaseDatabase(dataPath: string = DATA_ROOT): Promise<SuperTacticsBaseDatabase> {
+export async function buildSuperTacticsBaseDatabase(
+  dataPath: string = DATA_ROOT,
+): Promise<SuperTacticsBaseDatabase> {
   const result = await loadSuperTacticsBaseConfigAsync(dataPath);
   return {
     effects: result?.effects || [],

@@ -26,7 +26,10 @@ export interface ReadingStats {
  * Enregistre ou met à jour la progression de lecture d'un article.
  * Appelle la RPC upsert_reading_progress avec user_id, article_id, progress (0-100).
  */
-export async function trackReading(articleId: string, progress: number): Promise<void> {
+export async function trackReading(
+  articleId: string,
+  progress: number,
+): Promise<void> {
   const session = await getServerSession();
   if (!session?.user) {
     throw new Error("Non authentifié");
@@ -44,7 +47,9 @@ export async function trackReading(articleId: string, progress: number): Promise
  * Récupère l'historique de lecture de l'utilisateur connecté.
  * Retourne les articles publiés sur azalee, ordonnés par dernière lecture.
  */
-export async function getReadingHistory(limit = 10): Promise<ReadingHistoryEntry[]> {
+export async function getReadingHistory(
+  limit = 10,
+): Promise<ReadingHistoryEntry[]> {
   const session = await getServerSession();
   if (!session?.user) {
     throw new Error("Non authentifié");
@@ -66,7 +71,9 @@ export async function getReadingHistory(limit = 10): Promise<ReadingHistoryEntry
  * Récupère les articles commencés mais non terminés (progress < 100).
  * Permet d'afficher une section "Continuer la lecture".
  */
-export async function getContinueReading(limit = 4): Promise<ReadingHistoryEntry[]> {
+export async function getContinueReading(
+  limit = 4,
+): Promise<ReadingHistoryEntry[]> {
   const session = await getServerSession();
   if (!session?.user) {
     return [];
@@ -97,20 +104,21 @@ export async function getReadingStats(): Promise<ReadingStats> {
   }
 
   const pool = getPgPool();
-  const [{ rows: readRows }, { rows: progressRows }, { rows: history }] = await Promise.all([
-    pool.query<{ count: string }>(
-      "SELECT COUNT(*)::text AS count FROM reading_history WHERE user_id = $1 AND progress = 100",
-      [session.user.id],
-    ),
-    pool.query<{ count: string }>(
-      "SELECT COUNT(*)::text AS count FROM reading_history WHERE user_id = $1 AND progress < 100",
-      [session.user.id],
-    ),
-    pool.query<{ last_read_at: string }>(
-      "SELECT last_read_at FROM reading_history WHERE user_id = $1 ORDER BY last_read_at DESC",
-      [session.user.id],
-    ),
-  ]);
+  const [{ rows: readRows }, { rows: progressRows }, { rows: history }] =
+    await Promise.all([
+      pool.query<{ count: string }>(
+        "SELECT COUNT(*)::text AS count FROM reading_history WHERE user_id = $1 AND progress = 100",
+        [session.user.id],
+      ),
+      pool.query<{ count: string }>(
+        "SELECT COUNT(*)::text AS count FROM reading_history WHERE user_id = $1 AND progress < 100",
+        [session.user.id],
+      ),
+      pool.query<{ last_read_at: string }>(
+        "SELECT last_read_at FROM reading_history WHERE user_id = $1 ORDER BY last_read_at DESC",
+        [session.user.id],
+      ),
+    ]);
   const totalRead = Number(readRows[0]?.count ?? 0);
   const totalInProgress = Number(progressRows[0]?.count ?? 0);
 
@@ -118,7 +126,11 @@ export async function getReadingStats(): Promise<ReadingStats> {
   let streak = 0;
   if (history && history.length > 0) {
     // Construire un Set des jours (format YYYY-MM-DD) ayant une activité
-    const activeDays = new Set<string>(history.map(row => new Date(row.last_read_at).toISOString().slice(0, 10)));
+    const activeDays = new Set<string>(
+      history.map((row) =>
+        new Date(row.last_read_at).toISOString().slice(0, 10),
+      ),
+    );
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);

@@ -14,7 +14,11 @@ import ClanProfileClient from "./clan-profile-client";
  * fiches de clan ne vaudrait pas mieux que le titre unique qu'on vient de
  * supprimer : c'est exactement le même défaut, à une échelle plus petite.
  */
-export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
   const { id } = await params;
   const numero = Number(id);
   const chemin = `/achillea/clans/${id}`;
@@ -48,16 +52,30 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   });
 }
 
-export default async function ClanProfilePage({ params }: { params: Promise<{ id: string }> }) {
+export default async function ClanProfilePage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const { id } = await params;
   const clanId = Number(id);
-  if (!Number.isSafeInteger(clanId) || clanId <= 0) return <ClanProfileClient id={id} />;
+  if (!Number.isSafeInteger(clanId) || clanId <= 0)
+    return <ClanProfileClient id={id} />;
   const [clanResult, membersResult] = await Promise.allSettled([
     getPublicClan(clanId),
     createAchilleaClient().clans.members(clanId),
   ]);
-  const initialClan = clanResult.status === "fulfilled" ? clanResult.value : null;
+  const initialClan =
+    clanResult.status === "fulfilled" ? clanResult.value : null;
   const initialMembers: ClanMemberDTO[] | null =
-    membersResult.status === "fulfilled" && membersResult.value.ok ? membersResult.value.value : null;
-  return <ClanProfileClient id={id} initialClan={initialClan} initialMembers={initialMembers} />;
+    membersResult.status === "fulfilled" && membersResult.value.ok
+      ? membersResult.value.value
+      : null;
+  return (
+    <ClanProfileClient
+      id={id}
+      initialClan={initialClan}
+      initialMembers={initialMembers}
+    />
+  );
 }

@@ -67,10 +67,14 @@ export function AuraCard({
   const label = SUBTYPE_LABELS[subType] || subType;
   const [imgError, setImgError] = useState(false);
 
-  const imageUrl = resolveAssetUrl(image) || getAuraImageUrl(assetCode, subType);
+  const imageUrl =
+    resolveAssetUrl(image) || getAuraImageUrl(assetCode, subType);
 
   return (
-    <Link href={`/wiki/aura/${category}/${id}`} className={cn("block h-full", className)}>
+    <Link
+      href={`/wiki/aura/${category}/${id}`}
+      className={cn("block h-full", className)}
+    >
       <div
         className={cn(
           "group relative flex flex-col rounded-xl overflow-hidden border transition-all duration-200",
@@ -125,17 +129,27 @@ export function AuraCard({
 
         {/* Info area */}
         <div className="px-3 py-2 flex flex-col gap-1 bg-neutral-950 grow">
-          <h3 className="text-xs sm:text-sm font-bold text-white leading-tight line-clamp-2">{name}</h3>
+          <h3 className="text-xs sm:text-sm font-bold text-white leading-tight line-clamp-2">
+            {name}
+          </h3>
 
           {passiveEffect && (
             <p className="text-[10px] text-tertiary/80 font-medium line-clamp-1">
-              <Sparkles size={10} className="inline align-middle mr-0.5" aria-hidden="true" />
+              <Sparkles
+                size={10}
+                className="inline align-middle mr-0.5"
+                aria-hidden="true"
+              />
               {passiveEffect}
             </p>
           )}
           {hissatsuName && (
             <p className="text-[10px] text-primary/80 font-medium line-clamp-1">
-              <CircleDot size={10} className="inline align-middle mr-0.5" aria-hidden="true" />
+              <CircleDot
+                size={10}
+                className="inline align-middle mr-0.5"
+                aria-hidden="true"
+              />
               {hissatsuName}
             </p>
           )}

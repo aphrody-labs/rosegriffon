@@ -34,9 +34,11 @@ export async function toggleReaction(
     await client.from("article_reactions").delete().eq("id", existing.id);
   } else {
     // Add reaction
-    await client
-      .from("article_reactions")
-      .insert({ article_id: articleId, reaction_type: reactionType, user_id: userId });
+    await client.from("article_reactions").insert({
+      article_id: articleId,
+      reaction_type: reactionType,
+      user_id: userId,
+    });
   }
 
   // Get updated count
@@ -73,7 +75,10 @@ export async function getReactionCounts(
 
   try {
     // Get all reactions for these articles
-    const { rows: reactions } = await pool.query<{ article_id: string; user_id: string }>(
+    const { rows: reactions } = await pool.query<{
+      article_id: string;
+      user_id: string;
+    }>(
       "SELECT article_id, user_id FROM article_reactions WHERE article_id = ANY($1) AND reaction_type = $2",
       [articleIds, reactionType],
     );
@@ -104,7 +109,10 @@ export async function getAllReactionCounts(
   const session = await getServerSession();
   const userId = session?.user?.id;
 
-  const result = {} as Record<ReactionType, { count: number; userReacted: boolean }>;
+  const result = {} as Record<
+    ReactionType,
+    { count: number; userReacted: boolean }
+  >;
   for (const type of REACTION_TYPES) {
     result[type] = { count: 0, userReacted: false };
   }
@@ -112,7 +120,10 @@ export async function getAllReactionCounts(
   const pool = getPgPool();
 
   try {
-    const { rows: reactions } = await pool.query<{ reaction_type: string; user_id: string }>(
+    const { rows: reactions } = await pool.query<{
+      reaction_type: string;
+      user_id: string;
+    }>(
       "SELECT reaction_type, user_id FROM article_reactions WHERE article_id = $1",
       [articleId],
     );

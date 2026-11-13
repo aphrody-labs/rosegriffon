@@ -17,17 +17,22 @@ export const sourceYoutube: SourceFeed = {
   reseau: "youtube",
   comptes: COMPTES_SOURCE_YOUTUBE,
   async lire({ comptes }): Promise<PageSource> {
-    if (comptes.length === 0) return { posts: [], profils: [], statut: { reseau: "youtube", etat: "vide" } };
-    const choisis = new Set(comptes.map(c => c.pseudo));
+    if (comptes.length === 0)
+      return {
+        posts: [],
+        profils: [],
+        statut: { reseau: "youtube", etat: "vide" },
+      };
+    const choisis = new Set(comptes.map((c) => c.pseudo));
     const snapshot = await lireSnapshotServeur("youtube");
     let posts: PostFeed[];
     let profils: ProfilFeed[];
     if (estFrais(snapshot)) {
-      posts = snapshot.posts.filter(p => p.compte && choisis.has(p.compte));
-      profils = snapshot.profils.filter(p => choisis.has(p.pseudo));
+      posts = snapshot.posts.filter((p) => p.compte && choisis.has(p.compte));
+      profils = snapshot.profils.filter((p) => choisis.has(p.pseudo));
     } else {
       const lus = await Promise.allSettled(
-        comptes.map(c =>
+        comptes.map((c) =>
           avecDelai(
             memo(`yt:${c.pseudo}`, TTL_DIRECT_MS, () => lireYoutube(c)),
             15_000,
@@ -35,16 +40,26 @@ export const sourceYoutube: SourceFeed = {
           ),
         ),
       );
-      const ok = lus.flatMap(l => (l.status === "fulfilled" ? [l.value] : []));
+      const ok = lus.flatMap((l) =>
+        l.status === "fulfilled" ? [l.value] : [],
+      );
       if (ok.length === 0)
         return {
           posts: [],
           profils: [],
-          statut: { reseau: "youtube", etat: "indisponible", message: "YouTube ne répond pas pour le moment." },
+          statut: {
+            reseau: "youtube",
+            etat: "indisponible",
+            message: "YouTube ne répond pas pour le moment.",
+          },
         };
-      posts = ok.flatMap(r => r.posts);
-      profils = ok.flatMap(r => (r.profil ? [r.profil] : []));
+      posts = ok.flatMap((r) => r.posts);
+      profils = ok.flatMap((r) => (r.profil ? [r.profil] : []));
     }
-    return { posts, profils, statut: { reseau: "youtube", etat: posts.length > 0 ? "ok" : "vide" } };
+    return {
+      posts,
+      profils,
+      statut: { reseau: "youtube", etat: posts.length > 0 ? "ok" : "vide" },
+    };
   },
 };

@@ -28,9 +28,14 @@ interface ProjectCardProps {
   priority?: boolean;
 }
 
-const SIZES_PAR_DEFAUT = "(min-width: 1024px) 26rem, (min-width: 640px) 50vw, 100vw";
+const SIZES_PAR_DEFAUT =
+  "(min-width: 1024px) 26rem, (min-width: 640px) 50vw, 100vw";
 
-export function ProjectCard({ projet, sizes = SIZES_PAR_DEFAUT, priority = false }: ProjectCardProps) {
+export function ProjectCard({
+  projet,
+  sizes = SIZES_PAR_DEFAUT,
+  priority = false,
+}: ProjectCardProps) {
   const Icone = projet.icone;
 
   return (
@@ -76,7 +81,9 @@ export function ProjectCard({ projet, sizes = SIZES_PAR_DEFAUT, priority = false
               </h3>
             </div>
 
-            <p className="grow text-sm leading-relaxed text-muted-foreground sm:text-base">{projet.description}</p>
+            <p className="grow text-sm leading-relaxed text-muted-foreground sm:text-base">
+              {projet.description}
+            </p>
 
             <span className="mt-auto inline-flex items-center gap-2 border-t border-border pt-4 text-sm font-bold text-card-foreground transition-colors duration-300 group-hover:text-primary">
               Accéder au projet

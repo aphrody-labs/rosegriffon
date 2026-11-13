@@ -12,11 +12,16 @@ export interface RulesetValidationResult {
 
 const SEMVER_RE = /^\d+\.\d+\.\d+$/;
 
-export function validateRulesetMetadata(ruleset: RulesetValidationInput): RulesetValidationResult {
+export function validateRulesetMetadata(
+  ruleset: RulesetValidationInput,
+): RulesetValidationResult {
   const errors: string[] = [];
-  if (!ruleset.name || ruleset.name.trim().length === 0) errors.push("name must not be empty");
+  if (!ruleset.name || ruleset.name.trim().length === 0)
+    errors.push("name must not be empty");
   if (ruleset.version !== "legacy" && !SEMVER_RE.test(ruleset.version)) {
-    errors.push(`version "${ruleset.version}" is not a valid semver (X.Y.Z) or "legacy"`);
+    errors.push(
+      `version "${ruleset.version}" is not a valid semver (X.Y.Z) or "legacy"`,
+    );
   }
   if (!Number.isInteger(ruleset.defaultBo) || ruleset.defaultBo <= 0) {
     errors.push("defaultBo must be a positive integer");

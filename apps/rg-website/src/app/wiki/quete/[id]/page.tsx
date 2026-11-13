@@ -18,7 +18,11 @@ function typeLabel(type: number): string {
   return `Étape ${type}`;
 }
 
-export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
   const { id } = await params;
   const quest = await getQuest(id);
   const name = quest?.title || "Quête";
@@ -43,8 +47,12 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 function MetaRow({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div className="flex items-baseline justify-between gap-4 border-b border-outline-variant/20 py-2.5 last:border-0">
-      <span className="shrink-0 text-sm font-medium text-on-surface-variant">{label}</span>
-      <span className="text-right text-sm font-semibold text-on-surface">{value}</span>
+      <span className="shrink-0 text-sm font-medium text-on-surface-variant">
+        {label}
+      </span>
+      <span className="text-right text-sm font-semibold text-on-surface">
+        {value}
+      </span>
     </div>
   );
 }
@@ -57,7 +65,13 @@ function NeighborLink({ quest, dir }: { quest: Quest; dir: "prev" | "next" }) {
       href={`/wiki/quete/${quest.id}`}
       className="group flex min-w-0 flex-1 items-center gap-2 rounded-xl border border-outline-variant/30 bg-surface-container-low p-3 transition-colors hover:bg-surface-container"
     >
-      {isPrev && <ArrowLeft size={18} className="shrink-0 text-on-surface-variant" aria-hidden="true" />}
+      {isPrev && (
+        <ArrowLeft
+          size={18}
+          className="shrink-0 text-on-surface-variant"
+          aria-hidden="true"
+        />
+      )}
       <div className={isPrev ? "min-w-0" : "min-w-0 text-right"}>
         <span className="block text-[10px] font-bold uppercase tracking-wider text-on-surface-variant/60">
           {isPrev ? "Précédente" : "Suivante"}
@@ -66,12 +80,22 @@ function NeighborLink({ quest, dir }: { quest: Quest; dir: "prev" | "next" }) {
           {quest.title}
         </span>
       </div>
-      {!isPrev && <ArrowRight size={18} className="shrink-0 text-on-surface-variant" aria-hidden="true" />}
+      {!isPrev && (
+        <ArrowRight
+          size={18}
+          className="shrink-0 text-on-surface-variant"
+          aria-hidden="true"
+        />
+      )}
     </Link>
   );
 }
 
-export default async function QuestDetailPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function QuestDetailPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const { id } = await params;
   const quest = await getQuest(id);
 
@@ -105,11 +129,17 @@ export default async function QuestDetailPage({ params }: { params: Promise<{ id
 
   return (
     <div className="w-full space-y-8">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
 
       {/* Fil d'Ariane */}
       <div className="flex items-center gap-2 text-sm font-medium text-on-surface-variant">
-        <Link href="/wiki/quete" className="transition-colors hover:text-primary">
+        <Link
+          href="/wiki/quete"
+          className="transition-colors hover:text-primary"
+        >
           Quêtes
         </Link>
         <span className="opacity-30">/</span>
@@ -135,7 +165,9 @@ export default async function QuestDetailPage({ params }: { params: Promise<{ id
                 : "rounded-full bg-tertiary/10 px-2.5 py-1 text-xs font-bold uppercase tracking-wider text-tertiary"
             }
           >
-            {isMain ? "Histoire principale" : `Quête annexe${quest.area ? ` · Zone ${quest.area}` : ""}`}
+            {isMain
+              ? "Histoire principale"
+              : `Quête annexe${quest.area ? ` · Zone ${quest.area}` : ""}`}
           </span>
           <h1 className="mt-2 text-2xl sm:text-3xl font-extrabold leading-tight tracking-tight text-on-surface font-display">
             {quest.title}
@@ -145,7 +177,9 @@ export default async function QuestDetailPage({ params }: { params: Promise<{ id
 
       {/* Titres localisés */}
       <section className="rounded-2xl border border-outline-variant/30 bg-surface-container-low p-4">
-        <h2 className="mb-3 text-sm font-bold uppercase tracking-wider text-on-surface-variant/70">Titre localisé</h2>
+        <h2 className="mb-3 text-sm font-bold uppercase tracking-wider text-on-surface-variant/70">
+          Titre localisé
+        </h2>
         <div className="space-y-2">
           {quest.titles.fr && (
             <p className="text-sm text-on-surface">
@@ -170,31 +204,58 @@ export default async function QuestDetailPage({ params }: { params: Promise<{ id
 
       {/* Attributs */}
       <section className="rounded-2xl border border-outline-variant/30 bg-surface-container-low p-4">
-        <h2 className="mb-1 text-sm font-bold uppercase tracking-wider text-on-surface-variant/70">Détails</h2>
-        <MetaRow label="Identifiant" value={<code className="font-mono text-xs">{quest.id}</code>} />
-        <MetaRow label="Catégorie" value={isMain ? "Histoire principale" : "Quête annexe"} />
+        <h2 className="mb-1 text-sm font-bold uppercase tracking-wider text-on-surface-variant/70">
+          Détails
+        </h2>
+        <MetaRow
+          label="Identifiant"
+          value={<code className="font-mono text-xs">{quest.id}</code>}
+        />
+        <MetaRow
+          label="Catégorie"
+          value={isMain ? "Histoire principale" : "Quête annexe"}
+        />
         <MetaRow label="Type in-game" value={typeLabel(quest.type)} />
-        <MetaRow label={isMain ? "Chapitre" : "Code de phase"} value={quest.phase} />
+        <MetaRow
+          label={isMain ? "Chapitre" : "Code de phase"}
+          value={quest.phase}
+        />
         {quest.area !== null && <MetaRow label="Zone" value={quest.area} />}
         {quest.image && (
-          <MetaRow label="Asset image" value={<code className="font-mono text-xs">{quest.image}</code>} />
+          <MetaRow
+            label="Asset image"
+            value={<code className="font-mono text-xs">{quest.image}</code>}
+          />
         )}
       </section>
 
       {/* Note d'honnêteté : objectifs/récompenses non encore extraits. */}
       <div className="flex items-start gap-3 rounded-2xl border border-outline-variant/30 bg-surface-container p-4">
-        <Info size={18} className="mt-0.5 shrink-0 text-on-surface-variant" aria-hidden="true" />
+        <Info
+          size={18}
+          className="mt-0.5 shrink-0 text-on-surface-variant"
+          aria-hidden="true"
+        />
         <p className="text-sm text-on-surface-variant">
-          Les objectifs détaillés, récompenses et prérequis de cette quête ne sont pas encore extraits des données du
-          jeu. Seules les informations vérifiées (titre, chapitre, type) sont affichées.
+          Les objectifs détaillés, récompenses et prérequis de cette quête ne
+          sont pas encore extraits des données du jeu. Seules les informations
+          vérifiées (titre, chapitre, type) sont affichées.
         </p>
       </div>
 
       {/* Navigation précédente / suivante */}
       {(prev || next) && (
         <nav className="flex gap-3">
-          {prev ? <NeighborLink quest={prev} dir="prev" /> : <span className="flex-1" />}
-          {next ? <NeighborLink quest={next} dir="next" /> : <span className="flex-1" />}
+          {prev ? (
+            <NeighborLink quest={prev} dir="prev" />
+          ) : (
+            <span className="flex-1" />
+          )}
+          {next ? (
+            <NeighborLink quest={next} dir="next" />
+          ) : (
+            <span className="flex-1" />
+          )}
         </nav>
       )}
     </div>

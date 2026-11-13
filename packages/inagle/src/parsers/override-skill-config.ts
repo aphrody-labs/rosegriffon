@@ -109,12 +109,20 @@ function parseContent(content: any): OverrideSkillDatabase {
     const [condStart, condCount] = override.refConditionData;
     const resolvedConditions: ResolvedOverride["conditions"] = [];
 
-    for (let i = condStart; i < condStart + condCount && i < conditions.length; i++) {
+    for (
+      let i = condStart;
+      i < condStart + condCount && i < conditions.length;
+      i++
+    ) {
       const cond = conditions[i];
       const [skillStart, skillCount] = cond.refConditionSkillData;
       const requiredSkills: OverrideConditionSkillInfo[] = [];
 
-      for (let j = skillStart; j < skillStart + skillCount && j < conditionSkills.length; j++) {
+      for (
+        let j = skillStart;
+        j < skillStart + skillCount && j < conditionSkills.length;
+        j++
+      ) {
         requiredSkills.push(conditionSkills[j]);
       }
 
@@ -141,13 +149,18 @@ function findOverrideSkillConfigFile(dir: string): string | null {
   if (!existsSync(dir)) return null;
   const files = readdirSync(dir);
   const configFile = files
-    .filter(f => f.startsWith("override_skill_config_") && f.endsWith(".cfg.bin.json"))
+    .filter(
+      (f) =>
+        f.startsWith("override_skill_config_") && f.endsWith(".cfg.bin.json"),
+    )
     .sort()
     .pop();
   return configFile ? join(dir, configFile) : null;
 }
 
-export async function loadOverrideSkillConfigAsync(dataPath: string): Promise<OverrideSkillDatabase | null> {
+export async function loadOverrideSkillConfigAsync(
+  dataPath: string,
+): Promise<OverrideSkillDatabase | null> {
   const skillDir = join(dataPath, "common", "gamedata", "skill");
   const configPath = findOverrideSkillConfigFile(skillDir);
 
@@ -169,5 +182,7 @@ export async function loadOverrideSkillConfigAsync(dataPath: string): Promise<Ov
 
 export async function buildOverrideSkillDatabase(dataPath: string) {
   const db = await loadOverrideSkillConfigAsync(dataPath);
-  return db || { conditionSkills: [], conditions: [], overrides: [], resolved: [] };
+  return (
+    db || { conditionSkills: [], conditions: [], overrides: [], resolved: [] }
+  );
 }

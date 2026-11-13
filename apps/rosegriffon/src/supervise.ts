@@ -2,12 +2,20 @@
 
 /** Command that re-runs this program: the compiled executable, or Bun on the source entry. */
 export function selfCommand(...args: string[]): string[] {
-  const compiled = import.meta.path.startsWith("/$bunfs/") || /^[A-Z]:\\~BUN\\/i.test(import.meta.path);
-  return compiled ? [process.execPath, ...args] : [process.execPath, Bun.main, ...args];
+  const compiled =
+    import.meta.path.startsWith("/$bunfs/") ||
+    /^[A-Z]:\\~BUN\\/i.test(import.meta.path);
+  return compiled
+    ? [process.execPath, ...args]
+    : [process.execPath, Bun.main, ...args];
 }
 
 /** Restarts a child with exponential backoff (1 s to 60 s, reset after 60 s alive). */
-export function supervise(name: string, cmd: string[], env: Record<string, string | undefined> = {}): () => void {
+export function supervise(
+  name: string,
+  cmd: string[],
+  env: Record<string, string | undefined> = {},
+): () => void {
   let child: ReturnType<typeof Bun.spawn> | null = null;
   let stopped = false;
   let failures = 0;
@@ -26,7 +34,9 @@ export function supervise(name: string, cmd: string[], env: Record<string, strin
         if (stopped) return;
         failures = Date.now() - startedAt > 60_000 ? 0 : failures + 1;
         const delay = Math.min(60_000, 1000 * 2 ** Math.min(failures, 6));
-        console.error(`[rosegriffon] ${name} exited (code ${code ?? "?"}, signal ${signal ?? "-"}), restarting in ${delay} ms`);
+        console.error(
+          `[rosegriffon] ${name} exited (code ${code ?? "?"}, signal ${signal ?? "-"}), restarting in ${delay} ms`,
+        );
         timer = setTimeout(start, delay);
       },
     });

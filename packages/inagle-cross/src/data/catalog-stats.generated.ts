@@ -711,7 +711,11 @@ export default {
     stringtable_total: 378,
     stringtable_base_tables: 126,
     sharedtabledata: 125,
-    locale_objects: ["Chinese (Traditional) (zh-Hant)", "English (en)", "Japanese (ja)"],
+    locale_objects: [
+      "Chinese (Traditional) (zh-Hant)",
+      "English (en)",
+      "Japanese (ja)",
+    ],
     textasset: 188,
     container_bundles: {
       "a396f4e7ab9152faec46af7669a30dc0.bundle": 126,

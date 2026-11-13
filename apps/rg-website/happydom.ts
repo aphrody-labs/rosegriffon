@@ -64,7 +64,10 @@ for (const nom of PRIMITIVES_RESEAU) {
  */
 export function rendreReseauNatif(): void {
   for (const [nom, descripteur] of descripteursNatifs) {
-    Object.defineProperty(globalThis, nom, { ...descripteur, configurable: true });
+    Object.defineProperty(globalThis, nom, {
+      ...descripteur,
+      configurable: true,
+    });
   }
 }
 

@@ -69,7 +69,9 @@ describe("nommage", () => {
   });
 
   test("le nom tient toujours dans la limite de l'API", () => {
-    expect(nomSalonTicket(999_999).length).toBeLessThanOrEqual(LONGUEUR_NOM_SALON);
+    expect(nomSalonTicket(999_999).length).toBeLessThanOrEqual(
+      LONGUEUR_NOM_SALON,
+    );
   });
 
   test("la référence se cite telle quelle", () => {
@@ -79,7 +81,9 @@ describe("nommage", () => {
 
 describe("sujet et motif", () => {
   test("les retours à la ligne sont écrasés", () => {
-    expect(sujetPropre("Un souci\navec   la boutique")).toBe("Un souci avec la boutique");
+    expect(sujetPropre("Un souci\navec   la boutique")).toBe(
+      "Un souci avec la boutique",
+    );
   });
 
   test("un sujet vide n'existe pas", () => {
@@ -133,8 +137,12 @@ describe("états", () => {
 
 describe("ouverture", () => {
   test("cinq catégories au plus : c'est une rangée de boutons", () => {
-    expect(CATEGORIES_TICKET.length).toBeLessThanOrEqual(LIMITES.composantsParRangee);
-    expect(new Set(CATEGORIES_TICKET.map(c => c.cle)).size).toBe(CATEGORIES_TICKET.length);
+    expect(CATEGORIES_TICKET.length).toBeLessThanOrEqual(
+      LIMITES.composantsParRangee,
+    );
+    expect(new Set(CATEGORIES_TICKET.map((c) => c.cle)).size).toBe(
+      CATEGORIES_TICKET.length,
+    );
   });
 
   test("une catégorie inconnue liste les catégories valables", () => {
@@ -167,7 +175,9 @@ describe("ouverture", () => {
 
 describe("identifiants de composants", () => {
   test("aller-retour sans perte", () => {
-    expect(lireComposant(identifiantComposant("ouvrir", "signalement"))).toEqual({
+    expect(
+      lireComposant(identifiantComposant("ouvrir", "signalement")),
+    ).toEqual({
       action: "ouvrir",
       argument: "signalement",
     });
@@ -201,8 +211,12 @@ describe("accès", () => {
       pourLaDirection: false,
       rolesStaff: staff,
     });
-    expect(liste[0]).toEqual({ genre: "membre", id: "membre", raison: "Auteur du ticket." });
-    const roles = liste.filter(e => e.genre === "role").map(e => e.id);
+    expect(liste[0]).toEqual({
+      genre: "membre",
+      id: "membre",
+      raison: "Auteur du ticket.",
+    });
+    const roles = liste.filter((e) => e.genre === "role").map((e) => e.id);
     expect(roles).toEqual(staff);
     expect(roles).not.toContain("role-direction");
   });
@@ -214,7 +228,7 @@ describe("accès", () => {
       pourLaDirection: false,
       rolesStaff: [...staff, "role-mod-1"],
     });
-    const roles = liste.filter(e => e.genre === "role").map(e => e.id);
+    const roles = liste.filter((e) => e.genre === "role").map((e) => e.id);
     expect(roles).toEqual(staff);
   });
 
@@ -225,7 +239,7 @@ describe("accès", () => {
       rolesDirection: direction,
       rolesStaff: staff,
     });
-    const roles = liste.filter(e => e.genre === "role").map(e => e.id);
+    const roles = liste.filter((e) => e.genre === "role").map((e) => e.id);
     expect(roles).toEqual(direction);
     expect(roles).not.toContain("role-mod-1");
   });
@@ -233,7 +247,9 @@ describe("accès", () => {
   test("« sensible » ne décide plus du destinataire — le signalement va à la modération", () => {
     // Décision du 22/8/2026 : le premier vrai signalement notifiait trois
     // membres de la direction et aucun modérateur, pour un incident de vocal.
-    const signalement = CATEGORIES_TICKET.find(c => c.cle === "signalement") as (typeof CATEGORIES_TICKET)[number];
+    const signalement = CATEGORIES_TICKET.find(
+      (c) => c.cle === "signalement",
+    ) as (typeof CATEGORIES_TICKET)[number];
     expect(signalement.sensible).toBe(true);
     expect(signalement.pourLaDirection).toBe(false);
     const liste = invitations({
@@ -242,13 +258,16 @@ describe("accès", () => {
       rolesDirection: direction,
       rolesStaff: staff,
     });
-    const roles = liste.filter(e => e.genre === "role").map(e => e.id);
+    const roles = liste.filter((e) => e.genre === "role").map((e) => e.id);
     expect(roles).toEqual(staff);
     expect(roles).not.toContain("role-direction");
   });
 
   test("sans direction configurée, une catégorie de direction est refusée — pas rabattue", () => {
-    const pourLaDirection = { ...CATEGORIES_TICKET[1], pourLaDirection: true } as const;
+    const pourLaDirection = {
+      ...CATEGORIES_TICKET[1],
+      pourLaDirection: true,
+    } as const;
     const manque = manqueDeConfiguration(pourLaDirection, {
       rolesDirection: [],
       rolesStaff: staff,
@@ -325,7 +344,16 @@ describe("accès", () => {
 
   test("les rôles de bots ne sont pas des fuites", () => {
     const fuites = fuitesDAcces(
-      [{ administrateur: true, gereLesFils: true, id: "role-bot", integration: true, nom: "@RG", porteursHumains: 3 }],
+      [
+        {
+          administrateur: true,
+          gereLesFils: true,
+          id: "role-bot",
+          integration: true,
+          nom: "@RG",
+          porteursHumains: 3,
+        },
+      ],
       staff,
       "#tickets",
     );
@@ -353,8 +381,17 @@ describe("accès", () => {
   });
 
   test("sans aucun rôle, même une catégorie ordinaire est refusée", () => {
-    const ordinaire = CATEGORIES_TICKET.find(c => !c.pourLaDirection) as (typeof CATEGORIES_TICKET)[number];
-    expect(manqueDeConfiguration(ordinaire, { rolesDirection: [], rolesStaff: [] })).not.toBeNull();
-    expect(manqueDeConfiguration(ordinaire, { rolesDirection: [], rolesStaff: staff })).toBeNull();
+    const ordinaire = CATEGORIES_TICKET.find(
+      (c) => !c.pourLaDirection,
+    ) as (typeof CATEGORIES_TICKET)[number];
+    expect(
+      manqueDeConfiguration(ordinaire, { rolesDirection: [], rolesStaff: [] }),
+    ).not.toBeNull();
+    expect(
+      manqueDeConfiguration(ordinaire, {
+        rolesDirection: [],
+        rolesStaff: staff,
+      }),
+    ).toBeNull();
   });
 });

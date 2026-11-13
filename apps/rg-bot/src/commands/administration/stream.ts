@@ -109,7 +109,11 @@ const TTL_INDEX_MS = 30_000;
 const CLEF_INDEX = "administration:stream:index";
 
 async function indexCreneaux(): Promise<CreneauAdmin[]> {
-  return await cached(CLEF_INDEX, TTL_INDEX_MS, async () => await listerCreneaux(null));
+  return await cached(
+    CLEF_INDEX,
+    TTL_INDEX_MS,
+    async () => await listerCreneaux(null),
+  );
 }
 
 async function lireCreneau(id: string): Promise<CreneauAdmin | null> {
@@ -136,7 +140,9 @@ function ligneCreneau(creneau: CreneauAdmin): string {
   if (!estCreneauPublic(creneau.status)) {
     // Écrit en toutes lettres : c'est exactement la question qu'on se pose
     // quand un créneau n'apparaît pas sur le site.
-    morceaux.push(`⚠ ${libelleStatutCreneau(creneau.status)} — masqué du planning public`);
+    morceaux.push(
+      `⚠ ${libelleStatutCreneau(creneau.status)} — masqué du planning public`,
+    );
   }
   const ligne = `• ${morceaux.join(" · ")} \`${abregerIdentifiant(creneau.id)}\``;
   return creneau.notes ? `${ligne}\n   ${truncate(creneau.notes, 120)}` : ligne;
@@ -145,14 +151,22 @@ function ligneCreneau(creneau: CreneauAdmin): string {
 /** Fiche d'un créneau, réutilisée par ajout et modification. */
 function ficheCreneau(creneau: CreneauAdmin) {
   return rgEmbed()
-    .setTitle(`${libelleJourSemaine(creneau.day_of_week)} — ${truncate(creneau.streamer_name, 100)}`)
+    .setTitle(
+      `${libelleJourSemaine(creneau.day_of_week)} — ${truncate(creneau.streamer_name, 100)}`,
+    )
     .addFields(
-      { name: "Horaire", value: plageHoraire(creneau.start_time, creneau.end_time), inline: true },
+      {
+        name: "Horaire",
+        value: plageHoraire(creneau.start_time, creneau.end_time),
+        inline: true,
+      },
       // Une catégorie vide (chaîne vide posée par le formulaire du site) ferait
       // rejeter l'embed ENTIER : Discord refuse un champ sans valeur.
       {
         name: "Catégorie",
-        value: creneau.category?.trim() ? truncate(creneau.category, 900) : "*non renseignée*",
+        value: creneau.category?.trim()
+          ? truncate(creneau.category, 900)
+          : "*non renseignée*",
         inline: true,
       },
       {
@@ -162,7 +176,10 @@ function ficheCreneau(creneau: CreneauAdmin) {
           : `${libelleStatutCreneau(creneau.status)} — masqué du site`,
         inline: true,
       },
-      { name: "Notes", value: creneau.notes ? borner(creneau.notes, 1_000) : "*aucune*" },
+      {
+        name: "Notes",
+        value: creneau.notes ? borner(creneau.notes, 1_000) : "*aucune*",
+      },
       { name: "Identifiant", value: `\`${creneau.id}\`` },
     );
 }
@@ -175,7 +192,10 @@ function ficheCreneau(creneau: CreneauAdmin) {
 })
 @SlashGroup("stream", "gestion")
 export class AdministrationStreamCommand {
-  @Slash({ name: "liste", description: "Le planning complet, du lundi au dimanche" })
+  @Slash({
+    name: "liste",
+    description: "Le planning complet, du lundi au dimanche",
+  })
   async liste(
     @SlashChoice(...CHOIX_STATUT_CRENEAU)
     @SlashOption({
@@ -214,9 +234,13 @@ export class AdministrationStreamCommand {
           parJour.set(creneau.day_of_week, [creneau]);
         }
       }
-      const jours = [...parJour.entries()].toSorted(([a], [b]) => ordreAffichageJour(a) - ordreAffichageJour(b));
+      const jours = [...parJour.entries()].toSorted(
+        ([a], [b]) => ordreAffichageJour(a) - ordreAffichageJour(b),
+      );
 
-      const publics = creneaux.filter(creneau => estCreneauPublic(creneau.status)).length;
+      const publics = creneaux.filter((creneau) =>
+        estCreneauPublic(creneau.status),
+      ).length;
       const embed = rgEmbed().setTitle(
         `Planning Rose Griffon TV — ${creneaux.length} créneau${creneaux.length > 1 ? "x" : ""}`,
       );
@@ -231,7 +255,10 @@ export class AdministrationStreamCommand {
       });
       await interaction.editReply({ embeds: [embed] });
     } catch (err) {
-      await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
+      await repondre(
+        interaction,
+        echec("Le service n'a pas répondu", messagePanne(err)),
+      );
     }
   }
 
@@ -263,7 +290,8 @@ export class AdministrationStreamCommand {
     debut: string | undefined,
     @SlashOption({
       name: "fin",
-      description: "Heure de fin, format HH:MM (facultative — les 7 créneaux actuels n'en ont pas)",
+      description:
+        "Heure de fin, format HH:MM (facultative — les 7 créneaux actuels n'en ont pas)",
       type: ApplicationCommandOptionType.String,
       required: false,
     })
@@ -299,13 +327,17 @@ export class AdministrationStreamCommand {
     }
 
     if (!estJourSemaine(jour)) {
-      await interaction.editReply({ content: "❌ Jour hors des sept jours de la semaine." });
+      await interaction.editReply({
+        content: "❌ Jour hors des sept jours de la semaine.",
+      });
       return;
     }
     const debutLu = debut === undefined ? null : analyserHeure(debut);
     const finLue = fin === undefined ? null : analyserHeure(fin);
     if ((debut !== undefined && !debutLu) || (fin !== undefined && !finLue)) {
-      await interaction.editReply({ content: refusDHeure(debut, debutLu, fin, finLue) });
+      await interaction.editReply({
+        content: refusDHeure(debut, debutLu, fin, finLue),
+      });
       return;
     }
     const statutFinal = statut ?? "active";
@@ -358,15 +390,22 @@ export class AdministrationStreamCommand {
             : "Créé mais MASQUÉ du planning public — passe-le en « Actif » pour l'afficher",
         }),
       );
-      await interaction.editReply({ content: "✅ Créneau ajouté.", embeds: [embed] });
+      await interaction.editReply({
+        content: "✅ Créneau ajouté.",
+        embeds: [embed],
+      });
     } catch (err) {
-      await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
+      await repondre(
+        interaction,
+        echec("Le service n'a pas répondu", messagePanne(err)),
+      );
     }
   }
 
   @Slash({
     name: "modifier",
-    description: "Changer un créneau — les champs omis restent inchangés, « - » les vide",
+    description:
+      "Changer un créneau — les champs omis restent inchangés, « - » les vide",
   })
   async modifier(
     @SlashOption({
@@ -448,7 +487,9 @@ export class AdministrationStreamCommand {
       return;
     }
     if (jour !== undefined && !estJourSemaine(jour)) {
-      await interaction.editReply({ content: "❌ Jour hors des sept jours de la semaine." });
+      await interaction.editReply({
+        content: "❌ Jour hors des sept jours de la semaine.",
+      });
       return;
     }
     if (statut !== undefined && !estStatutCreneau(statut)) {
@@ -460,11 +501,21 @@ export class AdministrationStreamCommand {
     // une heure la remplace, l'absence la laisse telle quelle.
     const debutLu = lireChampTextuel(debut);
     const finLue = lireChampTextuel(fin);
-    const debutHeure = debutLu.valeur === null ? null : analyserHeure(debutLu.valeur);
-    const finHeure = finLue.valeur === null ? null : analyserHeure(finLue.valeur);
-    if ((debutLu.valeur !== null && !debutHeure) || (finLue.valeur !== null && !finHeure)) {
+    const debutHeure =
+      debutLu.valeur === null ? null : analyserHeure(debutLu.valeur);
+    const finHeure =
+      finLue.valeur === null ? null : analyserHeure(finLue.valeur);
+    if (
+      (debutLu.valeur !== null && !debutHeure) ||
+      (finLue.valeur !== null && !finHeure)
+    ) {
       await interaction.editReply({
-        content: refusDHeure(debutLu.valeur, debutHeure, finLue.valeur, finHeure),
+        content: refusDHeure(
+          debutLu.valeur,
+          debutHeure,
+          finLue.valeur,
+          finHeure,
+        ),
       });
       return;
     }
@@ -473,7 +524,8 @@ export class AdministrationStreamCommand {
     const streamerLu = lireChampTextuel(streamer);
     if (streamerLu.fourni && streamerLu.valeur === null) {
       await interaction.editReply({
-        content: "❌ Le nom du streamer ne peut pas être vidé : il est obligatoire.",
+        content:
+          "❌ Le nom du streamer ne peut pas être vidé : il est obligatoire.",
       });
       return;
     }
@@ -495,7 +547,9 @@ export class AdministrationStreamCommand {
     try {
       const avant = await lireCreneau(id);
       if (!avant) {
-        await interaction.editReply({ content: `Aucun créneau sous \`${truncate(id, 40)}\`.` });
+        await interaction.editReply({
+          content: `Aucun créneau sous \`${truncate(id, 40)}\`.`,
+        });
         return;
       }
 
@@ -515,7 +569,8 @@ export class AdministrationStreamCommand {
 			`;
       if (!apres) {
         await interaction.editReply({
-          content: "Le créneau a disparu entre la lecture et l'écriture. Rien n'a été modifié.",
+          content:
+            "Le créneau a disparu entre la lecture et l'écriture. Rien n'a été modifié.",
         });
         return;
       }
@@ -551,13 +606,22 @@ export class AdministrationStreamCommand {
                 : "Modifié · le créneau est désormais MASQUÉ du planning public",
         }),
       );
-      await interaction.editReply({ content: "✅ Créneau mis à jour.", embeds: [embed] });
+      await interaction.editReply({
+        content: "✅ Créneau mis à jour.",
+        embeds: [embed],
+      });
     } catch (err) {
-      await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
+      await repondre(
+        interaction,
+        echec("Le service n'a pas répondu", messagePanne(err)),
+      );
     }
   }
 
-  @Slash({ name: "supprimer", description: "Retirer définitivement un créneau du planning" })
+  @Slash({
+    name: "supprimer",
+    description: "Retirer définitivement un créneau du planning",
+  })
   async supprimer(
     @SlashOption({
       name: "identifiant",
@@ -569,7 +633,8 @@ export class AdministrationStreamCommand {
     identifiant: string,
     @SlashOption({
       name: "confirmation",
-      description: "Tape « oui » — préfère « modifier statut: Inactif » pour un retrait temporaire",
+      description:
+        "Tape « oui » — préfère « modifier statut: Inactif » pour un retrait temporaire",
       type: ApplicationCommandOptionType.String,
       required: true,
     })
@@ -640,7 +705,10 @@ export class AdministrationStreamCommand {
           `${truncate(supprime.streamer_name, 60)}`,
       });
     } catch (err) {
-      await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
+      await repondre(
+        interaction,
+        echec("Le service n'a pas répondu", messagePanne(err)),
+      );
     }
   }
 }
@@ -653,7 +721,9 @@ export class AdministrationStreamCommand {
  * repères qui permettent de reconnaître un créneau. Les créneaux masqués sont
  * proposés eux aussi : ce sont justement ceux qu'on vient réactiver.
  */
-async function proposerCreneaux(interaction: AutocompleteInteraction): Promise<void> {
+async function proposerCreneaux(
+  interaction: AutocompleteInteraction,
+): Promise<void> {
   try {
     const saisie = String(interaction.options.getFocused() ?? "")
       .trim()
@@ -661,15 +731,17 @@ async function proposerCreneaux(interaction: AutocompleteInteraction): Promise<v
     const index = await indexCreneaux();
     const retenus = index
       .filter(
-        creneau =>
+        (creneau) =>
           saisie.length === 0 ||
           creneau.streamer_name.toLowerCase().includes(saisie) ||
-          libelleJourSemaine(creneau.day_of_week).toLowerCase().includes(saisie) ||
+          libelleJourSemaine(creneau.day_of_week)
+            .toLowerCase()
+            .includes(saisie) ||
           creneau.id.startsWith(saisie),
       )
       .slice(0, 25);
     await interaction.respond(
-      retenus.map(creneau => ({
+      retenus.map((creneau) => ({
         name: truncate(
           `${libelleJourSemaine(creneau.day_of_week)} ${plageHoraire(creneau.start_time, creneau.end_time)} — ` +
             `${creneau.streamer_name}${estCreneauPublic(creneau.status) ? "" : " (masqué)"}`,

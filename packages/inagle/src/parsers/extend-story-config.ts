@@ -59,7 +59,8 @@ function parseContent(content: any) {
   const loseEvents: Array<{ loseEventId: string }> = [];
   const gameData: ExtendStoryGameData[] = [];
 
-  if (!content?.lists) return { stories, enterEvents, winEvents, loseEvents, gameData };
+  if (!content?.lists)
+    return { stories, enterEvents, winEvents, loseEvents, gameData };
 
   for (const list of content.lists) {
     if (list.name === "m_exStoryDataConfigList") {
@@ -75,11 +76,14 @@ function parseContent(content: any) {
         });
       }
     } else if (list.name === "m_exStoryGameEnterEvConfigList") {
-      for (const val of list.values) enterEvents.push({ enterEventId: val.enterEventId });
+      for (const val of list.values)
+        enterEvents.push({ enterEventId: val.enterEventId });
     } else if (list.name === "m_exStoryGameWinEvConfigList") {
-      for (const val of list.values) winEvents.push({ winEventId: val.winEventId });
+      for (const val of list.values)
+        winEvents.push({ winEventId: val.winEventId });
     } else if (list.name === "m_exStoryGameLoseEvConfigList") {
-      for (const val of list.values) loseEvents.push({ loseEventId: val.loseEventId });
+      for (const val of list.values)
+        loseEvents.push({ loseEventId: val.loseEventId });
     } else if (list.name === "m_exStoryGameDataConfigList") {
       for (const val of list.values) {
         gameData.push({
@@ -108,7 +112,9 @@ export async function loadExtendStoryConfigAsync(dataPath: string = DATA_ROOT) {
   return content ? parseContent(content) : null;
 }
 
-export async function buildExtendStoryDatabase(dataPath: string = DATA_ROOT): Promise<ExtendStoryDatabase> {
+export async function buildExtendStoryDatabase(
+  dataPath: string = DATA_ROOT,
+): Promise<ExtendStoryDatabase> {
   const result = await loadExtendStoryConfigAsync(dataPath);
   const stories = result?.stories || [];
   const enterEvents = result?.enterEvents || [];

@@ -1,4 +1,7 @@
-import { getInagleDatabaseURL, isInagleDatabaseConfigured } from "@rosegriffon/db/pg";
+import {
+  getInagleDatabaseURL,
+  isInagleDatabaseConfigured,
+} from "@rosegriffon/db/pg";
 /**
  * Recherche d'entités et traduction assistée par glossaire, pour la commande
  * `azalee translate`.
@@ -13,7 +16,11 @@ import { getInagleDatabaseURL, isInagleDatabaseConfigured } from "@rosegriffon/d
 import { Database } from "bun:sqlite";
 import { isKana, toHiragana, toKatakana } from "wanakana";
 
-import { containsJapanese, escapeRegExp, stripRubyAnnotations } from "../text/japanese-detect";
+import {
+  containsJapanese,
+  escapeRegExp,
+  stripRubyAnnotations,
+} from "../text/japanese-detect";
 import { japaneseToRomaji } from "../text/japanese-romaji";
 import { createPgClient, getSqlitePath } from "./context";
 
@@ -30,7 +37,11 @@ export interface TranslateMatch {
 }
 
 /** Traduction brute via l'API publique de Google Translate. */
-export async function translateWithGoogle(text: string, from: string, to: string): Promise<string> {
+export async function translateWithGoogle(
+  text: string,
+  from: string,
+  to: string,
+): Promise<string> {
   if (!text.trim()) return "";
   try {
     const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${from}&tl=${to}&dt=t&q=${encodeURIComponent(text)}`;
@@ -38,7 +49,7 @@ export async function translateWithGoogle(text: string, from: string, to: string
     if (res.ok) {
       const data = (await res.json()) as [Array<[string]>] | null;
       if (data && data[0]) {
-        return data[0].map(x => x[0]).join("");
+        return data[0].map((x) => x[0]).join("");
       }
     }
   } catch (e) {
@@ -51,7 +62,9 @@ export async function translateWithGoogle(text: string, from: string, to: string
  * Cherche l'entité dans PostgreSQL puis, en repli silencieux, dans le miroir
  * SQLite. Les requêtes acceptent kana ↔ romaji via `wanakana`.
  */
-export async function searchDatabaseTranslate(query: string): Promise<TranslateMatch[]> {
+export async function searchDatabaseTranslate(
+  query: string,
+): Promise<TranslateMatch[]> {
   const sanitized = query.replaceAll(/[%_,().*\\]/g, "").trim();
   if (!sanitized) return [];
 
@@ -59,11 +72,15 @@ export async function searchDatabaseTranslate(query: string): Promise<TranslateM
 
   const hira = toHiragana(sanitized.toLowerCase());
   const kata = toKatakana(sanitized.toLowerCase());
-  const isValidHira = hira.length > 0 && [...hira].every(c => isKana(c) || c === "ー");
-  const isValidKata = kata.length > 0 && [...kata].every(c => isKana(c) || c === "ー");
+  const isValidHira =
+    hira.length > 0 && [...hira].every((c) => isKana(c) || c === "ー");
+  const isValidKata =
+    kata.length > 0 && [...kata].every((c) => isKana(c) || c === "ー");
 
   // PostgreSQL en premier.
-  const dbUrl = isInagleDatabaseConfigured() ? getInagleDatabaseURL() : undefined;
+  const dbUrl = isInagleDatabaseConfigured()
+    ? getInagleDatabaseURL()
+    : undefined;
   if (dbUrl) {
     try {
       const client = createPgClient(dbUrl);
@@ -82,12 +99,18 @@ export async function searchDatabaseTranslate(query: string): Promise<TranslateM
 			`;
       const charParams: unknown[] = [q];
       if (isValidHira && hira !== sanitized.toLowerCase()) {
-        charSql = charSql.replace("OR name_roma ILIKE $1", `OR name_roma ILIKE $1 OR name_ja ILIKE $2`);
+        charSql = charSql.replace(
+          "OR name_roma ILIKE $1",
+          `OR name_roma ILIKE $1 OR name_ja ILIKE $2`,
+        );
         charParams.push(`%${hira}%`);
       }
       if (isValidKata && kata !== sanitized.toLowerCase()) {
         const paramIndex = charParams.length + 1;
-        charSql = charSql.replace("OR name_ja ILIKE $2", `OR name_ja ILIKE $2 OR name_ja ILIKE $${paramIndex}`);
+        charSql = charSql.replace(
+          "OR name_ja ILIKE $2",
+          `OR name_ja ILIKE $2 OR name_ja ILIKE $${paramIndex}`,
+        );
         charParams.push(`%${kata}%`);
       }
 
@@ -164,12 +187,18 @@ export async function searchDatabaseTranslate(query: string): Promise<TranslateM
 			`;
       const charParams: unknown[] = [q];
       if (isValidHira && hira !== sanitized.toLowerCase()) {
-        charSql = charSql.replace("OR name_ja LIKE ?1", `OR name_ja LIKE ?1 OR name_ja LIKE ?2`);
+        charSql = charSql.replace(
+          "OR name_ja LIKE ?1",
+          `OR name_ja LIKE ?1 OR name_ja LIKE ?2`,
+        );
         charParams.push(`%${hira}%`);
       }
       if (isValidKata && kata !== sanitized.toLowerCase()) {
         const paramIndex = charParams.length + 1;
-        charSql = charSql.replace("OR name_ja LIKE ?2", `OR name_ja LIKE ?2 OR name_ja LIKE ?${paramIndex}`);
+        charSql = charSql.replace(
+          "OR name_ja LIKE ?2",
+          `OR name_ja LIKE ?2 OR name_ja LIKE ?${paramIndex}`,
+        );
         charParams.push(`%${kata}%`);
       }
 
@@ -284,7 +313,9 @@ async function loadGlossaryRows(): Promise<GlossaryRow[]> {
 			FROM inagle_items
 			WHERE category <> 'special_tactics'
 		`;
-    const dbUrl = isInagleDatabaseConfigured() ? getInagleDatabaseURL() : undefined;
+    const dbUrl = isInagleDatabaseConfigured()
+      ? getInagleDatabaseURL()
+      : undefined;
     if (dbUrl) {
       try {
         const client = createPgClient(dbUrl);
@@ -300,7 +331,9 @@ async function loadGlossaryRows(): Promise<GlossaryRow[]> {
     if (!dbPath) return [];
     try {
       const db = new Database(dbPath, { readonly: true });
-      const rows = db.prepare(sql.replaceAll(/::text/g, "")).all() as GlossaryRow[];
+      const rows = db
+        .prepare(sql.replaceAll(/::text/g, ""))
+        .all() as GlossaryRow[];
       db.close();
       return rows;
     } catch {
@@ -311,7 +344,9 @@ async function loadGlossaryRows(): Promise<GlossaryRow[]> {
 }
 
 /** Cherche la requête dans toutes les projections SQL nommables. */
-export async function searchGlossaryTranslate(query: string): Promise<TranslateMatch[]> {
+export async function searchGlossaryTranslate(
+  query: string,
+): Promise<TranslateMatch[]> {
   const sanitized = query
     .replaceAll(/[%_,().*\\]/g, "")
     .trim()
@@ -319,29 +354,37 @@ export async function searchGlossaryTranslate(query: string): Promise<TranslateM
   if (!sanitized) return [];
   const hiraCandidate = toHiragana(sanitized).toLowerCase();
   const kataCandidate = toKatakana(sanitized).toLowerCase();
-  const isValidHira = [...hiraCandidate].every(c => isKana(c) || c === "ー");
-  const isValidKata = [...kataCandidate].every(c => isKana(c) || c === "ー");
+  const isValidHira = [...hiraCandidate].every((c) => isKana(c) || c === "ー");
+  const isValidKata = [...kataCandidate].every((c) => isKana(c) || c === "ー");
   const rows = await loadGlossaryRows();
   return rows
-    .filter(row => {
-      const names = [row.name_fr, row.name_en, row.name_ja].filter(Boolean).map(name => name!.toLowerCase());
+    .filter((row) => {
+      const names = [row.name_fr, row.name_en, row.name_ja]
+        .filter(Boolean)
+        .map((name) => name!.toLowerCase());
       return names.some(
-        name =>
+        (name) =>
           name.includes(sanitized) ||
           (isValidHira && name.includes(hiraCandidate)) ||
           (isValidKata && name.includes(kataCandidate)) ||
-          (row.name_ja ? japaneseToRomaji(row.name_ja)?.toLowerCase().includes(sanitized) : false),
+          (row.name_ja
+            ? japaneseToRomaji(row.name_ja)?.toLowerCase().includes(sanitized)
+            : false),
       );
     })
-    .map(row => ({
+    .map((row) => ({
       id: row.id,
       type: row.sub_type?.toLowerCase().includes("soul") ? "soul" : row.type,
-      typeLabel: row.sub_type?.toLowerCase().includes("soul") ? "Totem" : row.typeLabel,
+      typeLabel: row.sub_type?.toLowerCase().includes("soul")
+        ? "Totem"
+        : row.typeLabel,
       name_fr: row.name_fr,
       name_en: row.name_en,
       name_ja: row.name_ja,
       name_roma: row.name_ja ? japaneseToRomaji(row.name_ja) : null,
-      url: row.sub_type?.toLowerCase().includes("soul") ? `/aura/totems/${row.id}` : row.url,
+      url: row.sub_type?.toLowerCase().includes("soul")
+        ? `/aura/totems/${row.id}`
+        : row.url,
     }));
 }
 
@@ -367,19 +410,28 @@ export async function translateTextHelper(inputText: string): Promise<string> {
       const cleanJa = stripRubyAnnotations(row.name_ja);
       if (cleanJa.length > 1) jpToFrMap.set(cleanJa, frVal);
     }
-    if (row.name_en?.trim() && row.name_en.toLowerCase() !== frVal.toLowerCase()) {
+    if (
+      row.name_en?.trim() &&
+      row.name_en.toLowerCase() !== frVal.toLowerCase()
+    ) {
       enToFrMap.set(row.name_en.trim(), frVal);
     }
   }
 
-  const jpReplacements = Array.from(jpToFrMap.entries()).sort((a, b) => b[0].length - a[0].length);
-  const enReplacements = Array.from(enToFrMap.entries()).sort((a, b) => b[0].length - a[0].length);
+  const jpReplacements = Array.from(jpToFrMap.entries()).sort(
+    (a, b) => b[0].length - a[0].length,
+  );
+  const enReplacements = Array.from(enToFrMap.entries()).sort(
+    (a, b) => b[0].length - a[0].length,
+  );
 
-  const replacements = (isJa ? jpReplacements : enReplacements).map(([term, frVal]) => ({
-    term,
-    lowerTerm: term.toLowerCase(),
-    frVal,
-  }));
+  const replacements = (isJa ? jpReplacements : enReplacements).map(
+    ([term, frVal]) => ({
+      term,
+      lowerTerm: term.toLowerCase(),
+      frVal,
+    }),
+  );
 
   let processedText = inputText;
   const placeholderMap = new Map<string, string>();
@@ -432,10 +484,17 @@ export async function translateTextHelper(inputText: string): Promise<string> {
   let translated = await translateWithGoogle(processedText, from, "fr");
 
   for (const [placeholder, frVal] of placeholderMap.entries()) {
-    const cleanPlaceholder = placeholder.replace("[[", "").replace("]]", "").trim().toLowerCase();
+    const cleanPlaceholder = placeholder
+      .replace("[[", "")
+      .replace("]]", "")
+      .trim()
+      .toLowerCase();
     const num = cleanPlaceholder.replace("t", "");
 
-    const dblRegex = new RegExp("\\[\\s*\\[\\s*[tT]\\s*" + num + "\\s*\\]\\s*\\]", "g");
+    const dblRegex = new RegExp(
+      "\\[\\s*\\[\\s*[tT]\\s*" + num + "\\s*\\]\\s*\\]",
+      "g",
+    );
     translated = translated.replace(dblRegex, frVal);
 
     const sglRegex = new RegExp("\\[\\s*[tT]\\s*" + num + "\\s*\\]", "g");

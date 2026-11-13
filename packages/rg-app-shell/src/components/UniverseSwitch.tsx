@@ -30,7 +30,8 @@ export function UniverseSwitch({ className, ...props }: UniverseSwitchProps) {
       label: "Rose Griffon",
       logo: "/RG_Logo_V2.5.webp",
       path: "/",
-      activeClass: "bg-rose-griffon/20 border-rose-griffon/60 shadow-xs ring-1 ring-rose-griffon/50 scale-105",
+      activeClass:
+        "bg-rose-griffon/20 border-rose-griffon/60 shadow-xs ring-1 ring-rose-griffon/50 scale-105",
       hoverClass: "hover:bg-rose-griffon/10 hover:border-rose-griffon/30",
     },
     {
@@ -38,7 +39,8 @@ export function UniverseSwitch({ className, ...props }: UniverseSwitchProps) {
       label: "Azalée",
       logo: "/RG_Azalee-logo.webp",
       path: BASE_WIKI,
-      activeClass: "bg-secondary/20 border-secondary/60 shadow-xs ring-1 ring-secondary/50 scale-105",
+      activeClass:
+        "bg-secondary/20 border-secondary/60 shadow-xs ring-1 ring-secondary/50 scale-105",
       hoverClass: "hover:bg-secondary/10 hover:border-secondary/30",
     },
     {
@@ -61,7 +63,7 @@ export function UniverseSwitch({ className, ...props }: UniverseSwitchProps) {
       }`}
       {...props}
     >
-      {tabs.map(tab => {
+      {tabs.map((tab) => {
         const isActive = activeDomaine === tab.id;
         return (
           <Link
@@ -77,7 +79,13 @@ export function UniverseSwitch({ className, ...props }: UniverseSwitchProps) {
             }`}
           >
             <div className="relative size-5 shrink-0">
-              <Image src={tab.logo} alt={tab.label} fill sizes="20px" className="object-contain" />
+              <Image
+                src={tab.logo}
+                alt={tab.label}
+                fill
+                sizes="20px"
+                className="object-contain"
+              />
             </div>
             <span className="sr-only">{tab.label}</span>
           </Link>

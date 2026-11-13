@@ -2,10 +2,21 @@
 
 import { exportFile, importFile } from "@lexical/file";
 import { $generateHtmlFromNodes, $generateNodesFromDOM } from "@lexical/html";
-import { $convertFromMarkdownString, $convertToMarkdownString, TRANSFORMERS } from "@lexical/markdown";
+import {
+  $convertFromMarkdownString,
+  $convertToMarkdownString,
+  TRANSFORMERS,
+} from "@lexical/markdown";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import { $getRoot } from "lexical";
-import { Code, Download, FileCode, FileJson, FileText, Upload } from "lucide-react";
+import {
+  Code,
+  Download,
+  FileCode,
+  FileJson,
+  FileText,
+  Upload,
+} from "lucide-react";
 import { useCallback, useRef, useState } from "react";
 import { toast } from "sonner";
 import { IMAGE } from "@/components/editor/transformers/markdown-image-transformer";
@@ -62,7 +73,9 @@ export function ImportExportPlugin() {
   const handleExportMarkdown = useCallback(() => {
     editor.read(() => {
       const markdown = $convertToMarkdownString(ALL_TRANSFORMERS);
-      const blob = new Blob([markdown], { type: "text/markdown;charset=utf-8" });
+      const blob = new Blob([markdown], {
+        type: "text/markdown;charset=utf-8",
+      });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
@@ -113,7 +126,7 @@ export function ImportExportPlugin() {
       return;
     }
     fileInputRef.current.accept = ".html,.htm";
-    fileInputRef.current.onchange = e => {
+    fileInputRef.current.onchange = (e) => {
       const file = (e.target as HTMLInputElement).files?.[0];
       if (!file) {
         return;
@@ -136,7 +149,7 @@ export function ImportExportPlugin() {
       return;
     }
     fileInputRef.current.accept = ".md,.markdown,.txt";
-    fileInputRef.current.onchange = e => {
+    fileInputRef.current.onchange = (e) => {
       const file = (e.target as HTMLInputElement).files?.[0];
       if (!file) {
         return;
@@ -292,21 +305,31 @@ export function ImportExportPlugin() {
               Importer du {importType === "html" ? "HTML" : "Markdown"}
             </DialogTitle>
             <DialogDescription className="text-on-surface-variant">
-              Collez votre contenu {importType === "html" ? "HTML" : "Markdown"} ci-dessous. Le contenu actuel de
-              l&apos;éditeur sera remplacé.
+              Collez votre contenu {importType === "html" ? "HTML" : "Markdown"}{" "}
+              ci-dessous. Le contenu actuel de l&apos;éditeur sera remplacé.
             </DialogDescription>
           </DialogHeader>
           <textarea
-            aria-label={importType === "html" ? "Code HTML à importer" : "Contenu Markdown à importer"}
+            aria-label={
+              importType === "html"
+                ? "Code HTML à importer"
+                : "Contenu Markdown à importer"
+            }
             value={importContent}
-            onChange={e => setImportContent(e.target.value)}
+            onChange={(e) => setImportContent(e.target.value)}
             className="w-full h-64 p-4 rounded-2xl bg-surface-container-low border border-outline-variant/30 text-sm font-mono text-on-surface placeholder:text-on-surface-variant/40 focus:outline-hidden focus:ring-2 focus:ring-primary/30 resize-none"
             placeholder={
-              importType === "html" ? "<h1>Mon titre</h1>\n<p>Mon contenu...</p>" : "# Mon titre\n\nMon contenu..."
+              importType === "html"
+                ? "<h1>Mon titre</h1>\n<p>Mon contenu...</p>"
+                : "# Mon titre\n\nMon contenu..."
             }
           />
           <DialogFooter className="gap-2">
-            <Button variant="outline" onClick={() => setImportDialogOpen(false)} className="rounded-full">
+            <Button
+              variant="outline"
+              onClick={() => setImportDialogOpen(false)}
+              className="rounded-full"
+            >
               Annuler
             </Button>
             <Button

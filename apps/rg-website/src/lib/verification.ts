@@ -22,7 +22,7 @@ export const verifier = {
     // Let's mark it as issue.
     if (!char.descriptions?.fr) issues.push("Description française manquante");
 
-    const hasStats = char.variants.some(v => v.stats?.lv99?.kick > 0);
+    const hasStats = char.variants.some((v) => v.stats?.lv99?.kick > 0);
     if (!hasStats) issues.push("Statistiques manquantes");
 
     return { isValid: issues.length === 0, issues };
@@ -45,8 +45,10 @@ export const verifier = {
         names?: { fr?: string };
         descriptions?: { fr?: string };
       };
-    if (!probe.name_FR && !probe.names?.fr) issues.push("Nom français manquant");
-    if (!probe.desc_FR && !probe.descriptions?.fr) issues.push("Description française manquante");
+    if (!probe.name_FR && !probe.names?.fr)
+      issues.push("Nom français manquant");
+    if (!probe.desc_FR && !probe.descriptions?.fr)
+      issues.push("Description française manquante");
 
     return { isValid: issues.length === 0, issues };
   },
@@ -55,7 +57,8 @@ export const verifier = {
     const issues: string[] = [];
     // Legacy `name_FR` field on older Team exports — see LegacyLocalized above.
     const probe = team as Team & LegacyLocalized & { names?: { fr?: string } };
-    if (!probe.name_FR && !probe.names?.fr) issues.push("Nom français manquant");
+    if (!probe.name_FR && !probe.names?.fr)
+      issues.push("Nom français manquant");
     return { isValid: issues.length === 0, issues };
   },
 };

@@ -48,7 +48,8 @@ import { type DocumentVisionne, Visionneuse } from "./Visionneuse";
  * 1280, 226 px à 1920. Le `33vw` d'origine annonçait 633 px pour une tuile de
  * 226 px — trois fois trop d'octets sur chaque affiche.
  */
-const TAILLES_VIGNETTE = "(max-width: 639px) 100vw, (max-width: 1023px) 50vw, (max-width: 1279px) 30vw, 16vw";
+const TAILLES_VIGNETTE =
+  "(max-width: 639px) 100vw, (max-width: 1023px) 50vw, (max-width: 1279px) 30vw, 16vw";
 
 /**
  * En présentation `grand`, les deux documents occupent une pleine largeur sur
@@ -123,7 +124,9 @@ function Vignette({
        * exacte avant le chargement — pas de saut de mise en page pour autant.
        */}
       {echec ? (
-        <AspectRatio ratio={taille ? taille.largeur / taille.hauteur : RATIO_REPLI}>
+        <AspectRatio
+          ratio={taille ? taille.largeur / taille.hauteur : RATIO_REPLI}
+        >
           <div className="flex size-full items-center justify-center bg-surface-container-high text-on-surface-variant">
             <ImageOff className="size-10" aria-hidden />
           </div>
@@ -165,7 +168,9 @@ function Vignette({
        */}
       <span className="flex items-center justify-between gap-2 border-t border-outline-variant/40 px-3 py-2">
         <span className="min-w-0">
-          <span className="block text-xs font-bold leading-tight break-words text-on-surface">{document.titre}</span>
+          <span className="block text-xs font-bold leading-tight break-words text-on-surface">
+            {document.titre}
+          </span>
           {!grand && document.sousTitre && (
             <span className="mt-0.5 block text-xs leading-tight break-words text-on-surface-variant">
               {document.sousTitre}
@@ -212,11 +217,19 @@ export function VisuelsCampagne({
         baseNomFichier: `${slug}-affiche`,
         cle: "affiche",
         etiquette,
-        images: [{ alt: etiquette, kind: "image", source: imageAffiche, src: imageAffiche }],
+        images: [
+          {
+            alt: etiquette,
+            kind: "image",
+            source: imageAffiche,
+            src: imageAffiche,
+          },
+        ],
         // La rectification suit l'affiche jusque dans la visionneuse : c'est
         // là que l'image est la plus lisible, donc là que la consigne fautive
         // se lit le mieux.
-        legende: [description, noteAffiche].filter(Boolean).join("\n\n") || null,
+        legende:
+          [description, noteAffiche].filter(Boolean).join("\n\n") || null,
         sousTitre: titreCampagne,
         titre: "Affiche officielle",
       });
@@ -227,7 +240,14 @@ export function VisuelsCampagne({
         baseNomFichier: `${slug}-reglement`,
         cle: "reglement",
         etiquette,
-        images: [{ alt: etiquette, kind: "image", source: imageReglement, src: imageReglement }],
+        images: [
+          {
+            alt: etiquette,
+            kind: "image",
+            source: imageReglement,
+            src: imageReglement,
+          },
+        ],
         // Pas de légende : le règlement a été retiré de la page, visionneuse
         // comprise. La carte « Règles » se lit dans l'image.
         legende: null,
@@ -236,7 +256,14 @@ export function VisuelsCampagne({
       });
     }
     return liste;
-  }, [slug, titreCampagne, description, noteAffiche, imageAffiche, imageReglement]);
+  }, [
+    slug,
+    titreCampagne,
+    description,
+    noteAffiche,
+    imageAffiche,
+    imageReglement,
+  ]);
 
   if (documents.length === 0) {
     return null;

@@ -20,10 +20,13 @@ export default async function DropsPage() {
   return (
     <div className="space-y-6">
       <header className="space-y-2">
-        <h1 className="text-fluid-headline-lg font-extrabold text-on-surface">Drops &amp; Taux</h1>
+        <h1 className="text-fluid-headline-lg font-extrabold text-on-surface">
+          Drops &amp; Taux
+        </h1>
         <p className="text-on-surface-variant max-w-2xl">
-          Où et avec quelle probabilité obtenir chaque objet : coffres de victoire, émissions d'objets, tables de rareté
-          des esprits, et bonus passifs de Fèves d'équipe.
+          Où et avec quelle probabilité obtenir chaque objet : coffres de
+          victoire, émissions d'objets, tables de rareté des esprits, et bonus
+          passifs de Fèves d'équipe.
         </p>
       </header>
 
@@ -42,8 +45,12 @@ export default async function DropsPage() {
 function Stat({ label, value }: { label: string; value: number }) {
   return (
     <div className="rounded-2xl border border-outline-variant/30 bg-surface-container-low p-4">
-      <dd className="text-2xl font-extrabold text-on-surface tabular-nums">{value.toLocaleString("fr-FR")}</dd>
-      <dt className="text-xs font-medium text-on-surface-variant uppercase tracking-wider mt-1">{label}</dt>
+      <dd className="text-2xl font-extrabold text-on-surface tabular-nums">
+        {value.toLocaleString("fr-FR")}
+      </dd>
+      <dt className="text-xs font-medium text-on-surface-variant uppercase tracking-wider mt-1">
+        {label}
+      </dt>
     </div>
   );
 }

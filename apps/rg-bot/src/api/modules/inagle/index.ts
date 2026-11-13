@@ -27,8 +27,11 @@ export const inagleModule = new Elysia({ prefix: "/inagle" })
   .get(
     "/teams/:id",
     ({ params }) => {
-      return repository.team(params.id).then(dbData => {
-        return dbData ?? status(404, { error: "not_found", message: "Équipe introuvable" });
+      return repository.team(params.id).then((dbData) => {
+        return (
+          dbData ??
+          status(404, { error: "not_found", message: "Équipe introuvable" })
+        );
       });
     },
     { params: t.Object({ id: t.String() }) },
@@ -36,7 +39,8 @@ export const inagleModule = new Elysia({ prefix: "/inagle" })
   .get(
     "/formations",
     async ({ query }) => {
-      const data = (await repository.formations(query.q, query.limit ?? 50)) ?? [];
+      const data =
+        (await repository.formations(query.q, query.limit ?? 50)) ?? [];
       return { data, count: data.length, source: "postgres" as const };
     },
     { query: listQuery },
@@ -45,7 +49,10 @@ export const inagleModule = new Elysia({ prefix: "/inagle" })
     "/formations/:id",
     async ({ params }) => {
       const dbData = await repository.formation(params.id);
-      return dbData ?? status(404, { error: "not_found", message: "Formation introuvable" });
+      return (
+        dbData ??
+        status(404, { error: "not_found", message: "Formation introuvable" })
+      );
     },
     { params: t.Object({ id: t.String() }) },
   )
@@ -60,7 +67,10 @@ export const inagleModule = new Elysia({ prefix: "/inagle" })
     "/souls/:id",
     async ({ params }) => {
       const data = await repository.soul(params.id);
-      return data ?? status(404, { error: "not_found", message: "Esprit introuvable" });
+      return (
+        data ??
+        status(404, { error: "not_found", message: "Esprit introuvable" })
+      );
     },
     { params: t.Object({ id: t.String() }) },
   )
@@ -68,19 +78,29 @@ export const inagleModule = new Elysia({ prefix: "/inagle" })
     "/quests",
     ({ query }) => {
       const phase = query.phase === undefined ? undefined : Number(query.phase);
-      return repository.quests(query.q, phase, query.limit ?? 50).then(dbData => ({
-        data: dbData ?? [],
-        count: dbData?.length ?? 0,
-        source: "postgres" as const,
-      }));
+      return repository
+        .quests(query.q, phase, query.limit ?? 50)
+        .then((dbData) => ({
+          data: dbData ?? [],
+          count: dbData?.length ?? 0,
+          source: "postgres" as const,
+        }));
     },
-    { query: t.Object({ ...listQuery.properties, phase: t.Optional(t.Numeric()) }) },
+    {
+      query: t.Object({
+        ...listQuery.properties,
+        phase: t.Optional(t.Numeric()),
+      }),
+    },
   )
   .get(
     "/quests/:id",
     ({ params }) => {
-      return repository.quest(params.id).then(dbData => {
-        return dbData ?? status(404, { error: "not_found", message: "Quête introuvable" });
+      return repository.quest(params.id).then((dbData) => {
+        return (
+          dbData ??
+          status(404, { error: "not_found", message: "Quête introuvable" })
+        );
       });
     },
     { params: t.Object({ id: t.String() }) },
@@ -88,16 +108,26 @@ export const inagleModule = new Elysia({ prefix: "/inagle" })
   .get(
     "/items",
     async ({ query }) => {
-      const data = (await repository.items(query.q, query.category, query.limit ?? 50)) ?? [];
+      const data =
+        (await repository.items(query.q, query.category, query.limit ?? 50)) ??
+        [];
       return { data, count: data.length, source: "postgres" as const };
     },
-    { query: t.Object({ ...listQuery.properties, category: t.Optional(t.String()) }) },
+    {
+      query: t.Object({
+        ...listQuery.properties,
+        category: t.Optional(t.String()),
+      }),
+    },
   )
   .get(
     "/items/:id",
     async ({ params }) => {
       const dbData = await repository.item(params.id);
-      return dbData ?? status(404, { error: "not_found", message: "Objet introuvable" });
+      return (
+        dbData ??
+        status(404, { error: "not_found", message: "Objet introuvable" })
+      );
     },
     { params: t.Object({ id: t.String() }) },
   )
@@ -132,7 +162,10 @@ export const inagleModule = new Elysia({ prefix: "/inagle" })
     "/skill-cutins/:id",
     async ({ params }) => {
       const row = await repository.skillCutin(params.id);
-      return row ?? status(404, { error: "not_found", message: "Cut-in introuvable" });
+      return (
+        row ??
+        status(404, { error: "not_found", message: "Cut-in introuvable" })
+      );
     },
     { params: t.Object({ id: t.String() }) },
   )

@@ -4,7 +4,11 @@ import { revalidatePath } from "next/cache";
 import { getServerSession } from "@/lib/auth-helpers";
 import { isAdminRole } from "@/lib/auth-roles";
 import { createPostgresClient } from "@rosegriffon/db/service";
-import { convertTableToHtml, fetchGoogleSheetData, parseCsvData } from "@/lib/table-importer";
+import {
+  convertTableToHtml,
+  fetchGoogleSheetData,
+  parseCsvData,
+} from "@/lib/table-importer";
 
 async function requireImportAdmin() {
   const session = await getServerSession();
@@ -13,7 +17,11 @@ async function requireImportAdmin() {
   }
 
   const supabase = createPostgresClient();
-  const { data: profile } = await supabase.from("profiles").select("role").eq("id", session.user.id).single();
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", session.user.id)
+    .single();
 
   if (!profile || !isAdminRole(profile.role)) {
     return { error: "Permissions insuffisantes" as const, user: null };
@@ -23,7 +31,12 @@ async function requireImportAdmin() {
 }
 
 // Common helper to save article
-async function saveArticle(title: string, content: string, userId: string, category: string) {
+async function saveArticle(
+  title: string,
+  content: string,
+  userId: string,
+  category: string,
+) {
   const supabase = createPostgresClient();
 
   // Unique slug
@@ -75,7 +88,10 @@ export async function importGoogleSheet(sheetId: string) {
   } catch (error: unknown) {
     console.error("Sheet Import Error:", error);
     return {
-      error: error instanceof Error ? error.message : "Une erreur inconnue est survenue",
+      error:
+        error instanceof Error
+          ? error.message
+          : "Une erreur inconnue est survenue",
       success: false,
     };
   }
@@ -98,7 +114,10 @@ export async function importCsv(title: string, csvContent: string) {
   } catch (error: unknown) {
     console.error("CSV Import Error:", error);
     return {
-      error: error instanceof Error ? error.message : "Une erreur inconnue est survenue",
+      error:
+        error instanceof Error
+          ? error.message
+          : "Une erreur inconnue est survenue",
       success: false,
     };
   }

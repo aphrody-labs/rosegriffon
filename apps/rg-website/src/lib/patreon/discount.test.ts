@@ -1,6 +1,11 @@
 import { describe, expect, test } from "bun:test";
 
-import { PATRON_DISCOUNT_PERCENT, PATRON_STRIPE_COUPON_ID, REMISE_ABSENTE, remiseDepuisAdhesion } from "./discount";
+import {
+  PATRON_DISCOUNT_PERCENT,
+  PATRON_STRIPE_COUPON_ID,
+  REMISE_ABSENTE,
+  remiseDepuisAdhesion,
+} from "./discount";
 
 describe("PATRON_DISCOUNT_PERCENT", () => {
   test("vaut 20 % — décision produit, pas une valeur d'ajustement", () => {
@@ -34,17 +39,22 @@ describe("remiseDepuisAdhesion", () => {
     expect(r.currentlyEntitledCents).toBe(500);
   });
 
-  test.each(["former_patron", "declined_patron", "", "ACTIVE_PATRON", "active"])(
-    "le statut %p n'ouvre AUCUN droit",
-    statut => {
-      // Seul `active_patron` compte. Un `startsWith("active")` accorderait
-      // −20 % à vie aux anciens patrons dont le prélèvement a été refusé.
-      expect(remiseDepuisAdhesion({ patron_status: statut }).active).toBe(false);
-    },
-  );
+  test.each([
+    "former_patron",
+    "declined_patron",
+    "",
+    "ACTIVE_PATRON",
+    "active",
+  ])("le statut %p n'ouvre AUCUN droit", (statut) => {
+    // Seul `active_patron` compte. Un `startsWith("active")` accorderait
+    // −20 % à vie aux anciens patrons dont le prélèvement a été refusé.
+    expect(remiseDepuisAdhesion({ patron_status: statut }).active).toBe(false);
+  });
 
   test("un statut inconnu est rapporté tel quel pour le diagnostic", () => {
-    expect(remiseDepuisAdhesion({ patron_status: "zombie" }).patronStatus).toBe("zombie");
+    expect(remiseDepuisAdhesion({ patron_status: "zombie" }).patronStatus).toBe(
+      "zombie",
+    );
   });
 
   test("les champs absents se normalisent sans faire planter l'affichage", () => {
@@ -55,12 +65,20 @@ describe("remiseDepuisAdhesion", () => {
 
   test("un `tier_titles` nul devient un tableau, jamais null", () => {
     // L'UI fait `tierTitles.map(...)` : un `null` casserait le rendu du badge.
-    expect(remiseDepuisAdhesion({ patron_status: "active_patron", tier_titles: null }).tierTitles).toEqual([]);
+    expect(
+      remiseDepuisAdhesion({
+        patron_status: "active_patron",
+        tier_titles: null,
+      }).tierTitles,
+    ).toEqual([]);
   });
 
   test("un montant à zéro reste zéro et non null", () => {
     expect(
-      remiseDepuisAdhesion({ currently_entitled_cents: 0, patron_status: "active_patron" }).currentlyEntitledCents,
+      remiseDepuisAdhesion({
+        currently_entitled_cents: 0,
+        patron_status: "active_patron",
+      }).currentlyEntitledCents,
     ).toBe(0);
   });
 

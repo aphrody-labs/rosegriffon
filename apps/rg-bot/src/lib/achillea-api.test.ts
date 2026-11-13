@@ -20,33 +20,54 @@ import {
   remplacerFabriqueClientAchillea,
   TTL_JETON_DELEGUE_S,
 } from "./achillea-api";
-import { BASE_API_TEST, routeurApi, SECRET_TEST, type AppelApi } from "../../test/achillea-kit";
+import {
+  BASE_API_TEST,
+  routeurApi,
+  SECRET_TEST,
+  type AppelApi,
+} from "../../test/achillea-kit";
 
 const JOUEUR = { id: "123456789012345678", username: "akira", avatar: "abc" };
 
 describe("baseApiAchillea", () => {
   test("boucle locale de rg-core par défaut, préfixe /api compris", () => {
     expect(baseApiAchillea({})).toBe("http://127.0.0.1:8810/api");
-    expect(baseApiAchillea({ RG_CORE_PORT: "9000" })).toBe("http://127.0.0.1:9000/api");
-  });
-
-  test("ACHILLEA_API_INTERNAL_URL l'emporte, sans / final", () => {
-    expect(baseApiAchillea({ ACHILLEA_API_INTERNAL_URL: "https://ranked.rosegriffon.fr/api/" })).toBe(
-      "https://ranked.rosegriffon.fr/api",
+    expect(baseApiAchillea({ RG_CORE_PORT: "9000" })).toBe(
+      "http://127.0.0.1:9000/api",
     );
   });
 
+  test("ACHILLEA_API_INTERNAL_URL l'emporte, sans / final", () => {
+    expect(
+      baseApiAchillea({
+        ACHILLEA_API_INTERNAL_URL: "https://ranked.rosegriffon.fr/api/",
+      }),
+    ).toBe("https://ranked.rosegriffon.fr/api");
+  });
+
   test("un $VAR non substitué ou un port absurde retombent sur le défaut", () => {
-    expect(baseApiAchillea({ ACHILLEA_API_INTERNAL_URL: "$ACHILLEA_API" })).toBe("http://127.0.0.1:8810/api");
-    expect(baseApiAchillea({ RG_CORE_PORT: "abc" })).toBe("http://127.0.0.1:8810/api");
+    expect(
+      baseApiAchillea({ ACHILLEA_API_INTERNAL_URL: "$ACHILLEA_API" }),
+    ).toBe("http://127.0.0.1:8810/api");
+    expect(baseApiAchillea({ RG_CORE_PORT: "abc" })).toBe(
+      "http://127.0.0.1:8810/api",
+    );
   });
 });
 
 describe("jetonSessionDiscord", () => {
   test("le jeton est accepté par le vérificateur de l'API, pour ce joueur", async () => {
     const maintenant = Math.floor(Date.now() / 1000);
-    const jeton = jetonSessionDiscord(JOUEUR, { JWT_SECRET_KEY: SECRET_TEST }, maintenant);
-    const claims = await verifyAchilleaSessionToken(jeton, SECRET_TEST, maintenant + 1);
+    const jeton = jetonSessionDiscord(
+      JOUEUR,
+      { JWT_SECRET_KEY: SECRET_TEST },
+      maintenant,
+    );
+    const claims = await verifyAchilleaSessionToken(
+      jeton,
+      SECRET_TEST,
+      maintenant + 1,
+    );
     expect(claims?.id).toBe(JOUEUR.id);
     expect(claims?.username).toBe("akira");
     expect(claims?.expiresAt).toBe(maintenant + TTL_JETON_DELEGUE_S);
@@ -54,8 +75,18 @@ describe("jetonSessionDiscord", () => {
 
   test("il expire après 5 minutes, pas 30 jours", async () => {
     const maintenant = Math.floor(Date.now() / 1000);
-    const jeton = jetonSessionDiscord(JOUEUR, { JWT_SECRET_KEY: SECRET_TEST }, maintenant);
-    expect(await verifyAchilleaSessionToken(jeton, SECRET_TEST, maintenant + TTL_JETON_DELEGUE_S + 1)).toBeNull();
+    const jeton = jetonSessionDiscord(
+      JOUEUR,
+      { JWT_SECRET_KEY: SECRET_TEST },
+      maintenant,
+    );
+    expect(
+      await verifyAchilleaSessionToken(
+        jeton,
+        SECRET_TEST,
+        maintenant + TTL_JETON_DELEGUE_S + 1,
+      ),
+    ).toBeNull();
   });
 
   test("un autre secret le rend invalide", async () => {
@@ -64,10 +95,15 @@ describe("jetonSessionDiscord", () => {
   });
 
   test("sans secret ou avec un identifiant invalide : erreur de configuration", () => {
-    expect(() => jetonSessionDiscord(JOUEUR, {})).toThrow(ConfigurationApiAchillea);
-    expect(() => jetonSessionDiscord({ id: "pas-un-flocon" }, { JWT_SECRET_KEY: SECRET_TEST })).toThrow(
-      /Identifiant Discord invalide/,
+    expect(() => jetonSessionDiscord(JOUEUR, {})).toThrow(
+      ConfigurationApiAchillea,
     );
+    expect(() =>
+      jetonSessionDiscord(
+        { id: "pas-un-flocon" },
+        { JWT_SECRET_KEY: SECRET_TEST },
+      ),
+    ).toThrow(/Identifiant Discord invalide/);
   });
 });
 
@@ -85,7 +121,9 @@ describe("ClientAchilleaDelegue", () => {
     expect(appels).toHaveLength(1);
     expect(appels[0]?.chemin).toBe("/clans/role");
     const jeton = appels[0]?.porteur?.replace(/^Bearer /u, "") ?? "";
-    expect((await verifyAchilleaSessionToken(jeton, SECRET_TEST))?.id).toBe(JOUEUR.id);
+    expect((await verifyAchilleaSessionToken(jeton, SECRET_TEST))?.id).toBe(
+      JOUEUR.id,
+    );
     expect(client.utilisateurId).toBe(JOUEUR.id);
   });
 
@@ -106,7 +144,12 @@ describe("ClientAchilleaDelegue", () => {
       identite: JOUEUR,
       env: { JWT_SECRET_KEY: SECRET_TEST },
       baseUrl: BASE_API_TEST,
-      fetch: routeurApi({ "POST /clans/kick/42": [403, { message: "Seul le président peut exclure" }] }),
+      fetch: routeurApi({
+        "POST /clans/kick/42": [
+          403,
+          { message: "Seul le président peut exclure" },
+        ],
+      }),
     });
     const resultat = await client.clans.kickMember("42", "absence");
     expect(resultat.ok).toBe(false);
@@ -135,13 +178,31 @@ describe("ClientAchilleaDelegue", () => {
 describe("decrireEchec", () => {
   const base = { ok: false as const, path: "/x" };
   test("chaque statut a sa tournure, le motif de l'API passe devant", () => {
-    expect(decrireEchec({ ...base, kind: "http", status: 403, detail: "" })).toContain("droits");
-    expect(decrireEchec({ ...base, kind: "http", status: 404, detail: "" }, "Clan introuvable")).toBe("Clan introuvable");
-    expect(decrireEchec({ ...base, kind: "http", status: 400, detail: "" }, "nom trop long")).toBe(
-      "Demande invalide : nom trop long",
-    );
-    expect(decrireEchec({ ...base, kind: "http", status: 500, detail: "" })).toContain("HTTP 500");
-    expect(decrireEchec({ ...base, kind: "invalid_response", detail: "id : attendu" })).toContain("inattendue");
+    expect(
+      decrireEchec({ ...base, kind: "http", status: 403, detail: "" }),
+    ).toContain("droits");
+    expect(
+      decrireEchec(
+        { ...base, kind: "http", status: 404, detail: "" },
+        "Clan introuvable",
+      ),
+    ).toBe("Clan introuvable");
+    expect(
+      decrireEchec(
+        { ...base, kind: "http", status: 400, detail: "" },
+        "nom trop long",
+      ),
+    ).toBe("Demande invalide : nom trop long");
+    expect(
+      decrireEchec({ ...base, kind: "http", status: 500, detail: "" }),
+    ).toContain("HTTP 500");
+    expect(
+      decrireEchec({
+        ...base,
+        kind: "invalid_response",
+        detail: "id : attendu",
+      }),
+    ).toContain("inattendue");
   });
 
   test("motifDuCorps lit message, error, erreur", () => {
@@ -158,7 +219,10 @@ describe("fabrique", () => {
   afterEach(() => restaurer?.());
 
   test("remplaçable en test, restaurée ensuite", () => {
-    const factice = new ClientAchilleaDelegue({ jeton: "x", baseUrl: BASE_API_TEST });
+    const factice = new ClientAchilleaDelegue({
+      jeton: "x",
+      baseUrl: BASE_API_TEST,
+    });
     restaurer = remplacerFabriqueClientAchillea(() => factice);
     expect(clientAchilleaPour(JOUEUR)).toBe(factice);
     restaurer();

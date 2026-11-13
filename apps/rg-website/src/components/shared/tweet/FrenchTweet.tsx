@@ -7,7 +7,11 @@ import { Heart, MessageCircle } from "@/lib/icons-config"; // Assurez-vous que R
 import { formatDate, formatNumber } from "@/lib/tweet-utils";
 
 const TwitterLogo = () => (
-  <svg viewBox="0 0 24 24" aria-hidden="true" className="size-5 fill-current text-twitter dark:text-white">
+  <svg
+    viewBox="0 0 24 24"
+    aria-hidden="true"
+    className="size-5 fill-current text-twitter dark:text-white"
+  >
     <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
   </svg>
 );
@@ -22,7 +26,11 @@ export async function FrenchTweet({ id }: { id: string }) {
   }
 
   if (!tweet) {
-    return <div className="p-4 text-center text-muted-foreground">Tweet introuvable</div>;
+    return (
+      <div className="p-4 text-center text-muted-foreground">
+        Tweet introuvable
+      </div>
+    );
   }
 
   // Gestion des médias (Photos)
@@ -48,7 +56,11 @@ export async function FrenchTweet({ id }: { id: string }) {
       {/* Header */}
       <div className="p-4 flex items-start justify-between">
         <div className="flex items-center gap-3">
-          <Link href={userUrl} target="_blank" className="relative size-10 rounded-full overflow-hidden">
+          <Link
+            href={userUrl}
+            target="_blank"
+            className="relative size-10 rounded-full overflow-hidden"
+          >
             <Image
               src={tweet.user.profile_image_url_https}
               alt={tweet.user.name}
@@ -58,10 +70,18 @@ export async function FrenchTweet({ id }: { id: string }) {
             />
           </Link>
           <div>
-            <Link href={userUrl} target="_blank" className="block font-bold text-sm hover:underline">
+            <Link
+              href={userUrl}
+              target="_blank"
+              className="block font-bold text-sm hover:underline"
+            >
               {tweet.user.name}
             </Link>
-            <Link href={userUrl} target="_blank" className="block text-sm text-muted-foreground">
+            <Link
+              href={userUrl}
+              target="_blank"
+              className="block text-sm text-muted-foreground"
+            >
               @{tweet.user.screen_name}
             </Link>
           </div>
@@ -72,11 +92,15 @@ export async function FrenchTweet({ id }: { id: string }) {
       </div>
 
       {/* Body */}
-      <div className="px-4 pb-2 text-[15px] whitespace-pre-wrap leading-relaxed grow">{textContent}</div>
+      <div className="px-4 pb-2 text-[15px] whitespace-pre-wrap leading-relaxed grow">
+        {textContent}
+      </div>
 
       {/* Media */}
       {hasPhotos && (
-        <div className={`px-4 pb-2 grid gap-1 ${photos.length > 1 ? "grid-cols-2" : "grid-cols-1"}`}>
+        <div
+          className={`px-4 pb-2 grid gap-1 ${photos.length > 1 ? "grid-cols-2" : "grid-cols-1"}`}
+        >
           {photos.map((photo: { url: string }) => (
             <div
               key={photo.url}
@@ -96,7 +120,9 @@ export async function FrenchTweet({ id }: { id: string }) {
 
       {/* Footer (Date & Metrics) */}
       <div className="p-4 mt-auto border-t dark:border-zinc-800">
-        <div className="text-xs text-muted-foreground mb-3">{formatDate(new Date(tweet.created_at))}</div>
+        <div className="text-xs text-muted-foreground mb-3">
+          {formatDate(new Date(tweet.created_at))}
+        </div>
         <div className="flex items-center justify-between text-muted-foreground text-sm">
           <div className="flex items-center gap-6">
             <div className="flex items-center gap-1.5 group cursor-pointer hover:text-pink-600">

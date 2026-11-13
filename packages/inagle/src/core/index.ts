@@ -14,7 +14,10 @@
  * - types: Complete TypeScript type definitions
  */
 
-export { loadJsonAsync as loadJsonFileAsync, measureTime } from "./async-loader.js";
+export {
+  loadJsonAsync as loadJsonFileAsync,
+  measureTime,
+} from "./async-loader.js";
 export {
   configuredDataSource,
   localMirrorPath,
@@ -23,7 +26,12 @@ export {
   type InagleDataSourceOption,
 } from "./data-source.js";
 // Native game files remain accessible independently of the selected SQL projection adapter.
-export { configureGameVfs, gameDataDirectory, gameVfs, gameVfsPaths } from "./vfs-data.js";
+export {
+  configureGameVfs,
+  gameDataDirectory,
+  gameVfs,
+  gameVfsPaths,
+} from "./vfs-data.js";
 export {
   CONFIG_SCHEMA_VERSION,
   type CharaBaseData,
@@ -76,7 +84,13 @@ export * from "./images.js";
 export * from "./openapi.js";
 export * from "./parser.js";
 // New architecture - explicit exports to avoid conflicts
-export { DATA_ROOT, type DataFile, type DataPath, FILES, PATHS } from "./paths.js";
+export {
+  DATA_ROOT,
+  type DataFile,
+  type DataPath,
+  FILES,
+  PATHS,
+} from "./paths.js";
 export * from "./search.js";
 
 // Types with aliased names to avoid conflicts

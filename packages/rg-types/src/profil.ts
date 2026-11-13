@@ -75,7 +75,7 @@ const SCHEMAS_LIEN = new Set(["http:", "https:"]);
 export const SchemaLienPublic = z
   .string()
   .url("URL invalide")
-  .refine(valeur => {
+  .refine((valeur) => {
     try {
       return SCHEMAS_LIEN.has(new URL(valeur).protocol);
     } catch {
@@ -104,12 +104,13 @@ export const POSTES_PROFIL = ["GAR", "DEF", "MIL", "ATT"] as const;
 export type PosteProfil = (typeof POSTES_PROFIL)[number];
 
 /** Nom complet d'un poste, tel que le wiki le nomme. */
-export const LIBELLES_POSTES: Readonly<Record<PosteProfil, string>> = Object.freeze({
-  ATT: "Attaquant",
-  DEF: "Défenseur",
-  GAR: "Gardien",
-  MIL: "Milieu",
-});
+export const LIBELLES_POSTES: Readonly<Record<PosteProfil, string>> =
+  Object.freeze({
+    ATT: "Attaquant",
+    DEF: "Défenseur",
+    GAR: "Gardien",
+    MIL: "Milieu",
+  });
 
 export const SchemaProfilPublic = z.object({
   /**
@@ -126,8 +127,10 @@ export const SchemaProfilPublic = z.object({
   badges: z
     .array(z.string())
     .max(MAX_BADGES_PROFIL)
-    .transform(liste =>
-      liste.filter((badge): badge is BadgeProfil => (BADGES_PROFIL as readonly string[]).includes(badge)),
+    .transform((liste) =>
+      liste.filter((badge): badge is BadgeProfil =>
+        (BADGES_PROFIL as readonly string[]).includes(badge),
+      ),
     ),
   banner_url: z.string().optional().or(z.literal("")),
   /**
@@ -155,8 +158,10 @@ export const SchemaProfilPublic = z.object({
     // refusé. Un `<select>` vide renvoie `""`, et le jour où un poste
     // disparaîtra du jeu, les profils qui le portaient doivent rester
     // enregistrables.
-    .transform(valeur =>
-      valeur && (POSTES_PROFIL as readonly string[]).includes(valeur) ? (valeur as PosteProfil) : null,
+    .transform((valeur) =>
+      valeur && (POSTES_PROFIL as readonly string[]).includes(valeur)
+        ? (valeur as PosteProfil)
+        : null,
     ),
   bio: z.string().max(MAX_BIO_PROFIL).optional(),
   full_name: z.string().optional(),
@@ -186,10 +191,14 @@ export function badgeMerite(badge: string): boolean {
  */
 export function filtrerBadges(
   demandes: readonly string[],
-  droits: { estStaff: boolean; estMecene: boolean; dejaPoses: readonly string[] },
+  droits: {
+    estStaff: boolean;
+    estMecene: boolean;
+    dejaPoses: readonly string[];
+  },
 ): string[] {
   const deja = new Set(droits.dejaPoses);
-  return demandes.filter(badge => {
+  return demandes.filter((badge) => {
     if (!badgeMerite(badge)) {
       return true;
     }

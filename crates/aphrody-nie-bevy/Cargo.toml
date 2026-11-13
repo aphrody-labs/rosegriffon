@@ -18,7 +18,10 @@ required-features = ["bevy"]
 [dependencies]
 # `textures` porte `g4tx_decode` (BC7/BGRA8 → RGBA8) ; sans elle le module n'existe pas et le
 # convertisseur d'images ne compile pas. `lua`, dans les features par défaut, n'a rien à faire ici.
-aphrody-nie-formats = { workspace = true, default-features = false, features = ["std", "textures"] }
+aphrody-nie-formats = { workspace = true, default-features = false, features = [
+  "std",
+  "textures",
+] }
 thiserror = { workspace = true }
 
 # Bevy par SOUS-CRATES, pas par le méta-crate `bevy`.
@@ -51,13 +54,13 @@ default = []
 # Active l'intégration Bevy. Sans elle, la crate ne compile que son contrat d'erreurs : c'est ce
 # qui garde `cargo check --workspace` au même coût qu'avant l'ajout.
 bevy = [
-    "dep:bevy_app",
-    "dep:bevy_asset",
-    "dep:bevy_ecs",
-    "dep:bevy_image",
-    "dep:bevy_math",
-    "dep:bevy_mesh",
-    "dep:bevy_reflect",
-    "dep:bevy-wgpu-types",
-    "dep:futures-lite",
+  "dep:bevy_app",
+  "dep:bevy_asset",
+  "dep:bevy_ecs",
+  "dep:bevy_image",
+  "dep:bevy_math",
+  "dep:bevy_mesh",
+  "dep:bevy_reflect",
+  "dep:bevy-wgpu-types",
+  "dep:futures-lite",
 ]

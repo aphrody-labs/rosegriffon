@@ -1,17 +1,27 @@
 import { describe, expect, test } from "bun:test";
 
-import { clampAdjustments, DEFAULT_ADJUSTMENTS } from "@rosegriffon/ui/lib/color-engine";
+import {
+  clampAdjustments,
+  DEFAULT_ADJUSTMENTS,
+} from "@rosegriffon/ui/lib/color-engine";
 
 import { CURSEURS } from "../src/components/ThemeTuner";
 
 describe("ThemeTuner sliders", () => {
   test("cover the three adjustments within the engine bounds", () => {
-    expect(CURSEURS.map(c => c.cle)).toEqual(["hueShift", "chroma", "contrast"]);
+    expect(CURSEURS.map((c) => c.cle)).toEqual([
+      "hueShift",
+      "chroma",
+      "contrast",
+    ]);
     for (const c of CURSEURS) {
       expect(clampAdjustments({ [c.cle]: c.min })[c.cle]).toBe(c.min);
       expect(clampAdjustments({ [c.cle]: c.max })[c.cle]).toBe(c.max);
       const defaut = DEFAULT_ADJUSTMENTS[c.cle];
-      expect((defaut - c.min) / c.pas).toBeCloseTo(Math.round((defaut - c.min) / c.pas), 9);
+      expect((defaut - c.min) / c.pas).toBeCloseTo(
+        Math.round((defaut - c.min) / c.pas),
+        9,
+      );
     }
   });
 

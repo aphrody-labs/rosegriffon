@@ -28,7 +28,8 @@ function decodeBase64Url(value: string): ArrayBuffer {
     .replaceAll("_", "/")
     .padEnd(Math.ceil(value.length / 4) * 4, "=");
   const binary = atob(normalized);
-  return Uint8Array.from(binary, char => char.charCodeAt(0)).buffer as ArrayBuffer;
+  return Uint8Array.from(binary, (char) => char.charCodeAt(0))
+    .buffer as ArrayBuffer;
 }
 
 /**
@@ -48,11 +49,15 @@ async function verifyAchilleaToken(
   const [encodedHeader, encodedPayload, encodedSignature] = parts;
   if (!encodedHeader || !encodedPayload || !encodedSignature) return null;
   try {
-    const header = JSON.parse(new TextDecoder().decode(decodeBase64Url(encodedHeader))) as {
+    const header = JSON.parse(
+      new TextDecoder().decode(decodeBase64Url(encodedHeader)),
+    ) as {
       alg?: string;
       typ?: string;
     };
-    const payload = JSON.parse(new TextDecoder().decode(decodeBase64Url(encodedPayload))) as {
+    const payload = JSON.parse(
+      new TextDecoder().decode(decodeBase64Url(encodedPayload)),
+    ) as {
       id?: unknown;
       sub?: unknown;
       username?: unknown;
@@ -62,12 +67,28 @@ async function verifyAchilleaToken(
       aud?: unknown;
       exp?: unknown;
     };
-    if (header.alg !== "HS256" || payload.tokenUse !== tokenUse || payload.iss !== ACHILLEA_AUTH_ISSUER) return null;
+    if (
+      header.alg !== "HS256" ||
+      payload.tokenUse !== tokenUse ||
+      payload.iss !== ACHILLEA_AUTH_ISSUER
+    )
+      return null;
     const audience = Array.isArray(payload.aud) ? payload.aud : [payload.aud];
     if (!audience.includes(audienceName)) return null;
-    if (typeof payload.exp !== "number" || !Number.isFinite(payload.exp) || payload.exp <= now) return null;
-    const id = typeof payload.id === "string" && payload.id ? payload.id : payload.sub;
-    if (typeof id !== "string" || !id || (payload.id !== undefined && payload.id !== payload.sub)) return null;
+    if (
+      typeof payload.exp !== "number" ||
+      !Number.isFinite(payload.exp) ||
+      payload.exp <= now
+    )
+      return null;
+    const id =
+      typeof payload.id === "string" && payload.id ? payload.id : payload.sub;
+    if (
+      typeof id !== "string" ||
+      !id ||
+      (payload.id !== undefined && payload.id !== payload.sub)
+    )
+      return null;
 
     const key = await crypto.subtle.importKey(
       "raw",
@@ -85,7 +106,8 @@ async function verifyAchilleaToken(
     if (!valid) return null;
     return {
       id,
-      username: typeof payload.username === "string" ? payload.username : undefined,
+      username:
+        typeof payload.username === "string" ? payload.username : undefined,
       avatar: typeof payload.avatar === "string" ? payload.avatar : undefined,
       expiresAt: payload.exp,
     };
@@ -100,7 +122,13 @@ export function verifyAchilleaSessionToken(
   secret: string,
   now = Math.floor(Date.now() / 1000),
 ): Promise<AchilleaSessionClaims | null> {
-  return verifyAchilleaToken(token, secret, "session", ACHILLEA_SESSION_AUDIENCE, now);
+  return verifyAchilleaToken(
+    token,
+    secret,
+    "session",
+    ACHILLEA_SESSION_AUDIENCE,
+    now,
+  );
 }
 
 /** Verify a realtime token; session cookies must use the session verifier. */
@@ -109,11 +137,20 @@ export function verifyAchilleaRealtimeToken(
   secret: string,
   now = Math.floor(Date.now() / 1000),
 ): Promise<AchilleaSessionClaims | null> {
-  return verifyAchilleaToken(token, secret, "realtime", ACHILLEA_REALTIME_AUDIENCE, now);
+  return verifyAchilleaToken(
+    token,
+    secret,
+    "realtime",
+    ACHILLEA_REALTIME_AUDIENCE,
+    now,
+  );
 }
 
 /** Constant-time comparison for internal bearer secrets (portable Web runtime). */
-export function verifyAdminBearerToken(token: unknown, expected: string | undefined): boolean {
+export function verifyAdminBearerToken(
+  token: unknown,
+  expected: string | undefined,
+): boolean {
   if (typeof token !== "string" || !expected) return false;
   const left = new TextEncoder().encode(token);
   const right = new TextEncoder().encode(expected);

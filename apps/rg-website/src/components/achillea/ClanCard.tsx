@@ -45,10 +45,19 @@ export function ClanCard({ clan, className }: ClanCardProps) {
               <span className="text-primary mr-1">[{clan.shortName}]</span>
               {clan.name}
             </h3>
-            {clan.biography && <p className="text-lg text-on-surface-variant line-clamp-2">{clan.biography}</p>}
-            <p className="text-lg text-on-surface-variant">Notoriété : {clan.fame}</p>
+            {clan.biography && (
+              <p className="text-lg text-on-surface-variant line-clamp-2">
+                {clan.biography}
+              </p>
+            )}
+            <p className="text-lg text-on-surface-variant">
+              Notoriété : {clan.fame}
+            </p>
             {clan.isRecruiting ? (
-              <Badge variant="default" className="gap-1 bg-success text-success-foreground text-lg">
+              <Badge
+                variant="default"
+                className="gap-1 bg-success text-success-foreground text-lg"
+              >
                 <Check className="size-3" />
                 Recrute
               </Badge>

@@ -54,7 +54,7 @@ function renderText(node: LexicalNode, key: string | number): ReactNode {
   if (style) {
     const styleObj: Record<string, string> = {};
     for (const decl of style.split(";")) {
-      const [k, v] = decl.split(":").map(s => s.trim());
+      const [k, v] = decl.split(":").map((s) => s.trim());
       if (k && v) {
         styleObj[toCamel(k)] = v;
       }
@@ -110,7 +110,12 @@ function renderNode(node: LexicalNode, key: string | number): ReactNode {
     }
     case "link": {
       return (
-        <a key={key} href={node.url ?? "#"} target={node.target ?? undefined} rel={node.rel ?? "noopener noreferrer"}>
+        <a
+          key={key}
+          href={node.url ?? "#"}
+          target={node.target ?? undefined}
+          rel={node.rel ?? "noopener noreferrer"}
+        >
           {renderChildren(node.children)}
         </a>
       );
@@ -132,7 +137,9 @@ function renderNode(node: LexicalNode, key: string | number): ReactNode {
         return null;
       }
       // eslint-disable-next-line @next/next/no-img-element
-      return <img key={key} src={src} alt={alt} loading="lazy" decoding="async" />;
+      return (
+        <img key={key} src={src} alt={alt} loading="lazy" decoding="async" />
+      );
     }
     default: {
       // fallback : si le node a des children, on les rend dans un fragment
@@ -144,7 +151,11 @@ function renderNode(node: LexicalNode, key: string | number): ReactNode {
   }
 }
 
-export function LexicalRenderer({ content }: { content: SerializedEditorState | null | undefined }) {
+export function LexicalRenderer({
+  content,
+}: {
+  content: SerializedEditorState | null | undefined;
+}) {
   if (!content?.root) {
     return null;
   }

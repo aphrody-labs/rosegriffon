@@ -7,7 +7,9 @@
  * Allowed runes: ASCII word chars, whitespace, hyphen, plus the Latin-1 supplement
  * `À-ÿ` (which already covers `à-ÿ`) and the OE/oe ligatures `Œœ`.
  */
-export function sanitizeNewsSearchQuery(raw: string | null | undefined): string | null {
+export function sanitizeNewsSearchQuery(
+  raw: string | null | undefined,
+): string | null {
   if (!raw) {
     return null;
   }

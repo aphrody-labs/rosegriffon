@@ -35,7 +35,7 @@ One owner per function (map: `docs/gaming/OWNERSHIP.md` in aphrody-labs/src):
      uses steamcmd's cached login; no password on the command line; `--dry-run` prints the script);
    - `ay gaming run <exe> --prefix /srv/pfx/<app> --tool-path /srv/steam/proton-exp [--app <id>] [-- args]`:
      umu-run when installed, else `<proton>/proton waitforexitandrun` with `ay steam env`; `--dry-run`.
-   On Windows `ay gaming run` starts the exe natively.
+     On Windows `ay gaming run` starts the exe natively.
 6. Upstream updates of the forks: `ay upstream status` (stacks in `infra/upstream/stacks.toml`, daily timer).
 
 ## Rules

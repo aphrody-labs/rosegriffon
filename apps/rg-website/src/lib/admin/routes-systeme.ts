@@ -23,10 +23,15 @@ export interface InventaireRoutes {
   origine: "src" | "build" | "aucune";
 }
 
-const RACINES_APP = [join(process.cwd(), "src", "app"), join(process.cwd(), "apps", "rg-website", "src", "app")];
+const RACINES_APP = [
+  join(process.cwd(), "src", "app"),
+  join(process.cwd(), "apps", "rg-website", "src", "app"),
+];
 
 /** Fichiers `page`/`route` de l'arborescence `app/`, avec leur source pour les routes. */
-async function lireSrc(): Promise<{ fichier: string; source: string | null }[] | null> {
+async function lireSrc(): Promise<
+  { fichier: string; source: string | null }[] | null
+> {
   for (const racine of RACINES_APP) {
     const glob = new Bun.Glob("**/{page,route}.{tsx,ts,jsx,js,mdx}");
     const sortie: { fichier: string; source: string | null }[] = [];
@@ -34,7 +39,10 @@ async function lireSrc(): Promise<{ fichier: string; source: string | null }[] |
       for await (const fichier of glob.scan({ cwd: racine, onlyFiles: true })) {
         const chemin = fichier.replaceAll("\\", "/");
         const estRoute = /(^|\/)route\.(ts|js)$/.test(chemin);
-        sortie.push({ fichier: chemin, source: estRoute ? await Bun.file(join(racine, chemin)).text() : null });
+        sortie.push({
+          fichier: chemin,
+          source: estRoute ? await Bun.file(join(racine, chemin)).text() : null,
+        });
       }
     } catch {
       continue;
@@ -45,9 +53,16 @@ async function lireSrc(): Promise<{ fichier: string; source: string | null }[] |
 }
 
 /** Repli en production sans `src/` : le manifeste des chemins produit par `next build`. */
-async function lireManifeste(): Promise<{ fichier: string; source: string | null }[] | null> {
-  for (const base of [process.cwd(), join(process.cwd(), "apps", "rg-website")]) {
-    const fichier = Bun.file(join(base, ".next", "server", "app-paths-manifest.json"));
+async function lireManifeste(): Promise<
+  { fichier: string; source: string | null }[] | null
+> {
+  for (const base of [
+    process.cwd(),
+    join(process.cwd(), "apps", "rg-website"),
+  ]) {
+    const fichier = Bun.file(
+      join(base, ".next", "server", "app-paths-manifest.json"),
+    );
     if (!(await fichier.exists())) continue;
     try {
       const manifeste = (await fichier.json()) as Record<string, string>;
@@ -55,8 +70,16 @@ async function lireManifeste(): Promise<{ fichier: string; source: string | null
       for (const [cle, cible] of Object.entries(manifeste)) {
         const m = /^(.*)\/(page|route)$/.exec(cle);
         if (!m) continue;
-        const source = m[2] === "route" ? await Bun.file(join(base, ".next", "server", cible)).text().catch(() => null) : null;
-        entrees.push({ fichier: `${m[1]!.replace(/^\//, "")}/${m[2]}.ts`.replace(/^\//, ""), source });
+        const source =
+          m[2] === "route"
+            ? await Bun.file(join(base, ".next", "server", cible))
+                .text()
+                .catch(() => null)
+            : null;
+        entrees.push({
+          fichier: `${m[1]!.replace(/^\//, "")}/${m[2]}.ts`.replace(/^\//, ""),
+          source,
+        });
       }
       return entrees;
     } catch {
@@ -77,7 +100,11 @@ export async function inventaireRoutes(): Promise<InventaireRoutes> {
     origine = "build";
     entrees = await lireManifeste();
   }
-  const valeur: InventaireRoutes = { pages: [], api: [], origine: entrees ? origine : "aucune" };
+  const valeur: InventaireRoutes = {
+    pages: [],
+    api: [],
+    origine: entrees ? origine : "aucune",
+  };
   for (const { fichier, source } of entrees ?? []) {
     const route = routeDepuisFichier(fichier);
     if (!route) continue;

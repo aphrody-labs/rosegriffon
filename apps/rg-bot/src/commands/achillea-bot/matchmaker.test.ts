@@ -1,6 +1,10 @@
 import { afterEach, describe, expect, test } from "bun:test";
 
-import { fausseInteraction, installerApi, type AppelApi } from "../../../test/achillea-kit";
+import {
+  fausseInteraction,
+  installerApi,
+  type AppelApi,
+} from "../../../test/achillea-kit";
 import { BoutonsFileRanked, estCodeDefi, suffixe } from "./matchmaker";
 
 let restaurer: (() => void) | null = null;
@@ -14,7 +18,14 @@ function api(routes: Parameters<typeof installerApi>[0]): AppelApi[] {
   return installation.appels;
 }
 
-const defi = { code: "AbC123xy", url: "https://rosegriffon.fr/achillea/ranked/defi/AbC123xy", mode: 2, ranked: true, toUserId: null, expiresAt: Date.now() + 600_000 };
+const defi = {
+  code: "AbC123xy",
+  url: "https://rosegriffon.fr/achillea/ranked/defi/AbC123xy",
+  mode: 2,
+  ranked: true,
+  toUserId: null,
+  expiresAt: Date.now() + 600_000,
+};
 
 describe("analyse des custom_id", () => {
   test("ancien identifiant numérique ≠ code de défi", () => {
@@ -36,7 +47,9 @@ describe("join_queue", () => {
   });
 
   test("refus (403)", async () => {
-    api({ "POST /ranked/challenge": [403, { message: "Compte sur liste noire" }] });
+    api({
+      "POST /ranked/challenge": [403, { message: "Compte sur liste noire" }],
+    });
     const interaction = fausseInteraction({ customId: "join_queue:12" });
     await new BoutonsFileRanked().rejoindre(interaction as never);
     expect(interaction.texte()).toContain("Compte sur liste noire");
@@ -61,7 +74,12 @@ describe("leave_queue", () => {
   });
 
   test("annulation refusée (403)", async () => {
-    api({ "DELETE /ranked/challenge/AbC123xy": [403, { message: "Ce défi n'est pas le tien" }] });
+    api({
+      "DELETE /ranked/challenge/AbC123xy": [
+        403,
+        { message: "Ce défi n'est pas le tien" },
+      ],
+    });
     const interaction = fausseInteraction({ customId: "leave_queue:AbC123xy" });
     await new BoutonsFileRanked().quitter(interaction as never);
     expect(interaction.texte()).toContain("pas le tien");
@@ -70,7 +88,19 @@ describe("leave_queue", () => {
 
 describe("confirm_presence", () => {
   test("renvoie vers la salle du match", async () => {
-    api({ "GET /ranked/me": { userId: "111111111111111111", mode: 2, elo: 1000, peakRating: 1000, gamesPlayed: 0, wins: 0, losses: 0, tier: null, seasonId: null } });
+    api({
+      "GET /ranked/me": {
+        userId: "111111111111111111",
+        mode: 2,
+        elo: 1000,
+        peakRating: 1000,
+        gamesPlayed: 0,
+        wins: 0,
+        losses: 0,
+        tier: null,
+        seasonId: null,
+      },
+    });
     const interaction = fausseInteraction({ customId: "confirm_presence:9" });
     await new BoutonsFileRanked().confirmerPresence(interaction as never);
     expect(interaction.texte()).toContain("/ranked/match");

@@ -27,7 +27,13 @@ import {
   formaterNombre as formaterNombreUi,
   formaterOctets as formaterOctetsUi,
 } from "../../lib/ui/nombres";
-import { borner as bornerUi, decouper, echapper, ilYA, leJour } from "../../lib/ui/texte";
+import {
+  borner as bornerUi,
+  decouper,
+  echapper,
+  ilYA,
+  leJour,
+} from "../../lib/ui/texte";
 
 /** Vert quand ça répond, rouge sinon. Le texte reste lisible sans la couleur. */
 export function pastilleEtat(ok: boolean): string {
@@ -63,12 +69,16 @@ export function formaterOctets(octets: number | null | undefined): string {
  * Écrire « il y a 3 minutes » en dur donnerait une phrase fausse dès que
  * quelqu'un relit le message : un embed reste affiché des heures.
  */
-export function horodatageRelatif(valeur: string | Date | null | undefined): string {
+export function horodatageRelatif(
+  valeur: string | Date | null | undefined,
+): string {
   return ilYA(valeur);
 }
 
 /** Horodatage absolu natif de Discord (fuseau du lecteur). */
-export function horodatageAbsolu(valeur: string | Date | null | undefined): string {
+export function horodatageAbsolu(
+  valeur: string | Date | null | undefined,
+): string {
   return leJour(valeur, "f");
 }
 
@@ -89,17 +99,22 @@ export interface VersionDeployee {
  * peut lui-même commencer par un tiret (alphabet base64url), d'où le double
  * tiret. Découper sur le dernier `-` donnerait donc un identifiant tronqué.
  */
-export function analyserRelease(identifiant: string | null | undefined): VersionDeployee | null {
+export function analyserRelease(
+  identifiant: string | null | undefined,
+): VersionDeployee | null {
   if (typeof identifiant !== "string" || identifiant.trim().length === 0) {
     return null;
   }
   const brut = identifiant.trim();
-  const trouve = /^(\d{4}-\d{2}-\d{2})T(\d{2})-(\d{2})-(\d{2})-(\d{3})-(.*)$/.exec(brut);
+  const trouve =
+    /^(\d{4}-\d{2}-\d{2})T(\d{2})-(\d{2})-(\d{2})-(\d{3})-(.*)$/.exec(brut);
   if (!trouve) {
     return { identifiant: brut, assembleeLe: null, buildId: brut };
   }
   const [, jour, heures, minutes, secondes, millisecondes, buildId] = trouve;
-  const instant = new Date(`${jour}T${heures}:${minutes}:${secondes}.${millisecondes}Z`);
+  const instant = new Date(
+    `${jour}T${heures}:${minutes}:${secondes}.${millisecondes}Z`,
+  );
   return {
     identifiant: brut,
     assembleeLe: Number.isNaN(instant.getTime()) ? null : instant,
@@ -110,7 +125,9 @@ export function analyserRelease(identifiant: string | null | undefined): Version
 /** Une ligne d'état de service, prête à empiler dans une description d'embed. */
 export function ligneSonde(sonde: SondeService): string {
   const tete = `${pastilleEtat(sonde.ok)} \`${sonde.service.nom}\` — ${sonde.service.titre}`;
-  const mesure = sonde.ok ? formaterLatence(sonde.latenceMs) : (sonde.erreur ?? "injoignable");
+  const mesure = sonde.ok
+    ? formaterLatence(sonde.latenceMs)
+    : (sonde.erreur ?? "injoignable");
   const unite = sonde.service.unite ? ` · \`${sonde.service.unite}\`` : "";
   const detail = sonde.ok && sonde.detail ? `\n   └ ${sonde.detail}` : "";
   return `${tete} · ${mesure}${unite}${detail}`;
@@ -123,7 +140,11 @@ export function ligneSonde(sonde: SondeService): string {
  * des lignes illisibles, et couper au milieu d'un lien Markdown produit un
  * embed refusé par l'API.
  */
-export function decouperEnChamps(texte: string, limite = 1_024, maxChamps = 5): string[] {
+export function decouperEnChamps(
+  texte: string,
+  limite = 1_024,
+  maxChamps = 5,
+): string[] {
   return decouper(texte, limite, maxChamps);
 }
 
@@ -142,12 +163,16 @@ export function blocJson(valeur: unknown, limite = 1_400): string {
   }
   const enveloppe = "```json\n\n```".length;
   const utile = Math.max(0, limite - enveloppe);
-  const coupe = texte.length > utile ? `${texte.slice(0, Math.max(0, utile - 1))}…` : texte;
+  const coupe =
+    texte.length > utile ? `${texte.slice(0, Math.max(0, utile - 1))}…` : texte;
   return `\`\`\`json\n${coupe}\n\`\`\``;
 }
 
 /** Coupe un texte sans jamais dépasser la limite, ellipse comprise. */
-export function borner(texte: string | null | undefined, limite: number): string {
+export function borner(
+  texte: string | null | undefined,
+  limite: number,
+): string {
   return bornerUi(texte, limite);
 }
 
@@ -168,14 +193,28 @@ export interface ResultatRechercheWeb {
 }
 
 /** Une ligne de résultat de recherche web : titre cliquable + extrait. */
-export function ligneResultatWeb(resultat: ResultatRechercheWeb, rang: number): string {
+export function ligneResultatWeb(
+  resultat: ResultatRechercheWeb,
+  rang: number,
+): string {
   const url = typeof resultat.url === "string" ? resultat.url : "";
   const titre = borner(
-    echapperMarkdown(typeof resultat.titre === "string" && resultat.titre ? resultat.titre : url),
+    echapperMarkdown(
+      typeof resultat.titre === "string" && resultat.titre
+        ? resultat.titre
+        : url,
+    ),
     120,
   );
-  const extrait = borner(echapperMarkdown(typeof resultat.extrait === "string" ? resultat.extrait : ""), 200);
-  const entete = url ? `**${rang}.** [${titre}](${url})` : `**${rang}.** ${titre}`;
+  const extrait = borner(
+    echapperMarkdown(
+      typeof resultat.extrait === "string" ? resultat.extrait : "",
+    ),
+    200,
+  );
+  const entete = url
+    ? `**${rang}.** [${titre}](${url})`
+    : `**${rang}.** ${titre}`;
   return extrait.length > 0 ? `${entete}\n   ${extrait}` : entete;
 }
 
@@ -217,11 +256,18 @@ export interface PostXAffichable {
 
 /** Une ligne de post X : auteur, date relative, texte borné, portée. */
 export function lignePostX(post: PostXAffichable): string {
-  const auteur = typeof post.auteur === "string" && post.auteur ? `@${post.auteur}` : "compte inconnu";
+  const auteur =
+    typeof post.auteur === "string" && post.auteur
+      ? `@${post.auteur}`
+      : "compte inconnu";
   const url = typeof post.url === "string" ? post.url : "";
   const entete = url ? `[${auteur}](${url})` : auteur;
-  const quand = typeof post.date === "string" ? ` · ${horodatageRelatif(post.date)}` : "";
-  const texte = borner(echapperMarkdown(typeof post.texte === "string" ? post.texte : ""), 300);
+  const quand =
+    typeof post.date === "string" ? ` · ${horodatageRelatif(post.date)}` : "";
+  const texte = borner(
+    echapperMarkdown(typeof post.texte === "string" ? post.texte : ""),
+    300,
+  );
   const portee = formaterPortee(post);
   return `**${entete}**${quand}\n${texte || "*(sans texte)*"}\n${portee}`;
 }
@@ -240,7 +286,9 @@ export function lignePostX(post: PostXAffichable): string {
  * Les posts sans date lisible partent à la fin plutôt que de se retrouver
  * arbitrairement en tête : une date absente n'est pas une date récente.
  */
-export function trierPostsParDate<T extends PostXAffichable>(posts: readonly T[]): T[] {
+export function trierPostsParDate<T extends PostXAffichable>(
+  posts: readonly T[],
+): T[] {
   // Un repère FINI, pas `-Infinity` : deux posts sans date donneraient
   // `-Infinity - -Infinity = NaN`, et un comparateur qui rend NaN laisse le tri
   // au bon vouloir du moteur.
@@ -291,11 +339,18 @@ export function formaterEnTetes(entetes: unknown, limite = 900): string {
 }
 
 /** Liste courte séparée par des points médians, bornée en nombre ET en longueur. */
-export function listeCourte(valeurs: unknown, maximum = 12, limite = 900, vide = "*aucune*"): string {
+export function listeCourte(
+  valeurs: unknown,
+  maximum = 12,
+  limite = 900,
+  vide = "*aucune*",
+): string {
   if (!Array.isArray(valeurs) || valeurs.length === 0) {
     return vide;
   }
-  const propres = valeurs.filter((v): v is string => typeof v === "string" && v.length > 0);
+  const propres = valeurs.filter(
+    (v): v is string => typeof v === "string" && v.length > 0,
+  );
   if (propres.length === 0) {
     return vide;
   }

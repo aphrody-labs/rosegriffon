@@ -14,7 +14,10 @@ export async function GET(request: Request) {
     const pool = getPgPool();
     let rows: Array<{ share_count: number | null }> = [];
 
-    if (id && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) {
+    if (
+      id &&
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)
+    ) {
       const res = await pool.query<{ share_count: number | null }>(
         `SELECT share_count FROM articles WHERE id = $1 LIMIT 1`,
         [id],

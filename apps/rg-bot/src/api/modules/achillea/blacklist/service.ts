@@ -26,7 +26,11 @@ export interface EntreeListeNoire {
 
 export interface DepotListeNoire {
   roleUtilisateur(userId: string): Promise<number | null>;
-  joueur(userId: string): Promise<{ id: string; username: string | null; displayName: string } | null>;
+  joueur(userId: string): Promise<{
+    id: string;
+    username: string | null;
+    displayName: string;
+  } | null>;
   entree(userId: string): Promise<EntreeListeNoire | null>;
   lister(): Promise<EntreeListeNoire[]>;
   inscrire(userId: string, motif: string): Promise<EntreeListeNoire>;
@@ -42,7 +46,10 @@ type Ligne = {
 };
 
 function versEntree(ligne: Ligne): EntreeListeNoire {
-  const date = ligne.created_at instanceof Date ? ligne.created_at : new Date(ligne.created_at);
+  const date =
+    ligne.created_at instanceof Date
+      ? ligne.created_at
+      : new Date(ligne.created_at);
   return {
     userId: ligne.user_id,
     username: ligne.username,
@@ -58,7 +65,11 @@ export function depotKysely(db: Kysely<Database>): DepotListeNoire {
     from "user" u join blacklist b on b.id = u.blacklist_id`;
   return {
     async roleUtilisateur(userId) {
-      const ligne = await db.selectFrom("user").select("role").where("id", "=", userId).executeTakeFirst();
+      const ligne = await db
+        .selectFrom("user")
+        .select("role")
+        .where("id", "=", userId)
+        .executeTakeFirst();
       return ligne?.role ?? null;
     },
     async joueur(userId) {
@@ -67,35 +78,59 @@ export function depotKysely(db: Kysely<Database>): DepotListeNoire {
         .select(["id", "username", "display_name"])
         .where("id", "=", userId)
         .executeTakeFirst();
-      return ligne ? { id: ligne.id, username: ligne.username, displayName: ligne.display_name } : null;
+      return ligne
+        ? {
+            id: ligne.id,
+            username: ligne.username,
+            displayName: ligne.display_name,
+          }
+        : null;
     },
     async entree(userId) {
-      const { rows } = await sql<Ligne>`${selection} where u.id = ${userId} limit 1`.execute(db);
+      const { rows } =
+        await sql<Ligne>`${selection} where u.id = ${userId} limit 1`.execute(
+          db,
+        );
       return rows[0] ? versEntree(rows[0]) : null;
     },
     async lister() {
-      const { rows } = await sql<Ligne>`${selection} order by b.created_at desc`.execute(db);
+      const { rows } =
+        await sql<Ligne>`${selection} order by b.created_at desc`.execute(db);
       return rows.map(versEntree);
     },
     async inscrire(userId, motif) {
-      return db.transaction().execute(async trx => {
+      return db.transaction().execute(async (trx) => {
         const { rows } = await sql<{ id: number }>`
-          insert into blacklist (reason, created_at, updated_at) values (${motif}, now(), now()) returning id`.execute(trx);
+          insert into blacklist (reason, created_at, updated_at) values (${motif}, now(), now()) returning id`.execute(
+          trx,
+        );
         const id = rows[0]?.id;
-        await sql`update "user" set blacklist_id = ${id}, updated_at = now() where id = ${userId}`.execute(trx);
-        const lu = await sql<Ligne>`${selection} where u.id = ${userId} limit 1`.execute(trx);
+        await sql`update "user" set blacklist_id = ${id}, updated_at = now() where id = ${userId}`.execute(
+          trx,
+        );
+        const lu =
+          await sql<Ligne>`${selection} where u.id = ${userId} limit 1`.execute(
+            trx,
+          );
         const ligne = lu.rows[0];
-        if (!ligne) throw new Error(`Inscription de ${userId} sur la liste noire illisible après écriture.`);
+        if (!ligne)
+          throw new Error(
+            `Inscription de ${userId} sur la liste noire illisible après écriture.`,
+          );
         return versEntree(ligne);
       });
     },
     async retirer(userId) {
-      return db.transaction().execute(async trx => {
+      return db.transaction().execute(async (trx) => {
         const { rows } = await sql<{ blacklist_id: number | null }>`
-          select blacklist_id from "user" where id = ${userId} for update`.execute(trx);
+          select blacklist_id from "user" where id = ${userId} for update`.execute(
+          trx,
+        );
         const id = rows[0]?.blacklist_id;
         if (id === null || id === undefined) return false;
-        await sql`update "user" set blacklist_id = null, updated_at = now() where id = ${userId}`.execute(trx);
+        await sql`update "user" set blacklist_id = null, updated_at = now() where id = ${userId}`.execute(
+          trx,
+        );
         await sql`delete from blacklist where id = ${id}`.execute(trx);
         return true;
       });
@@ -103,14 +138,26 @@ export function depotKysely(db: Kysely<Database>): DepotListeNoire {
   };
 }
 
-export type EchecListeNoire = { ok: false; statut: 400 | 403 | 404 | 409; message: string };
+export type EchecListeNoire = {
+  ok: false;
+  statut: 400 | 403 | 404 | 409;
+  message: string;
+};
 export type IssueListeNoire<T> = { ok: true; valeur: T } | EchecListeNoire;
 
-const echec = (statut: EchecListeNoire["statut"], message: string): EchecListeNoire => ({ ok: false, statut, message });
+const echec = (
+  statut: EchecListeNoire["statut"],
+  message: string,
+): EchecListeNoire => ({ ok: false, statut, message });
 
-async function exigerAdministrateur(depot: DepotListeNoire, acteurId: string): Promise<EchecListeNoire | null> {
+async function exigerAdministrateur(
+  depot: DepotListeNoire,
+  acteurId: string,
+): Promise<EchecListeNoire | null> {
   const role = await depot.roleUtilisateur(acteurId);
-  return (role ?? 0) >= ROLE_ADMIN_LISTE_NOIRE ? null : echec(403, "Rôle Administrateur Achilléa requis.");
+  return (role ?? 0) >= ROLE_ADMIN_LISTE_NOIRE
+    ? null
+    : echec(403, "Rôle Administrateur Achilléa requis.");
 }
 
 /** Inscrit un joueur. Les développeurs du bot sont protégés, comme dans l'ancien bot. */
@@ -124,12 +171,22 @@ export async function ajouterListeNoire(
   const refus = await exigerAdministrateur(depot, acteurId);
   if (refus) return refus;
   const raison = motif.trim();
-  if (raison.length < 3) return echec(400, "Le motif doit faire au moins 3 caractères.");
-  if (developpeurs.includes(cibleId)) return echec(403, "Impossible d'ajouter un développeur à la liste noire.");
+  if (raison.length < 3)
+    return echec(400, "Le motif doit faire au moins 3 caractères.");
+  if (developpeurs.includes(cibleId))
+    return echec(403, "Impossible d'ajouter un développeur à la liste noire.");
   const joueur = await depot.joueur(cibleId);
-  if (!joueur) return echec(404, "Ce joueur n'a pas de compte Achilléa (il ne s'est jamais connecté).");
-  if (await depot.entree(cibleId)) return echec(409, `${joueur.displayName} est déjà sur la liste noire.`);
-  return { ok: true, valeur: await depot.inscrire(cibleId, raison.slice(0, 500)) };
+  if (!joueur)
+    return echec(
+      404,
+      "Ce joueur n'a pas de compte Achilléa (il ne s'est jamais connecté).",
+    );
+  if (await depot.entree(cibleId))
+    return echec(409, `${joueur.displayName} est déjà sur la liste noire.`);
+  return {
+    ok: true,
+    valeur: await depot.inscrire(cibleId, raison.slice(0, 500)),
+  };
 }
 
 /** Retire un joueur de la liste noire. */
@@ -140,7 +197,9 @@ export async function retirerListeNoire(
 ): Promise<IssueListeNoire<{ userId: string }>> {
   const refus = await exigerAdministrateur(depot, acteurId);
   if (refus) return refus;
-  if (!(await depot.joueur(cibleId))) return echec(404, "Ce joueur n'a pas de compte Achilléa.");
-  if (!(await depot.retirer(cibleId))) return echec(404, "Ce joueur n'est pas sur la liste noire.");
+  if (!(await depot.joueur(cibleId)))
+    return echec(404, "Ce joueur n'a pas de compte Achilléa.");
+  if (!(await depot.retirer(cibleId)))
+    return echec(404, "Ce joueur n'est pas sur la liste noire.");
   return { ok: true, valeur: { userId: cibleId } };
 }

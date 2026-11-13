@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: MIT
 import { describe, expect, test } from "bun:test";
-import { QueryBuilder, Type, type RelationshipFields } from "@rosegriffon/patreon-bun";
+import {
+  QueryBuilder,
+  Type,
+  type RelationshipFields,
+} from "@rosegriffon/patreon-bun";
 
 const campaignRelationships: RelationshipFields<Type.Campaign>[] = [
   "benefits",
@@ -12,12 +16,21 @@ const campaignRelationships: RelationshipFields<Type.Campaign>[] = [
 
 describe("published Patreon query contract", () => {
   test("encodes pagination and sorting", () => {
-    const { query } = QueryBuilder.campaigns.build()(undefined, { count: 100, sort: "created" });
-    expect(query).toBe("?" + new URLSearchParams({ "page[count]": "100", sort: "created" }));
+    const { query } = QueryBuilder.campaigns.build()(undefined, {
+      count: 100,
+      sort: "created",
+    });
+    expect(query).toBe(
+      "?" + new URLSearchParams({ "page[count]": "100", sort: "created" }),
+    );
   });
   test("includes the documented campaign relationships", () => {
-    expect(QueryBuilder.campaign.includeAll().relationships).toEqual(campaignRelationships);
-    expect(QueryBuilder.campaign.schemaRelationships).toEqual(campaignRelationships);
+    expect(QueryBuilder.campaign.includeAll().relationships).toEqual(
+      campaignRelationships,
+    );
+    expect(QueryBuilder.campaign.schemaRelationships).toEqual(
+      campaignRelationships,
+    );
   });
   test("replaces relationship attributes without duplicating the relationship", () => {
     const query = QueryBuilder.campaign

@@ -94,7 +94,10 @@ function parseContent(content: any): ParsedStadium[] {
 
   for (const entry of content.entries) {
     // Direct FIELD_INFO entries (flat format)
-    if (entry.name?.startsWith("SOCCER_OPTION_FIELD_INFO_") && !entry.name.includes("_LIST_")) {
+    if (
+      entry.name?.startsWith("SOCCER_OPTION_FIELD_INFO_") &&
+      !entry.name.includes("_LIST_")
+    ) {
       const s = parseFieldEntry(entry);
       if (s) stadiums.push(s);
     }
@@ -114,13 +117,20 @@ function parseContent(content: any): ParsedStadium[] {
 // Loaders
 // ============================================================================
 
-export async function loadStadiumConfigAsync(dataPath: string = DATA_ROOT): Promise<ParsedStadium[] | null> {
-  const path = join(dataPath, "common/gamedata/soccer/soccer_game_option.cfg.bin.json");
+export async function loadStadiumConfigAsync(
+  dataPath: string = DATA_ROOT,
+): Promise<ParsedStadium[] | null> {
+  const path = join(
+    dataPath,
+    "common/gamedata/soccer/soccer_game_option.cfg.bin.json",
+  );
   const content = await loadJsonAsync<any>(path);
   return content ? parseContent(content) : null;
 }
 
-export async function buildStadiumDatabase(dataPath: string = DATA_ROOT): Promise<StadiumDatabase> {
+export async function buildStadiumDatabase(
+  dataPath: string = DATA_ROOT,
+): Promise<StadiumDatabase> {
   const stadiums = (await loadStadiumConfigAsync(dataPath)) || [];
   const byId = new Map<string, ParsedStadium>();
   for (const s of stadiums) byId.set(s.fieldId, s);

@@ -12,7 +12,11 @@
  * relancer le joueur à chaque passage ; toute autre panne sera retentée.
  */
 
-import { envoyerMpAchillea, publierSalonAchillea, type MessageAchillea } from "../../../../lib/achillea-discord";
+import {
+  envoyerMpAchillea,
+  publierSalonAchillea,
+  type MessageAchillea,
+} from "../../../../lib/achillea-discord";
 import { CastSlotRole } from "@rosegriffon/achillea-core/enums";
 import type { CastDb, CastEvent } from "./service";
 import { rgUrl } from "@rosegriffon/config/rg-urls";
@@ -29,23 +33,36 @@ const ROLE_LABELS: Record<string, string> = {
 };
 
 const roleLabel = (role: string) => ROLE_LABELS[role] ?? role;
-const unix = (date: Date | string) => Math.floor(new Date(date).getTime() / 1000);
+const unix = (date: Date | string) =>
+  Math.floor(new Date(date).getTime() / 1000);
 
 export function castsPageUrl(eventId: string): string {
   return `${rgUrl(process.env, "site", "WEBSITE_URL").replace(/\/+$/, "")}/achillea/casts?event=${eventId}`;
 }
 
-export function attributionMessage(event: Pick<CastEvent, "id" | "name" | "kind" | "scheduledAt">, role: string): MessageAchillea {
+export function attributionMessage(
+  event: Pick<CastEvent, "id" | "name" | "kind" | "scheduledAt">,
+  role: string,
+): MessageAchillea {
   return {
     embeds: [
       {
         title: "Nouvelle attribution de cast",
         color: ACHILLEA_COLOR,
-        description: "Tu as été placé sur une diffusion. Confirme ta présence depuis le site.",
+        description:
+          "Tu as été placé sur une diffusion. Confirme ta présence depuis le site.",
         fields: [
-          { name: "Évènement", value: `${event.name} (${event.kind})`, inline: true },
+          {
+            name: "Évènement",
+            value: `${event.name} (${event.kind})`,
+            inline: true,
+          },
           { name: "Rôle", value: roleLabel(role), inline: true },
-          { name: "Date", value: `<t:${unix(event.scheduledAt)}:F>`, inline: false },
+          {
+            name: "Date",
+            value: `<t:${unix(event.scheduledAt)}:F>`,
+            inline: false,
+          },
         ],
         url: castsPageUrl(event.id),
         footer: { text: "Achilléa Cast — attribution" },
@@ -61,20 +78,31 @@ export async function notifyAttributions(
   event: Pick<CastEvent, "id" | "name" | "kind" | "scheduledAt">,
   attributions: ReadonlyArray<{ slotId: string; userId: string | null }>,
 ): Promise<number> {
-  const targets = attributions.filter(a => a.userId);
+  const targets = attributions.filter((a) => a.userId);
   if (targets.length === 0) return 0;
   try {
     const slots = await db
       .selectFrom("cast_slot")
       .select(["id", "role"])
-      .where("id", "in", targets.map(a => a.slotId))
+      .where(
+        "id",
+        "in",
+        targets.map((a) => a.slotId),
+      )
       .execute();
-    const roles = new Map(slots.map(slot => [slot.id, slot.role]));
+    const roles = new Map(slots.map((slot) => [slot.id, slot.role]));
     const results = await Promise.all(
-      targets.map(a => envoyerMpAchillea(a.userId as string, attributionMessage(event, roles.get(a.slotId) ?? ""))),
+      targets.map((a) =>
+        envoyerMpAchillea(
+          a.userId as string,
+          attributionMessage(event, roles.get(a.slotId) ?? ""),
+        ),
+      ),
     );
-    for (const result of results) if (!result.ok) console.warn("[casts] MP d'attribution non remis", result);
-    return results.filter(r => r.ok).length;
+    for (const result of results)
+      if (!result.ok)
+        console.warn("[casts] MP d'attribution non remis", result);
+    return results.filter((r) => r.ok).length;
   } catch (err) {
     console.error("[casts] MP d'attribution en échec", err);
     return 0;
@@ -101,18 +129,29 @@ export interface ReminderEvent {
  * `CastNotificationService`, mot pour mot (libellés sans accents, rôle brut,
  * blurple pour J-2, rouge pour H-2).
  */
-export function reminderMessage(kind: ReminderKind, event: ReminderEvent, role: string): MessageAchillea {
+export function reminderMessage(
+  kind: ReminderKind,
+  event: ReminderEvent,
+  role: string,
+): MessageAchillea {
   const ts = unix(event.scheduledAt);
-  const twitch = event.twitchUrl ? [{ name: "Twitch", value: event.twitchUrl, inline: false }] : [];
+  const twitch = event.twitchUrl
+    ? [{ name: "Twitch", value: event.twitchUrl, inline: false }]
+    : [];
   return {
     embeds: [
       kind === "j2"
         ? {
             title: "Rappel de cast — J-2",
             color: 0x58_65_f2,
-            description: "Tu as un cast dans **2 jours** ! Voici les informations :",
+            description:
+              "Tu as un cast dans **2 jours** ! Voici les informations :",
             fields: [
-              { name: "Evenement", value: `${event.name} (${event.kind})`, inline: true },
+              {
+                name: "Evenement",
+                value: `${event.name} (${event.kind})`,
+                inline: true,
+              },
               { name: "Role", value: role, inline: true },
               { name: "Date", value: `<t:${ts}:F>`, inline: false },
               ...twitch,
@@ -123,9 +162,14 @@ export function reminderMessage(kind: ReminderKind, event: ReminderEvent, role: 
         : {
             title: "Rappel de cast — H-2 (dans 2h !)",
             color: 0xed_42_45,
-            description: "Tu cast dans **2 heures** ! Verifie que tout est pret.",
+            description:
+              "Tu cast dans **2 heures** ! Verifie que tout est pret.",
             fields: [
-              { name: "Evenement", value: `${event.name} (${event.kind})`, inline: true },
+              {
+                name: "Evenement",
+                value: `${event.name} (${event.kind})`,
+                inline: true,
+              },
               { name: "Role", value: role, inline: true },
               { name: "Heure", value: `<t:${ts}:t>`, inline: false },
               ...twitch,
@@ -145,7 +189,11 @@ export interface ReminderReport {
 }
 
 /** Envoie les rappels d'un type pour les diffusions entrant dans leur fenêtre. */
-export async function dispatchReminders(db: CastDb, kind: ReminderKind, now = new Date()): Promise<ReminderReport> {
+export async function dispatchReminders(
+  db: CastDb,
+  kind: ReminderKind,
+  now = new Date(),
+): Promise<ReminderReport> {
   const { offset, window } = OFFSETS[kind];
   const target = now.getTime() + offset;
   const flag = kind === "j2" ? "ca.notified_j2" : "ca.notified_h2";
@@ -172,7 +220,8 @@ export async function dispatchReminders(db: CastDb, kind: ReminderKind, now = ne
     .execute();
 
   const byEvent = new Map<string, typeof rows>();
-  for (const row of rows) byEvent.set(row.event_id, [...(byEvent.get(row.event_id) ?? []), row]);
+  for (const row of rows)
+    byEvent.set(row.event_id, [...(byEvent.get(row.event_id) ?? []), row]);
 
   let sent = 0;
   let failed = 0;
@@ -190,7 +239,10 @@ export async function dispatchReminders(db: CastDb, kind: ReminderKind, now = ne
     let eventSent = 0;
     let eventFailed = 0;
     for (const row of group) {
-      const result = await envoyerMpAchillea(row.user_id as string, reminderMessage(kind, event, row.role));
+      const result = await envoyerMpAchillea(
+        row.user_id as string,
+        reminderMessage(kind, event, row.role),
+      );
       if (result.ok) {
         done.push(row.attribution_id);
         mentioned.push(`<@${row.user_id}>`);
@@ -218,7 +270,8 @@ export async function dispatchReminders(db: CastDb, kind: ReminderKind, now = ne
             `Bilan : ${eventSent} envoyé(s), ${eventFailed} echec(s)`,
           ].join("\n"),
         });
-        if (!recap.ok) console.warn("[casts] récapitulatif staff non publié", recap);
+        if (!recap.ok)
+          console.warn("[casts] récapitulatif staff non publié", recap);
       }
     }
     sent += eventSent;

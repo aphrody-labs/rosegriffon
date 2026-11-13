@@ -155,11 +155,11 @@ if (export_app_icons(config, result)) {
 
 **Benefits of zstd:**
 
--  Excellent ratio (27% with level 19)
--  Fast decompression (100+ MB/s)
--  Parallel compression
--  Dictionary support (future: app-specific dicts)
--  Streaming support (future: incremental uploads)
+- Excellent ratio (27% with level 19)
+- Fast decompression (100+ MB/s)
+- Parallel compression
+- Dictionary support (future: app-specific dicts)
+- Streaming support (future: incremental uploads)
 
 ## Future Optimizations
 

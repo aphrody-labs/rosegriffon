@@ -13,7 +13,10 @@ interface EventsListProps {
   isFiltered?: boolean;
 }
 
-const CATEGORY_COLORS: Record<EventCategory | string, { bg: string; text: string; border: string }> = {
+const CATEGORY_COLORS: Record<
+  EventCategory | string,
+  { bg: string; text: string; border: string }
+> = {
   Conventions: {
     bg: "bg-purple-100 dark:bg-purple-900/30",
     border: "border-purple-200 dark:border-purple-800",
@@ -42,12 +45,18 @@ const DEFAULT_COLOR = {
   text: "text-muted-foreground",
 };
 
-function EventsList({ events, isLoading, isFiltered = false }: EventsListProps) {
+function EventsList({
+  events,
+  isLoading,
+  isFiltered = false,
+}: EventsListProps) {
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center py-12 gap-4">
         <div className="animate-spin rounded-full size-10 border-b-2 border-primary" />
-        <p className="text-muted-foreground animate-pulse font-medium">Recherche des événements...</p>
+        <p className="text-muted-foreground animate-pulse font-medium">
+          Recherche des événements...
+        </p>
       </div>
     );
   }
@@ -55,9 +64,14 @@ function EventsList({ events, isLoading, isFiltered = false }: EventsListProps) 
   if (events.length === 0) {
     return (
       <div className="rounded-2xl border-2 border-dashed border-border bg-muted/40 py-12 text-center">
-        <Info className="mx-auto mb-3 size-10 text-muted-foreground" aria-hidden />
+        <Info
+          className="mx-auto mb-3 size-10 text-muted-foreground"
+          aria-hidden
+        />
         <p className="text-lg font-bold text-foreground">
-          {isFiltered ? "Aucun événement ne correspond à cette recherche." : "Aucun événement pour le moment."}
+          {isFiltered
+            ? "Aucun événement ne correspond à cette recherche."
+            : "Aucun événement pour le moment."}
         </p>
         <p className="mt-1 text-sm text-muted-foreground">
           {isFiltered
@@ -91,7 +105,8 @@ function EventsList({ events, isLoading, isFiltered = false }: EventsListProps) 
             className={cn(
               "group relative flex flex-col bg-card rounded-3xl overflow-hidden border transition-all duration-500 hover:shadow-2xl hover:-translate-y-2",
               colors.border,
-              event.type === "today" && "ring-4 ring-offset-4 ring-offset-card ring-primary shadow-primary/20",
+              event.type === "today" &&
+                "ring-4 ring-offset-4 ring-offset-card ring-primary shadow-primary/20",
             )}
           >
             {/* Status Strip */}
@@ -143,14 +158,18 @@ function EventsList({ events, isLoading, isFiltered = false }: EventsListProps) 
                   <div className="p-1.5 rounded-lg bg-muted">
                     <Clock className="size-4 shrink-0 text-primary" />
                   </div>
-                  <span>{event.startDateFormatted.split(" ").slice(1).join(" ")}</span>
+                  <span>
+                    {event.startDateFormatted.split(" ").slice(1).join(" ")}
+                  </span>
                 </div>
                 <div className="flex flex-col gap-3">
                   <div className="flex items-start gap-3">
                     <div className="p-1.5 rounded-lg bg-muted mt-0.5">
                       <MapPin className="size-4 shrink-0 text-primary" />
                     </div>
-                    <span className="line-clamp-2 leading-relaxed">{event.location}</span>
+                    <span className="line-clamp-2 leading-relaxed">
+                      {event.location}
+                    </span>
                   </div>
 
                   {event.name.toLowerCase().includes("epitanime") && (

@@ -16,7 +16,12 @@ import path from "node:path";
 
 import type { Command } from "commander";
 
-import { colors, errorMessage, getSqlitePath, openReadonlyDatabase } from "../context";
+import {
+  colors,
+  errorMessage,
+  getSqlitePath,
+  openReadonlyDatabase,
+} from "../context";
 import { exitUnlessRepl } from "../repl-state";
 import { rgWebsiteRoot, userHome } from "../roots";
 import type { TestOptions } from "../types";
@@ -80,11 +85,17 @@ const DYNAMIC_PAGES = [
   { name: "skill-detail", path: "/wiki/skill/whd00180" },
   { name: "item-detail", path: "/wiki/item/0x5F0F1EAC" },
   { name: "tactic-detail", path: "/wiki/tactic/wht10010" },
-  { name: "aura-detail", path: "/wiki/aura/esprits-guerriers/keshin_0x0181A884" },
+  {
+    name: "aura-detail",
+    path: "/wiki/aura/esprits-guerriers/keshin_0x0181A884",
+  },
   // `/news/welcome` n'existe plus : l'article témoin avait été supprimé, et la suite
   // entière échouait sur ce 404. Celui-ci est l'article de fond du wiki, celui vers
   // lequel la page d'accueil pointe.
-  { name: "news-detail", path: "/news/critique-communautaire-de-inazuma-eleven-victory-road" },
+  {
+    name: "news-detail",
+    path: "/news/critique-communautaire-de-inazuma-eleven-victory-road",
+  },
   { name: "patch-notes-detail", path: "/wiki/patch-notes/ps-steam_ver_1_4_2" },
 ];
 
@@ -100,29 +111,46 @@ interface PageResult {
 export function registerTestCommand(program: Command): void {
   program
     .command("test")
-    .description("Exécute l'intégralité des tests natifs (filtres, API, pages et boutons)")
+    .description(
+      "Exécute l'intégralité des tests natifs (filtres, API, pages et boutons)",
+    )
     .option("-p, --playwright", "Délègue la suite à Playwright")
     .action(async (_options: TestOptions) => {
-      console.log(`${colors.bold}${colors.magenta}=== RUNNING NATIVE VERIFICATION SUITE ===${colors.reset}\n`);
+      console.log(
+        `${colors.bold}${colors.magenta}=== RUNNING NATIVE VERIFICATION SUITE ===${colors.reset}\n`,
+      );
 
       // ─── SUITE 1 : filtres de base de données ───
-      console.log(`${colors.bold}${colors.blue}SUITE 1: FILTRES DE BASE DE DONNÉES (SQLITE)${colors.reset}`);
+      console.log(
+        `${colors.bold}${colors.blue}SUITE 1: FILTRES DE BASE DE DONNÉES (SQLITE)${colors.reset}`,
+      );
       const dbPath = getSqlitePath();
       if (!dbPath) {
-        console.error(`${colors.red}Erreur: Base de données SQLite introuvable pour les tests.${colors.reset}`);
+        console.error(
+          `${colors.red}Erreur: Base de données SQLite introuvable pour les tests.${colors.reset}`,
+        );
         process.exit(1);
       }
 
       try {
         const db = openReadonlyDatabase(dbPath);
 
-        const runTestStep = (name: string, queryStr: string, params: unknown[] = []) => {
+        const runTestStep = (
+          name: string,
+          queryStr: string,
+          params: unknown[] = [],
+        ) => {
           const start = performance.now();
           try {
-            const rows = db.query(queryStr).all(...(params as never[])) as Array<{
+            const rows = db
+              .query(queryStr)
+              .all(...(params as never[])) as Array<{
               count?: number;
             }>;
-            const count = rows.length > 0 && rows[0].count !== undefined ? rows[0].count : rows.length;
+            const count =
+              rows.length > 0 && rows[0].count !== undefined
+                ? rows[0].count
+                : rows.length;
             const duration = (performance.now() - start).toFixed(1);
             console.log(
               `  ${colors.green}✓${colors.reset} ${name.padEnd(65)} | ${colors.bold}${count.toString().padStart(4)} matches${colors.reset} | ${colors.yellow}${duration}ms${colors.reset}`,
@@ -207,9 +235,13 @@ export function registerTestCommand(program: Command): void {
         );
 
         db.close();
-        console.log(`\n  ${colors.green}🎉 Suite 1 réussie (11/11 étapes).${colors.reset}\n`);
+        console.log(
+          `\n  ${colors.green}🎉 Suite 1 réussie (11/11 étapes).${colors.reset}\n`,
+        );
       } catch (e) {
-        console.error(`\n${colors.bold}${colors.red}❌ ÉCHEC DE LA SUITE 1 : ${errorMessage(e)}${colors.reset}\n`);
+        console.error(
+          `\n${colors.bold}${colors.red}❌ ÉCHEC DE LA SUITE 1 : ${errorMessage(e)}${colors.reset}\n`,
+        );
         process.exit(1);
       }
 
@@ -221,10 +253,20 @@ export function registerTestCommand(program: Command): void {
       /** Une origine répond-elle un `/api/health` sain ? */
       const origineSaine = async (origine: string): Promise<boolean> => {
         try {
-          const res = await fetch(`${origine}/api/health`, { signal: AbortSignal.timeout(1500) });
+          const res = await fetch(`${origine}/api/health`, {
+            signal: AbortSignal.timeout(1500),
+          });
           if (res.status !== 200) return false;
-          const json = (await res.json()) as { status?: string; checks?: { db?: string } };
-          return Boolean(json && json.status === "ok" && json.checks && json.checks.db === "ok");
+          const json = (await res.json()) as {
+            status?: string;
+            checks?: { db?: string };
+          };
+          return Boolean(
+            json &&
+            json.status === "ok" &&
+            json.checks &&
+            json.checks.db === "ok",
+          );
         } catch {
           return false;
         }
@@ -269,7 +311,12 @@ export function registerTestCommand(program: Command): void {
           console.log(
             `${colors.cyan}Aucune origine saine parmi ${ORIGINES_CANDIDATES.join(", ")}. Démarrage de 'bun run dev'...${colors.reset}`,
           );
-          const homeBun = path.join(userHome(), ".bun", "bin", process.platform === "win32" ? "bun.exe" : "bun");
+          const homeBun = path.join(
+            userHome(),
+            ".bun",
+            "bin",
+            process.platform === "win32" ? "bun.exe" : "bun",
+          );
           const bunPath = homeBun && existsSync(homeBun) ? homeBun : "bun";
           devServerProcess = Bun.spawn([bunPath, "run", "dev"], {
             cwd: rgWebsiteRoot(),
@@ -283,7 +330,10 @@ export function registerTestCommand(program: Command): void {
           // compilation dépasse largement 30 s (l'ancien plafond faisait échouer
           // la suite alors que le serveur finissait par répondre, en laissant un
           // process orphelin sur le port 3000).
-          const BOOT_TIMEOUT_S = Number.parseInt(process.env.AZALEE_DEV_BOOT_TIMEOUT ?? "180", 10);
+          const BOOT_TIMEOUT_S = Number.parseInt(
+            process.env.AZALEE_DEV_BOOT_TIMEOUT ?? "180",
+            10,
+          );
           let ready = false;
           for (let i = 0; i < BOOT_TIMEOUT_S; i++) {
             await Bun.sleep(1000);
@@ -298,9 +348,13 @@ export function registerTestCommand(program: Command): void {
               `Le serveur Next.js n'a pas pu démarrer sur le port 3000 après ${BOOT_TIMEOUT_S} secondes.`,
             );
           }
-          console.log(`${colors.green}Serveur local démarré et prêt!${colors.reset}\n`);
+          console.log(
+            `${colors.green}Serveur local démarré et prêt!${colors.reset}\n`,
+          );
         } else {
-          console.log(`${colors.green}Serveur détecté sur ${url}.${colors.reset}\n`);
+          console.log(
+            `${colors.green}Serveur détecté sur ${url}.${colors.reset}\n`,
+          );
         }
 
         /**
@@ -329,7 +383,9 @@ export function registerTestCommand(program: Command): void {
           }
         })();
         if (prefixeWiki) {
-          console.log(`${colors.cyan}Wiki monté sous ${prefixeWiki} sur cette origine.${colors.reset}`);
+          console.log(
+            `${colors.cyan}Wiki monté sous ${prefixeWiki} sur cette origine.${colors.reset}`,
+          );
         }
 
         /** Applique le préfixe aux routes du wiki, jamais aux routes racine. */
@@ -345,21 +401,29 @@ export function registerTestCommand(program: Command): void {
             "/charte",
             "/maintenance",
           ];
-          const estRacine = RACINES.some(r => chemin === r || chemin.startsWith(`${r}/`));
+          const estRacine = RACINES.some(
+            (r) => chemin === r || chemin.startsWith(`${r}/`),
+          );
           const dejaSousPrefixe =
-            prefixeWiki.length > 0 && (chemin === prefixeWiki || chemin.startsWith(`${prefixeWiki}/`));
-          return estRacine || chemin === "/" || dejaSousPrefixe ? chemin : `${prefixeWiki}${chemin}`;
+            prefixeWiki.length > 0 &&
+            (chemin === prefixeWiki || chemin.startsWith(`${prefixeWiki}/`));
+          return estRacine || chemin === "/" || dejaSousPrefixe
+            ? chemin
+            : `${prefixeWiki}${chemin}`;
         };
 
         // ─── SUITE 2 : endpoints API & GraphQL ───
-        console.log(`${colors.bold}${colors.blue}SUITE 2: API & GRAPHQL ENDPOINTS (HTTP)${colors.reset}`);
+        console.log(
+          `${colors.bold}${colors.blue}SUITE 2: API & GRAPHQL ENDPOINTS (HTTP)${colors.reset}`,
+        );
 
         // 1. GET /api/health
         {
           const start = performance.now();
           const response = await fetch(`${url}/api/health`);
           const duration = (performance.now() - start).toFixed(1);
-          if (response.status !== 200) throw new Error(`HTTP status ${response.status}`);
+          if (response.status !== 200)
+            throw new Error(`HTTP status ${response.status}`);
           const body = (await response.json()) as any;
           if (body.status !== "ok" || body.checks.db !== "ok") {
             throw new Error(`Réponse inattendue : ${JSON.stringify(body)}`);
@@ -374,15 +438,28 @@ export function registerTestCommand(program: Command): void {
           const start = performance.now();
           const response = await fetch(`${url}/api/news/feed?page=1&limit=5`);
           const duration = (performance.now() - start).toFixed(1);
-          if (response.status !== 200) throw new Error(`HTTP status ${response.status}`);
+          if (response.status !== 200)
+            throw new Error(`HTTP status ${response.status}`);
           const body = (await response.json()) as any;
-          if (!body.items || body.hasMore === undefined || !Array.isArray(body.items)) {
+          if (
+            !body.items ||
+            body.hasMore === undefined ||
+            !Array.isArray(body.items)
+          ) {
             throw new Error("Propriétés de pagination manquantes");
           }
           if (body.items.length > 0) {
             const item = body.items[0];
-            if (!item.id || !item.title || !item.slug || !item.excerpt || item.type !== "article") {
-              throw new Error(`Propriétés d'article invalides : ${JSON.stringify(item)}`);
+            if (
+              !item.id ||
+              !item.title ||
+              !item.slug ||
+              !item.excerpt ||
+              item.type !== "article"
+            ) {
+              throw new Error(
+                `Propriétés d'article invalides : ${JSON.stringify(item)}`,
+              );
             }
           }
           console.log(
@@ -395,12 +472,16 @@ export function registerTestCommand(program: Command): void {
           const start = performance.now();
           const response = await fetch(`${url}/api/tags/popular`);
           const duration = (performance.now() - start).toFixed(1);
-          if (response.status !== 200) throw new Error(`HTTP status ${response.status}`);
+          if (response.status !== 200)
+            throw new Error(`HTTP status ${response.status}`);
           const body = (await response.json()) as any;
-          if (!Array.isArray(body)) throw new Error("Le corps de la réponse n'est pas un tableau");
+          if (!Array.isArray(body))
+            throw new Error("Le corps de la réponse n'est pas un tableau");
           if (body.length > 0) {
             if (body[0].tag === undefined || body[0].count === undefined) {
-              throw new Error(`Structure de tag invalide : ${JSON.stringify(body[0])}`);
+              throw new Error(
+                `Structure de tag invalide : ${JSON.stringify(body[0])}`,
+              );
             }
           }
           console.log(
@@ -430,7 +511,8 @@ export function registerTestCommand(program: Command): void {
             body: JSON.stringify(query),
           });
           const duration = (performance.now() - start).toFixed(1);
-          if (response.status !== 200) throw new Error(`HTTP status ${response.status}`);
+          if (response.status !== 200)
+            throw new Error(`HTTP status ${response.status}`);
           const body = (await response.json()) as any;
           if (
             !body.data ||
@@ -438,35 +520,48 @@ export function registerTestCommand(program: Command): void {
             !Array.isArray(body.data.characters) ||
             body.data.characters.length === 0
           ) {
-            throw new Error(`Réponse GraphQL invalide : ${JSON.stringify(body)}`);
+            throw new Error(
+              `Réponse GraphQL invalide : ${JSON.stringify(body)}`,
+            );
           }
           const char = body.data.characters[0];
           if (!char.id || !char.name || !char.name.fr) {
-            throw new Error(`Objet personnage GraphQL invalide : ${JSON.stringify(char)}`);
+            throw new Error(
+              `Objet personnage GraphQL invalide : ${JSON.stringify(char)}`,
+            );
           }
           console.log(
             `  ${colors.green}✓${colors.reset} POST /api/graphql resolves character query        | ${colors.yellow}${duration}ms${colors.reset}`,
           );
         }
-        console.log(`\n  ${colors.green}🎉 Suite 2 réussie (4/4 étapes).${colors.reset}\n`);
+        console.log(
+          `\n  ${colors.green}🎉 Suite 2 réussie (4/4 étapes).${colors.reset}\n`,
+        );
 
         // ─── SUITE 3 : vérifications HTTP directes ───
-        console.log(`${colors.bold}${colors.blue}SUITE 3: PUBLIC HTTP ROUTES${colors.reset}`);
+        console.log(
+          `${colors.bold}${colors.blue}SUITE 3: PUBLIC HTTP ROUTES${colors.reset}`,
+        );
         {
           const start = performance.now();
           const response = await fetch(url);
           const html = await response.text();
           const duration = (performance.now() - start).toFixed(1);
-          if (response.status !== 200) throw new Error(`Page HTTP ${response.status}`);
+          if (response.status !== 200)
+            throw new Error(`Page HTTP ${response.status}`);
           if (!html.trim()) throw new Error("Page servie vide");
           console.log(
             `  ${colors.green}✓${colors.reset} public page responds with HTML                   | ${colors.yellow}${duration}ms${colors.reset}`,
           );
         }
-        console.log(`\n  ${colors.green}🎉 Suite 3 réussie (1/1 étape).${colors.reset}\n`);
+        console.log(
+          `\n  ${colors.green}🎉 Suite 3 réussie (1/1 étape).${colors.reset}\n`,
+        );
 
         // ─── SUITE 4 : éléments interactifs servis ───
-        console.log(`${colors.bold}${colors.blue}SUITE 4: INTERACTIVE PAGE ELEMENTS (DOM SURVEY)${colors.reset}`);
+        console.log(
+          `${colors.bold}${colors.blue}SUITE 4: INTERACTIVE PAGE ELEMENTS (DOM SURVEY)${colors.reset}`,
+        );
 
         // 1. Bouton de bascule de thème
         {
@@ -475,7 +570,9 @@ export function registerTestCommand(program: Command): void {
           const html = await res.text();
           const duration = (performance.now() - start).toFixed(1);
           if (!html.includes("lucide-sun") && !html.includes("lucide-moon")) {
-            throw new Error("Bouton theme toggle (lucide-sun ou moon) introuvable dans le HTML");
+            throw new Error(
+              "Bouton theme toggle (lucide-sun ou moon) introuvable dans le HTML",
+            );
           }
           console.log(
             `  ${colors.green}✓${colors.reset} Theme toggle button exists in layout              | ${colors.yellow}${duration}ms${colors.reset}`,
@@ -491,7 +588,9 @@ export function registerTestCommand(program: Command): void {
           const hasFw = html.includes("Attaquant") || html.includes("FW");
           const hasGk = html.includes("Gardien") || html.includes("GK");
           if (!hasFw && !hasGk) {
-            throw new Error("Filtres de poste ('Attaquant' ou 'FW' ou 'Gardien') introuvables");
+            throw new Error(
+              "Filtres de poste ('Attaquant' ou 'FW' ou 'Gardien') introuvables",
+            );
           }
           console.log(
             `  ${colors.green}✓${colors.reset} Chara filter buttons are present in DOM           | ${colors.yellow}${duration}ms${colors.reset}`,
@@ -501,10 +600,13 @@ export function registerTestCommand(program: Command): void {
         // 3. Onglets de la fiche détaillée
         {
           const start = performance.now();
-          const res = await fetch(`${url}${cheminTeste("/chara/buddy-0x6A6392AD")}`);
+          const res = await fetch(
+            `${url}${cheminTeste("/chara/buddy-0x6A6392AD")}`,
+          );
           const html = await res.text();
           const duration = (performance.now() - start).toFixed(1);
-          const hasTabs = html.includes('role="tab"') || html.includes("role='tab'");
+          const hasTabs =
+            html.includes('role="tab"') || html.includes("role='tab'");
           if (hasTabs) {
             console.log(
               `  ${colors.green}✓${colors.reset} Tab buttons switch components in detail layout    | ${colors.yellow}${duration}ms${colors.reset}`,
@@ -515,10 +617,14 @@ export function registerTestCommand(program: Command): void {
             );
           }
         }
-        console.log(`\n  ${colors.green}🎉 Suite 4 réussie (3/3 étapes).${colors.reset}\n`);
+        console.log(
+          `\n  ${colors.green}🎉 Suite 4 réussie (3/3 étapes).${colors.reset}\n`,
+        );
 
         // ─── SUITE 5 : rendu des routes ───
-        console.log(`${colors.bold}${colors.blue}SUITE 5: PAGE RENDER VERIFICATION (29 ROUTES)${colors.reset}`);
+        console.log(
+          `${colors.bold}${colors.blue}SUITE 5: PAGE RENDER VERIFICATION (29 ROUTES)${colors.reset}`,
+        );
 
         const allPages = [...STATIC_PAGES, ...DYNAMIC_PAGES];
         const startPages = performance.now();
@@ -545,7 +651,9 @@ export function registerTestCommand(program: Command): void {
             } else if (
               text.includes("An error occurred") ||
               text.includes("Application error") ||
-              text.includes("Application error: a client-side exception has occurred")
+              text.includes(
+                "Application error: a client-side exception has occurred",
+              )
             ) {
               results.push({
                 name: p.name,
@@ -583,7 +691,9 @@ export function registerTestCommand(program: Command): void {
         }
 
         const totalPagesDuration = (performance.now() - startPages).toFixed(1);
-        console.log(`\n  Verified ${allPages.length} routes in ${totalPagesDuration}ms.`);
+        console.log(
+          `\n  Verified ${allPages.length} routes in ${totalPagesDuration}ms.`,
+        );
         if (pagesFailed) {
           throw new Error("Une ou plusieurs pages ont échoué au rendu.");
         }

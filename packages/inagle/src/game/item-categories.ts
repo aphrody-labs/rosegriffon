@@ -34,7 +34,9 @@ export const ITEM_CATEGORY_LABELS_FR: Record<string, string> = {
  * Libellé FR d'une catégorie d'objet. Une catégorie inconnue est renvoyée
  * telle quelle (identifiant brut) plutôt que masquée.
  */
-export function getItemCategoryLabel(category: string | undefined | null): string | undefined {
+export function getItemCategoryLabel(
+  category: string | undefined | null,
+): string | undefined {
   if (!category) return undefined;
   return ITEM_CATEGORY_LABELS_FR[category] ?? category;
 }

@@ -8,18 +8,12 @@
   "soloRank": {
     "elo": 16,
     "key": "Fer",
-    "gradient": [
-      "#959595",
-      "#919191"
-    ]
+    "gradient": ["#959595", "#919191"]
   },
   "duoRank": {
     "elo": 0,
     "key": "Fer",
-    "gradient": [
-      "#959595",
-      "#919191"
-    ]
+    "gradient": ["#959595", "#919191"]
   },
   "lastInteract": "2026-07-25T12:36:04.612Z",
   "role": 0,

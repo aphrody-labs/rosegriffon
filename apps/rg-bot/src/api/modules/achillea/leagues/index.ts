@@ -25,15 +25,28 @@ export const leagueController = new Elysia({ prefix: "/leagues" })
     },
     { response: { 200: LeagueModel.list } },
   )
-  .get("/astral", () => LeagueService.getAstralSeason(), { response: { 200: LeagueModel.season } })
-  .get("/astral-s1", () => LeagueService.getAstralSeason(), { response: { 200: LeagueModel.season } })
-  .get("/asytral", () => LeagueService.getAstralSeason(), { response: { 200: LeagueModel.season } })
-  .get("/asytral-s1", () => LeagueService.getAstralSeason(), { response: { 200: LeagueModel.season } })
+  .get("/astral", () => LeagueService.getAstralSeason(), {
+    response: { 200: LeagueModel.season },
+  })
+  .get("/astral-s1", () => LeagueService.getAstralSeason(), {
+    response: { 200: LeagueModel.season },
+  })
+  .get("/asytral", () => LeagueService.getAstralSeason(), {
+    response: { 200: LeagueModel.season },
+  })
+  .get("/asytral-s1", () => LeagueService.getAstralSeason(), {
+    response: { 200: LeagueModel.season },
+  })
   .get(
     "/:id",
-    ({ params }) => LeagueService.findSeason(params.id) ?? status(404, { message: "League not found" as const }),
+    ({ params }) =>
+      LeagueService.findSeason(params.id) ??
+      status(404, { message: "League not found" as const }),
     {
       params: t.Object({ id: t.String({ maxLength: 64 }) }),
-      response: { 200: LeagueModel.season, 404: t.Object({ message: t.Literal("League not found") }) },
+      response: {
+        200: LeagueModel.season,
+        404: t.Object({ message: t.Literal("League not found") }),
+      },
     },
   );

@@ -96,7 +96,10 @@ export interface ThemePack {
   logo: string;
   wallpaper: string;
   /** Compagnon du thème ; `null` tant qu'aucune mascotte n'existe. */
-  pet: { name: string; emotes: { hello: string; proud?: string; surprised?: string } } | null;
+  pet: {
+    name: string;
+    emotes: { hello: string; proud?: string; surprised?: string };
+  } | null;
   seed: ThemeSeed;
 }
 
@@ -105,7 +108,13 @@ export const THEME_PACKS = {
     title: "Rose Griffon",
     logo: "/RG_Logo_V2.5.webp",
     wallpaper: "/roy_bg.webp",
-    pet: { name: "Roy", emotes: { hello: "/emote/RG_Roy_salut.webp", proud: "/emote/RG_roy_fine.webp" } },
+    pet: {
+      name: "Roy",
+      emotes: {
+        hello: "/emote/RG_Roy_salut.webp",
+        proud: "/emote/RG_roy_fine.webp",
+      },
+    },
     seed: { hue: 265, chroma: 0.107, mode: "light" },
   },
   gaelle: {
@@ -143,7 +152,13 @@ export const THEME_PACKS = {
     pet: null,
     // Charte legacy (achillea-web, preset PrimeNG) : violet #9039ff, or
     // #fbbf24 en accent, surfaces en gris neutres (#131313, #1e1e1e).
-    seed: { hue: 297, chroma: 0.267, mode: "dark", secondary: { hue: 84, chroma: 0.164 }, neutralChroma: 0 },
+    seed: {
+      hue: 297,
+      chroma: 0.267,
+      mode: "dark",
+      secondary: { hue: 84, chroma: 0.164 },
+      neutralChroma: 0,
+    },
   },
 } as const satisfies Record<ThemeId, ThemePack>;
 
@@ -152,7 +167,9 @@ export const THEME_PACKS = {
  * au choix enregistré de l'utilisateur). `undefined` : la section suit le
  * thème choisi.
  */
-export function sectionTheme(section: "association" | "wiki" | "esport"): ThemeId | undefined {
+export function sectionTheme(
+  section: "association" | "wiki" | "esport",
+): ThemeId | undefined {
   if (section === "esport") return "achillea";
   if (section === "wiki") return "azalee-dark";
   return undefined;

@@ -11,7 +11,11 @@ import { wiki } from "@rosegriffon/app-shell";
 import { absoluteUrl } from "@/lib/site-url";
 import { wikiTitle, withDefaultOgImage } from "@/lib/seo";
 
-export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
   const { id } = await params;
   const stadium = await getStadium(id);
 
@@ -34,7 +38,11 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   };
 }
 
-export default async function StadiumDetailPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function StadiumDetailPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const { id } = await params;
   const stadium = await getStadium(id);
 
@@ -46,7 +54,12 @@ export default async function StadiumDetailPage({ params }: { params: Promise<{ 
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", item: absoluteUrl(wiki("/")), name: "Accueil", position: 1 },
+      {
+        "@type": "ListItem",
+        item: absoluteUrl(wiki("/")),
+        name: "Accueil",
+        position: 1,
+      },
       {
         "@type": "ListItem",
         item: absoluteUrl(wiki("/stade")),
@@ -59,11 +72,17 @@ export default async function StadiumDetailPage({ params }: { params: Promise<{ 
 
   return (
     <div className="w-full space-y-8">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
 
       {/* Breadcrumb */}
       <div className="flex items-center gap-2 text-sm text-on-surface-variant font-medium">
-        <Link href="/wiki/stade" className="hover:text-primary transition-colors">
+        <Link
+          href="/wiki/stade"
+          className="hover:text-primary transition-colors"
+        >
           Stades
         </Link>
         <span className="opacity-30">/</span>
@@ -91,7 +110,9 @@ export default async function StadiumDetailPage({ params }: { params: Promise<{ 
           <span className="text-xs font-bold uppercase tracking-wider text-on-surface-variant/60">
             Terrain de match
           </span>
-          <h1 className="text-2xl lg:text-3xl font-black text-on-surface tracking-tight">{stadium.title}</h1>
+          <h1 className="text-2xl lg:text-3xl font-black text-on-surface tracking-tight">
+            {stadium.title}
+          </h1>
         </div>
 
         <dl className="grid grid-cols-2 gap-3 sm:grid-cols-3">
@@ -99,7 +120,9 @@ export default async function StadiumDetailPage({ params }: { params: Promise<{ 
             <dt className="text-[11px] font-semibold uppercase tracking-wide text-on-surface-variant/60">
               Code interne
             </dt>
-            <dd className="mt-1 font-mono text-sm text-on-surface">{stadium.code}</dd>
+            <dd className="mt-1 font-mono text-sm text-on-surface">
+              {stadium.code}
+            </dd>
           </div>
           <div className="rounded-xl border border-outline-variant/30 bg-surface-container-low p-3">
             <dt className="text-[11px] font-semibold uppercase tracking-wide text-on-surface-variant/60">
@@ -113,7 +136,9 @@ export default async function StadiumDetailPage({ params }: { params: Promise<{ 
             <dt className="text-[11px] font-semibold uppercase tracking-wide text-on-surface-variant/60">
               Identifiant
             </dt>
-            <dd className="mt-1 font-mono text-sm text-on-surface break-all">{stadium.id}</dd>
+            <dd className="mt-1 font-mono text-sm text-on-surface break-all">
+              {stadium.id}
+            </dd>
           </div>
         </dl>
 

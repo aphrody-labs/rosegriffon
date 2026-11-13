@@ -10,7 +10,8 @@
 /**
  * Type union pour les valeurs de genre possibles
  */
-export type GenderValue = number | string | "M" | "F" | "Male" | "Female" | undefined | null;
+export type GenderValue =
+  number | string | "M" | "F" | "Male" | "Female" | undefined | null;
 
 /**
  * Vérifie si le genre est féminin

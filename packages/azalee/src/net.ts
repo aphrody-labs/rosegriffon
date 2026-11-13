@@ -28,7 +28,10 @@ export interface FetchJsonOptions {
  * `null` sur erreur réseau ou statut non-2xx — les appelants dégradent
  * proprement (liste vide, stats non résolues) plutôt que de propager.
  */
-export async function fetchJson<T>(url: string, options: FetchJsonOptions = {}): Promise<T | null> {
+export async function fetchJson<T>(
+  url: string,
+  options: FetchJsonOptions = {},
+): Promise<T | null> {
   const { revalidate = 0, signal } = options;
   const now = Date.now();
 

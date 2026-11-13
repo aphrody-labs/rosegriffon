@@ -53,11 +53,9 @@ describe("normalisation", () => {
 
 describe("extraction des hashtags d'un texte", () => {
   test("plusieurs hashtags, dans l'ordre d'apparition", () => {
-    expect(hashtagsDuTexte("Mon OC pour le #IERGDay ! #InazumaEleven #fanart")).toEqual([
-      "IERGDay",
-      "InazumaEleven",
-      "fanart",
-    ]);
+    expect(
+      hashtagsDuTexte("Mon OC pour le #IERGDay ! #InazumaEleven #fanart"),
+    ).toEqual(["IERGDay", "InazumaEleven", "fanart"]);
   });
 
   test("un hashtag japonais est un hashtag", () => {
@@ -125,7 +123,13 @@ describe("appariement d'un post à la campagne", () => {
   });
 
   test("les fautes de frappe réelles apparient, en restant marquées", () => {
-    for (const faute of ["#IERGDya", "#IERGDai", "#IERGDy", "#IERGGDay", "#IREGDay"]) {
+    for (const faute of [
+      "#IERGDya",
+      "#IERGDai",
+      "#IERGDy",
+      "#IERGGDay",
+      "#IREGDay",
+    ]) {
       const r = apparierHashtag(`Mon OC ${faute}`, IERGDAY);
       expect(r?.hashtag).toBe("iergday");
       expect(r?.fautes).toBe(1);
@@ -133,7 +137,9 @@ describe("appariement d'un post à la campagne", () => {
   });
 
   test("le hashtag de rattrapage déjà en base apparie aussi", () => {
-    expect(apparierHashtag("#InazumaRGday", IERGDAY)?.hashtag).toBe("inazumargday");
+    expect(apparierHashtag("#InazumaRGday", IERGDAY)?.hashtag).toBe(
+      "inazumargday",
+    );
   });
 
   test("la graphie exacte l'emporte sur une variante présente dans le même post", () => {
@@ -203,12 +209,19 @@ describe("empaquetage en requêtes X", () => {
   });
 
   test("les filtres de la campagne sont recollés à chaque requête", () => {
-    const [requete] = requetesVariantes(["iergday"], "-filter:replies since:2026-07-01");
+    const [requete] = requetesVariantes(
+      ["iergday"],
+      "-filter:replies since:2026-07-01",
+    );
     expect(requete).toBe("#iergday -filter:replies since:2026-07-01");
   });
 
   test("au-delà de la longueur maximale, la requête est découpée", () => {
-    const requetes = requetesVariantes(["aaaaaaaa", "bbbbbbbb", "cccccccc"], "", 30);
+    const requetes = requetesVariantes(
+      ["aaaaaaaa", "bbbbbbbb", "cccccccc"],
+      "",
+      30,
+    );
     expect(requetes.length).toBeGreaterThan(1);
     for (const r of requetes) expect(r.length).toBeLessThanOrEqual(40);
   });
@@ -227,11 +240,15 @@ describe("comptes de l'organisateur", () => {
   const CAMPAGNE = { comptes_organisateurs: ["rose_griffon"] };
 
   test("le compte de l'organisateur est écarté", () => {
-    expect(estCompteOrganisateur({ author: { username: "rose_griffon" } }, CAMPAGNE)).toBe(true);
+    expect(
+      estCompteOrganisateur({ author: { username: "rose_griffon" } }, CAMPAGNE),
+    ).toBe(true);
   });
 
   test("la casse et le @ ne changent rien", () => {
-    expect(estCompteOrganisateur({ author: { username: "Rose_Griffon" } }, CAMPAGNE)).toBe(true);
+    expect(
+      estCompteOrganisateur({ author: { username: "Rose_Griffon" } }, CAMPAGNE),
+    ).toBe(true);
     expect(
       estCompteOrganisateur(
         { author: { username: "rose_griffon" } },
@@ -245,13 +262,27 @@ describe("comptes de l'organisateur", () => {
   test("un participant N'EST PAS écarté", () => {
     // La règle doit être étroite : élargir ne serait pas « prudent », ce serait
     // faire disparaître la création d'un membre sans que personne ne le sache.
-    expect(estCompteOrganisateur({ author: { username: "yoyo__goat" } }, CAMPAGNE)).toBe(false);
-    expect(estCompteOrganisateur({ author: { username: "rose_griffonfr" } }, CAMPAGNE)).toBe(false);
+    expect(
+      estCompteOrganisateur({ author: { username: "yoyo__goat" } }, CAMPAGNE),
+    ).toBe(false);
+    expect(
+      estCompteOrganisateur(
+        { author: { username: "rose_griffonfr" } },
+        CAMPAGNE,
+      ),
+    ).toBe(false);
   });
 
   test("sans liste déclarée, rien n'est écarté", () => {
-    expect(estCompteOrganisateur({ author: { username: "rose_griffon" } }, {})).toBe(false);
-    expect(estCompteOrganisateur({ author: { username: "rose_griffon" } }, { comptes_organisateurs: [] })).toBe(false);
+    expect(
+      estCompteOrganisateur({ author: { username: "rose_griffon" } }, {}),
+    ).toBe(false);
+    expect(
+      estCompteOrganisateur(
+        { author: { username: "rose_griffon" } },
+        { comptes_organisateurs: [] },
+      ),
+    ).toBe(false);
   });
 
   test("un post sans auteur n'est jamais écarté par ce chemin", () => {

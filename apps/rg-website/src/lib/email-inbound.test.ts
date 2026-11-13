@@ -1,5 +1,10 @@
 import { describe, expect, it } from "bun:test";
-import { categorizeEmail, extractEmailAddress, parseInboundWebhook, processInboundEmail } from "./email-inbound";
+import {
+  categorizeEmail,
+  extractEmailAddress,
+  parseInboundWebhook,
+  processInboundEmail,
+} from "./email-inbound";
 
 describe("Gestion de Réception de Mail (Inbound Email Service)", () => {
   describe("extractEmailAddress", () => {
@@ -29,27 +34,51 @@ describe("Gestion de Réception de Mail (Inbound Email Service)", () => {
 
   describe("categorizeEmail", () => {
     it("catégorise les demandes pour la cellule de médiation", () => {
-      expect(categorizeEmail(["mediation@rosegriffon.fr"], "Signalement")).toBe("mediation");
-      expect(categorizeEmail(["contact@rosegriffon.fr"], "Demande d'aide médiation")).toBe("mediation");
+      expect(categorizeEmail(["mediation@rosegriffon.fr"], "Signalement")).toBe(
+        "mediation",
+      );
+      expect(
+        categorizeEmail(["contact@rosegriffon.fr"], "Demande d'aide médiation"),
+      ).toBe("mediation");
     });
 
     it("catégorise les messages tournoi / achilléa / e-sport", () => {
-      expect(categorizeEmail(["tournoi@rosegriffon.fr"], "Inscription")).toBe("tournament");
-      expect(categorizeEmail(["esport@rosegriffon.fr"], "Question")).toBe("tournament");
-      expect(categorizeEmail(["contact@rosegriffon.fr"], "Litige sur le tournoi Astral")).toBe("tournament");
+      expect(categorizeEmail(["tournoi@rosegriffon.fr"], "Inscription")).toBe(
+        "tournament",
+      );
+      expect(categorizeEmail(["esport@rosegriffon.fr"], "Question")).toBe(
+        "tournament",
+      );
+      expect(
+        categorizeEmail(
+          ["contact@rosegriffon.fr"],
+          "Litige sur le tournoi Astral",
+        ),
+      ).toBe("tournament");
     });
 
     it("catégorise les partenariats", () => {
-      expect(categorizeEmail(["partenariat@rosegriffon.fr"], "Offre de sponsoring")).toBe("partnership");
+      expect(
+        categorizeEmail(["partenariat@rosegriffon.fr"], "Offre de sponsoring"),
+      ).toBe("partnership");
     });
 
     it("catégorise les demandes de support technique", () => {
-      expect(categorizeEmail(["support@rosegriffon.fr"], "Impossible de charger mon avatar")).toBe("support");
-      expect(categorizeEmail(["contact@rosegriffon.fr"], "Bug sur la boutique")).toBe("support");
+      expect(
+        categorizeEmail(
+          ["support@rosegriffon.fr"],
+          "Impossible de charger mon avatar",
+        ),
+      ).toBe("support");
+      expect(
+        categorizeEmail(["contact@rosegriffon.fr"], "Bug sur la boutique"),
+      ).toBe("support");
     });
 
     it("classe par défaut en général", () => {
-      expect(categorizeEmail(["contact@rosegriffon.fr"], "Bonjour à l'équipe")).toBe("general");
+      expect(
+        categorizeEmail(["contact@rosegriffon.fr"], "Bonjour à l'équipe"),
+      ).toBe("general");
     });
   });
 
@@ -129,7 +158,9 @@ describe("Gestion de Réception de Mail (Inbound Email Service)", () => {
         text: "Bonjour, comment adhérer à l'association ?",
       };
 
-      const result = await processInboundEmail(emailData, { sendAutoReply: false });
+      const result = await processInboundEmail(emailData, {
+        sendAutoReply: false,
+      });
 
       expect(result.id).toBeDefined();
       expect(result.sender).toBe("player@inazuma.jp");

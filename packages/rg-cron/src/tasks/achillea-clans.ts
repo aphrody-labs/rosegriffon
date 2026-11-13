@@ -39,25 +39,36 @@ const COULEUR_ACHILLEA = 0x6d00ce;
 
 /** Identifiants du serveur central (valeurs de production du legacy, surchargeables). */
 export function configClans(env: Record<string, string | undefined> = Bun.env) {
-  const lire = (cle: string, defaut: string) => (env[cle] ?? "").trim() || defaut;
+  const lire = (cle: string, defaut: string) =>
+    (env[cle] ?? "").trim() || defaut;
   return {
     guildId: lire("ACHILLEA_CORE_GUILD_ID", "1055585286320554055"),
     captainRoleId: lire("ACHILLEA_CAPTAIN_ROLE_ID", "1398801292079403121"),
-    clanAnnouncementsChannelId: lire("ACHILLEA_CLAN_ANNOUNCEMENTS_CHANNEL_ID", "1398801515694788719"),
+    clanAnnouncementsChannelId: lire(
+      "ACHILLEA_CLAN_ANNOUNCEMENTS_CHANNEL_ID",
+      "1398801515694788719",
+    ),
   };
 }
 
 export type Decision = "dissoudre" | "retablir" | "attendre";
 
 /** Ce que le job legacy décidait à l'échéance, rendu indépendant de l'horloge du job. */
-export function decider(clan: { membres: number; depuis: Date | null }, maintenant: Date): Decision {
+export function decider(
+  clan: { membres: number; depuis: Date | null },
+  maintenant: Date,
+): Decision {
   if (clan.membres >= MEMBRES_MINIMUM) return "retablir";
   // Drapeau posé avant la colonne d'horodatage : on part du premier passage.
   if (!clan.depuis) return "attendre";
-  return maintenant.getTime() - clan.depuis.getTime() >= DELAI_GRACE_MS ? "dissoudre" : "attendre";
+  return maintenant.getTime() - clan.depuis.getTime() >= DELAI_GRACE_MS
+    ? "dissoudre"
+    : "attendre";
 }
 
-type ResultatRest = { ok: true; data: unknown } | { ok: false; statut: number | null; motif: string };
+type ResultatRest =
+  | { ok: true; data: unknown }
+  | { ok: false; statut: number | null; motif: string };
 
 /** Appel REST Discord avec le jeton Achilléa ; ne lève jamais. */
 export async function restDiscord(
@@ -77,19 +88,32 @@ export async function restDiscord(
       body: body === undefined ? undefined : JSON.stringify(body),
       signal: AbortSignal.timeout(15_000),
     });
-    if (!reponse.ok) return { ok: false, statut: reponse.status, motif: (await reponse.text().catch(() => "")).slice(0, 200) };
+    if (!reponse.ok)
+      return {
+        ok: false,
+        statut: reponse.status,
+        motif: (await reponse.text().catch(() => "")).slice(0, 200),
+      };
     const texte = await reponse.text();
     return { ok: true, data: texte ? JSON.parse(texte) : null };
   } catch (err) {
-    return { ok: false, statut: null, motif: err instanceof Error ? err.message : String(err) };
+    return {
+      ok: false,
+      statut: null,
+      motif: err instanceof Error ? err.message : String(err),
+    };
   }
 }
 
 function consigner(action: string, resultat: ResultatRest) {
-  if (!resultat.ok) console.warn(`[achillea:clans] ${action} : échec Discord (${resultat.statut ?? "réseau"}) ${resultat.motif}`);
+  if (!resultat.ok)
+    console.warn(
+      `[achillea:clans] ${action} : échec Discord (${resultat.statut ?? "réseau"}) ${resultat.motif}`,
+    );
 }
 
-const estSnowflake = (id: string | null | undefined): id is string => Boolean(id && /^\d{17,20}$/.test(id));
+const estSnowflake = (id: string | null | undefined): id is string =>
+  Boolean(id && /^\d{17,20}$/.test(id));
 
 export interface ClanDissous {
   id: number;
@@ -107,15 +131,29 @@ export interface ClanDissous {
 }
 
 /** Embed d'annonce du legacy (`buildClanDisbandEmbed`). */
-export function embedDissolution(clan: Pick<ClanDissous, "name" | "founders" | "clan_avatar_url" | "clan_fame" | "created_at">, le: Date) {
+export function embedDissolution(
+  clan: Pick<
+    ClanDissous,
+    "name" | "founders" | "clan_avatar_url" | "clan_fame" | "created_at"
+  >,
+  le: Date,
+) {
   return {
     color: COULEUR_ERREUR,
     title: `Dissolution de Clan : ${clan.name}`,
     description: `__*Clan dissout le ${le.toLocaleDateString("fr-FR")}*__`,
     thumbnail: { url: clan.clan_avatar_url },
     fields: [
-      { name: "Fondateurs", value: clan.founders.map(id => `- <@${id}>`).join("\n") || "—", inline: true },
-      { name: "Fondé le", value: new Date(clan.created_at).toLocaleDateString("fr-FR"), inline: true },
+      {
+        name: "Fondateurs",
+        value: clan.founders.map((id) => `- <@${id}>`).join("\n") || "—",
+        inline: true,
+      },
+      {
+        name: "Fondé le",
+        value: new Date(clan.created_at).toLocaleDateString("fr-FR"),
+        inline: true,
+      },
       { name: "Fame accumulée", value: String(clan.clan_fame), inline: true },
     ],
   };
@@ -127,7 +165,14 @@ export const MESSAGE_DISSOLUTION =
 /** Signature chaînée du journal d'audit, identique à `apps/rg-bot/src/api/modules/achillea/audit.ts`. */
 export function signatureAudit(
   precedente: string | null,
-  entree: { actor_id: string | null; action: string; target_type: string; target_id: string | null; payload: Record<string, unknown> | null; ts: Date },
+  entree: {
+    actor_id: string | null;
+    action: string;
+    target_type: string;
+    target_id: string | null;
+    payload: Record<string, unknown> | null;
+    ts: Date;
+  },
 ): string {
   const hachage = new Bun.CryptoHasher("sha256");
   hachage.update(
@@ -145,46 +190,101 @@ export function signatureAudit(
 }
 
 /** Effets Discord d'une dissolution, après la transaction. */
-export async function effetsDiscord(jeton: string, clan: ClanDissous, maintenant: Date) {
+export async function effetsDiscord(
+  jeton: string,
+  clan: ClanDissous,
+  maintenant: Date,
+) {
   const config = configClans();
   const raison = `Clan ${clan.name} dissous (sous-effectif)`;
-  if (estSnowflake(clan.channel_id)) consigner("suppression du salon", await restDiscord(jeton, "DELETE", `/channels/${clan.channel_id}`, undefined, raison));
+  if (estSnowflake(clan.channel_id))
+    consigner(
+      "suppression du salon",
+      await restDiscord(
+        jeton,
+        "DELETE",
+        `/channels/${clan.channel_id}`,
+        undefined,
+        raison,
+      ),
+    );
   if (estSnowflake(clan.role_id))
-    consigner("suppression du rôle", await restDiscord(jeton, "DELETE", `/guilds/${config.guildId}/roles/${clan.role_id}`, undefined, raison));
+    consigner(
+      "suppression du rôle",
+      await restDiscord(
+        jeton,
+        "DELETE",
+        `/guilds/${config.guildId}/roles/${clan.role_id}`,
+        undefined,
+        raison,
+      ),
+    );
   if (clan.capitaine)
     consigner(
       "retrait du rôle Président",
-      await restDiscord(jeton, "DELETE", `/guilds/${config.guildId}/members/${clan.capitaine}/roles/${config.captainRoleId}`, undefined, raison),
+      await restDiscord(
+        jeton,
+        "DELETE",
+        `/guilds/${config.guildId}/members/${clan.capitaine}/roles/${config.captainRoleId}`,
+        undefined,
+        raison,
+      ),
     );
   for (const fil of clan.fils.filter(estSnowflake))
-    consigner("suppression d'un fil d'invitation", await restDiscord(jeton, "DELETE", `/channels/${fil}`, undefined, raison));
+    consigner(
+      "suppression d'un fil d'invitation",
+      await restDiscord(jeton, "DELETE", `/channels/${fil}`, undefined, raison),
+    );
   if (estSnowflake(clan.broadcast_channel))
     consigner(
       "message au serveur du clan",
-      await restDiscord(jeton, "POST", `/channels/${clan.broadcast_channel}/messages`, {
-        embeds: [{ color: COULEUR_ACHILLEA, title: MESSAGE_DISSOLUTION }],
-        allowed_mentions: { parse: [] },
-      }),
+      await restDiscord(
+        jeton,
+        "POST",
+        `/channels/${clan.broadcast_channel}/messages`,
+        {
+          embeds: [{ color: COULEUR_ACHILLEA, title: MESSAGE_DISSOLUTION }],
+          allowed_mentions: { parse: [] },
+        },
+      ),
     );
   consigner(
     "annonce de dissolution",
-    await restDiscord(jeton, "POST", `/channels/${config.clanAnnouncementsChannelId}/messages`, {
-      embeds: [embedDissolution(clan, maintenant)],
-      allowed_mentions: { parse: [] },
-    }),
+    await restDiscord(
+      jeton,
+      "POST",
+      `/channels/${config.clanAnnouncementsChannelId}/messages`,
+      {
+        embeds: [embedDissolution(clan, maintenant)],
+        allowed_mentions: { parse: [] },
+      },
+    ),
   );
   for (const membre of clan.membres) {
-    const canal = await restDiscord(jeton, "POST", "/users/@me/channels", { recipient_id: membre });
+    const canal = await restDiscord(jeton, "POST", "/users/@me/channels", {
+      recipient_id: membre,
+    });
     if (!canal.ok) {
       consigner("ouverture du MP", canal);
       continue;
     }
     consigner(
       "MP de dissolution",
-      await restDiscord(jeton, "POST", `/channels/${(canal.data as { id: string }).id}/messages`, {
-        embeds: [{ color: COULEUR_ACHILLEA, title: `Clan ${clan.name} dissous`, description: MESSAGE_DISSOLUTION }],
-        allowed_mentions: { parse: [] },
-      }),
+      await restDiscord(
+        jeton,
+        "POST",
+        `/channels/${(canal.data as { id: string }).id}/messages`,
+        {
+          embeds: [
+            {
+              color: COULEUR_ACHILLEA,
+              title: `Clan ${clan.name} dissous`,
+              description: MESSAGE_DISSOLUTION,
+            },
+          ],
+          allowed_mentions: { parse: [] },
+        },
+      ),
     );
   }
 }
@@ -198,15 +298,19 @@ export interface ResultatClansAchillea {
   error?: string;
 }
 
-export async function runAchilleaClans(maintenant = new Date()): Promise<ResultatClansAchillea> {
+export async function runAchilleaClans(
+  maintenant = new Date(),
+): Promise<ResultatClansAchillea> {
   try {
-    const resultat = await sql.begin(async tx => {
+    const resultat = await sql.begin(async (tx) => {
       await tx`SET LOCAL ROLE service_role`;
       const [verrou] = await tx<Array<{ acquis: boolean }>>`
         SELECT pg_try_advisory_xact_lock(hashtext('rg-cron:achillea:clans')) AS acquis`;
       if (!verrou?.acquis) return { ignore: true as const };
 
-      const candidats = await tx<Array<{ id: number; membres: number; depuis: Date | null }>>`
+      const candidats = await tx<
+        Array<{ id: number; membres: number; depuis: Date | null }>
+      >`
         SELECT c.id, c.under_member_limit_since AS depuis,
                (SELECT count(*)::int FROM achillea.clan_member m WHERE m.clan_id = c.id) AS membres
           FROM achillea.clan c
@@ -225,30 +329,48 @@ export async function runAchilleaClans(maintenant = new Date()): Promise<Resulta
           dissous.push(await dissoudre(tx, candidat.id, maintenant));
         }
       }
-      return { ignore: false as const, examines: candidats.length, retablis, dissous };
+      return {
+        ignore: false as const,
+        examines: candidats.length,
+        retablis,
+        dissous,
+      };
     });
     if (resultat.ignore) return { success: true, ignore: true };
 
     const jeton = jetonAchillea();
     if (!jeton && resultat.dissous.length > 0)
-      console.warn("[achillea:clans] ACHILLEA_DISCORD_BOT_TOKEN absent : dissolutions faites en base sans effets Discord.");
-    if (jeton) for (const clan of resultat.dissous) await effetsDiscord(jeton, clan, maintenant);
+      console.warn(
+        "[achillea:clans] ACHILLEA_DISCORD_BOT_TOKEN absent : dissolutions faites en base sans effets Discord.",
+      );
+    if (jeton)
+      for (const clan of resultat.dissous)
+        await effetsDiscord(jeton, clan, maintenant);
 
     return {
       success: true,
       examines: resultat.examines,
-      dissous: resultat.dissous.map(clan => clan.id),
+      dissous: resultat.dissous.map((clan) => clan.id),
       retablis: resultat.retablis,
     };
   } catch (err) {
-    return { success: false, error: err instanceof Error ? err.message : String(err) };
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : String(err),
+    };
   }
 }
 
 type Tx = TransactionSQL;
 
-async function dissoudre(tx: Tx, clanId: number, maintenant: Date): Promise<ClanDissous> {
-  const [clan] = await tx<Array<Omit<ClanDissous, "capitaine" | "membres" | "fils">>>`
+async function dissoudre(
+  tx: Tx,
+  clanId: number,
+  maintenant: Date,
+): Promise<ClanDissous> {
+  const [clan] = await tx<
+    Array<Omit<ClanDissous, "capitaine" | "membres" | "fils">>
+  >`
     SELECT c.id, c.name, c.founders, c.clan_avatar_url, c.clan_fame, c.created_at, c.channel_id, c.role_id,
            g.broadcast_channel
       FROM achillea.clan c LEFT JOIN achillea.guild g ON g.id = c.guild_id
@@ -272,7 +394,7 @@ async function dissoudre(tx: Tx, clanId: number, maintenant: Date): Promise<Clan
            under_member_limit_since = NULL, updated_at = now()
      WHERE id = ${clanId}`;
 
-  const ids = membres.map(m => m.user_id);
+  const ids = membres.map((m) => m.user_id);
   if (ids.length > 0) {
     const [notification] = await tx<Array<{ id: number }>>`
       INSERT INTO achillea.notification (created_at, updated_at, title, message, type, category, payload)
@@ -304,8 +426,10 @@ async function dissoudre(tx: Tx, clanId: number, maintenant: Date): Promise<Clan
 
   return {
     ...clan!,
-    capitaine: membres.find(m => Number(m.role) === 3)?.user_id ?? null,
+    capitaine: membres.find((m) => Number(m.role) === 3)?.user_id ?? null,
     membres: ids,
-    fils: fils.map(f => f.thread_id).filter((id): id is string => Boolean(id)),
+    fils: fils
+      .map((f) => f.thread_id)
+      .filter((id): id is string => Boolean(id)),
   };
 }

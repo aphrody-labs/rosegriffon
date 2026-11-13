@@ -24,7 +24,9 @@ import { resolve } from "node:path";
 
 // Racine du monorepo rg (ce fichier vit dans scripts/).
 // RG lives in the IECODE monorepo root unless RG_ROOT says otherwise.
-const REPO_ROOT = resolve(process.env.RG_ROOT ?? resolve(import.meta.dir, ".."));
+const REPO_ROOT = resolve(
+  process.env.RG_ROOT ?? resolve(import.meta.dir, ".."),
+);
 const SW_PATH = resolve(REPO_ROOT, "apps/rg-website/public/sw.js");
 
 // ── Parsing minimal des arguments (sans dépendance) ──────────────────────────
@@ -69,7 +71,8 @@ function parseArgs(argv: string[]): CliArgs {
 // ── Levier 1 : bump de CACHE_NAME dans le Service Worker ─────────────────────
 // Format observé : `const CACHE_NAME = "azalee-shell-v7-20260517";`
 // On incrémente le segment `vN` (la première occurrence de v<chiffres>).
-const CACHE_NAME_LINE_RE = /^(\s*const\s+CACHE_NAME\s*=\s*)(["'])(.*?)\2(\s*;?)/m;
+const CACHE_NAME_LINE_RE =
+  /^(\s*const\s+CACHE_NAME\s*=\s*)(["'])(.*?)\2(\s*;?)/m;
 const VERSION_TOKEN_RE = /v(\d+)/;
 
 interface BumpResult {
@@ -127,7 +130,9 @@ async function runBumpSw(apply: boolean): Promise<boolean> {
   console.log(`   après   : "${result.after}"`);
 
   if (!apply) {
-    console.log("   mode    : DRY-RUN (aucune écriture) — relancer avec --apply");
+    console.log(
+      "   mode    : DRY-RUN (aucune écriture) — relancer avec --apply",
+    );
     return true;
   }
 
@@ -169,7 +174,10 @@ async function discoverG4txCacheDir(): Promise<string | null> {
   return null;
 }
 
-async function runPurgeG4tx(globPattern: string, apply: boolean): Promise<boolean> {
+async function runPurgeG4tx(
+  globPattern: string,
+  apply: boolean,
+): Promise<boolean> {
   console.log("── G4TX variant cache (disque local) ───────────────────────");
   const cacheDir = await discoverG4txCacheDir();
   if (!cacheDir) {
@@ -186,7 +194,11 @@ async function runPurgeG4tx(globPattern: string, apply: boolean): Promise<boolea
   // Énumération bornée AU SEIN du cacheDir uniquement.
   const glob = new Glob(globPattern);
   const matches: string[] = [];
-  for await (const rel of glob.scan({ cwd: cacheDir, onlyFiles: true, dot: true })) {
+  for await (const rel of glob.scan({
+    cwd: cacheDir,
+    onlyFiles: true,
+    dot: true,
+  })) {
     const abs = resolve(cacheDir, rel);
     // Garde-fou : ne JAMAIS sortir du cacheDir (anti-traversal).
     if (!abs.startsWith(cacheDir + "/")) {
@@ -203,10 +215,13 @@ async function runPurgeG4tx(globPattern: string, apply: boolean): Promise<boolea
 
   console.log(`   ${matches.length} fichier(s) ciblé(s) :`);
   for (const m of matches.slice(0, 20)) console.log(`     - ${m}`);
-  if (matches.length > 20) console.log(`     … (+${matches.length - 20} autres)`);
+  if (matches.length > 20)
+    console.log(`     … (+${matches.length - 20} autres)`);
 
   if (!apply) {
-    console.log("   mode       : DRY-RUN (aucune suppression) — relancer avec --apply");
+    console.log(
+      "   mode       : DRY-RUN (aucune suppression) — relancer avec --apply",
+    );
     return true;
   }
 
@@ -217,7 +232,9 @@ async function runPurgeG4tx(globPattern: string, apply: boolean): Promise<boolea
       await unlink(abs);
       deleted++;
     } catch (err) {
-      console.warn(`   ⚠️  échec suppression ${abs} : ${(err as Error).message}`);
+      console.warn(
+        `   ⚠️  échec suppression ${abs} : ${(err as Error).message}`,
+      );
     }
   }
   console.log(`   supprimé   : ✅ ${deleted}/${matches.length} fichier(s)`);
@@ -247,7 +264,9 @@ async function main() {
     return;
   }
 
-  const mode = args.apply ? "APPLY (mutations réelles)" : "DRY-RUN (par défaut)";
+  const mode = args.apply
+    ? "APPLY (mutations réelles)"
+    : "DRY-RUN (par défaut)";
   console.log(`▶ invalidate-cdn — mode : ${mode}\n`);
 
   let allOk = true;
@@ -262,14 +281,18 @@ async function main() {
 
   // Rappels hors-scope : actions manuelles côté prod (jamais automatisées ici).
   console.log("── Rappels (hors scope, à faire manuellement si nécessaire) ─");
-  console.log("   • Restart/reload nginx (CDN statique) : NON exécuté par ce script.");
-  console.log("   • Purge cache CDN G4TX côté origin : NON exécutée (réseau prod hors scope).");
+  console.log(
+    "   • Restart/reload nginx (CDN statique) : NON exécuté par ce script.",
+  );
+  console.log(
+    "   • Purge cache CDN G4TX côté origin : NON exécutée (réseau prod hors scope).",
+  );
   console.log("   • Redéploiement du frontend unifié : bun run deploy website");
 
   if (!allOk) process.exit(1);
 }
 
-main().catch(err => {
+main().catch((err) => {
   console.error("❌ Erreur fatale :", err);
   process.exit(1);
 });

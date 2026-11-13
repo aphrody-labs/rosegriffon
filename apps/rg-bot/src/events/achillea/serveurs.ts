@@ -57,10 +57,19 @@ export class PlanificateurReleve {
     const raisons = this.raisons.splice(0);
     try {
       const resultat = await this.declencher();
-      if (resultat.success) console.log(`[achillea] relevé des guildes effectué (${raisons.join(", ")})`);
-      else console.warn(`[achillea] relevé des guildes en échec : ${resultat.error ?? "raison inconnue"}`);
+      if (resultat.success)
+        console.log(
+          `[achillea] relevé des guildes effectué (${raisons.join(", ")})`,
+        );
+      else
+        console.warn(
+          `[achillea] relevé des guildes en échec : ${resultat.error ?? "raison inconnue"}`,
+        );
     } catch (err) {
-      console.error("[achillea] relevé des guildes :", err instanceof Error ? err.message : err);
+      console.error(
+        "[achillea] relevé des guildes :",
+        err instanceof Error ? err.message : err,
+      );
     }
   }
 
@@ -77,7 +86,9 @@ export const planificateurReleve = new PlanificateurReleve();
 export class EvenementsServeursAchillea {
   @On({ event: "guildCreate" })
   arrivee([guilde]: ArgsOf<"guildCreate">): void {
-    console.log(`[achillea] bot ajouté au serveur ${guilde.name} (${guilde.id})`);
+    console.log(
+      `[achillea] bot ajouté au serveur ${guilde.name} (${guilde.id})`,
+    );
     planificateurReleve.demander(`arrivée sur ${guilde.id}`);
   }
 

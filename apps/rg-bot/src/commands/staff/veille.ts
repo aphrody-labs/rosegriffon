@@ -27,7 +27,10 @@
  * démon ne répond pas » alors qu'il travaille encore.
  */
 import { Discord, Slash, SlashGroup, SlashOption } from "discordx";
-import { ApplicationCommandOptionType, type ChatInputCommandInteraction } from "discord.js";
+import {
+  ApplicationCommandOptionType,
+  type ChatInputCommandInteraction,
+} from "discord.js";
 
 import { appelerCron } from "../../lib/cron-ipc";
 import { rgEmbed } from "../../lib/embeds";
@@ -44,7 +47,12 @@ import {
   trierPostsParDate,
   type PostXAffichable,
 } from "./format";
-import { differerEnPrive, exigerDroits, expliquerRefusScrape, messagePanne } from "./garde";
+import {
+  differerEnPrive,
+  exigerDroits,
+  expliquerRefusScrape,
+  messagePanne,
+} from "./garde";
 import "./racine";
 import { echec, pied, piedTexte, repondre } from "../../lib/ui";
 
@@ -72,7 +80,10 @@ interface ReponseVerbe {
   [clef: string]: unknown;
 }
 
-async function appelerVerbe(verbe: string, charge: Record<string, unknown>): Promise<ReponseVerbe> {
+async function appelerVerbe(
+  verbe: string,
+  charge: Record<string, unknown>,
+): Promise<ReponseVerbe> {
   return await appelerCron<ReponseVerbe>(
     { cmd: verbe, ...charge },
     { timeoutMs: (DELAIS_VERBE_MS[verbe] ?? 45_000) + MARGE_IPC_MS },
@@ -94,7 +105,8 @@ function salonEffectif(filtre: { salon: string | null }): string | null {
 export class StaffVeilleCommand {
   @Slash({
     name: "suivi",
-    description: "État de la notification des nouveaux posts : filtre, curseur, salon",
+    description:
+      "État de la notification des nouveaux posts : filtre, curseur, salon",
   })
   async suivi(interaction: ChatInputCommandInteraction) {
     await differerEnPrive(interaction);
@@ -102,17 +114,27 @@ export class StaffVeilleCommand {
       return;
     }
     try {
-      const [filtre, curseur] = await Promise.all([lireFiltreNotification(), lireCurseur()]);
+      const [filtre, curseur] = await Promise.all([
+        lireFiltreNotification(),
+        lireCurseur(),
+      ]);
       const embed = rgEmbed()
         .setTitle("Notification des nouveaux posts X")
         .setDescription(
           [
             `État : **${filtre.actif ? "active" : "coupée"}**`,
             `Comptes suivis (${filtre.comptes.length}) : ${
-              filtre.comptes.length > 0 ? borner(filtre.comptes.map(compte => `@${compte}`).join(", "), 900) : "*aucun*"
+              filtre.comptes.length > 0
+                ? borner(
+                    filtre.comptes.map((compte) => `@${compte}`).join(", "),
+                    900,
+                  )
+                : "*aucun*"
             }`,
             `Catégories exclues : ${
-              filtre.categories_exclues.length > 0 ? filtre.categories_exclues.join(", ") : "*aucune*"
+              filtre.categories_exclues.length > 0
+                ? filtre.categories_exclues.join(", ")
+                : "*aucune*"
             } (+ leak, exclu en dur)`,
             `Lot détaillé au maximum : **${filtre.max_par_lot}** posts (au-delà : un embed de synthèse)`,
           ].join("\n"),
@@ -135,28 +157,40 @@ export class StaffVeilleCommand {
       // définie ne dit rien des droits du bot dessus. On vérifie en direct.
       const salonId = salonEffectif(filtre);
       if (salonId) {
-        const { salon, raison } = await resoudreSalon(interaction.client, salonId);
+        const { salon, raison } = await resoudreSalon(
+          interaction.client,
+          salonId,
+        );
         embed.addFields({
           name: "Salon de destination",
-          value: salon ? `✓ <#${salonId}> — le bot peut y écrire.` : `⚠ ${borner(raison ?? "injoignable", 900)}`,
+          value: salon
+            ? `✓ <#${salonId}> — le bot peut y écrire.`
+            : `⚠ ${borner(raison ?? "injoignable", 900)}`,
         });
       } else {
         embed.addFields({
           name: "Salon de destination",
-          value: "**aucun** — ni réglage en base, ni `DISCORD_NEWS_CHANNEL_ID`.",
+          value:
+            "**aucun** — ni réglage en base, ni `DISCORD_NEWS_CHANNEL_ID`.",
         });
       }
       pied(embed, { note: "Réglage : /administration veille regler" });
       await interaction.editReply({ embeds: [embed] });
     } catch (err) {
-      await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
+      await repondre(
+        interaction,
+        echec("Le service n'a pas répondu", messagePanne(err)),
+      );
     }
   }
 
   // `compte` et non `profil` : depuis l'arrivée de `/profil` (la carte de
   // progression d'un membre), « profil » ne doit plus désigner qu'une seule
   // chose dans tout le bot.
-  @Slash({ name: "compte", description: "Fiche d'un compte X, lue chez X à l'instant" })
+  @Slash({
+    name: "compte",
+    description: "Fiche d'un compte X, lue chez X à l'instant",
+  })
   async profil(
     @SlashOption({
       name: "pseudo",
@@ -174,7 +208,13 @@ export class StaffVeilleCommand {
     try {
       const reponse = await appelerVerbe("x.profil", { pseudo });
       if (!reponse.success) {
-        await repondre(interaction, echec("Lecture impossible", expliquerRefusScrape(reponse.code, reponse.error)));
+        await repondre(
+          interaction,
+          echec(
+            "Lecture impossible",
+            expliquerRefusScrape(reponse.code, reponse.error),
+          ),
+        );
         return;
       }
       const fiche = (reponse.fiche ?? {}) as Record<string, unknown>;
@@ -182,7 +222,8 @@ export class StaffVeilleCommand {
       // grille que le service (`[A-Za-z0-9_]{1,15}`). Un pseudo brut saisi avec
       // une espace ferait lever `setURL` et ferait perdre TOUT l'embed alors
       // que l'appel, lui, avait réussi.
-      const nomCompte = normaliserPseudoX(fiche.pseudo) || normaliserPseudoX(pseudo);
+      const nomCompte =
+        normaliserPseudoX(fiche.pseudo) || normaliserPseudoX(pseudo);
       const lien =
         typeof fiche.url === "string" && fiche.url.startsWith("https://")
           ? fiche.url
@@ -192,7 +233,9 @@ export class StaffVeilleCommand {
       const embed = rgEmbed()
         .setTitle(
           `${
-            typeof fiche.nom === "string" && fiche.nom.length > 0 ? borner(fiche.nom, 200) : nomCompte || "compte X"
+            typeof fiche.nom === "string" && fiche.nom.length > 0
+              ? borner(fiche.nom, 200)
+              : nomCompte || "compte X"
           }${fiche.certifie === true ? " ✔" : ""}`,
         )
         .setDescription(
@@ -201,20 +244,31 @@ export class StaffVeilleCommand {
             : "*(pas de biographie)*",
         )
         .addFields(
-          { name: "Pseudo", value: nomCompte ? `@${nomCompte}` : "—", inline: true },
+          {
+            name: "Pseudo",
+            value: nomCompte ? `@${nomCompte}` : "—",
+            inline: true,
+          },
           {
             name: "Abonnés",
-            value: formaterNombre(typeof fiche.abonnes === "number" ? fiche.abonnes : null),
+            value: formaterNombre(
+              typeof fiche.abonnes === "number" ? fiche.abonnes : null,
+            ),
             inline: true,
           },
           {
             name: "Abonnements",
-            value: formaterNombre(typeof fiche.abonnements === "number" ? fiche.abonnements : null),
+            value: formaterNombre(
+              typeof fiche.abonnements === "number" ? fiche.abonnements : null,
+            ),
             inline: true,
           },
           {
             name: "Compte créé",
-            value: typeof fiche.creeLe === "string" ? horodatageAbsolu(fiche.creeLe) : "—",
+            value:
+              typeof fiche.creeLe === "string"
+                ? horodatageAbsolu(fiche.creeLe)
+                : "—",
             inline: true,
           },
           {
@@ -223,20 +277,33 @@ export class StaffVeilleCommand {
             inline: true,
           },
         )
-        .setFooter(piedTexte({ note: `Lu en direct chez X en ${formaterLatence(reponse.ms ?? 0)}` }));
+        .setFooter(
+          piedTexte({
+            note: `Lu en direct chez X en ${formaterLatence(reponse.ms ?? 0)}`,
+          }),
+        );
       if (lien) {
         embed.setURL(lien);
       }
-      if (typeof fiche.avatar === "string" && fiche.avatar.startsWith("https://")) {
+      if (
+        typeof fiche.avatar === "string" &&
+        fiche.avatar.startsWith("https://")
+      ) {
         embed.setThumbnail(fiche.avatar);
       }
       await interaction.editReply({ embeds: [embed] });
     } catch (err) {
-      await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
+      await repondre(
+        interaction,
+        echec("Le service n'a pas répondu", messagePanne(err)),
+      );
     }
   }
 
-  @Slash({ name: "posts", description: "Derniers posts d'un compte X, lus chez X à l'instant" })
+  @Slash({
+    name: "posts",
+    description: "Derniers posts d'un compte X, lus chez X à l'instant",
+  })
   async posts(
     @SlashOption({
       name: "pseudo",
@@ -263,17 +330,34 @@ export class StaffVeilleCommand {
     try {
       const reponse = await appelerVerbe("x.posts", { pseudo, limite });
       if (!reponse.success) {
-        await repondre(interaction, echec("Lecture impossible", expliquerRefusScrape(reponse.code, reponse.error)));
+        await repondre(
+          interaction,
+          echec(
+            "Lecture impossible",
+            expliquerRefusScrape(reponse.code, reponse.error),
+          ),
+        );
         return;
       }
       // X place le post ÉPINGLÉ en tête et le service ne trie pas : sans ce
       // tri, « derniers posts » affichait un post de juillet au-dessus d'un
       // post d'août (mesuré sur @inazuma_project le 13/8/2026).
-      const posts = trierPostsParDate(Array.isArray(reponse.posts) ? (reponse.posts as PostXAffichable[]) : []);
-      const compte = normaliserPseudoX(reponse.pseudo) || normaliserPseudoX(pseudo);
+      const posts = trierPostsParDate(
+        Array.isArray(reponse.posts)
+          ? (reponse.posts as PostXAffichable[])
+          : [],
+      );
+      const compte =
+        normaliserPseudoX(reponse.pseudo) || normaliserPseudoX(pseudo);
       const embed = rgEmbed()
-        .setTitle(`${compte ? `@${compte}` : "Compte X"} — ${posts.length} post${posts.length > 1 ? "s" : ""}`)
-        .setFooter(piedTexte({ note: `Lu en direct chez X en ${formaterLatence(reponse.ms ?? 0)}` }));
+        .setTitle(
+          `${compte ? `@${compte}` : "Compte X"} — ${posts.length} post${posts.length > 1 ? "s" : ""}`,
+        )
+        .setFooter(
+          piedTexte({
+            note: `Lu en direct chez X en ${formaterLatence(reponse.ms ?? 0)}`,
+          }),
+        );
       if (compte) {
         embed.setURL(`https://x.com/${compte}`);
       }
@@ -288,14 +372,20 @@ export class StaffVeilleCommand {
         for (const post of posts) {
           const [valeur] = decouperEnChamps(lignePostX(post), 1_024, 1);
           embed.addFields({
-            name: typeof post.date === "string" ? `📅 ${post.date.slice(0, 10)}` : "📅 date inconnue",
+            name:
+              typeof post.date === "string"
+                ? `📅 ${post.date.slice(0, 10)}`
+                : "📅 date inconnue",
             value: valeur ?? "—",
           });
         }
       }
       await interaction.editReply({ embeds: [embed] });
     } catch (err) {
-      await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
+      await repondre(
+        interaction,
+        echec("Le service n'a pas répondu", messagePanne(err)),
+      );
     }
   }
 
@@ -330,17 +420,35 @@ export class StaffVeilleCommand {
     try {
       const reponse = await appelerVerbe("x.recherche", { requete, limite });
       if (!reponse.success) {
-        await repondre(interaction, echec("Lecture impossible", expliquerRefusScrape(reponse.code, reponse.error)));
+        await repondre(
+          interaction,
+          echec(
+            "Lecture impossible",
+            expliquerRefusScrape(reponse.code, reponse.error),
+          ),
+        );
         return;
       }
       // Le verbe demande le tri « Latest » à X, mais rien ne garantit l'ordre
       // de la charge rendue : on le rétablit ici, sinon la mention « tri le
       // plus récent » ci-dessous serait une promesse invérifiée.
-      const posts = trierPostsParDate(Array.isArray(reponse.posts) ? (reponse.posts as PostXAffichable[]) : []);
+      const posts = trierPostsParDate(
+        Array.isArray(reponse.posts)
+          ? (reponse.posts as PostXAffichable[])
+          : [],
+      );
       const embed = rgEmbed()
-        .setTitle(`Recherche X — ${posts.length} résultat${posts.length > 1 ? "s" : ""}`)
-        .setDescription(`Requête : « ${borner(requete, 200)} » · tri **le plus récent**.`)
-        .setFooter(piedTexte({ note: `Lu en direct chez X en ${formaterLatence(reponse.ms ?? 0)}` }));
+        .setTitle(
+          `Recherche X — ${posts.length} résultat${posts.length > 1 ? "s" : ""}`,
+        )
+        .setDescription(
+          `Requête : « ${borner(requete, 200)} » · tri **le plus récent**.`,
+        )
+        .setFooter(
+          piedTexte({
+            note: `Lu en direct chez X en ${formaterLatence(reponse.ms ?? 0)}`,
+          }),
+        );
 
       if (posts.length === 0) {
         embed.addFields({
@@ -351,14 +459,20 @@ export class StaffVeilleCommand {
         for (const post of posts) {
           const [valeur] = decouperEnChamps(lignePostX(post), 1_024, 1);
           embed.addFields({
-            name: typeof post.auteur === "string" && post.auteur.length > 0 ? `@${post.auteur}` : "compte inconnu",
+            name:
+              typeof post.auteur === "string" && post.auteur.length > 0
+                ? `@${post.auteur}`
+                : "compte inconnu",
             value: valeur ?? "—",
           });
         }
       }
       await interaction.editReply({ embeds: [embed] });
     } catch (err) {
-      await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
+      await repondre(
+        interaction,
+        echec("Le service n'a pas répondu", messagePanne(err)),
+      );
     }
   }
 }

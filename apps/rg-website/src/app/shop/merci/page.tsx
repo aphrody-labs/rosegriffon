@@ -39,7 +39,9 @@ export default async function ThankYouPage({ searchParams }: ThankYouProps) {
       <div className="grid size-20 place-items-center rounded-full bg-rg-or shadow-[0_4px_0_0_rgba(0,0,0,0.5)]">
         <Check className="size-10 text-rg-marine" strokeWidth={3} />
       </div>
-      <h1 className="mt-6 text-fluid-display-lg font-extrabold tracking-tight text-white">Merci 🌹</h1>
+      <h1 className="mt-6 text-fluid-display-lg font-extrabold tracking-tight text-white">
+        Merci 🌹
+      </h1>
       <p className="mt-4 max-w-md text-base text-white/80">
         Ta commande est confirmée. Tu vas recevoir un reçu Stripe par email
         {email ? (
@@ -56,13 +58,17 @@ export default async function ThankYouPage({ searchParams }: ThankYouProps) {
           {lineCount > 0 && (
             <>
               <dt className="text-left text-white/60">Articles</dt>
-              <dd className="text-right font-semibold text-white">{lineCount}</dd>
+              <dd className="text-right font-semibold text-white">
+                {lineCount}
+              </dd>
             </>
           )}
           {total !== null && (
             <>
               <dt className="text-left text-white/60">Total réglé</dt>
-              <dd className="text-right text-base font-extrabold text-rg-or">{formatEuros(total)}</dd>
+              <dd className="text-right text-base font-extrabold text-rg-or">
+                {formatEuros(total)}
+              </dd>
             </>
           )}
         </dl>

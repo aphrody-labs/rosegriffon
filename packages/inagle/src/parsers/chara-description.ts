@@ -55,7 +55,12 @@ function parseDescriptionNode(node: ConfigNode): ParsedDescription | null {
  * Load and parse chara_description_text for a locale
  */
 export function loadCharaDescriptions(locale: Locale): Map<string, string> {
-  const filePath = join(DATA_ROOT, "common/text", locale, "chara_description_text.cfg.bin.json");
+  const filePath = join(
+    DATA_ROOT,
+    "common/text",
+    locale,
+    "chara_description_text.cfg.bin.json",
+  );
 
   if (!existsSync(filePath)) {
     return new Map();
@@ -87,7 +92,17 @@ export function loadCharaDescriptions(locale: Locale): Map<string, string> {
  * Build description maps for all available locales
  */
 export function buildAllDescriptionMaps(): DescriptionMaps {
-  const locales: Locale[] = ["ja", "en", "fr", "de", "es", "it", "pt", "zh_hans", "zh_hant"];
+  const locales: Locale[] = [
+    "ja",
+    "en",
+    "fr",
+    "de",
+    "es",
+    "it",
+    "pt",
+    "zh_hans",
+    "zh_hant",
+  ];
   const descriptions = new Map<Locale, Map<string, string>>();
 
   for (const locale of locales) {
@@ -103,7 +118,10 @@ export function buildAllDescriptionMaps(): DescriptionMaps {
 /**
  * Get localized description for a character by nameHash
  */
-export function getDescription(maps: DescriptionMaps, nameHash: string): { en?: string; fr?: string; ja?: string } {
+export function getDescription(
+  maps: DescriptionMaps,
+  nameHash: string,
+): { en?: string; fr?: string; ja?: string } {
   return {
     en: maps.descriptions.get("en")?.get(nameHash),
     fr: maps.descriptions.get("fr")?.get(nameHash),

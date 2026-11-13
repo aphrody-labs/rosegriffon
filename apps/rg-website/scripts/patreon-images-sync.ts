@@ -18,13 +18,19 @@ if (!process.env.DATABASE_URL) throw new Error("DATABASE_URL manquante");
 const args = new Set(process.argv.slice(2));
 const dryRun = args.has("--dry-run");
 const force = args.has("--force");
-const limitArg = process.argv.find(a => a.startsWith("--limit="));
-const limit = limitArg ? Number.parseInt(limitArg.split("=")[1] || "0", 10) : null;
+const limitArg = process.argv.find((a) => a.startsWith("--limit="));
+const limit = limitArg
+  ? Number.parseInt(limitArg.split("=")[1] || "0", 10)
+  : null;
 
 const db = createPostgresClient();
 
 const BUCKET = "patreon";
-const ALLOWED_HOSTS = new Set(["c10.patreonusercontent.com", "c8.patreonusercontent.com", "c.patreon.com"]);
+const ALLOWED_HOSTS = new Set([
+  "c10.patreonusercontent.com",
+  "c8.patreonusercontent.com",
+  "c.patreon.com",
+]);
 
 interface ImgRef {
   postId: string;
@@ -73,7 +79,7 @@ function extFromContentType(mime: string | null): string {
 async function sha256(buf: ArrayBuffer): Promise<string> {
   const digest = await crypto.subtle.digest("SHA-256", buf);
   return Array.from(new Uint8Array(digest))
-    .map(b => b.toString(16).padStart(2, "0"))
+    .map((b) => b.toString(16).padStart(2, "0"))
     .join("");
 }
 
@@ -117,10 +123,12 @@ async function archiveOne(img: ImgRef): Promise<{
     };
   }
 
-  const { error: upErr } = await db.storage.from(BUCKET).upload(storage_path, buf, {
-    contentType: mime ?? "application/octet-stream",
-    upsert: true,
-  });
+  const { error: upErr } = await db.storage
+    .from(BUCKET)
+    .upload(storage_path, buf, {
+      contentType: mime ?? "application/octet-stream",
+      upsert: true,
+    });
   if (upErr) {
     return { skipped: true, reason: `storage: ${upErr.message}` };
   }
@@ -152,7 +160,9 @@ async function archiveOne(img: ImgRef): Promise<{
 
 async function main() {
   const start = Date.now();
-  console.log(`[patreon-images-sync] dry=${dryRun} force=${force} limit=${limit ?? "∞"}`);
+  console.log(
+    `[patreon-images-sync] dry=${dryRun} force=${force} limit=${limit ?? "∞"}`,
+  );
 
   const { data: posts, error } = await db
     .from("patreon_post_events")
@@ -167,7 +177,9 @@ async function main() {
   }
 
   const slice = limit ? allImages.slice(0, limit) : allImages;
-  console.log(`[scan] ${posts?.length} posts → ${allImages.length} images Patreon (${slice.length} dans cette run)`);
+  console.log(
+    `[scan] ${posts?.length} posts → ${allImages.length} images Patreon (${slice.length} dans cette run)`,
+  );
 
   let archived = 0;
   let skipped = 0;

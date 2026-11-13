@@ -6,7 +6,12 @@
  */
 
 // Hooks
-export { useEmoteHistory, useEmoteRotation, useEmotes, useEmoteValidation } from "@/hooks/useEmotes";
+export {
+  useEmoteHistory,
+  useEmoteRotation,
+  useEmotes,
+  useEmoteValidation,
+} from "@/hooks/useEmotes";
 // Types et constantes depuis @/lib/emotes
 export type { Emote } from "@/lib/emotes";
 export {
@@ -19,5 +24,10 @@ export {
 } from "@/lib/emotes";
 // Composants
 export { default as EmotePicker } from "./EmotePicker";
-export { default as EmoteRenderer, getTextWithoutEmotes, stripEmotes, useEmotesFromText } from "./EmoteRenderer";
+export {
+  default as EmoteRenderer,
+  getTextWithoutEmotes,
+  stripEmotes,
+  useEmotesFromText,
+} from "./EmoteRenderer";
 export { default as RgEmote, RgEmoteGrid, RgEmoteLine } from "./RgEmote";

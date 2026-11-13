@@ -292,9 +292,7 @@
         "type": "single_elimination",
         "settings": {
           "size": 32,
-          "seedOrdering": [
-            "inner_outer"
-          ],
+          "seedOrdering": ["inner_outer"],
           "consolationFinal": false,
           "matchesChildCount": 0
         },

@@ -110,7 +110,8 @@ export type LiveSnapshotResult =
   | { ok: true; snapshot: LiveCampaignSnapshot }
   | {
       ok: false;
-      reason: "no_admin_client" | "no_creator_token" | "no_campaign" | "fetch_failed";
+      reason:
+        "no_admin_client" | "no_creator_token" | "no_campaign" | "fetch_failed";
       error?: string;
     };
 
@@ -161,9 +162,18 @@ const TIER_FIELDS = [
   "url",
 ].join(",");
 
-const USER_FIELDS = ["email", "full_name", "thumb_url", "url", "social_connections"].join(",");
+const USER_FIELDS = [
+  "email",
+  "full_name",
+  "thumb_url",
+  "url",
+  "social_connections",
+].join(",");
 
-function getRel(resource: JsonApiResource<unknown>, name: string): { id: string; type: string }[] {
+function getRel(
+  resource: JsonApiResource<unknown>,
+  name: string,
+): { id: string; type: string }[] {
   const rel = resource.relationships?.[name]?.data;
   if (!rel) {
     return [];
@@ -225,18 +235,21 @@ export async function fetchLiveCampaignSnapshot(): Promise<LiveSnapshotResult> {
     };
   }
 
-  const campaignsData = Array.isArray(campaignsResp.data) ? campaignsResp.data : [campaignsResp.data];
-  const c = campaignsData[0] as JsonApiResource<PatreonCampaignAttrs> | undefined;
+  const campaignsData = Array.isArray(campaignsResp.data)
+    ? campaignsResp.data
+    : [campaignsResp.data];
+  const c = campaignsData[0] as
+    JsonApiResource<PatreonCampaignAttrs> | undefined;
   if (!c) {
     return { ok: false, reason: "no_campaign" };
   }
 
   const tierResources = (campaignsResp.included ?? []).filter(
-    r => r.type === "tier",
+    (r) => r.type === "tier",
   ) as unknown as JsonApiResource<PatreonTierAttrs>[];
 
   const tiers: LiveTier[] = tierResources
-    .map(t => ({
+    .map((t) => ({
       amount_cents: t.attributes.amount_cents ?? 0,
       description: t.attributes.description ?? null,
       discord_role_ids: t.attributes.discord_role_ids ?? [],
@@ -266,44 +279,57 @@ export async function fetchLiveCampaignSnapshot(): Promise<LiveSnapshotResult> {
         query["page[cursor]"] = cursor;
       }
 
-      const resp = await patreonFetch<PatreonMemberAttrs>(accessToken, `/campaigns/${c.id}/members`, query);
+      const resp = await patreonFetch<PatreonMemberAttrs>(
+        accessToken,
+        `/campaigns/${c.id}/members`,
+        query,
+      );
 
-      const memberArr = (Array.isArray(resp.data) ? resp.data : [resp.data]) as JsonApiResource<PatreonMemberAttrs>[];
+      const memberArr = (
+        Array.isArray(resp.data) ? resp.data : [resp.data]
+      ) as JsonApiResource<PatreonMemberAttrs>[];
       const includedTiers = (resp.included ?? []).filter(
-        r => r.type === "tier",
+        (r) => r.type === "tier",
       ) as unknown as JsonApiResource<PatreonTierAttrs>[];
-      const tiersById = new Map(includedTiers.map(t => [t.id, t]));
+      const tiersById = new Map(includedTiers.map((t) => [t.id, t]));
       const includedUsers = (resp.included ?? []).filter(
-        r => r.type === "user",
+        (r) => r.type === "user",
       ) as unknown as JsonApiResource<PatreonUserAttrs>[];
-      const usersById = new Map(includedUsers.map(u => [u.id, u]));
+      const usersById = new Map(includedUsers.map((u) => [u.id, u]));
       const includedAddresses = (resp.included ?? []).filter(
-        r => r.type === "address",
+        (r) => r.type === "address",
       ) as unknown as JsonApiResource<PatreonAddressAttrs>[];
-      const addressesById = new Map(includedAddresses.map(a => [a.id, a]));
+      const addressesById = new Map(includedAddresses.map((a) => [a.id, a]));
 
       for (const m of memberArr) {
         const tierRefs = getRel(m, "currently_entitled_tiers");
         const memberTiers = tierRefs
-          .map(r => tiersById.get(r.id))
+          .map((r) => tiersById.get(r.id))
           .filter((t): t is JsonApiResource<PatreonTierAttrs> => Boolean(t));
 
         const userRel = m.relationships?.user?.data;
         const userId = userRel && !Array.isArray(userRel) ? userRel.id : null;
         const userResource = userId ? usersById.get(userId) : null;
-        const discordUserId = userResource?.attributes.social_connections?.discord?.user_id?.toString() ?? null;
+        const discordUserId =
+          userResource?.attributes.social_connections?.discord?.user_id?.toString() ??
+          null;
 
         const addressRel = m.relationships?.address?.data;
-        const addressId = addressRel && !Array.isArray(addressRel) ? addressRel.id : null;
-        const addressAttrs = (addressId && addressesById.get(addressId)?.attributes) || null;
+        const addressId =
+          addressRel && !Array.isArray(addressRel) ? addressRel.id : null;
+        const addressAttrs =
+          (addressId && addressesById.get(addressId)?.attributes) || null;
 
-        const discordRoleIds = [...new Set(memberTiers.flatMap(t => t.attributes.discord_role_ids ?? []))].filter(
-          (s): s is string => Boolean(s),
-        );
+        const discordRoleIds = [
+          ...new Set(
+            memberTiers.flatMap((t) => t.attributes.discord_role_ids ?? []),
+          ),
+        ].filter((s): s is string => Boolean(s));
 
         members.push({
           address: addressAttrs as PatreonAddressAttrs | null,
-          currently_entitled_cents: m.attributes.currently_entitled_amount_cents ?? 0,
+          currently_entitled_cents:
+            m.attributes.currently_entitled_amount_cents ?? 0,
           discord_role_ids: discordRoleIds,
           discord_user_id: discordUserId,
           email: m.attributes.email ?? null,
@@ -314,7 +340,9 @@ export async function fetchLiveCampaignSnapshot(): Promise<LiveSnapshotResult> {
           last_charge_date: m.attributes.last_charge_date ?? null,
           last_charge_status: m.attributes.last_charge_status ?? null,
           lifetime_support_cents:
-            m.attributes.campaign_lifetime_support_cents ?? m.attributes.lifetime_support_cents ?? 0,
+            m.attributes.campaign_lifetime_support_cents ??
+            m.attributes.lifetime_support_cents ??
+            0,
           next_charge_date: m.attributes.next_charge_date ?? null,
           note: m.attributes.note ?? null,
           patreon_thumb_url: userResource?.attributes.thumb_url ?? null,
@@ -323,8 +351,10 @@ export async function fetchLiveCampaignSnapshot(): Promise<LiveSnapshotResult> {
           patron_status: m.attributes.patron_status ?? null,
           pledge_cadence: m.attributes.pledge_cadence ?? null,
           pledge_start: m.attributes.pledge_relationship_start ?? null,
-          tier_ids: memberTiers.map(t => t.id),
-          tier_titles: memberTiers.map(t => t.attributes.title ?? "").filter((s): s is string => Boolean(s)),
+          tier_ids: memberTiers.map((t) => t.id),
+          tier_titles: memberTiers
+            .map((t) => t.attributes.title ?? "")
+            .filter((s): s is string => Boolean(s)),
           will_pay_amount_cents: m.attributes.will_pay_amount_cents ?? 0,
         });
       }
@@ -340,7 +370,9 @@ export async function fetchLiveCampaignSnapshot(): Promise<LiveSnapshotResult> {
     };
   }
 
-  members.sort((a, b) => b.currently_entitled_cents - a.currently_entitled_cents);
+  members.sort(
+    (a, b) => b.currently_entitled_cents - a.currently_entitled_cents,
+  );
 
   return {
     ok: true,

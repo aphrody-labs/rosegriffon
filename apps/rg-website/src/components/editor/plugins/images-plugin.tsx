@@ -31,19 +31,37 @@ import { useEffect, useRef, useState } from "react";
 import type { JSX } from "react";
 
 import { uploadImage } from "@/app/actions/image-upload";
-import { $createImageNode, $isImageNode, ImageNode } from "@/components/editor/nodes/image-node";
+import {
+  $createImageNode,
+  $isImageNode,
+  ImageNode,
+} from "@/components/editor/nodes/image-node";
 import type { ImagePayload } from "@/components/editor/nodes/image-node";
 import { CAN_USE_DOM } from "@/components/editor/shared/can-use-dom";
-import { Button, DialogFooter, Input, Label, Tabs, TabsContent, TabsList, TabsTrigger } from "@rosegriffon/ui";
+import {
+  Button,
+  DialogFooter,
+  Input,
+  Label,
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@rosegriffon/ui";
 
 export type InsertImagePayload = Readonly<ImagePayload>;
 
 const getDOMSelection = (targetWindow: Window | null): Selection | null =>
   CAN_USE_DOM ? (targetWindow || window).getSelection() : null;
 
-export const INSERT_IMAGE_COMMAND: LexicalCommand<InsertImagePayload> = createCommand("INSERT_IMAGE_COMMAND");
+export const INSERT_IMAGE_COMMAND: LexicalCommand<InsertImagePayload> =
+  createCommand("INSERT_IMAGE_COMMAND");
 
-export function InsertImageUriDialogBody({ onClick }: { onClick: (payload: InsertImagePayload) => void }) {
+export function InsertImageUriDialogBody({
+  onClick,
+}: {
+  onClick: (payload: InsertImagePayload) => void;
+}) {
   const [src, setSrc] = useState("");
   const [altText, setAltText] = useState("");
 
@@ -56,7 +74,7 @@ export function InsertImageUriDialogBody({ onClick }: { onClick: (payload: Inser
         <Input
           id="image-url"
           placeholder="https://google.com/image.jpg"
-          onChange={e => setSrc(e.target.value)}
+          onChange={(e) => setSrc(e.target.value)}
           value={src}
           data-test-id="image-modal-url-input"
         />
@@ -66,7 +84,7 @@ export function InsertImageUriDialogBody({ onClick }: { onClick: (payload: Inser
         <Input
           id="image-url-alt"
           placeholder="Description de l'image"
-          onChange={e => setAltText(e.target.value)}
+          onChange={(e) => setAltText(e.target.value)}
           value={altText}
           data-test-id="image-modal-alt-text-input"
         />
@@ -85,7 +103,11 @@ export function InsertImageUriDialogBody({ onClick }: { onClick: (payload: Inser
   );
 }
 
-export function InsertImageUploadedDialogBody({ onClick }: { onClick: (payload: InsertImagePayload) => void }) {
+export function InsertImageUploadedDialogBody({
+  onClick,
+}: {
+  onClick: (payload: InsertImagePayload) => void;
+}) {
   const [src, setSrc] = useState("");
   const [altText, setAltText] = useState("");
   const [isUploading, setIsUploading] = useState(false);
@@ -123,13 +145,15 @@ export function InsertImageUploadedDialogBody({ onClick }: { onClick: (payload: 
         <Input
           id="image-upload"
           type="file"
-          onChange={e => loadImage(e.target.files)}
+          onChange={(e) => loadImage(e.target.files)}
           accept="image/*"
           data-test-id="image-modal-file-upload"
           disabled={isUploading}
         />
         {isUploading && (
-          <output className="text-xs text-muted-foreground">Optimisation et téléversement en cours...</output>
+          <output className="text-xs text-muted-foreground">
+            Optimisation et téléversement en cours...
+          </output>
         )}
       </div>
       <div className="grid gap-2">
@@ -137,7 +161,7 @@ export function InsertImageUploadedDialogBody({ onClick }: { onClick: (payload: 
         <Input
           id="image-upload-alt"
           placeholder="Description de l'image"
-          onChange={e => setAltText(e.target.value)}
+          onChange={(e) => setAltText(e.target.value)}
           value={altText}
           data-test-id="image-modal-alt-text-input"
         />
@@ -199,7 +223,11 @@ export function InsertImageDialog({
   );
 }
 
-export function ImagesPlugin({ captionsEnabled: _captionsEnabled }: { captionsEnabled?: boolean }): JSX.Element | null {
+export function ImagesPlugin({
+  captionsEnabled: _captionsEnabled,
+}: {
+  captionsEnabled?: boolean;
+}): JSX.Element | null {
   const [editor] = useLexicalComposerContext();
 
   useEffect(() => {
@@ -210,7 +238,7 @@ export function ImagesPlugin({ captionsEnabled: _captionsEnabled }: { captionsEn
     return mergeRegister(
       editor.registerCommand<InsertImagePayload>(
         INSERT_IMAGE_COMMAND,
-        payload => {
+        (payload) => {
           const imageNode = $createImageNode(payload);
           $insertNodes([imageNode]);
           if ($isRootOrShadowRoot(imageNode.getParentOrThrow())) {
@@ -221,10 +249,26 @@ export function ImagesPlugin({ captionsEnabled: _captionsEnabled }: { captionsEn
         },
         COMMAND_PRIORITY_EDITOR,
       ),
-      editor.registerCommand<DragEvent>(DRAGSTART_COMMAND, event => $onDragStart(event), COMMAND_PRIORITY_HIGH),
-      editor.registerCommand<DragEvent>(DRAGOVER_COMMAND, event => $onDragover(event), COMMAND_PRIORITY_LOW),
-      editor.registerCommand<DragEvent>(DROP_COMMAND, event => $onDrop(event, editor), COMMAND_PRIORITY_HIGH),
-      editor.registerCommand(PASTE_COMMAND, event => $onPaste(event, editor), COMMAND_PRIORITY_HIGH),
+      editor.registerCommand<DragEvent>(
+        DRAGSTART_COMMAND,
+        (event) => $onDragStart(event),
+        COMMAND_PRIORITY_HIGH,
+      ),
+      editor.registerCommand<DragEvent>(
+        DRAGOVER_COMMAND,
+        (event) => $onDragover(event),
+        COMMAND_PRIORITY_LOW,
+      ),
+      editor.registerCommand<DragEvent>(
+        DROP_COMMAND,
+        (event) => $onDrop(event, editor),
+        COMMAND_PRIORITY_HIGH,
+      ),
+      editor.registerCommand(
+        PASTE_COMMAND,
+        (event) => $onPaste(event, editor),
+        COMMAND_PRIORITY_HIGH,
+      ),
     );
   }, [editor]);
 
@@ -240,7 +284,8 @@ function $onDragStart(event: DragEvent): boolean {
   if (!dataTransfer) {
     return false;
   }
-  const TRANSPARENT_IMAGE = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
+  const TRANSPARENT_IMAGE =
+    "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
   const img = document.createElement("img");
   img.src = TRANSPARENT_IMAGE;
   dataTransfer.setData("text/plain", "_");
@@ -317,7 +362,7 @@ function $onDrop(event: DragEvent, editor: LexicalEditor): boolean {
       const formData = new FormData();
       formData.append("file", file);
 
-      uploadImage(formData).then(result => {
+      uploadImage(formData).then((result) => {
         if ("url" in result) {
           editor.dispatchCommand(INSERT_IMAGE_COMMAND, {
             altText: file.name,
@@ -332,7 +377,10 @@ function $onDrop(event: DragEvent, editor: LexicalEditor): boolean {
   return false;
 }
 
-function $onPaste(event: ClipboardEvent | InputEvent | KeyboardEvent, editor: LexicalEditor): boolean {
+function $onPaste(
+  event: ClipboardEvent | InputEvent | KeyboardEvent,
+  editor: LexicalEditor,
+): boolean {
   if (!("clipboardData" in event)) {
     return false;
   }
@@ -346,7 +394,7 @@ function $onPaste(event: ClipboardEvent | InputEvent | KeyboardEvent, editor: Le
       const formData = new FormData();
       formData.append("file", file);
 
-      uploadImage(formData).then(result => {
+      uploadImage(formData).then((result) => {
         if ("url" in result) {
           editor.dispatchCommand(INSERT_IMAGE_COMMAND, {
             altText: file.name,

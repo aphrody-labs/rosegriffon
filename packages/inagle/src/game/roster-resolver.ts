@@ -33,7 +33,9 @@ export interface RosterResolution {
  * Résout une liste d'IDs de roster (décimaux ou hex) en personnages nommés.
  * @throws si la requête réseau échoue.
  */
-export async function resolveRoster(ids: Array<number | string>): Promise<RosterResolution> {
+export async function resolveRoster(
+  ids: Array<number | string>,
+): Promise<RosterResolution> {
   if (ids.length === 0) {
     return { resolved: [], matched: 0, total: 0 };
   }
@@ -44,7 +46,9 @@ export async function resolveRoster(ids: Array<number | string>): Promise<Roster
   });
   if (!resp.ok) {
     const detail = await resp.text().catch(() => "");
-    throw new Error(`Résolution du roster échouée (HTTP ${resp.status}). ${detail}`.trim());
+    throw new Error(
+      `Résolution du roster échouée (HTTP ${resp.status}). ${detail}`.trim(),
+    );
   }
   return (await resp.json()) as RosterResolution;
 }

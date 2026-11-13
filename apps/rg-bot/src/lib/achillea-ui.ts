@@ -29,7 +29,9 @@ import { RG_BASE_URL } from "./config";
 import { echec, repondre } from "./ui";
 
 /** Client Achilléa signé pour l'auteur de l'interaction. */
-export function clientDe(interaction: { user: { id: string; username?: string | null; avatar?: string | null } }): ClientAchilleaDelegue {
+export function clientDe(interaction: {
+  user: { id: string; username?: string | null; avatar?: string | null };
+}): ClientAchilleaDelegue {
   return clientAchilleaPour(identiteDe(interaction.user));
 }
 
@@ -64,18 +66,23 @@ export async function appelApi<T>(
  * Pour les écrans qui composent plusieurs lectures et tolèrent qu'une manque.
  */
 export async function lireApi<T>(
-  interaction: { user: { id: string; username?: string | null; avatar?: string | null } },
+  interaction: {
+    user: { id: string; username?: string | null; avatar?: string | null };
+  },
   appel: (client: ClientAchilleaDelegue) => Promise<AchilleaClientResult<T>>,
 ): Promise<{ ok: true; valeur: T } | { ok: false; motif: string }> {
   let client: ClientAchilleaDelegue;
   try {
     client = clientDe(interaction);
   } catch (err) {
-    if (err instanceof ConfigurationApiAchillea) return { ok: false, motif: err.message };
+    if (err instanceof ConfigurationApiAchillea)
+      return { ok: false, motif: err.message };
     throw err;
   }
   const resultat = await appel(client);
-  return resultat.ok ? { ok: true, valeur: resultat.value } : { ok: false, motif: client.motifEchec(resultat) };
+  return resultat.ok
+    ? { ok: true, valeur: resultat.value }
+    : { ok: false, motif: client.motifEchec(resultat) };
 }
 
 /** Lien absolu vers une page du site Achilléa (`ACHILLEA_WEBSITE_URL`, sinon rosegriffon.fr/achillea). */
@@ -89,11 +96,18 @@ export function urlAchillea(chemin = "/"): string {
  * Lecture purement Discord : c'est l'équivalent de la garde `GuildAdminOnly`
  * de l'ancien bot, pour les réglages qui décrivent un serveur et non un joueur.
  */
-export function administreLeServeur(membre: GuildMember | null | undefined | { permissions?: unknown }): boolean {
+export function administreLeServeur(
+  membre: GuildMember | null | undefined | { permissions?: unknown },
+): boolean {
   const permissions = (membre as GuildMember | null | undefined)?.permissions;
-  if (!permissions || typeof permissions === "string" || typeof (permissions as { has?: unknown }).has !== "function")
+  if (
+    !permissions ||
+    typeof permissions === "string" ||
+    typeof (permissions as { has?: unknown }).has !== "function"
+  )
     return false;
   return (
-    permissions.has(PermissionFlagsBits.Administrator) || permissions.has(PermissionFlagsBits.ManageGuild)
+    permissions.has(PermissionFlagsBits.Administrator) ||
+    permissions.has(PermissionFlagsBits.ManageGuild)
   );
 }

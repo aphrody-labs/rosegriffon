@@ -15,7 +15,7 @@ export interface ResultatRolloverSaisons {
 }
 
 export async function runAchilleaSeasonRollover(): Promise<ResultatRolloverSaisons> {
-  return sql.begin(async tx => {
+  return sql.begin(async (tx) => {
     // Les tables importées d'Achilléa gardent leurs politiques RLS historiques.
     // `service_role` est le rôle d'écriture déjà utilisé par la projection
     // Discord dans `achillea-sync.ts`; il est impérativement réinitialisé.
@@ -32,7 +32,13 @@ export async function runAchilleaSeasonRollover(): Promise<ResultatRolloverSaiso
 			 WHERE state = 'Active' AND ends_at <= now()
 			 RETURNING id`;
 
-    console.log(`[achillea] rollover saisons : ${activees.length} activée(s), ${cloturees.length} clôturée(s)`);
-    return { activees: activees.length, cloturees: cloturees.length, success: true };
+    console.log(
+      `[achillea] rollover saisons : ${activees.length} activée(s), ${cloturees.length} clôturée(s)`,
+    );
+    return {
+      activees: activees.length,
+      cloturees: cloturees.length,
+      success: true,
+    };
   });
 }

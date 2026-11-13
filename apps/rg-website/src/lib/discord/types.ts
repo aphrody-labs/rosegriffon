@@ -142,8 +142,10 @@ function chaine(valeur: unknown, max = 4096): string | null {
 }
 
 function entier(valeur: unknown): number | null {
-  if (typeof valeur === "number" && Number.isFinite(valeur)) return Math.trunc(valeur);
-  if (typeof valeur === "string" && /^-?\d+$/.test(valeur)) return Number.parseInt(valeur, 10);
+  if (typeof valeur === "number" && Number.isFinite(valeur))
+    return Math.trunc(valeur);
+  if (typeof valeur === "string" && /^-?\d+$/.test(valeur))
+    return Number.parseInt(valeur, 10);
   return null;
 }
 
@@ -155,7 +157,8 @@ function identifiant(valeur: unknown): string | null {
 
 /** Convertit une date Postgres (`Date` ou texte) en ISO transmissible au client. */
 export function dateIso(valeur: unknown): string | null {
-  if (valeur instanceof Date) return Number.isNaN(valeur.getTime()) ? null : valeur.toISOString();
+  if (valeur instanceof Date)
+    return Number.isNaN(valeur.getTime()) ? null : valeur.toISOString();
   if (typeof valeur === "string" && valeur.length > 0) {
     const date = new Date(valeur);
     return Number.isNaN(date.getTime()) ? null : date.toISOString();
@@ -181,13 +184,15 @@ const EXTENSIONS_IMAGE = /\.(png|jpe?g|gif|webp|avif|bmp)(\?|$)/i;
 function normaliserPieceJointe(brut: unknown): PieceJointeDiscord | null {
   const source = objet(brut);
   if (!source) return null;
-  const url = urlPubliableOuNull(source.url) ?? urlPubliableOuNull(source.proxy_url);
+  const url =
+    urlPubliableOuNull(source.url) ?? urlPubliableOuNull(source.proxy_url);
   if (!url) return null;
   const nom = chaine(source.filename, 256) ?? "fichier";
   const typeMime = chaine(source.content_type, 128);
   return {
     description: chaine(source.description, 1024),
-    est_image: typeMime?.startsWith("image/") === true || EXTENSIONS_IMAGE.test(nom),
+    est_image:
+      typeMime?.startsWith("image/") === true || EXTENSIONS_IMAGE.test(nom),
     hauteur: entier(source.height),
     id: identifiant(source.id) ?? url,
     largeur: entier(source.width),
@@ -202,7 +207,8 @@ function normaliserPieceJointe(brut: unknown): PieceJointeDiscord | null {
 function normaliserMedia(brut: unknown): MediaEncart | null {
   const source = objet(brut);
   if (!source) return null;
-  const url = urlPubliableOuNull(source.url) ?? urlPubliableOuNull(source.proxy_url);
+  const url =
+    urlPubliableOuNull(source.url) ?? urlPubliableOuNull(source.proxy_url);
   if (!url) return null;
   return { hauteur: entier(source.height), largeur: entier(source.width), url };
 }
@@ -217,13 +223,17 @@ function normaliserEncart(brut: unknown): EncartDiscord | null {
   const textePied = piedSource ? chaine(piedSource.text, 2048) : null;
 
   const champs = tableau(source.fields)
-    .map(champ => {
+    .map((champ) => {
       const c = objet(champ);
       if (!c) return null;
       const nom = chaine(c.name, 256);
       const valeur = chaine(c.value, 1024);
       if (!nom && !valeur) return null;
-      return { aligne: c.inline === true, nom: nom ?? "", valeur: valeur ?? "" };
+      return {
+        aligne: c.inline === true,
+        nom: nom ?? "",
+        valeur: valeur ?? "",
+      };
     })
     .filter((champ): champ is ChampEncart => champ !== null)
     .slice(0, 25);
@@ -231,7 +241,9 @@ function normaliserEncart(brut: unknown): EncartDiscord | null {
   const encart: EncartDiscord = {
     auteur: nomAuteur
       ? {
-          icone: urlSureOuNull(auteurSource?.icon_url) ?? urlSureOuNull(auteurSource?.proxy_icon_url),
+          icone:
+            urlSureOuNull(auteurSource?.icon_url) ??
+            urlSureOuNull(auteurSource?.proxy_icon_url),
           nom: nomAuteur,
           url: urlSureOuNull(auteurSource?.url),
         }
@@ -243,7 +255,9 @@ function normaliserEncart(brut: unknown): EncartDiscord | null {
     image: normaliserMedia(source.image),
     pied: textePied
       ? {
-          icone: urlSureOuNull(piedSource?.icon_url) ?? urlSureOuNull(piedSource?.proxy_icon_url),
+          icone:
+            urlSureOuNull(piedSource?.icon_url) ??
+            urlSureOuNull(piedSource?.proxy_icon_url),
           texte: textePied,
         }
       : null,
@@ -353,7 +367,7 @@ export function normaliserMessage(ligne: LigneMessage): MessageDiscord | null {
 
   return {
     attachments: tableau(ligne.attachments)
-      .map(piece => normaliserPieceJointe(piece))
+      .map((piece) => normaliserPieceJointe(piece))
       .filter((piece): piece is PieceJointeDiscord => piece !== null)
       .slice(0, 10),
     author_avatar_url: urlSureOuNull(ligne.author_avatar_url),
@@ -362,24 +376,28 @@ export function normaliserMessage(ligne: LigneMessage): MessageDiscord | null {
     author_is_bot: ligne.author_is_bot === true,
     author_username: chaine(ligne.author_username, 128) ?? "inconnu",
     channel_id: channelId,
-    content: typeof ligne.content === "string" ? ligne.content.slice(0, 8000) : "",
+    content:
+      typeof ligne.content === "string" ? ligne.content.slice(0, 8000) : "",
     created_at: dateIso(ligne.created_at) ?? new Date(0).toISOString(),
     edited_at: dateIso(ligne.edited_at),
     embeds: tableau(ligne.embeds)
-      .map(encart => normaliserEncart(encart))
+      .map((encart) => normaliserEncart(encart))
       .filter((encart): encart is EncartDiscord => encart !== null)
       .slice(0, 10),
     message_id: messageId,
     pinned: ligne.pinned === true,
     poll: normaliserSondage(ligne.poll),
     reactions: tableau(ligne.reactions)
-      .map(reaction => normaliserReaction(reaction))
+      .map((reaction) => normaliserReaction(reaction))
       .filter((reaction): reaction is ReactionDiscord => reaction !== null)
       .slice(0, 20),
     reference_message_id: identifiant(ligne.reference_message_id),
     stickers: tableau(ligne.stickers)
-      .map(autocollant => normaliserAutocollant(autocollant))
-      .filter((autocollant): autocollant is AutocollantDiscord => autocollant !== null)
+      .map((autocollant) => normaliserAutocollant(autocollant))
+      .filter(
+        (autocollant): autocollant is AutocollantDiscord =>
+          autocollant !== null,
+      )
       .slice(0, 3),
     type: entier(ligne.type) ?? 0,
   };

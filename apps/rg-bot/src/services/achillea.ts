@@ -39,10 +39,13 @@ export type PageGuildes = AchilleaGuildPage;
 export type StatsGuildes = AchilleaGuildStats;
 
 export type Resultat<T> =
-  { ok: true; valeur: T } | { ok: false; raison: "injoignable" | "http" | "forme"; detail: string };
+  | { ok: true; valeur: T }
+  | { ok: false; raison: "injoignable" | "http" | "forme"; detail: string };
 
 const client = createAchilleaClient({
-  baseUrl: Bun.env.ACHILLEA_UNIFIED_API_URL ?? "https://api.rosegriffon.fr/v1/achillea",
+  baseUrl:
+    Bun.env.ACHILLEA_UNIFIED_API_URL ??
+    "https://api.rosegriffon.fr/v1/achillea",
 });
 
 function adapterResultat<T>(resultat: AchilleaClientResult<T>): Resultat<T> {
@@ -61,7 +64,10 @@ function adapterResultat<T>(resultat: AchilleaClientResult<T>): Resultat<T> {
       return {
         ok: false,
         raison: "forme",
-        detail: resultat.detail.replace(/^unreadable response:/u, "réponse illisible :"),
+        detail: resultat.detail.replace(
+          /^unreadable response:/u,
+          "réponse illisible :",
+        ),
       };
     case "invalid_response":
       return { ok: false, raison: "forme", detail: resultat.detail };
@@ -69,7 +75,10 @@ function adapterResultat<T>(resultat: AchilleaClientResult<T>): Resultat<T> {
 }
 
 /** Serveurs scannés, du plus peuplé au moins peuplé. */
-export async function listerGuildes(page = 1, limite = 25): Promise<Resultat<PageGuildes>> {
+export async function listerGuildes(
+  page = 1,
+  limite = 25,
+): Promise<Resultat<PageGuildes>> {
   return adapterResultat(await client.guilds.list(page, limite));
 }
 
@@ -79,7 +88,9 @@ export async function statistiquesGuildes(): Promise<Resultat<StatsGuildes>> {
 }
 
 /** Fiche d'un serveur avec ses rôles et ses salons. */
-export async function detailGuilde(id: string): Promise<Resultat<GuildeDetaillee>> {
+export async function detailGuilde(
+  id: string,
+): Promise<Resultat<GuildeDetaillee>> {
   return adapterResultat(await client.guilds.get(id));
 }
 

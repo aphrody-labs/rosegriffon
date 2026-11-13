@@ -14,7 +14,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@rosegriffon/ui";
-import { Check, Edit, EyeOff, MoreHorizontal, RotateCcw, Trash2 } from "lucide-react";
+import {
+  Check,
+  Edit,
+  EyeOff,
+  MoreHorizontal,
+  RotateCcw,
+  Trash2,
+} from "lucide-react";
 
 import type { TeamMember } from "./actions";
 import { AvatarMembre } from "./AvatarMembre";
@@ -65,7 +72,11 @@ export function StaffMemberCard({
               alt={`Photo de ${member.name}`}
               taille={80}
               attenue={estInactif}
-              className={estInactif ? "border-4 border-alerte/40" : "border-4 border-background"}
+              className={
+                estInactif
+                  ? "border-4 border-alerte/40"
+                  : "border-4 border-background"
+              }
             />
           </div>
           <div className="absolute right-2 top-2">
@@ -84,7 +95,9 @@ export function StaffMemberCard({
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
                 {estInactif ? (
-                  <DropdownMenuItem onClick={() => onToggleActive(member, true)}>
+                  <DropdownMenuItem
+                    onClick={() => onToggleActive(member, true)}
+                  >
                     {estEnAttente ? (
                       <Check className="mr-2 size-4" aria-hidden="true" />
                     ) : (
@@ -93,7 +106,9 @@ export function StaffMemberCard({
                     {libelleValidation}
                   </DropdownMenuItem>
                 ) : (
-                  <DropdownMenuItem onClick={() => onToggleActive(member, false)}>
+                  <DropdownMenuItem
+                    onClick={() => onToggleActive(member, false)}
+                  >
                     <EyeOff className="mr-2 size-4" aria-hidden="true" />
                     Désactiver
                   </DropdownMenuItem>
@@ -103,7 +118,10 @@ export function StaffMemberCard({
                   Modifier
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => onDelete(member)} className="text-destructive focus:text-destructive">
+                <DropdownMenuItem
+                  onClick={() => onDelete(member)}
+                  className="text-destructive focus:text-destructive"
+                >
                   <Trash2 className="mr-2 size-4" aria-hidden="true" />
                   Supprimer
                 </DropdownMenuItem>
@@ -114,10 +132,14 @@ export function StaffMemberCard({
       </CardHeader>
 
       <CardContent className="mt-12 p-4 pb-2 pt-10 text-center">
-        <h3 className="text-lg font-semibold leading-tight wrap-break-word">{member.name}</h3>
+        <h3 className="text-lg font-semibold leading-tight wrap-break-word">
+          {member.name}
+        </h3>
         <p
           className={
-            roleProvisoire ? "text-sm font-medium italic text-alerte" : "text-sm font-medium text-on-surface-variant"
+            roleProvisoire
+              ? "text-sm font-medium italic text-alerte"
+              : "text-sm font-medium text-on-surface-variant"
           }
           title={roleProvisoire ? "Rôle générique à préciser" : undefined}
         >
@@ -134,7 +156,10 @@ export function StaffMemberCard({
               className="inline-flex items-center rounded-full bg-discord/10 px-2 py-0.5 text-xs font-medium text-discord hover:bg-discord/20"
             >
               Lié à Discord
-              <span className="sr-only"> — ouvrir le profil {member.discord_user_id}</span>
+              <span className="sr-only">
+                {" "}
+                — ouvrir le profil {member.discord_user_id}
+              </span>
             </a>
           )}
           {estImportDiscord && (
@@ -142,13 +167,20 @@ export function StaffMemberCard({
               Import Discord
             </Badge>
           )}
-          {estInactif && !estEnAttente && <Badge variant="secondary">Désactivé</Badge>}
+          {estInactif && !estEnAttente && (
+            <Badge variant="secondary">Désactivé</Badge>
+          )}
         </div>
       </CardContent>
 
       <CardFooter className="flex flex-col gap-2 p-4 pb-6 pt-2">
         {estInactif ? (
-          <Button size="sm" className="w-full" disabled={disabled} onClick={() => onToggleActive(member, true)}>
+          <Button
+            size="sm"
+            className="w-full"
+            disabled={disabled}
+            onClick={() => onToggleActive(member, true)}
+          >
             {estEnAttente ? (
               <Check className="mr-2 size-4" aria-hidden="true" />
             ) : (
@@ -157,7 +189,9 @@ export function StaffMemberCard({
             {libelleValidation}
           </Button>
         ) : (
-          <div className="text-xs text-on-surface-variant">Ordre&nbsp;: {member.display_index ?? "—"}</div>
+          <div className="text-xs text-on-surface-variant">
+            Ordre&nbsp;: {member.display_index ?? "—"}
+          </div>
         )}
       </CardFooter>
     </Card>

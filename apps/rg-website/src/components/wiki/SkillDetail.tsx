@@ -163,11 +163,15 @@ export function SkillDetail({
 
           {/* Title + Alt Names */}
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold font-heading text-on-surface leading-tight">{name}</h1>
+            <h1 className="text-2xl md:text-3xl font-bold font-heading text-on-surface leading-tight">
+              {name}
+            </h1>
             {(nameEN || nameJA) && (
               <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1">
                 {nameEN && nameEN !== name && (
-                  <span className="text-sm text-on-surface-variant/70 italic">{nameEN}</span>
+                  <span className="text-sm text-on-surface-variant/70 italic">
+                    {nameEN}
+                  </span>
                 )}
                 {nameJA && (
                   <span className="text-sm text-on-surface-variant/50 font-light">
@@ -194,7 +198,13 @@ export function SkillDetail({
           />
 
           {/* Description Box */}
-          <DescriptionBox skill={skill} desc={desc} descEN={descEN} descJA={descJA} sheetData={sheetData} />
+          <DescriptionBox
+            skill={skill}
+            desc={desc}
+            descEN={descEN}
+            descJA={descJA}
+            sheetData={sheetData}
+          />
         </div>
 
         {/* Right Column: Overdrive + Related Skills */}
@@ -203,14 +213,18 @@ export function SkillDetail({
           {overrideSkills && overrideSkills.length > 0 && (
             <OverrideSkillSection
               overrides={overrideSkills}
-              currentSkillId={(skill as any).skillId || (skill as any).skillID || skill.skillIDStr}
+              currentSkillId={
+                (skill as any).skillId ||
+                (skill as any).skillID ||
+                skill.skillIDStr
+              }
             />
           )}
 
           <div className="space-y-4">
             <h3 className="text-lg font-bold text-on-surface px-1">À suivre</h3>
             <div className="space-y-3">
-              {relatedSkills.map(relSkill => (
+              {relatedSkills.map((relSkill) => (
                 <RelatedSkillItem key={relSkill.skillID} skill={relSkill} />
               ))}
             </div>
@@ -228,13 +242,23 @@ export function SkillDetail({
  * lecture DB indisponible) on retombe sur la vidéo principale portée par la
  * colonne scalaire `video_url`.
  */
-function buildVideoVariants(skill: Skill, videos?: SkillVideoVariant[]): SkillVideoVariant[] {
+function buildVideoVariants(
+  skill: Skill,
+  videos?: SkillVideoVariant[],
+): SkillVideoVariant[] {
   if (videos && videos.length > 0) {
     return videos;
   }
   const posterUrl = (skill as any).posterUrl as string | null | undefined;
   return skill.videoUrl
-    ? [{ label: "Movie", position: 0, posterUrl: posterUrl ?? null, videoUrl: skill.videoUrl }]
+    ? [
+        {
+          label: "Movie",
+          position: 0,
+          posterUrl: posterUrl ?? null,
+          videoUrl: skill.videoUrl,
+        },
+      ]
     : [];
 }
 
@@ -283,8 +307,16 @@ function VideoSection({
           </div>
         ) : (
           <>
-            <Icon name={getCategoryIcon(skill.category)} size={96} className="sm:hidden" />
-            <Icon name={getCategoryIcon(skill.category)} size={144} className="hidden sm:block" />
+            <Icon
+              name={getCategoryIcon(skill.category)}
+              size={96}
+              className="sm:hidden"
+            />
+            <Icon
+              name={getCategoryIcon(skill.category)}
+              size={144}
+              className="hidden sm:block"
+            />
           </>
         )}
       </div>
@@ -318,14 +350,26 @@ function MetaRow({
       <div className="flex items-center gap-3 flex-wrap">
         <div className="size-10 rounded-full bg-surface-container-highest flex items-center justify-center border border-outline-variant/10 overflow-hidden shrink-0">
           {elementIconUrl ? (
-            <Image src={elementIconUrl} alt={element} width={24} height={24} className="object-contain" />
+            <Image
+              src={elementIconUrl}
+              alt={element}
+              width={24}
+              height={24}
+              className="object-contain"
+            />
           ) : (
-            <CircleDot size={18} className="text-on-surface-variant" aria-hidden="true" />
+            <CircleDot
+              size={18}
+              className="text-on-surface-variant"
+              aria-hidden="true"
+            />
           )}
         </div>
         <div className="flex flex-col">
           <span className="text-sm font-bold text-on-surface">{category}</span>
-          <span className="text-xs text-on-surface-variant">{element || "Élément inconnu"}</span>
+          <span className="text-xs text-on-surface-variant">
+            {element || "Élément inconnu"}
+          </span>
         </div>
 
         {/* Skill Type Badge (main/sub) */}
@@ -338,8 +382,10 @@ function MetaRow({
         {/* Sheet type/subType badges — skip if type already matches the displayed category */}
         {sheetData?.type &&
           (() => {
-            const translatedType = SHEET_TYPE_FR[sheetData.type] || sheetData.type;
-            const isDuplicate = translatedType.toLowerCase() === category.toLowerCase();
+            const translatedType =
+              SHEET_TYPE_FR[sheetData.type] || sheetData.type;
+            const isDuplicate =
+              translatedType.toLowerCase() === category.toLowerCase();
             // Only show if it adds new information (different type or has a subType)
             if (isDuplicate && !sheetData.subType) {
               return null;
@@ -392,9 +438,14 @@ function DescriptionBox({
   sheetData?: CommunitySheetData;
 }) {
   // Collect all shops (from skill + sheetData) and deduplicate
-  const existingShops = new Set((skill.shops?.fr || []).map((s: string) => s.toLowerCase()));
-  const sheetShop = sheetData?.shop ? SHOP_FR[sheetData.shop] || sheetData.shop : null;
-  const sheetShopIsNew = sheetShop && !existingShops.has(sheetShop.toLowerCase());
+  const existingShops = new Set(
+    (skill.shops?.fr || []).map((s: string) => s.toLowerCase()),
+  );
+  const sheetShop = sheetData?.shop
+    ? SHOP_FR[sheetData.shop] || sheetData.shop
+    : null;
+  const sheetShopIsNew =
+    sheetShop && !existingShops.has(sheetShop.toLowerCase());
 
   return (
     <div className="bg-surface-container-high/50 hover:bg-surface-container-high transition-colors rounded-xl p-4 cursor-default">
@@ -405,38 +456,62 @@ function DescriptionBox({
         </span>
         {skill.foulRate !== undefined && skill.foulRate > 0 && (
           <span className="inline-flex items-center gap-1.5">
-            <AlertCircle size={16} className="text-tertiary" aria-hidden="true" />
+            <AlertCircle
+              size={16}
+              className="text-tertiary"
+              aria-hidden="true"
+            />
             {skill.foulRate}% Faute
           </span>
         )}
         {sheetData?.duration != null && (
           <span className="inline-flex items-center gap-1.5">
-            <Hourglass size={16} className="text-on-surface-variant" aria-hidden="true" />
+            <Hourglass
+              size={16}
+              className="text-on-surface-variant"
+              aria-hidden="true"
+            />
             {sheetData.duration} sec.
           </span>
         )}
         {(() => {
-          const evolution = (skill as any).evolutionType ?? (skill.growthType !== undefined ? skill.growthSpeed : null);
+          const evolution =
+            (skill as any).evolutionType ??
+            (skill.growthType !== undefined ? skill.growthSpeed : null);
           return evolution ? (
             <span className="inline-flex items-center gap-1.5">
-              <TrendingUp size={16} className="text-secondary" aria-hidden="true" />
+              <TrendingUp
+                size={16}
+                className="text-secondary"
+                aria-hidden="true"
+              />
               {evolution} Évolution
             </span>
           ) : null;
         })()}
         {skill.partnerCount !== undefined && skill.partnerCount > 0 && (
           <span className="inline-flex items-center gap-1.5">
-            <Users size={16} className="text-on-surface-variant" aria-hidden="true" />
+            <Users
+              size={16}
+              className="text-on-surface-variant"
+              aria-hidden="true"
+            />
             {skill.partnerCount + 1} Joueurs
           </span>
         )}
         {skill.recastTime !== undefined && skill.recastTime > 0 && (
           <span className="inline-flex items-center gap-1.5">
-            <Timer size={16} className="text-on-surface-variant" aria-hidden="true" />
+            <Timer
+              size={16}
+              className="text-on-surface-variant"
+              aria-hidden="true"
+            />
             {skill.recastTime} Recharge
           </span>
         )}
-        <span className="opacity-40 font-mono font-normal">#{(skill as any).internalCode || skill.skillIDStr}</span>
+        <span className="opacity-40 font-mono font-normal">
+          #{(skill as any).internalCode || skill.skillIDStr}
+        </span>
       </div>
 
       {/* Description FR */}
@@ -463,7 +538,9 @@ function DescriptionBox({
         <div className="border-t border-outline-variant/20 pt-3 mt-3 mb-2">
           <div className="flex items-center gap-1.5 mb-2">
             <Sparkles size={16} className="text-tertiary" aria-hidden="true" />
-            <span className="text-xs font-bold text-on-surface-variant uppercase tracking-wide">Effets</span>
+            <span className="text-xs font-bold text-on-surface-variant uppercase tracking-wide">
+              Effets
+            </span>
           </div>
           <ul className="list-disc list-inside text-sm space-y-1">
             {sheetData.effects.map((eff: string, i: number) => (
@@ -485,20 +562,33 @@ function DescriptionBox({
           return (
             <div className="border-t border-outline-variant/20 pt-3 mt-3">
               <div className="flex items-center gap-1.5 mb-2">
-                <Store size={16} className="text-secondary" aria-hidden="true" />
-                <span className="text-xs font-bold text-on-surface-variant uppercase tracking-wide">Obtention</span>
+                <Store
+                  size={16}
+                  className="text-secondary"
+                  aria-hidden="true"
+                />
+                <span className="text-xs font-bold text-on-surface-variant uppercase tracking-wide">
+                  Obtention
+                </span>
               </div>
               <div className="space-y-2">
                 {recipes.map((recipe, i) => (
-                  <div key={i} className="p-2 rounded-lg bg-surface-container-high/50 border border-outline-variant/10">
-                    <div className="text-[10px] font-bold text-on-surface-variant/60 uppercase mb-1">{recipe.shop}</div>
+                  <div
+                    key={i}
+                    className="p-2 rounded-lg bg-surface-container-high/50 border border-outline-variant/10"
+                  >
+                    <div className="text-[10px] font-bold text-on-surface-variant/60 uppercase mb-1">
+                      {recipe.shop}
+                    </div>
                     <div className="flex flex-wrap gap-1.5">
                       {recipe.costs.map((cost, j) => (
                         <span
                           key={j}
                           className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-primary/10 text-primary text-[11px] font-bold border border-primary/20"
                         >
-                          <span className="text-on-surface font-black">{cost.quantity}x</span>
+                          <span className="text-on-surface font-black">
+                            {cost.quantity}x
+                          </span>
                           {cost.name}
                         </span>
                       ))}
@@ -513,8 +603,14 @@ function DescriptionBox({
           return (
             <div className="border-t border-outline-variant/20 pt-3 mt-3">
               <div className="flex items-center gap-1.5 mb-2">
-                <Store size={16} className="text-secondary" aria-hidden="true" />
-                <span className="text-xs font-bold text-on-surface-variant uppercase tracking-wide">Obtention</span>
+                <Store
+                  size={16}
+                  className="text-secondary"
+                  aria-hidden="true"
+                />
+                <span className="text-xs font-bold text-on-surface-variant uppercase tracking-wide">
+                  Obtention
+                </span>
               </div>
               <div className="flex flex-wrap gap-2">
                 {skill.shops?.fr?.map((shop: string, i: number) => (
@@ -591,7 +687,8 @@ function RelatedSkillItem({ skill }: { skill: Skill }) {
         </h4>
         <div className="mt-1 text-xs text-on-surface-variant flex flex-col gap-0.5">
           <span>
-            {skill.categoryName?.fr || "Spécial"} • {skill.elementName?.fr || "Néant"}
+            {skill.categoryName?.fr || "Spécial"} •{" "}
+            {skill.elementName?.fr || "Néant"}
           </span>
           <div className="flex items-center gap-2">
             <span className="bg-surface-container-high px-1.5 rounded text-[10px]">

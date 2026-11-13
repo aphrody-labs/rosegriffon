@@ -3,21 +3,21 @@
 import { PatreonCreatorClient } from "@rosegriffon/patreon-bun";
 
 declare const env: {
-	CLIENT_ID: string;
-	CLIENT_SECRET: string;
-	CREATOR_ACCESS_TOKEN: string;
-	CREATOR_REFRESH_TOKEN: string;
+  CLIENT_ID: string;
+  CLIENT_SECRET: string;
+  CREATOR_ACCESS_TOKEN: string;
+  CREATOR_REFRESH_TOKEN: string;
 };
 
 const client = new PatreonCreatorClient({
-	oauth: {
-		clientId: env.CLIENT_ID,
-		clientSecret: env.CLIENT_SECRET,
-		token: {
-			access_token: env.CREATOR_ACCESS_TOKEN,
-			refresh_token: env.CREATOR_REFRESH_TOKEN,
-		},
-	},
+  oauth: {
+    clientId: env.CLIENT_ID,
+    clientSecret: env.CLIENT_SECRET,
+    token: {
+      access_token: env.CREATOR_ACCESS_TOKEN,
+      refresh_token: env.CREATOR_REFRESH_TOKEN,
+    },
+  },
 });
 
 // The cached token is the token from the client options

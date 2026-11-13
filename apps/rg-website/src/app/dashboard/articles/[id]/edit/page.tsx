@@ -1,6 +1,12 @@
 export const dynamic = "force-dynamic";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@rosegriffon/ui";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@rosegriffon/ui";
 import { ArrowLeft, PenSquare } from "lucide-react";
 import Link from "@/components/shared/Link";
 import { redirect } from "next/navigation";
@@ -10,7 +16,11 @@ import { createPostgresClient } from "@rosegriffon/db/service";
 
 import { getServerUser } from "@/lib/auth-helpers";
 
-export default async function EditArticlePage({ params }: { params: Promise<{ id: string }> }) {
+export default async function EditArticlePage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const { id } = await params;
   const user = await getServerUser();
   if (!user) {
@@ -20,14 +30,23 @@ export default async function EditArticlePage({ params }: { params: Promise<{ id
   const supabase = createPostgresClient();
 
   // Récupérer l'article
-  const { data: article } = await supabase.from("articles").select("*").eq("id", id).eq("app", "website").single();
+  const { data: article } = await supabase
+    .from("articles")
+    .select("*")
+    .eq("id", id)
+    .eq("app", "website")
+    .single();
 
   if (!article) {
     redirect("/dashboard/articles");
   }
 
   // Vérifier que l'utilisateur est l'auteur ou admin
-  const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
 
   const isAuthor = article.author_id === user.id;
   const isAdmin = profile?.role === "admin";
@@ -37,7 +56,10 @@ export default async function EditArticlePage({ params }: { params: Promise<{ id
   }
 
   // Récupérer les catégories
-  const { data: categoriesData } = await supabase.from("article_categories").select("*").order("name");
+  const { data: categoriesData } = await supabase
+    .from("article_categories")
+    .select("*")
+    .order("name");
 
   const categories = categoriesData || [];
 
@@ -62,7 +84,9 @@ export default async function EditArticlePage({ params }: { params: Promise<{ id
               <h1 className="text-3xl sm:text-4xl font-bold bg-clip-text text-transparent bg-linear-to-r from-indigo-500 to-indigo-600">
                 Éditer la Chronique
               </h1>
-              <p className="text-base text-gray-600 dark:text-gray-400 mt-1">{article.title}</p>
+              <p className="text-base text-gray-600 dark:text-gray-400 mt-1">
+                {article.title}
+              </p>
             </div>
           </div>
         </div>
@@ -71,10 +95,16 @@ export default async function EditArticlePage({ params }: { params: Promise<{ id
         <Card className="shadow-lg">
           <CardHeader>
             <CardTitle>Modifier votre chronique</CardTitle>
-            <CardDescription>Apportez les modifications nécessaires à votre entrée</CardDescription>
+            <CardDescription>
+              Apportez les modifications nécessaires à votre entrée
+            </CardDescription>
           </CardHeader>
           <CardContent>
-            <ArticleEditor categories={categories} userId={user.id} initialData={article} />
+            <ArticleEditor
+              categories={categories}
+              userId={user.id}
+              initialData={article}
+            />
           </CardContent>
         </Card>
       </div>

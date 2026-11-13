@@ -18,14 +18,15 @@ export default function GoogleMapEpita() {
     let disposed = false;
     let map: import("leaflet").Map | undefined;
 
-    void import("leaflet").then(L => {
+    void import("leaflet").then((L) => {
       if (disposed) {
         return;
       }
       const at: [number, number] = [EPITA_COORDS.lat, EPITA_COORDS.lng];
       map = L.map(el, { scrollWheelZoom: false }).setView(at, 18);
       L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+        attribution:
+          '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
         maxZoom: 19,
       }).addTo(map);
       const icon = L.divIcon({
@@ -52,9 +53,8 @@ export default function GoogleMapEpita() {
   }, []);
 
   return (
-    <div
+    <section
       ref={mapRef}
-      role="region"
       className="w-full h-[500px] rounded-xl shadow-lg border border-gray-200 overflow-hidden"
       aria-label="Carte de localisation de l'EPITA"
     />

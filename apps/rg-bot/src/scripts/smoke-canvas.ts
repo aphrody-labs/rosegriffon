@@ -35,10 +35,12 @@ async function ecrire(nom: string, png: Buffer): Promise<void> {
   console.log(`${nom} octets=${png.length} chemin=${chemin}`);
 }
 
-const AVATAR_ROMPU = "https://cdn.discordapp.com/avatars/000000000000000000/inexistant.png";
+const AVATAR_ROMPU =
+  "https://cdn.discordapp.com/avatars/000000000000000000/inexistant.png";
 
 /** Pseudo volontairement hostile : emoji, hangûl, thaï, mot d'un seul tenant. */
-const PSEUDO_EXTREME = "🔥🔥 SuperUtilisateurAvecUnPseudoBeaucoupTropLongQuiNeTientPas 한국어 ไทย 🌸✨";
+const PSEUDO_EXTREME =
+  "🔥🔥 SuperUtilisateurAvecUnPseudoBeaucoupTropLongQuiNeTientPas 한국어 ไทย 🌸✨";
 
 function membre(index: number): MemberCardData {
   return {
@@ -91,13 +93,17 @@ async function scenariosSynthetiques(): Promise<void> {
       bio: `${PSEUDO_EXTREME} ${"MotIndivisibleQuiDoitEtreCoupeAuMilieuSinonIlDeborde".repeat(3)} ${"Une bio très longue qui doit être tronquée proprement au bout de six lignes. ".repeat(8)}`,
       role: "Responsable de la cellule de médiation et des partenariats extérieurs",
       twitter_handle: "@un_handle_vraiment_beaucoup_trop_long_pour_la_carte",
-      website: "https://exemple.rosegriffon.fr/un/chemin/vraiment/tres/long/qui/deborde",
+      website:
+        "https://exemple.rosegriffon.fr/un/chemin/vraiment/tres/long/qui/deborde",
       discord_id: "987654321098765432",
     }),
   );
 
   await ecrire("membres-1", await renderMemberList([membre(1)]));
-  await ecrire("membres-25", await renderMemberList(Array.from({ length: 25 }, (_, i) => membre(i + 1))));
+  await ecrire(
+    "membres-25",
+    await renderMemberList(Array.from({ length: 25 }, (_, i) => membre(i + 1))),
+  );
   await ecrire(
     "membres-pseudo-extreme",
     await renderMemberList([
@@ -140,16 +146,23 @@ async function scenariosSynthetiques(): Promise<void> {
   );
   await ecrire(
     "equipe-1",
-    await renderTeamGrid([{ name: "Koltilasko", role: "Président", image_url: null }], "Bureau"),
+    await renderTeamGrid(
+      [{ name: "Koltilasko", role: "Président", image_url: null }],
+      "Bureau",
+    ),
   );
-  await ecrire("equipe-vide", await renderTeamGrid([], "Équipe Lore", "Filtré : archiviste"));
+  await ecrire(
+    "equipe-vide",
+    await renderTeamGrid([], "Équipe Lore", "Filtré : archiviste"),
+  );
 
   await ecrire(
     "evenements",
     await renderEventList([
       {
         title: "Tournoi Achilléa — phase finale",
-        description: "Diffusion en direct sur Twitch avec les commentateurs de la communauté.",
+        description:
+          "Diffusion en direct sur Twitch avec les commentateurs de la communauté.",
         start_time: new Date(2026, 8, 12, 20, 30),
         location: "En ligne · Twitch",
         image_url: null,
@@ -158,7 +171,8 @@ async function scenariosSynthetiques(): Promise<void> {
         title: PSEUDO_EXTREME,
         description: null,
         start_time: "date-invalide",
-        location: "Un lieu au nom interminable qui ne tient pas sur la ligne prévue pour lui",
+        location:
+          "Un lieu au nom interminable qui ne tient pas sur la ligne prévue pour lui",
         image_url: AVATAR_ROMPU,
       },
     ]),
@@ -196,18 +210,25 @@ async function scenariosProduction(): Promise<void> {
   try {
     services = await import("../services/website");
   } catch (err) {
-    console.log(`production=indisponible raison=${err instanceof Error ? err.message : err}`);
+    console.log(
+      `production=indisponible raison=${err instanceof Error ? err.message : err}`,
+    );
     return;
   }
   try {
     const equipe = await services.getTeam("staff");
-    await ecrire("prod-equipe", await renderTeamGrid(equipe, "Staff Rose Griffon"));
+    await ecrire(
+      "prod-equipe",
+      await renderTeamGrid(equipe, "Staff Rose Griffon"),
+    );
     const profil = await services.getProfile("koltilasko");
     if (profil) await ecrire("prod-profil", await renderProfileCard(profil));
     const evenements = await services.nextEvents(5);
     await ecrire("prod-evenements", await renderEventList(evenements));
   } catch (err) {
-    console.log(`production=echec raison=${err instanceof Error ? err.message : err}`);
+    console.log(
+      `production=echec raison=${err instanceof Error ? err.message : err}`,
+    );
   }
 }
 

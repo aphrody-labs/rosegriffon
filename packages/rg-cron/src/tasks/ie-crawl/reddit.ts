@@ -26,7 +26,11 @@ interface RedditPost {
 /**
  * Crawle les derniers posts du subreddit r/inazumaeleven pour Victory Road.
  */
-export async function crawlReddit(): Promise<{ success: boolean; count: number; error?: string }> {
+export async function crawlReddit(): Promise<{
+  success: boolean;
+  count: number;
+  error?: string;
+}> {
   console.log("[Crawl Reddit] Démarrage du crawl Reddit...");
 
   try {
@@ -39,18 +43,26 @@ export async function crawlReddit(): Promise<{ success: boolean; count: number; 
     // les IP de centres de données sans jeton développeur (403 « blocked by network
     // security ») : l'échec est alors explicite, jamais un succès à vide.
     const reponse = await fetch(url, {
-      headers: { "user-agent": "rosegriffon-cron/1.0 (+https://rosegriffon.fr)" },
+      headers: {
+        "user-agent": "rosegriffon-cron/1.0 (+https://rosegriffon.fr)",
+      },
       signal: AbortSignal.timeout(30_000),
     });
     if (!reponse.ok) {
-      throw new Error(`Reddit a répondu HTTP ${reponse.status} (${(await reponse.text()).slice(0, 80).trim()})`);
+      throw new Error(
+        `Reddit a répondu HTTP ${reponse.status} (${(await reponse.text()).slice(0, 80).trim()})`,
+      );
     }
-    const json = (await reponse.json()) as { data?: { children?: { data: RedditPost }[] } };
+    const json = (await reponse.json()) as {
+      data?: { children?: { data: RedditPost }[] };
+    };
 
     const children = json?.data?.children || [];
     let crawlCount = 0;
 
-    console.log(`[Crawl Reddit] ${children.length} posts récupérés. Filtrage...`);
+    console.log(
+      `[Crawl Reddit] ${children.length} posts récupérés. Filtrage...`,
+    );
 
     for (const child of children) {
       const post = child.data as RedditPost;
@@ -83,7 +95,8 @@ export async function crawlReddit(): Promise<{ success: boolean; count: number; 
         id: post.id,
         title: post.title,
         url: `https://www.reddit.com${post.permalink}`,
-        date: new Date(post.created_utc * 1000).toISOString().split("T")[0] || "",
+        date:
+          new Date(post.created_utc * 1000).toISOString().split("T")[0] || "",
         author: post.author,
         score: post.score,
         num_comments: post.num_comments,
@@ -107,7 +120,9 @@ export async function crawlReddit(): Promise<{ success: boolean; count: number; 
       crawlCount++;
     }
 
-    console.log(`[Crawl Reddit] Terminé. ${crawlCount} nouveaux posts Victory Road enregistrés.`);
+    console.log(
+      `[Crawl Reddit] Terminé. ${crawlCount} nouveaux posts Victory Road enregistrés.`,
+    );
     return { success: true, count: crawlCount };
   } catch (err: any) {
     const msg = err.message || String(err);

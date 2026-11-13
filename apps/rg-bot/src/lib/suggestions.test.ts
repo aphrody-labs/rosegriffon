@@ -45,7 +45,9 @@ describe("états", () => {
     for (const vers of ETATS_SUGGESTION) {
       expect(transitionSuggestionPermise("faite", vers)).toBe(false);
     }
-    expect(refusTransitionSuggestion("faite", "ouverte")).toContain("plus rien à décider");
+    expect(refusTransitionSuggestion("faite", "ouverte")).toContain(
+      "plus rien à décider",
+    );
   });
 
   test("une transition inconnue est refusée, pas devinée", () => {
@@ -56,7 +58,9 @@ describe("états", () => {
 
 describe("proposition", () => {
   test("une suggestion argumentée passe", () => {
-    const resultat = validerProposition("  Ajouter un salon dédié aux tournois, on en organise deux par mois.  ");
+    const resultat = validerProposition(
+      "  Ajouter un salon dédié aux tournois, on en organise deux par mois.  ",
+    );
     expect(resultat.ok).toBe(true);
     if (!resultat.ok) return;
     expect(resultat.texte).toStartWith("Ajouter");
@@ -66,7 +70,9 @@ describe("proposition", () => {
   test("les retours à la ligne sont CONSERVÉS", () => {
     // Contrairement au sujet d'un ticket : une suggestion argumentée en a
     // besoin, et elle vit dans une description d'embed, qui les accepte.
-    const resultat = validerProposition("Première ligne assez longue\nSeconde ligne");
+    const resultat = validerProposition(
+      "Première ligne assez longue\nSeconde ligne",
+    );
     expect(resultat.ok).toBe(true);
     if (!resultat.ok) return;
     expect(resultat.texte).toContain("\n");
@@ -94,7 +100,9 @@ describe("proposition", () => {
 
   test("un motif vide n'existe pas", () => {
     expect(motifSuggestionPropre("  ")).toBeNull();
-    expect(motifSuggestionPropre("Déjà prévu pour septembre")).toBe("Déjà prévu pour septembre");
+    expect(motifSuggestionPropre("Déjà prévu pour septembre")).toBe(
+      "Déjà prévu pour septembre",
+    );
   });
 });
 
@@ -126,7 +134,12 @@ describe("score", () => {
   });
 
   test("sans amorce du bot, rien n'est retiré", () => {
-    expect(score(3, 1, false)).toEqual({ contre: 1, ecart: 2, pour: 3, total: 4 });
+    expect(score(3, 1, false)).toEqual({
+      contre: 1,
+      ecart: 2,
+      pour: 3,
+      total: 4,
+    });
   });
 
   test("un compteur à zéro ne devient jamais négatif", () => {

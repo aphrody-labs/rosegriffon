@@ -21,12 +21,20 @@ export const REACTION_CONTRE = "👎";
 
 // ─── États ──────────────────────────────────────────────────────────────────
 
-export const ETATS_SUGGESTION = ["ouverte", "acceptee", "refusee", "faite"] as const;
+export const ETATS_SUGGESTION = [
+  "ouverte",
+  "acceptee",
+  "refusee",
+  "faite",
+] as const;
 
 export type EtatSuggestion = (typeof ETATS_SUGGESTION)[number];
 
 export function estEtatSuggestion(valeur: unknown): valeur is EtatSuggestion {
-  return typeof valeur === "string" && (ETATS_SUGGESTION as readonly string[]).includes(valeur);
+  return (
+    typeof valeur === "string" &&
+    (ETATS_SUGGESTION as readonly string[]).includes(valeur)
+  );
 }
 
 interface Habillage {
@@ -57,21 +65,28 @@ export function intentionEtatSuggestion(etat: string): Habillage["intention"] {
  * doit pas avoir à demander à l'auteur de la reproposer. Une suggestion `faite`
  * est terminale — ce qui est fait est fait.
  */
-const TRANSITIONS: Readonly<Record<EtatSuggestion, readonly EtatSuggestion[]>> = Object.freeze({
-  acceptee: ["faite", "refusee", "ouverte"],
-  faite: [],
-  ouverte: ["acceptee", "refusee"],
-  refusee: ["ouverte", "acceptee"],
-});
+const TRANSITIONS: Readonly<Record<EtatSuggestion, readonly EtatSuggestion[]>> =
+  Object.freeze({
+    acceptee: ["faite", "refusee", "ouverte"],
+    faite: [],
+    ouverte: ["acceptee", "refusee"],
+    refusee: ["ouverte", "acceptee"],
+  });
 
-export function transitionSuggestionPermise(depuis: string, vers: string): boolean {
+export function transitionSuggestionPermise(
+  depuis: string,
+  vers: string,
+): boolean {
   if (!estEtatSuggestion(depuis) || !estEtatSuggestion(vers)) {
     return false;
   }
   return TRANSITIONS[depuis].includes(vers);
 }
 
-export function refusTransitionSuggestion(depuis: string, vers: string): string {
+export function refusTransitionSuggestion(
+  depuis: string,
+  vers: string,
+): string {
   if (depuis === "faite") {
     return "Cette suggestion est marquée comme faite : il n'y a plus rien à décider.";
   }
@@ -102,7 +117,8 @@ function nettoyer(brut: unknown, limite: number): string | null {
   return propre.length <= limite ? propre : `${propre.slice(0, limite - 1)}…`;
 }
 
-export type ResultatProposition = { ok: true; texte: string } | { ok: false; erreur: string };
+export type ResultatProposition =
+  { ok: true; texte: string } | { ok: false; erreur: string };
 
 /**
  * Valide une proposition.
@@ -134,8 +150,13 @@ export function motifSuggestionPropre(brut: unknown): string | null {
 
 // ─── Numérotation et affichage ──────────────────────────────────────────────
 
-export function prochainNumeroSuggestion(dernier: number | null | undefined): number {
-  const valeur = typeof dernier === "number" && Number.isFinite(dernier) ? Math.floor(dernier) : 0;
+export function prochainNumeroSuggestion(
+  dernier: number | null | undefined,
+): number {
+  const valeur =
+    typeof dernier === "number" && Number.isFinite(dernier)
+      ? Math.floor(dernier)
+      : 0;
   return Math.max(1, valeur + 1);
 }
 

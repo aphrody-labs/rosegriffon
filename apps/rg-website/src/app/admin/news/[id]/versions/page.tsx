@@ -1,5 +1,8 @@
 import { notFound } from "next/navigation";
-import { getArticleVersions, restoreArticleVersion } from "@/app/actions/articles";
+import {
+  getArticleVersions,
+  restoreArticleVersion,
+} from "@/app/actions/articles";
 import { AdminPageHeader as DashboardPageHeader } from "@rosegriffon/ui";
 import { createPostgresClient } from "@rosegriffon/db/service";
 import { VersionsList } from "./VersionsList";
@@ -48,10 +51,16 @@ export default async function VersionsPage({ params }: VersionsPageProps) {
       />
 
       {versions.length > 0 ? (
-        <VersionsList versions={versions} articleId={article.id} restoreAction={restoreArticleVersion} />
+        <VersionsList
+          versions={versions}
+          articleId={article.id}
+          restoreAction={restoreArticleVersion}
+        />
       ) : (
         <div className="text-center py-20">
-          <p className="text-on-surface-variant">Aucune version enregistrée pour cet article.</p>
+          <p className="text-on-surface-variant">
+            Aucune version enregistrée pour cet article.
+          </p>
           <p className="text-xs text-on-surface-variant/60 mt-2">
             Les versions sont créées automatiquement à chaque sauvegarde.
           </p>

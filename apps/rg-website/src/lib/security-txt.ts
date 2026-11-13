@@ -11,7 +11,10 @@ const UN_AN_MS = 365 * 24 * 60 * 60 * 1000;
  * régénération de la route (un an après `maintenant`), au lieu d'être figé dans un
  * fichier statique qui expirerait sans que personne ne le voie.
  */
-export function securityTxt(siteUrl: string, maintenant: Date = new Date()): string {
+export function securityTxt(
+  siteUrl: string,
+  maintenant: Date = new Date(),
+): string {
   const origine = siteUrl.replace(/\/+$/, "");
   const expire = new Date(maintenant.getTime() + UN_AN_MS);
   expire.setUTCMilliseconds(0);

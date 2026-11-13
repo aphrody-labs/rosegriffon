@@ -22,7 +22,11 @@ import { Glob } from "bun";
 import { extname, join, relative } from "node:path";
 
 // --- Dossiers cibles par défaut (relatifs à la racine du monorepo) -----------
-const DEFAULT_DIRS = ["apps/rg-website/data/images/menu", "apps/rg-website/public", "apps/rg-website/public"];
+const DEFAULT_DIRS = [
+  "apps/rg-website/data/images/menu",
+  "apps/rg-website/public",
+  "apps/rg-website/public",
+];
 
 // Extensions raster candidates à la recompression.
 const EXTENSIONS = new Set([".png", ".jpg", ".jpeg", ".webp"]);
@@ -114,13 +118,20 @@ function pct(before: number, after: number): string {
  * Encode un fichier vers WebP en mémoire, retourne les octets encodés.
  * Préfère `cwebp` (CLI) ; repli sur `sharp` si indisponible.
  */
-async function encodeWebp(inputPath: string, quality: number, cwebpBin: string | null): Promise<Uint8Array> {
+async function encodeWebp(
+  inputPath: string,
+  quality: number,
+  cwebpBin: string | null,
+): Promise<Uint8Array> {
   if (cwebpBin) {
     // cwebp lit le fichier d'entrée, écrit le webp sur stdout ("-o -").
-    const proc = Bun.spawn([cwebpBin, "-quiet", "-q", String(quality), inputPath, "-o", "-"], {
-      stdout: "pipe",
-      stderr: "pipe",
-    });
+    const proc = Bun.spawn(
+      [cwebpBin, "-quiet", "-q", String(quality), inputPath, "-o", "-"],
+      {
+        stdout: "pipe",
+        stderr: "pipe",
+      },
+    );
     const out = new Uint8Array(await new Response(proc.stdout).arrayBuffer());
     const code = await proc.exited;
     if (code !== 0) {
@@ -134,7 +145,9 @@ async function encodeWebp(inputPath: string, quality: number, cwebpBin: string |
   // résolution statique au bundling (sharp n'est pas en deps de la racine).
   const sharpModule = "sharp";
   const { default: sharp } = (await import(sharpModule)) as {
-    default: (input: Buffer) => { webp: (o: { quality: number }) => { toBuffer: () => Promise<Buffer> } };
+    default: (input: Buffer) => {
+      webp: (o: { quality: number }) => { toBuffer: () => Promise<Buffer> };
+    };
   };
   const input = await Bun.file(inputPath).arrayBuffer();
   const out = await sharp(Buffer.from(input)).webp({ quality }).toBuffer();
@@ -158,8 +171,12 @@ async function main() {
   console.log(`  Encodeur : ${encoder}`);
   console.log(`  Qualité  : ${opts.quality}`);
   console.log(`  Seuil    : > ${opts.minKb} Ko`);
-  console.log(`  Mode     : ${opts.apply ? "APPLY (écriture)" : "DRY-RUN (aucune écriture)"}`);
-  console.log(`  Replace  : ${opts.replace ? "oui (supprime l'original si plus petit)" : "non"}`);
+  console.log(
+    `  Mode     : ${opts.apply ? "APPLY (écriture)" : "DRY-RUN (aucune écriture)"}`,
+  );
+  console.log(
+    `  Replace  : ${opts.replace ? "oui (supprime l'original si plus petit)" : "non"}`,
+  );
   console.log(`  Dossiers : ${opts.dirs.join(", ")}`);
   console.log("");
 
@@ -258,27 +275,39 @@ async function main() {
       totalBefore += r.before;
       totalAfter += r.after;
       savedFiles++;
-      const flag = r.deletedOriginal ? " [webp écrit, original supprimé]" : r.written ? " [webp écrit]" : " [dry-run]";
-      console.log(`  ✓ ${r.path}  ${fmtBytes(r.before)} → ${fmtBytes(r.after)}  (−${pct(r.before, r.after)})${flag}`);
+      const flag = r.deletedOriginal
+        ? " [webp écrit, original supprimé]"
+        : r.written
+          ? " [webp écrit]"
+          : " [dry-run]";
+      console.log(
+        `  ✓ ${r.path}  ${fmtBytes(r.before)} → ${fmtBytes(r.after)}  (−${pct(r.before, r.after)})${flag}`,
+      );
     } else {
-      console.log(`  · ${r.path}  ${fmtBytes(r.before)}  — ${r.skipReason ?? "ignoré"}`);
+      console.log(
+        `  · ${r.path}  ${fmtBytes(r.before)}  — ${r.skipReason ?? "ignoré"}`,
+      );
     }
   }
 
   console.log("");
   console.log("Total :");
-  console.log(`  Fichiers compressibles : ${savedFiles} / ${results.length} candidats`);
+  console.log(
+    `  Fichiers compressibles : ${savedFiles} / ${results.length} candidats`,
+  );
   console.log(
     `  Avant → Après : ${fmtBytes(totalBefore)} → ${fmtBytes(totalAfter)}  (−${pct(totalBefore, totalAfter)})`,
   );
   console.log(`  Économie : ${fmtBytes(totalBefore - totalAfter)}`);
   if (!opts.apply && savedFiles > 0) {
     console.log("");
-    console.log("  DRY-RUN : aucune écriture effectuée. Relancer avec --apply pour appliquer.");
+    console.log(
+      "  DRY-RUN : aucune écriture effectuée. Relancer avec --apply pour appliquer.",
+    );
   }
 }
 
-main().catch(e => {
+main().catch((e) => {
   console.error(`Erreur fatale : ${(e as Error).message}`);
   process.exit(1);
 });

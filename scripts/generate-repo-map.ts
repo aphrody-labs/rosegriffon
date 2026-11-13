@@ -96,7 +96,7 @@ Applications autonomes prêtes à être déployées :
 * **Chemin :** \`${app.path}\`
 * **Description :** ${app.description}
 * **Version :** \`${app.version}\`
-${app.entrypoints.length > 0 ? `* **Points d'entrée clés :**\n${app.entrypoints.map(e => `  - [\`${e}\`](file:///${app.path}/${e})`).join("\n")}\n` : ""}
+${app.entrypoints.length > 0 ? `* **Points d'entrée clés :**\n${app.entrypoints.map((e) => `  - [\`${e}\`](file:///${app.path}/${e})`).join("\n")}\n` : ""}
 * **Scripts disponibles :**
 ${
   Object.keys(app.scripts).length > 0
@@ -107,8 +107,8 @@ ${
 }
 
 * **Dépendances internes & externes :**
-  - **Dependencies :** ${app.dependencies.length > 0 ? app.dependencies.map(d => `\`${d}\``).join(", ") : "Aucune"}
-  - **DevDependencies :** ${app.devDependencies.length > 0 ? app.devDependencies.map(d => `\`${d}\``).join(", ") : "Aucune"}
+  - **Dependencies :** ${app.dependencies.length > 0 ? app.dependencies.map((d) => `\`${d}\``).join(", ") : "Aucune"}
+  - **DevDependencies :** ${app.devDependencies.length > 0 ? app.devDependencies.map((d) => `\`${d}\``).join(", ") : "Aucune"}
 
 ---
 
@@ -126,7 +126,7 @@ Packages partagés consommés par les applications :
 * **Chemin :** \`${pkg.path}\`
 * **Description :** ${pkg.description}
 * **Version :** \`${pkg.version}\`
-${pkg.entrypoints.length > 0 ? `* **Points d'entrée clés :**\n${pkg.entrypoints.map(e => `  - [\`${e}\`](file:///${pkg.path}/${e})`).join("\n")}\n` : ""}
+${pkg.entrypoints.length > 0 ? `* **Points d'entrée clés :**\n${pkg.entrypoints.map((e) => `  - [\`${e}\`](file:///${pkg.path}/${e})`).join("\n")}\n` : ""}
 * **Scripts disponibles :**
 ${
   Object.keys(pkg.scripts).length > 0
@@ -137,8 +137,8 @@ ${
 }
 
 * **Dépendances internes & externes :**
-  - **Dependencies :** ${pkg.dependencies.length > 0 ? pkg.dependencies.map(d => `\`${d}\``).join(", ") : "Aucune"}
-  - **DevDependencies :** ${pkg.devDependencies.length > 0 ? pkg.devDependencies.map(d => `\`${d}\``).join(", ") : "Aucune"}
+  - **Dependencies :** ${pkg.dependencies.length > 0 ? pkg.dependencies.map((d) => `\`${d}\``).join(", ") : "Aucune"}
+  - **DevDependencies :** ${pkg.devDependencies.length > 0 ? pkg.devDependencies.map((d) => `\`${d}\``).join(", ") : "Aucune"}
 
 ---
 
@@ -156,7 +156,7 @@ graph TD
   const all = [...apps, ...packages];
   for (const item of all) {
     const workspaceDeps = item.dependencies.filter(
-      d => d.startsWith("@rosegriffon/") || d.startsWith("@aphrody-code/"),
+      (d) => d.startsWith("@rosegriffon/") || d.startsWith("@aphrody-code/"),
     );
     for (const dep of workspaceDeps) {
       md += `    ${item.name.replace(/[@/-]/g, "_")} --> ${dep.replace(/[@/-]/g, "_")}\n`;

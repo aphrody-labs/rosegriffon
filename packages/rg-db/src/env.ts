@@ -11,7 +11,8 @@ const LOCAL_SUPABASE_URL = "http://127.0.0.1:54321";
 /** Origine de repli, évaluée à l'appel : Next évalue ce module pendant le build, sans `location`. */
 function origineDeRepli(): string {
   return "location" in globalThis
-    ? (globalThis as unknown as { location: { origin: string } }).location.origin
+    ? (globalThis as unknown as { location: { origin: string } }).location
+        .origin
     : LOCAL_SUPABASE_URL;
 }
 // Valeurs vides, littéraux "undefined"/"null" et blobs dotenvx scellés (`eyJ2Ijo…`)
@@ -28,7 +29,8 @@ function isValidKey(value: string | undefined | null): value is string {
 export function isBuildPhase(): boolean {
   return (
     process.env.NEXT_PHASE === "phase-production-build" ||
-    (process.env.NODE_ENV === "production" && !isValidKey(process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? null))
+    (process.env.NODE_ENV === "production" &&
+      !isValidKey(process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? null))
   );
 }
 
@@ -58,18 +60,25 @@ export function getSupabasePublishableKey(): string {
   const publiable = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
   if (isValidKey(publiable) && publiable.startsWith("sb_publishable_")) {
     const endpoint = new URL(getSupabaseUrl());
-    if (endpoint.protocol === "https:" && endpoint.hostname.endsWith(".supabase.co")) return publiable;
+    if (
+      endpoint.protocol === "https:" &&
+      endpoint.hostname.endsWith(".supabase.co")
+    )
+      return publiable;
   }
   if (estJwt(publiable)) return publiable;
 
   const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if (estJwt(anon)) return anon;
 
-  throw new Error("A Supabase Cloud publishable key or legacy RG anon JWT is required");
+  throw new Error(
+    "A Supabase Cloud publishable key or legacy RG anon JWT is required",
+  );
 }
 
 export function getSupabaseServiceRoleKey(): string | null {
-  const key = process.env.SUPABASE_SECRET_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const key =
+    process.env.SUPABASE_SECRET_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (isValidKey(key)) return key;
 
   return null;

@@ -13,7 +13,8 @@ import {
 } from "kysely";
 import type { Database } from "@rosegriffon/db/schema";
 
-const b64url = (value: string | Uint8Array) => Buffer.from(value).toString("base64url");
+const b64url = (value: string | Uint8Array) =>
+  Buffer.from(value).toString("base64url");
 
 /** Jeton de session Achilléa valide pour `JWT_SECRET_KEY` (cf. test/setup.ts). */
 export async function sessionToken(userId: string): Promise<string> {
@@ -35,7 +36,11 @@ export async function sessionToken(userId: string): Promise<string> {
     false,
     ["sign"],
   );
-  const signature = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(`${header}.${payload}`));
+  const signature = await crypto.subtle.sign(
+    "HMAC",
+    key,
+    new TextEncoder().encode(`${header}.${payload}`),
+  );
   return `${header}.${payload}.${b64url(new Uint8Array(signature))}`;
 }
 
@@ -64,7 +69,7 @@ export function fakeDb(handler: QueryHandler = () => []) {
   const db = new Kysely<Database>({
     dialect: {
       createAdapter: () => new PostgresAdapter(),
-      createIntrospector: kysely => new PostgresIntrospector(kysely),
+      createIntrospector: (kysely) => new PostgresIntrospector(kysely),
       createQueryCompiler: () => new PostgresQueryCompiler(),
       createDriver: () => ({
         init: async () => {},

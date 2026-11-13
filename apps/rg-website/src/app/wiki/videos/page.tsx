@@ -31,7 +31,12 @@ import { type FilmVue, VideoGallery } from "./VideoGallery";
 import { MediaEmpty, MediaHeader } from "@/components/wiki/MediaShell";
 import { videoLabel } from "@/lib/cpk/media-names";
 import { lsOrNull } from "@rosegriffon/azalee/cpk/live";
-import { aDuSon, type FilmDto, fetchVideoCatalogueOrNull, type LangueDto } from "@rosegriffon/azalee/cpk/video";
+import {
+  aDuSon,
+  type FilmDto,
+  fetchVideoCatalogueOrNull,
+  type LangueDto,
+} from "@rosegriffon/azalee/cpk/video";
 import { wiki } from "@rosegriffon/app-shell";
 import { withDefaultOgImage } from "@/lib/seo";
 
@@ -45,7 +50,8 @@ export const metadata: Metadata = {
   description:
     "Cinématiques et vidéos d'Inazuma Eleven: Victory Road (écrans-titre, événements), décodées à la volée depuis les fichiers du jeu (USM → MP4).",
   openGraph: withDefaultOgImage({
-    description: "Toutes les cinématiques d'Inazuma Eleven: Victory Road, décodées live depuis les CPK.",
+    description:
+      "Toutes les cinématiques d'Inazuma Eleven: Victory Road, décodées live depuis les CPK.",
     locale: "fr_FR",
     siteName: "Azalée - Inazuma Eleven Victory Road",
     title: "Vidéos & cinématiques | Azalée",
@@ -85,7 +91,10 @@ function ficheDeRepli(path: string, nom: string, octets: number): FilmDto {
 export default async function VideosPage() {
   // Le catalogue porte les métadonnées ; le listing dx11 dit lesquels existent en haut débit,
   // avec leur poids réel. Les deux en parallèle : ni l'un ni l'autre ne bloque l'autre.
-  const [catalogue, hd] = await Promise.all([fetchVideoCatalogueOrNull(), lsOrNull("data/dx11/movie", 500)]);
+  const [catalogue, hd] = await Promise.all([
+    fetchVideoCatalogueOrNull(),
+    lsOrNull("data/dx11/movie", 500),
+  ]);
 
   // Repli : le catalogue n'est pas encore construit. On liste au moins les films.
   let films: FilmDto[] = catalogue?.films ?? [];
@@ -96,8 +105,8 @@ export default async function VideosPage() {
     const sd = await lsOrNull("data/common/movie", 500);
     const source = (sd?.files ?? []).length > 0 ? sd : hd;
     films = (source?.files ?? [])
-      .filter(f => f.ext === "usm")
-      .map(f => ficheDeRepli(f.path, f.name.replace(/\.usm$/i, ""), f.size));
+      .filter((f) => f.ext === "usm")
+      .map((f) => ficheDeRepli(f.path, f.name.replace(/\.usm$/i, ""), f.size));
     langues = [];
   }
 
@@ -112,13 +121,16 @@ export default async function VideosPage() {
   // sous-titre. Résolu ici, côté serveur, parce que la table vit dans le miroir SQLite.
   // Les 97 libellés d'un coup : `videoLabel` partage un index d'épisodes mémoïsé, et une
   // boucle séquentielle ne ferait qu'ajouter 96 allers-retours au miroir.
-  const labels = await Promise.all(films.map(f => videoLabel(f.nom)));
+  const labels = await Promise.all(films.map((f) => videoLabel(f.nom)));
   const vues: FilmVue[] = films
     .map((film, i) => {
       const label = labels[i];
       const octetsHd = poidsHd.get(film.nom);
       return Object.assign({}, film, {
-        cheminServi: octetsHd == null ? film.chemin : film.chemin.replace("/common/movie/", "/dx11/movie/"),
+        cheminServi:
+          octetsHd == null
+            ? film.chemin
+            : film.chemin.replace("/common/movie/", "/dx11/movie/"),
         contexte: label?.context ?? null,
         octetsServis: octetsHd ?? film.octets,
         titre: label?.title ?? film.nom,
@@ -127,8 +139,8 @@ export default async function VideosPage() {
     })
     .toSorted((a, b) => a.nom.localeCompare(b.nom, "fr", { numeric: true }));
 
-  const hautes = vues.filter(v => v.variante === "haute").length;
-  const sonores = vues.filter(v => aDuSon(v)).length;
+  const hautes = vues.filter((v) => v.variante === "haute").length;
+  const sonores = vues.filter((v) => aDuSon(v)).length;
   const duree = vues.reduce((t, v) => t + (v.duree ?? 0), 0);
   const heures = Math.floor(duree / 3600);
   const minutes = Math.round((duree % 3600) / 60);
@@ -146,13 +158,16 @@ export default async function VideosPage() {
               "bandes-son manquent à cette liste."
             : `${heures > 0 ? `${heures} h ${minutes} min` : `${minutes} min`} au total, ` +
               `${sonores.toLocaleString("fr")} avec bande-son` +
-              (hautes > 0 ? `, ${hautes.toLocaleString("fr")} servies dans leur variante PC haut débit.` : "."))
+              (hautes > 0
+                ? `, ${hautes.toLocaleString("fr")} servies dans leur variante PC haut débit.`
+                : "."))
         }
       />
 
       {vues.length === 0 ? (
         <MediaEmpty>
-          Le VFS du jeu est momentanément injoignable — la liste des cinématiques ne peut pas être établie.
+          Le VFS du jeu est momentanément injoignable — la liste des
+          cinématiques ne peut pas être établie.
         </MediaEmpty>
       ) : (
         <VideoGallery films={vues} langues={langues} degrade={degrade} />

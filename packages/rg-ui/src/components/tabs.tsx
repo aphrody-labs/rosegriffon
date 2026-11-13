@@ -4,19 +4,28 @@ import { createContext, useContext } from "react";
 import { childRender, type PrimitiveProps } from "../lib/render";
 import { cn } from "../lib/utils";
 const ActivationContext = createContext(true);
-type TabsProps = Omit<PrimitiveProps<typeof TabsPrimitive.Root>, "value" | "defaultValue" | "onValueChange"> & {
+type TabsProps = Omit<
+  PrimitiveProps<typeof TabsPrimitive.Root>,
+  "value" | "defaultValue" | "onValueChange"
+> & {
   value?: string;
   defaultValue?: string;
   onValueChange?: (value: string) => void;
   activationMode?: "automatic" | "manual";
 };
-function Tabs({ activationMode = "automatic", asChild, children, onValueChange, ...props }: TabsProps) {
+function Tabs({
+  activationMode = "automatic",
+  asChild,
+  children,
+  onValueChange,
+  ...props
+}: TabsProps) {
   return (
     <ActivationContext.Provider value={activationMode === "automatic"}>
       <TabsPrimitive.Root
         data-slot="tabs"
         render={childRender(asChild, children)}
-        onValueChange={value => {
+        onValueChange={(value) => {
           if (typeof value === "string") onValueChange?.(value);
         }}
         {...props}
@@ -50,7 +59,12 @@ function TabsList({
     </TabsPrimitive.List>
   );
 }
-function TabsTrigger({ className, asChild, children, ...props }: PrimitiveProps<typeof TabsPrimitive.Tab>) {
+function TabsTrigger({
+  className,
+  asChild,
+  children,
+  ...props
+}: PrimitiveProps<typeof TabsPrimitive.Tab>) {
   return (
     <TabsPrimitive.Tab
       data-slot="tabs-trigger"

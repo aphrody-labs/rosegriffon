@@ -1,5 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from "bun:test";
-import { commonAuthOptions, deuxFacteurs, githubProvider, isAdmin, isStaff, resolveProfile } from "./index";
+import {
+  commonAuthOptions,
+  deuxFacteurs,
+  githubProvider,
+  isAdmin,
+  isStaff,
+  resolveProfile,
+} from "./index";
 
 describe("resolveProfile", () => {
   const mockSupabase = {
@@ -17,7 +24,9 @@ describe("resolveProfile", () => {
     const mockProfile = { id: "user-123", role: "admin" };
     mockSupabase.maybeSingle.mockResolvedValueOnce({ data: mockProfile });
 
-    const result = await resolveProfile(mockSupabase as never, { id: "user-123" });
+    const result = await resolveProfile(mockSupabase as never, {
+      id: "user-123",
+    });
 
     expect(result).toEqual(mockProfile as never);
     expect(mockSupabase.from).toHaveBeenCalledWith("profiles");
@@ -26,7 +35,11 @@ describe("resolveProfile", () => {
 
   it("should fallback to Discord bridge if direct ID fails", async () => {
     const mockAccount = { account_id: "discord-456" };
-    const mockProfile = { id: "profile-789", discord_id: "discord-456", role: "user" };
+    const mockProfile = {
+      id: "profile-789",
+      discord_id: "discord-456",
+      role: "user",
+    };
 
     // 1. Direct ID fails
     mockSupabase.maybeSingle.mockResolvedValueOnce({ data: null });
@@ -35,7 +48,9 @@ describe("resolveProfile", () => {
     // 3. Profile fetch by discord_id succeeds
     mockSupabase.maybeSingle.mockResolvedValueOnce({ data: mockProfile });
 
-    const result = await resolveProfile(mockSupabase as never, { id: "user-123" });
+    const result = await resolveProfile(mockSupabase as never, {
+      id: "user-123",
+    });
 
     expect(result).toEqual(mockProfile as never);
     expect(mockSupabase.eq).toHaveBeenCalledWith("provider_id", "discord");
@@ -43,7 +58,11 @@ describe("resolveProfile", () => {
   });
 
   it("should fallback to email if Discord bridge fails", async () => {
-    const mockProfile = { id: "profile-email", email: "test@google.com", role: "editor" };
+    const mockProfile = {
+      id: "profile-email",
+      email: "test@google.com",
+      role: "editor",
+    };
 
     // 1. Direct ID fails
     mockSupabase.maybeSingle.mockResolvedValueOnce({ data: null });
@@ -103,16 +122,24 @@ describe("Role Helpers", () => {
 
 describe("commonAuthOptions", () => {
   it("should have correct two-factor field mappings", () => {
-    expect(commonAuthOptions.user.fields.twoFactorEnabled).toBe("two_factor_enabled");
-    expect(commonAuthOptions.user.fields.twoFactorSecret).toBe("two_factor_secret");
-    expect(commonAuthOptions.user.fields.twoFactorBackupCodes).toBe("two_factor_backup_codes");
+    expect(commonAuthOptions.user.fields.twoFactorEnabled).toBe(
+      "two_factor_enabled",
+    );
+    expect(commonAuthOptions.user.fields.twoFactorSecret).toBe(
+      "two_factor_secret",
+    );
+    expect(commonAuthOptions.user.fields.twoFactorBackupCodes).toBe(
+      "two_factor_backup_codes",
+    );
   });
 });
 
 describe("deuxFacteurs", () => {
   it("mappe aussi le champ user ajouté par le plugin", () => {
     const plugin = deuxFacteurs("Azalée");
-    const champ = plugin.schema?.user?.fields.twoFactorEnabled as { fieldName?: string };
+    const champ = plugin.schema?.user?.fields.twoFactorEnabled as {
+      fieldName?: string;
+    };
     expect(champ.fieldName).toBe("two_factor_enabled");
   });
 });

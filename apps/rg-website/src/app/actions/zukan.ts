@@ -31,9 +31,9 @@ export async function searchZukan(searchParams: {
   if (query) {
     const searchResults = await apiClient.inagle.search(query, 1000);
     // Flatten variants
-    allItems = searchResults.flatMap(base =>
+    allItems = searchResults.flatMap((base) =>
       (base.variants || []).map(
-        v =>
+        (v) =>
           ({
             ...v,
             charaId: base.charaId,
@@ -46,9 +46,9 @@ export async function searchZukan(searchParams: {
   } else {
     const chars = await apiClient.inagle.getCharacters();
     // Flatten variants
-    allItems = chars.flatMap(base =>
+    allItems = chars.flatMap((base) =>
       (base.variants || []).map(
-        v =>
+        (v) =>
           ({
             ...v,
             charaId: base.charaId,
@@ -61,14 +61,23 @@ export async function searchZukan(searchParams: {
   }
 
   // Apply filters manually since the search API doesn't support structured filtering yet
-  const filtered = allItems.filter(char => {
-    if (typeFilter && char.spirit?.type?.toLowerCase() !== typeFilter.toLowerCase()) {
+  const filtered = allItems.filter((char) => {
+    if (
+      typeFilter &&
+      char.spirit?.type?.toLowerCase() !== typeFilter.toLowerCase()
+    ) {
       return false;
     }
-    if (elementFilter && char.element?.toLowerCase() !== elementFilter.toLowerCase()) {
+    if (
+      elementFilter &&
+      char.element?.toLowerCase() !== elementFilter.toLowerCase()
+    ) {
       return false;
     }
-    if (positionFilter && char.position?.toLowerCase() !== positionFilter.toLowerCase()) {
+    if (
+      positionFilter &&
+      char.position?.toLowerCase() !== positionFilter.toLowerCase()
+    ) {
       return false;
     }
     if (genderFilter) {

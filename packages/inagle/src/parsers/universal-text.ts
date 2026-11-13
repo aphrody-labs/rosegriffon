@@ -11,7 +11,17 @@ import { type Locale, sanitizeText, toHex } from "../core/data-loader.js";
 import { DATA_ROOT } from "../core/paths.js";
 
 /** Supported locales */
-export const ALL_LOCALES: Locale[] = ["ja", "en", "fr", "de", "es", "it", "pt", "zh_hans", "zh_hant"];
+export const ALL_LOCALES: Locale[] = [
+  "ja",
+  "en",
+  "fr",
+  "de",
+  "es",
+  "it",
+  "pt",
+  "zh_hans",
+  "zh_hant",
+];
 
 /** Text file info */
 export interface TextFileInfo {
@@ -28,7 +38,9 @@ export interface TextFileInfo {
 /**
  * Parse TEXT_INFO node to extract hashId and text
  */
-function parseTextInfoNode(node: ConfigNode): { hashId: string; text: string } | null {
+function parseTextInfoNode(
+  node: ConfigNode,
+): { hashId: string; text: string } | null {
   const vars = node.variables;
   if (vars.length < 3) return null;
 
@@ -48,7 +60,9 @@ function parseTextInfoNode(node: ConfigNode): { hashId: string; text: string } |
 /**
  * Parse NOUN_INFO node to extract hashId and text
  */
-function parseNounInfoNode(node: ConfigNode): { hashId: string; text: string } | null {
+function parseNounInfoNode(
+  node: ConfigNode,
+): { hashId: string; text: string } | null {
   const vars = node.variables;
   // We expect at least 6 variables. Index 5 is the text.
   if (vars.length < 6) return null;
@@ -107,7 +121,9 @@ export function loadTextFileRaw(filePath: string): Map<string, string> {
 /**
  * Discover all text files in the text directory
  */
-export function discoverTextFiles(dataPath: string = DATA_ROOT): TextFileInfo[] {
+export function discoverTextFiles(
+  dataPath: string = DATA_ROOT,
+): TextFileInfo[] {
   const textDir = join(dataPath, "common", "text");
   const results: TextFileInfo[] = [];
 
@@ -115,7 +131,7 @@ export function discoverTextFiles(dataPath: string = DATA_ROOT): TextFileInfo[] 
   const enDir = join(textDir, "en");
   if (!existsSync(enDir)) return results;
 
-  const files = readdirSync(enDir).filter(f => f.endsWith(".cfg.bin.json"));
+  const files = readdirSync(enDir).filter((f) => f.endsWith(".cfg.bin.json"));
 
   for (const file of files) {
     const type = file.replace(".cfg.bin.json", "");
@@ -159,7 +175,10 @@ export interface UniversalTextMap {
 /**
  * Load all locales for a specific text type
  */
-export function loadUniversalText(type: string, dataPath: string = DATA_ROOT): UniversalTextMap {
+export function loadUniversalText(
+  type: string,
+  dataPath: string = DATA_ROOT,
+): UniversalTextMap {
   const textDir = join(dataPath, "common", "text");
   const filename = `${type}.cfg.bin.json`;
   const key = type.replace("_text", "").replace("_roma", "_romanized");
@@ -223,7 +242,9 @@ export function buildUniversalTextDatabase(
     texts.set(info.key, textMap);
     totalEntries += textMap.totalEntries;
 
-    console.log(`  - ${info.key}: ${textMap.totalEntries} entries (${textMap.maps.size} locales)`);
+    console.log(
+      `  - ${info.key}: ${textMap.totalEntries} entries (${textMap.maps.size} locales)`,
+    );
   }
 
   return {
@@ -263,7 +284,7 @@ export function createUniversalTextAPI(dataPath: string = DATA_ROOT) {
     meta: {
       totalFiles: db.totalFiles,
       totalEntries: db.totalEntries,
-      types: db.types.map(t => ({
+      types: db.types.map((t) => ({
         key: t.key,
         locales: t.locales.length,
         entries: t.entryCounts.en || t.entryCounts.ja || 0,
@@ -277,7 +298,8 @@ export function createUniversalTextAPI(dataPath: string = DATA_ROOT) {
     getMap: (key: string) => db.texts.get(key),
 
     /** Get localized text */
-    getText: (textType: string, hashId: string) => getTextFromDatabase(db, textType, hashId),
+    getText: (textType: string, hashId: string) =>
+      getTextFromDatabase(db, textType, hashId),
 
     /** Search across all texts */
     search: (query: string, options?: { lang?: Locale; limit?: number }) => {

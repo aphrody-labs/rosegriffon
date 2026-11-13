@@ -11,23 +11,35 @@ export const rankedController = new Elysia({ prefix: "/ranked" })
     "/tiers",
     async ({ db, query }) => {
       const mode = Number(query.mode ?? 2);
-      if (mode !== 2 && mode !== 4) return status(400, { message: "Invalid mode" as const });
+      if (mode !== 2 && mode !== 4)
+        return status(400, { message: "Invalid mode" as const });
       return LeaderboardService.findTiers(db, mode);
     },
     {
       query: t.Object({ mode: t.Optional(t.Numeric()) }),
-      response: { 200: RankedModel.tiers, 400: t.Object({ message: t.Literal("Invalid mode") }) },
+      response: {
+        200: RankedModel.tiers,
+        400: t.Object({ message: t.Literal("Invalid mode") }),
+      },
     },
   )
   .get(
     "/leaderboard",
     async ({ db, query }) => {
       const mode = Number(query.mode ?? 2);
-      if (mode !== 2 && mode !== 4) return status(400, { message: "Invalid mode" as const });
-      if (query.minElo !== undefined && query.maxElo !== undefined && query.minElo > query.maxElo)
+      if (mode !== 2 && mode !== 4)
+        return status(400, { message: "Invalid mode" as const });
+      if (
+        query.minElo !== undefined &&
+        query.maxElo !== undefined &&
+        query.minElo > query.maxElo
+      )
         return status(400, { message: "Invalid Elo range" as const });
       const page = Math.max(0, Math.floor(Number(query.page ?? 0)) || 0);
-      const pageSize = Math.min(200, Math.max(1, Math.floor(Number(query.pageSize ?? 50)) || 50));
+      const pageSize = Math.min(
+        200,
+        Math.max(1, Math.floor(Number(query.pageSize ?? 50)) || 50),
+      );
       const pageData = await LeaderboardService.findActiveTop(
         db,
         mode,
@@ -50,7 +62,12 @@ export const rankedController = new Elysia({ prefix: "/ranked" })
       }),
       response: {
         200: RankedModel.leaderboard,
-        400: t.Object({ message: t.Union([t.Literal("Invalid mode"), t.Literal("Invalid Elo range")]) }),
+        400: t.Object({
+          message: t.Union([
+            t.Literal("Invalid mode"),
+            t.Literal("Invalid Elo range"),
+          ]),
+        }),
       },
     },
   )
@@ -58,10 +75,16 @@ export const rankedController = new Elysia({ prefix: "/ranked" })
     "/me",
     async ({ db, headers, query }) => {
       const mode = Number(query.mode ?? 2);
-      if (mode !== 2 && mode !== 4) return status(400, { message: "Invalid mode" as const });
+      if (mode !== 2 && mode !== 4)
+        return status(400, { message: "Invalid mode" as const });
       const session = await resolveAchilleaSession(headers);
-      if (!session) return status(401, { message: "Authentication required" as const });
-      const profile = await LeaderboardService.findProfile(db, session.id, mode);
+      if (!session)
+        return status(401, { message: "Authentication required" as const });
+      const profile = await LeaderboardService.findProfile(
+        db,
+        session.id,
+        mode,
+      );
       if (!profile) return status(404, { message: "User not found" as const });
       return profile;
     },

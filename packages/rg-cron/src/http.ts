@@ -57,7 +57,9 @@ function autorise(request: Request): boolean {
 function tacheDuChemin(pathname: string): string | null {
   const indice = pathname.indexOf("/cron");
   if (indice < 0) return null;
-  const reste = pathname.slice(indice + "/cron".length).replace(/^\/+|\/+$/g, "");
+  const reste = pathname
+    .slice(indice + "/cron".length)
+    .replace(/^\/+|\/+$/g, "");
   try {
     return decodeURIComponent(reste);
   } catch {
@@ -65,14 +67,22 @@ function tacheDuChemin(pathname: string): string | null {
   }
 }
 
-async function lireCorps(request: Request): Promise<{ origine: OrigineExecution; argument?: string }> {
+async function lireCorps(
+  request: Request,
+): Promise<{ origine: OrigineExecution; argument?: string }> {
   const texte = await request.text().catch(() => "");
   if (!texte.trim()) return { origine: "manuel" };
   try {
-    const corps = JSON.parse(texte) as { origine?: unknown; argument?: unknown };
+    const corps = JSON.parse(texte) as {
+      origine?: unknown;
+      argument?: unknown;
+    };
     return {
       origine: corps.origine === "planifie" ? "planifie" : "manuel",
-      argument: typeof corps.argument === "string" && corps.argument ? corps.argument : undefined,
+      argument:
+        typeof corps.argument === "string" && corps.argument
+          ? corps.argument
+          : undefined,
     };
   } catch {
     return { origine: "manuel" };
@@ -81,21 +91,26 @@ async function lireCorps(request: Request): Promise<{ origine: OrigineExecution;
 
 /** Point d'entrée `fetch` de la surface cron : `(Request) → Response`. */
 export async function handleCronHttp(request: Request): Promise<Response> {
-  if (!autorise(request)) return Response.json({ error: "Non autorisé" }, { status: 401 });
+  if (!autorise(request))
+    return Response.json({ error: "Non autorisé" }, { status: 401 });
 
   const url = new URL(request.url);
   const tache = tacheDuChemin(url.pathname);
-  if (tache === null) return Response.json({ error: "Chemin invalide" }, { status: 400 });
+  if (tache === null)
+    return Response.json({ error: "Chemin invalide" }, { status: 400 });
 
   if (tache === "") {
-    if (request.method !== "GET") return Response.json({ error: "Méthode non autorisée" }, { status: 405 });
+    if (request.method !== "GET")
+      return Response.json({ error: "Méthode non autorisée" }, { status: 405 });
     return Response.json({
       tasks: TACHES_CRON,
       schedules: PLANIFICATIONS,
       catalogue: CATALOGUE_TACHES,
       registre: Object.keys(REGISTRE_TACHES),
       alias: Object.fromEntries(
-        Object.entries(REGISTRE_TACHES).flatMap(([nom, def]) => (def.historique ? [[nom, def.historique]] : [])),
+        Object.entries(REGISTRE_TACHES).flatMap(([nom, def]) =>
+          def.historique ? [[nom, def.historique]] : [],
+        ),
       ),
       horsServerless: Object.fromEntries(
         Object.entries(REGISTRE_TACHES).flatMap(([nom, def]) =>
@@ -105,22 +120,41 @@ export async function handleCronHttp(request: Request): Promise<Response> {
     });
   }
 
-  if (request.method !== "POST") return Response.json({ error: "Méthode non autorisée" }, { status: 405 });
+  if (request.method !== "POST")
+    return Response.json({ error: "Méthode non autorisée" }, { status: 405 });
   const nom = resoudreNomTache(tache);
-  if (!nom) return Response.json({ error: `Tâche « ${tache} » inconnue.` }, { status: 404 });
+  if (!nom)
+    return Response.json(
+      { error: `Tâche « ${tache} » inconnue.` },
+      { status: 404 },
+    );
   const motif = REGISTRE_TACHES[nom]!.horsServerless;
   if (motif && Bun.env.VERCEL) {
-    return Response.json({ error: `Tâche « ${nom} » indisponible en serverless : ${motif}.` }, { status: 409 });
+    return Response.json(
+      { error: `Tâche « ${nom} » indisponible en serverless : ${motif}.` },
+      { status: 409 },
+    );
   }
 
   const { origine, argument } = await lireCorps(request);
-  const travail = lancerTache(nom, { origine, argument, echeance: Date.now() + budgetMs() });
+  const travail = lancerTache(nom, {
+    origine,
+    argument,
+    echeance: Date.now() + budgetMs(),
+  });
 
   if (url.searchParams.get("attendre") === "1") {
     const resultat = await travail;
-    return Response.json(resultat, { status: resultat.ignoree ? 409 : resultat.success ? 200 : 500 });
+    return Response.json(resultat, {
+      status: resultat.ignoree ? 409 : resultat.success ? 200 : 500,
+    });
   }
 
-  waitUntil(travail.catch(err => console.error(`[Cron HTTP] « ${nom} » :`, err)));
-  return Response.json({ success: true, task: nom, message: `Tâche « ${nom} » démarrée.` }, { status: 202 });
+  waitUntil(
+    travail.catch((err) => console.error(`[Cron HTTP] « ${nom} » :`, err)),
+  );
+  return Response.json(
+    { success: true, task: nom, message: `Tâche « ${nom} » démarrée.` },
+    { status: 202 },
+  );
 }

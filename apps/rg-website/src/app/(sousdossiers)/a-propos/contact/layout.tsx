@@ -18,12 +18,17 @@ export const metadata: Metadata = {
   },
   openGraph: withDefaultOgImage({
     title: "Nous contacter · Rose Griffon",
-    description: "Une question, une suggestion ou un projet de collaboration ? Écrivez à l'association Rose Griffon.",
+    description:
+      "Une question, une suggestion ou un projet de collaboration ? Écrivez à l'association Rose Griffon.",
     url: absoluteUrl("/a-propos/contact"),
     type: "website",
   }),
 };
 
-export default function ContactLayout({ children }: { children: React.ReactNode }) {
+export default function ContactLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return children;
 }

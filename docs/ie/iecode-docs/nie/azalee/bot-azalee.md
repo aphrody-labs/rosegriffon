@@ -1,6 +1,6 @@
 # Bot Azalée — mise en service
 
-Le serveur Discord **Azalée** (« 𝓐𝔃𝓪𝓵𝓮́𝓮  », guilde `1349526851672080414`) a
+Le serveur Discord **Azalée** (« 𝓐𝔃𝓪𝓵𝓮́𝓮 », guilde `1349526851672080414`) a
 son propre bot. Ce bot **n'a pas de code à lui** : c'est `apps/bot`, le même
 programme que le bot Rose Griffon, lancé une seconde fois avec un autre
 **profil** et un autre **jeton**.
@@ -206,7 +206,7 @@ Ce qui peut clocher, et ce que ça veut dire :
 | `[profil] Jeton Discord absent pour le profil « azalee »…`                | jeton absent — étape 3                                                                                                                                         |
 | `[profil] AZALEE_DISCORD_BOT_TOKEN contient un secret SCELLÉ…`            | un blob `eyJ2Ijo…` a remplacé le jeton en clair dans l'env                                                                                                     |
 | `[profil] RG_PROFIL_BOT="…" n'est pas un profil connu`                    | faute de frappe dans l'unité (`azalée`, `azale`, `Azalee` suivi d'une espace…) ; le service refuse de démarrer plutôt que de lancer un second bot Rose Griffon |
-| ` Guilde(s) configurée(s) mais non rejointe(s) : 1349526851672080414`    | invitation non faite ou refusée — étape 4                                                                                                                      |
+| ` Guilde(s) configurée(s) mais non rejointe(s) : 1349526851672080414`     | invitation non faite ou refusée — étape 4                                                                                                                      |
 | `Salon 1349528692086276148 injoignable` / « le bot ne peut pas y écrire » | permission de salon manquante — fin de l'étape 4                                                                                                               |
 | Bot en ligne, aucune commande dans le serveur                             | `applications.commands` oublié dans l'URL d'invitation                                                                                                         |
 

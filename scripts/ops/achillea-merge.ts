@@ -67,7 +67,8 @@ const ENV_A_BASCULER = [
 ] as const;
 
 async function psql(base: string, sql: string): Promise<string> {
-  const sortie = await $`sudo -u postgres psql -d ${base} -v ON_ERROR_STOP=1 -Atc ${sql}`.text();
+  const sortie =
+    await $`sudo -u postgres psql -d ${base} -v ON_ERROR_STOP=1 -Atc ${sql}`.text();
   return sortie.trim();
 }
 
@@ -91,7 +92,9 @@ async function inventaire(): Promise<void> {
   );
 
   console.info(`base ${SOURCE} : ${nombreTablesSource} tables`);
-  console.info(`base ${CIBLE}, schéma ${SCHEMA} : ${nombreTablesCible} tables réelles, ${etrangeres} étrangères`);
+  console.info(
+    `base ${CIBLE}, schéma ${SCHEMA} : ${nombreTablesCible} tables réelles, ${etrangeres} étrangères`,
+  );
 
   if (nombreTablesCible === 0) {
     return;
@@ -133,12 +136,17 @@ async function inventaire(): Promise<void> {
     if (b > a) enrichies.push(`${table}: source ${a}, cible ${b}`);
   }
   for (const table of tablesCible) {
-    if (!tablesSource.includes(table)) enrichies.push(`${table} présente seulement dans la cible`);
+    if (!tablesSource.includes(table))
+      enrichies.push(`${table} présente seulement dans la cible`);
   }
   if (manquantes.length > 0) {
-    throw new Error(`copie Achilléa incomplète :\n${manquantes.map(ecart => `  - ${ecart}`).join("\n")}`);
+    throw new Error(
+      `copie Achilléa incomplète :\n${manquantes.map((ecart) => `  - ${ecart}`).join("\n")}`,
+    );
   }
-  console.info(`  ${tablesSource.length} tables comparées : aucune donnée legacy manquante ✓`);
+  console.info(
+    `  ${tablesSource.length} tables comparées : aucune donnée legacy manquante ✓`,
+  );
   if (enrichies.length > 0) {
     console.info(`  cible enrichie depuis la copie : ${enrichies.join(" ; ")}`);
   }
@@ -176,22 +184,28 @@ async function copier(): Promise<void> {
     // `gin_trgm_ops` vient de l'extension pg_trgm, installée dans `public`
     // des deux côtés : la transposer casserait les index trigram.
     .replaceAll(`${SCHEMA}.gin_trgm_ops`, "public.gin_trgm_ops")
-    .replaceAll("SET search_path TO 'public'", `SET search_path TO '${SCHEMA}'`);
+    .replaceAll(
+      "SET search_path TO 'public'",
+      `SET search_path TO '${SCHEMA}'`,
+    );
 
   const transposeChemin = `${dump}.achillea`;
   await Bun.write(transposeChemin, transpose);
   await $`sudo chmod 644 ${transposeChemin}`;
 
   console.info("→ remplacement du schéma achillea dans la base rg");
-  await psql(CIBLE, `drop schema if exists ${SCHEMA} cascade; create schema ${SCHEMA};`);
+  await psql(
+    CIBLE,
+    `drop schema if exists ${SCHEMA} cascade; create schema ${SCHEMA};`,
+  );
   await $`sudo -u postgres psql -d ${CIBLE} -v ON_ERROR_STOP=1 -q -f ${transposeChemin}`;
 
   await copierStockage();
 
   console.info("→ droits et chemin de recherche des rôles");
   const grants = [
-    `grant usage on schema ${SCHEMA} to ${ROLES.map(r => r.nom).join(", ")}, rg, service_role, anon, authenticated;`,
-    ...ROLES.map(r =>
+    `grant usage on schema ${SCHEMA} to ${ROLES.map((r) => r.nom).join(", ")}, rg, service_role, anon, authenticated;`,
+    ...ROLES.map((r) =>
       r.ecriture
         ? `grant all privileges on all tables in schema ${SCHEMA} to ${r.nom};
 				   grant all privileges on all sequences in schema ${SCHEMA} to ${r.nom};
@@ -212,7 +226,10 @@ async function copier(): Promise<void> {
     `grant execute on all functions in schema storage to achillea_storage;`,
     `grant usage on schema storage to achillea_realtime;`,
     `grant select on all tables in schema storage to achillea_realtime;`,
-    ...ROLES.map(r => `alter role ${r.nom} in database ${CIBLE} set search_path = ${SCHEMA}, public;`),
+    ...ROLES.map(
+      (r) =>
+        `alter role ${r.nom} in database ${CIBLE} set search_path = ${SCHEMA}, public;`,
+    ),
   ].join("\n");
   await psql(CIBLE, grants);
 
@@ -253,11 +270,13 @@ async function copierStockage(): Promise<void> {
       lire(CIBLE, "and is_generated <> 'ALWAYS' and is_identity <> 'YES'"),
     ]);
     const insérables = new Set(cible.split(","));
-    return source.split(",").filter(colonne => insérables.has(colonne));
+    return source.split(",").filter((colonne) => insérables.has(colonne));
   };
 
   for (const table of ["buckets", "objects"]) {
-    const communes = (await colonnes(table)).map(colonne => `"${colonne}"`).join(", ");
+    const communes = (await colonnes(table))
+      .map((colonne) => `"${colonne}"`)
+      .join(", ");
     const csv = `/tmp/achillea-storage-${table}.csv`;
     const script = `/tmp/achillea-storage-${table}.psql`;
 
@@ -280,7 +299,9 @@ async function copierStockage(): Promise<void> {
     const resultat =
       await $`sudo -u postgres psql -d ${CIBLE} -v ON_ERROR_STOP=1 -q --single-transaction -f ${script}`.nothrow();
     if (resultat.exitCode !== 0) {
-      console.warn(`… storage.${table} : copie incomplète (${resultat.stderr.toString().trim()})`);
+      console.warn(
+        `… storage.${table} : copie incomplète (${resultat.stderr.toString().trim()})`,
+      );
     }
     await $`sudo rm -f ${csv} ${script}`.nothrow();
   }
@@ -296,10 +317,14 @@ async function copierStockage(): Promise<void> {
  */
 async function reconcilierDonneesVivantes(): Promise<void> {
   const stamp = Date.now();
-  const copierCsv = async (table: string, colonnes: string[], requete: string) => {
+  const copierCsv = async (
+    table: string,
+    colonnes: string[],
+    requete: string,
+  ) => {
     const csv = `/tmp/achillea-reconcile-${table}-${stamp}.csv`;
     const script = `/tmp/achillea-reconcile-${table}-${stamp}.sql`;
-    const liste = colonnes.map(colonne => `"${colonne}"`).join(", ");
+    const liste = colonnes.map((colonne) => `"${colonne}"`).join(", ");
     await $`sudo -u postgres psql -d ${SOURCE} -v ON_ERROR_STOP=1 -q -c ${`\\copy (${requete}) to '${csv}' csv`}`;
     await Bun.write(
       script,
@@ -323,16 +348,28 @@ async function reconcilierDonneesVivantes(): Promise<void> {
       ].join("\n"),
     );
     await $`sudo chmod 644 ${csv} ${script}`;
-    const resultat = await $`sudo -u postgres psql -d ${CIBLE} -v ON_ERROR_STOP=1 -q -f ${script}`.nothrow();
+    const resultat =
+      await $`sudo -u postgres psql -d ${CIBLE} -v ON_ERROR_STOP=1 -q -f ${script}`.nothrow();
     await $`sudo rm -f ${csv} ${script}`.nothrow();
     if (resultat.exitCode !== 0) {
-      throw new Error(`réconciliation ${table} échouée : ${resultat.stderr.toString().trim()}`);
+      throw new Error(
+        `réconciliation ${table} échouée : ${resultat.stderr.toString().trim()}`,
+      );
     }
   };
 
   await copierCsv(
     "guild_member_meta",
-    ["guild_id", "user_id", "nick", "joined_at", "premium_since", "roles", "pending", "scanned_at"],
+    [
+      "guild_id",
+      "user_id",
+      "nick",
+      "joined_at",
+      "premium_since",
+      "roles",
+      "pending",
+      "scanned_at",
+    ],
     "select guild_id, user_id, nick, joined_at, premium_since, roles, pending, scanned_at from public.guild_member_meta",
   );
   await copierCsv(
@@ -340,7 +377,9 @@ async function reconcilierDonneesVivantes(): Promise<void> {
     ["id", "type", "value", "additional_data", "created_at"],
     "select id, type, value, additional_data, created_at from public.stat",
   );
-  console.info("✓ métadonnées de guildes et statistiques legacy réconciliées sans écrasement");
+  console.info(
+    "✓ métadonnées de guildes et statistiques legacy réconciliées sans écrasement",
+  );
 }
 
 /** Repointe les fichiers d'environnement et redémarre les services. */
@@ -368,7 +407,9 @@ async function basculer(): Promise<void> {
 
   console.info("→ redémarrage du service Achilléa actif (achillea-bot)");
   await $`sudo systemctl restart achillea-bot.service`;
-  console.info("✓ bascule terminée — vérifier `journalctl -u achillea-bot.service -n 50`");
+  console.info(
+    "✓ bascule terminée — vérifier `journalctl -u achillea-bot.service -n 50`",
+  );
 }
 
 const arguments_ = Bun.argv.slice(2);

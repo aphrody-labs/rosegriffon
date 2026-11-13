@@ -53,6 +53,8 @@ describe("azalee cpk nie-bridge", () => {
     expect(typeof computeNieCrc32).toBe("function");
 
     // Reference CPK key verification
-    expect(deriveCpkKeyFromFilename("1d08dda99e8549431c6c7b459ed8deab.cpk")).toBe(0xbd281847);
+    expect(
+      deriveCpkKeyFromFilename("1d08dda99e8549431c6c7b459ed8deab.cpk"),
+    ).toBe(0xbd281847);
   });
 });

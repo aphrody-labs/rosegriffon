@@ -20,17 +20,27 @@ interface Version {
 interface VersionsListProps {
   versions: Version[];
   articleId: string;
-  restoreAction: (articleId: string, versionId: string) => Promise<{ success: boolean; error?: string }>;
+  restoreAction: (
+    articleId: string,
+    versionId: string,
+  ) => Promise<{ success: boolean; error?: string }>;
 }
 
 const STATUS_LABELS: Record<string, { label: string; className: string }> = {
-  archived: { className: "bg-on-surface-variant/10 text-on-surface-variant", label: "Archivé" },
+  archived: {
+    className: "bg-on-surface-variant/10 text-on-surface-variant",
+    label: "Archivé",
+  },
   draft: { className: "bg-warning/10 text-warning", label: "Brouillon" },
   published: { className: "bg-success/10 text-success", label: "Publié" },
   scheduled: { className: "bg-primary/10 text-primary", label: "Programmé" },
 };
 
-export function VersionsList({ versions, articleId, restoreAction }: VersionsListProps) {
+export function VersionsList({
+  versions,
+  articleId,
+  restoreAction,
+}: VersionsListProps) {
   const { confirm, dialog } = useConfirm();
   const [restoringId, setRestoringId] = useState<string | null>(null);
   const router = useRouter();
@@ -67,7 +77,8 @@ export function VersionsList({ versions, articleId, restoreAction }: VersionsLis
     <div className="rounded-2xl border border-outline-variant/20 overflow-hidden bg-surface-container-lowest divide-y divide-outline-variant/10">
       {dialog}
       {versions.map((version, i) => {
-        const statusInfo = STATUS_LABELS[version.status || "draft"] || STATUS_LABELS.draft;
+        const statusInfo =
+          STATUS_LABELS[version.status || "draft"] || STATUS_LABELS.draft;
         const isLatest = i === 0;
 
         return (
@@ -80,17 +91,27 @@ export function VersionsList({ versions, articleId, restoreAction }: VersionsLis
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
-                <span className="text-sm font-bold text-on-surface">Version {version.version_number}</span>
+                <span className="text-sm font-bold text-on-surface">
+                  Version {version.version_number}
+                </span>
                 {isLatest && (
-                  <Badge className="bg-primary/10 text-primary border-none text-[10px] rounded-lg">Dernière</Badge>
+                  <Badge className="bg-primary/10 text-primary border-none text-[10px] rounded-lg">
+                    Dernière
+                  </Badge>
                 )}
-                <Badge className={`${statusInfo.className} border-none text-[10px] rounded-lg`}>
+                <Badge
+                  className={`${statusInfo.className} border-none text-[10px] rounded-lg`}
+                >
                   {statusInfo.label}
                 </Badge>
               </div>
-              <p className="text-xs text-on-surface-variant mt-0.5 truncate">{version.title}</p>
+              <p className="text-xs text-on-surface-variant mt-0.5 truncate">
+                {version.title}
+              </p>
               <p className="text-[10px] text-on-surface-variant/60 mt-0.5">
-                {format(new Date(version.created_at), "d MMMM yyyy 'à' HH:mm", { locale: fr })}
+                {format(new Date(version.created_at), "d MMMM yyyy 'à' HH:mm", {
+                  locale: fr,
+                })}
               </p>
             </div>
             {!isLatest && (
@@ -98,7 +119,9 @@ export function VersionsList({ versions, articleId, restoreAction }: VersionsLis
                 variant="outline"
                 size="sm"
                 disabled={restoringId === version.id}
-                onClick={() => handleRestore(version.id, version.version_number)}
+                onClick={() =>
+                  handleRestore(version.id, version.version_number)
+                }
                 className="shrink-0 rounded-full text-xs"
               >
                 <RotateCcw className="size-3.5 mr-1.5" />

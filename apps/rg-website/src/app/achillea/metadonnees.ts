@@ -66,13 +66,23 @@ export interface OptionsMetadonnees {
  * de caractères : recopiés tels quels, ils produisent une méta-description
  * tronquée au hasard par le moteur de recherche.
  */
-export function resume(texte: string | null | undefined, maximum = 155): string | null {
+export function resume(
+  texte: string | null | undefined,
+  maximum = 155,
+): string | null {
   const propre = (texte ?? "").replace(/\s+/g, " ").trim();
   if (propre.length === 0) return null;
-  return propre.length <= maximum ? propre : `${propre.slice(0, maximum - 1).trimEnd()}…`;
+  return propre.length <= maximum
+    ? propre
+    : `${propre.slice(0, maximum - 1).trimEnd()}…`;
 }
 
-export function metadonneesAchillea({ titre, description: brute, chemin, indexable = true }: OptionsMetadonnees): Metadata {
+export function metadonneesAchillea({
+  titre,
+  description: brute,
+  chemin,
+  indexable = true,
+}: OptionsMetadonnees): Metadata {
   // Les descriptions de repli (« <nom> — tournoi … , N inscrit(s). ») ne passent
   // pas par `resume` : la borne est posée ici, pour toutes les pages du domaine.
   const description = clampText(brute);
@@ -94,7 +104,9 @@ export function metadonneesAchillea({ titre, description: brute, chemin, indexab
       siteName: "Achilléa Rose Griffon",
       locale: "fr_FR",
       type: "website",
-      images: [{ url: BANNIERE, width: 1200, height: 630, alt: "Bannière Achilléa" }],
+      images: [
+        { url: BANNIERE, width: 1200, height: 630, alt: "Bannière Achilléa" },
+      ],
     },
     twitter: {
       card: "summary_large_image",

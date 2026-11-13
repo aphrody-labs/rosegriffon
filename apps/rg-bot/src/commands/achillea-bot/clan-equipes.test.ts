@@ -5,7 +5,14 @@ import { afterEach, describe, expect, test } from "bun:test";
 
 import { fausseInteraction, installerApi } from "../../../test/achillea-kit";
 import { ClanEquipes, lireEffectif } from "./clan-equipes";
-import { appartenance, CLAN_ID, equipe, MEMBRE, PRESIDENT, VICE } from "./clan-fixtures.test-kit";
+import {
+  appartenance,
+  CLAN_ID,
+  equipe,
+  MEMBRE,
+  PRESIDENT,
+  VICE,
+} from "./clan-fixtures.test-kit";
 
 let restaurer: (() => void) | null = null;
 afterEach(() => {
@@ -20,12 +27,18 @@ function api(routes: Record<string, unknown>) {
 }
 
 function interaction(options: Parameters<typeof fausseInteraction>[0] = {}) {
-  const i = fausseInteraction({ utilisateur: { id: PRESIDENT, username: "Endou" }, ...options });
+  const i = fausseInteraction({
+    utilisateur: { id: PRESIDENT, username: "Endou" },
+    ...options,
+  });
   i.isChatInputCommand = () => !options.customId;
   return i;
 }
 
-const routesEquipes = (role: number | null, equipes = [equipe(0), equipe(1)]) => ({
+const routesEquipes = (
+  role: number | null,
+  equipes = [equipe(0), equipe(1)],
+) => ({
   "GET /clans/teams/membership": appartenance(role),
   [`GET /clans/teams/clan/${CLAN_ID}`]: equipes,
   "GET /clans/teams/70": equipe(0),
@@ -46,11 +59,14 @@ describe("/clan teams", () => {
   test("crée les équipes manquantes d'un clan validé avant leur introduction", async () => {
     const appels = api({
       ...routesEquipes(3, []),
-      "POST /clans/teams": (requete: { corps: unknown }) => equipe((requete.corps as { type: 0 | 1 }).type),
+      "POST /clans/teams": (requete: { corps: unknown }) =>
+        equipe((requete.corps as { type: 0 | 1 }).type),
     });
     const i = interaction({ commande: "clan", sousCommande: "teams" });
     await equipes.teams(i as never);
-    expect(appels.filter(a => a.chemin === "/clans/teams").map(a => a.corps)).toEqual([
+    expect(
+      appels.filter((a) => a.chemin === "/clans/teams").map((a) => a.corps),
+    ).toEqual([
       { clanId: CLAN_ID, type: 0 },
       { clanId: CLAN_ID, type: 1 },
     ]);
@@ -95,7 +111,7 @@ describe("composants team_*", () => {
     api(routesEquipes(3));
     const i = interaction({ customId: "team_edit_btn:0:1" });
     await equipes.editerEffectif(i as never);
-    expect(i.envois.map(e => e.via)).toEqual(["showModal"]);
+    expect(i.envois.map((e) => e.via)).toEqual(["showModal"]);
     expect(i.texte()).toContain("team_manager_modal:70:1");
     expect(i.texte()).toContain(`sub_1:0:${CLAN_ID}`);
   });
@@ -109,20 +125,35 @@ describe("composants team_*", () => {
   });
 
   test("team_manager_modal : effectif envoyé à l'API, équipe réaffichée", async () => {
-    const appels = api({ ...routesEquipes(3), "PUT /clans/teams/70/roster": equipe(0) });
+    const appels = api({
+      ...routesEquipes(3),
+      "PUT /clans/teams/70/roster": equipe(0),
+    });
     const i = interaction({
       customId: "team_manager_modal:70:0",
-      champs: { [`player_1:0:${CLAN_ID}`]: MEMBRE, [`player_2:0:${CLAN_ID}`]: ` ${VICE} ` },
+      champs: {
+        [`player_1:0:${CLAN_ID}`]: MEMBRE,
+        [`player_2:0:${CLAN_ID}`]: ` ${VICE} `,
+      },
     });
     await equipes.enregistrerEffectif(i as never);
-    expect(appels.find(a => a.methode === "PUT")?.corps).toEqual({ role: 0, userIds: [MEMBRE, VICE] });
+    expect(appels.find((a) => a.methode === "PUT")?.corps).toEqual({
+      role: 0,
+      userIds: [MEMBRE, VICE],
+    });
     expect(i.texte()).toContain("team_edit_btn:0:2");
   });
 
   test("team_manager_modal refusé par l'API (409) : motif affiché", async () => {
     api({
       ...routesEquipes(3),
-      "PUT /clans/teams/70/roster": [409, { message: "<@1> occupe déjà une place dans l'équipe « Equipe secondaire »" }],
+      "PUT /clans/teams/70/roster": [
+        409,
+        {
+          message:
+            "<@1> occupe déjà une place dans l'équipe « Equipe secondaire »",
+        },
+      ],
     });
     const i = interaction({ customId: "team_manager_modal:70:0", champs: {} });
     await equipes.enregistrerEffectif(i as never);
@@ -130,13 +161,24 @@ describe("composants team_*", () => {
   });
 
   test("team_settings_modal : nom et capitaine, sinon « aucun changement »", async () => {
-    const appels = api({ ...routesEquipes(3), "PATCH /clans/teams/70": equipe(0) });
-    const i = interaction({ customId: "team_settings_modal:70", champs: { "team_settings_name:70": "Les Éclairs" } });
+    const appels = api({
+      ...routesEquipes(3),
+      "PATCH /clans/teams/70": equipe(0),
+    });
+    const i = interaction({
+      customId: "team_settings_modal:70",
+      champs: { "team_settings_name:70": "Les Éclairs" },
+    });
     i.fields.getStringSelectValues = () => [MEMBRE];
     await equipes.enregistrerParametres(i as never);
-    expect(appels.find(a => a.methode === "PATCH")?.corps).toEqual({ name: "Les Éclairs" });
+    expect(appels.find((a) => a.methode === "PATCH")?.corps).toEqual({
+      name: "Les Éclairs",
+    });
 
-    const inchange = interaction({ customId: "team_settings_modal:70", champs: { "team_settings_name:70": "Equipe principale" } });
+    const inchange = interaction({
+      customId: "team_settings_modal:70",
+      champs: { "team_settings_name:70": "Equipe principale" },
+    });
     inchange.fields.getStringSelectValues = () => [MEMBRE];
     await equipes.enregistrerParametres(inchange as never);
     expect(inchange.texte()).toContain("Aucun changement");
@@ -149,6 +191,8 @@ describe("composants team_*", () => {
         throw new Error("absent");
       },
     };
-    expect(lireEffectif(champs, 2, { type: 1, clanId: CLAN_ID })).toEqual(["123"]);
+    expect(lireEffectif(champs, 2, { type: 1, clanId: CLAN_ID })).toEqual([
+      "123",
+    ]);
   });
 });

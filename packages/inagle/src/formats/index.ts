@@ -43,11 +43,18 @@ export class VfsFormatConsumer {
 
     // 2. Pure JS fallback detection by magic
     const magicAscii = this.readAscii(data, 0, 4);
-    const resolved = resolveFormat(magicAscii) ?? resolveFormat(this.readAscii(data, 0, 8));
+    const resolved =
+      resolveFormat(magicAscii) ?? resolveFormat(this.readAscii(data, 0, 8));
     if (resolved) return resolved;
 
     // Check PNG signature: 89 50 4E 47 0D 0A 1A 0A
-    if (data.length >= 8 && data[0] === 0x89 && data[1] === 0x50 && data[2] === 0x4e && data[3] === 0x47) {
+    if (
+      data.length >= 8 &&
+      data[0] === 0x89 &&
+      data[1] === 0x50 &&
+      data[2] === 0x4e &&
+      data[3] === 0x47
+    ) {
       const png = resolveFormat(".png");
       if (png) return png;
     }
@@ -78,7 +85,7 @@ export class VfsFormatConsumer {
    * Resolves format by ID (1..28).
    */
   static getById(id: number): VfsFormatDescriptor | undefined {
-    return VFS_FORMATS.find(f => f.id === id);
+    return VFS_FORMATS.find((f) => f.id === id);
   }
 
   /**
@@ -107,7 +114,8 @@ export class VfsFormatConsumer {
     if (data.length < 4) {
       return {
         valid: false,
-        reason: "Buffer too small for header validation (need at least 4 bytes)",
+        reason:
+          "Buffer too small for header validation (need at least 4 bytes)",
       };
     }
 
@@ -140,7 +148,11 @@ export class VfsFormatConsumer {
     };
   }
 
-  private static readAscii(data: Uint8Array, offset: number, length: number): string {
+  private static readAscii(
+    data: Uint8Array,
+    offset: number,
+    length: number,
+  ): string {
     if (data.length < offset + length) return "";
     let str = "";
     for (let i = 0; i < length; i++) {

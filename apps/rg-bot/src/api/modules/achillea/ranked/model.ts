@@ -38,7 +38,11 @@ export const RankedModel = {
   tier,
   tiers: t.Array(t.Intersect([tier, t.Object({ playerCount: t.Number() })])),
   profile,
-  leaderboard: t.Object({ mode: t.Number(), total: t.Number(), entries: t.Array(entry) }),
+  leaderboard: t.Object({
+    mode: t.Number(),
+    total: t.Number(),
+    entries: t.Array(entry),
+  }),
   unauthorized: t.Object({ message: t.Literal("Authentication required") }),
   notFound: t.Object({ message: t.Literal("User not found") }),
 };

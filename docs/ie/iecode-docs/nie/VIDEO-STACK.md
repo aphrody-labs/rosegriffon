@@ -39,13 +39,13 @@ C'est `ffmpeg-sidecar` (MIT) côté Rust, `Bun.spawn` côté Bun.
 
 | Rôle           | Crate                                                                             | Version · licence · date                           | Pur Rust           |
 | -------------- | --------------------------------------------------------------------------------- | -------------------------------------------------- | ------------------ |
-| Encodage vidéo | `rav1e` (AV1)                                                                     | 0.8.1 · BSD-2 + AOM Patent 1.0 · commit 2026-08-31 |  (NASM si `asm`) |
-| RGBA → I420    | `yuv`                                                                             | 0.8.19 · BSD-3 / Apache-2.0 · 2026-09-17           |                  |
-| Encodage audio | `opus-rs`                                                                         | 0.1.33 · BSD-3 · 2026-09-07                        |  `no_std`        |
-| Muxing WebM    | `webm` 2.2.1 (MPL-2.0, libwebm en C++) ou `webm-iterable` 0.7.1 (MIT, 100 % Rust) | 2026-08-25 / 2026-08-28                            |  /             |
-| Muxing MP4     | `mp4-atom`                                                                        | 0.15.0 · MIT / Apache-2.0 · commit 2026-09-17      |                  |
-| Décodage AV1   | `rav1d` 1.1.0 (BSD-2) ou `dav1d` 0.11.1                                           | —                                                  |  / lie libdav1d  |
-| Décodage VP9   | — aucun pur Rust crédible                                                         | —                                                  |                  |
+| Encodage vidéo | `rav1e` (AV1)                                                                     | 0.8.1 · BSD-2 + AOM Patent 1.0 · commit 2026-08-31 | (NASM si `asm`)    |
+| RGBA → I420    | `yuv`                                                                             | 0.8.19 · BSD-3 / Apache-2.0 · 2026-09-17           |                    |
+| Encodage audio | `opus-rs`                                                                         | 0.1.33 · BSD-3 · 2026-09-07                        | `no_std`           |
+| Muxing WebM    | `webm` 2.2.1 (MPL-2.0, libwebm en C++) ou `webm-iterable` 0.7.1 (MIT, 100 % Rust) | 2026-08-25 / 2026-08-28                            | /                  |
+| Muxing MP4     | `mp4-atom`                                                                        | 0.15.0 · MIT / Apache-2.0 · commit 2026-09-17      |                    |
+| Décodage AV1   | `rav1d` 1.1.0 (BSD-2) ou `dav1d` 0.11.1                                           | —                                                  | / lie libdav1d     |
+| Décodage VP9   | — aucun pur Rust crédible                                                         | —                                                  |                    |
 | Repli global   | `ffmpeg-sidecar`                                                                  | 2.5.2 · **MIT** · sous-processus                   | zéro contamination |
 
 Deux pièges relevés au passage :

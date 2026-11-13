@@ -15,7 +15,10 @@ import { loadJsonAsync } from "../core/async-loader.js";
 import { findConfigFile } from "../core/data-loader.js";
 import { EntityExporters, type ExportableEntity } from "../core/exporters.js";
 import { DATA_ROOT } from "../core/paths.js";
-import { decodeUnlockCondition, type UnlockCondition } from "./unlock-condition.js";
+import {
+  decodeUnlockCondition,
+  type UnlockCondition,
+} from "./unlock-condition.js";
 
 // ============================================================================
 // Types
@@ -76,7 +79,9 @@ function parseContent(content: any): ParsedGallery[] {
 // Loaders
 // ============================================================================
 
-export async function loadGalleryConfigAsync(dataPath: string = DATA_ROOT): Promise<ParsedGallery[] | null> {
+export async function loadGalleryConfigAsync(
+  dataPath: string = DATA_ROOT,
+): Promise<ParsedGallery[] | null> {
   const filename = findConfigFile("gallery", "gallery_config");
   if (!filename) return null;
 
@@ -85,7 +90,9 @@ export async function loadGalleryConfigAsync(dataPath: string = DATA_ROOT): Prom
   return content ? parseContent(content) : null;
 }
 
-export async function buildGalleryDatabase(dataPath: string = DATA_ROOT): Promise<GalleryDatabase> {
+export async function buildGalleryDatabase(
+  dataPath: string = DATA_ROOT,
+): Promise<GalleryDatabase> {
   const galleries = (await loadGalleryConfigAsync(dataPath)) || [];
   const byId = new Map<string, ParsedGallery>();
   for (const g of galleries) byId.set(g.galleryId, g);

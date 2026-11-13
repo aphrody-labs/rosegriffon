@@ -32,7 +32,8 @@ export const SERVEURS_DISCORD: readonly ServeurDiscord[] = [
   {
     atouts: ["Discussion", "Événements", "Créations"],
     cle: "rose-griffon",
-    description: "Le serveur de l'association : discussions, événements, projets créatifs et actualité Inazuma Eleven.",
+    description:
+      "Le serveur de l'association : discussions, événements, projets créatifs et actualité Inazuma Eleven.",
     guildId: "1072991720268111892",
     invitation: "https://discord.com/invite/rosegriffon",
     nom: "Rose Griffon",
@@ -40,15 +41,20 @@ export const SERVEURS_DISCORD: readonly ServeurDiscord[] = [
   {
     atouts: ["Clans", "Mode classé", "Tournois"],
     cle: "achillea",
-    description: "Le serveur compétitif : clans, matchs classés, tournois et classement de la scène française.",
+    description:
+      "Le serveur compétitif : clans, matchs classés, tournois et classement de la scène française.",
     guildId: "1055585286320554055",
-    invitation: "https://discord.gg/achillea-competitif-inazuma-eleven-fr-1055585286320554055",
+    invitation:
+      "https://discord.gg/achillea-competitif-inazuma-eleven-fr-1055585286320554055",
     nom: "Achilléa",
   },
 ];
 
 export function serveurDiscord(cle: string): ServeurDiscord {
-  return SERVEURS_DISCORD.find(serveur => serveur.cle === cle) ?? SERVEURS_DISCORD[0]!;
+  return (
+    SERVEURS_DISCORD.find((serveur) => serveur.cle === cle) ??
+    SERVEURS_DISCORD[0]!
+  );
 }
 
 /** Serveur Rose Griffon interrogé via le widget public de Discord. */

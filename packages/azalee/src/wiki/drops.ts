@@ -28,10 +28,23 @@
  */
 
 import { createInagleSql } from "@rosegriffon/db/inagle-sql";
-import type { DropEntry, DropsPageData, SpiritGroup, SpiritTier, TeamBean } from "./drops-shared";
+import type {
+  DropEntry,
+  DropsPageData,
+  SpiritGroup,
+  SpiritTier,
+  TeamBean,
+} from "./drops-shared";
 
 // Ré-export des types + helpers purs depuis le module client-safe (compat imports existants).
-export type { DropEntry, DropsCounts, DropsPageData, SpiritGroup, SpiritTier, TeamBean } from "./drops-shared";
+export type {
+  DropEntry,
+  DropsCounts,
+  DropsPageData,
+  SpiritGroup,
+  SpiritTier,
+  TeamBean,
+} from "./drops-shared";
 export { dropCategoryLabel, dropSourceLabel } from "./drops-shared";
 
 /** Une ligne brute de `inagle_drop_rates`. */
@@ -72,7 +85,10 @@ interface BeanRow {
 interface DropsDatabase {
   inagle_drop_rates: DropRateRow;
   inagle_items: ItemRow;
-  inagle_drops_battles: { battle_group_id: number; item_table_id: number | null };
+  inagle_drops_battles: {
+    battle_group_id: number;
+    item_table_id: number | null;
+  };
   inagle_drops: BeanRow;
 }
 
@@ -87,15 +103,23 @@ async function fetchConcreteDrops(): Promise<DropEntry[]> {
     .selectAll()
     .where("source", "in", [...SUPPORTED_CONCRETE_SOURCES])
     .execute();
-  const withItem = rows.filter(r => !!r.item_id);
+  const withItem = rows.filter((r) => !!r.item_id);
 
   // Résolution des objets en un seul `in` (les hash sont distincts et peu nombreux).
-  const itemIds = [...new Set(withItem.map(r => r.item_id as string))];
+  const itemIds = [...new Set(withItem.map((r) => r.item_id as string))];
   const itemMap = new Map<string, ItemRow>();
   if (itemIds.length > 0) {
     const itemData = await sql
       .selectFrom("inagle_items")
-      .select(["id", "name_fr", "name_en", "category", "rarity", "internal_code", "image_url"])
+      .select([
+        "id",
+        "name_fr",
+        "name_en",
+        "category",
+        "rarity",
+        "internal_code",
+        "image_url",
+      ])
       .where("id", "in", itemIds)
       .execute();
     for (const it of itemData) {
@@ -133,10 +157,17 @@ async function fetchConcreteDrops(): Promise<DropEntry[]> {
 
 /** Récupère les groupes d'esprit (paliers de rareté) + leurs combats associés. */
 async function fetchSpiritGroups(): Promise<SpiritGroup[]> {
-  const rows = await sql.selectFrom("inagle_drop_rates").selectAll().where("source", "=", "spirit_drop").execute();
+  const rows = await sql
+    .selectFrom("inagle_drop_rates")
+    .selectAll()
+    .where("source", "=", "spirit_drop")
+    .execute();
 
   // Lien combat → table (item_table_id stocké en INTEGER, reconverti en hash).
-  const battleData = await sql.selectFrom("inagle_drops_battles").selectAll().execute();
+  const battleData = await sql
+    .selectFrom("inagle_drops_battles")
+    .selectAll()
+    .execute();
   const battleByTable = new Map<string, number[]>();
   for (const b of battleData) {
     if (b.item_table_id === null) continue;
@@ -195,7 +226,11 @@ async function fetchSpiritGroups(): Promise<SpiritGroup[]> {
 
 /** Récupère les bonus « Fèves » d'équipe (mécanique distincte du drop d'objet). */
 async function fetchTeamBeans(): Promise<TeamBean[]> {
-  const rows = await sql.selectFrom("inagle_drops").selectAll().orderBy("id", "asc").execute();
+  const rows = await sql
+    .selectFrom("inagle_drops")
+    .selectAll()
+    .orderBy("id", "asc")
+    .execute();
   return rows.map((r): TeamBean => ({
     id: r.id,
     team: r.team ?? "—",
@@ -211,7 +246,11 @@ async function fetchTeamBeans(): Promise<TeamBean[]> {
 
 /** Charge l'intégralité des données de la page `/drops` (3 sous-jeux de données réels). */
 export async function getDropsData(): Promise<DropsPageData> {
-  const [drops, spiritGroups, beans] = await Promise.all([fetchConcreteDrops(), fetchSpiritGroups(), fetchTeamBeans()]);
+  const [drops, spiritGroups, beans] = await Promise.all([
+    fetchConcreteDrops(),
+    fetchSpiritGroups(),
+    fetchTeamBeans(),
+  ]);
 
   // Tri des drops : par source puis taux décroissant.
   drops.sort((a, b) => {
@@ -224,10 +263,17 @@ export async function getDropsData(): Promise<DropsPageData> {
     return b.chance - a.chance;
   });
 
-  const categories = [...new Set(drops.map(d => d.itemCategory).filter((c): c is string => !!c))].sort();
-  const beanGames = [...new Set(beans.map(b => b.game).filter(g => g && g !== "—"))].sort();
+  const categories = [
+    ...new Set(
+      drops.map((d) => d.itemCategory).filter((c): c is string => !!c),
+    ),
+  ].sort();
+  const beanGames = [
+    ...new Set(beans.map((b) => b.game).filter((g) => g && g !== "—")),
+  ].sort();
 
-  const dropSources = new Set(drops.map(d => `${d.source}:${d.sourceId}`)).size;
+  const dropSources = new Set(drops.map((d) => `${d.source}:${d.sourceId}`))
+    .size;
 
   return {
     drops,

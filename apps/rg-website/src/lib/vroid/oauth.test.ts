@@ -8,7 +8,13 @@
  */
 import { describe, expect, test } from "bun:test";
 import type { ConfigVroid } from "./constantes";
-import { base64url, genererCodeChallenge, genererCodeVerifier, genererState, urlAutorisation } from "./oauth";
+import {
+  base64url,
+  genererCodeChallenge,
+  genererCodeVerifier,
+  genererState,
+  urlAutorisation,
+} from "./oauth";
 
 /** Configuration factice : aucun secret réel n'entre dans un test. */
 const CONFIG: ConfigVroid = {
@@ -46,13 +52,17 @@ describe("code_verifier", () => {
 
 describe("code_challenge", () => {
   test("reproduit le vecteur de l'annexe B de la RFC 7636", async () => {
-    const challenge = await genererCodeChallenge("dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk");
+    const challenge = await genererCodeChallenge(
+      "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk",
+    );
     expect(challenge).toBe("E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM");
   });
 
   test("est déterministe pour un même verifier", async () => {
     const verifier = genererCodeVerifier();
-    expect(await genererCodeChallenge(verifier)).toBe(await genererCodeChallenge(verifier));
+    expect(await genererCodeChallenge(verifier)).toBe(
+      await genererCodeChallenge(verifier),
+    );
   });
 });
 
@@ -73,6 +83,8 @@ describe("urlAutorisation", () => {
   });
 
   test("ne laisse jamais fuiter le secret client dans l'URL", () => {
-    expect(urlAutorisation(CONFIG, genererState(), "c")).not.toContain(CONFIG.secret);
+    expect(urlAutorisation(CONFIG, genererState(), "c")).not.toContain(
+      CONFIG.secret,
+    );
   });
 });

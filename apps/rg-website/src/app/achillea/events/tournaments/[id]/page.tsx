@@ -15,7 +15,9 @@ interface FicheTournoiProps {
  * elle : les liens `events/*` déjà partagés continuent de fonctionner sans
  * créer un doublon indexé.
  */
-export async function generateMetadata({ params }: FicheTournoiProps): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: FicheTournoiProps): Promise<Metadata> {
   const { id } = await params;
   const numero = Number.parseInt(id, 10);
   const chemin = `/achillea/tournaments/${id}`;
@@ -34,7 +36,8 @@ export async function generateMetadata({ params }: FicheTournoiProps): Promise<M
     signalerEchec(`events/tournaments/${id} — métadonnées`, resultat);
     return metadonneesAchillea({
       titre: "Fiche de tournoi",
-      description: "Format, inscrits et arbre de rencontres d'un tournoi Achilléa.",
+      description:
+        "Format, inscrits et arbre de rencontres d'un tournoi Achilléa.",
       chemin,
     });
   }
@@ -49,7 +52,9 @@ export async function generateMetadata({ params }: FicheTournoiProps): Promise<M
   });
 }
 
-export default async function EventsTournamentDetailPage({ params }: FicheTournoiProps) {
+export default async function EventsTournamentDetailPage({
+  params,
+}: FicheTournoiProps) {
   const { id } = await params;
   return <TournamentDetailClient id={id} />;
 }

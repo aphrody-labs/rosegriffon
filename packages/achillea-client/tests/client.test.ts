@@ -9,7 +9,7 @@ function jsonResponse(body: unknown, status = 200): Response {
 describe("v1 HTTP client", () => {
   test("calls and validates the paginated guild endpoint", async () => {
     let requestedUrl = "";
-    const fetch: AchilleaFetch = async input => {
+    const fetch: AchilleaFetch = async (input) => {
       requestedUrl = String(input);
       return jsonResponse({
         data: [],
@@ -23,7 +23,9 @@ describe("v1 HTTP client", () => {
 
     const result = await client.guilds.list(2, 10);
 
-    expect(requestedUrl).toBe("https://example.test/api/guilds?page=2&limit=10");
+    expect(requestedUrl).toBe(
+      "https://example.test/api/guilds?page=2&limit=10",
+    );
     expect(result).toEqual({
       ok: true,
       value: { data: [], meta: { page: 2, limit: 10, total: 0, pageCount: 0 } },

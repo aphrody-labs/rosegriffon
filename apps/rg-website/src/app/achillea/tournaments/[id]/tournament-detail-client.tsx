@@ -22,7 +22,10 @@ import { TournamentTopSummary } from "@/components/achillea/TournamentTopSummary
 import { EventParticipantsTable } from "@/components/achillea/EventParticipantsTable";
 import { PlayerNotesPanel } from "@/components/achillea/PlayerNotesPanel";
 import { Badge, Button, Skeleton } from "@rosegriffon/ui";
-import type { WireTournament, WireParticipant } from "@rosegriffon/achillea-types/domain/tournament-ops";
+import type {
+  WireTournament,
+  WireParticipant,
+} from "@rosegriffon/achillea-types/domain/tournament-ops";
 import type { ParticipantDTO } from "@rosegriffon/achillea-types";
 import { TournamentState } from "@rosegriffon/achillea-types/enums/eventEnums";
 import {
@@ -43,7 +46,13 @@ import {
 } from "lucide-react";
 import { MEDAILLE } from "@/components/achillea/couleurs-donnees";
 
-export default function TournamentDetailPage({ id, titre }: { id: string; titre?: string }) {
+export default function TournamentDetailPage({
+  id,
+  titre,
+}: {
+  id: string;
+  titre?: string;
+}) {
   const tournamentId = parseInt(id, 10);
 
   const { user, isAuthenticated, login } = useAchilleaAuth();
@@ -56,7 +65,13 @@ export default function TournamentDetailPage({ id, titre }: { id: string; titre?
     Number.isNaN(tournamentId) ? "Identifiant de tournoi invalide." : null,
   );
   const [activeTab, setActiveTab] = useState<
-    "overview" | "bracket" | "participants" | "summary" | "events" | "organizers" | "notes"
+    | "overview"
+    | "bracket"
+    | "participants"
+    | "summary"
+    | "events"
+    | "organizers"
+    | "notes"
   >("overview");
   const tabListRef = useRef<HTMLDivElement>(null);
 
@@ -68,7 +83,7 @@ export default function TournamentDetailPage({ id, titre }: { id: string; titre?
     const client = createAchilleaClient();
     return client.tournaments
       .get(tournamentId)
-      .then(res => {
+      .then((res) => {
         if (res.ok && res.value) {
           setTournament(res.value[0]);
           setParticipants(res.value[1] ?? []);
@@ -85,8 +100,14 @@ export default function TournamentDetailPage({ id, titre }: { id: string; titre?
       });
   };
 
-  const [requestIdentity1, setRequestIdentity1] = useState<readonly unknown[]>([tournamentId]);
-  if ([tournamentId].some((value, position) => !Object.is(value, requestIdentity1[position]))) {
+  const [requestIdentity1, setRequestIdentity1] = useState<readonly unknown[]>([
+    tournamentId,
+  ]);
+  if (
+    [tournamentId].some(
+      (value, position) => !Object.is(value, requestIdentity1[position]),
+    )
+  ) {
     setRequestIdentity1([tournamentId]);
     (() => {
       if (isNaN(tournamentId)) {
@@ -105,9 +126,13 @@ export default function TournamentDetailPage({ id, titre }: { id: string; titre?
     void loadTournament();
   }, [tournamentId]);
 
-  const isUserRegistered = Boolean(user && participants.some(p => p.user?.id === user.id));
+  const isUserRegistered = Boolean(
+    user && participants.some((p) => p.user?.id === user.id),
+  );
 
-  const isOrganizer = Boolean(tournament && isTournamentOrganizer(user, tournament as any));
+  const isOrganizer = Boolean(
+    tournament && isTournamentOrganizer(user, tournament as any),
+  );
 
   const handleToggleRegister = async () => {
     if (!isAuthenticated) {
@@ -122,7 +147,7 @@ export default function TournamentDetailPage({ id, titre }: { id: string; titre?
     try {
       if (isUserRegistered) {
         await client.tournaments.unregister(tournament.id);
-        setParticipants(prev => prev.filter(p => p.user?.id !== user?.id));
+        setParticipants((prev) => prev.filter((p) => p.user?.id !== user?.id));
       } else {
         await client.tournaments.participate(tournament.id);
         void loadTournament();
@@ -136,7 +161,9 @@ export default function TournamentDetailPage({ id, titre }: { id: string; titre?
     return (
       <div className="max-w-5xl mx-auto px-4 py-12 space-y-6">
         {titre ? (
-          <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">{titre}</h1>
+          <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">
+            {titre}
+          </h1>
         ) : (
           <Skeleton className="h-8 w-48 rounded-lg" />
         )}
@@ -184,27 +211,37 @@ export default function TournamentDetailPage({ id, titre }: { id: string; titre?
   const firstPrize = placementPrizeAp(nbParticipants, 1);
   const secondPrize = placementPrizeAp(nbParticipants, 2);
   const semiPrize = placementPrizeAp(nbParticipants, 3);
-  const tabs: { id: typeof activeTab; label: string; icon: typeof FileText }[] = [
-    { id: "overview", label: "Présentation & Règles", icon: FileText },
-    { id: "bracket", label: "Arbre du tournoi", icon: Layers },
-    { id: "participants", label: `Participants (${participants.length})`, icon: Users },
-    { id: "summary", label: "Podium & Résultats", icon: Trophy },
-    { id: "events", label: "Journal d'arbitrage", icon: Activity },
-    { id: "organizers", label: "Organisateurs", icon: ShieldCheck },
-    ...(isOrganizer ? [{ id: "notes" as const, label: "Notes Staff", icon: ShieldAlert }] : []),
-  ];
+  const tabs: { id: typeof activeTab; label: string; icon: typeof FileText }[] =
+    [
+      { id: "overview", label: "Présentation & Règles", icon: FileText },
+      { id: "bracket", label: "Arbre du tournoi", icon: Layers },
+      {
+        id: "participants",
+        label: `Participants (${participants.length})`,
+        icon: Users,
+      },
+      { id: "summary", label: "Podium & Résultats", icon: Trophy },
+      { id: "events", label: "Journal d'arbitrage", icon: Activity },
+      { id: "organizers", label: "Organisateurs", icon: ShieldCheck },
+      ...(isOrganizer
+        ? [{ id: "notes" as const, label: "Notes Staff", icon: ShieldAlert }]
+        : []),
+    ];
   const selectTab = (tabId: typeof activeTab, focus = false) => {
     setActiveTab(tabId);
     if (focus)
       requestAnimationFrame(() =>
-        tabListRef.current?.querySelector<HTMLButtonElement>(`#tournament-tab-${tabId}`)?.focus(),
+        tabListRef.current
+          ?.querySelector<HTMLButtonElement>(`#tournament-tab-${tabId}`)
+          ?.focus(),
       );
   };
   const onTabKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>) => {
-    const index = tabs.findIndex(tab => tab.id === activeTab);
+    const index = tabs.findIndex((tab) => tab.id === activeTab);
     let next = index;
     if (event.key === "ArrowRight") next = (index + 1) % tabs.length;
-    else if (event.key === "ArrowLeft") next = (index - 1 + tabs.length) % tabs.length;
+    else if (event.key === "ArrowLeft")
+      next = (index - 1 + tabs.length) % tabs.length;
     else if (event.key === "Home") next = 0;
     else if (event.key === "End") next = tabs.length - 1;
     else return;
@@ -241,12 +278,20 @@ export default function TournamentDetailPage({ id, titre }: { id: string; titre?
           </div>
         )}
 
-        <div className={`p-6 md:p-8 ${tournament.affiche ? "-mt-16 relative z-10" : ""}`}>
+        <div
+          className={`p-6 md:p-8 ${tournament.affiche ? "-mt-16 relative z-10" : ""}`}
+        >
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
             <div className="flex items-center gap-5">
               <div className="relative w-20 h-20 rounded-2xl overflow-hidden bg-muted shrink-0 border-2 border-border shadow-md">
                 {tournament.logo ? (
-                  <Image src={tournament.logo} alt={tournament.name} fill unoptimized className="object-cover" />
+                  <Image
+                    src={tournament.logo}
+                    alt={tournament.name}
+                    fill
+                    unoptimized
+                    className="object-cover"
+                  />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-muted-foreground">
                     <Trophy className="w-8 h-8 text-warning" />
@@ -256,14 +301,17 @@ export default function TournamentDetailPage({ id, titre }: { id: string; titre?
 
               <div className="space-y-1.5">
                 <div className="flex flex-wrap items-center gap-2">
-                  <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">{tournament.name}</h1>
+                  <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">
+                    {tournament.name}
+                  </h1>
                   <Badge variant={variant} className="text-xs">
                     {stateLabel}
                   </Badge>
                 </div>
                 <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
                   <span className="font-medium text-foreground">
-                    {typeof tournament.organization === "object" && tournament.organization !== null
+                    {typeof tournament.organization === "object" &&
+                    tournament.organization !== null
                       ? tournament.organization.name
                       : "Achilléa Esport"}
                   </span>
@@ -320,7 +368,9 @@ export default function TournamentDetailPage({ id, titre }: { id: string; titre?
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6 pt-6 border-t border-border/60 text-xs">
             <div className="p-3 rounded-xl bg-background/60 border border-border">
               <div className="text-muted-foreground">Format</div>
-              <div className="font-bold text-foreground mt-0.5">{formatLabel}</div>
+              <div className="font-bold text-foreground mt-0.5">
+                {formatLabel}
+              </div>
             </div>
             <div className="p-3 rounded-xl bg-background/60 border border-border">
               <div className="text-muted-foreground">Places</div>
@@ -330,18 +380,27 @@ export default function TournamentDetailPage({ id, titre }: { id: string; titre?
             </div>
             <div className="p-3 rounded-xl bg-background/60 border border-border">
               <div className="text-muted-foreground">Cashprize 1er</div>
-              <div className="font-bold text-warning mt-0.5">{firstPrize} AP</div>
+              <div className="font-bold text-warning mt-0.5">
+                {firstPrize} AP
+              </div>
             </div>
             <div className="p-3 rounded-xl bg-background/60 border border-border">
               <div className="text-muted-foreground">Jeu officiel</div>
-              <div className="font-bold text-foreground mt-0.5">IE: Victory Road</div>
+              <div className="font-bold text-foreground mt-0.5">
+                IE: Victory Road
+              </div>
             </div>
           </div>
         </div>
       </div>
 
       {/* Panneau Organisateur / Arbitre */}
-      {isOrganizer && <TournamentLifecycleActions tournament={tournament} onUpdated={() => void loadTournament()} />}
+      {isOrganizer && (
+        <TournamentLifecycleActions
+          tournament={tournament}
+          onUpdated={() => void loadTournament()}
+        />
+      )}
 
       {/* Tabs Navigation */}
       <div
@@ -386,11 +445,19 @@ export default function TournamentDetailPage({ id, titre }: { id: string; titre?
               </div>
 
               <div className="pt-4 border-t border-border/60 space-y-2">
-                <h4 className="font-bold text-xs text-foreground">Déroulement des rencontres :</h4>
+                <h4 className="font-bold text-xs text-foreground">
+                  Déroulement des rencontres :
+                </h4>
                 <ul className="list-disc list-inside text-xs text-muted-foreground space-y-1">
                   <li>Format des matchs : {formatLabel}.</li>
-                  <li>Saisie des scores via l'interface Achilléa à la fin du match.</li>
-                  <li>En cas de déconnexion, capture d'écran obligatoire pour arbitrage.</li>
+                  <li>
+                    Saisie des scores via l'interface Achilléa à la fin du
+                    match.
+                  </li>
+                  <li>
+                    En cas de déconnexion, capture d'écran obligatoire pour
+                    arbitrage.
+                  </li>
                 </ul>
               </div>
             </div>
@@ -401,17 +468,35 @@ export default function TournamentDetailPage({ id, titre }: { id: string; titre?
                 Récompenses (AP)
               </h3>
               <div className="space-y-2.5 text-xs">
-                <div className={`flex items-center justify-between p-2.5 rounded-lg ${MEDAILLE.or.encartDoux}`}>
-                  <span className={`font-bold ${MEDAILLE.or.texte}`}>1ère Place</span>
-                  <span className="font-mono font-bold text-foreground">+{firstPrize} AP</span>
+                <div
+                  className={`flex items-center justify-between p-2.5 rounded-lg ${MEDAILLE.or.encartDoux}`}
+                >
+                  <span className={`font-bold ${MEDAILLE.or.texte}`}>
+                    1ère Place
+                  </span>
+                  <span className="font-mono font-bold text-foreground">
+                    +{firstPrize} AP
+                  </span>
                 </div>
-                <div className={`flex items-center justify-between p-2.5 rounded-lg ${MEDAILLE.argent.encartDoux}`}>
-                  <span className={`font-bold ${MEDAILLE.argent.texte}`}>2ème Place</span>
-                  <span className="font-mono font-bold text-foreground">+{secondPrize} AP</span>
+                <div
+                  className={`flex items-center justify-between p-2.5 rounded-lg ${MEDAILLE.argent.encartDoux}`}
+                >
+                  <span className={`font-bold ${MEDAILLE.argent.texte}`}>
+                    2ème Place
+                  </span>
+                  <span className="font-mono font-bold text-foreground">
+                    +{secondPrize} AP
+                  </span>
                 </div>
-                <div className={`flex items-center justify-between p-2.5 rounded-lg ${MEDAILLE.bronze.encartDoux}`}>
-                  <span className={`font-bold ${MEDAILLE.bronze.texte}`}>Demi-finalistes</span>
-                  <span className="font-mono font-bold text-foreground">+{semiPrize} AP</span>
+                <div
+                  className={`flex items-center justify-between p-2.5 rounded-lg ${MEDAILLE.bronze.encartDoux}`}
+                >
+                  <span className={`font-bold ${MEDAILLE.bronze.texte}`}>
+                    Demi-finalistes
+                  </span>
+                  <span className="font-mono font-bold text-foreground">
+                    +{semiPrize} AP
+                  </span>
                 </div>
               </div>
             </div>
@@ -426,7 +511,7 @@ export default function TournamentDetailPage({ id, titre }: { id: string; titre?
             maxSlots={tournament.participantsNumber ?? 16}
             isOngoing={tournament.internalState === TournamentState.ONGOING}
             canReportScore={isOrganizer || Boolean(isUserRegistered)}
-            onSelectMatch={mId => setSelectedMatchId(mId)}
+            onSelectMatch={(mId) => setSelectedMatchId(mId)}
           />
         )}
 
@@ -452,7 +537,9 @@ export default function TournamentDetailPage({ id, titre }: { id: string; titre?
         )}
 
         {/* Tab 5: Events Journal */}
-        {activeTab === "events" && <TournamentEventsJournal tournamentId={tournament.id} />}
+        {activeTab === "events" && (
+          <TournamentEventsJournal tournamentId={tournament.id} />
+        )}
 
         {/* Tab 6: Organizers */}
         {activeTab === "organizers" && (
@@ -464,11 +551,14 @@ export default function TournamentDetailPage({ id, titre }: { id: string; titre?
               </div>
               <div>
                 <div className="font-bold text-xs">
-                  {typeof tournament.organization === "object" && tournament.organization !== null
+                  {typeof tournament.organization === "object" &&
+                  tournament.organization !== null
                     ? tournament.organization.name
                     : "Achilléa Esport"}
                 </div>
-                <div className="text-xs text-muted-foreground">Organisateur principal</div>
+                <div className="text-xs text-muted-foreground">
+                  Organisateur principal
+                </div>
               </div>
             </div>
           </div>
@@ -478,7 +568,7 @@ export default function TournamentDetailPage({ id, titre }: { id: string; titre?
         {activeTab === "notes" && isOrganizer && (
           <PlayerNotesPanel
             tournamentId={tournament.id}
-            candidates={participants.map(p => ({
+            candidates={participants.map((p) => ({
               id: String(p.user?.id ?? p.id),
               label: p.user?.username ?? `Joueur #${p.id}`,
               avatar: p.user?.avatar,

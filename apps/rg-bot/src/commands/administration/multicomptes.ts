@@ -28,7 +28,14 @@
  * personne. Publié dans un salon, même de staff, il devient une accusation que
  * personne n'a portée. L'éphémère est exactement l'outil pour ça.
  */
-import { ButtonComponent, Discord, Slash, SlashChoice, SlashGroup, SlashOption } from "discordx";
+import {
+  ButtonComponent,
+  Discord,
+  Slash,
+  SlashChoice,
+  SlashGroup,
+  SlashOption,
+} from "discordx";
 import {
   ApplicationCommandOptionType,
   type ButtonInteraction,
@@ -118,7 +125,7 @@ const NIVEAU_DEFAUT: Niveau = "possible";
  * `/administration` en trois racines. `/moderation` en consomme 7 086 avec ce
  * groupe : chaque libellé se paye deux fois, une par sous-commande qui l'offre.
  */
-const CHOIX_NIVEAU = NIVEAUX.map(niveau => ({
+const CHOIX_NIVEAU = NIVEAUX.map((niveau) => ({
   name: `${ICONES_NIVEAU[niveau]} ${LIBELLES_NIVEAU[niveau]} et +`,
   value: niveau,
 })) as Array<{ name: string; value: Niveau }>;
@@ -126,7 +133,10 @@ const CHOIX_NIVEAU = NIVEAUX.map(niveau => ({
 // ─── Présentation ───────────────────────────────────────────────────────────
 
 /** Nom lisible d'un compte, même s'il a quitté le serveur. */
-function nomDe(empreintes: ReadonlyMap<string, EmpreinteCompte>, id: string): string {
+function nomDe(
+  empreintes: ReadonlyMap<string, EmpreinteCompte>,
+  id: string,
+): string {
   const compte = empreintes.get(id);
   if (!compte) {
     return `\`${id}\``;
@@ -161,8 +171,8 @@ function ligneRapprochement(
     `${nomDe(empreintes, rapprochement.compteA)} ↔ ${nomDe(empreintes, rapprochement.compteB)}` +
     marqueVerdict(verdicts.get(cle));
   const indices = rapprochement.indices
-    .filter(indice => indice.poids > 0)
-    .map(indice => indice.icone)
+    .filter((indice) => indice.poids > 0)
+    .map((indice) => indice.icone)
     .join(" ");
   return `${entete}\n<@${rapprochement.compteA}> ↔ <@${rapprochement.compteB}> · ${indices}`;
 }
@@ -176,7 +186,9 @@ function ligneRapprochement(
  * balayerait donc une population qui n'est pas celle qu'on a sous les yeux — et
  * rendrait des noms que personne ne reconnaît, sans rien signaler.
  */
-async function guildeAttendue(interaction: ChatInputCommandInteraction | ButtonInteraction): Promise<boolean> {
+async function guildeAttendue(
+  interaction: ChatInputCommandInteraction | ButtonInteraction,
+): Promise<boolean> {
   if (interaction.guildId === GUILD_ID) {
     return true;
   }
@@ -240,7 +252,15 @@ async function rendrePage(
 
   carte.bloc(
     "Paires",
-    entrees.map(rapprochement => ligneRapprochement(rapprochement, resultat.empreintes, resultat.verdicts)).join("\n"),
+    entrees
+      .map((rapprochement) =>
+        ligneRapprochement(
+          rapprochement,
+          resultat.empreintes,
+          resultat.verdicts,
+        ),
+      )
+      .join("\n"),
     4,
   );
   carte.champ(
@@ -255,10 +275,15 @@ async function rendrePage(
   const note = `cliché ${ilYA(resultat.chargeeLe)}`;
   const embed = interaction.isChatInputCommand()
     ? piedDeCommande(carte.embed, interaction, { note, page, pages })
-    : pied(carte.embed, { note: `${note} · /moderation multicomptes balayage`, page, pages });
+    : pied(carte.embed, {
+        note: `${note} · /moderation multicomptes balayage`,
+        page,
+        pages,
+      });
   await interaction.editReply({
     components: rangeePagination({
-      identifiant: cible => encoderEtat(PREFIXE, [etat.niveau, etat.jours, cible]),
+      identifiant: (cible) =>
+        encoderEtat(PREFIXE, [etat.niveau, etat.jours, cible]),
       page,
       pages,
       prefixe: PREFIXE,
@@ -271,13 +296,17 @@ async function rendrePage(
 
 @Discord()
 @SlashGroup({
-  description: "Rapprocher les comptes qui pourraient appartenir à la même personne",
+  description:
+    "Rapprocher les comptes qui pourraient appartenir à la même personne",
   name: "multicomptes",
   root: "moderation",
 })
 @SlashGroup("multicomptes", "moderation")
 export class ModerationMulticomptesCommand {
-  @Slash({ description: "Les comptes qui ressemblent à un membre donné", name: "membre" })
+  @Slash({
+    description: "Les comptes qui ressemblent à un membre donné",
+    name: "membre",
+  })
   async membre(
     @SlashOption({
       description: "Le membre à rapprocher",
@@ -297,7 +326,10 @@ export class ModerationMulticomptesCommand {
     interaction: ChatInputCommandInteraction,
   ) {
     await differerEnPrive(interaction);
-    if (!(await exigerDroits(interaction)) || !(await guildeAttendue(interaction))) {
+    if (
+      !(await exigerDroits(interaction)) ||
+      !(await guildeAttendue(interaction))
+    ) {
       return;
     }
     try {
@@ -318,7 +350,9 @@ export class ModerationMulticomptesCommand {
       }
 
       const retenus = resultat.rapprochements.filter(
-        paire => NIVEAUX.indexOf(paire.niveau) >= NIVEAUX.indexOf(niveau ?? NIVEAU_DEFAUT),
+        (paire) =>
+          NIVEAUX.indexOf(paire.niveau) >=
+          NIVEAUX.indexOf(niveau ?? NIVEAU_DEFAUT),
       );
       const carte = fiche({
         description:
@@ -326,7 +360,9 @@ export class ModerationMulticomptesCommand {
             ? `Aucun compte ne ressemble à ${echapper(cible.displayName)} au niveau demandé.\n\n${AVERTISSEMENT}`
             : `${retenus.length} compte${retenus.length > 1 ? "s" : ""} rapproché${retenus.length > 1 ? "s" : ""}.\n\n${AVERTISSEMENT}`,
         icone: "membre",
-        intention: retenus.some(paire => paire.niveau === "certain") ? "attention" : "marque",
+        intention: retenus.some((paire) => paire.niveau === "certain")
+          ? "attention"
+          : "marque",
         miniature: cible.displayAvatarURL({ extension: "png", size: 128 }),
         titre: `Rapprochements — ${cible.displayName}`,
       });
@@ -334,8 +370,13 @@ export class ModerationMulticomptesCommand {
       // Un champ par compte rapproché : le détail des indices est ce qu'on
       // vient chercher ici, contrairement à la liste de `balayage`.
       for (const rapprochement of retenus.slice(0, 6)) {
-        const autre = rapprochement.compteA === cible.id ? rapprochement.compteB : rapprochement.compteA;
-        const verdict = resultat.verdicts.get(clePaire(rapprochement.compteA, rapprochement.compteB));
+        const autre =
+          rapprochement.compteA === cible.id
+            ? rapprochement.compteB
+            : rapprochement.compteA;
+        const verdict = resultat.verdicts.get(
+          clePaire(rapprochement.compteA, rapprochement.compteB),
+        );
         carte.champ(
           `${ICONES_NIVEAU[rapprochement.niveau]} ${rapprochement.score} · ${nomDe(resultat.empreintes, autre)}${marqueVerdict(verdict)}`,
           [
@@ -344,7 +385,9 @@ export class ModerationMulticomptesCommand {
             // par le membre examiné. Un surnom de 27 caractères suffit à poser
             // un lien Markdown cliquable au milieu d'un rapport de modération
             // que le staff lit comme venant du bot.
-            ...rapprochement.indices.map(indice => `${indice.icone} ${echapper(indice.detail)}`),
+            ...rapprochement.indices.map(
+              (indice) => `${indice.icone} ${echapper(indice.detail)}`,
+            ),
             verdict?.motif ? `📝 ${echapper(verdict.motif)}` : null,
           ]
             .filter(Boolean)
@@ -372,14 +415,25 @@ export class ModerationMulticomptesCommand {
       }
 
       await interaction.editReply({
-        embeds: [piedDeCommande(carte.embed, interaction, { note: `cliché ${ilYA(resultat.chargeeLe)}` })],
+        embeds: [
+          piedDeCommande(carte.embed, interaction, {
+            note: `cliché ${ilYA(resultat.chargeeLe)}`,
+          }),
+        ],
       });
     } catch (err) {
-      await repondre(interaction, echec("Rapprochement impossible", messagePanne(err)));
+      await repondre(
+        interaction,
+        echec("Rapprochement impossible", messagePanne(err)),
+      );
     }
   }
 
-  @Slash({ description: "Tous les rapprochements du serveur, du plus fort au plus faible", name: "balayage" })
+  @Slash({
+    description:
+      "Tous les rapprochements du serveur, du plus fort au plus faible",
+    name: "balayage",
+  })
   async balayage(
     @SlashChoice(...CHOIX_NIVEAU)
     @SlashOption({
@@ -401,7 +455,10 @@ export class ModerationMulticomptesCommand {
     interaction: ChatInputCommandInteraction,
   ) {
     await differerEnPrive(interaction);
-    if (!(await exigerDroits(interaction)) || !(await guildeAttendue(interaction))) {
+    if (
+      !(await exigerDroits(interaction)) ||
+      !(await guildeAttendue(interaction))
+    ) {
       return;
     }
     try {
@@ -411,7 +468,10 @@ export class ModerationMulticomptesCommand {
         page: 1,
       });
     } catch (err) {
-      await repondre(interaction, echec("Balayage impossible", messagePanne(err)));
+      await repondre(
+        interaction,
+        echec("Balayage impossible", messagePanne(err)),
+      );
     }
   }
 
@@ -464,7 +524,10 @@ export class ModerationMulticomptesCommand {
     if (premier.id === second.id) {
       await repondre(
         interaction,
-        echec("Deux comptes différents sont attendus", "Un compte ne peut pas être son propre double."),
+        echec(
+          "Deux comptes différents sont attendus",
+          "Un compte ne peut pas être son propre double.",
+        ),
       );
       return;
     }
@@ -500,13 +563,19 @@ export class ModerationMulticomptesCommand {
                   `\nDécision effacée : ${LIBELLES_VERDICT[retire.verdict]}` +
                   (retire.motif ? ` — ${echapper(retire.motif)}` : ""),
               )
-            : vide("Aucun verdict à retirer", "Cette paire n'avait jamais été tranchée."),
+            : vide(
+                "Aucun verdict à retirer",
+                "Cette paire n'avait jamais été tranchée.",
+              ),
         );
         return;
       }
 
       if (!(VERDICTS as readonly string[]).includes(decision)) {
-        await repondre(interaction, echec("Décision inconnue", "Choisis une valeur dans la liste."));
+        await repondre(
+          interaction,
+          echec("Décision inconnue", "Choisis une valeur dans la liste."),
+        );
         return;
       }
 
@@ -547,14 +616,23 @@ export class ModerationMulticomptesCommand {
         ),
       );
     } catch (err) {
-      await repondre(interaction, echec("Verdict non enregistré", messagePanne(err)));
+      await repondre(
+        interaction,
+        echec("Verdict non enregistré", messagePanne(err)),
+      );
     }
   }
 
-  @Slash({ description: "Les paires déjà tranchées par le staff", name: "tranchees" })
+  @Slash({
+    description: "Les paires déjà tranchées par le staff",
+    name: "tranchees",
+  })
   async tranchees(interaction: ChatInputCommandInteraction) {
     await differerEnPrive(interaction);
-    if (!(await exigerDroits(interaction)) || !(await guildeAttendue(interaction))) {
+    if (
+      !(await exigerDroits(interaction)) ||
+      !(await guildeAttendue(interaction))
+    ) {
       return;
     }
     try {
@@ -562,7 +640,9 @@ export class ModerationMulticomptesCommand {
       // table des décisions. Passer par le balayage chargeait les 2 098 comptes,
       // calculait 4 821 paires et 1 338 rapprochements — puis n'en gardait rien.
       const verdicts = await verdictsDe(GUILD_ID);
-      const lignes = [...verdicts.values()].toSorted((gauche, droite) => droite.le.getTime() - gauche.le.getTime());
+      const lignes = [...verdicts.values()].toSorted(
+        (gauche, droite) => droite.le.getTime() - gauche.le.getTime(),
+      );
       if (lignes.length === 0) {
         await repondre(
           interaction,
@@ -592,7 +672,7 @@ export class ModerationMulticomptesCommand {
           : "Décisions",
         montrees
           .map(
-            ligne =>
+            (ligne) =>
               `${ligne.verdict === "confirme" ? "✔️" : "✖️"} <@${ligne.compteA}> ↔ <@${ligne.compteB}>` +
               `${ligne.parQui ? ` · par <@${ligne.parQui}>` : ""} · ${ilYA(ligne.le)}` +
               `${ligne.motif ? `\n   ${borner(echapper(ligne.motif), 120)}` : ""}`,
@@ -607,9 +687,14 @@ export class ModerationMulticomptesCommand {
             "Elles restent visibles sur la fiche de chaque membre concerné.",
         );
       }
-      await interaction.editReply({ embeds: [piedDeCommande(carte.embed, interaction)] });
+      await interaction.editReply({
+        embeds: [piedDeCommande(carte.embed, interaction)],
+      });
     } catch (err) {
-      await repondre(interaction, echec("Lecture impossible", messagePanne(err)));
+      await repondre(
+        interaction,
+        echec("Lecture impossible", messagePanne(err)),
+      );
     }
   }
 
@@ -628,13 +713,18 @@ export class ModerationMulticomptesCommand {
     }
     const [niveau, jours, page] = champs;
     await interaction.deferUpdate();
-    if (!(await exigerDroits(interaction)) || !(await guildeAttendue(interaction))) {
+    if (
+      !(await exigerDroits(interaction)) ||
+      !(await guildeAttendue(interaction))
+    ) {
       return;
     }
     try {
       await rendrePage(interaction, {
         jours: Number.parseInt(jours ?? "0", 10) || 0,
-        niveau: (NIVEAUX as readonly string[]).includes(niveau ?? "") ? (niveau as Niveau) : NIVEAU_DEFAUT,
+        niveau: (NIVEAUX as readonly string[]).includes(niveau ?? "")
+          ? (niveau as Niveau)
+          : NIVEAU_DEFAUT,
         page: Number.parseInt(page ?? "1", 10) || 1,
       });
     } catch (err) {

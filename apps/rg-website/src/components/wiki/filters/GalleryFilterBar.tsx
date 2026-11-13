@@ -17,7 +17,10 @@ interface GalleryFilterBarProps {
   currentCategory: string;
 }
 
-export function GalleryFilterBar({ categories, currentCategory }: GalleryFilterBarProps) {
+export function GalleryFilterBar({
+  categories,
+  currentCategory,
+}: GalleryFilterBarProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -38,8 +41,10 @@ export function GalleryFilterBar({ categories, currentCategory }: GalleryFilterB
 
   return (
     <div className="flex flex-wrap gap-2">
-      {categories.map(f => {
-        const isActive = currentCategory === f.value || (f.value === "all" && !currentCategory);
+      {categories.map((f) => {
+        const isActive =
+          currentCategory === f.value ||
+          (f.value === "all" && !currentCategory);
         return (
           <button
             key={f.value}
@@ -59,7 +64,9 @@ export function GalleryFilterBar({ categories, currentCategory }: GalleryFilterB
               <span
                 className={cn(
                   "rounded-full px-1.5 text-[11px] font-bold",
-                  isActive ? "bg-on-primary/20" : "bg-surface-container-highest/60",
+                  isActive
+                    ? "bg-on-primary/20"
+                    : "bg-surface-container-highest/60",
                 )}
               >
                 {f.count}

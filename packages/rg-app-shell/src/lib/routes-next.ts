@@ -19,14 +19,21 @@ function estGroupe(segment: string): boolean {
 
 /** `@modal` / `_prive` : parallel routes et dossiers privés ne sont pas des URL. */
 function estIgnore(segment: string): boolean {
-  return segment.startsWith("@") || segment.startsWith("_") || segment.startsWith(".");
+  return (
+    segment.startsWith("@") ||
+    segment.startsWith("_") ||
+    segment.startsWith(".")
+  );
 }
 
 /**
  * Liste les motifs d'URL d'un dossier `app/`, segments dynamiques conservés
  * (`/chara/[id]`, `/modeles/[[...path]]`).
  */
-export function listerMotifsRoutes(racineApp: string, inclureApi = false): string[] {
+export function listerMotifsRoutes(
+  racineApp: string,
+  inclureApi = false,
+): string[] {
   const motifs: string[] = [];
 
   const visiter = (dossier: string, urlSegments: string[]): void => {
@@ -38,10 +45,14 @@ export function listerMotifsRoutes(racineApp: string, inclureApi = false): strin
     }
 
     const fichiers = new Set(entrees);
-    const aPage = FICHIERS_PAGE.some(f => fichiers.has(f));
-    const aRoute = inclureApi && FICHIERS_ROUTE.some(f => fichiers.has(f));
+    const aPage = FICHIERS_PAGE.some((f) => fichiers.has(f));
+    const aRoute = inclureApi && FICHIERS_ROUTE.some((f) => fichiers.has(f));
     if (aPage || aRoute) {
-      motifs.push(`/${urlSegments.join("/")}`.replace(/\/+/g, "/").replace(/(.)\/$/, "$1"));
+      motifs.push(
+        `/${urlSegments.join("/")}`
+          .replace(/\/+/g, "/")
+          .replace(/(.)\/$/, "$1"),
+      );
     }
 
     for (const entree of entrees) {
@@ -52,7 +63,10 @@ export function listerMotifsRoutes(racineApp: string, inclureApi = false): strin
       if (!statSync(chemin).isDirectory()) {
         continue;
       }
-      visiter(chemin, estGroupe(entree) ? urlSegments : [...urlSegments, entree]);
+      visiter(
+        chemin,
+        estGroupe(entree) ? urlSegments : [...urlSegments, entree],
+      );
     }
   };
 
@@ -93,5 +107,5 @@ export function motifAccepte(motif: string, chemin: string): boolean {
 /** Ce chemin est-il servi par au moins une route de l'app ? */
 export function routeExiste(motifs: string[], chemin: string): boolean {
   const sansQuery = chemin.split(/[?#]/)[0]!;
-  return motifs.some(motif => motifAccepte(motif, sansQuery));
+  return motifs.some((motif) => motifAccepte(motif, sansQuery));
 }

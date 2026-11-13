@@ -5,12 +5,20 @@ import { childRender, type PrimitiveProps } from "../lib/render";
 
 import { cn } from "../lib/utils";
 
-function Avatar({ className, asChild, children, ...props }: PrimitiveProps<typeof AvatarPrimitive.Root>) {
+function Avatar({
+  className,
+  asChild,
+  children,
+  ...props
+}: PrimitiveProps<typeof AvatarPrimitive.Root>) {
   return (
     <AvatarPrimitive.Root
       render={childRender(asChild, children)}
       data-slot="avatar"
-      className={cn("relative flex size-8 shrink-0 overflow-hidden rounded-full", className)}
+      className={cn(
+        "relative flex size-8 shrink-0 overflow-hidden rounded-full",
+        className,
+      )}
       {...props}
     >
       {asChild ? undefined : children}
@@ -18,7 +26,12 @@ function Avatar({ className, asChild, children, ...props }: PrimitiveProps<typeo
   );
 }
 
-function AvatarImage({ className, asChild, children, ...props }: PrimitiveProps<typeof AvatarPrimitive.Image>) {
+function AvatarImage({
+  className,
+  asChild,
+  children,
+  ...props
+}: PrimitiveProps<typeof AvatarPrimitive.Image>) {
   return (
     <AvatarPrimitive.Image
       render={childRender(asChild, children)}
@@ -41,7 +54,10 @@ function AvatarFallback({
       delay={delayMs}
       render={childRender(asChild, children)}
       data-slot="avatar-fallback"
-      className={cn("bg-muted flex size-full items-center justify-center rounded-full", className)}
+      className={cn(
+        "bg-muted flex size-full items-center justify-center rounded-full",
+        className,
+      )}
       {...props}
     >
       {asChild ? undefined : children}

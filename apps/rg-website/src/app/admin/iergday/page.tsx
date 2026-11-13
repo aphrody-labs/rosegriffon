@@ -1,4 +1,12 @@
-import { AdminPageHeader, Badge, Card, CardContent, CardDescription, CardHeader, CardTitle } from "@rosegriffon/ui";
+import {
+  AdminPageHeader,
+  Badge,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@rosegriffon/ui";
 import { Hash } from "lucide-react";
 import Link from "@/components/shared/Link";
 
@@ -47,9 +55,13 @@ export default async function AdminIergDayPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const params = await searchParams;
-  const slugDemande = typeof params.campagne === "string" ? params.campagne : undefined;
+  const slugDemande =
+    typeof params.campagne === "string" ? params.campagne : undefined;
 
-  const [campagne, campagnes] = await Promise.all([chargerCampagneAdmin(slugDemande), listerCampagnesAdmin()]);
+  const [campagne, campagnes] = await Promise.all([
+    chargerCampagneAdmin(slugDemande),
+    listerCampagnesAdmin(),
+  ]);
 
   // Aucune campagne en base : état légitime (table vide juste après migration).
   // On l'explique plutôt que de rendre un formulaire qui n'écrirait nulle part.
@@ -72,9 +84,12 @@ export default async function AdminIergDayPage({
           </CardHeader>
           <CardContent className="text-sm text-muted-foreground">
             Une campagne se crée par migration SQL (voir{" "}
-            <code className="rounded bg-muted px-1.5 py-0.5">apps/website/sql/migrations/</code>
-            ). Cet écran administre une campagne existante, il n&apos;en crée pas — la création d&apos;une campagne
-            engage un slug, une URL publique et des index.
+            <code className="rounded bg-muted px-1.5 py-0.5">
+              apps/website/sql/migrations/
+            </code>
+            ). Cet écran administre une campagne existante, il n&apos;en crée
+            pas — la création d&apos;une campagne engage un slug, une URL
+            publique et des index.
           </CardContent>
         </Card>
       </div>
@@ -97,7 +112,9 @@ export default async function AdminIergDayPage({
         description="Suivi, configuration, salons Discord, tâches cron et modération."
         actions={
           <div className="flex flex-wrap items-center gap-2">
-            <Badge variant={etat === "en-cours" ? "default" : "secondary"}>{libelleEtatCampagne(etat)}</Badge>
+            <Badge variant={etat === "en-cours" ? "default" : "secondary"}>
+              {libelleEtatCampagne(etat)}
+            </Badge>
             <Badge variant={campagne.publiee ? "default" : "destructive"}>
               {campagne.publiee ? "Publiée" : "Non publiée"}
             </Badge>
@@ -106,7 +123,11 @@ export default async function AdminIergDayPage({
             </Badge>
             {/* La page publique dans un onglet à côté : on administre ce qu'on voit. */}
             <Link
-              href={campagne.principale ? "/iergday" : `/iergday?campagne=${campagne.slug}`}
+              href={
+                campagne.principale
+                  ? "/iergday"
+                  : `/iergday?campagne=${campagne.slug}`
+              }
               target="_blank"
               rel="noopener noreferrer"
               className="text-sm font-medium text-primary underline underline-offset-4"
@@ -117,7 +138,13 @@ export default async function AdminIergDayPage({
         }
       />
 
-      <GestionCampagne campagne={campagne} campagnes={campagnes} salons={salons} bilan={bilan} creations={creations} />
+      <GestionCampagne
+        campagne={campagne}
+        campagnes={campagnes}
+        salons={salons}
+        bilan={bilan}
+        creations={creations}
+      />
     </div>
   );
 }

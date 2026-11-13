@@ -31,11 +31,13 @@ export function ContinueReading({ articles }: ContinueReadingProps) {
     <section>
       <div className="flex items-center gap-2 mb-4">
         <BookOpen className="size-4 text-primary" />
-        <h2 className="text-sm font-bold text-on-surface">Continuer la lecture</h2>
+        <h2 className="text-sm font-bold text-on-surface">
+          Continuer la lecture
+        </h2>
       </div>
 
       <div className="flex gap-3 overflow-x-auto scrollbar-none pb-1">
-        {articles.map(article => (
+        {articles.map((article) => (
           <div
             key={article.article_id}
             className="shrink-0 w-52 rounded-2xl overflow-hidden bg-surface-container border border-outline-variant/20 flex flex-col"
@@ -43,7 +45,9 @@ export function ContinueReading({ articles }: ContinueReadingProps) {
             {/* Image */}
             <div className="relative aspect-[16/9] bg-surface-container-high">
               <Image
-                src={article.featured_image_url || "/images/placeholder-news.svg"}
+                src={
+                  article.featured_image_url || "/images/placeholder-news.svg"
+                }
                 alt={article.title}
                 fill
                 className="object-cover"
@@ -59,7 +63,9 @@ export function ContinueReading({ articles }: ContinueReadingProps) {
                 </span>
               )}
 
-              <p className="text-xs font-semibold text-on-surface line-clamp-3 leading-snug flex-1">{article.title}</p>
+              <p className="text-xs font-semibold text-on-surface line-clamp-3 leading-snug flex-1">
+                {article.title}
+              </p>
 
               {/* Barre de progression */}
               <div className="space-y-1">
@@ -69,7 +75,9 @@ export function ContinueReading({ articles }: ContinueReadingProps) {
                     style={{ width: `${Math.min(article.progress, 100)}%` }}
                   />
                 </div>
-                <span className="text-[10px] text-on-surface-variant/50 tabular-nums">{article.progress}% lu</span>
+                <span className="text-[10px] text-on-surface-variant/50 tabular-nums">
+                  {article.progress}% lu
+                </span>
               </div>
 
               <Link

@@ -22,8 +22,19 @@
  * Tout respecte `prefers-reduced-motion` (motion/react `useReducedMotion`).
  */
 
-import { useReducedMotion, motion, useInView, type Variants } from "motion/react";
-import { type ReactNode, useCallback, useEffect, useRef, useState } from "react";
+import {
+  useReducedMotion,
+  motion,
+  useInView,
+  type Variants,
+} from "motion/react";
+import {
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 
 // fadeup : translateY(20px)+opacity 0 → 0+1, cubic-bezier proche du site (ease-out doux).
 const FADEUP: Variants = {
@@ -62,7 +73,11 @@ function useReveal(
   ref: React.RefObject<Element | null>,
   { amount = 0.2, delayMs = 500 }: { amount?: number; delayMs?: number } = {},
 ): "show" | "hidden" {
-  const inView = useInView(ref, { once: true, amount, margin: "0px 0px -8% 0px" });
+  const inView = useInView(ref, {
+    once: true,
+    amount,
+    margin: "0px 0px -8% 0px",
+  });
   const [forced, setForced] = useState(false);
   useEffect(() => {
     const t = setTimeout(() => setForced(true), delayMs);
@@ -218,14 +233,24 @@ export function StampPop({
  * background-position en continu). Désactivé en reduced-motion.
  * Le contenu reste TOUJOURS visible (pas d'opacity:0).
  */
-export function KenBurns({ children, className }: { children: ReactNode; className?: string }) {
+export function KenBurns({
+  children,
+  className,
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
   const reduce = useReducedMotion();
   if (reduce) return <div className={className}>{children}</div>;
   return (
     <motion.div
       className={className}
       initial={{ scale: 1.06, x: "-1%", y: "-1%" }}
-      animate={{ scale: [1.06, 1.14, 1.06], x: ["-1%", "1%", "-1%"], y: ["-1%", "1%", "-1%"] }}
+      animate={{
+        scale: [1.06, 1.14, 1.06],
+        x: ["-1%", "1%", "-1%"],
+        y: ["-1%", "1%", "-1%"],
+      }}
       transition={{ duration: 28, ease: "easeInOut", repeat: Infinity }}
     >
       {children}
@@ -283,7 +308,10 @@ export function Carousel({
     if (!track) return;
     const child = track.children[i] as HTMLElement | undefined;
     if (child) {
-      track.scrollTo({ left: child.offsetLeft - track.offsetLeft, behavior: "smooth" });
+      track.scrollTo({
+        left: child.offsetLeft - track.offsetLeft,
+        behavior: "smooth",
+      });
     }
   }, []);
 
@@ -320,7 +348,10 @@ export function Carousel({
           className="flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
           {children.map((child, i) => (
-            <div key={i} className={`shrink-0 snap-center ${itemClassName ?? ""}`}>
+            <div
+              key={i}
+              className={`shrink-0 snap-center ${itemClassName ?? ""}`}
+            >
               {child}
             </div>
           ))}

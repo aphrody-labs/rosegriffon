@@ -134,24 +134,13 @@
               "type": "boolean"
             }
           },
-          "required": [
-            "online",
-            "uptime",
-            "username",
-            "guilds",
-            "maintenance"
-          ]
+          "required": ["online", "uptime", "username", "guilds", "maintenance"]
         },
         "host": {},
         "pid": {},
         "latency": {}
       },
-      "required": [
-        "bot",
-        "host",
-        "pid",
-        "latency"
-      ]
+      "required": ["bot", "host", "pid", "latency"]
     },
     "AdminInviteResponse": {
       "type": "object",
@@ -160,9 +149,7 @@
           "type": "string"
         }
       },
-      "required": [
-        "url"
-      ]
+      "required": ["url"]
     },
     "AdminMetricsSummary": {
       "type": "object",
@@ -177,10 +164,7 @@
           "type": "number"
         }
       },
-      "required": [
-        "counters",
-        "rawLines"
-      ]
+      "required": ["counters", "rawLines"]
     },
     "AdminOpsOverview": {
       "type": "object",
@@ -195,10 +179,7 @@
               "type": "number"
             }
           },
-          "required": [
-            "total",
-            "staff"
-          ]
+          "required": ["total", "staff"]
         },
         "wallet": {
           "type": "object",
@@ -213,11 +194,7 @@
               "type": "number"
             }
           },
-          "required": [
-            "wallets",
-            "totalBalance",
-            "txToday"
-          ]
+          "required": ["wallets", "totalBalance", "txToday"]
         },
         "moderation": {
           "type": "object",
@@ -229,10 +206,7 @@
               "type": "number"
             }
           },
-          "required": [
-            "sanctionsActive",
-            "licensesActive"
-          ]
+          "required": ["sanctionsActive", "licensesActive"]
         },
         "community": {
           "type": "object",
@@ -303,12 +277,7 @@
               "type": "number"
             }
           },
-          "required": [
-            "online",
-            "uptime",
-            "maintenance",
-            "guilds"
-          ]
+          "required": ["online", "uptime", "maintenance", "guilds"]
         },
         "generatedAt": {
           "type": "string"
@@ -336,11 +305,7 @@
           "type": "number"
         }
       },
-      "required": [
-        "success",
-        "id",
-        "role"
-      ]
+      "required": ["success", "id", "role"]
     },
     "AdminTransactionRow": {
       "type": "object",
@@ -477,11 +442,7 @@
           "type": "number"
         }
       },
-      "required": [
-        "success",
-        "userId",
-        "balance"
-      ]
+      "required": ["success", "userId", "balance"]
     },
     "AdminWalletRow": {
       "type": "object",
@@ -499,12 +460,7 @@
           "type": "string"
         }
       },
-      "required": [
-        "userId",
-        "displayName",
-        "balance",
-        "currency"
-      ]
+      "required": ["userId", "displayName", "balance", "currency"]
     },
     "AdminWalletsResponse": {
       "type": "object",
@@ -522,10 +478,7 @@
           }
         }
       },
-      "required": [
-        "top",
-        "recent"
-      ]
+      "required": ["top", "recent"]
     },
     "ApiEnvelope": {
       "description": "Réponse enveloppée : `{ success, data?, error? }`.",
@@ -539,9 +492,7 @@
           "type": "string"
         }
       },
-      "required": [
-        "success"
-      ]
+      "required": ["success"]
     },
     "BotMonitoringResponse": {
       "type": "object",
@@ -566,22 +517,13 @@
               "type": "boolean"
             }
           },
-          "required": [
-            "online",
-            "uptime",
-            "maintenance"
-          ]
+          "required": ["online", "uptime", "maintenance"]
         },
         "host": {},
         "pid": {},
         "latency": {}
       },
-      "required": [
-        "botStatus",
-        "host",
-        "pid",
-        "latency"
-      ]
+      "required": ["botStatus", "host", "pid", "latency"]
     },
     "BotTotalsResponse": {
       "description": "Formes du tableau de bord d'administration : ops, portefeuilles, audit,\nsanté du bot et console base de données.\n\nRéservées au staff côté API, mais décrites ici comme le reste : un contrat\nprivé reste un contrat, et c'est précisément là que la dérive silencieuse\ncoûte le plus cher (une colonne renommée casse une console d'admin sans que\npersonne ne le voie avant l'incident).",
@@ -611,9 +553,7 @@
           ]
         }
       },
-      "required": [
-        "stats"
-      ]
+      "required": ["stats"]
     },
     "BracketId": {
       "description": "Identifiant d'entité bracket (`brackets-model#Id`).",
@@ -629,14 +569,7 @@
     "BracketMatchStatus": {
       "description": "Statut d'un match de bracket (`brackets-model#Status`), en valeurs numériques.",
       "type": "number",
-      "enum": [
-        0,
-        1,
-        2,
-        3,
-        4,
-        5
-      ],
+      "enum": [0, 1, 2, 3, 4, 5],
       "x-enum-varnames": [
         "Locked",
         "Waiting",
@@ -648,11 +581,7 @@
     },
     "BracketsStageType": {
       "description": "`brackets-model#StageType` — formats de bracket supportés par la lib.",
-      "enum": [
-        "round_robin",
-        "single_elimination",
-        "double_elimination"
-      ]
+      "enum": ["round_robin", "single_elimination", "double_elimination"]
     },
     "CancelTournamentResult": {
       "type": "object",
@@ -667,9 +596,7 @@
           "type": "number"
         }
       },
-      "required": [
-        "success"
-      ]
+      "required": ["success"]
     },
     "CastAttribution": {
       "type": "object",
@@ -728,10 +655,7 @@
           "items": {}
         }
       },
-      "required": [
-        "created",
-        "attributions"
-      ]
+      "required": ["created", "attributions"]
     },
     "CastAvailability": {
       "type": "object",
@@ -783,16 +707,8 @@
     },
     "CastAvailabilityStatus": {
       "type": "string",
-      "enum": [
-        "available",
-        "maybe",
-        "unavailable"
-      ],
-      "x-enum-varnames": [
-        "Available",
-        "Maybe",
-        "Unavailable"
-      ]
+      "enum": ["available", "maybe", "unavailable"],
+      "x-enum-varnames": ["Available", "Maybe", "Unavailable"]
     },
     "CasterPublic": {
       "type": "object",
@@ -947,12 +863,7 @@
           }
         }
       },
-      "required": [
-        "event",
-        "slots",
-        "attributions",
-        "checklist"
-      ]
+      "required": ["event", "slots", "attributions", "checklist"]
     },
     "CastEventFilters": {
       "type": "object",
@@ -977,18 +888,8 @@
     "CastEventKind": {
       "description": "Nature d'un évènement à caster.",
       "type": "string",
-      "enum": [
-        "match",
-        "tournament",
-        "stream",
-        "other"
-      ],
-      "x-enum-varnames": [
-        "Match",
-        "Tournament",
-        "Stream",
-        "Other"
-      ]
+      "enum": ["match", "tournament", "stream", "other"],
+      "x-enum-varnames": ["Match", "Tournament", "Stream", "Other"]
     },
     "CastEventListResponse": {
       "$ref": "#/$defs/PagedList"
@@ -1108,11 +1009,7 @@
           "type": "number"
         }
       },
-      "required": [
-        "success",
-        "eventId",
-        "poolSize"
-      ]
+      "required": ["success", "eventId", "poolSize"]
     },
     "ChecklistItem": {
       "description": "Ligne de checklist : un poste, son attributaire éventuel, sa confirmation.",
@@ -1145,12 +1042,7 @@
           "type": "boolean"
         }
       },
-      "required": [
-        "slot",
-        "attribution",
-        "casterId",
-        "confirmed"
-      ]
+      "required": ["slot", "attribution", "casterId", "confirmed"]
     },
     "CircuitClanEntry": {
       "description": "Classement des clans — somme des points circuit de leurs membres actuels.",
@@ -1216,12 +1108,7 @@
           "type": "string"
         }
       },
-      "required": [
-        "id",
-        "name",
-        "shortName",
-        "avatar"
-      ]
+      "required": ["id", "name", "shortName", "avatar"]
     },
     "CircuitLeaderboardEntry": {
       "description": "Classement circuit — cumul de points de circuit sur tous les tournois\nélimination terminés. Calcul : `@rosegriffon/achillea-core/tournaments`.",
@@ -1318,13 +1205,7 @@
           "type": "string"
         }
       },
-      "required": [
-        "rank",
-        "rankLabel",
-        "userId",
-        "displayName",
-        "avatar"
-      ]
+      "required": ["rank", "rankLabel", "userId", "displayName", "avatar"]
     },
     "CircuitRanking": {
       "type": "object",
@@ -1348,11 +1229,7 @@
           }
         }
       },
-      "required": [
-        "leaderboard",
-        "tournaments",
-        "clanRanking"
-      ]
+      "required": ["leaderboard", "tournaments", "clanRanking"]
     },
     "CircuitTournamentSummary": {
       "type": "object",
@@ -1376,10 +1253,7 @@
           }
         },
         "standingsStatus": {
-          "enum": [
-            "resolved",
-            "unresolved"
-          ]
+          "enum": ["resolved", "unresolved"]
         }
       },
       "required": [
@@ -1520,9 +1394,7 @@
           "description": "`true` quand le clan accepte automatiquement les candidatures."
         }
       },
-      "required": [
-        "success"
-      ]
+      "required": ["success"]
     },
     "ClanDTO": {
       "type": "object",
@@ -1627,10 +1499,7 @@
               "type": "number"
             }
           },
-          "required": [
-            "currentLevel",
-            "totalXp"
-          ]
+          "required": ["currentLevel", "totalXp"]
         },
         "membersCount": {
           "type": "number"
@@ -1711,18 +1580,8 @@
     },
     "ClanMemberDistinction": {
       "type": "string",
-      "enum": [
-        "Joueur",
-        "Staff",
-        "Artiste",
-        "Créateur de contenu"
-      ],
-      "x-enum-varnames": [
-        "Player",
-        "Staff",
-        "Artist",
-        "ContentCreator"
-      ]
+      "enum": ["Joueur", "Staff", "Artiste", "Créateur de contenu"],
+      "x-enum-varnames": ["Player", "Staff", "Artist", "ContentCreator"]
     },
     "ClanMemberDTO": {
       "type": "object",
@@ -1772,25 +1631,12 @@
           "type": "number"
         }
       },
-      "required": [
-        "playerLimit",
-        "staffLimit"
-      ]
+      "required": ["playerLimit", "staffLimit"]
     },
     "ClanMemberRole": {
       "type": "number",
-      "enum": [
-        0,
-        1,
-        2,
-        3
-      ],
-      "x-enum-varnames": [
-        "Trial",
-        "Member",
-        "SubCaptain",
-        "Captain"
-      ]
+      "enum": [0, 1, 2, 3],
+      "x-enum-varnames": ["Trial", "Member", "SubCaptain", "Captain"]
     },
     "ClanRoleResponse": {
       "description": "`GET /clans/role` — `-1` quand l'appelant n'est dans aucun clan.",
@@ -1800,22 +1646,12 @@
           "type": "number"
         }
       },
-      "required": [
-        "role"
-      ]
+      "required": ["role"]
     },
     "ClanState": {
       "type": "number",
-      "enum": [
-        0,
-        1,
-        2
-      ],
-      "x-enum-varnames": [
-        "Creating",
-        "PendingReview",
-        "Approved"
-      ]
+      "enum": [0, 1, 2],
+      "x-enum-varnames": ["Creating", "PendingReview", "Approved"]
     },
     "CloseTournamentResult": {
       "type": "object",
@@ -1830,9 +1666,7 @@
           "type": "number"
         }
       },
-      "required": [
-        "success"
-      ]
+      "required": ["success"]
     },
     "Column": {
       "description": "Descripteur de colonne — partagé par toutes les tables, quel que soit l'UI.",
@@ -1845,10 +1679,7 @@
           "type": "string"
         }
       },
-      "required": [
-        "field",
-        "header"
-      ]
+      "required": ["field", "header"]
     },
     "CommandUsageRow": {
       "type": "object",
@@ -1866,12 +1697,7 @@
           "type": "number"
         }
       },
-      "required": [
-        "date",
-        "slashCommands",
-        "simpleCommands",
-        "contextMenus"
-      ]
+      "required": ["date", "slashCommands", "simpleCommands", "contextMenus"]
     },
     "CompetitionStats": {
       "description": "Stats agrégées d'un mode de compétition (interclans / tournois).",
@@ -1947,12 +1773,7 @@
           "description": "Nom du pays en français (`France`)."
         }
       },
-      "required": [
-        "code",
-        "language",
-        "flag",
-        "name"
-      ]
+      "required": ["code", "language", "flag", "name"]
     },
     "CreateCastEventPayload": {
       "type": "object",
@@ -2011,18 +1832,11 @@
                 "type": "boolean"
               }
             },
-            "required": [
-              "role"
-            ]
+            "required": ["role"]
           }
         }
       },
-      "required": [
-        "name",
-        "kind",
-        "scheduledAt",
-        "slots"
-      ]
+      "required": ["name", "kind", "scheduledAt", "slots"]
     },
     "CreatePlayerNotePayload": {
       "type": "object",
@@ -2050,10 +1864,7 @@
           "type": "string"
         }
       },
-      "required": [
-        "targetId",
-        "content"
-      ]
+      "required": ["targetId", "content"]
     },
     "CreateSanctionPayload": {
       "type": "object",
@@ -2102,11 +1913,7 @@
           ]
         }
       },
-      "required": [
-        "userId",
-        "guildId",
-        "type"
-      ]
+      "required": ["userId", "guildId", "type"]
     },
     "DailyCountRow": {
       "type": "object",
@@ -2118,10 +1925,7 @@
           "type": "number"
         }
       },
-      "required": [
-        "date",
-        "count"
-      ]
+      "required": ["date", "count"]
     },
     "DatabaseBackupResult": {
       "type": "object",
@@ -2136,14 +1940,10 @@
               "type": "string"
             }
           },
-          "required": [
-            "snapshotName"
-          ]
+          "required": ["snapshotName"]
         }
       },
-      "required": [
-        "message"
-      ]
+      "required": ["message"]
     },
     "DbColumn": {
       "description": "Métadonnée de colonne SQL — voisine de `Column`, mais côté base.",
@@ -2172,13 +1972,7 @@
           "type": "boolean"
         }
       },
-      "required": [
-        "name",
-        "dataType",
-        "nullable",
-        "default",
-        "isPrimaryKey"
-      ]
+      "required": ["name", "dataType", "nullable", "default", "isPrimaryKey"]
     },
     "DbMutationResult": {
       "type": "object",
@@ -2198,9 +1992,7 @@
           ]
         }
       },
-      "required": [
-        "success"
-      ]
+      "required": ["success"]
     },
     "DbQueryResult": {
       "type": "object",
@@ -2219,11 +2011,7 @@
           "type": "number"
         }
       },
-      "required": [
-        "data",
-        "rowCount",
-        "durationMs"
-      ]
+      "required": ["data", "rowCount", "durationMs"]
     },
     "DbRowsPage": {
       "type": "object",
@@ -2245,11 +2033,7 @@
           "$ref": "#/$defs/PageMeta"
         }
       },
-      "required": [
-        "data",
-        "columns",
-        "meta"
-      ]
+      "required": ["data", "columns", "meta"]
     },
     "DbTableRow": {
       "type": "object",
@@ -2264,11 +2048,7 @@
           "type": "boolean"
         }
       },
-      "required": [
-        "name",
-        "estimatedRows",
-        "protected"
-      ]
+      "required": ["name", "estimatedRows", "protected"]
     },
     "DisqualifyResult": {
       "type": "object",
@@ -2293,9 +2073,7 @@
           ]
         }
       },
-      "required": [
-        "success"
-      ]
+      "required": ["success"]
     },
     "EnrichedUserDTO": {
       "anyOf": [
@@ -2325,10 +2103,7 @@
                   "$ref": "#/$defs/RankedModeStats"
                 }
               },
-              "required": [
-                "solo",
-                "duo"
-              ]
+              "required": ["solo", "duo"]
             },
             "bio": {
               "anyOf": [
@@ -2407,30 +2182,14 @@
     },
     "EventTypeEnum": {
       "type": "string",
-      "enum": [
-        "TOURNAMENT",
-        "INTERCLAN",
-        "RANKED"
-      ],
-      "x-enum-varnames": [
-        "TOURNAMENT",
-        "INTERCLAN",
-        "RANKED"
-      ]
+      "enum": ["TOURNAMENT", "INTERCLAN", "RANKED"],
+      "x-enum-varnames": ["TOURNAMENT", "INTERCLAN", "RANKED"]
     },
     "FormMode": {
       "description": "Mode d'un formulaire de validation (création / revue / édition).",
       "type": "number",
-      "enum": [
-        0,
-        1,
-        2
-      ],
-      "x-enum-varnames": [
-        "Create",
-        "Validate",
-        "Edit"
-      ]
+      "enum": [0, 1, 2],
+      "x-enum-varnames": ["Create", "Validate", "Edit"]
     },
     "GameScoreDTO": {
       "type": "object",
@@ -2448,12 +2207,7 @@
           "type": "number"
         }
       },
-      "required": [
-        "lobbyId",
-        "gameNumber",
-        "score1",
-        "score2"
-      ]
+      "required": ["lobbyId", "gameNumber", "score1", "score2"]
     },
     "GameValidatorDTO": {
       "type": "object",
@@ -2465,18 +2219,11 @@
           "type": "number"
         }
       },
-      "required": [
-        "lobbyId",
-        "lobbyMatchId"
-      ]
+      "required": ["lobbyId", "lobbyMatchId"]
     },
     "GrandFinalType": {
       "description": "`brackets-model#GrandFinalType`.",
-      "enum": [
-        "none",
-        "simple",
-        "double"
-      ]
+      "enum": ["none", "simple", "double"]
     },
     "HealthCheckResponse": {
       "type": "object",
@@ -2496,10 +2243,7 @@
         },
         "lastStartup": {}
       },
-      "required": [
-        "online",
-        "uptime"
-      ]
+      "required": ["online", "uptime"]
     },
     "ImageGenerationResult": {
       "type": "object",
@@ -2514,23 +2258,11 @@
           "type": "string"
         }
       },
-      "required": [
-        "success"
-      ]
+      "required": ["success"]
     },
     "InterclanState": {
       "type": "number",
-      "enum": [
-        0,
-        1,
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8
-      ],
+      "enum": [0, 1, 2, 3, 4, 5, 6, 7, 8],
       "x-enum-varnames": [
         "PENDING_APPROVAL",
         "APPROVED",
@@ -2594,11 +2326,7 @@
           "$ref": "#/$defs/MatchMode"
         }
       },
-      "required": [
-        "entries",
-        "total",
-        "mode"
-      ]
+      "required": ["entries", "total", "mode"]
     },
     "LeagueListResponse": {
       "type": "object",
@@ -2610,9 +2338,7 @@
           }
         }
       },
-      "required": [
-        "items"
-      ]
+      "required": ["items"]
     },
     "LeagueMatchRow": {
       "type": "object",
@@ -2646,13 +2372,7 @@
           ]
         }
       },
-      "required": [
-        "homeId",
-        "awayId",
-        "homeScore",
-        "awayScore",
-        "matchday"
-      ]
+      "required": ["homeId", "awayId", "homeScore", "awayScore", "matchday"]
     },
     "LeaguePointsConfig": {
       "type": "object",
@@ -2838,10 +2558,7 @@
           "type": "string"
         }
       },
-      "required": [
-        "tag",
-        "name"
-      ]
+      "required": ["tag", "name"]
     },
     "License": {
       "description": "Licence joueur — un titulaire = un userId Discord, une licence active à la\nfois, vérifiable publiquement via un QR code.",
@@ -2921,32 +2638,17 @@
           "description": "Owner-only bearer token used to share the public verification URL."
         }
       },
-      "required": [
-        "license",
-        "verificationToken"
-      ]
+      "required": ["license", "verificationToken"]
     },
     "LicenseStatus": {
       "description": "État d'une licence joueur.",
       "type": "string",
-      "enum": [
-        "Active",
-        "Revoked",
-        "Expired"
-      ],
-      "x-enum-varnames": [
-        "Active",
-        "Revoked",
-        "Expired"
-      ]
+      "enum": ["Active", "Revoked", "Expired"],
+      "x-enum-varnames": ["Active", "Revoked", "Expired"]
     },
     "LicenseVerifyReason": {
       "description": "Motif d'invalidité renvoyé par la vérification publique.",
-      "enum": [
-        "not_found",
-        "revoked",
-        "expired"
-      ]
+      "enum": ["not_found", "revoked", "expired"]
     },
     "LicenseVerifyResult": {
       "description": "Résultat de `GET /licenses/verify/{qr}` (endpoint PUBLIC, sans auth).",
@@ -2981,15 +2683,10 @@
               ]
             }
           },
-          "required": [
-            "displayName",
-            "avatar"
-          ]
+          "required": ["displayName", "avatar"]
         }
       },
-      "required": [
-        "valid"
-      ]
+      "required": ["valid"]
     },
     "LobbyDTO": {
       "type": "object",
@@ -3124,11 +2821,7 @@
           "type": "string"
         }
       },
-      "required": [
-        "displayName",
-        "id",
-        "avatar"
-      ]
+      "required": ["displayName", "id", "avatar"]
     },
     "LobbyUserDTO": {
       "type": "object",
@@ -3149,24 +2842,11 @@
           "$ref": "#/$defs/LobbyUserState"
         }
       },
-      "required": [
-        "id",
-        "user",
-        "team",
-        "forfeit",
-        "state"
-      ]
+      "required": ["id", "user", "team", "forfeit", "state"]
     },
     "LobbyUserState": {
       "type": "string",
-      "enum": [
-        "Pending",
-        "Ready",
-        "Afk",
-        "Ongoing",
-        "Finished",
-        "Repooled"
-      ],
+      "enum": ["Pending", "Ready", "Afk", "Ongoing", "Finished", "Repooled"],
       "x-enum-varnames": [
         "PENDING",
         "READY",
@@ -3183,54 +2863,23 @@
           "type": "boolean"
         }
       },
-      "required": [
-        "maintenance"
-      ]
+      "required": ["maintenance"]
     },
     "MatchFormat": {
       "type": "string",
-      "enum": [
-        "bo1",
-        "bo3",
-        "bo5",
-        "double_leg",
-        "custom"
-      ],
-      "x-enum-varnames": [
-        "BO1",
-        "BO3",
-        "BO5",
-        "DOUBLE_LEG",
-        "CUSTOM"
-      ]
+      "enum": ["bo1", "bo3", "bo5", "double_leg", "custom"],
+      "x-enum-varnames": ["BO1", "BO3", "BO5", "DOUBLE_LEG", "CUSTOM"]
     },
     "MatchMode": {
       "type": "number",
-      "enum": [
-        2,
-        4
-      ],
-      "x-enum-varnames": [
-        "ONE_VS_ONE",
-        "TWO_VS_TWO"
-      ]
+      "enum": [2, 4],
+      "x-enum-varnames": ["ONE_VS_ONE", "TWO_VS_TWO"]
     },
     "MatchResult": {
-      "enum": [
-        "win",
-        "loss",
-        "draw",
-        "forfeit"
-      ]
+      "enum": ["win", "loss", "draw", "forfeit"]
     },
     "MatchRoomStatus": {
-      "enum": [
-        "waiting",
-        "playing",
-        "scoring",
-        "disputed",
-        "finished"
-      ]
+      "enum": ["waiting", "playing", "scoring", "disputed", "finished"]
     },
     "ModerationSyncResult": {
       "type": "object",
@@ -3242,10 +2891,7 @@
           "type": "string"
         }
       },
-      "required": [
-        "ok",
-        "sanctionId"
-      ]
+      "required": ["ok", "sanctionId"]
     },
     "NewClanPayload": {
       "description": "Création d'un clan (POST /clans/create, API Achilléa historique).",
@@ -3260,9 +2906,7 @@
                 "type": "string"
               }
             },
-            "required": [
-              "id"
-            ]
+            "required": ["id"]
           }
         },
         "logo": {
@@ -3329,9 +2973,7 @@
           "description": "Renseigné sur un conflit de nom (409)."
         }
       },
-      "required": [
-        "success"
-      ]
+      "required": ["success"]
     },
     "NewTournamentDTO": {
       "type": "object",
@@ -3511,18 +3153,8 @@
     },
     "NotificationCategory": {
       "type": "number",
-      "enum": [
-        0,
-        1,
-        2,
-        3
-      ],
-      "x-enum-varnames": [
-        "USER",
-        "CLAN",
-        "GLOBAL",
-        "ORGANIZATION"
-      ]
+      "enum": [0, 1, 2, 3],
+      "x-enum-varnames": ["USER", "CLAN", "GLOBAL", "ORGANIZATION"]
     },
     "NotificationModel": {
       "type": "object",
@@ -3554,32 +3186,11 @@
           ]
         }
       },
-      "required": [
-        "id",
-        "title",
-        "message",
-        "type",
-        "category",
-        "payload"
-      ]
+      "required": ["id", "title", "message", "type", "category", "payload"]
     },
     "NotificationType": {
       "type": "number",
-      "enum": [
-        0,
-        1,
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10,
-        11,
-        12
-      ],
+      "enum": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
       "x-enum-varnames": [
         "NEW_ORGANIZATION_CREATION_REQUEST",
         "NEW_ORGANIZATION_EDITION_REQUEST",
@@ -3609,11 +3220,7 @@
           "$ref": "#/$defs/TournamentState"
         }
       },
-      "required": [
-        "success",
-        "id",
-        "internalState"
-      ]
+      "required": ["success", "id", "internalState"]
     },
     "OrganizationDTO": {
       "type": "object",
@@ -3699,26 +3306,13 @@
           "format": "date-time"
         }
       },
-      "required": [
-        "name",
-        "normalizedName",
-        "logo",
-        "description"
-      ]
+      "required": ["name", "normalizedName", "logo", "description"]
     },
     "OrganizationState": {
       "description": "Cycle de revue d'une organisation (structure e-sport).",
       "type": "number",
-      "enum": [
-        0,
-        1,
-        2
-      ],
-      "x-enum-varnames": [
-        "Pending",
-        "Approved",
-        "Rejected"
-      ]
+      "enum": [0, 1, 2],
+      "x-enum-varnames": ["Pending", "Approved", "Rejected"]
     },
     "OrganizationValidationDTO": {
       "description": "Revue d'une demande de création / édition d'organisation.",
@@ -3855,9 +3449,7 @@
           "format": "date-time"
         }
       },
-      "required": [
-        "user"
-      ]
+      "required": ["user"]
     },
     "PagedList": {
       "type": "object",
@@ -3873,11 +3465,7 @@
           "$ref": "#/$defs/PageSizeMeta"
         }
       },
-      "required": [
-        "data",
-        "total",
-        "meta"
-      ]
+      "required": ["data", "total", "meta"]
     },
     "PageMeta": {
       "description": "Métadonnées de page renvoyées par l'API (style `Paginated<T>` historique).",
@@ -3904,9 +3492,7 @@
           ]
         }
       },
-      "required": [
-        "total"
-      ]
+      "required": ["total"]
     },
     "PageQuery": {
       "description": "Requête de pagination commune à toutes les listes.",
@@ -3934,11 +3520,7 @@
           "type": "number"
         }
       },
-      "required": [
-        "page",
-        "pageSize",
-        "pageCount"
-      ]
+      "required": ["page", "pageSize", "pageCount"]
     },
     "Paginated": {
       "type": "object",
@@ -3951,10 +3533,7 @@
           "$ref": "#/$defs/PageMeta"
         }
       },
-      "required": [
-        "data",
-        "meta"
-      ]
+      "required": ["data", "meta"]
     },
     "ParticipantDTO": {
       "type": "object",
@@ -4021,12 +3600,7 @@
           "description": "Motif de DQ — renseigné uniquement pour les organisateurs."
         }
       },
-      "required": [
-        "id",
-        "tournament",
-        "user",
-        "hasCheckedIn"
-      ]
+      "required": ["id", "tournament", "user", "hasCheckedIn"]
     },
     "ParticipantMutationResult": {
       "type": "object",
@@ -4041,23 +3615,13 @@
           "$ref": "#/$defs/WireParticipant"
         }
       },
-      "required": [
-        "success"
-      ]
+      "required": ["success"]
     },
     "ParticipantStatus": {
       "description": "Statut d'un inscrit à un tournoi.\n\nUn seul axe pour deux besoins qui portaient sur la même ligne : la liste d'attente\nquand le tournoi est plein, et la disqualification. Seuls les `Active` comptent dans\nla capacité, le seeding et le bracket.",
       "type": "string",
-      "enum": [
-        "Active",
-        "Waitlisted",
-        "Disqualified"
-      ],
-      "x-enum-varnames": [
-        "ACTIVE",
-        "WAITLISTED",
-        "DISQUALIFIED"
-      ]
+      "enum": ["Active", "Waitlisted", "Disqualified"],
+      "x-enum-varnames": ["ACTIVE", "WAITLISTED", "DISQUALIFIED"]
     },
     "PlacementPrizesResult": {
       "type": "object",
@@ -4084,9 +3648,7 @@
           "type": "number"
         }
       },
-      "required": [
-        "success"
-      ]
+      "required": ["success"]
     },
     "PlayerCircuitProfile": {
       "description": "Profil circuit d'un joueur — page profil public `/users/:id`.",
@@ -4189,10 +3751,7 @@
                   "type": "string"
                 }
               },
-              "required": [
-                "id",
-                "name"
-              ]
+              "required": ["id", "name"]
             },
             {
               "type": "null"
@@ -4354,19 +3913,10 @@
               "type": "boolean"
             }
           },
-          "required": [
-            "page",
-            "pageSize",
-            "pageCount",
-            "isStaff"
-          ]
+          "required": ["page", "pageSize", "pageCount", "isStaff"]
         }
       },
-      "required": [
-        "data",
-        "total",
-        "meta"
-      ]
+      "required": ["data", "total", "meta"]
     },
     "PlayerNotePerson": {
       "type": "object",
@@ -4384,25 +3934,12 @@
           "type": "string"
         }
       },
-      "required": [
-        "id",
-        "username",
-        "displayName",
-        "avatar"
-      ]
+      "required": ["id", "username", "displayName", "avatar"]
     },
     "PlayerNoteSeverity": {
       "type": "string",
-      "enum": [
-        "info",
-        "warning",
-        "serious"
-      ],
-      "x-enum-varnames": [
-        "INFO",
-        "WARNING",
-        "SERIOUS"
-      ]
+      "enum": ["info", "warning", "serious"],
+      "x-enum-varnames": ["INFO", "WARNING", "SERIOUS"]
     },
     "PlayerNoteSummary": {
       "type": "object",
@@ -4420,11 +3957,7 @@
           }
         }
       },
-      "required": [
-        "total",
-        "open",
-        "bySeverity"
-      ]
+      "required": ["total", "open", "bySeverity"]
     },
     "PlayerTournamentHistoryEntry": {
       "type": "object",
@@ -4500,12 +4033,7 @@
           }
         }
       },
-      "required": [
-        "label",
-        "minElo",
-        "maxElo",
-        "gradient"
-      ]
+      "required": ["label", "minElo", "maxElo", "gradient"]
     },
     "RankDTO": {
       "description": "Palier de rang tel qu'exposé sur un profil (clé FR + dégradé d'affichage).",
@@ -4524,11 +4052,7 @@
           }
         }
       },
-      "required": [
-        "elo",
-        "key",
-        "gradient"
-      ]
+      "required": ["elo", "key", "gradient"]
     },
     "RankedActiveMatch": {
       "description": "Un match ranked EN COURS (lobby `Ongoing`), avec son état live persisté.",
@@ -4552,13 +4076,7 @@
           "description": "Extérieur (team 2)."
         }
       },
-      "required": [
-        "lobbyId",
-        "mode",
-        "createdAt",
-        "player1",
-        "player2"
-      ]
+      "required": ["lobbyId", "mode", "createdAt", "player1", "player2"]
     },
     "RankedActivePlayer": {
       "description": "Un joueur d'un match EN COURS (vue admin « Matchs en cours »).",
@@ -4618,13 +4136,7 @@
           "type": "string"
         }
       },
-      "required": [
-        "lobbyId",
-        "mode",
-        "player1",
-        "player2",
-        "createdAt"
-      ]
+      "required": ["lobbyId", "mode", "player1", "player2", "createdAt"]
     },
     "RankedAdminSeason": {
       "type": "object",
@@ -4674,10 +4186,7 @@
           "type": "string"
         }
       },
-      "required": [
-        "scoreTeam1",
-        "scoreTeam2"
-      ]
+      "required": ["scoreTeam1", "scoreTeam2"]
     },
     "RankedAdminValidateResult": {
       "type": "object",
@@ -4695,16 +4204,11 @@
               "type": "number"
             }
           },
-          "required": [
-            "p1",
-            "p2"
-          ],
+          "required": ["p1", "p2"],
           "description": "Variation appliquée à chaque joueur, telle que la renvoie le serveur ranked."
         }
       },
-      "required": [
-        "ok"
-      ]
+      "required": ["ok"]
     },
     "RankedChallengeAccepted": {
       "description": "`POST /ranked/challenge/:code/accept` — la réservation temps réel est opaque.",
@@ -4718,11 +4222,7 @@
           "type": "boolean"
         }
       },
-      "required": [
-        "reservation",
-        "mode",
-        "ranked"
-      ]
+      "required": ["reservation", "mode", "ranked"]
     },
     "RankedChallengeLink": {
       "description": "Défi par lien partageable créé par le joueur courant (en attente d'acceptation).",
@@ -4754,14 +4254,7 @@
           "type": "number"
         }
       },
-      "required": [
-        "code",
-        "url",
-        "mode",
-        "ranked",
-        "toUserId",
-        "expiresAt"
-      ]
+      "required": ["code", "url", "mode", "ranked", "toUserId", "expiresAt"]
     },
     "RankedChallengePreview": {
       "description": "Aperçu d'un défi reçu via un lien.",
@@ -4820,11 +4313,7 @@
           "type": "number"
         }
       },
-      "required": [
-        "userId",
-        "text",
-        "at"
-      ]
+      "required": ["userId", "text", "at"]
     },
     "RankedDisputePlayer": {
       "type": "object",
@@ -4861,11 +4350,7 @@
           ]
         }
       },
-      "required": [
-        "userId",
-        "displayName",
-        "submittedScore"
-      ]
+      "required": ["userId", "displayName", "submittedScore"]
     },
     "RankedDisputeRequest": {
       "type": "object",
@@ -4877,10 +4362,7 @@
           "type": "string"
         }
       },
-      "required": [
-        "lobbyId",
-        "screenshotUrl"
-      ]
+      "required": ["lobbyId", "screenshotUrl"]
     },
     "RankedHistoryEntry": {
       "type": "object",
@@ -4922,11 +4404,7 @@
               "type": "string"
             }
           },
-          "required": [
-            "userId",
-            "displayName",
-            "avatar"
-          ]
+          "required": ["userId", "displayName", "avatar"]
         }
       },
       "required": [
@@ -4951,10 +4429,7 @@
           "type": "number"
         }
       },
-      "required": [
-        "ok",
-        "affected"
-      ]
+      "required": ["ok", "affected"]
     },
     "RankedLobbyPlayer": {
       "description": "Joueur présent dans le salon de présence ranked, pour le défi direct.",
@@ -4976,13 +4451,7 @@
           "type": "number"
         }
       },
-      "required": [
-        "userId",
-        "displayName",
-        "avatar",
-        "elo",
-        "mode"
-      ]
+      "required": ["userId", "displayName", "avatar", "elo", "mode"]
     },
     "RankedMatchEvent": {
       "description": "Un événement de télémétrie ranked (journal du flow des matchs, vue staff).",
@@ -5093,11 +4562,7 @@
               "type": "string"
             }
           },
-          "required": [
-            "userId",
-            "displayName",
-            "avatar"
-          ]
+          "required": ["userId", "displayName", "avatar"]
         },
         "result": {
           "$ref": "#/$defs/MatchResult"
@@ -5387,9 +4852,7 @@
           "type": "string"
         }
       },
-      "required": [
-        "url"
-      ]
+      "required": ["url"]
     },
     "RankedRematchOffer": {
       "description": "Proposition de revanche reçue en temps réel (`rematch_offer`).",
@@ -5444,11 +4907,7 @@
           "type": "number"
         }
       },
-      "required": [
-        "kFactor",
-        "baseRating",
-        "decayRate"
-      ]
+      "required": ["kFactor", "baseRating", "decayRate"]
     },
     "RankedSeasonInput": {
       "type": "object",
@@ -5466,12 +4925,7 @@
           "$ref": "#/$defs/RankedSeasonConfig"
         }
       },
-      "required": [
-        "name",
-        "startsAt",
-        "endsAt",
-        "config"
-      ]
+      "required": ["name", "startsAt", "endsAt", "config"]
     },
     "RankedSentInvite": {
       "description": "Invitation envoyée (on a défié un joueur, en attente de sa réponse).",
@@ -5490,12 +4944,7 @@
           "type": "boolean"
         }
       },
-      "required": [
-        "targetUserId",
-        "targetDisplayName",
-        "mode",
-        "ranked"
-      ]
+      "required": ["targetUserId", "targetDisplayName", "mode", "ranked"]
     },
     "RankedState": {
       "type": "string",
@@ -5629,14 +5078,7 @@
           }
         }
       },
-      "required": [
-        "key",
-        "minElo",
-        "maxElo",
-        "emojiId",
-        "emojiKey",
-        "gradient"
-      ]
+      "required": ["key", "minElo", "maxElo", "emojiId", "emojiKey", "gradient"]
     },
     "RealtimeTokenResponse": {
       "description": "`GET /auth/token` — jeton court destiné au client temps réel.",
@@ -5652,11 +5094,7 @@
           "type": "string"
         }
       },
-      "required": [
-        "token",
-        "expiresIn",
-        "userId"
-      ]
+      "required": ["token", "expiresIn", "userId"]
     },
     "RestoreTournamentResult": {
       "type": "object",
@@ -5671,16 +5109,11 @@
           "$ref": "#/$defs/TournamentState"
         }
       },
-      "required": [
-        "success"
-      ]
+      "required": ["success"]
     },
     "RoundRobinMode": {
       "description": "`brackets-model#RoundRobinMode`.",
-      "enum": [
-        "simple",
-        "double"
-      ]
+      "enum": ["simple", "double"]
     },
     "Sanction": {
       "type": "object",
@@ -5824,18 +5257,8 @@
     "SanctionIssuerType": {
       "description": "Origine d'une sanction (qui / quoi l'a émise).",
       "type": "string",
-      "enum": [
-        "user",
-        "bot",
-        "staff",
-        "system"
-      ],
-      "x-enum-varnames": [
-        "User",
-        "Bot",
-        "Staff",
-        "System"
-      ]
+      "enum": ["user", "bot", "staff", "system"],
+      "x-enum-varnames": ["User", "Bot", "Staff", "System"]
     },
     "SanctionListResponse": {
       "$ref": "#/$defs/PagedList"
@@ -5843,15 +5266,7 @@
     "SanctionType": {
       "description": "Types de sanction de modération.",
       "type": "string",
-      "enum": [
-        "warn",
-        "mute",
-        "kick",
-        "ban",
-        "unmute",
-        "unban",
-        "note"
-      ],
+      "enum": ["warn", "mute", "kick", "ban", "unmute", "unban", "note"],
       "x-enum-varnames": [
         "Warn",
         "Mute",
@@ -5875,29 +5290,16 @@
           "type": "string"
         }
       },
-      "required": [
-        "success",
-        "scoreReportPolicy"
-      ]
+      "required": ["success", "scoreReportPolicy"]
     },
     "ScoreReportPolicy": {
       "description": "Qui saisit les scores des matchs d'un tournoi.\n\n`PLAYERS` est le comportement historique : les deux joueurs d'un lobby remplissent\neux-mêmes leur score, puis le valident chacun de leur côté (ou un organisateur\ntranche). `STAFF_ONLY` réserve saisie et validation aux organisateurs — les joueurs\ngardent la lecture du match, sans aucun bouton.",
       "type": "string",
-      "enum": [
-        "players",
-        "staff_only"
-      ],
-      "x-enum-varnames": [
-        "PLAYERS",
-        "STAFF_ONLY"
-      ]
+      "enum": ["players", "staff_only"],
+      "x-enum-varnames": ["PLAYERS", "STAFF_ONLY"]
     },
     "SeasonState": {
-      "enum": [
-        "Upcoming",
-        "Active",
-        "Closed"
-      ]
+      "enum": ["Upcoming", "Active", "Closed"]
     },
     "SeedBatchResult": {
       "type": "object",
@@ -5916,10 +5318,7 @@
           "type": "number"
         }
       },
-      "required": [
-        "mode",
-        "bracketUpdated"
-      ]
+      "required": ["mode", "bracketUpdated"]
     },
     "SeedingResult": {
       "type": "object",
@@ -5993,20 +5392,8 @@
     },
     "SocialMedia": {
       "type": "number",
-      "enum": [
-        0,
-        1,
-        2,
-        3,
-        4
-      ],
-      "x-enum-varnames": [
-        "X",
-        "Instagram",
-        "TikTok",
-        "Youtube",
-        "Twitch"
-      ]
+      "enum": [0, 1, 2, 3, 4],
+      "x-enum-varnames": ["X", "Instagram", "TikTok", "Youtube", "Twitch"]
     },
     "SocialMediaDTO": {
       "type": "object",
@@ -6021,17 +5408,10 @@
           "type": "string"
         }
       },
-      "required": [
-        "platform",
-        "username",
-        "canonicalUrl"
-      ]
+      "required": ["platform", "username", "canonicalUrl"]
     },
     "SortDirection": {
-      "enum": [
-        "asc",
-        "desc"
-      ]
+      "enum": ["asc", "desc"]
     },
     "SortQuery": {
       "type": "object",
@@ -6149,11 +5529,7 @@
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "id",
-                    "name",
-                    "size"
-                  ]
+                  "required": ["id", "name", "size"]
                 },
                 {
                   "type": "null"
@@ -6420,12 +5796,7 @@
           "type": "string"
         }
       },
-      "required": [
-        "value",
-        "tournamentId",
-        "tournamentName",
-        "detail"
-      ]
+      "required": ["value", "tournamentId", "tournamentName", "detail"]
     },
     "StatsHubTournamentHistoryEntry": {
       "type": "object",
@@ -6491,9 +5862,7 @@
           "type": "string"
         }
       },
-      "required": [
-        "success"
-      ]
+      "required": ["success"]
     },
     "Suggestion": {
       "description": "Entrée d'autocomplétion globale (barre de recherche clans + joueurs).",
@@ -6503,10 +5872,7 @@
           "type": "string"
         },
         "type": {
-          "enum": [
-            "clan",
-            "user"
-          ]
+          "enum": ["clan", "user"]
         },
         "label": {
           "type": "string"
@@ -6549,14 +5915,7 @@
           "type": "boolean"
         }
       },
-      "required": [
-        "id",
-        "type",
-        "label",
-        "sim",
-        "soloRank",
-        "duoRank"
-      ]
+      "required": ["id", "type", "label", "sim", "soloRank", "duoRank"]
     },
     "SuggestionRank": {
       "description": "Alias historique de `SessionRankDTO` (mêmes champs, même origine).",
@@ -6564,14 +5923,8 @@
     },
     "TeamSide": {
       "type": "number",
-      "enum": [
-        1,
-        2
-      ],
-      "x-enum-varnames": [
-        "TEAM_1",
-        "TEAM_2"
-      ]
+      "enum": [1, 2],
+      "x-enum-varnames": ["TEAM_1", "TEAM_2"]
     },
     "Tournament": {
       "type": "object",
@@ -6843,12 +6196,7 @@
           "type": "string"
         }
       },
-      "required": [
-        "id",
-        "username",
-        "displayName",
-        "avatar"
-      ]
+      "required": ["id", "username", "displayName", "avatar"]
     },
     "TournamentEventDTO": {
       "type": "object",
@@ -7169,10 +6517,7 @@
           ]
         }
       },
-      "required": [
-        "top10",
-        "stats"
-      ]
+      "required": ["top10", "stats"]
     },
     "TournamentTop10Entry": {
       "type": "object",
@@ -7341,10 +6686,7 @@
           "type": "string"
         }
       },
-      "required": [
-        "id",
-        "url"
-      ]
+      "required": ["id", "url"]
     },
     "User": {
       "description": "Identité affichable d'un joueur dans un rendu 2D/3D ou un classement.",
@@ -7363,12 +6705,7 @@
           "type": "string"
         }
       },
-      "required": [
-        "id",
-        "name",
-        "rank",
-        "logo"
-      ]
+      "required": ["id", "name", "rank", "logo"]
     },
     "UserClanSummary": {
       "description": "Appartenance de clan résumée, telle qu'embarquée dans un profil enrichi.",
@@ -7396,13 +6733,7 @@
           }
         }
       },
-      "required": [
-        "id",
-        "shortenedName",
-        "name",
-        "role",
-        "distinctions"
-      ]
+      "required": ["id", "shortenedName", "name", "role", "distinctions"]
     },
     "UserDTO": {
       "type": "object",
@@ -7468,10 +6799,7 @@
           "type": "boolean"
         }
       },
-      "required": [
-        "id",
-        "username"
-      ]
+      "required": ["id", "username"]
     },
     "UserRef": {
       "description": "Vue minimale d'un utilisateur (avatar + libellé), suffisante pour une liste.",
@@ -7497,19 +6825,11 @@
           ]
         }
       },
-      "required": [
-        "id",
-        "username"
-      ]
+      "required": ["id", "username"]
     },
     "UserRole": {
       "type": "number",
-      "enum": [
-        0,
-        1,
-        2,
-        3
-      ],
+      "enum": [0, 1, 2, 3],
       "x-enum-varnames": [
         "User",
         "Moderator",
@@ -7539,11 +6859,7 @@
           }
         }
       },
-      "required": [
-        "activeUsers",
-        "users",
-        "guilds"
-      ]
+      "required": ["activeUsers", "users", "guilds"]
     },
     "WalletBalance": {
       "description": "Portefeuille — un solde par utilisateur dans une devise virtuelle (ex. ACH)\nplus un journal de mouvements.",
@@ -7556,10 +6872,7 @@
           "type": "string"
         }
       },
-      "required": [
-        "balance",
-        "currency"
-      ]
+      "required": ["balance", "currency"]
     },
     "WalletHistoryPage": {
       "type": "object",
@@ -7574,9 +6887,7 @@
           "type": "number"
         }
       },
-      "required": [
-        "transactions"
-      ]
+      "required": ["transactions"]
     },
     "WalletTransaction": {
       "description": "Une ligne du journal des transactions (`GET /wallet/me/history`).",
@@ -7609,44 +6920,19 @@
           "type": "string"
         }
       },
-      "required": [
-        "id",
-        "type",
-        "amount",
-        "reason",
-        "direction",
-        "createdAt"
-      ]
+      "required": ["id", "type", "amount", "reason", "direction", "createdAt"]
     },
     "WalletTransactionDirection": {
       "description": "Sens du mouvement vis-à-vis du solde du titulaire.",
       "type": "string",
-      "enum": [
-        "in",
-        "out"
-      ],
-      "x-enum-varnames": [
-        "In",
-        "Out"
-      ]
+      "enum": ["in", "out"],
+      "x-enum-varnames": ["In", "Out"]
     },
     "WalletTransactionType": {
       "description": "Type de mouvement du portefeuille (doit matcher l'enum côté bot).",
       "type": "string",
-      "enum": [
-        "Credit",
-        "Debit",
-        "Transfer",
-        "Payout",
-        "Fine"
-      ],
-      "x-enum-varnames": [
-        "Credit",
-        "Debit",
-        "Transfer",
-        "Payout",
-        "Fine"
-      ]
+      "enum": ["Credit", "Debit", "Transfer", "Payout", "Fine"],
+      "x-enum-varnames": ["Credit", "Debit", "Transfer", "Payout", "Fine"]
     },
     "WireParticipant": {
       "description": "`ParticipantDTO` tel qu'il circule (le tournoi n'est souvent qu'un id).",
@@ -7714,12 +7000,7 @@
           "$ref": "#/$defs/EntityRef"
         }
       },
-      "required": [
-        "id",
-        "user",
-        "hasCheckedIn",
-        "tournament"
-      ]
+      "required": ["id", "user", "hasCheckedIn", "tournament"]
     },
     "WireTournament": {
       "description": "`Tournament` tel qu'il circule (relations éventuellement réduites à un id).",
@@ -7980,13 +7261,7 @@
           }
         }
       },
-      "required": [
-        "id",
-        "name",
-        "description",
-        "logo",
-        "organization"
-      ]
+      "required": ["id", "name", "description", "logo", "organization"]
     }
   }
 }

@@ -23,7 +23,10 @@ import { COMPTES_SOURCE_INSTAGRAM } from "../comptes";
 import { avecDelai, memo } from "../memo";
 
 import { estFrais, lireSnapshotServeur } from "./snapshots";
-import { postDepuisCreationInstagram, postDepuisOembedInstagram } from "../normalisation";
+import {
+  postDepuisCreationInstagram,
+  postDepuisOembedInstagram,
+} from "../normalisation";
 import type { OembedInstagram } from "../normalisation";
 import type { PageSource, PostFeed, SourceFeed } from "../types";
 
@@ -38,7 +41,7 @@ const MESSAGE_VIDE =
 export function listeEnv(valeur: string | undefined): string[] {
   return (valeur ?? "")
     .split(/[\s,]+/)
-    .map(l => l.trim())
+    .map((l) => l.trim())
     .filter(Boolean);
 }
 
@@ -51,14 +54,16 @@ async function lireCreations(): Promise<PostFeed[]> {
       LIMIT $1`,
     [MAX_CREATIONS],
   );
-  return rows.map(r => postDepuisCreationInstagram(r, urlImageAsset));
+  return rows.map((r) => postDepuisCreationInstagram(r, urlImageAsset));
 }
 
 function lireOembed(code: string): Promise<OembedInstagram> {
   const url = `https://www.instagram.com/api/v1/oembed/?omitscript=true&url=${encodeURIComponent(`https://www.instagram.com/p/${code}/`)}`;
   return memo(`ig-oembed:${code}`, TTL_OEMBED_MS, async () => {
     const reponse = await fetch(url, {
-      headers: { "User-Agent": "Mozilla/5.0 (compatible; RoseGriffonFeed/1.0)" },
+      headers: {
+        "User-Agent": "Mozilla/5.0 (compatible; RoseGriffonFeed/1.0)",
+      },
       signal: AbortSignal.timeout(8000),
     });
     if (!reponse.ok) throw new Error(`oEmbed Instagram ${reponse.status}`);
@@ -70,14 +75,14 @@ async function lireLiens(): Promise<PostFeed[]> {
   const codes = [
     ...new Set(
       listeEnv(process.env.FEED_INSTAGRAM_POSTS)
-        .map(l => analyserPermalien(l)?.shortcode)
+        .map((l) => analyserPermalien(l)?.shortcode)
         .filter((c): c is string => !!c),
     ),
   ].slice(0, MAX_LIENS);
   const lus = await Promise.all(
-    codes.map(code =>
+    codes.map((code) =>
       lireOembed(code).then(
-        o => postDepuisOembedInstagram(code, o),
+        (o) => postDepuisOembedInstagram(code, o),
         () => null,
       ),
     ),
@@ -89,34 +94,56 @@ export const sourceInstagram: SourceFeed = {
   reseau: "instagram",
   comptes: COMPTES_SOURCE_INSTAGRAM,
   async lire({ comptes }): Promise<PageSource> {
-    if (comptes.length === 0) return { posts: [], profils: [], statut: { reseau: "instagram", etat: "vide" } };
-    const pseudos = new Set(comptes.map(c => c.pseudo.toLowerCase()));
+    if (comptes.length === 0)
+      return {
+        posts: [],
+        profils: [],
+        statut: { reseau: "instagram", etat: "vide" },
+      };
+    const pseudos = new Set(comptes.map((c) => c.pseudo.toLowerCase()));
     const toutLeReseau = comptes.length >= COMPTES_SOURCE_INSTAGRAM.length;
     const snapshot = await lireSnapshotServeur("instagram");
     const frais = estFrais(snapshot, 12 * 3600_000) ? snapshot : null;
     const [creations, liens] = await Promise.allSettled([
-      avecDelai(memo("ig-creations", TTL_BASE_MS, lireCreations), 8000, "Instagram (base)"),
+      avecDelai(
+        memo("ig-creations", TTL_BASE_MS, lireCreations),
+        8000,
+        "Instagram (base)",
+      ),
       avecDelai(lireLiens(), 12_000, "Instagram (oEmbed)"),
     ]);
     // Créations d'abord : à identifiant égal, c'est leur image ré-hébergée qui est servie.
-    const tous = [...[creations, liens].flatMap(r => (r.status === "fulfilled" ? r.value : [])), ...(frais?.posts ?? [])];
+    const tous = [
+      ...[creations, liens].flatMap((r) =>
+        r.status === "fulfilled" ? r.value : [],
+      ),
+      ...(frais?.posts ?? []),
+    ];
     const vus = new Set<string>();
-    const posts = tous.filter(p => {
+    const posts = tous.filter((p) => {
       if (vus.has(p.id)) return false;
       vus.add(p.id);
       return p.compte ? pseudos.has(p.compte.toLowerCase()) : toutLeReseau;
     });
-    const enPanne = creations.status === "rejected" && liens.status === "rejected";
+    const enPanne =
+      creations.status === "rejected" && liens.status === "rejected";
     return {
       posts,
-      profils: frais ? frais.profils.filter(p => pseudos.has(p.pseudo.toLowerCase())) : [],
+      profils: frais
+        ? frais.profils.filter((p) => pseudos.has(p.pseudo.toLowerCase()))
+        : [],
       statut: enPanne
         ? {
             reseau: "instagram",
             etat: "indisponible",
-            message: "Les publications Instagram ne sont pas lisibles pour le moment.",
+            message:
+              "Les publications Instagram ne sont pas lisibles pour le moment.",
           }
-        : { reseau: "instagram", etat: posts.length > 0 ? "ok" : "vide", message: MESSAGE_VIDE },
+        : {
+            reseau: "instagram",
+            etat: posts.length > 0 ? "ok" : "vide",
+            message: MESSAGE_VIDE,
+          },
     };
   },
 };

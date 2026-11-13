@@ -26,7 +26,14 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["index", "width", "height", "format", "dataOffset", "dataSize"],
+        "required": [
+          "index",
+          "width",
+          "height",
+          "format",
+          "dataOffset",
+          "dataSize"
+        ],
         "properties": {
           "index": { "type": "integer", "minimum": 0 },
           "width": { "type": "integer", "minimum": 1 },

@@ -29,7 +29,10 @@ export const FORMES_MENU = ["menu", "boutons"] as const;
 export type FormeMenu = (typeof FORMES_MENU)[number];
 
 export function estFormeMenu(valeur: unknown): valeur is FormeMenu {
-  return typeof valeur === "string" && (FORMES_MENU as readonly string[]).includes(valeur);
+  return (
+    typeof valeur === "string" &&
+    (FORMES_MENU as readonly string[]).includes(valeur)
+  );
 }
 
 /**
@@ -137,12 +140,18 @@ export const PREFIXE_COMPOSANT = "roles";
  * reste (cf. l'en-tête de la migration).
  */
 export function identifiantMenu(messageId: string): string {
-  return `${PREFIXE_COMPOSANT}:menu:${messageId}`.slice(0, LIMITES.identifiantComposant);
+  return `${PREFIXE_COMPOSANT}:menu:${messageId}`.slice(
+    0,
+    LIMITES.identifiantComposant,
+  );
 }
 
 /** `roles:bouton:<messageId>:<roleId>` — une rangée de boutons, un rôle chacun. */
 export function identifiantBouton(messageId: string, roleId: string): string {
-  return `${PREFIXE_COMPOSANT}:bouton:${messageId}:${roleId}`.slice(0, LIMITES.identifiantComposant);
+  return `${PREFIXE_COMPOSANT}:bouton:${messageId}:${roleId}`.slice(
+    0,
+    LIMITES.identifiantComposant,
+  );
 }
 
 export interface ComposantMenu {
@@ -203,17 +212,17 @@ export function planDeBascule(
   rolesDuMembre: readonly string[],
   choixMax = 0,
 ): PlanBascule {
-  const duMenu = new Set(entrees.map(entree => entree.roleId));
-  const voulus = new Set(selection.filter(roleId => duMenu.has(roleId)));
-  const portes = new Set(rolesDuMembre.filter(roleId => duMenu.has(roleId)));
+  const duMenu = new Set(entrees.map((entree) => entree.roleId));
+  const voulus = new Set(selection.filter((roleId) => duMenu.has(roleId)));
+  const portes = new Set(rolesDuMembre.filter((roleId) => duMenu.has(roleId)));
 
   if (choixMax > 0 && voulus.size > choixMax) {
     return { aPoser: [], aRetirer: [], tropDeChoix: true };
   }
 
   return {
-    aPoser: [...voulus].filter(roleId => !portes.has(roleId)),
-    aRetirer: [...portes].filter(roleId => !voulus.has(roleId)),
+    aPoser: [...voulus].filter((roleId) => !portes.has(roleId)),
+    aRetirer: [...portes].filter((roleId) => !voulus.has(roleId)),
     tropDeChoix: false,
   };
 }
@@ -232,15 +241,18 @@ export function planDeBouton(
   rolesDuMembre: readonly string[],
   choixMax = 0,
 ): PlanBascule {
-  const duMenu = new Set(entrees.map(entree => entree.roleId));
+  const duMenu = new Set(entrees.map((entree) => entree.roleId));
   if (!duMenu.has(roleId)) {
     return { aPoser: [], aRetirer: [], tropDeChoix: false };
   }
-  const portes = rolesDuMembre.filter(identifiant => duMenu.has(identifiant));
+  const portes = rolesDuMembre.filter((identifiant) => duMenu.has(identifiant));
   if (portes.includes(roleId)) {
     return { aPoser: [], aRetirer: [roleId], tropDeChoix: false };
   }
-  const aRetirer = choixMax > 0 && portes.length >= choixMax ? portes.slice(0, portes.length - choixMax + 1) : [];
+  const aRetirer =
+    choixMax > 0 && portes.length >= choixMax
+      ? portes.slice(0, portes.length - choixMax + 1)
+      : [];
   return { aPoser: [roleId], aRetirer, tropDeChoix: false };
 }
 
@@ -251,10 +263,14 @@ export function resumeBascule(plan: PlanBascule): string {
   }
   const morceaux: string[] = [];
   if (plan.aPoser.length > 0) {
-    morceaux.push(`Ajouté : ${plan.aPoser.map(roleId => `<@&${roleId}>`).join(", ")}`);
+    morceaux.push(
+      `Ajouté : ${plan.aPoser.map((roleId) => `<@&${roleId}>`).join(", ")}`,
+    );
   }
   if (plan.aRetirer.length > 0) {
-    morceaux.push(`Retiré : ${plan.aRetirer.map(roleId => `<@&${roleId}>`).join(", ")}`);
+    morceaux.push(
+      `Retiré : ${plan.aRetirer.map((roleId) => `<@&${roleId}>`).join(", ")}`,
+    );
   }
   return morceaux.length > 0 ? morceaux.join("\n") : "Rien n'a changé.";
 }

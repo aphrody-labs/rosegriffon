@@ -8,11 +8,11 @@ quelques jours avant le lancement.
 
 ## Les trois chemins d'une création
 
-| Source | Collecteur | Table |
-| --- | --- | --- |
-| X (le hashtag) | `packages/cron/src/tasks/ie-crawl/hashtag-harvest.ts` | `x_campagne_posts` × `tweets` |
-| Discord (salon de dépôt) | `packages/cron/src/tasks/campagnes-discord.ts` | `campagne_creations_discord` × `discord_messages` |
-| Instagram (dépôt manuel) | **aucun collecteur possible** — formulaire `/iergday` | `campagne_creations_instagram` |
+| Source                   | Collecteur                                            | Table                                             |
+| ------------------------ | ----------------------------------------------------- | ------------------------------------------------- |
+| X (le hashtag)           | `packages/cron/src/tasks/ie-crawl/hashtag-harvest.ts` | `x_campagne_posts` × `tweets`                     |
+| Discord (salon de dépôt) | `packages/cron/src/tasks/campagnes-discord.ts`        | `campagne_creations_discord` × `discord_messages` |
+| Instagram (dépôt manuel) | **aucun collecteur possible** — formulaire `/iergday` | `campagne_creations_instagram`                    |
 
 Instagram est autorisé par le règlement, mais **aucun collecteur de hashtag
 Instagram n'existe** : toutes les portes sont fermées à un client non connecté, et
@@ -38,12 +38,12 @@ téléphone. `#IERGDay` arrive donc aussi en `#IERG_Day`, `#iergday2026`,
 mécaniques distinctes :
 
 1. **`variantesRecherche()`** — la liste **bornée** (12) des graphies qu'on
-   *demande* à X : tiret bas au point de composition, millésime, pluriel,
+   _demande_ à X : tiret bas au point de composition, millésime, pluriel,
    transpositions, lettre doublée, lettre avalée. Elles sont empaquetées par
    `requetesVariantes()` en **une seule requête `OR`** : X facture la page, pas le
    terme, donc douze graphies coûtent le prix d'une.
 2. **`apparierHashtag()`** — le filet local, appliqué à **tout** ce que X renvoie.
-   Distance de **Damerau**-Levenshtein (la transposition compte pour *une* faute,
+   Distance de **Damerau**-Levenshtein (la transposition compte pour _une_ faute,
    pas deux), tolérance 1 à partir de 6 caractères, 2 à partir de 12. La graphie
    exacte l'emporte toujours sur une variante présente dans le même post.
 
@@ -65,7 +65,7 @@ Le bot dépose **chaque création, quelle que soit sa source**, dans
 `x_campagnes.relais_salon`. Pour IERG Day c'est `〡iergday-staff`
 (`1537470522764304435`).
 
->  **Le salon de relais n'est PAS le salon de dépôt.** `salons_depot`
+> **Le salon de relais n'est PAS le salon de dépôt.** `salons_depot`
 > (`〡iergday`) est l'endroit **public** où les membres déposent eux-mêmes ;
 > `relais_salon` est le fil de suivi de l'équipe. Confondre les deux ferait
 > republier par le bot, dans le salon public, ce qu'un membre vient d'y poster.

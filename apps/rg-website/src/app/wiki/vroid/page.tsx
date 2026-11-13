@@ -45,13 +45,21 @@ const MESSAGES_RETOUR: Record<string, string> = {
   connecte: "Compte VRoid Hub lié.",
   refus: "Autorisation refusée sur VRoid Hub.",
   "flux-perdu": "La demande d'autorisation a expiré. Relancez la liaison.",
-  "state-invalide": "Retour d'autorisation invalide : la demande a été rejetée.",
+  "state-invalide":
+    "Retour d'autorisation invalide : la demande a été rejetée.",
   "echange-refuse": "VRoid Hub a refusé l'échange du code d'autorisation.",
   "non-configure": "VRoid Hub n'est pas configuré sur cette instance.",
 };
 
-export default async function PageVroid({ searchParams }: { searchParams: Promise<{ vroid?: string }> }) {
-  const [{ vroid }, configure] = await Promise.all([searchParams, Promise.resolve(Boolean(lireConfigVroid()))]);
+export default async function PageVroid({
+  searchParams,
+}: {
+  searchParams: Promise<{ vroid?: string }>;
+}) {
+  const [{ vroid }, configure] = await Promise.all([
+    searchParams,
+    Promise.resolve(Boolean(lireConfigVroid())),
+  ]);
 
   // La liaison n'est possible que si l'application est configurée ; sans
   // configuration, `jetonValide()` léverait sur le déchiffrement du cookie.
@@ -74,11 +82,14 @@ export default async function PageVroid({ searchParams }: { searchParams: Promis
   return (
     <div className="w-full space-y-5">
       <header className="space-y-2">
-        <h1 className="text-fluid-headline-md font-extrabold text-on-surface">VRoid Hub</h1>
+        <h1 className="text-fluid-headline-md font-extrabold text-on-surface">
+          VRoid Hub
+        </h1>
         <p className="max-w-3xl text-sm text-on-surface-variant">
-          VRoid Hub est la plateforme de partage de modèles 3D de personnages de pixiv. Azalée s&apos;y connecte pour
-          les parcourir et les afficher dans le navigateur — elle n&apos;en héberge aucun, et affiche les conditions
-          d&apos;utilisation fixées par leurs auteurs.
+          VRoid Hub est la plateforme de partage de modèles 3D de personnages de
+          pixiv. Azalée s&apos;y connecte pour les parcourir et les afficher
+          dans le navigateur — elle n&apos;en héberge aucun, et affiche les
+          conditions d&apos;utilisation fixées par leurs auteurs.
         </p>
       </header>
 
@@ -100,18 +111,28 @@ export default async function PageVroid({ searchParams }: { searchParams: Promis
       ) : (
         <p className="rounded-2xl border border-outline-variant/40 bg-surface-container-low px-4 py-3 text-sm text-on-surface-variant">
           La liaison de compte est désactivée sur cette instance : les variables
-          <code className="mx-1 rounded bg-surface-container px-1">VROID_APPLICATION_ID</code>
-          et <code className="mx-1 rounded bg-surface-container px-1">VROID_SECRET</code>
+          <code className="mx-1 rounded bg-surface-container px-1">
+            VROID_APPLICATION_ID
+          </code>
+          et{" "}
+          <code className="mx-1 rounded bg-surface-container px-1">
+            VROID_SECRET
+          </code>
           ne sont pas renseignées. La sélection publique reste consultable.
         </p>
       )}
 
-      <GalerieVroid connecte={connecte} erreurInitiale={erreur} pageInitiale={page} />
+      <GalerieVroid
+        connecte={connecte}
+        erreurInitiale={erreur}
+        pageInitiale={page}
+      />
 
       <footer className="rounded-2xl border border-outline-variant/40 bg-surface-container-low p-4 text-xs text-on-surface-variant">
-        Les modèles, images et métadonnées proviennent de VRoid Hub (pixiv) et restent la propriété de leurs auteurs.
-        Azalée ne les redistribue pas : les fichiers `.vrm` sont relayés à la demande, sans stockage ni cache, et
-        uniquement lorsque leur auteur en autorise le téléchargement.
+        Les modèles, images et métadonnées proviennent de VRoid Hub (pixiv) et
+        restent la propriété de leurs auteurs. Azalée ne les redistribue pas :
+        les fichiers `.vrm` sont relayés à la demande, sans stockage ni cache,
+        et uniquement lorsque leur auteur en autorise le téléchargement.
       </footer>
     </div>
   );
@@ -130,8 +151,10 @@ function FormulaireDeliaison() {
       action={async () => {
         "use server";
         const { revoquerJeton } = await import("@/lib/vroid/oauth");
-        const { effacerSession, jetonValide: lireJeton } = await import("@/lib/vroid/session");
-        const { lireConfigVroid: lireConfig } = await import("@/lib/vroid/config");
+        const { effacerSession, jetonValide: lireJeton } =
+          await import("@/lib/vroid/session");
+        const { lireConfigVroid: lireConfig } =
+          await import("@/lib/vroid/config");
 
         const config = lireConfig();
         const jeton = await lireJeton();

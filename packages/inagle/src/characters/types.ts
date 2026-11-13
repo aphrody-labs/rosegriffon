@@ -3,7 +3,11 @@
  * Based on actual dump JSON structure
  */
 
-import type { CfgBinDocument, CfgBinEntry, CfgBinVariable } from "../schemas/cfgbin.js";
+import type {
+  CfgBinDocument,
+  CfgBinEntry,
+  CfgBinVariable,
+} from "../schemas/cfgbin.js";
 
 export type { CfgBinEntry, CfgBinVariable };
 export type CfgBinFile = CfgBinDocument;

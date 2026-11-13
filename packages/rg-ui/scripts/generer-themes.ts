@@ -21,9 +21,11 @@ export function selecteursTheme(id: ThemeId): string[] {
 }
 
 export function rendreThemesCss(): string {
-  const blocs = (Object.keys(THEME_PACKS) as ThemeId[]).map(id => {
+  const blocs = (Object.keys(THEME_PACKS) as ThemeId[]).map((id) => {
     const seed = THEME_PACKS[id].seed;
-    const lignes = Object.entries(roleVariables(computeRoles(seed))).map(([nom, valeur]) => `  ${nom}: ${valeur};`);
+    const lignes = Object.entries(roleVariables(computeRoles(seed))).map(
+      ([nom, valeur]) => `  ${nom}: ${valeur};`,
+    );
     return `/* ${id}: hue ${seed.hue}, chroma ${seed.chroma}, ${seed.mode}. */\n${selecteursTheme(id).join(",\n")} {\n${lignes.join("\n")}\n}\n`;
   });
   return `/* GENERATED - do not hand-edit.

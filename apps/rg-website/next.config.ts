@@ -23,7 +23,11 @@ const nextConfig: NextConfig = {
   outputFileTracingRoot: buildRoot,
   // Vercel optimise les images en amont : l'addon natif de sharp n'a rien à faire dans ses fonctions.
   // Le serveur autonome du VPS garde sharp pour l'optimiseur d'images de Next.
-  ...(process.env.VERCEL && { outputFileTracingExcludes: { "*": ["node_modules/sharp/**", "node_modules/@img/**"] } }),
+  ...(process.env.VERCEL && {
+    outputFileTracingExcludes: {
+      "*": ["node_modules/sharp/**", "node_modules/@img/**"],
+    },
+  }),
   turbopack: {
     root: buildRoot,
   },
@@ -54,7 +58,9 @@ const nextConfig: NextConfig = {
   // chemin (telops de cut-in en 404 sur ~1 000 fiches du wiki). Même origine que
   // `MENU_CDN_BASE` de `@rosegriffon/azalee/images`.
   env: {
-    NIE_CDN_BASE: (process.env.NIE_CDN_BASE || "https://cdn.rosegriffon.fr").replace(/\/+$/, ""),
+    NIE_CDN_BASE: (
+      process.env.NIE_CDN_BASE || "https://cdn.rosegriffon.fr"
+    ).replace(/\/+$/, ""),
   },
   transpilePackages: [
     "@rosegriffon/inagle",
@@ -157,7 +163,11 @@ const nextConfig: NextConfig = {
     return [
       // Le Feed s'appelait « X » : les anciens liens (et leurs conversations) suivent.
       { destination: "/feed", permanent: true, source: "/x" },
-      { destination: "/feed/status/:id", permanent: true, source: "/x/status/:id" },
+      {
+        destination: "/feed/status/:id",
+        permanent: true,
+        source: "/x/status/:id",
+      },
       // www → apex : l'auth-client force baseURL=https://rosegriffon.fr (apex) pour
       // que le cookie OAuth `state` et le callback soient sur le même domaine. Sur
       // www.rosegriffon.fr, l'appel /api/auth part donc en cross-origin → bloqué
@@ -183,8 +193,16 @@ const nextConfig: NextConfig = {
       // journal mais un second CORPUS du même, avec sa liste, sa page
       // d'article et son entrée de menu. Les slugs sont uniques sur toute la
       // table : une chronique se sert telle quelle sous `/news/<slug>`.
-      { destination: "/news?format=chronique", permanent: true, source: "/chroniques" },
-      { destination: "/news/:slug", permanent: true, source: "/chroniques/:slug" },
+      {
+        destination: "/news?format=chronique",
+        permanent: true,
+        source: "/chroniques",
+      },
+      {
+        destination: "/news/:slug",
+        permanent: true,
+        source: "/chroniques/:slug",
+      },
       // UNE SEULE PAGE DE CONNEXION.
       // `/achillea/auth` proposait un second écran « Connexion Discord »
       // pour le même compte Discord : depuis que la session e-sport dérive
@@ -192,110 +210,314 @@ const nextConfig: NextConfig = {
       // qu'une porte d'entrée.
       // La page `/notre-equipe` rassemble l'ensemble des pôles de l'association.
       // Les anciens sous-chemins fragmentés redirigent vers `/notre-equipe`.
-      { destination: "/notre-equipe", permanent: true, source: "/notre-equipe/:path+" },
+      {
+        destination: "/notre-equipe",
+        permanent: true,
+        source: "/notre-equipe/:path+",
+      },
       {
         destination: "/nous-soutenir",
         permanent: true,
         source: "/a-propos/soutenir",
       },
       { destination: "/nous-soutenir", permanent: true, source: "/soutenir" },
-      { destination: "/charte-engagements", permanent: true, source: "/charte" },
+      {
+        destination: "/charte-engagements",
+        permanent: true,
+        source: "/charte",
+      },
       // Redirections Wiki transparentes (zéro régression sur URLs Azalée)
       { destination: "/wiki/avatar", permanent: true, source: "/avatar" },
-      { destination: "/wiki/avatar/:path*", permanent: true, source: "/avatar/:path*" },
+      {
+        destination: "/wiki/avatar/:path*",
+        permanent: true,
+        source: "/avatar/:path*",
+      },
       { destination: "/wiki/chara", permanent: true, source: "/chara" },
-      { destination: "/wiki/chara/:path*", permanent: true, source: "/chara/:path*" },
+      {
+        destination: "/wiki/chara/:path*",
+        permanent: true,
+        source: "/chara/:path*",
+      },
       { destination: "/wiki/skill", permanent: true, source: "/skill" },
-      { destination: "/wiki/skill/:path*", permanent: true, source: "/skill/:path*" },
+      {
+        destination: "/wiki/skill/:path*",
+        permanent: true,
+        source: "/skill/:path*",
+      },
       { destination: "/wiki/item", permanent: true, source: "/item" },
-      { destination: "/wiki/item/:path*", permanent: true, source: "/item/:path*" },
+      {
+        destination: "/wiki/item/:path*",
+        permanent: true,
+        source: "/item/:path*",
+      },
       { destination: "/wiki/equipe", permanent: true, source: "/equipe" },
-      { destination: "/wiki/equipe/:path*", permanent: true, source: "/equipe/:path*" },
+      {
+        destination: "/wiki/equipe/:path*",
+        permanent: true,
+        source: "/equipe/:path*",
+      },
       { destination: "/wiki/modeles", permanent: true, source: "/keshin" },
-      { destination: "/wiki/modeles/:path*", permanent: true, source: "/keshin/:path*" },
+      {
+        destination: "/wiki/modeles/:path*",
+        permanent: true,
+        source: "/keshin/:path*",
+      },
       { destination: "/wiki/tactic", permanent: true, source: "/tactic" },
-      { destination: "/wiki/tactic/:path*", permanent: true, source: "/tactic/:path*" },
+      {
+        destination: "/wiki/tactic/:path*",
+        permanent: true,
+        source: "/tactic/:path*",
+      },
       { destination: "/wiki/passive", permanent: true, source: "/passive" },
-      { destination: "/wiki/passive/:path*", permanent: true, source: "/passive/:path*" },
+      {
+        destination: "/wiki/passive/:path*",
+        permanent: true,
+        source: "/passive/:path*",
+      },
       { destination: "/wiki/aura", permanent: true, source: "/aura" },
-      { destination: "/wiki/aura/:path*", permanent: true, source: "/aura/:path*" },
+      {
+        destination: "/wiki/aura/:path*",
+        permanent: true,
+        source: "/aura/:path*",
+      },
       { destination: "/wiki/stade", permanent: true, source: "/stade" },
-      { destination: "/wiki/stade/:path*", permanent: true, source: "/stade/:path*" },
+      {
+        destination: "/wiki/stade/:path*",
+        permanent: true,
+        source: "/stade/:path*",
+      },
       { destination: "/wiki/boutique", permanent: true, source: "/boutique" },
-      { destination: "/wiki/boutique/:path*", permanent: true, source: "/boutique/:path*" },
+      {
+        destination: "/wiki/boutique/:path*",
+        permanent: true,
+        source: "/boutique/:path*",
+      },
       { destination: "/wiki/capsule", permanent: true, source: "/capsule" },
-      { destination: "/wiki/capsule/:path*", permanent: true, source: "/capsule/:path*" },
+      {
+        destination: "/wiki/capsule/:path*",
+        permanent: true,
+        source: "/capsule/:path*",
+      },
       { destination: "/wiki/drops", permanent: true, source: "/drops" },
-      { destination: "/wiki/drops/:path*", permanent: true, source: "/drops/:path*" },
+      {
+        destination: "/wiki/drops/:path*",
+        permanent: true,
+        source: "/drops/:path*",
+      },
       { destination: "/wiki/quete", permanent: true, source: "/quete" },
-      { destination: "/wiki/quete/:path*", permanent: true, source: "/quete/:path*" },
+      {
+        destination: "/wiki/quete/:path*",
+        permanent: true,
+        source: "/quete/:path*",
+      },
       { destination: "/wiki/succes", permanent: true, source: "/succes" },
-      { destination: "/wiki/succes/:path*", permanent: true, source: "/succes/:path*" },
+      {
+        destination: "/wiki/succes/:path*",
+        permanent: true,
+        source: "/succes/:path*",
+      },
       { destination: "/wiki/niveau", permanent: true, source: "/niveau" },
-      { destination: "/wiki/niveau/:path*", permanent: true, source: "/niveau/:path*" },
-      { destination: "/wiki/entraineur", permanent: true, source: "/entraineur" },
-      { destination: "/wiki/entraineur/:path*", permanent: true, source: "/entraineur/:path*" },
+      {
+        destination: "/wiki/niveau/:path*",
+        permanent: true,
+        source: "/niveau/:path*",
+      },
+      {
+        destination: "/wiki/entraineur",
+        permanent: true,
+        source: "/entraineur",
+      },
+      {
+        destination: "/wiki/entraineur/:path*",
+        permanent: true,
+        source: "/entraineur/:path*",
+      },
       { destination: "/wiki/cross", permanent: true, source: "/cross" },
-      { destination: "/wiki/cross/:path*", permanent: true, source: "/cross/:path*" },
-      { destination: "/wiki/cross", permanent: true, source: "/cross/catalogue" },
-      { destination: "/wiki/patch-notes", permanent: true, source: "/patch-notes" },
-      { destination: "/wiki/patch-notes/:path*", permanent: true, source: "/patch-notes/:path*" },
+      {
+        destination: "/wiki/cross/:path*",
+        permanent: true,
+        source: "/cross/:path*",
+      },
+      {
+        destination: "/wiki/cross",
+        permanent: true,
+        source: "/cross/catalogue",
+      },
+      {
+        destination: "/wiki/patch-notes",
+        permanent: true,
+        source: "/patch-notes",
+      },
+      {
+        destination: "/wiki/patch-notes/:path*",
+        permanent: true,
+        source: "/patch-notes/:path*",
+      },
       { destination: "/wiki/tools", permanent: true, source: "/tools" },
-      { destination: "/wiki/tools/:path*", permanent: true, source: "/tools/:path*" },
-      { destination: "/wiki/tools/compare", permanent: true, source: "/compare" },
-      { destination: "/wiki/tools/random-team", permanent: true, source: "/random-team" },
+      {
+        destination: "/wiki/tools/:path*",
+        permanent: true,
+        source: "/tools/:path*",
+      },
+      {
+        destination: "/wiki/tools/compare",
+        permanent: true,
+        source: "/compare",
+      },
+      {
+        destination: "/wiki/tools/random-team",
+        permanent: true,
+        source: "/random-team",
+      },
       { destination: "/wiki/save", permanent: true, source: "/save" },
-      { destination: "/wiki/save/:path*", permanent: true, source: "/save/:path*" },
+      {
+        destination: "/wiki/save/:path*",
+        permanent: true,
+        source: "/save/:path*",
+      },
       { destination: "/wiki/modeles", permanent: true, source: "/modeles" },
-      { destination: "/wiki/modeles/:path*", permanent: true, source: "/modeles/:path*" },
+      {
+        destination: "/wiki/modeles/:path*",
+        permanent: true,
+        source: "/modeles/:path*",
+      },
       { destination: "/wiki/textures", permanent: true, source: "/textures" },
-      { destination: "/wiki/textures/:path*", permanent: true, source: "/textures/:path*" },
+      {
+        destination: "/wiki/textures/:path*",
+        permanent: true,
+        source: "/textures/:path*",
+      },
       { destination: "/wiki/vroid", permanent: true, source: "/vroid" },
-      { destination: "/wiki/vroid/:path*", permanent: true, source: "/vroid/:path*" },
+      {
+        destination: "/wiki/vroid/:path*",
+        permanent: true,
+        source: "/vroid/:path*",
+      },
       { destination: "/wiki/videos", permanent: true, source: "/videos" },
-      { destination: "/wiki/videos/:path*", permanent: true, source: "/videos/:path*" },
+      {
+        destination: "/wiki/videos/:path*",
+        permanent: true,
+        source: "/videos/:path*",
+      },
       { destination: "/wiki/sons", permanent: true, source: "/sons" },
-      { destination: "/wiki/sons/:path*", permanent: true, source: "/sons/:path*" },
+      {
+        destination: "/wiki/sons/:path*",
+        permanent: true,
+        source: "/sons/:path*",
+      },
       { destination: "/wiki/gallery", permanent: true, source: "/gallery" },
-      { destination: "/wiki/gallery/:path*", permanent: true, source: "/gallery/:path*" },
+      {
+        destination: "/wiki/gallery/:path*",
+        permanent: true,
+        source: "/gallery/:path*",
+      },
       { destination: "/wiki/demo", permanent: true, source: "/demo" },
-      { destination: "/wiki/invocation", permanent: true, source: "/invocation" },
+      {
+        destination: "/wiki/invocation",
+        permanent: true,
+        source: "/invocation",
+      },
       { destination: "/wiki/mode", permanent: true, source: "/mode" },
-      { destination: "/wiki/mode/:path*", permanent: true, source: "/mode/:path*" },
+      {
+        destination: "/wiki/mode/:path*",
+        permanent: true,
+        source: "/mode/:path*",
+      },
       // Redirections Dashboard Azalée vers Admin Rose Griffon
-      { destination: "/admin/news/new", permanent: true, source: "/dashboard/news/new" },
-      { destination: "/admin/news/:path*", permanent: true, source: "/dashboard/news/:path*" },
-      { destination: "/admin/news", permanent: true, source: "/dashboard/news" },
+      {
+        destination: "/admin/news/new",
+        permanent: true,
+        source: "/dashboard/news/new",
+      },
+      {
+        destination: "/admin/news/:path*",
+        permanent: true,
+        source: "/dashboard/news/:path*",
+      },
+      {
+        destination: "/admin/news",
+        permanent: true,
+        source: "/dashboard/news",
+      },
       {
         destination: "/admin/database/:path*",
         permanent: true,
         source: "/dashboard/database/:path*",
       },
-      { destination: "/admin/database", permanent: true, source: "/dashboard/database" },
-      { destination: "/admin/tweets/:path*", permanent: true, source: "/dashboard/tweets/:path*" },
-      { destination: "/admin/tweets", permanent: true, source: "/dashboard/tweets" },
-      { destination: "/admin/audit", permanent: true, source: "/dashboard/audit" },
-      { destination: "/admin/import-sheet", permanent: true, source: "/dashboard/import-sheet" },
+      {
+        destination: "/admin/database",
+        permanent: true,
+        source: "/dashboard/database",
+      },
+      {
+        destination: "/admin/tweets/:path*",
+        permanent: true,
+        source: "/dashboard/tweets/:path*",
+      },
+      {
+        destination: "/admin/tweets",
+        permanent: true,
+        source: "/dashboard/tweets",
+      },
+      {
+        destination: "/admin/audit",
+        permanent: true,
+        source: "/dashboard/audit",
+      },
+      {
+        destination: "/admin/import-sheet",
+        permanent: true,
+        source: "/dashboard/import-sheet",
+      },
       {
         destination: "/admin/import-google-doc",
         permanent: true,
         source: "/dashboard/import-google-doc",
       },
-      { destination: "/admin/zukan-review", permanent: true, source: "/dashboard/zukan-review" },
-      { destination: "/admin/users", permanent: true, source: "/dashboard/admin/users" },
-      { destination: "/admin/users", permanent: true, source: "/dashboard/users" },
+      {
+        destination: "/admin/zukan-review",
+        permanent: true,
+        source: "/dashboard/zukan-review",
+      },
+      {
+        destination: "/admin/users",
+        permanent: true,
+        source: "/dashboard/admin/users",
+      },
+      {
+        destination: "/admin/users",
+        permanent: true,
+        source: "/dashboard/users",
+      },
       // `/dashboard/settings` n'avait AUCUNE redirection alors que la barre du
       // tableau de bord et la barre basse y menaient toutes les deux : 404.
-      { destination: "/admin/settings", permanent: true, source: "/dashboard/settings" },
+      {
+        destination: "/admin/settings",
+        permanent: true,
+        source: "/dashboard/settings",
+      },
       // Réglages du compte unifiés avec azalee sur `/settings`.
-      { destination: "/settings", permanent: true, source: "/dashboard/account" },
-      { destination: "/settings", permanent: true, source: "/dashboard/account/:path*" },
+      {
+        destination: "/settings",
+        permanent: true,
+        source: "/dashboard/account",
+      },
+      {
+        destination: "/settings",
+        permanent: true,
+        source: "/dashboard/account/:path*",
+      },
       // Le pied de page partagé avec le wiki pointe vers `/contact`, qui
       // n'existait que côté azalee — un lien mort sur chaque page.
       { destination: "/a-propos/contact", permanent: true, source: "/contact" },
       // Forme d'URL de réinitialisation utilisée par azalee : les deux apps
       // partagent le chrome et les courriels, les deux formes doivent aboutir.
-      { destination: "/reset-password", permanent: false, source: "/auth/reset-password" },
+      {
+        destination: "/reset-password",
+        permanent: false,
+        source: "/auth/reset-password",
+      },
       // Redirections legacy Achilléa (Angular → Next.js)
       { destination: "/login", permanent: true, source: "/achillea/auth" },
       {
@@ -343,26 +565,46 @@ const nextConfig: NextConfig = {
         permanent: true,
         source: "/achillea/tournament-page/:id",
       },
-      { destination: "/achillea/clans/:id", permanent: true, source: "/achillea/clan-profile/:id" },
+      {
+        destination: "/achillea/clans/:id",
+        permanent: true,
+        source: "/achillea/clan-profile/:id",
+      },
       {
         destination: "/achillea/clans/dashboard",
         permanent: true,
         source: "/achillea/clan-dashboard",
       },
-      { destination: "/achillea/clans", permanent: true, source: "/achillea/clans-list" },
+      {
+        destination: "/achillea/clans",
+        permanent: true,
+        source: "/achillea/clans-list",
+      },
       {
         destination: "/achillea/ranked/leaderboard",
         permanent: true,
         source: "/achillea/ranked-leaderboard",
       },
-      { destination: "/achillea/ranked/tiers", permanent: true, source: "/achillea/ranked-tiers" },
-      { destination: "/achillea/ranked/match", permanent: true, source: "/achillea/ranked-match" },
+      {
+        destination: "/achillea/ranked/tiers",
+        permanent: true,
+        source: "/achillea/ranked-tiers",
+      },
+      {
+        destination: "/achillea/ranked/match",
+        permanent: true,
+        source: "/achillea/ranked-match",
+      },
       {
         destination: "/achillea/ranked/history",
         permanent: true,
         source: "/achillea/ranked-history",
       },
-      { destination: "/achillea/users/:id", permanent: true, source: "/achillea/user-profile/:id" },
+      {
+        destination: "/achillea/users/:id",
+        permanent: true,
+        source: "/achillea/user-profile/:id",
+      },
     ];
   },
 
@@ -378,7 +620,12 @@ const nextConfig: NextConfig = {
     return {
       afterFiles: [],
       beforeFiles: [],
-      fallback: [{ destination: `${supabaseUrl}/storage/v1/:path*`, source: "/storage/v1/:path*" }],
+      fallback: [
+        {
+          destination: `${supabaseUrl}/storage/v1/:path*`,
+          source: "/storage/v1/:path*",
+        },
+      ],
     };
   },
 
@@ -457,7 +704,11 @@ const nextConfig: NextConfig = {
     }),
     remotePatterns: [
       { hostname: "cdn.rosegriffon.fr", protocol: "https" },
-      { hostname: "*.supabase.co", pathname: "/storage/v1/**", protocol: "https" },
+      {
+        hostname: "*.supabase.co",
+        pathname: "/storage/v1/**",
+        protocol: "https",
+      },
       { hostname: "placehold.co", protocol: "https" },
       { hostname: "rosegriffon.fr", protocol: "https" },
       { hostname: "azalee.rosegriffon.fr", protocol: "https" },

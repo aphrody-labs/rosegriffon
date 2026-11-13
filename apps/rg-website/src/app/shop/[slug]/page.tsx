@@ -5,7 +5,12 @@ import Link from "@/components/shared/Link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
-import { CATEGORY_LABELS, formatEuros, getProduct, listerProduits } from "@/lib/shop/products";
+import {
+  CATEGORY_LABELS,
+  formatEuros,
+  getProduct,
+  listerProduits,
+} from "@/lib/shop/products";
 import { absoluteUrl, SITE_URL } from "@/lib/site-url";
 import { PatreonDiscountBanner } from "../_components/patreon-discount-banner";
 import { ProductCard } from "../_components/product-card";
@@ -15,7 +20,9 @@ interface ProductPageProps {
   params: Promise<{ slug: string }>;
 }
 
-export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: ProductPageProps): Promise<Metadata> {
   const { slug } = await params;
   const product = await getProduct(slug);
   if (!product) {
@@ -41,9 +48,13 @@ export default async function ProductPage({ params }: ProductPageProps) {
   }
 
   const gallery = product.gallery ?? [product.image];
-  const related = (await listerProduits()).filter(p => p.slug !== product.slug).slice(0, 4);
+  const related = (await listerProduits())
+    .filter((p) => p.slug !== product.slug)
+    .slice(0, 4);
 
-  const stockHintToAvailability = (hint: typeof product.stockHint): string | undefined => {
+  const stockHintToAvailability = (
+    hint: typeof product.stockHint,
+  ): string | undefined => {
     switch (hint) {
       case "limited": {
         return "https://schema.org/LimitedAvailability";
@@ -61,22 +72,32 @@ export default async function ProductPage({ params }: ProductPageProps) {
   const baseUrl = SITE_URL;
   const allImages = [
     `${baseUrl}${product.image}`,
-    ...(product.gallery ?? []).filter(src => src !== product.image).map(src => `${baseUrl}${src}`),
+    ...(product.gallery ?? [])
+      .filter((src) => src !== product.image)
+      .map((src) => `${baseUrl}${src}`),
   ];
 
   const offersSchema = product.variants
     ? {
         "@type": "AggregateOffer",
-        highPrice: Math.max(...product.variants.map(v => (v.priceCentsOverride ?? product.priceCents) / 100)).toFixed(
-          2,
-        ),
-        lowPrice: Math.min(...product.variants.map(v => (v.priceCentsOverride ?? product.priceCents) / 100)).toFixed(2),
+        highPrice: Math.max(
+          ...product.variants.map(
+            (v) => (v.priceCentsOverride ?? product.priceCents) / 100,
+          ),
+        ).toFixed(2),
+        lowPrice: Math.min(
+          ...product.variants.map(
+            (v) => (v.priceCentsOverride ?? product.priceCents) / 100,
+          ),
+        ).toFixed(2),
         offerCount: product.variants.length,
-        offers: product.variants.map(v => ({
+        offers: product.variants.map((v) => ({
           "@type": "Offer",
           name: v.label,
           priceCurrency: "EUR",
-          price: ((v.priceCentsOverride ?? product.priceCents) / 100).toFixed(2),
+          price: ((v.priceCentsOverride ?? product.priceCents) / 100).toFixed(
+            2,
+          ),
           availability: stockHintToAvailability(product.stockHint),
           itemCondition: "https://schema.org/NewCondition",
           url: `${baseUrl}/shop/${product.slug}`,
@@ -139,8 +160,14 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
   return (
     <div className="mx-auto max-w-7xl px-4 pb-16 pt-8 md:px-8 md:pt-12">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
       <nav aria-label="Fil d'Ariane" className="mb-6">
         <Link
           href="/shop"
@@ -206,7 +233,9 @@ export default async function ProductPage({ params }: ProductPageProps) {
             </div>
 
             <Suspense
-              fallback={<div className="h-20 animate-pulse rounded-2xl border-2 border-rg-or/30 bg-rg-marine/40" />}
+              fallback={
+                <div className="h-20 animate-pulse rounded-2xl border-2 border-rg-or/30 bg-rg-marine/40" />
+              }
             >
               <PatreonDiscountBanner />
             </Suspense>
@@ -217,10 +246,15 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
             {product.highlights && (
               <div>
-                <h2 className="mb-3 text-xs font-bold uppercase tracking-widest text-rg-or">Contenu du pack</h2>
+                <h2 className="mb-3 text-xs font-bold uppercase tracking-widest text-rg-or">
+                  Contenu du pack
+                </h2>
                 <ul className="space-y-2">
-                  {product.highlights.map(h => (
-                    <li key={h} className="flex items-start gap-3 text-sm text-white/85">
+                  {product.highlights.map((h) => (
+                    <li
+                      key={h}
+                      className="flex items-start gap-3 text-sm text-white/85"
+                    >
                       <Check className="mt-0.5 size-4 shrink-0 text-rg-or" />
                       <span>{h}</span>
                     </li>
@@ -231,7 +265,9 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
             <div className="grid grid-cols-2 gap-3 border-t-2 border-rg-or/30 pt-5 text-xs uppercase tracking-widest text-white/60">
               <span>Prix</span>
-              <span className="text-right text-white">{formatEuros(product.priceCents)}</span>
+              <span className="text-right text-white">
+                {formatEuros(product.priceCents)}
+              </span>
               <span>Livraison FR</span>
               <span className="text-right text-white">4,90 €</span>
               <span>Délai</span>
@@ -244,10 +280,14 @@ export default async function ProductPage({ params }: ProductPageProps) {
       {/* Description longue */}
       <section className="mt-16 grid gap-8 md:grid-cols-12">
         <div className="md:col-span-8">
-          <h2 className="text-xs font-bold uppercase tracking-widest text-rg-or">Description</h2>
-          <p className="mt-4 text-pretty text-lg leading-relaxed text-white/85">{product.description}</p>
+          <h2 className="text-xs font-bold uppercase tracking-widest text-rg-or">
+            Description
+          </h2>
+          <p className="mt-4 text-pretty text-lg leading-relaxed text-white/85">
+            {product.description}
+          </p>
           <div className="mt-6 flex flex-wrap gap-2">
-            {product.tags.map(t => (
+            {product.tags.map((t) => (
               <span
                 key={t}
                 className="inline-flex items-center rounded-full border border-rg-or/40 bg-rg-marine/60 px-3 py-1 text-xs font-semibold text-white/70"
@@ -262,9 +302,11 @@ export default async function ProductPage({ params }: ProductPageProps) {
       {/* Related */}
       {related.length > 0 && (
         <section aria-label="Produits similaires" className="mt-20">
-          <h2 className="mb-6 text-xs font-bold uppercase tracking-widest text-rg-or">Tu aimeras aussi</h2>
+          <h2 className="mb-6 text-xs font-bold uppercase tracking-widest text-rg-or">
+            Tu aimeras aussi
+          </h2>
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            {related.map(p => (
+            {related.map((p) => (
               <ProductCard key={p.slug} product={p} />
             ))}
           </div>

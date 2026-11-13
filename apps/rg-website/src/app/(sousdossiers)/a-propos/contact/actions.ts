@@ -56,7 +56,9 @@ export async function sendContactEmail(formData: ContactFormValues) {
       attachments,
     });
 
-    logger.info("Email de contact traité avec succès", { messageId: result.messageId });
+    logger.info("Email de contact traité avec succès", {
+      messageId: result.messageId,
+    });
     return { messageId: result.messageId, success: true };
   } catch (error) {
     logger.error("Erreur lors de l'envoi de l'email de contact", error);

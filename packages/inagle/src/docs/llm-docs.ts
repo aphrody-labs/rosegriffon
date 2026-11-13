@@ -7,7 +7,11 @@
 
 import type { LlmIndexDocument } from "./types.js";
 import { VFS_DIRECTORIES, VFS_FORMATS, VFS_PACK_RULES } from "./vfs-catalog.js";
-import { NIE_CRITICAL_OFFSETS, NIE_CRYPTO_CONSTANTS, NIE_RTTI_CLASSES } from "./nie-re-map.js";
+import {
+  NIE_CRITICAL_OFFSETS,
+  NIE_CRYPTO_CONSTANTS,
+  NIE_RTTI_CLASSES,
+} from "./nie-re-map.js";
 
 /**
  * Builds the structured LlmIndexDocument model.
@@ -29,7 +33,13 @@ export function getLlmIndexDocument(): LlmIndexDocument {
           summary:
             "Tri-language runtime linking Bun TypeScript, Rust libiecode.so C-ABI, and .NET 10 IECODE.Ffi NativeAOT.",
           tokensEstimate: 1200,
-          keyConcepts: ["bun:ffi", "NativeAOT", "C-ABI", "libiecode.so", "IECODE.Ffi.so"],
+          keyConcepts: [
+            "bun:ffi",
+            "NativeAOT",
+            "C-ABI",
+            "libiecode.so",
+            "IECODE.Ffi.so",
+          ],
         },
       ],
       Vfs: [
@@ -39,7 +49,14 @@ export function getLlmIndexDocument(): LlmIndexDocument {
           summary:
             "Complete specification of CriFs CPK containers, @UTF metadata, CRILAYLA decompression, and directory maps.",
           tokensEstimate: 2400,
-          keyConcepts: ["CPK", "@UTF", "CRILAYLA", "Viola 0x1717E18E", "CRC32 ISO-3309", "data/packs/"],
+          keyConcepts: [
+            "CPK",
+            "@UTF",
+            "CRILAYLA",
+            "Viola 0x1717E18E",
+            "CRC32 ISO-3309",
+            "data/packs/",
+          ],
         },
       ],
       ReverseEngineering: [
@@ -49,21 +66,35 @@ export function getLlmIndexDocument(): LlmIndexDocument {
           summary:
             "Authoritative PE32+ disassembly reference: 117,068 functions, 8 critical offsets, RTTI tree, and memory structs.",
           tokensEstimate: 2200,
-          keyConcepts: ["0x140000000", "GameTickLoop", "CharaControllerUpdate", "BonePalette", "RTTI", "0xEEFF blobs"],
+          keyConcepts: [
+            "0x140000000",
+            "GameTickLoop",
+            "CharaControllerUpdate",
+            "BonePalette",
+            "RTTI",
+            "0xEEFF blobs",
+          ],
         },
       ],
       Api: [
         {
           title: "OpenAPI 3.1.0 Specification (JSON)",
           url: "docs/OPENAPI.json",
-          summary: "REST & VFS API endpoints covering characters, skills, teams, format probe, and save decryption.",
+          summary:
+            "REST & VFS API endpoints covering characters, skills, teams, format probe, and save decryption.",
           tokensEstimate: 3100,
-          keyConcepts: ["OpenAPI 3.1", "/api/vfs/probe", "/api/characters", "/api/saves/decrypt"],
+          keyConcepts: [
+            "OpenAPI 3.1",
+            "/api/vfs/probe",
+            "/api/characters",
+            "/api/saves/decrypt",
+          ],
         },
         {
           title: "OpenAPI 3.1.0 Specification (YAML)",
           url: "docs/OPENAPI.yaml",
-          summary: "YAML equivalent of the canonical OpenAPI 3.1.0 specification.",
+          summary:
+            "YAML equivalent of the canonical OpenAPI 3.1.0 specification.",
           tokensEstimate: 2900,
           keyConcepts: ["OpenAPI 3.1", "YAML"],
         },
@@ -110,32 +141,32 @@ export function generateLlmsTxt(): string {
  */
 export function generateLlmsFullTxt(): string {
   const formatsTable = VFS_FORMATS.map(
-    f =>
+    (f) =>
       `| ${f.id} | ${f.magicHex} | ${f.magicAscii.padEnd(4, " ")} | ${f.extension.padEnd(8, " ")} | ${f.category.padEnd(9, " ")} | ${f.isBigEndian ? "BE" : "LE"} | ${f.encryptionSupported ? "Yes" : "No"} | ${f.compressionSupported ? "Yes" : "No"} | ${f.description} |`,
   ).join("\n");
 
   const packRulesTable = VFS_PACK_RULES.map(
-    r =>
+    (r) =>
       `| ${r.packName.padEnd(16, " ")} | ${r.filenameMask.padEnd(16, " ")} | ${r.keyDerivation.padEnd(15, " ")} | ${String(r.mountPriority).padStart(4, " ")} | ${r.isCompressed ? "Yes" : "No"} | ${r.description} |`,
   ).join("\n");
 
   const directoriesTable = VFS_DIRECTORIES.map(
-    d =>
+    (d) =>
       `| ${d.path.padEnd(16, " ")} | ${d.primaryExtension.padEnd(8, " ")} | ${String(d.fileCountEstimate).padStart(5, " ")} | ${d.description} |`,
   ).join("\n");
 
   const cryptoTable = NIE_CRYPTO_CONSTANTS.map(
-    c =>
+    (c) =>
       `| ${c.name.padEnd(24, " ")} | ${c.hexValue.padEnd(12, " ")} | ${String(c.intValue).padEnd(10, " ")} | ${c.verifiedInGameDump ? "Yes" : "No"} | ${c.usage} |`,
   ).join("\n");
 
   const offsetsTable = NIE_CRITICAL_OFFSETS.map(
-    o =>
+    (o) =>
       `| ${o.symbol.padEnd(24, " ")} | ${o.addressHex.padEnd(13, " ")} | ${o.subsystem.padEnd(11, " ")} | \`${o.signature}\` |`,
   ).join("\n");
 
   const rttiTable = NIE_RTTI_CLASSES.map(
-    r =>
+    (r) =>
       `| ${r.namespace}::${r.name} | ${r.vtableOffsetHex} | ${r.baseClasses.join(", ") || "(none)"} | ${r.description} |`,
   ).join("\n");
 

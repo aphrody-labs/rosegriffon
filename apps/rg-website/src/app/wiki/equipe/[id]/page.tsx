@@ -7,11 +7,20 @@ import Image from "next/image";
 import Link from "@/components/shared/Link";
 import { notFound } from "next/navigation";
 import { Icon } from "@/components/ui/Icon";
-import { getTeamDetail, type TeamKit, type TeamRosterMember, SEASON_LABELS } from "@/lib/wiki/teams";
+import {
+  getTeamDetail,
+  type TeamKit,
+  type TeamRosterMember,
+  SEASON_LABELS,
+} from "@/lib/wiki/teams";
 import { wiki } from "@rosegriffon/app-shell";
 import { wikiTitle } from "@/lib/seo";
 
-export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
   const { id } = await params;
   const team = await getTeamDetail(id);
   if (!team) {
@@ -34,7 +43,9 @@ function KitBlock({ kit }: { kit: TeamKit }) {
     <div className="rounded-2xl border border-outline-variant/30 bg-surface-container-low p-4">
       <div className="flex items-center justify-between mb-3">
         <h3 className="font-bold text-sm text-on-surface">{kit.seriesLabel}</h3>
-        <span className="text-[10px] font-mono text-on-surface-variant/60">{kit.nameId}</span>
+        <span className="text-[10px] font-mono text-on-surface-variant/60">
+          {kit.nameId}
+        </span>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         {kit.models.map((m, i) => (
@@ -48,25 +59,35 @@ function KitBlock({ kit }: { kit: TeamKit }) {
             <dl className="space-y-1 text-[11px] text-on-surface-variant">
               <div className="flex items-center justify-between gap-2">
                 <dt>Joueur</dt>
-                <dd className="font-mono text-on-surface">{m.uniformFielderModelIdCrc}</dd>
+                <dd className="font-mono text-on-surface">
+                  {m.uniformFielderModelIdCrc}
+                </dd>
               </div>
               <div className="flex items-center justify-between gap-2">
                 <dt>Gardien</dt>
-                <dd className="font-mono text-on-surface">{m.uniformKeeperModelIdCrc}</dd>
+                <dd className="font-mono text-on-surface">
+                  {m.uniformKeeperModelIdCrc}
+                </dd>
               </div>
               <div className="flex items-center justify-between gap-2">
                 <dt>Crampons</dt>
-                <dd className="font-mono text-on-surface">{m.shoesFielderModelIdCrc}</dd>
+                <dd className="font-mono text-on-surface">
+                  {m.shoesFielderModelIdCrc}
+                </dd>
               </div>
               <div className="flex items-center justify-between gap-2">
                 <dt>Gants</dt>
-                <dd className="font-mono text-on-surface">{m.gloveModelIdCrc}</dd>
+                <dd className="font-mono text-on-surface">
+                  {m.gloveModelIdCrc}
+                </dd>
               </div>
             </dl>
           </div>
         ))}
         {kit.models.length === 0 && (
-          <p className="text-xs text-on-surface-variant italic col-span-full">Uniforme non résolu dans les données.</p>
+          <p className="text-xs text-on-surface-variant italic col-span-full">
+            Uniforme non résolu dans les données.
+          </p>
         )}
       </div>
     </div>
@@ -96,7 +117,11 @@ function RosterMember({ member }: { member: TeamRosterMember }) {
               {member.position}
             </span>
           )}
-          {member.element && <span className="text-[10px] text-tertiary font-medium">{member.element}</span>}
+          {member.element && (
+            <span className="text-[10px] text-tertiary font-medium">
+              {member.element}
+            </span>
+          )}
         </div>
       </div>
     </div>
@@ -108,14 +133,20 @@ function RosterMember({ member }: { member: TeamRosterMember }) {
   return inner;
 }
 
-export default async function TeamDetailPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function TeamDetailPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const { id } = await params;
   const team = await getTeamDetail(id);
   if (!team) {
     notFound();
   }
 
-  const seasonEntries = Object.entries(team.seasons).sort(([, a], [, b]) => b - a);
+  const seasonEntries = Object.entries(team.seasons).sort(
+    ([, a], [, b]) => b - a,
+  );
   const hasEmblem = Boolean(team.emblemUrl);
 
   return (
@@ -141,15 +172,27 @@ export default async function TeamDetailPage({ params }: { params: Promise<{ id:
               unoptimized
             />
           ) : (
-            <Icon name="shield" size={36} className="text-on-surface-variant/30" />
+            <Icon
+              name="shield"
+              size={36}
+              className="text-on-surface-variant/30"
+            />
           )}
         </div>
         <div className="min-w-0 flex-1 space-y-1.5">
-          <h1 className="text-fluid-headline-md font-extrabold text-on-surface leading-tight">{team.name}</h1>
+          <h1 className="text-fluid-headline-md font-extrabold text-on-surface leading-tight">
+            {team.name}
+          </h1>
           {(team.nameJa || team.nameEn) && (
-            <p className="text-sm text-on-surface-variant">{[team.nameJa, team.nameEn].filter(Boolean).join(" · ")}</p>
+            <p className="text-sm text-on-surface-variant">
+              {[team.nameJa, team.nameEn].filter(Boolean).join(" · ")}
+            </p>
           )}
-          {team.descriptionFr && <p className="text-sm text-on-surface-variant/90 max-w-prose">{team.descriptionFr}</p>}
+          {team.descriptionFr && (
+            <p className="text-sm text-on-surface-variant/90 max-w-prose">
+              {team.descriptionFr}
+            </p>
+          )}
           {seasonEntries.length > 0 && (
             <div className="flex flex-wrap items-center gap-1.5 pt-1">
               {seasonEntries.map(([code, n]) => (
@@ -170,15 +213,21 @@ export default async function TeamDetailPage({ params }: { params: Promise<{ id:
       {/* Emblèmes par série */}
       {team.emblems.length > 0 && (
         <section className="space-y-3">
-          <h2 className="text-sm font-bold uppercase tracking-wider text-on-surface-variant">Emblèmes</h2>
+          <h2 className="text-sm font-bold uppercase tracking-wider text-on-surface-variant">
+            Emblèmes
+          </h2>
           <div className="flex flex-wrap gap-2">
-            {team.emblems.map(e => (
+            {team.emblems.map((e) => (
               <span
                 key={e.series}
                 className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border border-outline-variant/30 bg-surface-container-low text-xs"
               >
-                <span className="font-bold text-on-surface">{e.seriesLabel}</span>
-                <span className="font-mono text-on-surface-variant/60">{e.crc}</span>
+                <span className="font-bold text-on-surface">
+                  {e.seriesLabel}
+                </span>
+                <span className="font-mono text-on-surface-variant/60">
+                  {e.crc}
+                </span>
               </span>
             ))}
           </div>
@@ -188,9 +237,11 @@ export default async function TeamDetailPage({ params }: { params: Promise<{ id:
       {/* Kits / uniformes */}
       {team.kits.length > 0 && (
         <section className="space-y-3">
-          <h2 className="text-sm font-bold uppercase tracking-wider text-on-surface-variant">Uniformes</h2>
+          <h2 className="text-sm font-bold uppercase tracking-wider text-on-surface-variant">
+            Uniformes
+          </h2>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            {team.kits.map(kit => (
+            {team.kits.map((kit) => (
               <KitBlock key={`${kit.series}-${kit.nameId}`} kit={kit} />
             ))}
           </div>
@@ -200,17 +251,22 @@ export default async function TeamDetailPage({ params }: { params: Promise<{ id:
       {/* Effectif */}
       <section className="space-y-3">
         <h2 className="text-sm font-bold uppercase tracking-wider text-on-surface-variant">
-          Effectif <span className="text-on-surface-variant/60">({team.roster.length})</span>
+          Effectif{" "}
+          <span className="text-on-surface-variant/60">
+            ({team.roster.length})
+          </span>
         </h2>
         {team.roster.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {team.roster.map(m => (
+            {team.roster.map((m) => (
               <RosterMember key={m.charaId} member={m} />
             ))}
           </div>
         ) : (
           <div className="py-12 text-center rounded-2xl border border-outline-variant bg-surface-container-low border-dashed">
-            <p className="text-on-surface-variant italic text-sm">Aucun joueur lié à cette équipe dans les données.</p>
+            <p className="text-on-surface-variant italic text-sm">
+              Aucun joueur lié à cette équipe dans les données.
+            </p>
           </div>
         )}
       </section>

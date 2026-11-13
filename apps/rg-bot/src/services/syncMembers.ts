@@ -12,11 +12,17 @@ function resolveAvatarUrl(member: GuildMember): string | null {
 }
 
 function resolveUserAvatarUrl(user: User): string | null {
-  return user.avatarURL({ size: 256, extension: "webp" }) ?? user.defaultAvatarURL ?? null;
+  return (
+    user.avatarURL({ size: 256, extension: "webp" }) ??
+    user.defaultAvatarURL ??
+    null
+  );
 }
 
 export function memberToRow(member: GuildMember): MemberRow {
-  const roleIds = [...member.roles.cache.keys()].filter(id => id !== member.guild.id);
+  const roleIds = [...member.roles.cache.keys()].filter(
+    (id) => id !== member.guild.id,
+  );
   return {
     discord_id: member.id,
     username: member.user.username,
@@ -36,7 +42,7 @@ export function memberToRow(member: GuildMember): MemberRow {
 }
 
 function toPgTextArray(values: string[]): string {
-  return `{${values.map(v => `"${v.replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`).join(",")}}`;
+  return `{${values.map((v) => `"${v.replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`).join(",")}}`;
 }
 
 async function upsertRow(row: MemberRow): Promise<void> {
@@ -67,7 +73,10 @@ async function upsertRow(row: MemberRow): Promise<void> {
   `;
 }
 
-async function syncUserImage(discordId: string, avatarUrl: string | null): Promise<void> {
+async function syncUserImage(
+  discordId: string,
+  avatarUrl: string | null,
+): Promise<void> {
   if (!avatarUrl) return;
   await sql`
     UPDATE "user" u
@@ -96,7 +105,10 @@ async function syncUserImage(discordId: string, avatarUrl: string | null): Promi
  * à distinguer d'un bug. On ne remplace donc QUE ce que Discord avait posé, ou
  * rien du tout.
  */
-async function syncProfileAvatar(discordId: string, avatarUrl: string | null): Promise<void> {
+async function syncProfileAvatar(
+  discordId: string,
+  avatarUrl: string | null,
+): Promise<void> {
   if (!avatarUrl) return;
   await sql`
     UPDATE profiles
@@ -108,7 +120,10 @@ async function syncProfileAvatar(discordId: string, avatarUrl: string | null): P
 }
 
 /** Les trois tables où vit une photo de profil, mises à jour ensemble. */
-async function syncAvatars(discordId: string, avatarUrl: string | null): Promise<void> {
+async function syncAvatars(
+  discordId: string,
+  avatarUrl: string | null,
+): Promise<void> {
   await syncUserImage(discordId, avatarUrl);
   await syncProfileAvatar(discordId, avatarUrl);
 }
@@ -155,7 +170,9 @@ export async function syncOneMember(member: GuildMember): Promise<void> {
 }
 
 export async function syncOneUser(user: User, guild: Guild): Promise<void> {
-  const member = guild.members.cache.get(user.id) ?? (await guild.members.fetch(user.id).catch(() => null));
+  const member =
+    guild.members.cache.get(user.id) ??
+    (await guild.members.fetch(user.id).catch(() => null));
   if (member) {
     await syncOneMember(member);
     return;

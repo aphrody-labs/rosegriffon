@@ -1,6 +1,9 @@
 type ConsoleId = "dust" | "wii" | "switch" | "ctr";
 
-const consoleStatus: Record<Exclude<ConsoleId, "dust" | "wii">, { title: string; message: string }> = {
+const consoleStatus: Record<
+  Exclude<ConsoleId, "dust" | "wii">,
+  { title: string; message: string }
+> = {
   switch: {
     title: "Switch",
     message: "Not available yet.",
@@ -14,16 +17,25 @@ const consoleStatus: Record<Exclude<ConsoleId, "dust" | "wii">, { title: string;
 export function installConsoleSwitcher(suspendDust: () => void): void {
   const status = document.getElementById("console-status") as HTMLElement;
   const title = document.getElementById("console-status-title") as HTMLElement;
-  const message = document.getElementById("console-status-message") as HTMLElement;
+  const message = document.getElementById(
+    "console-status-message",
+  ) as HTMLElement;
   const canvas = document.getElementById("canvas-container") as HTMLElement;
   const menu = document.getElementById("menu-container") as HTMLElement;
   const wii = document.getElementById("wii-frame") as HTMLIFrameElement;
-  const buttons = document.querySelectorAll<HTMLButtonElement>("[data-console-target]");
+  const buttons = document.querySelectorAll<HTMLButtonElement>(
+    "[data-console-target]",
+  );
 
   for (const button of buttons) {
     button.addEventListener("click", () => {
       const selected = button.dataset["consoleTarget"] as ConsoleId;
-      if (selected !== "dust" && selected !== "wii" && !(selected in consoleStatus)) return;
+      if (
+        selected !== "dust" &&
+        selected !== "wii" &&
+        !(selected in consoleStatus)
+      )
+        return;
       if (selected !== "dust") suspendDust();
 
       document.body.dataset["console"] = selected;

@@ -55,4 +55,3 @@ jobs:
         run: bun run compile --target linux-x64
       - name: Smoke test
         run: ./dist/rg-core-linux-x64 --help
-

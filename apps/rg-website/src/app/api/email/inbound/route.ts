@@ -14,7 +14,10 @@ export async function POST(req: NextRequest) {
       const urlSecret = req.nextUrl.searchParams.get("secret");
       const headerSecret = req.headers.get("x-inbound-secret");
 
-      const tokenRecu = urlSecret || headerSecret || (authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null);
+      const tokenRecu =
+        urlSecret ||
+        headerSecret ||
+        (authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null);
 
       if (tokenRecu !== secretAttendu) {
         return NextResponse.json({ error: "non_autorise" }, { status: 401 });
@@ -45,19 +48,27 @@ export async function POST(req: NextRequest) {
         }
       }
     } else {
-      return NextResponse.json({ error: "type_contenu_non_supporte" }, { status: 415 });
+      return NextResponse.json(
+        { error: "type_contenu_non_supporte" },
+        { status: 415 },
+      );
     }
 
     const emailData = parseInboundWebhook(body);
 
     if (!emailData.from) {
       return NextResponse.json(
-        { error: "expediteur_manquant", hint: "Le champ from ou sender est obligatoire" },
+        {
+          error: "expediteur_manquant",
+          hint: "Le champ from ou sender est obligatoire",
+        },
         { status: 400 },
       );
     }
 
-    const processed = await processInboundEmail(emailData, { sendAutoReply: true });
+    const processed = await processInboundEmail(emailData, {
+      sendAutoReply: true,
+    });
 
     return NextResponse.json({
       ok: true,
@@ -70,7 +81,10 @@ export async function POST(req: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("[api/email/inbound] Erreur traitement email entrant:", error);
+    console.error(
+      "[api/email/inbound] Erreur traitement email entrant:",
+      error,
+    );
     return NextResponse.json({ error: "erreur_interne" }, { status: 500 });
   }
 }
@@ -83,7 +97,13 @@ export async function GET() {
     ok: true,
     service: "rg-email-inbound",
     status: "active",
-    categories: ["mediation", "tournament", "support", "partnership", "general"],
+    categories: [
+      "mediation",
+      "tournament",
+      "support",
+      "partnership",
+      "general",
+    ],
     providers: ["resend", "postmark", "sendgrid", "generic_json"],
   });
 }

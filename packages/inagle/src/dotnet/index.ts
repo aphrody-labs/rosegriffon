@@ -64,7 +64,11 @@ export function compressCrilayla(data: Uint8Array): Uint8Array {
 /**
  * Decrypts a CRIWARE CPK block using SIMD / native bitwise XOR cipher.
  */
-export function decryptCpkBlock(data: Uint8Array, offset?: bigint | number, key?: bigint | number): Uint8Array {
+export function decryptCpkBlock(
+  data: Uint8Array,
+  offset?: bigint | number,
+  key?: bigint | number,
+): Uint8Array {
   return dotnetBridge.decryptCpkBlock(data, offset, key);
 }
 

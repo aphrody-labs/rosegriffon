@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { CharacterComparator } from "@/components/wiki/CharacterComparator";
-import type { CompareCharacter, SkillInfo } from "@/components/wiki/CharacterComparator";
+import type {
+  CompareCharacter,
+  SkillInfo,
+} from "@/components/wiki/CharacterComparator";
 import { createPostgresClient } from "@rosegriffon/db/postgres-client";
 import { wikiService } from "@/lib/wiki-service";
 import { wiki } from "@rosegriffon/app-shell";
@@ -31,14 +34,16 @@ async function resolveSkillNames(raw: string): Promise<SkillInfo[]> {
   const separator = raw.includes("\n") ? "\n" : ",";
   const moveNames = raw
     .split(separator)
-    .map(s => s.trim())
-    .filter(s => s && !s.startsWith("#N/A") && !s.startsWith("Mix "));
-  const resolved = await Promise.all(moveNames.map(name => wikiService.getSkill(name)));
+    .map((s) => s.trim())
+    .filter((s) => s && !s.startsWith("#N/A") && !s.startsWith("Mix "));
+  const resolved = await Promise.all(
+    moveNames.map((name) => wikiService.getSkill(name)),
+  );
   const seen = new Set<string>();
   return resolved
     .filter(Boolean)
     .map((skill: any) => mapSkill(skill))
-    .filter(s => {
+    .filter((s) => {
       if (seen.has(s.name)) {
         return false;
       }
@@ -48,7 +53,10 @@ async function resolveSkillNames(raw: string): Promise<SkillInfo[]> {
 }
 
 /** Try to inherit skills from a sibling variant (same chara_id) that has skill data */
-async function inheritSkillsFromSibling(charaId: string, currentId: string): Promise<SkillInfo[]> {
+async function inheritSkillsFromSibling(
+  charaId: string,
+  currentId: string,
+): Promise<SkillInfo[]> {
   const db = createPostgresClient();
   const { data: siblings } = await db
     .from("inagle_characters")
@@ -77,11 +85,17 @@ async function inheritSkillsFromSibling(charaId: string, currentId: string): Pro
     const rawSkills: any[] = Array.isArray(sib.skills) ? sib.skills : [];
     if (rawSkills.length > 0) {
       const skillList = rawSkills
-        .map((s: any) => (typeof s === "string" ? { learnLevel: 0, skillId: s } : s))
+        .map((s: any) =>
+          typeof s === "string" ? { learnLevel: 0, skillId: s } : s,
+        )
         .filter((s: any) => !PHANTOM_SKILL_IDS.has(s.skillId));
 
-      const fetched = await Promise.all(skillList.map((s: any) => wikiService.getSkill(s.skillId)));
-      const resolved = fetched.filter(Boolean).map((skill: any) => mapSkill(skill));
+      const fetched = await Promise.all(
+        skillList.map((s: any) => wikiService.getSkill(s.skillId)),
+      );
+      const resolved = fetched
+        .filter(Boolean)
+        .map((skill: any) => mapSkill(skill));
       if (resolved.length > 0) {
         return resolved;
       }
@@ -124,7 +138,11 @@ const ELEMENT_TO_CODE: Record<string, string> = {
   Void: "Void",
 };
 
-function formatCompareName(baseName: string, series?: string, rarity?: string): string {
+function formatCompareName(
+  baseName: string,
+  series?: string,
+  rarity?: string,
+): string {
   const tags: string[] = [];
   if (series && series !== "Inazuma Eleven") {
     // Court labels pour les séries non-IE1 (Ares, GO, Orion…)
@@ -136,7 +154,9 @@ function formatCompareName(baseName: string, series?: string, rarity?: string): 
   return tags.length > 0 ? `${baseName} (${tags.join(" · ")})` : baseName;
 }
 
-async function resolveCharacter(idOrSlug: string | undefined): Promise<CompareCharacter | null> {
+async function resolveCharacter(
+  idOrSlug: string | undefined,
+): Promise<CompareCharacter | null> {
   if (!idOrSlug) {
     return null;
   }
@@ -145,9 +165,17 @@ async function resolveCharacter(idOrSlug: string | undefined): Promise<CompareCh
   //    On évite de passer par base_slug en premier : getCharacterByBaseSlug + variants[0]
   //    collapsait Byron IE / Ares / GO sur la même variante.
   const db = createPostgresClient();
-  let { data: exactRow } = await db.from("inagle_characters").select("*").eq("slug", idOrSlug).maybeSingle();
+  let { data: exactRow } = await db
+    .from("inagle_characters")
+    .select("*")
+    .eq("slug", idOrSlug)
+    .maybeSingle();
   if (!exactRow) {
-    ({ data: exactRow } = await db.from("inagle_characters").select("*").eq("id", idOrSlug).maybeSingle());
+    ({ data: exactRow } = await db
+      .from("inagle_characters")
+      .select("*")
+      .eq("id", idOrSlug)
+      .maybeSingle());
   }
 
   // 2) Fallback legacy : base_slug / groupVariants (liens sans suffixe hex)
@@ -173,7 +201,10 @@ async function resolveCharacter(idOrSlug: string | undefined): Promise<CompareCh
     }
     // Aligné fiche : match charaParamId OU slug variante
     const variants = (baseChar.variants as any[]) || [];
-    variant = variants.find(v => v.charaParamId === idOrSlug || v.slug === idOrSlug) || variants[0];
+    variant =
+      variants.find(
+        (v) => v.charaParamId === idOrSlug || v.slug === idOrSlug,
+      ) || variants[0];
   }
 
   if (!baseChar || !variant) {
@@ -183,11 +214,15 @@ async function resolveCharacter(idOrSlug: string | undefined): Promise<CompareCh
   const stats = variant.stats?.lv99 || {};
   // IMPORTANT : sheetData de la variante uniquement (pas baseChar.sheetData = youngest)
   const sd = variant.sheetData || {};
-  const isBasara = variant.rarity === "BASARA" || (variant.rarityCode ?? 0) >= 20;
+  const isBasara =
+    variant.rarity === "BASARA" || (variant.rarityCode ?? 0) >= 20;
   const series = variant.series || (baseChar as any).series || undefined;
   const variantSlug = variant.slug || variant.charaParamId || idOrSlug;
   const variantInternalCode =
-    variant.internalCode || (baseChar as any).internalCode || (baseChar as any).charaId || undefined;
+    variant.internalCode ||
+    (baseChar as any).internalCode ||
+    (baseChar as any).charaId ||
+    undefined;
 
   // Resolve skills — multiple fallback strategies
   let skills: SkillInfo[] = [];
@@ -197,14 +232,21 @@ async function resolveCharacter(idOrSlug: string | undefined): Promise<CompareCh
     skills = await resolveSkillNames(sd.moveset);
   } else {
     // 1) Try binary skill IDs (filter out phantom slots)
-    const rawSkills: Array<{ learnLevel: number; skillId: string }> | string[] = variant.skills || [];
+    const rawSkills: Array<{ learnLevel: number; skillId: string }> | string[] =
+      variant.skills || [];
     const skillList = rawSkills
-      .map((s: any) => (typeof s === "string" ? { learnLevel: 0, skillId: s } : s))
+      .map((s: any) =>
+        typeof s === "string" ? { learnLevel: 0, skillId: s } : s,
+      )
       .filter((s: any) => !PHANTOM_SKILL_IDS.has(s.skillId));
 
     if (skillList.length > 0) {
-      const fetchedSkills = await Promise.all(skillList.map((s: any) => wikiService.getSkill(s.skillId)));
-      skills = fetchedSkills.filter(Boolean).map((skill: any) => mapSkill(skill));
+      const fetchedSkills = await Promise.all(
+        skillList.map((s: any) => wikiService.getSkill(s.skillId)),
+      );
+      skills = fetchedSkills
+        .filter(Boolean)
+        .map((skill: any) => mapSkill(skill));
     }
 
     // 2) Fallback: use firstMoves/moveset from sheetData (skill names)
@@ -218,16 +260,22 @@ async function resolveCharacter(idOrSlug: string | undefined): Promise<CompareCh
     // 3) Fallback: inherit from a sibling variant with the same chara_id
     //    (même chara_id = même série/version de base, pas cross-Ares)
     if (skills.length === 0) {
-      const charaId = exactRow?.chara_id || (baseChar as any).charaId || (baseChar as any).internalCode;
+      const charaId =
+        exactRow?.chara_id ||
+        (baseChar as any).charaId ||
+        (baseChar as any).internalCode;
       if (charaId) {
-        skills = await inheritSkillsFromSibling(charaId, variant.charaParamId || idOrSlug);
+        skills = await inheritSkillsFromSibling(
+          charaId,
+          variant.charaParamId || idOrSlug,
+        );
       }
     }
   }
 
   // Deduplicate skills by name (keep first occurrence)
   const seen = new Set<string>();
-  skills = skills.filter(s => {
+  skills = skills.filter((s) => {
     if (seen.has(s.name)) {
       return false;
     }
@@ -235,7 +283,8 @@ async function resolveCharacter(idOrSlug: string | undefined): Promise<CompareCh
     return true;
   });
 
-  const baseName = baseChar.names?.fr || baseChar.names?.en || exactRow?.name_fr || "Inconnu";
+  const baseName =
+    baseChar.names?.fr || baseChar.names?.en || exactRow?.name_fr || "Inconnu";
   const rarity = variant.rarity || exactRow?.rarity_label || "Normal";
   const rawPosition = variant.position || exactRow?.position || "MF";
   const rawElement = variant.element || exactRow?.element || "Void";
@@ -316,7 +365,10 @@ export async function generateMetadata({
     };
   }
 
-  const [c1, c2] = await Promise.all([resolveCharacter(char1), resolveCharacter(char2)]);
+  const [c1, c2] = await Promise.all([
+    resolveCharacter(char1),
+    resolveCharacter(char2),
+  ]);
 
   const names = [c1?.name, c2?.name].filter(Boolean).join(" vs ");
 
@@ -332,7 +384,10 @@ export default async function ComparePage({
   searchParams: Promise<{ char1?: string; char2?: string }>;
 }) {
   const { char1, char2 } = await searchParams;
-  const [character1, character2] = await Promise.all([resolveCharacter(char1), resolveCharacter(char2)]);
+  const [character1, character2] = await Promise.all([
+    resolveCharacter(char1),
+    resolveCharacter(char2),
+  ]);
 
   return (
     <div className="w-full animate-in fade-in slide-in-from-bottom-4 duration-500">

@@ -43,7 +43,10 @@ const ZERO_STATS: CharaStats = {
  * - paliers complets (`lv1` + `lv30` + `lv50`) → interpolation par segment ;
  * - paliers partiels → interpolation linéaire unique `lv1`(ou `lv99`) → `lv99`.
  */
-export function interpolateVariantStats(variant: StatCurveVariant, level: number): CharaStats {
+export function interpolateVariantStats(
+  variant: StatCurveVariant,
+  level: number,
+): CharaStats {
   const stats = variant.stats?.lv99 ?? { ...ZERO_STATS };
   const statsLv1 = variant.stats?.lv1;
   const statsLv30 = variant.stats?.lv30;
@@ -57,7 +60,8 @@ export function interpolateVariantStats(variant: StatCurveVariant, level: number
     const startStats = statsLv1 || stats;
     const endStats = stats;
     const t = (level - 1) / 98;
-    const lerp = (start: number, end: number) => Math.floor(start + (end - start) * t);
+    const lerp = (start: number, end: number) =>
+      Math.floor(start + (end - start) * t);
 
     return {
       kick: lerp(startStats.kick, endStats.kick),

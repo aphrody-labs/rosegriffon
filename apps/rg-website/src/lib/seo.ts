@@ -69,12 +69,14 @@ export const DEFAULT_OG_IMAGE = {
  * partaient ainsi sans `og:image`. Sans image (absente, vide ou `undefined`),
  * {@link DEFAULT_OG_IMAGE} est posée.
  */
-export function withDefaultOgImage<T extends OpenGraph & { title: NonNullable<OpenGraph["title"]> }>(
-  og: T,
-): Omit<T, "images"> & { images: NonNullable<OpenGraph["images"]> } {
+export function withDefaultOgImage<
+  T extends OpenGraph & { title: NonNullable<OpenGraph["title"]> },
+>(og: T): Omit<T, "images"> & { images: NonNullable<OpenGraph["images"]> } {
   const { images } = og;
   if (Array.isArray(images) ? images.length > 0 : Boolean(images)) {
-    return og as Omit<T, "images"> & { images: NonNullable<OpenGraph["images"]> };
+    return og as Omit<T, "images"> & {
+      images: NonNullable<OpenGraph["images"]>;
+    };
   }
   return { ...og, images: [DEFAULT_OG_IMAGE] };
 }
@@ -92,7 +94,10 @@ export const DESCRIPTION_MAX = 160;
  * (tweets, articles, sondages) : `slice(0, n)` coupait en plein mot et
  * laissait des descriptions de 300 caractères passer telles quelles.
  */
-export function clampText(text: string | null | undefined, max: number = DESCRIPTION_MAX): string {
+export function clampText(
+  text: string | null | undefined,
+  max: number = DESCRIPTION_MAX,
+): string {
   const clean = (text ?? "").replace(/\s+/g, " ").trim();
   if (clean.length <= max) {
     return clean;
@@ -113,7 +118,11 @@ export const TITLE_MAX = 65;
  * le permet. Ordre de préférence : `base + suffix` s'il tient, sinon `base`
  * seul, sinon `base` coupé proprement. La marque est sacrifiée avant le sujet.
  */
-export function titleWithSuffix(base: string, suffix: string, max: number = TITLE_MAX): string {
+export function titleWithSuffix(
+  base: string,
+  suffix: string,
+  max: number = TITLE_MAX,
+): string {
   const clean = clampText(base, Number.MAX_SAFE_INTEGER);
   if (clean.length + suffix.length <= max) {
     return `${clean}${suffix}`;
@@ -128,9 +137,13 @@ export function titleWithSuffix(base: string, suffix: string, max: number = TITL
  * permet.
  */
 export function wikiTitle(subject: string, context?: string): string {
-  const game = context ? `${context} - Inazuma Eleven Victory Road` : "Inazuma Eleven Victory Road";
+  const game = context
+    ? `${context} - Inazuma Eleven Victory Road`
+    : "Inazuma Eleven Victory Road";
   const full = `${subject} | ${game} - Azalée`;
-  return full.length <= TITLE_MAX ? full : titleWithSuffix(subject, " | Azalée");
+  return full.length <= TITLE_MAX
+    ? full
+    : titleWithSuffix(subject, " | Azalée");
 }
 
 /**

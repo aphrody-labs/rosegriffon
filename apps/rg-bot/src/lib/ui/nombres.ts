@@ -30,7 +30,9 @@ export function formaterNombre(
   if (typeof valeur !== "number" || !Number.isFinite(valeur)) {
     return options.absent ?? ABSENT;
   }
-  return valeur.toLocaleString("fr-FR", { maximumFractionDigits: options.decimales ?? 0 });
+  return valeur.toLocaleString("fr-FR", {
+    maximumFractionDigits: options.decimales ?? 0,
+  });
 }
 
 /**
@@ -39,7 +41,10 @@ export function formaterNombre(
  * À utiliser partout où la valeur rendue est comparée dans un test : la locale
  * française pose une U+202F que personne ne tape au clavier.
  */
-export function entierLisible(valeur: number | null | undefined, absent = ABSENT): string {
+export function entierLisible(
+  valeur: number | null | undefined,
+  absent = ABSENT,
+): string {
   if (typeof valeur !== "number" || !Number.isFinite(valeur)) {
     return absent;
   }
@@ -78,7 +83,10 @@ export function formaterPourcentage(
  * tous les relevés du dépôt). Une seule décimale sous 10, aucune au-delà : au
  * dixième de gigaoctet près, la précision supplémentaire n'aide personne.
  */
-export function formaterOctets(octets: number | null | undefined, absent: string = ABSENT): string {
+export function formaterOctets(
+  octets: number | null | undefined,
+  absent: string = ABSENT,
+): string {
   if (typeof octets !== "number" || !Number.isFinite(octets) || octets < 0) {
     return absent;
   }
@@ -90,7 +98,11 @@ export function formaterOctets(octets: number | null | undefined, absent: string
     rang += 1;
   }
   const rendu =
-    rang === 0 ? String(Math.round(valeur)) : valeur < 10 ? valeur.toFixed(1).replace(".", ",") : valeur.toFixed(0);
+    rang === 0
+      ? String(Math.round(valeur))
+      : valeur < 10
+        ? valeur.toFixed(1).replace(".", ",")
+        : valeur.toFixed(0);
   return `${rendu} ${unites[rang]}`;
 }
 
@@ -102,7 +114,9 @@ export function formaterLatence(ms: number | null | undefined): string {
   if (typeof ms !== "number" || !Number.isFinite(ms) || ms < 0) {
     return ABSENT;
   }
-  return ms < 1_000 ? `${Math.round(ms)} ms` : `${(ms / 1_000).toFixed(1).replace(".", ",")} s`;
+  return ms < 1_000
+    ? `${Math.round(ms)} ms`
+    : `${(ms / 1_000).toFixed(1).replace(".", ",")} s`;
 }
 
 /** Durée d'exécution, jusqu'aux minutes. */
@@ -122,12 +136,20 @@ export function formaterDuree(ms: number | null | undefined): string {
 }
 
 /** Accord au pluriel. `pluriel(1, "membre")` → « membre », `pluriel(2, "membre")` → « membres ». */
-export function pluriel(n: number, singulier: string, pluriel_?: string): string {
+export function pluriel(
+  n: number,
+  singulier: string,
+  pluriel_?: string,
+): string {
   return Math.abs(n) <= 1 ? singulier : (pluriel_ ?? `${singulier}s`);
 }
 
 /** `3 illustrations` — le décompte et son nom accordé, en une expression. */
-export function compte(n: number, singulier: string, pluriel_?: string): string {
+export function compte(
+  n: number,
+  singulier: string,
+  pluriel_?: string,
+): string {
   return `${formaterNombre(n)} ${pluriel(n, singulier, pluriel_)}`;
 }
 

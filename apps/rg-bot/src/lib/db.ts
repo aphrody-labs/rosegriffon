@@ -16,7 +16,12 @@ let inagle: SQL | null = null;
 const inagleReel = (): SQL => (inagle ??= createInagleBunSql());
 
 export const inagleSql: SQL = new Proxy(function () {} as unknown as SQL, {
-  apply: (_cible, _this, args) => Reflect.apply(inagleReel() as unknown as (...a: unknown[]) => unknown, undefined, args),
+  apply: (_cible, _this, args) =>
+    Reflect.apply(
+      inagleReel() as unknown as (...a: unknown[]) => unknown,
+      undefined,
+      args,
+    ),
   get: (_cible, propriete) => {
     const valeur = Reflect.get(inagleReel(), propriete);
     return typeof valeur === "function" ? valeur.bind(inagleReel()) : valeur;

@@ -17,7 +17,10 @@ export const wikiController = new Elysia({ prefix: "/wiki" })
     async ({ params: { slug } }) => {
       const chara = await WikiService.getCharacter(slug);
       if (!chara) {
-        return status(404, { error: "not_found", message: "Personnage introuvable" });
+        return status(404, {
+          error: "not_found",
+          message: "Personnage introuvable",
+        });
       }
       return chara;
     },
@@ -39,7 +42,10 @@ export const wikiController = new Elysia({ prefix: "/wiki" })
     async ({ params: { id } }) => {
       const sk = await WikiService.getSkill(id);
       if (!sk) {
-        return status(404, { error: "not_found", message: "Technique introuvable" });
+        return status(404, {
+          error: "not_found",
+          message: "Technique introuvable",
+        });
       }
       return sk;
     },
@@ -55,7 +61,10 @@ export const wikiController = new Elysia({ prefix: "/wiki" })
     async ({ params: { id } }) => {
       const tm = await WikiService.getTeam(id);
       if (!tm) {
-        return status(404, { error: "not_found", message: "Équipe introuvable" });
+        return status(404, {
+          error: "not_found",
+          message: "Équipe introuvable",
+        });
       }
       return tm;
     },
@@ -87,7 +96,10 @@ export const wikiController = new Elysia({ prefix: "/wiki" })
     async ({ params: { hash } }) => {
       const res = await WikiService.resolveText(hash);
       if (!res) {
-        return status(404, { error: "not_found", message: "Texte introuvable" });
+        return status(404, {
+          error: "not_found",
+          message: "Texte introuvable",
+        });
       }
       return res;
     },

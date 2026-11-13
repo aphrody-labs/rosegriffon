@@ -31,11 +31,15 @@ export default async function InvocationPage() {
   return (
     <div className="w-full space-y-6">
       <div>
-        <h1 className="type-headline-small text-on-surface">Taux d'invocation — Univers des Joueurs</h1>
+        <h1 className="type-headline-small text-on-surface">
+          Taux d'invocation — Univers des Joueurs
+        </h1>
         <p className="type-body-medium text-on-surface-variant mt-1 max-w-3xl">
-          Probabilités réelles de tirage par constellation, décodées en direct depuis la gamedata du jeu (
-          <code className="font-mono text-xs">players_universe_config</code>). Chaque tirage donne un palier de rareté ;
-          au sein d'un palier, chaque personnage est équiprobable.
+          Probabilités réelles de tirage par constellation, décodées en direct
+          depuis la gamedata du jeu (
+          <code className="font-mono text-xs">players_universe_config</code>).
+          Chaque tirage donne un palier de rareté ; au sein d'un palier, chaque
+          personnage est équiprobable.
         </p>
       </div>
 
@@ -45,30 +49,39 @@ export default async function InvocationPage() {
         </p>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
-          {signs.map(s => (
+          {signs.map((s) => (
             <div
               key={s.signNo}
               className="rounded-2xl border border-outline-variant/20 bg-surface-container p-4 space-y-3"
             >
               <div className="flex items-baseline justify-between gap-2">
-                <h2 className="type-title-medium text-on-surface truncate">{s.name}</h2>
+                <h2 className="type-title-medium text-on-surface truncate">
+                  {s.name}
+                </h2>
                 <span className="type-label-small text-on-surface-variant/60 font-mono shrink-0">
                   #{s.signNo} · {s.totalChars} persos
                 </span>
               </div>
               <ul className="space-y-2">
-                {s.tiers.map(t => (
+                {s.tiers.map((t) => (
                   <li
                     key={t.rarityType}
                     className="flex items-center justify-between gap-3 rounded-xl bg-surface-container-low px-3 py-2"
                   >
                     <div className="min-w-0">
-                      <p className={`type-label-large font-bold ${TIER_COLORS[t.rarityType] ?? ""}`}>{t.label}</p>
+                      <p
+                        className={`type-label-large font-bold ${TIER_COLORS[t.rarityType] ?? ""}`}
+                      >
+                        {t.label}
+                      </p>
                       <p className="type-body-small text-on-surface-variant/70">
-                        {t.count} {t.count > 1 ? "personnages" : "personnage"} · {pct(t.perCharPct)} chacun
+                        {t.count} {t.count > 1 ? "personnages" : "personnage"} ·{" "}
+                        {pct(t.perCharPct)} chacun
                       </p>
                     </div>
-                    <span className="type-title-small text-on-surface font-mono shrink-0">{pct(t.ratePct)}</span>
+                    <span className="type-title-small text-on-surface font-mono shrink-0">
+                      {pct(t.ratePct)}
+                    </span>
                   </li>
                 ))}
               </ul>

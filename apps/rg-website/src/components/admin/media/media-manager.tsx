@@ -56,12 +56,17 @@ interface MediaManagerProps {
 
 export function MediaManager({ initialFiles }: MediaManagerProps) {
   const { confirm, dialog } = useConfirm();
-  const [files, _setFiles] = useResetState<FileObject[]>(initialFiles, initialFiles);
+  const [files, _setFiles] = useResetState<FileObject[]>(
+    initialFiles,
+    initialFiles,
+  );
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [currentPath, setCurrentPath] = useState<string>("");
   const searchParams = useSearchParams();
-  const [searchQuery, setSearchQuery] = useState(searchParams?.get("query") || "");
+  const [searchQuery, setSearchQuery] = useState(
+    searchParams?.get("query") || "",
+  );
 
   const router = useRouter();
   const storage = getBrowserStorage();
@@ -132,7 +137,7 @@ export function MediaManager({ initialFiles }: MediaManagerProps) {
     };
     const processedFolders = new Set<string>();
 
-    files.forEach(file => {
+    files.forEach((file) => {
       if (!file.name.startsWith(currentPath)) {
         return;
       }
@@ -170,7 +175,7 @@ export function MediaManager({ initialFiles }: MediaManagerProps) {
   const { folders, files: currentFiles } = getFileTree();
 
   const navigateToFolder = (folderName: string) => {
-    setCurrentPath(prev => `${prev + folderName}/`);
+    setCurrentPath((prev) => `${prev + folderName}/`);
   };
 
   const navigateUp = () => {
@@ -192,7 +197,13 @@ export function MediaManager({ initialFiles }: MediaManagerProps) {
 
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
         <div className="flex items-center gap-2 w-full sm:w-auto">
-          <Button variant="ghost" size="icon" aria-label="Retour à la racine" onClick={() => setCurrentPath("")} disabled={!currentPath}>
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label="Retour à la racine"
+            onClick={() => setCurrentPath("")}
+            disabled={!currentPath}
+          >
             <Home className="size-4" />
           </Button>
           {breadcrumbs.map((part, index) => (
@@ -218,7 +229,9 @@ export function MediaManager({ initialFiles }: MediaManagerProps) {
             <Input
               placeholder="Rechercher des fichiers…"
               value={searchQuery}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setSearchQuery(e.target.value)
+              }
               className="pl-8"
             />
           </div>
@@ -258,22 +271,34 @@ export function MediaManager({ initialFiles }: MediaManagerProps) {
               <span className="text-sm font-medium">..</span>
             </Card>
           )}
-          {folders.map(folder => (
+          {folders.map((folder) => (
             <Card
               key={folder}
               className="cursor-pointer hover:bg-accent/50 transition-colors flex flex-col items-center justify-center p-6 aspect-square"
               onClick={() => navigateToFolder(folder)}
             >
               <Folder className="size-12 text-primary mb-2" />
-              <span className="text-sm font-medium truncate w-full text-center">{folder}</span>
+              <span className="text-sm font-medium truncate w-full text-center">
+                {folder}
+              </span>
             </Card>
           ))}
-          {currentFiles.map(file => (
+          {currentFiles.map((file) => (
             <Card key={file.id} className="group relative overflow-hidden">
               <div className="aspect-square relative bg-muted">
-                <StorageImage src={file.name} alt={file.name} fill className="object-cover" />
+                <StorageImage
+                  src={file.name}
+                  alt={file.name}
+                  fill
+                  className="object-cover"
+                />
                 <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                  <Button size="icon" variant="secondary" aria-label="Copier l'URL" onClick={() => copyToClipboard(file.name)}>
+                  <Button
+                    size="icon"
+                    variant="secondary"
+                    aria-label="Copier l'URL"
+                    onClick={() => copyToClipboard(file.name)}
+                  >
                     <Copy className="size-4" />
                   </Button>
                   <Button
@@ -314,14 +339,17 @@ export function MediaManager({ initialFiles }: MediaManagerProps) {
             </TableHeader>
             <TableBody>
               {currentPath && (
-                <TableRow className="cursor-pointer hover:bg-muted/50" onClick={navigateUp}>
+                <TableRow
+                  className="cursor-pointer hover:bg-muted/50"
+                  onClick={navigateUp}
+                >
                   <TableCell>
                     <Folder className="size-4 text-primary/50" />
                   </TableCell>
                   <TableCell colSpan={5}>..</TableCell>
                 </TableRow>
               )}
-              {folders.map(folder => (
+              {folders.map((folder) => (
                 <TableRow
                   key={folder}
                   className="cursor-pointer hover:bg-muted/50"
@@ -337,20 +365,40 @@ export function MediaManager({ initialFiles }: MediaManagerProps) {
                   <TableCell />
                 </TableRow>
               ))}
-              {currentFiles.map(file => (
+              {currentFiles.map((file) => (
                 <TableRow key={file.id}>
                   <TableCell>
                     <div className="size-8 relative rounded overflow-hidden bg-muted">
-                      <StorageImage src={file.name} alt={file.name} fill className="object-cover" />
+                      <StorageImage
+                        src={file.name}
+                        alt={file.name}
+                        fill
+                        className="object-cover"
+                      />
                     </div>
                   </TableCell>
-                  <TableCell className="font-medium">{file.name.split("/").pop()}</TableCell>
-                  <TableCell>{file.metadata ? `${(file.metadata.size / 1024).toFixed(1)} KB` : "-"}</TableCell>
+                  <TableCell className="font-medium">
+                    {file.name.split("/").pop()}
+                  </TableCell>
+                  <TableCell>
+                    {file.metadata
+                      ? `${(file.metadata.size / 1024).toFixed(1)} KB`
+                      : "-"}
+                  </TableCell>
                   <TableCell>{file.metadata?.mimetype || "-"}</TableCell>
-                  <TableCell>{file.created_at ? new Date(file.created_at).toLocaleDateString() : "-"}</TableCell>
+                  <TableCell>
+                    {file.created_at
+                      ? new Date(file.created_at).toLocaleDateString()
+                      : "-"}
+                  </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
-                      <Button size="icon" variant="ghost" aria-label="Copier l'URL" onClick={() => copyToClipboard(file.name)}>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        aria-label="Copier l'URL"
+                        onClick={() => copyToClipboard(file.name)}
+                      >
                         <Copy className="size-4" />
                       </Button>
                       <Button

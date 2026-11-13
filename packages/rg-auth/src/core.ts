@@ -22,8 +22,15 @@ export async function resolveProfile(
   supabase: ProfileQueryClient,
   user: { id: string; email?: string | null },
 ): Promise<PublicProfile | null> {
-  const tryFetch = async (column: string, value: string): Promise<PublicProfile | null> => {
-    const { data } = await supabase.from("profiles").select(PUBLIC_PROFILE_COLUMNS).eq(column, value).maybeSingle();
+  const tryFetch = async (
+    column: string,
+    value: string,
+  ): Promise<PublicProfile | null> => {
+    const { data } = await supabase
+      .from("profiles")
+      .select(PUBLIC_PROFILE_COLUMNS)
+      .eq(column, value)
+      .maybeSingle();
     return (data as PublicProfile | null) ?? null;
   };
 
@@ -77,7 +84,11 @@ export function isStaff(role: string | null | undefined): boolean {
  * inscriptions simultanées sur le même candidat n'obtiennent pas le même
  * suffixe, et un rejeu retombe sur la même valeur.
  */
-async function trouverPseudoLibre(db: AuthDataClient, candidat: string, userId: string): Promise<string> {
+async function trouverPseudoLibre(
+  db: AuthDataClient,
+  candidat: string,
+  userId: string,
+): Promise<string> {
   const propositions = [
     candidat,
     `${candidat.slice(0, 22)}-${userId.replace(/-/g, "").slice(0, 6)}`,
@@ -85,7 +96,11 @@ async function trouverPseudoLibre(db: AuthDataClient, candidat: string, userId: 
   ];
 
   for (const proposition of propositions) {
-    const { data, error } = await db.from("profiles").select("id").eq("username", proposition).maybeSingle();
+    const { data, error } = await db
+      .from("profiles")
+      .select("id")
+      .eq("username", proposition)
+      .maybeSingle();
     // En cas d'erreur de lecture on ne peut pas conclure : passer à la
     // proposition suivante vaut mieux que réserver un pseudo peut-être pris.
     if (!error && !data) {
@@ -113,13 +128,24 @@ export async function ensureUserProfile(
 ) {
   const db: AuthDataClient = supabase ?? createPostgresClient();
   try {
-    const { data: existing } = await db.from("profiles").select("*").eq("id", user.id).maybeSingle();
+    const { data: existing } = await db
+      .from("profiles")
+      .select("*")
+      .eq("id", user.id)
+      .maybeSingle();
 
     // Fetch linked accounts to sync provider IDs
-    const { data: accounts } = await db.from("account").select("provider_id, account_id").eq("user_id", user.id);
+    const { data: accounts } = await db
+      .from("account")
+      .select("provider_id, account_id")
+      .eq("user_id", user.id);
 
-    const discordAccount = accounts?.find((a: { provider_id?: string }) => a.provider_id === "discord");
-    const patreonAccount = accounts?.find((a: { provider_id?: string }) => a.provider_id === "patreon");
+    const discordAccount = accounts?.find(
+      (a: { provider_id?: string }) => a.provider_id === "discord",
+    );
+    const patreonAccount = accounts?.find(
+      (a: { provider_id?: string }) => a.provider_id === "patreon",
+    );
 
     const discordId = discordAccount?.account_id || null;
     const patreonId = patreonAccount?.account_id || null;
@@ -129,7 +155,10 @@ export async function ensureUserProfile(
       // « réclamé », ce qui le rend visible publiquement (policy « Profils réclamés
       // visibles par tous »). Tant que personne ne s'y connecte, il reste masqué.
       if (!existing.claimed_at) {
-        await db.from("profiles").update({ claimed_at: new Date().toISOString() }).eq("id", user.id);
+        await db
+          .from("profiles")
+          .update({ claimed_at: new Date().toISOString() })
+          .eq("id", user.id);
       }
 
       // Update avatar/name/provider IDs if changed
@@ -138,7 +167,12 @@ export async function ensureUserProfile(
       const hasDiscordChanged = discordId && discordId !== existing.discord_id;
       const hasPatreonChanged = patreonId && patreonId !== existing.patreon_id;
 
-      if (hasAvatarChanged || hasNameChanged || hasDiscordChanged || hasPatreonChanged) {
+      if (
+        hasAvatarChanged ||
+        hasNameChanged ||
+        hasDiscordChanged ||
+        hasPatreonChanged
+      ) {
         await db
           .from("profiles")
           .update({
@@ -167,11 +201,17 @@ export async function ensureUserProfile(
       // pré-créé d'un profil RÉEL mal initialisé : la fonction exige en plus que
       // l'identifiant soit l'uuid v5 dérivé du `discord_id` et que le profil ne
       // porte aucun contenu saisi par un humain.
-      const { data: liberes, error: liberation } = await db.rpc("rg_liberer_profil_discord", {
-        p_discord_id: discordId,
-      });
+      const { data: liberes, error: liberation } = await db.rpc(
+        "rg_liberer_profil_discord",
+        {
+          p_discord_id: discordId,
+        },
+      );
       if (liberation) {
-        console.error(`[@rosegriffon/auth] libération du profil pré-créé ${discordId} impossible:`, liberation.message);
+        console.error(
+          `[@rosegriffon/auth] libération du profil pré-créé ${discordId} impossible:`,
+          liberation.message,
+        );
       } else if (liberes) {
         console.info(`[@rosegriffon/auth] profil pré-créé ${discordId} adopté`);
       }
@@ -231,7 +271,10 @@ export async function ensureUserProfile(
 
     return newProfile;
   } catch (err) {
-    console.error(`[@rosegriffon/auth] Exception in ensureUserProfile for ${user.id}:`, err);
+    console.error(
+      `[@rosegriffon/auth] Exception in ensureUserProfile for ${user.id}:`,
+      err,
+    );
     return null;
   }
 }
@@ -262,7 +305,8 @@ export const googleProvider = {
 export const githubProvider = {
   github: {
     clientId: process.env.GITHUB_CLIENT_ID ?? process.env.AUTH_GITHUB_ID ?? "",
-    clientSecret: process.env.GITHUB_CLIENT_SECRET ?? process.env.AUTH_GITHUB_SECRET ?? "",
+    clientSecret:
+      process.env.GITHUB_CLIENT_SECRET ?? process.env.AUTH_GITHUB_SECRET ?? "",
   },
 } as const;
 

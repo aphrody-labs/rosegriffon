@@ -58,10 +58,16 @@ function diffuser(evenement: EvenementIpc): void {
 
 /** Dernière exécution de chaque tâche, relue dans `public.cron_executions`. */
 async function dernieresExecutions(): Promise<
-  Record<string, { time: string; durationMs: number; success: boolean; error?: string }>
+  Record<
+    string,
+    { time: string; durationMs: number; success: boolean; error?: string }
+  >
 > {
   const { historiqueExecutions } = await import("@rosegriffon/cron");
-  const dernieres: Record<string, { time: string; durationMs: number; success: boolean; error?: string }> = {};
+  const dernieres: Record<
+    string,
+    { time: string; durationMs: number; success: boolean; error?: string }
+  > = {};
   for (const ligne of await historiqueExecutions(200)) {
     if (dernieres[ligne.tache]) continue;
     dernieres[ligne.tache] = {
@@ -81,7 +87,7 @@ function telemetrieDiscord(): Record<string, unknown> | null {
   return {
     utilisateur: client.user.tag,
     pingMs: client.ws.ping,
-    serveurs: client.guilds.cache.map(g => ({
+    serveurs: client.guilds.cache.map((g) => ({
       id: g.id,
       nom: g.name,
       membres: g.memberCount,
@@ -93,7 +99,9 @@ function telemetrieDiscord(): Record<string, unknown> | null {
 /** Lance une tâche en tâche de fond ; le verdict arrive par `task.done`. */
 async function lancer(requete: RequeteIpc): Promise<ReponseIpc> {
   const { resoudreNomTache, lancerTache } = await import("@rosegriffon/cron");
-  const nom = resoudreNomTache(typeof requete.nom === "string" ? requete.nom : "");
+  const nom = resoudreNomTache(
+    typeof requete.nom === "string" ? requete.nom : "",
+  );
   if (!nom)
     return {
       success: false,
@@ -110,7 +118,7 @@ async function lancer(requete: RequeteIpc): Promise<ReponseIpc> {
   compteurs.tasksTriggered++;
   const debut = Date.now();
   void lancerTache(nom, { origine: "manuel" })
-    .then(resultat => {
+    .then((resultat) => {
       if (resultat.success) compteurs.tasksSucceeded++;
       else compteurs.tasksFailed++;
       diffuser({
@@ -120,9 +128,10 @@ async function lancer(requete: RequeteIpc): Promise<ReponseIpc> {
         error: resultat.error,
         durationMs: Date.now() - debut,
       });
-      if (resultat.success && nom.startsWith("x")) diffuser({ event: "tweets.signal", nom });
+      if (resultat.success && nom.startsWith("x"))
+        diffuser({ event: "tweets.signal", nom });
     })
-    .catch(err => {
+    .catch((err) => {
       compteurs.tasksFailed++;
       diffuser({
         event: "task.done",
@@ -197,13 +206,18 @@ export async function appelerCron<T extends ReponseIpc = ReponseIpc>(
   const delai = options.timeoutMs ?? DELAI_DEFAUT_MS;
   let minuteur: ReturnType<typeof setTimeout> | undefined;
   const expiration = new Promise<never>((_, rejeter) => {
-    minuteur = setTimeout(() => rejeter(new CronInjoignableError(`Aucune réponse en ${delai} ms.`)), delai);
+    minuteur = setTimeout(
+      () => rejeter(new CronInjoignableError(`Aucune réponse en ${delai} ms.`)),
+      delai,
+    );
   });
   try {
     return (await Promise.race([repondre(requete), expiration])) as T;
   } catch (err) {
     if (err instanceof CronInjoignableError) throw err;
-    throw new CronInjoignableError(err instanceof Error ? err.message : String(err));
+    throw new CronInjoignableError(
+      err instanceof Error ? err.message : String(err),
+    );
   } finally {
     clearTimeout(minuteur);
   }
@@ -212,7 +226,10 @@ export async function appelerCron<T extends ReponseIpc = ReponseIpc>(
 /** Vrai si le registre répond. */
 export async function cronDisponible(): Promise<boolean> {
   try {
-    return (await appelerCron({ cmd: "health" }, { timeoutMs: 2_000 })).success === true;
+    return (
+      (await appelerCron({ cmd: "health" }, { timeoutMs: 2_000 })).success ===
+      true
+    );
   } catch {
     return false;
   }
@@ -224,7 +241,9 @@ export function signalerCron(evenement: EvenementIpc): void {
 }
 
 /** S'abonne aux poussées (`task.done`, `tweets.signal`). Renvoie la fonction de désabonnement. */
-export function abonnerCron(surEvenement: (evenement: EvenementIpc) => void): () => void {
+export function abonnerCron(
+  surEvenement: (evenement: EvenementIpc) => void,
+): () => void {
   abonnes.add(surEvenement);
   return () => abonnes.delete(surEvenement);
 }

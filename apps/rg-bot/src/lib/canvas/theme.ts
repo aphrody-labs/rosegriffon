@@ -48,9 +48,18 @@ let policesChargees = false;
 export function ensureFonts(): void {
   if (policesChargees) return;
   try {
-    GlobalFonts.registerFromPath(`${POLICES_WEBSITE}/Super Cartoon.ttf`, "SuperCartoon");
-    GlobalFonts.registerFromPath(`${POLICES_WEBSITE}/DEFAULT_BradBunR.ttf`, "BradBunR");
-    GlobalFonts.registerFromPath(`${POLICES_WEBSITE}/Autre police/aklatan.ttf`, "Aklatan");
+    GlobalFonts.registerFromPath(
+      `${POLICES_WEBSITE}/Super Cartoon.ttf`,
+      "SuperCartoon",
+    );
+    GlobalFonts.registerFromPath(
+      `${POLICES_WEBSITE}/DEFAULT_BradBunR.ttf`,
+      "BradBunR",
+    );
+    GlobalFonts.registerFromPath(
+      `${POLICES_WEBSITE}/Autre police/aklatan.ttf`,
+      "Aklatan",
+    );
   } catch (err) {
     console.warn("[canvas] enregistrement des polices impossible :", err);
   }
@@ -136,7 +145,11 @@ export const RAYONS = {
  * Ombre portée DURE de la DA (`0 4px 0 0 rgba(0,0,0,0.5)`) — surtout pas une
  * ombre douce Material. En Canvas, elle se dessine en copiant la forme décalée.
  */
-export const OMBRE_DURE = { x: 0, y: 4, couleur: "rgba(0, 0, 0, 0.5)" } as const;
+export const OMBRE_DURE = {
+  x: 0,
+  y: 4,
+  couleur: "rgba(0, 0, 0, 0.5)",
+} as const;
 
 /** Épaisseur des bordures or de la DA. */
 export const BORDURE_OR = 2;
@@ -157,7 +170,11 @@ export function luminance(hex: string): number {
   const r = Number.parseInt(n.slice(0, 2), 16);
   const v = Number.parseInt(n.slice(2, 4), 16);
   const b = Number.parseInt(n.slice(4, 6), 16);
-  return 0.2126 * canalLineaire(r) + 0.7152 * canalLineaire(v) + 0.0722 * canalLineaire(b);
+  return (
+    0.2126 * canalLineaire(r) +
+    0.7152 * canalLineaire(v) +
+    0.0722 * canalLineaire(b)
+  );
 }
 
 /** Rapport de contraste WCAG entre deux couleurs `#rrggbb` (1 → 21). */
@@ -174,20 +191,60 @@ export function contraste(premier: string, second: string): number {
  * en gras, ce qui est le cas de tous les titres cartoon).
  */
 export const PAIRES_CONTRASTE = [
-  { role: "texte de carte", texte: PALETTE.texte, fond: PALETTE.carte, min: 4.5 },
-  { role: "texte atténué de carte", texte: PALETTE.texteAttenue, fond: PALETTE.carte, min: 4.5 },
-  { role: "texte de carte alternée", texte: PALETTE.texte, fond: PALETTE.carteAlt, min: 4.5 },
+  {
+    role: "texte de carte",
+    texte: PALETTE.texte,
+    fond: PALETTE.carte,
+    min: 4.5,
+  },
+  {
+    role: "texte atténué de carte",
+    texte: PALETTE.texteAttenue,
+    fond: PALETTE.carte,
+    min: 4.5,
+  },
+  {
+    role: "texte de carte alternée",
+    texte: PALETTE.texte,
+    fond: PALETTE.carteAlt,
+    min: 4.5,
+  },
   {
     role: "texte atténué sur carte alternée",
     texte: PALETTE.texteAttenue,
     fond: PALETTE.carteAlt,
     min: 4.5,
   },
-  { role: "état vide", texte: PALETTE.texteAttenue, fond: PALETTE.carteCreuse, min: 4.5 },
-  { role: "titre sur marine", texte: PALETTE.surFond, fond: PALETTE.fond, min: 3 },
-  { role: "sous-titre sur marine", texte: PALETTE.or, fond: PALETTE.fond, min: 4.5 },
+  {
+    role: "état vide",
+    texte: PALETTE.texteAttenue,
+    fond: PALETTE.carteCreuse,
+    min: 4.5,
+  },
+  {
+    role: "titre sur marine",
+    texte: PALETTE.surFond,
+    fond: PALETTE.fond,
+    min: 3,
+  },
+  {
+    role: "sous-titre sur marine",
+    texte: PALETTE.or,
+    fond: PALETTE.fond,
+    min: 4.5,
+  },
   { role: "pied de page", texte: PALETTE.or, fond: PALETTE.fond, min: 4.5 },
   { role: "pastille or", texte: PALETTE.surOr, fond: PALETTE.or, min: 4.5 },
-  { role: "pastille brique", texte: PALETTE.surBrique, fond: PALETTE.brique, min: 4.5 },
-  { role: "en-tête brique", texte: PALETTE.surFond, fond: PALETTE.brique, min: 3 },
+  {
+    role: "pastille brique",
+    texte: PALETTE.surBrique,
+    fond: PALETTE.brique,
+    min: 4.5,
+  },
+  {
+    role: "en-tête brique",
+    texte: PALETTE.surFond,
+    fond: PALETTE.brique,
+    min: 3,
+  },
 ] as const;

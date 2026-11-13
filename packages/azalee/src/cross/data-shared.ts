@@ -204,7 +204,10 @@ export const TABLE_METADATA: Record<string, { label: string; desc: string }> = {
     label: "Matériaux de Techniques",
     desc: "Objets consommés pour augmenter la puissance des techniques.",
   },
-  QuestMaster: { label: "Quêtes du Jeu", desc: "Missions narratives et défis à accomplir." },
+  QuestMaster: {
+    label: "Quêtes du Jeu",
+    desc: "Missions narratives et défis à accomplir.",
+  },
   GuildEmblemMaster: {
     label: "Emblèmes de Guilde",
     desc: "Logos et bordures personnalisables pour les guildes.",
@@ -245,7 +248,10 @@ export const TABLE_METADATA: Record<string, { label: string; desc: string }> = {
     label: "Boutique d'Achats",
     desc: "Tarifs et contenu des microtransactions réelles.",
   },
-  OfferMaster: { label: "Offres Spéciales", desc: "Packs promotionnels limités dans le temps." },
+  OfferMaster: {
+    label: "Offres Spéciales",
+    desc: "Packs promotionnels limités dans le temps.",
+  },
   LoginBonusMaster: {
     label: "Bonus de Connexion",
     desc: "Calendriers mensuels et événementiels de fidélité.",

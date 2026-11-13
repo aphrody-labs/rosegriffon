@@ -19,6 +19,8 @@ export function findActiveSubtitle(
 ): SubtitleCue | null {
   if (!subtitles) return null;
   return (
-    subtitles.find((sub) => currentFrame >= sub.startFrame && currentFrame <= sub.endFrame) ?? null
+    subtitles.find(
+      (sub) => currentFrame >= sub.startFrame && currentFrame <= sub.endFrame,
+    ) ?? null
   );
 }

@@ -21,7 +21,8 @@ import type { RealtimeTokenResponse } from "./pending-contracts";
  */
 const RG_ORIGIN = process.env.NEXT_PUBLIC_BASE_URL || "https://rosegriffon.fr";
 
-export const sessionUserSchema = userDtoSchema satisfies z.ZodType<SessionUserDTO>;
+export const sessionUserSchema =
+  userDtoSchema satisfies z.ZodType<SessionUserDTO>;
 
 export const realtimeTokenResponseSchema = z.object({
   token: z.string(),
@@ -82,10 +83,16 @@ export class AuthResource extends AchilleaResource {
     userId: string,
     options?: { authorization?: string },
   ): Promise<AchilleaClientResult<{ url: string }>> {
-    return this.http.get(`/auth/oauth/${provider}/start`, providerOAuthUrlSchema, {
-      query: { userId },
-      headers: options?.authorization ? { Authorization: options.authorization } : undefined,
-    });
+    return this.http.get(
+      `/auth/oauth/${provider}/start`,
+      providerOAuthUrlSchema,
+      {
+        query: { userId },
+        headers: options?.authorization
+          ? { Authorization: options.authorization }
+          : undefined,
+      },
+    );
   }
 
   /**

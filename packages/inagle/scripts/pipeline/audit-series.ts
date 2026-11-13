@@ -18,7 +18,11 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import * as cheerio from "cheerio";
 import type { Client } from "pg";
-import { createPgClient, getInagleDatabaseURL, isInagleDatabaseConfigured } from "@rosegriffon/db/pg";
+import {
+  createPgClient,
+  getInagleDatabaseURL,
+  isInagleDatabaseConfigured,
+} from "@rosegriffon/db/pg";
 
 const __dirname = import.meta.dir;
 const PACKAGE_ROOT = resolve(__dirname, "../../..");
@@ -36,7 +40,17 @@ const MAX_PAGES = 40;
 // ─── 9 jeux dans l'ordre des colonnes appearedWorks ──────────────────────────
 // Ordre affiché sur le site : ie1, ie2, ie3, go1, go2, go3, ars, ori, vic
 
-const GAME_KEYS = ["ie1", "ie2", "ie3", "go1", "go2", "go3", "ars", "ori", "vic"] as const;
+const GAME_KEYS = [
+  "ie1",
+  "ie2",
+  "ie3",
+  "go1",
+  "go2",
+  "go3",
+  "ars",
+  "ori",
+  "vic",
+] as const;
 type GameKey = (typeof GAME_KEYS)[number];
 
 /** Série "principale" = jeu le plus récent (dernier de la liste) où ○ */
@@ -79,13 +93,16 @@ interface AuditReport {
   totalMatched: number;
   totalWrongSeries: number;
   totalNotFound: number;
-  bySeries: Record<string, { ok: number; wrong_series: number; not_found: number }>;
+  bySeries: Record<
+    string,
+    { ok: number; wrong_series: number; not_found: number }
+  >;
   anomalies: AuditEntry[];
 }
 
 // ─── Fetch + cache ────────────────────────────────────────────────────────────
 
-const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 const HASH_RE = /cloudfront\.net\/1\/([^."]+)/;
 
 async function fetchPage(page: number, forceFresh: boolean): Promise<string> {
@@ -140,9 +157,15 @@ function parsePage(html: string): ZukanCharacter[] {
       const key = Object.entries(GAME_TO_SERIES).find(([, v]) => {
         const label = singleGame ?? "";
         if (v === "Inazuma Eleven" && label === "Inazuma Eleven") return true;
-        if (v === "Inazuma Eleven 2" && label.startsWith("Inazuma Eleven 2")) return true;
-        if (v === "Inazuma Eleven 3" && label.startsWith("Inazuma Eleven 3")) return true;
-        if (v === "Inazuma Eleven GO" && label.startsWith("Inazuma Eleven GO: Light")) return true;
+        if (v === "Inazuma Eleven 2" && label.startsWith("Inazuma Eleven 2"))
+          return true;
+        if (v === "Inazuma Eleven 3" && label.startsWith("Inazuma Eleven 3"))
+          return true;
+        if (
+          v === "Inazuma Eleven GO" &&
+          label.startsWith("Inazuma Eleven GO: Light")
+        )
+          return true;
         if (v === "Chrono Stone" && label.includes("Chrono Stone")) return true;
         if (v === "Galaxy" && label.includes("Galaxy")) return true;
         if (v === "Ares" && label.includes("Ares")) return true;
@@ -155,7 +178,8 @@ function parsePage(html: string): ZukanCharacter[] {
       // Cas 2 : 9 cellules td.appearedWorks avec ○/×
       const cells = $row.find("td.appearedWorks");
       cells.each((i, cell) => {
-        if ($(cell).text().trim() === "○" && i < GAME_KEYS.length) appearedIn.push(GAME_KEYS[i]);
+        if ($(cell).text().trim() === "○" && i < GAME_KEYS.length)
+          appearedIn.push(GAME_KEYS[i]);
       });
     }
 
@@ -169,7 +193,13 @@ function parsePage(html: string): ZukanCharacter[] {
     }
     const primarySeries = primaryKey ? GAME_TO_SERIES[primaryKey] : "?";
 
-    chars.push({ name, zukanHash: finalHash, appearedIn, primarySeries, singleGame });
+    chars.push({
+      name,
+      zukanHash: finalHash,
+      appearedIn,
+      primarySeries,
+      singleGame,
+    });
   });
 
   return chars;
@@ -178,7 +208,9 @@ function parsePage(html: string): ZukanCharacter[] {
 // ─── Crawl ────────────────────────────────────────────────────────────────────
 
 async function crawlAll(forceFresh: boolean): Promise<ZukanCharacter[]> {
-  console.log(`\nCrawl zukan.inazuma.jp/en/chara_list/ (${forceFresh ? "frais" : "cache"})...\n`);
+  console.log(
+    `\nCrawl zukan.inazuma.jp/en/chara_list/ (${forceFresh ? "frais" : "cache"})...\n`,
+  );
   const all: ZukanCharacter[] = [];
 
   for (let page = 1; page <= MAX_PAGES; page++) {
@@ -205,7 +237,10 @@ async function crawlAll(forceFresh: boolean): Promise<ZukanCharacter[]> {
 
 // ─── Audit vs BDD ─────────────────────────────────────────────────────────────
 
-async function auditAgainstDB(characters: ZukanCharacter[], client: Client): Promise<AuditReport> {
+async function auditAgainstDB(
+  characters: ZukanCharacter[],
+  client: Client,
+): Promise<AuditReport> {
   console.log("\nChargement de la BDD...");
   const { rows: dbChars } = await client.query<{
     id: string;
@@ -243,7 +278,11 @@ async function auditAgainstDB(characters: ZukanCharacter[], client: Client): Pro
     report.totalCrawled++;
 
     if (!report.bySeries[zChar.primarySeries])
-      report.bySeries[zChar.primarySeries] = { ok: 0, wrong_series: 0, not_found: 0 };
+      report.bySeries[zChar.primarySeries] = {
+        ok: 0,
+        wrong_series: 0,
+        not_found: 0,
+      };
 
     // Match 1 : hash
     let dbRow = zChar.zukanHash ? (byHash.get(zChar.zukanHash) ?? null) : null;
@@ -256,7 +295,7 @@ async function auditAgainstDB(characters: ZukanCharacter[], client: Client): Pro
         dbRow = candidates[0];
         matchMethod = "name";
       } else if (candidates.length > 1) {
-        const best = candidates.find(c => c.series === zChar.primarySeries);
+        const best = candidates.find((c) => c.series === zChar.primarySeries);
         if (best) {
           dbRow = best;
           matchMethod = "name";
@@ -304,8 +343,13 @@ async function auditAgainstDB(characters: ZukanCharacter[], client: Client): Pro
 
 // ─── Corrections BDD ──────────────────────────────────────────────────────────
 
-async function applyCorrections(report: AuditReport, client: Client): Promise<void> {
-  const toFix = report.anomalies.filter(a => a.status === "wrong_series" && a.databaseId);
+async function applyCorrections(
+  report: AuditReport,
+  client: Client,
+): Promise<void> {
+  const toFix = report.anomalies.filter(
+    (a) => a.status === "wrong_series" && a.databaseId,
+  );
   if (toFix.length === 0) {
     console.log("Aucune correction nécessaire.");
     return;
@@ -314,7 +358,10 @@ async function applyCorrections(report: AuditReport, client: Client): Promise<vo
   console.log(`\nCorrection de ${toFix.length} séries...`);
   let fixed = 0;
   for (const a of toFix) {
-    await client.query("UPDATE inagle_characters SET series = $1 WHERE id = $2", [a.zukanSeries, a.databaseId]);
+    await client.query(
+      "UPDATE inagle_characters SET series = $1 WHERE id = $2",
+      [a.zukanSeries, a.databaseId],
+    );
     fixed++;
   }
   console.log(`  ✓ ${fixed} personnages corrigés.`);
@@ -330,21 +377,33 @@ async function main() {
   const forceFresh = process.argv.includes("--fresh");
   const applyFix = process.argv.includes("--db");
 
-  console.log("═════════════════════════════════════════════════════════════════");
-  console.log("  Audit Zukan — Vérification des séries Azalee vs zukan.inazuma.jp");
-  console.log("═════════════════════════════════════════════════════════════════");
-  console.log(`Mode : ${forceFresh ? "crawl frais" : "cache"} | ${applyFix ? "correction BDD" : "rapport seul"}`);
+  console.log(
+    "═════════════════════════════════════════════════════════════════",
+  );
+  console.log(
+    "  Audit Zukan — Vérification des séries Azalee vs zukan.inazuma.jp",
+  );
+  console.log(
+    "═════════════════════════════════════════════════════════════════",
+  );
+  console.log(
+    `Mode : ${forceFresh ? "crawl frais" : "cache"} | ${applyFix ? "correction BDD" : "rapport seul"}`,
+  );
 
   const characters = await crawlAll(forceFresh);
 
   // Stats distribution séries
   const dist = new Map<string, number>();
-  for (const c of characters) dist.set(c.primarySeries, (dist.get(c.primarySeries) ?? 0) + 1);
+  for (const c of characters)
+    dist.set(c.primarySeries, (dist.get(c.primarySeries) ?? 0) + 1);
   console.log("\nDistribution par série principale :");
-  for (const [s, n] of [...dist.entries()].sort((a, b) => b[1] - a[1])) console.log(`  ${String(n).padStart(5)}  ${s}`);
+  for (const [s, n] of [...dist.entries()].sort((a, b) => b[1] - a[1]))
+    console.log(`  ${String(n).padStart(5)}  ${s}`);
 
   if (!isInagleDatabaseConfigured()) {
-    console.warn("\nNo valid INAGLE_DATABASE_URL/NIE_PG_URL — database audit skipped.");
+    console.warn(
+      "\nNo valid INAGLE_DATABASE_URL/NIE_PG_URL — database audit skipped.",
+    );
     await writeFile(OUTPUT_PATH, JSON.stringify({ characters }, null, 2));
     return;
   }
@@ -353,12 +412,22 @@ async function main() {
   await client.connect();
   const report = await auditAgainstDB(characters, client);
 
-  console.log("\n═════════════════════════════════════════════════════════════════");
+  console.log(
+    "\n═════════════════════════════════════════════════════════════════",
+  );
   console.log(`Total crawlé  : ${report.totalCrawled}`);
-  console.log(`Matchés OK    : ${report.totalMatched}  (${pct(report.totalMatched, report.totalCrawled)}%)`);
-  console.log(`Série erronée : ${report.totalWrongSeries}  (${pct(report.totalWrongSeries, report.totalCrawled)}%)`);
-  console.log(`Non trouvé    : ${report.totalNotFound}  (${pct(report.totalNotFound, report.totalCrawled)}%)`);
-  console.log("─────────────────────────────────────────────────────────────────");
+  console.log(
+    `Matchés OK    : ${report.totalMatched}  (${pct(report.totalMatched, report.totalCrawled)}%)`,
+  );
+  console.log(
+    `Série erronée : ${report.totalWrongSeries}  (${pct(report.totalWrongSeries, report.totalCrawled)}%)`,
+  );
+  console.log(
+    `Non trouvé    : ${report.totalNotFound}  (${pct(report.totalNotFound, report.totalCrawled)}%)`,
+  );
+  console.log(
+    "─────────────────────────────────────────────────────────────────",
+  );
   console.log("Détail par série :");
   for (const [series, s] of Object.entries(report.bySeries)) {
     const total = s.ok + s.wrong_series + s.not_found;
@@ -371,17 +440,19 @@ async function main() {
   }
 
   if (report.anomalies.length) {
-    const wrongs = report.anomalies.filter(a => a.status === "wrong_series");
-    const missing = report.anomalies.filter(a => a.status === "not_found");
+    const wrongs = report.anomalies.filter((a) => a.status === "wrong_series");
+    const missing = report.anomalies.filter((a) => a.status === "not_found");
     if (wrongs.length) {
       console.log(`\n⚠ Exemples séries incorrectes :`);
-      wrongs.slice(0, 15).forEach(a => {
-        console.log(`  ✗ "${a.name}"  BDD="${a.databaseSeries}" → attendu="${a.zukanSeries}" [${a.matchMethod}]`);
+      wrongs.slice(0, 15).forEach((a) => {
+        console.log(
+          `  ✗ "${a.name}"  BDD="${a.databaseSeries}" → attendu="${a.zukanSeries}" [${a.matchMethod}]`,
+        );
       });
     }
     if (missing.length) {
       console.log(`\n○ Exemples non trouvés :`);
-      missing.slice(0, 10).forEach(a => {
+      missing.slice(0, 10).forEach((a) => {
         console.log(`  ? "${a.name}"  (${a.zukanSeries})`);
       });
     }
@@ -389,12 +460,16 @@ async function main() {
 
   if (applyFix) await applyCorrections(report, client);
   else if (report.totalWrongSeries > 0)
-    console.log(`\n→ Relancer avec --db pour corriger ${report.totalWrongSeries} séries.`);
+    console.log(
+      `\n→ Relancer avec --db pour corriger ${report.totalWrongSeries} séries.`,
+    );
 
   await client.end();
   await writeFile(OUTPUT_PATH, JSON.stringify(report, null, 2));
   console.log(`\nRapport : ${OUTPUT_PATH}`);
-  console.log("═════════════════════════════════════════════════════════════════");
+  console.log(
+    "═════════════════════════════════════════════════════════════════",
+  );
 }
 
 main().catch(console.error);

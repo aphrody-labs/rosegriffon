@@ -46,7 +46,9 @@ export interface ReglagesGuilde {
 }
 
 /** Réglages d'une guilde. Rend les défauts si la ligne n'existe pas. */
-export async function lireReglagesGuilde(guildId: string): Promise<ReglagesGuilde> {
+export async function lireReglagesGuilde(
+  guildId: string,
+): Promise<ReglagesGuilde> {
   const lignes = await pgQuery<LigneReglages>(
     "SELECT valeurs, maj_le FROM public.bot_reglages_guilde WHERE guild_id = $1 LIMIT 1",
     [guildId],
@@ -168,9 +170,16 @@ const STATISTIQUES_VIDES: StatistiquesCommunaute = Object.freeze({
  * connaît trois états (`ouvert`, `pris`, `ferme`) et un ticket PRIS en charge
  * est toujours ouvert pour qui l'a déposé.
  */
-export async function statistiquesCommunaute(guildId: string): Promise<StatistiquesCommunaute> {
+export async function statistiquesCommunaute(
+  guildId: string,
+): Promise<StatistiquesCommunaute> {
   const [profils, tickets, suggestions, menus] = await Promise.all([
-    compter<{ profils: string; niveau_moyen: string | null; xp: string; jetons: string }>(
+    compter<{
+      profils: string;
+      niveau_moyen: string | null;
+      xp: string;
+      jetons: string;
+    }>(
       `SELECT count(*) AS profils,
 			        coalesce(round(avg(niveau), 1), 0) AS niveau_moyen,
 			        coalesce(sum(xp), 0) AS xp,
@@ -188,7 +197,10 @@ export async function statistiquesCommunaute(guildId: string): Promise<Statistiq
 			  WHERE guild_id = $1 AND statut = 'ouverte'`,
       guildId,
     ),
-    compter<{ total: string }>("SELECT count(*) AS total FROM public.bot_menus_roles WHERE guild_id = $1", guildId),
+    compter<{ total: string }>(
+      "SELECT count(*) AS total FROM public.bot_menus_roles WHERE guild_id = $1",
+      guildId,
+    ),
   ]);
 
   return {
@@ -214,7 +226,10 @@ async function compter<T>(sql: string, guildId: string): Promise<T | null> {
     const lignes = await pgQuery<T>(sql, [guildId]);
     return lignes[0] ?? null;
   } catch (erreur) {
-    console.warn("[bot/reglages] agrégat indisponible :", erreur instanceof Error ? erreur.message : erreur);
+    console.warn(
+      "[bot/reglages] agrégat indisponible :",
+      erreur instanceof Error ? erreur.message : erreur,
+    );
     return null;
   }
 }

@@ -32,8 +32,10 @@ interface GalleryLightboxProps {
 /** Nom de fichier de téléchargement dérivé du titre, sinon du basename de l'URL. */
 function downloadName(item: GalleryLightboxItem): string {
   const fromUrl = (item.original ?? item.full)?.split("/").pop()?.split("?")[0];
-  const base = item.title?.trim() || fromUrl?.replace(/\.[a-z0-9]+$/i, "") || item.id;
-  const safe = base.replace(/[^\w.-]+/g, "_").replace(/^_+|_+$/g, "") || "illustration";
+  const base =
+    item.title?.trim() || fromUrl?.replace(/\.[a-z0-9]+$/i, "") || item.id;
+  const safe =
+    base.replace(/[^\w.-]+/g, "_").replace(/^_+|_+$/g, "") || "illustration";
   return safe.toLowerCase().endsWith(".png") ? safe : `${safe}.png`;
 }
 
@@ -43,7 +45,12 @@ function downloadName(item: GalleryLightboxItem): string {
  * (flèches clavier gauche/droite + boutons), fermeture (Échap, clic backdrop, bouton fermer).
  * Accessible : `role="dialog"`/`aria-modal`, focus trap léger, scroll du body bloqué.
  */
-export function GalleryLightbox({ items, index, onClose, onNavigate }: GalleryLightboxProps) {
+export function GalleryLightbox({
+  items,
+  index,
+  onClose,
+  onNavigate,
+}: GalleryLightboxProps) {
   const mounted = useHydrated();
   const [downloading, setDownloading] = useState(false);
   const closeRef = useRef<HTMLButtonElement>(null);
@@ -151,7 +158,10 @@ export function GalleryLightbox({ items, index, onClose, onNavigate }: GalleryLi
               {item.categoryLabel}
             </span>
           )}
-          <h2 className="truncate text-sm font-bold text-on-surface" title={item.title}>
+          <h2
+            className="truncate text-sm font-bold text-on-surface"
+            title={item.title}
+          >
             {item.title}
           </h2>
         </div>
@@ -166,7 +176,11 @@ export function GalleryLightbox({ items, index, onClose, onNavigate }: GalleryLi
               "bg-primary text-on-primary hover:bg-primary/90 disabled:opacity-50",
             )}
           >
-            {downloading ? <Loader2 className="size-4 animate-spin" /> : <Download className="size-4" />}
+            {downloading ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              <Download className="size-4" />
+            )}
             <span className="hidden sm:inline">Télécharger</span>
           </button>
           <button
@@ -188,7 +202,11 @@ export function GalleryLightbox({ items, index, onClose, onNavigate }: GalleryLi
         className="relative flex flex-1 cursor-zoom-out items-center justify-center overflow-hidden p-4 sm:p-8"
       >
         {item.full ? (
-          <div role="presentation" className="relative flex size-full items-center justify-center" onClick={e => e.stopPropagation()}>
+          <div
+            role="presentation"
+            className="relative flex size-full items-center justify-center"
+            onClick={(e) => e.stopPropagation()}
+          >
             <Image
               key={item.id}
               src={item.full}
@@ -214,7 +232,7 @@ export function GalleryLightbox({ items, index, onClose, onNavigate }: GalleryLi
             type="button"
             tabIndex={0}
             aria-label="Illustration précédente"
-            onClick={e => {
+            onClick={(e) => {
               e.stopPropagation();
               onNavigate(index - 1);
             }}
@@ -231,7 +249,7 @@ export function GalleryLightbox({ items, index, onClose, onNavigate }: GalleryLi
             type="button"
             tabIndex={0}
             aria-label="Illustration suivante"
-            onClick={e => {
+            onClick={(e) => {
               e.stopPropagation();
               onNavigate(index + 1);
             }}

@@ -2,7 +2,12 @@ import { NextResponse } from "next/server";
 import { sanitizeNewsSearchQuery } from "@/lib/news-search";
 import { getPgPool } from "@/lib/db/pg";
 
-const VALID_CATEGORIES = new Set(["announcement", "event", "critique", "community"]);
+const VALID_CATEGORIES = new Set([
+  "announcement",
+  "event",
+  "critique",
+  "community",
+]);
 
 interface ArticleFeedRow {
   id: string;
@@ -18,10 +23,14 @@ interface ArticleFeedRow {
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const page = Math.max(1, Number.parseInt(searchParams.get("page") || "1", 10) || 1);
+  const page = Math.max(
+    1,
+    Number.parseInt(searchParams.get("page") || "1", 10) || 1,
+  );
   const limit = 12;
   const rawCategory = searchParams.get("category");
-  const category = rawCategory && VALID_CATEGORIES.has(rawCategory) ? rawCategory : null;
+  const category =
+    rawCategory && VALID_CATEGORIES.has(rawCategory) ? rawCategory : null;
   const q = sanitizeNewsSearchQuery(searchParams.get("q"));
 
   const from = (page - 1) * limit;
@@ -54,7 +63,7 @@ export async function GET(request: Request) {
       params,
     );
 
-    const items = rows.map(a => ({
+    const items = rows.map((a) => ({
       author_id: a.author_id,
       category: a.category,
       date: a.published_at || a.created_at,

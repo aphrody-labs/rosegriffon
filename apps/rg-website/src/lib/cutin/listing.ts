@@ -53,7 +53,10 @@ export function parseLayerName(
   }
 
   // Le sujet `<eventId>` répété (couche « main ») est normalisé.
-  const subject = subjectParts.length === 0 || subjectParts.join("_") === eventId ? "main" : subjectParts.join("_");
+  const subject =
+    subjectParts.length === 0 || subjectParts.join("_") === eventId
+      ? "main"
+      : subjectParts.join("_");
   return { subject, phase, plan };
 }
 
@@ -68,9 +71,14 @@ interface CpkListingResponse {
  *
  * @throws si l'API `/api/cpk` répond non-OK.
  */
-export async function fetchCutinManifest(cutin: SkillCutin, signal?: AbortSignal): Promise<CutinManifest> {
+export async function fetchCutinManifest(
+  cutin: SkillCutin,
+  signal?: AbortSignal,
+): Promise<CutinManifest> {
   const dir = cutin.effects_dir.replace(/\/$/, "");
-  const res = await fetch(`/api/cpk?path=${encodeURIComponent(dir)}`, { signal });
+  const res = await fetch(`/api/cpk?path=${encodeURIComponent(dir)}`, {
+    signal,
+  });
   if (!res.ok) {
     throw new Error(`Listing CPK indisponible (${res.status}) pour ${dir}`);
   }
@@ -79,9 +87,12 @@ export async function fetchCutinManifest(cutin: SkillCutin, signal?: AbortSignal
 
   // Couches = tous les .g4pk de l'event (renderable résolu plus tard par decode.ts).
   const layers: CutinLayerDescriptor[] = files
-    .filter(f => f.name.toLowerCase().endsWith(".g4pk"))
-    .map(f => {
-      const { subject, phase, plan } = parseLayerName(cutin.event_id_name, f.name);
+    .filter((f) => f.name.toLowerCase().endsWith(".g4pk"))
+    .map((f) => {
+      const { subject, phase, plan } = parseLayerName(
+        cutin.event_id_name,
+        f.name,
+      );
       return {
         id: f.name.replace(/\.g4pk$/i, ""),
         vfsPath: f.path,
@@ -94,7 +105,9 @@ export async function fetchCutinManifest(cutin: SkillCutin, signal?: AbortSignal
     });
 
   // Caméra : repérée par suffixe de nom (plus robuste que reconstruire le chemin).
-  const cameraFile = files.find(f => f.name.toLowerCase().endsWith("_camera.g4cm"));
+  const cameraFile = files.find((f) =>
+    f.name.toLowerCase().endsWith("_camera.g4cm"),
+  );
   const cameraG4cmUrl = cameraFile ? cpkRawUrl(cameraFile.path) : null;
 
   // Telops par langue (g4tx → png via le CDN). On ignore les langues sans URL mappable.

@@ -46,7 +46,10 @@
  * de cent nombres se relit mal, et une formule d'une ligne se vérifie.
  */
 export const PALIERS_EXPERIENCE: readonly number[] = Object.freeze(
-  Array.from({ length: 100 }, (_, index) => 5 * index * index + 50 * index + 100),
+  Array.from(
+    { length: 100 },
+    (_, index) => 5 * index * index + 50 * index + 100,
+  ),
 );
 
 /** Plafond, celui du jeu. */
@@ -62,7 +65,9 @@ export const NIVEAU_MAX = 100;
 export const CUMULS: readonly number[] = (() => {
   const cumuls: number[] = Array.from({ length: NIVEAU_MAX + 1 }, () => 0);
   for (let niveau = 2; niveau <= NIVEAU_MAX; niveau++) {
-    cumuls[niveau] = (cumuls[niveau - 1] as number) + (PALIERS_EXPERIENCE[niveau - 2] as number);
+    cumuls[niveau] =
+      (cumuls[niveau - 1] as number) +
+      (PALIERS_EXPERIENCE[niveau - 2] as number);
   }
   return Object.freeze(cumuls);
 })();
@@ -215,7 +220,7 @@ export function rangDe(niveau: number): Rang {
 
 /** Niveau du prochain rang, `null` quand le dernier est atteint. */
 export function prochainRang(niveau: number): Rang | null {
-  return RANGS.find(rang => rang.depuis > niveau) ?? null;
+  return RANGS.find((rang) => rang.depuis > niveau) ?? null;
 }
 
 // ─── Gain d'expérience ──────────────────────────────────────────────────────
@@ -253,10 +258,15 @@ export interface ReglesGain {
  * donne toujours la même valeur) et ce qui évite un `Math.random()` planqué au
  * milieu d'un module par ailleurs pur.
  */
-export function gainDeMessage(regles: ReglesGain = GAIN_DEFAUT, tirage: number = Math.random()): number {
+export function gainDeMessage(
+  regles: ReglesGain = GAIN_DEFAUT,
+  tirage: number = Math.random(),
+): number {
   const bas = Math.max(0, Math.floor(regles.minimum));
   const haut = Math.max(bas, Math.floor(regles.maximum));
-  const borne = Number.isFinite(tirage) ? Math.min(0.999_999, Math.max(0, tirage)) : 0;
+  const borne = Number.isFinite(tirage)
+    ? Math.min(0.999_999, Math.max(0, tirage))
+    : 0;
   return bas + Math.floor(borne * (haut - bas + 1));
 }
 
@@ -305,7 +315,10 @@ export function meriteAnnonce(
   if (niveauApres <= niveauAvant) {
     return false;
   }
-  if (options.annoncerRang !== false && rangDe(niveauApres).nom !== rangDe(niveauAvant).nom) {
+  if (
+    options.annoncerRang !== false &&
+    rangDe(niveauApres).nom !== rangDe(niveauAvant).nom
+  ) {
     return true;
   }
   const palier = Math.max(1, Math.floor(options.palier ?? 5));
@@ -324,7 +337,10 @@ export function meriteAnnonce(
  * franchir le niveau 2, sans quoi la seule stratégie rentable serait de rester
  * en bas de l'échelle.
  */
-export function jetonsDeMontee(niveau: number, parNiveau: number = GAIN_DEFAUT.jetonsParNiveau): number {
+export function jetonsDeMontee(
+  niveau: number,
+  parNiveau: number = GAIN_DEFAUT.jetonsParNiveau,
+): number {
   const borne = Number.isFinite(niveau) ? Math.max(1, Math.floor(niveau)) : 1;
   return borne * Math.max(0, Math.floor(parNiveau));
 }

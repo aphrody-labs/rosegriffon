@@ -108,14 +108,20 @@ describe("passage quotidien", () => {
   });
 
   test("le prochain passage est minuit UTC du lendemain", () => {
-    expect(etatQuotidien("2026-08-14", 1, LE_14).prochain.toISOString()).toBe("2026-08-15T00:00:00.000Z");
+    expect(etatQuotidien("2026-08-14", 1, LE_14).prochain.toISOString()).toBe(
+      "2026-08-15T00:00:00.000Z",
+    );
   });
 
   test("la prime de série plafonne au onzième jour", () => {
     expect(recompenseQuotidienne(1)).toBe(QUOTIDIEN.base);
     expect(recompenseQuotidienne(2)).toBe(QUOTIDIEN.base + QUOTIDIEN.parJour);
-    expect(recompenseQuotidienne(11)).toBe(QUOTIDIEN.base + QUOTIDIEN.primeMaximale);
-    expect(recompenseQuotidienne(400)).toBe(QUOTIDIEN.base + QUOTIDIEN.primeMaximale);
+    expect(recompenseQuotidienne(11)).toBe(
+      QUOTIDIEN.base + QUOTIDIEN.primeMaximale,
+    );
+    expect(recompenseQuotidienne(400)).toBe(
+      QUOTIDIEN.base + QUOTIDIEN.primeMaximale,
+    );
   });
 });
 
@@ -133,7 +139,11 @@ describe("dons", () => {
   });
 
   test("un bot n'est pas un destinataire", () => {
-    const resultat = validerDon({ ...base, destinataireEstBot: true, montant: 10 });
+    const resultat = validerDon({
+      ...base,
+      destinataireEstBot: true,
+      montant: 10,
+    });
     expect(resultat.ok).toBe(false);
   });
 
@@ -141,12 +151,19 @@ describe("dons", () => {
     expect(validerDon({ ...base, montant: 4.5 }).ok).toBe(false);
     expect(validerDon({ ...base, montant: "beaucoup" }).ok).toBe(false);
     // Une saisie avec une espace de groupement reste comprise.
-    expect(validerDon({ ...base, montant: "1 000" })).toEqual({ montant: 1_000, ok: true });
+    expect(validerDon({ ...base, montant: "1 000" })).toEqual({
+      montant: 1_000,
+      ok: true,
+    });
   });
 
   test("les bornes du don unique sont dites, pas devinées", () => {
     expect(validerDon({ ...base, montant: 0 }).ok).toBe(false);
-    const trop = validerDon({ ...base, montant: DON.maximum + 1, solde: 1_000_000 });
+    const trop = validerDon({
+      ...base,
+      montant: DON.maximum + 1,
+      solde: 1_000_000,
+    });
     expect(trop.ok).toBe(false);
     if (trop.ok) return;
     expect(trop.erreur).toContain("5 000");

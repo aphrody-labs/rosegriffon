@@ -50,10 +50,10 @@ function episodes(): Promise<Map<string, string>> {
   _episodes ??= (async () => {
     const index = new Map<string, string>();
     try {
-      const rows = await selectInagle<{ event_id: string | null; episode: string | null }>(
-        "inagle_events",
-        "event_id,episode",
-      );
+      const rows = await selectInagle<{
+        event_id: string | null;
+        episode: string | null;
+      }>("inagle_events", "event_id,episode");
       for (const row of rows) {
         if (row.event_id && row.episode) index.set(row.event_id, row.episode);
       }
@@ -77,7 +77,10 @@ export async function videoLabel(nom: string): Promise<MediaLabel> {
     const [, famille, lang, num] = titre;
     const langue = LANGUES[lang ?? ""] ?? lang;
     return {
-      title: famille === "Chronicle" ? `Écran-titre — Chroniques ${num}` : `Écran-titre ${num}`,
+      title:
+        famille === "Chronicle"
+          ? `Écran-titre — Chroniques ${num}`
+          : `Écran-titre ${num}`,
       context: langue ? `en ${langue}` : null,
       code: nom,
     };
@@ -87,7 +90,9 @@ export async function videoLabel(nom: string): Promise<MediaLabel> {
   if (/^ev\d/i.test(nom)) {
     const episode = (await episodes()).get(nom);
     return {
-      title: episode ? `Cinématique — épisode ${episode}` : "Cinématique d'événement",
+      title: episode
+        ? `Cinématique — épisode ${episode}`
+        : "Cinématique d'événement",
       context: null,
       code: nom,
     };
@@ -118,7 +123,8 @@ export function itemNames(): Promise<Map<string, string>> {
       }>("inagle_items", "internal_code,name_fr,name_en,name_ja");
       for (const row of rows) {
         const nom = row.name_fr || row.name_en || row.name_ja;
-        if (row.internal_code && nom) index.set(row.internal_code.toLowerCase(), nom);
+        if (row.internal_code && nom)
+          index.set(row.internal_code.toLowerCase(), nom);
       }
     } catch {
       // Miroir absent : les textures gardent leur nom technique.

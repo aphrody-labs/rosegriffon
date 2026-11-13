@@ -10,7 +10,12 @@
 /** Buckets lourds servis depuis le disque de rg-core (`cdn.rosegriffon.fr`), qui retombe sur Supabase. */
 const BUCKETS_DISQUE = new Set(["tweets", "assets"]);
 
-const ENTETES_REQUETE = ["accept", "if-none-match", "if-modified-since", "range"] as const;
+const ENTETES_REQUETE = [
+  "accept",
+  "if-none-match",
+  "if-modified-since",
+  "range",
+] as const;
 // Pas de `content-length` : `fetch` décompresse, la longueur amont ne serait plus juste.
 const ENTETES_REPONSE = [
   "accept-ranges",
@@ -35,9 +40,14 @@ export function urlAmontObjet(
   recherche: string,
   origines: OriginesStockage,
 ): string | null {
-  const origine = BUCKETS_DISQUE.has(bucket) ? origines.medias : origines.supabase;
-  if (!origine?.startsWith("https://") && !origine?.startsWith("http://")) return null;
-  const segments = [bucket, ...chemin].map(s => encodeURIComponent(s)).join("/");
+  const origine = BUCKETS_DISQUE.has(bucket)
+    ? origines.medias
+    : origines.supabase;
+  if (!origine?.startsWith("https://") && !origine?.startsWith("http://"))
+    return null;
+  const segments = [bucket, ...chemin]
+    .map((s) => encodeURIComponent(s))
+    .join("/");
   return `${origine.replace(/\/+$/, "")}/storage/v1/object/public/${segments}${recherche}`;
 }
 
@@ -59,7 +69,11 @@ export async function estObjetAbsent(reponse: Response): Promise<boolean> {
 
 const DELAI_AMONT_MS = 15_000;
 
-const CORPS_ABSENT = JSON.stringify({ error: "not_found", message: "Object not found", statusCode: "404" });
+const CORPS_ABSENT = JSON.stringify({
+  error: "not_found",
+  message: "Object not found",
+  statusCode: "404",
+});
 
 export async function relayerObjet(
   requete: Request,
@@ -68,7 +82,12 @@ export async function relayerObjet(
   origines: OriginesStockage,
   recuperer: typeof fetch = fetch,
 ): Promise<Response> {
-  const cible = urlAmontObjet(bucket, chemin, new URL(requete.url).search, origines);
+  const cible = urlAmontObjet(
+    bucket,
+    chemin,
+    new URL(requete.url).search,
+    origines,
+  );
   if (!cible) return absent();
   const entetes = new Headers();
   for (const nom of ENTETES_REQUETE) {
@@ -96,7 +115,10 @@ export async function relayerObjet(
     const valeur = amont.headers.get(nom);
     if (valeur) sortie.set(nom, valeur);
   }
-  return new Response(requete.method === "HEAD" ? null : amont.body, { headers: sortie, status: amont.status });
+  return new Response(requete.method === "HEAD" ? null : amont.body, {
+    headers: sortie,
+    status: amont.status,
+  });
 }
 
 function absent(): Response {

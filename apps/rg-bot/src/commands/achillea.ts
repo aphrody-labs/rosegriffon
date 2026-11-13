@@ -6,7 +6,10 @@
  */
 
 import { Discord, Slash, SlashGroup, SlashOption } from "discordx";
-import { ApplicationCommandOptionType, type ChatInputCommandInteraction } from "discord.js";
+import {
+  ApplicationCommandOptionType,
+  type ChatInputCommandInteraction,
+} from "discord.js";
 
 import {
   bloquerLignes,
@@ -18,7 +21,14 @@ import {
   repartitionParType,
   rolesUtiles,
 } from "../lib/achillea-format";
-import { differer, echec, fiche, info, piedDeCommande, repondre } from "../lib/ui";
+import {
+  differer,
+  echec,
+  fiche,
+  info,
+  piedDeCommande,
+  repondre,
+} from "../lib/ui";
 import {
   detailGuilde,
   estScanne,
@@ -34,13 +44,22 @@ const ACHILLEA = "1055585286320554055";
  * Un échec de la passerelle se raconte par sa cause : ce n'est pas la même chose à
  * réparer, et ce n'est pas le même message pour qui lit.
  */
-function messageEchec(raison: "injoignable" | "http" | "forme", detail: string): [string, string] {
+function messageEchec(
+  raison: "injoignable" | "http" | "forme",
+  detail: string,
+): [string, string] {
   switch (raison) {
     case "injoignable": {
-      return ["Achillea ne répond pas", `Son API est injoignable (${detail}). Vérifiez \`systemctl status rg-api\`.`];
+      return [
+        "Achillea ne répond pas",
+        `Son API est injoignable (${detail}). Vérifiez \`systemctl status rg-api\`.`,
+      ];
     }
     case "http": {
-      return ["Achillea a refusé la demande", `${detail}. Le serveur demandé existe-t-il ?`];
+      return [
+        "Achillea a refusé la demande",
+        `${detail}. Le serveur demandé existe-t-il ?`,
+      ];
     }
     default: {
       return [
@@ -52,7 +71,10 @@ function messageEchec(raison: "injoignable" | "http" | "forme", detail: string):
 }
 
 /** Résout l'identifiant : celui donné, sinon le serveur courant, sinon Achillea. */
-function serveurVise(saisi: string | undefined, interaction: ChatInputCommandInteraction): string {
+function serveurVise(
+  saisi: string | undefined,
+  interaction: ChatInputCommandInteraction,
+): string {
   if (saisi && /^\d{15,25}$/u.test(saisi)) return saisi;
   return interaction.guildId ?? ACHILLEA;
 }
@@ -62,7 +84,10 @@ function serveurVise(saisi: string | undefined, interaction: ChatInputCommandInt
  * Rendre ce chemin commun évite que chaque sous-commande invente sa propre façon
  * d'échouer — c'est là que naissent les messages contradictoires.
  */
-async function chargerFiche(interaction: ChatInputCommandInteraction, id: string): Promise<GuildeDetaillee | null> {
+async function chargerFiche(
+  interaction: ChatInputCommandInteraction,
+  id: string,
+): Promise<GuildeDetaillee | null> {
   const resultat: Resultat<GuildeDetaillee> = await detailGuilde(id);
   if (!resultat.ok) {
     const [titre, description] = messageEchec(resultat.raison, resultat.detail);
@@ -88,18 +113,21 @@ async function chargerFiche(interaction: ChatInputCommandInteraction, id: string
 @Discord()
 @SlashGroup({
   name: "achillea",
-  description: "Les serveurs scannés par le bot Achillea : métadonnées, rôles, salons",
+  description:
+    "Les serveurs scannés par le bot Achillea : métadonnées, rôles, salons",
 })
 @SlashGroup("achillea")
 export class AchilleaCommand {
   @Slash({
     name: "serveur",
-    description: "Fiche d'un serveur scanné : membres, rôles, salons, date du dernier scan",
+    description:
+      "Fiche d'un serveur scanné : membres, rôles, salons, date du dernier scan",
   })
   async serveur(
     @SlashOption({
       name: "identifiant",
-      description: "Identifiant du serveur (par défaut : celui-ci, sinon Achillea)",
+      description:
+        "Identifiant du serveur (par défaut : celui-ci, sinon Achillea)",
       type: ApplicationCommandOptionType.String,
       required: false,
     })
@@ -107,7 +135,10 @@ export class AchilleaCommand {
     interaction: ChatInputCommandInteraction,
   ) {
     await differer(interaction);
-    const guilde = await chargerFiche(interaction, serveurVise(identifiant, interaction));
+    const guilde = await chargerFiche(
+      interaction,
+      serveurVise(identifiant, interaction),
+    );
     if (!guilde) return;
 
     const roles = rolesUtiles(guilde.roles);
@@ -126,7 +157,9 @@ export class AchilleaCommand {
             guilde.member_count === null
               ? "—"
               : `${guilde.member_count.toLocaleString("fr-FR")}${
-                  guilde.presence_count === null ? "" : ` · ${guilde.presence_count.toLocaleString("fr-FR")} en ligne`
+                  guilde.presence_count === null
+                    ? ""
+                    : ` · ${guilde.presence_count.toLocaleString("fr-FR")} en ligne`
                 }`,
           inline: true,
         },
@@ -136,19 +169,34 @@ export class AchilleaCommand {
           inline: true,
         },
         { name: "Salons", value: String(guilde.channels.length), inline: true },
-        { name: "Dernier scan", value: dateScan(guilde.scanned_at), inline: true },
+        {
+          name: "Dernier scan",
+          value: dateScan(guilde.scanned_at),
+          inline: true,
+        },
         {
           name: "Niveau de boost",
-          value: guilde.premium_tier === null ? "—" : `niveau ${guilde.premium_tier}`,
+          value:
+            guilde.premium_tier === null
+              ? "—"
+              : `niveau ${guilde.premium_tier}`,
           inline: true,
         },
         {
           name: "Vérification",
-          value: guilde.verification_level === null ? "—" : `niveau ${guilde.verification_level}`,
+          value:
+            guilde.verification_level === null
+              ? "—"
+              : `niveau ${guilde.verification_level}`,
           inline: true,
         },
       ])
-      .bloc("Répartition des salons", bloquerLignes(repartition.map(([type, nombre]) => `\`${nombre}\` ${type}`)));
+      .bloc(
+        "Répartition des salons",
+        bloquerLignes(
+          repartition.map(([type, nombre]) => `\`${nombre}\` ${type}`),
+        ),
+      );
 
     if (guilde.icon) {
       embed.miniature(
@@ -168,7 +216,8 @@ export class AchilleaCommand {
   async roles(
     @SlashOption({
       name: "identifiant",
-      description: "Identifiant du serveur (par défaut : celui-ci, sinon Achillea)",
+      description:
+        "Identifiant du serveur (par défaut : celui-ci, sinon Achillea)",
       type: ApplicationCommandOptionType.String,
       required: false,
     })
@@ -176,12 +225,15 @@ export class AchilleaCommand {
     interaction: ChatInputCommandInteraction,
   ) {
     await differer(interaction);
-    const guilde = await chargerFiche(interaction, serveurVise(identifiant, interaction));
+    const guilde = await chargerFiche(
+      interaction,
+      serveurVise(identifiant, interaction),
+    );
     if (!guilde) return;
 
     const roles = rolesUtiles(guilde.roles);
     const lignes = roles.map(
-      role =>
+      (role) =>
         `\`${String(role.position).padStart(3, " ")}\` ${role.name}` +
         `${role.color === 0 ? "" : ` · ${couleurHex(role.color)}`}` +
         `${role.managed ? " · intégration" : ""}${role.hoist ? " · affiché à part" : ""}`,
@@ -205,7 +257,8 @@ export class AchilleaCommand {
   async salons(
     @SlashOption({
       name: "identifiant",
-      description: "Identifiant du serveur (par défaut : celui-ci, sinon Achillea)",
+      description:
+        "Identifiant du serveur (par défaut : celui-ci, sinon Achillea)",
       type: ApplicationCommandOptionType.String,
       required: false,
     })
@@ -213,7 +266,10 @@ export class AchilleaCommand {
     interaction: ChatInputCommandInteraction,
   ) {
     await differer(interaction);
-    const guilde = await chargerFiche(interaction, serveurVise(identifiant, interaction));
+    const guilde = await chargerFiche(
+      interaction,
+      serveurVise(identifiant, interaction),
+    );
     if (!guilde) return;
 
     const groupes = grouperParCategorie(guilde.channels);
@@ -231,7 +287,9 @@ export class AchilleaCommand {
       embed.bloc(
         groupe.categorie ?? "Sans catégorie",
         bloquerLignes(
-          groupe.salons.map(salon => `${salon.name} · ${libelleType(salon.type)}`),
+          groupe.salons.map(
+            (salon) => `${salon.name} · ${libelleType(salon.type)}`,
+          ),
           512,
         ),
       );
@@ -252,30 +310,46 @@ export class AchilleaCommand {
 
   @Slash({
     name: "scan",
-    description: "État du scan Achillea : serveurs relevés, membres cumulés, dernier passage",
+    description:
+      "État du scan Achillea : serveurs relevés, membres cumulés, dernier passage",
   })
   async scan(interaction: ChatInputCommandInteraction) {
     await differer(interaction);
     const resultat = await statistiquesGuildes();
     if (!resultat.ok) {
-      const [titre, description] = messageEchec(resultat.raison, resultat.detail);
+      const [titre, description] = messageEchec(
+        resultat.raison,
+        resultat.detail,
+      );
       await repondre(interaction, echec(titre, description));
       return;
     }
     const stats = resultat.valeur;
     const embed = fiche({ titre: "Scan Achillea", intention: "marque" })
       .champs([
-        { name: "Serveurs scannés", value: String(stats.total_guilds), inline: true },
+        {
+          name: "Serveurs scannés",
+          value: String(stats.total_guilds),
+          inline: true,
+        },
         {
           name: "Membres cumulés",
           value: stats.total_members.toLocaleString("fr-FR"),
           inline: true,
         },
-        { name: "Dernier passage", value: dateScan(stats.last_scan), inline: true },
+        {
+          name: "Dernier passage",
+          value: dateScan(stats.last_scan),
+          inline: true,
+        },
       ])
       .bloc(
         "Salons par type",
-        bloquerLignes(stats.by_channel_type.map(({ type, count }) => `\`${count}\` ${libelleType(type)}`)),
+        bloquerLignes(
+          stats.by_channel_type.map(
+            ({ type, count }) => `\`${count}\` ${libelleType(type)}`,
+          ),
+        ),
       )
       .finir();
     piedDeCommande(embed, interaction);

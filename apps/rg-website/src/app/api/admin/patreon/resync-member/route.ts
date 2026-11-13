@@ -25,7 +25,10 @@ export async function POST(req: Request) {
 
   const result = await exportSingleMember(memberId);
   if (!result.ok) {
-    return NextResponse.json({ detail: result.error, error: "resync_failed" }, { status: 500 });
+    return NextResponse.json(
+      { detail: result.error, error: "resync_failed" },
+      { status: 500 },
+    );
   }
   return NextResponse.json({ ok: true });
 }

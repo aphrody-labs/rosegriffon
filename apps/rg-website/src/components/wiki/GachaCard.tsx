@@ -2,7 +2,10 @@
 
 import { Gift, Shirt } from "lucide-react";
 import Link from "@/components/shared/Link";
-import type { CapsulePrize, Costume } from "@rosegriffon/azalee/wiki/gacha-shared";
+import type {
+  CapsulePrize,
+  Costume,
+} from "@rosegriffon/azalee/wiki/gacha-shared";
 import { cn } from "@/lib/utils";
 
 /**
@@ -11,7 +14,13 @@ import { cn } from "@/lib/utils";
  * réelle du lot — son hash, son contenu (hash), son pool de tirage. Lien vers le
  * détail qui montre la composition complète du pool.
  */
-export function CapsuleCard({ prize, className }: { prize: CapsulePrize; className?: string }) {
+export function CapsuleCard({
+  prize,
+  className,
+}: {
+  prize: CapsulePrize;
+  className?: string;
+}) {
   return (
     <Link
       href={`/wiki/capsule/${prize.id}`}
@@ -27,7 +36,9 @@ export function CapsuleCard({ prize, className }: { prize: CapsulePrize; classNa
           <Gift size={20} aria-hidden="true" />
         </span>
         <div className="min-w-0">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant/60">Lot</span>
+          <span className="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant/60">
+            Lot
+          </span>
           <h3 className="truncate font-mono text-sm font-bold leading-tight text-on-surface transition-colors group-hover:text-primary">
             {prize.id}
           </h3>
@@ -36,11 +47,15 @@ export function CapsuleCard({ prize, className }: { prize: CapsulePrize; classNa
       <div className="mt-auto space-y-1 text-xs">
         <div className="flex items-center justify-between gap-2">
           <span className="text-on-surface-variant/70">Contenu</span>
-          <span className="truncate font-mono text-on-surface-variant">{prize.contentRef}</span>
+          <span className="truncate font-mono text-on-surface-variant">
+            {prize.contentRef}
+          </span>
         </div>
         <div className="flex items-center justify-between gap-2">
           <span className="text-on-surface-variant/70">Pool</span>
-          <span className="truncate font-mono text-on-surface-variant">{prize.poolRef}</span>
+          <span className="truncate font-mono text-on-surface-variant">
+            {prize.poolRef}
+          </span>
         </div>
       </div>
     </Link>
@@ -52,7 +67,13 @@ export function CapsuleCard({ prize, className }: { prize: CapsulePrize; classNa
  * affichable directement) ; on présente l'index, le type et le hash, sans inventer
  * de visuel.
  */
-export function CostumeCard({ costume, className }: { costume: Costume; className?: string }) {
+export function CostumeCard({
+  costume,
+  className,
+}: {
+  costume: Costume;
+  className?: string;
+}) {
   const typeColor =
     costume.type === 0
       ? "bg-slate-500/15 text-slate-500"
@@ -77,7 +98,9 @@ export function CostumeCard({ costume, className }: { costume: Costume; classNam
           <span className="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant/60">
             Costume #{costume.index}
           </span>
-          <h3 className="truncate font-mono text-sm font-bold leading-tight text-on-surface">{costume.modelRef}</h3>
+          <h3 className="truncate font-mono text-sm font-bold leading-tight text-on-surface">
+            {costume.modelRef}
+          </h3>
         </div>
       </div>
       <div className="mt-auto flex flex-wrap items-center gap-1.5">

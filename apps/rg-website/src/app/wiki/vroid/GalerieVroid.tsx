@@ -14,14 +14,26 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ExternalLink, Heart } from "lucide-react";
 import { estChargeable, nomModele } from "@/lib/vroid/licence";
-import type { ModeleVroid, PageModeles, SourceModeles } from "@/lib/vroid/types";
+import type {
+  ModeleVroid,
+  PageModeles,
+  SourceModeles,
+} from "@/lib/vroid/types";
 import { ConditionsUtilisation } from "./ConditionsUtilisation";
 import { urlVignette } from "./vignette";
 import { VisionneuseVrm } from "./VisionneuseVrm";
 
 /** Onglets proposés, avec leur libellé et le besoin d'un compte lié. */
-const ONGLETS: { source: SourceModeles; libelle: string; connexionRequise: boolean }[] = [
-  { source: "staff_picks", libelle: "Sélection VRoid Hub", connexionRequise: false },
+const ONGLETS: {
+  source: SourceModeles;
+  libelle: string;
+  connexionRequise: boolean;
+}[] = [
+  {
+    source: "staff_picks",
+    libelle: "Sélection VRoid Hub",
+    connexionRequise: false,
+  },
   { source: "recherche", libelle: "Recherche", connexionRequise: false },
   { source: "compte", libelle: "Mes modèles", connexionRequise: true },
   { source: "coeurs", libelle: "Mes coups de cœur", connexionRequise: true },
@@ -36,22 +48,36 @@ export interface GalerieVroidProps {
   connecte: boolean;
 }
 
-export function GalerieVroid({ pageInitiale, erreurInitiale = null, connecte }: GalerieVroidProps) {
+export function GalerieVroid({
+  pageInitiale,
+  erreurInitiale = null,
+  connecte,
+}: GalerieVroidProps) {
   const firstLoad = useRef(true);
   const [source, setSource] = useState<SourceModeles>("staff_picks");
   const [motCle, setMotCle] = useState("");
   const [motCleActif, setMotCleActif] = useState("");
-  const [telechargeablesSeulement, setTelechargeablesSeulement] = useState(false);
+  const [telechargeablesSeulement, setTelechargeablesSeulement] =
+    useState(false);
 
   const [modeles, setModeles] = useState<ModeleVroid[]>(pageInitiale.modeles);
-  const [curseur, setCurseur] = useState<string | null>(pageInitiale.curseurSuivant);
+  const [curseur, setCurseur] = useState<string | null>(
+    pageInitiale.curseurSuivant,
+  );
   const [loadingMore, setChargement] = useState(false);
-  const queryOwner = JSON.stringify([source, motCleActif, telechargeablesSeulement]);
+  const queryOwner = JSON.stringify([
+    source,
+    motCleActif,
+    telechargeablesSeulement,
+  ]);
   const [completedOwner, setCompletedOwner] = useState(queryOwner);
   const emptySearch = source === "recherche" && motCleActif.trim().length === 0;
-  const chargement = loadingMore || (!emptySearch && completedOwner !== queryOwner);
+  const chargement =
+    loadingMore || (!emptySearch && completedOwner !== queryOwner);
   const [erreur, setErreur] = useState<string | null>(erreurInitiale);
-  const [selection, setSelection] = useState<ModeleVroid | null>(pageInitiale.modeles[0] ?? null);
+  const [selection, setSelection] = useState<ModeleVroid | null>(
+    pageInitiale.modeles[0] ?? null,
+  );
 
   /**
    * Charge une page depuis le relais serveur.
@@ -59,7 +85,11 @@ export function GalerieVroid({ pageInitiale, erreurInitiale = null, connecte }: 
    * @param suite `true` pour ajouter à la suite, `false` pour repartir de zéro.
    */
   const charger = useCallback(
-    async (suite: boolean, signal?: AbortSignal, curseurCourant?: string | null) => {
+    async (
+      suite: boolean,
+      signal?: AbortSignal,
+      curseurCourant?: string | null,
+    ) => {
       if (source === "recherche" && motCleActif.trim().length === 0) return;
 
       if (suite) {
@@ -72,27 +102,37 @@ export function GalerieVroid({ pageInitiale, erreurInitiale = null, connecte }: 
         if (telechargeablesSeulement) parametres.set("telechargeables", "1");
         if (suite && curseurCourant) parametres.set("curseur", curseurCourant);
 
-        const reponse = await fetch(`/api/vroid/models?${parametres}`, { signal });
-        const charge = (await reponse.json()) as Partial<PageModeles> & { erreur?: string };
+        const reponse = await fetch(`/api/vroid/models?${parametres}`, {
+          signal,
+        });
+        const charge = (await reponse.json()) as Partial<PageModeles> & {
+          erreur?: string;
+        };
         if (signal?.aborted) return;
         setErreur(null);
 
-        if (!reponse.ok) throw new Error(charge.erreur ?? `Erreur ${reponse.status}.`);
+        if (!reponse.ok)
+          throw new Error(charge.erreur ?? `Erreur ${reponse.status}.`);
 
         const recus = charge.modeles ?? [];
         // Déduplication par identifiant : le tri par pertinence de la
         // recherche VRoid Hub n'est pas stable dans le temps, et un curseur
         // repris peut ramener un modèle déjà affiché (cf. `rechercherModeles`).
-        setModeles(precedents => {
+        setModeles((precedents) => {
           if (!suite) return recus;
-          const vus = new Set(precedents.map(modele => modele.id));
-          return [...precedents, ...recus.filter(modele => !vus.has(modele.id))];
+          const vus = new Set(precedents.map((modele) => modele.id));
+          return [
+            ...precedents,
+            ...recus.filter((modele) => !vus.has(modele.id)),
+          ];
         });
         setCurseur(charge.curseurSuivant ?? null);
         if (!suite) setSelection(recus[0] ?? null);
       } catch (cause) {
         if (signal?.aborted) return;
-        setErreur(cause instanceof Error ? cause.message : "Chargement impossible.");
+        setErreur(
+          cause instanceof Error ? cause.message : "Chargement impossible.",
+        );
         if (!suite) {
           setModeles([]);
           setCurseur(null);
@@ -114,7 +154,12 @@ export function GalerieVroid({ pageInitiale, erreurInitiale = null, connecte }: 
     // La page initiale est déjà en place : ne pas la redemander au montage.
     if (firstLoad.current) {
       firstLoad.current = false;
-      if (source === "staff_picks" && motCleActif === "" && !telechargeablesSeulement) return;
+      if (
+        source === "staff_picks" &&
+        motCleActif === "" &&
+        !telechargeablesSeulement
+      )
+        return;
     }
 
     const abandon = new AbortController();
@@ -125,7 +170,7 @@ export function GalerieVroid({ pageInitiale, erreurInitiale = null, connecte }: 
   return (
     <div className="space-y-5">
       <div className="flex flex-wrap items-center gap-2">
-        {ONGLETS.map(onglet => {
+        {ONGLETS.map((onglet) => {
           const indisponible = onglet.connexionRequise && !connecte;
           return (
             <button
@@ -137,7 +182,11 @@ export function GalerieVroid({ pageInitiale, erreurInitiale = null, connecte }: 
               disabled={indisponible}
               key={onglet.source}
               onClick={() => setSource(onglet.source)}
-              title={indisponible ? "Liez votre compte VRoid Hub pour y accéder." : undefined}
+              title={
+                indisponible
+                  ? "Liez votre compte VRoid Hub pour y accéder."
+                  : undefined
+              }
               type="button"
             >
               {onglet.libelle}
@@ -149,14 +198,14 @@ export function GalerieVroid({ pageInitiale, erreurInitiale = null, connecte }: 
       {source === "recherche" && (
         <form
           className="flex flex-wrap items-center gap-2"
-          onSubmit={evenement => {
+          onSubmit={(evenement) => {
             evenement.preventDefault();
             setMotCleActif(motCle);
           }}
         >
           <input
             className="min-w-0 flex-1 rounded-full border border-outline-variant/40 bg-surface-container-low px-4 py-2 text-sm text-on-surface outline-none focus:border-primary"
-            onChange={evenement => setMotCle(evenement.target.value)}
+            onChange={(evenement) => setMotCle(evenement.target.value)}
             placeholder="Chercher un modèle sur VRoid Hub…"
             type="search"
             value={motCle}
@@ -174,10 +223,13 @@ export function GalerieVroid({ pageInitiale, erreurInitiale = null, connecte }: 
         <input
           checked={telechargeablesSeulement}
           className="size-4 accent-[color:var(--color-primary)]"
-          onChange={evenement => setTelechargeablesSeulement(evenement.target.checked)}
+          onChange={(evenement) =>
+            setTelechargeablesSeulement(evenement.target.checked)
+          }
           type="checkbox"
         />
-        N&apos;afficher que les modèles affichables en 3D (téléchargement autorisé par l&apos;auteur)
+        N&apos;afficher que les modèles affichables en 3D (téléchargement
+        autorisé par l&apos;auteur)
       </label>
 
       {erreur && (
@@ -196,7 +248,7 @@ export function GalerieVroid({ pageInitiale, erreurInitiale = null, connecte }: 
             </p>
           ) : (
             <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-4">
-              {(emptySearch ? [] : modeles).map(modele => (
+              {(emptySearch ? [] : modeles).map((modele) => (
                 <CarteModele
                   actif={selection?.id === modele.id}
                   key={modele.id}
@@ -238,8 +290,18 @@ export function GalerieVroid({ pageInitiale, erreurInitiale = null, connecte }: 
 }
 
 /** Vignette cliquable d'un modèle dans la grille. */
-function CarteModele({ modele, actif, onSelection }: { modele: ModeleVroid; actif: boolean; onSelection: () => void }) {
-  const vignette = urlVignette(modele.portrait_image?.sq300?.url ?? modele.portrait_image?.original?.url);
+function CarteModele({
+  modele,
+  actif,
+  onSelection,
+}: {
+  modele: ModeleVroid;
+  actif: boolean;
+  onSelection: () => void;
+}) {
+  const vignette = urlVignette(
+    modele.portrait_image?.sq300?.url ?? modele.portrait_image?.original?.url,
+  );
   const nom = nomModele(modele);
 
   return (
@@ -272,11 +334,20 @@ function CarteModele({ modele, actif, onSelection }: { modele: ModeleVroid; acti
         </div>
         <div className="space-y-0.5 p-2.5">
           <p className="truncate text-sm font-medium text-on-surface">{nom}</p>
-          <p className="truncate text-xs text-on-surface-variant">{modele.character?.user?.name}</p>
+          <p className="truncate text-xs text-on-surface-variant">
+            {modele.character?.user?.name}
+          </p>
           <p className="flex items-center gap-1 text-xs text-on-surface-variant">
-            <span className="tabular-nums">{modele.heart_count.toLocaleString("fr")}</span>
-            <Heart className="size-3 text-rose-500 fill-rose-500/80 shrink-0" aria-label="coups de cœur" />
-            <span className="tabular-nums">· {modele.view_count.toLocaleString("fr")} vues</span>
+            <span className="tabular-nums">
+              {modele.heart_count.toLocaleString("fr")}
+            </span>
+            <Heart
+              className="size-3 text-rose-500 fill-rose-500/80 shrink-0"
+              aria-label="coups de cœur"
+            />
+            <span className="tabular-nums">
+              · {modele.view_count.toLocaleString("fr")} vues
+            </span>
           </p>
         </div>
       </button>
@@ -290,16 +361,22 @@ function FicheModele({ modele }: { modele: ModeleVroid }) {
 
   return (
     <div className="space-y-2 rounded-2xl border border-outline-variant/15 bg-surface-container p-4">
-      <h2 className="text-base font-semibold text-on-surface">{nomModele(modele)}</h2>
+      <h2 className="text-base font-semibold text-on-surface">
+        {nomModele(modele)}
+      </h2>
       <p className="text-sm text-on-surface-variant">
-        Par <span className="font-medium text-on-surface">{modele.character?.user?.name}</span> — le crédit de
-        l&apos;auteur suit le modèle.
+        Par{" "}
+        <span className="font-medium text-on-surface">
+          {modele.character?.user?.name}
+        </span>{" "}
+        — le crédit de l&apos;auteur suit le modèle.
       </p>
 
       {version && (
         <p className="text-xs text-on-surface-variant tabular-nums">
-          {version.triangle_count.toLocaleString("fr")} triangles · {version.material_count.toLocaleString("fr")}{" "}
-          matériaux · {version.joint_count.toLocaleString("fr")} os
+          {version.triangle_count.toLocaleString("fr")} triangles ·{" "}
+          {version.material_count.toLocaleString("fr")} matériaux ·{" "}
+          {version.joint_count.toLocaleString("fr")} os
         </p>
       )}
 

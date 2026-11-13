@@ -1,7 +1,13 @@
 import { describe, expect, test } from "bun:test";
 
-import { compareCastCandidates, scoreCastCandidate } from "@rosegriffon/achillea-core/casts";
-import { CastAvailabilityStatus, CastSlotRole } from "@rosegriffon/achillea-types";
+import {
+  compareCastCandidates,
+  scoreCastCandidate,
+} from "@rosegriffon/achillea-core/casts";
+import {
+  CastAvailabilityStatus,
+  CastSlotRole,
+} from "@rosegriffon/achillea-types";
 
 describe("cast assignment scoring", () => {
   test("prefers an explicit role and available status", () => {
@@ -26,7 +32,11 @@ describe("cast assignment scoring", () => {
       binomeBonus: 0,
     } as const;
     expect(
-      compareCastCandidates({ ...base, userId: "a" }, { ...base, userId: "b" }, CastSlotRole.CasterMain),
+      compareCastCandidates(
+        { ...base, userId: "a" },
+        { ...base, userId: "b" },
+        CastSlotRole.CasterMain,
+      ),
     ).toBeLessThan(0);
   });
 });

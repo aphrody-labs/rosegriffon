@@ -180,7 +180,11 @@ export function variantesRecherche(hashtag: string): string[] {
   const variantes: string[] = [base];
   const ajouter = (candidate: string) => {
     const propre = candidate.replace(/[^\p{L}\p{N}_]/gu, "");
-    if (propre && propre.toLowerCase() !== base && !variantes.includes(propre.toLowerCase())) {
+    if (
+      propre &&
+      propre.toLowerCase() !== base &&
+      !variantes.includes(propre.toLowerCase())
+    ) {
       variantes.push(propre.toLowerCase());
     }
   };
@@ -242,7 +246,7 @@ function pointsDeComposition(origine: string, base: string): number[] {
   }
   // Repli : un hashtag écrit tout en minuscules ne dit rien de sa composition.
   if (positions.size === 0 && base.length >= 6) return [];
-  return [...positions].filter(p => p > 0 && p < base.length);
+  return [...positions].filter((p) => p > 0 && p < base.length);
 }
 
 /** Ce qu'un post porte réellement, et à quel hashtag de campagne ça correspond. */
@@ -265,13 +269,16 @@ export interface Appariement {
  * @param texte   le texte du post
  * @param hashtags les hashtags de la campagne (déclarés + rattrapage)
  */
-export function apparierHashtag(texte: string, hashtags: readonly string[]): Appariement | null {
+export function apparierHashtag(
+  texte: string,
+  hashtags: readonly string[],
+): Appariement | null {
   const ecrits = hashtagsDuTexte(texte);
   if (ecrits.length === 0 || hashtags.length === 0) return null;
 
   const cibles = hashtags
-    .map(h => ({ declare: h, normalise: normaliserHashtag(h) }))
-    .filter(c => c.normalise.length > 0);
+    .map((h) => ({ declare: h, normalise: normaliserHashtag(h) }))
+    .filter((c) => c.normalise.length > 0);
 
   let meilleur: Appariement | null = null;
 
@@ -286,7 +293,10 @@ export function apparierHashtag(texte: string, hashtags: readonly string[]): App
       const tolerance = toleranceFautes(cible.normalise.length);
       if (tolerance === 0) continue;
       const distance = distanceFaute(normalise, cible.normalise, tolerance);
-      if (distance <= tolerance && (meilleur === null || distance < meilleur.fautes)) {
+      if (
+        distance <= tolerance &&
+        (meilleur === null || distance < meilleur.fautes)
+      ) {
         meilleur = { hashtag: cible.declare, ecrit, fautes: distance };
       }
     }
@@ -306,7 +316,11 @@ export function apparierHashtag(texte: string, hashtags: readonly string[]): App
  * @param variantes graphies normalisées (sans croisillon)
  * @param suffixe   filtres à recoller à chaque requête (`-filter:replies since:…`)
  */
-export function requetesVariantes(variantes: readonly string[], suffixe = "", longueurMax = 400): string[] {
+export function requetesVariantes(
+  variantes: readonly string[],
+  suffixe = "",
+  longueurMax = 400,
+): string[] {
   const uniques = [...new Set(variantes.filter(Boolean))];
   if (uniques.length === 0) return [];
 
@@ -315,14 +329,18 @@ export function requetesVariantes(variantes: readonly string[], suffixe = "", lo
 
   const vider = () => {
     if (lot.length === 0) return;
-    const groupe = lot.length === 1 ? `#${lot[0]}` : `(${lot.map(v => `#${v}`).join(" OR ")})`;
+    const groupe =
+      lot.length === 1
+        ? `#${lot[0]}`
+        : `(${lot.map((v) => `#${v}`).join(" OR ")})`;
     requetes.push(suffixe ? `${groupe} ${suffixe}`.trim() : groupe);
     lot = [];
   };
 
   for (const variante of uniques) {
     const essai = [...lot, variante];
-    const longueur = essai.reduce((n, v) => n + v.length + 5, 0) + suffixe.length + 2;
+    const longueur =
+      essai.reduce((n, v) => n + v.length + 5, 0) + suffixe.length + 2;
     if (lot.length > 0 && longueur > longueurMax) vider();
     lot.push(variante);
   }

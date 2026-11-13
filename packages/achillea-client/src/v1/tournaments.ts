@@ -55,8 +55,18 @@ import {
   TournamentState,
 } from "@rosegriffon/achillea-types/enums/eventEnums";
 
-import { apiDateSchema, matchModeSchema, paginatedSchema, successResponseSchema, userDtoSchema } from "./common";
-import { AchilleaResource, encodePathSegment, type AchilleaClientResult } from "./http";
+import {
+  apiDateSchema,
+  matchModeSchema,
+  paginatedSchema,
+  successResponseSchema,
+  userDtoSchema,
+} from "./common";
+import {
+  AchilleaResource,
+  encodePathSegment,
+  type AchilleaClientResult,
+} from "./http";
 import { organizationDtoSchema } from "./organizations";
 import type {
   CancelTournamentResult,
@@ -78,15 +88,31 @@ import type {
 
 // ── Enums ───────────────────────────────────────────────────────────────────
 
-export const eventTypeSchema = z.enum(EventTypeEnum) satisfies z.ZodType<EventTypeEnum>;
-export const tournamentStateSchema = z.enum(TournamentState) satisfies z.ZodType<TournamentState>;
-export const participantStatusSchema = z.enum(ParticipantStatus) satisfies z.ZodType<ParticipantStatus>;
-export const scoreReportPolicySchema = z.enum(ScoreReportPolicy) satisfies z.ZodType<ScoreReportPolicy>;
+export const eventTypeSchema = z.enum(
+  EventTypeEnum,
+) satisfies z.ZodType<EventTypeEnum>;
+export const tournamentStateSchema = z.enum(
+  TournamentState,
+) satisfies z.ZodType<TournamentState>;
+export const participantStatusSchema = z.enum(
+  ParticipantStatus,
+) satisfies z.ZodType<ParticipantStatus>;
+export const scoreReportPolicySchema = z.enum(
+  ScoreReportPolicy,
+) satisfies z.ZodType<ScoreReportPolicy>;
 export const stageTypeSchema = z.enum(StageType) satisfies z.ZodType<StageType>;
-export const matchFormatSchema = z.enum(MatchFormat) satisfies z.ZodType<MatchFormat>;
-export const tournamentEventTypeSchema = z.enum(TournamentEventType) satisfies z.ZodType<TournamentEventType>;
-export const lobbyStateSchema = z.enum(LobbyState) satisfies z.ZodType<LobbyState>;
-export const lobbyUserStateSchema = z.enum(LobbyUserState) satisfies z.ZodType<LobbyUserState>;
+export const matchFormatSchema = z.enum(
+  MatchFormat,
+) satisfies z.ZodType<MatchFormat>;
+export const tournamentEventTypeSchema = z.enum(
+  TournamentEventType,
+) satisfies z.ZodType<TournamentEventType>;
+export const lobbyStateSchema = z.enum(
+  LobbyState,
+) satisfies z.ZodType<LobbyState>;
+export const lobbyUserStateSchema = z.enum(
+  LobbyUserState,
+) satisfies z.ZodType<LobbyUserState>;
 export const teamSideSchema = z.enum(TeamSide) satisfies z.ZodType<TeamSide>;
 
 /** `SeedOrdering` est une union de chaînes recopiée de `brackets-model`. */
@@ -109,24 +135,28 @@ function entityRef<T>(schema: z.ZodType<T>): z.ZodType<number | T> {
   return z.union([z.number(), schema]);
 }
 
-export const tournamentSeriesSchema: z.ZodType<WireTournamentSeries> = z.object({
-  id: z.number(),
-  name: z.string(),
-  description: z.string(),
-  logo: z.string(),
-  organization: entityRef(organizationDtoSchema),
-  tournaments: z.array(z.lazy(() => entityRef(tournamentSchema))).optional(),
-});
+export const tournamentSeriesSchema: z.ZodType<WireTournamentSeries> = z.object(
+  {
+    id: z.number(),
+    name: z.string(),
+    description: z.string(),
+    logo: z.string(),
+    organization: entityRef(organizationDtoSchema),
+    tournaments: z.array(z.lazy(() => entityRef(tournamentSchema))).optional(),
+  },
+);
 
-export const tournamentListItemSchema: z.ZodType<TournamentListItem> = z.object({
-  id: z.number(),
-  name: z.string(),
-  description: z.string(),
-  type: z.string(),
-  status: z.string().nullable(),
-  createdAt: apiDateSchema,
-  updatedAt: apiDateSchema,
-});
+export const tournamentListItemSchema: z.ZodType<TournamentListItem> = z.object(
+  {
+    id: z.number(),
+    name: z.string(),
+    description: z.string(),
+    type: z.string(),
+    status: z.string().nullable(),
+    createdAt: apiDateSchema,
+    updatedAt: apiDateSchema,
+  },
+);
 
 export const tournamentSchema: z.ZodType<WireTournament> = z.object({
   id: z.number(),
@@ -414,7 +444,9 @@ export const statsHubSchema = z.object({
     mostTitles: statsHubPlayerEntrySchema.nullable(),
     mostTournaments: statsHubPlayerEntrySchema.nullable(),
     bestStreakPlayer: statsHubPlayerEntrySchema.nullable(),
-    biggestTournament: z.object({ id: z.number(), name: z.string(), size: z.number() }).nullable(),
+    biggestTournament: z
+      .object({ id: z.number(), name: z.string(), size: z.number() })
+      .nullable(),
     highestScoringMatch: statsHubRecordSchema.nullable(),
     closestFinal: statsHubRecordSchema.nullable(),
     biggestBlowoutFinal: statsHubRecordSchema.nullable(),
@@ -557,25 +589,40 @@ export type TournamentListQuery = {
 /** 35 routes. */
 export class TournamentsResource extends AchilleaResource {
   /** `GET /tournaments` — liste paginée, filtrable par organisation et par état. */
-  list(query: TournamentListQuery = {}): Promise<AchilleaClientResult<Paginated<TournamentListItem>>> {
-    return this.http.get("/tournaments", paginatedSchema(tournamentListItemSchema), {
-      query,
-    });
+  list(
+    query: TournamentListQuery = {},
+  ): Promise<AchilleaClientResult<Paginated<TournamentListItem>>> {
+    return this.http.get(
+      "/tournaments",
+      paginatedSchema(tournamentListItemSchema),
+      {
+        query,
+      },
+    );
   }
 
   /** `GET /tournaments/:id` — triplet `[tournoi, participants, données de bracket]`. */
   get(id: number): Promise<AchilleaClientResult<TournamentDetail>> {
-    return this.http.get(`/tournaments/${encodePathSegment(id)}`, tournamentDetailSchema);
+    return this.http.get(
+      `/tournaments/${encodePathSegment(id)}`,
+      tournamentDetailSchema,
+    );
   }
 
   /** `GET /tournaments/:id/summary` — top 10 et statistiques de matchs. */
   summary(id: number): Promise<AchilleaClientResult<TournamentSummary>> {
-    return this.http.get(`/tournaments/${encodePathSegment(id)}/summary`, tournamentSummarySchema);
+    return this.http.get(
+      `/tournaments/${encodePathSegment(id)}/summary`,
+      tournamentSummarySchema,
+    );
   }
 
   /** `GET /tournaments/:id/events` — journal métier du tournoi. */
   events(id: number): Promise<AchilleaClientResult<TournamentEventDTO[]>> {
-    return this.http.get(`/tournaments/${encodePathSegment(id)}/events`, z.array(tournamentEventDtoSchema));
+    return this.http.get(
+      `/tournaments/${encodePathSegment(id)}/events`,
+      z.array(tournamentEventDtoSchema),
+    );
   }
 
   /** `GET /tournaments/circuit/ranking` — classement circuit joueurs et clans. */
@@ -589,77 +636,151 @@ export class TournamentsResource extends AchilleaResource {
   }
 
   /** `GET /tournaments/circuit/players/:userId` — profil circuit d'un joueur. */
-  circuitPlayer(userId: string): Promise<AchilleaClientResult<PlayerCircuitProfile>> {
-    return this.http.get(`/tournaments/circuit/players/${encodePathSegment(userId)}`, playerCircuitProfileSchema);
+  circuitPlayer(
+    userId: string,
+  ): Promise<AchilleaClientResult<PlayerCircuitProfile>> {
+    return this.http.get(
+      `/tournaments/circuit/players/${encodePathSegment(userId)}`,
+      playerCircuitProfileSchema,
+    );
   }
 
   /** `POST /tournaments/create/achillea` — création par une organisation. */
-  create(payload: NewTournamentDTO): Promise<AchilleaClientResult<WireTournament>> {
-    return this.http.post("/tournaments/create/achillea", tournamentSchema, payload);
+  create(
+    payload: NewTournamentDTO,
+  ): Promise<AchilleaClientResult<WireTournament>> {
+    return this.http.post(
+      "/tournaments/create/achillea",
+      tournamentSchema,
+      payload,
+    );
   }
 
   /** `PUT /tournaments/:id/edit` — mise à jour complète (organisateurs). */
-  update(id: number, payload: NewTournamentDTO): Promise<AchilleaClientResult<WireTournament>> {
-    return this.http.put(`/tournaments/${encodePathSegment(id)}/edit`, tournamentSchema, payload);
+  update(
+    id: number,
+    payload: NewTournamentDTO,
+  ): Promise<AchilleaClientResult<WireTournament>> {
+    return this.http.put(
+      `/tournaments/${encodePathSegment(id)}/edit`,
+      tournamentSchema,
+      payload,
+    );
   }
 
   /** `POST /tournaments/open-registrations/:id` — ouvre les inscriptions. */
-  openRegistrations(id: number): Promise<AchilleaClientResult<OpenRegistrationsResult>> {
-    return this.http.post(`/tournaments/open-registrations/${encodePathSegment(id)}`, openRegistrationsResultSchema);
+  openRegistrations(
+    id: number,
+  ): Promise<AchilleaClientResult<OpenRegistrationsResult>> {
+    return this.http.post(
+      `/tournaments/open-registrations/${encodePathSegment(id)}`,
+      openRegistrationsResultSchema,
+    );
   }
 
   /** `POST /tournaments/participate/:id` — inscription du compte connecté. */
   participate(id: number): Promise<AchilleaClientResult<WireParticipant>> {
-    return this.http.post(`/tournaments/participate/${encodePathSegment(id)}`, participantSchema);
+    return this.http.post(
+      `/tournaments/participate/${encodePathSegment(id)}`,
+      participantSchema,
+    );
   }
 
   /** `POST /tournaments/unregister/:id` — désinscription du compte connecté. */
   unregister(id: number): Promise<AchilleaClientResult<unknown>> {
-    return this.http.post(`/tournaments/unregister/${encodePathSegment(id)}`, z.unknown());
+    return this.http.post(
+      `/tournaments/unregister/${encodePathSegment(id)}`,
+      z.unknown(),
+    );
   }
 
   /** `POST /tournaments/:id/score-policy` — bascule « qui saisit les scores ». */
-  setScorePolicy(id: number, policy: ScoreReportPolicy): Promise<AchilleaClientResult<ScorePolicyResult>> {
-    return this.http.post(`/tournaments/${encodePathSegment(id)}/score-policy`, scorePolicyResultSchema, { policy });
+  setScorePolicy(
+    id: number,
+    policy: ScoreReportPolicy,
+  ): Promise<AchilleaClientResult<ScorePolicyResult>> {
+    return this.http.post(
+      `/tournaments/${encodePathSegment(id)}/score-policy`,
+      scorePolicyResultSchema,
+      { policy },
+    );
   }
 
   /** `POST /tournaments/report-score` — saisie du score d'une manche. */
   reportScore(score: GameScoreDTO): Promise<AchilleaClientResult<unknown>> {
-    return this.http.post("/tournaments/report-score", z.unknown(), { ...score });
+    return this.http.post("/tournaments/report-score", z.unknown(), {
+      ...score,
+    });
   }
 
   /** `POST /tournaments/validate-score` — validation de la manche par un camp ; une série décidée fait avancer le vainqueur et ouvre les lobbys suivants. */
-  validateScore(gameValidation: GameValidatorDTO): Promise<AchilleaClientResult<SerieValidationResult>> {
-    return this.http.post("/tournaments/validate-score", serieValidationSchema, { ...gameValidation });
+  validateScore(
+    gameValidation: GameValidatorDTO,
+  ): Promise<AchilleaClientResult<SerieValidationResult>> {
+    return this.http.post(
+      "/tournaments/validate-score",
+      serieValidationSchema,
+      { ...gameValidation },
+    );
   }
 
   /** `POST /tournaments/unvalidate-score` — retire la validation d'un camp. */
-  unvalidateScore(gameValidation: GameValidatorDTO): Promise<AchilleaClientResult<unknown>> {
-    return this.http.post("/tournaments/unvalidate-score", z.unknown(), { ...gameValidation });
+  unvalidateScore(
+    gameValidation: GameValidatorDTO,
+  ): Promise<AchilleaClientResult<unknown>> {
+    return this.http.post("/tournaments/unvalidate-score", z.unknown(), {
+      ...gameValidation,
+    });
   }
 
   /** `POST /tournaments/remove-participant/:id` — retrait d'un inscrit. */
-  removeParticipant(id: number, userId: string, reason?: string): Promise<AchilleaClientResult<unknown>> {
-    return this.http.post(`/tournaments/remove-participant/${encodePathSegment(id)}`, z.unknown(), { userId, reason });
+  removeParticipant(
+    id: number,
+    userId: string,
+    reason?: string,
+  ): Promise<AchilleaClientResult<unknown>> {
+    return this.http.post(
+      `/tournaments/remove-participant/${encodePathSegment(id)}`,
+      z.unknown(),
+      { userId, reason },
+    );
   }
 
   /** `POST /tournaments/:id/disqualify` — disqualification (motif obligatoire). */
-  disqualifyParticipant(id: number, userId: string, reason: string): Promise<AchilleaClientResult<DisqualifyResult>> {
-    return this.http.post(`/tournaments/${encodePathSegment(id)}/disqualify`, disqualifyResultSchema, {
-      userId,
-      reason,
-    });
+  disqualifyParticipant(
+    id: number,
+    userId: string,
+    reason: string,
+  ): Promise<AchilleaClientResult<DisqualifyResult>> {
+    return this.http.post(
+      `/tournaments/${encodePathSegment(id)}/disqualify`,
+      disqualifyResultSchema,
+      {
+        userId,
+        reason,
+      },
+    );
   }
 
   /** `POST /tournaments/:id/reinstate` — annule une disqualification. */
-  reinstateParticipant(id: number, userId: string): Promise<AchilleaClientResult<ParticipantMutationResult>> {
-    return this.http.post(`/tournaments/${encodePathSegment(id)}/reinstate`, participantMutationResultSchema, {
-      userId,
-    });
+  reinstateParticipant(
+    id: number,
+    userId: string,
+  ): Promise<AchilleaClientResult<ParticipantMutationResult>> {
+    return this.http.post(
+      `/tournaments/${encodePathSegment(id)}/reinstate`,
+      participantMutationResultSchema,
+      {
+        userId,
+      },
+    );
   }
 
   /** `POST /tournaments/:id/promote-participant` — promotion depuis la liste d'attente. */
-  promoteParticipant(id: number, userId: string): Promise<AchilleaClientResult<ParticipantMutationResult>> {
+  promoteParticipant(
+    id: number,
+    userId: string,
+  ): Promise<AchilleaClientResult<ParticipantMutationResult>> {
     return this.http.post(
       `/tournaments/${encodePathSegment(id)}/promote-participant`,
       participantMutationResultSchema,
@@ -668,23 +789,45 @@ export class TournamentsResource extends AchilleaResource {
   }
 
   /** `POST /tournaments/:id/close` — clôture manuelle (`force` passe outre les matchs ouverts). */
-  close(id: number, force = false): Promise<AchilleaClientResult<CloseTournamentResult>> {
-    return this.http.post(`/tournaments/${encodePathSegment(id)}/close`, closeTournamentResultSchema, { force });
+  close(
+    id: number,
+    force = false,
+  ): Promise<AchilleaClientResult<CloseTournamentResult>> {
+    return this.http.post(
+      `/tournaments/${encodePathSegment(id)}/close`,
+      closeTournamentResultSchema,
+      { force },
+    );
   }
 
   /** `POST /tournaments/:id/cancel` — annulation ; l'entité reste consultable. */
-  cancel(id: number, reason: string): Promise<AchilleaClientResult<CancelTournamentResult>> {
-    return this.http.post(`/tournaments/${encodePathSegment(id)}/cancel`, cancelTournamentResultSchema, { reason });
+  cancel(
+    id: number,
+    reason: string,
+  ): Promise<AchilleaClientResult<CancelTournamentResult>> {
+    return this.http.post(
+      `/tournaments/${encodePathSegment(id)}/cancel`,
+      cancelTournamentResultSchema,
+      { reason },
+    );
   }
 
   /** `POST /tournaments/:id/restore` — restaure un tournoi annulé. */
   restore(id: number): Promise<AchilleaClientResult<RestoreTournamentResult>> {
-    return this.http.post(`/tournaments/${encodePathSegment(id)}/restore`, restoreTournamentResultSchema);
+    return this.http.post(
+      `/tournaments/${encodePathSegment(id)}/restore`,
+      restoreTournamentResultSchema,
+    );
   }
 
   /** `POST /tournaments/:id/apply-placement-prizes` — verse le bonus AP podium. */
-  applyPlacementPrizes(id: number): Promise<AchilleaClientResult<PlacementPrizesResult>> {
-    return this.http.post(`/tournaments/${encodePathSegment(id)}/apply-placement-prizes`, placementPrizesResultSchema);
+  applyPlacementPrizes(
+    id: number,
+  ): Promise<AchilleaClientResult<PlacementPrizesResult>> {
+    return this.http.post(
+      `/tournaments/${encodePathSegment(id)}/apply-placement-prizes`,
+      placementPrizesResultSchema,
+    );
   }
 
   /** `POST /tournaments/set-participant-seeding/:id` — place un inscrit à une seed. */
@@ -692,39 +835,69 @@ export class TournamentsResource extends AchilleaResource {
     id: number,
     participant: Pick<WireParticipant, "id" | "seed">,
   ): Promise<AchilleaClientResult<SeedingResult>> {
-    return this.http.post(`/tournaments/set-participant-seeding/${encodePathSegment(id)}`, seedingResultSchema, {
-      participant,
-    });
+    return this.http.post(
+      `/tournaments/set-participant-seeding/${encodePathSegment(id)}`,
+      seedingResultSchema,
+      {
+        participant,
+      },
+    );
   }
 
   /** `POST /tournaments/seed-by-ranked/:id` — seeding 1..N par Elo solo décroissant. */
   seedByRanked(id: number): Promise<AchilleaClientResult<SeedBatchResult>> {
-    return this.http.post(`/tournaments/seed-by-ranked/${encodePathSegment(id)}`, seedBatchResultSchema);
+    return this.http.post(
+      `/tournaments/seed-by-ranked/${encodePathSegment(id)}`,
+      seedBatchResultSchema,
+    );
   }
 
   /** `POST /tournaments/seed-random/:id` — mélange aléatoire des seeds. */
   seedRandom(id: number): Promise<AchilleaClientResult<SeedBatchResult>> {
-    return this.http.post(`/tournaments/seed-random/${encodePathSegment(id)}`, seedBatchResultSchema);
+    return this.http.post(
+      `/tournaments/seed-random/${encodePathSegment(id)}`,
+      seedBatchResultSchema,
+    );
   }
 
   /** `POST /tournaments/clear-seeds/:id` — retire toutes les seeds. */
   clearSeeds(id: number): Promise<AchilleaClientResult<SeedBatchResult>> {
-    return this.http.post(`/tournaments/clear-seeds/${encodePathSegment(id)}`, seedBatchResultSchema);
+    return this.http.post(
+      `/tournaments/clear-seeds/${encodePathSegment(id)}`,
+      seedBatchResultSchema,
+    );
   }
 
   /** `POST /tournaments/generate-bracket/:id` — génère l'arbre du tournoi. */
   generateBracket(id: number): Promise<AchilleaClientResult<SuccessResponse>> {
-    return this.http.post(`/tournaments/generate-bracket/${encodePathSegment(id)}`, successResponseSchema);
+    return this.http.post(
+      `/tournaments/generate-bracket/${encodePathSegment(id)}`,
+      successResponseSchema,
+    );
   }
 
   /** `POST /tournaments/add-managers/:id` — ajoute des organisateurs. */
-  addManagers(id: number, managers: Array<{ id: string }>): Promise<AchilleaClientResult<SuccessResponse>> {
-    return this.http.post(`/tournaments/add-managers/${encodePathSegment(id)}`, successResponseSchema, managers);
+  addManagers(
+    id: number,
+    managers: Array<{ id: string }>,
+  ): Promise<AchilleaClientResult<SuccessResponse>> {
+    return this.http.post(
+      `/tournaments/add-managers/${encodePathSegment(id)}`,
+      successResponseSchema,
+      managers,
+    );
   }
 
   /** `POST /tournaments/remove-manager/:id` — retire un organisateur. */
-  removeManager(id: number, manager: { id: string }): Promise<AchilleaClientResult<SuccessResponse>> {
-    return this.http.post(`/tournaments/remove-manager/${encodePathSegment(id)}`, successResponseSchema, manager);
+  removeManager(
+    id: number,
+    manager: { id: string },
+  ): Promise<AchilleaClientResult<SuccessResponse>> {
+    return this.http.post(
+      `/tournaments/remove-manager/${encodePathSegment(id)}`,
+      successResponseSchema,
+      manager,
+    );
   }
 
   /**
@@ -733,21 +906,33 @@ export class TournamentsResource extends AchilleaResource {
    * avec un message explicite (aucun arbre possible).
    */
   start(id: number): Promise<AchilleaClientResult<TournamentStartResult>> {
-    return this.http.put(`/tournaments/start/${encodePathSegment(id)}`, tournamentStartSchema);
+    return this.http.put(
+      `/tournaments/start/${encodePathSegment(id)}`,
+      tournamentStartSchema,
+    );
   }
 
   /** `PUT /tournaments/next-phase/:id` — avance à la phase suivante. */
   nextPhase(id: number): Promise<AchilleaClientResult<SuccessResponse>> {
-    return this.http.put(`/tournaments/next-phase/${encodePathSegment(id)}`, successResponseSchema);
+    return this.http.put(
+      `/tournaments/next-phase/${encodePathSegment(id)}`,
+      successResponseSchema,
+    );
   }
 
   /** `GET /tournaments/lobbies/:id` — lobbies du tournoi. */
   lobbies(id: number): Promise<AchilleaClientResult<LobbyDTO[]>> {
-    return this.http.get(`/tournaments/lobbies/${encodePathSegment(id)}`, z.array(lobbySchema));
+    return this.http.get(
+      `/tournaments/lobbies/${encodePathSegment(id)}`,
+      z.array(lobbySchema),
+    );
   }
 
   /** `GET /tournaments/lobby/:id` — détail d'un lobby. */
   lobby(id: number): Promise<AchilleaClientResult<LobbyDTO>> {
-    return this.http.get(`/tournaments/lobby/${encodePathSegment(id)}`, lobbySchema);
+    return this.http.get(
+      `/tournaments/lobby/${encodePathSegment(id)}`,
+      lobbySchema,
+    );
   }
 }

@@ -28,7 +28,12 @@ const DEFAULT_LIMIT = 1000;
 const MAX_LIMIT = 5000;
 
 /** Parse un entier de query borné à `[min, max]`, repli `fallback`. */
-function clampInt(raw: string | null, fallback: number, min: number, max: number): number {
+function clampInt(
+  raw: string | null,
+  fallback: number,
+  min: number,
+  max: number,
+): number {
   const n = Number.parseInt(raw ?? "", 10);
   if (!Number.isFinite(n)) return fallback;
   return Math.min(max, Math.max(min, n));
@@ -39,8 +44,18 @@ export async function GET(request: Request): Promise<NextResponse> {
   const rawPath = searchParams.get("path") ?? "";
   const wantMeta = searchParams.get("meta") === "1";
   const query = searchParams.get("q");
-  const offset = clampInt(searchParams.get("offset"), 0, 0, Number.MAX_SAFE_INTEGER);
-  const limit = clampInt(searchParams.get("limit"), DEFAULT_LIMIT, 1, MAX_LIMIT);
+  const offset = clampInt(
+    searchParams.get("offset"),
+    0,
+    0,
+    Number.MAX_SAFE_INTEGER,
+  );
+  const limit = clampInt(
+    searchParams.get("limit"),
+    DEFAULT_LIMIT,
+    1,
+    MAX_LIMIT,
+  );
 
   // Garde-fou : pas de `..`, on borne au sous-arbre `data/` de l'index.
   if (rawPath.includes("..")) {
@@ -58,7 +73,10 @@ export async function GET(request: Request): Promise<NextResponse> {
     if (wantMeta) {
       const meta = await fileMeta(rawPath);
       if (!meta) {
-        return NextResponse.json({ error: "not found", path: rawPath }, { status: 404 });
+        return NextResponse.json(
+          { error: "not found", path: rawPath },
+          { status: 404 },
+        );
       }
       return NextResponse.json(meta, {
         headers: { "Cache-Control": "public, max-age=300, s-maxage=300" },

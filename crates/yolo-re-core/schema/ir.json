@@ -1076,7 +1076,14 @@
                                 "type": "integer"
                               }
                             },
-                            "required": ["kind", "base", "index", "scale", "disp", "bits"],
+                            "required": [
+                              "kind",
+                              "base",
+                              "index",
+                              "scale",
+                              "disp",
+                              "bits"
+                            ],
                             "type": "object"
                           }
                         ]
@@ -1158,7 +1165,14 @@
                                 "type": "integer"
                               }
                             },
-                            "required": ["kind", "base", "index", "scale", "disp", "bits"],
+                            "required": [
+                              "kind",
+                              "base",
+                              "index",
+                              "scale",
+                              "disp",
+                              "bits"
+                            ],
                             "type": "object"
                           }
                         ]
@@ -1170,7 +1184,22 @@
                         "type": "array"
                       },
                       "cond": {
-                        "enum": ["o", "no", "b", "ae", "e", "ne", "be", "a", "s", "ns", "l", "ge", "le", "g"],
+                        "enum": [
+                          "o",
+                          "no",
+                          "b",
+                          "ae",
+                          "e",
+                          "ne",
+                          "be",
+                          "a",
+                          "s",
+                          "ns",
+                          "l",
+                          "ge",
+                          "le",
+                          "g"
+                        ],
                         "type": "string"
                       },
                       "dst": {
@@ -1246,7 +1275,14 @@
                                 "type": "integer"
                               }
                             },
-                            "required": ["kind", "base", "index", "scale", "disp", "bits"],
+                            "required": [
+                              "kind",
+                              "base",
+                              "index",
+                              "scale",
+                              "disp",
+                              "bits"
+                            ],
                             "type": "object"
                           }
                         ]
@@ -1369,7 +1405,14 @@
                                 "type": "integer"
                               }
                             },
-                            "required": ["kind", "base", "index", "scale", "disp", "bits"],
+                            "required": [
+                              "kind",
+                              "base",
+                              "index",
+                              "scale",
+                              "disp",
+                              "bits"
+                            ],
                             "type": "object"
                           }
                         ]
@@ -1434,7 +1477,12 @@
                                             "type": "string"
                                           }
                                         },
-                                        "required": ["kind", "name", "bits", "high"],
+                                        "required": [
+                                          "kind",
+                                          "name",
+                                          "bits",
+                                          "high"
+                                        ],
                                         "type": "object"
                                       },
                                       {
@@ -1488,7 +1536,14 @@
                                             "type": "integer"
                                           }
                                         },
-                                        "required": ["kind", "base", "index", "scale", "disp", "bits"],
+                                        "required": [
+                                          "kind",
+                                          "base",
+                                          "index",
+                                          "scale",
+                                          "disp",
+                                          "bits"
+                                        ],
                                         "type": "object"
                                       }
                                     ]
@@ -1612,7 +1667,15 @@
             "type": "boolean"
           }
         },
-        "required": ["name", "vaddr", "vsize", "file_offset", "file_size", "exec", "write"],
+        "required": [
+          "name",
+          "vaddr",
+          "vsize",
+          "file_offset",
+          "file_size",
+          "exec",
+          "write"
+        ],
         "type": "object"
       },
       "type": "array"

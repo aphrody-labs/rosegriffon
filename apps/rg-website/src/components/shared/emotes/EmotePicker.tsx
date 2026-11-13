@@ -50,7 +50,9 @@ export default function EmotePicker({
 }: EmotePickerProps) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
-  const [activeTab, setActiveTab] = useState<"all" | "gaelle" | "roy" | "rg">("all");
+  const [activeTab, setActiveTab] = useState<"all" | "gaelle" | "roy" | "rg">(
+    "all",
+  );
 
   const handleSelect = (emote: Emote) => {
     onSelect(emote);
@@ -63,14 +65,14 @@ export default function EmotePicker({
 
   // Filtre par personnage (onglet)
   if (activeTab !== "all") {
-    filteredEmotes = filteredEmotes.filter(e => e.character === activeTab);
+    filteredEmotes = filteredEmotes.filter((e) => e.character === activeTab);
   }
 
   // Filtre par recherche
   if (search) {
     const searchLower = search.toLowerCase();
     filteredEmotes = filteredEmotes.filter(
-      e =>
+      (e) =>
         e.name.toLowerCase().includes(searchLower) ||
         e.alt.toLowerCase().includes(searchLower) ||
         e.category.toLowerCase().includes(searchLower),
@@ -112,7 +114,7 @@ export default function EmotePicker({
                 placeholder="Rechercher une emote..."
                 className="pl-10"
                 value={search}
-                onChange={e => setSearch(e.target.value)}
+                onChange={(e) => setSearch(e.target.value)}
               />
             </div>
           </div>
@@ -120,7 +122,9 @@ export default function EmotePicker({
           {/* Onglets par personnage */}
           <Tabs
             value={activeTab}
-            onValueChange={v => setActiveTab(v as "all" | "gaelle" | "roy" | "rg")}
+            onValueChange={(v) =>
+              setActiveTab(v as "all" | "gaelle" | "roy" | "rg")
+            }
             className="flex-1 flex flex-col"
           >
             <div className="px-6 pt-4">
@@ -148,7 +152,7 @@ export default function EmotePicker({
                   </div>
                 ) : (
                   <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-3">
-                    {filteredEmotes.map(emote => (
+                    {filteredEmotes.map((emote) => (
                       <button
                         key={emote.name}
                         onClick={() => handleSelect(emote)}
@@ -156,7 +160,11 @@ export default function EmotePicker({
                         title={emote.alt}
                         type="button"
                       >
-                        <RgEmote name={emote.name as keyof typeof EMOTES} size={emoteSize} animated />
+                        <RgEmote
+                          name={emote.name as keyof typeof EMOTES}
+                          size={emoteSize}
+                          animated
+                        />
                         <span className="text-[10px] text-muted-foreground text-center line-clamp-2 group-hover:text-foreground transition-colors">
                           {emote.name.replaceAll(/-/g, " ")}
                         </span>
@@ -170,7 +178,8 @@ export default function EmotePicker({
 
           {/* Footer avec infos */}
           <div className="px-6 py-3 border-t bg-muted/30 text-xs text-muted-foreground">
-            {filteredEmotes.length} emote{filteredEmotes.length > 1 ? "s" : ""} {search && `pour "${search}"`}
+            {filteredEmotes.length} emote{filteredEmotes.length > 1 ? "s" : ""}{" "}
+            {search && `pour "${search}"`}
           </div>
         </div>
       </DialogContent>

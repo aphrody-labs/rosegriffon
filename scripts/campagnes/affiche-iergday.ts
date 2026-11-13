@@ -55,7 +55,12 @@ interface LigneMesuree {
   /** Le texte VOULU (donc « août » accentué), pas forcément celui qui est imprimé. */
   readonly texte: string;
   /** Boîte d'encre relevée sur l'affiche : x1..x2, y1..y2 inclus. */
-  readonly encre: { readonly x1: number; readonly y1: number; readonly x2: number; readonly y2: number };
+  readonly encre: {
+    readonly x1: number;
+    readonly y1: number;
+    readonly x2: number;
+    readonly y2: number;
+  };
   readonly couleur: keyof typeof COULEURS;
 }
 
@@ -68,9 +73,21 @@ const BLOC_DATE_DE_FIN = {
   bordDroit: 844,
   interligne: 33,
   lignes: [
-    { texte: "Date de fin :", encre: { x1: 687, y1: 64, x2: 843, y2: 86 }, couleur: "texteBlanc" },
-    { texte: "22 août 2026", encre: { x1: 631, y1: 95, x2: 844, y2: 119 }, couleur: "dateJaune" },
-    { texte: "23h59 (FR)", encre: { x1: 704, y1: 131, x2: 843, y2: 155 }, couleur: "texteBlanc" },
+    {
+      texte: "Date de fin :",
+      encre: { x1: 687, y1: 64, x2: 843, y2: 86 },
+      couleur: "texteBlanc",
+    },
+    {
+      texte: "22 août 2026",
+      encre: { x1: 631, y1: 95, x2: 844, y2: 119 },
+      couleur: "dateJaune",
+    },
+    {
+      texte: "23h59 (FR)",
+      encre: { x1: 704, y1: 131, x2: 843, y2: 155 },
+      couleur: "texteBlanc",
+    },
   ] satisfies LigneMesuree[],
 } as const;
 
@@ -152,7 +169,12 @@ interface Retouche {
    *  retouche. Bornée à droite par le fût du « t » (qui commence en x = 742, dès y = 95),
    *  en bas par le sommet du « u » (y = 100), en haut par la ligne « Date de fin : »
    *  (dernière encre en y = 86). */
-  readonly fenetre: { readonly x: number; readonly y: number; readonly largeur: number; readonly hauteur: number };
+  readonly fenetre: {
+    readonly x: number;
+    readonly y: number;
+    readonly largeur: number;
+    readonly hauteur: number;
+  };
   /** Garde-fous : au-delà, le script refuse d'écrire (police manquante, remplacement muet
    *  par une police de repli, mauvaise version de l'affiche…). */
   readonly attendu: {
@@ -189,7 +211,12 @@ interface Contexte2D {
   fillRect(x: number, y: number, l: number, h: number): void;
   fillText(texte: string, x: number, y: number): void;
   strokeText(texte: string, x: number, y: number): void;
-  getImageData(x: number, y: number, l: number, h: number): { data: Uint8ClampedArray };
+  getImageData(
+    x: number,
+    y: number,
+    l: number,
+    h: number,
+  ): { data: Uint8ClampedArray };
   font: string;
   fillStyle: string;
   strokeStyle: string;
@@ -218,7 +245,10 @@ async function chargerCanvas(): Promise<ModuleCanvas> {
   try {
     return (await import("@aphrody/canvas")) as unknown as ModuleCanvas;
   } catch {
-    const chemin = Bun.resolveSync("@aphrody/canvas", join(RACINE, "apps/rg-bot"));
+    const chemin = Bun.resolveSync(
+      "@aphrody/canvas",
+      join(RACINE, "apps/rg-bot"),
+    );
     return (await import(chemin)) as unknown as ModuleCanvas;
   }
 }
@@ -226,7 +256,11 @@ async function chargerCanvas(): Promise<ModuleCanvas> {
 /** Couverture d'encre d'un pixel : 0 = aplat de fond, 1 = couleur de texte pleine.
  *  Le mélange de l'affiche est un fondu exact entre ces deux couleurs (α cohérent sur R, G et B
  *  au centième), donc moyenner deux canaux suffit et évite le bruit du troisième. */
-function couverture(px: Uint8ClampedArray, indice: number, encre: readonly number[]): number {
+function couverture(
+  px: Uint8ClampedArray,
+  indice: number,
+  encre: readonly number[],
+): number {
   const f = COULEURS.fond.rvb;
   const a = (px[indice]! - f[0]!) / (encre[0]! - f[0]!);
   const b = (px[indice + 1]! - f[1]!) / (encre[1]! - f[1]!);
@@ -245,11 +279,17 @@ const lireOption = (nom: string) => {
 const enJson = args.includes("--json");
 const source = lireOption("--source") ?? Bun.env.AFFICHE_SOURCE;
 if (!source) {
-  console.error("usage : bun scripts/campagnes/affiche-iergday.ts --source <affiche.png> [--sortie <png>] [--json]");
+  console.error(
+    "usage : bun scripts/campagnes/affiche-iergday.ts --source <affiche.png> [--sortie <png>] [--json]",
+  );
   process.exit(2);
 }
 const sortie =
-  lireOption("--sortie") ?? join(dirname(source), `${basename(source).replace(/\.png$/i, "")}-corrigee.png`);
+  lireOption("--sortie") ??
+  join(
+    dirname(source),
+    `${basename(source).replace(/\.png$/i, "")}-corrigee.png`,
+  );
 
 const { createCanvas, loadImage, GlobalFonts } = await chargerCanvas();
 if (!GlobalFonts.registerFromPath(join(ICI, POLICE.fichier), POLICE.nom)) {
@@ -292,7 +332,9 @@ for (const retouche of RETOUCHES) {
         horsAplat++;
     }
   if (horsAplat > 0) {
-    console.error(`fenêtre non uniforme (${horsAplat} px hors aplat) — affiche inattendue, rien n'est écrit`);
+    console.error(
+      `fenêtre non uniforme (${horsAplat} px hors aplat) — affiche inattendue, rien n'est écrit`,
+    );
     process.exit(1);
   }
 
@@ -319,10 +361,15 @@ for (const retouche of RETOUCHES) {
     ec.fillText(texte, x, OY);
     return ec.getImageData(0, 0, L, H).data;
   };
-  const sansAccent = tracer(retouche.texte.normalize("NFD").replace(/\p{M}/gu, ""), OX);
+  const sansAccent = tracer(
+    retouche.texte.normalize("NFD").replace(/\p{M}/gu, ""),
+    OX,
+  );
   let sommetBase = H;
   for (let y = 0; y < H; y++)
-    for (let x = 0; x < L; x++) if (sansAccent[(y * L + x) * 4]! / 255 > SEUIL_ENCRE && y < sommetBase) sommetBase = y;
+    for (let x = 0; x < L; x++)
+      if (sansAccent[(y * L + x) * 4]! / 255 > SEUIL_ENCRE && y < sommetBase)
+        sommetBase = y;
 
   //    Le centrage se fait sur le centre de GRAVITÉ de l'encre (sous-pixel) et non sur la boîte
   //    englobante : à 13 px de large, un centrage à la boîte se trompe d'un demi-pixel entier.
@@ -344,10 +391,14 @@ for (const retouche of RETOUCHES) {
   for (let passe = 0; passe < 4; passe++) {
     const m = centreDeGravite(OX + (origineX - Math.round(origineX)));
     if (m.masse < 1) {
-      console.error("la police ne fournit pas d'accent pour ce glyphe — probable substitution muette");
+      console.error(
+        "la police ne fournit pas d'accent pour ce glyphe — probable substitution muette",
+      );
       process.exit(1);
     }
-    const suivant = retouche.centreCible - (m.centre - (OX + (origineX - Math.round(origineX))));
+    const suivant =
+      retouche.centreCible -
+      (m.centre - (OX + (origineX - Math.round(origineX))));
     if (Math.abs(suivant - origineX) < 0.01) {
       origineX = suivant;
       break;
@@ -383,9 +434,15 @@ for (const retouche of RETOUCHES) {
   for (let y = 0; y < HAUTEUR; y++)
     for (let x = 0; x < LARGEUR; x++) {
       const i = (y * LARGEUR + x) * 4;
-      if (avant[i] === apres[i] && avant[i + 1] === apres[i + 1] && avant[i + 2] === apres[i + 2]) continue;
+      if (
+        avant[i] === apres[i] &&
+        avant[i + 1] === apres[i + 1] &&
+        avant[i + 2] === apres[i + 2]
+      )
+        continue;
       modifies++;
-      if (x < f.x || x >= f.x + f.largeur || y < f.y || y >= f.y + f.hauteur) horsFenetre++;
+      if (x < f.x || x >= f.x + f.largeur || y < f.y || y >= f.y + f.hauteur)
+        horsFenetre++;
       if (couverture(apres, i, encre) > SEUIL_ENCRE) {
         if (x < x1) x1 = x;
         if (x > x2) x2 = x;
@@ -405,16 +462,35 @@ for (const retouche of RETOUCHES) {
 
   const soucis: string[] = [];
   if (horsFenetre > 0) soucis.push(`${horsFenetre} px modifiés HORS fenêtre`);
-  if (largeur < retouche.attendu.largeur[0] || largeur > retouche.attendu.largeur[1])
-    soucis.push(`largeur ${largeur} hors de ${retouche.attendu.largeur.join("..")}`);
-  if (hauteur < retouche.attendu.hauteur[0] || hauteur > retouche.attendu.hauteur[1])
-    soucis.push(`hauteur ${hauteur} hors de ${retouche.attendu.hauteur.join("..")}`);
-  if (modifies < retouche.attendu.pixelsModifies[0] || modifies > retouche.attendu.pixelsModifies[1])
-    soucis.push(`${modifies} px modifiés hors de ${retouche.attendu.pixelsModifies.join("..")}`);
-  if (jeuHaut < 1) soucis.push(`accent collé à la ligne du dessus (jeu ${jeuHaut} px)`);
-  if (jeuBas < 0) soucis.push(`accent qui mord sur la hauteur d'x (jeu ${jeuBas} px)`);
+  if (
+    largeur < retouche.attendu.largeur[0] ||
+    largeur > retouche.attendu.largeur[1]
+  )
+    soucis.push(
+      `largeur ${largeur} hors de ${retouche.attendu.largeur.join("..")}`,
+    );
+  if (
+    hauteur < retouche.attendu.hauteur[0] ||
+    hauteur > retouche.attendu.hauteur[1]
+  )
+    soucis.push(
+      `hauteur ${hauteur} hors de ${retouche.attendu.hauteur.join("..")}`,
+    );
+  if (
+    modifies < retouche.attendu.pixelsModifies[0] ||
+    modifies > retouche.attendu.pixelsModifies[1]
+  )
+    soucis.push(
+      `${modifies} px modifiés hors de ${retouche.attendu.pixelsModifies.join("..")}`,
+    );
+  if (jeuHaut < 1)
+    soucis.push(`accent collé à la ligne du dessus (jeu ${jeuHaut} px)`);
+  if (jeuBas < 0)
+    soucis.push(`accent qui mord sur la hauteur d'x (jeu ${jeuBas} px)`);
   if (soucis.length > 0) {
-    console.error(`retouche « ${retouche.nom} » refusée : ${soucis.join(" ; ")}`);
+    console.error(
+      `retouche « ${retouche.nom} » refusée : ${soucis.join(" ; ")}`,
+    );
     process.exit(1);
   }
 
@@ -432,7 +508,8 @@ for (const retouche of RETOUCHES) {
 
 await Bun.write(sortie, toile.toBuffer("image/png"));
 
-if (enJson) console.log(JSON.stringify({ source, sortie, retouches: rapport }, null, 2));
+if (enJson)
+  console.log(JSON.stringify({ source, sortie, retouches: rapport }, null, 2));
 else {
   for (const r of rapport)
     console.log(

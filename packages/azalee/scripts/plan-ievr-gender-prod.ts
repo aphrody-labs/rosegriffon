@@ -17,7 +17,10 @@ import { normaliserId } from "./ievr-names";
 const { values: options } = parseArgs({
   options: {
     prod: { type: "string", default: "var/prod-inagle-characters.jsonl" },
-    genres: { type: "string", default: "C:/src/yolo-re/var/ie-export/azalee/chara_gender.jsonl" },
+    genres: {
+      type: "string",
+      default: "C:/src/yolo-re/var/ie-export/azalee/chara_gender.jsonl",
+    },
     out: { type: "string", default: "var/ievr-gender-prod.sql" },
   },
 });
@@ -26,23 +29,27 @@ const lire = async <T>(chemin: string) =>
   (await Bun.file(chemin).text())
     .split("\n")
     .filter(Boolean)
-    .map(l => JSON.parse(l) as T);
+    .map((l) => JSON.parse(l) as T);
 
-const jeu = await lire<{ chara_id: string; gender: "M" | "F" | null }>(options.genres);
+const jeu = await lire<{ chara_id: string; gender: "M" | "F" | null }>(
+  options.genres,
+);
 const prod = await lire<{ chara_id: string }>(options.prod);
-const parId = new Map(jeu.map(r => [normaliserId(r.chara_id), r.gender]));
+const parId = new Map(jeu.map((r) => [normaliserId(r.chara_id), r.gender]));
 
 const valeurs: string[] = [];
 const stats: Record<string, number> = {};
 let manquants = 0;
-for (const id of new Set(prod.map(p => p.chara_id))) {
+for (const id of new Set(prod.map((p) => p.chara_id))) {
   const genre = parId.get(normaliserId(id));
   if (genre === undefined) {
     manquants++;
     continue;
   }
   stats[String(genre)] = (stats[String(genre)] ?? 0) + 1;
-  valeurs.push(`  ('${id.replaceAll("'", "''")}', ${genre ? `'${genre}'` : "null"})`);
+  valeurs.push(
+    `  ('${id.replaceAll("'", "''")}', ${genre ? `'${genre}'` : "null"})`,
+  );
 }
 
 await Bun.write(
@@ -56,4 +63,6 @@ update inagle_characters c set gender = g.gender from genre_jeu g
 commit;
 `,
 );
-console.log(`chara_id=${valeurs.length + manquants} manquants=${manquants} ${JSON.stringify(stats)} -> ${options.out}`);
+console.log(
+  `chara_id=${valeurs.length + manquants} manquants=${manquants} ${JSON.stringify(stats)} -> ${options.out}`,
+);

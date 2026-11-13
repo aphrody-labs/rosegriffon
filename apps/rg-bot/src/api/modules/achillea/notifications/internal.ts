@@ -18,19 +18,32 @@
 import { Elysia, status, t } from "elysia";
 import type { Kysely } from "kysely";
 import type { Database } from "@rosegriffon/db/schema";
-import { NotificationCategory, NotificationType } from "@rosegriffon/achillea-core/enums";
-import { publierSalonAchillea, SALON_TO_ACHILLEA, type MessageAchillea } from "../../../../lib/achillea-discord";
+import {
+  NotificationCategory,
+  NotificationType,
+} from "@rosegriffon/achillea-core/enums";
+import {
+  publierSalonAchillea,
+  SALON_TO_ACHILLEA,
+  type MessageAchillea,
+} from "../../../../lib/achillea-discord";
 import { dbPlugin } from "../../../plugins/db";
 import { isInternalCall } from "../guards";
 
 /** Livre un évènement aux joueurs connectés ; rend les identifiants atteints. */
-export type RealtimeDelivery = (userIds: readonly string[], event: string, payload: unknown) => Promise<Set<string>>;
+export type RealtimeDelivery = (
+  userIds: readonly string[],
+  event: string,
+  payload: unknown,
+) => Promise<Set<string>>;
 
 const lobbyDelivery: RealtimeDelivery = async (userIds, event, payload) => {
   // Import paresseux : le module Colyseus n'est chargé que si un relais arrive.
   const { LobbyRoom } = await import("../../../ranked/rooms/LobbyRoom");
   const reached = new Set<string>();
-  for (const userId of new Set(userIds)) if (LobbyRoom.livrerEvenement([userId], event, payload) > 0) reached.add(userId);
+  for (const userId of new Set(userIds))
+    if (LobbyRoom.livrerEvenement([userId], event, payload) > 0)
+      reached.add(userId);
   return reached;
 };
 
@@ -42,9 +55,18 @@ export function setRealtimeDelivery(next: RealtimeDelivery | null): void {
 }
 
 const TITLES: Record<string, [string, string]> = {
-  match_found: ["Match trouvé", "Un adversaire a été trouvé pour ta partie classée."],
-  rematch_offer: ["Proposition de revanche", "Ton adversaire te propose une revanche."],
-  ranked_dispute_resolved: ["Litige tranché", "Les administrateurs ont rendu leur décision sur ton litige ranked."],
+  match_found: [
+    "Match trouvé",
+    "Un adversaire a été trouvé pour ta partie classée.",
+  ],
+  rematch_offer: [
+    "Proposition de revanche",
+    "Ton adversaire te propose une revanche.",
+  ],
+  ranked_dispute_resolved: [
+    "Litige tranché",
+    "Les administrateurs ont rendu leur décision sur ton litige ranked.",
+  ],
 };
 
 /** Livre puis consigne ; une panne temps réel n'empêche jamais la persistance. */
@@ -59,19 +81,29 @@ export async function relayToUsers(
   try {
     reached = await delivery(unique, event, payload);
   } catch (err) {
-    console.error(`[notifications] livraison temps réel « ${event} » en échec`, err);
+    console.error(
+      `[notifications] livraison temps réel « ${event} » en échec`,
+      err,
+    );
   }
-  const existing = await db.selectFrom("user").select("id").where("id", "in", unique).execute();
+  const existing = await db
+    .selectFrom("user")
+    .select("id")
+    .where("id", "in", unique)
+    .execute();
   if (existing.length === 0) return { delivered: reached.size, stored: 0 };
   const [title, message] = TITLES[event] ?? [event, `Évènement « ${event} »`];
   const now = new Date();
-  await db.transaction().execute(async trx => {
+  await db.transaction().execute(async (trx) => {
     const notification = await trx
       .insertInto("notification")
       .values({
         title,
         message,
-        type: event === "match_found" ? NotificationType.RANKED_MATCH_FOUND : NotificationType.REALTIME_EVENT,
+        type:
+          event === "match_found"
+            ? NotificationType.RANKED_MATCH_FOUND
+            : NotificationType.REALTIME_EVENT,
         category: NotificationCategory.USER,
         payload: { event, data: payload ?? {} } as Record<string, unknown>,
       })
@@ -98,7 +130,11 @@ export function tournamentOrganizersChannel(): string {
 }
 
 /** Message de la preuve de litige, repris du `RankedDisputeNotifier` legacy. */
-export function rankedProofMessage(lobbyId: number, userId: string, url: string): MessageAchillea {
+export function rankedProofMessage(
+  lobbyId: number,
+  userId: string,
+  url: string,
+): MessageAchillea {
   const absolute = /^https:\/\//i.test(url);
   const embed: Record<string, unknown> = {
     title: "🧾 Nouvelle preuve de litige Ranked",
@@ -107,20 +143,36 @@ export function rankedProofMessage(lobbyId: number, userId: string, url: string)
     footer: { text: "À arbitrer via le dashboard admin." },
     timestamp: new Date().toISOString(),
   };
-  if (!absolute) return { embeds: [{ ...embed, fields: [{ name: "Preuve", value: url.slice(0, 1024) }] }] };
+  if (!absolute)
+    return {
+      embeds: [
+        { ...embed, fields: [{ name: "Preuve", value: url.slice(0, 1024) }] },
+      ],
+    };
   return {
     embeds: [{ ...embed, image: { url } }],
     components: [
-      { type: 1, components: [{ type: 2, style: 5, label: "🔗 Ouvrir la preuve", url }] },
+      {
+        type: 1,
+        components: [{ type: 2, style: 5, label: "🔗 Ouvrir la preuve", url }],
+      },
     ],
   };
 }
 
-const success = t.Object({ success: t.Boolean(), error: t.Optional(t.String()) });
+const success = t.Object({
+  success: t.Boolean(),
+  error: t.Optional(t.String()),
+});
 const forbidden = () => status(403, { success: false, error: "forbidden" });
-const userIds = t.Array(t.String({ pattern: "^\\d{5,24}$" }), { minItems: 1, maxItems: 100 });
+const userIds = t.Array(t.String({ pattern: "^\\d{5,24}$" }), {
+  minItems: 1,
+  maxItems: 100,
+});
 
-export const notificationsInternalController = new Elysia({ prefix: "/notifications" })
+export const notificationsInternalController = new Elysia({
+  prefix: "/notifications",
+})
   .use(dbPlugin)
   .post(
     "/emit-match-found",
@@ -159,8 +211,14 @@ export const notificationsInternalController = new Elysia({ prefix: "/notificati
         rankedProofMessage(body.lobbyId, body.userId, body.url),
       );
       if (!result.ok) {
-        console.error("[notifications] ranked-proof : envoi salon TO en échec", result);
-        return status(502, { success: false, error: result.motif || "discord" });
+        console.error(
+          "[notifications] ranked-proof : envoi salon TO en échec",
+          result,
+        );
+        return status(502, {
+          success: false,
+          error: result.motif || "discord",
+        });
       }
       return { success: true };
     },

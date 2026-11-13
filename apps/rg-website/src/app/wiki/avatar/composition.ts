@@ -2,7 +2,11 @@ import type { EtatAvatar } from "./projet";
 import type { Catalogue } from "./types";
 
 /** Compose la requête canonique depuis les identifiants de pièces, indépendamment de leur rang UI. */
-export function composerUrlAvatar(catalogue: Catalogue, cdn: string, avatar: EtatAvatar): string | null {
+export function composerUrlAvatar(
+  catalogue: Catalogue,
+  cdn: string,
+  avatar: EtatAvatar,
+): string | null {
   const { choix, valeurs, champs, genre, morphologie } = avatar;
   // Le SQUELETTE de la morphologie choisie, et rien d'autre : le serveur en déduit le corps
   // habillé qui va avec. L'appariement corps↔squelette est mesuré (chaque variante de corps
@@ -17,7 +21,7 @@ export function composerUrlAvatar(catalogue: Catalogue, cdn: string, avatar: Eta
   // morphologie du catalogue a exactement une part `edit_body_<nom>`, et les variantes
   // féminines partagent le squelette de leur équivalent — `smallfemale` comme `small`
   // pointent `c000201_edit`, ce qui rend le genre sans effet ici.
-  const catMorpho = catalogue.categories.find(c => c.faceSettingType === 17);
+  const catMorpho = catalogue.categories.find((c) => c.faceSettingType === 17);
   // Le GENRE et la MORPHOLOGIE sont deux réglages distincts de l'interface, mais le jeu, lui,
   // les fond dans une seule liste : `male` et `female` y sont deux morphologies parmi les
   // huit. Sans ce raccord, changer le genre ne changeait rien au modèle — l'état `genre`
@@ -25,11 +29,15 @@ export function composerUrlAvatar(catalogue: Catalogue, cdn: string, avatar: Eta
   const morphos = catalogue.modelesDeBase.morphologies;
   const nomBrut = morphos[morphologie];
   const nomMorpho =
-    genre === 1 && nomBrut === "male" ? "female" : genre === 0 && nomBrut === "female" ? "male" : nomBrut;
+    genre === 1 && nomBrut === "male"
+      ? "female"
+      : genre === 0 && nomBrut === "female"
+        ? "male"
+        : nomBrut;
   const partMorpho =
-    catMorpho?.parts.find(p => p.id === choix[17]) ??
-    catMorpho?.parts.find(p => p.resource === `edit_body_${nomMorpho}`);
-  const cheminSk = partMorpho?.modeles2?.find(m => m.endsWith(".g4sk"));
+    catMorpho?.parts.find((p) => p.id === choix[17]) ??
+    catMorpho?.parts.find((p) => p.resource === `edit_body_${nomMorpho}`);
+  const cheminSk = partMorpho?.modeles2?.find((m) => m.endsWith(".g4sk"));
   const squelette = cheminSk
     ?.split("/")
     .pop()
@@ -42,9 +50,13 @@ export function composerUrlAvatar(catalogue: Catalogue, cdn: string, avatar: Eta
   // de `visages` sont indexées nez-major et ne portent que 7 ressources distinctes par
   // morphologie. Tout le reste du visage (forme, yeux, pupilles, sourcils, bouche) est de la
   // TEXTURE, pas de la géométrie.
-  const catNez = catalogue.categories.find(c => c.faceSettingType === 9);
-  const iNez = Math.max(0, catNez?.parts.findIndex(p => p.id === choix[9]) ?? 0);
-  const visage = catalogue.modelesDeBase.visages[iNez] ?? catalogue.modelesDeBase.visages[0];
+  const catNez = catalogue.categories.find((c) => c.faceSettingType === 9);
+  const iNez = Math.max(
+    0,
+    catNez?.parts.findIndex((p) => p.id === choix[9]) ?? 0,
+  );
+  const visage =
+    catalogue.modelesDeBase.visages[iNez] ?? catalogue.modelesDeBase.visages[0];
   const res = visage?.resources[morphologie] ?? visage?.resources[0];
   if (res) pieces.push(`_facebase/${res}`);
 
@@ -61,14 +73,14 @@ export function composerUrlAvatar(catalogue: Catalogue, cdn: string, avatar: Eta
     // Quelle part exacte le jeu retient au départ n'est pas établi — la première est un
     // défaut assumé, pas un relevé.
     const id = choix[c.faceSettingType];
-    const part = id ? c.parts.find(p => p.id === id) : c.parts[0];
+    const part = id ? c.parts.find((p) => p.id === id) : c.parts[0];
     if (!part) continue;
 
     // `modeles` ET `modeles2` : une coiffure est en DEUX morceaux, l'avant (`_hairF`) et
     // l'arrière (`_hairB`). Sur les 98 coiffures, 45 n'ont QUE `modeles2` — ne lire que
     // `modeles` les rendait chauves — et les 53 autres perdaient leur nuque.
     const mailles = [...part.modeles, ...(part.modeles2 ?? [])].filter(
-      m => m.includes("/20_EDIT/") && m.endsWith(".g4md"),
+      (m) => m.includes("/20_EDIT/") && m.endsWith(".g4md"),
     );
     if (mailles.length > 0) {
       for (const maille of mailles) {
@@ -80,7 +92,9 @@ export function composerUrlAvatar(catalogue: Catalogue, cdn: string, avatar: Eta
       continue;
     }
 
-    const texture = part.modeles.find(m => m.includes("/_facetex/") && m.endsWith(".g4tx"));
+    const texture = part.modeles.find(
+      (m) => m.includes("/_facetex/") && m.endsWith(".g4tx"),
+    );
     if (texture) {
       const rel = texture.split("/_facetex/")[1]?.replace(/\.g4tx$/, "");
       if (rel) couches.push(rel);
@@ -107,7 +121,7 @@ export function composerUrlAvatar(catalogue: Catalogue, cdn: string, avatar: Eta
   const rgbDe = (type: number): string | null => {
     const libre = champs[`couleur.libre.${type}`];
     if (libre && /^[0-9A-Fa-f]{6}$/.test(libre)) return libre.toUpperCase();
-    const cat = catalogue.categories.find(c => c.faceSettingType === type);
+    const cat = catalogue.categories.find((c) => c.faceSettingType === type);
     const i = valeurs[`couleur.${type}`];
     const id = cat?.couleurs?.[i ?? -1];
     return id ? (catalogue.couleursRgb?.[id]?.rgb ?? null) : null;
@@ -116,7 +130,8 @@ export function composerUrlAvatar(catalogue: Catalogue, cdn: string, avatar: Eta
   // bleu reste clair. La couleur d'œil est la catégorie 6, celle de peau la 3.
   const peau = rgbDe(3);
   const iris = rgbDe(6);
-  const teinte = peau || iris ? `&tint=${peau ?? "F3CAC1"},${iris ?? "533B3B"},FFFFFF` : "";
+  const teinte =
+    peau || iris ? `&tint=${peau ?? "F3CAC1"},${iris ?? "533B3B"},FFFFFF` : "";
 
   // La chevelure a sa propre couleur (catégorie 4, 98 coupes et 65 teintes). Sa planche est
   // NEUTRE dans les fichiers — `hair_10` vaut 255,255,255 partout — donc sans cette couleur
@@ -138,16 +153,16 @@ export function composerUrlAvatar(catalogue: Catalogue, cdn: string, avatar: Eta
   // La FORME DE VISAGE : ses six parts ne désignent aucune ressource dans le catalogue
   // (`resource = 0xFFFFFFFF`), le choix ne pouvait donc rien changer. La route l'applique en
   // déformant la tête ; on lui transmet le rang de la part choisie.
-  const catForme = catalogue.categories.find(c => c.faceSettingType === 2);
-  const iForme = catForme?.parts.findIndex(p => p.id === choix[2]) ?? -1;
+  const catForme = catalogue.categories.find((c) => c.faceSettingType === 2);
+  const iForme = catForme?.parts.findIndex((p) => p.id === choix[2]) ?? -1;
   const forme = iForme >= 0 ? `&forme=${iForme}` : "";
 
   // Les HABITS — col (19), manches (20), ourlet (21). Leurs parts ne portent aucune maille ni
   // texture, rien qu'un nom de découpe (`fashion_collar`, `fashion_shoulder_baring`,
   // `fashion_shirt_out`, `fashion_navel_baring`) : la route ajuste la coupe du maillot.
   const rangDe = (type: number) => {
-    const cat = catalogue.categories.find(c => c.faceSettingType === type);
-    const i = cat?.parts.findIndex(p => p.id === choix[type]) ?? -1;
+    const cat = catalogue.categories.find((c) => c.faceSettingType === type);
+    const i = cat?.parts.findIndex((p) => p.id === choix[type]) ?? -1;
     return Math.max(0, i);
   };
   const habits = `&habits=${rangDe(19)},${rangDe(20)},${rangDe(21)}`;
@@ -155,6 +170,9 @@ export function composerUrlAvatar(catalogue: Catalogue, cdn: string, avatar: Eta
   const q =
     uniques.length > 0
       ? `?face=${encodeURIComponent(uniques.join(","))}${teinte}${teinteCheveux}${morpho}${taille}${forme}${habits}`
-      : `${teinte}${teinteCheveux}${morpho}${taille}${forme}${habits}`.replace("&", "?");
+      : `${teinte}${teinteCheveux}${morpho}${taille}${forme}${habits}`.replace(
+          "&",
+          "?",
+        );
   return `${cdn}/model-avatar/${piecesUniques.join("+")}.glb${q}`;
 }

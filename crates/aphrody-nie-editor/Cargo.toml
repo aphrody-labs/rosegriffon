@@ -28,4 +28,8 @@ eframe = { workspace = true, features = ["default_fonts", "wgpu", "x11", "waylan
 serde_json = { workspace = true }
 
 anyhow = { workspace = true }
-clap = { workspace = true, optional = true, features = ["derive", "color", "env"] }
+clap = { workspace = true, optional = true, features = [
+  "derive",
+  "color",
+  "env",
+] }

@@ -11,7 +11,9 @@ function getKey(): Buffer {
   }
   const key = Buffer.from(raw, "hex");
   if (key.length !== 32) {
-    throw new Error(`PATREON_ENCRYPTION_KEY must be 32 bytes hex (got ${key.length} bytes)`);
+    throw new Error(
+      `PATREON_ENCRYPTION_KEY must be 32 bytes hex (got ${key.length} bytes)`,
+    );
   }
   return key;
 }
@@ -19,7 +21,10 @@ function getKey(): Buffer {
 export function encryptToken(plaintext: string): string {
   const iv = randomBytes(IV_LEN);
   const cipher = createCipheriv(ALGO, getKey(), iv);
-  const ciphertext = Buffer.concat([cipher.update(plaintext, "utf8"), cipher.final()]);
+  const ciphertext = Buffer.concat([
+    cipher.update(plaintext, "utf8"),
+    cipher.final(),
+  ]);
   const tag = cipher.getAuthTag();
   return Buffer.concat([iv, tag, ciphertext]).toString("base64");
 }

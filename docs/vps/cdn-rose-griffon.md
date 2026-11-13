@@ -13,26 +13,27 @@ cdn.rosegriffon.fr  → nginx  ───────┤
 ```
 
 **2 surfaces, 1 vhost** :
+
 1. **API uploads** (legacy) : `POST /upload` + `DELETE /images/<id>` proxy vers Bun port 8804, storage `/var/www/cdn/images/`. Pattern fichier `[a-f0-9]{16}.<ext>`.
 2. **Static Next.js** (Phase 1+2) : `GET /static/<app>/...` servi directement par nginx depuis `/var/www/cdn/static/<app>/`. Cache-busting via hash dans le path Next + `Cache-Control: public, immutable, max-age=31536000`.
 
 ## Stack
 
-| Composant | Détail |
-|---|---|
-| nginx | 1.28.3, modules `gzip_static` + `brotli_static` + `http_v2` + `http_v3` + `slice` + `threads` |
-| Cert TLS | Let's Encrypt `/etc/letsencrypt/live/cdn.rosegriffon.fr/` |
-| Bun (uploads API) | `apps/cdn/server.ts`, port 8804, systemd `cdn.service` (User=ubuntu, hardened) |
-| Storage | `/var/www/cdn/images/` (uploads) + `/var/www/cdn/static/<app>/` (Next assets) |
-| Sync script | `scripts/ops/cdn-sync.ts` (Bun, idempotent, parallèle, brotli + gzip) |
+| Composant         | Détail                                                                                        |
+| ----------------- | --------------------------------------------------------------------------------------------- |
+| nginx             | 1.28.3, modules `gzip_static` + `brotli_static` + `http_v2` + `http_v3` + `slice` + `threads` |
+| Cert TLS          | Let's Encrypt `/etc/letsencrypt/live/cdn.rosegriffon.fr/`                                     |
+| Bun (uploads API) | `apps/cdn/server.ts`, port 8804, systemd `cdn.service` (User=ubuntu, hardened)                |
+| Storage           | `/var/www/cdn/images/` (uploads) + `/var/www/cdn/static/<app>/` (Next assets)                 |
+| Sync script       | `scripts/ops/cdn-sync.ts` (Bun, idempotent, parallèle, brotli + gzip)                         |
 
 ## Apps activées
 
-| App | Vhost origin | Phase 1 (assetPrefix) | Phase 2 (loader Image) |
-|---|---|---|---|
-| azalee | azalee.rosegriffon.fr |  |  |
-| website | rosegriffon.fr |  |  |
-| rpb-dashboard | rpbey.fr |  (non opted-in) |  |
+| App           | Vhost origin          | Phase 1 (assetPrefix) | Phase 2 (loader Image) |
+| ------------- | --------------------- | --------------------- | ---------------------- |
+| azalee        | azalee.rosegriffon.fr |                       |                        |
+| website       | rosegriffon.fr        |                       |                        |
+| rpb-dashboard | rpbey.fr              | (non opted-in)        |                        |
 
 ## Configuration nginx
 
@@ -141,13 +142,13 @@ bun scripts/ops/cdn-sync.ts --concurrency=16 azalee website   # tune parallélis
 
 ### Optimisations
 
-| Technique | Gain |
-|---|---|
-| Fast-path `mtime + size` (skip hash) | sync idempotent en **~50 ms** |
-| Parallélisme `pMap` (concurrency=8) | full sync en **~7 s** (vs 30+ s séquentiel) |
-| `Bun.gzipSync` + `node:zlib brotliCompressSync` | pas de subprocess, niveau 9/11 |
-| Batch `mkdir -p` via `node:fs/promises` | évite 1 fork par dir |
-| Batch `unlink` parallélisé | suppression orphelins rapide |
+| Technique                                       | Gain                                        |
+| ----------------------------------------------- | ------------------------------------------- |
+| Fast-path `mtime + size` (skip hash)            | sync idempotent en **~50 ms**               |
+| Parallélisme `pMap` (concurrency=8)             | full sync en **~7 s** (vs 30+ s séquentiel) |
+| `Bun.gzipSync` + `node:zlib brotliCompressSync` | pas de subprocess, niveau 9/11              |
+| Batch `mkdir -p` via `node:fs/promises`         | évite 1 fork par dir                        |
+| Batch `unlink` parallélisé                      | suppression orphelins rapide                |
 
 ### Statistiques live
 
@@ -217,7 +218,7 @@ const nextConfig: NextConfig = {
 export default function cdnLoader({ src, width, quality }) {
   const cdn = process.env.NEXT_PUBLIC_CDN_URL;
   if (!cdn) return src;
-  if (/^https?:\/\//i.test(src)) return src;     // URL absolue → pass-through
+  if (/^https?:\/\//i.test(src)) return src; // URL absolue → pass-through
   const path = src.startsWith("/") ? src : `/${src}`;
   const q = quality ?? 75;
   return `${cdn}/public${path}?w=${width}&q=${q}`;
@@ -316,10 +317,10 @@ sudo nginx -t && sudo systemctl restart nginx
 
 Submodules `apps/azalee` + `apps/rosegriffon` :
 
-| Branche | Rôle |
-|---|---|
-| `main` | Production avec patches CDN mergés (commits `486d666` → `64431ad`) |
-| `cdn` | Branche d'origine des patches (= main, conservée pour historique) |
+| Branche | Rôle                                                               |
+| ------- | ------------------------------------------------------------------ |
+| `main`  | Production avec patches CDN mergés (commits `486d666` → `64431ad`) |
+| `cdn`   | Branche d'origine des patches (= main, conservée pour historique)  |
 
 Commits :
 
@@ -333,27 +334,27 @@ Commits :
 
 ### Compression — chunk JS exemple
 
-| Encoding | Taille | Économie |
-|---|---|---|
-| identity | 6 558 B | — |
-| gzip -9 | 2 328 B | -64% |
-| brotli -11 | 2 007 B | -69% |
+| Encoding   | Taille  | Économie |
+| ---------- | ------- | -------- |
+| identity   | 6 558 B | —        |
+| gzip -9    | 2 328 B | -64%     |
+| brotli -11 | 2 007 B | -69%     |
 
 ### Locales JSON azalee
 
-| Fichier | Raw | Brotli | Économie |
-|---|---|---|---|
-| en.json | 223 KB | ~85 KB | -62% |
-| fr.json | 254 KB | ~87 KB | -66% |
-| ja.json | 265 KB | ~85 KB | -68% |
+| Fichier | Raw    | Brotli | Économie |
+| ------- | ------ | ------ | -------- |
+| en.json | 223 KB | ~85 KB | -62%     |
+| fr.json | 254 KB | ~87 KB | -66%     |
+| ja.json | 265 KB | ~85 KB | -68%     |
 
 ### Décharge runtime Next
 
-| Métrique | Avant CDN | Avec Phase 1+2 |
-|---|---|---|
-| Requêtes static origin Next | 100% | 0% (chunks/CSS/fonts CDN) |
-| Appels `/_next/image` (Sharp) | 100% | 0% (loader custom direct) |
-| RAM Next image cache | dynamique | minimal |
+| Métrique                      | Avant CDN | Avec Phase 1+2            |
+| ----------------------------- | --------- | ------------------------- |
+| Requêtes static origin Next   | 100%      | 0% (chunks/CSS/fonts CDN) |
+| Appels `/_next/image` (Sharp) | 100%      | 0% (loader custom direct) |
+| RAM Next image cache          | dynamique | minimal                   |
 
 ## Évolutions futures
 

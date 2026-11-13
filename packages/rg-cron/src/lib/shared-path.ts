@@ -1,7 +1,8 @@
 import { join } from "node:path";
 
 /** Données générées par le cron, hors des releases immuables. */
-export const CRON_SHARED_ROOT = process.env.RG_CRON_SHARED_ROOT ?? "/srv/rg/shared/cron";
+export const CRON_SHARED_ROOT =
+  process.env.RG_CRON_SHARED_ROOT ?? "/srv/rg/shared/cron";
 
 export function cronSharedPath(...segments: string[]): string {
   return join(CRON_SHARED_ROOT, ...segments);
@@ -15,5 +16,8 @@ export function cronSharedPath(...segments: string[]): string {
  * car le push d'Inagle y lit les fichiers du jeu.
  */
 export function crawlDataPath(...segments: string[]): string {
-  return join(process.env.RG_CRAWL_DATA_ROOT ?? cronSharedPath("ie-crawl"), ...segments);
+  return join(
+    process.env.RG_CRAWL_DATA_ROOT ?? cronSharedPath("ie-crawl"),
+    ...segments,
+  );
 }

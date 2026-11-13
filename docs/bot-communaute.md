@@ -5,6 +5,7 @@ Niveaux, jetons Kizuna, collection de joueurs, tickets. Tout vit dans
 ne charge aucun de ces modules.
 
 > **Trois principes gouvernent tout ce document.**
+>
 > 1. **Discrétion.** Le bot ne publie rien de lui-même tant que le staff ne l'a
 >    pas demandé, et les commandes répondent en privé par défaut.
 > 2. **Hiérarchie stricte.** Aucun rôle à permission sensible ne peut être
@@ -16,10 +17,10 @@ ne charge aucun de ces modules.
 
 ## Ce qui est déjà validé, et ne doit pas être coupé
 
-| Publication automatique | Décidé le | Garde en place |
-| --- | --- | --- |
-| **Posts X du bot Azalée** (`〡𝓐𝔃𝓪𝓵𝓮́𝓮`) | validé | carte de validation humaine dans `〡général-azalée` — rien ne part sans un clic |
-| **Relais des créations iergday** (`〡iergday-staff`) | validé | salon de STAFF, pas public ; `relais_depuis` borne le déluge |
+| Publication automatique                              | Décidé le | Garde en place                                                                  |
+| ---------------------------------------------------- | --------- | ------------------------------------------------------------------------------- |
+| **Posts X du bot Azalée** (`〡𝓐𝔃𝓪𝓵𝓮́𝓮`)               | validé    | carte de validation humaine dans `〡général-azalée` — rien ne part sans un clic |
+| **Relais des créations iergday** (`〡iergday-staff`) | validé    | salon de STAFF, pas public ; `relais_depuis` borne le déluge                    |
 
 Tout le reste (annonces de niveau, accueil, recrutements remarquables, annonces
 d'articles) est **éteint** tant qu'un humain ne l'a pas allumé.
@@ -44,7 +45,7 @@ côtés du fil (site et cron). Il a été remplacé par 32 octets aléatoires da
 les trois fichiers concernés, et `packages/cron/.env.example` ne livre plus de
 valeur utilisable.
 
- **À arbitrer par le staff** : `DISCORD_NEWS_CHANNEL_ID` vaut
+**À arbitrer par le staff** : `DISCORD_NEWS_CHANNEL_ID` vaut
 `1441915377754964061`, c'est-à-dire **`〡live`**. Les annonces d'articles
 partent donc dans le salon des directs, faute de
 `DISCORD_WEBSITE_ANNOUNCEMENTS_CHANNEL_ID` et
@@ -59,10 +60,10 @@ réellement passe par lui — jamais par un salon vu par les membres.
 
 ## 1. Ce qui a été repris de l'existant
 
-| Service en place | Ce qu'on en garde | Ce qu'on corrige |
-| --- | --- | --- |
-| **Noctaly** (niveaux, app `875811233616519219`) | la courbe d'activité, les paliers de rôle, l'XP des membres retrouvée | la courbe devient celle **du jeu** (`inagle_exp_table`) ; l'annonce ne part plus dans le salon du message |
-| **ticketsbot.net** (tickets, depuis le 16/4/2023) | les fils privés, le salon d'historique, la numérotation (reprise à **86**) | plus aucune transcription chez un tiers ; le motif de fermeture devient **obligatoire** |
+| Service en place                                  | Ce qu'on en garde                                                          | Ce qu'on corrige                                                                                          |
+| ------------------------------------------------- | -------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| **Noctaly** (niveaux, app `875811233616519219`)   | la courbe d'activité, les paliers de rôle, l'XP des membres retrouvée      | la courbe devient celle **du jeu** (`inagle_exp_table`) ; l'annonce ne part plus dans le salon du message |
+| **ticketsbot.net** (tickets, depuis le 16/4/2023) | les fils privés, le salon d'historique, la numérotation (reprise à **86**) | plus aucune transcription chez un tiers ; le motif de fermeture devient **obligatoire**                   |
 
 ### Import de l'XP — état réel
 
@@ -85,17 +86,17 @@ l'historique COMPLET de six salons plutôt qu'un seul instantané — fusion
 `GREATEST(xp, ...)` en base, une mesure ancienne ne rétrograde jamais une
 valeur plus fraîche déjà écrite.
 
-| Salon | Couverture | Trouvé |
-| --- | --- | ---: |
-| `#〡bots` | intégrale, 2023→2026 | 19 (`/rank` + `/leaderboard`) |
-| `#〡memes-inazuma` | intégrale, 2023→2026 | 3 |
-| `#〡questions` | intégrale, 2023→2026 | 1 |
-| `#〡général` | arrêtée au 11/3/2026 | 207 |
-| `#〡médias` | arrêtée au 11/3/2026 | 45 |
-| `#〡vos-fanarts` | arrêtée au 17/3/2026 | 7 |
+| Salon              | Couverture           |                        Trouvé |
+| ------------------ | -------------------- | ----------------------------: |
+| `#〡bots`          | intégrale, 2023→2026 | 19 (`/rank` + `/leaderboard`) |
+| `#〡memes-inazuma` | intégrale, 2023→2026 |                             3 |
+| `#〡questions`     | intégrale, 2023→2026 |                             1 |
+| `#〡général`       | arrêtée au 11/3/2026 |                           207 |
+| `#〡médias`        | arrêtée au 11/3/2026 |                            45 |
+| `#〡vos-fanarts`   | arrêtée au 17/3/2026 |                             7 |
 
 L'essentiel du volume (54 des 65 membres) ne vient PAS d'une carte `/rank` ou
-`/leaderboard`, mais des embeds automatiques **«  Niveau supérieur ! »**
+`/leaderboard`, mais des embeds automatiques **« Niveau supérieur ! »**
 postés dans les salons de discussion générale — ils mentionnent l'ID Discord
 en clair, donc aucune résolution par pseudo. Leur XP est le seuil OFFICIEL du
 palier annoncé (table `noctaly.com/table`), un minorant réel et non la valeur
@@ -111,7 +112,7 @@ C'était tout ce qui était atteignable **sans clé et sans session** :
   justifié d'arrêter les 3 autres dès qu'ils y remontaient sans rien trouver
   de plus.
 
->  **Une affirmation de cette page était fausse** et a coûté du temps : « la
+> **Une affirmation de cette page était fausse** et a coûté du temps : « la
 > page publique du classement charge ses données côté client (rien dans le HTML
 > brut) ». Vérifié le 14/8/2026 : les profils sont **dans le rendu serveur**,
 > sous la propriété `initProfiles` de la charge React. Ils n'apparaissent pas
@@ -132,11 +133,11 @@ expose en lecture, une fois la clé posée dans `apps/bot/.env`
 (`NOCTALY_API_KEY`, générée sur `noctaly.com/dashboard` par un compte ayant
 « Gérer le serveur » — une clé par serveur, connexion humaine obligatoire) :
 
-| Route | Portée | Ce qu'on en fait |
-| --- | --- | --- |
-| `GET …/users/{id}/level-profile` | 1 requête / membre | `xp`, `niveau`, `messages_comptes` |
+| Route                                                   | Portée             | Ce qu'on en fait                                       |
+| ------------------------------------------------------- | ------------------ | ------------------------------------------------------ |
+| `GET …/users/{id}/level-profile`                        | 1 requête / membre | `xp`, `niveau`, `messages_comptes`                     |
 | `GET …/users/{id}/eco-profile?items&chests&dailyStreak` | 1 requête / membre | `serie_quotidienne`, monnaie → jetons (taux explicite) |
-| `GET …/items` et `GET …/chests` | 2 requêtes en tout | catalogue archivé tel quel |
+| `GET …/items` et `GET …/chests`                         | 2 requêtes en tout | catalogue archivé tel quel                             |
 
 **Il n'existe aucune route de liste dans l'API** : ni classement, ni export, ni
 pagination. L'import est donc une boucle d'une à deux requêtes par membre sur
@@ -149,7 +150,7 @@ applications qui insistent. D'où trois choix : cadence alignée sur le quota
 `X-RateLimit-Reset-After`, et **interruption pure et simple** sur un 429 plutôt
 qu'un réessai. L'import étant idempotent, reprendre plus tard ne coûte rien.
 
->  **La documentation se trompe d'un facteur vingt-cinq.** Mesuré le 14/8/2026
+> **La documentation se trompe d'un facteur vingt-cinq.** Mesuré le 14/8/2026
 > avec une vraie clé : les en-têtes annoncent `X-RateLimit-Limit: 120` et
 > `X-RateLimit-Reset-After: 60`, et `Remaining` décroît d'une unité par requête.
 > Le plafond réel est de **120 requêtes par fenêtre de 60 secondes**, soit
@@ -164,8 +165,16 @@ La page `noctaly.com/fr/leaderboard/{guildID}` publie **cent profils complets**
 dans son rendu serveur, avec exactement les champs de `level-profile` :
 
 ```json
-{"userID":"…","username":"…","avatarID":"…",
- "level":26,"xp":44480,"messages":4977,"reactions":231,"voiceMinutes":298}
+{
+  "userID": "…",
+  "username": "…",
+  "avatarID": "…",
+  "level": 26,
+  "xp": 44480,
+  "messages": 4977,
+  "reactions": 231,
+  "voiceMinutes": 298
+}
 ```
 
 Le `xp` de cette source est bien l'XP **totale** — croisé avec l'API sur le même
@@ -236,11 +245,11 @@ Cette colonne n'est pas décorative. Elle se déduit de l'archive, qui est
 auto-descriptive — la réponse d'API porte `totalXp`, l'entrée de classement
 porte `userID`, et l'absence d'archive signale le dépouillement d'historique :
 
-| Source | Nature de l'XP | Compte au 14/8/2026 |
-| --- | --- | ---: |
-| API Noctaly | valeur exacte | 160 |
-| Classement public | exacte, datée du dernier rendu | 0 |
-| Historique des salons | **minorant** (seuil du palier annoncé) | 12 |
+| Source                | Nature de l'XP                         | Compte au 14/8/2026 |
+| --------------------- | -------------------------------------- | ------------------: |
+| API Noctaly           | valeur exacte                          |                 160 |
+| Classement public     | exacte, datée du dernier rendu         |                   0 |
+| Historique des salons | **minorant** (seuil du palier annoncé) |                  12 |
 
 Afficher un classement sans dire d'où vient chaque ligne inviterait à comparer
 des valeurs qui ne sont pas de même nature. L'en-tête de la page donne aussi la
@@ -296,12 +305,12 @@ n'est pas décoratif : monter de niveau sur le Discord coûte exactement ce que 
 coûte en jeu.
 
 | Niveau | XP cumulée | ≈ messages (20 XP / min) |
-| ---: | ---: | ---: |
-| 10 | 2 422 | 121 |
-| 20 | 12 291 | 615 |
-| 30 | 38 310 | 1 916 |
-| 50 | 195 502 | 9 776 |
-| 99 | 2 878 742 | 143 938 |
+| -----: | ---------: | -----------------------: |
+|     10 |      2 422 |                      121 |
+|     20 |     12 291 |                      615 |
+|     30 |     38 310 |                    1 916 |
+|     50 |    195 502 |                    9 776 |
+|     99 |  2 878 742 |                  143 938 |
 
 Les **rangs** reprennent l'échelle de rareté du jeu, avec ses libellés français
 exacts (`inagle_characters.rarity_label`) : **Normal** (1‑19), **Expérimenté**
@@ -364,11 +373,11 @@ fr « Jeton Kizuna », en « Bond Token », ja « キズナトークン ».
 
 **Trois sources, et l'absence délibérée d'une quatrième :**
 
-| Source | Détail |
-| --- | --- |
-| `quotidien` | 25 jetons, +5 par jour consécutif, prime plafonnée à +50 au 11ᵉ jour |
-| `montee-niveau` | 10 × le niveau atteint |
-| `don` | de 1 à 5 000 par don, 10 000 par jour et par membre |
+| Source          | Détail                                                               |
+| --------------- | -------------------------------------------------------------------- |
+| `quotidien`     | 25 jetons, +5 par jour consécutif, prime plafonnée à +50 au 11ᵉ jour |
+| `montee-niveau` | 10 × le niveau atteint                                               |
+| `don`           | de 1 à 5 000 par don, 10 000 par jour et par membre                  |
 
 **Aucun gain par message.** C'était le choix évident, et c'est celui qui
 transforme un salon en concours de messages d'un mot.
@@ -394,12 +403,12 @@ Zéro ligne = tout va bien.
 données du jeu, à égalité de chances. Il n'y a donc aucun taux à annoncer : la
 rareté observée est celle du jeu, et elle est vérifiable sur le wiki.
 
-| Rareté | Effectif | Part | Remboursement d'un doublon |
-| --- | ---: | ---: | ---: |
-| Normal | 5 747 | 94,4 % | 30 |
-| Expérimenté | 150 | 2,5 % | 100 |
-| Héros | 122 | 2,0 % | 250 |
-| BASARA | 71 | 1,2 % | 600 |
+| Rareté      | Effectif |   Part | Remboursement d'un doublon |
+| ----------- | -------: | -----: | -------------------------: |
+| Normal      |    5 747 | 94,4 % |                         30 |
+| Expérimenté |      150 |  2,5 % |                        100 |
+| Héros       |      122 |  2,0 % |                        250 |
+| BASARA      |       71 |  1,2 % |                        600 |
 
 Une seule entorse : **un tirage sur dix ne peut pas rendre un joueur Normal**.
 Sans elle, 56 % des membres n'auraient rien vu d'autre au bout de dix tirages.
@@ -418,7 +427,7 @@ taxe sur ceux qui n'y jouent pas.
 - Un ticket est un **fil privé** dans `〡demandes-tickets`, nommé
   `ticket-0086` — **le numéro, jamais le pseudo** : le nom d'un fil apparaît
   dans la liste du salon et dans le journal d'audit du serveur.
-- Cinq catégories. **Signalement** est *sensible* : il ne va **qu'à la
+- Cinq catégories. **Signalement** est _sensible_ : il ne va **qu'à la
   direction**, parce qu'un signalement peut viser un modérateur.
 - **Un seul ticket ouvert par membre.** Le second renvoie vers le premier au
   lieu de refuser.
@@ -429,7 +438,7 @@ taxe sur ceux qui n'y jouent pas.
 ### Le piège qui rend un système de tickets inutile
 
 Un fil privé n'est visible **que de ses invités et des porteurs de « Gérer les
-fils »**. Mentionner un *rôle* dans un fil ne l'y fait pas entrer. Un panneau
+fils »**. Mentionner un _rôle_ dans un fil ne l'y fait pas entrer. Un panneau
 publié sans cette permission crée des tickets que **personne au staff ne voit**,
 et la panne est silencieuse.
 
@@ -442,14 +451,14 @@ et la panne est silencieuse.
 
 ### Membres — privées par défaut, `partager: true` pour publier
 
-| Commande | Effet |
-| --- | --- |
-| `/profil [membre] [partager]` | carte de progression (plaque du jeu en fond, joueur fétiche, rang) |
-| `/classement [critere] [page] [partager]` | niveaux ou jetons Kizuna |
-| `/kizuna solde\|quotidien\|donner\|journal` | solde, passage du jour, don, historique |
-| `/collection voir\|recruter\|plaques\|acheter` | collection et boutique |
-| `/personnaliser favori\|plaque` | ce que la carte affiche |
-| `/ticket ouvrir\|fermer\|prendre\|rendre\|info\|liste` | tickets |
+| Commande                                               | Effet                                                              |
+| ------------------------------------------------------ | ------------------------------------------------------------------ |
+| `/profil [membre] [partager]`                          | carte de progression (plaque du jeu en fond, joueur fétiche, rang) |
+| `/classement [critere] [page] [partager]`              | niveaux ou jetons Kizuna                                           |
+| `/kizuna solde\|quotidien\|donner\|journal`            | solde, passage du jour, don, historique                            |
+| `/collection voir\|recruter\|plaques\|acheter`         | collection et boutique                                             |
+| `/personnaliser favori\|plaque`                        | ce que la carte affiche                                            |
+| `/ticket ouvrir\|fermer\|prendre\|rendre\|info\|liste` | tickets                                                            |
 
 `/kizuna quotidien`, `/kizuna donner` et `/kizuna journal` sont **toujours**
 privés. Le destinataire d'un don est prévenu **en message direct** : les deux
@@ -461,11 +470,11 @@ personnes concernées sont au courant, et personne d'autre.
 membres ordinaires (confort d'interface) ; `exigerDroits` lit le rôle réel dans
 `profiles` (la vraie garde).
 
-| Commande | Effet |
-| --- | --- |
-| `/gestion niveaux reglages\|recompense\|retirer\|annonce\|salon` | progression et récompenses |
-| `/gestion ticket reglages\|poser\|role\|diagnostic\|panneau\|encours` | tickets |
-| `/gestion sondage creer\|cloturer` | sondages natifs Discord |
+| Commande                                                              | Effet                      |
+| --------------------------------------------------------------------- | -------------------------- |
+| `/gestion niveaux reglages\|recompense\|retirer\|annonce\|salon`      | progression et récompenses |
+| `/gestion ticket reglages\|poser\|role\|diagnostic\|panneau\|encours` | tickets                    |
+| `/gestion sondage creer\|cloturer`                                    | sondages natifs Discord    |
 
 ---
 
@@ -473,20 +482,20 @@ membres ordinaires (confort d'interface) ; `exigerDroits` lit le rôle réel dan
 
 `apps/website/sql/migrations/20260814_bot_communaute.sql` (+ `_reglages`, `_kizuna`).
 
-| Table | Contenu | Lisible publiquement ? |
-| --- | --- | --- |
-| `bot_profils` | XP, niveau, jetons, cosmétiques équipés | **oui**, colonnes de classement seulement |
-| `bot_journal_kizuna` | mouvements signés | **non** — c'est un graphe social |
-| `bot_inventaire` | joueurs et plaques possédés | **non** |
-| `bot_tickets` | métadonnées, **aucun message** | **non** |
-| `bot_reglages_guilde` | réglages jsonb validés par zod | **non** |
-| `bot_recompenses_niveau` | palier → rôle | **non** |
+| Table                    | Contenu                                 | Lisible publiquement ?                    |
+| ------------------------ | --------------------------------------- | ----------------------------------------- |
+| `bot_profils`            | XP, niveau, jetons, cosmétiques équipés | **oui**, colonnes de classement seulement |
+| `bot_journal_kizuna`     | mouvements signés                       | **non** — c'est un graphe social          |
+| `bot_inventaire`         | joueurs et plaques possédés             | **non**                                   |
+| `bot_tickets`            | métadonnées, **aucun message**          | **non**                                   |
+| `bot_reglages_guilde`    | réglages jsonb validés par zod          | **non**                                   |
+| `bot_recompenses_niveau` | palier → rôle                           | **non**                                   |
 
 `dernier_gain_le` est explicitement **exclu** de la lecture publique : c'est un
 horodatage de présence, donc une donnée de comportement, sans rapport avec un
 classement.
 
->  Toute table créée en `postgres` doit finir par `alter table … owner to rg;`.
+> Toute table créée en `postgres` doit finir par `alter table … owner to rg;`.
 > Le bot se connecte sous le rôle `rg` : sans ça, il lève « permission denied »
 > à la première écriture, longtemps après la migration et loin d'elle.
 
@@ -531,7 +540,7 @@ rien), son texte, la carte image, et le rôle posé à l'arrivée.
 
 - **`aucune` par défaut**, comme les annonces de niveau. Un serveur qui reçoit
   vingt arrivées par jour n'a peut-être aucune envie de vingt messages.
-- **Le rôle d'arrivée est la surface la plus large du bot** — posé à *chaque*
+- **Le rôle d'arrivée est la surface la plus large du bot** — posé à _chaque_
   arrivée, sans clic, sans niveau à atteindre. Il passe donc par la garde
   stricte du §3, et il est revérifié à chaque arrivée.
 - **Aucune mention de masse possible.** Le texte est réglable par le staff ;
@@ -597,7 +606,7 @@ supprimé, droits retirés), l'accusé de réception de la sanction le dit en cl
 à celui qui vient de sanctionner : une action déjà appliquée ne se rejoue pas,
 la seule chose utile est de savoir ce qui n'a PAS été écrit.
 
- Le salon nomme des membres et leurs motifs : il se réserve au staff. Sur le
+Le salon nomme des membres et leurs motifs : il se réserve au staff. Sur le
 serveur Rose Griffon, `@everyone` n'y voit rien, seuls les Modérateurs y ont
 accès.
 
@@ -619,13 +628,13 @@ jour plutôt que de créer — une seconde création échoue avec une erreur ill
 anti-mentions, un filtre de mots-clés). Manquent l'**anti-spam** et les **jeux
 de mots-clés de Discord** — à activer par un admin, conformément au principe 3.
 
- Les rôles à permission « Gérer le serveur » échappent nativement à l'AutoMod :
+Les rôles à permission « Gérer le serveur » échappent nativement à l'AutoMod :
 Discord ne les filtre pas, quelle que soit la règle.
 
 ## 12. Suggestions — le vote reste chez Discord
 
 `/suggestion proposer` publie dans le salon configuré (fermé par défaut) ; le
-bot pose  et , et **c'est tout**. Le registre de qui a voté quoi reste chez
+bot pose et , et **c'est tout**. Le registre de qui a voté quoi reste chez
 Discord ; nous n'en lisons que les compteurs, au moment où le staff tranche.
 
 C'est la même ligne rouge que les sondages : le réflexe serait une table
@@ -668,7 +677,7 @@ sudo systemctl restart rg-bot.service
 journalctl -u rg-bot.service --since "-1 min" | tail -20
 ```
 
-Le démarrage doit afficher «  Commandes enregistrées » et lister les guildes.
+Le démarrage doit afficher « Commandes enregistrées » et lister les guildes.
 `initApplicationCommands failed` avec `Invalid Form Body` signale un dépassement
 du plafond de 8 000 caractères par racine de commande : c'est ce qui a déjà fait
 éclater `/administration` en trois racines (`/administration`, `/gestion`,

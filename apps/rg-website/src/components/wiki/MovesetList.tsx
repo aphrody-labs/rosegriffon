@@ -32,9 +32,15 @@ interface MovesetListProps {
   className?: string;
 }
 
-export function MovesetList({ skills, maxSlots = 4, className }: MovesetListProps) {
+export function MovesetList({
+  skills,
+  maxSlots = 4,
+  className,
+}: MovesetListProps) {
   return (
-    <div className={cn("flex flex-col gap-2 w-full max-w-sm mx-auto", className)}>
+    <div
+      className={cn("flex flex-col gap-2 w-full max-w-sm mx-auto", className)}
+    >
       {/* Header - Optionnel */}
       <div className="flex items-center gap-2 mb-1 px-1">
         <span className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">
@@ -45,7 +51,9 @@ export function MovesetList({ skills, maxSlots = 4, className }: MovesetListProp
 
       <div className="flex flex-col gap-2">
         {skills.map((skill, i) => {
-          const elementIcon = skill.element ? getSkillElementIconUrl(skill.element) : null;
+          const elementIcon = skill.element
+            ? getSkillElementIconUrl(skill.element)
+            : null;
           const skillHref = skill.id ? wiki(`/skill/${skill.id}`) : "#";
 
           return (
@@ -61,19 +69,34 @@ export function MovesetList({ skills, maxSlots = 4, className }: MovesetListProp
             >
               {/* Slot Number */}
               <div className="absolute -left-1 sm:-left-3 top-1/2 -translate-y-1/2 size-6 flex items-center justify-center">
-                <span className="text-[10px] font-black text-white ml-2">{i + 1}</span>
+                <span className="text-[10px] font-black text-white ml-2">
+                  {i + 1}
+                </span>
               </div>
 
               {/* Icon */}
               <div className="w-10 h-full flex items-center justify-center bg-surface-dim">
                 {elementIcon ? (
                   <div className="size-5 relative">
-                    <Image src={elementIcon} alt={skill.element || ""} fill className="object-contain" />
+                    <Image
+                      src={elementIcon}
+                      alt={skill.element || ""}
+                      fill
+                      className="object-contain"
+                    />
                   </div>
                 ) : skill.isPassive ? (
-                  <Sparkles size={18} className="text-outline-variant" aria-hidden="true" />
+                  <Sparkles
+                    size={18}
+                    className="text-outline-variant"
+                    aria-hidden="true"
+                  />
                 ) : (
-                  <CircleDot size={18} className="text-outline-variant" aria-hidden="true" />
+                  <CircleDot
+                    size={18}
+                    className="text-outline-variant"
+                    aria-hidden="true"
+                  />
                 )}
               </div>
 
@@ -89,15 +112,21 @@ export function MovesetList({ skills, maxSlots = 4, className }: MovesetListProp
                 >
                   {skill.name}
                   {skill.evolutionSuffix && (
-                    <span className="ml-1.5 text-[11px] font-black text-amber-400">{skill.evolutionSuffix}</span>
+                    <span className="ml-1.5 text-[11px] font-black text-amber-400">
+                      {skill.evolutionSuffix}
+                    </span>
                   )}
                 </span>
                 <div className="flex items-center gap-2">
                   {skill.isPassive && (
-                    <span className="text-[9px] font-bold text-purple-400 uppercase tracking-wider">Talent</span>
+                    <span className="text-[9px] font-bold text-purple-400 uppercase tracking-wider">
+                      Talent
+                    </span>
                   )}
                   {skill.learnLevel !== undefined && skill.learnLevel > 0 && (
-                    <span className="text-[9px] font-medium text-slate-400">Niv. {skill.learnLevel}</span>
+                    <span className="text-[9px] font-medium text-slate-400">
+                      Niv. {skill.learnLevel}
+                    </span>
                   )}
                 </div>
               </div>

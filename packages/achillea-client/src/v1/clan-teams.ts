@@ -9,7 +9,11 @@
 import { z } from "zod";
 
 import { apiDateSchema } from "./common";
-import { AchilleaResource, encodePathSegment, type AchilleaClientResult } from "./http";
+import {
+  AchilleaResource,
+  encodePathSegment,
+  type AchilleaClientResult,
+} from "./http";
 
 /** Type d'équipe : 0 principale, 1 secondaire. */
 export type ClanTeamType = 0 | 1;
@@ -42,7 +46,12 @@ export const clanTeamsMembershipSchema = z.object({
   clanId: z.number().nullable(),
   clanRole: z.number().nullable(),
   clan: z
-    .object({ id: z.number(), name: z.string(), shortenedName: z.string(), avatarUrl: z.string() })
+    .object({
+      id: z.number(),
+      name: z.string(),
+      shortenedName: z.string(),
+      avatarUrl: z.string(),
+    })
     .nullable(),
 });
 export type ClanTeamsMembership = z.infer<typeof clanTeamsMembershipSchema>;
@@ -65,34 +74,66 @@ export class ClanTeamsResource extends AchilleaResource {
 
   /** `GET /clans/teams/clan/:clanId` — équipes d'un clan, effectif et validité (public). */
   list(clanId: number): Promise<AchilleaClientResult<ClanTeam[]>> {
-    return this.http.get(`/clans/teams/clan/${encodePathSegment(clanId)}`, z.array(clanTeamSchema));
+    return this.http.get(
+      `/clans/teams/clan/${encodePathSegment(clanId)}`,
+      z.array(clanTeamSchema),
+    );
   }
 
   /** `GET /clans/teams/:teamId` — une équipe (public). */
   get(teamId: number): Promise<AchilleaClientResult<ClanTeam>> {
-    return this.http.get(`/clans/teams/${encodePathSegment(teamId)}`, clanTeamSchema);
+    return this.http.get(
+      `/clans/teams/${encodePathSegment(teamId)}`,
+      clanTeamSchema,
+    );
   }
 
   /** `POST /clans/teams` — crée l'équipe principale (0) ou secondaire (1) d'un clan (Vice-Président et plus). */
-  create(clanId: number, type: ClanTeamType, name?: string): Promise<AchilleaClientResult<ClanTeam>> {
-    return this.http.post("/clans/teams", clanTeamSchema, { clanId, type, ...(name ? { name } : {}) });
-  }
-
-  /** `PUT /clans/teams/:teamId/roster` — remplace l'effectif d'un rôle (joueurs, remplaçants ou coach). */
-  setRoster(teamId: number, role: ClanTeamRole, userIds: readonly string[]): Promise<AchilleaClientResult<ClanTeam>> {
-    return this.http.put(`/clans/teams/${encodePathSegment(teamId)}/roster`, clanTeamSchema, {
-      role,
-      userIds: [...userIds],
+  create(
+    clanId: number,
+    type: ClanTeamType,
+    name?: string,
+  ): Promise<AchilleaClientResult<ClanTeam>> {
+    return this.http.post("/clans/teams", clanTeamSchema, {
+      clanId,
+      type,
+      ...(name ? { name } : {}),
     });
   }
 
+  /** `PUT /clans/teams/:teamId/roster` — remplace l'effectif d'un rôle (joueurs, remplaçants ou coach). */
+  setRoster(
+    teamId: number,
+    role: ClanTeamRole,
+    userIds: readonly string[],
+  ): Promise<AchilleaClientResult<ClanTeam>> {
+    return this.http.put(
+      `/clans/teams/${encodePathSegment(teamId)}/roster`,
+      clanTeamSchema,
+      {
+        role,
+        userIds: [...userIds],
+      },
+    );
+  }
+
   /** `PATCH /clans/teams/:teamId` — renomme l'équipe ou change son capitaine. */
-  update(teamId: number, patch: UpdateClanTeamPayload): Promise<AchilleaClientResult<ClanTeam>> {
-    return this.http.patch(`/clans/teams/${encodePathSegment(teamId)}`, clanTeamSchema, patch);
+  update(
+    teamId: number,
+    patch: UpdateClanTeamPayload,
+  ): Promise<AchilleaClientResult<ClanTeam>> {
+    return this.http.patch(
+      `/clans/teams/${encodePathSegment(teamId)}`,
+      clanTeamSchema,
+      patch,
+    );
   }
 
   /** `DELETE /clans/teams/:teamId` — supprime une équipe et son effectif. */
   remove(teamId: number): Promise<AchilleaClientResult<{ success: true }>> {
-    return this.http.delete(`/clans/teams/${encodePathSegment(teamId)}`, deletionSchema);
+    return this.http.delete(
+      `/clans/teams/${encodePathSegment(teamId)}`,
+      deletionSchema,
+    );
   }
 }

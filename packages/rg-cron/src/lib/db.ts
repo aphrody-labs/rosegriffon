@@ -19,11 +19,13 @@ import { createBunSql, createInagleBunSql } from "@rosegriffon/db/bun-sql";
  * 0 ms de 00:40 à 13:10 UTC, jusqu'au redémarrage du service. Rien de propre au
  * code d'une tâche : c'est le pool partagé qui est empoisonné.
  */
-const MESSAGE_POOL_EMPOISONNE = /connection must be a (PostgresSQLConnection|MySQLConnection)/;
+const MESSAGE_POOL_EMPOISONNE =
+  /connection must be a (PostgresSQLConnection|MySQLConnection)/;
 
 /** Vrai pour l'erreur (ou son message) d'un pool Bun.SQL qu'il faut recréer. */
 export function estPoolEmpoisonne(err: unknown): boolean {
-  const message = err instanceof Error ? err.message : typeof err === "string" ? err : "";
+  const message =
+    err instanceof Error ? err.message : typeof err === "string" ? err : "";
   return MESSAGE_POOL_EMPOISONNE.test(message);
 }
 
@@ -50,7 +52,12 @@ export function clientParesseux(creer: () => SQL): ClientParesseux {
   let instance: SQL | null = null;
   const reel = (): SQL => (instance ??= creer());
   const sql = new Proxy(function () {} as unknown as SQL, {
-    apply: (_cible, _this, args) => Reflect.apply(reel() as unknown as (...a: unknown[]) => unknown, undefined, args),
+    apply: (_cible, _this, args) =>
+      Reflect.apply(
+        reel() as unknown as (...a: unknown[]) => unknown,
+        undefined,
+        args,
+      ),
     get: (_cible, propriete) => {
       const cible = reel();
       const valeur = Reflect.get(cible, propriete);
@@ -89,7 +96,10 @@ export const inagleSql = inagle.sql;
  */
 export function signalerErreurSql(err: unknown): boolean {
   if (!estPoolEmpoisonne(err)) return false;
-  const recrees = [principal.recreer() && "principal", inagle.recreer() && "inagle"].filter(Boolean);
+  const recrees = [
+    principal.recreer() && "principal",
+    inagle.recreer() && "inagle",
+  ].filter(Boolean);
   console.warn(
     `[db] pool Bun.SQL empoisonné (connexion native fermée laissée dans le pool) : recréation ${recrees.join(", ") || "(aucun pool ouvert)"}.`,
   );

@@ -20,15 +20,19 @@ export interface TranslationResult {
   fuzzy?: boolean;
 }
 
-const ENTITY_TYPE_CONFIG: Record<string, { label: string; urlPrefix: string }> = {
-  character: { label: "Personnage", urlPrefix: "/wiki/chara" },
-  item: { label: "Objet", urlPrefix: "/wiki/item" },
-  keshin: { label: "Esprit Guerrier", urlPrefix: "/wiki/aura/esprits-guerriers" },
-  skill: { label: "Technique", urlPrefix: "/wiki/skill" },
-  soul: { label: "Totem", urlPrefix: "/wiki/aura/totems" },
-  tactic: { label: "Tactique", urlPrefix: "/wiki/tactic" },
-  team: { label: "Équipe", urlPrefix: "/team" },
-};
+const ENTITY_TYPE_CONFIG: Record<string, { label: string; urlPrefix: string }> =
+  {
+    character: { label: "Personnage", urlPrefix: "/wiki/chara" },
+    item: { label: "Objet", urlPrefix: "/wiki/item" },
+    keshin: {
+      label: "Esprit Guerrier",
+      urlPrefix: "/wiki/aura/esprits-guerriers",
+    },
+    skill: { label: "Technique", urlPrefix: "/wiki/skill" },
+    soul: { label: "Totem", urlPrefix: "/wiki/aura/totems" },
+    tactic: { label: "Tactique", urlPrefix: "/wiki/tactic" },
+    team: { label: "Équipe", urlPrefix: "/team" },
+  };
 
 // ──────────────────────────────────────────────────────────────────────────
 // Normalisation & similarité — logique pure (testable hors Next)
@@ -104,7 +108,11 @@ function similarity(a: string, b: string): number {
  * dans le désordre) / similarité fuzzy par fenêtre.
  * Retourne une valeur dans [0, 1].
  */
-function nameScore(nameNorm: string, queryNorm: string, queryTokens: string[]): number {
+function nameScore(
+  nameNorm: string,
+  queryNorm: string,
+  queryTokens: string[],
+): number {
   if (!nameNorm) return 0;
   if (nameNorm === queryNorm) return 1;
   if (nameNorm.startsWith(queryNorm)) return 0.92;
@@ -119,7 +127,9 @@ function nameScore(nameNorm: string, queryNorm: string, queryTokens: string[]): 
     let prefixOnly = false;
     for (const qt of queryTokens) {
       const exact = nameTokens.includes(qt);
-      const asPrefix = !exact && nameTokens.some(nt => nt.startsWith(qt) || qt.startsWith(nt));
+      const asPrefix =
+        !exact &&
+        nameTokens.some((nt) => nt.startsWith(qt) || qt.startsWith(nt));
       if (!exact && !asPrefix) {
         matchedAll = false;
         break;
@@ -159,7 +169,11 @@ const FUZZY_THRESHOLD = 0.62;
 /**
  * Calcule le meilleur score d'un résultat (toutes langues + romaji dérivé).
  */
-function scoreResult(r: TranslationResult, queryNorm: string, queryTokens: string[]): number {
+function scoreResult(
+  r: TranslationResult,
+  queryNorm: string,
+  queryTokens: string[],
+): number {
   const candidates: (string | null)[] = [
     r.name_fr,
     r.name_en,
@@ -187,17 +201,28 @@ async function loadGlossary() {
   if (glossaryCache) return glossaryCache;
   try {
     const db = createPostgresClient();
-    const [characters, skills, keshins, souls, passives, teams, items] = await Promise.all([
-      db.from("inagle_characters").select("slug, name_fr, name_en, name_ja").not("internal_code", "like", "%_5000"),
-      db.from("inagle_skills").select("id, name_fr, name_en, name_ja"),
-      db.from("inagle_keshins_clean").select("id, name_fr, name_en, name_ja"),
-      db.from("inagle_souls_clean").select("id, name_fr, name_en, name_ja"),
-      db.from("inagle_passives").select("id, name_fr, name_en, name_ja"),
-      db.from("inagle_teams").select("id, name_fr, name_en, name_ja"),
-      db.from("inagle_items").select("id, name_fr, name_en, name_ja, category").neq("category", "special_tactics"),
-    ]);
-    const names = (rows: any[] | null | undefined, category: string, subType?: string) =>
-      (rows ?? []).map(row => ({
+    const [characters, skills, keshins, souls, passives, teams, items] =
+      await Promise.all([
+        db
+          .from("inagle_characters")
+          .select("slug, name_fr, name_en, name_ja")
+          .not("internal_code", "like", "%_5000"),
+        db.from("inagle_skills").select("id, name_fr, name_en, name_ja"),
+        db.from("inagle_keshins_clean").select("id, name_fr, name_en, name_ja"),
+        db.from("inagle_souls_clean").select("id, name_fr, name_en, name_ja"),
+        db.from("inagle_passives").select("id, name_fr, name_en, name_ja"),
+        db.from("inagle_teams").select("id, name_fr, name_en, name_ja"),
+        db
+          .from("inagle_items")
+          .select("id, name_fr, name_en, name_ja, category")
+          .neq("category", "special_tactics"),
+      ]);
+    const names = (
+      rows: any[] | null | undefined,
+      category: string,
+      subType?: string,
+    ) =>
+      (rows ?? []).map((row) => ({
         code: row.slug ?? row.id,
         en: row.name_en ?? undefined,
         fr: row.name_fr ?? undefined,
@@ -208,7 +233,10 @@ async function loadGlossary() {
     glossaryCache = {
       characters: names(characters.data, "characters"),
       techniques: names(skills.data, "techniques"),
-      auras: [...names(keshins.data, "auras", "keshin"), ...names(souls.data, "auras", "soul")],
+      auras: [
+        ...names(keshins.data, "auras", "keshin"),
+        ...names(souls.data, "auras", "soul"),
+      ],
       passives: names(passives.data, "passives"),
       teams: names(teams.data, "teams"),
       items: names(items.data, "items"),
@@ -235,7 +263,10 @@ interface GlossaryItem {
  * normalisée (accent-insensible), kana ↔ romaji dans les deux sens, et en
  * dernier recours une passe fuzzy sous seuil de similarité.
  */
-async function searchGlossary(query: string, entityType?: string): Promise<TranslationResult[]> {
+async function searchGlossary(
+  query: string,
+  entityType?: string,
+): Promise<TranslationResult[]> {
   const glossary = await loadGlossary();
   if (!glossary) return [];
 
@@ -246,13 +277,26 @@ async function searchGlossary(query: string, entityType?: string): Promise<Trans
   // Candidats kana à partir de la saisie latine (romaji → kana).
   const hiraCandidate = toHiragana(queryNorm).toLowerCase();
   const kataCandidate = toKatakana(queryNorm).toLowerCase();
-  const isValidHira = hiraCandidate.length > 0 && [...hiraCandidate].every(c => isKana(c) || c === "ー");
-  const isValidKata = kataCandidate.length > 0 && [...kataCandidate].every(c => isKana(c) || c === "ー");
+  const isValidHira =
+    hiraCandidate.length > 0 &&
+    [...hiraCandidate].every((c) => isKana(c) || c === "ー");
+  const isValidKata =
+    kataCandidate.length > 0 &&
+    [...kataCandidate].every((c) => isKana(c) || c === "ー");
 
   const results: TranslationResult[] = [];
 
-  const searchCategory = (catName: string, type: string, typeLabel: string, urlPrefix: string) => {
-    if (entityType && entityType !== type && !(type === "aura" && (entityType === "keshin" || entityType === "soul"))) {
+  const searchCategory = (
+    catName: string,
+    type: string,
+    typeLabel: string,
+    urlPrefix: string,
+  ) => {
+    if (
+      entityType &&
+      entityType !== type &&
+      !(type === "aura" && (entityType === "keshin" || entityType === "soul"))
+    ) {
       return;
     }
     const list = (glossary[catName] || []) as GlossaryItem[];
@@ -260,7 +304,9 @@ async function searchGlossary(query: string, entityType?: string): Promise<Trans
       const enNorm = normalizeForSearch(entry.en || "");
       const frNorm = normalizeForSearch(entry.fr || "");
       const jaLower = (entry.ja || "").toLowerCase();
-      const romaNorm = entry.ja ? normalizeForSearch(japaneseToRomaji(entry.ja) || "") : "";
+      const romaNorm = entry.ja
+        ? normalizeForSearch(japaneseToRomaji(entry.ja) || "")
+        : "";
 
       // Score « solide » (exact/prefix/token/contains) sur les noms latins + romaji.
       let score = 0;
@@ -289,10 +335,14 @@ async function searchGlossary(query: string, entityType?: string): Promise<Trans
       let finalUrl = `${urlPrefix}/${id}`;
 
       if (type === "aura") {
-        const isSoul = entry.subType === "soul" || (entry.subType && entry.subType.toLowerCase().includes("soul"));
+        const isSoul =
+          entry.subType === "soul" ||
+          (entry.subType && entry.subType.toLowerCase().includes("soul"));
         finalType = isSoul ? "soul" : "keshin";
         finalTypeLabel = isSoul ? "Totem" : "Esprit Guerrier";
-        finalUrl = isSoul ? `/aura/totems/${id}` : `/aura/esprits-guerriers/${id}`;
+        finalUrl = isSoul
+          ? `/aura/totems/${id}`
+          : `/aura/esprits-guerriers/${id}`;
         if (entityType && entityType !== finalType) continue;
       }
 
@@ -357,7 +407,10 @@ function buildOrFilters(columns: string[], variants: string[]): string {
  * plus large (variantes ilike + premier token / préfixe) que la stricte chaîne,
  * le ranking/post-filtrage fuzzy est fait en JS dans searchTranslations.
  */
-async function searchPostgres(query: string, entityType?: string): Promise<TranslationResult[]> {
+async function searchPostgres(
+  query: string,
+  entityType?: string,
+): Promise<TranslationResult[]> {
   const supabase = createPostgresClient();
   const queryNorm = normalizeForSearch(query);
   if (!queryNorm) return [];
@@ -371,16 +424,23 @@ async function searchPostgres(query: string, entityType?: string): Promise<Trans
     if (t.length >= 2) variants.add(t);
   }
   // Préfixe (>= 3 chars) pour attraper les troncatures ("tornad" → "tornado").
-  if (queryNorm.length >= 4) variants.add(queryNorm.slice(0, Math.max(3, queryNorm.length - 1)));
+  if (queryNorm.length >= 4)
+    variants.add(queryNorm.slice(0, Math.max(3, queryNorm.length - 1)));
 
   // Variantes kana (romaji → hiragana/katakana) pour matcher name_ja.
   const kanaVariants = new Set<string>();
   const hiraCandidate = toHiragana(queryNorm);
   const kataCandidate = toKatakana(queryNorm);
-  if ([...hiraCandidate].every(c => isKana(c) || c === "ー") && hiraCandidate !== queryNorm) {
+  if (
+    [...hiraCandidate].every((c) => isKana(c) || c === "ー") &&
+    hiraCandidate !== queryNorm
+  ) {
     kanaVariants.add(hiraCandidate);
   }
-  if ([...kataCandidate].every(c => isKana(c) || c === "ー") && kataCandidate !== queryNorm) {
+  if (
+    [...kataCandidate].every((c) => isKana(c) || c === "ー") &&
+    kataCandidate !== queryNorm
+  ) {
     kanaVariants.add(kataCandidate);
   }
 
@@ -620,7 +680,10 @@ async function searchPostgres(query: string, entityType?: string): Promise<Trans
  * (AND désordonné) et passe fuzzy de secours (Levenshtein) si peu de résultats
  * exacts. Dédup + tri par pertinence (exact > prefix > token > fuzzy).
  */
-export async function searchTranslations(query: string, entityType?: string): Promise<TranslationResult[]> {
+export async function searchTranslations(
+  query: string,
+  entityType?: string,
+): Promise<TranslationResult[]> {
   if (!query || query.length < 2) {
     return [];
   }
@@ -666,14 +729,14 @@ export async function searchTranslations(query: string, entityType?: string): Pr
   // Filtre : on ne garde que ce qui dépasse le seuil fuzzy. Les lignes DB
   // remontées par ilike mais qui ne matchent pas après normalisation
   // (faux positifs du sur-ensemble) sont écartées ici.
-  let kept = merged.filter(r => (r.score ?? 0) >= FUZZY_THRESHOLD);
+  let kept = merged.filter((r) => (r.score ?? 0) >= FUZZY_THRESHOLD);
 
   // Si la passe stricte/fuzzy ne donne rien mais que la DB a quand même
   // renvoyé des lignes (sur-ensemble large), on les garde en dernier recours
   // pour ne pas afficher un écran vide trompeur.
   if (kept.length === 0 && merged.length > 0) {
     kept = merged
-      .map(r => ({ ...r, fuzzy: true }))
+      .map((r) => ({ ...r, fuzzy: true }))
       .sort((a, b) => (b.score ?? 0) - (a.score ?? 0))
       .slice(0, 12);
   }

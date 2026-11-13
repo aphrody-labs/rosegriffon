@@ -4,12 +4,18 @@
  * Aucune I/O : durées, libellés, escalade et effet Discord d'une sanction se
  * décident ici et se testent sans passerelle (`achillea-moderation.test.ts`).
  */
-import { ESCALATION_WINDOW_SEC, evaluateEscalation } from "@rosegriffon/achillea-core";
+import {
+  ESCALATION_WINDOW_SEC,
+  evaluateEscalation,
+} from "@rosegriffon/achillea-core";
 import type { AchilleaClient } from "@rosegriffon/achillea-client";
 import type { GuildMember, User } from "discord.js";
 
 /** Sanction telle que l'API la rend. */
-export type Sanction = Extract<Awaited<ReturnType<AchilleaClient["sanctions"]["create"]>>, { ok: true }>["value"];
+export type Sanction = Extract<
+  Awaited<ReturnType<AchilleaClient["sanctions"]["create"]>>,
+  { ok: true }
+>["value"];
 
 /** Plafond d'un timeout Discord : 28 jours. */
 export const DUREE_MAX_MUTE_S = 2_419_200;
@@ -19,7 +25,13 @@ export function lireDuree(brut: string): number | null {
   const correspondance = /^(\d+)([smhdj])$/u.exec(brut.trim().toLowerCase());
   if (!correspondance) return null;
   const valeur = Number.parseInt(correspondance[1] ?? "", 10);
-  const multiplicateur: Record<string, number> = { s: 1, m: 60, h: 3600, d: 86_400, j: 86_400 };
+  const multiplicateur: Record<string, number> = {
+    s: 1,
+    m: 60,
+    h: 3600,
+    d: 86_400,
+    j: 86_400,
+  };
   const secondes = valeur * (multiplicateur[correspondance[2] ?? ""] ?? 0);
   return Number.isFinite(secondes) && secondes > 0 ? secondes : null;
 }
@@ -33,9 +45,13 @@ export function formaterDureeCourte(secondes: number): string {
 }
 
 /** Horodatage Discord (`<t:…:F>`), recalculé dans le fuseau du lecteur. */
-export function horodatage(valeur: string | Date | null | undefined, style: "R" | "t" | "f" | "F" = "F"): string {
+export function horodatage(
+  valeur: string | Date | null | undefined,
+  style: "R" | "t" | "f" | "F" = "F",
+): string {
   if (!valeur) return "—";
-  const ms = valeur instanceof Date ? valeur.getTime() : new Date(valeur).getTime();
+  const ms =
+    valeur instanceof Date ? valeur.getTime() : new Date(valeur).getTime();
   return Number.isFinite(ms) ? `<t:${Math.floor(ms / 1000)}:${style}>` : "—";
 }
 
@@ -48,10 +64,13 @@ export function utilisateurDe(brut: User | GuildMember): User {
  * Avertissements qui comptent pour l'escalade : actifs (non révoqués, non
  * expirés) et émis dans la fenêtre glissante d'`ESCALATION_WINDOW_SEC`.
  */
-export function avertissementsActifs(sanctions: readonly Sanction[], maintenant = Date.now()): number {
+export function avertissementsActifs(
+  sanctions: readonly Sanction[],
+  maintenant = Date.now(),
+): number {
   const debut = maintenant - ESCALATION_WINDOW_SEC * 1000;
   return sanctions.filter(
-    s =>
+    (s) =>
       s.type === "warn" &&
       s.revokedAt === null &&
       (s.expiresAt === null || new Date(s.expiresAt).getTime() > maintenant) &&
@@ -60,7 +79,10 @@ export function avertissementsActifs(sanctions: readonly Sanction[], maintenant 
 }
 
 /** Décision d'escalade automatique (mute/ban) d'après les avertissements actifs. */
-export function escaladeApres(sanctions: readonly Sanction[], maintenant = Date.now()) {
+export function escaladeApres(
+  sanctions: readonly Sanction[],
+  maintenant = Date.now(),
+) {
   const nombre = avertissementsActifs(sanctions, maintenant);
   const decision = evaluateEscalation(nombre);
   return decision ? { ...decision, avertissements: nombre } : null;
@@ -75,7 +97,9 @@ export type EffetDiscord =
   | { action: "lever-timeout" }
   | { action: "debannir" };
 
-export function effetDeSanction(sanction: Pick<Sanction, "type" | "durationSec">): EffetDiscord {
+export function effetDeSanction(
+  sanction: Pick<Sanction, "type" | "durationSec">,
+): EffetDiscord {
   switch (sanction.type) {
     case "mute": {
       return { action: "timeout", ms: (sanction.durationSec ?? 600) * 1000 };
@@ -93,7 +117,9 @@ export function effetDeSanction(sanction: Pick<Sanction, "type" | "durationSec">
 }
 
 /** Effet inverse appliqué à la révocation d'une sanction. */
-export function effetDeRevocation(sanction: Pick<Sanction, "type">): EffetDiscord {
+export function effetDeRevocation(
+  sanction: Pick<Sanction, "type">,
+): EffetDiscord {
   if (sanction.type === "mute") return { action: "lever-timeout" };
   if (sanction.type === "ban") return { action: "debannir" };
   return { action: "aucun" };
@@ -101,8 +127,16 @@ export function effetDeRevocation(sanction: Pick<Sanction, "type">): EffetDiscor
 
 /** Ce que la passerelle doit savoir faire pour appliquer un effet (doublé en test). */
 export interface ServeurModerable {
-  members: { fetch(id: string): Promise<{ timeout(ms: number | null, raison?: string): Promise<unknown>; kick(raison?: string): Promise<unknown> }> };
-  bans: { create(id: string, options?: { reason?: string }): Promise<unknown>; remove(id: string, raison?: string): Promise<unknown> };
+  members: {
+    fetch(id: string): Promise<{
+      timeout(ms: number | null, raison?: string): Promise<unknown>;
+      kick(raison?: string): Promise<unknown>;
+    }>;
+  };
+  bans: {
+    create(id: string, options?: { reason?: string }): Promise<unknown>;
+    remove(id: string, raison?: string): Promise<unknown>;
+  };
 }
 
 /** Applique l'effet Discord ; lève l'erreur Discord telle quelle, que l'appelant raconte. */
@@ -117,7 +151,9 @@ export async function appliquerEffet(
       return;
     }
     case "timeout": {
-      await (await serveur.members.fetch(utilisateurId)).timeout(effet.ms, raison);
+      await (
+        await serveur.members.fetch(utilisateurId)
+      ).timeout(effet.ms, raison);
       return;
     }
     case "lever-timeout": {
@@ -129,7 +165,10 @@ export async function appliquerEffet(
       return;
     }
     case "bannir": {
-      await serveur.bans.create(utilisateurId, raison ? { reason: raison } : {});
+      await serveur.bans.create(
+        utilisateurId,
+        raison ? { reason: raison } : {},
+      );
       return;
     }
     case "debannir": {
@@ -151,7 +190,10 @@ export function signe(n: number): string {
 }
 
 /** Lien cliquable vers une capture de litige (chemin relatif servi par le ranked). */
-export function lienCapture(url: string | null | undefined, origine: string): string {
+export function lienCapture(
+  url: string | null | undefined,
+  origine: string,
+): string {
   if (!url) return "pas de capture";
   return `[capture](${url.startsWith("http") ? url : `${origine.replace(/\/$/u, "")}${url}`})`;
 }

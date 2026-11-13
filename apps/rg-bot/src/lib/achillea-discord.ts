@@ -30,7 +30,9 @@ export interface MessageAchillea {
   components?: Array<Record<string, unknown>>;
 }
 
-export type ResultatEnvoi = { ok: true; id: string } | { ok: false; statut: number | null; motif: string };
+export type ResultatEnvoi =
+  | { ok: true; id: string }
+  | { ok: false; statut: number | null; motif: string };
 
 export function jetonBotAchillea(env: EnvAchillea = Bun.env): string | null {
   const jeton = (env.ACHILLEA_DISCORD_BOT_TOKEN ?? "").trim();
@@ -45,21 +47,36 @@ async function appelRest(
 ): Promise<Response> {
   const reponse = await fetch(`${API_DISCORD}${chemin}`, {
     method: init.method,
-    headers: { Authorization: `Bot ${jeton}`, "User-Agent": AGENT, "Content-Type": "application/json" },
+    headers: {
+      Authorization: `Bot ${jeton}`,
+      "User-Agent": AGENT,
+      "Content-Type": "application/json",
+    },
     body: init.body === undefined ? undefined : JSON.stringify(init.body),
     signal: AbortSignal.timeout(15_000),
   });
   if (reponse.status === 429 && tentative < TENTATIVES_429) {
-    const corps = (await reponse.json().catch(() => ({}))) as { retry_after?: number };
+    const corps = (await reponse.json().catch(() => ({}))) as {
+      retry_after?: number;
+    };
     await Bun.sleep(Math.ceil((corps.retry_after ?? 1) * 1000) + 250);
     return appelRest(jeton, chemin, init, tentative + 1);
   }
   return reponse;
 }
 
-async function poster(chemin: string, message: MessageAchillea, env: EnvAchillea): Promise<ResultatEnvoi> {
+async function poster(
+  chemin: string,
+  message: MessageAchillea,
+  env: EnvAchillea,
+): Promise<ResultatEnvoi> {
   const jeton = jetonBotAchillea(env);
-  if (!jeton) return { ok: false, statut: null, motif: "ACHILLEA_DISCORD_BOT_TOKEN absent" };
+  if (!jeton)
+    return {
+      ok: false,
+      statut: null,
+      motif: "ACHILLEA_DISCORD_BOT_TOKEN absent",
+    };
   try {
     // Aucune mention implicite : un texte saisi par un joueur ne doit jamais pinguer @everyone.
     const reponse = await appelRest(jeton, chemin, {
@@ -73,7 +90,11 @@ async function poster(chemin: string, message: MessageAchillea, env: EnvAchillea
     const cree = (await reponse.json()) as { id: string };
     return { ok: true, id: cree.id };
   } catch (err) {
-    return { ok: false, statut: null, motif: err instanceof Error ? err.message : String(err) };
+    return {
+      ok: false,
+      statut: null,
+      motif: err instanceof Error ? err.message : String(err),
+    };
   }
 }
 
@@ -82,7 +103,10 @@ export const SALON_TO_ACHILLEA = "1436378680153608203";
 
 /** Salon des preuves de litige : `RANKED_PROOF_CHANNEL_ID`, sinon `ACHILLEA_TO_CHANNEL_ID`, sinon le salon TO. */
 export function salonPreuvesRanked(env: EnvAchillea = Bun.env): string {
-  for (const variable of ["RANKED_PROOF_CHANNEL_ID", "ACHILLEA_TO_CHANNEL_ID"]) {
+  for (const variable of [
+    "RANKED_PROOF_CHANNEL_ID",
+    "ACHILLEA_TO_CHANNEL_ID",
+  ]) {
     const valeur = (env[variable] ?? "").trim();
     if (/^\d{15,25}$/.test(valeur)) return valeur;
   }
@@ -108,16 +132,32 @@ export async function envoyerMpAchillea(
   env: EnvAchillea = Bun.env,
 ): Promise<ResultatEnvoi> {
   const jeton = jetonBotAchillea(env);
-  if (!jeton) return { ok: false, statut: null, motif: "ACHILLEA_DISCORD_BOT_TOKEN absent" };
+  if (!jeton)
+    return {
+      ok: false,
+      statut: null,
+      motif: "ACHILLEA_DISCORD_BOT_TOKEN absent",
+    };
   try {
-    const canal = await appelRest(jeton, "/users/@me/channels", { method: "POST", body: { recipient_id: utilisateurId } });
+    const canal = await appelRest(jeton, "/users/@me/channels", {
+      method: "POST",
+      body: { recipient_id: utilisateurId },
+    });
     if (!canal.ok) {
-      return { ok: false, statut: canal.status, motif: (await canal.text().catch(() => "")).slice(0, 200) };
+      return {
+        ok: false,
+        statut: canal.status,
+        motif: (await canal.text().catch(() => "")).slice(0, 200),
+      };
     }
     const { id } = (await canal.json()) as { id: string };
     return poster(`/channels/${id}/messages`, message, env);
   } catch (err) {
-    return { ok: false, statut: null, motif: err instanceof Error ? err.message : String(err) };
+    return {
+      ok: false,
+      statut: null,
+      motif: err instanceof Error ? err.message : String(err),
+    };
   }
 }
 
@@ -135,7 +175,11 @@ export class BotAchilleaInjoignable extends Error {
 /** Base du serveur d'administration Achilléa (surchargeable en développement). */
 export function baseBotAchillea(env: EnvAchillea = Bun.env): string {
   const surcharge = (env.BOT_ADMIN_URL_ACHILLEA ?? "").trim();
-  return (surcharge === "" ? `http://127.0.0.1:${PROFILS_BOT.achillea.portAdmin}` : surcharge).replace(/\/+$/, "");
+  return (
+    surcharge === ""
+      ? `http://127.0.0.1:${PROFILS_BOT.achillea.portAdmin}`
+      : surcharge
+  ).replace(/\/+$/, "");
 }
 
 /**
@@ -150,7 +194,10 @@ export async function appelerBotAchillea<T>(
   env: EnvAchillea = Bun.env,
 ): Promise<T> {
   const secret = (env.BOT_ADMIN_TOKEN ?? "").trim();
-  if (secret === "") throw new BotAchilleaInjoignable("BOT_ADMIN_TOKEN absent : le bot Achilléa ne peut pas être interrogé.");
+  if (secret === "")
+    throw new BotAchilleaInjoignable(
+      "BOT_ADMIN_TOKEN absent : le bot Achilléa ne peut pas être interrogé.",
+    );
   let reponse: Response;
   try {
     reponse = await fetch(`${baseBotAchillea(env)}${chemin}`, {
@@ -164,8 +211,13 @@ export async function appelerBotAchillea<T>(
     );
   }
   if (!reponse.ok) {
-    const corps = (await reponse.json().catch(() => ({}))) as { erreur?: string };
-    throw new BotAchilleaInjoignable(corps.erreur ?? `HTTP ${reponse.status}`, reponse.status);
+    const corps = (await reponse.json().catch(() => ({}))) as {
+      erreur?: string;
+    };
+    throw new BotAchilleaInjoignable(
+      corps.erreur ?? `HTTP ${reponse.status}`,
+      reponse.status,
+    );
   }
   return (await reponse.json()) as T;
 }

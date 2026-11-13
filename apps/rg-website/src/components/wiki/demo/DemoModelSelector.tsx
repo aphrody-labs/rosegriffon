@@ -18,7 +18,7 @@ export function DemoModelSelector({
 }) {
   return (
     <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-6">
-      {options.map(o => {
+      {options.map((o) => {
         const active = o.id === selectedId;
         return (
           <button
@@ -27,7 +27,9 @@ export function DemoModelSelector({
             onClick={() => onSelect(o.id)}
             title={o.label}
             className={`group relative aspect-square overflow-hidden rounded-xl border-2 transition-colors ${
-              active ? "border-primary" : "border-transparent bg-surface-container-high hover:border-outline-variant"
+              active
+                ? "border-primary"
+                : "border-transparent bg-surface-container-high hover:border-outline-variant"
             }`}
           >
             {o.iconUrl ? (
@@ -45,7 +47,9 @@ export function DemoModelSelector({
             )}
             <span
               className={`absolute inset-x-0 bottom-0 truncate px-1.5 py-0.5 text-[10px] font-medium ${
-                active ? "bg-primary text-on-primary" : "bg-surface/70 text-on-surface-variant backdrop-blur"
+                active
+                  ? "bg-primary text-on-primary"
+                  : "bg-surface/70 text-on-surface-variant backdrop-blur"
               }`}
             >
               {o.label}

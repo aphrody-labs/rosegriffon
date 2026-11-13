@@ -35,7 +35,14 @@
  * et surtout parce qu'un bouton destructeur qui survit à un redémarrage est un
  * piège : après un redémarrage, il dit « expirée », ce qui est la vérité.
  */
-import { ButtonComponent, Discord, Slash, SlashChoice, SlashGroup, SlashOption } from "discordx";
+import {
+  ButtonComponent,
+  Discord,
+  Slash,
+  SlashChoice,
+  SlashGroup,
+  SlashOption,
+} from "discordx";
 import {
   ActionRowBuilder,
   ApplicationCommandOptionType,
@@ -51,9 +58,19 @@ import {
 import { logAdminAction } from "../../lib/audit";
 import { sql } from "../../lib/db";
 import { rgEmbed } from "../../lib/embeds";
-import { NotAdminError, invalidateRbacCache, requireRgAdmin, requireRgAdminStrict } from "../../lib/rbac";
+import {
+  NotAdminError,
+  invalidateRbacCache,
+  requireRgAdmin,
+  requireRgAdminStrict,
+} from "../../lib/rbac";
 import { borner, echapperMarkdown, horodatageRelatif } from "../staff/format";
-import { differerEnPrive, exigerDroits, messagePanne, type RgAdmin } from "../staff/garde";
+import {
+  differerEnPrive,
+  exigerDroits,
+  messagePanne,
+  type RgAdmin,
+} from "../staff/garde";
 import {
   ROLES_ASSIGNABLES,
   ROLES_ATTRIBUABLES,
@@ -149,12 +166,20 @@ export async function demanderConfirmation(
   purgerConfirmations();
 
   const graine = interaction.id;
-  const idOui = encoderEtatBouton(PREFIXE_CONFIRMATION, { r: "oui", g: graine });
-  const idNon = encoderEtatBouton(PREFIXE_CONFIRMATION, { r: "non", g: graine });
+  const idOui = encoderEtatBouton(PREFIXE_CONFIRMATION, {
+    r: "oui",
+    g: graine,
+  });
+  const idNon = encoderEtatBouton(PREFIXE_CONFIRMATION, {
+    r: "non",
+    g: graine,
+  });
   if (idOui === null || idNon === null) {
     // Impossible en pratique (un flocon fait 19 chiffres) mais un `custom_id`
     // trop long ferait échouer l'envoi ENTIER du message, sans rien dire.
-    await interaction.editReply({ content: "❌ Confirmation impossible à composer." });
+    await interaction.editReply({
+      content: "❌ Confirmation impossible à composer.",
+    });
     return;
   }
 
@@ -173,14 +198,24 @@ export async function demanderConfirmation(
   const embed = rgEmbed()
     .setTitle(borner(options.titre, 256))
     .setDescription(borner(options.description, 4_096))
-    .setFooter(piedTexte({ note: `Sans réponse dans les 2 minutes, rien ne sera fait.` }));
+    .setFooter(
+      piedTexte({
+        note: `Sans réponse dans les 2 minutes, rien ne sera fait.`,
+      }),
+    );
 
   await interaction.editReply({
     embeds: [embed],
     components: [
       new ActionRowBuilder<ButtonBuilder>().addComponents(
-        new ButtonBuilder().setCustomId(idOui).setLabel(borner(options.libelle, 80)).setStyle(ButtonStyle.Danger),
-        new ButtonBuilder().setCustomId(idNon).setLabel("Annuler").setStyle(ButtonStyle.Secondary),
+        new ButtonBuilder()
+          .setCustomId(idOui)
+          .setLabel(borner(options.libelle, 80))
+          .setStyle(ButtonStyle.Danger),
+        new ButtonBuilder()
+          .setCustomId(idNon)
+          .setLabel("Annuler")
+          .setStyle(ButtonStyle.Secondary),
       ),
     ],
   });
@@ -280,7 +315,10 @@ async function resoudreProfil(cle: string): Promise<FicheProfil | null> {
 }
 
 /** Ce qu'on cherche : la mention l'emporte sur la saisie libre. */
-function cleDemandee(membre: User | undefined, identifiant: string | undefined): string | null {
+function cleDemandee(
+  membre: User | undefined,
+  identifiant: string | undefined,
+): string | null {
   if (membre) {
     return membre.id;
   }
@@ -296,13 +334,18 @@ async function rendrePageProfils(
 ): Promise<InteractionEditReplyOptions> {
   const lignes = await chercherProfils(recherche, role, Math.max(0, offset));
   const filtres = [
-    recherche ? `recherche « ${borner(echapperMarkdown(recherche), 60)} »` : null,
+    recherche
+      ? `recherche « ${borner(echapperMarkdown(recherche), 60)} »`
+      : null,
     role ? `rôle \`${role}\`` : null,
   ].filter((filtre): filtre is string => filtre !== null);
 
   if (lignes.length === 0) {
     return {
-      content: filtres.length > 0 ? `Aucun profil ne correspond (${filtres.join(", ")}).` : "Aucun profil.",
+      content:
+        filtres.length > 0
+          ? `Aucun profil ne correspond (${filtres.join(", ")}).`
+          : "Aucun profil.",
       embeds: [],
       components: [],
     };
@@ -314,7 +357,7 @@ async function rendrePageProfils(
 
   const embed = rgEmbed()
     .setTitle(`Profils — ${total.toLocaleString("fr-FR")}`)
-    .setDescription(lignes.map(ligne => ligneProfil(ligne)).join("\n"))
+    .setDescription(lignes.map((ligne) => ligneProfil(ligne)).join("\n"))
     .setFooter(
       piedTexte({
         page,
@@ -368,7 +411,11 @@ async function rendrePageProfils(
  * silencieusement à personne. Zéro ligne rendue = quelqu'un d'autre est passé
  * avant nous, et l'accusé de réception doit le dire plutôt que de mentir.
  */
-async function ecrireRole(profileId: string, roleAttendu: string | null, nouveauRole: string): Promise<boolean> {
+async function ecrireRole(
+  profileId: string,
+  roleAttendu: string | null,
+  nouveauRole: string,
+): Promise<boolean> {
   const lignes = await sql<Array<{ id: string }>>`
 		UPDATE profiles
 		SET role = ${nouveauRole}, updated_at = NOW()
@@ -447,7 +494,8 @@ async function preparerChangementDeRole(
 ): Promise<void> {
   if (cle === null) {
     await interaction.editReply({
-      content: "Indique un membre (mention) ou un identifiant (uuid de profil ou identifiant Discord).",
+      content:
+        "Indique un membre (mention) ou un identifiant (uuid de profil ou identifiant Discord).",
     });
     return;
   }
@@ -488,7 +536,9 @@ async function preparerChangementDeRole(
     return;
   }
 
-  const raison = options.raison?.trim() ? borner(options.raison.trim(), LONGUEUR_RAISON) : null;
+  const raison = options.raison?.trim()
+    ? borner(options.raison.trim(), LONGUEUR_RAISON)
+    : null;
   const lignes = [
     ligneProfil(cible),
     "",
@@ -502,7 +552,7 @@ async function preparerChangementDeRole(
     description: lignes.join("\n"),
     libelle: options.libelle,
     resume: `${options.action} sur \`${abregerIdentifiant(cible.id)}\``,
-    executer: async confirmant =>
+    executer: async (confirmant) =>
       await appliquerRole(confirmant, cible, nouveauRole, options.action, {
         raison,
       }),
@@ -518,7 +568,10 @@ async function preparerChangementDeRole(
  * (deux comptes en production) est justement la raison pour laquelle on ne peut
  * pas y toucher depuis Discord.
  */
-const CHOIX_ROLE_FILTRE = ROLES_ASSIGNABLES.map(role => ({ name: role, value: role }));
+const CHOIX_ROLE_FILTRE = ROLES_ASSIGNABLES.map((role) => ({
+  name: role,
+  value: role,
+}));
 
 /**
  * Rôles proposés à l'ÉCRITURE : les mêmes, moins les intouchables.
@@ -530,7 +583,10 @@ const CHOIX_ROLE_FILTRE = ROLES_ASSIGNABLES.map(role => ({ name: role, value: ro
  * moment où elle s'applique, sans supprimer le garde-fou — la vérification
  * reste faite côté serveur, une option Discord n'étant qu'une suggestion.
  */
-const CHOIX_ROLE_ASSIGNABLE = ROLES_ATTRIBUABLES.map(role => ({ name: role, value: role }));
+const CHOIX_ROLE_ASSIGNABLE = ROLES_ATTRIBUABLES.map((role) => ({
+  name: role,
+  value: role,
+}));
 
 @Discord()
 @SlashGroup({
@@ -542,7 +598,8 @@ const CHOIX_ROLE_ASSIGNABLE = ROLES_ATTRIBUABLES.map(role => ({ name: role, valu
 export class AdministrationUtilisateurCommand {
   @Slash({
     name: "liste",
-    description: "Cherche des profils (pseudo, nom, identifiant) et filtre par rôle",
+    description:
+      "Cherche des profils (pseudo, nom, identifiant) et filtre par rôle",
   })
   async liste(
     @SlashOption({
@@ -556,7 +613,8 @@ export class AdministrationUtilisateurCommand {
     @SlashChoice(...CHOIX_ROLE_FILTRE)
     @SlashOption({
       name: "role",
-      description: "Ne garder que ce rôle (« member » couvre 1 839 profils sur 1 850)",
+      description:
+        "Ne garder que ce rôle (« member » couvre 1 839 profils sur 1 850)",
       type: ApplicationCommandOptionType.String,
       required: false,
     })
@@ -568,9 +626,14 @@ export class AdministrationUtilisateurCommand {
       return;
     }
     try {
-      await interaction.editReply(await rendrePageProfils(recherche?.trim() || null, role ?? null, 0));
+      await interaction.editReply(
+        await rendrePageProfils(recherche?.trim() || null, role ?? null, 0),
+      );
     } catch (err) {
-      await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
+      await repondre(
+        interaction,
+        echec("Le service n'a pas répondu", messagePanne(err)),
+      );
     }
   }
 
@@ -604,7 +667,8 @@ export class AdministrationUtilisateurCommand {
     const cle = cleDemandee(membre, identifiant);
     if (cle === null) {
       await interaction.editReply({
-        content: "Mentionne un membre, ou donne un uuid de profil / un identifiant Discord.",
+        content:
+          "Mentionne un membre, ou donne un uuid de profil / un identifiant Discord.",
       });
       return;
     }
@@ -647,7 +711,10 @@ export class AdministrationUtilisateurCommand {
           },
           {
             name: "Badges",
-            value: profil.badges && profil.badges.length > 0 ? profil.badges.join(" · ") : "—",
+            value:
+              profil.badges && profil.badges.length > 0
+                ? profil.badges.join(" · ")
+                : "—",
             inline: true,
           },
           {
@@ -675,7 +742,10 @@ export class AdministrationUtilisateurCommand {
         );
 
       if (profil.bio) {
-        embed.addFields({ name: "Bio", value: borner(echapperMarkdown(profil.bio), 1_000) });
+        embed.addFields({
+          name: "Bio",
+          value: borner(echapperMarkdown(profil.bio), 1_000),
+        });
       }
       // `website` est un champ libre du profil : sur les 1 850 lignes, 7 le
       // portent sans être une URL (des blancs). Non rogné, il produisait une
@@ -684,10 +754,15 @@ export class AdministrationUtilisateurCommand {
       const site = profil.website?.trim() ?? "";
       const liens = [
         site.length > 0 ? `Site : ${echapperMarkdown(site)}` : null,
-        profil.twitter_handle ? `X : @${echapperMarkdown(profil.twitter_handle)}` : null,
+        profil.twitter_handle
+          ? `X : @${echapperMarkdown(profil.twitter_handle)}`
+          : null,
       ].filter((lien): lien is string => lien !== null);
       if (liens.length > 0) {
-        embed.addFields({ name: "Liens", value: borner(liens.join("\n"), 1_000) });
+        embed.addFields({
+          name: "Liens",
+          value: borner(liens.join("\n"), 1_000),
+        });
       }
       // La vignette n'est posée que si la valeur EST une URL : Discord refuse
       // l'embed ENTIER sur une image invalide, et le refus ne dit pas laquelle
@@ -700,7 +775,10 @@ export class AdministrationUtilisateurCommand {
 
       await interaction.editReply({ embeds: [embed] });
     } catch (err) {
-      await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
+      await repondre(
+        interaction,
+        echec("Le service n'a pas répondu", messagePanne(err)),
+      );
     }
   }
 
@@ -740,13 +818,22 @@ export class AdministrationUtilisateurCommand {
       return;
     }
     try {
-      await preparerChangementDeRole(interaction, acteur, cleDemandee(membre, identifiant), role, {
-        titre: "Changer le rôle de ce profil ?",
-        libelle: "Changer le rôle",
-        action: "utilisateur.role",
-      });
+      await preparerChangementDeRole(
+        interaction,
+        acteur,
+        cleDemandee(membre, identifiant),
+        role,
+        {
+          titre: "Changer le rôle de ce profil ?",
+          libelle: "Changer le rôle",
+          action: "utilisateur.role",
+        },
+      );
     } catch (err) {
-      await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
+      await repondre(
+        interaction,
+        echec("Le service n'a pas répondu", messagePanne(err)),
+      );
     }
   }
 
@@ -786,14 +873,23 @@ export class AdministrationUtilisateurCommand {
       return;
     }
     try {
-      await preparerChangementDeRole(interaction, acteur, cleDemandee(membre, identifiant), "banned", {
-        titre: "Bannir ce profil ?",
-        libelle: "Bannir",
-        action: "utilisateur.bannir",
-        raison,
-      });
+      await preparerChangementDeRole(
+        interaction,
+        acteur,
+        cleDemandee(membre, identifiant),
+        "banned",
+        {
+          titre: "Bannir ce profil ?",
+          libelle: "Bannir",
+          action: "utilisateur.bannir",
+          raison,
+        },
+      );
     } catch (err) {
-      await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
+      await repondre(
+        interaction,
+        echec("Le service n'a pas répondu", messagePanne(err)),
+      );
     }
   }
 
@@ -828,14 +924,23 @@ export class AdministrationUtilisateurCommand {
       // « member », pas « user » : l'ancienne commande rendait un rôle que 1
       // seul compte porte en base, sortant le membre de la population normale
       // du site (1 839 profils sont `member`).
-      await preparerChangementDeRole(interaction, acteur, cleDemandee(membre, identifiant), "member", {
-        titre: "Lever le bannissement ?",
-        libelle: "Débannir",
-        action: "utilisateur.debannir",
-        exigerRoleActuel: "banned",
-      });
+      await preparerChangementDeRole(
+        interaction,
+        acteur,
+        cleDemandee(membre, identifiant),
+        "member",
+        {
+          titre: "Lever le bannissement ?",
+          libelle: "Débannir",
+          action: "utilisateur.debannir",
+          exigerRoleActuel: "banned",
+        },
+      );
     } catch (err) {
-      await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
+      await repondre(
+        interaction,
+        echec("Le service n'a pas répondu", messagePanne(err)),
+      );
     }
   }
 
@@ -966,7 +1071,11 @@ export class ConfirmationAdministration {
 
     try {
       const message = await attente.executer(acteur);
-      await interaction.editReply({ content: message, embeds: [], components: [] });
+      await interaction.editReply({
+        content: message,
+        embeds: [],
+        components: [],
+      });
     } catch (err) {
       await interaction.editReply({
         content: `❌ ${messagePanne(err)}`,

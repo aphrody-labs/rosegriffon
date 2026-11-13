@@ -20,7 +20,15 @@ interface SpriteIconProps extends React.HTMLAttributes<HTMLDivElement> {
   label?: string;
 }
 
-export const SpriteIcon = ({ name, variant = "default", scale = 1, label, className, style, ...props }: SpriteIconProps) => {
+export const SpriteIcon = ({
+  name,
+  variant = "default",
+  scale = 1,
+  label,
+  className,
+  style,
+  ...props
+}: SpriteIconProps) => {
   const sprite = SPRITES[name];
 
   if (!sprite) {
@@ -40,7 +48,9 @@ export const SpriteIcon = ({ name, variant = "default", scale = 1, label, classN
         width: displayW,
         ...style,
       }}
-      {...(label ? { role: "img", "aria-label": label } : { "aria-hidden": true })}
+      {...(label
+        ? { role: "img", "aria-label": label }
+        : { "aria-hidden": true })}
       {...props}
     >
       <div

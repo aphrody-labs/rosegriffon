@@ -27,7 +27,8 @@ function contexte(classe: string) {
       root: {
         classList: { contains: (c: string) => c === classe },
         style: {
-          setProperty: (k: string, v: string | null) => void props.set(k, v ?? ""),
+          setProperty: (k: string, v: string | null) =>
+            void props.set(k, v ?? ""),
           removeProperty: (k: string) => {
             const v = props.get(k) ?? "";
             props.delete(k);
@@ -44,10 +45,20 @@ describe("theme-tune", () => {
     const { donnees, props, ctx } = contexte("roy");
     setThemeTune("roy", { hueShift: 30, chroma: 1.2, contrast: 0.5 }, ctx);
     const brut = JSON.parse(donnees.get(TUNE_STORAGE_KEY)!);
-    const attendu = roleVariables(computeRoles(THEME_PACKS.roy.seed, { hueShift: 30, chroma: 1.2, contrast: 0.5 }));
+    const attendu = roleVariables(
+      computeRoles(THEME_PACKS.roy.seed, {
+        hueShift: 30,
+        chroma: 1.2,
+        contrast: 0.5,
+      }),
+    );
     expect(brut.roy.v).toEqual(attendu);
     expect(Object.fromEntries(props)).toEqual(attendu);
-    expect(getThemeTune("roy", ctx)).toEqual({ hueShift: 30, chroma: 1.2, contrast: 0.5 });
+    expect(getThemeTune("roy", ctx)).toEqual({
+      hueShift: 30,
+      chroma: 1.2,
+      contrast: 0.5,
+    });
   });
 
   test("does not touch <html> when tuning another theme", () => {
@@ -75,7 +86,13 @@ describe("theme-tune", () => {
     const { donnees, ctx } = contexte("roy");
     donnees.set(
       TUNE_STORAGE_KEY,
-      JSON.stringify({ roy: { a: { hueShift: 9999 }, v: { "--md-sys-color-primary": "red; x" } }, inconnu: {} }),
+      JSON.stringify({
+        roy: {
+          a: { hueShift: 9999 },
+          v: { "--md-sys-color-primary": "red; x" },
+        },
+        inconnu: {},
+      }),
     );
     const store = readTuneStore(ctx);
     expect(Object.keys(store)).toEqual(["roy"]);
@@ -87,14 +104,28 @@ describe("theme-tune", () => {
 
   test("boot snippet copies only well-formed role values", () => {
     const props = new Map<string, string>();
-    const d = { style: { setProperty: (k: string, v: string) => void props.set(k, v) } };
+    const d = {
+      style: { setProperty: (k: string, v: string) => void props.set(k, v) },
+    };
     const localStorage = {
       getItem: () =>
         JSON.stringify({
-          roy: { v: { "--md-sys-color-primary": "#123456", "--md-sys-color-surface": "url(x)", "--autre": "#000000" } },
+          roy: {
+            v: {
+              "--md-sys-color-primary": "#123456",
+              "--md-sys-color-surface": "url(x)",
+              "--autre": "#000000",
+            },
+          },
         }),
     };
-    new Function("t", "d", "localStorage", TUNE_BOOT_SNIPPET)("roy", d, localStorage);
-    expect(Object.fromEntries(props)).toEqual({ "--md-sys-color-primary": "#123456" });
+    new Function("t", "d", "localStorage", TUNE_BOOT_SNIPPET)(
+      "roy",
+      d,
+      localStorage,
+    );
+    expect(Object.fromEntries(props)).toEqual({
+      "--md-sys-color-primary": "#123456",
+    });
   });
 });

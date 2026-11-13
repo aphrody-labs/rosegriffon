@@ -21,7 +21,7 @@ const CATEGORY_ICON: Record<string, string> = {
 };
 
 function escapeHtml(value: string): string {
-  return value.replace(/[&<>"']/gu, c => `&#${c.charCodeAt(0)};`);
+  return value.replace(/[&<>"']/gu, (c) => `&#${c.charCodeAt(0)};`);
 }
 
 /**
@@ -29,7 +29,10 @@ function escapeHtml(value: string): string {
  * le géocodage passe déjà par Nominatim. Les champs d'événement sont échappés avant
  * d'entrer dans le HTML des marqueurs et des infobulles.
  */
-export default function GoogleMapEvents({ events, isLoading }: GoogleMapEventsProps) {
+export default function GoogleMapEvents({
+  events,
+  isLoading,
+}: GoogleMapEventsProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const [isLoaded, setIsLoaded] = useState(false);
 
@@ -41,13 +44,14 @@ export default function GoogleMapEvents({ events, isLoading }: GoogleMapEventsPr
     let disposed = false;
     let map: import("leaflet").Map | undefined;
 
-    void import("leaflet").then(L => {
+    void import("leaflet").then((L) => {
       if (disposed) {
         return;
       }
       map = L.map(el, { scrollWheelZoom: false }).setView(FRANCE, 5);
       L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+        attribution:
+          '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
         maxZoom: 19,
       }).addTo(map);
 
@@ -100,12 +104,18 @@ export default function GoogleMapEvents({ events, isLoading }: GoogleMapEventsPr
           <div className="flex flex-col items-center gap-3">
             <div className="animate-spin rounded-full size-10 border-b-2 border-primary" />
             <p className="text-sm font-medium text-muted-foreground">
-              {isLoading ? "Localisation des événements..." : "Chargement de la carte..."}
+              {isLoading
+                ? "Localisation des événements..."
+                : "Chargement de la carte..."}
             </p>
           </div>
         </div>
       )}
-      <div ref={mapRef} className="w-full h-full" aria-label="Carte des événements" role="region" />
+      <section
+        ref={mapRef}
+        className="w-full h-full"
+        aria-label="Carte des événements"
+      />
     </div>
   );
 }

@@ -66,7 +66,10 @@ export const CDN_BASE = PUBLIC_CDN_BASE;
  * Côté navigateur, retombe sur [`PUBLIC_CDN_BASE`].
  */
 export function resolveModelServeFetchBase(): string {
-  if (typeof window === "undefined" && typeof process !== "undefined") {
+  // No `window` in DOM-less consumers (Bun bot, server); `globalThis` keeps the same test.
+  const hasWindow =
+    typeof (globalThis as { window?: unknown }).window !== "undefined";
+  if (!hasWindow && typeof process !== "undefined") {
     const local =
       process.env.NIE_MODEL_SERVE_URL ||
       process.env.MODEL_SERVE_URL ||

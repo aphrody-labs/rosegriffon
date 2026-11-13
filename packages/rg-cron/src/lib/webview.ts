@@ -71,7 +71,9 @@ async function chromeDisponible(): Promise<void> {
  * déjà lancé avec le débogage distant : le cron a toujours son propre
  * navigateur, éphémère.
  */
-export function ouvrirVue(options: { largeur?: number; hauteur?: number } = {}): Bun.WebView {
+export function ouvrirVue(
+  options: { largeur?: number; hauteur?: number } = {},
+): Bun.WebView {
   clearTimeout(minuteurFermeture);
   minuteurFermeture = undefined;
   const vue = new Bun.WebView({
@@ -113,7 +115,13 @@ export async function naviguer(
     await Promise.race([
       vue.navigate(url),
       new Promise<never>((_, rejeter) => {
-        minuteur = setTimeout(() => rejeter(new Error(`Navigation trop longue (${delaiMs} ms) : ${url}`)), delaiMs);
+        minuteur = setTimeout(
+          () =>
+            rejeter(
+              new Error(`Navigation trop longue (${delaiMs} ms) : ${url}`),
+            ),
+          delaiMs,
+        );
       }),
     ]);
   } finally {
@@ -124,7 +132,10 @@ export async function naviguer(
 }
 
 /** Charge une page dans un onglet dédié et rend son HTML après exécution des scripts. */
-export async function chargerDocument(url: string, delaiMs = DELAI_NAVIGATION_MS): Promise<DocumentCharge> {
+export async function chargerDocument(
+  url: string,
+  delaiMs = DELAI_NAVIGATION_MS,
+): Promise<DocumentCharge> {
   await chromeDisponible();
   const vue = ouvrirVue();
   try {
@@ -174,18 +185,30 @@ export class PageWebView {
         .evaluate("JSON.stringify([document.readyState, window.__rgNav === 1])")
         .then(String)
         .catch(() => "");
-      const reponse = await Promise.race([attente, Bun.sleep(250).then(() => null)]);
+      const reponse = await Promise.race([
+        attente,
+        Bun.sleep(250).then(() => null),
+      ]);
       if (reponse === null) continue;
       attente = null;
       try {
         const [etat, ancien] = JSON.parse(reponse) as [string, boolean];
-        if ((etat === "interactive" || etat === "complete") && !ancien && vue.url && vue.url !== "about:blank") break;
+        if (
+          (etat === "interactive" || etat === "complete") &&
+          !ancien &&
+          vue.url &&
+          vue.url !== "about:blank"
+        )
+          break;
       } catch {
         // Document en cours de remplacement : on réessaie.
       }
       await Bun.sleep(150);
     }
-    if (Date.now() >= echeance) throw new Error(`Navigation trop longue (${DELAI_NAVIGATION_MS} ms) : ${url}`);
+    if (Date.now() >= echeance)
+      throw new Error(
+        `Navigation trop longue (${DELAI_NAVIGATION_MS} ms) : ${url}`,
+      );
     const status = Number(await vue.evaluate(SCRIPT_STATUT)) || 200;
     return { ok: status >= 200 && status < 400, status, url: vue.url };
   }

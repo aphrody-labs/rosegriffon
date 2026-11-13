@@ -18,7 +18,10 @@ interface RankedBucketClient {
   createSignedUrl(
     path: string,
     expiresIn: number,
-  ): Promise<{ data: { signedUrl: string } | null; error: { message: string } | null }>;
+  ): Promise<{
+    data: { signedUrl: string } | null;
+    error: { message: string } | null;
+  }>;
 }
 
 export interface RankedStorageClientLike {
@@ -47,7 +50,8 @@ export interface StoredRankedProof {
 function validateConfig(config: RankedStorageConfig): void {
   const url = new URL(config.url);
   const loopback = ["localhost", "127.0.0.1", "::1"].includes(url.hostname);
-  if (url.protocol !== "https:" && !loopback) throw new Error("SUPABASE_URL doit utiliser HTTPS");
+  if (url.protocol !== "https:" && !loopback)
+    throw new Error("SUPABASE_URL doit utiliser HTTPS");
   if (!config.secretKey || config.secretKey.startsWith("sb_publishable_")) {
     throw new Error("Une clé secrète serveur Supabase est requise");
   }
@@ -59,7 +63,9 @@ function validateConfig(config: RankedStorageConfig): void {
     config.signedUrlTtlSeconds < 60 ||
     config.signedUrlTtlSeconds > 86_400
   ) {
-    throw new Error("SUPABASE_SIGNED_URL_TTL doit être compris entre 60 et 86400 secondes");
+    throw new Error(
+      "SUPABASE_SIGNED_URL_TTL doit être compris entre 60 et 86400 secondes",
+    );
   }
 }
 
@@ -93,47 +99,72 @@ export class RankedProofStorage {
     if (!Number.isSafeInteger(input.lobbyId) || input.lobbyId < 1) {
       throw new Error("Identifiant de lobby invalide");
     }
-    if (!/^\d{5,24}$/.test(input.userId)) throw new Error("Identifiant utilisateur invalide");
-    if (input.buffer.byteLength === 0 || input.buffer.byteLength > MAX_UPLOAD_BYTES) {
+    if (!/^\d{5,24}$/.test(input.userId))
+      throw new Error("Identifiant utilisateur invalide");
+    if (
+      input.buffer.byteLength === 0 ||
+      input.buffer.byteLength > MAX_UPLOAD_BYTES
+    ) {
       throw new Error("Taille de preuve invalide");
     }
     const contentType = contentTypeForExt(input.ext);
     if (!contentType) throw new Error("Type de preuve invalide");
 
-    const hash = crypto.createHash("sha256").update(input.buffer).digest("hex").slice(0, 24);
+    const hash = crypto
+      .createHash("sha256")
+      .update(input.buffer)
+      .digest("hex")
+      .slice(0, 24);
     const objectKey = `proof/${input.lobbyId}/${input.userId}-${hash}${input.ext}`;
-    const { error } = await this.bucket.upload(objectKey, new Uint8Array(input.buffer), {
-      cacheControl: "3600",
-      contentType,
-      upsert: true,
-    });
+    const { error } = await this.bucket.upload(
+      objectKey,
+      new Uint8Array(input.buffer),
+      {
+        cacheControl: "3600",
+        contentType,
+        upsert: true,
+      },
+    );
     if (error) throw new Error(`Upload de preuve impossible: ${error.message}`);
 
-    const signedUrl = await this.signReference(`${PRIVATE_REFERENCE_PREFIX}${objectKey}`);
+    const signedUrl = await this.signReference(
+      `${PRIVATE_REFERENCE_PREFIX}${objectKey}`,
+    );
     if (!signedUrl) throw new Error("Création de l'URL signée impossible");
     return { reference: `${PRIVATE_REFERENCE_PREFIX}${objectKey}`, signedUrl };
   }
 
   async signReference(reference: string): Promise<string | null> {
-    if (!reference.startsWith(PRIVATE_REFERENCE_PREFIX)) return reference || null;
+    if (!reference.startsWith(PRIVATE_REFERENCE_PREFIX))
+      return reference || null;
     const objectKey = reference.slice(PRIVATE_REFERENCE_PREFIX.length);
-    if (!/^proof\/\d+\/\d{5,24}-[a-f0-9]{24}\.(?:png|jpg|jpeg|webp)$/.test(objectKey)) {
+    if (
+      !/^proof\/\d+\/\d{5,24}-[a-f0-9]{24}\.(?:png|jpg|jpeg|webp)$/.test(
+        objectKey,
+      )
+    ) {
       return null;
     }
-    const { data, error } = await this.bucket.createSignedUrl(objectKey, this.config.signedUrlTtlSeconds);
+    const { data, error } = await this.bucket.createSignedUrl(
+      objectKey,
+      this.config.signedUrlTtlSeconds,
+    );
     return error ? null : (data?.signedUrl ?? null);
   }
 }
 
 function createConfiguredStorage(): RankedProofStorage | null {
   const url = process.env.SUPABASE_URL ?? "";
-  const secretKey = process.env.SUPABASE_SECRET_KEY ?? process.env.SUPABASE_SERVICE_KEY ?? "";
+  const secretKey =
+    process.env.SUPABASE_SECRET_KEY ?? process.env.SUPABASE_SERVICE_KEY ?? "";
   if (!url || !secretKey) return null;
   return new RankedProofStorage({
     url,
     secretKey,
     bucket: process.env.SUPABASE_PRIVATE_STORAGE_BUCKET ?? DEFAULT_BUCKET,
-    signedUrlTtlSeconds: Number(process.env.SUPABASE_SIGNED_URL_TTL ?? DEFAULT_SIGNED_URL_TTL),
+    signedUrlTtlSeconds: Number(
+      process.env.SUPABASE_SIGNED_URL_TTL ?? DEFAULT_SIGNED_URL_TTL,
+    ),
   });
 }
 
@@ -143,7 +174,9 @@ export function isSupabaseStorageEnabled(): boolean {
   return configuredStorage !== null;
 }
 
-export async function uploadRankedProof(input: ProofUploadInput): Promise<StoredRankedProof | null> {
+export async function uploadRankedProof(
+  input: ProofUploadInput,
+): Promise<StoredRankedProof | null> {
   if (!configuredStorage) return null;
   try {
     return await configuredStorage.upload(input);
@@ -154,7 +187,9 @@ export async function uploadRankedProof(input: ProofUploadInput): Promise<Stored
 }
 
 /** Signe une référence privée ; laisse les anciennes URL et références locales intactes. */
-export async function resolveRankedProofUrl(reference: string | null): Promise<string | null> {
+export async function resolveRankedProofUrl(
+  reference: string | null,
+): Promise<string | null> {
   if (!reference) return null;
   if (!reference.startsWith(PRIVATE_REFERENCE_PREFIX)) return reference;
   if (!configuredStorage) return null;

@@ -24,8 +24,13 @@ interface TournamentEventsJournalProps {
   tournamentId: number;
 }
 
-export function TournamentEventsJournal({ tournamentId }: TournamentEventsJournalProps) {
-  const [events, setEvents] = useResetState<TournamentEventDTO[]>([], tournamentId);
+export function TournamentEventsJournal({
+  tournamentId,
+}: TournamentEventsJournalProps) {
+  const [events, setEvents] = useResetState<TournamentEventDTO[]>(
+    [],
+    tournamentId,
+  );
   const [loading, setLoading] = useResetState<boolean>(true, tournamentId);
   const [_error, setError] = useResetState<string | null>(null, tournamentId);
 
@@ -35,7 +40,7 @@ export function TournamentEventsJournal({ tournamentId }: TournamentEventsJourna
 
     client.tournaments
       .events(tournamentId)
-      .then(res => {
+      .then((res) => {
         if (cancelled) return;
         if (res.ok && res.value) {
           setEvents(res.value);
@@ -59,7 +64,9 @@ export function TournamentEventsJournal({ tournamentId }: TournamentEventsJourna
     return (
       <div className="py-12 text-center space-y-2">
         <Loader2 className="w-6 h-6 animate-spin text-primary mx-auto" />
-        <p className="text-xs text-muted-foreground">Chargement du journal d&apos;événements…</p>
+        <p className="text-xs text-muted-foreground">
+          Chargement du journal d&apos;événements…
+        </p>
       </div>
     );
   }
@@ -89,13 +96,17 @@ export function TournamentEventsJournal({ tournamentId }: TournamentEventsJourna
         };
       case TournamentEventType.PARTICIPANT_REGISTERED:
         return {
-          label: evt.target ? `${evt.target.displayName || evt.target.username} s'est inscrit` : "Nouvelle inscription",
+          label: evt.target
+            ? `${evt.target.displayName || evt.target.username} s'est inscrit`
+            : "Nouvelle inscription",
           icon: <UserPlus className="w-4 h-4 text-success" />,
         };
       case TournamentEventType.PARTICIPANT_UNREGISTERED:
       case TournamentEventType.PARTICIPANT_REMOVED:
         return {
-          label: evt.target ? `${evt.target.displayName || evt.target.username} a été désinscrit` : "Désinscription",
+          label: evt.target
+            ? `${evt.target.displayName || evt.target.username} a été désinscrit`
+            : "Désinscription",
           icon: <AlertCircle className="w-4 h-4 text-destructive" />,
         };
       case TournamentEventType.PARTICIPANT_DISQUALIFIED:
@@ -173,16 +184,27 @@ export function TournamentEventsJournal({ tournamentId }: TournamentEventsJourna
               className="p-3.5 px-4 flex items-center justify-between gap-4 hover:bg-muted/20 transition text-xs"
             >
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-xl bg-background border border-border shrink-0">{details.icon}</div>
+                <div className="p-2 rounded-xl bg-background border border-border shrink-0">
+                  {details.icon}
+                </div>
                 <div className="space-y-0.5">
-                  <div className="font-semibold text-foreground">{details.label}</div>
+                  <div className="font-semibold text-foreground">
+                    {details.label}
+                  </div>
                   <div className="text-xs text-muted-foreground flex items-center gap-2">
                     {evt.actor && (
                       <span>
-                        Par <strong className="text-foreground">{evt.actor.displayName || evt.actor.username}</strong>
+                        Par{" "}
+                        <strong className="text-foreground">
+                          {evt.actor.displayName || evt.actor.username}
+                        </strong>
                       </span>
                     )}
-                    {evt.reason && <span className="italic text-destructive">({evt.reason})</span>}
+                    {evt.reason && (
+                      <span className="italic text-destructive">
+                        ({evt.reason})
+                      </span>
+                    )}
                     <span>·</span>
                     <span>{dateStr}</span>
                   </div>

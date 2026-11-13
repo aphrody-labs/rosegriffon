@@ -1,6 +1,6 @@
 # Bot Azalée — mise en service
 
-Le serveur Discord **Azalée** (« 𝓐𝔃𝓪𝓵𝓮́𝓮  », guilde `1349526851672080414`) a
+Le serveur Discord **Azalée** (« 𝓐𝔃𝓪𝓵𝓮́𝓮 », guilde `1349526851672080414`) a
 son propre bot. Ce bot **n'a pas de code à lui** : c'est `apps/bot`, le même
 programme que le bot Rose Griffon, lancé une seconde fois avec un autre
 **profil** et un autre **jeton**.
@@ -18,15 +18,15 @@ Le profil se lit dans la variable d'environnement `RG_PROFIL_BOT` : `rg` par
 défaut (le bot Rose Griffon, rien à changer), `azalee` pour ce second bot. Un
 profil décide de cinq choses, et de rien d'autre :
 
-| Ce que le profil décide | Profil `rg` | Profil `azalee` |
-| --- | --- | --- |
-| Jeton lu (donc identité Discord) | `DISCORD_BOT_TOKEN` | `AZALEE_DISCORD_BOT_TOKEN` |
-| Portée des commandes | par guilde : RG, Azalée, Achillea | **globale** — tout serveur qui invite le bot |
-| Commandes chargées | communauté + `/administration` | données de jeu, archive X, `/staff` |
-| Marque des embeds (couleur, pied de page, URL de base) | `#a14b3f`, `rosegriffon.fr`, `WEBSITE_URL` | `#F89C5A`, `azalee.rosegriffon.fr`, `AZALEE_WEBSITE_URL` |
-| Salon d'annonce des posts X et nom du curseur | `DISCORD_NEWS_CHANNEL_ID`, curseur `discord` | salon `1349528692086276148` (ou `AZALEE_DISCORD_NEWS_CHANNEL_ID`), curseur `azalee` |
+| Ce que le profil décide                                | Profil `rg`                                  | Profil `azalee`                                                                     |
+| ------------------------------------------------------ | -------------------------------------------- | ----------------------------------------------------------------------------------- |
+| Jeton lu (donc identité Discord)                       | `DISCORD_BOT_TOKEN`                          | `AZALEE_DISCORD_BOT_TOKEN`                                                          |
+| Portée des commandes                                   | par guilde : RG, Azalée, Achillea            | **globale** — tout serveur qui invite le bot                                        |
+| Commandes chargées                                     | communauté + `/administration`               | données de jeu, archive X, `/staff`                                                 |
+| Marque des embeds (couleur, pied de page, URL de base) | `#a14b3f`, `rosegriffon.fr`, `WEBSITE_URL`   | `#F89C5A`, `azalee.rosegriffon.fr`, `AZALEE_WEBSITE_URL`                            |
+| Salon d'annonce des posts X et nom du curseur          | `DISCORD_NEWS_CHANNEL_ID`, curseur `discord` | salon `1349528692086276148` (ou `AZALEE_DISCORD_NEWS_CHANNEL_ID`), curseur `azalee` |
 
-**Pourquoi deux portées différentes.** Le bot Rose Griffon administre *une* communauté
+**Pourquoi deux portées différentes.** Le bot Rose Griffon administre _une_ communauté
 (membres, niveaux, accueil) : ses commandes n'ont aucun sens sur un serveur dont il ne
 connaît ni les membres ni les rôles, il reste donc enregistré serveur par serveur. Le bot
 Azalée sert le wiki — les mêmes fiches partout, aucune configuration propre à un serveur —
@@ -70,7 +70,7 @@ Portail développeur Discord → **New Application** (nom : `Azalée`) → ongle
 2. **Privileged Gateway Intents** → activer **Server Members Intent**.
    C'est obligatoire, pas optionnel : le client est commun aux deux profils et
    demande `Guilds` + `GuildMembers` (`src/index.ts`, `intents: [Guilds,
-   GuildMembers]`). `GuildMembers` est le seul des deux qui soit **privilégié**.
+GuildMembers]`). `GuildMembers` est le seul des deux qui soit **privilégié**.
    Sans lui activé, Discord ferme la passerelle au `login` avec le code **4014
    « Disallowed intent(s) »**, `Restart=on-failure` relance, et le service
    boucle sans jamais se connecter.
@@ -134,13 +134,13 @@ https://discord.com/oauth2/authorize
 `permissions=52224` est la somme de quatre bits, et de quatre seulement
 (valeurs lues dans `PermissionFlagsBits` de discord.js, pas de mémoire) :
 
-| Permission | Nom API | Bit | Pourquoi |
-| --- | --- | ---: | --- |
-| Voir les salons | `ViewChannel` | 1024 | résoudre le salon d'annonce |
-| Envoyer des messages | `SendMessages` | 2048 | publier l'annonce |
-| Intégrer des liens | `EmbedLinks` | 16384 | l'annonce est un embed |
-| Joindre des fichiers | `AttachFiles` | 32768 | `/cpk fichier` et `/cdn` renvoient de vrais fichiers |
-| **Total** | | **52224** | |
+| Permission           | Nom API        |       Bit | Pourquoi                                             |
+| -------------------- | -------------- | --------: | ---------------------------------------------------- |
+| Voir les salons      | `ViewChannel`  |      1024 | résoudre le salon d'annonce                          |
+| Envoyer des messages | `SendMessages` |      2048 | publier l'annonce                                    |
+| Intégrer des liens   | `EmbedLinks`   |     16384 | l'annonce est un embed                               |
+| Joindre des fichiers | `AttachFiles`  |     32768 | `/cpk fichier` et `/cdn` renvoient de vrais fichiers |
+| **Total**            |                | **52224** |                                                      |
 
 Ce n'est pas un choix par défaut recopié : l'annonce des nouveaux posts X est
 un **message ordinaire** envoyé dans le salon
@@ -200,15 +200,15 @@ annoncé sera un post publié après ce démarrage.
 
 Ce qui peut clocher, et ce que ça veut dire :
 
-| Journal | Cause |
-| --- | --- |
-| Le service redémarre en boucle sans « Logged in » | intent `Server Members` non activé (fermeture 4014) — étape 2 |
-| `[profil] Jeton Discord absent pour le profil « azalee »…` | jeton absent — étape 3 |
-| `[profil] AZALEE_DISCORD_BOT_TOKEN contient un secret SCELLÉ…` | un blob `eyJ2Ijo…` a remplacé le jeton en clair dans l'env |
-| `[profil] RG_PROFIL_BOT="…" n'est pas un profil connu` | faute de frappe dans l'unité (`azalée`, `azale`, `Azalee` suivi d'une espace…) ; le service refuse de démarrer plutôt que de lancer un second bot Rose Griffon |
-| ` Guilde(s) configurée(s) mais non rejointe(s) : 1349526851672080414` | invitation non faite ou refusée — étape 4 |
-| `Salon 1349528692086276148 injoignable` / « le bot ne peut pas y écrire » | permission de salon manquante — fin de l'étape 4 |
-| Bot en ligne, aucune commande dans le serveur | `applications.commands` oublié dans l'URL d'invitation |
+| Journal                                                                   | Cause                                                                                                                                                          |
+| ------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Le service redémarre en boucle sans « Logged in »                         | intent `Server Members` non activé (fermeture 4014) — étape 2                                                                                                  |
+| `[profil] Jeton Discord absent pour le profil « azalee »…`                | jeton absent — étape 3                                                                                                                                         |
+| `[profil] AZALEE_DISCORD_BOT_TOKEN contient un secret SCELLÉ…`            | un blob `eyJ2Ijo…` a remplacé le jeton en clair dans l'env                                                                                                     |
+| `[profil] RG_PROFIL_BOT="…" n'est pas un profil connu`                    | faute de frappe dans l'unité (`azalée`, `azale`, `Azalee` suivi d'une espace…) ; le service refuse de démarrer plutôt que de lancer un second bot Rose Griffon |
+| ` Guilde(s) configurée(s) mais non rejointe(s) : 1349526851672080414`     | invitation non faite ou refusée — étape 4                                                                                                                      |
+| `Salon 1349528692086276148 injoignable` / « le bot ne peut pas y écrire » | permission de salon manquante — fin de l'étape 4                                                                                                               |
+| Bot en ligne, aucune commande dans le serveur                             | `applications.commands` oublié dans l'URL d'invitation                                                                                                         |
 
 Côté Discord, `Ctrl+R` rafraîchit la liste des commandes du client : une
 commande fraîchement enregistrée peut ne pas apparaître dans une fenêtre

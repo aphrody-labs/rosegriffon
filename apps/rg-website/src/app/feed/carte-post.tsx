@@ -1,10 +1,21 @@
 "use client";
 
-import { ChartNoAxesColumn, Heart, MessageCircle, Play, Repeat2 } from "lucide-react";
+import {
+  ChartNoAxesColumn,
+  Heart,
+  MessageCircle,
+  Play,
+  Repeat2,
+} from "lucide-react";
 import Link from "@/components/shared/Link";
 import { Fragment, useState } from "react";
 
-import type { MetriquesFeed, PostFeed, ProfilFeed, Reseau } from "@/lib/feed/types";
+import type {
+  MetriquesFeed,
+  PostFeed,
+  ProfilFeed,
+  Reseau,
+} from "@/lib/feed/types";
 import { cleProfil } from "@/lib/feed/types";
 
 import { MARQUES } from "@/lib/feed/comptes";
@@ -13,9 +24,13 @@ import { initiale } from "@/lib/unicode";
 import { BadgeReseau } from "./marque";
 
 const SEUIL_LONG = 420;
-const MOTIF_TEXTE = /(https:\/\/t\.co\/\w+|#[\p{L}\p{N}_]+|@[A-Za-z0-9_]{1,30})/gu;
+const MOTIF_TEXTE =
+  /(https:\/\/t\.co\/\w+|#[\p{L}\p{N}_]+|@[A-Za-z0-9_]{1,30})/gu;
 
-export const compact = new Intl.NumberFormat("fr-FR", { notation: "compact", maximumFractionDigits: 1 });
+export const compact = new Intl.NumberFormat("fr-FR", {
+  notation: "compact",
+  maximumFractionDigits: 1,
+});
 export const entier = new Intl.NumberFormat("fr-FR");
 
 export function dateCourte(valeur: string): string {
@@ -24,15 +39,19 @@ export function dateCourte(valeur: string): string {
   const meme = date.getFullYear() === new Date().getFullYear();
   return date.toLocaleDateString(
     "fr-FR",
-    meme ? { day: "numeric", month: "short" } : { day: "numeric", month: "short", year: "numeric" },
+    meme
+      ? { day: "numeric", month: "short" }
+      : { day: "numeric", month: "short", year: "numeric" },
   );
 }
 
-const LIEN = "text-primary underline-offset-2 hover:underline focus-visible:rounded-sm";
+const LIEN =
+  "text-primary underline-offset-2 hover:underline focus-visible:rounded-sm";
 
 function lienHashtag(reseau: Reseau, mot: string): string | null {
   const nom = encodeURIComponent(mot.slice(1));
-  if (reseau === "instagram") return `https://www.instagram.com/explore/tags/${nom}/`;
+  if (reseau === "instagram")
+    return `https://www.instagram.com/explore/tags/${nom}/`;
   if (reseau === "tiktok") return `https://www.tiktok.com/tag/${nom}`;
   if (reseau === "youtube") return `https://www.youtube.com/hashtag/${nom}`;
   return null;
@@ -47,31 +66,59 @@ function lienMention(reseau: Reseau, mot: string): string {
 }
 
 /** Liens `t.co` → destination, #mots-dièses → recherche (X) ou page du réseau, @pseudos → profil. */
-export function TexteAvecLiens({ texte, reseau }: { texte: string; reseau: Reseau }) {
+export function TexteAvecLiens({
+  texte,
+  reseau,
+}: {
+  texte: string;
+  reseau: Reseau;
+}) {
   return (
     <>
       {texte.split(MOTIF_TEXTE).map((morceau, i) => {
         if (morceau.startsWith("https://t.co/"))
           return (
-            <a key={i} href={morceau} target="_blank" rel="noopener noreferrer" className={LIEN}>
+            <a
+              key={i}
+              href={morceau}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={LIEN}
+            >
               {morceau.replace("https://", "")}
             </a>
           );
         if (morceau.startsWith("#") && morceau.length > 1) {
           const externe = lienHashtag(reseau, morceau);
           return externe ? (
-            <a key={i} href={externe} target="_blank" rel="noopener noreferrer" className={LIEN}>
+            <a
+              key={i}
+              href={externe}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={LIEN}
+            >
               {morceau}
             </a>
           ) : (
-            <Link key={i} href={`/feed?q=${encodeURIComponent(morceau)}`} className={LIEN}>
+            <Link
+              key={i}
+              href={`/feed?q=${encodeURIComponent(morceau)}`}
+              className={LIEN}
+            >
               {morceau}
             </Link>
           );
         }
         if (/^@[A-Za-z0-9_]{1,30}$/.test(morceau))
           return (
-            <a key={i} href={lienMention(reseau, morceau)} target="_blank" rel="noopener noreferrer" className={LIEN}>
+            <a
+              key={i}
+              href={lienMention(reseau, morceau)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={LIEN}
+            >
               {morceau}
             </a>
           );
@@ -92,7 +139,10 @@ function Compteur({
 }) {
   if (valeur == null) return null;
   return (
-    <li className="flex min-h-11 items-center gap-1.5 text-sm text-on-surface-variant" title={`${entier.format(valeur)} ${libelle}`}>
+    <li
+      className="flex min-h-11 items-center gap-1.5 text-sm text-on-surface-variant"
+      title={`${entier.format(valeur)} ${libelle}`}
+    >
       <Icone className="size-[18px]" aria-hidden />
       <span className="tabular-nums" aria-hidden>
         {valeur > 0 ? compact.format(valeur) : "0"}
@@ -107,7 +157,8 @@ function Compteur({
 function Compteurs({ metriques }: { metriques?: MetriquesFeed }) {
   if (!metriques) return null;
   const { reponses, partages, jaime, vues } = metriques;
-  if (reponses == null && partages == null && jaime == null && vues == null) return null;
+  if (reponses == null && partages == null && jaime == null && vues == null)
+    return null;
   return (
     <ul className="-mb-1 flex flex-wrap gap-x-5">
       <Compteur icone={MessageCircle} libelle="réponses" valeur={reponses} />
@@ -118,7 +169,15 @@ function Compteurs({ metriques }: { metriques?: MetriquesFeed }) {
   );
 }
 
-export function Avatar({ profil, nom, taille }: { profil?: Pick<ProfilFeed, "avatar">; nom: string; taille: number }) {
+export function Avatar({
+  profil,
+  nom,
+  taille,
+}: {
+  profil?: Pick<ProfilFeed, "avatar">;
+  nom: string;
+  taille: number;
+}) {
   const style = { width: taille, height: taille };
   return profil?.avatar ? (
     // eslint-disable-next-line @next/next/no-img-element
@@ -178,7 +237,7 @@ function Integration({ post }: { post: PostFeed }) {
               loading="lazy"
               referrerPolicy="no-referrer"
               className="absolute inset-0 size-full object-cover"
-              onError={e => (e.currentTarget.style.display = "none")}
+              onError={(e) => (e.currentTarget.style.display = "none")}
             />
           )}
           <span className="relative flex size-14 items-center justify-center rounded-full bg-rg-marine/85 text-rg-sur-marine ring-2 ring-rg-or transition-transform group-hover:scale-105 motion-reduce:transition-none">
@@ -191,16 +250,19 @@ function Integration({ post }: { post: PostFeed }) {
 }
 
 function Medias({ post }: { post: PostFeed }) {
-  const medias = post.medias.filter(m => m.apercu || m.url);
+  const medias = post.medias.filter((m) => m.apercu || m.url);
   if (medias.length === 0) return null;
   const seul = medias.length === 1;
   const premier = medias[0]!;
-  const ratio = seul && premier.largeur && premier.hauteur ? premier.largeur / premier.hauteur : undefined;
+  const ratio =
+    seul && premier.largeur && premier.hauteur
+      ? premier.largeur / premier.hauteur
+      : undefined;
   return (
     <div
       className={`mt-3 grid gap-0.5 overflow-hidden rounded-2xl border border-outline-variant ${seul ? "grid-cols-1" : "grid-cols-2"}`}
     >
-      {medias.slice(0, 4).map(m =>
+      {medias.slice(0, 4).map((m) =>
         m.type !== "image" && /\.mp4(\?|$)/.test(m.url) ? (
           <video
             key={m.url}
@@ -213,7 +275,11 @@ function Medias({ post }: { post: PostFeed }) {
             playsInline
             preload="none"
             className="max-h-[510px] w-full bg-surface-container-high object-cover"
-            style={seul && ratio ? { aspectRatio: String(ratio) } : { aspectRatio: "1" }}
+            style={
+              seul && ratio
+                ? { aspectRatio: String(ratio) }
+                : { aspectRatio: "1" }
+            }
           >
             <track kind="captions" />
           </video>
@@ -228,7 +294,10 @@ function Medias({ post }: { post: PostFeed }) {
             loading="lazy"
             referrerPolicy="no-referrer"
             className="w-full bg-surface-container-high object-cover"
-            style={{ aspectRatio: seul && ratio ? String(Math.max(ratio, 0.6)) : "1", maxHeight: seul ? 510 : undefined }}
+            style={{
+              aspectRatio: seul && ratio ? String(Math.max(ratio, 0.6)) : "1",
+              maxHeight: seul ? 510 : undefined,
+            }}
           />
         ),
       )}
@@ -248,7 +317,9 @@ function Citation({ post }: { post: PostFeed }) {
         <span className="font-semibold text-on-surface">{post.auteur.nom}</span>
         <span className="text-on-surface-variant">@{post.auteur.pseudo}</span>
       </p>
-      <p className="mt-0.5 line-clamp-4 break-words whitespace-pre-line text-sm text-on-surface">{post.texte}</p>
+      <p className="mt-0.5 line-clamp-4 break-words whitespace-pre-line text-sm text-on-surface">
+        {post.texte}
+      </p>
       <Medias post={post} />
     </a>
   );
@@ -270,9 +341,7 @@ export function CartePost({
   const [deplie, setDeplie] = useState(ouvert);
   const long = post.texte.length > SEUIL_LONG;
   const profil = profils?.[cleProfil(post.reseau, post.auteur.pseudo)];
-  const horodatage = (
-    <time dateTime={post.date}>{dateCourte(post.date)}</time>
-  );
+  const horodatage = <time dateTime={post.date}>{dateCourte(post.date)}</time>;
   return (
     <article
       aria-label={`${post.auteur.nom}, ${post.reseau}`}
@@ -290,14 +359,19 @@ export function CartePost({
             {post.auteur.nom}
           </a>
           {post.reseau !== "youtube" && (
-            <span className="min-w-0 truncate text-on-surface-variant">@{post.auteur.pseudo}</span>
+            <span className="min-w-0 truncate text-on-surface-variant">
+              @{post.auteur.pseudo}
+            </span>
           )}
           <BadgeReseau reseau={post.reseau} taille={18} />
           <span aria-hidden className="text-on-surface-variant">
             ·
           </span>
           {post.reseau === "x" ? (
-            <Link href={`/feed/status/${post.idOrigine}`} className="shrink-0 py-3 text-on-surface-variant hover:underline">
+            <Link
+              href={`/feed/status/${post.idOrigine}`}
+              className="shrink-0 py-3 text-on-surface-variant hover:underline"
+            >
               {horodatage}
             </Link>
           ) : (
@@ -328,7 +402,11 @@ export function CartePost({
             {deplie ? "Réduire" : "Afficher plus"}
           </button>
         )}
-        {post.integration ? <Integration post={post} /> : <Medias post={post} />}
+        {post.integration ? (
+          <Integration post={post} />
+        ) : (
+          <Medias post={post} />
+        )}
         {post.citation && <Citation post={post.citation} />}
         <div className="mt-2 flex flex-wrap items-center justify-between gap-x-4">
           <Compteurs metriques={post.metriques} />
@@ -351,7 +429,10 @@ export function SquelettePosts({ nombre = 4 }: { nombre?: number }) {
   return (
     <div aria-hidden className="space-y-3">
       {Array.from({ length: nombre }, (_, i) => (
-        <div key={i} className="flex min-h-[184px] gap-3 rounded-2xl border border-outline-variant bg-surface-container-low p-4">
+        <div
+          key={i}
+          className="flex min-h-[184px] gap-3 rounded-2xl border border-outline-variant bg-surface-container-low p-4"
+        >
           <span className="size-11 shrink-0 rounded-full bg-surface-container-high motion-safe:animate-pulse" />
           <div className="flex-1 space-y-2.5">
             <span className="block h-4 w-1/3 rounded bg-surface-container-high motion-safe:animate-pulse" />

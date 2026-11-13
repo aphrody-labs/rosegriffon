@@ -9,7 +9,8 @@ const SCHEMAS_AUTORISES = new Set(["http:", "https:"]);
 
 /** Vrai si l'URL est absolue et porte un schéma web sûr. */
 export function estUrlSure(url: unknown): url is string {
-  if (typeof url !== "string" || url.length === 0 || url.length > 2048) return false;
+  if (typeof url !== "string" || url.length === 0 || url.length > 2048)
+    return false;
   try {
     return SCHEMAS_AUTORISES.has(new URL(url).protocol);
   } catch {
@@ -23,7 +24,10 @@ export function urlSureOuNull(url: unknown): string | null {
 }
 
 /** Hôtes servant les fichiers joints Discord derrière une signature temporaire. */
-const HOTES_CDN_DISCORD = new Set(["cdn.discordapp.com", "media.discordapp.net"]);
+const HOTES_CDN_DISCORD = new Set([
+  "cdn.discordapp.com",
+  "media.discordapp.net",
+]);
 
 /**
  * Vrai si l'URL est un fichier Discord SIGNÉ, donc périssable.

@@ -4,7 +4,10 @@ import { resolveAuthBaseURL } from "./auth-base-url";
 import { nextCookies } from "better-auth/next-js";
 import { createPgDialect, getPgPool } from "@rosegriffon/db/pg";
 import { sendEmail } from "@/lib/email";
-import { fetchIdentity, parseIdentityWithMemberships } from "@/lib/patreon/client";
+import {
+  fetchIdentity,
+  parseIdentityWithMemberships,
+} from "@/lib/patreon/client";
 import { encryptToken } from "@/lib/patreon/encryption";
 import { SCOPES_CREATOR, SCOPES_PATRON } from "@/lib/patreon/types";
 import { SITE_URL } from "@/lib/site-url";
@@ -20,7 +23,10 @@ function detectCreatorScopes(scope: string | null | undefined): boolean {
   return (scope ?? "")
     .split(/[\s,]+/)
     .filter(Boolean)
-    .some(value => value === "campaigns.members" || value === "w:campaigns.webhook");
+    .some(
+      (value) =>
+        value === "campaigns.members" || value === "w:campaigns.webhook",
+    );
 }
 
 /**
@@ -32,10 +38,13 @@ export const auth = createRoseGriffonAuth({
   baseURL: getBetterAuthURL(),
   secret: process.env.BETTER_AUTH_SECRET,
   sendEmail,
-  executerSql: (query, parameters) => getPgPool().query(query, parameters as unknown[]),
+  executerSql: (query, parameters) =>
+    getPgPool().query(query, parameters as unknown[]),
   nextCookiesPlugin: nextCookies(),
   passkey: {
-    rpID: process.env.BETTER_AUTH_PASSKEY_RP_ID ?? new URL(getBetterAuthURL()).hostname,
+    rpID:
+      process.env.BETTER_AUTH_PASSKEY_RP_ID ??
+      new URL(getBetterAuthURL()).hostname,
     origin: process.env.BETTER_AUTH_PASSKEY_ORIGIN ?? getBetterAuthURL(),
   },
   patreon: {
@@ -44,15 +53,19 @@ export const auth = createRoseGriffonAuth({
     clientId: process.env.PATREON_CLIENT_ID ?? "",
     clientSecret: process.env.PATREON_CLIENT_SECRET ?? "",
     scopes: SCOPES_PATRON,
-    getUserInfo: async tokens => {
+    getUserInfo: async (tokens) => {
       const accessToken = (tokens as { accessToken?: string }).accessToken;
       if (!accessToken) return null;
       try {
-        const response = await fetchIdentity(accessToken, { withMemberships: true });
+        const response = await fetchIdentity(accessToken, {
+          withMemberships: true,
+        });
         const identity = parseIdentityWithMemberships(response);
         return {
           id: identity.patreonUserId,
-          email: identity.user.email ?? `patreon-${identity.patreonUserId}@noemail.local`,
+          email:
+            identity.user.email ??
+            `patreon-${identity.patreonUserId}@noemail.local`,
           emailVerified: Boolean(identity.user.email),
           name: identity.user.full_name ?? "Utilisateur Patreon",
           image: identity.user.thumb_url ?? undefined,
@@ -71,7 +84,10 @@ export const auth = createRoseGriffonAuth({
 function getBetterAuthURL(): string {
   const configured = process.env.BETTER_AUTH_URL?.trim();
   if (configured?.startsWith("eyJ2Ijo")) return SITE_URL;
-  return resolveAuthBaseURL({ configured, production: process.env.NODE_ENV === "production" });
+  return resolveAuthBaseURL({
+    configured,
+    production: process.env.NODE_ENV === "production",
+  });
 }
 
 async function syncPatreonAccount(account: {
@@ -86,15 +102,20 @@ async function syncPatreonAccount(account: {
   if (!account.accessToken || !account.refreshToken) return;
 
   try {
-    const response = await fetchIdentity(account.accessToken, { withMemberships: true });
+    const response = await fetchIdentity(account.accessToken, {
+      withMemberships: true,
+    });
     const identity = parseIdentityWithMemberships(response);
     const top =
       [...identity.memberships].toSorted((a, b) => {
-        const score = (value: string | null | undefined) => (value === "active_patron" ? 0 : 1);
+        const score = (value: string | null | undefined) =>
+          value === "active_patron" ? 0 : 1;
         return score(a.attrs.patron_status) - score(b.attrs.patron_status);
       })[0] ?? null;
     const isCreator = detectCreatorScopes(account.scope);
-    const fallbackScopes = (isCreator ? SCOPES_CREATOR : SCOPES_PATRON).join(" ");
+    const fallbackScopes = (isCreator ? SCOPES_CREATOR : SCOPES_PATRON).join(
+      " ",
+    );
     const expiresAt = account.accessTokenExpiresAt
       ? account.accessTokenExpiresAt.toISOString()
       : new Date(Date.now() + 30 * 24 * 60 * 60 * 1_000).toISOString();
@@ -120,7 +141,8 @@ async function syncPatreonAccount(account: {
           {
             address: (top?.address ?? null) as never,
             campaign_id: top?.campaignId ?? null,
-            currently_entitled_cents: top?.attrs.currently_entitled_amount_cents ?? null,
+            currently_entitled_cents:
+              top?.attrs.currently_entitled_amount_cents ?? null,
             discord_role_ids: top?.discordRoleIds ?? [],
             discord_user_id: identity.discordUserId,
             fetched_at: new Date().toISOString(),
@@ -129,7 +151,9 @@ async function syncPatreonAccount(account: {
             last_charge_date: top?.attrs.last_charge_date ?? null,
             last_charge_status: top?.attrs.last_charge_status ?? null,
             lifetime_support_cents:
-              top?.attrs.campaign_lifetime_support_cents ?? top?.attrs.lifetime_support_cents ?? null,
+              top?.attrs.campaign_lifetime_support_cents ??
+              top?.attrs.lifetime_support_cents ??
+              null,
             member_email: top?.attrs.email ?? null,
             next_charge_date: top?.attrs.next_charge_date ?? null,
             note: top?.attrs.note ?? null,

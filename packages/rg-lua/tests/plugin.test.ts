@@ -3,7 +3,11 @@ import { expect, test, describe } from "bun:test";
 import { bunPluginLua } from "../src/bun";
 import { withLua } from "../src/next";
 import { Lua52VM } from "../src/vm";
-import { auditLua52Bytecode, isLua52Bytecode, transcodeLua52Bytecode } from "../src/bytecode";
+import {
+  auditLua52Bytecode,
+  isLua52Bytecode,
+  transcodeLua52Bytecode,
+} from "../src/bytecode";
 import { analyzeLua52Source } from "../src/ast";
 import { Lua52LanguageServer } from "../src/lsp";
 import { transformLuaToModule } from "../src/loader";
@@ -29,7 +33,10 @@ describe("@rosegriffon/lua-plugin Sovereign Suite", () => {
 
   test("withLua configures both Turbopack rules and Webpack 5 module rules", () => {
     const baseConfig = { reactStrictMode: true };
-    const extended = withLua(baseConfig, { includeBytecode: true, mode: "module" });
+    const extended = withLua(baseConfig, {
+      includeBytecode: true,
+      mode: "module",
+    });
 
     // 1. Turbopack rules (Next.js 15 & 16)
     expect(extended.turbopack?.rules?.["*.lua"]).toBeDefined();
@@ -41,8 +48,12 @@ describe("@rosegriffon/lua-plugin Sovereign Suite", () => {
     const mockWebpackConfig = { module: { rules: [] as any[] } };
     const finalConfig = extended.webpack(mockWebpackConfig, {});
     expect(finalConfig.module.rules.length).toBeGreaterThanOrEqual(2);
-    expect(finalConfig.module.rules.some((r: any) => r.test?.test("script.lua"))).toBeTrue();
-    expect(finalConfig.module.rules.some((r: any) => r.test?.test("quest.lua.bin"))).toBeTrue();
+    expect(
+      finalConfig.module.rules.some((r: any) => r.test?.test("script.lua")),
+    ).toBeTrue();
+    expect(
+      finalConfig.module.rules.some((r: any) => r.test?.test("quest.lua.bin")),
+    ).toBeTrue();
   });
 
   test("Lua52VM executes Lua 5.2 code, _ENV, 1-based indexing, bit32, and table.pack", () => {
@@ -76,7 +87,10 @@ describe("@rosegriffon/lua-plugin Sovereign Suite", () => {
   test("Lua 5.2 Bytecode parser, REA disassembly and wasm32 transcoding", () => {
     // Construct valid PUC-Rio Lua 5.2 18-byte chunk
     const chunk: number[] = [
-      0x1b, 0x4c, 0x75, 0x61, // \x1bLua
+      0x1b,
+      0x4c,
+      0x75,
+      0x61, // \x1bLua
       0x52, // version 5.2
       0x00, // official format
       0x01, // little endian
@@ -85,7 +99,12 @@ describe("@rosegriffon/lua-plugin Sovereign Suite", () => {
       0x04, // sizeof(Instruction) = 4
       0x08, // sizeof(lua_Number) = 8
       0x00, // integral flag = 0
-      0x19, 0x93, 0x0d, 0x0a, 0x1a, 0x0a, // LUAC_TAIL
+      0x19,
+      0x93,
+      0x0d,
+      0x0a,
+      0x1a,
+      0x0a, // LUAC_TAIL
     ];
 
     // Main proto: line 0..0, 0 params, vararg=1, stack=2
@@ -99,7 +118,12 @@ describe("@rosegriffon/lua-plugin Sovereign Suite", () => {
     // OP_RETURN = 31, A=0, B=1 -> 31 | (1 << 23)
     const rawInstr = 31 | (1 << 23);
     chunk.push(1, 0, 0, 0); // codeLen = 1
-    chunk.push(rawInstr & 0xff, (rawInstr >>> 8) & 0xff, (rawInstr >>> 16) & 0xff, (rawInstr >>> 24) & 0xff);
+    chunk.push(
+      rawInstr & 0xff,
+      (rawInstr >>> 8) & 0xff,
+      (rawInstr >>> 16) & 0xff,
+      (rawInstr >>> 24) & 0xff,
+    );
 
     // Constants: 0
     chunk.push(0, 0, 0, 0);
@@ -152,7 +176,9 @@ end
     expect(ast.labels).toContain("finish");
 
     // Linter should detect unpack() deprecation
-    expect(ast.findings.some((f) => f.ruleId === "LUA52-TABLE-UNPACK")).toBeTrue();
+    expect(
+      ast.findings.some((f) => f.ruleId === "LUA52-TABLE-UNPACK"),
+    ).toBeTrue();
   });
 
   test("Lua52LanguageServer provides diagnostics, symbols and completions", () => {

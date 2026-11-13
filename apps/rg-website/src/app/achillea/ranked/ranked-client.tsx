@@ -3,11 +3,33 @@
 import { useEffect, useState, useTransition } from "react";
 import Link from "@/components/shared/Link";
 import Image from "next/image";
-import { useAchilleaAuth, createAchilleaClient, rankImagePath, winRatePercent } from "@/lib/achillea";
+import {
+  useAchilleaAuth,
+  createAchilleaClient,
+  rankImagePath,
+  winRatePercent,
+} from "@/lib/achillea";
 import { Sparkline } from "@/components/achillea/Sparkline";
 import { useRankedQueue } from "@/lib/achillea/use-ranked-queue";
-import type { RankedProfile, RankedTrend, RankedChallengeLink } from "@rosegriffon/achillea-types";
-import { Check, Copy, ExternalLink, History, Layers, Loader2, Play, Search, ShieldAlert, Swords, Trophy, XCircle } from "lucide-react";
+import type {
+  RankedProfile,
+  RankedTrend,
+  RankedChallengeLink,
+} from "@rosegriffon/achillea-types";
+import {
+  Check,
+  Copy,
+  ExternalLink,
+  History,
+  Layers,
+  Loader2,
+  Play,
+  Search,
+  ShieldAlert,
+  Swords,
+  Trophy,
+  XCircle,
+} from "lucide-react";
 import { signalerException } from "@/lib/achillea/signaler";
 
 export default function RankedHubPage() {
@@ -32,15 +54,23 @@ export default function RankedHubPage() {
   } = useRankedQueue();
 
   // Challenge link state
-  const [challengeLink, setChallengeLink] = useState<RankedChallengeLink | null>(null);
+  const [challengeLink, setChallengeLink] =
+    useState<RankedChallengeLink | null>(null);
   const [creatingLink, setCreatingLink] = useState<boolean>(false);
   const [copied, setCopied] = useState<boolean>(false);
 
   const [, startTransition] = useTransition();
 
   // Fetch ranked profile and trend
-  const [requestIdentity1, setRequestIdentity1] = useState<readonly unknown[]>([isAuthenticated, mode]);
-  if ([isAuthenticated, mode].some((value, position) => !Object.is(value, requestIdentity1[position]))) {
+  const [requestIdentity1, setRequestIdentity1] = useState<readonly unknown[]>([
+    isAuthenticated,
+    mode,
+  ]);
+  if (
+    [isAuthenticated, mode].some(
+      (value, position) => !Object.is(value, requestIdentity1[position]),
+    )
+  ) {
     setRequestIdentity1([isAuthenticated, mode]);
     (() => {
       if (!isAuthenticated) {
@@ -61,19 +91,24 @@ export default function RankedHubPage() {
 
     const client = createAchilleaClient();
 
-    Promise.all([client.ranked.me(mode), client.users.myRankedTrend({ mode, last: 20 })])
+    Promise.all([
+      client.ranked.me(mode),
+      client.users.myRankedTrend({ mode, last: 20 }),
+    ])
       .then(([profRes, trendRes]) => {
         if (cancelled) return;
         if (profRes.ok) {
           setProfile(profRes.value);
         } else {
-          setProfileError("Votre profil classé est momentanément indisponible.");
+          setProfileError(
+            "Votre profil classé est momentanément indisponible.",
+          );
         }
         if (trendRes.ok) {
           setTrend(trendRes.value);
         }
       })
-      .catch(cause => {
+      .catch((cause) => {
         signalerException("ranked", cause);
       })
       .finally(() => {
@@ -98,7 +133,10 @@ export default function RankedHubPage() {
     setCreatingLink(true);
     const client = createAchilleaClient();
     try {
-      const res = await client.ranked.createChallenge({ mode, ranked: isRanked });
+      const res = await client.ranked.createChallenge({
+        mode,
+        ranked: isRanked,
+      });
       if (res.ok) {
         setChallengeLink(res.value);
       }
@@ -120,7 +158,9 @@ export default function RankedHubPage() {
   const gradientStops = profile?.tier?.gradient?.length
     ? `linear-gradient(135deg, ${profile.tier.gradient.join(", ")})`
     : "linear-gradient(135deg, #959595, #494949)";
-  const winrate = profile ? winRatePercent(profile.wins, profile.gamesPlayed) : 0;
+  const winrate = profile
+    ? winRatePercent(profile.wins, profile.gamesPlayed)
+    : 0;
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8 space-y-8">
@@ -131,11 +171,13 @@ export default function RankedHubPage() {
             <span className="p-2 rounded-xl bg-warning/10 text-warning border border-warning/20">
               <Swords className="w-5 h-5" />
             </span>
-            <h1 className="text-3xl font-bold tracking-tight">Système Classé (Ranked)</h1>
+            <h1 className="text-3xl font-bold tracking-tight">
+              Système Classé (Ranked)
+            </h1>
           </div>
           <p className="text-sm text-muted-foreground mt-1">
-            Affrontez les meilleurs joueurs en 1v1 ou 2v2, grimpez les 11 paliers ELO et gagnez des Achilléa Points
-            (AP).
+            Affrontez les meilleurs joueurs en 1v1 ou 2v2, grimpez les 11
+            paliers ELO et gagnez des Achilléa Points (AP).
           </p>
         </div>
 
@@ -197,7 +239,9 @@ export default function RankedHubPage() {
             type="button"
             onClick={() => setIsRanked(true)}
             className={`px-4 py-1.5 text-xs font-semibold rounded-lg transition-all ${
-              isRanked ? "bg-warning text-warning-foreground shadow-sm font-bold" : "text-muted-foreground hover:text-foreground"
+              isRanked
+                ? "bg-warning text-warning-foreground shadow-sm font-bold"
+                : "text-muted-foreground hover:text-foreground"
             }`}
           >
             Classé (ELO)
@@ -233,18 +277,27 @@ export default function RankedHubPage() {
         <div className="p-8 border border-outline-variant/15 bg-surface-container/40 backdrop-blur-md rounded-2xl text-center space-y-4 shadow-sm">
           <ShieldAlert className="w-12 h-12 text-warning mx-auto opacity-80" />
           <div className="space-y-1">
-            <h2 className="text-xl font-bold">Connexion requise pour votre profil classé</h2>
+            <h2 className="text-xl font-bold">
+              Connexion requise pour votre profil classé
+            </h2>
             <p className="text-sm text-muted-foreground max-w-md mx-auto">
-              Connectez-vous avec votre compte Discord pour enregistrer vos statistiques, grimper le classement et
-              participer aux matchs compétitifs.
+              Connectez-vous avec votre compte Discord pour enregistrer vos
+              statistiques, grimper le classement et participer aux matchs
+              compétitifs.
             </p>
             <p className="text-xs text-muted-foreground max-w-md mx-auto pt-1">
               Le{" "}
-              <Link href="/achillea/ranked/leaderboard" className="font-semibold underline hover:text-foreground">
+              <Link
+                href="/achillea/ranked/leaderboard"
+                className="font-semibold underline hover:text-foreground"
+              >
                 classement complet
               </Link>{" "}
               et les{" "}
-              <Link href="/achillea/ranked/tiers" className="font-semibold underline hover:text-foreground">
+              <Link
+                href="/achillea/ranked/tiers"
+                className="font-semibold underline hover:text-foreground"
+              >
                 paliers
               </Link>{" "}
               restent consultables sans compte.
@@ -261,7 +314,9 @@ export default function RankedHubPage() {
       ) : loadingProfile ? (
         <div className="p-12 text-center border border-outline-variant/15 rounded-2xl bg-surface-container/60 backdrop-blur-md">
           <Loader2 className="w-8 h-8 animate-spin mx-auto text-muted-foreground mb-3" />
-          <p className="text-sm text-muted-foreground">Chargement de votre profil classé...</p>
+          <p className="text-sm text-muted-foreground">
+            Chargement de votre profil classé...
+          </p>
         </div>
       ) : profileError || !profile ? (
         <div
@@ -297,36 +352,48 @@ export default function RankedHubPage() {
 
               <div className="space-y-3 text-center sm:text-left flex-1">
                 <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
-                  <h2 className="text-2xl font-bold tracking-tight">{tierKey}</h2>
+                  <h2 className="text-2xl font-bold tracking-tight">
+                    {tierKey}
+                  </h2>
                   <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-warning/10 text-warning border border-warning/30 font-mono">
                     {profile?.elo ?? 0} AP
                   </span>
                   <span className="px-2 py-0.5 rounded-lg text-xs font-medium bg-surface-container-high text-muted-foreground">
                     {mode === 2 ? "1v1" : "2v2"}
                   </span>
-                  {profile.globalRank != null && (profile.totalPlayers ?? 0) > 0 && profile.percentile != null && (
-                    <span className="px-2 py-0.5 rounded-lg text-xs font-medium bg-primary/10 text-primary border border-primary/20">
-                      Top {profile.percentile}%
-                    </span>
-                  )}
+                  {profile.globalRank != null &&
+                    (profile.totalPlayers ?? 0) > 0 &&
+                    profile.percentile != null && (
+                      <span className="px-2 py-0.5 rounded-lg text-xs font-medium bg-primary/10 text-primary border border-primary/20">
+                        Top {profile.percentile}%
+                      </span>
+                    )}
                 </div>
 
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
                   <div className="p-2.5 rounded-xl bg-surface-container-high/60 border border-outline-variant/15">
                     <div className="text-muted-foreground">Victoires</div>
-                    <div className="text-base font-bold text-success font-mono">{profile?.wins ?? 0}</div>
+                    <div className="text-base font-bold text-success font-mono">
+                      {profile?.wins ?? 0}
+                    </div>
                   </div>
                   <div className="p-2.5 rounded-xl bg-surface-container-high/60 border border-outline-variant/15">
                     <div className="text-muted-foreground">Défaites</div>
-                    <div className="text-base font-bold text-destructive font-mono">{profile?.losses ?? 0}</div>
+                    <div className="text-base font-bold text-destructive font-mono">
+                      {profile?.losses ?? 0}
+                    </div>
                   </div>
                   <div className="p-2.5 rounded-xl bg-surface-container-high/60 border border-outline-variant/15">
                     <div className="text-muted-foreground">Taux V</div>
-                    <div className="text-base font-bold font-mono">{winrate}%</div>
+                    <div className="text-base font-bold font-mono">
+                      {winrate}%
+                    </div>
                   </div>
                   <div className="p-2.5 rounded-xl bg-surface-container-high/60 border border-outline-variant/15">
                     <div className="text-muted-foreground">Pic ELO</div>
-                    <div className="text-base font-bold text-warning font-mono">{profile?.peakRating ?? 0} AP</div>
+                    <div className="text-base font-bold text-warning font-mono">
+                      {profile?.peakRating ?? 0} AP
+                    </div>
                   </div>
                 </div>
 
@@ -348,21 +415,28 @@ export default function RankedHubPage() {
                 <h3 className="font-semibold text-sm">Défi Direct</h3>
               </div>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                Générez un lien d'invitation pour affronter un adversaire précis sans passer par la file automatique.
+                Générez un lien d'invitation pour affronter un adversaire précis
+                sans passer par la file automatique.
               </p>
             </div>
 
             {challengeLink ? (
               <div className="space-y-2">
                 <div className="flex items-center gap-2 p-2 bg-surface-container-high/70 border border-outline-variant/20 rounded-xl text-xs font-mono">
-                  <span className="truncate flex-1">CODE: {challengeLink.code}</span>
+                  <span className="truncate flex-1">
+                    CODE: {challengeLink.code}
+                  </span>
                   <button
                     type="button"
                     onClick={handleCopy}
                     className="p-1.5 rounded-lg hover:bg-surface-container-highest transition text-muted-foreground hover:text-foreground"
                     title="Copier le lien"
                   >
-                    {copied ? <Check className="w-4 h-4 text-success" /> : <Copy className="w-4 h-4" />}
+                    {copied ? (
+                      <Check className="w-4 h-4 text-success" />
+                    ) : (
+                      <Copy className="w-4 h-4" />
+                    )}
                   </button>
                 </div>
                 <p className="text-[11px] text-success font-medium">
@@ -404,15 +478,20 @@ export default function RankedHubPage() {
               <div className="space-y-1">
                 <h3 className="text-xl font-bold">Lancer une recherche</h3>
                 <p className="text-sm text-muted-foreground">
-                  Recherchez un joueur de votre niveau en {mode === 2 ? "1v1" : "2v2"} (
-                  <span className="font-semibold text-foreground">{isRanked ? "Classé" : "Amical"}</span>
+                  Recherchez un joueur de votre niveau en{" "}
+                  {mode === 2 ? "1v1" : "2v2"} (
+                  <span className="font-semibold text-foreground">
+                    {isRanked ? "Classé" : "Amical"}
+                  </span>
                   ).
                 </p>
               </div>
 
               <button
                 type="button"
-                onClick={() => void rejoindreFile(mode === 4 ? "2v2" : "1v1", isRanked)}
+                onClick={() =>
+                  void rejoindreFile(mode === 4 ? "2v2" : "1v1", isRanked)
+                }
                 className="inline-flex items-center gap-2 px-8 py-3 bg-[var(--achillea-primary)] hover:bg-[var(--achillea-primary-400)] text-white font-bold text-sm rounded-xl transition shadow-lg active:scale-95"
               >
                 <Search className="w-4 h-4" />
@@ -428,8 +507,12 @@ export default function RankedHubPage() {
               </div>
 
               <div className="space-y-1">
-                <h3 className="text-lg font-bold">Recherche d'adversaire en cours...</h3>
-                <div className="text-2xl font-mono font-bold text-warning">{formatTimer(searchSeconds)}</div>
+                <h3 className="text-lg font-bold">
+                  Recherche d'adversaire en cours...
+                </h3>
+                <div className="text-2xl font-mono font-bold text-warning">
+                  {formatTimer(searchSeconds)}
+                </div>
                 <p className="text-xs text-muted-foreground">
                   {etaSecondes === null
                     ? "En attente d'une estimation du serveur…"
@@ -437,7 +520,11 @@ export default function RankedHubPage() {
                 </p>
               </div>
 
-              {erreurFile ? <p className="text-xs font-medium text-destructive">{erreurFile}</p> : null}
+              {erreurFile ? (
+                <p className="text-xs font-medium text-destructive">
+                  {erreurFile}
+                </p>
+              ) : null}
 
               <div className="flex items-center justify-center gap-3">
                 <button

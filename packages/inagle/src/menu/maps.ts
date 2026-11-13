@@ -44,7 +44,8 @@ export interface MenuMap {
  * Load all pre-generated menu maps
  */
 export function loadMenuMaps(dirPath?: string): MenuEntry[] {
-  const targetDir = dirPath || (existsSync(LOCAL_MAPS_DIR) ? LOCAL_MAPS_DIR : MAPS_DIR);
+  const targetDir =
+    dirPath || (existsSync(LOCAL_MAPS_DIR) ? LOCAL_MAPS_DIR : MAPS_DIR);
 
   if (!existsSync(targetDir)) {
     // console.warn(`[MenuMaps] Maps directory not found: ${targetDir}`);
@@ -54,7 +55,7 @@ export function loadMenuMaps(dirPath?: string): MenuEntry[] {
   const allEntries: MenuEntry[] = [];
 
   try {
-    const files = readdirSync(targetDir).filter(f => f.endsWith(".json"));
+    const files = readdirSync(targetDir).filter((f) => f.endsWith(".json"));
 
     for (const file of files) {
       try {

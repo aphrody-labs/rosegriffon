@@ -75,7 +75,8 @@ const EMOTES = emotesRoseGriffon(process.env);
 
 /** Origine publique du site, sans barre oblique finale. */
 export function origine(): string {
-  const brut = process.env.SITE_URL || process.env.NEXT_PUBLIC_SITE_URL || SITE_URL;
+  const brut =
+    process.env.SITE_URL || process.env.NEXT_PUBLIC_SITE_URL || SITE_URL;
   return brut.replace(/\/+$/, "");
 }
 
@@ -85,7 +86,11 @@ export function origine(): string {
  * `cdn.discordapp.com` et `media.discordapp.net` signent leurs pièces jointes
  * pour moins de 24 h ; `pbs.twimg.com` disparaît avec le compte ou le tweet.
  */
-const HOTES_PERISSABLES = new Set(["cdn.discordapp.com", "media.discordapp.net", "pbs.twimg.com"]);
+const HOTES_PERISSABLES = new Set([
+  "cdn.discordapp.com",
+  "media.discordapp.net",
+  "pbs.twimg.com",
+]);
 
 /**
  * URL absolue et durable d'une image, ou `null`.
@@ -94,8 +99,12 @@ const HOTES_PERISSABLES = new Set(["cdn.discordapp.com", "media.discordapp.net",
  * embed dont l'image sera cassée dans une semaine, dans un salon que personne ne
  * relira pour le corriger.
  */
-export function imageAbsolue(url: string | null, chemin: string | null): string | null {
-  const candidat = url && url.trim() !== "" ? url.trim() : urlImageAsset(chemin);
+export function imageAbsolue(
+  url: string | null,
+  chemin: string | null,
+): string | null {
+  const candidat =
+    url && url.trim() !== "" ? url.trim() : urlImageAsset(chemin);
   if (!candidat) {
     return null;
   }
@@ -199,12 +208,14 @@ export function chargeAnnonceTirage(
   const classes = gagnants.toSorted((a, b) => a.rang - b.rang);
   const premier = classes[0] ?? null;
 
-  const lignes = classes.map(gagnant => {
+  const lignes = classes.map((gagnant) => {
     // Une VRAIE mention seulement quand on détient le flocon ; sinon le pseudo en
     // gras. Les deux formes sont neutralisées : le pseudo est du texte que le
     // participant a choisi lui-même.
     const nom = neutraliserMentions(gagnant.pseudo);
-    const mention = gagnant.discordId ? `<@${gagnant.discordId}>` : `**${borner(nom, 60)}**`;
+    const mention = gagnant.discordId
+      ? `<@${gagnant.discordId}>`
+      : `**${borner(nom, 60)}**`;
     const lot = gagnant.lot ? ` — ${neutraliserMentions(gagnant.lot)}` : "";
     return `**${ordinalFr(gagnant.rang)} ·** ${mention}${lot}`;
   });
@@ -228,11 +239,17 @@ export function chargeAnnonceTirage(
   // le texte. La liste blanche `users` est ce qui rend la mention des gagnants
   // réelle sans rien ouvrir d'autre — et quand personne n'a de flocon, le champ
   // est ABSENT, donc aucune mention n'est émise.
-  const flocons = [...new Set(classes.map(g => g.discordId).filter((id): id is string => Boolean(id)))];
+  const flocons = [
+    ...new Set(
+      classes.map((g) => g.discordId).filter((id): id is string => Boolean(id)),
+    ),
+  ];
 
   const description = borner(
     [
-      classes.length === 1 ? `Bravo ${neutraliserMentions(classes[0]?.pseudo ?? "")} !` : "Bravo à toutes et tous !",
+      classes.length === 1
+        ? `Bravo ${neutraliserMentions(classes[0]?.pseudo ?? "")} !`
+        : "Bravo à toutes et tous !",
       "",
       `${ctx.nbParticipants} participant·es · ${ctx.nbOeuvres} œuvres · ${ctx.nbGagnants} gagnant·e·s`,
       `Poids : ${ctx.poidsMode === "un_par_personne" ? "une chance par personne" : "une chance par œuvre"}`,
@@ -246,24 +263,40 @@ export function chargeAnnonceTirage(
   // 5 boutons par rangée, 5 rangées : au-delà, Discord refuse le message entier.
   // Les gagnants au-delà du 25e gardent leur ligne dans le `content`, avec leur
   // mention — c'est le bouton qui manque, pas la personne.
-  const boutons = classes.slice(0, MAX_BOUTONS).map(gagnant => ({
-    label: borner(`Voir la création de ${neutraliserMentions(gagnant.pseudo)}`, LIMITE_LIBELLE_BOUTON),
+  const boutons = classes.slice(0, MAX_BOUTONS).map((gagnant) => ({
+    label: borner(
+      `Voir la création de ${neutraliserMentions(gagnant.pseudo)}`,
+      LIMITE_LIBELLE_BOUTON,
+    ),
     style: 5,
     type: 2,
     url: gagnant.lien,
   }));
   const rangees: Array<Record<string, unknown>> = [];
   for (let i = 0; i < boutons.length; i += BOUTONS_PAR_RANGEE) {
-    rangees.push({ components: boutons.slice(i, i + BOUTONS_PAR_RANGEE), type: 1 });
+    rangees.push({
+      components: boutons.slice(i, i + BOUTONS_PAR_RANGEE),
+      type: 1,
+    });
   }
 
   return {
-    allowed_mentions: flocons.length > 0 ? { parse: [], users: flocons } : { parse: [] },
+    allowed_mentions:
+      flocons.length > 0 ? { parse: [], users: flocons } : { parse: [] },
     ...(rangees.length > 0 ? { components: rangees } : {}),
     content,
     embeds: [
       {
-        ...(premier ? { author: { name: borner(neutraliserMentions(premier.pseudo), LIMITE_AUTEUR) } } : {}),
+        ...(premier
+          ? {
+              author: {
+                name: borner(
+                  neutraliserMentions(premier.pseudo),
+                  LIMITE_AUTEUR,
+                ),
+              },
+            }
+          : {}),
         color: COULEUR_MARQUE,
         description,
         footer: {

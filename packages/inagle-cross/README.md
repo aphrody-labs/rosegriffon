@@ -26,13 +26,13 @@ Le préfixe `inagle_cross_` est routé gratuitement vers le miroir SQLite d'azal
 
 ## Statut
 
-|                        |                                                                                                                            |
-| ---------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| Schéma masterdata      |  153 tables / 1215 colonnes typées                                                                                       |
-| Énumérations           |  214                                                                                                                     |
-| Catalogue Addressables |  25 328 objets (cf. `apps/azalee/data/cross/`)                                                                           |
-| Audio (voix)           |  305 WAV décodés (CRI HCA)                                                                                               |
-| **Valeurs masterdata** |  **Phase 1** — servies par le serveur du jeu derrière anti-triche (HTTP 426). Déblocage = capture runtime Android arm64. |
+|                        |                                                                                                                         |
+| ---------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| Schéma masterdata      | 153 tables / 1215 colonnes typées                                                                                       |
+| Énumérations           | 214                                                                                                                     |
+| Catalogue Addressables | 25 328 objets (cf. `apps/azalee/data/cross/`)                                                                           |
+| Audio (voix)           | 305 WAV décodés (CRI HCA)                                                                                               |
+| **Valeurs masterdata** | **Phase 1** — servies par le serveur du jeu derrière anti-triche (HTTP 426). Déblocage = capture runtime Android arm64. |
 
 ## Phase 1 (à venir)
 

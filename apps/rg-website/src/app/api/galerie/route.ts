@@ -26,7 +26,8 @@ export const dynamic = "force-dynamic";
  * 8810, sur la même machine ; l'ancien `rg-api` sur 8800 n'existe plus
  * (ECONNREFUSED → 502 en prod).
  */
-const BASE_INTERNE = process.env.AZALEE_API_URL ?? "http://127.0.0.1:8810/v1/azalee";
+const BASE_INTERNE =
+  process.env.AZALEE_API_URL ?? "http://127.0.0.1:8810/v1/azalee";
 
 /** Plafond de page : la popup en affiche douze, personne n'a besoin de mille. */
 const LIMITE_MAX = 48;
@@ -35,7 +36,12 @@ export async function GET(requete: Request): Promise<Response> {
   const entrants = new URL(requete.url).searchParams;
   const sortants = new URLSearchParams();
   sortants.set("page", String(entier(entrants.get("page"), 1)));
-  sortants.set("limit", String(Math.min(LIMITE_MAX, entier(entrants.get("limite"), GALERIE_PAR_PAGE))));
+  sortants.set(
+    "limit",
+    String(
+      Math.min(LIMITE_MAX, entier(entrants.get("limite"), GALERIE_PAR_PAGE)),
+    ),
+  );
   const categorie = entrants.get("categorie");
   if (categorie) {
     sortants.set("category", categorie);
@@ -46,17 +52,26 @@ export async function GET(requete: Request): Promise<Response> {
   }
 
   try {
-    const reponse = await fetch(`${BASE_INTERNE}/api/gallery?${sortants.toString()}`, {
-      cache: "no-store",
-      signal: AbortSignal.timeout(8_000),
-    });
+    const reponse = await fetch(
+      `${BASE_INTERNE}/api/gallery?${sortants.toString()}`,
+      {
+        cache: "no-store",
+        signal: AbortSignal.timeout(8_000),
+      },
+    );
     if (!reponse.ok) {
-      return Response.json({ error: `La galerie du wiki a répondu ${reponse.status}.` }, { status: 502 });
+      return Response.json(
+        { error: `La galerie du wiki a répondu ${reponse.status}.` },
+        { status: 502 },
+      );
     }
     return Response.json(await reponse.json(), { headers: cachePublic(3600) });
   } catch (erreur) {
     console.error("[galerie] wiki injoignable", erreur);
-    return Response.json({ error: "Galerie momentanément injoignable." }, { status: 502 });
+    return Response.json(
+      { error: "Galerie momentanément injoignable." },
+      { status: 502 },
+    );
   }
 }
 

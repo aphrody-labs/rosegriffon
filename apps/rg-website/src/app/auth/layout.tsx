@@ -8,6 +8,10 @@ export const metadata: Metadata = {
   robots: { follow: false, index: false },
 };
 
-export default function AuthTechniqueLayout({ children }: { children: ReactNode }) {
+export default function AuthTechniqueLayout({
+  children,
+}: {
+  children: ReactNode;
+}) {
   return children;
 }

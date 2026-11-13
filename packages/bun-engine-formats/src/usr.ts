@@ -26,11 +26,19 @@ function openProvenanceDatabase(): Database | undefined {
 }
 
 /** Reads an installed release record without creating files or changing the tool store. */
-export async function installedRelease(id: string): Promise<InstalledRelease | undefined> {
+export async function installedRelease(
+  id: string,
+): Promise<InstalledRelease | undefined> {
   const database = openProvenanceDatabase();
   if (!database) return undefined;
   try {
-    return database.query<InstalledRelease, [string]>("SELECT * FROM packages WHERE id = ?").get(id) ?? undefined;
+    return (
+      database
+        .query<InstalledRelease, [string]>(
+          "SELECT * FROM packages WHERE id = ?",
+        )
+        .get(id) ?? undefined
+    );
   } finally {
     database.close();
   }
@@ -41,7 +49,9 @@ export async function listInstalled(): Promise<InstalledRelease[]> {
   const database = openProvenanceDatabase();
   if (!database) return [];
   try {
-    return database.query<InstalledRelease, []>("SELECT * FROM packages ORDER BY id").all();
+    return database
+      .query<InstalledRelease, []>("SELECT * FROM packages ORDER BY id")
+      .all();
   } finally {
     database.close();
   }

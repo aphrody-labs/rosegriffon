@@ -5,7 +5,11 @@ import Image from "next/image";
 import Link from "@/components/shared/Link";
 import { useState } from "react";
 import { Icon } from "@/components/ui/Icon";
-import { getItemIconUrl, PLACEHOLDERS, resolveAssetUrl } from "@rosegriffon/azalee/images";
+import {
+  getItemIconUrl,
+  PLACEHOLDERS,
+  resolveAssetUrl,
+} from "@rosegriffon/azalee/images";
 import { cn } from "@/lib/utils";
 import { wiki } from "@rosegriffon/app-shell";
 
@@ -61,31 +65,44 @@ export function ItemCard({
   bonuses,
   className,
 }: ItemCardProps) {
-  const resolvedSrc = resolveAssetUrl(icon) || (internalCode ? getItemIconUrl(internalCode) : null);
+  const resolvedSrc =
+    resolveAssetUrl(icon) ||
+    (internalCode ? getItemIconUrl(internalCode) : null);
   const [imgError, setImgError] = useState(false);
   const catIcon = CATEGORY_ICONS[category] || "backpack";
   // Une URL = placeholder (`/ievr.webp`) ou erreur runtime → on n'affiche PAS de <img>
   // cassé : on rend l'icône de catégorie (toujours propre, jamais 404). Les items
   // « important » `gd120002..091` n'ont aucune icône réelle (vérité terrain CPK), résolus
   // en amont vers le placeholder ; le `onError` ci-dessous couvre tout 404 résiduel.
-  const hasRealImage = !!resolvedSrc && resolvedSrc !== PLACEHOLDERS.item && !imgError;
+  const hasRealImage =
+    !!resolvedSrc && resolvedSrc !== PLACEHOLDERS.item && !imgError;
 
   // Bonus de stats RÉELS prioritaires (kick/control/…). Les `stats` bruts
   // (stat1/stat2 = codes non interprétables) ne sont PLUS affichés tels quels :
   // on ne garde que les clés de stats reconnues.
   const bonusEntries = bonuses
-    ? Object.entries(bonuses).filter(([k, v]) => k in STAT_SHORT && typeof v === "number" && v !== 0)
+    ? Object.entries(bonuses).filter(
+        ([k, v]) => k in STAT_SHORT && typeof v === "number" && v !== 0,
+      )
     : [];
   const fallbackStatEntries =
     bonusEntries.length === 0 && stats
-      ? Object.entries(stats).filter(([k, v]) => k in STAT_SHORT && typeof v === "number" && v > 0)
+      ? Object.entries(stats).filter(
+          ([k, v]) => k in STAT_SHORT && typeof v === "number" && v > 0,
+        )
       : [];
-  const topEntries = bonusEntries.length > 0 ? bonusEntries : fallbackStatEntries;
-  const topStats = topEntries.toSorted(([, a], [, b]) => Math.abs(b) - Math.abs(a)).slice(0, 2);
+  const topEntries =
+    bonusEntries.length > 0 ? bonusEntries : fallbackStatEntries;
+  const topStats = topEntries
+    .toSorted(([, a], [, b]) => Math.abs(b) - Math.abs(a))
+    .slice(0, 2);
 
   // Tactic effects
   const isTactic = category === "special_tactics";
-  const effects = isTactic && stats ? [stats.effect1, stats.effect2, stats.effect3].filter(Boolean) : [];
+  const effects =
+    isTactic && stats
+      ? [stats.effect1, stats.effect2, stats.effect3].filter(Boolean)
+      : [];
 
   return (
     <Link
@@ -112,7 +129,11 @@ export function ItemCard({
               onError={() => setImgError(true)}
             />
           ) : (
-            <Icon name={catIcon} size={24} className="text-on-surface-variant/30" />
+            <Icon
+              name={catIcon}
+              size={24}
+              className="text-on-surface-variant/30"
+            />
           )}
         </div>
 
@@ -150,7 +171,10 @@ export function ItemCard({
                 )}
                 {stats.cooldown && (
                   <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-error/10 text-[10px] font-bold text-error font-mono tabular-nums">
-                    <Hourglass className="size-2.5 shrink-0" aria-hidden="true" />
+                    <Hourglass
+                      className="size-2.5 shrink-0"
+                      aria-hidden="true"
+                    />
                     <span>{stats.cooldown}s</span>
                   </span>
                 )}
@@ -162,7 +186,11 @@ export function ItemCard({
           {effects.length > 0 && (
             <div className="mt-2 space-y-1">
               {effects.slice(0, 2).map((eff, i) => (
-                <p key={i} className="text-[10px] text-on-surface-variant leading-tight truncate" title={eff}>
+                <p
+                  key={i}
+                  className="text-[10px] text-on-surface-variant leading-tight truncate"
+                  title={eff}
+                >
                   • {eff}
                 </p>
               ))}

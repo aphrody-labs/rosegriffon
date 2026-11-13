@@ -25,7 +25,9 @@ export async function findLinkedPublicProfile(
   return uniqueLinkedPublicProfile(result.rows);
 }
 
-export function uniqueLinkedPublicProfile(profiles: readonly LinkedPublicProfile[]): LinkedPublicProfile | null {
+export function uniqueLinkedPublicProfile(
+  profiles: readonly LinkedPublicProfile[],
+): LinkedPublicProfile | null {
   return profiles.length === 1 ? (profiles[0] ?? null) : null;
 }
 

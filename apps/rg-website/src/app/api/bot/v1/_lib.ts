@@ -11,7 +11,10 @@ const TOKEN = process.env.BOT_API_TOKEN;
  */
 export function assertBotAuth(request: NextRequest): NextResponse | null {
   if (!TOKEN) {
-    return NextResponse.json({ error: "BOT_API_TOKEN not configured on server" }, { status: 503 });
+    return NextResponse.json(
+      { error: "BOT_API_TOKEN not configured on server" },
+      { status: 503 },
+    );
   }
   const auth = request.headers.get("authorization") ?? "";
   const provided = auth.startsWith("Bearer ") ? auth.slice(7).trim() : null;
@@ -66,7 +69,9 @@ export interface BotDiscordIdentity {
  * Achillea/RG member imports, but never treats them as OAuth credentials. Keep
  * `resolveDiscordToProfile` for RBAC and all write endpoints.
  */
-export async function resolveBotDiscordIdentity(discordId: string): Promise<BotDiscordIdentity | null> {
+export async function resolveBotDiscordIdentity(
+  discordId: string,
+): Promise<BotDiscordIdentity | null> {
   const oauthProfile = await resolveDiscordToProfile(discordId);
   if (oauthProfile) {
     const profile = oauthProfile as Omit<BotDiscordIdentity, "linked">;
@@ -112,24 +117,38 @@ export async function authBotAndActor(
 
   const discordId = request.headers.get("x-discord-id");
   if (!discordId) {
-    return NextResponse.json({ error: "Missing x-discord-id header (actor identity required)" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Missing x-discord-id header (actor identity required)" },
+      { status: 400 },
+    );
   }
-  const profile = (await resolveDiscordToProfile(discordId)) as (BotPrincipal & { id?: string }) | null;
+  const profile = (await resolveDiscordToProfile(discordId)) as
+    (BotPrincipal & { id?: string }) | null;
   if (!profile) {
-    return NextResponse.json({ error: `Discord user ${discordId} not linked to any RG profile` }, { status: 404 });
+    return NextResponse.json(
+      { error: `Discord user ${discordId} not linked to any RG profile` },
+      { status: 404 },
+    );
   }
   const role = (profile as unknown as { role?: string }).role ?? "user";
   if (role !== "admin" && role !== "staff") {
-    return NextResponse.json({ error: `Insufficient role: ${role}` }, { status: 403 });
+    return NextResponse.json(
+      { error: `Insufficient role: ${role}` },
+      { status: 403 },
+    );
   }
   if (opts.adminOnly && role !== "admin") {
-    return NextResponse.json({ error: "Strict admin required" }, { status: 403 });
+    return NextResponse.json(
+      { error: "Strict admin required" },
+      { status: 403 },
+    );
   }
   return {
     discord_id: discordId,
     profile_id: (profile as unknown as { id: string }).id,
     role,
-    username: (profile as unknown as { username?: string | null }).username ?? null,
+    username:
+      (profile as unknown as { username?: string | null }).username ?? null,
   };
 }
 
@@ -147,7 +166,11 @@ export async function logBotAction(opts: {
     const supabase = createPostgresClient();
     await supabase.from("admin_audit_log").insert({
       action: opts.action,
-      details: { discord_id: opts.principal.discord_id, via: "bot-api", ...opts.details },
+      details: {
+        discord_id: opts.principal.discord_id,
+        via: "bot-api",
+        ...opts.details,
+      },
       entity_id: opts.entity_id ?? null,
       entity_type: opts.entity_type ?? "bot-api",
       user_id: opts.principal.profile_id,

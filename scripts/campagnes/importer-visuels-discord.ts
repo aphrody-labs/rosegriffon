@@ -54,7 +54,8 @@ const VISUELS: readonly Visuel[] = [
     fichier: "exp0.png",
     cle: "affiche",
     titre: "Annonce de lancement du #inazumaRG",
-    legende: "Visuel de l'annonce du 2 août 2023 ouvrant le premier challenge communautaire.",
+    legende:
+      "Visuel de l'annonce du 2 août 2023 ouvrant le premier challenge communautaire.",
   },
   {
     slug: "inazuma-rg",
@@ -73,7 +74,8 @@ const VISUELS: readonly Visuel[] = [
     fichier: "inazuma_affiche_remerciement_rg.png",
     cle: "fresque",
     titre: "Affiche finale du #inazumaRG",
-    legende: "Affiche réunissant toutes les participations, révélée le 9 septembre 2023 avec la fresque interactive.",
+    legende:
+      "Affiche réunissant toutes les participations, révélée le 9 septembre 2023 avec la fresque interactive.",
   },
   // Les huit fonds du trailer, republiés en bonne qualité le 4 août 2023. L'ordre
   // des pièces jointes n'est PAS celui des numéros : la position mesurée fait foi.
@@ -84,7 +86,8 @@ const VISUELS: readonly Visuel[] = [
     fichier: "BG_39_modele.png",
     cle: "maillot-bg-39",
     titre: "Fond BG_39",
-    legende: "Fond couleur du trailer, republié en bonne qualité le 4 août 2023.",
+    legende:
+      "Fond couleur du trailer, republié en bonne qualité le 4 août 2023.",
   },
   {
     slug: "inazuma-rg",
@@ -93,7 +96,8 @@ const VISUELS: readonly Visuel[] = [
     fichier: "BG_40.png",
     cle: "maillot-bg-40",
     titre: "Fond BG_40",
-    legende: "Fond couleur du trailer, republié en bonne qualité le 4 août 2023.",
+    legende:
+      "Fond couleur du trailer, republié en bonne qualité le 4 août 2023.",
   },
   {
     slug: "inazuma-rg",
@@ -102,7 +106,8 @@ const VISUELS: readonly Visuel[] = [
     fichier: "BG_41_modele.png",
     cle: "maillot-bg-41",
     titre: "Fond BG_41",
-    legende: "Fond couleur du trailer, republié en bonne qualité le 4 août 2023.",
+    legende:
+      "Fond couleur du trailer, republié en bonne qualité le 4 août 2023.",
   },
   {
     slug: "inazuma-rg",
@@ -111,7 +116,8 @@ const VISUELS: readonly Visuel[] = [
     fichier: "BG_42.png",
     cle: "maillot-bg-42",
     titre: "Fond BG_42",
-    legende: "Fond couleur du trailer, republié en bonne qualité le 4 août 2023.",
+    legende:
+      "Fond couleur du trailer, republié en bonne qualité le 4 août 2023.",
   },
   {
     slug: "inazuma-rg",
@@ -120,7 +126,8 @@ const VISUELS: readonly Visuel[] = [
     fichier: "BG_43_modele.png",
     cle: "maillot-bg-43",
     titre: "Fond BG_43",
-    legende: "Fond couleur du trailer, republié en bonne qualité le 4 août 2023.",
+    legende:
+      "Fond couleur du trailer, republié en bonne qualité le 4 août 2023.",
   },
   {
     slug: "inazuma-rg",
@@ -129,7 +136,8 @@ const VISUELS: readonly Visuel[] = [
     fichier: "BG_44_modele.png",
     cle: "maillot-bg-44",
     titre: "Fond BG_44",
-    legende: "Fond couleur du trailer, republié en bonne qualité le 4 août 2023.",
+    legende:
+      "Fond couleur du trailer, republié en bonne qualité le 4 août 2023.",
   },
   {
     slug: "inazuma-rg",
@@ -138,7 +146,8 @@ const VISUELS: readonly Visuel[] = [
     fichier: "BG_45_modele.png",
     cle: "maillot-bg-45",
     titre: "Fond BG_45",
-    legende: "Fond couleur du trailer, republié en bonne qualité le 4 août 2023.",
+    legende:
+      "Fond couleur du trailer, republié en bonne qualité le 4 août 2023.",
   },
   {
     slug: "inazuma-rg",
@@ -147,7 +156,8 @@ const VISUELS: readonly Visuel[] = [
     fichier: "BG_46_modele.png",
     cle: "maillot-bg-46",
     titre: "Fond BG_46",
-    legende: "Fond couleur du trailer, republié en bonne qualité le 4 août 2023.",
+    legende:
+      "Fond couleur du trailer, republié en bonne qualité le 4 août 2023.",
   },
 
   // ── inatober-rg-2023 — octobre 2023 ──
@@ -170,7 +180,8 @@ const VISUELS: readonly Visuel[] = [
     fichier: "RG2v3.png",
     cle: "affiche",
     titre: "Affiche de lancement du #InazumaRG2",
-    legende: "Affiche de la seconde édition, publiée le 2 août 2024 pour l'anniversaire du premier challenge.",
+    legende:
+      "Affiche de la seconde édition, publiée le 2 août 2024 pour l'anniversaire du premier challenge.",
   },
   {
     slug: "inazuma-rg-2",
@@ -199,7 +210,8 @@ const VISUELS: readonly Visuel[] = [
     fichier: "20240930_inatober.png",
     cle: "affiche",
     titre: "Liste des thèmes de l'InatoberRG2024",
-    legende: "Affiche des thèmes centrés sur la saison 2, publiée le 30 septembre 2024.",
+    legende:
+      "Affiche des thèmes centrés sur la saison 2, publiée le 30 septembre 2024.",
   },
 
   // ── inatober-rg-2025 — octobre 2025 ──
@@ -210,7 +222,8 @@ const VISUELS: readonly Visuel[] = [
     fichier: "inatober_fr.png",
     cle: "affiche",
     titre: "Liste des thèmes de l'inatoberRG2025",
-    legende: "Affiche des thèmes centrés sur la saison 3 (FFI), publiée le 30 septembre 2025.",
+    legende:
+      "Affiche des thèmes centrés sur la saison 3 (FFI), publiée le 30 septembre 2025.",
   },
 ] as const;
 
@@ -224,13 +237,15 @@ const QUALITE_ORIGINAL = 90;
 
 const RACINE_REPO = Bun.env.RG_REPO_ROOT ?? checkoutRoot("rg");
 /** Service Storage self-host (`apps/storage/server.ts`). */
-const STORAGE_INTERNE = Bun.env.RG_STORAGE_INTERNAL_URL ?? "http://127.0.0.1:8810";
+const STORAGE_INTERNE =
+  Bun.env.RG_STORAGE_INTERNAL_URL ?? "http://127.0.0.1:8810";
 /**
  * Origine publique : celle du SITE, où nginx expose `/storage/v1/` via
  * `supabase-compat.inc`. C'est la forme déjà stockée dans `x_campagnes` pour
  * `iergday` — ne pas dévier vers `storage.rosegriffon.fr` (préflight CORS inutile).
  */
-const ORIGINE_PUBLIQUE = Bun.env.RG_STORAGE_PUBLIC_ORIGIN ?? "https://rosegriffon.fr";
+const ORIGINE_PUBLIQUE =
+  Bun.env.RG_STORAGE_PUBLIC_ORIGIN ?? "https://rosegriffon.fr";
 /** L'écriture dans `storage.objects` est réservée au `service_role`. */
 const CLE_SERVICE = Bun.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
 /** Le jeton s'appelle `DISCORD_BOT_TOKEN` dans le `.env` du dépôt. */
@@ -240,7 +255,9 @@ const args = Bun.argv.slice(2);
 const DRY = args.includes("--dry-run") || args.includes("--dry");
 const FORCE = args.includes("--force");
 const JSON_SORTIE = args.includes("--json");
-const SLUG_FILTRE = args.includes("--slug") ? args[args.indexOf("--slug") + 1] : null;
+const SLUG_FILTRE = args.includes("--slug")
+  ? args[args.indexOf("--slug") + 1]
+  : null;
 
 // ───────────────────────── Outils ─────────────────────────
 
@@ -303,16 +320,27 @@ async function rafraichirUrls(urls: string[]): Promise<Map<string, string>> {
   // Par lots : l'API borne la taille du tableau.
   for (let i = 0; i < urls.length; i += 25) {
     const lot = urls.slice(i, i + 25);
-    const reponse = await fetch("https://discord.com/api/v10/attachments/refresh-urls", {
-      method: "POST",
-      headers: { authorization: `Bot ${JETON_DISCORD}`, "content-type": "application/json" },
-      body: JSON.stringify({ attachment_urls: lot }),
-    });
+    const reponse = await fetch(
+      "https://discord.com/api/v10/attachments/refresh-urls",
+      {
+        method: "POST",
+        headers: {
+          authorization: `Bot ${JETON_DISCORD}`,
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({ attachment_urls: lot }),
+      },
+    );
     if (!reponse.ok) {
-      throw new Error(`refresh-urls ${reponse.status} : ${(await reponse.text()).slice(0, 200)}`);
+      throw new Error(
+        `refresh-urls ${reponse.status} : ${(await reponse.text()).slice(0, 200)}`,
+      );
     }
-    const corps = (await reponse.json()) as { refreshed_urls?: Array<{ original: string; refreshed: string }> };
-    for (const { original, refreshed } of corps.refreshed_urls ?? []) carte.set(original, refreshed);
+    const corps = (await reponse.json()) as {
+      refreshed_urls?: Array<{ original: string; refreshed: string }>;
+    };
+    for (const { original, refreshed } of corps.refreshed_urls ?? [])
+      carte.set(original, refreshed);
   }
   return carte;
 }
@@ -343,7 +371,9 @@ async function televerser(nom: string, octets: Uint8Array): Promise<void> {
     body: new Blob([octets.slice()]),
   });
   if (!reponse.ok) {
-    throw new Error(`téléversement ${nom} : ${reponse.status} ${(await reponse.text()).slice(0, 200)}`);
+    throw new Error(
+      `téléversement ${nom} : ${reponse.status} ${(await reponse.text()).slice(0, 200)}`,
+    );
   }
 }
 
@@ -353,7 +383,9 @@ async function televerser(nom: string, octets: Uint8Array): Promise<void> {
  * du fichier ET son accessibilité réelle.
  */
 async function lireObjet(nom: string): Promise<Uint8Array | null> {
-  const reponse = await fetch(`${STORAGE_INTERNE}/object/public/${BUCKET}/${encodeURI(nom)}`);
+  const reponse = await fetch(
+    `${STORAGE_INTERNE}/object/public/${BUCKET}/${encodeURI(nom)}`,
+  );
   if (!reponse.ok) return null;
   return new Uint8Array(await reponse.arrayBuffer());
 }
@@ -375,15 +407,16 @@ if (!URL_BASE) throw new Error("DATABASE_URL manquant");
 const sql = createBunSql({ url: URL_BASE });
 const sharp = await chargerSharp();
 
-const aTraiter = VISUELS.filter(v => !SLUG_FILTRE || v.slug === SLUG_FILTRE);
+const aTraiter = VISUELS.filter((v) => !SLUG_FILTRE || v.slug === SLUG_FILTRE);
 if (!DRY && !CLE_SERVICE) throw new Error("SUPABASE_SERVICE_ROLE_KEY manquant");
 
 // 1. Pièces jointes : une lecture par message source (dix messages au plus).
 const messages = new Map<string, PieceJointe[]>();
-for (const id of new Set(aTraiter.map(v => v.messageId))) {
+for (const id of new Set(aTraiter.map((v) => v.messageId))) {
   const lignes: Array<{ attachments: PieceJointe[] }> =
     await sql`select attachments from public.discord_messages where message_id = ${id}`;
-  if (!lignes.length) throw new Error(`message ${id} absent de discord_messages`);
+  if (!lignes.length)
+    throw new Error(`message ${id} absent de discord_messages`);
   messages.set(id, lignes[0].attachments ?? []);
 }
 
@@ -404,12 +437,16 @@ for (const visuel of aTraiter) {
   const piece = pieces[visuel.piece];
   const repere = `${visuel.slug}/${visuel.cle}`;
   if (!piece) {
-    echecs.push(`${repere} : pièce jointe #${visuel.piece} absente du message ${visuel.messageId}`);
+    echecs.push(
+      `${repere} : pièce jointe #${visuel.piece} absente du message ${visuel.messageId}`,
+    );
     continue;
   }
   // Garde-fou : la position seule ne suffit pas, le nom mesuré doit correspondre.
   if (piece.filename !== visuel.fichier) {
-    echecs.push(`${repere} : attendu ${visuel.fichier}, trouvé ${piece.filename ?? "?"} — import refusé`);
+    echecs.push(
+      `${repere} : attendu ${visuel.fichier}, trouvé ${piece.filename ?? "?"} — import refusé`,
+    );
     continue;
   }
   if (!piece.url) {
@@ -422,16 +459,21 @@ for (const visuel of aTraiter) {
     ? []
     : await sql`select count(*)::int as n from storage.objects
 		            where bucket_id = ${BUCKET} and name in (${nomRendu}, ${nomOriginal})`;
-  const dejaLa = !FORCE && (indexes[0]?.n ?? 0) === 2 && (await lireObjet(nomRendu)) !== null;
+  const dejaLa =
+    !FORCE &&
+    (indexes[0]?.n ?? 0) === 2 &&
+    (await lireObjet(nomRendu)) !== null;
   taches.push({ visuel, piece, nomRendu, nomOriginal, dejaLa });
 }
 
 // 3. Une seule requête de rafraîchissement pour toutes les URL à télécharger.
-const aTelecharger = taches.filter(t => !t.dejaLa);
+const aTelecharger = taches.filter((t) => !t.dejaLa);
 let urlsFraiches = new Map<string, string>();
 if (aTelecharger.length && !DRY) {
   if (!JETON_DISCORD) throw new Error("DISCORD_BOT_TOKEN manquant");
-  urlsFraiches = await rafraichirUrls(aTelecharger.map(t => t.piece.url as string));
+  urlsFraiches = await rafraichirUrls(
+    aTelecharger.map((t) => t.piece.url as string),
+  );
 }
 
 // 4. Traitement, visuel par visuel.
@@ -454,12 +496,16 @@ for (const tache of taches) {
 
     if (tache.dejaLa) {
       // Déjà en place : on relit ce qui est stocké pour en rapporter les mesures.
-      const [r, o] = await Promise.all([lireObjet(nomRendu), lireObjet(nomOriginal)]);
+      const [r, o] = await Promise.all([
+        lireObjet(nomRendu),
+        lireObjet(nomOriginal),
+      ]);
       if (!r || !o) throw new Error("objet indexé mais illisible");
       rendu = r;
       original = o;
     } else {
-      const source = urlsFraiches.get(piece.url as string) ?? (piece.url as string);
+      const source =
+        urlsFraiches.get(piece.url as string) ?? (piece.url as string);
       const reponse = await fetch(source);
       if (!reponse.ok) throw new Error(`téléchargement ${reponse.status}`);
       const brut = new Uint8Array(await reponse.arrayBuffer());
@@ -467,17 +513,29 @@ for (const tache of taches) {
       // Le rendu tient dans 1600px de large ; l'original garde sa définition.
       rendu = new Uint8Array(
         await sharp(brut)
-          .resize({ width: LARGEUR_RENDU, fit: "inside", withoutEnlargement: true })
+          .resize({
+            width: LARGEUR_RENDU,
+            fit: "inside",
+            withoutEnlargement: true,
+          })
           .webp({ quality: QUALITE_RENDU })
           .toBuffer(),
       );
-      original = new Uint8Array(await sharp(brut).webp({ quality: QUALITE_ORIGINAL }).toBuffer());
+      original = new Uint8Array(
+        await sharp(brut).webp({ quality: QUALITE_ORIGINAL }).toBuffer(),
+      );
       await televerser(nomRendu, rendu);
       await televerser(nomOriginal, original);
     }
 
-    const [mesureRendu, mesureOriginal] = await Promise.all([sharp(rendu).metadata(), sharp(original).metadata()]);
-    const [httpRendu, httpOriginal] = await Promise.all([statutPublic(nomRendu), statutPublic(nomOriginal)]);
+    const [mesureRendu, mesureOriginal] = await Promise.all([
+      sharp(rendu).metadata(),
+      sharp(original).metadata(),
+    ]);
+    const [httpRendu, httpOriginal] = await Promise.all([
+      statutPublic(nomRendu),
+      statutPublic(nomOriginal),
+    ]);
 
     objets.push({
       slug: visuel.slug,
@@ -515,7 +573,9 @@ for (const tache of taches) {
 }
 
 if (JSON_SORTIE) console.log(JSON.stringify({ objets, echecs }, null, 2));
-console.log(`total visuels=${taches.length} objets=${objets.length} echecs=${echecs.length}`);
+console.log(
+  `total visuels=${taches.length} objets=${objets.length} echecs=${echecs.length}`,
+);
 for (const echec of echecs) console.log(`echec ${echec}`);
 
 await sql.end();

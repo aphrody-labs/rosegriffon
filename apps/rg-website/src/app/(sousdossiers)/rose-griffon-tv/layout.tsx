@@ -4,9 +4,11 @@ import { absoluteUrl } from "@/lib/site-url";
 
 export const metadata: Metadata = {
   alternates: { canonical: absoluteUrl("/rose-griffon-tv") },
-  description: "Votre rendez-vous quotidien 100% Inazuma Eleven sur Twitch et YouTube avec Rose Griffon TV.",
+  description:
+    "Votre rendez-vous quotidien 100% Inazuma Eleven sur Twitch et YouTube avec Rose Griffon TV.",
   openGraph: {
-    description: "Votre rendez-vous quotidien 100% Inazuma Eleven sur Twitch et YouTube avec Rose Griffon TV.",
+    description:
+      "Votre rendez-vous quotidien 100% Inazuma Eleven sur Twitch et YouTube avec Rose Griffon TV.",
     images: [
       {
         url: "/rgtv/rgtv.webp",
@@ -23,7 +25,8 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     creator: "@rose_griffon",
-    description: "Votre rendez-vous quotidien 100% Inazuma Eleven sur Twitch et YouTube.",
+    description:
+      "Votre rendez-vous quotidien 100% Inazuma Eleven sur Twitch et YouTube.",
     images: ["/rgtv/rgtv.webp"],
     title: "Rose Griffon TV | 100% Inazuma Eleven",
   },
@@ -38,7 +41,11 @@ export const viewport: Viewport = {
   width: "device-width",
 };
 
-export default function RoseGriffonTvLayout({ children }: { children: React.ReactNode }) {
+export default function RoseGriffonTvLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   // La barre du bas est déjà montée par `client-layout.tsx` sur les écrans
   // compacts : la remonter ici en empilait deux.
   return children;

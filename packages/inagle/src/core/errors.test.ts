@@ -1,9 +1,18 @@
 import { describe, expect, it, spyOn } from "bun:test";
-import { InagleError, InagleErrorCode, inagleLogger, isInagleError, wrapError } from "./errors.js";
+import {
+  InagleError,
+  InagleErrorCode,
+  inagleLogger,
+  isInagleError,
+  wrapError,
+} from "./errors.js";
 
 describe("InagleError", () => {
   it("should create error with code and message", () => {
-    const error = new InagleError(InagleErrorCode.DATA_NOT_FOUND, "File not found");
+    const error = new InagleError(
+      InagleErrorCode.DATA_NOT_FOUND,
+      "File not found",
+    );
 
     expect(error.name).toBe("InagleError");
     expect(error.code).toBe("DATA_NOT_FOUND");
@@ -12,11 +21,15 @@ describe("InagleError", () => {
   });
 
   it("should create error with details", () => {
-    const error = new InagleError(InagleErrorCode.ENTITY_NOT_FOUND, "Character not found", {
-      entityType: "character",
-      entityId: "c01000100",
-      hint: "Check the character ID format",
-    });
+    const error = new InagleError(
+      InagleErrorCode.ENTITY_NOT_FOUND,
+      "Character not found",
+      {
+        entityType: "character",
+        entityId: "c01000100",
+        hint: "Check the character ID format",
+      },
+    );
 
     expect(error.details?.entityType).toBe("character");
     expect(error.details?.entityId).toBe("c01000100");
@@ -25,16 +38,25 @@ describe("InagleError", () => {
 
   it("should create error with cause", () => {
     const originalError = new Error("Original error");
-    const error = new InagleError(InagleErrorCode.DATA_PARSE_ERROR, "Failed to parse", undefined, originalError);
+    const error = new InagleError(
+      InagleErrorCode.DATA_PARSE_ERROR,
+      "Failed to parse",
+      undefined,
+      originalError,
+    );
 
     expect(error.cause).toBe(originalError);
   });
 
   it("should format error for logs", () => {
-    const error = new InagleError(InagleErrorCode.DATA_NOT_FOUND, "Config file missing", {
-      filePath: "/data/config.json",
-      hint: "Run setup first",
-    });
+    const error = new InagleError(
+      InagleErrorCode.DATA_NOT_FOUND,
+      "Config file missing",
+      {
+        filePath: "/data/config.json",
+        hint: "Run setup first",
+      },
+    );
 
     const logString = error.toLogString();
     expect(logString).toContain("[Inagle] DATA_NOT_FOUND");
@@ -44,9 +66,13 @@ describe("InagleError", () => {
   });
 
   it("should convert to JSON", () => {
-    const error = new InagleError(InagleErrorCode.PARSER_ERROR, "Invalid format", {
-      filePath: "test.json",
-    });
+    const error = new InagleError(
+      InagleErrorCode.PARSER_ERROR,
+      "Invalid format",
+      {
+        filePath: "test.json",
+      },
+    );
 
     const json = error.toJSON();
     expect(json.name).toBe("InagleError");
@@ -96,7 +122,10 @@ describe("wrapError", () => {
   });
 
   it("should wrap string error", () => {
-    const wrapped = wrapError("Something went wrong", InagleErrorCode.API_INIT_FAILED);
+    const wrapped = wrapError(
+      "Something went wrong",
+      InagleErrorCode.API_INIT_FAILED,
+    );
 
     expect(wrapped).toBeInstanceOf(InagleError);
     expect(wrapped.message).toBe("Something went wrong");
@@ -105,7 +134,11 @@ describe("wrapError", () => {
 
   it("should add context to message", () => {
     const original = new Error("File not found");
-    const wrapped = wrapError(original, InagleErrorCode.DATA_NOT_FOUND, "Loading characters");
+    const wrapped = wrapError(
+      original,
+      InagleErrorCode.DATA_NOT_FOUND,
+      "Loading characters",
+    );
 
     expect(wrapped.message).toBe("Loading characters: File not found");
   });
@@ -117,7 +150,10 @@ describe("inagleLogger", () => {
 
     inagleLogger.warn(InagleErrorCode.CONFIG_MISSING, "Missing config file");
 
-    expect(warnSpy).toHaveBeenCalledWith("[Inagle] CONFIG_MISSING: Missing config file", "");
+    expect(warnSpy).toHaveBeenCalledWith(
+      "[Inagle] CONFIG_MISSING: Missing config file",
+      "",
+    );
 
     warnSpy.mockRestore();
   });
@@ -135,9 +171,13 @@ describe("inagleLogger", () => {
   it("should log errors with full details", () => {
     const errorSpy = spyOn(console, "error").mockImplementation(() => {});
 
-    const error = new InagleError(InagleErrorCode.DATA_NOT_FOUND, "File missing", {
-      filePath: "/data/test.json",
-    });
+    const error = new InagleError(
+      InagleErrorCode.DATA_NOT_FOUND,
+      "File missing",
+      {
+        filePath: "/data/test.json",
+      },
+    );
 
     inagleLogger.error(error);
 

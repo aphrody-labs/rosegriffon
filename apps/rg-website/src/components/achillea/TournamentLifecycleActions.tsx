@@ -26,26 +26,31 @@ interface TournamentLifecycleActionsProps {
   onUpdated: () => void;
 }
 
-export function TournamentLifecycleActions({ tournament, onUpdated }: TournamentLifecycleActionsProps) {
+export function TournamentLifecycleActions({
+  tournament,
+  onUpdated,
+}: TournamentLifecycleActionsProps) {
   const [loadingAction, setLoadingAction] = useState<string | null>(null);
-  const [message, setMessage] = useState<{ text: string; type: "success" | "error" } | null>(null);
+  const [message, setMessage] = useState<{
+    text: string;
+    type: "success" | "error";
+  } | null>(null);
   const [cancelReason, setCancelReason] = useState<string>("");
   const [showCancelPrompt, setShowCancelPrompt] = useState<boolean>(false);
-  const [payoutReadiness, setPayoutReadiness] = useResetState<"checking" | "ready" | "unresolved" | "unavailable">(
-    "checking",
-    `${tournament.id}:${tournament.internalState}`,
-  );
+  const [payoutReadiness, setPayoutReadiness] = useResetState<
+    "checking" | "ready" | "unresolved" | "unavailable"
+  >("checking", `${tournament.id}:${tournament.internalState}`);
 
   useEffect(() => {
     if (tournament.internalState !== TournamentState.FINISHED) return;
     let cancelled = false;
     createAchilleaClient()
       .tournaments.summary(tournament.id)
-      .then(result => {
+      .then((result) => {
         if (cancelled) return;
         setPayoutReadiness(
           result.ok && result.value
-            ? result.value.top10.some(standing => standing.rank === 1)
+            ? result.value.top10.some((standing) => standing.rank === 1)
               ? "ready"
               : "unresolved"
             : "unavailable",
@@ -69,13 +74,22 @@ export function TournamentLifecycleActions({ tournament, onUpdated }: Tournament
     try {
       const res = await fn();
       if (res.ok) {
-        setMessage({ text: succes?.(res.value) ?? "Action exécutée avec succès.", type: "success" });
+        setMessage({
+          text: succes?.(res.value) ?? "Action exécutée avec succès.",
+          type: "success",
+        });
         onUpdated();
       } else {
-        setMessage({ text: res.error?.message || "L'action a échoué.", type: "error" });
+        setMessage({
+          text: res.error?.message || "L'action a échoué.",
+          type: "error",
+        });
       }
     } catch {
-      setMessage({ text: "Erreur de communication avec le serveur.", type: "error" });
+      setMessage({
+        text: "Erreur de communication avec le serveur.",
+        type: "error",
+      });
     } finally {
       setLoadingAction(null);
     }
@@ -91,12 +105,19 @@ export function TournamentLifecycleActions({ tournament, onUpdated }: Tournament
             <ShieldAlert className="w-4 h-4" />
           </span>
           <div>
-            <h3 className="font-bold text-sm text-foreground">Panneau d&apos;Organisation Officiel</h3>
-            <p className="text-xs text-muted-foreground">Contrôle du cycle de vie et de l&apos;arbre de compétition.</p>
+            <h3 className="font-bold text-sm text-foreground">
+              Panneau d&apos;Organisation Officiel
+            </h3>
+            <p className="text-xs text-muted-foreground">
+              Contrôle du cycle de vie et de l&apos;arbre de compétition.
+            </p>
           </div>
         </div>
 
-        <Badge variant="outline" className="border-primary/40 text-primary text-xs">
+        <Badge
+          variant="outline"
+          className="border-primary/40 text-primary text-xs"
+        >
           Organisateur
         </Badge>
       </div>
@@ -125,7 +146,9 @@ export function TournamentLifecycleActions({ tournament, onUpdated }: Tournament
             size="sm"
             disabled={loadingAction !== null}
             onClick={() =>
-              executeAction("openRegistrations", () => client.tournaments.openRegistrations(tournament.id))
+              executeAction("openRegistrations", () =>
+                client.tournaments.openRegistrations(tournament.id),
+              )
             }
             className="text-xs font-bold gap-1.5"
           >
@@ -146,7 +169,11 @@ export function TournamentLifecycleActions({ tournament, onUpdated }: Tournament
               size="sm"
               variant="outline"
               disabled={loadingAction !== null}
-              onClick={() => executeAction("generateBracket", () => client.tournaments.generateBracket(tournament.id))}
+              onClick={() =>
+                executeAction("generateBracket", () =>
+                  client.tournaments.generateBracket(tournament.id),
+                )
+              }
               className="text-xs font-semibold gap-1.5"
             >
               {loadingAction === "generateBracket" ? (
@@ -161,7 +188,11 @@ export function TournamentLifecycleActions({ tournament, onUpdated }: Tournament
               size="sm"
               variant="ghost"
               disabled={loadingAction !== null}
-              onClick={() => executeAction("seedByRanked", () => client.tournaments.seedByRanked(tournament.id))}
+              onClick={() =>
+                executeAction("seedByRanked", () =>
+                  client.tournaments.seedByRanked(tournament.id),
+                )
+              }
               className="text-xs font-semibold gap-1.5"
               title="Attribue les têtes de séries par niveau ELO solo"
             >
@@ -177,7 +208,11 @@ export function TournamentLifecycleActions({ tournament, onUpdated }: Tournament
               size="sm"
               variant="ghost"
               disabled={loadingAction !== null}
-              onClick={() => executeAction("seedRandom", () => client.tournaments.seedRandom(tournament.id))}
+              onClick={() =>
+                executeAction("seedRandom", () =>
+                  client.tournaments.seedRandom(tournament.id),
+                )
+              }
               className="text-xs font-semibold gap-1.5"
             >
               {loadingAction === "seedRandom" ? (
@@ -196,12 +231,18 @@ export function TournamentLifecycleActions({ tournament, onUpdated }: Tournament
             size="sm"
             disabled={loadingAction !== null}
             onClick={() =>
-              executeAction("start", () => client.tournaments.start(tournament.id), reponse => {
-                const demarrage = reponse as { success: boolean; phases?: number; lobbies?: number } | undefined;
-                return demarrage?.phases
-                  ? "Tournoi démarré : la première phase est appariée par la tâche planifiée."
-                  : `Tournoi démarré : ${demarrage?.lobbies ?? 0} lobby(s) ouvert(s) sur l'arbre.`;
-              })
+              executeAction(
+                "start",
+                () => client.tournaments.start(tournament.id),
+                (reponse) => {
+                  const demarrage = reponse as
+                    | { success: boolean; phases?: number; lobbies?: number }
+                    | undefined;
+                  return demarrage?.phases
+                    ? "Tournoi démarré : la première phase est appariée par la tâche planifiée."
+                    : `Tournoi démarré : ${demarrage?.lobbies ?? 0} lobby(s) ouvert(s) sur l'arbre.`;
+                },
+              )
             }
             className="text-xs font-bold gap-1.5 bg-success hover:bg-success/90 text-success-foreground"
           >
@@ -219,7 +260,11 @@ export function TournamentLifecycleActions({ tournament, onUpdated }: Tournament
           <Button
             size="sm"
             disabled={loadingAction !== null}
-            onClick={() => executeAction("nextPhase", () => client.tournaments.nextPhase(tournament.id))}
+            onClick={() =>
+              executeAction("nextPhase", () =>
+                client.tournaments.nextPhase(tournament.id),
+              )
+            }
             className="text-xs font-bold gap-1.5"
           >
             {loadingAction === "nextPhase" ? (
@@ -237,7 +282,11 @@ export function TournamentLifecycleActions({ tournament, onUpdated }: Tournament
             size="sm"
             variant="outline"
             disabled={loadingAction !== null}
-            onClick={() => executeAction("close", () => client.tournaments.close(tournament.id, false))}
+            onClick={() =>
+              executeAction("close", () =>
+                client.tournaments.close(tournament.id, false),
+              )
+            }
             className="text-xs font-semibold gap-1.5 border-success/40 text-success"
           >
             {loadingAction === "close" ? (
@@ -256,7 +305,9 @@ export function TournamentLifecycleActions({ tournament, onUpdated }: Tournament
               variant="outline"
               disabled={loadingAction !== null || payoutReadiness !== "ready"}
               onClick={() =>
-                executeAction("applyPlacementPrizes", () => client.tournaments.applyPlacementPrizes(tournament.id))
+                executeAction("applyPlacementPrizes", () =>
+                  client.tournaments.applyPlacementPrizes(tournament.id),
+                )
               }
               className="text-xs font-semibold gap-1.5 border-warning/40 text-warning"
             >
@@ -297,16 +348,23 @@ export function TournamentLifecycleActions({ tournament, onUpdated }: Tournament
 
       {showCancelPrompt && (
         <div className="p-4 rounded-2xl bg-destructive/10 border border-destructive/30 space-y-3 mt-3">
-          <h4 className="text-xs font-bold text-destructive">Confirmation d&apos;annulation du tournoi</h4>
+          <h4 className="text-xs font-bold text-destructive">
+            Confirmation d&apos;annulation du tournoi
+          </h4>
           <input
             type="text"
             value={cancelReason}
-            onChange={e => setCancelReason(e.target.value)}
+            onChange={(e) => setCancelReason(e.target.value)}
             placeholder="Motif de l'annulation (obligatoire)"
             className="w-full px-3 py-2 rounded-xl bg-background border border-border text-xs focus:outline-hidden focus:ring-1 focus:ring-destructive"
           />
           <div className="flex items-center justify-end gap-2">
-            <Button size="sm" variant="ghost" onClick={() => setShowCancelPrompt(false)} className="text-xs">
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => setShowCancelPrompt(false)}
+              className="text-xs"
+            >
               Retour
             </Button>
             <Button
@@ -314,7 +372,9 @@ export function TournamentLifecycleActions({ tournament, onUpdated }: Tournament
               disabled={!cancelReason.trim() || loadingAction !== null}
               onClick={() => {
                 setShowCancelPrompt(false);
-                executeAction("cancel", () => client.tournaments.cancel(tournament.id, cancelReason));
+                executeAction("cancel", () =>
+                  client.tournaments.cancel(tournament.id, cancelReason),
+                );
               }}
               className="text-xs font-bold bg-destructive hover:bg-destructive/90 text-destructive-foreground"
             >

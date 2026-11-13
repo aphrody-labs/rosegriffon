@@ -50,7 +50,9 @@ export interface CpkHeaderVerification {
 /**
  * Validates a CPK archive header buffer against authoritative CRI / Level-5 binary contracts from NIE.
  */
-export function verifyCpkBuffer(buffer: ArrayBuffer | Uint8Array): CpkHeaderVerification {
+export function verifyCpkBuffer(
+  buffer: ArrayBuffer | Uint8Array,
+): CpkHeaderVerification {
   const probe = probeFormat(buffer);
   if (probe.kind !== "cpk" || !probe.isValid) {
     return {

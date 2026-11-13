@@ -11,7 +11,8 @@ const OUTPUTS = {
 } as const;
 
 type Mode = "generate" | "check";
-type DependencyKind = "dependencies" | "devDependencies" | "optionalDependencies";
+type DependencyKind =
+  "dependencies" | "devDependencies" | "optionalDependencies";
 
 interface Args {
   mode: Mode;
@@ -91,32 +92,64 @@ const ALLOWED_MAPPINGS = [
 ] as const;
 
 const EXCLUSION_RULES = [
-  { id: "git-metadata", description: ".git metadata (never enumerated by git ls-files)" },
+  {
+    id: "git-metadata",
+    description: ".git metadata (never enumerated by git ls-files)",
+  },
   { id: "dependencies", description: "node_modules directories" },
   { id: "lockfile", description: "Bun, npm, pnpm and Yarn lockfiles" },
   { id: "environment", description: ".env and every .env* variant" },
-  { id: "build-output", description: "build, dist and .angular output/cache directories" },
+  {
+    id: "build-output",
+    description: "build, dist and .angular output/cache directories",
+  },
   { id: "snapshot", description: "database snapshots and *.snap files" },
   { id: "dump", description: "database/archive dump artifacts" },
-  { id: "runtime-data", description: "backup, storage, upload and log directories" },
-  { id: "certificate", description: "certificate and private-key paths/extensions" },
-  { id: "deploy-workflow", description: "source deployment/migration/release workflows" },
-  { id: "duplicate-bot-infra", description: "non-canonical apps/bot/infra copy" },
-  { id: "secret-signature", description: "tracked file quarantined by content scan" },
-  { id: "outside-port-scope", description: "tracked source outside the four Phase 0 destinations" },
+  {
+    id: "runtime-data",
+    description: "backup, storage, upload and log directories",
+  },
+  {
+    id: "certificate",
+    description: "certificate and private-key paths/extensions",
+  },
+  {
+    id: "deploy-workflow",
+    description: "source deployment/migration/release workflows",
+  },
+  {
+    id: "duplicate-bot-infra",
+    description: "non-canonical apps/bot/infra copy",
+  },
+  {
+    id: "secret-signature",
+    description: "tracked file quarantined by content scan",
+  },
+  {
+    id: "outside-port-scope",
+    description: "tracked source outside the four Phase 0 destinations",
+  },
 ] as const;
 
 const SECRET_SIGNATURES: Array<{ id: string; pattern: RegExp }> = [
-  { id: "private-key", pattern: /-----BEGIN (?:RSA |EC |OPENSSH |DSA )?PRIVATE KEY-----/ },
+  {
+    id: "private-key",
+    pattern: /-----BEGIN (?:RSA |EC |OPENSSH |DSA )?PRIVATE KEY-----/,
+  },
   { id: "aws-access-key", pattern: /\b(?:AKIA|ASIA)[0-9A-Z]{16}\b/ },
   { id: "github-token", pattern: /\bgh[pousr]_[A-Za-z0-9_]{20,}\b/ },
   { id: "slack-token", pattern: /\bxox[baprs]-[A-Za-z0-9-]{10,}\b/ },
   { id: "stripe-secret", pattern: /\bsk_(?:live|test)_[A-Za-z0-9]{16,}\b/ },
   { id: "google-api-key", pattern: /\bAIza[0-9A-Za-z_-]{35}\b/ },
-  { id: "jwt", pattern: /\beyJ[A-Za-z0-9_-]{16,}\.eyJ[A-Za-z0-9_-]{16,}\.[A-Za-z0-9_-]{16,}\b/ },
+  {
+    id: "jwt",
+    pattern:
+      /\beyJ[A-Za-z0-9_-]{16,}\.eyJ[A-Za-z0-9_-]{16,}\.[A-Za-z0-9_-]{16,}\b/,
+  },
   {
     id: "credential-url",
-    pattern: /\b(?:postgres(?:ql)?|mysql|redis|mongodb(?:\+srv)?):\/\/[A-Za-z0-9._-]+:[A-Za-z0-9._~!%+,-]{4,}@/i,
+    pattern:
+      /\b(?:postgres(?:ql)?|mysql|redis|mongodb(?:\+srv)?):\/\/[A-Za-z0-9._-]+:[A-Za-z0-9._~!%+,-]{4,}@/i,
   },
 ];
 
@@ -134,7 +167,9 @@ function parseArgs(argv: string[]): Args {
     else if (argument === "--check") mode = "check";
     else if (argument === "--source") source = argv[++index] ?? "";
     else if (argument === "--help" || argument === "-h") {
-      console.log("Usage: bun scripts/achillea/phase0.ts (--generate|--check) --source <clean-achillea-clone>");
+      console.log(
+        "Usage: bun scripts/achillea/phase0.ts (--generate|--check) --source <clean-achillea-clone>",
+      );
       process.exit(0);
     } else fail(`unknown argument: ${argument}`);
   }
@@ -143,7 +178,10 @@ function parseArgs(argv: string[]): Args {
 }
 
 function runGit(source: string, args: string[]): Uint8Array {
-  const result = Bun.spawnSync(["git", "-C", source, ...args], { stdout: "pipe", stderr: "pipe" });
+  const result = Bun.spawnSync(["git", "-C", source, ...args], {
+    stdout: "pipe",
+    stderr: "pipe",
+  });
   if (result.exitCode !== 0) {
     fail(`git ${args.join(" ")} failed: ${result.stderr.toString().trim()}`);
   }
@@ -164,28 +202,63 @@ function pathExclusion(path: string): string | undefined {
   const file = basename(lower);
   if (segments.includes(".git")) return "git-metadata";
   if (segments.includes("node_modules")) return "dependencies";
-  if (/^(?:bun\.lockb?|package-lock\.json|npm-shrinkwrap\.json|pnpm-lock\.ya?ml|yarn\.lock)$/.test(file))
+  if (
+    /^(?:bun\.lockb?|package-lock\.json|npm-shrinkwrap\.json|pnpm-lock\.ya?ml|yarn\.lock)$/.test(
+      file,
+    )
+  )
     return "lockfile";
   if (file === ".env" || file.startsWith(".env.")) return "environment";
-  if (segments.some(part => part === "build" || part === "dist" || part === ".angular")) return "build-output";
-  if (segments.includes("snapshots") || file.startsWith(".snapshot") || file.endsWith(".snap")) return "snapshot";
-  if (segments.some(part => part === "dump" || part === "dumps") || /\.(?:dump|sql\.gz|sqlite3?|db)$/.test(file))
+  if (
+    segments.some(
+      (part) => part === "build" || part === "dist" || part === ".angular",
+    )
+  )
+    return "build-output";
+  if (
+    segments.includes("snapshots") ||
+    file.startsWith(".snapshot") ||
+    file.endsWith(".snap")
+  )
+    return "snapshot";
+  if (
+    segments.some((part) => part === "dump" || part === "dumps") ||
+    /\.(?:dump|sql\.gz|sqlite3?|db)$/.test(file)
+  )
     return "dump";
-  if (segments.some(part => ["backup", "backups", "storage", "upload", "uploads", "log", "logs"].includes(part)))
+  if (
+    segments.some((part) =>
+      [
+        "backup",
+        "backups",
+        "storage",
+        "upload",
+        "uploads",
+        "log",
+        "logs",
+      ].includes(part),
+    )
+  )
     return "runtime-data";
   if (
-    segments.some(part => ["cert", "certs", "certificate", "certificates"].includes(part)) ||
+    segments.some((part) =>
+      ["cert", "certs", "certificate", "certificates"].includes(part),
+    ) ||
     /\.(?:pem|key|crt|cer|p12|pfx)$/.test(file)
   )
     return "certificate";
-  if (/^\.github\/workflows\/.*(?:deploy|migration|migrate|release)/.test(lower)) return "deploy-workflow";
+  if (
+    /^\.github\/workflows\/.*(?:deploy|migration|migrate|release)/.test(lower)
+  )
+    return "deploy-workflow";
   if (lower.startsWith("apps/bot/infra/")) return "duplicate-bot-infra";
   return undefined;
 }
 
 function destinationFor(path: string): string | undefined {
   for (const [sourcePrefix, destinationPrefix] of ALLOWED_MAPPINGS) {
-    if (path.startsWith(sourcePrefix)) return destinationPrefix + path.slice(sourcePrefix.length);
+    if (path.startsWith(sourcePrefix))
+      return destinationPrefix + path.slice(sourcePrefix.length);
   }
   return undefined;
 }
@@ -218,15 +291,20 @@ function assertPolicy(): void {
     ["apps/bot/infra/systemd/service", "duplicate-bot-infra"],
   ];
   for (const [path, expected] of cases) {
-    if (pathExclusion(path) !== expected) fail(`policy self-test failed for ${path}`);
+    if (pathExclusion(path) !== expected)
+      fail(`policy self-test failed for ${path}`);
   }
   for (const [sourcePrefix, destinationPrefix] of ALLOWED_MAPPINGS) {
     const mapped = destinationFor(`${sourcePrefix}sentinel.ts`);
-    if (mapped !== `${destinationPrefix}sentinel.ts`) fail(`mapping self-test failed for ${sourcePrefix}`);
+    if (mapped !== `${destinationPrefix}sentinel.ts`)
+      fail(`mapping self-test failed for ${sourcePrefix}`);
   }
 }
 
-async function createManifest(source: string, trackedFiles: string[]): Promise<Manifest> {
+async function createManifest(
+  source: string,
+  trackedFiles: string[],
+): Promise<Manifest> {
   const imports: ImportEntry[] = [];
   const exclusions: ExcludedEntry[] = [];
   const destinations = new Set<string>();
@@ -240,10 +318,13 @@ async function createManifest(source: string, trackedFiles: string[]): Promise<M
       continue;
     }
     if (!destination) fail(`internal mapping error for ${path}`);
-    if (!ALLOWED_MAPPINGS.some(([, prefix]) => destination.startsWith(prefix))) {
+    if (
+      !ALLOWED_MAPPINGS.some(([, prefix]) => destination.startsWith(prefix))
+    ) {
       fail(`destination escaped allowlist: ${destination}`);
     }
-    if (destinations.has(destination)) fail(`destination collision: ${destination}`);
+    if (destinations.has(destination))
+      fail(`destination collision: ${destination}`);
     destinations.add(destination);
 
     const absolutePath = join(source, path);
@@ -253,7 +334,12 @@ async function createManifest(source: string, trackedFiles: string[]): Promise<M
       exclusions.push({ source: path, rule: `secret-signature:${signature}` });
       continue;
     }
-    imports.push({ source: path, destination, sha256: sha256(bytes), size: bytes.length });
+    imports.push({
+      source: path,
+      destination,
+      sha256: sha256(bytes),
+      size: bytes.length,
+    });
   }
 
   imports.sort((a, b) => a.source.localeCompare(b.source));
@@ -264,7 +350,9 @@ async function createManifest(source: string, trackedFiles: string[]): Promise<M
     policy: {
       trackedFilesOnly: true,
       requireCleanWorktree: true,
-      allowedDestinations: ALLOWED_MAPPINGS.map(([, destination]) => destination.slice(0, -1)),
+      allowedDestinations: ALLOWED_MAPPINGS.map(([, destination]) =>
+        destination.slice(0, -1),
+      ),
       exclusionRules: [...EXCLUSION_RULES],
       secretSignatures: SECRET_SIGNATURES.map(({ id }) => id),
     },
@@ -286,18 +374,24 @@ function parseLockVersions(lockText: string): Map<string, string> {
     const resolution = match[2];
     if (key.includes("/node_modules/") || key.includes("/@")) continue;
     const prefix = `${key}@`;
-    if (resolution.startsWith(prefix)) versions.set(key, resolution.slice(prefix.length));
+    if (resolution.startsWith(prefix))
+      versions.set(key, resolution.slice(prefix.length));
   }
   return versions;
 }
 
-function packageLockMetadata(text: string): Map<string, { version?: string; license?: string }> {
-  const parsed = JSON.parse(text) as { packages?: Record<string, { version?: string; license?: string }> };
+function packageLockMetadata(
+  text: string,
+): Map<string, { version?: string; license?: string }> {
+  const parsed = JSON.parse(text) as {
+    packages?: Record<string, { version?: string; license?: string }>;
+  };
   const result = new Map<string, { version?: string; license?: string }>();
   for (const [path, metadata] of Object.entries(parsed.packages ?? {})) {
     if (!path.startsWith("node_modules/")) continue;
     const name = path.slice("node_modules/".length);
-    if (!name.includes("/node_modules/") && metadata.license) result.set(name, metadata);
+    if (!name.includes("/node_modules/") && metadata.license)
+      result.set(name, metadata);
   }
   return result;
 }
@@ -305,53 +399,93 @@ function packageLockMetadata(text: string): Map<string, { version?: string; lice
 function runtimeFor(workspace: string, kind: DependencyKind): string {
   if (kind === "optionalDependencies") return "backend native optionnel";
   if (workspace === "apps/bot")
-    return kind === "dependencies" ? "backend Bun/Discord/API/ranked" : "build, lint et tests backend";
-  if (workspace === "apps/iecode-web") return kind === "dependencies" ? "navigateur Angular" : "build et tests Angular";
+    return kind === "dependencies"
+      ? "backend Bun/Discord/API/ranked"
+      : "build, lint et tests backend";
+  if (workspace === "apps/iecode-web")
+    return kind === "dependencies"
+      ? "navigateur Angular"
+      : "build et tests Angular";
   if (workspace === "packages/core") return "cœur métier multi-runtime";
   if (workspace === "packages/types") return "types/compilation";
   return "outillage monorepo source";
 }
 
-function dependencyDecision(name: string, declared: string, rgCatalog: Record<string, string>): string {
-  if (declared === "workspace:*") return "conserver en workspace dédié et remapper le chemin";
+function dependencyDecision(
+  name: string,
+  declared: string,
+  rgCatalog: Record<string, string>,
+): string {
+  if (declared === "workspace:*")
+    return "conserver en workspace dédié et remapper le chemin";
   if (name.startsWith("@aphrody/"))
     return "bloquer avant install : arbitrer @aphrody/* vs @aphrody-code/* et tester le natif";
-  if (name.startsWith("@angular/") || ["primeng", "primeicons", "@primeuix/themes", "zone.js"].includes(name))
+  if (
+    name.startsWith("@angular/") ||
+    ["primeng", "primeicons", "@primeuix/themes", "zone.js"].includes(name)
+  )
     return "conserver Angular/PrimeNG dans achillea-web ; ne pas convertir vers Next";
-  if (name.startsWith("@tsed/")) return "conserver Ts.ED dans achillea-bot isolé";
-  if (name.startsWith("@mikro-orm/")) return "conserver MikroORM 7 ; base et migrations Achillea séparées";
-  if (name.includes("colyseus") || name === "socket.io" || name === "socket.io-client")
+  if (name.startsWith("@tsed/"))
+    return "conserver Ts.ED dans achillea-bot isolé";
+  if (name.startsWith("@mikro-orm/"))
+    return "conserver MikroORM 7 ; base et migrations Achillea séparées";
+  if (
+    name.includes("colyseus") ||
+    name === "socket.io" ||
+    name === "socket.io-client"
+  )
     return "conserver ; valider séparément REST, Colyseus et Socket.IO";
-  if (name === "bullmq" || name === "ioredis") return "conserver ; Redis Achillea reste une dépendance runtime externe";
-  if (rgCatalog[name]) return `réutiliser le catalogue RG (${rgCatalog[name]}) après contrôle de compatibilité`;
-  if (declared === "catalog:") return "ajouter au catalogue RG avec la version source résolue";
+  if (name === "bullmq" || name === "ioredis")
+    return "conserver ; Redis Achillea reste une dépendance runtime externe";
+  if (rgCatalog[name])
+    return `réutiliser le catalogue RG (${rgCatalog[name]}) après contrôle de compatibilité`;
+  if (declared === "catalog:")
+    return "ajouter au catalogue RG avec la version source résolue";
   return "ajouter au seul workspace consommateur ; licence/gate ciblée avant install global";
 }
 
 async function dependencyRows(source: string): Promise<DependencyRow[]> {
-  const sourceRootManifest = (await Bun.file(join(source, "package.json")).json()) as PackageManifest;
+  const sourceRootManifest = (await Bun.file(
+    join(source, "package.json"),
+  ).json()) as PackageManifest;
   const sourceCatalog = sourceRootManifest.catalog ?? {};
-  const rgRootManifest = (await Bun.file(join(REPO_ROOT, "package.json")).json()) as {
+  const rgRootManifest = (await Bun.file(
+    join(REPO_ROOT, "package.json"),
+  ).json()) as {
     workspaces?: { catalog?: Record<string, string> };
   };
   const rgCatalog = rgRootManifest.workspaces?.catalog ?? {};
-  const lockVersions = parseLockVersions(await Bun.file(join(source, "bun.lock")).text());
-  const npmMetadata = packageLockMetadata(await Bun.file(join(source, "apps/bot/package-lock.json")).text());
+  const lockVersions = parseLockVersions(
+    await Bun.file(join(source, "bun.lock")).text(),
+  );
+  const npmMetadata = packageLockMetadata(
+    await Bun.file(join(source, "apps/bot/package-lock.json")).text(),
+  );
   const workspaceVersions = new Map<string, string>();
   const manifests = new Map<string, PackageManifest>();
 
   for (const path of PACKAGE_MANIFESTS) {
-    const manifest = (await Bun.file(join(source, path)).json()) as PackageManifest;
+    const manifest = (await Bun.file(
+      join(source, path),
+    ).json()) as PackageManifest;
     const workspace = dirname(path) === "." ? "." : dirname(path);
     manifests.set(workspace, manifest);
-    if (manifest.name && manifest.version) workspaceVersions.set(manifest.name, manifest.version);
+    if (manifest.name && manifest.version)
+      workspaceVersions.set(manifest.name, manifest.version);
   }
 
   const rows: DependencyRow[] = [];
   for (const [workspace, manifest] of manifests) {
-    for (const kind of ["dependencies", "devDependencies", "optionalDependencies"] as const) {
+    for (const kind of [
+      "dependencies",
+      "devDependencies",
+      "optionalDependencies",
+    ] as const) {
       for (const [name, declared] of Object.entries(manifest[kind] ?? {})) {
-        const effectiveDeclared = declared === "catalog:" ? (sourceCatalog[name] ?? "catalog:UNRESOLVED") : declared;
+        const effectiveDeclared =
+          declared === "catalog:"
+            ? (sourceCatalog[name] ?? "catalog:UNRESOLVED")
+            : declared;
         const metadata = npmMetadata.get(name);
         const resolved =
           declared === "workspace:*"
@@ -359,8 +493,11 @@ async function dependencyRows(source: string): Promise<DependencyRow[]> {
             : (lockVersions.get(name) ?? "non résolue dans bun.lock");
         const metadataLicense = metadata?.license;
         const license = name.startsWith("@rosegriffon/achillea-")
-          ? (manifests.get(name === "@rosegriffon/achillea-core" ? "packages/core" : "packages/types")?.license ??
-            "non déclarée")
+          ? (manifests.get(
+              name === "@rosegriffon/achillea-core"
+                ? "packages/core"
+                : "packages/types",
+            )?.license ?? "non déclarée")
           : metadataLicense
             ? metadata?.version === resolved
               ? metadataLicense
@@ -390,7 +527,10 @@ async function dependencyRows(source: string): Promise<DependencyRow[]> {
     }
   }
   return rows.sort(
-    (a, b) => a.workspace.localeCompare(b.workspace) || a.kind.localeCompare(b.kind) || a.name.localeCompare(b.name),
+    (a, b) =>
+      a.workspace.localeCompare(b.workspace) ||
+      a.kind.localeCompare(b.kind) ||
+      a.name.localeCompare(b.name),
   );
 }
 
@@ -400,14 +540,26 @@ function escapeCell(value: string): string {
 
 function dependencyMarkdown(rows: DependencyRow[]): string {
   const critical = [
-    ["Angular 21 / PrimeNG 21", "Conserver dans `apps/achillea-web`; aucune conversion Next.js pendant le portage."],
-    ["Ts.ED 8", "Conserver dans `apps/achillea-bot`; ne pas fusionner avec l'API ou le bot RG."],
+    [
+      "Angular 21 / PrimeNG 21",
+      "Conserver dans `apps/achillea-web`; aucune conversion Next.js pendant le portage.",
+    ],
+    [
+      "Ts.ED 8",
+      "Conserver dans `apps/achillea-bot`; ne pas fusionner avec l'API ou le bot RG.",
+    ],
     [
       "MikroORM 7",
       "Conserver avec ses migrations; interdire toute cible DB RG et tester sur une base Achillea dédiée.",
     ],
-    ["Colyseus + Socket.IO", "Conserver les trois processus/flux; valider REST, Colyseus et Socket.IO séparément."],
-    ["BullMQ + ioredis", "Conserver seulement avec une cible Redis Achillea explicitement configurée."],
+    [
+      "Colyseus + Socket.IO",
+      "Conserver les trois processus/flux; valider REST, Colyseus et Socket.IO séparément.",
+    ],
+    [
+      "BullMQ + ioredis",
+      "Conserver seulement avec une cible Redis Achillea explicitement configurée.",
+    ],
     [
       "`@aphrody/*`",
       "Bloquant avant install global : arbitrer le namespace face à `@aphrody-code/*`; tester `canvas` et son binaire optionnel.",
@@ -422,7 +574,7 @@ function dependencyMarkdown(rows: DependencyRow[]): string {
     "",
     `Generated from \`rose-griffon/achillea\` at \`${EXPECTED_COMMIT}\` by \`scripts/achillea/phase0.ts\`. This ledger enumerates every direct dependency declaration in the five source manifests. The resolved version comes from the frozen source \`bun.lock\`; licenses come only from local package metadata (principally the source bot's package-lock metadata), and are explicitly left undetermined otherwise.`,
     "",
-    `Entries: **${rows.length}** declarations across **${new Set(rows.map(row => row.workspace)).size}** manifests. No package installation or network lookup was performed.`,
+    `Entries: **${rows.length}** declarations across **${new Set(rows.map((row) => row.workspace)).size}** manifests. No package installation or network lookup was performed.`,
     "",
     "## Critical decisions before Phase 1",
     "",
@@ -435,7 +587,7 @@ function dependencyMarkdown(rows: DependencyRow[]): string {
     "| Workspace | Surface | Dependency | Declared constraint | Frozen resolution | License | License provenance | Runtime | Phase 0 decision |",
     "| --- | --- | --- | --- | --- | --- | --- | --- | --- |",
     ...rows.map(
-      row =>
+      (row) =>
         `| ${[row.workspace, row.kind, row.name, row.declared, row.resolved, row.license, row.licenseProvenance, row.runtime, row.decision].map(escapeCell).join(" | ")} |`,
     ),
     "",
@@ -448,15 +600,19 @@ function dependencyMarkdown(rows: DependencyRow[]): string {
 }
 
 function sourceMapMarkdown(manifest: Manifest): string {
-  const importStats = ALLOWED_MAPPINGS.map(([sourcePrefix, destinationPrefix]) => {
-    const entries = manifest.imports.filter(entry => entry.source.startsWith(sourcePrefix));
-    return {
-      source: sourcePrefix.slice(0, -1),
-      destination: destinationPrefix.slice(0, -1),
-      files: entries.length,
-      bytes: entries.reduce((sum, entry) => sum + entry.size, 0),
-    };
-  });
+  const importStats = ALLOWED_MAPPINGS.map(
+    ([sourcePrefix, destinationPrefix]) => {
+      const entries = manifest.imports.filter((entry) =>
+        entry.source.startsWith(sourcePrefix),
+      );
+      return {
+        source: sourcePrefix.slice(0, -1),
+        destination: destinationPrefix.slice(0, -1),
+        files: entries.length,
+        bytes: entries.reduce((sum, entry) => sum + entry.size, 0),
+      };
+    },
+  );
   const exclusionCounts = new Map<string, number>();
   for (const entry of manifest.exclusions) {
     const rule = entry.rule.split(":", 1)[0];
@@ -527,13 +683,16 @@ function sourceMapMarkdown(manifest: Manifest): string {
     "",
     "| Source root | RG destination | Files | Bytes |",
     "| --- | --- | ---: | ---: |",
-    ...importStats.map(row => `| \`${row.source}\` | \`${row.destination}\` | ${row.files} | ${row.bytes} |`),
+    ...importStats.map(
+      (row) =>
+        `| \`${row.source}\` | \`${row.destination}\` | ${row.files} | ${row.bytes} |`,
+    ),
     "",
     "## Operational mapping",
     "",
     "| Source surface | RG target/action | Earliest phase | Boundary |",
     "| --- | --- | --- | --- |",
-    ...detailed.map(row => `| ${row.join(" | ")} |`),
+    ...detailed.map((row) => `| ${row.join(" | ")} |`),
     "",
     "## Exclusion evidence",
     "",
@@ -559,7 +718,11 @@ function sourceMapMarkdown(manifest: Manifest): string {
   return lines.join("\n");
 }
 
-async function compareOrWrite(path: string, content: string, mode: Mode): Promise<void> {
+async function compareOrWrite(
+  path: string,
+  content: string,
+  mode: Mode,
+): Promise<void> {
   const normalized = content.endsWith("\n") ? content : `${content}\n`;
   if (mode === "generate") {
     await Bun.write(path, normalized);
@@ -567,10 +730,13 @@ async function compareOrWrite(path: string, content: string, mode: Mode): Promis
     return;
   }
   const file = Bun.file(path);
-  if (!(await file.exists())) fail(`missing generated artifact: ${relative(REPO_ROOT, path)}`);
+  if (!(await file.exists()))
+    fail(`missing generated artifact: ${relative(REPO_ROOT, path)}`);
   const actual = await file.text();
   if (actual !== normalized)
-    fail(`generated artifact drift: ${relative(REPO_ROOT, path)} (run --generate deliberately)`);
+    fail(
+      `generated artifact drift: ${relative(REPO_ROOT, path)} (run --generate deliberately)`,
+    );
   console.log(`verified ${relative(REPO_ROOT, path)}`);
 }
 
@@ -578,14 +744,21 @@ async function main(): Promise<void> {
   const args = parseArgs(Bun.argv.slice(2));
   assertPolicy();
   const head = gitText(args.source, ["rev-parse", "HEAD"]);
-  if (head !== EXPECTED_COMMIT) fail(`source HEAD is ${head}, expected ${EXPECTED_COMMIT}`);
-  const status = gitText(args.source, ["status", "--porcelain=v1", "--untracked-files=all"]);
+  if (head !== EXPECTED_COMMIT)
+    fail(`source HEAD is ${head}, expected ${EXPECTED_COMMIT}`);
+  const status = gitText(args.source, [
+    "status",
+    "--porcelain=v1",
+    "--untracked-files=all",
+  ]);
   if (status) fail("source worktree must be clean, including untracked files");
   const indexModes = new TextDecoder()
     .decode(runGit(args.source, ["ls-files", "-s", "-z"]))
     .split("\0")
     .filter(Boolean);
-  const unsupportedEntry = indexModes.find(entry => !entry.startsWith("100644 ") && !entry.startsWith("100755 "));
+  const unsupportedEntry = indexModes.find(
+    (entry) => !entry.startsWith("100644 ") && !entry.startsWith("100755 "),
+  );
   if (unsupportedEntry)
     fail(
       `source contains a symlink, submodule or unsupported Git mode: ${unsupportedEntry.split("\t", 2)[1] ?? "unknown"}`,
@@ -598,12 +771,27 @@ async function main(): Promise<void> {
   if (tracked.length === 0) fail("source contains no tracked files");
 
   const manifest = await createManifest(args.source, tracked);
-  if (manifest.summary.trackedFiles !== manifest.summary.importedFiles + manifest.summary.excludedFiles)
+  if (
+    manifest.summary.trackedFiles !==
+    manifest.summary.importedFiles + manifest.summary.excludedFiles
+  )
     fail("manifest accounting mismatch");
   const rows = await dependencyRows(args.source);
-  await compareOrWrite(OUTPUTS.manifest, JSON.stringify(manifest, null, 2), args.mode);
-  await compareOrWrite(OUTPUTS.dependencies, dependencyMarkdown(rows), args.mode);
-  await compareOrWrite(OUTPUTS.sourceMap, sourceMapMarkdown(manifest), args.mode);
+  await compareOrWrite(
+    OUTPUTS.manifest,
+    JSON.stringify(manifest, null, 2),
+    args.mode,
+  );
+  await compareOrWrite(
+    OUTPUTS.dependencies,
+    dependencyMarkdown(rows),
+    args.mode,
+  );
+  await compareOrWrite(
+    OUTPUTS.sourceMap,
+    sourceMapMarkdown(manifest),
+    args.mode,
+  );
   console.log(
     `ok: ${manifest.summary.importedFiles} imports, ${manifest.summary.excludedFiles} exclusions, ${rows.length} dependency declarations`,
   );

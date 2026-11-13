@@ -48,13 +48,17 @@ export function TweetFormClient({ initialData }: { initialData?: any }) {
         <Textarea
           id="route--id--tweet-form-client-tsx-1"
           value={text}
-          onChange={e => setText(e.target.value)}
+          onChange={(e) => setText(e.target.value)}
           className="h-[70vh] bg-surface-container-high border-none rounded-xl text-lg resize-y"
           placeholder="Quoi de neuf ?"
         />
       </div>
       <div className="flex justify-end">
-        <Button onClick={handleSave} disabled={loading} className="rounded-full px-8">
+        <Button
+          onClick={handleSave}
+          disabled={loading}
+          className="rounded-full px-8"
+        >
           {loading ? "Enregistrement…" : "Enregistrer"}
         </Button>
       </div>

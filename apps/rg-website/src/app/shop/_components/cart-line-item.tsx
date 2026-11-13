@@ -29,15 +29,31 @@ export function CartLineItem({ item }: { item: CartItemResolved }) {
       data-pending={pending || undefined}
       className="grid grid-cols-[96px_1fr_auto] items-center gap-4 rounded-2xl border-2 border-rg-or/40 bg-rg-marine/60 p-3 transition-opacity motion-safe:duration-200 data-[pending]:opacity-60"
     >
-      <Link href={`/shop/${item.slug}`} className="relative aspect-square overflow-hidden rounded-xl bg-rg-marine">
-        <Image src={item.product.image} alt={item.product.name} fill sizes="96px" className="object-cover" />
+      <Link
+        href={`/shop/${item.slug}`}
+        className="relative aspect-square overflow-hidden rounded-xl bg-rg-marine"
+      >
+        <Image
+          src={item.product.image}
+          alt={item.product.name}
+          fill
+          sizes="96px"
+          className="object-cover"
+        />
       </Link>
 
       <div className="min-w-0">
-        <Link href={`/shop/${item.slug}`} className="block truncate text-sm font-bold text-white hover:text-rg-or">
+        <Link
+          href={`/shop/${item.slug}`}
+          className="block truncate text-sm font-bold text-white hover:text-rg-or"
+        >
           {item.product.name}
         </Link>
-        {item.variantLabel && <p className="mt-0.5 truncate text-xs text-white/60">{item.variantLabel}</p>}
+        {item.variantLabel && (
+          <p className="mt-0.5 truncate text-xs text-white/60">
+            {item.variantLabel}
+          </p>
+        )}
         <div className="mt-2 inline-flex items-center gap-1 rounded-full border-2 border-rg-or/40 bg-rg-marine">
           <button
             type="button"
@@ -48,7 +64,9 @@ export function CartLineItem({ item }: { item: CartItemResolved }) {
           >
             <Minus className="size-3.5" />
           </button>
-          <span className="min-w-6 text-center text-xs font-bold text-white">{item.qty}</span>
+          <span className="min-w-6 text-center text-xs font-bold text-white">
+            {item.qty}
+          </span>
           <button
             type="button"
             onClick={() => update(+1)}
@@ -62,7 +80,9 @@ export function CartLineItem({ item }: { item: CartItemResolved }) {
       </div>
 
       <div className="flex flex-col items-end gap-2">
-        <span className="text-base font-extrabold text-white">{formatEuros(item.lineTotalCents)}</span>
+        <span className="text-base font-extrabold text-white">
+          {formatEuros(item.lineTotalCents)}
+        </span>
         <button
           type="button"
           onClick={remove}

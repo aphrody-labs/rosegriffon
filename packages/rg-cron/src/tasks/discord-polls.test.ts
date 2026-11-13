@@ -62,7 +62,8 @@ const ENCARTS: Record<string, Encart> = {
     author_is_bot: true,
     type: 20,
     created_at: "2023-08-01T13:53:47.401Z",
-    content: "Premier sondage pour mieux vous connaître, vous et votre rapport à la license ! ⚡",
+    content:
+      "Premier sondage pour mieux vous connaître, vous et votre rapport à la license ! ⚡",
     color: 16393766,
     footer: "Poll ID: 489f97c9",
     reactions: [
@@ -401,7 +402,12 @@ Rapide sondage pour de futurs émotes sur le serveur : quel style préférez-vou
       "Vous avez répondu au sondage pour choisir un sticker Victory Road à retaper à la Rose Griffon il y a une semaine, voici la seconde partie où c'est VOUS qui choisissez qui l'incarnera ! Pour rappel : ce n'est pas un sondage de popularité, veuillez choisir en fonction du personnage que vous pensez le plus approprié pour l'expression donnée !",
     color: 16393766,
     footer: "Poll ID: b99e9c66",
-    reactions: [{ emoji: { id: "1142879907660181535", name: "RG_hurley_like" }, count: 9 }],
+    reactions: [
+      {
+        emoji: { id: "1142879907660181535", name: "RG_hurley_like" },
+        count: 9,
+      },
+    ],
     description: `**Question**
 Quel personnage aimeriez-vous voir incarner ce sticker (référence ci-dessus) ? Vous avez TROIS choix possibles !
 
@@ -673,7 +679,11 @@ function messageDe(encart: Encart): MessageSondage {
 function analyser(id: string): SondageExtrait {
   const encart = ENCARTS[id];
   if (!encart) throw new Error(`fixture ${id} absente`);
-  const sondage = parseEasyPollEmbed(encart.description, encart.footer, messageDe(encart));
+  const sondage = parseEasyPollEmbed(
+    encart.description,
+    encart.footer,
+    messageDe(encart),
+  );
   if (!sondage) throw new Error(`fixture ${id} rejetée par le parseur`);
   return sondage;
 }
@@ -697,7 +707,9 @@ describe("parseEasyPollEmbed — les trois ères d'écriture", () => {
     expect(s.results_hidden).toBe(false);
     expect(s.total_votes).toBe(120);
     expect(s.total_voters).toBe(67);
-    expect(s.ends_at?.toISOString()).toBe(new Date(1785948540 * 1000).toISOString());
+    expect(s.ends_at?.toISOString()).toBe(
+      new Date(1785948540 * 1000).toISOString(),
+    );
     expect(s.options[0]).toMatchObject({
       position: 0,
       emoji: "🥞",
@@ -716,7 +728,11 @@ describe("parseEasyPollEmbed — les trois ères d'écriture", () => {
     expect(s.max_choices).toBe(3);
     expect(s.total_votes).toBe(133);
     expect(s.total_voters).toBe(77);
-    expect(s.options[4]).toMatchObject({ emoji: "🐰", votes: 39, pourcentage: 29.3 });
+    expect(s.options[4]).toMatchObject({
+      emoji: "🐰",
+      votes: 39,
+      pourcentage: 29.3,
+    });
     expect(s.avertissements).toEqual([]);
   });
 
@@ -725,8 +741,8 @@ describe("parseEasyPollEmbed — les trois ères d'écriture", () => {
     expect(s.options).toHaveLength(4);
     expect(s.max_choices).toBe(1);
     expect(s.locked).toBe(true);
-    expect(s.options.map(o => o.votes)).toEqual([32, 41, 2, 2]);
-    expect(s.options.map(o => o.pourcentage)).toEqual([42, 53, 3, 3]);
+    expect(s.options.map((o) => o.votes)).toEqual([32, 41, 2, 2]);
+    expect(s.options.map((o) => o.pourcentage)).toEqual([42, 53, 3, 3]);
     // `N users voted` ne donne PAS le nombre de votes : il se reconstitue par
     // somme, et il vaut ici le même chiffre parce que le sondage est à choix
     // unique. Sur un multi-choix les deux divergent (cf. a453e8bb).
@@ -752,7 +768,9 @@ describe("parseEasyPollEmbed — cas limites du corpus", () => {
     expect(s.total_votes).toBeNull();
     expect(s.total_voters).toBeNull();
     expect(s.options).toHaveLength(10);
-    expect(s.options.every(o => o.votes === null && o.pourcentage === null)).toBe(true);
+    expect(
+      s.options.every((o) => o.votes === null && o.pourcentage === null),
+    ).toBe(true);
     expect(s.ended).toBe(false);
     expect(s.locked).toBe(false);
     expect(s.ends_at).toBeNull();
@@ -771,18 +789,35 @@ describe("parseEasyPollEmbed — cas limites du corpus", () => {
     expect(s.total_votes).toBe(167);
     expect(sommeVotes(s)).toBe(167);
     // Le PREMIER token est l'emoji de vote ; le 🩷 appartient au libellé.
-    expect(s.options[9]).toMatchObject({ emoji: "🇯", label: "🩷 rose", votes: 13 });
-    expect(s.options[10]).toMatchObject({ emoji: "🇰", label: "🩶 gris", votes: 6 });
+    expect(s.options[9]).toMatchObject({
+      emoji: "🇯",
+      label: "🩷 rose",
+      votes: 13,
+    });
+    expect(s.options[10]).toMatchObject({
+      emoji: "🇰",
+      label: "🩶 gris",
+      votes: 6,
+    });
     // Teintes de peau : le modificateur reste collé à l'emoji de vote.
-    expect(s.options.slice(0, 3).map(o => o.emoji)).toEqual(["👍🏻", "👍🏽", "👍🏿"]);
+    expect(s.options.slice(0, 3).map((o) => o.emoji)).toEqual([
+      "👍🏻",
+      "👍🏽",
+      "👍🏿",
+    ]);
   });
 
   test("7835ac27 : quatre choix au libellé strictement identique", () => {
     const s = analyser("7835ac27");
     expect(s.options).toHaveLength(4);
-    expect(s.options.map(o => o.label)).toEqual(["Horreur", "Horreur", "Horreur", "Horreur"]);
+    expect(s.options.map((o) => o.label)).toEqual([
+      "Horreur",
+      "Horreur",
+      "Horreur",
+      "Horreur",
+    ]);
     // La clé d'une option est sa POSITION, jamais son libellé.
-    expect(s.options.map(o => o.position)).toEqual([0, 1, 2, 3]);
+    expect(s.options.map((o) => o.position)).toEqual([0, 1, 2, 3]);
   });
 
   test("bb1f3c28 : sondage à une seule option (inscription à un tirage)", () => {
@@ -803,7 +838,7 @@ describe("parseEasyPollEmbed — cas limites du corpus", () => {
 
   test("4cabbaaf : emoji personnalisés conservés bruts, mention de rôle intacte", () => {
     const s = analyser("4cabbaaf");
-    expect(s.options.map(o => o.emoji)).toEqual([
+    expect(s.options.map((o) => o.emoji)).toEqual([
       "<:IE_TerryLike:1089594869623832636>",
       "<:Hey2:1089276549120925717>",
       "🤷",
@@ -837,8 +872,8 @@ describe("parseSondageNatif", () => {
     expect(s!.poll_id).toBe("1269002639828586547");
     // Trié par `answer_id` : Roy (1) puis Gaëlle (2). Un appariement par
     // position aurait interverti 50 et 32.
-    expect(s!.options.map(o => o.label)).toEqual(["Roy !", "Gaëlle !"]);
-    expect(s!.options.map(o => o.votes)).toEqual([50, 32]);
+    expect(s!.options.map((o) => o.label)).toEqual(["Roy !", "Gaëlle !"]);
+    expect(s!.options.map((o) => o.votes)).toEqual([50, 32]);
     expect(s!.max_choices).toBe(1);
     expect(s!.ended).toBe(true);
     expect(s!.results_hidden).toBe(false);
@@ -862,10 +897,15 @@ describe("parseSondageNatif", () => {
 describe("appliquerVotesDepuisReactions — les quatre garde-fous", () => {
   test("3c67262a : masqué + aligné + avant juin 2024 → reconstitué", () => {
     const encart = ENCARTS["3c67262a"]!;
-    const s = appliquerVotesDepuisReactions(analyser("3c67262a"), encart.reactions);
+    const s = appliquerVotesDepuisReactions(
+      analyser("3c67262a"),
+      encart.reactions,
+    );
     expect(s.source).toBe("reactions");
     // `count - 1` : EasyPoll amorce chaque choix de sa propre réaction.
-    expect(s.options.map(o => o.votes)).toEqual([45, 12, 11, 54, 11, 8, 23, 10, 33, 35]);
+    expect(s.options.map((o) => o.votes)).toEqual([
+      45, 12, 11, 54, 11, 8, 23, 10, 33, 35,
+    ]);
     expect(s.total_votes).toBe(242);
     // `results_hidden` RESTE vrai : c'est l'ENCART qui ne publie rien.
     expect(s.results_hidden).toBe(true);
@@ -885,14 +925,16 @@ describe("appliquerVotesDepuisReactions — les quatre garde-fous", () => {
     const apres = appliquerVotesDepuisReactions(avant, encart.reactions);
     expect(apres).toEqual(avant);
     expect(apres.source).toBe("embed");
-    expect(apres.options.map(o => o.votes)).toEqual([32, 41, 2, 2]);
+    expect(apres.options.map((o) => o.votes)).toEqual([32, 41, 2, 2]);
   });
 
   test("b99e9c66 : réaction décorative → aucun décompte inventé", () => {
     const encart = ENCARTS["b99e9c66"]!;
     expect(encart.reactions).toHaveLength(1);
     const avant = analyser("b99e9c66");
-    expect(appliquerVotesDepuisReactions(avant, encart.reactions)).toEqual(avant);
+    expect(appliquerVotesDepuisReactions(avant, encart.reactions)).toEqual(
+      avant,
+    );
   });
 
   test("les emoji doivent correspondre EXACTEMENT, ordre compris", () => {
@@ -911,7 +953,9 @@ describe("appliquerVotesDepuisReactions — les quatre garde-fous", () => {
       ...analyser("3c67262a"),
       created_at: new Date(FIN_ERE_REACTIONS.getTime() + 1000),
     };
-    expect(appliquerVotesDepuisReactions(tardif, encart.reactions)).toEqual(tardif);
+    expect(appliquerVotesDepuisReactions(tardif, encart.reactions)).toEqual(
+      tardif,
+    );
   });
 });
 
@@ -922,31 +966,55 @@ describe("parseEasyPollEmbed — rejets propres, jamais d'exception", () => {
 
   test("pied d'encart illisible", () => {
     const journal: { raison?: string } = {};
-    expect(parseEasyPollEmbed("**Question**\nBonjour ?\n\n**Choices**\n🇦 Oui", "Poll", message(), journal)).toBeNull();
+    expect(
+      parseEasyPollEmbed(
+        "**Question**\nBonjour ?\n\n**Choices**\n🇦 Oui",
+        "Poll",
+        message(),
+        journal,
+      ),
+    ).toBeNull();
     expect(journal.raison).toBe("pied d'encart illisible");
   });
 
   test("description vide ou absente", () => {
     expect(parseEasyPollEmbed("", "Poll ID: abcdef", message())).toBeNull();
     expect(parseEasyPollEmbed(null, "Poll ID: abcdef", message())).toBeNull();
-    expect(parseEasyPollEmbed(undefined, "Poll ID: abcdef", message())).toBeNull();
+    expect(
+      parseEasyPollEmbed(undefined, "Poll ID: abcdef", message()),
+    ).toBeNull();
   });
 
   test("description sans section Question", () => {
     const journal: { raison?: string } = {};
-    parseEasyPollEmbed("Un texte quelconque", "Poll ID: abcdef", message(), journal);
+    parseEasyPollEmbed(
+      "Un texte quelconque",
+      "Poll ID: abcdef",
+      message(),
+      journal,
+    );
     expect(journal.raison).toBe("section question absente");
   });
 
   test("question vide", () => {
     const journal: { raison?: string } = {};
-    parseEasyPollEmbed("**Question**\n\n**Choices**\n🇦 Oui", "Poll ID: abcdef", message(), journal);
+    parseEasyPollEmbed(
+      "**Question**\n\n**Choices**\n🇦 Oui",
+      "Poll ID: abcdef",
+      message(),
+      journal,
+    );
     expect(journal.raison).toBe("question vide");
   });
 
   test("section choix absente", () => {
     const journal: { raison?: string } = {};
-    parseEasyPollEmbed("**Question**\nBonjour ?", "Poll ID: abcdef", message(), journal);
+    parseEasyPollEmbed(
+      "**Question**\nBonjour ?",
+      "Poll ID: abcdef",
+      message(),
+      journal,
+    );
     expect(journal.raison).toBe("section choix absente");
   });
 
@@ -957,7 +1025,9 @@ describe("parseEasyPollEmbed — rejets propres, jamais d'exception", () => {
       message(),
     );
     expect(s).not.toBeNull();
-    expect(s!.avertissements.join(" ")).toContain("ligne de paramètre non reconnue");
+    expect(s!.avertissements.join(" ")).toContain(
+      "ligne de paramètre non reconnue",
+    );
     expect(s!.max_choices).toBe(1);
   });
 
@@ -985,7 +1055,9 @@ describe("chapoUtilisable", () => {
     expect(chapoUtilisable(ENCARTS["489f97c9"]!.content)).toBe(
       "Premier sondage pour mieux vous connaître, vous et votre rapport à la license ! ⚡",
     );
-    expect(chapoUtilisable("Nouveau sondage <@&1136286992620064778>")).toBe("Nouveau sondage");
+    expect(chapoUtilisable("Nouveau sondage <@&1136286992620064778>")).toBe(
+      "Nouveau sondage",
+    );
   });
 });
 
@@ -1017,7 +1089,8 @@ describe("choisirVisuel", () => {
   const avecVignetteTenor: MessageHumainAvecMedia = {
     message_id: "1159505289922478100",
     created_at: new Date("2023-10-05T15:00:03.684Z"),
-    content: "https://tenor.com/view/think-smart-meme-use-your-head-gif-4595800915730774837",
+    content:
+      "https://tenor.com/view/think-smart-meme-use-your-head-gif-4595800915730774837",
     attachments: [],
     embeds: [
       {
@@ -1039,7 +1112,10 @@ describe("choisirVisuel", () => {
   });
 
   test("une vignette d'encart compte comme visuel (lien Tenor)", () => {
-    const v = choisirVisuel({ created_at: new Date("2023-10-05T15:00:30.551Z") }, [avecVignetteTenor]);
+    const v = choisirVisuel(
+      { created_at: new Date("2023-10-05T15:00:30.551Z") },
+      [avecVignetteTenor],
+    );
     expect(v?.attachment_id).toBe("embed-0");
     expect(v?.ecart_s).toBe(-27);
   });
@@ -1054,7 +1130,11 @@ describe("choisirVisuel", () => {
 
   test("aucun candidat porteur d'image : aucun rattachement", () => {
     expect(choisirVisuel(encart, [])).toBeNull();
-    expect(choisirVisuel(encart, [{ ...avecPieceJointe, attachments: [], embeds: [] }])).toBeNull();
+    expect(
+      choisirVisuel(encart, [
+        { ...avecPieceJointe, attachments: [], embeds: [] },
+      ]),
+    ).toBeNull();
   });
 
   test("le précédent l'emporte sur le suivant, même plus proche", () => {
@@ -1063,7 +1143,9 @@ describe("choisirVisuel", () => {
       message_id: "apres",
       created_at: new Date(encart.created_at.getTime() + 2000),
     };
-    expect(choisirVisuel(encart, [suivant, avecPieceJointe])?.message_id).toBe("1532068756610744360");
+    expect(choisirVisuel(encart, [suivant, avecPieceJointe])?.message_id).toBe(
+      "1532068756610744360",
+    );
   });
 
   test("à défaut de précédent, le suivant est retenu", () => {
@@ -1081,7 +1163,11 @@ describe("choisirVisuel", () => {
 describe("cohérence du corpus", () => {
   test("color = 16393766 ⟺ résultats publiés ET terminé ET verrouillé", () => {
     for (const [id, encart] of Object.entries(ENCARTS)) {
-      const s = parseEasyPollEmbed(encart.description, encart.footer, messageDe(encart));
+      const s = parseEasyPollEmbed(
+        encart.description,
+        encart.footer,
+        messageDe(encart),
+      );
       expect(s, `fixture ${id}`).not.toBeNull();
       const publie = !s!.results_hidden && s!.ended && s!.locked;
       expect(encart.color === 16393766, `fixture ${id}`).toBe(publie);
@@ -1099,12 +1185,16 @@ describe("cohérence du corpus", () => {
 
 describe("garde-fous du fichier d'import", () => {
   test("la tâche ne mentionne JAMAIS discord_poll_votes", async () => {
-    const source = await Bun.file(new URL("./discord-polls.ts", import.meta.url)).text();
+    const source = await Bun.file(
+      new URL("./discord-polls.ts", import.meta.url),
+    ).text();
     expect(source.includes("discord_poll_votes")).toBe(false);
   });
 
   test("les récapitulatifs POLL_RESULT (type 46) sont exclus du sélecteur", async () => {
-    const source = await Bun.file(new URL("./discord-polls.ts", import.meta.url)).text();
+    const source = await Bun.file(
+      new URL("./discord-polls.ts", import.meta.url),
+    ).text();
     expect(source).toContain("m.type <> 46");
   });
 });

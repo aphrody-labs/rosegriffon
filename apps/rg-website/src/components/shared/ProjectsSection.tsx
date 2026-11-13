@@ -32,7 +32,7 @@ export function ProjectsSection() {
       </div>
 
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-4 lg:gap-8">
-        {PROJETS_ACCUEIL.map(projet => (
+        {PROJETS_ACCUEIL.map((projet) => (
           <ProjectCard
             key={projet.slug}
             projet={projet}

@@ -36,7 +36,13 @@ export function DemoVoicePlayer({ forms }: { forms: DemoFormData[] }) {
         ))}
       </div>
       {/* `key` force le remontage de la balise audio au changement de forme. */}
-      <audio key={form.code} controls preload="none" src={form.voiceUrl} className="w-full">
+      <audio
+        key={form.code}
+        controls
+        preload="none"
+        src={form.voiceUrl}
+        className="w-full"
+      >
         <track kind="captions" />
       </audio>
       <a

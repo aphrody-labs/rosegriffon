@@ -12,7 +12,8 @@ import { absoluteUrl } from "@/lib/site-url";
 
 export const metadata: Metadata = {
   alternates: { canonical: wiki("/aura") },
-  description: "Explorez les Esprits Guerriers, Totems, Miximax et autres pouvoirs spéciaux.",
+  description:
+    "Explorez les Esprits Guerriers, Totems, Miximax et autres pouvoirs spéciaux.",
   title: "Hyper Techniques - Azalée",
 };
 
@@ -63,8 +64,13 @@ export default function AuraHubPage() {
   const pageJsonLd = {
     "@context": "https://schema.org",
     "@type": "WebPage",
-    description: "Explorez les Esprits Guerriers, Totems, Miximax et autres pouvoirs spéciaux.",
-    isPartOf: { "@type": "WebSite", name: "Azalée", url: absoluteUrl(wiki("/")) },
+    description:
+      "Explorez les Esprits Guerriers, Totems, Miximax et autres pouvoirs spéciaux.",
+    isPartOf: {
+      "@type": "WebSite",
+      name: "Azalée",
+      url: absoluteUrl(wiki("/")),
+    },
     name: "Hyper Techniques - Azalée",
     url: absoluteUrl(wiki("/aura")),
     mainEntity: {
@@ -81,29 +87,41 @@ export default function AuraHubPage() {
 
   return (
     <div className="w-full space-y-6">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(pageJsonLd) }} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(pageJsonLd) }}
+      />
       <div>
-        <h1 className="type-headline-small text-on-surface">Hyper Techniques</h1>
+        <h1 className="type-headline-small text-on-surface">
+          Hyper Techniques
+        </h1>
         <p className="type-body-medium text-on-surface-variant mt-1">
           Les pouvoirs spéciaux d&apos;Inazuma Eleven: Victory Road.
         </p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-        {CATEGORIES.map(cat => (
+        {CATEGORIES.map((cat) => (
           <Link
             key={cat.id}
             href={`/wiki/aura/${cat.id}`}
             className="group flex items-center gap-4 p-4 rounded-2xl bg-surface-container border border-outline-variant/20 hover:border-primary/40 hover:bg-surface-container-high transition-all duration-200 active:scale-[0.98]"
           >
-            <div className={cn("size-14 rounded-2xl flex items-center justify-center shrink-0", cat.color)}>
+            <div
+              className={cn(
+                "size-14 rounded-2xl flex items-center justify-center shrink-0",
+                cat.color,
+              )}
+            >
               <CommonSpriteIcon name={cat.sprite} scale={0.6} />
             </div>
             <div className="flex-1 min-w-0">
               <h2 className="type-title-medium text-on-surface group-hover:text-primary transition-colors">
                 {cat.title}
               </h2>
-              <p className="type-body-small text-on-surface-variant line-clamp-2">{cat.description}</p>
+              <p className="type-body-small text-on-surface-variant line-clamp-2">
+                {cat.description}
+              </p>
             </div>
             <ChevronRight
               size={20}

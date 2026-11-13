@@ -32,7 +32,14 @@ export interface ShopCardProps {
   className?: string;
 }
 
-export function ShopCard({ shopId, name, nameJa, itemCount, categories, className }: ShopCardProps) {
+export function ShopCard({
+  shopId,
+  name,
+  nameJa,
+  itemCount,
+  categories,
+  className,
+}: ShopCardProps) {
   const topCategories = categories.slice(0, 4);
 
   return (
@@ -57,7 +64,11 @@ export function ShopCard({ shopId, name, nameJa, itemCount, categories, classNam
           <h3 className="font-bold text-sm text-on-surface leading-tight group-hover:text-primary transition-colors line-clamp-2">
             {name}
           </h3>
-          {nameJa ? <p className="text-[11px] text-on-surface-variant/70 truncate mt-0.5">{nameJa}</p> : null}
+          {nameJa ? (
+            <p className="text-[11px] text-on-surface-variant/70 truncate mt-0.5">
+              {nameJa}
+            </p>
+          ) : null}
 
           <div className="flex items-center gap-1.5 mt-1.5">
             <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-primary/10 text-[10px] font-bold text-primary uppercase tracking-wider">
@@ -73,7 +84,10 @@ export function ShopCard({ shopId, name, nameJa, itemCount, categories, classNam
                   key={category}
                   className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-surface-container-highest/50 text-[10px] font-medium text-on-surface-variant"
                 >
-                  <Icon name={CATEGORY_ICON[category] || "category"} size={12} />
+                  <Icon
+                    name={CATEGORY_ICON[category] || "category"}
+                    size={12}
+                  />
                   {SHOP_CATEGORY_FR[category] || category}
                   <span className="opacity-60">·{count}</span>
                 </span>

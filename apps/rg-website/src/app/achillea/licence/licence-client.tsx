@@ -12,19 +12,41 @@ import {
 import { UserAvatar } from "@/components/achillea/UserAvatar";
 import { Badge } from "@rosegriffon/ui";
 import type { License } from "@rosegriffon/achillea-types/domain/license";
-import { IdCard, ArrowLeft, ShieldAlert, Download, QrCode, Loader2, AlertCircle } from "lucide-react";
+import {
+  IdCard,
+  ArrowLeft,
+  ShieldAlert,
+  Download,
+  QrCode,
+  Loader2,
+  AlertCircle,
+} from "lucide-react";
 import { signalerException } from "@/lib/achillea/signaler";
 
 export default function LicencePage() {
-  const { user, isAuthenticated, login, isLoading: authLoading } = useAchilleaAuth();
+  const {
+    user,
+    isAuthenticated,
+    login,
+    isLoading: authLoading,
+  } = useAchilleaAuth();
   const [license, setLicense] = useState<License | null>(null);
-  const [verificationToken, setVerificationToken] = useState<string | null>(null);
+  const [verificationToken, setVerificationToken] = useState<string | null>(
+    null,
+  );
   const [loading, setLoading] = useState<boolean>(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [reload, setReload] = useState(0);
 
-  const [requestIdentity1, setRequestIdentity1] = useState<readonly unknown[]>([isAuthenticated, reload]);
-  if ([isAuthenticated, reload].some((value, position) => !Object.is(value, requestIdentity1[position]))) {
+  const [requestIdentity1, setRequestIdentity1] = useState<readonly unknown[]>([
+    isAuthenticated,
+    reload,
+  ]);
+  if (
+    [isAuthenticated, reload].some(
+      (value, position) => !Object.is(value, requestIdentity1[position]),
+    )
+  ) {
     setRequestIdentity1([isAuthenticated, reload]);
     (() => {
       if (!isAuthenticated) {
@@ -46,18 +68,22 @@ export default function LicencePage() {
 
     client.licenses
       .mine()
-      .then(res => {
+      .then((res) => {
         if (cancelled) return;
         if (!res.ok) {
-          setLoadError("Impossible de charger votre licence. Réessayez dans un instant.");
+          setLoadError(
+            "Impossible de charger votre licence. Réessayez dans un instant.",
+          );
           return;
         }
         setLicense(res.value.license);
         setVerificationToken(res.value.verificationToken);
       })
-      .catch(cause => {
+      .catch((cause) => {
         if (!cancelled) {
-          setLoadError("Impossible de charger votre licence. Réessayez dans un instant.");
+          setLoadError(
+            "Impossible de charger votre licence. Réessayez dans un instant.",
+          );
         }
         signalerException("licence", cause);
       })
@@ -123,17 +149,22 @@ export default function LicencePage() {
           <span className="p-2 rounded-xl bg-primary/10 text-primary border border-primary/20">
             <IdCard className="w-5 h-5" />
           </span>
-          <h1 className="text-3xl font-bold tracking-tight">Licence Compétiteur</h1>
+          <h1 className="text-3xl font-bold tracking-tight">
+            Licence Compétiteur
+          </h1>
         </div>
         <p className="text-sm text-muted-foreground">
-          Votre titre officiel d'adhésion pour la participation aux compétitions homologuées Achilléa.
+          Votre titre officiel d'adhésion pour la participation aux compétitions
+          homologuées Achilléa.
         </p>
       </div>
 
       {loading ? (
         <div className="py-20 text-center space-y-3">
           <Loader2 className="w-8 h-8 animate-spin mx-auto text-muted-foreground" />
-          <p className="text-sm text-muted-foreground">Chargement de votre licence...</p>
+          <p className="text-sm text-muted-foreground">
+            Chargement de votre licence...
+          </p>
         </div>
       ) : loadError ? (
         <div
@@ -141,11 +172,13 @@ export default function LicencePage() {
           className="border border-destructive/30 bg-destructive/5 rounded-2xl p-8 text-center space-y-4"
         >
           <AlertCircle className="w-10 h-10 text-destructive mx-auto" />
-          <h3 className="font-bold text-base">Licence temporairement indisponible</h3>
+          <h3 className="font-bold text-base">
+            Licence temporairement indisponible
+          </h3>
           <p className="text-sm text-muted-foreground">{loadError}</p>
           <button
             type="button"
-            onClick={() => setReload(value => value + 1)}
+            onClick={() => setReload((value) => value + 1)}
             className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-primary-foreground font-semibold hover:bg-primary/90 transition-all active:scale-[0.99]"
           >
             Réessayer
@@ -156,8 +189,8 @@ export default function LicencePage() {
           <AlertCircle className="w-10 h-10 text-muted-foreground/60 mx-auto" />
           <h3 className="font-bold text-base">Aucune licence active</h3>
           <p className="text-xs text-muted-foreground max-w-sm mx-auto">
-            Vous n'avez pas encore de licence joueur émise. Rejoignez un clan ou participez à un tournoi pour générer
-            votre numéro de licence.
+            Vous n'avez pas encore de licence joueur émise. Rejoignez un clan ou
+            participez à un tournoi pour générer votre numéro de licence.
           </p>
         </div>
       ) : (
@@ -167,7 +200,9 @@ export default function LicencePage() {
             {/* Top Card Header */}
             <div className="flex items-center justify-between border-b border-outline-variant/15 pb-4">
               <div className="flex items-center gap-2">
-                <span className="font-black tracking-widest text-sm text-primary">ACHILLÉA</span>
+                <span className="font-black tracking-widest text-sm text-primary">
+                  ACHILLÉA
+                </span>
                 <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">
                   Licence E-Sport
                 </span>
@@ -185,8 +220,12 @@ export default function LicencePage() {
                 className="w-16 h-16 ring-2 ring-primary shrink-0"
               />
               <div className="space-y-1 min-w-0 flex-1">
-                <h2 className="text-xl font-black text-foreground truncate">{user?.username}</h2>
-                <div className="font-mono text-xs font-semibold text-primary">N° {license.licenseNumber}</div>
+                <h2 className="text-xl font-black text-foreground truncate">
+                  {user?.username}
+                </h2>
+                <div className="font-mono text-xs font-semibold text-primary">
+                  N° {license.licenseNumber}
+                </div>
               </div>
               <div className="p-2.5 rounded-2xl bg-surface-container-high/80 border border-outline-variant/20 shrink-0 hidden sm:block">
                 <QrCode className="w-12 h-12 text-foreground" />
@@ -197,11 +236,15 @@ export default function LicencePage() {
             <div className="grid grid-cols-2 gap-3 pt-2 text-xs">
               <div className="p-3 rounded-xl bg-surface-container-high/60 border border-outline-variant/15">
                 <div className="text-muted-foreground">Date d'émission</div>
-                <div className="font-bold mt-0.5">{new Date(license.issuedAt).toLocaleDateString("fr-FR")}</div>
+                <div className="font-bold mt-0.5">
+                  {new Date(license.issuedAt).toLocaleDateString("fr-FR")}
+                </div>
               </div>
               <div className="p-3 rounded-xl bg-surface-container-high/60 border border-outline-variant/15">
                 <div className="text-muted-foreground">Valable jusqu'au</div>
-                <div className="font-bold mt-0.5">{new Date(license.validUntil).toLocaleDateString("fr-FR")}</div>
+                <div className="font-bold mt-0.5">
+                  {new Date(license.validUntil).toLocaleDateString("fr-FR")}
+                </div>
               </div>
             </div>
 

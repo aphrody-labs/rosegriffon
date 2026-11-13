@@ -52,7 +52,12 @@ import {
   rankImageSlug,
   resolveDiscordAvatarUrl,
 } from "../src/identity/index";
-import { canAfford, netAmount, signedAmount, totalsByType } from "../src/wallet/index";
+import {
+  canAfford,
+  netAmount,
+  signedAmount,
+  totalsByType,
+} from "../src/wallet/index";
 import {
   canActOnMember,
   canDissolveClan,
@@ -76,10 +81,27 @@ import {
   sortBySeed,
   waitlist,
 } from "../src/participants/index";
-import { canTransitionCastStatus, castReadiness, rankCandidatesForRole } from "../src/casts/index";
-import { downsample, longestStreak, median, tierDistribution, winRatePercent } from "../src/stats/index";
-import { stageTypeLabel, sanctionTypeLabel, STAGE_TYPE_OPTIONS } from "../src/labels/index";
-import { sanctionTypeTone, TONE_TO_SHADCN_BADGE } from "../src/presentation/index";
+import {
+  canTransitionCastStatus,
+  castReadiness,
+  rankCandidatesForRole,
+} from "../src/casts/index";
+import {
+  downsample,
+  longestStreak,
+  median,
+  tierDistribution,
+  winRatePercent,
+} from "../src/stats/index";
+import {
+  stageTypeLabel,
+  sanctionTypeLabel,
+  STAGE_TYPE_OPTIONS,
+} from "../src/labels/index";
+import {
+  sanctionTypeTone,
+  TONE_TO_SHADCN_BADGE,
+} from "../src/presentation/index";
 import { isTournamentOrganizer } from "../src/tournaments/organizers";
 
 describe("pagination", () => {
@@ -108,7 +130,12 @@ describe("pagination", () => {
   });
 
   test("buildPageMeta produit des métadonnées cohérentes", () => {
-    expect(buildPageMeta(9, 20, 41)).toEqual({ page: 3, limit: 20, total: 41, pageCount: 3 });
+    expect(buildPageMeta(9, 20, 41)).toEqual({
+      page: 3,
+      limit: 20,
+      total: 41,
+      pageCount: 3,
+    });
   });
 
   test("hasNextPage et pageWindow", () => {
@@ -129,17 +156,25 @@ describe("pagination", () => {
 
 describe("URL d'API", () => {
   test("joinApiUrl ne double jamais la frontière /api", () => {
-    expect(joinApiUrl("https://x.fr/api", "/api/users")).toBe("https://x.fr/api/users");
-    expect(joinApiUrl("https://x.fr/api", "/users")).toBe("https://x.fr/api/users");
+    expect(joinApiUrl("https://x.fr/api", "/api/users")).toBe(
+      "https://x.fr/api/users",
+    );
+    expect(joinApiUrl("https://x.fr/api", "/users")).toBe(
+      "https://x.fr/api/users",
+    );
     expect(joinApiUrl("", "/users")).toBe("/users");
   });
 
   test("joinApiUrl laisse passer une URL absolue", () => {
-    expect(joinApiUrl("https://x.fr/api", "https://cdn.fr/a.png")).toBe("https://cdn.fr/a.png");
+    expect(joinApiUrl("https://x.fr/api", "https://cdn.fr/a.png")).toBe(
+      "https://cdn.fr/a.png",
+    );
   });
 
   test("buildQueryString omet les valeurs vides et répète les tableaux", () => {
-    expect(buildQueryString({ page: 2, q: "", tag: ["a", "b"], off: null })).toBe("?page=2&tag=a&tag=b");
+    expect(
+      buildQueryString({ page: 2, q: "", tag: ["a", "b"], off: null }),
+    ).toBe("?page=2&tag=a&tag=b");
     expect(buildQueryString({})).toBe("");
     expect(withQuery("/users")).toBe("/users");
     expect(withQuery("/users", { page: 1 })).toBe("/users?page=1");
@@ -196,12 +231,19 @@ describe("identité", () => {
   });
 
   test("un hash d'avatar devient une URL CDN dimensionnée", () => {
-    expect(resolveDiscordAvatarUrl("42", "abc123")).toBe("https://cdn.discordapp.com/avatars/42/abc123.webp?size=256");
+    expect(resolveDiscordAvatarUrl("42", "abc123")).toBe(
+      "https://cdn.discordapp.com/avatars/42/abc123.webp?size=256",
+    );
   });
 
   test("un avatar animé est servi en .gif", () => {
     expect(resolveDiscordAvatarUrl("42", "a_ff00aa")).toContain(".gif");
-    expect(resolveDiscordAvatarUrl("42", "https://cdn.discordapp.com/avatars/42/a_ff00aa.webp")).toContain(".gif");
+    expect(
+      resolveDiscordAvatarUrl(
+        "42",
+        "https://cdn.discordapp.com/avatars/42/a_ff00aa.webp",
+      ),
+    ).toContain(".gif");
   });
 
   test("sans avatar, on retombe sur l'embed Discord", () => {
@@ -212,17 +254,38 @@ describe("identité", () => {
     expect(rankImageSlug("Émeraude")).toBe("emeraude");
     expect(rankImageSlug("inconnu")).toBe("fer");
     expect(rankImagePath("Or")).toBe("ranks/or.webp");
-    expect(rankImagePath("Or", "https://cdn.fr/img/")).toBe("https://cdn.fr/img/or.webp");
+    expect(rankImagePath("Or", "https://cdn.fr/img/")).toBe(
+      "https://cdn.fr/img/or.webp",
+    );
   });
 });
 
 describe("portefeuille", () => {
-  const tx = (type: WalletTransactionType, amount: number, direction: WalletTransactionDirection) =>
-    ({ id: 1, type, amount, reason: null, direction, createdAt: "" }) satisfies WalletTransaction;
+  const tx = (
+    type: WalletTransactionType,
+    amount: number,
+    direction: WalletTransactionDirection,
+  ) =>
+    ({
+      id: 1,
+      type,
+      amount,
+      reason: null,
+      direction,
+      createdAt: "",
+    }) satisfies WalletTransaction;
 
   test("le montant est signé selon le sens du mouvement", () => {
-    expect(signedAmount(tx(WalletTransactionType.Credit, 50, WalletTransactionDirection.In))).toBe(50);
-    expect(signedAmount(tx(WalletTransactionType.Fine, 20, WalletTransactionDirection.Out))).toBe(-20);
+    expect(
+      signedAmount(
+        tx(WalletTransactionType.Credit, 50, WalletTransactionDirection.In),
+      ),
+    ).toBe(50);
+    expect(
+      signedAmount(
+        tx(WalletTransactionType.Fine, 20, WalletTransactionDirection.Out),
+      ),
+    ).toBe(-20);
   });
 
   test("netAmount somme les mouvements signés", () => {
@@ -241,7 +304,9 @@ describe("portefeuille", () => {
   });
 
   test("totalsByType ventile en valeur absolue", () => {
-    const totals = totalsByType([tx(WalletTransactionType.Fine, 20, WalletTransactionDirection.Out)]);
+    const totals = totalsByType([
+      tx(WalletTransactionType.Fine, 20, WalletTransactionDirection.Out),
+    ]);
     expect(totals[WalletTransactionType.Fine]).toBe(20);
     expect(totals[WalletTransactionType.Credit]).toBe(0);
   });
@@ -249,13 +314,21 @@ describe("portefeuille", () => {
 
 describe("clans", () => {
   test("les distinctions se trient Staff → Player → Artist → ContentCreator", () => {
-    expect(sortDistinctions(["ContentCreator", "Staff", "Player"])).toEqual(["Staff", "Player", "ContentCreator"]);
+    expect(sortDistinctions(["ContentCreator", "Staff", "Player"])).toEqual([
+      "Staff",
+      "Player",
+      "ContentCreator",
+    ]);
     expect(distinctionPriority("Inconnu")).toBe(99);
   });
 
   test("on n'agit que sur un rôle strictement inférieur", () => {
-    expect(canActOnMember(ClanMemberRole.Captain, ClanMemberRole.SubCaptain)).toBe(true);
-    expect(canActOnMember(ClanMemberRole.SubCaptain, ClanMemberRole.SubCaptain)).toBe(false);
+    expect(
+      canActOnMember(ClanMemberRole.Captain, ClanMemberRole.SubCaptain),
+    ).toBe(true);
+    expect(
+      canActOnMember(ClanMemberRole.SubCaptain, ClanMemberRole.SubCaptain),
+    ).toBe(false);
     expect(canDissolveClan(ClanMemberRole.SubCaptain)).toBe(false);
   });
 
@@ -270,7 +343,9 @@ describe("clans", () => {
     expect(isClanRecruiting(base)).toBe(true);
     expect(isClanRecruiting({ ...base, isHidden: true })).toBe(false);
     expect(isClanRecruiting({ ...base, isInactive: true })).toBe(false);
-    expect(isClanRecruiting({ ...base, state: ClanState.PendingReview })).toBe(false);
+    expect(isClanRecruiting({ ...base, state: ClanState.PendingReview })).toBe(
+      false,
+    );
   });
 });
 
@@ -284,7 +359,11 @@ describe("casts", () => {
     defraymentReason: null,
     notes: null,
   });
-  const item = (role: CastSlotRole, required: boolean, settled: boolean): ChecklistItem => ({
+  const item = (
+    role: CastSlotRole,
+    required: boolean,
+    settled: boolean,
+  ): ChecklistItem => ({
     slot: slot(role, required),
     attribution: null,
     casterId: settled ? "u1" : null,
@@ -313,9 +392,18 @@ describe("casts", () => {
   });
 
   test("les transitions de statut interdites sont refusées", () => {
-    expect(canTransitionCastStatus(CastEventStatus.Planned, CastEventStatus.OpenSignup)).toBe(true);
-    expect(canTransitionCastStatus(CastEventStatus.Planned, CastEventStatus.Live)).toBe(false);
-    expect(canTransitionCastStatus(CastEventStatus.Done, CastEventStatus.Live)).toBe(false);
+    expect(
+      canTransitionCastStatus(
+        CastEventStatus.Planned,
+        CastEventStatus.OpenSignup,
+      ),
+    ).toBe(true);
+    expect(
+      canTransitionCastStatus(CastEventStatus.Planned, CastEventStatus.Live),
+    ).toBe(false);
+    expect(
+      canTransitionCastStatus(CastEventStatus.Done, CastEventStatus.Live),
+    ).toBe(false);
   });
 
   test("les candidats sont triés par disponibilité puis ancienneté", () => {
@@ -324,18 +412,29 @@ describe("casts", () => {
       status: CastAvailabilityStatus,
       declaredAt: string,
       preferredRoles: CastSlotRole[] | null = null,
-    ): CastAvailability => ({ id: userId, userId, status, preferredRoles, notes: null, declaredAt });
+    ): CastAvailability => ({
+      id: userId,
+      userId,
+      status,
+      preferredRoles,
+      notes: null,
+      declaredAt,
+    });
 
     const ranked = rankCandidatesForRole(
       [
         avail("maybe", CastAvailabilityStatus.Maybe, "2026-01-01T00:00:00Z"),
         avail("no", CastAvailabilityStatus.Unavailable, "2026-01-01T00:00:00Z"),
         avail("late", CastAvailabilityStatus.Available, "2026-01-03T00:00:00Z"),
-        avail("early", CastAvailabilityStatus.Available, "2026-01-02T00:00:00Z"),
+        avail(
+          "early",
+          CastAvailabilityStatus.Available,
+          "2026-01-02T00:00:00Z",
+        ),
       ],
       CastSlotRole.CasterMain,
     );
-    expect(ranked.map(a => a.userId)).toEqual(["early", "late", "maybe"]);
+    expect(ranked.map((a) => a.userId)).toEqual(["early", "late", "maybe"]);
   });
 
   test("un caster qui a exclu le rôle n'est pas proposé", () => {
@@ -381,7 +480,7 @@ describe("stats", () => {
       { key: "Or", minElo: 100, maxElo: 199, gradient: [] },
     ];
     const buckets = tierDistribution([10, 50, 150], tiers);
-    expect(buckets.map(b => b.count)).toEqual([2, 1]);
+    expect(buckets.map((b) => b.count)).toEqual([2, 1]);
     expect(buckets[0]?.share).toBeCloseTo(2 / 3);
   });
 });
@@ -390,25 +489,34 @@ describe("libellés et tonalités", () => {
   test("chaque format de tournoi a un libellé", () => {
     expect(stageTypeLabel(StageType.league)).toBe("Championnat (ligue)");
     expect(STAGE_TYPE_OPTIONS).toHaveLength(4);
-    expect(STAGE_TYPE_OPTIONS.every(option => option.label.length > 0)).toBe(true);
+    expect(STAGE_TYPE_OPTIONS.every((option) => option.label.length > 0)).toBe(
+      true,
+    );
   });
 
   test("la gravité d'une sanction est neutre vis-à-vis de l'UI", () => {
     expect(sanctionTypeLabel(SanctionType.Ban)).toBe("Bannissement");
     expect(sanctionTypeTone(SanctionType.Ban)).toBe("danger");
-    expect(TONE_TO_SHADCN_BADGE[sanctionTypeTone(SanctionType.Ban)]).toBe("destructive");
+    expect(TONE_TO_SHADCN_BADGE[sanctionTypeTone(SanctionType.Ban)]).toBe(
+      "destructive",
+    );
   });
 });
 
 describe("organisateurs de tournoi", () => {
   const tournament = {
-    organization: { owner: { id: "owner" }, managers: [{ user: { id: "orgmanager" } }] },
+    organization: {
+      owner: { id: "owner" },
+      managers: [{ user: { id: "orgmanager" } }],
+    },
     managers: [{ id: "to" }],
   };
 
   test("un visiteur anonyme n'est jamais organisateur", () => {
     expect(isTournamentOrganizer(null, tournament)).toBe(false);
-    expect(isTournamentOrganizer({}, { organization: { owner: {} } })).toBe(false);
+    expect(isTournamentOrganizer({}, { organization: { owner: {} } })).toBe(
+      false,
+    );
   });
 
   test("owner, manager d'org et TO passent", () => {
@@ -428,7 +536,11 @@ describe("inscrits de tournoi", () => {
   const participant = (
     username: string,
     status: ParticipantStatus | undefined,
-    extra: { seed?: number | null; waitlistPosition?: number | null; elo?: number } = {},
+    extra: {
+      seed?: number | null;
+      waitlistPosition?: number | null;
+      elo?: number;
+    } = {},
   ) => ({
     status,
     seed: extra.seed ?? null,
@@ -439,23 +551,37 @@ describe("inscrits de tournoi", () => {
   const roster = [
     participant("actif", ParticipantStatus.ACTIVE, { seed: 2, elo: 900 }),
     participant("hérité", undefined, { elo: 1200 }),
-    participant("attente-2", ParticipantStatus.WAITLISTED, { waitlistPosition: 2 }),
-    participant("attente-1", ParticipantStatus.WAITLISTED, { waitlistPosition: 1 }),
+    participant("attente-2", ParticipantStatus.WAITLISTED, {
+      waitlistPosition: 2,
+    }),
+    participant("attente-1", ParticipantStatus.WAITLISTED, {
+      waitlistPosition: 1,
+    }),
     participant("dq", ParticipantStatus.DISQUALIFIED, { elo: 1500 }),
   ];
 
   test("un statut absent vaut ACTIVE (réponses d'API antérieures)", () => {
     expect(participantStatus({})).toBe(ParticipantStatus.ACTIVE);
-    expect(activeParticipants(roster).map(p => p.user.username)).toEqual(["actif", "hérité"]);
+    expect(activeParticipants(roster).map((p) => p.user.username)).toEqual([
+      "actif",
+      "hérité",
+    ]);
   });
 
   test("le tableau montre tout sauf la liste d'attente", () => {
-    expect(rosterParticipants(roster).map(p => p.user.username)).toEqual(["actif", "hérité", "dq"]);
+    expect(rosterParticipants(roster).map((p) => p.user.username)).toEqual([
+      "actif",
+      "hérité",
+      "dq",
+    ]);
     expect(disqualifiedCount(roster)).toBe(1);
   });
 
   test("la liste d'attente suit l'ordre de promotion", () => {
-    expect(waitlist(roster).map(p => p.user.username)).toEqual(["attente-1", "attente-2"]);
+    expect(waitlist(roster).map((p) => p.user.username)).toEqual([
+      "attente-1",
+      "attente-2",
+    ]);
   });
 
   test("la capacité ne compte que les actifs", () => {
@@ -466,18 +592,38 @@ describe("inscrits de tournoi", () => {
   });
 
   test("le tri par seed met les non-seedés en bas", () => {
-    expect(sortBySeed(roster).map(p => p.user.username)).toEqual(["actif", "attente-1", "attente-2", "dq", "hérité"]);
+    expect(sortBySeed(roster).map((p) => p.user.username)).toEqual([
+      "actif",
+      "attente-1",
+      "attente-2",
+      "dq",
+      "hérité",
+    ]);
     expect(seededCount(roster)).toBe(1);
     expect(freeSeeds(roster, 4)).toEqual([1, 3, 4]);
   });
 
   test("le seeding par Elo classe le mieux noté premier", () => {
-    expect(seedByElo(activeParticipants(roster)).map(s => s.participant.user.username)).toEqual(["hérité", "actif"]);
+    expect(
+      seedByElo(activeParticipants(roster)).map(
+        (s) => s.participant.user.username,
+      ),
+    ).toEqual(["hérité", "actif"]);
   });
 
   test("une disqualification est réversible, pas définitive", () => {
-    expect(canTransitionParticipantStatus(ParticipantStatus.DISQUALIFIED, ParticipantStatus.ACTIVE)).toBe(true);
-    expect(canTransitionParticipantStatus(ParticipantStatus.ACTIVE, ParticipantStatus.ACTIVE)).toBe(false);
+    expect(
+      canTransitionParticipantStatus(
+        ParticipantStatus.DISQUALIFIED,
+        ParticipantStatus.ACTIVE,
+      ),
+    ).toBe(true);
+    expect(
+      canTransitionParticipantStatus(
+        ParticipantStatus.ACTIVE,
+        ParticipantStatus.ACTIVE,
+      ),
+    ).toBe(false);
   });
 });
 
@@ -497,12 +643,22 @@ describe("distinctions de clan", () => {
   });
 
   test("un membre est classé par sa distinction la plus haute", () => {
-    expect(memberDistinctionPriority([ClanMemberDistinction.ContentCreator, ClanMemberDistinction.Staff])).toBe(1);
+    expect(
+      memberDistinctionPriority([
+        ClanMemberDistinction.ContentCreator,
+        ClanMemberDistinction.Staff,
+      ]),
+    ).toBe(1);
     expect(memberDistinctionPriority([])).toBe(99);
   });
 
   test("le tri des membres départage rôle, puis distinction, puis renommée", () => {
-    const member = (username: string, clanRole: ClanMemberRole, distinctions: string[], clanFameContributed = 0) =>
+    const member = (
+      username: string,
+      clanRole: ClanMemberRole,
+      distinctions: string[],
+      clanFameContributed = 0,
+    ) =>
       ({
         clanRole,
         distinctions,
@@ -513,13 +669,22 @@ describe("distinctions de clan", () => {
       }) as unknown as Parameters<typeof sortClanMembers>[0][number];
 
     const sorted = sortClanMembers([
-      member("membre-createur", ClanMemberRole.Member, [ClanMemberDistinction.ContentCreator]),
+      member("membre-createur", ClanMemberRole.Member, [
+        ClanMemberDistinction.ContentCreator,
+      ]),
       member("president", ClanMemberRole.Captain, []),
-      member("membre-staff", ClanMemberRole.Member, [ClanMemberDistinction.Staff]),
-      member("membre-joueur-riche", ClanMemberRole.Member, [ClanMemberDistinction.Player], 500),
+      member("membre-staff", ClanMemberRole.Member, [
+        ClanMemberDistinction.Staff,
+      ]),
+      member(
+        "membre-joueur-riche",
+        ClanMemberRole.Member,
+        [ClanMemberDistinction.Player],
+        500,
+      ),
     ]);
 
-    expect(sorted.map(m => m.user.username)).toEqual([
+    expect(sorted.map((m) => m.user.username)).toEqual([
       "president",
       "membre-staff",
       "membre-joueur-riche",

@@ -11,17 +11,27 @@ import type { ScoreReportPolicy, TournamentState } from "../enums/eventEnums";
 
 import type { ApiEnvelope, EntityRef, SuccessResponse } from "./api";
 import type { OrganizationDTO } from "./organization";
-import type { ParticipantDTO, Tournament, TournamentSeries } from "./tournament";
+import type {
+  ParticipantDTO,
+  Tournament,
+  TournamentSeries,
+} from "./tournament";
 import type { UserDTO } from "./user";
 
 /** `TournamentSeries` sans sa récursion de tournois peuplés. */
-export interface WireTournamentSeries extends Omit<TournamentSeries, "organization" | "tournaments"> {
+export interface WireTournamentSeries extends Omit<
+  TournamentSeries,
+  "organization" | "tournaments"
+> {
   organization: EntityRef<OrganizationDTO>;
   tournaments?: Array<EntityRef<WireTournament>>;
 }
 
 /** `Tournament` tel qu'il circule (relations éventuellement réduites à un id). */
-export interface WireTournament extends Omit<Tournament, "series" | "organization" | "managers" | "participants"> {
+export interface WireTournament extends Omit<
+  Tournament,
+  "series" | "organization" | "managers" | "participants"
+> {
   series?: EntityRef<WireTournamentSeries> | null;
   organization: EntityRef<OrganizationDTO>;
   /**

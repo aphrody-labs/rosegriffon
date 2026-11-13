@@ -4,7 +4,12 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { domaineDeLaRoute } from "@rosegriffon/app-shell";
-import { sectionTheme, THEME_PACKS, type ThemeType, useTheme } from "@rosegriffon/ui";
+import {
+  sectionTheme,
+  THEME_PACKS,
+  type ThemeType,
+  useTheme,
+} from "@rosegriffon/ui";
 
 /**
  * Fond d’écran du thème effectif (thème de section, sinon celui de
@@ -26,7 +31,12 @@ import { sectionTheme, THEME_PACKS, type ThemeType, useTheme } from "@rosegriffo
  */
 function planifierEnArrierePlan(tache: () => void) {
   const w = window as typeof window & {
-    scheduler?: { postTask?: (cb: () => void, o: { priority: "background" }) => Promise<unknown> };
+    scheduler?: {
+      postTask?: (
+        cb: () => void,
+        o: { priority: "background" },
+      ) => Promise<unknown>;
+    };
   };
   if (w.scheduler?.postTask) {
     void w.scheduler.postTask(tache, { priority: "background" });
@@ -57,7 +67,10 @@ export function ThemeBackdrop() {
     };
   }, []);
 
-  const pack = THEME_PACKS[sectionTheme(domaineDeLaRoute(chemin)) ?? (theme as ThemeType)] ?? THEME_PACKS.roy;
+  const pack =
+    THEME_PACKS[
+      sectionTheme(domaineDeLaRoute(chemin)) ?? (theme as ThemeType)
+    ] ?? THEME_PACKS.roy;
 
   // Une règle rendue par React plutôt qu'un style posé à la main sur <html> :
   // d'autres modules réécrivent le style en ligne de <html> (réglages de

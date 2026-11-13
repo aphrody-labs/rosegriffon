@@ -29,8 +29,16 @@ export function matchStatusLabel(status: string): string {
   }
 }
 
-export type RankedMatchConnection = "inactive" | "connexion" | "connecte" | "erreur";
-export type RankedMatchViewState = "loading" | "login" | "error" | "empty" | "disconnected" | "syncing" | "match";
+export type RankedMatchConnection =
+  "inactive" | "connexion" | "connecte" | "erreur";
+export type RankedMatchViewState =
+  | "loading"
+  | "login"
+  | "error"
+  | "empty"
+  | "disconnected"
+  | "syncing"
+  | "match";
 
 export function rankedMatchViewState(input: {
   authLoading: boolean;
@@ -38,7 +46,11 @@ export function rankedMatchViewState(input: {
   connection: RankedMatchConnection;
   roomCode: string | null;
 }): RankedMatchViewState {
-  if (input.authLoading || (input.isAuthenticated && input.connection === "connexion")) return "loading";
+  if (
+    input.authLoading ||
+    (input.isAuthenticated && input.connection === "connexion")
+  )
+    return "loading";
   if (!input.isAuthenticated) return "login";
   if (input.connection === "erreur") return "error";
   if (input.connection === "inactive" && !input.roomCode) return "empty";

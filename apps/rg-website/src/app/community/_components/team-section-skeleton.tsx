@@ -24,7 +24,9 @@ export default function TeamSectionSkeleton() {
                 <div
                   key={memberIdx}
                   className="flex flex-col items-center gap-3 animate-fade-in"
-                  style={{ animationDelay: `${teamIdx * 100 + memberIdx * 50}ms` }}
+                  style={{
+                    animationDelay: `${teamIdx * 100 + memberIdx * 50}ms`,
+                  }}
                 >
                   <Skeleton className="size-32 sm:w-40 sm:h-40 rounded-full bg-linear-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800" />
                   <div className="w-full space-y-2">

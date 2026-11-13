@@ -1,7 +1,16 @@
-import type { BaseCharacter, CharacterVariant, MultiLevelStats, Skill } from "@rosegriffon/inagle";
+import type {
+  BaseCharacter,
+  CharacterVariant,
+  MultiLevelStats,
+  Skill,
+} from "@rosegriffon/inagle";
 import { unstable_cache } from "next/cache";
 import { getInaglePgPool, getPgPool } from "@rosegriffon/db/pg";
-import { getMiximaxImageUrl, resolveAssetUrl, resolveAuraTelopUrl } from "@rosegriffon/azalee/images";
+import {
+  getMiximaxImageUrl,
+  resolveAssetUrl,
+  resolveAuraTelopUrl,
+} from "@rosegriffon/azalee/images";
 
 const CACHE_TTL = 3600 * 24;
 
@@ -152,7 +161,9 @@ async function fetchTable<T>(table: string): Promise<T[]> {
   ]);
   if (!allowed.has(table)) return [];
   try {
-    const { rows } = await getInaglePgPool().query(`select * from public."${table}"`);
+    const { rows } = await getInaglePgPool().query(
+      `select * from public."${table}"`,
+    );
     return rows as T[];
   } catch {
     return [];
@@ -211,16 +222,21 @@ const ELEMENT_NAMES: Record<number, { en: string; ja: string; fr: string }> = {
 };
 
 function mapAuraRow(row: any): any {
-  const elementInfo = ELEMENT_NAMES[row.element_id as number] || ELEMENT_NAMES[0];
+  const elementInfo =
+    ELEMENT_NAMES[row.element_id as number] || ELEMENT_NAMES[0];
   const sd = row.sheet_data || {};
   const assetCode = row.asset_code || sd.assetCode;
   // Miximax (`wmm`) : icône via le manifeste (cn/ca), JAMAIS le telop périmé
   // `aura_mixi_c05028*` du DB (= bannière d'un autre perso, cf. bug Arthur). Les
   // autres types ont un telop self-cohérent (k{N}/a{N}/aura_power) → chaîne normale.
-  const isMiximax = row.sub_type === "Miximax" || (assetCode || "").startsWith("wmm");
+  const isMiximax =
+    row.sub_type === "Miximax" || (assetCode || "").startsWith("wmm");
   const image = isMiximax
     ? getMiximaxImageUrl(row.icon_code, assetCode, row.image_url)
-    : resolveAuraTelopUrl(row.asset_code) || resolveAssetUrl(row.image_url) || sd.image || row.image_url;
+    : resolveAuraTelopUrl(row.asset_code) ||
+      resolveAssetUrl(row.image_url) ||
+      sd.image ||
+      row.image_url;
   return {
     _file: "inagle_auras",
     _source: "postgres",
@@ -229,7 +245,13 @@ function mapAuraRow(row: any): any {
     auraIdStr: row.id,
     desc_FR: row.description_fr || sd.desc_FR,
     desc_JA: row.description_ja || sd.desc_JA,
-    displayName: row.name_fr || row.name_en || sd.displayName || sd.name_FR || sd.name_EN || "Inconnu",
+    displayName:
+      row.name_fr ||
+      row.name_en ||
+      sd.displayName ||
+      sd.name_FR ||
+      sd.name_EN ||
+      "Inconnu",
     element: row.element_id,
     elementName: elementInfo,
     image,
@@ -277,18 +299,28 @@ const AURA_TABLES = [
 
 const getAuras = unstable_cache(
   async (): Promise<any[]> => {
-    const results = await Promise.all(AURA_TABLES.map(t => fetchTable<any>(t)));
+    const results = await Promise.all(
+      AURA_TABLES.map((t) => fetchTable<any>(t)),
+    );
     const allRows = results.flat();
 
     // Collect skill_ids to fetch video URLs in one batch
-    const skillIds = [...new Set(allRows.map(r => r.skill_id).filter(Boolean))] as string[];
-    const skillVideoMap = new Map<string, { video_url: string | null; internal_code: string | null }>();
+    const skillIds = [
+      ...new Set(allRows.map((r) => r.skill_id).filter(Boolean)),
+    ] as string[];
+    const skillVideoMap = new Map<
+      string,
+      { video_url: string | null; internal_code: string | null }
+    >();
     if (skillIds.length > 0) {
       const { rows: skills } = await getInaglePgPool().query<{
         id: string;
         video_url: string | null;
         internal_code: string | null;
-      }>("select id, video_url, internal_code from public.inagle_skills where id = any($1::text[])", [skillIds]);
+      }>(
+        "select id, video_url, internal_code from public.inagle_skills where id = any($1::text[])",
+        [skillIds],
+      );
       if (skills) {
         for (const s of skills) {
           skillVideoMap.set(s.id, {
@@ -299,7 +331,7 @@ const getAuras = unstable_cache(
       }
     }
 
-    return allRows.map(row => {
+    return allRows.map((row) => {
       const mapped = mapAuraRow(row);
       if (row.skill_id) {
         const skillInfo = skillVideoMap.get(row.skill_id);
@@ -319,7 +351,8 @@ const getAuras = unstable_cache(
 // `fetchTable("inagle_hissatsu")` levait "no such table" → catch → [] → le
 // compteur "Techniques" du dashboard affichait 0 (au lieu de ~1002).
 const getRawSkills = unstable_cache(
-  async (): Promise<Array<Record<string, unknown>>> => fetchTable<Record<string, unknown>>("inagle_skills"),
+  async (): Promise<Array<Record<string, unknown>>> =>
+    fetchTable<Record<string, unknown>>("inagle_skills"),
   ["all-skills"],
   { revalidate: CACHE_TTL, tags: ["skills"] },
 );
@@ -327,9 +360,12 @@ const getRawSkills = unstable_cache(
 const getSkills = async (): Promise<Skill[]> => {
   const rows = await getRawSkills();
   return rows.map(
-    r =>
+    (r) =>
       ({
-        categoryName: { en: r.category || undefined, fr: r.category || undefined },
+        categoryName: {
+          en: r.category || undefined,
+          fr: r.category || undefined,
+        },
         displayName: r.name_fr || r.name_en || "Inconnu",
         element: 0,
         elementName: { en: r.element || undefined, fr: r.element || undefined },
@@ -356,7 +392,8 @@ function mapPassiveRow(row: any): any {
     return {
       ...row.data,
       // Ensure rarity from effect_value if not in data
-      rarity: row.data.rarity ?? (row.effect_value ? Number(row.effect_value) : 0),
+      rarity:
+        row.data.rarity ?? (row.effect_value ? Number(row.effect_value) : 0),
     };
   }
   // Fallback: map flat columns
@@ -445,10 +482,15 @@ interface MerchProductRow {
 async function getMerchProducts(): Promise<MerchProductRow[]> {
   try {
     const pool = getPgPool();
-    const { rows } = await pool.query<MerchProductRow>("SELECT * FROM merch_products WHERE is_active = true");
-    return rows.map(row => ({
+    const { rows } = await pool.query<MerchProductRow>(
+      "SELECT * FROM merch_products WHERE is_active = true",
+    );
+    return rows.map((row) => ({
       ...row,
-      created_at: row.created_at instanceof Date ? row.created_at.toISOString() : row.created_at,
+      created_at:
+        row.created_at instanceof Date
+          ? row.created_at.toISOString()
+          : row.created_at,
       price: typeof row.price === "string" ? Number(row.price) : row.price,
     }));
   } catch (error) {
@@ -480,7 +522,11 @@ export const apiClient = {
       const chars = await getCharacters();
       const q = query.toLowerCase();
       return chars
-        .filter(c => c.names.fr?.toLowerCase().includes(q) || c.names.ja?.toLowerCase().includes(q))
+        .filter(
+          (c) =>
+            c.names.fr?.toLowerCase().includes(q) ||
+            c.names.ja?.toLowerCase().includes(q),
+        )
         .slice(0, limit);
     },
     searchGlobal: async (query: string, limit: number = 20) => {
@@ -488,9 +534,9 @@ export const apiClient = {
       const items = await getItems();
       const q = query.toLowerCase();
       const charResults = chars
-        .filter(c => c.names.fr?.toLowerCase().includes(q))
+        .filter((c) => c.names.fr?.toLowerCase().includes(q))
         .slice(0, limit)
-        .map(c => ({
+        .map((c) => ({
           id: c.charaId,
           image: undefined,
           name: c.names.fr,
@@ -498,9 +544,9 @@ export const apiClient = {
           type: "character",
         }));
       const itemResults = items
-        .filter(i => i.name.toLowerCase().includes(q))
+        .filter((i) => i.name.toLowerCase().includes(q))
         .slice(0, limit)
-        .map(i => ({
+        .map((i) => ({
           id: i.name,
           image: undefined,
           name: i.name,

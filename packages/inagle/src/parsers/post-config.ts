@@ -35,13 +35,15 @@ export function buildPostDatabase(dataPath: string) {
     try {
       const content = JSON.parse(readFileSync(passFile, "utf-8"));
       if (content.lists) {
-        const codesList = content.lists.find((l: any) => l.name === "m_Codes")?.values || [];
+        const codesList =
+          content.lists.find((l: any) => l.name === "m_Codes")?.values || [];
         // The 'info' list links IDs to codes?
         // Actually m_Codes seems to be the source.
         // But wait, the previous cat showed m_Codes has "japanese", "english", etc.
         // And "info" has "codes": [0, 1] indices into m_Codes.
 
-        const infoList = content.lists.find((l: any) => l.name === "info")?.values || [];
+        const infoList =
+          content.lists.find((l: any) => l.name === "info")?.values || [];
 
         for (const info of infoList) {
           const pass: ParsedPassword = {
@@ -73,12 +75,19 @@ export function buildPostDatabase(dataPath: string) {
 
   // 2. Deliveries
   const files = readdirSync(dir);
-  const deliveryFile = files.find(f => f.startsWith("delivery_config_") && f.endsWith(".cfg.bin.json"));
+  const deliveryFile = files.find(
+    (f) => f.startsWith("delivery_config_") && f.endsWith(".cfg.bin.json"),
+  );
   if (deliveryFile) {
     try {
-      const content = JSON.parse(readFileSync(join(dir, deliveryFile), "utf-8"));
+      const content = JSON.parse(
+        readFileSync(join(dir, deliveryFile), "utf-8"),
+      );
       if (content.lists) {
-        const list = content.lists.find((l: any) => l.name === "m_DeliveryContentsDataList")?.values || [];
+        const list =
+          content.lists.find(
+            (l: any) => l.name === "m_DeliveryContentsDataList",
+          )?.values || [];
         for (const entry of list) {
           deliveries.push({
             itemId: entry.itemIdCrc,
@@ -92,6 +101,8 @@ export function buildPostDatabase(dataPath: string) {
     }
   }
 
-  console.log(`[PostParser] Loaded ${passwords.length} passwords, ${deliveries.length} deliveries.`);
+  console.log(
+    `[PostParser] Loaded ${passwords.length} passwords, ${deliveries.length} deliveries.`,
+  );
   return { passwords, deliveries };
 }

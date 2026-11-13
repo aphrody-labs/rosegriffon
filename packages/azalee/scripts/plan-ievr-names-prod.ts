@@ -21,7 +21,10 @@ import { classerEcart, normaliserId, sansFurigana } from "./ievr-names";
 const { values: options } = parseArgs({
   options: {
     prod: { type: "string", default: "var/prod-inagle-characters.jsonl" },
-    names: { type: "string", default: "C:/src/yolo-re/var/ie-export/azalee/names.jsonl" },
+    names: {
+      type: "string",
+      default: "C:/src/yolo-re/var/ie-export/azalee/names.jsonl",
+    },
     out: { type: "string", default: "var/ievr-names-prod.sql" },
   },
 });
@@ -42,7 +45,7 @@ const lireJsonl = async <T>(chemin: string) =>
   (await Bun.file(chemin).text())
     .split("\n")
     .filter(Boolean)
-    .map(l => JSON.parse(l) as T);
+    .map((l) => JSON.parse(l) as T);
 
 const prod = await lireJsonl<LigneProd>(options.prod);
 const exportJeu = await lireJsonl<{
@@ -59,7 +62,8 @@ for (const r of exportJeu) {
   const fr = r.names.fr;
   const en = r.names.en;
   const ja = r.names.ja;
-  if (!fr || !en || !ja || [fr, en, ja].some(n => n.startsWith("<"))) continue;
+  if (!fr || !en || !ja || [fr, en, ja].some((n) => n.startsWith("<")))
+    continue;
   // Les furigana apparaissent aussi hors du japonais (personnages de test au
   // nom japonais) ; certains noms du jeu finissent par une espace.
   const propre = (n: string) => sansFurigana(n).trim();
@@ -70,7 +74,11 @@ for (const r of exportJeu) {
     const cle = normaliserId(ref.id);
     const deja = parId.get(cle);
     if (deja === undefined) parId.set(cle, noms);
-    else if (deja && (deja.fr !== noms.fr || deja.en !== noms.en || deja.ja !== noms.ja)) parId.set(cle, null);
+    else if (
+      deja &&
+      (deja.fr !== noms.fr || deja.en !== noms.en || deja.ja !== noms.ja)
+    )
+      parId.set(cle, null);
   }
 }
 
@@ -102,7 +110,8 @@ for (const ligne of prod) {
 }
 
 const lignesSql = [...valeurs].map(
-  ([charaId, n]) => `  (${sql(charaId)}, ${sql(n.fr)}, ${sql(n.en)}, ${sql(n.ja)})`,
+  ([charaId, n]) =>
+    `  (${sql(charaId)}, ${sql(n.fr)}, ${sql(n.en)}, ${sql(n.ja)})`,
 );
 const script = `-- Généré par packages/azalee/scripts/plan-ievr-names-prod.ts le ${new Date().toISOString()}
 -- Source : ${options.names}
@@ -122,4 +131,5 @@ await Bun.write(options.out, script);
 console.log(
   `lignes prod=${prod.length} sans_correspondance=${sansCorrespondance} ambigus=${ambigus} chara_id_a_corriger=${valeurs.size} -> ${options.out}`,
 );
-for (const [langue, parEcart] of Object.entries(stats)) console.log(langue, JSON.stringify(parEcart));
+for (const [langue, parEcart] of Object.entries(stats))
+  console.log(langue, JSON.stringify(parEcart));

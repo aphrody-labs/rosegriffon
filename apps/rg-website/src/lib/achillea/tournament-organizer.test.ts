@@ -32,7 +32,9 @@ describe("isTournamentOrganizer (website)", () => {
     const t = {
       organization: {
         owner: { id: "owner-1" },
-        managers: [{ user: { id: "org-mgr-1" }, id: undefined as string | undefined }],
+        managers: [
+          { user: { id: "org-mgr-1" }, id: undefined as string | undefined },
+        ],
       },
       managers: [],
     };
@@ -44,17 +46,25 @@ describe("isTournamentOrganizer (website)", () => {
     expect(isTournamentOrganizer({ id: "owner-1" }, tournament)).toBe(true);
     expect(isTournamentOrganizer({ id: "org-mgr-2" }, tournament)).toBe(true);
     expect(isTournamentOrganizer({ id: "to-1" }, tournament)).toBe(true);
-    expect(isTournamentOrganizer({ id: "anyone", role: 3 }, tournament)).toBe(true);
+    expect(isTournamentOrganizer({ id: "anyone", role: 3 }, tournament)).toBe(
+      true,
+    );
   });
 
   test("refuse un simple participant / intrus", () => {
-    expect(isTournamentOrganizer({ id: "intrus", role: 0 }, tournament)).toBe(false);
-    expect(isTournamentOrganizer({ id: "intrus", role: 1 }, tournament)).toBe(false);
+    expect(isTournamentOrganizer({ id: "intrus", role: 0 }, tournament)).toBe(
+      false,
+    );
+    expect(isTournamentOrganizer({ id: "intrus", role: 1 }, tournament)).toBe(
+      false,
+    );
   });
 
   test("gère tournoi ou org absents sans throw", () => {
     expect(isTournamentOrganizer({ id: "x" }, null)).toBe(false);
     expect(isTournamentOrganizer({ id: "x" }, {})).toBe(false);
-    expect(isTournamentOrganizer({ id: "x" }, { organization: null })).toBe(false);
+    expect(isTournamentOrganizer({ id: "x" }, { organization: null })).toBe(
+      false,
+    );
   });
 });

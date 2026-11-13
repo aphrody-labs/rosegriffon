@@ -3,12 +3,20 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Client, IntentsBitField, Routes, type Guild, type GuildMember } from "discord.js";
+import {
+  Client,
+  IntentsBitField,
+  Routes,
+  type Guild,
+  type GuildMember,
+} from "discord.js";
 import { listGuildMembers } from "@rosegriffon/discord-sync";
 import { sql } from "./db.js";
 import { resolveGuildId } from "@rosegriffon/types/discord";
 
-export const GUILD_ID = resolveGuildId(Bun.env as Record<string, string | undefined>);
+export const GUILD_ID = resolveGuildId(
+  Bun.env as Record<string, string | undefined>,
+);
 export const DISCORD_TOKEN = Bun.env.DISCORD_BOT_TOKEN || Bun.env.DISCORD_TOKEN;
 
 /**
@@ -24,7 +32,11 @@ export const DISCORD_TOKEN = Bun.env.DISCORD_BOT_TOKEN || Bun.env.DISCORD_TOKEN;
  * `discord_appartenances`.
  */
 export const GUILDES_SUIVIES = [
-  { id: GUILD_ID ?? "1072991720268111892", cle: "rose-griffon", nom: "Rose Griffon" },
+  {
+    id: GUILD_ID ?? "1072991720268111892",
+    cle: "rose-griffon",
+    nom: "Rose Griffon",
+  },
   { id: "1055585286320554055", cle: "achillea", nom: "Achilléa" },
 ] as const;
 
@@ -46,7 +58,12 @@ let botId: string | null = null;
 export function getDiscordClient(): Client | null {
   if (!DISCORD_TOKEN) return null;
   if (!discordClient) {
-    const client = new Client({ intents: [IntentsBitField.Flags.Guilds, IntentsBitField.Flags.GuildMembers] });
+    const client = new Client({
+      intents: [
+        IntentsBitField.Flags.Guilds,
+        IntentsBitField.Flags.GuildMembers,
+      ],
+    });
     client.token = DISCORD_TOKEN;
     client.rest.setToken(DISCORD_TOKEN);
     discordClient = client;
@@ -79,7 +96,7 @@ function resolveAvatarUrl(member: GuildMember): string | null {
 }
 
 function toPgTextArray(values: string[]): string {
-  return `{${values.map(v => `"${v.replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`).join(",")}}`;
+  return `{${values.map((v) => `"${v.replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`).join(",")}}`;
 }
 
 interface MemberRow {
@@ -96,7 +113,9 @@ interface MemberRow {
 }
 
 function memberToRow(member: GuildMember): MemberRow {
-  const roleIds = [...member.roles.cache.keys()].filter(id => id !== member.guild.id);
+  const roleIds = [...member.roles.cache.keys()].filter(
+    (id) => id !== member.guild.id,
+  );
   return {
     discord_id: member.id,
     username: member.user.username,
@@ -152,7 +171,10 @@ async function upsertRows(rows: readonly MemberRow[]): Promise<void> {
  * « qui est cette personne pour Rose Griffon », `discord_appartenances` dit
  * « de quels serveurs elle est membre, avec quels rôles ».
  */
-async function upsertAppartenances(guildId: string, rows: readonly MemberRow[]): Promise<void> {
+async function upsertAppartenances(
+  guildId: string,
+  rows: readonly MemberRow[],
+): Promise<void> {
   await sql`
     INSERT INTO discord_appartenances (
       guild_id, discord_id, username, display_name, nickname,
@@ -211,9 +233,13 @@ export async function syncAllMembers(
   // déclencher la purge des départs.
   const members = verifiedMembers ?? (await listGuildMembers(guild));
   if (members.size === 0 && membresAnnonces(guild) > 0) {
-    throw new Error(`Inventaire Discord vide pour ${guild.id} (${membresAnnonces(guild)} membres annoncés).`);
+    throw new Error(
+      `Inventaire Discord vide pour ${guild.id} (${membresAnnonces(guild)} membres annoncés).`,
+    );
   }
-  console.log(`[Cron Discord] ${members.size} membres récupérés depuis Discord.`);
+  console.log(
+    `[Cron Discord] ${members.size} membres récupérés depuis Discord.`,
+  );
   const errors: SyncReport["errors"] = [];
   let upserted = 0;
 
@@ -321,7 +347,9 @@ export interface StaffPhotoSyncReport {
   durationMs: number;
 }
 
-export async function syncStaffPhotos(client: Client): Promise<StaffPhotoSyncReport> {
+export async function syncStaffPhotos(
+  client: Client,
+): Promise<StaffPhotoSyncReport> {
   const start = Date.now();
   const rows = await sql<StaffRow[]>`
     SELECT id, name, discord_user_id, image_url AS current_image
@@ -335,8 +363,11 @@ export async function syncStaffPhotos(client: Client): Promise<StaffPhotoSyncRep
   let unchanged = 0;
 
   // Récupérer les comptes Discord reliés pour éviter les requêtes SQL lentes d'update inutile sur la table "user"
-  const linkedAccounts = await sql`SELECT account_id FROM account WHERE provider_id = 'discord'`;
-  const linkedDiscordIds = new Set(linkedAccounts.map((a: any) => a.account_id));
+  const linkedAccounts =
+    await sql`SELECT account_id FROM account WHERE provider_id = 'discord'`;
+  const linkedDiscordIds = new Set(
+    linkedAccounts.map((a: any) => a.account_id),
+  );
 
   for (const row of rows) {
     try {

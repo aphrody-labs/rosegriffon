@@ -36,8 +36,13 @@ const COULEUR_RETABLISSEMENT = 0xd4af37;
 let salonManquantSignale = false;
 
 /** Identifiant du salon d'exploitation, ou `null` s'il n'est pas configuré. */
-export function salonAlertes(env: Record<string, string | undefined> = Bun.env): string | null {
-  const id = env.DISCORD_CRON_ALERTS_CHANNEL_ID || env.DISCORD_LOGS_CHANNEL_ID || env.DISCORD_BOTS_CHANNEL_ID;
+export function salonAlertes(
+  env: Record<string, string | undefined> = Bun.env,
+): string | null {
+  const id =
+    env.DISCORD_CRON_ALERTS_CHANNEL_ID ||
+    env.DISCORD_LOGS_CHANNEL_ID ||
+    env.DISCORD_BOTS_CHANNEL_ID;
   return id && id.trim().length > 0 ? id.trim() : null;
 }
 
@@ -51,7 +56,9 @@ export function encartDecision(decision: DecisionAlerte): EncartDiscord | null {
       title: `Tâche cron en échec : ${decision.nom}`,
       description:
         `\`${decision.nom}\` a échoué **${decision.echecsConsecutifs} fois de suite**.\n` +
-        (decision.erreur ? `Dernière erreur :\n\`\`\`\n${decision.erreur}\n\`\`\`` : "Aucun message d'erreur remonté."),
+        (decision.erreur
+          ? `Dernière erreur :\n\`\`\`\n${decision.erreur}\n\`\`\``
+          : "Aucun message d'erreur remonté."),
       color: COULEUR_ECHEC,
       footer: { text: "rg-cron — une seule alerte par série d'échecs" },
       timestamp: new Date().toISOString(),
@@ -77,7 +84,9 @@ export function encartDecision(decision: DecisionAlerte): EncartDiscord | null {
  * Ne lève jamais et n'est jamais attendue par le chemin critique d'une tâche.
  * Rend `true` si un message est effectivement parti.
  */
-export async function signalerDecisionAlerte(decision: DecisionAlerte): Promise<boolean> {
+export async function signalerDecisionAlerte(
+  decision: DecisionAlerte,
+): Promise<boolean> {
   const encart = encartDecision(decision);
   if (!encart) return false;
 
@@ -92,7 +101,9 @@ export async function signalerDecisionAlerte(decision: DecisionAlerte): Promise<
     // Test explicite et non `else` : `encartDecision` a déjà écarté le cas
     // `aucune` juste au-dessus, mais TypeScript ne le déduit pas d'un `null` —
     // un `else` nu lisait donc `.nom` sur une variante qui n'en a pas.
-    console.log(`[cron-alerte] ${decision.nom} : rétablie après ${decision.echecsPrecedents} échec(s).`);
+    console.log(
+      `[cron-alerte] ${decision.nom} : rétablie après ${decision.echecsPrecedents} échec(s).`,
+    );
   }
 
   const salon = salonAlertes();

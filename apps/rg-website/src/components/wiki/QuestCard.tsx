@@ -36,7 +36,9 @@ export function QuestCard({ quest, className }: QuestCardProps) {
       <div
         className={cn(
           "flex size-11 shrink-0 items-center justify-center rounded-xl",
-          isMain ? "bg-primary/10 text-primary" : "bg-tertiary/10 text-tertiary",
+          isMain
+            ? "bg-primary/10 text-primary"
+            : "bg-tertiary/10 text-tertiary",
         )}
       >
         <Icon size={20} aria-hidden="true" />
@@ -47,7 +49,9 @@ export function QuestCard({ quest, className }: QuestCardProps) {
           <span
             className={cn(
               "rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider",
-              isMain ? "bg-primary/10 text-primary" : "bg-tertiary/10 text-tertiary",
+              isMain
+                ? "bg-primary/10 text-primary"
+                : "bg-tertiary/10 text-tertiary",
             )}
           >
             {isMain ? "Histoire" : areaLabel(quest.area)}
@@ -60,7 +64,9 @@ export function QuestCard({ quest, className }: QuestCardProps) {
           {quest.title}
         </h3>
         {quest.titles.en && quest.titles.en !== quest.title && (
-          <p className="mt-0.5 line-clamp-1 text-xs text-on-surface-variant/70">{quest.titles.en}</p>
+          <p className="mt-0.5 line-clamp-1 text-xs text-on-surface-variant/70">
+            {quest.titles.en}
+          </p>
         )}
       </div>
     </Link>

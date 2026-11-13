@@ -15,10 +15,27 @@
  * clé publique (RLS sans policy, cf. la migration).
  */
 import { Discord, Slash, SlashGroup, SlashOption } from "discordx";
-import { ApplicationCommandOptionType, type ChatInputCommandInteraction, type User } from "discord.js";
+import {
+  ApplicationCommandOptionType,
+  type ChatInputCommandInteraction,
+  type User,
+} from "discord.js";
 
-import { DON, formaterDelta, formaterJetons, libelleMotif, QUOTIDIEN, validerDon } from "../lib/kizuna";
-import { dejaDonneAujourdhui, journalDe, profilDe, reclamerQuotidien, transfererKizuna } from "../services/communaute";
+import {
+  DON,
+  formaterDelta,
+  formaterJetons,
+  libelleMotif,
+  QUOTIDIEN,
+  validerDon,
+} from "../lib/kizuna";
+import {
+  dejaDonneAujourdhui,
+  journalDe,
+  profilDe,
+  reclamerQuotidien,
+  transfererKizuna,
+} from "../services/communaute";
 import {
   attention,
   creerEmbed,
@@ -79,7 +96,9 @@ export class KizunaCommand {
       });
       carte
         .champ("Solde", formaterJetons(profil.jetons), { enLigne: true })
-        .champ("Gagnés en tout", formaterJetons(profil.jetonsGagnes), { enLigne: true })
+        .champ("Gagnés en tout", formaterJetons(profil.jetonsGagnes), {
+          enLigne: true,
+        })
         .champ(
           "Série quotidienne",
           profil.serieQuotidienne > 0
@@ -87,9 +106,17 @@ export class KizunaCommand {
             : "aucune en cours",
           { enLigne: true },
         );
-      await interaction.editReply({ embeds: [piedDeCommande(carte.embed, interaction)] });
+      await interaction.editReply({
+        embeds: [piedDeCommande(carte.embed, interaction)],
+      });
     } catch (err) {
-      await repondre(interaction, echec("Solde illisible", err instanceof Error ? err.message : String(err)));
+      await repondre(
+        interaction,
+        echec(
+          "Solde illisible",
+          err instanceof Error ? err.message : String(err),
+        ),
+      );
     }
   }
 
@@ -140,20 +167,33 @@ export class KizunaCommand {
           { enLigne: true },
         )
         .champ("Solde", formaterJetons(resultat.solde), { enLigne: true })
-        .champ("Prochain passage", leJour(resultat.prochain, "R"), { enLigne: true });
+        .champ("Prochain passage", leJour(resultat.prochain, "R"), {
+          enLigne: true,
+        });
       if (resultat.serie < 11) {
         carte.champ(
           "Prime de série",
           `+${QUOTIDIEN.parJour} jetons par jour consécutif, jusqu'à +${QUOTIDIEN.primeMaximale} au onzième.`,
         );
       }
-      await interaction.editReply({ embeds: [piedDeCommande(carte.embed, interaction)] });
+      await interaction.editReply({
+        embeds: [piedDeCommande(carte.embed, interaction)],
+      });
     } catch (err) {
-      await repondre(interaction, echec("Passage impossible", err instanceof Error ? err.message : String(err)));
+      await repondre(
+        interaction,
+        echec(
+          "Passage impossible",
+          err instanceof Error ? err.message : String(err),
+        ),
+      );
     }
   }
 
-  @Slash({ description: "Offrir des jetons Kizuna à un membre", name: "donner" })
+  @Slash({
+    description: "Offrir des jetons Kizuna à un membre",
+    name: "donner",
+  })
   async donner(
     @SlashOption({
       description: "À qui",
@@ -198,11 +238,19 @@ export class KizunaCommand {
         solde: profil.jetons,
       });
       if (!validation.ok) {
-        await repondre(interaction, attention("Don refusé", validation.erreur, { prive: true }));
+        await repondre(
+          interaction,
+          attention("Don refusé", validation.erreur, { prive: true }),
+        );
         return;
       }
 
-      const soldes = await transfererKizuna(guildId, interaction.user.id, destinataire.id, validation.montant);
+      const soldes = await transfererKizuna(
+        guildId,
+        interaction.user.id,
+        destinataire.id,
+        validation.montant,
+      );
 
       // Publique, et volontairement : la générosité est la seule chose que ce
       // système récompense socialement. Le JOURNAL, lui, reste privé.
@@ -232,15 +280,30 @@ export class KizunaCommand {
         titre: "Don envoyé",
       });
       carte
-        .champ("Ton solde", formaterJetons(soldes.soldeExpediteur), { enLigne: true })
-        .champ("Son solde", formaterJetons(soldes.soldeDestinataire), { enLigne: true });
-      await interaction.editReply({ embeds: [piedDeCommande(carte.embed, interaction)] });
+        .champ("Ton solde", formaterJetons(soldes.soldeExpediteur), {
+          enLigne: true,
+        })
+        .champ("Son solde", formaterJetons(soldes.soldeDestinataire), {
+          enLigne: true,
+        });
+      await interaction.editReply({
+        embeds: [piedDeCommande(carte.embed, interaction)],
+      });
     } catch (err) {
-      await repondre(interaction, echec("Don impossible", err instanceof Error ? err.message : String(err)));
+      await repondre(
+        interaction,
+        echec(
+          "Don impossible",
+          err instanceof Error ? err.message : String(err),
+        ),
+      );
     }
   }
 
-  @Slash({ description: "Tes derniers mouvements de jetons (privé)", name: "journal" })
+  @Slash({
+    description: "Tes derniers mouvements de jetons (privé)",
+    name: "journal",
+  })
   async journal(interaction: ChatInputCommandInteraction) {
     await differerEnPrive(interaction);
     const guildId = interaction.guildId;
@@ -256,15 +319,20 @@ export class KizunaCommand {
       if (lignes.length === 0) {
         await repondre(
           interaction,
-          vide("Journal vide", "Aucun mouvement pour l'instant. `/kizuna quotidien` en écrit un premier."),
+          vide(
+            "Journal vide",
+            "Aucun mouvement pour l'instant. `/kizuna quotidien` en écrit un premier.",
+          ),
         );
         return;
       }
 
       const carte = fiche({
         description: lignes
-          .map(ligne => {
-            const contrepartie = ligne.contrepartie ? ` ↔ <@${ligne.contrepartie}>` : "";
+          .map((ligne) => {
+            const contrepartie = ligne.contrepartie
+              ? ` ↔ <@${ligne.contrepartie}>`
+              : "";
             return `\`${formaterDelta(ligne.delta).padStart(7)}\` ${libelleMotif(ligne.motif)}${contrepartie} · ${ilYA(ligne.creeLe)}`;
           })
           .join("\n"),
@@ -272,9 +340,17 @@ export class KizunaCommand {
         titre: "Journal de tes jetons Kizuna",
       });
       carte.champ("Solde", formaterJetons(profil.jetons), { enLigne: true });
-      await interaction.editReply({ embeds: [piedDeCommande(carte.embed, interaction)] });
+      await interaction.editReply({
+        embeds: [piedDeCommande(carte.embed, interaction)],
+      });
     } catch (err) {
-      await repondre(interaction, echec("Journal illisible", err instanceof Error ? err.message : String(err)));
+      await repondre(
+        interaction,
+        echec(
+          "Journal illisible",
+          err instanceof Error ? err.message : String(err),
+        ),
+      );
     }
   }
 }

@@ -28,7 +28,9 @@ function align(offset: number, boundary: number): number {
 /**
  * Probes the binary format of a buffer by inspecting magic headers and structure constraints.
  */
-export function probeFormat(buffer: ArrayBuffer | Uint8Array): BinaryHeaderProbe {
+export function probeFormat(
+  buffer: ArrayBuffer | Uint8Array,
+): BinaryHeaderProbe {
   const view =
     buffer instanceof Uint8Array
       ? new DataView(buffer.buffer, buffer.byteOffset, buffer.byteLength)
@@ -145,19 +147,25 @@ export function probeFormat(buffer: ArrayBuffer | Uint8Array): BinaryHeaderProbe
  * Parses and validates an authoritative RDBN (cfg.bin) header matching aphrody-nie-formats.
  * Throws an Error if the buffer is malformed or invalid.
  */
-export function parseRdbnHeader(buffer: ArrayBuffer | Uint8Array): RdbnHeaderInfo {
+export function parseRdbnHeader(
+  buffer: ArrayBuffer | Uint8Array,
+): RdbnHeaderInfo {
   const view =
     buffer instanceof Uint8Array
       ? new DataView(buffer.buffer, buffer.byteOffset, buffer.byteLength)
       : new DataView(buffer);
 
   if (view.byteLength < RDBN_LAYOUT.MIN_HEADER_SIZE) {
-    throw new Error(`RDBN buffer too small: expected >= 0x50 bytes, got ${view.byteLength}`);
+    throw new Error(
+      `RDBN buffer too small: expected >= 0x50 bytes, got ${view.byteLength}`,
+    );
   }
 
   const magic = view.getUint32(0, true);
   if (magic !== RDBN_MAGIC) {
-    throw new Error(`Invalid RDBN magic: expected 0x${RDBN_MAGIC.toString(16)}, got 0x${magic.toString(16)}`);
+    throw new Error(
+      `Invalid RDBN magic: expected 0x${RDBN_MAGIC.toString(16)}, got 0x${magic.toString(16)}`,
+    );
   }
 
   const headerSize = view.getUint16(0x04, true);
@@ -200,19 +208,25 @@ export function parseRdbnHeader(buffer: ArrayBuffer | Uint8Array): RdbnHeaderInf
  * Parses and computes exact table offsets for a Level-5 G4TX texture container.
  * Strictly implements the table layout formula from aphrody-nie-formats/src/g4tx.rs.
  */
-export function parseG4txHeader(buffer: ArrayBuffer | Uint8Array): G4txHeaderInfo {
+export function parseG4txHeader(
+  buffer: ArrayBuffer | Uint8Array,
+): G4txHeaderInfo {
   const view =
     buffer instanceof Uint8Array
       ? new DataView(buffer.buffer, buffer.byteOffset, buffer.byteLength)
       : new DataView(buffer);
 
   if (view.byteLength < G4TX_LAYOUT.HEADER_SIZE) {
-    throw new Error(`G4TX buffer too small: expected >= 0x60 bytes, got ${view.byteLength}`);
+    throw new Error(
+      `G4TX buffer too small: expected >= 0x60 bytes, got ${view.byteLength}`,
+    );
   }
 
   const magic = view.getUint32(0, true);
   if (magic !== G4TX_MAGIC) {
-    throw new Error(`Invalid G4TX magic: expected 0x${G4TX_MAGIC.toString(16)}, got 0x${magic.toString(16)}`);
+    throw new Error(
+      `Invalid G4TX magic: expected 0x${G4TX_MAGIC.toString(16)}, got 0x${magic.toString(16)}`,
+    );
   }
 
   const headerSize = view.getUint32(0x04, true);
@@ -232,7 +246,10 @@ export function parseG4txHeader(buffer: ArrayBuffer | Uint8Array): G4txHeaderInf
   // nxtch_base = align16(header_size + table_size)
   const entryOffset = 0x60;
   const subEntryOffset = entryOffset + textureCount * G4TX_LAYOUT.ENTRY_SIZE;
-  const hashOffset = align(subEntryOffset + subTextureCount * G4TX_LAYOUT.SUB_ENTRY_SIZE, 16);
+  const hashOffset = align(
+    subEntryOffset + subTextureCount * G4TX_LAYOUT.SUB_ENTRY_SIZE,
+    16,
+  );
   const idOffset = hashOffset + totalCount * 4;
   const stringOffset = align(idOffset + totalCount, 4);
   const nxtchBase = align(headerSize + tableSize, 16);
@@ -390,7 +407,9 @@ class BitReader {
 
     const take3 = bitCount;
     const mask3 = take3 >= 16 ? 0xffff : (1 << take3) - 1;
-    result = (result << take3) | ((input[this.ptr] >> (this.bitsLeft - take3)) & mask3);
+    result =
+      (result << take3) |
+      ((input[this.ptr] >> (this.bitsLeft - take3)) & mask3);
     this.bitsLeft -= take3;
     return result;
   }
@@ -400,10 +419,14 @@ class BitReader {
  * Decompresses a CRILAYLA compressed buffer and returns the uncompressed bytes.
  * Byte-exact with aphrody-nie-formats::crilayla::decompress.
  */
-export function decompressCrilayla(buffer: ArrayBuffer | Uint8Array): Uint8Array {
+export function decompressCrilayla(
+  buffer: ArrayBuffer | Uint8Array,
+): Uint8Array {
   const input = buffer instanceof Uint8Array ? buffer : new Uint8Array(buffer);
   if (input.length < CRILAYLA_MIN_FILE_SIZE) {
-    throw new Error(`CRILAYLA buffer too small: expected >= ${CRILAYLA_MIN_FILE_SIZE} bytes, got ${input.length}`);
+    throw new Error(
+      `CRILAYLA buffer too small: expected >= ${CRILAYLA_MIN_FILE_SIZE} bytes, got ${input.length}`,
+    );
   }
   if (!isCrilayla(input)) {
     throw new Error("Invalid CRILAYLA magic");
@@ -518,10 +541,19 @@ function computeXorByte(crc: number, position: number): number {
  * @param key - 32-bit uint decryption key (e.g. from deriveCpkKeyFromFilename or VIOLA_FIXED_KEY)
  * @param fileOffset - Absolute offset in the file corresponding to buffer[0] (default 0)
  */
-export function decryptCpkBlock(buffer: Uint8Array, key: number, fileOffset: number = 0): void {
+export function decryptCpkBlock(
+  buffer: Uint8Array,
+  key: number,
+  fileOffset: number = 0,
+): void {
   if (buffer.length === 0) return;
 
-  const k = new Uint8Array([key & 0xff, (key >>> 8) & 0xff, (key >>> 16) & 0xff, (key >>> 24) & 0xff]);
+  const k = new Uint8Array([
+    key & 0xff,
+    (key >>> 8) & 0xff,
+    (key >>> 16) & 0xff,
+    (key >>> 24) & 0xff,
+  ]);
 
   const length = buffer.length;
   let i = 0;

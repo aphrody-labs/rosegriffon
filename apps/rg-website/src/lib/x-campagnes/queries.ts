@@ -187,7 +187,10 @@ function imagesDiscord(brut: unknown): ImageCampagne[] {
       // 26/8/2026 — le type MIME tranche, et sinon c'est une image. Aucune de
       // ces trois lectures ne devine : la dernière décrit l'état réel du stock
       // à cette date (aucune vidéo récoltée avant elle).
-      kind: image.kind === "video" || (image.type_mime ?? "").startsWith("video/") ? "video" : "image",
+      kind:
+        image.kind === "video" || (image.type_mime ?? "").startsWith("video/")
+          ? "video"
+          : "image",
       largeur: typeof image.largeur === "number" ? image.largeur : null,
       source: src,
       src,
@@ -210,8 +213,12 @@ function imagesDiscord(brut: unknown): ImageCampagne[] {
  * Un échec de lecture n'est pas fatal : on rend la résolution vide, les mentions retombent sur
  * « @membre » et la galerie s'affiche. Personne ne doit tomber sur une 500 en venant voir des dessins.
  */
-async function resoudreDiscord(lignes: readonly LigneCreation[]): Promise<ResolutionDiscord> {
-  const { membres, roles, salons } = collecterIdentifiantsDiscord(lignes.map(ligne => ligne.texte ?? ""));
+async function resoudreDiscord(
+  lignes: readonly LigneCreation[],
+): Promise<ResolutionDiscord> {
+  const { membres, roles, salons } = collecterIdentifiantsDiscord(
+    lignes.map((ligne) => ligne.texte ?? ""),
+  );
   if (membres.length === 0 && roles.length === 0 && salons.length === 0) {
     return RESOLUTION_VIDE;
   }
@@ -243,9 +250,15 @@ async function resoudreDiscord(lignes: readonly LigneCreation[]): Promise<Resolu
     ]);
 
     return {
-      membres: Object.fromEntries((lignesMembres?.rows ?? []).map(r => [r.discord_id, r.nom])),
-      roles: Object.fromEntries((lignesRoles?.rows ?? []).map(r => [r.role_id, r.name])),
-      salons: Object.fromEntries((lignesSalons?.rows ?? []).map(r => [r.channel_id, r.name])),
+      membres: Object.fromEntries(
+        (lignesMembres?.rows ?? []).map((r) => [r.discord_id, r.nom]),
+      ),
+      roles: Object.fromEntries(
+        (lignesRoles?.rows ?? []).map((r) => [r.role_id, r.name]),
+      ),
+      salons: Object.fromEntries(
+        (lignesSalons?.rows ?? []).map((r) => [r.channel_id, r.name]),
+      ),
     };
   } catch (error) {
     console.error("Erreur de résolution des identifiants Discord :", error);
@@ -253,7 +266,10 @@ async function resoudreDiscord(lignes: readonly LigneCreation[]): Promise<Resolu
   }
 }
 
-function versPost(ligne: LigneCreation, resolution: ResolutionDiscord = RESOLUTION_VIDE): PostCampagne {
+function versPost(
+  ligne: LigneCreation,
+  resolution: ResolutionDiscord = RESOLUTION_VIDE,
+): PostCampagne {
   const commun = {
     // ⚠ `||` ET NON `??`. Mesuré le 13/8/2026 : 55 des 451 créations Discord ont
     // un `author_display_name` VIDE (chaîne vide, pas `null`) — `??` les
@@ -304,7 +320,9 @@ function versPost(ligne: LigneCreation, resolution: ResolutionDiscord = RESOLUTI
   }
 
   const metriques =
-    ligne.metrics && typeof ligne.metrics === "object" && !Array.isArray(ligne.metrics)
+    ligne.metrics &&
+    typeof ligne.metrics === "object" &&
+    !Array.isArray(ligne.metrics)
       ? (ligne.metrics as MetriquesPost)
       : null;
   return {
@@ -331,9 +349,15 @@ function versPost(ligne: LigneCreation, resolution: ResolutionDiscord = RESOLUTI
  * envoyer un participant lui promettrait que sa création rejoindra la galerie,
  * ce qui serait faux. Mieux vaut ne pas afficher le bouton.
  */
-export async function lienDepotDiscord(slug: string): Promise<{ url: string; nom: string | null } | null> {
+export async function lienDepotDiscord(
+  slug: string,
+): Promise<{ url: string; nom: string | null } | null> {
   try {
-    const { rows } = await getPgPool().query<{ channel_id: string; guild_id: string | null; name: string | null }>(
+    const { rows } = await getPgPool().query<{
+      channel_id: string;
+      guild_id: string | null;
+      name: string | null;
+    }>(
       `select c.channel_id, c.guild_id, c.name
 			   from public.x_campagnes camp
 			   join public.discord_channels c on c.channel_id = any(camp.salons_depot)
@@ -442,7 +466,9 @@ export async function chargerCampagne(slug?: string): Promise<Campagne | null> {
  * l'illustration), chacune avec son niveau de preuve. Un compteur peut lire un
  * acte de modération déjà posé ; ce qu'il ne doit pas faire, c'est en inventer un.
  */
-export async function compterPostsCampagne(slug: string): Promise<StatsCampagne> {
+export async function compterPostsCampagne(
+  slug: string,
+): Promise<StatsCampagne> {
   try {
     const { rows } = await getPgPool().query<{
       posts: number;
@@ -620,7 +646,11 @@ const SELECT_POSTS = `
 const GALERIE = `select * from (${SELECT_POSTS}) as creations`;
 
 /** Page de la galerie, chronologique stricte (posts avec image, non masqués). */
-export async function listerPostsCampagne(slug: string, page: number, parPage: number): Promise<PostCampagne[]> {
+export async function listerPostsCampagne(
+  slug: string,
+  page: number,
+  parPage: number,
+): Promise<PostCampagne[]> {
   // `Math.max(1, NaN)` vaut NaN : sans `entierPositif`, `?page=abc` envoyait
   // littéralement « NaN » à Postgres (`invalid input syntax for type bigint`),
   // la requête partait en erreur et la galerie s'affichait vide alors que la
@@ -636,7 +666,7 @@ export async function listerPostsCampagne(slug: string, page: number, parPage: n
       [slug, taille, offset],
     );
     const resolution = await resoudreDiscord(rows);
-    return rows.map(ligne => versPost(ligne, resolution));
+    return rows.map((ligne) => versPost(ligne, resolution));
   } catch (error) {
     console.error("Erreur de lecture des publications de campagne :", error);
     return [];
@@ -648,7 +678,10 @@ export async function listerPostsCampagne(slug: string, page: number, parPage: n
  * dans l'`ORDER BY` de la grille neutraliserait l'index ET rendrait la
  * pagination instable (un post promu depuis la page 3 décalerait tout).
  */
-export async function listerPostsEnAvant(slug: string, limite = 6): Promise<PostCampagne[]> {
+export async function listerPostsEnAvant(
+  slug: string,
+  limite = 6,
+): Promise<PostCampagne[]> {
   try {
     const { rows } = await getPgPool().query<LigneCreation>(
       `${GALERIE}
@@ -658,7 +691,7 @@ export async function listerPostsEnAvant(slug: string, limite = 6): Promise<Post
       [slug, entierPositif(limite, 6)],
     );
     const resolution = await resoudreDiscord(rows);
-    return rows.map(ligne => versPost(ligne, resolution));
+    return rows.map((ligne) => versPost(ligne, resolution));
   } catch (error) {
     console.error("Erreur de lecture des publications à la une :", error);
     return [];

@@ -4,7 +4,7 @@
 # (content/cameras/broadcast.toml) at kick-off; when off, the game's own camera.
 [[option]]
 id = "broadcast_camera"
-visual = true          # only what this player sees; not compared in online rooms
+visual = true # only what this player sees; not compared in online rooms
 type = "toggle"
 label = "broadcast_camera"
 help = "broadcast_camera_help"

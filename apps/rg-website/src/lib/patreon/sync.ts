@@ -1,4 +1,7 @@
-import { fetchIdentity, parseIdentityWithMemberships } from "@/lib/patreon/client";
+import {
+  fetchIdentity,
+  parseIdentityWithMemberships,
+} from "@/lib/patreon/client";
 import { decryptToken, encryptToken } from "@/lib/patreon/encryption";
 import { isTokenFresh, refreshOAuthToken } from "@/lib/oauth/refresh";
 import { SCOPES_PATRON } from "@/lib/patreon/types";
@@ -28,7 +31,11 @@ const refreshLocks = new Map<string, Promise<string>>();
  * 1. Un verrou local (in-memory lock via Map de Promises) empêche les appels concurrents dans le même processus.
  * 2. Un verrou optimiste sur la base de données (PostgREST match sur refresh_token_enc) empêche les conflits multi-processus.
  */
-async function ensureFreshAccessToken(supabase: AdminClient, row: TokenRow, marginMs = 5 * 60 * 1000): Promise<string> {
+async function ensureFreshAccessToken(
+  supabase: AdminClient,
+  row: TokenRow,
+  marginMs = 5 * 60 * 1000,
+): Promise<string> {
   // 1. Verrou local en mémoire pour fusionner les requêtes concurrentes du même process
   const activeRefresh = refreshLocks.get(row.id);
   if (activeRefresh) {
@@ -80,7 +87,9 @@ async function ensureFreshAccessToken(supabase: AdminClient, row: TokenRow, marg
         if (finalToken) {
           return decryptToken(finalToken.access_token_enc);
         }
-        throw new Error("Patreon token refreshed concurrently but final token could not be retrieved");
+        throw new Error(
+          "Patreon token refreshed concurrently but final token could not be retrieved",
+        );
       }
 
       return refreshed.accessToken;
@@ -110,7 +119,9 @@ export async function refreshPatreonMembership(
 
   const { data: tokenRow } = await supabase
     .from("patreon_oauth_tokens")
-    .select("id, user_id, patreon_user_id, access_token_enc, refresh_token_enc, expires_at, scope")
+    .select(
+      "id, user_id, patreon_user_id, access_token_enc, refresh_token_enc, expires_at, scope",
+    )
     .eq("user_id", userId)
     .eq("is_creator", false)
     .maybeSingle();
@@ -126,7 +137,8 @@ export async function refreshPatreonMembership(
 
   const top =
     [...identity.memberships].toSorted((a, b) => {
-      const score = (s: string | null | undefined) => (s === "active_patron" ? 0 : 1);
+      const score = (s: string | null | undefined) =>
+        s === "active_patron" ? 0 : 1;
       return score(a.attrs.patron_status) - score(b.attrs.patron_status);
     })[0] ?? null;
 
@@ -134,7 +146,8 @@ export async function refreshPatreonMembership(
     {
       address: top?.address ?? null,
       campaign_id: top?.campaignId ?? null,
-      currently_entitled_cents: top?.attrs.currently_entitled_amount_cents ?? null,
+      currently_entitled_cents:
+        top?.attrs.currently_entitled_amount_cents ?? null,
       discord_role_ids: top?.discordRoleIds ?? [],
       discord_user_id: identity.discordUserId,
       fetched_at: new Date().toISOString(),
@@ -142,7 +155,10 @@ export async function refreshPatreonMembership(
       is_gifted: top?.attrs.is_gifted ?? null,
       last_charge_date: top?.attrs.last_charge_date ?? null,
       last_charge_status: top?.attrs.last_charge_status ?? null,
-      lifetime_support_cents: top?.attrs.campaign_lifetime_support_cents ?? top?.attrs.lifetime_support_cents ?? null,
+      lifetime_support_cents:
+        top?.attrs.campaign_lifetime_support_cents ??
+        top?.attrs.lifetime_support_cents ??
+        null,
       member_email: top?.attrs.email ?? null,
       next_charge_date: top?.attrs.next_charge_date ?? null,
       note: top?.attrs.note ?? null,
@@ -181,7 +197,9 @@ export async function refreshAllMemberships(opts: {
 }): Promise<{ refreshed: number; failed: number }> {
   const supabase = createPostgresClient();
 
-  const olderThan = new Date(Date.now() - (opts.olderThanMs ?? 6 * 24 * 3600 * 1000)).toISOString();
+  const olderThan = new Date(
+    Date.now() - (opts.olderThanMs ?? 6 * 24 * 3600 * 1000),
+  ).toISOString();
   const limit = opts.limit ?? 200;
 
   const { data } = await supabase

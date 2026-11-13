@@ -17,16 +17,21 @@ describe("apiUrl (website)", () => {
   });
 
   test("laisse intacte une URL absolue http(s)", () => {
-    expect(apiUrl("https://ranked.rosegriffon.fr/api/health")).toBe("https://ranked.rosegriffon.fr/api/health");
+    expect(apiUrl("https://ranked.rosegriffon.fr/api/health")).toBe(
+      "https://ranked.rosegriffon.fr/api/health",
+    );
     expect(apiUrl("http://x/y")).toBe("http://x/y");
   });
 });
 
 describe("joinApiUrl (website)", () => {
   test("ne duplique pas /api avec une base absolue qui le contient déjà", () => {
-    expect(joinApiUrl("https://achillea.rosegriffon.fr/api", "api/tournaments?page=1")).toBe(
-      "https://achillea.rosegriffon.fr/api/tournaments?page=1",
-    );
+    expect(
+      joinApiUrl(
+        "https://achillea.rosegriffon.fr/api",
+        "api/tournaments?page=1",
+      ),
+    ).toBe("https://achillea.rosegriffon.fr/api/tournaments?page=1");
   });
 
   test("ne duplique pas /api avec une base relative", () => {
@@ -34,12 +39,17 @@ describe("joinApiUrl (website)", () => {
   });
 
   test("ajoute /api quand la base ne le contient pas", () => {
-    expect(joinApiUrl("https://api.example.test", "/api/clans")).toBe("https://api.example.test/api/clans");
+    expect(joinApiUrl("https://api.example.test", "/api/clans")).toBe(
+      "https://api.example.test/api/clans",
+    );
   });
 
   test("conserve les URL http(s) déjà absolues", () => {
-    expect(joinApiUrl("https://api.example.test/api", "https://ranked.example.test/health")).toBe(
-      "https://ranked.example.test/health",
-    );
+    expect(
+      joinApiUrl(
+        "https://api.example.test/api",
+        "https://ranked.example.test/health",
+      ),
+    ).toBe("https://ranked.example.test/health");
   });
 });

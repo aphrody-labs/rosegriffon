@@ -6,7 +6,8 @@ import { resolveAchilleaSession } from "../../auth/session";
 import { requireRole, ROLE_ADMINISTRATOR } from "../guards";
 import { renderLicensePdf } from "./pdf";
 
-const LICENSE_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const LICENSE_ID =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const message = t.Object({ message: t.String() });
 
 export const licenseController = new Elysia({ prefix: "/licenses" })
@@ -15,7 +16,8 @@ export const licenseController = new Elysia({ prefix: "/licenses" })
     "/me",
     async ({ db, headers }) => {
       const session = await resolveAchilleaSession(headers);
-      if (!session) return status(401, { message: "Authentication required" as const });
+      if (!session)
+        return status(401, { message: "Authentication required" as const });
       return LicenseService.findLatestForUser(db, session.id);
     },
     {
@@ -33,7 +35,9 @@ export const licenseController = new Elysia({ prefix: "/licenses" })
       return LicenseService.verify(db, qrSecret);
     },
     {
-      params: t.Object({ qrSecret: t.String({ minLength: 1, maxLength: 128 }) }),
+      params: t.Object({
+        qrSecret: t.String({ minLength: 1, maxLength: 128 }),
+      }),
       response: { 200: LicenseModel.verify },
     },
   )
@@ -43,15 +47,26 @@ export const licenseController = new Elysia({ prefix: "/licenses" })
       const auth = await requireRole(db, headers, ROLE_ADMINISTRATOR);
       if (auth.error) return auth.error;
       try {
-        return status(201, await LicenseService.issue(db, userId.trim(), auth.session.id));
+        return status(
+          201,
+          await LicenseService.issue(db, userId.trim(), auth.session.id),
+        );
       } catch (err) {
-        if (err instanceof LicenseUserNotFoundError) return status(404, { message: err.message });
+        if (err instanceof LicenseUserNotFoundError)
+          return status(404, { message: err.message });
         throw err;
       }
     },
     {
-      params: t.Object({ userId: t.String({ pattern: "^\\s*\\d{5,24}\\s*$" }) }),
-      response: { 201: LicenseModel.license, 401: message, 403: message, 404: message },
+      params: t.Object({
+        userId: t.String({ pattern: "^\\s*\\d{5,24}\\s*$" }),
+      }),
+      response: {
+        201: LicenseModel.license,
+        401: message,
+        403: message,
+        404: message,
+      },
     },
   )
   .post(
@@ -59,12 +74,19 @@ export const licenseController = new Elysia({ prefix: "/licenses" })
     async ({ db, headers, params: { id } }) => {
       const auth = await requireRole(db, headers, ROLE_ADMINISTRATOR);
       if (auth.error) return auth.error;
-      const license = LICENSE_ID.test(id) ? await LicenseService.revoke(db, id, auth.session.id) : null;
+      const license = LICENSE_ID.test(id)
+        ? await LicenseService.revoke(db, id, auth.session.id)
+        : null;
       return license ?? status(404, { message: `Licence ${id} introuvable` });
     },
     {
       params: t.Object({ id: t.String({ maxLength: 64 }) }),
-      response: { 200: LicenseModel.license, 401: message, 403: message, 404: message },
+      response: {
+        200: LicenseModel.license,
+        401: message,
+        403: message,
+        404: message,
+      },
     },
   )
   // `/:id.pdf` : le routeur n'accepte pas de suffixe après un paramètre, on
@@ -74,7 +96,8 @@ export const licenseController = new Elysia({ prefix: "/licenses" })
     "/:id",
     async ({ db, params: { id } }) => {
       const licenseId = id.endsWith(".pdf") ? id.slice(0, -4) : "";
-      if (!LICENSE_ID.test(licenseId)) return status(404, { message: "PDF introuvable" });
+      if (!LICENSE_ID.test(licenseId))
+        return status(404, { message: "PDF introuvable" });
       const input = await LicenseService.pdfInput(db, licenseId);
       if (!input) return status(404, { message: "PDF introuvable" });
       const pdf = await renderLicensePdf(input);

@@ -30,30 +30,45 @@ function autorise(request: Request, secret: string): boolean {
 }
 
 export async function handleAnnounceHttp(request: Request): Promise<Response> {
-  if (request.method !== "POST") return new Response("Not Found", { status: 404 });
+  if (request.method !== "POST")
+    return new Response("Not Found", { status: 404 });
 
   const secret = (Bun.env.DISCORD_ANNOUNCE_SECRET ?? "").trim();
   if (secret === "") {
-    console.error("[announce] requête refusée : DISCORD_ANNOUNCE_SECRET n'est pas configuré.");
+    console.error(
+      "[announce] requête refusée : DISCORD_ANNOUNCE_SECRET n'est pas configuré.",
+    );
     return new Response("Announce service not configured", { status: 503 });
   }
-  if (!autorise(request, secret)) return new Response("Unauthorized", { status: 401 });
+  if (!autorise(request, secret))
+    return new Response("Unauthorized", { status: 401 });
 
-  let corps: { type?: string; title?: string; slug?: string; excerpt?: string; featured_image_url?: string };
+  let corps: {
+    type?: string;
+    title?: string;
+    slug?: string;
+    excerpt?: string;
+    featured_image_url?: string;
+  };
   try {
     corps = (await request.json()) as typeof corps;
   } catch {
     return new Response("Invalid JSON", { status: 400 });
   }
   const { type, title, slug, excerpt, featured_image_url } = corps;
-  if (!title || !slug) return new Response("Missing title or slug", { status: 400 });
+  if (!title || !slug)
+    return new Response("Missing title or slug", { status: 400 });
 
   const wiki = type === "wiki";
   const salon = wiki
-    ? Bun.env.DISCORD_WIKI_ANNOUNCEMENTS_CHANNEL_ID || Bun.env.DISCORD_NEWS_CHANNEL_ID
-    : Bun.env.DISCORD_WEBSITE_ANNOUNCEMENTS_CHANNEL_ID || Bun.env.DISCORD_NEWS_CHANNEL_ID;
+    ? Bun.env.DISCORD_WIKI_ANNOUNCEMENTS_CHANNEL_ID ||
+      Bun.env.DISCORD_NEWS_CHANNEL_ID
+    : Bun.env.DISCORD_WEBSITE_ANNOUNCEMENTS_CHANNEL_ID ||
+      Bun.env.DISCORD_NEWS_CHANNEL_ID;
   if (!salon) {
-    console.error("[announce] refusé : aucun salon d'annonces configuré. Un salon public ne se devine pas.");
+    console.error(
+      "[announce] refusé : aucun salon d'annonces configuré. Un salon public ne se devine pas.",
+    );
     return new Response("Announce channel not configured", { status: 503 });
   }
 
@@ -61,7 +76,9 @@ export async function handleAnnounceHttp(request: Request): Promise<Response> {
     embeds: [
       {
         title,
-        url: wiki ? `https://azalee.rosegriffon.fr/news/${slug}` : `https://rosegriffon.fr/chroniques/${slug}`,
+        url: wiki
+          ? `https://azalee.rosegriffon.fr/news/${slug}`
+          : `https://rosegriffon.fr/chroniques/${slug}`,
         description: excerpt || undefined,
         // Orange Azalée / rouge Rose Griffon.
         color: wiki ? 0xf2a93b : 0xa14b3f,
@@ -71,7 +88,13 @@ export async function handleAnnounceHttp(request: Request): Promise<Response> {
       },
     ],
   });
-  if (!message) return Response.json({ error: "Publication Discord refusée" }, { status: 502 });
-  console.log(`[announce] Annonce envoyée pour « ${title} » dans le salon ${salon}`);
+  if (!message)
+    return Response.json(
+      { error: "Publication Discord refusée" },
+      { status: 502 },
+    );
+  console.log(
+    `[announce] Annonce envoyée pour « ${title} » dans le salon ${salon}`,
+  );
   return Response.json({ success: true });
 }

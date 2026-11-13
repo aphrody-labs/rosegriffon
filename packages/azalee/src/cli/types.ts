@@ -90,7 +90,8 @@ export interface RandomTeamOptions extends JsonOption {
 }
 
 /** Actions acceptées par `azalee team-builder`. */
-export type TeamBuilderAction = "list" | "show" | "delete" | "save" | "generate";
+export type TeamBuilderAction =
+  "list" | "show" | "delete" | "save" | "generate";
 
 /** `azalee team-builder <action> [args...] [-j] [-f <formation>]` */
 export interface TeamBuilderOptions extends JsonOption {

@@ -12,7 +12,8 @@
 import type { G4cmParsed } from "./g4cm";
 
 /** Type de mouvement d'un plan. */
-export type CutinShotMove = "orbit" | "dolly-in" | "dolly-out" | "static" | "crane" | "whip-pan";
+export type CutinShotMove =
+  "orbit" | "dolly-in" | "dolly-out" | "static" | "crane" | "whip-pan";
 
 /** Un plan de caméra prêt à jouer (temps normalisés + paramètres de cadrage). */
 export interface CutinShot {
@@ -107,7 +108,7 @@ export function buildCutinShots(parsed: G4cmParsed): CutinStoryboard {
   const fps = parsed.assumedFps || 60;
   if (!parsed.shots.length) return defaultCutinShots();
 
-  const t0 = Math.min(...parsed.shots.map(s => s.startFrame));
+  const t0 = Math.min(...parsed.shots.map((s) => s.startFrame));
   const shots: CutinShot[] = parsed.shots.map((seg, i) => {
     const preset = SHOT_PRESETS[i % SHOT_PRESETS.length];
     return {
@@ -163,8 +164,14 @@ const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
  * Échantillonne la caméra au temps `t` (s). Centre supposé en `[0, centerY, 0]` (le GLB waza est
  * recentré au chargement). Retourne position/cible/FOV — à appliquer sur une `PerspectiveCamera`.
  */
-export function sampleCutinCamera(story: CutinStoryboard, t: number, centerY = 1.0): CutinCameraState {
-  const shot = story.shots.find(s => t >= s.tStart && t < s.tEnd) ?? story.shots[story.shots.length - 1];
+export function sampleCutinCamera(
+  story: CutinStoryboard,
+  t: number,
+  centerY = 1.0,
+): CutinCameraState {
+  const shot =
+    story.shots.find((s) => t >= s.tStart && t < s.tEnd) ??
+    story.shots[story.shots.length - 1];
   const span = Math.max(shot.tEnd - shot.tStart, 1e-3);
   const local = ease(Math.min(Math.max((t - shot.tStart) / span, 0), 1));
 

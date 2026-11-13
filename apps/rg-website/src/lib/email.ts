@@ -30,7 +30,10 @@ const transporter = nodemailer.createTransport({
   },
   host: process.env.SMTP_HOST || "ssl0.ovh.net",
   port: parseInt(process.env.SMTP_PORT || "465", 10),
-  secure: process.env.SMTP_SECURE === "true" || process.env.SMTP_PORT === "465" || !process.env.SMTP_PORT, // true pour 465 (OVH), false pour 587
+  secure:
+    process.env.SMTP_SECURE === "true" ||
+    process.env.SMTP_PORT === "465" ||
+    !process.env.SMTP_PORT, // true pour 465 (OVH), false pour 587
   connectionTimeout: 5000,
   greetingTimeout: 5000,
   socketTimeout: 5000,
@@ -94,7 +97,11 @@ export async function sendEmail({
       (process.env.NEXT_PUBLIC_APP_NAME === "Rose Griffon"
         ? '"Rose Griffon" <contact@rosegriffon.fr>'
         : '"Aphrody" <contact@aphrody.com>');
-    const defaultReplyTo = replyTo || process.env.SMTP_REPLY_TO || process.env.MAIL_REPLY_TO || "contact@aphrody.com";
+    const defaultReplyTo =
+      replyTo ||
+      process.env.SMTP_REPLY_TO ||
+      process.env.MAIL_REPLY_TO ||
+      "contact@aphrody.com";
     const info = await transporter.sendMail({
       from: from || defaultFrom,
       html,
@@ -129,7 +136,7 @@ export async function sendOrderConfirmationEmail(data: OrderConfirmationData) {
   try {
     const itemsHtml = data.items
       .map(
-        item => `
+        (item) => `
       <tr>
         <td style="padding: 12px; border-bottom: 1px solid #e0e0e0;">${item.productName}</td>
         <td style="padding: 12px; border-bottom: 1px solid #e0e0e0;">${item.variantName}</td>
@@ -244,9 +251,15 @@ export async function sendOrderConfirmationEmail(data: OrderConfirmationData) {
 /**
  * Envoyer un email d'avis d'expédition
  */
-export async function sendShippingNotificationEmail(customerEmail: string, orderId: string, trackingNumber?: string) {
+export async function sendShippingNotificationEmail(
+  customerEmail: string,
+  orderId: string,
+  trackingNumber?: string,
+) {
   try {
-    const trackingHtml = trackingNumber ? `<p><strong>Numéro de suivi:</strong> ${trackingNumber}</p>` : "";
+    const trackingHtml = trackingNumber
+      ? `<p><strong>Numéro de suivi:</strong> ${trackingNumber}</p>`
+      : "";
 
     const htmlContent = `
       <!DOCTYPE html>
@@ -300,7 +313,10 @@ export async function sendShippingNotificationEmail(customerEmail: string, order
 /**
  * Envoyer un email de confirmation de livraison
  */
-export async function sendDeliveryConfirmationEmail(customerEmail: string, orderId: string) {
+export async function sendDeliveryConfirmationEmail(
+  customerEmail: string,
+  orderId: string,
+) {
   try {
     const htmlContent = `
       <!DOCTYPE html>
@@ -352,9 +368,15 @@ export async function sendDeliveryConfirmationEmail(customerEmail: string, order
 /**
  * Envoyer un email d'annulation de commande
  */
-export async function sendOrderCancellationEmail(customerEmail: string, orderId: string, reason?: string) {
+export async function sendOrderCancellationEmail(
+  customerEmail: string,
+  orderId: string,
+  reason?: string,
+) {
   try {
-    const reasonHtml = reason ? `<p><strong>Raison:</strong> ${reason}</p>` : "";
+    const reasonHtml = reason
+      ? `<p><strong>Raison:</strong> ${reason}</p>`
+      : "";
 
     const htmlContent = `
       <!DOCTYPE html>
@@ -420,7 +442,10 @@ export async function sendContactFormEmail(data: {
     contentType: string;
   }[];
 }): Promise<SendEmailResult> {
-  const recipient = process.env.SMTP_TO_CONTACT || process.env.SMTP_USER || "contact@rosegriffon.fr";
+  const recipient =
+    process.env.SMTP_TO_CONTACT ||
+    process.env.SMTP_USER ||
+    "contact@rosegriffon.fr";
 
   const html = `<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"></head>
 <body style="margin:0;padding:24px;background:#f5f5f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#1a1a1a">
@@ -463,7 +488,8 @@ export async function sendMediationRequestEmail(data: {
   senderEmail?: string;
   senderName?: string;
 }): Promise<SendEmailResult> {
-  const recipient = process.env.RG_MEDIATION_EMAIL?.trim() || "contact@rosegriffon.fr";
+  const recipient =
+    process.env.RG_MEDIATION_EMAIL?.trim() || "contact@rosegriffon.fr";
 
   const html = `<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"></head>
 <body style="margin:0;padding:24px;background:#f5f5f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#1a1a1a">

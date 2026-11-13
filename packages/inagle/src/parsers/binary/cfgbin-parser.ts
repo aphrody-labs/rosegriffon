@@ -17,7 +17,12 @@
  */
 
 import { crc32String } from "../hash/crc32.js";
-import { RDBN_MAGIC, parseRdbnHeader, probeFormat, type RdbnHeaderInfo } from "../../nie-bridge/index.js";
+import {
+  RDBN_MAGIC,
+  parseRdbnHeader,
+  probeFormat,
+  type RdbnHeaderInfo,
+} from "../../nie-bridge/index.js";
 
 // ============================================================================
 // Types
@@ -230,7 +235,9 @@ function parseCfgBinTS(data: Uint8Array): CfgBinDocument {
 
       default:
         // Unknown type, skip
-        console.warn(`Unknown cfg.bin entry type: ${type} at offset ${offset - 8}`);
+        console.warn(
+          `Unknown cfg.bin entry type: ${type} at offset ${offset - 8}`,
+        );
         return null;
     }
   }
@@ -276,7 +283,10 @@ export function buildHashTable(names: string[]): Map<number, string> {
 /**
  * Resolve entry hashes to names using a lookup table.
  */
-export function resolveNames(entries: CfgBinEntry[], hashTable: Map<number, string>): void {
+export function resolveNames(
+  entries: CfgBinEntry[],
+  hashTable: Map<number, string>,
+): void {
   function resolveEntry(entry: CfgBinEntry): void {
     const name = hashTable.get(entry.hash);
     if (name) entry.name = name;
@@ -331,7 +341,9 @@ export function getCfgBinInfo(data: Uint8Array): CfgBinInfo {
  */
 export function toJson(doc: CfgBinDocument): Record<string, unknown> {
   function entryToJson(entry: CfgBinEntry): Record<string, unknown> {
-    const key = entry.name || `0x${entry.hash.toString(16).toUpperCase().padStart(8, "0")}`;
+    const key =
+      entry.name ||
+      `0x${entry.hash.toString(16).toUpperCase().padStart(8, "0")}`;
 
     if (entry.type === VariableType.List && Array.isArray(entry.value)) {
       return {

@@ -147,7 +147,11 @@ export abstract class WikiService {
 
   public static async searchText(q: string, locale = "fr", limit = 50) {
     return {
-      data: await sqlWiki.gameTextSearch(q, locale as "fr" | "en" | "ja", limit),
+      data: await sqlWiki.gameTextSearch(
+        q,
+        locale as "fr" | "en" | "ja",
+        limit,
+      ),
       query: q,
       locale,
       limit,
@@ -159,9 +163,13 @@ export abstract class WikiService {
     const rows = await sqlWiki.gameText(hash);
     if (rows.length === 0) return null;
     const first = rows[0];
-    const out: Record<string, unknown> = { hashId: first?.hash_id, category: first?.category };
+    const out: Record<string, unknown> = {
+      hashId: first?.hash_id,
+      category: first?.category,
+    };
     for (const row of rows)
-      if (row.locale === "fr" || row.locale === "en" || row.locale === "ja") out[row.locale] = row.value;
+      if (row.locale === "fr" || row.locale === "en" || row.locale === "ja")
+        out[row.locale] = row.value;
     return out;
   }
 

@@ -69,7 +69,11 @@ export function FadeInItem({
   className,
   as: Element = "div",
   ...aria
-}: { children: React.ReactNode; className?: string; as?: "div" | "li" } & AriaProps) {
+}: {
+  children: React.ReactNode;
+  className?: string;
+  as?: "div" | "li";
+} & AriaProps) {
   const ref = useRef<HTMLElement | null>(null);
 
   useEffect(() => {

@@ -6,7 +6,10 @@ import { dbPlugin } from "../../../plugins/db";
 import { LeaderboardService } from "../leaderboard/service";
 import { UsersModel } from "./model";
 import { resolveAchilleaSession } from "../../auth/session";
-import { findLinkedPublicProfile, projectPublicIdentity } from "./public-profile";
+import {
+  findLinkedPublicProfile,
+  projectPublicIdentity,
+} from "./public-profile";
 import { interclanStats, tournamentStats } from "./competition-stats";
 
 async function rankedHistory(
@@ -14,20 +17,30 @@ async function rankedHistory(
   userId: string,
   query: { mode?: number; limit?: number; offset?: number },
 ) {
-  const user = await db.selectFrom("user").select("id").where("id", "=", userId).executeTakeFirst();
+  const user = await db
+    .selectFrom("user")
+    .select("id")
+    .where("id", "=", userId)
+    .executeTakeFirst();
   if (!user) return null;
   const limit = Math.max(1, Math.min(100, Number(query.limit ?? 20) || 20));
   const offset = Math.max(0, Number(query.offset ?? 0) || 0);
   const mode = query.mode == null ? null : Number(query.mode);
   let request = db
     .selectFrom("lobby as l")
-    .innerJoin("lobby_user as me", join => join.onRef("me.lobby_id", "=", "l.id").on("me.user_id", "=", userId))
+    .innerJoin("lobby_user as me", (join) =>
+      join.onRef("me.lobby_id", "=", "l.id").on("me.user_id", "=", userId),
+    )
     // A duo lobby contains a teammate as well as two opponents.  The old
     // `user_id <> me.user_id` predicate selected all three rows, so the
     // history could label a teammate as an opponent and render the same
     // lobby more than once.  The public DTO has one opponent slot, therefore
     // project one stable player from the opposing team per lobby below.
-    .innerJoin("lobby_user as opp", join => join.onRef("opp.lobby_id", "=", "l.id").onRef("opp.team", "<>", "me.team"))
+    .innerJoin("lobby_user as opp", (join) =>
+      join
+        .onRef("opp.lobby_id", "=", "l.id")
+        .onRef("opp.team", "<>", "me.team"),
+    )
     .innerJoin("user as u", "u.id", "opp.user_id")
     .select([
       "l.id as lobby_id",
@@ -45,15 +58,25 @@ async function rankedHistory(
       "u.avatar as opp_avatar",
     ])
     .where("l.state", "in", ["Finished", "Forfeited"])
-    .where(eb =>
+    .where((eb) =>
       eb.or([
         eb("l.event_type", "=", "RANKED"),
-        eb.and([eb("l.event_type", "=", "TOURNAMENT"), eb("l.ranked_elo_applied", "=", true)]),
+        eb.and([
+          eb("l.event_type", "=", "TOURNAMENT"),
+          eb("l.ranked_elo_applied", "=", true),
+        ]),
       ]),
     );
-  if (mode !== null && Number.isFinite(mode)) request = request.where("l.mode", "=", mode);
+  if (mode !== null && Number.isFinite(mode))
+    request = request.where("l.mode", "=", mode);
   const rows = await db
-    .selectFrom(request.distinctOn("l.id").orderBy("l.id").orderBy("opp.user_id").as("ranked_history"))
+    .selectFrom(
+      request
+        .distinctOn("l.id")
+        .orderBy("l.id")
+        .orderBy("opp.user_id")
+        .as("ranked_history"),
+    )
     .selectAll()
     .orderBy("created_at", "desc")
     .limit(limit)
@@ -67,7 +90,7 @@ async function rankedHistory(
       return "https://cdn.discordapp.com/embed/avatars/0.png";
     }
   };
-  return rows.map(row => {
+  return rows.map((row) => {
     const mine = Number(row.my_score ?? 0);
     const theirs = Number(row.opp_score ?? 0);
     const forfeited = Boolean(row.my_forfeit);
@@ -80,10 +103,17 @@ async function rankedHistory(
       myScore: mine,
       opponentScore: theirs,
       eloDelta: Number(row.my_elo_delta ?? 0),
-      result: forfeited ? "forfeit" : opponentForfeited || mine > theirs ? "win" : mine < theirs ? "loss" : "draw",
+      result: forfeited
+        ? "forfeit"
+        : opponentForfeited || mine > theirs
+          ? "win"
+          : mine < theirs
+            ? "loss"
+            : "draw",
       opponent: {
         userId: String(row.opp_user_id),
-        displayName: row.opp_display_name ?? row.opp_username ?? String(row.opp_user_id),
+        displayName:
+          row.opp_display_name ?? row.opp_username ?? String(row.opp_user_id),
         avatar: avatar(String(row.opp_user_id), row.opp_avatar),
       },
     };
@@ -97,7 +127,8 @@ export const usersController = new Elysia({ prefix: "/users" })
     "/me/ranked-history",
     async ({ db, headers, query }) => {
       const session = await resolveAchilleaSession(headers);
-      if (!session) return status(401, { message: "Authentication required" as const });
+      if (!session)
+        return status(401, { message: "Authentication required" as const });
       return (await rankedHistory(db, session.id, query)) ?? [];
     },
     {
@@ -106,25 +137,36 @@ export const usersController = new Elysia({ prefix: "/users" })
         limit: t.Optional(t.Numeric()),
         offset: t.Optional(t.Numeric()),
       }),
-      response: { 200: t.Array(t.Any()), 401: t.Object({ message: t.Literal("Authentication required") }) },
+      response: {
+        200: t.Array(t.Any()),
+        401: t.Object({ message: t.Literal("Authentication required") }),
+      },
     },
   )
   .get(
     "/me/ranked-trend",
     async ({ db, headers, query }) => {
       const session = await resolveAchilleaSession(headers);
-      if (!session) return status(401, { message: "Authentication required" as const });
+      if (!session)
+        return status(401, { message: "Authentication required" as const });
       const days = Math.max(1, Math.min(90, Number(query.days ?? 7) || 7));
       const last = Math.max(1, Math.min(50, Number(query.last ?? 20) || 20));
       const mode = query.mode == null ? null : Number(query.mode);
-      const modeClause = mode !== null && Number.isFinite(mode) ? sql`and l.mode = ${mode}` : sql``;
+      const modeClause =
+        mode !== null && Number.isFinite(mode)
+          ? sql`and l.mode = ${mode}`
+          : sql``;
       const spark = await sql<{ delta: number | string }>`
 			select lu.elo_variation as delta
 			from lobby l join lobby_user lu on lu.lobby_id = l.id and lu.user_id = ${session.id}
 			where l.event_type = 'RANKED' and l.state in ('Finished', 'Forfeited') ${modeClause}
 			order by l.created_at desc limit ${last}
 		`.execute(db);
-      const period = await sql<{ delta_total: number | string; games: number | string; wins: number | string }>`
+      const period = await sql<{
+        delta_total: number | string;
+        games: number | string;
+        wins: number | string;
+      }>`
 			select coalesce(sum(lu.elo_variation), 0) as delta_total, count(*) as games,
 			count(*) filter (where not lu.forfeit and exists (
 				select 1 from lobby_user opp
@@ -138,7 +180,7 @@ export const usersController = new Elysia({ prefix: "/users" })
       const row = period.rows[0];
       const games = Number(row?.games ?? 0);
       return {
-        sparkline: spark.rows.map(item => Number(item.delta ?? 0)).reverse(),
+        sparkline: spark.rows.map((item) => Number(item.delta ?? 0)).reverse(),
         deltaPeriod: Number(row?.delta_total ?? 0),
         gamesInPeriod: games,
         winRatePeriod: games > 0 ? Number(row?.wins ?? 0) / games : 0,
@@ -146,8 +188,15 @@ export const usersController = new Elysia({ prefix: "/users" })
       };
     },
     {
-      query: t.Object({ mode: t.Optional(t.Numeric()), days: t.Optional(t.Numeric()), last: t.Optional(t.Numeric()) }),
-      response: { 200: t.Any(), 401: t.Object({ message: t.Literal("Authentication required") }) },
+      query: t.Object({
+        mode: t.Optional(t.Numeric()),
+        days: t.Optional(t.Numeric()),
+        last: t.Optional(t.Numeric()),
+      }),
+      response: {
+        200: t.Any(),
+        401: t.Object({ message: t.Literal("Authentication required") }),
+      },
     },
   )
   .get(
@@ -163,7 +212,10 @@ export const usersController = new Elysia({ prefix: "/users" })
         limit: t.Optional(t.Numeric()),
         offset: t.Optional(t.Numeric()),
       }),
-      response: { 200: t.Array(t.Any()), 404: t.Object({ message: t.Literal("User not found") }) },
+      response: {
+        200: t.Array(t.Any()),
+        404: t.Object({ message: t.Literal("User not found") }),
+      },
     },
   )
   .get(
@@ -171,11 +223,28 @@ export const usersController = new Elysia({ prefix: "/users" })
     async ({ db, params: { id } }) => {
       const user = await db
         .selectFrom("user")
-        .select(["id", "username", "display_name", "avatar", "role", "bio", "twitch_url", "last_interact"])
+        .select([
+          "id",
+          "username",
+          "display_name",
+          "avatar",
+          "role",
+          "bio",
+          "twitch_url",
+          "last_interact",
+        ])
         .where("id", "=", id)
         .executeTakeFirst();
       if (!user) return status(404, { message: "User not found" as const });
-      const [elos, ranks, clan, publicProfile, rankedStats, tournaments, interclans] = await Promise.all([
+      const [
+        elos,
+        ranks,
+        clan,
+        publicProfile,
+        rankedStats,
+        tournaments,
+        interclans,
+      ] = await Promise.all([
         db
           .selectFrom("user_elo")
           .select(["mode", "elo", "games_played", "wins", "losses"])
@@ -185,7 +254,14 @@ export const usersController = new Elysia({ prefix: "/users" })
         db
           .selectFrom("clan_member as cm")
           .innerJoin("clan as c", "c.id", "cm.clan_id")
-          .select(["cm.clan_id", "cm.role", "cm.distinctions", "c.name", "c.shortened_name", "c.clan_avatar_url"])
+          .select([
+            "cm.clan_id",
+            "cm.role",
+            "cm.distinctions",
+            "c.name",
+            "c.shortened_name",
+            "c.clan_avatar_url",
+          ])
           .where("cm.user_id", "=", id)
           .executeTakeFirst(),
         findLinkedPublicProfile(db, id),
@@ -223,15 +299,19 @@ export const usersController = new Elysia({ prefix: "/users" })
 				from stats left join goals on goals.mode = stats.mode
 			`
           .execute(db)
-          .then(result => result.rows),
+          .then((result) => result.rows),
         tournamentStats(db, id),
         interclanStats(db, id),
       ]);
       const modeStats = (mode: number) => {
-        const row = elos.find(elo => Number(elo.mode) === mode);
-        const matches = rankedStats.find(stats => Number(stats.mode) === mode);
+        const row = elos.find((elo) => Number(elo.mode) === mode);
+        const matches = rankedStats.find(
+          (stats) => Number(stats.mode) === mode,
+        );
         const rating = Number(row?.elo ?? 0);
-        const tier = ranks.find(rank => rating >= rank.min_elo && rating <= rank.max_elo);
+        const tier = ranks.find(
+          (rank) => rating >= rank.min_elo && rating <= rank.max_elo,
+        );
         return {
           mode,
           total: Number(matches?.total ?? 0),
@@ -240,7 +320,11 @@ export const usersController = new Elysia({ prefix: "/users" })
           draws: Number(matches?.draws ?? 0),
           goalsScored: Number(matches?.goals_scored ?? 0),
           goalsReceived: Number(matches?.goals_received ?? 0),
-          rank: { elo: rating, key: tier?.key ?? "Non classé", gradient: tier?.gradient ?? [] },
+          rank: {
+            elo: rating,
+            key: tier?.key ?? "Non classé",
+            gradient: tier?.gradient ?? [],
+          },
         };
       };
       const solo = modeStats(2);
@@ -287,19 +371,26 @@ export const usersController = new Elysia({ prefix: "/users" })
           : undefined,
         interclans,
         tournaments,
-        ranked: { solo: { ...solo, rank: undefined }, duo: { ...duo, rank: undefined } },
+        ranked: {
+          solo: { ...solo, rank: undefined },
+          duo: { ...duo, rank: undefined },
+        },
       };
     },
     {
       params: t.Object({ id: t.String() }),
-      response: { 200: UsersModel.publicProfile, 404: t.Object({ message: t.Literal("User not found") }) },
+      response: {
+        200: UsersModel.publicProfile,
+        404: t.Object({ message: t.Literal("User not found") }),
+      },
     },
   )
   .get(
     "/me",
     async ({ db, headers }) => {
       const session = await resolveAchilleaSession(headers);
-      if (!session) return status(401, { message: "Authentication required" as const });
+      if (!session)
+        return status(401, { message: "Authentication required" as const });
       const user = await db
         .selectFrom("user")
         .select(["id", "username", "display_name", "avatar", "role"])
@@ -307,7 +398,11 @@ export const usersController = new Elysia({ prefix: "/users" })
         .executeTakeFirst();
       if (!user) return status(404, { message: "User not found" as const });
       const [clan, connection, publicProfile] = await Promise.all([
-        db.selectFrom("clan_member").select("clan_id").where("user_id", "=", session.id).executeTakeFirst(),
+        db
+          .selectFrom("clan_member")
+          .select("clan_id")
+          .where("user_id", "=", session.id)
+          .executeTakeFirst(),
         db
           .selectFrom("user_connection")
           .select("user_id")
@@ -349,13 +444,16 @@ export const usersController = new Elysia({ prefix: "/users" })
     "/me/profile",
     async ({ db, headers, body }) => {
       const session = await resolveAchilleaSession(headers);
-      if (!session) return status(401, { message: "Authentication required" as const });
+      if (!session)
+        return status(401, { message: "Authentication required" as const });
       const bio = body.bio?.trim() || null;
       const twitchUrl = body.twitchUrl?.trim() || null;
-      if (bio && bio.length > 500) return status(400, { message: "Bio too long" as const });
+      if (bio && bio.length > 500)
+        return status(400, { message: "Bio too long" as const });
       if (twitchUrl) {
         try {
-          if (new URL(twitchUrl).hostname.replace(/^www\./, "") !== "twitch.tv") throw new Error();
+          if (new URL(twitchUrl).hostname.replace(/^www\./, "") !== "twitch.tv")
+            throw new Error();
         } catch {
           return status(400, { message: "Invalid Twitch URL" as const });
         }
@@ -368,14 +466,20 @@ export const usersController = new Elysia({ prefix: "/users" })
       if (!current) return status(404, { message: "User not found" as const });
       const publicProfile = await findLinkedPublicProfile(db, session.id);
       if (body.bio !== undefined && !publicProfile)
-        return status(409, { message: "Rose Griffon profile required" as const });
-      await db.transaction().execute(async trx => {
+        return status(409, {
+          message: "Rose Griffon profile required" as const,
+        });
+      await db.transaction().execute(async (trx) => {
         if (body.bio !== undefined && publicProfile) {
           await sql`update public.profiles set bio = ${bio}, updated_at = now()
 					where id::text = ${publicProfile.id} and claimed_at is not null`.execute(trx);
         }
         if (body.twitchUrl !== undefined) {
-          await trx.updateTable("user").set({ twitch_url: twitchUrl }).where("id", "=", session.id).execute();
+          await trx
+            .updateTable("user")
+            .set({ twitch_url: twitchUrl })
+            .where("id", "=", session.id)
+            .execute();
         }
       });
       return {
@@ -384,7 +488,8 @@ export const usersController = new Elysia({ prefix: "/users" })
         displayName: publicProfile?.username ?? current.display_name ?? "",
         avatar: publicProfile?.avatar_url ?? current.avatar,
         bio: body.bio === undefined ? (publicProfile?.bio ?? null) : bio,
-        twitchUrl: body.twitchUrl === undefined ? current.twitch_url : twitchUrl,
+        twitchUrl:
+          body.twitchUrl === undefined ? current.twitch_url : twitchUrl,
       };
     },
     {
@@ -406,7 +511,13 @@ export const usersController = new Elysia({ prefix: "/users" })
     async ({ db, query }) => {
       const mode = Number(query.mode ?? 2);
       const season = query.season?.trim() || null;
-      const page = await LeaderboardService.findTop(db, mode, season, query.limit, query.offset);
+      const page = await LeaderboardService.findTop(
+        db,
+        mode,
+        season,
+        query.limit,
+        query.offset,
+      );
       return { entries: page.data, total: page.count, mode };
     },
     {

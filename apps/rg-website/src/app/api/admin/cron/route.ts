@@ -16,7 +16,10 @@ export async function GET() {
     return garde.response;
   }
 
-  const [cron, historique] = await Promise.all([etatDuCron(), historiqueDuCron()]);
+  const [cron, historique] = await Promise.all([
+    etatDuCron(),
+    historiqueDuCron(),
+  ]);
 
   return NextResponse.json(
     { cron, historique, role: garde.data.role },

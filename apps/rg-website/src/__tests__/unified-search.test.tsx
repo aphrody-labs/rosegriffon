@@ -1,6 +1,15 @@
 import { afterEach, describe, expect, mock, test } from "bun:test";
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { AppRouterContext, type AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
+import {
+  AppRouterContext,
+  type AppRouterInstance,
+} from "next/dist/shared/lib/app-router-context.shared-runtime";
 
 import { UnifiedSearchBar } from "@rosegriffon/app-shell";
 
@@ -17,7 +26,9 @@ const router: AppRouterInstance = {
 const originalFetch = globalThis.fetch;
 
 function stubFetch(responder: () => Promise<Response>) {
-  globalThis.fetch = Object.assign(mock(responder), { preconnect: originalFetch.preconnect });
+  globalThis.fetch = Object.assign(mock(responder), {
+    preconnect: originalFetch.preconnect,
+  });
 }
 
 afterEach(() => {
@@ -32,7 +43,14 @@ describe("UnifiedSearchBar", () => {
       async () =>
         new Response(
           JSON.stringify({
-            resultats: [{ domaine: "wiki", href: "/wiki/chara/axel", id: "axel", titre: "Axel" }],
+            resultats: [
+              {
+                domaine: "wiki",
+                href: "/wiki/chara/axel",
+                id: "axel",
+                titre: "Axel",
+              },
+            ],
           }),
           { status: 200 },
         ),
@@ -50,6 +68,10 @@ describe("UnifiedSearchBar", () => {
     fireEvent.change(input, { target: { value: "jude" } });
     expect(screen.queryByText("Axel")).toBeNull();
     expect(screen.getByRole("status").textContent).toContain("Recherche dans");
-    await waitFor(() => expect(screen.getByRole("status").textContent).toContain("temporairement indisponible"));
+    await waitFor(() =>
+      expect(screen.getByRole("status").textContent).toContain(
+        "temporairement indisponible",
+      ),
+    );
   });
 });

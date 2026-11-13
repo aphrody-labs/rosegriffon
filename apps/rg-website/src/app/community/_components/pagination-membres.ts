@@ -22,7 +22,11 @@ export interface TrancheSection<S> {
 }
 
 /** Lit `?page=`, borné à `[1, derniere]`. Toute valeur illisible vaut 1. */
-export function lirePage(brut: unknown, total: number, parPage = MEMBRES_PAR_PAGE): number {
+export function lirePage(
+  brut: unknown,
+  total: number,
+  parPage = MEMBRES_PAR_PAGE,
+): number {
   const derniere = Math.max(1, Math.ceil(total / parPage));
   const n = typeof brut === "string" ? Number.parseInt(brut, 10) : Number.NaN;
   if (!Number.isFinite(n) || n < 1) return 1;

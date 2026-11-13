@@ -27,7 +27,9 @@ import { deposerCreationInstagram } from "./actions";
  */
 export function DepotInstagram({ slug }: { slug: string }) {
   const [enCours, demarrer] = useTransition();
-  const [retour, setRetour] = useState<{ ok: boolean; texte: string } | null>(null);
+  const [retour, setRetour] = useState<{ ok: boolean; texte: string } | null>(
+    null,
+  );
   const formulaire = useRef<HTMLFormElement>(null);
 
   const envoyer = (donnees: FormData) =>
@@ -35,7 +37,9 @@ export function DepotInstagram({ slug }: { slug: string }) {
       const resultat = await deposerCreationInstagram(donnees);
       setRetour({
         ok: resultat.success,
-        texte: resultat.success ? (resultat.message ?? "Création enregistrée.") : (resultat.error ?? "Échec du dépôt."),
+        texte: resultat.success
+          ? (resultat.message ?? "Création enregistrée.")
+          : (resultat.error ?? "Échec du dépôt."),
       });
       // On ne vide le formulaire QUE sur succès : après un refus, le
       // participant doit retrouver ce qu'il avait saisi pour le corriger,
@@ -57,14 +61,29 @@ export function DepotInstagram({ slug }: { slug: string }) {
         <input type="hidden" name="campagne" value={slug} />
 
         <label className="block space-y-1">
-          <span className="text-xs text-on-surface-variant">Lien de ta publication</span>
-          <input name="permalien" type="url" required placeholder="https://www.instagram.com/p/…" className={champ} />
+          <span className="text-xs text-on-surface-variant">
+            Lien de ta publication
+          </span>
+          <input
+            name="permalien"
+            type="url"
+            required
+            placeholder="https://www.instagram.com/p/…"
+            className={champ}
+          />
         </label>
 
         <div className="grid gap-2 sm:grid-cols-2">
           <label className="block space-y-1">
-            <span className="text-xs text-on-surface-variant">Ton pseudo Instagram</span>
-            <input name="pseudo" type="text" placeholder="@ton_pseudo" className={champ} />
+            <span className="text-xs text-on-surface-variant">
+              Ton pseudo Instagram
+            </span>
+            <input
+              name="pseudo"
+              type="text"
+              placeholder="@ton_pseudo"
+              className={champ}
+            />
           </label>
 
           <label className="block space-y-1">
@@ -83,7 +102,9 @@ export function DepotInstagram({ slug }: { slug: string }) {
         </div>
 
         <label className="block space-y-1">
-          <span className="text-xs text-on-surface-variant">Légende (facultatif)</span>
+          <span className="text-xs text-on-surface-variant">
+            Légende (facultatif)
+          </span>
           <textarea name="legende" rows={2} className={champ} />
         </label>
 

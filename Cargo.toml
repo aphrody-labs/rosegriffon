@@ -1,60 +1,60 @@
 [workspace]
 resolver = "2"
 members = [
-    "crates/aphrody-nie-app",
-    "crates/aphrody-nie-asm",
-    "crates/aphrody-nie-bench",
-    "crates/aphrody-nie-bevy",
-    "crates/aphrody-nie-camera",
-    "crates/aphrody-nie-cli",
-    "crates/aphrody-nie-computer-use",
-    "crates/aphrody-nie-core",
-    "crates/aphrody-nie-data",
-    "crates/aphrody-nie-editor",
-    "crates/aphrody-nie-explore",
-    "crates/aphrody-nie-ffi",
-    "crates/aphrody-nie-forge",
-    "crates/aphrody-nie-formats",
-    "crates/aphrody-nie-game",
-    "crates/aphrody-nie-geom",
-    "crates/aphrody-nie-headless",
-    "crates/aphrody-nie-identity-source",
-    "crates/aphrody-nie-index",
-    "crates/aphrody-nie-inventory",
-    "crates/aphrody-nie-launcher",
-    "crates/aphrody-nie-lua",
-    "crates/aphrody-nie-lua-web",
-    "crates/aphrody-nie-mcp",
-    "crates/aphrody-nie-model-core",
-    "crates/aphrody-nie-model-serve",
-    "crates/aphrody-nie-net",
-    "crates/aphrody-nie-ocgen",
-    "crates/aphrody-nie-pe",
-    "crates/aphrody-nie-pe-inspect",
-    "crates/aphrody-nie-pg",
-    "crates/aphrody-nie-play",
-    "crates/aphrody-nie-queue",
-    "crates/aphrody-nie-render",
-    "crates/aphrody-nie-render3d",
-    "crates/aphrody-nie-runtime",
-    "crates/aphrody-nie-save",
-    "crates/aphrody-nie-seed",
-    "crates/aphrody-nie-sql",
-    "crates/aphrody-nie-tasks",
-    "crates/aphrody-nie-trace",
-    "crates/aphrody-nie-ui",
-    "crates/aphrody-nie-video",
-    "crates/aphrody-nie-viola",
-    "crates/aphrody-nie-wasm",
-    "crates/aphrody-nie-wiki",
-    "crates/aphrody-nie-zukan",
-    "crates/aphrody-softraster",
-    "crates/nie-pkg",
-    "crates/nie-pkg-ui",
-    "crates/re",
-    "crates/yolo-re-bin-format",
-    "crates/yolo-re-core",
-    "crates/yre-worker",
+  "crates/aphrody-nie-app",
+  "crates/aphrody-nie-asm",
+  "crates/aphrody-nie-bench",
+  "crates/aphrody-nie-bevy",
+  "crates/aphrody-nie-camera",
+  "crates/aphrody-nie-cli",
+  "crates/aphrody-nie-computer-use",
+  "crates/aphrody-nie-core",
+  "crates/aphrody-nie-data",
+  "crates/aphrody-nie-editor",
+  "crates/aphrody-nie-explore",
+  "crates/aphrody-nie-ffi",
+  "crates/aphrody-nie-forge",
+  "crates/aphrody-nie-formats",
+  "crates/aphrody-nie-game",
+  "crates/aphrody-nie-geom",
+  "crates/aphrody-nie-headless",
+  "crates/aphrody-nie-identity-source",
+  "crates/aphrody-nie-index",
+  "crates/aphrody-nie-inventory",
+  "crates/aphrody-nie-launcher",
+  "crates/aphrody-nie-lua",
+  "crates/aphrody-nie-lua-web",
+  "crates/aphrody-nie-mcp",
+  "crates/aphrody-nie-model-core",
+  "crates/aphrody-nie-model-serve",
+  "crates/aphrody-nie-net",
+  "crates/aphrody-nie-ocgen",
+  "crates/aphrody-nie-pe",
+  "crates/aphrody-nie-pe-inspect",
+  "crates/aphrody-nie-pg",
+  "crates/aphrody-nie-play",
+  "crates/aphrody-nie-queue",
+  "crates/aphrody-nie-render",
+  "crates/aphrody-nie-render3d",
+  "crates/aphrody-nie-runtime",
+  "crates/aphrody-nie-save",
+  "crates/aphrody-nie-seed",
+  "crates/aphrody-nie-sql",
+  "crates/aphrody-nie-tasks",
+  "crates/aphrody-nie-trace",
+  "crates/aphrody-nie-ui",
+  "crates/aphrody-nie-video",
+  "crates/aphrody-nie-viola",
+  "crates/aphrody-nie-wasm",
+  "crates/aphrody-nie-wiki",
+  "crates/aphrody-nie-zukan",
+  "crates/aphrody-softraster",
+  "crates/nie-pkg",
+  "crates/nie-pkg-ui",
+  "crates/re",
+  "crates/yolo-re-bin-format",
+  "crates/yolo-re-core",
+  "crates/yre-worker",
 ]
 
 [workspace.package]
@@ -65,7 +65,6 @@ license = "Apache-2.0"
 repository = "https://github.com/aphrody-dev/rosegriffon"
 homepage = "https://aphrody.com"
 authors = ["aphrody-dev <contact@aphrody.com>"]
-
 
 
 [workspace.lints.rust]
@@ -92,10 +91,17 @@ libc = { version = "0.2.190", default-features = false }
 log = { version = "0.4.34", default-features = false }
 png = { version = "0.18.1", default-features = false }
 rayon = { version = "1.12.0", default-features = false }
-serde = { version = "1.0.228", default-features = false, features = ["derive", "std"] }
-serde_json = { version = "1.0.154", default-features = false, features = ["std"] }
+serde = { version = "1.0.228", default-features = false, features = [
+  "derive",
+  "std",
+] }
+serde_json = { version = "1.0.154", default-features = false, features = [
+  "std",
+] }
 sha2 = { version = "0.11.1", default-features = false }
-tempfile = { version = "3.27.0", default-features = false, features = ["getrandom"] }
+tempfile = { version = "3.27.0", default-features = false, features = [
+  "getrandom",
+] }
 thiserror = { version = "2.0.21", default-features = false }
 tracing = { version = "0.1.44", default-features = false }
 windows = { version = "0.62.2", default-features = false }
@@ -107,15 +113,30 @@ bevy = { version = "0.20.1", default-features = false, features = ["std"] }
 bevy_app = { version = "0.20.1", default-features = false, features = ["std"] }
 bevy_asset = { version = "0.20.1", default-features = false }
 bevy_ecs = { version = "0.20.1", default-features = false, features = ["std"] }
-bevy_image = { version = "0.20.1", default-features = false, features = ["bevy_reflect"] }
+bevy_image = { version = "0.20.1", default-features = false, features = [
+  "bevy_reflect",
+] }
 bevy_math = { version = "0.20.1", default-features = false }
 bevy_mesh = { version = "0.20.1", default-features = false }
 bevy_reflect = { version = "0.20.1", default-features = false }
 bevy-wgpu-types = { package = "wgpu-types", version = "30.0.1", default-features = false }
-wgpu = { version = "30.0.1", default-features = false, features = ["std", "wgsl", "vulkan", "gles", "dx12", "metal", "web", "webgpu"] }
+wgpu = { version = "30.0.1", default-features = false, features = [
+  "std",
+  "wgsl",
+  "vulkan",
+  "gles",
+  "dx12",
+  "metal",
+  "web",
+  "webgpu",
+] }
 bun-steam = { git = "https://github.com/aphrody-dev/steam-depot", rev = "d098b41687a63767ee5eee3a351b2936a1d902e6", package = "steam-depot", default-features = false }
 parking_lot = "0.12.3"
-bytemuck = { version = "1.0", features = ["derive", "extern_crate_alloc", "min_const_generics"] }
+bytemuck = { version = "1.0", features = [
+  "derive",
+  "extern_crate_alloc",
+  "min_const_generics",
+] }
 clap = { version = "4", features = ["derive", "env"] }
 console_error_panic_hook = "0.1.5"
 futures-lite = "2"
@@ -199,7 +220,5 @@ panic = "abort"
 debug = false
 strip = true
 incremental = false
-
-
 
 

@@ -14,7 +14,10 @@ import {
   type CastEventKind,
   type CastSlotRole,
 } from "@rosegriffon/achillea-core/enums";
-import { canTransitionCastStatus, compareCastCandidates } from "@rosegriffon/achillea-core/casts";
+import {
+  canTransitionCastStatus,
+  compareCastCandidates,
+} from "@rosegriffon/achillea-core/casts";
 import { resolveDiscordAvatarUrl } from "@rosegriffon/achillea-core/identity";
 import { journaliserAudit } from "../audit";
 import type { CastModel, CastTables } from "./model";
@@ -25,7 +28,7 @@ export type CastSlot = typeof CastModel.slot.static;
 export type CastAvailability = typeof CastModel.availability.static;
 export type CastAttribution = typeof CastModel.attribution.static;
 export type CasterPublic = typeof CastModel.caster.static;
-export type ChecklistItem = typeof CastModel.detail.static.checklist[number];
+export type ChecklistItem = (typeof CastModel.detail.static.checklist)[number];
 
 /** Greffe les tables cast au client partagé (aucune connexion supplémentaire). */
 export function castDb(db: Kysely<Database>): CastDb {
@@ -66,12 +69,16 @@ type SlotRow = Selectable<CastTables["cast_slot"]>;
 type AvailabilityRow = Selectable<CastTables["cast_availability"]>;
 type AttributionRow = Selectable<CastTables["cast_attribution"]>;
 
-const iso = (value: Date | string) => (value instanceof Date ? value : new Date(value)).toISOString();
+const iso = (value: Date | string) =>
+  (value instanceof Date ? value : new Date(value)).toISOString();
 
 function parseRoles(value: unknown): CastSlotRole[] | null {
   if (value == null) return null;
-  const parsed = typeof value === "string" ? (JSON.parse(value) as unknown) : value;
-  return Array.isArray(parsed) ? (parsed.filter(role => typeof role === "string") as CastSlotRole[]) : null;
+  const parsed =
+    typeof value === "string" ? (JSON.parse(value) as unknown) : value;
+  return Array.isArray(parsed)
+    ? (parsed.filter((role) => typeof role === "string") as CastSlotRole[])
+    : null;
 }
 
 export function toEvent(row: EventRow): CastEvent {
@@ -96,7 +103,8 @@ export function toSlot(row: SlotRow): CastSlot {
     id: row.id,
     role: row.role as CastSlotRole,
     required: row.required,
-    defraymentAmount: row.defrayment_amount == null ? null : String(row.defrayment_amount),
+    defraymentAmount:
+      row.defrayment_amount == null ? null : String(row.defrayment_amount),
     defraymentCurrency: row.defrayment_currency,
     defraymentReason: row.defrayment_reason,
     notes: row.notes,
@@ -126,9 +134,14 @@ export function toAttribution(row: AttributionRow): CastAttribution {
 }
 
 /** Checklist : chaque poste avec son attribution courante et sa confirmation. */
-export function buildChecklist(slots: CastSlot[], attributions: CastAttribution[]): ChecklistItem[] {
-  const bySlot = new Map(attributions.map(attribution => [attribution.slotId, attribution]));
-  return slots.map(slot => {
+export function buildChecklist(
+  slots: CastSlot[],
+  attributions: CastAttribution[],
+): ChecklistItem[] {
+  const bySlot = new Map(
+    attributions.map((attribution) => [attribution.slotId, attribution]),
+  );
+  return slots.map((slot) => {
     const attribution = bySlot.get(slot.id) ?? null;
     return {
       slot,
@@ -174,7 +187,9 @@ export function planAutoAssign(
   const plan: Array<{ slotId: string; userId: string }> = [];
   for (const slot of slots) {
     const eligible = candidates.filter(
-      candidate => (recent.get(candidate.userId) ?? 0) < maxSlotsPerCaster && !used.has(candidate.userId),
+      (candidate) =>
+        (recent.get(candidate.userId) ?? 0) < maxSlotsPerCaster &&
+        !used.has(candidate.userId),
     );
     const input = (candidate: AutoAssignCandidate) => ({
       userId: candidate.userId,
@@ -183,7 +198,9 @@ export function planAutoAssign(
       recentAssignments: recent.get(candidate.userId) ?? 0,
       binomeBonus: binomeBonus.get(candidate.userId) ?? 0,
     });
-    const winner = eligible.toSorted((a, b) => compareCastCandidates(input(a), input(b), slot.role))[0];
+    const winner = eligible.toSorted((a, b) =>
+      compareCastCandidates(input(a), input(b), slot.role),
+    )[0];
     if (!winner) continue;
     plan.push({ slotId: slot.id, userId: winner.userId });
     used.add(winner.userId);
@@ -195,7 +212,13 @@ export function planAutoAssign(
 export abstract class CastService {
   static async listEvents(
     db: CastDb,
-    query: { status?: CastEventStatus; from?: Date; to?: Date; page: number; pageSize: number },
+    query: {
+      status?: CastEventStatus;
+      from?: Date;
+      to?: Date;
+      page: number;
+      pageSize: number;
+    },
   ) {
     let base = db.selectFrom("cast_event");
     if (query.status) base = base.where("status", "=", query.status);
@@ -208,18 +231,28 @@ export abstract class CastService {
         .limit(query.pageSize)
         .offset((query.page - 1) * query.pageSize)
         .execute(),
-      base.select(({ fn }) => fn.countAll<string>().as("total")).executeTakeFirst(),
+      base
+        .select(({ fn }) => fn.countAll<string>().as("total"))
+        .executeTakeFirst(),
     ]);
     const total = Number(count?.total ?? 0);
     return {
       data: rows.map(toEvent),
       total,
-      meta: { page: query.page, pageSize: query.pageSize, pageCount: Math.ceil(total / query.pageSize) },
+      meta: {
+        page: query.page,
+        pageSize: query.pageSize,
+        pageCount: Math.ceil(total / query.pageSize),
+      },
     };
   }
 
   static async findEvent(db: CastDb, id: string) {
-    const row = await db.selectFrom("cast_event").selectAll().where("id", "=", id).executeTakeFirst();
+    const row = await db
+      .selectFrom("cast_event")
+      .selectAll()
+      .where("id", "=", id)
+      .executeTakeFirst();
     return row ? toEvent(row) : null;
   }
 
@@ -227,7 +260,12 @@ export abstract class CastService {
     const event = await CastService.findEvent(db, id);
     if (!event) return null;
     const [slotRows, attributionRows] = await Promise.all([
-      db.selectFrom("cast_slot").selectAll().where("event_id", "=", id).orderBy("id").execute(),
+      db
+        .selectFrom("cast_slot")
+        .selectAll()
+        .where("event_id", "=", id)
+        .orderBy("id")
+        .execute(),
       db
         .selectFrom("cast_attribution")
         .innerJoin("cast_slot", "cast_slot.id", "cast_attribution.slot_id")
@@ -237,11 +275,16 @@ export abstract class CastService {
     ]);
     const slots = slotRows.map(toSlot);
     const attributions = attributionRows.map(toAttribution);
-    return { event, slots, attributions, checklist: buildChecklist(slots, attributions) };
+    return {
+      event,
+      slots,
+      attributions,
+      checklist: buildChecklist(slots, attributions),
+    };
   }
 
   static async createEvent(db: CastDb, input: CreateEventInput) {
-    return db.transaction().execute(async trx => {
+    return db.transaction().execute(async (trx) => {
       const row = await trx
         .insertInto("cast_event")
         .values({
@@ -259,14 +302,27 @@ export abstract class CastService {
         .executeTakeFirstOrThrow();
       await trx
         .insertInto("cast_slot")
-        .values(input.slots.map(slot => ({ event_id: row.id, role: slot.role, required: slot.required ?? true })))
+        .values(
+          input.slots.map((slot) => ({
+            event_id: row.id,
+            role: slot.role,
+            required: slot.required ?? true,
+          })),
+        )
         .execute();
-      await audit(trx, input.createdBy, "cast.event.create", "cast_event", row.id, {
-        name: input.name,
-        kind: input.kind,
-        scheduledAt: input.scheduledAt.toISOString(),
-        slots: input.slots.length,
-      });
+      await audit(
+        trx,
+        input.createdBy,
+        "cast.event.create",
+        "cast_event",
+        row.id,
+        {
+          name: input.name,
+          kind: input.kind,
+          scheduledAt: input.scheduledAt.toISOString(),
+          slots: input.slots.length,
+        },
+      );
       return toEvent(row);
     });
   }
@@ -275,15 +331,24 @@ export abstract class CastService {
    * Ouvre le sondage : une disponibilité neutre (`unavailable`) par membre du
    * pool, idempotent sur (user_id, event_id), puis `planned` → `open_signup`.
    */
-  static async openSurvey(db: CastDb, event: CastEvent, casterPool: readonly string[], actorId: string) {
+  static async openSurvey(
+    db: CastDb,
+    event: CastEvent,
+    casterPool: readonly string[],
+    actorId: string,
+  ) {
     const pool = [...new Set(casterPool)];
-    await db.transaction().execute(async trx => {
+    await db.transaction().execute(async (trx) => {
       await trx
         .insertInto("cast_availability")
         .values(
-          pool.map(userId => ({ user_id: userId, event_id: event.id, status: CastAvailabilityStatus.Unavailable })),
+          pool.map((userId) => ({
+            user_id: userId,
+            event_id: event.id,
+            status: CastAvailabilityStatus.Unavailable,
+          })),
         )
-        .onConflict(oc => oc.columns(["user_id", "event_id"]).doNothing())
+        .onConflict((oc) => oc.columns(["user_id", "event_id"]).doNothing())
         .execute();
       if (event.status === CastEventStatus.Planned) {
         await trx
@@ -293,9 +358,15 @@ export abstract class CastService {
           .where("status", "=", CastEventStatus.Planned)
           .execute();
       }
-      await audit(trx, actorId, "cast.survey.open", "cast_event", event.id, { casterPool: pool });
+      await audit(trx, actorId, "cast.survey.open", "cast_event", event.id, {
+        casterPool: pool,
+      });
     });
-    return { success: true as const, eventId: event.id, poolSize: casterPool.length };
+    return {
+      success: true as const,
+      eventId: event.id,
+      poolSize: casterPool.length,
+    };
   }
 
   /** Upsert de la disponibilité du caster connecté ; `declared_at` est rafraîchi. */
@@ -309,9 +380,15 @@ export abstract class CastService {
       notes?: string | null;
     },
   ) {
-    const roles = input.preferredRoles == null ? null : sql`${JSON.stringify(input.preferredRoles)}::jsonb`;
+    const roles =
+      input.preferredRoles == null
+        ? null
+        : sql`${JSON.stringify(input.preferredRoles)}::jsonb`;
     const now = new Date();
-    const update: Record<string, unknown> = { status: input.status, declared_at: now };
+    const update: Record<string, unknown> = {
+      status: input.status,
+      declared_at: now,
+    };
     if (input.preferredRoles !== undefined) update.preferred_roles = roles;
     if (input.notes !== undefined) update.notes = input.notes;
     const row = await db
@@ -324,7 +401,9 @@ export abstract class CastService {
         notes: input.notes ?? null,
         declared_at: now,
       })
-      .onConflict(oc => oc.columns(["user_id", "event_id"]).doUpdateSet(update))
+      .onConflict((oc) =>
+        oc.columns(["user_id", "event_id"]).doUpdateSet(update),
+      )
       .returningAll()
       .executeTakeFirstOrThrow();
     return toAvailability(row);
@@ -337,7 +416,12 @@ export abstract class CastService {
     maxSlotsPerCaster = DEFAULT_MAX_SLOTS_PER_CASTER,
   ) {
     const [slots, existing, availabilities] = await Promise.all([
-      db.selectFrom("cast_slot").selectAll().where("event_id", "=", event.id).orderBy("id").execute(),
+      db
+        .selectFrom("cast_slot")
+        .selectAll()
+        .where("event_id", "=", event.id)
+        .orderBy("id")
+        .execute(),
       db
         .selectFrom("cast_attribution")
         .innerJoin("cast_slot", "cast_slot.id", "cast_attribution.slot_id")
@@ -348,14 +432,19 @@ export abstract class CastService {
         .selectFrom("cast_availability")
         .selectAll()
         .where("event_id", "=", event.id)
-        .where("status", "in", [CastAvailabilityStatus.Available, CastAvailabilityStatus.Maybe])
+        .where("status", "in", [
+          CastAvailabilityStatus.Available,
+          CastAvailabilityStatus.Maybe,
+        ])
         .execute(),
     ]);
-    const assignedSlotIds = new Set(existing.filter(a => a.user_id !== null).map(a => a.slot_id));
-    const freeSlots = slots.filter(slot => !assignedSlotIds.has(slot.id));
+    const assignedSlotIds = new Set(
+      existing.filter((a) => a.user_id !== null).map((a) => a.slot_id),
+    );
+    const freeSlots = slots.filter((slot) => !assignedSlotIds.has(slot.id));
     if (freeSlots.length === 0 || availabilities.length === 0) return [];
 
-    const candidateIds = [...new Set(availabilities.map(a => a.user_id))];
+    const candidateIds = [...new Set(availabilities.map((a) => a.user_id))];
     const windowStart = new Date(Date.now() - RECENT_CAST_WINDOW_DAYS * DAY_MS);
     const recentRows = await db
       .selectFrom("cast_attribution")
@@ -364,11 +453,15 @@ export abstract class CastService {
       .where("assigned_at", ">=", windowStart)
       .groupBy("user_id")
       .execute();
-    const recentCounts = new Map(recentRows.map(row => [row.user_id as string, Number(row.count)]));
+    const recentCounts = new Map(
+      recentRows.map((row) => [row.user_id as string, Number(row.count)]),
+    );
 
     // Bonus binôme : le candidat a déjà été co-attribué, sur un AUTRE évènement,
     // avec un caster déjà placé sur celui-ci (+SCORE_BINOME_BONUS par binôme).
-    const alreadyAssigned = existing.flatMap(a => (a.user_id ? [a.user_id] : []));
+    const alreadyAssigned = existing.flatMap((a) =>
+      a.user_id ? [a.user_id] : [],
+    );
     const binomeBonus = new Map<string, number>();
     if (alreadyAssigned.length > 0) {
       const pairs = await sql<{ candidate: string; partner: string }>`
@@ -382,13 +475,19 @@ export abstract class CastService {
           AND s1.event_id <> ${event.id}
       `.execute(db);
       for (const pair of pairs.rows) {
-        binomeBonus.set(pair.candidate, (binomeBonus.get(pair.candidate) ?? 0) + SCORE_BINOME_BONUS);
+        binomeBonus.set(
+          pair.candidate,
+          (binomeBonus.get(pair.candidate) ?? 0) + SCORE_BINOME_BONUS,
+        );
       }
     }
 
     const plan = planAutoAssign(
-      freeSlots.map(slot => ({ id: slot.id, role: slot.role as CastSlotRole })),
-      availabilities.map(a => ({
+      freeSlots.map((slot) => ({
+        id: slot.id,
+        role: slot.role as CastSlotRole,
+      })),
+      availabilities.map((a) => ({
         userId: a.user_id,
         status: a.status as CastAvailabilityStatus,
         preferredRoles: parseRoles(a.preferred_roles),
@@ -399,18 +498,29 @@ export abstract class CastService {
     );
     if (plan.length === 0) return [];
 
-    return db.transaction().execute(async trx => {
+    return db.transaction().execute(async (trx) => {
       const now = new Date();
       const created: CastAttribution[] = [];
       for (const { slotId, userId } of plan) {
         // Une attribution vide peut déjà exister pour le poste (contrainte unique sur slot_id).
         const row = await trx
           .insertInto("cast_attribution")
-          .values({ slot_id: slotId, user_id: userId, assigned_by: "system", assigned_at: now, confirmed_at: null })
-          .onConflict(oc =>
+          .values({
+            slot_id: slotId,
+            user_id: userId,
+            assigned_by: "system",
+            assigned_at: now,
+            confirmed_at: null,
+          })
+          .onConflict((oc) =>
             oc
               .column("slot_id")
-              .doUpdateSet({ user_id: userId, assigned_by: "system", assigned_at: now, confirmed_at: null })
+              .doUpdateSet({
+                user_id: userId,
+                assigned_by: "system",
+                assigned_at: now,
+                confirmed_at: null,
+              })
               .where("cast_attribution.user_id", "is", null),
           )
           .returningAll()
@@ -418,9 +528,17 @@ export abstract class CastService {
         if (row) created.push(toAttribution(row));
       }
 
-      const covered = new Set([...assignedSlotIds, ...created.map(a => a.slotId)]);
-      const allRequiredCovered = slots.filter(slot => slot.required).every(slot => covered.has(slot.id));
-      if (allRequiredCovered && canTransitionCastStatus(event.status, CastEventStatus.Attributed)) {
+      const covered = new Set([
+        ...assignedSlotIds,
+        ...created.map((a) => a.slotId),
+      ]);
+      const allRequiredCovered = slots
+        .filter((slot) => slot.required)
+        .every((slot) => covered.has(slot.id));
+      if (
+        allRequiredCovered &&
+        canTransitionCastStatus(event.status, CastEventStatus.Attributed)
+      ) {
         await trx
           .updateTable("cast_event")
           .set({ status: CastEventStatus.Attributed, updated_at: now })
@@ -428,10 +546,21 @@ export abstract class CastService {
           .execute();
       }
       if (created.length > 0)
-        await audit(trx, actorId, "cast.attribution.auto_assign", "cast_event", event.id, {
-          maxSlotsPerCaster,
-          attributions: created.map(a => ({ id: a.id, slotId: a.slotId, userId: a.userId })),
-        });
+        await audit(
+          trx,
+          actorId,
+          "cast.attribution.auto_assign",
+          "cast_event",
+          event.id,
+          {
+            maxSlotsPerCaster,
+            attributions: created.map((a) => ({
+              id: a.id,
+              slotId: a.slotId,
+              userId: a.userId,
+            })),
+          },
+        );
       return created;
     });
   }
@@ -447,13 +576,22 @@ export abstract class CastService {
   }
 
   static async findAttribution(db: CastDb, id: string) {
-    const row = await db.selectFrom("cast_attribution").selectAll().where("id", "=", id).executeTakeFirst();
+    const row = await db
+      .selectFrom("cast_attribution")
+      .selectAll()
+      .where("id", "=", id)
+      .executeTakeFirst();
     return row ? toAttribution(row) : null;
   }
 
   /** Remplace le caster : la confirmation est remise à zéro. */
-  static async swap(db: CastDb, attributionId: string, newCasterId: string, swappedBy: string) {
-    return db.transaction().execute(async trx => {
+  static async swap(
+    db: CastDb,
+    attributionId: string,
+    newCasterId: string,
+    swappedBy: string,
+  ) {
+    return db.transaction().execute(async (trx) => {
       const previous = await trx
         .selectFrom("cast_attribution")
         .select("user_id")
@@ -463,15 +601,27 @@ export abstract class CastService {
       if (!previous) return null;
       const row = await trx
         .updateTable("cast_attribution")
-        .set({ user_id: newCasterId, confirmed_at: null, assigned_by: swappedBy, assigned_at: new Date() })
+        .set({
+          user_id: newCasterId,
+          confirmed_at: null,
+          assigned_by: swappedBy,
+          assigned_at: new Date(),
+        })
         .where("id", "=", attributionId)
         .returningAll()
         .executeTakeFirstOrThrow();
-      await audit(trx, swappedBy, "cast.attribution.swap", "cast_attribution", row.id, {
-        slotId: row.slot_id,
-        from: previous.user_id,
-        to: newCasterId,
-      });
+      await audit(
+        trx,
+        swappedBy,
+        "cast.attribution.swap",
+        "cast_attribution",
+        row.id,
+        {
+          slotId: row.slot_id,
+          from: previous.user_id,
+          to: newCasterId,
+        },
+      );
       return toAttribution(row);
     });
   }
@@ -492,14 +642,32 @@ export abstract class CastService {
     const since = new Date(Date.now() - SHOWCASE_WINDOW_DAYS * DAY_MS);
     const [available, attributed] = await Promise.all([
       db.selectFrom("cast_availability").select("user_id").distinct().execute(),
-      db.selectFrom("cast_attribution").select("user_id").distinct().where("user_id", "is not", null).execute(),
+      db
+        .selectFrom("cast_attribution")
+        .select("user_id")
+        .distinct()
+        .where("user_id", "is not", null)
+        .execute(),
     ]);
-    const userIds = [...new Set([...available, ...attributed].flatMap(row => (row.user_id ? [row.user_id] : [])))];
+    const userIds = [
+      ...new Set(
+        [...available, ...attributed].flatMap((row) =>
+          row.user_id ? [row.user_id] : [],
+        ),
+      ),
+    ];
     if (userIds.length === 0) return [];
     const [users, recent] = await Promise.all([
       db
         .selectFrom("user")
-        .select(["id", "display_name", "username", "avatar", "bio", "twitch_url"])
+        .select([
+          "id",
+          "display_name",
+          "username",
+          "avatar",
+          "bio",
+          "twitch_url",
+        ])
         .where("id", "in", userIds)
         .execute(),
       db
@@ -510,10 +678,12 @@ export abstract class CastService {
         .groupBy("user_id")
         .execute(),
     ]);
-    const byId = new Map(users.map(user => [user.id, user]));
-    const recentById = new Map(recent.map(row => [row.user_id as string, Number(row.count)]));
+    const byId = new Map(users.map((user) => [user.id, user]));
+    const recentById = new Map(
+      recent.map((row) => [row.user_id as string, Number(row.count)]),
+    );
     return userIds
-      .map(userId => {
+      .map((userId) => {
         const user = byId.get(userId);
         return {
           id: userId,
@@ -524,6 +694,8 @@ export abstract class CastService {
           recentCasts: recentById.get(userId) ?? 0,
         };
       })
-      .toSorted((a, b) => b.recentCasts - a.recentCasts || a.id.localeCompare(b.id));
+      .toSorted(
+        (a, b) => b.recentCasts - a.recentCasts || a.id.localeCompare(b.id),
+      );
   }
 }

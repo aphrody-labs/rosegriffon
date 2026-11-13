@@ -27,7 +27,10 @@ import { randomBytes } from "node:crypto";
 import { fileURLToPath } from "node:url";
 import { memoryAdapter } from "better-auth/adapters/memory";
 import { verifyAchilleaSessionToken } from "@rosegriffon/achillea-core/auth";
-import { ACHILLEA_SESSION_COOKIE_NAME, signAchilleaSessionToken } from "./achillea-session";
+import {
+  ACHILLEA_SESSION_COOKIE_NAME,
+  signAchilleaSessionToken,
+} from "./achillea-session";
 import type { RoseGriffonAuthOptions } from "./factory";
 
 // The profile hooks write to the site's Postgres through this client: keep them
@@ -36,7 +39,9 @@ const profileLookups: string[] = [];
 const noDb = () => {
   const chain: any = new Proxy(() => chain, {
     get: (_target, key) => {
-      if (key === "then") return (resolve: (value: unknown) => void) => resolve({ data: null, error: null });
+      if (key === "then")
+        return (resolve: (value: unknown) => void) =>
+          resolve({ data: null, error: null });
       if (key === "eq") {
         return (column: string, value: string) => {
           if (column === "id") profileLookups.push(value);
@@ -71,9 +76,27 @@ const providerCalls: { url: string; body?: string }[] = [];
 function memoryDb() {
   const tables: Record<string, unknown[]> = {};
   for (const model of [
-    "user", "session", "account", "verification", "jwks", "apikey", "two_factor", "twoFactor", "passkey",
-    "oauthClient", "oauthRefreshToken", "oauthAccessToken", "oauthConsent", "agent", "agentHost", "agentCapabilityGrant",
-    "approvalRequest", "agentSession", "agentCapability", "agentDevice", "deviceCode",
+    "user",
+    "session",
+    "account",
+    "verification",
+    "jwks",
+    "apikey",
+    "two_factor",
+    "twoFactor",
+    "passkey",
+    "oauthClient",
+    "oauthRefreshToken",
+    "oauthAccessToken",
+    "oauthConsent",
+    "agent",
+    "agentHost",
+    "agentCapabilityGrant",
+    "approvalRequest",
+    "agentSession",
+    "agentCapability",
+    "agentDevice",
+    "deviceCode",
   ]) {
     tables[model] = [];
   }
@@ -94,13 +117,25 @@ function jar(response: Response, cookies = new Map<string, string>()) {
   }
   return cookies;
 }
-const cookieHeader = (cookies: Map<string, string>) => [...cookies].map(([name, value]) => `${name}=${value}`).join("; ");
+const cookieHeader = (cookies: Map<string, string>) =>
+  [...cookies].map(([name, value]) => `${name}=${value}`).join("; ");
 
 let requests = 0;
-function call(path: string, init: { method?: string; body?: unknown; cookies?: Map<string, string>; origin?: string } = {}) {
+function call(
+  path: string,
+  init: {
+    method?: string;
+    body?: unknown;
+    cookies?: Map<string, string>;
+    origin?: string;
+  } = {},
+) {
   // A distinct client address per request keeps Better Auth's sign-in rate limit out of the way.
   requests += 1;
-  const headers = new Headers({ origin: init.origin ?? ORIGIN, "x-forwarded-for": `198.51.100.${requests % 250}` });
+  const headers = new Headers({
+    origin: init.origin ?? ORIGIN,
+    "x-forwarded-for": `198.51.100.${requests % 250}`,
+  });
   if (init.body !== undefined) headers.set("content-type", "application/json");
   if (init.cookies?.size) headers.set("cookie", cookieHeader(init.cookies));
   return auth.handler(
@@ -114,7 +149,10 @@ function call(path: string, init: { method?: string; body?: unknown; cookies?: M
 
 async function session(cookies: Map<string, string>) {
   const response = await call("/get-session", { cookies });
-  return (await response.json()) as { user: { id: string; email: string }; session: { token: string } } | null;
+  return (await response.json()) as {
+    user: { id: string; email: string };
+    session: { token: string };
+  } | null;
 }
 
 const DISCORD_PROFILE = {
@@ -132,13 +170,22 @@ beforeAll(async () => {
     previousEnv[key] = process.env[key];
     process.env[key] = value;
   }
-  globalThis.fetch = (async (input: Request | string | URL, init?: RequestInit) => {
-    const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
+  globalThis.fetch = (async (
+    input: Request | string | URL,
+    init?: RequestInit,
+  ) => {
+    const url =
+      typeof input === "string"
+        ? input
+        : input instanceof URL
+          ? input.href
+          : input.url;
     const body = init?.body ? String(init.body) : undefined;
     providerCalls.push({ url, body });
     if (url === "https://discord.com/api/oauth2/token") {
       const code = new URLSearchParams(body).get("code");
-      if (code !== "discord-code-ok") return Response.json({ error: "invalid_grant" }, { status: 400 });
+      if (code !== "discord-code-ok")
+        return Response.json({ error: "invalid_grant" }, { status: 400 });
       return Response.json({
         access_token: "discord-access-fixture",
         refresh_token: "discord-refresh-fixture",
@@ -147,9 +194,15 @@ beforeAll(async () => {
         scope: "identify email",
       });
     }
-    if (decodeURIComponent(url) === "https://discord.com/api/users/@me") return Response.json(DISCORD_PROFILE);
+    if (decodeURIComponent(url) === "https://discord.com/api/users/@me")
+      return Response.json(DISCORD_PROFILE);
     if (url === "https://www.patreon.com/api/oauth2/token") {
-      return Response.json({ access_token: "patreon-access-fixture", refresh_token: "patreon-refresh-fixture", token_type: "Bearer", expires_in: 3600 });
+      return Response.json({
+        access_token: "patreon-access-fixture",
+        refresh_token: "patreon-refresh-fixture",
+        token_type: "Bearer",
+        expires_in: 3600,
+      });
     }
     throw new Error(`Unexpected network call in an offline auth test: ${url}`);
   }) as typeof fetch;
@@ -158,10 +211,12 @@ beforeAll(async () => {
   const { createRoseGriffonAuth } = await import("./factory");
   auth = createRoseGriffonAuth({
     // Two @better-auth/core copies are installed; the adapter is the same at runtime.
-    database: memoryAdapter(db) as unknown as RoseGriffonAuthOptions["database"],
+    database: memoryAdapter(
+      db,
+    ) as unknown as RoseGriffonAuthOptions["database"],
     baseURL: ORIGIN,
     secret: SECRET,
-    sendEmail: async message => {
+    sendEmail: async (message) => {
       mails.push(message);
     },
     passkey: { rpID: "rosegriffon.fr", origin: ORIGIN },
@@ -171,7 +226,12 @@ beforeAll(async () => {
       clientId: "test-patreon-client",
       clientSecret: randomBytes(16).toString("hex"),
       scopes: ["identity", "identity[email]"],
-      getUserInfo: async () => ({ id: "patreon-77", email: "patron@example.test", emailVerified: true, name: "Patron" }),
+      getUserInfo: async () => ({
+        id: "patreon-77",
+        email: "patron@example.test",
+        emailVerified: true,
+        name: "Patron",
+      }),
     },
   });
 });
@@ -195,76 +255,128 @@ describe("RG email and password", () => {
   const password = "correct horse battery staple";
 
   test("sign-up stores the user but opens no session before the address is verified", async () => {
-    const response = await call("/sign-up/email", { body: { email, password, name: "Member" } });
+    const response = await call("/sign-up/email", {
+      body: { email, password, name: "Member" },
+    });
     expect(response.status).toBe(200);
-    expect(response.headers.getSetCookie().some(value => value.includes("session_token="))).toBe(false);
-    expect(db.user!.find(user => user.email === email)).toMatchObject({ email_verified: false });
-    expect(db.account!.find(account => account.provider_id === "credential")?.password).not.toContain(password);
-    expect(mails.at(-1)).toMatchObject({ to: email, subject: "Confirme ton adresse — Rose Griffon" });
+    expect(
+      response.headers
+        .getSetCookie()
+        .some((value) => value.includes("session_token=")),
+    ).toBe(false);
+    expect(db.user!.find((user) => user.email === email)).toMatchObject({
+      email_verified: false,
+    });
+    expect(
+      db.account!.find((account) => account.provider_id === "credential")
+        ?.password,
+    ).not.toContain(password);
+    expect(mails.at(-1)).toMatchObject({
+      to: email,
+      subject: "Confirme ton adresse — Rose Griffon",
+    });
   });
 
   test("rejects passwords shorter than twelve characters", async () => {
-    const response = await call("/sign-up/email", { body: { email: "short@example.test", password: "elevenchars", name: "S" } });
+    const response = await call("/sign-up/email", {
+      body: { email: "short@example.test", password: "elevenchars", name: "S" },
+    });
     expect(response.status).toBe(400);
   });
 
   test("an unverified address cannot sign in", async () => {
-    const response = await call("/sign-in/email", { body: { email, password } });
+    const response = await call("/sign-in/email", {
+      body: { email, password },
+    });
     expect(response.status).toBe(403);
   });
 
   test("verification link, sign-in, session read and sign-out", async () => {
-    const link = linkFrom(mails.findLast(mail => mail.to === email)!);
+    const link = linkFrom(mails.findLast((mail) => mail.to === email)!);
     expect(link.origin).toBe(ORIGIN);
     expect(link.pathname).toBe("/api/auth/verify-email");
-    const verified = await call(`${link.pathname.replace("/api/auth", "")}${link.search}`);
+    const verified = await call(
+      `${link.pathname.replace("/api/auth", "")}${link.search}`,
+    );
     expect([200, 302]).toContain(verified.status);
-    expect(db.user!.find(user => user.email === email)?.email_verified).toBe(true);
+    expect(db.user!.find((user) => user.email === email)?.email_verified).toBe(
+      true,
+    );
 
-    expect((await call("/sign-in/email", { body: { email, password: "wrong password value" } })).status).toBe(401);
+    expect(
+      (
+        await call("/sign-in/email", {
+          body: { email, password: "wrong password value" },
+        })
+      ).status,
+    ).toBe(401);
 
     const signIn = await call("/sign-in/email", { body: { email, password } });
     expect(signIn.status).toBe(200);
     const cookies = jar(signIn);
-    const setCookie = signIn.headers.getSetCookie().find(value => value.startsWith("better-auth.session_token="))!;
+    const setCookie = signIn.headers
+      .getSetCookie()
+      .find((value) => value.startsWith("better-auth.session_token="))!;
     expect(setCookie).toMatch(/HttpOnly/i);
     expect(setCookie).toMatch(/SameSite=Lax/i);
     expect(setCookie).not.toMatch(/Domain=/i);
     expect((await session(cookies))?.user.email).toBe(email);
 
     const signOut = await call("/sign-out", { body: {}, cookies });
-    expect(signOut.headers.getSetCookie().some(value => /^better-auth\.session_token=;.*Max-Age=0/i.test(value))).toBe(true);
+    expect(
+      signOut.headers
+        .getSetCookie()
+        .some((value) =>
+          /^better-auth\.session_token=;.*Max-Age=0/i.test(value),
+        ),
+    ).toBe(true);
     // Regression: the derived Achilléa token is erased with the RG session.
-    expect(signOut.headers.getSetCookie().some(value => /^token=;.*Max-Age=0/i.test(value) && /Path=\//.test(value))).toBe(true);
+    expect(
+      signOut.headers
+        .getSetCookie()
+        .some(
+          (value) =>
+            /^token=;.*Max-Age=0/i.test(value) && /Path=\//.test(value),
+        ),
+    ).toBe(true);
     expect(signOut.status).toBe(200);
     jar(signOut, cookies);
     expect(await session(cookies)).toBeNull();
   });
-
 });
 
 test("regression: every new session syncs the profile of its user (session hook had no user)", async () => {
   const email = "profile-sync@example.test";
   const password = "profile sync password";
   await call("/sign-up/email", { body: { email, password, name: "Sync" } });
-  await call(`/verify-email${linkFrom(mails.findLast(mail => mail.to === email)!).search}`);
-  const id = db.user!.find(user => user.email === email)!.id as string;
+  await call(
+    `/verify-email${linkFrom(mails.findLast((mail) => mail.to === email)!).search}`,
+  );
+  const id = db.user!.find((user) => user.email === email)!.id as string;
   const errors: unknown[][] = [];
   const realError = console.error;
   console.error = (...args: unknown[]) => void errors.push(args);
   try {
     profileLookups.length = 0;
-    expect((await call("/sign-in/email", { body: { email, password } })).status).toBe(200);
+    expect(
+      (await call("/sign-in/email", { body: { email, password } })).status,
+    ).toBe(200);
   } finally {
     console.error = realError;
   }
-  expect(errors.filter(args => String(args[0]).includes("session profile sync failed"))).toEqual([]);
+  expect(
+    errors.filter((args) =>
+      String(args[0]).includes("session profile sync failed"),
+    ),
+  ).toEqual([]);
   expect(profileLookups).toContain(id);
 });
 
 describe("RG social OAuth", () => {
   async function start(provider: string) {
-    const response = await call("/sign-in/social", { body: { provider, callbackURL: "/settings" } });
+    const response = await call("/sign-in/social", {
+      body: { provider, callbackURL: "/settings" },
+    });
     expect(response.status).toBe(200);
     const { url } = (await response.json()) as { url: string };
     return { url: new URL(url), cookies: jar(response) };
@@ -272,87 +384,145 @@ describe("RG social OAuth", () => {
 
   test("each configured provider builds its authorization URL on rosegriffon.fr", async () => {
     const expected = {
-      discord: ["https://discord.com/api/oauth2/authorize", "test-discord-client"],
+      discord: [
+        "https://discord.com/api/oauth2/authorize",
+        "test-discord-client",
+      ],
       twitch: ["https://id.twitch.tv/oauth2/authorize", "test-twitch-client"],
-      github: ["https://github.com/login/oauth/authorize", "test-github-client"],
+      github: [
+        "https://github.com/login/oauth/authorize",
+        "test-github-client",
+      ],
     } as const;
     for (const [provider, [endpoint, clientId]] of Object.entries(expected)) {
       const { url } = await start(provider);
       expect(`${url.origin}${url.pathname}`).toBe(endpoint);
       expect(url.searchParams.get("client_id")).toBe(clientId);
-      expect(url.searchParams.get("redirect_uri")).toBe(`${ORIGIN}/api/auth/callback/${provider}`);
+      expect(url.searchParams.get("redirect_uri")).toBe(
+        `${ORIGIN}/api/auth/callback/${provider}`,
+      );
       expect(url.searchParams.get("response_type")).toBe("code");
-      expect(url.searchParams.get("state")?.length ?? 0).toBeGreaterThanOrEqual(32);
+      expect(url.searchParams.get("state")?.length ?? 0).toBeGreaterThanOrEqual(
+        32,
+      );
     }
     const discord = await start("discord");
     expect(discord.url.searchParams.get("scope")).toBe("identify email");
     expect(discord.url.searchParams.get("prompt")).toBe("consent");
     // Each start mints a fresh state.
-    expect((await start("discord")).url.searchParams.get("state")).not.toBe(discord.url.searchParams.get("state"));
+    expect((await start("discord")).url.searchParams.get("state")).not.toBe(
+      discord.url.searchParams.get("state"),
+    );
   });
 
   test("Patreon (genericOAuth) uses the standard social callback", async () => {
-    const response = await call("/sign-in/social", { body: { provider: "patreon", callbackURL: "/settings" } });
+    const response = await call("/sign-in/social", {
+      body: { provider: "patreon", callbackURL: "/settings" },
+    });
     expect(response.status).toBe(200);
     const url = new URL(((await response.json()) as { url: string }).url);
-    expect(`${url.origin}${url.pathname}`).toBe("https://www.patreon.com/oauth2/authorize");
+    expect(`${url.origin}${url.pathname}`).toBe(
+      "https://www.patreon.com/oauth2/authorize",
+    );
     expect(url.searchParams.get("client_id")).toBe("test-patreon-client");
-    expect(url.searchParams.get("redirect_uri")).toBe(`${ORIGIN}/api/auth/callback/patreon`);
+    expect(url.searchParams.get("redirect_uri")).toBe(
+      `${ORIGIN}/api/auth/callback/patreon`,
+    );
     expect(url.searchParams.get("state")).toBeTruthy();
   });
 
   test("a callback with a forged state is refused before any token exchange", async () => {
     const { cookies } = await start("discord");
     const before = providerCalls.length;
-    const response = await call(`/callback/discord?code=discord-code-ok&state=${"x".repeat(32)}`, { cookies });
+    const response = await call(
+      `/callback/discord?code=discord-code-ok&state=${"x".repeat(32)}`,
+      { cookies },
+    );
     expect(response.status).toBe(302);
     expect(response.headers.get("location")).toContain("error=");
     expect(providerCalls.length).toBe(before);
-    expect(response.headers.getSetCookie().some(value => value.startsWith("better-auth.session_token="))).toBe(false);
+    expect(
+      response.headers
+        .getSetCookie()
+        .some((value) => value.startsWith("better-auth.session_token=")),
+    ).toBe(false);
   });
 
   test("a callback without the state cookie of its browser is refused", async () => {
     const { url } = await start("discord");
-    const response = await call(`/callback/discord?code=discord-code-ok&state=${url.searchParams.get("state")}`);
+    const response = await call(
+      `/callback/discord?code=discord-code-ok&state=${url.searchParams.get("state")}`,
+    );
     expect(response.status).toBe(302);
     expect(response.headers.get("location")).toContain("error=");
   });
 
   test("callback exchanges the code, reads the profile and links to the verified email account", async () => {
     // Existing verified email/password account with the same address as the Discord profile.
-    await call("/sign-up/email", { body: { email: DISCORD_PROFILE.email, password: "linked account password", name: "Linked" } });
-    const link = linkFrom(mails.findLast(mail => mail.to === DISCORD_PROFILE.email)!);
+    await call("/sign-up/email", {
+      body: {
+        email: DISCORD_PROFILE.email,
+        password: "linked account password",
+        name: "Linked",
+      },
+    });
+    const link = linkFrom(
+      mails.findLast((mail) => mail.to === DISCORD_PROFILE.email)!,
+    );
     await call(`${link.pathname.replace("/api/auth", "")}${link.search}`);
-    const existing = db.user!.find(user => user.email === DISCORD_PROFILE.email)!;
+    const existing = db.user!.find(
+      (user) => user.email === DISCORD_PROFILE.email,
+    )!;
 
     const { url, cookies } = await start("discord");
-    const response = await call(`/callback/discord?code=discord-code-ok&state=${url.searchParams.get("state")}`, { cookies });
+    const response = await call(
+      `/callback/discord?code=discord-code-ok&state=${url.searchParams.get("state")}`,
+      { cookies },
+    );
     expect(response.status).toBe(302);
     expect(response.headers.get("location")).toBe("/settings");
-    const tokenCall = providerCalls.findLast(entry => entry.url === "https://discord.com/api/oauth2/token")!;
+    const tokenCall = providerCalls.findLast(
+      (entry) => entry.url === "https://discord.com/api/oauth2/token",
+    )!;
     const form = new URLSearchParams(tokenCall.body);
     expect(form.get("grant_type")).toBe("authorization_code");
-    expect(form.get("redirect_uri")).toBe(`${ORIGIN}/api/auth/callback/discord`);
+    expect(form.get("redirect_uri")).toBe(
+      `${ORIGIN}/api/auth/callback/discord`,
+    );
 
     jar(response, cookies);
     expect((await session(cookies))?.user.id).toBe(existing.id);
-    const accounts = db.account!.filter(account => account.user_id === existing.id).map(account => account.provider_id);
+    const accounts = db
+      .account!.filter((account) => account.user_id === existing.id)
+      .map((account) => account.provider_id);
     expect(accounts.toSorted()).toEqual(["credential", "discord"]);
-    const discord = db.account!.find(account => account.provider_id === "discord")!;
+    const discord = db.account!.find(
+      (account) => account.provider_id === "discord",
+    )!;
     expect(discord.account_id).toBe(DISCORD_PROFILE.id);
     // encryptOAuthTokens: provider tokens never rest in clear.
     expect(discord.access_token).not.toBe("discord-access-fixture");
 
     // The state is single use.
-    const replay = await call(`/callback/discord?code=discord-code-ok&state=${url.searchParams.get("state")}`, { cookies });
+    const replay = await call(
+      `/callback/discord?code=discord-code-ok&state=${url.searchParams.get("state")}`,
+      { cookies },
+    );
     expect(replay.headers.get("location")).toContain("error=");
   });
 
   test("a code rejected by the provider yields no session", async () => {
     const { url, cookies } = await start("discord");
-    const response = await call(`/callback/discord?code=bad-code&state=${url.searchParams.get("state")}`, { cookies });
+    const response = await call(
+      `/callback/discord?code=bad-code&state=${url.searchParams.get("state")}`,
+      { cookies },
+    );
     expect(response.headers.get("location")).toContain("error=");
-    expect(response.headers.getSetCookie().some(value => value.startsWith("better-auth.session_token="))).toBe(false);
+    expect(
+      response.headers
+        .getSetCookie()
+        .some((value) => value.startsWith("better-auth.session_token=")),
+    ).toBe(false);
   });
 });
 
@@ -361,25 +531,43 @@ describe("RG versus Achilléa", () => {
 
   async function rgMember(email: string) {
     const password = "distinct systems password";
-    await call("/sign-up/email", { body: { email, password, name: "Distinct" } });
-    await call(`/verify-email${linkFrom(mails.findLast(mail => mail.to === email)!).search}`);
-    const response = await call("/sign-in/email", { body: { email, password } });
-    return { cookies: jar(response), user: db.user!.find(user => user.email === email)! };
+    await call("/sign-up/email", {
+      body: { email, password, name: "Distinct" },
+    });
+    await call(
+      `/verify-email${linkFrom(mails.findLast((mail) => mail.to === email)!).search}`,
+    );
+    const response = await call("/sign-in/email", {
+      body: { email, password },
+    });
+    return {
+      cookies: jar(response),
+      user: db.user!.find((user) => user.email === email)!,
+    };
   }
 
   test("different cookie names, secrets and callback hosts", () => {
     expect(ACHILLEA_SESSION_COOKIE_NAME).toBe("token");
     expect(ACHILLEA_SECRET).not.toBe(SECRET);
     // RG callbacks live on the site, Achilléa provider callbacks on the API.
-    expect(`${ORIGIN}/api/auth/callback/twitch`).not.toBe("https://api.rosegriffon.fr/v1/auth/oauth/callback?provider=twitch");
+    expect(`${ORIGIN}/api/auth/callback/twitch`).not.toBe(
+      "https://api.rosegriffon.fr/v1/auth/oauth/callback?provider=twitch",
+    );
   });
 
   test("an RG session cookie is not an Achilléa token", async () => {
     const { cookies } = await rgMember("rg-only@example.test");
     const rgCookie = cookies.get("better-auth.session_token")!;
     expect(rgCookie).toBeTruthy();
-    expect(await verifyAchilleaSessionToken(decodeURIComponent(rgCookie), SECRET)).toBeNull();
-    expect(await verifyAchilleaSessionToken(decodeURIComponent(rgCookie), ACHILLEA_SECRET)).toBeNull();
+    expect(
+      await verifyAchilleaSessionToken(decodeURIComponent(rgCookie), SECRET),
+    ).toBeNull();
+    expect(
+      await verifyAchilleaSessionToken(
+        decodeURIComponent(rgCookie),
+        ACHILLEA_SECRET,
+      ),
+    ).toBeNull();
     const bearer = (await session(cookies))!.session.token;
     expect(await verifyAchilleaSessionToken(bearer, SECRET)).toBeNull();
   });
@@ -387,11 +575,18 @@ describe("RG versus Achilléa", () => {
   test("an Achilléa token opens no RG session, as cookie or bearer, whatever secret signed it", async () => {
     const { user } = await rgMember("achillea-token@example.test");
     for (const secret of [ACHILLEA_SECRET, SECRET]) {
-      const token = signAchilleaSessionToken({ id: user.id, username: "Distinct" }, secret);
+      const token = signAchilleaSessionToken(
+        { id: user.id, username: "Distinct" },
+        secret,
+      );
       expect(await session(new Map([["token", token]]))).toBeNull();
-      expect(await session(new Map([["better-auth.session_token", token]]))).toBeNull();
+      expect(
+        await session(new Map([["better-auth.session_token", token]])),
+      ).toBeNull();
       const response = await auth.handler(
-        new Request(`${ORIGIN}/api/auth/get-session`, { headers: { authorization: `Bearer ${token}`, origin: ORIGIN } }),
+        new Request(`${ORIGIN}/api/auth/get-session`, {
+          headers: { authorization: `Bearer ${token}`, origin: ORIGIN },
+        }),
       );
       expect(await response.json()).toBeNull();
     }
@@ -399,31 +594,49 @@ describe("RG versus Achilléa", () => {
 
   test("an email-only RG member has no Discord account, so no Achilléa identity to derive", async () => {
     const { user } = await rgMember("no-discord@example.test");
-    const providers = db.account!.filter(account => account.user_id === user.id).map(account => account.provider_id);
+    const providers = db
+      .account!.filter((account) => account.user_id === user.id)
+      .map((account) => account.provider_id);
     expect(providers).toEqual(["credential"]);
   });
 });
 
 describe("RG second factors", () => {
   test("two-factor and passkey plugins are mounted with the RG issuer and relying party", () => {
-    const plugins = auth.options.plugins as { id: string; options?: Record<string, unknown> }[];
-    const twoFactor = plugins.find(plugin => plugin.id === "two-factor");
-    expect(twoFactor?.options).toMatchObject({ issuer: "Rose Griffon", allowPasswordless: true });
-    expect(plugins.find(plugin => plugin.id === "passkey")?.options).toMatchObject({ rpID: "rosegriffon.fr", origin: ORIGIN });
-    expect(typeof (auth.api as Record<string, unknown>).enableTwoFactor).toBe("function");
-    expect(typeof (auth.api as Record<string, unknown>).generatePasskeyRegistrationOptions).toBe("function");
+    const plugins = auth.options.plugins as {
+      id: string;
+      options?: Record<string, unknown>;
+    }[];
+    const twoFactor = plugins.find((plugin) => plugin.id === "two-factor");
+    expect(twoFactor?.options).toMatchObject({
+      issuer: "Rose Griffon",
+      allowPasswordless: true,
+    });
+    expect(
+      plugins.find((plugin) => plugin.id === "passkey")?.options,
+    ).toMatchObject({ rpID: "rosegriffon.fr", origin: ORIGIN });
+    expect(typeof (auth.api as Record<string, unknown>).enableTwoFactor).toBe(
+      "function",
+    );
+    expect(
+      typeof (auth.api as Record<string, unknown>)
+        .generatePasskeyRegistrationOptions,
+    ).toBe("function");
   });
 });
 
 test("production cookies are __Secure-, Secure, HttpOnly, SameSite=Lax and host-only", async () => {
-  const probe = fileURLToPath(new URL("./test-fixtures/prod-auth-probe.ts", import.meta.url));
+  const probe = fileURLToPath(
+    new URL("./test-fixtures/prod-auth-probe.ts", import.meta.url),
+  );
   const child = Bun.spawn([process.execPath, probe], {
     env: {
       PATH: process.env.PATH ?? "",
       SYSTEMROOT: process.env.SYSTEMROOT ?? "",
       NODE_ENV: "production",
       BETTER_AUTH_SECRET: randomBytes(32).toString("base64url"),
-      DATABASE_URL: "postgres://fixture:fixture@127.0.0.1:1/rg_auth_probe_unavailable",
+      DATABASE_URL:
+        "postgres://fixture:fixture@127.0.0.1:1/rg_auth_probe_unavailable",
       GOOGLE_CLIENT_ID: "test-google-client",
       GOOGLE_CLIENT_SECRET: randomBytes(16).toString("hex"),
       ...PROVIDER_ENV,
@@ -431,7 +644,11 @@ test("production cookies are __Secure-, Secure, HttpOnly, SameSite=Lax and host-
     stdout: "pipe",
     stderr: "pipe",
   });
-  const [stdout, stderr, code] = await Promise.all([new Response(child.stdout).text(), new Response(child.stderr).text(), child.exited]);
+  const [stdout, stderr, code] = await Promise.all([
+    new Response(child.stdout).text(),
+    new Response(child.stderr).text(),
+    child.exited,
+  ]);
   if (code !== 0) throw new Error(stderr);
   const report = JSON.parse(stdout.trim().split("\n").at(-1)!) as {
     sessionCookie: string;
@@ -444,15 +661,23 @@ test("production cookies are __Secure-, Secure, HttpOnly, SameSite=Lax and host-
     achilleaCookieOnSignOut: string;
     sessionAfterSignOut: boolean;
   };
-  expect(report.sessionCookie).toStartWith("__Secure-better-auth.session_token=");
+  expect(report.sessionCookie).toStartWith(
+    "__Secure-better-auth.session_token=",
+  );
   expect(report.sessionCookie).toMatch(/; Secure/i);
   expect(report.sessionCookie).toMatch(/; HttpOnly/i);
   expect(report.sessionCookie).toMatch(/SameSite=Lax/i);
   expect(report.sessionCookie).not.toMatch(/Domain=/i);
   expect(report.trustedOrigins).toContain(ORIGIN);
-  expect(report.trustedOrigins.some(origin => origin.startsWith("http://localhost"))).toBe(false);
+  expect(
+    report.trustedOrigins.some((origin) =>
+      origin.startsWith("http://localhost"),
+    ),
+  ).toBe(false);
   const google = new URL(report.google);
-  expect(google.searchParams.get("redirect_uri")).toBe(`${ORIGIN}/api/auth/callback/google`);
+  expect(google.searchParams.get("redirect_uri")).toBe(
+    `${ORIGIN}/api/auth/callback/google`,
+  );
   expect(google.searchParams.get("client_id")).toBe("test-google-client");
   expect(google.searchParams.get("code_challenge_method")).toBe("S256");
   expect(google.searchParams.get("code_challenge")).toBeTruthy();

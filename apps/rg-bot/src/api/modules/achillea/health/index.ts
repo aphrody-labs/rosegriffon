@@ -8,12 +8,31 @@
  * démarrage sont lus dans `achillea.data`, comme le `DataStore` legacy.
  * Bot injoignable → 503 avec le motif, jamais de valeurs inventées.
  */
-import { cpus, freemem, hostname, platform, release, totalmem, type, uptime as uptimeHote } from "node:os";
+import {
+  cpus,
+  freemem,
+  hostname,
+  platform,
+  release,
+  totalmem,
+  type,
+  uptime as uptimeHote,
+} from "node:os";
 import { Elysia } from "elysia";
 import { sql } from "kysely";
 import { dbPlugin } from "../../../plugins/db";
-import { appelBotParDefaut, lireBot, lireDataStore, type AppelBot, type EtatBot } from "../bot-achillea";
-import { chargerRoleEnBase, superAdminOuJetonDev, type ChargeurRole } from "../staff";
+import {
+  appelBotParDefaut,
+  lireBot,
+  lireDataStore,
+  type AppelBot,
+  type EtatBot,
+} from "../bot-achillea";
+import {
+  chargerRoleEnBase,
+  superAdminOuJetonDev,
+  type ChargeurRole,
+} from "../staff";
 
 const MIO = 1024 * 1024;
 
@@ -34,7 +53,9 @@ async function usageCpuHote(intervalleMs = 200): Promise<number> {
   await Bun.sleep(intervalleMs);
   const apres = instantaneCpu();
   const total = apres.total - avant.total;
-  return total > 0 ? Number((((apres.actif - avant.actif) / total) * 100).toFixed(1)) : 0;
+  return total > 0
+    ? Number((((apres.actif - avant.actif) / total) * 100).toFixed(1))
+    : 0;
 }
 
 /** Forme `getHostUsage` du legacy (node-os-utils), mesurée avec `node:os`. */
@@ -104,7 +125,10 @@ export function creerHealthController(options: OptionsHealth = {}) {
         if (!etat.ok) return etat.reponse;
         const debut = performance.now();
         await sql`SELECT 1`.execute(db);
-        return { ping: etat.valeur.latenceMs, database: Math.round(performance.now() - debut) };
+        return {
+          ping: etat.valeur.latenceMs,
+          database: Math.round(performance.now() - debut),
+        };
       })
       .get("/usage", async ({ db, headers }) => {
         const auth = await superAdminOuJetonDev(db, headers, chargerRole);
@@ -123,9 +147,16 @@ export function creerHealthController(options: OptionsHealth = {}) {
         if (auth.error) return auth.error;
         const etat = await lireBot<EtatBot>(appelBot, "/etat");
         if (!etat.ok) return etat.reponse;
-        const [{ maintenance }, host] = await Promise.all([lireDataStore(db), usageHote()]);
+        const [{ maintenance }, host] = await Promise.all([
+          lireDataStore(db),
+          usageHote(),
+        ]);
         return {
-          botStatus: { online: botEnLigne(etat.valeur), uptime: etat.valeur.uptimeSecondes * 1000, maintenance },
+          botStatus: {
+            online: botEnLigne(etat.valeur),
+            uptime: etat.valeur.uptimeSecondes * 1000,
+            maintenance,
+          },
           host,
           pid: usageProcessusBot(etat.valeur),
           latency: { ping: etat.valeur.latenceMs },
@@ -134,7 +165,10 @@ export function creerHealthController(options: OptionsHealth = {}) {
       .get("/logs", async ({ db, headers }) => {
         const auth = await superAdminOuJetonDev(db, headers, chargerRole);
         if (auth.error) return auth.error;
-        const journal = await lireBot<{ lignes: string[] }>(appelBot, "/journal");
+        const journal = await lireBot<{ lignes: string[] }>(
+          appelBot,
+          "/journal",
+        );
         if (!journal.ok) return journal.reponse;
         return journal.valeur.lignes;
       })

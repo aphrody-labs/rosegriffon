@@ -4,9 +4,22 @@ import { useState } from "react";
 import Link from "@/components/shared/Link";
 import { useRouter } from "next/navigation";
 import { createAchilleaClient, useAchilleaAuth } from "@/lib/achillea";
-import { COFONDATEURS_REQUIS, LOGO_TYPES, erreurLogo, lireCofondateurs, messageErreurCreation } from "./erreurs";
+import {
+  COFONDATEURS_REQUIS,
+  LOGO_TYPES,
+  erreurLogo,
+  lireCofondateurs,
+  messageErreurCreation,
+} from "./erreurs";
 import type { Country } from "@rosegriffon/achillea-types/domain/common";
-import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle } from "@rosegriffon/ui";
+import {
+  Button,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@rosegriffon/ui";
 import { ArrowLeft, Shield, AlertCircle } from "lucide-react";
 
 export default function CreateClanPage() {
@@ -39,13 +52,15 @@ export default function CreateClanPage() {
       setError("Le sigle (tag) doit comporter 2 ou 3 lettres ou chiffres.");
       return;
     }
-    if (![xUrl, instagramUrl, tiktokUrl].some(url => url.trim())) {
+    if (![xUrl, instagramUrl, tiktokUrl].some((url) => url.trim())) {
       setError("Ajoute au moins un lien X, Instagram ou TikTok pour le clan.");
       return;
     }
     const cofondateurs = lireCofondateurs(founderIds);
     if (!cofondateurs || cofondateurs.length !== COFONDATEURS_REQUIS) {
-      setError(`Indique exactement ${COFONDATEURS_REQUIS} identifiants Discord de co-fondateurs (17 à 20 chiffres).`);
+      setError(
+        `Indique exactement ${COFONDATEURS_REQUIS} identifiants Discord de co-fondateurs (17 à 20 chiffres).`,
+      );
       return;
     }
     const logoInvalide = erreurLogo(logo);
@@ -61,7 +76,10 @@ export default function CreateClanPage() {
       const client = createAchilleaClient({ credentials: "include" });
       // Logo propre au clan : `clan.clan_avatar_url` est unique en base, un
       // visuel partagé faisait refuser (409) chaque création après la première.
-      const depot = await client.admin.uploadImage(logo, logo.name || "logo-clan");
+      const depot = await client.admin.uploadImage(
+        logo,
+        logo.name || "logo-clan",
+      );
       if (!depot.ok) {
         setError(
           depot.kind === "http" && depot.status === 401
@@ -70,7 +88,7 @@ export default function CreateClanPage() {
         );
         return;
       }
-      const founders = cofondateurs.map(id => ({ id }));
+      const founders = cofondateurs.map((id) => ({ id }));
       const clanName = name.trim();
       const clanTag = tag.trim().toUpperCase();
       const paysFrance: Country = {
@@ -92,7 +110,9 @@ export default function CreateClanPage() {
           .replace(/^-|-$/g, ""),
         shortName: clanTag,
         normalizedShortName: clanTag,
-        description: biography.trim() || `Clan ${clanName} sur la scène compétitive Achilléa.`,
+        description:
+          biography.trim() ||
+          `Clan ${clanName} sur la scène compétitive Achilléa.`,
         ...(xUrl.trim() ? { twitter: xUrl.trim() } : {}),
         ...(instagramUrl.trim() ? { instagram: instagramUrl.trim() } : {}),
         ...(tiktokUrl.trim() ? { tiktok: tiktokUrl.trim() } : {}),
@@ -129,7 +149,9 @@ export default function CreateClanPage() {
       <div className="mx-auto max-w-md space-y-4 px-4 py-20 text-center">
         <Shield className="mx-auto size-12 text-primary" />
         <h2 className="text-xl font-bold text-on-surface">Connexion requise</h2>
-        <p className="text-sm text-on-surface-variant">Connecte-toi pour déposer une demande de création de clan.</p>
+        <p className="text-sm text-on-surface-variant">
+          Connecte-toi pour déposer une demande de création de clan.
+        </p>
         <Button type="button" onClick={() => login("/achillea/clans/create")}>
           Se connecter
         </Button>
@@ -139,7 +161,12 @@ export default function CreateClanPage() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8 space-y-6">
-      <Button asChild variant="ghost" size="sm" className="gap-1.5 -ml-2 text-on-surface-variant">
+      <Button
+        asChild
+        variant="ghost"
+        size="sm"
+        className="gap-1.5 -ml-2 text-on-surface-variant"
+      >
         <Link href="/achillea/clans">
           <ArrowLeft className="size-4" />
           Tous les clans
@@ -151,7 +178,9 @@ export default function CreateClanPage() {
           <div className="size-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center font-bold mb-2">
             <Shield className="size-6" />
           </div>
-          <CardTitle className="text-2xl font-black">Fonder un clan officiel</CardTitle>
+          <CardTitle className="text-2xl font-black">
+            Fonder un clan officiel
+          </CardTitle>
           <CardDescription className="text-sm text-on-surface-variant">
             Remplis les informations fondamentales de ton équipe compétitive.
           </CardDescription>
@@ -178,11 +207,13 @@ export default function CreateClanPage() {
                 type="text"
                 required
                 value={name}
-                onChange={e => setName(e.target.value)}
+                onChange={(e) => setName(e.target.value)}
                 placeholder="ex. Raimon Eleven"
                 className="w-full px-3.5 py-2.5 rounded-xl border border-outline/30 bg-surface-variant/20 text-sm text-on-surface focus:outline-none focus:border-primary"
               />
-              <p className="text-[11px] text-on-surface-variant">Entre 3 et 30 caractères.</p>
+              <p className="text-[11px] text-on-surface-variant">
+                Entre 3 et 30 caractères.
+              </p>
             </div>
 
             <div className="space-y-1.5">
@@ -198,7 +229,7 @@ export default function CreateClanPage() {
                 required
                 maxLength={3}
                 value={tag}
-                onChange={e => setTag(e.target.value.toUpperCase())}
+                onChange={(e) => setTag(e.target.value.toUpperCase())}
                 placeholder="ex. RG"
                 className="w-full max-w-xs px-3.5 py-2.5 rounded-xl border border-outline/30 bg-surface-variant/20 text-sm text-on-surface uppercase font-mono font-bold focus:outline-none focus:border-primary"
               />
@@ -218,7 +249,7 @@ export default function CreateClanPage() {
                 id="route-create-clan-create-client-tsx-3"
                 rows={4}
                 value={biography}
-                onChange={e => setBiography(e.target.value)}
+                onChange={(e) => setBiography(e.target.value)}
                 placeholder="Présentation du clan, ambitions esport, critères de sélection..."
                 className="w-full p-3 rounded-xl border border-outline/30 bg-surface-variant/20 text-sm text-on-surface focus:outline-none focus:border-primary"
               />
@@ -229,20 +260,22 @@ export default function CreateClanPage() {
                 htmlFor="route-create-clan-create-client-tsx-4"
                 className="text-xs font-bold text-on-surface uppercase tracking-wider"
               >
-                Identifiants des co-fondateurs (Discord IDs) <span className="text-destructive">*</span>
+                Identifiants des co-fondateurs (Discord IDs){" "}
+                <span className="text-destructive">*</span>
               </label>
               <input
                 id="route-create-clan-create-client-tsx-4"
                 type="text"
                 required
                 value={founderIds}
-                onChange={e => setFounderIds(e.target.value)}
+                onChange={(e) => setFounderIds(e.target.value)}
                 placeholder="ID1, ID2, ID3..."
                 className="w-full px-3.5 py-2.5 rounded-xl border border-outline/30 bg-surface-variant/20 text-sm text-on-surface focus:outline-none focus:border-primary"
               />
               <p className="text-[11px] text-on-surface-variant">
-                Exactement {COFONDATEURS_REQUIS} IDs Discord séparés par des virgules : ils recevront le vote de
-                fondation et doivent être présents sur le Discord d&apos;Achilléa.
+                Exactement {COFONDATEURS_REQUIS} IDs Discord séparés par des
+                virgules : ils recevront le vote de fondation et doivent être
+                présents sur le Discord d&apos;Achilléa.
               </p>
             </div>
 
@@ -258,11 +291,12 @@ export default function CreateClanPage() {
                 type="file"
                 required
                 accept={LOGO_TYPES.join(",")}
-                onChange={e => setLogo(e.target.files?.[0] ?? null)}
+                onChange={(e) => setLogo(e.target.files?.[0] ?? null)}
                 className="w-full text-sm text-on-surface file:mr-3 file:rounded-lg file:border-0 file:bg-primary/10 file:px-3 file:py-1.5 file:text-primary"
               />
               <p className="text-[11px] text-on-surface-variant">
-                PNG, JPEG, GIF ou WebP, 256 Ko maximum. Il devient aussi l&apos;émoji du clan sur Discord.
+                PNG, JPEG, GIF ou WebP, 256 Ko maximum. Il devient aussi
+                l&apos;émoji du clan sur Discord.
               </p>
             </div>
 
@@ -270,11 +304,13 @@ export default function CreateClanPage() {
               <legend className="text-xs font-bold text-on-surface uppercase tracking-wider">
                 Réseaux sociaux <span className="text-destructive">*</span>
               </legend>
-              <p className="text-[11px] text-on-surface-variant">Ajoute au moins un lien X, Instagram ou TikTok.</p>
+              <p className="text-[11px] text-on-surface-variant">
+                Ajoute au moins un lien X, Instagram ou TikTok.
+              </p>
               <input
                 type="url"
                 value={xUrl}
-                onChange={e => setXUrl(e.target.value)}
+                onChange={(e) => setXUrl(e.target.value)}
                 placeholder="https://x.com/mon-clan"
                 aria-label="Lien X du clan"
                 className="w-full px-3.5 py-2.5 rounded-xl border border-outline/30 bg-surface-variant/20 text-sm text-on-surface focus:outline-none focus:border-primary"
@@ -282,7 +318,7 @@ export default function CreateClanPage() {
               <input
                 type="url"
                 value={instagramUrl}
-                onChange={e => setInstagramUrl(e.target.value)}
+                onChange={(e) => setInstagramUrl(e.target.value)}
                 placeholder="https://instagram.com/mon-clan"
                 aria-label="Lien Instagram du clan"
                 className="w-full px-3.5 py-2.5 rounded-xl border border-outline/30 bg-surface-variant/20 text-sm text-on-surface focus:outline-none focus:border-primary"
@@ -290,7 +326,7 @@ export default function CreateClanPage() {
               <input
                 type="url"
                 value={tiktokUrl}
-                onChange={e => setTiktokUrl(e.target.value)}
+                onChange={(e) => setTiktokUrl(e.target.value)}
                 placeholder="https://tiktok.com/@mon-clan"
                 aria-label="Lien TikTok du clan"
                 className="w-full px-3.5 py-2.5 rounded-xl border border-outline/30 bg-surface-variant/20 text-sm text-on-surface focus:outline-none focus:border-primary"
@@ -302,7 +338,9 @@ export default function CreateClanPage() {
                 <Link href="/achillea/clans">Annuler</Link>
               </Button>
               <Button type="submit" disabled={submitting} className="font-bold">
-                {submitting ? "Création en cours..." : "Valider et créer le clan"}
+                {submitting
+                  ? "Création en cours..."
+                  : "Valider et créer le clan"}
               </Button>
             </div>
           </form>

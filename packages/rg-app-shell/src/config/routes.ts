@@ -89,7 +89,13 @@ export const CHEMINS_WIKI = [
  * Routes servies à la racine : elles ne prennent JAMAIS le préfixe du wiki.
  * Les préfixer était la cause des 404 sur `/wiki/news` et `/wiki/settings`.
  */
-export const CHEMINS_RACINE = ["/news", "/settings", "/search", "/login", "/play"] as const;
+export const CHEMINS_RACINE = [
+  "/news",
+  "/settings",
+  "/search",
+  "/login",
+  "/play",
+] as const;
 
 /**
  * Routes de l'e-sport (Achilléa), exprimées SANS préfixe.

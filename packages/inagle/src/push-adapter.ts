@@ -17,9 +17,17 @@ import { createPgPool } from "@rosegriffon/db/pg";
 // === Interface ===
 
 export interface DataAdapter {
-  upsert(table: string, records: any[], onConflict?: string): Promise<{ error: any }>;
+  upsert(
+    table: string,
+    records: any[],
+    onConflict?: string,
+  ): Promise<{ error: any }>;
   insert(table: string, records: any[]): Promise<{ error: any }>;
-  deleteAllExcept(table: string, column: string, value: any): Promise<{ error: any }>;
+  deleteAllExcept(
+    table: string,
+    column: string,
+    value: any,
+  ): Promise<{ error: any }>;
   // Lit toutes les lignes (colonnes choisies) — sert à préserver les colonnes
   // curatées hors-pipeline (sheet_data, zukan_order) à travers un delete+reinsert.
   fetchAll(table: string, columns: string): Promise<any[]>;
@@ -42,7 +50,9 @@ export function dedup(records: any[], key = "id") {
 export class PostgresAdapter implements DataAdapter {
   private pool: ReturnType<typeof createPgPool>;
   constructor(connectionString: string) {
-    this.pool = createPgPool(connectionString, { applicationName: "inagle-push" });
+    this.pool = createPgPool(connectionString, {
+      applicationName: "inagle-push",
+    });
   }
 
   async upsert(table: string, records: any[], onConflict = "id") {
@@ -59,7 +69,11 @@ export class PostgresAdapter implements DataAdapter {
     return { error: null };
   }
 
-  private async _upsertBatch(table: string, records: any[], onConflict: string) {
+  private async _upsertBatch(
+    table: string,
+    records: any[],
+    onConflict: string,
+  ) {
     const keys = Object.keys(records[0]);
     let paramIndex = 1;
     const values: any[] = [];
@@ -76,14 +90,14 @@ export class PostgresAdapter implements DataAdapter {
       rows.push(`(${rowParams.join(", ")})`);
     }
 
-    const updateSet = keys.map(k => `"${k}" = EXCLUDED."${k}"`).join(", ");
+    const updateSet = keys.map((k) => `"${k}" = EXCLUDED."${k}"`).join(", ");
 
     const conflictCols = onConflict
       .split(",")
-      .map(c => `"${c.trim()}"`)
+      .map((c) => `"${c.trim()}"`)
       .join(", ");
     const query = `
-            INSERT INTO "${table}" (${keys.map(k => `"${k}"`).join(", ")})
+            INSERT INTO "${table}" (${keys.map((k) => `"${k}"`).join(", ")})
             VALUES ${rows.join(", ")}
             ON CONFLICT (${conflictCols}) DO UPDATE SET ${updateSet}
         `;
@@ -105,7 +119,9 @@ export class PostgresAdapter implements DataAdapter {
 
   async deleteAllExcept(table: string, column: string, value: any) {
     try {
-      await this.pool.query(`DELETE FROM "${table}" WHERE "${column}" != $1`, [value]);
+      await this.pool.query(`DELETE FROM "${table}" WHERE "${column}" != $1`, [
+        value,
+      ]);
       return { error: null };
     } catch (e: any) {
       return { error: e };
@@ -116,7 +132,7 @@ export class PostgresAdapter implements DataAdapter {
     try {
       const cols = columns
         .split(",")
-        .map(c => `"${c.trim()}"`)
+        .map((c) => `"${c.trim()}"`)
         .join(", ");
       const res = await this.pool.query(`SELECT ${cols} FROM "${table}"`);
       return res.rows;

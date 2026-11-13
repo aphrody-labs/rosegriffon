@@ -58,7 +58,12 @@ export interface AdminOpsOverview {
     totalPlayers: number;
   };
   audit24h: number;
-  bot?: { online: boolean; uptime: number; maintenance: boolean; guilds: number };
+  bot?: {
+    online: boolean;
+    uptime: number;
+    maintenance: boolean;
+    guilds: number;
+  };
   generatedAt?: string;
 }
 

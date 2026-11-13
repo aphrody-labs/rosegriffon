@@ -109,7 +109,9 @@ export type DBTweetRow = {
  * `is_thread: false` et `raw_tweets: null` : ce module ne fabrique jamais de fil.
  */
 export function tweetToRow(t: Tweet): DBTweetRow {
-  const createdAtIso = t.created_at ? new Date(t.created_at).toISOString() : snowflakeToIso(t.id);
+  const createdAtIso = t.created_at
+    ? new Date(t.created_at).toISOString()
+    : snowflakeToIso(t.id);
   const media = ((t.media ?? []) as MediaBrut[]).map(mapMedia);
   return {
     id: t.id,
@@ -134,7 +136,9 @@ export function tweetToRow(t: Tweet): DBTweetRow {
       view_count: t.view_count,
     },
     media,
-    quoted_tweets: t.quoted_tweet ? JSON.parse(JSON.stringify(t.quoted_tweet)) : null,
+    quoted_tweets: t.quoted_tweet
+      ? JSON.parse(JSON.stringify(t.quoted_tweet))
+      : null,
     raw_tweets: null,
     updated_at: new Date().toISOString(),
   };
@@ -168,21 +172,28 @@ type MediaLisible = {
  * afficherait en pictogramme de repli, et surtout gonflerait `nb_images` et le
  * compteur public « publications avec image » avec des images inexistantes.
  */
-export function estImageAffichable(media: MediaLisible | null | undefined): boolean {
+export function estImageAffichable(
+  media: MediaLisible | null | undefined,
+): boolean {
   if (!media || media.type !== "photo") return false;
-  return [media.storage_url, media.url, media.preview_url, media.original_url].some(
-    u => typeof u === "string" && u.trim().length > 0,
-  );
+  return [
+    media.storage_url,
+    media.url,
+    media.preview_url,
+    media.original_url,
+  ].some((u) => typeof u === "string" && u.trim().length > 0);
 }
 
 /** Le post porte-t-il au moins une image affichable ? */
 export function porteUneImage(t: Tweet): boolean {
   const media = (t.media ?? []) as MediaBrut[];
-  return media.some(m => estImageAffichable(m));
+  return media.some((m) => estImageAffichable(m));
 }
 
 /** Nombre d'images d'un tableau de médias (pour l'aperçu « +N » sans relire le jsonb). */
-export function compterImages(media: MediaItem[] | MediaBrut[] | null | undefined): number {
+export function compterImages(
+  media: MediaItem[] | MediaBrut[] | null | undefined,
+): number {
   if (!Array.isArray(media)) return 0;
-  return (media as MediaLisible[]).filter(m => estImageAffichable(m)).length;
+  return (media as MediaLisible[]).filter((m) => estImageAffichable(m)).length;
 }

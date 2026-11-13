@@ -2,11 +2,22 @@
 
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { ChevronDown, MessageSquare, Pencil, Pin, Trash2, User } from "lucide-react";
+import {
+  ChevronDown,
+  MessageSquare,
+  Pencil,
+  Pin,
+  Trash2,
+  User,
+} from "lucide-react";
 import Image from "next/image";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
-import { deleteComment, getReplies, updateComment } from "@/app/actions/comments";
+import {
+  deleteComment,
+  getReplies,
+  updateComment,
+} from "@/app/actions/comments";
 import { CommentForm } from "@/components/news/CommentForm";
 import { useAuth } from "@/contexts/auth-context";
 import { useProfile } from "@/contexts/profile-context";
@@ -62,7 +73,13 @@ interface CommentItemProps {
   depth?: number;
 }
 
-export function CommentItem({ comment, articleId, onDelete, onUpdate, depth = 0 }: CommentItemProps) {
+export function CommentItem({
+  comment,
+  articleId,
+  onDelete,
+  onUpdate,
+  depth = 0,
+}: CommentItemProps) {
   const { user } = useAuth();
   const { profile } = useProfile();
   const isAdmin = isAdminRole(profile?.role ?? null);
@@ -84,7 +101,10 @@ export function CommentItem({ comment, articleId, onDelete, onUpdate, depth = 0 
   const canEdit = isOwner;
   const canDelete = isOwner || isAdmin;
 
-  const authorName = comment.author.full_name ?? comment.author.username ?? "Utilisateur inconnu";
+  const authorName =
+    comment.author.full_name ??
+    comment.author.username ??
+    "Utilisateur inconnu";
 
   // Chargement des réponses
   const handleLoadReplies = async () => {
@@ -107,8 +127,8 @@ export function CommentItem({ comment, articleId, onDelete, onUpdate, depth = 0 
 
   // Ajout d'une réponse
   const handleReplyCreated = (reply: Comment) => {
-    setReplies(prev => [...prev, reply]);
-    setReplyCount(c => c + 1);
+    setReplies((prev) => [...prev, reply]);
+    setReplyCount((c) => c + 1);
     if (!repliesLoaded) {
       setRepliesLoaded(true);
     }
@@ -117,13 +137,15 @@ export function CommentItem({ comment, articleId, onDelete, onUpdate, depth = 0 
 
   // Suppression d'une réponse imbriquée
   const handleReplyDeleted = (id: string) => {
-    setReplies(prev => prev.filter(r => r.id !== id));
-    setReplyCount(c => Math.max(0, c - 1));
+    setReplies((prev) => prev.filter((r) => r.id !== id));
+    setReplyCount((c) => Math.max(0, c - 1));
   };
 
   // Mise à jour d'une réponse imbriquée
   const handleReplyUpdated = (id: string, content: string) => {
-    setReplies(prev => prev.map(r => (r.id === id ? { ...r, content, is_edited: true } : r)));
+    setReplies((prev) =>
+      prev.map((r) => (r.id === id ? { ...r, content, is_edited: true } : r)),
+    );
   };
 
   // Suppression du commentaire
@@ -143,7 +165,11 @@ export function CommentItem({ comment, articleId, onDelete, onUpdate, depth = 0 
   // Sauvegarde de l'édition
   const handleEditSave = () => {
     const trimmed = editContent.trim();
-    if (!trimmed || trimmed === comment.content || trimmed.length > EDIT_MAX_LENGTH) {
+    if (
+      !trimmed ||
+      trimmed === comment.content ||
+      trimmed.length > EDIT_MAX_LENGTH
+    ) {
       return;
     }
 
@@ -162,7 +188,9 @@ export function CommentItem({ comment, articleId, onDelete, onUpdate, depth = 0 
   const editRemaining = EDIT_MAX_LENGTH - editContent.length;
 
   return (
-    <div className={cn(depth > 0 && "pl-4 border-l-2 border-outline-variant/15")}>
+    <div
+      className={cn(depth > 0 && "pl-4 border-l-2 border-outline-variant/15")}
+    >
       <div className="bg-surface-container-low border border-outline-variant/10 rounded-2xl p-4 space-y-3">
         {/* Header */}
         <div className="flex items-start justify-between gap-2">
@@ -186,16 +214,24 @@ export function CommentItem({ comment, articleId, onDelete, onUpdate, depth = 0 
             {/* Nom + temps */}
             <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-sm font-semibold text-on-surface truncate">{authorName}</span>
+                <span className="text-sm font-semibold text-on-surface truncate">
+                  {authorName}
+                </span>
                 {comment.is_pinned && (
                   <Badge className="inline-flex items-center gap-1 bg-primary/10 text-primary border-none rounded-lg px-1.5 py-0.5 text-[10px] font-semibold">
                     <Pin className="size-2.5" />
                     Épinglé
                   </Badge>
                 )}
-                {comment.is_edited && <span className="text-[10px] text-on-surface-variant/50 italic">(modifié)</span>}
+                {comment.is_edited && (
+                  <span className="text-[10px] text-on-surface-variant/50 italic">
+                    (modifié)
+                  </span>
+                )}
               </div>
-              <span className="text-xs text-on-surface-variant/50">{timeAgo(comment.created_at)}</span>
+              <span className="text-xs text-on-surface-variant/50">
+                {timeAgo(comment.created_at)}
+              </span>
             </div>
           </div>
 
@@ -217,7 +253,7 @@ export function CommentItem({ comment, articleId, onDelete, onUpdate, depth = 0 
               )}
               {canDelete && (
                 <button
-                  onClick={() => setShowDeleteConfirm(v => !v)}
+                  onClick={() => setShowDeleteConfirm((v) => !v)}
                   className={cn(
                     "inline-flex items-center justify-center min-h-11 min-w-11 sm:min-h-0 sm:min-w-0 p-1.5 rounded-xl transition-colors",
                     showDeleteConfirm
@@ -236,7 +272,9 @@ export function CommentItem({ comment, articleId, onDelete, onUpdate, depth = 0 
         {/* Confirmation de suppression */}
         {showDeleteConfirm && (
           <div className="flex items-center justify-between gap-3 bg-destructive/5 border border-destructive/20 rounded-xl px-3 py-2.5">
-            <p className="text-xs text-on-surface">Supprimer ce commentaire ?</p>
+            <p className="text-xs text-on-surface">
+              Supprimer ce commentaire ?
+            </p>
             <div className="flex items-center gap-2">
               <Button
                 variant="ghost"
@@ -264,12 +302,14 @@ export function CommentItem({ comment, articleId, onDelete, onUpdate, depth = 0 
             <div
               className={cn(
                 "relative border rounded-xl bg-surface-container transition-colors focus-within:border-primary/40",
-                editContent.length > EDIT_MAX_LENGTH ? "border-destructive/40" : "border-outline-variant/15",
+                editContent.length > EDIT_MAX_LENGTH
+                  ? "border-destructive/40"
+                  : "border-outline-variant/15",
               )}
             >
               <textarea
                 value={editContent}
-                onChange={e => setEditContent(e.target.value)}
+                onChange={(e) => setEditContent(e.target.value)}
                 rows={3}
                 className="w-full resize-none bg-transparent px-3 pt-3 pb-14 sm:pb-9 text-sm text-on-surface focus:outline-hidden leading-relaxed"
                 style={{ minHeight: "80px" }}
@@ -314,14 +354,16 @@ export function CommentItem({ comment, articleId, onDelete, onUpdate, depth = 0 
             </div>
           </div>
         ) : (
-          <p className="text-sm text-on-surface leading-relaxed whitespace-pre-wrap break-words">{comment.content}</p>
+          <p className="text-sm text-on-surface leading-relaxed whitespace-pre-wrap break-words">
+            {comment.content}
+          </p>
         )}
 
         {/* Bouton répondre */}
         {!isEditing && user && depth < MAX_DEPTH && (
           <div>
             <button
-              onClick={() => setShowReplyForm(v => !v)}
+              onClick={() => setShowReplyForm((v) => !v)}
               className={cn(
                 "inline-flex items-center gap-1.5 text-xs font-medium transition-colors rounded-lg px-3 py-1 min-h-11 sm:min-h-0",
                 showReplyForm
@@ -356,7 +398,12 @@ export function CommentItem({ comment, articleId, onDelete, onUpdate, depth = 0 
             disabled={repliesLoading}
             className="inline-flex items-center gap-1.5 min-h-11 sm:min-h-0 text-xs font-medium text-primary/70 hover:text-primary transition-colors disabled:opacity-50"
           >
-            <ChevronDown className={cn("size-3.5 transition-transform", repliesLoaded && "rotate-180")} />
+            <ChevronDown
+              className={cn(
+                "size-3.5 transition-transform",
+                repliesLoaded && "rotate-180",
+              )}
+            />
             {repliesLoading
               ? "Chargement…"
               : repliesLoaded
@@ -369,7 +416,7 @@ export function CommentItem({ comment, articleId, onDelete, onUpdate, depth = 0 
       {/* Réponses imbriquées */}
       {repliesLoaded && replies.length > 0 && (
         <div className="mt-3 space-y-3">
-          {replies.map(reply => (
+          {replies.map((reply) => (
             <CommentItem
               key={reply.id}
               comment={reply}

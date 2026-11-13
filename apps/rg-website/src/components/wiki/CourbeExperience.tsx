@@ -37,21 +37,31 @@ export interface CourbeExperienceProps {
 const VIEW_W = 320;
 const VIEW_H = 150;
 
-export function CourbeExperience({ points, mode, niveau, onNiveauChange }: CourbeExperienceProps) {
+export function CourbeExperience({
+  points,
+  mode,
+  niveau,
+  onNiveauChange,
+}: CourbeExperienceProps) {
   const titleId = useId();
 
   const geometrie = useMemo(() => {
     if (points.length < 2) {
       return null;
     }
-    const valeurs = points.map(p => (mode === "cumulative" ? p.cumulative : p.needExp));
+    const valeurs = points.map((p) =>
+      mode === "cumulative" ? p.cumulative : p.needExp,
+    );
     const max = Math.max(...valeurs);
     const min = Math.min(...valeurs);
     const amplitude = Math.max(1, max - min);
     const x = (index: number) => (index / (points.length - 1)) * VIEW_W;
-    const y = (valeur: number) => VIEW_H - ((valeur - min) / amplitude) * VIEW_H;
+    const y = (valeur: number) =>
+      VIEW_H - ((valeur - min) / amplitude) * VIEW_H;
 
-    const ligne = valeurs.map((v, i) => `${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(" ");
+    const ligne = valeurs
+      .map((v, i) => `${x(i).toFixed(1)},${y(v).toFixed(1)}`)
+      .join(" ");
     const aire = `0,${VIEW_H} ${ligne} ${VIEW_W},${VIEW_H}`;
 
     return { aire, ligne, max, min, valeurs, x, y };
@@ -67,7 +77,7 @@ export function CourbeExperience({ points, mode, niveau, onNiveauChange }: Courb
 
   const index = Math.max(
     0,
-    points.findIndex(p => p.level === niveau),
+    points.findIndex((p) => p.level === niveau),
   );
   const valeurCourante = geometrie.valeurs[index] ?? 0;
   const cx = geometrie.x(index);
@@ -84,7 +94,10 @@ export function CourbeExperience({ points, mode, niveau, onNiveauChange }: Courb
     if (rect.width === 0) {
       return;
     }
-    const ratio = Math.min(1, Math.max(0, (event.clientX - rect.left) / rect.width));
+    const ratio = Math.min(
+      1,
+      Math.max(0, (event.clientX - rect.left) / rect.width),
+    );
     const cible = points[Math.round(ratio * (points.length - 1))];
     if (cible && cible.level !== niveau) {
       onNiveauChange(cible.level);
@@ -100,7 +113,7 @@ export function CourbeExperience({ points, mode, niveau, onNiveauChange }: Courb
 
         aria-labelledby={titleId}
         onPointerDown={pointerVersNiveau}
-        onPointerMove={e => {
+        onPointerMove={(e) => {
           if (e.buttons === 1) {
             pointerVersNiveau(e);
           }

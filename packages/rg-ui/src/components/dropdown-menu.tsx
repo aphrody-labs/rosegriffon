@@ -7,16 +7,29 @@ import { CheckIcon, ChevronRightIcon, CircleIcon } from "lucide-react";
 import { cn } from "../lib/utils";
 import type { PrimitiveProps } from "../lib/render";
 
-function DropdownMenu({ ...props }: PrimitiveProps<typeof DropdownMenuPrimitive.Root>) {
+function DropdownMenu({
+  ...props
+}: PrimitiveProps<typeof DropdownMenuPrimitive.Root>) {
   return <DropdownMenuPrimitive.Root data-slot="dropdown-menu" {...props} />;
 }
 
-function DropdownMenuPortal({ ...props }: PrimitiveProps<typeof DropdownMenuPrimitive.Portal>) {
-  return <DropdownMenuPrimitive.Portal data-slot="dropdown-menu-portal" {...props} />;
+function DropdownMenuPortal({
+  ...props
+}: PrimitiveProps<typeof DropdownMenuPrimitive.Portal>) {
+  return (
+    <DropdownMenuPrimitive.Portal data-slot="dropdown-menu-portal" {...props} />
+  );
 }
 
-function DropdownMenuTrigger({ ...props }: PrimitiveProps<typeof DropdownMenuPrimitive.Trigger>) {
-  return <DropdownMenuPrimitive.Trigger data-slot="dropdown-menu-trigger" {...props} />;
+function DropdownMenuTrigger({
+  ...props
+}: PrimitiveProps<typeof DropdownMenuPrimitive.Trigger>) {
+  return (
+    <DropdownMenuPrimitive.Trigger
+      data-slot="dropdown-menu-trigger"
+      {...props}
+    />
+  );
 }
 
 function DropdownMenuContent({
@@ -39,8 +52,12 @@ function DropdownMenuContent({
   );
 }
 
-function DropdownMenuGroup({ ...props }: PrimitiveProps<typeof DropdownMenuPrimitive.Group>) {
-  return <DropdownMenuPrimitive.Group data-slot="dropdown-menu-group" {...props} />;
+function DropdownMenuGroup({
+  ...props
+}: PrimitiveProps<typeof DropdownMenuPrimitive.Group>) {
+  return (
+    <DropdownMenuPrimitive.Group data-slot="dropdown-menu-group" {...props} />
+  );
 }
 
 function DropdownMenuItem({
@@ -92,8 +109,15 @@ function DropdownMenuCheckboxItem({
   );
 }
 
-function DropdownMenuRadioGroup({ ...props }: PrimitiveProps<typeof DropdownMenuPrimitive.RadioGroup>) {
-  return <DropdownMenuPrimitive.RadioGroup data-slot="dropdown-menu-radio-group" {...props} />;
+function DropdownMenuRadioGroup({
+  ...props
+}: PrimitiveProps<typeof DropdownMenuPrimitive.RadioGroup>) {
+  return (
+    <DropdownMenuPrimitive.RadioGroup
+      data-slot="dropdown-menu-radio-group"
+      {...props}
+    />
+  );
 }
 
 function DropdownMenuRadioItem({
@@ -131,13 +155,19 @@ function DropdownMenuLabel({
     <div
       data-slot="dropdown-menu-label"
       data-inset={inset}
-      className={cn("px-2 py-1.5 text-sm font-medium data-[inset]:ps-8", className)}
+      className={cn(
+        "px-2 py-1.5 text-sm font-medium data-[inset]:ps-8",
+        className,
+      )}
       {...props}
     />
   );
 }
 
-function DropdownMenuSeparator({ className, ...props }: PrimitiveProps<typeof DropdownMenuPrimitive.Separator>) {
+function DropdownMenuSeparator({
+  className,
+  ...props
+}: PrimitiveProps<typeof DropdownMenuPrimitive.Separator>) {
   return (
     <DropdownMenuPrimitive.Separator
       data-slot="dropdown-menu-separator"
@@ -147,17 +177,25 @@ function DropdownMenuSeparator({ className, ...props }: PrimitiveProps<typeof Dr
   );
 }
 
-function DropdownMenuShortcut({ className, ...props }: React.ComponentProps<"span">) {
+function DropdownMenuShortcut({
+  className,
+  ...props
+}: React.ComponentProps<"span">) {
   return (
     <span
       data-slot="dropdown-menu-shortcut"
-      className={cn("text-muted-foreground ml-auto text-xs tracking-widest", className)}
+      className={cn(
+        "text-muted-foreground ml-auto text-xs tracking-widest",
+        className,
+      )}
       {...props}
     />
   );
 }
 
-function DropdownMenuSub({ ...props }: PrimitiveProps<typeof DropdownMenuPrimitive.Sub>) {
+function DropdownMenuSub({
+  ...props
+}: PrimitiveProps<typeof DropdownMenuPrimitive.Sub>) {
   return <DropdownMenuPrimitive.Sub data-slot="dropdown-menu-sub" {...props} />;
 }
 
@@ -185,7 +223,10 @@ function DropdownMenuSubTrigger({
   );
 }
 
-function DropdownMenuSubContent({ className, ...props }: PrimitiveProps<typeof DropdownMenuPrimitive.SubContent>) {
+function DropdownMenuSubContent({
+  className,
+  ...props
+}: PrimitiveProps<typeof DropdownMenuPrimitive.SubContent>) {
   return (
     <DropdownMenuPrimitive.SubContent
       data-slot="dropdown-menu-sub-content"

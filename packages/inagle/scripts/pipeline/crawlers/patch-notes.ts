@@ -33,22 +33,29 @@ export async function scrapePatchNoteList(
         const dateMatch = fullText.match(/(\d{4}\.\d{1,2}\.\d{1,2})/);
         const date = dateMatch ? dateMatch[0] : "";
 
-        let title = fullText.replace(date, "").replace("[JST]", "").replace(/\s+/g, " ").trim();
+        let title = fullText
+          .replace(date, "")
+          .replace("[JST]", "")
+          .replace(/\s+/g, " ")
+          .trim();
 
         // Fallback for title
         if (!title && $(el).find(".text").length) {
           title = $(el).find(".text").text().trim();
         }
 
-        const absoluteUrl = href.startsWith("http") ? href : `https://www.inazuma.jp${href}`;
+        const absoluteUrl = href.startsWith("http")
+          ? href
+          : `https://www.inazuma.jp${href}`;
         const id = absoluteUrl.split("/").filter(Boolean).pop() || "";
 
-        if (!notes.find(n => n.id === id)) {
+        if (!notes.find((n) => n.id === id)) {
           notes.push({
             id,
             title: title || "Patch Note",
             date,
-            platform: platform === "ps-steam" ? ["ps4", "ps5", "steam"] : [platform],
+            platform:
+              platform === "ps-steam" ? ["ps4", "ps5", "steam"] : [platform],
             url: absoluteUrl,
           });
         }

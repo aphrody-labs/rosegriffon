@@ -34,24 +34,43 @@ export async function participantSoloRanks(
     .where("state", "=", "Active")
     .orderBy("starts_at", "desc")
     .executeTakeFirst();
-  const seasonElos = db.selectFrom("user_elo").select(["user_id", "elo"]).where("mode", "=", 2);
+  const seasonElos = db
+    .selectFrom("user_elo")
+    .select(["user_id", "elo"])
+    .where("mode", "=", 2);
   const [elos, ranks] = await Promise.all([
-    (season ? seasonElos.where("season_id", "=", season.id) : seasonElos.where("season_id", "is", null))
+    (season
+      ? seasonElos.where("season_id", "=", season.id)
+      : seasonElos.where("season_id", "is", null)
+    )
       .where("user_id", "in", ids)
       .execute(),
-    db.selectFrom("rank").select(["key", "min_elo", "max_elo", "gradient"]).orderBy("min_elo", "asc").execute(),
+    db
+      .selectFrom("rank")
+      .select(["key", "min_elo", "max_elo", "gradient"])
+      .orderBy("min_elo", "asc")
+      .execute(),
   ]);
   return new Map(
-    elos.map(row => {
+    elos.map((row) => {
       const elo = Number(row.elo ?? 0);
-      const tier = ranks.find(rank => elo >= rank.min_elo && elo <= rank.max_elo);
-      return [row.user_id, { elo, key: tier?.key ?? "Non classé", gradient: tier?.gradient ?? [] }] as const;
+      const tier = ranks.find(
+        (rank) => elo >= rank.min_elo && elo <= rank.max_elo,
+      );
+      return [
+        row.user_id,
+        { elo, key: tier?.key ?? "Non classé", gradient: tier?.gradient ?? [] },
+      ] as const;
     }),
   );
 }
 
 export abstract class TournamentService {
-  public static async findDetail(db: Kysely<Database>, id: number, includeReasons = false) {
+  public static async findDetail(
+    db: Kysely<Database>,
+    id: number,
+    includeReasons = false,
+  ) {
     const row = await db
       .selectFrom("event")
       .selectAll()
@@ -60,20 +79,29 @@ export abstract class TournamentService {
       .executeTakeFirst();
     if (!row) return null;
     const organizationRow =
-      row.organization_id === null ? null : await OrganizationService.findById(db, row.organization_id);
+      row.organization_id === null
+        ? null
+        : await OrganizationService.findById(db, row.organization_id);
     const managers =
       row.organization_id === null
         ? []
         : await db
             .selectFrom("organization_manager as manager")
             .innerJoin("user", "user.id", "manager.user_id")
-            .select(["user.id", "user.username", "user.display_name as displayName", "user.avatar"])
+            .select([
+              "user.id",
+              "user.username",
+              "user.display_name as displayName",
+              "user.avatar",
+            ])
             .where("manager.organization_id", "=", row.organization_id)
             .execute();
     const organization = organizationRow
       ? {
           ...organizationRow,
-          managers: organizationRow.managers.map((manager: Record<string, unknown>) => ({ user: manager })),
+          managers: organizationRow.managers.map(
+            (manager: Record<string, unknown>) => ({ user: manager }),
+          ),
         }
       : null;
     const participants = await db
@@ -99,9 +127,11 @@ export abstract class TournamentService {
       .execute();
     const soloRanks = await participantSoloRanks(
       db,
-      participants.map(participant => participant.user_id),
+      participants.map((participant) => participant.user_id),
     );
-    const waitlisted = participants.filter(participant => participant.status === "Waitlisted");
+    const waitlisted = participants.filter(
+      (participant) => participant.status === "Waitlisted",
+    );
     const tournament = {
       id: row.id,
       name: row.name,
@@ -111,7 +141,8 @@ export abstract class TournamentService {
       updatedAt: row.updated_at.toISOString(),
       internalState: row.internal_state ?? "Pending",
       startsAt: row.starts_at?.toISOString() ?? row.created_at.toISOString(),
-      grandFinalAt: row.grand_final_at?.toISOString() ?? row.created_at.toISOString(),
+      grandFinalAt:
+        row.grand_final_at?.toISOString() ?? row.created_at.toISOString(),
       series: null,
       organization,
       managers,
@@ -148,14 +179,19 @@ export abstract class TournamentService {
           id: participant.user_id,
           username: participant.username ?? participant.user_id,
           avatar: participant.avatar ?? undefined,
-          ...(soloRanks.has(participant.user_id) ? { soloRank: soloRanks.get(participant.user_id) } : {}),
+          ...(soloRanks.has(participant.user_id)
+            ? { soloRank: soloRanks.get(participant.user_id) }
+            : {}),
         },
         bracketParticipantId: participant.bracket_participant_id,
         seed: participant.seed,
         hasCheckedIn: participant.has_checked_in,
         status: participant.status,
         registeredAt: participant.registered_at.toISOString(),
-        waitlistPosition: participant.status === "Waitlisted" ? waitlisted.indexOf(participant) + 1 : null,
+        waitlistPosition:
+          participant.status === "Waitlisted"
+            ? waitlisted.indexOf(participant) + 1
+            : null,
         statusReason: includeReasons ? participant.status_reason : null,
       })),
       bracketData,
@@ -167,8 +203,14 @@ export abstract class TournamentService {
     pageSize = 25,
     organization?: number,
     states: string[] = [],
-  ): Promise<{ data: TournamentDTO[]; meta: { page: number; limit: number; total: number; pageCount: number } }> {
-    let base = db.selectFrom("event").selectAll().where("type", "=", "TOURNAMENT");
+  ): Promise<{
+    data: TournamentDTO[];
+    meta: { page: number; limit: number; total: number; pageCount: number };
+  }> {
+    let base = db
+      .selectFrom("event")
+      .selectAll()
+      .where("type", "=", "TOURNAMENT");
     let countBase = db
       .selectFrom("event")
       .select(({ fn }) => fn.countAll<number>().as("count"))
@@ -178,12 +220,23 @@ export abstract class TournamentService {
       countBase = countBase.where("organization_id", "=", organization);
     }
     if (states.length > 0) {
-      const allowed = ["Pending", "Preregistering", "Preparing", "Ongoing", "Finished", "Canceled"] as const;
+      const allowed = [
+        "Pending",
+        "Preregistering",
+        "Preparing",
+        "Ongoing",
+        "Finished",
+        "Canceled",
+      ] as const;
       const internalStates = [
         ...new Set(
           states
-            .flatMap(state => (state === "Open" ? ["Preregistering", "Preparing"] : [state]))
-            .filter((state): state is (typeof allowed)[number] => allowed.some(value => value === state)),
+            .flatMap((state) =>
+              state === "Open" ? ["Preregistering", "Preparing"] : [state],
+            )
+            .filter((state): state is (typeof allowed)[number] =>
+              allowed.some((value) => value === state),
+            ),
         ),
       ];
       base = base.where("internal_state", "in", internalStates);
@@ -198,22 +251,41 @@ export abstract class TournamentService {
       countBase.executeTakeFirst(),
     ]);
 
-    const data: TournamentDTO[] = rows.map(r => ({
+    const data: TournamentDTO[] = rows.map((r) => ({
       id: r.id,
       name: r.name,
       description: r.description,
       type: r.type,
       status: publicTournamentStatus(r.internal_state),
-      createdAt: r.created_at ? new Date(r.created_at).toISOString() : new Date().toISOString(),
-      updatedAt: r.updated_at ? new Date(r.updated_at).toISOString() : new Date().toISOString(),
+      createdAt: r.created_at
+        ? new Date(r.created_at).toISOString()
+        : new Date().toISOString(),
+      updatedAt: r.updated_at
+        ? new Date(r.updated_at).toISOString()
+        : new Date().toISOString(),
     }));
 
     const total = Number(countRow?.count ?? data.length);
-    return { data, meta: { page, limit: pageSize, total, pageCount: Math.ceil(total / pageSize) } };
+    return {
+      data,
+      meta: {
+        page,
+        limit: pageSize,
+        total,
+        pageCount: Math.ceil(total / pageSize),
+      },
+    };
   }
 
-  public static async findById(db: Kysely<Database>, id: number): Promise<TournamentDTO | null> {
-    const r = await db.selectFrom("event").selectAll().where("id", "=", id).executeTakeFirst();
+  public static async findById(
+    db: Kysely<Database>,
+    id: number,
+  ): Promise<TournamentDTO | null> {
+    const r = await db
+      .selectFrom("event")
+      .selectAll()
+      .where("id", "=", id)
+      .executeTakeFirst();
 
     if (!r) return null;
 
@@ -223,8 +295,12 @@ export abstract class TournamentService {
       description: r.description,
       type: r.type,
       status: publicTournamentStatus(r.internal_state),
-      createdAt: r.created_at ? new Date(r.created_at).toISOString() : new Date().toISOString(),
-      updatedAt: r.updated_at ? new Date(r.updated_at).toISOString() : new Date().toISOString(),
+      createdAt: r.created_at
+        ? new Date(r.created_at).toISOString()
+        : new Date().toISOString(),
+      updatedAt: r.updated_at
+        ? new Date(r.updated_at).toISOString()
+        : new Date().toISOString(),
     };
   }
 }

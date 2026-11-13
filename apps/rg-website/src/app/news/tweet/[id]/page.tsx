@@ -8,7 +8,12 @@ import Link from "@/components/shared/Link";
 import { notFound } from "next/navigation";
 import { getPgPool } from "@/lib/db/pg";
 import { getAuthorInfo } from "@/lib/author";
-import { clampText, TITLE_MAX, titleWithSuffix, withDefaultOgImage } from "@/lib/seo";
+import {
+  clampText,
+  TITLE_MAX,
+  titleWithSuffix,
+  withDefaultOgImage,
+} from "@/lib/seo";
 import { absoluteUrl } from "@/lib/site-url";
 
 export const dynamic = "force-static";
@@ -48,7 +53,15 @@ interface TweetRow {
   updated_at: string | null;
 }
 
-type TweetMetaRow = Pick<TweetRow, "text" | "translation" | "author_username" | "author_name" | "media" | "raw_tweets">;
+type TweetMetaRow = Pick<
+  TweetRow,
+  | "text"
+  | "translation"
+  | "author_username"
+  | "author_name"
+  | "media"
+  | "raw_tweets"
+>;
 
 const AZALEE_USERNAME = "Azalee_IE";
 
@@ -64,7 +77,9 @@ async function getTweetMetaById(id: string): Promise<TweetMetaRow | null> {
   return rows[0] ?? null;
 }
 
-async function getTweetMetaByThreadId(id: string): Promise<TweetMetaRow | null> {
+async function getTweetMetaByThreadId(
+  id: string,
+): Promise<TweetMetaRow | null> {
   const pool = getPgPool();
   const { rows } = await pool.query<TweetMetaRow>(
     `SELECT text, translation, author_username, author_name, media, raw_tweets
@@ -78,10 +93,10 @@ async function getTweetMetaByThreadId(id: string): Promise<TweetMetaRow | null> 
 
 async function getTweetById(id: string): Promise<TweetRow | null> {
   const pool = getPgPool();
-  const { rows } = await pool.query<TweetRow>(`SELECT * FROM tweets WHERE id = $1 AND author_username = $2 LIMIT 1`, [
-    id,
-    AZALEE_USERNAME,
-  ]);
+  const { rows } = await pool.query<TweetRow>(
+    `SELECT * FROM tweets WHERE id = $1 AND author_username = $2 LIMIT 1`,
+    [id, AZALEE_USERNAME],
+  );
   return rows[0] ?? null;
 }
 
@@ -105,7 +120,11 @@ function estimateReadTime(text: string): number {
   return Math.max(1, Math.ceil(text.trim().split(/\s+/).length / 200));
 }
 
-export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
   const { id } = await params;
   let tweet = await getTweetMetaById(id);
 
@@ -113,7 +132,9 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     tweet = await getTweetMetaByThreadId(id);
   }
 
-  const { title } = extractTitleAndBody(tweet?.translation || tweet?.text || "");
+  const { title } = extractTitleAndBody(
+    tweet?.translation || tweet?.text || "",
+  );
   const description = clampText(title);
   const pageTitle = titleWithSuffix(title, " | Azalée");
   const image = tweet?.media?.[0]?.preview_url || tweet?.media?.[0]?.url;
@@ -132,7 +153,9 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     title: pageTitle,
     twitter: {
       card: "summary_large_image",
-      creator: tweet?.author_username ? `@${tweet.author_username}` : "@Azalee_IE",
+      creator: tweet?.author_username
+        ? `@${tweet.author_username}`
+        : "@Azalee_IE",
       site: tweet?.author_username ? `@${tweet.author_username}` : "@Azalee_IE",
     },
   };
@@ -154,7 +177,9 @@ function renderFormattedText(text: string) {
         url = url.slice(0, -1);
       }
       const isTwitterLink = url.includes("t.co");
-      const displayUrl = isTwitterLink ? "Lien externe ↗" : url.replace(/^https?:\/\/(www\.)?/, "");
+      const displayUrl = isTwitterLink
+        ? "Lien externe ↗"
+        : url.replace(/^https?:\/\/(www\.)?/, "");
 
       return (
         <a
@@ -178,7 +203,9 @@ function formatSectionText(text: string, isFirstSection = false) {
   if (!text) return null;
 
   // Strip trailing media URL short-links
-  const cleanedText = text.replace(/https:\/\/t\.co\/[a-zA-Z0-9]+$/g, "").trim();
+  const cleanedText = text
+    .replace(/https:\/\/t\.co\/[a-zA-Z0-9]+$/g, "")
+    .trim();
   if (!cleanedText) return null;
 
   const paragraphs = cleanedText.split(/\n+/).filter(Boolean);
@@ -221,7 +248,9 @@ function formatSectionText(text: string, isFirstSection = false) {
               className="list-none flex items-start gap-2.5 my-2 pl-2 text-on-surface-variant/90 leading-relaxed text-base sm:text-lg font-medium"
             >
               <span className="inline-flex size-2 rounded-full bg-twitter/50 mt-2.5 shrink-0 animate-pulse" />
-              <span className="flex-1">{renderFormattedText(trimmed.replace(/^[-\s•]+/g, ""))}</span>
+              <span className="flex-1">
+                {renderFormattedText(trimmed.replace(/^[-\s•]+/g, ""))}
+              </span>
             </li>
           );
         }
@@ -278,7 +307,11 @@ function formatSectionText(text: string, isFirstSection = false) {
   );
 }
 
-export default async function TweetPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function TweetPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const { id } = await params;
   let tweet = await getTweetById(id);
 
@@ -302,7 +335,8 @@ export default async function TweetPage({ params }: { params: Promise<{ id: stri
   const isThread = tweet.is_thread && (tweet.tweet_count ?? 0) > 1;
   const publishedDate = tweet.created_at;
 
-  const rawTweets: any[] = isThread && Array.isArray(tweet.raw_tweets) ? tweet.raw_tweets : [];
+  const rawTweets: any[] =
+    isThread && Array.isArray(tweet.raw_tweets) ? tweet.raw_tweets : [];
 
   interface Section {
     text: string;
@@ -314,7 +348,9 @@ export default async function TweetPage({ params }: { params: Promise<{ id: stri
     // Thread
     sections = rawTweets.map((rt: any) => ({
       media: (rt.media || []).map((m: any) => {
-        const downloaded = tweet.media?.find((dm: any) => dm.original_url === m.url || dm.url === m.url);
+        const downloaded = tweet.media?.find(
+          (dm: any) => dm.original_url === m.url || dm.url === m.url,
+        );
         return downloaded || m;
       }),
       text: rt.translation || rt.fullText || rt.text || "",
@@ -341,7 +377,7 @@ export default async function TweetPage({ params }: { params: Promise<{ id: stri
 
   // Filter out the hero image from section media to avoid duplicate rendering
   if (sections.length > 0 && heroImage) {
-    sections[0].media = sections[0].media.filter(m => m.url !== heroImage);
+    sections[0].media = sections[0].media.filter((m) => m.url !== heroImage);
   }
 
   return (
@@ -401,7 +437,13 @@ export default async function TweetPage({ params }: { params: Promise<{ id: stri
               <div className="flex items-center gap-2">
                 {authorInfo.avatar ? (
                   <div className="size-8 sm:size-9 rounded-full bg-surface-container-high overflow-hidden relative shrink-0 ring-2 ring-background">
-                    <Image src={authorInfo.avatar} alt={authorInfo.name} fill sizes="36px" className="object-cover" />
+                    <Image
+                      src={authorInfo.avatar}
+                      alt={authorInfo.name}
+                      fill
+                      sizes="36px"
+                      className="object-cover"
+                    />
                   </div>
                 ) : (
                   <div
@@ -411,20 +453,32 @@ export default async function TweetPage({ params }: { params: Promise<{ id: stri
                   </div>
                 )}
                 <div>
-                  <span className="font-bold text-on-surface block sm:inline">{authorInfo.name}</span>
-                  <span className="text-on-surface-variant/70 text-xs sm:ml-1.5">@{tweet.author_username}</span>
+                  <span className="font-bold text-on-surface block sm:inline">
+                    {authorInfo.name}
+                  </span>
+                  <span className="text-on-surface-variant/70 text-xs sm:ml-1.5">
+                    @{tweet.author_username}
+                  </span>
                 </div>
               </div>
 
-              <span className="text-on-surface-variant/20 hidden sm:inline">|</span>
+              <span className="text-on-surface-variant/20 hidden sm:inline">
+                |
+              </span>
 
               {/* Date */}
               <div className="flex items-center gap-1.5 text-on-surface-variant/80">
                 <Calendar className="size-3.5" />
-                <time dateTime={publishedDate}>{format(new Date(publishedDate), "d MMMM yyyy", { locale: fr })}</time>
+                <time dateTime={publishedDate}>
+                  {format(new Date(publishedDate), "d MMMM yyyy", {
+                    locale: fr,
+                  })}
+                </time>
               </div>
 
-              <span className="text-on-surface-variant/20 hidden sm:inline">|</span>
+              <span className="text-on-surface-variant/20 hidden sm:inline">
+                |
+              </span>
 
               {/* Reading time */}
               <div className="flex items-center gap-1.5 text-on-surface-variant/80">
@@ -455,8 +509,10 @@ export default async function TweetPage({ params }: { params: Promise<{ id: stri
                     }`}
                   >
                     {section.media.map((m: any, j: number) => {
-                      const videoSrc = m.video_url || (m.type === "video" ? m.url : undefined);
-                      const posterSrc = m.preview_url || (videoSrc ? undefined : m.url);
+                      const videoSrc =
+                        m.video_url || (m.type === "video" ? m.url : undefined);
+                      const posterSrc =
+                        m.preview_url || (videoSrc ? undefined : m.url);
                       return (
                         <div
                           key={j}
@@ -488,7 +544,9 @@ export default async function TweetPage({ params }: { params: Promise<{ id: stri
                                 alt=""
                                 fill
                                 className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.02]"
-                                sizes={section.media.length === 1 ? "850px" : "425px"}
+                                sizes={
+                                  section.media.length === 1 ? "850px" : "425px"
+                                }
                               />
                               <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                             </>
@@ -509,7 +567,12 @@ export default async function TweetPage({ params }: { params: Promise<{ id: stri
             <div className="flex items-center gap-4">
               {authorInfo.avatar ? (
                 <div className="size-14 rounded-full bg-surface-container-high overflow-hidden relative border border-outline-variant/15 shrink-0 shadow-inner">
-                  <Image src={authorInfo.avatar} alt={authorInfo.name} fill className="object-cover" />
+                  <Image
+                    src={authorInfo.avatar}
+                    alt={authorInfo.name}
+                    fill
+                    className="object-cover"
+                  />
                 </div>
               ) : (
                 <div
@@ -520,12 +583,16 @@ export default async function TweetPage({ params }: { params: Promise<{ id: stri
               )}
               <div>
                 <div className="flex items-center gap-2">
-                  <p className="font-bold text-on-surface text-base sm:text-lg">{authorInfo.name}</p>
+                  <p className="font-bold text-on-surface text-base sm:text-lg">
+                    {authorInfo.name}
+                  </p>
                   <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-twitter/10 text-twitter">
                     Auteur
                   </span>
                 </div>
-                <p className="text-sm text-on-surface-variant/60 font-medium">@{tweet.author_username}</p>
+                <p className="text-sm text-on-surface-variant/60 font-medium">
+                  @{tweet.author_username}
+                </p>
                 <p className="text-xs sm:text-sm text-on-surface-variant/70 mt-1.5 max-w-[520px] leading-relaxed">
                   {authorInfo.bio}
                 </p>

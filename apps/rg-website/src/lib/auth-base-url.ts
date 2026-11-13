@@ -3,7 +3,9 @@ import { SITE_URL } from "@/lib/site-url";
 const SITE_HOSTNAME = new URL(SITE_URL).hostname;
 
 function isLoopback(hostname: string): boolean {
-  return hostname === "localhost" || hostname === "127.0.0.1" || hostname === "[::1]";
+  return (
+    hostname === "localhost" || hostname === "127.0.0.1" || hostname === "[::1]"
+  );
 }
 
 /** Resolve Better Auth's origin without allowing a production callback to point at a developer machine. */
@@ -16,9 +18,15 @@ export function resolveAuthBaseURL(input: {
   if (origin) {
     try {
       const parsed = new URL(origin);
-      const rosegriffonHost = parsed.hostname === SITE_HOSTNAME || parsed.hostname.endsWith(`.${SITE_HOSTNAME}`);
+      const rosegriffonHost =
+        parsed.hostname === SITE_HOSTNAME ||
+        parsed.hostname.endsWith(`.${SITE_HOSTNAME}`);
       if (parsed.protocol === "https:" && rosegriffonHost) return SITE_URL;
-      if (!input.production && /^https?:$/.test(parsed.protocol) && isLoopback(parsed.hostname)) {
+      if (
+        !input.production &&
+        /^https?:$/.test(parsed.protocol) &&
+        isLoopback(parsed.hostname)
+      ) {
         return parsed.origin;
       }
     } catch {
@@ -33,7 +41,8 @@ export function resolveAuthBaseURL(input: {
       if (
         !parsed.username &&
         !parsed.password &&
-        (/^https:$/.test(parsed.protocol) || (!input.production && parsed.protocol === "http:")) &&
+        (/^https:$/.test(parsed.protocol) ||
+          (!input.production && parsed.protocol === "http:")) &&
         (!input.production || !isLoopback(parsed.hostname))
       ) {
         return parsed.origin;

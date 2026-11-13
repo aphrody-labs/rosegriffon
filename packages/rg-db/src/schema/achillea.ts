@@ -159,7 +159,14 @@ export interface EventTable {
   fixed_date: Date | null;
   discord_channel_id: string | null;
   organization_id: number | null;
-  internal_state: "Pending" | "Preregistering" | "Preparing" | "Ongoing" | "Finished" | "Canceled" | null;
+  internal_state:
+    | "Pending"
+    | "Preregistering"
+    | "Preparing"
+    | "Ongoing"
+    | "Finished"
+    | "Canceled"
+    | null;
   participants_number: number | null;
   tournament_type: string | null;
   starts_at: Date | null;

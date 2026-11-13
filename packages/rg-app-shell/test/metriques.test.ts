@@ -1,6 +1,12 @@
 import { describe, expect, test } from "bun:test";
 
-import { BUDGET_CHROME_MOBILE, coutChromeMobile, decalageHaut, HAUTEURS, PLANS } from "../src/config/metriques";
+import {
+  BUDGET_CHROME_MOBILE,
+  coutChromeMobile,
+  decalageHaut,
+  HAUTEURS,
+  PLANS,
+} from "../src/config/metriques";
 
 /**
  * Le chrome coûte de la place sur CHAQUE page. Sans chiffre, une barre
@@ -16,7 +22,9 @@ describe("budget du chrome", () => {
   });
 
   test("l'ajout d'une sous-barre de section reste dans le budget", () => {
-    expect(coutChromeMobile(true)).toBeLessThanOrEqual(BUDGET_CHROME_MOBILE + 3);
+    expect(coutChromeMobile(true)).toBeLessThanOrEqual(
+      BUDGET_CHROME_MOBILE + 3,
+    );
   });
 
   test("les cibles tactiles de la barre du bas restent au-dessus de 48 px", () => {
@@ -41,7 +49,9 @@ describe("plans d'empilement", () => {
   test("les écarts laissent de la place pour intercaler", () => {
     const plans = Object.values(PLANS).sort((a, b) => a - b);
     for (let i = 1; i < plans.length; i += 1) {
-      expect((plans[i] as number) - (plans[i - 1] as number)).toBeGreaterThanOrEqual(10);
+      expect(
+        (plans[i] as number) - (plans[i - 1] as number),
+      ).toBeGreaterThanOrEqual(10);
     }
   });
 });

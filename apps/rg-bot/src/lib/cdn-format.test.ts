@@ -110,7 +110,9 @@ describe("normalisation d'un chemin d'asset", () => {
   });
 
   test("URL publique complète, query comprise", () => {
-    const r = reussi("https://cdn.rosegriffon.fr/dx11/menu/220_img/vsroute_map/grid_map00.png?w=1600&format=webp");
+    const r = reussi(
+      "https://cdn.rosegriffon.fr/dx11/menu/220_img/vsroute_map/grid_map00.png?w=1600&format=webp",
+    );
     expect(r.chemin).toBe("/dx11/menu/220_img/vsroute_map/grid_map00.png");
     expect(r.variante).toBe(true);
   });
@@ -170,7 +172,9 @@ describe("normalisation d'un chemin d'asset", () => {
 
   test("une surface inconnue du CDN est refusée avec les formes acceptées", () => {
     // `data/common/**` n'a AUCUNE location nginx : mesuré 404 sur /common/chr/test.png.
-    const raison = refuse("data/common/chr/_face/01_ie1/c01000010/c01000010.g4tx");
+    const raison = refuse(
+      "data/common/chr/_face/01_ie1/c01000010/c01000010.g4tx",
+    );
     expect(raison).toContain("dx11/");
     expect(raison).toContain("static/");
   });
@@ -190,12 +194,18 @@ describe("normalisation d'un chemin d'asset", () => {
 
 describe("forge des URLs d'image", () => {
   test("URL directe", () => {
-    expect(urlAsset(CDN, "/dx11/a.png")).toBe("https://cdn.rosegriffon.fr/dx11/a.png");
-    expect(urlAsset("https://cdn.rosegriffon.fr/", "dx11/a.png")).toBe("https://cdn.rosegriffon.fr/dx11/a.png");
+    expect(urlAsset(CDN, "/dx11/a.png")).toBe(
+      "https://cdn.rosegriffon.fr/dx11/a.png",
+    );
+    expect(urlAsset("https://cdn.rosegriffon.fr/", "dx11/a.png")).toBe(
+      "https://cdn.rosegriffon.fr/dx11/a.png",
+    );
   });
 
   test("URL de variante — forme exacte vérifiée en 200", () => {
-    expect(urlVariante(CDN, "/dx11/menu/220_img/vsroute_map/grid_map00.png", 200)).toBe(
+    expect(
+      urlVariante(CDN, "/dx11/menu/220_img/vsroute_map/grid_map00.png", 200),
+    ).toBe(
       "https://cdn.rosegriffon.fr/dx11/menu/220_img/vsroute_map/grid_map00.png?w=200&format=webp",
     );
   });
@@ -215,8 +225,14 @@ describe("codes de modèle 3D", () => {
       code: "c01000010",
       famille: "personnage",
     });
-    expect(normaliserCodeModele("k000010")).toEqual({ code: "k000010", famille: "keshin" });
-    expect(normaliserCodeModele("ka000101")).toEqual({ code: "ka000101", famille: "armure" });
+    expect(normaliserCodeModele("k000010")).toEqual({
+      code: "k000010",
+      famille: "keshin",
+    });
+    expect(normaliserCodeModele("ka000101")).toEqual({
+      code: "ka000101",
+      famille: "armure",
+    });
   });
 
   test("une armure n'est jamais classée keshin", () => {
@@ -229,14 +245,23 @@ describe("codes de modèle 3D", () => {
       code: "c01000010",
       famille: "personnage",
     });
-    expect(normaliserCodeModele("https://cdn.rosegriffon.fr/model-full/ka000101.glb")).toEqual({
+    expect(
+      normaliserCodeModele(
+        "https://cdn.rosegriffon.fr/model-full/ka000101.glb",
+      ),
+    ).toEqual({
       code: "ka000101",
       famille: "armure",
     });
   });
 
   test("toute forme permettant une traversée de chemin est refusée", () => {
-    for (const mauvais of ["../../etc/passwd", "c01000010/../x", "c0100 0010", "c01000010?x=1"]) {
+    for (const mauvais of [
+      "../../etc/passwd",
+      "c01000010/../x",
+      "c0100 0010",
+      "c01000010?x=1",
+    ]) {
       const r = normaliserCodeModele(mauvais);
       expect("raison" in r).toBe(true);
     }
@@ -250,7 +275,9 @@ describe("codes de modèle 3D", () => {
   });
 
   test("URL du modèle", () => {
-    expect(urlModele(CDN, "c01000010")).toBe("https://cdn.rosegriffon.fr/model-full/c01000010.glb");
+    expect(urlModele(CDN, "c01000010")).toBe(
+      "https://cdn.rosegriffon.fr/model-full/c01000010.glb",
+    );
   });
 
   test("libellés français des familles", () => {
@@ -271,7 +298,11 @@ describe("codes de modèle 3D", () => {
 describe("choix de la texture d'aperçu d'un modèle", () => {
   // Extrait RÉEL de `GET /api/cpk/search?q=c01000010&limit=10`.
   const fichiersPersonnage = [
-    { path: "data/common/sound_asset/ja/c01000010.acb", ext: "acb", name: "c01000010.acb" },
+    {
+      path: "data/common/sound_asset/ja/c01000010.acb",
+      ext: "acb",
+      name: "c01000010.acb",
+    },
     {
       path: "data/common/chr/_face/01_ie1/c01000010/c01000010.g4md",
       ext: "g4md",
@@ -314,7 +345,9 @@ describe("choix de la texture d'aperçu d'un modèle", () => {
 
   test("aucune texture dx11 exploitable → null", () => {
     expect(
-      choisirTextureModele("k000020", [{ path: "data/common/chr/_keshin/k000020/k000020.g4mg", ext: "g4mg" }]),
+      choisirTextureModele("k000020", [
+        { path: "data/common/chr/_keshin/k000020/k000020.g4mg", ext: "g4mg" },
+      ]),
     ).toBeNull();
     expect(choisirTextureModele("c01000010", [])).toBeNull();
   });
@@ -322,13 +355,15 @@ describe("choix de la texture d'aperçu d'un modèle", () => {
 
 describe("conversion d'un chemin CPK en chemin CDN", () => {
   test("une texture dx11 est convertie", () => {
-    expect(cheminCdnDepuisCpk("data/dx11/chr/_keshin/k000010/k000010.g4tx")).toBe(
-      "/dx11/chr/_keshin/k000010/k000010.png",
-    );
+    expect(
+      cheminCdnDepuisCpk("data/dx11/chr/_keshin/k000010/k000010.g4tx"),
+    ).toBe("/dx11/chr/_keshin/k000010/k000010.png");
   });
 
   test("hors dx11 ou hors g4tx : rien à proposer", () => {
-    expect(cheminCdnDepuisCpk("data/common/chr/_armd/ka000101/ka000101.g4md")).toBeNull();
+    expect(
+      cheminCdnDepuisCpk("data/common/chr/_armd/ka000101/ka000101.g4md"),
+    ).toBeNull();
     expect(cheminCdnDepuisCpk("data/dx11/chr/x/y.bin")).toBeNull();
     expect(cheminCdnDepuisCpk(null)).toBeNull();
     expect(cheminCdnDepuisCpk(undefined)).toBeNull();
@@ -339,7 +374,7 @@ describe("catégories de galerie", () => {
   test("les douze catégories réellement peuplées sont proposées", () => {
     // Totaux relevés sur /api/gallery : aucune de ces catégories n'est vide.
     expect(CATEGORIES_GALERIE).toHaveLength(12);
-    expect(CATEGORIES_GALERIE.map(c => c.valeur)).toEqual([
+    expect(CATEGORIES_GALERIE.map((c) => c.valeur)).toEqual([
       "story",
       "chronicle",
       "special",
@@ -396,7 +431,11 @@ describe("pagination de la galerie", () => {
   });
 
   test("un état sans filtre fait aussi l'aller-retour", () => {
-    const id = encoderEtatGalerie({ page: 1, categorie: null, recherche: null });
+    const id = encoderEtatGalerie({
+      page: 1,
+      categorie: null,
+      recherche: null,
+    });
     expect(decoderEtatGalerie(id as string)).toEqual({
       page: 1,
       categorie: null,
@@ -405,13 +444,23 @@ describe("pagination de la galerie", () => {
   });
 
   test("les séparateurs de la recherche ne cassent pas le décodage", () => {
-    const id = encoderEtatGalerie({ page: 2, categorie: null, recherche: "a|b|c" });
+    const id = encoderEtatGalerie({
+      page: 2,
+      categorie: null,
+      recherche: "a|b|c",
+    });
     expect(id).not.toBeNull();
     expect(decoderEtatGalerie(id as string)?.recherche).toBe("a b c");
   });
 
   test("au-delà de 100 caractères, aucun bouton n'est proposé", () => {
-    expect(encoderEtatGalerie({ page: 1, categorie: null, recherche: "x".repeat(120) })).toBeNull();
+    expect(
+      encoderEtatGalerie({
+        page: 1,
+        categorie: null,
+        recherche: "x".repeat(120),
+      }),
+    ).toBeNull();
   });
 
   test("un customId étranger n'est jamais décodé", () => {
@@ -425,9 +474,12 @@ describe("pagination de la galerie", () => {
   test("le préfixe et la limite Discord sont ceux annoncés", () => {
     expect(PREFIXE_BOUTON_GALERIE).toBe("cdng");
     expect(MAX_CUSTOM_ID).toBe(100);
-    expect((encoderEtatGalerie({ page: 1, categorie: "menu", recherche: null }) ?? "").length).toBeLessThanOrEqual(
-      MAX_CUSTOM_ID,
-    );
+    expect(
+      (
+        encoderEtatGalerie({ page: 1, categorie: "menu", recherche: null }) ??
+        ""
+      ).length,
+    ).toBeLessThanOrEqual(MAX_CUSTOM_ID);
   });
 });
 
@@ -483,7 +535,11 @@ describe("description des sondes de santé", () => {
   });
 
   test("un manifeste présent est pesé", () => {
-    const lignes = decrireSanteCdn({ ok: true, storage: "/x", assetsManifest: { bytes: 2048 } });
+    const lignes = decrireSanteCdn({
+      ok: true,
+      storage: "/x",
+      assetsManifest: { bytes: 2048 },
+    });
     expect(lignes[1]).toContain("2,0 Ko");
   });
 

@@ -1,5 +1,8 @@
 "use client";
-import { useNotificationPermission, refreshNotificationPermission } from "../_context/notification-permission";
+import {
+  useNotificationPermission,
+  refreshNotificationPermission,
+} from "../_context/notification-permission";
 
 import { Button } from "@rosegriffon/ui";
 import { AnimatePresence, motion } from "motion/react";
@@ -8,7 +11,14 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { useTheme } from "@/contexts/theme-context";
-import { Bell, CalendarDays, Menu, Radio, Share2, Users } from "@/lib/icons-config";
+import {
+  Bell,
+  CalendarDays,
+  Menu,
+  Radio,
+  Share2,
+  Users,
+} from "@/lib/icons-config";
 
 interface RgtvAppShellProps {
   children: React.ReactNode;
@@ -41,7 +51,9 @@ export function RgtvAppShell({
 
   const requestNotificationPermission = async () => {
     if (!("Notification" in window)) {
-      toast.error("Les notifications ne sont pas supportées par votre navigateur");
+      toast.error(
+        "Les notifications ne sont pas supportées par votre navigateur",
+      );
       return;
     }
 
@@ -58,7 +70,9 @@ export function RgtvAppShell({
           icon: "/rgtv/rgtv.webp",
         });
       } else if (permission === "denied") {
-        toast.error("❌ Notifications refusées. Activez-les dans les paramètres du navigateur.");
+        toast.error(
+          "❌ Notifications refusées. Activez-les dans les paramètres du navigateur.",
+        );
       }
     } catch (error) {
       console.error("Erreur notification:", error);
@@ -113,11 +127,15 @@ export function RgtvAppShell({
         initial={false}
         animate={{
           backdropFilter: "blur(12px)",
-          backgroundColor: isScrolled ? `${colors.background}F5` : `${colors.background}DD`,
+          backgroundColor: isScrolled
+            ? `${colors.background}F5`
+            : `${colors.background}DD`,
         }}
         className="fixed top-0 left-0 right-0 z-50 border-b transition-colors"
         style={{
-          borderColor: isScrolled ? `${colors.primary}30` : `${colors.primary}20`,
+          borderColor: isScrolled
+            ? `${colors.primary}30`
+            : `${colors.primary}20`,
         }}
       >
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
@@ -127,13 +145,24 @@ export function RgtvAppShell({
               className="relative size-10 rounded-full ring-2 ring-offset-2 overflow-hidden"
               style={{ "--tw-ring-color": "#d63901" } as React.CSSProperties}
             >
-              <Image src="/rgtv/rgtv.webp" alt="RGTV" fill sizes="40px" className="object-cover" />
+              <Image
+                src="/rgtv/rgtv.webp"
+                alt="RGTV"
+                fill
+                sizes="40px"
+                className="object-cover"
+              />
             </div>
             <div className="min-w-0">
-              <h1 className="truncate text-base font-bold sm:text-lg" style={{ color: "#345182" }}>
+              <h1
+                className="truncate text-base font-bold sm:text-lg"
+                style={{ color: "#345182" }}
+              >
                 Rose Griffon TV
               </h1>
-              <p className="hidden text-xs text-muted-foreground sm:block">100% Inazuma Eleven</p>
+              <p className="hidden text-xs text-muted-foreground sm:block">
+                100% Inazuma Eleven
+              </p>
             </div>
           </div>
 
@@ -154,16 +183,28 @@ export function RgtvAppShell({
                 className="size-2 rounded-full"
                 style={{ backgroundColor: "#d63901" }}
               />
-              <span className="text-xs font-bold uppercase" style={{ color: "#345182" }}>
+              <span
+                className="text-xs font-bold uppercase"
+                style={{ color: "#345182" }}
+              >
                 Live
               </span>
-              {viewerCount > 0 && <span className="text-xs text-muted-foreground">• {viewerCount}</span>}
+              {viewerCount > 0 && (
+                <span className="text-xs text-muted-foreground">
+                  • {viewerCount}
+                </span>
+              )}
             </motion.div>
           )}
 
           {/* Actions */}
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" onClick={handleShare} className="hidden sm:flex">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleShare}
+              className="hidden sm:flex"
+            >
               <Share2 className="size-5" />
             </Button>
             <Button
@@ -177,7 +218,11 @@ export function RgtvAppShell({
                 <span className="absolute top-1 right-1 size-2 bg-[#d63901] rounded-full animate-pulse" />
               )}
             </Button>
-            <Button variant="ghost" size="icon" onClick={() => setShowMenu(!showMenu)}>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setShowMenu(!showMenu)}
+            >
               <Menu className="size-5" />
             </Button>
           </div>
@@ -208,22 +253,36 @@ export function RgtvAppShell({
                 <div className="space-y-3">
                   {notificationPermission === "default" && (
                     <div className="p-4 rounded-lg bg-primary/10 border border-primary/30">
-                      <p className="text-sm font-semibold mb-3">🔔 Activez les notifications</p>
-                      <p className="text-xs text-muted-foreground mb-3">Soyez prévenu des prochains streams !</p>
-                      <Button onClick={requestNotificationPermission} className="w-full" size="sm">
+                      <p className="text-sm font-semibold mb-3">
+                        🔔 Activez les notifications
+                      </p>
+                      <p className="text-xs text-muted-foreground mb-3">
+                        Soyez prévenu des prochains streams !
+                      </p>
+                      <Button
+                        onClick={requestNotificationPermission}
+                        className="w-full"
+                        size="sm"
+                      >
                         Activer
                       </Button>
                     </div>
                   )}
                   {notificationPermission === "granted" && (
                     <div className="p-3 rounded-lg bg-green-500/10 border border-green-500/30">
-                      <p className="text-sm font-semibold text-green-600">✅ Notifications activées</p>
-                      <p className="text-xs text-muted-foreground mt-1">Vous serez prévenu des prochains streams</p>
+                      <p className="text-sm font-semibold text-green-600">
+                        ✅ Notifications activées
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Vous serez prévenu des prochains streams
+                      </p>
                     </div>
                   )}
                   {notificationPermission === "denied" && (
                     <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/30">
-                      <p className="text-sm font-semibold text-red-600">❌ Notifications bloquées</p>
+                      <p className="text-sm font-semibold text-red-600">
+                        ❌ Notifications bloquées
+                      </p>
                       <p className="text-xs text-muted-foreground mt-1">
                         Activez-les dans les paramètres du navigateur
                       </p>
@@ -257,7 +316,11 @@ export function RgtvAppShell({
               <div className="p-6">
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="font-bold text-xl">Menu</h3>
-                  <Button variant="ghost" size="icon" onClick={() => setShowMenu(false)}>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setShowMenu(false)}
+                  >
                     <Menu className="size-5" />
                   </Button>
                 </div>
@@ -287,11 +350,19 @@ export function RgtvAppShell({
                     Communauté
                   </Button>
                   <div className="h-px bg-border my-4" />
-                  <Button variant="ghost" className="w-full justify-start" onClick={handleShare}>
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start"
+                    onClick={handleShare}
+                  >
                     <Share2 className="mr-2 size-4" />
                     Partager
                   </Button>
-                  <Button variant="ghost" className="w-full justify-start" onClick={requestNotificationPermission}>
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start"
+                    onClick={requestNotificationPermission}
+                  >
                     <Bell className="mr-2 size-4" />
                     Notifications
                   </Button>

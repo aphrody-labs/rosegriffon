@@ -9,7 +9,11 @@
 import { z } from "zod";
 
 import { apiDateSchema } from "./common";
-import { AchilleaResource, encodePathSegment, type AchilleaClientResult } from "./http";
+import {
+  AchilleaResource,
+  encodePathSegment,
+  type AchilleaClientResult,
+} from "./http";
 
 export const interclanClanSchema = z.object({
   id: z.number(),
@@ -27,14 +31,27 @@ export const interclanLineupSchema = z.object({
   clanId: z.number(),
   lockedIn: z.boolean(),
   valid: z.boolean(),
-  members: z.array(z.object({ userId: z.string(), displayName: z.string(), position: z.number() })),
+  members: z.array(
+    z.object({
+      userId: z.string(),
+      displayName: z.string(),
+      position: z.number(),
+    }),
+  ),
 });
 export type InterclanLineup = z.infer<typeof interclanLineupSchema>;
 
 export const interclanMatchSchema = z.object({
   id: z.number(),
   state: z.string(),
-  players: z.array(z.object({ userId: z.string(), displayName: z.string(), team: z.number(), score: z.number() })),
+  players: z.array(
+    z.object({
+      userId: z.string(),
+      displayName: z.string(),
+      team: z.number(),
+      score: z.number(),
+    }),
+  ),
 });
 export type InterclanMatch = z.infer<typeof interclanMatchSchema>;
 
@@ -65,7 +82,13 @@ export const interclanDetailSchema = z.object({
   lineups: z.array(interclanLineupSchema),
   matches: z.array(interclanMatchSchema),
   validation: interclanValidationSchema.nullable(),
-  viewer: z.object({ clanId: z.number().nullable(), clanRole: z.number().nullable(), isAdmin: z.boolean() }).nullable(),
+  viewer: z
+    .object({
+      clanId: z.number().nullable(),
+      clanRole: z.number().nullable(),
+      isAdmin: z.boolean(),
+    })
+    .nullable(),
 });
 export type InterclanDetail = z.infer<typeof interclanDetailSchema>;
 
@@ -84,7 +107,13 @@ export type InterclanSummary = z.infer<typeof interclanSummarySchema>;
 export const interclanScoreResultSchema = z.object({
   detail: interclanDetailSchema,
   termine: z.boolean(),
-  match: z.object({ id: z.number(), scoreA: z.number(), scoreB: z.number(), joueurA: z.string(), joueurB: z.string() }),
+  match: z.object({
+    id: z.number(),
+    scoreA: z.number(),
+    scoreB: z.number(),
+    joueurA: z.string(),
+    joueurB: z.string(),
+  }),
 });
 export type InterclanScoreResult = z.infer<typeof interclanScoreResultSchema>;
 
@@ -114,56 +143,117 @@ export interface InterclanLineupEntry {
 /** 10 routes. */
 export class InterclansResource extends AchilleaResource {
   /** `GET /interclans` — interclans d'un clan (ou du sien avec `mine`), du plus récent au plus ancien. */
-  list(query: InterclanListQuery = {}): Promise<AchilleaClientResult<{ data: InterclanSummary[] }>> {
-    return this.http.get("/interclans", z.object({ data: z.array(interclanSummarySchema) }), {
-      query: { clanId: query.clanId, state: query.state, limit: query.limit, mine: query.mine },
-    });
+  list(
+    query: InterclanListQuery = {},
+  ): Promise<AchilleaClientResult<{ data: InterclanSummary[] }>> {
+    return this.http.get(
+      "/interclans",
+      z.object({ data: z.array(interclanSummarySchema) }),
+      {
+        query: {
+          clanId: query.clanId,
+          state: query.state,
+          limit: query.limit,
+          mine: query.mine,
+        },
+      },
+    );
   }
 
   /** `GET /interclans/:id` — fiche : compositions, matchs, vote de validation, droits du lecteur. */
   get(id: number): Promise<AchilleaClientResult<InterclanDetail>> {
-    return this.http.get(`/interclans/${encodePathSegment(id)}`, interclanDetailSchema);
+    return this.http.get(
+      `/interclans/${encodePathSegment(id)}`,
+      interclanDetailSchema,
+    );
   }
 
   /** `POST /interclans` — défie un clan (Vice-Président et plus du clan challenger). */
-  create(payload: CreateInterclanPayload): Promise<AchilleaClientResult<InterclanDetail>> {
+  create(
+    payload: CreateInterclanPayload,
+  ): Promise<AchilleaClientResult<InterclanDetail>> {
     return this.http.post("/interclans", interclanDetailSchema, payload);
   }
 
   /** `POST /interclans/:id/respond` — le clan défié accepte (ouvre le salon) ou refuse. */
-  respond(id: number, accept: boolean): Promise<AchilleaClientResult<InterclanDetail>> {
-    return this.http.post(`/interclans/${encodePathSegment(id)}/respond`, interclanDetailSchema, { accept });
+  respond(
+    id: number,
+    accept: boolean,
+  ): Promise<AchilleaClientResult<InterclanDetail>> {
+    return this.http.post(
+      `/interclans/${encodePathSegment(id)}/respond`,
+      interclanDetailSchema,
+      { accept },
+    );
   }
 
   /** `PUT /interclans/:id/lineups/:clanId` — remplace la composition d'un clan (5 joueurs, positions 1–5). */
-  setLineup(id: number, clanId: number, members: readonly InterclanLineupEntry[]): Promise<AchilleaClientResult<InterclanDetail>> {
-    return this.http.put(`/interclans/${encodePathSegment(id)}/lineups/${encodePathSegment(clanId)}`, interclanDetailSchema, {
-      members: members.map(m => ({ userId: m.userId, position: m.position })),
-    });
+  setLineup(
+    id: number,
+    clanId: number,
+    members: readonly InterclanLineupEntry[],
+  ): Promise<AchilleaClientResult<InterclanDetail>> {
+    return this.http.put(
+      `/interclans/${encodePathSegment(id)}/lineups/${encodePathSegment(clanId)}`,
+      interclanDetailSchema,
+      {
+        members: members.map((m) => ({
+          userId: m.userId,
+          position: m.position,
+        })),
+      },
+    );
   }
 
   /** `POST /interclans/:id/lineups/:clanId/lock` — verrouille une composition complète, dans l'heure qui précède. */
-  lockLineup(id: number, clanId: number): Promise<AchilleaClientResult<InterclanDetail>> {
-    return this.http.post(`/interclans/${encodePathSegment(id)}/lineups/${encodePathSegment(clanId)}/lock`, interclanDetailSchema);
+  lockLineup(
+    id: number,
+    clanId: number,
+  ): Promise<AchilleaClientResult<InterclanDetail>> {
+    return this.http.post(
+      `/interclans/${encodePathSegment(id)}/lineups/${encodePathSegment(clanId)}/lock`,
+      interclanDetailSchema,
+    );
   }
 
   /** `POST /interclans/:id/cancel` — annule un interclan accepté ou prêt (Président de l'un des clans). */
   cancel(id: number): Promise<AchilleaClientResult<InterclanDetail>> {
-    return this.http.post(`/interclans/${encodePathSegment(id)}/cancel`, interclanDetailSchema);
+    return this.http.post(
+      `/interclans/${encodePathSegment(id)}/cancel`,
+      interclanDetailSchema,
+    );
   }
 
   /** `POST /interclans/:id/start` — lance l'interclan et génère un match par position. */
   start(id: number): Promise<AchilleaClientResult<InterclanDetail>> {
-    return this.http.post(`/interclans/${encodePathSegment(id)}/start`, interclanDetailSchema);
+    return this.http.post(
+      `/interclans/${encodePathSegment(id)}/start`,
+      interclanDetailSchema,
+    );
   }
 
   /** `POST /interclans/matches/:lobbyId/score` — saisit le score d'un match ; le dernier ouvre le vote de validation. */
-  reportScore(lobbyId: number, scoreA: number, scoreB: number): Promise<AchilleaClientResult<InterclanScoreResult>> {
-    return this.http.post(`/interclans/matches/${encodePathSegment(lobbyId)}/score`, interclanScoreResultSchema, { scoreA, scoreB });
+  reportScore(
+    lobbyId: number,
+    scoreA: number,
+    scoreB: number,
+  ): Promise<AchilleaClientResult<InterclanScoreResult>> {
+    return this.http.post(
+      `/interclans/matches/${encodePathSegment(lobbyId)}/score`,
+      interclanScoreResultSchema,
+      { scoreA, scoreB },
+    );
   }
 
   /** `POST /interclans/:id/arbitrate` — arbitrage staff : valide le résultat ou annule l'interclan. */
-  arbitrate(id: number, approve: boolean): Promise<AchilleaClientResult<InterclanDetail>> {
-    return this.http.post(`/interclans/${encodePathSegment(id)}/arbitrate`, interclanDetailSchema, { approve });
+  arbitrate(
+    id: number,
+    approve: boolean,
+  ): Promise<AchilleaClientResult<InterclanDetail>> {
+    return this.http.post(
+      `/interclans/${encodePathSegment(id)}/arbitrate`,
+      interclanDetailSchema,
+      { approve },
+    );
   }
 }

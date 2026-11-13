@@ -68,10 +68,15 @@ async function chargerCatalogue(): Promise<Catalogue | null> {
   }
 }
 
-export default async function Page({ searchParams }: { searchParams: Promise<{ code?: string | string[] }> }) {
+export default async function Page({
+  searchParams,
+}: {
+  searchParams: Promise<{ code?: string | string[] }>;
+}) {
   const catalogue = await chargerCatalogue();
   const codeBrut = (await searchParams).code;
-  const codeInitial = typeof codeBrut === "string" && codeBrut.length <= 128 ? codeBrut : "";
+  const codeInitial =
+    typeof codeBrut === "string" && codeBrut.length <= 128 ? codeBrut : "";
 
   if (!catalogue) {
     return (
@@ -81,8 +86,12 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ c
    "
       >
         {/* L'Atelier porte le `h1` quand le catalogue répond ; sans lui, la page en garde un. */}
-        <h1 className="mb-2 text-xl font-semibold text-on-surface">Éditeur d&apos;avatar</h1>
-        <p className="italic text-on-surface-variant">Catalogue injoignable pour le moment.</p>
+        <h1 className="mb-2 text-xl font-semibold text-on-surface">
+          Éditeur d&apos;avatar
+        </h1>
+        <p className="italic text-on-surface-variant">
+          Catalogue injoignable pour le moment.
+        </p>
       </div>
     );
   }

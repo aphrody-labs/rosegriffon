@@ -15,6 +15,13 @@ test("legacy unsupported escapes preserve the literal backslash and nested metad
 });
 
 test("structurally malformed JSON fails without creating empty metadata", () => {
-  for (const json of ["{", '{"missing":}', String.raw`{"path":"a\q"} trailing`, String.raw`{"path":"a\q`])
-    expect(() => decodeProjectionJson(json)).toThrow("Invalid imported JSON projection metadata");
+  for (const json of [
+    "{",
+    '{"missing":}',
+    String.raw`{"path":"a\q"} trailing`,
+    String.raw`{"path":"a\q`,
+  ])
+    expect(() => decodeProjectionJson(json)).toThrow(
+      "Invalid imported JSON projection metadata",
+    );
 });

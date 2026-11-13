@@ -49,16 +49,20 @@ export function couleurHex(couleur: number): string {
  * personne explicitement, et occuperait une ligne dans un affichage déjà contraint.
  */
 export function rolesUtiles(roles: readonly RoleAchillea[]): RoleAchillea[] {
-  return roles.filter(role => role.name !== "@everyone").toSorted((a, b) => b.position - a.position);
+  return roles
+    .filter((role) => role.name !== "@everyone")
+    .toSorted((a, b) => b.position - a.position);
 }
 
 /** Rôles gérés par une intégration (bots, boosts) : utile pour expliquer un total. */
 export function compterRolesGeres(roles: readonly RoleAchillea[]): number {
-  return roles.filter(role => role.managed === true).length;
+  return roles.filter((role) => role.managed === true).length;
 }
 
 /** Nombre de salons par type, du plus fréquent au moins fréquent. */
-export function repartitionParType(salons: readonly SalonAchillea[]): Array<[string, number]> {
+export function repartitionParType(
+  salons: readonly SalonAchillea[],
+): Array<[string, number]> {
   const compte = new Map<string, number>();
   for (const salon of salons) {
     const cle = libelleType(salon.type);
@@ -84,7 +88,9 @@ export function grouperParCategorie(
   const groupes = new Map<string | null, SalonAchillea[]>();
   for (const salon of salons) {
     if (salon.type === 4) continue; // la catégorie elle-même n'est pas son propre enfant
-    const cle = salon.parent_id ? (categories.get(salon.parent_id) ?? salon.parent_id) : null;
+    const cle = salon.parent_id
+      ? (categories.get(salon.parent_id) ?? salon.parent_id)
+      : null;
     groupes.set(cle, [...(groupes.get(cle) ?? []), salon]);
   }
 
@@ -110,7 +116,10 @@ export function grouperParCategorie(
  * Tronquer en silence donnerait un décompte faux à qui lit : « 102 rôles » en titre
  * et cinquante affichés. La dernière ligne annonce donc explicitement le reste.
  */
-export function bloquerLignes(lignes: readonly string[], limite = LIMITE_CHAMP): string {
+export function bloquerLignes(
+  lignes: readonly string[],
+  limite = LIMITE_CHAMP,
+): string {
   if (lignes.length === 0) return "—";
   const retenues: string[] = [];
   let taille = 0;

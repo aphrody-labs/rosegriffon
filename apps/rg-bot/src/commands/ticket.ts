@@ -16,7 +16,15 @@
  * `required: true` — une consigne qu'aucun outil ne fait respecter n'est pas
  * une consigne.
  */
-import { ButtonComponent, Discord, ModalComponent, Slash, SlashChoice, SlashGroup, SlashOption } from "discordx";
+import {
+  ButtonComponent,
+  Discord,
+  ModalComponent,
+  Slash,
+  SlashChoice,
+  SlashGroup,
+  SlashOption,
+} from "discordx";
 import {
   ActionRowBuilder,
   ApplicationCommandOptionType,
@@ -97,7 +105,8 @@ function identifiantFenetre(categorieCle: string): string {
  * nommer le réglage qui manque, pas répondre « erreur ».
  */
 async function salonPanneauDe(
-  interaction: ChatInputCommandInteraction | ButtonInteraction | ModalSubmitInteraction,
+  interaction:
+    ChatInputCommandInteraction | ButtonInteraction | ModalSubmitInteraction,
 ): Promise<{ salon: SalonAFils } | { erreur: string }> {
   const guildId = interaction.guildId;
   if (!guildId) {
@@ -109,10 +118,13 @@ async function salonPanneauDe(
   }
   if (!reglages.tickets.salonPanneau) {
     return {
-      erreur: "Aucun salon de tickets n'est configuré. Le staff le pose avec `/gestion ticket reglages`.",
+      erreur:
+        "Aucun salon de tickets n'est configuré. Le staff le pose avec `/gestion ticket reglages`.",
     };
   }
-  const salon = await interaction.client.channels.fetch(reglages.tickets.salonPanneau).catch(() => null);
+  const salon = await interaction.client.channels
+    .fetch(reglages.tickets.salonPanneau)
+    .catch(() => null);
   if (!salon || !salon.isTextBased() || salon.isDMBased()) {
     return {
       erreur: `Le salon de tickets configuré (\`${reglages.tickets.salonPanneau}\`) est introuvable ou n'est pas un salon textuel.`,
@@ -129,12 +141,16 @@ async function salonPanneauDe(
 }
 
 /** Le membre fait-il partie du staff habilité sur ce ticket ? */
-async function estStaff(guildId: string, membreRoles: readonly string[], pourLaDirection: boolean): Promise<boolean> {
+async function estStaff(
+  guildId: string,
+  membreRoles: readonly string[],
+  pourLaDirection: boolean,
+): Promise<boolean> {
   const reglages = await reglagesDe(guildId);
   const habilites = pourLaDirection
     ? reglages.tickets.rolesDirection
     : [...reglages.tickets.rolesStaff, ...reglages.tickets.rolesDirection];
-  return habilites.some(roleId => membreRoles.includes(roleId));
+  return habilites.some((roleId) => membreRoles.includes(roleId));
 }
 
 /** Carte d'accueil déposée dans le fil au moment de l'ouverture. */
@@ -152,7 +168,9 @@ function carteAccueil(ticket: Ticket): ReturnType<typeof creerEmbed> {
     icone: "ticket",
     titre: `Ticket ${referenceTicket(ticket.numero)} — ${libelleCategorieTicket(ticket.categorie)}`,
   });
-  return pied(embed, { note: `Ouvert par le membre · ${libelleEtatTicket(ticket.statut)}` });
+  return pied(embed, {
+    note: `Ouvert par le membre · ${libelleEtatTicket(ticket.statut)}`,
+  });
 }
 
 /** Boutons du fil : prendre en charge, fermer. */
@@ -181,7 +199,10 @@ async function ouvrir(
   interaction: ChatInputCommandInteraction | ModalSubmitInteraction,
   categorieCle: string,
   sujetBrut: string | null,
-): Promise<{ ok: true; fil: ThreadChannel; ticket: Ticket } | { ok: false; message: string }> {
+): Promise<
+  | { ok: true; fil: ThreadChannel; ticket: Ticket }
+  | { ok: false; message: string }
+> {
   const guildId = interaction.guildId;
   if (!guildId || !interaction.guild) {
     return { message: HORS_GUILDE, ok: false };
@@ -196,7 +217,7 @@ async function ouvrir(
   const verification = verifierOuverture(
     categorieCle,
     sujetBrut,
-    dejaOuverts.map(ticket => ticket.salonId),
+    dejaOuverts.map((ticket) => ticket.salonId),
   );
   if (!verification.ok) {
     return {
@@ -233,19 +254,27 @@ async function ouvrir(
 
   await fil
     .send({ components: [boutonsDuFil()], embeds: [carteAccueil(ticket)] })
-    .catch((err: unknown) => console.warn("[tickets] accueil non posé :", err instanceof Error ? err.message : err));
+    .catch((err: unknown) =>
+      console.warn(
+        "[tickets] accueil non posé :",
+        err instanceof Error ? err.message : err,
+      ),
+    );
 
   return { fil, ok: true, ticket };
 }
 
 @Discord()
-@SlashGroup({ description: "Ouvrir et suivre un ticket d'assistance", name: "ticket" })
+@SlashGroup({
+  description: "Ouvrir et suivre un ticket d'assistance",
+  name: "ticket",
+})
 @SlashGroup("ticket")
 export class TicketCommand {
   @Slash({ description: "Ouvrir un ticket auprès du staff", name: "ouvrir" })
   async ouvrirCommande(
     @SlashChoice(
-      ...CATEGORIES_TICKET.map(categorie => ({
+      ...CATEGORIES_TICKET.map((categorie) => ({
         name: `${categorie.emoji} ${categorie.libelle}`,
         value: categorie.cle,
       })),
@@ -271,7 +300,10 @@ export class TicketCommand {
     try {
       const resultat = await ouvrir(interaction, categorieCle, sujet ?? null);
       if (!resultat.ok) {
-        await repondre(interaction, attention("Ticket non ouvert", resultat.message, { prive: true }));
+        await repondre(
+          interaction,
+          attention("Ticket non ouvert", resultat.message, { prive: true }),
+        );
         return;
       }
       await repondre(
@@ -283,11 +315,20 @@ export class TicketCommand {
         ),
       );
     } catch (err) {
-      await repondre(interaction, echec("Ouverture impossible", err instanceof Error ? err.message : String(err)));
+      await repondre(
+        interaction,
+        echec(
+          "Ouverture impossible",
+          err instanceof Error ? err.message : String(err),
+        ),
+      );
     }
   }
 
-  @Slash({ description: "Fermer le ticket de ce fil, avec son motif", name: "fermer" })
+  @Slash({
+    description: "Fermer le ticket de ce fil, avec son motif",
+    name: "fermer",
+  })
   async fermer(
     @SlashOption({
       description: "Problème + solution, en une phrase — obligatoire",
@@ -306,14 +347,22 @@ export class TicketCommand {
       if (!ticket) {
         await repondre(
           interaction,
-          attention("Pas un ticket", "Cette commande se lance DANS le fil du ticket à fermer.", { prive: true }),
+          attention(
+            "Pas un ticket",
+            "Cette commande se lance DANS le fil du ticket à fermer.",
+            { prive: true },
+          ),
         );
         return;
       }
       if (!transitionPermise(ticket.statut, "ferme")) {
         await repondre(
           interaction,
-          attention("Fermeture impossible", refusTransition(ticket.statut, "ferme"), { prive: true }),
+          attention(
+            "Fermeture impossible",
+            refusTransition(ticket.statut, "ferme"),
+            { prive: true },
+          ),
         );
         return;
       }
@@ -322,7 +371,10 @@ export class TicketCommand {
       if (!motif) {
         await repondre(
           interaction,
-          echec("Motif vide", "La consigne du staff est claire : toujours fermer avec un motif."),
+          echec(
+            "Motif vide",
+            "La consigne du staff est claire : toujours fermer avec un motif.",
+          ),
         );
         return;
       }
@@ -332,27 +384,46 @@ export class TicketCommand {
       // tiers, mais la garde est écrite quand même.
       const categorie = categorieDe(ticket);
       const roles = interaction.member?.roles;
-      const listeRoles = Array.isArray(roles) ? roles : roles && "cache" in roles ? [...roles.cache.keys()] : [];
+      const listeRoles = Array.isArray(roles)
+        ? roles
+        : roles && "cache" in roles
+          ? [...roles.cache.keys()]
+          : [];
       const autorise =
         ticket.auteurId === interaction.user.id ||
-        (await estStaff(ticket.guildId, listeRoles, categorie?.pourLaDirection ?? false));
+        (await estStaff(
+          ticket.guildId,
+          listeRoles,
+          categorie?.pourLaDirection ?? false,
+        ));
       if (!autorise) {
         await repondre(
           interaction,
-          attention("Pas à toi", "Seuls l'auteur du ticket et le staff peuvent le fermer.", {
-            prive: true,
-          }),
+          attention(
+            "Pas à toi",
+            "Seuls l'auteur du ticket et le staff peuvent le fermer.",
+            {
+              prive: true,
+            },
+          ),
         );
         return;
       }
 
       const ferme = await fermerTicket(ticket.id, interaction.user.id, motif);
       if (!ferme) {
-        await repondre(interaction, attention("Déjà fermé", "Quelqu'un a été plus rapide.", { prive: true }));
+        await repondre(
+          interaction,
+          attention("Déjà fermé", "Quelqu'un a été plus rapide.", {
+            prive: true,
+          }),
+        );
         return;
       }
 
-      const fil = interaction.channel?.isThread() ? (interaction.channel as ThreadChannel) : null;
+      const fil = interaction.channel?.isThread()
+        ? (interaction.channel as ThreadChannel)
+        : null;
       await publierFermeture({
         client: interaction.client,
         fermePar: interaction.user.id,
@@ -380,17 +451,29 @@ export class TicketCommand {
         await clore(fil, `Fermé par ${interaction.user.tag} — ${motif}`);
       }
     } catch (err) {
-      await repondre(interaction, echec("Fermeture impossible", err instanceof Error ? err.message : String(err)));
+      await repondre(
+        interaction,
+        echec(
+          "Fermeture impossible",
+          err instanceof Error ? err.message : String(err),
+        ),
+      );
     }
   }
 
-  @Slash({ description: "Prendre en charge le ticket de ce fil (staff)", name: "prendre" })
+  @Slash({
+    description: "Prendre en charge le ticket de ce fil (staff)",
+    name: "prendre",
+  })
   async prendre(interaction: ChatInputCommandInteraction) {
     await differer(interaction);
     await basculerPriseEnCharge(interaction, "prendre");
   }
 
-  @Slash({ description: "Rendre le ticket de ce fil au staff (staff)", name: "rendre" })
+  @Slash({
+    description: "Rendre le ticket de ce fil au staff (staff)",
+    name: "rendre",
+  })
   async rendre(interaction: ChatInputCommandInteraction) {
     await differer(interaction);
     await basculerPriseEnCharge(interaction, "rendre");
@@ -402,7 +485,13 @@ export class TicketCommand {
     try {
       const ticket = await ticketDuSalon(interaction.channelId);
       if (!ticket) {
-        await repondre(interaction, vide("Pas un ticket", "Cette commande se lance dans le fil d'un ticket."));
+        await repondre(
+          interaction,
+          vide(
+            "Pas un ticket",
+            "Cette commande se lance dans le fil d'un ticket.",
+          ),
+        );
         return;
       }
       const carte = fiche({
@@ -411,14 +500,28 @@ export class TicketCommand {
       });
       carte
         .champ("État", libelleEtatTicket(ticket.statut), { enLigne: true })
-        .champ("Catégorie", libelleCategorieTicket(ticket.categorie), { enLigne: true })
+        .champ("Catégorie", libelleCategorieTicket(ticket.categorie), {
+          enLigne: true,
+        })
         .champ("Ouvert par", `<@${ticket.auteurId}>`, { enLigne: true })
         .champ("Ouvert", ilYA(ticket.ouvertLe), { enLigne: true })
-        .champ("Pris par", ticket.prisPar ? `<@${ticket.prisPar}>` : "personne", { enLigne: true })
+        .champ(
+          "Pris par",
+          ticket.prisPar ? `<@${ticket.prisPar}>` : "personne",
+          { enLigne: true },
+        )
         .champ("Sujet", ticket.sujet ?? "—");
-      await interaction.editReply({ embeds: [piedDeCommande(carte.embed, interaction)] });
+      await interaction.editReply({
+        embeds: [piedDeCommande(carte.embed, interaction)],
+      });
     } catch (err) {
-      await repondre(interaction, echec("Ticket illisible", err instanceof Error ? err.message : String(err)));
+      await repondre(
+        interaction,
+        echec(
+          "Ticket illisible",
+          err instanceof Error ? err.message : String(err),
+        ),
+      );
     }
   }
 
@@ -432,26 +535,43 @@ export class TicketCommand {
     }
     try {
       const roles = interaction.member?.roles;
-      const listeRoles = Array.isArray(roles) ? roles : roles && "cache" in roles ? [...roles.cache.keys()] : [];
+      const listeRoles = Array.isArray(roles)
+        ? roles
+        : roles && "cache" in roles
+          ? [...roles.cache.keys()]
+          : [];
       if (!(await estStaff(guildId, listeRoles, false))) {
         await repondre(
           interaction,
-          attention("Réservé au staff", "Cette liste nomme des demandes d'autres membres.", {
-            prive: true,
-          }),
+          attention(
+            "Réservé au staff",
+            "Cette liste nomme des demandes d'autres membres.",
+            {
+              prive: true,
+            },
+          ),
         );
         return;
       }
 
-      const [ouverts, compte] = await Promise.all([ticketsOuverts(guildId), compterTickets(guildId)]);
+      const [ouverts, compte] = await Promise.all([
+        ticketsOuverts(guildId),
+        compterTickets(guildId),
+      ]);
       if (ouverts.length === 0) {
-        await repondre(interaction, vide("Aucun ticket ouvert", `${compte.ferme} ticket(s) fermé(s) au total.`));
+        await repondre(
+          interaction,
+          vide(
+            "Aucun ticket ouvert",
+            `${compte.ferme} ticket(s) fermé(s) au total.`,
+          ),
+        );
         return;
       }
       const carte = fiche({
         description: ouverts
           .map(
-            ticket =>
+            (ticket) =>
               `${libelleEtatTicket(ticket.statut)} **${referenceTicket(ticket.numero)}** ` +
               `<#${ticket.salonId}> · ${libelleCategorieTicket(ticket.categorie)} · ${ilYA(ticket.ouvertLe)}`,
           )
@@ -459,10 +579,21 @@ export class TicketCommand {
         icone: "ticket",
         titre: `${ouverts.length} ticket(s) ouvert(s)`,
       });
-      carte.champ("Total", `${compte.ouvert} en attente · ${compte.pris} pris en charge · ${compte.ferme} fermés`);
-      await interaction.editReply({ embeds: [piedDeCommande(carte.embed, interaction)] });
+      carte.champ(
+        "Total",
+        `${compte.ouvert} en attente · ${compte.pris} pris en charge · ${compte.ferme} fermés`,
+      );
+      await interaction.editReply({
+        embeds: [piedDeCommande(carte.embed, interaction)],
+      });
     } catch (err) {
-      await repondre(interaction, echec("Liste illisible", err instanceof Error ? err.message : String(err)));
+      await repondre(
+        interaction,
+        echec(
+          "Liste illisible",
+          err instanceof Error ? err.message : String(err),
+        ),
+      );
     }
   }
 }
@@ -477,22 +608,41 @@ async function basculerPriseEnCharge(
     if (!ticket) {
       await repondre(
         interaction,
-        attention("Pas un ticket", "Cette commande se lance dans le fil d'un ticket.", {
-          prive: true,
-        }),
+        attention(
+          "Pas un ticket",
+          "Cette commande se lance dans le fil d'un ticket.",
+          {
+            prive: true,
+          },
+        ),
       );
       return;
     }
     const vers = sens === "prendre" ? "pris" : "ouvert";
     if (!transitionPermise(ticket.statut, vers)) {
-      await repondre(interaction, attention("Impossible", refusTransition(ticket.statut, vers), { prive: true }));
+      await repondre(
+        interaction,
+        attention("Impossible", refusTransition(ticket.statut, vers), {
+          prive: true,
+        }),
+      );
       return;
     }
 
     const categorie = categorieDe(ticket);
     const roles = interaction.member?.roles;
-    const listeRoles = Array.isArray(roles) ? roles : roles && "cache" in roles ? [...roles.cache.keys()] : [];
-    if (!(await estStaff(ticket.guildId, listeRoles, categorie?.pourLaDirection ?? false))) {
+    const listeRoles = Array.isArray(roles)
+      ? roles
+      : roles && "cache" in roles
+        ? [...roles.cache.keys()]
+        : [];
+    if (
+      !(await estStaff(
+        ticket.guildId,
+        listeRoles,
+        categorie?.pourLaDirection ?? false,
+      ))
+    ) {
       await repondre(
         interaction,
         attention(
@@ -507,9 +657,14 @@ async function basculerPriseEnCharge(
     }
 
     const apres =
-      sens === "prendre" ? await prendreTicket(ticket.id, interaction.user.id) : await rendreTicket(ticket.id);
+      sens === "prendre"
+        ? await prendreTicket(ticket.id, interaction.user.id)
+        : await rendreTicket(ticket.id);
     if (!apres) {
-      await repondre(interaction, attention("Trop tard", "L'état a changé entre-temps.", { prive: true }));
+      await repondre(
+        interaction,
+        attention("Trop tard", "L'état a changé entre-temps.", { prive: true }),
+      );
       return;
     }
 
@@ -530,7 +685,13 @@ async function basculerPriseEnCharge(
       ],
     });
   } catch (err) {
-    await repondre(interaction, echec("Action impossible", err instanceof Error ? err.message : String(err)));
+    await repondre(
+      interaction,
+      echec(
+        "Action impossible",
+        err instanceof Error ? err.message : String(err),
+      ),
+    );
   }
 }
 
@@ -547,10 +708,13 @@ export class TicketComposants {
   @ButtonComponent({ id: /^ticket:ouvrir:/ })
   async surOuvrir(interaction: ButtonInteraction) {
     const composant = lireComposant(interaction.customId);
-    const categorie = composant?.argument ? categorieTicket(composant.argument) : null;
+    const categorie = composant?.argument
+      ? categorieTicket(composant.argument)
+      : null;
     if (!categorie) {
       await interaction.reply({
-        content: "Ce bouton pointe vers une catégorie qui n'existe plus. Utilise `/ticket ouvrir`.",
+        content:
+          "Ce bouton pointe vers une catégorie qui n'existe plus. Utilise `/ticket ouvrir`.",
         flags: MessageFlags.Ephemeral,
       });
       return;
@@ -585,7 +749,9 @@ export class TicketComposants {
         interaction.fields.getTextInputValue("sujet"),
       );
       if (!resultat.ok) {
-        await interaction.editReply(attention("Ticket non ouvert", resultat.message, { prive: true }));
+        await interaction.editReply(
+          attention("Ticket non ouvert", resultat.message, { prive: true }),
+        );
         return;
       }
       await interaction.editReply(
@@ -596,7 +762,12 @@ export class TicketComposants {
         ),
       );
     } catch (err) {
-      await interaction.editReply(echec("Ouverture impossible", err instanceof Error ? err.message : String(err)));
+      await interaction.editReply(
+        echec(
+          "Ouverture impossible",
+          err instanceof Error ? err.message : String(err),
+        ),
+      );
     }
   }
 
@@ -639,29 +810,43 @@ export class TicketComposants {
       const ticket = await ticketDuSalon(interaction.channelId ?? "");
       if (!ticket) {
         await interaction.editReply(
-          attention("Pas un ticket", "Ce fil n'est rattaché à aucun ticket.", { prive: true }),
+          attention("Pas un ticket", "Ce fil n'est rattaché à aucun ticket.", {
+            prive: true,
+          }),
         );
         return;
       }
       const motif = motifPropre(interaction.fields.getTextInputValue("motif"));
       if (!motif) {
-        await interaction.editReply(echec("Motif vide", "Toujours fermer avec un motif."));
+        await interaction.editReply(
+          echec("Motif vide", "Toujours fermer avec un motif."),
+        );
         return;
       }
       if (!transitionPermise(ticket.statut, "ferme")) {
         await interaction.editReply(
-          attention("Fermeture impossible", refusTransition(ticket.statut, "ferme"), { prive: true }),
+          attention(
+            "Fermeture impossible",
+            refusTransition(ticket.statut, "ferme"),
+            { prive: true },
+          ),
         );
         return;
       }
 
       const ferme = await fermerTicket(ticket.id, interaction.user.id, motif);
       if (!ferme) {
-        await interaction.editReply(attention("Déjà fermé", "Quelqu'un a été plus rapide.", { prive: true }));
+        await interaction.editReply(
+          attention("Déjà fermé", "Quelqu'un a été plus rapide.", {
+            prive: true,
+          }),
+        );
         return;
       }
 
-      const fil = interaction.channel?.isThread() ? (interaction.channel as ThreadChannel) : null;
+      const fil = interaction.channel?.isThread()
+        ? (interaction.channel as ThreadChannel)
+        : null;
       await publierFermeture({
         client: interaction.client,
         fermePar: interaction.user.id,
@@ -687,38 +872,70 @@ export class TicketComposants {
         await clore(fil, `Fermé par ${interaction.user.tag} — ${motif}`);
       }
     } catch (err) {
-      await interaction.editReply(echec("Fermeture impossible", err instanceof Error ? err.message : String(err)));
+      await interaction.editReply(
+        echec(
+          "Fermeture impossible",
+          err instanceof Error ? err.message : String(err),
+        ),
+      );
     }
   }
 }
 
 /** Prise en charge depuis un bouton — même règle que la commande. */
-async function basculerParBouton(interaction: ButtonInteraction, sens: "prendre" | "rendre"): Promise<void> {
+async function basculerParBouton(
+  interaction: ButtonInteraction,
+  sens: "prendre" | "rendre",
+): Promise<void> {
   try {
     const ticket = await ticketDuSalon(interaction.channelId);
     if (!ticket) {
-      await interaction.editReply(attention("Pas un ticket", "Ce fil n'est rattaché à aucun ticket.", { prive: true }));
-      return;
-    }
-    const vers = sens === "prendre" ? "pris" : "ouvert";
-    if (!transitionPermise(ticket.statut, vers)) {
-      await interaction.editReply(attention("Impossible", refusTransition(ticket.statut, vers), { prive: true }));
-      return;
-    }
-    const categorie = categorieDe(ticket);
-    const roles = interaction.member?.roles;
-    const listeRoles = Array.isArray(roles) ? roles : roles && "cache" in roles ? [...roles.cache.keys()] : [];
-    if (!(await estStaff(ticket.guildId, listeRoles, categorie?.pourLaDirection ?? false))) {
       await interaction.editReply(
-        attention("Réservé au staff", "Seuls les rôles de prise en charge peuvent le faire.", {
+        attention("Pas un ticket", "Ce fil n'est rattaché à aucun ticket.", {
           prive: true,
         }),
       );
       return;
     }
+    const vers = sens === "prendre" ? "pris" : "ouvert";
+    if (!transitionPermise(ticket.statut, vers)) {
+      await interaction.editReply(
+        attention("Impossible", refusTransition(ticket.statut, vers), {
+          prive: true,
+        }),
+      );
+      return;
+    }
+    const categorie = categorieDe(ticket);
+    const roles = interaction.member?.roles;
+    const listeRoles = Array.isArray(roles)
+      ? roles
+      : roles && "cache" in roles
+        ? [...roles.cache.keys()]
+        : [];
+    if (
+      !(await estStaff(
+        ticket.guildId,
+        listeRoles,
+        categorie?.pourLaDirection ?? false,
+      ))
+    ) {
+      await interaction.editReply(
+        attention(
+          "Réservé au staff",
+          "Seuls les rôles de prise en charge peuvent le faire.",
+          {
+            prive: true,
+          },
+        ),
+      );
+      return;
+    }
     const apres = await prendreTicket(ticket.id, interaction.user.id);
     if (!apres) {
-      await interaction.editReply(attention("Trop tard", "L'état a changé entre-temps.", { prive: true }));
+      await interaction.editReply(
+        attention("Trop tard", "L'état a changé entre-temps.", { prive: true }),
+      );
       return;
     }
     await interaction.editReply({
@@ -735,7 +952,12 @@ async function basculerParBouton(interaction: ButtonInteraction, sens: "prendre"
       ],
     });
   } catch (err) {
-    await interaction.editReply(echec("Action impossible", err instanceof Error ? err.message : String(err)));
+    await interaction.editReply(
+      echec(
+        "Action impossible",
+        err instanceof Error ? err.message : String(err),
+      ),
+    );
   }
 }
 
@@ -746,20 +968,25 @@ export function construirePanneau(): {
 } {
   const embed = creerEmbed({
     description: `Besoin du staff ? Choisis la porte qui correspond. Un **fil privé** s'ouvre, visible de toi et du staff concerné, et de personne d'autre.\n\n${CATEGORIES_TICKET.map(
-      categorie => `${categorie.emoji} **${categorie.libelle}** — ${categorie.description}`,
+      (categorie) =>
+        `${categorie.emoji} **${categorie.libelle}** — ${categorie.description}`,
     ).join("\n")}`,
     icone: "ticket",
     titre: "Ouvrir un ticket",
   });
-  pied(embed, { note: "un seul ticket ouvert à la fois · le fil reste lisible après fermeture" });
+  pied(embed, {
+    note: "un seul ticket ouvert à la fois · le fil reste lisible après fermeture",
+  });
 
   const rangee = new ActionRowBuilder<ButtonBuilder>().addComponents(
-    CATEGORIES_TICKET.map(categorie =>
+    CATEGORIES_TICKET.map((categorie) =>
       new ButtonBuilder()
         .setCustomId(identifiantComposant("ouvrir", categorie.cle))
         .setEmoji(categorie.emoji)
         .setLabel(categorie.libelle)
-        .setStyle(categorie.sensible ? ButtonStyle.Danger : ButtonStyle.Secondary),
+        .setStyle(
+          categorie.sensible ? ButtonStyle.Danger : ButtonStyle.Secondary,
+        ),
     ),
   );
   return { components: [rangee], embeds: [embed] };

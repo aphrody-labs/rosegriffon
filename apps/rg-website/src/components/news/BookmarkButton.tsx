@@ -13,7 +13,11 @@ interface BookmarkButtonProps {
   compact?: boolean;
 }
 
-export function BookmarkButton({ articleId, initialBookmarked = false, compact }: BookmarkButtonProps) {
+export function BookmarkButton({
+  articleId,
+  initialBookmarked = false,
+  compact,
+}: BookmarkButtonProps) {
   const { user } = useAuth();
   const [bookmarked, setBookmarked] = useState(initialBookmarked);
   const [isPending, startTransition] = useTransition();
@@ -30,7 +34,11 @@ export function BookmarkButton({ articleId, initialBookmarked = false, compact }
       try {
         const result = await toggleBookmark(articleId);
         setBookmarked(result.bookmarked);
-        toast.success(result.bookmarked ? "Article sauvegardé" : "Article retiré des favoris");
+        toast.success(
+          result.bookmarked
+            ? "Article sauvegardé"
+            : "Article retiré des favoris",
+        );
       } catch {
         setBookmarked(!newState);
         toast.error("Erreur");
@@ -41,7 +49,7 @@ export function BookmarkButton({ articleId, initialBookmarked = false, compact }
   if (compact) {
     return (
       <button
-        onClick={e => {
+        onClick={(e) => {
           e.preventDefault();
           e.stopPropagation();
           handleToggle();
@@ -49,7 +57,9 @@ export function BookmarkButton({ articleId, initialBookmarked = false, compact }
         disabled={isPending}
         className={cn(
           "inline-flex items-center text-xs transition-colors",
-          bookmarked ? "text-primary" : "text-on-surface-variant/50 hover:text-primary",
+          bookmarked
+            ? "text-primary"
+            : "text-on-surface-variant/50 hover:text-primary",
         )}
       >
         <Bookmark className={cn("size-3.5", bookmarked && "fill-current")} />

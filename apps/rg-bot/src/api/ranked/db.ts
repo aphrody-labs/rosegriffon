@@ -126,7 +126,11 @@ export function findTier(elo: number, ranks: RankRow[]): RankRow | null {
 // ---------------------------------------------------------------------------
 
 export type SeasonStateValue = "Upcoming" | "Active" | "Closed";
-export const SEASON_STATES: readonly SeasonStateValue[] = ["Upcoming", "Active", "Closed"];
+export const SEASON_STATES: readonly SeasonStateValue[] = [
+  "Upcoming",
+  "Active",
+  "Closed",
+];
 
 export interface SeasonAdminRow {
   id: string;
@@ -197,7 +201,8 @@ export async function updateSeasonAdmin(
   const startsAt = patch.startsAt ?? cur.starts_at;
   const endsAt = patch.endsAt ?? cur.ends_at;
   const state = patch.state ?? cur.state;
-  const config = patch.config ?? cur.config ?? { kFactor: 32, baseRating: 0, decayRate: 0 };
+  const config = patch.config ??
+    cur.config ?? { kFactor: 32, baseRating: 0, decayRate: 0 };
   await sql`
 		UPDATE achillea.season
 		SET name = ${name},
@@ -212,7 +217,9 @@ export async function updateSeasonAdmin(
 }
 
 /** Active une saison et clôt toute autre saison actuellement 'Active'. */
-export async function activateSeasonAdmin(id: string): Promise<SeasonAdminRow | null> {
+export async function activateSeasonAdmin(
+  id: string,
+): Promise<SeasonAdminRow | null> {
   const cur = await getSeasonAdmin(id);
   if (!cur) return null;
   await sql`UPDATE achillea.season SET state = 'Closed'::achillea.season_state, updated_at = NOW() WHERE state = 'Active' AND id <> ${id}`;
@@ -231,7 +238,10 @@ export async function resetLadderForSeason(id: string): Promise<number | null> {
 		SELECT config FROM achillea.season WHERE id = ${id} LIMIT 1
 	`;
   if (!season[0]) return null;
-  const base = Math.max(0, Math.floor(Number(season[0].config?.baseRating ?? 0)));
+  const base = Math.max(
+    0,
+    Math.floor(Number(season[0].config?.baseRating ?? 0)),
+  );
   const rows = await sql<Array<{ user_id: string }>>`
 		UPDATE achillea.user_elo
 		SET elo = ${base}, peak_rating = ${base}, games_played = 0, wins = 0, losses = 0

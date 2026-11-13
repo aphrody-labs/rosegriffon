@@ -47,7 +47,13 @@ export interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
  * Affiche l'identité du domaine actif (Rose Griffon, Azalée, Achilléa)
  * et propose un switch d'univers instantané sans casser le layout.
  */
-export function SidebarUniverseHeader({ pathname, isCollapsed }: { pathname: string; isCollapsed: boolean }) {
+export function SidebarUniverseHeader({
+  pathname,
+  isCollapsed,
+}: {
+  pathname: string;
+  isCollapsed: boolean;
+}) {
   const activeDomaine = domaineDeLaRoute(pathname);
 
   const info: Record<
@@ -94,7 +100,13 @@ export function SidebarUniverseHeader({ pathname, isCollapsed }: { pathname: str
           className="relative size-10 rounded-xl p-1.5 flex items-center justify-center text-sidebar-foreground hover:bg-sidebar-accent transition-colors"
           title={`${current.name} — ${current.badge}`}
         >
-          <Image src={current.logo} alt={current.name} fill sizes="32px" className="object-contain" />
+          <Image
+            src={current.logo}
+            alt={current.name}
+            fill
+            sizes="32px"
+            className="object-contain"
+          />
         </Link>
       </SidebarHeader>
     );
@@ -104,16 +116,27 @@ export function SidebarUniverseHeader({ pathname, isCollapsed }: { pathname: str
     <SidebarHeader className="p-3 border-b border-sidebar-border space-y-2.5 text-sidebar-foreground">
       {/* Univers Identity */}
       <div className="flex items-center justify-between gap-2">
-        <Link href={current.href} className="flex items-center gap-2.5 min-w-0 group/brand flex-1">
+        <Link
+          href={current.href}
+          className="flex items-center gap-2.5 min-w-0 group/brand flex-1"
+        >
           <div className="relative size-8 shrink-0 rounded-lg overflow-hidden p-0.5 bg-sidebar-accent border border-sidebar-border group-hover/brand:scale-105 transition-transform">
-            <Image src={current.logo} alt={current.name} fill sizes="32px" className="object-contain" />
+            <Image
+              src={current.logo}
+              alt={current.name}
+              fill
+              sizes="32px"
+              className="object-contain"
+            />
           </div>
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-1.5">
               <span className="font-black text-sm text-sidebar-foreground truncate transition-colors">
                 {current.name}
               </span>
-              <span className={`text-xs font-bold px-1.5 py-0.5 rounded border ${current.badgeColor}`}>
+              <span
+                className={`text-xs font-bold px-1.5 py-0.5 rounded border ${current.badgeColor}`}
+              >
                 {current.badge}
               </span>
             </div>
@@ -154,7 +177,9 @@ function NavIcon({
           alt={traduireNav(item.label, t)}
           fill
           className={`object-contain ${
-            isActive ? "opacity-100" : "opacity-70 grayscale group-hover:grayscale-0 group-hover:opacity-100"
+            isActive
+              ? "opacity-100"
+              : "opacity-70 grayscale group-hover:grayscale-0 group-hover:opacity-100"
           }`}
         />
       </div>
@@ -198,13 +223,18 @@ function RecursiveNavItem({
       (item.path === "#wiki" && activeDomaine === "wiki") ||
       (item.path === "#esport" && activeDomaine === "esport"));
 
-  const [isOpen, setIsOpen] = React.useState(isActive || isUniversePillar || Boolean(item.defaultOpen));
+  const [isOpen, setIsOpen] = React.useState(
+    isActive || isUniversePillar || Boolean(item.defaultOpen),
+  );
 
   // Un changement d'univers ouvre sa catégorie et replie celle que l'on
   // quitte. Les sous-sections internes conservent, elles, le choix manuel.
   // Ajusté pendant le rendu (et non dans un effet) pour éviter un rendu en cascade.
   const [suivi, setSuivi] = React.useState({ isActive, isUniversePillar });
-  if (suivi.isActive !== isActive || suivi.isUniversePillar !== isUniversePillar) {
+  if (
+    suivi.isActive !== isActive ||
+    suivi.isUniversePillar !== isUniversePillar
+  ) {
     setSuivi({ isActive, isUniversePillar });
     if (depth === 0 && item.groupOnly) setIsOpen(isUniversePillar);
     else if (isActive) setIsOpen(true);
@@ -297,7 +327,13 @@ function RecursiveNavItem({
                 }
                 aria-expanded={isOpen}
               >
-                <div className={isPillar ? `flex items-center justify-center size-5 ${pillarColor}` : iconClass}>
+                <div
+                  className={
+                    isPillar
+                      ? `flex items-center justify-center size-5 ${pillarColor}`
+                      : iconClass
+                  }
+                >
                   <NavIcon
                     item={item}
                     isActive={Boolean(isActive)}
@@ -309,7 +345,9 @@ function RecursiveNavItem({
                 </div>
                 <span
                   className={`whitespace-nowrap transition-all duration-300 truncate flex-1 text-left ${
-                    isPillar ? "font-extrabold text-xs tracking-wider" : "text-sm font-medium"
+                    isPillar
+                      ? "font-extrabold text-xs tracking-wider"
+                      : "text-sm font-medium"
                   } ${isActive || isUniversePillar ? "font-black" : ""}`}
                 >
                   {traduireNav(item.label, t)}
@@ -331,7 +369,10 @@ function RecursiveNavItem({
                 tooltip={traduireNav(item.label, t)}
                 className={`${buttonClass} flex-1 min-w-0 !pr-0`}
               >
-                <Link href={item.path} aria-current={isActive ? "page" : undefined}>
+                <Link
+                  href={item.path}
+                  aria-current={isActive ? "page" : undefined}
+                >
                   <div className={iconClass}>
                     <NavIcon
                       item={item}
@@ -367,7 +408,7 @@ function RecursiveNavItem({
           )}
           <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down">
             <SidebarMenu className="mt-1 ml-4 border-l-2 border-sidebar-border pl-2 space-y-1">
-              {item.children.map(child => (
+              {item.children.map((child) => (
                 <RecursiveNavItem
                   key={child.path}
                   item={child}
@@ -384,11 +425,18 @@ function RecursiveNavItem({
     );
   }
 
-  const href = item.groupOnly ? (item.children?.[0]?.path ?? item.path) : item.path;
+  const href = item.groupOnly
+    ? (item.children?.[0]?.path ?? item.path)
+    : item.path;
 
   return (
     <SidebarMenuItem>
-      <SidebarMenuButton asChild isActive={isActive} tooltip={traduireNav(item.label, t)} className={buttonClass}>
+      <SidebarMenuButton
+        asChild
+        isActive={isActive}
+        tooltip={traduireNav(item.label, t)}
+        className={buttonClass}
+      >
         <Link href={href} aria-current={isActive ? "page" : undefined}>
           {itemContent}
         </Link>
@@ -415,12 +463,14 @@ export function AppSidebar({
 
   const mounted = useIsClient();
 
-  const filteredNavItems = filtrerNavigation(resolvedNavItems, item => {
+  const filteredNavItems = filtrerNavigation(resolvedNavItems, (item) => {
     if (item.adminOnly && !(mounted && isAdmin)) return false;
     return canView?.(item) ?? true;
   });
 
-  const defaultHeader = <SidebarUniverseHeader pathname={pathname} isCollapsed={isCollapsed} />;
+  const defaultHeader = (
+    <SidebarUniverseHeader pathname={pathname} isCollapsed={isCollapsed} />
+  );
 
   return (
     <Sidebar
@@ -437,9 +487,14 @@ export function AppSidebar({
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu className="gap-1">
-              {filteredNavItems.map(item => (
+              {filteredNavItems.map((item) => (
                 <div key={item.path} className="w-full">
-                  <RecursiveNavItem item={item} pathname={pathname} t={t} renderIcon={renderIcon} />
+                  <RecursiveNavItem
+                    item={item}
+                    pathname={pathname}
+                    t={t}
+                    renderIcon={renderIcon}
+                  />
                 </div>
               ))}
             </SidebarMenu>

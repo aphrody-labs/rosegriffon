@@ -21,7 +21,8 @@
  * sur le repli — une valeur plausible et fausse, le pire des deux mondes.
  */
 export function toNumber(value: unknown): number | null {
-  if (value === null || value === undefined || typeof value === "boolean") return null;
+  if (value === null || value === undefined || typeof value === "boolean")
+    return null;
   if (typeof value === "string" && value.trim() === "") return null;
   if (typeof value === "object") return null;
 
@@ -42,7 +43,11 @@ export function toCount(value: unknown, fallback = 0): number {
 }
 
 /** Entier `>= minimum` (un numéro de page, un nombre de manches). */
-export function toPositiveInt(value: unknown, fallback = 1, minimum = 1): number {
+export function toPositiveInt(
+  value: unknown,
+  fallback = 1,
+  minimum = 1,
+): number {
   const parsed = toNumber(value);
   if (parsed === null) return fallback;
   return Math.max(minimum, Math.floor(parsed));

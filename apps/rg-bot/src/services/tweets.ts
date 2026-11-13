@@ -116,8 +116,12 @@ export function annonceHistorique(): AnnoncePosts {
  * sans cette règle, régler le salon côté Rose Griffon détournerait l'annonce
  * d'Azalée vers un salon d'un serveur où son bot n'est même pas présent.
  */
-export function salonAnnonce(annonce: AnnoncePosts, filtre: Pick<FiltreTweets, "salon">): string | null {
-  const duReglage = annonce.curseur === CANAL_NOTIFICATION ? (filtre.salon ?? "").trim() : "";
+export function salonAnnonce(
+  annonce: AnnoncePosts,
+  filtre: Pick<FiltreTweets, "salon">,
+): string | null {
+  const duReglage =
+    annonce.curseur === CANAL_NOTIFICATION ? (filtre.salon ?? "").trim() : "";
   const choisi = duReglage.length > 0 ? duReglage : annonce.salon.trim();
   return choisi.length > 0 ? choisi : null;
 }
@@ -143,7 +147,9 @@ const CLE_CACHE_CATEGORIES = "tweets:categories";
  * PARAMÈTRE lié (`$n::text[]`), jamais du SQL concaténé.
  */
 export function litteralTexteArray(valeurs: readonly string[]): string {
-  const echappees = valeurs.map(valeur => `"${valeur.replaceAll("\\", "\\\\").replaceAll('"', '\\"')}"`);
+  const echappees = valeurs.map(
+    (valeur) => `"${valeur.replaceAll("\\", "\\\\").replaceAll('"', '\\"')}"`,
+  );
   return `{${echappees.join(",")}}`;
 }
 
@@ -173,7 +179,9 @@ function nettoyer(valeur: string | null | undefined): string | null {
  * La recherche couvre le texte ORIGINAL et la TRADUCTION : sans elle, chercher
  * « stade » ne trouverait rien dans les 6000 posts japonais de l'archive.
  */
-export async function listerTweets(filtres: FiltresListe = {}): Promise<PageTweets> {
+export async function listerTweets(
+  filtres: FiltresListe = {},
+): Promise<PageTweets> {
   const auteur = nettoyer(filtres.auteur);
   const categorie = nettoyer(filtres.categorie);
   const recherche = nettoyer(filtres.recherche);
@@ -242,33 +250,43 @@ export async function lireTweet(id: string): Promise<LigneTweet | null> {
  * d'une minute, sans toucher au service.
  */
 export async function curseursEnPause(): Promise<string[]> {
-  const brut = await cached<unknown>(CLE_CACHE_PAUSE, TTL_PAUSE_MS, async () => {
-    const lignes = await sql<Array<{ value: unknown }>>`
+  const brut = await cached<unknown>(
+    CLE_CACHE_PAUSE,
+    TTL_PAUSE_MS,
+    async () => {
+      const lignes = await sql<Array<{ value: unknown }>>`
 			SELECT value FROM public.settings WHERE key = ${CLE_PAUSE_TWEETS} LIMIT 1
 		`;
-    return lignes[0]?.value ?? null;
-  });
+      return lignes[0]?.value ?? null;
+    },
+  );
 
   // Deux formes acceptées : `["azalee"]` et `{"curseurs":["azalee"]}`. Une
   // valeur illisible NE MET RIEN EN PAUSE — un réglage cassé ne doit pas faire
   // taire tous les bots en silence.
   const liste = Array.isArray(brut)
     ? brut
-    : typeof brut === "object" && brut !== null && Array.isArray((brut as { curseurs?: unknown }).curseurs)
+    : typeof brut === "object" &&
+        brut !== null &&
+        Array.isArray((brut as { curseurs?: unknown }).curseurs)
       ? (brut as { curseurs: unknown[] }).curseurs
       : [];
   return liste
     .filter((v): v is string => typeof v === "string" && v.trim().length > 0)
-    .map(v => v.trim().toLowerCase());
+    .map((v) => v.trim().toLowerCase());
 }
 
 export async function lireFiltreNotification(): Promise<FiltreTweets> {
-  const brut = await cached<unknown>(CLE_CACHE_REGLAGE, TTL_REGLAGE_MS, async () => {
-    const lignes = await sql<Array<{ value: unknown }>>`
+  const brut = await cached<unknown>(
+    CLE_CACHE_REGLAGE,
+    TTL_REGLAGE_MS,
+    async () => {
+      const lignes = await sql<Array<{ value: unknown }>>`
 			SELECT value FROM public.settings WHERE key = ${CLE_REGLAGE_TWEETS} LIMIT 1
 		`;
-    return lignes[0]?.value ?? null;
-  });
+      return lignes[0]?.value ?? null;
+    },
+  );
   return lireFiltreTweets(brut);
 }
 
@@ -277,7 +295,9 @@ export async function lireFiltreNotification(): Promise<FiltreTweets> {
  * Le `UPDATE` réveille le déclencheur `rg_realtime_settings` : la page
  * d'administration voit le changement sans rechargement.
  */
-export async function ecrireFiltreNotification(patch: Partial<FiltreTweets>): Promise<FiltreTweets> {
+export async function ecrireFiltreNotification(
+  patch: Partial<FiltreTweets>,
+): Promise<FiltreTweets> {
   const courant = await lireFiltreNotification();
   const fusionne: FiltreTweets = { ...courant, ...patch };
   // Pas de `JSON.stringify(fusionne)` : Bun.SQL encode déjà en JSON une valeur
@@ -320,9 +340,16 @@ export interface Curseur {
  * ni l'archive, ni ce que Rose Griffon a déjà publié — il commence à son propre
  * présent, et `cree: true` fait sortir le drain avant tout envoi.
  */
-export async function assurerCurseur(canal = CANAL_NOTIFICATION): Promise<Curseur> {
+export async function assurerCurseur(
+  canal = CANAL_NOTIFICATION,
+): Promise<Curseur> {
   const inseres = await sql<
-    Array<{ canal: string; curseur_le: Date; dernier_tweet_id: string | null; annonces: number }>
+    Array<{
+      canal: string;
+      curseur_le: Date;
+      dernier_tweet_id: string | null;
+      annonces: number;
+    }>
   >`
 		INSERT INTO public.tweet_notification_curseurs (canal, curseur_le)
 		VALUES (${canal}, date_trunc('milliseconds', now()))
@@ -343,7 +370,12 @@ export async function assurerCurseur(canal = CANAL_NOTIFICATION): Promise<Curseu
     };
   }
   const lignes = await sql<
-    Array<{ canal: string; curseur_le: Date; dernier_tweet_id: string | null; annonces: number }>
+    Array<{
+      canal: string;
+      curseur_le: Date;
+      dernier_tweet_id: string | null;
+      annonces: number;
+    }>
   >`
 		SELECT canal, curseur_le, dernier_tweet_id, annonces
 		FROM public.tweet_notification_curseurs
@@ -361,8 +393,16 @@ export async function assurerCurseur(canal = CANAL_NOTIFICATION): Promise<Curseu
 }
 
 /** Curseur sans création : `null` s'il n'existe pas encore. */
-export async function lireCurseur(canal = CANAL_NOTIFICATION): Promise<Curseur | null> {
-  const lignes = await sql<Array<{ curseur_le: Date; dernier_tweet_id: string | null; annonces: number }>>`
+export async function lireCurseur(
+  canal = CANAL_NOTIFICATION,
+): Promise<Curseur | null> {
+  const lignes = await sql<
+    Array<{
+      curseur_le: Date;
+      dernier_tweet_id: string | null;
+      annonces: number;
+    }>
+  >`
 		SELECT curseur_le, dernier_tweet_id, annonces
 		FROM public.tweet_notification_curseurs
 		WHERE canal = ${canal}
@@ -415,8 +455,12 @@ export async function tweetsAPublier(
   if (filtre.comptes.length === 0) {
     return [];
   }
-  const comptes = litteralTexteArray(filtre.comptes.map(compte => compte.toLowerCase()));
-  const bannies = litteralTexteArray(categoriesBannies(filtre).map(c => c.toLowerCase()));
+  const comptes = litteralTexteArray(
+    filtre.comptes.map((compte) => compte.toLowerCase()),
+  );
+  const bannies = litteralTexteArray(
+    categoriesBannies(filtre).map((c) => c.toLowerCase()),
+  );
   const limite = Math.min(PLAFOND_DRAIN, Math.max(1, Math.trunc(plafond)));
 
   return await sql<LigneTweet[]>`
@@ -503,8 +547,11 @@ export async function avancerCurseur(
 
 /** Comptes les plus actifs sur 90 jours, puis les plus fournis de l'archive. */
 export async function auteursConnus(): Promise<string[]> {
-  return await cached<string[]>(CLE_CACHE_AUTEURS, TTL_SUGGESTIONS_MS, async () => {
-    const lignes = await sql<Array<{ author_username: string }>>`
+  return await cached<string[]>(
+    CLE_CACHE_AUTEURS,
+    TTL_SUGGESTIONS_MS,
+    async () => {
+      const lignes = await sql<Array<{ author_username: string }>>`
 			SELECT author_username
 			FROM public.tweets
 			WHERE author_username IS NOT NULL AND author_username <> ''
@@ -513,14 +560,18 @@ export async function auteursConnus(): Promise<string[]> {
 			         count(*) DESC
 			LIMIT 100
 		`;
-    return lignes.map(ligne => ligne.author_username);
-  });
+      return lignes.map((ligne) => ligne.author_username);
+    },
+  );
 }
 
 /** Catégories réellement présentes en base (la colonne est libre, pas une énumération). */
 export async function categoriesConnues(): Promise<string[]> {
-  return await cached<string[]>(CLE_CACHE_CATEGORIES, TTL_SUGGESTIONS_MS, async () => {
-    const lignes = await sql<Array<{ category: string }>>`
+  return await cached<string[]>(
+    CLE_CACHE_CATEGORIES,
+    TTL_SUGGESTIONS_MS,
+    async () => {
+      const lignes = await sql<Array<{ category: string }>>`
 			SELECT category
 			FROM public.tweets
 			WHERE category IS NOT NULL AND category <> ''
@@ -528,14 +579,20 @@ export async function categoriesConnues(): Promise<string[]> {
 			ORDER BY count(*) DESC
 			LIMIT 25
 		`;
-    return lignes.map(ligne => ligne.category);
-  });
+      return lignes.map((ligne) => ligne.category);
+    },
+  );
 }
 
 /** Dernier tweet d'un compte de la liste blanche — support de `/tweets test`. */
-export async function dernierTweetSuivi(filtre: FiltreTweets): Promise<LigneTweet | null> {
+export async function dernierTweetSuivi(
+  filtre: FiltreTweets,
+): Promise<LigneTweet | null> {
   const comptes = litteralTexteArray(
-    (filtre.comptes.length > 0 ? filtre.comptes : FILTRE_TWEETS_DEFAUT.comptes).map(c => c.toLowerCase()),
+    (filtre.comptes.length > 0
+      ? filtre.comptes
+      : FILTRE_TWEETS_DEFAUT.comptes
+    ).map((c) => c.toLowerCase()),
   );
   const lignes = await sql<LigneTweet[]>`
 		SELECT ${sql.unsafe(COLONNES)}

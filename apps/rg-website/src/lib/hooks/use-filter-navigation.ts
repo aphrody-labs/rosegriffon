@@ -1,7 +1,13 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { createContext, useCallback, useContext, useMemo, useTransition } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useTransition,
+} from "react";
 
 // ── Shared pending context ────────────────────────────────
 
@@ -10,7 +16,9 @@ interface FilterPendingCtx {
   startTransition: (cb: () => void) => void;
 }
 
-export const FilterTransitionContext = createContext<FilterPendingCtx | null>(null);
+export const FilterTransitionContext = createContext<FilterPendingCtx | null>(
+  null,
+);
 
 /**
  * Call once in the page-level client component (e.g. PlayersClient)
@@ -18,7 +26,10 @@ export const FilterTransitionContext = createContext<FilterPendingCtx | null>(nu
  */
 export function useFilterTransition() {
   const [isPending, startTransition] = useTransition();
-  const value = useMemo<FilterPendingCtx>(() => ({ isPending, startTransition }), [isPending]);
+  const value = useMemo<FilterPendingCtx>(
+    () => ({ isPending, startTransition }),
+    [isPending],
+  );
   return value;
 }
 
@@ -36,7 +47,9 @@ export function useFilterNavigation() {
   const [localPending, localStartTransition] = useTransition();
 
   const isPending = shared ? shared.isPending : localPending;
-  const startTransition = shared ? shared.startTransition : localStartTransition;
+  const startTransition = shared
+    ? shared.startTransition
+    : localStartTransition;
 
   const navigate = useCallback(
     (updater: (params: URLSearchParams) => void) => {

@@ -76,21 +76,43 @@ describe("escalade", () => {
   });
 
   test("3, 5, 8 warns → mute 1 h, mute 24 h, ban 7 j", () => {
-    expect(escaladeApres([warn(), warn(), warn()])).toMatchObject({ type: "mute", durationSec: 3600, avertissements: 3 });
-    expect(escaladeApres(Array.from({ length: 5 }, () => warn()))).toMatchObject({ type: "mute", durationSec: 86_400 });
-    expect(escaladeApres(Array.from({ length: 8 }, () => warn()))).toMatchObject({ type: "ban", durationSec: 604_800 });
+    expect(escaladeApres([warn(), warn(), warn()])).toMatchObject({
+      type: "mute",
+      durationSec: 3600,
+      avertissements: 3,
+    });
+    expect(
+      escaladeApres(Array.from({ length: 5 }, () => warn())),
+    ).toMatchObject({ type: "mute", durationSec: 86_400 });
+    expect(
+      escaladeApres(Array.from({ length: 8 }, () => warn())),
+    ).toMatchObject({ type: "ban", durationSec: 604_800 });
   });
 });
 
 describe("effets Discord", () => {
   test("par type de sanction et à la révocation", () => {
-    expect(effetDeSanction({ type: "warn" as Sanction["type"], durationSec: null })).toEqual({ action: "aucun" });
-    expect(effetDeSanction({ type: "mute" as Sanction["type"], durationSec: 60 })).toEqual({ action: "timeout", ms: 60_000 });
-    expect(effetDeSanction({ type: "kick" as Sanction["type"], durationSec: null })).toEqual({ action: "expulser" });
-    expect(effetDeSanction({ type: "ban" as Sanction["type"], durationSec: null })).toEqual({ action: "bannir" });
-    expect(effetDeRevocation({ type: "mute" as Sanction["type"] })).toEqual({ action: "lever-timeout" });
-    expect(effetDeRevocation({ type: "ban" as Sanction["type"] })).toEqual({ action: "debannir" });
-    expect(effetDeRevocation({ type: "kick" as Sanction["type"] })).toEqual({ action: "aucun" });
+    expect(
+      effetDeSanction({ type: "warn" as Sanction["type"], durationSec: null }),
+    ).toEqual({ action: "aucun" });
+    expect(
+      effetDeSanction({ type: "mute" as Sanction["type"], durationSec: 60 }),
+    ).toEqual({ action: "timeout", ms: 60_000 });
+    expect(
+      effetDeSanction({ type: "kick" as Sanction["type"], durationSec: null }),
+    ).toEqual({ action: "expulser" });
+    expect(
+      effetDeSanction({ type: "ban" as Sanction["type"], durationSec: null }),
+    ).toEqual({ action: "bannir" });
+    expect(effetDeRevocation({ type: "mute" as Sanction["type"] })).toEqual({
+      action: "lever-timeout",
+    });
+    expect(effetDeRevocation({ type: "ban" as Sanction["type"] })).toEqual({
+      action: "debannir",
+    });
+    expect(effetDeRevocation({ type: "kick" as Sanction["type"] })).toEqual({
+      action: "aucun",
+    });
   });
 
   test("appliquerEffet appelle la bonne méthode", async () => {
@@ -98,7 +120,8 @@ describe("effets Discord", () => {
     const serveur = {
       members: {
         fetch: async (id: string) => ({
-          timeout: async (ms: number | null) => void journal.push(`t:${id}:${ms}`),
+          timeout: async (ms: number | null) =>
+            void journal.push(`t:${id}:${ms}`),
           kick: async () => void journal.push(`k:${id}`),
         }),
       },
@@ -130,7 +153,9 @@ describe("divers", () => {
     expect(libelleMode(null)).toBe("—");
     expect(signe(3)).toBe("+3");
     expect(signe(-2)).toBe("-2");
-    expect(lienCapture("/storage/a.png", "https://r.fr/")).toBe("[capture](https://r.fr/storage/a.png)");
+    expect(lienCapture("/storage/a.png", "https://r.fr/")).toBe(
+      "[capture](https://r.fr/storage/a.png)",
+    );
     expect(lienCapture(null, "x")).toBe("pas de capture");
   });
 });

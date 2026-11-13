@@ -6,7 +6,12 @@ import { FadeInItem, FadeInStagger } from "@/components/ui/fade-in";
 import { FilterChips } from "@/components/wiki/FilterChips";
 import { CoachCard } from "@/components/wiki/CoachCard";
 import { WikiSearchToolbar } from "@/components/wiki/WikiSearchToolbar";
-import { COACH_ELEMENT_OPTIONS, COACH_PLAYSTYLE_OPTIONS, COACH_ROLE_OPTIONS, getCoachesList } from "@/lib/wiki/coaches";
+import {
+  COACH_ELEMENT_OPTIONS,
+  COACH_PLAYSTYLE_OPTIONS,
+  COACH_ROLE_OPTIONS,
+  getCoachesList,
+} from "@/lib/wiki/coaches";
 import { parseSearchParams } from "@/lib/validations";
 import { wiki } from "@rosegriffon/app-shell";
 import { absoluteUrl } from "@/lib/site-url";
@@ -37,7 +42,11 @@ export default async function CoachesPage({
     "@context": "https://schema.org",
     "@type": "CollectionPage",
     description: `Liste complète des entraîneurs, managers et coachs d'Inazuma Eleven: Victory Road.`,
-    isPartOf: { "@type": "WebSite", name: "Azalée", url: absoluteUrl(wiki("/")) },
+    isPartOf: {
+      "@type": "WebSite",
+      name: "Azalée",
+      url: absoluteUrl(wiki("/")),
+    },
     mainEntity: {
       "@type": "ItemList",
       itemListElement: coaches.slice(0, 10).map((c: any, i: number) => ({
@@ -55,7 +64,10 @@ export default async function CoachesPage({
 
   return (
     <div className="space-y-6">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionJsonLd) }} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionJsonLd) }}
+      />
 
       {/* En-tête */}
       <div className="space-y-1">
@@ -63,24 +75,40 @@ export default async function CoachesPage({
           Entraîneurs &amp; Coachs
         </h1>
         <p className="text-sm text-on-surface-variant">
-          Liste complète des entraîneurs, managers et coachs d&apos;Inazuma Eleven: Victory Road.
+          Liste complète des entraîneurs, managers et coachs d&apos;Inazuma
+          Eleven: Victory Road.
         </p>
       </div>
 
       {/* Recherche + filtres */}
-      <WikiSearchToolbar placeholder="Rechercher un entraîneur..." filterKeys={["role", "element", "playstyle"]}>
+      <WikiSearchToolbar
+        placeholder="Rechercher un entraîneur..."
+        filterKeys={["role", "element", "playstyle"]}
+      >
         <div className="space-y-4">
           <div>
-            <p className="mb-2 text-xs font-bold uppercase tracking-wider text-on-surface-variant/70">Rôle</p>
+            <p className="mb-2 text-xs font-bold uppercase tracking-wider text-on-surface-variant/70">
+              Rôle
+            </p>
             <FilterChips paramName="role" options={[...COACH_ROLE_OPTIONS]} />
           </div>
           <div>
-            <p className="mb-2 text-xs font-bold uppercase tracking-wider text-on-surface-variant/70">Élément</p>
-            <FilterChips paramName="element" options={[...COACH_ELEMENT_OPTIONS]} />
+            <p className="mb-2 text-xs font-bold uppercase tracking-wider text-on-surface-variant/70">
+              Élément
+            </p>
+            <FilterChips
+              paramName="element"
+              options={[...COACH_ELEMENT_OPTIONS]}
+            />
           </div>
           <div>
-            <p className="mb-2 text-xs font-bold uppercase tracking-wider text-on-surface-variant/70">Style de jeu</p>
-            <FilterChips paramName="playstyle" options={[...COACH_PLAYSTYLE_OPTIONS]} />
+            <p className="mb-2 text-xs font-bold uppercase tracking-wider text-on-surface-variant/70">
+              Style de jeu
+            </p>
+            <FilterChips
+              paramName="playstyle"
+              options={[...COACH_PLAYSTYLE_OPTIONS]}
+            />
           </div>
         </div>
       </WikiSearchToolbar>
@@ -94,7 +122,7 @@ export default async function CoachesPage({
       {/* Grille */}
       {coaches.length > 0 ? (
         <FadeInStagger className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-          {coaches.map(c => (
+          {coaches.map((c) => (
             <FadeInItem key={c.id}>
               <CoachCard
                 id={c.id}
@@ -113,7 +141,11 @@ export default async function CoachesPage({
         </FadeInStagger>
       ) : (
         <div className="py-16 text-center">
-          <SearchX size={48} className="mb-4 block text-on-surface-variant/30" aria-hidden="true" />
+          <SearchX
+            size={48}
+            className="mb-4 block text-on-surface-variant/30"
+            aria-hidden="true"
+          />
           <p className="text-on-surface-variant">Aucun entraîneur trouvé.</p>
         </div>
       )}

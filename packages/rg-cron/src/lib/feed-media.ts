@@ -25,7 +25,11 @@
  *    Sans lui, la sonde lit l'en-tête MP4 (`sonderMp4`) et l'image d'affiche est abandonnée.
  */
 
-import { fichierMedia, objetPresent, televerserObjet } from "./storage-assets.js";
+import {
+  fichierMedia,
+  objetPresent,
+  televerserObjet,
+} from "./storage-assets.js";
 
 const BUCKET = "assets";
 const MAX_IMAGE_OCTETS = 12 * 1024 * 1024;
@@ -49,14 +53,27 @@ export function rectangleRecadrage(
   const ratioSource = largeur / hauteur;
   if (ratioSource > ratio) {
     const width = Math.max(1, Math.round(hauteur * ratio));
-    return { left: Math.floor((largeur - width) / 2), top: 0, width: Math.min(width, largeur), height: hauteur };
+    return {
+      left: Math.floor((largeur - width) / 2),
+      top: 0,
+      width: Math.min(width, largeur),
+      height: hauteur,
+    };
   }
   const height = Math.max(1, Math.round(largeur / ratio));
-  return { left: 0, top: Math.floor((hauteur - height) / 2), width: largeur, height: Math.min(height, hauteur) };
+  return {
+    left: 0,
+    top: Math.floor((hauteur - height) / 2),
+    width: largeur,
+    height: Math.min(height, hauteur),
+  };
 }
 
 /** Dimensions de sortie : largeur bornée, hauteur dérivée du ratio. */
-export function dimensionsSortie(largeurRecadree: number, o: OptionsVignette): { largeur: number; hauteur: number } {
+export function dimensionsSortie(
+  largeurRecadree: number,
+  o: OptionsVignette,
+): { largeur: number; hauteur: number } {
   const largeur = Math.max(1, Math.min(o.largeurMax, largeurRecadree));
   return { largeur, hauteur: Math.max(1, Math.round(largeur / o.ratio)) };
 }
@@ -68,7 +85,10 @@ export interface VignetteNormalisee {
 }
 
 /** Recadre au ratio voulu, borne la taille et encode en WebP. Rejette si l'image est illisible. */
-export async function normaliserVignette(source: Uint8Array, o: OptionsVignette): Promise<VignetteNormalisee> {
+export async function normaliserVignette(
+  source: Uint8Array,
+  o: OptionsVignette,
+): Promise<VignetteNormalisee> {
   // maxPixels : garde-fou contre les images « bombes » (la source est un CDN tiers).
   const options = { maxPixels: 4096 * 4096 };
   const { width, height } = await new Bun.Image(source, options).metadata();
@@ -89,7 +109,10 @@ export async function telechargerBorne(
   max: number,
   entetes: Record<string, string> = {},
 ): Promise<Uint8Array> {
-  const reponse = await fetch(url, { headers: entetes, signal: AbortSignal.timeout(DELAI_TELECHARGEMENT_MS) });
+  const reponse = await fetch(url, {
+    headers: entetes,
+    signal: AbortSignal.timeout(DELAI_TELECHARGEMENT_MS),
+  });
   if (!reponse.ok) throw new Error(`HTTP ${reponse.status}`);
   const annonce = Number(reponse.headers.get("content-length") ?? 0);
   if (annonce > max) throw new Error(`Fichier trop gros (${annonce} octets)`);
@@ -112,7 +135,8 @@ export async function telechargerBorne(
 }
 
 /** URL publique relative d'un objet du bucket `assets` (même origine que le site, via nginx). */
-export const urlAsset = (chemin: string): string => `/storage/v1/object/public/${BUCKET}/${chemin}`;
+export const urlAsset = (chemin: string): string =>
+  `/storage/v1/object/public/${BUCKET}/${chemin}`;
 
 const SEGMENT_SUR = /[^A-Za-z0-9_-]/g;
 /** Chemin déterministe d'une vignette : `feed/vignettes/<réseau>/<id>.webp`. */
@@ -139,18 +163,33 @@ export async function reheberger(
   entetes: Record<string, string> = {},
 ): Promise<ResultatVignette | null> {
   const chemin = cheminVignette(reseau, id);
-  if (await objetPresent(BUCKET, chemin)) return { url: urlAsset(chemin), existante: true };
+  if (await objetPresent(BUCKET, chemin))
+    return { url: urlAsset(chemin), existante: true };
   try {
     const brut = await telechargerBorne(urlSource, MAX_IMAGE_OCTETS, entetes);
     const vignette = await normaliserVignette(brut, o);
-    const ecrit = await televerserObjet(BUCKET, chemin, vignette.octets.slice().buffer as ArrayBuffer, "image/webp");
+    const ecrit = await televerserObjet(
+      BUCKET,
+      chemin,
+      vignette.octets.slice().buffer as ArrayBuffer,
+      "image/webp",
+    );
     if (!ecrit.ok) {
-      console.warn(`[Feed] vignette ${reseau}:${id} non écrite : ${ecrit.motif}`);
+      console.warn(
+        `[Feed] vignette ${reseau}:${id} non écrite : ${ecrit.motif}`,
+      );
       return null;
     }
-    return { url: urlAsset(chemin), largeur: vignette.largeur, hauteur: vignette.hauteur, existante: false };
+    return {
+      url: urlAsset(chemin),
+      largeur: vignette.largeur,
+      hauteur: vignette.hauteur,
+      existante: false,
+    };
   } catch (err) {
-    console.warn(`[Feed] vignette ${reseau}:${id} illisible : ${err instanceof Error ? err.message : String(err)}`);
+    console.warn(
+      `[Feed] vignette ${reseau}:${id} illisible : ${err instanceof Error ? err.message : String(err)}`,
+    );
     return null;
   }
 }
@@ -163,14 +202,25 @@ export interface MesuresVideo {
 }
 
 export interface VideoInstance {
-  metadata(): Promise<{ duration?: number; width: number; height: number; codec: string }>;
+  metadata(): Promise<{
+    duration?: number;
+    width: number;
+    height: number;
+    codec: string;
+  }>;
   frame(time: number): {
     extract(r: unknown): {
-      resize(w: number, h: number): {
+      resize(
+        w: number,
+        h: number,
+      ): {
         webp(opts: { quality: number }): { bytes(): Promise<Uint8Array> };
       };
     };
-    resize(w: number, h: number): {
+    resize(
+      w: number,
+      h: number,
+    ): {
       webp(opts: { quality: number }): { bytes(): Promise<Uint8Array> };
     };
     webp(opts: { quality: number }): { bytes(): Promise<Uint8Array> };
@@ -209,7 +259,12 @@ function boites(vue: DataView, debut: number, fin: number): Boite[] {
   let p = debut;
   while (p + 8 <= fin) {
     let taille = vue.getUint32(p);
-    const type = String.fromCharCode(vue.getUint8(p + 4), vue.getUint8(p + 5), vue.getUint8(p + 6), vue.getUint8(p + 7));
+    const type = String.fromCharCode(
+      vue.getUint8(p + 4),
+      vue.getUint8(p + 5),
+      vue.getUint8(p + 6),
+      vue.getUint8(p + 7),
+    );
     let entete = 8;
     if (taille === 1) {
       if (p + 16 > fin) break;
@@ -225,29 +280,41 @@ function boites(vue: DataView, debut: number, fin: number): Boite[] {
   return sortie;
 }
 
-const fille = (vue: DataView, b: Boite | undefined, type: string): Boite | undefined =>
-  b ? boites(vue, b.debut, b.fin).find(x => x.type === type) : undefined;
+const fille = (
+  vue: DataView,
+  b: Boite | undefined,
+  type: string,
+): Boite | undefined =>
+  b ? boites(vue, b.debut, b.fin).find((x) => x.type === type) : undefined;
 
 /** Durée (`mvhd`) et piste vidéo (`hdlr` = `vide`) d'un MP4 en mémoire ; `null` si illisible. */
 export function sonderMp4(mp4: Uint8Array): MesuresVideo | null {
   try {
     const vue = new DataView(mp4.buffer, mp4.byteOffset, mp4.byteLength);
-    const moov = boites(vue, 0, mp4.byteLength).find(b => b.type === "moov");
+    const moov = boites(vue, 0, mp4.byteLength).find((b) => b.type === "moov");
     if (!moov) return null;
     let duree: number | undefined;
     const mvhd = fille(vue, moov, "mvhd");
     if (mvhd) {
       const version = vue.getUint8(mvhd.debut);
       const echelle = vue.getUint32(mvhd.debut + (version === 1 ? 20 : 12));
-      const brute = version === 1 ? Number(vue.getBigUint64(mvhd.debut + 24)) : vue.getUint32(mvhd.debut + 16);
-      if (echelle > 0 && brute > 0 && brute !== 0xffffffff) duree = Math.round((brute / echelle) * 10) / 10;
+      const brute =
+        version === 1
+          ? Number(vue.getBigUint64(mvhd.debut + 24))
+          : vue.getUint32(mvhd.debut + 16);
+      if (echelle > 0 && brute > 0 && brute !== 0xffffffff)
+        duree = Math.round((brute / echelle) * 10) / 10;
     }
-    for (const trak of boites(vue, moov.debut, moov.fin).filter(b => b.type === "trak")) {
+    for (const trak of boites(vue, moov.debut, moov.fin).filter(
+      (b) => b.type === "trak",
+    )) {
       const mdia = fille(vue, trak, "mdia");
       const hdlr = fille(vue, mdia, "hdlr");
       // hdlr : version/flags (4), pre_defined (4), handler_type (4).
       if (!hdlr || hdlr.debut + 12 > hdlr.fin) continue;
-      const genre = String.fromCharCode(...mp4.subarray(hdlr.debut + 8, hdlr.debut + 12));
+      const genre = String.fromCharCode(
+        ...mp4.subarray(hdlr.debut + 8, hdlr.debut + 12),
+      );
       if (genre !== "vide") continue;
       const tkhd = fille(vue, trak, "tkhd");
       if (!tkhd) continue;
@@ -255,10 +322,18 @@ export function sonderMp4(mp4: Uint8Array): MesuresVideo | null {
       const largeur = vue.getUint32(tkhd.fin - 8) >>> 16;
       const hauteur = vue.getUint32(tkhd.fin - 4) >>> 16;
       if (largeur === 0 || hauteur === 0) continue;
-      const stsd = fille(vue, fille(vue, fille(vue, mdia, "minf"), "stbl"), "stsd");
+      const stsd = fille(
+        vue,
+        fille(vue, fille(vue, mdia, "minf"), "stbl"),
+        "stsd",
+      );
       // stsd : version/flags (4), nombre d'entrées (4), puis la première entrée (taille, type).
       const codec =
-        stsd && stsd.debut + 16 <= stsd.fin ? String.fromCharCode(...mp4.subarray(stsd.debut + 12, stsd.debut + 16)) : "";
+        stsd && stsd.debut + 16 <= stsd.fin
+          ? String.fromCharCode(
+              ...mp4.subarray(stsd.debut + 12, stsd.debut + 16),
+            )
+          : "";
       return { duree, largeur, hauteur, codec };
     }
     return null;
@@ -272,11 +347,20 @@ export function sonderMp4(mp4: Uint8Array): MesuresVideo | null {
  * lecture des boîtes de l'en-tête (`sonderMp4`) : la mesure ne dépend pas de la version de Bun.
  * `null` si ni l'un ni l'autre ne lit le fichier.
  */
-export async function sonderVideo(mp4: Uint8Array, moteur: MoteurVideo | undefined = moteurVideo()): Promise<MesuresVideo | null> {
+export async function sonderVideo(
+  mp4: Uint8Array,
+  moteur: MoteurVideo | undefined = moteurVideo(),
+): Promise<MesuresVideo | null> {
   if (moteur) {
     try {
       const m = await new moteur(mp4).metadata();
-      return { duree: m.duration == null ? undefined : Math.round(m.duration * 10) / 10, largeur: m.width, hauteur: m.height, codec: m.codec };
+      return {
+        duree:
+          m.duration == null ? undefined : Math.round(m.duration * 10) / 10,
+        largeur: m.width,
+        hauteur: m.height,
+        codec: m.codec,
+      };
     } catch {
       // Codec que FilmCraft ne décode pas (HEVC…) : l'en-tête reste lisible.
     }
@@ -313,10 +397,19 @@ export async function afficheVideo(
 }
 
 /** Écrit un objet JSON dans le bucket `assets` (disque ou Storage). */
-export async function ecrireJson(chemin: string, valeur: unknown): Promise<void> {
+export async function ecrireJson(
+  chemin: string,
+  valeur: unknown,
+): Promise<void> {
   const octets = new TextEncoder().encode(JSON.stringify(valeur));
-  const ecrit = await televerserObjet(BUCKET, chemin, octets.slice().buffer as ArrayBuffer, "application/json");
-  if (!ecrit.ok) throw new Error(`Écriture de ${chemin} impossible : ${ecrit.motif}`);
+  const ecrit = await televerserObjet(
+    BUCKET,
+    chemin,
+    octets.slice().buffer as ArrayBuffer,
+    "application/json",
+  );
+  if (!ecrit.ok)
+    throw new Error(`Écriture de ${chemin} impossible : ${ecrit.motif}`);
 }
 
 /** Relit un objet JSON du bucket `assets` quand il vit sur disque ; `null` sinon. */

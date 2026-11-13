@@ -7,7 +7,12 @@ import Link from "@/components/shared/Link";
 import { useState } from "react";
 import type { FeedItem } from "@/app/news/news-client";
 import { LikeButton } from "@/components/news/LikeButton";
-import { Badge, HoverCard, HoverCardContent, HoverCardTrigger } from "@rosegriffon/ui";
+import {
+  Badge,
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@rosegriffon/ui";
 import { ArrowRight, MessageCircle } from "@/lib/icons-config";
 import { typographieFr } from "@/lib/typographie";
 import { cn } from "@/lib/utils";
@@ -32,10 +37,15 @@ interface ArticleCardProps {
   commentCount?: number;
 }
 
-export function ArticleCard({ item, reactionData, commentCount }: ArticleCardProps) {
+export function ArticleCard({
+  item,
+  reactionData,
+  commentCount,
+}: ArticleCardProps) {
   const date = new Date(item.date);
   const categoryLabel = CATEGORY_LABELS[item.category] || item.category;
-  const categoryTone = CATEGORY_TONE[item.category] || "bg-primary/10 text-primary";
+  const categoryTone =
+    CATEGORY_TONE[item.category] || "bg-primary/10 text-primary";
   const [imgError, setImgError] = useState(false);
   const href = `/news/${item.slug}`;
 
@@ -45,7 +55,11 @@ export function ArticleCard({ item, reactionData, commentCount }: ArticleCardPro
         {/* Cover image */}
         <div className="relative aspect-video overflow-hidden bg-surface-container">
           <Image
-            src={imgError || !item.image ? "/images/placeholder-news.svg" : item.image}
+            src={
+              imgError || !item.image
+                ? "/images/placeholder-news.svg"
+                : item.image
+            }
             alt={item.title}
             fill
             className="object-cover transition-transform duration-500 group-hover:scale-105"
@@ -74,7 +88,9 @@ export function ArticleCard({ item, reactionData, commentCount }: ArticleCardPro
           </h3>
 
           {item.excerpt && (
-            <p className="line-clamp-2 text-on-surface-variant/70 text-sm leading-relaxed">{item.excerpt}</p>
+            <p className="line-clamp-2 text-on-surface-variant/70 text-sm leading-relaxed">
+              {item.excerpt}
+            </p>
           )}
 
           <div className="flex items-center justify-between pt-1">
@@ -127,7 +143,13 @@ export function ArticleCard({ item, reactionData, commentCount }: ArticleCardPro
       >
         {item.image && !imgError && (
           <div className="relative aspect-video">
-            <Image src={item.image} alt="" fill className="object-cover" sizes="320px" />
+            <Image
+              src={item.image}
+              alt=""
+              fill
+              className="object-cover"
+              sizes="320px"
+            />
             <div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent" />
             <Badge
               className={cn(
@@ -140,8 +162,12 @@ export function ArticleCard({ item, reactionData, commentCount }: ArticleCardPro
           </div>
         )}
         <div className="flex flex-col gap-2 p-4">
-          <h4 className="font-bold text-on-surface text-sm leading-snug">{typographieFr(item.title)}</h4>
-          <p className="line-clamp-4 text-on-surface-variant text-xs leading-relaxed">{item.excerpt}</p>
+          <h4 className="font-bold text-on-surface text-sm leading-snug">
+            {typographieFr(item.title)}
+          </h4>
+          <p className="line-clamp-4 text-on-surface-variant text-xs leading-relaxed">
+            {item.excerpt}
+          </p>
           <div className="flex items-center justify-between border-outline-variant/20 border-t pt-2 text-on-surface-variant/70 text-xs">
             <span title={format(date, "PPPp", { locale: fr })}>
               {formatDistanceToNow(date, { addSuffix: true, locale: fr })}

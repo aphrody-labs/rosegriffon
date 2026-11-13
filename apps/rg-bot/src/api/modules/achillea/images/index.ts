@@ -24,11 +24,15 @@ const TTL_MS = 5 * 60 * 1000;
 const MAX_ENTRIES = 200;
 const cache = new Map<string, { expires: number; png: Buffer }>();
 
-async function cached(key: string, render: () => Promise<Buffer>): Promise<Buffer> {
+async function cached(
+  key: string,
+  render: () => Promise<Buffer>,
+): Promise<Buffer> {
   const hit = cache.get(key);
   if (hit && hit.expires > Date.now()) return hit.png;
   const png = await render();
-  if (cache.size >= MAX_ENTRIES) cache.delete(cache.keys().next().value as string);
+  if (cache.size >= MAX_ENTRIES)
+    cache.delete(cache.keys().next().value as string);
   cache.set(key, { expires: Date.now() + TTL_MS, png });
   return png;
 }
@@ -50,12 +54,20 @@ function png(bytes: Buffer, filename: string): Response {
 }
 
 async function roleOf(db: Kysely<Database>, userId: string): Promise<number> {
-  const row = await db.selectFrom("user").select("role").where("id", "=", userId).executeTakeFirst();
+  const row = await db
+    .selectFrom("user")
+    .select("role")
+    .where("id", "=", userId)
+    .executeTakeFirst();
   return row?.role ?? 0;
 }
 
 const SNOWFLAKE = /^\d{5,24}$/;
-const generationResult = t.Object({ success: t.Boolean(), path: t.Optional(t.String()), error: t.Optional(t.String()) });
+const generationResult = t.Object({
+  success: t.Boolean(),
+  path: t.Optional(t.String()),
+  error: t.Optional(t.String()),
+});
 const message = t.Object({ message: t.String() });
 
 export const imagesController = new Elysia()
@@ -63,12 +75,16 @@ export const imagesController = new Elysia()
   .get(
     "/users/:id/card.png",
     async ({ db, params: { id } }) => {
-      if (!SNOWFLAKE.test(id)) return status(404, { message: "Utilisateur introuvable" });
+      if (!SNOWFLAKE.test(id))
+        return status(404, { message: "Utilisateur introuvable" });
       try {
-        const bytes = await cached(`card:${id}`, async () => renderPlayerCard(await loadPlayerCardData(db, id)));
+        const bytes = await cached(`card:${id}`, async () =>
+          renderPlayerCard(await loadPlayerCardData(db, id)),
+        );
         return png(bytes, `player-${id}-card.png`);
       } catch (err) {
-        if (err instanceof ImageNotFoundError) return status(404, { message: err.message });
+        if (err instanceof ImageNotFoundError)
+          return status(404, { message: err.message });
         throw err;
       }
     },
@@ -79,14 +95,25 @@ export const imagesController = new Elysia()
     async ({ db, headers, params: { id } }) => {
       const auth = await requireSession(headers);
       if (auth.error) return auth.error;
-      if (auth.session.id !== id && (await roleOf(db, auth.session.id)) < ROLE_MODERATOR)
+      if (
+        auth.session.id !== id &&
+        (await roleOf(db, auth.session.id)) < ROLE_MODERATOR
+      )
         return status(403, { message: "Réservé au joueur ou au staff" });
       const storage = publicImageStorage();
-      if (!storage) return status(503, { success: false, error: "Stockage d'images non configuré" });
+      if (!storage)
+        return status(503, {
+          success: false,
+          error: "Stockage d'images non configuré",
+        });
       try {
         const bytes = await renderPlayerCard(await loadPlayerCardData(db, id));
         cache.set(`card:${id}`, { expires: Date.now() + TTL_MS, png: bytes });
-        const stored = await storage.put(`cards/${id}.png`, new Uint8Array(bytes), "image/png");
+        const stored = await storage.put(
+          `cards/${id}.png`,
+          new Uint8Array(bytes),
+          "image/png",
+        );
         await journaliserAudit(db, {
           acteur: auth.session.id,
           action: "user.card.regenerate",
@@ -96,23 +123,37 @@ export const imagesController = new Elysia()
         });
         return { success: true, path: stored.url };
       } catch (err) {
-        if (err instanceof ImageNotFoundError) return status(404, { message: err.message });
-        return status(400, { success: false, error: err instanceof Error ? err.message : "Génération impossible" });
+        if (err instanceof ImageNotFoundError)
+          return status(404, { message: err.message });
+        return status(400, {
+          success: false,
+          error: err instanceof Error ? err.message : "Génération impossible",
+        });
       }
     },
     {
       params: t.Object({ id: t.String({ maxLength: 32 }) }),
-      response: { 200: generationResult, 400: generationResult, 401: message, 403: message, 404: message, 503: generationResult },
+      response: {
+        200: generationResult,
+        400: generationResult,
+        401: message,
+        403: message,
+        404: message,
+        503: generationResult,
+      },
     },
   )
   .get(
     "/clans/:id/poster.png",
     async ({ db, params: { id } }) => {
       try {
-        const bytes = await cached(`poster:${id}`, async () => renderClanPoster(await loadClanPosterData(db, id)));
+        const bytes = await cached(`poster:${id}`, async () =>
+          renderClanPoster(await loadClanPosterData(db, id)),
+        );
         return png(bytes, `clan-${id}-poster.png`);
       } catch (err) {
-        if (err instanceof ImageNotFoundError) return status(404, { message: err.message });
+        if (err instanceof ImageNotFoundError)
+          return status(404, { message: err.message });
         throw err;
       }
     },
@@ -130,14 +171,24 @@ export const imagesController = new Elysia()
         .where("user_id", "=", auth.session.id)
         .executeTakeFirst();
       if (!member && (await roleOf(db, auth.session.id)) < ROLE_MODERATOR)
-        return status(403, { message: "Réservé aux membres du clan ou au staff" });
+        return status(403, {
+          message: "Réservé aux membres du clan ou au staff",
+        });
       const storage = publicImageStorage();
-      if (!storage) return status(503, { success: false, error: "Stockage d'images non configuré" });
+      if (!storage)
+        return status(503, {
+          success: false,
+          error: "Stockage d'images non configuré",
+        });
       try {
         const bytes = await renderClanPoster(await loadClanPosterData(db, id));
         cache.set(`poster:${id}`, { expires: Date.now() + TTL_MS, png: bytes });
         // Archive horodatée, comme le legacy (`storage/clans/<id>-<ts>.png`).
-        const stored = await storage.put(`posters/${id}-${Date.now()}.png`, new Uint8Array(bytes), "image/png");
+        const stored = await storage.put(
+          `posters/${id}-${Date.now()}.png`,
+          new Uint8Array(bytes),
+          "image/png",
+        );
         await journaliserAudit(db, {
           acteur: auth.session.id,
           action: "clan.poster.regenerate",
@@ -147,12 +198,23 @@ export const imagesController = new Elysia()
         });
         return { success: true, path: stored.url };
       } catch (err) {
-        if (err instanceof ImageNotFoundError) return status(404, { message: err.message });
-        return status(400, { success: false, error: err instanceof Error ? err.message : "Génération impossible" });
+        if (err instanceof ImageNotFoundError)
+          return status(404, { message: err.message });
+        return status(400, {
+          success: false,
+          error: err instanceof Error ? err.message : "Génération impossible",
+        });
       }
     },
     {
       params: t.Object({ id: t.Numeric({ minimum: 1 }) }),
-      response: { 200: generationResult, 400: generationResult, 401: message, 403: message, 404: message, 503: generationResult },
+      response: {
+        200: generationResult,
+        400: generationResult,
+        401: message,
+        403: message,
+        404: message,
+        503: generationResult,
+      },
     },
   );

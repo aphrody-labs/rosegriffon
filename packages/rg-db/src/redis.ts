@@ -33,7 +33,7 @@ export function getRedisClient(): RedisClient {
         console.log(`[Redis] Connecté avec succès sur ${redactUrl(REDIS_URL)}`);
       };
 
-      clientInstance.onclose = err => {
+      clientInstance.onclose = (err) => {
         if (err) {
           console.error("[Redis] Déconnexion avec erreur :", err);
         } else {
@@ -116,7 +116,11 @@ export const cache = {
   /**
    * Enveloppe une fonction asynchrone (ex: requête DB) dans un cache transparent.
    */
-  async wrap<T>(key: string, ttlSeconds: number, fetcher: () => Promise<T>): Promise<T> {
+  async wrap<T>(
+    key: string,
+    ttlSeconds: number,
+    fetcher: () => Promise<T>,
+  ): Promise<T> {
     const cached = await this.get<T>(key);
     if (cached !== null) {
       return cached;
@@ -144,7 +148,10 @@ export const crawlerTracker = {
       const lastHash = await redis.get(key);
       return lastHash !== currentHash;
     } catch (err) {
-      console.warn(`[Redis Crawler] Erreur lors du check de hash pour ${url} :`, err);
+      console.warn(
+        `[Redis Crawler] Erreur lors du check de hash pour ${url} :`,
+        err,
+      );
       resetRedisClient();
       return true; // En cas de doute, on traite
     }
@@ -153,13 +160,20 @@ export const crawlerTracker = {
   /**
    * Enregistre le hash actuel d'un URL pour marquer le crawl comme traité.
    */
-  async markProcessed(url: string, currentHash: string, ttlSeconds = 86400 * 7): Promise<void> {
+  async markProcessed(
+    url: string,
+    currentHash: string,
+    ttlSeconds = 86400 * 7,
+  ): Promise<void> {
     const redis = getRedisClient();
     const key = `crawler:hash:${url}`;
     try {
       await redis.set(key, currentHash, "EX", ttlSeconds);
     } catch (err) {
-      console.warn(`[Redis Crawler] Impossible de sauvegarder le hash pour ${url} :`, err);
+      console.warn(
+        `[Redis Crawler] Impossible de sauvegarder le hash pour ${url} :`,
+        err,
+      );
       resetRedisClient();
     }
   },
@@ -199,7 +213,10 @@ export const vectorStore = {
       // Ajouter également à un set pour l'indexation de la collection
       await redis.sadd(`vector:collection:${collection}`, doc.id);
     } catch (err) {
-      console.error(`[Redis Vector] Erreur de sauvegarde du document ${doc.id} :`, err);
+      console.error(
+        `[Redis Vector] Erreur de sauvegarde du document ${doc.id} :`,
+        err,
+      );
       resetRedisClient();
       throw err;
     }
@@ -215,7 +232,10 @@ export const vectorStore = {
       await redis.del(key);
       await redis.srem(`vector:collection:${collection}`, id);
     } catch (err) {
-      console.error(`[Redis Vector] Erreur de suppression du document ${id} :`, err);
+      console.error(
+        `[Redis Vector] Erreur de suppression du document ${id} :`,
+        err,
+      );
       resetRedisClient();
     }
   },
@@ -226,12 +246,15 @@ export const vectorStore = {
   async deleteDocuments(collection: string, ids: string[]): Promise<void> {
     if (ids.length === 0) return;
     const redis = getRedisClient();
-    const keys = ids.map(id => `vector:${collection}:${id}`);
+    const keys = ids.map((id) => `vector:${collection}:${id}`);
     try {
       await redis.del(...keys);
       await redis.srem(`vector:collection:${collection}`, ...ids);
     } catch (err) {
-      console.error(`[Redis Vector] Erreur de suppression en lot pour ${ids.length} documents :`, err);
+      console.error(
+        `[Redis Vector] Erreur de suppression en lot pour ${ids.length} documents :`,
+        err,
+      );
       resetRedisClient();
     }
   },
@@ -239,7 +262,9 @@ export const vectorStore = {
   /**
    * Récupère tous les documents d'une collection.
    */
-  async getCollection<M = Record<string, unknown>>(collection: string): Promise<VectorDocument<M>[]> {
+  async getCollection<M = Record<string, unknown>>(
+    collection: string,
+  ): Promise<VectorDocument<M>[]> {
     const redis = getRedisClient();
     const collectionSetKey = `vector:collection:${collection}`;
 
@@ -248,7 +273,7 @@ export const vectorStore = {
       if (ids.length === 0) return [];
 
       // Pipeline pour récupérer tous les documents d'un coup
-      const promises = ids.map(id => redis.get(`vector:${collection}:${id}`));
+      const promises = ids.map((id) => redis.get(`vector:${collection}:${id}`));
       const results = await Promise.all(promises);
 
       const docs: VectorDocument<M>[] = [];
@@ -259,7 +284,10 @@ export const vectorStore = {
       }
       return docs;
     } catch (err) {
-      console.error(`[Redis Vector] Erreur lors de la récupération de la collection ${collection} :`, err);
+      console.error(
+        `[Redis Vector] Erreur lors de la récupération de la collection ${collection} :`,
+        err,
+      );
       resetRedisClient();
       return [];
     }
@@ -273,11 +301,13 @@ export const vectorStore = {
     queryEmbedding: number[],
     limit = 5,
     queryText?: string,
-  ): Promise<{ document: Omit<VectorDocument<M>, "embedding">; score: number }[]> {
+  ): Promise<
+    { document: Omit<VectorDocument<M>, "embedding">; score: number }[]
+  > {
     const docs = await this.getCollection<M>(collection);
     if (docs.length === 0) return [];
 
-    const scored = docs.map(doc => {
+    const scored = docs.map((doc) => {
       const cosineScore = cosineSimilarity(queryEmbedding, doc.embedding);
       let keywordScore = 0;
 
@@ -287,13 +317,28 @@ export const vectorStore = {
           .replace(/[.,/#!$%^&*;:{}=\-_`~()]/g, " ")
           .split(/\s+/)
           .filter(
-            w =>
+            (w) =>
               w.length > 2 &&
-              !["pour", "avec", "dans", "les", "des", "une", "dans", "sur", "the", "and", "for", "with"].includes(w),
+              ![
+                "pour",
+                "avec",
+                "dans",
+                "les",
+                "des",
+                "une",
+                "dans",
+                "sur",
+                "the",
+                "and",
+                "for",
+                "with",
+              ].includes(w),
           );
 
         if (queryWords.length > 0) {
-          const docTextLower = doc.text.toLowerCase().replace(/[.,/#!$%^&*;:{}=\-_`~()]/g, " ");
+          const docTextLower = doc.text
+            .toLowerCase()
+            .replace(/[.,/#!$%^&*;:{}=\-_`~()]/g, " ");
           let matches = 0;
           for (const word of queryWords) {
             if (docTextLower.includes(word)) {
@@ -305,7 +350,9 @@ export const vectorStore = {
       }
 
       // Recherche hybride : 60% similarité cosinus, 40% correspondance de mot-clé
-      let score = queryText ? cosineScore * 0.6 + keywordScore * 0.4 : cosineScore;
+      let score = queryText
+        ? cosineScore * 0.6 + keywordScore * 0.4
+        : cosineScore;
 
       // Exact phrase match boost
       if (queryText) {
@@ -353,7 +400,9 @@ export const vectorStore = {
  */
 export function cosineSimilarity(vecA: number[], vecB: number[]): number {
   if (vecA.length !== vecB.length) {
-    throw new Error(`Incohérence de taille de vecteurs : ${vecA.length} vs ${vecB.length}`);
+    throw new Error(
+      `Incohérence de taille de vecteurs : ${vecA.length} vs ${vecB.length}`,
+    );
   }
 
   let dotProduct = 0;
@@ -404,14 +453,21 @@ export async function getEmbedding(text: string): Promise<number[]> {
       });
 
       if (response.ok) {
-        const json = (await response.json()) as { data?: { embedding?: number[] }[] };
+        const json = (await response.json()) as {
+          data?: { embedding?: number[] }[];
+        };
         if (json.data && json.data[0] && json.data[0].embedding) {
           return json.data[0].embedding;
         }
       }
-      console.warn(`[Redis Embeddings] Échec OpenAI API (status ${response.status}). Repli sur hash vectorizer.`);
+      console.warn(
+        `[Redis Embeddings] Échec OpenAI API (status ${response.status}). Repli sur hash vectorizer.`,
+      );
     } catch (err) {
-      console.warn("[Redis Embeddings] Erreur lors de la requête OpenAI API. Repli sur hash vectorizer :", err);
+      console.warn(
+        "[Redis Embeddings] Erreur lors de la requête OpenAI API. Repli sur hash vectorizer :",
+        err,
+      );
     }
   }
 

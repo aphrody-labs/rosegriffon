@@ -77,14 +77,21 @@ export async function toRomajiTitleCase(text: string): Promise<string> {
   return rawRomaji
     .split(/[・\s]+/)
     .filter(Boolean)
-    .map(part => part.charAt(0).toUpperCase() + part.slice(part.length > 1 ? 1 : 0).toLowerCase())
+    .map(
+      (part) =>
+        part.charAt(0).toUpperCase() +
+        part.slice(part.length > 1 ? 1 : 0).toLowerCase(),
+    )
     .join(" ");
 }
 
 /**
  * Converts Japanese text to Hiragana or Katakana.
  */
-export async function toKana(text: string, target: "hiragana" | "katakana"): Promise<string> {
+export async function toKana(
+  text: string,
+  target: "hiragana" | "katakana",
+): Promise<string> {
   const kuro = await initRomaji();
   return kuro.convert(text, {
     to: target,

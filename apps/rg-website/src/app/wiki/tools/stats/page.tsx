@@ -23,10 +23,13 @@ export default function StatsToolPage() {
   return (
     <div className="w-full space-y-6">
       <header className="space-y-1">
-        <h1 className="text-fluid-headline-md font-extrabold text-on-surface">Calculateur de statistiques</h1>
+        <h1 className="text-fluid-headline-md font-extrabold text-on-surface">
+          Calculateur de statistiques
+        </h1>
         <p className="text-sm text-on-surface-variant max-w-2xl">
-          Simulez les 7 statistiques d'un joueur du niveau 1 à 99 avec les vraies tables de croissance d'Inazuma Eleven:
-          Victory Road, calculées directement dans le navigateur.
+          Simulez les 7 statistiques d'un joueur du niveau 1 à 99 avec les
+          vraies tables de croissance d'Inazuma Eleven: Victory Road, calculées
+          directement dans le navigateur.
         </p>
       </header>
       <StatCalculator />

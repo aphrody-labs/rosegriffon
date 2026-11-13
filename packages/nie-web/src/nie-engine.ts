@@ -35,7 +35,9 @@ async function ensureWasm(): Promise<void> {
       // l'onglet : chaque appel ultérieur rejouait la MÊME erreur, sans
       // jamais retenter le chargement.
       initPromise = null;
-      throw new Error(`Chargement du module wasm impossible (${WASM_URL}).`, { cause });
+      throw new Error(`Chargement du module wasm impossible (${WASM_URL}).`, {
+        cause,
+      });
     });
   }
   return initPromise;
@@ -75,7 +77,10 @@ export interface GrowthParams {
 }
 
 /** Calcule le bloc de 7 stats à un niveau donné (tables de croissance réelles IEVR, byte-exact). */
-export async function calculateStats(params: GrowthParams, level: number): Promise<StatResult> {
+export async function calculateStats(
+  params: GrowthParams,
+  level: number,
+): Promise<StatResult> {
   await ensureWasm();
   return JSON.parse(
     calculate_stats(
@@ -138,13 +143,19 @@ export async function rarityToGrowthRank(rarityCode: number): Promise<number> {
  * (puissance, élément, type…) telle que le moteur la lit. `configJson`/`textJson` = JSON des
  * `cfg.bin` correspondants (ex. via `/typed` ou `cfgbinTyped`).
  */
-export async function skillLookup(configJson: string, textJson: string): Promise<unknown> {
+export async function skillLookup(
+  configJson: string,
+  textJson: string,
+): Promise<unknown> {
   await ensureWasm();
   return JSON.parse(skill_lookup(configJson, textJson)) as unknown;
 }
 
 /** Résolution typée d'une aura (keshin/soul/mixi) depuis ses `cfg.bin`. */
-export async function auraLookup(auraConfigJson: string, skillConfigJson: string): Promise<unknown> {
+export async function auraLookup(
+  auraConfigJson: string,
+  skillConfigJson: string,
+): Promise<unknown> {
   await ensureWasm();
   return JSON.parse(aura_lookup(auraConfigJson, skillConfigJson)) as unknown;
 }
@@ -158,13 +169,20 @@ export async function itemLookup(itemConfigJson: string): Promise<unknown> {
 // --- FSM de match (nie-core) ------------------------------------------------
 
 /** Avance la machine à états d'un match d'un tick ; renvoie le nouvel état (JSON). */
-export async function matchTick(state: string, isTraining: boolean, endCounter: number): Promise<unknown> {
+export async function matchTick(
+  state: string,
+  isTraining: boolean,
+  endCounter: number,
+): Promise<unknown> {
   await ensureWasm();
   return JSON.parse(match_tick(state, isTraining, endCounter)) as unknown;
 }
 
 /** Score final encodé depuis (minutes, secondes) — helper FSM du moteur. */
-export async function finalScore(minutes: number, seconds: number): Promise<number> {
+export async function finalScore(
+  minutes: number,
+  seconds: number,
+): Promise<number> {
   await ensureWasm();
   return final_score(minutes, seconds);
 }

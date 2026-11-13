@@ -7,7 +7,8 @@ import CastsClient from "./casts-client";
  */
 export const metadata = metadonneesAchillea({
   titre: "Casters et régie",
-  description: "L'équipe de commentateurs et de streamers officiels d'Achilléa sur Inazuma Eleven: Victory Road.",
+  description:
+    "L'équipe de commentateurs et de streamers officiels d'Achilléa sur Inazuma Eleven: Victory Road.",
   chemin: "/achillea/casts",
   indexable: true,
 });

@@ -5,7 +5,13 @@
  * Aphrody's vendorized Remotion composition, player, and sequencing engine.
  */
 
-import React, { createContext, useContext, useState, useEffect, useMemo } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useMemo,
+} from "react";
 
 export * from "./timeline";
 export * from "./waveform";
@@ -77,15 +83,22 @@ export interface SequenceProps {
   children: React.ReactNode;
 }
 
-export const Sequence: React.FC<SequenceProps> = ({ from, durationInFrames, children }) => {
+export const Sequence: React.FC<SequenceProps> = ({
+  from,
+  durationInFrames,
+  children,
+}) => {
   const currentFrame = useCurrentFrame();
   const relativeFrame = currentFrame - from;
 
   if (relativeFrame < 0) return null;
-  if (durationInFrames !== undefined && relativeFrame >= durationInFrames) return null;
+  if (durationInFrames !== undefined && relativeFrame >= durationInFrames)
+    return null;
 
   return (
-    <CurrentFrameContext.Provider value={relativeFrame}>{children}</CurrentFrameContext.Provider>
+    <CurrentFrameContext.Provider value={relativeFrame}>
+      {children}
+    </CurrentFrameContext.Provider>
   );
 };
 
@@ -169,7 +182,8 @@ export const Player: React.FC<PlayerProps> = ({
                 {isPlaying ? "Pause" : "Play"}
               </button>
               <span className="font-mono">
-                Frame: {frame} / {durationInFrames} ({Math.round((frame / fps) * 10) / 10}s)
+                Frame: {frame} / {durationInFrames} (
+                {Math.round((frame / fps) * 10) / 10}s)
               </span>
             </div>
           )}

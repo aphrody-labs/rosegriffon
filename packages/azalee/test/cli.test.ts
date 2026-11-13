@@ -25,11 +25,23 @@ import { CLI_NAME, CLI_VERSION, createAzaleeProgram } from "../src/cli/program";
 import { parseReplArgs } from "../src/cli/commands/shell";
 import { renderAsciiTable } from "../src/cli/context";
 import { LEGACY_FORMATIONS } from "../src/game/formations";
-import { getItemCategoryLabel, ITEM_CATEGORY_LABELS_FR } from "../src/game/item-categories";
+import {
+  getItemCategoryLabel,
+  ITEM_CATEGORY_LABELS_FR,
+} from "../src/game/item-categories";
 import { getPersonalityName, PERSONALITY_NAMES } from "../src/game/personality";
 import { interpolateVariantStats } from "../src/game/stats-interpolation";
-import { base64ToUtf8, decodeTeamCode, encodeTeamCode, utf8ToBase64 } from "../src/game/team-code";
-import { containsJapanese, escapeRegExp, stripRubyAnnotations } from "../src/text/japanese-detect";
+import {
+  base64ToUtf8,
+  decodeTeamCode,
+  encodeTeamCode,
+  utf8ToBase64,
+} from "../src/game/team-code";
+import {
+  containsJapanese,
+  escapeRegExp,
+  stripRubyAnnotations,
+} from "../src/text/japanese-detect";
 import { hasPostgresConfiguration } from "../src/config";
 
 /** Chemin du binaire CLI (exécuté tel quel par Bun). */
@@ -73,20 +85,20 @@ function captureHelp(argv: string[]): string {
   let out = "";
   program.exitOverride();
   program.configureOutput({
-    writeOut: str => {
+    writeOut: (str) => {
       out += str;
     },
-    writeErr: str => {
+    writeErr: (str) => {
       out += str;
     },
   });
   for (const cmd of allCommands(program)) {
     cmd.exitOverride();
     cmd.configureOutput({
-      writeOut: str => {
+      writeOut: (str) => {
         out += str;
       },
-      writeErr: str => {
+      writeErr: (str) => {
         out += str;
       },
     });
@@ -114,7 +126,9 @@ function allCommands(program: Command): Command[] {
 }
 
 /** Exécute réellement le CLI et renvoie son code de sortie et sa sortie. */
-async function runCli(args: string[]): Promise<{ code: number; stdout: string; stderr: string }> {
+async function runCli(
+  args: string[],
+): Promise<{ code: number; stdout: string; stderr: string }> {
   const proc = Bun.spawn(["bun", CLI_ENTRY, ...args], {
     cwd: REPO_ROOT,
     stdout: "pipe",
@@ -134,26 +148,30 @@ describe("createAzaleeProgram", () => {
     const program = createAzaleeProgram();
     expect(program.name()).toBe(CLI_NAME);
     expect(program.name()).toBe("azalee");
-    expect(program.description()).toBe("CLI d'Azalée pour Inazuma Eleven: Victory Road");
+    expect(program.description()).toBe(
+      "CLI d'Azalée pour Inazuma Eleven: Victory Road",
+    );
     expect(program.version()).toBe(CLI_VERSION);
     expect(CLI_VERSION).toBe(require("../package.json").version);
   });
 
   test("enregistre exactement les 22 commandes attendues, dans l'ordre", () => {
     const program = createAzaleeProgram();
-    expect(program.commands.map(c => c.name())).toEqual([...EXPECTED_COMMANDS]);
+    expect(program.commands.map((c) => c.name())).toEqual([
+      ...EXPECTED_COMMANDS,
+    ]);
   });
 
   test("`shell` conserve son alias `repl`", () => {
     const program = createAzaleeProgram();
-    const shell = program.commands.find(c => c.name() === "shell");
+    const shell = program.commands.find((c) => c.name() === "shell");
     expect(shell?.aliases()).toEqual(["repl"]);
   });
 
   test("`data` expose ses 7 sous-commandes de pipeline", () => {
     const program = createAzaleeProgram();
-    const data = program.commands.find(c => c.name() === "data");
-    expect(data?.commands.map(c => c.name())).toEqual([
+    const data = program.commands.find((c) => c.name() === "data");
+    expect(data?.commands.map((c) => c.name())).toEqual([
       "push",
       "migrate",
       "load",
@@ -208,16 +226,21 @@ describe("options déclarées", () => {
     test: ["-p, --playwright"],
     shell: [],
     data: [],
-    serve: ["-p, --port <port>", "-H, --host <host>", "--cors <origin>", "-j, --json"],
+    serve: [
+      "-p, --port <port>",
+      "-H, --host <host>",
+      "--cors <origin>",
+      "-j, --json",
+    ],
   };
 
   test("chaque commande déclare exactement ses drapeaux", () => {
     const program = createAzaleeProgram();
     for (const [name, flags] of Object.entries(EXPECTED_FLAGS)) {
-      const cmd = program.commands.find(c => c.name() === name);
+      const cmd = program.commands.find((c) => c.name() === name);
       expect(cmd, `commande ${name} absente`).toBeDefined();
       expect(
-        cmd!.options.map(o => o.flags),
+        cmd!.options.map((o) => o.flags),
         `drapeaux de ${name}`,
       ).toEqual(flags);
     }
@@ -226,27 +249,34 @@ describe("options déclarées", () => {
   test("les valeurs par défaut documentées sont bien posées", () => {
     const program = createAzaleeProgram();
     const optionOf = (cmdName: string, long: string) =>
-      program.commands.find(c => c.name() === cmdName)?.options.find(o => o.long === long);
+      program.commands
+        .find((c) => c.name() === cmdName)
+        ?.options.find((o) => o.long === long);
 
     expect(optionOf("compare", "--level")?.defaultValue).toBe("99");
     expect(optionOf("dialogue", "--limit")?.defaultValue).toBe("10");
     expect(optionOf("random-team", "--formation")?.defaultValue).toBe("4-4-2");
-    expect(optionOf("serve", "--host")?.defaultValue).toBe(process.env.AZALEE_HOST ?? "127.0.0.1");
-    expect(optionOf("serve", "--port")?.defaultValue).toBe(process.env.AZALEE_PORT ?? "3010");
+    expect(optionOf("serve", "--host")?.defaultValue).toBe(
+      process.env.AZALEE_HOST ?? "127.0.0.1",
+    );
+    expect(optionOf("serve", "--port")?.defaultValue).toBe(
+      process.env.AZALEE_PORT ?? "3010",
+    );
   });
 
   test("`data migrate` et `data sync` déclarent leurs drapeaux longs", () => {
     const program = createAzaleeProgram();
-    const data = program.commands.find(c => c.name() === "data");
-    const migrate = data?.commands.find(c => c.name() === "migrate");
-    const sync = data?.commands.find(c => c.name() === "sync");
-    expect(migrate?.options.map(o => o.flags)).toEqual(["--apply"]);
-    expect(sync?.options.map(o => o.flags)).toEqual(["--full", "--deletes"]);
+    const data = program.commands.find((c) => c.name() === "data");
+    const migrate = data?.commands.find((c) => c.name() === "migrate");
+    const sync = data?.commands.find((c) => c.name() === "sync");
+    expect(migrate?.options.map((o) => o.flags)).toEqual(["--apply"]);
+    expect(sync?.options.map((o) => o.flags)).toEqual(["--full", "--deletes"]);
   });
 
   test("les arguments positionnels sont conformes", () => {
     const program = createAzaleeProgram();
-    const usageOf = (name: string) => program.commands.find(c => c.name() === name)?.usage();
+    const usageOf = (name: string) =>
+      program.commands.find((c) => c.name() === name)?.usage();
 
     expect(usageOf("redis")).toContain("<cmd> <key> [val]");
     expect(usageOf("compare")).toContain("<chara1> <chara2>");
@@ -264,15 +294,18 @@ describe("--help", () => {
     }
   });
 
-  test.each([...EXPECTED_COMMANDS])("`azalee %s --help` s'affiche sans exécuter la commande", name => {
-    const help = captureHelp([name, "--help"]);
-    expect(help).toContain(`Usage: azalee ${name}`);
-    expect(help).toContain("display help for command");
-  });
+  test.each([...EXPECTED_COMMANDS])(
+    "`azalee %s --help` s'affiche sans exécuter la commande",
+    (name) => {
+      const help = captureHelp([name, "--help"]);
+      expect(help).toContain(`Usage: azalee ${name}`);
+      expect(help).toContain("display help for command");
+    },
+  );
 
   test.each(["push", "migrate", "load", "sync", "typecheck", "verify", "all"])(
     "`azalee data %s --help` s'affiche",
-    name => {
+    (name) => {
       const help = captureHelp(["data", name, "--help"]);
       expect(help).toContain(`Usage: azalee data ${name}`);
     },
@@ -286,7 +319,9 @@ describe("--help", () => {
       cmd.exitOverride();
       cmd.configureOutput({ writeOut: () => {}, writeErr: () => {} });
     }
-    expect(() => program.parse(["bun", "azalee", "status", "--nawak"])).toThrow(CommanderError);
+    expect(() => program.parse(["bun", "azalee", "status", "--nawak"])).toThrow(
+      CommanderError,
+    );
   });
 });
 
@@ -294,7 +329,12 @@ describe("exécution réelle", () => {
   test.skipIf(!hasPostgres)(
     "`db --sqlite --json` renvoie un tableau JSON depuis le miroir",
     async () => {
-      const { code, stdout } = await runCli(["db", "select count(*) as n from inagle_teams", "--sqlite", "--json"]);
+      const { code, stdout } = await runCli([
+        "db",
+        "select count(*) as n from inagle_teams",
+        "--sqlite",
+        "--json",
+      ]);
       expect(code).toBe(0);
       const rows = JSON.parse(stdout) as Array<{ n: number }>;
       expect(Array.isArray(rows)).toBe(true);
@@ -306,7 +346,11 @@ describe("exécution réelle", () => {
   test.skipIf(!hasPostgres)(
     "`db --sqlite` sans --json rend une table ASCII",
     async () => {
-      const { code, stdout } = await runCli(["db", "select count(*) as n from inagle_teams", "--sqlite"]);
+      const { code, stdout } = await runCli([
+        "db",
+        "select count(*) as n from inagle_teams",
+        "--sqlite",
+      ]);
       expect(code).toBe(0);
       expect(stdout).toContain("SQLite DB utilisé :");
       expect(stdout).toContain("┌");
@@ -328,7 +372,11 @@ describe("exécution réelle", () => {
     async () => {
       const { code, stdout } = await runCli(["search", "mark", "--json"]);
       expect(code).toBe(0);
-      const results = JSON.parse(stdout) as Array<{ id: string; name: string; type: string }>;
+      const results = JSON.parse(stdout) as Array<{
+        id: string;
+        name: string;
+        type: string;
+      }>;
       expect(results.length).toBeGreaterThan(0);
       expect(results[0]).toHaveProperty("name");
       expect(results[0]).toHaveProperty("type");
@@ -369,8 +417,14 @@ describe("rendu de table ASCII", () => {
 
 describe("découpage des lignes du shell", () => {
   test("respecte les guillemets simples et doubles", () => {
-    expect(parseReplArgs('chara "Mark Evans"')).toEqual(["chara", "Mark Evans"]);
-    expect(parseReplArgs("chara 'Axel Blaze'")).toEqual(["chara", "Axel Blaze"]);
+    expect(parseReplArgs('chara "Mark Evans"')).toEqual([
+      "chara",
+      "Mark Evans",
+    ]);
+    expect(parseReplArgs("chara 'Axel Blaze'")).toEqual([
+      "chara",
+      "Axel Blaze",
+    ]);
     expect(parseReplArgs("  search   mark  ")).toEqual(["search", "mark"]);
     expect(parseReplArgs("")).toEqual([]);
   });
@@ -436,7 +490,9 @@ describe("règles de jeu remontées dans la lib", () => {
   });
 
   test("sans paliers intermédiaires, l'interpolation reste linéaire lv1→lv99", () => {
-    const partial = { stats: { lv1: variant.stats.lv1, lv99: variant.stats.lv99 } };
+    const partial = {
+      stats: { lv1: variant.stats.lv1, lv99: variant.stats.lv99 },
+    };
     const mid = interpolateVariantStats(partial, 50);
     expect(mid.kick).toBe(Math.floor(10 + 90 * (49 / 98)));
   });
@@ -491,7 +547,9 @@ describe("code de partage d'équipe", () => {
   });
 
   test("un segment malformé est ignoré sans casser le décodage", () => {
-    const decoded = decodeTeamCode(utf8ToBase64("box442|field-0:0x1111|corrompu"));
+    const decoded = decodeTeamCode(
+      utf8ToBase64("box442|field-0:0x1111|corrompu"),
+    );
     expect(decoded.formationId).toBe("box442");
     expect(decoded.slots).toEqual([{ slot: "field-0", charaId: "0x1111" }]);
   });
@@ -517,7 +575,7 @@ describe("détection de texte japonais", () => {
 
 describe("formations partagées avec l'éditeur web", () => {
   test("les 8 formations héritées portent les identifiants persistés", () => {
-    expect(LEGACY_FORMATIONS.map(f => f.id)).toEqual([
+    expect(LEGACY_FORMATIONS.map((f) => f.id)).toEqual([
       "diamond442",
       "box442",
       "freedom352",
@@ -533,11 +591,11 @@ describe("formations partagées avec l'éditeur web", () => {
     for (const f of LEGACY_FORMATIONS) {
       expect(f.positions, f.id).toHaveLength(11);
       expect(
-        f.positions.filter(p => p.role === "GK"),
+        f.positions.filter((p) => p.role === "GK"),
         f.id,
       ).toHaveLength(1);
       expect(
-        f.positions.map(p => p.index),
+        f.positions.map((p) => p.index),
         f.id,
       ).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
     }

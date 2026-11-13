@@ -4,7 +4,12 @@ import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 
 import { Button } from "./button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./dropdown-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "./dropdown-menu";
 
 export function ThemeToggle() {
   const { setTheme } = useTheme();
@@ -19,9 +24,15 @@ export function ThemeToggle() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={() => setTheme("light")}>Clair</DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("dark")}>Sombre</DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("system")}>Système</DropdownMenuItem>
+        <DropdownMenuItem onClick={() => setTheme("light")}>
+          Clair
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => setTheme("dark")}>
+          Sombre
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => setTheme("system")}>
+          Système
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );

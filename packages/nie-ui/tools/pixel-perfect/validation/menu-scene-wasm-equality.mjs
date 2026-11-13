@@ -9,12 +9,18 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
-import { initSync, menu_runtime_scene_json } from "../../../../nie-web/src/nie-wasm-web/nie_wasm.js";
+import {
+  initSync,
+  menu_runtime_scene_json,
+} from "../../../../nie-web/src/nie-wasm-web/nie_wasm.js";
 
 const paths = process.argv.slice(2);
 assert(paths.length > 0, "Pass at least one native runtime-layout JSON export");
 const wasmBytes = readFileSync(
-  new URL("../../../packages/nie-web/public/static/game/nie_wasm_bg.wasm", import.meta.url),
+  new URL(
+    "../../../packages/nie-web/public/static/game/nie_wasm_bg.wasm",
+    import.meta.url,
+  ),
 );
 initSync({ module: wasmBytes });
 let scenes = 0;
@@ -22,7 +28,10 @@ let layers = 0;
 let objects = 0;
 for (const path of paths) {
   const document = JSON.parse(readFileSync(path, "utf8"));
-  assert(document.runtimeScenes && typeof document.runtimeScenes === "object", "Missing native runtimeScenes");
+  assert(
+    document.runtimeScenes && typeof document.runtimeScenes === "object",
+    "Missing native runtimeScenes",
+  );
   const nativeScenes = Object.values(document.runtimeScenes);
   assert(nativeScenes.length > 0, "Native export contains no scenes");
   for (const scene of nativeScenes) {
@@ -43,14 +52,24 @@ for (const path of paths) {
       current_layer: 0,
     };
     const actual = JSON.parse(menu_runtime_scene_json(JSON.stringify(state)));
-    assert.deepStrictEqual(actual, scene, "Native and WebAssembly object state differs");
+    assert.deepStrictEqual(
+      actual,
+      scene,
+      "Native and WebAssembly object state differs",
+    );
     scenes++;
     layers += Object.keys(actual.layers).length;
-    objects += Object.values(actual.layers).reduce((sum, layer) => sum + Object.keys(layer.objects).length, 0);
+    objects += Object.values(actual.layers).reduce(
+      (sum, layer) => sum + Object.keys(layer.objects).length,
+      0,
+    );
   }
 }
 for (const input of ["{}", "null", "invalid"]) {
-  assert.throws(() => menu_runtime_scene_json(input), "Invalid state must fail instead of producing an empty scene");
+  assert.throws(
+    () => menu_runtime_scene_json(input),
+    "Invalid state must fail instead of producing an empty scene",
+  );
 }
 assert(objects > 0, "At least one observed runtime object is required");
 console.log(

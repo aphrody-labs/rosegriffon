@@ -39,7 +39,14 @@ export interface BankEntry {
   ownerSlug: string | null;
 }
 
-const FAMILLES: AudioBankKind[] = ["voix", "bgm", "technique", "effet", "systeme", "autre"];
+const FAMILLES: AudioBankKind[] = [
+  "voix",
+  "bgm",
+  "technique",
+  "effet",
+  "systeme",
+  "autre",
+];
 
 /** Langues telles que les dossiers du jeu les nomment. */
 const LANGUES: Record<string, string> = { ja: "japonais", en: "anglais" };
@@ -57,15 +64,25 @@ function contexte(b: BankEntry): string {
   return langue ? `${famille} — ${langue}` : famille;
 }
 
-export function SoundGallery({ banks, namedCount }: { banks: BankEntry[]; namedCount: number }) {
+export function SoundGallery({
+  banks,
+  namedCount,
+}: {
+  banks: BankEntry[];
+  namedCount: number;
+}) {
   const [famille, setFamille] = useState<AudioBankKind | "all">("all");
   const [recherche, setRecherche] = useState("");
   const [ouverte, setOuverte] = useState<string | null>(null);
-  const [catalogues, setCatalogues] = useState<Record<string, AudioBank | null>>({});
+  const [catalogues, setCatalogues] = useState<
+    Record<string, AudioBank | null>
+  >({});
   const [chargement, setChargement] = useState<string | null>(null);
   // Ce qui joue : la banque et le RANG du cue dans son catalogue. Le rang permet de passer au
   // suivant sans rechercher la piste dans la liste.
-  const [piste, setPiste] = useState<{ path: string; index: number } | null>(null);
+  const [piste, setPiste] = useState<{ path: string; index: number } | null>(
+    null,
+  );
 
   const comptes = useMemo(() => {
     const c = new Map<AudioBankKind, number>();
@@ -75,12 +92,15 @@ export function SoundGallery({ banks, namedCount }: { banks: BankEntry[]; namedC
 
   const visibles = useMemo(() => {
     const q = recherche.trim().toLowerCase();
-    return banks.filter(b => {
+    return banks.filter((b) => {
       if (famille !== "all" && b.kind !== famille) return false;
       if (!q) return true;
       // La recherche porte sur le nom du personnage autant que sur le code de fichier :
       // « Mark » doit trouver sa banque de voix sans qu'on ait à connaître son code.
-      return b.name.toLowerCase().includes(q) || (b.owner?.toLowerCase().includes(q) ?? false);
+      return (
+        b.name.toLowerCase().includes(q) ||
+        (b.owner?.toLowerCase().includes(q) ?? false)
+      );
     });
   }, [banks, famille, recherche]);
 
@@ -94,7 +114,7 @@ export function SoundGallery({ banks, namedCount }: { banks: BankEntry[]; namedC
       if (catalogues[path] !== undefined) return;
       setChargement(path);
       const bank = await fetchAudioBankOrNull(path);
-      setCatalogues(c => ({ ...c, [path]: bank }));
+      setCatalogues((c) => ({ ...c, [path]: bank }));
       setChargement(null);
     },
     [ouverte, catalogues],
@@ -107,7 +127,7 @@ export function SoundGallery({ banks, namedCount }: { banks: BankEntry[]; namedC
     const cat = catalogues[piste.path];
     const cue = cat?.cues[piste.index];
     if (!cat || !cue) return null;
-    const banque = banks.find(b => b.path === piste.path);
+    const banque = banks.find((b) => b.path === piste.path);
     return {
       path: piste.path,
       awbId: cue.awbId,
@@ -120,7 +140,7 @@ export function SoundGallery({ banks, namedCount }: { banks: BankEntry[]; namedC
   /** Passe au cue précédent (`-1`) ou suivant (`+1`), borné aux extrémités du catalogue. */
   const naviguer = useCallback(
     (delta: number) => {
-      setPiste(p => {
+      setPiste((p) => {
         if (!p) return p;
         const total = catalogues[p.path]?.cues.length ?? 0;
         const suivant = p.index + delta;
@@ -144,7 +164,7 @@ export function SoundGallery({ banks, namedCount }: { banks: BankEntry[]; namedC
         >
           Toutes ({banks.length.toLocaleString("fr")})
         </button>
-        {FAMILLES.filter(f => comptes.get(f)).map(f => (
+        {FAMILLES.filter((f) => comptes.get(f)).map((f) => (
           <button
             key={f}
             type="button"
@@ -155,7 +175,8 @@ export function SoundGallery({ banks, namedCount }: { banks: BankEntry[]; namedC
                 : "bg-surface-container text-on-surface-variant hover:bg-surface-container-high"
             }`}
           >
-            {audioBankKindLabel(f)} ({(comptes.get(f) ?? 0).toLocaleString("fr")})
+            {audioBankKindLabel(f)} (
+            {(comptes.get(f) ?? 0).toLocaleString("fr")})
           </button>
         ))}
       </div>
@@ -163,20 +184,22 @@ export function SoundGallery({ banks, namedCount }: { banks: BankEntry[]; namedC
       <input
         type="search"
         value={recherche}
-        onChange={e => setRecherche(e.target.value)}
+        onChange={(e) => setRecherche(e.target.value)}
         placeholder="Rechercher un personnage ou un code de banque…"
         className="w-full rounded-2xl border border-outline-variant bg-surface-container-low px-4 py-2.5 text-sm text-on-surface placeholder:text-on-surface-variant focus:border-primary focus:outline-none"
       />
 
       <p className="px-1 text-xs text-on-surface-variant tabular-nums">
-        {visibles.length.toLocaleString("fr")} banque{visibles.length > 1 ? "s" : ""} affichée
-        {visibles.length > 1 ? "s" : ""} — {namedCount.toLocaleString("fr")} rattachée
-        {namedCount > 1 ? "s" : ""} à un personnage. Les autres portent un code absent du miroir : elles restent
-        jouables, sans nom.
+        {visibles.length.toLocaleString("fr")} banque
+        {visibles.length > 1 ? "s" : ""} affichée
+        {visibles.length > 1 ? "s" : ""} — {namedCount.toLocaleString("fr")}{" "}
+        rattachée
+        {namedCount > 1 ? "s" : ""} à un personnage. Les autres portent un code
+        absent du miroir : elles restent jouables, sans nom.
       </p>
 
       <ul className="space-y-1.5">
-        {visibles.slice(0, 400).map(b => {
+        {visibles.slice(0, 400).map((b) => {
           const est_ouverte = ouverte === b.path;
           const cat = catalogues[b.path];
           return (
@@ -196,31 +219,46 @@ export function SoundGallery({ banks, namedCount }: { banks: BankEntry[]; namedC
 								    on affiche ce que le fichier EST — sa famille et sa langue — et le code
 								    passe en dessous, en petit. */}
                 <span className="min-w-0 flex-1">
-                  <span className="block truncate text-sm font-medium text-on-surface">{b.owner ?? contexte(b)}</span>
+                  <span className="block truncate text-sm font-medium text-on-surface">
+                    {b.owner ?? contexte(b)}
+                  </span>
                   <span className="block truncate text-[11px] text-on-surface-variant">
                     {b.lang ? `${LANGUES[b.lang] ?? b.lang} · ` : ""}
                     <span className="font-mono">{b.name}</span>
                   </span>
                 </span>
                 <span className="shrink-0 text-on-surface-variant">
-                  {est_ouverte ? <ChevronDown className="size-4" /> : <ChevronRight className="size-4" />}
+                  {est_ouverte ? (
+                    <ChevronDown className="size-4" />
+                  ) : (
+                    <ChevronRight className="size-4" />
+                  )}
                 </span>
               </button>
 
               {est_ouverte && (
                 <div className="border-t border-outline-variant/15 px-4 py-3">
                   {chargement === b.path && (
-                    <p className="text-xs italic text-on-surface-variant">Lecture du catalogue…</p>
+                    <p className="text-xs italic text-on-surface-variant">
+                      Lecture du catalogue…
+                    </p>
                   )}
                   {cat === null && (
-                    <p className="text-xs italic text-on-surface-variant">Catalogue illisible pour cette banque.</p>
+                    <p className="text-xs italic text-on-surface-variant">
+                      Catalogue illisible pour cette banque.
+                    </p>
                   )}
                   {cat && (
                     <>
                       <div className="mb-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-on-surface-variant">
-                        <span className="tabular-nums">{cat.cueCount.toLocaleString("fr")} cues</span>
+                        <span className="tabular-nums">
+                          {cat.cueCount.toLocaleString("fr")} cues
+                        </span>
                         {b.ownerSlug && (
-                          <Link href={`/wiki/chara/${b.ownerSlug}`} className="text-primary hover:underline">
+                          <Link
+                            href={`/wiki/chara/${b.ownerSlug}`}
+                            className="text-primary hover:underline"
+                          >
                             Fiche du personnage
                           </Link>
                         )}
@@ -228,12 +266,15 @@ export function SoundGallery({ banks, namedCount }: { banks: BankEntry[]; namedC
                       <ul className="max-h-80 space-y-0.5 overflow-y-auto">
                         {cat.cues.map((c, rang) => {
                           const cle = `${b.path}#${c.index}`;
-                          const actif = piste?.path === b.path && piste.index === rang;
+                          const actif =
+                            piste?.path === b.path && piste.index === rang;
                           return (
                             <li key={cle}>
                               <button
                                 type="button"
-                                onClick={() => setPiste({ path: b.path, index: rang })}
+                                onClick={() =>
+                                  setPiste({ path: b.path, index: rang })
+                                }
                                 className={`flex w-full items-center gap-3 rounded-lg px-2 py-1.5 text-left text-xs transition hover:bg-surface-container-high ${
                                   actif ? "bg-surface-container-high" : ""
                                 }`}
@@ -252,8 +293,14 @@ export function SoundGallery({ banks, namedCount }: { banks: BankEntry[]; namedC
                                   {formatDuration(c.durationSec)}
                                 </span>
                                 {c.looped && (
-                                  <span className="shrink-0 text-on-surface-variant" title="Boucle">
-                                    <Repeat className="size-3" aria-hidden="true" />
+                                  <span
+                                    className="shrink-0 text-on-surface-variant"
+                                    title="Boucle"
+                                  >
+                                    <Repeat
+                                      className="size-3"
+                                      aria-hidden="true"
+                                    />
                                   </span>
                                 )}
                               </button>
@@ -272,12 +319,16 @@ export function SoundGallery({ banks, namedCount }: { banks: BankEntry[]; namedC
 
       {visibles.length > 400 && (
         <p className="px-1 text-xs italic text-on-surface-variant tabular-nums">
-          400 banques affichées sur {visibles.length.toLocaleString("fr")} — affinez la recherche pour atteindre les
-          autres.
+          400 banques affichées sur {visibles.length.toLocaleString("fr")} —
+          affinez la recherche pour atteindre les autres.
         </p>
       )}
 
-      <AudioPlayer piste={pisteCourante} onNavigate={naviguer} onClose={() => setPiste(null)} />
+      <AudioPlayer
+        piste={pisteCourante}
+        onNavigate={naviguer}
+        onClose={() => setPiste(null)}
+      />
     </div>
   );
 }

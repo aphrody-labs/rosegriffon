@@ -304,7 +304,9 @@ export async function generateMetadata({
 
   const seoTitle = news.meta_title || news.title;
   const seoDescription = clampText(
-    news.meta_description || news.excerpt || `${news.title} - Actualites Inazuma Eleven Victory Road`,
+    news.meta_description ||
+      news.excerpt ||
+      `${news.title} - Actualites Inazuma Eleven Victory Road`,
   );
   const publishedDate = news.published_at || news.created_at;
   const modifiedDate = news.updated_at || publishedDate;
@@ -325,7 +327,14 @@ export async function generateMetadata({
       // l'`opengraph-image.tsx` du segment que si la page ne la déclare pas
       // (`images: []` suffisait à le masquer).
       ...(news.featured_image_url && {
-        images: [{ alt: news.title, height: 630, url: news.featured_image_url, width: 1200 }],
+        images: [
+          {
+            alt: news.title,
+            height: 630,
+            url: news.featured_image_url,
+            width: 1200,
+          },
+        ],
       }),
       locale: "fr_FR",
       modifiedTime: modifiedDate,

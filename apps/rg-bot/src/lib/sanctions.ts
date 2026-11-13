@@ -35,8 +35,13 @@ export const ACTIONS_MODERATION = [
 
 export type ActionModeration = (typeof ACTIONS_MODERATION)[number];
 
-export function estActionModeration(valeur: unknown): valeur is ActionModeration {
-  return typeof valeur === "string" && (ACTIONS_MODERATION as readonly string[]).includes(valeur);
+export function estActionModeration(
+  valeur: unknown,
+): valeur is ActionModeration {
+  return (
+    typeof valeur === "string" &&
+    (ACTIONS_MODERATION as readonly string[]).includes(valeur)
+  );
 }
 
 interface Etiquette {
@@ -51,14 +56,24 @@ interface Etiquette {
   poids: number;
 }
 
-const ETIQUETTES: Readonly<Record<ActionModeration, Etiquette>> = Object.freeze({
-  "discord.avertir": { icone: "⚠️", libelle: "Avertissement", poids: 1 },
-  "discord.bannir": { icone: "⛔", libelle: "Bannissement", poids: 5 },
-  "discord.debannir": { icone: "🔓", libelle: "Débannissement", poids: 0 },
-  "discord.exclure": { icone: "🔇", libelle: "Exclusion temporaire", poids: 2 },
-  "discord.expulser": { icone: "👢", libelle: "Expulsion", poids: 3 },
-  "discord.lever-exclusion": { icone: "🔈", libelle: "Exclusion levée", poids: 0 },
-});
+const ETIQUETTES: Readonly<Record<ActionModeration, Etiquette>> = Object.freeze(
+  {
+    "discord.avertir": { icone: "⚠️", libelle: "Avertissement", poids: 1 },
+    "discord.bannir": { icone: "⛔", libelle: "Bannissement", poids: 5 },
+    "discord.debannir": { icone: "🔓", libelle: "Débannissement", poids: 0 },
+    "discord.exclure": {
+      icone: "🔇",
+      libelle: "Exclusion temporaire",
+      poids: 2,
+    },
+    "discord.expulser": { icone: "👢", libelle: "Expulsion", poids: 3 },
+    "discord.lever-exclusion": {
+      icone: "🔈",
+      libelle: "Exclusion levée",
+      poids: 0,
+    },
+  },
+);
 
 export function libelleAction(action: string): string {
   return estActionModeration(action) ? ETIQUETTES[action].libelle : action;
@@ -107,8 +122,13 @@ export const JOURS_RECENTS = 90;
  * deux ans n'est pas dans la même situation qu'un membre qui en a trois ce
  * mois-ci, et un seul compteur confond les deux.
  */
-export function resumer(entrees: readonly EntreeHistorique[], maintenant: Date = new Date()): Resume {
-  const compteurs = new Map<ActionModeration, number>(ACTIONS_MODERATION.map(action => [action, 0]));
+export function resumer(
+  entrees: readonly EntreeHistorique[],
+  maintenant: Date = new Date(),
+): Resume {
+  const compteurs = new Map<ActionModeration, number>(
+    ACTIONS_MODERATION.map((action) => [action, 0]),
+  );
   let gravite = 0;
   let recentes = 0;
   const limite = maintenant.getTime() - JOURS_RECENTS * 86_400_000;
@@ -118,7 +138,8 @@ export function resumer(entrees: readonly EntreeHistorique[], maintenant: Date =
       compteurs.set(entree.action, (compteurs.get(entree.action) ?? 0) + 1);
     }
     gravite += poidsAction(entree.action);
-    const instant = entree.le instanceof Date ? entree.le.getTime() : Number.NaN;
+    const instant =
+      entree.le instanceof Date ? entree.le.getTime() : Number.NaN;
     if (Number.isFinite(instant) && instant >= limite) {
       recentes += 1;
     }
@@ -128,12 +149,14 @@ export function resumer(entrees: readonly EntreeHistorique[], maintenant: Date =
   // requête) ; on ne re-trie pas pour ne pas dépendre silencieusement de
   // l'appelant sur le seul point qui compte.
   const derniere =
-    entrees.length === 0 ? null : entrees.reduce((plus, entree) => (entree.le > plus.le ? entree : plus));
+    entrees.length === 0
+      ? null
+      : entrees.reduce((plus, entree) => (entree.le > plus.le ? entree : plus));
 
   return {
     derniere,
     gravite,
-    parAction: ACTIONS_MODERATION.map(action => ({
+    parAction: ACTIONS_MODERATION.map((action) => ({
       action,
       nombre: compteurs.get(action) ?? 0,
     })),
@@ -200,14 +223,15 @@ export type IntentionJournal = "attention" | "echec" | "succes";
  * il s'est passé l'inverse, et le journal se parcourt à la couleur avant de se
  * lire.
  */
-const INTENTIONS: Readonly<Record<ActionModeration, IntentionJournal>> = Object.freeze({
-  "discord.avertir": "attention",
-  "discord.bannir": "echec",
-  "discord.debannir": "succes",
-  "discord.exclure": "attention",
-  "discord.expulser": "echec",
-  "discord.lever-exclusion": "succes",
-});
+const INTENTIONS: Readonly<Record<ActionModeration, IntentionJournal>> =
+  Object.freeze({
+    "discord.avertir": "attention",
+    "discord.bannir": "echec",
+    "discord.debannir": "succes",
+    "discord.exclure": "attention",
+    "discord.expulser": "echec",
+    "discord.lever-exclusion": "succes",
+  });
 
 export function intentionAction(action: ActionModeration): IntentionJournal {
   return INTENTIONS[action];
@@ -237,12 +261,20 @@ export interface LigneJournal {
  */
 export function ligneJournal(entree: ActionJournalisee): LigneJournal {
   const champs: LigneJournal["champs"] = [
-    { enLigne: false, nom: "Motif", valeur: borner(entree.motif ?? "—", 1_000) },
+    {
+      enLigne: false,
+      nom: "Motif",
+      valeur: borner(entree.motif ?? "—", 1_000),
+    },
     { enLigne: true, nom: "Par", valeur: `<@${entree.parQui}>` },
   ];
   for (const precision of entree.precisions ?? []) {
     if (precision && precision.valeur && precision.valeur.trim().length > 0) {
-      champs.push({ enLigne: true, nom: precision.nom, valeur: borner(precision.valeur, 1_000) });
+      champs.push({
+        enLigne: true,
+        nom: precision.nom,
+        valeur: borner(precision.valeur, 1_000),
+      });
     }
   }
   return {

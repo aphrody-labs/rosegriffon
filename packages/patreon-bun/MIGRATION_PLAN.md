@@ -184,17 +184,21 @@ Bun.serve example (skeleton) :
 import { parseWebhookRequest } from "@rose-griffon/patreon-bun";
 
 Bun.serve({
-	port: Number(Bun.env.PORT ?? 3000),
-	async fetch(req) {
-		const url = new URL(req.url);
-		if (url.pathname === "/webhook" && req.method === "POST") {
-			const result = await parseWebhookRequest(req, Bun.env.PATREON_WEBHOOK_SECRET!);
-			if (!result.verified) return new Response("Unauthorized", { status: 401 });
-			console.log(result.event, result.payload);
-			return new Response("OK");
-		}
-		return new Response("Not Found", { status: 404 });
-	},
+  port: Number(Bun.env.PORT ?? 3000),
+  async fetch(req) {
+    const url = new URL(req.url);
+    if (url.pathname === "/webhook" && req.method === "POST") {
+      const result = await parseWebhookRequest(
+        req,
+        Bun.env.PATREON_WEBHOOK_SECRET!,
+      );
+      if (!result.verified)
+        return new Response("Unauthorized", { status: 401 });
+      console.log(result.event, result.payload);
+      return new Response("OK");
+    }
+    return new Response("Not Found", { status: 404 });
+  },
 });
 ```
 
@@ -250,29 +254,29 @@ Commit : `feat(tests): migrer vitest → bun:test (P3)`
 
 ```jsonc
 {
-	"name": "@rose-griffon/patreon-bun", // rename
-	"exports": {
-		".": {
-			"types": "./dist/index.d.ts",
-			"import": "./dist/index.mjs", // drop require CJS
-		},
-	},
-	"scripts": {
-		"build": "bun build src/index.ts --outdir dist --target bun && tsc --emitDeclarationOnly",
-		"test": "bun test",
-		"lint": "oxlint src/ examples/",
-		"lint:fix": "oxlint --fix src/ examples/",
-		"type-check": "tsc --noEmit",
-		// drop: prestart (npx tsc && node), build:openapi (npx tsc && node)
-	},
-	"engines": {
-		"bun": ">=1.1.0", // drop node
-	},
-	"devDependencies": {
-		// drop: tsup, vitest, @vitest/coverage-istanbul, eslint, typescript-eslint, eslint-plugin-jsdoc
-		// add: oxlint, @types/bun
-		// keep: msw, ts-morph, openapi-types, typescript
-	},
+  "name": "@rose-griffon/patreon-bun", // rename
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs", // drop require CJS
+    },
+  },
+  "scripts": {
+    "build": "bun build src/index.ts --outdir dist --target bun && tsc --emitDeclarationOnly",
+    "test": "bun test",
+    "lint": "oxlint src/ examples/",
+    "lint:fix": "oxlint --fix src/ examples/",
+    "type-check": "tsc --noEmit",
+    // drop: prestart (npx tsc && node), build:openapi (npx tsc && node)
+  },
+  "engines": {
+    "bun": ">=1.1.0", // drop node
+  },
+  "devDependencies": {
+    // drop: tsup, vitest, @vitest/coverage-istanbul, eslint, typescript-eslint, eslint-plugin-jsdoc
+    // add: oxlint, @types/bun
+    // keep: msw, ts-morph, openapi-types, typescript
+  },
 }
 ```
 
@@ -290,17 +294,17 @@ bun install
 
 ```jsonc
 {
-	"compilerOptions": {
-		"module": "ESNext", // drop commonjs
-		"moduleResolution": "bundler", // pour Bun
-		"moduleDetection": "force",
-		"verbatimModuleSyntax": true,
-		"allowImportingTsExtensions": true,
-		"noEmit": true, // Bun émet, tsc type-check only
-		"target": "ESNext", // drop ES2020
-		"types": ["bun", "@types/node"], // ajouter bun
-		// ... garder les flags strict
-	},
+  "compilerOptions": {
+    "module": "ESNext", // drop commonjs
+    "moduleResolution": "bundler", // pour Bun
+    "moduleDetection": "force",
+    "verbatimModuleSyntax": true,
+    "allowImportingTsExtensions": true,
+    "noEmit": true, // Bun émet, tsc type-check only
+    "target": "ESNext", // drop ES2020
+    "types": ["bun", "@types/node"], // ajouter bun
+    // ... garder les flags strict
+  },
 }
 ```
 

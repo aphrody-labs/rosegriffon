@@ -6,7 +6,9 @@ import { childRender, type PrimitiveProps } from "../lib/render";
 
 import { cn } from "../lib/utils";
 
-const DirectionContext = React.createContext<"top" | "bottom" | "left" | "right">("bottom");
+const DirectionContext = React.createContext<
+  "top" | "bottom" | "left" | "right"
+>("bottom");
 function Drawer({
   direction = "bottom",
   dismissible = true,
@@ -23,7 +25,12 @@ function Drawer({
   setActiveSnapPoint?: (point: number | string | null) => void;
   onClose?: () => void;
 }) {
-  const swipe = { top: "up", bottom: "down", left: "left", right: "right" } as const;
+  const swipe = {
+    top: "up",
+    bottom: "down",
+    left: "left",
+    right: "right",
+  } as const;
   return (
     <DirectionContext.Provider value={direction}>
       <DrawerPrimitive.Root
@@ -33,13 +40,17 @@ function Drawer({
         snapPoint={activeSnapPoint}
         onSnapPointChange={setActiveSnapPoint}
         onOpenChange={(open, details) => {
-          if (!dismissible && !open && ["outside-press", "escape-key", "swipe"].includes(details.reason)) {
+          if (
+            !dismissible &&
+            !open &&
+            ["outside-press", "escape-key", "swipe"].includes(details.reason)
+          ) {
             details.cancel();
             return;
           }
           onOpenChange?.(open, details);
         }}
-        onOpenChangeComplete={open => {
+        onOpenChangeComplete={(open) => {
           props.onOpenChangeComplete?.(open);
           if (!open) onClose?.();
         }}
@@ -50,9 +61,17 @@ function Drawer({
   );
 }
 
-function DrawerTrigger({ asChild, children, ...props }: PrimitiveProps<typeof DrawerPrimitive.Trigger>) {
+function DrawerTrigger({
+  asChild,
+  children,
+  ...props
+}: PrimitiveProps<typeof DrawerPrimitive.Trigger>) {
   return (
-    <DrawerPrimitive.Trigger data-slot="drawer-trigger" render={childRender(asChild, children)} {...props}>
+    <DrawerPrimitive.Trigger
+      data-slot="drawer-trigger"
+      render={childRender(asChild, children)}
+      {...props}
+    >
       {asChild ? undefined : children}
     </DrawerPrimitive.Trigger>
   );
@@ -61,19 +80,32 @@ function DrawerTrigger({ asChild, children, ...props }: PrimitiveProps<typeof Dr
 function DrawerPortal({
   forceMount,
   ...props
-}: React.ComponentProps<typeof DrawerPrimitive.Portal> & { forceMount?: true }) {
+}: React.ComponentProps<typeof DrawerPrimitive.Portal> & {
+  forceMount?: true;
+}) {
   return <DrawerPrimitive.Portal keepMounted={forceMount} {...props} />;
 }
 
-function DrawerClose({ asChild, children, ...props }: PrimitiveProps<typeof DrawerPrimitive.Close>) {
+function DrawerClose({
+  asChild,
+  children,
+  ...props
+}: PrimitiveProps<typeof DrawerPrimitive.Close>) {
   return (
-    <DrawerPrimitive.Close data-slot="drawer-close" render={childRender(asChild, children)} {...props}>
+    <DrawerPrimitive.Close
+      data-slot="drawer-close"
+      render={childRender(asChild, children)}
+      {...props}
+    >
       {asChild ? undefined : children}
     </DrawerPrimitive.Close>
   );
 }
 
-function DrawerOverlay({ className, ...props }: PrimitiveProps<typeof DrawerPrimitive.Backdrop>) {
+function DrawerOverlay({
+  className,
+  ...props
+}: PrimitiveProps<typeof DrawerPrimitive.Backdrop>) {
   return (
     <DrawerPrimitive.Backdrop
       data-slot="drawer-overlay"
@@ -86,7 +118,11 @@ function DrawerOverlay({ className, ...props }: PrimitiveProps<typeof DrawerPrim
   );
 }
 
-function DrawerContent({ className, children, ...props }: PrimitiveProps<typeof DrawerPrimitive.Popup>) {
+function DrawerContent({
+  className,
+  children,
+  ...props
+}: PrimitiveProps<typeof DrawerPrimitive.Popup>) {
   const direction = React.useContext(DirectionContext);
   return (
     <DrawerPortal>
@@ -130,13 +166,19 @@ function DrawerFooter({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="drawer-footer"
-      className={cn("mt-auto flex flex-col gap-2 p-4 @md/drawer:flex-row @md/drawer:justify-end", className)}
+      className={cn(
+        "mt-auto flex flex-col gap-2 p-4 @md/drawer:flex-row @md/drawer:justify-end",
+        className,
+      )}
       {...props}
     />
   );
 }
 
-function DrawerTitle({ className, ...props }: PrimitiveProps<typeof DrawerPrimitive.Title>) {
+function DrawerTitle({
+  className,
+  ...props
+}: PrimitiveProps<typeof DrawerPrimitive.Title>) {
   return (
     <DrawerPrimitive.Title
       data-slot="drawer-title"
@@ -146,7 +188,10 @@ function DrawerTitle({ className, ...props }: PrimitiveProps<typeof DrawerPrimit
   );
 }
 
-function DrawerDescription({ className, ...props }: PrimitiveProps<typeof DrawerPrimitive.Description>) {
+function DrawerDescription({
+  className,
+  ...props
+}: PrimitiveProps<typeof DrawerPrimitive.Description>) {
   return (
     <DrawerPrimitive.Description
       data-slot="drawer-description"

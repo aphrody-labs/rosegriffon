@@ -5,8 +5,15 @@ import Link from "@/components/shared/Link";
 import { useState } from "react";
 import { Icon } from "@/components/ui/Icon";
 import type { DropEntry } from "@rosegriffon/azalee/wiki/drops-shared";
-import { dropCategoryLabel, dropSourceLabel } from "@rosegriffon/azalee/wiki/drops-shared";
-import { getItemIconUrl, PLACEHOLDERS, resolveAssetUrl } from "@rosegriffon/azalee/images";
+import {
+  dropCategoryLabel,
+  dropSourceLabel,
+} from "@rosegriffon/azalee/wiki/drops-shared";
+import {
+  getItemIconUrl,
+  PLACEHOLDERS,
+  resolveAssetUrl,
+} from "@rosegriffon/azalee/images";
 import { cn } from "@/lib/utils";
 import { wiki } from "@rosegriffon/app-shell";
 
@@ -35,8 +42,10 @@ function chanceTone(chance: number): string {
 export function DropsCard({ drop, className }: DropsCardProps) {
   const [imgError, setImgError] = useState(false);
   const resolvedSrc =
-    resolveAssetUrl(drop.itemImageUrl) || (drop.itemInternalCode ? getItemIconUrl(drop.itemInternalCode) : null);
-  const hasRealImage = !!resolvedSrc && resolvedSrc !== PLACEHOLDERS.item && !imgError;
+    resolveAssetUrl(drop.itemImageUrl) ||
+    (drop.itemInternalCode ? getItemIconUrl(drop.itemInternalCode) : null);
+  const hasRealImage =
+    !!resolvedSrc && resolvedSrc !== PLACEHOLDERS.item && !imgError;
 
   // Toujours la fiche objet : `/wiki/tactic/<id>` ne résout que les codes `wht*` de
   // `inagle_tactics`, pas l'id hash ni le code `st*` d'un objet Hyper Tactique
@@ -68,7 +77,11 @@ export function DropsCard({ drop, className }: DropsCardProps) {
               onError={() => setImgError(true)}
             />
           ) : (
-            <Icon name="backpack" size={24} className="text-on-surface-variant/30" />
+            <Icon
+              name="backpack"
+              size={24}
+              className="text-on-surface-variant/30"
+            />
           )}
         </div>
 
@@ -85,7 +98,10 @@ export function DropsCard({ drop, className }: DropsCardProps) {
               )}
               title={`Poids ${drop.weight} dans le groupe`}
             >
-              {drop.chance.toLocaleString("fr-FR", { maximumFractionDigits: 1 })}%
+              {drop.chance.toLocaleString("fr-FR", {
+                maximumFractionDigits: 1,
+              })}
+              %
             </span>
           </div>
 
@@ -103,7 +119,10 @@ export function DropsCard({ drop, className }: DropsCardProps) {
           </div>
 
           {/* Groupe source (hash) */}
-          <p className="mt-2 text-[10px] text-on-surface-variant/70 font-mono truncate" title={drop.sourceId}>
+          <p
+            className="mt-2 text-[10px] text-on-surface-variant/70 font-mono truncate"
+            title={drop.sourceId}
+          >
             Groupe {drop.sourceId}
           </p>
         </div>

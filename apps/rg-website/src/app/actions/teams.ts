@@ -7,7 +7,10 @@ import type { SavedTeam, TeamData } from "@rosegriffon/azalee/game/team-types";
 import { wikiService } from "@/lib/wiki-service";
 
 /** Save a new team */
-export async function saveTeam(name: string, data: TeamData): Promise<{ id: string } | { error: string }> {
+export async function saveTeam(
+  name: string,
+  data: TeamData,
+): Promise<{ id: string } | { error: string }> {
   const session = await getServerSession();
   if (!session?.user) {
     return { error: "Non authentifié" };
@@ -62,14 +65,20 @@ export async function updateTeam(
 }
 
 /** Delete a team */
-export async function deleteTeam(teamId: string): Promise<{ success: boolean } | { error: string }> {
+export async function deleteTeam(
+  teamId: string,
+): Promise<{ success: boolean } | { error: string }> {
   const session = await getServerSession();
   if (!session?.user) {
     return { error: "Non authentifié" };
   }
 
   const supabase = createPostgresClient();
-  const { error } = await (supabase as any).from("user_teams").delete().eq("id", teamId).eq("user_id", session.user.id);
+  const { error } = await (supabase as any)
+    .from("user_teams")
+    .delete()
+    .eq("id", teamId)
+    .eq("user_id", session.user.id);
 
   if (error) {
     return { error: error.message };
@@ -118,7 +127,9 @@ export async function getTeam(teamId: string): Promise<SavedTeam | null> {
 }
 
 /** Toggle team visibility */
-export async function toggleTeamVisibility(teamId: string): Promise<{ is_public: boolean } | { error: string }> {
+export async function toggleTeamVisibility(
+  teamId: string,
+): Promise<{ is_public: boolean } | { error: string }> {
   const session = await getServerSession();
   if (!session?.user) {
     return { error: "Non authentifié" };
@@ -151,7 +162,9 @@ export async function toggleTeamVisibility(teamId: string): Promise<{ is_public:
 }
 
 /** Resolve skills for a character (on-demand, for the detail panel) */
-export async function getCharacterSkills(charaId: string): Promise<MovesetSkill[]> {
+export async function getCharacterSkills(
+  charaId: string,
+): Promise<MovesetSkill[]> {
   const PHANTOM_IDS = new Set(["0xDBEDB6B8"]);
 
   const supabase = createPostgresClient();
@@ -168,15 +181,22 @@ export async function getCharacterSkills(charaId: string): Promise<MovesetSkill[
   }
 
   // Try variant skills from DB
-  const rawSkills: Array<{ skillId: string; learnLevel: number }> = Array.isArray(row.skills) ? row.skills : [];
+  const rawSkills: Array<{ skillId: string; learnLevel: number }> =
+    Array.isArray(row.skills) ? row.skills : [];
   const skillList = rawSkills
     .map((s: any) => {
       if (typeof s === "string") {
         return { skillId: s, learnLevel: 0 };
       }
       // Fix reversed mapping
-      const skillIdNum = typeof s.skillId === "string" ? Number.parseInt(s.skillId, 16) : s.skillId;
-      const learnNum = typeof s.learnLevel === "number" ? s.learnLevel : Number.parseInt(s.learnLevel, 10);
+      const skillIdNum =
+        typeof s.skillId === "string"
+          ? Number.parseInt(s.skillId, 16)
+          : s.skillId;
+      const learnNum =
+        typeof s.learnLevel === "number"
+          ? s.learnLevel
+          : Number.parseInt(s.learnLevel, 10);
       if (skillIdNum < 1000 && Math.abs(learnNum) > 1_000_000) {
         const hexSkillId = `0x${(learnNum >>> 0).toString(16).toUpperCase().padStart(8, "0")}`;
         return { learnLevel: skillIdNum, skillId: hexSkillId };
@@ -185,7 +205,9 @@ export async function getCharacterSkills(charaId: string): Promise<MovesetSkill[
     })
     .filter((s: any) => !PHANTOM_IDS.has(s.skillId));
 
-  const fetchedSkills = await Promise.all(skillList.map((s: any) => wikiService.getSkill(s.skillId)));
+  const fetchedSkills = await Promise.all(
+    skillList.map((s: any) => wikiService.getSkill(s.skillId)),
+  );
 
   const result: MovesetSkill[] = [];
   fetchedSkills.forEach((skill, index) => {
@@ -201,11 +223,18 @@ export async function getCharacterSkills(charaId: string): Promise<MovesetSkill[
     result.push({
       category: skill.categoryName?.fr || "Spécial",
       element: skill.elementName?.en?.toLowerCase(),
-      id: (skill as any).skillId || (skill as any).skillID || (skill as any).skillIDStr,
+      id:
+        (skill as any).skillId ||
+        (skill as any).skillID ||
+        (skill as any).skillIDStr,
       imageUrl: skill.image,
       isPassive,
       learnLevel,
-      name: skill.displayName || (skill as any).name_FR || (skill as any).name_EN || "???",
+      name:
+        skill.displayName ||
+        (skill as any).name_FR ||
+        (skill as any).name_EN ||
+        "???",
       power: skill.power_min ? `${skill.power_min}` : undefined,
       tension: (skill as any).consumeTp || (skill as any).tension_cost,
     });
@@ -223,14 +252,20 @@ export async function getCharacterSkills(charaId: string): Promise<MovesetSkill[
       .split(/[,\n]/)
       .map((n: string) => n.trim())
       .filter(Boolean);
-    const resolved = await Promise.all(moveNames.map((name: string) => wikiService.getSkill(name)));
+    const resolved = await Promise.all(
+      moveNames.map((name: string) => wikiService.getSkill(name)),
+    );
     resolved.forEach((skill, i) => {
       if (!skill) {
         return;
       }
       result.push({
         element: skill.elementName?.en?.toLowerCase(),
-        name: skill.displayName || (skill as any).name_FR || (skill as any).name_EN || moveNames[i],
+        name:
+          skill.displayName ||
+          (skill as any).name_FR ||
+          (skill as any).name_EN ||
+          moveNames[i],
         power: skill.power_min ? `${skill.power_min}` : undefined,
         slotNumber: result.length + 1,
       });

@@ -15,7 +15,9 @@ export function SyncEventsButton() {
     try {
       const result = await syncGoogleEvents();
       if (result.success) {
-        toast.success(`Synchronisation réussie : ${result.imported} importés, ${result.skipped} ignorés.`);
+        toast.success(
+          `Synchronisation réussie : ${result.imported} importés, ${result.skipped} ignorés.`,
+        );
       } else {
         toast.error("Erreur lors de la synchronisation.");
       }
@@ -28,7 +30,12 @@ export function SyncEventsButton() {
   };
 
   return (
-    <Button variant="outline" onClick={handleSync} disabled={isSyncing} className="gap-2">
+    <Button
+      variant="outline"
+      onClick={handleSync}
+      disabled={isSyncing}
+      className="gap-2"
+    >
       <RefreshCw className={`size-4 ${isSyncing ? "animate-spin" : ""}`} />
       {isSyncing ? "Sync…" : "Sync Google"}
     </Button>

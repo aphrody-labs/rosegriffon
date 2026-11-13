@@ -16,7 +16,7 @@ export async function GET() {
     dbError = error instanceof Error ? error.message : String(error);
   }
 
-  const allOk = Object.values(checks).every(v => v === "ok");
+  const allOk = Object.values(checks).every((v) => v === "ok");
 
   return NextResponse.json(
     {

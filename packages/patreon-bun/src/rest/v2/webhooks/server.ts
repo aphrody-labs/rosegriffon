@@ -7,29 +7,35 @@ import { PatreonWebhookTrigger } from "./triggers";
 import { verify } from "./verify";
 
 export type WebhookServerEventMap = {
-	[T in PatreonWebhookTrigger]: [payload: WebhookPayloadClient<T>];
+    [T in PatreonWebhookTrigger]: [payload: WebhookPayloadClient<T>];
 };
 
 export interface WebhookServerOptions {
-	secret: string | string[];
-	cache?: string;
-	events?: NodeJS.EventEmitter<WebhookServerEventMap>;
+    secret: string | string[];
+    cache?: string;
+    events?: NodeJS.EventEmitter<WebhookServerEventMap>;
 }
 
 export class WebhookServer {
-	public constructor(public options: WebhookServerOptions) {}
+    public constructor(public options: WebhookServerOptions) {}
 
-	public verify(signature: string | null, body: string): boolean;
-	// eslint-disable-next-line @typescript-eslint/unified-signatures
-	public verify(signature: RestHeaders, body: string): boolean;
-	public verify(signature: RestHeaders | string | null, body: string): boolean {
-		const signatureStr =
-			typeof signature === "string" || signature == null
-				? signature
-				: (resolveHeaders(signature)[WebhookClient.headers.signature] ?? null);
+    public verify(signature: string | null, body: string): boolean;
+    // eslint-disable-next-line @typescript-eslint/unified-signatures
+    public verify(signature: RestHeaders, body: string): boolean;
+    public verify(
+        signature: RestHeaders | string | null,
+        body: string,
+    ): boolean {
+        const signatureStr =
+            typeof signature === "string" || signature == null
+                ? signature
+                : (resolveHeaders(signature)[WebhookClient.headers.signature] ??
+                  null);
 
-		return Array.isArray(this.options.secret)
-			? this.options.secret.some((secret) => verify(secret, signatureStr, body))
-			: verify(this.options.secret, signatureStr, body);
-	}
+        return Array.isArray(this.options.secret)
+            ? this.options.secret.some((secret) =>
+                  verify(secret, signatureStr, body),
+              )
+            : verify(this.options.secret, signatureStr, body);
+    }
 }

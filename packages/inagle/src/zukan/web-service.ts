@@ -11,12 +11,15 @@ export interface ZukanWebService {
   bytes(url: string): Promise<Uint8Array>;
 }
 
-export type ZukanWebServiceFactory = () => ZukanWebService | Promise<ZukanWebService>;
+export type ZukanWebServiceFactory = () =>
+  ZukanWebService | Promise<ZukanWebService>;
 const APHRODY_WEB_MODULE = "@aphrody/agent-browser/service";
 let serviceFactory: ZukanWebServiceFactory | null = null;
 
 /** Override the service for another host or tests; null restores the optional peer. */
-export function setZukanWebServiceFactory(factory: ZukanWebServiceFactory | null): void {
+export function setZukanWebServiceFactory(
+  factory: ZukanWebServiceFactory | null,
+): void {
   serviceFactory = factory;
 }
 
@@ -39,7 +42,11 @@ export async function createZukanWebService(): Promise<ZukanWebService> {
 }
 
 /** Require complete original HTML before domain parsing or writing source evidence. */
-export async function zukanResponseHtml(service: ZukanWebService, url: string, context: string): Promise<string> {
+export async function zukanResponseHtml(
+  service: ZukanWebService,
+  url: string,
+  context: string,
+): Promise<string> {
   const response = await service.response(url, { maxBytes: 16_000_000 });
   if (response.status < 200 || response.status >= 300) {
     throw new Error(`${context}: HTTP ${response.status}`);

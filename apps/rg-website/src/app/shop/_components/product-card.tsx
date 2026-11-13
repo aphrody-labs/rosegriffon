@@ -33,7 +33,10 @@ export function ProductCard({ product }: { product: Product }) {
           />
         )}
         {/* Vignette */}
-        <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-rg-marine via-transparent to-transparent" />
+        <div
+          aria-hidden
+          className="absolute inset-0 bg-gradient-to-t from-rg-marine via-transparent to-transparent"
+        />
         {/* Stock badge */}
         {product.stockHint && (
           <span
@@ -53,7 +56,9 @@ export function ProductCard({ product }: { product: Product }) {
       {/* Content */}
       <div className="flex flex-1 flex-col gap-3 p-5">
         <div>
-          <h3 className="font-bold leading-tight text-white text-lg">{product.name}</h3>
+          <h3 className="font-bold leading-tight text-white text-lg">
+            {product.name}
+          </h3>
           <p className="mt-1 text-sm text-white/70">{product.tagline}</p>
         </div>
 
@@ -62,7 +67,9 @@ export function ProductCard({ product }: { product: Product }) {
             <span className="block text-[10px] font-bold uppercase tracking-widest text-rg-or">
               {hasVariants ? "À partir de" : "Prix"}
             </span>
-            <span className="block text-2xl font-extrabold text-white">{formatEuros(product.priceCents)}</span>
+            <span className="block text-2xl font-extrabold text-white">
+              {formatEuros(product.priceCents)}
+            </span>
           </div>
           <span className="inline-flex items-center gap-1 rounded-full bg-rg-or px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-rg-marine shadow-sm transition-transform motion-safe:duration-200 group-hover:scale-105">
             Voir →

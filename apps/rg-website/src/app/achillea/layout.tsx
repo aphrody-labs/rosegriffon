@@ -46,12 +46,17 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Achilléa — E-Sport Inazuma Eleven",
-    description: "La scène compétitive Inazuma Eleven: Victory Road. Tournois, clans, ranked et championnats.",
+    description:
+      "La scène compétitive Inazuma Eleven: Victory Road. Tournois, clans, ranked et championnats.",
     images: ["/achillea/achillea-banner.png"],
   },
 };
 
-export default function AchilleaLayout({ children }: { children: React.ReactNode }) {
+export default function AchilleaLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <div className="achillea-scope min-h-full w-full min-w-0">
       {/*

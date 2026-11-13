@@ -1,7 +1,8 @@
 import type { Database } from "@rosegriffon/db";
 
 /** Horaire de stream. */
-export type StreamSchedule = Database["public"]["Tables"]["stream_schedules"]["Row"];
+export type StreamSchedule =
+  Database["public"]["Tables"]["stream_schedules"]["Row"];
 
 /** Horaire pour affichage (alias avec types strings pour les colonnes time). */
 export interface PlanningRow {

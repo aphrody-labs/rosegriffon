@@ -52,12 +52,18 @@ import {
 
 describe("validerUrl", () => {
   it("accepte une adresse publique en http et en https", () => {
-    expect(validerUrl("https://www.inazuma.jp/victory-road/fr/").hostname).toBe("www.inazuma.jp");
+    expect(validerUrl("https://www.inazuma.jp/victory-road/fr/").hostname).toBe(
+      "www.inazuma.jp",
+    );
     expect(validerUrl("  http://rosegriffon.fr/  ").protocol).toBe("http:");
   });
 
   it("refuse un schéma qui n'est pas http(s)", () => {
-    for (const brut of ["file:///etc/passwd", "ftp://exemple.fr/", "gopher://exemple.fr/"]) {
+    for (const brut of [
+      "file:///etc/passwd",
+      "ftp://exemple.fr/",
+      "gopher://exemple.fr/",
+    ]) {
       expect(() => validerUrl(brut)).toThrow(ErreurScrape);
     }
   });
@@ -104,7 +110,9 @@ describe("validerUrl", () => {
 
 describe("validerRequete", () => {
   it("accepte et rogne une requête normale", () => {
-    expect(validerRequete("  Inazuma Eleven Victory Road  ")).toBe("Inazuma Eleven Victory Road");
+    expect(validerRequete("  Inazuma Eleven Victory Road  ")).toBe(
+      "Inazuma Eleven Victory Road",
+    );
   });
 
   it("refuse une requête trop courte", () => {
@@ -122,7 +130,9 @@ describe("validerPseudo", () => {
     expect(validerPseudo("inazuma_project")).toBe("inazuma_project");
     expect(validerPseudo("@Azalee_IE")).toBe("Azalee_IE");
     expect(validerPseudo("https://x.com/AkihiroHino")).toBe("AkihiroHino");
-    expect(validerPseudo("https://twitter.com/LEVEL5_times/status/123")).toBe("LEVEL5_times");
+    expect(validerPseudo("https://twitter.com/LEVEL5_times/status/123")).toBe(
+      "LEVEL5_times",
+    );
   });
 
   it("refuse ce qui n'est pas un pseudo X", () => {
@@ -165,7 +175,9 @@ describe("nettoyerMessage", () => {
   });
 
   it("masque un jeton porteur", () => {
-    expect(nettoyerMessage("401 avec Bearer AAAAAAAAAAAAAAAAAAAAANRILgAA")).toBe("401 avec Bearer ***");
+    expect(
+      nettoyerMessage("401 avec Bearer AAAAAAAAAAAAAAAAAAAAANRILgAA"),
+    ).toBe("401 avec Bearer ***");
   });
 
   it("borne la longueur du message", () => {
@@ -268,15 +280,21 @@ describe("lecture bornée du corps", () => {
   it("décode selon le jeu de caractères annoncé", async () => {
     // « Société » en windows-1252 : 0xE9 pour « é ».
     const octets = new Uint8Array([0x53, 0x6f, 0x63, 0x69, 0xe9, 0x74, 0xe9]);
-    const reponse = new Response(octets, { headers: { "content-type": "text/html; charset=windows-1252" } });
+    const reponse = new Response(octets, {
+      headers: { "content-type": "text/html; charset=windows-1252" },
+    });
     expect((await lireCorpsBorne(reponse, 1000)).texte).toBe("Société");
   });
 
   it("réduit un jeu de caractères absent ou inconnu à utf-8", () => {
     expect(charsetDepuisTypeContenu(null)).toBe("utf-8");
     expect(charsetDepuisTypeContenu("text/html")).toBe("utf-8");
-    expect(charsetDepuisTypeContenu('text/html; charset="ISO-8859-1"')).toBe("iso-8859-1");
-    expect(charsetDepuisTypeContenu("text/html; charset=charabia-42")).toBe("utf-8");
+    expect(charsetDepuisTypeContenu('text/html; charset="ISO-8859-1"')).toBe(
+      "iso-8859-1",
+    );
+    expect(charsetDepuisTypeContenu("text/html; charset=charabia-42")).toBe(
+      "utf-8",
+    );
   });
 });
 
@@ -331,7 +349,9 @@ describe("detecterTechnologies", () => {
   });
 
   it("ne détecte rien sur une page nue", () => {
-    expect(detecterTechnologies({}, "<html><body>bonjour</body></html>")).toEqual([]);
+    expect(
+      detecterTechnologies({}, "<html><body>bonjour</body></html>"),
+    ).toEqual([]);
   });
 });
 
@@ -346,15 +366,23 @@ describe("extraireLiens", () => {
 			<a href="mailto:contact@exemple.fr">Courriel</a>
 			<a href="javascript:void(0)">Rien</a>
 		`;
-    const liens = extraireLiens(html, "https://www.inazuma.jp/victory-road/fr/");
+    const liens = extraireLiens(
+      html,
+      "https://www.inazuma.jp/victory-road/fr/",
+    );
     expect(liens.total).toBe(3);
     expect(liens.internes).toBe(2);
     expect(liens.externes).toBe(1);
-    expect(liens.exemples[0]).toBe("https://www.inazuma.jp/victory-road/fr/character/");
+    expect(liens.exemples[0]).toBe(
+      "https://www.inazuma.jp/victory-road/fr/character/",
+    );
   });
 
   it("borne le nombre d'exemples", () => {
-    const html = Array.from({ length: 40 }, (_, i) => `<a href="/p${i}">p${i}</a>`).join("");
+    const html = Array.from(
+      { length: 40 },
+      (_, i) => `<a href="/p${i}">p${i}</a>`,
+    ).join("");
     const liens = extraireLiens(html, "https://rosegriffon.fr/");
     expect(liens.total).toBe(40);
     expect(liens.exemples).toHaveLength(LIMITE_LIENS_EXEMPLES);
@@ -391,13 +419,15 @@ describe("analyserSerpDuckDuckGo", () => {
     expect(resultats[0]?.url).toBe("https://www.inazuma.jp/victory-road/en/");
     expect(resultats[0]?.titre).toBe("INAZUMA ELEVEN: Victory Road");
     expect(resultats[0]?.extrait).toContain("Victorio");
-    expect(resultats.some(r => r.url.includes("duckduckgo.com"))).toBe(false);
+    expect(resultats.some((r) => r.url.includes("duckduckgo.com"))).toBe(false);
   });
 
   it("décode les entités HTML des titres et des extraits", () => {
     const resultats = analyserSerpDuckDuckGo(SERP_DUCKDUCKGO, 10);
     expect(resultats[1]?.titre).toBe("Azalée — le wiki");
-    expect(resultats[1]?.extrait).toBe("Le wiki français d'Inazuma Eleven: Victory Road.");
+    expect(resultats[1]?.extrait).toBe(
+      "Le wiki français d'Inazuma Eleven: Victory Road.",
+    );
   });
 
   it("respecte la limite demandée", () => {
@@ -405,19 +435,25 @@ describe("analyserSerpDuckDuckGo", () => {
   });
 
   it("rend une liste vide sur un HTML sans résultat", () => {
-    expect(analyserSerpDuckDuckGo("<html><body>rien</body></html>", 5)).toEqual([]);
+    expect(analyserSerpDuckDuckGo("<html><body>rien</body></html>", 5)).toEqual(
+      [],
+    );
   });
 });
 
 describe("deplierLienDuckDuckGo", () => {
   it("déplie la redirection uddg", () => {
-    expect(deplierLienDuckDuckGo("//duckduckgo.com/l/?uddg=https%3A%2F%2Frosegriffon.fr%2F&amp;rut=1")).toBe(
-      "https://rosegriffon.fr/",
-    );
+    expect(
+      deplierLienDuckDuckGo(
+        "//duckduckgo.com/l/?uddg=https%3A%2F%2Frosegriffon.fr%2F&amp;rut=1",
+      ),
+    ).toBe("https://rosegriffon.fr/");
   });
 
   it("laisse passer une URL déjà directe et refuse le reste", () => {
-    expect(deplierLienDuckDuckGo("https://azalee.rosegriffon.fr/")).toBe("https://azalee.rosegriffon.fr/");
+    expect(deplierLienDuckDuckGo("https://azalee.rosegriffon.fr/")).toBe(
+      "https://azalee.rosegriffon.fr/",
+    );
     expect(deplierLienDuckDuckGo("javascript:void(0)")).toBeNull();
     expect(deplierLienDuckDuckGo("")).toBeNull();
   });
@@ -429,13 +465,18 @@ const RESULTAT_X_AZALEE = {
   rest_id: "1391462345197686789",
   is_blue_verified: true,
   core: { name: "Azalée 🌸 | Inazuma Eleven FR", screen_name: "Azalee_IE" },
-  avatar: { image_url: "https://pbs.twimg.com/profile_images/1932460448755949568/6-Ul-rMi_normal.jpg" },
+  avatar: {
+    image_url:
+      "https://pbs.twimg.com/profile_images/1932460448755949568/6-Ul-rMi_normal.jpg",
+  },
   legacy: {
-    description: "Médias et informations sur l'univers d'Inazuma Eleven en français.",
+    description:
+      "Médias et informations sur l'univers d'Inazuma Eleven en français.",
     followers_count: 13701,
     friends_count: 26,
     created_at: "Sun May 09 18:37:38 +0000 2021",
-    profile_image_url_https: "https://pbs.twimg.com/profile_images/1932460448755949568/6-Ul-rMi_normal.jpg",
+    profile_image_url_https:
+      "https://pbs.twimg.com/profile_images/1932460448755949568/6-Ul-rMi_normal.jpg",
   },
 };
 
@@ -456,13 +497,17 @@ describe("ficheDepuisResultatX", () => {
   it("rend null quand X ne renvoie pas de compte", () => {
     expect(ficheDepuisResultatX(null, "inconnu")).toBeNull();
     expect(ficheDepuisResultatX({}, "inconnu")).toBeNull();
-    expect(ficheDepuisResultatX({ legacy: { name: "sans identifiant" } }, "inconnu")).toBeNull();
+    expect(
+      ficheDepuisResultatX({ legacy: { name: "sans identifiant" } }, "inconnu"),
+    ).toBeNull();
   });
 });
 
 describe("dateXVersIso", () => {
   it("convertit le format publié par X", () => {
-    expect(dateXVersIso("Mon Jul 06 08:21:03 +0000 2026")).toBe("2026-07-06T08:21:03.000Z");
+    expect(dateXVersIso("Mon Jul 06 08:21:03 +0000 2026")).toBe(
+      "2026-07-06T08:21:03.000Z",
+    );
   });
 
   it("rend null plutôt qu'une date inventée", () => {
@@ -489,7 +534,9 @@ describe("bornerPostX", () => {
       "inazuma_project",
     );
     expect(post).not.toBeNull();
-    expect(post?.url).toBe("https://x.com/inazuma_project/status/2074045952747548797");
+    expect(post?.url).toBe(
+      "https://x.com/inazuma_project/status/2074045952747548797",
+    );
     expect(post?.texte).toHaveLength(400);
     expect(post?.likes).toBe(1142);
     expect(post?.vues).toBe(98_000);
@@ -555,7 +602,9 @@ describe("routage des verbes", () => {
     expect(sansPseudo.success).toBe(false);
     expect(sansPseudo.code).toBe("requete_invalide");
 
-    const urlInterne = await servirVerbeScrape("scrape.recon", { url: "http://127.0.0.1:8809/" });
+    const urlInterne = await servirVerbeScrape("scrape.recon", {
+      url: "http://127.0.0.1:8809/",
+    });
     expect(urlInterne.success).toBe(false);
     expect(urlInterne.code).toBe("requete_invalide");
 

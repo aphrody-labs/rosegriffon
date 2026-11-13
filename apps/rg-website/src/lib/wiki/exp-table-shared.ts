@@ -85,12 +85,19 @@ function toPositiveInt(value: unknown): number | null {
  * inutilisables, trie par niveau, écarte les doublons de niveau (première ligne
  * gagnante) et pré-calcule bornes et cumul total.
  */
-export function buildExpTableData(entries: readonly ExpLevelEntry[]): ExpTableData {
+export function buildExpTableData(
+  entries: readonly ExpLevelEntry[],
+): ExpTableData {
   const byLevel = new Map<number, number>();
   for (const entry of entries) {
     const level = toPositiveInt(entry?.level);
     const needExp = toPositiveInt(entry?.needExp);
-    if (level === null || needExp === null || level <= 0 || byLevel.has(level)) {
+    if (
+      level === null ||
+      needExp === null ||
+      level <= 0 ||
+      byLevel.has(level)
+    ) {
       continue;
     }
     byLevel.set(level, needExp);
@@ -136,7 +143,10 @@ export function clampLevel(data: ExpTableData, level: number): number {
  * EXP du palier `level` → `level + 1`, telle qu'elle figure en base.
  * `null` si le niveau n'existe pas dans la table.
  */
-export function needExpForLevel(data: ExpTableData, level: number): number | null {
+export function needExpForLevel(
+  data: ExpTableData,
+  level: number,
+): number | null {
   for (const entry of data.entries) {
     if (entry.level === level) {
       return entry.needExp;
@@ -150,7 +160,11 @@ export function needExpForLevel(data: ExpTableData, level: number): number | nul
  * `from`, `from + 1`, …, `to - 1`. Renvoie 0 si `to <= from`. Les deux bornes sont
  * ramenées dans l'intervalle réel de la table.
  */
-export function expBetweenLevels(data: ExpTableData, from: number, to: number): number {
+export function expBetweenLevels(
+  data: ExpTableData,
+  from: number,
+  to: number,
+): number {
   if (data.entries.length === 0) {
     return 0;
   }
@@ -169,7 +183,10 @@ export function expBetweenLevels(data: ExpTableData, from: number, to: number): 
 }
 
 /** EXP cumulée depuis le premier niveau de la table jusqu'à `level`. */
-export function cumulativeExpToLevel(data: ExpTableData, level: number): number {
+export function cumulativeExpToLevel(
+  data: ExpTableData,
+  level: number,
+): number {
   return expBetweenLevels(data, data.minLevel, level);
 }
 

@@ -22,7 +22,12 @@
  * Éclairage 100 % local. `@theatre/studio` reste DEV-only (import conditionnel).
  */
 import { Bloom, EffectComposer } from "@react-three/postprocessing";
-import { ContactShadows, OrbitControls, useGLTF, useTexture } from "@react-three/drei";
+import {
+  ContactShadows,
+  OrbitControls,
+  useGLTF,
+  useTexture,
+} from "@react-three/drei";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { getProject } from "@theatre/core";
 import type { ISequence } from "@theatre/core";
@@ -91,7 +96,11 @@ function PlayerModel({ url }: { url: string }): React.JSX.Element {
     const scale = PLAYER_HEIGHT / (size.y || 1);
     clone.scale.setScalar(scale);
     // Recentre en X/Z, pose la base (pieds) sur le sol (y=0).
-    clone.position.set(-center.x * scale, -box.min.y * scale, -center.z * scale);
+    clone.position.set(
+      -center.x * scale,
+      -box.min.y * scale,
+      -center.z * scale,
+    );
     return clone;
   }, [gltf.scene]);
   return <primitive object={object} />;
@@ -122,10 +131,12 @@ function EffectModel({
       -center.z * scale + EFFECT_OFFSET.z,
     );
     // Émissif boosté + hors tonemapping → l'effet « brille » dans le Bloom.
-    clone.traverse(child => {
+    clone.traverse((child) => {
       const mesh = child as THREE.Mesh;
       if (!mesh.isMesh) return;
-      const mats = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+      const mats = Array.isArray(mesh.material)
+        ? mesh.material
+        : [mesh.material];
       for (const m of mats) {
         const mat = m as THREE.MeshStandardMaterial;
         if ("emissiveIntensity" in mat) mat.emissiveIntensity = 2.5;
@@ -193,7 +204,8 @@ function CameraRig({
     } else {
       if (playing) {
         let p = sequence.position + delta;
-        if (storyboard.duration > 0 && p > storyboard.duration) p %= storyboard.duration;
+        if (storyboard.duration > 0 && p > storyboard.duration)
+          p %= storyboard.duration;
         setSequencePosition(sequence, p);
       }
       t = sequence.position;
@@ -220,12 +232,18 @@ function CameraRig({
 }
 
 /** Remonte le handle de rendu (gl/scene/camera/advance/sequence) au wrapper — identique CutinScene. */
-function ReadyReporter({ sequence, onReady }: { sequence: ISequence; onReady?: (h: CutinSceneHandle) => void }): null {
-  const gl = useThree(s => s.gl);
-  const scene = useThree(s => s.scene);
-  const camera = useThree(s => s.camera);
-  const advance = useThree(s => s.advance);
-  const setFrameloop = useThree(s => s.setFrameloop);
+function ReadyReporter({
+  sequence,
+  onReady,
+}: {
+  sequence: ISequence;
+  onReady?: (h: CutinSceneHandle) => void;
+}): null {
+  const gl = useThree((s) => s.gl);
+  const scene = useThree((s) => s.scene);
+  const camera = useThree((s) => s.camera);
+  const advance = useThree((s) => s.advance);
+  const setFrameloop = useThree((s) => s.setFrameloop);
   useEffect(() => {
     onReady?.({
       gl,
@@ -233,7 +251,7 @@ function ReadyReporter({ sequence, onReady }: { sequence: ISequence; onReady?: (
       camera,
       advance,
       sequence,
-      setFrameloop: mode => setFrameloop(mode),
+      setFrameloop: (mode) => setFrameloop(mode),
     });
   }, [gl, scene, camera, advance, sequence, setFrameloop, onReady]);
   return null;
@@ -241,9 +259,19 @@ function ReadyReporter({ sequence, onReady }: { sequence: ISequence; onReady?: (
 
 /** Contenu de la scène (intérieur du `<Canvas>`). */
 function SceneContent(props: ComposedHissatsuSceneProps): React.JSX.Element {
-  const { playerUrl, effectUrl, storyboard, backdropUrl, bloom = true, orbit = false } = props;
+  const {
+    playerUrl,
+    effectUrl,
+    storyboard,
+    backdropUrl,
+    bloom = true,
+    orbit = false,
+  } = props;
   const eventId = useMemo(() => eventIdFromEffectUrl(effectUrl), [effectUrl]);
-  const sheet = useMemo(() => getProject("azalee-cutin").sheet(eventId), [eventId]);
+  const sheet = useMemo(
+    () => getProject("azalee-cutin").sheet(eventId),
+    [eventId],
+  );
   const sequence = sheet.sequence;
   const mixerRef = useRef<THREE.AnimationMixer | null>(null);
 
@@ -256,7 +284,7 @@ function SceneContent(props: ComposedHissatsuSceneProps): React.JSX.Element {
   useEffect(() => {
     if (process.env.NODE_ENV !== "development") return;
     let active = true;
-    void import("@theatre/studio").then(mod => {
+    void import("@theatre/studio").then((mod) => {
       if (active) mod.default.initialize();
     });
     return () => {
@@ -270,7 +298,11 @@ function SceneContent(props: ComposedHissatsuSceneProps): React.JSX.Element {
       <hemisphereLight args={[0xffffff, 0x33384a, 1.1]} />
       <ambientLight intensity={0.35} />
       <directionalLight position={[3, 5, 4]} intensity={1.6} castShadow />
-      <directionalLight position={[-4, 2, -3]} intensity={0.8} color={0xbcd0ff} />
+      <directionalLight
+        position={[-4, 2, -3]}
+        intensity={0.8}
+        color={0xbcd0ff}
+      />
 
       {/* Sol procédural + ombre de contact ancrée au plan des pieds (y=0). */}
       <mesh rotation-x={-Math.PI / 2} position-y={0} receiveShadow>
@@ -303,11 +335,18 @@ function SceneContent(props: ComposedHissatsuSceneProps): React.JSX.Element {
         onShot={props.onShot}
         mixerRef={mixerRef}
       />
-      {orbit && <OrbitControls makeDefault enableDamping target={[0, EFFECT_VY, 0]} />}
+      {orbit && (
+        <OrbitControls makeDefault enableDamping target={[0, EFFECT_VY, 0]} />
+      )}
 
       {bloom && (
         <EffectComposer>
-          <Bloom mipmapBlur luminanceThreshold={1} intensity={1.4} kernelSize={KERNEL_SIZE_LARGE} />
+          <Bloom
+            mipmapBlur
+            luminanceThreshold={1}
+            intensity={1.4}
+            kernelSize={KERNEL_SIZE_LARGE}
+          />
         </EffectComposer>
       )}
 
@@ -320,7 +359,9 @@ function SceneContent(props: ComposedHissatsuSceneProps): React.JSX.Element {
  * Canvas R3F de la scène composée. `preserveDrawingBuffer` IMPÉRATIF : sans lui, la capture
  * `new VideoFrame(canvas)` de l'export renverrait un cadre NOIR.
  */
-export default function ComposedHissatsuScene(props: ComposedHissatsuSceneProps): React.JSX.Element {
+export default function ComposedHissatsuScene(
+  props: ComposedHissatsuSceneProps,
+): React.JSX.Element {
   return (
     <Canvas
       frameloop="always"

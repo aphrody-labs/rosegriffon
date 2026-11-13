@@ -15,7 +15,11 @@ export default async function EditEventPage({ params }: PageProps) {
   const { id } = await params;
   const supabase = createPostgresClient();
 
-  const { data: event } = await supabase.from("events").select("*").eq("id", id).single();
+  const { data: event } = await supabase
+    .from("events")
+    .select("*")
+    .eq("id", id)
+    .single();
 
   if (!event) {
     notFound();

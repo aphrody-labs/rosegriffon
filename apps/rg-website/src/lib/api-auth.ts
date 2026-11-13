@@ -14,7 +14,8 @@ export interface ApiAuthSuccess {
   role: Role;
 }
 
-export type ApiAuthResult = { ok: true; data: ApiAuthSuccess } | { ok: false; response: NextResponse };
+export type ApiAuthResult =
+  { ok: true; data: ApiAuthSuccess } | { ok: false; response: NextResponse };
 
 /**
  * API-route equivalent of `requireAuth()` — returns 401 JSON instead of redirecting.
@@ -24,7 +25,10 @@ export async function requireApiAuth(): Promise<ApiAuthResult> {
   if (!session?.user) {
     return {
       ok: false,
-      response: NextResponse.json({ error: "Non authentifié" }, { status: 401 }),
+      response: NextResponse.json(
+        { error: "Non authentifié" },
+        { status: 401 },
+      ),
     };
   }
   return {

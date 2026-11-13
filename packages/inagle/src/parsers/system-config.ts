@@ -23,14 +23,16 @@ export function buildMenuDatabase(dataPath: string) {
   const textFr = loadTextFile("menu", "fr");
   const textJa = loadTextFile("menu", "ja");
 
-  const files = readdirSync(dir).filter(f => f.endsWith(".cfg.bin.json"));
+  const files = readdirSync(dir).filter((f) => f.endsWith(".cfg.bin.json"));
   for (const file of files) {
     try {
       const content = JSON.parse(readFileSync(join(dir, file), "utf-8"));
 
       // Check for lists format (Menu Preset)
       if (content.lists) {
-        const infoList = content.lists.find((l: any) => l.name === "m_sceneMenuPresetInfoList");
+        const infoList = content.lists.find(
+          (l: any) => l.name === "m_sceneMenuPresetInfoList",
+        );
         if (infoList?.values) {
           for (const entry of infoList.values) {
             const id = entry.menuPresetType;

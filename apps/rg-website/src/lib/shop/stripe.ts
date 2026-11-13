@@ -15,7 +15,9 @@ export function getStripe(): Stripe {
   }
   const key = process.env.STRIPE_SECRET_KEY;
   if (!key) {
-    throw new Error("[shop] STRIPE_SECRET_KEY missing — voir .env.example pour la config Stripe.");
+    throw new Error(
+      "[shop] STRIPE_SECRET_KEY missing — voir .env.example pour la config Stripe.",
+    );
   }
   cached = new Stripe(key, {
     // Explicit monthly Endive version matching the installed SDK types.

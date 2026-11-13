@@ -183,7 +183,10 @@ export class ErreurScrape extends Error {
  */
 export function nettoyerMessage(message: string): string {
   return message
-    .replace(/(auth_token|ct0|csrf_token|token|api[_-]?key|password)=([^;&\s"']+)/gi, "$1=***")
+    .replace(
+      /(auth_token|ct0|csrf_token|token|api[_-]?key|password)=([^;&\s"']+)/gi,
+      "$1=***",
+    )
     .replace(/Bearer\s+[A-Za-z0-9._%-]+/gi, "Bearer ***")
     .replace(/(gt|guest_id|kdt|twid)=([^;&\s"']+)/gi, "$1=***")
     .slice(0, 400);
@@ -196,12 +199,22 @@ export function nettoyerMessage(message: string): string {
  */
 export function bornerTexte(valeur: string, limite: number): string {
   const propre = valeur.replace(/[\u200B-\u200D\uFEFF]/g, "").trim();
-  return propre.length <= limite ? propre : `${propre.slice(0, Math.max(0, limite - 1)).trimEnd()}…`;
+  return propre.length <= limite
+    ? propre
+    : `${propre.slice(0, Math.max(0, limite - 1)).trimEnd()}…`;
 }
 
 /** Ramène un entier dans `[min, max]`, avec repli sur `defaut` si absent/illisible. */
-export function bornerEntier(valeur: unknown, defaut: number, min: number, max: number): number {
-  const nombre = typeof valeur === "number" ? valeur : Number.parseInt(String(valeur ?? ""), 10);
+export function bornerEntier(
+  valeur: unknown,
+  defaut: number,
+  min: number,
+  max: number,
+): number {
+  const nombre =
+    typeof valeur === "number"
+      ? valeur
+      : Number.parseInt(String(valeur ?? ""), 10);
   if (!Number.isFinite(nombre)) {
     return defaut;
   }
@@ -211,7 +224,14 @@ export function bornerEntier(valeur: unknown, defaut: number, min: number, max: 
 // ─── Validation des entrées ──────────────────────────────────────────────────
 
 /** Hôtes bouclés ou réservés, refusés quelle que soit la casse. */
-const HOTES_INTERDITS = new Set(["localhost", "127.0.0.1", "0.0.0.0", "::1", "[::1]", "metadata.google.internal"]);
+const HOTES_INTERDITS = new Set([
+  "localhost",
+  "127.0.0.1",
+  "0.0.0.0",
+  "::1",
+  "[::1]",
+  "metadata.google.internal",
+]);
 
 function estAdressePrivee(hote: string): boolean {
   const v4 = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/.exec(hote);
@@ -226,7 +246,10 @@ function estAdressePrivee(hote: string): boolean {
   }
   const sansCrochets = hote.replace(/^\[|\]$/g, "").toLowerCase();
   // ULA (fc00::/7) et lien-local IPv6 (fe80::/10).
-  return /^f[cd][0-9a-f]{2}:/.test(sansCrochets) || /^fe[89ab][0-9a-f]:/.test(sansCrochets);
+  return (
+    /^f[cd][0-9a-f]{2}:/.test(sansCrochets) ||
+    /^fe[89ab][0-9a-f]:/.test(sansCrochets)
+  );
 }
 
 /**
@@ -246,14 +269,28 @@ export function validerUrl(brut: unknown): URL {
   try {
     url = new URL(texte);
   } catch {
-    throw new ErreurScrape("requete_invalide", `« ${bornerTexte(texte, 80)} » n'est pas une URL valide.`);
+    throw new ErreurScrape(
+      "requete_invalide",
+      `« ${bornerTexte(texte, 80)} » n'est pas une URL valide.`,
+    );
   }
   if (url.protocol !== "http:" && url.protocol !== "https:") {
-    throw new ErreurScrape("requete_invalide", "Seules les adresses http:// et https:// sont acceptées.");
+    throw new ErreurScrape(
+      "requete_invalide",
+      "Seules les adresses http:// et https:// sont acceptées.",
+    );
   }
   const hote = url.hostname.toLowerCase();
-  if (HOTES_INTERDITS.has(hote) || hote.endsWith(".localhost") || hote.endsWith(".local") || estAdressePrivee(hote)) {
-    throw new ErreurScrape("requete_invalide", "Cette adresse vise le réseau interne du serveur : refusée.");
+  if (
+    HOTES_INTERDITS.has(hote) ||
+    hote.endsWith(".localhost") ||
+    hote.endsWith(".local") ||
+    estAdressePrivee(hote)
+  ) {
+    throw new ErreurScrape(
+      "requete_invalide",
+      "Cette adresse vise le réseau interne du serveur : refusée.",
+    );
   }
   return url;
 }
@@ -261,11 +298,17 @@ export function validerUrl(brut: unknown): URL {
 /** Valide une requête textuelle (recherche web, recherche X). */
 export function validerRequete(brut: unknown, minimum = 2): string {
   if (typeof brut !== "string") {
-    throw new ErreurScrape("requete_invalide", "Il manque la requête de recherche.");
+    throw new ErreurScrape(
+      "requete_invalide",
+      "Il manque la requête de recherche.",
+    );
   }
   const texte = brut.trim();
   if (texte.length < minimum) {
-    throw new ErreurScrape("requete_invalide", `La requête doit faire au moins ${minimum} caractères.`);
+    throw new ErreurScrape(
+      "requete_invalide",
+      `La requête doit faire au moins ${minimum} caractères.`,
+    );
   }
   return bornerTexte(texte, 200);
 }
@@ -273,7 +316,10 @@ export function validerRequete(brut: unknown, minimum = 2): string {
 /** Normalise un pseudo X : retire le `@`, l'URL complète, et valide la forme. */
 export function validerPseudo(brut: unknown): string {
   if (typeof brut !== "string") {
-    throw new ErreurScrape("requete_invalide", "Il manque le pseudo du compte X.");
+    throw new ErreurScrape(
+      "requete_invalide",
+      "Il manque le pseudo du compte X.",
+    );
   }
   const nettoye = brut
     .trim()
@@ -308,7 +354,12 @@ export class LimiteurDebit {
   #horodatages: number[] = [];
   readonly #maintenant: () => number;
 
-  constructor(nom: string, maxSimultane: number, maxParMinute: number, maintenant: () => number = Date.now) {
+  constructor(
+    nom: string,
+    maxSimultane: number,
+    maxParMinute: number,
+    maintenant: () => number = Date.now,
+  ) {
     this.nom = nom;
     this.maxSimultane = maxSimultane;
     this.maxParMinute = maxParMinute;
@@ -327,7 +378,7 @@ export class LimiteurDebit {
 
   #purger(): void {
     const limite = this.#maintenant() - 60_000;
-    this.#horodatages = this.#horodatages.filter(t => t > limite);
+    this.#horodatages = this.#horodatages.filter((t) => t > limite);
   }
 
   /** Réserve un jeton ou lève. À libérer systématiquement par `liberer()`. */
@@ -392,7 +443,11 @@ export function estVerbeScrape(verbe: string): boolean {
  * la main à l'appelant Discord, qui n'a que 15 minutes de jeton d'interaction et
  * beaucoup moins de patience.
  */
-async function avecDelai<T>(promesse: Promise<T>, delaiMs: number, quoi: string): Promise<T> {
+async function avecDelai<T>(
+  promesse: Promise<T>,
+  delaiMs: number,
+  quoi: string,
+): Promise<T> {
   let minuteur: ReturnType<typeof setTimeout> | undefined;
   try {
     return await Promise.race([
@@ -400,7 +455,12 @@ async function avecDelai<T>(promesse: Promise<T>, delaiMs: number, quoi: string)
       new Promise<never>((_, rejeter) => {
         minuteur = setTimeout(
           () =>
-            rejeter(new ErreurScrape("delai_depasse", `${quoi} n'a pas répondu en ${Math.round(delaiMs / 1000)} s.`)),
+            rejeter(
+              new ErreurScrape(
+                "delai_depasse",
+                `${quoi} n'a pas répondu en ${Math.round(delaiMs / 1000)} s.`,
+              ),
+            ),
           delaiMs,
         );
       }),
@@ -450,9 +510,12 @@ export function charsetDepuisTypeContenu(typeContenu: string | null): string {
  * `charsetDepuisTypeContenu` se sert pour retomber sur `utf-8`.
  */
 function creerDecodeur(etiquette: string): TextDecoder {
-  return new TextDecoder(etiquette as ConstructorParameters<typeof TextDecoder>[0], {
-    fatal: false,
-  });
+  return new TextDecoder(
+    etiquette as ConstructorParameters<typeof TextDecoder>[0],
+    {
+      fatal: false,
+    },
+  );
 }
 
 export interface CorpsLu {
@@ -472,7 +535,10 @@ export interface CorpsLu {
  * plafond et on annule le flux — la connexion est libérée sans télécharger le
  * reste.
  */
-export async function lireCorpsBorne(reponse: Response, maxOctets: number): Promise<CorpsLu> {
+export async function lireCorpsBorne(
+  reponse: Response,
+  maxOctets: number,
+): Promise<CorpsLu> {
   const flux = reponse.body;
   if (!flux) {
     return { texte: "", octets: 0, tronque: false };
@@ -513,11 +579,15 @@ export async function lireCorpsBorne(reponse: Response, maxOctets: number): Prom
   }
   // `creerDecodeur` pose `fatal: false` : un dernier morceau coupé au milieu
   // d'un caractère ne doit pas faire échouer tout le diagnostic.
-  const decodeur = creerDecodeur(charsetDepuisTypeContenu(reponse.headers.get("content-type")));
+  const decodeur = creerDecodeur(
+    charsetDepuisTypeContenu(reponse.headers.get("content-type")),
+  );
   // Sur une lecture tronquée, les 4 derniers octets peuvent être un caractère
   // incomplet : on les écarte plutôt que de rendre un « caractère de
   // remplacement » en fin de texte.
-  const texte = decodeur.decode(tronque ? assemble.subarray(0, Math.max(0, octets - 4)) : assemble);
+  const texte = decodeur.decode(
+    tronque ? assemble.subarray(0, Math.max(0, octets - 4)) : assemble,
+  );
   return { texte, octets, tronque };
 }
 
@@ -587,12 +657,21 @@ const SIGNATURES: readonly SignatureTechno[] = [
     entete: ["x-powered-by", /next\.js/i],
     html: /\/_next\/static\/|__NEXT_DATA__/,
   },
-  { nom: "React", html: /data-reactroot|react(?:-dom)?(?:\.production)?\.min\.js/i },
+  {
+    nom: "React",
+    html: /data-reactroot|react(?:-dom)?(?:\.production)?\.min\.js/i,
+  },
   { nom: "Nuxt", html: /__NUXT__|\/_nuxt\// },
-  { nom: "Vue.js", html: /vue(?:\.runtime)?(?:\.min)?\.js|data-v-[0-9a-f]{8}/i },
+  {
+    nom: "Vue.js",
+    html: /vue(?:\.runtime)?(?:\.min)?\.js|data-v-[0-9a-f]{8}/i,
+  },
   { nom: "Svelte", html: /\/_app\/immutable\/|svelte-[0-9a-z]{6}/ },
   { nom: "Angular", html: /ng-version="|\bng-app\b/ },
-  { nom: "WordPress", html: /\/wp-content\/|\/wp-includes\/|name="generator" content="WordPress/i },
+  {
+    nom: "WordPress",
+    html: /\/wp-content\/|\/wp-includes\/|name="generator" content="WordPress/i,
+  },
   { nom: "Drupal", html: /drupal-settings-json|\/sites\/default\/files\// },
   { nom: "Shopify", html: /cdn\.shopify\.com|Shopify\.theme/ },
   { nom: "jQuery", html: /jquery(?:-|\.)\d|jquery(?:\.min)?\.js/i },
@@ -620,7 +699,10 @@ const SIGNATURES: readonly SignatureTechno[] = [
  * Détecte les technologies d'une page à partir de ses en-têtes et de son HTML.
  * Renvoie une liste triée, sans doublon.
  */
-export function detecterTechnologies(entetes: Record<string, string>, html: string): string[] {
+export function detecterTechnologies(
+  entetes: Record<string, string>,
+  html: string,
+): string[] {
   const enMinuscules: Record<string, string> = {};
   for (const [clef, valeur] of Object.entries(entetes)) {
     enMinuscules[clef.toLowerCase()] = valeur;
@@ -639,7 +721,8 @@ export function detecterTechnologies(entetes: Record<string, string>, html: stri
       trouvees.add(signature.nom);
     }
   }
-  const generateur = /<meta[^>]+name=["']generator["'][^>]+content=["']([^"']+)["']/i.exec(html);
+  const generateur =
+    /<meta[^>]+name=["']generator["'][^>]+content=["']([^"']+)["']/i.exec(html);
   if (generateur?.[1]) {
     trouvees.add(bornerTexte(generateur[1], 60));
   }
@@ -666,7 +749,11 @@ export function extraireLiens(html: string, base: string): ResumeLiens {
   }
   for (const trouve of html.matchAll(/<a\b[^>]*\bhref=["']([^"']+)["']/gi)) {
     const brut = trouve[1]?.trim();
-    if (!brut || brut.startsWith("#") || /^(?:javascript|mailto|tel|data):/i.test(brut)) {
+    if (
+      !brut ||
+      brut.startsWith("#") ||
+      /^(?:javascript|mailto|tel|data):/i.test(brut)
+    ) {
       continue;
     }
     let absolu: string;
@@ -689,7 +776,9 @@ export function extraireLiens(html: string, base: string): ResumeLiens {
     total: vus.size,
     internes,
     externes,
-    exemples: [...vus].slice(0, LIMITE_LIENS_EXEMPLES).map(u => bornerTexte(u, 180)),
+    exemples: [...vus]
+      .slice(0, LIMITE_LIENS_EXEMPLES)
+      .map((u) => bornerTexte(u, 180)),
   };
 }
 
@@ -748,9 +837,16 @@ const ENTITES_NOMMEES: Record<string, string> = {
 /** Décode une entité HTML nommée ou numérique. `&amp;` est traité en dernier. */
 function decoderEntites(texte: string): string {
   return texte
-    .replace(/&#(\d+);/g, (_, code: string) => String.fromCodePoint(Number(code)))
-    .replace(/&#x([0-9a-f]+);/gi, (_, code: string) => String.fromCodePoint(Number.parseInt(code, 16)))
-    .replace(/&([a-z]+);/gi, (entier, nom: string) => ENTITES_NOMMEES[nom.toLowerCase()] ?? entier)
+    .replace(/&#(\d+);/g, (_, code: string) =>
+      String.fromCodePoint(Number(code)),
+    )
+    .replace(/&#x([0-9a-f]+);/gi, (_, code: string) =>
+      String.fromCodePoint(Number.parseInt(code, 16)),
+    )
+    .replace(
+      /&([a-z]+);/gi,
+      (entier, nom: string) => ENTITES_NOMMEES[nom.toLowerCase()] ?? entier,
+    )
     .replace(/&amp;/g, "&");
 }
 
@@ -769,7 +865,10 @@ function texteBrut(fragment: string): string {
  * extrait dans `<a class="result__snippet">`. Les publicités portent la classe
  * `result--ad` ET une cible `duckduckgo.com/y.js` : les deux sont écartées.
  */
-export function analyserSerpDuckDuckGo(html: string, limite: number): ResultatRecherche[] {
+export function analyserSerpDuckDuckGo(
+  html: string,
+  limite: number,
+): ResultatRecherche[] {
   const resultats: ResultatRecherche[] = [];
   const blocs = html.split(/<div class="result\b/);
   for (const bloc of blocs.slice(1)) {
@@ -780,7 +879,10 @@ export function analyserSerpDuckDuckGo(html: string, limite: number): ResultatRe
     if (/result--ad/.test(enTeteBloc)) {
       continue;
     }
-    const lien = /<a[^>]*class="result__a"[^>]*href="([^"]+)"[^>]*>([\s\S]*?)<\/a>/i.exec(bloc);
+    const lien =
+      /<a[^>]*class="result__a"[^>]*href="([^"]+)"[^>]*>([\s\S]*?)<\/a>/i.exec(
+        bloc,
+      );
     if (!lien) {
       continue;
     }
@@ -797,7 +899,9 @@ export function analyserSerpDuckDuckGo(html: string, limite: number): ResultatRe
     if (hote.endsWith("duckduckgo.com")) {
       continue; // redirection publicitaire `y.js`
     }
-    const extrait = /<a[^>]*class="result__snippet"[^>]*>([\s\S]*?)<\/a>/i.exec(bloc);
+    const extrait = /<a[^>]*class="result__snippet"[^>]*>([\s\S]*?)<\/a>/i.exec(
+      bloc,
+    );
     resultats.push({
       titre: bornerTexte(texteBrut(lien[2] ?? "") || hote, 160),
       url: bornerTexte(url, 300),
@@ -858,7 +962,10 @@ export function dateXVersIso(brut: unknown): string | null {
  * contrat visible de tsc pour `@aphrody/x`. Les champs lus sont ceux
  * qu'utilise le paquet (`core` d'abord, `legacy` en repli).
  */
-export function ficheDepuisResultatX(resultat: unknown, pseudoDemande: string): FicheX | null {
+export function ficheDepuisResultatX(
+  resultat: unknown,
+  pseudoDemande: string,
+): FicheX | null {
   if (!resultat || typeof resultat !== "object") {
     return null;
   }
@@ -868,7 +975,9 @@ export function ficheDepuisResultatX(resultat: unknown, pseudoDemande: string): 
   const avatarObjet = (brut.avatar ?? {}) as Record<string, unknown>;
 
   const id =
-    (typeof brut.rest_id === "string" && brut.rest_id) || (typeof legacy.id_str === "string" && legacy.id_str) || "";
+    (typeof brut.rest_id === "string" && brut.rest_id) ||
+    (typeof legacy.id_str === "string" && legacy.id_str) ||
+    "";
   const pseudo =
     (typeof core.screen_name === "string" && core.screen_name) ||
     (typeof legacy.screen_name === "string" && legacy.screen_name) ||
@@ -877,9 +986,12 @@ export function ficheDepuisResultatX(resultat: unknown, pseudoDemande: string): 
     return null;
   }
   const nom =
-    (typeof core.name === "string" && core.name) || (typeof legacy.name === "string" && legacy.name) || pseudo;
+    (typeof core.name === "string" && core.name) ||
+    (typeof legacy.name === "string" && legacy.name) ||
+    pseudo;
   const avatar =
-    (typeof legacy.profile_image_url_https === "string" && legacy.profile_image_url_https) ||
+    (typeof legacy.profile_image_url_https === "string" &&
+      legacy.profile_image_url_https) ||
     (typeof avatarObjet.image_url === "string" && avatarObjet.image_url) ||
     null;
 
@@ -887,9 +999,16 @@ export function ficheDepuisResultatX(resultat: unknown, pseudoDemande: string): 
     pseudo,
     id,
     nom,
-    description: bornerTexte(typeof legacy.description === "string" ? legacy.description : "", LIMITE_DESCRIPTION),
-    abonnes: typeof legacy.followers_count === "number" ? legacy.followers_count : null,
-    abonnements: typeof legacy.friends_count === "number" ? legacy.friends_count : null,
+    description: bornerTexte(
+      typeof legacy.description === "string" ? legacy.description : "",
+      LIMITE_DESCRIPTION,
+    ),
+    abonnes:
+      typeof legacy.followers_count === "number"
+        ? legacy.followers_count
+        : null,
+    abonnements:
+      typeof legacy.friends_count === "number" ? legacy.friends_count : null,
     certifie: brut.is_blue_verified === true,
     avatar,
     creeLe: dateXVersIso(legacy.created_at ?? core.created_at),
@@ -912,7 +1031,10 @@ export interface PostX {
 }
 
 /** Met un post X (forme `Tweet` du paquet) à la forme bornée qui traverse la socket. */
-export function bornerPostX(brut: unknown, pseudoParDefaut: string): PostX | null {
+export function bornerPostX(
+  brut: unknown,
+  pseudoParDefaut: string,
+): PostX | null {
   if (!brut || typeof brut !== "object") {
     return null;
   }
@@ -923,15 +1045,23 @@ export function bornerPostX(brut: unknown, pseudoParDefaut: string): PostX | nul
   }
   const auteurObjet = (tweet.author ?? {}) as Record<string, unknown>;
   const auteur =
-    typeof auteurObjet.username === "string" && auteurObjet.username ? auteurObjet.username : pseudoParDefaut;
+    typeof auteurObjet.username === "string" && auteurObjet.username
+      ? auteurObjet.username
+      : pseudoParDefaut;
   const medias = Array.isArray(tweet.media) ? tweet.media.length : 0;
   return {
     id,
     url: `https://x.com/${auteur}/status/${id}`,
     auteur,
-    auteurNom: typeof auteurObjet.name === "string" && auteurObjet.name ? auteurObjet.name : auteur,
+    auteurNom:
+      typeof auteurObjet.name === "string" && auteurObjet.name
+        ? auteurObjet.name
+        : auteur,
     date: dateXVersIso(tweet.created_at),
-    texte: bornerTexte(typeof tweet.text === "string" ? tweet.text : "", LIMITE_TEXTE_POST),
+    texte: bornerTexte(
+      typeof tweet.text === "string" ? tweet.text : "",
+      LIMITE_TEXTE_POST,
+    ),
     likes: typeof tweet.like_count === "number" ? tweet.like_count : 0,
     retweets: typeof tweet.retweet_count === "number" ? tweet.retweet_count : 0,
     reponses: typeof tweet.reply_count === "number" ? tweet.reply_count : 0,
@@ -956,7 +1086,8 @@ async function clientX(): Promise<XClient> {
       "Les identifiants X ne sont pas disponibles sur cet hôte (cookies absents ou incomplets).",
     );
   }
-  const { XClient: ClasseXClient, XSession } = await import("../../lib/x-natif");
+  const { XClient: ClasseXClient, XSession } =
+    await import("../../lib/x-natif");
   try {
     return new ClasseXClient(XSession.fromCookieString(cookie));
   } catch (err) {
@@ -969,7 +1100,9 @@ async function clientX(): Promise<XClient> {
 
 // ─── Verbes ──────────────────────────────────────────────────────────────────
 
-async function verbeScrapePage(requete: Record<string, unknown>): Promise<ReponseScrape> {
+async function verbeScrapePage(
+  requete: Record<string, unknown>,
+): Promise<ReponseScrape> {
   const url = validerUrl(requete.url);
   if (requete.profil !== undefined) {
     throw new ErreurScrape(
@@ -990,7 +1123,9 @@ async function verbeScrapePage(requete: Record<string, unknown>): Promise<Repons
   try {
     const navigation = await page.goto(url.toString());
     const html: string = await page.content();
-    const markdownComplet: string = await page.evaluate<string>('document.body?.innerText ?? ""');
+    const markdownComplet: string = await page.evaluate<string>(
+      'document.body?.innerText ?? ""',
+    );
     const titre: string = await page.title();
     return {
       success: true,
@@ -1013,7 +1148,10 @@ async function verbeScrapePage(requete: Record<string, unknown>): Promise<Repons
 }
 
 /** DuckDuckGo result parsing; Aphrody Web owns page acquisition and rendering. */
-async function chercherDuckDuckGo(requete: string, limite: number): Promise<ResultatRecherche[]> {
+async function chercherDuckDuckGo(
+  requete: string,
+  limite: number,
+): Promise<ResultatRecherche[]> {
   const url = new URL("https://html.duckduckgo.com/html/");
   url.searchParams.set("q", requete);
   url.searchParams.set("kl", "fr-fr");
@@ -1032,7 +1170,9 @@ async function chercherDuckDuckGo(requete: string, limite: number): Promise<Resu
   }
 }
 
-async function verbeScrapeGoogle(requete: Record<string, unknown>): Promise<ReponseScrape> {
+async function verbeScrapeGoogle(
+  requete: Record<string, unknown>,
+): Promise<ReponseScrape> {
   const texte = validerRequete(requete.requete);
   const limite = bornerEntier(requete.limite, 5, 1, 8);
   const debut = Bun.nanoseconds();
@@ -1040,7 +1180,10 @@ async function verbeScrapeGoogle(requete: Record<string, unknown>): Promise<Repo
   const moteur = "duckduckgo";
   const resultats = await chercherDuckDuckGo(texte, limite);
   if (resultats.length === 0) {
-    throw new ErreurScrape("moteur_indisponible", "Aucun moteur de recherche n'a répondu depuis ce serveur.");
+    throw new ErreurScrape(
+      "moteur_indisponible",
+      "Aucun moteur de recherche n'a répondu depuis ce serveur.",
+    );
   }
 
   return {
@@ -1052,7 +1195,9 @@ async function verbeScrapeGoogle(requete: Record<string, unknown>): Promise<Repo
   };
 }
 
-async function verbeScrapeRecon(requete: Record<string, unknown>): Promise<ReponseScrape> {
+async function verbeScrapeRecon(
+  requete: Record<string, unknown>,
+): Promise<ReponseScrape> {
   const url = validerUrl(requete.url);
   const debut = Bun.nanoseconds();
 
@@ -1094,17 +1239,19 @@ async function verbeScrapeRecon(requete: Record<string, unknown>): Promise<Repon
   };
 }
 
-async function verbeXProfil(requete: Record<string, unknown>): Promise<ReponseScrape> {
+async function verbeXProfil(
+  requete: Record<string, unknown>,
+): Promise<ReponseScrape> {
   const pseudo = validerPseudo(requete.pseudo);
   const debut = Bun.nanoseconds();
   const client = await clientX();
 
   let brut: unknown;
   try {
-    brut = await client.graphqlWaiting(
-      "UserByScreenName",
-      { screen_name: pseudo, withSafetyModeUserFields: true },
-    );
+    brut = await client.graphqlWaiting("UserByScreenName", {
+      screen_name: pseudo,
+      withSafetyModeUserFields: true,
+    });
   } catch (err) {
     throw new ErreurScrape(
       "introuvable",
@@ -1117,12 +1264,21 @@ async function verbeXProfil(requete: Record<string, unknown>): Promise<ReponseSc
   const conteneur = (brut ?? {}) as { data?: { user?: { result?: unknown } } };
   const fiche = ficheDepuisResultatX(conteneur.data?.user?.result, pseudo);
   if (!fiche) {
-    throw new ErreurScrape("introuvable", `Aucun compte X ne répond au pseudo @${pseudo}.`);
+    throw new ErreurScrape(
+      "introuvable",
+      `Aucun compte X ne répond au pseudo @${pseudo}.`,
+    );
   }
-  return { success: true, fiche, ms: Math.round((Bun.nanoseconds() - debut) / 1e6) };
+  return {
+    success: true,
+    fiche,
+    ms: Math.round((Bun.nanoseconds() - debut) / 1e6),
+  };
 }
 
-async function verbeXPosts(requete: Record<string, unknown>): Promise<ReponseScrape> {
+async function verbeXPosts(
+  requete: Record<string, unknown>,
+): Promise<ReponseScrape> {
   const pseudo = validerPseudo(requete.pseudo);
   const limite = bornerEntier(requete.limite, 5, 1, 10);
   const debut = Bun.nanoseconds();
@@ -1138,29 +1294,44 @@ async function verbeXPosts(requete: Record<string, unknown>): Promise<ReponseScr
     );
   }
   if (!identifiant) {
-    throw new ErreurScrape("introuvable", `Aucun compte X ne répond au pseudo @${pseudo}.`);
+    throw new ErreurScrape(
+      "introuvable",
+      `Aucun compte X ne répond au pseudo @${pseudo}.`,
+    );
   }
 
   // X sert la chronologie avec ses épingles et ses réponses : on demande large
   // puis on borne, sinon `limite: 3` peut ne rendre qu'un post original.
   const page = await client.userTweets(identifiant, Math.max(limite * 3, 20));
   const posts = page.tweets
-    .map(tweet => bornerPostX(tweet, pseudo))
+    .map((tweet) => bornerPostX(tweet, pseudo))
     .filter((post): post is PostX => post !== null)
     .slice(0, limite);
 
-  return { success: true, pseudo, posts, ms: Math.round((Bun.nanoseconds() - debut) / 1e6) };
+  return {
+    success: true,
+    pseudo,
+    posts,
+    ms: Math.round((Bun.nanoseconds() - debut) / 1e6),
+  };
 }
 
-async function verbeXRecherche(requete: Record<string, unknown>): Promise<ReponseScrape> {
+async function verbeXRecherche(
+  requete: Record<string, unknown>,
+): Promise<ReponseScrape> {
   const texte = validerRequete(requete.requete);
   const limite = bornerEntier(requete.limite, 5, 1, 10);
   const debut = Bun.nanoseconds();
   const client = await clientX();
 
-  const page = await client.search(texte, Math.max(limite * 2, 20), undefined, "Latest");
+  const page = await client.search(
+    texte,
+    Math.max(limite * 2, 20),
+    undefined,
+    "Latest",
+  );
   const posts = page.tweets
-    .map(tweet => bornerPostX(tweet, ""))
+    .map((tweet) => bornerPostX(tweet, ""))
     .filter((post): post is PostX => post !== null && post.auteur.length > 0)
     .slice(0, limite);
 
@@ -1172,7 +1343,10 @@ async function verbeXRecherche(requete: Record<string, unknown>): Promise<Repons
   };
 }
 
-const IMPLEMENTATIONS: Record<string, (requete: Record<string, unknown>) => Promise<ReponseScrape>> = {
+const IMPLEMENTATIONS: Record<
+  string,
+  (requete: Record<string, unknown>) => Promise<ReponseScrape>
+> = {
   "scrape.page": verbeScrapePage,
   "scrape.google": verbeScrapeGoogle,
   "scrape.recon": verbeScrapeRecon,
@@ -1188,7 +1362,10 @@ const IMPLEMENTATIONS: Record<string, (requete: Record<string, unknown>) => Prom
  * de délai, ressort en `{ success: false, error, code }`. C'est la promesse
  * faite au démon — un scraping ne doit pas pouvoir arrêter `rg-cron`.
  */
-export async function servirVerbeScrape(verbe: string, requete: Record<string, unknown>): Promise<ReponseScrape> {
+export async function servirVerbeScrape(
+  verbe: string,
+  requete: Record<string, unknown>,
+): Promise<ReponseScrape> {
   const implementation = IMPLEMENTATIONS[verbe];
   const limiteur = LIMITEURS[verbe];
   if (!implementation || !limiteur) {
@@ -1212,7 +1389,11 @@ export async function servirVerbeScrape(verbe: string, requete: Record<string, u
   }
 
   try {
-    return await avecDelai(implementation(requete), DELAIS_MS[verbe] ?? 30_000, `Le verbe « ${verbe} »`);
+    return await avecDelai(
+      implementation(requete),
+      DELAIS_MS[verbe] ?? 30_000,
+      `Le verbe « ${verbe} »`,
+    );
   } catch (err) {
     return enReponse(err);
   } finally {
@@ -1226,6 +1407,12 @@ export function enReponse(err: unknown): ReponseScrape {
   if (err instanceof ErreurScrape) {
     return { success: false, error: err.message, code: err.code };
   }
-  const message = nettoyerMessage(err instanceof Error ? err.message : String(err));
-  return { success: false, error: message || "Échec du scraping.", code: "erreur_scraping" };
+  const message = nettoyerMessage(
+    err instanceof Error ? err.message : String(err),
+  );
+  return {
+    success: false,
+    error: message || "Échec du scraping.",
+    code: "erreur_scraping",
+  };
 }

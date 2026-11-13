@@ -1,7 +1,14 @@
 import type { Kysely } from "kysely";
 import type { Database } from "@rosegriffon/db/schema";
 
-type Filters = { userId?: string; guildId?: string; type?: string; active?: boolean; page?: number; pageSize?: number };
+type Filters = {
+  userId?: string;
+  guildId?: string;
+  type?: string;
+  active?: boolean;
+  page?: number;
+  pageSize?: number;
+};
 
 function dto(row: any) {
   return {
@@ -33,9 +40,19 @@ export abstract class SanctionService {
     if (filters.active === true)
       query = query
         .where("revoked_at", "is", null)
-        .where(eb => eb.or([eb("expires_at", "is", null), eb("expires_at", ">", new Date())]));
+        .where((eb) =>
+          eb.or([
+            eb("expires_at", "is", null),
+            eb("expires_at", ">", new Date()),
+          ]),
+        );
     if (filters.active === false)
-      query = query.where(eb => eb.or([eb("revoked_at", "is not", null), eb("expires_at", "<=", new Date())]));
+      query = query.where((eb) =>
+        eb.or([
+          eb("revoked_at", "is not", null),
+          eb("expires_at", "<=", new Date()),
+        ]),
+      );
     const [rows, count] = await Promise.all([
       query
         .orderBy("created_at", "desc")
@@ -48,7 +65,11 @@ export abstract class SanctionService {
         .executeTakeFirst(),
     ]);
     const total = Number(count?.count ?? 0);
-    return { data: rows.map(dto), total, meta: { page, pageSize, pageCount: Math.ceil(total / pageSize) } };
+    return {
+      data: rows.map(dto),
+      total,
+      meta: { page, pageSize, pageCount: Math.ceil(total / pageSize) },
+    };
   }
 
   static async create(
@@ -63,7 +84,9 @@ export abstract class SanctionService {
       evidence?: Record<string, unknown>[] | null;
     },
   ) {
-    const expiresAt = input.durationSec ? new Date(Date.now() + input.durationSec * 1000) : null;
+    const expiresAt = input.durationSec
+      ? new Date(Date.now() + input.durationSec * 1000)
+      : null;
     const row = await db
       .insertInto("sanction")
       .values({
@@ -85,10 +108,20 @@ export abstract class SanctionService {
     return dto(row);
   }
 
-  static async revoke(db: Kysely<Database>, id: string, by: string, reason?: string) {
+  static async revoke(
+    db: Kysely<Database>,
+    id: string,
+    by: string,
+    reason?: string,
+  ) {
     const row = await db
       .updateTable("sanction")
-      .set({ revoked_at: new Date(), revoked_by: by, revoke_reason: reason ?? null, updated_at: new Date() })
+      .set({
+        revoked_at: new Date(),
+        revoked_by: by,
+        revoke_reason: reason ?? null,
+        updated_at: new Date(),
+      })
       .where("id", "=", id)
       .where("revoked_at", "is", null)
       .returningAll()
@@ -96,10 +129,22 @@ export abstract class SanctionService {
     return row ? dto(row) : null;
   }
 
-  static async appeal(db: Kysely<Database>, id: string, by: string, message: string) {
-    const existing = await db.selectFrom("sanction").select(["evidence"]).where("id", "=", id).executeTakeFirst();
+  static async appeal(
+    db: Kysely<Database>,
+    id: string,
+    by: string,
+    message: string,
+  ) {
+    const existing = await db
+      .selectFrom("sanction")
+      .select(["evidence"])
+      .where("id", "=", id)
+      .executeTakeFirst();
     if (!existing) return null;
-    const evidence = [...(existing.evidence ?? []), { type: "appeal", message, by, at: new Date().toISOString() }];
+    const evidence = [
+      ...(existing.evidence ?? []),
+      { type: "appeal", message, by, at: new Date().toISOString() },
+    ];
     const row = await db
       .updateTable("sanction")
       .set({ evidence, updated_at: new Date() })

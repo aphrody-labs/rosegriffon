@@ -28,8 +28,12 @@ async function navigateurIndisponible(): Promise<string | null> {
 
 const absent = await navigateurIndisponible();
 // RG_REQUIRE_WEBVIEW=1 (hôte de production, CI navigateur) : l'absence est un échec, pas un saut.
-if (absent && Bun.env.RG_REQUIRE_WEBVIEW === "1") throw new Error(`Bun.WebView indisponible : ${absent}`);
-if (absent) console.warn(`[Aphrody Web CDP] Navigateur indisponible (${absent}) — test navigateur sauté.`);
+if (absent && Bun.env.RG_REQUIRE_WEBVIEW === "1")
+  throw new Error(`Bun.WebView indisponible : ${absent}`);
+if (absent)
+  console.warn(
+    `[Aphrody Web CDP] Navigateur indisponible (${absent}) — test navigateur sauté.`,
+  );
 
 describe("Aphrody Web CDP integration", () => {
   it.skipIf(absent !== null)(

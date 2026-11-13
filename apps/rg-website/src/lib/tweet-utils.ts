@@ -7,4 +7,5 @@ export const formatDate = (date: Date) =>
     year: "numeric",
   }).format(date);
 
-export const formatNumber = (n: number) => new Intl.NumberFormat("fr-FR", { notation: "compact" }).format(n);
+export const formatNumber = (n: number) =>
+  new Intl.NumberFormat("fr-FR", { notation: "compact" }).format(n);

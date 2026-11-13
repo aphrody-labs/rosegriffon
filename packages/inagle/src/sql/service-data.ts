@@ -5,10 +5,15 @@ import { decodeProjectionJson } from "./projection-json.js";
 
 type JsonObject = Record<string, unknown>;
 type Db = ReturnType<typeof createInagleSql<Database>>;
-type ReadRows = (table: string, order?: string) => Promise<Record<string, any>[]>;
+type ReadRows = (
+  table: string,
+  order?: string,
+) => Promise<Record<string, any>[]>;
 
 function object(value: unknown): JsonObject {
-  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonObject) : {};
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? (value as JsonObject)
+    : {};
 }
 
 function array<T>(value: unknown): T[] {
@@ -20,7 +25,9 @@ function array<T>(value: unknown): T[] {
  * The host selects an owned PostgreSQL service or an existing read-only SQLite
  * mirror. Both consume the same imported projections; this boundary never restores data.
  */
-export async function loadInagleServiceData(db: Db = createInagleSql<Database>()) {
+export async function loadInagleServiceData(
+  db: Db = createInagleSql<Database>(),
+) {
   return loadProjectionData(async (table, order) => {
     let query = db.selectFrom(table as any).selectAll();
     if (order) query = query.orderBy(order, "asc");
@@ -33,12 +40,16 @@ export async function loadSqliteServiceData(path: string) {
   const db = new SqliteDatabase(path, { readonly: true, strict: true });
   try {
     return await loadProjectionData(async (table, order) => {
-      if (!/^inagle_[a-z_]+$/.test(table) || (order && !/^[a-z_]+$/.test(order)))
+      if (
+        !/^inagle_[a-z_]+$/.test(table) ||
+        (order && !/^[a-z_]+$/.test(order))
+      )
         throw new Error("Invalid internal projection identifier");
-      const rows = db.query(`SELECT * FROM "${table}"${order ? ` ORDER BY "${order}" ASC` : ""}`).all() as Record<
-        string,
-        any
-      >[];
+      const rows = db
+        .query(
+          `SELECT * FROM "${table}"${order ? ` ORDER BY "${order}" ASC` : ""}`,
+        )
+        .all() as Record<string, any>[];
       for (const row of rows) {
         for (const key of [
           "data",
@@ -53,11 +64,16 @@ export async function loadSqliteServiceData(path: string) {
           "sheet_data",
         ]) {
           const value = row[key];
-          if (typeof value === "string" && (value.trim().startsWith("[") || value.trim().startsWith("{")))
+          if (
+            typeof value === "string" &&
+            (value.trim().startsWith("[") || value.trim().startsWith("{"))
+          )
             try {
               row[key] = decodeProjectionJson(value);
             } catch {
-              throw new Error(`Invalid SQLite JSON projection metadata in ${table}.${key}`);
+              throw new Error(
+                `Invalid SQLite JSON projection metadata in ${table}.${key}`,
+              );
             }
         }
       }
@@ -122,7 +138,9 @@ async function loadProjectionData(readRows: ReadRows) {
     ]);
 
     if (characters.length === 0 || skills.length === 0 || teams.length === 0) {
-      throw new Error("Incomplete Inagle SQL projections: characters, skills and teams are required");
+      throw new Error(
+        "Incomplete Inagle SQL projections: characters, skills and teams are required",
+      );
     }
 
     return {
@@ -130,7 +148,7 @@ async function loadProjectionData(readRows: ReadRows) {
       characters,
       skills,
       passives,
-      teams: teams.map(row => {
+      teams: teams.map((row) => {
         const payload = object(row.data);
         const name = row.name_fr ?? row.name_en ?? row.name_ja ?? row.id;
         return {
@@ -148,7 +166,7 @@ async function loadProjectionData(readRows: ReadRows) {
           uniforms: array(payload.uniforms),
         };
       }),
-      formations: formations.map(row => {
+      formations: formations.map((row) => {
         const payload = object(row.data);
         return {
           ...payload,
@@ -160,7 +178,7 @@ async function loadProjectionData(readRows: ReadRows) {
           placements: array(payload.placements),
         };
       }),
-      items: items.map(row => {
+      items: items.map((row) => {
         const payload = object(row.data);
         return {
           ...payload,
@@ -183,7 +201,7 @@ async function loadProjectionData(readRows: ReadRows) {
           price: row.price ?? undefined,
         };
       }),
-      quests: quests.map(row => {
+      quests: quests.map((row) => {
         const payload = object(row.data);
         const titles = object(payload.titles);
         return {
@@ -199,7 +217,7 @@ async function loadProjectionData(readRows: ReadRows) {
           },
         };
       }),
-      capsules: capsules.map(row => ({
+      capsules: capsules.map((row) => ({
         ...object(row.data),
         capsuleId: row.id,
         capsuleIdStr: row.id,
@@ -207,7 +225,7 @@ async function loadProjectionData(readRows: ReadRows) {
         dropTable: array(row.prize_data),
         thumbnailPath: String(object(row.data).thumbnailPath ?? ""),
       })),
-      gallery: gallery.map(row => ({
+      gallery: gallery.map((row) => ({
         ...object(row.data),
         galleryId: row.id,
         galleryIdStr: row.id,
@@ -217,7 +235,11 @@ async function loadProjectionData(readRows: ReadRows) {
         unlockCondition: String(object(row.data).unlockCondition ?? ""),
       })),
       uniforms,
-      drops: { tables: dropTables, battles: dropBattles, treasures: dropTreasures },
+      drops: {
+        tables: dropTables,
+        battles: dropBattles,
+        treasures: dropTreasures,
+      },
       auras,
       keshins,
       souls,
@@ -226,8 +248,11 @@ async function loadProjectionData(readRows: ReadRows) {
       modeChanges,
     };
   } catch (error) {
-    throw new Error("Inagle SQL projections are unavailable; run the SQL importers before starting the runtime.", {
-      cause: error,
-    });
+    throw new Error(
+      "Inagle SQL projections are unavailable; run the SQL importers before starting the runtime.",
+      {
+        cause: error,
+      },
+    );
   }
 }

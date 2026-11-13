@@ -35,8 +35,8 @@ const tables = (
     where table_schema = 'public' and table_type = 'BASE TABLE' and table_name like 'inagle\_%'
     order by table_name`
 )
-  .map(t => t.table_name)
-  .filter(t => !EXCLUES.has(t));
+  .map((t) => t.table_name)
+  .filter((t) => !EXCLUES.has(t));
 
 await Bun.write(sortie, "");
 const db = new Database(sortie, { create: true, strict: true });
@@ -47,7 +47,8 @@ const versSqlite = (v: unknown): string | number | bigint | null => {
   if (v === null || v === undefined) return null;
   if (v instanceof Date) return v.toISOString();
   if (typeof v === "boolean") return Number(v);
-  if (typeof v === "number" || typeof v === "bigint" || typeof v === "string") return v;
+  if (typeof v === "number" || typeof v === "bigint" || typeof v === "string")
+    return v;
   return JSON.stringify(v);
 };
 
@@ -58,14 +59,15 @@ for (const table of tables) {
     await pg<{ column_name: string }[]>`
       select column_name from information_schema.columns
       where table_schema = 'public' and table_name = ${table} order by ordinal_position`
-  ).map(c => c.column_name);
+  ).map((c) => c.column_name);
   db.exec(`create table ${ident(table)} (${colonnes.map(ident).join(", ")})`);
   const inserer = db.prepare(
     `insert into ${ident(table)} values (${colonnes.map(() => "?").join(", ")})`,
   );
   const lignes = await pg.unsafe(`select * from public.${ident(table)}`);
   db.transaction(() => {
-    for (const ligne of lignes) inserer.run(...colonnes.map(c => versSqlite(ligne[c])));
+    for (const ligne of lignes)
+      inserer.run(...colonnes.map((c) => versSqlite(ligne[c])));
   })();
   total += lignes.length;
   console.log(`${table}\t${lignes.length}`);

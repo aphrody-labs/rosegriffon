@@ -50,7 +50,9 @@ describe("normaliserChemin", () => {
   });
 
   test("laisse un chemin déjà préfixé intact", () => {
-    expect(normaliserChemin("data/dx11/menu/220_img")).toBe("data/dx11/menu/220_img");
+    expect(normaliserChemin("data/dx11/menu/220_img")).toBe(
+      "data/dx11/menu/220_img",
+    );
   });
 
   test("absorbe slashs de bord, doublons et antislashs", () => {
@@ -60,7 +62,9 @@ describe("normaliserChemin", () => {
   });
 
   test("écarte les segments de traversée", () => {
-    expect(normaliserChemin("data/dx11/../../etc/passwd")).toBe("data/dx11/etc/passwd");
+    expect(normaliserChemin("data/dx11/../../etc/passwd")).toBe(
+      "data/dx11/etc/passwd",
+    );
     expect(normaliserChemin("../../..")).toBe("");
     expect(normaliserChemin("./data/./dx11")).toBe("data/dx11");
   });
@@ -89,8 +93,12 @@ describe("cheminParent", () => {
 
 describe("filAriane", () => {
   test("traduit le premier segment par `topLabel`, les suivants par `segLabel`", () => {
-    expect(ligneAriane("data/dx11/menu/220_img")).toBe("data › DX11 (PC) › Menus › 220_img");
-    expect(ligneAriane("data/common/chr/_waza")).toBe("data › Commun › Modèles 3D › Techniques (waza)");
+    expect(ligneAriane("data/dx11/menu/220_img")).toBe(
+      "data › DX11 (PC) › Menus › 220_img",
+    );
+    expect(ligneAriane("data/common/chr/_waza")).toBe(
+      "data › Commun › Modèles 3D › Techniques (waza)",
+    );
   });
 
   test("chaque étape porte un chemin réutilisable tel quel", () => {
@@ -202,7 +210,10 @@ describe("tranchePage", () => {
 
 describe("état des boutons", () => {
   test("aller-retour d'un parcours", () => {
-    const id = encoderParcours({ chemin: "data/dx11/menu/220_img", offset: 24 });
+    const id = encoderParcours({
+      chemin: "data/dx11/menu/220_img",
+      offset: 24,
+    });
     expect(id).toBe("cpkd|24|data/dx11/menu/220_img");
     expect(decoderParcours(id ?? "")).toEqual({
       chemin: "data/dx11/menu/220_img",
@@ -212,7 +223,8 @@ describe("état des boutons", () => {
 
   test("le dossier le plus long de l'index tient sous la limite Discord", () => {
     // Chemin de dossier le plus long mesuré sur les 250 800 entrées : 66 caractères.
-    const long = "data/common/event/ev60/ev60_10080/ev60_10080_c000101_s03_p00_c0300";
+    const long =
+      "data/common/event/ev60/ev60_10080/ev60_10080_c000101_s03_p00_c0300";
     expect(long.length).toBe(66);
     const id = encoderParcours({ chemin: long, offset: 999_999 });
     expect(id).not.toBeNull();
@@ -220,13 +232,18 @@ describe("état des boutons", () => {
   });
 
   test("un chemin trop long refuse le bouton au lieu de produire un identifiant invalide", () => {
-    expect(encoderParcours({ chemin: "data/".concat("x".repeat(120)), offset: 0 })).toBeNull();
+    expect(
+      encoderParcours({ chemin: "data/".concat("x".repeat(120)), offset: 0 }),
+    ).toBeNull();
   });
 
   test("aller-retour d'une recherche", () => {
     const id = encoderRecherche({ motif: "telop_waza", offset: 10 });
     expect(id).toBe("cpkq|10|telop_waza");
-    expect(decoderRecherche(id ?? "")).toEqual({ motif: "telop_waza", offset: 10 });
+    expect(decoderRecherche(id ?? "")).toEqual({
+      motif: "telop_waza",
+      offset: 10,
+    });
   });
 
   test("un identifiant étranger ou malformé est rejeté", () => {
@@ -244,12 +261,21 @@ describe("état des boutons", () => {
 
 describe("decouperSaisieDossier", () => {
   test("le slash final veut dire « liste le contenu »", () => {
-    expect(decouperSaisieDossier("data/dx11/")).toEqual({ parent: "data/dx11", filtre: "" });
+    expect(decouperSaisieDossier("data/dx11/")).toEqual({
+      parent: "data/dx11",
+      filtre: "",
+    });
   });
 
   test("sans slash final, le dernier segment est un filtre de frère", () => {
-    expect(decouperSaisieDossier("data/dx11/me")).toEqual({ parent: "data/dx11", filtre: "me" });
-    expect(decouperSaisieDossier("dx11/me")).toEqual({ parent: "data/dx11", filtre: "me" });
+    expect(decouperSaisieDossier("data/dx11/me")).toEqual({
+      parent: "data/dx11",
+      filtre: "me",
+    });
+    expect(decouperSaisieDossier("dx11/me")).toEqual({
+      parent: "data/dx11",
+      filtre: "me",
+    });
   });
 
   test("saisie vide ou racine seule propose les racines", () => {
@@ -297,20 +323,36 @@ describe("formats lisibles", () => {
   });
 
   test("nomPieceJointe retire la chaîne de requête", () => {
-    expect(nomPieceJointe("https://cdn.rosegriffon.fr/model-full/c05021090.glb", "x.glb")).toBe("c05021090.glb");
-    expect(nomPieceJointe("https://cdn.rosegriffon.fr/dx11/a.png?w=800&format=webp", "x")).toBe("a.png");
-    expect(nomPieceJointe("https://cdn.rosegriffon.fr/", "repli.bin")).toBe("repli.bin");
+    expect(
+      nomPieceJointe(
+        "https://cdn.rosegriffon.fr/model-full/c05021090.glb",
+        "x.glb",
+      ),
+    ).toBe("c05021090.glb");
+    expect(
+      nomPieceJointe(
+        "https://cdn.rosegriffon.fr/dx11/a.png?w=800&format=webp",
+        "x",
+      ),
+    ).toBe("a.png");
+    expect(nomPieceJointe("https://cdn.rosegriffon.fr/", "repli.bin")).toBe(
+      "repli.bin",
+    );
   });
 });
 
 describe("rendu des lignes", () => {
   test("un sous-dossier connu porte sa traduction et son compte", () => {
     // Relevé : `/api/cpk?path=data/common/chr` → `{"name":"_waza","count":833}`.
-    expect(ligneDossier({ name: "_waza", count: 833 })).toBe("📁 `_waza/` *(Techniques (waza))* — 833 fichiers");
+    expect(ligneDossier({ name: "_waza", count: 833 })).toBe(
+      "📁 `_waza/` *(Techniques (waza))* — 833 fichiers",
+    );
   });
 
   test("un sous-dossier sans traduction reste brut", () => {
-    expect(ligneDossier({ name: "220_img", count: 1 })).toBe("📁 `220_img/` — 1 fichier");
+    expect(ligneDossier({ name: "220_img", count: 1 })).toBe(
+      "📁 `220_img/` — 1 fichier",
+    );
   });
 
   test("un fichier porte sa famille de preview", () => {
@@ -332,7 +374,9 @@ describe("rendu des lignes", () => {
         cpk: "8dcfc5f5cd0e051d45c8dedb65d3be35.cpk",
         path: "data/common/chr/_face/05_go2/c05021090/c05021090.g4md",
       }),
-    ).toBe("`data/common/chr/_face/05_go2/c05021090/c05021090.g4md`\n↳ Modèle 3D");
+    ).toBe(
+      "`data/common/chr/_face/05_go2/c05021090/c05021090.g4md`\n↳ Modèle 3D",
+    );
   });
 });
 
@@ -363,7 +407,9 @@ describe("apercuCpk", () => {
       ext: "g4md",
     });
     expect(apercu.famille).toBe("model");
-    expect(apercu.contenu).toBe("https://cdn.rosegriffon.fr/model-full/c05021090.glb");
+    expect(apercu.contenu).toBe(
+      "https://cdn.rosegriffon.fr/model-full/c05021090.glb",
+    );
     expect(apercu.modele3d).toBe(true);
     expect(apercu.image).toBeNull();
   });
@@ -382,9 +428,15 @@ describe("apercuCpk", () => {
   });
 
   test("un son et une vidéo passent par leurs décodeurs dédiés", () => {
-    expect(apercuCpk({ path: "data/common/sound_asset/ja/c05021090.acb", ext: "acb" })).toMatchObject({
+    expect(
+      apercuCpk({
+        path: "data/common/sound_asset/ja/c05021090.acb",
+        ext: "acb",
+      }),
+    ).toMatchObject({
       famille: "sound",
-      contenu: "https://cdn.rosegriffon.fr/audio/data/common/sound_asset/ja/c05021090.acb",
+      contenu:
+        "https://cdn.rosegriffon.fr/audio/data/common/sound_asset/ja/c05021090.acb",
     });
     expect(apercuCpk({ path: "data/movie/op.usm", ext: "usm" })).toMatchObject({
       famille: "movie",
@@ -399,7 +451,9 @@ describe("apercuCpk", () => {
     });
     expect(apercu.famille).toBe("package");
     expect(apercu.contenu).toBe(apercu.brut);
-    expect(apercu.brut).toBe("https://cdn.rosegriffon.fr/raw/data/common/event/ev60/ev60_10080/ev60_10080.g4pk");
+    expect(apercu.brut).toBe(
+      "https://cdn.rosegriffon.fr/raw/data/common/event/ev60/ev60_10080/ev60_10080.g4pk",
+    );
   });
 });
 
@@ -429,19 +483,31 @@ describe("liensContenu", () => {
     // `.g4pk` : `contenu` vaut `brut` (mesuré : /raw/data/common/map/w/w90i001/
     // cam/cam.g4pk → 200, 1 664 octets). Deux libellés pour la même URL
     // laisseraient croire à un décodage qui n'existe pas.
-    const apercu = apercuCpk({ path: "data/common/map/w/w90i001/cam/cam.g4pk", ext: "g4pk" });
+    const apercu = apercuCpk({
+      path: "data/common/map/w/w90i001/cam/cam.g4pk",
+      ext: "g4pk",
+    });
     const lignes = liensContenu(apercu);
-    expect(lignes).toContain("https://cdn.rosegriffon.fr/raw/data/common/map/w/w90i001/cam/cam.g4pk");
+    expect(lignes).toContain(
+      "https://cdn.rosegriffon.fr/raw/data/common/map/w/w90i001/cam/cam.g4pk",
+    );
     expect(lignes.split("https://").length - 1).toBe(1);
     expect(lignes).toContain("Aucun décodeur");
   });
 
   test("un format décodé montre le décodage ET les octets bruts", () => {
     // Vidéo : /video/data/common/movie/ev01_00050.usm → 200 video/mp4.
-    const apercu = apercuCpk({ path: "data/common/movie/ev01_00050.usm", ext: "usm" });
+    const apercu = apercuCpk({
+      path: "data/common/movie/ev01_00050.usm",
+      ext: "usm",
+    });
     const lignes = liensContenu(apercu);
-    expect(lignes).toContain("https://cdn.rosegriffon.fr/video/data/common/movie/ev01_00050.usm");
-    expect(lignes).toContain("https://cdn.rosegriffon.fr/raw/data/common/movie/ev01_00050.usm");
+    expect(lignes).toContain(
+      "https://cdn.rosegriffon.fr/video/data/common/movie/ev01_00050.usm",
+    );
+    expect(lignes).toContain(
+      "https://cdn.rosegriffon.fr/raw/data/common/movie/ev01_00050.usm",
+    );
     expect(lignes).toContain("Vidéo");
   });
 
@@ -488,13 +554,21 @@ describe("resumerConfig", () => {
         },
       ],
     });
-    expect(resume).toBe(["Format **T2b** · 1 bloc racine", "• `TEXT_INFO_BEGIN` — 2 enfants"].join("\n"));
+    expect(resume).toBe(
+      [
+        "Format **T2b** · 1 bloc racine",
+        "• `TEXT_INFO_BEGIN` — 2 enfants",
+      ].join("\n"),
+    );
   });
 
   test("au-delà de huit listes, le reste est annoncé", () => {
     const resume = resumerConfig({
       format: "rdbn",
-      lists: Array.from({ length: 10 }, (_, i) => ({ name: `l${i}`, count: 1 })),
+      lists: Array.from({ length: 10 }, (_, i) => ({
+        name: `l${i}`,
+        count: 1,
+      })),
     });
     expect(resume).toContain("Format **rdbn** · 10 listes");
     expect(resume).toContain("… et 2 autres listes");

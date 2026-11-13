@@ -10,8 +10,24 @@
 
 import { type Canvas, createCanvas, type SKRSContext2D } from "@aphrody/canvas";
 
-import { BORDURE_OR, ensureFonts, MARGE, MARQUE_CANVAS, OMBRE_DURE, PALETTE, POLICES, RAYONS, VISUELS } from "./theme";
-import { assainir, decouperEnLignes, initiale, premierTexteUtilisable, tronquer } from "./texte";
+import {
+  BORDURE_OR,
+  ensureFonts,
+  MARGE,
+  MARQUE_CANVAS,
+  OMBRE_DURE,
+  PALETTE,
+  POLICES,
+  RAYONS,
+  VISUELS,
+} from "./theme";
+import {
+  assainir,
+  decouperEnLignes,
+  initiale,
+  premierTexteUtilisable,
+  tronquer,
+} from "./texte";
 import {
   dessinerFilet,
   dessinerFond,
@@ -69,7 +85,11 @@ function dessinerEnTete(ctx: SKRSContext2D, opts: OptionsEnTete): void {
   if (sousTitre) {
     ctx.font = `20px ${POLICES.corps}`;
     ctx.fillStyle = PALETTE.or;
-    ctx.fillText(tronquer(ctx, sousTitre, L - MARGE * 2 - largeurBadge), MARGE, 126);
+    ctx.fillText(
+      tronquer(ctx, sousTitre, L - MARGE * 2 - largeurBadge),
+      MARGE,
+      126,
+    );
   }
 
   if (opts.badge) {
@@ -93,7 +113,11 @@ function dessinerEnTete(ctx: SKRSContext2D, opts: OptionsEnTete): void {
   ctx.restore();
 }
 
-function dessinerPied(ctx: SKRSContext2D, hauteur: number, note?: string): void {
+function dessinerPied(
+  ctx: SKRSContext2D,
+  hauteur: number,
+  note?: string,
+): void {
   const y = hauteur - HAUTEUR_PIED + 20;
   ctx.save();
   ctx.textAlign = "left";
@@ -136,7 +160,10 @@ async function dessinerEtatVide(
   ctx.textBaseline = "alphabetic";
   ctx.fillStyle = PALETTE.texteAttenue;
   ctx.font = `22px ${POLICES.corps}`;
-  const lignes = decouperEnLignes(ctx, message, { largeurMax: largeur - 80, maxLignes: 2 });
+  const lignes = decouperEnLignes(ctx, message, {
+    largeurMax: largeur - 80,
+    maxLignes: 2,
+  });
   const hauteurTexte = lignes.length * 30;
   const cote = Math.max(0, Math.min(124, hauteur - hauteurTexte - 72));
   const hauteurBloc = (cote > 0 ? cote + 26 : 0) + hauteurTexte;
@@ -145,7 +172,14 @@ async function dessinerEtatVide(
   if (cote > 0) {
     // Sans masque circulaire : la mascotte est déjà détourée, l'arrondi lui
     // coupait la tête et le ballon.
-    await drawCoveredImage(ctx, VISUELS.emote, x + largeur / 2 - cote / 2, haut, cote, cote);
+    await drawCoveredImage(
+      ctx,
+      VISUELS.emote,
+      x + largeur / 2 - cote / 2,
+      haut,
+      cote,
+      cote,
+    );
   }
   const baseTexte = haut + (cote > 0 ? cote + 26 : 0) + 22;
   for (const [index, ligne] of lignes.entries()) {
@@ -171,7 +205,9 @@ async function dessinerAvatar(
   ctx.fill();
   ctx.restore();
 
-  const dessine = source ? await drawCircularImage(ctx, source, cx, cy, rayon) : false;
+  const dessine = source
+    ? await drawCircularImage(ctx, source, cx, cy, rayon)
+    : false;
   if (!dessine) {
     // Avatar absent ou 404 : pastille brique et initiale cartoon.
     ctx.save();
@@ -255,37 +291,57 @@ export const MAX_LIGNES_ROLE = 3;
  * réellement rendues : à hauteur fixe, une équipe aux intitulés courts laissait
  * un tiers de carte vide.
  */
-export function planifierGrilleEquipe(total: number, lignesRole = 1): PlanGrille {
+export function planifierGrilleEquipe(
+  total: number,
+  lignesRole = 1,
+): PlanGrille {
   const affiches = Math.max(total, 0);
   const colonnes = affiches <= 1 ? 1 : affiches <= 4 ? 2 : 3;
   const lignes = Math.max(1, Math.ceil(affiches / colonnes));
   const largeurCarte = (L - MARGE * 2 - ECART * (colonnes - 1)) / colonnes;
   const hauteurCarte =
-    HAUT_CARTE_EQUIPE + Math.min(Math.max(lignesRole, 1), MAX_LIGNES_ROLE) * INTERLIGNE_ROLE + RESPIRATION;
-  const corps = affiches === 0 ? HAUTEUR_ETAT_VIDE : lignes * (hauteurCarte + ECART) - ECART;
+    HAUT_CARTE_EQUIPE +
+    Math.min(Math.max(lignesRole, 1), MAX_LIGNES_ROLE) * INTERLIGNE_ROLE +
+    RESPIRATION;
+  const corps =
+    affiches === 0
+      ? HAUTEUR_ETAT_VIDE
+      : lignes * (hauteurCarte + ECART) - ECART;
   return {
     colonnes,
     lignes,
     largeurCarte,
     hauteurCarte,
-    hauteurImage: HAUTEUR_ENTETE + RESPIRATION + corps + RESPIRATION + HAUTEUR_PIED,
+    hauteurImage:
+      HAUTEUR_ENTETE + RESPIRATION + corps + RESPIRATION + HAUTEUR_PIED,
   };
 }
 
-export async function renderTeamGrid(members: TeamCardData[], title: string, subtitle?: string): Promise<Buffer> {
+export async function renderTeamGrid(
+  members: TeamCardData[],
+  title: string,
+  subtitle?: string,
+): Promise<Buffer> {
   ensureFonts();
 
   // Passe de mesure : on découpe les rôles avant de fixer la hauteur des cartes.
   const provisoire = planifierGrilleEquipe(members.length, MAX_LIGNES_ROLE);
   const mesure = createCanvas(L, 10).getContext("2d");
   mesure.font = `18px ${POLICES.corps}`;
-  const rolesDecoupes = members.map(membre =>
-    decouperEnLignes(mesure, assainir(membre.role, POLICES.corps) || "Rôle non renseigné", {
-      largeurMax: provisoire.largeurCarte - 48,
-      maxLignes: MAX_LIGNES_ROLE,
-    }),
+  const rolesDecoupes = members.map((membre) =>
+    decouperEnLignes(
+      mesure,
+      assainir(membre.role, POLICES.corps) || "Rôle non renseigné",
+      {
+        largeurMax: provisoire.largeurCarte - 48,
+        maxLignes: MAX_LIGNES_ROLE,
+      },
+    ),
   );
-  const lignesRoleMax = rolesDecoupes.reduce((max, lignes) => Math.max(max, lignes.length), 1);
+  const lignesRoleMax = rolesDecoupes.reduce(
+    (max, lignes) => Math.max(max, lignes.length),
+    1,
+  );
   const plan = planifierGrilleEquipe(members.length, lignesRoleMax);
 
   const canvas = createCanvas(L, plan.hauteurImage);
@@ -319,9 +375,15 @@ export async function renderTeamGrid(members: TeamCardData[], title: string, sub
     const x = MARGE + colonne * (plan.largeurCarte + ECART);
     const y = hautCorps + ligne * (plan.hauteurCarte + ECART);
     const centre = x + plan.largeurCarte / 2;
-    const nom = premierTexteUtilisable([membre.name], POLICES.display, "Membre");
+    const nom = premierTexteUtilisable(
+      [membre.name],
+      POLICES.display,
+      "Membre",
+    );
 
-    dessinerPanneau(ctx, x, y, plan.largeurCarte, plan.hauteurCarte, { rayon: RAYONS.xl });
+    dessinerPanneau(ctx, x, y, plan.largeurCarte, plan.hauteurCarte, {
+      rayon: RAYONS.xl,
+    });
     // Bandeau haut brique, coupé à l'arrondi de la carte…
     ctx.save();
     roundedRect(ctx, x, y, plan.largeurCarte, plan.hauteurCarte, RAYONS.xl);
@@ -354,7 +416,11 @@ export async function renderTeamGrid(members: TeamCardData[], title: string, sub
     ctx.font = `18px ${POLICES.corps}`;
     ctx.fillStyle = PALETTE.texteAttenue;
     for (const [i, texte] of (rolesDecoupes[index] ?? []).entries()) {
-      ctx.fillText(texte, centre, y + HAUT_CARTE_EQUIPE + 8 + i * INTERLIGNE_ROLE);
+      ctx.fillText(
+        texte,
+        centre,
+        y + HAUT_CARTE_EQUIPE + 8 + i * INTERLIGNE_ROLE,
+      );
     }
     ctx.textAlign = "left";
     ctx.restore();
@@ -388,7 +454,11 @@ const MAX_LIGNES_BIO = 6;
  * le profil n'a ni pseudo ni rôle — l'ancienne carte réservait la place dans
  * tous les cas.
  */
-function ordonneeFiletProfil(yCarte: number, avecPseudo: boolean, avecRole: boolean): number {
+function ordonneeFiletProfil(
+  yCarte: number,
+  avecPseudo: boolean,
+  avecRole: boolean,
+): number {
   let bas = yCarte;
   if (avecPseudo) bas = yCarte + 66;
   if (avecRole) bas = (avecPseudo ? yCarte + 78 : yCarte + 44) + 34;
@@ -399,16 +469,22 @@ function ordonneeFiletProfil(yCarte: number, avecPseudo: boolean, avecRole: bool
 export async function renderProfileCard(p: ProfileCardData): Promise<Buffer> {
   ensureFonts();
 
-  const nom = premierTexteUtilisable([p.full_name, p.username, p.discord_id], POLICES.display, "Membre Rose Griffon");
+  const nom = premierTexteUtilisable(
+    [p.full_name, p.username, p.discord_id],
+    POLICES.display,
+    "Membre Rose Griffon",
+  );
   const pseudo = assainir(p.username, POLICES.corps);
   const role = assainir(p.role, POLICES.corps);
   const bio = assainir(p.bio, POLICES.corps);
 
   const liens: { icone: NomPictogramme; texte: string }[] = [];
   const twitter = assainir(p.twitter_handle, POLICES.corps);
-  if (twitter) liens.push({ icone: "croix", texte: `@${twitter.replace(/^@/, "")}` });
+  if (twitter)
+    liens.push({ icone: "croix", texte: `@${twitter.replace(/^@/, "")}` });
   const site = assainir(p.website, POLICES.corps);
-  if (site) liens.push({ icone: "globe", texte: site.replace(/^https?:\/\//, "") });
+  if (site)
+    liens.push({ icone: "globe", texte: site.replace(/^https?:\/\//, "") });
   const discord = assainir(p.discord_id, POLICES.corps);
   if (discord) liens.push({ icone: "lien", texte: `Discord ${discord}` });
 
@@ -419,11 +495,21 @@ export async function renderProfileCard(p: ProfileCardData): Promise<Buffer> {
   const yCarte = HAUTEUR_BANNIERE - 48;
   const largeurInterne = L - MARGE * 2 - RESPIRATION * 2;
   mesure.font = `22px ${POLICES.corps}`;
-  const lignesBio = bio ? decouperEnLignes(mesure, bio, { largeurMax: largeurInterne, maxLignes: MAX_LIGNES_BIO }) : [];
+  const lignesBio = bio
+    ? decouperEnLignes(mesure, bio, {
+        largeurMax: largeurInterne,
+        maxLignes: MAX_LIGNES_BIO,
+      })
+    : [];
   const hauteurBio = bio ? Math.max(1, lignesBio.length) * 34 : 76;
   const hauteurLiens = liens.length > 0 ? 56 : 0;
-  const yFilet = ordonneeFiletProfil(yCarte, pseudo.length > 0, role.length > 0);
-  const hauteurCarte = yFilet - yCarte + 40 + hauteurBio + hauteurLiens + RESPIRATION;
+  const yFilet = ordonneeFiletProfil(
+    yCarte,
+    pseudo.length > 0,
+    role.length > 0,
+  );
+  const hauteurCarte =
+    yFilet - yCarte + 40 + hauteurBio + hauteurLiens + RESPIRATION;
   const hauteur = yCarte + hauteurCarte + 24 + HAUTEUR_PIED;
 
   const canvas = createCanvas(L, hauteur);
@@ -431,7 +517,9 @@ export async function renderProfileCard(p: ProfileCardData): Promise<Buffer> {
   await dessinerFond(ctx, L, hauteur);
 
   // Bannière : image de couverture, ou dégradé brique de repli.
-  const banniere = p.banner_url ? await drawCoveredImage(ctx, p.banner_url, 0, 0, L, HAUTEUR_BANNIERE) : false;
+  const banniere = p.banner_url
+    ? await drawCoveredImage(ctx, p.banner_url, 0, 0, L, HAUTEUR_BANNIERE)
+    : false;
   if (!banniere) {
     const degrade = ctx.createLinearGradient(0, 0, L, HAUTEUR_BANNIERE);
     degrade.addColorStop(0, PALETTE.brique);
@@ -441,7 +529,12 @@ export async function renderProfileCard(p: ProfileCardData): Promise<Buffer> {
   }
   // Voile marine en bas de bannière : garantit la lisibilité quelle que soit
   // l'image téléversée par le membre.
-  const voile = ctx.createLinearGradient(0, HAUTEUR_BANNIERE - 130, 0, HAUTEUR_BANNIERE);
+  const voile = ctx.createLinearGradient(
+    0,
+    HAUTEUR_BANNIERE - 130,
+    0,
+    HAUTEUR_BANNIERE,
+  );
   voile.addColorStop(0, "rgba(10, 21, 44, 0)");
   voile.addColorStop(1, "rgba(10, 21, 44, 0.92)");
   ctx.fillStyle = voile;
@@ -475,9 +568,18 @@ export async function renderProfileCard(p: ProfileCardData): Promise<Buffer> {
     largeurMax: largeurTexte,
   });
 
-  dessinerPanneau(ctx, MARGE, yCarte, L - MARGE * 2, hauteurCarte, { rayon: RAYONS.xl });
+  dessinerPanneau(ctx, MARGE, yCarte, L - MARGE * 2, hauteurCarte, {
+    rayon: RAYONS.xl,
+  });
 
-  await dessinerAvatar(ctx, p.avatar_url, MARGE + 110, yCarte, RAYON_AVATAR, nom);
+  await dessinerAvatar(
+    ctx,
+    p.avatar_url,
+    MARGE + 110,
+    yCarte,
+    RAYON_AVATAR,
+    nom,
+  );
 
   if (pseudo) {
     ctx.save();
@@ -485,7 +587,11 @@ export async function renderProfileCard(p: ProfileCardData): Promise<Buffer> {
     ctx.textBaseline = "alphabetic";
     ctx.font = `26px ${POLICES.corps}`;
     ctx.fillStyle = PALETTE.texteAttenue;
-    ctx.fillText(tronquer(ctx, `@${pseudo}`, largeurTexte), xTexte, yCarte + 56);
+    ctx.fillText(
+      tronquer(ctx, `@${pseudo}`, largeurTexte),
+      xTexte,
+      yCarte + 56,
+    );
     ctx.restore();
   }
 
@@ -516,10 +622,22 @@ export async function renderProfileCard(p: ProfileCardData): Promise<Buffer> {
     }
   } else {
     // État vide explicite : l'ancienne carte affichait un simple tiret cadratin.
-    fillRoundedRect(ctx, xInterne, y - 12, largeurInterne, 64, RAYONS.md, PALETTE.carteCreuse);
+    fillRoundedRect(
+      ctx,
+      xInterne,
+      y - 12,
+      largeurInterne,
+      64,
+      RAYONS.md,
+      PALETTE.carteCreuse,
+    );
     ctx.font = `20px ${POLICES.corps}`;
     ctx.fillStyle = PALETTE.texteAttenue;
-    ctx.fillText("Ce membre n'a pas encore rédigé de présentation.", xInterne + 20, y + 26);
+    ctx.fillText(
+      "Ce membre n'a pas encore rédigé de présentation.",
+      xInterne + 20,
+      y + 26,
+    );
   }
   ctx.restore();
 
@@ -531,16 +649,28 @@ export async function renderProfileCard(p: ProfileCardData): Promise<Buffer> {
     const restant = () => largeurInterne - (x - xInterne);
     for (const lien of liens) {
       if (restant() < 120) break;
-      const largeur = dessinerLigneIcone(ctx, lien.icone, lien.texte, x, y + 36, restant(), {
-        taille: 18,
-        couleurIcone: PALETTE.brique,
-        couleurTexte: PALETTE.texteAttenue,
-      });
+      const largeur = dessinerLigneIcone(
+        ctx,
+        lien.icone,
+        lien.texte,
+        x,
+        y + 36,
+        restant(),
+        {
+          taille: 18,
+          couleurIcone: PALETTE.brique,
+          couleurTexte: PALETTE.texteAttenue,
+        },
+      );
       x += largeur + 34;
     }
   }
 
-  dessinerPied(ctx, hauteur, pseudo ? `rosegriffon.fr/profil/${pseudo}` : undefined);
+  dessinerPied(
+    ctx,
+    hauteur,
+    pseudo ? `rosegriffon.fr/profil/${pseudo}` : undefined,
+  );
   return await encoder(canvas);
 }
 
@@ -574,10 +704,16 @@ function formaterDateHeure(valeur: Date | string): string {
 
 const HAUTEUR_CARTE_EVENEMENT = 176;
 
-export async function renderEventList(events: EventCardData[]): Promise<Buffer> {
+export async function renderEventList(
+  events: EventCardData[],
+): Promise<Buffer> {
   ensureFonts();
-  const corps = events.length === 0 ? HAUTEUR_ETAT_VIDE : events.length * (HAUTEUR_CARTE_EVENEMENT + ECART) - ECART;
-  const hauteur = HAUTEUR_ENTETE + RESPIRATION + corps + RESPIRATION + HAUTEUR_PIED;
+  const corps =
+    events.length === 0
+      ? HAUTEUR_ETAT_VIDE
+      : events.length * (HAUTEUR_CARTE_EVENEMENT + ECART) - ECART;
+  const hauteur =
+    HAUTEUR_ENTETE + RESPIRATION + corps + RESPIRATION + HAUTEUR_PIED;
 
   const canvas = createCanvas(L, hauteur);
   const ctx = canvas.getContext("2d");
@@ -616,13 +752,45 @@ export async function renderEventList(events: EventCardData[]): Promise<Buffer> 
     const cadreL = 216;
     const cadreH = HAUTEUR_CARTE_EVENEMENT - 40;
     const vignette = evenement.image_url
-      ? await drawCoveredImage(ctx, evenement.image_url, cadreX, cadreY, cadreL, cadreH, RAYONS.md)
+      ? await drawCoveredImage(
+          ctx,
+          evenement.image_url,
+          cadreX,
+          cadreY,
+          cadreL,
+          cadreH,
+          RAYONS.md,
+        )
       : false;
     if (!vignette) {
-      fillRoundedRect(ctx, cadreX, cadreY, cadreL, cadreH, RAYONS.md, PALETTE.carteCreuse);
-      dessinerPictogramme(ctx, "calendrier", cadreX + cadreL / 2 - 28, cadreY + cadreH / 2 - 28, 56, PALETTE.brique);
+      fillRoundedRect(
+        ctx,
+        cadreX,
+        cadreY,
+        cadreL,
+        cadreH,
+        RAYONS.md,
+        PALETTE.carteCreuse,
+      );
+      dessinerPictogramme(
+        ctx,
+        "calendrier",
+        cadreX + cadreL / 2 - 28,
+        cadreY + cadreH / 2 - 28,
+        56,
+        PALETTE.brique,
+      );
     }
-    strokeRoundedRect(ctx, cadreX + 1, cadreY + 1, cadreL - 2, cadreH - 2, RAYONS.md, PALETTE.or, BORDURE_OR);
+    strokeRoundedRect(
+      ctx,
+      cadreX + 1,
+      cadreY + 1,
+      cadreL - 2,
+      cadreH - 2,
+      RAYONS.md,
+      PALETTE.or,
+      BORDURE_OR,
+    );
 
     const xTexte = cadreX + cadreL + 24;
     const largeurTexte = L - MARGE - RESPIRATION - xTexte;
@@ -632,7 +800,11 @@ export async function renderEventList(events: EventCardData[]): Promise<Buffer> 
     ctx.textBaseline = "alphabetic";
     ctx.font = `28px ${POLICES.display}`;
     ctx.fillStyle = PALETTE.texte;
-    const titre = premierTexteUtilisable([evenement.title], POLICES.display, "Événement");
+    const titre = premierTexteUtilisable(
+      [evenement.title],
+      POLICES.display,
+      "Événement",
+    );
     ctx.fillText(tronquer(ctx, titre, largeurTexte), xTexte, y + 54);
     ctx.restore();
 
@@ -663,7 +835,11 @@ export async function renderEventList(events: EventCardData[]): Promise<Buffer> 
       ctx.font = `16px ${POLICES.corps}`;
       ctx.fillStyle = PALETTE.texteAttenue;
       ctx.textBaseline = "alphabetic";
-      ctx.fillText(tronquer(ctx, description, largeurTexte), xTexte, y + (lieu ? 154 : 126));
+      ctx.fillText(
+        tronquer(ctx, description, largeurTexte),
+        xTexte,
+        y + (lieu ? 154 : 126),
+      );
       ctx.restore();
     }
   }
@@ -686,10 +862,17 @@ export interface ChroniqueCardData {
 
 const HAUTEUR_CARTE_CHRONIQUE = 190;
 
-export async function renderChroniqueList(rows: ChroniqueCardData[], filterLabel?: string): Promise<Buffer> {
+export async function renderChroniqueList(
+  rows: ChroniqueCardData[],
+  filterLabel?: string,
+): Promise<Buffer> {
   ensureFonts();
-  const corps = rows.length === 0 ? HAUTEUR_ETAT_VIDE : rows.length * (HAUTEUR_CARTE_CHRONIQUE + ECART) - ECART;
-  const hauteur = HAUTEUR_ENTETE + RESPIRATION + corps + RESPIRATION + HAUTEUR_PIED;
+  const corps =
+    rows.length === 0
+      ? HAUTEUR_ETAT_VIDE
+      : rows.length * (HAUTEUR_CARTE_CHRONIQUE + ECART) - ECART;
+  const hauteur =
+    HAUTEUR_ENTETE + RESPIRATION + corps + RESPIRATION + HAUTEUR_PIED;
 
   const canvas = createCanvas(L, hauteur);
   const ctx = canvas.getContext("2d");
@@ -728,13 +911,45 @@ export async function renderChroniqueList(rows: ChroniqueCardData[], filterLabel
     const cadreL = 240;
     const cadreH = HAUTEUR_CARTE_CHRONIQUE - 40;
     const vignette = chronique.featured_image
-      ? await drawCoveredImage(ctx, chronique.featured_image, cadreX, cadreY, cadreL, cadreH, RAYONS.md)
+      ? await drawCoveredImage(
+          ctx,
+          chronique.featured_image,
+          cadreX,
+          cadreY,
+          cadreL,
+          cadreH,
+          RAYONS.md,
+        )
       : false;
     if (!vignette) {
-      fillRoundedRect(ctx, cadreX, cadreY, cadreL, cadreH, RAYONS.md, PALETTE.carteCreuse);
-      dessinerPictogramme(ctx, "etoile", cadreX + cadreL / 2 - 26, cadreY + cadreH / 2 - 26, 52, PALETTE.or);
+      fillRoundedRect(
+        ctx,
+        cadreX,
+        cadreY,
+        cadreL,
+        cadreH,
+        RAYONS.md,
+        PALETTE.carteCreuse,
+      );
+      dessinerPictogramme(
+        ctx,
+        "etoile",
+        cadreX + cadreL / 2 - 26,
+        cadreY + cadreH / 2 - 26,
+        52,
+        PALETTE.or,
+      );
     }
-    strokeRoundedRect(ctx, cadreX + 1, cadreY + 1, cadreL - 2, cadreH - 2, RAYONS.md, PALETTE.or, BORDURE_OR);
+    strokeRoundedRect(
+      ctx,
+      cadreX + 1,
+      cadreY + 1,
+      cadreL - 2,
+      cadreH - 2,
+      RAYONS.md,
+      PALETTE.or,
+      BORDURE_OR,
+    );
 
     const xTexte = cadreX + cadreL + 24;
     const largeurTexte = L - MARGE - RESPIRATION - xTexte;
@@ -756,14 +971,21 @@ export async function renderChroniqueList(rows: ChroniqueCardData[], filterLabel
     ctx.textBaseline = "alphabetic";
     ctx.font = `28px ${POLICES.display}`;
     ctx.fillStyle = PALETTE.texte;
-    const titre = premierTexteUtilisable([chronique.title, chronique.slug], POLICES.display, "Chronique");
+    const titre = premierTexteUtilisable(
+      [chronique.title, chronique.slug],
+      POLICES.display,
+      "Chronique",
+    );
     ctx.fillText(tronquer(ctx, titre, largeurTexte), xTexte, y + 92);
 
     const extrait = assainir(chronique.excerpt, POLICES.corps);
     if (extrait) {
       ctx.font = `18px ${POLICES.corps}`;
       ctx.fillStyle = PALETTE.texteAttenue;
-      const lignes = decouperEnLignes(ctx, extrait, { largeurMax: largeurTexte, maxLignes: 2 });
+      const lignes = decouperEnLignes(ctx, extrait, {
+        largeurMax: largeurTexte,
+        maxLignes: 2,
+      });
       for (const [i, ligne] of lignes.entries()) {
         ctx.fillText(ligne, xTexte, y + 122 + i * 26);
       }
@@ -779,7 +1001,11 @@ export async function renderChroniqueList(rows: ChroniqueCardData[], filterLabel
       xTexte,
       y + HAUTEUR_CARTE_CHRONIQUE - 24,
       largeurTexte,
-      { taille: 15, couleurIcone: PALETTE.or, couleurTexte: PALETTE.texteAttenue },
+      {
+        taille: 15,
+        couleurIcone: PALETTE.or,
+        couleurTexte: PALETTE.texteAttenue,
+      },
     );
     dessinerLigneIcone(
       ctx,
@@ -788,7 +1014,11 @@ export async function renderChroniqueList(rows: ChroniqueCardData[], filterLabel
       xTexte + largeurMeta + 28,
       y + HAUTEUR_CARTE_CHRONIQUE - 24,
       largeurTexte - largeurMeta - 28,
-      { taille: 15, couleurIcone: PALETTE.or, couleurTexte: PALETTE.texteAttenue },
+      {
+        taille: 15,
+        couleurIcone: PALETTE.or,
+        couleurTexte: PALETTE.texteAttenue,
+      },
     );
   }
 
@@ -831,18 +1061,24 @@ export function planifierListeMembres(total: number): PlanListeMembres {
   const colonnes = affiches > SEUIL_DEUX_COLONNES ? 2 : 1;
   const lignes = Math.max(1, Math.ceil(affiches / colonnes));
   const largeurCarte = (L - MARGE * 2 - ECART * (colonnes - 1)) / colonnes;
-  const corps = affiches === 0 ? HAUTEUR_ETAT_VIDE : lignes * (HAUTEUR_LIGNE_MEMBRE + 12) - 12;
+  const corps =
+    affiches === 0
+      ? HAUTEUR_ETAT_VIDE
+      : lignes * (HAUTEUR_LIGNE_MEMBRE + 12) - 12;
   return {
     colonnes,
     lignes,
     largeurCarte,
     hauteurLigne: HAUTEUR_LIGNE_MEMBRE,
     affiches,
-    hauteurImage: HAUTEUR_ENTETE + RESPIRATION + corps + RESPIRATION + HAUTEUR_PIED,
+    hauteurImage:
+      HAUTEUR_ENTETE + RESPIRATION + corps + RESPIRATION + HAUTEUR_PIED,
   };
 }
 
-export async function renderMemberList(rows: MemberCardData[]): Promise<Buffer> {
+export async function renderMemberList(
+  rows: MemberCardData[],
+): Promise<Buffer> {
   ensureFonts();
   const plan = planifierListeMembres(rows.length);
   const visibles = rows.slice(0, plan.affiches);
@@ -886,21 +1122,38 @@ export async function renderMemberList(rows: MemberCardData[]): Promise<Buffer> 
       ombre: { x: 0, y: 3, couleur: OMBRE_DURE.couleur },
     });
 
-    const nom = premierTexteUtilisable([membre.display_name, membre.username], POLICES.display, "Membre");
-    await dessinerAvatar(ctx, membre.avatar_url, x + 62, y + plan.hauteurLigne / 2, 34, nom);
+    const nom = premierTexteUtilisable(
+      [membre.display_name, membre.username],
+      POLICES.display,
+      "Membre",
+    );
+    await dessinerAvatar(
+      ctx,
+      membre.avatar_url,
+      x + 62,
+      y + plan.hauteurLigne / 2,
+      34,
+      nom,
+    );
 
     // La pastille est mesurée AVANT le nom : sans cela, un pseudo long passait
     // sous le badge de rôles au lieu d'être tronqué.
     const libelleRoles = `${membre.roles_count} rôle${membre.roles_count > 1 ? "s" : ""}`;
     const largeurRoles = largeurPastille(ctx, libelleRoles, 14, POLICES.corps);
-    dessinerPastille(ctx, x + plan.largeurCarte - largeurRoles - 20, y + plan.hauteurLigne / 2 - 15, libelleRoles, {
-      fond: PALETTE.carteCreuse,
-      texte: PALETTE.texte,
-      taillePolice: 14,
-      police: POLICES.corps,
-      hauteur: 30,
-      largeurMax: plan.largeurCarte / 3,
-    });
+    dessinerPastille(
+      ctx,
+      x + plan.largeurCarte - largeurRoles - 20,
+      y + plan.hauteurLigne / 2 - 15,
+      libelleRoles,
+      {
+        fond: PALETTE.carteCreuse,
+        texte: PALETTE.texte,
+        taillePolice: 14,
+        police: POLICES.corps,
+        hauteur: 30,
+        largeurMax: plan.largeurCarte / 3,
+      },
+    );
 
     const xTexte = x + 108;
     const largeurTexte = plan.largeurCarte - 108 - largeurRoles - 36;

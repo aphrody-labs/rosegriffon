@@ -1,4 +1,11 @@
-import { BASE_ESPORT, BASE_WIKI, CHEMINS_ESPORT, CHEMINS_WIKI, esport, wiki } from "./routes";
+import {
+  BASE_ESPORT,
+  BASE_WIKI,
+  CHEMINS_ESPORT,
+  CHEMINS_WIKI,
+  esport,
+  wiki,
+} from "./routes";
 
 export interface NavItem {
   label: string;
@@ -69,18 +76,20 @@ export function estRouteActive(pathname: string, path: string): boolean {
  * doit se signaler quand la page courante est dans sa section.
  */
 export function estItemActif(pathname: string, item: NavItem): boolean {
-  if (item.activePaths?.some(p => estRouteActive(pathname, p))) {
+  if (item.activePaths?.some((p) => estRouteActive(pathname, p))) {
     return true;
   }
   if (!item.groupOnly && estRouteActive(pathname, item.path)) {
     return true;
   }
-  return Boolean(item.children?.some(enfant => estItemActif(pathname, enfant)));
+  return Boolean(
+    item.children?.some((enfant) => estItemActif(pathname, enfant)),
+  );
 }
 
 /** Parcourt un arbre de navigation en profondeur. */
 export function parcourirNav(items: NavItem[]): NavItem[] {
-  return items.flatMap(item => [item, ...parcourirNav(item.children ?? [])]);
+  return items.flatMap((item) => [item, ...parcourirNav(item.children ?? [])]);
 }
 
 /**
@@ -89,10 +98,15 @@ export function parcourirNav(items: NavItem[]): NavItem[] {
  * protégée reste visible dans un accordéon alors qu'elle est absente d'une
  * autre surface de navigation.
  */
-export function filtrerNavigation(items: NavItem[], canView: (item: NavItem) => boolean): NavItem[] {
-  return items.flatMap(item => {
+export function filtrerNavigation(
+  items: NavItem[],
+  canView: (item: NavItem) => boolean,
+): NavItem[] {
+  return items.flatMap((item) => {
     if (!canView(item)) return [];
-    const children = item.children ? filtrerNavigation(item.children, canView) : undefined;
+    const children = item.children
+      ? filtrerNavigation(item.children, canView)
+      : undefined;
     // Un groupe purement structurel ne doit pas devenir un accordéon vide.
     if (item.groupOnly && item.children && children?.length === 0) return [];
     return [{ ...item, ...(item.children ? { children } : {}) }];
@@ -108,8 +122,8 @@ export function cheminsCliquables(items: NavItem[]): string[] {
   return [
     ...new Set(
       parcourirNav(items)
-        .filter(i => !i.groupOnly)
-        .map(i => i.path),
+        .filter((i) => !i.groupOnly)
+        .map((i) => i.path),
     ),
   ];
 }
@@ -127,15 +141,30 @@ export function construireNavigationItems(): NavItem[] {
   return [
     // Accueil : pictogramme Material, le logo Azalée reste réservé à l'entête du groupe.
     { icon: "home", label: "nav.home", path: w("/") },
-    { commonSprite: "justice", icon: "sports_esports", label: "nav.play", path: "/play" },
+    {
+      commonSprite: "justice",
+      icon: "sports_esports",
+      label: "nav.play",
+      path: "/play",
+    },
     // Sprite « lien » : connexion/collaboration, utilisé pour Inazuma Eleven Cross.
-    { commonSprite: "lien", icon: "sports_soccer", label: "nav.cross", path: w("/cross") },
+    {
+      commonSprite: "lien",
+      icon: "sports_soccer",
+      label: "nav.cross",
+      path: w("/cross"),
+    },
     // Les articles et notes de version décrivent l'actualité du jeu et du wiki.
     { icon: "feed", label: "nav.association.news", path: "/news" },
     { icon: "update", label: "nav.news.patch_notes", path: w("/patch-notes") },
     // — Base de données (wiki curé) —
     // Sprite « chara » : portrait/personnage, donc index des joueurs.
-    { commonSprite: "chara", icon: "groups", label: "nav.wiki.players", path: w("/chara") },
+    {
+      commonSprite: "chara",
+      icon: "groups",
+      label: "nav.wiki.players",
+      path: w("/chara"),
+    },
     {
       // Techniques, tactiques, passifs (capacités hors hyper).
       children: [
@@ -203,9 +232,24 @@ export function construireNavigationItems(): NavItem[] {
     {
       // Équipes, entraîneurs, stades.
       children: [
-        { label: "nav.wiki.teams", path: w("/equipe"), icon: "shield", gameIcon: "emblem" },
-        { label: "nav.wiki.coaches", path: w("/entraineur"), icon: "sports", gameIcon: "medal" },
-        { label: "nav.wiki.stadiums", path: w("/stade"), icon: "stadium", gameIcon: "stadium" },
+        {
+          label: "nav.wiki.teams",
+          path: w("/equipe"),
+          icon: "shield",
+          gameIcon: "emblem",
+        },
+        {
+          label: "nav.wiki.coaches",
+          path: w("/entraineur"),
+          icon: "sports",
+          gameIcon: "medal",
+        },
+        {
+          label: "nav.wiki.stadiums",
+          path: w("/stade"),
+          icon: "stadium",
+          gameIcon: "stadium",
+        },
       ],
       gameIcon: "emblem",
       icon: "shield",
@@ -215,16 +259,36 @@ export function construireNavigationItems(): NavItem[] {
     {
       // Objets & moyens d'obtention (boutiques, capsules, drops).
       children: [
-        { label: "nav.wiki.items", path: w("/item"), icon: "backpack", gameIcon: "chest" },
-        { label: "nav.wiki.shops", path: w("/boutique"), icon: "storefront", gameIcon: "moneybag" },
-        { label: "nav.wiki.capsules", path: w("/capsule"), icon: "casino", gameIcon: "ticket" },
+        {
+          label: "nav.wiki.items",
+          path: w("/item"),
+          icon: "backpack",
+          gameIcon: "chest",
+        },
+        {
+          label: "nav.wiki.shops",
+          path: w("/boutique"),
+          icon: "storefront",
+          gameIcon: "moneybag",
+        },
+        {
+          label: "nav.wiki.capsules",
+          path: w("/capsule"),
+          icon: "casino",
+          gameIcon: "ticket",
+        },
         {
           label: "nav.wiki.invocation",
           path: w("/invocation"),
           icon: "stars",
           gameIcon: "star-token",
         },
-        { gameIcon: "creature", label: "nav.wiki.drops", path: w("/drops"), icon: "redeem" },
+        {
+          gameIcon: "creature",
+          label: "nav.wiki.drops",
+          path: w("/drops"),
+          icon: "redeem",
+        },
       ],
       gameIcon: "chest",
       icon: "backpack",
@@ -238,7 +302,12 @@ export function construireNavigationItems(): NavItem[] {
       label: "nav.wiki.levels",
       path: w("/niveau"),
     },
-    { gameIcon: "medal", icon: "emoji_events", label: "nav.wiki.trophies", path: w("/succes") },
+    {
+      gameIcon: "medal",
+      icon: "emoji_events",
+      label: "nav.wiki.trophies",
+      path: w("/succes"),
+    },
   ];
 }
 
@@ -256,8 +325,8 @@ export function construireMobileNavUnifiee(): NavItem[] {
   // sert encore les anciennes URL d'azalee.rosegriffon.fr par redirection
   // permanente, et l'onglet doit rester allumé le temps qu'elle se résolve.
   const cheminsWikiActifs = [
-    ...CHEMINS_WIKI.filter(c => c !== "/").map(wiki),
-    ...CHEMINS_WIKI.filter(c => c !== "/"),
+    ...CHEMINS_WIKI.filter((c) => c !== "/").map(wiki),
+    ...CHEMINS_WIKI.filter((c) => c !== "/"),
     BASE_WIKI,
   ];
 
@@ -366,7 +435,11 @@ export function construireEsportItems(): NavItem[] {
           label: "nav.esport.ranked.leaderboard",
           path: e("/ranked/leaderboard"),
         },
-        { icon: "military_tech", label: "nav.esport.ranked.tiers", path: e("/ranked/tiers") },
+        {
+          icon: "military_tech",
+          label: "nav.esport.ranked.tiers",
+          path: e("/ranked/tiers"),
+        },
         {
           icon: "swords",
           label: "nav.esport.ranked.play",
@@ -489,7 +562,14 @@ export function construireEsportItems(): NavItem[] {
  * chroniques sont un filtre et non un second site.
  */
 export function construireActualiteItems(): NavItem[] {
-  return [{ emote: "gaelle-fiere", icon: "feed", label: "nav.association.news", path: "/news" }];
+  return [
+    {
+      emote: "gaelle-fiere",
+      icon: "feed",
+      label: "nav.association.news",
+      path: "/news",
+    },
+  ];
 }
 
 /**
@@ -503,8 +583,18 @@ export function construireAssociationItems(): NavItem[] {
   return [
     // Le groupe porte déjà le logo RG : l'accueil utilise le symbole Maison.
     { icon: "home", label: "nav.association.home", path: "/" },
-    { emote: "rg-funny", icon: "forum", label: "nav.association.community", path: "/community" },
-    { emote: "gaelle-salut", icon: "groups", label: "nav.association.team", path: "/notre-equipe" },
+    {
+      emote: "rg-funny",
+      icon: "forum",
+      label: "nav.association.community",
+      path: "/community",
+    },
+    {
+      emote: "gaelle-salut",
+      icon: "groups",
+      label: "nav.association.team",
+      path: "/notre-equipe",
+    },
     { icon: "event", label: "nav.association.events", path: "/evenements" },
     { icon: "how_to_vote", label: "nav.association.polls", path: "/sondages" },
     { icon: "alternate_email", label: "nav.association.feed", path: "/feed" },
@@ -611,8 +701,8 @@ export function construireNavigationUnifiee(): SousCategorieNav[] {
   ];
 
   return groupes
-    .filter(groupe => groupe.enfants.length > 0)
-    .map(groupe => ({
+    .filter((groupe) => groupe.enfants.length > 0)
+    .map((groupe) => ({
       domaine: groupe.domaine,
       item: {
         children: groupe.enfants,
@@ -651,5 +741,5 @@ export function domaineDeLaRoute(pathname: string): Domaine {
  * ayant sa propre barre latérale (`AdminSidebar`). Une seule fonction, donc.
  */
 export function itemsDeNavigation(): NavItem[] {
-  return construireNavigationUnifiee().map(groupe => groupe.item);
+  return construireNavigationUnifiee().map((groupe) => groupe.item);
 }

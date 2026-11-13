@@ -21,7 +21,11 @@ const result = await Bun.build({
   outdir: fn,
   // Lazy routes (Discord interactions, canvas cards and their native addon)
   // stay in separate chunks, so a cold start only parses the HTTP API.
-  naming: { entry: "index.js", chunk: "chunks/[name]-[hash].js", asset: "assets/[name]-[hash].[ext]" },
+  naming: {
+    entry: "index.js",
+    chunk: "chunks/[name]-[hash].js",
+    asset: "assets/[name]-[hash].[ext]",
+  },
   splitting: true,
   target: "bun",
   format: "esm",
@@ -55,8 +59,20 @@ await Bun.write(
 await Bun.write(join(fn, "package.json"), JSON.stringify({ type: "module" }));
 await Bun.write(
   join(output, "config.json"),
-  JSON.stringify({ version: 3, routes: [{ handle: "filesystem" }, { src: "/(.*)", dest: "/index" }] }, null, 2),
+  JSON.stringify(
+    {
+      version: 3,
+      routes: [{ handle: "filesystem" }, { src: "/(.*)", dest: "/index" }],
+    },
+    null,
+    2,
+  ),
 );
 
-const size = result.outputs.reduce((total, artifact) => total + artifact.size, 0);
-console.info(`[build-vercel] ${result.outputs.length} artifacts, ${(size / 1_048_576).toFixed(1)} MiB in ${fn}`);
+const size = result.outputs.reduce(
+  (total, artifact) => total + artifact.size,
+  0,
+);
+console.info(
+  `[build-vercel] ${result.outputs.length} artifacts, ${(size / 1_048_576).toFixed(1)} MiB in ${fn}`,
+);

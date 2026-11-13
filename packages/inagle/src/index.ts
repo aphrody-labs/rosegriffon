@@ -49,7 +49,11 @@ export interface Team extends CoreTeam {
   [key: string]: any;
 }
 // New entity builders
-export { type BaseCharacterStats, type CharacterFilter, type CharacterStatsSummary } from "./entities/types.js";
+export {
+  type BaseCharacterStats,
+  type CharacterFilter,
+  type CharacterStatsSummary,
+} from "./entities/types.js";
 export * from "./menu/index.js";
 // APIs
 export * from "./service.js";
@@ -60,7 +64,10 @@ export * from "./stat-calculator.js";
 export * from "./zukan/index.js";
 
 // Items
-export type { ItemCategory, ParsedItem as Item } from "./parsers/item-config.js";
+export type {
+  ItemCategory,
+  ParsedItem as Item,
+} from "./parsers/item-config.js";
 // Global Search
 export {
   type GlobalSearchAPI,
@@ -70,10 +77,20 @@ export {
 } from "./search/index.js";
 // Canonical skill types and labels.
 export type { TeamPassive } from "./skills/types.js";
-export { CATEGORY_NAMES, ELEMENT_NAMES, PASSIVE_BOOST_NAMES, PASSIVE_SCOPE_NAMES } from "./skills/types.js";
+export {
+  CATEGORY_NAMES,
+  ELEMENT_NAMES,
+  PASSIVE_BOOST_NAMES,
+  PASSIVE_SCOPE_NAMES,
+} from "./skills/types.js";
 
 // Romaji & Transliteration
-export { initRomaji, toRomaji, toRomajiTitleCase, toKana } from "./utils/romaji.js";
+export {
+  initRomaji,
+  toRomaji,
+  toRomajiTitleCase,
+  toKana,
+} from "./utils/romaji.js";
 
 // Authoritative Level-5 NIE binary bridge
 export * as NieBridge from "./nie-bridge/index.js";
@@ -133,7 +150,14 @@ export * as cpk from "./cpk/index.js";
 
 // Canonical text formatting, gaiji & translations
 export * as text from "./text/index.js";
-export { formatDescription, translateEffect, tacticSlug, GAIJI, GAIJI_ATLAS, type GaijiGlyph } from "./text/index.js";
+export {
+  formatDescription,
+  translateEffect,
+  tacticSlug,
+  GAIJI,
+  GAIJI_ATLAS,
+  type GaijiGlyph,
+} from "./text/index.js";
 
 // Canonical game-text SQL lookup
 export * as gameText from "./game-text/index.js";

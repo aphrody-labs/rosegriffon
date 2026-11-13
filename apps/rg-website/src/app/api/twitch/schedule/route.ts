@@ -21,7 +21,10 @@ export async function GET() {
     let recurringSchedules: StreamSchedule[] | null = null;
     try {
       const pool = getPgPool();
-      const { rows } = await pool.query<StreamSchedule>(`SELECT * FROM stream_schedules WHERE status = $1`, ["active"]);
+      const { rows } = await pool.query<StreamSchedule>(
+        `SELECT * FROM stream_schedules WHERE status = $1`,
+        ["active"],
+      );
       recurringSchedules = rows;
     } catch (dbError) {
       console.error("Erreur Postgres Schedule:", dbError);
@@ -31,8 +34,14 @@ export async function GET() {
     let calendarEvents: CalendarEvent[] = [];
 
     // Vérification des variables d'environnement Google
-    if (!process.env.GOOGLE_CLIENT_EMAIL || !process.env.GOOGLE_PRIVATE_KEY || !process.env.GOOGLE_EVENTS_CALENDAR_ID) {
-      console.warn("⚠️ Variables d'environnement Google Calendar manquantes. Le planning Google ne sera pas chargé.");
+    if (
+      !process.env.GOOGLE_CLIENT_EMAIL ||
+      !process.env.GOOGLE_PRIVATE_KEY ||
+      !process.env.GOOGLE_EVENTS_CALENDAR_ID
+    ) {
+      console.warn(
+        "⚠️ Variables d'environnement Google Calendar manquantes. Le planning Google ne sera pas chargé.",
+      );
     }
 
     try {
@@ -54,9 +63,11 @@ export async function GET() {
         currentDate.setDate(now.getDate() + i);
         const currentDayOfWeek = currentDate.getDay(); // 0 = Dimanche, 1 = Lundi...
 
-        const daysStreams = recurringSchedules.filter(s => s.day_of_week === currentDayOfWeek);
+        const daysStreams = recurringSchedules.filter(
+          (s) => s.day_of_week === currentDayOfWeek,
+        );
 
-        daysStreams.forEach(stream => {
+        daysStreams.forEach((stream) => {
           if (!stream.start_time) {
             return;
           }
@@ -64,13 +75,24 @@ export async function GET() {
           // Combiner la date courante avec l'heure du stream
           const [hours = "0", minutes = "0"] = stream.start_time.split(":");
           const startDate = new Date(currentDate);
-          startDate.setHours(Number.parseInt(hours, 10), Number.parseInt(minutes, 10), 0, 0);
+          startDate.setHours(
+            Number.parseInt(hours, 10),
+            Number.parseInt(minutes, 10),
+            0,
+            0,
+          );
 
           // Calculer la date de fin (si end_time existe, sinon +2h par défaut)
           const endDate = new Date(startDate);
           if (stream.end_time) {
-            const [endHours = "0", endMinutes = "0"] = stream.end_time.split(":");
-            endDate.setHours(Number.parseInt(endHours, 10), Number.parseInt(endMinutes, 10), 0, 0);
+            const [endHours = "0", endMinutes = "0"] =
+              stream.end_time.split(":");
+            endDate.setHours(
+              Number.parseInt(endHours, 10),
+              Number.parseInt(endMinutes, 10),
+              0,
+              0,
+            );
             // Gérer le cas où la fin est le lendemain (ex: 23h -> 01h)
             if (endDate < startDate) {
               endDate.setDate(endDate.getDate() + 1);
@@ -92,7 +114,7 @@ export async function GET() {
     }
 
     // Traitement des événements Google Calendar
-    calendarEvents.forEach(event => {
+    calendarEvents.forEach((event) => {
       const start = event.start?.dateTime || event.start?.date;
       const end = event.end?.dateTime || event.end?.date;
 
@@ -101,7 +123,9 @@ export async function GET() {
       }
 
       const startDate = new Date(start);
-      const endDate = end ? new Date(end) : new Date(startDate.getTime() + 2 * 60 * 60 * 1000); // +2h par défaut
+      const endDate = end
+        ? new Date(end)
+        : new Date(startDate.getTime() + 2 * 60 * 60 * 1000); // +2h par défaut
 
       if (startDate >= now && startDate <= nextWeek) {
         segments.push({
@@ -117,22 +141,26 @@ export async function GET() {
 
     // 3.5 Gestion des conflits : Les événements spéciaux (Google Cal) remplacent le planning récurrent
     // On filtre les événements récurrents qui chevauchent un événement spécial
-    segments = segments.filter(segment => {
+    segments = segments.filter((segment) => {
       if (segment.type === "special") {
         return true;
       } // On garde toujours les spéciaux
 
       const segmentStart = new Date(segment.start_time).getTime();
-      const segmentEnd = segment.end_time ? new Date(segment.end_time).getTime() : segmentStart + 2 * 3_600_000;
+      const segmentEnd = segment.end_time
+        ? new Date(segment.end_time).getTime()
+        : segmentStart + 2 * 3_600_000;
 
       // Chercher un conflit avec un événement spécial
-      const hasConflict = segments.some(special => {
+      const hasConflict = segments.some((special) => {
         if (special.type !== "special") {
           return false;
         }
 
         const specialStart = new Date(special.start_time).getTime();
-        const specialEnd = special.end_time ? new Date(special.end_time).getTime() : specialStart + 2 * 3_600_000;
+        const specialEnd = special.end_time
+          ? new Date(special.end_time).getTime()
+          : specialStart + 2 * 3_600_000;
 
         // Vérifier le chevauchement
         return segmentStart < specialEnd && segmentEnd > specialStart;
@@ -142,7 +170,10 @@ export async function GET() {
     });
 
     // 4. Trier par date
-    segments.sort((a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime());
+    segments.sort(
+      (a, b) =>
+        new Date(a.start_time).getTime() - new Date(b.start_time).getTime(),
+    );
 
     // 5. Retourner la réponse formatée
     const headers = {
@@ -157,7 +188,10 @@ export async function GET() {
     );
   } catch (error) {
     console.error("Erreur globale API Schedule:", error);
-    return NextResponse.json({ error: "Erreur interne serveur" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Erreur interne serveur" },
+      { status: 500 },
+    );
   }
 }
 

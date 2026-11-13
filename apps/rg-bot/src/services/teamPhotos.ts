@@ -29,7 +29,9 @@ export interface StaffPhotoSyncReport {
   durationMs: number;
 }
 
-export async function syncStaffPhotos(client: Client): Promise<StaffPhotoSyncReport> {
+export async function syncStaffPhotos(
+  client: Client,
+): Promise<StaffPhotoSyncReport> {
   const start = Date.now();
   const rows = await sql<StaffRow[]>`
     SELECT id, name, discord_user_id, image_url AS current_image
@@ -45,7 +47,9 @@ export async function syncStaffPhotos(client: Client): Promise<StaffPhotoSyncRep
   for (const row of rows) {
     try {
       // discord.js fetch avec cache + rate-limit auto + retry intégré
-      const user = await client.users.fetch(row.discord_user_id, { force: true });
+      const user = await client.users.fetch(row.discord_user_id, {
+        force: true,
+      });
       const newWebp = user.displayAvatarURL({ size: 256, extension: "webp" });
 
       if (row.current_image === newWebp) {

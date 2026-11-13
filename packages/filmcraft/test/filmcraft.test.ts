@@ -13,7 +13,10 @@ import {
 
 describe("@aphrody/filmcraft timeline", () => {
   it("creates a standard Dragon Ball FilmCraft project", () => {
-    const proj = createFilmProject({ title: "DBZ Episode 5 Remaster", fps: 24 });
+    const proj = createFilmProject({
+      title: "DBZ Episode 5 Remaster",
+      fps: 24,
+    });
     expect(proj.title).toBe("DBZ Episode 5 Remaster");
     expect(proj.fps).toBe(24);
     expect(proj.tracks.length).toBe(4);
@@ -118,7 +121,9 @@ describe("@aphrody/filmcraft engine & MCP tools", () => {
       r2DestinationKey: "dbz-ep5-remaster.mp4",
     });
     expect(exp.status).toBe("completed");
-    expect(exp.r2Url).toBe("https://cdn.dragonballfr.com/exports/dbz-ep5-remaster.mp4");
+    expect(exp.r2Url).toBe(
+      "https://cdn.dragonballfr.com/exports/dbz-ep5-remaster.mp4",
+    );
   });
 
   it("handles tool calls through FilmCraftMcpServer", async () => {

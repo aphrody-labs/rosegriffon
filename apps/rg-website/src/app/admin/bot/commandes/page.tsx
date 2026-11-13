@@ -1,6 +1,12 @@
 import { AlertTriangle, ListTree } from "lucide-react";
 
-import { AdminPageHeader, Card, CardDescription, CardHeader, CardTitle } from "@rosegriffon/ui";
+import {
+  AdminPageHeader,
+  Card,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@rosegriffon/ui";
 
 import { commandesDesBots } from "@/lib/bot/serveur";
 
@@ -9,7 +15,8 @@ import { TableauCommandes } from "./TableauCommandes";
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  description: "Toutes les slash commands réellement enregistrées par les deux bots Discord.",
+  description:
+    "Toutes les slash commands réellement enregistrées par les deux bots Discord.",
   title: "Commandes du bot — Administration",
 };
 
@@ -51,10 +58,10 @@ export default async function CommandesBotPage() {
               Catalogue incomplet
             </CardTitle>
             <CardDescription>
-              {indisponibles.map(manquant => (
+              {indisponibles.map((manquant) => (
                 <span key={manquant.profil.nom} className="block">
-                  {manquant.profil.titre} n&apos;a pas répondu : {manquant.erreur}. Ses commandes manquent à cette
-                  liste.
+                  {manquant.profil.titre} n&apos;a pas répondu :{" "}
+                  {manquant.erreur}. Ses commandes manquent à cette liste.
                 </span>
               ))}
             </CardDescription>

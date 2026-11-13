@@ -5,7 +5,11 @@
  * verification stay owned by `nie steam`; this module only invokes that CLI
  * and mounts its resulting install through Inagle's existing native VFS.
  */
-import { configureGameVfs, gameDataDirectory, gameVfs } from "../core/vfs-data.js";
+import {
+  configureGameVfs,
+  gameDataDirectory,
+  gameVfs,
+} from "../core/vfs-data.js";
 
 // The VFS adapter is process-global, so Steam syncs through this bridge must
 // complete their download-and-mount sequence one at a time.
@@ -52,19 +56,33 @@ export function mountIEVR(installDir: string): MountedIEVRInstall {
  * Inagle. Steam credentials and refresh tokens remain in NIE's environment
  * and token store; they are never accepted as API arguments or added to argv.
  */
-export async function syncAndMountIEVR(options: SyncIEVROptions): Promise<MountedIEVRInstall> {
+export async function syncAndMountIEVR(
+  options: SyncIEVROptions,
+): Promise<MountedIEVRInstall> {
   const installDir = options.installDir.trim();
   if (!installDir) throw new TypeError("installDir must not be empty");
 
   const maxDownloads = options.maxDownloads ?? 16;
-  if (!Number.isSafeInteger(maxDownloads) || maxDownloads < 1 || maxDownloads > 128) {
+  if (
+    !Number.isSafeInteger(maxDownloads) ||
+    maxDownloads < 1 ||
+    maxDownloads > 128
+  ) {
     throw new RangeError("maxDownloads must be an integer from 1 through 128");
   }
 
   const executable = options.nieBin?.trim() || "nie";
   const run = syncQueue.then(async () => {
     const child = Bun.spawn(
-      [executable, "steam", "sync", "--out", installDir, "--max-downloads", String(maxDownloads)],
+      [
+        executable,
+        "steam",
+        "sync",
+        "--out",
+        installDir,
+        "--max-downloads",
+        String(maxDownloads),
+      ],
       { stdin: "inherit", stdout: "inherit", stderr: "inherit" },
     );
     const exitCode = await child.exited;

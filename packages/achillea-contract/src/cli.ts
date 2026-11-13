@@ -19,11 +19,20 @@ import { generateContract } from "./generate";
 function packageRoot(): string {
   const explicit = process.env.ACHILLEA_CONTRACT_ROOT?.trim();
   if (explicit) return resolve(explicit);
-  const candidates = [join(import.meta.dir, ".."), process.cwd(), join(process.cwd(), "packages", "achillea-contract")];
+  const candidates = [
+    join(import.meta.dir, ".."),
+    process.cwd(),
+    join(process.cwd(), "packages", "achillea-contract"),
+  ];
   const root = candidates.find(
-    candidate => existsSync(join(candidate, "generated")) && existsSync(join(candidate, "..", "achillea-types", "src")),
+    (candidate) =>
+      existsSync(join(candidate, "generated")) &&
+      existsSync(join(candidate, "..", "achillea-types", "src")),
   );
-  if (!root) throw new Error("achillea-contract root not found: run it from the package or the workspace root");
+  if (!root)
+    throw new Error(
+      "achillea-contract root not found: run it from the package or the workspace root",
+    );
   return root;
 }
 
@@ -32,7 +41,9 @@ const TYPES_ROOT = join(PACKAGE_ROOT, "..", "achillea-types", "src");
 const OUTPUT_DIR = join(PACKAGE_ROOT, "generated");
 
 async function readTypesVersion(): Promise<string> {
-  const manifest = (await Bun.file(join(TYPES_ROOT, "..", "package.json")).json()) as {
+  const manifest = (await Bun.file(
+    join(TYPES_ROOT, "..", "package.json"),
+  ).json()) as {
     version?: string;
   };
   return manifest.version ?? "0.0.0";
@@ -58,7 +69,9 @@ async function main(): Promise<number> {
 
     await Bun.write(target, content);
     const lines = content.split("\n").length;
-    console.log(`  ✓ ${file.padEnd(24)} ${String(lines).padStart(5)} lignes  — ${language}`);
+    console.log(
+      `  ✓ ${file.padEnd(24)} ${String(lines).padStart(5)} lignes  — ${language}`,
+    );
   }
 
   const summary = `${contract.declarations.length} déclarations (${contract.source}@${contract.version})`;
@@ -66,7 +79,9 @@ async function main(): Promise<number> {
   if (check) {
     if (stale.length > 0) {
       console.error(`Contrat périmé : ${stale.join(", ")}`);
-      console.error("Régénérer avec : bun --filter @rosegriffon/achillea-contract generate");
+      console.error(
+        "Régénérer avec : bun --filter @rosegriffon/achillea-contract generate",
+      );
       return 1;
     }
     console.log(`Contrat à jour — ${summary}`);

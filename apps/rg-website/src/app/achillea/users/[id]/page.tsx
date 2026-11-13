@@ -20,7 +20,9 @@ interface ProfilJoueurProps {
  * Le pseudo affiché est celui que l'API sert publiquement (`GET /users/:id`) ;
  * aucune donnée de session n'est lue ici.
  */
-export async function generateMetadata({ params }: ProfilJoueurProps): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: ProfilJoueurProps): Promise<Metadata> {
   const { id } = await params;
   const chemin = `/achillea/users/${id}`;
 
@@ -29,7 +31,8 @@ export async function generateMetadata({ params }: ProfilJoueurProps): Promise<M
     signalerEchec(`users/${id} — métadonnées`, resultat);
     return metadonneesAchillea({
       titre: "Profil joueur",
-      description: "Palier, statistiques classées et palmarès d'un joueur Achilléa.",
+      description:
+        "Palier, statistiques classées et palmarès d'un joueur Achilléa.",
       chemin,
     });
   }
@@ -50,5 +53,10 @@ export default async function UserProfilePage({ params }: ProfilJoueurProps) {
   // Le pseudo est passé au client pour que le `h1` existe dès le HTML serveur,
   // avant que le client ait rechargé le profil.
   const resultat = await lireJoueur(id);
-  return <UserProfileClient id={id} titre={resultat.ok ? resultat.value.username : undefined} />;
+  return (
+    <UserProfileClient
+      id={id}
+      titre={resultat.ok ? resultat.value.username : undefined}
+    />
+  );
 }

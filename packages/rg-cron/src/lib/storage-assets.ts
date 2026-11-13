@@ -46,7 +46,8 @@ export function fichierMedia(bucket: string, chemin: string): string | null {
   if (!racine || !BUCKETS_MEDIAS_LOURDS.has(bucket)) return null;
   const dossier = join(racine, bucket);
   const fichier = normalize(join(dossier, chemin));
-  if (!fichier.startsWith(dossier + sep)) throw new Error(`Chemin d'objet hors du bucket : ${chemin}`);
+  if (!fichier.startsWith(dossier + sep))
+    throw new Error(`Chemin d'objet hors du bucket : ${chemin}`);
   return fichier;
 }
 
@@ -54,7 +55,11 @@ export function fichierMedia(bucket: string, chemin: string): string | null {
  * URL publique d'un objet : l'origine des médias (`RG_MEDIA_PUBLIC_ORIGIN`, `cdn.rosegriffon.fr`)
  * quand il vit sur disque, sinon `origineStorage` (l'origine qui relaie Supabase Storage).
  */
-export function urlPubliqueObjet(bucket: string, chemin: string, origineStorage: string): string {
+export function urlPubliqueObjet(
+  bucket: string,
+  chemin: string,
+  origineStorage: string,
+): string {
   const origine = fichierMedia(bucket, chemin)
     ? (Bun.env.RG_MEDIA_PUBLIC_ORIGIN ?? "https://cdn.rosegriffon.fr")
     : origineStorage;
@@ -69,14 +74,22 @@ export function urlPubliqueObjet(bucket: string, chemin: string, origineStorage:
  * fonction serverless n'a pas de service Storage sur sa machine.
  */
 export function baseStorage(): string {
-  const brut = Bun.env.SUPABASE_INTERNAL_URL || Bun.env.SUPABASE_URL || Bun.env.NEXT_PUBLIC_SUPABASE_URL || "";
-  if (!brut) throw new Error("SUPABASE_URL (ou SUPABASE_INTERNAL_URL) n'est pas configurée.");
+  const brut =
+    Bun.env.SUPABASE_INTERNAL_URL ||
+    Bun.env.SUPABASE_URL ||
+    Bun.env.NEXT_PUBLIC_SUPABASE_URL ||
+    "";
+  if (!brut)
+    throw new Error(
+      "SUPABASE_URL (ou SUPABASE_INTERNAL_URL) n'est pas configurée.",
+    );
   return brut.replace(/\/+$/, "");
 }
 
 /** Résultat d'un téléchargement : les octets, ou le motif de l'échec. */
 export type TelechargementDiscord =
-  { ok: true; octets: ArrayBuffer; typeMime: string; urlUtilisee: string } | { ok: false; motif: string };
+  | { ok: true; octets: ArrayBuffer; typeMime: string; urlUtilisee: string }
+  | { ok: false; motif: string };
 
 /**
  * Télécharge une pièce jointe Discord, en re-signant son URL si elle a expiré.
@@ -106,17 +119,24 @@ export async function telechargerPieceJointeDiscord(
   if (!reponse || reponse.status === 403 || reponse.status === 404) {
     const fraiches = await resignerPiecesJointes([urlUtilisee]);
     const fraiche = fraiches?.[0];
-    if (!fraiche) return { ok: false, motif: `URL Discord périmée et non re-signable (salon ${salonId})` };
+    if (!fraiche)
+      return {
+        ok: false,
+        motif: `URL Discord périmée et non re-signable (salon ${salonId})`,
+      };
     urlUtilisee = fraiche;
     reponse = await fetch(urlUtilisee).catch(() => null);
   }
 
   if (!reponse?.ok) {
-    return { ok: false, motif: `téléchargement Discord ${reponse?.status ?? "injoignable"}` };
+    return {
+      ok: false,
+      motif: `téléchargement Discord ${reponse?.status ?? "injoignable"}`,
+    };
   }
 
   const typeMime = reponse.headers.get("content-type") ?? typeMimeAttendu ?? "";
-  if (!prefixesAutorises.some(prefixe => typeMime.startsWith(prefixe))) {
+  if (!prefixesAutorises.some((prefixe) => typeMime.startsWith(prefixe))) {
     return {
       ok: false,
       motif: `type refusé (${typeMime || "inconnu"} ; attendu ${prefixesAutorises.join(" ou ")})`,
@@ -143,7 +163,10 @@ export async function telechargerPieceJointeDiscord(
  * garantit pas : après une migration d'hôte, la base gardait les chemins de
  * médias dont les fichiers n'avaient pas suivi, et plus rien ne les recopiait.
  */
-export async function objetPresent(bucket: string, chemin: string): Promise<boolean> {
+export async function objetPresent(
+  bucket: string,
+  chemin: string,
+): Promise<boolean> {
   const fichier = fichierMedia(bucket, chemin);
   if (fichier) return Bun.file(fichier).exists();
   let base: string;
@@ -152,7 +175,10 @@ export async function objetPresent(bucket: string, chemin: string): Promise<bool
   } catch {
     return false;
   }
-  const reponse = await fetch(`${base}/storage/v1/object/public/${bucket}/${chemin}`, { method: "HEAD" }).catch(() => null);
+  const reponse = await fetch(
+    `${base}/storage/v1/object/public/${bucket}/${chemin}`,
+    { method: "HEAD" },
+  ).catch(() => null);
   return reponse?.ok ?? false;
 }
 
@@ -169,16 +195,26 @@ export async function televerserObjet(
       await Bun.write(fichier, octets);
       return { ok: true };
     } catch (err) {
-      return { ok: false, motif: `écriture disque ${err instanceof Error ? err.message : String(err)}` };
+      return {
+        ok: false,
+        motif: `écriture disque ${err instanceof Error ? err.message : String(err)}`,
+      };
     }
   }
   const cle = Bun.env.SUPABASE_SECRET_KEY || Bun.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!cle) return { ok: false, motif: "SUPABASE_SECRET_KEY et SUPABASE_SERVICE_ROLE_KEY absentes" };
+  if (!cle)
+    return {
+      ok: false,
+      motif: "SUPABASE_SECRET_KEY et SUPABASE_SERVICE_ROLE_KEY absentes",
+    };
   let base: string;
   try {
     base = baseStorage();
   } catch (err) {
-    return { ok: false, motif: err instanceof Error ? err.message : String(err) };
+    return {
+      ok: false,
+      motif: err instanceof Error ? err.message : String(err),
+    };
   }
 
   const envoi = await fetch(`${base}/storage/v1/object/${bucket}/${chemin}`, {

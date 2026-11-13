@@ -1,4 +1,8 @@
-import { circuitPointsForRank, circuitPointsToTier, denseRankToTier } from "@rosegriffon/achillea-core";
+import {
+  circuitPointsForRank,
+  circuitPointsToTier,
+  denseRankToTier,
+} from "@rosegriffon/achillea-core";
 import { sql, type Kysely } from "kysely";
 import type { Database } from "@rosegriffon/db/schema";
 import { finalTournamentStandings } from "./bracket";
@@ -28,7 +32,10 @@ export async function circuitRanking(db: Kysely<Database>) {
     .select(["id", "name", "participants_number", "grand_final_at"])
     .where("type", "=", "TOURNAMENT")
     .where("internal_state", "=", "Finished")
-    .where("tournament_type", "in", ["single_elimination", "double_elimination"])
+    .where("tournament_type", "in", [
+      "single_elimination",
+      "double_elimination",
+    ])
     .orderBy("grand_final_at", "desc")
     .execute();
   const players = new Map<string, Player>();
@@ -60,7 +67,7 @@ export async function circuitRanking(db: Kysely<Database>) {
       // but contributes no resolved circuit points yet.
       continue;
     }
-    const ids = standings.map(s => s.userId);
+    const ids = standings.map((s) => s.userId);
     const users = ids.length
       ? await db
           .selectFrom("user")
@@ -68,7 +75,7 @@ export async function circuitRanking(db: Kysely<Database>) {
           .where("id", "in", ids)
           .execute()
       : [];
-    const byId = new Map(users.map(u => [u.id, u]));
+    const byId = new Map(users.map((u) => [u.id, u]));
     if (standings.length > 0) summary.standingsStatus = "resolved";
     for (const standing of standings) {
       const user = byId.get(standing.userId);
@@ -119,7 +126,13 @@ export async function circuitRanking(db: Kysely<Database>) {
     ? await db
         .selectFrom("clan_member as cm")
         .innerJoin("clan as c", "c.id", "cm.clan_id")
-        .select(["cm.user_id", "c.id", "c.name", "c.shortened_name", "c.clan_avatar_url"])
+        .select([
+          "cm.user_id",
+          "c.id",
+          "c.name",
+          "c.shortened_name",
+          "c.clan_avatar_url",
+        ])
         .where("cm.user_id", "in", [...players.keys()])
         .where("c.is_hidden", "=", false)
         .where("c.is_disbanded", "=", false)
@@ -170,31 +183,64 @@ export async function circuitRanking(db: Kysely<Database>) {
   }
   return {
     leaderboard: [...players.values()].sort(
-      (a, b) => b.points - a.points || b.tournamentsPlayed - a.tournamentsPlayed || a.bestRank - b.bestRank,
+      (a, b) =>
+        b.points - a.points ||
+        b.tournamentsPlayed - a.tournamentsPlayed ||
+        a.bestRank - b.bestRank,
     ),
     tournaments: summaries,
-    clanRanking: [...clanTotals.values()].sort((a, b) => b.points - a.points || b.wins - a.wins || a.id - b.id),
+    clanRanking: [...clanTotals.values()].sort(
+      (a, b) => b.points - a.points || b.wins - a.wins || a.id - b.id,
+    ),
   };
 }
 
-type RawMatch = { opponent1Id: number; opponent2Id: number; score1: number; score2: number; isFinal: boolean };
+type RawMatch = {
+  opponent1Id: number;
+  opponent2Id: number;
+  score1: number;
+  score2: number;
+  isFinal: boolean;
+};
 
-async function rawMatches(db: Kysely<Database>, tournamentId: number): Promise<RawMatch[]> {
+async function rawMatches(
+  db: Kysely<Database>,
+  tournamentId: number,
+): Promise<RawMatch[]> {
   const stage = await sql<{
     id: number;
-  }>`select id from bm_stage where tournament_id = ${tournamentId} order by id desc limit 1`.execute(db);
+  }>`select id from bm_stage where tournament_id = ${tournamentId} order by id desc limit 1`.execute(
+    db,
+  );
   if (!stage.rows[0]) return [];
-  const rows = await sql<{ round_id: number; opponent1: unknown; opponent2: unknown; round_number: number }>`
+  const rows = await sql<{
+    round_id: number;
+    opponent1: unknown;
+    opponent2: unknown;
+    round_number: number;
+  }>`
 		select m.round_id, m.opponent1, m.opponent2, r.number as round_number
 		from bm_match m left join bm_round r on r.id = m.round_id where m.stage_id = ${stage.rows[0].id}
 	`.execute(db);
-  const maxRound = Math.max(0, ...rows.rows.map(r => Number(r.round_number ?? 0)));
+  const maxRound = Math.max(
+    0,
+    ...rows.rows.map((r) => Number(r.round_number ?? 0)),
+  );
   const parse = (value: unknown) =>
-    (typeof value === "string" ? JSON.parse(value) : value) as { id?: number; score?: number } | null;
-  return rows.rows.flatMap(row => {
+    (typeof value === "string" ? JSON.parse(value) : value) as {
+      id?: number;
+      score?: number;
+    } | null;
+  return rows.rows.flatMap((row) => {
     const one = parse(row.opponent1);
     const two = parse(row.opponent2);
-    if (one?.id == null || two?.id == null || one.score == null || two.score == null) return [];
+    if (
+      one?.id == null ||
+      two?.id == null ||
+      one.score == null ||
+      two.score == null
+    )
+      return [];
     return [
       {
         opponent1Id: Number(one.id),
@@ -207,7 +253,10 @@ async function rawMatches(db: Kysely<Database>, tournamentId: number): Promise<R
   });
 }
 
-export async function tournamentSummary(db: Kysely<Database>, tournamentId: number) {
+export async function tournamentSummary(
+  db: Kysely<Database>,
+  tournamentId: number,
+) {
   const tournament = await db
     .selectFrom("event")
     .select(["id", "name", "participants_number"])
@@ -219,11 +268,18 @@ export async function tournamentSummary(db: Kysely<Database>, tournamentId: numb
   const participants = await db
     .selectFrom("tournament_participant as p")
     .innerJoin("user as u", "u.id", "p.user_id")
-    .select(["p.bracket_participant_id", "p.user_id", "u.display_name", "u.avatar"])
+    .select([
+      "p.bracket_participant_id",
+      "p.user_id",
+      "u.display_name",
+      "u.avatar",
+    ])
     .where("p.tournament_id", "=", tournamentId)
     .execute();
   const users = new Map(
-    participants.filter(p => p.bracket_participant_id != null).map(p => [Number(p.bracket_participant_id), p]),
+    participants
+      .filter((p) => p.bracket_participant_id != null)
+      .map((p) => [Number(p.bracket_participant_id), p]),
   );
   const goalsByUser = new Map<string, { scored: number; conceded: number }>();
   for (const match of matches) {
@@ -242,7 +298,7 @@ export async function tournamentSummary(db: Kysely<Database>, tournamentId: numb
   const stats = matches.length
     ? (() => {
         const goals = matches.reduce((n, m) => n + m.score1 + m.score2, 0);
-        const margins = matches.map(m => Math.abs(m.score1 - m.score2));
+        const margins = matches.map((m) => Math.abs(m.score1 - m.score2));
         const matchup = (m: RawMatch | undefined, max = false) => {
           if (!m) return null;
           const a =
@@ -266,10 +322,13 @@ export async function tournamentSummary(db: Kysely<Database>, tournamentId: numb
           matches: matches.length,
           totalGoals: goals,
           avgGoals: Math.round((goals / matches.length) * 100) / 100,
-          topScore: Math.max(...matches.flatMap(m => [m.score1, m.score2])),
+          topScore: Math.max(...matches.flatMap((m) => [m.score1, m.score2])),
           minMargin: Math.min(...margins),
           maxMargin: Math.max(...margins),
-          biggestBlowout: matchup(matches[margins.indexOf(Math.max(...margins))], true),
+          biggestBlowout: matchup(
+            matches[margins.indexOf(Math.max(...margins))],
+            true,
+          ),
           closestMatch: matchup(matches[margins.indexOf(Math.min(...margins))]),
         };
       })()
@@ -277,17 +336,24 @@ export async function tournamentSummary(db: Kysely<Database>, tournamentId: numb
   let top10: unknown[] = [];
   try {
     const standings = await finalTournamentStandings(db, tournamentId);
-    const ids = standings.map(s => s.userId);
+    const ids = standings.map((s) => s.userId);
     const rows = ids.length
-      ? await db.selectFrom("user").select(["id", "display_name", "avatar"]).where("id", "in", ids).execute()
+      ? await db
+          .selectFrom("user")
+          .select(["id", "display_name", "avatar"])
+          .where("id", "in", ids)
+          .execute()
       : [];
-    const byId = new Map(rows.map(u => [u.id, u]));
+    const byId = new Map(rows.map((u) => [u.id, u]));
     top10 = standings
-      .filter(s => s.rank <= 10)
-      .map(s => {
+      .filter((s) => s.rank <= 10)
+      .map((s) => {
         const u = byId.get(s.userId);
         if (!u) return null;
-        const points = circuitPointsForRank(Number(tournament.participants_number ?? 0), s.rank);
+        const points = circuitPointsForRank(
+          Number(tournament.participants_number ?? 0),
+          s.rank,
+        );
         const goals = goalsByUser.get(u.id) ?? { scored: 0, conceded: 0 };
         return {
           rank: s.rank,
@@ -300,7 +366,9 @@ export async function tournamentSummary(db: Kysely<Database>, tournamentId: numb
           tier: circuitPointsToTier(points).key,
           goalsScored: goals.scored,
           goalsConceded: goals.conceded,
-          goalAverage: goals.conceded ? Math.round((goals.scored / goals.conceded) * 100) / 100 : goals.scored,
+          goalAverage: goals.conceded
+            ? Math.round((goals.scored / goals.conceded) * 100) / 100
+            : goals.scored,
         };
       })
       .filter(Boolean);
@@ -310,13 +378,26 @@ export async function tournamentSummary(db: Kysely<Database>, tournamentId: numb
   return { top10, stats };
 }
 
-export async function playerCircuitProfile(db: Kysely<Database>, userId: string) {
-  const user = await db.selectFrom("user").select("id").where("id", "=", userId).executeTakeFirst();
+export async function playerCircuitProfile(
+  db: Kysely<Database>,
+  userId: string,
+) {
+  const user = await db
+    .selectFrom("user")
+    .select("id")
+    .where("id", "=", userId)
+    .executeTakeFirst();
   if (!user) return null;
   const participations = await db
     .selectFrom("tournament_participant as p")
     .innerJoin("event as e", "e.id", "p.tournament_id")
-    .select(["p.tournament_id", "p.bracket_participant_id", "e.name", "e.participants_number", "e.grand_final_at"])
+    .select([
+      "p.tournament_id",
+      "p.bracket_participant_id",
+      "e.name",
+      "e.participants_number",
+      "e.grand_final_at",
+    ])
     .where("p.user_id", "=", userId)
     .where("e.internal_state", "=", "Finished")
     .orderBy("e.grand_final_at", "desc")
@@ -336,12 +417,17 @@ export async function playerCircuitProfile(db: Kysely<Database>, userId: string)
     let tournamentPoints = 0;
     let rankLabel = "—";
     try {
-      const standing = (await finalTournamentStandings(db, p.tournament_id)).find(s => s.userId === userId);
+      const standing = (
+        await finalTournamentStandings(db, p.tournament_id)
+      ).find((s) => s.userId === userId);
       if (standing) {
         rank = standing.rank;
         const rankTier = denseRankToTier(rank);
         rankLabel = rankTier.label;
-        tournamentPoints = circuitPointsForRank(Number(p.participants_number ?? 0), rank);
+        tournamentPoints = circuitPointsForRank(
+          Number(p.participants_number ?? 0),
+          rank,
+        );
         points += tournamentPoints;
         bestRank = Math.min(bestRank, rank);
         if (rank === 1) wins++;
@@ -392,10 +478,14 @@ export async function playerCircuitProfile(db: Kysely<Database>, userId: string)
     podiums,
     top4,
     top8,
-    bestRankLabel: Number.isFinite(bestRank) ? denseRankToTier(bestRank).label : "—",
+    bestRankLabel: Number.isFinite(bestRank)
+      ? denseRankToTier(bestRank).label
+      : "—",
     goalsScored,
     goalsConceded,
-    goalAverage: goalsConceded ? Math.round((goalsScored / goalsConceded) * 100) / 100 : goalsScored,
+    goalAverage: goalsConceded
+      ? Math.round((goalsScored / goalsConceded) * 100) / 100
+      : goalsScored,
     bestStreak,
     history,
   };
@@ -415,10 +505,14 @@ export async function circuitStats(db: Kysely<Database>) {
   const tournamentHistory: unknown[] = [];
   for (const t of finished) {
     const summary = await tournamentSummary(db, t.id);
-    const stats = summary?.stats as { matches?: number; totalGoals?: number } | null;
+    const stats = summary?.stats as {
+      matches?: number;
+      totalGoals?: number;
+    } | null;
     totalMatches += stats?.matches ?? 0;
     totalGoals += stats?.totalGoals ?? 0;
-    const podium = (circuit.tournaments.find(x => x.id === t.id)?.podium ?? []) as Array<{
+    const podium = (circuit.tournaments.find((x) => x.id === t.id)?.podium ??
+      []) as Array<{
       rank: number;
       displayName: string;
     }>;
@@ -429,8 +523,8 @@ export async function circuitStats(db: Kysely<Database>) {
       size: Number(t.participants_number ?? 0),
       matches: stats?.matches ?? 0,
       goals: stats?.totalGoals ?? 0,
-      champion: podium.find(p => p.rank === 1)?.displayName ?? null,
-      runnerUp: podium.find(p => p.rank === 2)?.displayName ?? null,
+      champion: podium.find((p) => p.rank === 1)?.displayName ?? null,
+      runnerUp: podium.find((p) => p.rank === 2)?.displayName ?? null,
     });
   }
   return {
@@ -438,7 +532,9 @@ export async function circuitStats(db: Kysely<Database>) {
       totalTournaments: finished.length,
       totalMatches,
       totalGoals,
-      avgGoalsPerMatch: totalMatches ? Math.round((totalGoals / totalMatches) * 100) / 100 : 0,
+      avgGoalsPerMatch: totalMatches
+        ? Math.round((totalGoals / totalMatches) * 100) / 100
+        : 0,
       totalPlayers: circuit.leaderboard.length,
       totalClans: circuit.clanRanking.length,
     },
@@ -450,7 +546,11 @@ export async function circuitStats(db: Kysely<Database>) {
       biggestTournament: finished.reduce(
         (best, t) =>
           !best || Number(t.participants_number ?? 0) > best.size
-            ? { id: t.id, name: t.name, size: Number(t.participants_number ?? 0) }
+            ? {
+                id: t.id,
+                name: t.name,
+                size: Number(t.participants_number ?? 0),
+              }
             : best,
         null as { id: number; name: string; size: number } | null,
       ),

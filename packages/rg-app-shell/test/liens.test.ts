@@ -12,7 +12,11 @@ import {
   domaineDeLaRoute,
   itemsDeNavigation,
 } from "../src/config/navigation";
-import { listerMotifsRoutes, motifAccepte, routeExiste } from "../src/lib/routes-next";
+import {
+  listerMotifsRoutes,
+  motifAccepte,
+  routeExiste,
+} from "../src/lib/routes-next";
 
 const RACINE = join(import.meta.dir, "../../..");
 
@@ -53,7 +57,7 @@ describe("inventaire des routes", () => {
     const motifs = listerMotifsRoutes(APP);
     expect(motifs.length).toBeGreaterThan(50);
     // Les route groups ne doivent jamais fuiter dans une URL.
-    expect(motifs.filter(m => m.includes("("))).toEqual([]);
+    expect(motifs.filter((m) => m.includes("("))).toEqual([]);
   });
 });
 
@@ -64,14 +68,22 @@ describe("inventaire des routes", () => {
  */
 describe("navigation unifiée : trois catégories", () => {
   test("sépare les projets RG des sous-routes de tournois Achilléa", () => {
-    const projects = construireAssociationItems().find(item => item.path === "/projets");
-    const tournaments = construireEsportItems().find(item => item.path === "/achillea/tournaments");
-    const projectPaths = (projects?.children ?? []).map(item => item.path);
-    const tournamentPaths = (tournaments?.children ?? []).map(item => item.path);
+    const projects = construireAssociationItems().find(
+      (item) => item.path === "/projets",
+    );
+    const tournaments = construireEsportItems().find(
+      (item) => item.path === "/achillea/tournaments",
+    );
+    const projectPaths = (projects?.children ?? []).map((item) => item.path);
+    const tournamentPaths = (tournaments?.children ?? []).map(
+      (item) => item.path,
+    );
 
     expect(projectPaths).toContain("/projets/emotes");
     expect(projectPaths).toContain("/rose-griffon-tv");
-    expect(projectPaths.some(path => path.startsWith("/achillea/tournaments"))).toBe(false);
+    expect(
+      projectPaths.some((path) => path.startsWith("/achillea/tournaments")),
+    ).toBe(false);
     expect(tournamentPaths).toEqual([
       "/achillea/tournaments",
       "/achillea/tournaments/create",
@@ -81,7 +93,11 @@ describe("navigation unifiée : trois catégories", () => {
 
   test("les trois catégories sont présentes, dans l'ordre", () => {
     const groupes = construireNavigationUnifiee();
-    expect(groupes.map(g => g.domaine)).toEqual(["association", "wiki", "esport"]);
+    expect(groupes.map((g) => g.domaine)).toEqual([
+      "association",
+      "wiki",
+      "esport",
+    ]);
   });
 
   test("les entêtes de groupe ne sont pas des destinations", () => {
@@ -92,14 +108,20 @@ describe("navigation unifiée : trois catégories", () => {
 
   test("chaque lien cliquable du menu unifié correspond à une route réelle", () => {
     const motifs = listerMotifsRoutes(APP);
-    const items = itemsDeNavigation().flatMap(groupe => groupe.children ?? []);
-    const morts = cheminsCliquables(items).filter(chemin => !routeExiste(motifs, chemin));
+    const items = itemsDeNavigation().flatMap(
+      (groupe) => groupe.children ?? [],
+    );
+    const morts = cheminsCliquables(items).filter(
+      (chemin) => !routeExiste(motifs, chemin),
+    );
     expect(morts).toEqual([]);
   });
 
   test("chaque onglet de la barre mobile correspond à une route réelle", () => {
     const motifs = listerMotifsRoutes(APP);
-    const morts = cheminsCliquables(construireMobileNavUnifiee()).filter(chemin => !routeExiste(motifs, chemin));
+    const morts = cheminsCliquables(construireMobileNavUnifiee()).filter(
+      (chemin) => !routeExiste(motifs, chemin),
+    );
     expect(morts).toEqual([]);
   });
 

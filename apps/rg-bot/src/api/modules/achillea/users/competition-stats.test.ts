@@ -10,7 +10,12 @@ import {
   type QueryResult,
 } from "kysely";
 import type { Database } from "@rosegriffon/db/schema";
-import { interclanStats, toInterclanStats, toTournamentStats, tournamentStats } from "./competition-stats";
+import {
+  interclanStats,
+  toInterclanStats,
+  toTournamentStats,
+  tournamentStats,
+} from "./competition-stats";
 import { participantSoloRanks } from "../tournaments/service";
 
 /** Kysely réel (compilation Postgres) dont le pilote renvoie des lignes enregistrées. */
@@ -38,7 +43,7 @@ function recordingDb(answer: (query: CompiledQuery) => unknown[]) {
     dialect: {
       createAdapter: () => new PostgresAdapter(),
       createDriver: () => driver,
-      createIntrospector: innerDb => new PostgresIntrospector(innerDb),
+      createIntrospector: (innerDb) => new PostgresIntrospector(innerDb),
       createQueryCompiler: () => new PostgresQueryCompiler(),
     },
   });
@@ -79,7 +84,11 @@ describe("bilan tournois du profil", () => {
   });
 
   it("renvoie des zéros quand le joueur n'a aucun match de tournoi", () => {
-    expect(toTournamentStats(undefined)).toMatchObject({ total: 0, personalTotal: 0, goalsScoredAvg: 0 });
+    expect(toTournamentStats(undefined)).toMatchObject({
+      total: 0,
+      personalTotal: 0,
+      goalsScoredAvg: 0,
+    });
   });
 });
 
@@ -117,7 +126,10 @@ describe("bilan interclans du profil", () => {
   });
 
   it("ignore les valeurs non numériques", () => {
-    expect(toInterclanStats({ total: "abc", wins: null })).toMatchObject({ total: 0, wins: 0 });
+    expect(toInterclanStats({ total: "abc", wins: null })).toMatchObject({
+      total: 0,
+      wins: 0,
+    });
   });
 });
 
@@ -128,7 +140,7 @@ describe("palier solo des participants d'un tournoi", () => {
   ];
 
   it("associe l'ELO solo de la saison active au palier", async () => {
-    const { db, queries } = recordingDb(query => {
+    const { db, queries } = recordingDb((query) => {
       if (query.sql.includes('from "season"')) return [{ id: "s1" }];
       if (query.sql.includes('from "user_elo"'))
         return [
@@ -139,10 +151,18 @@ describe("palier solo des participants d'un tournoi", () => {
       return [];
     });
     const result = await participantSoloRanks(db, ["a", "b", "c", "a"]);
-    expect(result.get("a")).toEqual({ elo: 16, key: "Fer", gradient: ["#959595"] });
-    expect(result.get("b")).toEqual({ elo: 87, key: "Bronze", gradient: ["#cd7f32"] });
+    expect(result.get("a")).toEqual({
+      elo: 16,
+      key: "Fer",
+      gradient: ["#959595"],
+    });
+    expect(result.get("b")).toEqual({
+      elo: 87,
+      key: "Bronze",
+      gradient: ["#cd7f32"],
+    });
     expect(result.has("c")).toBe(false);
-    const elo = queries.find(query => query.sql.includes('from "user_elo"'));
+    const elo = queries.find((query) => query.sql.includes('from "user_elo"'));
     expect(elo?.sql).toContain('"season_id" =');
     expect(elo?.parameters).toEqual([2, "s1", "a", "b", "c"]);
   });

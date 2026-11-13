@@ -17,7 +17,15 @@ import {
   ContextMenuSubTrigger,
   ContextMenuTrigger,
 } from "@rosegriffon/ui";
-import { Archive, CheckCircle, Copy, Edit, ExternalLink, FileText, Trash2 } from "@/lib/icons-config";
+import {
+  Archive,
+  CheckCircle,
+  Copy,
+  Edit,
+  ExternalLink,
+  FileText,
+  Trash2,
+} from "@/lib/icons-config";
 import { cn } from "@/lib/utils";
 import type { NewsItem } from "@/types/news";
 import { NewsCard } from "./news-card";
@@ -49,7 +57,11 @@ const QUICK_STATUS = [
   },
 ];
 
-export function SelectableNewsCard({ item, selected, onToggle }: SelectableNewsCardProps) {
+export function SelectableNewsCard({
+  item,
+  selected,
+  onToggle,
+}: SelectableNewsCardProps) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   const slug = item.slug || "";
@@ -71,7 +83,8 @@ export function SelectableNewsCard({ item, selected, onToggle }: SelectableNewsC
       if (result.error) {
         throw new Error(result.error);
       }
-      const label = QUICK_STATUS.find(s => s.value === newStatus)?.label || newStatus;
+      const label =
+        QUICK_STATUS.find((s) => s.value === newStatus)?.label || newStatus;
       toast.success(`Statut changé en « ${label} »`);
       router.refresh();
     } catch {
@@ -100,7 +113,11 @@ export function SelectableNewsCard({ item, selected, onToggle }: SelectableNewsC
   };
 
   const handleDelete = async () => {
-    if (!confirm("Êtes-vous sûr de vouloir supprimer cet article ? Cette action est irréversible.")) {
+    if (
+      !confirm(
+        "Êtes-vous sûr de vouloir supprimer cet article ? Cette action est irréversible.",
+      )
+    ) {
       return;
     }
     setBusy(true);
@@ -122,11 +139,13 @@ export function SelectableNewsCard({ item, selected, onToggle }: SelectableNewsC
   return (
     <ContextMenu>
       <ContextMenuTrigger asChild>
-        <div className={cn("relative", busy && "pointer-events-none opacity-60")}>
+        <div
+          className={cn("relative", busy && "pointer-events-none opacity-60")}
+        >
           {/* Checkbox overlay */}
           <button
             type="button"
-            onClick={e => {
+            onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
               onToggle();
@@ -135,10 +154,18 @@ export function SelectableNewsCard({ item, selected, onToggle }: SelectableNewsC
             aria-label={selected ? "Désélectionner" : "Sélectionner"}
           >
             <div
-              className={cn("flex size-4 items-center justify-center rounded transition-all", selected && "bg-primary")}
+              className={cn(
+                "flex size-4 items-center justify-center rounded transition-all",
+                selected && "bg-primary",
+              )}
             >
               {selected && (
-                <svg className="size-3 text-on-primary" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                <svg
+                  className="size-3 text-on-primary"
+                  viewBox="0 0 12 12"
+                  fill="none"
+                  aria-hidden="true"
+                >
                   <path
                     d="M2 6L5 9L10 3"
                     stroke="currentColor"
@@ -155,7 +182,8 @@ export function SelectableNewsCard({ item, selected, onToggle }: SelectableNewsC
           <div
             className={cn(
               "rounded-[26px] transition-all duration-200",
-              selected && "ring-2 ring-primary ring-offset-2 ring-offset-background",
+              selected &&
+                "ring-2 ring-primary ring-offset-2 ring-offset-background",
             )}
           >
             <NewsCard item={item} />
@@ -169,14 +197,27 @@ export function SelectableNewsCard({ item, selected, onToggle }: SelectableNewsC
         <ContextMenuSeparator className="bg-outline-variant/10" />
 
         <ContextMenuGroup>
-          <ContextMenuItem asChild className="rounded-xl font-bold focus:bg-primary/10 focus:text-primary">
+          <ContextMenuItem
+            asChild
+            className="rounded-xl font-bold focus:bg-primary/10 focus:text-primary"
+          >
             <Link href={`/admin/news/${item.id}`}>
               <Edit /> Modifier
               <ContextMenuShortcut>E</ContextMenuShortcut>
             </Link>
           </ContextMenuItem>
-          <ContextMenuItem asChild className="rounded-xl font-bold focus:bg-primary/10 focus:text-primary">
-            <Link href={item.status === "published" ? `/news/${slug}` : `/news/${slug}?preview=true`} target="_blank">
+          <ContextMenuItem
+            asChild
+            className="rounded-xl font-bold focus:bg-primary/10 focus:text-primary"
+          >
+            <Link
+              href={
+                item.status === "published"
+                  ? `/news/${slug}`
+                  : `/news/${slug}?preview=true`
+              }
+              target="_blank"
+            >
               <ExternalLink /> Voir l&apos;aperçu
             </Link>
           </ContextMenuItem>
@@ -189,7 +230,7 @@ export function SelectableNewsCard({ item, selected, onToggle }: SelectableNewsC
             Statut
           </ContextMenuSubTrigger>
           <ContextMenuSubContent className="min-w-[160px] rounded-2xl border-none bg-surface-container-high p-1.5 shadow-2xl">
-            {QUICK_STATUS.map(opt => (
+            {QUICK_STATUS.map((opt) => (
               <ContextMenuItem
                 key={opt.value}
                 onSelect={() => handleStatusChange(opt.value)}
@@ -198,7 +239,11 @@ export function SelectableNewsCard({ item, selected, onToggle }: SelectableNewsC
               >
                 <opt.icon className={cn("mr-1", opt.color)} />
                 {opt.label}
-                {opt.value === item.status && <ContextMenuShortcut className="opacity-60">actuel</ContextMenuShortcut>}
+                {opt.value === item.status && (
+                  <ContextMenuShortcut className="opacity-60">
+                    actuel
+                  </ContextMenuShortcut>
+                )}
               </ContextMenuItem>
             ))}
           </ContextMenuSubContent>
@@ -219,7 +264,11 @@ export function SelectableNewsCard({ item, selected, onToggle }: SelectableNewsC
 
         <ContextMenuSeparator className="bg-outline-variant/10" />
 
-        <ContextMenuItem variant="destructive" onSelect={handleDelete} className="rounded-xl font-bold">
+        <ContextMenuItem
+          variant="destructive"
+          onSelect={handleDelete}
+          className="rounded-xl font-bold"
+        >
           <Trash2 /> Supprimer
         </ContextMenuItem>
       </ContextMenuContent>

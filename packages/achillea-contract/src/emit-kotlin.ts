@@ -6,7 +6,13 @@
  */
 
 import { resolveFields } from "./emit-json-schema";
-import { indexDeclarations, type IrContract, type IrDeclaration, type IrField, type IrType } from "./ir";
+import {
+  indexDeclarations,
+  type IrContract,
+  type IrDeclaration,
+  type IrField,
+  type IrType,
+} from "./ir";
 import { docComment, kotlinFieldName } from "./naming";
 
 /**
@@ -33,7 +39,11 @@ function kotlinType(type: IrType): string {
     case "date":
       return "String";
     case "literal":
-      return typeof type.value === "string" ? "String" : typeof type.value === "number" ? "Double" : "Boolean";
+      return typeof type.value === "string"
+        ? "String"
+        : typeof type.value === "number"
+          ? "Double"
+          : "Boolean";
     case "param":
       return type.name;
     case "ref":
@@ -43,7 +53,8 @@ function kotlinType(type: IrType): string {
     case "array":
       return `List<${kotlinType(type.of)}>`;
     case "tuple":
-      if (type.of.length === 2) return `Pair<${kotlinType(type.of[0]!)}, ${kotlinType(type.of[1]!)}>`;
+      if (type.of.length === 2)
+        return `Pair<${kotlinType(type.of[0]!)}, ${kotlinType(type.of[1]!)}>`;
       if (type.of.length === 3)
         return `Triple<${kotlinType(type.of[0]!)}, ${kotlinType(type.of[1]!)}, ${kotlinType(type.of[2]!)}>`;
       return `List<JsonElement>`;
@@ -59,14 +70,17 @@ function kotlinType(type: IrType): string {
 }
 
 function unionType(members: readonly IrType[]): string {
-  const nullable = members.some(member => member.kind === "null");
-  const rest = members.filter(member => member.kind !== "null");
+  const nullable = members.some((member) => member.kind === "null");
+  const rest = members.filter((member) => member.kind !== "null");
   if (rest.length === 0) return "JsonElement?";
 
   const inner =
     rest.length === 1
       ? kotlinType(rest[0] as IrType)
-      : rest.every(member => member.kind === "literal" && typeof member.value === "string")
+      : rest.every(
+            (member) =>
+              member.kind === "literal" && typeof member.value === "string",
+          )
         ? "String"
         : "JsonElement";
 
@@ -113,13 +127,18 @@ function emitDataClass(
     let rendered = kotlinType(field.type);
     const suffix = field.optional && !rendered.endsWith("?") ? "?" : "";
     rendered += suffix;
-    lines.push(`\tval ${kotlinName}: ${rendered}${field.optional ? " = null" : ""},`);
+    lines.push(
+      `\tval ${kotlinName}: ${rendered}${field.optional ? " = null" : ""},`,
+    );
   }
   lines.push(")");
   return lines;
 }
 
-export function emitKotlin(contract: IrContract, packageName = "fr.rosegriffon.achillea"): string {
+export function emitKotlin(
+  contract: IrContract,
+  packageName = "fr.rosegriffon.achillea",
+): string {
   const byName = indexDeclarations(contract);
   const out: string[] = [
     "// Contrat Achilléa — FICHIER GÉNÉRÉ, ne pas éditer à la main.",
@@ -138,26 +157,60 @@ export function emitKotlin(contract: IrContract, packageName = "fr.rosegriffon.a
     if (decl.kind === "enum") out.push(...emitEnum(decl), "");
     else if (decl.kind === "alias") {
       if (decl.type.kind === "object") {
-        out.push(...emitDataClass(decl.name, decl.doc, decl.typeParams, decl.type.fields), "");
+        out.push(
+          ...emitDataClass(
+            decl.name,
+            decl.doc,
+            decl.typeParams,
+            decl.type.fields,
+          ),
+          "",
+        );
       } else if (decl.type.kind === "union") {
-        const refs = decl.type.of.filter(member => member.kind === "ref");
-        const objects = decl.type.of.filter(member => member.kind === "object");
+        const refs = decl.type.of.filter((member) => member.kind === "ref");
+        const objects = decl.type.of.filter(
+          (member) => member.kind === "object",
+        );
         if (refs.length > 0 && objects.length > 0) {
           // Pas d'héritage de data class en Kotlin : on aplatit.
-          const inherited = refs.flatMap(ref => {
+          const inherited = refs.flatMap((ref) => {
             const target = byName.get((ref as { name: string }).name);
             return target ? resolveFields(target, byName) : [];
           });
-          const own = objects.flatMap(object => (object as { fields: IrField[] }).fields);
-          out.push(...emitDataClass(decl.name, decl.doc, decl.typeParams, [...inherited, ...own]), "");
+          const own = objects.flatMap(
+            (object) => (object as { fields: IrField[] }).fields,
+          );
+          out.push(
+            ...emitDataClass(decl.name, decl.doc, decl.typeParams, [
+              ...inherited,
+              ...own,
+            ]),
+            "",
+          );
         } else {
-          out.push(...docComment(decl.doc, "/// "), `typealias ${typeName(decl.name)} = ${kotlinType(decl.type)}`, "");
+          out.push(
+            ...docComment(decl.doc, "/// "),
+            `typealias ${typeName(decl.name)} = ${kotlinType(decl.type)}`,
+            "",
+          );
         }
       } else {
-        out.push(...docComment(decl.doc, "/// "), `typealias ${typeName(decl.name)} = ${kotlinType(decl.type)}`, "");
+        out.push(
+          ...docComment(decl.doc, "/// "),
+          `typealias ${typeName(decl.name)} = ${kotlinType(decl.type)}`,
+          "",
+        );
       }
     } else {
-      out.push(...emitDataClass(decl.name, decl.doc, decl.typeParams, resolveFields(decl, byName)), "");
+      out.push(
+        ...emitDataClass(
+          decl.name,
+          decl.doc,
+          decl.typeParams,
+          resolveFields(decl, byName),
+        ),
+        "",
+      );
     }
   }
 

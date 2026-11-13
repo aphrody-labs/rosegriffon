@@ -86,7 +86,12 @@ export namespace UiToEmu {
     value: boolean;
   }
 
-  export type Message = StartMessage | RawMessage | LoadSaveMessage | UpdateInputMessage | UpdateFlagMessage;
+  export type Message =
+    | StartMessage
+    | RawMessage
+    | LoadSaveMessage
+    | UpdateInputMessage
+    | UpdateFlagMessage;
 }
 
 export namespace EmuToUi {

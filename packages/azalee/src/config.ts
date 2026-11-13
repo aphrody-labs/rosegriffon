@@ -40,8 +40,10 @@ export function hasPostgresConfiguration(): boolean {
  * une seule fois au démarrage de l'application hôte ou du CLI.
  */
 export function configureAzalee(config: AzaleeConfig): void {
-  if (config.dataDir !== undefined) explicit.dataDir = path.resolve(config.dataDir);
-  if (config.mirrorPath !== undefined) explicit.mirrorPath = path.resolve(config.mirrorPath);
+  if (config.dataDir !== undefined)
+    explicit.dataDir = path.resolve(config.dataDir);
+  if (config.mirrorPath !== undefined)
+    explicit.mirrorPath = path.resolve(config.mirrorPath);
 }
 
 /** Renvoie la configuration explicite courante (lecture seule). */
@@ -61,7 +63,10 @@ export function resetAzaleeConfig(): void {
  */
 function packageRoot(): string {
   // `import.meta.dir` (Bun) / `import.meta.url` (Node) → `<pkg>/src`.
-  const here = typeof import.meta.dir === "string" ? import.meta.dir : path.dirname(new URL(import.meta.url).pathname);
+  const here =
+    typeof import.meta.dir === "string"
+      ? import.meta.dir
+      : path.dirname(new URL(import.meta.url).pathname);
   return path.resolve(here, "..");
 }
 
@@ -100,7 +105,11 @@ const DATA_DIR_MARKERS = ["backups/mirror.sqlite", "schema-snapshot"];
 export function resolveDataDir(): string | null {
   for (const candidate of dataDirCandidates()) {
     if (!existsSync(candidate)) continue;
-    if (DATA_DIR_MARKERS.some(marker => existsSync(path.join(candidate, marker)))) {
+    if (
+      DATA_DIR_MARKERS.some((marker) =>
+        existsSync(path.join(candidate, marker)),
+      )
+    ) {
       return candidate;
     }
   }
@@ -115,7 +124,8 @@ export function resolveDataDir(): string | null {
  */
 export function resolveMirrorPath(): string | null {
   if (explicit.mirrorPath) return explicit.mirrorPath;
-  if (process.env.SQLITE_DB_PATH) return path.resolve(process.env.SQLITE_DB_PATH);
+  if (process.env.SQLITE_DB_PATH)
+    return path.resolve(process.env.SQLITE_DB_PATH);
   if (process.env.NIERS_MIRROR) {
     const configured = path.resolve(process.env.NIERS_MIRROR);
     return existsSync(configured) ? configured : null;
@@ -126,7 +136,9 @@ export function resolveMirrorPath(): string | null {
   const candidates = [
     process.env.NIERS_MIRROR,
     path.resolve(repoRoot, "var/mirror.sqlite"),
-    process.env.IECODE_DATA_DIR ? path.resolve(process.env.IECODE_DATA_DIR, "../var/mirror.sqlite") : undefined,
+    process.env.IECODE_DATA_DIR
+      ? path.resolve(process.env.IECODE_DATA_DIR, "../var/mirror.sqlite")
+      : undefined,
   ].filter((p): p is string => Boolean(p));
 
   for (const candidate of candidates) {

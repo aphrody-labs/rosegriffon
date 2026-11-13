@@ -28,7 +28,12 @@ export interface Site {
   role: string;
   /** `false` = servi par le second VPS : audience collectée par SSH, pas lue en direct. */
   local: boolean;
-  statut: { ok: boolean; code: number | null; latenceMs: number | null; erreur?: string };
+  statut: {
+    ok: boolean;
+    code: number | null;
+    latenceMs: number | null;
+    erreur?: string;
+  };
   metriques: MetriqueSite[];
 }
 
@@ -36,8 +41,15 @@ export interface Site {
 async function sonder(url: string) {
   const debut = Date.now();
   try {
-    const res = await fetch(url, { cache: "no-store", signal: AbortSignal.timeout(4_000) });
-    return { code: res.status, latenceMs: Date.now() - debut, ok: res.status < 400 };
+    const res = await fetch(url, {
+      cache: "no-store",
+      signal: AbortSignal.timeout(4_000),
+    });
+    return {
+      code: res.status,
+      latenceMs: Date.now() - debut,
+      ok: res.status < 400,
+    };
   } catch (error) {
     return {
       code: null,
@@ -89,9 +101,13 @@ export async function lireSites(): Promise<Site[]> {
     compte("select count(*)::text n from chronicles"),
     compte("select count(*)::text n from events"),
     compte("select count(*)::text n from orders"),
-    compte("select count(*)::text n from discord_members where left_at is null and coalesce(is_bot,false) = false"),
+    compte(
+      "select count(*)::text n from discord_members where left_at is null and coalesce(is_bot,false) = false",
+    ),
     compte("select count(*)::text n from profiles"),
-    compte("select count(*)::text n from profiles where claimed_at is not null"),
+    compte(
+      "select count(*)::text n from profiles where claimed_at is not null",
+    ),
     compte("select count(*)::text n from inagle_characters"),
     compte("select count(*)::text n from inagle_skills"),
     compte("select count(*)::text n from inagle_items"),
@@ -104,8 +120,16 @@ export async function lireSites(): Promise<Site[]> {
       domaine: "rosegriffon.fr",
       local: true,
       metriques: [
-        { label: "Comptes", valeur: profilsPublics, detail: `${profils} profils en base` },
-        { label: "Membres Discord", valeur: membresDiscord, detail: "présents sur le serveur" },
+        {
+          label: "Comptes",
+          valeur: profilsPublics,
+          detail: `${profils} profils en base`,
+        },
+        {
+          label: "Membres Discord",
+          valeur: membresDiscord,
+          detail: "présents sur le serveur",
+        },
         { label: "Chroniques", valeur: chroniques },
         { label: "Articles publiés", valeur: articles },
         { label: "Événements", valeur: evenements },

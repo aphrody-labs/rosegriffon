@@ -35,8 +35,10 @@ import {
 
 export type { CharaMultiLevelStats, CharaStats } from "./chara-stats-shared";
 
-const GROWTH_VFS = "data/common/gamedata/character/growth_table_config_0.00.00.00.cfg.bin";
-const CHARA_PARAM_VFS = "data/common/gamedata/character/chara_param_1.03.66.00.cfg.bin";
+const GROWTH_VFS =
+  "data/common/gamedata/character/growth_table_config_0.00.00.00.cfg.bin";
+const CHARA_PARAM_VFS =
+  "data/common/gamedata/character/chara_param_1.03.66.00.cfg.bin";
 const CDN = "https://cdn.rosegriffon.fr/cfg";
 
 /** Lignes RDBN brutes des 3 listes de croissance utiles. */
@@ -94,7 +96,10 @@ interface GrowthIndex {
 }
 
 /** Index growthPattern par charaParamId (hex minuscule, ex `0x3055cf22`). */
-type ParamIndex = Map<string, { mainPosition: number; subPosition: number; growthPattern: number }>;
+type ParamIndex = Map<
+  string,
+  { mainPosition: number; subPosition: number; growthPattern: number }
+>;
 
 let growthCache: GrowthIndex | null = null;
 let paramCache: ParamIndex | null = null;
@@ -106,12 +111,15 @@ function toHexId(n: number): string {
 /** Charge + indexe la table de croissance (1 fetch CDN, caché process-local). */
 async function loadGrowthIndex(): Promise<GrowthIndex | null> {
   if (growthCache) return growthCache;
-  const cfg = await fetchJson<{ lists?: Array<{ name: string; rows: unknown[] }> }>(`${CDN}/${GROWTH_VFS}.json`, {
+  const cfg = await fetchJson<{
+    lists?: Array<{ name: string; rows: unknown[] }>;
+  }>(`${CDN}/${GROWTH_VFS}.json`, {
     revalidate: 86400,
   });
   if (!cfg) return null;
   const lists = cfg.lists ?? [];
-  const findRows = (name: string) => (lists.find(l => l.name === name)?.rows ?? []) as unknown[];
+  const findRows = (name: string) =>
+    (lists.find((l) => l.name === name)?.rows ?? []) as unknown[];
 
   const main = new Map<string, GrowthMainRow>();
   for (const r of findRows("m_growthTableMainList") as GrowthMainRow[]) {
@@ -135,11 +143,14 @@ async function loadGrowthIndex(): Promise<GrowthIndex | null> {
 async function loadParamIndex(): Promise<ParamIndex | null> {
   if (paramCache) return paramCache;
   const cfg = await fetchJson<{
-    entries?: Array<{ name: string; children?: Array<{ variables?: unknown[] }> }>;
+    entries?: Array<{
+      name: string;
+      children?: Array<{ variables?: unknown[] }>;
+    }>;
   }>(`${CDN}/${CHARA_PARAM_VFS}.json`, { revalidate: 86400 });
   if (!cfg) return null;
   const idx: ParamIndex = new Map();
-  const list = cfg.entries?.find(e => e.name === "CHARA_PARAM_INFO_LIST_BEG");
+  const list = cfg.entries?.find((e) => e.name === "CHARA_PARAM_INFO_LIST_BEG");
   for (const child of list?.children ?? []) {
     const vars = (child.variables ?? []) as Array<{ Int?: number }>;
     if (vars.length < 9) continue;
@@ -159,9 +170,16 @@ async function loadParamIndex(): Promise<ParamIndex | null> {
 }
 
 /** Pattern effectif : la table ne couvre que 0/1 → ≥2 retombe sur 1 puis 0. */
-function resolvePattern<T>(table: Map<string, T>, mainPos: number, pattern: number, rank: number): T | undefined {
+function resolvePattern<T>(
+  table: Map<string, T>,
+  mainPos: number,
+  pattern: number,
+  rank: number,
+): T | undefined {
   return (
-    table.get(`${mainPos}-${pattern}-${rank}`) ?? table.get(`${mainPos}-1-${rank}`) ?? table.get(`${mainPos}-0-${rank}`)
+    table.get(`${mainPos}-${pattern}-${rank}`) ??
+    table.get(`${mainPos}-1-${rank}`) ??
+    table.get(`${mainPos}-0-${rank}`)
   );
 }
 
@@ -182,7 +200,10 @@ export async function resolveCharaStats(
   const mainPos = positionToMainPosition(position);
   if (mainPos === null) return null; // Coach / position inconnue
 
-  const [growth, params] = await Promise.all([loadGrowthIndex(), loadParamIndex()]);
+  const [growth, params] = await Promise.all([
+    loadGrowthIndex(),
+    loadParamIndex(),
+  ]);
   if (!growth) return null;
 
   const param = params?.get(charaParamId.toLowerCase());
@@ -196,7 +217,9 @@ export async function resolveCharaStats(
 
   // Lv1 : clé mainPos×subPos×playStyle (playStyle = growthPattern, capé 0..2).
   const playStyle = Math.min(pattern, 2);
-  const lv1Row = growth.lv1.get(`${mainPos}-${subPos}-${playStyle}`) ?? growth.lv1.get(`${mainPos}-${subPos}-0`);
+  const lv1Row =
+    growth.lv1.get(`${mainPos}-${subPos}-${playStyle}`) ??
+    growth.lv1.get(`${mainPos}-${subPos}-0`);
 
   const lv99: CharaStats = {
     kick: main.Kc_99,
@@ -226,7 +249,15 @@ export async function resolveCharaStats(
         agility: lv30.Ag_30,
         intelligence: lv30.It_30,
       }
-    : { kick: 0, control: 0, technique: 0, pressure: 0, physical: 0, agility: 0, intelligence: 0 };
+    : {
+        kick: 0,
+        control: 0,
+        technique: 0,
+        pressure: 0,
+        physical: 0,
+        agility: 0,
+        intelligence: 0,
+      };
   const lv1Stats: CharaStats = lv1Row
     ? {
         kick: lv1Row.Kc_1,
@@ -237,7 +268,15 @@ export async function resolveCharaStats(
         agility: lv1Row.Ag_1,
         intelligence: lv1Row.It_1,
       }
-    : { kick: 0, control: 0, technique: 0, pressure: 0, physical: 0, agility: 0, intelligence: 0 };
+    : {
+        kick: 0,
+        control: 0,
+        technique: 0,
+        pressure: 0,
+        physical: 0,
+        agility: 0,
+        intelligence: 0,
+      };
 
   return {
     lv1: lv1Stats,

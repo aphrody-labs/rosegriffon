@@ -41,7 +41,9 @@ function flocon(creeLe: Date): string {
   return String((BigInt(creeLe.getTime() - EPOQUE_DISCORD) << 22n) | 1n);
 }
 
-function compte(partiel: Partial<EmpreinteCompte> & { pseudo: string }): EmpreinteCompte {
+function compte(
+  partiel: Partial<EmpreinteCompte> & { pseudo: string },
+): EmpreinteCompte {
   const creeLe = partiel.discordId
     ? (dateDeCreation(partiel.discordId) ?? new Date("2024-01-01T00:00:00Z"))
     : new Date("2024-01-01T00:00:00Z");
@@ -84,11 +86,20 @@ describe("dateDeCreation", () => {
     // Le flocon d'exemple de la documentation Discord, dont la date est publiée
     // avec lui. Aucun identifiant du serveur n'est écrit ici : `profil.test.ts`
     // interdit d'en semer ailleurs que dans le registre.
-    expect(dateDeCreation("175928847299117063")?.toISOString()).toBe("2016-04-30T11:18:25.796Z");
+    expect(dateDeCreation("175928847299117063")?.toISOString()).toBe(
+      "2016-04-30T11:18:25.796Z",
+    );
   });
 
   test("refuse ce qui n'est pas un flocon", () => {
-    for (const valeur of ["", "abc", "12", null, undefined, "12345678901234567890123456"]) {
+    for (const valeur of [
+      "",
+      "abc",
+      "12",
+      null,
+      undefined,
+      "12345678901234567890123456",
+    ]) {
       expect(dateDeCreation(valeur)).toBeNull();
     }
   });
@@ -202,7 +213,11 @@ describe("empreinteAvatar", () => {
     // Le cas qui noie tout : 122 membres de la production se répartissent les
     // cinq images par défaut de Discord, dont 25 sur la même.
     for (let index = 0; index < 5; index++) {
-      expect(empreinteAvatar(`https://cdn.discordapp.com/embed/avatars/${index}.png`)).toBeNull();
+      expect(
+        empreinteAvatar(
+          `https://cdn.discordapp.com/embed/avatars/${index}.png`,
+        ),
+      ).toBeNull();
     }
   });
 
@@ -232,8 +247,14 @@ describe("comparer — ce qui NE DOIT PAS rapprocher", () => {
   test("deux inconnus sans rien en commun", () => {
     expect(
       comparer(
-        compte({ pseudo: "markevans", discordId: flocon(new Date("2019-04-02T00:00:00Z")) }),
-        compte({ pseudo: "gouenji", discordId: flocon(new Date("2024-11-20T00:00:00Z")) }),
+        compte({
+          pseudo: "markevans",
+          discordId: flocon(new Date("2019-04-02T00:00:00Z")),
+        }),
+        compte({
+          pseudo: "gouenji",
+          discordId: flocon(new Date("2024-11-20T00:00:00Z")),
+        }),
       ),
     ).toBeNull();
   });
@@ -285,7 +306,9 @@ describe("comparer — ce qui NE DOIT PAS rapprocher", () => {
         surnom: "Capitaine",
       }),
     );
-    expect(rapprochement?.indices.map(indice => indice.cle)).toEqual(["surnom"]);
+    expect(rapprochement?.indices.map((indice) => indice.cle)).toEqual([
+      "surnom",
+    ]);
     expect(rapprochement?.niveau).toBe("possible");
   });
 
@@ -316,7 +339,9 @@ describe("comparer — ce qui NE DOIT PAS rapprocher", () => {
     // décrit la moitié des nouveaux membres, et l'accoler à « arrivé le même
     // jour » ne dit rien de plus que « deux personnes se sont inscrites en
     // même temps ».
-    expect(rapprochement?.indices.map(indice => indice.cle) ?? []).not.toContain("jeune");
+    expect(
+      rapprochement?.indices.map((indice) => indice.cle) ?? [],
+    ).not.toContain("jeune");
   });
 
   test("une seule journée de création partagée reste une coïncidence", () => {
@@ -325,7 +350,10 @@ describe("comparer — ce qui NE DOIT PAS rapprocher", () => {
     const jour = new Date("2020-03-17T12:00:00Z");
     const rapprochement = comparer(
       compte({ discordId: flocon(jour), pseudo: "vaarsaaa" }),
-      compte({ discordId: flocon(new Date(jour.getTime() + 4 * 3_600_000)), pseudo: "monroe0111" }),
+      compte({
+        discordId: flocon(new Date(jour.getTime() + 4 * 3_600_000)),
+        pseudo: "monroe0111",
+      }),
     );
     expect(rapprochement?.niveau ?? null).not.toBe("fort");
     expect(rapprochement?.niveau ?? null).not.toBe("certain");
@@ -354,14 +382,18 @@ describe("comparer — ce qui DOIT rapprocher", () => {
     // Un condensat de courriel dans un embed, c'est une fuite de donnée
     // personnelle dans l'historique d'un salon.
     const rapprochement = comparer(
-      compte({ liaisons: ["courriel:5f4dcc3b5aa765d61d8327deb882cf99"], pseudo: "a_pseudo" }),
+      compte({
+        liaisons: ["courriel:5f4dcc3b5aa765d61d8327deb882cf99"],
+        pseudo: "a_pseudo",
+      }),
       compte({
         discordId: flocon(new Date("2025-06-01T00:00:00Z")),
         liaisons: ["courriel:5f4dcc3b5aa765d61d8327deb882cf99"],
         pseudo: "b_pseudo",
       }),
     );
-    const detail = rapprochement?.indices.map(indice => indice.detail).join(" ") ?? "";
+    const detail =
+      rapprochement?.indices.map((indice) => indice.detail).join(" ") ?? "";
     expect(detail).toContain("courriel");
     expect(detail).not.toContain("5f4dcc3b");
   });
@@ -383,8 +415,12 @@ describe("comparer — ce qui DOIT rapprocher", () => {
       }),
     );
     expect(rapprochement?.niveau).toBe("certain");
-    expect(rapprochement?.indices.map(indice => indice.cle)).toContain("racine");
-    expect(rapprochement?.indices.map(indice => indice.cle)).toContain("avatar");
+    expect(rapprochement?.indices.map((indice) => indice.cle)).toContain(
+      "racine",
+    );
+    expect(rapprochement?.indices.map((indice) => indice.cle)).toContain(
+      "avatar",
+    );
   });
 
   test("la relève : un compte part, un autre arrive dans la foulée", () => {
@@ -402,7 +438,7 @@ describe("comparer — ce qui DOIT rapprocher", () => {
         pseudo: "shadow12_new",
       }),
     );
-    const cles = rapprochement?.indices.map(indice => indice.cle) ?? [];
+    const cles = rapprochement?.indices.map((indice) => indice.cle) ?? [];
     expect(cles).toContain("releve");
     expect(cles).toContain("jeune");
     expect(rapprochement?.niveau).toBe("fort");
@@ -423,19 +459,30 @@ describe("comparer — ce qui DOIT rapprocher", () => {
 });
 
 describe("comparer — activité", () => {
-  const base = (surcharge: Partial<EmpreinteCompte>): EmpreinteCompte => compte({ pseudo: "markevans", ...surcharge });
+  const base = (surcharge: Partial<EmpreinteCompte>): EmpreinteCompte =>
+    compte({ pseudo: "markevans", ...surcharge });
 
   const paire = (): [EmpreinteCompte, EmpreinteCompte] => [
     base({ discordId: flocon(new Date("2020-01-01T00:00:00Z")) }),
-    base({ discordId: flocon(new Date("2024-01-01T00:00:00Z")), pseudo: "markevans_bis" }),
+    base({
+      discordId: flocon(new Date("2024-01-01T00:00:00Z")),
+      pseudo: "markevans_bis",
+    }),
   ];
 
   test("l'alternance parfaite pèse", () => {
     const [a, b] = paire();
     const rapprochement = comparer(a, b, {
-      activite: { creneauxA: 400, creneauxB: 120, creneauxCommuns: 0, salonsCommuns: 5 },
+      activite: {
+        creneauxA: 400,
+        creneauxB: 120,
+        creneauxCommuns: 0,
+        salonsCommuns: 5,
+      },
     });
-    expect(rapprochement?.indices.map(indice => indice.cle)).toContain("alternance");
+    expect(rapprochement?.indices.map((indice) => indice.cle)).toContain(
+      "alternance",
+    );
   });
 
   test("sans activité suffisante, l'absence de recouvrement ne dit RIEN", () => {
@@ -443,9 +490,16 @@ describe("comparer — activité", () => {
     // minimum des deux côtés, « zéro créneau commun » veut dire « zéro donnée ».
     const [a, b] = paire();
     const rapprochement = comparer(a, b, {
-      activite: { creneauxA: 400, creneauxB: 3, creneauxCommuns: 0, salonsCommuns: 5 },
+      activite: {
+        creneauxA: 400,
+        creneauxB: 3,
+        creneauxCommuns: 0,
+        salonsCommuns: 5,
+      },
     });
-    expect(rapprochement?.indices.map(indice => indice.cle) ?? []).not.toContain("alternance");
+    expect(
+      rapprochement?.indices.map((indice) => indice.cle) ?? [],
+    ).not.toContain("alternance");
   });
 
   test("une activité simultanée retire des points, sans disculper", () => {
@@ -453,7 +507,12 @@ describe("comparer — activité", () => {
     const seul = comparer(a, b)?.score ?? 0;
     const avecSimultaneite =
       comparer(a, b, {
-        activite: { creneauxA: 200, creneauxB: 180, creneauxCommuns: 90, salonsCommuns: 4 },
+        activite: {
+          creneauxA: 200,
+          creneauxB: 180,
+          creneauxCommuns: 90,
+          salonsCommuns: 4,
+        },
       })?.score ?? 0;
     expect(avecSimultaneite).toBeLessThan(seul);
   });
@@ -535,7 +594,9 @@ describe("balayer", () => {
       }),
     ];
     expect(balayer(population).rapprochements.length).toBeGreaterThan(0);
-    expect(balayer(population, { niveauMinimum: "certain" }).rapprochements).toHaveLength(0);
+    expect(
+      balayer(population, { niveauMinimum: "certain" }).rapprochements,
+    ).toHaveLength(0);
   });
 
   test("les paires écartées par le staff ne reviennent pas", () => {
@@ -550,7 +611,11 @@ describe("balayer", () => {
       pseudo: "kazemaru_alt",
     });
     expect(balayer([a, b]).rapprochements).toHaveLength(1);
-    expect(balayer([a, b], { ecartees: new Set([clePaire(a.discordId, b.discordId)]) }).rapprochements).toHaveLength(0);
+    expect(
+      balayer([a, b], {
+        ecartees: new Set([clePaire(a.discordId, b.discordId)]),
+      }).rapprochements,
+    ).toHaveLength(0);
   });
 
   test("l'activité n'est demandée que pour les paires candidates", () => {

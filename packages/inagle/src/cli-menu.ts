@@ -23,11 +23,13 @@ export function registerMenuCommand(program: Command) {
         return;
       }
 
-      entries.forEach(entry => {
+      entries.forEach((entry) => {
         if (entry.type === "directory") {
           console.log(`${pc.blue("DIR ")} ${entry.name}/`);
         } else {
-          const sizeStr = entry.size ? ` ${(entry.size / 1024).toFixed(1)}KB` : "";
+          const sizeStr = entry.size
+            ? ` ${(entry.size / 1024).toFixed(1)}KB`
+            : "";
           console.log(`${pc.green("FILE")} ${entry.name}${pc.dim(sizeStr)}`);
         }
       });
@@ -40,7 +42,9 @@ export function registerMenuCommand(program: Command) {
     .option("-p, --path <path>", "Start path", "")
     .action((pattern, options) => {
       const explorer = createMenuExplorer();
-      console.log(pc.cyan(`Searching for '${pattern}' in '${options.path || "/"}'...`));
+      console.log(
+        pc.cyan(`Searching for '${pattern}' in '${options.path || "/"}'...`),
+      );
 
       const start = performance.now();
       const results = explorer.find(pattern, options.path);
@@ -53,7 +57,7 @@ export function registerMenuCommand(program: Command) {
 
       // Limit output if too many results
       const MAX_DISPLAY = 20;
-      results.slice(0, MAX_DISPLAY).forEach(entry => {
+      results.slice(0, MAX_DISPLAY).forEach((entry) => {
         console.log(`${pc.dim(entry.path)}`);
       });
 
@@ -61,13 +65,19 @@ export function registerMenuCommand(program: Command) {
         console.log(pc.dim(`... and ${results.length - MAX_DISPLAY} more.`));
       }
 
-      console.log(pc.bold(`\nFound ${results.length} matches in ${duration}ms`));
+      console.log(
+        pc.bold(`\nFound ${results.length} matches in ${duration}ms`),
+      );
     });
 
   menu
     .command("scan [path]")
     .description("Recursively scan directory statistics")
-    .option("-e, --ext <extensions>", "Filter by extensions (comma separated)", val => val.split(","))
+    .option(
+      "-e, --ext <extensions>",
+      "Filter by extensions (comma separated)",
+      (val) => val.split(","),
+    )
     .option("-d, --depth <number>", "Max recursion depth", parseInt)
     .action((path = "", options) => {
       const explorer = createMenuExplorer();
@@ -86,7 +96,7 @@ export function registerMenuCommand(program: Command) {
       const byExt: Record<string, number> = {};
       let totalSize = 0;
 
-      results.forEach(entry => {
+      results.forEach((entry) => {
         const ext = entry.extension || "unknown";
         byExt[ext] = (byExt[ext] || 0) + 1;
         totalSize += entry.size || 0;
@@ -95,7 +105,9 @@ export function registerMenuCommand(program: Command) {
       console.log(pc.bold("\n📊 Scan Results"));
       console.log(pc.dim("--------------------------------"));
       console.log(`Total Files: ${pc.bold(results.length)}`);
-      console.log(`Total Size:  ${pc.bold((totalSize / 1024 / 1024).toFixed(2))} MB`);
+      console.log(
+        `Total Size:  ${pc.bold((totalSize / 1024 / 1024).toFixed(2))} MB`,
+      );
       console.log(`Time:        ${duration}ms`);
 
       console.log(pc.bold("\nBy Extension:"));
@@ -110,7 +122,7 @@ export function registerMenuCommand(program: Command) {
     .command("map")
     .description("Generate complete JSON maps for each top-level folder")
     .argument("[outputDir]", "Directory to save JSON maps", "./menu-maps")
-    .action(outputDir => {
+    .action((outputDir) => {
       const explorer = createMenuExplorer();
       const resolvedOut = resolve(process.cwd(), outputDir);
 
@@ -126,7 +138,7 @@ export function registerMenuCommand(program: Command) {
 
       // Get top-level folders
       const topLevel = explorer.list("");
-      const folders = topLevel.filter(e => e.type === "directory");
+      const folders = topLevel.filter((e) => e.type === "directory");
 
       console.log(pc.dim(`Found ${folders.length} top-level folders to map.`));
 
@@ -149,7 +161,7 @@ export function registerMenuCommand(program: Command) {
           name: folderName,
           generatedAt: new Date().toISOString(),
           totalFiles: files.length,
-          files: files.map(f => ({
+          files: files.map((f) => ({
             path: f.path,
             name: f.name,
             size: f.size,
@@ -168,7 +180,9 @@ export function registerMenuCommand(program: Command) {
 
       const totalTime = ((performance.now() - startTotal) / 1000).toFixed(2);
       console.log(
-        pc.bold(`\n✨ Completed! Mapped ${totalFiles} files across ${folders.length} folders in ${totalTime}s.`),
+        pc.bold(
+          `\n✨ Completed! Mapped ${totalFiles} files across ${folders.length} folders in ${totalTime}s.`,
+        ),
       );
       console.log(`Maps saved to: ${pc.underline(resolvedOut)}`);
     });

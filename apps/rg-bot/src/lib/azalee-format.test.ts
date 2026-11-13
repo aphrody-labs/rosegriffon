@@ -88,7 +88,9 @@ describe("nettoyerTexteJeu", () => {
 describe("nettoyerRubis", () => {
   test("garde le kanji et retire la lecture", () => {
     // Valeur réelle du japonais de `cps20008_03`.
-    expect(nettoyerRubis("キャッチ[以外/いがい]でボール[奪還後/だっかんご]")).toBe("キャッチ以外でボール奪還後");
+    expect(
+      nettoyerRubis("キャッチ[以外/いがい]でボール[奪還後/だっかんご]"),
+    ).toBe("キャッチ以外でボール奪還後");
   });
 
   test("laisse un texte sans annotation intact", () => {
@@ -133,7 +135,9 @@ describe("formaterNombre / formaterPourcentage", () => {
   test("formate en français", () => {
     // Intl place une espace fine insécable : on compare sans les espaces.
     expect(formaterNombre(1716).replaceAll(/\s+/g, " ")).toBe("1 716");
-    expect(formaterPourcentage(0.4972375690607735, 1).replaceAll(/\s+/g, " ")).toBe("0,5 %");
+    expect(
+      formaterPourcentage(0.4972375690607735, 1).replaceAll(/\s+/g, " "),
+    ).toBe("0,5 %");
   });
 
   test("renvoie un tiret pour une valeur absente", () => {
@@ -144,7 +148,9 @@ describe("formaterNombre / formaterPourcentage", () => {
 
 describe("decouperEnChamps", () => {
   test("regroupe les lignes sans dépasser la limite d'un champ", () => {
-    const lignes = Array.from({ length: 40 }, (_v, i) => `ligne ${i}`.padEnd(100, "."));
+    const lignes = Array.from({ length: 40 }, (_v, i) =>
+      `ligne ${i}`.padEnd(100, "."),
+    );
     const blocs = decouperEnChamps(lignes);
     expect(blocs.length).toBeGreaterThan(1);
     for (const bloc of blocs) {
@@ -171,14 +177,22 @@ describe("decouperEnChamps", () => {
 describe("corrigerCheminIconeChr", () => {
   test("répare le dossier ET le nom d'une icône d'esprit guerrier", () => {
     // Origine `/api/auras/esprits-guerriers` → 404 ; forme corrigée → 200.
-    expect(corrigerCheminIconeChr("/dx11/menu/icon_chr/aura_fs/k000520_l_k000520_l00.png")).toBe(
+    expect(
+      corrigerCheminIconeChr(
+        "/dx11/menu/icon_chr/aura_fs/k000520_l_k000520_l00.png",
+      ),
+    ).toBe(
       "/dx11/menu/200_icon/10_icon_chr/aura_fs/k000520_l.g4tx/k000520_l00.png",
     );
   });
 
   test("répare une icône de totem", () => {
     // Mesuré 200, 71 973 octets, image/png.
-    expect(corrigerCheminIconeChr("/dx11/menu/icon_chr/aura_soul/a000250_l_a000250_l00.png")).toBe(
+    expect(
+      corrigerCheminIconeChr(
+        "/dx11/menu/icon_chr/aura_soul/a000250_l_a000250_l00.png",
+      ),
+    ).toBe(
       "/dx11/menu/200_icon/10_icon_chr/aura_soul/a000250_l.g4tx/a000250_l00.png",
     );
   });
@@ -187,7 +201,11 @@ describe("corrigerCheminIconeChr", () => {
     // Un visage a DEUX textures : `_1_l00` (portrait) et `_2_l00` (seconde pose).
     // Demander le conteneur entier laisse le CDN choisir, et il rend `_2_l00`.
     // Forme nommée mesurée 200, 23 802 octets, image/png.
-    expect(corrigerCheminIconeChr("/dx11/menu/icon_chr/face/c05026530_l_c05026530_1_l00.png")).toBe(
+    expect(
+      corrigerCheminIconeChr(
+        "/dx11/menu/icon_chr/face/c05026530_l_c05026530_1_l00.png",
+      ),
+    ).toBe(
       "/dx11/menu/200_icon/10_icon_chr/face/c05026530_l.g4tx/c05026530_1_l00.png",
     );
   });
@@ -201,7 +219,11 @@ describe("corrigerCheminIconeChr", () => {
 describe("imageJeu", () => {
   test("corrige le nom doublé d'un télop de technique", () => {
     // `whd00990_whd00990.png` → 404 ; `whd00990.png` → 200 (327 716 octets).
-    expect(imageJeu("https://cdn.rosegriffon.fr/dx11/menu/220_img/telop_waza/fr/whd00990_whd00990.png")).toBe(
+    expect(
+      imageJeu(
+        "https://cdn.rosegriffon.fr/dx11/menu/220_img/telop_waza/fr/whd00990_whd00990.png",
+      ),
+    ).toBe(
       "https://cdn.rosegriffon.fr/dx11/menu/220_img/telop_waza/fr/whd00990.png",
     );
   });
@@ -213,7 +235,9 @@ describe("imageJeu", () => {
         "https://cdn.rosegriffon.fr/dx11/menu/220_img/stadium/img_room_s90g001_img_room_s90g001.png?w=400&format=webp",
         400,
       ),
-    ).toBe("https://cdn.rosegriffon.fr/dx11/menu/220_img/stadium/img_room_s90g001.png?w=400&format=webp");
+    ).toBe(
+      "https://cdn.rosegriffon.fr/dx11/menu/220_img/stadium/img_room_s90g001.png?w=400&format=webp",
+    );
   });
 
   test("demande une variante WebP sur les grandes illustrations", () => {
@@ -223,12 +247,19 @@ describe("imageJeu", () => {
         "https://cdn.rosegriffon.fr/dx11/menu/220_img/gallery_img2/img_story_ev01_main_0010_img_story_ev01_main_0010.png",
         400,
       ),
-    ).toBe("https://cdn.rosegriffon.fr/dx11/menu/220_img/gallery_img2/img_story_ev01_main_0010.png?w=400&format=webp");
+    ).toBe(
+      "https://cdn.rosegriffon.fr/dx11/menu/220_img/gallery_img2/img_story_ev01_main_0010.png?w=400&format=webp",
+    );
   });
 
   test("répare l'icône d'aura et lui demande sa variante", () => {
     // Mesuré 200, 11 088 octets, image/webp.
-    expect(imageJeu("https://cdn.rosegriffon.fr/dx11/menu/icon_chr/aura_fs/k000520_l_k000520_l00.png", 200)).toBe(
+    expect(
+      imageJeu(
+        "https://cdn.rosegriffon.fr/dx11/menu/icon_chr/aura_fs/k000520_l_k000520_l00.png",
+        200,
+      ),
+    ).toBe(
       "https://cdn.rosegriffon.fr/dx11/menu/200_icon/10_icon_chr/aura_fs/k000520_l.g4tx/k000520_l00.png?w=200&format=webp",
     );
   });
@@ -237,7 +268,10 @@ describe("imageJeu", () => {
     // C'est la forme que sert l'API depuis que le CDN sait extraire une texture
     // d'un conteneur. Mesuré 200, 9 006 octets, image/webp.
     expect(
-      imageJeu("https://cdn.rosegriffon.fr/dx11/menu/200_icon/02_icon_item/icon_item05.g4tx/eq_ac0100101.png", 200),
+      imageJeu(
+        "https://cdn.rosegriffon.fr/dx11/menu/200_icon/02_icon_item/icon_item05.g4tx/eq_ac0100101.png",
+        200,
+      ),
     ).toBe(
       "https://cdn.rosegriffon.fr/dx11/menu/200_icon/02_icon_item/icon_item05.g4tx/eq_ac0100101.png?w=200&format=webp",
     );
@@ -247,9 +281,15 @@ describe("imageJeu", () => {
     // Le dump collait le nom du conteneur à celui de la texture. Ce nommage
     // n'existe dans aucun des 250 800 chemins du CPK : 404 par construction.
     expect(
-      imageJeu("https://cdn.rosegriffon.fr/dx11/menu/200_icon/02_icon_item/icon_item05_eq_ac0105301.png"),
+      imageJeu(
+        "https://cdn.rosegriffon.fr/dx11/menu/200_icon/02_icon_item/icon_item05_eq_ac0105301.png",
+      ),
     ).toBeNull();
-    expect(imageJeu("https://cdn.rosegriffon.fr/dx11/menu/200_icon/02_icon_item/.webp")).toBeNull();
+    expect(
+      imageJeu(
+        "https://cdn.rosegriffon.fr/dx11/menu/200_icon/02_icon_item/.webp",
+      ),
+    ).toBeNull();
   });
 
   test("refuse le repli local de l'API", () => {
@@ -260,16 +300,19 @@ describe("imageJeu", () => {
 
   test("ne pose pas de variante hors du CDN qui sait les servir", () => {
     // Les portraits `zukan` sont sur CloudFront : `?w=` n'y redimensionne rien.
-    const portrait = "https://dxi4wb638ujep.cloudfront.net/1/k/v/w/vwj02v5fvcs.png";
+    const portrait =
+      "https://dxi4wb638ujep.cloudfront.net/1/k/v/w/vwj02v5fvcs.png";
     expect(imageJeu(portrait, 400)).toBe(portrait);
   });
 });
 
 describe("cheminCpkDepuisUrl", () => {
   test("retrouve le fichier source d'une illustration de quête", () => {
-    expect(cheminCpkDepuisUrl("https://cdn.rosegriffon.fr/dx11/menu/220_img/quest_img/story_img001_l01.png")).toBe(
-      "data/dx11/menu/220_img/quest_img/story_img001_l01.g4tx",
-    );
+    expect(
+      cheminCpkDepuisUrl(
+        "https://cdn.rosegriffon.fr/dx11/menu/220_img/quest_img/story_img001_l01.png",
+      ),
+    ).toBe("data/dx11/menu/220_img/quest_img/story_img001_l01.g4tx");
   });
 
   test("ignore la chaîne de requête de variante", () => {
@@ -281,8 +324,14 @@ describe("cheminCpkDepuisUrl", () => {
   });
 
   test("renvoie null hors du décodage CPK", () => {
-    expect(cheminCpkDepuisUrl("https://cdn.rosegriffon.fr/model-full/k000520.glb")).toBeNull();
-    expect(cheminCpkDepuisUrl("https://dxi4wb638ujep.cloudfront.net/1/k/v/w/vwj02v5fvcs.png")).toBeNull();
+    expect(
+      cheminCpkDepuisUrl("https://cdn.rosegriffon.fr/model-full/k000520.glb"),
+    ).toBeNull();
+    expect(
+      cheminCpkDepuisUrl(
+        "https://dxi4wb638ujep.cloudfront.net/1/k/v/w/vwj02v5fvcs.png",
+      ),
+    ).toBeNull();
     expect(cheminCpkDepuisUrl(null)).toBeNull();
   });
 });
@@ -309,14 +358,20 @@ describe("urlVisage / urlModele3d", () => {
 
   test("forge l'URL du modèle 3D complet d'un personnage", () => {
     // 11/11 codes `c########` mesurés à 200 sur `nie-model-serve` (345–480 Ko).
-    expect(urlModele3d("c01000010")).toBe("https://cdn.rosegriffon.fr/model-full/c01000010.glb");
-    expect(urlModele3d("c05026530")).toBe("https://cdn.rosegriffon.fr/model-full/c05026530.glb");
+    expect(urlModele3d("c01000010")).toBe(
+      "https://cdn.rosegriffon.fr/model-full/c01000010.glb",
+    );
+    expect(urlModele3d("c05026530")).toBe(
+      "https://cdn.rosegriffon.fr/model-full/c05026530.glb",
+    );
   });
 
   test("retire le suffixe de variante de paramètres", () => {
     // `c01000010_5000` est la variante retenue par `/azalee perso` pour Mark
     // Evans : `/model-full/c01000010_5000.glb` répond 404, la base répond 200.
-    expect(urlModele3d("c01000010_5000")).toBe("https://cdn.rosegriffon.fr/model-full/c01000010.glb");
+    expect(urlModele3d("c01000010_5000")).toBe(
+      "https://cdn.rosegriffon.fr/model-full/c01000010.glb",
+    );
   });
 
   test("refuse tout code dont le modèle n'est PAS servi", () => {
@@ -350,7 +405,7 @@ describe("urlIllustrationQuete", () => {
 
 describe("catégories de galerie", () => {
   test("les onze valeurs sont celles acceptées par l'API", () => {
-    expect(CATEGORIES_GALERIE.map(c => c.valeur)).toEqual([
+    expect(CATEGORIES_GALERIE.map((c) => c.valeur)).toEqual([
       "story",
       "chronicle",
       "special",
@@ -419,7 +474,7 @@ describe("libellés de quête et de succès", () => {
 
 describe("familles d'aura", () => {
   test("les six slugs sont ceux acceptés par l'API", () => {
-    expect(TYPES_AURA.map(t => t.slug)).toEqual([
+    expect(TYPES_AURA.map((t) => t.slug)).toEqual([
       "esprits-guerriers",
       "totems",
       "miximax",
@@ -461,7 +516,12 @@ describe("pagination", () => {
   });
 
   test("l'état d'une liste fait l'aller-retour", () => {
-    const etat = { vue: "galerie", page: 3, filtre: "story", recherche: "ev01" };
+    const etat = {
+      vue: "galerie",
+      page: 3,
+      filtre: "story",
+      recherche: "ev01",
+    };
     const identifiant = encoderEtatListe(etat);
     expect(identifiant).toBe("az|galerie|3|story|ev01");
     expect(decoderEtatListe(identifiant as string)).toEqual(etat);
@@ -478,7 +538,14 @@ describe("pagination", () => {
   });
 
   test("renvoie null au-delà de la limite Discord de 100 caractères", () => {
-    expect(encoderEtatListe({ vue: "galerie", page: 1, filtre: null, recherche: "z".repeat(120) })).toBeNull();
+    expect(
+      encoderEtatListe({
+        vue: "galerie",
+        page: 1,
+        filtre: null,
+        recherche: "z".repeat(120),
+      }),
+    ).toBeNull();
   });
 
   test("rejette un customId étranger", () => {
@@ -498,17 +565,25 @@ describe("classerPropositions", () => {
   ];
 
   test("place les préfixes avant les inclusions", () => {
-    expect(classerPropositions(equipes, "ra", e => e.nom).map(e => e.nom)).toEqual(["Raimon", "Ultra Raimon"]);
+    expect(
+      classerPropositions(equipes, "ra", (e) => e.nom).map((e) => e.nom),
+    ).toEqual(["Raimon", "Ultra Raimon"]);
   });
 
   test("ignore accents et casse", () => {
-    expect(classerPropositions([{ nom: "Forêt" }], "FORET", e => e.nom)).toHaveLength(1);
+    expect(
+      classerPropositions([{ nom: "Forêt" }], "FORET", (e) => e.nom),
+    ).toHaveLength(1);
   });
 
   test("plafonne à 25 propositions", () => {
-    const beaucoup = Array.from({ length: 100 }, (_v, i) => ({ nom: `equipe ${i}` }));
-    expect(classerPropositions(beaucoup, "", e => e.nom)).toHaveLength(25);
-    expect(classerPropositions(beaucoup, "equipe", e => e.nom)).toHaveLength(25);
+    const beaucoup = Array.from({ length: 100 }, (_v, i) => ({
+      nom: `equipe ${i}`,
+    }));
+    expect(classerPropositions(beaucoup, "", (e) => e.nom)).toHaveLength(25);
+    expect(classerPropositions(beaucoup, "equipe", (e) => e.nom)).toHaveLength(
+      25,
+    );
   });
 });
 
@@ -543,7 +618,9 @@ describe("identité visuelle des fiches", () => {
   });
 
   test("le titre reste sous la limite de Discord et n'ouvre pas sur une espace", () => {
-    expect(titreFiche("Mark Evans", "🔥", "Attaquant")).toBe("🔥 Mark Evans — Attaquant");
+    expect(titreFiche("Mark Evans", "🔥", "Attaquant")).toBe(
+      "🔥 Mark Evans — Attaquant",
+    );
     expect(titreFiche("Mark Evans", "", null)).toBe("Mark Evans");
     expect(titreFiche("Mark Evans", null, "")).toBe("Mark Evans");
     const long = titreFiche("x".repeat(400), "🔥", "Attaquant");

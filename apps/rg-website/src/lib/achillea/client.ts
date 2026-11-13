@@ -10,7 +10,11 @@
  * rester importable côté navigateur.
  */
 
-import { AchilleaClient, DEFAULT_ACHILLEA_API_URL, type AchilleaClientOptions } from "@rosegriffon/achillea-client";
+import {
+  AchilleaClient,
+  DEFAULT_ACHILLEA_API_URL,
+  type AchilleaClientOptions,
+} from "@rosegriffon/achillea-client";
 
 /**
  * Origine de l'API. `NEXT_PUBLIC_*` est inliné au build : lancer le déploiement
@@ -33,12 +37,16 @@ export function achilleaApiUrl(): string {
  * bougent à la minute, et un `force-cache` par défaut servirait un classement
  * périmé. Les appelants qui veulent du cache passent leur propre `fetch`.
  */
-export function createAchilleaClient(options: AchilleaClientOptions = {}): AchilleaClient {
+export function createAchilleaClient(
+  options: AchilleaClientOptions = {},
+): AchilleaClient {
   return new AchilleaClient({
     baseUrl: achilleaApiUrl(),
     // Le cookie HttpOnly est posé sur .rosegriffon.fr et l'API est sur une
     // autre origine : fetch ne l'envoie pas avec son mode same-origin implicite.
-    ...(typeof window !== "undefined" ? { credentials: "include" as const } : {}),
+    ...(typeof window !== "undefined"
+      ? { credentials: "include" as const }
+      : {}),
     ...options,
   });
 }

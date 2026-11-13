@@ -8,7 +8,14 @@
  * et tout ce qui est en base (maintenance, audit, compteurs) est lu directement.
  * Un bot injoignable rend 503 avec la raison : jamais des zéros inventés.
  */
-import { loadavg, cpus, totalmem, freemem, hostname, uptime as uptimeHote } from "node:os";
+import {
+  loadavg,
+  cpus,
+  totalmem,
+  freemem,
+  hostname,
+  uptime as uptimeHote,
+} from "node:os";
 import { Elysia, status, t } from "elysia";
 import { sql, type Kysely } from "kysely";
 import type { Database } from "@rosegriffon/db/schema";
@@ -16,7 +23,10 @@ import { verifyAdminBearerToken } from "@rosegriffon/achillea-core";
 import type { CommandeBot, EtatBot, GuildeBot } from "@rosegriffon/types/bot";
 
 import { dbPlugin } from "../../plugins/db";
-import { appelerBotAchillea, BotAchilleaInjoignable } from "../../../lib/achillea-discord";
+import {
+  appelerBotAchillea,
+  BotAchilleaInjoignable,
+} from "../../../lib/achillea-discord";
 import { journaliserAudit } from "./audit";
 import { ROLE_STAFF, staff, type EnTetesAuth } from "./staff";
 
@@ -28,9 +38,15 @@ const ROLE = {
 } as const;
 
 /** Garde staff partagée (`staff.ts`) : 401 sans session, 403 sous le rôle requis. */
-async function exigerStaff(db: Kysely<Database>, headers: EnTetesAuth, minimum: number) {
+async function exigerStaff(
+  db: Kysely<Database>,
+  headers: EnTetesAuth,
+  minimum: number,
+) {
   const garde = await staff(db, headers, minimum);
-  return "error" in garde && garde.error ? { erreur: garde.error } : { acteur: garde.actor! };
+  return "error" in garde && garde.error
+    ? { erreur: garde.error }
+    : { acteur: garde.actor! };
 }
 
 /** Traduit l'échec d'un appel au bot en statut HTTP explicite. */
@@ -38,14 +54,18 @@ function echecBot(err: unknown) {
   if (err instanceof BotAchilleaInjoignable) {
     if (err.statut === 404) return status(404, { message: err.message });
     if (err.statut === 409) return status(409, { message: err.message });
-    return status(503, { message: `Bot Discord Achilléa indisponible : ${err.message}` });
+    return status(503, {
+      message: `Bot Discord Achilléa indisponible : ${err.message}`,
+    });
   }
   throw err;
 }
 
 /** Mode maintenance, stocké comme le legacy dans `achillea.data` (clé `maintenance`, JSON). */
 export async function lireMaintenance(db: Kysely<Database>): Promise<boolean> {
-  const ligne = await sql<{ value: string }>`SELECT value FROM achillea.data WHERE key = 'maintenance'`.execute(db);
+  const ligne = await sql<{
+    value: string;
+  }>`SELECT value FROM achillea.data WHERE key = 'maintenance'`.execute(db);
   const brut = ligne.rows[0]?.value;
   if (brut === undefined) return false;
   try {
@@ -55,11 +75,16 @@ export async function lireMaintenance(db: Kysely<Database>): Promise<boolean> {
   }
 }
 
-async function ecrireMaintenance(db: Kysely<Database>, valeur: boolean): Promise<void> {
+async function ecrireMaintenance(
+  db: Kysely<Database>,
+  valeur: boolean,
+): Promise<void> {
   await sql`
     INSERT INTO achillea.data (key, value, created_at, updated_at)
     VALUES ('maintenance', ${JSON.stringify(valeur)}, now(), now())
-    ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, updated_at = now()`.execute(db);
+    ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, updated_at = now()`.execute(
+    db,
+  );
 }
 
 /** Mesures de l'hôte et du processus API, au format lu par l'onglet « Santé ». */
@@ -71,7 +96,11 @@ export function mesuresHote() {
       hostname: hostname(),
       cpus: cpus().length,
       loadAverage: { "1m": charge1, "5m": charge5, "15m": charge15 },
-      memory: { total: totalmem(), free: freemem(), used: totalmem() - freemem() },
+      memory: {
+        total: totalmem(),
+        free: freemem(),
+        used: totalmem() - freemem(),
+      },
       uptime: Math.round(uptimeHote()),
     },
     pid: {
@@ -123,14 +152,23 @@ export const opsController = new Elysia({ prefix: "/admin/ops" })
           maintenance,
         },
         host,
-        pid: { ...pid, bot: { rss: etat.memoireOctets, commandes: etat.nombreCommandes } },
+        pid: {
+          ...pid,
+          bot: { rss: etat.memoireOctets, commandes: etat.nombreCommandes },
+        },
         latency: { ws: etat.latenceMs },
       };
     } catch (err) {
       if (!(err instanceof BotAchilleaInjoignable)) throw err;
       // Le tableau de bord doit voir le bot HORS LIGNE et pourquoi, pas une erreur de page.
       return {
-        bot: { online: false, uptime: 0, username: null, guilds: 0, maintenance },
+        bot: {
+          online: false,
+          uptime: 0,
+          username: null,
+          guilds: 0,
+          maintenance,
+        },
         host,
         pid: { ...pid, bot: null, erreur: err.message },
         latency: null,
@@ -143,7 +181,7 @@ export const opsController = new Elysia({ prefix: "/admin/ops" })
       const garde = await exigerStaff(db, headers, ROLE.superAdministrateur);
       if (garde.erreur) return garde.erreur;
       const maintenance = body.maintenance;
-      await db.transaction().execute(async trx => {
+      await db.transaction().execute(async (trx) => {
         await ecrireMaintenance(trx, maintenance);
         await journaliserAudit(trx, {
           acteur: garde.acteur.id,
@@ -171,9 +209,11 @@ export const opsController = new Elysia({ prefix: "/admin/ops" })
         target_id: string | null;
         reason: string | null;
       }>`SELECT id, ts, actor_id, action, target_type, target_id, reason
-           FROM achillea.audit_log ORDER BY ts DESC LIMIT ${limite}`.execute(db);
+           FROM achillea.audit_log ORDER BY ts DESC LIMIT ${limite}`.execute(
+        db,
+      );
       return {
-        data: lignes.rows.map(ligne => ({
+        data: lignes.rows.map((ligne) => ({
           id: ligne.id,
           ts: new Date(ligne.ts).toISOString(),
           actorId: ligne.actor_id,
@@ -198,10 +238,13 @@ export const opsController = new Elysia({ prefix: "/admin/ops" })
           (SELECT count(*) FROM achillea.event WHERE type = 'TOURNAMENT') AS achillea_tournaments_total,
           (SELECT count(*) FROM achillea.sanction WHERE revoked_at IS NULL) AS achillea_sanctions_active,
           (SELECT count(*) FROM achillea.guild WHERE NOT deleted AND name IS NOT NULL) AS achillea_guilds_scanned,
-          (SELECT count(*) FROM achillea.audit_log) AS achillea_audit_entries`.execute(db)
+          (SELECT count(*) FROM achillea.audit_log) AS achillea_audit_entries`.execute(
+        db,
+      )
     ).rows;
     const counters: Record<string, number> = {};
-    for (const [nom, valeur] of Object.entries(compteurs ?? {})) counters[nom] = Number(valeur);
+    for (const [nom, valeur] of Object.entries(compteurs ?? {}))
+      counters[nom] = Number(valeur);
     const { pid } = mesuresHote();
     counters.api_process_rss_bytes = pid.rss;
     counters.api_process_uptime_seconds = pid.uptime;
@@ -223,7 +266,9 @@ export const opsController = new Elysia({ prefix: "/admin/ops" })
     const garde = await exigerStaff(db, headers, ROLE.moderateur);
     if (garde.erreur) return garde.erreur;
     try {
-      const { guildes } = await appelerBotAchillea<{ guildes: GuildeBot[] }>("/guildes");
+      const { guildes } = await appelerBotAchillea<{ guildes: GuildeBot[] }>(
+        "/guildes",
+      );
       return { data: guildes.map(versLigneGuilde) };
     } catch (err) {
       return echecBot(err);
@@ -235,7 +280,10 @@ export const opsController = new Elysia({ prefix: "/admin/ops" })
       const garde = await exigerStaff(db, headers, ROLE.administrateur);
       if (garde.erreur) return garde.erreur;
       try {
-        const { url } = await appelerBotAchillea<{ url: string }>(`/guildes/${params.id}/invitation`, { method: "POST" });
+        const { url } = await appelerBotAchillea<{ url: string }>(
+          `/guildes/${params.id}/invitation`,
+          { method: "POST" },
+        );
         await journaliserAudit(db, {
           acteur: garde.acteur.id,
           action: "guild.invite",
@@ -253,7 +301,9 @@ export const opsController = new Elysia({ prefix: "/admin/ops" })
     const garde = await exigerStaff(db, headers, ROLE.moderateur);
     if (garde.erreur) return garde.erreur;
     try {
-      const { commandes } = await appelerBotAchillea<{ commandes: CommandeBot[] }>("/commandes");
+      const { commandes } = await appelerBotAchillea<{
+        commandes: CommandeBot[];
+      }>("/commandes");
       return { data: commandes.map(versLigneCommande) };
     } catch (err) {
       return echecBot(err);
@@ -263,7 +313,9 @@ export const opsController = new Elysia({ prefix: "/admin/ops" })
     const garde = await exigerStaff(db, headers, ROLE.superAdministrateur);
     if (garde.erreur) return garde.erreur;
     try {
-      const { lignes } = await appelerBotAchillea<{ lignes: string[] }>("/journal");
+      const { lignes } = await appelerBotAchillea<{ lignes: string[] }>(
+        "/journal",
+      );
       return { data: lignes };
     } catch (err) {
       return echecBot(err);
@@ -273,7 +325,8 @@ export const opsController = new Elysia({ prefix: "/admin/ops" })
 /** Garde de l'API développeur : `Authorization: Bearer <API_ADMIN_TOKEN>`. */
 function exigerDev(headers: { authorization?: string }) {
   const entete = headers.authorization ?? "";
-  if (!entete.startsWith("Bearer ")) return status(400, { message: "Missing token" as const });
+  if (!entete.startsWith("Bearer "))
+    return status(400, { message: "Missing token" as const });
   const jeton = entete.slice(7).trim();
   if (!verifyAdminBearerToken(jeton, process.env.API_ADMIN_TOKEN)) {
     return status(401, { message: "Unauthorized" as const });
@@ -282,13 +335,20 @@ function exigerDev(headers: { authorization?: string }) {
 }
 
 /** Développeurs déclarés : `ACHILLEA_DEV_IDS` (liste séparée par des virgules) + propriétaire. */
-export function developpeurs(env: Record<string, string | undefined> = process.env): string[] {
+export function developpeurs(
+  env: Record<string, string | undefined> = process.env,
+): string[] {
   const ids = (env.ACHILLEA_DEV_IDS ?? "")
     .split(",")
-    .map(id => id.trim())
-    .filter(id => /^\d{15,25}$/.test(id));
-  const proprietaire = (env.ACHILLEA_BOT_OWNER_ID ?? env.BOT_OWNER_ID ?? "").trim();
-  if (/^\d{15,25}$/.test(proprietaire) && !ids.includes(proprietaire)) ids.unshift(proprietaire);
+    .map((id) => id.trim())
+    .filter((id) => /^\d{15,25}$/.test(id));
+  const proprietaire = (
+    env.ACHILLEA_BOT_OWNER_ID ??
+    env.BOT_OWNER_ID ??
+    ""
+  ).trim();
+  if (/^\d{15,25}$/.test(proprietaire) && !ids.includes(proprietaire))
+    ids.unshift(proprietaire);
   return ids;
 }
 
@@ -297,7 +357,9 @@ export const botController = new Elysia({ prefix: "/bot" })
   .onBeforeHandle(({ headers }) => exigerDev(headers) ?? undefined)
   .get("/info", async () => {
     try {
-      return await appelerBotAchillea<{ user: unknown; owner: unknown }>("/identite");
+      return await appelerBotAchillea<{ user: unknown; owner: unknown }>(
+        "/identite",
+      );
     } catch (err) {
       return echecBot(err);
     }
@@ -311,13 +373,19 @@ export const botController = new Elysia({ prefix: "/bot" })
   })
   .get("/guilds", async ({ db }) => {
     try {
-      const { guildes } = await appelerBotAchillea<{ guildes: GuildeBot[] }>("/guildes");
+      const { guildes } = await appelerBotAchillea<{ guildes: GuildeBot[] }>(
+        "/guildes",
+      );
       const lignes = await sql<Record<string, unknown> & { id: string }>`
-        SELECT * FROM achillea.guild WHERE id IN (SELECT jsonb_array_elements_text(${JSON.stringify(guildes.map(g => g.id))}::jsonb))`.execute(db);
-      const parId = new Map(lignes.rows.map(ligne => [ligne.id, ligne]));
+        SELECT * FROM achillea.guild WHERE id IN (SELECT jsonb_array_elements_text(${JSON.stringify(guildes.map((g) => g.id))}::jsonb))`.execute(
+        db,
+      );
+      const parId = new Map(lignes.rows.map((ligne) => [ligne.id, ligne]));
       return Promise.all(
-        guildes.map(async guilde => ({
-          discord: await appelerBotAchillea<unknown>(`/guildes/${guilde.id}/detail`),
+        guildes.map(async (guilde) => ({
+          discord: await appelerBotAchillea<unknown>(
+            `/guildes/${guilde.id}/detail`,
+          ),
           database: parId.get(guilde.id) ?? null,
         })),
       );
@@ -329,8 +397,12 @@ export const botController = new Elysia({ prefix: "/bot" })
     "/guilds/:id",
     async ({ db, params }) => {
       try {
-        const discord = await appelerBotAchillea<unknown>(`/guildes/${params.id}/detail`);
-        const ligne = await sql<Record<string, unknown>>`SELECT * FROM achillea.guild WHERE id = ${params.id}`.execute(db);
+        const discord = await appelerBotAchillea<unknown>(
+          `/guildes/${params.id}/detail`,
+        );
+        const ligne = await sql<
+          Record<string, unknown>
+        >`SELECT * FROM achillea.guild WHERE id = ${params.id}`.execute(db);
         return { discord, database: ligne.rows[0] ?? null };
       } catch (err) {
         return echecBot(err);
@@ -342,12 +414,23 @@ export const botController = new Elysia({ prefix: "/bot" })
     "/guilds/:id",
     async ({ db, params }) => {
       try {
-        const resultat = await appelerBotAchillea<{ success: true; message: string }>(`/guildes/${params.id}/quitter`, {
+        const resultat = await appelerBotAchillea<{
+          success: true;
+          message: string;
+        }>(`/guildes/${params.id}/quitter`, {
           method: "POST",
         });
-        await db.transaction().execute(async trx => {
-          await sql`UPDATE achillea.guild SET deleted = true, updated_at = now() WHERE id = ${params.id}`.execute(trx);
-          await journaliserAudit(trx, { acteur: null, action: "guild.leave", cibleType: "guild", cibleId: params.id, motif: "API développeur" });
+        await db.transaction().execute(async (trx) => {
+          await sql`UPDATE achillea.guild SET deleted = true, updated_at = now() WHERE id = ${params.id}`.execute(
+            trx,
+          );
+          await journaliserAudit(trx, {
+            acteur: null,
+            action: "guild.leave",
+            cibleType: "guild",
+            cibleId: params.id,
+            motif: "API développeur",
+          });
         });
         return resultat;
       } catch (err) {
@@ -360,7 +443,10 @@ export const botController = new Elysia({ prefix: "/bot" })
     "/guilds/:id/invite",
     async ({ params }) => {
       try {
-        return await appelerBotAchillea<{ url: string }>(`/guildes/${params.id}/invitation`, { method: "POST" });
+        return await appelerBotAchillea<{ url: string }>(
+          `/guildes/${params.id}/invitation`,
+          { method: "POST" },
+        );
       } catch (err) {
         return echecBot(err);
       }
@@ -369,14 +455,18 @@ export const botController = new Elysia({ prefix: "/bot" })
   )
   .get("/users", async ({ db }) => {
     try {
-      const membres = await appelerBotAchillea<Array<{ id: string }>>("/membres");
+      const membres =
+        await appelerBotAchillea<Array<{ id: string }>>("/membres");
       const lignes = await db
         .selectFrom("user")
         .selectAll()
-        .where("id", "in", membres.length > 0 ? membres.map(m => m.id) : [""])
+        .where("id", "in", membres.length > 0 ? membres.map((m) => m.id) : [""])
         .execute();
-      const parId = new Map(lignes.map(ligne => [ligne.id, ligne]));
-      return membres.map(membre => ({ discord: membre, database: parId.get(membre.id) ?? null }));
+      const parId = new Map(lignes.map((ligne) => [ligne.id, ligne]));
+      return membres.map((membre) => ({
+        discord: membre,
+        database: parId.get(membre.id) ?? null,
+      }));
     } catch (err) {
       return echecBot(err);
     }
@@ -393,8 +483,14 @@ export const botController = new Elysia({ prefix: "/bot" })
     "/users/:id",
     async ({ db, params }) => {
       try {
-        const discord = await appelerBotAchillea<unknown>(`/utilisateurs/${params.id}`);
-        const database = await db.selectFrom("user").selectAll().where("id", "=", params.id).executeTakeFirst();
+        const discord = await appelerBotAchillea<unknown>(
+          `/utilisateurs/${params.id}`,
+        );
+        const database = await db
+          .selectFrom("user")
+          .selectAll()
+          .where("id", "=", params.id)
+          .executeTakeFirst();
         return { discord, database: database ?? null };
       } catch (err) {
         return echecBot(err);
@@ -402,11 +498,13 @@ export const botController = new Elysia({ prefix: "/bot" })
     },
     { params: identifiant },
   )
-  .get("/maintenance", async ({ db }) => ({ maintenance: await lireMaintenance(db) }))
+  .get("/maintenance", async ({ db }) => ({
+    maintenance: await lireMaintenance(db),
+  }))
   .post(
     "/maintenance",
     async ({ db, body }) => {
-      await db.transaction().execute(async trx => {
+      await db.transaction().execute(async (trx) => {
         await ecrireMaintenance(trx, body.maintenance);
         await journaliserAudit(trx, {
           acteur: null,
@@ -421,4 +519,6 @@ export const botController = new Elysia({ prefix: "/bot" })
     { body: t.Object({ maintenance: t.Boolean() }) },
   )
   .get("/devs", () => developpeurs())
-  .get("/devs/:id", ({ params }) => developpeurs().includes(params.id), { params: identifiant });
+  .get("/devs/:id", ({ params }) => developpeurs().includes(params.id), {
+    params: identifiant,
+  });

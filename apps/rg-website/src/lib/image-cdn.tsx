@@ -17,7 +17,9 @@
  * transformation also spares Supabase egress. An explicit `unoptimized` or
  * `loader` prop always wins. See docs/aphrody/reference/infra/rg-free-tier-allocation.md.
  */
-import NextImage, { getImageProps as nextGetImageProps } from "next/dist/api/image";
+import NextImage, {
+  getImageProps as nextGetImageProps,
+} from "next/dist/api/image";
 import type { ImageProps } from "next/image";
 
 /** Hosts whose images are worth a Vercel transformation (first-party uploads). */
@@ -28,10 +30,11 @@ export function isOptimizedImageSource(src: ImageProps["src"]): boolean {
   // Un SVG n'a rien à gagner à l'optimiseur (vectoriel, déjà léger) : servi tel quel, il évite
   // un aller-retour par `/_next/image` (le repli des couvertures de `/news` était l'élément LCP).
   if (src.split("?", 1)[0]!.toLowerCase().endsWith(".svg")) return false;
-  if (src.startsWith("/") && !src.startsWith("//")) return !src.startsWith("/api/");
+  if (src.startsWith("/") && !src.startsWith("//"))
+    return !src.startsWith("/api/");
   try {
     const { hostname } = new URL(src);
-    return OPTIMIZED_HOST_SUFFIXES.some(suffix => hostname.endsWith(suffix));
+    return OPTIMIZED_HOST_SUFFIXES.some((suffix) => hostname.endsWith(suffix));
   } catch {
     return false;
   }
@@ -39,7 +42,9 @@ export function isOptimizedImageSource(src: ImageProps["src"]): boolean {
 
 function withGuardrail(props: ImageProps): ImageProps {
   if (props.unoptimized !== undefined || props.loader) return props;
-  return isOptimizedImageSource(props.src) ? props : { ...props, unoptimized: true };
+  return isOptimizedImageSource(props.src)
+    ? props
+    : { ...props, unoptimized: true };
 }
 
 export default function Image(props: ImageProps) {
@@ -50,4 +55,9 @@ export function getImageProps(props: ImageProps) {
   return nextGetImageProps(withGuardrail(props));
 }
 
-export type { ImageLoader, ImageLoaderProps, ImageProps, StaticImageData } from "next/image";
+export type {
+  ImageLoader,
+  ImageLoaderProps,
+  ImageProps,
+  StaticImageData,
+} from "next/image";

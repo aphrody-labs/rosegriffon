@@ -14,7 +14,12 @@ import {
 } from "discord.js";
 
 import { lireApi, urlAchillea } from "../../lib/achillea-ui";
-import { COULEURS_LEGACY, dureeLegacy, finirCommeLegacy, octetsLegacy } from "../../lib/achillea-legacy";
+import {
+  COULEURS_LEGACY,
+  dureeLegacy,
+  finirCommeLegacy,
+  octetsLegacy,
+} from "../../lib/achillea-legacy";
 import { fiche } from "../../lib/ui";
 
 export interface Controle {
@@ -48,17 +53,32 @@ async function mesurer(
   const latence = Math.round(performance.now() - debut);
   return resultat.ok
     ? { nom, ok: true, valeur: `${latence} ms`, latenceMs: latence, detail }
-    : { nom, ok: false, valeur: "KO", latenceMs: null, detail: resultat.motif.slice(0, 120) };
+    : {
+        nom,
+        ok: false,
+        valeur: "KO",
+        latenceMs: null,
+        detail: resultat.motif.slice(0, 120),
+      };
 }
 
 @Discord()
 export class CommandesGenerales {
-  @Slash({ name: "website", description: "Envoie le lien vers le site web d'Achillea" })
+  @Slash({
+    name: "website",
+    description: "Envoie le lien vers le site web d'Achillea",
+  })
   async website(interaction: ChatInputCommandInteraction): Promise<void> {
-    await interaction.reply({ content: `Le site web d'Achillea est joignable à l'adresse suivante : ${urlAchillea("/")}` });
+    await interaction.reply({
+      content: `Le site web d'Achillea est joignable à l'adresse suivante : ${urlAchillea("/")}`,
+    });
   }
 
-  @Slash({ name: "ping", description: "Diagnostic complet du bot (Discord, DB, API, mémoire, uptime)" })
+  @Slash({
+    name: "ping",
+    description:
+      "Diagnostic complet du bot (Discord, DB, API, mémoire, uptime)",
+  })
   async ping(
     @SlashOption({
       name: "public",
@@ -70,7 +90,9 @@ export class CommandesGenerales {
     interaction: ChatInputCommandInteraction,
   ): Promise<void> {
     const debut = Date.now();
-    await interaction.deferReply(publique ? {} : { flags: MessageFlags.Ephemeral });
+    await interaction.deferReply(
+      publique ? {} : { flags: MessageFlags.Ephemeral },
+    );
 
     const ws = interaction.client.ws.ping;
     const controles: Controle[] = [
@@ -79,7 +101,10 @@ export class CommandesGenerales {
         ok: ws >= 0 && ws < 5000,
         valeur: `${ws} ms`,
         latenceMs: ws >= 0 ? ws : null,
-        detail: interaction.client.ws.status === 0 ? "Ready" : `status=${interaction.client.ws.status}`,
+        detail:
+          interaction.client.ws.status === 0
+            ? "Ready"
+            : `status=${interaction.client.ws.status}`,
       },
       {
         nom: "Interaction RTT",
@@ -89,13 +114,17 @@ export class CommandesGenerales {
       },
     ];
     const [api, ranked] = await Promise.all([
-      mesurer("API + PostgreSQL", "GET /bot/maintenance", () => lireApi(interaction, c => c.admin.botMaintenance())),
-      mesurer("Ranked", "GET /health", () => lireApi(interaction, c => c.admin.apiHealth())),
+      mesurer("API + PostgreSQL", "GET /bot/maintenance", () =>
+        lireApi(interaction, (c) => c.admin.botMaintenance()),
+      ),
+      mesurer("Ranked", "GET /health", () =>
+        lireApi(interaction, (c) => c.admin.apiHealth()),
+      ),
     ]);
     controles.push(api, ranked);
 
     const memoire = process.memoryUsage();
-    const toutVa = controles.every(c => c.ok);
+    const toutVa = controles.every((c) => c.ok);
     const embed = fiche({
       icone: "🏓",
       titre: "Pong — Achilléa Bot",
@@ -125,7 +154,11 @@ export class CommandesGenerales {
     // Ancien bot : vert (Colors.Green) si tout va, jaune (Colors.Yellow) sinon ; pied = latence seule.
     await interaction.editReply({
       embeds: [
-        finirCommeLegacy(embed, toutVa ? COULEURS_LEGACY.vert : COULEURS_LEGACY.jaune, `Latence totale : ${Date.now() - debut} ms`),
+        finirCommeLegacy(
+          embed,
+          toutVa ? COULEURS_LEGACY.vert : COULEURS_LEGACY.jaune,
+          `Latence totale : ${Date.now() - debut} ms`,
+        ),
       ],
     });
   }

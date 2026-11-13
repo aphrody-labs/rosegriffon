@@ -1,4 +1,11 @@
-import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle } from "@rosegriffon/ui";
+import {
+  Button,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@rosegriffon/ui";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "@/components/shared/Link";
@@ -40,7 +47,8 @@ export const metadata: Metadata = {
   },
   openGraph: withDefaultOgImage({
     title: "Rejoindre Rose Griffon · Recrutement",
-    description: "Contribuez à l'essor de la communauté Inazuma Eleven en France selon vos disponibilités.",
+    description:
+      "Contribuez à l'essor de la communauté Inazuma Eleven en France selon vos disponibilités.",
     url: absoluteUrl("/a-propos/rejoindre-rg"),
     type: "website",
   }),
@@ -81,7 +89,8 @@ const CONDITIONS = [
   {
     id: "age",
     titre: "18 ans minimum",
-    texte: "Être majeur (18 ans révolus). Cette condition est stricte pour des raisons légales et organisationnelles.",
+    texte:
+      "Être majeur (18 ans révolus). Cette condition est stricte pour des raisons légales et organisationnelles.",
   },
   {
     id: "mobilite",
@@ -153,12 +162,24 @@ const ETAPES = [
 export default async function RejoindreRGPage() {
   const { data: members } = await getAllTeamMembers();
   // `getAllTeamMembers` retourne aussi les inactifs (côté admin), on ne compte que les actifs.
-  const activeMembersCount = members ? members.filter(m => m.is_active !== false).length : 50; // Repli à 50 si la requête échoue
+  const activeMembersCount = members
+    ? members.filter((m) => m.is_active !== false).length
+    : 50; // Repli à 50 si la requête échoue
   const discordMemberCount = 3000;
 
   const STATS = [
-    { id: "adherents", icon: Users, label: "Adhérents", value: activeMembersCount },
-    { id: "discord", icon: MessageCircle, label: "Membres Discord", value: discordMemberCount },
+    {
+      id: "adherents",
+      icon: Users,
+      label: "Adhérents",
+      value: activeMembersCount,
+    },
+    {
+      id: "discord",
+      icon: MessageCircle,
+      label: "Membres Discord",
+      value: discordMemberCount,
+    },
     { id: "regions", icon: MapPin, label: "Rayonnement", value: "France" },
     { id: "passion", icon: Heart, label: "Passion", value: "100 %" },
   ];
@@ -174,7 +195,12 @@ export default async function RejoindreRGPage() {
       />
 
       <PageHero
-        icon={<UserPlus className="size-7 shrink-0 text-rg-or md:size-8" aria-hidden />}
+        icon={
+          <UserPlus
+            className="size-7 shrink-0 text-rg-or md:size-8"
+            aria-hidden
+          />
+        }
         eyebrow="Recrutement ouvert"
         title="Rejoignez l'aventure Rose Griffon"
         description="Une association dynamique et passionnée qui recherche constamment de nouveaux talents. Contribuez à l'essor de la communauté Inazuma Eleven en France, selon vos disponibilités."
@@ -187,7 +213,11 @@ export default async function RejoindreRGPage() {
                 <ArrowRight className="size-5" aria-hidden />
               </a>
             </Button>
-            <Button asChild variant="outline" className={heroSecondaryButtonClass}>
+            <Button
+              asChild
+              variant="outline"
+              className={heroSecondaryButtonClass}
+            >
               <a href="#postes">Voir les postes ouverts</a>
             </Button>
           </>
@@ -200,15 +230,22 @@ export default async function RejoindreRGPage() {
           L&apos;association en chiffres
         </h2>
         <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-          {STATS.map(stat => (
-            <Card key={stat.id} className="py-4 shadow-lg transition-shadow hover:shadow-xl">
+          {STATS.map((stat) => (
+            <Card
+              key={stat.id}
+              className="py-4 shadow-lg transition-shadow hover:shadow-xl"
+            >
               <CardContent className="flex flex-col items-center gap-3 text-center">
                 <span className="rounded-2xl bg-primary/10 p-3 text-primary">
                   <stat.icon className="size-6" aria-hidden />
                 </span>
                 <div>
-                  <p className="text-2xl font-black text-foreground">{stat.value}</p>
-                  <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">{stat.label}</p>
+                  <p className="text-2xl font-black text-foreground">
+                    {stat.value}
+                  </p>
+                  <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+                    {stat.label}
+                  </p>
                 </div>
               </CardContent>
             </Card>
@@ -217,7 +254,10 @@ export default async function RejoindreRGPage() {
       </section>
 
       {/* Conditions & postes */}
-      <section aria-labelledby="profils" className="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:gap-8">
+      <section
+        aria-labelledby="profils"
+        className="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:gap-8"
+      >
         <h2 id="profils" className="sr-only">
           Conditions d&apos;intégration et postes ouverts
         </h2>
@@ -230,46 +270,64 @@ export default async function RejoindreRGPage() {
                 <span className="rounded-xl bg-primary/10 p-2.5 text-primary">
                   <CheckCircle className="size-6" aria-hidden />
                 </span>
-                <CardTitle className="text-fluid-headline-md font-bold">Conditions d&apos;intégration</CardTitle>
+                <CardTitle className="text-fluid-headline-md font-bold">
+                  Conditions d&apos;intégration
+                </CardTitle>
               </div>
-              <CardDescription>Les pré-requis pour rejoindre l&apos;aventure.</CardDescription>
+              <CardDescription>
+                Les pré-requis pour rejoindre l&apos;aventure.
+              </CardDescription>
             </div>
           </CardHeader>
 
           <CardContent className="flex grow flex-col gap-3">
-            {CONDITIONS.map(condition => (
+            {CONDITIONS.map((condition) => (
               <div
                 key={condition.id}
                 className="rounded-xl border border-border bg-muted p-3 transition-colors hover:bg-accent"
               >
-                <p className="font-semibold text-foreground">{condition.titre}</p>
-                <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{condition.texte}</p>
+                <p className="font-semibold text-foreground">
+                  {condition.titre}
+                </p>
+                <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+                  {condition.texte}
+                </p>
               </div>
             ))}
           </CardContent>
         </Card>
 
-        <Card id="postes" className="flex h-full scroll-mt-24 flex-col border-t-4 border-t-secondary shadow-lg">
+        <Card
+          id="postes"
+          className="flex h-full scroll-mt-24 flex-col border-t-4 border-t-secondary shadow-lg"
+        >
           <CardHeader>
             <div>
               <div className="mb-2 flex items-center gap-3">
                 <span className="rounded-xl bg-secondary/10 p-2.5 text-secondary">
                   <Briefcase className="size-6" aria-hidden />
                 </span>
-                <CardTitle className="text-fluid-headline-md font-bold">Postes ouverts</CardTitle>
+                <CardTitle className="text-fluid-headline-md font-bold">
+                  Postes ouverts
+                </CardTitle>
               </div>
-              <CardDescription>Les rôles que nous recherchons activement.</CardDescription>
+              <CardDescription>
+                Les rôles que nous recherchons activement.
+              </CardDescription>
             </div>
           </CardHeader>
 
           <CardContent className="flex grow flex-col gap-3">
-            {POSTES.map(poste => (
+            {POSTES.map((poste) => (
               <div
                 key={poste.id}
                 className="rounded-xl border border-border p-4 transition-colors hover:border-secondary hover:bg-accent"
               >
                 <h3 className="mb-1 flex items-center gap-2 text-lg font-bold text-foreground">
-                  <span className="size-2 shrink-0 rounded-full bg-secondary" aria-hidden />
+                  <span
+                    className="size-2 shrink-0 rounded-full bg-secondary"
+                    aria-hidden
+                  />
                   {poste.titre}
                 </h3>
                 <p className="text-sm text-muted-foreground">{poste.texte}</p>
@@ -289,7 +347,7 @@ export default async function RejoindreRGPage() {
           subtitle="Un processus simple et transparent, en trois étapes."
         />
         <ol className="grid grid-cols-1 gap-6 md:grid-cols-3">
-          {ETAPES.map(etape => (
+          {ETAPES.map((etape) => (
             <li key={etape.id}>
               <Card className="h-full py-6 shadow-lg transition-shadow hover:shadow-xl">
                 <CardContent className="flex flex-col items-center gap-2 text-center">
@@ -299,8 +357,12 @@ export default async function RejoindreRGPage() {
                   <span className="text-xs font-bold tracking-wide text-muted-foreground uppercase">
                     Étape {etape.numero}
                   </span>
-                  <h3 className="text-lg font-bold text-foreground">{etape.titre}</h3>
-                  <p className="text-sm leading-relaxed text-muted-foreground">{etape.texte}</p>
+                  <h3 className="text-lg font-bold text-foreground">
+                    {etape.titre}
+                  </h3>
+                  <p className="text-sm leading-relaxed text-muted-foreground">
+                    {etape.texte}
+                  </p>
                 </CardContent>
               </Card>
             </li>
@@ -314,12 +376,13 @@ export default async function RejoindreRGPage() {
           Prêt à écrire l&apos;histoire avec nous ?
         </h2>
         <p className="mx-auto mt-4 max-w-2xl text-fluid-body-lg leading-relaxed text-muted-foreground">
-          Que vous soyez artiste, organisateur, développeur ou simplement passionné, il y a une place pour vous chez
-          Rose Griffon. Choisissez le formulaire qui correspond à votre profil.
+          Que vous soyez artiste, organisateur, développeur ou simplement
+          passionné, il y a une place pour vous chez Rose Griffon. Choisissez le
+          formulaire qui correspond à votre profil.
         </p>
 
         <div className="mt-8 flex flex-col flex-wrap items-stretch justify-center gap-4 sm:flex-row sm:items-center">
-          {CANDIDATURES.map(candidature => (
+          {CANDIDATURES.map((candidature) => (
             <Button
               key={candidature.id}
               asChild
@@ -328,7 +391,11 @@ export default async function RejoindreRGPage() {
               // `whitespace-normal` : sans lui, un libellé long déborde du bouton à 320 px.
               className="h-auto min-h-14 rounded-2xl px-5 py-3 text-base font-bold whitespace-normal sm:px-8"
             >
-              <a href={candidature.href} target="_blank" rel="noopener noreferrer">
+              <a
+                href={candidature.href}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 {candidature.logo ? (
                   <Image
                     src={candidature.logo.src}
@@ -348,12 +415,18 @@ export default async function RejoindreRGPage() {
         </div>
 
         <p className="mt-6 flex items-center justify-center gap-2 text-sm font-medium text-muted-foreground">
-          <span className="size-2 shrink-0 animate-pulse rounded-full bg-succes" aria-hidden />
+          <span
+            className="size-2 shrink-0 animate-pulse rounded-full bg-succes"
+            aria-hidden
+          />
           Réponse sous 48 h en moyenne
         </p>
         <p className="mt-2 text-sm text-muted-foreground">
           Une question avant de candidater ?{" "}
-          <Link href="/a-propos/contact" className="font-medium text-primary underline">
+          <Link
+            href="/a-propos/contact"
+            className="font-medium text-primary underline"
+          >
             Écrivez-nous
           </Link>
           .

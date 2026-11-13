@@ -75,7 +75,11 @@ export function PlatformBadge({
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
       {iconSrc && (
-        <img src={iconSrc} alt={label} className="size-4 rounded-[3px] object-contain" />
+        <img
+          src={iconSrc}
+          alt={label}
+          className="size-4 rounded-[3px] object-contain"
+        />
       )}
       {showLabel && <span>{label}</span>}
     </div>

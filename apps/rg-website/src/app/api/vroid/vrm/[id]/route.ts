@@ -24,23 +24,36 @@
  *   compréhensible au lieu d'un 403 opaque.
  */
 import { NextResponse } from "next/server";
-import { detailModele, ErreurVroid, estNonAutorise, estQuotaDepasse, resoudreVrm } from "@/lib/vroid/client";
+import {
+  detailModele,
+  ErreurVroid,
+  estNonAutorise,
+  estQuotaDepasse,
+  resoudreVrm,
+} from "@/lib/vroid/client";
 import { jetonValide } from "@/lib/vroid/session";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-export async function GET(_requete: Request, { params }: { params: Promise<{ id: string }> }): Promise<Response> {
+export async function GET(
+  _requete: Request,
+  { params }: { params: Promise<{ id: string }> },
+): Promise<Response> {
   const { id } = await params;
   if (!/^\d+$/.test(id)) {
-    return NextResponse.json({ erreur: "Identifiant de modèle invalide." }, { status: 400 });
+    return NextResponse.json(
+      { erreur: "Identifiant de modèle invalide." },
+      { status: 400 },
+    );
   }
 
   const jeton = await jetonValide();
   if (!jeton) {
     return NextResponse.json(
       {
-        erreur: "Le chargement d'un modèle VRoid Hub exige d'avoir lié son compte.",
+        erreur:
+          "Le chargement d'un modèle VRoid Hub exige d'avoir lié son compte.",
         connexionRequise: true,
       },
       { status: 401 },
@@ -69,7 +82,9 @@ export async function GET(_requete: Request, { params }: { params: Promise<{ id:
     const amont = await fetch(url, { cache: "no-store" });
     if (!amont.ok || !amont.body) {
       return NextResponse.json(
-        { erreur: `Le fichier n'a pas pu être récupéré (statut ${amont.status}).` },
+        {
+          erreur: `Le fichier n'a pas pu être récupéré (statut ${amont.status}).`,
+        },
         { status: 502 },
       );
     }
@@ -99,13 +114,24 @@ export async function GET(_requete: Request, { params }: { params: Promise<{ id:
     }
     if (estQuotaDepasse(erreur)) {
       return NextResponse.json(
-        { erreur: "Quota d'appels VRoid Hub atteint, réessayez dans quelques minutes." },
+        {
+          erreur:
+            "Quota d'appels VRoid Hub atteint, réessayez dans quelques minutes.",
+        },
         { status: 429 },
       );
     }
-    const statut = erreur instanceof ErreurVroid && erreur.statut >= 400 ? erreur.statut : 502;
+    const statut =
+      erreur instanceof ErreurVroid && erreur.statut >= 400
+        ? erreur.statut
+        : 502;
     return NextResponse.json(
-      { erreur: erreur instanceof Error ? erreur.message : "Chargement du modèle en échec." },
+      {
+        erreur:
+          erreur instanceof Error
+            ? erreur.message
+            : "Chargement du modèle en échec.",
+      },
       { status: statut },
     );
   }

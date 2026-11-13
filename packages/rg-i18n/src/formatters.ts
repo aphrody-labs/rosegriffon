@@ -17,7 +17,10 @@ export interface IntlFormatters {
   list(values: Iterable<string>, options?: Intl.ListFormatOptions): string;
 }
 
-function formattingDefinition(locale: string, registry: LocaleRegistry): LocaleDefinition {
+function formattingDefinition(
+  locale: string,
+  registry: LocaleRegistry,
+): LocaleDefinition {
   return matchLocale(locale, registry) ?? getDefaultLocaleDefinition(registry);
 }
 

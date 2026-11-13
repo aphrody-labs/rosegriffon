@@ -6,7 +6,12 @@ import { requireApiPatreonCreator } from "@/lib/api-auth";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const VALID_STATUSES = new Set(["pending", "reactivated", "churned", "grandfathered"]);
+const VALID_STATUSES = new Set([
+  "pending",
+  "reactivated",
+  "churned",
+  "grandfathered",
+]);
 
 export async function POST(req: Request) {
   const auth = await requireApiPatreonCreator();
@@ -35,7 +40,10 @@ export async function POST(req: Request) {
 
   if (error) {
     console.error("[admin/patreon/grandfather]", error);
-    return NextResponse.json({ detail: error.message, error: "update_failed" }, { status: 500 });
+    return NextResponse.json(
+      { detail: error.message, error: "update_failed" },
+      { status: 500 },
+    );
   }
   return NextResponse.json({ ok: true });
 }

@@ -30,7 +30,16 @@
       ]
     },
     "stage": {
-      "enum": ["acquire", "identify", "unpack", "analyze", "lift", "decompile", "rebuild", "verify"],
+      "enum": [
+        "acquire",
+        "identify",
+        "unpack",
+        "analyze",
+        "lift",
+        "decompile",
+        "rebuild",
+        "verify"
+      ],
       "type": "string"
     },
     "status": {

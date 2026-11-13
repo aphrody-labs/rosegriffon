@@ -22,15 +22,31 @@
 import { getItemCategoryLabel } from "@rosegriffon/azalee/game";
 
 /** Éléments, dans l'ordre d'affichage du jeu. */
-export const ELEMENTS_FR = ["Feu", "Vent", "Forêt", "Montagne", "Néant"] as const;
+export const ELEMENTS_FR = [
+  "Feu",
+  "Vent",
+  "Forêt",
+  "Montagne",
+  "Néant",
+] as const;
 export type ElementFr = (typeof ELEMENTS_FR)[number];
 
 /** Catégories de technique spéciale. */
-export const CATEGORIES_TECHNIQUE_FR = ["Tir", "Dribble", "Défense", "Arrêt"] as const;
+export const CATEGORIES_TECHNIQUE_FR = [
+  "Tir",
+  "Dribble",
+  "Défense",
+  "Arrêt",
+] as const;
 export type CategorieTechniqueFr = (typeof CATEGORIES_TECHNIQUE_FR)[number];
 
 /** Postes de joueur. `Entraîneur` existe en base (10 lignes) mais n'est pas un poste jouable. */
-export const POSITIONS_FR = ["Gardien", "Défenseur", "Milieu", "Attaquant"] as const;
+export const POSITIONS_FR = [
+  "Gardien",
+  "Défenseur",
+  "Milieu",
+  "Attaquant",
+] as const;
 export type PositionFr = (typeof POSITIONS_FR)[number];
 
 /** Raretés, telles qu'écrites dans `inagle_characters.rarity_label`. */
@@ -50,7 +66,9 @@ export function normaliserLibelle(valeur: string): string {
 }
 
 /** Construit une table de synonymes déjà normalisés. */
-function tableSynonymes<T extends string>(entrees: Record<string, T>): Map<string, T> {
+function tableSynonymes<T extends string>(
+  entrees: Record<string, T>,
+): Map<string, T> {
   const table = new Map<string, T>();
   for (const [clef, valeur] of Object.entries(entrees)) {
     table.set(normaliserLibelle(clef), valeur);
@@ -123,7 +141,10 @@ const SYNONYMES_RARETE = tableSynonymes<RareteFr>({
   Basara: "BASARA",
 });
 
-function resoudre<T extends string>(table: Map<string, T>, saisie: string | null | undefined): T | null {
+function resoudre<T extends string>(
+  table: Map<string, T>,
+  saisie: string | null | undefined,
+): T | null {
   if (!saisie) {
     return null;
   }
@@ -131,22 +152,30 @@ function resoudre<T extends string>(table: Map<string, T>, saisie: string | null
 }
 
 /** Élément canonique en français, ou `null` si la saisie n'en désigne aucun. */
-export function resoudreElement(saisie: string | null | undefined): ElementFr | null {
+export function resoudreElement(
+  saisie: string | null | undefined,
+): ElementFr | null {
   return resoudre(SYNONYMES_ELEMENT, saisie);
 }
 
 /** Catégorie de technique canonique en français. */
-export function resoudreCategorieTechnique(saisie: string | null | undefined): CategorieTechniqueFr | null {
+export function resoudreCategorieTechnique(
+  saisie: string | null | undefined,
+): CategorieTechniqueFr | null {
   return resoudre(SYNONYMES_CATEGORIE, saisie);
 }
 
 /** Poste canonique en français. */
-export function resoudrePosition(saisie: string | null | undefined): PositionFr | null {
+export function resoudrePosition(
+  saisie: string | null | undefined,
+): PositionFr | null {
   return resoudre(SYNONYMES_POSITION, saisie);
 }
 
 /** Rareté canonique en français. */
-export function resoudreRarete(saisie: string | null | undefined): RareteFr | null {
+export function resoudreRarete(
+  saisie: string | null | undefined,
+): RareteFr | null {
   return resoudre(SYNONYMES_RARETE, saisie);
 }
 
@@ -160,7 +189,9 @@ export function resoudreRarete(saisie: string | null | undefined): RareteFr | nu
  * (mesuré : 1 668 objets) sont toutes couvertes ; une catégorie inconnue est
  * renvoyée telle quelle plutôt que masquée.
  */
-export function libelleCategorieObjet(categorie: string | null | undefined): string | null {
+export function libelleCategorieObjet(
+  categorie: string | null | undefined,
+): string | null {
   return getItemCategoryLabel(categorie) ?? null;
 }
 
@@ -173,7 +204,9 @@ export function libelleCategorieObjet(categorie: string | null | undefined): str
  * sait pas rendre. Ces quatre webp-là existent et sont stables.
  * Le néant n'a pas d'icône : la fonction renvoie `null`, l'appelant n'affiche rien.
  */
-export function iconeElementUrl(element: string | null | undefined): string | null {
+export function iconeElementUrl(
+  element: string | null | undefined,
+): string | null {
   const canonique = resoudreElement(element);
   const fichiers: Record<ElementFr, string | null> = {
     Feu: "fire",
@@ -186,7 +219,9 @@ export function iconeElementUrl(element: string | null | undefined): string | nu
     return null;
   }
   const fichier = fichiers[canonique];
-  return fichier ? `https://azalee.rosegriffon.fr/spirit_type/${fichier}.webp` : null;
+  return fichier
+    ? `https://azalee.rosegriffon.fr/spirit_type/${fichier}.webp`
+    : null;
 }
 
 /**
@@ -196,7 +231,11 @@ export function iconeElementUrl(element: string | null | undefined): string | nu
  * contiennent seulement : taper « for » propose « Forêt » avant « Renfort ».
  * Discord plafonne à 25 propositions.
  */
-export function suggerer<T extends string>(valeurs: readonly T[], saisie: string | null | undefined, max = 25): T[] {
+export function suggerer<T extends string>(
+  valeurs: readonly T[],
+  saisie: string | null | undefined,
+  max = 25,
+): T[] {
   const aiguille = normaliserLibelle(saisie ?? "");
   if (aiguille.length === 0) {
     return valeurs.slice(0, max);

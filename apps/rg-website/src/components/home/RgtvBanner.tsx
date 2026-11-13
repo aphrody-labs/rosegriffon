@@ -52,7 +52,13 @@ export function RgtvBanner({
           <CardContent className="px-6 pb-6 pt-0 sm:px-10 sm:pb-10 sm:pt-0 md:p-12 md:pt-0 flex flex-col justify-center gap-6 bg-transparent relative">
             <div className="flex flex-col gap-3">
               <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#d63901] border-2 border-border text-white text-xs font-black uppercase tracking-wide shadow-lg transform -rotate-2">
-                <Image src="/rgtv/rgtv.webp" alt="RGTV Logo" width={16} height={16} className="size-4" />
+                <Image
+                  src="/rgtv/rgtv.webp"
+                  alt="RGTV Logo"
+                  width={16}
+                  height={16}
+                  className="size-4"
+                />
                 {subtitle}
               </div>
               <h2
@@ -66,7 +72,9 @@ export function RgtvBanner({
               </h2>
             </div>
 
-            <p className="text-black/80 text-lg leading-relaxed max-w-md font-bold text-pretty">{description}</p>
+            <p className="text-black/80 text-lg leading-relaxed max-w-md font-bold text-pretty">
+              {description}
+            </p>
 
             <div className="flex justify-start pt-2">
               <Button
@@ -75,7 +83,13 @@ export function RgtvBanner({
                 className="bg-[#d63901] hover:bg-[#b52f00] text-white font-black rounded-xl shadow-[4px_4px_0px_0px_#90310f] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_#90310f] transition-all duration-200 border-2 border-[#90310f] w-full sm:w-auto px-8"
               >
                 <a href={link}>
-                  <Image src="/rgtv/rgtv.webp" alt="RGTV Logo" width={20} height={20} className="mr-2 size-5" />
+                  <Image
+                    src="/rgtv/rgtv.webp"
+                    alt="RGTV Logo"
+                    width={20}
+                    height={20}
+                    className="mr-2 size-5"
+                  />
                   {buttonText}
                 </a>
               </Button>

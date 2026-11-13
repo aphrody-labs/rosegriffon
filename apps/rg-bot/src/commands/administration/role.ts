@@ -98,7 +98,13 @@ import { borner, echapperMarkdown } from "../staff/format";
 import { differerEnPrive, exigerDroits, messagePanne } from "../staff/garde";
 import { analyserIdConfirmation, construireIdConfirmation } from "./valeurs";
 import "./racine-moderation";
-import { echec, pied, piedTexte, refus as accesRefuse, repondre } from "../../lib/ui";
+import {
+  echec,
+  pied,
+  piedTexte,
+  refus as accesRefuse,
+  repondre,
+} from "../../lib/ui";
 
 /**
  * Délai laissé pour cliquer « Confirmer ».
@@ -132,11 +138,14 @@ interface ContexteServeur {
  *
  * @returns `null` quand le refus a déjà été envoyé.
  */
-async function contexteServeur(interaction: ChatInputCommandInteraction): Promise<ContexteServeur | null> {
+async function contexteServeur(
+  interaction: ChatInputCommandInteraction,
+): Promise<ContexteServeur | null> {
   const guilde = interaction.guild;
   if (!guilde) {
     await interaction.editReply({
-      content: "🚫 Cette commande n'a de sens que sur le serveur : les rôles n'existent pas en message privé.",
+      content:
+        "🚫 Cette commande n'a de sens que sur le serveur : les rôles n'existent pas en message privé.",
     });
     return null;
   }
@@ -154,10 +163,15 @@ async function contexteServeur(interaction: ChatInputCommandInteraction): Promis
   return { guilde, bot, positionBot: bot.roles.highest.position };
 }
 
-type ResolutionRole = { readonly ok: true; readonly role: Role } | { readonly ok: false; readonly raison: string };
+type ResolutionRole =
+  | { readonly ok: true; readonly role: Role }
+  | { readonly ok: false; readonly raison: string };
 
 /** Retrouve le rôle désigné par l'option textuelle. */
-async function lireRole(guilde: Guild, saisie: string): Promise<ResolutionRole> {
+async function lireRole(
+  guilde: Guild,
+  saisie: string,
+): Promise<ResolutionRole> {
   const identifiant = extraireIdentifiantRole(saisie);
   if (!identifiant) {
     return {
@@ -190,8 +204,12 @@ function refusSurRole(contexte: ContexteServeur, role: Role): string | null {
   const empechement = empechementRole({
     estEveryone: role.id === contexte.guilde.roles.everyone.id,
     gereParIntegration: role.managed,
-    estRoleDuBot: contexte.guilde.roles.botRoleFor(contexte.guilde.client.user)?.id === role.id,
-    porteAdministration: role.permissions.has(PermissionFlagsBits.Administrator),
+    estRoleDuBot:
+      contexte.guilde.roles.botRoleFor(contexte.guilde.client.user)?.id ===
+      role.id,
+    porteAdministration: role.permissions.has(
+      PermissionFlagsBits.Administrator,
+    ),
     positionRole: role.position,
     positionBot: contexte.positionBot,
   });
@@ -209,7 +227,10 @@ function messageRefus(err: unknown): string {
 }
 
 /** Récupère un membre, en distinguant « absent du serveur » d'une vraie panne. */
-async function recupererMembre(guilde: Guild, identifiant: string): Promise<GuildMember | null> {
+async function recupererMembre(
+  guilde: Guild,
+  identifiant: string,
+): Promise<GuildMember | null> {
   try {
     return await guilde.members.fetch(identifiant);
   } catch (err) {
@@ -255,7 +276,10 @@ function pouvoirsDuRole(role: Role): string[] {
  *
  * @returns la phrase de refus, ou `null` quand le rang suffit.
  */
-function refusRangInsuffisant(admin: { role: string }, pouvoirs: readonly string[]): string | null {
+function refusRangInsuffisant(
+  admin: { role: string },
+  pouvoirs: readonly string[],
+): string | null {
   if (pouvoirs.length === 0 || admin.role === "admin") {
     return null;
   }
@@ -279,7 +303,10 @@ function refusRangInsuffisant(admin: { role: string }, pouvoirs: readonly string
  * L'autocomplétion n'a que 3 secondes et n'affiche aucune erreur : en cas de
  * pépin on rend une liste vide plutôt que de laisser l'appel se perdre.
  */
-async function suggererRoles(interaction: AutocompleteInteraction, gerablesSeulement: boolean): Promise<void> {
+async function suggererRoles(
+  interaction: AutocompleteInteraction,
+  gerablesSeulement: boolean,
+): Promise<void> {
   try {
     const guilde = interaction.guild;
     if (!guilde) {
@@ -294,7 +321,7 @@ async function suggererRoles(interaction: AutocompleteInteraction, gerablesSeule
     const roleDuBot = guilde.roles.botRoleFor(guilde.client.user)?.id;
 
     const propositions = [...guilde.roles.cache.values()]
-      .filter(role => {
+      .filter((role) => {
         if (role.id === guilde.roles.everyone.id) {
           return false;
         }
@@ -304,7 +331,9 @@ async function suggererRoles(interaction: AutocompleteInteraction, gerablesSeule
             estEveryone: false,
             gereParIntegration: role.managed,
             estRoleDuBot: role.id === roleDuBot,
-            porteAdministration: role.permissions.has(PermissionFlagsBits.Administrator),
+            porteAdministration: role.permissions.has(
+              PermissionFlagsBits.Administrator,
+            ),
             positionRole: role.position,
             positionBot,
           }) !== null
@@ -317,7 +346,7 @@ async function suggererRoles(interaction: AutocompleteInteraction, gerablesSeule
       // serveur, celui que le staff a en tête.
       .toSorted((a, b) => b.position - a.position)
       .slice(0, MAX_PROPOSITIONS)
-      .map(role => ({
+      .map((role) => ({
         name: borner(`${role.name} — rang ${role.position}`, 100),
         value: role.id,
       }));
@@ -365,14 +394,21 @@ async function confirmer(
       .setLabel("Annuler")
       .setStyle(ButtonStyle.Secondary),
   );
-  const message = await interaction.editReply({ embeds: [embed], components: [rangee] });
+  const message = await interaction.editReply({
+    embeds: [embed],
+    components: [rangee],
+  });
   try {
     const clic = await message.awaitMessageComponent({
       componentType: ComponentType.Button,
       time: DELAI_CONFIRMATION_MS,
-      filter: bouton => {
+      filter: (bouton) => {
         const lu = analyserIdConfirmation(bouton.customId);
-        return lu !== null && lu.graine === graine && bouton.user.id === interaction.user.id;
+        return (
+          lu !== null &&
+          lu.graine === graine &&
+          bouton.user.id === interaction.user.id
+        );
       },
     });
     // `deferUpdate` accuse réception du clic sans rien changer à l'écran : sans
@@ -407,12 +443,16 @@ async function confirmer(
 @Discord()
 @SlashGroup({
   name: "role",
-  description: "Distribution des rôles Discord : attribution, création, suppression",
+  description:
+    "Distribution des rôles Discord : attribution, création, suppression",
   root: "moderation",
 })
 @SlashGroup("role", "moderation")
 export class AdministrationRoleCommand {
-  @Slash({ name: "donner", description: "Donne un rôle à un membre du serveur" })
+  @Slash({
+    name: "donner",
+    description: "Donne un rôle à un membre du serveur",
+  })
   async donner(
     @SlashOption({
       name: "membre",
@@ -423,10 +463,12 @@ export class AdministrationRoleCommand {
     cible: { id: string },
     @SlashOption({
       name: "role",
-      description: "Rôle à donner — seuls les rôles réellement attribuables sont proposés",
+      description:
+        "Rôle à donner — seuls les rôles réellement attribuables sont proposés",
       type: ApplicationCommandOptionType.String,
       required: true,
-      autocomplete: (interaction: AutocompleteInteraction) => suggererRoles(interaction, true),
+      autocomplete: (interaction: AutocompleteInteraction) =>
+        suggererRoles(interaction, true),
     })
     roleSaisi: string,
     @SlashOption({
@@ -462,7 +504,8 @@ export class AdministrationRoleCommand {
       const membre = await recupererMembre(contexte.guilde, cible.id);
       if (!membre) {
         await interaction.editReply({
-          content: "🚫 Ce compte n'est pas (ou plus) membre du serveur : il n'y a aucun rôle à lui donner.",
+          content:
+            "🚫 Ce compte n'est pas (ou plus) membre du serveur : il n'y a aucun rôle à lui donner.",
         });
         return;
       }
@@ -490,7 +533,10 @@ export class AdministrationRoleCommand {
             `${decrireRole(role)} → <@${membre.id}>\n\nCe rôle ne fait pas que colorer un pseudo : ` +
               "il accorde des pouvoirs sur le serveur, tout de suite, à ce membre.",
           )
-          .addFields({ name: "Pouvoirs accordés", value: borner(pouvoirs.join("\n"), 1_000) });
+          .addFields({
+            name: "Pouvoirs accordés",
+            value: borner(pouvoirs.join("\n"), 1_000),
+          });
         if (!(await confirmer(interaction, apercu, "Accorder ces pouvoirs"))) {
           return;
         }
@@ -517,9 +563,16 @@ export class AdministrationRoleCommand {
         .setDescription(`${decrireRole(role)} → <@${membre.id}>`)
         .addFields({ name: "Motif d'audit", value: borner(raison, 1_000) });
       if (pouvoirs.length > 0) {
-        accuse.addFields({ name: "Pouvoirs accordés", value: borner(pouvoirs.join("\n"), 1_000) });
+        accuse.addFields({
+          name: "Pouvoirs accordés",
+          value: borner(pouvoirs.join("\n"), 1_000),
+        });
       }
-      await interaction.editReply({ content: "", embeds: [accuse], components: [] });
+      await interaction.editReply({
+        content: "",
+        embeds: [accuse],
+        components: [],
+      });
     } catch (err) {
       // `components: []` : la confirmation des rôles à pouvoirs a pu poser des
       // boutons, et un bouton laissé sur un message d'erreur reste cliquable.
@@ -530,7 +583,10 @@ export class AdministrationRoleCommand {
     }
   }
 
-  @Slash({ name: "retirer", description: "Retire un rôle à un membre du serveur" })
+  @Slash({
+    name: "retirer",
+    description: "Retire un rôle à un membre du serveur",
+  })
   async retirer(
     @SlashOption({
       name: "membre",
@@ -541,10 +597,12 @@ export class AdministrationRoleCommand {
     cible: { id: string },
     @SlashOption({
       name: "role",
-      description: "Rôle à retirer — seuls les rôles réellement gérables sont proposés",
+      description:
+        "Rôle à retirer — seuls les rôles réellement gérables sont proposés",
       type: ApplicationCommandOptionType.String,
       required: true,
-      autocomplete: (interaction: AutocompleteInteraction) => suggererRoles(interaction, true),
+      autocomplete: (interaction: AutocompleteInteraction) =>
+        suggererRoles(interaction, true),
     })
     roleSaisi: string,
     @SlashOption({
@@ -580,7 +638,8 @@ export class AdministrationRoleCommand {
       const membre = await recupererMembre(contexte.guilde, cible.id);
       if (!membre) {
         await interaction.editReply({
-          content: "🚫 Ce compte n'est pas (ou plus) membre du serveur : il ne porte plus aucun rôle ici.",
+          content:
+            "🚫 Ce compte n'est pas (ou plus) membre du serveur : il ne porte plus aucun rôle ici.",
         });
         return;
       }
@@ -615,11 +674,15 @@ export class AdministrationRoleCommand {
     }
   }
 
-  @Slash({ name: "creer", description: "Crée un rôle aux couleurs de la charte Rose Griffon" })
+  @Slash({
+    name: "creer",
+    description: "Crée un rôle aux couleurs de la charte Rose Griffon",
+  })
   async creer(
     @SlashOption({
       name: "nom",
-      description: "Nom du rôle (100 caractères au plus, accents et majuscules conservés)",
+      description:
+        "Nom du rôle (100 caractères au plus, accents et majuscules conservés)",
       type: ApplicationCommandOptionType.String,
       required: true,
     })
@@ -630,21 +693,24 @@ export class AdministrationRoleCommand {
     @SlashChoice(...CHOIX_COULEUR_ROLE)
     @SlashOption({
       name: "couleur",
-      description: "Couleur de la charte (par défaut : aucune, le rôle reste gris)",
+      description:
+        "Couleur de la charte (par défaut : aucune, le rôle reste gris)",
       type: ApplicationCommandOptionType.String,
       required: false,
     })
     couleur: string | undefined,
     @SlashOption({
       name: "mentionnable",
-      description: "Le rôle peut-il être mentionné par tout le monde ? (défaut : non)",
+      description:
+        "Le rôle peut-il être mentionné par tout le monde ? (défaut : non)",
       type: ApplicationCommandOptionType.Boolean,
       required: false,
     })
     mentionnable: boolean | undefined,
     @SlashOption({
       name: "affiche-separement",
-      description: "Afficher ses membres à part dans la liste du serveur ? (défaut : non)",
+      description:
+        "Afficher ses membres à part dans la liste du serveur ? (défaut : non)",
       type: ApplicationCommandOptionType.Boolean,
       required: false,
     })
@@ -719,8 +785,16 @@ export class AdministrationRoleCommand {
             .setDescription(decrireRole(role))
             .addFields(
               { name: "Couleur", value: `${teinte.nom}`, inline: true },
-              { name: "Mentionnable", value: role.mentionable ? "oui" : "non", inline: true },
-              { name: "Affiché à part", value: role.hoist ? "oui" : "non", inline: true },
+              {
+                name: "Mentionnable",
+                value: role.mentionable ? "oui" : "non",
+                inline: true,
+              },
+              {
+                name: "Affiché à part",
+                value: role.hoist ? "oui" : "non",
+                inline: true,
+              },
               {
                 name: "Permissions",
                 value:
@@ -740,14 +814,19 @@ export class AdministrationRoleCommand {
     }
   }
 
-  @Slash({ name: "supprimer", description: "Supprime définitivement un rôle du serveur" })
+  @Slash({
+    name: "supprimer",
+    description: "Supprime définitivement un rôle du serveur",
+  })
   async supprimer(
     @SlashOption({
       name: "role",
-      description: "Rôle à supprimer — irréversible, une confirmation sera demandée",
+      description:
+        "Rôle à supprimer — irréversible, une confirmation sera demandée",
       type: ApplicationCommandOptionType.String,
       required: true,
-      autocomplete: (interaction: AutocompleteInteraction) => suggererRoles(interaction, true),
+      autocomplete: (interaction: AutocompleteInteraction) =>
+        suggererRoles(interaction, true),
     })
     roleSaisi: string,
     @SlashOption({
@@ -845,7 +924,8 @@ export class AdministrationRoleCommand {
       description: "Rôle à renommer",
       type: ApplicationCommandOptionType.String,
       required: true,
-      autocomplete: (interaction: AutocompleteInteraction) => suggererRoles(interaction, true),
+      autocomplete: (interaction: AutocompleteInteraction) =>
+        suggererRoles(interaction, true),
     })
     roleSaisi: string,
     @SlashOption({
@@ -926,7 +1006,8 @@ export class AdministrationRoleCommand {
 
   @Slash({
     name: "masse",
-    description: "Donne un rôle à tous les porteurs d'un autre rôle (simulation par défaut)",
+    description:
+      "Donne un rôle à tous les porteurs d'un autre rôle (simulation par défaut)",
   })
   async masse(
     @SlashOption({
@@ -936,7 +1017,8 @@ export class AdministrationRoleCommand {
       required: true,
       // La source n'est que LUE : un rôle d'intégration ou un rôle au-dessus du
       // bot désigne parfaitement un ensemble de membres, on ne le filtre pas.
-      autocomplete: (interaction: AutocompleteInteraction) => suggererRoles(interaction, false),
+      autocomplete: (interaction: AutocompleteInteraction) =>
+        suggererRoles(interaction, false),
     })
     sourceSaisie: string,
     @SlashOption({
@@ -944,12 +1026,14 @@ export class AdministrationRoleCommand {
       description: "Rôle attribué à chacun d'eux",
       type: ApplicationCommandOptionType.String,
       required: true,
-      autocomplete: (interaction: AutocompleteInteraction) => suggererRoles(interaction, true),
+      autocomplete: (interaction: AutocompleteInteraction) =>
+        suggererRoles(interaction, true),
     })
     cibleSaisie: string,
     @SlashOption({
       name: "simulation",
-      description: "VRAI (défaut) : compte les membres sans rien écrire. FAUX : distribue vraiment.",
+      description:
+        "VRAI (défaut) : compte les membres sans rien écrire. FAUX : distribue vraiment.",
       type: ApplicationCommandOptionType.Boolean,
       required: false,
     })
@@ -974,17 +1058,22 @@ export class AdministrationRoleCommand {
       }
       const source = await lireRole(contexte.guilde, sourceSaisie);
       if (!source.ok) {
-        await interaction.editReply({ content: `🚫 Rôle source : ${source.raison}` });
+        await interaction.editReply({
+          content: `🚫 Rôle source : ${source.raison}`,
+        });
         return;
       }
       const destination = await lireRole(contexte.guilde, cibleSaisie);
       if (!destination.ok) {
-        await interaction.editReply({ content: `🚫 Rôle à donner : ${destination.raison}` });
+        await interaction.editReply({
+          content: `🚫 Rôle à donner : ${destination.raison}`,
+        });
         return;
       }
       if (source.role.id === destination.role.id) {
         await interaction.editReply({
-          content: "🚫 Le rôle source et le rôle à donner sont le même : l'opération n'aurait aucun effet.",
+          content:
+            "🚫 Le rôle source et le rôle à donner sont le même : l'opération n'aurait aucun effet.",
         });
         return;
       }
@@ -998,9 +1087,14 @@ export class AdministrationRoleCommand {
 
       // Une seule requête à la passerelle, puis tout se lit dans le cache.
       const tousLesMembres = await contexte.guilde.members.fetch();
-      const porteurs = [...tousLesMembres.values()].filter(membre => membre.roles.cache.has(source.role.id));
+      const porteurs = [...tousLesMembres.values()].filter((membre) =>
+        membre.roles.cache.has(source.role.id),
+      );
       const tri = trierMembresPourRole(
-        porteurs.map(membre => ({ id: membre.id, roles: [...membre.roles.cache.keys()] })),
+        porteurs.map((membre) => ({
+          id: membre.id,
+          roles: [...membre.roles.cache.keys()],
+        })),
         destination.role.id,
         "donner",
       );
@@ -1025,11 +1119,23 @@ export class AdministrationRoleCommand {
       }
 
       const apercu = rgEmbed()
-        .setTitle(enSimulation ? "Simulation — rien n'a été écrit" : "Distribuer ce rôle en masse ?")
+        .setTitle(
+          enSimulation
+            ? "Simulation — rien n'a été écrit"
+            : "Distribuer ce rôle en masse ?",
+        )
         .setDescription(entete)
         .addFields(
-          { name: "Membres à traiter", value: `**${plan.aTraiter}**`, inline: true },
-          { name: "Déjà pourvus", value: String(tri.sansChangement.length), inline: true },
+          {
+            name: "Membres à traiter",
+            value: `**${plan.aTraiter}**`,
+            inline: true,
+          },
+          {
+            name: "Déjà pourvus",
+            value: String(tri.sansChangement.length),
+            inline: true,
+          },
           {
             name: "Cadence",
             value: `${TAILLE_LOT_MASSE} par lot, ${PAUSE_LOT_MASSE_MS / 1000} s de pause — ${plan.lots} lot(s)`,
@@ -1068,7 +1174,13 @@ export class AdministrationRoleCommand {
         await interaction.editReply({ embeds: [apercu] });
         return;
       }
-      if (!(await confirmer(interaction, apercu, `Distribuer à ${plan.aTraiter} membre(s)`))) {
+      if (
+        !(await confirmer(
+          interaction,
+          apercu,
+          `Distribuer à ${plan.aTraiter} membre(s)`,
+        ))
+      ) {
         return;
       }
 
@@ -1081,12 +1193,16 @@ export class AdministrationRoleCommand {
       let reussis = 0;
       let echecs = 0;
 
-      for (let debutLot = 0; debutLot < aFaire.length; debutLot += TAILLE_LOT_MASSE) {
+      for (
+        let debutLot = 0;
+        debutLot < aFaire.length;
+        debutLot += TAILLE_LOT_MASSE
+      ) {
         const lot = aFaire.slice(debutLot, debutLot + TAILLE_LOT_MASSE);
         // `allSettled`, pas `all` : un membre parti entre le chargement et
         // l'écriture ne doit pas interrompre les 495 suivants.
         const resultats = await Promise.allSettled(
-          lot.map(async identifiant => {
+          lot.map(async (identifiant) => {
             const membre = tousLesMembres.get(identifiant);
             if (!membre) {
               throw new Error("membre disparu du cache");

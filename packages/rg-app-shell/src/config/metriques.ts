@@ -83,10 +83,15 @@ export function decalageHaut(options: {
 }): string {
   const parts: string[] = [];
   if (options.barreSuperieure) parts.push(rem(HAUTEURS.barreSuperieure));
-  if (options.enteteMobile) parts.push(`calc(${rem(HAUTEURS.enteteMobile)} + env(safe-area-inset-top))`);
+  if (options.enteteMobile)
+    parts.push(
+      `calc(${rem(HAUTEURS.enteteMobile)} + env(safe-area-inset-top))`,
+    );
   if (options.sousBarre) parts.push(rem(HAUTEURS.sousBarre));
   if (parts.length === 0) return "0px";
-  return parts.length === 1 ? (parts[0] as string) : `calc(${parts.join(" + ")})`;
+  return parts.length === 1
+    ? (parts[0] as string)
+    : `calc(${parts.join(" + ")})`;
 }
 
 /**
@@ -97,7 +102,11 @@ export function decalageHaut(options: {
  * personne ne s'en aperçoit avant que le contenu n'ait plus de place.
  */
 export function coutChromeMobile(avecSousBarre = false): number {
-  return HAUTEURS.enteteMobile + HAUTEURS.barreBasse + (avecSousBarre ? HAUTEURS.sousBarre : 0);
+  return (
+    HAUTEURS.enteteMobile +
+    HAUTEURS.barreBasse +
+    (avecSousBarre ? HAUTEURS.sousBarre : 0)
+  );
 }
 
 /** Budget maximal admis pour le chrome mobile, en `rem` (soit 144 px). */

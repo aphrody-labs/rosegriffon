@@ -4,12 +4,17 @@
 import { analyzeLua52Source } from "./ast";
 import { auditLua52Bytecode, isLua52Bytecode } from "./bytecode";
 
-export function transformLuaToModule(filePath: string, content: string | Buffer | Uint8Array): string {
+export function transformLuaToModule(
+  filePath: string,
+  content: string | Buffer | Uint8Array,
+): string {
   const isBinary =
-    typeof content !== "string" && (content instanceof Uint8Array || Buffer.isBuffer(content));
+    typeof content !== "string" &&
+    (content instanceof Uint8Array || Buffer.isBuffer(content));
 
   if (isBinary) {
-    const bytes = content instanceof Uint8Array ? content : new Uint8Array(content);
+    const bytes =
+      content instanceof Uint8Array ? content : new Uint8Array(content);
     if (isLua52Bytecode(bytes)) {
       const audit = auditLua52Bytecode(bytes);
       return `// Lua 5.2 Compiled Bytecode Module
@@ -30,7 +35,8 @@ export default {
     }
   }
 
-  const source = typeof content === "string" ? content : new TextDecoder().decode(content);
+  const source =
+    typeof content === "string" ? content : new TextDecoder().decode(content);
   const ast = analyzeLua52Source(filePath, source);
 
   return `// Lua 5.2 Source Module
@@ -52,7 +58,10 @@ export default rawSource;
 }
 
 // CJS export for Webpack and Turbopack loader runner
-export default function webpackLoader(this: any, content: string | Buffer): string {
+export default function webpackLoader(
+  this: any,
+  content: string | Buffer,
+): string {
   const filePath = this?.resourcePath || "script.lua";
   return transformLuaToModule(filePath, content);
 }

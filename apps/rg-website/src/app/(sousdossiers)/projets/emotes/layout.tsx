@@ -19,6 +19,10 @@ export const metadata: Metadata = {
   title: "Projet Émotes | Rose Griffon",
 };
 
-export default function ProjetEmotesLayout({ children }: { children: ReactNode }) {
+export default function ProjetEmotesLayout({
+  children,
+}: {
+  children: ReactNode;
+}) {
   return children;
 }

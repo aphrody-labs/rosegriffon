@@ -52,13 +52,20 @@ describe("parité fonctionnelle Achilléa — Angular vers Next", () => {
   test("chaque écran Angular migré possède sa page Next", () => {
     for (const route of ROUTES_ANGULAR_MIGREES) {
       const page = resolve(ACHILLEA_APP_DIR, route, "page.tsx");
-      expect(existsSync(page), `Route /achillea/${route || ""} absente : ${page}`).toBe(true);
+      expect(
+        existsSync(page),
+        `Route /achillea/${route || ""} absente : ${page}`,
+      ).toBe(true);
     }
   });
 
   test("l'aperçu d'accueil garde toutes les données de compétition", async () => {
-    const apiRoute = await Bun.file(resolve(ACHILLEA_APP_DIR, "../api/public/achillea/preview/route.ts")).text();
-    const hub = await Bun.file(resolve(ACHILLEA_APP_DIR, "../../components/home/AchilleaLiveHub.tsx")).text();
+    const apiRoute = await Bun.file(
+      resolve(ACHILLEA_APP_DIR, "../api/public/achillea/preview/route.ts"),
+    ).text();
+    const hub = await Bun.file(
+      resolve(ACHILLEA_APP_DIR, "../../components/home/AchilleaLiveHub.tsx"),
+    ).text();
 
     for (const field of ["clans", "leaderboard", "tournaments", "stats"]) {
       expect(apiRoute).toContain(`${field}:`);

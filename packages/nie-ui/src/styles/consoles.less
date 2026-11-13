@@ -39,13 +39,15 @@
     padding: 0.35rem 0.65rem;
     color: inherit;
     font-size: 0.9rem;
-    transition: background-color var(--md-sys-motion-duration-short4) var(--md-sys-motion-easing-standard);
+    transition: background-color var(--md-sys-motion-duration-short4)
+      var(--md-sys-motion-easing-standard);
   }
 
   button:hover {
     background: color-mix(
       in srgb,
-      var(--md-sys-color-on-surface) calc(var(--md-sys-state-hover-state-layer-opacity) * 100%),
+      var(--md-sys-color-on-surface)
+        calc(var(--md-sys-state-hover-state-layer-opacity) * 100%),
       transparent
     );
   }
@@ -58,7 +60,8 @@
   button[aria-pressed="true"]:hover {
     background: color-mix(
       in srgb,
-      var(--md-sys-color-on-primary-container) calc(var(--md-sys-state-hover-state-layer-opacity) * 100%),
+      var(--md-sys-color-on-primary-container)
+        calc(var(--md-sys-state-hover-state-layer-opacity) * 100%),
       var(--md-sys-color-primary-container)
     );
   }

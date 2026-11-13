@@ -7,7 +7,8 @@ import OrganizationValidateClient from "./organization-validate-client";
  */
 export const metadata = metadonneesAchillea({
   titre: "Organisations à valider",
-  description: "File de validation des organisations esport candidates à l'accréditation.",
+  description:
+    "File de validation des organisations esport candidates à l'accréditation.",
   chemin: "/achillea/organizations/validate",
   indexable: false,
 });

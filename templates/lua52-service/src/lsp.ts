@@ -54,7 +54,8 @@ export class Lua52LanguageServer {
       return {
         contents: {
           kind: "markdown",
-          value: "**Lua 5.2 `_ENV`**: The first upvalue of any chunk or function, replacing `setfenv`/`getfenv`. Any free name `x` is syntactic sugar for `_ENV.x`.",
+          value:
+            "**Lua 5.2 `_ENV`**: The first upvalue of any chunk or function, replacing `setfenv`/`getfenv`. Any free name `x` is syntactic sugar for `_ENV.x`.",
         },
       };
     }
@@ -63,7 +64,8 @@ export class Lua52LanguageServer {
       return {
         contents: {
           kind: "markdown",
-          value: "**Lua 5.2 `goto` statement**: Jumps to label `::name::`. Cannot jump into local scope or inside another function.",
+          value:
+            "**Lua 5.2 `goto` statement**: Jumps to label `::name::`. Cannot jump into local scope or inside another function.",
         },
       };
     }
@@ -72,7 +74,8 @@ export class Lua52LanguageServer {
       return {
         contents: {
           kind: "markdown",
-          value: "**Lua 5.2 `bit32` Library**: Official 32-bit bitwise library (`band`, `bor`, `bxor`, `bnot`, `lshift`, `rshift`, `arshift`).",
+          value:
+            "**Lua 5.2 `bit32` Library**: Official 32-bit bitwise library (`band`, `bor`, `bxor`, `bnot`, `lshift`, `rshift`, `arshift`).",
         },
       };
     }
@@ -95,7 +98,8 @@ export class Lua52LanguageServer {
             end: { line: i, character: line.indexOf("setfenv") + 7 },
           },
           severity: 1,
-          message: "setfenv is removed in Lua 5.2. Use lexical '_ENV' scoping instead.",
+          message:
+            "setfenv is removed in Lua 5.2. Use lexical '_ENV' scoping instead.",
           source: "lua52-lsp",
         });
       }
@@ -119,7 +123,8 @@ export class Lua52LanguageServer {
             end: { line: i, character: line.indexOf("unpack") + 6 },
           },
           severity: 2,
-          message: "Global 'unpack' is deprecated in Lua 5.2. Use 'table.unpack' instead.",
+          message:
+            "Global 'unpack' is deprecated in Lua 5.2. Use 'table.unpack' instead.",
           source: "lua52-lsp",
         });
       }
@@ -131,7 +136,8 @@ export class Lua52LanguageServer {
             end: { line: i, character: line.indexOf("module") + 6 },
           },
           severity: 1,
-          message: "'module()' is removed in Lua 5.2. Return a table directly from your module.",
+          message:
+            "'module()' is removed in Lua 5.2. Return a table directly from your module.",
           source: "lua52-lsp",
         });
       }

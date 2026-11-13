@@ -6,13 +6,17 @@ import { Popover as PopoverPrimitive } from "@base-ui/react/popover";
 import { cn } from "../lib/utils";
 import { childRender, Slot } from "../lib/render";
 
-type Anchor = React.ComponentProps<typeof PopoverPrimitive.Positioner>["anchor"];
+type Anchor = React.ComponentProps<
+  typeof PopoverPrimitive.Positioner
+>["anchor"];
 const AnchorContext = React.createContext<{
   anchor: Anchor;
   setAnchor: React.Dispatch<React.SetStateAction<Anchor>>;
 } | null>(null);
 
-function Popover({ ...props }: React.ComponentProps<typeof PopoverPrimitive.Root>) {
+function Popover({
+  ...props
+}: React.ComponentProps<typeof PopoverPrimitive.Root>) {
   const [anchor, setAnchor] = React.useState<Anchor>(null);
   const context = React.useMemo(() => ({ anchor, setAnchor }), [anchor]);
   return (
@@ -26,7 +30,9 @@ function PopoverTrigger({
   asChild,
   children,
   ...props
-}: React.ComponentProps<typeof PopoverPrimitive.Trigger> & { asChild?: boolean }) {
+}: React.ComponentProps<typeof PopoverPrimitive.Trigger> & {
+  asChild?: boolean;
+}) {
   return (
     <PopoverPrimitive.Trigger
       data-slot="popover-trigger"
@@ -52,7 +58,13 @@ function PopoverContent({
 }: React.ComponentProps<typeof PopoverPrimitive.Popup> &
   Pick<
     React.ComponentProps<typeof PopoverPrimitive.Positioner>,
-    "align" | "sideOffset" | "side" | "alignOffset" | "anchor" | "collisionBoundary" | "collisionPadding"
+    | "align"
+    | "sideOffset"
+    | "side"
+    | "alignOffset"
+    | "anchor"
+    | "collisionBoundary"
+    | "collisionPadding"
   > & { forceMount?: boolean }) {
   const context = React.useContext(AnchorContext);
   return (
@@ -69,7 +81,7 @@ function PopoverContent({
       >
         <PopoverPrimitive.Popup
           data-slot="popover-content"
-          className={state =>
+          className={(state) =>
             cn(
               "z-50 w-72 origin-(--transform-origin) rounded-md border bg-popover p-4 text-popover-foreground shadow-md outline-hidden data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 data-[closed]:animate-out data-[closed]:fade-out-0 data-[closed]:zoom-out-95 data-[open]:animate-in data-[open]:fade-in-0 data-[open]:zoom-in-95",
               typeof className === "function" ? className(state) : className,
@@ -111,27 +123,57 @@ function PopoverAnchor({
 }
 
 function PopoverHeader({ className, ...props }: React.ComponentProps<"div">) {
-  return <div data-slot="popover-header" className={cn("flex flex-col gap-1 text-sm", className)} {...props} />;
+  return (
+    <div
+      data-slot="popover-header"
+      className={cn("flex flex-col gap-1 text-sm", className)}
+      {...props}
+    />
+  );
 }
 
-function PopoverTitle({ className, ...props }: React.ComponentProps<typeof PopoverPrimitive.Title>) {
+function PopoverTitle({
+  className,
+  ...props
+}: React.ComponentProps<typeof PopoverPrimitive.Title>) {
   return (
     <PopoverPrimitive.Title
       data-slot="popover-title"
-      className={state => cn("font-medium", typeof className === "function" ? className(state) : className)}
+      className={(state) =>
+        cn(
+          "font-medium",
+          typeof className === "function" ? className(state) : className,
+        )
+      }
       {...props}
     />
   );
 }
 
-function PopoverDescription({ className, ...props }: React.ComponentProps<typeof PopoverPrimitive.Description>) {
+function PopoverDescription({
+  className,
+  ...props
+}: React.ComponentProps<typeof PopoverPrimitive.Description>) {
   return (
     <PopoverPrimitive.Description
       data-slot="popover-description"
-      className={state => cn("text-muted-foreground", typeof className === "function" ? className(state) : className)}
+      className={(state) =>
+        cn(
+          "text-muted-foreground",
+          typeof className === "function" ? className(state) : className,
+        )
+      }
       {...props}
     />
   );
 }
 
-export { Popover, PopoverTrigger, PopoverContent, PopoverAnchor, PopoverHeader, PopoverTitle, PopoverDescription };
+export {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+  PopoverAnchor,
+  PopoverHeader,
+  PopoverTitle,
+  PopoverDescription,
+};

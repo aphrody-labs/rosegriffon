@@ -3,18 +3,24 @@ import { existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 
 const repoRoot = fileURLToPath(new URL("../../../", import.meta.url));
-const manifestPath = new URL("../../../crates/aphrody-homebrew/Cargo.toml", import.meta.url);
+const manifestPath = new URL(
+  "../../../crates/aphrody-homebrew/Cargo.toml",
+  import.meta.url,
+);
 const manifestFile = fileURLToPath(manifestPath);
 const args = Bun.argv.slice(2);
 
 if (args.length === 0 || args[0] === "help" || args[0] === "--help") {
-  console.log("Usage: bun run iecode-homebrew <targets|doctor|build nds|build 3ds>");
+  console.log(
+    "Usage: bun run iecode-homebrew <targets|doctor|build nds|build 3ds>",
+  );
   process.exit(0);
 }
 
 const configuredBinary = process.env.IECODE_HOMEBREW_BINARY?.trim();
 const binary = configuredBinary
-  ? Bun.which(configuredBinary) ?? (existsSync(configuredBinary) ? configuredBinary : undefined)
+  ? (Bun.which(configuredBinary) ??
+    (existsSync(configuredBinary) ? configuredBinary : undefined))
   : Bun.which("aphrody-homebrew");
 if (configuredBinary && !binary) {
   console.error(
@@ -32,7 +38,15 @@ try {
   const proc = Bun.spawn(
     binary
       ? [binary, ...args]
-      : ["cargo", "run", "--quiet", "--manifest-path", manifestFile, "--", ...args],
+      : [
+          "cargo",
+          "run",
+          "--quiet",
+          "--manifest-path",
+          manifestFile,
+          "--",
+          ...args,
+        ],
     { cwd: repoRoot, stdin: "inherit", stdout: "inherit", stderr: "inherit" },
   );
   process.exit(await proc.exited);

@@ -7,7 +7,14 @@ export const leaderboardController = new Elysia({ prefix: "/leaderboard" })
   .use(dbPlugin)
   .get(
     "/",
-    ({ db, query }) => LeaderboardService.findTop(db, query.mode, query.seasonId ?? null, query.limit, query.offset),
+    ({ db, query }) =>
+      LeaderboardService.findTop(
+        db,
+        query.mode,
+        query.seasonId ?? null,
+        query.limit,
+        query.offset,
+      ),
     {
       query: t.Object({
         mode: t.Numeric({ minimum: 0 }),

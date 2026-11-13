@@ -14,10 +14,16 @@ interface TournamentTopSummaryProps {
   isFinished?: boolean;
 }
 
-export function TournamentTopSummary({ tournamentId, isFinished = false }: TournamentTopSummaryProps) {
+export function TournamentTopSummary({
+  tournamentId,
+  isFinished = false,
+}: TournamentTopSummaryProps) {
   const [attempt, setAttempt] = useState(0);
   const requestKey = `${tournamentId}:${attempt}`;
-  const [summary, setSummary] = useResetState<TournamentSummary | null>(null, requestKey);
+  const [summary, setSummary] = useResetState<TournamentSummary | null>(
+    null,
+    requestKey,
+  );
   const [loading, setLoading] = useResetState<boolean>(true, requestKey);
   const [error, setError] = useResetState<string | null>(null, requestKey);
 
@@ -27,7 +33,7 @@ export function TournamentTopSummary({ tournamentId, isFinished = false }: Tourn
 
     client.tournaments
       .summary(tournamentId)
-      .then(res => {
+      .then((res) => {
         if (cancelled) return;
         if (res.ok && res.value) {
           setSummary(res.value);
@@ -51,18 +57,23 @@ export function TournamentTopSummary({ tournamentId, isFinished = false }: Tourn
     return (
       <output aria-live="polite" className="py-8 text-center space-y-2">
         <Loader2 className="w-6 h-6 animate-spin text-warning mx-auto" />
-        <p className="text-lg text-muted-foreground">Chargement des classements et du podium…</p>
+        <p className="text-lg text-muted-foreground">
+          Chargement des classements et du podium…
+        </p>
       </output>
     );
   }
 
   if (error)
     return (
-      <div role="alert" className="rounded-2xl border border-destructive/50 bg-destructive/10 p-6 text-lg space-y-4">
+      <div
+        role="alert"
+        className="rounded-2xl border border-destructive/50 bg-destructive/10 p-6 text-lg space-y-4"
+      >
         <p>{error}</p>
         <button
           type="button"
-          onClick={() => setAttempt(value => value + 1)}
+          onClick={() => setAttempt((value) => value + 1)}
           className="min-h-11 rounded-lg border border-current px-5 font-semibold focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-warning"
         >
           Réessayer
@@ -73,7 +84,9 @@ export function TournamentTopSummary({ tournamentId, isFinished = false }: Tourn
   if (!summary?.top10?.length)
     return (
       <output className="rounded-2xl border border-border bg-card p-6 text-lg space-y-2">
-        <h3 className="font-bold">{isFinished ? "Classement non résolu" : "Aucun classement disponible"}</h3>
+        <h3 className="font-bold">
+          {isFinished ? "Classement non résolu" : "Aucun classement disponible"}
+        </h3>
         <p className="text-muted-foreground">
           {isFinished
             ? "Les résultats enregistrés ne permettent pas encore de valider le bracket et le podium. Aucun rang ni point de circuit n'est attribué ici."
@@ -82,8 +95,8 @@ export function TournamentTopSummary({ tournamentId, isFinished = false }: Tourn
       </output>
     );
 
-  const podium = summary.top10.filter(entry => entry.rank <= 3);
-  const rest = summary.top10.filter(entry => entry.rank > 3);
+  const podium = summary.top10.filter((entry) => entry.rank <= 3);
+  const rest = summary.top10.filter((entry) => entry.rank > 3);
 
   return (
     <div className="space-y-6">
@@ -93,7 +106,9 @@ export function TournamentTopSummary({ tournamentId, isFinished = false }: Tourn
           <span className="p-2 rounded-xl bg-warning/10 text-warning border border-warning/20">
             <Trophy className="w-4 h-4" />
           </span>
-          <h3 className="font-bold text-lg uppercase tracking-wider text-foreground">Classement (ex æquo inclus)</h3>
+          <h3 className="font-bold text-lg uppercase tracking-wider text-foreground">
+            Classement (ex æquo inclus)
+          </h3>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
@@ -112,7 +127,9 @@ export function TournamentTopSummary({ tournamentId, isFinished = false }: Tourn
                 key={entry.userId || idx}
                 className={`p-5 rounded-2xl border text-center space-y-3 flex flex-col items-center justify-center relative shadow-xs ${medalBg}`}
               >
-                <div className="absolute top-3 left-3 font-mono font-black text-lg">#{entry.rank}</div>
+                <div className="absolute top-3 left-3 font-mono font-black text-lg">
+                  #{entry.rank}
+                </div>
 
                 <UserAvatar
                   avatar={entry.avatar}
@@ -121,7 +138,9 @@ export function TournamentTopSummary({ tournamentId, isFinished = false }: Tourn
                 />
 
                 <div className="space-y-0.5">
-                  <div className="font-bold text-lg text-foreground truncate max-w-[150px]">{entry.displayName}</div>
+                  <div className="font-bold text-lg text-foreground truncate max-w-[150px]">
+                    {entry.displayName}
+                  </div>
                   {entry.clan && (
                     <div className="text-lg text-muted-foreground font-semibold">
                       [{entry.clan.shortName}] {entry.clan.name}
@@ -153,14 +172,28 @@ export function TournamentTopSummary({ tournamentId, isFinished = false }: Tourn
                 className="p-3 px-4 flex flex-wrap items-center justify-between gap-3 text-lg hover:bg-muted/20 transition"
               >
                 <div className="flex items-center gap-3">
-                  <span className="font-mono font-bold text-muted-foreground min-w-6">{entry.rankLabel}</span>
-                  <UserAvatar avatar={entry.avatar} displayName={entry.displayName} className="w-7 h-7" />
-                  <span className="font-semibold text-foreground">{entry.displayName}</span>
-                  {entry.clan && <span className="text-lg text-muted-foreground">[{entry.clan.shortName}]</span>}
+                  <span className="font-mono font-bold text-muted-foreground min-w-6">
+                    {entry.rankLabel}
+                  </span>
+                  <UserAvatar
+                    avatar={entry.avatar}
+                    displayName={entry.displayName}
+                    className="w-7 h-7"
+                  />
+                  <span className="font-semibold text-foreground">
+                    {entry.displayName}
+                  </span>
+                  {entry.clan && (
+                    <span className="text-lg text-muted-foreground">
+                      [{entry.clan.shortName}]
+                    </span>
+                  )}
                 </div>
 
                 {entry.points > 0 && (
-                  <span className="font-mono font-bold text-warning">+{entry.points} points de circuit</span>
+                  <span className="font-mono font-bold text-warning">
+                    +{entry.points} points de circuit
+                  </span>
                 )}
               </div>
             ))}

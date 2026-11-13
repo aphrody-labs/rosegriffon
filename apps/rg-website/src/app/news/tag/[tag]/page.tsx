@@ -55,7 +55,13 @@ export default async function TagPage({ params, searchParams }: TagPageProps) {
 		 WHERE status = $1 AND app = $2 AND tags @> $3
 		 ORDER BY published_at DESC
 		 LIMIT $4 OFFSET $5`,
-    ["published", "azalee", [tag], ITEMS_PER_PAGE, (currentPage - 1) * ITEMS_PER_PAGE],
+    [
+      "published",
+      "azalee",
+      [tag],
+      ITEMS_PER_PAGE,
+      (currentPage - 1) * ITEMS_PER_PAGE,
+    ],
   );
 
   return (
@@ -63,7 +69,11 @@ export default async function TagPage({ params, searchParams }: TagPageProps) {
       {/* Header */}
       <div className="bg-surface-container-low rounded-b-[32px] px-4 md:px-8 pt-12 lg:pt-20 pb-8">
         <Link href="/news">
-          <Button variant="ghost" size="sm" className="rounded-full mb-4 text-on-surface-variant">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="rounded-full mb-4 text-on-surface-variant"
+          >
             <ArrowLeft className="mr-2 size-4" /> Retour aux actualités
           </Button>
         </Link>
@@ -72,7 +82,9 @@ export default async function TagPage({ params, searchParams }: TagPageProps) {
             <Tag className="size-5 text-on-secondary-container" />
           </div>
           <div>
-            <h1 className="text-2xl md:text-3xl font-black font-sans tracking-tight text-on-surface">{tag}</h1>
+            <h1 className="text-2xl md:text-3xl font-black font-sans tracking-tight text-on-surface">
+              {tag}
+            </h1>
             <p className="text-sm text-on-surface-variant">
               {totalItems} article{totalItems !== 1 ? "s" : ""}
             </p>
@@ -92,7 +104,9 @@ export default async function TagPage({ params, searchParams }: TagPageProps) {
             >
               <div className="relative aspect-[16/9] bg-surface-container">
                 <Image
-                  src={article.featured_image_url || "/images/placeholder-news.svg"}
+                  src={
+                    article.featured_image_url || "/images/placeholder-news.svg"
+                  }
                   alt={article.title}
                   fill
                   className="object-cover group-hover:scale-105 transition-transform duration-500"
@@ -106,13 +120,20 @@ export default async function TagPage({ params, searchParams }: TagPageProps) {
                     </Badge>
                   )}
                   <span className="text-[10px] text-on-surface-variant">
-                    {article.published_at && format(new Date(article.published_at), "d MMM yyyy", { locale: fr })}
+                    {article.published_at &&
+                      format(new Date(article.published_at), "d MMM yyyy", {
+                        locale: fr,
+                      })}
                   </span>
                 </div>
                 <h2 className="text-sm font-bold text-on-surface group-hover:text-primary transition-colors line-clamp-2">
                   {article.title}
                 </h2>
-                {article.excerpt && <p className="text-xs text-on-surface-variant line-clamp-2">{article.excerpt}</p>}
+                {article.excerpt && (
+                  <p className="text-xs text-on-surface-variant line-clamp-2">
+                    {article.excerpt}
+                  </p>
+                )}
                 {/* Tags */}
                 {article.tags && article.tags.length > 0 && (
                   <div className="flex flex-wrap gap-1 pt-1">
@@ -137,7 +158,11 @@ export default async function TagPage({ params, searchParams }: TagPageProps) {
       )}
 
       <div className="px-4 md:px-8">
-        <WikiPagination totalItems={totalItems} itemsPerPage={ITEMS_PER_PAGE} currentPage={currentPage} />
+        <WikiPagination
+          totalItems={totalItems}
+          itemsPerPage={ITEMS_PER_PAGE}
+          currentPage={currentPage}
+        />
       </div>
     </div>
   );

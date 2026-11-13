@@ -25,4 +25,5 @@ export type ProfileInsert = Database["public"]["Tables"]["profiles"]["Insert"];
 export type ProfileUpdate = Database["public"]["Tables"]["profiles"]["Update"];
 
 /** Membre Discord synchronisé en DB. */
-export type DiscordMember = Database["public"]["Tables"]["discord_members"]["Row"];
+export type DiscordMember =
+  Database["public"]["Tables"]["discord_members"]["Row"];

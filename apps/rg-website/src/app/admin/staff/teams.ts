@@ -25,13 +25,18 @@ export const EQUIPES = [
 export type IdEquipe = (typeof EQUIPES)[number]["id"];
 
 /** Identifiants d'équipe acceptés, en tuple (exigé par `z.enum`). */
-export const IDS_EQUIPES = EQUIPES.map(equipe => equipe.id) as unknown as [IdEquipe, ...IdEquipe[]];
+export const IDS_EQUIPES = EQUIPES.map((equipe) => equipe.id) as unknown as [
+  IdEquipe,
+  ...IdEquipe[],
+];
 
-const INDEX_LIBELLES = new Map<string, string>(EQUIPES.map(equipe => [equipe.id as string, equipe.libelle as string]));
+const INDEX_LIBELLES = new Map<string, string>(
+  EQUIPES.map((equipe) => [equipe.id as string, equipe.libelle as string]),
+);
 
 /** Rang d'affichage d'une équipe ; les identifiants inconnus passent en dernier. */
 export function rangEquipe(id: string): number {
-  const rang = EQUIPES.findIndex(equipe => equipe.id === id);
+  const rang = EQUIPES.findIndex((equipe) => equipe.id === id);
   return rang === -1 ? EQUIPES.length : rang;
 }
 

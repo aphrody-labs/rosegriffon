@@ -43,5 +43,9 @@
     }
   },
   "site_hreflang": { "fr": "/", "en": "/en/", "es": "/es/", "ja": "/ja/" },
-  "open_graph": { "type": "website", "image": "/static/afubuki.svg", "site_name": "nie — Afubuki" }
+  "open_graph": {
+    "type": "website",
+    "image": "/static/afubuki.svg",
+    "site_name": "nie — Afubuki"
+  }
 }

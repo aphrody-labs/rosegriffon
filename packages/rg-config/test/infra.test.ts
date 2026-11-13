@@ -15,9 +15,16 @@ import {
 
 const infra = loadInfra();
 
+/** A role resolves to one host key, or to an ordered list of interchangeable ones. */
+const firstHostOfRole = (role: string): string => {
+  const v = infra.hosts.roles[role];
+  if (!v) throw new Error(`role ${role} has no host`);
+  return Array.isArray(v) ? v[0]! : v;
+};
+
 test("every role points at a declared host", () => {
   for (const role of roles(infra))
-    expect(infra.hosts.hosts[infra.hosts.roles[role]!]).toBeDefined();
+    expect(infra.hosts.hosts[firstHostOfRole(role)]).toBeDefined();
 });
 
 test("every service deploys to a known role", () => {
@@ -32,7 +39,7 @@ test("RG_HOST_<ROLE> re-points a role, by key or ad hoc alias", () => {
 });
 
 test("RG_HOST_<KEY>_<FIELD> overrides one field", () => {
-  const key = infra.hosts.roles.prod!;
+  const key = firstHostOfRole("prod");
   const h = resolveHost(infra, "prod", {
     [`RG_HOST_${key.toUpperCase()}_SRV_ROOT`]: "/data/rg",
   });

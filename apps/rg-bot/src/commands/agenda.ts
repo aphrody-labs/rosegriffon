@@ -28,7 +28,11 @@
  * justesse au pixel.
  */
 import { Discord, Slash, SlashChoice, SlashGroup, SlashOption } from "discordx";
-import { ApplicationCommandOptionType, type ChatInputCommandInteraction, type EmbedBuilder } from "discord.js";
+import {
+  ApplicationCommandOptionType,
+  type ChatInputCommandInteraction,
+  type EmbedBuilder,
+} from "discord.js";
 
 import { cached } from "../lib/cache";
 import {
@@ -82,7 +86,11 @@ interface ChampEmbed {
  * Renvoie le nombre de champs réellement posés, pour que l'appelant puisse le
  * dire au lecteur plutôt que de laisser croire à une liste complète.
  */
-function ajouterChamps(embed: EmbedBuilder, champs: readonly ChampEmbed[], deja: number): number {
+function ajouterChamps(
+  embed: EmbedBuilder,
+  champs: readonly ChampEmbed[],
+  deja: number,
+): number {
   let reste = BUDGET_EMBED - deja;
   let poses = 0;
   for (const champ of champs) {
@@ -98,7 +106,10 @@ function ajouterChamps(embed: EmbedBuilder, champs: readonly ChampEmbed[], deja:
 
 async function agendaDuSite(): Promise<EvenementCalendrier[]> {
   return await cached("agenda:evenements", TTL_AGENDA_MS, async () => {
-    const reponse = await appelService<ReponseCalendrier>("site", "/api/calendar-events");
+    const reponse = await appelService<ReponseCalendrier>(
+      "site",
+      "/api/calendar-events",
+    );
     return reponse.data?.events ?? [];
   });
 }
@@ -163,8 +174,13 @@ export class AgendaCommand {
     await interaction.deferReply();
     try {
       const brut = await agendaDuSite();
-      const tous = brut.map(normaliserEvenement).filter(e => e !== null);
-      const demande: PeriodeAgenda = periode === "passes" ? "passes" : periode === "tous" ? "tous" : "a-venir";
+      const tous = brut.map(normaliserEvenement).filter((e) => e !== null);
+      const demande: PeriodeAgenda =
+        periode === "passes"
+          ? "passes"
+          : periode === "tous"
+            ? "tous"
+            : "a-venir";
       const choix = choisirEvenements(tous, demande, nombre ?? 5, new Date());
 
       if (choix.evenements.length === 0) {
@@ -190,7 +206,7 @@ export class AgendaCommand {
         : "";
       if (avertissement) embed.setDescription(avertissement);
 
-      const champs = choix.evenements.map(evenement => {
+      const champs = choix.evenements.map((evenement) => {
         const details = [formaterPlageEvenement(evenement)];
         if (evenement.lieu) details.push(`📍 ${evenement.lieu}`);
         const description = nettoyerHtml(evenement.description);
@@ -200,7 +216,11 @@ export class AgendaCommand {
           value: truncate(details.join("\n"), 1000),
         };
       });
-      const poses = ajouterChamps(embed, champs, titre.length + avertissement.length);
+      const poses = ajouterChamps(
+        embed,
+        champs,
+        titre.length + avertissement.length,
+      );
 
       // Le pied dit ce qui est affiché ET ce qui existe : une liste tronquée
       // par le budget de l'embed ne doit pas passer pour l'agenda complet.
@@ -217,7 +237,10 @@ export class AgendaCommand {
     }
   }
 
-  @Slash({ name: "streams", description: "Le planning hebdomadaire de Rose Griffon TV" })
+  @Slash({
+    name: "streams",
+    description: "Le planning hebdomadaire de Rose Griffon TV",
+  })
   async streams(
     @SlashChoice(
       { name: "Lundi", value: 1 },
@@ -250,7 +273,10 @@ export class AgendaCommand {
         return;
       }
 
-      const titre = jour === undefined ? "Planning hebdomadaire" : `Planning — ${libelleJour(jour)}`;
+      const titre =
+        jour === undefined
+          ? "Planning hebdomadaire"
+          : `Planning — ${libelleJour(jour)}`;
       const embed = rgEmbed().setTitle(titre).setURL(URL_STREAMS);
 
       // Un champ par jour : au pire 7, très loin des 25 autorisés, chacun borné
@@ -259,7 +285,7 @@ export class AgendaCommand {
       const sections = grouperParJour(lignes);
       const poses = ajouterChamps(
         embed,
-        sections.map(section => ({
+        sections.map((section) => ({
           name: section.libelle,
           value: truncate(section.lignes.map(ligneStream).join("\n"), 1000),
         })),

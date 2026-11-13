@@ -13,13 +13,13 @@ workspace = true
 [features]
 default = ["host"]
 host = [
-    "dep:clap",
-    "dep:aphrody-nie-core",
-    "dep:aphrody-nie-data",
-    "dep:aphrody-nie-save",
-    "dep:aphrody-nie-pe-inspect",
-    "dep:aphrody-nie-video",
-    "dep:png",
+  "dep:clap",
+  "dep:aphrody-nie-core",
+  "dep:aphrody-nie-data",
+  "dep:aphrody-nie-save",
+  "dep:aphrody-nie-pe-inspect",
+  "dep:aphrody-nie-video",
+  "dep:png",
 ]
 
 [dependencies]
@@ -33,7 +33,11 @@ aphrody-nie-save = { path = "../aphrody-nie-save", optional = true }
 aphrody-nie-pe-inspect = { path = "../aphrody-nie-pe-inspect", optional = true }
 aphrody-nie-video = { path = "../aphrody-nie-video", optional = true }
 png = { workspace = true, optional = true }
-clap = { workspace = true, optional = true, features = ["derive", "color", "env"] }
+clap = { workspace = true, optional = true, features = [
+  "derive",
+  "color",
+  "env",
+] }
 aphrody-nie-app = { path = "../aphrody-nie-app", version = "1.4.8" }
 aphrody-nie-runtime = { path = "../aphrody-nie-runtime", version = "1.4.8" }
 

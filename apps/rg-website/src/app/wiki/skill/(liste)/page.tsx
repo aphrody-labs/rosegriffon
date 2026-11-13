@@ -26,13 +26,15 @@ export async function generateMetadata({
   const filters: string[] = [];
 
   if (category) {
-    const catLabel = CATEGORY_FILTERS.find(c => c.value === category)?.label;
+    const catLabel = CATEGORY_FILTERS.find((c) => c.value === category)?.label;
     if (catLabel) {
       filters.push(catLabel);
     }
   }
   if (element) {
-    const elemLabel = ELEMENT_FILTERS.find(e => e.value.toLowerCase() === element.toString().toLowerCase())?.label;
+    const elemLabel = ELEMENT_FILTERS.find(
+      (e) => e.value.toLowerCase() === element.toString().toLowerCase(),
+    )?.label;
     if (elemLabel) {
       filters.push(elemLabel);
     }
@@ -61,12 +63,28 @@ export async function generateMetadata({
 
 const ITEMS_PER_PAGE = 60;
 
-const CATEGORY_FILTERS: Array<{ value: string; label: string; imageIcon?: string }> = [
+const CATEGORY_FILTERS: Array<{
+  value: string;
+  label: string;
+  imageIcon?: string;
+}> = [
   { label: "Tout", value: "" },
   { imageIcon: getSkillCategoryIconUrl("tir"), label: "Tir", value: "shoot" },
-  { imageIcon: getSkillCategoryIconUrl("defense"), label: "Défense", value: "block" },
-  { imageIcon: getSkillCategoryIconUrl("dribble"), label: "Dribble", value: "dribble" },
-  { imageIcon: getSkillCategoryIconUrl("gardien"), label: "Arrêt", value: "catch" },
+  {
+    imageIcon: getSkillCategoryIconUrl("defense"),
+    label: "Défense",
+    value: "block",
+  },
+  {
+    imageIcon: getSkillCategoryIconUrl("dribble"),
+    label: "Dribble",
+    value: "dribble",
+  },
+  {
+    imageIcon: getSkillCategoryIconUrl("gardien"),
+    label: "Arrêt",
+    value: "catch",
+  },
 ];
 
 const ELEMENT_FILTERS = [
@@ -85,7 +103,18 @@ export default async function SkillsPage({
 }) {
   const rawParams = await searchParams;
   const params = parseSearchParams(rawParams);
-  const { q, page, type: category, element, has_video, show_aura, overdrive, sort, power_min, power_max } = params;
+  const {
+    q,
+    page,
+    type: category,
+    element,
+    has_video,
+    show_aura,
+    overdrive,
+    sort,
+    power_min,
+    power_max,
+  } = params;
 
   const pageNumber = page ? Number.parseInt(page.toString(), 10) : 1;
 
@@ -105,14 +134,18 @@ export default async function SkillsPage({
   });
 
   // Re-map for UI
-  const categoryCounts = CATEGORY_FILTERS.map(f => ({ ...f, count: 0 })); // Counts disabled for perf
-  const elementCounts = ELEMENT_FILTERS.map(f => ({ ...f, count: 0 }));
+  const categoryCounts = CATEGORY_FILTERS.map((f) => ({ ...f, count: 0 })); // Counts disabled for perf
+  const elementCounts = ELEMENT_FILTERS.map((f) => ({ ...f, count: 0 }));
 
   const collectionJsonLd = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
     description: `${total.toLocaleString("fr-FR")} techniques spéciales (Hissatsu) avec puissance, tension et vidéos.`,
-    isPartOf: { "@type": "WebSite", name: "Azalée", url: absoluteUrl(wiki("/")) },
+    isPartOf: {
+      "@type": "WebSite",
+      name: "Azalée",
+      url: absoluteUrl(wiki("/")),
+    },
     mainEntity: {
       "@type": "ItemList",
       // Toutes les techniques affichées, pas les dix premières : le balisage
@@ -135,7 +168,10 @@ export default async function SkillsPage({
 
   return (
     <div className="space-y-6">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionJsonLd) }} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionJsonLd) }}
+      />
       <WikiPageHeader
         icon="bolt"
         title="Techniques spéciales"
@@ -143,7 +179,10 @@ export default async function SkillsPage({
         description="Base de données complète des techniques (Hissatsu) d'Inazuma Eleven: Victory Road."
       />
       <div className="space-y-4">
-        <WikiSearchToolbar placeholder="Rechercher une technique..." showFilters={false} />
+        <WikiSearchToolbar
+          placeholder="Rechercher une technique..."
+          showFilters={false}
+        />
         <SkillFilterBar
           currentCategory={category || ""}
           currentElement={element || ""}
@@ -188,11 +227,17 @@ export default async function SkillsPage({
         </FadeInStagger>
       ) : (
         <div className="py-20 text-center rounded-[32px] border border-outline-variant bg-surface-container-low border-dashed">
-          <p className="text-on-surface-variant italic">Aucune technique trouvée.</p>
+          <p className="text-on-surface-variant italic">
+            Aucune technique trouvée.
+          </p>
         </div>
       )}
 
-      <WikiPagination totalItems={total} itemsPerPage={ITEMS_PER_PAGE} currentPage={pageNumber} />
+      <WikiPagination
+        totalItems={total}
+        itemsPerPage={ITEMS_PER_PAGE}
+        currentPage={pageNumber}
+      />
     </div>
   );
 }

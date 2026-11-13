@@ -100,31 +100,49 @@ function webpVp8l(largeur: number, hauteur: number): Uint8Array {
 
 describe("formats reconnus", () => {
   test("PNG", () => {
-    expect(lireDimensions(png(1051, 1447))).toEqual({ hauteur: 1447, largeur: 1051 });
+    expect(lireDimensions(png(1051, 1447))).toEqual({
+      hauteur: 1447,
+      largeur: 1051,
+    });
   });
 
   test("GIF", () => {
-    expect(lireDimensions(gif(320, 240))).toEqual({ hauteur: 240, largeur: 320 });
+    expect(lireDimensions(gif(320, 240))).toEqual({
+      hauteur: 240,
+      largeur: 320,
+    });
   });
 
   test("JPEG — la taille n'est PAS à un décalage fixe", () => {
     // Le SOF0 arrive après un nombre variable de segments de métadonnées : lire
     // à un décalage constant marche sur un fichier et échoue sur le suivant.
-    expect(lireDimensions(jpeg(1600, 2197))).toEqual({ hauteur: 2197, largeur: 1600 });
+    expect(lireDimensions(jpeg(1600, 2197))).toEqual({
+      hauteur: 2197,
+      largeur: 1600,
+    });
   });
 
   test("WebP avec perte (VP8 ) — l'affiche réelle de la campagne", () => {
-    expect(lireDimensions(webpVp8(1051, 1447))).toEqual({ hauteur: 1447, largeur: 1051 });
+    expect(lireDimensions(webpVp8(1051, 1447))).toEqual({
+      hauteur: 1447,
+      largeur: 1051,
+    });
   });
 
   test("WebP étendu (VP8X) — la carte des règles réelle", () => {
-    expect(lireDimensions(webpVp8x(1600, 2197))).toEqual({ hauteur: 2197, largeur: 1600 });
+    expect(lireDimensions(webpVp8x(1600, 2197))).toEqual({
+      hauteur: 2197,
+      largeur: 1600,
+    });
   });
 
   test("WebP sans perte (VP8L)", () => {
     // Les trois variantes encodent la taille différemment : n'en gérer qu'une
     // revient à ne rien gérer, nos visuels étant convertis en WebP.
-    expect(lireDimensions(webpVp8l(1051, 1447))).toEqual({ hauteur: 1447, largeur: 1051 });
+    expect(lireDimensions(webpVp8l(1051, 1447))).toEqual({
+      hauteur: 1447,
+      largeur: 1051,
+    });
   });
 });
 

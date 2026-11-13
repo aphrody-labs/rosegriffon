@@ -1,6 +1,9 @@
 import Image from "next/image";
 
-import { couleurRole, type MembreClasse } from "@rosegriffon/types/discord-hierarchie";
+import {
+  couleurRole,
+  type MembreClasse,
+} from "@rosegriffon/types/discord-hierarchie";
 
 import { couleurLisible } from "@/lib/couleur-lisible";
 
@@ -41,7 +44,10 @@ export function CarteMembre({
   const contenu = (
     <>
       <div
-        className={cn("relative overflow-hidden rounded-full border", compacte ? "size-10" : "size-14")}
+        className={cn(
+          "relative overflow-hidden rounded-full border",
+          compacte ? "size-10" : "size-14",
+        )}
         style={couleur ? { borderColor: couleur } : undefined}
       >
         <Image
@@ -57,29 +63,45 @@ export function CarteMembre({
       </div>
       <div className="min-w-0 flex-1">
         <p
-          className={cn("truncate font-semibold", compacte ? "text-xs" : "text-sm")}
+          className={cn(
+            "truncate font-semibold",
+            compacte ? "text-xs" : "text-sm",
+          )}
           style={couleur ? { color: couleurLisible(couleur) } : undefined}
           title={nom}
         >
           {nom}
         </p>
         {role && (
-          <p className="truncate text-[11px] text-on-surface-variant/80" title={role}>
+          <p
+            className="truncate text-[11px] text-on-surface-variant/80"
+            title={role}
+          >
             {role}
           </p>
         )}
-        {detail && <p className="truncate text-[10px] text-on-surface-variant/50">{detail}</p>}
+        {detail && (
+          <p className="truncate text-[10px] text-on-surface-variant/50">
+            {detail}
+          </p>
+        )}
       </div>
     </>
   );
 
   const classes = cn(
     "flex items-center gap-2.5 rounded-xl border border-outline-variant/15 bg-surface-container-low p-2.5",
-    lien && "transition-colors hover:border-primary/40 hover:bg-surface-container",
+    lien &&
+      "transition-colors hover:border-primary/40 hover:bg-surface-container",
   );
 
   return lien ? (
-    <a href={lien} target="_blank" rel="noopener noreferrer" className={classes}>
+    <a
+      href={lien}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={classes}
+    >
       {contenu}
     </a>
   ) : (
@@ -88,7 +110,13 @@ export function CarteMembre({
 }
 
 /** Grille de membres Discord — une section de la hiérarchie. */
-export function GrilleMembres({ membres, compacte }: { membres: MembreClasse[]; compacte?: boolean }) {
+export function GrilleMembres({
+  membres,
+  compacte,
+}: {
+  membres: MembreClasse[];
+  compacte?: boolean;
+}) {
   return (
     <div
       className={cn(
@@ -98,7 +126,7 @@ export function GrilleMembres({ membres, compacte }: { membres: MembreClasse[]; 
           : "grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4",
       )}
     >
-      {membres.map(membre => (
+      {membres.map((membre) => (
         <CarteMembre
           key={membre.discord_id}
           nom={membre.nomAffiche}
@@ -125,10 +153,15 @@ export function TitreSection({
 }) {
   return (
     <div className="flex items-baseline gap-2">
-      <h3 className="text-sm font-bold uppercase tracking-wide" style={couleur ? { color: couleurLisible(couleur) } : undefined}>
+      <h3
+        className="text-sm font-bold uppercase tracking-wide"
+        style={couleur ? { color: couleurLisible(couleur) } : undefined}
+      >
         {titre}
       </h3>
-      <span className="text-xs tabular-nums text-on-surface-variant/60">{effectif}</span>
+      <span className="text-xs tabular-nums text-on-surface-variant/60">
+        {effectif}
+      </span>
       <div className="ml-1 h-px flex-1 bg-outline-variant/15" />
     </div>
   );

@@ -19,7 +19,9 @@ const unscannedGuild = {
 
 describe("Achillea bot compatibility facade", () => {
   test("keeps the historical schema exports", () => {
-    expect(IdentifiantDiscord.safeParse("123456789012345678").success).toBe(true);
+    expect(IdentifiantDiscord.safeParse("123456789012345678").success).toBe(
+      true,
+    );
     expect(GuildeAchillea.parse(unscannedGuild).member_count).toBeNull();
   });
 

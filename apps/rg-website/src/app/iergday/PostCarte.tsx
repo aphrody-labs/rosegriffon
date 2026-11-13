@@ -3,7 +3,13 @@
 import { AspectRatio, Badge, Card } from "@rosegriffon/ui";
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
-import { ExternalLink, Heart, ImageIcon, MessageCircle, Repeat2 } from "lucide-react";
+import {
+  ExternalLink,
+  Heart,
+  ImageIcon,
+  MessageCircle,
+  Repeat2,
+} from "lucide-react";
 import Image from "next/image";
 
 import { extraitTexteDiscord } from "@/lib/x-campagnes/discord-texte";
@@ -40,7 +46,8 @@ import { VignetteVideo } from "./VignetteVideo";
  * pour une vignette de demi-largeur — du sur-téléchargement pur à ces trois
  * largeurs précises.
  */
-const TAILLES_VIGNETTE = "(max-width: 374px) 100vw, (max-width: 1023px) 50vw, (max-width: 1279px) 33vw, 25vw";
+const TAILLES_VIGNETTE =
+  "(max-width: 374px) 100vw, (max-width: 1023px) 50vw, (max-width: 1279px) 33vw, 25vw";
 
 /*
  * Indicateur de focus clavier de la vignette : une `outline` à décalage NÉGATIF,
@@ -54,7 +61,8 @@ const TAILLES_VIGNETTE = "(max-width: 374px) 100vw, (max-width: 1023px) 50vw, (m
  * Une `outline` négative reste dans la zone de rognage et, d'après l'ordre de
  * peinture CSS, passe au-dessus de l'image de la vignette.
  */
-const FOCUS_VIGNETTE = "focus-visible:outline-4 focus-visible:-outline-offset-4 focus-visible:outline-primary";
+const FOCUS_VIGNETTE =
+  "focus-visible:outline-4 focus-visible:-outline-offset-4 focus-visible:outline-primary";
 
 /*
  * Lien « Voir sur X ». `min-h-11` comme les autres cibles tactiles de la page :
@@ -138,7 +146,12 @@ export function PostCarte({
         : post.auteurPseudo
           ? `@${post.auteurPseudo}`
           : "Instagram";
-  const reseau = post.source === "x" ? "X" : post.source === "discord" ? "Discord" : "Instagram";
+  const reseau =
+    post.source === "x"
+      ? "X"
+      : post.source === "discord"
+        ? "Discord"
+        : "Instagram";
   const lien =
     post.source === "x"
       ? {
@@ -169,7 +182,10 @@ export function PostCarte({
         <AspectRatio ratio={4 / 5}>
           {image?.kind === "video" ? (
             /* Rien n'est téléchargé avant le survol : voir `VignetteVideo`. */
-            <VignetteVideo src={image.src} ariaLabel={`Vidéo publiée sur ${reseau} par ${post.auteurNom}`} />
+            <VignetteVideo
+              src={image.src}
+              ariaLabel={`Vidéo publiée sur ${reseau} par ${post.auteurNom}`}
+            />
           ) : image ? (
             <Image
               src={image.src}
@@ -207,12 +223,19 @@ export function PostCarte({
 
       <div className="flex flex-1 flex-col gap-2 p-4">
         <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
-          <span className="truncate text-sm font-bold text-on-surface">{post.auteurNom}</span>
-          <span className="truncate text-xs text-on-surface-variant">{auteurSecondaire}</span>
+          <span className="truncate text-sm font-bold text-on-surface">
+            {post.auteurNom}
+          </span>
+          <span className="truncate text-xs text-on-surface-variant">
+            {auteurSecondaire}
+          </span>
         </div>
 
         {dateValide && (
-          <time dateTime={dateValide.toISOString()} className="text-xs text-on-surface-variant">
+          <time
+            dateTime={dateValide.toISOString()}
+            className="text-xs text-on-surface-variant"
+          >
             {formatDistanceToNow(dateValide, { addSuffix: true, locale: fr })}
           </time>
         )}
@@ -226,12 +249,26 @@ export function PostCarte({
         <div className="mt-auto flex flex-wrap items-center justify-between gap-2 pt-2">
           {post.source === "x" ? (
             <div className="flex items-center gap-3 text-xs text-on-surface-variant">
-              <Metrique icone={Heart} valeur={post.metriques?.like_count} libelle="j'aime" />
-              <Metrique icone={Repeat2} valeur={post.metriques?.retweet_count} libelle="repartages" />
-              <Metrique icone={MessageCircle} valeur={post.metriques?.reply_count} libelle="réponses" />
+              <Metrique
+                icone={Heart}
+                valeur={post.metriques?.like_count}
+                libelle="j'aime"
+              />
+              <Metrique
+                icone={Repeat2}
+                valeur={post.metriques?.retweet_count}
+                libelle="repartages"
+              />
+              <Metrique
+                icone={MessageCircle}
+                valeur={post.metriques?.reply_count}
+                libelle="réponses"
+              />
             </div>
           ) : (
-            <span className="text-xs text-on-surface-variant">Déposé sur Discord</span>
+            <span className="text-xs text-on-surface-variant">
+              Déposé sur Discord
+            </span>
           )}
 
           <a
@@ -249,7 +286,9 @@ export function PostCarte({
         {/* `text-primary` et non `text-rg-or` : l'or de marque est lisible sur le
 				    dégradé marine de la bannière, pas sur une surface d'interface claire. */}
         {post.hashtagTrouve && (
-          <span className="text-xs font-semibold text-primary">{afficherHashtag(post.hashtagTrouve)}</span>
+          <span className="text-xs font-semibold text-primary">
+            {afficherHashtag(post.hashtagTrouve)}
+          </span>
         )}
       </div>
     </Card>

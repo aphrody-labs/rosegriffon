@@ -48,7 +48,14 @@ export const COULEUR_MAX = 63;
 export type Grille = { colonnes: number; lignes: number };
 
 /** Rôle des deux bouts d'un curseur — les paires de `edit_bar_iconNN` du jeu. */
-export type RoleBouts = "moinsPlus" | "largeur" | "longueur" | "verticale" | "echelle" | "rotation" | "couleur";
+export type RoleBouts =
+  | "moinsPlus"
+  | "largeur"
+  | "longueur"
+  | "verticale"
+  | "echelle"
+  | "rotation"
+  | "couleur";
 
 /** Un curseur d'une rubrique : son rôle de bouts et, quand le jeu le nomme, son libellé. */
 export type Reglage = { bouts: RoleBouts; hash?: string };
@@ -72,7 +79,12 @@ export type Section = {
    * l'éditeur : 02 tête, 03 visage, 04 main, 05 cheveux, 06 œil, 07 nez, 08 bouche, 09 sourcil,
    * 10 oreille, 11 lunettes, 12 voix, 13 habits, 14 stats, 16 personnalité, 17 nom.
    */
-  lignes?: { hash: string; categorie: number; couleurDe?: number; icone: string }[];
+  lignes?: {
+    hash: string;
+    categorie: number;
+    couleurDe?: number;
+    icone: string;
+  }[];
 };
 
 /** Une rubrique de la colonne de gauche. */
@@ -94,7 +106,12 @@ export type Rubrique = {
  */
 export const RUBRIQUES_VISAGE: Rubrique[] = [
   // Échantillon de visage — les 36 visages prédéfinis, en 3×3.
-  { icone: 1, sections: [{ hash: "D49774C1", categorie: 1, grille: { colonnes: 3, lignes: 3 } }] },
+  {
+    icone: 1,
+    sections: [
+      { hash: "D49774C1", categorie: 1, grille: { colonnes: 3, lignes: 3 } },
+    ],
+  },
   // Forme de visage — 6 formes en 4×2, puis largeur, mâchoire et longueur.
   {
     icone: 2,
@@ -142,7 +159,10 @@ export const RUBRIQUES_VISAGE: Rubrique[] = [
     icone: 7,
     sections: [
       { hash: "34FBC64A", categorie: 10, grille: { colonnes: 6, lignes: 2 } },
-      { hash: "C7AAA035", reglages: [{ bouts: "verticale" }, { bouts: "echelle" }] },
+      {
+        hash: "C7AAA035",
+        reglages: [{ bouts: "verticale" }, { bouts: "echelle" }],
+      },
       { hash: "56FD4CEE", couleurDe: 10 },
     ],
   },
@@ -153,19 +173,37 @@ export const RUBRIQUES_VISAGE: Rubrique[] = [
       { hash: "F70F637F", categorie: 11, grille: { colonnes: 6, lignes: 2 } },
       {
         hash: "C7AAA035",
-        reglages: [{ bouts: "verticale" }, { bouts: "largeur" }, { bouts: "echelle" }, { bouts: "rotation" }],
+        reglages: [
+          { bouts: "verticale" },
+          { bouts: "largeur" },
+          { bouts: "echelle" },
+          { bouts: "rotation" },
+        ],
       },
       { hash: "206063FF", couleurDe: 11 },
     ],
   },
   // Oreilles — 6 oreilles en 4×2.
-  { icone: 9, sections: [{ hash: "CBEB0846", categorie: 12, grille: { colonnes: 4, lignes: 2 } }] },
+  {
+    icone: 9,
+    sections: [
+      { hash: "CBEB0846", categorie: 12, grille: { colonnes: 4, lignes: 2 } },
+    ],
+  },
   // Extras — deux emplacements, chacun une part et sa couleur.
   {
     icone: 10,
     sections: [
-      { lignes: [{ hash: "F7A91AF1", categorie: 13, couleurDe: 13, icone: "02" }] },
-      { lignes: [{ hash: "6EA04B4B", categorie: 14, couleurDe: 14, icone: "11" }] },
+      {
+        lignes: [
+          { hash: "F7A91AF1", categorie: 13, couleurDe: 13, icone: "02" },
+        ],
+      },
+      {
+        lignes: [
+          { hash: "6EA04B4B", categorie: 14, couleurDe: 14, icone: "11" },
+        ],
+      },
     ],
   },
 ];

@@ -45,7 +45,10 @@ async function main() {
   for (const sk of skills) {
     const name = sk.name_FR || sk.displayName;
     if (name) {
-      const cat = typeof sk.category === "object" ? sk.category?.fr : catNames[sk.category] || "?";
+      const cat =
+        typeof sk.category === "object"
+          ? sk.category?.fr
+          : catNames[sk.category] || "?";
       skillNames.set(name, cat);
     }
     if (sk.desc_FR) {
@@ -100,16 +103,24 @@ async function main() {
       generatedAt: new Date().toISOString(),
       source: "inagle MCP — données IEVR",
       totalEntries:
-        charaNames.size + skillNames.size + auraNames.size + passiveNames.length + teamNames.length + itemNames.length,
+        charaNames.size +
+        skillNames.size +
+        auraNames.size +
+        passiveNames.length +
+        teamNames.length +
+        itemNames.length,
     },
     terminologie: {
-      "Super Technique": "Technique spéciale (Hissatsu en JP). Catégories : Tir, Dribble, Bloc, Arrêt, Spécial.",
-      "Esprit Guerrier": "Keshin (化身) — avatar spirituel invoqué par un joueur. Augmente les stats.",
+      "Super Technique":
+        "Technique spéciale (Hissatsu en JP). Catégories : Tir, Dribble, Bloc, Arrêt, Spécial.",
+      "Esprit Guerrier":
+        "Keshin (化身) — avatar spirituel invoqué par un joueur. Augmente les stats.",
       Totem: "Soul (ソウル) — esprit animal qui booste le joueur.",
       Éveil: "Awakening — transformation qui débloque de nouvelles capacités.",
       Mode: "Mode Change — changement de style de jeu.",
       Miximax: "Fusion temporaire avec l'esprit d'un autre joueur.",
-      Tension: "Jauge d'énergie consommée par les Super Techniques (pas TP, pas mana).",
+      Tension:
+        "Jauge d'énergie consommée par les Super Techniques (pas TP, pas mana).",
       "Feu (火)": "Élément 1 — fort contre Forêt, faible contre Montagne.",
       "Forêt (林)": "Élément 2 — fort contre Vent, faible contre Feu.",
       "Vent (風)": "Élément 3 — fort contre Montagne, faible contre Forêt.",
@@ -133,14 +144,18 @@ async function main() {
       total: auraNames.size,
       parType: {} as Record<string, string[]>,
     },
-    passifs: { total: passiveNames.length, noms: passiveNames.sort().slice(0, 100) },
+    passifs: {
+      total: passiveNames.length,
+      noms: passiveNames.sort().slice(0, 100),
+    },
     equipes: { total: teamNames.length, noms: teamNames.sort() },
     items: { total: itemNames.length, noms: itemNames.sort().slice(0, 200) },
   };
 
   // Group skills by category
   for (const [name, cat] of skillNames) {
-    if (!glossary.techniques.parCategorie[cat]) glossary.techniques.parCategorie[cat] = [];
+    if (!glossary.techniques.parCategorie[cat])
+      glossary.techniques.parCategorie[cat] = [];
     glossary.techniques.parCategorie[cat].push(name);
   }
   for (const cat of Object.keys(glossary.techniques.parCategorie)) {
@@ -164,7 +179,9 @@ async function main() {
     "",
     "## Terminologie officielle française",
     "",
-    ...Object.entries(glossary.terminologie).map(([k, v]) => `- **${k}** : ${v}`),
+    ...Object.entries(glossary.terminologie).map(
+      ([k, v]) => `- **${k}** : ${v}`,
+    ),
     "",
     `## Personnages (${charaNames.size})`,
     "",
@@ -173,13 +190,15 @@ async function main() {
     `## Super Techniques (${skillNames.size})`,
     "",
     ...Object.entries(glossary.techniques.parCategorie).map(
-      ([cat, names]) => `### ${cat} (${(names as string[]).length})\n${(names as string[]).slice(0, 40).join(", ")}`,
+      ([cat, names]) =>
+        `### ${cat} (${(names as string[]).length})\n${(names as string[]).slice(0, 40).join(", ")}`,
     ),
     "",
     `## Esprits Guerriers / Totems / Éveils (${auraNames.size})`,
     "",
     ...Object.entries(glossary.auras.parType).map(
-      ([type, names]) => `### ${type} (${(names as string[]).length})\n${(names as string[]).join(", ")}`,
+      ([type, names]) =>
+        `### ${type} (${(names as string[]).length})\n${(names as string[]).join(", ")}`,
     ),
     "",
     `## Équipes (${teamNames.length})`,
@@ -188,11 +207,11 @@ async function main() {
     "",
     `## Exemples de descriptions de personnages`,
     "",
-    ...charaDescriptions.slice(0, 20).map(d => `> ${d}`),
+    ...charaDescriptions.slice(0, 20).map((d) => `> ${d}`),
     "",
     `## Exemples de descriptions de techniques`,
     "",
-    ...skillDescriptions.slice(0, 20).map(d => `> ${d}`),
+    ...skillDescriptions.slice(0, 20).map((d) => `> ${d}`),
   ].join("\n");
 
   const mdPath = join(outDir, "inazuma-glossary.md");

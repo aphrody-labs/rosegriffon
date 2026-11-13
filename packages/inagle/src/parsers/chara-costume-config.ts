@@ -64,17 +64,25 @@ function parseEntries(entries: ConfigNode[]): CharaCostume[] {
 // Loaders
 // ============================================================================
 
-export async function loadCharaCostumeConfigAsync(dataPath: string = DATA_ROOT) {
+export async function loadCharaCostumeConfigAsync(
+  dataPath: string = DATA_ROOT,
+) {
   // Résolution version-agnostique (repli sur le chemin versionné historique si introuvable)
   const path =
     resolveGameDataFile("character", "chara_costume") ??
-    join(dataPath, "common/gamedata/character", "chara_costume_1.02.28.00.cfg.bin.json");
+    join(
+      dataPath,
+      "common/gamedata/character",
+      "chara_costume_1.02.28.00.cfg.bin.json",
+    );
   const content = await loadJsonAsync<{ entries: ConfigNode[] }>(path);
   if (!content?.entries) return null;
   return parseEntries(content.entries);
 }
 
-export async function buildCharaCostumeDatabase(dataPath: string = DATA_ROOT): Promise<CharaCostumeDatabase> {
+export async function buildCharaCostumeDatabase(
+  dataPath: string = DATA_ROOT,
+): Promise<CharaCostumeDatabase> {
   const costumes = (await loadCharaCostumeConfigAsync(dataPath)) || [];
   const byIndex = new Map<number, CharaCostume>();
   for (const c of costumes) byIndex.set(c.index, c);

@@ -13,7 +13,12 @@ import {
  * Better Auth owns identity; this purpose-bound token only carries it to
  * Achilléa API, ranked, and realtime consumers.
  */
-export { ACHILLEA_AUTH_ISSUER, ACHILLEA_SESSION_AUDIENCE, ACHILLEA_SESSION_TTL_SECONDS, type AchilleaSessionIdentity };
+export {
+  ACHILLEA_AUTH_ISSUER,
+  ACHILLEA_SESSION_AUDIENCE,
+  ACHILLEA_SESSION_TTL_SECONDS,
+  type AchilleaSessionIdentity,
+};
 export {
   ACHILLEA_SESSION_COOKIE_NAME,
   ACHILLEA_REALTIME_AUDIENCE,
@@ -27,7 +32,9 @@ export {
  * `ranked.rosegriffon.fr`. A cookie is only erased with the same name, domain
  * and path, so every writer and eraser goes through this one definition.
  */
-export function achilleaSessionCookieAttributes(production = process.env.NODE_ENV === "production") {
+export function achilleaSessionCookieAttributes(
+  production = process.env.NODE_ENV === "production",
+) {
   return {
     domain: production ? ".rosegriffon.fr" : undefined,
     httpOnly: true,
@@ -38,7 +45,11 @@ export function achilleaSessionCookieAttributes(production = process.env.NODE_EN
 }
 
 function base64url(value: Buffer | string): string {
-  return Buffer.from(value).toString("base64").replaceAll("+", "-").replaceAll("/", "_").replaceAll("=", "");
+  return Buffer.from(value)
+    .toString("base64")
+    .replaceAll("+", "-")
+    .replaceAll("/", "_")
+    .replaceAll("=", "");
 }
 
 /**
@@ -53,7 +64,10 @@ export function signAchilleaSessionToken(
   now = Math.floor(Date.now() / 1000),
   ttlSeconds = ACHILLEA_SESSION_TTL_SECONDS,
 ): string {
-  if (!identity.id) throw new Error("Cannot sign an Achillea token without a Discord identifier");
+  if (!identity.id)
+    throw new Error(
+      "Cannot sign an Achillea token without a Discord identifier",
+    );
 
   const payload = {
     id: identity.id,
@@ -69,7 +83,9 @@ export function signAchilleaSessionToken(
 
   const header = base64url(JSON.stringify({ alg: "HS256", typ: "JWT" }));
   const body = base64url(JSON.stringify(payload));
-  const signature = base64url(createHmac("sha256", secret).update(`${header}.${body}`).digest());
+  const signature = base64url(
+    createHmac("sha256", secret).update(`${header}.${body}`).digest(),
+  );
   return `${header}.${body}.${signature}`;
 }
 
@@ -79,7 +95,8 @@ export function signAchilleaRealtimeToken(
   secret: string,
   now = Math.floor(Date.now() / 1000),
 ): string {
-  if (!identity.id) throw new Error("Cannot sign an Achillea token without a user identifier");
+  if (!identity.id)
+    throw new Error("Cannot sign an Achillea token without a user identifier");
   const payload = {
     id: identity.id,
     ...(identity.username ? { username: identity.username } : {}),
@@ -93,6 +110,8 @@ export function signAchilleaRealtimeToken(
   };
   const header = base64url(JSON.stringify({ alg: "HS256", typ: "JWT" }));
   const body = base64url(JSON.stringify(payload));
-  const signature = base64url(createHmac("sha256", secret).update(`${header}.${body}`).digest());
+  const signature = base64url(
+    createHmac("sha256", secret).update(`${header}.${body}`).digest(),
+  );
   return `${header}.${body}.${signature}`;
 }

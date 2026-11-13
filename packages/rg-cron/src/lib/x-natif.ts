@@ -36,7 +36,8 @@ export class XSession {
     }
     const auth = valeurs.get("auth_token");
     const ct0 = valeurs.get("ct0");
-    if (!auth || !ct0) throw new Error("cookies X incomplets : auth_token et ct0 sont requis");
+    if (!auth || !ct0)
+      throw new Error("cookies X incomplets : auth_token et ct0 sont requis");
     return new XSession(auth, ct0);
   }
 
@@ -44,13 +45,23 @@ export class XSession {
   static loadOrEnv(): XSession {
     const chaine = process.env.X_COOKIE_STRING;
     if (chaine) return XSession.fromCookieString(chaine);
-    const fichier = join(process.env.APHRODY_HOME ?? join(homedir(), ".aphrody"), "x-session.json");
+    const fichier = join(
+      process.env.APHRODY_HOME ?? join(homedir(), ".aphrody"),
+      "x-session.json",
+    );
     if (existsSync(fichier)) {
-      const brut = JSON.parse(readFileSync(fichier, "utf8")) as { auth_token?: string; ct0?: string };
-      if (brut.auth_token && brut.ct0) return new XSession(brut.auth_token, brut.ct0);
+      const brut = JSON.parse(readFileSync(fichier, "utf8")) as {
+        auth_token?: string;
+        ct0?: string;
+      };
+      if (brut.auth_token && brut.ct0)
+        return new XSession(brut.auth_token, brut.ct0);
     }
-    if (process.env.X_AUTH_TOKEN && process.env.X_CT0) return new XSession(process.env.X_AUTH_TOKEN, process.env.X_CT0);
-    throw new Error("aucune session X : X_COOKIE_STRING, ~/.aphrody/x-session.json ou X_AUTH_TOKEN + X_CT0");
+    if (process.env.X_AUTH_TOKEN && process.env.X_CT0)
+      return new XSession(process.env.X_AUTH_TOKEN, process.env.X_CT0);
+    throw new Error(
+      "aucune session X : X_COOKIE_STRING, ~/.aphrody/x-session.json ou X_AUTH_TOKEN + X_CT0",
+    );
   }
 
   cookieHeader(): string {
@@ -59,7 +70,11 @@ export class XSession {
 }
 
 function binaireAphrody(): string {
-  return process.env.APHRODY_BIN || Bun.which("aphrody") || join(homedir(), ".local", "bin", "aphrody");
+  return (
+    process.env.APHRODY_BIN ||
+    Bun.which("aphrody") ||
+    join(homedir(), ".local", "bin", "aphrody")
+  );
 }
 
 export class XClient {
@@ -80,7 +95,9 @@ export class XClient {
       proc.exited,
     ]);
     if (code !== 0) {
-      throw new Error(`aphrody x ${args[0]} : ${(erreur || sortie).trim().split("\n").slice(-3).join(" ").slice(0, 300)}`);
+      throw new Error(
+        `aphrody x ${args[0]} : ${(erreur || sortie).trim().split("\n").slice(-3).join(" ").slice(0, 300)}`,
+      );
     }
     return JSON.parse(sortie) as T;
   }
@@ -92,10 +109,23 @@ export class XClient {
     return utilisateur;
   }
 
-  userTweets(idUtilisateur: string, nombre: number, curseur?: string): Promise<TweetPage> {
+  userTweets(
+    idUtilisateur: string,
+    nombre: number,
+    curseur?: string,
+  ): Promise<TweetPage> {
     const pseudo = this.pseudos.get(idUtilisateur);
-    if (!pseudo) throw new Error(`userTweets : pseudo inconnu pour ${idUtilisateur}, appeler userByScreenName d'abord`);
-    return this.lancer<TweetPage>(["user-tweets", pseudo, "-n", String(nombre), ...(curseur ? ["--cursor", curseur] : [])]);
+    if (!pseudo)
+      throw new Error(
+        `userTweets : pseudo inconnu pour ${idUtilisateur}, appeler userByScreenName d'abord`,
+      );
+    return this.lancer<TweetPage>([
+      "user-tweets",
+      pseudo,
+      "-n",
+      String(nombre),
+      ...(curseur ? ["--cursor", curseur] : []),
+    ]);
   }
 
   async getTweet(id: string): Promise<Tweet | null> {
@@ -107,10 +137,21 @@ export class XClient {
   }
 
   thread(id: string, curseur?: string): Promise<TweetPage> {
-    return this.lancer<TweetPage>(["thread", id, "--quote-depth", "1", ...(curseur ? ["--cursor", curseur] : [])]);
+    return this.lancer<TweetPage>([
+      "thread",
+      id,
+      "--quote-depth",
+      "1",
+      ...(curseur ? ["--cursor", curseur] : []),
+    ]);
   }
 
-  search(requete: string, nombre: number, curseur?: string, produit = "Latest"): Promise<TweetPage> {
+  search(
+    requete: string,
+    nombre: number,
+    curseur?: string,
+    produit = "Latest",
+  ): Promise<TweetPage> {
     return this.lancer<TweetPage>([
       "search",
       requete,
@@ -123,6 +164,12 @@ export class XClient {
 
   /** Opération GraphQL du catalogue ; la CLI attend d'elle-même les limites souples (`--wait`). */
   graphqlWaiting(operation: string, variables: unknown): Promise<unknown> {
-    return this.lancer<unknown>(["graphql", operation, "--vars-json", JSON.stringify(variables ?? {}), "--wait"]);
+    return this.lancer<unknown>([
+      "graphql",
+      operation,
+      "--vars-json",
+      JSON.stringify(variables ?? {}),
+      "--wait",
+    ]);
   }
 }

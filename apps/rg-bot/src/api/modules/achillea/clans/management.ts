@@ -11,8 +11,15 @@
 
 import { sql, type Kysely, type Transaction } from "kysely";
 import type { Database } from "@rosegriffon/db/schema";
-import { normalizeNames, resolveDiscordAvatarUrl } from "@rosegriffon/achillea-core";
-import { canActOnMember, canManageRecruitment, toDistinction } from "@rosegriffon/achillea-core/clans";
+import {
+  normalizeNames,
+  resolveDiscordAvatarUrl,
+} from "@rosegriffon/achillea-core";
+import {
+  canActOnMember,
+  canManageRecruitment,
+  toDistinction,
+} from "@rosegriffon/achillea-core/clans";
 import {
   ClanMemberDistinction,
   ClanMemberRole,
@@ -29,11 +36,22 @@ import * as discord from "./discord";
 
 type Db = Kysely<Database> | Transaction<Database>;
 
-export type Failure = { ok: false; status: 400 | 403 | 404 | 409 | 502 | 503; error: string; code?: string };
+export type Failure = {
+  ok: false;
+  status: 400 | 403 | 404 | 409 | 502 | 503;
+  error: string;
+  code?: string;
+};
 type Result<T> = ({ ok: true } & T) | Failure;
 
-function fail(status: Failure["status"], error: string, code?: string): Failure {
-  return code ? { ok: false, status, error, code } : { ok: false, status, error };
+function fail(
+  status: Failure["status"],
+  error: string,
+  code?: string,
+): Failure {
+  return code
+    ? { ok: false, status, error, code }
+    : { ok: false, status, error };
 }
 
 /** Motif de départ stocké dans `clan_member_history.leave_reason` (enum legacy `LeaveReason`). */
@@ -52,11 +70,14 @@ export const INVITE_NOTIFY_COOLDOWN_MS = 12 * 60 * 60 * 1000;
 export const CLAN_CREATION_ERRORS = {
   INVALID_NAME: "Le nom est invalide et ne respecte pas le format demandé",
   NAME_TAKEN: "Le nom est déjà pris par un autre Clan",
-  INVALID_SHORTNAME: "Le sigle est invalide et ne respecte pas le format demandé",
+  INVALID_SHORTNAME:
+    "Le sigle est invalide et ne respecte pas le format demandé",
   SHORTNAME_TAKEN: "Le sigle est déjà pris par un autre Clan",
-  DUPLICATE_FOUNDERS: "Vous ne pouvez pas créer un Clan avec une duplication des membres fondateurs",
+  DUPLICATE_FOUNDERS:
+    "Vous ne pouvez pas créer un Clan avec une duplication des membres fondateurs",
   FOUNDER_IN_CLAN: "Un fondateur est déjà dans un autre Clan",
-  WRONG_FOUNDERS_NUMBER: "Les fondateurs doivent être au nombre de 5: Président + 4 fondateurs",
+  WRONG_FOUNDERS_NUMBER:
+    "Les fondateurs doivent être au nombre de 5: Président + 4 fondateurs",
   CLAN_CREATION_FAIL: "La création de Clan n'a pas pu aboutir",
   INVALID_SOCIALS: "Les URLs des réseaux sociaux sont invalides",
   UNKNOWN_FOUNDER: "Au moins un fondateur n'a pas encore de compte Achilléa",
@@ -68,17 +89,39 @@ export const CLAN_CREATION_ERRORS = {
 
 export type ClanMemberLimits = { playerLimit: number; staffLimit: number };
 
-export const DEFAULT_CLAN_MEMBER_LIMITS: ClanMemberLimits = { playerLimit: 30, staffLimit: 7 };
+export const DEFAULT_CLAN_MEMBER_LIMITS: ClanMemberLimits = {
+  playerLimit: 30,
+  staffLimit: 7,
+};
 
-export function normalizeClanMemberLimits(input: { playerLimit?: unknown; staffLimit?: unknown }): ClanMemberLimits {
-  const bound = (value: unknown, fallback: number, min: number, max: number) => {
+export function normalizeClanMemberLimits(input: {
+  playerLimit?: unknown;
+  staffLimit?: unknown;
+}): ClanMemberLimits {
+  const bound = (
+    value: unknown,
+    fallback: number,
+    min: number,
+    max: number,
+  ) => {
     const n = typeof value === "number" ? value : Number(value);
-    if (value === undefined || value === null || !Number.isFinite(n)) return fallback;
+    if (value === undefined || value === null || !Number.isFinite(n))
+      return fallback;
     return Math.round(Math.max(min, Math.min(max, n)));
   };
   return {
-    playerLimit: bound(input.playerLimit, DEFAULT_CLAN_MEMBER_LIMITS.playerLimit, 1, 100),
-    staffLimit: bound(input.staffLimit, DEFAULT_CLAN_MEMBER_LIMITS.staffLimit, 1, 50),
+    playerLimit: bound(
+      input.playerLimit,
+      DEFAULT_CLAN_MEMBER_LIMITS.playerLimit,
+      1,
+      100,
+    ),
+    staffLimit: bound(
+      input.staffLimit,
+      DEFAULT_CLAN_MEMBER_LIMITS.staffLimit,
+      1,
+      50,
+    ),
   };
 }
 
@@ -88,8 +131,16 @@ export function memberLimitExceeded(
   limits: ClanMemberLimits,
   desired: readonly ClanMemberDistinction[],
 ): "player" | "staff" | null {
-  if (desired.includes(ClanMemberDistinction.Player) && counts.players >= limits.playerLimit) return "player";
-  if (desired.includes(ClanMemberDistinction.Staff) && counts.staff >= limits.staffLimit) return "staff";
+  if (
+    desired.includes(ClanMemberDistinction.Player) &&
+    counts.players >= limits.playerLimit
+  )
+    return "player";
+  if (
+    desired.includes(ClanMemberDistinction.Staff) &&
+    counts.staff >= limits.staffLimit
+  )
+    return "staff";
   return null;
 }
 
@@ -106,25 +157,52 @@ async function readMemberLimits(db: Db): Promise<ClanMemberLimits> {
         // Valeur illisible : le défaut s'applique.
       }
     }
-    return normalizeClanMemberLimits({ playerLimit: parsed.clanPlayerLimit, staffLimit: parsed.clanStaffLimit });
+    return normalizeClanMemberLimits({
+      playerLimit: parsed.clanPlayerLimit,
+      staffLimit: parsed.clanStaffLimit,
+    });
   } catch {
     return DEFAULT_CLAN_MEMBER_LIMITS;
   }
 }
 
-async function checkMemberLimits(db: Db, clanId: number, desired: readonly ClanMemberDistinction[]) {
-  if (!desired.includes(ClanMemberDistinction.Player) && !desired.includes(ClanMemberDistinction.Staff)) return null;
+async function checkMemberLimits(
+  db: Db,
+  clanId: number,
+  desired: readonly ClanMemberDistinction[],
+) {
+  if (
+    !desired.includes(ClanMemberDistinction.Player) &&
+    !desired.includes(ClanMemberDistinction.Staff)
+  )
+    return null;
   const [limits, members] = await Promise.all([
     readMemberLimits(db),
-    db.selectFrom("clan_member").select("distinctions").where("clan_id", "=", clanId).execute(),
+    db
+      .selectFrom("clan_member")
+      .select("distinctions")
+      .where("clan_id", "=", clanId)
+      .execute(),
   ]);
   const counts = {
-    players: members.filter(m => (m.distinctions ?? []).includes(ClanMemberDistinction.Player)).length,
-    staff: members.filter(m => (m.distinctions ?? []).includes(ClanMemberDistinction.Staff)).length,
+    players: members.filter((m) =>
+      (m.distinctions ?? []).includes(ClanMemberDistinction.Player),
+    ).length,
+    staff: members.filter((m) =>
+      (m.distinctions ?? []).includes(ClanMemberDistinction.Staff),
+    ).length,
   };
   const exceeded = memberLimitExceeded(counts, limits, desired);
-  if (exceeded === "player") return fail(400, `Le clan a déjà atteint la limite de ${limits.playerLimit} joueurs.`);
-  if (exceeded === "staff") return fail(400, `Le clan a déjà atteint la limite de ${limits.staffLimit} staff.`);
+  if (exceeded === "player")
+    return fail(
+      400,
+      `Le clan a déjà atteint la limite de ${limits.playerLimit} joueurs.`,
+    );
+  if (exceeded === "staff")
+    return fail(
+      400,
+      `Le clan a déjà atteint la limite de ${limits.staffLimit} staff.`,
+    );
   return null;
 }
 
@@ -137,7 +215,9 @@ async function checkMemberLimits(db: Db, clanId: number, desired: readonly ClanM
  * `null` si l'une d'elles est inconnue — le legacy voulait rejeter ce cas mais
  * son `forEach(... return res.status(400))` n'interrompait rien.
  */
-export function parseDistinctions(values: readonly string[]): ClanMemberDistinction[] | null {
+export function parseDistinctions(
+  values: readonly string[],
+): ClanMemberDistinction[] | null {
   const out: ClanMemberDistinction[] = [];
   for (const value of values) {
     const known = toDistinction(value);
@@ -156,21 +236,35 @@ export function isClanMemberRole(value: unknown): value is ClanMemberRole {
   );
 }
 
-export type ClanSocials = { xUrl: string | null; instagramUrl: string | null; tiktokUrl: string | null };
+export type ClanSocials = {
+  xUrl: string | null;
+  instagramUrl: string | null;
+  tiktokUrl: string | null;
+};
 
 /** URL canonique d'un réseau social de clan (legacy `parseSocialMediaUrl`, limité à X/Instagram/TikTok). */
-export function canonicalSocial(url: string): { platform: keyof ClanSocials; url: string } | null {
+export function canonicalSocial(
+  url: string,
+): { platform: keyof ClanSocials; url: string } | null {
   try {
     const parsed = new URL(url.trim());
     const host = parsed.hostname.replace(/^www\./, "");
     let username = parsed.pathname.split("/").filter(Boolean)[0];
     if (!username) return null;
     let result: { platform: keyof ClanSocials; url: string };
-    if (host === "instagram.com") result = { platform: "instagramUrl", url: `https://instagram.com/${username}` };
+    if (host === "instagram.com")
+      result = {
+        platform: "instagramUrl",
+        url: `https://instagram.com/${username}`,
+      };
     else if (host === "tiktok.com") {
       username = username.replace(/^@/, "");
-      result = { platform: "tiktokUrl", url: `https://tiktok.com/@${username}` };
-    } else if (host === "x.com" || host === "twitter.com") result = { platform: "xUrl", url: `https://x.com/${username}` };
+      result = {
+        platform: "tiktokUrl",
+        url: `https://tiktok.com/@${username}`,
+      };
+    } else if (host === "x.com" || host === "twitter.com")
+      result = { platform: "xUrl", url: `https://x.com/${username}` };
     else return null;
     return /^[\w.-]{1,30}$/.test(username) ? result : null;
   } catch {
@@ -188,7 +282,10 @@ type Membership = { clan_id: number; user_id: string; role: number };
  * Adhésion de référence d'un utilisateur : un clan non dissous, l'adhésion à
  * un clan actif étant préférée à celle d'un clan inactif (prêt/transfert).
  */
-async function membershipOf(db: Db, userId: string): Promise<Membership | undefined> {
+async function membershipOf(
+  db: Db,
+  userId: string,
+): Promise<Membership | undefined> {
   const row = await db
     .selectFrom("clan_member as cm")
     .innerJoin("clan as c", "c.id", "cm.clan_id")
@@ -198,7 +295,9 @@ async function membershipOf(db: Db, userId: string): Promise<Membership | undefi
     .orderBy("c.is_inactive", "asc")
     .limit(1)
     .executeTakeFirst();
-  return row ? { clan_id: row.clan_id, user_id: row.user_id, role: Number(row.role) } : undefined;
+  return row
+    ? { clan_id: row.clan_id, user_id: row.user_id, role: Number(row.role) }
+    : undefined;
 }
 
 /** Une adhésion à un clan inactif ne bloque pas une nouvelle adhésion (legacy `hasActiveClanMembership`). */
@@ -215,7 +314,10 @@ async function hasActiveMembership(db: Db, userId: string): Promise<boolean> {
 }
 
 /** Vice-président ou président de son clan (legacy : `role < SubCaptain` → refus). */
-async function managerOf(db: Db, userId: string): Promise<Result<{ member: Membership }>> {
+async function managerOf(
+  db: Db,
+  userId: string,
+): Promise<Result<{ member: Membership }>> {
   const member = await membershipOf(db, userId);
   if (!member) return fail(400, "Vous ne faites pas partie d'un Clan.");
   if (!canManageRecruitment(member.role as ClanMemberRole))
@@ -227,10 +329,14 @@ async function managerOf(db: Db, userId: string): Promise<Result<{ member: Membe
  * Vice-président au minimum, et rôle strictement supérieur à la cible — sauf
  * le président, qui garde la main sur tout son effectif.
  */
-export function canManageMember(executorRole: ClanMemberRole, targetRole: ClanMemberRole): boolean {
+export function canManageMember(
+  executorRole: ClanMemberRole,
+  targetRole: ClanMemberRole,
+): boolean {
   return (
     canManageRecruitment(executorRole) &&
-    (canActOnMember(executorRole, targetRole) || executorRole === ClanMemberRole.Captain)
+    (canActOnMember(executorRole, targetRole) ||
+      executorRole === ClanMemberRole.Captain)
   );
 }
 
@@ -245,10 +351,18 @@ export function roleChangeError(
   newRole: ClanMemberRole,
 ): Failure | null {
   if (newRole === target.role) return null;
-  if (executor.userId === target.userId) return fail(400, "Vous ne pouvez pas modifier votre propre rôle.");
-  if (newRole === ClanMemberRole.Captain) return fail(400, "La présidence ne se transmet pas par cette action.");
-  if (executor.role !== ClanMemberRole.Captain && !canActOnMember(executor.role, newRole))
-    return fail(403, "Vous ne pouvez pas attribuer un rôle égal ou supérieur au vôtre.");
+  if (executor.userId === target.userId)
+    return fail(400, "Vous ne pouvez pas modifier votre propre rôle.");
+  if (newRole === ClanMemberRole.Captain)
+    return fail(400, "La présidence ne se transmet pas par cette action.");
+  if (
+    executor.role !== ClanMemberRole.Captain &&
+    !canActOnMember(executor.role, newRole)
+  )
+    return fail(
+      403,
+      "Vous ne pouvez pas attribuer un rôle égal ou supérieur au vôtre.",
+    );
   return null;
 }
 
@@ -278,7 +392,10 @@ async function memberManagement(
   }
   const targetRole = Number(target.role) as ClanMemberRole;
   if (!canManageMember(executor.role as ClanMemberRole, targetRole))
-    return fail(403, "Vous n'avez pas les permissions pour modifier ce membre.");
+    return fail(
+      403,
+      "Vous n'avez pas les permissions pour modifier ce membre.",
+    );
   return { ok: true, executor, target: { ...target, role: targetRole } };
 }
 
@@ -303,7 +420,7 @@ export async function clanMembers(db: Db, clanId: number) {
     .where("cm.clan_id", "=", clanId)
     .orderBy("cm.role", "asc")
     .execute();
-  return rows.map(row => ({
+  return rows.map((row) => ({
     clanRole: Number(row.role),
     distinctions: row.distinctions ?? [],
     clanFameContributed: Number(row.clan_fame_contributed ?? 0),
@@ -324,11 +441,20 @@ export async function clanMembers(db: Db, clanId: number) {
 // Contexte Discord (lectures après transaction)
 // ---------------------------------------------------------------------------
 
-async function clanDiscord(db: Db, clanId: number): Promise<discord.ClanDiscord | null> {
+async function clanDiscord(
+  db: Db,
+  clanId: number,
+): Promise<discord.ClanDiscord | null> {
   const row = await db
     .selectFrom("clan as c")
     .leftJoin("guild as g", "g.id", "c.guild_id")
-    .select(["c.id", "c.name", "c.channel_id", "c.role_id", "g.broadcast_channel"])
+    .select([
+      "c.id",
+      "c.name",
+      "c.channel_id",
+      "c.role_id",
+      "g.broadcast_channel",
+    ])
     .where("c.id", "=", clanId)
     .executeTakeFirst();
   return row
@@ -342,19 +468,31 @@ async function clanDiscord(db: Db, clanId: number): Promise<discord.ClanDiscord 
     : null;
 }
 
-async function joueurs(db: Db, ids: readonly string[]): Promise<Map<string, discord.Joueur>> {
+async function joueurs(
+  db: Db,
+  ids: readonly string[],
+): Promise<Map<string, discord.Joueur>> {
   const unique = [...new Set(ids)];
   const rows = unique.length
-    ? await db.selectFrom("user").select(["id", "display_name", "username", "avatar"]).where("id", "in", unique).execute()
+    ? await db
+        .selectFrom("user")
+        .select(["id", "display_name", "username", "avatar"])
+        .where("id", "in", unique)
+        .execute()
     : [];
   const map = new Map(
-    rows.map(row => [
+    rows.map((row) => [
       row.id,
-      { id: row.id, nom: row.display_name || row.username || row.id, avatar: resolveDiscordAvatarUrl(row.id, row.avatar) },
+      {
+        id: row.id,
+        nom: row.display_name || row.username || row.id,
+        avatar: resolveDiscordAvatarUrl(row.id, row.avatar),
+      },
     ]),
   );
   for (const id of unique)
-    if (!map.has(id)) map.set(id, { id, nom: id, avatar: resolveDiscordAvatarUrl(id, null) });
+    if (!map.has(id))
+      map.set(id, { id, nom: id, avatar: resolveDiscordAvatarUrl(id, null) });
   return map;
 }
 
@@ -374,7 +512,12 @@ type AcceptedApplication = {
 async function notifier(
   trx: Transaction<Database>,
   userIds: readonly string[],
-  notification: { title: string; message: string; type: NotificationType; payload: Record<string, unknown> },
+  notification: {
+    title: string;
+    message: string;
+    type: NotificationType;
+    payload: Record<string, unknown>;
+  },
 ) {
   const destinataires = [...new Set(userIds)];
   if (destinataires.length === 0) return;
@@ -385,25 +528,37 @@ async function notifier(
     .executeTakeFirstOrThrow();
   await trx
     .insertInto("user_notification")
-    .values(destinataires.map(user_id => ({ user_id, notification_id: ligne.id })))
+    .values(
+      destinataires.map((user_id) => ({ user_id, notification_id: ligne.id })),
+    )
     .execute();
 }
 
 /** Gestionnaires (vice-président et plus) d'un clan : destinataires des candidatures. */
-async function gestionnaires(trx: Transaction<Database>, clanId: number): Promise<string[]> {
+async function gestionnaires(
+  trx: Transaction<Database>,
+  clanId: number,
+): Promise<string[]> {
   const rows = await trx
     .selectFrom("clan_member")
     .select("user_id")
     .where("clan_id", "=", clanId)
     .where("role", ">=", ClanMemberRole.SubCaptain)
     .execute();
-  return rows.map(row => row.user_id);
+  return rows.map((row) => row.user_id);
 }
 
 /** Entrée signée du journal d'audit, dans la transaction de l'écriture. */
 function auditer(
   trx: Transaction<Database>,
-  entree: { acteur: string | null; action: string; cibleType: string; cibleId: string | number; charge?: Record<string, unknown>; motif?: string },
+  entree: {
+    acteur: string | null;
+    action: string;
+    cibleType: string;
+    cibleId: string | number;
+    charge?: Record<string, unknown>;
+    motif?: string;
+  },
 ) {
   return journaliserAudit(trx, {
     acteur: entree.acteur,
@@ -418,13 +573,22 @@ function auditer(
 
 async function acceptApplicationRow(
   trx: Transaction<Database>,
-  application: { id: number; user_id: string; clan_id: number; distinctions: string[] | null; message_id: string | null },
+  application: {
+    id: number;
+    user_id: string;
+    clan_id: number;
+    distinctions: string[] | null;
+    message_id: string | null;
+  },
   /** `null` : admission automatique (`auto_accept_members`). */
   executorId: string | null,
 ): Promise<Result<{ accepted: AcceptedApplication }>> {
   if (await hasActiveMembership(trx, application.user_id))
     return fail(400, "Cet Utilisateur fait déjà partie d'un Clan");
-  await trx.deleteFrom("clan_application").where("user_id", "=", application.user_id).execute();
+  await trx
+    .deleteFrom("clan_application")
+    .where("user_id", "=", application.user_id)
+    .execute();
   // Adhésion conservée à un clan inactif : la nouvelle s'y ajoute (prêt/transfert implicite).
   await trx
     .insertInto("clan_member")
@@ -434,21 +598,35 @@ async function acceptApplicationRow(
       role: ClanMemberRole.Trial,
       distinctions: application.distinctions ?? [],
     })
-    .onConflict(oc => oc.columns(["clan_id", "user_id"]).doNothing())
+    .onConflict((oc) => oc.columns(["clan_id", "user_id"]).doNothing())
     .execute();
-  const clan = await trx.selectFrom("clan").select("name").where("id", "=", application.clan_id).executeTakeFirstOrThrow();
+  const clan = await trx
+    .selectFrom("clan")
+    .select("name")
+    .where("id", "=", application.clan_id)
+    .executeTakeFirstOrThrow();
   await notifier(trx, [application.user_id], {
     title: "Candidature acceptée",
     message: `Ta candidature au Clan ${clan.name} a été acceptée.`,
     type: NotificationType.CLAN_APPLICATION_ACCEPTED,
-    payload: { clanId: application.clan_id, clanName: clan.name, applicationId: application.id, executorId },
+    payload: {
+      clanId: application.clan_id,
+      clanName: clan.name,
+      applicationId: application.id,
+      executorId,
+    },
   });
   await auditer(trx, {
     acteur: executorId,
     action: "clan.application.accept",
     cibleType: "ClanApplication",
     cibleId: application.id,
-    charge: { clanId: application.clan_id, userId: application.user_id, distinctions: application.distinctions ?? [], automatique: executorId === null },
+    charge: {
+      clanId: application.clan_id,
+      userId: application.user_id,
+      distinctions: application.distinctions ?? [],
+      automatique: executorId === null,
+    },
   });
   return {
     ok: true,
@@ -463,19 +641,37 @@ async function acceptApplicationRow(
 }
 
 /** Effets Discord d'une candidature acceptée (legacy `acceptApplication`, après la transaction). */
-async function annoncerAdmission(db: Kysely<Database>, accepted: AcceptedApplication, executorId: string | null) {
+async function annoncerAdmission(
+  db: Kysely<Database>,
+  accepted: AcceptedApplication,
+  executorId: string | null,
+) {
   const [clan, gens] = await Promise.all([
     clanDiscord(db, accepted.clanId),
     joueurs(db, executorId ? [accepted.userId, executorId] : [accepted.userId]),
   ]);
   if (!clan) return;
   const joueur = gens.get(accepted.userId)!;
-  await discord.ajouterRoleClan(joueur.id, clan.roleId, `Candidature acceptée (Clan ${clan.name})`);
+  await discord.ajouterRoleClan(
+    joueur.id,
+    clan.roleId,
+    `Candidature acceptée (Clan ${clan.name})`,
+  );
   if (accepted.messageId)
     await discord.modifierMessage(
       clan.channelId,
       accepted.messageId,
-      { content: "", embeds: [discord.embedJoueur(joueur, "Candidature acceptée", discord.COULEUR_SUCCES)], components: [] },
+      {
+        content: "",
+        embeds: [
+          discord.embedJoueur(
+            joueur,
+            "Candidature acceptée",
+            discord.COULEUR_SUCCES,
+          ),
+        ],
+        components: [],
+      },
       "mise à jour du message de candidature",
     );
   if (executorId) {
@@ -497,11 +693,23 @@ async function annoncerAdmission(db: Kysely<Database>, accepted: AcceptedApplica
     {
       embeds: [
         {
-          ...discord.embedJoueur(joueur, "Nouveau membre", discord.COULEUR_SUCCES),
+          ...discord.embedJoueur(
+            joueur,
+            "Nouveau membre",
+            discord.COULEUR_SUCCES,
+          ),
           description: `__*Clan rejoint le ${new Date().toLocaleDateString("fr-FR")}*__`,
           fields: [
-            { name: "Rôle", value: CLAN_MEMBER_ROLE_LABELS[ClanMemberRole.Trial], inline: true },
-            { name: "Distinctions", value: accepted.distinctions.join("\n") || "—", inline: true },
+            {
+              name: "Rôle",
+              value: CLAN_MEMBER_ROLE_LABELS[ClanMemberRole.Trial],
+              inline: true,
+            },
+            {
+              name: "Distinctions",
+              value: accepted.distinctions.join("\n") || "—",
+              inline: true,
+            },
           ],
         },
       ],
@@ -565,60 +773,119 @@ export const FOUNDING_VOTE_MIN_PARTICIPATION = 1;
 
 export abstract class ClanManagementService {
   /** `POST /clans/create` — legacy `ClansController.submitForm`. */
-  static async create(db: Kysely<Database>, presidentId: string, dto: NewClanInput): Promise<Result<{ clanId: number }>> {
-    if (await hasActiveMembership(db, presidentId)) return fail(400, "Vous faites déjà partie d'un Clan.", "IN_CLAN");
+  static async create(
+    db: Kysely<Database>,
+    presidentId: string,
+    dto: NewClanInput,
+  ): Promise<Result<{ clanId: number }>> {
+    if (await hasActiveMembership(db, presidentId))
+      return fail(400, "Vous faites déjà partie d'un Clan.", "IN_CLAN");
 
-    const founderIds = [presidentId, ...dto.founders.map(founder => founder.id.trim())];
+    const founderIds = [
+      presidentId,
+      ...dto.founders.map((founder) => founder.id.trim()),
+    ];
     if (founderIds.length !== CLAN_FOUNDERS_COUNT)
       return fail(400, CLAN_CREATION_ERRORS.WRONG_FOUNDERS_NUMBER, "FOUNDERS");
     if (new Set(founderIds).size !== founderIds.length)
       return fail(400, CLAN_CREATION_ERRORS.DUPLICATE_FOUNDERS, "FOUNDERS");
     // Le legacy synchronisait les fondateurs depuis Discord à la volée ; ici un
     // fondateur doit déjà avoir un compte Achilléa (toute connexion le crée).
-    const known = await db.selectFrom("user").select("id").where("id", "in", founderIds).execute();
-    if (known.length !== founderIds.length) return fail(400, CLAN_CREATION_ERRORS.UNKNOWN_FOUNDER, "FOUNDERS");
-    const inClan = await db.selectFrom("clan_member").select("user_id").where("user_id", "in", founderIds).execute();
-    if (inClan.length > 0) return fail(400, CLAN_CREATION_ERRORS.FOUNDER_IN_CLAN, "FOUNDERS");
+    const known = await db
+      .selectFrom("user")
+      .select("id")
+      .where("id", "in", founderIds)
+      .execute();
+    if (known.length !== founderIds.length)
+      return fail(400, CLAN_CREATION_ERRORS.UNKNOWN_FOUNDER, "FOUNDERS");
+    const inClan = await db
+      .selectFrom("clan_member")
+      .select("user_id")
+      .where("user_id", "in", founderIds)
+      .execute();
+    if (inClan.length > 0)
+      return fail(400, CLAN_CREATION_ERRORS.FOUNDER_IN_CLAN, "FOUNDERS");
 
     const name = dto.name.trim();
     const shortName = dto.shortName.trim();
     const validName = await ClanService.validateName(db, name);
-    if (!validName.valid) return fail(400, CLAN_CREATION_ERRORS[validName.code], "NAME");
+    if (!validName.valid)
+      return fail(400, CLAN_CREATION_ERRORS[validName.code], "NAME");
     const validShortName = await ClanService.validateShortName(db, shortName);
-    if (!validShortName.valid) return fail(400, CLAN_CREATION_ERRORS[validShortName.code], "SHORT_NAME");
+    if (!validShortName.valid)
+      return fail(400, CLAN_CREATION_ERRORS[validShortName.code], "SHORT_NAME");
 
-    const socials: ClanSocials = { xUrl: null, instagramUrl: null, tiktokUrl: null };
+    const socials: ClanSocials = {
+      xUrl: null,
+      instagramUrl: null,
+      tiktokUrl: null,
+    };
     for (const raw of [dto.twitter, dto.instagram, dto.tiktok]) {
       if (!raw?.trim()) continue;
       const social = canonicalSocial(raw);
-      if (social && socials[social.platform] === null) socials[social.platform] = social.url;
+      if (social && socials[social.platform] === null)
+        socials[social.platform] = social.url;
     }
     if (!socials.xUrl && !socials.instagramUrl && !socials.tiktokUrl)
       return fail(400, CLAN_CREATION_ERRORS.INVALID_SOCIALS, "SOCIALS");
 
     const logo = dto.logo.trim();
-    if (!isValidUrl(logo) || !/^https?:\/\//i.test(logo)) return fail(400, "Logo invalide.", "LOGO");
-    const logoTaken = await db.selectFrom("clan").select("id").where("clan_avatar_url", "=", logo).executeTakeFirst();
-    if (logoTaken) return fail(409, "Cette image est déjà utilisée par un autre clan.", "LOGO");
+    if (!isValidUrl(logo) || !/^https?:\/\//i.test(logo))
+      return fail(400, "Logo invalide.", "LOGO");
+    const logoTaken = await db
+      .selectFrom("clan")
+      .select("id")
+      .where("clan_avatar_url", "=", logo)
+      .executeTakeFirst();
+    if (logoTaken)
+      return fail(
+        409,
+        "Cette image est déjà utilisée par un autre clan.",
+        "LOGO",
+      );
 
     const biography = dto.description.trim();
-    if (biography.length > 1500) return fail(400, "Biographie trop longue (1500 caractères max).", "DESCRIPTION");
+    if (biography.length > 1500)
+      return fail(
+        400,
+        "Biographie trop longue (1500 caractères max).",
+        "DESCRIPTION",
+      );
 
     // Présence sur le serveur central, puis rôle + salon du clan : préalables
     // Discord du legacy, vérifiés avant toute écriture en base.
     const absents = await discord.membresAbsents(founderIds);
-    if (!absents.ok) return fail(503, "Discord Achilléa est indisponible, réessayez plus tard.", "DISCORD_UNAVAILABLE");
+    if (!absents.ok)
+      return fail(
+        503,
+        "Discord Achilléa est indisponible, réessayez plus tard.",
+        "DISCORD_UNAVAILABLE",
+      );
     if (absents.data.length > 0)
-      return fail(400, "Au moins un fondateur n'est pas présent sur le Discord d'Achillea", "DISCORD_USER_FETCH_ERROR");
-    const provision = await discord.provisionnerClan({ name, shortName, presidentId, founderIds, logo });
+      return fail(
+        400,
+        "Au moins un fondateur n'est pas présent sur le Discord d'Achillea",
+        "DISCORD_USER_FETCH_ERROR",
+      );
+    const provision = await discord.provisionnerClan({
+      name,
+      shortName,
+      presidentId,
+      founderIds,
+      logo,
+    });
     if (!provision.ok) {
       discord.consigner("provisionnement du clan", provision);
-      return fail(503, "Discord Achilléa est indisponible, réessayez plus tard.", "DISCORD_UNAVAILABLE");
+      return fail(
+        503,
+        "Discord Achilléa est indisponible, réessayez plus tard.",
+        "DISCORD_UNAVAILABLE",
+      );
     }
 
     let created: { clanId: number; proposalId: number };
     try {
-      created = await db.transaction().execute(async trx => {
+      created = await db.transaction().execute(async (trx) => {
         const clan = await trx
           .insertInto("clan")
           .values({
@@ -637,7 +904,7 @@ export abstract class ClanManagementService {
             clan_emoji_id: provision.data.emojiId,
             state: ClanState.Creating,
             origin: dto.origin?.code ?? "",
-            languages: dto.languages?.map(language => language.code) ?? [],
+            languages: dto.languages?.map((language) => language.code) ?? [],
           })
           .returning("id")
           .executeTakeFirstOrThrow();
@@ -653,7 +920,9 @@ export abstract class ClanManagementService {
         // Vote de fondation (legacy `initFoundingVoteProcedure`) : tables MikroORM
         // historiques `vote_proposal` / `vote_proposal_eligible_voters`, hors schéma typé.
         const now = new Date();
-        const presidentName = (await joueurs(trx, [presidentId])).get(presidentId)!.nom;
+        const presidentName = (await joueurs(trx, [presidentId])).get(
+          presidentId,
+        )!.nom;
         const proposal = await sql<{ id: number }>`
           insert into vote_proposal
             (created_at, updated_at, type, target_entity_type, target_entity_id, reason, strategy,
@@ -674,7 +943,14 @@ export abstract class ClanManagementService {
           action: "clan.create",
           cibleType: "Clan",
           cibleId: clan.id,
-          charge: { name, shortName, founders: founderIds, roleId: provision.data.roleId, channelId: provision.data.channelId, proposalId },
+          charge: {
+            name,
+            shortName,
+            founders: founderIds,
+            roleId: provision.data.roleId,
+            channelId: provision.data.channelId,
+            proposalId,
+          },
         });
         return { clanId: clan.id, proposalId };
       });
@@ -682,7 +958,11 @@ export abstract class ClanManagementService {
       await discord.annulerProvision(provision.data);
       // Course perdue sur une contrainte unique (nom, sigle, logo).
       if ((error as { code?: string })?.code === "23505")
-        return fail(409, CLAN_CREATION_ERRORS.CLAN_CREATION_FAIL, "CLAN_CREATION_FAIL");
+        return fail(
+          409,
+          CLAN_CREATION_ERRORS.CLAN_CREATION_FAIL,
+          "CLAN_CREATION_FAIL",
+        );
       throw error;
     }
 
@@ -710,7 +990,14 @@ export abstract class ClanManagementService {
     distinctions: ClanMemberDistinction[],
   ): Promise<Result<{ autojoin: boolean }>> {
     const result = await db.transaction().execute(
-      async (trx): Promise<Result<{ applicationId: number; accepted: AcceptedApplication | null }>> => {
+      async (
+        trx,
+      ): Promise<
+        Result<{
+          applicationId: number;
+          accepted: AcceptedApplication | null;
+        }>
+      > => {
         const clan = await trx
           .selectFrom("clan")
           .select(["id", "auto_accept_members"])
@@ -719,14 +1006,19 @@ export abstract class ClanManagementService {
           .forUpdate()
           .executeTakeFirst();
         if (!clan) return fail(404, "Clan introuvable.");
-        if (await hasActiveMembership(trx, userId)) return fail(400, "Vous faites déjà partie d'un Clan.");
+        if (await hasActiveMembership(trx, userId))
+          return fail(400, "Vous faites déjà partie d'un Clan.");
         const already = await trx
           .selectFrom("clan_application")
           .select("id")
           .where("user_id", "=", userId)
           .where("clan_id", "=", clanId)
           .executeTakeFirst();
-        if (already) return fail(400, "Vous avez déjà soumis votre candidature auprès de ce Clan.");
+        if (already)
+          return fail(
+            400,
+            "Vous avez déjà soumis votre candidature auprès de ce Clan.",
+          );
         const limit = await checkMemberLimits(trx, clanId, distinctions);
         if (limit) return limit;
 
@@ -741,13 +1033,22 @@ export abstract class ClanManagementService {
             title: "Nouvelle candidature",
             message: `${candidat} postule en tant que ${distinctions.join(", ") || "membre"}.`,
             type: NotificationType.CLAN_APPLICATION_RECEIVED,
-            payload: { clanId, applicationId: application.id, userId, distinctions },
+            payload: {
+              clanId,
+              applicationId: application.id,
+              userId,
+              distinctions,
+            },
           });
           return { ok: true, applicationId: application.id, accepted: null };
         }
         const accepted = await acceptApplicationRow(trx, application, null);
         if (!accepted.ok) return accepted;
-        return { ok: true, applicationId: application.id, accepted: accepted.accepted };
+        return {
+          ok: true,
+          applicationId: application.id,
+          accepted: accepted.accepted,
+        };
       },
     );
     if (!result.ok) return result;
@@ -756,11 +1057,19 @@ export abstract class ClanManagementService {
       return { ok: true, autojoin: true };
     }
 
-    const [clan, gens] = await Promise.all([clanDiscord(db, clanId), joueurs(db, [userId])]);
+    const [clan, gens] = await Promise.all([
+      clanDiscord(db, clanId),
+      joueurs(db, [userId]),
+    ]);
     if (clan) {
       const envoi = await publierSalonAchilleaSafe(
         clan.channelId,
-        discord.messageCandidature(clan, gens.get(userId)!, distinctions, result.applicationId),
+        discord.messageCandidature(
+          clan,
+          gens.get(userId)!,
+          distinctions,
+          result.applicationId,
+        ),
       );
       discord.consigner("publication de la candidature", envoi);
       if (envoi.ok)
@@ -774,28 +1083,43 @@ export abstract class ClanManagementService {
   }
 
   /** `POST /clans/applications/accept` — legacy `acceptApplication`. */
-  static async acceptApplication(db: Kysely<Database>, executorId: string, applicationId: number): Promise<Result<object>> {
-    const result = await db.transaction().execute(async (trx): Promise<Result<{ accepted: AcceptedApplication }>> => {
-      const access = await managerOf(trx, executorId);
-      if (!access.ok) return access;
-      const application = await trx
-        .selectFrom("clan_application")
-        .select(["id", "user_id", "clan_id", "distinctions", "message_id"])
-        .where("id", "=", applicationId)
-        .forUpdate()
-        .executeTakeFirst();
-      if (!application) return fail(404, "Candidature introuvable.");
-      if (application.clan_id !== access.member.clan_id)
-        return fail(403, "Vous ne pouvez pas gérer les candidatures des autres Clans.");
-      return acceptApplicationRow(trx, application, executorId);
-    });
+  static async acceptApplication(
+    db: Kysely<Database>,
+    executorId: string,
+    applicationId: number,
+  ): Promise<Result<object>> {
+    const result = await db
+      .transaction()
+      .execute(
+        async (trx): Promise<Result<{ accepted: AcceptedApplication }>> => {
+          const access = await managerOf(trx, executorId);
+          if (!access.ok) return access;
+          const application = await trx
+            .selectFrom("clan_application")
+            .select(["id", "user_id", "clan_id", "distinctions", "message_id"])
+            .where("id", "=", applicationId)
+            .forUpdate()
+            .executeTakeFirst();
+          if (!application) return fail(404, "Candidature introuvable.");
+          if (application.clan_id !== access.member.clan_id)
+            return fail(
+              403,
+              "Vous ne pouvez pas gérer les candidatures des autres Clans.",
+            );
+          return acceptApplicationRow(trx, application, executorId);
+        },
+      );
     if (!result.ok) return result;
     await annoncerAdmission(db, result.accepted, executorId);
     return { ok: true };
   }
 
   /** `POST /clans/applications/reject` — legacy `rejectApplication`. */
-  static async rejectApplication(db: Kysely<Database>, executorId: string, applicationId: number): Promise<Result<object>> {
+  static async rejectApplication(
+    db: Kysely<Database>,
+    executorId: string,
+    applicationId: number,
+  ): Promise<Result<object>> {
     const access = await managerOf(db, executorId);
     if (!access.ok) return access;
     const application = await db
@@ -805,11 +1129,24 @@ export abstract class ClanManagementService {
       .executeTakeFirst();
     if (!application) return fail(404, "Candidature introuvable.");
     if (application.clan_id !== access.member.clan_id)
-      return fail(403, "Vous ne pouvez pas gérer les candidatures des autres Clans.");
-    await db.transaction().execute(async trx => {
-      const supprimee = await trx.deleteFrom("clan_application").where("id", "=", applicationId).returning("id").executeTakeFirst();
+      return fail(
+        403,
+        "Vous ne pouvez pas gérer les candidatures des autres Clans.",
+      );
+    await db.transaction().execute(async (trx) => {
+      const supprimee = await trx
+        .deleteFrom("clan_application")
+        .where("id", "=", applicationId)
+        .returning("id")
+        .executeTakeFirst();
       if (!supprimee) return;
-      const clanName = (await trx.selectFrom("clan").select("name").where("id", "=", application.clan_id).executeTakeFirstOrThrow()).name;
+      const clanName = (
+        await trx
+          .selectFrom("clan")
+          .select("name")
+          .where("id", "=", application.clan_id)
+          .executeTakeFirstOrThrow()
+      ).name;
       await notifier(trx, [application.user_id], {
         title: "Candidature refusée",
         message: `Ta candidature au Clan ${clanName} n'a pas été retenue.`,
@@ -835,7 +1172,17 @@ export abstract class ClanManagementService {
         await discord.modifierMessage(
           clan.channelId,
           application.message_id,
-          { content: "", embeds: [discord.embedJoueur(joueur, "Candidature rejetée", discord.COULEUR_ERREUR)], components: [] },
+          {
+            content: "",
+            embeds: [
+              discord.embedJoueur(
+                joueur,
+                "Candidature rejetée",
+                discord.COULEUR_ERREUR,
+              ),
+            ],
+            components: [],
+          },
           "mise à jour du message de candidature",
         );
       await discord.publierSalonsClan(
@@ -873,52 +1220,104 @@ export abstract class ClanManagementService {
     targetId: string,
     distinctions: ClanMemberDistinction[],
   ): Promise<Result<object>> {
-    const result = await db.transaction().execute(async (trx): Promise<Result<{ inviteId: number; clanId: number }>> => {
-      const access = await managerOf(trx, executorId);
-      if (!access.ok) return access;
-      const clanId = access.member.clan_id;
-      await trx.selectFrom("clan").select("id").where("id", "=", clanId).forUpdate().executeTakeFirst();
-      const target = await trx.selectFrom("user").select("id").where("id", "=", targetId).executeTakeFirst();
-      if (!target) return fail(404, "L'Utilisateur ciblé est introuvable.");
-      if (await hasActiveMembership(trx, targetId)) return fail(400, "L'Utilisateur ciblé fait déjà partie d'un Clan.");
-      const already = await trx
-        .selectFrom("clan_invite")
-        .select("id")
-        .where("user_id", "=", targetId)
-        .where("clan_id", "=", clanId)
-        .executeTakeFirst();
-      if (already) return fail(400, "L'utilisateur ciblé a déjà une invitation en attente de votre part !");
-      const limit = await checkMemberLimits(trx, clanId, distinctions);
-      if (limit) return limit;
-      const invite = await trx
-        .insertInto("clan_invite")
-        .values({ user_id: targetId, clan_id: clanId, inviter_id: executorId, distinctions, thread_id: null })
-        .returning("id")
-        .executeTakeFirstOrThrow();
-      const clanName = (await trx.selectFrom("clan").select("name").where("id", "=", clanId).executeTakeFirstOrThrow()).name;
-      await notifier(trx, [targetId], {
-        title: "Invitation de clan",
-        message: `Tu as été invité à rejoindre le Clan ${clanName} en qualité de ${distinctions.join(", ") || "membre"}.`,
-        type: NotificationType.CLAN_INVITE_RECEIVED,
-        payload: { clanId, clanName, inviteId: invite.id, inviterId: executorId, distinctions },
-      });
-      await auditer(trx, {
-        acteur: executorId,
-        action: "clan.invite.create",
-        cibleType: "ClanInvite",
-        cibleId: invite.id,
-        charge: { clanId, userId: targetId, distinctions },
-      });
-      return { ok: true, inviteId: invite.id, clanId };
-    });
+    const result = await db
+      .transaction()
+      .execute(
+        async (trx): Promise<Result<{ inviteId: number; clanId: number }>> => {
+          const access = await managerOf(trx, executorId);
+          if (!access.ok) return access;
+          const clanId = access.member.clan_id;
+          await trx
+            .selectFrom("clan")
+            .select("id")
+            .where("id", "=", clanId)
+            .forUpdate()
+            .executeTakeFirst();
+          const target = await trx
+            .selectFrom("user")
+            .select("id")
+            .where("id", "=", targetId)
+            .executeTakeFirst();
+          if (!target) return fail(404, "L'Utilisateur ciblé est introuvable.");
+          if (await hasActiveMembership(trx, targetId))
+            return fail(400, "L'Utilisateur ciblé fait déjà partie d'un Clan.");
+          const already = await trx
+            .selectFrom("clan_invite")
+            .select("id")
+            .where("user_id", "=", targetId)
+            .where("clan_id", "=", clanId)
+            .executeTakeFirst();
+          if (already)
+            return fail(
+              400,
+              "L'utilisateur ciblé a déjà une invitation en attente de votre part !",
+            );
+          const limit = await checkMemberLimits(trx, clanId, distinctions);
+          if (limit) return limit;
+          const invite = await trx
+            .insertInto("clan_invite")
+            .values({
+              user_id: targetId,
+              clan_id: clanId,
+              inviter_id: executorId,
+              distinctions,
+              thread_id: null,
+            })
+            .returning("id")
+            .executeTakeFirstOrThrow();
+          const clanName = (
+            await trx
+              .selectFrom("clan")
+              .select("name")
+              .where("id", "=", clanId)
+              .executeTakeFirstOrThrow()
+          ).name;
+          await notifier(trx, [targetId], {
+            title: "Invitation de clan",
+            message: `Tu as été invité à rejoindre le Clan ${clanName} en qualité de ${distinctions.join(", ") || "membre"}.`,
+            type: NotificationType.CLAN_INVITE_RECEIVED,
+            payload: {
+              clanId,
+              clanName,
+              inviteId: invite.id,
+              inviterId: executorId,
+              distinctions,
+            },
+          });
+          await auditer(trx, {
+            acteur: executorId,
+            action: "clan.invite.create",
+            cibleType: "ClanInvite",
+            cibleId: invite.id,
+            charge: { clanId, userId: targetId, distinctions },
+          });
+          return { ok: true, inviteId: invite.id, clanId };
+        },
+      );
     if (!result.ok) return result;
 
-    const [clan, gens] = await Promise.all([clanDiscord(db, result.clanId), joueurs(db, [targetId])]);
+    const [clan, gens] = await Promise.all([
+      clanDiscord(db, result.clanId),
+      joueurs(db, [targetId]),
+    ]);
     if (clan) {
-      const message = discord.messageInvitation(clan.name, targetId, executorId, distinctions, result.inviteId);
-      const threadId = await discord.ouvrirFilInvitation(gens.get(targetId)!.nom, message);
+      const message = discord.messageInvitation(
+        clan.name,
+        targetId,
+        executorId,
+        distinctions,
+        result.inviteId,
+      );
+      const threadId = await discord.ouvrirFilInvitation(
+        gens.get(targetId)!.nom,
+        message,
+      );
       if (threadId)
-        await db.updateTable("clan_invite").set({ thread_id: threadId }).where("id", "=", result.inviteId).execute();
+        await db
+          .updateTable("clan_invite")
+          .set({ thread_id: threadId })
+          .where("id", "=", result.inviteId)
+          .execute();
       // Le legacy ne faisait que mentionner le joueur dans le fil ; le MP porte
       // les mêmes boutons pour qu'il puisse répondre sans chercher le forum.
       await discord.mp(targetId, message, "MP d'invitation de clan");
@@ -931,25 +1330,50 @@ export abstract class ClanManagementService {
    * l'invitation envoyée dans le corps (rôle de l'inviteur compris) et ne
    * vérifiait pas qu'elle appartenait au clan de l'exécutant.
    */
-  private static async managedInvite(db: Kysely<Database>, executorId: string, inviteId: number) {
+  private static async managedInvite(
+    db: Kysely<Database>,
+    executorId: string,
+    inviteId: number,
+  ) {
     const access = await managerOf(db, executorId);
     if (!access.ok) return access;
     const invite = await db
       .selectFrom("clan_invite")
-      .select(["id", "clan_id", "user_id", "inviter_id", "thread_id", "last_notified_at"])
+      .select([
+        "id",
+        "clan_id",
+        "user_id",
+        "inviter_id",
+        "thread_id",
+        "last_notified_at",
+      ])
       .where("id", "=", inviteId)
       .executeTakeFirst();
     if (!invite || invite.clan_id !== access.member.clan_id)
-      return fail(400, "Cette invitation n'existe pas. Essayez de synchroniser les données !");
+      return fail(
+        400,
+        "Cette invitation n'existe pas. Essayez de synchroniser les données !",
+      );
     return { ok: true as const, executor: access.member, invite };
   }
 
   /** `POST /clans/invites/revoke` — legacy `revokeInvite`. */
-  static async revokeInvite(db: Kysely<Database>, executorId: string, inviteId: number): Promise<Result<object>> {
-    const found = await ClanManagementService.managedInvite(db, executorId, inviteId);
+  static async revokeInvite(
+    db: Kysely<Database>,
+    executorId: string,
+    inviteId: number,
+  ): Promise<Result<object>> {
+    const found = await ClanManagementService.managedInvite(
+      db,
+      executorId,
+      inviteId,
+    );
     if (!found.ok) return found;
     const { executor, invite } = found;
-    if (invite.inviter_id !== executor.user_id && executor.role !== ClanMemberRole.Captain) {
+    if (
+      invite.inviter_id !== executor.user_id &&
+      executor.role !== ClanMemberRole.Captain
+    ) {
       const inviter = await db
         .selectFrom("clan_member")
         .select("role")
@@ -958,20 +1382,35 @@ export abstract class ClanManagementService {
         .executeTakeFirst();
       // Inviteur parti du clan : plus de hiérarchie à protéger.
       if (inviter && executor.role <= Number(inviter.role))
-        return fail(403, "Vous n'avez pas les droits pour effectuer cette action");
+        return fail(
+          403,
+          "Vous n'avez pas les droits pour effectuer cette action",
+        );
     }
-    await db.transaction().execute(async trx => {
-      const supprimee = await trx.deleteFrom("clan_invite").where("id", "=", invite.id).returning("id").executeTakeFirst();
+    await db.transaction().execute(async (trx) => {
+      const supprimee = await trx
+        .deleteFrom("clan_invite")
+        .where("id", "=", invite.id)
+        .returning("id")
+        .executeTakeFirst();
       if (!supprimee) return;
       await auditer(trx, {
         acteur: executor.user_id,
         action: "clan.invite.revoke",
         cibleType: "ClanInvite",
         cibleId: invite.id,
-        charge: { clanId: invite.clan_id, userId: invite.user_id, inviterId: invite.inviter_id },
+        charge: {
+          clanId: invite.clan_id,
+          userId: invite.user_id,
+          inviterId: invite.inviter_id,
+        },
       });
     });
-    if (invite.thread_id) await discord.supprimerSalon(invite.thread_id, "Invitation de clan révoquée");
+    if (invite.thread_id)
+      await discord.supprimerSalon(
+        invite.thread_id,
+        "Invitation de clan révoquée",
+      );
     return { ok: true };
   }
 
@@ -987,15 +1426,27 @@ export abstract class ClanManagementService {
     inviteId: number,
     now = Date.now(),
   ): Promise<Result<object>> {
-    const found = await ClanManagementService.managedInvite(db, executorId, inviteId);
+    const found = await ClanManagementService.managedInvite(
+      db,
+      executorId,
+      inviteId,
+    );
     if (!found.ok) return found;
     const { invite } = found;
-    if (now - new Date(invite.last_notified_at).getTime() < INVITE_NOTIFY_COOLDOWN_MS)
-      return fail(400, "Vous avez notifié cet utilisateur trop récemment, veuillez patienter !");
+    if (
+      now - new Date(invite.last_notified_at).getTime() <
+      INVITE_NOTIFY_COOLDOWN_MS
+    )
+      return fail(
+        400,
+        "Vous avez notifié cet utilisateur trop récemment, veuillez patienter !",
+      );
     const relance = {
       content: `<@${invite.user_id}>, vous avez une invitation sans réponse de la part de <@${invite.inviter_id}> !`,
     };
-    let envoi = invite.thread_id ? await publierSalonAchilleaSafe(invite.thread_id, relance) : null;
+    let envoi = invite.thread_id
+      ? await publierSalonAchilleaSafe(invite.thread_id, relance)
+      : null;
     if (!envoi?.ok) {
       if (envoi) discord.consigner("relance dans le fil d'invitation", envoi);
       envoi = await discord.mp(
@@ -1004,7 +1455,8 @@ export abstract class ClanManagementService {
         "MP de relance d'invitation",
       );
     }
-    if (!envoi.ok) return fail(502, "La relance n'a pas pu être envoyée sur Discord.");
+    if (!envoi.ok)
+      return fail(502, "La relance n'a pas pu être envoyée sur Discord.");
     await db
       .updateTable("clan_invite")
       .set({ last_notified_at: new Date(now), updated_at: new Date(now) })
@@ -1020,87 +1472,123 @@ export abstract class ClanManagementService {
     targetId: string,
     rawReason: string | undefined,
   ): Promise<Result<{ clanId: number }>> {
-    const result = await db.transaction().execute(
-      async (trx): Promise<Result<{ clanId: number; clanName: string; underLimitNow: boolean }>> => {
-        const access = await memberManagement(trx, executorId, targetId);
-        if (!access.ok) return access;
-        if (access.executor.user_id === targetId) return fail(400, "Vous ne pouvez pas vous exclure vous-même");
-        const reason = rawReason?.trim() ?? "";
-        if (reason.length < 3) return fail(400, "Veuillez fournir une raison valide (au moins 3 caractères).");
+    const result = await db
+      .transaction()
+      .execute(
+        async (
+          trx,
+        ): Promise<
+          Result<{ clanId: number; clanName: string; underLimitNow: boolean }>
+        > => {
+          const access = await memberManagement(trx, executorId, targetId);
+          if (!access.ok) return access;
+          if (access.executor.user_id === targetId)
+            return fail(400, "Vous ne pouvez pas vous exclure vous-même");
+          const reason = rawReason?.trim() ?? "";
+          if (reason.length < 3)
+            return fail(
+              400,
+              "Veuillez fournir une raison valide (au moins 3 caractères).",
+            );
 
-        const clanId = access.executor.clan_id;
-        const clan = await trx
-          .selectFrom("clan")
-          .select(["id", "name", "under_member_limit"])
-          .where("id", "=", clanId)
-          .forUpdate()
-          .executeTakeFirstOrThrow();
-        const member = await trx
-          .deleteFrom("clan_member")
-          .where("clan_id", "=", clanId)
-          .where("user_id", "=", targetId)
-          .returningAll()
-          .executeTakeFirstOrThrow();
-        await trx
-          .insertInto("clan_member_history")
-          .values({
-            user_id: targetId,
-            clan_id: clanId,
-            join_date: member.created_at,
-            leave_reason: LEAVE_REASON_KICK,
-            kick_reason: reason,
-            clan_fame_contributed: member.clan_fame_contributed,
-            role: member.role,
-          })
-          .execute();
-
-        const gens = await joueurs(trx, [targetId, executorId]);
-        const cible = gens.get(targetId)!.nom;
-        const executeur = gens.get(executorId)!.nom;
-        const remaining = await trx.selectFrom("clan_member").select("user_id").where("clan_id", "=", clanId).execute();
-        // Le legacy ne prévenait que les membres restants ; le joueur exclu l'est aussi.
-        await notifier(trx, [...remaining.map(({ user_id }) => user_id), targetId], {
-          title: "Expulsion",
-          message: `L'utilisateur ${cible} a été expulsé par ${executeur} !`,
-          type: NotificationType.CLAN_MEMBER_KICK,
-          payload: {
-            targetId,
-            targetName: cible,
-            clanId,
-            clanName: clan.name,
-            executorId,
-            executorName: executeur,
-          },
-        });
-        await auditer(trx, {
-          acteur: executorId,
-          action: "clan.member.kick",
-          cibleType: "ClanMember",
-          cibleId: `${clanId}:${targetId}`,
-          charge: { clanId, userId: targetId, role: Number(member.role), membresRestants: remaining.length },
-          motif: reason,
-        });
-
-        // `under_member_limit(_since)` : état que lit la tâche cron `achillea:clans`
-        // (dissolution après 24 h, ou retrait de l'alerte si l'effectif remonte).
-        const underLimitNow = remaining.length < MIN_CLAN_MEMBERS && !clan.under_member_limit;
-        if (underLimitNow)
-          await trx
-            .updateTable("clan")
-            .set({ under_member_limit: true, under_member_limit_since: new Date(), updated_at: new Date() })
+          const clanId = access.executor.clan_id;
+          const clan = await trx
+            .selectFrom("clan")
+            .select(["id", "name", "under_member_limit"])
             .where("id", "=", clanId)
+            .forUpdate()
+            .executeTakeFirstOrThrow();
+          const member = await trx
+            .deleteFrom("clan_member")
+            .where("clan_id", "=", clanId)
+            .where("user_id", "=", targetId)
+            .returningAll()
+            .executeTakeFirstOrThrow();
+          await trx
+            .insertInto("clan_member_history")
+            .values({
+              user_id: targetId,
+              clan_id: clanId,
+              join_date: member.created_at,
+              leave_reason: LEAVE_REASON_KICK,
+              kick_reason: reason,
+              clan_fame_contributed: member.clan_fame_contributed,
+              role: member.role,
+            })
             .execute();
-        return { ok: true, clanId, clanName: clan.name, underLimitNow };
-      },
-    );
+
+          const gens = await joueurs(trx, [targetId, executorId]);
+          const cible = gens.get(targetId)!.nom;
+          const executeur = gens.get(executorId)!.nom;
+          const remaining = await trx
+            .selectFrom("clan_member")
+            .select("user_id")
+            .where("clan_id", "=", clanId)
+            .execute();
+          // Le legacy ne prévenait que les membres restants ; le joueur exclu l'est aussi.
+          await notifier(
+            trx,
+            [...remaining.map(({ user_id }) => user_id), targetId],
+            {
+              title: "Expulsion",
+              message: `L'utilisateur ${cible} a été expulsé par ${executeur} !`,
+              type: NotificationType.CLAN_MEMBER_KICK,
+              payload: {
+                targetId,
+                targetName: cible,
+                clanId,
+                clanName: clan.name,
+                executorId,
+                executorName: executeur,
+              },
+            },
+          );
+          await auditer(trx, {
+            acteur: executorId,
+            action: "clan.member.kick",
+            cibleType: "ClanMember",
+            cibleId: `${clanId}:${targetId}`,
+            charge: {
+              clanId,
+              userId: targetId,
+              role: Number(member.role),
+              membresRestants: remaining.length,
+            },
+            motif: reason,
+          });
+
+          // `under_member_limit(_since)` : état que lit la tâche cron `achillea:clans`
+          // (dissolution après 24 h, ou retrait de l'alerte si l'effectif remonte).
+          const underLimitNow =
+            remaining.length < MIN_CLAN_MEMBERS && !clan.under_member_limit;
+          if (underLimitNow)
+            await trx
+              .updateTable("clan")
+              .set({
+                under_member_limit: true,
+                under_member_limit_since: new Date(),
+                updated_at: new Date(),
+              })
+              .where("id", "=", clanId)
+              .execute();
+          return { ok: true, clanId, clanName: clan.name, underLimitNow };
+        },
+      );
     if (!result.ok) return result;
 
-    const [clan, gens] = await Promise.all([clanDiscord(db, result.clanId), joueurs(db, [targetId, executorId])]);
+    const [clan, gens] = await Promise.all([
+      clanDiscord(db, result.clanId),
+      joueurs(db, [targetId, executorId]),
+    ]);
     if (clan) {
       const cible = gens.get(targetId)!;
       const executeur = gens.get(executorId)!;
       const reason = rawReason!.trim();
-      await discord.retirerRoleClan(targetId, clan.roleId, `Expulsé du Clan ${clan.name}`);
+      await discord.retirerRoleClan(
+        targetId,
+        clan.roleId,
+        `Expulsé du Clan ${clan.name}`,
+      );
       await discord.publierSalonsClan(
         clan,
         {
@@ -1114,7 +1602,16 @@ export abstract class ClanManagementService {
       );
       await discord.publierSalonsClan(
         clan,
-        { embeds: [discord.embedJoueur(cible, "Expulsion", discord.COULEUR_ERREUR, `**Raison :** ${reason}`)] },
+        {
+          embeds: [
+            discord.embedJoueur(
+              cible,
+              "Expulsion",
+              discord.COULEUR_ERREUR,
+              `**Raison :** ${reason}`,
+            ),
+          ],
+        },
         "fiche de départ",
       );
       await discord.annoncerClans(
@@ -1167,41 +1664,69 @@ export abstract class ClanManagementService {
     role: ClanMemberRole,
     distinctions: ClanMemberDistinction[],
   ): Promise<Result<{ clanId: number }>> {
-    const result = await db.transaction().execute(
-      async (trx): Promise<Result<{ clanId: number; previousRole: ClanMemberRole }>> => {
-        const access = await memberManagement(trx, executorId, targetId);
-        if (!access.ok) return access;
-        const { executor, target } = access;
-        const refused = roleChangeError(
-          { userId: executor.user_id, role: executor.role as ClanMemberRole },
-          { userId: targetId, role: target.role as ClanMemberRole },
-          role,
-        );
-        if (refused) return refused;
-        await trx
-          .updateTable("clan_member")
-          .set({ role, distinctions, updated_at: new Date() })
-          .where("clan_id", "=", executor.clan_id)
-          .where("user_id", "=", targetId)
-          .execute();
-        await auditer(trx, {
-          acteur: executorId,
-          action: role === target.role ? "clan.member.distinctions" : "clan.member.role",
-          cibleType: "ClanMember",
-          cibleId: `${executor.clan_id}:${targetId}`,
-          charge: { clanId: executor.clan_id, userId: targetId, ancienRole: Number(target.role), nouveauRole: role, distinctions },
-        });
-        return { ok: true, clanId: executor.clan_id, previousRole: target.role as ClanMemberRole };
-      },
-    );
+    const result = await db
+      .transaction()
+      .execute(
+        async (
+          trx,
+        ): Promise<
+          Result<{ clanId: number; previousRole: ClanMemberRole }>
+        > => {
+          const access = await memberManagement(trx, executorId, targetId);
+          if (!access.ok) return access;
+          const { executor, target } = access;
+          const refused = roleChangeError(
+            { userId: executor.user_id, role: executor.role as ClanMemberRole },
+            { userId: targetId, role: target.role as ClanMemberRole },
+            role,
+          );
+          if (refused) return refused;
+          await trx
+            .updateTable("clan_member")
+            .set({ role, distinctions, updated_at: new Date() })
+            .where("clan_id", "=", executor.clan_id)
+            .where("user_id", "=", targetId)
+            .execute();
+          await auditer(trx, {
+            acteur: executorId,
+            action:
+              role === target.role
+                ? "clan.member.distinctions"
+                : "clan.member.role",
+            cibleType: "ClanMember",
+            cibleId: `${executor.clan_id}:${targetId}`,
+            charge: {
+              clanId: executor.clan_id,
+              userId: targetId,
+              ancienRole: Number(target.role),
+              nouveauRole: role,
+              distinctions,
+            },
+          });
+          return {
+            ok: true,
+            clanId: executor.clan_id,
+            previousRole: target.role as ClanMemberRole,
+          };
+        },
+      );
     if (!result.ok) return result;
     if (role !== result.previousRole) {
-      const [clan, gens] = await Promise.all([clanDiscord(db, result.clanId), joueurs(db, [targetId])]);
+      const [clan, gens] = await Promise.all([
+        clanDiscord(db, result.clanId),
+        joueurs(db, [targetId]),
+      ]);
       if (clan)
         await discord.publierSalonsClan(
           clan,
-          discord.messageRole(gens.get(targetId)!, role, role > result.previousRole),
-          role > result.previousRole ? "annonce de promotion" : "annonce de rétrogradation",
+          discord.messageRole(
+            gens.get(targetId)!,
+            role,
+            role > result.previousRole,
+          ),
+          role > result.previousRole
+            ? "annonce de promotion"
+            : "annonce de rétrogradation",
         );
     }
     return { ok: true, clanId: result.clanId };
@@ -1209,7 +1734,15 @@ export abstract class ClanManagementService {
 }
 
 /** `publierSalonAchillea` en garde : un identifiant non numérique (donnée ancienne) n'est pas un salon. */
-function publierSalonAchilleaSafe(salonId: string, message: Parameters<typeof publierSalonAchillea>[1]) {
-  if (!/^\d+$/.test(salonId)) return Promise.resolve({ ok: false as const, statut: null, motif: `salon invalide « ${salonId} »` });
+function publierSalonAchilleaSafe(
+  salonId: string,
+  message: Parameters<typeof publierSalonAchillea>[1],
+) {
+  if (!/^\d+$/.test(salonId))
+    return Promise.resolve({
+      ok: false as const,
+      statut: null,
+      motif: `salon invalide « ${salonId} »`,
+    });
   return publierSalonAchillea(salonId, message);
 }

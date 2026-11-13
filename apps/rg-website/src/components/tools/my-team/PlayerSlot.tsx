@@ -16,15 +16,16 @@ interface PlayerSlotProps {
 }
 
 export function PlayerSlot({ member, onRemove, compact }: PlayerSlotProps) {
-  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
-    data: {
-      member,
-      origin: member.slot.startsWith("field-") ? "field" : "bench",
-      slotId: member.slot,
-      type: "player",
-    },
-    id: `placed-${member.slot}`,
-  });
+  const { attributes, listeners, setNodeRef, transform, isDragging } =
+    useDraggable({
+      data: {
+        member,
+        origin: member.slot.startsWith("field-") ? "field" : "bench",
+        slotId: member.slot,
+        type: "player",
+      },
+      id: `placed-${member.slot}`,
+    });
 
   const style = {
     opacity: isDragging ? 0.3 : 1,
@@ -50,7 +51,11 @@ export function PlayerSlot({ member, onRemove, compact }: PlayerSlotProps) {
       <SafeImage
         src={member.imageUrl}
         zukanHash={member.zukanHash}
-        fallbackSrc={member.internalCode ? getCharacterImageUrl(member.internalCode) : undefined}
+        fallbackSrc={
+          member.internalCode
+            ? getCharacterImageUrl(member.internalCode)
+            : undefined
+        }
         alt={member.name}
         fill
         sizes={compact ? "60px" : "100px"}
@@ -83,11 +88,11 @@ export function PlayerSlot({ member, onRemove, compact }: PlayerSlotProps) {
 
       {/* Remove button — always visible on touch, hover on desktop */}
       <button
-        onClick={e => {
+        onClick={(e) => {
           e.stopPropagation();
           onRemove();
         }}
-        onPointerDown={e => e.stopPropagation()}
+        onPointerDown={(e) => e.stopPropagation()}
         className={cn(
           "no-export absolute top-0 right-0 p-1.5 sm:p-1 bg-red-600/90 rounded-bl-xl z-10 transition-opacity",
           "opacity-70 sm:opacity-0 sm:group-hover:opacity-100",
@@ -112,7 +117,11 @@ export function PlayerSlotOverlay({ member }: { member: TeamMember }) {
         <SafeImage
           src={member.imageUrl}
           zukanHash={member.zukanHash}
-          fallbackSrc={member.internalCode ? getCharacterImageUrl(member.internalCode) : undefined}
+          fallbackSrc={
+            member.internalCode
+              ? getCharacterImageUrl(member.internalCode)
+              : undefined
+          }
           alt={member.name}
           fill
           sizes="100px"

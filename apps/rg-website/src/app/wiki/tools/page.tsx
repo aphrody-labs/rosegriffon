@@ -42,21 +42,24 @@ const TOOLS: Array<{
   },
   {
     container: "bg-secondary-container text-on-secondary-container",
-    description: "11 joueurs, 1 coach, 3 manageuses. Filtrez par élément ou style de jeu.",
+    description:
+      "11 joueurs, 1 coach, 3 manageuses. Filtrez par élément ou style de jeu.",
     href: outil("/tools/random-team"),
     icon: "casino",
     title: "Équipe aléatoire",
   },
   {
     container: "bg-tertiary-container text-on-tertiary-container",
-    description: "Trouvez les noms français, anglais et japonais de toutes les entités du jeu.",
+    description:
+      "Trouvez les noms français, anglais et japonais de toutes les entités du jeu.",
     href: outil("/tools/translator"),
     icon: "translate",
     title: "Traducteur",
   },
   {
     container: "bg-primary-container text-on-primary-container",
-    description: "Composez votre équipe idéale en glissant-déposant vos joueurs sur le terrain.",
+    description:
+      "Composez votre équipe idéale en glissant-déposant vos joueurs sur le terrain.",
     href: outil("/tools/my-team"),
     icon: "stadium",
     title: "Mon Équipe",
@@ -87,7 +90,7 @@ export default function ToolsPage() {
      sm:gap-5
    "
       >
-        {TOOLS.map(tool => (
+        {TOOLS.map((tool) => (
           <Link
             key={tool.href}
             href={tool.href}
@@ -136,7 +139,9 @@ export default function ToolsPage() {
               >
                 {tool.title}
               </h2>
-              <p className="type-body-small text-on-surface-variant leading-relaxed">{tool.description}</p>
+              <p className="type-body-small text-on-surface-variant leading-relaxed">
+                {tool.description}
+              </p>
               <div className="mt-auto pt-3 flex items-center justify-end">
                 <Icon
                   name="arrow_forward"

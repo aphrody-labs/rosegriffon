@@ -38,13 +38,20 @@ end
     const lsp = new Lua52LanguageServer();
     const diags = lsp.onDocumentOpen("file:///legacy.lua", legacyCode);
     expect(diags.length).toBeGreaterThanOrEqual(2);
-    expect(diags.some((d) => d.message.includes("setfenv is removed"))).toBeTrue();
-    expect(diags.some((d) => d.message.includes("Global 'unpack' is deprecated"))).toBeTrue();
+    expect(
+      diags.some((d) => d.message.includes("setfenv is removed")),
+    ).toBeTrue();
+    expect(
+      diags.some((d) => d.message.includes("Global 'unpack' is deprecated")),
+    ).toBeTrue();
   });
 
   test("LSP Hover provides Lua 5.2 context for _ENV, goto, bit32", () => {
     const lsp = new Lua52LanguageServer();
-    lsp.onDocumentOpen("file:///sample.lua", "local _ENV = {}\ngoto my_label\nlocal b = bit32.band(1, 2)");
+    lsp.onDocumentOpen(
+      "file:///sample.lua",
+      "local _ENV = {}\ngoto my_label\nlocal b = bit32.band(1, 2)",
+    );
     const hoverEnv = lsp.getHover("file:///sample.lua", 0, 8);
     expect(hoverEnv).not.toBeNull();
     expect(hoverEnv?.contents.value).toContain("_ENV");
@@ -72,11 +79,9 @@ end
     const fixturePath = `${import.meta.dir}/fixture.luac`;
     const chunk = new Uint8Array([
       0x1b, 0x4c, 0x75, 0x61, 0x52, 0x00, 0x01, 0x04, 0x08, 0x04, 0x08, 0x00,
-      0x19, 0x93, 0x0d, 0x0a, 0x1a, 0x0a,
-      0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2,
-      1, 0, 0, 0, 31, 0, 0, 1,
-      0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0,
-      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0x19, 0x93, 0x0d, 0x0a, 0x1a, 0x0a, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 1, 0,
+      0, 0, 31, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     ]);
     await Bun.write(fixturePath, chunk);
 

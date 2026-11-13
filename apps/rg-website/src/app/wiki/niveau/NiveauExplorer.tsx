@@ -15,8 +15,18 @@
  */
 
 import { useId, useMemo, useState } from "react";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@rosegriffon/ui";
-import { CourbeExperience, type CourbeMode } from "@/components/wiki/CourbeExperience";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@rosegriffon/ui";
+import {
+  CourbeExperience,
+  type CourbeMode,
+} from "@/components/wiki/CourbeExperience";
 import {
   buildExpCurve,
   clampLevel,
@@ -32,7 +42,15 @@ const CHAMP =
   "h-11 w-full rounded-xl border border-outline-variant/40 bg-surface-container-low px-3 text-sm text-on-surface tabular-nums focus:border-primary focus:outline-none";
 
 /** Carte de section : même habillage que les blocs du calculateur de stats. */
-function Bloc({ titre, description, children }: { titre: string; description: string; children: React.ReactNode }) {
+function Bloc({
+  titre,
+  description,
+  children,
+}: {
+  titre: string;
+  description: string;
+  children: React.ReactNode;
+}) {
   return (
     <section className="space-y-4 rounded-2xl border border-outline-variant/20 bg-surface-container p-4 sm:p-5">
       <header className="space-y-1">
@@ -48,7 +66,9 @@ function Bloc({ titre, description, children }: { titre: string; description: st
 function Resultat({ valeur, legende }: { valeur: string; legende: string }) {
   return (
     <div className="rounded-xl bg-surface-container-highest px-4 py-3">
-      <p className="text-fluid-headline-md font-extrabold tabular-nums text-primary">{valeur}</p>
+      <p className="text-fluid-headline-md font-extrabold tabular-nums text-primary">
+        {valeur}
+      </p>
       <p className="text-xs text-on-surface-variant">{legende}</p>
     </div>
   );
@@ -87,18 +107,28 @@ export function NiveauExplorer({ data }: { data: ExpTableData }) {
     return Number.isFinite(valeur) ? valeur : null;
   }, [expSaisie]);
 
-  const inverse = useMemo(() => (expNombre === null ? null : levelFromExp(data, expNombre)), [data, expNombre]);
+  const inverse = useMemo(
+    () => (expNombre === null ? null : levelFromExp(data, expNombre)),
+    [data, expNombre],
+  );
 
   const lignesFiltrees = useMemo(() => {
-    const bas = Math.min(clampLevel(data, filtreMin), clampLevel(data, filtreMax));
-    const haut = Math.max(clampLevel(data, filtreMin), clampLevel(data, filtreMax));
-    return points.filter(p => p.level >= bas && p.level <= haut);
+    const bas = Math.min(
+      clampLevel(data, filtreMin),
+      clampLevel(data, filtreMax),
+    );
+    const haut = Math.max(
+      clampLevel(data, filtreMin),
+      clampLevel(data, filtreMax),
+    );
+    return points.filter((p) => p.level >= bas && p.level <= haut);
   }, [data, points, filtreMin, filtreMax]);
 
   if (data.entries.length === 0) {
     return (
       <p className="rounded-2xl border border-outline-variant/20 bg-surface-container p-6 text-center text-sm text-on-surface-variant">
-        La table d'expérience n'a pas pu être lue. Aucune courbe n'est affichée plutôt qu'une courbe approximative.
+        La table d'expérience n'a pas pu être lue. Aucune courbe n'est affichée
+        plutôt qu'une courbe approximative.
       </p>
     );
   }
@@ -120,7 +150,7 @@ export function NiveauExplorer({ data }: { data: ExpTableData }) {
               { label: "EXP cumulée depuis le niveau 1", valeur: "cumulative" },
               { label: "EXP du palier seul", valeur: "palier" },
             ] as const
-          ).map(option => (
+          ).map((option) => (
             <button
               key={option.valeur}
               type="button"
@@ -137,10 +167,18 @@ export function NiveauExplorer({ data }: { data: ExpTableData }) {
           ))}
         </fieldset>
 
-        <CourbeExperience points={points} mode={mode} niveau={niveauCourbe} onNiveauChange={setNiveauCourbe} />
+        <CourbeExperience
+          points={points}
+          mode={mode}
+          niveau={niveauCourbe}
+          onNiveauChange={setNiveauCourbe}
+        />
 
         <div className="space-y-1.5">
-          <label htmlFor={idCurseur} className="text-xs font-medium text-on-surface-variant">
+          <label
+            htmlFor={idCurseur}
+            className="text-xs font-medium text-on-surface-variant"
+          >
             Niveau observé sur la courbe
           </label>
           <input
@@ -149,14 +187,18 @@ export function NiveauExplorer({ data }: { data: ExpTableData }) {
             min={data.minLevel}
             max={data.maxLevel}
             value={niveauCourbe}
-            onChange={e => setNiveauCourbe(clampLevel(data, Number(e.target.value)))}
+            onChange={(e) =>
+              setNiveauCourbe(clampLevel(data, Number(e.target.value)))
+            }
             className="w-full accent-primary"
           />
         </div>
 
         <dl className="grid grid-cols-1 gap-3 sm:grid-cols-3">
           <div className="rounded-xl bg-surface-container-highest px-4 py-3">
-            <dt className="text-xs text-on-surface-variant">EXP cumulée pour atteindre le niveau {niveauCourbe}</dt>
+            <dt className="text-xs text-on-surface-variant">
+              EXP cumulée pour atteindre le niveau {niveauCourbe}
+            </dt>
             <dd className="text-lg font-bold tabular-nums text-on-surface">
               {formatExp(cumulativeExpToLevel(data, niveauCourbe))}
             </dd>
@@ -168,14 +210,18 @@ export function NiveauExplorer({ data }: { data: ExpTableData }) {
                 : `EXP inscrite au niveau ${data.maxLevel}`}
             </dt>
             <dd className="text-lg font-bold tabular-nums text-on-surface">
-              {formatExp(points.find(p => p.level === niveauCourbe)?.needExp ?? 0)}
+              {formatExp(
+                points.find((p) => p.level === niveauCourbe)?.needExp ?? 0,
+              )}
             </dd>
           </div>
           <div className="rounded-xl bg-surface-container-highest px-4 py-3">
             <dt className="text-xs text-on-surface-variant">
               EXP totale niveau {data.minLevel} → {data.maxLevel}
             </dt>
-            <dd className="text-lg font-bold tabular-nums text-on-surface">{formatExp(data.totalExp)}</dd>
+            <dd className="text-lg font-bold tabular-nums text-on-surface">
+              {formatExp(data.totalExp)}
+            </dd>
           </div>
         </dl>
       </Bloc>
@@ -187,7 +233,10 @@ export function NiveauExplorer({ data }: { data: ExpTableData }) {
       >
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div className="space-y-1.5">
-            <label htmlFor={idDepart} className="text-xs font-medium text-on-surface-variant">
+            <label
+              htmlFor={idDepart}
+              className="text-xs font-medium text-on-surface-variant"
+            >
               Niveau de départ
             </label>
             <input
@@ -197,12 +246,15 @@ export function NiveauExplorer({ data }: { data: ExpTableData }) {
               min={data.minLevel}
               max={data.maxLevel}
               value={depart}
-              onChange={e => setDepart(Number(e.target.value))}
+              onChange={(e) => setDepart(Number(e.target.value))}
               className={CHAMP}
             />
           </div>
           <div className="space-y-1.5">
-            <label htmlFor={idArrivee} className="text-xs font-medium text-on-surface-variant">
+            <label
+              htmlFor={idArrivee}
+              className="text-xs font-medium text-on-surface-variant"
+            >
               Niveau d'arrivée
             </label>
             <input
@@ -212,13 +264,16 @@ export function NiveauExplorer({ data }: { data: ExpTableData }) {
               min={data.minLevel}
               max={data.maxLevel}
               value={arrivee}
-              onChange={e => setArrivee(Number(e.target.value))}
+              onChange={(e) => setArrivee(Number(e.target.value))}
               className={CHAMP}
             />
           </div>
         </div>
 
-        <div aria-live="polite" className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <div
+          aria-live="polite"
+          className="grid grid-cols-1 gap-3 sm:grid-cols-2"
+        >
           <Resultat
             valeur={formatExp(coutTrajet)}
             legende={
@@ -240,7 +295,10 @@ export function NiveauExplorer({ data }: { data: ExpTableData }) {
         description="Saisissez une expérience totale accumulée depuis le niveau 1 pour retrouver le niveau correspondant."
       >
         <div className="space-y-1.5">
-          <label htmlFor={idExp} className="text-xs font-medium text-on-surface-variant">
+          <label
+            htmlFor={idExp}
+            className="text-xs font-medium text-on-surface-variant"
+          >
             Expérience totale accumulée
           </label>
           <input
@@ -248,7 +306,7 @@ export function NiveauExplorer({ data }: { data: ExpTableData }) {
             type="text"
             inputMode="numeric"
             value={expSaisie}
-            onChange={e => setExpSaisie(e.target.value)}
+            onChange={(e) => setExpSaisie(e.target.value)}
             placeholder={`Ex. ${formatExp(data.totalExp)}`}
             className={CHAMP}
           />
@@ -256,7 +314,9 @@ export function NiveauExplorer({ data }: { data: ExpTableData }) {
 
         <div aria-live="polite">
           {inverse === null ? (
-            <p className="text-sm text-on-surface-variant">Entrez un nombre pour obtenir le niveau atteint.</p>
+            <p className="text-sm text-on-surface-variant">
+              Entrez un nombre pour obtenir le niveau atteint.
+            </p>
           ) : (
             <div className="space-y-3">
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -269,7 +329,11 @@ export function NiveauExplorer({ data }: { data: ExpTableData }) {
                   }
                 />
                 <Resultat
-                  valeur={inverse.expToNextLevel === null ? "—" : formatExp(inverse.expToNextLevel)}
+                  valeur={
+                    inverse.expToNextLevel === null
+                      ? "—"
+                      : formatExp(inverse.expToNextLevel)
+                  }
                   legende={
                     inverse.expToNextLevel === null
                       ? "Aucun palier suivant : le niveau maximum est atteint."
@@ -285,7 +349,8 @@ export function NiveauExplorer({ data }: { data: ExpTableData }) {
                   aria-label={`Progression dans le niveau ${inverse.level}`}
                 />
                 <p className="mt-1 text-xs text-on-surface-variant">
-                  {Math.round(inverse.progress * 100)} % du niveau {inverse.level}
+                  {Math.round(inverse.progress * 100)} % du niveau{" "}
+                  {inverse.level}
                 </p>
               </div>
             </div>
@@ -300,7 +365,10 @@ export function NiveauExplorer({ data }: { data: ExpTableData }) {
       >
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1.5">
-            <label htmlFor={idFiltreMin} className="text-xs font-medium text-on-surface-variant">
+            <label
+              htmlFor={idFiltreMin}
+              className="text-xs font-medium text-on-surface-variant"
+            >
               Du niveau
             </label>
             <input
@@ -310,12 +378,15 @@ export function NiveauExplorer({ data }: { data: ExpTableData }) {
               min={data.minLevel}
               max={data.maxLevel}
               value={filtreMin}
-              onChange={e => setFiltreMin(Number(e.target.value))}
+              onChange={(e) => setFiltreMin(Number(e.target.value))}
               className={CHAMP}
             />
           </div>
           <div className="space-y-1.5">
-            <label htmlFor={idFiltreMax} className="text-xs font-medium text-on-surface-variant">
+            <label
+              htmlFor={idFiltreMax}
+              className="text-xs font-medium text-on-surface-variant"
+            >
               Au niveau
             </label>
             <input
@@ -325,7 +396,7 @@ export function NiveauExplorer({ data }: { data: ExpTableData }) {
               min={data.minLevel}
               max={data.maxLevel}
               value={filtreMax}
-              onChange={e => setFiltreMax(Number(e.target.value))}
+              onChange={(e) => setFiltreMax(Number(e.target.value))}
               className={CHAMP}
             />
           </div>
@@ -341,9 +412,11 @@ export function NiveauExplorer({ data }: { data: ExpTableData }) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {lignesFiltrees.map(point => (
+              {lignesFiltrees.map((point) => (
                 <TableRow key={point.level}>
-                  <TableCell className="font-semibold tabular-nums text-on-surface">{point.level}</TableCell>
+                  <TableCell className="font-semibold tabular-nums text-on-surface">
+                    {point.level}
+                  </TableCell>
                   <TableCell className="text-right tabular-nums text-on-surface-variant">
                     {point.level < data.maxLevel
                       ? `${formatExp(point.needExp)} → ${point.level + 1}`
@@ -358,7 +431,8 @@ export function NiveauExplorer({ data }: { data: ExpTableData }) {
           </Table>
         </div>
         <p className="text-xs text-on-surface-variant">
-          {lignesFiltrees.length} niveau{lignesFiltrees.length > 1 ? "x" : ""} affiché
+          {lignesFiltrees.length} niveau{lignesFiltrees.length > 1 ? "x" : ""}{" "}
+          affiché
           {lignesFiltrees.length > 1 ? "s" : ""} sur {data.entries.length}.
         </p>
       </Bloc>

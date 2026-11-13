@@ -18,10 +18,20 @@ import {
   TableRow,
 } from "@rosegriffon/ui";
 import { Filter, X } from "lucide-react";
-import { BoutonActualiser, Chargement, Erreur, Vide, formaterDate, useClientAchillea, useLecture } from "./etat";
+import {
+  BoutonActualiser,
+  Chargement,
+  Erreur,
+  Vide,
+  formaterDate,
+  useClientAchillea,
+  useLecture,
+} from "./etat";
 
 /** Résumé compact du détail JSON d'un événement. */
-function resumerDetail(detail: Record<string, unknown> | null | undefined): string {
+function resumerDetail(
+  detail: Record<string, unknown> | null | undefined,
+): string {
   if (!detail) return "";
   try {
     return JSON.stringify(detail);
@@ -35,8 +45,12 @@ export function RankedTelemetryTab() {
   const client = useClientAchillea();
   const [saisie, setSaisie] = useState("");
   const [lobbyId, setLobbyId] = useState<number | null>(null);
-  const journal = useLecture(`admin/ranked/telemetry#${lobbyId ?? "tous"}`, () =>
-    client.ranked.adminTelemetry(lobbyId ? { lobbyId, limit: 200 } : { limit: 200 }),
+  const journal = useLecture(
+    `admin/ranked/telemetry#${lobbyId ?? "tous"}`,
+    () =>
+      client.ranked.adminTelemetry(
+        lobbyId ? { lobbyId, limit: 200 } : { limit: 200 },
+      ),
   );
   const evenements = journal.donnees ?? [];
 
@@ -50,12 +64,18 @@ export function RankedTelemetryTab() {
     <Card className="border-border/60">
       <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-4">
         <div className="space-y-1">
-          <CardTitle className="text-base">Télémétrie ranked ({evenements.length})</CardTitle>
+          <CardTitle className="text-base">
+            Télémétrie ranked ({evenements.length})
+          </CardTitle>
           <p className="text-xs text-muted-foreground">
-            {lobbyId ? `Lobby #${lobbyId}` : "Tous les lobbies"} · 200 derniers événements
+            {lobbyId ? `Lobby #${lobbyId}` : "Tous les lobbies"} · 200 derniers
+            événements
           </p>
         </div>
-        <BoutonActualiser enCours={journal.chargement} onClick={journal.recharger} />
+        <BoutonActualiser
+          enCours={journal.chargement}
+          onClick={journal.recharger}
+        />
       </CardHeader>
       <CardContent className="space-y-4">
         <form className="flex flex-wrap items-end gap-2" onSubmit={filtrer}>
@@ -65,7 +85,7 @@ export function RankedTelemetryTab() {
               id="telemetrie-lobby"
               inputMode="numeric"
               value={saisie}
-              onChange={event => setSaisie(event.target.value)}
+              onChange={(event) => setSaisie(event.target.value)}
               placeholder="ID du lobby"
               className="min-h-11 w-40 font-mono"
             />
@@ -90,7 +110,9 @@ export function RankedTelemetryTab() {
           )}
         </form>
 
-        {journal.erreur && <Erreur message={journal.erreur} onReessayer={journal.recharger} />}
+        {journal.erreur && (
+          <Erreur message={journal.erreur} onReessayer={journal.recharger} />
+        )}
         {journal.chargement && !journal.donnees ? (
           <Chargement lignes={5} />
         ) : evenements.length === 0 && !journal.erreur ? (
@@ -109,20 +131,31 @@ export function RankedTelemetryTab() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {evenements.map(evenement => (
+                {evenements.map((evenement) => (
                   <TableRow key={evenement.id}>
-                    <TableCell className="whitespace-nowrap text-xs">{formaterDate(evenement.createdAt)}</TableCell>
+                    <TableCell className="whitespace-nowrap text-xs">
+                      {formaterDate(evenement.createdAt)}
+                    </TableCell>
                     <TableCell>
                       <Badge variant="secondary" className="font-mono">
                         {evenement.type}
                       </Badge>
                     </TableCell>
                     <TableCell className="font-mono">
-                      {evenement.lobbyId != null ? `#${evenement.lobbyId}` : "—"}
+                      {evenement.lobbyId != null
+                        ? `#${evenement.lobbyId}`
+                        : "—"}
                     </TableCell>
-                    <TableCell className="font-mono text-xs">{evenement.roomCode ?? "—"}</TableCell>
-                    <TableCell className="text-xs">{evenement.displayName ?? evenement.userId ?? "—"}</TableCell>
-                    <TableCell className="max-w-md truncate font-mono text-xs" title={resumerDetail(evenement.detail)}>
+                    <TableCell className="font-mono text-xs">
+                      {evenement.roomCode ?? "—"}
+                    </TableCell>
+                    <TableCell className="text-xs">
+                      {evenement.displayName ?? evenement.userId ?? "—"}
+                    </TableCell>
+                    <TableCell
+                      className="max-w-md truncate font-mono text-xs"
+                      title={resumerDetail(evenement.detail)}
+                    >
                       {resumerDetail(evenement.detail)}
                     </TableCell>
                   </TableRow>

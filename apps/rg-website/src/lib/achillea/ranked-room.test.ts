@@ -1,9 +1,16 @@
 import { describe, expect, test } from "bun:test";
-import { matchStatusLabel, rankedMatchPath, rankedMatchViewState, roomIdFromReservation } from "./ranked-room";
+import {
+  matchStatusLabel,
+  rankedMatchPath,
+  rankedMatchViewState,
+  roomIdFromReservation,
+} from "./ranked-room";
 
 describe("réservation de salle ranked", () => {
   test("extrait l'identifiant de la réservation Colyseus", () => {
-    expect(roomIdFromReservation({ room: { roomId: "room-123" } })).toBe("room-123");
+    expect(roomIdFromReservation({ room: { roomId: "room-123" } })).toBe(
+      "room-123",
+    );
   });
 
   test("refuse les réservations absentes ou incomplètes", () => {
@@ -13,7 +20,9 @@ describe("réservation de salle ranked", () => {
   });
 
   test("construit un retour match avec un identifiant échappé", () => {
-    expect(rankedMatchPath("room id/1")).toBe("/achillea/ranked/match?salle=room%20id%2F1");
+    expect(rankedMatchPath("room id/1")).toBe(
+      "/achillea/ranked/match?salle=room%20id%2F1",
+    );
   });
 
   test("traduit les phases de match connues et les valeurs inconnues", () => {
@@ -32,10 +41,24 @@ describe("réservation de salle ranked", () => {
       roomCode: null,
     };
     expect(rankedMatchViewState(common)).toBe("empty");
-    expect(rankedMatchViewState({ ...common, isAuthenticated: false })).toBe("login");
-    expect(rankedMatchViewState({ ...common, connection: "connexion" })).toBe("loading");
-    expect(rankedMatchViewState({ ...common, connection: "connecte" })).toBe("syncing");
-    expect(rankedMatchViewState({ ...common, connection: "connecte", roomCode: "ACH-1" })).toBe("match");
-    expect(rankedMatchViewState({ ...common, connection: "erreur" })).toBe("error");
+    expect(rankedMatchViewState({ ...common, isAuthenticated: false })).toBe(
+      "login",
+    );
+    expect(rankedMatchViewState({ ...common, connection: "connexion" })).toBe(
+      "loading",
+    );
+    expect(rankedMatchViewState({ ...common, connection: "connecte" })).toBe(
+      "syncing",
+    );
+    expect(
+      rankedMatchViewState({
+        ...common,
+        connection: "connecte",
+        roomCode: "ACH-1",
+      }),
+    ).toBe("match");
+    expect(rankedMatchViewState({ ...common, connection: "erreur" })).toBe(
+      "error",
+    );
   });
 });

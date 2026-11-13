@@ -68,7 +68,9 @@ export interface DescriptionSiteArticle {
  * du temps où la table `chronicles` servait, le wiki publie sous `/news`.
  * Les deux ont été vérifiés en HTTP 200 sur un slug réel.
  */
-export const SITES_ARTICLE: Readonly<Record<AppArticle, DescriptionSiteArticle>> = Object.freeze({
+export const SITES_ARTICLE: Readonly<
+  Record<AppArticle, DescriptionSiteArticle>
+> = Object.freeze({
   website: Object.freeze({
     app: "website",
     choix: "rosegriffon",
@@ -85,15 +87,23 @@ export const SITES_ARTICLE: Readonly<Record<AppArticle, DescriptionSiteArticle>>
   }),
 });
 
-export const APPS_ARTICLE: readonly AppArticle[] = Object.freeze(["website", "azalee"]);
+export const APPS_ARTICLE: readonly AppArticle[] = Object.freeze([
+  "website",
+  "azalee",
+]);
 
 /** Site d'un article, avec repli sur le site principal si `app` est inconnu. */
-export function siteArticle(app: string | null | undefined): DescriptionSiteArticle {
+export function siteArticle(
+  app: string | null | undefined,
+): DescriptionSiteArticle {
   return app === "azalee" ? SITES_ARTICLE.azalee : SITES_ARTICLE.website;
 }
 
 /** URL publique d'un article. */
-export function urlArticle(app: string | null | undefined, slug: string): string {
+export function urlArticle(
+  app: string | null | undefined,
+  slug: string,
+): string {
   const site = siteArticle(app);
   return `${site.base}/${site.segment}/${slug}`;
 }
@@ -114,7 +124,7 @@ export function appsDemandees(choix: string | null | undefined): AppArticle[] {
 /** Libellé de la portée choisie, pour le sous-titre d'un embed. */
 export function libellePortee(apps: readonly AppArticle[]): string {
   if (apps.length === 1) return SITES_ARTICLE[apps[0] as AppArticle].libelle;
-  return APPS_ARTICLE.map(a => SITES_ARTICLE[a].libelle).join(" + ");
+  return APPS_ARTICLE.map((a) => SITES_ARTICLE[a].libelle).join(" + ");
 }
 
 /**
@@ -165,7 +175,9 @@ export function resumeArticle(article: LigneArticle, max = 180): string {
 /** Fuseau de référence de l'association. Explicite pour rester testable. */
 export const FUSEAU = "Europe/Paris";
 
-export function versDate(valeur: Date | string | number | null | undefined): Date | null {
+export function versDate(
+  valeur: Date | string | number | null | undefined,
+): Date | null {
   if (valeur === null || valeur === undefined || valeur === "") return null;
   const date = valeur instanceof Date ? valeur : new Date(valeur);
   return Number.isNaN(date.getTime()) ? null : date;
@@ -203,7 +215,9 @@ export function dateHeure(valeur: Date | string | null | undefined): string {
  * Préférable à une date figée dans un embed : chaque membre le lit dans SON
  * fuseau, et il reste juste quand le message est relu des semaines plus tard.
  */
-export function horodatageRelatif(valeur: Date | string | null | undefined): string | null {
+export function horodatageRelatif(
+  valeur: Date | string | null | undefined,
+): string | null {
   const date = versDate(valeur);
   if (!date) return null;
   return `<t:${Math.floor(date.getTime() / 1000)}:R>`;
@@ -241,7 +255,10 @@ export function heureCourte(valeur: string | null | undefined): string | null {
  * l'heure de fin n'est simplement jamais renseignée. On n'affiche que ce qui
  * existe.
  */
-export function plageHoraire(debut: string | null | undefined, fin: string | null | undefined): string {
+export function plageHoraire(
+  debut: string | null | undefined,
+  fin: string | null | undefined,
+): string {
   const d = heureCourte(debut);
   const f = heureCourte(fin);
   if (d && f) return `${d} → ${f}`;
@@ -260,7 +277,10 @@ export interface LigneStream {
 }
 
 export function ligneStream(row: LigneStream): string {
-  const morceaux = [`**${row.streamer_name}**`, plageHoraire(row.start_time, row.end_time)];
+  const morceaux = [
+    `**${row.streamer_name}**`,
+    plageHoraire(row.start_time, row.end_time),
+  ];
   if (row.category) morceaux.push(`*${row.category}*`);
   const ligne = `• ${morceaux.join(" · ")}`;
   return row.notes ? `${ligne}\n  ${row.notes}` : ligne;
@@ -291,7 +311,9 @@ export function grouperParJour(rows: readonly LigneStream[]): SectionJour[] {
       jour,
       libelle: libelleJour(jour),
       lignes: lignes.toSorted((a, b) =>
-        (heureCourte(a.start_time) ?? "99:99").localeCompare(heureCourte(b.start_time) ?? "99:99"),
+        (heureCourte(a.start_time) ?? "99:99").localeCompare(
+          heureCourte(b.start_time) ?? "99:99",
+        ),
       ),
     }))
     .toSorted((a, b) => ((a.jour + 6) % 7) - ((b.jour + 6) % 7));
@@ -305,8 +327,16 @@ export interface EvenementCalendrier {
   summary?: string | null;
   description?: string | null;
   location?: string | null;
-  start?: { date?: string | null; dateTime?: string | null; timeZone?: string | null } | null;
-  end?: { date?: string | null; dateTime?: string | null; timeZone?: string | null } | null;
+  start?: {
+    date?: string | null;
+    dateTime?: string | null;
+    timeZone?: string | null;
+  } | null;
+  end?: {
+    date?: string | null;
+    dateTime?: string | null;
+    timeZone?: string | null;
+  } | null;
 }
 
 export interface EvenementNormalise {
@@ -332,7 +362,9 @@ const JOUR_MS = 24 * 60 * 60 * 1000;
  * l'affichage (`formaterPlageEvenement`), pas ici : la fin exclusive reste la
  * bonne borne pour décider si l'événement est terminé.
  */
-export function normaliserEvenement(ev: EvenementCalendrier): EvenementNormalise | null {
+export function normaliserEvenement(
+  ev: EvenementCalendrier,
+): EvenementNormalise | null {
   const journeeEntiere = Boolean(ev.start?.date && !ev.start?.dateTime);
   const debut = versDate(ev.start?.dateTime ?? ev.start?.date ?? null);
   if (!debut) return null;
@@ -362,7 +394,9 @@ export function formaterPlageEvenement(ev: EvenementNormalise): string {
   if (ev.journeeEntiere) {
     const dernier = ev.fin ? new Date(ev.fin.getTime() - JOUR_MS) : ev.debut;
     const meme = dateCourte(dernier) === dateCourte(ev.debut);
-    return meme ? `le ${dateCourte(ev.debut)}` : `du ${dateCourte(ev.debut)} au ${dateCourte(dernier)}`;
+    return meme
+      ? `le ${dateCourte(ev.debut)}`
+      : `du ${dateCourte(ev.debut)} au ${dateCourte(dernier)}`;
   }
   const debut = dateHeure(ev.debut);
   if (!ev.fin) return `le ${debut}`;
@@ -372,7 +406,9 @@ export function formaterPlageEvenement(ev: EvenementNormalise): string {
     minute: "2-digit",
     timeZone: FUSEAU,
   });
-  return memeJour ? `le ${debut} → ${fin}` : `du ${debut} au ${dateHeure(ev.fin)}`;
+  return memeJour
+    ? `le ${debut} → ${fin}`
+    : `du ${debut} au ${dateHeure(ev.fin)}`;
 }
 
 export type PeriodeAgenda = "a-venir" | "passes" | "tous";
@@ -402,8 +438,12 @@ export function choisirEvenements(
   maintenant: Date,
 ): SelectionEvenements {
   const max = Math.max(1, limite);
-  const aVenir = tous.filter(e => estAVenir(e, maintenant)).toSorted((a, b) => a.debut.getTime() - b.debut.getTime());
-  const passes = tous.filter(e => !estAVenir(e, maintenant)).toSorted((a, b) => b.debut.getTime() - a.debut.getTime());
+  const aVenir = tous
+    .filter((e) => estAVenir(e, maintenant))
+    .toSorted((a, b) => a.debut.getTime() - b.debut.getTime());
+  const passes = tous
+    .filter((e) => !estAVenir(e, maintenant))
+    .toSorted((a, b) => b.debut.getTime() - a.debut.getTime());
 
   if (periode === "passes") {
     return {
@@ -414,7 +454,9 @@ export function choisirEvenements(
     };
   }
   if (periode === "tous") {
-    const ordonnes = tous.toSorted((a, b) => b.debut.getTime() - a.debut.getTime());
+    const ordonnes = tous.toSorted(
+      (a, b) => b.debut.getTime() - a.debut.getTime(),
+    );
     return {
       periode: "tous",
       evenements: ordonnes.slice(0, max),
@@ -430,7 +472,12 @@ export function choisirEvenements(
       total: tous.length,
     };
   }
-  return { periode: "passes", evenements: passes.slice(0, max), repli: true, total: tous.length };
+  return {
+    periode: "passes",
+    evenements: passes.slice(0, max),
+    repli: true,
+    total: tous.length,
+  };
 }
 
 // ─── Membres ───────────────────────────────────────────────────────────────
@@ -471,7 +518,9 @@ export const CLES_PII_PROFIL: readonly string[] = Object.freeze([
 ]);
 
 /** Retire toute clé personnelle d'un objet profil. Barrière de dernier recours. */
-export function assainirProfil<T extends Record<string, unknown>>(profil: T): Partial<T> {
+export function assainirProfil<T extends Record<string, unknown>>(
+  profil: T,
+): Partial<T> {
   const propre: Record<string, unknown> = {};
   for (const [clef, valeur] of Object.entries(profil)) {
     if (!CLES_PII_PROFIL.includes(clef)) propre[clef] = valeur;
@@ -504,8 +553,10 @@ export function resoudreRoles(
 }
 
 /** Construit l'index des rôles à partir des lignes de `discord_roles`. */
-export function indexerRoles(roles: readonly RoleDiscord[]): Map<string, RoleDiscord> {
-  return new Map(roles.map(r => [r.role_id, r]));
+export function indexerRoles(
+  roles: readonly RoleDiscord[],
+): Map<string, RoleDiscord> {
+  return new Map(roles.map((r) => [r.role_id, r]));
 }
 
 /**
@@ -517,7 +568,7 @@ export function indexerRoles(roles: readonly RoleDiscord[]): Map<string, RoleDis
  */
 export function listerRoles(roles: readonly RoleDiscord[], max = 12): string {
   if (roles.length === 0) return "aucun";
-  const visibles = roles.slice(0, max).map(r => r.name);
+  const visibles = roles.slice(0, max).map((r) => r.name);
   const reste = roles.length - visibles.length;
   return reste > 0 ? `${visibles.join(", ")} … +${reste}` : visibles.join(", ");
 }
@@ -540,14 +591,25 @@ export function nomAffiche(membre: {
   display_name?: string | null;
   username?: string | null;
 }): string {
-  return membre.nickname?.trim() || membre.display_name?.trim() || membre.username?.trim() || "Membre inconnu";
+  return (
+    membre.nickname?.trim() ||
+    membre.display_name?.trim() ||
+    membre.username?.trim() ||
+    "Membre inconnu"
+  );
 }
 
 /** Ancienneté en jours pleins, ou `null` si la date d'arrivée manque. */
-export function ancienneteJours(arrivee: string | Date | null | undefined, maintenant: Date): number | null {
+export function ancienneteJours(
+  arrivee: string | Date | null | undefined,
+  maintenant: Date,
+): number | null {
   const date = versDate(arrivee);
   if (!date) return null;
-  return Math.max(0, Math.floor((maintenant.getTime() - date.getTime()) / JOUR_MS));
+  return Math.max(
+    0,
+    Math.floor((maintenant.getTime() - date.getTime()) / JOUR_MS),
+  );
 }
 
 /** « 3 ans et 2 mois », « 5 mois », « 12 jours ». */
@@ -563,7 +625,10 @@ export function libelleAnciennete(jours: number | null): string {
 }
 
 /** Ligne compacte d'un membre, pour `/membre recherche`. */
-export function ligneMembreDiscord(row: LigneMembreDiscord, avecProfil: boolean): string {
+export function ligneMembreDiscord(
+  row: LigneMembreDiscord,
+  avecProfil: boolean,
+): string {
   const morceaux = [`**${nomAffiche(row)}**`, `\`${row.username}\``];
   const nb = row.roles?.length ?? 0;
   morceaux.push(`${nb} rôle${nb > 1 ? "s" : ""}`);
@@ -580,12 +645,14 @@ export function ligneMembreDiscord(row: LigneMembreDiscord, avecProfil: boolean)
  * d'interpolation) — c'est le SENS du motif qu'on borne ici, pas son innocuité.
  */
 export function motifRecherche(terme: string): string {
-  const propre = terme.trim().replaceAll(/[\\%_]/g, c => `\\${c}`);
+  const propre = terme.trim().replaceAll(/[\\%_]/g, (c) => `\\${c}`);
   return `%${propre}%`;
 }
 
 /** Une recherche trop courte ratisse tout : on exige deux caractères utiles. */
-export function rechercheExploitable(terme: string | null | undefined): boolean {
+export function rechercheExploitable(
+  terme: string | null | undefined,
+): boolean {
   return (terme ?? "").trim().length >= 2;
 }
 
@@ -617,7 +684,7 @@ export const EQUIPES: readonly DescriptionEquipe[] = Object.freeze([
 export const EQUIPE_PAR_DEFAUT = "bureauteam";
 
 export function libelleEquipe(id: string): string {
-  return EQUIPES.find(e => e.id === id)?.libelle ?? "Équipe Rose Griffon";
+  return EQUIPES.find((e) => e.id === id)?.libelle ?? "Équipe Rose Griffon";
 }
 
 /**
@@ -627,11 +694,17 @@ export function libelleEquipe(id: string): string {
  * que hors filtre, si bien qu'« Équipe Achilléa » (28 actifs) semblait n'en
  * compter que 24 dès qu'un rôle était saisi.
  */
-export function sousTitreEquipe(total: number, affiches: number, role?: string | null): string {
+export function sousTitreEquipe(
+  total: number,
+  affiches: number,
+  role?: string | null,
+): string {
   const morceaux: string[] = [];
   if (role?.trim()) morceaux.push(`Filtré : ${role.trim()}`);
   morceaux.push(
-    total > affiches ? `${total} membres — ${affiches} affichés` : `${total} membre${total > 1 ? "s" : ""}`,
+    total > affiches
+      ? `${total} membres — ${affiches} affichés`
+      : `${total} membre${total > 1 ? "s" : ""}`,
   );
   return morceaux.join(" · ");
 }

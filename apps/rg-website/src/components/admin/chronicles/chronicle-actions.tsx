@@ -21,7 +21,10 @@ import Link from "@/components/shared/Link";
 import { useState } from "react";
 import { toast } from "sonner";
 
-import { deleteChronicle, toggleChronicleStatus } from "@/app/admin/chroniques/actions";
+import {
+  deleteChronicle,
+  toggleChronicleStatus,
+} from "@/app/admin/chroniques/actions";
 
 import { Edit, Eye, EyeOff, MoreHorizontal, Trash } from "@/lib/icons-config";
 
@@ -44,7 +47,9 @@ export function ChronicleActions({ id, published }: ChronicleActionsProps) {
         return;
       }
 
-      toast.success(`Chronique ${published ? "dépubliée" : "publiée"} avec succès`);
+      toast.success(
+        `Chronique ${published ? "dépubliée" : "publiée"} avec succès`,
+      );
     } catch (error) {
       console.error("Erreur toggleChronicleStatus:", error);
       toast.error("Erreur lors de la modification du statut");
@@ -119,7 +124,8 @@ export function ChronicleActions({ id, published }: ChronicleActionsProps) {
           <AlertDialogHeader>
             <AlertDialogTitle>Êtes-vous absolument sûr ?</AlertDialogTitle>
             <AlertDialogDescription>
-              Cette action est irréversible. Cela supprimera définitivement la chronique de nos serveurs.
+              Cette action est irréversible. Cela supprimera définitivement la
+              chronique de nos serveurs.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

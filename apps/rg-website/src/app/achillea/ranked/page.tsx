@@ -7,7 +7,8 @@ import RankedClient from "./ranked-client";
  */
 export const metadata = metadonneesAchillea({
   titre: "Mode classé",
-  description: "File d'attente 1v1 et 2v2, défis privés et profil ELO du mode classé Achilléa.",
+  description:
+    "File d'attente 1v1 et 2v2, défis privés et profil ELO du mode classé Achilléa.",
   chemin: "/achillea/ranked",
   indexable: true,
 });

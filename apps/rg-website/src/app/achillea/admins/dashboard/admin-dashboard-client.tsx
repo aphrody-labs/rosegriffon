@@ -10,7 +10,10 @@ import type {
   AdminWalletRow,
   AdminTransactionRow,
 } from "@rosegriffon/achillea-types/domain/admin";
-import type { RankedAdminDispute, RankedAdminSeason } from "@rosegriffon/achillea-types/domain/ranked";
+import type {
+  RankedAdminDispute,
+  RankedAdminSeason,
+} from "@rosegriffon/achillea-types/domain/ranked";
 import type { Sanction } from "@rosegriffon/achillea-types/domain/sanction";
 import { UserAvatar } from "@/components/achillea/UserAvatar";
 import { PlayerNotesPanel } from "@/components/achillea/PlayerNotesPanel";
@@ -52,7 +55,12 @@ import {
   RotateCcw,
 } from "lucide-react";
 
-import { groupesVisibles, libelleRole, ongletsVisibles, type AdminTab } from "./_tabs/visibilite";
+import {
+  groupesVisibles,
+  libelleRole,
+  ongletsVisibles,
+  type AdminTab,
+} from "./_tabs/visibilite";
 import { AuditTab } from "./_tabs/audit-tab";
 import { BotHealthTab } from "./_tabs/bot-health-tab";
 import { CastsTab } from "./_tabs/casts-tab";
@@ -136,7 +144,8 @@ export default function AchilleaAdminDashboardPage() {
   const [userQuery, setUserQuery] = useState("");
   const [usersTotal, setUsersTotal] = useState(0);
   const [usersLoading, setUsersLoading] = useState(false);
-  const [selectedUserForRole, setSelectedUserForRole] = useState<AdminUserRow | null>(null);
+  const [selectedUserForRole, setSelectedUserForRole] =
+    useState<AdminUserRow | null>(null);
   const [newRole, setNewRole] = useState<number>(0);
   const [roleModalOpen, setRoleModalOpen] = useState(false);
   const [updatingRole, setUpdatingRole] = useState(false);
@@ -144,7 +153,9 @@ export default function AchilleaAdminDashboardPage() {
   // Wallets tab state
   const [walletsLoading, setWalletsLoading] = useState(false);
   const [topWallets, setTopWallets] = useState<AdminWalletRow[]>([]);
-  const [recentTransactions, setRecentTransactions] = useState<AdminTransactionRow[]>([]);
+  const [recentTransactions, setRecentTransactions] = useState<
+    AdminTransactionRow[]
+  >([]);
   const [adjustWalletOpen, setAdjustWalletOpen] = useState(false);
   const [adjustUserId, setAdjustUserId] = useState("");
   const [adjustAmount, setAdjustAmount] = useState(100);
@@ -154,13 +165,19 @@ export default function AchilleaAdminDashboardPage() {
   // Seasons tab state
   const [seasonsLoading, setSeasonsLoading] = useState(false);
   const [seasons, setSeasons] = useState<RankedAdminSeason[]>([]);
-  const [activatingSeasonId, setActivatingSeasonId] = useState<string | null>(null);
-  const [resettingSeasonId, setResettingSeasonId] = useState<string | null>(null);
+  const [activatingSeasonId, setActivatingSeasonId] = useState<string | null>(
+    null,
+  );
+  const [resettingSeasonId, setResettingSeasonId] = useState<string | null>(
+    null,
+  );
 
   // Sanctions tab state
   const [sanctionsLoading, setSanctionsLoading] = useState(false);
   const [sanctionsList, setSanctionsList] = useState<Sanction[]>([]);
-  const [revokingSanctionId, setRevokingSanctionId] = useState<string | null>(null);
+  const [revokingSanctionId, setRevokingSanctionId] = useState<string | null>(
+    null,
+  );
 
   const client = createAchilleaClient({ credentials: "include" });
 
@@ -179,7 +196,7 @@ export default function AchilleaAdminDashboardPage() {
           signalerEchec("admin/lobbies/disputes", dispRes);
         }
       })
-      .catch(cause => {
+      .catch((cause) => {
         setOpsError(signalerException("admin/dashboard", cause));
       })
       .finally(() => {
@@ -190,7 +207,7 @@ export default function AchilleaAdminDashboardPage() {
   const loadUsers = (page = usersPage, q = userQuery) => {
     return client.admin
       .users({ page, pagination: 15, q: q.trim() || undefined })
-      .then(res => {
+      .then((res) => {
         if (res.ok && res.value) {
           setUsersList(res.value.data);
           setUsersTotal(res.value.meta.total);
@@ -207,7 +224,7 @@ export default function AchilleaAdminDashboardPage() {
   const loadWallets = () => {
     return client.admin
       .wallets(20)
-      .then(res => {
+      .then((res) => {
         if (res.ok && res.value) {
           setTopWallets(res.value.top);
           setRecentTransactions(res.value.recent);
@@ -224,7 +241,7 @@ export default function AchilleaAdminDashboardPage() {
   const loadSeasons = () => {
     return client.ranked
       .adminSeasons()
-      .then(res => {
+      .then((res) => {
         if (res.ok && res.value) {
           setSeasons(res.value);
         }
@@ -240,7 +257,7 @@ export default function AchilleaAdminDashboardPage() {
   const loadSanctions = () => {
     return client.sanctions
       .list({ pageSize: 30 })
-      .then(res => {
+      .then((res) => {
         if (res.ok && res.value) {
           setSanctionsList(res.value.data);
         }
@@ -257,9 +274,16 @@ export default function AchilleaAdminDashboardPage() {
     if (!selectedUserForRole) return;
     setUpdatingRole(true);
     try {
-      const res = await client.admin.setUserRole(selectedUserForRole.id, newRole);
+      const res = await client.admin.setUserRole(
+        selectedUserForRole.id,
+        newRole,
+      );
       if (res.ok) {
-        setUsersList(prev => prev.map(u => (u.id === selectedUserForRole.id ? { ...u, role: newRole } : u)));
+        setUsersList((prev) =>
+          prev.map((u) =>
+            u.id === selectedUserForRole.id ? { ...u, role: newRole } : u,
+          ),
+        );
         setRoleModalOpen(false);
         setSelectedUserForRole(null);
       }
@@ -272,7 +296,11 @@ export default function AchilleaAdminDashboardPage() {
     if (!adjustUserId.trim() || adjustAmount === 0) return;
     setAdjusting(true);
     try {
-      const res = await client.admin.adjustWallet(adjustUserId.trim(), adjustAmount, adjustReason.trim() || undefined);
+      const res = await client.admin.adjustWallet(
+        adjustUserId.trim(),
+        adjustAmount,
+        adjustReason.trim() || undefined,
+      );
       if (res.ok) {
         setAdjustWalletOpen(false);
         setAdjustUserId("");
@@ -298,7 +326,12 @@ export default function AchilleaAdminDashboardPage() {
   };
 
   const handleResetLadder = async (seasonId: string) => {
-    if (!confirm("Confirmer la réinitialisation du classement ranked pour cette saison ?")) return;
+    if (
+      !confirm(
+        "Confirmer la réinitialisation du classement ranked pour cette saison ?",
+      )
+    )
+      return;
     setResettingSeasonId(seasonId);
     try {
       const res = await client.ranked.adminResetLadder(seasonId);
@@ -314,9 +347,12 @@ export default function AchilleaAdminDashboardPage() {
     if (!confirm("Confirmer la levée immédiate de cette sanction ?")) return;
     setRevokingSanctionId(sanctionId);
     try {
-      const res = await client.sanctions.revoke(sanctionId, "Levée par un administrateur depuis le dashboard");
+      const res = await client.sanctions.revoke(
+        sanctionId,
+        "Levée par un administrateur depuis le dashboard",
+      );
       if (res.ok) {
-        setSanctionsList(prev => prev.filter(s => s.id !== sanctionId));
+        setSanctionsList((prev) => prev.filter((s) => s.id !== sanctionId));
       }
     } finally {
       setRevokingSanctionId(null);
@@ -330,13 +366,20 @@ export default function AchilleaAdminDashboardPage() {
   }, [isAuthenticated]);
 
   const [tabRequest, setTabRequest] = useState({ activeTab, isAuthenticated });
-  if (tabRequest.activeTab !== activeTab || tabRequest.isAuthenticated !== isAuthenticated) {
+  if (
+    tabRequest.activeTab !== activeTab ||
+    tabRequest.isAuthenticated !== isAuthenticated
+  ) {
     setTabRequest({ activeTab, isAuthenticated });
     if (isAuthenticated) {
-      if (activeTab === "users" && usersList.length === 0) setUsersLoading(true);
-      if (activeTab === "wallets" && topWallets.length === 0) setWalletsLoading(true);
-      if (activeTab === "seasons" && seasons.length === 0) setSeasonsLoading(true);
-      if (activeTab === "sanctions" && sanctionsList.length === 0) setSanctionsLoading(true);
+      if (activeTab === "users" && usersList.length === 0)
+        setUsersLoading(true);
+      if (activeTab === "wallets" && topWallets.length === 0)
+        setWalletsLoading(true);
+      if (activeTab === "seasons" && seasons.length === 0)
+        setSeasonsLoading(true);
+      if (activeTab === "sanctions" && sanctionsList.length === 0)
+        setSanctionsLoading(true);
     }
   }
   useEffect(() => {
@@ -344,7 +387,8 @@ export default function AchilleaAdminDashboardPage() {
     if (activeTab === "users" && usersList.length === 0) void loadUsers();
     if (activeTab === "wallets" && topWallets.length === 0) void loadWallets();
     if (activeTab === "seasons" && seasons.length === 0) void loadSeasons();
-    if (activeTab === "sanctions" && sanctionsList.length === 0) void loadSanctions();
+    if (activeTab === "sanctions" && sanctionsList.length === 0)
+      void loadSanctions();
   }, [activeTab, isAuthenticated]);
 
   // Garde d'accès (Modérateur+)
@@ -370,7 +414,8 @@ export default function AchilleaAdminDashboardPage() {
         </div>
         <h1 className="text-2xl font-bold">Accès Administrateur Restreint</h1>
         <p className="text-sm text-muted-foreground">
-          Ce tableau de bord est réservé aux modérateurs et administrateurs d&apos;Achilléa.
+          Ce tableau de bord est réservé aux modérateurs et administrateurs
+          d&apos;Achilléa.
         </p>
         <Link href="/achillea">
           <Button variant="outline" className="mt-4">
@@ -384,7 +429,9 @@ export default function AchilleaAdminDashboardPage() {
   const role = user?.role ?? 0;
   const visibles = ongletsVisibles(role);
   // Un onglet masqué pour ce rôle ne s'affiche jamais, même s'il était actif.
-  const ongletActif: AdminTab = visibles.includes(activeTab) ? activeTab : (visibles[0] ?? "overview");
+  const ongletActif: AdminTab = visibles.includes(activeTab)
+    ? activeTab
+    : (visibles[0] ?? "overview");
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 space-y-8">
@@ -395,13 +442,19 @@ export default function AchilleaAdminDashboardPage() {
             <span className="p-2 rounded-lg bg-primary/10 text-primary border border-primary/20">
               <LayoutDashboard className="size-5" />
             </span>
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">Achilléa Backoffice</h1>
-            <Badge variant="outline" className="border-primary/40 text-primary text-xs">
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
+              Achilléa Backoffice
+            </h1>
+            <Badge
+              variant="outline"
+              className="border-primary/40 text-primary text-xs"
+            >
               {libelleRole(user?.role)}
             </Badge>
           </div>
           <p className="text-xs text-muted-foreground">
-            Supervision des compétitions, arbitrage des litiges, économie ACH et modération.
+            Supervision des compétitions, arbitrage des litiges, économie ACH et
+            modération.
           </p>
         </div>
 
@@ -425,7 +478,9 @@ export default function AchilleaAdminDashboardPage() {
             disabled={refreshing}
             className="gap-2 text-xs"
           >
-            <RefreshCw className={`size-3.5 ${refreshing ? "animate-spin" : ""}`} />
+            <RefreshCw
+              className={`size-3.5 ${refreshing ? "animate-spin" : ""}`}
+            />
             Actualiser
           </Button>
         </div>
@@ -441,14 +496,20 @@ export default function AchilleaAdminDashboardPage() {
       )}
 
       {/* Navigation par onglets, groupée et filtrée par rôle (`_tabs/visibilite.ts`) */}
-      <nav aria-label="Onglets du back-office" className="space-y-3 border-b border-border/60 pb-3">
-        {groupesVisibles(role).map(groupe => (
-          <div key={groupe.titre} className="flex flex-col gap-1.5 sm:flex-row sm:items-center sm:gap-3">
+      <nav
+        aria-label="Onglets du back-office"
+        className="space-y-3 border-b border-border/60 pb-3"
+      >
+        {groupesVisibles(role).map((groupe) => (
+          <div
+            key={groupe.titre}
+            className="flex flex-col gap-1.5 sm:flex-row sm:items-center sm:gap-3"
+          >
             <span className="w-40 shrink-0 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               {groupe.titre}
             </span>
             <div className="flex flex-wrap gap-1.5">
-              {groupe.onglets.map(onglet => {
+              {groupe.onglets.map((onglet) => {
                 const Icone = ICONES_ONGLETS[onglet.id];
                 const actif = ongletActif === onglet.id;
                 return (
@@ -463,7 +524,10 @@ export default function AchilleaAdminDashboardPage() {
                     <Icone className="size-4" aria-hidden="true" />
                     {onglet.libelle}
                     {onglet.id === "disputes" && disputes.length > 0 && (
-                      <Badge variant="destructive" aria-label={`${disputes.length} litiges ouverts`}>
+                      <Badge
+                        variant="destructive"
+                        aria-label={`${disputes.length} litiges ouverts`}
+                      >
                         {disputes.length}
                       </Badge>
                     )}
@@ -482,18 +546,28 @@ export default function AchilleaAdminDashboardPage() {
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
             <Card className="bg-card/50 border-border/60">
               <CardContent className="p-4 space-y-1">
-                <div className="text-xs text-muted-foreground">Membres inscrits</div>
-                <div className="text-2xl font-bold">{ops?.users?.total ?? "—"}</div>
-                <div className="text-xs text-muted-foreground">{ops?.users?.staff ?? "—"} staff</div>
+                <div className="text-xs text-muted-foreground">
+                  Membres inscrits
+                </div>
+                <div className="text-2xl font-bold">
+                  {ops?.users?.total ?? "—"}
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  {ops?.users?.staff ?? "—"} staff
+                </div>
               </CardContent>
             </Card>
 
             <Card className="bg-card/50 border-border/60">
               <CardContent className="p-4 space-y-1">
-                <div className="text-xs text-muted-foreground">Litiges ouverts</div>
+                <div className="text-xs text-muted-foreground">
+                  Litiges ouverts
+                </div>
                 <div
                   className={`text-2xl font-bold ${
-                    (ops?.ranked?.contestedMatches ?? 0) > 0 ? "text-destructive" : "text-success"
+                    (ops?.ranked?.contestedMatches ?? 0) > 0
+                      ? "text-destructive"
+                      : "text-success"
                   }`}
                 >
                   {ops?.ranked?.contestedMatches ?? disputes.length}
@@ -504,26 +578,45 @@ export default function AchilleaAdminDashboardPage() {
 
             <Card className="bg-card/50 border-border/60">
               <CardContent className="p-4 space-y-1">
-                <div className="text-xs text-muted-foreground">Matchs en cours</div>
-                <div className="text-2xl font-bold text-warning">{ops?.ranked?.activeMatches ?? "—"}</div>
-                <div className="text-xs text-muted-foreground">Lobbies actifs</div>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-card/50 border-border/60">
-              <CardContent className="p-4 space-y-1">
-                <div className="text-xs text-muted-foreground">Clans en attente</div>
-                <div className="text-2xl font-bold">{ops?.community?.clansPending ?? "—"}</div>
-                <div className="text-xs text-muted-foreground">Validation fondateurs</div>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-card/50 border-border/60">
-              <CardContent className="p-4 space-y-1">
-                <div className="text-xs text-muted-foreground">Organisations</div>
-                <div className="text-2xl font-bold">{ops?.community?.orgsPending ?? "—"}</div>
                 <div className="text-xs text-muted-foreground">
-                  <Link href="/achillea/organizations/validate" className="text-primary hover:underline">
+                  Matchs en cours
+                </div>
+                <div className="text-2xl font-bold text-warning">
+                  {ops?.ranked?.activeMatches ?? "—"}
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  Lobbies actifs
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-card/50 border-border/60">
+              <CardContent className="p-4 space-y-1">
+                <div className="text-xs text-muted-foreground">
+                  Clans en attente
+                </div>
+                <div className="text-2xl font-bold">
+                  {ops?.community?.clansPending ?? "—"}
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  Validation fondateurs
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-card/50 border-border/60">
+              <CardContent className="p-4 space-y-1">
+                <div className="text-xs text-muted-foreground">
+                  Organisations
+                </div>
+                <div className="text-2xl font-bold">
+                  {ops?.community?.orgsPending ?? "—"}
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  <Link
+                    href="/achillea/organizations/validate"
+                    className="text-primary hover:underline"
+                  >
                     Voir validation
                   </Link>
                 </div>
@@ -534,10 +627,16 @@ export default function AchilleaAdminDashboardPage() {
               <CardContent className="p-4 space-y-1">
                 <div className="text-xs text-muted-foreground">Bot Uptime</div>
                 <div className="text-2xl font-bold font-mono">
-                  {typeof ops?.bot?.uptime === "number" ? formaterDuree(ops.bot.uptime) : "—"}
+                  {typeof ops?.bot?.uptime === "number"
+                    ? formaterDuree(ops.bot.uptime)
+                    : "—"}
                 </div>
                 <div className="text-xs text-success">
-                  {ops?.bot ? (ops.bot.online ? "En ligne" : "Inactif") : "Non mesuré"}
+                  {ops?.bot
+                    ? ops.bot.online
+                      ? "En ligne"
+                      : "Inactif"
+                    : "Non mesuré"}
                 </div>
               </CardContent>
             </Card>
@@ -561,11 +660,16 @@ export default function AchilleaAdminDashboardPage() {
               </CardHeader>
               <CardContent className="p-5 pt-2 text-xs text-muted-foreground space-y-3">
                 <p>
-                  Visualise les captures d&apos;écran déposées par les joueurs en litige et attribue la victoire ou
-                  annule le lobby sans perte de points.
+                  Visualise les captures d&apos;écran déposées par les joueurs
+                  en litige et attribue la victoire ou annule le lobby sans
+                  perte de points.
                 </p>
                 <Link href="/achillea/admins/ranked-disputes" className="block">
-                  <Button variant="outline" size="sm" className="w-full text-xs gap-1.5">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full text-xs gap-1.5"
+                  >
                     Ouvrir la salle des litiges
                   </Button>
                 </Link>
@@ -588,11 +692,16 @@ export default function AchilleaAdminDashboardPage() {
               </CardHeader>
               <CardContent className="p-5 pt-2 text-xs text-muted-foreground space-y-3">
                 <p>
-                  Gère les avertissements, exclusions temporaires de ranked et bannissements définitifs des joueurs pour
-                  infraction aux règles.
+                  Gère les avertissements, exclusions temporaires de ranked et
+                  bannissements définitifs des joueurs pour infraction aux
+                  règles.
                 </p>
                 <Link href="/achillea/admins/sanctions" className="block">
-                  <Button variant="outline" size="sm" className="w-full text-xs gap-1.5">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full text-xs gap-1.5"
+                  >
                     Gérer les sanctions actives
                   </Button>
                 </Link>
@@ -615,11 +724,16 @@ export default function AchilleaAdminDashboardPage() {
               </CardHeader>
               <CardContent className="p-5 pt-2 text-xs text-muted-foreground space-y-3">
                 <p>
-                  Examine les demandes d&apos;agrément des associations, clans et collectifs tiers souhaitant organiser
-                  des tournois officiels.
+                  Examine les demandes d&apos;agrément des associations, clans
+                  et collectifs tiers souhaitant organiser des tournois
+                  officiels.
                 </p>
                 <Link href="/achillea/organizations/validate" className="block">
-                  <Button variant="outline" size="sm" className="w-full text-xs gap-1.5">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full text-xs gap-1.5"
+                  >
                     Examiner les demandes ({ops?.community?.orgsPending ?? 0})
                   </Button>
                 </Link>
@@ -652,25 +766,37 @@ export default function AchilleaAdminDashboardPage() {
             </div>
           ) : (
             <div className="divide-y divide-border/60 border border-border/60 rounded-xl bg-card/40 overflow-hidden">
-              {disputes.map(d => (
-                <div key={d.lobbyId} className="p-4 flex items-center justify-between gap-4">
+              {disputes.map((d) => (
+                <div
+                  key={d.lobbyId}
+                  className="p-4 flex items-center justify-between gap-4"
+                >
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
-                      <Badge variant="outline" className="text-destructive border-destructive/30">
+                      <Badge
+                        variant="outline"
+                        className="text-destructive border-destructive/30"
+                      >
                         Litige #{d.lobbyId}
                       </Badge>
                       <span className="text-xs text-muted-foreground">
-                        Lobby {d.lobbyId} · Signalé le {new Date(d.createdAt).toLocaleDateString("fr-FR")}
+                        Lobby {d.lobbyId} · Signalé le{" "}
+                        {new Date(d.createdAt).toLocaleDateString("fr-FR")}
                       </span>
                     </div>
                     <p className="text-sm font-medium">
-                      {d.player1?.displayName ?? "Joueur 1"} vs {d.player2?.displayName ?? "Joueur 2"} — Score contesté
+                      {d.player1?.displayName ?? "Joueur 1"} vs{" "}
+                      {d.player2?.displayName ?? "Joueur 2"} — Score contesté
                     </p>
                   </div>
 
                   <div className="flex items-center gap-2">
                     <Link href="/achillea/admins/ranked-disputes">
-                      <Button size="sm" variant="default" className="text-xs gap-1">
+                      <Button
+                        size="sm"
+                        variant="default"
+                        className="text-xs gap-1"
+                      >
                         Arbitrer
                         <ArrowRight className="size-3" />
                       </Button>
@@ -688,9 +814,12 @@ export default function AchilleaAdminDashboardPage() {
         <div className="space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-              <h2 className="text-lg font-bold">Modération & Registre des Sanctions</h2>
+              <h2 className="text-lg font-bold">
+                Modération & Registre des Sanctions
+              </h2>
               <p className="text-xs text-muted-foreground">
-                Consigne centrale des exclusions temporaires, mutes et bannissements du réseau.
+                Consigne centrale des exclusions temporaires, mutes et
+                bannissements du réseau.
               </p>
             </div>
             <div className="flex items-center gap-2">
@@ -704,7 +833,9 @@ export default function AchilleaAdminDashboardPage() {
                 disabled={sanctionsLoading}
                 className="text-xs gap-1.5"
               >
-                <RefreshCw className={`size-3.5 ${sanctionsLoading ? "animate-spin" : ""}`} />
+                <RefreshCw
+                  className={`size-3.5 ${sanctionsLoading ? "animate-spin" : ""}`}
+                />
                 Actualiser
               </Button>
               <Link href="/achillea/admins/sanctions">
@@ -719,8 +850,12 @@ export default function AchilleaAdminDashboardPage() {
           {sanctionsList.length === 0 ? (
             <div className="p-12 text-center border border-border/60 rounded-xl bg-card/40 space-y-2">
               <ShieldAlert className="size-8 text-muted-foreground mx-auto" />
-              <div className="font-semibold text-sm">Aucune sanction enregistrée</div>
-              <p className="text-xs text-muted-foreground">Le casier disciplinaire des joueurs est vierge.</p>
+              <div className="font-semibold text-sm">
+                Aucune sanction enregistrée
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Le casier disciplinaire des joueurs est vierge.
+              </p>
             </div>
           ) : (
             <div className="border border-border/60 rounded-xl bg-card/40 overflow-x-auto">
@@ -736,8 +871,11 @@ export default function AchilleaAdminDashboardPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border/40">
-                  {sanctionsList.map(s => (
-                    <tr key={s.id} className="hover:bg-muted/20 transition-colors">
+                  {sanctionsList.map((s) => (
+                    <tr
+                      key={s.id}
+                      className="hover:bg-muted/20 transition-colors"
+                    >
                       <td className="p-3 font-mono text-xs">{s.userId}</td>
                       <td className="p-3">
                         <Badge
@@ -753,12 +891,19 @@ export default function AchilleaAdminDashboardPage() {
                           {s.type}
                         </Badge>
                       </td>
-                      <td className="p-3 max-w-xs truncate" title={s.reason ?? "Sans motif"}>
+                      <td
+                        className="p-3 max-w-xs truncate"
+                        title={s.reason ?? "Sans motif"}
+                      >
                         {s.reason ?? "Sans motif spécifié"}
                       </td>
-                      <td className="p-3 text-muted-foreground">{new Date(s.createdAt).toLocaleDateString("fr-FR")}</td>
                       <td className="p-3 text-muted-foreground">
-                        {s.expiresAt ? new Date(s.expiresAt).toLocaleDateString("fr-FR") : "Permanent"}
+                        {new Date(s.createdAt).toLocaleDateString("fr-FR")}
+                      </td>
+                      <td className="p-3 text-muted-foreground">
+                        {s.expiresAt
+                          ? new Date(s.expiresAt).toLocaleDateString("fr-FR")
+                          : "Permanent"}
                       </td>
                       <td className="p-3 text-right">
                         <Button
@@ -768,7 +913,11 @@ export default function AchilleaAdminDashboardPage() {
                           disabled={revokingSanctionId === s.id}
                           className="text-xs text-destructive hover:text-destructive/80 hover:bg-destructive/10 h-7 px-2"
                         >
-                          {revokingSanctionId === s.id ? <Loader2 className="size-3 animate-spin" /> : "Lever"}
+                          {revokingSanctionId === s.id ? (
+                            <Loader2 className="size-3 animate-spin" />
+                          ) : (
+                            "Lever"
+                          )}
                         </Button>
                       </td>
                     </tr>
@@ -781,7 +930,9 @@ export default function AchilleaAdminDashboardPage() {
       )}
 
       {/* CONTENU ONGLET: SIGNALEMENTS & NOTES STAFF */}
-      {ongletActif === "notes" && <PlayerNotesPanel title="Registre global des signalements staff" />}
+      {ongletActif === "notes" && (
+        <PlayerNotesPanel title="Registre global des signalements staff" />
+      )}
 
       {/* CONTENU ONGLET: SAISONS */}
       {ongletActif === "seasons" && (
@@ -790,7 +941,8 @@ export default function AchilleaAdminDashboardPage() {
             <div>
               <h2 className="text-lg font-bold">Saisons du Ladder Ranked</h2>
               <p className="text-xs text-muted-foreground">
-                Gestion des cycles de compétition, du calibrage ELO et des réinitialisations de points.
+                Gestion des cycles de compétition, du calibrage ELO et des
+                réinitialisations de points.
               </p>
             </div>
             <Button
@@ -803,7 +955,9 @@ export default function AchilleaAdminDashboardPage() {
               disabled={seasonsLoading}
               className="text-xs gap-1.5 self-start"
             >
-              <RefreshCw className={`size-3.5 ${seasonsLoading ? "animate-spin" : ""}`} />
+              <RefreshCw
+                className={`size-3.5 ${seasonsLoading ? "animate-spin" : ""}`}
+              />
               Actualiser
             </Button>
           </div>
@@ -811,21 +965,26 @@ export default function AchilleaAdminDashboardPage() {
           {seasons.length === 0 ? (
             <div className="p-12 text-center border border-border/60 rounded-xl bg-card/40 space-y-2">
               <Calendar className="size-8 text-primary mx-auto" />
-              <div className="font-semibold text-sm">Aucune saison configurée</div>
+              <div className="font-semibold text-sm">
+                Aucune saison configurée
+              </div>
               <p className="text-xs text-muted-foreground">
-                Les données du classement officiel sont actuellement non segmentées.
+                Les données du classement officiel sont actuellement non
+                segmentées.
               </p>
             </div>
           ) : (
             <div className="grid gap-4">
-              {seasons.map(season => (
+              {seasons.map((season) => (
                 <Card key={season.id} className="border-border/60 bg-card/40">
                   <CardContent className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div className="space-y-1.5 min-w-0">
                       <div className="flex items-center gap-2.5">
                         <h3 className="font-bold text-base">{season.name}</h3>
                         <Badge
-                          variant={season.state === "Active" ? "default" : "outline"}
+                          variant={
+                            season.state === "Active" ? "default" : "outline"
+                          }
                           className="text-xs font-semibold"
                         >
                           {season.state === "Active"
@@ -836,16 +995,33 @@ export default function AchilleaAdminDashboardPage() {
                         </Badge>
                       </div>
                       <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
-                        <span>Début : {new Date(season.startsAt).toLocaleDateString("fr-FR")}</span>
-                        {season.endsAt && <span>Fin : {new Date(season.endsAt).toLocaleDateString("fr-FR")}</span>}
                         <span>
-                          Note de base : <strong>{season.config?.baseRating ?? 1000} ELO</strong>
+                          Début :{" "}
+                          {new Date(season.startsAt).toLocaleDateString(
+                            "fr-FR",
+                          )}
+                        </span>
+                        {season.endsAt && (
+                          <span>
+                            Fin :{" "}
+                            {new Date(season.endsAt).toLocaleDateString(
+                              "fr-FR",
+                            )}
+                          </span>
+                        )}
+                        <span>
+                          Note de base :{" "}
+                          <strong>
+                            {season.config?.baseRating ?? 1000} ELO
+                          </strong>
                         </span>
                         <span>
-                          Facteur K : <strong>{season.config?.kFactor ?? 32}</strong>
+                          Facteur K :{" "}
+                          <strong>{season.config?.kFactor ?? 32}</strong>
                         </span>
                         <span>
-                          Participants : <strong>{season.playerCount ?? 0}</strong>
+                          Participants :{" "}
+                          <strong>{season.playerCount ?? 0}</strong>
                         </span>
                       </div>
                     </div>
@@ -895,9 +1071,12 @@ export default function AchilleaAdminDashboardPage() {
         <div className="space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-              <h2 className="text-lg font-bold">Gestion des Utilisateurs & Rôles</h2>
+              <h2 className="text-lg font-bold">
+                Gestion des Utilisateurs & Rôles
+              </h2>
               <p className="text-xs text-muted-foreground">
-                Recherche de comptes, vérification des accès et attribution des privilèges Staff.
+                Recherche de comptes, vérification des accès et attribution des
+                privilèges Staff.
               </p>
             </div>
           </div>
@@ -905,7 +1084,7 @@ export default function AchilleaAdminDashboardPage() {
           {/* Barre de recherche et pagination */}
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
             <form
-              onSubmit={e => {
+              onSubmit={(e) => {
                 e.preventDefault();
                 setUsersPage(1);
                 void loadUsers(1, userQuery);
@@ -918,11 +1097,16 @@ export default function AchilleaAdminDashboardPage() {
                   type="text"
                   placeholder="Pseudo Discord ou ID..."
                   value={userQuery}
-                  onChange={e => setUserQuery(e.target.value)}
+                  onChange={(e) => setUserQuery(e.target.value)}
                   className="w-full pl-8 pr-3 py-1.5 text-xs rounded-lg border border-border/60 bg-muted/20 focus:outline-none focus:border-primary"
                 />
               </div>
-              <Button type="submit" size="sm" variant="secondary" className="text-xs">
+              <Button
+                type="submit"
+                size="sm"
+                variant="secondary"
+                className="text-xs"
+              >
                 Filtrer
               </Button>
             </form>
@@ -967,8 +1151,12 @@ export default function AchilleaAdminDashboardPage() {
           ) : usersList.length === 0 ? (
             <div className="p-12 text-center border border-border/60 rounded-xl bg-card/40 space-y-2">
               <Users className="size-8 text-muted-foreground mx-auto" />
-              <div className="font-semibold text-sm">Aucun utilisateur trouvé</div>
-              <p className="text-xs text-muted-foreground">Essaie une autre recherche par pseudo ou identifiant.</p>
+              <div className="font-semibold text-sm">
+                Aucun utilisateur trouvé
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Essaie une autre recherche par pseudo ou identifiant.
+              </p>
             </div>
           ) : (
             <div className="border border-border/60 rounded-xl bg-card/40 overflow-x-auto">
@@ -983,11 +1171,19 @@ export default function AchilleaAdminDashboardPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border/40">
-                  {usersList.map(u => (
-                    <tr key={u.id} className="hover:bg-muted/20 transition-colors">
+                  {usersList.map((u) => (
+                    <tr
+                      key={u.id}
+                      className="hover:bg-muted/20 transition-colors"
+                    >
                       <td className="p-3">
                         <div className="flex items-center gap-2.5">
-                          <UserAvatar userId={u.id} avatar={u.avatar} name={u.username ?? "Utilisateur"} size="sm" />
+                          <UserAvatar
+                            userId={u.id}
+                            avatar={u.avatar}
+                            name={u.username ?? "Utilisateur"}
+                            size="sm"
+                          />
                           <div className="min-w-0">
                             <Link
                               href={`/achillea/users/${u.id}`}
@@ -996,12 +1192,16 @@ export default function AchilleaAdminDashboardPage() {
                               {u.displayName || u.username || "Sans pseudo"}
                             </Link>
                             {u.username && u.displayName && (
-                              <span className="text-xs text-muted-foreground block truncate">@{u.username}</span>
+                              <span className="text-xs text-muted-foreground block truncate">
+                                @{u.username}
+                              </span>
                             )}
                           </div>
                         </div>
                       </td>
-                      <td className="p-3 font-mono text-xs text-muted-foreground">{u.id}</td>
+                      <td className="p-3 font-mono text-xs text-muted-foreground">
+                        {u.id}
+                      </td>
                       <td className="p-3">
                         <Badge
                           variant={
@@ -1015,11 +1215,19 @@ export default function AchilleaAdminDashboardPage() {
                           }
                           className="text-xs font-semibold"
                         >
-                          {u.role >= 3 ? "Super-Admin" : u.role >= 2 ? "Admin" : u.role >= 1 ? "Modérateur" : "Membre"}
+                          {u.role >= 3
+                            ? "Super-Admin"
+                            : u.role >= 2
+                              ? "Admin"
+                              : u.role >= 1
+                                ? "Modérateur"
+                                : "Membre"}
                         </Badge>
                       </td>
                       <td className="p-3 text-muted-foreground">
-                        {u.lastInteract ? new Date(u.lastInteract).toLocaleDateString("fr-FR") : "—"}
+                        {u.lastInteract
+                          ? new Date(u.lastInteract).toLocaleDateString("fr-FR")
+                          : "—"}
                       </td>
                       <td className="p-3 text-right">
                         <Button
@@ -1049,9 +1257,12 @@ export default function AchilleaAdminDashboardPage() {
         <div className="space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-              <h2 className="text-lg font-bold">Économie & Portefeuilles ACH</h2>
+              <h2 className="text-lg font-bold">
+                Économie & Portefeuilles ACH
+              </h2>
               <p className="text-xs text-muted-foreground">
-                Surveillance des jetons en circulation et attribution manuelle de primes.
+                Surveillance des jetons en circulation et attribution manuelle
+                de primes.
               </p>
             </div>
             <div className="flex items-center gap-2">
@@ -1079,7 +1290,9 @@ export default function AchilleaAdminDashboardPage() {
                 disabled={walletsLoading}
                 className="text-xs gap-1.5"
               >
-                <RefreshCw className={`size-3.5 ${walletsLoading ? "animate-spin" : ""}`} />
+                <RefreshCw
+                  className={`size-3.5 ${walletsLoading ? "animate-spin" : ""}`}
+                />
                 Actualiser
               </Button>
             </div>
@@ -1096,14 +1309,23 @@ export default function AchilleaAdminDashboardPage() {
               </CardHeader>
               <CardContent className="p-4 pt-2">
                 {topWallets.length === 0 ? (
-                  <div className="py-6 text-center text-xs text-muted-foreground">Aucun solde actif</div>
+                  <div className="py-6 text-center text-xs text-muted-foreground">
+                    Aucun solde actif
+                  </div>
                 ) : (
                   <div className="divide-y divide-border/40">
-                    {topWallets.map(w => (
-                      <div key={w.userId} className="py-2.5 flex items-center justify-between gap-2">
+                    {topWallets.map((w) => (
+                      <div
+                        key={w.userId}
+                        className="py-2.5 flex items-center justify-between gap-2"
+                      >
                         <div className="min-w-0">
-                          <div className="font-semibold text-xs truncate">{w.displayName || w.userId}</div>
-                          <div className="font-mono text-xs text-muted-foreground truncate">{w.userId}</div>
+                          <div className="font-semibold text-xs truncate">
+                            {w.displayName || w.userId}
+                          </div>
+                          <div className="font-mono text-xs text-muted-foreground truncate">
+                            {w.userId}
+                          </div>
                         </div>
                         <div className="flex items-center gap-3">
                           <span className="font-extrabold text-sm text-warning">
@@ -1140,24 +1362,33 @@ export default function AchilleaAdminDashboardPage() {
               </CardHeader>
               <CardContent className="p-4 pt-2">
                 {recentTransactions.length === 0 ? (
-                  <div className="py-6 text-center text-xs text-muted-foreground">Aucun mouvement récent</div>
+                  <div className="py-6 text-center text-xs text-muted-foreground">
+                    Aucun mouvement récent
+                  </div>
                 ) : (
                   <div className="divide-y divide-border/40 max-h-96 overflow-y-auto">
-                    {recentTransactions.map(tx => (
+                    {recentTransactions.map((tx) => (
                       <div key={tx.id} className="py-2.5 space-y-1">
                         <div className="flex items-center justify-between text-xs">
                           <span className="font-semibold uppercase tracking-wider text-muted-foreground">
                             {tx.type}
                           </span>
-                          <span className={`font-bold ${tx.amount >= 0 ? "text-success" : "text-destructive"}`}>
+                          <span
+                            className={`font-bold ${tx.amount >= 0 ? "text-success" : "text-destructive"}`}
+                          >
                             {tx.amount >= 0 ? `+${tx.amount}` : tx.amount} ACH
                           </span>
                         </div>
                         <div className="flex items-center justify-between text-xs text-muted-foreground">
-                          <span className="truncate max-w-[200px]" title={tx.reason ?? ""}>
+                          <span
+                            className="truncate max-w-[200px]"
+                            title={tx.reason ?? ""}
+                          >
                             {tx.reason ?? "Transaction sans motif"}
                           </span>
-                          <span>{new Date(tx.createdAt).toLocaleDateString("fr-FR")}</span>
+                          <span>
+                            {new Date(tx.createdAt).toLocaleDateString("fr-FR")}
+                          </span>
                         </div>
                       </div>
                     ))}
@@ -1188,21 +1419,37 @@ export default function AchilleaAdminDashboardPage() {
             <DialogTitle>Modifier les permissions</DialogTitle>
             <DialogDescription>
               Définis le niveau de rôle système pour{" "}
-              <strong>{selectedUserForRole?.displayName || selectedUserForRole?.username}</strong>.
+              <strong>
+                {selectedUserForRole?.displayName ||
+                  selectedUserForRole?.username}
+              </strong>
+              .
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-3 py-3">
             {[
-              { label: "Membre ordinaire (Rôle 0)", value: 0, desc: "Accès standard joueur" },
-              { label: "Modérateur (Rôle 1)", value: 1, desc: "Accès aux litiges et signalements" },
+              {
+                label: "Membre ordinaire (Rôle 0)",
+                value: 0,
+                desc: "Accès standard joueur",
+              },
+              {
+                label: "Modérateur (Rôle 1)",
+                value: 1,
+                desc: "Accès aux litiges et signalements",
+              },
               {
                 label: "Administrateur (Rôle 2)",
                 value: 2,
                 desc: "Validation clans, sanctions, saisons",
               },
-              { label: "Super-Admin (Rôle 3)", value: 3, desc: "Contrôle infrastructure et bot" },
-            ].map(r => (
+              {
+                label: "Super-Admin (Rôle 3)",
+                value: 3,
+                desc: "Contrôle infrastructure et bot",
+              },
+            ].map((r) => (
               <button
                 key={r.value}
                 type="button"
@@ -1213,8 +1460,12 @@ export default function AchilleaAdminDashboardPage() {
                     : "border-border/60 bg-muted/20 text-muted-foreground hover:border-border"
                 }`}
               >
-                <div className="font-semibold text-xs text-on-surface">{r.label}</div>
-                <div className="text-xs text-muted-foreground mt-0.5">{r.desc}</div>
+                <div className="font-semibold text-xs text-on-surface">
+                  {r.label}
+                </div>
+                <div className="text-xs text-muted-foreground mt-0.5">
+                  {r.desc}
+                </div>
               </button>
             ))}
           </div>
@@ -1236,47 +1487,57 @@ export default function AchilleaAdminDashboardPage() {
           <DialogHeader>
             <DialogTitle>Ajuster un portefeuille ACH</DialogTitle>
             <DialogDescription>
-              Crédite (positif) ou débite (négatif) des jetons sur le compte d&apos;un utilisateur.
+              Crédite (positif) ou débite (négatif) des jetons sur le compte
+              d&apos;un utilisateur.
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-3 py-2">
             <div className="space-y-1">
-              <label htmlFor="route-dashboard-admin-dashboard-client-tsx-1" className="text-xs font-semibold">
+              <label
+                htmlFor="route-dashboard-admin-dashboard-client-tsx-1"
+                className="text-xs font-semibold"
+              >
                 Identifiant Utilisateur (UUID)
               </label>
               <input
                 id="route-dashboard-admin-dashboard-client-tsx-1"
                 type="text"
                 value={adjustUserId}
-                onChange={e => setAdjustUserId(e.target.value)}
+                onChange={(e) => setAdjustUserId(e.target.value)}
                 placeholder="UUID du compte..."
                 className="w-full p-2.5 rounded-xl border border-border/60 bg-muted/20 text-xs font-mono"
               />
             </div>
 
             <div className="space-y-1">
-              <label htmlFor="route-dashboard-admin-dashboard-client-tsx-2" className="text-xs font-semibold">
+              <label
+                htmlFor="route-dashboard-admin-dashboard-client-tsx-2"
+                className="text-xs font-semibold"
+              >
                 Montant en ACH (ex: 150 ou -50)
               </label>
               <input
                 id="route-dashboard-admin-dashboard-client-tsx-2"
                 type="number"
                 value={adjustAmount}
-                onChange={e => setAdjustAmount(Number(e.target.value))}
+                onChange={(e) => setAdjustAmount(Number(e.target.value))}
                 className="w-full p-2.5 rounded-xl border border-border/60 bg-muted/20 text-xs font-bold"
               />
             </div>
 
             <div className="space-y-1">
-              <label htmlFor="route-dashboard-admin-dashboard-client-tsx-3" className="text-xs font-semibold">
+              <label
+                htmlFor="route-dashboard-admin-dashboard-client-tsx-3"
+                className="text-xs font-semibold"
+              >
                 Motif de l&apos;ajustement
               </label>
               <input
                 id="route-dashboard-admin-dashboard-client-tsx-3"
                 type="text"
                 value={adjustReason}
-                onChange={e => setAdjustReason(e.target.value)}
+                onChange={(e) => setAdjustReason(e.target.value)}
                 placeholder="Ex: Prime tournoi, compensation, etc."
                 className="w-full p-2.5 rounded-xl border border-border/60 bg-muted/20 text-xs"
               />
@@ -1287,7 +1548,10 @@ export default function AchilleaAdminDashboardPage() {
             <Button variant="ghost" onClick={() => setAdjustWalletOpen(false)}>
               Annuler
             </Button>
-            <Button onClick={handleAdjustWalletSubmit} disabled={adjusting || !adjustUserId}>
+            <Button
+              onClick={handleAdjustWalletSubmit}
+              disabled={adjusting || !adjustUserId}
+            >
               {adjusting ? "Traitement..." : "Valider l'ajustement"}
             </Button>
           </DialogFooter>

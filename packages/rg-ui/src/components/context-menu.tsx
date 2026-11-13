@@ -7,28 +7,51 @@ import { ContextMenuParts as ContextMenuPrimitive } from "../lib/menu";
 import { cn } from "../lib/utils";
 import type { PrimitiveProps } from "../lib/render";
 
-function ContextMenu({ ...props }: PrimitiveProps<typeof ContextMenuPrimitive.Root>) {
+function ContextMenu({
+  ...props
+}: PrimitiveProps<typeof ContextMenuPrimitive.Root>) {
   return <ContextMenuPrimitive.Root data-slot="context-menu" {...props} />;
 }
 
-function ContextMenuTrigger({ ...props }: PrimitiveProps<typeof ContextMenuPrimitive.Trigger>) {
-  return <ContextMenuPrimitive.Trigger data-slot="context-menu-trigger" {...props} />;
+function ContextMenuTrigger({
+  ...props
+}: PrimitiveProps<typeof ContextMenuPrimitive.Trigger>) {
+  return (
+    <ContextMenuPrimitive.Trigger data-slot="context-menu-trigger" {...props} />
+  );
 }
 
-function ContextMenuGroup({ ...props }: PrimitiveProps<typeof ContextMenuPrimitive.Group>) {
-  return <ContextMenuPrimitive.Group data-slot="context-menu-group" {...props} />;
+function ContextMenuGroup({
+  ...props
+}: PrimitiveProps<typeof ContextMenuPrimitive.Group>) {
+  return (
+    <ContextMenuPrimitive.Group data-slot="context-menu-group" {...props} />
+  );
 }
 
-function ContextMenuPortal({ ...props }: PrimitiveProps<typeof ContextMenuPrimitive.Portal>) {
-  return <ContextMenuPrimitive.Portal data-slot="context-menu-portal" {...props} />;
+function ContextMenuPortal({
+  ...props
+}: PrimitiveProps<typeof ContextMenuPrimitive.Portal>) {
+  return (
+    <ContextMenuPrimitive.Portal data-slot="context-menu-portal" {...props} />
+  );
 }
 
-function ContextMenuSub({ ...props }: PrimitiveProps<typeof ContextMenuPrimitive.Sub>) {
+function ContextMenuSub({
+  ...props
+}: PrimitiveProps<typeof ContextMenuPrimitive.Sub>) {
   return <ContextMenuPrimitive.Sub data-slot="context-menu-sub" {...props} />;
 }
 
-function ContextMenuRadioGroup({ ...props }: PrimitiveProps<typeof ContextMenuPrimitive.RadioGroup>) {
-  return <ContextMenuPrimitive.RadioGroup data-slot="context-menu-radio-group" {...props} />;
+function ContextMenuRadioGroup({
+  ...props
+}: PrimitiveProps<typeof ContextMenuPrimitive.RadioGroup>) {
+  return (
+    <ContextMenuPrimitive.RadioGroup
+      data-slot="context-menu-radio-group"
+      {...props}
+    />
+  );
 }
 
 function ContextMenuSubTrigger({
@@ -55,7 +78,10 @@ function ContextMenuSubTrigger({
   );
 }
 
-function ContextMenuSubContent({ className, ...props }: PrimitiveProps<typeof ContextMenuPrimitive.SubContent>) {
+function ContextMenuSubContent({
+  className,
+  ...props
+}: PrimitiveProps<typeof ContextMenuPrimitive.SubContent>) {
   return (
     <ContextMenuPrimitive.SubContent
       data-slot="context-menu-sub-content"
@@ -68,7 +94,10 @@ function ContextMenuSubContent({ className, ...props }: PrimitiveProps<typeof Co
   );
 }
 
-function ContextMenuContent({ className, ...props }: PrimitiveProps<typeof ContextMenuPrimitive.Content>) {
+function ContextMenuContent({
+  className,
+  ...props
+}: PrimitiveProps<typeof ContextMenuPrimitive.Content>) {
   return (
     <ContextMenuPrimitive.Portal>
       <ContextMenuPrimitive.Content
@@ -167,13 +196,19 @@ function ContextMenuLabel({
     <div
       data-slot="context-menu-label"
       data-inset={inset}
-      className={cn("px-2 py-1.5 text-sm font-medium text-foreground data-[inset]:ps-8", className)}
+      className={cn(
+        "px-2 py-1.5 text-sm font-medium text-foreground data-[inset]:ps-8",
+        className,
+      )}
       {...props}
     />
   );
 }
 
-function ContextMenuSeparator({ className, ...props }: PrimitiveProps<typeof ContextMenuPrimitive.Separator>) {
+function ContextMenuSeparator({
+  className,
+  ...props
+}: PrimitiveProps<typeof ContextMenuPrimitive.Separator>) {
   return (
     <ContextMenuPrimitive.Separator
       data-slot="context-menu-separator"
@@ -183,11 +218,17 @@ function ContextMenuSeparator({ className, ...props }: PrimitiveProps<typeof Con
   );
 }
 
-function ContextMenuShortcut({ className, ...props }: React.ComponentProps<"span">) {
+function ContextMenuShortcut({
+  className,
+  ...props
+}: React.ComponentProps<"span">) {
   return (
     <span
       data-slot="context-menu-shortcut"
-      className={cn("ml-auto text-xs tracking-widest text-muted-foreground", className)}
+      className={cn(
+        "ml-auto text-xs tracking-widest text-muted-foreground",
+        className,
+      )}
       {...props}
     />
   );

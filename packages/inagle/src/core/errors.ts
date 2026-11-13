@@ -32,7 +32,8 @@ export const InagleErrorCode = {
   SCRAPING_ERROR: "SCRAPING_ERROR",
 } as const;
 
-export type InagleErrorCodeType = (typeof InagleErrorCode)[keyof typeof InagleErrorCode];
+export type InagleErrorCodeType =
+  (typeof InagleErrorCode)[keyof typeof InagleErrorCode];
 
 /**
  * Interface pour les détails d'erreur
@@ -68,7 +69,12 @@ export class InagleError extends Error {
   public readonly timestamp: Date;
   public override readonly cause?: Error;
 
-  constructor(code: InagleErrorCodeType, message: string, details?: InagleErrorDetails, cause?: Error) {
+  constructor(
+    code: InagleErrorCodeType,
+    message: string,
+    details?: InagleErrorDetails,
+    cause?: Error,
+  ) {
     super(message);
     this.name = "InagleError";
     this.code = code;
@@ -93,7 +99,9 @@ export class InagleError extends Error {
         parts.push(`  File: ${this.details.filePath}`);
       }
       if (this.details.entityId) {
-        parts.push(`  Entity: ${this.details.entityType || "unknown"}#${this.details.entityId}`);
+        parts.push(
+          `  Entity: ${this.details.entityType || "unknown"}#${this.details.entityId}`,
+        );
       }
       if (this.details.hint) {
         parts.push(`  Hint: ${this.details.hint}`);
@@ -128,7 +136,11 @@ export function isInagleError(error: unknown): error is InagleError {
 /**
  * Wrappe une erreur inconnue en InagleError
  */
-export function wrapError(error: unknown, code: InagleErrorCodeType, context?: string): InagleError {
+export function wrapError(
+  error: unknown,
+  code: InagleErrorCodeType,
+  context?: string,
+): InagleError {
   if (isInagleError(error)) {
     return error;
   }
@@ -144,7 +156,11 @@ export function wrapError(error: unknown, code: InagleErrorCodeType, context?: s
  * Logger structuré pour inagle
  */
 export const inagleLogger = {
-  warn(code: InagleErrorCodeType, message: string, details?: InagleErrorDetails): void {
+  warn(
+    code: InagleErrorCodeType,
+    message: string,
+    details?: InagleErrorDetails,
+  ): void {
     console.warn(`[Inagle] ${code}: ${message}`, details ?? "");
   },
 

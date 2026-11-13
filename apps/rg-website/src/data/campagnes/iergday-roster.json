@@ -21,20 +21,12 @@
   "avertissement": "Fichier GÉNÉRÉ par scripts/campagnes/exporter-participants.ts. Ne jamais l'éditer à la main : il est reconstruit à chaque collecte et toute correction manuelle serait écrasée sans bruit. Un arbitrage se pose dans x_campagne_participants (colonnes eligible, motif_ineligible, fusionne_dans, verrouille), pas ici.",
   "campagne": {
     "collecte_le": "2026-08-26T16:20:19.808Z",
-    "comptes_organisateurs": [
-      "rose_griffon"
-    ],
+    "comptes_organisateurs": ["rose_griffon"],
     "debut_le": null,
     "fin_le": "2026-08-22T21:59:59.000Z",
-    "hashtags": [
-      "iergday"
-    ],
-    "hashtags_affichage": [
-      "IERGDay"
-    ],
-    "hashtags_rattrapage": [
-      "inazumargday"
-    ],
+    "hashtags": ["iergday"],
+    "hashtags_affichage": ["IERGDay"],
+    "hashtags_rattrapage": ["inazumargday"],
     "publiee": true,
     "reglement": [
       "Postez une image mettant en scène un OC accompagné du #IERGDay sur Twitter ou Instagram.",
@@ -42,9 +34,7 @@
       "Vous pouvez participer autant de fois que vous le souhaitez.",
       "L'utilisation d'IA est absolument interdite."
     ],
-    "salons_depot": [
-      "1537458038623965194"
-    ],
+    "salons_depot": ["1537458038623965194"],
     "slug": "iergday",
     "sur_titre": "IERG Day",
     "titre": "Un mois de célébration"
@@ -876,17 +866,11 @@
       "motif_ineligible": null,
       "nb_creations_brutes": 3,
       "nb_oeuvres": 2,
-      "oeuvres": [
-        "discord:1540301925298348062",
-        "x:2090455666267713840"
-      ],
+      "oeuvres": ["discord:1540301925298348062", "x:2090455666267713840"],
       "poids": 2,
       "premiere_le": "2026-08-20T07:25:46.647Z",
       "pseudo_affichage": "Sanada",
-      "sources": [
-        "discord",
-        "x"
-      ]
+      "sources": ["discord", "x"]
     },
     {
       "cle_publique": "bfbc38b7ce33e4fd",
@@ -895,16 +879,11 @@
       "motif_ineligible": null,
       "nb_creations_brutes": 2,
       "nb_oeuvres": 2,
-      "oeuvres": [
-        "instagram:DcUEDDKoTgP",
-        "instagram:DcW22ScIdYv"
-      ],
+      "oeuvres": ["instagram:DcUEDDKoTgP", "instagram:DcW22ScIdYv"],
       "poids": 2,
       "premiere_le": "2026-08-21T19:13:55.054Z",
       "pseudo_affichage": "orphelinalius",
-      "sources": [
-        "instagram"
-      ]
+      "sources": ["instagram"]
     },
     {
       "cle_publique": "a34011f072de1e83",
@@ -913,15 +892,11 @@
       "motif_ineligible": null,
       "nb_creations_brutes": 1,
       "nb_oeuvres": 1,
-      "oeuvres": [
-        "x:2087922862803841524"
-      ],
+      "oeuvres": ["x:2087922862803841524"],
       "poids": 1,
       "premiere_le": "2026-08-13T15:22:56.000Z",
       "pseudo_affichage": "Ruvi_Seiya",
-      "sources": [
-        "x"
-      ]
+      "sources": ["x"]
     },
     {
       "cle_publique": "8d2c2443d063968f",
@@ -930,15 +905,11 @@
       "motif_ineligible": null,
       "nb_creations_brutes": 1,
       "nb_oeuvres": 1,
-      "oeuvres": [
-        "x:2087923415000789199"
-      ],
+      "oeuvres": ["x:2087923415000789199"],
       "poids": 1,
       "premiere_le": "2026-08-13T15:25:08.000Z",
       "pseudo_affichage": "Inazo",
-      "sources": [
-        "x"
-      ]
+      "sources": ["x"]
     },
     {
       "cle_publique": "8173911f6d314d52",
@@ -947,15 +918,11 @@
       "motif_ineligible": null,
       "nb_creations_brutes": 1,
       "nb_oeuvres": 1,
-      "oeuvres": [
-        "x:2087998363211825503"
-      ],
+      "oeuvres": ["x:2087998363211825503"],
       "poids": 1,
       "premiere_le": "2026-08-13T20:22:57.000Z",
       "pseudo_affichage": "Grimnape",
-      "sources": [
-        "x"
-      ]
+      "sources": ["x"]
     },
     {
       "cle_publique": "f5da8c3824cbf6d3",
@@ -964,15 +931,11 @@
       "motif_ineligible": null,
       "nb_creations_brutes": 1,
       "nb_oeuvres": 1,
-      "oeuvres": [
-        "x:2090513552087879823"
-      ],
+      "oeuvres": ["x:2090513552087879823"],
       "poids": 1,
       "premiere_le": "2026-08-20T18:57:25.000Z",
       "pseudo_affichage": "Lya",
-      "sources": [
-        "x"
-      ]
+      "sources": ["x"]
     },
     {
       "cle_publique": "1c24f2746294fec3",
@@ -981,15 +944,11 @@
       "motif_ineligible": null,
       "nb_creations_brutes": 1,
       "nb_oeuvres": 1,
-      "oeuvres": [
-        "x:2090897441985896710"
-      ],
+      "oeuvres": ["x:2090897441985896710"],
       "poids": 1,
       "premiere_le": "2026-08-21T20:22:51.000Z",
       "pseudo_affichage": "Haroldinho",
-      "sources": [
-        "x"
-      ]
+      "sources": ["x"]
     },
     {
       "cle_publique": "9d5c5d3f2f9dfb4e",
@@ -998,16 +957,11 @@
       "motif_ineligible": null,
       "nb_creations_brutes": 2,
       "nb_oeuvres": 1,
-      "oeuvres": [
-        "x:2090899354148368577"
-      ],
+      "oeuvres": ["x:2090899354148368577"],
       "poids": 1,
       "premiere_le": "2026-08-21T20:24:27.681Z",
       "pseudo_affichage": "Munfurawa",
-      "sources": [
-        "discord",
-        "x"
-      ]
+      "sources": ["discord", "x"]
     },
     {
       "cle_publique": "2571c7c01298b90a",
@@ -1016,16 +970,11 @@
       "motif_ineligible": null,
       "nb_creations_brutes": 2,
       "nb_oeuvres": 1,
-      "oeuvres": [
-        "x:2091112393455632493"
-      ],
+      "oeuvres": ["x:2091112393455632493"],
       "poids": 1,
       "premiere_le": "2026-08-21T23:50:29.259Z",
       "pseudo_affichage": "Cieran / FujoRin",
-      "sources": [
-        "discord",
-        "x"
-      ]
+      "sources": ["discord", "x"]
     },
     {
       "cle_publique": "c28146fd79d7dd01",
@@ -1034,16 +983,11 @@
       "motif_ineligible": null,
       "nb_creations_brutes": 2,
       "nb_oeuvres": 1,
-      "oeuvres": [
-        "x:2091195848247885914"
-      ],
+      "oeuvres": ["x:2091195848247885914"],
       "poids": 1,
       "premiere_le": "2026-08-22T15:19:05.275Z",
       "pseudo_affichage": "kittycaillou / sigmimi",
-      "sources": [
-        "discord",
-        "x"
-      ]
+      "sources": ["discord", "x"]
     },
     {
       "cle_publique": "759de4391aa09ce6",
@@ -1052,15 +996,11 @@
       "motif_ineligible": null,
       "nb_creations_brutes": 1,
       "nb_oeuvres": 1,
-      "oeuvres": [
-        "discord:1540784107729064108"
-      ],
+      "oeuvres": ["discord:1540784107729064108"],
       "poids": 1,
       "premiere_le": "2026-08-22T18:05:57.667Z",
       "pseudo_affichage": "Jenn Scarlet",
-      "sources": [
-        "discord"
-      ]
+      "sources": ["discord"]
     },
     {
       "cle_publique": "7ee2f15e330bba7b",
@@ -1069,15 +1009,11 @@
       "motif_ineligible": null,
       "nb_creations_brutes": 1,
       "nb_oeuvres": 1,
-      "oeuvres": [
-        "discord:1540790666056040508"
-      ],
+      "oeuvres": ["discord:1540790666056040508"],
       "poids": 1,
       "premiere_le": "2026-08-22T18:32:01.294Z",
       "pseudo_affichage": "✧˚Karu˚✧",
-      "sources": [
-        "discord"
-      ]
+      "sources": ["discord"]
     },
     {
       "cle_publique": "21eb9299be683904",
@@ -1086,15 +1022,11 @@
       "motif_ineligible": null,
       "nb_creations_brutes": 1,
       "nb_oeuvres": 1,
-      "oeuvres": [
-        "discord:1540808591806570586"
-      ],
+      "oeuvres": ["discord:1540808591806570586"],
       "poids": 1,
       "premiere_le": "2026-08-22T19:43:15.126Z",
       "pseudo_affichage": "Isma",
-      "sources": [
-        "discord"
-      ]
+      "sources": ["discord"]
     },
     {
       "cle_publique": "9b398f8513658cdb",
@@ -1103,15 +1035,11 @@
       "motif_ineligible": null,
       "nb_creations_brutes": 1,
       "nb_oeuvres": 1,
-      "oeuvres": [
-        "discord:1540837023487631391"
-      ],
+      "oeuvres": ["discord:1540837023487631391"],
       "poids": 1,
       "premiere_le": "2026-08-22T21:36:13.767Z",
       "pseudo_affichage": "ThunderAce / Kaze",
-      "sources": [
-        "discord"
-      ]
+      "sources": ["discord"]
     },
     {
       "cle_publique": "d8eaefbf5d0c5891",
@@ -1120,15 +1048,11 @@
       "motif_ineligible": null,
       "nb_creations_brutes": 1,
       "nb_oeuvres": 1,
-      "oeuvres": [
-        "discord:1540842925456359557"
-      ],
+      "oeuvres": ["discord:1540842925456359557"],
       "poids": 1,
       "premiere_le": "2026-08-22T21:59:40.906Z",
       "pseudo_affichage": "Deb",
-      "sources": [
-        "discord"
-      ]
+      "sources": ["discord"]
     }
   ],
   "seuil_doublon": {

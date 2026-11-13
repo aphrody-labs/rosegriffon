@@ -21,7 +21,9 @@ export const clanController = new Elysia({ prefix: "/clans" })
       body: t.Object({ name: t.String() }),
       response: {
         200: ClanModel.validation,
-        401: t.Object({ message: t.Literal("Internal authentication required") }),
+        401: t.Object({
+          message: t.Literal("Internal authentication required"),
+        }),
       },
     },
   )
@@ -39,7 +41,9 @@ export const clanController = new Elysia({ prefix: "/clans" })
       body: t.Object({ shortName: t.String() }),
       response: {
         200: ClanModel.validation,
-        401: t.Object({ message: t.Literal("Internal authentication required") }),
+        401: t.Object({
+          message: t.Literal("Internal authentication required"),
+        }),
       },
     },
   )
@@ -47,7 +51,8 @@ export const clanController = new Elysia({ prefix: "/clans" })
     "/me",
     async ({ db, headers }) => {
       const session = await resolveAchilleaSession(headers);
-      if (!session) return status(401, { message: "Authentication required" as const });
+      if (!session)
+        return status(401, { message: "Authentication required" as const });
       const membership = await db
         .selectFrom("clan_member as cm")
         .innerJoin("clan as c", "c.id", "cm.clan_id")
@@ -69,7 +74,11 @@ export const clanController = new Elysia({ prefix: "/clans" })
     "/",
     async ({ db, query }) => {
       // `pagination` est le nom qu'envoie `AchilleaClient.clans.list` (contrat legacy).
-      return await ClanService.findAll(db, query.page, query.pageSize ?? query.pagination);
+      return await ClanService.findAll(
+        db,
+        query.page,
+        query.pageSize ?? query.pagination,
+      );
     },
     {
       query: t.Object({
@@ -87,7 +96,8 @@ export const clanController = new Elysia({ prefix: "/clans" })
     "/invites",
     async ({ db, headers }) => {
       const session = await resolveAchilleaSession(headers);
-      if (!session) return status(401, { message: "Authentication required" as const });
+      if (!session)
+        return status(401, { message: "Authentication required" as const });
       const result = await ClanService.listInvitesForManager(db, session.id);
       if (!result.ok) return status(result.status, { message: result.message });
       return result.data;
@@ -104,8 +114,12 @@ export const clanController = new Elysia({ prefix: "/clans" })
     "/applications",
     async ({ db, headers }) => {
       const session = await resolveAchilleaSession(headers);
-      if (!session) return status(401, { message: "Authentication required" as const });
-      const result = await ClanService.listApplicationsForManager(db, session.id);
+      if (!session)
+        return status(401, { message: "Authentication required" as const });
+      const result = await ClanService.listApplicationsForManager(
+        db,
+        session.id,
+      );
       if (!result.ok) return status(result.status, { message: result.message });
       return result.data;
     },
@@ -121,10 +135,19 @@ export const clanController = new Elysia({ prefix: "/clans" })
     "/:id",
     async ({ db, headers, params, body, set }) => {
       const session = await resolveAchilleaSession(headers);
-      if (!session) return status(401, { message: "Authentication required" as const });
+      if (!session)
+        return status(401, { message: "Authentication required" as const });
       const result = await ClanService.update(db, params.id, session.id, body);
-      if (!result.ok) return status(result.status as 400 | 401 | 403 | 404, { message: result.message });
-      return { success: true as const, previousName: result.previousName, roleId: result.roleId, clan: result.clan };
+      if (!result.ok)
+        return status(result.status as 400 | 401 | 403 | 404, {
+          message: result.message,
+        });
+      return {
+        success: true as const,
+        previousName: result.previousName,
+        roleId: result.roleId,
+        clan: result.clan,
+      };
     },
     {
       params: t.Object({ id: t.Numeric() }),
@@ -179,7 +202,7 @@ export const clanController = new Elysia({ prefix: "/clans" })
         .where("cm.clan_id", "=", id)
         .orderBy("cm.role", "asc")
         .execute();
-      return rows.map(row => ({
+      return rows.map((row) => ({
         clanRole: Number(row.role),
         distinctions: row.distinctions ?? [],
         clanFameContributed: Number(row.clan_fame_contributed ?? 0),
@@ -197,5 +220,8 @@ export const clanController = new Elysia({ prefix: "/clans" })
         },
       }));
     },
-    { params: t.Object({ id: t.Numeric() }), response: { 200: ClanModel.members } },
+    {
+      params: t.Object({ id: t.Numeric() }),
+      response: { 200: ClanModel.members },
+    },
   );

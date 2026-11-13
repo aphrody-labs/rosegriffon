@@ -24,5 +24,7 @@ export function clientActif(): Client | null {
 
 /** Résout dès que le client existe (immédiatement s'il existe déjà). */
 export function attendreClientActif(): Promise<Client> {
-  return client ? Promise.resolve(client) : new Promise(resoudre => enAttente.add(resoudre));
+  return client
+    ? Promise.resolve(client)
+    : new Promise((resoudre) => enAttente.add(resoudre));
 }

@@ -52,6 +52,9 @@ export async function GET(req: Request) {
     });
   } catch (error) {
     console.error("Erreur GET utilisateurs:", error);
-    return NextResponse.json({ error: "Erreur lors du chargement des utilisateurs", success: false }, { status: 500 });
+    return NextResponse.json(
+      { error: "Erreur lors du chargement des utilisateurs", success: false },
+      { status: 500 },
+    );
   }
 }

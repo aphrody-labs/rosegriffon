@@ -157,9 +157,13 @@ test("MCP server runs nie_headless_pipeline end-to-end", async () => {
   expect(parsed.filmcraft_timeline.smpteCues.length).toBeGreaterThanOrEqual(6);
 
   // Validate output files on disk
-  expect(existsSync(resolve(testOutDir, "002AB8F4-USERDATALIVE.bin"))).toBe(true);
+  expect(existsSync(resolve(testOutDir, "002AB8F4-USERDATALIVE.bin"))).toBe(
+    true,
+  );
   expect(existsSync(resolve(testOutDir, "nie_memory_dump.bin"))).toBe(true);
   expect(existsSync(resolve(testOutDir, "nie_memory_map.json"))).toBe(true);
   expect(existsSync(resolve(testOutDir, "frames/timeline.json"))).toBe(true);
-  expect(existsSync(resolve(testOutDir, "frames/frame_00000_boot_00.png"))).toBe(true);
+  expect(
+    existsSync(resolve(testOutDir, "frames/frame_00000_boot_00.png")),
+  ).toBe(true);
 });

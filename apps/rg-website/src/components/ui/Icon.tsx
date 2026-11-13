@@ -27,11 +27,23 @@ export interface IconProps {
   preferSprite?: boolean;
 }
 
-export const Icon = ({ name, fill = false, size = 24, className, preferSprite = true }: IconProps) => {
+export const Icon = ({
+  name,
+  fill = false,
+  size = 24,
+  className,
+  preferSprite = true,
+}: IconProps) => {
   if (preferSprite) {
     const spriteKey = SPRITE_FOR_ICON[name];
     if (spriteKey) {
-      return <CommonSpriteIcon name={spriteKey} scale={size / 64} className={cn(className)} />;
+      return (
+        <CommonSpriteIcon
+          name={spriteKey}
+          scale={size / 64}
+          className={cn(className)}
+        />
+      );
     }
   }
 
@@ -42,9 +54,22 @@ export const Icon = ({ name, fill = false, size = 24, className, preferSprite = 
     // En développement on le rend visible ; en production on n'affiche rien.
     if (process.env.NODE_ENV !== "production") {
       console.warn(`Icon inconnue : « ${name} » (absente de iconMap)`);
-      return <CircleHelp size={size} className={cn("opacity-40", className)} aria-hidden="true" />;
+      return (
+        <CircleHelp
+          size={size}
+          className={cn("opacity-40", className)}
+          aria-hidden="true"
+        />
+      );
     }
     return null;
   }
-  return <LucideIcon size={size} className={cn(className)} fill={fill ? "currentColor" : "none"} aria-hidden="true" />;
+  return (
+    <LucideIcon
+      size={size}
+      className={cn(className)}
+      fill={fill ? "currentColor" : "none"}
+      aria-hidden="true"
+    />
+  );
 };

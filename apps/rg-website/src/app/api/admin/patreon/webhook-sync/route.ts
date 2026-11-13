@@ -43,7 +43,8 @@ export async function POST(req: Request) {
   const supabase = createPostgresClient();
 
   const url = new URL(req.url);
-  const targetUri = url.searchParams.get("uri") ?? absoluteUrl("/api/auth/patreon/webhook");
+  const targetUri =
+    url.searchParams.get("uri") ?? absoluteUrl("/api/auth/patreon/webhook");
 
   // 1. Récupère le creator token (déchiffré)
   const { data: tokenRow } = await supabase
@@ -54,15 +55,22 @@ export async function POST(req: Request) {
     .limit(1)
     .maybeSingle();
   if (!tokenRow) {
-    return NextResponse.json({ ok: false, reason: "no_creator_token" }, { status: 400 });
+    return NextResponse.json(
+      { ok: false, reason: "no_creator_token" },
+      { status: 400 },
+    );
   }
-  const creatorToken = decryptToken((tokenRow as { access_token_enc: string }).access_token_enc);
+  const creatorToken = decryptToken(
+    (tokenRow as { access_token_enc: string }).access_token_enc,
+  );
 
   // 2. Récupère le campaign_id du créateur (via /campaigns)
   let campaignId: string | null;
   try {
     const campaigns = await patreonFetch(creatorToken, "/campaigns");
-    const data = Array.isArray(campaigns.data) ? campaigns.data[0] : campaigns.data;
+    const data = Array.isArray(campaigns.data)
+      ? campaigns.data[0]
+      : campaigns.data;
     campaignId = data?.id ?? null;
   } catch (error) {
     console.error("[admin/webhook-sync] fetch campaigns failed", error);
@@ -76,7 +84,10 @@ export async function POST(req: Request) {
     );
   }
   if (!campaignId) {
-    return NextResponse.json({ ok: false, reason: "no_campaign" }, { status: 400 });
+    return NextResponse.json(
+      { ok: false, reason: "no_campaign" },
+      { status: 400 },
+    );
   }
 
   // 3. Liste les webhooks existants pour cette campaign
@@ -86,7 +97,7 @@ export async function POST(req: Request) {
     const arr = (Array.isArray(list.data) ? list.data : [list.data]).filter(
       Boolean,
     ) as unknown as PatreonWebhookResource[];
-    const ours = arr.find(w => w.attributes?.uri === targetUri);
+    const ours = arr.find((w) => w.attributes?.uri === targetUri);
     existingId = ours?.id ?? null;
   } catch (error) {
     console.warn("[admin/webhook-sync] list webhooks failed (proceed)", error);
@@ -128,7 +139,11 @@ export async function POST(req: Request) {
     });
     if (!res.ok) {
       const text = await res.text();
-      throw new PatreonApiError(`webhook ${method} ${res.status}`, res.status, text);
+      throw new PatreonApiError(
+        `webhook ${method} ${res.status}`,
+        res.status,
+        text,
+      );
     }
     const json = (await res.json()) as { data: PatreonWebhookResource };
     result = json.data;
@@ -155,7 +170,8 @@ export async function POST(req: Request) {
       .from("patreon_webhook_state")
       .update({
         last_attempted_at: result.attributes.last_attempted_at,
-        num_consecutive_times_failed: result.attributes.num_consecutive_times_failed,
+        num_consecutive_times_failed:
+          result.attributes.num_consecutive_times_failed,
         patreon_webhook_id: result.id,
         paused: result.attributes.paused,
         triggers: result.attributes.triggers,
@@ -175,7 +191,8 @@ export async function POST(req: Request) {
           uri: result.attributes.uri,
           triggers: result.attributes.triggers,
           paused: result.attributes.paused,
-          num_consecutive_times_failed: result.attributes.num_consecutive_times_failed,
+          num_consecutive_times_failed:
+            result.attributes.num_consecutive_times_failed,
         }
       : null,
   });
@@ -196,9 +213,14 @@ export async function GET() {
     .limit(1)
     .maybeSingle();
   if (!tokenRow) {
-    return NextResponse.json({ ok: false, reason: "no_creator_token" }, { status: 400 });
+    return NextResponse.json(
+      { ok: false, reason: "no_creator_token" },
+      { status: 400 },
+    );
   }
-  const creatorToken = decryptToken((tokenRow as { access_token_enc: string }).access_token_enc);
+  const creatorToken = decryptToken(
+    (tokenRow as { access_token_enc: string }).access_token_enc,
+  );
 
   try {
     const list = await patreonFetch(creatorToken, "/webhooks");
@@ -207,7 +229,7 @@ export async function GET() {
     ) as unknown as PatreonWebhookResource[];
     return NextResponse.json({
       ok: true,
-      webhooks: arr.map(w => ({
+      webhooks: arr.map((w) => ({
         id: w.id,
         last_attempted_at: w.attributes.last_attempted_at,
         num_consecutive_times_failed: w.attributes.num_consecutive_times_failed,

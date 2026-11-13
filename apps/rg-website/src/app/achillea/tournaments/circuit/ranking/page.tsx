@@ -7,7 +7,8 @@ import CircuitRankingClient from "./circuit-ranking-client";
  */
 export const metadata = metadonneesAchillea({
   titre: "Classement du circuit",
-  description: "Le classement général du circuit Achilléa : joueurs, clans et tournois comptant pour la saison.",
+  description:
+    "Le classement général du circuit Achilléa : joueurs, clans et tournois comptant pour la saison.",
   chemin: "/achillea/tournaments/circuit/ranking",
   indexable: true,
 });

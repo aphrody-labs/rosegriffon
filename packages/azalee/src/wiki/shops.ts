@@ -1,8 +1,17 @@
 import { createInagleSql } from "@rosegriffon/db/inagle-sql";
-import { type ShopDetail, type ShopItem, type ShopSummary } from "./shops-shared";
+import {
+  type ShopDetail,
+  type ShopItem,
+  type ShopSummary,
+} from "./shops-shared";
 
 // Ré-export des types + constante depuis le module client-safe (compat imports existants).
-export { SHOP_CATEGORY_FR, type ShopDetail, type ShopItem, type ShopSummary } from "./shops-shared";
+export {
+  SHOP_CATEGORY_FR,
+  type ShopDetail,
+  type ShopItem,
+  type ShopSummary,
+} from "./shops-shared";
 
 /**
  * Accès données dédié à la section « Boutiques » (table `inagle_shops`, 2331 lignes).
@@ -74,7 +83,16 @@ async function fetchAllShopRows(): Promise<RawShopRow[]> {
   try {
     return await sql
       .selectFrom("inagle_shops")
-      .select(["shop_id", "name_fr", "name_en", "name_ja", "item_db_id", "item_name_fr", "item_name_en", "slot_index"])
+      .select([
+        "shop_id",
+        "name_fr",
+        "name_en",
+        "name_ja",
+        "item_db_id",
+        "item_name_fr",
+        "item_name_en",
+        "slot_index",
+      ])
       .orderBy("shop_id", "asc")
       .orderBy("slot_index", "asc")
       .execute();
@@ -85,13 +103,22 @@ async function fetchAllShopRows(): Promise<RawShopRow[]> {
 }
 
 /** Index `inagle_items.id` → métadonnées (nom FR, catégorie, icône) pour un set d'ids. */
-async function fetchItemsByIds(ids: string[]): Promise<Map<string, RawItemRow>> {
+async function fetchItemsByIds(
+  ids: string[],
+): Promise<Map<string, RawItemRow>> {
   const map = new Map<string, RawItemRow>();
   if (ids.length === 0) return map;
   try {
     const rows = await sql
       .selectFrom("inagle_items")
-      .select(["id", "name_fr", "name_en", "category", "image_url", "internal_code"])
+      .select([
+        "id",
+        "name_fr",
+        "name_en",
+        "category",
+        "image_url",
+        "internal_code",
+      ])
       .where("id", "in", ids)
       .execute();
     for (const row of rows) {
@@ -106,7 +133,9 @@ async function fetchItemsByIds(ids: string[]): Promise<Map<string, RawItemRow>> 
 /** Liste de toutes les boutiques avec compteurs + répartition par catégorie. */
 export async function getShopsList(): Promise<ShopSummary[]> {
   const rows = await fetchAllShopRows();
-  const itemIds = Array.from(new Set(rows.map(r => r.item_db_id).filter((v): v is string => !!v)));
+  const itemIds = Array.from(
+    new Set(rows.map((r) => r.item_db_id).filter((v): v is string => !!v)),
+  );
   const itemMap = await fetchItemsByIds(itemIds);
 
   const byShop = new Map<
@@ -139,30 +168,43 @@ export async function getShopsList(): Promise<ShopSummary[]> {
     if (cat) entry.cats.set(cat, (entry.cats.get(cat) || 0) + 1);
   }
 
-  const list: ShopSummary[] = Array.from(byShop.entries()).map(([shopId, e]) => ({
-    shopId: Number(shopId),
-    name: resolveShopName(Number(shopId), e.name_fr),
-    nameEn: e.name_en || null,
-    nameJa: e.name_ja || null,
-    itemCount: e.count,
-    categories: Array.from(e.cats.entries())
-      .map(([category, count]) => ({ category, count }))
-      .sort((a, b) => b.count - a.count),
-  }));
+  const list: ShopSummary[] = Array.from(byShop.entries()).map(
+    ([shopId, e]) => ({
+      shopId: Number(shopId),
+      name: resolveShopName(Number(shopId), e.name_fr),
+      nameEn: e.name_en || null,
+      nameJa: e.name_ja || null,
+      itemCount: e.count,
+      categories: Array.from(e.cats.entries())
+        .map(([category, count]) => ({ category, count }))
+        .sort((a, b) => b.count - a.count),
+    }),
+  );
 
   list.sort((a, b) => b.itemCount - a.itemCount);
   return list;
 }
 
 /** Détail d'une boutique : métadonnées + liste complète des objets vendus. */
-export async function getShop(shopId: number | string): Promise<ShopDetail | null> {
+export async function getShop(
+  shopId: number | string,
+): Promise<ShopDetail | null> {
   const numId = typeof shopId === "number" ? shopId : Number(shopId);
   if (!Number.isFinite(numId)) return null;
   let rows: RawShopRow[];
   try {
     rows = await sql
       .selectFrom("inagle_shops")
-      .select(["shop_id", "name_fr", "name_en", "name_ja", "item_db_id", "item_name_fr", "item_name_en", "slot_index"])
+      .select([
+        "shop_id",
+        "name_fr",
+        "name_en",
+        "name_ja",
+        "item_db_id",
+        "item_name_fr",
+        "item_name_en",
+        "slot_index",
+      ])
       .where("shop_id", "=", numId)
       .orderBy("slot_index", "asc")
       .execute();
@@ -172,7 +214,9 @@ export async function getShop(shopId: number | string): Promise<ShopDetail | nul
   }
   if (rows.length === 0) return null;
 
-  const itemIds = Array.from(new Set(rows.map(r => r.item_db_id).filter((v): v is string => !!v)));
+  const itemIds = Array.from(
+    new Set(rows.map((r) => r.item_db_id).filter((v): v is string => !!v)),
+  );
   const itemMap = await fetchItemsByIds(itemIds);
 
   const seen = new Set<string>();
@@ -180,7 +224,8 @@ export async function getShop(shopId: number | string): Promise<ShopDetail | nul
   const cats = new Map<string, number>();
 
   for (const r of rows) {
-    const dbId = r.item_db_id || r.item_name_fr || `${r.shop_id}:${r.slot_index ?? ""}`;
+    const dbId =
+      r.item_db_id || r.item_name_fr || `${r.shop_id}:${r.slot_index ?? ""}`;
     // déduplication (un même objet peut apparaître plusieurs fois)
     const key = `${dbId}:${r.slot_index ?? ""}`;
     if (seen.has(key)) continue;

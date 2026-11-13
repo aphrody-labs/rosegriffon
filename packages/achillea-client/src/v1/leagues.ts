@@ -112,7 +112,9 @@ export class LeaguesResource extends AchilleaResource {
    * `GET /leagues/astral` — règlement, classement, résultats et play-offs.
    * Les alias `astral-s1`, `asytral` et `asytral-s1` pointent le même payload.
    */
-  astral(alias: AstralAlias = "astral"): Promise<AchilleaClientResult<LeagueSeasonPayload>> {
+  astral(
+    alias: AstralAlias = "astral",
+  ): Promise<AchilleaClientResult<LeagueSeasonPayload>> {
     return this.http.get(`/leagues/${alias}`, leagueSeasonPayloadSchema);
   }
 }

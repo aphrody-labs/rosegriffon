@@ -18,7 +18,13 @@
 import type { LicenceVrm0, MetaVrm1, ModeleVroid } from "./types";
 
 /** Verdict affiché pour une condition. */
-export type Verdict = "autorise" | "interdit" | "non-lucratif" | "requis" | "non-requis" | "inconnu";
+export type Verdict =
+  | "autorise"
+  | "interdit"
+  | "non-lucratif"
+  | "requis"
+  | "non-requis"
+  | "inconnu";
 
 /** Une ligne du bloc de conditions d'utilisation. */
 export interface ConditionUtilisation {
@@ -37,7 +43,8 @@ export interface ConditionsModele {
 }
 
 /** Titre imposé par les guidelines pixiv, en français. */
-export const TITRE_CONDITIONS = "Conditions d'utilisation des données du modèle";
+export const TITRE_CONDITIONS =
+  "Conditions d'utilisation des données du modèle";
 
 /** Texte affiché pour chaque verdict. */
 export const TEXTE_VERDICT: Record<Verdict, string> = {
@@ -56,7 +63,9 @@ function depuisBooleen(valeur: boolean | undefined): Verdict {
 }
 
 /** Traduit un triplet VRM 0.0 `default | allow | disallow`. */
-function depuisTriplet(valeur: "default" | "allow" | "disallow" | undefined): Verdict {
+function depuisTriplet(
+  valeur: "default" | "allow" | "disallow" | undefined,
+): Verdict {
   if (valeur === "allow") return "autorise";
   if (valeur === "disallow") return "interdit";
   return "inconnu";
@@ -108,7 +117,12 @@ function conditionsVrm1(meta: MetaVrm1): ConditionUtilisation[] {
     {
       cle: "entreprise",
       libelle: "Usage par une entreprise",
-      verdict: commercial === undefined ? "inconnu" : commercial === "corporation" ? "autorise" : "interdit",
+      verdict:
+        commercial === undefined
+          ? "inconnu"
+          : commercial === "corporation"
+            ? "autorise"
+            : "interdit",
     },
     {
       cle: "commercial-perso",
@@ -128,7 +142,12 @@ function conditionsVrm1(meta: MetaVrm1): ConditionUtilisation[] {
     {
       cle: "modification",
       libelle: "Modifications",
-      verdict: modification === undefined ? "inconnu" : modification === "prohibited" ? "interdit" : "autorise",
+      verdict:
+        modification === undefined
+          ? "inconnu"
+          : modification === "prohibited"
+            ? "interdit"
+            : "autorise",
     },
     {
       cle: "redistribution-modifiee",
@@ -144,7 +163,11 @@ function conditionsVrm1(meta: MetaVrm1): ConditionUtilisation[] {
       cle: "credit",
       libelle: "Mention de l'auteur",
       verdict:
-        meta.creditNotation === undefined ? "inconnu" : meta.creditNotation === "required" ? "requis" : "non-requis",
+        meta.creditNotation === undefined
+          ? "inconnu"
+          : meta.creditNotation === "required"
+            ? "requis"
+            : "non-requis",
     },
   ];
 }
@@ -202,7 +225,12 @@ function conditionsVrm0(licence: LicenceVrm0): ConditionUtilisation[] {
     {
       cle: "credit",
       libelle: "Mention de l'auteur",
-      verdict: licence.credit === "necessary" ? "requis" : licence.credit === "unnecessary" ? "non-requis" : "inconnu",
+      verdict:
+        licence.credit === "necessary"
+          ? "requis"
+          : licence.credit === "unnecessary"
+            ? "non-requis"
+            : "inconnu",
     },
   ];
 }
@@ -222,7 +250,10 @@ export function conditionsDuModele(modele: ModeleVroid): ConditionsModele {
     return { specification: "vrm1", conditions: conditionsVrm1(meta) };
   }
   if (modele.license) {
-    return { specification: "vrm0", conditions: conditionsVrm0(modele.license) };
+    return {
+      specification: "vrm0",
+      conditions: conditionsVrm0(modele.license),
+    };
   }
   return { specification: "inconnue", conditions: [] };
 }
@@ -236,7 +267,7 @@ export function conditionsDuModele(modele: ModeleVroid): ConditionsModele {
  */
 export function creditRequis(modele: ModeleVroid): boolean {
   const { conditions } = conditionsDuModele(modele);
-  const credit = conditions.find(condition => condition.cle === "credit");
+  const credit = conditions.find((condition) => condition.cle === "credit");
   return credit?.verdict !== "non-requis";
 }
 
@@ -254,5 +285,7 @@ export function estChargeable(modele: ModeleVroid): boolean {
 
 /** Nom affichable d'un modèle — l'API laisse `name` à `null` très souvent. */
 export function nomModele(modele: ModeleVroid): string {
-  return modele.name?.trim() || modele.character?.name?.trim() || "Modèle sans titre";
+  return (
+    modele.name?.trim() || modele.character?.name?.trim() || "Modèle sans titre"
+  );
 }

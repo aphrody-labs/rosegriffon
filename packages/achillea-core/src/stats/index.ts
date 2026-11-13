@@ -6,7 +6,11 @@
  * localement les mêmes chiffres que l'API.
  */
 
-import type { CompetitionStats, RankTier, RankedModeStats } from "@rosegriffon/achillea-types";
+import type {
+  CompetitionStats,
+  RankTier,
+  RankedModeStats,
+} from "@rosegriffon/achillea-types";
 
 import { clamp, toCount, toFinite } from "../numbers/index";
 
@@ -18,7 +22,11 @@ export function winRate(wins: number, total: number): number {
 }
 
 /** Taux de victoire en pourcentage arrondi. */
-export function winRatePercent(wins: number, total: number, digits = 0): number {
+export function winRatePercent(
+  wins: number,
+  total: number,
+  digits = 0,
+): number {
   const factor = 10 ** digits;
   return Math.round(winRate(wins, total) * 100 * factor) / factor;
 }
@@ -78,15 +86,18 @@ export interface TierBucket<T extends RankTier = RankTier> {
  * Distribution d'une population d'Elo sur des paliers.
  * Les paliers sont supposés couvrants ; un Elo hors bornes est ignoré.
  */
-export function tierDistribution<T extends RankTier>(elos: readonly number[], tiers: readonly T[]): TierBucket<T>[] {
+export function tierDistribution<T extends RankTier>(
+  elos: readonly number[],
+  tiers: readonly T[],
+): TierBucket<T>[] {
   const counts = new Map<string, number>();
   for (const elo of elos) {
-    const tier = tiers.find(t => elo >= t.minElo && elo <= t.maxElo);
+    const tier = tiers.find((t) => elo >= t.minElo && elo <= t.maxElo);
     if (!tier) continue;
     counts.set(tier.key, (counts.get(tier.key) ?? 0) + 1);
   }
   const total = Array.from(counts.values()).reduce((sum, n) => sum + n, 0);
-  return tiers.map(tier => {
+  return tiers.map((tier) => {
     const count = counts.get(tier.key) ?? 0;
     return { tier, count, share: total === 0 ? 0 : count / total };
   });
@@ -96,7 +107,10 @@ export function tierDistribution<T extends RankTier>(elos: readonly number[], ti
  * Réduit une série de valeurs à `points` échantillons, pour une sparkline.
  * Conserve toujours la première et la dernière valeur.
  */
-export function downsample(values: readonly number[], points: number): number[] {
+export function downsample(
+  values: readonly number[],
+  points: number,
+): number[] {
   const target = Math.max(2, toCount(points));
   if (values.length <= target) return values.slice();
   const step = (values.length - 1) / (target - 1);

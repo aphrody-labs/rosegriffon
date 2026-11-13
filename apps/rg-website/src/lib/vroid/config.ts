@@ -40,7 +40,9 @@ export function lireConfigVroid(): ConfigVroid | null {
   return {
     applicationId,
     secret,
-    redirectUri: process.env.VROID_REDIRECT_URI?.trim() || "https://azalee.rosegriffon.fr/",
+    redirectUri:
+      process.env.VROID_REDIRECT_URI?.trim() ||
+      "https://azalee.rosegriffon.fr/",
     scope: process.env.VROID_SCOPE?.trim() || "heart default",
   };
 }
@@ -53,7 +55,9 @@ export function lireConfigVroid(): ConfigVroid | null {
 export function exigerConfigVroid(): ConfigVroid {
   const config = lireConfigVroid();
   if (!config) {
-    throw new Error("VRoid Hub n'est pas configuré : posez VROID_APPLICATION_ID et VROID_SECRET dans l'environnement.");
+    throw new Error(
+      "VRoid Hub n'est pas configuré : posez VROID_APPLICATION_ID et VROID_SECRET dans l'environnement.",
+    );
   }
   return config;
 }

@@ -4464,7 +4464,10 @@
       "EOS_Lobby_UpdateLobbyModification"
     ],
     "Logging": ["EOS_Logging_SetCallback", "EOS_Logging_SetLogLevel"],
-    "Metrics": ["EOS_Metrics_BeginPlayerSession", "EOS_Metrics_EndPlayerSession"],
+    "Metrics": [
+      "EOS_Metrics_BeginPlayerSession",
+      "EOS_Metrics_EndPlayerSession"
+    ],
     "Mods": [
       "EOS_Mods_CopyModInfo",
       "EOS_Mods_EnumerateMods",

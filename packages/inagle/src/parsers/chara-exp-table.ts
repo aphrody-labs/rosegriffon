@@ -50,7 +50,10 @@ export interface CharaExpTableDatabase {
 // Parser
 // ============================================================================
 
-function parseContent(content: any): { expTable: CharaExpEntry[]; rarityRates: ExpRarityRate[] } {
+function parseContent(content: any): {
+  expTable: CharaExpEntry[];
+  rarityRates: ExpRarityRate[];
+} {
   const expTable: CharaExpEntry[] = [];
   const rarityRates: ExpRarityRate[] = [];
   if (!content?.lists) return { expTable, rarityRates };
@@ -84,7 +87,9 @@ export async function loadCharaExpTableAsync(
   return content ? parseContent(content) : null;
 }
 
-export async function buildCharaExpTableDatabase(dataPath: string = DATA_ROOT): Promise<CharaExpTableDatabase> {
+export async function buildCharaExpTableDatabase(
+  dataPath: string = DATA_ROOT,
+): Promise<CharaExpTableDatabase> {
   const parsed = await loadCharaExpTableAsync(dataPath);
   const expTable = parsed?.expTable ?? [];
   const rarityRates = parsed?.rarityRates ?? [];

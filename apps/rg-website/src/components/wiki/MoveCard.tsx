@@ -90,7 +90,9 @@ export function MoveCard({
   // grille de 60 techniques à ~0,4 Mo au lieu de ~4 Mo.
   const displayImage = thumbnailUrl || posterUrl || telopUrl;
   const elSprite = element ? ELEMENT_SPRITE[element] : undefined;
-  const borderAccent = element ? ELEMENT_ACCENT[element] || "border-outline-variant/20" : "border-outline-variant/20";
+  const borderAccent = element
+    ? ELEMENT_ACCENT[element] || "border-outline-variant/20"
+    : "border-outline-variant/20";
   const catLabel = CAT_LABEL[category] || category?.slice(0, 3).toUpperCase();
   const catColor = CAT_COLOR[category] || "bg-slate-600";
 
@@ -112,14 +114,19 @@ export function MoveCard({
             src={displayImage}
             alt={name}
             fill
-            className={cn("object-cover transition-transform duration-300", "group-hover:scale-105")}
+            className={cn(
+              "object-cover transition-transform duration-300",
+              "group-hover:scale-105",
+            )}
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
             onError={() => setImgError(true)}
             unoptimized
           />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center">
-            <span className="text-on-surface/20 text-3xl font-black">{catLabel}</span>
+            <span className="text-on-surface/20 text-3xl font-black">
+              {catLabel}
+            </span>
           </div>
         )}
 
@@ -134,7 +141,11 @@ export function MoveCard({
                 "group-hover:bg-black/70 group-hover:scale-110",
               )}
             >
-              <svg viewBox="0 0 24 24" fill="white" className="size-5 sm:w-6 sm:h-6 ml-0.5">
+              <svg
+                viewBox="0 0 24 24"
+                fill="white"
+                className="size-5 sm:w-6 sm:h-6 ml-0.5"
+              >
                 <path d="M8 5v14l11-7z" />
               </svg>
             </div>
@@ -172,17 +183,27 @@ export function MoveCard({
           </p>
           <div className="flex items-center gap-1.5 shrink-0">
             {tensionCost != null && tensionCost > 0 && (
-              <span className="text-[9px] font-bold text-primary/80 tabular-nums">{tensionCost}TP</span>
+              <span className="text-[9px] font-bold text-primary/80 tabular-nums">
+                {tensionCost}TP
+              </span>
             )}
             {powerMax != null && powerMax > 0 && (
-              <span className="text-[9px] font-mono font-bold text-on-surface/60 tabular-nums">{powerMax}</span>
+              <span className="text-[9px] font-mono font-bold text-on-surface/60 tabular-nums">
+                {powerMax}
+              </span>
             )}
           </div>
         </div>
         {shop && (
           <div className="flex items-center gap-1 min-w-0">
-            <Store size={10} className="text-on-surface/30" aria-hidden="true" />
-            <span className="text-[9px] text-on-surface/40 truncate leading-tight">{shop}</span>
+            <Store
+              size={10}
+              className="text-on-surface/30"
+              aria-hidden="true"
+            />
+            <span className="text-[9px] text-on-surface/40 truncate leading-tight">
+              {shop}
+            </span>
           </div>
         )}
       </div>

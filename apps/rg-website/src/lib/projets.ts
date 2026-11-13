@@ -115,4 +115,6 @@ export const PROJETS: Projet[] = [
 ];
 
 /** Extrait mis en avant sur la page d'accueil. */
-export const PROJETS_ACCUEIL: Projet[] = PROJETS.filter(projet => projet.surAccueil);
+export const PROJETS_ACCUEIL: Projet[] = PROJETS.filter(
+  (projet) => projet.surAccueil,
+);

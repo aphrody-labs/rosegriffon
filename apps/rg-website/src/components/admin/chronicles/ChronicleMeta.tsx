@@ -78,14 +78,19 @@ export function ChronicleMeta({
 
       const fileName = `chronicles/${Date.now()}-cropped.jpg`;
 
-      const { error: uploadError } = await storage.from("assets").upload(fileName, croppedBlob, {
-        contentType: "image/jpeg",
-        upsert: true,
-      });
+      const { error: uploadError } = await storage
+        .from("assets")
+        .upload(fileName, croppedBlob, {
+          contentType: "image/jpeg",
+          upsert: true,
+        });
 
       if (uploadError) {
         console.error("Upload error details:", uploadError);
-        if (uploadError.message?.includes("policy") || uploadError.message?.includes("permission")) {
+        if (
+          uploadError.message?.includes("policy") ||
+          uploadError.message?.includes("permission")
+        ) {
           throw new Error("Permission refusée. Vérifiez que vous êtes admin.");
         }
         throw uploadError;
@@ -99,7 +104,10 @@ export function ChronicleMeta({
       toast.success("Image recadrée et uploadée !");
     } catch (error) {
       console.error("Erreur upload:", error);
-      const errorMessage = error instanceof Error ? error.message : "Erreur lors de l'upload de l'image";
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Erreur lors de l'upload de l'image";
       toast.error(errorMessage);
     } finally {
       setIsUploading(false);
@@ -111,7 +119,13 @@ export function ChronicleMeta({
 
   return (
     <div className="space-y-4">
-      <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileSelect} />
+      <input
+        type="file"
+        ref={fileInputRef}
+        className="hidden"
+        accept="image/*"
+        onChange={handleFileSelect}
+      />
 
       {cropImageSrc && (
         <ImageCropper
@@ -128,7 +142,7 @@ export function ChronicleMeta({
         <Input
           id="title"
           value={title}
-          onChange={e => onTitleChange(e.target.value)}
+          onChange={(e) => onTitleChange(e.target.value)}
           placeholder="Ex: Nouveautés de novembre 2025"
           required
           className="text-lg font-semibold"
@@ -144,7 +158,7 @@ export function ChronicleMeta({
           <Input
             id="slug"
             value={slug}
-            onChange={e => setSlug(e.target.value)}
+            onChange={(e) => setSlug(e.target.value)}
             placeholder="nouveautes-novembre-2025"
             required
             className="rounded-l-none"
@@ -157,7 +171,7 @@ export function ChronicleMeta({
         <Textarea
           id="excerpt"
           value={excerpt}
-          onChange={e => setExcerpt(e.target.value)}
+          onChange={(e) => setExcerpt(e.target.value)}
           placeholder="Bref résumé visible dans la liste…"
           rows={3}
           required
@@ -178,12 +192,16 @@ export function ChronicleMeta({
               <SelectItem value="communaute">Communauté</SelectItem>
               <SelectItem value="technique">Technique</SelectItem>
               <SelectItem value="loreteam">Équipe Lore</SelectItem>
-              <SelectItem value="dessinateurteam">Équipe Dessinateur</SelectItem>
+              <SelectItem value="dessinateurteam">
+                Équipe Dessinateur
+              </SelectItem>
               <SelectItem value="productionteam">Équipe Production</SelectItem>
               <SelectItem value="socialteam">Équipe Réseaux</SelectItem>
               <SelectItem value="achilleateam">Équipe Achilléa</SelectItem>
               <SelectItem value="azaleeteam">Équipe Azalée</SelectItem>
-              <SelectItem value="mediationteam">Cellule de Médiation</SelectItem>
+              <SelectItem value="mediationteam">
+                Cellule de Médiation
+              </SelectItem>
               <SelectItem value="collabteam">Partenaires</SelectItem>
             </SelectContent>
           </Select>
@@ -202,7 +220,9 @@ export function ChronicleMeta({
             {isUploading ? (
               <div className="absolute inset-0 flex flex-col items-center justify-center bg-muted/30">
                 <Loader2 className="size-8 animate-spin text-rg-rose" />
-                <span className="text-sm text-muted-foreground mt-2">Upload en cours…</span>
+                <span className="text-sm text-muted-foreground mt-2">
+                  Upload en cours…
+                </span>
               </div>
             ) : featuredImage ? (
               <>
@@ -218,7 +238,7 @@ export function ChronicleMeta({
                     type="button"
                     variant="secondary"
                     size="sm"
-                    onClick={e => {
+                    onClick={(e) => {
                       e.stopPropagation();
                       fileInputRef.current?.click();
                     }}
@@ -230,7 +250,7 @@ export function ChronicleMeta({
                     type="button"
                     variant="secondary"
                     size="sm"
-                    onClick={e => {
+                    onClick={(e) => {
                       e.stopPropagation();
                       onImageUpload();
                     }}
@@ -242,7 +262,7 @@ export function ChronicleMeta({
                     type="button"
                     variant="destructive"
                     size="sm"
-                    onClick={e => {
+                    onClick={(e) => {
                       e.stopPropagation();
                       setFeaturedImage("");
                     }}
@@ -260,7 +280,7 @@ export function ChronicleMeta({
                   type="button"
                   variant="outline"
                   size="sm"
-                  onClick={e => {
+                  onClick={(e) => {
                     e.stopPropagation();
                     fileInputRef.current?.click();
                   }}
@@ -273,7 +293,7 @@ export function ChronicleMeta({
           </div>
           <Input
             value={featuredImage}
-            onChange={e => setFeaturedImage(e.target.value)}
+            onChange={(e) => setFeaturedImage(e.target.value)}
             placeholder="Ou collez une URL ici…"
             className="text-xs text-muted-foreground font-mono"
           />

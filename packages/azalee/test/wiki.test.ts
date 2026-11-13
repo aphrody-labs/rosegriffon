@@ -52,8 +52,8 @@ suite("wikiService.getCharactersList", () => {
     const p1 = await wikiService.getCharactersList({ page: 1, limit: 10 });
     const p2 = await wikiService.getCharactersList({ page: 2, limit: 10 });
     expect(p2.page).toBe(2);
-    const ids = new Set((p1.data as Loose[]).map(c => c.charaId));
-    expect((p2.data as Loose[]).every(c => !ids.has(c.charaId))).toBe(true);
+    const ids = new Set((p1.data as Loose[]).map((c) => c.charaId));
+    expect((p2.data as Loose[]).every((c) => !ids.has(c.charaId))).toBe(true);
     expect(p1.total).toBe(p2.total);
   });
 
@@ -74,7 +74,10 @@ suite("wikiService.getCharactersList", () => {
   });
 
   test("filtre element : le code EN est traduit vers la colonne FR de la DB", async () => {
-    const res = await wikiService.getCharactersList({ element: "Fire", limit: 10 });
+    const res = await wikiService.getCharactersList({
+      element: "Fire",
+      limit: 10,
+    });
     expect(res.data.length).toBeGreaterThan(0);
     for (const chara of res.data as Loose[]) {
       expect(chara.variants[0].element).toBe("Feu");
@@ -82,7 +85,10 @@ suite("wikiService.getCharactersList", () => {
   });
 
   test("filtre position : GK → Gardien", async () => {
-    const res = await wikiService.getCharactersList({ limit: 10, position: "GK" });
+    const res = await wikiService.getCharactersList({
+      limit: 10,
+      position: "GK",
+    });
     expect(res.data.length).toBeGreaterThan(0);
     for (const chara of res.data as Loose[]) {
       expect(chara.variants[0].position).toBe("Gardien");
@@ -90,7 +96,10 @@ suite("wikiService.getCharactersList", () => {
   });
 
   test("position COACH est redirigé vers la liste des coordinateurs", async () => {
-    const coachs = await wikiService.getCharactersList({ limit: 5, position: "COACH" });
+    const coachs = await wikiService.getCharactersList({
+      limit: 5,
+      position: "COACH",
+    });
     const direct = await wikiService.getCoordinatorsList({ limit: 5 });
     expect(coachs.total).toBe(direct.total);
   });
@@ -100,7 +109,8 @@ suite("wikiService.getCharacterBySlug", () => {
   test("résout le slug renvoyé par la liste", async () => {
     const list = await wikiService.getCharactersList({ page: 1, limit: 3 });
     for (const item of list.data as Loose[]) {
-      const found = (await wikiService.getCharacterBySlug(item.slug)) as Loose | undefined;
+      const found = (await wikiService.getCharacterBySlug(item.slug)) as
+        Loose | undefined;
       expect(found).toBeDefined();
       expect(found?.charaId).toBe(item.charaId);
       expect(found?.names?.fr).toBe(item.names.fr);
@@ -113,14 +123,17 @@ suite("wikiService.getCharacterBySlug", () => {
     // `getCharacterBySlug` ne matche QUE la colonne `slug` (slug de variante) :
     // la forme canonique passe par `getCharacterByBaseSlug`.
     expect(await wikiService.getCharacterBySlug(item.baseSlug)).toBeUndefined();
-    const found = (await wikiService.getCharacterByBaseSlug(item.baseSlug)) as Loose | undefined;
+    const found = (await wikiService.getCharacterByBaseSlug(item.baseSlug)) as
+      Loose | undefined;
     expect(found).toBeDefined();
     expect(found?.baseSlug).toBe(item.baseSlug);
     expect(found?.charaId).toBe(item.charaId);
   });
 
   test("slug inconnu → undefined (404 côté appelant, pas une ligne au hasard)", async () => {
-    expect(await wikiService.getCharacterBySlug("slug-qui-nexiste-pas-xyz")).toBeUndefined();
+    expect(
+      await wikiService.getCharacterBySlug("slug-qui-nexiste-pas-xyz"),
+    ).toBeUndefined();
   });
 });
 
@@ -143,7 +156,11 @@ suite("wikiService.getSkillsList", () => {
     for (const skill of res.data as Loose[]) {
       const fr = String(skill.names?.fr ?? "").toLowerCase();
       const en = String(skill.names?.en ?? "").toLowerCase();
-      expect(fr.includes("tornade") || en.includes("tornado") || en.includes("tornade")).toBe(true);
+      expect(
+        fr.includes("tornade") ||
+          en.includes("tornado") ||
+          en.includes("tornade"),
+      ).toBe(true);
     }
   });
 
@@ -173,7 +190,10 @@ suite("wikiService.getItemsList", () => {
   });
 
   test("filtre category homogène", async () => {
-    const res = await wikiService.getItemsList({ category: "shoes", limit: 10 });
+    const res = await wikiService.getItemsList({
+      category: "shoes",
+      limit: 10,
+    });
     expect(res.data.length).toBeGreaterThan(0);
     expect(res.total).toBeGreaterThan(0);
     for (const item of res.data as Loose[]) {
@@ -203,12 +223,12 @@ suite("wiki/teams — section Équipes", () => {
       expect(team.rosterCount).toBeGreaterThanOrEqual(0);
     }
     // Les ids sont uniques (1 ligne = 1 équipe).
-    expect(new Set(teams.map(t => t.id)).size).toBe(teams.length);
+    expect(new Set(teams.map((t) => t.id)).size).toBe(teams.length);
   });
 
   test("getTeamDetail hydrate l'effectif et les emblèmes", async () => {
     const teams = await getTeamsList();
-    const raimon = teams.find(t => t.name === "Raimon") ?? teams[0]!;
+    const raimon = teams.find((t) => t.name === "Raimon") ?? teams[0]!;
     const detail = await getTeamDetail(raimon.id);
     expect(detail).not.toBeNull();
     expect(detail?.id).toBe(raimon.id);
@@ -216,7 +236,7 @@ suite("wiki/teams — section Équipes", () => {
     expect(Array.isArray(detail?.roster)).toBe(true);
     expect(detail?.roster.length).toBe(raimon.rosterCount);
     // Un effectif dédupliqué par `chara_id`.
-    const charaIds = (detail?.roster ?? []).map(m => m.charaId);
+    const charaIds = (detail?.roster ?? []).map((m) => m.charaId);
     expect(new Set(charaIds).size).toBe(charaIds.length);
   });
 
@@ -241,17 +261,17 @@ suite("wiki/shops — section Boutiques", () => {
       const parCategorie = shop.categories.reduce((acc, c) => acc + c.count, 0);
       expect(parCategorie).toBeLessThanOrEqual(shop.itemCount);
       // Tri décroissant sur les catégories.
-      const counts = shop.categories.map(c => c.count);
+      const counts = shop.categories.map((c) => c.count);
       expect([...counts].sort((a, b) => b - a)).toEqual(counts);
       totalItems += shop.itemCount;
     }
     expect(totalItems).toBeGreaterThan(2000);
-    expect(new Set(shops.map(s => s.shopId)).size).toBe(shops.length);
+    expect(new Set(shops.map((s) => s.shopId)).size).toBe(shops.length);
     // La jointure vers `inagle_items` résout la catégorie d'une bonne part des
     // lignes : au moins une boutique doit être ventilée.
-    expect(shops.some(s => s.categories.length > 0)).toBe(true);
+    expect(shops.some((s) => s.categories.length > 0)).toBe(true);
     // Tri décroissant du plus gros catalogue au plus petit.
-    const tailles = shops.map(s => s.itemCount);
+    const tailles = shops.map((s) => s.itemCount);
     expect([...tailles].sort((a, b) => b - a)).toEqual(tailles);
   });
 

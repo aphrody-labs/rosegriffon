@@ -36,7 +36,9 @@ import { wikiTitle } from "@/lib/seo";
  * render them. We read them directly here and map onto the field names SkillDetail
  * already expects, without touching wiki-service.
  */
-async function enrichSkillFromDbColumns(skill: Record<string, unknown>): Promise<void> {
+async function enrichSkillFromDbColumns(
+  skill: Record<string, unknown>,
+): Promise<void> {
   const code = skill.internalCode as string | undefined;
   if (!code) {
     return;
@@ -115,10 +117,10 @@ async function fetchSkillVideos(skillId: string): Promise<SkillVideos> {
       poster_url: string | null;
       video_url: string;
     }>;
-    const dates = rows.map(row => row.created_at).filter(Boolean) as string[];
+    const dates = rows.map((row) => row.created_at).filter(Boolean) as string[];
     return {
       publishedAt: dates.length > 0 ? dates.toSorted()[0]! : null,
-      variants: rows.map(row => ({
+      variants: rows.map((row) => ({
         label: row.label,
         posterUrl: row.poster_url,
         position: row.position,
@@ -131,7 +133,11 @@ async function fetchSkillVideos(skillId: string): Promise<SkillVideos> {
   }
 }
 
-export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
   const { id } = await params;
   const skill = await wikiService.getSkill(id);
   const name = skill?.name_FR || skill?.displayName || "Technique";
@@ -149,7 +155,9 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   // dans une page de résultats. Le texte du jeu, lui, est unique par technique —
   // c'est la seule phrase qui donne une raison de cliquer sur celle-ci plutôt que
   // sur la voisine. Les chiffres restent, en fin de ligne, quand il reste la place.
-  const gameDesc = (skill?.desc_FR || skill?.desc_EN || "").replace(/\s+/g, " ").trim();
+  const gameDesc = (skill?.desc_FR || skill?.desc_EN || "")
+    .replace(/\s+/g, " ")
+    .trim();
   const facts = metaParts.join(" · ");
   const description = gameDesc
     ? `${truncate(gameDesc, 145 - facts.length)} ${facts}`.trim()
@@ -168,7 +176,8 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   // annoncer une grande image et servir un telop étroit donne un aperçu vide.
   const poster = skill?.posterUrl || null;
   const ogImage = poster || telop;
-  const ogImageUrl = ogImage && ogImage.startsWith("/") ? absoluteUrl(ogImage) : ogImage;
+  const ogImageUrl =
+    ogImage && ogImage.startsWith("/") ? absoluteUrl(ogImage) : ogImage;
 
   return {
     alternates: { canonical: wiki(`/skill/${id}`) },
@@ -192,7 +201,9 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
       title: `${name} | Azalée`,
       type: "article",
       url: `/wiki/skill/${id}`,
-      ...(skill?.videoUrl ? { videos: [{ type: "video/webm", url: skill.videoUrl as string }] } : {}),
+      ...(skill?.videoUrl
+        ? { videos: [{ type: "video/webm", url: skill.videoUrl as string }] }
+        : {}),
     },
     title,
     twitter: {
@@ -217,7 +228,11 @@ function truncate(text: string, max: number): string {
   return `${(lastSpace > 20 ? cut.slice(0, lastSpace) : cut).replace(/[\s,;:.–-]+$/, "")}…`;
 }
 
-export default async function MoveDetailPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function MoveDetailPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const { id } = await params;
 
   const skill = await wikiService.getSkill(id);
@@ -232,7 +247,8 @@ export default async function MoveDetailPage({ params }: { params: Promise<{ id:
 
   const name = skill.name_FR || skill.name_EN || skill.displayName || "Unknown";
   const desc = skill.desc_FR || skill.desc_EN || "";
-  const category = skill.categoryName?.fr || skill.categoryName?.en || "Spécial";
+  const category =
+    skill.categoryName?.fr || skill.categoryName?.en || "Spécial";
   const element = skill.elementName?.fr || skill.elementName?.en || "Néant";
 
   // Fetch related skills from same category via wikiService (consistent types)
@@ -247,7 +263,10 @@ export default async function MoveDetailPage({ params }: { params: Promise<{ id:
     .filter((s: any) => s.internalCode !== currentCode)
     .map((s: any) => {
       let score = 10; // Same category guaranteed
-      if (skill.elementName?.en && s.elementName?.en === skill.elementName?.en) {
+      if (
+        skill.elementName?.en &&
+        s.elementName?.en === skill.elementName?.en
+      ) {
         score += 5;
       }
       if (s.videoUrl) {
@@ -257,25 +276,37 @@ export default async function MoveDetailPage({ params }: { params: Promise<{ id:
     })
     .toSorted((a, b) => b.score - a.score)
     .slice(0, 3)
-    .map(item => item.skill);
+    .map((item) => item.skill);
 
   // Fetch override skills (Overdrive combinations)
   const skillHexId = (skill as any).skillId || (skill as any).skillID || id;
-  const overrideSkills: OverrideSkillData[] = await wikiService.getOverrideSkillsForSkill(skillHexId);
+  const overrideSkills: OverrideSkillData[] =
+    await wikiService.getOverrideSkillsForSkill(skillHexId);
 
   // Assets de cut-in (niers : modèle 3D, telop, son) — clé = code interne `skill_id_str`.
-  const cutinEntry = await wikiService.getSkillCutin((skill as any).internalCode || id);
-  const cutinAssetsAvailable = await wikiService.hasSkillCutinAssets(cutinEntry?.cutin?.event_id_name);
+  const cutinEntry = await wikiService.getSkillCutin(
+    (skill as any).internalCode || id,
+  );
+  const cutinAssetsAvailable = await wikiService.hasSkillCutinAssets(
+    cutinEntry?.cutin?.event_id_name,
+  );
 
   // Vidéos officielles zukan (1 ou 2 variantes selon la technique).
-  const { variants: videos, publishedAt } = await fetchSkillVideos((skill as any).skillId || id);
+  const { variants: videos, publishedAt } = await fetchSkillVideos(
+    (skill as any).skillId || id,
+  );
 
   const pageUrl = absoluteUrl(wiki(`/skill/${id}`));
 
   const breadcrumbJsonLd = {
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", item: absoluteUrl(wiki("/")), name: "Accueil", position: 1 },
+      {
+        "@type": "ListItem",
+        item: absoluteUrl(wiki("/")),
+        name: "Accueil",
+        position: 1,
+      },
       {
         "@type": "ListItem",
         item: absoluteUrl(wiki("/skill")),
@@ -302,8 +333,8 @@ export default async function MoveDetailPage({ params }: { params: Promise<{ id:
    * est un balisage qui ment.
    */
   const videoJsonLd = videos
-    .filter(v => v.videoUrl)
-    .map(v => ({
+    .filter((v) => v.videoUrl)
+    .map((v) => ({
       "@type": "VideoObject",
       contentUrl: v.videoUrl,
       description: `${v.label} — ${name}, technique ${category.toLowerCase()} d'élément ${element.toLowerCase()} d'Inazuma Eleven: Victory Road.`,
@@ -322,7 +353,10 @@ export default async function MoveDetailPage({ params }: { params: Promise<{ id:
 
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <SkillDetail
         skill={skill}
         name={name}
@@ -335,7 +369,11 @@ export default async function MoveDetailPage({ params }: { params: Promise<{ id:
       />
       {cutinEntry?.cutin && (
         <div className="mt-6">
-          <SkillCutinSection cutin={cutinEntry.cutin} skillName={name} assetsAvailable={cutinAssetsAvailable} />
+          <SkillCutinSection
+            cutin={cutinEntry.cutin}
+            skillName={name}
+            assetsAvailable={cutinAssetsAvailable}
+          />
         </div>
       )}
     </>

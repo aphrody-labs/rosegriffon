@@ -9,7 +9,10 @@ import type { CleServeur } from "@/lib/discord/hierarchie";
 import { absoluteUrl } from "@/lib/site-url";
 import { cn } from "@/lib/utils";
 
-import { HierarchieServeur, ResumeServeur } from "./_components/hierarchie-serveur";
+import {
+  HierarchieServeur,
+  ResumeServeur,
+} from "./_components/hierarchie-serveur";
 
 /**
  * Qui fait Rose Griffon — page UNIQUE, deux lectures.
@@ -91,7 +94,7 @@ function Onglets<T extends string>({
 }) {
   return (
     <nav className="flex gap-1 rounded-full bg-surface-container p-1">
-      {entrees.map(entree => (
+      {entrees.map((entree) => (
         <Link
           key={entree.cle}
           href={lien(entree.cle)}
@@ -99,7 +102,9 @@ function Onglets<T extends string>({
           className={cn(
             "inline-flex items-center rounded-full font-medium transition-colors",
             compact ? "min-h-8 px-3 text-xs" : "min-h-10 px-4 text-sm",
-            actif === entree.cle ? "bg-primary text-on-primary" : "text-on-surface-variant hover:text-on-surface",
+            actif === entree.cle
+              ? "bg-primary text-on-primary"
+              : "text-on-surface-variant hover:text-on-surface",
           )}
         >
           {entree.libelle}
@@ -117,17 +122,23 @@ export default async function CommunityPage({
   const params = await searchParams;
   const recherche = typeof params.q === "string" ? params.q.trim() : "";
   const vue: Vue = params.vue === "staff" ? "staff" : "communaute";
-  const serveur = serveurDiscord(typeof params.serveur === "string" ? params.serveur : "");
+  const serveur = serveurDiscord(
+    typeof params.serveur === "string" ? params.serveur : "",
+  );
   const cleServeur = serveur.cle as CleServeur;
 
   const lienVue = (cle: Vue) =>
-    cle === "communaute" ? `/community?serveur=${serveur.cle}` : `/community?vue=${cle}&serveur=${serveur.cle}`;
+    cle === "communaute"
+      ? `/community?serveur=${serveur.cle}`
+      : `/community?vue=${cle}&serveur=${serveur.cle}`;
   const lienServeur = (cle: string) =>
-    vue === "communaute" ? `/community?serveur=${cle}` : `/community?vue=${vue}&serveur=${cle}`;
+    vue === "communaute"
+      ? `/community?serveur=${cle}`
+      : `/community?vue=${vue}&serveur=${cle}`;
 
   const selecteurServeur = (
     <Onglets
-      entrees={SERVEURS_DISCORD.map(s => ({ cle: s.cle, libelle: s.nom }))}
+      entrees={SERVEURS_DISCORD.map((s) => ({ cle: s.cle, libelle: s.nom }))}
       actif={serveur.cle}
       lien={lienServeur}
       compact
@@ -138,7 +149,9 @@ export default async function CommunityPage({
     <div className="container mx-auto flex flex-col gap-6 px-4 py-4 min-[600px]:px-6 min-[600px]:py-6 min-[840px]:gap-8">
       <header className="flex min-h-16 flex-col gap-3 border-b border-border pb-4 min-[600px]:flex-row min-[600px]:items-center min-[600px]:justify-between">
         <div>
-          <h1 className="text-fluid-2xl font-bold text-foreground">Communauté</h1>
+          <h1 className="text-fluid-2xl font-bold text-foreground">
+            Communauté
+          </h1>
         </div>
         <Onglets entrees={VUES} actif={vue} lien={lienVue} />
       </header>
@@ -148,7 +161,9 @@ export default async function CommunityPage({
           <section className="flex flex-col gap-4">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="space-y-1">
-                <h2 className="text-lg font-bold text-on-surface">Hiérarchie — {serveur.nom}</h2>
+                <h2 className="text-lg font-bold text-on-surface">
+                  Hiérarchie — {serveur.nom}
+                </h2>
                 <Suspense fallback={<Skeleton className="h-4 w-56" />}>
                   <ResumeServeur cle={cleServeur} />
                 </Suspense>
@@ -166,7 +181,10 @@ export default async function CommunityPage({
               />
             </form>
 
-            <Suspense key={`${serveur.cle}-${recherche}-${String(params.page ?? "")}`} fallback={<SquelettedeSection />}>
+            <Suspense
+              key={`${serveur.cle}-${recherche}-${String(params.page ?? "")}`}
+              fallback={<SquelettedeSection />}
+            >
               <HierarchieServeur
                 cle={cleServeur}
                 recherche={recherche}
@@ -180,9 +198,12 @@ export default async function CommunityPage({
           <section className="flex flex-col gap-4">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="space-y-1">
-                <h2 className="text-lg font-bold text-on-surface">Équipe Discord — {serveur.nom}</h2>
+                <h2 className="text-lg font-bold text-on-surface">
+                  Équipe Discord — {serveur.nom}
+                </h2>
                 <p className="text-xs text-on-surface-variant/70">
-                  Déduit des permissions réellement accordées aux rôles, pas d&apos;une liste tenue à la main.
+                  Déduit des permissions réellement accordées aux rôles, pas
+                  d&apos;une liste tenue à la main.
                 </p>
               </div>
               {selecteurServeur}

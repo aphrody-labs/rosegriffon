@@ -1,4 +1,12 @@
-import { Button, Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@rosegriffon/ui";
+import {
+  Button,
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@rosegriffon/ui";
 import { Hash, ImageIcon, ImagePlus, Users } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "@/components/shared/Link";
@@ -74,7 +82,9 @@ const POSTS_PAR_PAGE = 24;
 const ORIGINE = SITE_URL;
 
 /** Lit `?campagne=` sans toucher au schéma partagé `parseSearchParams`. */
-function lireSlug(params: Record<string, string | string[] | undefined>): string | undefined {
+function lireSlug(
+  params: Record<string, string | string[] | undefined>,
+): string | undefined {
   const brut = params.campagne;
   return typeof brut === "string" && brut.trim() ? brut.trim() : undefined;
 }
@@ -85,8 +95,12 @@ function lireSlug(params: Record<string, string | string[] | undefined>): string
  * annoncer `/iergday` alors que l'écran montre « Inazuma Day 2026 » ferait
  * indexer le mauvais contenu.
  */
-function cheminCampagne(campagne: Pick<Campagne, "principale" | "slug">): string {
-  return campagne.principale ? "/iergday" : `/iergday?campagne=${campagne.slug}`;
+function cheminCampagne(
+  campagne: Pick<Campagne, "principale" | "slug">,
+): string {
+  return campagne.principale
+    ? "/iergday"
+    : `/iergday?campagne=${campagne.slug}`;
 }
 
 /** Période éditoriale en français, TOUJOURS en heure de Paris (le VPS tourne en UTC). */
@@ -120,7 +134,10 @@ interface Rebours {
  * décompte vers son OUVERTURE, pas vers sa clôture. L'îlot client ne décide de
  * rien : il bat la seconde et gère son propre passage à zéro.
  */
-function choisirRebours(campagne: Campagne, etat: ReturnType<typeof etatCampagne>): Rebours | null {
+function choisirRebours(
+  campagne: Campagne,
+  etat: ReturnType<typeof etatCampagne>,
+): Rebours | null {
   if (etat === "en-cours" && campagne.finLe) {
     return {
       cibleIso: campagne.finLe,
@@ -159,7 +176,9 @@ export async function generateMetadata({
   // Le hashtag DANS le titre : c'est ce qu'un participant cherche, et ce qui
   // distingue deux campagnes qui s'appellent toutes les deux « Inatober RG ».
   const hashtag = hashtagsAffichables(campagne)[0]?.libelle;
-  const titre = hashtag ? `${campagne.titre} — ${hashtag} | Rose Griffon` : `${campagne.titre} | Rose Griffon`;
+  const titre = hashtag
+    ? `${campagne.titre} — ${hashtag} | Rose Griffon`
+    : `${campagne.titre} | Rose Griffon`;
   // `extraitTexte` coupe au mot près et ajoute une ellipse, là où un `slice(0, 160)`
   // tranchait au milieu d'un mot.
   const description = campagne.description
@@ -177,8 +196,16 @@ export async function generateMetadata({
           ? // Le visuel RÉEL de la campagne. Ni `width` ni `height` : ils
             // dépendent du fichier téléversé, et les annoncer au jugé serait
             // une donnée fausse dans la balise.
-            { alt: `${campagne.titre} — Rose Griffon`, url: campagne.imageCouverture }
-          : { alt: "Campagnes communautaires Rose Griffon", height: 630, url: "/opengraph-image.png", width: 1200 },
+            {
+              alt: `${campagne.titre} — Rose Griffon`,
+              url: campagne.imageCouverture,
+            }
+          : {
+              alt: "Campagnes communautaires Rose Griffon",
+              height: 630,
+              url: "/opengraph-image.png",
+              width: 1200,
+            },
       ],
       title: titre,
       type: "website",
@@ -209,11 +236,21 @@ export async function generateMetadata({
  * en gros au-dessus d'un libellé en petit. C'est deux fois moins de hauteur pour
  * la même information.
  */
-function Compteur({ icone: Icone, valeur, libelle }: { icone: typeof Users; valeur: string; libelle: string }) {
+function Compteur({
+  icone: Icone,
+  valeur,
+  libelle,
+}: {
+  icone: typeof Users;
+  valeur: string;
+  libelle: string;
+}) {
   return (
     <span className="inline-flex items-center gap-1.5 rounded-full border border-outline-variant/60 bg-surface-container-low px-3 py-1.5 text-xs">
       <Icone className="size-3.5 shrink-0 text-primary" aria-hidden />
-      <strong className="font-bold tabular-nums text-on-surface">{valeur}</strong>
+      <strong className="font-bold tabular-nums text-on-surface">
+        {valeur}
+      </strong>
       <span className="text-on-surface-variant">{libelle}</span>
     </span>
   );
@@ -227,7 +264,13 @@ function Compteur({ icone: Icone, valeur, libelle }: { icone: typeof Users; vale
  * mobile, ces en-têtes occupaient à eux seuls le premier écran. Ici : un mot,
  * une taille de corps de texte, rien d'autre.
  */
-function TitreSection({ id, children }: { id: string; children: React.ReactNode }) {
+function TitreSection({
+  id,
+  children,
+}: {
+  id: string;
+  children: React.ReactNode;
+}) {
   return (
     <h2 id={id} className="mb-3 text-base font-bold text-foreground sm:text-lg">
       {children}
@@ -251,7 +294,10 @@ export default async function IergDayPage({
   const pageCourante = entierPositif(pageBrute, 1);
   const slugDemande = lireSlug(params);
 
-  const [campagne, campagnes] = await Promise.all([chargerCampagne(slugDemande), listerCampagnesPubliees()]);
+  const [campagne, campagnes] = await Promise.all([
+    chargerCampagne(slugDemande),
+    listerCampagnesPubliees(),
+  ]);
 
   // Aucune campagne publiée en base : on ne rend pas une grille cassée, on
   // explique l'état. C'est un état légitime (table vide juste après migration).
@@ -278,8 +324,9 @@ export default async function IergDayPage({
               </EmptyMedia>
               <EmptyTitle>Aucune campagne publiée</EmptyTitle>
               <EmptyDescription>
-                Aucune campagne n&apos;est ouverte au public pour le moment. Revenez bientôt&nbsp;: la prochaine
-                opération de la communauté s&apos;affichera ici.
+                Aucune campagne n&apos;est ouverte au public pour le moment.
+                Revenez bientôt&nbsp;: la prochaine opération de la communauté
+                s&apos;affichera ici.
               </EmptyDescription>
             </EmptyHeader>
           </Empty>
@@ -288,10 +335,19 @@ export default async function IergDayPage({
     );
   }
 
-  const [stats, posts, enAvant, sondageAffiche, sondageReglement, depotDiscord] = await Promise.all([
+  const [
+    stats,
+    posts,
+    enAvant,
+    sondageAffiche,
+    sondageReglement,
+    depotDiscord,
+  ] = await Promise.all([
     compterPostsCampagne(campagne.slug),
     listerPostsCampagne(campagne.slug, pageCourante, POSTS_PAR_PAGE),
-    pageCourante === 1 ? listerPostsEnAvant(campagne.slug, 6) : Promise.resolve([]),
+    pageCourante === 1
+      ? listerPostsEnAvant(campagne.slug, 6)
+      : Promise.resolve([]),
     // Les proportions RÉELLES des visuels, lues dans l'en-tête des fichiers.
     // Les deviner (un cadre carré, puis 3/4) bordait chaque document de bandes
     // vides ; les écrire en dur serait faux dès la campagne suivante, dont les
@@ -303,7 +359,9 @@ export default async function IergDayPage({
   // Un visuel que le stockage déclare absent n'est pas émis : réserver sa place
   // puis la retirer au premier `onError` faisait sauter toute la page (CLS 0,52).
   const imageAffiche = sondageAffiche.absente ? null : campagne.imageAffiche;
-  const imageReglement = sondageReglement.absente ? null : campagne.imageReglement;
+  const imageReglement = sondageReglement.absente
+    ? null
+    : campagne.imageReglement;
 
   /*
    * ── LE TIRAGE AU SORT ──────────────────────────────────────────────────
@@ -351,7 +409,9 @@ export default async function IergDayPage({
           nbParticipants: bilan.personnesEligibles,
           tirageId: dernier?.id ?? null,
           tireNonPublie:
-            dernier && dernier.etat === "tire" ? { nbGagnants: dernier.nbGagnants, tirageId: dernier.id } : null,
+            dernier && dernier.etat === "tire"
+              ? { nbGagnants: dernier.nbGagnants, tirageId: dernier.id }
+              : null,
         };
       })()
     : null;
@@ -362,7 +422,8 @@ export default async function IergDayPage({
   const hashtagPrincipal = campagne.hashtags[0] ?? "";
   const libelleHashtagPrincipal = hashtags[0]?.libelle ?? "";
   // Une autre campagne, déjà remplie, vers laquelle renvoyer si celle-ci est vide.
-  const campagneDeRepli = campagnes.find(autre => autre.slug !== campagne.slug) ?? null;
+  const campagneDeRepli =
+    campagnes.find((autre) => autre.slug !== campagne.slug) ?? null;
   // Distinguer « la campagne est vide » de « on a demandé une page qui n'existe pas ».
   const dernierePage = Math.max(1, Math.ceil(stats.posts / POSTS_PAR_PAGE));
   const pageHorsBornes = stats.posts > 0 && posts.length === 0;
@@ -402,7 +463,11 @@ export default async function IergDayPage({
          * tient pas lieu : aucun des deux ne lit les pixels. `sr-only` le garde
          * dans le document sans le peindre.
          */}
-        <h1 className="sr-only">{campagne.surTitre ? `${campagne.surTitre} — ${campagne.titre}` : campagne.titre}</h1>
+        <h1 className="sr-only">
+          {campagne.surTitre
+            ? `${campagne.surTitre} — ${campagne.titre}`
+            : campagne.titre}
+        </h1>
 
         {/*
          * ── LE COMPTE À REBOURS D'ABORD, ET EN COULEURS DE MARQUE ────────────
@@ -533,15 +598,20 @@ export default async function IergDayPage({
             aria-labelledby="titre-campagnes"
             className="rounded-3xl border border-outline-variant/50 bg-surface-container-lowest p-4 sm:p-5"
           >
-            <TitreSection id="titre-campagnes">Les autres campagnes</TitreSection>
-            <SelecteurCampagne campagnes={campagnes} slugActif={campagne.slug} />
+            <TitreSection id="titre-campagnes">
+              Les autres campagnes
+            </TitreSection>
+            <SelecteurCampagne
+              campagnes={campagnes}
+              slugActif={campagne.slug}
+            />
           </section>
         )}
 
         {tiragePublie && tiragePublie.gagnants.length > 0 && (
           <Gagnants
             posts={postsTirage}
-            gagnants={tiragePublie.gagnants.map(gagnant => ({
+            gagnants={tiragePublie.gagnants.map((gagnant) => ({
               cleCreation: gagnant.creation?.cleCreation ?? null,
               clePublique: gagnant.clePublique,
               lot: gagnant.lot,
@@ -575,7 +645,9 @@ export default async function IergDayPage({
           <TitreSection id="titre-publications">
             Les créations
             {stats.posts > 0 && (
-              <span className="ml-2 text-sm font-normal text-muted-foreground tabular-nums">{stats.posts}</span>
+              <span className="ml-2 text-sm font-normal text-muted-foreground tabular-nums">
+                {stats.posts}
+              </span>
             )}
           </TitreSection>
 
@@ -593,11 +665,15 @@ export default async function IergDayPage({
                   <Hash className="size-8" aria-hidden />
                 </EmptyMedia>
                 <EmptyTitle>Cette page n&apos;existe pas</EmptyTitle>
-                <EmptyDescription>La galerie s&apos;arrête à la page {dernierePage}.</EmptyDescription>
+                <EmptyDescription>
+                  La galerie s&apos;arrête à la page {dernierePage}.
+                </EmptyDescription>
               </EmptyHeader>
               <EmptyContent className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
                 <Button asChild>
-                  <Link href={cheminCampagne(campagne)}>Retour à la première page</Link>
+                  <Link href={cheminCampagne(campagne)}>
+                    Retour à la première page
+                  </Link>
                 </Button>
               </EmptyContent>
             </Empty>
@@ -628,8 +704,11 @@ export default async function IergDayPage({
                     "Aucune création n'a été récoltée."
                   ) : libelleHashtagPrincipal ? (
                     <>
-                      Publiez une image avec <strong className="text-on-surface">{libelleHashtagPrincipal}</strong> :
-                      elle arrive ici toute seule.
+                      Publiez une image avec{" "}
+                      <strong className="text-on-surface">
+                        {libelleHashtagPrincipal}
+                      </strong>{" "}
+                      : elle arrive ici toute seule.
                     </>
                   ) : (
                     "Pas encore de hashtag publié."
@@ -647,7 +726,9 @@ export default async function IergDayPage({
 										    l'est peut-être pas encore à cette seconde. */}
                     <Button asChild>
                       <a
-                        href={urlPublicationX(libelleHashtagPrincipal || hashtagPrincipal)}
+                        href={urlPublicationX(
+                          libelleHashtagPrincipal || hashtagPrincipal,
+                        )}
                         target="_blank"
                         rel="noopener noreferrer"
                       >
@@ -655,7 +736,11 @@ export default async function IergDayPage({
                       </a>
                     </Button>
                     <Button asChild variant="outline">
-                      <a href={urlRechercheX(hashtagPrincipal)} target="_blank" rel="noopener noreferrer">
+                      <a
+                        href={urlRechercheX(hashtagPrincipal)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
                         Voir le fil sur X
                       </a>
                     </Button>
@@ -663,7 +748,9 @@ export default async function IergDayPage({
                 )}
                 {campagneDeRepli && (
                   <Button asChild variant="link">
-                    <Link href={cheminCampagne(campagneDeRepli)}>Voir « {campagneDeRepli.titre} »</Link>
+                    <Link href={cheminCampagne(campagneDeRepli)}>
+                      Voir « {campagneDeRepli.titre} »
+                    </Link>
                   </Button>
                 )}
               </EmptyContent>
@@ -707,11 +794,20 @@ export default async function IergDayPage({
          * tout cela — on n'invite pas à participer à ce qui est clos.
          */}
         {etat !== "terminee" && (
-          <section aria-labelledby="titre-reseaux" className="border-t border-outline-variant/40 pt-6">
+          <section
+            aria-labelledby="titre-reseaux"
+            className="border-t border-outline-variant/40 pt-6"
+          >
             <TitreSection id="titre-reseaux">Les réseaux</TitreSection>
             <div className="space-y-3">
               <BoutonsParticiper
-                urlX={hashtagPrincipal ? urlPublicationX(libelleHashtagPrincipal || hashtagPrincipal) : null}
+                urlX={
+                  hashtagPrincipal
+                    ? urlPublicationX(
+                        libelleHashtagPrincipal || hashtagPrincipal,
+                      )
+                    : null
+                }
                 depotDiscord={depotDiscord}
                 hashtag={libelleHashtagPrincipal || `#${hashtagPrincipal}`}
               />

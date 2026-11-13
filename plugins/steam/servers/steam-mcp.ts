@@ -317,7 +317,10 @@ const tools: Tool[] = [
       type: "object",
       properties: {
         appid: { type: "integer" },
-        prefix: { type: "string", description: "Proton prefix (default: compatdata/<appid>)" },
+        prefix: {
+          type: "string",
+          description: "Proton prefix (default: compatdata/<appid>)",
+        },
         steam_path: { type: "string" },
       },
       required: ["appid"],

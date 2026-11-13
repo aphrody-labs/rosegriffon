@@ -63,7 +63,7 @@ export function verifierSpec(spec: SpecPartage): string | null {
   if (somme !== spec.bits) {
     return `les emplacements totalisent ${somme} bits, ${spec.bits} annoncés`;
   }
-  const trop = spec.emplacements.find(e => e.valeurs > 1 << e.bits);
+  const trop = spec.emplacements.find((e) => e.valeurs > 1 << e.bits);
   if (trop) {
     return `l'emplacement ${trop.emplacement} admet ${trop.valeurs} valeurs sur ${trop.bits} bits`;
   }
@@ -74,7 +74,11 @@ export function verifierSpec(spec: SpecPartage): string | null {
 export function specDe(catalogue: Catalogue): SpecPartage | null {
   const cp = catalogue.codePartage;
   if (!cp?.alphabet?.length || !cp.emplacements?.length) return null;
-  return { alphabet: cp.alphabet, bits: cp.bits, emplacements: cp.emplacements };
+  return {
+    alphabet: cp.alphabet,
+    bits: cp.bits,
+    emplacements: cp.emplacements,
+  };
 }
 
 /**
@@ -115,7 +119,8 @@ export function decoder(spec: SpecPartage, code: string): number[] | null {
   for (const c of code.trim()) {
     const index = rang.get(c);
     if (index === undefined) return null;
-    for (let b = BITS_PAR_CARACTERE - 1; b >= 0; b--) bits.push((index >> b) & 1);
+    for (let b = BITS_PAR_CARACTERE - 1; b >= 0; b--)
+      bits.push((index >> b) & 1);
   }
   if (bits.length < spec.bits) return null;
 
@@ -156,7 +161,9 @@ export function valeursDepuisChoix(
   morphologie: number,
 ): number[] {
   const valeurs = Array.from({ length: spec.emplacements.length }, () => 0);
-  const categories = [...catalogue.categories].sort((a, b) => a.faceSettingType - b.faceSettingType);
+  const categories = [...catalogue.categories].sort(
+    (a, b) => a.faceSettingType - b.faceSettingType,
+  );
 
   // Les deux premiers emplacements portent le genre et la morphologie, qui ne sont pas des parts.
   valeurs[0] = genre;
@@ -166,7 +173,7 @@ export function valeursDepuisChoix(
     const cible = i + 2;
     if (cible >= valeurs.length) return;
     const id = choix[cat.faceSettingType];
-    const rang = id ? cat.parts.findIndex(p => p.id === id) : -1;
+    const rang = id ? cat.parts.findIndex((p) => p.id === id) : -1;
     valeurs[cible] = Math.max(0, rang);
   });
   return valeurs;
@@ -178,7 +185,9 @@ export function choixDepuisValeurs(
   valeurs: number[],
 ): { choix: Record<number, string>; genre: number; morphologie: number } {
   const choix: Record<number, string> = {};
-  const categories = [...catalogue.categories].sort((a, b) => a.faceSettingType - b.faceSettingType);
+  const categories = [...catalogue.categories].sort(
+    (a, b) => a.faceSettingType - b.faceSettingType,
+  );
   categories.forEach((cat, i) => {
     const rang = valeurs[i + 2] ?? 0;
     const part = cat.parts[rang];

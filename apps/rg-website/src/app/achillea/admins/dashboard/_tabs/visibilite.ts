@@ -173,17 +173,21 @@ export const GROUPES_ONGLETS: readonly GroupeOnglets[] = [
 ];
 
 /** Groupes d'onglets visibles pour un rôle ; un groupe vide disparaît. */
-export function groupesVisibles(role: number | null | undefined): GroupeOnglets[] {
+export function groupesVisibles(
+  role: number | null | undefined,
+): GroupeOnglets[] {
   const niveau = role ?? 0;
-  return GROUPES_ONGLETS.map(groupe => ({
+  return GROUPES_ONGLETS.map((groupe) => ({
     titre: groupe.titre,
-    onglets: groupe.onglets.filter(onglet => niveau >= onglet.roleMinimal),
-  })).filter(groupe => groupe.onglets.length > 0);
+    onglets: groupe.onglets.filter((onglet) => niveau >= onglet.roleMinimal),
+  })).filter((groupe) => groupe.onglets.length > 0);
 }
 
 /** Identifiants des onglets visibles pour un rôle, dans l'ordre d'affichage. */
 export function ongletsVisibles(role: number | null | undefined): AdminTab[] {
-  return groupesVisibles(role).flatMap(groupe => groupe.onglets.map(onglet => onglet.id));
+  return groupesVisibles(role).flatMap((groupe) =>
+    groupe.onglets.map((onglet) => onglet.id),
+  );
 }
 
 /** Libellé du rôle affiché dans l'en-tête. */

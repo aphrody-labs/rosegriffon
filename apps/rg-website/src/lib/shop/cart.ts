@@ -60,7 +60,11 @@ async function readCookieCart(): Promise<CartItem[]> {
     }
     return parsed.filter(
       (i): i is CartItem =>
-        typeof i === "object" && i !== null && typeof i.slug === "string" && typeof i.qty === "number" && i.qty > 0,
+        typeof i === "object" &&
+        i !== null &&
+        typeof i.slug === "string" &&
+        typeof i.qty === "number" &&
+        i.qty > 0,
     );
   } catch {
     return [];
@@ -88,7 +92,10 @@ async function readRedisCart(userId: string): Promise<CartItem[]> {
   return items ?? [];
 }
 
-async function writeRedisCart(userId: string, items: CartItem[]): Promise<void> {
+async function writeRedisCart(
+  userId: string,
+  items: CartItem[],
+): Promise<void> {
   const key = `cart:${userId}`;
   if (items.length === 0) {
     await redisCache.del(key);
@@ -106,7 +113,7 @@ async function readCart(): Promise<CartItem[]> {
     if (cookieItems.length > 0) {
       const merged = [...redisItems];
       for (const cookieItem of cookieItems) {
-        const existing = merged.find(i => i.id === cookieItem.id);
+        const existing = merged.find((i) => i.id === cookieItem.id);
         if (existing) {
           existing.qty = Math.min(existing.qty + cookieItem.qty, 10);
         } else {
@@ -140,7 +147,9 @@ async function resolveCart(items: CartItem[]): Promise<CartSnapshot> {
       continue;
     }
     const unit = getVariantPrice(product, item.variantId);
-    const variantLabel = item.variantId ? product.variants?.find(v => v.id === item.variantId)?.label : undefined;
+    const variantLabel = item.variantId
+      ? product.variants?.find((v) => v.id === item.variantId)?.label
+      : undefined;
     resolved.push({
       ...item,
       lineTotalCents: unit * item.qty,
@@ -161,7 +170,11 @@ export async function getCart(): Promise<CartSnapshot> {
   return resolveCart(items);
 }
 
-export async function addToCart(slug: string, variantId?: string, qty = 1): Promise<CartSnapshot> {
+export async function addToCart(
+  slug: string,
+  variantId?: string,
+  qty = 1,
+): Promise<CartSnapshot> {
   const product = await getProduct(slug);
   if (!product) {
     throw new Error(`[cart] unknown product: ${slug}`);
@@ -171,7 +184,7 @@ export async function addToCart(slug: string, variantId?: string, qty = 1): Prom
   }
   const items = await readCart();
   const id = makeId(slug, variantId);
-  const existing = items.find(i => i.id === id);
+  const existing = items.find((i) => i.id === id);
   if (existing) {
     existing.qty = Math.min(existing.qty + qty, 10);
   } else {
@@ -182,18 +195,23 @@ export async function addToCart(slug: string, variantId?: string, qty = 1): Prom
   return resolveCart(items);
 }
 
-export async function updateQty(itemId: string, qty: number): Promise<CartSnapshot> {
+export async function updateQty(
+  itemId: string,
+  qty: number,
+): Promise<CartSnapshot> {
   const items = await readCart();
   const next = items
-    .map(i => (i.id === itemId ? { ...i, qty: Math.max(0, Math.min(qty, 10)) } : i))
-    .filter(i => i.qty > 0);
+    .map((i) =>
+      i.id === itemId ? { ...i, qty: Math.max(0, Math.min(qty, 10)) } : i,
+    )
+    .filter((i) => i.qty > 0);
   await writeCart(next);
   revalidatePath("/shop");
   return resolveCart(next);
 }
 
 export async function removeFromCart(itemId: string): Promise<CartSnapshot> {
-  const items = (await readCart()).filter(i => i.id !== itemId);
+  const items = (await readCart()).filter((i) => i.id !== itemId);
   await writeCart(items);
   revalidatePath("/shop");
   return resolveCart(items);

@@ -52,7 +52,10 @@ export type PassiveBoostType =
   | "unknown";
 
 /** Passive skill scope names */
-export const PASSIVE_SCOPE_NAMES: Record<PassiveScope, { en: string; fr: string }> = {
+export const PASSIVE_SCOPE_NAMES: Record<
+  PassiveScope,
+  { en: string; fr: string }
+> = {
   team: { en: "Team", fr: "Équipe" },
   player: { en: "Player", fr: "Joueur" },
   enemy: { en: "Enemy", fr: "Adversaire" },
@@ -60,7 +63,10 @@ export const PASSIVE_SCOPE_NAMES: Record<PassiveScope, { en: string; fr: string 
 };
 
 /** Passive skill boost type names */
-export const PASSIVE_BOOST_NAMES: Record<PassiveBoostType, { en: string; fr: string }> = {
+export const PASSIVE_BOOST_NAMES: Record<
+  PassiveBoostType,
+  { en: string; fr: string }
+> = {
   breach: { en: "Breach", fr: "Brèche" },
   justice: { en: "Justice", fr: "Justice" },
   attack: { en: "Attack", fr: "Attaque" },

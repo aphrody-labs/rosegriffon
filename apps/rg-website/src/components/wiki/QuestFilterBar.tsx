@@ -29,8 +29,12 @@ export function QuestFilterBar({ counts }: QuestFilterBarProps) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  const activeKind = (searchParams.get("kind") as "all" | "main" | "side") || "all";
-  const [query, setQuery] = useResetState(searchParams.get("q") || "", searchParams.get("q") || "");
+  const activeKind =
+    (searchParams.get("kind") as "all" | "main" | "side") || "all";
+  const [query, setQuery] = useResetState(
+    searchParams.get("q") || "",
+    searchParams.get("q") || "",
+  );
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -52,13 +56,17 @@ export function QuestFilterBar({ counts }: QuestFilterBarProps) {
   };
 
   const countFor = (value: "all" | "main" | "side") =>
-    value === "main" ? counts.main : value === "side" ? counts.side : counts.all;
+    value === "main"
+      ? counts.main
+      : value === "side"
+        ? counts.side
+        : counts.all;
 
   return (
     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
       {/* Onglets catégorie */}
       <div className="flex flex-wrap gap-2">
-        {KIND_TABS.map(tab => {
+        {KIND_TABS.map((tab) => {
           const active = activeKind === tab.value;
           return (
             <button
@@ -94,10 +102,14 @@ export function QuestFilterBar({ counts }: QuestFilterBarProps) {
           "p-1 pr-2 shadow-sm transition-all focus-within:border-primary/50 sm:max-w-xs",
         )}
       >
-        <Search size={20} aria-hidden="true" className="ml-2 text-on-surface-variant" />
+        <Search
+          size={20}
+          aria-hidden="true"
+          className="ml-2 text-on-surface-variant"
+        />
         <input
           value={query}
-          onChange={e => setQuery(e.target.value)}
+          onChange={(e) => setQuery(e.target.value)}
           placeholder="Rechercher une quête..."
           aria-label="Rechercher une quête"
           className="h-8 flex-1 bg-transparent text-sm text-on-surface outline-none placeholder:text-on-surface-variant/60"

@@ -26,7 +26,12 @@ import {
   TooltipTrigger,
 } from "@rosegriffon/ui";
 import { Icon } from "@/components/ui/Icon";
-import { Check as CheckIcon, ChevronsUpDown, Search as SearchIcon, X as XIcon } from "@/lib/icons-config";
+import {
+  Check as CheckIcon,
+  ChevronsUpDown,
+  Search as SearchIcon,
+  X as XIcon,
+} from "@/lib/icons-config";
 import { cn } from "@/lib/utils";
 
 const CATEGORY_OPTIONS = [
@@ -65,7 +70,12 @@ interface NewsFiltersProps {
   authors?: Array<{ id: string; name: string }>;
 }
 
-export function NewsFilters({ totalItems, rangeStart, rangeEnd, authors = [] }: NewsFiltersProps) {
+export function NewsFilters({
+  totalItems,
+  rangeStart,
+  rangeEnd,
+  authors = [],
+}: NewsFiltersProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const currentStatus = searchParams.get("status") || "";
@@ -81,7 +91,10 @@ export function NewsFilters({ totalItems, rangeStart, rangeEnd, authors = [] }: 
   const searchTimerRef = useRef<NodeJS.Timeout | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const currentAuthorName = useMemo(() => authors.find(a => a.id === currentAuthor)?.name, [authors, currentAuthor]);
+  const currentAuthorName = useMemo(
+    () => authors.find((a) => a.id === currentAuthor)?.name,
+    [authors, currentAuthor],
+  );
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
@@ -136,7 +149,9 @@ export function NewsFilters({ totalItems, rangeStart, rangeEnd, authors = [] }: 
     inputRef.current?.focus();
   };
 
-  const activeAdvancedFilters = [currentCategory, currentAuthor].filter(Boolean).length;
+  const activeAdvancedFilters = [currentCategory, currentAuthor].filter(
+    Boolean,
+  ).length;
 
   return (
     <div className="flex flex-col gap-3">
@@ -149,7 +164,7 @@ export function NewsFilters({ totalItems, rangeStart, rangeEnd, authors = [] }: 
             ref={inputRef}
             type="search"
             value={searchValue}
-            onChange={e => handleSearch(e.target.value)}
+            onChange={(e) => handleSearch(e.target.value)}
             placeholder="Rechercher  /  pour focus"
             className="h-12 w-full rounded-full border border-outline-variant/50 bg-surface-container-low pr-10 pl-10 text-on-surface text-sm placeholder:text-on-surface-variant/50 transition-all focus:border-primary/50 focus:outline-hidden focus:ring-2 focus:ring-primary/30"
           />
@@ -169,11 +184,11 @@ export function NewsFilters({ totalItems, rangeStart, rangeEnd, authors = [] }: 
         <ToggleGroup
           type="single"
           value={currentStatus}
-          onValueChange={value => pushOverrides({ status: value || null })}
+          onValueChange={(value) => pushOverrides({ status: value || null })}
           className="scrollbar-hide w-full overflow-x-auto sm:w-auto"
           aria-label="Filtre par statut"
         >
-          {STATUS_FILTERS.map(f => (
+          {STATUS_FILTERS.map((f) => (
             <ToggleGroupItem
               key={f.status || "all"}
               value={f.status}
@@ -190,7 +205,7 @@ export function NewsFilters({ totalItems, rangeStart, rangeEnd, authors = [] }: 
         <ToggleGroup
           type="single"
           value={currentView}
-          onValueChange={value => pushOverrides({ view: value || "grid" })}
+          onValueChange={(value) => pushOverrides({ view: value || "grid" })}
           className="ml-auto shrink-0 rounded-full border border-outline-variant/50 bg-surface p-1"
           aria-label="Mode d'affichage"
         >
@@ -216,7 +231,9 @@ export function NewsFilters({ totalItems, rangeStart, rangeEnd, authors = [] }: 
         {/* Category */}
         <Select
           value={currentCategory || "_all"}
-          onValueChange={value => pushOverrides({ category: value === "_all" ? null : value })}
+          onValueChange={(value) =>
+            pushOverrides({ category: value === "_all" ? null : value })
+          }
         >
           <SelectTrigger
             size="sm"
@@ -231,7 +248,7 @@ export function NewsFilters({ totalItems, rangeStart, rangeEnd, authors = [] }: 
           </SelectTrigger>
           <SelectContent>
             <SelectGroup>
-              {CATEGORY_OPTIONS.map(opt => (
+              {CATEGORY_OPTIONS.map((opt) => (
                 <SelectItem key={opt.value} value={opt.value}>
                   {opt.label}
                 </SelectItem>
@@ -250,11 +267,14 @@ export function NewsFilters({ totalItems, rangeStart, rangeEnd, authors = [] }: 
                 aria-expanded={authorOpen}
                 className={cn(
                   "flex h-8 items-center gap-1.5 rounded-full border border-outline-variant/40 bg-surface-container-low px-3 font-medium text-xs transition-colors hover:bg-surface-container",
-                  currentAuthor && "border-primary/30 bg-primary/10 text-primary",
+                  currentAuthor &&
+                    "border-primary/30 bg-primary/10 text-primary",
                 )}
               >
                 <Icon name="person" size={14} className="opacity-70" />
-                <span className="max-w-[120px] truncate">{currentAuthorName ?? "Tous les auteurs"}</span>
+                <span className="max-w-[120px] truncate">
+                  {currentAuthorName ?? "Tous les auteurs"}
+                </span>
                 <ChevronsUpDown className="size-3 opacity-50" />
               </button>
             </PopoverTrigger>
@@ -271,10 +291,15 @@ export function NewsFilters({ totalItems, rangeStart, rangeEnd, authors = [] }: 
                         setAuthorOpen(false);
                       }}
                     >
-                      <CheckIcon className={cn("mr-2 size-4", !currentAuthor ? "opacity-100" : "opacity-0")} />
+                      <CheckIcon
+                        className={cn(
+                          "mr-2 size-4",
+                          !currentAuthor ? "opacity-100" : "opacity-0",
+                        )}
+                      />
                       Tous les auteurs
                     </CommandItem>
-                    {authors.map(a => (
+                    {authors.map((a) => (
                       <CommandItem
                         key={a.id}
                         value={a.name}
@@ -284,7 +309,12 @@ export function NewsFilters({ totalItems, rangeStart, rangeEnd, authors = [] }: 
                         }}
                       >
                         <CheckIcon
-                          className={cn("mr-2 size-4", currentAuthor === a.id ? "opacity-100" : "opacity-0")}
+                          className={cn(
+                            "mr-2 size-4",
+                            currentAuthor === a.id
+                              ? "opacity-100"
+                              : "opacity-0",
+                          )}
                         />
                         {a.name}
                       </CommandItem>
@@ -317,7 +347,9 @@ export function NewsFilters({ totalItems, rangeStart, rangeEnd, authors = [] }: 
         {/* Sort */}
         <Select
           value={currentSort}
-          onValueChange={value => pushOverrides({ sort: value === "created_at" ? null : value })}
+          onValueChange={(value) =>
+            pushOverrides({ sort: value === "created_at" ? null : value })
+          }
         >
           <SelectTrigger
             size="sm"
@@ -329,7 +361,7 @@ export function NewsFilters({ totalItems, rangeStart, rangeEnd, authors = [] }: 
           </SelectTrigger>
           <SelectContent>
             <SelectGroup>
-              {SORT_OPTIONS.map(opt => (
+              {SORT_OPTIONS.map((opt) => (
                 <SelectItem key={opt.value} value={opt.value}>
                   {opt.label}
                 </SelectItem>
@@ -343,7 +375,9 @@ export function NewsFilters({ totalItems, rangeStart, rangeEnd, authors = [] }: 
         {/* Per page */}
         <Select
           value={currentPerPage}
-          onValueChange={value => pushOverrides({ perPage: value === "20" ? null : value })}
+          onValueChange={(value) =>
+            pushOverrides({ perPage: value === "20" ? null : value })
+          }
         >
           <SelectTrigger
             size="sm"
@@ -354,7 +388,7 @@ export function NewsFilters({ totalItems, rangeStart, rangeEnd, authors = [] }: 
           </SelectTrigger>
           <SelectContent>
             <SelectGroup>
-              {PERPAGE_OPTIONS.map(opt => (
+              {PERPAGE_OPTIONS.map((opt) => (
                 <SelectItem key={opt.value} value={opt.value}>
                   {opt.label}
                 </SelectItem>
@@ -364,7 +398,9 @@ export function NewsFilters({ totalItems, rangeStart, rangeEnd, authors = [] }: 
         </Select>
 
         <span className="ml-auto text-on-surface-variant/70 text-xs">
-          {totalItems > 0 ? `${rangeStart}–${rangeEnd} sur ${totalItems}` : "Aucun résultat"}
+          {totalItems > 0
+            ? `${rangeStart}–${rangeEnd} sur ${totalItems}`
+            : "Aucun résultat"}
         </span>
       </div>
     </div>

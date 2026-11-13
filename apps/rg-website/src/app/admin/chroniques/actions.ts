@@ -18,7 +18,11 @@ async function checkStaffPermission() {
   }
 
   // Vérifier via la table profiles
-  const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
 
   const authorized = profile?.role === "admin" || profile?.role === "staff";
   return { authorized, user };
@@ -222,7 +226,9 @@ export async function toggleChronicleStatus(
   }
 }
 
-export async function deleteChronicle(id: string): Promise<{ success: boolean; error?: string }> {
+export async function deleteChronicle(
+  id: string,
+): Promise<{ success: boolean; error?: string }> {
   try {
     const { authorized, user } = await checkStaffPermission();
     if (!authorized || !user) {
@@ -270,24 +276,31 @@ async function triggerDiscordAnnouncement(article: {
     return;
   }
   try {
-    const res = await fetch(`${rgUrl(process.env, "api", "RG_API_URL")}/v1/discord/announce`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${secret}`,
+    const res = await fetch(
+      `${rgUrl(process.env, "api", "RG_API_URL")}/v1/discord/announce`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${secret}`,
+        },
+        body: JSON.stringify({
+          type: article.type,
+          title: article.title,
+          slug: article.slug,
+          excerpt: article.excerpt || "",
+          featured_image_url: article.featured_image_url || "",
+        }),
       },
-      body: JSON.stringify({
-        type: article.type,
-        title: article.title,
-        slug: article.slug,
-        excerpt: article.excerpt || "",
-        featured_image_url: article.featured_image_url || "",
-      }),
-    });
+    );
     if (!res.ok) {
-      console.warn(`[Discord Announcement] Failed to announce: ${res.status} ${await res.text()}`);
+      console.warn(
+        `[Discord Announcement] Failed to announce: ${res.status} ${await res.text()}`,
+      );
     } else {
-      console.log(`[Discord Announcement] Announcement triggered successfully for ${article.slug}`);
+      console.log(
+        `[Discord Announcement] Announcement triggered successfully for ${article.slug}`,
+      );
     }
   } catch (err) {
     console.warn("[Discord Announcement] Error triggering announcement:", err);

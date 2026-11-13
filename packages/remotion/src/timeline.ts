@@ -27,7 +27,9 @@ export function formatTimecodeSMPTE(frame: number, fps: number = 24): string {
 export function parseSMPTETimecode(smpte: string, fps: number = 24): number {
   const parts = smpte.split(":").map((p) => parseInt(p, 10));
   if (parts.length !== 4 || parts.some((p) => isNaN(p))) {
-    throw new Error(`Invalid SMPTE timecode format: "${smpte}" (expected HH:MM:SS:FF)`);
+    throw new Error(
+      `Invalid SMPTE timecode format: "${smpte}" (expected HH:MM:SS:FF)`,
+    );
   }
   const [h, m, s, f] = parts;
   return (h * 3600 + m * 60 + s) * fps + f;
@@ -40,7 +42,10 @@ export function interpolate(
   frame: number,
   inputRange: [number, number],
   outputRange: [number, number],
-  options?: { extrapolateLeft?: "clamp" | "extend"; extrapolateRight?: "clamp" | "extend" },
+  options?: {
+    extrapolateLeft?: "clamp" | "extend";
+    extrapolateRight?: "clamp" | "extend";
+  },
 ): number {
   const [inMin, inMax] = inputRange;
   const [outMin, outMax] = outputRange;

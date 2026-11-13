@@ -26,7 +26,13 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["tableHash", "tableName", "rowCount", "columnCount", "rows"],
+        "required": [
+          "tableHash",
+          "tableName",
+          "rowCount",
+          "columnCount",
+          "rows"
+        ],
         "properties": {
           "tableHash": { "type": "string" },
           "tableName": { "type": "string" },

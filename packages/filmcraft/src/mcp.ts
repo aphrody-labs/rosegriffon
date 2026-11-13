@@ -27,7 +27,9 @@ export class FilmCraftMcpServer {
     return this.engine;
   }
 
-  public async handleToolCall(request: McpToolCallRequest): Promise<McpToolCallResponse> {
+  public async handleToolCall(
+    request: McpToolCallRequest,
+  ): Promise<McpToolCallResponse> {
     const { tool, arguments: args } = request;
 
     switch (tool) {
@@ -90,7 +92,8 @@ export class FilmCraftMcpServer {
           format: args.format as ExportJobOptions["format"],
           preset: args.preset as ExportJobOptions["preset"],
           quality: args.quality != null ? Number(args.quality) : undefined,
-          startFrame: args.startFrame != null ? Number(args.startFrame) : undefined,
+          startFrame:
+            args.startFrame != null ? Number(args.startFrame) : undefined,
           endFrame: args.endFrame != null ? Number(args.endFrame) : undefined,
           outputPath: args.outputPath as string | undefined,
           r2DestinationKey: args.r2DestinationKey as string | undefined,

@@ -103,7 +103,11 @@ function htmlWrap(greeting: string, body: string): string {
 </body></html>`;
 }
 
-export async function sendReminder(email: string, stage: ReminderStage, fullName?: string): Promise<void> {
+export async function sendReminder(
+  email: string,
+  stage: ReminderStage,
+  fullName?: string,
+): Promise<void> {
   const content = buildContent(stage, fullName);
   await transporter.sendMail({
     from: FROM,
@@ -122,7 +126,9 @@ export interface ReminderRunSummary {
   failed: number;
 }
 
-export async function runReminderBatch(stage: ReminderStage): Promise<ReminderRunSummary> {
+export async function runReminderBatch(
+  stage: ReminderStage,
+): Promise<ReminderRunSummary> {
   const supabase = createPostgresClient();
 
   const minNotificationCount = (

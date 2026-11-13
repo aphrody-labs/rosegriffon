@@ -65,9 +65,9 @@ async function repondreSuggestions(
   try {
     await interaction.respond(
       produire()
-        .filter(choix => choix.value.length > 0)
+        .filter((choix) => choix.value.length > 0)
         .slice(0, MAX_PROPOSITIONS)
-        .map(choix => ({
+        .map((choix) => ({
           name: truncate(choix.name, MAX_LONGUEUR_PROPOSITION),
           value: truncate(choix.value, MAX_LONGUEUR_PROPOSITION),
         })),
@@ -86,7 +86,10 @@ async function repondreSuggestions(
 }
 
 /** Un produit dans une liste d'autocomplétion : nom + prix, valeur = slug. */
-function choixProduit(produit: ProduitBoutique): { name: string; value: string } {
+function choixProduit(produit: ProduitBoutique): {
+  name: string;
+  value: string;
+} {
   return {
     name: `${produit.nom} — ${formaterFourchettePrix(produit)}`,
     value: produit.slug,
@@ -101,7 +104,8 @@ function choixProduit(produit: ProduitBoutique): { name: string; value: string }
 @SlashGroup("boutique")
 export class CommandesBoutique {
   @Slash({
-    description: "Le catalogue de la boutique, avec les prix et les liens vers les fiches",
+    description:
+      "Le catalogue de la boutique, avec les prix et les liens vers les fiches",
     name: "catalogue",
   })
   async catalogue(
@@ -110,10 +114,16 @@ export class CommandesBoutique {
         repondreSuggestions(interaction, () => {
           const aiguille = normaliser(saisie(interaction));
           return CATEGORIES.filter(
-            famille => aiguille.length === 0 || normaliser(famille.libelle).includes(aiguille),
-          ).map(famille => ({ name: famille.libelle, value: famille.valeur }));
+            (famille) =>
+              aiguille.length === 0 ||
+              normaliser(famille.libelle).includes(aiguille),
+          ).map((famille) => ({
+            name: famille.libelle,
+            value: famille.valeur,
+          }));
         }),
-      description: "Ne montrer qu'une famille de produits (prints, stickers, textile…)",
+      description:
+        "Ne montrer qu'une famille de produits (prints, stickers, textile…)",
       name: "categorie",
       required: false,
       type: ApplicationCommandOptionType.String,
@@ -133,14 +143,21 @@ export class CommandesBoutique {
     const groupes = catalogueParCategorie(categorie);
     if (groupes.length === 0) {
       await interaction.editReply({
-        content: `Aucun produit dans la famille « ${truncate(categorie ?? "", 80)} ». Familles disponibles : ${CATEGORIES.map(f => f.libelle).join(", ")}.`,
+        content: `Aucun produit dans la famille « ${truncate(categorie ?? "", 80)} ». Familles disponibles : ${CATEGORIES.map((f) => f.libelle).join(", ")}.`,
       });
       return;
     }
 
-    const nombreDeProduits = groupes.reduce((total, groupe) => total + groupe.produits.length, 0);
-    const prixMini = formaterEuros(Math.min(...CATALOGUE.map(p => p.prixCents)));
-    const prixMaxi = formaterEuros(Math.max(...CATALOGUE.map(p => p.prixMaxCents)));
+    const nombreDeProduits = groupes.reduce(
+      (total, groupe) => total + groupe.produits.length,
+      0,
+    );
+    const prixMini = formaterEuros(
+      Math.min(...CATALOGUE.map((p) => p.prixCents)),
+    );
+    const prixMaxi = formaterEuros(
+      Math.max(...CATALOGUE.map((p) => p.prixMaxCents)),
+    );
     const titre = "Boutique Rose Griffon";
     const entete = categorie
       ? `${nombreDeProduits} produit${nombreDeProduits > 1 ? "s" : ""} dans cette famille. Commande sur ${BASE_BOUTIQUE}/shop.`
@@ -149,7 +166,10 @@ export class CommandesBoutique {
     // Le budget des champs, c'est les 6 000 caractères de l'embed MOINS ce qui
     // est déjà écrit ailleurs (titre, description, pied de page) — sinon la
     // somme peut franchir la limite et Discord refuse le message entier.
-    const { champs, omises } = champsCatalogue(groupes, MAX_TOTAL_EMBED - titre.length - entete.length - 200);
+    const { champs, omises } = champsCatalogue(
+      groupes,
+      MAX_TOTAL_EMBED - titre.length - entete.length - 200,
+    );
     const accordOmises = omises > 1 ? "s" : "";
     const description =
       omises > 0
@@ -162,7 +182,10 @@ export class CommandesBoutique {
       .setDescription(truncate(description, MAX_DESCRIPTION));
 
     for (const champ of champs.slice(0, MAX_CHAMPS_EMBED)) {
-      embed.addFields({ name: champ.nom, value: truncate(champ.valeur, MAX_VALEUR_CHAMP) });
+      embed.addFields({
+        name: champ.nom,
+        value: truncate(champ.valeur, MAX_VALEUR_CHAMP),
+      });
     }
 
     const premier = groupes[0]?.produits[0];
@@ -173,13 +196,16 @@ export class CommandesBoutique {
   }
 
   @Slash({
-    description: "La fiche d'un produit : prix, variantes, contenu et lien de commande",
+    description:
+      "La fiche d'un produit : prix, variantes, contenu et lien de commande",
     name: "produit",
   })
   async produit(
     @SlashOption({
       autocomplete: (interaction: AutocompleteInteraction) =>
-        repondreSuggestions(interaction, () => chercherProduits(saisie(interaction)).map(choixProduit)),
+        repondreSuggestions(interaction, () =>
+          chercherProduits(saisie(interaction)).map(choixProduit),
+        ),
       description: "Nom du produit",
       name: "produit",
       required: true,
@@ -205,7 +231,12 @@ export class CommandesBoutique {
     const embed = rgEmbed()
       .setTitle(produit.nom)
       .setURL(urlFicheProduit(produit.slug))
-      .setDescription(truncate(`*${produit.accroche}*\n\n${produit.description}`, MAX_DESCRIPTION))
+      .setDescription(
+        truncate(
+          `*${produit.accroche}*\n\n${produit.description}`,
+          MAX_DESCRIPTION,
+        ),
+      )
       .setThumbnail(urlImageProduit(produit.image));
 
     const prix = [
@@ -213,7 +244,10 @@ export class CommandesBoutique {
       libelleStock(produit.stock),
       produit.exclusifPatreon ? "Réservé aux soutiens Patreon" : null,
     ]
-      .filter((valeur): valeur is string => typeof valeur === "string" && valeur.length > 0)
+      .filter(
+        (valeur): valeur is string =>
+          typeof valeur === "string" && valeur.length > 0,
+      )
       .join(" · ");
     embed.addFields(
       { inline: true, name: "Prix", value: truncate(prix, MAX_VALEUR_CHAMP) },
@@ -224,7 +258,12 @@ export class CommandesBoutique {
       embed.addFields({
         name: `Choix disponibles (${produit.variantes.length})`,
         value: truncate(
-          produit.variantes.map(variante => `• ${variante.libelle} — ${formaterEuros(variante.prixCents)}`).join("\n"),
+          produit.variantes
+            .map(
+              (variante) =>
+                `• ${variante.libelle} — ${formaterEuros(variante.prixCents)}`,
+            )
+            .join("\n"),
           MAX_VALEUR_CHAMP,
         ),
       });
@@ -233,7 +272,10 @@ export class CommandesBoutique {
     if (produit.points.length > 0) {
       embed.addFields({
         name: "Ce que tu reçois",
-        value: truncate(produit.points.map(point => `• ${point}`).join("\n"), MAX_VALEUR_CHAMP),
+        value: truncate(
+          produit.points.map((point) => `• ${point}`).join("\n"),
+          MAX_VALEUR_CHAMP,
+        ),
       });
     }
 

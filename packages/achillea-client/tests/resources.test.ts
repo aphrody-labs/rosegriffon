@@ -8,7 +8,10 @@ import {
   type AchilleaFetch,
   type AchilleaClientResult,
 } from "../src/v1";
-import { MatchMode, ScoreReportPolicy } from "@rosegriffon/achillea-types/enums/eventEnums";
+import {
+  MatchMode,
+  ScoreReportPolicy,
+} from "@rosegriffon/achillea-types/enums/eventEnums";
 import { SanctionType } from "@rosegriffon/achillea-types/enums/sanction";
 
 interface RecordedCall {
@@ -31,7 +34,10 @@ function tracingClient(response: unknown = {}): {
     calls.push({ url: String(input), method: init?.method, body: init?.body });
     return Response.json(response);
   };
-  return { client: createAchilleaClient({ baseUrl: "https://a.test/api", fetch }), calls };
+  return {
+    client: createAchilleaClient({ baseUrl: "https://a.test/api", fetch }),
+    calls,
+  };
 }
 
 function path(call: RecordedCall | undefined): string {
@@ -73,7 +79,11 @@ describe("agrégat de ressources", () => {
     await client.guilds.stats();
     await client.guilds.get("123/456");
 
-    expect(calls.map(path)).toEqual(["/guilds?page=3&limit=5", "/guilds/stats", "/guilds/123%2F456"]);
+    expect(calls.map(path)).toEqual([
+      "/guilds?page=3&limit=5",
+      "/guilds/stats",
+      "/guilds/123%2F456",
+    ]);
   });
 });
 
@@ -82,7 +92,11 @@ describe("chemins et verbes par ressource", () => {
     const { client, calls } = tracingClient();
 
     await client.users.get("42");
-    await client.users.leaderboard({ mode: MatchMode.TWO_VS_TWO, limit: 10, offset: 20 });
+    await client.users.leaderboard({
+      mode: MatchMode.TWO_VS_TWO,
+      limit: 10,
+      offset: 20,
+    });
     await client.users.myRankedHistory({ limit: 5 });
     await client.users.myRankedTrend({ days: 30 });
     await client.users.updateMyProfile({ bio: "salut" });
@@ -100,8 +114,19 @@ describe("chemins et verbes par ressource", () => {
       "/users/resync-avatars",
       "/misc/suggest/all?query=roy",
     ]);
-    expect(calls.map(call => call.method)).toEqual(["GET", "GET", "GET", "GET", "PUT", "POST", "POST", "GET"]);
-    expect(client.users.cardUrl("42")).toBe("https://a.test/api/users/42/card.png");
+    expect(calls.map((call) => call.method)).toEqual([
+      "GET",
+      "GET",
+      "GET",
+      "GET",
+      "PUT",
+      "POST",
+      "POST",
+      "GET",
+    ]);
+    expect(client.users.cardUrl("42")).toBe(
+      "https://a.test/api/users/42/card.png",
+    );
   });
 
   test("tournois : liste filtrée, cycle de vie, seeding", async () => {
@@ -131,7 +156,9 @@ describe("chemins et verbes par ressource", () => {
       "/tournaments/lobby/99",
     ]);
     expect(calls[4]?.body).toBe(JSON.stringify({ policy: "staff_only" }));
-    expect(calls[5]?.body).toBe(JSON.stringify({ userId: "42", reason: "no-show" }));
+    expect(calls[5]?.body).toBe(
+      JSON.stringify({ userId: "42", reason: "no-show" }),
+    );
     expect(calls[6]?.body).toBe(JSON.stringify({ force: true }));
     expect(calls[7]?.method).toBe("PUT");
   });
@@ -181,7 +208,10 @@ describe("chemins et verbes par ressource", () => {
     await client.ranked.cancelChallenge("ABCD");
     await client.ranked.uploadDisputeProof(77, "data:image/png;base64,AAAA");
     await client.ranked.adminDisputes();
-    await client.ranked.adminValidateLobby(77, { scoreTeam1: 3, scoreTeam2: 1 });
+    await client.ranked.adminValidateLobby(77, {
+      scoreTeam1: 3,
+      scoreTeam2: 1,
+    });
     await client.ranked.adminTelemetry({ lobbyId: 77, limit: 10 });
     await client.ranked.adminUpdateSeason("s1", { name: "Saison 1" });
     await client.ranked.adminResetLadder("s1");
@@ -234,7 +264,9 @@ describe("chemins et verbes par ressource", () => {
     ]);
     expect(calls[2]?.method).toBe("PATCH");
     expect(calls[7]?.method).toBe("PATCH");
-    expect(client.licenses.pdfUrl("abc")).toBe("https://a.test/api/licenses/abc.pdf");
+    expect(client.licenses.pdfUrl("abc")).toBe(
+      "https://a.test/api/licenses/abc.pdf",
+    );
   });
 
   test("licence me expose le jeton de vérification propriétaire et accepte un PDF absent", async () => {
@@ -264,7 +296,11 @@ describe("chemins et verbes par ressource", () => {
   test("sanctions, notes joueur, portefeuille, notifications", async () => {
     const { client, calls } = tracingClient();
 
-    await client.sanctions.list({ userId: "42", type: SanctionType.Ban, active: true });
+    await client.sanctions.list({
+      userId: "42",
+      type: SanctionType.Ban,
+      active: true,
+    });
     await client.sanctions.appeal("s-1", "je conteste");
     await client.playerNotes.list({ tournamentId: 12, resolved: false });
     await client.playerNotes.summary("42");
@@ -291,7 +327,12 @@ describe("chemins et verbes par ressource", () => {
 
     await client.admin.users({ page: 1, pagination: 50, q: "roy" });
     await client.admin.adjustWallet("42", -10, "amende");
-    await client.admin.dbRows("clan", { page: 2, limit: 25, sort: "name", order: "desc" });
+    await client.admin.dbRows("clan", {
+      page: 2,
+      limit: 25,
+      sort: "name",
+      order: "desc",
+    });
     await client.admin.dbDeleteRow("clan", { id: 3 });
     await client.admin.dbQuery("SELECT 1");
     await client.admin.metrics();
@@ -314,8 +355,12 @@ describe("chemins et verbes par ressource", () => {
     ]);
     expect(calls[3]?.method).toBe("DELETE");
     expect(calls[3]?.body).toBe(JSON.stringify({ pk: { id: 3 } }));
-    expect(client.auth.discordLoginUrl("/ranked")).toBe("https://rosegriffon.fr/login?redirect=%2Franked");
-    expect(client.auth.callbackUrl()).toBe("https://rosegriffon.fr/api/auth/callback/discord");
+    expect(client.auth.discordLoginUrl("/ranked")).toBe(
+      "https://rosegriffon.fr/login?redirect=%2Franked",
+    );
+    expect(client.auth.callbackUrl()).toBe(
+      "https://rosegriffon.fr/api/auth/callback/discord",
+    );
   });
 });
 
@@ -378,7 +423,11 @@ describe("schémas de ressource", () => {
       ruleset: "",
     };
 
-    const parsed = tournamentDetailSchema.parse([tournament, [], { stage: [] }]);
+    const parsed = tournamentDetailSchema.parse([
+      tournament,
+      [],
+      { stage: [] },
+    ]);
 
     expect(parsed[0].organization).toBe(7);
     expect(parsed[0].createdAt).toBeInstanceOf(Date);
@@ -392,7 +441,8 @@ describe("schémas de ressource", () => {
       fetch: async () => Response.json([{ id: "douze" }, [], null]),
     });
 
-    const result: AchilleaClientResult<unknown> = await client.tournaments.get(12);
+    const result: AchilleaClientResult<unknown> =
+      await client.tournaments.get(12);
 
     expect(result.ok).toBe(false);
     if (result.ok) return;

@@ -68,8 +68,15 @@ interface Props {
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
-const SEVERITY_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
-  critical: { bg: "bg-destructive/20", color: "text-destructive", label: "Critique" },
+const SEVERITY_CONFIG: Record<
+  string,
+  { label: string; color: string; bg: string }
+> = {
+  critical: {
+    bg: "bg-destructive/20",
+    color: "text-destructive",
+    label: "Critique",
+  },
   high: { bg: "bg-warning/20", color: "text-warning", label: "Élevé" },
   low: { bg: "bg-primary/20", color: "text-primary", label: "Faible" },
   medium: { bg: "bg-warning/20", color: "text-warning", label: "Moyen" },
@@ -100,12 +107,17 @@ const GAMES = [
 
 // ─── Main Component ─────────────────────────────────────────────────────────
 
-export function ZukanReviewClient({ issues, bySeverity, zukanCatalog, missingCharacters }: Props) {
+export function ZukanReviewClient({
+  issues,
+  bySeverity,
+  zukanCatalog,
+  missingCharacters,
+}: Props) {
   const [filter, setFilter] = useState<string>("all");
   const [dismissed, setDismissed] = useState<Set<string>>(new Set());
   const [resolvedIssues, setResolvedIssues] = useState<Set<string>>(new Set());
 
-  const filtered = issues.filter(i => {
+  const filtered = issues.filter((i) => {
     if (dismissed.has(i.code + i.hash)) {
       return false;
     }
@@ -119,11 +131,11 @@ export function ZukanReviewClient({ issues, bySeverity, zukanCatalog, missingCha
   });
 
   const dismiss = (issue: Issue) => {
-    setDismissed(prev => new Set(prev).add(issue.code + issue.hash));
+    setDismissed((prev) => new Set(prev).add(issue.code + issue.hash));
   };
 
   const markResolved = (code: string) => {
-    setResolvedIssues(prev => new Set(prev).add(code));
+    setResolvedIssues((prev) => new Set(prev).add(code));
   };
 
   return (
@@ -166,13 +178,16 @@ export function ZukanReviewClient({ issues, bySeverity, zukanCatalog, missingCha
       {/* Legend */}
       <div className="flex flex-wrap gap-4 text-xs text-on-surface-variant px-1">
         <span className="flex items-center gap-1">
-          <span className="size-2 rounded-full bg-warning" /> Stats inversées = probable mauvais variant
+          <span className="size-2 rounded-full bg-warning" /> Stats inversées =
+          probable mauvais variant
         </span>
         <span className="flex items-center gap-1">
-          <span className="size-2 rounded-full bg-warning" /> Ère différente = image d&apos;une autre série
+          <span className="size-2 rounded-full bg-warning" /> Ère différente =
+          image d&apos;une autre série
         </span>
         <span className="flex items-center gap-1">
-          <span className="size-2 rounded-full bg-warning" /> Hash dupliqué = personnages différents, même image
+          <span className="size-2 rounded-full bg-warning" /> Hash dupliqué =
+          personnages différents, même image
         </span>
       </div>
 
@@ -191,7 +206,11 @@ export function ZukanReviewClient({ issues, bySeverity, zukanCatalog, missingCha
 
       {filtered.length === 0 && (
         <div className="py-16 text-center text-on-surface-variant">
-          <Icon name="check_circle" size={48} className="mx-auto mb-3 text-primary/50" />
+          <Icon
+            name="check_circle"
+            size={48}
+            className="mx-auto mb-3 text-primary/50"
+          />
           <p className="text-lg font-medium">Aucun problème restant</p>
           <p className="text-sm mt-1">
             {dismissed.size + resolvedIssues.size > 0
@@ -203,7 +222,10 @@ export function ZukanReviewClient({ issues, bySeverity, zukanCatalog, missingCha
 
       {/* Missing characters with assign button */}
       {missingCharacters && missingCharacters.length > 0 && (
-        <MissingCharactersTable characters={missingCharacters} zukanCatalog={zukanCatalog} />
+        <MissingCharactersTable
+          characters={missingCharacters}
+          zukanCatalog={zukanCatalog}
+        />
       )}
     </div>
   );
@@ -273,10 +295,18 @@ function IssueCard({
 
         <div className="flex-1 min-w-0 space-y-1">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className={cn("px-2 py-0.5 rounded-full text-[10px] font-bold uppercase", cfg.bg, cfg.color)}>
+            <span
+              className={cn(
+                "px-2 py-0.5 rounded-full text-[10px] font-bold uppercase",
+                cfg.bg,
+                cfg.color,
+              )}
+            >
               {cfg.label}
             </span>
-            <span className="text-xs text-on-surface-variant font-mono">{issue.code}</span>
+            <span className="text-xs text-on-surface-variant font-mono">
+              {issue.code}
+            </span>
             {issue.dbRarity && issue.dbRarity !== "Normal" && (
               <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-tertiary-container text-on-tertiary-container">
                 {issue.dbRarity}
@@ -288,12 +318,19 @@ function IssueCard({
             <span className="font-medium text-on-surface truncate">
               {issue.dbNameFr || issue.dbNameEn || issue.dbNameJa}
             </span>
-            {issue.dbNameJa && <span className="text-xs text-on-surface-variant">{issue.dbNameJa}</span>}
+            {issue.dbNameJa && (
+              <span className="text-xs text-on-surface-variant">
+                {issue.dbNameJa}
+              </span>
+            )}
           </div>
 
           <div className="space-y-0.5">
             {issue.problems.map((p, i) => (
-              <p key={i} className="text-xs text-on-surface-variant leading-snug">
+              <p
+                key={i}
+                className="text-xs text-on-surface-variant leading-snug"
+              >
                 {p}
               </p>
             ))}
@@ -349,8 +386,12 @@ function IssueCard({
               <div className="grid gap-1.5">
                 {issue.characters.map((c, i) => (
                   <div key={i} className="flex items-center gap-2 text-xs">
-                    <span className="font-mono text-on-surface-variant">{c.code}</span>
-                    <span className="font-medium text-on-surface">{c.name}</span>
+                    <span className="font-mono text-on-surface-variant">
+                      {c.code}
+                    </span>
+                    <span className="font-medium text-on-surface">
+                      {c.name}
+                    </span>
                     <span className="text-on-surface-variant">{c.nameJa}</span>
                     <div className="flex gap-1 ml-auto">
                       <span className="px-1.5 py-0.5 rounded bg-surface-container-high text-on-surface-variant">
@@ -371,7 +412,9 @@ function IssueCard({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {/* DB side */}
               <div>
-                <h4 className="text-xs font-bold text-on-surface-variant uppercase mb-2">Base de données</h4>
+                <h4 className="text-xs font-bold text-on-surface-variant uppercase mb-2">
+                  Base de données
+                </h4>
                 <div className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-xs">
                   <span className="text-on-surface-variant">Nom EN</span>
                   <span className="font-medium">{issue.dbNameEn || "—"}</span>
@@ -394,7 +437,9 @@ function IssueCard({
                     <>
                       <span className="text-on-surface-variant">Stats</span>
                       <span className="font-mono text-[10px]">
-                        {STAT_LABELS.map((l, i) => `${l}:${issue.dbStats![i]}`).join(" ")}
+                        {STAT_LABELS.map(
+                          (l, i) => `${l}:${issue.dbStats![i]}`,
+                        ).join(" ")}
                       </span>
                     </>
                   )}
@@ -403,19 +448,29 @@ function IssueCard({
 
               {/* Zukan side */}
               <div>
-                <h4 className="text-xs font-bold text-on-surface-variant uppercase mb-2">Zukan (image source)</h4>
+                <h4 className="text-xs font-bold text-on-surface-variant uppercase mb-2">
+                  Zukan (image source)
+                </h4>
                 <div className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-xs">
                   <span className="text-on-surface-variant">Nom EN</span>
-                  <span className="font-medium">{issue.zukanNameEn || "—"}</span>
+                  <span className="font-medium">
+                    {issue.zukanNameEn || "—"}
+                  </span>
                   <span className="text-on-surface-variant">Nom JA</span>
-                  <span className="font-medium">{issue.zukanNameJa || "—"}</span>
+                  <span className="font-medium">
+                    {issue.zukanNameJa || "—"}
+                  </span>
                   <span className="text-on-surface-variant">Position</span>
                   <span>{issue.zukanPosition || "—"}</span>
                   <span className="text-on-surface-variant">Élément</span>
                   <span className="flex items-center gap-1">
-                    {issue.zukanElement && ELEMENT_ICONS[issue.zukanElement] && (
-                      <Icon name={ELEMENT_ICONS[issue.zukanElement]} size={14} />
-                    )}
+                    {issue.zukanElement &&
+                      ELEMENT_ICONS[issue.zukanElement] && (
+                        <Icon
+                          name={ELEMENT_ICONS[issue.zukanElement]}
+                          size={14}
+                        />
+                      )}
                     {issue.zukanElement || "—"}
                   </span>
                   <span className="text-on-surface-variant">Jeu</span>
@@ -424,13 +479,17 @@ function IssueCard({
                     <>
                       <span className="text-on-surface-variant">Stats</span>
                       <span className="font-mono text-[10px]">
-                        {STAT_LABELS.map((l, i) => `${l}:${issue.zukanStats![i]}`).join(" ")}
+                        {STAT_LABELS.map(
+                          (l, i) => `${l}:${issue.zukanStats![i]}`,
+                        ).join(" ")}
                       </span>
                     </>
                   )}
                   {issue.statsCorrelation != null && (
                     <>
-                      <span className="text-on-surface-variant">Corrélation</span>
+                      <span className="text-on-surface-variant">
+                        Corrélation
+                      </span>
                       <span
                         className={cn(
                           "font-mono",
@@ -499,8 +558,12 @@ function CandidatePanel({
     }
     const q = search.toLowerCase().trim();
     return catalog
-      .filter(c => {
-        if (q && !c.name.toLowerCase().includes(q) && !(c.nickname ?? "").toLowerCase().includes(q)) {
+      .filter((c) => {
+        if (
+          q &&
+          !c.name.toLowerCase().includes(q) &&
+          !(c.nickname ?? "").toLowerCase().includes(q)
+        ) {
           return false;
         }
         if (posFilter && c.position !== posFilter) {
@@ -528,13 +591,13 @@ function CandidatePanel({
         <input
           type="text"
           value={search}
-          onChange={e => setSearch(e.target.value)}
+          onChange={(e) => setSearch(e.target.value)}
           placeholder="Rechercher par nom…"
           className="flex-1 min-w-[200px] px-3 py-1.5 rounded-xl bg-surface-container-high border border-outline-variant/30 text-sm text-on-surface placeholder:text-on-surface-variant/50 focus:outline-hidden focus:border-primary"
         />
         <select
           value={posFilter}
-          onChange={e => setPosFilter(e.target.value)}
+          onChange={(e) => setPosFilter(e.target.value)}
           className="px-2 py-1.5 rounded-xl bg-surface-container-high border border-outline-variant/30 text-xs text-on-surface"
         >
           <option value="">Position</option>
@@ -545,7 +608,7 @@ function CandidatePanel({
         </select>
         <select
           value={elemFilter}
-          onChange={e => setElemFilter(e.target.value)}
+          onChange={(e) => setElemFilter(e.target.value)}
           className="px-2 py-1.5 rounded-xl bg-surface-container-high border border-outline-variant/30 text-xs text-on-surface"
         >
           <option value="">Élément</option>
@@ -556,11 +619,11 @@ function CandidatePanel({
         </select>
         <select
           value={gameFilter}
-          onChange={e => setGameFilter(e.target.value)}
+          onChange={(e) => setGameFilter(e.target.value)}
           className="px-2 py-1.5 rounded-xl bg-surface-container-high border border-outline-variant/30 text-xs text-on-surface"
         >
           <option value="">Jeu</option>
-          {GAMES.map(g => (
+          {GAMES.map((g) => (
             <option key={g} value={g}>
               {g}
             </option>
@@ -603,7 +666,9 @@ function CandidatePanel({
                   )}
                 </div>
                 <div className="p-2 space-y-1">
-                  <p className="text-xs font-medium text-on-surface truncate">{c.name}</p>
+                  <p className="text-xs font-medium text-on-surface truncate">
+                    {c.name}
+                  </p>
                   <div className="flex items-center gap-1 flex-wrap">
                     <span
                       className={cn(
@@ -623,20 +688,28 @@ function CandidatePanel({
                           : "bg-surface-container-high text-on-surface-variant",
                       )}
                     >
-                      {ELEMENT_ICONS[c.element] && <Icon name={ELEMENT_ICONS[c.element]} size={10} />}
+                      {ELEMENT_ICONS[c.element] && (
+                        <Icon name={ELEMENT_ICONS[c.element]} size={10} />
+                      )}
                       {c.element}
                     </span>
                   </div>
-                  <p className="text-[9px] text-on-surface-variant truncate">{c.game}</p>
+                  <p className="text-[9px] text-on-surface-variant truncate">
+                    {c.game}
+                  </p>
                 </div>
               </button>
             );
           })}
         </div>
       ) : search.trim() || posFilter || elemFilter || gameFilter ? (
-        <p className="text-xs text-on-surface-variant py-4 text-center">Aucun résultat</p>
+        <p className="text-xs text-on-surface-variant py-4 text-center">
+          Aucun résultat
+        </p>
       ) : (
-        <p className="text-xs text-on-surface-variant py-4 text-center">Tapez un nom pour chercher dans le catalogue</p>
+        <p className="text-xs text-on-surface-variant py-4 text-center">
+          Tapez un nom pour chercher dans le catalogue
+        </p>
       )}
 
       {results.length >= 50 && (
@@ -661,14 +734,16 @@ function MissingCharactersTable({
   const [assignedIds, setAssignedIds] = useState<Set<string>>(new Set());
   const [isPending, startTransition] = useTransition();
 
-  const assigningChar = assigningId ? characters.find(c => c.id === assigningId) : null;
+  const assigningChar = assigningId
+    ? characters.find((c) => c.id === assigningId)
+    : null;
 
   const handleChoose = (characterId: string, hash: string) => {
     startTransition(async () => {
       const result = await updateZukanHash(characterId, hash);
       if (result.success) {
         toast.success("Image assignée");
-        setAssignedIds(prev => new Set(prev).add(characterId));
+        setAssignedIds((prev) => new Set(prev).add(characterId));
         setAssigningId(null);
       } else {
         toast.error(result.error || "Erreur");
@@ -676,7 +751,7 @@ function MissingCharactersTable({
     });
   };
 
-  const visibleChars = characters.filter(c => !assignedIds.has(c.id));
+  const visibleChars = characters.filter((c) => !assignedIds.has(c.id));
 
   return (
     <div className="rounded-[24px] bg-surface-container-lowest border border-outline-variant/20 p-6">
@@ -684,8 +759,10 @@ function MissingCharactersTable({
         Personnages sans image Zukan
       </h2>
       <p className="text-xs text-on-surface-variant/60 mb-4">
-        Hors Coach (_5000) et MixiMax (×). {visibleChars.length} affichés (max 200).
-        {assignedIds.size > 0 && ` — ${assignedIds.size} assigné(s) cette session.`}
+        Hors Coach (_5000) et MixiMax (×). {visibleChars.length} affichés (max
+        200).
+        {assignedIds.size > 0 &&
+          ` — ${assignedIds.size} assigné(s) cette session.`}
       </p>
 
       {/* Assign panel */}
@@ -699,7 +776,11 @@ function MissingCharactersTable({
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-sm font-medium text-on-surface">
               Assigner une image à :{" "}
-              <strong>{assigningChar.name_fr || assigningChar.name_en || assigningChar.id}</strong>
+              <strong>
+                {assigningChar.name_fr ||
+                  assigningChar.name_en ||
+                  assigningChar.id}
+              </strong>
             </h3>
             <button
               onClick={() => setAssigningId(null)}
@@ -714,7 +795,7 @@ function MissingCharactersTable({
             currentHash=""
             dbPosition={assigningChar.position || undefined}
             dbElement={assigningChar.element || undefined}
-            onChoose={hash => handleChoose(assigningChar.id, hash)}
+            onChoose={(hash) => handleChoose(assigningChar.id, hash)}
           />
         </div>
       )}
@@ -750,18 +831,32 @@ function MissingCharactersTable({
             </tr>
           </thead>
           <tbody>
-            {visibleChars.map(char => (
+            {visibleChars.map((char) => (
               <tr
                 key={char.id}
                 className="border-b border-outline-variant/5 hover:bg-surface-container-low transition-colors"
               >
-                <td className="py-1.5 px-2 font-mono text-on-surface-variant">{char.internal_code}</td>
-                <td className="py-1.5 px-2 font-medium text-on-surface">{char.name_fr || "—"}</td>
-                <td className="py-1.5 px-2 text-on-surface-variant">{char.name_en || "—"}</td>
-                <td className="py-1.5 px-2 text-on-surface-variant hidden sm:table-cell">{char.series || "—"}</td>
-                <td className="py-1.5 px-2 text-on-surface-variant hidden md:table-cell">{char.rarity_label || "—"}</td>
-                <td className="py-1.5 px-2 text-on-surface-variant hidden md:table-cell">{char.position || "—"}</td>
-                <td className="py-1.5 px-2 text-on-surface-variant hidden md:table-cell">{char.element || "—"}</td>
+                <td className="py-1.5 px-2 font-mono text-on-surface-variant">
+                  {char.internal_code}
+                </td>
+                <td className="py-1.5 px-2 font-medium text-on-surface">
+                  {char.name_fr || "—"}
+                </td>
+                <td className="py-1.5 px-2 text-on-surface-variant">
+                  {char.name_en || "—"}
+                </td>
+                <td className="py-1.5 px-2 text-on-surface-variant hidden sm:table-cell">
+                  {char.series || "—"}
+                </td>
+                <td className="py-1.5 px-2 text-on-surface-variant hidden md:table-cell">
+                  {char.rarity_label || "—"}
+                </td>
+                <td className="py-1.5 px-2 text-on-surface-variant hidden md:table-cell">
+                  {char.position || "—"}
+                </td>
+                <td className="py-1.5 px-2 text-on-surface-variant hidden md:table-cell">
+                  {char.element || "—"}
+                </td>
                 <td className="py-1.5 px-2">
                   <button
                     onClick={() => setAssigningId(char.id)}

@@ -97,8 +97,12 @@ export async function crawlTwitter(
   // QUE le dernier post d'`@Azalee_IE` : l'archive des autres comptes est déjà
   // en base, et re-parcourir vingt timelines toutes les heures ne ferait que
   // consommer le quota X pour ré-écrire des lignes identiques.
-  const screenNames = options.comptes ? [...options.comptes] : getOfficialXAccounts();
-  console.log(`[Crawl Twitter] Démarrage de la synchronisation des tweets de : ${screenNames.join(", ")}...`);
+  const screenNames = options.comptes
+    ? [...options.comptes]
+    : getOfficialXAccounts();
+  console.log(
+    `[Crawl Twitter] Démarrage de la synchronisation des tweets de : ${screenNames.join(", ")}...`,
+  );
 
   let totalCount = 0;
   let hasErrors = false;
@@ -120,7 +124,11 @@ export async function crawlTwitter(
     const usernameToUserMap = new Map<string, { id: string; name: string }>();
     try {
       const existingTweets = await sql<
-        { author_id: string | null; author_name: string | null; author_username: string | null }[]
+        {
+          author_id: string | null;
+          author_name: string | null;
+          author_username: string | null;
+        }[]
       >`SELECT author_id, author_name, author_username FROM tweets`;
       for (const t of existingTweets) {
         if (t.author_username && t.author_id) {
@@ -130,20 +138,32 @@ export async function crawlTwitter(
           });
         }
       }
-      console.log(`[Crawl Twitter] Cache d'IDs chargé depuis la DB (${usernameToUserMap.size} profils trouvés).`);
+      console.log(
+        `[Crawl Twitter] Cache d'IDs chargé depuis la DB (${usernameToUserMap.size} profils trouvés).`,
+      );
     } catch (dbErr) {
-      console.warn("[Crawl Twitter] Impossible de charger le cache d'IDs depuis la DB:", dbErr);
+      console.warn(
+        "[Crawl Twitter] Impossible de charger le cache d'IDs depuis la DB:",
+        dbErr,
+      );
     }
 
     for (const screenName of screenNames) {
       try {
         let user = usernameToUserMap.get(screenName.toLowerCase());
         if (!user) {
-          console.log(`[Crawl Twitter] Résolution du profil @${screenName} via API X...`);
+          console.log(
+            `[Crawl Twitter] Résolution du profil @${screenName} via API X...`,
+          );
           try {
             const apiUser = await Promise.race([
               client.userByScreenName(screenName),
-              new Promise<any>((_, rej) => setTimeout(() => rej(new Error("userByScreenName() timeout")), 20000)),
+              new Promise<any>((_, rej) =>
+                setTimeout(
+                  () => rej(new Error("userByScreenName() timeout")),
+                  20000,
+                ),
+              ),
             ]);
             if (apiUser && apiUser.id) {
               user = {
@@ -151,22 +171,33 @@ export async function crawlTwitter(
                 name: apiUser.name || screenName,
               };
               usernameToUserMap.set(screenName.toLowerCase(), user);
-              console.log(`[Crawl Twitter] ID résolu pour @${screenName} via API X : ${user.id} (${user.name})`);
+              console.log(
+                `[Crawl Twitter] ID résolu pour @${screenName} via API X : ${user.id} (${user.name})`,
+              );
             }
           } catch (profileErr) {
-            console.error(`[Crawl Twitter] Erreur lors de la résolution de @${screenName} via API X :`, profileErr);
+            console.error(
+              `[Crawl Twitter] Erreur lors de la résolution de @${screenName} via API X :`,
+              profileErr,
+            );
           }
         } else {
-          console.log(`[Crawl Twitter] Profil @${screenName} résolu via le cache DB : ${user.id} (${user.name})`);
+          console.log(
+            `[Crawl Twitter] Profil @${screenName} résolu via le cache DB : ${user.id} (${user.name})`,
+          );
         }
 
         if (!user) {
-          console.warn(`[Crawl Twitter] Impossible de résoudre l'ID de @${screenName}`);
+          console.warn(
+            `[Crawl Twitter] Impossible de résoudre l'ID de @${screenName}`,
+          );
           hasErrors = true;
           continue;
         }
 
-        console.log(`[Crawl Twitter] Crawl historique complet de @${screenName}...`);
+        console.log(
+          `[Crawl Twitter] Crawl historique complet de @${screenName}...`,
+        );
         // rg cron + Aphrody X : MAX plus élevé pour AkihiroHino (CEO Level-5, tweets clés pour Azalée wiki + RAG).
         // "peuple tout les tweets" via pagination userTweets + session Aphrody X.
         // `parCompte` borne la moisson : la veille horaire ne demande qu'UN
@@ -174,7 +205,11 @@ export async function crawlTwitter(
         // Sans cette borne, la veille repaginait toute la timeline chaque
         // heure — vingt pages d'API X pour, au mieux, une ligne nouvelle.
         const MAX_TWEETS_PER_ACCOUNT =
-          options.parCompte && options.parCompte > 0 ? options.parCompte : screenName === "AkihiroHino" ? 5000 : 1200;
+          options.parCompte && options.parCompte > 0
+            ? options.parCompte
+            : screenName === "AkihiroHino"
+              ? 5000
+              : 1200;
         const fetchedTweets: Tweet[] = [];
         const seenTimelineIds = new Set<string>();
         let cursor: string | undefined;
@@ -189,8 +224,14 @@ export async function crawlTwitter(
             // Timeout dur : un backoff interne de userTweets ne doit pas
             // bloquer le crawl indéfiniment (sinon hang sans throw).
             page = await Promise.race([
-              client.userTweets(user.id, Math.min(100, MAX_TWEETS_PER_ACCOUNT), cursor),
-              new Promise<never>((_, rej) => setTimeout(() => rej(new Error("userTweets() timeout")), 20000)),
+              client.userTweets(
+                user.id,
+                Math.min(100, MAX_TWEETS_PER_ACCOUNT),
+                cursor,
+              ),
+              new Promise<never>((_, rej) =>
+                setTimeout(() => rej(new Error("userTweets() timeout")), 20000),
+              ),
             ]);
           } catch (pageErr) {
             console.warn(
@@ -221,18 +262,24 @@ export async function crawlTwitter(
           }
           cursor = page.next_cursor;
           // Throttle léger pour limiter le rate-limit X sur l'historique.
-          await new Promise(r => setTimeout(r, 700));
+          await new Promise((r) => setTimeout(r, 700));
         }
 
-        console.log(`[Crawl Twitter] ${fetchedTweets.length} tweets accumulés au total pour @${screenName}.`);
+        console.log(
+          `[Crawl Twitter] ${fetchedTweets.length} tweets accumulés au total pour @${screenName}.`,
+        );
         if (screenName === "AkihiroHino") {
           console.log(
             `[AkihiroHino] Peuplement tweets CEO Level-5 via rg-cron + Aphrody X (historique étendu, pour sync Azalée + RAG + traductions).`,
           );
         }
 
-        const nonRetweets = fetchedTweets.filter(t => !t.text.startsWith("RT @"));
-        console.log(`[Crawl Twitter] ${nonRetweets.length} tweets après filtrage des RTs.`);
+        const nonRetweets = fetchedTweets.filter(
+          (t) => !t.text.startsWith("RT @"),
+        );
+        console.log(
+          `[Crawl Twitter] ${nonRetweets.length} tweets après filtrage des RTs.`,
+        );
 
         const conversations = new Map<string, Tweet[]>();
         for (const t of nonRetweets) {
@@ -255,7 +302,7 @@ export async function crawlTwitter(
         for (const [convId, group] of conversations.entries()) {
           group.sort((a, b) => a.id.localeCompare(b.id));
 
-          let isUserThread = group.some(t => t.id === convId);
+          let isUserThread = group.some((t) => t.id === convId);
 
           if (!isUserThread && group.length > 0) {
             const dbHeadRows = await sql<
@@ -264,15 +311,24 @@ export async function crawlTwitter(
             const dbHead = dbHeadRows[0];
 
             if (dbHead) {
-              isUserThread = dbHead.author_username?.toLowerCase() === screenName.toLowerCase();
+              isUserThread =
+                dbHead.author_username?.toLowerCase() ===
+                screenName.toLowerCase();
             } else if (!originCheckDisabled) {
               try {
                 const headTweet = await Promise.race([
                   client.getTweet(convId),
-                  new Promise<never>((_, rej) => setTimeout(() => rej(new Error("getTweet() timeout")), 10000)),
+                  new Promise<never>((_, rej) =>
+                    setTimeout(
+                      () => rej(new Error("getTweet() timeout")),
+                      10000,
+                    ),
+                  ),
                 ]);
                 if (headTweet) {
-                  isUserThread = headTweet.author.username.toLowerCase() === screenName.toLowerCase();
+                  isUserThread =
+                    headTweet.author.username.toLowerCase() ===
+                    screenName.toLowerCase();
                 }
               } catch (apiErr) {
                 // Coupe les vérifications d'origine après le 1er échec (429/timeout).
@@ -284,7 +340,7 @@ export async function crawlTwitter(
             }
           }
 
-          const filteredGroup = group.filter(t => {
+          const filteredGroup = group.filter((t) => {
             if (!t.in_reply_to_status_id) {
               return true;
             }
@@ -308,7 +364,12 @@ export async function crawlTwitter(
                   // Timeout dur : un appel thread() ne doit jamais bloquer le crawl.
                   const threadPage = await Promise.race([
                     client.thread(convId, threadCursor),
-                    new Promise<never>((_, rej) => setTimeout(() => rej(new Error("thread() timeout")), 12000)),
+                    new Promise<never>((_, rej) =>
+                      setTimeout(
+                        () => rej(new Error("thread() timeout")),
+                        12000,
+                      ),
+                    ),
                   ]);
                   threadTweets.push(...(threadPage.tweets || []));
                   if (!threadPage.next_cursor) break;
@@ -321,13 +382,18 @@ export async function crawlTwitter(
                   merged.set(item.id, item);
                 }
                 for (const item of threadTweets) {
-                  if (item.author.username.toLowerCase() === screenName.toLowerCase()) {
+                  if (
+                    item.author.username.toLowerCase() ===
+                    screenName.toLowerCase()
+                  ) {
                     if (!merged.has(item.id)) {
                       merged.set(item.id, item);
                     }
                   }
                 }
-                threadGroup = Array.from(merged.values()).sort((a, b) => a.id.localeCompare(b.id));
+                threadGroup = Array.from(merged.values()).sort((a, b) =>
+                  a.id.localeCompare(b.id),
+                );
                 console.log(
                   `[Crawl Twitter] Thread ${convId} : ${threadGroup.length} tweets après fusion timeline+thread.`,
                 );
@@ -359,7 +425,9 @@ export async function crawlTwitter(
             const seenMediaUrls = new Set<string>();
 
             for (const item of threadGroup) {
-              const itemMedia = (item.media || []).map((m: RawMediaItem) => mapMedia(m));
+              const itemMedia = (item.media || []).map((m: RawMediaItem) =>
+                mapMedia(m),
+              );
               for (const m of itemMedia) {
                 if (m.url && !seenMediaUrls.has(m.url)) {
                   allThreadMedia.push(m);
@@ -385,8 +453,10 @@ export async function crawlTwitter(
                 view_count: lastTweet.view_count,
               },
               media: allThreadMedia,
-              quoted_tweets: lastTweet.quoted_tweet ? JSON.parse(JSON.stringify(lastTweet.quoted_tweet)) : null,
-              raw_tweets: threadGroup.map(item => ({
+              quoted_tweets: lastTweet.quoted_tweet
+                ? JSON.parse(JSON.stringify(lastTweet.quoted_tweet))
+                : null,
+              raw_tweets: threadGroup.map((item) => ({
                 id: item.id,
                 text: item.text,
                 fullText: item.text,
@@ -411,9 +481,13 @@ export async function crawlTwitter(
             // s'appuyaient dessus sans l'avoir vérifié.
             const t = filteredGroup[0];
             if (!t) continue;
-            const createdAtIso = t.created_at ? new Date(t.created_at).toISOString() : snowflakeToIso(t.id);
+            const createdAtIso = t.created_at
+              ? new Date(t.created_at).toISOString()
+              : snowflakeToIso(t.id);
 
-            const tMedia = (t.media || []).map((m: RawMediaItem) => mapMedia(m));
+            const tMedia = (t.media || []).map((m: RawMediaItem) =>
+              mapMedia(m),
+            );
 
             const tweetRow: DBTweetRow = {
               id: t.id,
@@ -432,7 +506,9 @@ export async function crawlTwitter(
                 view_count: t.view_count,
               },
               media: tMedia,
-              quoted_tweets: t.quoted_tweet ? JSON.parse(JSON.stringify(t.quoted_tweet)) : null,
+              quoted_tweets: t.quoted_tweet
+                ? JSON.parse(JSON.stringify(t.quoted_tweet))
+                : null,
               raw_tweets: null,
               updated_at: new Date().toISOString(),
             };
@@ -443,7 +519,11 @@ export async function crawlTwitter(
 
         if (finalTweetsToUpsert.length > 0) {
           // Deduplicate by ID to prevent ON CONFLICT DO UPDATE constraints error
-          let uniqueTweets = Array.from(new Map(finalTweetsToUpsert.map(item => [item.id, item])).values());
+          let uniqueTweets = Array.from(
+            new Map(
+              finalTweetsToUpsert.map((item) => [item.id, item]),
+            ).values(),
+          );
 
           // Anti-régression : la timeline collapse les longs self-threads à ~5
           // tweets, et thread() peut être coupé sur 429 (threadFetchDisabled) →
@@ -454,7 +534,7 @@ export async function crawlTwitter(
           try {
             const existingRows = await sql<
               { id: string; tweet_count: number | null }[]
-            >`SELECT id, tweet_count FROM tweets WHERE id IN ${sql(uniqueTweets.map(t => t.id))}`;
+            >`SELECT id, tweet_count FROM tweets WHERE id IN ${sql(uniqueTweets.map((t) => t.id))}`;
             for (const r of existingRows) {
               existingCounts.set(r.id, r.tweet_count ?? 0);
             }
@@ -464,7 +544,7 @@ export async function crawlTwitter(
               e instanceof Error ? e.message : e,
             );
           }
-          uniqueTweets = uniqueTweets.filter(t => {
+          uniqueTweets = uniqueTweets.filter((t) => {
             const prev = existingCounts.get(t.id) ?? 0;
             if (t.is_thread && (t.tweet_count ?? 0) < prev) {
               console.warn(
@@ -475,15 +555,23 @@ export async function crawlTwitter(
             return true;
           });
           if (uniqueTweets.length === 0) {
-            console.log(`[Crawl Twitter] Rien à upserter pour @${screenName} après garde anti-régression.`);
+            console.log(
+              `[Crawl Twitter] Rien à upserter pour @${screenName} après garde anti-régression.`,
+            );
           }
 
           console.log(
             `[Crawl Twitter] Envoi de ${uniqueTweets.length} tweets uniques pour @${screenName} (total brut: ${finalTweetsToUpsert.length})...`,
           );
-          const { error } = uniqueTweets.length > 0 ? await db.from("tweets").upsert(uniqueTweets) : { error: null };
+          const { error } =
+            uniqueTweets.length > 0
+              ? await db.from("tweets").upsert(uniqueTweets)
+              : { error: null };
           if (error) {
-            console.error(`[Crawl Twitter] Erreur d'upsert pour @${screenName} :`, error);
+            console.error(
+              `[Crawl Twitter] Erreur d'upsert pour @${screenName} :`,
+              error,
+            );
             hasErrors = true;
           } else {
             totalCount += uniqueTweets.length;
@@ -491,26 +579,42 @@ export async function crawlTwitter(
               console.log(
                 `[Crawl Twitter] Nettoyage de ${deleteOldTweetIds.length} doublons de threads de la base de données...`,
               );
-              const { error: deleteErr } = await db.from("tweets").delete().in("id", deleteOldTweetIds);
+              const { error: deleteErr } = await db
+                .from("tweets")
+                .delete()
+                .in("id", deleteOldTweetIds);
               if (deleteErr) {
-                console.warn(`[Crawl Twitter] Échec de suppression des anciens tweets de thread :`, deleteErr);
+                console.warn(
+                  `[Crawl Twitter] Échec de suppression des anciens tweets de thread :`,
+                  deleteErr,
+                );
               }
             }
           }
         } else {
-          console.log(`[Crawl Twitter] Aucun nouveau tweet à synchroniser pour @${screenName}.`);
+          console.log(
+            `[Crawl Twitter] Aucun nouveau tweet à synchroniser pour @${screenName}.`,
+          );
         }
       } catch (profileErr) {
-        console.error(`[Crawl Twitter] Erreur lors de la synchronisation de @${screenName} :`, profileErr);
+        console.error(
+          `[Crawl Twitter] Erreur lors de la synchronisation de @${screenName} :`,
+          profileErr,
+        );
         hasErrors = true;
       }
     }
 
-    console.log(`[Crawl Twitter] Synchronisation Twitter terminée. ${totalCount} tweets insérés/mis à jour.`);
+    console.log(
+      `[Crawl Twitter] Synchronisation Twitter terminée. ${totalCount} tweets insérés/mis à jour.`,
+    );
     return { success: !hasErrors, count: totalCount };
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : String(err);
-    console.error("[Crawl Twitter] Erreur critique lors de la synchronisation Twitter :", err);
+    console.error(
+      "[Crawl Twitter] Erreur critique lors de la synchronisation Twitter :",
+      err,
+    );
     return { success: false, error: msg };
   }
 }

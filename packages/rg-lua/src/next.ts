@@ -8,7 +8,10 @@ export interface NextLuaPluginOptions {
   mode?: "raw" | "module";
 }
 
-export function withLua(nextConfig: any = {}, pluginOptions: NextLuaPluginOptions = {}) {
+export function withLua(
+  nextConfig: any = {},
+  pluginOptions: NextLuaPluginOptions = {},
+) {
   const includeBytecode = pluginOptions.includeBytecode ?? true;
   const mode = pluginOptions.mode ?? "module";
 

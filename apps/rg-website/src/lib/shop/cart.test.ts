@@ -133,8 +133,16 @@ describe("Cart persistence & merging", () => {
     });
 
     it("should retrieve items from cookie when cookie is present", async () => {
-      const initialItems = [{ id: "11111111-1111-4111-8111-111111111111::default", qty: 2, slug: "11111111-1111-4111-8111-111111111111" }];
-      mockCookies.get.mockReturnValue({ value: encodeURIComponent(JSON.stringify(initialItems)) });
+      const initialItems = [
+        {
+          id: "11111111-1111-4111-8111-111111111111::default",
+          qty: 2,
+          slug: "11111111-1111-4111-8111-111111111111",
+        },
+      ];
+      mockCookies.get.mockReturnValue({
+        value: encodeURIComponent(JSON.stringify(initialItems)),
+      });
 
       const cart = await getCart();
       expect(cart.items.length).toBe(1);
@@ -154,8 +162,16 @@ describe("Cart persistence & merging", () => {
     });
 
     it("should update product quantity in cookie cart", async () => {
-      const initialItems = [{ id: "11111111-1111-4111-8111-111111111111::default", qty: 2, slug: "11111111-1111-4111-8111-111111111111" }];
-      mockCookies.get.mockReturnValue({ value: encodeURIComponent(JSON.stringify(initialItems)) });
+      const initialItems = [
+        {
+          id: "11111111-1111-4111-8111-111111111111::default",
+          qty: 2,
+          slug: "11111111-1111-4111-8111-111111111111",
+        },
+      ];
+      mockCookies.get.mockReturnValue({
+        value: encodeURIComponent(JSON.stringify(initialItems)),
+      });
 
       await updateQty("11111111-1111-4111-8111-111111111111::default", 5);
       expect(mockCookies.set).toHaveBeenCalled();
@@ -165,8 +181,16 @@ describe("Cart persistence & merging", () => {
     });
 
     it("should remove product from cookie cart", async () => {
-      const initialItems = [{ id: "11111111-1111-4111-8111-111111111111::default", qty: 2, slug: "11111111-1111-4111-8111-111111111111" }];
-      mockCookies.get.mockReturnValue({ value: encodeURIComponent(JSON.stringify(initialItems)) });
+      const initialItems = [
+        {
+          id: "11111111-1111-4111-8111-111111111111::default",
+          qty: 2,
+          slug: "11111111-1111-4111-8111-111111111111",
+        },
+      ];
+      mockCookies.get.mockReturnValue({
+        value: encodeURIComponent(JSON.stringify(initialItems)),
+      });
 
       await removeFromCart("11111111-1111-4111-8111-111111111111::default");
       expect(mockCookies.delete).toHaveBeenCalledWith("rg_cart");
@@ -195,7 +219,13 @@ describe("Cart persistence & merging", () => {
     });
 
     it("should retrieve items from Redis cache when authenticated", async () => {
-      const redisItems = [{ id: "11111111-1111-4111-8111-111111111111::default", qty: 3, slug: "11111111-1111-4111-8111-111111111111" }];
+      const redisItems = [
+        {
+          id: "11111111-1111-4111-8111-111111111111::default",
+          qty: 3,
+          slug: "11111111-1111-4111-8111-111111111111",
+        },
+      ];
       redisCache.get.mockResolvedValue(redisItems);
 
       const cart = await getCart();
@@ -205,12 +235,22 @@ describe("Cart persistence & merging", () => {
 
     it("should merge cookie cart items into Redis cart when logging in", async () => {
       // Simule des items existants dans le cache Redis
-      const redisItems = [{ id: "11111111-1111-4111-8111-111111111111::default", qty: 1, slug: "11111111-1111-4111-8111-111111111111" }];
+      const redisItems = [
+        {
+          id: "11111111-1111-4111-8111-111111111111::default",
+          qty: 1,
+          slug: "11111111-1111-4111-8111-111111111111",
+        },
+      ];
       redisCache.get.mockResolvedValue(redisItems);
 
       // Simule des items dans le cookie (avant authentification complète)
       const cookieItems = [
-        { id: "11111111-1111-4111-8111-111111111111::default", qty: 2, slug: "11111111-1111-4111-8111-111111111111" },
+        {
+          id: "11111111-1111-4111-8111-111111111111::default",
+          qty: 2,
+          slug: "11111111-1111-4111-8111-111111111111",
+        },
         {
           id: "22222222-2222-4222-8222-222222222222::solstice",
           qty: 1,
@@ -218,18 +258,24 @@ describe("Cart persistence & merging", () => {
           variantId: "solstice",
         },
       ];
-      mockCookies.get.mockReturnValue({ value: encodeURIComponent(JSON.stringify(cookieItems)) });
+      mockCookies.get.mockReturnValue({
+        value: encodeURIComponent(JSON.stringify(cookieItems)),
+      });
 
       // Appeler getCart() devrait déclencher la fusion
       const cart = await getCart();
 
       // Vérifie que les paniers ont été fusionnés
       // 1 print (Redis) + 2 prints (Cookie) = 3 prints
-      const print = cart.items.find(i => i.slug === "11111111-1111-4111-8111-111111111111");
+      const print = cart.items.find(
+        (i) => i.slug === "11111111-1111-4111-8111-111111111111",
+      );
       expect(print?.qty).toBe(3);
 
       // Le pack personnage a également été ajouté
-      const pack = cart.items.find(i => i.slug === "22222222-2222-4222-8222-222222222222");
+      const pack = cart.items.find(
+        (i) => i.slug === "22222222-2222-4222-8222-222222222222",
+      );
       expect(pack?.qty).toBe(1);
 
       // Le cache Redis doit être mis à jour avec le panier fusionné
@@ -248,7 +294,9 @@ describe("Cart persistence & merging", () => {
       const key = call[0];
       const savedItems = call[1];
       expect(key).toBe("cart:user_123");
-      expect((savedItems as { slug: string; qty: number }[])[0]!.slug).toBe("11111111-1111-4111-8111-111111111111");
+      expect((savedItems as { slug: string; qty: number }[])[0]!.slug).toBe(
+        "11111111-1111-4111-8111-111111111111",
+      );
       expect((savedItems as { slug: string; qty: number }[])[0]!.qty).toBe(2);
     });
 

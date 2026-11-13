@@ -7,7 +7,9 @@ export function loadModelViewer(): Promise<void> {
   if (window.customElements?.get("model-viewer")) return Promise.resolve();
   if (loading) return loading;
   // Décodeurs locaux : aucun fichier utilisateur ni demande de décodage vers un CDN tiers.
-  const config = window as typeof window & { ModelViewerElement?: Record<string, unknown> };
+  const config = window as typeof window & {
+    ModelViewerElement?: Record<string, unknown>;
+  };
   config.ModelViewerElement = {
     ...config.ModelViewerElement,
     dracoDecoderLocation: "/vendor/draco/",
@@ -15,7 +17,9 @@ export function loadModelViewer(): Promise<void> {
     meshoptDecoderLocation: "/vendor/meshopt_decoder.module.js",
   };
   const attempt = new Promise<void>((resolve, reject) => {
-    const existing = document.querySelector<HTMLScriptElement>(`script[src="${SOURCE}"]`);
+    const existing = document.querySelector<HTMLScriptElement>(
+      `script[src="${SOURCE}"]`,
+    );
     const script = existing ?? document.createElement("script");
     let settled = false;
     const finish = (error?: Error) => {
@@ -29,9 +33,14 @@ export function loadModelViewer(): Promise<void> {
       } else resolve();
     };
     const fail = () => finish(new Error("Échec du chargement du viewer 3D."));
-    const timeout = setTimeout(() => finish(new Error("Délai de chargement du viewer 3D dépassé.")), 30_000);
+    const timeout = setTimeout(
+      () => finish(new Error("Délai de chargement du viewer 3D dépassé.")),
+      30_000,
+    );
     script.addEventListener("error", fail);
-    window.customElements.whenDefined("model-viewer").then(() => finish(), fail);
+    window.customElements
+      .whenDefined("model-viewer")
+      .then(() => finish(), fail);
     if (!existing) {
       script.src = SOURCE;
       script.async = true;

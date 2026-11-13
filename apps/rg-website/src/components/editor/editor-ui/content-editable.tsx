@@ -9,7 +9,11 @@ interface Props {
   placeholderClassName?: string;
 }
 
-export function ContentEditable({ placeholder, className, placeholderClassName }: Props): JSX.Element {
+export function ContentEditable({
+  placeholder,
+  className,
+  placeholderClassName,
+}: Props): JSX.Element {
   return (
     <LexicalContentEditable
       className={
@@ -17,7 +21,9 @@ export function ContentEditable({ placeholder, className, placeholderClassName }
         "ContentEditable__root relative block min-h-72 min-h-full overflow-auto px-8 py-4 focus:outline-hidden"
       }
       aria-label="Contenu de l'article"
-      aria-placeholder={typeof placeholder === "string" ? placeholder : "Éditeur de texte"}
+      aria-placeholder={
+        typeof placeholder === "string" ? placeholder : "Éditeur de texte"
+      }
       aria-multiline="true"
       placeholder={
         <div

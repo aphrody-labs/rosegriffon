@@ -21,21 +21,32 @@ async function charger(reseau: Reseau): Promise<SnapshotFeed | null> {
   try {
     if (racine) {
       const fichier = Bun.file(join(racine, "assets", chemin));
-      if (await fichier.exists()) return lireSnapshot(await fichier.json(), reseau);
+      if (await fichier.exists())
+        return lireSnapshot(await fichier.json(), reseau);
     }
-    const origine = rgUrl(process.env, "cdn", "RG_MEDIA_PUBLIC_ORIGIN").replace(/\/+$/, "");
-    const reponse = await fetch(`${origine}/storage/v1/object/public/assets/${chemin}`, {
-      signal: AbortSignal.timeout(4000),
-    });
+    const origine = rgUrl(process.env, "cdn", "RG_MEDIA_PUBLIC_ORIGIN").replace(
+      /\/+$/,
+      "",
+    );
+    const reponse = await fetch(
+      `${origine}/storage/v1/object/public/assets/${chemin}`,
+      {
+        signal: AbortSignal.timeout(4000),
+      },
+    );
     return reponse.ok ? lireSnapshot(await reponse.json(), reseau) : null;
   } catch {
     return null;
   }
 }
 
-export function lireSnapshotServeur(reseau: Reseau): Promise<SnapshotFeed | null> {
+export function lireSnapshotServeur(
+  reseau: Reseau,
+): Promise<SnapshotFeed | null> {
   return memo(`snapshot:${reseau}`, TTL_MS, () => charger(reseau));
 }
 
-export const estFrais = (s: SnapshotFeed | null, ageMaxMs = AGE_MAX_MS): s is SnapshotFeed =>
-  !!s && Date.now() - Date.parse(s.genereLe) < ageMaxMs;
+export const estFrais = (
+  s: SnapshotFeed | null,
+  ageMaxMs = AGE_MAX_MS,
+): s is SnapshotFeed => !!s && Date.now() - Date.parse(s.genereLe) < ageMaxMs;

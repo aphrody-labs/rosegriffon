@@ -41,8 +41,16 @@ function dimensionsJpeg(vue: DataView): DimensionsImage | null {
     }
     const marqueur = vue.getUint8(position + 1);
     // SOF0..SOF15, sauf DHT (c4), DAC (c8) et RSTn (d0-d7) qui partagent la plage.
-    if (marqueur >= 0xc0 && marqueur <= 0xcf && marqueur !== 0xc4 && marqueur !== 0xc8) {
-      return { hauteur: vue.getUint16(position + 5), largeur: vue.getUint16(position + 7) };
+    if (
+      marqueur >= 0xc0 &&
+      marqueur <= 0xcf &&
+      marqueur !== 0xc4 &&
+      marqueur !== 0xc8
+    ) {
+      return {
+        hauteur: vue.getUint16(position + 5),
+        largeur: vue.getUint16(position + 7),
+      };
     }
     const longueur = vue.getUint16(position + 2);
     if (longueur < 2) return null;
@@ -58,7 +66,10 @@ function dimensionsJpeg(vue: DataView): DimensionsImage | null {
  * différemment, et nos visuels sont convertis en WebP : ne gérer qu'une variante
  * reviendrait à ne rien gérer.
  */
-function dimensionsWebp(vue: DataView, octets: Uint8Array): DimensionsImage | null {
+function dimensionsWebp(
+  vue: DataView,
+  octets: Uint8Array,
+): DimensionsImage | null {
   if (vue.byteLength < 30) return null;
   if (vue.getUint32(0) !== 0x52494646) return null; // "RIFF"
   if (vue.getUint32(8) !== 0x57454250) return null; // "WEBP"
@@ -76,12 +87,17 @@ function dimensionsWebp(vue: DataView, octets: Uint8Array): DimensionsImage | nu
     const b = octets.subarray(21, 25);
     if (b.length < 4) return null;
     const bits = b[0]! | (b[1]! << 8) | (b[2]! << 16) | (b[3]! << 24);
-    return { hauteur: (((bits >> 14) & 0x3fff) >>> 0) + 1, largeur: ((bits & 0x3fff) >>> 0) + 1 };
+    return {
+      hauteur: (((bits >> 14) & 0x3fff) >>> 0) + 1,
+      largeur: ((bits & 0x3fff) >>> 0) + 1,
+    };
   }
   if (type === 0x56503858) {
     // "VP8X" : tailles sur 24 bits, moins un.
     const lire24 = (decalage: number) =>
-      octets[decalage]! | (octets[decalage + 1]! << 8) | (octets[decalage + 2]! << 16);
+      octets[decalage]! |
+      (octets[decalage + 1]! << 8) |
+      (octets[decalage + 2]! << 16);
     return { hauteur: lire24(27) + 1, largeur: lire24(24) + 1 };
   }
   return null;
@@ -104,7 +120,11 @@ function dimensionsGif(vue: DataView): DimensionsImage | null {
 export function lireDimensions(octets: Uint8Array): DimensionsImage | null {
   if (octets.byteLength < 10) return null;
   const vue = new DataView(octets.buffer, octets.byteOffset, octets.byteLength);
-  const mesure = dimensionsPng(vue) ?? dimensionsGif(vue) ?? dimensionsWebp(vue, octets) ?? dimensionsJpeg(vue);
+  const mesure =
+    dimensionsPng(vue) ??
+    dimensionsGif(vue) ??
+    dimensionsWebp(vue, octets) ??
+    dimensionsJpeg(vue);
   // Une largeur ou une hauteur nulle est un en-tête mal lu, pas une image :
   // la propager donnerait une division par zéro dans le calcul de proportions.
   if (!mesure || mesure.largeur <= 0 || mesure.hauteur <= 0) return null;

@@ -25,13 +25,28 @@ import {
   cfgbinPostgresFindLatest,
   cfgbinPostgresLoad,
 } from "./cfgbin-db.js";
-import type { ConfigDocument, ConfigFile, ConfigNode, RawConfigFile } from "./config-parser.js";
+import type {
+  ConfigDocument,
+  ConfigFile,
+  ConfigNode,
+  RawConfigFile,
+} from "./config-parser.js";
 import { DATA_ROOT, FILES, PATHS } from "./paths.js";
 
 /**
  * Supported locales for text files
  */
-export const LOCALES = ["ja", "en", "fr", "de", "es", "it", "pt", "zh_hans", "zh_hant"] as const;
+export const LOCALES = [
+  "ja",
+  "en",
+  "fr",
+  "de",
+  "es",
+  "it",
+  "pt",
+  "zh_hans",
+  "zh_hant",
+] as const;
 export type Locale = (typeof LOCALES)[number];
 
 /**
@@ -65,12 +80,16 @@ export function getDataPath(): string {
  * route via require() qui supporte JSON nativement et reste sync.
  */
 export function loadJSON<T>(filePath: string): T {
-  if (cfgbinDataSource() === "vfs" && filePath.replaceAll("\\", "/").includes("/common/"))
+  if (
+    cfgbinDataSource() === "vfs" &&
+    filePath.replaceAll("\\", "/").includes("/common/")
+  )
     return readVfsConfig(filePath) as T;
   if (dataCache.has(filePath)) {
     return dataCache.get(filePath) as T;
   }
-  if (!allowLooseJson()) return { data: [], _meta: { count: 0 } } as unknown as T;
+  if (!allowLooseJson())
+    return { data: [], _meta: { count: 0 } } as unknown as T;
 
   try {
     // eslint-disable-next-line @typescript-eslint/no-require-imports, no-undef
@@ -87,7 +106,10 @@ export function loadJSON<T>(filePath: string): T {
  * Tries the durable PostgreSQL cfgbin projection first in async callers;
  * synchronous callers retain the explicit offline SQLite/filesystem path.
  */
-export function findConfigFile(category: string, prefix: string): string | null {
+export function findConfigFile(
+  category: string,
+  prefix: string,
+): string | null {
   if (cfgbinDataSource() === "vfs") return findVfsConfig(category, prefix);
   // 1. cfgbin SQLite DB (opt-in)
   if (cfgbinDbAvailable()) {
@@ -116,10 +138,16 @@ export function findConfigFile(category: string, prefix: string): string | null 
 /**
  * Load a raw config file from common/gamedata (Async), PostgreSQL-first.
  */
-export async function loadConfigAsync(category: string, filename: string): Promise<ConfigFile> {
+export async function loadConfigAsync(
+  category: string,
+  filename: string,
+): Promise<ConfigFile> {
   if (cfgbinDataSource() === "vfs") return loadConfig(category, filename);
   try {
-    const raw = (await cfgbinPostgresLoad(category, filename)) as Partial<RawConfigFile>;
+    const raw = (await cfgbinPostgresLoad(
+      category,
+      filename,
+    )) as Partial<RawConfigFile>;
     return { name: filename, variables: [], children: raw.entries || [] };
   } catch {
     // PostgreSQL absent/not imported: use the local extraction cache.
@@ -139,7 +167,9 @@ export async function loadConfigAsync(category: string, filename: string): Promi
   if (!allowLooseJson()) return { name: filename, variables: [], children: [] };
 
   const filePath = join(PATHS.gamedata, category, filename);
-  const raw = (await loadJsonAsync<ConfigDocument>(filePath)) ?? { entries: [] };
+  const raw = (await loadJsonAsync<ConfigDocument>(filePath)) ?? {
+    entries: [],
+  };
 
   return {
     name: filename,
@@ -149,7 +179,10 @@ export async function loadConfigAsync(category: string, filename: string): Promi
 }
 
 /** Async discovery counterpart: durable PostgreSQL, then explicit offline caches. */
-export async function findConfigFileAsync(category: string, prefix: string): Promise<string | null> {
+export async function findConfigFileAsync(
+  category: string,
+  prefix: string,
+): Promise<string | null> {
   if (cfgbinDataSource() === "vfs") return findVfsConfig(category, prefix);
   const fromPostgres = await cfgbinPostgresFindLatest(category, prefix);
   if (fromPostgres) return fromPostgres;
@@ -160,7 +193,16 @@ export async function findConfigFileAsync(category: string, prefix: string): Pro
   if (!allowLooseJson()) return null;
   const dir = join(PATHS.gamedata, category);
   try {
-    return [...new Bun.Glob(`${prefix}*.cfg.bin.json`).scanSync({ cwd: dir, onlyFiles: true })].sort().pop() ?? null;
+    return (
+      [
+        ...new Bun.Glob(`${prefix}*.cfg.bin.json`).scanSync({
+          cwd: dir,
+          onlyFiles: true,
+        }),
+      ]
+        .sort()
+        .pop() ?? null
+    );
   } catch {
     return null;
   }
@@ -194,8 +236,14 @@ export function loadConfig(category: string, filename: string): ConfigFile {
  * of the normalized `entries` tree. SQLite is the synchronous extraction
  * source; loose JSON remains an explicit compatibility escape hatch.
  */
-export function loadConfigData<T = ConfigDocument>(category: string, filename: string): T | null {
-  if (cfgbinDataSource() === "vfs") return readVfsConfig(`data/common/gamedata/${category}/${filename}`) as T | null;
+export function loadConfigData<T = ConfigDocument>(
+  category: string,
+  filename: string,
+): T | null {
+  if (cfgbinDataSource() === "vfs")
+    return readVfsConfig(
+      `data/common/gamedata/${category}/${filename}`,
+    ) as T | null;
   if (cfgbinDbAvailable()) {
     try {
       return cfgbinDbLoad(category, filename) as T;
@@ -211,7 +259,8 @@ export function loadConfigData<T = ConfigDocument>(category: string, filename: s
  * Load character param config
  */
 export function loadCharaParam(): ConfigFile {
-  const filename = findConfigFile("character", "chara_param_1") || FILES.charaParam;
+  const filename =
+    findConfigFile("character", "chara_param_1") || FILES.charaParam;
   return loadConfig("character", filename);
 }
 
@@ -219,7 +268,8 @@ export function loadCharaParam(): ConfigFile {
  * Load character base config
  */
 export function loadCharaBase(): ConfigFile {
-  const filename = findConfigFile("character", "chara_base_1") || FILES.charaBase;
+  const filename =
+    findConfigFile("character", "chara_base_1") || FILES.charaBase;
   return loadConfig("character", filename);
 }
 
@@ -227,7 +277,8 @@ export function loadCharaBase(): ConfigFile {
  * Load character details config
  */
 export function loadCharaDetailsConfig(): ConfigFile {
-  const filename = findConfigFile("character", "chara_details_config_0") || FILES.charaDetails;
+  const filename =
+    findConfigFile("character", "chara_details_config_0") || FILES.charaDetails;
   return loadConfig("character", filename);
 }
 
@@ -262,7 +313,9 @@ export function loadCharaText(locale: Locale): ConfigFile {
     return {
       name: FILES.charaText,
       variables: [],
-      children: readVfsConfig(`data/common/text/${locale}/${FILES.charaText}`)?.entries ?? [],
+      children:
+        readVfsConfig(`data/common/text/${locale}/${FILES.charaText}`)
+          ?.entries ?? [],
     };
   if (cfgbinDbAvailable()) {
     try {
@@ -278,7 +331,8 @@ export function loadCharaText(locale: Locale): ConfigFile {
       // Fallback to filesystem
     }
   }
-  if (!allowLooseJson()) return { name: `chara_text_${locale}`, variables: [], children: [] };
+  if (!allowLooseJson())
+    return { name: `chara_text_${locale}`, variables: [], children: [] };
   const filePath = join(PATHS.textRoot, locale, FILES.charaText);
   const raw = loadJSON<{ entries?: ConfigNode[] }>(filePath);
   return {
@@ -297,7 +351,9 @@ export function loadCharaTextRoma(locale: Locale): ConfigFile {
     return {
       name: FILES.charaTextRoma,
       variables: [],
-      children: readVfsConfig(`data/common/text/${locale}/${FILES.charaTextRoma}`)?.entries ?? [],
+      children:
+        readVfsConfig(`data/common/text/${locale}/${FILES.charaTextRoma}`)
+          ?.entries ?? [],
     };
   if (cfgbinDbAvailable()) {
     try {
@@ -313,7 +369,8 @@ export function loadCharaTextRoma(locale: Locale): ConfigFile {
       // Fallback to filesystem
     }
   }
-  if (!allowLooseJson()) return { name: `chara_text_roma_${locale}`, variables: [], children: [] };
+  if (!allowLooseJson())
+    return { name: `chara_text_roma_${locale}`, variables: [], children: [] };
   const filePath = join(PATHS.textRoot, locale, FILES.charaTextRoma);
   const raw = loadJSON<{ entries?: ConfigNode[] }>(filePath);
   return {
@@ -389,7 +446,7 @@ export function sanitizeText(text: string): string {
       .replace(/\n{3,}/g, "\n\n")
       // Trim each line
       .split("\n")
-      .map(line => line.trim())
+      .map((line) => line.trim())
       .join("\n")
       // Final trim
       .trim()
@@ -401,8 +458,10 @@ export function sanitizeText(text: string): string {
  */
 export function getAvailableLocales(): Locale[] {
   try {
-    const entries = [...new Bun.Glob("*").scanSync({ cwd: PATHS.textRoot, onlyFiles: false })];
-    return entries.filter(d => LOCALES.includes(d as Locale)) as Locale[];
+    const entries = [
+      ...new Bun.Glob("*").scanSync({ cwd: PATHS.textRoot, onlyFiles: false }),
+    ];
+    return entries.filter((d) => LOCALES.includes(d as Locale)) as Locale[];
   } catch {
     return [];
   }

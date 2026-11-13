@@ -12,7 +12,10 @@ import {
   type Ref,
 } from "react";
 
-export type PrimitiveProps<T extends ElementType> = Omit<ComponentProps<T>, "className"> & {
+export type PrimitiveProps<T extends ElementType> = Omit<
+  ComponentProps<T>,
+  "className"
+> & {
   className?: string;
   asChild?: boolean;
 };
@@ -26,7 +29,11 @@ interface LazyNode {
 }
 
 function isLazyNode(node: unknown): node is LazyNode {
-  return typeof node === "object" && node !== null && (node as { $$typeof?: unknown }).$$typeof === REACT_LAZY_TYPE;
+  return (
+    typeof node === "object" &&
+    node !== null &&
+    (node as { $$typeof?: unknown }).$$typeof === REACT_LAZY_TYPE
+  );
 }
 
 /**
@@ -44,10 +51,14 @@ function resolveLazyChild(node: ReactNode): ReactNode {
   return current as ReactNode;
 }
 
-export function childRender(asChild: boolean | undefined, children: ReactNode): ReactElement | undefined {
+export function childRender(
+  asChild: boolean | undefined,
+  children: ReactNode,
+): ReactElement | undefined {
   if (!asChild) return undefined;
   const child = Children.only(resolveLazyChild(children));
-  if (!isValidElement(child)) throw new Error("asChild requires one React element");
+  if (!isValidElement(child))
+    throw new Error("asChild requires one React element");
   return child;
 }
 
@@ -80,6 +91,9 @@ export function Slot({
   children,
   ref,
   ...props
-}: HTMLAttributes<HTMLElement> & { children?: ReactNode; ref?: Ref<HTMLElement> }) {
+}: HTMLAttributes<HTMLElement> & {
+  children?: ReactNode;
+  ref?: Ref<HTMLElement>;
+}) {
   return useRender({ render: childRender(true, children), ref, props });
 }

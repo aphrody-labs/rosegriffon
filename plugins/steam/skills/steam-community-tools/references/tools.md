@@ -65,18 +65,18 @@ Local source root: `third_party/`.
 
 ## Libraries and mirrored tools
 
-| Library                | Lang | License           | Source path                                          | Notes                                                                       |
-| ---------------------- | ---- | ----------------- | ---------------------------------------------------- | --------------------------------------------------------------------------- |
-| SteamKit2              | C#   | LGPL-2.1          | `third_party/steamkit`               | EMsg, manifest format reference                                             |
+| Library                | Lang | License           | Source path                          | Notes                                                        |
+| ---------------------- | ---- | ----------------- | ------------------------------------ | ------------------------------------------------------------ |
+| SteamKit2              | C#   | LGPL-2.1          | `third_party/steamkit`               | EMsg, manifest format reference                              |
 | node-steam-user        | JS   | MIT               | `third_party/node-steam-user`        | CM client; runs under Bun (`crates/steam-depot/UPSTREAM.md`) |
-| node-steam-session     | JS   | MIT               | `third_party/node-steam-session`     | IAuthenticationService login                                                |
-| ValvePython steam      | Py   | MIT               | `third_party/valvepython-steam`      | CM client and CDN                                                           |
-| steam-vent             | Rust | MIT               | `third_party/steam-vent`             | repository is Codeberg (`Cargo.toml`)                                       |
-| steamworks-rs          | Rust | MIT OR Apache-2.0 | `third_party/steamworks-rs`          | needs running Steam client                                                  |
-| steam-rs               | Rust | MIT               | `third_party/steam-rs`               | Web API                                                                     |
-| vdf-rs                 | Rust | MIT OR Apache-2.0 | `third_party/vdf-rs`                 | text VDF parser (`keyvalues-parser`)                                        |
-| steamlocate-rs         | Rust | MIT               | `third_party/steamlocate-rs`         | library discovery, StateFlags                                               |
-| steam-lancache-prefill | C#   | MIT               | `third_party/steam-lancache-prefill` | lancache prefill                                                            |
+| node-steam-session     | JS   | MIT               | `third_party/node-steam-session`     | IAuthenticationService login                                 |
+| ValvePython steam      | Py   | MIT               | `third_party/valvepython-steam`      | CM client and CDN                                            |
+| steam-vent             | Rust | MIT               | `third_party/steam-vent`             | repository is Codeberg (`Cargo.toml`)                        |
+| steamworks-rs          | Rust | MIT OR Apache-2.0 | `third_party/steamworks-rs`          | needs running Steam client                                   |
+| steam-rs               | Rust | MIT               | `third_party/steam-rs`               | Web API                                                      |
+| vdf-rs                 | Rust | MIT OR Apache-2.0 | `third_party/vdf-rs`                 | text VDF parser (`keyvalues-parser`)                         |
+| steamlocate-rs         | Rust | MIT               | `third_party/steamlocate-rs`         | library discovery, StateFlags                                |
+| steam-lancache-prefill | C#   | MIT               | `third_party/steam-lancache-prefill` | lancache prefill                                             |
 
 License sources: `third_party/vdf-rs/keyvalues-parser/Cargo.toml`, `third_party/vdf-rs/LICENSE-MIT`, `third_party/vdf-rs/LICENSE-APACHE`; `third_party/steamlocate-rs/Cargo.toml`, `third_party/steamlocate-rs/LICENSE`; `third_party/steam-lancache-prefill/LICENSE`; `third_party/steam-vent/Cargo.toml` (`repository`).
 

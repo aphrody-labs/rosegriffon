@@ -29,7 +29,11 @@ export const COULEURS_LEGACY = Object.freeze({
  * Termine une `Fiche` comme l'ancien bot : couleur imposée, pas de pied de
  * marque, un pied texte seulement quand l'ancien en posait un.
  */
-export function finirCommeLegacy(f: Fiche, couleur: number, piedTexte?: string | null): EmbedBuilder {
+export function finirCommeLegacy(
+  f: Fiche,
+  couleur: number,
+  piedTexte?: string | null,
+): EmbedBuilder {
   f.couleur(couleur);
   if (piedTexte) f.embed.setFooter({ text: piedTexte });
   return f.embed;
@@ -37,7 +41,9 @@ export function finirCommeLegacy(f: Fiche, couleur: number, piedTexte?: string |
 
 /** `followUpWithSuccessEmbed` de l'ancien bot : vert, titre `✅ message`, sans horodatage. */
 export function embedSuccesLegacy(message: string): EmbedBuilder {
-  return new EmbedBuilder().setColor(0x57_f2_87).setTitle(`✅ ${message}`.slice(0, 256));
+  return new EmbedBuilder()
+    .setColor(0x57_f2_87)
+    .setTitle(`✅ ${message}`.slice(0, 256));
 }
 
 /** `formatBytes` de `/ping` dans l'ancien bot : `512 B`, `1.5 KB`, `42.0 MB`, `1.25 GB`. */
@@ -65,7 +71,9 @@ export function dureeLegacy(secondes: number): string {
 }
 
 /** `formatFrenchDate` de l'ancien bot : « 27 oct. à 12h02 », heure de Paris. */
-export function dateFrancaiseLegacy(valeur: Date | string | null | undefined): string {
+export function dateFrancaiseLegacy(
+  valeur: Date | string | null | undefined,
+): string {
   const date = valeur instanceof Date ? valeur : new Date(valeur ?? Date.now());
   if (!Number.isFinite(date.getTime())) return "—";
   return date
@@ -83,5 +91,7 @@ export function dateFrancaiseLegacy(valeur: Date | string | null | undefined): s
 
 /** `followUpWithErrorEmbed` de l'ancien bot : rouge, titre `❌ message`, sans horodatage. */
 export function embedEchecLegacy(message: string): EmbedBuilder {
-  return new EmbedBuilder().setColor(Colors.Red).setTitle(`❌ ${message}`.slice(0, 256));
+  return new EmbedBuilder()
+    .setColor(Colors.Red)
+    .setTitle(`❌ ${message}`.slice(0, 256));
 }

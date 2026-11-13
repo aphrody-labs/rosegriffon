@@ -1,4 +1,5 @@
 <!-- SPDX-License-Identifier: Apache-2.0 -->
+
 # Plan de Convergence et Unification Totale : Rose Griffon, Achilléa, ElysiaJS, Colyseus & Bun
 
 Ce document constitue la feuille de route canonique de consolidation définitive des architectures de Rose Griffon et d'Achilléa sous Bun 1.4.2 et TypeScript 7.0.2 dans le monorepo Aphrody.
@@ -32,23 +33,24 @@ Ce document constitue la feuille de route canonique de consolidation définitive
 
 ## 2. Matrice d'Alignement des Services (État Actif)
 
-| Composant | État Initial (Fragmenté) | État Final Unifié | Statut |
-| :--- | :--- | :--- | :--- |
-| **Bot Discord RG** | `iecode/apps/rg/bot` (Profils `rg` et `azalee`) | `iecode/apps/rg/bot` (Profils `rg`, `azalee`, `achillea`) | **Actif** |
-| **Bot Discord Achilléa** | `apps/rg/achillea-bot` (not in repo) (Daemon hybride lourd) | Intégré dans `iecode/apps/rg/bot` (profil `achillea`) | **Actif** |
-| **API REST Achilléa & RG**| `apps/rg/achillea-bot` (not in repo) (:4000) & `apps/rg/api` (not in repo) | `iecode/apps/rg/bot/src/api` (ElysiaJS :8800, 153 routes) | **Actif** |
-| **Live Notifications** | `socket.io` (:4005) dans `achillea-bot` | Elysia WebSocket natif (`/v1/achillea/ws` :8800) | **Actif** |
-| **Moteur Ranked** | Colyseus subprocess managé par `achillea-bot` | Colyseus Engine intégré (`iecode/apps/rg/bot/src/api/ranked`) | **Actif** |
-| **ORM & Base SQL** | MikroORM 7 + Kysely (dual-stack) | **Kysely** + SQL typesafe unifié (`@rosegriffon/db`) | **Actif** |
-| **Stockage, Realtime & CDN** | 3 apps autonomes (`storage`, `realtime`, `cdn`) | Absorbés in-process dans `apps/rg/bot/src/api/services` (not in repo) | **Actif** |
-| **Libs Inazuma (Jeu)** | `packages/rg/{azalee,inagle,inagle-cross}` (not in repo) | Transférées vers `iecode` (`../iecode/packages/`) | **Actif** |
-| **Application Web** | `iecode/apps/rg/website` | `iecode/apps/rg/website` (Next.js 16 Turbopack validé) | **Actif** |
+| Composant                    | État Initial (Fragmenté)                                                   | État Final Unifié                                                     | Statut    |
+| :--------------------------- | :------------------------------------------------------------------------- | :-------------------------------------------------------------------- | :-------- |
+| **Bot Discord RG**           | `iecode/apps/rg/bot` (Profils `rg` et `azalee`)                            | `iecode/apps/rg/bot` (Profils `rg`, `azalee`, `achillea`)             | **Actif** |
+| **Bot Discord Achilléa**     | `apps/rg/achillea-bot` (not in repo) (Daemon hybride lourd)                | Intégré dans `iecode/apps/rg/bot` (profil `achillea`)                 | **Actif** |
+| **API REST Achilléa & RG**   | `apps/rg/achillea-bot` (not in repo) (:4000) & `apps/rg/api` (not in repo) | `iecode/apps/rg/bot/src/api` (ElysiaJS :8800, 153 routes)             | **Actif** |
+| **Live Notifications**       | `socket.io` (:4005) dans `achillea-bot`                                    | Elysia WebSocket natif (`/v1/achillea/ws` :8800)                      | **Actif** |
+| **Moteur Ranked**            | Colyseus subprocess managé par `achillea-bot`                              | Colyseus Engine intégré (`iecode/apps/rg/bot/src/api/ranked`)         | **Actif** |
+| **ORM & Base SQL**           | MikroORM 7 + Kysely (dual-stack)                                           | **Kysely** + SQL typesafe unifié (`@rosegriffon/db`)                  | **Actif** |
+| **Stockage, Realtime & CDN** | 3 apps autonomes (`storage`, `realtime`, `cdn`)                            | Absorbés in-process dans `apps/rg/bot/src/api/services` (not in repo) | **Actif** |
+| **Libs Inazuma (Jeu)**       | `packages/rg/{azalee,inagle,inagle-cross}` (not in repo)                   | Transférées vers `iecode` (`../iecode/packages/`)                     | **Actif** |
+| **Application Web**          | `iecode/apps/rg/website`                                                   | `iecode/apps/rg/website` (Next.js 16 Turbopack validé)                | **Actif** |
 
 ---
 
 ## 3. Détail des Interfaces & Endpoints Migrés
 
 ### 3.1. Routes REST `/v1/achillea/*` sous ElysiaJS
+
 1. **Contrats & Tournois** : `/tournaments`, `/leagues`, `/organizations`, `/clans`, `/guilds`.
 2. **Joueurs & Profils** : `/users`, `/wallet`, `/licenses`, `/player-notes`.
 3. **Compétition Live** : `/ranked/tiers`, `/ranked/leaderboard`, `/ranked/me`.
@@ -57,6 +59,7 @@ Ce document constitue la feuille de route canonique de consolidation définitive
 6. **Streaming & Casts** : `/casts/events`, `/casts/availabilities`, `/casts/auto-assign`.
 
 ### 3.2. WebSocket & Hub Temps Réel
+
 - Point d'accès : `ws://api.rosegriffon.fr/v1/achillea/ws` (ou port :8800 local).
 - Authentification par jeton Bearer ou cookie de session.
 - Salons dynamiques : `user:${userId}` recevant les événements :

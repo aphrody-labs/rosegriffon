@@ -6,7 +6,9 @@ import { initiale, sansCaracteresIllisibles, tronquerUnicode } from "./unicode";
 
 const FFFD = String.fromCharCode(0xfffd);
 /** Une moitié de paire isolée devient U+FFFD à l'encodage UTF-8 de la page. */
-const bienForme = (s: string) => new TextDecoder().decode(new TextEncoder().encode(s)) === s && !s.includes(FFFD);
+const bienForme = (s: string) =>
+  new TextDecoder().decode(new TextEncoder().encode(s)) === s &&
+  !s.includes(FFFD);
 
 describe("initiale", () => {
   it("takes the first grapheme, not half of a surrogate pair", () => {
@@ -41,9 +43,15 @@ describe("sansCaracteresIllisibles", () => {
   it("drops U+FFFD and lone surrogates, keeps valid pairs", () => {
     // Tweet réel d'@InazumaCrossFR rendu sur /feed?groupe=Inazuma+Eleven.
     const brut = `ℹ️ Gabriel Garcia - Raimon GO\n\n#イナイレクロス${FFFD}  #InazumaEleven`;
-    expect(sansCaracteresIllisibles(brut)).toBe("ℹ️ Gabriel Garcia - Raimon GO\n\n#イナイレクロス  #InazumaEleven");
-    expect(sansCaracteresIllisibles(`a${String.fromCharCode(0xd83d)}b`)).toBe("ab");
-    expect(sansCaracteresIllisibles(`a${String.fromCharCode(0xde00)}b`)).toBe("ab");
+    expect(sansCaracteresIllisibles(brut)).toBe(
+      "ℹ️ Gabriel Garcia - Raimon GO\n\n#イナイレクロス  #InazumaEleven",
+    );
+    expect(sansCaracteresIllisibles(`a${String.fromCharCode(0xd83d)}b`)).toBe(
+      "ab",
+    );
+    expect(sansCaracteresIllisibles(`a${String.fromCharCode(0xde00)}b`)).toBe(
+      "ab",
+    );
     expect(sansCaracteresIllisibles("ok 😀 ok")).toBe("ok 😀 ok");
   });
 

@@ -32,7 +32,9 @@ describe("suppression de compte", () => {
     });
     expect(executees).toHaveLength(2);
     expect(executees[0]?.requete).toContain("delete from public.profiles");
-    expect(executees[0]?.parametres).toEqual(["16bf61fd-edb7-445b-9a9f-848e63974ce7"]);
+    expect(executees[0]?.parametres).toEqual([
+      "16bf61fd-edb7-445b-9a9f-848e63974ce7",
+    ]);
     expect(executees[1]?.requete).toContain("delete from auth.users");
   });
 
@@ -75,7 +77,14 @@ describe("suppression de compte", () => {
   });
 
   test("sans exécuteur, l'option reste utilisable — c'est l'ancien comportement", async () => {
-    const sans = createAccountOptions({ appName: "Test", sendEmail: () => undefined });
-    await expect(sans.deleteUser.beforeDelete({ id: "16bf61fd-edb7-445b-9a9f-848e63974ce7" })).resolves.toBeUndefined();
+    const sans = createAccountOptions({
+      appName: "Test",
+      sendEmail: () => undefined,
+    });
+    await expect(
+      sans.deleteUser.beforeDelete({
+        id: "16bf61fd-edb7-445b-9a9f-848e63974ce7",
+      }),
+    ).resolves.toBeUndefined();
   });
 });

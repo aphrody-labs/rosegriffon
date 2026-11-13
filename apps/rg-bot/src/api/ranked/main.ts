@@ -16,12 +16,21 @@ import {
 import path from "node:path";
 import fs from "node:fs/promises";
 
-import { PASSER, RouteurRanked, type ReponseRanked, type RequeteRanked } from "./http";
+import {
+  PASSER,
+  RouteurRanked,
+  type ReponseRanked,
+  type RequeteRanked,
+} from "./http";
 
 import { QueueRoom } from "./rooms/QueueRoom";
 import { MatchRoom } from "./rooms/MatchRoom";
 import { LobbyRoom } from "./rooms/LobbyRoom";
-import { authFromAuthorization, authFromCookieHeader, type SessionUser } from "./auth";
+import {
+  authFromAuthorization,
+  authFromCookieHeader,
+  type SessionUser,
+} from "./auth";
 import {
   activateSeasonAdmin,
   createSeasonAdmin,
@@ -54,9 +63,13 @@ import { rgUrl } from "@rosegriffon/config/rg-urls";
 
 const PORT = Number(process.env.PORT ?? process.env.RANKED_PORT ?? 4002);
 const HOST = process.env.RANKED_HOST ?? "127.0.0.1";
-const STORAGE_DIR = process.env.RANKED_STORAGE_DIR ?? path.join(process.cwd(), "storage", "disputes");
+const STORAGE_DIR =
+  process.env.RANKED_STORAGE_DIR ??
+  path.join(process.cwd(), "storage", "disputes");
 // Base du site public (pour construire les liens de défi partageables).
-const WEBSITE_URL = (process.env.WEBSITE_URL ?? "http://localhost:4200").replace(/\/$/, "");
+const WEBSITE_URL = (
+  process.env.WEBSITE_URL ?? "http://localhost:4200"
+).replace(/\/$/, "");
 const ALLOWED_ORIGINS = [
   ...new Set(
     (
@@ -68,7 +81,7 @@ const ALLOWED_ORIGINS = [
       ].join(",")
     )
       .split(",")
-      .map(s => s.trim())
+      .map((s) => s.trim())
       .filter(Boolean),
   ),
 ];
@@ -95,7 +108,10 @@ async function userRole(userId: string): Promise<number> {
 // `x-internal-actor` = id Discord de l'admin (pour la télémétrie).
 const INTERNAL_SECRET = process.env.RANKED_INTERNAL_SECRET ?? "";
 function isInternal(req: RequeteRanked): boolean {
-  return INTERNAL_SECRET.length > 0 && req.headers["x-internal-secret"] === INTERNAL_SECRET;
+  return (
+    INTERNAL_SECRET.length > 0 &&
+    req.headers["x-internal-secret"] === INTERNAL_SECRET
+  );
 }
 
 // Pousse un évènement aux joueurs présents dans la lobby Colyseus (même processus). Best-effort :
@@ -105,28 +121,41 @@ function emitToUsers(userIds: string[], event: string, payload: unknown): void {
 }
 
 /** Relais d'une preuve de litige vers Discord, posé par l'hôte qui tient la passerelle (`rg-core`). */
-export type RelaisPreuveRanked = (lobbyId: number, userId: string, url: string) => Promise<void>;
+export type RelaisPreuveRanked = (
+  lobbyId: number,
+  userId: string,
+  url: string,
+) => Promise<void>;
 let relaisPreuve: RelaisPreuveRanked | null = null;
 
 /** Branche le relais des preuves (salon des Tournament Organizers) ; `null` le retire. */
-export function definirRelaisPreuveRanked(relais: RelaisPreuveRanked | null): void {
+export function definirRelaisPreuveRanked(
+  relais: RelaisPreuveRanked | null,
+): void {
   relaisPreuve = relais;
 }
 
 // Relaie une preuve de litige vers Discord. Best-effort : un échec n'empêche pas son enregistrement.
 function notifyProofToBot(lobbyId: number, userId: string, url: string): void {
   if (!relaisPreuve) {
-    console.warn(`[ranked] preuve du lobby ${lobbyId} enregistrée sans relais Discord (passerelle absente)`);
+    console.warn(
+      `[ranked] preuve du lobby ${lobbyId} enregistrée sans relais Discord (passerelle absente)`,
+    );
     return;
   }
-  relaisPreuve(lobbyId, userId, url).catch(err => console.error("[ranked] relais de preuve en échec", err));
+  relaisPreuve(lobbyId, userId, url).catch((err) =>
+    console.error("[ranked] relais de preuve en échec", err),
+  );
 }
 
 // Notifie en TEMPS RÉEL les 2 joueurs d'un litige tranché par un admin (validation ou
 // annulation) → toast côté front (« la décision des admins »). Couvre les 2 voies d'arbitrage
 // (dashboard web + commande Discord /ranked-admin), qui passent toutes deux par les endpoints
 // /admin/lobbies/:id/{validate,cancel}. Best-effort : un échec de notif n'invalide pas l'arbitrage.
-async function notifyDisputeResolved(lobbyId: number, cancelled: boolean): Promise<void> {
+async function notifyDisputeResolved(
+  lobbyId: number,
+  cancelled: boolean,
+): Promise<void> {
   try {
     const lob = await sql<Array<{ mode: number }>>`
 			SELECT mode FROM achillea.lobby WHERE id = ${lobbyId} LIMIT 1
@@ -150,7 +179,7 @@ async function notifyDisputeResolved(lobbyId: number, cancelled: boolean): Promi
 			ORDER BY lu.team ASC
 		`;
     if (rows.length < 2) return;
-    const players = rows.map(r => ({
+    const players = rows.map((r) => ({
       userId: r.user_id,
       team: r.team,
       score: r.score,
@@ -159,7 +188,7 @@ async function notifyDisputeResolved(lobbyId: number, cancelled: boolean): Promi
       eloAfter: r.elo,
     }));
     emitToUsers(
-      rows.map(r => r.user_id),
+      rows.map((r) => r.user_id),
       "ranked_dispute_resolved",
       { lobbyId, mode, cancelled, players },
     );
@@ -172,11 +201,21 @@ async function notifyDisputeResolved(lobbyId: number, cancelled: boolean): Promi
 async function resolvePlayer(
   userId: string,
   mode: number,
-): Promise<{ userId: string; displayName: string; avatar: string; elo: number }> {
+): Promise<{
+  userId: string;
+  displayName: string;
+  avatar: string;
+  elo: number;
+}> {
   const userRow = await getUserRow(userId);
   const season = await getActiveSeason();
   const baseRating = season?.config?.baseRating ?? 0;
-  const elo = await getOrCreateElo(userId, mode, season?.id ?? null, baseRating);
+  const elo = await getOrCreateElo(
+    userId,
+    mode,
+    season?.id ?? null,
+    baseRating,
+  );
   return {
     userId,
     displayName: userRow?.display_name ?? userId,
@@ -195,12 +234,17 @@ function discordAvatar(userId: string, avatar: string | null): string {
   return `https://cdn.discordapp.com/avatars/${userId}/${avatar}.png`;
 }
 
-type AuthorizeResult = { ok: true; actorId: string | null } | { ok: false; status: number; error: string };
+type AuthorizeResult =
+  | { ok: true; actorId: string | null }
+  | { ok: false; status: number; error: string };
 
 // UserRole : Member=0, Moderator=1, Administrator=2, SuperAdministrator=3.
 // Lecture (litiges + télémétrie) → Modérateurs+ ; actions (valider/annuler) → Admins+.
 // `needAdmin=false` ⇒ Modérateur+ suffit. Les appels internes (secret) passent toujours.
-async function authorizeStaff(req: RequeteRanked, needAdmin: boolean): Promise<AuthorizeResult> {
+async function authorizeStaff(
+  req: RequeteRanked,
+  needAdmin: boolean,
+): Promise<AuthorizeResult> {
   if (isInternal(req)) {
     const actor = req.headers["x-internal-actor"];
     return { ok: true, actorId: typeof actor === "string" ? actor : null };
@@ -208,7 +252,8 @@ async function authorizeStaff(req: RequeteRanked, needAdmin: boolean): Promise<A
   const auth = await resolveAuth(req);
   if (!auth) return { ok: false, status: 401, error: "unauthenticated" };
   const role = await userRole(auth.id);
-  if (role < (needAdmin ? 2 : 1)) return { ok: false, status: 403, error: "forbidden" };
+  if (role < (needAdmin ? 2 : 1))
+    return { ok: false, status: 403, error: "forbidden" };
   return { ok: true, actorId: auth.id };
 }
 
@@ -220,13 +265,28 @@ async function authorizeStaff(req: RequeteRanked, needAdmin: boolean): Promise<A
 const DISPUTE_MAX_BYTES = 5 * 1024 * 1024;
 
 function sniffImageExt(buf: Buffer): string | null {
-  if (buf.length >= 8 && buf[0] === 0x89 && buf[1] === 0x50 && buf[2] === 0x4e && buf[3] === 0x47) {
+  if (
+    buf.length >= 8 &&
+    buf[0] === 0x89 &&
+    buf[1] === 0x50 &&
+    buf[2] === 0x4e &&
+    buf[3] === 0x47
+  ) {
     return ".png"; // 89 50 4E 47 (\x89PNG)
   }
-  if (buf.length >= 3 && buf[0] === 0xff && buf[1] === 0xd8 && buf[2] === 0xff) {
+  if (
+    buf.length >= 3 &&
+    buf[0] === 0xff &&
+    buf[1] === 0xd8 &&
+    buf[2] === 0xff
+  ) {
     return ".jpg"; // FF D8 FF (JPEG)
   }
-  if (buf.length >= 12 && buf.toString("ascii", 0, 4) === "RIFF" && buf.toString("ascii", 8, 12) === "WEBP") {
+  if (
+    buf.length >= 12 &&
+    buf.toString("ascii", 0, 4) === "RIFF" &&
+    buf.toString("ascii", 8, 12) === "WEBP"
+  ) {
     return ".webp"; // RIFF....WEBP
   }
   return null;
@@ -237,12 +297,17 @@ function sniffImageExt(buf: Buffer): string | null {
  * Colyseus (`matchMaker.controller`), puis ceux du ranked par-dessus. Les pré-vols `OPTIONS`
  * restent répondus par Colyseus avant toute route (inchangé).
  */
-function appliquerCors(req: RequeteRanked, res: ReponseRanked, requete: Request): void {
+function appliquerCors(
+  req: RequeteRanked,
+  res: ReponseRanked,
+  requete: Request,
+): void {
   const colyseus = {
     ...matchMaker.controller.DEFAULT_CORS_HEADERS,
     ...matchMaker.controller.getCorsHeaders(requete.headers),
   };
-  for (const [nom, valeur] of Object.entries(colyseus)) res.setHeader(nom, String(valeur));
+  for (const [nom, valeur] of Object.entries(colyseus))
+    res.setHeader(nom, String(valeur));
   // On ne pose `Allow-Credentials: true` QUE pour les origines connues (ALLOWED_ORIGINS) —
   // sinon « reflet de n'importe quelle origine + credentials » est un anti-pattern. Les
   // autres origines (et les appels sans Origin : sondes, server-to-server) restent
@@ -257,22 +322,37 @@ function appliquerCors(req: RequeteRanked, res: ReponseRanked, requete: Request)
   } else {
     res.setHeader("Access-Control-Allow-Origin", "*");
   }
-  res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE,OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type,Authorization,Cookie,apikey,x-client-info");
+  res.setHeader(
+    "Access-Control-Allow-Methods",
+    "GET,POST,PUT,PATCH,DELETE,OPTIONS",
+  );
+  res.setHeader(
+    "Access-Control-Allow-Headers",
+    "Content-Type,Authorization,Cookie,apikey,x-client-info",
+  );
 }
 
 /** Appel de l'API unifiée (`/v1/*`) : en processus sous `rg-core`, HTTP sinon. */
 export type ApiUnifiee = (requete: Request) => Promise<Response>;
 
-const URL_API_UNIFIEE = rgUrl(process.env, "api", "UNIFIED_API_URL").replace(/\/$/, "");
-let apiUnifiee: ApiUnifiee = requete => fetch(requete);
+const URL_API_UNIFIEE = rgUrl(process.env, "api", "UNIFIED_API_URL").replace(
+  /\/$/,
+  "",
+);
+let apiUnifiee: ApiUnifiee = (requete) => fetch(requete);
 
 function appelerApiUnifiee(requete: Request): Promise<Response> {
   return apiUnifiee(requete);
 }
 
 /** En-têtes de transport qui ne se relaient pas d'une réponse à l'autre. */
-const ENTETES_NON_RELAYES = new Set(["connection", "content-encoding", "content-length", "keep-alive", "transfer-encoding"]);
+const ENTETES_NON_RELAYES = new Set([
+  "connection",
+  "content-encoding",
+  "content-length",
+  "keep-alive",
+  "transfer-encoding",
+]);
 
 /**
  * Chemin unifié d'un ancien chemin `/api/*` du client Achilléa (`DEFAULT_ACHILLEA_API_URL`) :
@@ -281,7 +361,8 @@ const ENTETES_NON_RELAYES = new Set(["connection", "content-encoding", "content-
  */
 export function cheminApiUnifiee(cheminApi: string): string {
   if (cheminApi === "/auth/token") return "/v1/auth/realtime-token";
-  if (cheminApi === "/auth" || cheminApi.startsWith("/auth/")) return `/v1${cheminApi}`;
+  if (cheminApi === "/auth" || cheminApi.startsWith("/auth/"))
+    return `/v1${cheminApi}`;
   return `/v1/achillea${cheminApi}`;
 }
 
@@ -294,12 +375,21 @@ export function cheminApiUnifiee(cheminApi: string): string {
  * ce qui reste confié à Colyseus.
  */
 export function avecCorpsLisible(requete: Request): Request {
-  if (requete.body !== null || requete.method === "GET" || requete.method === "HEAD") return requete;
-  return new Request(requete, { method: requete.method, body: new Uint8Array(0) });
+  if (
+    requete.body !== null ||
+    requete.method === "GET" ||
+    requete.method === "HEAD"
+  )
+    return requete;
+  return new Request(requete, {
+    method: requete.method,
+    body: new Uint8Array(0),
+  });
 }
 
 /** Types de corps binaires : jamais acceptés par les routes REST du ranked. */
-const CORPS_BINAIRES = /^(multipart\/form-data|application\/octet-stream|image\/)/i;
+const CORPS_BINAIRES =
+  /^(multipart\/form-data|application\/octet-stream|image\/)/i;
 
 /**
  * Requête `/api/*` à corps binaire, routée DIRECTEMENT vers l'API unifiée, ou `null`.
@@ -308,29 +398,44 @@ const CORPS_BINAIRES = /^(multipart\/form-data|application\/octet-stream|image\/
  * un upload d'image (`POST /api/proxy/upload`) part tel quel, en processus, sans passer
  * par le relais `/api` (qui ne réémet que les corps texte ou JSON).
  */
-export function versApiUnifieeDirecte(requete: Request, origine = "http://localhost"): Request | null {
+export function versApiUnifieeDirecte(
+  requete: Request,
+  origine = "http://localhost",
+): Request | null {
   const url = new URL(requete.url);
   if (!url.pathname.startsWith("/api/")) return null;
-  if (!CORPS_BINAIRES.test(requete.headers.get("content-type") ?? "")) return null;
-  const cible = new URL(cheminApiUnifiee(url.pathname.slice("/api".length)), origine);
+  if (!CORPS_BINAIRES.test(requete.headers.get("content-type") ?? ""))
+    return null;
+  const cible = new URL(
+    cheminApiUnifiee(url.pathname.slice("/api".length)),
+    origine,
+  );
   cible.search = url.search;
   return new Request(cible.href, requete);
 }
 
 /** Traduit une requête `/api/*` du routeur ranked (corps texte ou JSON) en requête Fetch vers l'API unifiée. */
 export function versRequeteUnifiee(req: RequeteRanked): Request {
-  const [chemin = "/", query] = req.originalUrl.replace(/^\/api(?=\/|$)/, "").split("?", 2);
+  const [chemin = "/", query] = req.originalUrl
+    .replace(/^\/api(?=\/|$)/, "")
+    .split("?", 2);
   const cible = new URL(cheminApiUnifiee(chemin || "/"), URL_API_UNIFIEE);
   if (query) cible.search = query;
   const headers = new Headers();
   for (const [nom, valeur] of Object.entries(req.headers)) {
-    if (nom === "host" || nom === "content-length" || valeur === undefined) continue;
+    if (nom === "host" || nom === "content-length" || valeur === undefined)
+      continue;
     headers.set(nom, Array.isArray(valeur) ? valeur.join(", ") : valeur);
   }
   const sansCorps = req.method === "GET" || req.method === "HEAD";
   let body: string | undefined;
   if (!sansCorps && typeof req.body === "string") body = req.body;
-  else if (!sansCorps && req.body && typeof req.body === "object" && Object.keys(req.body).length > 0) {
+  else if (
+    !sansCorps &&
+    req.body &&
+    typeof req.body === "object" &&
+    Object.keys(req.body).length > 0
+  ) {
     body = JSON.stringify(req.body);
     headers.set("content-type", "application/json");
   }
@@ -352,26 +457,53 @@ let intercepteur: IntercepteurHttp | null = null;
 /** Routes REST du ranked, servies avant Colyseus (cf. `monterRoutes`). */
 const routeur = new RouteurRanked({
   preparer: appliquerCors,
-  surErreur: err => console.error("[ranked] requête en erreur (body-parser/middleware)", err),
+  surErreur: (err) =>
+    console.error("[ranked] requête en erreur (body-parser/middleware)", err),
 });
 
 /** Routes REST du ranked pour une requête HTTP ordinaire ; pré-vols et WebSocket restent à Colyseus. */
-function servirRoutesRanked(requete: Request): Promise<Response | undefined> | undefined {
-  if (requete.method === "OPTIONS" || requete.headers.get("upgrade")?.toLowerCase() === "websocket") return undefined;
+function servirRoutesRanked(
+  requete: Request,
+): Promise<Response | undefined> | undefined {
+  if (
+    requete.method === "OPTIONS" ||
+    requete.headers.get("upgrade")?.toLowerCase() === "websocket"
+  )
+    return undefined;
   return routeur.servir(requete);
 }
 
 class TransportRanked extends BunWebSockets {
-  override listen(port: number, hostname?: string, backlog?: number, listeningListener?: () => void) {
+  override listen(
+    port: number,
+    hostname?: string,
+    backlog?: number,
+    listeningListener?: () => void,
+  ) {
     const intercepter = intercepteur;
     const serveOriginal = Bun.serve;
-    type FetchColyseus = (this: Bun.Server<unknown>, requete: Request, serveur: Bun.Server<unknown>) => unknown;
-    (Bun as { serve: unknown }).serve = (options: Bun.Serve.Options<unknown> & { fetch: FetchColyseus }) =>
+    type FetchColyseus = (
+      this: Bun.Server<unknown>,
+      requete: Request,
+      serveur: Bun.Server<unknown>,
+    ) => unknown;
+    (Bun as { serve: unknown }).serve = (
+      options: Bun.Serve.Options<unknown> & { fetch: FetchColyseus },
+    ) =>
       serveOriginal({
         ...options,
         async fetch(requete: Request, serveur: Bun.Server<unknown>) {
-          const reponse = (await intercepter?.(requete, serveur)) ?? (await servirRoutesRanked(requete));
-          return reponse ?? ((await options.fetch.call(serveur, avecCorpsLisible(requete), serveur)) as Response);
+          const reponse =
+            (await intercepter?.(requete, serveur)) ??
+            (await servirRoutesRanked(requete));
+          return (
+            reponse ??
+            ((await options.fetch.call(
+              serveur,
+              avecCorpsLisible(requete),
+              serveur,
+            )) as Response)
+          );
         },
       } as Bun.Serve.Options<unknown>);
     try {
@@ -397,10 +529,13 @@ const server = defineServer({
 /** Routes REST du ranked, dans l'ordre d'évaluation (la première qui répond l'emporte). */
 function monterRoutes(app: RouteurRanked): void {
   {
-
     // Healthcheck
     app.get("/api/health", (_req, res) => {
-      res.json({ ok: true, ts: Date.now(), activeChallenges: activeChallengeCount() });
+      res.json({
+        ok: true,
+        ts: Date.now(),
+        activeChallenges: activeChallengeCount(),
+      });
     });
 
     // POST /api/ranked/challenge — crée un lien de défi partageable. Body : { mode, ranked,
@@ -413,11 +548,19 @@ function monterRoutes(app: RouteurRanked): void {
         return;
       }
       try {
-        const body = (req.body ?? {}) as { mode?: number; ranked?: boolean; toUserId?: string };
+        const body = (req.body ?? {}) as {
+          mode?: number;
+          ranked?: boolean;
+          toUserId?: string;
+        };
         const mode = parseMode(body.mode);
         const ranked = body.ranked !== false;
         const toUserId =
-          typeof body.toUserId === "string" && body.toUserId && body.toUserId !== auth.id ? body.toUserId : null;
+          typeof body.toUserId === "string" &&
+          body.toUserId &&
+          body.toUserId !== auth.id
+            ? body.toUserId
+            : null;
         const me = await resolvePlayer(auth.id, mode);
         const challenge = createChallenge({
           fromUserId: me.userId,
@@ -476,7 +619,11 @@ function monterRoutes(app: RouteurRanked): void {
         return;
       }
       // Défi ciblé : seul le destinataire (ou l'inviteur) peut le consulter.
-      if (challenge.toUserId && challenge.toUserId !== auth.id && challenge.fromUserId !== auth.id) {
+      if (
+        challenge.toUserId &&
+        challenge.toUserId !== auth.id &&
+        challenge.fromUserId !== auth.id
+      ) {
         res.status(403).json({ error: "not_for_you" });
         return;
       }
@@ -537,7 +684,10 @@ function monterRoutes(app: RouteurRanked): void {
           invitee,
           challenge.ranked,
         );
-        const deliveredToInviter = LobbyRoom.deliverMatchTo(inviter.userId, reservationA);
+        const deliveredToInviter = LobbyRoom.deliverMatchTo(
+          inviter.userId,
+          reservationA,
+        );
         void logMatchEvent({
           type: "challenge_accepted",
           mode: challenge.mode,
@@ -549,7 +699,11 @@ function monterRoutes(app: RouteurRanked): void {
             deliveredToInviter,
           },
         });
-        res.json({ reservation: reservationB, mode: challenge.mode, ranked: challenge.ranked });
+        res.json({
+          reservation: reservationB,
+          mode: challenge.mode,
+          ranked: challenge.ranked,
+        });
       } catch (err) {
         console.error("[ranked] POST /challenge/accept failed", err);
         res.status(500).json({ error: "internal" });
@@ -572,81 +726,92 @@ function monterRoutes(app: RouteurRanked): void {
     // POST /api/ranked/:lobbyId/dispute — capture encodee en base64 (corps text/plain).
     // Le corps est lu en texte (tout Content-Type, 8 Mio max, comme l'ancien express.text) ;
     // on decode le base64 puis on valide le contenu.
-    app.post("/api/ranked/:lobbyId/dispute", { texte: { limite: 8 * 1024 * 1024 } }, async (req, res) => {
-      const auth = await resolveAuth(req);
-      if (!auth) {
-        res.status(401).json({ error: "unauthenticated" });
-        return;
-      }
-      const lobbyId = Number(req.params.lobbyId);
-      if (!Number.isFinite(lobbyId)) {
-        res.status(400).json({ error: "invalid_lobby_id" });
-        return;
-      }
-      // Le corps est l'image en base64 (eventuellement un data-URL `data:...;base64,XXXX`).
-      const raw = typeof req.body === "string" ? req.body.trim() : "";
-      const b64 = raw.includes(",") ? raw.slice(raw.lastIndexOf(",") + 1) : raw;
-      if (!b64) {
-        res.status(400).json({ error: "no_file" });
-        return;
-      }
-      const body = Buffer.from(b64, "base64");
-      if (body.length === 0) {
-        res.status(400).json({ error: "no_file" });
-        return;
-      }
-      if (body.length > DISPUTE_MAX_BYTES) {
-        res.status(400).json({ error: "too_large" });
-        return;
-      }
-      // Validation par contenu : seules png/jpeg/webp (magic bytes) passent.
-      const ext = sniffImageExt(body);
-      if (!ext) {
-        res.status(400).json({ error: "unsupported_type" });
-        return;
-      }
-      try {
-        // Vérifier que le user fait partie du lobby
-        const ownership = await sql<Array<{ team: number }>>`
+    app.post(
+      "/api/ranked/:lobbyId/dispute",
+      { texte: { limite: 8 * 1024 * 1024 } },
+      async (req, res) => {
+        const auth = await resolveAuth(req);
+        if (!auth) {
+          res.status(401).json({ error: "unauthenticated" });
+          return;
+        }
+        const lobbyId = Number(req.params.lobbyId);
+        if (!Number.isFinite(lobbyId)) {
+          res.status(400).json({ error: "invalid_lobby_id" });
+          return;
+        }
+        // Le corps est l'image en base64 (eventuellement un data-URL `data:...;base64,XXXX`).
+        const raw = typeof req.body === "string" ? req.body.trim() : "";
+        const b64 = raw.includes(",")
+          ? raw.slice(raw.lastIndexOf(",") + 1)
+          : raw;
+        if (!b64) {
+          res.status(400).json({ error: "no_file" });
+          return;
+        }
+        const body = Buffer.from(b64, "base64");
+        if (body.length === 0) {
+          res.status(400).json({ error: "no_file" });
+          return;
+        }
+        if (body.length > DISPUTE_MAX_BYTES) {
+          res.status(400).json({ error: "too_large" });
+          return;
+        }
+        // Validation par contenu : seules png/jpeg/webp (magic bytes) passent.
+        const ext = sniffImageExt(body);
+        if (!ext) {
+          res.status(400).json({ error: "unsupported_type" });
+          return;
+        }
+        try {
+          // Vérifier que le user fait partie du lobby
+          const ownership = await sql<Array<{ team: number }>>`
 						SELECT team FROM achillea.lobby_user
 						WHERE lobby_id = ${lobbyId} AND user_id = ${auth.id} LIMIT 1
 					`;
-        if (!ownership[0]) {
-          res.status(403).json({ error: "not_in_lobby" });
-          return;
-        }
-        // Stockage PRIORITAIRE = bucket Supabase privé. La base conserve une référence
-        // interne stable ; seule une URL signée temporaire sort de l'API.
-        const uploaded = await uploadRankedProof({ buffer: body, lobbyId, userId: auth.id, ext });
-        let storedReference = uploaded?.reference ?? "";
-        let accessUrl = uploaded?.signedUrl ?? "";
-        if (!uploaded) {
-          if ((process.env.NODE_ENV ?? "development") === "production") {
-            res.status(503).json({ error: "private_storage_unavailable" });
+          if (!ownership[0]) {
+            res.status(403).json({ error: "not_in_lobby" });
             return;
           }
-          // Nom de fichier sûr (jamais le nom client) + écriture sur disque.
-          const fileName = `${Date.now()}-${Math.round(Math.random() * 1e9)}${ext}`;
-          await fs.writeFile(path.join(STORAGE_DIR, fileName), body);
-          // path relatif (URL exposée via /storage/disputes/).
-          storedReference = `/storage/disputes/${fileName}`;
-          accessUrl = storedReference;
+          // Stockage PRIORITAIRE = bucket Supabase privé. La base conserve une référence
+          // interne stable ; seule une URL signée temporaire sort de l'API.
+          const uploaded = await uploadRankedProof({
+            buffer: body,
+            lobbyId,
+            userId: auth.id,
+            ext,
+          });
+          let storedReference = uploaded?.reference ?? "";
+          let accessUrl = uploaded?.signedUrl ?? "";
+          if (!uploaded) {
+            if ((process.env.NODE_ENV ?? "development") === "production") {
+              res.status(503).json({ error: "private_storage_unavailable" });
+              return;
+            }
+            // Nom de fichier sûr (jamais le nom client) + écriture sur disque.
+            const fileName = `${Date.now()}-${Math.round(Math.random() * 1e9)}${ext}`;
+            await fs.writeFile(path.join(STORAGE_DIR, fileName), body);
+            // path relatif (URL exposée via /storage/disputes/).
+            storedReference = `/storage/disputes/${fileName}`;
+            accessUrl = storedReference;
+          }
+          await setLobbyUserScreenshot(lobbyId, auth.id, storedReference);
+          // Relaie la preuve vers le salon des Tournament Organizers (best-effort).
+          notifyProofToBot(lobbyId, auth.id, accessUrl);
+          void logMatchEvent({
+            type: "proof_uploaded",
+            lobbyId,
+            userId: auth.id,
+            detail: { storage: uploaded ? "supabase-private" : "local" },
+          });
+          res.json({ url: accessUrl });
+        } catch (err) {
+          console.error("[ranked] /dispute failed", err);
+          res.status(500).json({ error: "internal" });
         }
-        await setLobbyUserScreenshot(lobbyId, auth.id, storedReference);
-        // Relaie la preuve vers le salon des Tournament Organizers (best-effort).
-        notifyProofToBot(lobbyId, auth.id, accessUrl);
-        void logMatchEvent({
-          type: "proof_uploaded",
-          lobbyId,
-          userId: auth.id,
-          detail: { storage: uploaded ? "supabase-private" : "local" },
-        });
-        res.json({ url: accessUrl });
-      } catch (err) {
-        console.error("[ranked] /dispute failed", err);
-        res.status(500).json({ error: "internal" });
-      }
-    });
+      },
+    );
 
     // Static : sert les screenshots disputés (read-only). nosniff empeche le
     // navigateur de re-deviner le type (defense en profondeur vs le fileFilter
@@ -656,7 +821,13 @@ function monterRoutes(app: RouteurRanked): void {
     if ((process.env.NODE_ENV ?? "development") !== "production") {
       app.get("/storage/disputes/:fichier", async (req, res) => {
         const nom = req.params.fichier ?? "";
-        if (!nom || nom.startsWith(".") || nom.includes("/") || nom.includes("\\")) return PASSER;
+        if (
+          !nom ||
+          nom.startsWith(".") ||
+          nom.includes("/") ||
+          nom.includes("\\")
+        )
+          return PASSER;
         const fichier = Bun.file(path.join(STORAGE_DIR, nom));
         if (!(await fichier.exists())) return PASSER;
         res.setHeader("Content-Type", fichier.type);
@@ -678,7 +849,7 @@ function monterRoutes(app: RouteurRanked): void {
         const list = await listDisputedLobbies();
         res.json(
           await Promise.all(
-            list.map(async d => ({
+            list.map(async (d) => ({
               lobbyId: d.lobbyId,
               mode: d.mode,
               player1: {
@@ -716,7 +887,7 @@ function monterRoutes(app: RouteurRanked): void {
       try {
         const list = await listActiveLobbies();
         res.json(
-          list.map(m => ({
+          list.map((m) => ({
             lobbyId: m.lobbyId,
             mode: m.mode,
             createdAt: m.createdAt,
@@ -776,8 +947,14 @@ function monterRoutes(app: RouteurRanked): void {
         scoreTeam2?: number;
         forfeitUserId?: string;
       };
-      const s1 = Math.max(0, Math.min(99, Math.floor(Number(body.scoreTeam1 ?? 0))));
-      const s2 = Math.max(0, Math.min(99, Math.floor(Number(body.scoreTeam2 ?? 0))));
+      const s1 = Math.max(
+        0,
+        Math.min(99, Math.floor(Number(body.scoreTeam1 ?? 0))),
+      );
+      const s2 = Math.max(
+        0,
+        Math.min(99, Math.floor(Number(body.scoreTeam2 ?? 0))),
+      );
       try {
         // Récupère le mode + season du lobby
         const lobby = await sql<Array<{ mode: number }>>`
@@ -792,20 +969,31 @@ function monterRoutes(app: RouteurRanked): void {
           const players = await sql<Array<{ user_id: string }>>`
 						SELECT user_id FROM achillea.lobby_user WHERE lobby_id = ${lobbyId}
 					`;
-          if (!players.some(p => p.user_id === body.forfeitUserId)) {
+          if (!players.some((p) => p.user_id === body.forfeitUserId)) {
             res.status(400).json({ error: "forfeit_user_not_in_lobby" });
             return;
           }
         }
         const season = await getActiveSeason();
         const kFactor = season?.config?.kFactor ?? 32;
-        const result = await adminResolveLobby(lobbyId, s1, s2, body.forfeitUserId, lobby[0].mode, kFactor);
+        const result = await adminResolveLobby(
+          lobbyId,
+          s1,
+          s2,
+          body.forfeitUserId,
+          lobby[0].mode,
+          kFactor,
+        );
         void logMatchEvent({
           type: "admin_validated",
           lobbyId,
           mode: lobby[0].mode,
           userId: gate.actorId,
-          detail: { scoreTeam1: s1, scoreTeam2: s2, forfeitUserId: body.forfeitUserId ?? null },
+          detail: {
+            scoreTeam1: s1,
+            scoreTeam2: s2,
+            forfeitUserId: body.forfeitUserId ?? null,
+          },
         });
         // Notif temps réel des 2 joueurs (uniquement si l'arbitrage a réellement été appliqué
         // ce coup-ci — pas sur une double-validation idempotente, pour ne pas spammer).
@@ -835,7 +1023,11 @@ function monterRoutes(app: RouteurRanked): void {
           res.status(409).json({ error: "not_cancellable" });
           return;
         }
-        void logMatchEvent({ type: "admin_cancelled", lobbyId, userId: gate.actorId });
+        void logMatchEvent({
+          type: "admin_cancelled",
+          lobbyId,
+          userId: gate.actorId,
+        });
         // Notif temps réel des 2 joueurs : match annulé, aucun impact sur le rang.
         void notifyDisputeResolved(lobbyId, true);
         res.json({ ok: true });
@@ -855,8 +1047,10 @@ function monterRoutes(app: RouteurRanked): void {
       }
       try {
         const lobbyId = req.query.lobbyId ? Number(req.query.lobbyId) : null;
-        const roomCode = typeof req.query.roomCode === "string" ? req.query.roomCode : null;
-        const userId = typeof req.query.userId === "string" ? req.query.userId : null;
+        const roomCode =
+          typeof req.query.roomCode === "string" ? req.query.roomCode : null;
+        const userId =
+          typeof req.query.userId === "string" ? req.query.userId : null;
         const limit = req.query.limit ? Number(req.query.limit) : 200;
         const events = await listMatchEvents({
           lobbyId: Number.isFinite(lobbyId as number) ? lobbyId : null,
@@ -865,7 +1059,7 @@ function monterRoutes(app: RouteurRanked): void {
           limit,
         });
         res.json(
-          events.map(e => ({
+          events.map((e) => ({
             id: e.id,
             createdAt: e.created_at,
             lobbyId: e.lobby_id,
@@ -892,7 +1086,12 @@ function monterRoutes(app: RouteurRanked): void {
     // Normalise + borne la config Elo d'une saison (jamais de valeur aberrante en base).
     const parseSeasonConfig = (raw: unknown): SeasonConfigInput => {
       const c = (raw ?? {}) as Partial<SeasonConfigInput>;
-      const bound = (v: unknown, def: number, min: number, max: number): number => {
+      const bound = (
+        v: unknown,
+        def: number,
+        min: number,
+        max: number,
+      ): number => {
         const n = Number(v);
         return Number.isFinite(n) ? Math.max(min, Math.min(max, n)) : def;
       };
@@ -938,7 +1137,12 @@ function monterRoutes(app: RouteurRanked): void {
         res.status(400).json({ error: "name_required" });
         return;
       }
-      if (!startsAt || Number.isNaN(startsAt.getTime()) || !endsAt || Number.isNaN(endsAt.getTime())) {
+      if (
+        !startsAt ||
+        Number.isNaN(startsAt.getTime()) ||
+        !endsAt ||
+        Number.isNaN(endsAt.getTime())
+      ) {
         res.status(400).json({ error: "invalid_dates" });
         return;
       }
@@ -986,7 +1190,8 @@ function monterRoutes(app: RouteurRanked): void {
         state?: SeasonStateValue;
         config?: SeasonConfigInput;
       } = {};
-      if (typeof body.name === "string" && body.name.trim()) patch.name = body.name.trim();
+      if (typeof body.name === "string" && body.name.trim())
+        patch.name = body.name.trim();
       if (body.startsAt) {
         const d = new Date(body.startsAt);
         if (!Number.isNaN(d.getTime())) patch.startsAt = d.toISOString();
@@ -1002,7 +1207,8 @@ function monterRoutes(app: RouteurRanked): void {
         }
         patch.state = body.state as SeasonStateValue;
       }
-      if (body.config !== undefined) patch.config = parseSeasonConfig(body.config);
+      if (body.config !== undefined)
+        patch.config = parseSeasonConfig(body.config);
       try {
         const season = await updateSeasonAdmin(req.params.id, patch);
         if (!season) {
@@ -1084,7 +1290,8 @@ function monterRoutes(app: RouteurRanked): void {
         res.send(Buffer.from(await reponse.arrayBuffer()));
       } catch (err) {
         console.error("[ranked] API unifiée injoignable :", err);
-        if (!res.headersSent) res.status(502).json({ error: "api_unavailable" });
+        if (!res.headersSent)
+          res.status(502).json({ error: "api_unavailable" });
       }
     });
 
@@ -1100,10 +1307,10 @@ monterRoutes(routeur);
 // @colyseus/bun-websockets fait `new URL(req.url)` qui throw sur un req.url == "/" sans
 // Host — sonde/scan direct du port) ne doit JAMAIS faire tomber le process ni polluer les
 // logs d'une stack non gérée. On trace et on continue (le process reste up).
-process.on("unhandledRejection", reason => {
+process.on("unhandledRejection", (reason) => {
   console.error("[ranked] unhandledRejection", reason);
 });
-process.on("uncaughtException", err => {
+process.on("uncaughtException", (err) => {
   console.error("[ranked] uncaughtException", err);
 });
 
@@ -1119,7 +1326,9 @@ export interface OptionsRanked {
 let demarre = false;
 
 /** Démarre Colyseus (rooms + REST ranked) et le nettoyage périodique des lobbies. Idempotent. */
-export async function demarrerRanked(options: OptionsRanked = {}): Promise<void> {
+export async function demarrerRanked(
+  options: OptionsRanked = {},
+): Promise<void> {
   if (demarre) return;
   demarre = true;
   if (options.api) apiUnifiee = options.api;
@@ -1127,13 +1336,16 @@ export async function demarrerRanked(options: OptionsRanked = {}): Promise<void>
   const port = options.port ?? PORT;
   const hostname = options.hostname ?? HOST;
   await server.listen(port, hostname);
-  console.info(`[ranked] Colyseus server listening on ${hostname}:${port} (origins=${ALLOWED_ORIGINS.join(",")})`);
+  console.info(
+    `[ranked] Colyseus server listening on ${hostname}:${port} (origins=${ALLOWED_ORIGINS.join(",")})`,
+  );
 
   // Nettoyage périodique des lobbies abandonnés (Ongoing >24h jamais finalisés) — préserve Contested.
   const runLobbyCleanup = async () => {
     try {
       const n = await cleanupStaleOngoingLobbies(24);
-      if (n > 0) console.info(`[ranked] ${n} lobby(s) Ongoing abandonné(s) annulé(s)`);
+      if (n > 0)
+        console.info(`[ranked] ${n} lobby(s) Ongoing abandonné(s) annulé(s)`);
     } catch (err) {
       console.error("[ranked] cleanup lobbies failed", err);
     }

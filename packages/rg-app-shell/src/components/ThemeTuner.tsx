@@ -32,7 +32,7 @@ export const CURSEURS: readonly Curseur[] = [
     min: -180,
     max: 180,
     pas: 1,
-    format: v => `${signe(v)}${Math.abs(v)}°`,
+    format: (v) => `${signe(v)}${Math.abs(v)}°`,
   },
   {
     cle: "chroma",
@@ -41,7 +41,7 @@ export const CURSEURS: readonly Curseur[] = [
     min: 0,
     max: 2,
     pas: 0.05,
-    format: v => `${Math.round(v * 100)} %`,
+    format: (v) => `${Math.round(v * 100)} %`,
   },
   {
     cle: "contrast",
@@ -50,7 +50,10 @@ export const CURSEURS: readonly Curseur[] = [
     min: -1,
     max: 1,
     pas: 0.1,
-    format: v => (Math.abs(v) < 1e-9 ? "Standard" : `${signe(v)}${Math.round(Math.abs(v) * 100)} %`),
+    format: (v) =>
+      Math.abs(v) < 1e-9
+        ? "Standard"
+        : `${signe(v)}${Math.round(Math.abs(v) * 100)} %`,
   },
 ];
 
@@ -61,8 +64,16 @@ export const CURSEURS: readonly Curseur[] = [
  * (`@rosegriffon/ui` → `setThemeTune`), enregistrés dans `rg-theme-tune`.
  * À monter avec `key={themeId}` pour repartir des réglages du thème affiché.
  */
-export function ThemeTuner({ themeId, className }: { themeId: ThemeType; className?: string }) {
-  const [reglages, setReglages] = useState<ThemeAdjustments>(() => getThemeTune(themeId));
+export function ThemeTuner({
+  themeId,
+  className,
+}: {
+  themeId: ThemeType;
+  className?: string;
+}) {
+  const [reglages, setReglages] = useState<ThemeAdjustments>(() =>
+    getThemeTune(themeId),
+  );
   const id = useId();
 
   const changer = (cle: keyof ThemeAdjustments, valeur: number) => {
@@ -79,16 +90,22 @@ export function ThemeTuner({ themeId, className }: { themeId: ThemeType; classNa
   return (
     <fieldset className={`flex flex-col gap-4 ${className ?? ""}`}>
       <legend className="sr-only">Réglage des couleurs du thème</legend>
-      {CURSEURS.map(c => {
+      {CURSEURS.map((c) => {
         const valeur = reglages[c.cle];
         const champ = `${id}-${c.cle}`;
         return (
           <div key={c.cle} className="flex flex-col gap-1.5">
             <div className="flex items-baseline justify-between gap-3">
-              <label htmlFor={champ} className="text-sm font-medium text-on-surface">
+              <label
+                htmlFor={champ}
+                className="text-sm font-medium text-on-surface"
+              >
                 {c.libelle}
               </label>
-              <output htmlFor={champ} className="text-sm tabular-nums text-on-surface-variant">
+              <output
+                htmlFor={champ}
+                className="text-sm tabular-nums text-on-surface-variant"
+              >
                 {c.format(valeur)}
               </output>
             </div>
@@ -101,7 +118,7 @@ export function ThemeTuner({ themeId, className }: { themeId: ThemeType; classNa
               value={valeur}
               aria-valuetext={c.format(valeur)}
               aria-describedby={`${champ}-aide`}
-              onChange={e => changer(c.cle, Number(e.currentTarget.value))}
+              onChange={(e) => changer(c.cle, Number(e.currentTarget.value))}
               className="h-11 w-full cursor-pointer accent-primary"
             />
             <p id={`${champ}-aide`} className="text-xs text-on-surface-variant">

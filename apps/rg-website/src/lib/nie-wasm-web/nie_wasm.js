@@ -45,7 +45,11 @@ export class WasmGame {
    * @param {string} cmd
    */
   input(cmd) {
-    const ptr0 = passStringToWasm0(cmd, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+    const ptr0 = passStringToWasm0(
+      cmd,
+      wasm.__wbindgen_malloc,
+      wasm.__wbindgen_realloc,
+    );
     const len0 = WASM_VECTOR_LEN;
     wasm.wasmgame_input(this.__wbg_ptr, ptr0, len0);
   }
@@ -104,7 +108,8 @@ export class WasmGame {
     return ret >>> 0;
   }
 }
-if (Symbol.dispose) WasmGame.prototype[Symbol.dispose] = WasmGame.prototype.free;
+if (Symbol.dispose)
+  WasmGame.prototype[Symbol.dispose] = WasmGame.prototype.free;
 
 /**
  * Point d'entrée **auto-exécuté à l'instanciation** du module (attribut `start`,
@@ -150,9 +155,17 @@ export function aura_lookup(aura_config_json, skill_config_json) {
   let deferred4_0;
   let deferred4_1;
   try {
-    const ptr0 = passStringToWasm0(aura_config_json, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+    const ptr0 = passStringToWasm0(
+      aura_config_json,
+      wasm.__wbindgen_malloc,
+      wasm.__wbindgen_realloc,
+    );
     const len0 = WASM_VECTOR_LEN;
-    const ptr1 = passStringToWasm0(skill_config_json, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+    const ptr1 = passStringToWasm0(
+      skill_config_json,
+      wasm.__wbindgen_malloc,
+      wasm.__wbindgen_realloc,
+    );
     const len1 = WASM_VECTOR_LEN;
     const ret = wasm.aura_lookup(ptr0, len0, ptr1, len1);
     var ptr3 = ret[0];
@@ -200,11 +213,25 @@ export function aura_lookup(aura_config_json, skill_config_json) {
  * @param {number} level
  * @returns {string}
  */
-export function calculate_stats(main_position, sub_position, growth_pattern, chara_rank, play_style, level) {
+export function calculate_stats(
+  main_position,
+  sub_position,
+  growth_pattern,
+  chara_rank,
+  play_style,
+  level,
+) {
   let deferred1_0;
   let deferred1_1;
   try {
-    const ret = wasm.calculate_stats(main_position, sub_position, growth_pattern, chara_rank, play_style, level);
+    const ret = wasm.calculate_stats(
+      main_position,
+      sub_position,
+      growth_pattern,
+      chara_rank,
+      play_style,
+      level,
+    );
     deferred1_0 = ret[0];
     deferred1_1 = ret[1];
     return getStringFromWasm0(ret[0], ret[1]);
@@ -252,7 +279,11 @@ export function cfgbin_typed_json(bytes, filename) {
   try {
     const ptr0 = passArray8ToWasm0(bytes, wasm.__wbindgen_malloc);
     const len0 = WASM_VECTOR_LEN;
-    const ptr1 = passStringToWasm0(filename, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+    const ptr1 = passStringToWasm0(
+      filename,
+      wasm.__wbindgen_malloc,
+      wasm.__wbindgen_realloc,
+    );
     const len1 = WASM_VECTOR_LEN;
     const ret = wasm.cfgbin_typed_json(ptr0, len0, ptr1, len1);
     var ptr3 = ret[0];
@@ -280,9 +311,17 @@ export function cfgbin_typed_json(bytes, filename) {
 export function cpk_extract_file(cpk_bytes, cpk_filename, entry_json) {
   const ptr0 = passArray8ToWasm0(cpk_bytes, wasm.__wbindgen_malloc);
   const len0 = WASM_VECTOR_LEN;
-  const ptr1 = passStringToWasm0(cpk_filename, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+  const ptr1 = passStringToWasm0(
+    cpk_filename,
+    wasm.__wbindgen_malloc,
+    wasm.__wbindgen_realloc,
+  );
   const len1 = WASM_VECTOR_LEN;
-  const ptr2 = passStringToWasm0(entry_json, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+  const ptr2 = passStringToWasm0(
+    entry_json,
+    wasm.__wbindgen_malloc,
+    wasm.__wbindgen_realloc,
+  );
   const len2 = WASM_VECTOR_LEN;
   const ret = wasm.cpk_extract_file(ptr0, len0, ptr1, len1, ptr2, len2);
   if (ret[3]) {
@@ -305,7 +344,11 @@ export function cpk_parse_entries(cpk_bytes, cpk_filename) {
   try {
     const ptr0 = passArray8ToWasm0(cpk_bytes, wasm.__wbindgen_malloc);
     const len0 = WASM_VECTOR_LEN;
-    const ptr1 = passStringToWasm0(cpk_filename, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+    const ptr1 = passStringToWasm0(
+      cpk_filename,
+      wasm.__wbindgen_malloc,
+      wasm.__wbindgen_realloc,
+    );
     const len1 = WASM_VECTOR_LEN;
     const ret = wasm.cpk_parse_entries(ptr0, len0, ptr1, len1);
     var ptr3 = ret[0];
@@ -427,7 +470,11 @@ export function g4mg_extract_json(g4mg_bytes, g4md_json) {
   try {
     const ptr0 = passArray8ToWasm0(g4mg_bytes, wasm.__wbindgen_malloc);
     const len0 = WASM_VECTOR_LEN;
-    const ptr1 = passStringToWasm0(g4md_json, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+    const ptr1 = passStringToWasm0(
+      g4md_json,
+      wasm.__wbindgen_malloc,
+      wasm.__wbindgen_realloc,
+    );
     const len1 = WASM_VECTOR_LEN;
     const ret = wasm.g4mg_extract_json(ptr0, len0, ptr1, len1);
     var ptr3 = ret[0];
@@ -508,7 +555,11 @@ export function g4tx_info_json(bytes) {
 export function g4tx_named_to_png(bytes, nom) {
   const ptr0 = passArray8ToWasm0(bytes, wasm.__wbindgen_malloc);
   const len0 = WASM_VECTOR_LEN;
-  const ptr1 = passStringToWasm0(nom, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+  const ptr1 = passStringToWasm0(
+    nom,
+    wasm.__wbindgen_malloc,
+    wasm.__wbindgen_realloc,
+  );
   const len1 = WASM_VECTOR_LEN;
   const ret = wasm.g4tx_named_to_png(ptr0, len0, ptr1, len1);
   if (ret[3]) {
@@ -605,7 +656,11 @@ export function item_lookup(item_config_json) {
   let deferred3_0;
   let deferred3_1;
   try {
-    const ptr0 = passStringToWasm0(item_config_json, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+    const ptr0 = passStringToWasm0(
+      item_config_json,
+      wasm.__wbindgen_malloc,
+      wasm.__wbindgen_realloc,
+    );
     const len0 = WASM_VECTOR_LEN;
     const ret = wasm.item_lookup(ptr0, len0);
     var ptr2 = ret[0];
@@ -696,7 +751,11 @@ export function match_tick(state, is_training, end_counter) {
   let deferred3_0;
   let deferred3_1;
   try {
-    const ptr0 = passStringToWasm0(state, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+    const ptr0 = passStringToWasm0(
+      state,
+      wasm.__wbindgen_malloc,
+      wasm.__wbindgen_realloc,
+    );
     const len0 = WASM_VECTOR_LEN;
     const ret = wasm.match_tick(ptr0, len0, is_training, end_counter);
     var ptr2 = ret[0];
@@ -761,7 +820,11 @@ export function parse_save_json(bytes, filename) {
   try {
     const ptr0 = passArray8ToWasm0(bytes, wasm.__wbindgen_malloc);
     const len0 = WASM_VECTOR_LEN;
-    const ptr1 = passStringToWasm0(filename, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+    const ptr1 = passStringToWasm0(
+      filename,
+      wasm.__wbindgen_malloc,
+      wasm.__wbindgen_realloc,
+    );
     const len1 = WASM_VECTOR_LEN;
     const ret = wasm.parse_save_json(ptr0, len0, ptr1, len1);
     var ptr3 = ret[0];
@@ -804,7 +867,13 @@ export function rarity_to_growth_rank(rarity_code) {
  * @returns {number}
  */
 export function single_stat(level, stat_lv1, stat_lv30, stat_lv50, stat_lv99) {
-  const ret = wasm.single_stat(level, stat_lv1, stat_lv30, stat_lv50, stat_lv99);
+  const ret = wasm.single_stat(
+    level,
+    stat_lv1,
+    stat_lv30,
+    stat_lv50,
+    stat_lv99,
+  );
   return ret;
 }
 
@@ -826,9 +895,17 @@ export function skill_lookup(skill_config_json, skill_text_json) {
   let deferred4_0;
   let deferred4_1;
   try {
-    const ptr0 = passStringToWasm0(skill_config_json, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+    const ptr0 = passStringToWasm0(
+      skill_config_json,
+      wasm.__wbindgen_malloc,
+      wasm.__wbindgen_realloc,
+    );
     const len0 = WASM_VECTOR_LEN;
-    const ptr1 = passStringToWasm0(skill_text_json, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+    const ptr1 = passStringToWasm0(
+      skill_text_json,
+      wasm.__wbindgen_malloc,
+      wasm.__wbindgen_realloc,
+    );
     const len1 = WASM_VECTOR_LEN;
     const ret = wasm.skill_lookup(ptr0, len0, ptr1, len1);
     var ptr3 = ret[0];
@@ -912,7 +989,11 @@ function __wbg_get_imports() {
     },
     __wbg_stack_3b0d974bbf31e44f: function (arg0, arg1) {
       const ret = arg1.stack;
-      const ptr1 = passStringToWasm0(ret, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+      const ptr1 = passStringToWasm0(
+        ret,
+        wasm.__wbindgen_malloc,
+        wasm.__wbindgen_realloc,
+      );
       const len1 = WASM_VECTOR_LEN;
       getDataViewMemory0().setInt32(arg0 + 4 * 1, len1, true);
       getDataViewMemory0().setInt32(arg0 + 4 * 0, ptr1, true);
@@ -941,7 +1022,7 @@ function __wbg_get_imports() {
 const WasmGameFinalization =
   typeof FinalizationRegistry === "undefined"
     ? { register: () => {}, unregister: () => {} }
-    : new FinalizationRegistry(ptr => wasm.__wbg_wasmgame_free(ptr, 1));
+    : new FinalizationRegistry((ptr) => wasm.__wbg_wasmgame_free(ptr, 1));
 
 function getArrayU32FromWasm0(ptr, len) {
   ptr = ptr >>> 0;
@@ -958,7 +1039,8 @@ function getDataViewMemory0() {
   if (
     cachedDataViewMemory0 === null ||
     cachedDataViewMemory0.buffer.detached === true ||
-    (cachedDataViewMemory0.buffer.detached === undefined && cachedDataViewMemory0.buffer !== wasm.memory.buffer)
+    (cachedDataViewMemory0.buffer.detached === undefined &&
+      cachedDataViewMemory0.buffer !== wasm.memory.buffer)
   ) {
     cachedDataViewMemory0 = new DataView(wasm.memory.buffer);
   }
@@ -971,7 +1053,10 @@ function getStringFromWasm0(ptr, len) {
 
 let cachedUint32ArrayMemory0 = null;
 function getUint32ArrayMemory0() {
-  if (cachedUint32ArrayMemory0 === null || cachedUint32ArrayMemory0.byteLength === 0) {
+  if (
+    cachedUint32ArrayMemory0 === null ||
+    cachedUint32ArrayMemory0.byteLength === 0
+  ) {
     cachedUint32ArrayMemory0 = new Uint32Array(wasm.memory.buffer);
   }
   return cachedUint32ArrayMemory0;
@@ -979,7 +1064,10 @@ function getUint32ArrayMemory0() {
 
 let cachedUint8ArrayMemory0 = null;
 function getUint8ArrayMemory0() {
-  if (cachedUint8ArrayMemory0 === null || cachedUint8ArrayMemory0.byteLength === 0) {
+  if (
+    cachedUint8ArrayMemory0 === null ||
+    cachedUint8ArrayMemory0.byteLength === 0
+  ) {
     cachedUint8ArrayMemory0 = new Uint8Array(wasm.memory.buffer);
   }
   return cachedUint8ArrayMemory0;
@@ -1037,18 +1125,26 @@ function takeFromExternrefTable0(idx) {
   return value;
 }
 
-let cachedTextDecoder = new TextDecoder("utf-8", { ignoreBOM: true, fatal: true });
+let cachedTextDecoder = new TextDecoder("utf-8", {
+  ignoreBOM: true,
+  fatal: true,
+});
 cachedTextDecoder.decode();
 const MAX_SAFARI_DECODE_BYTES = 2146435072;
 let numBytesDecoded = 0;
 function decodeText(ptr, len) {
   numBytesDecoded += len;
   if (numBytesDecoded >= MAX_SAFARI_DECODE_BYTES) {
-    cachedTextDecoder = new TextDecoder("utf-8", { ignoreBOM: true, fatal: true });
+    cachedTextDecoder = new TextDecoder("utf-8", {
+      ignoreBOM: true,
+      fatal: true,
+    });
     cachedTextDecoder.decode();
     numBytesDecoded = len;
   }
-  return cachedTextDecoder.decode(getUint8ArrayMemory0().subarray(ptr, ptr + len));
+  return cachedTextDecoder.decode(
+    getUint8ArrayMemory0().subarray(ptr, ptr + len),
+  );
 }
 
 const cachedTextEncoder = new TextEncoder();
@@ -1086,7 +1182,10 @@ async function __wbg_load(module, imports) {
       } catch (e) {
         const validResponse = module.ok && expectedResponseType(module.type);
 
-        if (validResponse && module.headers.get("Content-Type") !== "application/wasm") {
+        if (
+          validResponse &&
+          module.headers.get("Content-Type") !== "application/wasm"
+        ) {
           console.warn(
             "`WebAssembly.instantiateStreaming` failed because your server does not serve Wasm with `application/wasm` MIME type. Falling back to `WebAssembly.instantiate` which is slower. Original error:\n",
             e,
@@ -1127,7 +1226,9 @@ function initSync(module) {
     if (Object.getPrototypeOf(module) === Object.prototype) {
       ({ module } = module);
     } else {
-      console.warn("using deprecated parameters for `initSync()`; pass a single object instead");
+      console.warn(
+        "using deprecated parameters for `initSync()`; pass a single object instead",
+      );
     }
   }
 
@@ -1146,7 +1247,9 @@ async function __wbg_init(module_or_path) {
     if (Object.getPrototypeOf(module_or_path) === Object.prototype) {
       ({ module_or_path } = module_or_path);
     } else {
-      console.warn("using deprecated parameters for the initialization function; pass a single object instead");
+      console.warn(
+        "using deprecated parameters for the initialization function; pass a single object instead",
+      );
     }
   }
 

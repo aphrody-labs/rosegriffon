@@ -23,7 +23,14 @@ export interface StadiumCardProps {
  * est absente ou 404. AUCUN nom de stade ni nom d'équipe n'est affiché : la table
  * `inagle_stadiums` n'en contient pas, on n'invente donc rien.
  */
-export function StadiumCard({ id, code, title, index, thumb, className }: StadiumCardProps) {
+export function StadiumCard({
+  id,
+  code,
+  title,
+  index,
+  thumb,
+  className,
+}: StadiumCardProps) {
   const [imgError, setImgError] = useState(false);
   const hasImage = !!thumb && !imgError;
 
@@ -49,20 +56,30 @@ export function StadiumCard({ id, code, title, index, thumb, className }: Stadiu
             onError={() => setImgError(true)}
           />
         ) : (
-          <LandPlot size={32} className="text-on-surface-variant/25" aria-hidden="true" />
+          <LandPlot
+            size={32}
+            className="text-on-surface-variant/25"
+            aria-hidden="true"
+          />
         )}
       </div>
       <div className="p-3">
         <div className="flex items-center justify-between gap-2">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant/60">Stade</span>
+          <span className="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant/60">
+            Stade
+          </span>
           {typeof index === "number" && (
-            <span className="text-[10px] font-mono text-on-surface-variant/50">#{index}</span>
+            <span className="text-[10px] font-mono text-on-surface-variant/50">
+              #{index}
+            </span>
           )}
         </div>
         <h3 className="line-clamp-1 text-sm font-bold leading-tight text-on-surface transition-colors group-hover:text-primary">
           {title}
         </h3>
-        <p className="mt-0.5 line-clamp-1 font-mono text-[10px] text-on-surface-variant/50">{code}</p>
+        <p className="mt-0.5 line-clamp-1 font-mono text-[10px] text-on-surface-variant/50">
+          {code}
+        </p>
       </div>
     </Link>
   );

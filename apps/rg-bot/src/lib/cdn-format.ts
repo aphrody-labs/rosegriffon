@@ -120,13 +120,19 @@ function hoteDe(base: string): string {
  * alors que l'asset existe (vérifié : `/dx11/menu/220_img/stadium/
  * img_room_b10g001.png?w=800&format=webp` → 200, 112 042 octets).
  */
-export function normaliserCheminAsset(saisie: string, baseCdn: string): ResolutionAsset {
+export function normaliserCheminAsset(
+  saisie: string,
+  baseCdn: string,
+): ResolutionAsset {
   const brut = (saisie ?? "").trim();
   if (brut.length === 0) {
     return { ok: false, raison: "Chemin vide." };
   }
   if (brut.length > 300) {
-    return { ok: false, raison: "Chemin trop long (300 caractères au maximum)." };
+    return {
+      ok: false,
+      raison: "Chemin trop long (300 caractères au maximum).",
+    };
   }
   if (/\s/.test(brut)) {
     return { ok: false, raison: "Un chemin d'asset ne contient pas d'espace." };
@@ -162,12 +168,12 @@ export function normaliserCheminAsset(saisie: string, baseCdn: string): Resoluti
   try {
     segments = chemin
       .split("/")
-      .filter(s => s.length > 0)
+      .filter((s) => s.length > 0)
       .map(decodeSegment);
   } catch {
     return { ok: false, raison: "Chemin illisible (encodage invalide)." };
   }
-  if (segments.some(s => s === "." || s === "..")) {
+  if (segments.some((s) => s === "." || s === "..")) {
     return { ok: false, raison: "Chemin invalide : `.` et `..` sont refusés." };
   }
   if (segments.length === 0) {
@@ -245,7 +251,9 @@ function decodeSegment(segment: string): string {
  * fait déjà ce rapprochement, on le fait AVANT pour que l'URL affichée à un
  * membre soit celle qui sera réellement servie.
  */
-export function largeurAutorisee(brut: number | null | undefined): LargeurVariante {
+export function largeurAutorisee(
+  brut: number | null | undefined,
+): LargeurVariante {
   if (typeof brut !== "number" || !Number.isFinite(brut)) {
     return LARGEUR_VIGNETTE;
   }
@@ -267,7 +275,11 @@ export function urlAsset(baseCdn: string, chemin: string): string {
 }
 
 /** URL de la variante WebP redimensionnée. */
-export function urlVariante(baseCdn: string, chemin: string, largeur: LargeurVariante): string {
+export function urlVariante(
+  baseCdn: string,
+  chemin: string,
+  largeur: LargeurVariante,
+): string {
   return `${urlAsset(baseCdn, chemin)}?w=${largeur}&format=webp`;
 }
 
@@ -302,7 +314,9 @@ export interface CodeModele {
  * 692 132 octets). La validation ici ne promet donc que la FORME, jamais
  * l'existence — c'est l'appel réel qui tranche.
  */
-export function normaliserCodeModele(saisie: string): CodeModele | { readonly raison: string } {
+export function normaliserCodeModele(
+  saisie: string,
+): CodeModele | { readonly raison: string } {
   let code = (saisie ?? "").trim().toLowerCase();
   code = code.replace(/^.*\/model-full\//, "").replace(/^\/+/, "");
   code = code.replace(/\.glb$/, "");
@@ -329,7 +343,8 @@ export function normaliserCodeModele(saisie: string): CodeModele | { readonly ra
 
   if (famille === null) {
     return {
-      raison: "Seuls les codes `c…` (personnages), `ka…` (armures) et `k…` (keshins) sont assemblés en 3D.",
+      raison:
+        "Seuls les codes `c…` (personnages), `ka…` (armures) et `k…` (keshins) sont assemblés en 3D.",
     };
   }
 
@@ -338,7 +353,11 @@ export function normaliserCodeModele(saisie: string): CodeModele | { readonly ra
 
 /** Libellé français d'une famille de modèle. */
 export function libelleFamille(famille: FamilleModele): string {
-  return famille === "armure" ? "Armure" : famille === "keshin" ? "Keshin" : "Personnage";
+  return famille === "armure"
+    ? "Armure"
+    : famille === "keshin"
+      ? "Keshin"
+      : "Personnage";
 }
 
 /** URL du modèle 3D complet (corps + visage + uniforme, assemblé en direct). */
@@ -370,13 +389,20 @@ export const LIMITE_PIECE_JOINTE_OCTETS = 8 * 1024 * 1024;
  */
 export function choisirTextureModele(
   code: string,
-  fichiers: ReadonlyArray<{ path?: string | null; ext?: string | null; name?: string | null }>,
+  fichiers: ReadonlyArray<{
+    path?: string | null;
+    ext?: string | null;
+    name?: string | null;
+  }>,
 ): string | null {
   const candidats = fichiers
     .filter(
-      f => typeof f.path === "string" && f.path.startsWith("data/dx11/") && (f.ext ?? "").toLowerCase() === "g4tx",
+      (f) =>
+        typeof f.path === "string" &&
+        f.path.startsWith("data/dx11/") &&
+        (f.ext ?? "").toLowerCase() === "g4tx",
     )
-    .map(f => f.path as string);
+    .map((f) => f.path as string);
 
   if (candidats.length === 0) {
     return null;
@@ -390,7 +416,9 @@ export function choisirTextureModele(
   });
 
   const choisi = trie[0];
-  return typeof choisi === "string" ? `/${choisi.slice("data/".length).replace(/\.g4tx$/i, ".png")}` : null;
+  return typeof choisi === "string"
+    ? `/${choisi.slice("data/".length).replace(/\.g4tx$/i, ".png")}`
+    : null;
 }
 
 // ─── Galerie ────────────────────────────────────────────────────────────────
@@ -422,11 +450,13 @@ export const CATEGORIES_GALERIE = [
 ] as const;
 
 /** Libellé français d'une catégorie, ou la valeur brute si elle est inconnue. */
-export function libelleCategorieGalerie(valeur: string | null | undefined): string {
+export function libelleCategorieGalerie(
+  valeur: string | null | undefined,
+): string {
   if (!valeur) {
     return "Toutes";
   }
-  return CATEGORIES_GALERIE.find(c => c.valeur === valeur)?.libelle ?? valeur;
+  return CATEGORIES_GALERIE.find((c) => c.valeur === valeur)?.libelle ?? valeur;
 }
 
 /** Nombre d'illustrations par page de `/cdn galerie` (1 entête + 4 visuels ≤ 10 embeds). */
@@ -443,7 +473,11 @@ export function nombreDePages(total: number, parPage: number): number {
  * Sans plafond, une page hors bornes renvoie une liste vide et le membre conclut
  * que la catégorie est vide alors qu'il a simplement dépassé la fin.
  */
-export function bornerPage(page: number, total: number, parPage: number): number {
+export function bornerPage(
+  page: number,
+  total: number,
+  parPage: number,
+): number {
   return bornerPageUi(page, total, parPage);
 }
 
@@ -468,7 +502,11 @@ export interface EtatGalerie {
  * les boutons plutôt que d'envoyer un composant qui sera refusé.
  */
 export function encoderEtatGalerie(etat: EtatGalerie): string | null {
-  return encoderEtat(PREFIXE_BOUTON_GALERIE, [Math.max(1, Math.trunc(etat.page)), etat.categorie, etat.recherche]);
+  return encoderEtat(PREFIXE_BOUTON_GALERIE, [
+    Math.max(1, Math.trunc(etat.page)),
+    etat.categorie,
+    etat.recherche,
+  ]);
 }
 
 /** Décode un `customId` produit par `encoderEtatGalerie`. `null` si ce n'en est pas un. */
@@ -500,13 +538,19 @@ export function formaterOctets(octets: number | null | undefined): string {
 
 /** `true` si le type MIME annoncé est bien celui d'une image. */
 export function estTypeImage(typeMime: string | null | undefined): boolean {
-  return typeof typeMime === "string" && typeMime.trim().toLowerCase().startsWith("image/");
+  return (
+    typeof typeMime === "string" &&
+    typeMime.trim().toLowerCase().startsWith("image/")
+  );
 }
 
 /** `true` si le type MIME annoncé est bien celui d'un modèle glTF binaire. */
 export function estTypeModele(typeMime: string | null | undefined): boolean {
   const propre = (typeMime ?? "").trim().toLowerCase();
-  return propre.startsWith("model/gltf-binary") || propre.startsWith("model/gltf+json");
+  return (
+    propre.startsWith("model/gltf-binary") ||
+    propre.startsWith("model/gltf+json")
+  );
 }
 
 /** Santé de `rg-cdn.service` telle qu'il la renvoie sur `/health`. */
@@ -524,7 +568,9 @@ export function decrireSanteCdn(charge: SanteCdn | null | undefined): string[] {
   if (!charge) {
     return ["Sonde muette."];
   }
-  const lignes = [`Stockage des téléversements : \`${charge.storage ?? "inconnu"}\``];
+  const lignes = [
+    `Stockage des téléversements : \`${charge.storage ?? "inconnu"}\``,
+  ];
   lignes.push(
     charge.assetsManifest
       ? `Manifeste d'assets : ${formaterOctets(charge.assetsManifest.bytes ?? 0)}`
@@ -553,7 +599,9 @@ export function libelleCache(entete: string | null | undefined): string {
  * Convertit un chemin de l'index CPK en chemin CDN, ou `null` s'il n'est pas
  * servi. Sert l'autocomplétion : elle ne propose que ce qui s'affichera.
  */
-export function cheminCdnDepuisCpk(pathCpk: string | null | undefined): string | null {
+export function cheminCdnDepuisCpk(
+  pathCpk: string | null | undefined,
+): string | null {
   if (typeof pathCpk !== "string" || !pathCpk.startsWith("data/dx11/")) {
     return null;
   }

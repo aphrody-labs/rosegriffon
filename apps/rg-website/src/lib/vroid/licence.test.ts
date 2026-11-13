@@ -12,17 +12,29 @@
  * `/api/staff_picks` le 2026-09-02 (tout à `disallow`, crédit `necessary`).
  */
 import { describe, expect, test } from "bun:test";
-import { conditionsDuModele, creditRequis, estChargeable, nomModele } from "./licence";
+import {
+  conditionsDuModele,
+  creditRequis,
+  estChargeable,
+  nomModele,
+} from "./licence";
 import type { LicenceVrm0, MetaVrm1, ModeleVroid } from "./types";
 
 /** Assemble un modèle minimal portant la licence ou les métadonnées voulues. */
 function modele(parties: Partial<ModeleVroid>): ModeleVroid {
-  return { id: "1", tags: [], character_model_booth_items: [], ...parties } as unknown as ModeleVroid;
+  return {
+    id: "1",
+    tags: [],
+    character_model_booth_items: [],
+    ...parties,
+  } as unknown as ModeleVroid;
 }
 
 /** Retrouve le verdict d'une condition par sa clé. */
 function verdict(cible: ModeleVroid, cle: string): string | undefined {
-  return conditionsDuModele(cible).conditions.find(condition => condition.cle === cle)?.verdict;
+  return conditionsDuModele(cible).conditions.find(
+    (condition) => condition.cle === cle,
+  )?.verdict;
 }
 
 const LICENCE_MESUREE: LicenceVrm0 = {
@@ -56,21 +68,34 @@ describe("conditions VRM 0.0", () => {
 
   test("`default` vaut « non renseigné », jamais « autorisé »", () => {
     const flou = modele({
-      license: { ...LICENCE_MESUREE, violent_expression: "default", characterization_allowed_user: "default" },
+      license: {
+        ...LICENCE_MESUREE,
+        violent_expression: "default",
+        characterization_allowed_user: "default",
+      },
     });
     expect(verdict(flou, "violence")).toBe("inconnu");
     expect(verdict(flou, "avatar")).toBe("inconnu");
   });
 
   test("distingue l'usage personnel non lucratif de l'interdiction", () => {
-    const lucratif = modele({ license: { ...LICENCE_MESUREE, personal_commercial_use: "profit" } });
-    const nonLucratif = modele({ license: { ...LICENCE_MESUREE, personal_commercial_use: "nonprofit" } });
+    const lucratif = modele({
+      license: { ...LICENCE_MESUREE, personal_commercial_use: "profit" },
+    });
+    const nonLucratif = modele({
+      license: { ...LICENCE_MESUREE, personal_commercial_use: "nonprofit" },
+    });
     expect(verdict(lucratif, "commercial-perso")).toBe("autorise");
     expect(verdict(nonLucratif, "commercial-perso")).toBe("non-lucratif");
   });
 
   test("`everyone` est la seule valeur qui autorise l'usage en avatar", () => {
-    const ouvert = modele({ license: { ...LICENCE_MESUREE, characterization_allowed_user: "everyone" } });
+    const ouvert = modele({
+      license: {
+        ...LICENCE_MESUREE,
+        characterization_allowed_user: "everyone",
+      },
+    });
     expect(verdict(ouvert, "avatar")).toBe("autorise");
   });
 });
@@ -88,7 +113,9 @@ describe("conditions VRM 1.0", () => {
     modification: "allowModification",
   };
   const sujet = modele({
-    latest_character_model_version: { vrm_meta: META } as ModeleVroid["latest_character_model_version"],
+    latest_character_model_version: {
+      vrm_meta: META,
+    } as ModeleVroid["latest_character_model_version"],
   });
 
   test("prime sur `license` quand `vrm_meta` est présent", () => {
@@ -168,9 +195,21 @@ describe("cas sans condition connue", () => {
 
 describe("creditRequis", () => {
   test("n'est faux que si l'auteur l'a explicitement dispensé", () => {
-    expect(creditRequis(modele({ license: { ...LICENCE_MESUREE, credit: "unnecessary" } }))).toBe(false);
-    expect(creditRequis(modele({ license: { ...LICENCE_MESUREE, credit: "necessary" } }))).toBe(true);
-    expect(creditRequis(modele({ license: { ...LICENCE_MESUREE, credit: "default" } }))).toBe(true);
+    expect(
+      creditRequis(
+        modele({ license: { ...LICENCE_MESUREE, credit: "unnecessary" } }),
+      ),
+    ).toBe(false);
+    expect(
+      creditRequis(
+        modele({ license: { ...LICENCE_MESUREE, credit: "necessary" } }),
+      ),
+    ).toBe(true);
+    expect(
+      creditRequis(
+        modele({ license: { ...LICENCE_MESUREE, credit: "default" } }),
+      ),
+    ).toBe(true);
   });
 });
 
@@ -185,9 +224,14 @@ describe("estChargeable", () => {
 describe("nomModele", () => {
   test("retombe sur le nom du personnage puis sur un libellé neutre", () => {
     expect(nomModele(modele({ name: "Aphrodi" }))).toBe("Aphrodi");
-    expect(nomModele(modele({ name: null, character: { name: "Personnage" } as ModeleVroid["character"] }))).toBe(
-      "Personnage",
-    );
+    expect(
+      nomModele(
+        modele({
+          name: null,
+          character: { name: "Personnage" } as ModeleVroid["character"],
+        }),
+      ),
+    ).toBe("Personnage");
     expect(nomModele(modele({ name: "   " }))).toBe("Modèle sans titre");
   });
 });

@@ -30,7 +30,11 @@
 
 import { createBunSql } from "@rosegriffon/db/bun-sql";
 import type { SQL } from "bun";
-import { fichierMedia, televerserObjet, urlPubliqueObjet } from "../../lib/storage-assets.js";
+import {
+  fichierMedia,
+  televerserObjet,
+  urlPubliqueObjet,
+} from "../../lib/storage-assets.js";
 import type { MediaItem } from "./tweet-row";
 
 const BUCKET = "tweets";
@@ -41,7 +45,8 @@ const BUCKET = "tweets";
  * ce qui évite tout préflight CORS et permet à next/image de traiter l'URL comme
  * locale une fois relativisée côté front.
  */
-const ORIGINE_PUBLIQUE = Bun.env.RG_STORAGE_PUBLIC_ORIGIN ?? "https://rosegriffon.fr";
+const ORIGINE_PUBLIQUE =
+  Bun.env.RG_STORAGE_PUBLIC_ORIGIN ?? "https://rosegriffon.fr";
 
 /**
  * Types MIME acceptés par le bucket `tweets`. On restreint volontairement aux
@@ -121,10 +126,20 @@ async function objetDejaPresent(
   const dossierDisque = fichierMedia(BUCKET, tweetId);
   if (dossierDisque) {
     const glob = new Bun.Glob(`${tweetId}_${index}.*`);
-    for await (const nom of glob.scan({ cwd: dossierDisque, onlyFiles: true, throwErrorOnBrokenSymlink: false })) {
+    for await (const nom of glob.scan({
+      cwd: dossierDisque,
+      onlyFiles: true,
+      throwErrorOnBrokenSymlink: false,
+    })) {
       const ext = nom.split(".").pop() ?? "jpg";
-      const mime = Object.entries(MIMES_IMAGE).find(([, e]) => e === ext)?.[0] ?? "image/jpeg";
-      return { chemin: `${tweetId}/${nom}`, octets: Bun.file(`${dossierDisque}/${nom}`).size, mime };
+      const mime =
+        Object.entries(MIMES_IMAGE).find(([, e]) => e === ext)?.[0] ??
+        "image/jpeg";
+      return {
+        chemin: `${tweetId}/${nom}`,
+        octets: Bun.file(`${dossierDisque}/${nom}`).size,
+        mime,
+      };
     }
     return null;
   }
@@ -136,12 +151,18 @@ async function objetDejaPresent(
     name: string;
     metadata: { size?: number; mimetype?: string } | null;
   }[];
-  const trouve = lignes.find(ligne => motif.test(ligne.name));
+  const trouve = lignes.find((ligne) => motif.test(ligne.name));
   if (!trouve) return null;
   const ext = trouve.name.split(".").pop() ?? "jpg";
   const mime =
-    trouve.metadata?.mimetype ?? Object.entries(MIMES_IMAGE).find(([, e]) => e === ext)?.[0] ?? "image/jpeg";
-  return { chemin: trouve.name, octets: Number(trouve.metadata?.size ?? 0), mime };
+    trouve.metadata?.mimetype ??
+    Object.entries(MIMES_IMAGE).find(([, e]) => e === ext)?.[0] ??
+    "image/jpeg";
+  return {
+    chemin: trouve.name,
+    octets: Number(trouve.metadata?.size ?? 0),
+    mime,
+  };
 }
 
 /**
@@ -157,7 +178,8 @@ export async function rehebergerImage(
   // 1) Déjà là ? On ne retélécharge pas.
   try {
     const existant = await objetDejaPresent(tweetId, index);
-    if (existant) return { ...existant, url: urlPublique(existant.chemin), deja: true };
+    if (existant)
+      return { ...existant, url: urlPublique(existant.chemin), deja: true };
   } catch {
     return null;
   }
@@ -170,7 +192,10 @@ export async function rehebergerImage(
     });
     if (!reponse.ok) return null;
 
-    const mime = (reponse.headers.get("content-type") ?? "").split(";")[0]!.trim().toLowerCase();
+    const mime = (reponse.headers.get("content-type") ?? "")
+      .split(";")[0]!
+      .trim()
+      .toLowerCase();
     const ext = MIMES_IMAGE[mime];
     // Le bucket refuse tout autre type : inutile d'écrire un fichier qui ne
     // serait jamais servi.
@@ -183,7 +208,13 @@ export async function rehebergerImage(
     const envoi = await televerserObjet(BUCKET, chemin, contenu, mime);
     if (!envoi.ok) return null;
 
-    return { chemin, url: urlPublique(chemin), octets: contenu.byteLength, mime, deja: false };
+    return {
+      chemin,
+      url: urlPublique(chemin),
+      octets: contenu.byteLength,
+      mime,
+      deja: false,
+    };
   } catch {
     return null;
   }
@@ -218,7 +249,9 @@ export async function rehebergerMediasTweet(
     // Test sur le CHEMIN, pas sur l'hôte : une URL déjà réécrite vers
     // rosegriffon.fr, azalee.rosegriffon.fr ou storage.rosegriffon.fr est
     // reconnue de la même façon (même convention que process-tweets.ts).
-    const dejaHeberge = (item.url ?? "").includes(`storage/v1/object/public/${BUCKET}`);
+    const dejaHeberge = (item.url ?? "").includes(
+      `storage/v1/object/public/${BUCKET}`,
+    );
     if (dejaHeberge) {
       sortie.push(item);
       continue;

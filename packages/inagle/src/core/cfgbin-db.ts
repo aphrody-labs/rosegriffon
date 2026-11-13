@@ -34,13 +34,24 @@ import type { Database } from "bun:sqlite";
 import { createRequire } from "node:module";
 
 import type { Database as SqlDatabase } from "@rosegriffon/db/schema";
-import { configuredDataSource, localMirrorPath, selectDataSource } from "./data-source.js";
+import {
+  configuredDataSource,
+  localMirrorPath,
+  selectDataSource,
+} from "./data-source.js";
 import { decodeProjectionJson } from "../sql/projection-json.js";
 
 const require = createRequire(import.meta.url);
-const DB = typeof Bun !== "undefined" ? (require("bun:sqlite").Database as typeof Database) : null;
+const DB =
+  typeof Bun !== "undefined"
+    ? (require("bun:sqlite").Database as typeof Database)
+    : null;
 
-const DEFAULT_DB_PATH = join(process.env.IECODE_ROOT || process.cwd(), "var", "cfgbin.sqlite");
+const DEFAULT_DB_PATH = join(
+  process.env.IECODE_ROOT || process.cwd(),
+  "var",
+  "cfgbin.sqlite",
+);
 
 let _db: Database | null = null;
 let _enabled: boolean | null = null;
@@ -88,7 +99,10 @@ async function postgresDb() {
   return createInagleSql<SqlDatabase>();
 }
 
-export async function cfgbinPostgresFindLatest(category: string, prefix: string): Promise<string | null> {
+export async function cfgbinPostgresFindLatest(
+  category: string,
+  prefix: string,
+): Promise<string | null> {
   if (!cfgbinPostgresEnabled()) return null;
   try {
     const row = await (
@@ -96,7 +110,11 @@ export async function cfgbinPostgresFindLatest(category: string, prefix: string)
     )
       .selectFrom("inagle_cfgbin")
       .select("path")
-      .where("path", "like", `data/common/gamedata/${category}/${prefix}%cfg.bin`)
+      .where(
+        "path",
+        "like",
+        `data/common/gamedata/${category}/${prefix}%cfg.bin`,
+      )
       .where("parsed", "=", 1)
       .orderBy("path", "desc")
       .limit(1)
@@ -118,15 +136,24 @@ export async function cfgbinPostgresLoadByPath(path: string): Promise<unknown> {
     .where("path", "=", path)
     .executeTakeFirst();
   if (!row) throw new Error(`cfgbin-postgres: row not found '${path}'`);
-  if (row.data == null) throw new Error(`cfgbin-postgres: parse failed '${path}': ${row.error ?? "?"}`);
+  if (row.data == null)
+    throw new Error(
+      `cfgbin-postgres: parse failed '${path}': ${row.error ?? "?"}`,
+    );
   return row.data;
 }
 
-export function cfgbinPostgresLoad(category: string, filename: string): Promise<unknown> {
+export function cfgbinPostgresLoad(
+  category: string,
+  filename: string,
+): Promise<unknown> {
   return cfgbinPostgresLoadByPath(cfgbinDbPathFor(category, filename));
 }
 
-export function cfgbinPostgresLoadText(locale: string, filename: string): Promise<unknown> {
+export function cfgbinPostgresLoadText(
+  locale: string,
+  filename: string,
+): Promise<unknown> {
   return cfgbinPostgresLoadByPath(cfgbinDbTextPathFor(locale, filename));
 }
 
@@ -171,7 +198,9 @@ function getDb(): Database | null {
   if (!table) {
     _db.close();
     _db = null;
-    throw new Error("cfgbin-db: the selected SQLite source has no cfg.bin projection");
+    throw new Error(
+      "cfgbin-db: the selected SQLite source has no cfg.bin projection",
+    );
   }
   _cfgbinTable = table.name;
   _jsonColumn = table.name === "inagle_cfgbin" ? "data" : "json";
@@ -194,7 +223,10 @@ function findStmt(db: Database) {
 
 function loadStmt(db: Database) {
   if (!_loadStmt) {
-    _loadStmt = db.prepare<{ json: string | null; error: string | null }, [string]>(
+    _loadStmt = db.prepare<
+      { json: string | null; error: string | null },
+      [string]
+    >(
       `SELECT ${_jsonColumn} AS json, error FROM ${_cfgbinTable} WHERE path = ?`,
     );
   }
@@ -215,7 +247,9 @@ function listStmt(db: Database) {
  * Strips `.json` since the DB stores the original `.cfg.bin` paths.
  */
 export function cfgbinDbPathFor(category: string, filename: string): string {
-  const stripped = filename.endsWith(".json") ? filename.slice(0, -".json".length) : filename;
+  const stripped = filename.endsWith(".json")
+    ? filename.slice(0, -".json".length)
+    : filename;
   return `data/common/gamedata/${category}/${stripped}`;
 }
 
@@ -225,7 +259,9 @@ export function cfgbinDbPathFor(category: string, filename: string): string {
  *   DB:     data/common/text/<locale>/chara_text.cfg.bin
  */
 export function cfgbinDbTextPathFor(locale: string, filename: string): string {
-  const stripped = filename.endsWith(".json") ? filename.slice(0, -".json".length) : filename;
+  const stripped = filename.endsWith(".json")
+    ? filename.slice(0, -".json".length)
+    : filename;
   return `data/common/text/${locale}/${stripped}`;
 }
 
@@ -236,7 +272,10 @@ export function cfgbinDbTextPathFor(locale: string, filename: string): string {
  *
  * Returns null if DB unavailable or no match.
  */
-export function cfgbinDbFindLatest(category: string, prefix: string): string | null {
+export function cfgbinDbFindLatest(
+  category: string,
+  prefix: string,
+): string | null {
   const db = getDb();
   if (!db) return null;
   // Pattern : data/common/gamedata/<category>/<prefix>%cfg.bin
@@ -280,7 +319,9 @@ export function cfgbinDbLoadText(locale: string, filename: string): unknown {
   const db = getDb();
   if (!db) throw new Error("cfgbin-db: DB unavailable");
   if (_cfgbinTable === "cfgbin" && process.env.IEVR_CFGBIN_DB_TEXT !== "1") {
-    throw new Error("cfgbin-db: text loading disabled (parser bug). Set IEVR_CFGBIN_DB_TEXT=1 to opt in.");
+    throw new Error(
+      "cfgbin-db: text loading disabled (parser bug). Set IEVR_CFGBIN_DB_TEXT=1 to opt in.",
+    );
   }
   const path = cfgbinDbTextPathFor(locale, filename);
   const row = loadStmt(db).get(path) as {
@@ -307,7 +348,9 @@ export function cfgbinDbLoadByPath(internalPath: string): unknown {
   } | null;
   if (!row) throw new Error(`cfgbin-db: row not found '${internalPath}'`);
   if (row.json === null) {
-    throw new Error(`cfgbin-db: parse failed '${internalPath}': ${row.error ?? "?"}`);
+    throw new Error(
+      `cfgbin-db: parse failed '${internalPath}': ${row.error ?? "?"}`,
+    );
   }
   return decodeProjectionJson(row.json);
 }
@@ -320,7 +363,7 @@ export function cfgbinDbList(pathPattern: string): string[] {
   const db = getDb();
   if (!db) return [];
   const rows = listStmt(db).all(pathPattern) as { path: string }[];
-  return rows.map(r => r.path);
+  return rows.map((r) => r.path);
 }
 
 /**

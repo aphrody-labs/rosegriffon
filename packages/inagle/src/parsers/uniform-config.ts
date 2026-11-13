@@ -84,7 +84,8 @@ function parseContent(content: any) {
   const exUniforms: any[] = [];
   const charaExUniforms: any[] = [];
 
-  if (!content?.lists) return { models, uniforms, exModels, exUniforms, charaExUniforms };
+  if (!content?.lists)
+    return { models, uniforms, exModels, exUniforms, charaExUniforms };
 
   for (const list of content.lists) {
     if (list.name === "m_UniformModelInfoList") {
@@ -94,20 +95,34 @@ function parseContent(content: any) {
           uniformKeeperModelIdCrc: val.uniformKeeperModelIdCrc,
           uniformDirectorModelIdCrc: val.uniformDirectorModelIdCrc,
           uniformManagerModelIdCrc: val.uniformManagerModelIdCrc,
-          uniformFielderShoulderBaringModelIdCrc: val.uniformFielderShoulderBaringModelIdCrc,
-          uniformKeeperShoulderBaringModelIdCrc: val.uniformKeeperShoulderBaringModelIdCrc,
-          uniformFielderShortSleeveRollUpArmModelIdCrc: val.uniformFielderShortSleeveRollUpArmModelIdCrc,
-          uniformKeeperShortSleeveRollUpArmModelIdCrc: val.uniformKeeperShortSleeveRollUpArmModelIdCrc,
-          uniformFielderShoulderBaringPatternedModelIdCrc: val.uniformFielderShoulderBaringPatternedModelIdCrc,
-          uniformKeeperShoulderBaringPatternedModelIdCrc: val.uniformKeeperShoulderBaringPatternedModelIdCrc,
-          uniformFielderHalfSleeveModelIdCrc: val.uniformFielderHalfSleeveModelIdCrc,
-          uniformKeeperHalfSleeveModelIdCrc: val.uniformKeeperHalfSleeveModelIdCrc,
-          uniformFielderLongSleeveRollUpArmModelIdCrc: val.uniformFielderLongSleeveRollUpArmModelIdCrc,
-          uniformKeeperLongSleeveRollUpArmModelIdCrc: val.uniformKeeperLongSleeveRollUpArmModelIdCrc,
-          uniformFielderLongSleeveRollUpSleeveModelIdCrc: val.uniformFielderLongSleeveRollUpSleeveModelIdCrc,
-          uniformKeeperLongSleeveRollUpSleeveModelIdCrc: val.uniformKeeperLongSleeveRollUpSleeveModelIdCrc,
-          uniformFielderNavelBaringModelIdCrc: val.uniformFielderNavelBaringModelIdCrc,
-          uniformKeeperNavelBaringModelIdCrc: val.uniformKeeperNavelBaringModelIdCrc,
+          uniformFielderShoulderBaringModelIdCrc:
+            val.uniformFielderShoulderBaringModelIdCrc,
+          uniformKeeperShoulderBaringModelIdCrc:
+            val.uniformKeeperShoulderBaringModelIdCrc,
+          uniformFielderShortSleeveRollUpArmModelIdCrc:
+            val.uniformFielderShortSleeveRollUpArmModelIdCrc,
+          uniformKeeperShortSleeveRollUpArmModelIdCrc:
+            val.uniformKeeperShortSleeveRollUpArmModelIdCrc,
+          uniformFielderShoulderBaringPatternedModelIdCrc:
+            val.uniformFielderShoulderBaringPatternedModelIdCrc,
+          uniformKeeperShoulderBaringPatternedModelIdCrc:
+            val.uniformKeeperShoulderBaringPatternedModelIdCrc,
+          uniformFielderHalfSleeveModelIdCrc:
+            val.uniformFielderHalfSleeveModelIdCrc,
+          uniformKeeperHalfSleeveModelIdCrc:
+            val.uniformKeeperHalfSleeveModelIdCrc,
+          uniformFielderLongSleeveRollUpArmModelIdCrc:
+            val.uniformFielderLongSleeveRollUpArmModelIdCrc,
+          uniformKeeperLongSleeveRollUpArmModelIdCrc:
+            val.uniformKeeperLongSleeveRollUpArmModelIdCrc,
+          uniformFielderLongSleeveRollUpSleeveModelIdCrc:
+            val.uniformFielderLongSleeveRollUpSleeveModelIdCrc,
+          uniformKeeperLongSleeveRollUpSleeveModelIdCrc:
+            val.uniformKeeperLongSleeveRollUpSleeveModelIdCrc,
+          uniformFielderNavelBaringModelIdCrc:
+            val.uniformFielderNavelBaringModelIdCrc,
+          uniformKeeperNavelBaringModelIdCrc:
+            val.uniformKeeperNavelBaringModelIdCrc,
           shoesFielderModelIdCrc: val.shoesFielderModelIdCrc,
           shoesKeeperModelIdCrc: val.shoesKeeperModelIdCrc,
           shoesDirectorModelIdCrc: val.shoesDirectorModelIdCrc,
@@ -145,7 +160,9 @@ export async function loadUniformConfigAsync(dataPath: string = DATA_ROOT) {
   return content ? parseContent(content) : null;
 }
 
-export async function buildUniformDatabase(dataPath: string = DATA_ROOT): Promise<UniformDatabase> {
+export async function buildUniformDatabase(
+  dataPath: string = DATA_ROOT,
+): Promise<UniformDatabase> {
   const result = await loadUniformConfigAsync(dataPath);
   const models = result?.models || [];
   const uniforms = result?.uniforms || [];

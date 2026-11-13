@@ -13,7 +13,11 @@ import {
   SALON_TO_DEFAUT,
   VOCAL_AIDE_RANKED_DEFAUT,
 } from "./aide-ranked";
-import { EvenementsServeursAchillea, planificateurReleve, PlanificateurReleve } from "./serveurs";
+import {
+  EvenementsServeursAchillea,
+  planificateurReleve,
+  PlanificateurReleve,
+} from "./serveurs";
 
 afterEach(() => {
   planificateurReleve.annuler();
@@ -37,7 +41,10 @@ describe("relevé des guildes", () => {
   });
 
   test("un échec ou une exception du relevé ne lève jamais", async () => {
-    const enEchec = new PlanificateurReleve(async () => ({ success: false, error: "bail pris" }), 1);
+    const enEchec = new PlanificateurReleve(
+      async () => ({ success: false, error: "bail pris" }),
+      1,
+    );
     await enEchec.executer();
     const quiLeve = new PlanificateurReleve(async () => {
       throw new Error("boum");
@@ -58,8 +65,16 @@ describe("relevé des guildes", () => {
 
 describe("vocal d'aide ranked", () => {
   test("salons : environnement, sinon valeurs legacy", () => {
-    expect(salonsAideRanked({})).toEqual({ vocal: VOCAL_AIDE_RANKED_DEFAUT, to: SALON_TO_DEFAUT });
-    expect(salonsAideRanked({ ACHILLEA_HELP_RANKED_VOICE_ID: "123456789012345678", ACHILLEA_TO_CHANNEL_ID: "x" })).toEqual({
+    expect(salonsAideRanked({})).toEqual({
+      vocal: VOCAL_AIDE_RANKED_DEFAUT,
+      to: SALON_TO_DEFAUT,
+    });
+    expect(
+      salonsAideRanked({
+        ACHILLEA_HELP_RANKED_VOICE_ID: "123456789012345678",
+        ACHILLEA_TO_CHANNEL_ID: "x",
+      }),
+    ).toEqual({
       vocal: "123456789012345678",
       to: SALON_TO_DEFAUT,
     });
@@ -86,7 +101,10 @@ describe("vocal d'aide ranked", () => {
       member: { user: { bot } },
       client: {
         channels: {
-          fetch: async () => ({ isSendable: () => true, send: async (m: unknown) => envoyes.push(m) }),
+          fetch: async () => ({
+            isSendable: () => true,
+            send: async (m: unknown) => envoyes.push(m),
+          }),
         },
       },
     };
@@ -94,18 +112,36 @@ describe("vocal d'aide ranked", () => {
 
   test("entrée d'un joueur : alerte dans le salon des TO, mention du seul joueur", async () => {
     const envoyes: unknown[] = [];
-    await new EvenementAideRanked().etatVocal([etat(null, envoyes), etat(VOCAL_AIDE_RANKED_DEFAUT, envoyes)] as never);
+    await new EvenementAideRanked().etatVocal([
+      etat(null, envoyes),
+      etat(VOCAL_AIDE_RANKED_DEFAUT, envoyes),
+    ] as never);
     expect(envoyes).toEqual([
-      { content: messageAlerte("555555555555555555"), allowedMentions: { users: ["555555555555555555"] } },
+      {
+        content: messageAlerte("555555555555555555"),
+        allowedMentions: { users: ["555555555555555555"] },
+      },
     ]);
   });
 
   test("bot, départ ou salon introuvable : aucune alerte", async () => {
     const envoyes: unknown[] = [];
-    await new EvenementAideRanked().etatVocal([etat(null, envoyes), etat(VOCAL_AIDE_RANKED_DEFAUT, envoyes, true)] as never);
-    await new EvenementAideRanked().etatVocal([etat(VOCAL_AIDE_RANKED_DEFAUT, envoyes), etat(null, envoyes)] as never);
-    const sansSalon = { ...etat(VOCAL_AIDE_RANKED_DEFAUT, envoyes), client: { channels: { fetch: async () => null } } };
-    await new EvenementAideRanked().etatVocal([etat(null, envoyes), sansSalon] as never);
+    await new EvenementAideRanked().etatVocal([
+      etat(null, envoyes),
+      etat(VOCAL_AIDE_RANKED_DEFAUT, envoyes, true),
+    ] as never);
+    await new EvenementAideRanked().etatVocal([
+      etat(VOCAL_AIDE_RANKED_DEFAUT, envoyes),
+      etat(null, envoyes),
+    ] as never);
+    const sansSalon = {
+      ...etat(VOCAL_AIDE_RANKED_DEFAUT, envoyes),
+      client: { channels: { fetch: async () => null } },
+    };
+    await new EvenementAideRanked().etatVocal([
+      etat(null, envoyes),
+      sansSalon,
+    ] as never);
     expect(envoyes).toEqual([]);
   });
 });

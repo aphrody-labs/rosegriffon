@@ -112,7 +112,9 @@ export function normaliserDuree(valeur: unknown): DureeSondage | null {
   if (brut.length === 0) {
     return null;
   }
-  const trouve = /^(\d+(?:[.,]\d+)?)\s*(h|heures?|j|jours?|s|semaines?)?$/.exec(brut);
+  const trouve = /^(\d+(?:[.,]\d+)?)\s*(h|heures?|j|jours?|s|semaines?)?$/.exec(
+    brut,
+  );
   if (!trouve) {
     return null;
   }
@@ -123,7 +125,10 @@ export function normaliserDuree(valeur: unknown): DureeSondage | null {
   const unite = trouve[2] ?? "h";
   const facteur = unite.startsWith("j") ? 24 : unite.startsWith("s") ? 168 : 1;
   const heures = Math.round(nombre * facteur);
-  if (heures < LIMITES_SONDAGE.dureeMinHeures || heures > LIMITES_SONDAGE.dureeMaxHeures) {
+  if (
+    heures < LIMITES_SONDAGE.dureeMinHeures ||
+    heures > LIMITES_SONDAGE.dureeMaxHeures
+  ) {
     return null;
   }
   return { heures, libelle: libelleDuree(heures) };
@@ -180,7 +185,11 @@ export function separerEmojiDeTete(brut: string): ChoixSondage {
     const reste = texte.slice(personnalise[0].length).trim();
     if (reste.length > 0) {
       return {
-        emoji: { animated: personnalise[1] === "a", id: personnalise[3], name: personnalise[2] },
+        emoji: {
+          animated: personnalise[1] === "a",
+          id: personnalise[3],
+          name: personnalise[2],
+        },
         emojiTexte: personnalise[0],
         texte: reste,
       };
@@ -194,7 +203,11 @@ export function separerEmojiDeTete(brut: string): ChoixSondage {
     // simplement manqué. En revanche un emoji SEUL reste le libellé — sinon
     // le choix n'aurait plus de texte du tout.
     if (reste.length > 0) {
-      return { emoji: { name: unicode[0] }, emojiTexte: unicode[0], texte: reste };
+      return {
+        emoji: { name: unicode[0] },
+        emojiTexte: unicode[0],
+        texte: reste,
+      };
     }
   }
   return { emoji: null, emojiTexte: null, texte };
@@ -216,8 +229,8 @@ export function decouperChoix(brut: unknown): string[] {
   }
   return brut
     .split(SEPARATEURS_CHOIX)
-    .map(morceau => morceau.trim())
-    .filter(morceau => morceau.length > 0);
+    .map((morceau) => morceau.trim())
+    .filter((morceau) => morceau.length > 0);
 }
 
 // ─── Projet de sondage ──────────────────────────────────────────────────────
@@ -241,7 +254,8 @@ export interface ProjetSondage {
 }
 
 export type ResultatPreparation =
-  { ok: true; projet: ProjetSondage; avertissements: string[] } | { ok: false; erreurs: string[] };
+  | { ok: true; projet: ProjetSondage; avertissements: string[] }
+  | { ok: false; erreurs: string[] };
 
 /**
  * Valide une saisie et rend un projet de sondage.
@@ -255,7 +269,8 @@ export function preparerSondage(saisie: SaisieSondage): ResultatPreparation {
   const erreurs: string[] = [];
   const avertissements: string[] = [];
 
-  const question = typeof saisie.question === "string" ? saisie.question.trim() : "";
+  const question =
+    typeof saisie.question === "string" ? saisie.question.trim() : "";
   if (question.length === 0) {
     erreurs.push("La question est vide.");
   } else if (question.length > LIMITES_SONDAGE.longueurQuestion) {
@@ -276,7 +291,9 @@ export function preparerSondage(saisie: SaisieSondage): ResultatPreparation {
     );
   }
 
-  const choix = bruts.slice(0, LIMITES_SONDAGE.choixMax).map(brut => separerEmojiDeTete(brut));
+  const choix = bruts
+    .slice(0, LIMITES_SONDAGE.choixMax)
+    .map((brut) => separerEmojiDeTete(brut));
   for (const [index, entree] of choix.entries()) {
     if (entree.texte.length === 0) {
       erreurs.push(`Le choix nº ${index + 1} est vide.`);
@@ -293,7 +310,8 @@ export function preparerSondage(saisie: SaisieSondage): ResultatPreparation {
   // Une durée illisible ne fait pas échouer la commande : on retombe sur le
   // défaut de Discord et on le DIT, plutôt que de renvoyer le membre à sa
   // saisie pour un « 3 jrs ».
-  const dureeSaisie = saisie.duree === undefined || saisie.duree === null ? null : saisie.duree;
+  const dureeSaisie =
+    saisie.duree === undefined || saisie.duree === null ? null : saisie.duree;
   let duree = normaliserDuree(dureeSaisie);
   if (dureeSaisie !== null && String(dureeSaisie).trim().length > 0 && !duree) {
     avertissements.push(
@@ -317,12 +335,17 @@ export function preparerSondage(saisie: SaisieSondage): ResultatPreparation {
 }
 
 /** Instant de clôture d'un projet, tel que Discord le calculera. */
-export function clotureDe(projet: Pick<ProjetSondage, "duree">, maintenant = new Date()): Date {
+export function clotureDe(
+  projet: Pick<ProjetSondage, "duree">,
+  maintenant = new Date(),
+): Date {
   return new Date(maintenant.getTime() + projet.duree.heures * 3_600_000);
 }
 
 /** Règle de vote, dite comme sur le site (`libelleChoixAutorises`). */
-export function libelleRegleDeVote(projet: Pick<ProjetSondage, "multiple">): string {
+export function libelleRegleDeVote(
+  projet: Pick<ProjetSondage, "multiple">,
+): string {
   return projet.multiple ? "Choix illimités" : "1 choix par personne";
 }
 
@@ -368,5 +391,7 @@ export function referenceMessage(brut: unknown): ReferenceMessage | null {
   }
   // Flocon nu : Discord les rend sur 17 à 20 chiffres aujourd'hui, la borne
   // large (15–25) laisse la place à leur croissance sans rien casser.
-  return /^\d{15,25}$/.test(valeur) ? { messageId: valeur, salonId: null } : null;
+  return /^\d{15,25}$/.test(valeur)
+    ? { messageId: valeur, salonId: null }
+    : null;
 }

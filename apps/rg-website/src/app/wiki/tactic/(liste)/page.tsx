@@ -41,7 +41,11 @@ export default async function TacticsPage({
     "@context": "https://schema.org",
     "@type": "CollectionPage",
     description: `Base de données des tactiques spéciales dans Inazuma Eleven: Victory Road.`,
-    isPartOf: { "@type": "WebSite", name: "Azalée", url: absoluteUrl(wiki("/")) },
+    isPartOf: {
+      "@type": "WebSite",
+      name: "Azalée",
+      url: absoluteUrl(wiki("/")),
+    },
     mainEntity: {
       "@type": "ItemList",
       itemListElement: tactics.slice(0, 10).map((t: any, i: number) => ({
@@ -59,18 +63,27 @@ export default async function TacticsPage({
 
   return (
     <div className="space-y-6">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionJsonLd) }} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionJsonLd) }}
+      />
 
       {/* Header */}
       <div className="space-y-1">
-        <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-on-surface font-display">Tactiques</h1>
+        <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-on-surface font-display">
+          Tactiques
+        </h1>
         <p className="text-sm text-on-surface-variant">
-          Liste complète des tactiques spéciales dans Inazuma Eleven: Victory Road.
+          Liste complète des tactiques spéciales dans Inazuma Eleven: Victory
+          Road.
         </p>
       </div>
 
       {/* Search */}
-      <WikiSearchToolbar placeholder="Rechercher une tactique..." showFilters={false} />
+      <WikiSearchToolbar
+        placeholder="Rechercher une tactique..."
+        showFilters={false}
+      />
 
       <div className="flex items-center justify-between text-xs font-medium text-on-surface-variant px-1 uppercase tracking-wider">
         <span>{total} tactiques</span>
@@ -95,13 +108,23 @@ export default async function TacticsPage({
         </FadeInStagger>
       ) : (
         <div className="text-center py-16">
-          <SearchX size={48} className="text-on-surface-variant/30 mb-4 block" aria-hidden="true" />
+          <SearchX
+            size={48}
+            className="text-on-surface-variant/30 mb-4 block"
+            aria-hidden="true"
+          />
           <p className="text-on-surface-variant">Aucune tactique trouvée.</p>
         </div>
       )}
 
       {/* Pagination */}
-      {total > ITEMS_PER_PAGE && <WikiPagination currentPage={page} totalItems={total} itemsPerPage={ITEMS_PER_PAGE} />}
+      {total > ITEMS_PER_PAGE && (
+        <WikiPagination
+          currentPage={page}
+          totalItems={total}
+          itemsPerPage={ITEMS_PER_PAGE}
+        />
+      )}
     </div>
   );
 }

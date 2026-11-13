@@ -6,7 +6,12 @@ import { describe, expect, test } from "bun:test";
 
 import { interclanController } from "./index";
 
-const requete = (methode: string, chemin: string, corps?: unknown, entetes: Record<string, string> = {}) =>
+const requete = (
+  methode: string,
+  chemin: string,
+  corps?: unknown,
+  entetes: Record<string, string> = {},
+) =>
   interclanController.handle(
     new Request(`http://api.test/interclans${chemin}`, {
       method: methode,
@@ -19,7 +24,11 @@ describe("écritures sans session : 401", () => {
   const cas: Array<[string, string, unknown]> = [
     ["POST", "", { challengedShortName: "BB", date: "25/10 20:00" }],
     ["POST", "/42/respond", { accept: true }],
-    ["PUT", "/42/lineups/7", { members: [{ userId: "110000000000000000", position: 1 }] }],
+    [
+      "PUT",
+      "/42/lineups/7",
+      { members: [{ userId: "110000000000000000", position: 1 }] },
+    ],
     ["POST", "/42/lineups/7/lock", undefined],
     ["POST", "/42/cancel", undefined],
     ["POST", "/42/start", undefined],
@@ -30,12 +39,16 @@ describe("écritures sans session : 401", () => {
     test(`${methode} /interclans${chemin}`, async () => {
       const reponse = await requete(methode, chemin, corps);
       expect(reponse.status).toBe(401);
-      expect(await reponse.json()).toEqual({ message: "Authentication required" });
+      expect(await reponse.json()).toEqual({
+        message: "Authentication required",
+      });
     });
   }
 
   test("un jeton invalide ne vaut pas une session", async () => {
-    const reponse = await requete("POST", "/42/start", undefined, { authorization: "Bearer faux.jeton.signe" });
+    const reponse = await requete("POST", "/42/start", undefined, {
+      authorization: "Bearer faux.jeton.signe",
+    });
     expect(reponse.status).toBe(401);
   });
 
@@ -51,8 +64,15 @@ describe("route interne d'entretien", () => {
     try {
       const sans = await requete("POST", "/internal/maintenance", {});
       expect(sans.status).toBe(401);
-      expect(await sans.json()).toEqual({ message: "Internal authentication required" });
-      const faux = await requete("POST", "/internal/maintenance", {}, { authorization: "Bearer autre-jeton" });
+      expect(await sans.json()).toEqual({
+        message: "Internal authentication required",
+      });
+      const faux = await requete(
+        "POST",
+        "/internal/maintenance",
+        {},
+        { authorization: "Bearer autre-jeton" },
+      );
       expect(faux.status).toBe(401);
     } finally {
       if (precedent === undefined) delete process.env.API_ADMIN_TOKEN;
@@ -64,7 +84,16 @@ describe("route interne d'entretien", () => {
     const precedent = process.env.API_ADMIN_TOKEN;
     delete process.env.API_ADMIN_TOKEN;
     try {
-      expect((await requete("POST", "/internal/maintenance", {}, { authorization: "Bearer " })).status).toBe(401);
+      expect(
+        (
+          await requete(
+            "POST",
+            "/internal/maintenance",
+            {},
+            { authorization: "Bearer " },
+          )
+        ).status,
+      ).toBe(401);
     } finally {
       if (precedent !== undefined) process.env.API_ADMIN_TOKEN = precedent;
     }
@@ -73,10 +102,24 @@ describe("route interne d'entretien", () => {
 
 describe("validation des entrées", () => {
   test("score hors bornes, position hors 1–5, sans date : refusés avant le service", async () => {
-    expect((await requete("POST", "/matches/100/score", { scoreA: -1, scoreB: 1 })).status).toBeGreaterThanOrEqual(400);
-    expect((await requete("POST", "/matches/100/score", { scoreA: -1, scoreB: 1 })).status).not.toBe(401);
-    expect((await requete("PUT", "/42/lineups/7", { members: [{ userId: "110000000000000000", position: 6 }] })).status).not.toBe(200);
-    expect((await requete("POST", "", { challengedShortName: "BB" })).status).not.toBe(200);
+    expect(
+      (await requete("POST", "/matches/100/score", { scoreA: -1, scoreB: 1 }))
+        .status,
+    ).toBeGreaterThanOrEqual(400);
+    expect(
+      (await requete("POST", "/matches/100/score", { scoreA: -1, scoreB: 1 }))
+        .status,
+    ).not.toBe(401);
+    expect(
+      (
+        await requete("PUT", "/42/lineups/7", {
+          members: [{ userId: "110000000000000000", position: 6 }],
+        })
+      ).status,
+    ).not.toBe(200);
+    expect(
+      (await requete("POST", "", { challengedShortName: "BB" })).status,
+    ).not.toBe(200);
     expect((await requete("POST", "/abc/start")).status).not.toBe(200);
   });
 });

@@ -19,8 +19,10 @@ import {
 import { iecodeDataRoot, webAppPath } from "../../src/core/roots.ts";
 
 const DATA_DIR = iecodeDataRoot();
-const PARAM_EN = process.env.ZUKAN_PARAM_EN || join(DATA_DIR, "zukan/param_en.json");
-const AUDIT_OUT = process.env.AUDIT_OUT || join(DATA_DIR, "zukan-audit-mirror.json");
+const PARAM_EN =
+  process.env.ZUKAN_PARAM_EN || join(DATA_DIR, "zukan/param_en.json");
+const AUDIT_OUT =
+  process.env.AUDIT_OUT || join(DATA_DIR, "zukan-audit-mirror.json");
 
 function mirrorPath(): string {
   const fs = require("node:fs");
@@ -76,7 +78,9 @@ async function main() {
     }
   }
   console.log(`Mirror: ${MIRROR}`);
-  console.log(`Zukan: ${zukanData.length} entries, ${zukanByHash.size} unique hashes`);
+  console.log(
+    `Zukan: ${zukanData.length} entries, ${zukanByHash.size} unique hashes`,
+  );
 
   const db = new Database(MIRROR, { readonly: true });
   const rows = db
@@ -139,7 +143,9 @@ async function main() {
     const dbFirst = dbNameEn.split(/\s+/)[0];
     const dbFirstFr = dbNameFr.split(/\s+/)[0];
     const isMixiMax = dbNameEn.includes("×") || dbNameEn.includes("+");
-    const dbBaseName = isMixiMax ? dbNameEn.split(/[×+]/)[0].trim().split(/\s+/)[0] : null;
+    const dbBaseName = isMixiMax
+      ? dbNameEn.split(/[×+]/)[0].trim().split(/\s+/)[0]
+      : null;
 
     const nameMatch =
       zukanName === dbNameEn ||
@@ -150,9 +156,15 @@ async function main() {
       zukanName.includes(dbFirst) ||
       dbNameEn.includes(zukanFirst);
 
-    const posMismatch = z.position && db.position && normPos(z.position) !== normPos(db.position);
-    const elemMismatch = !isMixiMax && z.element && db.element && normElem(z.element) !== normElem(db.element);
-    const zGender = z.gender === "Male" ? "M" : z.gender === "Female" ? "F" : null;
+    const posMismatch =
+      z.position && db.position && normPos(z.position) !== normPos(db.position);
+    const elemMismatch =
+      !isMixiMax &&
+      z.element &&
+      db.element &&
+      normElem(z.element) !== normElem(db.element);
+    const zGender =
+      z.gender === "Male" ? "M" : z.gender === "Female" ? "F" : null;
     const genderMismatch = zGender && db.gender && zGender !== db.gender;
 
     const isAresHero = db.rarity_label === "Héros" && db.series === "Ares";
@@ -183,24 +195,34 @@ async function main() {
       ];
       const zTotal = zArr.reduce((a, b) => a + b, 0);
       const dTotal = dArr.reduce((a, b) => a + b, 0);
-      if (zTotal > 0 && dTotal > 0) statCorrelation = spearmanCorrelation(zArr, dArr);
+      if (zTotal > 0 && dTotal > 0)
+        statCorrelation = spearmanCorrelation(zArr, dArr);
     }
 
     const reasons: string[] = [];
-    if (!nameMatch) reasons.push(`NAME: zukan="${z.name}" ≠ db="${db.name_en}"`);
-    if (posMismatch) reasons.push(`POS: zukan=${z.position} ≠ db=${db.position}`);
-    if (elemMismatch) reasons.push(`ELEM: zukan=${z.element} ≠ db=${db.element}`);
-    if (genderMismatch) reasons.push(`GENDER: zukan=${z.gender} ≠ db=${db.gender}`);
-    if (eraMismatch) reasons.push(`ERA: zukan=${zSeries}(${zEra}) ≠ db=${db.series}(${dbEra})`);
+    if (!nameMatch)
+      reasons.push(`NAME: zukan="${z.name}" ≠ db="${db.name_en}"`);
+    if (posMismatch)
+      reasons.push(`POS: zukan=${z.position} ≠ db=${db.position}`);
+    if (elemMismatch)
+      reasons.push(`ELEM: zukan=${z.element} ≠ db=${db.element}`);
+    if (genderMismatch)
+      reasons.push(`GENDER: zukan=${z.gender} ≠ db=${db.gender}`);
+    if (eraMismatch)
+      reasons.push(
+        `ERA: zukan=${zSeries}(${zEra}) ≠ db=${db.series}(${dbEra})`,
+      );
     if (statCorrelation !== undefined && statCorrelation < 0.3) {
-      reasons.push(`STATS: correlation=${statCorrelation.toFixed(2)} (very low)`);
+      reasons.push(
+        `STATS: correlation=${statCorrelation.toFixed(2)} (very low)`,
+      );
     }
 
     if (reasons.length > 0) {
       mismatches.push({
-        type: reasons.some(r => r.startsWith("NAME"))
+        type: reasons.some((r) => r.startsWith("NAME"))
           ? "NAME_MISMATCH"
-          : reasons.some(r => r.startsWith("GENDER"))
+          : reasons.some((r) => r.startsWith("GENDER"))
             ? "GENDER_MISMATCH"
             : "ATTR_MISMATCH",
         dbId: db.id,
@@ -230,19 +252,22 @@ async function main() {
   }
   const jsonIssues: AuditIssue[] = [];
   for (const m of mismatches) {
-    const isStatsInverted = m.statCorrelation !== undefined && m.statCorrelation < 0;
+    const isStatsInverted =
+      m.statCorrelation !== undefined && m.statCorrelation < 0;
     const problems: string[] = [];
-    if (isStatsInverted) problems.push(`Stats inversées (corr=${m.statCorrelation!.toFixed(2)})`);
-    if (m.reasons.some(r => r.startsWith("ERA"))) problems.push(`Ère`);
-    if (m.reasons.some(r => r.startsWith("NAME"))) problems.push(`Nom: DB="${m.dbName}" image="${m.zukanName}"`);
-    if (m.reasons.some(r => r.startsWith("POS"))) problems.push(`Position`);
-    if (m.reasons.some(r => r.startsWith("ELEM"))) problems.push(`Élément`);
+    if (isStatsInverted)
+      problems.push(`Stats inversées (corr=${m.statCorrelation!.toFixed(2)})`);
+    if (m.reasons.some((r) => r.startsWith("ERA"))) problems.push(`Ère`);
+    if (m.reasons.some((r) => r.startsWith("NAME")))
+      problems.push(`Nom: DB="${m.dbName}" image="${m.zukanName}"`);
+    if (m.reasons.some((r) => r.startsWith("POS"))) problems.push(`Position`);
+    if (m.reasons.some((r) => r.startsWith("ELEM"))) problems.push(`Élément`);
 
     const category = isStatsInverted
       ? "stats_inverted"
-      : m.reasons.some(r => r.startsWith("ERA"))
+      : m.reasons.some((r) => r.startsWith("ERA"))
         ? "era_mismatch"
-        : m.reasons.some(r => r.startsWith("NAME"))
+        : m.reasons.some((r) => r.startsWith("NAME"))
           ? "name_mismatch"
           : "attribute_mismatch";
     const severity = isStatsInverted ? ("high" as const) : ("medium" as const);
@@ -260,7 +285,8 @@ async function main() {
   const hashToNames = new Map<string, Set<string>>();
   for (const r of rows) {
     if (!r.zukan_hash) continue;
-    if (!hashToNames.has(r.zukan_hash)) hashToNames.set(r.zukan_hash, new Set());
+    if (!hashToNames.has(r.zukan_hash))
+      hashToNames.set(r.zukan_hash, new Set());
     hashToNames.get(r.zukan_hash)!.add(r.name_en || r.name_ja);
   }
   let dupHashGroups = 0;
@@ -268,7 +294,7 @@ async function main() {
     if (names.size <= 1) continue;
     dupHashGroups++;
     jsonIssues.push({
-      code: rows.find(r => r.zukan_hash === hash)?.id || "",
+      code: rows.find((r) => r.zukan_hash === hash)?.id || "",
       hash,
       dbNameEn: [...names].join(" / "),
       severity: "medium",
@@ -277,8 +303,8 @@ async function main() {
     });
   }
 
-  const highCount = jsonIssues.filter(i => i.severity === "high").length;
-  const mediumCount = jsonIssues.filter(i => i.severity === "medium").length;
+  const highCount = jsonIssues.filter((i) => i.severity === "high").length;
+  const mediumCount = jsonIssues.filter((i) => i.severity === "medium").length;
   const byCat: Record<string, number> = {};
   for (const i of jsonIssues) byCat[i.category] = (byCat[i.category] || 0) + 1;
 

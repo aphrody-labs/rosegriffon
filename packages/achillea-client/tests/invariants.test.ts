@@ -43,12 +43,16 @@ async function callAnyway(
   owner: Record<string, unknown> | undefined,
   method: string,
 ): Promise<{ value: unknown; called: true } | { called: false }> {
-  const target = owner?.[method] as ((...args: unknown[]) => unknown) | undefined;
+  const target = owner?.[method] as
+    ((...args: unknown[]) => unknown) | undefined;
   if (typeof target !== "function") return { called: false };
 
   for (const variant of ARGUMENT_VARIANTS) {
     try {
-      return { value: await target.call(owner, ...variant.slice(0, target.length)), called: true };
+      return {
+        value: await target.call(owner, ...variant.slice(0, target.length)),
+        called: true,
+      };
     } catch {
       continue;
     }
@@ -62,13 +66,21 @@ interface Call {
 }
 
 /** Instancie un client dont chaque appel est enregistré au lieu de partir. */
-function recordingClient(status = 200, body = "{}"): { client: AchilleaClient; calls: Call[] } {
+function recordingClient(
+  status = 200,
+  body = "{}",
+): { client: AchilleaClient; calls: Call[] } {
   const calls: Call[] = [];
   const client = new AchilleaClient({
     baseUrl: BASE_URL,
     fetch: (input, init) => {
       calls.push({ url: String(input), method: init?.method ?? "GET" });
-      return Promise.resolve(new Response(body, { status, headers: { "content-type": "application/json" } }));
+      return Promise.resolve(
+        new Response(body, {
+          status,
+          headers: { "content-type": "application/json" },
+        }),
+      );
     },
   });
   return { client, calls };
@@ -77,13 +89,18 @@ function recordingClient(status = 200, body = "{}"): { client: AchilleaClient; c
 /** Ressources exposées par l'agrégat, et leurs méthodes publiques. */
 function resources(client: AchilleaClient): Array<[string, object]> {
   return Object.entries(client)
-    .filter(([name, value]) => name !== "http" && typeof value === "object" && value !== null)
+    .filter(
+      ([name, value]) =>
+        name !== "http" && typeof value === "object" && value !== null,
+    )
     .map(([name, value]) => [name, value as object]);
 }
 
 function methodNames(resource: object): string[] {
   return Object.getOwnPropertyNames(Object.getPrototypeOf(resource)).filter(
-    name => name !== "constructor" && typeof (resource as Record<string, unknown>)[name] === "function",
+    (name) =>
+      name !== "constructor" &&
+      typeof (resource as Record<string, unknown>)[name] === "function",
   );
 }
 
@@ -128,7 +145,10 @@ describe("surface du client", () => {
   });
 
   test("la surface totale reste de l'ordre attendu", () => {
-    const total = resources(client).reduce((sum, [, resource]) => sum + methodNames(resource).length, 0);
+    const total = resources(client).reduce(
+      (sum, [, resource]) => sum + methodNames(resource).length,
+      0,
+    );
     // Un effondrement (ressource vidée par une refonte) doit se voir ici.
     expect(total).toBeGreaterThan(150);
   });
@@ -138,12 +158,16 @@ describe("chaque méthode construit une requête valide", () => {
   test("toute méthode appelante émet bien une requête", async () => {
     const silent: string[] = [];
 
-    for (const [resourceName, resource] of resources(recordingClient().client)) {
+    for (const [resourceName, resource] of resources(
+      recordingClient().client,
+    )) {
       for (const method of methodNames(resource)) {
         if (isUrlBuilder(method)) continue;
 
         const { client: fresh, calls } = recordingClient();
-        const owner = (fresh as unknown as Record<string, Record<string, unknown>>)[resourceName];
+        const owner = (
+          fresh as unknown as Record<string, Record<string, unknown>>
+        )[resourceName];
         const outcome = await callAnyway(owner, method);
         if (!outcome.called) continue;
 
@@ -151,18 +175,25 @@ describe("chaque méthode construit une requête valide", () => {
       }
     }
 
-    expect(silent, `Méthodes qui n'émettent aucune requête (return oublié ?) : ${silent.join(", ")}`).toEqual([]);
+    expect(
+      silent,
+      `Méthodes qui n'émettent aucune requête (return oublié ?) : ${silent.join(", ")}`,
+    ).toEqual([]);
   });
 
   test("les constructeurs d'URL rendent un lien absolu sans toucher au réseau", async () => {
     const invalid: string[] = [];
 
-    for (const [resourceName, resource] of resources(recordingClient().client)) {
+    for (const [resourceName, resource] of resources(
+      recordingClient().client,
+    )) {
       for (const method of methodNames(resource)) {
         if (!isUrlBuilder(method)) continue;
 
         const { client: fresh, calls } = recordingClient();
-        const owner = (fresh as unknown as Record<string, Record<string, unknown>>)[resourceName];
+        const owner = (
+          fresh as unknown as Record<string, Record<string, unknown>>
+        )[resourceName];
         const outcome = await callAnyway(owner, method);
         if (!outcome.called) continue;
 
@@ -172,8 +203,10 @@ describe("chaque méthode construit une requête valide", () => {
           invalid.push(`${label} (pas une chaîne)`);
           continue;
         }
-        if (!outcome.value.startsWith("http")) invalid.push(`${label} (lien relatif)`);
-        if (outcome.value.includes("undefined")) invalid.push(`${label} (interpolation ratée)`);
+        if (!outcome.value.startsWith("http"))
+          invalid.push(`${label} (lien relatif)`);
+        if (outcome.value.includes("undefined"))
+          invalid.push(`${label} (interpolation ratée)`);
       }
     }
 
@@ -183,12 +216,16 @@ describe("chaque méthode construit une requête valide", () => {
   test("aucune URL produite n'est malformée", async () => {
     const malformed: string[] = [];
 
-    for (const [resourceName, resource] of resources(recordingClient().client)) {
+    for (const [resourceName, resource] of resources(
+      recordingClient().client,
+    )) {
       for (const method of methodNames(resource)) {
         if (isUrlBuilder(method)) continue;
 
         const { client: fresh, calls } = recordingClient();
-        const owner = (fresh as unknown as Record<string, Record<string, unknown>>)[resourceName];
+        const owner = (
+          fresh as unknown as Record<string, Record<string, unknown>>
+        )[resourceName];
         const outcome = await callAnyway(owner, method);
         if (!outcome.called) continue;
 
@@ -196,7 +233,8 @@ describe("chaque méthode construit une requête valide", () => {
           const label = `${resourceName}.${method} → ${url}`;
           if (!url.startsWith(BASE_URL)) malformed.push(`${label} (hors base)`);
           // `//` en milieu de chemin trahit un segment vide.
-          if (url.slice(BASE_URL.length).includes("//")) malformed.push(`${label} (double /)`);
+          if (url.slice(BASE_URL.length).includes("//"))
+            malformed.push(`${label} (double /)`);
           if (url.includes("undefined") || url.includes("[object")) {
             malformed.push(`${label} (interpolation ratée)`);
           }
@@ -211,12 +249,16 @@ describe("chaque méthode construit une requête valide", () => {
   test("une erreur HTTP ne lève jamais et rend toujours ok: false", async () => {
     const wrong: string[] = [];
 
-    for (const [resourceName, resource] of resources(recordingClient().client)) {
+    for (const [resourceName, resource] of resources(
+      recordingClient().client,
+    )) {
       for (const method of methodNames(resource)) {
         if (isUrlBuilder(method)) continue;
 
         const { client: fresh } = recordingClient(500, "pas du json");
-        const owner = (fresh as unknown as Record<string, Record<string, unknown>>)[resourceName];
+        const owner = (
+          fresh as unknown as Record<string, Record<string, unknown>>
+        )[resourceName];
         const outcome = await callAnyway(owner, method);
         if (!outcome.called) continue;
 
@@ -229,6 +271,9 @@ describe("chaque méthode construit une requête valide", () => {
       }
     }
 
-    expect(wrong, `Méthodes qui ne signalent pas l'échec : ${wrong.join(", ")}`).toEqual([]);
+    expect(
+      wrong,
+      `Méthodes qui ne signalent pas l'échec : ${wrong.join(", ")}`,
+    ).toEqual([]);
   });
 });

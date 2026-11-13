@@ -1,6 +1,10 @@
 import * as React from "react";
 
-import { BREAKPOINTS as M3_BREAKPOINTS, classifyWidth, type WindowSizeClass } from "@aphrody/m3-tokens/breakpoints";
+import {
+  BREAKPOINTS as M3_BREAKPOINTS,
+  classifyWidth,
+  type WindowSizeClass,
+} from "@aphrody/m3-tokens/breakpoints";
 export const BREAKPOINTS = {
   MEDIUM: M3_BREAKPOINTS.medium,
   EXPANDED: M3_BREAKPOINTS.expanded,

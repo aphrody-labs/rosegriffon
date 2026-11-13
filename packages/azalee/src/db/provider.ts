@@ -1,9 +1,13 @@
 import { createPostgresClient } from "@rosegriffon/db/postgres-client";
-import { isDatabaseConfigured, isInagleDatabaseConfigured } from "@rosegriffon/db/pg";
+import {
+  isDatabaseConfigured,
+  isInagleDatabaseConfigured,
+} from "@rosegriffon/db/pg";
 import { createSqliteClient } from "./sqlite-client";
 
 export type DatabaseClient = { from(table: string): any };
-export type DatabaseClientFactory = () => DatabaseClient | Promise<DatabaseClient>;
+export type DatabaseClientFactory = () =>
+  DatabaseClient | Promise<DatabaseClient>;
 let factory: DatabaseClientFactory | null = null;
 export function setDatabaseProvider(next: DatabaseClientFactory | null): void {
   factory = next;

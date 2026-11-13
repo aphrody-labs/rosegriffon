@@ -75,7 +75,9 @@ export function isoToDatetimeLocal(iso: string | null | undefined): string {
  * Inverse de `isoToDatetimeLocal` : prend la valeur du `<input type="datetime-local">`
  * (heure locale), produit l'ISO UTC à stocker en DB.
  */
-export function datetimeLocalToIso(value: string | null | undefined): string | null {
+export function datetimeLocalToIso(
+  value: string | null | undefined,
+): string | null {
   if (!value) {
     return null;
   }

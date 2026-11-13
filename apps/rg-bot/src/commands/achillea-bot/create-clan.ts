@@ -52,46 +52,104 @@ export interface CreationEnAttente {
 const enAttente = new Map<string, CreationEnAttente>();
 
 /** Garde l'état d'une création ; purge au passage ce qui a expiré. */
-export function retenirCreation(joueurId: string, creation: CreationEnAttente, maintenant = Date.now()): void {
-  for (const [cle, valeur] of enAttente) if (valeur.expireLe <= maintenant) enAttente.delete(cle);
+export function retenirCreation(
+  joueurId: string,
+  creation: CreationEnAttente,
+  maintenant = Date.now(),
+): void {
+  for (const [cle, valeur] of enAttente)
+    if (valeur.expireLe <= maintenant) enAttente.delete(cle);
   enAttente.set(joueurId, creation);
 }
 
 /** Reprend (et consomme) l'état d'une création encore valide. */
-export function reprendreCreation(joueurId: string, maintenant = Date.now()): CreationEnAttente | null {
+export function reprendreCreation(
+  joueurId: string,
+  maintenant = Date.now(),
+): CreationEnAttente | null {
   const creation = enAttente.get(joueurId) ?? null;
   enAttente.delete(joueurId);
   return creation && creation.expireLe > maintenant ? creation : null;
 }
 
 /** Refus d'une liste de fondateurs, ou `null` si elle convient. */
-export function refusFondateurs(auteurId: string, membres: readonly Pick<User, "id" | "bot">[]): string | null {
-  const ids = [auteurId, ...membres.map(m => m.id)];
-  if (new Set(ids).size !== ids.length) return "Vous ne pouvez pas créer un Clan avec des utilisateurs dupliqués !";
-  if (membres.some(m => m.bot)) return "Un bot ne peut pas être fondateur d'un Clan.";
+export function refusFondateurs(
+  auteurId: string,
+  membres: readonly Pick<User, "id" | "bot">[],
+): string | null {
+  const ids = [auteurId, ...membres.map((m) => m.id)];
+  if (new Set(ids).size !== ids.length)
+    return "Vous ne pouvez pas créer un Clan avec des utilisateurs dupliqués !";
+  if (membres.some((m) => m.bot))
+    return "Un bot ne peut pas être fondateur d'un Clan.";
   return null;
 }
 
 /** Modale de l'ancien bot (`buildClanCreationModal`), mêmes identifiants de champs. */
 export function modaleCreation(): ModalBuilder {
-  const champ = (id: string, style: TextInputStyle, min: number, max: number, aide: string, requis = true) =>
-    new TextInputBuilder().setCustomId(id).setStyle(style).setMinLength(min).setMaxLength(max).setPlaceholder(aide).setRequired(requis);
+  const champ = (
+    id: string,
+    style: TextInputStyle,
+    min: number,
+    max: number,
+    aide: string,
+    requis = true,
+  ) =>
+    new TextInputBuilder()
+      .setCustomId(id)
+      .setStyle(style)
+      .setMinLength(min)
+      .setMaxLength(max)
+      .setPlaceholder(aide)
+      .setRequired(requis);
   return new ModalBuilder()
     .setTitle("Création de Clan")
     .setCustomId("createClan1")
     .addLabelComponents(
       new LabelBuilder()
         .setLabel("Nom du Clan")
-        .setTextInputComponent(champ("clanName", TextInputStyle.Short, 2, 30, "Les noms inappropriés seront rejetés")),
+        .setTextInputComponent(
+          champ(
+            "clanName",
+            TextInputStyle.Short,
+            2,
+            30,
+            "Les noms inappropriés seront rejetés",
+          ),
+        ),
       new LabelBuilder()
         .setLabel("Sigle du Clan")
-        .setTextInputComponent(champ("clanShortenedName", TextInputStyle.Short, 2, 6, "ex. PSG, 𝕯𝕽, etc.")),
+        .setTextInputComponent(
+          champ(
+            "clanShortenedName",
+            TextInputStyle.Short,
+            2,
+            6,
+            "ex. PSG, 𝕯𝕽, etc.",
+          ),
+        ),
       new LabelBuilder()
         .setLabel("Biographie de Clan")
-        .setTextInputComponent(champ("clanBiography", TextInputStyle.Paragraph, 15, 1500, "La présentation de votre Clan...")),
+        .setTextInputComponent(
+          champ(
+            "clanBiography",
+            TextInputStyle.Paragraph,
+            15,
+            1500,
+            "La présentation de votre Clan...",
+          ),
+        ),
       new LabelBuilder()
         .setLabel("Réseau social du Clan")
-        .setTextInputComponent(champ("socialMedia", TextInputStyle.Short, 10, 100, "Lien X, Instagram ou TikTok")),
+        .setTextInputComponent(
+          champ(
+            "socialMedia",
+            TextInputStyle.Short,
+            10,
+            100,
+            "Lien X, Instagram ou TikTok",
+          ),
+        ),
     );
 }
 
@@ -99,13 +157,33 @@ export function modaleCreation(): ModalBuilder {
 export class CreationClan {
   @Slash({ name: "create-clan", description: "Créez votre propre Clan" })
   async creer(
-    @SlashOption({ name: "member_1", description: "Premier membre fondateur", type: ApplicationCommandOptionType.User, required: true })
+    @SlashOption({
+      name: "member_1",
+      description: "Premier membre fondateur",
+      type: ApplicationCommandOptionType.User,
+      required: true,
+    })
     membre1: User,
-    @SlashOption({ name: "member_2", description: "Deuxième membre fondateur", type: ApplicationCommandOptionType.User, required: true })
+    @SlashOption({
+      name: "member_2",
+      description: "Deuxième membre fondateur",
+      type: ApplicationCommandOptionType.User,
+      required: true,
+    })
     membre2: User,
-    @SlashOption({ name: "member_3", description: "Troisième membre fondateur", type: ApplicationCommandOptionType.User, required: true })
+    @SlashOption({
+      name: "member_3",
+      description: "Troisième membre fondateur",
+      type: ApplicationCommandOptionType.User,
+      required: true,
+    })
     membre3: User,
-    @SlashOption({ name: "member_4", description: "Quatrième membre fondateur", type: ApplicationCommandOptionType.User, required: true })
+    @SlashOption({
+      name: "member_4",
+      description: "Quatrième membre fondateur",
+      type: ApplicationCommandOptionType.User,
+      required: true,
+    })
     membre4: User,
     @SlashOption({
       name: "logo",
@@ -123,12 +201,22 @@ export class CreationClan {
       return;
     }
     if (!logoAccepte(logo.contentType)) {
-      await repondre(interaction, echec("Logo refusé", "Ce format d'image n'est pas pris en charge : envoyez un PNG ou un JPEG."));
+      await repondre(
+        interaction,
+        echec(
+          "Logo refusé",
+          "Ce format d'image n'est pas pris en charge : envoyez un PNG ou un JPEG.",
+        ),
+      );
       return;
     }
     retenirCreation(interaction.user.id, {
-      fondateurs: membres.map(m => m.id),
-      logo: { url: logo.url, nom: logo.name, type: (logo.contentType ?? "image/png").split(";")[0]!.trim() },
+      fondateurs: membres.map((m) => m.id),
+      logo: {
+        url: logo.url,
+        nom: logo.name,
+        type: (logo.contentType ?? "image/png").split(";")[0]!.trim(),
+      },
       expireLe: Date.now() + DELAI_CREATION_MS,
     });
     await interaction.showModal(modaleCreation());
@@ -139,16 +227,32 @@ export class CreationClan {
     await interaction.deferReply({ flags: MessageFlags.Ephemeral });
     const creation = reprendreCreation(interaction.user.id);
     if (!creation) {
-      await repondre(interaction, echec("Délai dépassé", "Délai d'attente maximum dépassé ! Relancez `/create-clan`."));
+      await repondre(
+        interaction,
+        echec(
+          "Délai dépassé",
+          "Délai d'attente maximum dépassé ! Relancez `/create-clan`.",
+        ),
+      );
       return;
     }
     const nom = interaction.fields.getTextInputValue("clanName").trim();
-    const sigle = interaction.fields.getTextInputValue("clanShortenedName").trim();
-    const biographie = interaction.fields.getTextInputValue("clanBiography").trim();
+    const sigle = interaction.fields
+      .getTextInputValue("clanShortenedName")
+      .trim();
+    const biographie = interaction.fields
+      .getTextInputValue("clanBiography")
+      .trim();
     const reseau = interaction.fields.getTextInputValue("socialMedia").trim();
     const plateforme = reseauDe(reseau);
     if (!plateforme) {
-      await repondre(interaction, echec("Réseau social invalide", "L'url de ce réseau est invalide ! Donnez un lien X, Instagram ou TikTok."));
+      await repondre(
+        interaction,
+        echec(
+          "Réseau social invalide",
+          "L'url de ce réseau est invalide ! Donnez un lien X, Instagram ou TikTok.",
+        ),
+      );
       return;
     }
 
@@ -156,24 +260,35 @@ export class CreationClan {
     // Discord est signée et expire, elle ne peut pas servir d'avatar de clan.
     let fichier: Blob;
     try {
-      const reponse = await fetch(creation.logo.url, { signal: AbortSignal.timeout(15_000) });
+      const reponse = await fetch(creation.logo.url, {
+        signal: AbortSignal.timeout(15_000),
+      });
       if (!reponse.ok) throw new Error(`HTTP ${reponse.status}`);
-      fichier = new Blob([await reponse.arrayBuffer()], { type: creation.logo.type });
+      fichier = new Blob([await reponse.arrayBuffer()], {
+        type: creation.logo.type,
+      });
     } catch (err) {
       await repondre(
         interaction,
-        echec("Logo illisible", `Téléchargement du logo échoué (${err instanceof Error ? err.message : String(err)}). Relancez la commande.`),
+        echec(
+          "Logo illisible",
+          `Téléchargement du logo échoué (${err instanceof Error ? err.message : String(err)}). Relancez la commande.`,
+        ),
       );
       return;
     }
-    const depot = await appelApi(interaction, c => c.admin.uploadImage(fichier, creation.logo.nom), "Logo non déposé");
+    const depot = await appelApi(
+      interaction,
+      (c) => c.admin.uploadImage(fichier, creation.logo.nom),
+      "Logo non déposé",
+    );
     if (!depot) return;
 
     const cree = await appelApi(
       interaction,
-      c =>
+      (c) =>
         c.clans.create({
-          founders: creation.fondateurs.map(id => ({ id })),
+          founders: creation.fondateurs.map((id) => ({ id })),
           logo: depot.url,
           name: nom,
           normalizedName: normalizeNames(nom),
@@ -186,7 +301,13 @@ export class CreationClan {
     );
     if (!cree) return;
     if (!cree.success) {
-      await repondre(interaction, echec("Création du Clan impossible", cree.error ?? cree.conflict ?? "Refus de l'API."));
+      await repondre(
+        interaction,
+        echec(
+          "Création du Clan impossible",
+          cree.error ?? cree.conflict ?? "Refus de l'API.",
+        ),
+      );
       return;
     }
     await repondre(

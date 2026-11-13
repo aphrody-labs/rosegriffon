@@ -18,7 +18,8 @@ export default async function Image() {
   return new ImageResponse(
     <div
       style={{
-        background: "linear-gradient(135deg, #1A120D 0%, #2D1F14 50%, #1A120D 100%)",
+        background:
+          "linear-gradient(135deg, #1A120D 0%, #2D1F14 50%, #1A120D 100%)",
         color: "white",
         display: "flex",
         fontFamily: "sans-serif",
@@ -105,7 +106,7 @@ export default async function Image() {
 
         {/* Position pills */}
         <div style={{ display: "flex", gap: 12, marginTop: 12 }}>
-          {POSITIONS.map(p => (
+          {POSITIONS.map((p) => (
             <div
               key={p.abbr}
               style={{
@@ -118,8 +119,26 @@ export default async function Image() {
                 padding: "8px 18px",
               }}
             >
-              <div style={{ color: p.color, display: "flex", fontSize: 14, fontWeight: 800 }}>{p.abbr}</div>
-              <div style={{ color: `${p.color}CC`, display: "flex", fontSize: 14, fontWeight: 600 }}>{p.label}</div>
+              <div
+                style={{
+                  color: p.color,
+                  display: "flex",
+                  fontSize: 14,
+                  fontWeight: 800,
+                }}
+              >
+                {p.abbr}
+              </div>
+              <div
+                style={{
+                  color: `${p.color}CC`,
+                  display: "flex",
+                  fontSize: 14,
+                  fontWeight: 600,
+                }}
+              >
+                {p.label}
+              </div>
             </div>
           ))}
         </div>
@@ -137,8 +156,24 @@ export default async function Image() {
           width: 320,
         }}
       >
-        {["Frappe", "Controle", "Technique", "Pression", "Physique", "Agilite", "Intelligence"].map((s, i) => (
-          <div key={s} style={{ alignItems: "center", display: "flex", gap: 12, width: "100%" }}>
+        {[
+          "Frappe",
+          "Controle",
+          "Technique",
+          "Pression",
+          "Physique",
+          "Agilite",
+          "Intelligence",
+        ].map((s, i) => (
+          <div
+            key={s}
+            style={{
+              alignItems: "center",
+              display: "flex",
+              gap: 12,
+              width: "100%",
+            }}
+          >
             <div
               style={{
                 color: "#6D5E50",
@@ -187,9 +222,26 @@ export default async function Image() {
           position: "absolute",
         }}
       >
-        <img src={getOgLogoDataUri()} width={28} height={28} style={{ borderRadius: 7 }} alt="Logo Azalée" />
-        <div style={{ color: "#F2A93B", display: "flex", fontSize: 14, fontWeight: 700 }}>rosegriffon.fr/wiki</div>
-        <div style={{ color: "#6D5E50", display: "flex", fontSize: 12 }}>Inazuma Eleven: Victory Road</div>
+        <img
+          src={getOgLogoDataUri()}
+          width={28}
+          height={28}
+          style={{ borderRadius: 7 }}
+          alt="Logo Azalée"
+        />
+        <div
+          style={{
+            color: "#F2A93B",
+            display: "flex",
+            fontSize: 14,
+            fontWeight: 700,
+          }}
+        >
+          rosegriffon.fr/wiki
+        </div>
+        <div style={{ color: "#6D5E50", display: "flex", fontSize: 12 }}>
+          Inazuma Eleven: Victory Road
+        </div>
       </div>
     </div>,
     { ...size },

@@ -138,7 +138,10 @@ export function normaliserPseudo(valeur: string | null | undefined): string {
   // lettres (`2024` → `2o2a`) qui ne ressemble à rien et se met à rapprocher
   // des comptes sur du bruit.
   const lettres = brut.match(/[a-z]/g)?.length ?? 0;
-  const plie = lettres >= 2 ? brut.replaceAll(/[0134578@$!|€]/g, c => LEET[c] ?? c) : brut;
+  const plie =
+    lettres >= 2
+      ? brut.replaceAll(/[0134578@$!|€]/g, (c) => LEET[c] ?? c)
+      : brut;
   return plie.replaceAll(/[^a-z0-9]/g, "");
 }
 
@@ -214,7 +217,10 @@ export function racinePseudo(valeur: string | null | undefined): string {
     }
     const normalisee = normaliserPseudo(queue);
     for (const suffixe of SUFFIXES_DE_DOUBLE) {
-      if (normalisee.length > suffixe.length + 2 && normalisee.endsWith(suffixe)) {
+      if (
+        normalisee.length > suffixe.length + 2 &&
+        normalisee.endsWith(suffixe)
+      ) {
         // Le suffixe est reconnu sur la forme normalisée, mais retranché de la
         // chaîne brute — seule à porter encore les chiffres non pliés.
         const position = queue.lastIndexOf(suffixe);
@@ -242,7 +248,11 @@ export function racinePseudo(valeur: string | null | undefined): string {
  * question posée est « sont-ils PROCHES ». Dès que la ligne courante dépasse le
  * plafond, la réponse est non et le calcul s'arrête.
  */
-export function distance(a: string, b: string, plafond = Number.POSITIVE_INFINITY): number {
+export function distance(
+  a: string,
+  b: string,
+  plafond = Number.POSITIVE_INFINITY,
+): number {
   if (a === b) {
     return 0;
   }
@@ -260,7 +270,11 @@ export function distance(a: string, b: string, plafond = Number.POSITIVE_INFINIT
     let minimum = i;
     for (let j = 1; j <= b.length; j++) {
       const cout = a[i - 1] === b[j - 1] ? 0 : 1;
-      const valeur = Math.min((courante[j - 1] ?? 0) + 1, (precedente[j] ?? 0) + 1, (precedente[j - 1] ?? 0) + cout);
+      const valeur = Math.min(
+        (courante[j - 1] ?? 0) + 1,
+        (precedente[j] ?? 0) + 1,
+        (precedente[j - 1] ?? 0) + cout,
+      );
       courante[j] = valeur;
       if (valeur < minimum) {
         minimum = valeur;
@@ -316,7 +330,9 @@ export function empreinteAvatar(url: string | null | undefined): string | null {
   // Un condensat Discord fait 32 caractères hexadécimaux, préfixé `a_` quand
   // l'image est animée. Tout le reste (un nom de fichier, un identifiant de
   // membre) rapprocherait des comptes sur autre chose que leur image.
-  return condensat && /^(a_)?[a-f0-9]{32}$/i.test(condensat) ? condensat.toLowerCase() : null;
+  return condensat && /^(a_)?[a-f0-9]{32}$/i.test(condensat)
+    ? condensat.toLowerCase()
+    : null;
 }
 
 // ─── Ce qu'on sait d'un compte ──────────────────────────────────────────────
@@ -433,7 +449,11 @@ export const POIDS: Readonly<Record<CleIndice, number>> = Object.freeze({
 export const PLAFOND_TEMPOREL = 24;
 
 /** Les indices qui ne parlent que de dates, et partagent donc un seul budget. */
-const EST_TEMPOREL: ReadonlySet<CleIndice> = new Set<CleIndice>(["creation", "arrivee", "jeune"]);
+const EST_TEMPOREL: ReadonlySet<CleIndice> = new Set<CleIndice>([
+  "creation",
+  "arrivee",
+  "jeune",
+]);
 
 const ICONES_INDICE: Readonly<Record<CleIndice, string>> = Object.freeze({
   liaison: "🔗",
@@ -457,7 +477,10 @@ const ICONES_INDICE: Readonly<Record<CleIndice, string>> = Object.freeze({
  * production. La décroissance est brutale exprès : au-delà de cinq, un partage
  * ne vaut plus qu'une note de bas de page.
  */
-export function poidsDegressif(poidsMaximum: number, tailleGrappe: number): number {
+export function poidsDegressif(
+  poidsMaximum: number,
+  tailleGrappe: number,
+): number {
   if (!Number.isFinite(tailleGrappe) || tailleGrappe <= 2) {
     return poidsMaximum;
   }
@@ -467,19 +490,20 @@ export function poidsDegressif(poidsMaximum: number, tailleGrappe: number): numb
 }
 
 /** Nom lisible de chaque indice — l'en-tête d'une ligne de rapport. */
-export const LIBELLES_INDICE: Readonly<Record<CleIndice, string>> = Object.freeze({
-  liaison: "Même compte du site",
-  avatar: "Même avatar",
-  surnom: "Même surnom",
-  racine: "Même racine de pseudo",
-  pseudo: "Pseudos voisins",
-  releve: "Relève",
-  creation: "Créations rapprochées",
-  arrivee: "Arrivées rapprochées",
-  jeune: "Compte neuf",
-  alternance: "Activités alternées",
-  simultaneite: "Activités simultanées",
-});
+export const LIBELLES_INDICE: Readonly<Record<CleIndice, string>> =
+  Object.freeze({
+    liaison: "Même compte du site",
+    avatar: "Même avatar",
+    surnom: "Même surnom",
+    racine: "Même racine de pseudo",
+    pseudo: "Pseudos voisins",
+    releve: "Relève",
+    creation: "Créations rapprochées",
+    arrivee: "Arrivées rapprochées",
+    jeune: "Compte neuf",
+    alternance: "Activités alternées",
+    simultaneite: "Activités simultanées",
+  });
 
 /** Ce que dit une liaison partagée, sans jamais dire sa valeur. */
 const NATURE_LIAISON: Readonly<Record<string, string>> = Object.freeze({
@@ -554,7 +578,10 @@ const JOUR = 24 * HEURE;
  * Barème dégressif d'un écart de temps : plus deux dates sont proches, plus
  * l'indice pèse. Rend `0` au-delà de la dernière borne.
  */
-function poidsDEcart(ecartMs: number, bornes: ReadonlyArray<readonly [number, number]>): number | null {
+function poidsDEcart(
+  ecartMs: number,
+  bornes: ReadonlyArray<readonly [number, number]>,
+): number | null {
   for (const [limite, poids] of bornes) {
     if (ecartMs <= limite) {
       return poids;
@@ -591,7 +618,7 @@ function identites(compte: EmpreinteCompte, exclure?: string): string[] {
     ...new Set(
       [compte.pseudo, compte.nomAffiche, compte.surnom]
         .map(normaliserPseudo)
-        .filter(valeur => valeur.length >= 3 && valeur !== exclure),
+        .filter((valeur) => valeur.length >= 3 && valeur !== exclure),
     ),
   ];
 }
@@ -614,12 +641,18 @@ export function comparer(
   }
   const creationPremier = dateDeCreation(premier.discordId)?.getTime() ?? 0;
   const creationSecond = dateDeCreation(second.discordId)?.getTime() ?? 0;
-  const [a, b] = creationPremier <= creationSecond ? [premier, second] : [second, premier];
+  const [a, b] =
+    creationPremier <= creationSecond ? [premier, second] : [second, premier];
   const creationA = Math.min(creationPremier, creationSecond);
   const creationB = Math.max(creationPremier, creationSecond);
 
   const indices: Indice[] = [];
-  const poser = (cle: CleIndice, poids: number, detail: string, libelle?: string): void => {
+  const poser = (
+    cle: CleIndice,
+    poids: number,
+    detail: string,
+    libelle?: string,
+  ): void => {
     if (poids === 0) {
       return;
     }
@@ -638,13 +671,20 @@ export function comparer(
   // affiche jamais autrement que par leur NATURE (« même profil du site »),
   // jamais par leur valeur — un condensat de courriel n'a rien à faire dans un
   // embed, et l'adresse encore moins.
-  const rattachements = a.liaisons.filter(liaison => b.liaisons.includes(liaison));
+  const rattachements = a.liaisons.filter((liaison) =>
+    b.liaisons.includes(liaison),
+  );
   if (rattachements.length > 0) {
     poser(
       "liaison",
       POIDS.liaison,
       [
-        ...new Set(rattachements.map(liaison => NATURE_LIAISON[liaison.split(":")[0] ?? ""] ?? "identité commune")),
+        ...new Set(
+          rattachements.map(
+            (liaison) =>
+              NATURE_LIAISON[liaison.split(":")[0] ?? ""] ?? "identité commune",
+          ),
+        ),
       ].join(", "),
     );
   }
@@ -666,9 +706,14 @@ export function comparer(
 
   // ── Identités ────────────────────────────────────────────────────────────
   const surnomA = normaliserPseudo(a.surnom);
-  const surnomPartage = surnomA.length >= 3 && surnomA === normaliserPseudo(b.surnom);
+  const surnomPartage =
+    surnomA.length >= 3 && surnomA === normaliserPseudo(b.surnom);
   if (surnomPartage) {
-    poser("surnom", POIDS.surnom, `même surnom sur le serveur (« ${a.surnom} »)`);
+    poser(
+      "surnom",
+      POIDS.surnom,
+      `même surnom sur le serveur (« ${a.surnom} »)`,
+    );
   }
 
   const racineA = racinePseudo(a.pseudo);
@@ -702,7 +747,9 @@ export function comparer(
     }
     if (meilleure >= 0.72 && couple) {
       // De 0,72 (le seuil) à 1 (identique), étalé sur tout le poids.
-      const poids = Math.round(POIDS.pseudo * ((meilleure - 0.72) / 0.28) ** 0.6);
+      const poids = Math.round(
+        POIDS.pseudo * ((meilleure - 0.72) / 0.28) ** 0.6,
+      );
       poser(
         "pseudo",
         Math.max(poids, 4),
@@ -727,13 +774,23 @@ export function comparer(
   // La cohorte d'arrivée est un CONTEXTE, pas une preuve : le budget commun la
   // plafonne au niveau « à examiner », qu'elle ne peut plus dépasser seule.
   let budgetTemporel = PLAFOND_TEMPOREL;
-  const poserTemporel = (cle: CleIndice, poids: number, detail: string): void => {
+  const poserTemporel = (
+    cle: CleIndice,
+    poids: number,
+    detail: string,
+  ): void => {
     const accorde = Math.min(poids, budgetTemporel);
     if (accorde <= 0) {
       return;
     }
     budgetTemporel -= accorde;
-    poser(cle, accorde, accorde < poids ? `${detail} — plafonné, les dates ne sont pas des indices séparés` : detail);
+    poser(
+      cle,
+      accorde,
+      accorde < poids
+        ? `${detail} — plafonné, les dates ne sont pas des indices séparés`
+        : detail,
+    );
   };
 
   if (creationA > 0 && creationB > 0) {
@@ -745,7 +802,11 @@ export function comparer(
       [45 * JOUR, 4],
     ]);
     if (poids !== null) {
-      poserTemporel("creation", poids, `comptes créés à ${ecartLisible(ecart)} d'intervalle`);
+      poserTemporel(
+        "creation",
+        poids,
+        `comptes créés à ${ecartLisible(ecart)} d'intervalle`,
+      );
     }
   }
 
@@ -758,7 +819,11 @@ export function comparer(
       [3 * JOUR, 3],
     ]);
     if (poids !== null) {
-      poserTemporel("arrivee", poids, `arrivés sur le serveur à ${ecartLisible(ecart)} d'intervalle`);
+      poserTemporel(
+        "arrivee",
+        poids,
+        `arrivés sur le serveur à ${ecartLisible(ecart)} d'intervalle`,
+      );
     }
   }
 
@@ -767,7 +832,11 @@ export function comparer(
   // est sorti), un autre arrive dans la foulée. C'est le seul indice qui porte
   // une ORIENTATION — il ne dit pas « ces comptes se ressemblent » mais « ce
   // compte-ci a pris la suite de celui-là ».
-  if (a.partiLe && b.arriveeLe && b.arriveeLe.getTime() >= a.partiLe.getTime()) {
+  if (
+    a.partiLe &&
+    b.arriveeLe &&
+    b.arriveeLe.getTime() >= a.partiLe.getTime()
+  ) {
     const ecart = b.arriveeLe.getTime() - a.partiLe.getTime();
     const poids = poidsDEcart(ecart, [
       [2 * HEURE, POIDS.releve],
@@ -775,7 +844,11 @@ export function comparer(
       [7 * JOUR, 7],
     ]);
     if (poids !== null) {
-      poser("releve", poids, `arrivé ${ecartLisible(ecart)} après le départ de l'autre compte`);
+      poser(
+        "releve",
+        poids,
+        `arrivé ${ecartLisible(ecart)} après le départ de l'autre compte`,
+      );
     }
   }
 
@@ -789,8 +862,16 @@ export function comparer(
     // de son arrivée » décrit la moitié des nouveaux membres d'un serveur, et
     // l'accoler à « arrivé le même jour qu'un autre » ne dit rien de plus que
     // « deux personnes se sont inscrites en même temps ».
-    if (age >= 0 && age <= 7 * JOUR && indices.some(indice => !EST_TEMPOREL.has(indice.cle))) {
-      poserTemporel("jeune", POIDS.jeune, `le compte le plus récent a rejoint ${ecartLisible(age)} après sa création`);
+    if (
+      age >= 0 &&
+      age <= 7 * JOUR &&
+      indices.some((indice) => !EST_TEMPOREL.has(indice.cle))
+    ) {
+      poserTemporel(
+        "jeune",
+        POIDS.jeune,
+        `le compte le plus récent a rejoint ${ecartLisible(age)} après sa création`,
+      );
     }
   }
 
@@ -803,8 +884,15 @@ export function comparer(
   // et un membre sur huit. Sans minimum d'activité des DEUX côtés, « aucun
   // créneau commun » ne veut dire qu'une chose — on n'a pas de données.
   const activite = options.activite ?? null;
-  if (activite && activite.creneauxA >= 25 && activite.creneauxB >= 25 && activite.salonsCommuns >= 2) {
-    const recouvrement = activite.creneauxCommuns / Math.max(1, Math.min(activite.creneauxA, activite.creneauxB));
+  if (
+    activite &&
+    activite.creneauxA >= 25 &&
+    activite.creneauxB >= 25 &&
+    activite.salonsCommuns >= 2
+  ) {
+    const recouvrement =
+      activite.creneauxCommuns /
+      Math.max(1, Math.min(activite.creneauxA, activite.creneauxB));
     if (activite.creneauxCommuns === 0) {
       poser(
         "alternance",
@@ -812,7 +900,11 @@ export function comparer(
         `jamais actifs dans le même quart d'heure, sur ${activite.salonsCommuns} salons communs`,
       );
     } else if (recouvrement <= 0.02) {
-      poser("alternance", 10, `activités quasi disjointes (${Math.round(recouvrement * 100)} % de créneaux communs)`);
+      poser(
+        "alternance",
+        10,
+        `activités quasi disjointes (${Math.round(recouvrement * 100)} % de créneaux communs)`,
+      );
     } else if (recouvrement >= 0.25) {
       // Ce n'est PAS une preuve d'innocence — une personne tient très bien deux
       // comptes de front, sur deux appareils. Le poids négatif reste léger, et
@@ -930,8 +1022,11 @@ const RANG_NIVEAU: Readonly<Record<Niveau, number>> = Object.freeze({
  * calculée. C'est ce qui fait tenir le balayage en quelques dizaines de
  * millisecondes au lieu de plusieurs minutes.
  */
-export function balayer(empreintes: readonly EmpreinteCompte[], options: OptionsBalayage = {}): Balayage {
-  const parId = new Map(empreintes.map(compte => [compte.discordId, compte]));
+export function balayer(
+  empreintes: readonly EmpreinteCompte[],
+  options: OptionsBalayage = {},
+): Balayage {
+  const parId = new Map(empreintes.map((compte) => [compte.discordId, compte]));
 
   // ── Regroupements ────────────────────────────────────────────────────────
   const grappes = new Map<string, string[]>();
@@ -968,10 +1063,16 @@ export function balayer(empreintes: readonly EmpreinteCompte[], options: Options
     }
     const creation = dateDeCreation(compte.discordId);
     if (creation) {
-      ajouter(`creation:${Math.floor(creation.getTime() / JOUR)}`, compte.discordId);
+      ajouter(
+        `creation:${Math.floor(creation.getTime() / JOUR)}`,
+        compte.discordId,
+      );
     }
     if (compte.arriveeLe) {
-      ajouter(`arrivee:${Math.floor(compte.arriveeLe.getTime() / JOUR)}`, compte.discordId);
+      ajouter(
+        `arrivee:${Math.floor(compte.arriveeLe.getTime() / JOUR)}`,
+        compte.discordId,
+      );
     }
     for (const liaison of compte.liaisons) {
       ajouter(`liaison:${liaison}`, compte.discordId);
@@ -1039,7 +1140,12 @@ export function balayer(empreintes: readonly EmpreinteCompte[], options: Options
 
   rapprochements.sort((gauche, droite) => droite.score - gauche.score);
 
-  const parNiveau: Record<Niveau, number> = { certain: 0, faible: 0, fort: 0, possible: 0 };
+  const parNiveau: Record<Niveau, number> = {
+    certain: 0,
+    faible: 0,
+    fort: 0,
+    possible: 0,
+  };
   for (const rapprochement of rapprochements) {
     parNiveau[rapprochement.niveau]++;
   }
@@ -1068,12 +1174,18 @@ export function libelleBalayage(balayage: Balayage): string {
   // l'option `jours`) laisserait sinon la phrase décrire une liste qu'il ne
   // montre pas — « 32 rapprochements — 3 faisceaux » sous une page qui n'en
   // contient aucun.
-  const compte = new Map<Niveau, number>(NIVEAUX.map(niveau => [niveau, 0]));
+  const compte = new Map<Niveau, number>(NIVEAUX.map((niveau) => [niveau, 0]));
   for (const rapprochement of balayage.rapprochements) {
-    compte.set(rapprochement.niveau, (compte.get(rapprochement.niveau) ?? 0) + 1);
+    compte.set(
+      rapprochement.niveau,
+      (compte.get(rapprochement.niveau) ?? 0) + 1,
+    );
   }
   const morceaux = NIVEAUX.toReversed()
-    .filter(niveau => (compte.get(niveau) ?? 0) > 0)
-    .map(niveau => `${compte.get(niveau)} ${LIBELLES_NIVEAU[niveau].toLowerCase()}`);
+    .filter((niveau) => (compte.get(niveau) ?? 0) > 0)
+    .map(
+      (niveau) =>
+        `${compte.get(niveau)} ${LIBELLES_NIVEAU[niveau].toLowerCase()}`,
+    );
   return `${balayage.comptes} comptes · ${balayage.rapprochements.length} rapprochements — ${morceaux.join(", ")}.`;
 }

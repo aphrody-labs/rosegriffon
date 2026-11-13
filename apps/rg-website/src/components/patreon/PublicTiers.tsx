@@ -47,32 +47,47 @@ export async function PublicTiers() {
   return (
     <div className="space-y-6">
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {paliers.map(palier => {
+        {paliers.map((palier) => {
           const nom = texteSansDecor(palier.titre);
-          const avantages = AVANTAGES[nom.split(/\s+/).at(-1)?.toLowerCase() ?? ""] ?? [];
+          const avantages =
+            AVANTAGES[nom.split(/\s+/).at(-1)?.toLowerCase() ?? ""] ?? [];
           return (
             <div
               key={palier.titre}
               className="flex h-full flex-col rounded-2xl border border-border bg-card p-6 text-card-foreground"
             >
               <h3 className="text-lg font-bold text-foreground">{nom}</h3>
-              <p className="mt-1 mb-4 text-2xl font-bold text-primary">{formatPrix(Number(palier.montant_cents))}</p>
+              <p className="mt-1 mb-4 text-2xl font-bold text-primary">
+                {formatPrix(Number(palier.montant_cents))}
+              </p>
               {avantages.length > 0 && (
                 <ul className="space-y-2 text-sm text-foreground/85">
-                  {avantages.map(avantage => (
+                  {avantages.map((avantage) => (
                     <li key={avantage} className="flex gap-2">
-                      <Check className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden />
+                      <Check
+                        className="mt-0.5 size-4 shrink-0 text-primary"
+                        aria-hidden
+                      />
                       <span>{avantage}</span>
                     </li>
                   ))}
                 </ul>
               )}
               <p className="mt-4 text-xs text-muted-foreground">
-                {palier.mecenes} mécène{palier.mecenes > 1 ? "s" : ""} actuellement
+                {palier.mecenes} mécène{palier.mecenes > 1 ? "s" : ""}{" "}
+                actuellement
               </p>
               <div className="mt-auto pt-6">
-                <Button asChild size="lg" className="h-auto min-h-12 w-full rounded-full px-4 py-3 whitespace-normal">
-                  <a href={PATREON_URL} target="_blank" rel="noopener noreferrer">
+                <Button
+                  asChild
+                  size="lg"
+                  className="h-auto min-h-12 w-full rounded-full px-4 py-3 whitespace-normal"
+                >
+                  <a
+                    href={PATREON_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
                     Choisir {nom}
                     <ExternalLink className="size-4" aria-hidden />
                   </a>

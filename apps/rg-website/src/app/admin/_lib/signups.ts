@@ -22,7 +22,10 @@ export function buildDailySignups(
 
   for (const row of rows) {
     if (!row.created_at) continue;
-    const date = row.created_at instanceof Date ? row.created_at : new Date(row.created_at);
+    const date =
+      row.created_at instanceof Date
+        ? row.created_at
+        : new Date(row.created_at);
     if (Number.isNaN(date.getTime())) continue;
     const key = date.toISOString().slice(0, 10);
     if (buckets.has(key)) buckets.set(key, (buckets.get(key) ?? 0) + 1);

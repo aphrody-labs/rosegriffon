@@ -170,9 +170,12 @@ function parseEntries(entries: ConfigNode[]) {
           condData: parseStringVar(vars[1]),
         });
       }
-    } else if (entry.name.startsWith("SPECIAL_TACTICS_SUCCESS_COND_ID_LIST_BEG")) {
+    } else if (
+      entry.name.startsWith("SPECIAL_TACTICS_SUCCESS_COND_ID_LIST_BEG")
+    ) {
       for (const child of children) {
-        if (!child.name.startsWith("SPECIAL_TACTICS_SUCCESS_COND_ID_")) continue;
+        if (!child.name.startsWith("SPECIAL_TACTICS_SUCCESS_COND_ID_"))
+          continue;
         const vars = child.variables;
         if (vars.length < 2) continue;
 
@@ -220,15 +223,26 @@ function parseEntries(entries: ConfigNode[]) {
           };
         } else if (child.name.startsWith("SPECIAL_TACTICS_INFO_REF_EFFECT_")) {
           if (currentTactic && child.variables.length >= 2) {
-            currentTactic.effectRef = [parseIntVar(child.variables[0]), parseIntVar(child.variables[1])];
+            currentTactic.effectRef = [
+              parseIntVar(child.variables[0]),
+              parseIntVar(child.variables[1]),
+            ];
           }
         } else if (child.name.startsWith("SPECIAL_TACTICS_INFO_REF_COND_ID_")) {
           if (currentTactic && child.variables.length >= 2) {
-            currentTactic.condRef = [parseIntVar(child.variables[0]), parseIntVar(child.variables[1])];
+            currentTactic.condRef = [
+              parseIntVar(child.variables[0]),
+              parseIntVar(child.variables[1]),
+            ];
           }
-        } else if (child.name.startsWith("SPECIAL_TACTICS_INFO_REF_SUCCESS_COND_ID_")) {
+        } else if (
+          child.name.startsWith("SPECIAL_TACTICS_INFO_REF_SUCCESS_COND_ID_")
+        ) {
           if (currentTactic && child.variables.length >= 2) {
-            currentTactic.successCondRef = [parseIntVar(child.variables[0]), parseIntVar(child.variables[1])];
+            currentTactic.successCondRef = [
+              parseIntVar(child.variables[0]),
+              parseIntVar(child.variables[1]),
+            ];
           }
         }
       }
@@ -247,13 +261,18 @@ function findSpecialTacticsConfigFile(dir: string): string | null {
   if (!existsSync(dir)) return null;
   const files = readdirSync(dir);
   const configFile = files
-    .filter(f => f.startsWith("special_tactics_config_") && f.endsWith(".cfg.bin.json"))
+    .filter(
+      (f) =>
+        f.startsWith("special_tactics_config_") && f.endsWith(".cfg.bin.json"),
+    )
     .sort()
     .pop();
   return configFile ? join(dir, configFile) : null;
 }
 
-export async function buildSpecialTacticsDatabase(dataPath: string): Promise<SpecialTacticsDatabase> {
+export async function buildSpecialTacticsDatabase(
+  dataPath: string,
+): Promise<SpecialTacticsDatabase> {
   const skillDir = join(dataPath, "common", "gamedata", "skill");
   const configPath = findSpecialTacticsConfigFile(skillDir);
 

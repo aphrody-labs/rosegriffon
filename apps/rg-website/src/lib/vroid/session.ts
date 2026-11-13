@@ -54,7 +54,13 @@ export interface FluxAutorisation {
 /** Dérive la clé AES-GCM du cookie à partir du secret de l'application. */
 async function cleCookie(): Promise<CryptoKey> {
   const { secret } = exigerConfigVroid();
-  const matiere = await crypto.subtle.importKey("raw", new TextEncoder().encode(secret), "HKDF", false, ["deriveKey"]);
+  const matiere = await crypto.subtle.importKey(
+    "raw",
+    new TextEncoder().encode(secret),
+    "HKDF",
+    false,
+    ["deriveKey"],
+  );
   return crypto.subtle.deriveKey(
     {
       name: "HKDF",
@@ -83,14 +89,17 @@ async function chiffrer(valeur: unknown): Promise<string> {
   paquet.set(new Uint8Array(chiffre), iv.length);
   let binaire = "";
   for (const octet of paquet) binaire += String.fromCharCode(octet);
-  return btoa(binaire).replaceAll("+", "-").replaceAll("/", "_").replaceAll("=", "");
+  return btoa(binaire)
+    .replaceAll("+", "-")
+    .replaceAll("/", "_")
+    .replaceAll("=", "");
 }
 
 /** Déchiffre une valeur produite par {@link chiffrer}. `null` si altérée. */
 async function dechiffrer<T>(encode: string): Promise<T | null> {
   try {
     const binaire = atob(encode.replaceAll("-", "+").replaceAll("_", "/"));
-    const paquet = Uint8Array.from(binaire, c => c.charCodeAt(0));
+    const paquet = Uint8Array.from(binaire, (c) => c.charCodeAt(0));
     if (paquet.length <= 12) return null;
     const clair = await crypto.subtle.decrypt(
       { name: "AES-GCM", iv: paquet.subarray(0, 12) },
@@ -118,7 +127,9 @@ function optionsCookie(dureeS: number) {
 }
 
 /** Enregistre le flux d'autorisation en cours (avant la redirection). */
-export async function poserFluxAutorisation(flux: FluxAutorisation): Promise<void> {
+export async function poserFluxAutorisation(
+  flux: FluxAutorisation,
+): Promise<void> {
   const magasin = await cookies();
   magasin.set(COOKIE_FLUX, await chiffrer(flux), optionsCookie(DUREE_FLUX_S));
 }
@@ -140,7 +151,11 @@ export async function poserSession(jeton: JetonVroid): Promise<void> {
     expireLe: Date.now() + jeton.expires_in * 1000,
   };
   const magasin = await cookies();
-  magasin.set(COOKIE_SESSION, await chiffrer(session), optionsCookie(DUREE_SESSION_S));
+  magasin.set(
+    COOKIE_SESSION,
+    await chiffrer(session),
+    optionsCookie(DUREE_SESSION_S),
+  );
 }
 
 /** Efface la session (déconnexion). */
@@ -171,7 +186,10 @@ export async function jetonValide(): Promise<string | null> {
   }
 
   try {
-    const renouvele = await rafraichirJeton(exigerConfigVroid(), session.refreshToken);
+    const renouvele = await rafraichirJeton(
+      exigerConfigVroid(),
+      session.refreshToken,
+    );
     await poserSession(renouvele);
     return renouvele.access_token;
   } catch {

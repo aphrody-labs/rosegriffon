@@ -15,9 +15,12 @@ const VALEURS = { compte: 1_903, membre: "<@42>", serveur: "Rose Griffon" };
 
 describe("gabarit d'accueil", () => {
   test("les trois jetons sont remplacés", () => {
-    expect(remplirGabarit("{membre} rejoint {serveur} — {compte} membres !", VALEURS)).toBe(
-      "<@42> rejoint Rose Griffon — 1903 membres !",
-    );
+    expect(
+      remplirGabarit(
+        "{membre} rejoint {serveur} — {compte} membres !",
+        VALEURS,
+      ),
+    ).toBe("<@42> rejoint Rose Griffon — 1903 membres !");
   });
 
   test("un jeton répété est remplacé à CHAQUE occurrence", () => {
@@ -32,7 +35,9 @@ describe("gabarit d'accueil", () => {
 
   test("aucun autre motif n'est interprété — le champ n'est pas un langage", () => {
     const brut = "{inconnu} ${process.env.SECRET} {{membre}} <@&123>";
-    expect(remplirGabarit(brut, VALEURS)).toBe("{inconnu} ${process.env.SECRET} {<@42>} <@&123>");
+    expect(remplirGabarit(brut, VALEURS)).toBe(
+      "{inconnu} ${process.env.SECRET} {<@42>} <@&123>",
+    );
   });
 
   test("un texte vide reste vide", () => {

@@ -239,7 +239,13 @@
       "screen": "title00",
       "visual_subscreen": null,
       "identity_source": "PLAN.md corrected screen identity: START, field and two foreground characters",
-      "screen_tokens": ["title00_01_st", "title00_03_02", "title00_", "title_menu_setting", "title_menu_0."],
+      "screen_tokens": [
+        "title00_01_st",
+        "title00_03_02",
+        "title00_",
+        "title_menu_setting",
+        "title_menu_0."
+      ],
       "pairing_status": "resolved",
       "setting_recipes": [
         {
@@ -823,7 +829,12 @@
       "screen": "kizuna_town_avatar_menu",
       "visual_subscreen": "chara_edit_clothes",
       "identity_source": "data/menu/manifest.json (documented_family)",
-      "screen_tokens": ["kizuna_town_avatar", "chara_edit", "chara_edit_recipe_menu", "chara_uniform"],
+      "screen_tokens": [
+        "kizuna_town_avatar",
+        "chara_edit",
+        "chara_edit_recipe_menu",
+        "chara_uniform"
+      ],
       "pairing_status": "resolved",
       "setting_recipes": [
         {
@@ -2804,7 +2815,12 @@
       "screen": "kizuna_town_avatar_menu",
       "visual_subscreen": "chara_edit_name",
       "identity_source": "data/menu/manifest.json (documented_family)",
-      "screen_tokens": ["kizuna_town_avatar", "chara_edit", "chara_edit_menu", "name_entry"],
+      "screen_tokens": [
+        "kizuna_town_avatar",
+        "chara_edit",
+        "chara_edit_menu",
+        "name_entry"
+      ],
       "pairing_status": "resolved",
       "setting_recipes": [
         {
@@ -3792,7 +3808,11 @@
       "screen": "kizuna_town_avatar_menu",
       "visual_subscreen": "chara_edit_stats",
       "identity_source": "data/menu/manifest.json (documented_family)",
-      "screen_tokens": ["kizuna_town_avatar", "chara_edit", "chara_edit_parts_menu_status"],
+      "screen_tokens": [
+        "kizuna_town_avatar",
+        "chara_edit",
+        "chara_edit_parts_menu_status"
+      ],
       "pairing_status": "resolved",
       "setting_recipes": [
         {
@@ -4780,7 +4800,12 @@
       "screen": "kizuna_town_avatar_menu",
       "visual_subscreen": "chara_edit_style",
       "identity_source": "data/menu/manifest.json (documented_family)",
-      "screen_tokens": ["kizuna_town_avatar", "chara_edit", "chara_edit_parts_menu", "chara_edit_model_menu"],
+      "screen_tokens": [
+        "kizuna_town_avatar",
+        "chara_edit",
+        "chara_edit_parts_menu",
+        "chara_edit_model_menu"
+      ],
       "pairing_status": "resolved",
       "setting_recipes": [
         {
@@ -5768,7 +5793,12 @@
       "screen": "kizuna_town_avatar_menu",
       "visual_subscreen": "avatar_edit_root",
       "identity_source": "data/menu/manifest.json (documented_family)",
-      "screen_tokens": ["kizuna_town_avatar", "chara_edit", "chara_edit_menu", "chara_edit_list_menu"],
+      "screen_tokens": [
+        "kizuna_town_avatar",
+        "chara_edit",
+        "chara_edit_menu",
+        "chara_edit_list_menu"
+      ],
       "pairing_status": "resolved",
       "setting_recipes": [
         {
@@ -6756,7 +6786,11 @@
       "screen": "chara_bank_menu",
       "visual_subscreen": "character_detail",
       "identity_source": "data/menu/manifest.json (documented_family)",
-      "screen_tokens": ["chara_bank_menu", "chara_status_menu", "chara_model_menu"],
+      "screen_tokens": [
+        "chara_bank_menu",
+        "chara_status_menu",
+        "chara_model_menu"
+      ],
       "pairing_status": "resolved",
       "setting_recipes": [
         {
@@ -6885,7 +6919,11 @@
       "screen": "chara_bank_menu",
       "visual_subscreen": "character_detail",
       "identity_source": "data/menu/manifest.json (documented_family)",
-      "screen_tokens": ["chara_bank_menu", "chara_status_menu", "chara_model_menu"],
+      "screen_tokens": [
+        "chara_bank_menu",
+        "chara_status_menu",
+        "chara_model_menu"
+      ],
       "pairing_status": "resolved",
       "setting_recipes": [
         {
@@ -7404,7 +7442,11 @@
       "screen": "chara_bank_menu",
       "visual_subscreen": "filter_appearance",
       "identity_source": "data/menu/manifest.json (documented_family)",
-      "screen_tokens": ["chara_bank_menu", "chara_bank_filter_menu", "chara_filter_menu"],
+      "screen_tokens": [
+        "chara_bank_menu",
+        "chara_bank_filter_menu",
+        "chara_filter_menu"
+      ],
       "pairing_status": "resolved",
       "setting_recipes": [
         {
@@ -7543,7 +7585,11 @@
       "screen": "chara_bank_menu",
       "visual_subscreen": "filter_bonus",
       "identity_source": "data/menu/manifest.json (documented_family)",
-      "screen_tokens": ["chara_bank_menu", "chara_bank_filter_menu", "chara_filter_menu"],
+      "screen_tokens": [
+        "chara_bank_menu",
+        "chara_bank_filter_menu",
+        "chara_filter_menu"
+      ],
       "pairing_status": "resolved",
       "setting_recipes": [
         {
@@ -7682,7 +7728,11 @@
       "screen": "chara_bank_menu",
       "visual_subscreen": "filter_elements",
       "identity_source": "data/menu/manifest.json (documented_family)",
-      "screen_tokens": ["chara_bank_menu", "chara_bank_filter_menu", "chara_filter_menu"],
+      "screen_tokens": [
+        "chara_bank_menu",
+        "chara_bank_filter_menu",
+        "chara_filter_menu"
+      ],
       "pairing_status": "resolved",
       "setting_recipes": [
         {
@@ -7821,7 +7871,11 @@
       "screen": "chara_bank_menu",
       "visual_subscreen": "filter_foot",
       "identity_source": "data/menu/manifest.json (documented_family)",
-      "screen_tokens": ["chara_bank_menu", "chara_bank_filter_menu", "chara_filter_menu"],
+      "screen_tokens": [
+        "chara_bank_menu",
+        "chara_bank_filter_menu",
+        "chara_filter_menu"
+      ],
       "pairing_status": "resolved",
       "setting_recipes": [
         {
@@ -7960,7 +8014,11 @@
       "screen": "chara_bank_menu",
       "visual_subscreen": "filter_position",
       "identity_source": "data/menu/manifest.json (documented_family)",
-      "screen_tokens": ["chara_bank_menu", "chara_bank_filter_menu", "chara_filter_menu"],
+      "screen_tokens": [
+        "chara_bank_menu",
+        "chara_bank_filter_menu",
+        "chara_filter_menu"
+      ],
       "pairing_status": "resolved",
       "setting_recipes": [
         {
@@ -8099,7 +8157,11 @@
       "screen": "chara_bank_menu",
       "visual_subscreen": "filter_rarity",
       "identity_source": "data/menu/manifest.json (documented_family)",
-      "screen_tokens": ["chara_bank_menu", "chara_bank_filter_menu", "chara_filter_menu"],
+      "screen_tokens": [
+        "chara_bank_menu",
+        "chara_bank_filter_menu",
+        "chara_filter_menu"
+      ],
       "pairing_status": "resolved",
       "setting_recipes": [
         {
@@ -8238,7 +8300,11 @@
       "screen": "chara_bank_menu",
       "visual_subscreen": "filter_team",
       "identity_source": "data/menu/manifest.json (documented_family)",
-      "screen_tokens": ["chara_bank_menu", "chara_bank_filter_menu", "chara_filter_menu"],
+      "screen_tokens": [
+        "chara_bank_menu",
+        "chara_bank_filter_menu",
+        "chara_filter_menu"
+      ],
       "pairing_status": "resolved",
       "setting_recipes": [
         {
@@ -8377,7 +8443,11 @@
       "screen": "chara_bank_menu",
       "visual_subscreen": "filter_team_role",
       "identity_source": "data/menu/manifest.json (documented_family)",
-      "screen_tokens": ["chara_bank_menu", "chara_bank_filter_menu", "chara_filter_menu"],
+      "screen_tokens": [
+        "chara_bank_menu",
+        "chara_bank_filter_menu",
+        "chara_filter_menu"
+      ],
       "pairing_status": "resolved",
       "setting_recipes": [
         {
@@ -8516,7 +8586,11 @@
       "screen": "soccer_formation_menu",
       "visual_subscreen": "formation_preset_selector",
       "identity_source": "data/menu/manifest.json (documented_family)",
-      "screen_tokens": ["soccer_formation_menu", "menu_preset_config", "soccer_formation"],
+      "screen_tokens": [
+        "soccer_formation_menu",
+        "menu_preset_config",
+        "soccer_formation"
+      ],
       "pairing_status": "resolved",
       "setting_recipes": [
         {
@@ -9086,7 +9160,11 @@
       "screen": "setting_menu",
       "visual_subscreen": null,
       "identity_source": "OBJBIN list of data/common/gamedata/menu/cfg/setting_menu_setting.cfg.bin",
-      "screen_tokens": ["setting_menu_setting", "setting_menu_1.", "option01_0"],
+      "screen_tokens": [
+        "setting_menu_setting",
+        "setting_menu_1.",
+        "option01_0"
+      ],
       "pairing_status": "resolved",
       "setting_recipes": [
         {

@@ -67,7 +67,10 @@ export class AzaleeRemoteError extends Error {
   readonly body?: unknown;
 
   constructor(message: string, init: AzaleeRemoteErrorInit) {
-    super(message, init.cause === undefined ? undefined : { cause: init.cause });
+    super(
+      message,
+      init.cause === undefined ? undefined : { cause: init.cause },
+    );
     this.name = "AzaleeRemoteError";
     this.kind = init.kind;
     this.status = init.status ?? 0;
@@ -82,11 +85,15 @@ export class AzaleeRemoteError extends Error {
  * structurelle couvre le cas multi-realm (module dupliqué par un bundler,
  * message passé entre la webview et un worker) où `instanceof` échoue.
  */
-export function isAzaleeRemoteError(value: unknown): value is AzaleeRemoteError {
+export function isAzaleeRemoteError(
+  value: unknown,
+): value is AzaleeRemoteError {
   if (value instanceof AzaleeRemoteError) return true;
   if (typeof value !== "object" || value === null) return false;
   const candidate = value as Partial<AzaleeRemoteError>;
-  return candidate.name === "AzaleeRemoteError" && typeof candidate.kind === "string";
+  return (
+    candidate.name === "AzaleeRemoteError" && typeof candidate.kind === "string"
+  );
 }
 
 /** `true` si l'échec est un 404 de l'API (ressource absente, pas une panne). */
@@ -103,5 +110,10 @@ export function isAzaleeRetriable(value: unknown): boolean {
   if (!isAzaleeRemoteError(value)) return false;
   if (value.kind === "network" || value.kind === "timeout") return true;
   if (value.kind !== "http") return false;
-  return value.status === 408 || value.status === 425 || value.status === 429 || value.status >= 500;
+  return (
+    value.status === 408 ||
+    value.status === 425 ||
+    value.status === 429 ||
+    value.status >= 500
+  );
 }

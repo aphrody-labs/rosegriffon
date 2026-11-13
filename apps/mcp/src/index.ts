@@ -19,8 +19,16 @@ import * as readline from "node:readline";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { resolve, join } from "node:path";
 
-import { createFilmProject, addFilmClip, type FilmProject } from "@aphrody/filmcraft/timeline";
-import { formatTimecodeSMPTE, framesToSeconds, secondsToFrames } from "@aphrody/remotion/timeline";
+import {
+  createFilmProject,
+  addFilmClip,
+  type FilmProject,
+} from "@aphrody/filmcraft/timeline";
+import {
+  formatTimecodeSMPTE,
+  framesToSeconds,
+  secondsToFrames,
+} from "@aphrody/remotion/timeline";
 
 interface JsonRpcRequest {
   jsonrpc: "2.0";
@@ -46,7 +54,8 @@ const SERVER_VERSION = "1.5.0";
 const TOOLS = [
   {
     name: "rg_status",
-    description: "Monorepo services, Bun runtime, and sovereign database readiness status",
+    description:
+      "Monorepo services, Bun runtime, and sovereign database readiness status",
     inputSchema: {
       type: "object",
       properties: {},
@@ -54,13 +63,15 @@ const TOOLS = [
   },
   {
     name: "rg_search",
-    description: "Search across Inazuma Eleven: Victory Road data (players, hissatsu skills, items, teams)",
+    description:
+      "Search across Inazuma Eleven: Victory Road data (players, hissatsu skills, items, teams)",
     inputSchema: {
       type: "object",
       properties: {
         query: {
           type: "string",
-          description: "Search keyword or character name (e.g. 'Mark Evans', 'Fire Tornado', 'Endou')",
+          description:
+            "Search keyword or character name (e.g. 'Mark Evans', 'Fire Tornado', 'Endou')",
         },
         limit: {
           type: "number",
@@ -72,13 +83,15 @@ const TOOLS = [
   },
   {
     name: "rg_identify_format",
-    description: "Identify console ROM, binary, or archive format using Bun Engine formats detector",
+    description:
+      "Identify console ROM, binary, or archive format using Bun Engine formats detector",
     inputSchema: {
       type: "object",
       properties: {
         path: {
           type: "string",
-          description: "Absolute or relative file path to the binary or ROM image",
+          description:
+            "Absolute or relative file path to the binary or ROM image",
         },
       },
       required: ["path"],
@@ -86,7 +99,8 @@ const TOOLS = [
   },
   {
     name: "nie_headless_save_editor",
-    description: "Headless save editor runner for IEVR: load, decrypt CRC32 stream, inspect blobs, apply level/coins modifications, and re-encrypt",
+    description:
+      "Headless save editor runner for IEVR: load, decrypt CRC32 stream, inspect blobs, apply level/coins modifications, and re-encrypt",
     inputSchema: {
       type: "object",
       properties: {
@@ -112,20 +126,23 @@ const TOOLS = [
         },
         mockIfMissing: {
           type: "boolean",
-          description: "Create genuine mock save if file does not exist (default true)",
+          description:
+            "Create genuine mock save if file does not exist (default true)",
         },
       },
     },
   },
   {
     name: "nie_menu_capture",
-    description: "Capture pixel-accurate frames of all game menu screens (boot, title, main_menu, save_editor, match_ui, formation) as PNG sequence + timeline manifest",
+    description:
+      "Capture pixel-accurate frames of all game menu screens (boot, title, main_menu, save_editor, match_ui, formation) as PNG sequence + timeline manifest",
     inputSchema: {
       type: "object",
       properties: {
         outDir: {
           type: "string",
-          description: "Directory where captured PNG frames and timeline.json will be saved",
+          description:
+            "Directory where captured PNG frames and timeline.json will be saved",
         },
         width: {
           type: "number",
@@ -148,17 +165,20 @@ const TOOLS = [
   },
   {
     name: "nie_memory_dump",
-    description: "Dumps process memory layout of running/simulated nie.exe (PE header, .text, .rdata, SaveManager, Heap) into binary core and structured JSON map",
+    description:
+      "Dumps process memory layout of running/simulated nie.exe (PE header, .text, .rdata, SaveManager, Heap) into binary core and structured JSON map",
     inputSchema: {
       type: "object",
       properties: {
         outBin: {
           type: "string",
-          description: "Output path for raw binary memory dump (default 'nie_memory_dump.bin')",
+          description:
+            "Output path for raw binary memory dump (default 'nie_memory_dump.bin')",
         },
         outJson: {
           type: "string",
-          description: "Output path for JSON memory map (default 'nie_memory_map.json')",
+          description:
+            "Output path for JSON memory map (default 'nie_memory_map.json')",
         },
         slot: {
           type: "string",
@@ -169,7 +189,8 @@ const TOOLS = [
   },
   {
     name: "nie_filmcraft_timeline",
-    description: "Assembles captured game frames into an automated FilmCraft NLE video timeline and Remotion SMPTE composition",
+    description:
+      "Assembles captured game frames into an automated FilmCraft NLE video timeline and Remotion SMPTE composition",
     inputSchema: {
       type: "object",
       properties: {
@@ -179,20 +200,23 @@ const TOOLS = [
         },
         projectName: {
           type: "string",
-          description: "Name of the FilmCraft project (default 'IEVR Showcase')",
+          description:
+            "Name of the FilmCraft project (default 'IEVR Showcase')",
         },
       },
     },
   },
   {
     name: "nie_headless_pipeline",
-    description: "End-to-end headless pipeline: save editor run + memory dump + game menu frame capture + FilmCraft & Remotion video timeline composition",
+    description:
+      "End-to-end headless pipeline: save editor run + memory dump + game menu frame capture + FilmCraft & Remotion video timeline composition",
     inputSchema: {
       type: "object",
       properties: {
         outDir: {
           type: "string",
-          description: "Output directory for all generated artifacts (default 'target/nie_pipeline_out')",
+          description:
+            "Output directory for all generated artifacts (default 'target/nie_pipeline_out')",
         },
         slot: {
           type: "string",
@@ -223,7 +247,10 @@ function findHeadlessBinary(): { command: string; prefixArgs: string[] } {
     resolve(cwd, "target/release/aphrody-nie-headless.exe"),
     resolve(cwd, "../../target/debug/aphrody-nie-headless.exe"),
     resolve(cwd, "../../target/release/aphrody-nie-headless.exe"),
-    resolve(process.env.USERPROFILE || "", ".local/bin/aphrody-nie-headless.exe"),
+    resolve(
+      process.env.USERPROFILE || "",
+      ".local/bin/aphrody-nie-headless.exe",
+    ),
   ];
 
   for (const c of candidates) {
@@ -232,7 +259,10 @@ function findHeadlessBinary(): { command: string; prefixArgs: string[] } {
     }
   }
 
-  return { command: "cargo", prefixArgs: ["run", "-q", "-p", "aphrody-nie-headless", "--"] };
+  return {
+    command: "cargo",
+    prefixArgs: ["run", "-q", "-p", "aphrody-nie-headless", "--"],
+  };
 }
 
 async function runHeadlessCommand(args: string[]): Promise<any> {
@@ -260,7 +290,10 @@ async function runHeadlessCommand(args: string[]): Promise<any> {
   }
 }
 
-async function handleToolCall(name: string, args: Record<string, any> = {}): Promise<any> {
+async function handleToolCall(
+  name: string,
+  args: Record<string, any> = {},
+): Promise<any> {
   switch (name) {
     case "rg_status": {
       return {
@@ -283,7 +316,7 @@ async function handleToolCall(name: string, args: Record<string, any> = {}): Pro
                 ],
               },
               null,
-              2
+              2,
             ),
           },
         ],
@@ -305,7 +338,7 @@ async function handleToolCall(name: string, args: Record<string, any> = {}): Pro
                 results: [],
               },
               null,
-              2
+              2,
             ),
           },
         ],
@@ -332,7 +365,7 @@ async function handleToolCall(name: string, args: Record<string, any> = {}): Pro
                   detection: image.detection,
                 },
                 null,
-                2
+                2,
               ),
             },
           ],
@@ -361,7 +394,8 @@ async function handleToolCall(name: string, args: Record<string, any> = {}): Pro
       if (args.out) cliArgs.push("--out", String(args.out));
       if (args.level !== undefined) cliArgs.push("--level", String(args.level));
       if (args.coins !== undefined) cliArgs.push("--coins", String(args.coins));
-      if (args.mockIfMissing !== false) cliArgs.push("--mock-if-missing", "true");
+      if (args.mockIfMissing !== false)
+        cliArgs.push("--mock-if-missing", "true");
 
       const res = await runHeadlessCommand(cliArgs);
       return {
@@ -418,7 +452,9 @@ async function handleToolCall(name: string, args: Record<string, any> = {}): Pro
     }
 
     case "nie_filmcraft_timeline": {
-      const manifestPath = String(args.manifestPath || "target/captured_menus/timeline.json");
+      const manifestPath = String(
+        args.manifestPath || "target/captured_menus/timeline.json",
+      );
       const projectName = String(args.projectName || "IEVR Headless Showcase");
 
       if (!existsSync(manifestPath)) {
@@ -443,7 +479,11 @@ async function handleToolCall(name: string, args: Record<string, any> = {}): Pro
         },
       });
 
-      const smpteCues: Array<{ screen: string; startSMPTE: string; frame: number }> = [];
+      const smpteCues: Array<{
+        screen: string;
+        startSMPTE: string;
+        frame: number;
+      }> = [];
 
       for (const clip of manifestData.filmcraft_clips || []) {
         addFilmClip(project, {
@@ -480,7 +520,9 @@ async function handleToolCall(name: string, args: Record<string, any> = {}): Pro
       };
 
       return {
-        content: [{ type: "text", text: JSON.stringify(outputTimeline, null, 2) }],
+        content: [
+          { type: "text", text: JSON.stringify(outputTimeline, null, 2) },
+        ],
       };
     }
 
@@ -506,7 +548,11 @@ async function handleToolCall(name: string, args: Record<string, any> = {}): Pro
           metadata: { pipeline: "nie_headless_pipeline" },
         });
 
-        const smpteCues: Array<{ screen: string; startSMPTE: string; frame: number }> = [];
+        const smpteCues: Array<{
+          screen: string;
+          startSMPTE: string;
+          frame: number;
+        }> = [];
         for (const clip of manifestData.filmcraft_clips || []) {
           addFilmClip(project, {
             name: clip.name,
@@ -546,7 +592,7 @@ async function handleToolCall(name: string, args: Record<string, any> = {}): Pro
                 filmcraft_timeline: filmcraftTimeline,
               },
               null,
-              2
+              2,
             ),
           },
         ],
@@ -618,7 +664,10 @@ async function handleRequest(request: JsonRpcRequest) {
         return;
       }
       try {
-        const result = await handleToolCall(params.name, params.arguments || {});
+        const result = await handleToolCall(
+          params.name,
+          params.arguments || {},
+        );
         sendResponse({
           jsonrpc: "2.0",
           id,

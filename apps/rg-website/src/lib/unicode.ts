@@ -13,7 +13,8 @@ const SEGMENTEUR = new Intl.Segmenter("fr", { granularity: "grapheme" });
 export function initiale(nom: string | null | undefined, repli = "?"): string {
   const propre = (nom ?? "").trim();
   if (!propre) return repli;
-  const premier = SEGMENTEUR.segment(propre)[Symbol.iterator]().next().value?.segment ?? "";
+  const premier =
+    SEGMENTEUR.segment(propre)[Symbol.iterator]().next().value?.segment ?? "";
   return premier.toLocaleUpperCase("fr") || repli;
 }
 
@@ -27,7 +28,8 @@ export function tronquerUnicode(s: string, n: number): string {
   return dernier >= 0xd800 && dernier <= 0xdbff ? coupe.slice(0, -1) : coupe;
 }
 
-const ILLISIBLE = /[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]|\uFFFD/g;
+const ILLISIBLE =
+  /[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]|\uFFFD/g;
 
 /**
  * Retire d'un texte venu d'un réseau tiers les caractères qui s'affichent « � » : moitiés

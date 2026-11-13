@@ -36,7 +36,13 @@ describe("compatibilité brackets-model", () => {
     const roundRobin: Exact<RoundRobinMode, LibRoundRobinMode> = true;
     const id: Exact<BracketId, LibId> = true;
 
-    expect([stageType, seedOrdering, grandFinal, roundRobin, id]).toEqual([true, true, true, true, true]);
+    expect([stageType, seedOrdering, grandFinal, roundRobin, id]).toEqual([
+      true,
+      true,
+      true,
+      true,
+      true,
+    ]);
   });
 
   test("les statuts de match gardent leur valeur numérique persistée", () => {

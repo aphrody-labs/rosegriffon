@@ -19,7 +19,12 @@ function IconeTiktok({ className }: { className?: string }) {
   );
 }
 
-const ICONES = { x: Twitter, instagram: Instagram, tiktok: IconeTiktok, youtube: Youtube } as const;
+const ICONES = {
+  x: Twitter,
+  instagram: Instagram,
+  tiktok: IconeTiktok,
+  youtube: Youtube,
+} as const;
 
 /**
  * Pastille du réseau : la couleur de marque est la seule couleur brute de la page.

@@ -74,13 +74,19 @@ interface SalonDiscord {
 }
 
 /** Jeton de l'application Achilléa — jamais celui du bot Rose Griffon. */
-export function jetonAchillea(env: Record<string, string | undefined> = Bun.env): string | null {
+export function jetonAchillea(
+  env: Record<string, string | undefined> = Bun.env,
+): string | null {
   const jeton = (env.ACHILLEA_DISCORD_BOT_TOKEN ?? "").trim();
   return jeton === "" ? null : jeton;
 }
 
 /** URL CDN d'une icône ou bannière, animée si le hachage l'indique. */
-export function urlCdn(type: "icons" | "banners", id: string, hachage: string | null): string | null {
+export function urlCdn(
+  type: "icons" | "banners",
+  id: string,
+  hachage: string | null,
+): string | null {
   if (!hachage) return null;
   const extension = hachage.startsWith("a_") ? "gif" : "webp";
   return `https://cdn.discordapp.com/${type}/${id}/${hachage}.${extension}?size=512`;
@@ -91,22 +97,31 @@ async function listerGuildes(jeton: string): Promise<GuildePartielle[]> {
   const toutes: GuildePartielle[] = [];
   let apres = "0";
   for (;;) {
-    const page = await appelDiscord<GuildePartielle[]>(`/users/@me/guilds?limit=200&after=${apres}`, 0, jeton);
+    const page = await appelDiscord<GuildePartielle[]>(
+      `/users/@me/guilds?limit=200&after=${apres}`,
+      0,
+      jeton,
+    );
     toutes.push(...page);
     if (page.length < 200) return toutes;
     apres = page.at(-1)!.id;
   }
 }
 
-async function releverGuilde(jeton: string, id: string): Promise<{ roles: number; salons: number }> {
+async function releverGuilde(
+  jeton: string,
+  id: string,
+): Promise<{ roles: number; salons: number }> {
   const [detail, roles, salons] = await Promise.all([
     appelDiscord<GuildeDetail>(`/guilds/${id}?with_counts=true`, 0, jeton),
     appelDiscord<RoleDiscord[]>(`/guilds/${id}/roles`, 0, jeton),
     // Un serveur peut retirer au bot la vue des salons : la guilde reste relevée.
-    appelDiscordOuNull<SalonDiscord[]>(`/guilds/${id}/channels`, jeton).then(s => s ?? []),
+    appelDiscordOuNull<SalonDiscord[]>(`/guilds/${id}/channels`, jeton).then(
+      (s) => s ?? [],
+    ),
   ]);
 
-  await sql.begin(async tx => {
+  await sql.begin(async (tx) => {
     // Mêmes politiques RLS que `sync:achillea` : écriture via `service_role`.
     // Les tableaux passent en JSON (Bun.SQL ne produit pas de littéral de tableau
     // Postgres, cf. `diagnostiquerSalons` dans `tasks/campagnes-discord.ts`).
@@ -156,7 +171,11 @@ async function releverGuilde(jeton: string, id: string): Promise<{ roles: number
 export async function runAchilleaGuildes(): Promise<ResultatGuildesAchillea> {
   const jeton = jetonAchillea();
   if (!jeton) {
-    return { success: false, error: "ACHILLEA_DISCORD_BOT_TOKEN absent : aucun serveur du bot Achilléa à relever." };
+    return {
+      success: false,
+      error:
+        "ACHILLEA_DISCORD_BOT_TOKEN absent : aucun serveur du bot Achilléa à relever.",
+    };
   }
   try {
     const guildes = await listerGuildes(jeton);
@@ -171,12 +190,14 @@ export async function runAchilleaGuildes(): Promise<ResultatGuildesAchillea> {
         roles += compte.roles;
         salons += compte.salons;
       } catch (err) {
-        echecs.push(`${guilde.id} (${guilde.name}) : ${err instanceof Error ? err.message : String(err)}`);
+        echecs.push(
+          `${guilde.id} (${guilde.name}) : ${err instanceof Error ? err.message : String(err)}`,
+        );
       }
     }
 
-    const presentes = guildes.map(g => g.id);
-    const quittees = await sql.begin(async tx => {
+    const presentes = guildes.map((g) => g.id);
+    const quittees = await sql.begin(async (tx) => {
       await tx`SET LOCAL ROLE service_role`;
       const lignes = await tx`
         UPDATE achillea.guild SET deleted = true, updated_at = now()
@@ -195,6 +216,9 @@ export async function runAchilleaGuildes(): Promise<ResultatGuildesAchillea> {
       ...(echecs.length > 0 ? { echecs } : {}),
     };
   } catch (err) {
-    return { success: false, error: err instanceof Error ? err.message : String(err) };
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : String(err),
+    };
   }
 }

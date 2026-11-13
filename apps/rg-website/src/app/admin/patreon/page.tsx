@@ -10,7 +10,14 @@ import {
   AdminPageHeader,
 } from "@rosegriffon/ui";
 import { createPostgresClient } from "@rosegriffon/db/service";
-import { AlertCircle, BarChart3, Heart, RefreshCw, TrendingUp, Users } from "lucide-react";
+import {
+  AlertCircle,
+  BarChart3,
+  Heart,
+  RefreshCw,
+  TrendingUp,
+  Users,
+} from "lucide-react";
 
 import { PatreonAdminActions } from "@/components/patreon/admin/PatreonAdminActions";
 import { PatreonLiveMembersTable } from "@/components/patreon/admin/PatreonLiveMembersTable";
@@ -58,20 +65,36 @@ export default async function AdminPatreonPage() {
   const creatorLinked = Boolean(tokenRow);
 
   const live = liveResult.ok ? liveResult.snapshot : null;
-  const liveActive = live ? live.members.filter(m => m.patron_status === "active_patron") : [];
-  const liveFormer = live
-    ? live.members.filter(m => m.patron_status === "former_patron" || m.patron_status === "declined_patron")
+  const liveActive = live
+    ? live.members.filter((m) => m.patron_status === "active_patron")
     : [];
-  const liveFormerPaid = liveFormer.filter(m => m.lifetime_support_cents > 0);
-  const liveMonthlyCents = liveActive.reduce((acc, m) => acc + m.currently_entitled_cents, 0);
-  const liveLifetimeCents = live ? live.members.reduce((acc, m) => acc + m.lifetime_support_cents, 0) : 0;
-  const liveAvgPledge = liveActive.length > 0 ? liveMonthlyCents / liveActive.length : 0;
+  const liveFormer = live
+    ? live.members.filter(
+        (m) =>
+          m.patron_status === "former_patron" ||
+          m.patron_status === "declined_patron",
+      )
+    : [];
+  const liveFormerPaid = liveFormer.filter((m) => m.lifetime_support_cents > 0);
+  const liveMonthlyCents = liveActive.reduce(
+    (acc, m) => acc + m.currently_entitled_cents,
+    0,
+  );
+  const liveLifetimeCents = live
+    ? live.members.reduce((acc, m) => acc + m.lifetime_support_cents, 0)
+    : 0;
+  const liveAvgPledge =
+    liveActive.length > 0 ? liveMonthlyCents / liveActive.length : 0;
   const liveTotal = live?.members.length ?? 0;
-  const liveTierOptions = live ? [...new Set(live.members.flatMap(m => m.tier_titles))].toSorted() : [];
+  const liveTierOptions = live
+    ? [...new Set(live.members.flatMap((m) => m.tier_titles))].toSorted()
+    : [];
 
   const redirectUri = absoluteUrl("/api/auth/callback/patreon");
   const clientId = process.env.PATREON_CLIENT_ID;
-  const clientIdMasked = clientId ? `${clientId.slice(0, 8)}…${clientId.slice(-4)}` : null;
+  const clientIdMasked = clientId
+    ? `${clientId.slice(0, 8)}…${clientId.slice(-4)}`
+    : null;
 
   return (
     <div className="mx-auto max-w-7xl space-y-8 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
@@ -115,9 +138,12 @@ export default async function AdminPatreonPage() {
               Raison :{" "}
               <code className="rounded bg-muted px-1 py-0.5 text-xs">
                 {liveResult.ok ? "ok" : liveResult.reason}
-                {!liveResult.ok && liveResult.error ? ` — ${liveResult.error}` : ""}
+                {!liveResult.ok && liveResult.error
+                  ? ` — ${liveResult.error}`
+                  : ""}
               </code>
-              . Lance « Lier le créateur » avec les scopes campagne pour activer la lecture live.
+              . Lance « Lier le créateur » avec les scopes campagne pour activer
+              la lecture live.
             </p>
           </CardContent>
         </Card>
@@ -151,7 +177,9 @@ export default async function AdminPatreonPage() {
         <TabsList className="grid w-full grid-cols-2 lg:w-fit lg:grid-cols-4">
           <TabsTrigger value="overview">Vue d'ensemble</TabsTrigger>
           <TabsTrigger value="members-live">Membres ({liveTotal})</TabsTrigger>
-          <TabsTrigger value="tiers">Tiers ({live?.tiers.length ?? 0})</TabsTrigger>
+          <TabsTrigger value="tiers">
+            Tiers ({live?.tiers.length ?? 0})
+          </TabsTrigger>
           <TabsTrigger value="webhooks">Webhooks</TabsTrigger>
         </TabsList>
 
@@ -179,13 +207,17 @@ export default async function AdminPatreonPage() {
                       <div className="flex items-center justify-between">
                         <dt className="text-muted-foreground">Scope OAuth</dt>
                         <dd>
-                          <code className="text-xs text-muted-foreground">{(tokenRow as { scope: string }).scope}</code>
+                          <code className="text-xs text-muted-foreground">
+                            {(tokenRow as { scope: string }).scope}
+                          </code>
                         </dd>
                       </div>
                       <div className="flex items-center justify-between">
                         <dt className="text-muted-foreground">Token expire</dt>
                         <dd className="text-xs text-foreground">
-                          {new Date((tokenRow as { expires_at: string }).expires_at).toLocaleString("fr-FR")}
+                          {new Date(
+                            (tokenRow as { expires_at: string }).expires_at,
+                          ).toLocaleString("fr-FR")}
                         </dd>
                       </div>
                     </>
@@ -196,12 +228,18 @@ export default async function AdminPatreonPage() {
                         <dt className="text-muted-foreground">Fetch live</dt>
                         <dd className="text-xs text-foreground">
                           {new Date(live.fetchedAt).toLocaleString("fr-FR")} ·{" "}
-                          <span className="text-muted-foreground">{live.fetchDurationMs} ms</span>
+                          <span className="text-muted-foreground">
+                            {live.fetchDurationMs} ms
+                          </span>
                         </dd>
                       </div>
                       <div className="flex items-center justify-between">
-                        <dt className="text-muted-foreground">Patrons (campaign)</dt>
-                        <dd className="text-xs text-foreground">{live.campaign.patron_count}</dd>
+                        <dt className="text-muted-foreground">
+                          Patrons (campaign)
+                        </dt>
+                        <dd className="text-xs text-foreground">
+                          {live.campaign.patron_count}
+                        </dd>
                       </div>
                     </>
                   )}
@@ -211,42 +249,63 @@ export default async function AdminPatreonPage() {
 
             <Card>
               <CardContent className="p-6">
-                <h2 className="mb-4 font-semibold text-foreground">Top tiers actifs</h2>
+                <h2 className="mb-4 font-semibold text-foreground">
+                  Top tiers actifs
+                </h2>
                 <div className="space-y-2 text-sm">
                   {(live?.tiers ?? [])
-                    .filter(t => t.published !== false)
-                    .toSorted((a, b) => (b.patron_count ?? 0) - (a.patron_count ?? 0))
+                    .filter((t) => t.published !== false)
+                    .toSorted(
+                      (a, b) => (b.patron_count ?? 0) - (a.patron_count ?? 0),
+                    )
                     .slice(0, 5)
-                    .map(t => (
-                      <div key={t.id} className="flex items-center justify-between gap-2">
-                        <span className="truncate text-foreground">{t.title}</span>
+                    .map((t) => (
+                      <div
+                        key={t.id}
+                        className="flex items-center justify-between gap-2"
+                      >
+                        <span className="truncate text-foreground">
+                          {t.title}
+                        </span>
                         <div className="flex items-center gap-3 text-xs">
-                          <span className="text-muted-foreground">{t.patron_count ?? 0} patrons</span>
-                          <span className="font-mono tabular-nums text-foreground">{formatEur(t.amount_cents)}</span>
+                          <span className="text-muted-foreground">
+                            {t.patron_count ?? 0} patrons
+                          </span>
+                          <span className="font-mono tabular-nums text-foreground">
+                            {formatEur(t.amount_cents)}
+                          </span>
                         </div>
                       </div>
                     ))}
                   {(!live || live.tiers.length === 0) && (
-                    <p className="text-muted-foreground">Aucun tier renvoyé par l'API.</p>
+                    <p className="text-muted-foreground">
+                      Aucun tier renvoyé par l'API.
+                    </p>
                   )}
                 </div>
               </CardContent>
             </Card>
           </div>
 
-          <PatreonOAuthConfig redirectUri={redirectUri} clientIdMasked={clientIdMasked} />
+          <PatreonOAuthConfig
+            redirectUri={redirectUri}
+            clientIdMasked={clientIdMasked}
+          />
 
           <PatreonAdminActions />
         </TabsContent>
 
         <TabsContent value="members-live">
           {live ? (
-            <PatreonLiveMembersTable members={live.members} tierOptions={liveTierOptions} />
+            <PatreonLiveMembersTable
+              members={live.members}
+              tierOptions={liveTierOptions}
+            />
           ) : (
             <Card>
               <CardContent className="p-6 text-sm text-muted-foreground">
-                Liste indisponible — l'API Patreon n'a pas pu être interrogée. Lance « Lier le créateur » pour autoriser
-                les scopes campagne.
+                Liste indisponible — l'API Patreon n'a pas pu être interrogée.
+                Lance « Lier le créateur » pour autoriser les scopes campagne.
               </CardContent>
             </Card>
           )}
@@ -264,12 +323,19 @@ export default async function AdminPatreonPage() {
                 </tr>
               </thead>
               <tbody>
-                {(live?.tiers ?? []).map(t => (
-                  <tr key={t.id} className="border-t border-border/40 transition-colors hover:bg-muted/30">
+                {(live?.tiers ?? []).map((t) => (
+                  <tr
+                    key={t.id}
+                    className="border-t border-border/40 transition-colors hover:bg-muted/30"
+                  >
                     <td className="px-4 py-3">
-                      <div className="font-medium text-foreground">{t.title}</div>
+                      <div className="font-medium text-foreground">
+                        {t.title}
+                      </div>
                       {t.description && (
-                        <div className="line-clamp-1 text-xs text-muted-foreground">{t.description}</div>
+                        <div className="line-clamp-1 text-xs text-muted-foreground">
+                          {t.description}
+                        </div>
                       )}
                       {t.discord_role_ids.length > 0 && (
                         <div className="mt-1 text-xs text-muted-foreground">
@@ -277,7 +343,9 @@ export default async function AdminPatreonPage() {
                         </div>
                       )}
                     </td>
-                    <td className="px-4 py-3 font-mono tabular-nums">{formatEur(t.amount_cents)}</td>
+                    <td className="px-4 py-3 font-mono tabular-nums">
+                      {formatEur(t.amount_cents)}
+                    </td>
                     <td className="px-4 py-3">{t.patron_count ?? 0}</td>
                     <td className="px-4 py-3">
                       {t.published === false ? (
@@ -294,7 +362,10 @@ export default async function AdminPatreonPage() {
                 ))}
                 {(!live || live.tiers.length === 0) && (
                   <tr>
-                    <td colSpan={4} className="px-4 py-8 text-center text-muted-foreground">
+                    <td
+                      colSpan={4}
+                      className="px-4 py-8 text-center text-muted-foreground"
+                    >
                       Aucun tier renvoyé par l'API Patreon.
                     </td>
                   </tr>

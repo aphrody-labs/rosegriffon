@@ -8,7 +8,10 @@ interface ExcerptSectionProps {
   onExcerptChange: (value: string) => void;
 }
 
-export function ExcerptSection({ excerpt, onExcerptChange }: ExcerptSectionProps) {
+export function ExcerptSection({
+  excerpt,
+  onExcerptChange,
+}: ExcerptSectionProps) {
   return (
     <div className="space-y-2">
       <label htmlFor="article-excerpt" className="sr-only">
@@ -17,7 +20,7 @@ export function ExcerptSection({ excerpt, onExcerptChange }: ExcerptSectionProps
       <Textarea
         id="article-excerpt"
         value={excerpt}
-        onChange={e => onExcerptChange(e.target.value)}
+        onChange={(e) => onExcerptChange(e.target.value)}
         className="bg-surface-container-high border-none rounded-xl resize-none text-sm font-sans"
         placeholder="Résumé court de l'article..."
         rows={3}
@@ -25,7 +28,12 @@ export function ExcerptSection({ excerpt, onExcerptChange }: ExcerptSectionProps
       />
       <p
         id="excerpt-hint"
-        className={cn("text-[10px]", excerpt.length > 160 ? "text-destructive" : "text-muted-foreground/50")}
+        className={cn(
+          "text-[10px]",
+          excerpt.length > 160
+            ? "text-destructive"
+            : "text-muted-foreground/50",
+        )}
       >
         {excerpt.length}/160 caractères
       </p>

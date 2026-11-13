@@ -36,8 +36,17 @@ import {
 import { logAdminAction } from "../../lib/audit";
 import { rgEmbed } from "../../lib/embeds";
 import { CLE_REGLAGE_TWEETS } from "../../lib/tweets-format";
-import { getSettingDetail, listSettings, setSetting } from "../../services/admin";
-import { blocJson, borner, decouperEnChamps, horodatageRelatif } from "../staff/format";
+import {
+  getSettingDetail,
+  listSettings,
+  setSetting,
+} from "../../services/admin";
+import {
+  blocJson,
+  borner,
+  decouperEnChamps,
+  horodatageRelatif,
+} from "../staff/format";
 import { differerEnPrive, exigerDroits, messagePanne } from "../staff/garde";
 import {
   analyserValeurReglage,
@@ -57,7 +66,9 @@ import { echec, piedTexte, refus as accesRefuse, repondre } from "../../lib/ui";
  * erreur : si la base ne répond pas, on rend une liste vide plutôt que de
  * laisser l'appel se perdre.
  */
-async function suggererCles(interaction: AutocompleteInteraction): Promise<void> {
+async function suggererCles(
+  interaction: AutocompleteInteraction,
+): Promise<void> {
   const saisie = String(interaction.options.getFocused() ?? "")
     .trim()
     .toLowerCase();
@@ -65,9 +76,12 @@ async function suggererCles(interaction: AutocompleteInteraction): Promise<void>
     const lignes = await listSettings();
     await interaction.respond(
       lignes
-        .filter(ligne => saisie.length === 0 || ligne.key.toLowerCase().includes(saisie))
+        .filter(
+          (ligne) =>
+            saisie.length === 0 || ligne.key.toLowerCase().includes(saisie),
+        )
         .slice(0, 25)
-        .map(ligne => ({ name: borner(ligne.key, 100), value: ligne.key })),
+        .map((ligne) => ({ name: borner(ligne.key, 100), value: ligne.key })),
     );
   } catch {
     await interaction.respond([]);
@@ -82,7 +96,10 @@ async function suggererCles(interaction: AutocompleteInteraction): Promise<void>
 })
 @SlashGroup("reglages", "administration")
 export class AdministrationReglagesCommand {
-  @Slash({ name: "liste", description: "Toutes les clés de réglage, avec leur rôle" })
+  @Slash({
+    name: "liste",
+    description: "Toutes les clés de réglage, avec leur rôle",
+  })
   async liste(interaction: ChatInputCommandInteraction) {
     await differerEnPrive(interaction);
     if (!(await exigerDroits(interaction))) {
@@ -98,13 +115,20 @@ export class AdministrationReglagesCommand {
       }
       const embed = rgEmbed()
         .setTitle(`Réglages — ${lignes.length} clés`)
-        .setFooter(piedTexte({ note: "Lecture : /administration reglages lire · écriture : … ecrire" }));
+        .setFooter(
+          piedTexte({
+            note: "Lecture : /administration reglages lire · écriture : … ecrire",
+          }),
+        );
 
       // Une clé + sa description dépasse vite les 4 096 caractères d'une
       // description d'embed quand la table grossit : on découpe en champs
       // bornés plutôt que de risquer un envoi refusé en entier.
       const corps = lignes
-        .map(ligne => `\`${ligne.key}\` — ${borner(ligne.description ?? bornerValeur(ligne.value), 120)}`)
+        .map(
+          (ligne) =>
+            `\`${ligne.key}\` — ${borner(ligne.description ?? bornerValeur(ligne.value), 120)}`,
+        )
         .join("\n");
       // 5 champs de 1 000 caractères au plus : le total d'un embed est plafonné
       // à 6 000 par Discord, titre et pied compris.
@@ -117,11 +141,17 @@ export class AdministrationReglagesCommand {
       }
       await interaction.editReply({ embeds: [embed] });
     } catch (err) {
-      await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
+      await repondre(
+        interaction,
+        echec("Le service n'a pas répondu", messagePanne(err)),
+      );
     }
   }
 
-  @Slash({ name: "lire", description: "Valeur exacte d'une clé, telle qu'elle est stockée" })
+  @Slash({
+    name: "lire",
+    description: "Valeur exacte d'une clé, telle qu'elle est stockée",
+  })
   async lire(
     @SlashOption({
       name: "clef",
@@ -168,7 +198,10 @@ export class AdministrationReglagesCommand {
         ],
       });
     } catch (err) {
-      await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
+      await repondre(
+        interaction,
+        echec("Le service n'a pas répondu", messagePanne(err)),
+      );
     }
   }
 
@@ -187,7 +220,8 @@ export class AdministrationReglagesCommand {
     clef: string,
     @SlashOption({
       name: "valeur",
-      description: 'Valeur JSON (60, true, "texte", {…}) ; sinon rangée telle quelle en chaîne',
+      description:
+        'Valeur JSON (60, true, "texte", {…}) ; sinon rangée telle quelle en chaîne',
       type: ApplicationCommandOptionType.String,
       required: true,
     })
@@ -269,7 +303,13 @@ export class AdministrationReglagesCommand {
 
       const embed = rgEmbed()
         .setTitle(avant ? `⚙ ${cle} — remplacé` : `⚙ ${cle} — créé`)
-        .setDescription(decrireChangement(avant?.value ?? null, apres?.value ?? lue.valeur, 300))
+        .setDescription(
+          decrireChangement(
+            avant?.value ?? null,
+            apres?.value ?? lue.valeur,
+            300,
+          ),
+        )
         .addFields({
           name: "Valeur relue en base",
           value: blocJson(apres?.value ?? lue.valeur, 1_000),
@@ -295,7 +335,10 @@ export class AdministrationReglagesCommand {
       }
       await interaction.editReply({ embeds: [embed] });
     } catch (err) {
-      await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
+      await repondre(
+        interaction,
+        echec("Le service n'a pas répondu", messagePanne(err)),
+      );
     }
   }
 }

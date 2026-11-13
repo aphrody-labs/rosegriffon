@@ -7,7 +7,16 @@ schema = "VRFW.theme/1"
 id = "rose_griffon"
 name = { en = "Rose Griffon (roy)", fr = "Rose Griffon (roy)" }
 include = ["dx11/menu"]
-exclude = ["dx11/menu/200_icon", "dx11/menu/220_img", "dx11/menu/210_minimap", "dx11/menu/13_map", "dx11/menu/90_map", "dx11/menu/112_gallery", "dx11/menu/50_title/title00", "dx11/menu/50_title/title02/title02_00"]
+exclude = [
+  "dx11/menu/200_icon",
+  "dx11/menu/220_img",
+  "dx11/menu/210_minimap",
+  "dx11/menu/13_map",
+  "dx11/menu/90_map",
+  "dx11/menu/112_gallery",
+  "dx11/menu/50_title/title00",
+  "dx11/menu/50_title/title02/title02_00",
+]
 
 [palette]
 bg = "#dbd7d0"

@@ -41,7 +41,11 @@ export async function GET(): Promise<Response> {
       await effacerSession();
       return NextResponse.json({ configure: true, connecte: false });
     }
-    return NextResponse.json({ configure: true, connecte: true, utilisateur: null });
+    return NextResponse.json({
+      configure: true,
+      connecte: true,
+      utilisateur: null,
+    });
   }
 }
 

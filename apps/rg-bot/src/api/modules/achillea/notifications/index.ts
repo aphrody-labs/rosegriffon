@@ -12,7 +12,8 @@ export const notificationsController = new Elysia({ prefix: "/notifications" })
     "/me",
     async ({ db, headers }) => {
       const identity = await session(headers);
-      if (!identity) return status(401, { message: "Authentication required" as const });
+      if (!identity)
+        return status(401, { message: "Authentication required" as const });
       const rows = await db
         .selectFrom("user_notification as link")
         .innerJoin("notification", "notification.id", "link.notification_id")
@@ -32,13 +33,18 @@ export const notificationsController = new Elysia({ prefix: "/notifications" })
         .execute();
       return { success: true as const, data: rows };
     },
-    { response: { 401: t.Object({ message: t.Literal("Authentication required") }) } },
+    {
+      response: {
+        401: t.Object({ message: t.Literal("Authentication required") }),
+      },
+    },
   )
   .patch(
     "/read/:id",
     async ({ db, headers, params: { id } }) => {
       const identity = await session(headers);
-      if (!identity) return status(401, { message: "Authentication required" as const });
+      if (!identity)
+        return status(401, { message: "Authentication required" as const });
       const updated = await db
         .updateTable("user_notification")
         .set({ is_read: true, read_at: new Date(), updated_at: new Date() })
@@ -46,7 +52,8 @@ export const notificationsController = new Elysia({ prefix: "/notifications" })
         .where("notification_id", "=", id)
         .returning("id")
         .executeTakeFirst();
-      if (!updated) return status(404, { message: "Notification not found" as const });
+      if (!updated)
+        return status(404, { message: "Notification not found" as const });
       return { success: true as const };
     },
     { params: t.Object({ id: t.Numeric() }) },
@@ -55,7 +62,8 @@ export const notificationsController = new Elysia({ prefix: "/notifications" })
     "/unread/:id",
     async ({ db, headers, params: { id } }) => {
       const identity = await session(headers);
-      if (!identity) return status(401, { message: "Authentication required" as const });
+      if (!identity)
+        return status(401, { message: "Authentication required" as const });
       const updated = await db
         .updateTable("user_notification")
         .set({ is_read: false, read_at: null, updated_at: new Date() })
@@ -63,7 +71,8 @@ export const notificationsController = new Elysia({ prefix: "/notifications" })
         .where("notification_id", "=", id)
         .returning("id")
         .executeTakeFirst();
-      if (!updated) return status(404, { message: "Notification not found" as const });
+      if (!updated)
+        return status(404, { message: "Notification not found" as const });
       return { success: true as const };
     },
     { params: t.Object({ id: t.Numeric() }) },
@@ -72,7 +81,8 @@ export const notificationsController = new Elysia({ prefix: "/notifications" })
     "/read-all",
     async ({ db, headers }) => {
       const identity = await session(headers);
-      if (!identity) return status(401, { message: "Authentication required" as const });
+      if (!identity)
+        return status(401, { message: "Authentication required" as const });
       await db
         .updateTable("user_notification")
         .set({ is_read: true, read_at: new Date(), updated_at: new Date() })
@@ -81,5 +91,9 @@ export const notificationsController = new Elysia({ prefix: "/notifications" })
         .execute();
       return { success: true as const };
     },
-    { response: { 401: t.Object({ message: t.Literal("Authentication required") }) } },
+    {
+      response: {
+        401: t.Object({ message: t.Literal("Authentication required") }),
+      },
+    },
   );

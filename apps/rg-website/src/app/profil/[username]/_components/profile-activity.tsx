@@ -15,7 +15,10 @@ interface Activity {
 export function ProfileActivity({ activities }: { activities: Activity[] }) {
   return (
     <section aria-labelledby="activity-title" className="space-y-4">
-      <h2 id="activity-title" className="flex items-center gap-2 text-xl font-bold text-foreground">
+      <h2
+        id="activity-title"
+        className="flex items-center gap-2 text-xl font-bold text-foreground"
+      >
         <History className="size-5 text-primary" aria-hidden="true" />
         Activités récentes
       </h2>
@@ -23,12 +26,14 @@ export function ProfileActivity({ activities }: { activities: Activity[] }) {
       {activities.length === 0 ? (
         <Card>
           <CardContent className="p-8 text-center">
-            <p className="text-muted-foreground">Aucune activité récente à afficher.</p>
+            <p className="text-muted-foreground">
+              Aucune activité récente à afficher.
+            </p>
           </CardContent>
         </Card>
       ) : (
         <ul className="space-y-4">
-          {activities.map(activity => (
+          {activities.map((activity) => (
             <li key={activity.id}>
               <Link
                 href={`/news/${activity.slug}`}
@@ -53,10 +58,16 @@ export function ProfileActivity({ activities }: { activities: Activity[] }) {
                         <span className="flex items-center gap-1">
                           <Calendar className="size-3" aria-hidden="true" />
                           {activity.created_at
-                            ? format(new Date(activity.created_at), "d MMMM yyyy", { locale: fr })
+                            ? format(
+                                new Date(activity.created_at),
+                                "d MMMM yyyy",
+                                { locale: fr },
+                              )
                             : "Date inconnue"}
                         </span>
-                        <span className="rounded-full bg-muted px-2 py-0.5 text-muted-foreground">Chronique</span>
+                        <span className="rounded-full bg-muted px-2 py-0.5 text-muted-foreground">
+                          Chronique
+                        </span>
                       </p>
                     </div>
                   </CardContent>

@@ -20,7 +20,13 @@
  *   interclan_match_result_modal:<lobbyId>     fenêtre de score
  *   vote:approve:<proposalId> / vote:reject:<proposalId>   validation des résultats
  */
-import { calculerVainqueur, compositionValide, ETAT, LIBELLES_ETAT, TAILLE_COMPOSITION } from "./regles";
+import {
+  calculerVainqueur,
+  compositionValide,
+  ETAT,
+  LIBELLES_ETAT,
+  TAILLE_COMPOSITION,
+} from "./regles";
 
 export const COULEURS_INTERCLAN = {
   defi: 0xc27c0e,
@@ -118,9 +124,12 @@ const secondes = (d: DateApi) => Math.floor(new Date(d).getTime() / 1000);
 /** Horodatage Discord : affiché dans le fuseau du LECTEUR. */
 export const quand = (d: DateApi, style = "F") => `<t:${secondes(d)}:${style}>`;
 
-export function compositionDe(detail: DetailInterclan, cote: 0 | 1): CompositionInterclan | null {
+export function compositionDe(
+  detail: DetailInterclan,
+  cote: 0 | 1,
+): CompositionInterclan | null {
   const clanId = cote === 0 ? detail.clanA.id : detail.clanB.id;
-  return detail.lineups.find(l => l.clanId === clanId) ?? null;
+  return detail.lineups.find((l) => l.clanId === clanId) ?? null;
 }
 
 function statutComposition(l: CompositionInterclan | null): string {
@@ -145,12 +154,23 @@ function bouton(
     ...(options.disabled ? { disabled: true } : {}),
   };
 }
-const rangee = (...composants: Array<Record<string, unknown>>) => ({ type: 1, components: composants });
+const rangee = (...composants: Array<Record<string, unknown>>) => ({
+  type: 1,
+  components: composants,
+});
 
 /** Émoji de clan utilisable dans un bouton, ou `undefined` si le clan n'en a pas. */
-function emojiClan(clan: ClanInterclan): { name: string; id: string } | undefined {
+function emojiClan(
+  clan: ClanInterclan,
+): { name: string; id: string } | undefined {
   return clan.emojiId && /^\d{5,25}$/u.test(clan.emojiId)
-    ? { name: clan.normalizedShortName.replace(/[^A-Za-z0-9_]/gu, "").slice(0, 32) || "clan", id: clan.emojiId }
+    ? {
+        name:
+          clan.normalizedShortName
+            .replace(/[^A-Za-z0-9_]/gu, "")
+            .slice(0, 32) || "clan",
+        id: clan.emojiId,
+      }
     : undefined;
 }
 
@@ -164,13 +184,20 @@ export function boutonsAccepterRefuser(cible: string, id: number | string) {
 
 // ─── Défi ───────────────────────────────────────────────────────────────────
 
-export function embedDefi(detail: DetailInterclan, proposeur: string): Record<string, unknown> {
-  const expire = new Date(new Date(detail.createdAt).getTime() + 24 * 60 * 60 * 1000);
+export function embedDefi(
+  detail: DetailInterclan,
+  proposeur: string,
+): Record<string, unknown> {
+  const expire = new Date(
+    new Date(detail.createdAt).getTime() + 24 * 60 * 60 * 1000,
+  );
   return {
     color: COULEURS_INTERCLAN.defi,
     title: `${detail.name} - Proposition d'Interclan`,
     description: `Vous êtes défié à un Interclan par le clan ${detail.clanA.name} !\nMotif : ${detail.description}`,
-    ...(/^https?:\/\//u.test(detail.clanA.avatarUrl) ? { thumbnail: { url: detail.clanA.avatarUrl } } : {}),
+    ...(/^https?:\/\//u.test(detail.clanA.avatarUrl)
+      ? { thumbnail: { url: detail.clanA.avatarUrl } }
+      : {}),
     fields: [
       { name: "Proposé par", value: proposeur, inline: true },
       { name: "Clan rival", value: detail.clanA.name, inline: true },
@@ -181,10 +208,15 @@ export function embedDefi(detail: DetailInterclan, proposeur: string): Record<st
 }
 
 /** Message posté dans le salon du clan défié : mentions de ses dirigeants + boutons de réponse. */
-export function messageDefi(detail: DetailInterclan, proposeurId: string, dirigeants: readonly string[]): MessageDiscord {
-  const mentions = dirigeants.map(id => `<@${id}>`).join(", ");
+export function messageDefi(
+  detail: DetailInterclan,
+  proposeurId: string,
+  dirigeants: readonly string[],
+): MessageDiscord {
+  const mentions = dirigeants.map((id) => `<@${id}>`).join(", ");
   return {
-    content: `${mentions}\n<@${proposeurId}> du clan ${detail.clanA.name} vous défie ! Acceptez-vous ?`.trim(),
+    content:
+      `${mentions}\n<@${proposeurId}> du clan ${detail.clanA.name} vous défie ! Acceptez-vous ?`.trim(),
     embeds: [embedDefi(detail, `<@${proposeurId}>`)],
     components: [boutonsAccepterRefuser("interclan_approval", detail.id)],
   };
@@ -196,15 +228,32 @@ export function embedRecap(detail: DetailInterclan): Record<string, unknown> {
   const fields = [
     { name: "Clan challenger", value: detail.clanA.name, inline: true },
     { name: "Clan défié", value: detail.clanB.name, inline: true },
-    { name: "État", value: LIBELLES_ETAT[detail.state] ?? String(detail.state), inline: true },
+    {
+      name: "État",
+      value: LIBELLES_ETAT[detail.state] ?? String(detail.state),
+      inline: true,
+    },
     { name: "Initié le", value: quand(detail.createdAt), inline: true },
     { name: "Débute le", value: quand(detail.fixedDate), inline: true },
     { name: "​", value: "​", inline: true },
-    { name: `Lineup ${detail.clanA.shortName}`, value: statutComposition(compositionDe(detail, 0)), inline: true },
-    { name: `Lineup ${detail.clanB.shortName}`, value: statutComposition(compositionDe(detail, 1)), inline: true },
+    {
+      name: `Lineup ${detail.clanA.shortName}`,
+      value: statutComposition(compositionDe(detail, 0)),
+      inline: true,
+    },
+    {
+      name: `Lineup ${detail.clanB.shortName}`,
+      value: statutComposition(compositionDe(detail, 1)),
+      inline: true,
+    },
     { name: "​", value: "​", inline: true },
   ];
-  if (detail.description) fields.push({ name: "Motif", value: detail.description.slice(0, 1024), inline: false });
+  if (detail.description)
+    fields.push({
+      name: "Motif",
+      value: detail.description.slice(0, 1024),
+      inline: false,
+    });
   return {
     color: COULEURS_INTERCLAN.recap,
     title: `🏆 Interclan — ${detail.name}`,
@@ -226,31 +275,52 @@ export function boutonsCompositions(detail: DetailInterclan) {
   const emojiA = emojiClan(detail.clanA);
   const emojiB = emojiClan(detail.clanB);
   return rangee(
-    bouton(`Lineup ${detail.clanA.name}`, valideA ? 3 : 4, `interclan_lineup:${detail.id}:0`, {
-      ...(emojiA ? { emoji: emojiA } : {}),
-      disabled: verrouA,
+    bouton(
+      `Lineup ${detail.clanA.name}`,
+      valideA ? 3 : 4,
+      `interclan_lineup:${detail.id}:0`,
+      {
+        ...(emojiA ? { emoji: emojiA } : {}),
+        disabled: verrouA,
+      },
+    ),
+    bouton("Verrouiller", 1, `lock_interclan_lineup:${detail.id}:0`, {
+      emoji: { name: "🔒" },
+      disabled: !valideA || verrouA,
     }),
-    bouton("Verrouiller", 1, `lock_interclan_lineup:${detail.id}:0`, { emoji: { name: "🔒" }, disabled: !valideA || verrouA }),
-    bouton(`Lineup ${detail.clanB.name}`, valideB ? 3 : 4, `interclan_lineup:${detail.id}:1`, {
-      ...(emojiB ? { emoji: emojiB } : {}),
-      disabled: verrouB,
+    bouton(
+      `Lineup ${detail.clanB.name}`,
+      valideB ? 3 : 4,
+      `interclan_lineup:${detail.id}:1`,
+      {
+        ...(emojiB ? { emoji: emojiB } : {}),
+        disabled: verrouB,
+      },
+    ),
+    bouton("Verrouiller", 1, `lock_interclan_lineup:${detail.id}:1`, {
+      emoji: { name: "🔒" },
+      disabled: !valideB || verrouB,
     }),
-    bouton("Verrouiller", 1, `lock_interclan_lineup:${detail.id}:1`, { emoji: { name: "🔒" }, disabled: !valideB || verrouB }),
-    bouton("Annuler", 4, `cancel_interclan:${detail.id}`, { emoji: { name: "❌" } }),
+    bouton("Annuler", 4, `cancel_interclan:${detail.id}`, {
+      emoji: { name: "❌" },
+    }),
   );
 }
 
 function listeJoueurs(l: CompositionInterclan | null): string {
   const lignes = (l?.members ?? [])
     .toSorted((x, y) => x.position - y.position)
-    .map(m => `**${m.position}.** ${m.displayName}`);
+    .map((m) => `**${m.position}.** ${m.displayName}`);
   return lignes.join("\n") || "*Aucun joueur*";
 }
 
 /** Composition d'un clan après mise à jour (legacy `interclanRecapLineupEmbed`). */
-export function embedComposition(detail: DetailInterclan, clanId: number): Record<string, unknown> {
+export function embedComposition(
+  detail: DetailInterclan,
+  clanId: number,
+): Record<string, unknown> {
   const clan = clanId === detail.clanA.id ? detail.clanA : detail.clanB;
-  const l = detail.lineups.find(x => x.clanId === clanId) ?? null;
+  const l = detail.lineups.find((x) => x.clanId === clanId) ?? null;
   return {
     color: COULEURS_INTERCLAN.succes,
     title: `${clan.shortName} - Mise à jour de la lineup`,
@@ -259,7 +329,9 @@ export function embedComposition(detail: DetailInterclan, clanId: number): Recor
   };
 }
 
-export function embedVerrouille(detail: DetailInterclan): Record<string, unknown> {
+export function embedVerrouille(
+  detail: DetailInterclan,
+): Record<string, unknown> {
   const a = compositionDe(detail, 0);
   const b = compositionDe(detail, 1);
   return {
@@ -268,7 +340,11 @@ export function embedVerrouille(detail: DetailInterclan): Record<string, unknown
     description: `**Date prévue :** ${quand(detail.fixedDate)}\nLes deux clans ont verrouillé leur lineup.`,
     fields: [
       { name: detail.clanA.name, value: listeJoueurs(a), inline: true },
-      { name: "-", value: (b?.members ?? []).map(() => "VS").join("\n") || "​", inline: true },
+      {
+        name: "-",
+        value: (b?.members ?? []).map(() => "VS").join("\n") || "​",
+        inline: true,
+      },
       { name: detail.clanB.name, value: listeJoueurs(b), inline: true },
     ],
     timestamp: new Date().toISOString(),
@@ -277,18 +353,32 @@ export function embedVerrouille(detail: DetailInterclan): Record<string, unknown
 
 export function boutonsLancement(detail: DetailInterclan) {
   return rangee(
-    bouton("Commencer", 3, `start_interclan:${detail.id}`, { emoji: { name: "⚽" } }),
-    bouton("Annuler", 4, `cancel_interclan:${detail.id}`, { emoji: { name: "❌" } }),
+    bouton("Commencer", 3, `start_interclan:${detail.id}`, {
+      emoji: { name: "⚽" },
+    }),
+    bouton("Annuler", 4, `cancel_interclan:${detail.id}`, {
+      emoji: { name: "❌" },
+    }),
   );
 }
 
 // ─── Matchs et scores ───────────────────────────────────────────────────────
 
 /** Scores d'un match : équipe 1 = clan A, équipe 2 = clan B. */
-export function scoresDuMatch(m: MatchInterclan): { scoreA: number; scoreB: number; joueurA: JoueurMatch | null; joueurB: JoueurMatch | null } {
-  const joueurA = m.players.find(p => p.team === 1) ?? null;
-  const joueurB = m.players.find(p => p.team === 2) ?? null;
-  return { scoreA: joueurA?.score ?? 0, scoreB: joueurB?.score ?? 0, joueurA, joueurB };
+export function scoresDuMatch(m: MatchInterclan): {
+  scoreA: number;
+  scoreB: number;
+  joueurA: JoueurMatch | null;
+  joueurB: JoueurMatch | null;
+} {
+  const joueurA = m.players.find((p) => p.team === 1) ?? null;
+  const joueurB = m.players.find((p) => p.team === 2) ?? null;
+  return {
+    scoreA: joueurA?.score ?? 0,
+    scoreB: joueurB?.score ?? 0,
+    joueurA,
+    joueurB,
+  };
 }
 
 function tableauScores(detail: DetailInterclan) {
@@ -303,9 +393,21 @@ function tableauScores(detail: DetailInterclan) {
     };
   });
   return [
-    { name: detail.clanA.name, value: lignes.map(l => l.a).join("\n") || "*Aucun joueur*", inline: true },
-    { name: "Score", value: lignes.map(l => l.vs).join("\n") || "​", inline: true },
-    { name: detail.clanB.name, value: lignes.map(l => l.b).join("\n") || "*Aucun joueur*", inline: true },
+    {
+      name: detail.clanA.name,
+      value: lignes.map((l) => l.a).join("\n") || "*Aucun joueur*",
+      inline: true,
+    },
+    {
+      name: "Score",
+      value: lignes.map((l) => l.vs).join("\n") || "​",
+      inline: true,
+    },
+    {
+      name: detail.clanB.name,
+      value: lignes.map((l) => l.b).join("\n") || "*Aucun joueur*",
+      inline: true,
+    },
   ];
 }
 
@@ -314,18 +416,24 @@ export function embedScores(detail: DetailInterclan): Record<string, unknown> {
   const fields = tableauScores(detail);
   if (!enCours) {
     const total = calculerVainqueur(
-      detail.matches.filter(m => m.state === "Finished").map(scoresDuMatch),
+      detail.matches.filter((m) => m.state === "Finished").map(scoresDuMatch),
       detail.clanA.id,
       detail.clanB.id,
     );
-    fields.push({ name: "Bilan", value: `${detail.clanA.shortName} ${total.pointsA} — ${total.pointsB} ${detail.clanB.shortName}`, inline: false });
+    fields.push({
+      name: "Bilan",
+      value: `${detail.clanA.shortName} ${total.pointsA} — ${total.pointsB} ${detail.clanB.shortName}`,
+      inline: false,
+    });
   }
   return {
     color: COULEURS_INTERCLAN.scores,
     title: `🏆 Interclan — ${detail.clanA.name} vs ${detail.clanB.name}`,
     description:
       `**Dernière mise à jour :** ${quand(detail.updatedAt)}\n` +
-      (enCours ? "Les matchs sont en cours. Voici les scores actuels :" : "Interclan terminé, voici les résultats finaux :"),
+      (enCours
+        ? "Les matchs sont en cours. Voici les scores actuels :"
+        : "Interclan terminé, voici les résultats finaux :"),
     fields,
     timestamp: new Date().toISOString(),
   };
@@ -337,10 +445,15 @@ export function boutonsMatchs(detail: DetailInterclan) {
   return rangee(
     ...matchs.map((m, i) => {
       const fini = m.state === "Finished";
-      return bouton(fini ? `Match ${i + 1} — Terminé` : `Match ${i + 1}`, fini ? 2 : 1, `interclan_match:${detail.id}:${m.id}`, {
-        emoji: { name: fini ? "✅" : "⚽" },
-        disabled: fini,
-      });
+      return bouton(
+        fini ? `Match ${i + 1} — Terminé` : `Match ${i + 1}`,
+        fini ? 2 : 1,
+        `interclan_match:${detail.id}:${m.id}`,
+        {
+          emoji: { name: fini ? "✅" : "⚽" },
+          disabled: fini,
+        },
+      );
     }),
   );
 }
@@ -349,15 +462,28 @@ export function boutonsMatchs(detail: DetailInterclan) {
 
 export function embedVote(detail: DetailInterclan): Record<string, unknown> {
   const v = detail.validation;
-  const fields: Array<{ name: string; value: string; inline?: boolean }> = tableauScores(detail);
+  const fields: Array<{ name: string; value: string; inline?: boolean }> =
+    tableauScores(detail);
   if (v) {
     const votes = v.approvals + v.rejections;
     const requis = Math.ceil(v.eligible * v.minParticipationRatio);
     const pct = (n: number) => (votes > 0 ? Math.round((n / votes) * 100) : 0);
     fields.push(
-      { name: "Requis", value: `${requis}/${v.eligible} (${Math.round(v.minParticipationRatio * 100)}%)`, inline: true },
-      { name: "Pour", value: `✅ ${v.approvals}/${votes} (${pct(v.approvals)}%)`, inline: true },
-      { name: "Contre", value: `❌ ${v.rejections}/${votes} (${pct(v.rejections)}%)`, inline: true },
+      {
+        name: "Requis",
+        value: `${requis}/${v.eligible} (${Math.round(v.minParticipationRatio * 100)}%)`,
+        inline: true,
+      },
+      {
+        name: "Pour",
+        value: `✅ ${v.approvals}/${votes} (${pct(v.approvals)}%)`,
+        inline: true,
+      },
+      {
+        name: "Contre",
+        value: `❌ ${v.rejections}/${votes} (${pct(v.rejections)}%)`,
+        inline: true,
+      },
       v.closedAt
         ? {
             name: `Vote clôturé ${quand(v.closedAt, "R")}`,
@@ -375,20 +501,27 @@ export function embedVote(detail: DetailInterclan): Record<string, unknown> {
   return {
     color: COULEURS_INTERCLAN.vote,
     title: `${titres[v?.status ?? "PENDING"] ?? "🗳️ Vote"} - Validation Interclan ${detail.name}`,
-    description: "Tous les joueurs alignés doivent approuver les scores (unanimité, 24 h).",
+    description:
+      "Tous les joueurs alignés doivent approuver les scores (unanimité, 24 h).",
     fields,
   };
 }
 
 export function boutonsVote(proposalId: number) {
-  return rangee(bouton("Approuver", 3, `vote:approve:${proposalId}`), bouton("Rejeter", 4, `vote:reject:${proposalId}`));
+  return rangee(
+    bouton("Approuver", 3, `vote:approve:${proposalId}`),
+    bouton("Rejeter", 4, `vote:reject:${proposalId}`),
+  );
 }
 
 export function messageVote(detail: DetailInterclan): MessageDiscord {
   return {
     content: `<@&${detail.clanA.roleId}> <@&${detail.clanB.roleId}>`,
     embeds: [embedVote(detail)],
-    components: detail.validation && detail.validation.status === "PENDING" ? [boutonsVote(detail.validation.proposalId)] : [],
+    components:
+      detail.validation && detail.validation.status === "PENDING"
+        ? [boutonsVote(detail.validation.proposalId)]
+        : [],
   };
 }
 
@@ -398,20 +531,34 @@ export function messageVote(detail: DetailInterclan): MessageDiscord {
 export function messagePourEtat(detail: DetailInterclan): MessageDiscord {
   switch (detail.state) {
     case ETAT.EN_ATTENTE: {
-      return { embeds: [embedDefi(detail, detail.clanA.name)], components: [boutonsAccepterRefuser("interclan_approval", detail.id)] };
+      return {
+        embeds: [embedDefi(detail, detail.clanA.name)],
+        components: [boutonsAccepterRefuser("interclan_approval", detail.id)],
+      };
     }
     case ETAT.ACCEPTE: {
-      return { embeds: [embedRecap(detail)], components: [boutonsCompositions(detail)] };
+      return {
+        embeds: [embedRecap(detail)],
+        components: [boutonsCompositions(detail)],
+      };
     }
     case ETAT.PRET: {
-      return { embeds: [embedVerrouille(detail)], components: [boutonsLancement(detail)] };
+      return {
+        embeds: [embedVerrouille(detail)],
+        components: [boutonsLancement(detail)],
+      };
     }
     case ETAT.EN_COURS: {
-      return { embeds: [embedScores(detail)], components: detail.matches.length > 0 ? [boutonsMatchs(detail)] : [] };
+      return {
+        embeds: [embedScores(detail)],
+        components: detail.matches.length > 0 ? [boutonsMatchs(detail)] : [],
+      };
     }
     case ETAT.TERMINE:
     case ETAT.RESULTAT_CONTESTE: {
-      return detail.validation ? messageVote(detail) : { embeds: [embedScores(detail)], components: [] };
+      return detail.validation
+        ? messageVote(detail)
+        : { embeds: [embedScores(detail)], components: [] };
     }
     case ETAT.RESULTAT_VALIDE: {
       return { embeds: [embedScores(detail)], components: [] };
@@ -431,26 +578,40 @@ export function messageOuverture(detail: DetailInterclan): MessageDiscord {
   };
 }
 
-export const embedSucces = (message: string) => ({ color: COULEURS_INTERCLAN.succes, title: `✅ ${message}`.slice(0, 256) });
-export const embedErreur = (message: string) => ({ color: COULEURS_INTERCLAN.erreur, title: `❌ ${message}`.slice(0, 256) });
+export const embedSucces = (message: string) => ({
+  color: COULEURS_INTERCLAN.succes,
+  title: `✅ ${message}`.slice(0, 256),
+});
+export const embedErreur = (message: string) => ({
+  color: COULEURS_INTERCLAN.erreur,
+  title: `❌ ${message}`.slice(0, 256),
+});
 
 // ─── Fenêtres ───────────────────────────────────────────────────────────────
 
 /** Fenêtre de composition : 5 champs `lineup_member_1..5` pré-remplis (legacy `buildLineupManagementModal`). */
-export function fenetreComposition(detail: DetailInterclan, cote: 0 | 1): Record<string, unknown> {
+export function fenetreComposition(
+  detail: DetailInterclan,
+  cote: 0 | 1,
+): Record<string, unknown> {
   const clan = cote === 0 ? detail.clanA : detail.clanB;
   const l = compositionDe(detail, cote);
   const champs = Array.from({ length: TAILLE_COMPOSITION }, (_, i) => {
-    const membre = l?.members.find(m => m.position === i + 1);
+    const membre = l?.members.find((m) => m.position === i + 1);
     return rangee({
       type: 4,
       custom_id: `lineup_member_${i + 1}`,
-      label: `Joueur ${i + 1}${membre ? ` (${membre.displayName})` : ""}`.slice(0, 45),
+      label: `Joueur ${i + 1}${membre ? ` (${membre.displayName})` : ""}`.slice(
+        0,
+        45,
+      ),
       style: 1,
       min_length: 17,
       max_length: 20,
       required: false,
-      ...(membre ? { value: membre.userId } : { placeholder: "Identifiant Discord du joueur" }),
+      ...(membre
+        ? { value: membre.userId }
+        : { placeholder: "Identifiant Discord du joueur" }),
     });
   });
   return {
@@ -461,15 +622,29 @@ export function fenetreComposition(detail: DetailInterclan, cote: 0 | 1): Record
 }
 
 /** Fenêtre de score d'un match : `score_a` / `score_b` (legacy `buildInterclanMatchScoreModal`). */
-export function fenetreScore(m: MatchInterclan): Record<string, unknown> | null {
+export function fenetreScore(
+  m: MatchInterclan,
+): Record<string, unknown> | null {
   const s = scoresDuMatch(m);
   if (!s.joueurA || !s.joueurB) return null;
   const champ = (id: string, label: string, valeur: number) =>
-    rangee({ type: 4, custom_id: id, label: label.slice(0, 45), style: 1, min_length: 1, max_length: 2, required: true, value: String(valeur) });
+    rangee({
+      type: 4,
+      custom_id: id,
+      label: label.slice(0, 45),
+      style: 1,
+      min_length: 1,
+      max_length: 2,
+      required: true,
+      value: String(valeur),
+    });
   return {
     custom_id: `interclan_match_result_modal:${m.id}`,
     title: `Résultat du match #${m.id}`.slice(0, 45),
-    components: [champ("score_a", s.joueurA.displayName, s.scoreA), champ("score_b", s.joueurB.displayName, s.scoreB)],
+    components: [
+      champ("score_a", s.joueurA.displayName, s.scoreA),
+      champ("score_b", s.joueurB.displayName, s.scoreB),
+    ],
   };
 }
 

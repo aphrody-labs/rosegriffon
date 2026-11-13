@@ -27,7 +27,8 @@ const symbols = {
 } as const;
 
 function pointer(bytes: Uint8Array): ReturnType<typeof ptr> {
-  if (bytes.byteLength === 0) throw new RangeError("Tinke buffer must not be empty");
+  if (bytes.byteLength === 0)
+    throw new RangeError("Tinke buffer must not be empty");
   return ptr(bytes);
 }
 
@@ -43,9 +44,18 @@ export function loadTinkeAot(path = tinkeAotLibrary) {
       throw new RangeError("block size must be a positive integer");
     }
     const result = encrypt
-      ? library.symbols.bun_engine_nds_tinke_encrypt(pointer(bytes), bytes.byteLength, blockSize)
-      : library.symbols.bun_engine_nds_tinke_decrypt(pointer(bytes), bytes.byteLength, blockSize);
-    if (result !== 0) throw new Error(`Tinke transform failed with status ${result}`);
+      ? library.symbols.bun_engine_nds_tinke_encrypt(
+          pointer(bytes),
+          bytes.byteLength,
+          blockSize,
+        )
+      : library.symbols.bun_engine_nds_tinke_decrypt(
+          pointer(bytes),
+          bytes.byteLength,
+          blockSize,
+        );
+    if (result !== 0)
+      throw new Error(`Tinke transform failed with status ${result}`);
   }
 
   return {
@@ -56,7 +66,10 @@ export function loadTinkeAot(path = tinkeAotLibrary) {
       transform(bytes, blockSize, false);
     },
     pacCount(bytes: Uint8Array): number {
-      const count = library.symbols.bun_engine_nds_tinke_pac_count(pointer(bytes), bytes.byteLength);
+      const count = library.symbols.bun_engine_nds_tinke_pac_count(
+        pointer(bytes),
+        bytes.byteLength,
+      );
       if (count < 0) throw new Error(`invalid Tinke PAC buffer (${count})`);
       return count;
     },

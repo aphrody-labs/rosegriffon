@@ -16,20 +16,20 @@ import type { Webhook as WebhookSchema } from "./webhook";
 
 // eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace SchemaResources {
-	export type AccessRule = Schema;
-	export type Address = AddressSchema;
-	export type Benefit = BenefitSchema;
-	export type Campaign = CampaignSchema;
-	export type Deliverable = DeliverableSchema;
-	/** @deprecated */
-	export type Goal = GoalSchema;
-	export type Live = LiveSchema;
-	export type Media = MediaSchema;
-	export type Member = MemberSchema;
-	export type OauthClient = OauthClientSchema;
-	export type Post = PostSchema;
-	export type PledgeEvent = PledgeEventSchema;
-	export type Tier = TierSchema;
-	export type User = UserSchema;
-	export type Webhook = WebhookSchema;
+    export type AccessRule = Schema;
+    export type Address = AddressSchema;
+    export type Benefit = BenefitSchema;
+    export type Campaign = CampaignSchema;
+    export type Deliverable = DeliverableSchema;
+    /** @deprecated */
+    export type Goal = GoalSchema;
+    export type Live = LiveSchema;
+    export type Media = MediaSchema;
+    export type Member = MemberSchema;
+    export type OauthClient = OauthClientSchema;
+    export type Post = PostSchema;
+    export type PledgeEvent = PledgeEventSchema;
+    export type Tier = TierSchema;
+    export type User = UserSchema;
+    export type Webhook = WebhookSchema;
 }

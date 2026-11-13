@@ -6,7 +6,11 @@ import { Skeleton } from "@rosegriffon/ui";
  */
 export default function AdminLoading() {
   return (
-    <output className="mx-auto block max-w-7xl px-4 py-8 lg:px-8" aria-live="polite" aria-busy="true">
+    <output
+      className="mx-auto block max-w-7xl px-4 py-8 lg:px-8"
+      aria-live="polite"
+      aria-busy="true"
+    >
       <span className="sr-only">Chargement en cours…</span>
       <div className="space-y-8">
         <div className="space-y-2 border-b border-border pb-6">

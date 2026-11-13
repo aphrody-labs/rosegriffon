@@ -39,7 +39,9 @@ for (const { page, fallback } of pages) {
     expect(source).toContain("authClient.twoFactor.verifyTotp({");
     expect(source).toContain("trustDevice: appareilDeConfiance");
     // Insensible à la mise en forme : `bun fmt` éclate l'objet sur plusieurs lignes.
-    expect(source).toMatch(/authClient\.twoFactor\.verifyBackupCode\(\{\s*code,?\s*\}\)/);
+    expect(source).toMatch(
+      /authClient\.twoFactor\.verifyBackupCode\(\{\s*code,?\s*\}\)/,
+    );
     expect(source).toContain('error.message ?? "Code refusé."');
     expect(source).toContain('error.message ?? "Code de secours refusé."');
     expect(source).toContain("router.push(destination)");

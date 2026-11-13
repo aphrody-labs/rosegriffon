@@ -1,6 +1,12 @@
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 
 import { useAuth } from "@/contexts/auth-context";
 import { useProfileSync } from "@/hooks/use-profile-sync";
@@ -54,7 +60,8 @@ export function ProfileProvider({ children }: { children: React.ReactNode }) {
       setProfile(data);
       setError(null);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Erreur inconnue";
+      const errorMessage =
+        error instanceof Error ? error.message : "Erreur inconnue";
       console.error("[ProfileProvider] Erreur inattendue:", error);
       setError(errorMessage);
       setProfile(null);
@@ -74,8 +81,11 @@ export function ProfileProvider({ children }: { children: React.ReactNode }) {
   // Écouter les changements broadcast du profil
   useProfileSync({
     enabled: !!user?.id,
-    onProfileChange: updatedProfile => {
-      console.warn("[ProfileProvider] Profil mis à jour via broadcast:", updatedProfile);
+    onProfileChange: (updatedProfile) => {
+      console.warn(
+        "[ProfileProvider] Profil mis à jour via broadcast:",
+        updatedProfile,
+      );
       setProfile(updatedProfile);
       setError(null);
     },
@@ -89,7 +99,9 @@ export function ProfileProvider({ children }: { children: React.ReactNode }) {
     refreshProfile: fetchProfile,
   };
 
-  return <ProfileContext.Provider value={value}>{children}</ProfileContext.Provider>;
+  return (
+    <ProfileContext.Provider value={value}>{children}</ProfileContext.Provider>
+  );
 }
 
 /**

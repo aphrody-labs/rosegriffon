@@ -4,7 +4,7 @@
 
 Le projet Supabase Cloud a été restreint pour dépassement du quota de stockage
 (`exceed_storage_size_quota`, 3,99 Go sur un plafond de 1 Go), ce qui a coupé
-**toute** l'API du projet — Storage *et* Data API PostgREST, y compris avec la
+**toute** l'API du projet — Storage _et_ Data API PostgREST, y compris avec la
 clé `service_role`. Seule la connexion Postgres directe restait ouverte.
 
 L'ensemble a donc été rapatrié sur le VPS. Aucun appel ne sort plus vers
@@ -12,12 +12,12 @@ L'ensemble a donc été rapatrié sur le VPS. Aucun appel ne sort plus vers
 
 ## Ce qui remplace quoi
 
-| Service Supabase | Remplacement self-host | Port | Unité systemd |
-| --- | --- | --- | --- |
-| Postgres géré | PostgreSQL 18 local, base `rg` | 5432 | `postgresql.service` |
-| Data API (`/rest/v1`) | PostgREST 12.2.12 (binaire natif) | 8809 | `rg-postgrest.service` |
-| Storage (`/storage/v1`) | `apps/storage/server.ts` (Bun, fichiers sur disque) | 8810 | `rg-storage.service` |
-| Realtime (`postgres_changes`) | `apps/realtime/server.ts` (SSE + `LISTEN/NOTIFY`) | 8812 | `rg-realtime.service` |
+| Service Supabase              | Remplacement self-host                              | Port | Unité systemd          |
+| ----------------------------- | --------------------------------------------------- | ---- | ---------------------- |
+| Postgres géré                 | PostgreSQL 18 local, base `rg`                      | 5432 | `postgresql.service`   |
+| Data API (`/rest/v1`)         | PostgREST 12.2.12 (binaire natif)                   | 8809 | `rg-postgrest.service` |
+| Storage (`/storage/v1`)       | `apps/storage/server.ts` (Bun, fichiers sur disque) | 8810 | `rg-storage.service`   |
+| Realtime (`postgres_changes`) | `apps/realtime/server.ts` (SSE + `LISTEN/NOTIFY`)   | 8812 | `rg-realtime.service`  |
 
 Le code applicatif n'a **pas** été réécrit : `@supabase/supabase-js` continue de
 fonctionner tel quel parce que la version de PostgREST est la même que celle de
@@ -56,12 +56,12 @@ routes sur `127.0.0.1:8811`, point d'entrée des scripts serveur
 `infra/nginx/supabase.rosegriffon.conf` ajoute quatre noms publics, un seul
 certificat, enregistrements A chez OVH vers `51.77.147.152` :
 
-| Nom | Rôle |
-| --- | --- |
+| Nom                       | Rôle                                                                                                                            |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
 | `supabase.rosegriffon.fr` | remplaçant exact de `https://<ref>.supabase.co` — `/rest/v1`, `/storage/v1`, `/realtime/v1` sous leurs préfixes ; racine en 404 |
-| `db.rosegriffon.fr` | PostgREST seul, à la racine (`/articles?select=…`) |
-| `storage.rosegriffon.fr` | fichiers seuls, à la racine (`/object/public/<bucket>/<chemin>`) |
-| `realtime.rosegriffon.fr` | flux SSE seul, à la racine (`/stream?table=…`) |
+| `db.rosegriffon.fr`       | PostgREST seul, à la racine (`/articles?select=…`)                                                                              |
+| `storage.rosegriffon.fr`  | fichiers seuls, à la racine (`/object/public/<bucket>/<chemin>`)                                                                |
+| `realtime.rosegriffon.fr` | flux SSE seul, à la racine (`/stream?table=…`)                                                                                  |
 
 Ces noms **s'ajoutent** aux routes servies sur l'origine des applications, ils
 ne les remplacent pas : `NEXT_PUBLIC_SUPABASE_URL` reste volontairement sur
@@ -74,12 +74,12 @@ bloc HTTP du vhost sert `/.well-known/acme-challenge/` depuis `/var/www/html`.
 
 Variables d'environnement :
 
-| Variable | Valeur |
-| --- | --- |
-| `NEXT_PUBLIC_SUPABASE_URL` | l'origine de l'app (`https://rosegriffon.fr`) |
-| `SUPABASE_INTERNAL_URL` | `http://127.0.0.1:8811` |
-| `DATABASE_URL` | `postgresql://rg:<motdepasse>@127.0.0.1:5432/rg` |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_JWT_SECRET` | inchangées |
+| Variable                                                                            | Valeur                                           |
+| ----------------------------------------------------------------------------------- | ------------------------------------------------ |
+| `NEXT_PUBLIC_SUPABASE_URL`                                                          | l'origine de l'app (`https://rosegriffon.fr`)    |
+| `SUPABASE_INTERNAL_URL`                                                             | `http://127.0.0.1:8811`                          |
+| `DATABASE_URL`                                                                      | `postgresql://rg:<motdepasse>@127.0.0.1:5432/rg` |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_JWT_SECRET` | inchangées                                       |
 
 ## Studio
 
@@ -87,11 +87,11 @@ Variables d'environnement :
 Deux conteneurs (`infra/docker/supabase-studio.yml`), en réseau hôte parce
 qu'ils doivent joindre des services qui n'écoutent que sur la boucle locale :
 
-| Conteneur | Port | Rôle |
-| --- | --- | --- |
-| `rg-pg-meta` | 8813 | introspection Postgres (`supabase/postgres-meta`) |
-| | 8814 | port d'admin de pg-meta, **non configurable** (= `PG_META_PORT + 1`) |
-| `rg-studio` | 8815 | interface Next (`supabase/studio`) |
+| Conteneur    | Port | Rôle                                                                 |
+| ------------ | ---- | -------------------------------------------------------------------- |
+| `rg-pg-meta` | 8813 | introspection Postgres (`supabase/postgres-meta`)                    |
+|              | 8814 | port d'admin de pg-meta, **non configurable** (= `PG_META_PORT + 1`) |
+| `rg-studio`  | 8815 | interface Next (`supabase/studio`)                                   |
 
 Ce qui fonctionne, vérifié bout en bout : **éditeur SQL** (requêtes réelles sur
 la base), **éditeur de tables**, **policies RLS**, **rôles et extensions**,
@@ -116,7 +116,7 @@ sudo docker compose --env-file /etc/rg-studio-stack.env \
 
 Piège : le fichier `htpasswd` doit être lisible par le groupe de l'utilisateur
 des workers nginx — ici `nobody:nogroup`, pas `www-data`. Sinon nginx renvoie
-**500** (et non 401) sur toute requête *authentifiée*, avec un
+**500** (et non 401) sur toute requête _authentifiée_, avec un
 `13: Permission denied` dans `studio.rosegriffon.fr.error.log`.
 
 ## API GraphQL
@@ -167,12 +167,12 @@ publique, exactement comme avant la migration.
 
 Les outils internes d'exploitation accèdent à la pile via quatre opérations de lecture :
 
-| Outil | Ce qu'il ouvre |
-| --- | --- |
-| `live_tables` | tables, vues et fonctions exposées, colonnes comprises |
-| `live_select` | lecture d'une table avec filtres PostgREST et total exact |
-| `live_graphql` | requête GraphQL, introspection incluse |
-| `live_storage` | buckets, objets et URL publiques |
+| Outil          | Ce qu'il ouvre                                            |
+| -------------- | --------------------------------------------------------- |
+| `live_tables`  | tables, vues et fonctions exposées, colonnes comprises    |
+| `live_select`  | lecture d'une table avec filtres PostgREST et total exact |
+| `live_graphql` | requête GraphQL, introspection incluse                    |
+| `live_storage` | buckets, objets et URL publiques                          |
 
 Ils complètent les outils `db_*`, qui restent sur le miroir SQLite : celui-ci
 est rapide et hors-ligne mais ne couvre que les 65 tables `inagle_*` du jeu et
@@ -239,12 +239,12 @@ réservée au `service_role` ou aux administrateurs, dossier personnel imposé s
 Le Storage étant devenu inaccessible avant la migration, les octets ont été
 reconstruits depuis les sources d'origine :
 
-| Bucket | Objets | État |
-| --- | --- | --- |
-| `tweets` | 6 423 | 5 529 re-téléchargés depuis `pbs.twimg.com` (`scripts/ops/refetch-tweet-media.ts`). Le reste correspond à des vidéos ou à des médias supprimés côté Twitter. |
-| `patreon` | 26 | À re-synchroniser via l'API Patreon (`apps/website/scripts/patreon-images-sync.ts`) : les URLs d'origine sont signées et expirées. |
-| `assets` | 4 | Deux logos partenaires et deux photos d'équipe, non récupérables automatiquement. |
-| `article` | 0 | Bucket purgé. La couverture perdue a été remplacée par un visuel du jeu servi par le CDN ; les trois lignes d'index orphelines ont été retirées via l'API Storage. |
+| Bucket    | Objets | État                                                                                                                                                               |
+| --------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `tweets`  | 6 423  | 5 529 re-téléchargés depuis `pbs.twimg.com` (`scripts/ops/refetch-tweet-media.ts`). Le reste correspond à des vidéos ou à des médias supprimés côté Twitter.       |
+| `patreon` | 26     | À re-synchroniser via l'API Patreon (`apps/website/scripts/patreon-images-sync.ts`) : les URLs d'origine sont signées et expirées.                                 |
+| `assets`  | 4      | Deux logos partenaires et deux photos d'équipe, non récupérables automatiquement.                                                                                  |
+| `article` | 0      | Bucket purgé. La couverture perdue a été remplacée par un visuel du jeu servi par le CDN ; les trois lignes d'index orphelines ont été retirées via l'API Storage. |
 
 Sur les images de `gallery_img2`, toujours passer par la variante `?w=<largeur>&format=webp`
 du CDN : l'originale est un PNG de 9,3 Mo, la variante 1600 px pèse 42 Ko.

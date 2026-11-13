@@ -14,14 +14,19 @@ function sourceFor(table: string): string {
   const branch = [construireRequete("rg"), construireRequete("inagle")]
     .join("\nUNION ALL\n")
     .split("\nUNION ALL\n")
-    .find(candidate => candidate.includes(`FROM ${table}`));
+    .find((candidate) => candidate.includes(`FROM ${table}`));
   const index = branch?.match(/(\d+)::int AS source/)?.[1];
   if (index === undefined) throw new Error(`Missing search source ${table}`);
   return index;
 }
 
 const rows: LigneBrute[] = [
-  { detail: null, id: "article-axel", source: sourceFor("public.articles"), titre: "Article Axel" },
+  {
+    detail: null,
+    id: "article-axel",
+    source: sourceFor("public.articles"),
+    titre: "Article Axel",
+  },
   {
     detail: "azalee",
     id: "article-wiki-axel",
@@ -40,12 +45,17 @@ const rows: LigneBrute[] = [
     source: sourceFor("public.inagle_keshins_clean"),
     titre: "Esprit d'Axel",
   },
-  { detail: null, id: "clan-axel", source: sourceFor("achillea.clan"), titre: "Clan Axel" },
+  {
+    detail: null,
+    id: "clan-axel",
+    source: sourceFor("achillea.clan"),
+    titre: "Clan Axel",
+  },
 ];
 
 const searchFixture = async (): Promise<ResultatRecherche[]> =>
   rows
-    .map(row => formaterLigne(row, BASES_PAR_DEFAUT))
+    .map((row) => formaterLigne(row, BASES_PAR_DEFAUT))
     .filter((result): result is ResultatRecherche => result !== null);
 
 describe("/search", () => {

@@ -1,6 +1,10 @@
 import { describe, expect, test } from "bun:test";
 
-import { classerEcart, normaliserId, sansFurigana } from "../scripts/ievr-names";
+import {
+  classerEcart,
+  normaliserId,
+  sansFurigana,
+} from "../scripts/ievr-names";
 
 describe("importeur de noms IEVR", () => {
   test("normalise les identifiants hexadécimaux du miroir", () => {
@@ -16,7 +20,9 @@ describe("importeur de noms IEVR", () => {
   test("classe les écarts observés dans le miroir", () => {
     expect(classerEcart("Jim Wraith", "Jim Wraith")).toBe("identique");
     expect(classerEcart("Jim Jim", "Jim Wraith")).toBe("mot-double");
-    expect(classerEcart("Tim Saunders Timmy", "Tim Saunders")).toBe("surnom-colle");
+    expect(classerEcart("Tim Saunders Timmy", "Tim Saunders")).toBe(
+      "surnom-colle",
+    );
     expect(classerEcart(null, "Jim Wraith")).toBe("vide");
     expect(classerEcart("Mark Evans", "円堂 守")).toBe("autre");
   });

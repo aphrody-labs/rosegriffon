@@ -54,9 +54,11 @@ describe("license verification token ownership", () => {
     };
     const db = { selectFrom: () => query } as unknown as Kysely<Database>;
 
-    expect(await LicenseService.findLatestForUser(db, "discord-owner")).toEqual({
-      license: null,
-      verificationToken: null,
-    });
+    expect(await LicenseService.findLatestForUser(db, "discord-owner")).toEqual(
+      {
+        license: null,
+        verificationToken: null,
+      },
+    );
   });
 });

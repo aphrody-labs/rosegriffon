@@ -14,12 +14,13 @@
 import { spawn } from "node:child_process";
 import { existsSync, mkdirSync } from "node:fs";
 import { join } from "node:path";
-import { FilmCraftEngine, createFilmProject, type FilmClip, type FilmProject } from "@aphrody/filmcraft";
 import {
-  findAtom,
-  parseAtoms,
-  type AtomHeader,
-} from "@aphrody/hyperframes";
+  FilmCraftEngine,
+  createFilmProject,
+  type FilmClip,
+  type FilmProject,
+} from "@aphrody/filmcraft";
+import { findAtom, parseAtoms, type AtomHeader } from "@aphrody/hyperframes";
 
 export interface SavePlayerStats {
   level: number;
@@ -134,8 +135,10 @@ export class NieStudioEngine {
       const args = ["save-edit", "--slot", slot];
       if (options.inputFile) args.push("--file", options.inputFile);
       if (options.outputPath) args.push("--out", options.outputPath);
-      if (options.level !== undefined) args.push("--level", options.level.toString());
-      if (options.coins !== undefined) args.push("--coins", options.coins.toString());
+      if (options.level !== undefined)
+        args.push("--level", options.level.toString());
+      if (options.coins !== undefined)
+        args.push("--coins", options.coins.toString());
 
       const proc = spawn(binary, args, { stdio: ["ignore", "pipe", "pipe"] });
       let output = "";
@@ -197,7 +200,9 @@ export class NieStudioEngine {
     // Check mods in reverse installation order (last mod overrides)
     const mods = Array.from(this.installedMods.values()).reverse();
     for (const mod of mods) {
-      const override = mod.overrides.find((o) => o.vfsPath === requestedVfsPath);
+      const override = mod.overrides.find(
+        (o) => o.vfsPath === requestedVfsPath,
+      );
       if (override) {
         return override.localPath;
       }
@@ -230,7 +235,10 @@ export class NieStudioEngine {
   // 4. 3D Character Editor (Ocgen & WebGPU Recipe)
   // ---------------------------------------------------------------------------
 
-  public createDefaultCharaRecipe(characterId = 1, name = "Unmei Sasanami"): Chara3DRecipe {
+  public createDefaultCharaRecipe(
+    characterId = 1,
+    name = "Unmei Sasanami",
+  ): Chara3DRecipe {
     return {
       characterId,
       name,
@@ -278,7 +286,8 @@ export class NieStudioEngine {
 
   public addCinematicCut(clip: FilmClip): void {
     const project = this.filmEngine.getProject();
-    const track = project.tracks.find((t) => t.type === "video") ?? project.tracks[0];
+    const track =
+      project.tracks.find((t) => t.type === "video") ?? project.tracks[0];
     if (track) {
       track.clips.push(clip);
     }
@@ -306,15 +315,24 @@ export class NieStudioEngine {
     hissatsuName?: string;
   }): CinematicRagEntry[] {
     return Array.from(this.ragIndex.values()).filter((e) => {
-      if (query.characterId !== undefined && e.characterId !== query.characterId) return false;
-      if (query.hissatsuName !== undefined && !e.hissatsuName.toLowerCase().includes(query.hissatsuName.toLowerCase())) {
+      if (
+        query.characterId !== undefined &&
+        e.characterId !== query.characterId
+      )
+        return false;
+      if (
+        query.hissatsuName !== undefined &&
+        !e.hissatsuName.toLowerCase().includes(query.hissatsuName.toLowerCase())
+      ) {
         return false;
       }
       return true;
     });
   }
 
-  public async runFullHeadlessPipeline(outputDir = "var/headless_studio_out"): Promise<{
+  public async runFullHeadlessPipeline(
+    outputDir = "var/headless_studio_out",
+  ): Promise<{
     success: boolean;
     outputDir: string;
     filesGenerated: string[];

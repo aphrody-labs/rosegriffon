@@ -35,12 +35,25 @@ import {
   TextInputBuilder,
   TextInputStyle,
 } from "discord.js";
-import { ClanMemberDistinction, ClanMemberRole } from "@rosegriffon/achillea-core/enums";
+import {
+  ClanMemberDistinction,
+  ClanMemberRole,
+} from "@rosegriffon/achillea-core/enums";
 import { CLAN_MEMBER_ROLE_LABELS } from "@rosegriffon/achillea-core/labels";
-import type { ClanDTO, ClanInviteDTO, ClanMemberDTO } from "@rosegriffon/achillea-types/domain/clan";
+import type {
+  ClanDTO,
+  ClanInviteDTO,
+  ClanMemberDTO,
+} from "@rosegriffon/achillea-types/domain/clan";
 import type { ClanTeam } from "@rosegriffon/achillea-client";
 
-import { COULEUR_CARRIERE, COULEURS_LEGACY, dateBarree, miniatureClan, type AuteurEmbed } from "./achillea-clan-format";
+import {
+  COULEUR_CARRIERE,
+  COULEURS_LEGACY,
+  dateBarree,
+  miniatureClan,
+  type AuteurEmbed,
+} from "./achillea-clan-format";
 import { ABSENT, borner, fiche, leJour } from "./ui";
 
 // ─── Constantes ──────────────────────────────────────────────────────────────
@@ -70,19 +83,28 @@ const mention = (id: string) => `<@${id}>`;
 // ─── Identifiants ────────────────────────────────────────────────────────────
 
 /** `clan_manage:<action>:<args…>`. */
-export function idGestion(action: string, ...args: Array<string | number>): string {
+export function idGestion(
+  action: string,
+  ...args: Array<string | number>
+): string {
   return [PREFIXE_GESTION, action, ...args.map(String)].join(":");
 }
 
 /** Décode `clan_manage:<action>:<args…>`, ou `null` si l'identifiant n'est pas de cette surface. */
-export function decoderIdGestion(customId: string): { action: string; args: string[] } | null {
+export function decoderIdGestion(
+  customId: string,
+): { action: string; args: string[] } | null {
   const [prefixe, action, ...args] = customId.split(":");
   if (prefixe !== PREFIXE_GESTION || !action) return null;
   return { action, args };
 }
 
 /** Page bornée à [1, pages]. */
-export function bornerPageMembres(page: number, total: number, parPage = MEMBRES_PAR_PAGE): number {
+export function bornerPageMembres(
+  page: number,
+  total: number,
+  parPage = MEMBRES_PAR_PAGE,
+): number {
   const pages = Math.max(1, Math.ceil(total / parPage));
   if (!Number.isFinite(page)) return 1;
   return Math.min(Math.max(1, Math.trunc(page)), pages);
@@ -91,7 +113,9 @@ export function bornerPageMembres(page: number, total: number, parPage = MEMBRES
 // ─── Clan : panneau principal ────────────────────────────────────────────────
 
 /** Réseaux en liens, un par ligne (legacy `buildSocialMediaString`). */
-function chaineReseaux(clan: Pick<ClanDTO, "xUrl" | "instagramUrl" | "tiktokUrl">): string {
+function chaineReseaux(
+  clan: Pick<ClanDTO, "xUrl" | "instagramUrl" | "tiktokUrl">,
+): string {
   const lien = (u: string) => (u.startsWith("https") ? u : `https://${u}`);
   return [
     clan.xUrl ? `[Twitter](${lien(clan.xUrl)})\n` : "",
@@ -106,13 +130,23 @@ function valeurChamp(texte: string): string {
 }
 
 /** Auteur des embeds de l'ancien bot : l'utilisateur qui a lancé la commande. */
-function poserAuteur(embed: EmbedBuilder, auteur: AuteurEmbed | null | undefined): EmbedBuilder {
+function poserAuteur(
+  embed: EmbedBuilder,
+  auteur: AuteurEmbed | null | undefined,
+): EmbedBuilder {
   if (!auteur) return embed;
-  return embed.setAuthor(auteur.avatar ? { name: borner(auteur.nom, 256), iconURL: auteur.avatar } : { name: borner(auteur.nom, 256) });
+  return embed.setAuthor(
+    auteur.avatar
+      ? { name: borner(auteur.nom, 256), iconURL: auteur.avatar }
+      : { name: borner(auteur.nom, 256) },
+  );
 }
 
 /** Nom affiché d'un compte (legacy `displayName`), « Unknown » à défaut. */
-function nomAffiche(user: { username?: string | null; displayName?: string | null }): string {
+function nomAffiche(user: {
+  username?: string | null;
+  displayName?: string | null;
+}): string {
   return user.displayName || user.username || "Unknown";
 }
 
@@ -121,13 +155,21 @@ export function dateCourte(date: Date | string | null | undefined): string {
   if (!date) return "—";
   const d = date instanceof Date ? date : new Date(date);
   if (Number.isNaN(d.getTime())) return "—";
-  return d.toLocaleDateString("fr-FR", { timeZone: "Europe/Paris", day: "2-digit", month: "short" });
+  return d.toLocaleDateString("fr-FR", {
+    timeZone: "Europe/Paris",
+    day: "2-digit",
+    month: "short",
+  });
 }
 
 /** Membres triés comme l'ancien bot : rôle décroissant, puis arrivée la plus récente. */
-export function trierMembres(membres: readonly ClanMemberDTO[]): ClanMemberDTO[] {
+export function trierMembres(
+  membres: readonly ClanMemberDTO[],
+): ClanMemberDTO[] {
   return [...membres].sort(
-    (a, b) => b.clanRole - a.clanRole || new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    (a, b) =>
+      b.clanRole - a.clanRole ||
+      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
   );
 }
 
@@ -141,22 +183,44 @@ export function embedInfosClan(
   auteur: AuteurEmbed | null = null,
   discord: boolean | null = null,
 ): EmbedBuilder {
-  const president = membres.find(m => m.clanRole === ClanMemberRole.Captain)?.user.id ?? clan.president?.id ?? null;
-  const vices = membres.filter(m => m.clanRole === ClanMemberRole.SubCaptain).map(m => `- ${mention(m.user.id)}`);
-  const fondateurs = clan.founders.map(id => `- ${mention(id)}\n`).join("");
+  const president =
+    membres.find((m) => m.clanRole === ClanMemberRole.Captain)?.user.id ??
+    clan.president?.id ??
+    null;
+  const vices = membres
+    .filter((m) => m.clanRole === ClanMemberRole.SubCaptain)
+    .map((m) => `- ${mention(m.user.id)}`);
+  const fondateurs = clan.founders.map((id) => `- ${mention(id)}\n`).join("");
   const embed = new EmbedBuilder()
     .setColor(COULEUR_CARRIERE)
     .setTitle(borner(`[${clan.shortenedName}] ${clan.name}\n`, 256))
     .setThumbnail(miniatureClan(clan.clanAvatarUrl));
-  if (clan.clanBiography.trim().length > 0) embed.setDescription(borner(clan.clanBiography, 4096));
+  if (clan.clanBiography.trim().length > 0)
+    embed.setDescription(borner(clan.clanBiography, 4096));
   poserAuteur(embed, auteur);
   return embed.setFields(
-    { name: "Président", value: president ? mention(president) : " ", inline: true },
-    { name: "Vice-Présidents", value: valeurChamp(vices.join("\n")), inline: true },
+    {
+      name: "Président",
+      value: president ? mention(president) : " ",
+      inline: true,
+    },
+    {
+      name: "Vice-Présidents",
+      value: valeurChamp(vices.join("\n")),
+      inline: true,
+    },
     { name: "Fondateurs", value: valeurChamp(fondateurs), inline: true },
-    { name: "Membres", value: String(membres.length || clan.membersCount), inline: true },
+    {
+      name: "Membres",
+      value: String(membres.length || clan.membersCount),
+      inline: true,
+    },
     { name: "Discord", value: discord ? "Yes" : "No", inline: true },
-    { name: "Réseaux sociaux", value: valeurChamp(chaineReseaux(clan)), inline: true },
+    {
+      name: "Réseaux sociaux",
+      value: valeurChamp(chaineReseaux(clan)),
+      inline: true,
+    },
   );
 }
 
@@ -179,7 +243,9 @@ export function rangeeEditionInfos(): ActionRowBuilder<ButtonBuilder> {
   );
 }
 
-export function rangeeParametres(clan: Pick<ClanDTO, "isRecruiting" | "autoAcceptMembers" | "isHidden">) {
+export function rangeeParametres(
+  clan: Pick<ClanDTO, "isRecruiting" | "autoAcceptMembers" | "isHidden">,
+) {
   const bascule = (id: string, libelle: string, actif: boolean) =>
     new ButtonBuilder()
       .setCustomId(idGestion("toggle", id))
@@ -198,7 +264,11 @@ export function rangeeParametres(clan: Pick<ClanDTO, "isRecruiting" | "autoAccep
 export function patchBascule(
   cle: string,
   clan: Pick<ClanDTO, "isRecruiting" | "autoAcceptMembers" | "isHidden">,
-): { isRecruiting: boolean } | { autoAcceptMembers: boolean } | { isHidden: boolean } | null {
+):
+  | { isRecruiting: boolean }
+  | { autoAcceptMembers: boolean }
+  | { isHidden: boolean }
+  | null {
   switch (cle) {
     case "recruiting": {
       return { isRecruiting: !clan.isRecruiting };
@@ -215,8 +285,16 @@ export function patchBascule(
   }
 }
 
-function bouton(id: string, libelle: string, emoji?: string, style = ButtonStyle.Primary): ButtonBuilder {
-  const b = new ButtonBuilder().setCustomId(id).setLabel(libelle).setStyle(style);
+function bouton(
+  id: string,
+  libelle: string,
+  emoji?: string,
+  style = ButtonStyle.Primary,
+): ButtonBuilder {
+  const b = new ButtonBuilder()
+    .setCustomId(id)
+    .setLabel(libelle)
+    .setStyle(style);
   return emoji ? b.setEmoji(emoji) : b;
 }
 
@@ -235,17 +313,38 @@ export function embedListeMembres(
 ): EmbedBuilder {
   const tries = trierMembres(membres);
   const pages = Math.ceil(tries.length / MEMBRES_PAR_PAGE);
-  const tranche = tries.slice((page - 1) * MEMBRES_PAR_PAGE, page * MEMBRES_PAR_PAGE);
+  const tranche = tries.slice(
+    (page - 1) * MEMBRES_PAR_PAGE,
+    page * MEMBRES_PAR_PAGE,
+  );
   const embed = new EmbedBuilder()
     .setColor(COULEUR_CARRIERE)
     .setTitle(borner(`[${clan.shortenedName}] ${clan.name} - Members`, 256))
-    .setDescription(`Liste des membres du clan ordonnées par rôle et ancienneté\n\n**${tries.length} Membres** - Page ${page}/${pages}`)
+    .setDescription(
+      `Liste des membres du clan ordonnées par rôle et ancienneté\n\n**${tries.length} Membres** - Page ${page}/${pages}`,
+    )
     .setThumbnail(miniatureClan(clan.clanAvatarUrl));
   poserAuteur(embed, auteur);
   return embed.setFields(
-    { name: "Membre", value: valeurChamp(tranche.map(m => mention(m.user.id)).join("\n")), inline: true },
-    { name: "Rôle", value: valeurChamp(tranche.map(m => libelleRoleClan(m.clanRole)).join("\n")), inline: true },
-    { name: "Dernière activité", value: valeurChamp(tranche.map(m => dateCourte(m.user.lastInteract)).join("\n")), inline: true },
+    {
+      name: "Membre",
+      value: valeurChamp(tranche.map((m) => mention(m.user.id)).join("\n")),
+      inline: true,
+    },
+    {
+      name: "Rôle",
+      value: valeurChamp(
+        tranche.map((m) => libelleRoleClan(m.clanRole)).join("\n"),
+      ),
+      inline: true,
+    },
+    {
+      name: "Dernière activité",
+      value: valeurChamp(
+        tranche.map((m) => dateCourte(m.user.lastInteract)).join("\n"),
+      ),
+      inline: true,
+    },
   );
 }
 
@@ -258,45 +357,88 @@ const BOUTONS_PAGE = [
 ] as const;
 
 /** Début / Précédent / Suivant / Fin + « Menu » ; identifiants uniques (Discord refuse deux fois le même). */
-export function rangeePaginationGestion(vue: "members" | "invites", page: number, pages: number) {
+export function rangeePaginationGestion(
+  vue: "members" | "invites",
+  page: number,
+  pages: number,
+) {
   const p = Math.max(1, pages);
-  const cibles = { first: 1, prev: Math.max(1, page - 1), next: Math.min(p, page + 1), last: p };
+  const cibles = {
+    first: 1,
+    prev: Math.max(1, page - 1),
+    next: Math.min(p, page + 1),
+    last: p,
+  };
   const auDebut = pages === 0 || page === 1;
   const aLaFin = pages === 0 || page === pages;
   return new ActionRowBuilder<ButtonBuilder>().addComponents(
-    ...BOUTONS_PAGE.map(b =>
-      bouton(idGestion(vue, cibles[b.cle], b.cle), b.libelle, b.emoji).setDisabled(
-        b.cle === "first" || b.cle === "prev" ? auDebut : aLaFin,
-      ),
+    ...BOUTONS_PAGE.map((b) =>
+      bouton(
+        idGestion(vue, cibles[b.cle], b.cle),
+        b.libelle,
+        b.emoji,
+      ).setDisabled(b.cle === "first" || b.cle === "prev" ? auDebut : aLaFin),
     ),
     boutonMenu(),
   );
 }
 
 /** Menu des membres de la page (legacy `buildClanMembersSelector`). */
-export function selecteurMembres(membres: readonly ClanMemberDTO[], page: number) {
-  const tranche = trierMembres(membres).slice((page - 1) * MEMBRES_PAR_PAGE, page * MEMBRES_PAR_PAGE);
+export function selecteurMembres(
+  membres: readonly ClanMemberDTO[],
+  page: number,
+) {
+  const tranche = trierMembres(membres).slice(
+    (page - 1) * MEMBRES_PAR_PAGE,
+    page * MEMBRES_PAR_PAGE,
+  );
   if (tranche.length === 0) return null;
   return new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
     new StringSelectMenuBuilder()
       .setCustomId(idGestion("member_select"))
       .setPlaceholder("Sélectionnez un Membre")
-      .addOptions(tranche.map(m => new StringSelectMenuOptionBuilder().setLabel(borner(nomAffiche(m.user), 100)).setValue(m.user.id))),
+      .addOptions(
+        tranche.map((m) =>
+          new StringSelectMenuOptionBuilder()
+            .setLabel(borner(nomAffiche(m.user), 100))
+            .setValue(m.user.id),
+        ),
+      ),
   );
 }
 
 /** Fiche d'un membre (legacy `buildClanMemberEmbed`) : vert pour un « Nouveau » membre, bleu sinon. */
-export function embedMembre(membre: ClanMemberDTO, titre = "Gestion du membre", avatar: string | null = null): EmbedBuilder {
+export function embedMembre(
+  membre: ClanMemberDTO,
+  titre = "Gestion du membre",
+  avatar: string | null = null,
+): EmbedBuilder {
   const embed = new EmbedBuilder()
-    .setColor(titre.toLowerCase().includes("nouveau") ? COULEURS_LEGACY.succes : COULEUR_CARRIERE)
+    .setColor(
+      titre.toLowerCase().includes("nouveau")
+        ? COULEURS_LEGACY.succes
+        : COULEUR_CARRIERE,
+    )
     .setTitle(borner(`${nomAffiche(membre.user)} - ${titre}`, 256))
     .setDescription(`__*Clan rejoint le ${dateBarree(membre.createdAt)}*__`);
   if (avatar) embed.setThumbnail(avatar);
   return embed.setFields(
     { name: "Rôle", value: libelleRoleClan(membre.clanRole), inline: true },
-    { name: "Distinctions", value: valeurChamp(membre.distinctions.join("\n")), inline: true },
-    { name: "Dernière activité", value: dateCourte(membre.user.lastInteract), inline: true },
-    { name: "Contributions", value: String(membre.clanFameContributed), inline: true },
+    {
+      name: "Distinctions",
+      value: valeurChamp(membre.distinctions.join("\n")),
+      inline: true,
+    },
+    {
+      name: "Dernière activité",
+      value: dateCourte(membre.user.lastInteract),
+      inline: true,
+    },
+    {
+      name: "Contributions",
+      value: String(membre.clanFameContributed),
+      inline: true,
+    },
     { name: "Stats Interclan", value: "0", inline: true },
     { name: "Stats Coupes des Clans", value: "0", inline: true },
   );
@@ -307,26 +449,52 @@ export function embedMembre(membre: ClanMemberDTO, titre = "Gestion du membre", 
  * (`buildClanMemberManagementButtons`). L'API retranche de toute façon : un
  * bouton actif n'est jamais une autorisation, seulement une invitation à essayer.
  */
-export function rangeeGestionMembre(membre: ClanMemberDTO, acteurRole: number, clanId: number) {
+export function rangeeGestionMembre(
+  membre: ClanMemberDTO,
+  acteurRole: number,
+  clanId: number,
+) {
   const id = membre.user.id;
   const roleBouton =
     membre.clanRole > ClanMemberRole.Member
-      ? bouton(idGestion("role", id, ClanMemberRole.Member), "Rétrograder", "⚽", ButtonStyle.Danger).setDisabled(
-          acteurRole <= membre.clanRole,
-        )
-      : bouton(idGestion("role", id, ClanMemberRole.Member), "Promouvoir", "⚽", ButtonStyle.Success).setDisabled(
-          membre.clanRole >= ClanMemberRole.Member,
-        );
+      ? bouton(
+          idGestion("role", id, ClanMemberRole.Member),
+          "Rétrograder",
+          "⚽",
+          ButtonStyle.Danger,
+        ).setDisabled(acteurRole <= membre.clanRole)
+      : bouton(
+          idGestion("role", id, ClanMemberRole.Member),
+          "Promouvoir",
+          "⚽",
+          ButtonStyle.Success,
+        ).setDisabled(membre.clanRole >= ClanMemberRole.Member);
   return new ActionRowBuilder<ButtonBuilder>().addComponents(
     roleBouton,
-    bouton(idGestion("role", id, ClanMemberRole.SubCaptain), "Promouvoir Vice-Président", "🎖️", ButtonStyle.Success).setDisabled(
-      acteurRole < ClanMemberRole.SubCaptain || membre.clanRole > ClanMemberRole.Member,
+    bouton(
+      idGestion("role", id, ClanMemberRole.SubCaptain),
+      "Promouvoir Vice-Président",
+      "🎖️",
+      ButtonStyle.Success,
+    ).setDisabled(
+      acteurRole < ClanMemberRole.SubCaptain ||
+        membre.clanRole > ClanMemberRole.Member,
     ),
-    bouton(`editDistinctions:${id}:${clanId}`, "Editer les distinctions", "✏️").setDisabled(
+    bouton(
+      `editDistinctions:${id}:${clanId}`,
+      "Editer les distinctions",
+      "✏️",
+    ).setDisabled(
       acteurRole !== ClanMemberRole.Captain && acteurRole <= membre.clanRole,
     ),
-    bouton(idGestion("kick", id), "Expulser", "👢", ButtonStyle.Danger).setDisabled(
-      acteurRole <= membre.clanRole || membre.clanRole === ClanMemberRole.Captain,
+    bouton(
+      idGestion("kick", id),
+      "Expulser",
+      "👢",
+      ButtonStyle.Danger,
+    ).setDisabled(
+      acteurRole <= membre.clanRole ||
+        membre.clanRole === ClanMemberRole.Captain,
     ),
     bouton(idGestion("members", 1, "back"), "Retour", "↩️"),
   );
@@ -359,12 +527,15 @@ export function rangeeRetourMembre(membreId: string, clanId: number) {
 }
 
 /** Clés (`Player`) ou libellés (`Joueur`) → libellés de l'enum ; inconnus écartés. */
-export function distinctionsDepuisValeurs(valeurs: readonly string[]): ClanMemberDistinction[] {
+export function distinctionsDepuisValeurs(
+  valeurs: readonly string[],
+): ClanMemberDistinction[] {
   const table = ClanMemberDistinction as Record<string, ClanMemberDistinction>;
   const connues = new Set<string>(Object.values(ClanMemberDistinction));
   const sortie: ClanMemberDistinction[] = [];
   for (const v of valeurs) {
-    const d = table[v] ?? (connues.has(v) ? (v as ClanMemberDistinction) : undefined);
+    const d =
+      table[v] ?? (connues.has(v) ? (v as ClanMemberDistinction) : undefined);
     if (d && !sortie.includes(d)) sortie.push(d);
   }
   return sortie;
@@ -372,8 +543,12 @@ export function distinctionsDepuisValeurs(valeurs: readonly string[]): ClanMembe
 
 // ─── Invitations ─────────────────────────────────────────────────────────────
 
-function trierInvitations(invitations: readonly ClanInviteDTO[]): ClanInviteDTO[] {
-  return [...invitations].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+function trierInvitations(
+  invitations: readonly ClanInviteDTO[],
+): ClanInviteDTO[] {
+  return [...invitations].sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+  );
 }
 
 /** Liste des invitations (legacy `buildClanInvitesEmbed`). */
@@ -385,8 +560,12 @@ export function embedListeInvitations(
 ): EmbedBuilder {
   const triees = trierInvitations(invitations);
   const pages = Math.ceil(triees.length / MEMBRES_PAR_PAGE);
-  const tranche = triees.slice((page - 1) * MEMBRES_PAR_PAGE, page * MEMBRES_PAR_PAGE);
-  const colonne = (lignes: string[]) => (lignes.length > 0 ? borner(lignes.join("\n"), 1024) : "-");
+  const tranche = triees.slice(
+    (page - 1) * MEMBRES_PAR_PAGE,
+    page * MEMBRES_PAR_PAGE,
+  );
+  const colonne = (lignes: string[]) =>
+    lignes.length > 0 ? borner(lignes.join("\n"), 1024) : "-";
   const embed = new EmbedBuilder()
     .setColor(COULEUR_CARRIERE)
     .setTitle(borner(`[${clan.shortenedName}] ${clan.name} - Invites`, 256))
@@ -396,34 +575,70 @@ export function embedListeInvitations(
     .setThumbnail(miniatureClan(clan.clanAvatarUrl));
   poserAuteur(embed, auteur);
   return embed.setFields(
-    { name: "Invité", value: colonne(tranche.map(i => mention(i.user.id))), inline: true },
-    { name: "Invitant", value: colonne(tranche.map(i => mention(i.inviter.user.id))), inline: true },
-    { name: "Invité le", value: colonne(tranche.map(i => dateCourte(i.createdAt))), inline: true },
+    {
+      name: "Invité",
+      value: colonne(tranche.map((i) => mention(i.user.id))),
+      inline: true,
+    },
+    {
+      name: "Invitant",
+      value: colonne(tranche.map((i) => mention(i.inviter.user.id))),
+      inline: true,
+    },
+    {
+      name: "Invité le",
+      value: colonne(tranche.map((i) => dateCourte(i.createdAt))),
+      inline: true,
+    },
   );
 }
 
 /** Menu des invitations de la page (legacy `buildClanInvitesSelector`). */
-export function selecteurInvitations(invitations: readonly ClanInviteDTO[], page: number) {
-  const tranche = trierInvitations(invitations).slice((page - 1) * MEMBRES_PAR_PAGE, page * MEMBRES_PAR_PAGE);
+export function selecteurInvitations(
+  invitations: readonly ClanInviteDTO[],
+  page: number,
+) {
+  const tranche = trierInvitations(invitations).slice(
+    (page - 1) * MEMBRES_PAR_PAGE,
+    page * MEMBRES_PAR_PAGE,
+  );
   if (tranche.length === 0) return null;
   return new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
     new StringSelectMenuBuilder()
       .setCustomId(idGestion("invite_select"))
       .setPlaceholder("Sélectionnez une invitation")
-      .addOptions(tranche.map(i => new StringSelectMenuOptionBuilder().setLabel(borner(nomAffiche(i.user), 100)).setValue(String(i.id)))),
+      .addOptions(
+        tranche.map((i) =>
+          new StringSelectMenuOptionBuilder()
+            .setLabel(borner(nomAffiche(i.user), 100))
+            .setValue(String(i.id)),
+        ),
+      ),
   );
 }
 
 /** Fiche d'une invitation (legacy `buildClanInviteManagementEmbed`, compteurs figés de l'ancien bot). */
-export function embedInvitation(invitation: ClanInviteDTO, auteur: AuteurEmbed | null = null, avatar: string | null = null): EmbedBuilder {
+export function embedInvitation(
+  invitation: ClanInviteDTO,
+  auteur: AuteurEmbed | null = null,
+  avatar: string | null = null,
+): EmbedBuilder {
   const embed = new EmbedBuilder()
     .setColor(COULEUR_CARRIERE)
-    .setTitle(borner(`${nomAffiche(invitation.user)} - Gestion de l'invitation`, 256))
-    .setDescription(`__*Invitation émise le ${dateCourte(invitation.createdAt)}*__`);
+    .setTitle(
+      borner(`${nomAffiche(invitation.user)} - Gestion de l'invitation`, 256),
+    )
+    .setDescription(
+      `__*Invitation émise le ${dateCourte(invitation.createdAt)}*__`,
+    );
   poserAuteur(embed, auteur);
   if (avatar) embed.setThumbnail(avatar);
   return embed.setFields(
-    { name: "Dernière activité", value: dateCourte(invitation.user.lastInteract), inline: true },
+    {
+      name: "Dernière activité",
+      value: dateCourte(invitation.user.lastInteract),
+      inline: true,
+    },
     { name: "Elo", value: "Non classé", inline: true },
     { name: "Tournois gagnés", value: "0", inline: true },
     { name: "Participations Interclan", value: "0", inline: true },
@@ -434,7 +649,12 @@ export function embedInvitation(invitation: ClanInviteDTO, auteur: AuteurEmbed |
 
 export function rangeeGestionInvitation(invitation: ClanInviteDTO) {
   return new ActionRowBuilder<ButtonBuilder>().addComponents(
-    bouton(idGestion("revoke", invitation.id), "Révoquer", "✖️", ButtonStyle.Danger),
+    bouton(
+      idGestion("revoke", invitation.id),
+      "Révoquer",
+      "✖️",
+      ButtonStyle.Danger,
+    ),
     bouton(idGestion("invites", 1, "back"), "Retour", "↩️"),
   );
 }
@@ -442,8 +662,18 @@ export function rangeeGestionInvitation(invitation: ClanInviteDTO) {
 /** Confirmer / Annuler de l'ancien bot (`buildConfirmCancelButtons`), sur la demande privée de révocation. */
 export function rangeeConfirmationRevocation(invitationId: number) {
   return new ActionRowBuilder<ButtonBuilder>().addComponents(
-    bouton(idGestion("revoke_ok", invitationId), "Confirmer", "✅", ButtonStyle.Success),
-    bouton(idGestion("revoke_no", invitationId), "Annuler", "✖️", ButtonStyle.Danger),
+    bouton(
+      idGestion("revoke_ok", invitationId),
+      "Confirmer",
+      "✅",
+      ButtonStyle.Success,
+    ),
+    bouton(
+      idGestion("revoke_no", invitationId),
+      "Annuler",
+      "✖️",
+      ButtonStyle.Danger,
+    ),
   );
 }
 
@@ -454,7 +684,18 @@ export function questionRevocation(invitation: ClanInviteDTO): string {
 
 // ─── Modales de gestion ──────────────────────────────────────────────────────
 
-function champTexte(id: string, libelle: string, options: { valeur?: string | null; long?: boolean; requis?: boolean; min?: number; max?: number; aide?: string } = {}) {
+function champTexte(
+  id: string,
+  libelle: string,
+  options: {
+    valeur?: string | null;
+    long?: boolean;
+    requis?: boolean;
+    min?: number;
+    max?: number;
+    aide?: string;
+  } = {},
+) {
   const entree = new TextInputBuilder()
     .setCustomId(id)
     .setStyle(options.long ? TextInputStyle.Paragraph : TextInputStyle.Short)
@@ -466,24 +707,39 @@ function champTexte(id: string, libelle: string, options: { valeur?: string | nu
   return new LabelBuilder().setLabel(libelle).setTextInputComponent(entree);
 }
 
-export function modaleNom(clan: Pick<ClanDTO, "name" | "shortenedName">): ModalBuilder {
+export function modaleNom(
+  clan: Pick<ClanDTO, "name" | "shortenedName">,
+): ModalBuilder {
   return new ModalBuilder()
     .setCustomId(idGestion("name_modal"))
     .setTitle("Changement de nom du Clan")
     .addLabelComponents(
       champTexte("nameInput", "Nom du Clan", { valeur: clan.name }),
-      champTexte("shortNameInput", "Sigle du Clan", { valeur: clan.shortenedName }),
+      champTexte("shortNameInput", "Sigle du Clan", {
+        valeur: clan.shortenedName,
+      }),
     );
 }
 
-export function modaleBiographie(clan: Pick<ClanDTO, "clanBiography">): ModalBuilder {
+export function modaleBiographie(
+  clan: Pick<ClanDTO, "clanBiography">,
+): ModalBuilder {
   return new ModalBuilder()
     .setCustomId(idGestion("bio_modal"))
     .setTitle("Change Clan Biography")
-    .addLabelComponents(champTexte("textInput", "Clan biography", { valeur: clan.clanBiography, long: true, min: 5, max: 1500 }));
+    .addLabelComponents(
+      champTexte("textInput", "Clan biography", {
+        valeur: clan.clanBiography,
+        long: true,
+        min: 5,
+        max: 1500,
+      }),
+    );
 }
 
-export function modaleReseaux(clan: Pick<ClanDTO, "xUrl" | "instagramUrl" | "tiktokUrl">): ModalBuilder {
+export function modaleReseaux(
+  clan: Pick<ClanDTO, "xUrl" | "instagramUrl" | "tiktokUrl">,
+): ModalBuilder {
   return new ModalBuilder()
     .setCustomId(idGestion("socials_modal"))
     .setTitle("Modifier les Réseaux du Clan")
@@ -497,7 +753,9 @@ export function modaleReseaux(clan: Pick<ClanDTO, "xUrl" | "instagramUrl" | "tik
       champTexte("instagramInput", "Lien du compte Instagram", {
         valeur: clan.instagramUrl,
         requis: false,
-        aide: clan.instagramUrl ? undefined : "https://instagram.com/youraccount",
+        aide: clan.instagramUrl
+          ? undefined
+          : "https://instagram.com/youraccount",
       }),
       champTexte("tikTokInput", "Lien du compte TikTok", {
         valeur: clan.tiktokUrl,
@@ -515,7 +773,13 @@ export function modaleLogo(): ModalBuilder {
     .addLabelComponents(
       new LabelBuilder()
         .setLabel("Nouveau logo (png, jpg ou jpeg)")
-        .setFileUploadComponent(new FileUploadBuilder().setCustomId("logoInput").setMinValues(1).setMaxValues(1).setRequired(true)),
+        .setFileUploadComponent(
+          new FileUploadBuilder()
+            .setCustomId("logoInput")
+            .setMinValues(1)
+            .setMaxValues(1)
+            .setRequired(true),
+        ),
     );
 }
 
@@ -523,7 +787,13 @@ export function modaleExpulsion(membreId: string, nom: string): ModalBuilder {
   return new ModalBuilder()
     .setCustomId(idGestion("kick_modal", membreId))
     .setTitle(borner(`Expulser ${nom} du Clan`, 45))
-    .addLabelComponents(champTexte("textInput", "Raison de l'expulsion", { long: true, min: 5, max: 1500 }));
+    .addLabelComponents(
+      champTexte("textInput", "Raison de l'expulsion", {
+        long: true,
+        min: 5,
+        max: 1500,
+      }),
+    );
 }
 
 /** Extensions d'image acceptées pour le logo (comme l'ancien bot). */
@@ -532,7 +802,9 @@ export const EXTENSIONS_LOGO = ["png", "jpg", "jpeg"] as const;
 /** Le type MIME d'une pièce jointe est-il un logo accepté ? */
 export function logoAccepte(typeMime: string | null | undefined): boolean {
   if (!typeMime?.startsWith("image/")) return false;
-  return (EXTENSIONS_LOGO as readonly string[]).includes(typeMime.slice("image/".length).toLowerCase());
+  return (EXTENSIONS_LOGO as readonly string[]).includes(
+    typeMime.slice("image/".length).toLowerCase(),
+  );
 }
 
 // ─── Équipes ─────────────────────────────────────────────────────────────────
@@ -544,30 +816,52 @@ export const DESCRIPTION_EQUIPES =
 
 function validite(equipe: ClanTeam | undefined): string {
   if (!equipe) return "Absente";
-  return equipe.valid ? "Valide ✅" : `Invalide ❌\n*${equipe.errors.join("\n")}*`;
+  return equipe.valid
+    ? "Valide ✅"
+    : `Invalide ❌\n*${equipe.errors.join("\n")}*`;
 }
 
-export function embedMenuEquipes(clan: { name: string; shortenedName: string }, equipes: readonly ClanTeam[]): EmbedBuilder {
-  const principale = equipes.find(e => e.type === 0);
-  const secondaire = equipes.find(e => e.type === 1);
-  return fiche({ titre: `🏆 [${clan.shortenedName}] ${clan.name} — Équipes`, description: DESCRIPTION_EQUIPES, icone: "" })
-    .champ(principale?.name ?? "Team 1", validite(principale), { enLigne: true })
-    .champ(secondaire?.name ?? "Team 2", validite(secondaire), { enLigne: true })
+export function embedMenuEquipes(
+  clan: { name: string; shortenedName: string },
+  equipes: readonly ClanTeam[],
+): EmbedBuilder {
+  const principale = equipes.find((e) => e.type === 0);
+  const secondaire = equipes.find((e) => e.type === 1);
+  return fiche({
+    titre: `🏆 [${clan.shortenedName}] ${clan.name} — Équipes`,
+    description: DESCRIPTION_EQUIPES,
+    icone: "",
+  })
+    .champ(principale?.name ?? "Team 1", validite(principale), {
+      enLigne: true,
+    })
+    .champ(secondaire?.name ?? "Team 2", validite(secondaire), {
+      enLigne: true,
+    })
     .finir();
 }
 
-export function rangeeMenuEquipes(clanId: number): ActionRowBuilder<ButtonBuilder> {
+export function rangeeMenuEquipes(
+  clanId: number,
+): ActionRowBuilder<ButtonBuilder> {
   return new ActionRowBuilder<ButtonBuilder>().addComponents(
     bouton(`team_manager_btn:${clanId}:1`, "Team 1", "1️⃣"),
     bouton(`team_manager_btn:${clanId}:2`, "Team 2", "2️⃣"),
   );
 }
 
-export function embedEquipe(clan: { name: string; shortenedName: string }, equipe: ClanTeam): EmbedBuilder {
+export function embedEquipe(
+  clan: { name: string; shortenedName: string },
+  equipe: ClanTeam,
+): EmbedBuilder {
   const noms = (role: RoleEquipe) =>
     equipe.members
-      .filter(m => m.role === role)
-      .map(m => (m.userId === equipe.captainUserId ? `**[C]** ${m.displayName}` : m.displayName));
+      .filter((m) => m.role === role)
+      .map((m) =>
+        m.userId === equipe.captainUserId
+          ? `**[C]** ${m.displayName}`
+          : m.displayName,
+      );
   return fiche({
     titre: `🏆 [${clan.shortenedName}] ${clan.name} — ${equipe.name}`,
     description: `*Dernière mise à jour ${leJour(equipe.updatedAt, "f")}*`,
@@ -580,7 +874,9 @@ export function embedEquipe(clan: { name: string; shortenedName: string }, equip
     .finir();
 }
 
-export function rangeeGestionEquipe(equipe: Pick<ClanTeam, "id" | "type">): ActionRowBuilder<ButtonBuilder> {
+export function rangeeGestionEquipe(
+  equipe: Pick<ClanTeam, "id" | "type">,
+): ActionRowBuilder<ButtonBuilder> {
   return new ActionRowBuilder<ButtonBuilder>().addComponents(
     bouton(`team_edit_btn:${equipe.type}:0`, "Joueurs"),
     bouton(`team_edit_btn:${equipe.type}:1`, "Remplaçants"),
@@ -591,13 +887,20 @@ export function rangeeGestionEquipe(equipe: Pick<ClanTeam, "id" | "type">): Acti
 }
 
 /** Identifiant d'un champ de la modale d'effectif (legacy : `<prefixe>_<n>:<type>:<clanId>`). */
-export function idChampEffectif(role: RoleEquipe, rang: number, equipe: Pick<ClanTeam, "type" | "clanId">): string {
+export function idChampEffectif(
+  role: RoleEquipe,
+  rang: number,
+  equipe: Pick<ClanTeam, "type" | "clanId">,
+): string {
   return `${ROLES_EQUIPE[role].prefixe}_${rang}:${equipe.type}:${equipe.clanId}`;
 }
 
-export function modaleEffectif(equipe: ClanTeam, role: RoleEquipe): ModalBuilder {
+export function modaleEffectif(
+  equipe: ClanTeam,
+  role: RoleEquipe,
+): ModalBuilder {
   const config = ROLES_EQUIPE[role];
-  const actuels = equipe.members.filter(m => m.role === role);
+  const actuels = equipe.members.filter((m) => m.role === role);
   const champs = Array.from({ length: config.max }, (_, i) => {
     const entree = new TextInputBuilder()
       .setCustomId(idChampEffectif(role, i + 1, equipe))
@@ -608,7 +911,9 @@ export function modaleEffectif(equipe: ClanTeam, role: RoleEquipe): ModalBuilder
     const lien = actuels[i];
     if (lien) entree.setValue(lien.userId);
     else entree.setPlaceholder(`ID Discord — ${config.libelle} ${i + 1}`);
-    return new LabelBuilder().setLabel(`${config.libelle} ${i + 1}`).setTextInputComponent(entree);
+    return new LabelBuilder()
+      .setLabel(`${config.libelle} ${i + 1}`)
+      .setTextInputComponent(entree);
   });
   return new ModalBuilder()
     .setCustomId(`team_manager_modal:${equipe.id}:${role}`)
@@ -626,23 +931,30 @@ export function modaleParametresEquipe(equipe: ClanTeam): ModalBuilder {
   const modale = new ModalBuilder()
     .setCustomId(`team_settings_modal:${equipe.id}`)
     .setTitle("Paramètres de l'équipe")
-    .addLabelComponents(new LabelBuilder().setLabel("Nom de l'équipe").setDescription("3 à 30 caractères").setTextInputComponent(nom));
-  const joueurs = equipe.members.filter(m => m.role === 0);
+    .addLabelComponents(
+      new LabelBuilder()
+        .setLabel("Nom de l'équipe")
+        .setDescription("3 à 30 caractères")
+        .setTextInputComponent(nom),
+    );
+  const joueurs = equipe.members.filter((m) => m.role === 0);
   if (joueurs.length > 0) {
     modale.addLabelComponents(
-      new LabelBuilder().setLabel("Capitaine de l'équipe").setStringSelectMenuComponent(
-        new StringSelectMenuBuilder()
-          .setCustomId(`team_settings_captain:${equipe.id}`)
-          .setRequired(false)
-          .addOptions(
-            joueurs.map(j =>
-              new StringSelectMenuOptionBuilder()
-                .setLabel(borner(j.displayName, 100))
-                .setValue(j.userId)
-                .setDefault(j.userId === equipe.captainUserId),
+      new LabelBuilder()
+        .setLabel("Capitaine de l'équipe")
+        .setStringSelectMenuComponent(
+          new StringSelectMenuBuilder()
+            .setCustomId(`team_settings_captain:${equipe.id}`)
+            .setRequired(false)
+            .addOptions(
+              joueurs.map((j) =>
+                new StringSelectMenuOptionBuilder()
+                  .setLabel(borner(j.displayName, 100))
+                  .setValue(j.userId)
+                  .setDefault(j.userId === equipe.captainUserId),
+              ),
             ),
-          ),
-      ),
+        ),
     );
   }
   return modale;

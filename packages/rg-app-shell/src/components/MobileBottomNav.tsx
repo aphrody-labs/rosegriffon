@@ -3,12 +3,20 @@
 import type { MouseEvent } from "react";
 import Link from "@rosegriffon/ui/link";
 import { usePathname } from "next/navigation";
-import { construireMobileNavUnifiee, estRouteActive, type NavItem } from "../config/navigation";
+import {
+  construireMobileNavUnifiee,
+  estRouteActive,
+  type NavItem,
+} from "../config/navigation";
 import { iconMap } from "../lib/icons";
 import { traduireNav } from "../lib/translations";
 
 function safeHaptic() {
-  if (typeof window !== "undefined" && "navigator" in window && "vibrate" in navigator) {
+  if (
+    typeof window !== "undefined" &&
+    "navigator" in window &&
+    "vibrate" in navigator
+  ) {
     try {
       navigator.vibrate(10);
     } catch {
@@ -68,7 +76,9 @@ function NavItemButton({
             <LucideIcon
               size={24}
               className={`relative z-10 transition-colors duration-200 ${
-                isActive ? "text-sidebar-primary-foreground" : "text-sidebar-foreground/80"
+                isActive
+                  ? "text-sidebar-primary-foreground"
+                  : "text-sidebar-foreground/80"
               }`}
               fill={isActive ? "currentColor" : "none"}
               aria-hidden="true"
@@ -107,13 +117,25 @@ function FABActionButton({
       className="relative flex items-center justify-center -mt-5 size-14 rounded-full bg-primary text-on-primary shadow-lg transition-all duration-200 motion-standard hover:shadow-xl hover:scale-105 active:scale-95 active:shadow-md z-20"
     >
       {customIcon ??
-        (LucideIcon && <LucideIcon size={28} className="relative z-10" fill="currentColor" aria-hidden="true" />)}
+        (LucideIcon && (
+          <LucideIcon
+            size={28}
+            className="relative z-10"
+            fill="currentColor"
+            aria-hidden="true"
+          />
+        ))}
       <span className="sr-only">{traduireNav(item.label, t)}</span>
     </Link>
   );
 }
 
-export function MobileBottomNav({ items, t, renderIcon, className }: MobileBottomNavProps = {}) {
+export function MobileBottomNav({
+  items,
+  t,
+  renderIcon,
+  className,
+}: MobileBottomNavProps = {}) {
   const pathname = usePathname() || "/";
   // L'administration a sa propre barre latérale : la barre du bas portait une
   // liste d'actions `/admin/**` qu'aucun écran ne rendait (le chrome est masqué
@@ -128,17 +150,33 @@ export function MobileBottomNav({ items, t, renderIcon, className }: MobileBotto
       }`}
     >
       <div className="flex items-center justify-around h-full px-2">
-        {resolvedItems.map(item => {
-          const activePaths = "activePaths" in item ? item.activePaths : undefined;
+        {resolvedItems.map((item) => {
+          const activePaths =
+            "activePaths" in item ? item.activePaths : undefined;
           const isActive = activePaths
-            ? activePaths.some(p => estRouteActive(pathname, p))
+            ? activePaths.some((p) => estRouteActive(pathname, p))
             : estRouteActive(pathname, item.path);
 
           if ("isAction" in item && item.isAction) {
-            return <FABActionButton key={item.path} item={item} t={t} renderIcon={renderIcon} />;
+            return (
+              <FABActionButton
+                key={item.path}
+                item={item}
+                t={t}
+                renderIcon={renderIcon}
+              />
+            );
           }
 
-          return <NavItemButton key={item.path} item={item} isActive={isActive} t={t} renderIcon={renderIcon} />;
+          return (
+            <NavItemButton
+              key={item.path}
+              item={item}
+              isActive={isActive}
+              t={t}
+              renderIcon={renderIcon}
+            />
+          );
         })}
       </div>
     </nav>

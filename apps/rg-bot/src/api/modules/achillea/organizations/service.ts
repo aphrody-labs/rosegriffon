@@ -8,17 +8,26 @@ export abstract class OrganizationService {
     return db
       .selectFrom("organization as organization")
       .selectAll("organization")
-      .select(eb => [
+      .select((eb) => [
         jsonObjectFrom(
           eb
             .selectFrom("user as owner")
-            .select(["owner.id", "owner.username", "owner.display_name as displayName", "owner.avatar"])
+            .select([
+              "owner.id",
+              "owner.username",
+              "owner.display_name as displayName",
+              "owner.avatar",
+            ])
             .whereRef("owner.id", "=", "organization.owner_id"),
         ).as("owner"),
         jsonArrayFrom(
           eb
             .selectFrom("organization_manager as manager")
-            .innerJoin("user as managerUser", "managerUser.id", "manager.user_id")
+            .innerJoin(
+              "user as managerUser",
+              "managerUser.id",
+              "manager.user_id",
+            )
             .select([
               "managerUser.id",
               "managerUser.username",
@@ -31,7 +40,12 @@ export abstract class OrganizationService {
       ]);
   }
 
-  public static async findAll(db: Kysely<Database>, page = 1, pageSize = 50, state = 1) {
+  public static async findAll(
+    db: Kysely<Database>,
+    page = 1,
+    pageSize = 50,
+    state = 1,
+  ) {
     const offset = Math.max(0, page - 1) * Math.min(50, Math.max(1, pageSize));
     const limit = Math.min(50, Math.max(1, pageSize));
     const rows = await this.baseQuery(db)
@@ -49,7 +63,9 @@ export abstract class OrganizationService {
   }
 
   public static async findById(db: Kysely<Database>, id: number) {
-    const row = await this.baseQuery(db).where("organization.id", "=", id).executeTakeFirst();
+    const row = await this.baseQuery(db)
+      .where("organization.id", "=", id)
+      .executeTakeFirst();
     return row ? toDTO(row) : null;
   }
 
@@ -59,9 +75,12 @@ export abstract class OrganizationService {
       .select("organization_id")
       .where("user_id", "=", userId)
       .execute();
-    const ids = managed.map(row => row.organization_id);
+    const ids = managed.map((row) => row.organization_id);
     let query = this.baseQuery(db).where("organization.owner_id", "=", userId);
-    if (ids.length) query = query.unionAll(this.baseQuery(db).where("organization.id", "in", ids)) as typeof query;
+    if (ids.length)
+      query = query.unionAll(
+        this.baseQuery(db).where("organization.id", "in", ids),
+      ) as typeof query;
     return (await query.execute()).map(toDTO);
   }
 
@@ -80,21 +99,28 @@ export abstract class OrganizationService {
     },
   ) {
     const normalizedName = normalizeNames(input.name);
-    if (normalizedName.toLowerCase() !== input.normalizedName.trim().toLowerCase())
+    if (
+      normalizedName.toLowerCase() !== input.normalizedName.trim().toLowerCase()
+    )
       throw new Error("Normalized name does not match");
-    if ([...input.name].length < 3 || [...input.name].length > 30) throw new Error("Invalid organization name");
+    if ([...input.name].length < 3 || [...input.name].length > 30)
+      throw new Error("Invalid organization name");
     const duplicate = await db
       .selectFrom("organization")
       .select("id")
       .where("normalized_name", "=", normalizedName)
       .executeTakeFirst();
     if (duplicate) throw new Error("Organization name already taken");
-    const links = [...(input.socialMedias ?? []), ...(input.broadcastMedias ?? [])];
+    const links = [
+      ...(input.socialMedias ?? []),
+      ...(input.broadcastMedias ?? []),
+    ];
     const link = (platform: string) =>
-      links.find(item => item.platform?.toLowerCase() === platform)?.canonicalUrl ?? null;
+      links.find((item) => item.platform?.toLowerCase() === platform)
+        ?.canonicalUrl ?? null;
     return db
       .transaction()
-      .execute(async trx => {
+      .execute(async (trx) => {
         const row = await trx
           .insertInto("organization")
           .values({
@@ -116,18 +142,29 @@ export abstract class OrganizationService {
           })
           .returning("id")
           .executeTakeFirstOrThrow();
-        const managerIds = [...new Set(input.orgManagerIds.filter(id => id !== input.ownerId))];
+        const managerIds = [
+          ...new Set(input.orgManagerIds.filter((id) => id !== input.ownerId)),
+        ];
         if (managerIds.length)
           await trx
             .insertInto("organization_manager")
-            .values(managerIds.map(userId => ({ organization_id: row.id, user_id: userId })))
+            .values(
+              managerIds.map((userId) => ({
+                organization_id: row.id,
+                user_id: userId,
+              })),
+            )
             .execute();
         return row.id;
       })
-      .then(id => this.findById(db, id));
+      .then((id) => this.findById(db, id));
   }
 
-  public static async setState(db: Kysely<Database>, id: number, state: number) {
+  public static async setState(
+    db: Kysely<Database>,
+    id: number,
+    state: number,
+  ) {
     const updated = await db
       .updateTable("organization")
       .set({ state, updated_at: new Date() })

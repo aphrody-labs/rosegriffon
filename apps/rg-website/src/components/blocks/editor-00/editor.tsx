@@ -36,12 +36,19 @@ export function Editor({
   className?: string;
 }) {
   return (
-    <div className={cn("bg-background overflow-hidden rounded-lg border shadow h-full", className)}>
+    <div
+      className={cn(
+        "bg-background overflow-hidden rounded-lg border shadow h-full",
+        className,
+      )}
+    >
       <LexicalComposer
         initialConfig={{
           ...editorConfig,
           ...(editorState ? { editorState } : {}),
-          ...(editorSerializedState ? { editorState: JSON.stringify(editorSerializedState) } : {}),
+          ...(editorSerializedState
+            ? { editorState: JSON.stringify(editorSerializedState) }
+            : {}),
         }}
       >
         <TooltipProvider>
@@ -49,7 +56,7 @@ export function Editor({
 
           <OnChangePlugin
             ignoreSelectionChange
-            onChange={editorState => {
+            onChange={(editorState) => {
               onChange?.(editorState);
               onSerializedChange?.(editorState.toJSON());
             }}

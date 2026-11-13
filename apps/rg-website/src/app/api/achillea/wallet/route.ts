@@ -60,7 +60,7 @@ export async function GET() {
         balance: Number(portefeuille.rows[0]?.balance ?? 0),
         currency: portefeuille.rows[0]?.currency ?? "ACH",
       },
-      transactions: mouvements.rows.map(mouvement => ({
+      transactions: mouvements.rows.map((mouvement) => ({
         id: mouvement.id,
         type: mouvement.type,
         amount: Number(mouvement.amount),
@@ -71,6 +71,9 @@ export async function GET() {
     });
   } catch (error) {
     console.error("[api/achillea/wallet] lecture directe impossible", error);
-    return NextResponse.json({ error: "base_de_donnees_indisponible" }, { status: 503 });
+    return NextResponse.json(
+      { error: "base_de_donnees_indisponible" },
+      { status: 503 },
+    );
   }
 }

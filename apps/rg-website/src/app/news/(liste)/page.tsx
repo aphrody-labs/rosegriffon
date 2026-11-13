@@ -1,4 +1,8 @@
-import { getPopularArticles, getPopularTags, getTrendingArticles } from "@/app/actions/articles";
+import {
+  getPopularArticles,
+  getPopularTags,
+  getTrendingArticles,
+} from "@/app/actions/articles";
 import { getCommentCounts } from "@/app/actions/comments";
 import { getReactionCounts } from "@/app/actions/reactions";
 import { getContinueReading } from "@/app/actions/reading-history";
@@ -21,7 +25,13 @@ export const metadata = {
 
 const ITEMS_PER_PAGE = 12;
 
-const VALID_CATEGORIES = new Set(["announcement", "event", "critique", "community", "Tweet"]);
+const VALID_CATEGORIES = new Set([
+  "announcement",
+  "event",
+  "critique",
+  "community",
+  "Tweet",
+]);
 
 export default async function NewsFeedPage({
   searchParams,
@@ -31,7 +41,8 @@ export default async function NewsFeedPage({
   const searchParamsValue = await searchParams;
   const { page: currentPage } = parseSearchParams(searchParamsValue);
   const rawCategory = searchParamsValue.category as string | undefined;
-  const categoryFilter = rawCategory && VALID_CATEGORIES.has(rawCategory) ? rawCategory : undefined;
+  const categoryFilter =
+    rawCategory && VALID_CATEGORIES.has(rawCategory) ? rawCategory : undefined;
   const rawQuery = (searchParamsValue.q as string | undefined) || "";
   const searchQuery = sanitizeNewsSearchQuery(rawQuery);
 
@@ -49,7 +60,12 @@ export default async function NewsFeedPage({
    * de paramètre montre tout — c'est la vue par défaut.
    */
   const format = searchParamsValue.format as string | undefined;
-  const appsDuFil = format === "chronique" ? ["website"] : format === "actu" ? ["azalee"] : ["azalee", "website"];
+  const appsDuFil =
+    format === "chronique"
+      ? ["website"]
+      : format === "actu"
+        ? ["azalee"]
+        : ["azalee", "website"];
 
   let featuredArticles: FeedItem[] = [];
   const featuredIds = new Set<string>();
@@ -73,7 +89,7 @@ export default async function NewsFeedPage({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const featuredArr = (featured as any[]) || [];
     if (featuredArr.length > 0) {
-      featuredArticles = featuredArr.map(a => ({
+      featuredArticles = featuredArr.map((a) => ({
         author_id: a.author_id,
         category: a.category,
         date: a.published_at || a.created_at,
@@ -84,7 +100,7 @@ export default async function NewsFeedPage({
         title: a.title,
         type: "article",
       }));
-      featuredArr.forEach(f => featuredIds.add(f.id));
+      featuredArr.forEach((f) => featuredIds.add(f.id));
     }
   }
 
@@ -109,7 +125,9 @@ export default async function NewsFeedPage({
 
         if (searchQuery) {
           params.push(searchQuery);
-          conditions.push(`search_vector @@ to_tsquery('french', $${params.length})`);
+          conditions.push(
+            `search_vector @@ to_tsquery('french', $${params.length})`,
+          );
         }
         if (categoryFilter && categoryFilter !== "Tweet") {
           params.push(categoryFilter);
@@ -136,7 +154,9 @@ export default async function NewsFeedPage({
             params,
           );
 
-          const total = rows[0] ? Number((rows[0] as { full_count: string }).full_count) : 0;
+          const total = rows[0]
+            ? Number((rows[0] as { full_count: string }).full_count)
+            : 0;
           const items: FeedItem[] = (rows as any[]).map(
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             (a: any) => ({
@@ -174,7 +194,9 @@ export default async function NewsFeedPage({
           );
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const data = rows as any[];
-          const count = data[0] ? Number((data[0] as { full_count: string }).full_count) : 0;
+          const count = data[0]
+            ? Number((data[0] as { full_count: string }).full_count)
+            : 0;
           const items: FeedItem[] = data.map(
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             (t: any) => ({
@@ -185,7 +207,10 @@ export default async function NewsFeedPage({
               date: t.created_at,
               excerpt: t.translation || t.text,
               id: t.id,
-              image: t.media && t.media.length > 0 ? t.media[0].preview_url || t.media[0].url : null,
+              image:
+                t.media && t.media.length > 0
+                  ? t.media[0].preview_url || t.media[0].url
+                  : null,
               media: t.media || [],
               quotedTweets: t.quoted_tweets || [],
               slug: t.id,
@@ -202,20 +227,27 @@ export default async function NewsFeedPage({
       })()
     : Promise.resolve({ items: [] as FeedItem[], total: 0 });
 
-  const [articlesRes, tweetsRes] = await Promise.all([articlesPromise, tweetsPromise]);
+  const [articlesRes, tweetsRes] = await Promise.all([
+    articlesPromise,
+    tweetsPromise,
+  ]);
 
   const feedItems: FeedItem[] = [...articlesRes.items, ...tweetsRes.items];
   // Tri stable global pour l'affichage (chaque section sera ré-extraite côté client).
-  feedItems.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  feedItems.sort(
+    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+  );
 
   // Le total pour la pagination correspond à la source dominante : si on filtre
   // "Tweet" → total tweets, sinon → total articles (les tweets sont une bande
   // Secondaire). Ça rend la pagination prévisible et cohérente avec le tri.
-  const totalItems = isTweetOnly ? tweetsRes.total : articlesRes.total + (tweetsAllowed ? tweetsRes.total : 0);
+  const totalItems = isTweetOnly
+    ? tweetsRes.total
+    : articlesRes.total + (tweetsAllowed ? tweetsRes.total : 0);
 
   const articleIds = [
-    ...feedItems.filter(i => i.type === "article").map(i => i.id),
-    ...featuredArticles.map(i => i.id),
+    ...feedItems.filter((i) => i.type === "article").map((i) => i.id),
+    ...featuredArticles.map((i) => i.id),
   ];
 
   // Une couverture qui ne répond pas (CDN en 502) est remplacée dès le HTML : sinon le repli
@@ -223,28 +255,45 @@ export default async function NewsFeedPage({
   // (Sondage lancé en parallèle des lectures secondaires ci-dessous.)
   const sondages = Promise.all([
     sansImagesMortes(featuredArticles),
-    sansImagesMortes(feedItems.filter(i => i.type === "article")),
+    sansImagesMortes(feedItems.filter((i) => i.type === "article")),
   ]);
 
-  const [popularTags, reactionCounts, popularArticles, trendingArticles, commentCounts, continueReadingArticles] =
-    await Promise.all([
-      currentPage === 1 && !searchQuery ? getPopularTags(20) : Promise.resolve([]),
-      articleIds.length > 0 ? getReactionCounts(articleIds) : Promise.resolve({}),
-      currentPage === 1 && !searchQuery ? getPopularArticles(5) : Promise.resolve([]),
-      currentPage === 1 && !searchQuery ? getTrendingArticles(5) : Promise.resolve([]),
-      articleIds.length > 0 ? getCommentCounts(articleIds) : Promise.resolve({}),
-      currentPage === 1 && !searchQuery ? getContinueReading(4) : Promise.resolve([]),
-    ]);
+  const [
+    popularTags,
+    reactionCounts,
+    popularArticles,
+    trendingArticles,
+    commentCounts,
+    continueReadingArticles,
+  ] = await Promise.all([
+    currentPage === 1 && !searchQuery
+      ? getPopularTags(20)
+      : Promise.resolve([]),
+    articleIds.length > 0 ? getReactionCounts(articleIds) : Promise.resolve({}),
+    currentPage === 1 && !searchQuery
+      ? getPopularArticles(5)
+      : Promise.resolve([]),
+    currentPage === 1 && !searchQuery
+      ? getTrendingArticles(5)
+      : Promise.resolve([]),
+    articleIds.length > 0 ? getCommentCounts(articleIds) : Promise.resolve({}),
+    currentPage === 1 && !searchQuery
+      ? getContinueReading(4)
+      : Promise.resolve([]),
+  ]);
 
   const [featuredServis, articlesServis] = await sondages;
   featuredArticles = featuredServis;
-  const articlesParId = new Map(articlesServis.map(a => [a.id, a]));
-  const feedItemsServis = feedItems.map(i => (i.type === "article" ? (articlesParId.get(i.id) ?? i) : i));
+  const articlesParId = new Map(articlesServis.map((a) => [a.id, a]));
+  const feedItemsServis = feedItems.map((i) =>
+    i.type === "article" ? (articlesParId.get(i.id) ?? i) : i,
+  );
 
   const collectionJsonLd = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
-    description: "Actualités, traductions exclusives, interviews et analyses sur Inazuma Eleven: Victory Road.",
+    description:
+      "Actualités, traductions exclusives, interviews et analyses sur Inazuma Eleven: Victory Road.",
     isPartOf: { "@type": "WebSite", name: "Rose Griffon", url: SITE_URL },
     mainEntity: {
       "@type": "ItemList",
@@ -266,7 +315,10 @@ export default async function NewsFeedPage({
 
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionJsonLd) }} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionJsonLd) }}
+      />
       <NewsFeedClient
         feedItems={feedItemsServis}
         totalItems={totalItems}

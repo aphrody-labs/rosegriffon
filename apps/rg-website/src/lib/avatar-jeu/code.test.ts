@@ -1,12 +1,19 @@
 import { describe, expect, test } from "bun:test";
 
-import { encoder, longueurCode, specDe, valeursDepuisChoix } from "@/app/wiki/avatar/partage";
+import {
+  encoder,
+  longueurCode,
+  specDe,
+  valeursDepuisChoix,
+} from "@/app/wiki/avatar/partage";
 import type { Catalogue, Part } from "@/app/wiki/avatar/types";
 
 import { analyserCode, extraireCode, urlApercu } from "./code";
 
 // Alphabet publié par le catalogue du jeu (64 caractères distincts).
-const ALPHABET = [..."3456789ABCDEFGHJKLMNPQRSTUVWXYabcdefghijkmnpqrstuvwxy!?-#$*&=+><"];
+const ALPHABET = [
+  ..."3456789ABCDEFGHJKLMNPQRSTUVWXYabcdefghijkmnpqrstuvwxy!?-#$*&=+><",
+];
 
 const part = (id: string, resource: string, modele: string): Part => ({
   id,
@@ -30,7 +37,14 @@ const part = (id: string, resource: string, modele: string): Part => ({
 // 86 emplacements totalisant 410 bits, comme le jeu : 66 de 5 bits et 20 de 4 bits.
 const emplacements = Array.from({ length: 86 }, (_, i) => {
   const bits = i < 66 ? 5 : 4;
-  return { emplacement: i, bits, valeurs: 2 ** bits, categorie: 0, param: 0, paramSub: 0 };
+  return {
+    emplacement: i,
+    bits,
+    valeurs: 2 ** bits,
+    categorie: 0,
+    param: 0,
+    paramSub: 0,
+  };
 });
 
 const CATALOGUE = {
@@ -56,11 +70,16 @@ const CATALOGUE = {
 } as unknown as Catalogue;
 
 const spec = specDe(CATALOGUE)!;
-const codeValide = encoder(spec, valeursDepuisChoix(CATALOGUE, spec, { 4: "A3" }, 1, 1));
+const codeValide = encoder(
+  spec,
+  valeursDepuisChoix(CATALOGUE, spec, { 4: "A3" }, 1, 1),
+);
 
 describe("extraireCode", () => {
   test("retire les blancs d'un copier-coller", () => {
-    expect(extraireCode(` ${codeValide.slice(0, 30)}\n${codeValide.slice(30)} `)).toBe(codeValide);
+    expect(
+      extraireCode(` ${codeValide.slice(0, 30)}\n${codeValide.slice(30)} `),
+    ).toBe(codeValide);
   });
 
   test("lit le paramètre d'un lien de partage, y compris avec des caractères encodés", () => {
@@ -83,7 +102,12 @@ describe("analyserCode", () => {
   });
 
   test("refuse un code vide, trop court, trop long ou à caractère étranger", () => {
-    for (const mauvais of ["", codeValide.slice(1), `${codeValide}3`, `${codeValide.slice(0, -1)}0`]) {
+    for (const mauvais of [
+      "",
+      codeValide.slice(1),
+      `${codeValide}3`,
+      `${codeValide.slice(0, -1)}0`,
+    ]) {
       expect(analyserCode(CATALOGUE, mauvais).ok).toBe(false);
     }
     const intrus = analyserCode(CATALOGUE, `${codeValide.slice(0, -1)}0`);
@@ -91,9 +115,15 @@ describe("analyserCode", () => {
   });
 
   test("refuse un catalogue sans spécification ou incohérent", () => {
-    const sans = { ...CATALOGUE, codePartage: undefined } as unknown as Catalogue;
+    const sans = {
+      ...CATALOGUE,
+      codePartage: undefined,
+    } as unknown as Catalogue;
     expect(analyserCode(sans, codeValide).ok).toBe(false);
-    const faux = { ...CATALOGUE, codePartage: { ...CATALOGUE.codePartage, bits: 400 } } as Catalogue;
+    const faux = {
+      ...CATALOGUE,
+      codePartage: { ...CATALOGUE.codePartage, bits: 400 },
+    } as Catalogue;
     expect(analyserCode(faux, codeValide).ok).toBe(false);
   });
 

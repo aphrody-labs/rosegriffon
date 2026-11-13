@@ -194,7 +194,9 @@ export function decouperEnLots<T extends { length: number }>(
     const taille = Math.max(0, element.length);
     // Un élément seul plus gros que la borne part quand même seul : le tronquer
     // ici serait une décision de rendu prise au mauvais endroit.
-    const debordement = courant.length > 0 && (courant.length >= maxParLot || poids + taille > maxCaracteres);
+    const debordement =
+      courant.length > 0 &&
+      (courant.length >= maxParLot || poids + taille > maxCaracteres);
     if (debordement) {
       lots.push(courant);
       courant = [];
@@ -235,7 +237,9 @@ function listeDeChaines(valeur: unknown, repli: string[]): string[] {
   if (!Array.isArray(valeur)) {
     return repli;
   }
-  const propres = valeur.filter(estChaineNonVide).map(v => v.trim().replace(/^@/, ""));
+  const propres = valeur
+    .filter(estChaineNonVide)
+    .map((v) => v.trim().replace(/^@/, ""));
   return propres;
 }
 
@@ -260,14 +264,19 @@ function listeDeChaines(valeur: unknown, repli: string[]): string[] {
  */
 export function lireFiltreTweets(valeur: unknown): FiltreTweets {
   if (!valeur || typeof valeur !== "object" || Array.isArray(valeur)) {
-    return { ...FILTRE_TWEETS_DEFAUT, comptes: [...FILTRE_TWEETS_DEFAUT.comptes] };
+    return {
+      ...FILTRE_TWEETS_DEFAUT,
+      comptes: [...FILTRE_TWEETS_DEFAUT.comptes],
+    };
   }
   const brut = valeur as Record<string, unknown>;
   const max = Number(brut.max_par_lot);
   return {
     actif: brut.actif === true,
     comptes: listeDeChaines(brut.comptes, [...FILTRE_TWEETS_DEFAUT.comptes]),
-    categories_exclues: listeDeChaines(brut.categories_exclues, [...FILTRE_TWEETS_DEFAUT.categories_exclues]),
+    categories_exclues: listeDeChaines(brut.categories_exclues, [
+      ...FILTRE_TWEETS_DEFAUT.categories_exclues,
+    ]),
     max_par_lot: Number.isFinite(max)
       ? Math.min(PLAFOND_DRAIN, Math.max(1, Math.trunc(max)))
       : FILTRE_TWEETS_DEFAUT.max_par_lot,
@@ -285,11 +294,17 @@ export function categoriesBannies(filtre: FiltreTweets): string[] {
 }
 
 /** Compare deux pseudos X : la casse n'a aucun sens sur X (`@Level5Hub` = `@level5hub`). */
-export function memeCompte(a: string | null | undefined, b: string | null | undefined): boolean {
+export function memeCompte(
+  a: string | null | undefined,
+  b: string | null | undefined,
+): boolean {
   if (!a || !b) {
     return false;
   }
-  return a.trim().replace(/^@/, "").toLowerCase() === b.trim().replace(/^@/, "").toLowerCase();
+  return (
+    a.trim().replace(/^@/, "").toLowerCase() ===
+    b.trim().replace(/^@/, "").toLowerCase()
+  );
 }
 
 /**
@@ -300,11 +315,16 @@ export function memeCompte(a: string | null | undefined, b: string | null | unde
  * ligne). Deux implémentations qui divergeraient produiraient soit un silence
  * inexplicable, soit une annonce non voulue.
  */
-export function tweetEstNotifiable(tweet: LigneTweet, filtre: FiltreTweets): boolean {
+export function tweetEstNotifiable(
+  tweet: LigneTweet,
+  filtre: FiltreTweets,
+): boolean {
   if (!filtre.actif) {
     return false;
   }
-  if (!filtre.comptes.some(compte => memeCompte(compte, tweet.author_username))) {
+  if (
+    !filtre.comptes.some((compte) => memeCompte(compte, tweet.author_username))
+  ) {
     return false;
   }
   const categorie = (tweet.category ?? "").toLowerCase();
@@ -315,7 +335,9 @@ export function tweetEstNotifiable(tweet: LigneTweet, filtre: FiltreTweets): boo
 }
 
 /** Lien canonique vers le post d'origine. */
-export function urlTweet(tweet: Pick<LigneTweet, "id" | "author_username">): string {
+export function urlTweet(
+  tweet: Pick<LigneTweet, "id" | "author_username">,
+): string {
   const auteur = tweet.author_username?.trim().replace(/^@/, "") || "i";
   return `https://x.com/${auteur}/status/${tweet.id}`;
 }
@@ -333,7 +355,9 @@ export function urlTweet(tweet: Pick<LigneTweet, "id" | "author_username">): str
  * `?s=20` est conservé tel quel : c'est ce que le partage mobile de X ajoute,
  * et c'est ce que portent les messages existants.
  */
-export function urlFixvx(tweet: Pick<LigneTweet, "id" | "author_username">): string {
+export function urlFixvx(
+  tweet: Pick<LigneTweet, "id" | "author_username">,
+): string {
   const auteur = tweet.author_username?.trim().replace(/^@/, "") || "i";
   return `https://fixvx.com/${auteur}/status/${tweet.id}?s=20`;
 }
@@ -347,7 +371,10 @@ export function urlFixvx(tweet: Pick<LigneTweet, "id" | "author_username">): str
  */
 export function messageAnnonce(tweet: LigneTweet, maxAmorce = 120): string {
   const texte = texteSansLienMedia(tweet.text).split(/\r?\n/)[0]?.trim() ?? "";
-  const amorce = texte.length > maxAmorce ? `${texte.slice(0, maxAmorce - 1).trimEnd()}…` : texte;
+  const amorce =
+    texte.length > maxAmorce
+      ? `${texte.slice(0, maxAmorce - 1).trimEnd()}…`
+      : texte;
   const url = urlFixvx(tweet);
   return amorce.length > 0 ? `${amorce} : ${url}` : url;
 }
@@ -410,10 +437,18 @@ export function imagesTweet(media: unknown): ImageTweet[] {
     if (item.type !== "photo") {
       continue;
     }
-    const candidats = [item.storage_url, item.url, item.preview_url, item.previewUrl, item.original_url]
+    const candidats = [
+      item.storage_url,
+      item.url,
+      item.preview_url,
+      item.previewUrl,
+      item.original_url,
+    ]
       .filter(estChaineNonVide)
-      .map(valeur => valeur.trim());
-    const stockee = candidats.find(valeur => valeur.includes(CHEMIN_STOCKAGE));
+      .map((valeur) => valeur.trim());
+    const stockee = candidats.find((valeur) =>
+      valeur.includes(CHEMIN_STOCKAGE),
+    );
     const url = urlMediaAbsolue(stockee ?? candidats[0]);
     if (!url) {
       continue;
@@ -434,7 +469,13 @@ export function metriquesTweet(metrics: unknown): MetriquesTweet | null {
   }
   const brut = metrics as Record<string, unknown>;
   const retenues: MetriquesTweet = {};
-  for (const clef of ["like_count", "retweet_count", "reply_count", "quote_count", "view_count"] as const) {
+  for (const clef of [
+    "like_count",
+    "retweet_count",
+    "reply_count",
+    "quote_count",
+    "view_count",
+  ] as const) {
     const valeur = brut[clef];
     if (typeof valeur === "number" && Number.isFinite(valeur)) {
       retenues[clef] = valeur;
@@ -451,9 +492,12 @@ export function formaterMetriques(metrics: unknown): string | null {
   }
   const morceaux: string[] = [];
   if (m.like_count) morceaux.push(`♥ ${m.like_count.toLocaleString("fr-FR")}`);
-  if (m.retweet_count) morceaux.push(`RT ${m.retweet_count.toLocaleString("fr-FR")}`);
-  if (m.reply_count) morceaux.push(`↩ ${m.reply_count.toLocaleString("fr-FR")}`);
-  if (m.quote_count) morceaux.push(`❝ ${m.quote_count.toLocaleString("fr-FR")}`);
+  if (m.retweet_count)
+    morceaux.push(`RT ${m.retweet_count.toLocaleString("fr-FR")}`);
+  if (m.reply_count)
+    morceaux.push(`↩ ${m.reply_count.toLocaleString("fr-FR")}`);
+  if (m.quote_count)
+    morceaux.push(`❝ ${m.quote_count.toLocaleString("fr-FR")}`);
   if (m.view_count) morceaux.push(`👁 ${m.view_count.toLocaleString("fr-FR")}`);
   return morceaux.length > 0 ? morceaux.join(" · ") : null;
 }
@@ -513,7 +557,8 @@ export function corpsTweet(tweet: LigneTweet, max = 700): string {
     // 2 = le `\n\n` qui sépare la traduction de la citation. En dessous de 40
     // caractères utiles, la citation n'apprend rien : on garde la traduction seule.
     const budget = max - bloc.length - 2;
-    const citation = original.length > 0 && budget >= 40 ? citer(original, budget) : "";
+    const citation =
+      original.length > 0 && budget >= 40 ? citer(original, budget) : "";
     if (citation.length > 0) {
       return `${bloc}\n\n${citation}`;
     }
@@ -527,7 +572,10 @@ export function dateTweet(tweet: LigneTweet): Date | null {
   if (!tweet.created_at) {
     return null;
   }
-  const date = tweet.created_at instanceof Date ? tweet.created_at : new Date(tweet.created_at);
+  const date =
+    tweet.created_at instanceof Date
+      ? tweet.created_at
+      : new Date(tweet.created_at);
   return Number.isNaN(date.getTime()) ? null : date;
 }
 
@@ -538,14 +586,20 @@ export function horodatageDiscord(tweet: LigneTweet): string {
 
 /** Ligne d'un tweet dans la liste paginée. */
 export function ligneListe(tweet: LigneTweet, maxTexte = 180): string {
-  const auteur = tweet.author_username ? `@${tweet.author_username}` : "compte inconnu";
+  const auteur = tweet.author_username
+    ? `@${tweet.author_username}`
+    : "compte inconnu";
   const etiquettes: string[] = [];
   if (tweet.category) etiquettes.push(`*${tweet.category}*`);
   if (tweet.is_thread) etiquettes.push(`fil de ${tweet.tweet_count ?? 1}`);
   const images = imagesTweet(tweet.media);
-  if (images.length > 0) etiquettes.push(`${images.length} image${images.length > 1 ? "s" : ""}`);
+  if (images.length > 0)
+    etiquettes.push(`${images.length} image${images.length > 1 ? "s" : ""}`);
   const suffixe = etiquettes.length > 0 ? ` · ${etiquettes.join(" · ")}` : "";
-  const corps = couper(texteSansLienMedia(tweet.translation) || texteSansLienMedia(tweet.text), maxTexte);
+  const corps = couper(
+    texteSansLienMedia(tweet.translation) || texteSansLienMedia(tweet.text),
+    maxTexte,
+  );
   return `**[${auteur}](${urlTweet(tweet)})** · ${horodatageDiscord(tweet)}${suffixe}\n${corps || "*(sans texte)*"}`;
 }
 
@@ -561,12 +615,18 @@ export function nombreDePages(total: number, parPage: number): number {
  * bigint : la commande répondrait par une erreur au lieu d'une liste vide. Même
  * garde que `entierPositif` côté site (`lib/x-campagnes/types.ts`).
  */
-export function bornerPage(page: number, total: number, parPage: number): number {
+export function bornerPage(
+  page: number,
+  total: number,
+  parPage: number,
+): number {
   return bornerPageUi(page, total, parPage);
 }
 
 /** Décompte par auteur, du plus prolifique au moins, pour la synthèse d'un gros lot. */
-export function compterParAuteur(tweets: LigneTweet[]): Array<{ compte: string; n: number }> {
+export function compterParAuteur(
+  tweets: LigneTweet[],
+): Array<{ compte: string; n: number }> {
   const compteurs = new Map<string, number>();
   for (const tweet of tweets) {
     const compte = tweet.author_username?.trim().replace(/^@/, "") || "inconnu";
@@ -601,7 +661,12 @@ export interface EtatListeTweets {
  * seraient pires que pas de boutons du tout.
  */
 export function encoderEtatListe(etat: EtatListeTweets): string | null {
-  return encoderEtat(PREFIXE_BOUTON_TWEETS, [etat.page, etat.auteur, etat.categorie, etat.recherche]);
+  return encoderEtat(PREFIXE_BOUTON_TWEETS, [
+    etat.page,
+    etat.auteur,
+    etat.categorie,
+    etat.recherche,
+  ]);
 }
 
 /** Décode un `customId` produit par `encoderEtatListe`. `null` si ce n'en est pas un. */

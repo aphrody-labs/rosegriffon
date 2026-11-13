@@ -23,12 +23,19 @@ import { cn } from "@/lib/utils";
  * `whitespace-normal` + `h-auto min-h-12` : le `Button` partagé impose
  * `whitespace-nowrap`, ce qui fait déborder un libellé long dès 320 px.
  */
-const heroButtonBase = "h-auto min-h-11 rounded-xl px-4 py-2 text-center text-sm font-semibold whitespace-normal";
+const heroButtonBase =
+  "h-auto min-h-11 rounded-xl px-4 py-2 text-center text-sm font-semibold whitespace-normal";
 export const heroPrimaryButtonClass = `${heroButtonBase} bg-rg-or text-rg-marine hover:bg-rg-or/90`;
 export const heroSecondaryButtonClass = `${heroButtonBase} border border-rg-or/60 bg-transparent text-foreground hover:border-rg-or hover:bg-rg-or/10 hover:text-foreground`;
 
 /** Conteneur de page — même largeur maximale et mêmes gouttières que la home. */
-export function PageContainer({ children, className }: { children: React.ReactNode; className?: string }) {
+export function PageContainer({
+  children,
+  className,
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
   return (
     <div
       className={cn(
@@ -89,10 +96,14 @@ export function PageHero({
               {eyebrow}
             </div>
           )}
-          <h1 className="truncate text-2xl font-bold tracking-tight text-foreground min-[840px]:text-3xl">{title}</h1>
+          <h1 className="truncate text-2xl font-bold tracking-tight text-foreground min-[840px]:text-3xl">
+            {title}
+          </h1>
         </div>
       </div>
-      {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}
+      {actions && (
+        <div className="flex flex-wrap items-center gap-2">{actions}</div>
+      )}
       {children && <div className="min-[600px]:basis-full">{children}</div>}
     </header>
   );
@@ -118,12 +129,23 @@ export function SectionHeading({
   return (
     <div className="mb-4 flex flex-col items-start justify-between gap-3 min-[600px]:flex-row min-[600px]:items-center">
       <div className="flex items-center gap-3">
-        {icon && <div className={cn("rounded-lg p-2 shadow-lg", iconClassName)}>{icon}</div>}
+        {icon && (
+          <div className={cn("rounded-lg p-2 shadow-lg", iconClassName)}>
+            {icon}
+          </div>
+        )}
         <div>
-          <h2 id={id} className="text-fluid-headline-lg font-bold text-foreground">
+          <h2
+            id={id}
+            className="text-fluid-headline-lg font-bold text-foreground"
+          >
             {title}
           </h2>
-          {subtitle && <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">{subtitle}</p>}
+          {subtitle && (
+            <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
+              {subtitle}
+            </p>
+          )}
         </div>
       </div>
       {action}

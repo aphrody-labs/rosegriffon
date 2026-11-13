@@ -42,11 +42,15 @@ function publicationDate(value: Date): string {
   });
 }
 
-export function TournamentTable({ tournaments, loading = false, className }: TournamentTableProps) {
+export function TournamentTable({
+  tournaments,
+  loading = false,
+  className,
+}: TournamentTableProps) {
   if (loading) {
     return (
       <output aria-label="Chargement des tournois" className="space-y-3">
-        {[1, 2, 3, 4].map(i => (
+        {[1, 2, 3, 4].map((i) => (
           <Skeleton key={i} className="h-24 w-full rounded-xl" />
         ))}
       </output>
@@ -56,7 +60,10 @@ export function TournamentTable({ tournaments, loading = false, className }: Tou
   if (!tournaments.length) {
     return (
       <output className="text-center py-12 border border-dashed border-outline-variant/25 rounded-2xl p-6 text-lg text-on-surface-variant bg-surface-container/30 backdrop-blur-md">
-        <Trophy aria-hidden="true" className="size-10 mx-auto mb-2 opacity-40" />
+        <Trophy
+          aria-hidden="true"
+          className="size-10 mx-auto mb-2 opacity-40"
+        />
         <p className="font-semibold">Aucun tournoi trouvé</p>
       </output>
     );
@@ -65,12 +72,19 @@ export function TournamentTable({ tournaments, loading = false, className }: Tou
   return (
     <div className={className}>
       <ul className="grid gap-4 lg:hidden" aria-label="Tournois">
-        {tournaments.map(t => (
-          <li key={t.id} className="rounded-2xl border border-outline-variant/15 bg-surface-container/60 backdrop-blur-md p-4 text-lg text-on-surface shadow-sm transition-all duration-200 hover:bg-surface-container-high/60">
+        {tournaments.map((t) => (
+          <li
+            key={t.id}
+            className="rounded-2xl border border-outline-variant/15 bg-surface-container/60 backdrop-blur-md p-4 text-lg text-on-surface shadow-sm transition-all duration-200 hover:bg-surface-container-high/60"
+          >
             <h2 className="font-bold leading-snug">{t.name}</h2>
             <div className="mt-3 flex flex-wrap items-center gap-2">
               <Badge
-                variant={t.status === "Finished" || t.status === "Canceled" ? "secondary" : "default"}
+                variant={
+                  t.status === "Finished" || t.status === "Canceled"
+                    ? "secondary"
+                    : "default"
+                }
                 className="text-lg"
               >
                 {statusLabel(t.status)}
@@ -78,9 +92,13 @@ export function TournamentTable({ tournaments, loading = false, className }: Tou
               {/* La liste ne contient que des tournois : le type « Tournoi » y
                   serait redondant (et précédait une description commençant
                   souvent par « Tournoi … »). Seuls les autres types s’affichent. */}
-              {t.type !== "TOURNAMENT" && <span>{eventTypeLabel(t.type as EventTypeEnum)}</span>}
+              {t.type !== "TOURNAMENT" && (
+                <span>{eventTypeLabel(t.type as EventTypeEnum)}</span>
+              )}
             </div>
-            <p className="mt-3 text-on-surface-variant">{summary(t.description)}</p>
+            <p className="mt-3 text-on-surface-variant">
+              {summary(t.description)}
+            </p>
             <p className="mt-3 flex items-center gap-2 text-on-surface-variant">
               <Calendar aria-hidden="true" className="size-5" />
               Publié le {publicationDate(t.createdAt)}
@@ -121,23 +139,39 @@ export function TournamentTable({ tournaments, loading = false, className }: Tou
             </tr>
           </thead>
           <tbody className="divide-y divide-outline-variant/10 text-on-surface">
-            {tournaments.map(t => (
-              <tr key={t.id} className="hover:bg-surface-container-high/40 transition-colors duration-150">
+            {tournaments.map((t) => (
+              <tr
+                key={t.id}
+                className="hover:bg-surface-container-high/40 transition-colors duration-150"
+              >
                 <th scope="row" className="px-4 py-4 font-semibold">
                   <Link
                     href={`/achillea/tournaments/${t.id}`}
                     className="inline-flex min-h-11 items-center gap-2 rounded-lg text-primary focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-primary hover:underline"
                   >
-                    <Trophy aria-hidden="true" className="size-6 shrink-0 text-warning" />
+                    <Trophy
+                      aria-hidden="true"
+                      className="size-6 shrink-0 text-warning"
+                    />
                     {t.name}
                   </Link>
                 </th>
-                <td className="px-4 py-4">{eventTypeLabel(t.type as EventTypeEnum)}</td>
-                <td className="max-w-sm px-4 py-4 text-on-surface-variant">{summary(t.description)}</td>
-                <td className="px-4 py-4 whitespace-nowrap">{publicationDate(t.createdAt)}</td>
+                <td className="px-4 py-4">
+                  {eventTypeLabel(t.type as EventTypeEnum)}
+                </td>
+                <td className="max-w-sm px-4 py-4 text-on-surface-variant">
+                  {summary(t.description)}
+                </td>
+                <td className="px-4 py-4 whitespace-nowrap">
+                  {publicationDate(t.createdAt)}
+                </td>
                 <td className="px-4 py-4">
                   <Badge
-                    variant={t.status === "Finished" || t.status === "Canceled" ? "secondary" : "default"}
+                    variant={
+                      t.status === "Finished" || t.status === "Canceled"
+                        ? "secondary"
+                        : "default"
+                    }
                     className="text-lg whitespace-nowrap"
                   >
                     {statusLabel(t.status)}

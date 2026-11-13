@@ -3,8 +3,21 @@
 import { useEffect, useState, useMemo } from "react";
 import Link from "@/components/shared/Link";
 import { createAchilleaClient } from "@/lib/achillea";
-import type { LeagueSeasonPayload, LeagueMatchRow } from "@rosegriffon/achillea-types/domain/league";
-import { Trophy, ArrowLeft, Calendar, Users, Sparkles, Layers, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
+import type {
+  LeagueSeasonPayload,
+  LeagueMatchRow,
+} from "@rosegriffon/achillea-types/domain/league";
+import {
+  Trophy,
+  ArrowLeft,
+  Calendar,
+  Users,
+  Sparkles,
+  Layers,
+  ChevronLeft,
+  ChevronRight,
+  Loader2,
+} from "lucide-react";
 import { signalerException } from "@/lib/achillea/signaler";
 import { MEDAILLE } from "@/components/achillea/couleurs-donnees";
 
@@ -30,10 +43,18 @@ function isPlayoffResult(value: unknown): value is PlayoffResult {
   );
 }
 
-export default function AstralLeaguePage({ initialSeason = null }: { initialSeason?: LeagueSeasonPayload | null }) {
-  const [season, setSeason] = useState<LeagueSeasonPayload | null>(initialSeason);
+export default function AstralLeaguePage({
+  initialSeason = null,
+}: {
+  initialSeason?: LeagueSeasonPayload | null;
+}) {
+  const [season, setSeason] = useState<LeagueSeasonPayload | null>(
+    initialSeason,
+  );
   const [loading, setLoading] = useState<boolean>(initialSeason == null);
-  const [activeTab, setActiveTab] = useState<"standings" | "matches" | "playoffs" | "rules">("standings");
+  const [activeTab, setActiveTab] = useState<
+    "standings" | "matches" | "playoffs" | "rules"
+  >("standings");
   const [selectedMatchday, setSelectedMatchday] = useState<number>(1);
 
   useEffect(() => {
@@ -43,13 +64,13 @@ export default function AstralLeaguePage({ initialSeason = null }: { initialSeas
 
     client.leagues
       .astral("astral")
-      .then(res => {
+      .then((res) => {
         if (cancelled) return;
         if (res.ok && res.value) {
           setSeason(res.value);
         }
       })
-      .catch(cause => {
+      .catch((cause) => {
         signalerException("leagues/astral", cause);
       })
       .finally(() => {
@@ -79,11 +100,16 @@ export default function AstralLeaguePage({ initialSeason = null }: { initialSeas
 
   const matchdayResults = useMemo(() => {
     if (!season?.results) return [];
-    return season.results.filter((m: LeagueMatchRow) => m.matchday === selectedMatchday);
+    return season.results.filter(
+      (m: LeagueMatchRow) => m.matchday === selectedMatchday,
+    );
   }, [season, selectedMatchday]);
 
   const playoffResults = useMemo(
-    () => (Array.isArray(season?.playoffs) ? season.playoffs.filter(isPlayoffResult) : []),
+    () =>
+      Array.isArray(season?.playoffs)
+        ? season.playoffs.filter(isPlayoffResult)
+        : [],
     [season],
   );
 
@@ -102,7 +128,9 @@ export default function AstralLeaguePage({ initialSeason = null }: { initialSeas
           <span className="p-2 rounded-xl bg-warning/10 text-warning border border-warning/20">
             <Trophy className="w-5 h-5" />
           </span>
-          <h1 className="text-2xl font-bold tracking-tight min-[840px]:text-3xl">Astral League</h1>
+          <h1 className="text-2xl font-bold tracking-tight min-[840px]:text-3xl">
+            Astral League
+          </h1>
         </div>
         <div className="flex flex-wrap items-center gap-3 text-xs font-medium text-muted-foreground">
           <span className="flex items-center gap-1.5">
@@ -175,7 +203,9 @@ export default function AstralLeaguePage({ initialSeason = null }: { initialSeas
       {loading ? (
         <div className="py-20 text-center space-y-3">
           <Loader2 className="w-8 h-8 animate-spin mx-auto text-muted-foreground" />
-          <p className="text-sm text-muted-foreground">Chargement des données de l'Astral League...</p>
+          <p className="text-sm text-muted-foreground">
+            Chargement des données de l'Astral League...
+          </p>
         </div>
       ) : (
         <>
@@ -200,7 +230,7 @@ export default function AstralLeaguePage({ initialSeason = null }: { initialSeas
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-outline-variant/10">
-                    {standings.map(row => {
+                    {standings.map((row) => {
                       const isPlayoffSpot = row.rank <= 4;
                       const teamName = teamsMap.get(row.teamId) || row.teamId;
 
@@ -226,7 +256,10 @@ export default function AstralLeaguePage({ initialSeason = null }: { initialSeas
                               {row.rank}
                             </span>
                           </td>
-                          <td aria-label={teamName} className="py-3 px-4 font-semibold text-foreground">
+                          <td
+                            aria-label={teamName}
+                            className="py-3 px-4 font-semibold text-foreground"
+                          >
                             <div className="flex items-center gap-2">
                               <span className="font-mono text-xs px-1.5 py-0.5 rounded-lg bg-surface-container-high text-muted-foreground border border-outline-variant/20">
                                 {row.teamId}
@@ -234,15 +267,27 @@ export default function AstralLeaguePage({ initialSeason = null }: { initialSeas
                               <span>{teamName}</span>
                             </div>
                           </td>
-                          <td className="py-3 px-3 text-center text-muted-foreground font-mono">{row.played}</td>
-                          <td className="py-3 px-3 text-center font-semibold text-success font-mono">{row.wins}</td>
+                          <td className="py-3 px-3 text-center text-muted-foreground font-mono">
+                            {row.played}
+                          </td>
+                          <td className="py-3 px-3 text-center font-semibold text-success font-mono">
+                            {row.wins}
+                          </td>
                           <td className="py-3 px-3 text-center font-semibold text-success/80 font-mono">
                             {row.winsOt}
                           </td>
-                          <td className="py-3 px-3 text-center text-destructive font-mono">{row.losses}</td>
-                          <td className="py-3 px-3 text-center text-destructive/80 font-mono">{row.lossesOt}</td>
-                          <td className="py-3 px-3 text-center text-muted-foreground font-mono">{row.mapsFor}</td>
-                          <td className="py-3 px-3 text-center text-muted-foreground font-mono">{row.mapsAgainst}</td>
+                          <td className="py-3 px-3 text-center text-destructive font-mono">
+                            {row.losses}
+                          </td>
+                          <td className="py-3 px-3 text-center text-destructive/80 font-mono">
+                            {row.lossesOt}
+                          </td>
+                          <td className="py-3 px-3 text-center text-muted-foreground font-mono">
+                            {row.mapsFor}
+                          </td>
+                          <td className="py-3 px-3 text-center text-muted-foreground font-mono">
+                            {row.mapsAgainst}
+                          </td>
                           <td
                             className={`py-3 px-3 text-center font-mono font-semibold ${
                               row.mapDiff > 0
@@ -266,7 +311,9 @@ export default function AstralLeaguePage({ initialSeason = null }: { initialSeas
 
               <div className="p-3 bg-surface-container-high/40 border-t border-outline-variant/15 flex items-center gap-2 text-xs text-muted-foreground">
                 <span className="w-2.5 h-2.5 rounded-full bg-primary/40 inline-block" />
-                <span>Les 4 premières équipes sont qualifiées pour les Play-offs.</span>
+                <span>
+                  Les 4 premières équipes sont qualifiées pour les Play-offs.
+                </span>
               </div>
             </div>
           )}
@@ -278,7 +325,7 @@ export default function AstralLeaguePage({ initialSeason = null }: { initialSeas
               <div className="flex items-center justify-between p-3 rounded-2xl bg-surface-container/60 backdrop-blur-md border border-outline-variant/15 shadow-sm">
                 <button
                   type="button"
-                  onClick={() => setSelectedMatchday(d => Math.max(1, d - 1))}
+                  onClick={() => setSelectedMatchday((d) => Math.max(1, d - 1))}
                   disabled={selectedMatchday === 1}
                   className="p-1.5 rounded-lg border border-outline-variant/20 hover:bg-surface-container-high disabled:opacity-40 transition"
                 >
@@ -289,7 +336,9 @@ export default function AstralLeaguePage({ initialSeason = null }: { initialSeas
                 </span>
                 <button
                   type="button"
-                  onClick={() => setSelectedMatchday(d => Math.min(totalMatchdays, d + 1))}
+                  onClick={() =>
+                    setSelectedMatchday((d) => Math.min(totalMatchdays, d + 1))
+                  }
                   disabled={selectedMatchday >= totalMatchdays}
                   className="p-1.5 rounded-lg border border-outline-variant/20 hover:bg-surface-container-high disabled:opacity-40 transition"
                 >
@@ -314,8 +363,12 @@ export default function AstralLeaguePage({ initialSeason = null }: { initialSeas
                         className="border border-outline-variant/15 bg-surface-container/60 backdrop-blur-md rounded-2xl p-4 flex items-center justify-between gap-4 shadow-sm hover:bg-surface-container-high/60 transition-all duration-200"
                       >
                         <div className="text-right flex-1 min-w-0">
-                          <div className="font-bold text-xs truncate">{homeName}</div>
-                          <div className="text-xs font-mono text-muted-foreground">[{match.homeId}]</div>
+                          <div className="font-bold text-xs truncate">
+                            {homeName}
+                          </div>
+                          <div className="text-xs font-mono text-muted-foreground">
+                            [{match.homeId}]
+                          </div>
                         </div>
 
                         <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-surface-container-high border border-outline-variant/20 font-mono font-bold text-sm shrink-0">
@@ -325,8 +378,12 @@ export default function AstralLeaguePage({ initialSeason = null }: { initialSeas
                         </div>
 
                         <div className="text-left flex-1 min-w-0">
-                          <div className="font-bold text-xs truncate">{awayName}</div>
-                          <div className="text-xs font-mono text-muted-foreground">[{match.awayId}]</div>
+                          <div className="font-bold text-xs truncate">
+                            {awayName}
+                          </div>
+                          <div className="text-xs font-mono text-muted-foreground">
+                            [{match.awayId}]
+                          </div>
                         </div>
                       </div>
                     );
@@ -349,7 +406,8 @@ export default function AstralLeaguePage({ initialSeason = null }: { initialSeas
                       Final Four — Play-offs Officiels
                     </h3>
                     <p className="text-xs text-muted-foreground mt-0.5">
-                      Arbre à élimination directe réunissant les 4 meilleures équipes de la saison régulière.
+                      Arbre à élimination directe réunissant les 4 meilleures
+                      équipes de la saison régulière.
                     </p>
                   </div>
                 </div>
@@ -360,7 +418,8 @@ export default function AstralLeaguePage({ initialSeason = null }: { initialSeas
 
               {season?.meta?.champion && (
                 <div className="rounded-2xl border border-warning/30 bg-warning/10 px-4 py-3 text-sm font-bold text-warning/80">
-                  Champion de la saison : {teamsMap.get(season.meta.champion) ?? season.meta.champion}
+                  Champion de la saison :{" "}
+                  {teamsMap.get(season.meta.champion) ?? season.meta.champion}
                 </div>
               )}
 
@@ -399,23 +458,29 @@ export default function AstralLeaguePage({ initialSeason = null }: { initialSeas
           {/* Rules Tab */}
           {activeTab === "rules" && (
             <div className="border border-outline-variant/15 bg-surface-container/60 backdrop-blur-md rounded-2xl p-6 space-y-4 text-xs text-muted-foreground leading-relaxed shadow-sm">
-              <h3 className="font-bold text-sm text-foreground">Barème de Points Astral League</h3>
+              <h3 className="font-bold text-sm text-foreground">
+                Barème de Points Astral League
+              </h3>
               <ul className="list-disc list-inside space-y-1.5">
                 <li>
-                  <b className="text-foreground">Victoire dans le temps réglementaire</b> :{" "}
-                  {season?.pointsConfig?.winRegulation ?? 3} points.
+                  <b className="text-foreground">
+                    Victoire dans le temps réglementaire
+                  </b>{" "}
+                  : {season?.pointsConfig?.winRegulation ?? 3} points.
                 </li>
                 <li>
-                  <b className="text-foreground">Victoire en prolongation</b> : {season?.pointsConfig?.winOvertime ?? 2}{" "}
-                  points.
+                  <b className="text-foreground">Victoire en prolongation</b> :{" "}
+                  {season?.pointsConfig?.winOvertime ?? 2} points.
                 </li>
                 <li>
-                  <b className="text-foreground">Défaite en prolongation</b> : {season?.pointsConfig?.lossOvertime ?? 1}{" "}
-                  point.
+                  <b className="text-foreground">Défaite en prolongation</b> :{" "}
+                  {season?.pointsConfig?.lossOvertime ?? 1} point.
                 </li>
                 <li>
-                  <b className="text-foreground">Défaite dans le temps réglementaire</b> :{" "}
-                  {season?.pointsConfig?.lossRegulation ?? 0} point.
+                  <b className="text-foreground">
+                    Défaite dans le temps réglementaire
+                  </b>{" "}
+                  : {season?.pointsConfig?.lossRegulation ?? 0} point.
                 </li>
               </ul>
 
@@ -423,8 +488,9 @@ export default function AstralLeaguePage({ initialSeason = null }: { initialSeas
                 Phase Finale (Play-offs)
               </h3>
               <p>
-                Les 4 premières équipes accèdent à l'arbre des play-offs en match à élimination directe pour désigner le
-                grand champion de la saison.
+                Les 4 premières équipes accèdent à l'arbre des play-offs en
+                match à élimination directe pour désigner le grand champion de
+                la saison.
               </p>
             </div>
           )}

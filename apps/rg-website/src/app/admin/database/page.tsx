@@ -1,7 +1,20 @@
-import { Backpack, BadgeCheck, ScanSearch, Swords, User, Users, Zap } from "lucide-react";
+import {
+  Backpack,
+  BadgeCheck,
+  ScanSearch,
+  Swords,
+  User,
+  Users,
+  Zap,
+} from "lucide-react";
 import Link from "@/components/shared/Link";
 import type React from "react";
-import { AdminPageHeader as DashboardPageHeader, Card, CardContent, CardTitle } from "@rosegriffon/ui";
+import {
+  AdminPageHeader as DashboardPageHeader,
+  Card,
+  CardContent,
+  CardTitle,
+} from "@rosegriffon/ui";
 import { ElementChartLoader } from "./ElementChartLoader";
 import { apiClient } from "@/lib/api-client";
 import { createPostgresClient } from "@rosegriffon/db/service";
@@ -25,7 +38,9 @@ export default async function DatabasePage() {
   ]);
 
   // Fetch Element Stats directly from DB for speed
-  const { data: charElements } = await supabase.from("inagle_characters").select("element");
+  const { data: charElements } = await supabase
+    .from("inagle_characters")
+    .select("element");
 
   const elementCounts: Record<string, number> = {};
   (charElements || []).forEach((c: any) => {
@@ -95,7 +110,10 @@ export default async function DatabasePage() {
   return (
     <div className="space-y-6 sm:space-y-8">
       <DashboardPageHeader
-        breadcrumbs={[{ href: "/dashboard", label: "Tableau de bord" }, { label: "Base de données" }]}
+        breadcrumbs={[
+          { href: "/dashboard", label: "Tableau de bord" },
+          { label: "Base de données" },
+        ]}
         title="Base de données"
         subtitle="Accès brut aux tables Wiki"
         icon={<Icon name="database" size={20} />}

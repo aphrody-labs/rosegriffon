@@ -1,6 +1,10 @@
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 
-import { enregistrerConsentement, lireConsentement, signauxGoogle } from "./consentement";
+import {
+  enregistrerConsentement,
+  lireConsentement,
+  signauxGoogle,
+} from "./consentement";
 
 const memoire = new Map<string, string>();
 // Selon l’environnement de test, localStorage existe déjà (DOM simulé, en
@@ -34,7 +38,10 @@ describe("consentement", () => {
     enregistrerConsentement({ mesure: true, pub: false });
     const c = lireConsentement();
     expect(c).toMatchObject({ mesure: true, pub: false });
-    expect(signauxGoogle(c)).toMatchObject({ analytics_storage: "granted", ad_storage: "denied" });
+    expect(signauxGoogle(c)).toMatchObject({
+      analytics_storage: "granted",
+      ad_storage: "denied",
+    });
   });
 
   test("après 6 mois, le choix expire et le bandeau revient", () => {

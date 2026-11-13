@@ -47,7 +47,10 @@ import {
 } from "@rosegriffon/achillea-types";
 
 /** Renvoie le libellé de `key`, ou la clé brute si elle n'est pas connue. */
-function labelOf<K extends PropertyKey>(table: Record<K, string>, key: K): string {
+function labelOf<K extends PropertyKey>(
+  table: Record<K, string>,
+  key: K,
+): string {
   return table[key] ?? String(key);
 }
 
@@ -128,7 +131,9 @@ export interface SelectOption<T> {
 }
 
 /** Chaque politique porte toujours son explication : `hint` n'est pas optionnel ici. */
-export const SCORE_REPORT_POLICY_OPTIONS: ReadonlyArray<Required<SelectOption<ScoreReportPolicy>>> = [
+export const SCORE_REPORT_POLICY_OPTIONS: ReadonlyArray<
+  Required<SelectOption<ScoreReportPolicy>>
+> = [
   {
     value: ScoreReportPolicy.PLAYERS,
     label: SCORE_REPORT_POLICY_LABELS[ScoreReportPolicy.PLAYERS],
@@ -143,7 +148,7 @@ export const SCORE_REPORT_POLICY_OPTIONS: ReadonlyArray<Required<SelectOption<Sc
 
 export const STAGE_TYPE_OPTIONS: ReadonlyArray<SelectOption<StageType>> = (
   Object.keys(STAGE_TYPE_LABELS) as StageType[]
-).map(value => ({ value, label: STAGE_TYPE_LABELS[value] }));
+).map((value) => ({ value, label: STAGE_TYPE_LABELS[value] }));
 
 // ── Clans ───────────────────────────────────────────────────────────────────
 
@@ -158,14 +163,19 @@ export function clanMemberRoleLabel(role: ClanMemberRole): string {
   return labelOf(CLAN_MEMBER_ROLE_LABELS, role);
 }
 
-export const CLAN_MEMBER_DISTINCTION_LABELS: Record<ClanMemberDistinction, string> = {
+export const CLAN_MEMBER_DISTINCTION_LABELS: Record<
+  ClanMemberDistinction,
+  string
+> = {
   [ClanMemberDistinction.Player]: "Joueur",
   [ClanMemberDistinction.Staff]: "Staff",
   [ClanMemberDistinction.Artist]: "Artiste",
   [ClanMemberDistinction.ContentCreator]: "Créateur de contenu",
 };
 
-export function clanMemberDistinctionLabel(distinction: ClanMemberDistinction): string {
+export function clanMemberDistinctionLabel(
+  distinction: ClanMemberDistinction,
+): string {
   return labelOf(CLAN_MEMBER_DISTINCTION_LABELS, distinction);
 }
 
@@ -241,7 +251,10 @@ export function licenseStatusLabel(status: LicenseStatus): string {
   return labelOf(LICENSE_STATUS_LABELS, status);
 }
 
-export const WALLET_TRANSACTION_TYPE_LABELS: Record<WalletTransactionType, string> = {
+export const WALLET_TRANSACTION_TYPE_LABELS: Record<
+  WalletTransactionType,
+  string
+> = {
   [WalletTransactionType.Credit]: "Crédit",
   [WalletTransactionType.Debit]: "Débit",
   [WalletTransactionType.Transfer]: "Transfert",
@@ -249,7 +262,9 @@ export const WALLET_TRANSACTION_TYPE_LABELS: Record<WalletTransactionType, strin
   [WalletTransactionType.Fine]: "Amende",
 };
 
-export function walletTransactionTypeLabel(type: WalletTransactionType): string {
+export function walletTransactionTypeLabel(
+  type: WalletTransactionType,
+): string {
   return labelOf(WALLET_TRANSACTION_TYPE_LABELS, type);
 }
 
@@ -292,13 +307,18 @@ export function castSlotRoleLabel(role: CastSlotRole): string {
   return labelOf(CAST_SLOT_ROLE_LABELS, role);
 }
 
-export const CAST_AVAILABILITY_STATUS_LABELS: Record<CastAvailabilityStatus, string> = {
+export const CAST_AVAILABILITY_STATUS_LABELS: Record<
+  CastAvailabilityStatus,
+  string
+> = {
   [CastAvailabilityStatus.Available]: "Disponible",
   [CastAvailabilityStatus.Maybe]: "Peut-être",
   [CastAvailabilityStatus.Unavailable]: "Indisponible",
 };
 
-export function castAvailabilityStatusLabel(status: CastAvailabilityStatus): string {
+export function castAvailabilityStatusLabel(
+  status: CastAvailabilityStatus,
+): string {
   return labelOf(CAST_AVAILABILITY_STATUS_LABELS, status);
 }
 
@@ -314,14 +334,19 @@ export function organizationStateLabel(state: OrganizationState): string {
   return labelOf(ORGANIZATION_STATE_LABELS, state);
 }
 
-export const NOTIFICATION_CATEGORY_LABELS: Record<NotificationCategory, string> = {
+export const NOTIFICATION_CATEGORY_LABELS: Record<
+  NotificationCategory,
+  string
+> = {
   [NotificationCategory.USER]: "Perso.",
   [NotificationCategory.CLAN]: "Clan",
   [NotificationCategory.GLOBAL]: "Globale",
   [NotificationCategory.ORGANIZATION]: "Organisation",
 };
 
-export function notificationCategoryLabel(category: NotificationCategory): string {
+export function notificationCategoryLabel(
+  category: NotificationCategory,
+): string {
   return labelOf(NOTIFICATION_CATEGORY_LABELS, category);
 }
 
@@ -461,12 +486,17 @@ export function sanctionIssuerLabel(issuer: SanctionIssuerType): string {
   return labelOf(SANCTION_ISSUER_LABELS, issuer);
 }
 
-export const WALLET_DIRECTION_LABELS: Record<WalletTransactionDirection, string> = {
+export const WALLET_DIRECTION_LABELS: Record<
+  WalletTransactionDirection,
+  string
+> = {
   [WalletTransactionDirection.In]: "Entrée",
   [WalletTransactionDirection.Out]: "Sortie",
 };
 
-export function walletDirectionLabel(direction: WalletTransactionDirection): string {
+export function walletDirectionLabel(
+  direction: WalletTransactionDirection,
+): string {
   return labelOf(WALLET_DIRECTION_LABELS, direction);
 }
 
@@ -483,9 +513,12 @@ export function socialMediaLabel(platform: SocialMedia): string {
 }
 
 export const NOTIFICATION_TYPE_LABELS: Record<NotificationType, string> = {
-  [NotificationType.NEW_ORGANIZATION_CREATION_REQUEST]: "Demande de création d'organisation",
-  [NotificationType.NEW_ORGANIZATION_EDITION_REQUEST]: "Demande de modification d'organisation",
-  [NotificationType.NEW_ORGANIZATION_EDIT_REPLY]: "Réponse à une modification d'organisation",
+  [NotificationType.NEW_ORGANIZATION_CREATION_REQUEST]:
+    "Demande de création d'organisation",
+  [NotificationType.NEW_ORGANIZATION_EDITION_REQUEST]:
+    "Demande de modification d'organisation",
+  [NotificationType.NEW_ORGANIZATION_EDIT_REPLY]:
+    "Réponse à une modification d'organisation",
   [NotificationType.NEW_ORGANIZATION_ACCEPT_REPLY]: "Organisation validée",
   [NotificationType.NEW_ORGANIZATION_REJECT_REPLY]: "Organisation refusée",
   [NotificationType.CLAN_MEMBER_KICK]: "Exclusion d'un membre de clan",

@@ -48,7 +48,9 @@ const RETENTION_JOURS_DEFAUT = 90;
 const PERIODE_PURGE_MS = 24 * 3600_000;
 
 /** Où tourne l'exécution : la région Vercel en serverless, le nom d'hôte ailleurs. */
-const HOTE = Bun.env.VERCEL_REGION ? `vercel:${Bun.env.VERCEL_REGION}` : hostname();
+const HOTE = Bun.env.VERCEL_REGION
+  ? `vercel:${Bun.env.VERCEL_REGION}`
+  : hostname();
 
 let enVeilleJusqua = 0;
 let motifVeille = "";
@@ -87,11 +89,15 @@ function mettreEnVeille(err: unknown): void {
   }
   if (etat === SQLSTATE_DROITS) {
     motifVeille = "droits insuffisants";
-    console.warn(`[cron-historique] écriture refusée (SQLSTATE 42501) : ${message.slice(0, 200)}`);
+    console.warn(
+      `[cron-historique] écriture refusée (SQLSTATE 42501) : ${message.slice(0, 200)}`,
+    );
     return;
   }
   motifVeille = etat ? `SQLSTATE ${etat}` : "erreur base";
-  console.warn(`[cron-historique] écriture impossible (${motifVeille}) : ${message.slice(0, 200)}`);
+  console.warn(
+    `[cron-historique] écriture impossible (${motifVeille}) : ${message.slice(0, 200)}`,
+  );
 }
 
 /**
@@ -100,7 +106,9 @@ function mettreEnVeille(err: unknown): void {
  * Ne lève jamais. Rend `true` si la ligne a bien été écrite — utile aux tests
  * d'intégration et au diagnostic, ignoré par l'exécuteur.
  */
-export async function enregistrerExecutionEnBase(resultat: ResultatExecution): Promise<boolean> {
+export async function enregistrerExecutionEnBase(
+  resultat: ResultatExecution,
+): Promise<boolean> {
   if (persistanceEnVeille()) {
     echecsPersistance += 1;
     return false;
@@ -139,12 +147,18 @@ export async function enregistrerExecutionEnBase(resultat: ResultatExecution): P
  * Faite ici plutôt que par un `Bun.cron` de plus : la purge n'a de sens que si
  * des lignes sont écrites.
  */
-export async function purgerHistoriqueSiNecessaire(maintenant = Date.now()): Promise<number> {
+export async function purgerHistoriqueSiNecessaire(
+  maintenant = Date.now(),
+): Promise<number> {
   if (maintenant - dernierePurge < PERIODE_PURGE_MS) return 0;
   dernierePurge = maintenant;
 
-  const brut = Number.parseInt(Bun.env.CRON_HISTORIQUE_RETENTION_JOURS ?? "", 10);
-  const jours = Number.isFinite(brut) && brut > 0 ? brut : RETENTION_JOURS_DEFAUT;
+  const brut = Number.parseInt(
+    Bun.env.CRON_HISTORIQUE_RETENTION_JOURS ?? "",
+    10,
+  );
+  const jours =
+    Number.isFinite(brut) && brut > 0 ? brut : RETENTION_JOURS_DEFAUT;
 
   try {
     const supprimees = await sql`
@@ -154,11 +168,16 @@ export async function purgerHistoriqueSiNecessaire(maintenant = Date.now()): Pro
 		`;
     const n = Array.isArray(supprimees) ? supprimees.length : 0;
     if (n > 0) {
-      console.log(`[cron-historique] purge : ${n} exécution(s) de plus de ${jours} jours retirées.`);
+      console.log(
+        `[cron-historique] purge : ${n} exécution(s) de plus de ${jours} jours retirées.`,
+      );
     }
     return n;
   } catch (err) {
-    console.warn("[cron-historique] purge impossible :", err instanceof Error ? err.message.slice(0, 200) : err);
+    console.warn(
+      "[cron-historique] purge impossible :",
+      err instanceof Error ? err.message.slice(0, 200) : err,
+    );
     return 0;
   }
 }
@@ -205,7 +224,10 @@ export function motifVeillePersistance(): string {
  * aucune instance serverless ne garde la série en mémoire. Rend 0 si
  * l'historique est indisponible — on n'alerte pas sur une donnée absente.
  */
-export async function echecsConsecutifsAvant(nom: string, avantLe: number): Promise<number> {
+export async function echecsConsecutifsAvant(
+  nom: string,
+  avantLe: number,
+): Promise<number> {
   if (persistanceEnVeille()) return 0;
   const avant = new Date(avantLe).toISOString();
   try {
@@ -239,7 +261,10 @@ export const BAIL_LIBRE = "libre";
  * façon abandonné. Sans table, ou base injoignable, on laisse passer : un
  * verrou manquant ne doit pas bloquer la production.
  */
-export async function prendreBail(nom: string, dureeMs: number): Promise<string | null> {
+export async function prendreBail(
+  nom: string,
+  dureeMs: number,
+): Promise<string | null> {
   const jeton = crypto.randomUUID();
   try {
     const lignes = await sql`
@@ -253,7 +278,10 @@ export async function prendreBail(nom: string, dureeMs: number): Promise<string 
     return lignes.length > 0 ? jeton : null;
   } catch (err) {
     if (sqlstate(err) !== SQLSTATE_TABLE_ABSENTE) {
-      console.warn("[cron-bail] bail indisponible :", err instanceof Error ? err.message.slice(0, 200) : err);
+      console.warn(
+        "[cron-bail] bail indisponible :",
+        err instanceof Error ? err.message.slice(0, 200) : err,
+      );
     }
     // Première requête de chaque exécution : un pool empoisonné est recréé ici,
     // AVANT que la tâche ne s'en serve.
@@ -268,6 +296,9 @@ export async function rendreBail(nom: string, jeton: string): Promise<void> {
   try {
     await sql`DELETE FROM public.cron_task_leases WHERE tache = ${nom} AND jeton = ${jeton}::uuid`;
   } catch (err) {
-    console.warn("[cron-bail] bail non rendu :", err instanceof Error ? err.message.slice(0, 200) : err);
+    console.warn(
+      "[cron-bail] bail non rendu :",
+      err instanceof Error ? err.message.slice(0, 200) : err,
+    );
   }
 }

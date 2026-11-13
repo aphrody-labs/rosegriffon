@@ -55,7 +55,12 @@ export function renderOneColumn(text: string): string {
 }
 
 /** Ligne de cadre à deux colonnes (39 + 34 cellules par défaut). */
-export function renderTwoColumns(left: string, right: string, colWidthLeft = 39, colWidthRight = 34): string {
+export function renderTwoColumns(
+  left: string,
+  right: string,
+  colWidthLeft = 39,
+  colWidthRight = 34,
+): string {
   const visibleLeft = getVisibleLength(left);
   const visibleRight = getVisibleLength(right);
 
@@ -80,13 +85,17 @@ export function renderCharaProfile(chara: any, svc: InagleService): string {
 
   const personality =
     chara.personalityType !== undefined
-      ? PERSONALITY_NAMES[chara.personalityType] || `Type ${chara.personalityType}`
+      ? PERSONALITY_NAMES[chara.personalityType] ||
+        `Type ${chara.personalityType}`
       : "Inconnu";
 
   const firstPerson = chara.firstPerson?.ja || chara.firstPerson?.fr || "N/A";
-  const secondPerson = chara.secondPersonMale?.ja || chara.secondPersonMale?.fr || "N/A";
+  const secondPerson =
+    chara.secondPersonMale?.ja || chara.secondPersonMale?.fr || "N/A";
 
-  lines.push(`┌──────────────────────────────────────────────────────────────────────────────┐`);
+  lines.push(
+    `┌──────────────────────────────────────────────────────────────────────────────┐`,
+  );
   lines.push(
     renderTwoColumns(
       `${colors.bold}${colors.green}${nameFr}${colors.reset}`,
@@ -105,8 +114,14 @@ export function renderCharaProfile(chara: any, svc: InagleService): string {
       `${colors.yellow}Genre: ${genderStr}${colors.reset}`,
     ),
   );
-  lines.push(`├──────────────────────────────────────────────────────────────────────────────┤`);
-  lines.push(renderOneColumn(`${colors.bold}Affiliation :${colors.reset} ${chara.teamName || "Aucune"}`));
+  lines.push(
+    `├──────────────────────────────────────────────────────────────────────────────┤`,
+  );
+  lines.push(
+    renderOneColumn(
+      `${colors.bold}Affiliation :${colors.reset} ${chara.teamName || "Aucune"}`,
+    ),
+  );
   lines.push(
     renderTwoColumns(
       `${colors.bold}Contrôlable :${colors.reset} ${controllableStr}`,
@@ -119,7 +134,9 @@ export function renderCharaProfile(chara: any, svc: InagleService): string {
       `${colors.bold}Tu (Masc) :${colors.reset} ${secondPerson}`,
     ),
   );
-  lines.push(`├──────────────────────────────────────────────────────────────────────────────┤`);
+  lines.push(
+    `├──────────────────────────────────────────────────────────────────────────────┤`,
+  );
 
   if (chara.descriptions?.fr || chara.descriptions?.en) {
     const desc = chara.descriptions.fr || chara.descriptions.en;
@@ -137,20 +154,26 @@ export function renderCharaProfile(chara: any, svc: InagleService): string {
     if (currentLine !== "  ") {
       lines.push(renderOneColumn(currentLine));
     }
-    lines.push(`├──────────────────────────────────────────────────────────────────────────────┤`);
+    lines.push(
+      `├──────────────────────────────────────────────────────────────────────────────┤`,
+    );
   }
 
   if (chara.variants && chara.variants.length > 0) {
     const varHeader = `Variantes de cartes (${chara.variants.length}) :`;
     const varPadding = " ".repeat(Math.max(0, 76 - varHeader.length));
-    lines.push(`│ ${colors.bold}${colors.magenta}${varHeader}${colors.reset}${varPadding} │`);
+    lines.push(
+      `│ ${colors.bold}${colors.magenta}${varHeader}${colors.reset}${varPadding} │`,
+    );
     for (const [idx, v] of (chara.variants as any[]).entries()) {
       const el = v.element || "N/A";
       const pos = v.position || "N/A";
       const rar = v.rarity || "N/A";
 
       lines.push(
-        renderOneColumn(`  [${idx + 1}] Element: ${el.padEnd(10)} | Position: ${pos.padEnd(4)} | Rareté: ${rar}`),
+        renderOneColumn(
+          `  [${idx + 1}] Element: ${el.padEnd(10)} | Position: ${pos.padEnd(4)} | Rareté: ${rar}`,
+        ),
       );
 
       if (v.stats) {
@@ -159,13 +182,36 @@ export function renderCharaProfile(chara: any, svc: InagleService): string {
         const s99 = interpolateVariantStats(v, 99);
 
         const t1 =
-          s1.kick + s1.control + s1.physical + s1.pressure + s1.technique + s1.agility + (s1.intelligence || 0);
+          s1.kick +
+          s1.control +
+          s1.physical +
+          s1.pressure +
+          s1.technique +
+          s1.agility +
+          (s1.intelligence || 0);
         const t50 =
-          s50.kick + s50.control + s50.physical + s50.pressure + s50.technique + s50.agility + (s50.intelligence || 0);
+          s50.kick +
+          s50.control +
+          s50.physical +
+          s50.pressure +
+          s50.technique +
+          s50.agility +
+          (s50.intelligence || 0);
         const t99 =
-          s99.kick + s99.control + s99.physical + s99.pressure + s99.technique + s99.agility + (s99.intelligence || 0);
+          s99.kick +
+          s99.control +
+          s99.physical +
+          s99.pressure +
+          s99.technique +
+          s99.agility +
+          (s99.intelligence || 0);
 
-        const renderRow = (label: string, v1: number, v2: number, v3: number) => {
+        const renderRow = (
+          label: string,
+          v1: number,
+          v2: number,
+          v3: number,
+        ) => {
           const col1 = ` ${label.padEnd(12)} `;
           const col2 = ` ${v1.toString().padStart(7)} `;
           const col3 = ` ${v2.toString().padStart(7)} `;
@@ -181,34 +227,73 @@ export function renderCharaProfile(chara: any, svc: InagleService): string {
           return `│       │${col1}│${col2}│${col3}│${col4}│                         │`;
         };
 
-        lines.push(`│       ${colors.bold}Courbe de progression des statistiques :${colors.reset}${" ".repeat(30)} │`);
-        lines.push(`│       ┌──────────────┬─────────┬─────────┬─────────┐                         │`);
-        lines.push(`│       │ Stat         │ Niv. 1  │ Niv. 50 │ Niv. 99 │                         │`);
-        lines.push(`│       ├──────────────┼─────────┼─────────┼─────────┤                         │`);
+        lines.push(
+          `│       ${colors.bold}Courbe de progression des statistiques :${colors.reset}${" ".repeat(30)} │`,
+        );
+        lines.push(
+          `│       ┌──────────────┬─────────┬─────────┬─────────┐                         │`,
+        );
+        lines.push(
+          `│       │ Stat         │ Niv. 1  │ Niv. 50 │ Niv. 99 │                         │`,
+        );
+        lines.push(
+          `│       ├──────────────┼─────────┼─────────┼─────────┤                         │`,
+        );
         lines.push(renderRow("Frappe", s1.kick, s50.kick, s99.kick));
         lines.push(renderRow("Contrôle", s1.control, s50.control, s99.control));
-        lines.push(renderRow("Physique", s1.physical, s50.physical, s99.physical));
-        lines.push(renderRow("Pression", s1.pressure, s50.pressure, s99.pressure));
-        lines.push(renderRow("Technique", s1.technique, s50.technique, s99.technique));
+        lines.push(
+          renderRow("Physique", s1.physical, s50.physical, s99.physical),
+        );
+        lines.push(
+          renderRow("Pression", s1.pressure, s50.pressure, s99.pressure),
+        );
+        lines.push(
+          renderRow("Technique", s1.technique, s50.technique, s99.technique),
+        );
         lines.push(renderRow("Agilité", s1.agility, s50.agility, s99.agility));
-        lines.push(renderRow("Intelligence", s1.intelligence || 0, s50.intelligence || 0, s99.intelligence || 0));
-        lines.push(`│       ├──────────────┼─────────┼─────────┼─────────┤                         │`);
+        lines.push(
+          renderRow(
+            "Intelligence",
+            s1.intelligence || 0,
+            s50.intelligence || 0,
+            s99.intelligence || 0,
+          ),
+        );
+        lines.push(
+          `│       ├──────────────┼─────────┼─────────┼─────────┤                         │`,
+        );
         lines.push(renderTotalRow());
-        lines.push(`│       └──────────────┴─────────┴─────────┴─────────┘                         │`);
+        lines.push(
+          `│       └──────────────┴─────────┴─────────┴─────────┘                         │`,
+        );
       }
 
       const auraHashes = getAuraHashSet(svc);
-      const trueSkills = (v.skills || []).filter((s: any) => s.skillId !== "0x00000002" && !auraHashes.has(s.skillId));
-      const rawAuraIds = (v.skills || []).filter((s: any) => auraHashes.has(s.skillId)).map((s: any) => s.skillId);
+      const trueSkills = (v.skills || []).filter(
+        (s: any) => s.skillId !== "0x00000002" && !auraHashes.has(s.skillId),
+      );
+      const rawAuraIds = (v.skills || [])
+        .filter((s: any) => auraHashes.has(s.skillId))
+        .map((s: any) => s.skillId);
 
-      const renderColoredLine = (prefix: string, content: string, colorCode: string) => {
+      const renderColoredLine = (
+        prefix: string,
+        content: string,
+        colorCode: string,
+      ) => {
         const visibleLength = prefix.length + content.length;
         const padding = " ".repeat(Math.max(0, 70 - visibleLength));
         return `│       ${colorCode}${prefix}${content}${colors.reset}${padding} │`;
       };
 
       if (trueSkills.length > 0) {
-        lines.push(renderColoredLine("Techniques : ", `(${trueSkills.length})`, colors.bold + colors.blue));
+        lines.push(
+          renderColoredLine(
+            "Techniques : ",
+            `(${trueSkills.length})`,
+            colors.bold + colors.blue,
+          ),
+        );
         for (const sk of trueSkills) {
           const name = getSkillName(svc, sk.skillId);
           const label = ` - ${name} (Niv. ${sk.learnLevel})`;
@@ -220,7 +305,11 @@ export function renderCharaProfile(chara: any, svc: InagleService): string {
       const sqliteAuras = getAurasForChara(chara.charaId, v.charaParamId);
       const allAuras: ResolvedAura[] = [...sqliteAuras];
       for (const auraId of rawAuraIds) {
-        if (!allAuras.some(a => a.id.toLowerCase().includes(auraId.toLowerCase()))) {
+        if (
+          !allAuras.some((a) =>
+            a.id.toLowerCase().includes(auraId.toLowerCase()),
+          )
+        ) {
           const auraDetails = getAuraMetadataFromDb(auraId);
           if (auraDetails) {
             allAuras.push(auraDetails);
@@ -237,7 +326,11 @@ export function renderCharaProfile(chara: any, svc: InagleService): string {
 
       if (allAuras.length > 0) {
         lines.push(
-          renderColoredLine("Auras / Miximax / Keshin : ", `(${allAuras.length})`, colors.bold + colors.magenta),
+          renderColoredLine(
+            "Auras / Miximax / Keshin : ",
+            `(${allAuras.length})`,
+            colors.bold + colors.magenta,
+          ),
         );
         for (const aura of allAuras) {
           const typeLabel =
@@ -254,31 +347,42 @@ export function renderCharaProfile(chara: any, svc: InagleService): string {
       }
 
       if (idx < chara.variants.length - 1) {
-        lines.push(`│                                                                              │`);
+        lines.push(
+          `│                                                                              │`,
+        );
       }
     }
   }
 
-  lines.push(`└──────────────────────────────────────────────────────────────────────────────┘`);
+  lines.push(
+    `└──────────────────────────────────────────────────────────────────────────────┘`,
+  );
   return lines.join("\n");
 }
 
 /** Fiche d'une technique / passive / aura : nom, description, puissance. */
 export function renderSkillProfile(skill: any, _svc: InagleService): string {
   const lines: string[] = [];
-  const displayName = skill.displayName || skill.name_FR || skill.name_EN || "N/A";
+  const displayName =
+    skill.displayName || skill.name_FR || skill.name_EN || "N/A";
   const typeStr = (skill.skillType || "Technique").toUpperCase();
   const idStr = skill.skillIDStr || skill.auraId || skill.passiveId || "N/A";
 
-  lines.push(`┌──────────────────────────────────────────────────────────────────────────────┐`);
+  lines.push(
+    `┌──────────────────────────────────────────────────────────────────────────────┐`,
+  );
   lines.push(
     `│ [${colors.bold}${colors.green}${typeStr}${colors.reset}] ${colors.bold}${displayName.padEnd(50)}${colors.reset} │ ${colors.cyan}ID: ${idStr.padEnd(10)}${colors.reset} │`,
   );
 
   if (skill.desc_FR || skill.description_FR || skill.desc_EN) {
     const desc = skill.desc_FR || skill.description_FR || skill.desc_EN;
-    lines.push(`├──────────────────────────────────────────────────────────────────────────────┤`);
-    lines.push(`│ ${colors.bold}Description :${colors.reset}${" ".repeat(63)} │`);
+    lines.push(
+      `├──────────────────────────────────────────────────────────────────────────────┤`,
+    );
+    lines.push(
+      `│ ${colors.bold}Description :${colors.reset}${" ".repeat(63)} │`,
+    );
     const words = desc.split(" ");
     let currentLine = "│   ";
     for (const word of words) {
@@ -295,7 +399,9 @@ export function renderSkillProfile(skill: any, _svc: InagleService): string {
   }
 
   if (skill.power_max !== undefined) {
-    lines.push(`├──────────────────────────────────────────────────────────────────────────────┤`);
+    lines.push(
+      `├──────────────────────────────────────────────────────────────────────────────┤`,
+    );
     const power = skill.power_max;
     const cost = skill.cost || 0;
     const element = skill.elementName?.fr || "N/A";
@@ -304,7 +410,9 @@ export function renderSkillProfile(skill: any, _svc: InagleService): string {
       `│ Puissance Max : ${power.toString().padEnd(10)} | Coût : ${cost.toString().padEnd(8)} | Élément : ${element.padEnd(10)} | Cat : ${category.padEnd(8)} │`,
     );
   }
-  lines.push(`└──────────────────────────────────────────────────────────────────────────────┘`);
+  lines.push(
+    `└──────────────────────────────────────────────────────────────────────────────┘`,
+  );
   return lines.join("\n");
 }
 
@@ -318,7 +426,9 @@ export function renderItemProfile(item: any): string {
   const cat = getItemCategoryLabel(item.category) || "N/A";
   const priceStr = item.price ? `${item.price} Ptz` : "N/A";
 
-  lines.push(`┌──────────────────────────────────────────────────────────────────────────────┐`);
+  lines.push(
+    `┌──────────────────────────────────────────────────────────────────────────────┐`,
+  );
   lines.push(
     `│ ${colors.bold}${colors.green}${nameFr.padEnd(40)}${colors.reset} │ ${colors.cyan}ID: ${item.itemId.padEnd(28)}${colors.reset} │`,
   );
@@ -328,23 +438,35 @@ export function renderItemProfile(item: any): string {
   lines.push(
     `│ ${colors.yellow}Code: ${code.padEnd(34)}${colors.reset} │ ${colors.yellow}Catégorie: ${cat.padEnd(28)}${colors.reset} │`,
   );
-  lines.push(`├──────────────────────────────────────────────────────────────────────────────┤`);
+  lines.push(
+    `├──────────────────────────────────────────────────────────────────────────────┤`,
+  );
   lines.push(`│ Prix d'achat: ${priceStr.padEnd(64)} │`);
 
   if (item.stats) {
-    lines.push(`│ ${colors.bold}Statistiques octroyées :${colors.reset}${" ".repeat(53)} │`);
-    lines.push(`│   Stat 1: ${String(item.stats.stat1).padEnd(10)} | Stat 2: ${String(item.stats.stat2).padEnd(44)} │`);
+    lines.push(
+      `│ ${colors.bold}Statistiques octroyées :${colors.reset}${" ".repeat(53)} │`,
+    );
+    lines.push(
+      `│   Stat 1: ${String(item.stats.stat1).padEnd(10)} | Stat 2: ${String(item.stats.stat2).padEnd(44)} │`,
+    );
   }
 
   if (item.shops && (item.shops.fr?.length > 0 || item.shops.en?.length > 0)) {
     const shops = item.shops.fr || item.shops.en;
-    lines.push(`│ Disponibilité : ${shops.join(", ").substring(0, 58).padEnd(60)} │`);
+    lines.push(
+      `│ Disponibilité : ${shops.join(", ").substring(0, 58).padEnd(60)} │`,
+    );
   }
 
   if (item.descriptions?.fr || item.descriptions?.en) {
     const desc = item.descriptions.fr || item.descriptions.en;
-    lines.push(`├──────────────────────────────────────────────────────────────────────────────┤`);
-    lines.push(`│ ${colors.bold}Description :${colors.reset}${" ".repeat(63)} │`);
+    lines.push(
+      `├──────────────────────────────────────────────────────────────────────────────┤`,
+    );
+    lines.push(
+      `│ ${colors.bold}Description :${colors.reset}${" ".repeat(63)} │`,
+    );
     const words = desc.split(" ");
     let currentLine = "│   ";
     for (const word of words) {
@@ -360,7 +482,9 @@ export function renderItemProfile(item: any): string {
     }
   }
 
-  lines.push(`└──────────────────────────────────────────────────────────────────────────────┘`);
+  lines.push(
+    `└──────────────────────────────────────────────────────────────────────────────┘`,
+  );
   return lines.join("\n");
 }
 
@@ -373,32 +497,48 @@ export function renderTeamProfile(team: any): string {
   const id = team.teamId || "N/A";
   const code = team.teamIdStr || "N/A";
 
-  lines.push(`┌──────────────────────────────────────────────────────────────────────────────┐`);
+  lines.push(
+    `┌──────────────────────────────────────────────────────────────────────────────┐`,
+  );
   lines.push(
     `│ ${colors.bold}${colors.green}${nameFr.padEnd(40)}${colors.reset} │ ${colors.cyan}ID: ${id.padEnd(28)}${colors.reset} │`,
   );
   lines.push(
     `│ ${colors.yellow}Anglais: ${nameEn.padEnd(31)}${colors.reset} │ ${colors.yellow}Japonais: ${nameJa.padEnd(29)}${colors.reset} │`,
   );
-  lines.push(`│ ${colors.yellow}Code: ${code.padEnd(34)}${colors.reset} │${" ".repeat(30)} │`);
-  lines.push(`├──────────────────────────────────────────────────────────────────────────────┤`);
+  lines.push(
+    `│ ${colors.yellow}Code: ${code.padEnd(34)}${colors.reset} │${" ".repeat(30)} │`,
+  );
+  lines.push(
+    `├──────────────────────────────────────────────────────────────────────────────┤`,
+  );
 
   if (team.uniforms && team.uniforms.length > 0) {
-    lines.push(`│ ${colors.bold}Kits / Uniformes (${team.uniforms.length}) :${colors.reset}${" ".repeat(53)} │`);
+    lines.push(
+      `│ ${colors.bold}Kits / Uniformes (${team.uniforms.length}) :${colors.reset}${" ".repeat(53)} │`,
+    );
     for (const [idx, u] of (team.uniforms as any[]).slice(0, 5).entries()) {
       const kitId = u.uniformId || "N/A";
       const modelName = u.modelName || "N/A";
-      lines.push(`│   [${idx + 1}] ID Uniforme: ${String(kitId).padEnd(10)} | Modèle: ${modelName.padEnd(34)} │`);
+      lines.push(
+        `│   [${idx + 1}] ID Uniforme: ${String(kitId).padEnd(10)} | Modèle: ${modelName.padEnd(34)} │`,
+      );
     }
     if (team.uniforms.length > 5) {
-      lines.push(`│   ... et ${team.uniforms.length - 5} autres kits.                                              │`);
+      lines.push(
+        `│   ... et ${team.uniforms.length - 5} autres kits.                                              │`,
+      );
     }
   }
 
   if (team.seasons && team.seasons.length > 0) {
-    lines.push(`│ Saisons / Événements: ${team.seasons.join(", ").substring(0, 56).padEnd(58)} │`);
+    lines.push(
+      `│ Saisons / Événements: ${team.seasons.join(", ").substring(0, 56).padEnd(58)} │`,
+    );
   }
 
-  lines.push(`└──────────────────────────────────────────────────────────────────────────────┘`);
+  lines.push(
+    `└──────────────────────────────────────────────────────────────────────────────┘`,
+  );
   return lines.join("\n");
 }

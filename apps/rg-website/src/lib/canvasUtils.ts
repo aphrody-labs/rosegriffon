@@ -2,7 +2,7 @@ export const createImage = (url: string): Promise<HTMLImageElement> =>
   new Promise((resolve, reject) => {
     const image = new Image();
     image.addEventListener("load", () => resolve(image));
-    image.addEventListener("error", error => reject(error));
+    image.addEventListener("error", (error) => reject(error));
     image.setAttribute("crossOrigin", "anonymous"); // Nécessaire pour éviter les problèmes de CORS
     image.src = url;
   });
@@ -18,8 +18,10 @@ export function rotateSize(width: number, height: number, rotation: number) {
   const rotRad = getRadianAngle(rotation);
 
   return {
-    height: Math.abs(Math.sin(rotRad) * width) + Math.abs(Math.cos(rotRad) * height),
-    width: Math.abs(Math.cos(rotRad) * width) + Math.abs(Math.sin(rotRad) * height),
+    height:
+      Math.abs(Math.sin(rotRad) * width) + Math.abs(Math.cos(rotRad) * height),
+    width:
+      Math.abs(Math.cos(rotRad) * width) + Math.abs(Math.sin(rotRad) * height),
   };
 }
 
@@ -43,7 +45,11 @@ export default async function getCroppedImg(
   const rotRad = getRadianAngle(rotation);
 
   // Calculer la taille de la bounding box après rotation
-  const { width: bBoxWidth, height: bBoxHeight } = rotateSize(image.width, image.height, rotation);
+  const { width: bBoxWidth, height: bBoxHeight } = rotateSize(
+    image.width,
+    image.height,
+    rotation,
+  );
 
   // Définir la taille du canvas
   canvas.width = bBoxWidth;
@@ -59,7 +65,12 @@ export default async function getCroppedImg(
   ctx.drawImage(image, 0, 0);
 
   // Extraire l'image croppée
-  const data = ctx.getImageData(pixelCrop.x, pixelCrop.y, pixelCrop.width, pixelCrop.height);
+  const data = ctx.getImageData(
+    pixelCrop.x,
+    pixelCrop.y,
+    pixelCrop.width,
+    pixelCrop.height,
+  );
 
   // Redimensionner le canvas à la taille finale souhaitée (le crop)
   canvas.width = pixelCrop.width;
@@ -69,9 +80,9 @@ export default async function getCroppedImg(
   ctx.putImageData(data, 0, 0);
 
   // Retourner un Blob (plus performant que base64 pour l'upload)
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     canvas.toBlob(
-      file => {
+      (file) => {
         resolve(file);
       },
       "image/jpeg",

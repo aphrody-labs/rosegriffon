@@ -86,7 +86,12 @@ import { rgEmbed, truncate } from "../../lib/embeds";
 import type { ActionModeration } from "../../lib/sanctions";
 import { publierAuJournal } from "../../services/journal-moderation";
 import { borner, echapperMarkdown, horodatageRelatif } from "../staff/format";
-import { differerEnPrive, exigerDroits, messagePanne, type RgAdmin } from "../staff/garde";
+import {
+  differerEnPrive,
+  exigerDroits,
+  messagePanne,
+  type RgAdmin,
+} from "../staff/garde";
 import {
   analyserIdConfirmation,
   construireIdConfirmation,
@@ -141,7 +146,10 @@ interface Cible {
  * Promise<GuildMember>` et `client.users.fetch(user: UserResolvable,
  * options?: BaseFetchOptions): Promise<User>` (discord.js 14.26.4).
  */
-async function resoudreCible(guild: Guild, identifiant: string): Promise<Cible> {
+async function resoudreCible(
+  guild: Guild,
+  identifiant: string,
+): Promise<Cible> {
   let membre: GuildMember | null = null;
   try {
     membre = await guild.members.fetch(identifiant);
@@ -151,7 +159,12 @@ async function resoudreCible(guild: Guild, identifiant: string): Promise<Cible> 
     }
   }
   if (membre) {
-    return { id: membre.id, etiquette: membre.user.tag, membre, utilisateur: membre.user };
+    return {
+      id: membre.id,
+      etiquette: membre.user.tag,
+      membre,
+      utilisateur: membre.user,
+    };
   }
   let utilisateur: User | null = null;
   try {
@@ -187,7 +200,10 @@ function refusPouvoirs(opts: {
   auteurId: string;
   cible: Cible;
 }): string | null {
-  const manquantes = permissionsManquantes(opts.moi.permissions.bitfield, opts.action);
+  const manquantes = permissionsManquantes(
+    opts.moi.permissions.bitfield,
+    opts.action,
+  );
   if (manquantes.length > 0) {
     return (
       `Le bot n'a pas les permissions nécessaires sur ce serveur : ` +
@@ -218,10 +234,15 @@ async function notifier(
   try {
     // `User.send(options: string | MessagePayload | MessageCreateOptions):
     // Promise<Message>` (héritée de `PartialTextBasedChannelFields`).
-    await destinataire.send(messageSanctionPrivee({ sanction, serveur, motif, dureeMs }));
+    await destinataire.send(
+      messageSanctionPrivee({ sanction, serveur, motif, dureeMs }),
+    );
     return "remise";
   } catch (err) {
-    return expliquerCodeDiscord(codeErreurDiscord(err)) ?? "non remise (Discord a refusé l'envoi)";
+    return (
+      expliquerCodeDiscord(codeErreurDiscord(err)) ??
+      "non remise (Discord a refusé l'envoi)"
+    );
   }
 }
 
@@ -267,9 +288,13 @@ async function confirmer(
     const bouton = await message.awaitMessageComponent<ComponentType.Button>({
       componentType: ComponentType.Button,
       time: DELAI_CONFIRMATION_MS,
-      filter: candidat => {
+      filter: (candidat) => {
         const decode = analyserIdConfirmation(candidat.customId);
-        return candidat.user.id === interaction.user.id && decode !== null && decode.graine === graine;
+        return (
+          candidat.user.id === interaction.user.id &&
+          decode !== null &&
+          decode.graine === graine
+        );
       },
     });
     // `deferUpdate()` accuse réception du clic sans rien réécrire : la suite
@@ -286,7 +311,10 @@ async function confirmer(
 }
 
 /** Retire les boutons et affiche le verdict final sur le même message. */
-async function conclure(interaction: ChatInputCommandInteraction, embed: EmbedBuilder): Promise<void> {
+async function conclure(
+  interaction: ChatInputCommandInteraction,
+  embed: EmbedBuilder,
+): Promise<void> {
   await interaction.editReply({ embeds: [embed], components: [] });
 }
 
@@ -304,7 +332,10 @@ async function conclure(interaction: ChatInputCommandInteraction, embed: EmbedBu
  * Rend la phrase à afficher : l'échec du bannissement de compte n'annule jamais
  * le bannissement Discord, qui a déjà eu lieu.
  */
-async function bannirLeCompte(admin: RgAdmin, discordId: string): Promise<string> {
+async function bannirLeCompte(
+  admin: RgAdmin,
+  discordId: string,
+): Promise<string> {
   try {
     return await bannirLeCompteOuLever(admin, discordId);
   } catch (err) {
@@ -314,7 +345,10 @@ async function bannirLeCompte(admin: RgAdmin, discordId: string): Promise<string
   }
 }
 
-async function bannirLeCompteOuLever(admin: RgAdmin, discordId: string): Promise<string> {
+async function bannirLeCompteOuLever(
+  admin: RgAdmin,
+  discordId: string,
+): Promise<string> {
   const profils = await sql<ProfilAffichable[]>`
 		SELECT id::text, username, full_name, role, discord_id
 		FROM profiles
@@ -363,7 +397,7 @@ async function chargerBannis(guild: Guild): Promise<BanniAffichable[]> {
     // Promise<Collection<Snowflake, GuildBan>>` — `limit` plafonne à 1000,
     // ce qui couvre très largement un serveur de ~1 984 membres.
     const bannis = await guild.bans.fetch({ limit: 1_000 });
-    return bannis.map(banni => ({
+    return bannis.map((banni) => ({
       id: banni.user.id,
       etiquette: banni.user.tag,
       motif: banni.reason ?? null,
@@ -372,7 +406,9 @@ async function chargerBannis(guild: Guild): Promise<BanniAffichable[]> {
 }
 
 /** Autocomplétion de `debannir` : les comptes réellement bannis, et eux seuls. */
-async function proposerBannis(interaction: AutocompleteInteraction): Promise<void> {
+async function proposerBannis(
+  interaction: AutocompleteInteraction,
+): Promise<void> {
   try {
     const guild = interaction.guild;
     if (!guild) {
@@ -380,7 +416,9 @@ async function proposerBannis(interaction: AutocompleteInteraction): Promise<voi
       return;
     }
     const bannis = await chargerBannis(guild);
-    await interaction.respond(filtrerBannis(bannis, interaction.options.getFocused()));
+    await interaction.respond(
+      filtrerBannis(bannis, interaction.options.getFocused()),
+    );
   } catch {
     // Une autocomplétion qui lève laisse le champ figé sur « chargement… ».
     await interaction.respond([]);
@@ -414,7 +452,8 @@ async function ouvrir(
   const guild = interaction.guild;
   if (!guild) {
     await interaction.editReply({
-      content: "Cette commande n'a de sens que sur un serveur, pas en message privé.",
+      content:
+        "Cette commande n'a de sens que sur un serveur, pas en message privé.",
     });
     return null;
   }
@@ -447,7 +486,9 @@ function messageApi(err: unknown): string {
  *
  * Rend `null` quand tout s'est bien passé, la phrase d'alerte sinon.
  */
-async function tracer(entree: Parameters<typeof logAdminAction>[0]): Promise<string | null> {
+async function tracer(
+  entree: Parameters<typeof logAdminAction>[0],
+): Promise<string | null> {
   try {
     await logAdminAction(entree);
     return null;
@@ -480,7 +521,10 @@ async function tracer(entree: Parameters<typeof logAdminAction>[0]): Promise<str
  * afficher dans l'accusé de réception — une action déjà appliquée ne se rejoue
  * pas, la seule chose utile est de dire ce qui n'a PAS été écrit.
  */
-async function consigner(contexte: Contexte, entree: ActionAConsigner): Promise<string | null> {
+async function consigner(
+  contexte: Contexte,
+  entree: ActionAConsigner,
+): Promise<string | null> {
   const alerteAudit = await tracer({
     adminId: contexte.admin.profileId,
     discordId: contexte.admin.discordId,
@@ -494,15 +538,21 @@ async function consigner(contexte: Contexte, entree: ActionAConsigner): Promise<
       ...entree.details,
     },
   });
-  const alerteSalon = await publierAuJournal(contexte.guild.client, contexte.guild.id, {
-    action: entree.action,
-    cibleId: entree.cibleId,
-    cibleEtiquette: entree.cibleEtiquette,
-    parQui: contexte.admin.discordId,
-    motif: entree.motif,
-    precisions: entree.precisions,
-  });
-  const alertes = [alerteAudit, alerteSalon].filter((alerte): alerte is string => alerte !== null);
+  const alerteSalon = await publierAuJournal(
+    contexte.guild.client,
+    contexte.guild.id,
+    {
+      action: entree.action,
+      cibleId: entree.cibleId,
+      cibleEtiquette: entree.cibleEtiquette,
+      parQui: contexte.admin.discordId,
+      motif: entree.motif,
+      precisions: entree.precisions,
+    },
+  );
+  const alertes = [alerteAudit, alerteSalon].filter(
+    (alerte): alerte is string => alerte !== null,
+  );
   return alertes.length === 0 ? null : alertes.join("\n");
 }
 
@@ -520,40 +570,53 @@ interface ActionAConsigner {
 }
 
 /** Ajoute le champ d'alerte du journal, quand il y a quelque chose à dire. */
-function ajouterAlerteJournal(embed: EmbedBuilder, alerte: string | null): EmbedBuilder {
-  return alerte ? embed.addFields({ name: "⚠ Journal Rose Griffon", value: truncate(alerte, 1_000) }) : embed;
+function ajouterAlerteJournal(
+  embed: EmbedBuilder,
+  alerte: string | null,
+): EmbedBuilder {
+  return alerte
+    ? embed.addFields({
+        name: "⚠ Journal Rose Griffon",
+        value: truncate(alerte, 1_000),
+      })
+    : embed;
 }
 
 @Discord()
 @SlashGroup({
   name: "moderation",
-  description: "Modération du SERVEUR DISCORD : bannir, expulser, exclure, avertir",
+  description:
+    "Modération du SERVEUR DISCORD : bannir, expulser, exclure, avertir",
   root: "moderation",
 })
 @SlashGroup("moderation", "moderation")
 export class AdministrationModerationCommand {
   @Slash({
     name: "bannir",
-    description: "Bannir du SERVEUR DISCORD (≠ bannir le compte du site : voir /administration utilisateur)",
+    description:
+      "Bannir du SERVEUR DISCORD (≠ bannir le compte du site : voir /administration utilisateur)",
   })
   async bannir(
     @SlashOption({
       name: "membre",
-      description: "Membre à bannir — accepte aussi l'identifiant d'un compte déjà parti du serveur",
+      description:
+        "Membre à bannir — accepte aussi l'identifiant d'un compte déjà parti du serveur",
       type: ApplicationCommandOptionType.User,
       required: true,
     })
     qui: { id: string },
     @SlashOption({
       name: "motif",
-      description: "Motif inscrit au journal d'audit Discord ET dans le journal Rose Griffon",
+      description:
+        "Motif inscrit au journal d'audit Discord ET dans le journal Rose Griffon",
       type: ApplicationCommandOptionType.String,
       required: true,
     })
     motif: string,
     @SlashOption({
       name: "jours-messages",
-      description: "Effacer ses messages des N derniers jours (0 à 7, 0 par défaut)",
+      description:
+        "Effacer ses messages des N derniers jours (0 à 7, 0 par défaut)",
       type: ApplicationCommandOptionType.Integer,
       required: false,
       minValue: 0,
@@ -562,7 +625,8 @@ export class AdministrationModerationCommand {
     joursMessages: number | undefined,
     @SlashOption({
       name: "aussi-le-compte",
-      description: "Bannir EN PLUS son compte rosegriffon.fr (profiles.role = banned)",
+      description:
+        "Bannir EN PLUS son compte rosegriffon.fr (profiles.role = banned)",
       type: ApplicationCommandOptionType.Boolean,
       required: false,
     })
@@ -603,8 +667,13 @@ export class AdministrationModerationCommand {
       try {
         // `GuildBanManager.fetch(options: UserResolvable | FetchBanOptions):
         // Promise<GuildBan>` — lève `10026 Unknown Ban` s'il n'y en a pas.
-        const dejaBanni = await contexte.guild.bans.fetch({ user: cible.id, force: true });
-        const motifOrigine = dejaBanni.reason ? ` (motif : ${echapperMarkdown(borner(dejaBanni.reason, 200))})` : "";
+        const dejaBanni = await contexte.guild.bans.fetch({
+          user: cible.id,
+          force: true,
+        });
+        const motifOrigine = dejaBanni.reason
+          ? ` (motif : ${echapperMarkdown(borner(dejaBanni.reason, 200))})`
+          : "";
         await interaction.editReply({
           content: `**${echapperMarkdown(cible.etiquette)}** est déjà banni de ce serveur${motifOrigine}. Rien n'a été fait.`,
         });
@@ -619,7 +688,9 @@ export class AdministrationModerationCommand {
         .setTitle("Confirmer le bannissement Discord")
         .setDescription(
           `**${echapperMarkdown(cible.etiquette)}** — <@${cible.id}>\n\`${cible.id}\`${
-            cible.membre ? "" : "\n*Ce compte n'est plus sur le serveur : le bannissement l'empêchera de revenir.*"
+            cible.membre
+              ? ""
+              : "\n*Ce compte n'est plus sur le serveur : le bannissement l'empêchera de revenir.*"
           }`,
         )
         .addFields(
@@ -635,7 +706,11 @@ export class AdministrationModerationCommand {
             inline: true,
           },
         )
-        .setFooter(piedTexte({ note: "Action irréversible · 60 secondes pour confirmer" }));
+        .setFooter(
+          piedTexte({
+            note: "Action irréversible · 60 secondes pour confirmer",
+          }),
+        );
 
       const decision = await confirmer(interaction, apercu, "Bannir");
       if (decision === null) {
@@ -643,19 +718,31 @@ export class AdministrationModerationCommand {
           interaction,
           rgEmbed()
             .setTitle("Bannissement abandonné")
-            .setDescription("Personne n'a confirmé dans les 60 secondes. Rien n'a été fait."),
+            .setDescription(
+              "Personne n'a confirmé dans les 60 secondes. Rien n'a été fait.",
+            ),
         );
         return;
       }
       if (!decision) {
-        await conclure(interaction, rgEmbed().setTitle("Bannissement annulé").setDescription("Rien n'a été fait."));
+        await conclure(
+          interaction,
+          rgEmbed()
+            .setTitle("Bannissement annulé")
+            .setDescription("Rien n'a été fait."),
+        );
         return;
       }
 
       const raison = motifAudit({ auteur: interaction.user.tag, motif });
       // La notification part AVANT : après le bannissement, il n'y a plus de
       // serveur commun et Discord refuse d'ouvrir le salon privé.
-      const remise = await notifier(cible.utilisateur, "bannissement", contexte.guild.name, motif);
+      const remise = await notifier(
+        cible.utilisateur,
+        "bannissement",
+        contexte.guild.name,
+        motif,
+      );
 
       // `GuildBanManager.create(user: UserResolvable, options?: BanOptions):
       // Promise<GuildMember | User | Snowflake>` — `BanOptions` porte
@@ -666,7 +753,9 @@ export class AdministrationModerationCommand {
       });
       invalidate(clefBannis(contexte.guild.id));
 
-      const compte = aussiLeCompte ? await bannirLeCompte(contexte.admin, cible.id) : "non touché";
+      const compte = aussiLeCompte
+        ? await bannirLeCompte(contexte.admin, cible.id)
+        : "non touché";
 
       const alerteJournal = await consigner(contexte, {
         action: "discord.bannir",
@@ -674,9 +763,15 @@ export class AdministrationModerationCommand {
         cibleEtiquette: cible.etiquette,
         motif,
         precisions: [
-          { nom: "Messages effacés", valeur: jours === 0 ? "aucun" : `les ${jours} derniers jours` },
+          {
+            nom: "Messages effacés",
+            valeur: jours === 0 ? "aucun" : `les ${jours} derniers jours`,
+          },
           { nom: "Message privé", valeur: remise },
-          { nom: "Compte rosegriffon.fr", valeur: aussiLeCompte ? "banni également" : null },
+          {
+            nom: "Compte rosegriffon.fr",
+            valeur: aussiLeCompte ? "banni également" : null,
+          },
         ],
         details: {
           jours_messages: jours,
@@ -690,7 +785,9 @@ export class AdministrationModerationCommand {
         ajouterAlerteJournal(
           rgEmbed()
             .setTitle("Bannissement Discord appliqué")
-            .setDescription(`**${echapperMarkdown(cible.etiquette)}** — \`${cible.id}\``)
+            .setDescription(
+              `**${echapperMarkdown(cible.etiquette)}** — \`${cible.id}\``,
+            )
             .addFields(
               { name: "Motif", value: truncate(motif, 1_000) },
               {
@@ -724,7 +821,8 @@ export class AdministrationModerationCommand {
   async debannir(
     @SlashOption({
       name: "identifiant",
-      description: "Compte banni (autocomplété depuis la liste réelle des bannis) ou son identifiant",
+      description:
+        "Compte banni (autocomplété depuis la liste réelle des bannis) ou son identifiant",
       type: ApplicationCommandOptionType.String,
       required: true,
       autocomplete: proposerBannis,
@@ -732,7 +830,8 @@ export class AdministrationModerationCommand {
     identifiant: string,
     @SlashOption({
       name: "motif",
-      description: "Pourquoi la sanction est levée — inscrit dans les deux journaux",
+      description:
+        "Pourquoi la sanction est levée — inscrit dans les deux journaux",
       type: ApplicationCommandOptionType.String,
       required: true,
     })
@@ -756,11 +855,16 @@ export class AdministrationModerationCommand {
         return;
       }
 
-      const manquantes = permissionsManquantes(contexte.moi.permissions.bitfield, "bannir");
+      const manquantes = permissionsManquantes(
+        contexte.moi.permissions.bitfield,
+        "bannir",
+      );
       if (manquantes.length > 0) {
         await repondre(
           interaction,
-          accesRefuse(`Le bot n'a pas la permission **${manquantes.join(", ")}** sur ce serveur.`),
+          accesRefuse(
+            `Le bot n'a pas la permission **${manquantes.join(", ")}** sur ce serveur.`,
+          ),
         );
         return;
       }
@@ -768,7 +872,10 @@ export class AdministrationModerationCommand {
       let etiquette = saisie;
       let motifOrigine: string | null = null;
       try {
-        const banni = await contexte.guild.bans.fetch({ user: saisie, force: true });
+        const banni = await contexte.guild.bans.fetch({
+          user: saisie,
+          force: true,
+        });
         etiquette = banni.user.tag;
         motifOrigine = banni.reason ?? null;
       } catch (err) {
@@ -783,7 +890,10 @@ export class AdministrationModerationCommand {
 
       // `GuildBanManager.remove(user: UserResolvable, reason?: string):
       // Promise<User | null>` — rend `null` si Discord ne résout pas le compte.
-      await contexte.guild.bans.remove(saisie, motifAudit({ auteur: interaction.user.tag, motif }));
+      await contexte.guild.bans.remove(
+        saisie,
+        motifAudit({ auteur: interaction.user.tag, motif }),
+      );
       invalidate(clefBannis(contexte.guild.id));
 
       const alerteJournal = await consigner(contexte, {
@@ -791,7 +901,9 @@ export class AdministrationModerationCommand {
         cibleId: saisie,
         cibleEtiquette: etiquette,
         motif,
-        precisions: [{ nom: "Motif du bannissement levé", valeur: motifOrigine }],
+        precisions: [
+          { nom: "Motif du bannissement levé", valeur: motifOrigine },
+        ],
         details: { motif_du_bannissement: motifOrigine },
       });
 
@@ -800,12 +912,16 @@ export class AdministrationModerationCommand {
           ajouterAlerteJournal(
             rgEmbed()
               .setTitle("Bannissement levé")
-              .setDescription(`**${echapperMarkdown(etiquette)}** — \`${saisie}\``)
+              .setDescription(
+                `**${echapperMarkdown(etiquette)}** — \`${saisie}\``,
+              )
               .addFields(
                 { name: "Motif de la levée", value: truncate(motif, 1_000) },
                 {
                   name: "Motif du bannissement d'origine",
-                  value: motifOrigine ? truncate(motifOrigine, 1_000) : "*aucun motif enregistré*",
+                  value: motifOrigine
+                    ? truncate(motifOrigine, 1_000)
+                    : "*aucun motif enregistré*",
                 },
               )
               .setFooter(
@@ -818,13 +934,17 @@ export class AdministrationModerationCommand {
         ],
       });
     } catch (err) {
-      await repondre(interaction, echec("Discord a refusé l'action", messageApi(err)));
+      await repondre(
+        interaction,
+        echec("Discord a refusé l'action", messageApi(err)),
+      );
     }
   }
 
   @Slash({
     name: "expulser",
-    description: "Expulser du SERVEUR DISCORD (le membre peut revenir avec une invitation)",
+    description:
+      "Expulser du SERVEUR DISCORD (le membre peut revenir avec une invitation)",
   })
   async expulser(
     @SlashOption({
@@ -836,7 +956,8 @@ export class AdministrationModerationCommand {
     qui: { id: string },
     @SlashOption({
       name: "motif",
-      description: "Motif inscrit au journal d'audit Discord ET dans le journal Rose Griffon",
+      description:
+        "Motif inscrit au journal d'audit Discord ET dans le journal Rose Griffon",
       type: ApplicationCommandOptionType.String,
       required: true,
     })
@@ -871,7 +992,9 @@ export class AdministrationModerationCommand {
 
       const apercu = rgEmbed()
         .setTitle("Confirmer l'expulsion")
-        .setDescription(`**${echapperMarkdown(cible.etiquette)}** — <@${cible.id}>\n\`${cible.id}\``)
+        .setDescription(
+          `**${echapperMarkdown(cible.etiquette)}** — <@${cible.id}>\n\`${cible.id}\``,
+        )
         .addFields(
           { name: "Motif", value: truncate(motif, 1_000) },
           {
@@ -892,18 +1015,32 @@ export class AdministrationModerationCommand {
           interaction,
           rgEmbed()
             .setTitle("Expulsion abandonnée")
-            .setDescription("Personne n'a confirmé dans les 60 secondes. Rien n'a été fait."),
+            .setDescription(
+              "Personne n'a confirmé dans les 60 secondes. Rien n'a été fait.",
+            ),
         );
         return;
       }
       if (!decision) {
-        await conclure(interaction, rgEmbed().setTitle("Expulsion annulée").setDescription("Rien n'a été fait."));
+        await conclure(
+          interaction,
+          rgEmbed()
+            .setTitle("Expulsion annulée")
+            .setDescription("Rien n'a été fait."),
+        );
         return;
       }
 
-      const remise = await notifier(cible.utilisateur, "expulsion", contexte.guild.name, motif);
+      const remise = await notifier(
+        cible.utilisateur,
+        "expulsion",
+        contexte.guild.name,
+        motif,
+      );
       // `GuildMember.kick(reason?: string): Promise<GuildMember>` (14.26.4).
-      await cible.membre.kick(motifAudit({ auteur: interaction.user.tag, motif }));
+      await cible.membre.kick(
+        motifAudit({ auteur: interaction.user.tag, motif }),
+      );
 
       const alerteJournal = await consigner(contexte, {
         action: "discord.expulser",
@@ -919,7 +1056,9 @@ export class AdministrationModerationCommand {
         ajouterAlerteJournal(
           rgEmbed()
             .setTitle("Expulsion appliquée")
-            .setDescription(`**${echapperMarkdown(cible.etiquette)}** — \`${cible.id}\``)
+            .setDescription(
+              `**${echapperMarkdown(cible.etiquette)}** — \`${cible.id}\``,
+            )
             .addFields(
               { name: "Motif", value: truncate(motif, 1_000) },
               { name: "Notification privée", value: remise, inline: true },
@@ -942,7 +1081,8 @@ export class AdministrationModerationCommand {
 
   @Slash({
     name: "exclure",
-    description: "Exclure temporairement : le membre reste, mais ne peut plus écrire ni parler",
+    description:
+      "Exclure temporairement : le membre reste, mais ne peut plus écrire ni parler",
   })
   async exclure(
     @SlashOption({
@@ -954,14 +1094,16 @@ export class AdministrationModerationCommand {
     qui: { id: string },
     @SlashOption({
       name: "duree",
-      description: "Durée : 10m, 1h30m, 7j… — 28 jours au maximum (plafond de l'API Discord)",
+      description:
+        "Durée : 10m, 1h30m, 7j… — 28 jours au maximum (plafond de l'API Discord)",
       type: ApplicationCommandOptionType.String,
       required: true,
     })
     duree: string,
     @SlashOption({
       name: "motif",
-      description: "Motif inscrit au journal d'audit Discord ET dans le journal Rose Griffon",
+      description:
+        "Motif inscrit au journal d'audit Discord ET dans le journal Rose Griffon",
       type: ApplicationCommandOptionType.String,
       required: true,
     })
@@ -1005,11 +1147,20 @@ export class AdministrationModerationCommand {
       }
 
       const exclusionEnCours = cible.membre.communicationDisabledUntil;
-      const remise = await notifier(cible.utilisateur, "exclusion", contexte.guild.name, motif, millisecondes);
+      const remise = await notifier(
+        cible.utilisateur,
+        "exclusion",
+        contexte.guild.name,
+        motif,
+        millisecondes,
+      );
       // `GuildMember.timeout(timeout: number | null, reason?: string):
       // Promise<GuildMember>` — la durée est en millisecondes, `null` lève
       // l'exclusion (voir `lever-exclusion`).
-      const apres = await cible.membre.timeout(millisecondes, motifAudit({ auteur: interaction.user.tag, motif }));
+      const apres = await cible.membre.timeout(
+        millisecondes,
+        motifAudit({ auteur: interaction.user.tag, motif }),
+      );
 
       const alerteJournal = await consigner(contexte, {
         action: "discord.exclure",
@@ -1018,7 +1169,10 @@ export class AdministrationModerationCommand {
         motif,
         precisions: [
           { nom: "Durée", valeur: dureeLisible(millisecondes) },
-          { nom: "Fin", valeur: horodatageRelatif(apres.communicationDisabledUntil) },
+          {
+            nom: "Fin",
+            valeur: horodatageRelatif(apres.communicationDisabledUntil),
+          },
           { nom: "Message privé", valeur: remise },
         ],
         details: {
@@ -1031,14 +1185,24 @@ export class AdministrationModerationCommand {
 
       const embed = rgEmbed()
         .setTitle("Exclusion temporaire appliquée")
-        .setDescription(`**${echapperMarkdown(cible.etiquette)}** — <@${cible.id}>`)
+        .setDescription(
+          `**${echapperMarkdown(cible.etiquette)}** — <@${cible.id}>`,
+        )
         .addFields(
           { name: "Durée", value: dureeLisible(millisecondes), inline: true },
-          { name: "Fin", value: horodatageRelatif(apres.communicationDisabledUntil), inline: true },
+          {
+            name: "Fin",
+            value: horodatageRelatif(apres.communicationDisabledUntil),
+            inline: true,
+          },
           { name: "Notification privée", value: remise, inline: true },
           { name: "Motif", value: truncate(motif, 1_000) },
         )
-        .setFooter(piedTexte({ note: "Lever avant terme : /moderation moderation lever-exclusion" }));
+        .setFooter(
+          piedTexte({
+            note: "Lever avant terme : /moderation moderation lever-exclusion",
+          }),
+        );
       ajouterAlerteJournal(embed, alerteJournal);
       if (exclusionEnCours) {
         embed.addFields({
@@ -1048,7 +1212,10 @@ export class AdministrationModerationCommand {
       }
       await interaction.editReply({ embeds: [embed] });
     } catch (err) {
-      await repondre(interaction, echec("Discord a refusé l'action", messageApi(err)));
+      await repondre(
+        interaction,
+        echec("Discord a refusé l'action", messageApi(err)),
+      );
     }
   }
 
@@ -1068,7 +1235,8 @@ export class AdministrationModerationCommand {
     qui: { id: string },
     @SlashOption({
       name: "motif",
-      description: "Pourquoi l'exclusion est levée — inscrit dans les deux journaux",
+      description:
+        "Pourquoi l'exclusion est levée — inscrit dans les deux journaux",
       type: ApplicationCommandOptionType.String,
       required: true,
     })
@@ -1112,14 +1280,19 @@ export class AdministrationModerationCommand {
 
       // `timeout(null, reason)` lève l'exclusion : c'est la forme documentée,
       // il n'existe pas de méthode `removeTimeout`.
-      await cible.membre.timeout(null, motifAudit({ auteur: interaction.user.tag, motif }));
+      await cible.membre.timeout(
+        null,
+        motifAudit({ auteur: interaction.user.tag, motif }),
+      );
 
       const alerteJournal = await consigner(contexte, {
         action: "discord.lever-exclusion",
         cibleId: cible.id,
         cibleEtiquette: cible.etiquette,
         motif,
-        precisions: [{ nom: "Elle devait courir jusqu'à", valeur: horodatageRelatif(fin) }],
+        precisions: [
+          { nom: "Elle devait courir jusqu'à", valeur: horodatageRelatif(fin) },
+        ],
         details: { fin_prevue: fin?.toISOString() ?? null },
       });
 
@@ -1128,7 +1301,9 @@ export class AdministrationModerationCommand {
           ajouterAlerteJournal(
             rgEmbed()
               .setTitle("Exclusion levée")
-              .setDescription(`**${echapperMarkdown(cible.etiquette)}** — <@${cible.id}>`)
+              .setDescription(
+                `**${echapperMarkdown(cible.etiquette)}** — <@${cible.id}>`,
+              )
               .addFields(
                 { name: "Motif de la levée", value: truncate(motif, 1_000) },
                 {
@@ -1137,19 +1312,27 @@ export class AdministrationModerationCommand {
                   inline: true,
                 },
               )
-              .setFooter(piedTexte({ note: "Le membre peut de nouveau écrire, réagir et parler en vocal" })),
+              .setFooter(
+                piedTexte({
+                  note: "Le membre peut de nouveau écrire, réagir et parler en vocal",
+                }),
+              ),
             alerteJournal,
           ),
         ],
       });
     } catch (err) {
-      await repondre(interaction, echec("Discord a refusé l'action", messageApi(err)));
+      await repondre(
+        interaction,
+        echec("Discord a refusé l'action", messageApi(err)),
+      );
     }
   }
 
   @Slash({
     name: "avertir",
-    description: "Avertir en privé : aucune sanction Discord, mais une trace dans le journal",
+    description:
+      "Avertir en privé : aucune sanction Discord, mais une trace dans le journal",
   })
   async avertir(
     @SlashOption({
@@ -1161,7 +1344,8 @@ export class AdministrationModerationCommand {
     qui: { id: string },
     @SlashOption({
       name: "motif",
-      description: "Ce qui est reproché — le texte est envoyé tel quel au membre",
+      description:
+        "Ce qui est reproché — le texte est envoyé tel quel au membre",
       type: ApplicationCommandOptionType.String,
       required: true,
     })
@@ -1181,17 +1365,26 @@ export class AdministrationModerationCommand {
         cibleEstBot: cible.id === contexte.moi.id,
       });
       if (empechement) {
-        await repondre(interaction, accesRefuse(expliquerEmpechement(empechement)));
+        await repondre(
+          interaction,
+          accesRefuse(expliquerEmpechement(empechement)),
+        );
         return;
       }
       if (!cible.utilisateur) {
         await interaction.editReply({
-          content: "Discord ne connaît plus ce compte : aucun message ne peut lui être remis.",
+          content:
+            "Discord ne connaît plus ce compte : aucun message ne peut lui être remis.",
         });
         return;
       }
 
-      const remise = await notifier(cible.utilisateur, "avertissement", contexte.guild.name, motif);
+      const remise = await notifier(
+        cible.utilisateur,
+        "avertissement",
+        contexte.guild.name,
+        motif,
+      );
       const transmis = remise === "remise";
 
       // L'avertissement est consigné MÊME si le message privé n'a pas pu être
@@ -1205,7 +1398,10 @@ export class AdministrationModerationCommand {
         motif,
         precisions: [
           { nom: "Message privé", valeur: remise },
-          { nom: "Sur le serveur", valeur: cible.membre ? null : "non — compte parti" },
+          {
+            nom: "Sur le serveur",
+            valeur: cible.membre ? null : "non — compte parti",
+          },
         ],
         details: {
           message_prive_remis: transmis,
@@ -1217,8 +1413,14 @@ export class AdministrationModerationCommand {
         embeds: [
           ajouterAlerteJournal(
             rgEmbed()
-              .setTitle(transmis ? "Avertissement envoyé" : "Avertissement consigné, non remis")
-              .setDescription(`**${echapperMarkdown(cible.etiquette)}** — <@${cible.id}>`)
+              .setTitle(
+                transmis
+                  ? "Avertissement envoyé"
+                  : "Avertissement consigné, non remis",
+              )
+              .setDescription(
+                `**${echapperMarkdown(cible.etiquette)}** — <@${cible.id}>`,
+              )
               .addFields(
                 { name: "Motif", value: truncate(motif, 1_000) },
                 { name: "Message privé", value: remise, inline: true },
@@ -1240,7 +1442,10 @@ export class AdministrationModerationCommand {
         ],
       });
     } catch (err) {
-      await repondre(interaction, echec("Discord a refusé l'action", messageApi(err)));
+      await repondre(
+        interaction,
+        echec("Discord a refusé l'action", messageApi(err)),
+      );
     }
   }
 }

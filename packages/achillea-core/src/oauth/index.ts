@@ -15,16 +15,23 @@ export interface ProviderOAuthState {
   token: string;
 }
 
-const PROVIDER_STATE_PATTERN = /^(?<discordId>\d{17,20}):(?<token>[a-f\d]{48})$/u;
+const PROVIDER_STATE_PATTERN =
+  /^(?<discordId>\d{17,20}):(?<token>[a-f\d]{48})$/u;
 
-export function formatProviderOAuthState(discordId: string, token: string): string {
+export function formatProviderOAuthState(
+  discordId: string,
+  token: string,
+): string {
   const value = `${discordId}:${token}`;
-  if (!PROVIDER_STATE_PATTERN.test(value)) throw new Error("Invalid provider OAuth state");
+  if (!PROVIDER_STATE_PATTERN.test(value))
+    throw new Error("Invalid provider OAuth state");
   return value;
 }
 
 /** Parses the state used when linking a provider to an existing Discord user. */
-export function parseProviderOAuthState(value: unknown): ProviderOAuthState | null {
+export function parseProviderOAuthState(
+  value: unknown,
+): ProviderOAuthState | null {
   if (typeof value !== "string") return null;
   const match = PROVIDER_STATE_PATTERN.exec(value);
   const discordId = match?.groups?.discordId;
@@ -49,7 +56,9 @@ export function buildChallongeOAuthUrl(config: ProviderOAuthConfig): string {
     client_id: config.clientId,
     redirect_uri: `${config.callbackUrl}?provider=challonge`,
     response_type: "code",
-    scope: config.challongeScope ?? "me tournaments:read tournaments:write participants:write",
+    scope:
+      config.challongeScope ??
+      "me tournaments:read tournaments:write participants:write",
     state: config.state,
   });
   return `https://api.challonge.com/oauth/authorize?${params.toString()}`;

@@ -1,4 +1,10 @@
-import { Button, Card, CardContent, CardHeader, CardTitle } from "@rosegriffon/ui";
+import {
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@rosegriffon/ui";
 import type { Metadata } from "next";
 import Link from "@/components/shared/Link";
 
@@ -11,8 +17,22 @@ import {
   SectionCard,
   SectionHeading,
 } from "@/components/shared/PageShell";
-import { BreadcrumbSchema, OrganizationSchema } from "@/components/shared/StructuredData";
-import { ExternalLink, Eye, Heart, Mail, Megaphone, Server, Swords, Trophy, Users, Video } from "@/lib/icons-config";
+import {
+  BreadcrumbSchema,
+  OrganizationSchema,
+} from "@/components/shared/StructuredData";
+import {
+  ExternalLink,
+  Eye,
+  Heart,
+  Mail,
+  Megaphone,
+  Server,
+  Swords,
+  Trophy,
+  Users,
+  Video,
+} from "@/lib/icons-config";
 import { absoluteUrl } from "@/lib/site-url";
 
 export const metadata: Metadata = {
@@ -83,7 +103,15 @@ const TRANSPARENCY = [
 ];
 
 /** Carte d'information — même surface, même bordure, même rayon sur toute la page. */
-function InfoCard({ icon: Icon, title, desc }: { icon: typeof Trophy; title: string; desc: string }) {
+function InfoCard({
+  icon: Icon,
+  title,
+  desc,
+}: {
+  icon: typeof Trophy;
+  title: string;
+  desc: string;
+}) {
   return (
     <Card className="h-full gap-3 shadow-sm transition-shadow hover:shadow-md">
       <CardHeader>
@@ -93,7 +121,9 @@ function InfoCard({ icon: Icon, title, desc }: { icon: typeof Trophy; title: str
           <span className="block w-fit rounded-lg bg-primary/10 p-2 text-primary">
             <Icon className="size-6" aria-hidden />
           </span>
-          <CardTitle className="mt-3 text-fluid-headline-md leading-tight">{title}</CardTitle>
+          <CardTitle className="mt-3 text-fluid-headline-md leading-tight">
+            {title}
+          </CardTitle>
         </div>
       </CardHeader>
       <CardContent>
@@ -115,7 +145,9 @@ export default function NousSoutenirPage() {
       <OrganizationSchema />
 
       <PageHero
-        icon={<Heart className="size-7 shrink-0 text-rg-or md:size-8" aria-hidden />}
+        icon={
+          <Heart className="size-7 shrink-0 text-rg-or md:size-8" aria-hidden />
+        }
         eyebrow="Communauté & soutien"
         title="Nous soutenir"
         description="Rose Griffon est une association à but non lucratif portée par une équipe de bénévoles. Vos soutiens financent les projets, pas les salaires."
@@ -124,7 +156,11 @@ export default function NousSoutenirPage() {
             <Button asChild className={heroPrimaryButtonClass}>
               <a href="#tiers">Voir les paliers</a>
             </Button>
-            <Button asChild variant="outline" className={heroSecondaryButtonClass}>
+            <Button
+              asChild
+              variant="outline"
+              className={heroSecondaryButtonClass}
+            >
               <a href="#transparence">Où va votre soutien ?</a>
             </Button>
           </>
@@ -132,7 +168,11 @@ export default function NousSoutenirPage() {
       />
 
       {/* Paliers Patreon — seul endroit de la page où l'on part vers Patreon. */}
-      <section id="tiers" aria-labelledby="paliers-titre" className="scroll-mt-24">
+      <section
+        id="tiers"
+        aria-labelledby="paliers-titre"
+        className="scroll-mt-24"
+      >
         <SectionHeading
           id="paliers-titre"
           icon={<Heart className="size-6" aria-hidden />}
@@ -142,7 +182,8 @@ export default function NousSoutenirPage() {
         />
         <PublicTiers />
         <p className="mx-auto mt-8 max-w-2xl text-center text-xs text-muted-foreground">
-          Sur chaque contribution, Patreon prélève 8 à 12 % de commission plus les frais de paiement. Pour maximiser le soutien net à
+          Sur chaque contribution, Patreon prélève 8 à 12 % de commission plus
+          les frais de paiement. Pour maximiser le soutien net à
           l&apos;association, un don unique PayPal est plus efficace côté frais.
         </p>
       </section>
@@ -157,8 +198,13 @@ export default function NousSoutenirPage() {
           subtitle="Ce que votre contribution rend possible au quotidien."
         />
         <div className="grid gap-6 md:grid-cols-3">
-          {WHY_CARDS.map(card => (
-            <InfoCard key={card.title} icon={card.icon} title={card.title} desc={card.desc} />
+          {WHY_CARDS.map((card) => (
+            <InfoCard
+              key={card.title}
+              icon={card.icon}
+              title={card.title}
+              desc={card.desc}
+            />
           ))}
         </div>
       </section>
@@ -177,21 +223,30 @@ export default function NousSoutenirPage() {
           <Card className="h-full shadow-sm">
             <CardHeader>
               <div>
-                <CardTitle className="text-fluid-headline-md">Don ponctuel via PayPal</CardTitle>
-                <p className="mt-1 text-xs font-semibold tracking-wider text-primary uppercase">Coup de main unique</p>
+                <CardTitle className="text-fluid-headline-md">
+                  Don ponctuel via PayPal
+                </CardTitle>
+                <p className="mt-1 text-xs font-semibold tracking-wider text-primary uppercase">
+                  Coup de main unique
+                </p>
               </div>
             </CardHeader>
             <CardContent className="space-y-6">
               <p className="text-fluid-body-md text-muted-foreground">
-                Vous souhaitez faire un don unique pour soutenir nos actions ? PayPal vous permet de contribuer
-                facilement et en toute sécurité, quel que soit le montant.
+                Vous souhaitez faire un don unique pour soutenir nos actions ?
+                PayPal vous permet de contribuer facilement et en toute
+                sécurité, quel que soit le montant.
               </p>
               <Button
                 asChild
                 size="lg"
                 className="h-auto min-h-12 w-full rounded-full py-3 whitespace-normal sm:w-auto"
               >
-                <a href="https://www.paypal.com/paypalme/rosegriffon" target="_blank" rel="noopener noreferrer">
+                <a
+                  href="https://www.paypal.com/paypalme/rosegriffon"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   Faire un don
                   <ExternalLink className="size-4" aria-hidden />
                 </a>
@@ -202,14 +257,18 @@ export default function NousSoutenirPage() {
           <Card className="h-full shadow-sm">
             <CardHeader>
               <div>
-                <CardTitle className="text-fluid-headline-md">Mécénat, dons en nature, presse</CardTitle>
-                <p className="mt-1 text-xs font-semibold tracking-wider text-primary uppercase">Nous écrire</p>
+                <CardTitle className="text-fluid-headline-md">
+                  Mécénat, dons en nature, presse
+                </CardTitle>
+                <p className="mt-1 text-xs font-semibold tracking-wider text-primary uppercase">
+                  Nous écrire
+                </p>
               </div>
             </CardHeader>
             <CardContent className="space-y-6">
               <p className="text-fluid-body-md text-muted-foreground">
-                Entreprise, association, média ou simple curieux : écrivez-nous et nous construirons ensemble la forme
-                de soutien la plus utile.
+                Entreprise, association, média ou simple curieux : écrivez-nous
+                et nous construirons ensemble la forme de soutien la plus utile.
               </p>
               <Button
                 asChild
@@ -228,7 +287,11 @@ export default function NousSoutenirPage() {
       </section>
 
       {/* Transparence */}
-      <section id="transparence" aria-labelledby="transparence-titre" className="scroll-mt-24">
+      <section
+        id="transparence"
+        aria-labelledby="transparence-titre"
+        className="scroll-mt-24"
+      >
         <SectionHeading
           id="transparence-titre"
           icon={<Eye className="size-6" aria-hidden />}
@@ -237,8 +300,13 @@ export default function NousSoutenirPage() {
           subtitle="Bilan financier annuel partagé en assemblée générale."
         />
         <div className="grid gap-6 md:grid-cols-2">
-          {TRANSPARENCY.map(card => (
-            <InfoCard key={card.title} icon={card.icon} title={card.title} desc={card.desc} />
+          {TRANSPARENCY.map((card) => (
+            <InfoCard
+              key={card.title}
+              icon={card.icon}
+              title={card.title}
+              desc={card.desc}
+            />
           ))}
         </div>
       </section>
@@ -247,10 +315,13 @@ export default function NousSoutenirPage() {
 			    existe déjà une seule fois plus haut. */}
       <SectionCard className="text-center">
         <Heart className="mx-auto size-8 text-primary" aria-hidden />
-        <h2 className="mt-3 text-fluid-headline-lg font-bold text-foreground">Merci de faire vivre Rose Griffon</h2>
+        <h2 className="mt-3 text-fluid-headline-lg font-bold text-foreground">
+          Merci de faire vivre Rose Griffon
+        </h2>
         <p className="mx-auto mt-3 max-w-2xl text-fluid-body-md text-muted-foreground">
-          Chaque soutien — petit ou grand — fait avancer la communauté. Les comptes de l&apos;association sont présentés
-          chaque année à ses adhérents.
+          Chaque soutien — petit ou grand — fait avancer la communauté. Les
+          comptes de l&apos;association sont présentés chaque année à ses
+          adhérents.
         </p>
       </SectionCard>
     </PageContainer>

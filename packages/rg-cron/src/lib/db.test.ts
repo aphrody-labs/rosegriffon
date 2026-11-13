@@ -8,8 +8,15 @@ import type { SQL } from "bun";
 import { clientParesseux, estPoolEmpoisonne, signalerErreurSql } from "./db";
 
 /** Faux client Bun.SQL : tag appelable, `begin()` et `close()` tracés. */
-function fauxSql(id: number, fermetures: Array<{ id: number; timeout?: number }>): SQL {
-  const tag = (strings: TemplateStringsArray, ...valeurs: unknown[]) => ({ id, texte: strings.join("?"), valeurs });
+function fauxSql(
+  id: number,
+  fermetures: Array<{ id: number; timeout?: number }>,
+): SQL {
+  const tag = (strings: TemplateStringsArray, ...valeurs: unknown[]) => ({
+    id,
+    texte: strings.join("?"),
+    valeurs,
+  });
   return Object.assign(tag, {
     id,
     begin(this: { id: number }, fn: (tx: unknown) => unknown) {
@@ -24,18 +31,30 @@ function fauxSql(id: number, fermetures: Array<{ id: number; timeout?: number }>
 
 describe("estPoolEmpoisonne", () => {
   test("reconnaît l'erreur native du pool, en Error comme en message agrégé", () => {
-    expect(estPoolEmpoisonne(new Error("connection must be a PostgresSQLConnection"))).toBe(true);
+    expect(
+      estPoolEmpoisonne(
+        new Error("connection must be a PostgresSQLConnection"),
+      ),
+    ).toBe(true);
     // Forme du résumé de `discord:sync`, repris tel quel par le runner.
     expect(
-      estPoolEmpoisonne("Rose Griffon : 2 membre(s) en échec | liens OAuth : connection must be a PostgresSQLConnection"),
+      estPoolEmpoisonne(
+        "Rose Griffon : 2 membre(s) en échec | liens OAuth : connection must be a PostgresSQLConnection",
+      ),
     ).toBe(true);
   });
 
   test("ignore les erreurs de base ordinaires", () => {
-    expect(estPoolEmpoisonne(new Error('relation "discord_polls" does not exist'))).toBe(false);
+    expect(
+      estPoolEmpoisonne(new Error('relation "discord_polls" does not exist')),
+    ).toBe(false);
     expect(estPoolEmpoisonne(new Error("Connection closed"))).toBe(false);
     expect(estPoolEmpoisonne(undefined)).toBe(false);
-    expect(estPoolEmpoisonne({ message: "connection must be a PostgresSQLConnection" })).toBe(false);
+    expect(
+      estPoolEmpoisonne({
+        message: "connection must be a PostgresSQLConnection",
+      }),
+    ).toBe(false);
   });
 });
 
@@ -46,10 +65,13 @@ describe("clientParesseux", () => {
     const client = clientParesseux(() => fauxSql(++crees, fermetures));
     expect(crees).toBe(0);
 
-    const requete = client.sql`SELECT ${1}` as unknown as { id: number; valeurs: unknown[] };
+    const requete = client.sql`SELECT ${1}` as unknown as {
+      id: number;
+      valeurs: unknown[];
+    };
     expect(requete.id).toBe(1);
     expect(requete.valeurs).toEqual([1]);
-    expect((await client.sql.begin(async tx => tx)) as unknown).toBe(1);
+    expect((await client.sql.begin(async (tx) => tx)) as unknown).toBe(1);
     expect(crees).toBe(1);
   });
 
@@ -61,11 +83,11 @@ describe("clientParesseux", () => {
     expect(client.recreer()).toBe(false); // rien d'ouvert : rien à fermer
     expect(crees).toBe(0);
 
-    expect((await client.sql.begin(async tx => tx)) as unknown).toBe(1);
+    expect((await client.sql.begin(async (tx) => tx)) as unknown).toBe(1);
     expect(client.recreer()).toBe(true);
     expect(fermetures).toEqual([{ id: 1, timeout: 30 }]);
 
-    expect((await client.sql.begin(async tx => tx)) as unknown).toBe(2);
+    expect((await client.sql.begin(async (tx) => tx)) as unknown).toBe(2);
     expect((client.sql`SELECT 1` as unknown as { id: number }).id).toBe(2);
     expect(crees).toBe(2);
   });
@@ -75,9 +97,12 @@ describe("clientParesseux", () => {
     const client = clientParesseux(() => {
       crees++;
       return Object.assign(() => undefined, {
-        close: crees === 1 ? () => Promise.reject(new Error("pool mort")) : () => {
-          throw new Error("pool mort");
-        },
+        close:
+          crees === 1
+            ? () => Promise.reject(new Error("pool mort"))
+            : () => {
+                throw new Error("pool mort");
+              },
       }) as unknown as SQL;
     });
     void client.sql.close;

@@ -128,11 +128,21 @@ export function loadXCookieHeader(): string | null {
 }
 
 /** Load the shared Aphrody X session as cookies for the x.com CDP page. */
-export function loadAphrodyXCookies(): Array<{ name: string; value: string; domain: string; path: string }> {
+export function loadAphrodyXCookies(): Array<{
+  name: string;
+  value: string;
+  domain: string;
+  path: string;
+}> {
   try {
     const session = XSession.loadOrEnv();
     return [
-      { name: "auth_token", value: session.auth_token, domain: ".x.com", path: "/" },
+      {
+        name: "auth_token",
+        value: session.auth_token,
+        domain: ".x.com",
+        path: "/",
+      },
       { name: "ct0", value: session.ct0, domain: ".x.com", path: "/" },
     ];
   } catch {

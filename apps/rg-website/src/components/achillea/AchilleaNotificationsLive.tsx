@@ -6,7 +6,11 @@ import { createSupabaseBrowserClient } from "@rosegriffon/db/browser";
 
 import { createAchilleaClient, useAchilleaAuth } from "@/lib/achillea";
 
-import { EVENEMENT_NOTIFICATION, lireSignal, topicNotifications } from "./notifications-live";
+import {
+  EVENEMENT_NOTIFICATION,
+  lireSignal,
+  topicNotifications,
+} from "./notifications-live";
 
 /**
  * Notifications Achilléa en direct (expulsion, candidatures, invitations,
@@ -30,14 +34,17 @@ export function AchilleaNotificationsLive() {
     }
     const canal = supabase
       .channel(topicNotifications(userId), { config: { private: false } })
-      .on("broadcast", { event: EVENEMENT_NOTIFICATION }, async message => {
+      .on("broadcast", { event: EVENEMENT_NOTIFICATION }, async (message) => {
         const signal = lireSignal(message.payload);
         if (!signal || deja.has(signal.notificationId)) return;
         deja.add(signal.notificationId);
         const boite = await client.notifications.mine();
         if (!boite.ok) return;
-        const notification = boite.value.data?.find(n => n.id === signal.notificationId);
-        if (notification) toast(notification.title, { description: notification.message });
+        const notification = boite.value.data?.find(
+          (n) => n.id === signal.notificationId,
+        );
+        if (notification)
+          toast(notification.title, { description: notification.message });
       })
       .subscribe();
     return () => {

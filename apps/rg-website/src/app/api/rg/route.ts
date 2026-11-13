@@ -9,7 +9,8 @@ export async function GET() {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || SITE_URL;
 
   return NextResponse.json({
-    documentation: "Cette API est destinée à être utilisée par les sites partenaires de Rose Griffon.",
+    documentation:
+      "Cette API est destinée à être utilisée par les sites partenaires de Rose Griffon.",
     endpoints: {
       articles: `${baseUrl}/api/rg/articles`,
       emotes: `${baseUrl}/api/rg/emotes`,

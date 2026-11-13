@@ -23,7 +23,15 @@ describe("pastilles", () => {
     expect(pastille({ ok: true, latenceMs: 10 })).toBe("🟢");
     expect(pastille({ ok: true, latenceMs: 120 })).toBe("🟡");
     expect(pastille({ ok: true, latenceMs: 900 })).toBe("🟠");
-    expect(ligneControle({ nom: "API", ok: true, valeur: "5 ms", latenceMs: 5, detail: "x" })).toBe("🟢 **API** : `5 ms` — x");
+    expect(
+      ligneControle({
+        nom: "API",
+        ok: true,
+        valeur: "5 ms",
+        latenceMs: 5,
+        detail: "x",
+      }),
+    ).toBe("🟢 **API** : `5 ms` — x");
   });
 });
 
@@ -37,20 +45,31 @@ describe("/website", () => {
 
 describe("/ping", () => {
   test("tout répond : opérationnel, mesures API et ranked", async () => {
-    const installation = installerApi({ "GET /bot/maintenance": { maintenance: false }, "GET /health": { ok: true, ts: 1, activeChallenges: 0 } });
+    const installation = installerApi({
+      "GET /bot/maintenance": { maintenance: false },
+      "GET /health": { ok: true, ts: 1, activeChallenges: 0 },
+    });
     restaurer = installation.restaurer;
     const interaction = fausseInteraction({ client: clientDiscord });
     await new CommandesGenerales().ping(undefined, interaction as never);
-    expect(installation.appels.map(a => a.chemin).toSorted()).toEqual(["/bot/maintenance", "/health"]);
+    expect(installation.appels.map((a) => a.chemin).toSorted()).toEqual([
+      "/bot/maintenance",
+      "/health",
+    ]);
     expect(interaction.texte()).toContain("Tous systèmes opérationnels");
     expect(interaction.texte()).toContain("Guilds");
     // Couleur et pied de l'ancien bot : Colors.Green, « Latence totale : N ms » seul.
     expect(interaction.texte()).toContain('"color":5763719');
-    expect(interaction.texte()).toMatch(/"footer":{"text":"Latence totale : [0-9]+ ms"}/);
+    expect(interaction.texte()).toMatch(
+      /"footer":{"text":"Latence totale : [0-9]+ ms"}/,
+    );
   });
 
   test("API en échec : dégradé, avec le motif", async () => {
-    const installation = installerApi({ "GET /bot/maintenance": [503, { message: "base injoignable" }], "GET /health": { ok: true, ts: 1, activeChallenges: 0 } });
+    const installation = installerApi({
+      "GET /bot/maintenance": [503, { message: "base injoignable" }],
+      "GET /health": { ok: true, ts: 1, activeChallenges: 0 },
+    });
     restaurer = installation.restaurer;
     const interaction = fausseInteraction({ client: clientDiscord });
     await new CommandesGenerales().ping(true, interaction as never);

@@ -10,8 +10,20 @@ import {
   Layers,
   Radio,
 } from "lucide-react";
-import { AdminPageHeader, Card, CardHeader, CardTitle, CardContent, Badge, Button } from "@rosegriffon/ui";
-import { recouperComptes, schemaAchilleaPresent, volumesAchillea } from "@/lib/achillea/admin-db";
+import {
+  AdminPageHeader,
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  Badge,
+  Button,
+} from "@rosegriffon/ui";
+import {
+  recouperComptes,
+  schemaAchilleaPresent,
+  volumesAchillea,
+} from "@/lib/achillea/admin-db";
 
 export const dynamic = "force-dynamic";
 
@@ -23,7 +35,10 @@ export default async function AdminAchilleaPage() {
 
   if (donneesPresentes) {
     try {
-      [comptes, volumes] = await Promise.all([recouperComptes(), volumesAchillea()]);
+      [comptes, volumes] = await Promise.all([
+        recouperComptes(),
+        volumesAchillea(),
+      ]);
     } catch {
       // Lecture impossible : la page reste affichable, sans les compteurs.
     }
@@ -37,7 +52,10 @@ export default async function AdminAchilleaPage() {
         description="Supervision de la ligue esport et recoupement des comptes Rose Griffon et Achilléa."
         actions={
           <Button asChild size="sm">
-            <Link href="/achillea/admins/dashboard" className="inline-flex items-center gap-1.5">
+            <Link
+              href="/achillea/admins/dashboard"
+              className="inline-flex items-center gap-1.5"
+            >
               Ouvrir le Backoffice Achilléa
               <ExternalLink className="size-3.5" />
             </Link>
@@ -84,42 +102,61 @@ export default async function AdminAchilleaPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <Card className="border-border/60 bg-card/60">
               <CardContent className="p-5 space-y-1">
-                <div className="text-lg text-muted-foreground">Profils Rose Griffon</div>
-                <div className="text-2xl font-black font-mono">{comptes.profilsRg.toLocaleString("fr-FR")}</div>
-                <div className="text-lg text-muted-foreground">Base locale RG</div>
+                <div className="text-lg text-muted-foreground">
+                  Profils Rose Griffon
+                </div>
+                <div className="text-2xl font-black font-mono">
+                  {comptes.profilsRg.toLocaleString("fr-FR")}
+                </div>
+                <div className="text-lg text-muted-foreground">
+                  Base locale RG
+                </div>
               </CardContent>
             </Card>
 
             <Card className="border-border/60 bg-card/60">
               <CardContent className="p-5 space-y-1">
-                <div className="text-lg text-muted-foreground">Joueurs Achilléa</div>
+                <div className="text-lg text-muted-foreground">
+                  Joueurs Achilléa
+                </div>
                 <div className="text-2xl font-black font-mono text-warning">
                   {comptes.joueursAchillea.toLocaleString("fr-FR")}
                 </div>
-                <div className="text-lg text-muted-foreground">Base esport Achilléa</div>
+                <div className="text-lg text-muted-foreground">
+                  Base esport Achilléa
+                </div>
               </CardContent>
             </Card>
 
             <Card className="border-border/60 bg-card/60">
               <CardContent className="p-5 space-y-1">
-                <div className="text-lg text-muted-foreground">Comptes Communs</div>
+                <div className="text-lg text-muted-foreground">
+                  Comptes Communs
+                </div>
                 <div className="text-2xl font-black font-mono text-success">
                   {comptes.communs.toLocaleString("fr-FR")}
                 </div>
                 <div className="text-lg text-muted-foreground">
                   Discord ID apparié (
-                  {comptes.profilsRg > 0 ? Math.round((comptes.communs / comptes.profilsRg) * 100) : 0}% de RG)
+                  {comptes.profilsRg > 0
+                    ? Math.round((comptes.communs / comptes.profilsRg) * 100)
+                    : 0}
+                  % de RG)
                 </div>
               </CardContent>
             </Card>
 
             <Card className="border-border/60 bg-card/60">
               <CardContent className="p-5 space-y-1">
-                <div className="text-lg text-muted-foreground">Joueurs Achilléa Seuls</div>
+                <div className="text-lg text-muted-foreground">
+                  Joueurs Achilléa Seuls
+                </div>
                 <div className="text-2xl font-black font-mono text-primary">
                   {comptes.achilleaSeuls.toLocaleString("fr-FR")}
                 </div>
-                <div className="text-lg text-muted-foreground">Cibles d'onboarding RG</div>
+                <div className="text-lg text-muted-foreground">
+                  Cibles d'onboarding RG
+                </div>
               </CardContent>
             </Card>
           </div>
@@ -135,49 +172,77 @@ export default async function AdminAchilleaPage() {
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
             <Card className="border-border/60 bg-card/60">
               <CardContent className="p-4 space-y-1">
-                <div className="text-lg text-muted-foreground">Clans enregistrés</div>
-                <div className="text-xl font-bold font-mono">{volumes.clans}</div>
-                <div className="text-lg text-muted-foreground">Équipes de compétition</div>
+                <div className="text-lg text-muted-foreground">
+                  Clans enregistrés
+                </div>
+                <div className="text-xl font-bold font-mono">
+                  {volumes.clans}
+                </div>
+                <div className="text-lg text-muted-foreground">
+                  Équipes de compétition
+                </div>
               </CardContent>
             </Card>
 
             <Card className="border-border/60 bg-card/60">
               <CardContent className="p-4 space-y-1">
-                <div className="text-lg text-muted-foreground">Tournois disputés</div>
-                <div className="text-xl font-bold font-mono">{volumes.tournois}</div>
-                <div className="text-lg text-muted-foreground">Coupes et championnats</div>
+                <div className="text-lg text-muted-foreground">
+                  Tournois disputés
+                </div>
+                <div className="text-xl font-bold font-mono">
+                  {volumes.tournois}
+                </div>
+                <div className="text-lg text-muted-foreground">
+                  Coupes et championnats
+                </div>
               </CardContent>
             </Card>
 
             <Card className="border-border/60 bg-card/60">
               <CardContent className="p-4 space-y-1">
-                <div className="text-lg text-muted-foreground">Licences actives</div>
-                <div className="text-xl font-bold font-mono text-success">{volumes.licencesActives}</div>
-                <div className="text-lg text-muted-foreground">Joueurs officiels certifiés</div>
+                <div className="text-lg text-muted-foreground">
+                  Licences actives
+                </div>
+                <div className="text-xl font-bold font-mono text-success">
+                  {volumes.licencesActives}
+                </div>
+                <div className="text-lg text-muted-foreground">
+                  Joueurs officiels certifiés
+                </div>
               </CardContent>
             </Card>
 
             <Card className="border-border/60 bg-card/60">
               <CardContent className="p-4 space-y-1">
-                <div className="text-lg text-muted-foreground">Sanctions actives</div>
+                <div className="text-lg text-muted-foreground">
+                  Sanctions actives
+                </div>
                 <div
                   className={`text-xl font-bold font-mono ${
-                    volumes.sanctionsOuvertes > 0 ? "text-destructive" : "text-muted-foreground"
+                    volumes.sanctionsOuvertes > 0
+                      ? "text-destructive"
+                      : "text-muted-foreground"
                   }`}
                 >
                   {volumes.sanctionsOuvertes}
                 </div>
-                <div className="text-lg text-muted-foreground">Mesures de discipline</div>
+                <div className="text-lg text-muted-foreground">
+                  Mesures de discipline
+                </div>
               </CardContent>
             </Card>
 
             <Card className="border-border/60 bg-card/60">
               <CardContent className="p-4 space-y-1">
-                <div className="text-lg text-muted-foreground">Matchs classés</div>
+                <div className="text-lg text-muted-foreground">
+                  Matchs classés
+                </div>
                 <div className="text-xl font-bold font-mono text-warning">
                   {volumes.matchsClasses.toLocaleString("fr-FR")}
                 </div>
-                <div className="text-lg text-muted-foreground">Rencontres ELO / AP</div>
+                <div className="text-lg text-muted-foreground">
+                  Rencontres ELO / AP
+                </div>
               </CardContent>
             </Card>
           </div>
@@ -201,9 +266,19 @@ export default async function AdminAchilleaPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="p-5 pt-2 text-lg text-muted-foreground space-y-3">
-              <p>Supervision des saisons, télémétrie bot, serveurs surveillés et état opérationnel.</p>
-              <Button asChild variant="outline" size="sm" className="w-full text-lg">
-                <Link href="/achillea/admins/dashboard">Accéder au dashboard</Link>
+              <p>
+                Supervision des saisons, télémétrie bot, serveurs surveillés et
+                état opérationnel.
+              </p>
+              <Button
+                asChild
+                variant="outline"
+                size="sm"
+                className="w-full text-lg"
+              >
+                <Link href="/achillea/admins/dashboard">
+                  Accéder au dashboard
+                </Link>
               </Button>
             </CardContent>
           </Card>
@@ -219,9 +294,19 @@ export default async function AdminAchilleaPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="p-5 pt-2 text-lg text-muted-foreground space-y-3">
-              <p>Tranchage des contestations de scores, annulation de matchs et réajustement des AP.</p>
-              <Button asChild variant="outline" size="sm" className="w-full text-lg">
-                <Link href="/achillea/admins/ranked-disputes">Gérer les litiges</Link>
+              <p>
+                Tranchage des contestations de scores, annulation de matchs et
+                réajustement des AP.
+              </p>
+              <Button
+                asChild
+                variant="outline"
+                size="sm"
+                className="w-full text-lg"
+              >
+                <Link href="/achillea/admins/ranked-disputes">
+                  Gérer les litiges
+                </Link>
               </Button>
             </CardContent>
           </Card>
@@ -237,9 +322,19 @@ export default async function AdminAchilleaPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="p-5 pt-2 text-lg text-muted-foreground space-y-3">
-              <p>Application d'avertissements, exclusions temporaires et bannissements du circuit.</p>
-              <Button asChild variant="outline" size="sm" className="w-full text-lg">
-                <Link href="/achillea/admins/sanctions">Voir les sanctions</Link>
+              <p>
+                Application d'avertissements, exclusions temporaires et
+                bannissements du circuit.
+              </p>
+              <Button
+                asChild
+                variant="outline"
+                size="sm"
+                className="w-full text-lg"
+              >
+                <Link href="/achillea/admins/sanctions">
+                  Voir les sanctions
+                </Link>
               </Button>
             </CardContent>
           </Card>
@@ -255,9 +350,19 @@ export default async function AdminAchilleaPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="p-5 pt-2 text-lg text-muted-foreground space-y-3">
-              <p>Examen et approbation des structures candidates pour l'organisation de tournois.</p>
-              <Button asChild variant="outline" size="sm" className="w-full text-lg">
-                <Link href="/achillea/organizations/validate">Valider les orgs</Link>
+              <p>
+                Examen et approbation des structures candidates pour
+                l'organisation de tournois.
+              </p>
+              <Button
+                asChild
+                variant="outline"
+                size="sm"
+                className="w-full text-lg"
+              >
+                <Link href="/achillea/organizations/validate">
+                  Valider les orgs
+                </Link>
               </Button>
             </CardContent>
           </Card>
@@ -273,8 +378,16 @@ export default async function AdminAchilleaPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="p-5 pt-2 text-lg text-muted-foreground space-y-3">
-              <p>Supervision des casters, gestion des disponibilités et plannings de stream.</p>
-              <Button asChild variant="outline" size="sm" className="w-full text-lg">
+              <p>
+                Supervision des casters, gestion des disponibilités et plannings
+                de stream.
+              </p>
+              <Button
+                asChild
+                variant="outline"
+                size="sm"
+                className="w-full text-lg"
+              >
                 <Link href="/achillea/casts">Gestion des casts</Link>
               </Button>
             </CardContent>
@@ -291,8 +404,16 @@ export default async function AdminAchilleaPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="p-5 pt-2 text-lg text-muted-foreground space-y-3">
-              <p>Calendrier des journées, classements et résultats de la ligue par points.</p>
-              <Button asChild variant="outline" size="sm" className="w-full text-lg">
+              <p>
+                Calendrier des journées, classements et résultats de la ligue
+                par points.
+              </p>
+              <Button
+                asChild
+                variant="outline"
+                size="sm"
+                className="w-full text-lg"
+              >
                 <Link href="/achillea/leagues/astral">Consulter la ligue</Link>
               </Button>
             </CardContent>

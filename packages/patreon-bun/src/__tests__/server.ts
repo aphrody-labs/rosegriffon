@@ -8,20 +8,20 @@ import { resetMockFetch } from "./client";
 const server = setupServer(...[...apiHandlers]);
 
 server.events.on("request:start", ({ request }) => {
-	console.log("Outgoing:", request.method, request.url);
+    console.log("Outgoing:", request.method, request.url);
 });
 
 beforeAll(() => {
-	server.listen({
-		onUnhandledRequest: "error",
-	});
+    server.listen({
+        onUnhandledRequest: "error",
+    });
 });
 
 afterAll(() => {
-	server.close();
+    server.close();
 });
 
 afterEach(() => {
-	server.resetHandlers();
-	resetMockFetch();
+    server.resetHandlers();
+    resetMockFetch();
 });

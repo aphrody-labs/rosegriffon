@@ -46,20 +46,27 @@ const compile = Bun.spawn(
     "--format",
     "esm",
     ...(values.target ? [`--target=${values.target}`] : []),
-    ...(values["compile-executable-path"] ? [`--compile-executable-path=${values["compile-executable-path"]}`] : []),
+    ...(values["compile-executable-path"]
+      ? [`--compile-executable-path=${values["compile-executable-path"]}`]
+      : []),
     entry,
     "--outfile",
     outFile,
   ],
   { cwd: pkgRoot, stdout: "inherit", stderr: "inherit" },
 );
-if ((await compile.exited) !== 0) throw new Error("Azalee standalone compilation failed");
+if ((await compile.exited) !== 0)
+  throw new Error("Azalee standalone compilation failed");
 
 // Bun appends `.exe` to Windows executables.
-const windows = values.target ? values.target.includes("windows") : process.platform === "win32";
+const windows = values.target
+  ? values.target.includes("windows")
+  : process.platform === "win32";
 const builtFile = windows ? `${outFile}.exe` : outFile;
 const size = Bun.file(builtFile).size;
-console.log(`built=${builtFile} size=${(size / 1024 / 1024).toFixed(1)}Mo ms=${Date.now() - started}`);
+console.log(
+  `built=${builtFile} size=${(size / 1024 / 1024).toFixed(1)}Mo ms=${Date.now() - started}`,
+);
 
 if (values.install) {
   const target = path.join(process.env.HOME || homedir(), ".local/bin/azalee");

@@ -29,7 +29,9 @@ export class Ui {
   private gl!: WebGLRenderingContext;
   private fbProgram!: WebGLProgram;
   private fbCoordsAttrib!: number;
-  private useWebGpu = "gpu" in navigator && "transferControlToOffscreen" in HTMLCanvasElement.prototype;
+  private useWebGpu =
+    "gpu" in navigator &&
+    "transferControlToOffscreen" in HTMLCanvasElement.prototype;
 
   private worker: Worker | undefined;
   private rendererWorker: Worker | undefined;
@@ -42,11 +44,15 @@ export class Ui {
   private playing: boolean;
 
   constructor(touch: boolean) {
-    this.canvasContainer = document.getElementById("canvas-container") as HTMLDivElement;
+    this.canvasContainer = document.getElementById(
+      "canvas-container",
+    ) as HTMLDivElement;
     this.canvas = document.getElementById("canvas") as HTMLCanvasElement;
 
     this.input = new Input(touch, this.pause.bind(this));
-    this.audio = new (window.AudioContext || (window as any).webkitAudioContext)();
+    this.audio = new (
+      window.AudioContext || (window as any).webkitAudioContext
+    )();
     this.audioTime = 0;
 
     const startAudioContext = () => {
@@ -68,13 +74,19 @@ export class Ui {
       }
     });
 
-    this.exportSaveButton = document.getElementById("export-save") as HTMLButtonElement;
+    this.exportSaveButton = document.getElementById(
+      "export-save",
+    ) as HTMLButtonElement;
     this.playButton = document.getElementById("play") as HTMLButtonElement;
     this.stopButton = document.getElementById("stop") as HTMLButtonElement;
     this.resetButton = document.getElementById("reset") as HTMLButtonElement;
 
-    this.limitFramerateCheckbox = document.getElementById("toggle-framerate-limit") as HTMLInputElement;
-    this.touchControlsCheckbox = document.getElementById("toggle-touch-controls") as HTMLInputElement;
+    this.limitFramerateCheckbox = document.getElementById(
+      "toggle-framerate-limit",
+    ) as HTMLInputElement;
+    this.touchControlsCheckbox = document.getElementById(
+      "toggle-touch-controls",
+    ) as HTMLInputElement;
 
     this.files = new Files(
       (id, filename, buffer) => {
@@ -106,7 +118,10 @@ export class Ui {
       },
     );
 
-    this.exportSaveButton.addEventListener("click", this.requestSaveExport.bind(this));
+    this.exportSaveButton.addEventListener(
+      "click",
+      this.requestSaveExport.bind(this),
+    );
     this.playButton.addEventListener("click", this.play.bind(this));
     this.stopButton.addEventListener("click", this.requestStop.bind(this));
     this.resetButton.addEventListener("click", this.reset.bind(this));
@@ -147,20 +162,34 @@ export class Ui {
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 256, 384, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array(256 * 384 * 4));
+    gl.texImage2D(
+      gl.TEXTURE_2D,
+      0,
+      gl.RGBA,
+      256,
+      384,
+      0,
+      gl.RGBA,
+      gl.UNSIGNED_BYTE,
+      new Uint8Array(256 * 384 * 4),
+    );
 
     const vertShader = gl.createShader(gl.VERTEX_SHADER)!;
     gl.shaderSource(vertShader, vertShaderSource);
     gl.compileShader(vertShader);
     if (!gl.getShaderParameter(vertShader, gl.COMPILE_STATUS)) {
-      throw new Error(`WebGL vertex shader compilation failed: ${gl.getShaderInfoLog(vertShader)}`);
+      throw new Error(
+        `WebGL vertex shader compilation failed: ${gl.getShaderInfoLog(vertShader)}`,
+      );
     }
 
     const fragShader = gl.createShader(gl.FRAGMENT_SHADER)!;
     gl.shaderSource(fragShader, fragShaderSource);
     gl.compileShader(fragShader);
     if (!gl.getShaderParameter(fragShader, gl.COMPILE_STATUS)) {
-      throw new Error(`WebGL fragment shader compilation failed: ${gl.getShaderInfoLog(fragShader)}`);
+      throw new Error(
+        `WebGL fragment shader compilation failed: ${gl.getShaderInfoLog(fragShader)}`,
+      );
     }
 
     const fbProgram = gl.createProgram()!;
@@ -168,7 +197,9 @@ export class Ui {
     gl.attachShader(fbProgram, fragShader);
     gl.linkProgram(fbProgram);
     if (!gl.getProgramParameter(fbProgram, gl.LINK_STATUS)) {
-      throw new Error(`WebGL program linking failed: ${gl.getProgramInfoLog(fbProgram)}`);
+      throw new Error(
+        `WebGL program linking failed: ${gl.getProgramInfoLog(fbProgram)}`,
+      );
     }
     this.fbProgram = fbProgram;
 
@@ -176,7 +207,11 @@ export class Ui {
 
     const fbBuffer = gl.createBuffer()!;
     gl.bindBuffer(gl.ARRAY_BUFFER, fbBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
+    gl.bufferData(
+      gl.ARRAY_BUFFER,
+      new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]),
+      gl.STATIC_DRAW,
+    );
   }
 
   private replaceCanvas() {
@@ -211,15 +246,23 @@ export class Ui {
 
     const romFilenameExtStart = this.nextRomFilename!.lastIndexOf(".");
     this.gameTitle =
-      romFilenameExtStart === -1 ? this.nextRomFilename! : this.nextRomFilename!.slice(0, romFilenameExtStart);
+      romFilenameExtStart === -1
+        ? this.nextRomFilename!
+        : this.nextRomFilename!.slice(0, romFilenameExtStart);
     this.saveFilename = `${this.gameTitle}.sav`;
 
-    const gameCode = new Uint32Array(this.nextRomBuffer!.buffer, 0, this.nextRomBuffer!.length >> 2)[0xc >> 2]!;
+    const gameCode = new Uint32Array(
+      this.nextRomBuffer!.buffer,
+      0,
+      this.nextRomBuffer!.length >> 2,
+    )[0xc >> 2]!;
     let saveType: SaveType | undefined;
     const dbEntry = dbLookup(this.files.gameDb!, gameCode);
     if (dbEntry) {
       if (this.nextRomBuffer!.length !== dbEntry["rom-size"]) {
-        console.warn(`Unexpected ROM size: expected ${dbEntry["rom-size"]} B, got ${this.nextRomBuffer!.length} B`);
+        console.warn(
+          `Unexpected ROM size: expected ${dbEntry["rom-size"]} B, got ${this.nextRomBuffer!.length} B`,
+        );
       }
       saveType = saveTypes[dbEntry["save-type"]];
     }
@@ -268,7 +311,11 @@ export class Ui {
       }
 
       case EmuToUi.MessageType.ExportSave: {
-        this.files.storeSaveToStorage(this.saveFilename!, message.buffer.slice().buffer, this.gameTitle!);
+        this.files.storeSaveToStorage(
+          this.saveFilename!,
+          message.buffer.slice().buffer,
+          this.gameTitle!,
+        );
         if (message.triggerDownload) {
           const file = new Blob([message.buffer as BlobPart], {
             type: "application/octet-stream;charset=utf-8",
@@ -303,16 +350,22 @@ export class Ui {
       case EmuToUi.MessageType.PlayAudioChunk: {
         const sysClockFreq = 1 << 25;
         const origFrameRate = sysClockFreq / (6.0 * 355.0 * 263.0);
-        const inputSampleRate = ((sysClockFreq / 1024.0) * 60.0) / origFrameRate;
+        const inputSampleRate =
+          ((sysClockFreq / 1024.0) * 60.0) / origFrameRate;
 
-        const currentTime = this.audio.currentTime + (this.audio.baseLatency || 1 / 60);
+        const currentTime =
+          this.audio.currentTime + (this.audio.baseLatency || 1 / 60);
         if (this.audioTime > currentTime + message.l.length / inputSampleRate) {
           break;
         }
         if (this.audioTime < currentTime) {
           this.audioTime = currentTime;
         }
-        const buffer = this.audio.createBuffer(2, message.l.length, inputSampleRate);
+        const buffer = this.audio.createBuffer(
+          2,
+          message.l.length,
+          inputSampleRate,
+        );
         if (buffer.copyToChannel) {
           buffer.copyToChannel(message.l as Float32Array<ArrayBuffer>, 0);
           buffer.copyToChannel(message.r as Float32Array<ArrayBuffer>, 1);
@@ -345,7 +398,11 @@ export class Ui {
     this.rendererWorker = undefined;
     if (this.useWebGpu) this.replaceCanvas();
 
-    this.files.storeSaveToStorage(this.saveFilename!, message.buffer.slice().buffer, this.gameTitle!);
+    this.files.storeSaveToStorage(
+      this.saveFilename!,
+      message.buffer.slice().buffer,
+      this.gameTitle!,
+    );
 
     this.saveFilename = undefined;
     this.gameTitle = undefined;
@@ -437,7 +494,9 @@ export class Ui {
       const containerWidth = this.canvasContainer.clientWidth;
       const containerHeight = this.canvasContainer.clientHeight;
       const fbAspectRatio = 256 / 384;
-      let width = Math.floor(Math.min(containerHeight * fbAspectRatio, containerWidth));
+      let width = Math.floor(
+        Math.min(containerHeight * fbAspectRatio, containerWidth),
+      );
       let height = Math.floor(width / fbAspectRatio);
       this.canvas.style.width = `${width}px`;
       this.canvas.style.height = `${height}px`;
@@ -451,7 +510,14 @@ export class Ui {
         this.gl.clearColor(0, 0, 0, 1.0);
         this.gl.clear(this.gl.COLOR_BUFFER_BIT);
         this.gl.useProgram(this.fbProgram);
-        this.gl.vertexAttribPointer(this.fbCoordsAttrib, 2, this.gl.FLOAT, false, 8, 0);
+        this.gl.vertexAttribPointer(
+          this.fbCoordsAttrib,
+          2,
+          this.gl.FLOAT,
+          false,
+          8,
+          0,
+        );
         this.gl.enableVertexAttribArray(this.fbCoordsAttrib);
         this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4);
       }
@@ -459,7 +525,12 @@ export class Ui {
 
     const canvasRect = this.canvas.getBoundingClientRect();
     const changes = this.input.update(
-      Rect.fromParts(canvasRect.bottom, canvasRect.left, canvasRect.width, canvasRect.height * 0.5),
+      Rect.fromParts(
+        canvasRect.bottom,
+        canvasRect.left,
+        canvasRect.width,
+        canvasRect.height * 0.5,
+      ),
     );
     if (this.worker && changes) {
       this.sendMessage({
@@ -494,7 +565,10 @@ export class Ui {
   }
 }
 
-export const ui = typeof document !== "undefined" ? new Ui(isMobileBrowser()) : (null as unknown as Ui);
+export const ui =
+  typeof document !== "undefined"
+    ? new Ui(isMobileBrowser())
+    : (null as unknown as Ui);
 if (typeof document !== "undefined") {
   installConsoleSwitcher(() => ui?.suspend());
 }

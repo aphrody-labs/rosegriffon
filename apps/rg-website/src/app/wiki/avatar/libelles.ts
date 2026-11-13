@@ -100,7 +100,12 @@ export const H = {
 } as const;
 
 /** Les quatre éléments, dans l'ordre du script de statistiques. */
-export const ELEMENTS = ["1AD56B6C", "5D4CADCF", "6300365D", "0B6C830B"] as const;
+export const ELEMENTS = [
+  "1AD56B6C",
+  "5D4CADCF",
+  "6300365D",
+  "0B6C830B",
+] as const;
 
 /** Les six types de build, dans l'ordre du script, avec leur description. */
 export const BUILDS = [
@@ -144,7 +149,13 @@ export const PERSONNALITES_VOIX = [
 export const TYPES_VOIX = ["752A7D5B", "EC232CE1"] as const;
 
 /** Les cinq styles d'habits (`chara_edit_parts_menu_fashion`). */
-export const STYLES_HABITS = ["32E2996F", "7F751E8A", "17FEF7EC", "9E6BC849", "CF3A12C8"] as const;
+export const STYLES_HABITS = [
+  "32E2996F",
+  "7F751E8A",
+  "17FEF7EC",
+  "9E6BC849",
+  "CF3A12C8",
+] as const;
 
 /**
  * Les huit morphologies, dans l'ordre de `nie_data::chara_edit::BODY_TYPES`.
@@ -172,15 +183,19 @@ export type Libelle = { libelle: string; gaiji: string[] };
  * Un même hachage peut apparaître dans plusieurs panneaux avec le même texte ; le premier gagne.
  * Un hachage absent rend `undefined` — l'appelant n'affiche alors rien, plutôt qu'un identifiant.
  */
-export function resolveur(catalogue: Catalogue): (hash: string) => Libelle | undefined {
+export function resolveur(
+  catalogue: Catalogue,
+): (hash: string) => Libelle | undefined {
   const table = new Map<string, Libelle>();
   for (const panneau of catalogue.panneaux ?? []) {
     for (const l of panneau.libelles) {
-      if (!table.has(l.hash)) table.set(l.hash, { libelle: l.libelle, gaiji: l.gaiji ?? [] });
+      if (!table.has(l.hash))
+        table.set(l.hash, { libelle: l.libelle, gaiji: l.gaiji ?? [] });
     }
   }
   for (const r of catalogue.rubriques ?? []) {
-    if (!table.has(r.hash)) table.set(r.hash, { libelle: r.libelle, gaiji: [] });
+    if (!table.has(r.hash))
+      table.set(r.hash, { libelle: r.libelle, gaiji: [] });
   }
   return (hash: string) => table.get(hash);
 }

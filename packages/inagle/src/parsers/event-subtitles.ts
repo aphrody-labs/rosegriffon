@@ -84,7 +84,17 @@ const TEXT_ROOT = join(DATA_ROOT, "common/text");
 const WASHA_DIR = join(TEXT_ROOT, "event");
 
 /** Langues de sous-titres réelles (9). */
-const SUBTITLE_LANGS = ["de", "en", "es", "fr", "it", "ja", "pt", "zh_hans", "zh_hant"] as const;
+const SUBTITLE_LANGS = [
+  "de",
+  "en",
+  "es",
+  "fr",
+  "it",
+  "ja",
+  "pt",
+  "zh_hans",
+  "zh_hant",
+] as const;
 /** Langues de dialogue par-event réelles (texte présent uniquement ici). */
 const TEXT_LANGS = ["ja", "en", "fr"] as const;
 type TextLang = (typeof TEXT_LANGS)[number];
@@ -109,7 +119,7 @@ function safeReadJson(path: string): any | null {
 /** Liste les `.cfg.bin.json` d'un dossier (exclut les `.cfg.bin` jumeaux). */
 function listJsonCfg(dir: string): string[] {
   if (!existsSync(dir)) return [];
-  return readdirSync(dir).filter(f => f.endsWith(".cfg.bin.json"));
+  return readdirSync(dir).filter((f) => f.endsWith(".cfg.bin.json"));
 }
 
 /** Convertit "Subtitle_ev09_05000.cfg.bin.json" → "ev09_05000". */
@@ -144,13 +154,19 @@ function parseSubtitleFile(path: string): ParsedSubtitleRow[] | null {
   const data = safeReadJson(path);
   if (!data?.entries?.length) return null;
   const beg = data.entries.find(
-    (e: any) => typeof e?.name === "string" && e.name.startsWith("EV_SUBTITLE_DATA_LIST_BEG_"),
+    (e: any) =>
+      typeof e?.name === "string" &&
+      e.name.startsWith("EV_SUBTITLE_DATA_LIST_BEG_"),
   );
   if (!beg?.children) return null;
 
   const rows: ParsedSubtitleRow[] = [];
   for (const child of beg.children) {
-    if (typeof child?.name !== "string" || !child.name.startsWith("EV_SUBTITLE_DATA_")) continue;
+    if (
+      typeof child?.name !== "string" ||
+      !child.name.startsWith("EV_SUBTITLE_DATA_")
+    )
+      continue;
     const v = child.variables;
     if (!Array.isArray(v) || v.length < 5) continue;
     rows.push({
@@ -165,17 +181,24 @@ function parseSubtitleFile(path: string): ParsedSubtitleRow[] | null {
 }
 
 /** Charge la table de texte localisé d'un event : Map<hash:number, rawText:string>. */
-function loadTextMap(eventId: string, lang: TextLang): Map<number, string> | null {
+function loadTextMap(
+  eventId: string,
+  lang: TextLang,
+): Map<number, string> | null {
   const path = join(TEXT_ROOT, lang, "event", `${eventId}.cfg.bin.json`);
   if (!existsSync(path)) return null;
   const data = safeReadJson(path);
   if (!data?.entries?.length) return null;
-  const beg = data.entries.find((e: any) => typeof e?.name === "string" && e.name.startsWith("TEXT_INFO_BEGIN_"));
+  const beg = data.entries.find(
+    (e: any) =>
+      typeof e?.name === "string" && e.name.startsWith("TEXT_INFO_BEGIN_"),
+  );
   if (!beg?.children) return null;
 
   const map = new Map<number, string>();
   for (const child of beg.children) {
-    if (typeof child?.name !== "string" || !child.name.startsWith("TEXT_INFO_")) continue;
+    if (typeof child?.name !== "string" || !child.name.startsWith("TEXT_INFO_"))
+      continue;
     const v = child.variables;
     if (!Array.isArray(v) || v.length < 3) continue;
     const hash = Number.parseInt(v[0].value, 10);
@@ -197,12 +220,19 @@ function loadWashaMap(eventId: string): Map<number, WashaEntry> | null {
   if (!existsSync(path)) return null;
   const data = safeReadJson(path);
   if (!data?.entries?.length) return null;
-  const beg = data.entries.find((e: any) => typeof e?.name === "string" && e.name.startsWith("TEXT_WASHA_MAP_BEGIN_"));
+  const beg = data.entries.find(
+    (e: any) =>
+      typeof e?.name === "string" && e.name.startsWith("TEXT_WASHA_MAP_BEGIN_"),
+  );
   if (!beg?.children) return null;
 
   const map = new Map<number, WashaEntry>();
   for (const child of beg.children) {
-    if (typeof child?.name !== "string" || !child.name.startsWith("TEXT_WASHA_MAP_")) continue;
+    if (
+      typeof child?.name !== "string" ||
+      !child.name.startsWith("TEXT_WASHA_MAP_")
+    )
+      continue;
     const v = child.variables;
     if (!Array.isArray(v) || v.length < 16) continue;
     const hash = Number.parseInt(v[0].value, 10);
@@ -239,7 +269,17 @@ function indexSubtitleFiles(): Map<string, string[]> {
 
 /** Choisit la langue source canonique pour le timing (préfère ja > fr > en > autres présentes). */
 function pickCanonicalLang(langs: string[]): string {
-  for (const pref of ["ja", "fr", "en", "de", "es", "it", "pt", "zh_hans", "zh_hant"]) {
+  for (const pref of [
+    "ja",
+    "fr",
+    "en",
+    "de",
+    "es",
+    "it",
+    "pt",
+    "zh_hans",
+    "zh_hant",
+  ]) {
     if (langs.includes(pref)) return pref;
   }
   return langs[0];
@@ -263,18 +303,24 @@ export function parseAllEventSubtitles(): EventSubtitleLine[] {
   for (const [eventId, langs] of subtitleIndex.entries()) {
     // Timing canonique : la langue préférée présente (ja>fr>en>…).
     const canonLang = pickCanonicalLang(langs);
-    const canonPath = join(SUBTITLE_ROOT, canonLang, `Subtitle_${eventId}.cfg.bin.json`);
+    const canonPath = join(
+      SUBTITLE_ROOT,
+      canonLang,
+      `Subtitle_${eventId}.cfg.bin.json`,
+    );
     let rows = parseSubtitleFile(canonPath);
     if (!rows || rows.length === 0) continue;
 
     // Si la langue canonique a des sentinelles -1 (timing non authored), on
     // bascule sur une langue dont le 1er timing est réel, sans inventer.
-    const hasReal = rows.some(r => r.t1 >= 0 || r.t2 >= 0);
+    const hasReal = rows.some((r) => r.t1 >= 0 || r.t2 >= 0);
     if (!hasReal) {
       for (const lang of langs) {
         if (lang === canonLang) continue;
-        const alt = parseSubtitleFile(join(SUBTITLE_ROOT, lang, `Subtitle_${eventId}.cfg.bin.json`));
-        if (alt && alt.some(r => r.t1 >= 0 || r.t2 >= 0)) {
+        const alt = parseSubtitleFile(
+          join(SUBTITLE_ROOT, lang, `Subtitle_${eventId}.cfg.bin.json`),
+        );
+        if (alt && alt.some((r) => r.t1 >= 0 || r.t2 >= 0)) {
           rows = alt;
           break;
         }
@@ -284,8 +330,11 @@ export function parseAllEventSubtitles(): EventSubtitleLine[] {
     // Langues dont le fichier porte un timing valide (≠ -1) pour cet event.
     const langsWithTiming: string[] = [];
     for (const lang of langs) {
-      const lr = parseSubtitleFile(join(SUBTITLE_ROOT, lang, `Subtitle_${eventId}.cfg.bin.json`));
-      if (lr && lr.some(r => r.t1 >= 0 || r.t2 >= 0)) langsWithTiming.push(lang);
+      const lr = parseSubtitleFile(
+        join(SUBTITLE_ROOT, lang, `Subtitle_${eventId}.cfg.bin.json`),
+      );
+      if (lr && lr.some((r) => r.t1 >= 0 || r.t2 >= 0))
+        langsWithTiming.push(lang);
     }
 
     const textMaps: Partial<Record<TextLang, Map<number, string> | null>> = {};
@@ -316,7 +365,13 @@ export function parseAllEventSubtitles(): EventSubtitleLine[] {
   }
 
   // Tri stable (event puis ordre) pour un upsert déterministe.
-  out.sort((a, b) => (a.event_id < b.event_id ? -1 : a.event_id > b.event_id ? 1 : a.line_index - b.line_index));
+  out.sort((a, b) =>
+    a.event_id < b.event_id
+      ? -1
+      : a.event_id > b.event_id
+        ? 1
+        : a.line_index - b.line_index,
+  );
   return out;
 }
 
@@ -347,14 +402,17 @@ export function parseAllEventAggregates(): EventAggregate[] {
       if (map) {
         dialogueLangs.push(lang);
         // line_count = master ja en priorité, sinon le max disponible.
-        if (lang === "ja" || map.size > lineCount) lineCount = Math.max(lineCount, map.size);
+        if (lang === "ja" || map.size > lineCount)
+          lineCount = Math.max(lineCount, map.size);
       }
     }
 
     let subtitleRows = 0;
     if (subLangs.length > 0) {
       const canon = pickCanonicalLang(subLangs);
-      const rows = parseSubtitleFile(join(SUBTITLE_ROOT, canon, `Subtitle_${eventId}.cfg.bin.json`));
+      const rows = parseSubtitleFile(
+        join(SUBTITLE_ROOT, canon, `Subtitle_${eventId}.cfg.bin.json`),
+      );
       subtitleRows = rows?.length ?? 0;
     }
 
@@ -370,6 +428,8 @@ export function parseAllEventAggregates(): EventAggregate[] {
     });
   }
 
-  out.sort((a, b) => (a.event_id < b.event_id ? -1 : a.event_id > b.event_id ? 1 : 0));
+  out.sort((a, b) =>
+    a.event_id < b.event_id ? -1 : a.event_id > b.event_id ? 1 : 0,
+  );
   return out;
 }

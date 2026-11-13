@@ -17,11 +17,11 @@ propre `public/` pour les publier.
 
 Les assets se répartissent volontairement en trois classes :
 
-| Classe | Source | URL publique | Responsable |
-| --- | --- | --- | --- |
-| Communs / marque | `packages/assets/public/` | `https://cdn.rosegriffon.fr/static/rg/public/<fichier>` | tâche cron `cdn` |
+| Classe                | Source                             | URL publique                                                                        | Responsable                |
+| --------------------- | ---------------------------------- | ----------------------------------------------------------------------------------- | -------------------------- |
+| Communs / marque      | `packages/assets/public/`          | `https://cdn.rosegriffon.fr/static/rg/public/<fichier>`                             | tâche cron `cdn`           |
 | Données du jeu Azalée | extraction CPK et services `niers` | `https://cdn.rosegriffon.fr/static/azalee/...`, `/dx11`, `/model-*`, `/audio`, etc. | pipeline de données du jeu |
-| Fichiers utilisateurs | buckets Storage | URL Storage signée ou publique selon le bucket | service Storage |
+| Fichiers utilisateurs | buckets Storage                    | URL Storage signée ou publique selon le bucket                                      | service Storage            |
 
 Les deux dernières classes ne doivent jamais être déplacées dans le paquet
 d'assets : elles ont une provenance, un volume, des droits d'accès et un cycle
@@ -37,7 +37,9 @@ import { cdnOrigin, gameAssetUrl, sharedAssetUrl } from "@rosegriffon/assets";
 
 const cdn = cdnOrigin(process.env.NEXT_PUBLIC_CDN_ORIGIN);
 const logo = sharedAssetUrl("RG_Logo_V2.5.webp");
-const classSprite = gameAssetUrl("menu/200_icon/06_icon_class/icon_class_s.webp");
+const classSprite = gameAssetUrl(
+  "menu/200_icon/06_icon_class/icon_class_s.webp",
+);
 ```
 
 `cdnOrigin()` accepte une origine HTTP(S) sans chemin ; elle tombe sur
@@ -53,12 +55,12 @@ purge le cache Cloudflare qu'en cas de changement.
 
 Les variables utiles sont :
 
-| Variable | Défaut | Usage |
-| --- | --- | --- |
-| `RG_ASSETS_SOURCE_DIR` | chemin du package `assets` relatif à la tâche | source locale, utile en CI ou conteneur |
-| `CDN_STATIC_ROOT` | `/var/www/cdn/static` | racine de publication locale |
-| `CDN_PUBLIC_BASE` | `https://cdn.rosegriffon.fr` | origine annoncée par l'API CDN |
-| `NEXT_PUBLIC_CDN_ORIGIN` | origine CDN par défaut | override explicite du client Website |
+| Variable                 | Défaut                                        | Usage                                   |
+| ------------------------ | --------------------------------------------- | --------------------------------------- |
+| `RG_ASSETS_SOURCE_DIR`   | chemin du package `assets` relatif à la tâche | source locale, utile en CI ou conteneur |
+| `CDN_STATIC_ROOT`        | `/var/www/cdn/static`                         | racine de publication locale            |
+| `CDN_PUBLIC_BASE`        | `https://cdn.rosegriffon.fr`                  | origine annoncée par l'API CDN          |
+| `NEXT_PUBLIC_CDN_ORIGIN` | origine CDN par défaut                        | override explicite du client Website    |
 
 Avant de déployer ce changement sur le VPS, publier ensemble `infra/nginx/cdn.rosegriffon.conf`
 et `infra/systemd/rg-cron.service`, lancer `sudo nginx -t`, puis recharger nginx

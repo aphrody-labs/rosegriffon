@@ -21,9 +21,13 @@ function loadModelViewer(): Promise<void> {
   if (window.customElements?.get("model-viewer")) return Promise.resolve();
   if (modelViewerLoading) return modelViewerLoading;
 
-  const existing = document.querySelector<HTMLScriptElement>(`script[src="${MODEL_VIEWER_SRC}"]`);
+  const existing = document.querySelector<HTMLScriptElement>(
+    `script[src="${MODEL_VIEWER_SRC}"]`,
+  );
   if (existing) {
-    modelViewerLoading = window.customElements.whenDefined("model-viewer").then(() => {});
+    modelViewerLoading = window.customElements
+      .whenDefined("model-viewer")
+      .then(() => {});
     return modelViewerLoading;
   }
 
@@ -32,7 +36,9 @@ function loadModelViewer(): Promise<void> {
     script.src = MODEL_VIEWER_SRC;
     script.async = true;
     script.addEventListener("load", () => {
-      window.customElements.whenDefined("model-viewer").then(() => resolve(), reject);
+      window.customElements
+        .whenDefined("model-viewer")
+        .then(() => resolve(), reject);
     });
     script.addEventListener("error", () => {
       modelViewerLoading = null;
@@ -50,7 +56,10 @@ function loadModelViewer(): Promise<void> {
  * dizaines de modèles ouvrirait des dizaines de contextes WebGL (limite navigateur ~16).
  * En attente/hors-champ : fond stade neutre + spinner au chargement (aucune fausse icône).
  */
-export default function InlineModelViewer({ glbUrl, name }: InlineModelViewerProps) {
+export default function InlineModelViewer({
+  glbUrl,
+  name,
+}: InlineModelViewerProps) {
   const hostRef = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
   const [ready, setReady] = useResetState(false, visible);
@@ -61,7 +70,7 @@ export default function InlineModelViewer({ glbUrl, name }: InlineModelViewerPro
     const host = hostRef.current;
     if (!host) return;
     const io = new IntersectionObserver(
-      entries => {
+      (entries) => {
         for (const e of entries) setVisible(e.isIntersecting);
       },
       { rootMargin: "200px" },
@@ -125,7 +134,9 @@ export default function InlineModelViewer({ glbUrl, name }: InlineModelViewerPro
       )}
       {errored && (
         <div className="absolute inset-0 flex items-center justify-center p-3 text-center">
-          <span className="text-xs text-on-surface-variant">Modèle indisponible</span>
+          <span className="text-xs text-on-surface-variant">
+            Modèle indisponible
+          </span>
         </div>
       )}
     </div>

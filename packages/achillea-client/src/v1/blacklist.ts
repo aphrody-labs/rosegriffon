@@ -3,7 +3,11 @@
  */
 import { z } from "zod";
 
-import { AchilleaResource, encodePathSegment, type AchilleaClientResult } from "./http";
+import {
+  AchilleaResource,
+  encodePathSegment,
+  type AchilleaClientResult,
+} from "./http";
 
 export const blacklistEntrySchema = z.object({
   userId: z.string(),
@@ -21,7 +25,10 @@ export const blacklistStatusSchema = z.object({
 export type BlacklistStatus = z.infer<typeof blacklistStatusSchema>;
 
 const blacklistListSchema = z.object({ data: z.array(blacklistEntrySchema) });
-const blacklistRemovalSchema = z.object({ success: z.boolean(), userId: z.string() });
+const blacklistRemovalSchema = z.object({
+  success: z.boolean(),
+  userId: z.string(),
+});
 
 /** 4 routes. */
 export class BlacklistResource extends AchilleaResource {
@@ -32,16 +39,31 @@ export class BlacklistResource extends AchilleaResource {
 
   /** `GET /blacklist/:userId` — statut d'un joueur (`entry: null` s'il n'y figure pas). */
   get(userId: string): Promise<AchilleaClientResult<BlacklistStatus>> {
-    return this.http.get(`/blacklist/${encodePathSegment(userId)}`, blacklistStatusSchema);
+    return this.http.get(
+      `/blacklist/${encodePathSegment(userId)}`,
+      blacklistStatusSchema,
+    );
   }
 
   /** `POST /blacklist/:userId` — inscrit un joueur avec un motif (Administrateur). */
-  add(userId: string, reason: string): Promise<AchilleaClientResult<BlacklistEntry>> {
-    return this.http.post(`/blacklist/${encodePathSegment(userId)}`, blacklistEntrySchema, { reason });
+  add(
+    userId: string,
+    reason: string,
+  ): Promise<AchilleaClientResult<BlacklistEntry>> {
+    return this.http.post(
+      `/blacklist/${encodePathSegment(userId)}`,
+      blacklistEntrySchema,
+      { reason },
+    );
   }
 
   /** `DELETE /blacklist/:userId` — retire un joueur de la liste noire (Administrateur). */
-  remove(userId: string): Promise<AchilleaClientResult<{ success: boolean; userId: string }>> {
-    return this.http.delete(`/blacklist/${encodePathSegment(userId)}`, blacklistRemovalSchema);
+  remove(
+    userId: string,
+  ): Promise<AchilleaClientResult<{ success: boolean; userId: string }>> {
+    return this.http.delete(
+      `/blacklist/${encodePathSegment(userId)}`,
+      blacklistRemovalSchema,
+    );
   }
 }

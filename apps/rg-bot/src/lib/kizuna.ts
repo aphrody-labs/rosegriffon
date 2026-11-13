@@ -66,7 +66,9 @@ const LIBELLES_MOTIF: Readonly<Record<Motif, string>> = Object.freeze({
 });
 
 export function estMotif(valeur: unknown): valeur is Motif {
-  return typeof valeur === "string" && (MOTIFS as readonly string[]).includes(valeur);
+  return (
+    typeof valeur === "string" && (MOTIFS as readonly string[]).includes(valeur)
+  );
 }
 
 /** Libellé lisible d'un motif ; le motif brut si un jour la base en porte un autre. */
@@ -83,7 +85,10 @@ export function libelleUnite(montant: number): string {
 
 /** `1 250 jetons Kizuna` — la forme complète, groupée à la française. */
 export function formaterJetons(montant: number | null | undefined): string {
-  const valeur = typeof montant === "number" && Number.isFinite(montant) ? Math.trunc(montant) : 0;
+  const valeur =
+    typeof montant === "number" && Number.isFinite(montant)
+      ? Math.trunc(montant)
+      : 0;
   return `${entierLisible(valeur)} ${libelleUnite(valeur)}`;
 }
 
@@ -113,7 +118,10 @@ export const QUOTIDIEN = Object.freeze({
  */
 export function recompenseQuotidienne(serie: number): number {
   const jours = Number.isFinite(serie) ? Math.max(1, Math.floor(serie)) : 1;
-  const prime = Math.min(QUOTIDIEN.primeMaximale, (jours - 1) * QUOTIDIEN.parJour);
+  const prime = Math.min(
+    QUOTIDIEN.primeMaximale,
+    (jours - 1) * QUOTIDIEN.parJour,
+  );
   return QUOTIDIEN.base + prime;
 }
 
@@ -164,8 +172,12 @@ export function etatQuotidien(
   maintenant: Date = new Date(),
 ): EtatQuotidien {
   const aujourdhui = jourCivil(maintenant);
-  const demain = new Date(Date.parse(`${aujourdhui}T00:00:00.000Z`) + 86_400_000);
-  const serie = Number.isFinite(serieActuelle) ? Math.max(0, Math.floor(serieActuelle)) : 0;
+  const demain = new Date(
+    Date.parse(`${aujourdhui}T00:00:00.000Z`) + 86_400_000,
+  );
+  const serie = Number.isFinite(serieActuelle)
+    ? Math.max(0, Math.floor(serieActuelle))
+    : 0;
 
   const precedent =
     dernierJour instanceof Date
@@ -230,7 +242,8 @@ export interface DemandeDon {
   destinataireEstBot?: boolean;
 }
 
-export type ResultatDon = { ok: true; montant: number } | { ok: false; erreur: string };
+export type ResultatDon =
+  { ok: true; montant: number } | { ok: false; erreur: string };
 
 /**
  * Valide un don avant qu'il ne touche la base.
@@ -242,7 +255,8 @@ export type ResultatDon = { ok: true; montant: number } | { ok: false; erreur: s
 export function validerDon(demande: DemandeDon): ResultatDon {
   if (demande.expediteurId === demande.destinataireId) {
     return {
-      erreur: "On ne se fait pas de cadeau à soi-même. Choisis quelqu'un d'autre.",
+      erreur:
+        "On ne se fait pas de cadeau à soi-même. Choisis quelqu'un d'autre.",
       ok: false,
     };
   }
@@ -260,7 +274,10 @@ export function validerDon(demande: DemandeDon): ResultatDon {
         ? Number(demande.montant.replaceAll(/[\s_]/g, ""))
         : Number.NaN;
   if (!Number.isFinite(brut) || Math.floor(brut) !== brut) {
-    return { erreur: "Le montant doit être un nombre entier de jetons.", ok: false };
+    return {
+      erreur: "Le montant doit être un nombre entier de jetons.",
+      ok: false,
+    };
   }
   const montant = Math.trunc(brut);
 
@@ -274,7 +291,9 @@ export function validerDon(demande: DemandeDon): ResultatDon {
     };
   }
 
-  const solde = Number.isFinite(demande.solde) ? Math.max(0, Math.trunc(demande.solde)) : 0;
+  const solde = Number.isFinite(demande.solde)
+    ? Math.max(0, Math.trunc(demande.solde))
+    : 0;
   if (montant > solde) {
     return {
       erreur: `Tu n'as que ${formaterJetons(solde)} : il t'en manque ${entierLisible(montant - solde)}.`,
@@ -282,12 +301,16 @@ export function validerDon(demande: DemandeDon): ResultatDon {
     };
   }
 
-  const dejaDonne = Number.isFinite(demande.dejaDonne) ? Math.max(0, Math.trunc(demande.dejaDonne as number)) : 0;
+  const dejaDonne = Number.isFinite(demande.dejaDonne)
+    ? Math.max(0, Math.trunc(demande.dejaDonne as number))
+    : 0;
   if (dejaDonne + montant > DON.plafondJournalier) {
     const reste = Math.max(0, DON.plafondJournalier - dejaDonne);
     return {
       erreur: `Plafond journalier atteint : ${formaterJetons(DON.plafondJournalier)} par jour et par membre. ${
-        reste > 0 ? `Il te reste ${formaterJetons(reste)} à donner aujourd'hui.` : "Réessaie demain."
+        reste > 0
+          ? `Il te reste ${formaterJetons(reste)} à donner aujourd'hui.`
+          : "Réessaie demain."
       }`,
       ok: false,
     };
@@ -298,14 +321,18 @@ export function validerDon(demande: DemandeDon): ResultatDon {
 
 // ─── Dépenses ───────────────────────────────────────────────────────────────
 
-export type ResultatDepense = { ok: true; soldeApres: number } | { ok: false; erreur: string; manque: number };
+export type ResultatDepense =
+  | { ok: true; soldeApres: number }
+  | { ok: false; erreur: string; manque: number };
 
 /**
  * Peut-on payer ce prix ? Le message dit COMBIEN il manque : « solde
  * insuffisant » oblige à faire la soustraction soi-même.
  */
 export function verifierDepense(solde: number, prix: number): ResultatDepense {
-  const disponible = Number.isFinite(solde) ? Math.max(0, Math.trunc(solde)) : 0;
+  const disponible = Number.isFinite(solde)
+    ? Math.max(0, Math.trunc(solde))
+    : 0;
   const cout = Number.isFinite(prix) ? Math.max(0, Math.trunc(prix)) : 0;
   if (cout > disponible) {
     return {

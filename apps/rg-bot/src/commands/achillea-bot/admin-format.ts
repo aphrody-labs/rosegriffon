@@ -5,7 +5,10 @@ import type { AdminGuildRow } from "@rosegriffon/achillea-client";
 import type { Paginated } from "@rosegriffon/achillea-types/domain/common";
 import type { OrganizationDTO } from "@rosegriffon/achillea-types/domain/organization";
 import type { PlayerNote } from "@rosegriffon/achillea-types/domain/player-note";
-import type { RankedAdminDispute, RankedAdminSeason } from "@rosegriffon/achillea-types/domain/ranked";
+import type {
+  RankedAdminDispute,
+  RankedAdminSeason,
+} from "@rosegriffon/achillea-types/domain/ranked";
 import type { Sanction } from "@rosegriffon/achillea-types/domain/sanction";
 
 /** Rôles Achilléa (`UserRole`). */
@@ -20,12 +23,17 @@ export const LIBELLES_ROLE: Readonly<Record<number, string>> = Object.freeze({
 export function dateIso(saisie: string): string | null {
   const brut = saisie.trim();
   if (!/^\d{4}-\d{2}-\d{2}([T ][\d:.]+Z?)?$/u.test(brut)) return null;
-  const date = new Date(brut.length === 10 ? `${brut}T00:00:00.000Z` : brut.replace(" ", "T"));
+  const date = new Date(
+    brut.length === 10 ? `${brut}T00:00:00.000Z` : brut.replace(" ", "T"),
+  );
   return Number.isNaN(date.getTime()) ? null : date.toISOString();
 }
 
 /** Horodatage Discord relatif (`<t:…:R>`) ou `—`. */
-export function quand(iso: string | Date | null | undefined, style = "R"): string {
+export function quand(
+  iso: string | Date | null | undefined,
+  style = "R",
+): string {
   if (!iso) return "—";
   const ms = (iso instanceof Date ? iso : new Date(iso)).getTime();
   return Number.isNaN(ms) ? "—" : `<t:${Math.floor(ms / 1000)}:${style}>`;
@@ -36,7 +44,12 @@ export function ligneGuilde(g: AdminGuildRow): string {
 }
 
 export function ligneSaison(s: RankedAdminSeason): string {
-  const etat = s.state === "Active" ? "🟢 active" : s.state === "Upcoming" ? "🕓 à venir" : "⚪ close";
+  const etat =
+    s.state === "Active"
+      ? "🟢 active"
+      : s.state === "Upcoming"
+        ? "🕓 à venir"
+        : "⚪ close";
   return `**${s.name}** · ${etat} · ${quand(s.startsAt, "d")} → ${quand(s.endsAt, "d")} · ${s.playerCount} joueurs\n\`${s.id}\``;
 }
 
@@ -47,7 +60,11 @@ export function ligneLitige(d: RankedAdminDispute): string {
 }
 
 export function ligneSanction(s: Sanction): string {
-  const etat = s.revokedAt ? "révoquée" : s.expiresAt && new Date(s.expiresAt).getTime() < Date.now() ? "expirée" : "active";
+  const etat = s.revokedAt
+    ? "révoquée"
+    : s.expiresAt && new Date(s.expiresAt).getTime() < Date.now()
+      ? "expirée"
+      : "active";
   return `\`${s.id}\` · **${s.type}** · <@${s.userId}> · ${etat} · ${quand(s.createdAt)}${s.reason ? `\n> ${s.reason.slice(0, 150)}` : ""}`;
 }
 
@@ -57,7 +74,12 @@ export function ligneNote(n: PlayerNote): string {
 }
 
 export function ligneOrganisation(o: OrganizationDTO): string {
-  const proprietaire = typeof o.owner === "string" ? `<@${o.owner}>` : o.owner ? `<@${o.owner.id}>` : "—";
+  const proprietaire =
+    typeof o.owner === "string"
+      ? `<@${o.owner}>`
+      : o.owner
+        ? `<@${o.owner.id}>`
+        : "—";
   return `\`${o.id ?? "?"}\` · **${o.name}** · ${proprietaire}`;
 }
 
@@ -68,7 +90,11 @@ export function totalPage<T>(page: Paginated<T>): number {
 }
 
 /** Joint des lignes sans dépasser la limite d'une description d'embed. */
-export function listeBornee(lignes: readonly string[], vide: string, limite = 3_900): string {
+export function listeBornee(
+  lignes: readonly string[],
+  vide: string,
+  limite = 3_900,
+): string {
   if (lignes.length === 0) return vide;
   let texte = "";
   let affichees = 0;
@@ -78,5 +104,7 @@ export function listeBornee(lignes: readonly string[], vide: string, limite = 3_
     texte = suivant;
     affichees += 1;
   }
-  return affichees < lignes.length ? `${texte}\n\n… et ${lignes.length - affichees} de plus.` : texte;
+  return affichees < lignes.length
+    ? `${texte}\n\n… et ${lignes.length - affichees} de plus.`
+    : texte;
 }

@@ -24,7 +24,11 @@ async function getWebPush() {
   const mod = await import("web-push");
   const webpush = mod.default ?? mod;
   if (VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY) {
-    webpush.setVapidDetails("mailto:azalee@rose-griffon.fr", VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY);
+    webpush.setVapidDetails(
+      "mailto:azalee@rose-griffon.fr",
+      VAPID_PUBLIC_KEY,
+      VAPID_PRIVATE_KEY,
+    );
   }
   return webpush;
 }
@@ -97,7 +101,11 @@ export async function markAllAsRead(): Promise<void> {
 
   const supabase = createPostgresClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  await (supabase as any).from("notifications").update({ read: true }).eq("user_id", session.user.id).eq("read", false);
+  await (supabase as any)
+    .from("notifications")
+    .update({ read: true })
+    .eq("user_id", session.user.id)
+    .eq("read", false);
 }
 
 export async function subscribeToPush(subscription: {
@@ -132,7 +140,11 @@ export async function unsubscribeFromPush(endpoint: string): Promise<void> {
 
   const supabase = createPostgresClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  await (supabase as any).from("push_subscriptions").delete().eq("user_id", session.user.id).eq("endpoint", endpoint);
+  await (supabase as any)
+    .from("push_subscriptions")
+    .delete()
+    .eq("user_id", session.user.id)
+    .eq("endpoint", endpoint);
 }
 
 export async function sendPushToAll(
@@ -146,15 +158,19 @@ export async function sendPushToAll(
   const client = supabase as any;
 
   // Get all push subscriptions
-  const { data: subscriptions } = await client.from("push_subscriptions").select("endpoint, p256dh, auth_key, user_id");
+  const { data: subscriptions } = await client
+    .from("push_subscriptions")
+    .select("endpoint, p256dh, auth_key, user_id");
 
   if (!subscriptions || subscriptions.length === 0) {
     return { failed: 0, sent: 0 };
   }
 
   // Create in-app notifications for all unique users
-  const userIds = [...new Set(subscriptions.map((s: { user_id: string }) => s.user_id))];
-  const notifications = userIds.map(userId => ({
+  const userIds = [
+    ...new Set(subscriptions.map((s: { user_id: string }) => s.user_id)),
+  ];
+  const notifications = userIds.map((userId) => ({
     body,
     data,
     title,
@@ -179,22 +195,27 @@ export async function sendPushToAll(
   }
 
   await Promise.allSettled(
-    subscriptions.map(async (sub: { endpoint: string; p256dh: string; auth_key: string }) => {
-      try {
-        await webpush.sendNotification(
-          {
-            endpoint: sub.endpoint,
-            keys: { auth: sub.auth_key, p256dh: sub.p256dh },
-          },
-          payload,
-        );
-        sent++;
-      } catch {
-        failed++;
-        // Remove invalid subscriptions (410 Gone)
-        await client.from("push_subscriptions").delete().eq("endpoint", sub.endpoint);
-      }
-    }),
+    subscriptions.map(
+      async (sub: { endpoint: string; p256dh: string; auth_key: string }) => {
+        try {
+          await webpush.sendNotification(
+            {
+              endpoint: sub.endpoint,
+              keys: { auth: sub.auth_key, p256dh: sub.p256dh },
+            },
+            payload,
+          );
+          sent++;
+        } catch {
+          failed++;
+          // Remove invalid subscriptions (410 Gone)
+          await client
+            .from("push_subscriptions")
+            .delete()
+            .eq("endpoint", sub.endpoint);
+        }
+      },
+    ),
   );
 
   return { failed, sent };

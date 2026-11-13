@@ -15,7 +15,10 @@ import { ROLE_COLORS, ROLE_LABELS } from "@rosegriffon/azalee/game/formations";
 import type { Formation } from "@rosegriffon/azalee/game/formations";
 import type { TeamMember } from "@rosegriffon/azalee/game/team-types";
 import { getCharacterImageUrl } from "@rosegriffon/azalee/images";
-import { getPositionMatchFactor, recalculateMemberStats } from "@rosegriffon/azalee/game/team-rules";
+import {
+  getPositionMatchFactor,
+  recalculateMemberStats,
+} from "@rosegriffon/azalee/game/team-rules";
 
 const ELEMENT_SPRITE: Record<string, SpriteCommonKey> = {
   Fire: "fire",
@@ -48,7 +51,13 @@ interface PlayerDetailPanelProps {
   formation?: Formation | null;
 }
 
-export function PlayerDetailPanel({ member, onClose, onRemove, level = 99, formation }: PlayerDetailPanelProps) {
+export function PlayerDetailPanel({
+  member,
+  onClose,
+  onRemove,
+  level = 99,
+  formation,
+}: PlayerDetailPanelProps) {
   const [skills, setSkills] = useState<MovesetSkill[]>([]);
   const [loading, setLoading] = useState(true);
   const lastCharaId = useRef<string | null>(null);
@@ -60,7 +69,7 @@ export function PlayerDetailPanel({ member, onClose, onRemove, level = 99, forma
     lastCharaId.current = member.charaId;
     let cancelled = false;
     setLoading(true);
-    getCharacterSkills(member.charaId).then(result => {
+    getCharacterSkills(member.charaId).then((result) => {
       if (!cancelled) {
         setSkills(result);
         setLoading(false);
@@ -75,7 +84,8 @@ export function PlayerDetailPanel({ member, onClose, onRemove, level = 99, forma
   const roleLabel = ROLE_LABELS[member.position] || member.position;
   const elSprite = ELEMENT_SPRITE[member.element];
   const elLabel = ELEMENT_LABELS[member.element] || member.element;
-  const hasStats = member.stats && Object.values(member.stats).some(v => v > 0);
+  const hasStats =
+    member.stats && Object.values(member.stats).some((v) => v > 0);
 
   // Position match checking
   const posInfo = useMemo(() => {
@@ -99,7 +109,11 @@ export function PlayerDetailPanel({ member, onClose, onRemove, level = 99, forma
         <SafeImage
           src={member.imageUrl}
           zukanHash={member.zukanHash}
-          fallbackSrc={member.internalCode ? getCharacterImageUrl(member.internalCode) : undefined}
+          fallbackSrc={
+            member.internalCode
+              ? getCharacterImageUrl(member.internalCode)
+              : undefined
+          }
           alt={member.name}
           fill
           sizes="300px"
@@ -123,7 +137,11 @@ export function PlayerDetailPanel({ member, onClose, onRemove, level = 99, forma
             <SafeImage
               src={member.imageUrl}
               zukanHash={member.zukanHash}
-              fallbackSrc={member.internalCode ? getCharacterImageUrl(member.internalCode) : undefined}
+              fallbackSrc={
+                member.internalCode
+                  ? getCharacterImageUrl(member.internalCode)
+                  : undefined
+              }
               alt={member.name}
               fill
               sizes="64px"
@@ -132,7 +150,9 @@ export function PlayerDetailPanel({ member, onClose, onRemove, level = 99, forma
             />
           </div>
           <div className="flex-1 min-w-0 pb-0.5">
-            <p className="font-bold text-on-surface text-sm truncate">{member.name}</p>
+            <p className="font-bold text-on-surface text-sm truncate">
+              {member.name}
+            </p>
             <div className="flex items-center gap-1.5 mt-0.5 font-bold">
               <span
                 className="text-[9px] font-black px-1.5 py-0.5 rounded text-white"
@@ -143,7 +163,9 @@ export function PlayerDetailPanel({ member, onClose, onRemove, level = 99, forma
               {elSprite && (
                 <span className="inline-flex items-center gap-0.5">
                   <CommonSpriteIcon name={elSprite} scale={0.16} />
-                  <span className="text-[9px] text-on-surface-variant font-medium">{elLabel}</span>
+                  <span className="text-[9px] text-on-surface-variant font-medium">
+                    {elLabel}
+                  </span>
                 </span>
               )}
               <RarityBadge rarity={member.rarity} size="xs" />
@@ -159,8 +181,9 @@ export function PlayerDetailPanel({ member, onClose, onRemove, level = 99, forma
           <div className="p-2.5 rounded-xl border border-red-500/20 bg-red-500/5 text-red-400 text-xs flex items-center gap-2 font-medium">
             <Icon name="error" size={16} />
             <span>
-              Malus de position ({posInfo.status === "adjacent" ? "-15%" : "-35%"} de stats). Placez ce joueur à un
-              poste adapté pour restaurer ses capacités.
+              Malus de position (
+              {posInfo.status === "adjacent" ? "-15%" : "-35%"} de stats).
+              Placez ce joueur à un poste adapté pour restaurer ses capacités.
             </span>
           </div>
         )}
@@ -172,7 +195,9 @@ export function PlayerDetailPanel({ member, onClose, onRemove, level = 99, forma
               <p className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">
                 Stats Recalculées (Niv. {level})
               </p>
-              <span className="text-[10px] font-bold text-on-surface-variant">Total: {statTotal}</span>
+              <span className="text-[10px] font-bold text-on-surface-variant">
+                Total: {statTotal}
+              </span>
             </div>
             <div className="flex items-start gap-3">
               <MiniStatHeptagon stats={finalStats} size={72} />
@@ -180,9 +205,16 @@ export function PlayerDetailPanel({ member, onClose, onRemove, level = 99, forma
                 {Object.entries(finalStats).map(([key, value]) => {
                   if (key === "combatPower") return null;
                   return (
-                    <div key={key} className="flex items-center justify-between">
-                      <span className="text-[9px] text-on-surface-variant truncate">{STAT_LABELS[key] || key}</span>
-                      <span className="text-[10px] font-bold text-on-surface tabular-nums">{value}</span>
+                    <div
+                      key={key}
+                      className="flex items-center justify-between"
+                    >
+                      <span className="text-[9px] text-on-surface-variant truncate">
+                        {STAT_LABELS[key] || key}
+                      </span>
+                      <span className="text-[10px] font-bold text-on-surface tabular-nums">
+                        {value}
+                      </span>
                     </div>
                   );
                 })}
@@ -199,9 +231,15 @@ export function PlayerDetailPanel({ member, onClose, onRemove, level = 99, forma
               <span className="text-xs">Chargement des techniques...</span>
             </div>
           ) : skills.length > 0 ? (
-            <MovesetList skills={skills} maxSlots={skills.length} className="!max-w-none" />
+            <MovesetList
+              skills={skills}
+              maxSlots={skills.length}
+              className="!max-w-none"
+            />
           ) : (
-            <p className="text-xs text-on-surface-variant/50 text-center py-2">Aucune technique trouvée</p>
+            <p className="text-xs text-on-surface-variant/50 text-center py-2">
+              Aucune technique trouvée
+            </p>
           )}
         </div>
 

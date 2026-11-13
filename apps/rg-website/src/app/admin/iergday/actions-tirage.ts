@@ -102,7 +102,10 @@ function messageErreur(err: unknown): string {
 const slugCampagne = z.string().trim().min(1, "Slug de campagne manquant");
 
 /** Un identifiant de tirage : un UUID, jamais autre chose. */
-const identifiantTirage = z.string().trim().uuid("Identifiant de tirage invalide");
+const identifiantTirage = z
+  .string()
+  .trim()
+  .uuid("Identifiant de tirage invalide");
 
 /**
  * Une clé de participant.
@@ -119,7 +122,7 @@ const cleParticipant = z
   .string()
   .trim()
   .refine(
-    v => /^((discord|x):\d{6,25}|instagram:[a-z0-9._]{1,30})$/.test(v),
+    (v) => /^((discord|x):\d{6,25}|instagram:[a-z0-9._]{1,30})$/.test(v),
     "Clé de participant invalide : ce doit être un identifiant, jamais un pseudo",
   );
 
@@ -130,7 +133,10 @@ const cleParticipant = z
  * `…_annule_motive`) : une personne écartée sans motif, c'est une décision
  * cachée dans la donnée, que plus personne ne saura expliquer dans six mois.
  */
-const motifObligatoire = z.string().trim().min(10, "Un motif d'au moins 10 caractères est exigé");
+const motifObligatoire = z
+  .string()
+  .trim()
+  .min(10, "Un motif d'au moins 10 caractères est exigé");
 
 /**
  * Une liste saisie à l'écran : soit un champ par rang (tableau), soit un
@@ -143,7 +149,11 @@ const motifObligatoire = z.string().trim().min(10, "Un motif d'au moins 10 carac
 const lignes = z
   .union([z.string(), z.array(z.string())])
   .default("")
-  .transform(v => (typeof v === "string" ? v.split("\n") : v).map(l => l.trim()).filter(Boolean));
+  .transform((v) =>
+    (typeof v === "string" ? v.split("\n") : v)
+      .map((l) => l.trim())
+      .filter(Boolean),
+  );
 
 const schemaEngagement = z.object({
   slug: slugCampagne,
@@ -151,7 +161,12 @@ const schemaEngagement = z.object({
   nbGagnants: z.coerce.number().int().min(1).max(50),
   lots: lignes,
   graineOrigine: z.enum(["balise", "locale"]),
-  delaiRoundSecondes: z.coerce.number().int().min(60).max(3600).default(DELAI_ROUND_DEFAUT),
+  delaiRoundSecondes: z.coerce
+    .number()
+    .int()
+    .min(60)
+    .max(3600)
+    .default(DELAI_ROUND_DEFAUT),
 });
 
 export type FormEngagement = z.input<typeof schemaEngagement>;
@@ -161,8 +176,11 @@ const schemaAnnonce = z.object({
     .string()
     .trim()
     .optional()
-    .transform(v => (v && v !== "" ? v : null))
-    .refine(v => v === null || /^\d{15,25}$/.test(v), "Identifiant de salon Discord invalide"),
+    .transform((v) => (v && v !== "" ? v : null))
+    .refine(
+      (v) => v === null || /^\d{15,25}$/.test(v),
+      "Identifiant de salon Discord invalide",
+    ),
   aBlanc: z.coerce.boolean(),
   confirmation: z.string().trim(),
 });
@@ -181,8 +199,13 @@ export type OptionsAnnonce = z.input<typeof schemaAnnonce>;
  * pour l'apprendre. Fusionner, écarter ou verrouiller quelqu'un se refuse donc
  * ICI, avec un message qui propose d'annuler l'engagement d'abord.
  */
-async function engagementOuvert(slug: string): Promise<{ numero: number; round: string } | null> {
-  const { rows } = await getPgPool().query<{ numero: number; balise_round: string | number | null }>(
+async function engagementOuvert(
+  slug: string,
+): Promise<{ numero: number; round: string } | null> {
+  const { rows } = await getPgPool().query<{
+    numero: number;
+    balise_round: string | number | null;
+  }>(
     `select numero, balise_round from public.x_campagne_tirages
 		  where campagne_slug = $1 and graine is null and annule_le is null
 		  order by numero desc
@@ -190,7 +213,9 @@ async function engagementOuvert(slug: string): Promise<{ numero: number; round: 
     [slug],
   );
   const ouvert = rows[0];
-  return ouvert ? { numero: Number(ouvert.numero), round: String(ouvert.balise_round ?? 0) } : null;
+  return ouvert
+    ? { numero: Number(ouvert.numero), round: String(ouvert.balise_round ?? 0) }
+    : null;
 }
 
 function refusRosterGele(ouvert: { numero: number; round: string }): Resultat {
@@ -227,7 +252,10 @@ export async function reconstruireParticipants(
 
   const analyse = slugCampagne.safeParse(slug);
   if (!analyse.success) {
-    return { error: analyse.error.issues[0]?.message ?? "Données invalides", success: false };
+    return {
+      error: analyse.error.issues[0]?.message ?? "Données invalides",
+      success: false,
+    };
   }
 
   try {
@@ -252,7 +280,8 @@ export async function reconstruireParticipants(
       message:
         (simulation
           ? `Simulation : ${rapport.participantsAvant} → ${rapport.participantsApres} personne(s), ${rapport.oeuvres} œuvre(s). Rien n'a été écrit.`
-          : `Roster reconstruit : ${rapport.participantsApres} personne(s), ${rapport.oeuvres} œuvre(s).`) + alerte,
+          : `Roster reconstruit : ${rapport.participantsApres} personne(s), ${rapport.oeuvres} œuvre(s).`) +
+        alerte,
       rapport,
       success: true,
     };
@@ -298,11 +327,17 @@ export async function fusionnerParticipant(
     })
     .safeParse({ cle, note, slug, versCle });
   if (!analyse.success) {
-    return { error: analyse.error.issues[0]?.message ?? "Données invalides", success: false };
+    return {
+      error: analyse.error.issues[0]?.message ?? "Données invalides",
+      success: false,
+    };
   }
   const v = analyse.data;
   if (v.versCle === v.cle) {
-    return { error: "Une ligne ne peut pas être fusionnée dans elle-même.", success: false };
+    return {
+      error: "Une ligne ne peut pas être fusionnée dans elle-même.",
+      success: false,
+    };
   }
 
   const client = await getPgPool().connect();
@@ -316,7 +351,10 @@ export async function fusionnerParticipant(
     // croiser. `pg_advisory_xact_lock` est relâché par `commit` COMME par
     // `rollback` — la variante de session fuirait si la connexion repartait au
     // pool en cours d'erreur, et bloquerait tous les tirages suivants.
-    await client.query("select pg_advisory_xact_lock($1::int, hashtext($2)::int)", [1_380_271_689, v.slug]);
+    await client.query(
+      "select pg_advisory_xact_lock($1::int, hashtext($2)::int)",
+      [1_380_271_689, v.slug],
+    );
 
     const { rows: lignesRoster } = await client.query<LigneRosterMinimale>(
       `select cle, pseudo_affichage, sources, identifiants, fusionne_dans, verrouille, notes,
@@ -326,16 +364,20 @@ export async function fusionnerParticipant(
 			  for update`,
       [v.slug, v.versCle ? [v.cle, v.versCle] : [v.cle]],
     );
-    const alias = lignesRoster.find(l => l.cle === v.cle);
+    const alias = lignesRoster.find((l) => l.cle === v.cle);
     if (!alias) {
-      throw new Error(`Aucun participant « ${v.cle} » sur la campagne « ${v.slug} ».`);
+      throw new Error(
+        `Aucun participant « ${v.cle} » sur la campagne « ${v.slug} ».`,
+      );
     }
 
     let message: string;
     if (v.versCle === null) {
       // ── DÉFAIRE ────────────────────────────────────────────────────
       if (!alias.fusionne_dans) {
-        throw new Error(`« ${alias.pseudo_affichage} » n'est pas un alias : il n'y a pas de fusion à défaire.`);
+        throw new Error(
+          `« ${alias.pseudo_affichage} » n'est pas un alias : il n'y a pas de fusion à défaire.`,
+        );
       }
       const cible = alias.fusionne_dans;
       const transferees = oeuvresTransferees(alias.identifiants);
@@ -353,7 +395,15 @@ export async function fusionnerParticipant(
         `update public.x_campagne_participants
 				    set fusionne_dans = null, identifiants = $3::jsonb, notes = $4
 				  where campagne_slug = $1 and cle = $2`,
-        [v.slug, v.cle, identifiants, ajouterNote(alias.notes, `Fusion défaite : ${v.note || "sans commentaire"}`)],
+        [
+          v.slug,
+          v.cle,
+          identifiants,
+          ajouterNote(
+            alias.notes,
+            `Fusion défaite : ${v.note || "sans commentaire"}`,
+          ),
+        ],
       );
       await recalculerCompteurs(client, v.slug, v.cle);
       await recalculerCompteurs(client, v.slug, cible);
@@ -364,9 +414,11 @@ export async function fusionnerParticipant(
             "devait en récupérer, réaffectez-les à la main puis relancez la reconstruction.";
     } else {
       // ── FUSIONNER ──────────────────────────────────────────────────
-      const cible = lignesRoster.find(l => l.cle === v.versCle);
+      const cible = lignesRoster.find((l) => l.cle === v.versCle);
       if (!cible) {
-        throw new Error(`Aucun participant « ${v.versCle} » sur la campagne « ${v.slug} ».`);
+        throw new Error(
+          `Aucun participant « ${v.versCle} » sur la campagne « ${v.slug} ».`,
+        );
       }
       if (cible.fusionne_dans) {
         throw new Error(
@@ -387,7 +439,7 @@ export async function fusionnerParticipant(
 				 returning oeuvre_id`,
         [v.slug, v.cle, v.versCle],
       );
-      const oeuvreIds = deplacees.map(l => l.oeuvre_id);
+      const oeuvreIds = deplacees.map((l) => l.oeuvre_id);
 
       // L'alias garde la mémoire de ce qu'il a cédé — c'est ce qui rend le
       // geste réversible. Ses compteurs tombent à zéro dans la MÊME écriture
@@ -401,7 +453,10 @@ export async function fusionnerParticipant(
           v.slug,
           v.cle,
           v.versCle,
-          { ...objetOuVide(alias.identifiants), oeuvres_transferees: oeuvreIds },
+          {
+            ...objetOuVide(alias.identifiants),
+            oeuvres_transferees: oeuvreIds,
+          },
           ajouterNote(
             alias.notes,
             `Fusionné dans ${v.versCle} (${cible.pseudo_affichage}) : ${v.note || "sans commentaire"}`,
@@ -423,7 +478,9 @@ export async function fusionnerParticipant(
         [
           v.slug,
           v.versCle,
-          [...new Set([...(cible.sources ?? []), ...(alias.sources ?? [])])].toSorted(),
+          [
+            ...new Set([...(cible.sources ?? []), ...(alias.sources ?? [])]),
+          ].toSorted(),
           alias.premiere_le,
           alias.derniere_le,
           absorberIdentifiants(cible.identifiants, alias, v.note),
@@ -492,7 +549,10 @@ export async function basculerEligibilite(
     })
     .safeParse({ cle, eligible, motif, slug });
   if (!analyse.success) {
-    return { error: analyse.error.issues[0]?.message ?? "Données invalides", success: false };
+    return {
+      error: analyse.error.issues[0]?.message ?? "Données invalides",
+      success: false,
+    };
   }
   const v = analyse.data;
 
@@ -511,7 +571,10 @@ export async function basculerEligibilite(
     const ouvert = await engagementOuvert(v.slug);
     if (ouvert) return refusRosterGele(ouvert);
 
-    const { rows } = await getPgPool().query<{ pseudo_affichage: string; motif_ineligible: string | null }>(
+    const { rows } = await getPgPool().query<{
+      pseudo_affichage: string;
+      motif_ineligible: string | null;
+    }>(
       `update public.x_campagne_participants
 			    set eligible = $3, motif_ineligible = case when $3 then null else $4 end
 			  where campagne_slug = $1 and cle = $2
@@ -520,7 +583,10 @@ export async function basculerEligibilite(
     );
     const ligne = rows[0];
     if (!ligne) {
-      return { error: `Aucun participant « ${v.cle} » sur la campagne « ${v.slug} ».`, success: false };
+      return {
+        error: `Aucun participant « ${v.cle} » sur la campagne « ${v.slug} ».`,
+        success: false,
+      };
     }
     await logAdminAction("tirage-eligibilite", "campagne:participant", v.cle, {
       campagne: v.slug,
@@ -548,15 +614,26 @@ export async function basculerEligibilite(
  * qui permet de corriger un pseudo ou une fusion sans qu'une reconstruction
  * lancée trois jours plus tard n'efface l'arbitrage sans laisser de trace.
  */
-export async function verrouillerParticipant(slug: string, cle: string, verrouille: boolean): Promise<Resultat> {
+export async function verrouillerParticipant(
+  slug: string,
+  cle: string,
+  verrouille: boolean,
+): Promise<Resultat> {
   const garde = await exigerAdmin();
   if (!garde.ok) return { error: garde.message, success: false };
 
   const analyse = z
-    .object({ cle: cleParticipant, slug: slugCampagne, verrouille: z.coerce.boolean() })
+    .object({
+      cle: cleParticipant,
+      slug: slugCampagne,
+      verrouille: z.coerce.boolean(),
+    })
     .safeParse({ cle, slug, verrouille });
   if (!analyse.success) {
-    return { error: analyse.error.issues[0]?.message ?? "Données invalides", success: false };
+    return {
+      error: analyse.error.issues[0]?.message ?? "Données invalides",
+      success: false,
+    };
   }
   const v = analyse.data;
 
@@ -569,7 +646,10 @@ export async function verrouillerParticipant(slug: string, cle: string, verrouil
     );
     const ligne = rows[0];
     if (!ligne) {
-      return { error: `Aucun participant « ${v.cle} » sur la campagne « ${v.slug} ».`, success: false };
+      return {
+        error: `Aucun participant « ${v.cle} » sur la campagne « ${v.slug} ».`,
+        success: false,
+      };
     }
     await logAdminAction("tirage-verrou", "campagne:participant", v.cle, {
       campagne: v.slug,
@@ -607,15 +687,23 @@ export async function verrouillerParticipant(slug: string, cle: string, verrouil
  * complet en clair. Publier la seule empreinte ne prouverait rien — personne ne
  * peut recalculer un SHA-256 sans les données qui l'ont produit.
  */
-export async function engagerTirage(
-  donnees: FormEngagement,
-): Promise<Resultat & { tirageId?: string; roundVise?: number; roundPrevuLe?: string; texteEngagement?: string }> {
+export async function engagerTirage(donnees: FormEngagement): Promise<
+  Resultat & {
+    tirageId?: string;
+    roundVise?: number;
+    roundPrevuLe?: string;
+    texteEngagement?: string;
+  }
+> {
   const garde = await exigerAdmin();
   if (!garde.ok) return { error: garde.message, success: false };
 
   const analyse = schemaEngagement.safeParse(donnees);
   if (!analyse.success) {
-    return { error: analyse.error.issues[0]?.message ?? "Données invalides", success: false };
+    return {
+      error: analyse.error.issues[0]?.message ?? "Données invalides",
+      success: false,
+    };
   }
   const v = analyse.data;
 
@@ -634,17 +722,22 @@ export async function engagerTirage(
 
     // Les DEUX empreintes sont journalisées : elles ne révèlent rien (aucune
     // graine n'existe encore) et ce sont elles qu'un tiers opposera au résultat.
-    await logAdminAction("tirage-engagement", "campagne:tirage", engagement.tirageId, {
-      baliseRound: engagement.baliseRound,
-      campagne: v.slug,
-      empreinteEngagement: engagement.empreinteEngagement,
-      empreinteParticipants: engagement.empreinteParticipants,
-      graineOrigine: v.graineOrigine,
-      lots: v.lots.length,
-      nbGagnants: v.nbGagnants,
-      numero: engagement.numero,
-      poidsMode: v.poidsMode,
-    });
+    await logAdminAction(
+      "tirage-engagement",
+      "campagne:tirage",
+      engagement.tirageId,
+      {
+        baliseRound: engagement.baliseRound,
+        campagne: v.slug,
+        empreinteEngagement: engagement.empreinteEngagement,
+        empreinteParticipants: engagement.empreinteParticipants,
+        graineOrigine: v.graineOrigine,
+        lots: v.lots.length,
+        nbGagnants: v.nbGagnants,
+        numero: engagement.numero,
+        poidsMode: v.poidsMode,
+      },
+    );
     revaliderCampagne();
     return {
       message:
@@ -671,7 +764,10 @@ export async function engagerTirage(
  * et signale toute édition. Le noter APRÈS le tirage n'aurait aucun sens — on
  * refuse donc dès que la graine existe.
  */
-export async function marquerEngagementPublie(tirageId: string, messageId: string): Promise<Resultat> {
+export async function marquerEngagementPublie(
+  tirageId: string,
+  messageId: string,
+): Promise<Resultat> {
   const garde = await exigerAdmin();
   if (!garde.ok) return { error: garde.message, success: false };
 
@@ -685,7 +781,10 @@ export async function marquerEngagementPublie(tirageId: string, messageId: strin
     })
     .safeParse({ messageId, tirageId });
   if (!analyse.success) {
-    return { error: analyse.error.issues[0]?.message ?? "Données invalides", success: false };
+    return {
+      error: analyse.error.issues[0]?.message ?? "Données invalides",
+      success: false,
+    };
   }
   const v = analyse.data;
 
@@ -703,11 +802,19 @@ export async function marquerEngagementPublie(tirageId: string, messageId: strin
         success: false,
       };
     }
-    await logAdminAction("tirage-engagement-publie", "campagne:tirage", v.tirageId, {
-      messageId: v.messageId,
-    });
+    await logAdminAction(
+      "tirage-engagement-publie",
+      "campagne:tirage",
+      v.tirageId,
+      {
+        messageId: v.messageId,
+      },
+    );
     revaliderCampagne();
-    return { message: "Message d'engagement enregistré. Le compte à rebours court.", success: true };
+    return {
+      message: "Message d'engagement enregistré. Le compte à rebours court.",
+      success: true,
+    };
   } catch (err) {
     console.error("[admin/iergday] marquerEngagementPublie :", err);
     return { error: messageErreur(err), success: false };
@@ -734,20 +841,27 @@ export async function marquerEngagementPublie(tirageId: string, messageId: strin
  * `graine_origine` est gelée par le trigger d'immuabilité, la base refuserait
  * l'`update`.
  */
-export async function effectuerTirage(
-  tirageId: string,
-): Promise<Resultat & { gagnants?: GagnantResume[]; deja?: boolean; verdict?: VerdictVerification }> {
+export async function effectuerTirage(tirageId: string): Promise<
+  Resultat & {
+    gagnants?: GagnantResume[];
+    deja?: boolean;
+    verdict?: VerdictVerification;
+  }
+> {
   const garde = await exigerAdmin();
   if (!garde.ok) return { error: garde.message, success: false };
 
   const analyse = identifiantTirage.safeParse(tirageId);
   if (!analyse.success) {
-    return { error: analyse.error.issues[0]?.message ?? "Données invalides", success: false };
+    return {
+      error: analyse.error.issues[0]?.message ?? "Données invalides",
+      success: false,
+    };
   }
 
   try {
     const resultat = await executerEtEnregistrer(analyse.data, garde.userId);
-    const gagnants: GagnantResume[] = resultat.gagnants.map(gagnant => ({
+    const gagnants: GagnantResume[] = resultat.gagnants.map((gagnant) => ({
       lot: gagnant.lot,
       oeuvreId: gagnant.oeuvreId,
       pseudoAffichage: gagnant.pseudoAffichage,
@@ -763,12 +877,12 @@ export async function effectuerTirage(
       deja: resultat.deja,
       nbGagnants: gagnants.length,
       numero: resultat.numero,
-      rangs: gagnants.map(g => `${g.rang}·${g.pseudoAffichage}`),
+      rangs: gagnants.map((g) => `${g.rang}·${g.pseudoAffichage}`),
       valide: resultat.verdict.valide,
     });
     revaliderCampagne();
 
-    const nomsGagnants = gagnants.map(g => g.pseudoAffichage).join(", ");
+    const nomsGagnants = gagnants.map((g) => g.pseudoAffichage).join(", ");
     return {
       deja: resultat.deja,
       gagnants,
@@ -799,28 +913,40 @@ export async function effectuerTirage(
  * l'afficher tel quel, jamais un nombre en dur — un tirage valide en rend
  * quinze aujourd'hui, et ce nombre bougera quand un contrôle s'ajoutera.
  */
-export async function verifierTirageAction(tirageId: string): Promise<Resultat & { verdict?: VerdictVerification }> {
+export async function verifierTirageAction(
+  tirageId: string,
+): Promise<Resultat & { verdict?: VerdictVerification }> {
   const garde = await exigerAdmin();
   if (!garde.ok) return { error: garde.message, success: false };
 
   const analyse = identifiantTirage.safeParse(tirageId);
   if (!analyse.success) {
-    return { error: analyse.error.issues[0]?.message ?? "Données invalides", success: false };
+    return {
+      error: analyse.error.issues[0]?.message ?? "Données invalides",
+      success: false,
+    };
   }
 
   try {
     const verdict = await verifierTirageEnregistre(analyse.data);
     if (!verdict) {
-      return { error: "Ce tirage n'a pas encore eu lieu : il n'y a rien à vérifier.", success: false };
+      return {
+        error: "Ce tirage n'a pas encore eu lieu : il n'y a rien à vérifier.",
+        success: false,
+      };
     }
     await logAdminAction("tirage-verifie", "campagne:tirage", analyse.data, {
-      anomalies: verdict.anomalies.map(a => a.code),
+      anomalies: verdict.anomalies.map((a) => a.code),
       controles: verdict.controles,
       valide: verdict.valide,
     });
     return {
-      error: verdict.valide ? undefined : `Vérification EN ÉCHEC : ${verdict.anomalies.map(a => a.code).join(", ")}.`,
-      message: verdict.valide ? `${verdict.controles} contrôles concordants.` : undefined,
+      error: verdict.valide
+        ? undefined
+        : `Vérification EN ÉCHEC : ${verdict.anomalies.map((a) => a.code).join(", ")}.`,
+      message: verdict.valide
+        ? `${verdict.controles} contrôles concordants.`
+        : undefined,
       success: verdict.valide,
       verdict,
     };
@@ -842,19 +968,29 @@ export async function verifierTirageAction(tirageId: string): Promise<Resultat &
  * tirages par seconde, 902 essais pour imposer un trio exact). La base le refuse
  * elle-même ; ce message ne fait que le dire en français avant elle.
  */
-export async function publierTirage(tirageId: string, publie: boolean): Promise<Resultat> {
+export async function publierTirage(
+  tirageId: string,
+  publie: boolean,
+): Promise<Resultat> {
   const garde = await exigerAdmin();
   if (!garde.ok) return { error: garde.message, success: false };
 
-  const analyse = z.object({ publie: z.coerce.boolean(), tirageId: identifiantTirage }).safeParse({ publie, tirageId });
+  const analyse = z
+    .object({ publie: z.coerce.boolean(), tirageId: identifiantTirage })
+    .safeParse({ publie, tirageId });
   if (!analyse.success) {
-    return { error: analyse.error.issues[0]?.message ?? "Données invalides", success: false };
+    return {
+      error: analyse.error.issues[0]?.message ?? "Données invalides",
+      success: false,
+    };
   }
   const v = analyse.data;
 
   try {
     await marquerPublie(v.tirageId, v.publie);
-    await logAdminAction("tirage-publie", "campagne:tirage", v.tirageId, { publie: v.publie });
+    await logAdminAction("tirage-publie", "campagne:tirage", v.tirageId, {
+      publie: v.publie,
+    });
     revaliderCampagne();
     return {
       message: v.publie
@@ -906,7 +1042,10 @@ export async function annoncerTirageDiscord(
   const analyse = schemaAnnonce.safeParse(options);
   if (!analyseId.success || !analyse.success) {
     const souci = analyseId.success ? analyse : analyseId;
-    return { error: souci.error?.issues[0]?.message ?? "Données invalides", success: false };
+    return {
+      error: souci.error?.issues[0]?.message ?? "Données invalides",
+      success: false,
+    };
   }
   const v = analyse.data;
 
@@ -917,7 +1056,10 @@ export async function annoncerTirageDiscord(
     }
     const campagne = await chargerCampagneAdmin(tirage.campagneSlug);
     if (!campagne) {
-      return { error: `Campagne « ${tirage.campagneSlug} » introuvable.`, success: false };
+      return {
+        error: `Campagne « ${tirage.campagneSlug} » introuvable.`,
+        success: false,
+      };
     }
 
     // La confirmation au clavier vient AVANT tout le reste : c'est le seul geste
@@ -929,7 +1071,12 @@ export async function annoncerTirageDiscord(
         success: false,
       };
     }
-    if (!tirage.publie || tirage.annuleLe || tirage.graineOrigine !== "balise" || !tirage.graine) {
+    if (
+      !tirage.publie ||
+      tirage.annuleLe ||
+      tirage.graineOrigine !== "balise" ||
+      !tirage.graine
+    ) {
       return {
         error:
           "Annonce refusée : seul un tirage PUBLIÉ, non annulé et tiré depuis une balise publique peut être " +
@@ -938,7 +1085,11 @@ export async function annoncerTirageDiscord(
       };
     }
     if (tirage.gagnants.length === 0) {
-      return { error: "Ce tirage n'a aucun gagnant enregistré : il n'y a rien à annoncer.", success: false };
+      return {
+        error:
+          "Ce tirage n'a aucun gagnant enregistré : il n'y a rien à annoncer.",
+        success: false,
+      };
     }
 
     const salonTest = process.env.RG_SALON_TEST || SALON_TEST_DEFAUT;
@@ -951,10 +1102,17 @@ export async function annoncerTirageDiscord(
         success: false,
       };
     }
-    const salon = await verifierSalonAnnonce(salonDemande, campagne.salonsDepot, salonTest);
+    const salon = await verifierSalonAnnonce(
+      salonDemande,
+      campagne.salonsDepot,
+      salonTest,
+    );
 
     const bilan = await bilanRoster(campagne.slug);
-    const gagnants = await rassemblerGagnantsAnnonce(campagne.slug, tirage.gagnants);
+    const gagnants = await rassemblerGagnantsAnnonce(
+      campagne.slug,
+      tirage.gagnants,
+    );
     const charge = chargeAnnonceTirage(gagnants, {
       baliseChaine: tirage.balise?.chaine ?? "",
       baliseRound: tirage.balise?.round ?? 0,
@@ -969,10 +1127,15 @@ export async function annoncerTirageDiscord(
     });
 
     if (v.aBlanc) {
-      await logAdminAction("tirage-annonce", "campagne:tirage", analyseId.data, {
-        aBlanc: true,
-        salon: salon.id,
-      });
+      await logAdminAction(
+        "tirage-annonce",
+        "campagne:tirage",
+        analyseId.data,
+        {
+          aBlanc: true,
+          salon: salon.id,
+        },
+      );
       return {
         apercu: JSON.stringify(charge, null, 2),
         message: `Essai à blanc : rien n'a été envoyé. Destination prévue : ${salon.nom ?? salon.id}.`,
@@ -1032,22 +1195,33 @@ export async function annoncerTirageDiscord(
  * abandonné reste donc en base avec son motif, et l'historique de l'écran
  * l'affiche : effacer un tirage, c'est effacer la preuve qu'il a eu lieu.
  */
-export async function annulerTirage(tirageId: string, motif: string): Promise<Resultat> {
+export async function annulerTirage(
+  tirageId: string,
+  motif: string,
+): Promise<Resultat> {
   const garde = await exigerAdmin();
   if (!garde.ok) return { error: garde.message, success: false };
 
-  const analyse = z.object({ motif: motifObligatoire, tirageId: identifiantTirage }).safeParse({ motif, tirageId });
+  const analyse = z
+    .object({ motif: motifObligatoire, tirageId: identifiantTirage })
+    .safeParse({ motif, tirageId });
   if (!analyse.success) {
-    return { error: analyse.error.issues[0]?.message ?? "Données invalides", success: false };
+    return {
+      error: analyse.error.issues[0]?.message ?? "Données invalides",
+      success: false,
+    };
   }
   const v = analyse.data;
 
   try {
     await annuler(v.tirageId, v.motif);
-    await logAdminAction("tirage-annule", "campagne:tirage", v.tirageId, { motif: v.motif });
+    await logAdminAction("tirage-annule", "campagne:tirage", v.tirageId, {
+      motif: v.motif,
+    });
     revaliderCampagne();
     return {
-      message: "Tirage annulé. Il reste en base avec son motif : l'historique ne se vide jamais.",
+      message:
+        "Tirage annulé. Il reste en base avec son motif : l'historique ne se vide jamais.",
       success: true,
     };
   } catch (err) {
@@ -1080,13 +1254,17 @@ function objetOuVide(valeur: unknown): Record<string, unknown> {
 /** Les œuvres qu'une fusion a déplacées, telles que l'alias les a mémorisées. */
 function oeuvresTransferees(identifiants: unknown): string[] {
   const brut = objetOuVide(identifiants).oeuvres_transferees;
-  return Array.isArray(brut) ? brut.filter((v): v is string => typeof v === "string") : [];
+  return Array.isArray(brut)
+    ? brut.filter((v): v is string => typeof v === "string")
+    : [];
 }
 
 /** Empile une note datée sans jamais écraser les précédentes. */
 function ajouterNote(existantes: string | null, ajout: string): string {
   const ligne = `[${new Date().toISOString().slice(0, 10)}] ${ajout}`;
-  return existantes && existantes.trim() !== "" ? `${existantes}\n${ligne}` : ligne;
+  return existantes && existantes.trim() !== ""
+    ? `${existantes}\n${ligne}`
+    : ligne;
 }
 
 /**
@@ -1098,10 +1276,20 @@ function ajouterNote(existantes: string | null, ajout: string): string {
  * recréerait une ligne pour l'identité absorbée — et rendrait un second ticket au
  * même humain, exactement ce que la fusion venait d'empêcher.
  */
-function absorberIdentifiants(cible: unknown, alias: LigneRosterMinimale, note: string): Record<string, unknown> {
+function absorberIdentifiants(
+  cible: unknown,
+  alias: LigneRosterMinimale,
+  note: string,
+): Record<string, unknown> {
   const fusionne = objetOuVide(cible);
   const source = objetOuVide(alias.identifiants);
-  for (const champ of ["x_id", "discord_id", "instagram_pseudo", "x_handle", "discord_handle"]) {
+  for (const champ of [
+    "x_id",
+    "discord_id",
+    "instagram_pseudo",
+    "x_handle",
+    "discord_handle",
+  ]) {
     if (fusionne[champ] === undefined && typeof source[champ] === "string") {
       fusionne[champ] = source[champ];
     }

@@ -30,5 +30,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
   // Le SidebarProvider réel (état contrôlé + persistance) vit dans
   // SidebarWrapper (client-layout.tsx) — un second ici serait un doublon
   // (double listener clavier ⌘B, double cookie, double TooltipProvider).
-  return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
+  return (
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  );
 }

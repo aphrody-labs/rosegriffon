@@ -18,5 +18,9 @@ export function getAchilleaDatabaseUrl(): string {
 }
 
 export function getAchilleaApiUrl(): string {
-  return process.env["NEXT_PUBLIC_ACHILLEA_API_URL"] || process.env["ACHILLEA_API_URL"] || "https://api.rosegriffon.fr";
+  return (
+    process.env["NEXT_PUBLIC_ACHILLEA_API_URL"] ||
+    process.env["ACHILLEA_API_URL"] ||
+    "https://api.rosegriffon.fr"
+  );
 }

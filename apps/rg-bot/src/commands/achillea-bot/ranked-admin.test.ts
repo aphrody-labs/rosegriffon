@@ -1,6 +1,10 @@
 import { afterEach, describe, expect, test } from "bun:test";
 
-import { fausseInteraction, installerApi, type AppelApi } from "../../../test/achillea-kit";
+import {
+  fausseInteraction,
+  installerApi,
+  type AppelApi,
+} from "../../../test/achillea-kit";
 import { CommandeRankedAdmin, origineRanked } from "./ranked-admin";
 
 let restaurer: (() => void) | null = null;
@@ -27,13 +31,21 @@ describe("/ranked-admin", () => {
   test("litiges : liste avec captures absolues", async () => {
     api({
       "GET /admin/lobbies/disputes": [
-        { lobbyId: 7, mode: 2, player1: joueur("1", "Akira"), player2: joueur("2", "Bo"), createdAt: new Date().toISOString() },
+        {
+          lobbyId: 7,
+          mode: 2,
+          player1: joueur("1", "Akira"),
+          player2: joueur("2", "Bo"),
+          createdAt: new Date().toISOString(),
+        },
       ],
     });
     const interaction = fausseInteraction();
     await new CommandeRankedAdmin().litiges(interaction as never);
     expect(interaction.texte()).toContain("Lobby #7");
-    expect(interaction.texte()).toContain(`${origineRanked({})}/storage/disputes/1.png`);
+    expect(interaction.texte()).toContain(
+      `${origineRanked({})}/storage/disputes/1.png`,
+    );
   });
 
   test("litiges : aucun", async () => {
@@ -44,22 +56,46 @@ describe("/ranked-admin", () => {
   });
 
   test("valider : score, forfait et Elo", async () => {
-    const appels = api({ "POST /admin/lobbies/7/validate": { ok: true, eloDelta: { p1: 12, p2: -12 } } });
+    const appels = api({
+      "POST /admin/lobbies/7/validate": {
+        ok: true,
+        eloDelta: { p1: 12, p2: -12 },
+      },
+    });
     const interaction = fausseInteraction();
-    await new CommandeRankedAdmin().valider(7, 3, 1, { id: "999999999999999991", username: "x" } as never, interaction as never);
-    expect(appels[0]?.corps).toEqual({ scoreTeam1: 3, scoreTeam2: 1, forfeitUserId: "999999999999999991" });
+    await new CommandeRankedAdmin().valider(
+      7,
+      3,
+      1,
+      { id: "999999999999999991", username: "x" } as never,
+      interaction as never,
+    );
+    expect(appels[0]?.corps).toEqual({
+      scoreTeam1: 3,
+      scoreTeam2: 1,
+      forfeitUserId: "999999999999999991",
+    });
     expect(interaction.texte()).toContain("+12");
   });
 
   test("valider refusé (403)", async () => {
     api({ "POST /admin/lobbies/7/validate": REFUS });
     const interaction = fausseInteraction();
-    await new CommandeRankedAdmin().valider(7, 3, 1, undefined, interaction as never);
+    await new CommandeRankedAdmin().valider(
+      7,
+      3,
+      1,
+      undefined,
+      interaction as never,
+    );
     expect(interaction.texte()).toContain("Administrator role required");
   });
 
   test("annuler : nominal et conflit", async () => {
-    api({ "POST /admin/lobbies/7/cancel": { ok: true }, "POST /admin/lobbies/8/cancel": [409, { message: "Lobby déjà résolu" }] });
+    api({
+      "POST /admin/lobbies/7/cancel": { ok: true },
+      "POST /admin/lobbies/8/cancel": [409, { message: "Lobby déjà résolu" }],
+    });
     const ok = fausseInteraction();
     await new CommandeRankedAdmin().annuler(7, ok as never);
     expect(ok.texte()).toContain("Match annulé");
@@ -71,7 +107,17 @@ describe("/ranked-admin", () => {
   test("logs : filtre par lobby transmis à l'API", async () => {
     const appels = api({
       "GET /admin/ranked/telemetry": [
-        { id: 1, createdAt: new Date().toISOString(), lobbyId: 7, roomCode: null, mode: 2, userId: "1", displayName: "Akira", type: "score_submitted", detail: {} },
+        {
+          id: 1,
+          createdAt: new Date().toISOString(),
+          lobbyId: 7,
+          roomCode: null,
+          mode: 2,
+          userId: "1",
+          displayName: "Akira",
+          type: "score_submitted",
+          detail: {},
+        },
       ],
     });
     const interaction = fausseInteraction();
@@ -81,7 +127,12 @@ describe("/ranked-admin", () => {
   });
 
   test("logs refusé (403)", async () => {
-    api({ "GET /admin/ranked/telemetry": [403, { message: "Moderator role required" }] });
+    api({
+      "GET /admin/ranked/telemetry": [
+        403,
+        { message: "Moderator role required" },
+      ],
+    });
     const interaction = fausseInteraction();
     await new CommandeRankedAdmin().logs(undefined, interaction as never);
     expect(interaction.texte()).toContain("Moderator role required");

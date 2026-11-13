@@ -23,7 +23,9 @@ import type { TranslateOptions } from "../types";
 export function registerTranslateCommand(program: Command): void {
   program
     .command("translate [text]")
-    .description("Traduit du texte en français en appliquant le glossaire consolidé")
+    .description(
+      "Traduit du texte en français en appliquant le glossaire consolidé",
+    )
     .option("-j, --json", "Format de sortie en JSON brute")
     .action(async (text: string | undefined, options: TranslateOptions) => {
       suppressLogs(!!options.json);
@@ -109,8 +111,10 @@ export function registerTranslateCommand(program: Command): void {
           );
         } else {
           if (merged.length > 0) {
-            console.log(`\n${colors.bold}${colors.blue}Entités trouvées dans la base & le glossaire :${colors.reset}`);
-            const rows = merged.slice(0, 15).map(r => ({
+            console.log(
+              `\n${colors.bold}${colors.blue}Entités trouvées dans la base & le glossaire :${colors.reset}`,
+            );
+            const rows = merged.slice(0, 15).map((r) => ({
               Type: r.typeLabel,
               "Nom FR": r.name_fr || "—",
               "Nom EN": r.name_en || "—",
@@ -120,7 +124,9 @@ export function registerTranslateCommand(program: Command): void {
             console.log(renderAsciiTable(rows));
           }
 
-          console.log(`\n${colors.bold}${colors.green}Traduction brute du texte :${colors.reset}`);
+          console.log(
+            `\n${colors.bold}${colors.green}Traduction brute du texte :${colors.reset}`,
+          );
           console.log(translatedBlock);
         }
         process.exit(0);

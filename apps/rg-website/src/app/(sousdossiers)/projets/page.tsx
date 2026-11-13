@@ -11,7 +11,8 @@ import { absoluteUrl } from "@/lib/site-url";
 
 export const metadata: Metadata = {
   alternates: { canonical: absoluteUrl("/projets") },
-  description: "Découvrez les outils et initiatives créatives de la communauté Rose Griffon.",
+  description:
+    "Découvrez les outils et initiatives créatives de la communauté Rose Griffon.",
   title: "Projets | Rose Griffon",
 };
 
@@ -29,7 +30,9 @@ export default function ProjetsPage() {
         <div className="flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
           <Palette className="size-5" aria-hidden />
         </div>
-        <h1 className="text-2xl font-extrabold tracking-tight text-on-surface min-[840px]:text-3xl">Projets</h1>
+        <h1 className="text-2xl font-extrabold tracking-tight text-on-surface min-[840px]:text-3xl">
+          Projets
+        </h1>
       </header>
 
       {/* Grille — même carte et mêmes données que l'extrait de la page d'accueil */}

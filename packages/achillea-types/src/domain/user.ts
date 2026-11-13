@@ -1,4 +1,7 @@
-import type { ClanMemberDistinction, ClanMemberRole } from "../enums/clanMemberRole";
+import type {
+  ClanMemberDistinction,
+  ClanMemberRole,
+} from "../enums/clanMemberRole";
 import type { MatchMode } from "../enums/eventEnums";
 import type { UserRole } from "../enums/userRole";
 

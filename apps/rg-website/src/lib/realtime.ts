@@ -29,7 +29,9 @@ export interface SubscribeOptions {
   filter?: string;
 }
 
-type RealtimeChannel = ReturnType<ReturnType<typeof createSupabaseBrowserClient>["channel"]>;
+type RealtimeChannel = ReturnType<
+  ReturnType<typeof createSupabaseBrowserClient>["channel"]
+>;
 
 type Listener = (event: RealtimeEvent) => void;
 
@@ -40,7 +42,9 @@ interface SharedChannel {
 
 const channels = new Map<string, SharedChannel>();
 
-function parseFilter(raw: string | undefined): { column: string; value: string } | null {
+function parseFilter(
+  raw: string | undefined,
+): { column: string; value: string } | null {
   if (!raw) return null;
   const match = raw.match(/^([a-z0-9_]+)=eq\.(.*)$/i);
   return match ? { column: match[1], value: match[2] } : null;
@@ -56,7 +60,7 @@ function acquire(topic: string): SharedChannel {
   const listeners = new Set<Listener>();
   const channel = createSupabaseBrowserClient()
     .channel(topic, { config: { private: false } })
-    .on("broadcast", { event: "*" }, message => {
+    .on("broadcast", { event: "*" }, (message) => {
       const event = message.payload as RealtimeEvent;
       for (const listener of listeners) listener(event);
     })
@@ -89,7 +93,7 @@ export function subscribeTable<T = Record<string, unknown>>(
     return () => {};
   }
 
-  const listener: Listener = event => {
+  const listener: Listener = (event) => {
     if (event.table !== options.table || event.schema !== schema) return;
     if (filter) {
       const row = event.new ?? event.old;

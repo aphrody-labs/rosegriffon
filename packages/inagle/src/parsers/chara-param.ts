@@ -159,7 +159,11 @@ export function parseAllCharaParams(): ParsedCharaParam[] {
   const results: ParsedCharaParam[] = [];
 
   function traverse(node: ConfigNode) {
-    if (node.name.startsWith("CHARA_PARAM_INFO_") && !node.name.includes("LIST") && !node.name.includes("BEG")) {
+    if (
+      node.name.startsWith("CHARA_PARAM_INFO_") &&
+      !node.name.includes("LIST") &&
+      !node.name.includes("BEG")
+    ) {
       const parsed = parseParamNode(node);
       if (parsed) {
         results.push(parsed);
@@ -214,7 +218,9 @@ export function buildCharaBaseToParamsMap(): Map<string, ParsedCharaParam[]> {
 /**
  * Position ID to code
  */
-export function positionIdToCode(id: number): "Coach" | "GK" | "FW" | "MF" | "DF" | undefined {
+export function positionIdToCode(
+  id: number,
+): "Coach" | "GK" | "FW" | "MF" | "DF" | undefined {
   switch (id) {
     case 0:
       return "Coach";
@@ -240,7 +246,9 @@ export function positionIdToCode(id: number): "Coach" | "GK" | "FW" | "MF" | "DF
  * - Axel Blaze: raw[2]=3 → Fire ✓
  * - Nathan Swift/Shawn Froste: raw[2]=1 → Wind ✓
  */
-export function elementIdToNames(id: number): { ja: string; en: string; fr: string } | undefined {
+export function elementIdToNames(
+  id: number,
+): { ja: string; en: string; fr: string } | undefined {
   switch (id) {
     case 1:
       return { ja: "風", en: "Wind", fr: "Vent" };

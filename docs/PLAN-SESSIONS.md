@@ -31,13 +31,13 @@ désaccord sur les ports, unités et routes, `aphrody-infra` fait foi.
 
 Scripts versionnés dans `scripts/deploy/vps/` (à copier dans `/home/ubuntu/build/` sur le VPS) :
 
-| Script | Rôle |
-|---|---|
-| `lancer-build.sh` | `git reset --hard origin/main` dans `/home/ubuntu/build/rg/repo`, lève le verrou `.next/lock`, lance `run-build.sh` |
-| `run-build.sh` | charge `/etc/rg/rg.env` ligne par ligne (les valeurs contiennent `&` et des guillemets : `source` ne marche pas) puis `bun run build` |
-| `deploy.sh` | copie `.next/standalone` + `static` + `public` vers `apps/rg/current`, crée `.next/cache` (requis par l'unité), redémarre `rg-website`, supprime l'ancienne release |
+| Script            | Rôle                                                                                                                                                                                                                        |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `lancer-build.sh` | `git reset --hard origin/main` dans `/home/ubuntu/build/rg/repo`, lève le verrou `.next/lock`, lance `run-build.sh`                                                                                                         |
+| `run-build.sh`    | charge `/etc/rg/rg.env` ligne par ligne (les valeurs contiennent `&` et des guillemets : `source` ne marche pas) puis `bun run build`                                                                                       |
+| `deploy.sh`       | copie `.next/standalone` + `static` + `public` vers `apps/rg/current`, crée `.next/cache` (requis par l'unité), redémarre `rg-website`, supprime l'ancienne release                                                         |
 | `rebuild-core.sh` | compile `apps/rg-bot` (`bun run compile:core`), installe `/usr/local/bin/rg-core`, redémarre `rg-core`. Lancer `bun install --frozen-lockfile` avant si une dépendance a changé ; garder l'ancien binaire en `rg-core.prev` |
-| `vnc-up.sh` | bureau virtuel Xvfb `:99` + openbox + `aphrody infra remote serve` (VNC 127.0.0.1:5900, viewer 8795) |
+| `vnc-up.sh`       | bureau virtuel Xvfb `:99` + openbox + `aphrody infra remote serve` (VNC 127.0.0.1:5900, viewer 8795)                                                                                                                        |
 
 Gates avant déploiement : `bun check apps/rg-website packages/rg-ui packages/rg-app-shell packages/rg-cron packages/rg-types`
 et `bun test packages/rg-app-shell`. Un seul build lourd à la fois.
@@ -74,7 +74,7 @@ et `bun test packages/rg-app-shell`. Un seul build lourd à la fois.
   `images` du projet courant (`scripts/achillea/migrer-images-legacy.ts`, rejouable).
 - **Migrations appliquées** : `20261022_achillea_data_valeur_texte.sql`, `20261022_achillea_clans_temps_reel.sql`.
 - **Back-office Next** : les 17 onglets du BO Angular sont portés (`/achillea/admins/dashboard`), visibilité par
-  rôle identique au legacy.  Côté site, ces changements ne sont **pas encore en ligne** : voir chantier 0.
+  rôle identique au legacy. Côté site, ces changements ne sont **pas encore en ligne** : voir chantier 0.
 
 ## Chantiers restants (par priorité)
 
@@ -115,6 +115,7 @@ et `bun test packages/rg-app-shell`. Un seul build lourd à la fois.
 ## Streaming du jeu (Inazuma Eleven: Victory Road)
 
 Constats mesurés :
+
 - Aucune capture du vrai jeu en local. Le jeu (58 Go, appid 2799860) est dans `/home/ubuntu/apps/nie/game` sur le VPS.
 - `aphrody-nie-game --play` (réimplémentation Rust) tourne sous Xvfb mais n'affiche qu'un écran titre générique.
 - `nie.exe` sous Wine 10 : `E-01000100 Failed to connect to Steam`. Sous Proton Experimental : assertion

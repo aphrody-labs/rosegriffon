@@ -5,7 +5,12 @@
  * directory topologies, and format signatures. Grounded in aphrody-nie-formats and IECODE.Core.
  */
 
-import type { VfsCatalog, VfsDirectoryCategory, VfsFormatDescriptor, VfsPackRule } from "./types.js";
+import type {
+  VfsCatalog,
+  VfsDirectoryCategory,
+  VfsFormatDescriptor,
+  VfsPackRule,
+} from "./types.js";
 
 /**
  * All 28 authoritative binary formats recognized by IECODE & NIE.
@@ -16,7 +21,8 @@ export const VFS_FORMATS: VfsFormatDescriptor[] = [
     magicHex: "0x58543447",
     magicAscii: "G4TX",
     extension: ".g4tx",
-    description: "Level-5 Texture Container (main DDS BCn textures + atlas sprite subregions)",
+    description:
+      "Level-5 Texture Container (main DDS BCn textures + atlas sprite subregions)",
     isBigEndian: false,
     category: "texture",
     encryptionSupported: false,
@@ -27,7 +33,8 @@ export const VFS_FORMATS: VfsFormatDescriptor[] = [
     magicHex: "0x444D3447",
     magicAscii: "G4MD",
     extension: ".g4md",
-    description: "Level-5 3D Model Data (meshes, bone indices, vertex buffers, materials)",
+    description:
+      "Level-5 3D Model Data (meshes, bone indices, vertex buffers, materials)",
     isBigEndian: false,
     category: "model",
     encryptionSupported: false,
@@ -49,7 +56,8 @@ export const VFS_FORMATS: VfsFormatDescriptor[] = [
     magicHex: "0x544D3447",
     magicAscii: "G4MT",
     extension: ".g4mt",
-    description: "Level-5 Material Properties (shaders, blend modes, diffuse/specular colors)",
+    description:
+      "Level-5 Material Properties (shaders, blend modes, diffuse/specular colors)",
     isBigEndian: false,
     category: "model",
     encryptionSupported: false,
@@ -60,7 +68,8 @@ export const VFS_FORMATS: VfsFormatDescriptor[] = [
     magicHex: "0x4B533447",
     magicAscii: "G4SK",
     extension: ".g4sk",
-    description: "Level-5 Skeleton & Bone Hierarchy (quaternions, bind poses, transform trees)",
+    description:
+      "Level-5 Skeleton & Bone Hierarchy (quaternions, bind poses, transform trees)",
     isBigEndian: false,
     category: "model",
     encryptionSupported: false,
@@ -71,7 +80,8 @@ export const VFS_FORMATS: VfsFormatDescriptor[] = [
     magicHex: "0x4B503447",
     magicAscii: "G4PK",
     extension: ".g4pk",
-    description: "Level-5 Package Container (multi-resource bundle for characters and stadiums)",
+    description:
+      "Level-5 Package Container (multi-resource bundle for characters and stadiums)",
     isBigEndian: false,
     category: "container",
     encryptionSupported: false,
@@ -82,7 +92,8 @@ export const VFS_FORMATS: VfsFormatDescriptor[] = [
     magicHex: "0x41523447",
     magicAscii: "G4RA",
     extension: ".g4ra",
-    description: "Level-5 Resource Archive (compact asset bundle indexed in nie.exe)",
+    description:
+      "Level-5 Resource Archive (compact asset bundle indexed in nie.exe)",
     isBigEndian: false,
     category: "container",
     encryptionSupported: false,
@@ -93,7 +104,8 @@ export const VFS_FORMATS: VfsFormatDescriptor[] = [
     magicHex: "0x20494741",
     magicAscii: "AGI ",
     extension: ".agi",
-    description: "Level-5 Animation Graphic Interface (timeline tracks, animation nodes)",
+    description:
+      "Level-5 Animation Graphic Interface (timeline tracks, animation nodes)",
     isBigEndian: false,
     category: "model",
     encryptionSupported: false,
@@ -104,7 +116,8 @@ export const VFS_FORMATS: VfsFormatDescriptor[] = [
     magicHex: "0x424A424F",
     magicAscii: "OBJB",
     extension: ".objb",
-    description: "Level-5 Object Binary (scene layout descriptors, actor placements)",
+    description:
+      "Level-5 Object Binary (scene layout descriptors, actor placements)",
     isBigEndian: false,
     category: "config",
     encryptionSupported: false,
@@ -115,7 +128,8 @@ export const VFS_FORMATS: VfsFormatDescriptor[] = [
     magicHex: "0x4C435850",
     magicAscii: "PXCL",
     extension: ".pxcl",
-    description: "Level-5 Pixel Collision & Physics Hull (hitboxes, boundary colliders)",
+    description:
+      "Level-5 Pixel Collision & Physics Hull (hitboxes, boundary colliders)",
     isBigEndian: false,
     category: "system",
     encryptionSupported: false,
@@ -126,7 +140,8 @@ export const VFS_FORMATS: VfsFormatDescriptor[] = [
     magicHex: "0x4E424452",
     magicAscii: "RDBN",
     extension: ".cfg.bin",
-    description: "Level-5 Relational Database Binary (T2B structured binary data sheets)",
+    description:
+      "Level-5 Relational Database Binary (T2B structured binary data sheets)",
     isBigEndian: false,
     category: "config",
     encryptionSupported: true,
@@ -137,7 +152,8 @@ export const VFS_FORMATS: VfsFormatDescriptor[] = [
     magicHex: "0x5346454D",
     magicAscii: "MEVS",
     extension: ".mevbin",
-    description: "Level-5 Motion Event Script (choreographed cutscenes, camera paths, audio cues)",
+    description:
+      "Level-5 Motion Event Script (choreographed cutscenes, camera paths, audio cues)",
     isBigEndian: false,
     category: "script",
     encryptionSupported: false,
@@ -148,7 +164,8 @@ export const VFS_FORMATS: VfsFormatDescriptor[] = [
     magicHex: "0x4D433447",
     magicAscii: "G4CM",
     extension: ".g4cm",
-    description: "Level-5 Camera Track & Spline Path (cinematic parameters, FOV transitions)",
+    description:
+      "Level-5 Camera Track & Spline Path (cinematic parameters, FOV transitions)",
     isBigEndian: false,
     category: "script",
     encryptionSupported: false,
@@ -159,7 +176,8 @@ export const VFS_FORMATS: VfsFormatDescriptor[] = [
     magicHex: "0x204B5043",
     magicAscii: "CPK ",
     extension: ".cpk",
-    description: "CRI Middleware File Package (TOC, ITOC, ETOC, @UTF directory descriptors)",
+    description:
+      "CRI Middleware File Package (TOC, ITOC, ETOC, @UTF directory descriptors)",
     isBigEndian: true,
     category: "container",
     encryptionSupported: true,
@@ -181,7 +199,8 @@ export const VFS_FORMATS: VfsFormatDescriptor[] = [
     magicHex: "0x00465455",
     magicAscii: "@UTF",
     extension: ".utf",
-    description: "CRI Universal Table Format (schema, column flags, string pools, row vectors)",
+    description:
+      "CRI Universal Table Format (schema, column flags, string pools, row vectors)",
     isBigEndian: true,
     category: "container",
     encryptionSupported: true,
@@ -192,7 +211,8 @@ export const VFS_FORMATS: VfsFormatDescriptor[] = [
     magicHex: "0x20534444",
     magicAscii: "DDS ",
     extension: ".dds",
-    description: "DirectDraw Surface (raw BC1/BC2/BC3/BC4/BC5/BC7 compressed texture payload)",
+    description:
+      "DirectDraw Surface (raw BC1/BC2/BC3/BC4/BC5/BC7 compressed texture payload)",
     isBigEndian: false,
     category: "texture",
     encryptionSupported: false,
@@ -203,7 +223,8 @@ export const VFS_FORMATS: VfsFormatDescriptor[] = [
     magicHex: "0x474E5089",
     magicAscii: "PNG\r",
     extension: ".png",
-    description: "Portable Network Graphics (decoded atlas glyphs, UI elements, web exports)",
+    description:
+      "Portable Network Graphics (decoded atlas glyphs, UI elements, web exports)",
     isBigEndian: true,
     category: "texture",
     encryptionSupported: false,
@@ -214,7 +235,8 @@ export const VFS_FORMATS: VfsFormatDescriptor[] = [
     magicHex: "0x46464952",
     magicAscii: "RIFF",
     extension: ".wav",
-    description: "Resource Interchange File Format (PCM and ADPCM audio tracks)",
+    description:
+      "Resource Interchange File Format (PCM and ADPCM audio tracks)",
     isBigEndian: false,
     category: "audio",
     encryptionSupported: false,
@@ -236,7 +258,8 @@ export const VFS_FORMATS: VfsFormatDescriptor[] = [
     magicHex: "0x41534658",
     magicAscii: "XFSA",
     extension: ".xfsa",
-    description: "Level-5 XFSA Archive (file system archive with hash-addressed records)",
+    description:
+      "Level-5 XFSA Archive (file system archive with hash-addressed records)",
     isBigEndian: false,
     category: "container",
     encryptionSupported: false,
@@ -247,7 +270,8 @@ export const VFS_FORMATS: VfsFormatDescriptor[] = [
     magicHex: "0x4159414C",
     magicAscii: "LAYL",
     extension: ".crilayla",
-    description: "CRI Layla Reverse-Bitstream LZSS Compressed Container (16-byte header + bitstream + 0x100 raw)",
+    description:
+      "CRI Layla Reverse-Bitstream LZSS Compressed Container (16-byte header + bitstream + 0x100 raw)",
     isBigEndian: false,
     category: "container",
     encryptionSupported: false,
@@ -258,7 +282,8 @@ export const VFS_FORMATS: VfsFormatDescriptor[] = [
     magicHex: "0x46424341",
     magicAscii: "@ACB",
     extension: ".acb",
-    description: "Criware Audio Cue Sheet (cue mappings, sound triggers, DSP effects)",
+    description:
+      "Criware Audio Cue Sheet (cue mappings, sound triggers, DSP effects)",
     isBigEndian: true,
     category: "audio",
     encryptionSupported: true,
@@ -269,7 +294,8 @@ export const VFS_FORMATS: VfsFormatDescriptor[] = [
     magicHex: "0x20534D43",
     magicAscii: "CRID",
     extension: ".usm",
-    description: "CRI Movie 2 Container (video stream, multi-track audio, subtitle packets)",
+    description:
+      "CRI Movie 2 Container (video stream, multi-track audio, subtitle packets)",
     isBigEndian: true,
     category: "video",
     encryptionSupported: true,
@@ -280,7 +306,8 @@ export const VFS_FORMATS: VfsFormatDescriptor[] = [
     magicHex: "0x564E3447",
     magicAscii: "G4NV",
     extension: ".g4nv",
-    description: "Level-5 Navigation Mesh (stadium and field locomotion polygons)",
+    description:
+      "Level-5 Navigation Mesh (stadium and field locomotion polygons)",
     isBigEndian: false,
     category: "system",
     encryptionSupported: false,
@@ -302,7 +329,8 @@ export const VFS_FORMATS: VfsFormatDescriptor[] = [
     magicHex: "0x534C4F43",
     magicAscii: "COLS",
     extension: ".cols",
-    description: "Level-5 Collision Set (stadium boundaries, goal posts, ball bouncing volumes)",
+    description:
+      "Level-5 Collision Set (stadium boundaries, goal posts, ball bouncing volumes)",
     isBigEndian: false,
     category: "system",
     encryptionSupported: false,
@@ -313,7 +341,8 @@ export const VFS_FORMATS: VfsFormatDescriptor[] = [
     magicHex: "0x9DCE66C3",
     magicAscii: "LIVE",
     extension: ".live",
-    description: "Level-5 Lives Save Container (002AB8F4-* CRC32-keyed XOR stream cipher, 0xEEFF blobs)",
+    description:
+      "Level-5 Lives Save Container (002AB8F4-* CRC32-keyed XOR stream cipher, 0xEEFF blobs)",
     isBigEndian: false,
     category: "system",
     encryptionSupported: true,
@@ -339,7 +368,8 @@ export const VFS_PACK_RULES: VfsPackRule[] = [
     filenameMask: "*menu*.cpk",
     keyDerivation: "filename-crc32",
     mountPriority: 90,
-    description: "UI layouts, T2B menu settings, 200_icon sprites, portrait textures, and font atlases",
+    description:
+      "UI layouts, T2B menu settings, 200_icon sprites, portrait textures, and font atlases",
     isCompressed: true,
   },
   {
@@ -347,7 +377,8 @@ export const VFS_PACK_RULES: VfsPackRule[] = [
     filenameMask: "*model*.cpk",
     keyDerivation: "filename-crc32",
     mountPriority: 80,
-    description: "3D player models (G4MD), team kits, stadium geometries, and animation tracks (AGI)",
+    description:
+      "3D player models (G4MD), team kits, stadium geometries, and animation tracks (AGI)",
     isCompressed: true,
   },
   {
@@ -355,7 +386,8 @@ export const VFS_PACK_RULES: VfsPackRule[] = [
     filenameMask: "*dx11*.cpk",
     keyDerivation: "filename-crc32",
     mountPriority: 70,
-    description: "DirectX 11 compiled shaders, material descriptors, and GPU texture streams",
+    description:
+      "DirectX 11 compiled shaders, material descriptors, and GPU texture streams",
     isCompressed: true,
   },
   {
@@ -363,7 +395,8 @@ export const VFS_PACK_RULES: VfsPackRule[] = [
     filenameMask: "*sound*.cpk",
     keyDerivation: "filename-crc32",
     mountPriority: 60,
-    description: "HCA voice lines, character dialogue, match commentary, and crowd atmosphere",
+    description:
+      "HCA voice lines, character dialogue, match commentary, and crowd atmosphere",
     isCompressed: false,
   },
   {
@@ -371,7 +404,8 @@ export const VFS_PACK_RULES: VfsPackRule[] = [
     filenameMask: "*movie*.cpk",
     keyDerivation: "filename-crc32",
     mountPriority: 50,
-    description: "Full-motion cutscenes, anime openings, and special moves (Hissatsu) USM video sequences",
+    description:
+      "Full-motion cutscenes, anime openings, and special moves (Hissatsu) USM video sequences",
     isCompressed: false,
   },
   {
@@ -379,7 +413,8 @@ export const VFS_PACK_RULES: VfsPackRule[] = [
     filenameMask: "*event*.cpk",
     keyDerivation: "filename-crc32",
     mountPriority: 40,
-    description: "Story mode cutscenes, MEVBIN choreography scripts, and chapter dialogue triggers",
+    description:
+      "Story mode cutscenes, MEVBIN choreography scripts, and chapter dialogue triggers",
     isCompressed: true,
   },
   {
@@ -387,7 +422,8 @@ export const VFS_PACK_RULES: VfsPackRule[] = [
     filenameMask: "cpk_list.cfg.bin",
     keyDerivation: "viola-fixed",
     mountPriority: 1000,
-    description: "Master VFS manifest mapping internal paths to CPK pack files. Encrypted with Viola key 0x1717E18E",
+    description:
+      "Master VFS manifest mapping internal paths to CPK pack files. Encrypted with Viola key 0x1717E18E",
     isCompressed: false,
   },
 ];
@@ -420,7 +456,8 @@ export const VFS_DIRECTORIES: VfsDirectoryCategory[] = [
       "data/menu/ui/hud_match.cfg.bin",
       "data/menu/emblem/emblem_t001.g4tx",
     ],
-    description: "User interface assets, HUD compositions, sprite sheets, font glyphs, and localized texture cards.",
+    description:
+      "User interface assets, HUD compositions, sprite sheets, font glyphs, and localized texture cards.",
   },
   {
     path: "data/model/",
@@ -438,14 +475,22 @@ export const VFS_DIRECTORIES: VfsDirectoryCategory[] = [
     path: "data/event/",
     primaryExtension: ".mevbin",
     fileCountEstimate: 5173,
-    sampleFiles: ["data/event/ch01/ev_01_001.mevbin", "data/event/ch01/ev_01_001.cfg.bin"],
-    description: "Cinematic cutscenes, camera choreography, dialogue synchronizers, and story progression state trees.",
+    sampleFiles: [
+      "data/event/ch01/ev_01_001.mevbin",
+      "data/event/ch01/ev_01_001.cfg.bin",
+    ],
+    description:
+      "Cinematic cutscenes, camera choreography, dialogue synchronizers, and story progression state trees.",
   },
   {
     path: "data/audio/",
     primaryExtension: ".acb",
     fileCountEstimate: 850,
-    sampleFiles: ["data/audio/bgm/bgm_match_01.acb", "data/audio/voice/v_c01000010.acb", "data/audio/se/se_battle.acb"],
+    sampleFiles: [
+      "data/audio/bgm/bgm_match_01.acb",
+      "data/audio/voice/v_c01000010.acb",
+      "data/audio/se/se_battle.acb",
+    ],
     description:
       "Criware CRI Atom Craft audio cue sheets, HCA stream banks, music loops, and synchronized voice tracks.",
   },
@@ -453,7 +498,11 @@ export const VFS_DIRECTORIES: VfsDirectoryCategory[] = [
     path: "data/saves/",
     primaryExtension: ".live",
     fileCountEstimate: 10,
-    sampleFiles: ["data/saves/002AB8F4-SYSTEMLIVE", "data/saves/002AB8F4-USERDATALIVE", "data/saves/002AB8F4-AUTOSAVE"],
+    sampleFiles: [
+      "data/saves/002AB8F4-SYSTEMLIVE",
+      "data/saves/002AB8F4-USERDATALIVE",
+      "data/saves/002AB8F4-AUTOSAVE",
+    ],
     description:
       "Player career saves, team rosters, gacha inventory, and trophy progress encrypted with CRC32 filename cipher.",
   },
@@ -478,13 +527,20 @@ export function getVfsCatalog(): VfsCatalog {
 /**
  * Resolves a format descriptor by 4-byte magic number or extension.
  */
-export function resolveFormat(magicOrExt: number | string): VfsFormatDescriptor | undefined {
+export function resolveFormat(
+  magicOrExt: number | string,
+): VfsFormatDescriptor | undefined {
   if (typeof magicOrExt === "number") {
-    return VFS_FORMATS.find(f => parseInt(f.magicHex, 16) === magicOrExt);
+    return VFS_FORMATS.find((f) => parseInt(f.magicHex, 16) === magicOrExt);
   }
   const needle = magicOrExt.trim().toLowerCase();
   // Rust detects the full eight-byte stream prefix; the retained descriptor
   // represents the four-byte LAYL segment rather than the stream start.
-  if (needle === "crilayla") return VFS_FORMATS.find(format => format.id === 22);
-  return VFS_FORMATS.find(f => f.extension.toLowerCase() === needle || f.magicAscii.trim().toLowerCase() === needle);
+  if (needle === "crilayla")
+    return VFS_FORMATS.find((format) => format.id === 22);
+  return VFS_FORMATS.find(
+    (f) =>
+      f.extension.toLowerCase() === needle ||
+      f.magicAscii.trim().toLowerCase() === needle,
+  );
 }

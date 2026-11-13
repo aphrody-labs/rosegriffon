@@ -73,7 +73,11 @@ function parseBaseNode(node: ConfigNode): ParsedCharaBase | null {
   let lastNameHash: string | undefined;
   if (vars.length > 4) {
     const lastNameVar = vars[4];
-    if (lastNameVar && lastNameVar.type === "Int" && Number.parseInt(lastNameVar.value, 10) !== 0) {
+    if (
+      lastNameVar &&
+      lastNameVar.type === "Int" &&
+      Number.parseInt(lastNameVar.value, 10) !== 0
+    ) {
       lastNameHash = toHex(Number.parseInt(lastNameVar.value, 10));
     }
   }
@@ -91,7 +95,11 @@ function parseBaseNode(node: ConfigNode): ParsedCharaBase | null {
   let seriesId: string | undefined;
   if (vars.length > 15) {
     const seriesVar = vars[15];
-    if (seriesVar && seriesVar.type === "Int" && Number.parseInt(seriesVar.value, 10) !== 0) {
+    if (
+      seriesVar &&
+      seriesVar.type === "Int" &&
+      Number.parseInt(seriesVar.value, 10) !== 0
+    ) {
       seriesId = toHex(Number.parseInt(seriesVar.value, 10));
     }
   }
@@ -100,7 +108,11 @@ function parseBaseNode(node: ConfigNode): ParsedCharaBase | null {
   let belongTeamId: string | undefined;
   if (vars.length > 16) {
     const teamVar = vars[16];
-    if (teamVar && teamVar.type === "Int" && Number.parseInt(teamVar.value, 10) !== 0) {
+    if (
+      teamVar &&
+      teamVar.type === "Int" &&
+      Number.parseInt(teamVar.value, 10) !== 0
+    ) {
       belongTeamId = toHex(Number.parseInt(teamVar.value, 10));
     }
   }
@@ -109,7 +121,11 @@ function parseBaseNode(node: ConfigNode): ParsedCharaBase | null {
   let descriptionHash: string | undefined;
   if (vars.length > 19) {
     const descVar = vars[19];
-    if (descVar && descVar.type === "Int" && Number.parseInt(descVar.value, 10) !== 0) {
+    if (
+      descVar &&
+      descVar.type === "Int" &&
+      Number.parseInt(descVar.value, 10) !== 0
+    ) {
       descriptionHash = toHex(Number.parseInt(descVar.value, 10));
     }
   }

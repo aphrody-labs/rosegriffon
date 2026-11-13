@@ -1,5 +1,10 @@
 import { describe, expect, it } from "bun:test";
-import { sendContactFormEmail, sendEmail, sendMediationRequestEmail, sendTournamentNotificationEmail } from "./email";
+import {
+  sendContactFormEmail,
+  sendEmail,
+  sendMediationRequestEmail,
+  sendTournamentNotificationEmail,
+} from "./email";
 
 describe("Gestion d'Envoi d'Email (Email Service)", () => {
   it("envoie un email générique avec succès (mode simulé/connecté)", async () => {

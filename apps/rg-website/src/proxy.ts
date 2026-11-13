@@ -6,7 +6,7 @@ const PROTECTED_PATHS = ["/dashboard", "/admin", "/profil/settings"];
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const isProtected = PROTECTED_PATHS.some(p => pathname.startsWith(p));
+  const isProtected = PROTECTED_PATHS.some((p) => pathname.startsWith(p));
   if (!isProtected) {
     return NextResponse.next();
   }

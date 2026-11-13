@@ -99,7 +99,10 @@ const LARGEUR_IMAGE_CDN = 1600;
  * Ce qui ne donne pas une URL `http(s)` valide est écarté plutôt que passé à
  * Discord, qui rejetterait l'embed entier.
  */
-function imageArticle(app: string | null | undefined, brut: string | null | undefined): string | null {
+function imageArticle(
+  app: string | null | undefined,
+  brut: string | null | undefined,
+): string | null {
   const valeur = brut?.trim();
   if (!valeur) return null;
   let url: URL;
@@ -159,7 +162,9 @@ async function chercherArticles(
 	`;
 }
 
-async function lireArticle(slug: string): Promise<(Article & { content: string | null }) | null> {
+async function lireArticle(
+  slug: string,
+): Promise<(Article & { content: string | null }) | null> {
   const lignes = await sql<Array<Article & { content: string | null }>>`
 		SELECT id::text, title::text, slug::text, excerpt, category::text, app,
 		       featured_image_url, published_at, view_count, content
@@ -171,7 +176,9 @@ async function lireArticle(slug: string): Promise<(Article & { content: string |
 }
 
 /** Index léger pour l'autocomplétion : titre + slug + site, rien d'autre. */
-async function indexAutocompletion(): Promise<Array<{ title: string; slug: string; app: string }>> {
+async function indexAutocompletion(): Promise<
+  Array<{ title: string; slug: string; app: string }>
+> {
   return await cached("article:index", TTL_LISTE_MS, async () => {
     return await sql<Array<{ title: string; slug: string; app: string }>>`
 			SELECT title::text, slug::text, app
@@ -200,12 +207,14 @@ async function categoriesPubliees(): Promise<string[]> {
 			WHERE status = 'published' AND category IS NOT NULL AND category <> ''
 			ORDER BY category
 		`;
-    return lignes.map(l => l.category);
+    return lignes.map((l) => l.category);
   });
 }
 
 /** Autocomplétion de l'option `categorie`, bornée aux 25 propositions de Discord. */
-async function completerCategorie(interaction: AutocompleteInteraction): Promise<void> {
+async function completerCategorie(
+  interaction: AutocompleteInteraction,
+): Promise<void> {
   try {
     const saisie = String(interaction.options.getFocused() ?? "")
       .trim()
@@ -213,9 +222,9 @@ async function completerCategorie(interaction: AutocompleteInteraction): Promise
     const categories = await categoriesPubliees();
     await interaction.respond(
       categories
-        .filter(c => saisie.length === 0 || c.toLowerCase().includes(saisie))
+        .filter((c) => saisie.length === 0 || c.toLowerCase().includes(saisie))
         .slice(0, 25)
-        .map(c => ({ name: truncate(c, 100), value: truncate(c, 100) })),
+        .map((c) => ({ name: truncate(c, 100), value: truncate(c, 100) })),
     );
   } catch {
     // Sans réponse, le champ reste figé sur « chargement… » côté client.
@@ -268,7 +277,10 @@ function messageErreur(err: unknown): string {
 })
 @SlashGroup("article")
 export class ArticleCommand {
-  @Slash({ name: "derniers", description: "Les articles les plus récents des deux sites" })
+  @Slash({
+    name: "derniers",
+    description: "Les articles les plus récents des deux sites",
+  })
   async derniers(
     @SlashChoice(...CHOIX_SITE)
     @SlashOption({
@@ -311,9 +323,16 @@ export class ArticleCommand {
         return;
       }
 
-      const portee = filtre ? `${libellePortee(apps)} · ${truncate(filtre, 40)}` : libellePortee(apps);
+      const portee = filtre
+        ? `${libellePortee(apps)} · ${truncate(filtre, 40)}`
+        : libellePortee(apps);
       const embed = rgEmbed()
-        .setTitle(truncate(`${articles.length} article${articles.length > 1 ? "s" : ""} — ${portee}`, 250))
+        .setTitle(
+          truncate(
+            `${articles.length} article${articles.length > 1 ? "s" : ""} — ${portee}`,
+            250,
+          ),
+        )
         .setURL(siteArticle(apps.length === 1 ? apps[0] : "website").base)
         .setDescription(descriptionListe(articles));
 
@@ -323,7 +342,7 @@ export class ArticleCommand {
       let fichiers: AttachmentBuilder[] = [];
       try {
         const png = await renderChroniqueList(
-          articles.map(a => ({
+          articles.map((a) => ({
             title: a.title,
             slug: a.slug,
             excerpt: resumeArticle(a, 220) || null,
@@ -356,13 +375,20 @@ export class ArticleCommand {
       required: true,
       autocomplete: async (interaction: AutocompleteInteraction) => {
         try {
-          const saisie = String(interaction.options.getFocused() ?? "").toLowerCase();
+          const saisie = String(
+            interaction.options.getFocused() ?? "",
+          ).toLowerCase();
           const index = await indexAutocompletion();
           const retenus = index
-            .filter(a => saisie.length === 0 || a.title.toLowerCase().includes(saisie) || a.slug.includes(saisie))
+            .filter(
+              (a) =>
+                saisie.length === 0 ||
+                a.title.toLowerCase().includes(saisie) ||
+                a.slug.includes(saisie),
+            )
             .slice(0, 25);
           await interaction.respond(
-            retenus.map(a => ({
+            retenus.map((a) => ({
               name: truncate(`${a.title} — ${siteArticle(a.app).libelle}`, 100),
               value: truncate(a.slug, 100),
             })),
@@ -391,14 +417,27 @@ export class ArticleCommand {
       const embed = rgEmbed()
         .setTitle(truncate(article.title, 250))
         .setURL(urlArticle(article.app, article.slug))
-        .setDescription(truncate(corps, 1500) || "Cet article n'a pas encore de résumé.")
+        .setDescription(
+          truncate(corps, 1500) || "Cet article n'a pas encore de résumé.",
+        )
         .addFields(
           { name: "Site", value: site.libelle, inline: true },
           { name: "Catégorie", value: article.category ?? "—", inline: true },
-          { name: "Publié le", value: dateCourte(article.published_at), inline: true },
-          { name: "Vues", value: String(article.view_count ?? 0), inline: true },
+          {
+            name: "Publié le",
+            value: dateCourte(article.published_at),
+            inline: true,
+          },
+          {
+            name: "Vues",
+            value: String(article.view_count ?? 0),
+            inline: true,
+          },
         );
-      const illustration = imageArticle(article.app, article.featured_image_url);
+      const illustration = imageArticle(
+        article.app,
+        article.featured_image_url,
+      );
       if (illustration) embed.setImage(illustration);
 
       await interaction.editReply({ embeds: [embed] });
@@ -407,7 +446,10 @@ export class ArticleCommand {
     }
   }
 
-  @Slash({ name: "recherche", description: "Chercher un article par mot-clé, titre ou contenu" })
+  @Slash({
+    name: "recherche",
+    description: "Chercher un article par mot-clé, titre ou contenu",
+  })
   async recherche(
     @SlashOption({
       name: "texte",
@@ -438,16 +480,20 @@ export class ArticleCommand {
     await interaction.deferReply();
     const terme = texte.trim();
     if (terme.length < 2) {
-      await interaction.editReply({ content: "Il faut au moins deux caractères pour chercher." });
+      await interaction.editReply({
+        content: "Il faut au moins deux caractères pour chercher.",
+      });
       return;
     }
     const apps = appsDemandees(site);
     const filtre = categorieDemandee(categorie);
-    const portee = filtre ? `${libellePortee(apps)} · ${truncate(filtre, 40)}` : libellePortee(apps);
+    const portee = filtre
+      ? `${libellePortee(apps)} · ${truncate(filtre, 40)}`
+      : libellePortee(apps);
     try {
       // Le motif est échappé côté SQL : les jokers `%` et `_` d'une saisie
       // libre transformeraient sinon la recherche en « tout afficher ».
-      const motif = `%${terme.replaceAll(/[\\%_]/g, c => `\\${c}`)}%`;
+      const motif = `%${terme.replaceAll(/[\\%_]/g, (c) => `\\${c}`)}%`;
       const articles = await chercherArticles(apps, filtre, motif, 10);
       if (articles.length === 0) {
         await interaction.editReply({
@@ -457,10 +503,17 @@ export class ArticleCommand {
       }
       const embed = rgEmbed()
         .setTitle(
-          truncate(`« ${truncate(terme, 60)} » — ${articles.length} résultat${articles.length > 1 ? "s" : ""}`, 250),
+          truncate(
+            `« ${truncate(terme, 60)} » — ${articles.length} résultat${articles.length > 1 ? "s" : ""}`,
+            250,
+          ),
         )
         .setDescription(descriptionListe(articles))
-        .setFooter(piedTexte({ note: truncate(`Recherche sur ${portee} · rosegriffon.fr`, 2000) }));
+        .setFooter(
+          piedTexte({
+            note: truncate(`Recherche sur ${portee} · rosegriffon.fr`, 2000),
+          }),
+        );
       await interaction.editReply({ embeds: [embed] });
     } catch (err) {
       await interaction.editReply({ content: messageErreur(err) });

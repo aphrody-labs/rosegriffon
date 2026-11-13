@@ -20,7 +20,8 @@ export const SOCIAL_LINKS = {
     x: "https://x.com/Azalee_IE",
   },
   achillea: {
-    discord: "https://discord.gg/achillea-competitif-inazuma-eleven-fr-1055585286320554055",
+    discord:
+      "https://discord.gg/achillea-competitif-inazuma-eleven-fr-1055585286320554055",
     twitch: "https://twitch.tv/Achillea_IE",
     x: "https://x.com/Achillea_IE",
     youtube: "https://www.youtube.com/@AchilleaRG",
@@ -44,6 +45,13 @@ export const NETWORK_SOCIAL_LINKS = [
 
 // Les sous-domaines azalee./achillea. ne répondent plus (Cloudflare 526) depuis la
 // fusion : le wiki et l'e-sport sont servis sous `/wiki` et `/achillea`.
-export const NETWORK_SITES = [SITE_URL, absoluteUrl("/wiki"), absoluteUrl("/achillea")] as const;
+export const NETWORK_SITES = [
+  SITE_URL,
+  absoluteUrl("/wiki"),
+  absoluteUrl("/achillea"),
+] as const;
 
-export const NETWORK_SAME_AS = [...NETWORK_SITES, ...NETWORK_SOCIAL_LINKS] as const;
+export const NETWORK_SAME_AS = [
+  ...NETWORK_SITES,
+  ...NETWORK_SOCIAL_LINKS,
+] as const;

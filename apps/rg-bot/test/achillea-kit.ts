@@ -37,12 +37,22 @@ export interface RequeteSimulee {
 
 /** Réponse d'une route : un objet (200 JSON), `[statut, corps]`, ou une `Response`. */
 export type ReponseSimulee = unknown;
-export type Gestionnaire = (requete: RequeteSimulee) => ReponseSimulee | Promise<ReponseSimulee>;
+export type Gestionnaire = (
+  requete: RequeteSimulee,
+) => ReponseSimulee | Promise<ReponseSimulee>;
 
 /** `routes` : `"GET /clans/role"` → gestionnaire ou valeur. Le chemin s'entend SANS query-string. */
-export function routeurApi(routes: Record<string, Gestionnaire | ReponseSimulee>, appels: AppelApi[] = []): AchilleaFetch {
+export function routeurApi(
+  routes: Record<string, Gestionnaire | ReponseSimulee>,
+  appels: AppelApi[] = [],
+): AchilleaFetch {
   return async (entree, init) => {
-    const brut = typeof entree === "string" ? entree : entree instanceof URL ? entree.href : entree.url;
+    const brut =
+      typeof entree === "string"
+        ? entree
+        : entree instanceof URL
+          ? entree.href
+          : entree.url;
     const url = new URL(brut);
     const methode = (init?.method ?? "GET").toUpperCase();
     const chemin = url.pathname.replace(/^\/api/u, "");
@@ -54,17 +64,36 @@ export function routeurApi(routes: Record<string, Gestionnaire | ReponseSimulee>
         corps = init.body;
       }
     }
-    const entetes = new Headers(init?.headers as Record<string, string> | undefined);
-    appels.push({ methode, chemin, corps, porteur: entetes.get("authorization") });
+    const entetes = new Headers(
+      init?.headers as Record<string, string> | undefined,
+    );
+    appels.push({
+      methode,
+      chemin,
+      corps,
+      porteur: entetes.get("authorization"),
+    });
 
     const cle = `${methode} ${chemin}`;
-    const route = routes[cle] ?? Object.entries(routes).find(([motif]) => correspond(motif, cle))?.[1];
+    const route =
+      routes[cle] ??
+      Object.entries(routes).find(([motif]) => correspond(motif, cle))?.[1];
     if (route === undefined) {
-      return Response.json({ message: `Route non simulée : ${cle}` }, { status: 404 });
+      return Response.json(
+        { message: `Route non simulée : ${cle}` },
+        { status: 404 },
+      );
     }
-    const valeur = typeof route === "function" ? await (route as Gestionnaire)({ methode, chemin, url, corps }) : route;
+    const valeur =
+      typeof route === "function"
+        ? await (route as Gestionnaire)({ methode, chemin, url, corps })
+        : route;
     if (valeur instanceof Response) return valeur;
-    if (Array.isArray(valeur) && valeur.length === 2 && typeof valeur[0] === "number") {
+    if (
+      Array.isArray(valeur) &&
+      valeur.length === 2 &&
+      typeof valeur[0] === "number"
+    ) {
       return Response.json(valeur[1], { status: valeur[0] });
     }
     return Response.json(valeur ?? {});
@@ -74,7 +103,10 @@ export function routeurApi(routes: Record<string, Gestionnaire | ReponseSimulee>
 /** `GET /clans/:id` correspond à `GET /clans/42`. */
 function correspond(motif: string, cle: string): boolean {
   if (!motif.includes(":")) return false;
-  const expression = new RegExp(`^${motif.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&").replace(/:[A-Za-z]+/gu, "[^/]+")}$`, "u");
+  const expression = new RegExp(
+    `^${motif.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&").replace(/:[A-Za-z]+/gu, "[^/]+")}$`,
+    "u",
+  );
   return expression.test(cle);
 }
 
@@ -82,27 +114,47 @@ function correspond(motif: string, cle: string): boolean {
  * Remplace la fabrique des clients Achilléa le temps d'un test.
  * À appeler dans `beforeEach`, avec `restaurer()` dans `afterEach`.
  */
-export function installerApi(routes: Record<string, Gestionnaire | ReponseSimulee>): {
+export function installerApi(
+  routes: Record<string, Gestionnaire | ReponseSimulee>,
+): {
   appels: AppelApi[];
   restaurer: () => void;
 } {
   const appels: AppelApi[] = [];
   const fetch = routeurApi(routes, appels);
   const restaurer = remplacerFabriqueClientAchillea(
-    identite =>
-      new ClientAchilleaDelegue({ identite, fetch, baseUrl: BASE_API_TEST, env: { JWT_SECRET_KEY: SECRET_TEST } }),
+    (identite) =>
+      new ClientAchilleaDelegue({
+        identite,
+        fetch,
+        baseUrl: BASE_API_TEST,
+        env: { JWT_SECRET_KEY: SECRET_TEST },
+      }),
   );
   return { appels, restaurer };
 }
 
 /** Charge envoyée à Discord, telle que la commande l'a construite. */
 export interface ChargeEnvoyee {
-  via: "reply" | "editReply" | "followUp" | "update" | "showModal" | "deferReply" | "deferUpdate";
+  via:
+    | "reply"
+    | "editReply"
+    | "followUp"
+    | "update"
+    | "showModal"
+    | "deferReply"
+    | "deferUpdate";
   charge: unknown;
 }
 
 export interface OptionsInteraction {
-  utilisateur?: { id: string; username?: string; avatar?: string | null; bot?: boolean; displayName?: string };
+  utilisateur?: {
+    id: string;
+    username?: string;
+    avatar?: string | null;
+    bot?: boolean;
+    displayName?: string;
+  };
   guildId?: string | null;
   customId?: string;
   valeurs?: string[];
@@ -127,17 +179,25 @@ export interface InteractionSimulee {
 /** Texte lisible d'une charge (embeds compris), pour les assertions. */
 export function texteDe(charge: unknown): string {
   return JSON.stringify(charge, (_cle, valeur) =>
-    valeur && typeof valeur === "object" && "toJSON" in valeur && typeof valeur.toJSON === "function"
+    valeur &&
+    typeof valeur === "object" &&
+    "toJSON" in valeur &&
+    typeof valeur.toJSON === "function"
       ? valeur.toJSON()
       : valeur,
   );
 }
 
-export function fausseInteraction(options: OptionsInteraction = {}): InteractionSimulee & Record<string, any> {
+export function fausseInteraction(
+  options: OptionsInteraction = {},
+): InteractionSimulee & Record<string, any> {
   const utilisateur = {
     id: options.utilisateur?.id ?? "111111111111111111",
     username: options.utilisateur?.username ?? "joueur",
-    displayName: options.utilisateur?.displayName ?? options.utilisateur?.username ?? "joueur",
+    displayName:
+      options.utilisateur?.displayName ??
+      options.utilisateur?.username ??
+      "joueur",
     avatar: options.utilisateur?.avatar ?? null,
     bot: options.utilisateur?.bot ?? false,
     toString() {
@@ -149,7 +209,8 @@ export function fausseInteraction(options: OptionsInteraction = {}): Interaction
   const interaction: Record<string, any> = {
     id: "999999999999999999",
     user: utilisateur,
-    guildId: options.guildId === undefined ? "1055585286320554055" : options.guildId,
+    guildId:
+      options.guildId === undefined ? "1055585286320554055" : options.guildId,
     guild: options.guilde ?? null,
     client: options.client ?? { user: { id: "222222222222222222" } },
     commandName: options.commande ?? "commande",
@@ -163,14 +224,21 @@ export function fausseInteraction(options: OptionsInteraction = {}): Interaction
         has: () => options.administrateur === true,
       },
     },
-    message: { interactionMetadata: { user: { id: utilisateur.id } }, edit: async () => undefined },
+    message: {
+      interactionMetadata: { user: { id: utilisateur.id } },
+      edit: async () => undefined,
+    },
     options: {
       getSubcommand: () => options.sousCommande ?? null,
       getSubcommandGroup: () => options.groupe ?? null,
-      getString: (nom: string) => (valeursOptions[nom] as string | undefined) ?? null,
-      getInteger: (nom: string) => (valeursOptions[nom] as number | undefined) ?? null,
-      getNumber: (nom: string) => (valeursOptions[nom] as number | undefined) ?? null,
-      getBoolean: (nom: string) => (valeursOptions[nom] as boolean | undefined) ?? null,
+      getString: (nom: string) =>
+        (valeursOptions[nom] as string | undefined) ?? null,
+      getInteger: (nom: string) =>
+        (valeursOptions[nom] as number | undefined) ?? null,
+      getNumber: (nom: string) =>
+        (valeursOptions[nom] as number | undefined) ?? null,
+      getBoolean: (nom: string) =>
+        (valeursOptions[nom] as boolean | undefined) ?? null,
       getUser: (nom: string) => (valeursOptions[nom] as unknown) ?? null,
       getFocused: () => (valeursOptions.focused as string | undefined) ?? "",
     },
@@ -192,7 +260,10 @@ export function fausseInteraction(options: OptionsInteraction = {}): Interaction
     async reply(charge: unknown) {
       interaction.replied = true;
       envois.push({ via: "reply", charge });
-      return { id: "1", createMessageComponentCollector: () => ({ on: () => undefined }) };
+      return {
+        id: "1",
+        createMessageComponentCollector: () => ({ on: () => undefined }),
+      };
     },
     async editReply(charge: unknown) {
       envois.push({ via: "editReply", charge });
@@ -218,6 +289,7 @@ export function fausseInteraction(options: OptionsInteraction = {}): Interaction
     },
   };
   interaction.envois = envois;
-  interaction.texte = () => envois.map(envoi => texteDe(envoi.charge)).join("\n");
+  interaction.texte = () =>
+    envois.map((envoi) => texteDe(envoi.charge)).join("\n");
   return interaction as InteractionSimulee & Record<string, any>;
 }

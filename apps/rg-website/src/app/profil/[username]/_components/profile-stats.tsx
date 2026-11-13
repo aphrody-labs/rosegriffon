@@ -1,7 +1,17 @@
 import { Card, CardContent } from "@rosegriffon/ui";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { CalendarDays, Coins, Flame, Gem, MessageSquare, Star, TrendingUp, Trophy, UserCheck } from "lucide-react";
+import {
+  CalendarDays,
+  Coins,
+  Flame,
+  Gem,
+  MessageSquare,
+  Star,
+  TrendingUp,
+  Trophy,
+  UserCheck,
+} from "lucide-react";
 
 import { couleurLisible } from "@/lib/couleur-lisible";
 
@@ -51,20 +61,46 @@ export function ProfileStats({ stats }: { stats: StatistiquesProfil }) {
       libelle: "Sur le serveur depuis",
       valeur: dateLongue(stats.arriveeDiscord),
     },
-    { icone: UserCheck, libelle: "Compte du site créé", valeur: dateLongue(stats.inscriptionSite) },
-    { icone: MessageSquare, libelle: "Messages", valeur: nombre(stats.messages) },
-    { icone: TrendingUp, libelle: "Expérience", valeur: nombre(stats.xp, " XP") },
+    {
+      icone: UserCheck,
+      libelle: "Compte du site créé",
+      valeur: dateLongue(stats.inscriptionSite),
+    },
+    {
+      icone: MessageSquare,
+      libelle: "Messages",
+      valeur: nombre(stats.messages),
+    },
+    {
+      icone: TrendingUp,
+      libelle: "Expérience",
+      valeur: nombre(stats.xp, " XP"),
+    },
     { icone: Coins, libelle: "Jetons Kizuna", valeur: nombre(stats.jetons) },
-    { icone: Trophy, libelle: "Clan Achilléa", valeur: stats.clanAchillea ?? null },
+    {
+      icone: Trophy,
+      libelle: "Clan Achilléa",
+      valeur: stats.clanAchillea ?? null,
+    },
     { icone: Trophy, libelle: "Meilleur ELO", valeur: nombre(stats.eloMax) },
-    { icone: Trophy, libelle: "Parties classées", valeur: nombre(stats.partiesClassees) },
+    {
+      icone: Trophy,
+      libelle: "Parties classées",
+      valeur: nombre(stats.partiesClassees),
+    },
     {
       icone: Flame,
       libelle: "Série quotidienne",
-      valeur: stats.serie ? `${stats.serie} jour${stats.serie > 1 ? "s" : ""}` : null,
+      valeur: stats.serie
+        ? `${stats.serie} jour${stats.serie > 1 ? "s" : ""}`
+        : null,
     },
-    { icone: Gem, libelle: "Boost du serveur", valeur: dateLongue(stats.boostDepuis) },
-  ].filter(tuile => tuile.valeur !== null);
+    {
+      icone: Gem,
+      libelle: "Boost du serveur",
+      valeur: dateLongue(stats.boostDepuis),
+    },
+  ].filter((tuile) => tuile.valeur !== null);
 
   const roles = stats.roles ?? [];
 
@@ -82,13 +118,18 @@ export function ProfileStats({ stats }: { stats: StatistiquesProfil }) {
 
         {tuiles.length > 0 && (
           <dl className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-            {tuiles.map(tuile => (
-              <div key={tuile.libelle} className="rounded-xl border border-border bg-muted/30 p-3">
+            {tuiles.map((tuile) => (
+              <div
+                key={tuile.libelle}
+                className="rounded-xl border border-border bg-muted/30 p-3"
+              >
                 <dt className="flex items-center gap-1.5 text-xs text-muted-foreground">
                   <tuile.icone className="size-3.5 shrink-0" aria-hidden />
                   {tuile.libelle}
                 </dt>
-                <dd className="mt-1 text-sm font-bold text-foreground">{tuile.valeur}</dd>
+                <dd className="mt-1 text-sm font-bold text-foreground">
+                  {tuile.valeur}
+                </dd>
               </div>
             ))}
           </dl>
@@ -96,9 +137,11 @@ export function ProfileStats({ stats }: { stats: StatistiquesProfil }) {
 
         {roles.length > 0 && (
           <div className="mt-5">
-            <h3 className="mb-2 text-xs font-semibold text-muted-foreground uppercase">Rôles sur le Discord</h3>
+            <h3 className="mb-2 text-xs font-semibold text-muted-foreground uppercase">
+              Rôles sur le Discord
+            </h3>
             <ul className="flex flex-wrap gap-1.5">
-              {roles.map(role => (
+              {roles.map((role) => (
                 <li
                   key={role.nom}
                   className="rounded-full border px-2.5 py-0.5 text-xs font-semibold"
@@ -108,7 +151,9 @@ export function ProfileStats({ stats }: { stats: StatistiquesProfil }) {
                     role.couleur
                       ? {
                           borderColor: `#${role.couleur.toString(16).padStart(6, "0")}66`,
-                          color: couleurLisible(`#${role.couleur.toString(16).padStart(6, "0")}`),
+                          color: couleurLisible(
+                            `#${role.couleur.toString(16).padStart(6, "0")}`,
+                          ),
                         }
                       : undefined
                   }
@@ -130,11 +175,18 @@ function dateLongue(valeur: string | null | undefined): string | null {
     return null;
   }
   const date = new Date(valeur);
-  return Number.isNaN(date.getTime()) ? null : format(date, "d MMMM yyyy", { locale: fr });
+  return Number.isNaN(date.getTime())
+    ? null
+    : format(date, "d MMMM yyyy", { locale: fr });
 }
 
 /** Un compteur n'a de sens qu'à partir de 1 : à zéro, la tuile disparaît. */
-function nombre(valeur: number | null | undefined, suffixe = ""): string | null {
+function nombre(
+  valeur: number | null | undefined,
+  suffixe = "",
+): string | null {
   const n = Number(valeur ?? 0);
-  return Number.isFinite(n) && n > 0 ? `${n.toLocaleString("fr-FR")}${suffixe}` : null;
+  return Number.isFinite(n) && n > 0
+    ? `${n.toLocaleString("fr-FR")}${suffixe}`
+    : null;
 }

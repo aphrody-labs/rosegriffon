@@ -5,7 +5,13 @@ import { useId, useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "../button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "../card";
 import { Input } from "../input";
 import { Label } from "../label";
 import type { AccountActionResult } from "./types";
@@ -34,7 +40,11 @@ interface AccountDangerZoneProps {
   kept?: string[];
 }
 
-export function AccountDangerZone({ onDelete, losses, kept }: AccountDangerZoneProps) {
+export function AccountDangerZone({
+  onDelete,
+  losses,
+  kept,
+}: AccountDangerZoneProps) {
   const fieldId = useId();
   const [confirm, setConfirm] = useState("");
   const [pending, setPending] = useState(false);
@@ -53,7 +63,9 @@ export function AccountDangerZone({ onDelete, losses, kept }: AccountDangerZoneP
         toast.error(res.error);
         return;
       }
-      toast.success("Demande enregistrée : confirme la suppression depuis l'e-mail reçu.");
+      toast.success(
+        "Demande enregistrée : confirme la suppression depuis l'e-mail reçu.",
+      );
       setConfirm("");
     } catch (error) {
       console.error("[compte] suppression en échec", error);
@@ -76,18 +88,19 @@ export function AccountDangerZone({ onDelete, losses, kept }: AccountDangerZoneP
         <form onSubmit={submit} className="space-y-4">
           <div className="space-y-2 text-sm text-muted-foreground">
             <p>
-              La suppression du compte est <strong className="text-destructive">définitive</strong>.
+              La suppression du compte est{" "}
+              <strong className="text-destructive">définitive</strong>.
             </p>
             {losses && losses.length > 0 && (
               <ul className="list-disc space-y-1 pl-5">
-                {losses.map(loss => (
+                {losses.map((loss) => (
                   <li key={loss}>{loss}</li>
                 ))}
               </ul>
             )}
             {kept && kept.length > 0 && (
               <ul className="list-disc space-y-1 pl-5 text-muted-foreground/80">
-                {kept.map(entree => (
+                {kept.map((entree) => (
                   <li key={entree}>{entree}</li>
                 ))}
               </ul>
@@ -96,12 +109,14 @@ export function AccountDangerZone({ onDelete, losses, kept }: AccountDangerZoneP
 
           <div className="space-y-2">
             <Label htmlFor={fieldId}>
-              Tape <span className="font-bold text-destructive">{CONFIRM_WORD}</span> pour confirmer
+              Tape{" "}
+              <span className="font-bold text-destructive">{CONFIRM_WORD}</span>{" "}
+              pour confirmer
             </Label>
             <Input
               id={fieldId}
               value={confirm}
-              onChange={e => setConfirm(e.target.value)}
+              onChange={(e) => setConfirm(e.target.value)}
               placeholder={CONFIRM_WORD}
               autoComplete="off"
               aria-describedby={`${fieldId}-aide`}
@@ -112,7 +127,12 @@ export function AccountDangerZone({ onDelete, losses, kept }: AccountDangerZoneP
             </p>
           </div>
 
-          <Button type="submit" variant="destructive" disabled={pending || !armed} className="w-full rounded-full">
+          <Button
+            type="submit"
+            variant="destructive"
+            disabled={pending || !armed}
+            className="w-full rounded-full"
+          >
             {pending ? (
               <Loader2 className="size-4 animate-spin" aria-hidden />
             ) : (

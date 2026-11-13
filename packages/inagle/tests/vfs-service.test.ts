@@ -85,7 +85,17 @@ test("native domain DTOs retain identities and actual UR99 stats without SQL or 
     },
     statsBasis: { level: 99, rarity: "UR" },
   });
-  expect(data.skills[0]).toMatchObject({ id: "0x300", category_id: 1, element_id: 3 });
-  expect(data.items[0]).toMatchObject({ itemId: "0x400", names: { fr: "Fixture item" } });
-  expect(data.teams[0]).toMatchObject({ teamId: "0x500", name_FR: "Fixture team" });
+  expect(data.skills[0]).toMatchObject({
+    id: "0x300",
+    category_id: 1,
+    element_id: 3,
+  });
+  expect(data.items[0]).toMatchObject({
+    itemId: "0x400",
+    names: { fr: "Fixture item" },
+  });
+  expect(data.teams[0]).toMatchObject({
+    teamId: "0x500",
+    name_FR: "Fixture team",
+  });
 });

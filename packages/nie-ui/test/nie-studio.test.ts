@@ -48,7 +48,9 @@ describe("NieStudioEngine Suite", () => {
     studio.registerMod(modA);
     expect(studio.getInstalledMods().length).toBe(1);
 
-    const resolved = studio.resolveVfsPath("data/chara/texture/raimon_uniform.g4tx");
+    const resolved = studio.resolveVfsPath(
+      "data/chara/texture/raimon_uniform.g4tx",
+    );
     expect(resolved).toBe("/mods/mod-raimon-hd/raimon_uniform.g4tx");
 
     const unknown = studio.resolveVfsPath("data/chara/texture/unknown.g4tx");

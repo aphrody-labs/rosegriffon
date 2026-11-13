@@ -30,7 +30,10 @@ export const articleSchema = z.object({
   slug: z
     .string()
     .min(1, "Le slug est requis")
-    .regex(/^[a-z0-9-]+$/, "Le slug ne doit contenir que des lettres minuscules, des chiffres et des tirets"),
+    .regex(
+      /^[a-z0-9-]+$/,
+      "Le slug ne doit contenir que des lettres minuscules, des chiffres et des tirets",
+    ),
   status: z.enum(ARTICLE_STATUS).default("draft"),
   title: z.string().min(1, "Le titre est requis"),
 });

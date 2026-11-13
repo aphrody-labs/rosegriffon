@@ -56,7 +56,9 @@ export interface OptionsPagination {
  * Discord n'accepte que cinq composants par rangée — le bouton de lien part
  * donc dans une seconde rangée quand les sauts sont présents.
  */
-export function rangeePagination(options: OptionsPagination): Array<ActionRowBuilder<ButtonBuilder>> {
+export function rangeePagination(
+  options: OptionsPagination,
+): Array<ActionRowBuilder<ButtonBuilder>> {
   const { prefixe, page, pages } = options;
   if (pages <= 1) {
     return options.lien ? [rangeeLien(options.lien)] : [];
@@ -126,7 +128,9 @@ export function rangeePagination(options: OptionsPagination): Array<ActionRowBui
     );
   }
 
-  const rangees = [new ActionRowBuilder<ButtonBuilder>().addComponents(...boutons)];
+  const rangees = [
+    new ActionRowBuilder<ButtonBuilder>().addComponents(...boutons),
+  ];
   if (options.lien) {
     if (boutons.length < LIMITES.composantsParRangee) {
       rangees[0]!.addComponents(boutonLien(options.lien));
@@ -162,7 +166,9 @@ export function boutonLien(options: OptionsLien): ButtonBuilder {
 }
 
 function rangeeLien(options: OptionsLien): ActionRowBuilder<ButtonBuilder> {
-  return new ActionRowBuilder<ButtonBuilder>().addComponents(boutonLien(options));
+  return new ActionRowBuilder<ButtonBuilder>().addComponents(
+    boutonLien(options),
+  );
 }
 
 /** Retire tous les boutons d'un message (fin de vie d'une confirmation, expiration). */

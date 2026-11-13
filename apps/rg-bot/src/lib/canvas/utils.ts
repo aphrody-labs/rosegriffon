@@ -11,7 +11,14 @@ import { type Image, loadImage, type SKRSContext2D } from "@aphrody/canvas";
 import { BORDURE_OR, OMBRE_DURE, PALETTE, RAYONS, VISUELS } from "./theme";
 import { tronquer } from "./texte";
 
-export function roundedRect(ctx: SKRSContext2D, x: number, y: number, w: number, h: number, r: number): void {
+export function roundedRect(
+  ctx: SKRSContext2D,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+  r: number,
+): void {
   const radius = Math.max(0, Math.min(r, w / 2, h / 2));
   ctx.beginPath();
   ctx.moveTo(x + radius, y);
@@ -87,7 +94,8 @@ export function dessinerPanneau(
   const rayon = options.rayon ?? RAYONS.lg;
   const epaisseur = options.epaisseur ?? BORDURE_OR;
   const ombre = options.ombre === undefined ? OMBRE_DURE : options.ombre;
-  if (ombre) fillRoundedRect(ctx, x + ombre.x, y + ombre.y, w, h, rayon, ombre.couleur);
+  if (ombre)
+    fillRoundedRect(ctx, x + ombre.x, y + ombre.y, w, h, rayon, ombre.couleur);
   fillRoundedRect(ctx, x, y, w, h, rayon, options.fond ?? PALETTE.carte);
   strokeRoundedRect(
     ctx,
@@ -124,7 +132,9 @@ export function dessinerPastille(
   ctx.save();
   ctx.font = `bold ${options.taillePolice}px ${options.police}`;
   const rendu =
-    options.largeurMax === undefined ? libelle : tronquer(ctx, libelle, Math.max(0, options.largeurMax - 26));
+    options.largeurMax === undefined
+      ? libelle
+      : tronquer(ctx, libelle, Math.max(0, options.largeurMax - 26));
   const largeur = Math.ceil(ctx.measureText(rendu).width) + 26;
   fillRoundedRect(ctx, x, y, largeur, hauteur, hauteur / 2, options.fond);
   ctx.fillStyle = options.texte;
@@ -136,7 +146,12 @@ export function dessinerPastille(
 }
 
 /** Largeur qu'occupera une pastille, sans la dessiner (pour réserver la place). */
-export function largeurPastille(ctx: SKRSContext2D, libelle: string, taillePolice: number, police: string): number {
+export function largeurPastille(
+  ctx: SKRSContext2D,
+  libelle: string,
+  taillePolice: number,
+  police: string,
+): number {
   ctx.save();
   ctx.font = `bold ${taillePolice}px ${police}`;
   const largeur = Math.ceil(ctx.measureText(libelle).width) + 26;
@@ -165,7 +180,10 @@ export function dessinerTitreCartoon(
   ctx.font = `${options.taille}px ${options.police}`;
   // Troncature après avoir posé la police du titre : mesurée avec la police en
   // cours d'appel, un nom long passait le contrôle puis débordait de l'image.
-  const rendu = options.largeurMax === undefined ? texte : tronquer(ctx, texte, options.largeurMax);
+  const rendu =
+    options.largeurMax === undefined
+      ? texte
+      : tronquer(ctx, texte, options.largeurMax);
   ctx.textBaseline = "alphabetic";
   ctx.textAlign = "left";
   ctx.lineJoin = "round";
@@ -203,7 +221,11 @@ export function dessinerFilet(
  * griffon en filigrane. Le filigrane échoue silencieusement si le fichier est
  * absent — un fond sans mascotte reste correct.
  */
-export async function dessinerFond(ctx: SKRSContext2D, w: number, h: number): Promise<void> {
+export async function dessinerFond(
+  ctx: SKRSContext2D,
+  w: number,
+  h: number,
+): Promise<void> {
   ctx.save();
   ctx.fillStyle = PALETTE.fond;
   ctx.fillRect(0, 0, w, h);
@@ -238,7 +260,11 @@ export async function dessinerFond(ctx: SKRSContext2D, w: number, h: number): Pr
 }
 
 /** Logo griffon en filigrane, centré, très peu opaque. */
-export async function dessinerFiligrane(ctx: SKRSContext2D, w: number, h: number): Promise<boolean> {
+export async function dessinerFiligrane(
+  ctx: SKRSContext2D,
+  w: number,
+  h: number,
+): Promise<boolean> {
   try {
     const logo = await loadImage(VISUELS.griffon);
     const taille = Math.min(w, h) * 0.85;
@@ -317,7 +343,8 @@ export async function drawCoveredImage(
  * Les pictogrammes sont tracés, jamais écrits en emoji : le VPS n'a aucune
  * police emoji, les « 📅 » et « 📍 » de l'ancienne version sortaient en carrés.
  */
-export type NomPictogramme = "calendrier" | "epingle" | "oeil" | "globe" | "lien" | "etoile" | "croix";
+export type NomPictogramme =
+  "calendrier" | "epingle" | "oeil" | "globe" | "lien" | "etoile" | "croix";
 
 export function dessinerPictogramme(
   ctx: SKRSContext2D,

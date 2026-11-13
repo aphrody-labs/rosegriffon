@@ -15,23 +15,34 @@ export function resolveAuthSecret(
   if (secret) {
     if (
       production &&
-      (secret.length < 32 || secret.includes("build-placeholder-secret") || secret === "better-auth-secret")
+      (secret.length < 32 ||
+        secret.includes("build-placeholder-secret") ||
+        secret === "better-auth-secret")
     ) {
-      throw new Error("BETTER_AUTH_SECRET must be a private, high-entropy secret of at least 32 characters");
+      throw new Error(
+        "BETTER_AUTH_SECRET must be a private, high-entropy secret of at least 32 characters",
+      );
     }
     return secret;
   }
   if (production && environment.NEXT_PHASE !== "phase-production-build") {
-    throw new Error("BETTER_AUTH_SECRET is required for production authentication");
+    throw new Error(
+      "BETTER_AUTH_SECRET is required for production authentication",
+    );
   }
   // Next sets this phase before collecting routes; the emitted server resolves its own secret at startup.
   return randomBytes(32).toString("base64url");
 }
 
-export function resolveTrustedOrigins(baseURL: string, production = process.env.NODE_ENV === "production"): string[] {
+export function resolveTrustedOrigins(
+  baseURL: string,
+  production = process.env.NODE_ENV === "production",
+): string[] {
   const base = new URL(baseURL);
   if (!/^https?:$/.test(base.protocol) || base.username || base.password) {
-    throw new Error("Better Auth baseURL must be an HTTP origin without credentials");
+    throw new Error(
+      "Better Auth baseURL must be an HTTP origin without credentials",
+    );
   }
   if (production && base.protocol !== "https:") {
     throw new Error("Production Better Auth baseURL must use HTTPS");
@@ -43,7 +54,9 @@ export function resolveTrustedOrigins(baseURL: string, production = process.env.
       base.hostname.startsWith("127.") ||
       base.hostname === "[::1]")
   ) {
-    throw new Error("Production Better Auth baseURL cannot use a loopback host");
+    throw new Error(
+      "Production Better Auth baseURL cannot use a loopback host",
+    );
   }
   const origins = [
     "https://rg.aphrody.com",
@@ -58,7 +71,12 @@ export function resolveTrustedOrigins(baseURL: string, production = process.env.
     "http://tauri.localhost",
     base.origin,
     ...(!production
-      ? ["http://localhost:3000", "http://localhost:3001", "http://localhost:5011", "http://127.0.0.1:5011"]
+      ? [
+          "http://localhost:3000",
+          "http://localhost:3001",
+          "http://localhost:5011",
+          "http://127.0.0.1:5011",
+        ]
       : []),
   ];
   return [...new Set(origins)];

@@ -16,20 +16,39 @@ interface DatePickerProps {
   className?: string;
 }
 
-export function DatePicker({ date, setDate, placeholder = "Choisir une date", className }: DatePickerProps) {
+export function DatePicker({
+  date,
+  setDate,
+  placeholder = "Choisir une date",
+  className,
+}: DatePickerProps) {
   return (
     <Popover>
       <PopoverTrigger asChild>
         <Button
           variant={"outline"}
-          className={cn("w-full justify-start text-left font-normal", !date && "text-muted-foreground", className)}
+          className={cn(
+            "w-full justify-start text-left font-normal",
+            !date && "text-muted-foreground",
+            className,
+          )}
         >
           <CalendarIcon className="mr-2 h-4 w-4" />
-          {date ? format(date, "PPP", { locale: fr }) : <span>{placeholder}</span>}
+          {date ? (
+            format(date, "PPP", { locale: fr })
+          ) : (
+            <span>{placeholder}</span>
+          )}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0" align="start">
-        <Calendar mode="single" selected={date} onSelect={setDate} autoFocus locale={fr} />
+        <Calendar
+          mode="single"
+          selected={date}
+          onSelect={setDate}
+          autoFocus
+          locale={fr}
+        />
       </PopoverContent>
     </Popover>
   );

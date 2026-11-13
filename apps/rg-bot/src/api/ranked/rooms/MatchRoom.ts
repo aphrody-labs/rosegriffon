@@ -125,7 +125,7 @@ export class MatchRoom extends Room<{ state: MatchState }> {
 
     // « Début de match » : chaque joueur confirme qu'il est prêt. Quand les 2 ont
     // confirmé → status playing (déclenche l'affichage du bouton « Fin de match »).
-    this.onMessage("start", client => {
+    this.onMessage("start", (client) => {
       const userId = this.sessionToUser.get(client.sessionId);
       if (!userId) return;
       const p = this.state.players.get(userId);
@@ -137,7 +137,9 @@ export class MatchRoom extends Room<{ state: MatchState }> {
         mode: this.state.mode,
         userId,
       });
-      const allStarted = Array.from(this.state.players.values()).every(x => x.startedMatch);
+      const allStarted = Array.from(this.state.players.values()).every(
+        (x) => x.startedMatch,
+      );
       if (allStarted && this.state.status === "waiting") {
         this.state.status = "playing";
         void logMatchEvent({
@@ -151,7 +153,7 @@ export class MatchRoom extends Room<{ state: MatchState }> {
     // « Fin de match » ASYNCHRONE : ce joueur confirme la fin. On entre en phase de
     // saisie SANS attendre l'autre (qui peut être absent puis revenir). Le 1er « Fin de
     // match » crée le lobby 'Ongoing' → preuve uploadable par les 2 joueurs.
-    this.onMessage("finish", client => {
+    this.onMessage("finish", (client) => {
       const userId = this.sessionToUser.get(client.sessionId);
       if (!userId) return;
       const p = this.state.players.get(userId);
@@ -173,40 +175,49 @@ export class MatchRoom extends Room<{ state: MatchState }> {
     // Saisie du score COMPLET du point de vue du joueur : { myScore, oppScore }.
     // Autorisé dès qu'on joue (entre alors en phase de saisie au besoin) — chaque
     // joueur saisit indépendamment de l'autre.
-    this.onMessage("submitScore", (client, payload: { myScore: number; oppScore: number }) => {
-      const userId = this.sessionToUser.get(client.sessionId);
-      if (!userId) return;
-      if (this.state.status !== "playing" && this.state.status !== "scoring") return;
-      const p = this.state.players.get(userId);
-      if (!p) return;
-      // Re-soumission ignorée une fois validé (anti double-saisie / double-télémétrie).
-      if (p.submitted) return;
-      p.myScore = clampScore(payload?.myScore);
-      p.oppScore = clampScore(payload?.oppScore);
-      p.submitted = true;
-      void logMatchEvent({
-        type: "score_submitted",
-        lobbyId: this.state.lobbyId || null,
-        roomCode: this.state.roomCode,
-        mode: this.state.mode,
-        userId,
-        detail: { myScore: p.myScore, oppScore: p.oppScore },
-      });
-      void this.ensureScoringStarted().then(() => {
-        // Persistance AU FIL DE L'EAU : le score saisi survit à un crash/restart du bot
-        // (l'état Colyseus en mémoire, lui, serait perdu).
-        if (this.state.lobbyId > 0) {
-          void recordLobbyUserScore(this.state.lobbyId, userId, p.myScore, p.oppScore).catch(err =>
-            console.error("[ranked] recordLobbyUserScore failed", err),
-          );
-        }
-        return this.evaluateScores();
-      });
-    });
+    this.onMessage(
+      "submitScore",
+      (client, payload: { myScore: number; oppScore: number }) => {
+        const userId = this.sessionToUser.get(client.sessionId);
+        if (!userId) return;
+        if (this.state.status !== "playing" && this.state.status !== "scoring")
+          return;
+        const p = this.state.players.get(userId);
+        if (!p) return;
+        // Re-soumission ignorée une fois validé (anti double-saisie / double-télémétrie).
+        if (p.submitted) return;
+        p.myScore = clampScore(payload?.myScore);
+        p.oppScore = clampScore(payload?.oppScore);
+        p.submitted = true;
+        void logMatchEvent({
+          type: "score_submitted",
+          lobbyId: this.state.lobbyId || null,
+          roomCode: this.state.roomCode,
+          mode: this.state.mode,
+          userId,
+          detail: { myScore: p.myScore, oppScore: p.oppScore },
+        });
+        void this.ensureScoringStarted().then(() => {
+          // Persistance AU FIL DE L'EAU : le score saisi survit à un crash/restart du bot
+          // (l'état Colyseus en mémoire, lui, serait perdu).
+          if (this.state.lobbyId > 0) {
+            void recordLobbyUserScore(
+              this.state.lobbyId,
+              userId,
+              p.myScore,
+              p.oppScore,
+            ).catch((err) =>
+              console.error("[ranked] recordLobbyUserScore failed", err),
+            );
+          }
+          return this.evaluateScores();
+        });
+      },
+    );
 
     // Le joueur a uploadé sa preuve via l'API REST → on le reflète dans le state
     // (l'upload binaire ne passe pas par Colyseus, cf. main.ts /dispute).
-    this.onMessage("proofUploaded", client => {
+    this.onMessage("proofUploaded", (client) => {
       const userId = this.sessionToUser.get(client.sessionId);
       if (!userId) return;
       const p = this.state.players.get(userId);
@@ -217,7 +228,7 @@ export class MatchRoom extends Room<{ state: MatchState }> {
     // « Abandonner » : ce joueur déclare forfait immédiatement → l'adversaire gagne
     // (1-0). En classé l'ELO est appliqué (défaite réelle), en non classé c'est sans
     // conséquence. Idempotent et bloqué une fois le match résolu.
-    this.onMessage("surrender", client => {
+    this.onMessage("surrender", (client) => {
       void this.handleSurrender(client);
     });
   }
@@ -244,7 +255,11 @@ export class MatchRoom extends Room<{ state: MatchState }> {
     await this.finalizeMatch(ha.home, ha.away, s1, s2, userId);
   }
 
-  override async onAuth(_client: Client, options: any, request: any): Promise<SessionUser> {
+  override async onAuth(
+    _client: Client,
+    options: any,
+    request: any,
+  ): Promise<SessionUser> {
     const auth = await authFromColyseus(options, request);
     if (auth) return auth;
     throw new Error("Non authentifié");
@@ -282,15 +297,20 @@ export class MatchRoom extends Room<{ state: MatchState }> {
 
   /** Snapshot ScoreInput pur d'un joueur (pour la logique de résolution testable). */
   private toScoreInput(p: PlayerState): ScoreInput {
-    return { userId: p.userId, myScore: p.myScore, oppScore: p.oppScore, submitted: p.submitted };
+    return {
+      userId: p.userId,
+      myScore: p.myScore,
+      oppScore: p.oppScore,
+      submitted: p.submitted,
+    };
   }
 
   /** Joueur à domicile (team 1) / extérieur (team 2), avec repli sur l'ordre d'insertion. */
   private homeAway(): { home: PlayerState; away: PlayerState } | null {
     const ps = Array.from(this.state.players.values());
     if (ps.length !== 2) return null;
-    const home = ps.find(p => p.team === 1) ?? ps[0];
-    const away = ps.find(p => p.team === 2) ?? ps[1];
+    const home = ps.find((p) => p.team === 1) ?? ps[0];
+    const away = ps.find((p) => p.team === 2) ?? ps[1];
     return { home, away };
   }
 
@@ -300,7 +320,8 @@ export class MatchRoom extends Room<{ state: MatchState }> {
    * les 2 joueurs puissent uploader une preuve.
    */
   private async ensureScoringStarted(): Promise<void> {
-    if (this.state.status === "finished" || this.state.status === "disputed") return;
+    if (this.state.status === "finished" || this.state.status === "disputed")
+      return;
 
     if (this.state.status !== "scoring") {
       this.state.status = "scoring";
@@ -374,7 +395,11 @@ export class MatchRoom extends Room<{ state: MatchState }> {
     }
     const { home, away } = ha;
 
-    const outcome = resolveScores(this.toScoreInput(home), this.toScoreInput(away), forced);
+    const outcome = resolveScores(
+      this.toScoreInput(home),
+      this.toScoreInput(away),
+      forced,
+    );
 
     switch (outcome.kind) {
       case "wait":
@@ -389,7 +414,13 @@ export class MatchRoom extends Room<{ state: MatchState }> {
         await this.finalizeMatch(home, away, outcome.s1, outcome.s2);
         return;
       case "forfeit":
-        await this.finalizeMatch(home, away, outcome.s1, outcome.s2, outcome.forfeitUserId);
+        await this.finalizeMatch(
+          home,
+          away,
+          outcome.s1,
+          outcome.s2,
+          outcome.forfeitUserId,
+        );
         return;
       case "dispute":
         void logMatchEvent({
@@ -440,7 +471,10 @@ export class MatchRoom extends Room<{ state: MatchState }> {
   }
 
   /** Non classé au timeout sans accord : clôt la partie en « nulle » (aucun ELO, aucune persistance). */
-  private async finalizeVoid(home: PlayerState, away: PlayerState): Promise<void> {
+  private async finalizeVoid(
+    home: PlayerState,
+    away: PlayerState,
+  ): Promise<void> {
     if (this.finishedPersisted) return;
     this.finishedPersisted = true;
     this.state.status = "finished";
@@ -449,11 +483,26 @@ export class MatchRoom extends Room<{ state: MatchState }> {
       roomCode: this.state.roomCode,
       mode: this.state.mode,
     });
-    this.broadcastEnded(home, away, 0, 0, undefined, { p1: 0, p2: 0 }, { p1: 0, p2: 0 }, 0);
+    this.broadcastEnded(
+      home,
+      away,
+      0,
+      0,
+      undefined,
+      { p1: 0, p2: 0 },
+      { p1: 0, p2: 0 },
+      0,
+    );
   }
 
   /** Persiste + applique l'ELO + diffuse le résultat (nul possible, forfait possible). */
-  private async finalizeMatch(home: PlayerState, away: PlayerState, s1: number, s2: number, forfeitUserId?: string) {
+  private async finalizeMatch(
+    home: PlayerState,
+    away: PlayerState,
+    s1: number,
+    s2: number,
+    forfeitUserId?: string,
+  ) {
     if (this.finishedPersisted) return;
     this.finishedPersisted = true;
 
@@ -501,14 +550,21 @@ export class MatchRoom extends Room<{ state: MatchState }> {
 
       if (this.state.lobbyId > 0) {
         // Cas normal : le lobby 'Ongoing' existe → on le finalise (UPDATE).
-        const res = await finalizeOngoingLobby(this.state.lobbyId, matchInput, this.kFactor);
+        const res = await finalizeOngoingLobby(
+          this.state.lobbyId,
+          matchInput,
+          this.kFactor,
+        );
         lobbyId = res.lobbyId;
         eloAfter = res.eloAfter;
         deltas = res.eloDelta;
       } else {
         // Repli (lobby jamais créé, ex. saisie échouée) : création + application directe.
         const eventId = await getOrCreatePerpetualRankedEventId();
-        const res = await persistAndApplyMatch({ ...matchInput, eventId }, this.kFactor);
+        const res = await persistAndApplyMatch(
+          { ...matchInput, eventId },
+          this.kFactor,
+        );
         lobbyId = res.lobbyId;
         eloAfter = res.eloAfter;
         deltas = res.eloDelta;
@@ -530,7 +586,16 @@ export class MatchRoom extends Room<{ state: MatchState }> {
         },
       });
 
-      this.broadcastEnded(home, away, s1, s2, forfeitUserId, eloAfter, deltas, lobbyId);
+      this.broadcastEnded(
+        home,
+        away,
+        s1,
+        s2,
+        forfeitUserId,
+        eloAfter,
+        deltas,
+        lobbyId,
+      );
     } catch (err) {
       console.error("[ranked] finalizeMatch failed", err);
       this.finishedPersisted = false; // permet une nouvelle tentative
@@ -585,7 +650,8 @@ export class MatchRoom extends Room<{ state: MatchState }> {
   /** Désaccord : passe le lobby en 'Contested' avec les 2 scorelines réclamées + demande la preuve. */
   private async toDispute(home: PlayerState, away: PlayerState) {
     this.state.status = "disputed";
-    this.state.disputeReason = "Scores différents — envoyez une capture de preuve, un admin tranchera.";
+    this.state.disputeReason =
+      "Scores différents — envoyez une capture de preuve, un admin tranchera.";
     try {
       const disputeInput = {
         eventId: 0,
@@ -608,7 +674,10 @@ export class MatchRoom extends Room<{ state: MatchState }> {
         await contestOngoingLobby(this.state.lobbyId, disputeInput);
       } else {
         const eventId = await getOrCreatePerpetualRankedEventId();
-        const { lobbyId } = await persistDisputedLobby({ ...disputeInput, eventId });
+        const { lobbyId } = await persistDisputedLobby({
+          ...disputeInput,
+          eventId,
+        });
         this.state.lobbyId = lobbyId;
       }
     } catch (err) {

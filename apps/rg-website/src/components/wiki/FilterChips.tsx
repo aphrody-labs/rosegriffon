@@ -22,12 +22,17 @@ export interface FilterChipsProps {
   hideLabel?: boolean;
 }
 
-export function FilterChips({ paramName, options, className, hideLabel }: FilterChipsProps) {
+export function FilterChips({
+  paramName,
+  options,
+  className,
+  hideLabel,
+}: FilterChipsProps) {
   const { isPending, navigate, searchParams } = useFilterNavigation();
   const currentValue = searchParams.get(paramName);
 
   const toggleFilter = (value: string) => {
-    navigate(params => {
+    navigate((params) => {
       if (params.get(paramName) === value) {
         params.delete(paramName);
       } else {
@@ -37,10 +42,17 @@ export function FilterChips({ paramName, options, className, hideLabel }: Filter
   };
 
   return (
-    <div className={cn("flex flex-wrap gap-2", isPending && "pointer-events-none opacity-70", className)}>
-      {options.map(option => {
+    <div
+      className={cn(
+        "flex flex-wrap gap-2",
+        isPending && "pointer-events-none opacity-70",
+        className,
+      )}
+    >
+      {options.map((option) => {
         const isSelected = currentValue === option.value;
-        const isImageOnly = hideLabel && (option.imageIcon || option.commonSprite || option.icon);
+        const isImageOnly =
+          hideLabel && (option.imageIcon || option.commonSprite || option.icon);
 
         return (
           <button
@@ -65,7 +77,9 @@ export function FilterChips({ paramName, options, className, hideLabel }: Filter
             )}
           >
             {option.imageIcon ? (
-              <div className={cn("relative", isImageOnly ? "size-10" : "size-6")}>
+              <div
+                className={cn("relative", isImageOnly ? "size-10" : "size-6")}
+              >
                 <Image
                   src={option.imageIcon}
                   fill
@@ -75,7 +89,10 @@ export function FilterChips({ paramName, options, className, hideLabel }: Filter
                 />
               </div>
             ) : option.commonSprite ? (
-              <CommonSpriteIcon name={option.commonSprite as SpriteCommonKey} scale={isImageOnly ? 0.6 : 0.4} />
+              <CommonSpriteIcon
+                name={option.commonSprite as SpriteCommonKey}
+                scale={isImageOnly ? 0.6 : 0.4}
+              />
             ) : option.icon ? (
               <Icon name={option.icon} size={isImageOnly ? 28 : 20} />
             ) : null}

@@ -45,7 +45,10 @@ function EventCard({ event }: EventCardProps) {
           className="relative p-2 sm:p-3 rounded-xl transition-transform duration-300 group-hover:scale-110"
           style={{ backgroundColor: "rgba(161, 75, 63, 0.1)" }}
         >
-          <CalendarDays className="size-6 sm:w-7 sm:h-7" style={{ color: "#a14b3f" }} />
+          <CalendarDays
+            className="size-6 sm:w-7 sm:h-7"
+            style={{ color: "#a14b3f" }}
+          />
           {isUpcoming && (
             <div
               className="absolute -top-0.5 -right-0.5 sm:-top-1 sm:-right-1 w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full animate-pulse"
@@ -61,7 +64,10 @@ function EventCard({ event }: EventCardProps) {
           {event.summary}
         </h3>
         <div className="flex flex-col gap-0.5 sm:gap-1">
-          <p className="text-xs sm:text-sm font-medium" style={{ color: "#a14b3f" }}>
+          <p
+            className="text-xs sm:text-sm font-medium"
+            style={{ color: "#a14b3f" }}
+          >
             📅 {format(eventDate, "EEEE dd MMMM yyyy", { locale: fr })}
           </p>
           <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
@@ -84,7 +90,11 @@ function EventCard({ event }: EventCardProps) {
           className="relative mt-3 sm:mt-4 md:mt-0 md:ml-4 text-white hover:scale-105 transition-all duration-300 shadow-md hover:shadow-lg group/btn overflow-hidden w-full sm:w-auto"
           style={{ backgroundColor: "#a14b3f" }}
         >
-          <Link href={event.extendedProperties.shared.eventLink} target="_blank" rel="noopener noreferrer">
+          <Link
+            href={event.extendedProperties.shared.eventLink}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             <span className="absolute inset-0 bg-white opacity-0 group-hover/btn:opacity-20 transition-opacity duration-300" />
             <span className="relative flex items-center justify-center text-xs sm:text-sm">
               Rejoindre l&apos;événement

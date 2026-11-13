@@ -36,6 +36,9 @@ describe("marqueur de NULL du dump", () => {
   });
 
   test("les valeurs normales traversent sans modification", () => {
-    expect(parse({ nom: "Mark Evans", id: 42 })).toEqual({ nom: "Mark Evans", id: 42 });
+    expect(parse({ nom: "Mark Evans", id: 42 })).toEqual({
+      nom: "Mark Evans",
+      id: 42,
+    });
   });
 });

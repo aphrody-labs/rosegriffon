@@ -21,7 +21,7 @@ const allowedOrigins = new Set(
     "https://www.rosegriffon.fr",
     ...(process.env.WEB_ALLOWED_ORIGINS ?? "").split(","),
   ]
-    .map(origin => origin?.trim().replace(/\/$/, ""))
+    .map((origin) => origin?.trim().replace(/\/$/, ""))
     .filter((origin): origin is string => Boolean(origin)),
 );
 
@@ -31,12 +31,17 @@ export const app = new Elysia()
     cors({
       // Credentials and wildcard origins are incompatible. Reflect only the
       // explicitly configured first-party origins.
-      origin: request => {
+      origin: (request) => {
         const origin = request.headers.get("origin");
         return !origin || allowedOrigins.has(origin);
       },
       methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-      allowedHeaders: ["Content-Type", "Authorization", "X-Api-Key", "X-Internal-Secret"],
+      allowedHeaders: [
+        "Content-Type",
+        "Authorization",
+        "X-Api-Key",
+        "X-Internal-Secret",
+      ],
       credentials: true,
     }),
   )
@@ -49,7 +54,8 @@ export const app = new Elysia()
         info: {
           title: "Rose Griffon Unified API",
           version: "3.0.0",
-          description: "API unique du monorepo Rose Griffon (ElysiaJS + Kysely + Bun)",
+          description:
+            "API unique du monorepo Rose Griffon (ElysiaJS + Kysely + Bun)",
         },
       },
     }),
@@ -58,12 +64,18 @@ export const app = new Elysia()
   // à la racine : monté sur `/`, il recevait toute URL inconnue et interrogeait la base pour
   // répondre — 500 au lieu de 404 dès que Postgres manquait. Les routes explicites de
   // `authController` (`/v1/auth/realtime-token`, `/v1/auth/logout`…) restent prioritaires.
-  .all("/v1/auth/*", ({ request }) => elysiaAuth.handler(request), { parse: "none" })
-  .all("/.well-known/*", ({ request }) => elysiaAuth.handler(request), { parse: "none" })
+  .all("/v1/auth/*", ({ request }) => elysiaAuth.handler(request), {
+    parse: "none",
+  })
+  .all("/.well-known/*", ({ request }) => elysiaAuth.handler(request), {
+    parse: "none",
+  })
   .get("/.well-known/agent-configuration", ({ request }) =>
     (
       elysiaAuth.api as unknown as {
-        getAgentConfiguration: (input: { headers: Headers }) => Promise<Response>;
+        getAgentConfiguration: (input: {
+          headers: Headers;
+        }) => Promise<Response>;
       }
     ).getAgentConfiguration({ headers: request.headers }),
   )
@@ -78,13 +90,16 @@ export const app = new Elysia()
   .all(
     "/v1/cron/*",
     ({ request, server }) => {
-      if (new URL(request.url).searchParams.get("attendre") === "1") server?.timeout(request, 0);
+      if (new URL(request.url).searchParams.get("attendre") === "1")
+        server?.timeout(request, 0);
       return handleCronHttp(request);
     },
     { parse: "none" },
   )
-  .post("/v1/discord/announce", ({ request }) => handleAnnounceHttp(request), { parse: "none" })
-  .group("/v1", v1 =>
+  .post("/v1/discord/announce", ({ request }) => handleAnnounceHttp(request), {
+    parse: "none",
+  })
+  .group("/v1", (v1) =>
     v1
       .use(achilleaModule)
       .use(wikiController)
@@ -98,7 +113,10 @@ export const app = new Elysia()
       // the executor reads the bot token and loads the command modules.
       .post(
         "/discord/interactions/execute",
-        async ({ request }) => (await import("../interactions/executor")).executerInteractionDiscord(request),
+        async ({ request }) =>
+          (await import("../interactions/executor")).executerInteractionDiscord(
+            request,
+          ),
         { parse: "none" },
       ),
   );
@@ -108,8 +126,12 @@ const HOST = process.env.API_HOST ?? "0.0.0.0";
 
 export function startApiServer(port = PORT, host = HOST) {
   return app.listen({ port, hostname: host }, () => {
-    console.info(`[rg-api] Rose Griffon Unified API listening on http://${host}:${port}`);
-    console.info(`[rg-api] OpenAPI documentation available on http://${host}:${port}/docs`);
+    console.info(
+      `[rg-api] Rose Griffon Unified API listening on http://${host}:${port}`,
+    );
+    console.info(
+      `[rg-api] OpenAPI documentation available on http://${host}:${port}/docs`,
+    );
   });
 }
 

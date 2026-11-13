@@ -1,5 +1,8 @@
 import { afterEach, expect, test } from "bun:test";
-import { cfgbinPostgresEnabled, cfgbinPostgresLoadByPath } from "./cfgbin-db.js";
+import {
+  cfgbinPostgresEnabled,
+  cfgbinPostgresLoadByPath,
+} from "./cfgbin-db.js";
 
 const keys = [
   "INAGLE_DATA_SOURCE",
@@ -9,7 +12,7 @@ const keys = [
   "NEXT_PUBLIC_ASSET_URL",
   "NIE_DATA_SOURCE",
 ] as const;
-const original = Object.fromEntries(keys.map(key => [key, process.env[key]]));
+const original = Object.fromEntries(keys.map((key) => [key, process.env[key]]));
 afterEach(() => {
   for (const key of keys) {
     if (original[key] === undefined) delete process.env[key];
@@ -21,11 +24,12 @@ test("unrelated database configuration does not activate external game data", as
   delete process.env.INAGLE_DATA_SOURCE;
   delete process.env.NIE_DATA_SOURCE;
   delete process.env.IEVR_CFGBIN_POSTGRES;
-  for (const key of keys.slice(2, 6)) process.env[key] = "postgres://unused.invalid/test";
+  for (const key of keys.slice(2, 6))
+    process.env[key] = "postgres://unused.invalid/test";
   expect(cfgbinPostgresEnabled()).toBe(false);
-  await expect(cfgbinPostgresLoadByPath("data/common/gamedata/test.cfg.bin")).rejects.toThrow(
-    "cfgbin-postgres: disabled",
-  );
+  await expect(
+    cfgbinPostgresLoadByPath("data/common/gamedata/test.cfg.bin"),
+  ).rejects.toThrow("cfgbin-postgres: disabled");
 });
 
 test("explicit PostgreSQL selection works and explicit opt-out wins", () => {
@@ -47,6 +51,8 @@ test("asset paths default to the local origin without a remote mirror", async ()
   const local = await import(`./paths.ts?local=${crypto.randomUUID()}`);
   expect(local.CDN_URL).toBe("");
   process.env.NEXT_PUBLIC_ASSET_URL = "https://assets.example.invalid///";
-  const configured = await import(`./paths.ts?configured=${crypto.randomUUID()}`);
+  const configured = await import(
+    `./paths.ts?configured=${crypto.randomUUID()}`
+  );
   expect(configured.CDN_URL).toBe("https://assets.example.invalid");
 });

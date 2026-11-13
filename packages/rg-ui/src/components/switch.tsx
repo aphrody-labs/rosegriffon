@@ -5,7 +5,12 @@ import { childRender, type PrimitiveProps } from "../lib/render";
 
 import { cn } from "../lib/utils";
 
-function Switch({ className, asChild, children, ...props }: PrimitiveProps<typeof SwitchPrimitive.Root>) {
+function Switch({
+  className,
+  asChild,
+  children,
+  ...props
+}: PrimitiveProps<typeof SwitchPrimitive.Root>) {
   return (
     <SwitchPrimitive.Root
       render={childRender(asChild, children)}

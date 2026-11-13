@@ -95,7 +95,10 @@ const CHOIX_PORTEE = [
 /** Format accepté par toutes les options de date, répété tel quel dans Discord. */
 const FORMAT_DATE = "2026-05-01 20:00 (ou 2026-05-01T20:00:00+02:00)";
 
-async function listerEvenements(portee: PorteeEvenement, limite: number): Promise<EvenementAdmin[]> {
+async function listerEvenements(
+  portee: PorteeEvenement,
+  limite: number,
+): Promise<EvenementAdmin[]> {
   // Trois requêtes plutôt qu'un prédicat paramétré : l'ORDRE change avec la
   // portée. Le prochain événement se lit du plus proche au plus lointain, les
   // passés du plus récent au plus ancien — l'inverse mettrait en tête un
@@ -167,13 +170,18 @@ async function indexEvenements(): Promise<EvenementAdmin[]> {
 
 /** Compte total, pour dire « 3 affichés sur 12 » au lieu de laisser croire à 3. */
 async function compterEvenements(): Promise<number> {
-  const [ligne] = await sql<Array<{ total: number }>>`SELECT count(*)::int AS total FROM events`;
+  const [ligne] = await sql<
+    Array<{ total: number }>
+  >`SELECT count(*)::int AS total FROM events`;
   return ligne?.total ?? 0;
 }
 
 /** Une ligne de liste : titre, plage lue dans le fuseau du lecteur, lieu. */
 function ligneEvenement(evenement: EvenementAdmin): string {
-  const morceaux = [`**${truncate(evenement.title, 90)}**`, `\`${abregerIdentifiant(evenement.id)}\``];
+  const morceaux = [
+    `**${truncate(evenement.title, 90)}**`,
+    `\`${abregerIdentifiant(evenement.id)}\``,
+  ];
   const detail = [
     `du ${horodatageAbsolu(evenement.start_time)} au ${horodatageAbsolu(evenement.end_time)}`,
     horodatageRelatif(evenement.start_time),
@@ -189,14 +197,28 @@ function ficheEvenement(evenement: EvenementAdmin) {
   const embed = rgEmbed()
     .setTitle(truncate(evenement.title, 240))
     .addFields(
-      { name: "Début", value: horodatageAbsolu(evenement.start_time), inline: true },
-      { name: "Fin", value: horodatageAbsolu(evenement.end_time), inline: true },
-      { name: "Dans", value: horodatageRelatif(evenement.start_time), inline: true },
+      {
+        name: "Début",
+        value: horodatageAbsolu(evenement.start_time),
+        inline: true,
+      },
+      {
+        name: "Fin",
+        value: horodatageAbsolu(evenement.end_time),
+        inline: true,
+      },
+      {
+        name: "Dans",
+        value: horodatageRelatif(evenement.start_time),
+        inline: true,
+      },
       // `?? ` ne suffit pas : une chaîne VIDE écrite depuis l'administration du
       // site ferait rejeter l'embed entier (Discord refuse un champ sans valeur).
       {
         name: "Lieu",
-        value: evenement.location?.trim() ? truncate(evenement.location, 900) : "*non renseigné*",
+        value: evenement.location?.trim()
+          ? truncate(evenement.location, 900)
+          : "*non renseigné*",
         inline: true,
       },
       { name: "Identifiant", value: `\`${evenement.id}\`` },
@@ -222,7 +244,10 @@ function ficheEvenement(evenement: EvenementAdmin) {
 })
 @SlashGroup("evenement", "gestion")
 export class AdministrationEvenementCommand {
-  @Slash({ name: "liste", description: "Les événements enregistrés dans la table `events`" })
+  @Slash({
+    name: "liste",
+    description: "Les événements enregistrés dans la table `events`",
+  })
   async liste(
     @SlashChoice(...CHOIX_PORTEE)
     @SlashOption({
@@ -247,9 +272,13 @@ export class AdministrationEvenementCommand {
     if (!(await exigerDroits(interaction))) {
       return;
     }
-    const choisie: PorteeEvenement = portee === "passes" || portee === "tous" ? portee : "a-venir";
+    const choisie: PorteeEvenement =
+      portee === "passes" || portee === "tous" ? portee : "a-venir";
     try {
-      const [evenements, total] = await Promise.all([listerEvenements(choisie, nombre ?? 10), compterEvenements()]);
+      const [evenements, total] = await Promise.all([
+        listerEvenements(choisie, nombre ?? 10),
+        compterEvenements(),
+      ]);
 
       if (evenements.length === 0) {
         await interaction.editReply({
@@ -258,15 +287,22 @@ export class AdministrationEvenementCommand {
               ? "La table `events` est **vide**. Tant qu'elle le reste, " +
                 "`rosegriffon.fr/evenements` affiche l'agenda Google ; le premier " +
                 "événement créé ici prendra sa place intégralement."
-              : `Aucun événement dans cette portée (${total} au total). ` + "Essaie `portee: Tous`.",
+              : `Aucun événement dans cette portée (${total} au total). ` +
+                "Essaie `portee: Tous`.",
         });
         return;
       }
 
-      const libelle = CHOIX_PORTEE.find(choix => choix.value === choisie)?.name ?? "À venir";
+      const libelle =
+        CHOIX_PORTEE.find((choix) => choix.value === choisie)?.name ??
+        "À venir";
       const embed = rgEmbed()
-        .setTitle(`${evenements.length} événement${evenements.length > 1 ? "s" : ""} — ${libelle}`)
-        .setDescription(borner(evenements.map(ligneEvenement).join("\n\n"), 4_000))
+        .setTitle(
+          `${evenements.length} événement${evenements.length > 1 ? "s" : ""} — ${libelle}`,
+        )
+        .setDescription(
+          borner(evenements.map(ligneEvenement).join("\n\n"), 4_000),
+        )
         .setFooter(
           piedTexte({
             note: `${total} événement${total > 1 ? "s" : ""} en base · source de rosegriffon.fr/evenements`,
@@ -274,11 +310,17 @@ export class AdministrationEvenementCommand {
         );
       await interaction.editReply({ embeds: [embed] });
     } catch (err) {
-      await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
+      await repondre(
+        interaction,
+        echec("Le service n'a pas répondu", messagePanne(err)),
+      );
     }
   }
 
-  @Slash({ name: "creer", description: "Ajouter un événement à l'agenda public" })
+  @Slash({
+    name: "creer",
+    description: "Ajouter un événement à l'agenda public",
+  })
   async creer(
     @SlashOption({
       name: "titre",
@@ -335,7 +377,9 @@ export class AdministrationEvenementCommand {
     const debutLu = analyserDate(debut);
     const finLue = analyserDate(fin);
     if (!debutLu || !finLue) {
-      await interaction.editReply({ content: refusDeDate(debutLu !== null, finLue !== null) });
+      await interaction.editReply({
+        content: refusDeDate(debutLu !== null, finLue !== null),
+      });
       return;
     }
     const plage = verifierPlageTemporelle(debutLu, finLue);
@@ -346,7 +390,8 @@ export class AdministrationEvenementCommand {
     const imageLue = lireChampTextuel(image);
     if (imageLue.valeur && !urlAcceptable(imageLue.valeur)) {
       await interaction.editReply({
-        content: "❌ L'illustration doit être une URL `http` ou `https` complète.",
+        content:
+          "❌ L'illustration doit être une URL `http` ou `https` complète.",
       });
       return;
     }
@@ -390,15 +435,22 @@ export class AdministrationEvenementCommand {
           note: "Créé · la table `events` prend désormais le pas sur l'agenda Google",
         }),
       );
-      await interaction.editReply({ content: "✅ Événement créé.", embeds: [embed] });
+      await interaction.editReply({
+        content: "✅ Événement créé.",
+        embeds: [embed],
+      });
     } catch (err) {
-      await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
+      await repondre(
+        interaction,
+        echec("Le service n'a pas répondu", messagePanne(err)),
+      );
     }
   }
 
   @Slash({
     name: "modifier",
-    description: "Changer un événement — les champs omis restent inchangés, « - » les vide",
+    description:
+      "Changer un événement — les champs omis restent inchangés, « - » les vide",
   })
   async modifier(
     @SlashOption({
@@ -479,7 +531,10 @@ export class AdministrationEvenementCommand {
     const finLue = fin === undefined ? null : analyserDate(fin);
     if ((debut !== undefined && !debutLu) || (fin !== undefined && !finLue)) {
       await interaction.editReply({
-        content: refusDeDate(debut === undefined || debutLu !== null, fin === undefined || finLue !== null),
+        content: refusDeDate(
+          debut === undefined || debutLu !== null,
+          fin === undefined || finLue !== null,
+        ),
       });
       return;
     }
@@ -490,9 +545,14 @@ export class AdministrationEvenementCommand {
       });
       return;
     }
-    if (imageLue.fourni && imageLue.valeur !== null && !urlAcceptable(imageLue.valeur)) {
+    if (
+      imageLue.fourni &&
+      imageLue.valeur !== null &&
+      !urlAcceptable(imageLue.valeur)
+    ) {
       await interaction.editReply({
-        content: "❌ L'illustration doit être une URL `http` ou `https` complète.",
+        content:
+          "❌ L'illustration doit être une URL `http` ou `https` complète.",
       });
       return;
     }
@@ -544,7 +604,8 @@ export class AdministrationEvenementCommand {
 			`;
       if (!apres) {
         await interaction.editReply({
-          content: "L'événement a disparu entre la lecture et l'écriture. Rien n'a été modifié.",
+          content:
+            "L'événement a disparu entre la lecture et l'écriture. Rien n'a été modifié.",
         });
         return;
       }
@@ -568,14 +629,25 @@ export class AdministrationEvenementCommand {
       });
 
       invalidate(CLEF_INDEX);
-      const embed = ficheEvenement(apres).setFooter(piedTexte({ note: "Modifié" }));
-      await interaction.editReply({ content: "✅ Événement mis à jour.", embeds: [embed] });
+      const embed = ficheEvenement(apres).setFooter(
+        piedTexte({ note: "Modifié" }),
+      );
+      await interaction.editReply({
+        content: "✅ Événement mis à jour.",
+        embeds: [embed],
+      });
     } catch (err) {
-      await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
+      await repondre(
+        interaction,
+        echec("Le service n'a pas répondu", messagePanne(err)),
+      );
     }
   }
 
-  @Slash({ name: "supprimer", description: "Retirer définitivement un événement de l'agenda" })
+  @Slash({
+    name: "supprimer",
+    description: "Retirer définitivement un événement de l'agenda",
+  })
   async supprimer(
     @SlashOption({
       name: "identifiant",
@@ -601,7 +673,8 @@ export class AdministrationEvenementCommand {
     }
     if (!estConfirme(confirmation)) {
       await interaction.editReply({
-        content: "Suppression annulée : il faut écrire « oui » dans `confirmation`.",
+        content:
+          "Suppression annulée : il faut écrire « oui » dans `confirmation`.",
       });
       return;
     }
@@ -659,7 +732,10 @@ export class AdministrationEvenementCommand {
         content: `🗑 **${truncate(supprime.title, 120)}** supprimé de l'agenda.\n${suite}`,
       });
     } catch (err) {
-      await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
+      await repondre(
+        interaction,
+        echec("Le service n'a pas répondu", messagePanne(err)),
+      );
     }
   }
 }
@@ -675,7 +751,9 @@ export class AdministrationEvenementCommand {
  * Une autocomplétion qui lève laisse le champ figé sur « chargement… » : on
  * répond une liste vide plutôt que rien du tout.
  */
-async function proposerEvenements(interaction: AutocompleteInteraction): Promise<void> {
+async function proposerEvenements(
+  interaction: AutocompleteInteraction,
+): Promise<void> {
   try {
     const saisie = String(interaction.options.getFocused() ?? "")
       .trim()
@@ -683,14 +761,19 @@ async function proposerEvenements(interaction: AutocompleteInteraction): Promise
     const index = await indexEvenements();
     const retenus = index
       .filter(
-        evenement =>
-          saisie.length === 0 || evenement.title.toLowerCase().includes(saisie) || evenement.id.startsWith(saisie),
+        (evenement) =>
+          saisie.length === 0 ||
+          evenement.title.toLowerCase().includes(saisie) ||
+          evenement.id.startsWith(saisie),
       )
       // Discord refuse au-delà de 25 propositions.
       .slice(0, 25);
     await interaction.respond(
-      retenus.map(evenement => ({
-        name: truncate(`${evenement.title} — ${dateCourte(evenement.start_time)}`, 100),
+      retenus.map((evenement) => ({
+        name: truncate(
+          `${evenement.title} — ${dateCourte(evenement.start_time)}`,
+          100,
+        ),
         value: evenement.id,
       })),
     );

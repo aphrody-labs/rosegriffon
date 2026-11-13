@@ -17,12 +17,19 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 /** Identifiant Discord (snowflake) : uniquement des chiffres. */
-const snowflake = z.string().regex(/^\d{15,25}$/, "identifiant Discord invalide");
+const snowflake = z
+  .string()
+  .regex(/^\d{15,25}$/, "identifiant Discord invalide");
 
 const schemaRequete = z.object({
   before: snowflake.nullish(),
   channel: snowflake,
-  limit: z.coerce.number().int().min(1).max(LIMITE_MESSAGES).default(MESSAGES_PAR_DEFAUT),
+  limit: z.coerce
+    .number()
+    .int()
+    .min(1)
+    .max(LIMITE_MESSAGES)
+    .default(MESSAGES_PAR_DEFAUT),
 });
 
 export async function GET(request: NextRequest) {
@@ -35,7 +42,10 @@ export async function GET(request: NextRequest) {
 
   if (!analyse.success) {
     return Response.json(
-      { erreur: "Paramètres invalides.", details: analyse.error.issues.map(i => i.message) },
+      {
+        erreur: "Paramètres invalides.",
+        details: analyse.error.issues.map((i) => i.message),
+      },
       { status: 400 },
     );
   }
@@ -44,7 +54,10 @@ export async function GET(request: NextRequest) {
 
   // Un salon non suivi n'est jamais republié, même si son identifiant est connu.
   if (!(await salonEstSuivi(channel))) {
-    return Response.json({ erreur: "Salon introuvable ou non republié." }, { status: 404 });
+    return Response.json(
+      { erreur: "Salon introuvable ou non republié." },
+      { status: 404 },
+    );
   }
 
   const messages = await listerMessages({ before, channelId: channel, limit });

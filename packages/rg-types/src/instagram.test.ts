@@ -42,7 +42,9 @@ describe("formes acceptées d'un permalien", () => {
   });
 
   test("la forme AVEC le pseudo — celle du post réel de la campagne", () => {
-    expect(analyserPermalien(`https://www.instagram.com/rose_griffonfr/p/${CODE}/`)).toEqual({
+    expect(
+      analyserPermalien(`https://www.instagram.com/rose_griffonfr/p/${CODE}/`),
+    ).toEqual({
       permalien: CANONIQUE,
       pseudo: "rose_griffonfr",
       shortcode: CODE,
@@ -50,8 +52,12 @@ describe("formes acceptées d'un permalien", () => {
   });
 
   test("un reel, une vidéo IGTV", () => {
-    expect(analyserPermalien(`https://www.instagram.com/reel/${CODE}/`)?.shortcode).toBe(CODE);
-    expect(analyserPermalien(`https://www.instagram.com/tv/${CODE}/`)?.shortcode).toBe(CODE);
+    expect(
+      analyserPermalien(`https://www.instagram.com/reel/${CODE}/`)?.shortcode,
+    ).toBe(CODE);
+    expect(
+      analyserPermalien(`https://www.instagram.com/tv/${CODE}/`)?.shortcode,
+    ).toBe(CODE);
   });
 
   test("sans protocole, sans www, sans barre finale", () => {
@@ -68,13 +74,17 @@ describe("formes acceptées d'un permalien", () => {
     // Il identifie le partageur, pas la publication : le garder stockerait une
     // donnée de pistage, et deux membres partageant le même post créeraient
     // deux lignes au lieu d'une.
-    const r = analyserPermalien(`https://www.instagram.com/p/${CODE}/?igsh=MzRlODBiNWFlZA%3D%3D`);
+    const r = analyserPermalien(
+      `https://www.instagram.com/p/${CODE}/?igsh=MzRlODBiNWFlZA%3D%3D`,
+    );
     expect(r?.permalien).toBe(CANONIQUE);
     expect(r?.permalien).not.toContain("igsh");
   });
 
   test("deux écritures du même post donnent le MÊME permalien canonique", () => {
-    const a = analyserPermalien(`https://www.instagram.com/rose_griffonfr/p/${CODE}/?igsh=abc`);
+    const a = analyserPermalien(
+      `https://www.instagram.com/rose_griffonfr/p/${CODE}/?igsh=abc`,
+    );
     const b = analyserPermalien(`instagram.com/p/${CODE}`);
     expect(a?.permalien).toBe(b?.permalien);
     expect(a?.shortcode).toBe(b?.shortcode);
@@ -84,25 +94,35 @@ describe("formes acceptées d'un permalien", () => {
     // Le cron revalide depuis la COLONNE `shortcode` quand `permalink` est
     // douteux : les deux chemins doivent interroger Meta sur la même URL,
     // sinon un lien accepté au dépôt deviendrait « introuvable » le lendemain.
-    expect(permalienCanonique(CODE)).toBe(analyserPermalien(CANONIQUE)!.permalien);
+    expect(permalienCanonique(CODE)).toBe(
+      analyserPermalien(CANONIQUE)!.permalien,
+    );
   });
 });
 
 describe("ce qui est refusé", () => {
   test("un profil n'est pas une publication", () => {
-    expect(analyserPermalien("https://www.instagram.com/rose_griffonfr/")).toBeNull();
+    expect(
+      analyserPermalien("https://www.instagram.com/rose_griffonfr/"),
+    ).toBeNull();
   });
 
   test("un autre domaine, même s'il contient le mot instagram", () => {
-    expect(analyserPermalien(`https://instagram.com.pirate.example/p/${CODE}/`)).toBeNull();
+    expect(
+      analyserPermalien(`https://instagram.com.pirate.example/p/${CODE}/`),
+    ).toBeNull();
     expect(analyserPermalien(`https://x.com/p/${CODE}/`)).toBeNull();
   });
 
   test("un shortcode absent ou hors gabarit", () => {
     expect(analyserPermalien("https://www.instagram.com/p/")).toBeNull();
     expect(analyserPermalien("https://www.instagram.com/p/ab/")).toBeNull(); // trop court
-    expect(analyserPermalien("https://www.instagram.com/p/" + "a".repeat(40))).toBeNull();
-    expect(analyserPermalien("https://www.instagram.com/p/avec espace/")).toBeNull();
+    expect(
+      analyserPermalien("https://www.instagram.com/p/" + "a".repeat(40)),
+    ).toBeNull();
+    expect(
+      analyserPermalien("https://www.instagram.com/p/avec espace/"),
+    ).toBeNull();
   });
 
   test("du texte quelconque, du vide", () => {
@@ -170,7 +190,10 @@ const MEDIA_INTROUVABLE = {
 
 describe("publication vérifiée", () => {
   test("un 200 vaut « publique »", () => {
-    const r = verdictDepuisReponse(200, { provider_name: "Instagram", type: "rich" });
+    const r = verdictDepuisReponse(200, {
+      provider_name: "Instagram",
+      type: "rich",
+    });
     expect(r.verdict).toBe("publique");
   });
 });
@@ -203,7 +226,9 @@ describe("vérification impossible", () => {
   });
 
   test("un corps illisible ne fait pas basculer le verdict", () => {
-    expect(verdictDepuisReponse(500, "pas du json").verdict).toBe("indeterminee");
+    expect(verdictDepuisReponse(500, "pas du json").verdict).toBe(
+      "indeterminee",
+    );
     expect(verdictDepuisReponse(200, undefined).verdict).toBe("publique");
   });
 
@@ -241,17 +266,23 @@ describe("l'appel réseau, contre un bouchon local", () => {
   test("le permalien et `omitscript` partent bien dans la requête", async () => {
     // `omitscript` évite que Meta nous rende un `<script>` tiers ; l'oublier
     // ferait grossir la réponse pour rien, et tenterait de l'embarquer un jour.
-    const vues = await avecBouchon(200, { type: "rich" }, async (base, vues) => {
-      const r = await verifierPublication(CANONIQUE, { base });
-      expect(r.verdict).toBe("publique");
-      return vues;
-    });
+    const vues = await avecBouchon(
+      200,
+      { type: "rich" },
+      async (base, vues) => {
+        const r = await verifierPublication(CANONIQUE, { base });
+        expect(r.verdict).toBe("publique");
+        return vues;
+      },
+    );
     expect(vues[0]?.searchParams.get("url")).toBe(CANONIQUE);
     expect(vues[0]?.searchParams.get("omitscript")).toBe("true");
   });
 
   test("un 400 code 24 remonte « introuvable »", async () => {
-    const r = await avecBouchon(400, MEDIA_INTROUVABLE, base => verifierPublication(CANONIQUE, { base }));
+    const r = await avecBouchon(400, MEDIA_INTROUVABLE, (base) =>
+      verifierPublication(CANONIQUE, { base }),
+    );
     expect(r.verdict).toBe("introuvable");
   });
 

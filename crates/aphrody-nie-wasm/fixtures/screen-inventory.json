@@ -26,10 +26,7 @@
       "screen": "loading01",
       "visual_subscreen": null,
       "identity_source": "PLAN.md corrected screen identity: black loading, football and French label",
-      "screen_tokens": [
-        "loading01",
-        "loading_menu_setting"
-      ],
+      "screen_tokens": ["loading01", "loading_menu_setting"],
       "pairing_status": "resolved",
       "setting_recipes": [
         {
@@ -182,9 +179,7 @@
       "screen": "title_auto_save_info_menu",
       "visual_subscreen": null,
       "identity_source": "PLAN.md corrected screen identity: autosave notice and textured OK control",
-      "screen_tokens": [
-        "title_auto_save_info"
-      ],
+      "screen_tokens": ["title_auto_save_info"],
       "pairing_status": "resolved",
       "setting_recipes": [
         {
@@ -7057,10 +7052,7 @@
       "screen": "chronicle_mode_top_menu",
       "visual_subscreen": "chronicle_map",
       "identity_source": "data/menu/manifest.json (documented_family)",
-      "screen_tokens": [
-        "chronicle_mode_top_menu",
-        "chronicle_mode_top_menu"
-      ],
+      "screen_tokens": ["chronicle_mode_top_menu", "chronicle_mode_top_menu"],
       "pairing_status": "resolved",
       "setting_recipes": [
         {
@@ -7115,9 +7107,7 @@
       "screen": "chronicle_mode_top_menu",
       "visual_subscreen": null,
       "identity_source": "data/menu/manifest.json (documented_exact)",
-      "screen_tokens": [
-        "chronicle_mode_top_menu"
-      ],
+      "screen_tokens": ["chronicle_mode_top_menu"],
       "pairing_status": "resolved",
       "setting_recipes": [
         {
@@ -7172,10 +7162,7 @@
       "screen": "shop_menu",
       "visual_subscreen": "chronicle_shop",
       "identity_source": "data/menu/manifest.json (documented_family)",
-      "screen_tokens": [
-        "shop_menu",
-        "shop_menu"
-      ],
+      "screen_tokens": ["shop_menu", "shop_menu"],
       "pairing_status": "resolved",
       "setting_recipes": [
         {
@@ -7298,10 +7285,7 @@
       "screen": "keyconfig_setting_menu",
       "visual_subscreen": "controller_settings",
       "identity_source": "OBJBIN list of data/common/gamedata/menu/cfg/keyconfig_setting_menu_setting.cfg.bin",
-      "screen_tokens": [
-        "keyconfig_setting_menu",
-        "option01_2"
-      ],
+      "screen_tokens": ["keyconfig_setting_menu", "option01_2"],
       "pairing_status": "resolved",
       "setting_recipes": [
         {
@@ -7403,9 +7387,7 @@
       "screen": "advent_calendar_menu",
       "visual_subscreen": null,
       "identity_source": "data/menu/manifest.json (documented_exact)",
-      "screen_tokens": [
-        "advent_calendar_menu"
-      ],
+      "screen_tokens": ["advent_calendar_menu"],
       "pairing_status": "resolved",
       "setting_recipes": [
         {
@@ -8673,9 +8655,7 @@
       "screen": "soccer_formation_menu",
       "visual_subscreen": null,
       "identity_source": "data/menu/manifest.json (documented_family)",
-      "screen_tokens": [
-        "soccer_formation_menu"
-      ],
+      "screen_tokens": ["soccer_formation_menu"],
       "pairing_status": "resolved",
       "setting_recipes": [
         {
@@ -8740,9 +8720,7 @@
       "screen": "main_menu",
       "visual_subscreen": null,
       "identity_source": "data/menu/manifest.json (documented_exact)",
-      "screen_tokens": [
-        "main_menu"
-      ],
+      "screen_tokens": ["main_menu"],
       "pairing_status": "resolved",
       "setting_recipes": [
         {
@@ -8840,11 +8818,7 @@
       "screen": "title_menu_2",
       "visual_subscreen": null,
       "identity_source": "PLAN.md corrected screen identity: front selection menu, title02 + title_menu_2_setting",
-      "screen_tokens": [
-        "title_menu_2",
-        "title02",
-        "title00_07"
-      ],
+      "screen_tokens": ["title_menu_2", "title02", "title00_07"],
       "pairing_status": "resolved",
       "setting_recipes": [
         {
@@ -9340,10 +9314,7 @@
       "screen": "pause_menu",
       "visual_subscreen": null,
       "identity_source": "data/menu/manifest.json (dictionary_and_visual)",
-      "screen_tokens": [
-        "pause_menu",
-        "virtual_pad"
-      ],
+      "screen_tokens": ["pause_menu", "virtual_pad"],
       "pairing_status": "resolved",
       "setting_recipes": [
         {
@@ -9428,10 +9399,7 @@
       "screen": "chara_bank_menu",
       "visual_subscreen": "character_roster",
       "identity_source": "data/menu/manifest.json (documented_family)",
-      "screen_tokens": [
-        "chara_bank_menu",
-        "chara_bank_menu"
-      ],
+      "screen_tokens": ["chara_bank_menu", "chara_bank_menu"],
       "pairing_status": "resolved",
       "setting_recipes": [
         {
@@ -9528,9 +9496,7 @@
       "screen": "ability_learning_board_menu",
       "visual_subscreen": null,
       "identity_source": "data/menu/manifest.json (documented_exact)",
-      "screen_tokens": [
-        "ability_learning_board_menu"
-      ],
+      "screen_tokens": ["ability_learning_board_menu"],
       "pairing_status": "resolved",
       "setting_recipes": [
         {
@@ -9585,10 +9551,7 @@
       "screen": "players_universe_menu",
       "visual_subscreen": null,
       "identity_source": "data/menu/manifest.json (documented_exact)",
-      "screen_tokens": [
-        "players_universe",
-        "player_universe"
-      ],
+      "screen_tokens": ["players_universe", "player_universe"],
       "pairing_status": "resolved",
       "setting_recipes": [
         {
@@ -9690,9 +9653,7 @@
       "screen": "shop_menu",
       "visual_subscreen": null,
       "identity_source": "data/menu/manifest.json (documented_exact)",
-      "screen_tokens": [
-        "shop_menu"
-      ],
+      "screen_tokens": ["shop_menu"],
       "pairing_status": "resolved",
       "setting_recipes": [
         {
@@ -9815,10 +9776,7 @@
       "screen": "story_mode_top_menu",
       "visual_subscreen": null,
       "identity_source": "data/menu/manifest.json (documented_exact)",
-      "screen_tokens": [
-        "story_mode",
-        "chapter_menu"
-      ],
+      "screen_tokens": ["story_mode", "chapter_menu"],
       "pairing_status": "resolved",
       "setting_recipes": [
         {
@@ -9925,10 +9883,7 @@
       "screen": "gallery_menu",
       "visual_subscreen": null,
       "identity_source": "data/menu/manifest.json (documented_family)",
-      "screen_tokens": [
-        "gallery_menu",
-        "medal"
-      ],
+      "screen_tokens": ["gallery_menu", "medal"],
       "pairing_status": "resolved",
       "setting_recipes": [
         {

@@ -10,7 +10,13 @@ interface SparklineProps {
   className?: string;
 }
 
-export function Sparkline({ data = [], width = 120, height = 36, showLastPoint = true, className }: SparklineProps) {
+export function Sparkline({
+  data = [],
+  width = 120,
+  height = 36,
+  showLastPoint = true,
+  className,
+}: SparklineProps) {
   const id = useId();
   const gradientId = `spark-grad-${id.replace(/:/g, "")}`;
 
@@ -46,7 +52,9 @@ export function Sparkline({ data = [], width = 120, height = 36, showLastPoint =
     y: height - pad - ((v - min) * (height - pad * 2)) / span,
   }));
 
-  const line = points.map((p, i) => `${i === 0 ? "M" : "L"}${p.x.toFixed(2)},${p.y.toFixed(2)}`).join(" ");
+  const line = points
+    .map((p, i) => `${i === 0 ? "M" : "L"}${p.x.toFixed(2)},${p.y.toFixed(2)}`)
+    .join(" ");
 
   const firstPt = points[0]!;
   const lastPt = points[points.length - 1]!;
@@ -61,13 +69,33 @@ export function Sparkline({ data = [], width = 120, height = 36, showLastPoint =
     >
       <defs>
         <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" style={{ stopColor: strokeColor, stopOpacity: 0.45 }} />
-          <stop offset="100%" style={{ stopColor: strokeColor, stopOpacity: 0 }} />
+          <stop
+            offset="0%"
+            style={{ stopColor: strokeColor, stopOpacity: 0.45 }}
+          />
+          <stop
+            offset="100%"
+            style={{ stopColor: strokeColor, stopOpacity: 0 }}
+          />
         </linearGradient>
       </defs>
       <path d={area} fill={`url(#${gradientId})`} />
-      <path d={line} fill="none" style={{ stroke: strokeColor }} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-      {showLastPoint && <circle cx={lastPt.x} cy={lastPt.y} r="2.4" style={{ fill: strokeColor }} />}
+      <path
+        d={line}
+        fill="none"
+        style={{ stroke: strokeColor }}
+        strokeWidth="1.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      {showLastPoint && (
+        <circle
+          cx={lastPt.x}
+          cy={lastPt.y}
+          r="2.4"
+          style={{ fill: strokeColor }}
+        />
+      )}
     </svg>
   );
 }

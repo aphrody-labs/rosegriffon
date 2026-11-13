@@ -1,7 +1,19 @@
 "use client";
-import { useNotificationPermission, refreshNotificationPermission } from "../_context/notification-permission";
+import {
+  useNotificationPermission,
+  refreshNotificationPermission,
+} from "../_context/notification-permission";
 
-import { Badge, Button, Card, CardContent, CardHeader, Avatar, AvatarFallback, AvatarImage } from "@rosegriffon/ui";
+import {
+  Badge,
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@rosegriffon/ui";
 import { AnimatePresence, motion } from "motion/react";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -9,7 +21,13 @@ import { toast } from "sonner";
 import { useTheme } from "@/contexts/theme-context";
 import { authClient } from "@/lib/auth-client";
 import type { ClientSession } from "@/lib/auth-client";
-import { Bell, BellOff, LogIn, LogOut, MessageSquare } from "@/lib/icons-config";
+import {
+  Bell,
+  BellOff,
+  LogIn,
+  LogOut,
+  MessageSquare,
+} from "@/lib/icons-config";
 import { SITE_URL } from "@/lib/site-url";
 
 const SITE_HOSTNAME = new URL(SITE_URL).hostname;
@@ -34,21 +52,29 @@ interface TwitchUserData {
   created_at: string;
 }
 
-export function TwitchChat({ channelName = "rose_griffontv" }: TwitchChatProps) {
+export function TwitchChat({
+  channelName = "rose_griffontv",
+}: TwitchChatProps) {
   const { colors } = useTheme();
   const [user, setUser] = useState<SessionUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [twitchUsername, setTwitchUsername] = useState<string | null>(null);
-  const [twitchUserData, setTwitchUserData] = useState<TwitchUserData | null>(null);
+  const [twitchUserData, setTwitchUserData] = useState<TwitchUserData | null>(
+    null,
+  );
   const permission = useNotificationPermission();
-  const [notificationsPreference, setNotificationsEnabled] = useState<boolean | null>(null);
-  const notificationsEnabled = notificationsPreference ?? permission === "granted";
+  const [notificationsPreference, setNotificationsEnabled] = useState<
+    boolean | null
+  >(null);
+  const notificationsEnabled =
+    notificationsPreference ?? permission === "granted";
   const [isSubscribed, setIsSubscribed] = useState(false);
 
   // Declared before the effects that reference it (TDZ fix for Turbopack prod build)
   const checkSubscriptionStatus = useCallback((userId: string) => {
     try {
-      const subscribed = localStorage.getItem(`twitch_subscribed_${userId}`) === "true";
+      const subscribed =
+        localStorage.getItem(`twitch_subscribed_${userId}`) === "true";
       setIsSubscribed(subscribed);
     } catch (error) {
       console.error("Error checking subscription:", error);
@@ -72,11 +98,16 @@ export function TwitchChat({ channelName = "rose_griffontv" }: TwitchChatProps) 
           // Better Auth expose name / image / email — on les utilise pour le UI minimal.
           // Pour les vraies infos Twitch (follows, sub) on appellera l'API Twitch côté serveur
           // Avec le token stocké dans `account` quand nécessaire.
-          const username = (sessionUser.name as string | undefined) ?? sessionUser.email?.split("@")[0] ?? "user";
+          const username =
+            (sessionUser.name as string | undefined) ??
+            sessionUser.email?.split("@")[0] ??
+            "user";
           setTwitchUsername(username);
           setTwitchUserData({
             broadcaster_type: "",
-            created_at: sessionUser.createdAt ? new Date(sessionUser.createdAt).toISOString() : "",
+            created_at: sessionUser.createdAt
+              ? new Date(sessionUser.createdAt).toISOString()
+              : "",
             description: "",
             display_name: (sessionUser.name as string | undefined) ?? username,
             email: sessionUser.email ?? undefined,
@@ -181,7 +212,10 @@ export function TwitchChat({ channelName = "rose_griffontv" }: TwitchChatProps) 
       setIsSubscribed(newSubscriptionState);
 
       // Store in localStorage
-      localStorage.setItem(`twitch_subscribed_${twitchUserData.id}`, String(newSubscriptionState));
+      localStorage.setItem(
+        `twitch_subscribed_${twitchUserData.id}`,
+        String(newSubscriptionState),
+      );
 
       if (newSubscriptionState) {
         toast.success(`✅ Abonné à ${channelName} !`);
@@ -201,20 +235,35 @@ export function TwitchChat({ channelName = "rose_griffontv" }: TwitchChatProps) 
 
   if (isLoading) {
     return (
-      <Card className="border-2 h-[600px]" style={{ borderColor: `${colors.primary}40` }}>
+      <Card
+        className="border-2 h-[600px]"
+        style={{ borderColor: `${colors.primary}40` }}
+      >
         <CardContent className="p-6 flex items-center justify-center h-full">
-          <div className="animate-spin rounded-full size-8 border-b-2" style={{ borderColor: colors.primary }} />
+          <div
+            className="animate-spin rounded-full size-8 border-b-2"
+            style={{ borderColor: colors.primary }}
+          />
         </CardContent>
       </Card>
     );
   }
 
   return (
-    <Card className="border-2 h-[600px] overflow-hidden" style={{ borderColor: `${colors.primary}40` }}>
-      <CardHeader className="pb-3 border-b" style={{ borderColor: `${colors.primary}20` }}>
+    <Card
+      className="border-2 h-[600px] overflow-hidden"
+      style={{ borderColor: `${colors.primary}40` }}
+    >
+      <CardHeader
+        className="pb-3 border-b"
+        style={{ borderColor: `${colors.primary}20` }}
+      >
         <div className="flex items-center justify-between">
           <h3 className="font-bold flex items-center gap-2">
-            <MessageSquare className="size-5" style={{ color: colors.primary }} />
+            <MessageSquare
+              className="size-5"
+              style={{ color: colors.primary }}
+            />
             Chat en direct
           </h3>
 
@@ -222,12 +271,16 @@ export function TwitchChat({ channelName = "rose_griffontv" }: TwitchChatProps) 
             <div className="flex items-center gap-2">
               <Avatar className="size-8">
                 <AvatarImage src={twitchUserData?.profile_image_url} />
-                <AvatarFallback style={{ backgroundColor: `${colors.primary}40` }}>
+                <AvatarFallback
+                  style={{ backgroundColor: `${colors.primary}40` }}
+                >
                   {twitchUsername?.[0]?.toUpperCase() || "U"}
                 </AvatarFallback>
               </Avatar>
               <div className="hidden sm:flex flex-col">
-                <span className="text-sm font-semibold leading-tight">{twitchUsername}</span>
+                <span className="text-sm font-semibold leading-tight">
+                  {twitchUsername}
+                </span>
                 {twitchUserData?.broadcaster_type && (
                   <Badge variant="secondary" className="text-[10px] h-4 px-1">
                     {twitchUserData.broadcaster_type}
@@ -239,16 +292,34 @@ export function TwitchChat({ channelName = "rose_griffontv" }: TwitchChatProps) 
                 size="sm"
                 onClick={handleNotifications}
                 className="h-8"
-                title={notificationsEnabled ? "Désactiver notifications" : "Activer notifications"}
+                title={
+                  notificationsEnabled
+                    ? "Désactiver notifications"
+                    : "Activer notifications"
+                }
               >
-                {notificationsEnabled ? <Bell className="size-4 text-green-500" /> : <BellOff className="size-4" />}
+                {notificationsEnabled ? (
+                  <Bell className="size-4 text-green-500" />
+                ) : (
+                  <BellOff className="size-4" />
+                )}
               </Button>
-              <Button variant="ghost" size="sm" onClick={handleLogout} className="h-8">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleLogout}
+                className="h-8"
+              >
                 <LogOut className="size-4" />
               </Button>
             </div>
           ) : (
-            <Button size="sm" onClick={handleTwitchLogin} className="gap-2" style={{ backgroundColor: "#9146FF" }}>
+            <Button
+              size="sm"
+              onClick={handleTwitchLogin}
+              className="gap-2"
+              style={{ backgroundColor: "#9146FF" }}
+            >
               <LogIn className="size-4" />
               <span className="hidden sm:inline">Connexion Twitch</span>
             </Button>
@@ -273,7 +344,9 @@ export function TwitchChat({ channelName = "rose_griffontv" }: TwitchChatProps) 
                   className="p-3 bg-linear-to-r from-purple-500/20 to-pink-500/20 border-b"
                 >
                   <div className="flex items-center justify-between gap-2">
-                    <p className="text-xs">💜 Abonne-toi pour être notifié des streams !</p>
+                    <p className="text-xs">
+                      💜 Abonne-toi pour être notifié des streams !
+                    </p>
                     <Button
                       size="sm"
                       onClick={handleSubscribe}
@@ -296,7 +369,12 @@ export function TwitchChat({ channelName = "rose_griffontv" }: TwitchChatProps) 
                     <p className="text-xs text-green-600 font-semibold flex items-center gap-1">
                       ✅ Abonné à {channelName}
                     </p>
-                    <Button size="sm" variant="ghost" onClick={handleSubscribe} className="h-6 text-xs">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={handleSubscribe}
+                      className="h-6 text-xs"
+                    >
                       Se désabonner
                     </Button>
                   </div>
@@ -319,20 +397,35 @@ export function TwitchChat({ channelName = "rose_griffontv" }: TwitchChatProps) 
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.3 }}
             >
-              <div className="mb-4 p-4 rounded-full" style={{ backgroundColor: `${colors.primary}20` }}>
-                <MessageSquare className="size-12" style={{ color: colors.primary }} />
+              <div
+                className="mb-4 p-4 rounded-full"
+                style={{ backgroundColor: `${colors.primary}20` }}
+              >
+                <MessageSquare
+                  className="size-12"
+                  style={{ color: colors.primary }}
+                />
               </div>
-              <h4 className="font-bold text-lg mb-2">Rejoignez le chat Twitch !</h4>
+              <h4 className="font-bold text-lg mb-2">
+                Rejoignez le chat Twitch !
+              </h4>
               <p className="text-sm text-muted-foreground mb-4 max-w-sm">
-                Connectez-vous avec votre compte Twitch pour participer aux discussions en direct avec la communauté.
+                Connectez-vous avec votre compte Twitch pour participer aux
+                discussions en direct avec la communauté.
               </p>
-              <Button onClick={handleTwitchLogin} className="gap-2" style={{ backgroundColor: "#9146FF" }}>
+              <Button
+                onClick={handleTwitchLogin}
+                className="gap-2"
+                style={{ backgroundColor: "#9146FF" }}
+              >
                 <svg className="size-5" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714Z" />
                 </svg>
                 Se connecter avec Twitch
               </Button>
-              <p className="text-xs text-muted-foreground mt-4">Votre connexion est sécurisée via Supabase Auth</p>
+              <p className="text-xs text-muted-foreground mt-4">
+                Votre connexion est sécurisée via Supabase Auth
+              </p>
             </motion.div>
           </div>
         )}

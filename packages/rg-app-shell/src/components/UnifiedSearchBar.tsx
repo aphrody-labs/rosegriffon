@@ -36,7 +36,9 @@ export function UnifiedSearchBar({
   const router = useRouter();
   const [query, setQuery] = React.useState(defaultValue);
   const [results, setResults] = React.useState<SearchResult[]>([]);
-  const [isSearching, setIsSearching] = React.useState(defaultValue.trim().length >= 2);
+  const [isSearching, setIsSearching] = React.useState(
+    defaultValue.trim().length >= 2,
+  );
   const [hasSearchError, setHasSearchError] = React.useState(false);
   const inputRef = React.useRef<HTMLInputElement>(null);
   const abortRef = React.useRef<AbortController | null>(null);
@@ -71,16 +73,20 @@ export function UnifiedSearchBar({
     abortRef.current = controller;
     const timer = window.setTimeout(async () => {
       try {
-        const response = await fetch(`/api/recherche?q=${encodeURIComponent(value)}`, {
-          signal: controller.signal,
-        });
+        const response = await fetch(
+          `/api/recherche?q=${encodeURIComponent(value)}`,
+          {
+            signal: controller.signal,
+          },
+        );
         if (controller.signal.aborted) return;
         if (!response.ok) {
           setHasSearchError(true);
           return;
         }
         const data = (await response.json()) as { resultats?: SearchResult[] };
-        if (!controller.signal.aborted) setResults((data.resultats ?? []).slice(0, 8));
+        if (!controller.signal.aborted)
+          setResults((data.resultats ?? []).slice(0, 8));
       } catch {
         if (!controller.signal.aborted) setHasSearchError(true);
       } finally {
@@ -133,7 +139,7 @@ export function UnifiedSearchBar({
         ref={inputRef}
         type="text"
         value={query}
-        onChange={e => changeQuery(e.target.value)}
+        onChange={(e) => changeQuery(e.target.value)}
         onKeyDown={handleKeyDown}
         placeholder={placeholder}
         aria-label="Recherche unifiée"
@@ -167,13 +173,15 @@ export function UnifiedSearchBar({
             </output>
           ) : (
             <ul>
-              {results.map(result => (
+              {results.map((result) => (
                 <li key={`${result.domaine}-${result.id}`}>
                   <Link
                     href={result.href}
                     className="flex items-center justify-between gap-3 rounded-xl px-3 py-2 text-sm hover:bg-surface-container-high"
                   >
-                    <span className="truncate text-on-surface">{result.titre}</span>
+                    <span className="truncate text-on-surface">
+                      {result.titre}
+                    </span>
                     <span className="shrink-0 text-[10px] font-bold uppercase tracking-wide text-on-surface-variant">
                       {DOMAIN_LABEL[result.domaine] ?? result.domaine}
                     </span>

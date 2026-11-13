@@ -31,15 +31,23 @@ function parseArgs(args: string[]) {
   let outdir = join(ROOT, "dist");
   for (let i = 0; i < args.length; i++) {
     const arg = args[i]!;
-    const value = (name: string) => (arg.includes("=") ? arg.slice(arg.indexOf("=") + 1) : args[++i] ?? "");
-    if (arg.startsWith("--target")) targets.push(...value("--target").split(",").filter(Boolean));
+    const value = (name: string) =>
+      arg.includes("=") ? arg.slice(arg.indexOf("=") + 1) : (args[++i] ?? "");
+    if (arg.startsWith("--target"))
+      targets.push(...value("--target").split(",").filter(Boolean));
     else if (arg.startsWith("--outdir")) outdir = resolve(value("--outdir"));
-    else if (arg.startsWith("--site")) continue; // Compatibility no-op
+    else if (arg.startsWith("--site"))
+      continue; // Compatibility no-op
     else throw new Error(`unknown argument: ${arg}`);
   }
-  if (targets.includes("all")) targets.splice(0, targets.length, "linux-x64", "windows-x64");
+  if (targets.includes("all"))
+    targets.splice(0, targets.length, "linux-x64", "windows-x64");
   if (targets.length === 0) targets.push(hostTarget());
-  for (const target of targets) if (!TARGETS[target]) throw new Error(`unknown target ${target} (${Object.keys(TARGETS).join(", ")})`);
+  for (const target of targets)
+    if (!TARGETS[target])
+      throw new Error(
+        `unknown target ${target} (${Object.keys(TARGETS).join(", ")})`,
+      );
   return { targets, outdir };
 }
 
@@ -47,7 +55,10 @@ const { targets, outdir } = parseArgs(process.argv.slice(2));
 mkdirSync(outdir, { recursive: true });
 
 for (const target of targets) {
-  const outfile = join(outdir, `rg-core-${target}${target.startsWith("windows") ? ".exe" : ""}`);
+  const outfile = join(
+    outdir,
+    `rg-core-${target}${target.startsWith("windows") ? ".exe" : ""}`,
+  );
   rmSync(outfile, { force: true });
   const result = await Bun.build({
     entrypoints: [join(BOT_APP, "src/core.ts")],
@@ -63,5 +74,7 @@ for (const target of targets) {
     throw new Error(`compile failed for ${target}`);
   }
   const size = Bun.file(outfile).size;
-  console.log(`[compile] ${relative(ROOT, outfile)} ${(size / 1048576).toFixed(1)} MiB`);
+  console.log(
+    `[compile] ${relative(ROOT, outfile)} ${(size / 1048576).toFixed(1)} MiB`,
+  );
 }

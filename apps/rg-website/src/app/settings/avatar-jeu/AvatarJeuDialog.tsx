@@ -28,7 +28,12 @@ export function AvatarJeuDialog({
 
   return (
     <>
-      <Button variant="outline" size="sm" className="h-11 w-full rounded-full" onClick={() => setOuvert(true)}>
+      <Button
+        variant="outline"
+        size="sm"
+        className="h-11 w-full rounded-full"
+        onClick={() => setOuvert(true)}
+      >
         <Gamepad2 className="size-4" aria-hidden />
         Avatar du jeu
       </Button>
@@ -39,7 +44,10 @@ export function AvatarJeuDialog({
         description="Un portrait de la banque de personnages, ou ton avatar créé dans l'éditeur."
         contentClassName="sm:max-w-2xl"
       >
-        <Tabs defaultValue={codeActuel ? "code" : "banque"} className="min-w-0 pb-4">
+        <Tabs
+          defaultValue={codeActuel ? "code" : "banque"}
+          className="min-w-0 pb-4"
+        >
           <TabsList className="grid h-11 w-full grid-cols-2">
             <TabsTrigger value="banque" className="h-9">
               Banque de personnages
@@ -48,10 +56,16 @@ export function AvatarJeuDialog({
               Avatar créé
             </TabsTrigger>
           </TabsList>
-          <TabsContent value="banque" className="mt-3 max-h-[65vh] overflow-y-auto px-1">
+          <TabsContent
+            value="banque"
+            className="mt-3 max-h-[65vh] overflow-y-auto px-1"
+          >
             <BanquePortraits avatarUrl={avatarUrl} onSaved={termine} />
           </TabsContent>
-          <TabsContent value="code" className="mt-3 max-h-[65vh] overflow-y-auto px-1">
+          <TabsContent
+            value="code"
+            className="mt-3 max-h-[65vh] overflow-y-auto px-1"
+          >
             <AvatarCode codeActuel={codeActuel} onSaved={termine} />
           </TabsContent>
         </Tabs>

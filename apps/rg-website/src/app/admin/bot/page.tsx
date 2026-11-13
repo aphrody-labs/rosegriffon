@@ -26,7 +26,11 @@ import {
   CardTitle,
   DashboardStatsCard,
 } from "@rosegriffon/ui";
-import { manquesParSection, LIBELLES_SECTIONS, SECTIONS_REGLAGES } from "@rosegriffon/types/bot";
+import {
+  manquesParSection,
+  LIBELLES_SECTIONS,
+  SECTIONS_REGLAGES,
+} from "@rosegriffon/types/bot";
 import { RG_GUILD_ID } from "@rosegriffon/types/discord";
 
 import { etatDuCron } from "@/lib/bot/cron";
@@ -36,7 +40,8 @@ import { etatDesBots } from "@/lib/bot/serveur";
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  description: "État des deux bots Discord, réglages de communauté et ordonnanceur des tâches planifiées.",
+  description:
+    "État des deux bots Discord, réglages de communauté et ordonnanceur des tâches planifiées.",
   title: "Bot Discord — Administration",
 };
 
@@ -69,9 +74,14 @@ export default async function BotDashboardPage() {
   ]);
 
   const manques = manquesParSection(reglages.reglages);
-  const sectionsIncompletes = SECTIONS_REGLAGES.filter(section => manques[section].length > 0);
-  const commandesTotales = bots.reduce((somme, b) => somme + (b.etat?.nombreCommandes ?? 0), 0);
-  const guildesAbsentes = bots.flatMap(b => b.etat?.guildesAbsentes ?? []);
+  const sectionsIncompletes = SECTIONS_REGLAGES.filter(
+    (section) => manques[section].length > 0,
+  );
+  const commandesTotales = bots.reduce(
+    (somme, b) => somme + (b.etat?.nombreCommandes ?? 0),
+    0,
+  );
+  const guildesAbsentes = bots.flatMap((b) => b.etat?.guildesAbsentes ?? []);
 
   return (
     <div className="mx-auto max-w-7xl space-y-8 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
@@ -108,23 +118,37 @@ export default async function BotDashboardPage() {
 
       {/* ── Les deux profils ─────────────────────────────────────────────── */}
       <section className="grid gap-4 lg:grid-cols-2">
-        {bots.map(bot => (
+        {bots.map((bot) => (
           <Card key={bot.profil.nom} className="overflow-hidden">
-            <div className="h-1 w-full" style={{ backgroundColor: bot.profil.couleurHex }} aria-hidden />
+            <div
+              className="h-1 w-full"
+              style={{ backgroundColor: bot.profil.couleurHex }}
+              aria-hidden
+            />
             <CardHeader>
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <CardTitle className="flex items-center gap-2">
                     {bot.joignable ? (
-                      <CheckCircle2 className="size-4 text-succes" aria-hidden />
+                      <CheckCircle2
+                        className="size-4 text-succes"
+                        aria-hidden
+                      />
                     ) : (
-                      <XCircle className="size-4 text-destructive" aria-hidden />
+                      <XCircle
+                        className="size-4 text-destructive"
+                        aria-hidden
+                      />
                     )}
                     {bot.profil.titre}
                   </CardTitle>
-                  <CardDescription className="mt-1">{bot.profil.role}</CardDescription>
+                  <CardDescription className="mt-1">
+                    {bot.profil.role}
+                  </CardDescription>
                 </div>
-                <Badge variant={bot.joignable ? "secondary" : "destructive"}>{bot.profil.unite}</Badge>
+                <Badge variant={bot.joignable ? "secondary" : "destructive"}>
+                  {bot.profil.unite}
+                </Badge>
               </div>
             </CardHeader>
             <CardContent>
@@ -132,15 +156,27 @@ export default async function BotDashboardPage() {
                 <dl className="grid grid-cols-2 gap-x-4 gap-y-3 text-sm sm:grid-cols-3">
                   <div>
                     <dt className="text-xs text-muted-foreground">Identité</dt>
-                    <dd className="truncate font-medium">{bot.etat.etiquette ?? "—"}</dd>
+                    <dd className="truncate font-medium">
+                      {bot.etat.etiquette ?? "—"}
+                    </dd>
                   </div>
                   <div>
-                    <dt className="text-xs text-muted-foreground">En ligne depuis</dt>
-                    <dd className="font-medium">{duree(bot.etat.uptimeSecondes)}</dd>
+                    <dt className="text-xs text-muted-foreground">
+                      En ligne depuis
+                    </dt>
+                    <dd className="font-medium">
+                      {duree(bot.etat.uptimeSecondes)}
+                    </dd>
                   </div>
                   <div>
-                    <dt className="text-xs text-muted-foreground">Latence passerelle</dt>
-                    <dd className="font-medium">{bot.etat.latenceMs < 0 ? "—" : `${bot.etat.latenceMs} ms`}</dd>
+                    <dt className="text-xs text-muted-foreground">
+                      Latence passerelle
+                    </dt>
+                    <dd className="font-medium">
+                      {bot.etat.latenceMs < 0
+                        ? "—"
+                        : `${bot.etat.latenceMs} ms`}
+                    </dd>
                   </div>
                   <div>
                     <dt className="text-xs text-muted-foreground">Commandes</dt>
@@ -152,7 +188,9 @@ export default async function BotDashboardPage() {
                   </div>
                   <div>
                     <dt className="text-xs text-muted-foreground">Mémoire</dt>
-                    <dd className="font-medium">{mega(bot.etat.memoireOctets)}</dd>
+                    <dd className="font-medium">
+                      {mega(bot.etat.memoireOctets)}
+                    </dd>
                   </div>
                   <div className="col-span-full">
                     <dt className="text-xs text-muted-foreground">Serveurs</dt>
@@ -160,7 +198,7 @@ export default async function BotDashboardPage() {
                       {bot.etat.guildes.length === 0 ? (
                         <span className="text-muted-foreground">aucun</span>
                       ) : (
-                        bot.etat.guildes.map(guilde => (
+                        bot.etat.guildes.map((guilde) => (
                           <Badge
                             key={guilde.id}
                             variant={guilde.servie ? "default" : "outline"}
@@ -198,7 +236,8 @@ export default async function BotDashboardPage() {
               Serveur configuré mais non rejoint
             </CardTitle>
             <CardDescription>
-              Les commandes n&apos;apparaîtront pas tant que le bot n&apos;y aura pas été autorisé via son URL OAuth2 :{" "}
+              Les commandes n&apos;apparaîtront pas tant que le bot n&apos;y
+              aura pas été autorisé via son URL OAuth2 :{" "}
               {[...new Set(guildesAbsentes)].join(", ")}.
             </CardDescription>
           </CardHeader>
@@ -261,7 +300,9 @@ export default async function BotDashboardPage() {
           />
           <DashboardStatsCard
             title="Tâches planifiées"
-            value={cron.joignable ? `${cron.bilan.total} tâches` : "API injoignable"}
+            value={
+              cron.joignable ? `${cron.bilan.total} tâches` : "API injoignable"
+            }
             icon={Activity}
             description={
               cron.bilan.enEchec > 0
@@ -269,7 +310,9 @@ export default async function BotDashboardPage() {
                 : `${cron.bilan.reussies} réussies à la dernière exécution`
             }
             href="/admin/cron"
-            accent={cron.joignable && cron.bilan.enEchec === 0 ? "emerald" : "rose"}
+            accent={
+              cron.joignable && cron.bilan.enEchec === 0 ? "emerald" : "rose"
+            }
           />
         </div>
       </section>
@@ -294,11 +337,15 @@ export default async function BotDashboardPage() {
             </p>
           ) : (
             <ul className="space-y-2">
-              {sectionsIncompletes.map(section => (
+              {sectionsIncompletes.map((section) => (
                 <li key={section} className="flex items-start gap-2 text-sm">
-                  <AlertTriangle className="mt-0.5 size-4 shrink-0 text-alerte" aria-hidden />
+                  <AlertTriangle
+                    className="mt-0.5 size-4 shrink-0 text-alerte"
+                    aria-hidden
+                  />
                   <span>
-                    <strong>{LIBELLES_SECTIONS[section].titre}</strong> — il manque {manques[section].join(", ")}.
+                    <strong>{LIBELLES_SECTIONS[section].titre}</strong> — il
+                    manque {manques[section].join(", ")}.
                   </span>
                 </li>
               ))}

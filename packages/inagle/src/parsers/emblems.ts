@@ -69,7 +69,8 @@ function parseContent(content: any): ParsedEmblem[] {
     for (const val of list.values) {
       const emblemName: string = val.emblemName || "";
       const smallFilePath: string = val.s_filePath || "";
-      const isTemplate = smallFilePath.includes("<resourceID>") || emblemName === "default";
+      const isTemplate =
+        smallFilePath.includes("<resourceID>") || emblemName === "default";
 
       emblems.push({
         id: val.emblemId,
@@ -97,7 +98,9 @@ function parseContent(content: any): ParsedEmblem[] {
 // Loaders
 // ============================================================================
 
-export async function loadEmblemConfigAsync(dataPath: string = DATA_ROOT): Promise<ParsedEmblem[] | null> {
+export async function loadEmblemConfigAsync(
+  dataPath: string = DATA_ROOT,
+): Promise<ParsedEmblem[] | null> {
   const filename = findConfigFile("menu", "emblem_resource");
   if (!filename) return null;
 
@@ -106,7 +109,9 @@ export async function loadEmblemConfigAsync(dataPath: string = DATA_ROOT): Promi
   return content ? parseContent(content) : null;
 }
 
-export async function buildEmblemDatabase(dataPath: string = DATA_ROOT): Promise<EmblemDatabase> {
+export async function buildEmblemDatabase(
+  dataPath: string = DATA_ROOT,
+): Promise<EmblemDatabase> {
   const emblems = (await loadEmblemConfigAsync(dataPath)) || [];
   const byId = new Map<string, ParsedEmblem>();
   for (const e of emblems) byId.set(e.emblemId, e);

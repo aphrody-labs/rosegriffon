@@ -4,7 +4,11 @@ import Image from "next/image";
 import Link from "@/components/shared/Link";
 import { useState } from "react";
 import { Icon } from "@/components/ui/Icon";
-import { SEASON_LABELS, SERIES_LABELS, type TeamListItem } from "@rosegriffon/azalee/wiki/teams-shared";
+import {
+  SEASON_LABELS,
+  SERIES_LABELS,
+  type TeamListItem,
+} from "@rosegriffon/azalee/wiki/teams-shared";
 import { cn } from "@/lib/utils";
 
 interface TeamCardProps {
@@ -17,7 +21,9 @@ export function TeamCard({ team, className }: TeamCardProps) {
   const hasEmblem = Boolean(team.emblemUrl) && !imgError;
 
   // Saisons triées par effectif décroissant (les plus représentatives en premier).
-  const seasonEntries = Object.entries(team.seasons).sort(([, a], [, b]) => b - a);
+  const seasonEntries = Object.entries(team.seasons).sort(
+    ([, a], [, b]) => b - a,
+  );
   const topSeasons = seasonEntries.slice(0, 3);
 
   return (
@@ -45,7 +51,11 @@ export function TeamCard({ team, className }: TeamCardProps) {
               onError={() => setImgError(true)}
             />
           ) : (
-            <Icon name="shield" size={24} className="text-on-surface-variant/30" />
+            <Icon
+              name="shield"
+              size={24}
+              className="text-on-surface-variant/30"
+            />
           )}
         </div>
 
@@ -55,7 +65,9 @@ export function TeamCard({ team, className }: TeamCardProps) {
             {team.name}
           </h3>
           {team.nameJa && team.nameJa !== team.name && (
-            <p className="text-[11px] text-on-surface-variant/70 truncate mt-0.5">{team.nameJa}</p>
+            <p className="text-[11px] text-on-surface-variant/70 truncate mt-0.5">
+              {team.nameJa}
+            </p>
           )}
 
           {/* Chips méta */}
@@ -66,7 +78,7 @@ export function TeamCard({ team, className }: TeamCardProps) {
                 {team.rosterCount}
               </span>
             )}
-            {team.seriesKeys.map(s => (
+            {team.seriesKeys.map((s) => (
               <span
                 key={s}
                 className="inline-flex items-center px-1.5 py-0.5 rounded bg-surface-container-highest/50 text-[10px] font-bold text-on-surface-variant uppercase tracking-wider"

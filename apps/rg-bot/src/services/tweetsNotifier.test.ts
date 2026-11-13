@@ -47,7 +47,13 @@ interface Appels {
   filtre: number;
   assurer: string[];
   lire: string[];
-  avance: Array<{ canal: string; attendu: Date; jusqua: Date; id: string | null; publies: number }>;
+  avance: Array<{
+    canal: string;
+    attendu: Date;
+    jusqua: Date;
+    id: string | null;
+    publies: number;
+  }>;
 }
 let appels: Appels;
 
@@ -79,7 +85,8 @@ await mock.module("./tweets", () => ({
   },
 }));
 
-const { drainerTweets, demarrerNotifieurTweets, ligneJournal, resoudreSalon } = await import("./tweetsNotifier");
+const { drainerTweets, demarrerNotifieurTweets, ligneJournal, resoudreSalon } =
+  await import("./tweetsNotifier");
 const { annonceHistorique, normaliserCanal, salonAnnonce } = servicesReels;
 
 // ── Doublures ──────────────────────────────────────────────────────────────
@@ -98,7 +105,10 @@ interface Envoi {
   embeds: number;
 }
 
-function clientFactice(envois: Envoi[], comportement: { echec?: string; nonEcrivable?: boolean } = {}): Client {
+function clientFactice(
+  envois: Envoi[],
+  comportement: { echec?: string; nonEcrivable?: boolean } = {},
+): Client {
   return {
     channels: {
       fetch: async (id: string) => {
@@ -107,7 +117,11 @@ function clientFactice(envois: Envoi[], comportement: { echec?: string; nonEcriv
         }
         return {
           isSendable: () => comportement.nonEcrivable !== true,
-          send: async (options: { embeds?: unknown[]; nonce?: unknown; enforceNonce?: unknown }) => {
+          send: async (options: {
+            embeds?: unknown[];
+            nonce?: unknown;
+            enforceNonce?: unknown;
+          }) => {
             envois.push({
               salonId: id,
               nonce: options.nonce,
@@ -164,14 +178,19 @@ beforeEach(() => {
 });
 
 /** Capture `console.info`/`console.warn` le temps d'un appel. */
-async function sansJournal<T>(action: () => T | Promise<T>): Promise<{ valeur: T; lignes: string[] }> {
+async function sansJournal<T>(
+  action: () => T | Promise<T>,
+): Promise<{ valeur: T; lignes: string[] }> {
   const lignes: string[] = [];
   const infoOrigine = console.info;
   const warnOrigine = console.warn;
   const errorOrigine = console.error;
-  console.info = (...args: unknown[]) => void lignes.push(args.map(String).join(" "));
-  console.warn = (...args: unknown[]) => void lignes.push(args.map(String).join(" "));
-  console.error = (...args: unknown[]) => void lignes.push(args.map(String).join(" "));
+  console.info = (...args: unknown[]) =>
+    void lignes.push(args.map(String).join(" "));
+  console.warn = (...args: unknown[]) =>
+    void lignes.push(args.map(String).join(" "));
+  console.error = (...args: unknown[]) =>
+    void lignes.push(args.map(String).join(" "));
   try {
     const valeur = await action();
     return { valeur, lignes };
@@ -215,7 +234,9 @@ describe("normaliserCanal", () => {
 
 describe("salonAnnonce", () => {
   test("le profil historique laisse le réglage partagé décider", () => {
-    expect(salonAnnonce(ANNONCE_RG, { salon: "333333333333333333" })).toBe("333333333333333333");
+    expect(salonAnnonce(ANNONCE_RG, { salon: "333333333333333333" })).toBe(
+      "333333333333333333",
+    );
     expect(salonAnnonce(ANNONCE_RG, { salon: null })).toBe(SALON_RG);
     expect(salonAnnonce(ANNONCE_RG, { salon: "   " })).toBe(SALON_RG);
   });
@@ -224,19 +245,27 @@ describe("salonAnnonce", () => {
     // C'est LE piège du second bot : `settings['tweets.notification']` est une
     // ligne unique. Si Azalée la suivait, régler le salon côté Rose Griffon
     // enverrait ses annonces vers un serveur où son bot n'est pas présent.
-    expect(salonAnnonce(ANNONCE_AZALEE, { salon: "333333333333333333" })).toBe(SALON_AZALEE);
+    expect(salonAnnonce(ANNONCE_AZALEE, { salon: "333333333333333333" })).toBe(
+      SALON_AZALEE,
+    );
     expect(salonAnnonce(ANNONCE_AZALEE, { salon: null })).toBe(SALON_AZALEE);
   });
 
   test("aucun salon nulle part vaut `null`, pas une chaîne vide", () => {
-    expect(salonAnnonce({ salon: "", curseur: "azalee" }, { salon: null })).toBeNull();
-    expect(salonAnnonce({ salon: "  ", curseur: "discord" }, { salon: "" })).toBeNull();
+    expect(
+      salonAnnonce({ salon: "", curseur: "azalee" }, { salon: null }),
+    ).toBeNull();
+    expect(
+      salonAnnonce({ salon: "  ", curseur: "discord" }, { salon: "" }),
+    ).toBeNull();
   });
 
   test("le profil historique garde son curseur et son salon d'environnement", () => {
     const historique = annonceHistorique();
     expect(historique.curseur).toBe("discord");
-    expect(historique.salon).toBe(Bun.env.DISCORD_NEWS_CHANNEL_ID?.trim() ?? "");
+    expect(historique.salon).toBe(
+      Bun.env.DISCORD_NEWS_CHANNEL_ID?.trim() ?? "",
+    );
   });
 });
 
@@ -244,7 +273,11 @@ describe("ligneJournal", () => {
   const contexte = { origine: "filet", canal: "azalee" };
 
   test("un tour nominal ne dit rien", () => {
-    const trace = ligneJournal({ etat: "rien", candidats: 0, publies: 0 }, contexte, null);
+    const trace = ligneJournal(
+      { etat: "rien", candidats: 0, publies: 0 },
+      contexte,
+      null,
+    );
     expect(trace.ligne).toBeNull();
     expect(trace.empreinte).toBeNull();
   });
@@ -280,19 +313,34 @@ describe("ligneJournal", () => {
       contexte,
       null,
     );
-    const repris = ligneJournal({ etat: "rien", candidats: 0, publies: 0 }, contexte, bloque.empreinte);
+    const repris = ligneJournal(
+      { etat: "rien", candidats: 0, publies: 0 },
+      contexte,
+      bloque.empreinte,
+    );
     expect(repris.ligne).toContain("la cause du blocage précédent a disparu");
     expect(repris.empreinte).toBeNull();
 
-    const suivant = ligneJournal({ etat: "rien", candidats: 0, publies: 0 }, contexte, repris.empreinte);
+    const suivant = ligneJournal(
+      { etat: "rien", candidats: 0, publies: 0 },
+      contexte,
+      repris.empreinte,
+    );
     expect(suivant.ligne).toBeNull();
   });
 
   test("une publication et une amorce sont toujours tracées", () => {
-    expect(ligneJournal({ etat: "publie", candidats: 2, publies: 2 }, contexte, null).ligne).toContain("2/2");
-    expect(ligneJournal({ etat: "amorce", candidats: 0, publies: 0, detail: "créé" }, contexte, null).ligne).toContain(
-      "amorce",
-    );
+    expect(
+      ligneJournal({ etat: "publie", candidats: 2, publies: 2 }, contexte, null)
+        .ligne,
+    ).toContain("2/2");
+    expect(
+      ligneJournal(
+        { etat: "amorce", candidats: 0, publies: 0, detail: "créé" },
+        contexte,
+        null,
+      ).ligne,
+    ).toContain("amorce");
   });
 });
 
@@ -320,8 +368,14 @@ describe("drainerTweets — un curseur par profil", () => {
   });
 
   test("chaque profil avance sa propre ligne de curseur", async () => {
-    curseurCourant = curseurFactice("azalee", "2026-08-13T00:00:00.000Z", false);
-    tweetsCourants = [tweetFactice("1955000000000000001", "2026-08-13T08:00:00.000Z")];
+    curseurCourant = curseurFactice(
+      "azalee",
+      "2026-08-13T00:00:00.000Z",
+      false,
+    );
+    tweetsCourants = [
+      tweetFactice("1955000000000000001", "2026-08-13T08:00:00.000Z"),
+    ];
     const envois: Envoi[] = [];
 
     const { valeur: resultat } = await sansJournal(() =>
@@ -339,17 +393,27 @@ describe("drainerTweets — un curseur par profil", () => {
     expect(appels.avance).toHaveLength(1);
     expect(appels.avance[0]?.canal).toBe("azalee");
     // Échange-comparaison : la position ATTENDUE est celle qui a été lue.
-    expect(appels.avance[0]?.attendu.toISOString()).toBe("2026-08-13T00:00:00.000Z");
+    expect(appels.avance[0]?.attendu.toISOString()).toBe(
+      "2026-08-13T00:00:00.000Z",
+    );
     expect(appels.avance[0]?.publies).toBe(1);
   });
 
   test("sans profil, le drain reste celui de Rose Griffon", async () => {
-    curseurCourant = curseurFactice("discord", "2026-08-13T00:00:00.000Z", false);
-    tweetsCourants = [tweetFactice("1955000000000000002", "2026-08-13T08:00:00.000Z")];
+    curseurCourant = curseurFactice(
+      "discord",
+      "2026-08-13T00:00:00.000Z",
+      false,
+    );
+    tweetsCourants = [
+      tweetFactice("1955000000000000002", "2026-08-13T08:00:00.000Z"),
+    ];
     filtreCourant = { ...filtreCourant, salon: SALON_RG };
     const envois: Envoi[] = [];
 
-    const { valeur: resultat } = await sansJournal(() => drainerTweets(clientFactice(envois), {}));
+    const { valeur: resultat } = await sansJournal(() =>
+      drainerTweets(clientFactice(envois), {}),
+    );
 
     expect(resultat.etat).toBe("publie");
     expect(appels.assurer).toEqual(["discord"]);
@@ -375,8 +439,14 @@ describe("drainerTweets — un curseur par profil", () => {
   test("un salon injoignable n'avance jamais le curseur et explique l'invitation manquante", async () => {
     // Cas NORMAL au premier démarrage : le bot Azalée n'est pas encore autorisé
     // sur sa guilde, l'API répond « Unknown Channel ».
-    curseurCourant = curseurFactice("azalee", "2026-08-13T00:00:00.000Z", false);
-    tweetsCourants = [tweetFactice("1955000000000000003", "2026-08-13T08:00:00.000Z")];
+    curseurCourant = curseurFactice(
+      "azalee",
+      "2026-08-13T00:00:00.000Z",
+      false,
+    );
+    tweetsCourants = [
+      tweetFactice("1955000000000000003", "2026-08-13T08:00:00.000Z"),
+    ];
     const envois: Envoi[] = [];
 
     const { valeur: resultat } = await sansJournal(() =>
@@ -394,13 +464,21 @@ describe("drainerTweets — un curseur par profil", () => {
   });
 
   test("aucun salon nulle part : le profil le dit au lieu de publier au hasard", async () => {
-    curseurCourant = curseurFactice("azalee", "2026-08-13T00:00:00.000Z", false);
-    tweetsCourants = [tweetFactice("1955000000000000004", "2026-08-13T08:00:00.000Z")];
+    curseurCourant = curseurFactice(
+      "azalee",
+      "2026-08-13T00:00:00.000Z",
+      false,
+    );
+    tweetsCourants = [
+      tweetFactice("1955000000000000004", "2026-08-13T08:00:00.000Z"),
+    ];
     filtreCourant = { ...filtreCourant, salon: SALON_RG };
     const envois: Envoi[] = [];
 
     const { valeur: resultat } = await sansJournal(() =>
-      drainerTweets(clientFactice(envois), { annonce: { salon: "", curseur: "azalee" } }),
+      drainerTweets(clientFactice(envois), {
+        annonce: { salon: "", curseur: "azalee" },
+      }),
     );
 
     expect(resultat.etat).toBe("sans-salon");
@@ -409,12 +487,21 @@ describe("drainerTweets — un curseur par profil", () => {
   });
 
   test("la simulation ne crée ni n'avance aucun curseur", async () => {
-    curseurCourant = curseurFactice("azalee", "2026-08-13T00:00:00.000Z", false);
-    tweetsCourants = [tweetFactice("1955000000000000005", "2026-08-13T08:00:00.000Z")];
+    curseurCourant = curseurFactice(
+      "azalee",
+      "2026-08-13T00:00:00.000Z",
+      false,
+    );
+    tweetsCourants = [
+      tweetFactice("1955000000000000005", "2026-08-13T08:00:00.000Z"),
+    ];
     const envois: Envoi[] = [];
 
     const { valeur: resultat } = await sansJournal(() =>
-      drainerTweets(clientFactice(envois), { annonce: ANNONCE_AZALEE, simulation: true }),
+      drainerTweets(clientFactice(envois), {
+        annonce: ANNONCE_AZALEE,
+        simulation: true,
+      }),
     );
 
     expect(resultat.etat).toBe("publie");
@@ -425,8 +512,14 @@ describe("drainerTweets — un curseur par profil", () => {
   });
 
   test("un curseur déplacé par un autre drain arrête la publication", async () => {
-    curseurCourant = curseurFactice("azalee", "2026-08-13T00:00:00.000Z", false);
-    tweetsCourants = [tweetFactice("1955000000000000006", "2026-08-13T08:00:00.000Z")];
+    curseurCourant = curseurFactice(
+      "azalee",
+      "2026-08-13T00:00:00.000Z",
+      false,
+    );
+    tweetsCourants = [
+      tweetFactice("1955000000000000006", "2026-08-13T08:00:00.000Z"),
+    ];
     avancementAccepte = false;
     const envois: Envoi[] = [];
 
@@ -461,7 +554,10 @@ describe("resoudreSalon", () => {
 
   test("un salon non écrivable est expliqué, pas confondu avec une absence", async () => {
     const { valeur } = await sansJournal(() =>
-      resoudreSalon(clientFactice([], { nonEcrivable: true }), "555555555555555555"),
+      resoudreSalon(
+        clientFactice([], { nonEcrivable: true }),
+        "555555555555555555",
+      ),
     );
     expect(valeur.salon).toBeNull();
     expect(valeur.raison).toContain("Envoyer des messages");
@@ -488,7 +584,10 @@ describe("demarrerNotifieurTweets", () => {
 
   test("`annoncePosts: null` vaut « ce profil n'annonce pas »", async () => {
     const { lignes } = await sansJournal(() =>
-      demarrerNotifieurTweets(clientFactice([]), { nom: "azalee", annoncePosts: null }),
+      demarrerNotifieurTweets(clientFactice([]), {
+        nom: "azalee",
+        annoncePosts: null,
+      }),
     );
     expect(lignes).toHaveLength(1);
     expect(appels.filtre).toBe(0);
@@ -512,8 +611,12 @@ describe("demarrerNotifieurTweets", () => {
 
     expect(appels.assurer).toEqual(["azalee"]);
     expect(envois).toHaveLength(0);
-    expect(lignes.some(ligne => ligne.includes("notifieur démarré"))).toBe(true);
-    expect(lignes.some(ligne => ligne.includes("abonné au pont"))).toBe(false);
+    expect(lignes.some((ligne) => ligne.includes("notifieur démarré"))).toBe(
+      true,
+    );
+    expect(lignes.some((ligne) => ligne.includes("abonné au pont"))).toBe(
+      false,
+    );
   });
 
   test("un curseur mal nommé dans le registre ne démarre pas non plus", async () => {
@@ -565,7 +668,9 @@ describe("ni retweet, ni réponse dans un salon d'annonces", () => {
     // distinguer par le seul texte, et le doute profite à la publication —
     // mieux vaut une annonce de trop qu'une annonce perdue en silence.
     expect(estReponse("Voici la mise à jour de @inazuma_project")).toBe(false);
-    expect(estReponse("La mise à jour 7.1.0 de Victory Road est sortie ⚡️")).toBe(false);
+    expect(
+      estReponse("La mise à jour 7.1.0 de Victory Road est sortie ⚡️"),
+    ).toBe(false);
   });
 
   test("un texte vide ou absent est annonçable — ce n'est pas ce filtre qui l'écarte", () => {
@@ -612,7 +717,9 @@ describe("pause par profil", () => {
 
     // Sans `annonce`, le drain retombe sur le profil HISTORIQUE (curseur
     // `discord`), c'est-à-dire le bot Rose Griffon.
-    const { valeur: resultat } = await sansJournal(() => drainerTweets(clientFactice(envois), {}));
+    const { valeur: resultat } = await sansJournal(() =>
+      drainerTweets(clientFactice(envois), {}),
+    );
 
     expect(resultat.etat).not.toBe("inactif");
   });
@@ -623,7 +730,9 @@ describe("pause par profil", () => {
     pauseCourante = [];
     tweetsCourants = [tweetFactice("1", "2026-08-13T10:00:00Z")];
 
-    const { valeur: resultat } = await sansJournal(() => drainerTweets(clientFactice([]), { annonce: ANNONCE_AZALEE }));
+    const { valeur: resultat } = await sansJournal(() =>
+      drainerTweets(clientFactice([]), { annonce: ANNONCE_AZALEE }),
+    );
 
     expect(resultat.etat).not.toBe("inactif");
   });
@@ -645,7 +754,12 @@ describe("liste de comptes par profil", () => {
   } as const;
 
   test("un post d'un AUTRE compte n'est pas retenu", async () => {
-    tweetsCourants = [{ ...tweetFactice("1", "2026-08-13T10:00:00Z"), author_username: "rose_griffon" }];
+    tweetsCourants = [
+      {
+        ...tweetFactice("1", "2026-08-13T10:00:00Z"),
+        author_username: "rose_griffon",
+      },
+    ];
     const envois: Envoi[] = [];
 
     const { valeur: resultat } = await sansJournal(() =>
@@ -657,7 +771,12 @@ describe("liste de comptes par profil", () => {
   });
 
   test("un post du compte de la marque est retenu", async () => {
-    tweetsCourants = [{ ...tweetFactice("1", "2026-08-13T10:00:00Z"), author_username: "Azalee_IE" }];
+    tweetsCourants = [
+      {
+        ...tweetFactice("1", "2026-08-13T10:00:00Z"),
+        author_username: "Azalee_IE",
+      },
+    ];
     const envois: Envoi[] = [];
 
     const { valeur: resultat } = await sansJournal(() =>
@@ -673,12 +792,18 @@ describe("liste de comptes par profil", () => {
     // `inazuma_project`, et c'est bien lui qui décide.
     tweetsCourants = [tweetFactice("1", "2026-08-13T10:00:00Z")];
 
-    const { valeur: publie } = await sansJournal(() => drainerTweets(clientFactice([]), { annonce: ANNONCE_AZALEE }));
+    const { valeur: publie } = await sansJournal(() =>
+      drainerTweets(clientFactice([]), { annonce: ANNONCE_AZALEE }),
+    );
     expect(publie.publies).toBe(1);
 
     // Et le même post, sous une liste de profil qui ne le contient pas, ne part
     // pas : c'est bien la liste du PROFIL qui l'emporte quand elle existe.
-    curseurCourant = curseurFactice("azalee", "2026-08-13T00:00:00.000Z", false);
+    curseurCourant = curseurFactice(
+      "azalee",
+      "2026-08-13T00:00:00.000Z",
+      false,
+    );
     tweetsCourants = [tweetFactice("2", "2026-08-13T11:00:00Z")];
 
     const { valeur: ecarte } = await sansJournal(() =>
@@ -699,10 +824,17 @@ describe("validation humaine — le curseur avance AVANT la carte", () => {
    * arrête le drain au lieu de déposer une carte de plus.
    */
   const SALON_VALIDATION = "333333333333333333";
-  const ANNONCE_VALIDEE = { ...ANNONCE_AZALEE, salonValidation: SALON_VALIDATION } as const;
+  const ANNONCE_VALIDEE = {
+    ...ANNONCE_AZALEE,
+    salonValidation: SALON_VALIDATION,
+  } as const;
 
   test("le curseur avance avant l'envoi, et la carte part dans le salon de validation", async () => {
-    curseurCourant = curseurFactice("azalee", "2026-08-13T00:00:00.000Z", false);
+    curseurCourant = curseurFactice(
+      "azalee",
+      "2026-08-13T00:00:00.000Z",
+      false,
+    );
     tweetsCourants = [tweetFactice("1", "2026-08-13T10:00:00Z")];
     const envois: Envoi[] = [];
 
@@ -713,13 +845,19 @@ describe("validation humaine — le curseur avance AVANT la carte", () => {
     expect(resultat.etat).toBe("propose");
     expect(resultat.publies).toBe(1);
     expect(appels.avance).toHaveLength(1);
-    expect(appels.avance[0]!.jusqua.toISOString()).toBe("2026-08-13T10:00:00.000Z");
+    expect(appels.avance[0]!.jusqua.toISOString()).toBe(
+      "2026-08-13T10:00:00.000Z",
+    );
     // Rien dans le salon d'annonce : la publication attend un clic.
-    expect(envois.map(e => e.salonId)).toEqual([SALON_VALIDATION]);
+    expect(envois.map((e) => e.salonId)).toEqual([SALON_VALIDATION]);
   });
 
   test("un curseur refusé n'envoie AUCUNE carte", async () => {
-    curseurCourant = curseurFactice("azalee", "2026-08-13T00:00:00.000Z", false);
+    curseurCourant = curseurFactice(
+      "azalee",
+      "2026-08-13T00:00:00.000Z",
+      false,
+    );
     tweetsCourants = [tweetFactice("1", "2026-08-13T10:00:00Z")];
     avancementAccepte = false;
     const envois: Envoi[] = [];

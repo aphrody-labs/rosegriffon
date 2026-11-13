@@ -62,7 +62,9 @@ export class NieAssetOptimizer {
     vfsPath: string,
     preferredFormat: "webp" | "png" | "avif" = "webp",
   ): string {
-    const cleanPath = vfsPath.replace(/^data\/dx11\//, "").replace(/\.g4tx$/i, "");
+    const cleanPath = vfsPath
+      .replace(/^data\/dx11\//, "")
+      .replace(/\.g4tx$/i, "");
     return `${this.cdnBase}/dx11/${cleanPath}.${preferredFormat}`;
   }
 
@@ -80,7 +82,14 @@ export class NieAssetOptimizer {
     sheetUrl: string,
     sheetWidth: number,
     sheetHeight: number,
-    items: Array<{ id: string; name: string; category: SpriteAtlasEntry["category"]; col: number; row: number; size: number }>,
+    items: Array<{
+      id: string;
+      name: string;
+      category: SpriteAtlasEntry["category"];
+      col: number;
+      row: number;
+      size: number;
+    }>,
   ): SpriteAtlas {
     const entries = new Map<string, SpriteAtlasEntry>();
 
@@ -126,7 +135,8 @@ export class NieAssetOptimizer {
         baseColor: "#051630",
         accentColor: "#00FFFF",
         imageUrl: `${this.cdnBase}/dx11/menu/wallpaper/bg_nagumohara_coast.png`,
-        overlayGradient: "linear-gradient(180deg, rgba(5,22,48,0.3) 0%, rgba(5,22,48,0.92) 100%)",
+        overlayGradient:
+          "linear-gradient(180deg, rgba(5,22,48,0.3) 0%, rgba(5,22,48,0.92) 100%)",
       },
       {
         id: "odaiba-arena-night",
@@ -135,7 +145,8 @@ export class NieAssetOptimizer {
         baseColor: "#070E20",
         accentColor: "#0874FF",
         imageUrl: `${this.cdnBase}/dx11/menu/wallpaper/bg_odaiba_arena.png`,
-        overlayGradient: "radial-gradient(circle at 50% 30%, rgba(8,116,255,0.25) 0%, rgba(7,14,32,0.95) 75%)",
+        overlayGradient:
+          "radial-gradient(circle at 50% 30%, rgba(8,116,255,0.25) 0%, rgba(7,14,32,0.95) 75%)",
       },
       {
         id: "raimon-hallowed-ground",
@@ -144,7 +155,8 @@ export class NieAssetOptimizer {
         baseColor: "#0A1F14",
         accentColor: "#FFCC00",
         imageUrl: `${this.cdnBase}/dx11/menu/wallpaper/bg_raimon_ground.png`,
-        overlayGradient: "linear-gradient(135deg, rgba(255,204,0,0.15) 0%, rgba(10,31,20,0.9) 100%)",
+        overlayGradient:
+          "linear-gradient(135deg, rgba(255,204,0,0.15) 0%, rgba(10,31,20,0.9) 100%)",
       },
       {
         id: "teikoku-command-center",
@@ -153,7 +165,8 @@ export class NieAssetOptimizer {
         baseColor: "#140810",
         accentColor: "#FF3B30",
         imageUrl: `${this.cdnBase}/dx11/menu/wallpaper/bg_teikoku_hq.png`,
-        overlayGradient: "linear-gradient(180deg, rgba(255,59,48,0.2) 0%, rgba(20,8,16,0.95) 100%)",
+        overlayGradient:
+          "linear-gradient(180deg, rgba(255,59,48,0.2) 0%, rgba(20,8,16,0.95) 100%)",
       },
     ];
   }

@@ -37,7 +37,9 @@ import {
   type SaisieClan,
 } from "./clan-edition";
 
-const CODES_PAYS: ReadonlySet<string> = new Set(COUNTRIES.map(pays => pays.code));
+const CODES_PAYS: ReadonlySet<string> = new Set(
+  COUNTRIES.map((pays) => pays.code),
+);
 /** Mêmes limites que l'ancien téléversement : 6 Mo, images courantes. */
 const LOGO_TAILLE_MAX = 6_000_000;
 const LOGO_TYPES = ["image/png", "image/jpeg", "image/webp", "image/gif"];
@@ -94,9 +96,20 @@ export function EditionClanDialog({
   onEnregistre: (nom: string) => void;
 }) {
   return (
-    <Dialog open={clan !== null} onOpenChange={ouvert => !ouvert && onFermer()}>
+    <Dialog
+      open={clan !== null}
+      onOpenChange={(ouvert) => !ouvert && onFermer()}
+    >
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
-        {clan && <FormulaireClan key={clan.id} clan={clan} estAdmin={estAdmin} onFermer={onFermer} onEnregistre={onEnregistre} />}
+        {clan && (
+          <FormulaireClan
+            key={clan.id}
+            clan={clan}
+            estAdmin={estAdmin}
+            onFermer={onFermer}
+            onEnregistre={onEnregistre}
+          />
+        )}
       </DialogContent>
     </Dialog>
   );
@@ -123,8 +136,8 @@ function FormulaireClan({
   const fichier = useRef<HTMLInputElement>(null);
 
   const modifier = <C extends ChampClan>(champ: C, valeur: SaisieClan[C]) => {
-    setSaisie(courante => ({ ...courante, [champ]: valeur }));
-    setErreurs(courantes => ({ ...courantes, [champ]: undefined }));
+    setSaisie((courante) => ({ ...courante, [champ]: valeur }));
+    setErreurs((courantes) => ({ ...courantes, [champ]: undefined }));
   };
 
   const patch = patchClan(initial, saisie, estAdmin);
@@ -135,18 +148,28 @@ function FormulaireClan({
     event.target.value = "";
     if (!choisi) return;
     if (!LOGO_TYPES.includes(choisi.type)) {
-      setErreurs(courantes => ({ ...courantes, clanAvatarUrl: "Formats acceptés : PNG, JPEG, WebP, GIF." }));
+      setErreurs((courantes) => ({
+        ...courantes,
+        clanAvatarUrl: "Formats acceptés : PNG, JPEG, WebP, GIF.",
+      }));
       return;
     }
     if (choisi.size > LOGO_TAILLE_MAX) {
-      setErreurs(courantes => ({ ...courantes, clanAvatarUrl: "Image trop lourde (6 Mo au plus)." }));
+      setErreurs((courantes) => ({
+        ...courantes,
+        clanAvatarUrl: "Image trop lourde (6 Mo au plus).",
+      }));
       return;
     }
     setTeleversement(true);
     try {
       const resultat = await client.admin.uploadImage(choisi, choisi.name);
       if (resultat.ok) modifier("clanAvatarUrl", resultat.value.url);
-      else setErreurs(courantes => ({ ...courantes, clanAvatarUrl: signalerEchec("proxy/upload", resultat) }));
+      else
+        setErreurs((courantes) => ({
+          ...courantes,
+          clanAvatarUrl: signalerEchec("proxy/upload", resultat),
+        }));
     } finally {
       setTeleversement(false);
     }
@@ -161,15 +184,23 @@ function FormulaireClan({
     setEnregistrement(true);
     try {
       const resultat = await client.clans.update(clan.id, patch);
-      if (resultat.ok && resultat.value.success) onEnregistre(saisie.name.trim());
-      else if (resultat.ok) setErreurApi(resultat.value.error ?? "Le clan n'a pas pu être mis à jour.");
+      if (resultat.ok && resultat.value.success)
+        onEnregistre(saisie.name.trim());
+      else if (resultat.ok)
+        setErreurApi(
+          resultat.value.error ?? "Le clan n'a pas pu être mis à jour.",
+        );
       else setErreurApi(signalerEchec("clans/update", resultat));
     } finally {
       setEnregistrement(false);
     }
   };
 
-  const champTexte = (champ: "name" | "shortenedName" | "xUrl" | "instagramUrl" | "tiktokUrl", libelle: string, extra: { maxLength?: number; placeholder?: string } = {}) => {
+  const champTexte = (
+    champ: "name" | "shortenedName" | "xUrl" | "instagramUrl" | "tiktokUrl",
+    libelle: string,
+    extra: { maxLength?: number; placeholder?: string } = {},
+  ) => {
     const id = `clan-edition-${champ}`;
     return (
       <div className="space-y-1">
@@ -177,7 +208,7 @@ function FormulaireClan({
         <Input
           id={id}
           value={saisie[champ]}
-          onChange={event => modifier(champ, event.target.value)}
+          onChange={(event) => modifier(champ, event.target.value)}
           aria-invalid={Boolean(erreurs[champ])}
           aria-describedby={erreurs[champ] ? `${id}-erreur` : undefined}
           autoComplete="off"
@@ -190,17 +221,31 @@ function FormulaireClan({
   };
 
   return (
-    <form onSubmit={event => void enregistrer(event)} noValidate className="space-y-5">
+    <form
+      onSubmit={(event) => void enregistrer(event)}
+      noValidate
+      className="space-y-5"
+    >
       <DialogHeader>
         <DialogTitle>Éditer {clan.name}</DialogTitle>
-        <DialogDescription>Les modifications s&apos;appliquent aussi au rôle et au salon Discord du clan.</DialogDescription>
+        <DialogDescription>
+          Les modifications s&apos;appliquent aussi au rôle et au salon Discord
+          du clan.
+        </DialogDescription>
       </DialogHeader>
 
       <div className="flex flex-col gap-5 sm:flex-row">
         <div className="flex shrink-0 flex-col items-center gap-2">
           <Avatar className="size-24 rounded-xl">
-            {saisie.clanAvatarUrl && <AvatarImage src={saisie.clanAvatarUrl} alt={`Logo de ${clan.name}`} />}
-            <AvatarFallback className="rounded-xl">{saisie.shortenedName.slice(0, 3)}</AvatarFallback>
+            {saisie.clanAvatarUrl && (
+              <AvatarImage
+                src={saisie.clanAvatarUrl}
+                alt={`Logo de ${clan.name}`}
+              />
+            )}
+            <AvatarFallback className="rounded-xl">
+              {saisie.shortenedName.slice(0, 3)}
+            </AvatarFallback>
           </Avatar>
           <input
             ref={fichier}
@@ -209,7 +254,7 @@ function FormulaireClan({
             className="sr-only"
             tabIndex={-1}
             aria-hidden="true"
-            onChange={event => void televerserLogo(event)}
+            onChange={(event) => void televerserLogo(event)}
           />
           <Button
             type="button"
@@ -225,7 +270,10 @@ function FormulaireClan({
             )}
             Changer le logo
           </Button>
-          <MessageChamp id="clan-edition-logo-erreur" message={erreurs.clanAvatarUrl} />
+          <MessageChamp
+            id="clan-edition-logo-erreur"
+            message={erreurs.clanAvatarUrl}
+          />
         </div>
 
         <div className="grid w-full gap-4">
@@ -239,19 +287,33 @@ function FormulaireClan({
               id="clan-edition-bio"
               rows={4}
               value={saisie.clanBiography}
-              onChange={event => modifier("clanBiography", event.target.value)}
+              onChange={(event) =>
+                modifier("clanBiography", event.target.value)
+              }
               aria-invalid={Boolean(erreurs.clanBiography)}
               aria-describedby="clan-edition-bio-compte"
             />
-            <p id="clan-edition-bio-compte" className="text-xs text-muted-foreground">
+            <p
+              id="clan-edition-bio-compte"
+              className="text-xs text-muted-foreground"
+            >
               {saisie.clanBiography.length} / {BIO_MAX}
             </p>
-            <MessageChamp id="clan-edition-bio-erreur" message={erreurs.clanBiography} />
+            <MessageChamp
+              id="clan-edition-bio-erreur"
+              message={erreurs.clanBiography}
+            />
           </div>
           <div className="grid gap-4 sm:grid-cols-3">
-            {champTexte("xUrl", "X / Twitter", { placeholder: "https://x.com/…" })}
-            {champTexte("instagramUrl", "Instagram", { placeholder: "https://instagram.com/…" })}
-            {champTexte("tiktokUrl", "TikTok", { placeholder: "https://tiktok.com/@…" })}
+            {champTexte("xUrl", "X / Twitter", {
+              placeholder: "https://x.com/…",
+            })}
+            {champTexte("instagramUrl", "Instagram", {
+              placeholder: "https://instagram.com/…",
+            })}
+            {champTexte("tiktokUrl", "TikTok", {
+              placeholder: "https://tiktok.com/@…",
+            })}
           </div>
         </div>
       </div>
@@ -262,36 +324,48 @@ function FormulaireClan({
           <NativeSelect
             id="clan-edition-origine"
             value={saisie.origin}
-            onChange={event => modifier("origin", event.target.value)}
+            onChange={(event) => modifier("origin", event.target.value)}
             aria-invalid={Boolean(erreurs.origin)}
             className="min-h-11"
           >
-            {!CODES_PAYS.has(saisie.origin) && <NativeSelectOption value={saisie.origin}>Non renseignée</NativeSelectOption>}
-            {COUNTRIES.map(pays => (
+            {!CODES_PAYS.has(saisie.origin) && (
+              <NativeSelectOption value={saisie.origin}>
+                Non renseignée
+              </NativeSelectOption>
+            )}
+            {COUNTRIES.map((pays) => (
               <NativeSelectOption key={pays.code} value={pays.code}>
                 {pays.name}
               </NativeSelectOption>
             ))}
           </NativeSelect>
-          <MessageChamp id="clan-edition-origine-erreur" message={erreurs.origin} />
+          <MessageChamp
+            id="clan-edition-origine-erreur"
+            message={erreurs.origin}
+          />
         </div>
         <fieldset className="space-y-1">
           <legend className="text-sm font-medium">Langues parlées</legend>
           <div className="grid grid-cols-2 gap-1">
-            {COUNTRIES.map(pays => {
+            {COUNTRIES.map((pays) => {
               const id = `clan-edition-langue-${pays.code}`;
               const coche = saisie.languages.includes(pays.code);
               return (
-                <div key={pays.code} className="flex min-h-11 items-center gap-2">
+                <div
+                  key={pays.code}
+                  className="flex min-h-11 items-center gap-2"
+                >
                   <Checkbox
                     id={id}
                     checked={coche}
-                    onCheckedChange={valeur =>
+                    onCheckedChange={(valeur) =>
                       modifier(
                         "languages",
                         valeur === true
                           ? [...saisie.languages, pays.code]
-                          : saisie.languages.filter(code => code !== pays.code),
+                          : saisie.languages.filter(
+                              (code) => code !== pays.code,
+                            ),
                       )
                     }
                   />
@@ -302,7 +376,10 @@ function FormulaireClan({
               );
             })}
           </div>
-          <MessageChamp id="clan-edition-langues-erreur" message={erreurs.languages} />
+          <MessageChamp
+            id="clan-edition-langues-erreur"
+            message={erreurs.languages}
+          />
         </fieldset>
       </div>
 
@@ -311,13 +388,13 @@ function FormulaireClan({
           id="clan-edition-recrutement"
           libelle="Recrutement ouvert"
           valeur={saisie.isRecruiting}
-          onChange={valeur => modifier("isRecruiting", valeur)}
+          onChange={(valeur) => modifier("isRecruiting", valeur)}
         />
         <Bascule
           id="clan-edition-auto"
           libelle="Candidatures acceptées automatiquement"
           valeur={saisie.autoAcceptMembers}
-          onChange={valeur => modifier("autoAcceptMembers", valeur)}
+          onChange={(valeur) => modifier("autoAcceptMembers", valeur)}
         />
         {estAdmin && (
           <>
@@ -326,30 +403,42 @@ function FormulaireClan({
               libelle="Clan inactif"
               aide="Signale le clan comme en sommeil."
               valeur={saisie.isInactive}
-              onChange={valeur => modifier("isInactive", valeur)}
+              onChange={(valeur) => modifier("isInactive", valeur)}
             />
             <Bascule
               id="clan-edition-masque"
               libelle="Clan masqué"
               aide="Retire le clan des listes et du classement publics."
               valeur={saisie.isHidden}
-              onChange={valeur => modifier("isHidden", valeur)}
+              onChange={(valeur) => modifier("isHidden", valeur)}
             />
           </>
         )}
       </div>
 
       {erreurApi && (
-        <p role="alert" className="rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">
+        <p
+          role="alert"
+          className="rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive"
+        >
           {erreurApi}
         </p>
       )}
 
       <DialogFooter>
-        <Button type="button" variant="ghost" className="min-h-11" onClick={onFermer}>
+        <Button
+          type="button"
+          variant="ghost"
+          className="min-h-11"
+          onClick={onFermer}
+        >
           Annuler
         </Button>
-        <Button type="submit" className="min-h-11 gap-2" disabled={enregistrement || televersement || !modifie}>
+        <Button
+          type="submit"
+          className="min-h-11 gap-2"
+          disabled={enregistrement || televersement || !modifie}
+        >
           {enregistrement ? (
             <Loader2 className="size-4 animate-spin" aria-hidden="true" />
           ) : (

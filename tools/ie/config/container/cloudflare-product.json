@@ -5,8 +5,18 @@
   "runtimeHost": "dbfr",
   "runtime": "bun@1.4.3-aphrody.4",
   "buckets": [
-    { "name": "iecode-vfs", "binding": "VFS", "jurisdiction": "eu", "public": false },
-    { "name": "rg-assets", "binding": "RG", "jurisdiction": "eu", "public": false }
+    {
+      "name": "iecode-vfs",
+      "binding": "VFS",
+      "jurisdiction": "eu",
+      "public": false
+    },
+    {
+      "name": "rg-assets",
+      "binding": "RG",
+      "jurisdiction": "eu",
+      "public": false
+    }
   ],
   "surfaces": [
     {

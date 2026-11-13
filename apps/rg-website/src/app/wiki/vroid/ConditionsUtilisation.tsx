@@ -9,7 +9,12 @@
  * rendu côté serveur quand la page le peut, et se laisse aussi importer par un
  * îlot client.
  */
-import { conditionsDuModele, TEXTE_VERDICT, TITRE_CONDITIONS, type Verdict } from "@/lib/vroid/licence";
+import {
+  conditionsDuModele,
+  TEXTE_VERDICT,
+  TITRE_CONDITIONS,
+  type Verdict,
+} from "@/lib/vroid/licence";
 import type { ModeleVroid } from "@/lib/vroid/types";
 
 /** Couleur du verdict — un refus doit se voir sans lire. */
@@ -28,16 +33,21 @@ export interface ConditionsUtilisationProps {
   compact?: boolean;
 }
 
-export function ConditionsUtilisation({ modele, compact = false }: ConditionsUtilisationProps) {
+export function ConditionsUtilisation({
+  modele,
+  compact = false,
+}: ConditionsUtilisationProps) {
   const { conditions, specification } = conditionsDuModele(modele);
 
   if (conditions.length === 0) {
     return (
       <div className="rounded-2xl border border-outline-variant/40 bg-surface-container-low p-4">
-        <h3 className="text-sm font-semibold text-on-surface">{TITRE_CONDITIONS}</h3>
+        <h3 className="text-sm font-semibold text-on-surface">
+          {TITRE_CONDITIONS}
+        </h3>
         <p className="mt-2 text-sm text-on-surface-variant">
-          VRoid Hub ne renvoie pas les conditions d&apos;utilisation dans cette liste. Ouvrez la fiche du modèle pour
-          les consulter.
+          VRoid Hub ne renvoie pas les conditions d&apos;utilisation dans cette
+          liste. Ouvrez la fiche du modèle pour les consulter.
         </p>
       </div>
     );
@@ -46,22 +56,33 @@ export function ConditionsUtilisation({ modele, compact = false }: ConditionsUti
   return (
     <div className="rounded-2xl border border-outline-variant/40 bg-surface-container-low p-4">
       <div className="flex items-baseline justify-between gap-3">
-        <h3 className="text-sm font-semibold text-on-surface">{TITRE_CONDITIONS}</h3>
-        <span className="text-xs text-on-surface-variant">{specification === "vrm1" ? "VRM 1.0" : "VRM 0.0"}</span>
+        <h3 className="text-sm font-semibold text-on-surface">
+          {TITRE_CONDITIONS}
+        </h3>
+        <span className="text-xs text-on-surface-variant">
+          {specification === "vrm1" ? "VRM 1.0" : "VRM 0.0"}
+        </span>
       </div>
 
-      <dl className={`mt-3 grid gap-x-4 gap-y-1.5 ${compact ? "grid-cols-1" : "sm:grid-cols-2"}`}>
-        {conditions.map(condition => (
-          <div className="flex items-baseline justify-between gap-3 text-sm" key={condition.cle}>
+      <dl
+        className={`mt-3 grid gap-x-4 gap-y-1.5 ${compact ? "grid-cols-1" : "sm:grid-cols-2"}`}
+      >
+        {conditions.map((condition) => (
+          <div
+            className="flex items-baseline justify-between gap-3 text-sm"
+            key={condition.cle}
+          >
             <dt className="text-on-surface-variant">{condition.libelle}</dt>
-            <dd className={`shrink-0 font-medium ${TEINTE[condition.verdict]}`}>{TEXTE_VERDICT[condition.verdict]}</dd>
+            <dd className={`shrink-0 font-medium ${TEINTE[condition.verdict]}`}>
+              {TEXTE_VERDICT[condition.verdict]}
+            </dd>
           </div>
         ))}
       </dl>
 
       <p className="mt-3 text-xs text-on-surface-variant">
-        Conditions déclarées par l&apos;auteur sur VRoid Hub. Azalée les relaie sans les modifier et n&apos;héberge
-        aucun modèle.
+        Conditions déclarées par l&apos;auteur sur VRoid Hub. Azalée les relaie
+        sans les modifier et n&apos;héberge aucun modèle.
       </p>
     </div>
   );

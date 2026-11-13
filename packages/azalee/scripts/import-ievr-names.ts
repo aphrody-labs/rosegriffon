@@ -26,7 +26,10 @@ import { classerEcart, normaliserId, sansFurigana } from "./ievr-names";
 
 const { values: options } = parseArgs({
   options: {
-    names: { type: "string", default: "C:/src/yolo-re/var/ie-export/azalee/names.jsonl" },
+    names: {
+      type: "string",
+      default: "C:/src/yolo-re/var/ie-export/azalee/names.jsonl",
+    },
     mirror: { type: "string", default: "var/inagle-mirror.sqlite" },
     out: { type: "string", default: "var/ievr-names-report.json" },
   },
@@ -56,36 +59,60 @@ interface NomJeu {
 const lignes = (await Bun.file(options.names).text())
   .split("\n")
   .filter(Boolean)
-  .map(l => JSON.parse(l) as NomJeu);
+  .map((l) => JSON.parse(l) as NomJeu);
 
 const db = new Database(options.mirror, { readonly: true });
 const personnages = new Map(
   db
-    .query<{ chara_id: string; name_fr: string | null; name_en: string | null; name_ja: string | null }, []>(
-      "select chara_id, name_fr, name_en, name_ja from inagle_characters",
-    )
+    .query<
+      {
+        chara_id: string;
+        name_fr: string | null;
+        name_en: string | null;
+        name_ja: string | null;
+      },
+      []
+    >("select chara_id, name_fr, name_en, name_ja from inagle_characters")
     .all()
-    .map(r => [normaliserId(String(r.chara_id)), r]),
+    .map((r) => [normaliserId(String(r.chara_id)), r]),
 );
 const equipes = new Map(
   db
-    .query<{ id: string; name_fr: string | null; name_en: string | null; name_ja: string | null }, []>(
-      "select id, name_fr, name_en, name_ja from inagle_teams",
-    )
+    .query<
+      {
+        id: string;
+        name_fr: string | null;
+        name_en: string | null;
+        name_ja: string | null;
+      },
+      []
+    >("select id, name_fr, name_en, name_ja from inagle_teams")
     .all()
-    .map(r => [normaliserId(String(r.id)), r]),
+    .map((r) => [normaliserId(String(r.id)), r]),
 );
 const competences = new Map(
   db
-    .query<{ internal_code: string; name_fr: string | null; name_en: string | null; name_ja: string | null }, []>(
+    .query<
+      {
+        internal_code: string;
+        name_fr: string | null;
+        name_en: string | null;
+        name_ja: string | null;
+      },
+      []
+    >(
       "select internal_code, name_fr, name_en, name_ja from inagle_skills where internal_code is not null",
     )
     .all()
-    .map(r => [r.internal_code, r]),
+    .map((r) => [r.internal_code, r]),
 );
 db.close();
 
-type LigneMiroir = { name_fr: string | null; name_en: string | null; name_ja: string | null };
+type LigneMiroir = {
+  name_fr: string | null;
+  name_en: string | null;
+  name_ja: string | null;
+};
 
 /**
  * Ligne du miroir désignée par une ref de l’export :
@@ -94,10 +121,15 @@ type LigneMiroir = { name_fr: string | null; name_en: string | null; name_ja: st
  *     team_config sont des équipes de match, absentes du miroir ;
  *   - technique : skill_config (code skillIDStr) → inagle_skills.internal_code.
  */
-function ligneDuMiroir(kind: NomJeu["kind"], ref: Ref): LigneMiroir | undefined {
-  if (kind === "character" && ref.table === "chara_base") return personnages.get(normaliserId(ref.id));
+function ligneDuMiroir(
+  kind: NomJeu["kind"],
+  ref: Ref,
+): LigneMiroir | undefined {
+  if (kind === "character" && ref.table === "chara_base")
+    return personnages.get(normaliserId(ref.id));
   if (kind === "team" && ref.club) return equipes.get(normaliserId(ref.id));
-  if (kind === "skill" && ref.table === "skill_config" && ref.code) return competences.get(ref.code);
+  if (kind === "skill" && ref.table === "skill_config" && ref.code)
+    return competences.get(ref.code);
   return undefined;
 }
 
@@ -136,7 +168,15 @@ for (const nom of lignes) {
       stats[cle] ??= {};
       stats[cle][ecart] = (stats[cle][ecart] ?? 0) + 1;
       if (ecart !== "identique")
-        corrections.push({ kind: nom.kind, id: ref.code ?? ref.id, code: ref.code, langue, actuel, propose, ecart });
+        corrections.push({
+          kind: nom.kind,
+          id: ref.code ?? ref.id,
+          code: ref.code,
+          langue,
+          actuel,
+          propose,
+          ecart,
+        });
     }
   }
 }
@@ -150,5 +190,8 @@ const rapport = {
   corrections,
 };
 await Bun.write(options.out, `${JSON.stringify(rapport, null, 2)}\n`);
-console.log(`relies=${relies} orphelins=${orphelins} corrections=${corrections.length} -> ${options.out}`);
-for (const [cle, parEcart] of Object.entries(stats)) console.log(cle, JSON.stringify(parEcart));
+console.log(
+  `relies=${relies} orphelins=${orphelins} corrections=${corrections.length} -> ${options.out}`,
+);
+for (const [cle, parEcart] of Object.entries(stats))
+  console.log(cle, JSON.stringify(parEcart));

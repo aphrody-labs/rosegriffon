@@ -77,19 +77,19 @@ publique stable `https://ranked.rosegriffon.fr/api`, indépendante de l'IP du VP
 > Cette campagne est historique et n'a pas été rejouée pendant l'audit du 7/9/2026. Elle
 > documente les derniers résultats connus, pas un état courant garanti.
 
-| Endpoint | Résultat | Note |
-| --- | --- | --- |
-| `https://rosegriffon.fr/` | **200** HTML | Next.js SSR (lang fr) |
-| `https://azalee.rosegriffon.fr/` | **200** HTML | Next.js SSR (dark) |
-| `https://api.rosegriffon.fr/health` | **200** `{"status":"ok"}` | stub |
-| `https://api.rosegriffon.fr/` (autre route) | **404** `{"error":"unknown service"}` | **rien d'autre que /health** |
-| `https://ranked.rosegriffon.fr/api/health` | **200** | backend Achillea (bot) |
-| `…/api/tournaments?page=1` | **200** (données réelles) | lecture OK |
-| `…/api/clans?page=1` | **200** (vide en local) | lecture OK |
-| `…/api/auth/me` · `…/api/ranked/me` | **401** | auth-gated (attendu) |
-| `https://cdn.rosegriffon.fr/` | **404** | pas de listing |
-| `cdn.rosegriffon.fr/images/<hash invalide>` | **403** | validation content-addressed |
-| `https://achillea.rosegriffon.fr/` | **200** | front Achillea (nginx, VPS `51.255.162.6`) |
+| Endpoint                                    | Résultat                              | Note                                       |
+| ------------------------------------------- | ------------------------------------- | ------------------------------------------ |
+| `https://rosegriffon.fr/`                   | **200** HTML                          | Next.js SSR (lang fr)                      |
+| `https://azalee.rosegriffon.fr/`            | **200** HTML                          | Next.js SSR (dark)                         |
+| `https://api.rosegriffon.fr/health`         | **200** `{"status":"ok"}`             | stub                                       |
+| `https://api.rosegriffon.fr/` (autre route) | **404** `{"error":"unknown service"}` | **rien d'autre que /health**               |
+| `https://ranked.rosegriffon.fr/api/health`  | **200**                               | backend Achillea (bot)                     |
+| `…/api/tournaments?page=1`                  | **200** (données réelles)             | lecture OK                                 |
+| `…/api/clans?page=1`                        | **200** (vide en local)               | lecture OK                                 |
+| `…/api/auth/me` · `…/api/ranked/me`         | **401**                               | auth-gated (attendu)                       |
+| `https://cdn.rosegriffon.fr/`               | **404**                               | pas de listing                             |
+| `cdn.rosegriffon.fr/images/<hash invalide>` | **403**                               | validation content-addressed               |
+| `https://achillea.rosegriffon.fr/`          | **200**                               | front Achillea (nginx, VPS `51.255.162.6`) |
 
 > ️ **Images legacy mortes** : d'anciennes lignes `image` (ancienne prod Achillea) pointent sur
 > `https://api.alessf.fr/images/<id>` qui **ne répond plus (000)**. Les uploads actuels utilisent
@@ -98,12 +98,12 @@ publique stable `https://ranked.rosegriffon.fr/api`, indépendante de l'IP du VP
 
 ## 1. Écosystème — les 3 sites
 
-| Site | Domaine | Stack | Rôle |
-| --- | --- | --- | --- |
-| **website** | `rosegriffon.fr` | Next.js 16 (`apps/website`) | site principal RG et wiki Azalée sous `/wiki` |
-| **azalee** | `azalee.rosegriffon.fr` | redirection HTTP permanente | compatibilité vers `rosegriffon.fr/wiki`, aucun build autonome |
-| **Achilléa** | `rosegriffon.fr/achillea` | Next.js (`apps/website`) | espace compétitif : clans, tournois, ranked, casts |
-| Alias historique | `achillea.rosegriffon.fr` | redirection permanente vers `/achillea` | compatibilité de l'ancien domaine |
+| Site             | Domaine                   | Stack                                   | Rôle                                                           |
+| ---------------- | ------------------------- | --------------------------------------- | -------------------------------------------------------------- |
+| **website**      | `rosegriffon.fr`          | Next.js 16 (`apps/website`)             | site principal RG et wiki Azalée sous `/wiki`                  |
+| **azalee**       | `azalee.rosegriffon.fr`   | redirection HTTP permanente             | compatibilité vers `rosegriffon.fr/wiki`, aucun build autonome |
+| **Achilléa**     | `rosegriffon.fr/achillea` | Next.js (`apps/website`)                | espace compétitif : clans, tournois, ranked, casts             |
+| Alias historique | `achillea.rosegriffon.fr` | redirection permanente vers `/achillea` | compatibilité de l'ancien domaine                              |
 
 Infra partagée : `api.rosegriffon.fr` (stub nginx, `/health`), `cdn.rosegriffon.fr` (service CDN d'images
 `cdn.service`), backend Achillea sur `ranked.rosegriffon.fr` (bot Bun :4002/:4000).
@@ -115,6 +115,7 @@ les rewrites de son nginx). `api.rosegriffon.fr` n'est qu'un **stub** (`/health`
 **passerelle API unifiée** de l'écosystème, avec un préfixe par produit.
 
 ### Proposition — écrite dans le repo, pas encore activée sur le VPS
+
 - `api.rosegriffon.fr/achillea/*` → proxy vers `https://ranked.rosegriffon.fr/api/` (pas de `127.0.0.1:4002` :
   le bot Achillea vit sur son propre VPS, cf. la décision du 7/9/2026 ci-dessus — l'IP change avec leur
   migration, `ranked.rosegriffon.fr` non).
@@ -124,6 +125,7 @@ les rewrites de son nginx). `api.rosegriffon.fr` n'est qu'un **stub** (`/health`
   `nginx -t` + `reload` (cf. en-tête du fichier) — pas fait automatiquement par un déploiement d'app.
 
 ### Points d'attention
+
 - **CORS** : ajouter `https://api.rosegriffon.fr` aux `WEB_ALLOWED_ORIGINS` du bot (`apps/bot/.env`).
 - **OAuth Discord** : l'authentification est possédée exclusivement par Better Auth sur
   `https://rosegriffon.fr/api/auth/callback/discord`. L'API Achillea ne fait plus d'échange de code Discord ;
@@ -177,15 +179,15 @@ Achillea est une **SPA Angular (CSR, pas de SSR)** → handicap SEO majeur (HTML
 Aligner sur l'approche `docs/la stratégie SEO du dépôt` (website + azalee, **vérifié** : `generateMetadata`,
 `StructuredData` JSON-LD, `sitemap.ts` dans les deux apps) :
 
-| Levier | website / azalee (réf.) | Achillea (à faire) |
-| --- | --- | --- |
-| Rendu | SSR/SSG Next.js | **Prerender Angular** (`@angular/ssr`) sur les routes publiques (`/clans/:id`, `/tournaments/:id`, `/chara/...`) |
-| `<title>` / meta | `generateMetadata` par page | service `Title`/`Meta` Angular + `@angular/ssr` ; titres uniques par entité |
-| Open Graph / Twitter | oui | balises OG/Twitter par route (image via CDN) |
-| Données structurées | JSON-LD (`StructuredData`) | JSON-LD `BreadcrumbList`, `Organization`, `SportsTeam`/`Event` pour clans/tournois |
-| Canonical | oui | `<link rel="canonical">` par route |
-| `sitemap.xml` | `app/sitemap.ts` | sitemap dynamique (routes + entités) — **absent** côté Achillea (vérifié) |
-| `robots.txt` | oui |  déjà présent (statique) |
+| Levier               | website / azalee (réf.)     | Achillea (à faire)                                                                                               |
+| -------------------- | --------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| Rendu                | SSR/SSG Next.js             | **Prerender Angular** (`@angular/ssr`) sur les routes publiques (`/clans/:id`, `/tournaments/:id`, `/chara/...`) |
+| `<title>` / meta     | `generateMetadata` par page | service `Title`/`Meta` Angular + `@angular/ssr` ; titres uniques par entité                                      |
+| Open Graph / Twitter | oui                         | balises OG/Twitter par route (image via CDN)                                                                     |
+| Données structurées  | JSON-LD (`StructuredData`)  | JSON-LD `BreadcrumbList`, `Organization`, `SportsTeam`/`Event` pour clans/tournois                               |
+| Canonical            | oui                         | `<link rel="canonical">` par route                                                                               |
+| `sitemap.xml`        | `app/sitemap.ts`            | sitemap dynamique (routes + entités) — **absent** côté Achillea (vérifié)                                        |
+| `robots.txt`         | oui                         | déjà présent (statique)                                                                                          |
 
 > **Priorité** : sans prerender, Google n'indexe que l'index. `@angular/ssr` (prerender des pages entité)
 > = gain SEO #1, puis sitemap + JSON-LD + OG. Réutiliser les conventions titres/OG de `la stratégie SEO du dépôt`.
@@ -193,6 +195,7 @@ Aligner sur l'approche `docs/la stratégie SEO du dépôt` (website + azalee, **
 ## 5. Intégration cross-site (home des 3 sites) — largement fait, vérifié (7/9/2026)
 
 Le maillage existe déjà des deux côtés, pas seulement en projet :
+
 - **website** (`apps/website/src/app/page.tsx`) : bannières `AzaleeBanner` + `AchilleaBanner` sur la home,
   et le footer (`components/layout/footer.tsx`, colonne « L'association ») liste `azalee.rosegriffon.fr` +
   `achillea.rosegriffon.fr`.
@@ -210,6 +213,7 @@ préalable. Pas de `RG_SITES`/`EcosystemNav` partagé : chaque app définit ses 
 composant de bannière.
 
 ### SEO du maillage
+
 - Liens réciproques crawlables entre website ↔ azalee (vérifié). Achillea → à vérifier côté de son repo.
 - `Organization` JSON-LD avec `sameAs` listant les 3 domaines : à vérifier (non audité ici).
 - Domaine `achillea.rosegriffon.fr` en place (200, nginx) — le sous-domaine RG consolide le SEO.
@@ -254,16 +258,16 @@ composant de bannière.
 
 ### 8.1 Inventaire réel du dépôt source
 
-| Surface | État au commit audité | Destination de portage |
-| --- | --- | --- |
-| Backend | `apps/bot/src` : 383 fichiers, 55 services, 60 fichiers d'entités, 25 contrôleurs et 181 handlers REST déclarés | `apps/achillea-bot` ; conserver le nom de package `achillea-bot` au premier portage |
-| Ranked / temps réel | Sous-processus Colyseus dans `apps/bot/src/ranked`, plus Socket.IO séparé | inclus dans `apps/achillea-bot`, sans le mélanger au bot RG |
-| Frontend | `apps/web/src` : 295 fichiers, 37 entrées de routes Angular, SPA Angular 21 + PrimeNG 21 | migration terminée vers `apps/website` ; le frontend Angular est retiré |
-| Cœur métier | `packages/core/src` : 21 fichiers, logique ELO, ranking, sanctions, licences, votes, ligues et tournois | `packages/achillea-core` ; première surface réutilisable |
-| Contrats | `packages/types/src` : 5 fichiers, enums et DTO métier | `packages/achillea-types` ; contrat versionné |
-| Base | 56 fichiers `Migration*.ts` MikroORM ; la documentation source indique 47 migrations appliquées en production | migration séparée sous `apps/achillea-bot/database/migrations` |
-| Vérification | 44 fichiers de tests repérés dans bot/web/packages | gates ciblées avant toute gate RG globale |
-| Opérations | 13 docs, 16 fichiers d'infra, 20 scripts, Docker + workflows GitHub | adapter un par un ; ne pas copier l'automatisation de production telle quelle |
+| Surface             | État au commit audité                                                                                           | Destination de portage                                                              |
+| ------------------- | --------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| Backend             | `apps/bot/src` : 383 fichiers, 55 services, 60 fichiers d'entités, 25 contrôleurs et 181 handlers REST déclarés | `apps/achillea-bot` ; conserver le nom de package `achillea-bot` au premier portage |
+| Ranked / temps réel | Sous-processus Colyseus dans `apps/bot/src/ranked`, plus Socket.IO séparé                                       | inclus dans `apps/achillea-bot`, sans le mélanger au bot RG                         |
+| Frontend            | `apps/web/src` : 295 fichiers, 37 entrées de routes Angular, SPA Angular 21 + PrimeNG 21                        | migration terminée vers `apps/website` ; le frontend Angular est retiré             |
+| Cœur métier         | `packages/core/src` : 21 fichiers, logique ELO, ranking, sanctions, licences, votes, ligues et tournois         | `packages/achillea-core` ; première surface réutilisable                            |
+| Contrats            | `packages/types/src` : 5 fichiers, enums et DTO métier                                                          | `packages/achillea-types` ; contrat versionné                                       |
+| Base                | 56 fichiers `Migration*.ts` MikroORM ; la documentation source indique 47 migrations appliquées en production   | migration séparée sous `apps/achillea-bot/database/migrations`                      |
+| Vérification        | 44 fichiers de tests repérés dans bot/web/packages                                                              | gates ciblées avant toute gate RG globale                                           |
+| Opérations          | 13 docs, 16 fichiers d'infra, 20 scripts, Docker + workflows GitHub                                             | adapter un par un ; ne pas copier l'automatisation de production telle quelle       |
 
 Le dépôt source a son propre `package.json`, son propre catalogue Bun et trois lockfiles
 (`bun.lock` racine, `apps/bot/bun.lock`, `apps/web/bun.lock`). Ces lockfiles et artefacts n'ont
@@ -275,27 +279,27 @@ ci-dessous sont des points de contact dans cet arbre, pas un workspace déjà in
 
 ### 8.2 Cartographie des surfaces déjà présentes dans RG
 
-| Surface RG | Ce qu'elle fait aujourd'hui | Décision |
-| --- | --- | --- |
-| `apps/bot/src/services/achillea.ts` | Client distant Zod pour `GET /guilds`, `/guilds/stats`, `/guilds/:id` | garder comme adaptateur de compatibilité, puis le faire reposer sur un client partagé |
-| `apps/bot/src/commands/achillea.ts` + `src/lib/achillea-format.ts` | commandes Discord et formatage des rôles/salons ; 102 rôles et 113 salons observés lors du scan | ne pas le confondre avec le bot Achillea porté |
-| `packages/cron/src/tasks/stats/achillea.ts` | collecte SSH toutes les 15 minutes vers `/var/lib/rg/achillea-audience.json` | garder hors du runtime Achillea tant qu'aucun endpoint de métriques contractuel n'existe |
-| `apps/website/src/app/api/public/achillea/info/route.ts` | lit les réglages `home_achillea_*` de la base RG | rester une donnée éditoriale RG, pas un proxy implicite vers la DB Achillea |
-| `apps/website` / `apps/azalee` | deux `AchilleaBanner` divergentes et des copies d'assets | mutualiser seulement après arbitrage design ; éviter une déduplication destructive |
-| `packages/assets/public/achillea` | réserve d'assets partagés déjà présente | distinguer assets de marque RG et assets privés du build Angular |
-| `infra/nginx/api.rosegriffon.fr` | bloc `/achillea/` écrit dans le dépôt mais non activé automatiquement | activer seulement après allowlist, CORS et tests de contrat |
-| `infra/nginx/achillea.rosegriffon.conf` | vhost Achillea déjà versionné, avec chemins de releases propres à l'ancien déploiement | choisir un propriétaire canonique puis adapter les chemins ; ne pas dupliquer les vhosts |
-| `scripts/ops/deploy.ts` / `scripts/ops/infra.ts` | déploiement bleu/vert enregistré pour website/Azalée ; préfixes systemd RG sans Achillea | ajouter un adaptateur Angular/systemd séparé, après un build local reproductible |
-| `packages/db` + `apps/website/supabase` | client, types et migrations de la base Supabase RG | ne jamais mélanger avec MikroORM/Supabase Achillea |
+| Surface RG                                                         | Ce qu'elle fait aujourd'hui                                                                     | Décision                                                                                 |
+| ------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| `apps/bot/src/services/achillea.ts`                                | Client distant Zod pour `GET /guilds`, `/guilds/stats`, `/guilds/:id`                           | garder comme adaptateur de compatibilité, puis le faire reposer sur un client partagé    |
+| `apps/bot/src/commands/achillea.ts` + `src/lib/achillea-format.ts` | commandes Discord et formatage des rôles/salons ; 102 rôles et 113 salons observés lors du scan | ne pas le confondre avec le bot Achillea porté                                           |
+| `packages/cron/src/tasks/stats/achillea.ts`                        | collecte SSH toutes les 15 minutes vers `/var/lib/rg/achillea-audience.json`                    | garder hors du runtime Achillea tant qu'aucun endpoint de métriques contractuel n'existe |
+| `apps/website/src/app/api/public/achillea/info/route.ts`           | lit les réglages `home_achillea_*` de la base RG                                                | rester une donnée éditoriale RG, pas un proxy implicite vers la DB Achillea              |
+| `apps/website` / `apps/azalee`                                     | deux `AchilleaBanner` divergentes et des copies d'assets                                        | mutualiser seulement après arbitrage design ; éviter une déduplication destructive       |
+| `packages/assets/public/achillea`                                  | réserve d'assets partagés déjà présente                                                         | distinguer assets de marque RG et assets privés du build Angular                         |
+| `infra/nginx/api.rosegriffon.fr`                                   | bloc `/achillea/` écrit dans le dépôt mais non activé automatiquement                           | activer seulement après allowlist, CORS et tests de contrat                              |
+| `infra/nginx/achillea.rosegriffon.conf`                            | vhost Achillea déjà versionné, avec chemins de releases propres à l'ancien déploiement          | choisir un propriétaire canonique puis adapter les chemins ; ne pas dupliquer les vhosts |
+| `scripts/ops/deploy.ts` / `scripts/ops/infra.ts`                   | déploiement bleu/vert enregistré pour website/Azalée ; préfixes systemd RG sans Achillea        | ajouter un adaptateur Angular/systemd séparé, après un build local reproductible         |
+| `packages/db` + `apps/website/supabase`                            | client, types et migrations de la base Supabase RG                                              | ne jamais mélanger avec MikroORM/Supabase Achillea                                       |
 
 ### 8.3 Topologie cible et décisions non négociables
 
-| Surface | Chemin cible | Responsabilité |
-| --- | --- | --- |
-| Frontend | `apps/website` | routes, assets et configuration publique Achillea sous `/achillea` |
-| Backend | `apps/achillea-bot` | Discord, API Ts.ED, jobs, migrations et orchestration ranked |
-| Cœur métier | `packages/achillea-core` | logique pure sans ORM, Discord, DI ou secrets |
-| Contrats | `packages/achillea-types` | DTO/enums partagés entre front, backend et clients |
+| Surface             | Chemin cible               | Responsabilité                                                                                     |
+| ------------------- | -------------------------- | -------------------------------------------------------------------------------------------------- |
+| Frontend            | `apps/website`             | routes, assets et configuration publique Achillea sous `/achillea`                                 |
+| Backend             | `apps/achillea-bot`        | Discord, API Ts.ED, jobs, migrations et orchestration ranked                                       |
+| Cœur métier         | `packages/achillea-core`   | logique pure sans ORM, Discord, DI ou secrets                                                      |
+| Contrats            | `packages/achillea-types`  | DTO/enums partagés entre front, backend et clients                                                 |
 | Client RG optionnel | `packages/achillea-client` | transport HTTP + validation Zod pour les consommateurs RG ; à créer après stabilisation du contrat |
 
 1. Ne pas copier Achillea dans `apps/bot` : ce chemin appartient à `@rosegriffon/bot` et
@@ -325,11 +329,11 @@ ci-dessous sont des points de contact dans cet arbre, pas un workspace déjà in
 
 Le portage doit conserver cette topologie, car les processus ne sont pas interchangeables :
 
-| Port | Processus | Flux interne à préserver |
-| --- | --- | --- |
-| `4000` | API REST Ts.ED du bot | contrôleurs, auth cookie/JWT, Swagger et tâches bot |
+| Port   | Processus                               | Flux interne à préserver                             |
+| ------ | --------------------------------------- | ---------------------------------------------------- |
+| `4000` | API REST Ts.ED du bot                   | contrôleurs, auth cookie/JWT, Swagger et tâches bot  |
 | `4002` | sous-processus Colyseus + routes ranked | relaie certaines routes `/api` vers `127.0.0.1:4000` |
-| `4005` | Socket.IO | notifications et temps réel avec handshake JWT |
+| `4005` | Socket.IO                               | notifications et temps réel avec handshake JWT       |
 
 `apps/bot/src/main.ts` démarre le serveur REST et le Socket.IO puis lance le ranked en
 sous-processus Bun ESM ; `src/ranked/main.ts` appelle le port REST local pour les notifications
@@ -487,18 +491,18 @@ locale ou IP de VPS dans l'artefact prod, et aucun secret dans le bundle.
 
 ### 8.8 État des décisions au 7/9/2026
 
-| Sujet | État | Suite |
-| --- | --- | --- |
-| Client RG guildes/rôles/salons | en service, distant, validé par Zod | conserver comme compatibilité puis centraliser |
-| Maillage website/Azalée | largement en place, copies divergentes | mutualiser après design commun |
-| Bloc Nginx `/achillea/` | écrit dans RG, non activé par ce plan | allowlist + contrat + approbation |
-| Workspaces Achillea dans RG | importés, lockfile racine reproductible | maintenir les gates ciblées |
-| Portage backend/frontend/core/types | réalisé et validé sans secrets live | sondes avec environnement isolé |
-| Base/migrations/secrets | cible `achillea` et outils préparés, aucune restauration | fournir des credentials rotatés hors Git |
-| Storage | migration d'octets idempotente préparée | exécuter après restore et gel des écritures |
-| Auth Supabase | schéma inclus dans le dump, GoTrue local absent | qualifier GoTrue avant toute bascule Auth |
-| DNS, certificats, systemd production | non activés | Gate 5 uniquement |
-| SEO SSR/prerender/sitemap | partiel/global seulement | après le build SPA fonctionnel |
+| Sujet                                | État                                                     | Suite                                          |
+| ------------------------------------ | -------------------------------------------------------- | ---------------------------------------------- |
+| Client RG guildes/rôles/salons       | en service, distant, validé par Zod                      | conserver comme compatibilité puis centraliser |
+| Maillage website/Azalée              | largement en place, copies divergentes                   | mutualiser après design commun                 |
+| Bloc Nginx `/achillea/`              | écrit dans RG, non activé par ce plan                    | allowlist + contrat + approbation              |
+| Workspaces Achillea dans RG          | importés, lockfile racine reproductible                  | maintenir les gates ciblées                    |
+| Portage backend/frontend/core/types  | réalisé et validé sans secrets live                      | sondes avec environnement isolé                |
+| Base/migrations/secrets              | cible `achillea` et outils préparés, aucune restauration | fournir des credentials rotatés hors Git       |
+| Storage                              | migration d'octets idempotente préparée                  | exécuter après restore et gel des écritures    |
+| Auth Supabase                        | schéma inclus dans le dump, GoTrue local absent          | qualifier GoTrue avant toute bascule Auth      |
+| DNS, certificats, systemd production | non activés                                              | Gate 5 uniquement                              |
+| SEO SSR/prerender/sitemap            | partiel/global seulement                                 | après le build SPA fonctionnel                 |
 
 ### 8.9 Opérations séparées du portage de code
 

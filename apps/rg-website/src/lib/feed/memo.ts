@@ -15,17 +15,22 @@ export const PERIME_MAX_MS = 15 * 60_000;
 const cache = new Map<string, { at: number; valeur: unknown }>();
 const enCours = new Map<string, Promise<unknown>>();
 
-function relire<T>(cle: string, produire: () => Promise<T>, repli?: { valeur: unknown }): Promise<T> {
+function relire<T>(
+  cle: string,
+  produire: () => Promise<T>,
+  repli?: { valeur: unknown },
+): Promise<T> {
   const attente = enCours.get(cle);
   if (attente) return attente as Promise<T>;
   const p = produire()
-    .then(valeur => {
+    .then((valeur) => {
       cache.delete(cle);
-      if (cache.size >= MAX_ENTREES) cache.delete(cache.keys().next().value as string);
+      if (cache.size >= MAX_ENTREES)
+        cache.delete(cache.keys().next().value as string);
       cache.set(cle, { at: Date.now(), valeur });
       return valeur;
     })
-    .catch(erreur => {
+    .catch((erreur) => {
       if (repli) return repli.valeur as T;
       throw erreur;
     })
@@ -34,7 +39,11 @@ function relire<T>(cle: string, produire: () => Promise<T>, repli?: { valeur: un
   return p;
 }
 
-export async function memo<T>(cle: string, ttlMs: number, produire: () => Promise<T>): Promise<T> {
+export async function memo<T>(
+  cle: string,
+  ttlMs: number,
+  produire: () => Promise<T>,
+): Promise<T> {
   const connue = cache.get(cle);
   const age = connue ? Date.now() - connue.at : Infinity;
   if (connue && age < ttlMs) return connue.valeur as T;
@@ -53,10 +62,17 @@ export function viderMemo(): void {
 }
 
 /** Borne la durée d'un appel : une source lente ne retient pas le fil entier. */
-export function avecDelai<T>(promesse: Promise<T>, ms: number, etiquette: string): Promise<T> {
+export function avecDelai<T>(
+  promesse: Promise<T>,
+  ms: number,
+  etiquette: string,
+): Promise<T> {
   let minuteur: ReturnType<typeof setTimeout>;
   const delai = new Promise<never>((_, rejeter) => {
-    minuteur = setTimeout(() => rejeter(new Error(`${etiquette} : délai dépassé`)), ms);
+    minuteur = setTimeout(
+      () => rejeter(new Error(`${etiquette} : délai dépassé`)),
+      ms,
+    );
   });
   return Promise.race([promesse, delai]).finally(() => clearTimeout(minuteur));
 }

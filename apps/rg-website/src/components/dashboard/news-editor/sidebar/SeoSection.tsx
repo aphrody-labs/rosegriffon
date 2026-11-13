@@ -33,7 +33,10 @@ export function SeoSection({
     <div className="space-y-4">
       {/* Slug */}
       <div className="space-y-2">
-        <label htmlFor="article-slug" className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+        <label
+          htmlFor="article-slug"
+          className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider"
+        >
           Slug URL
         </label>
         <div className="flex gap-1.5">
@@ -41,7 +44,7 @@ export function SeoSection({
             <Input
               id="article-slug"
               value={slug}
-              onChange={e => onSlugChange(e.target.value)}
+              onChange={(e) => onSlugChange(e.target.value)}
               className={cn(
                 "bg-surface-container-high border-none rounded-xl text-sm h-10 font-sans pr-8",
                 slugStatus === "taken" && "ring-2 ring-destructive/50",
@@ -76,9 +79,15 @@ export function SeoSection({
         </div>
         <div className="space-y-0.5">
           {slugStatus === "taken" && (
-            <p className="text-[10px] text-destructive font-medium">Ce slug est déjà utilisé</p>
+            <p className="text-[10px] text-destructive font-medium">
+              Ce slug est déjà utilisé
+            </p>
           )}
-          {slugStatus === "available" && <p className="text-[10px] text-success font-medium">Slug disponible</p>}
+          {slugStatus === "available" && (
+            <p className="text-[10px] text-success font-medium">
+              Slug disponible
+            </p>
+          )}
           <p id="slug-hint" className="text-[10px] text-muted-foreground/50">
             {slug ? (
               <>
@@ -106,14 +115,19 @@ export function SeoSection({
         <Input
           id="article-meta-title"
           value={metaTitle}
-          onChange={e => onMetaTitleChange(e.target.value)}
+          onChange={(e) => onMetaTitleChange(e.target.value)}
           className="bg-surface-container-high border-none rounded-xl text-sm h-10 font-sans"
           placeholder="Titre SEO (optionnel)"
           aria-describedby="meta-title-hint"
         />
         <p
           id="meta-title-hint"
-          className={cn("text-[10px]", metaTitle.length > 60 ? "text-destructive" : "text-muted-foreground/50")}
+          className={cn(
+            "text-[10px]",
+            metaTitle.length > 60
+              ? "text-destructive"
+              : "text-muted-foreground/50",
+          )}
         >
           {metaTitle.length}/60 caractères recommandés
         </p>
@@ -130,7 +144,7 @@ export function SeoSection({
         <Textarea
           id="article-meta-description"
           value={metaDescription}
-          onChange={e => onMetaDescriptionChange(e.target.value)}
+          onChange={(e) => onMetaDescriptionChange(e.target.value)}
           className="bg-surface-container-high border-none rounded-xl resize-none text-sm font-sans"
           placeholder="Meta description (optionnel)"
           rows={2}
@@ -138,7 +152,12 @@ export function SeoSection({
         />
         <p
           id="meta-desc-hint"
-          className={cn("text-[10px]", metaDescription.length > 160 ? "text-destructive" : "text-muted-foreground/50")}
+          className={cn(
+            "text-[10px]",
+            metaDescription.length > 160
+              ? "text-destructive"
+              : "text-muted-foreground/50",
+          )}
         >
           {metaDescription.length}/160 caractères recommandés
         </p>

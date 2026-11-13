@@ -7,7 +7,8 @@ import ClanDashboardClient from "./clan-dashboard-client";
  */
 export const metadata = metadonneesAchillea({
   titre: "Tableau de bord de mon clan",
-  description: "Gestion des membres, des candidatures et des invitations de votre clan Achilléa.",
+  description:
+    "Gestion des membres, des candidatures et des invitations de votre clan Achilléa.",
   chemin: "/achillea/clans/dashboard",
   indexable: false,
 });

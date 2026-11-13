@@ -2,7 +2,14 @@
 
 import { List } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { Drawer, DrawerClose, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from "@rosegriffon/ui";
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@rosegriffon/ui";
 import type { TocItem } from "@/lib/lexical-utils";
 
 interface MobileTableOfContentsProps {
@@ -19,17 +26,21 @@ export function MobileTableOfContents({ items }: MobileTableOfContentsProps) {
       return;
     }
 
-    const headingElements = items.map(item => document.getElementById(item.id)).filter(Boolean) as HTMLElement[];
+    const headingElements = items
+      .map((item) => document.getElementById(item.id))
+      .filter(Boolean) as HTMLElement[];
 
     if (headingElements.length === 0) {
       return;
     }
 
     observerRef.current = new IntersectionObserver(
-      entries => {
-        const visible = entries.filter(e => e.isIntersecting);
+      (entries) => {
+        const visible = entries.filter((e) => e.isIntersecting);
         if (visible.length > 0) {
-          const sorted = visible.toSorted((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+          const sorted = visible.toSorted(
+            (a, b) => a.boundingClientRect.top - b.boundingClientRect.top,
+          );
           setActiveId(sorted[0].target.id);
         }
       },
@@ -39,7 +50,7 @@ export function MobileTableOfContents({ items }: MobileTableOfContentsProps) {
       },
     );
 
-    headingElements.forEach(el => observerRef.current?.observe(el));
+    headingElements.forEach((el) => observerRef.current?.observe(el));
 
     return () => {
       observerRef.current?.disconnect();
@@ -70,18 +81,21 @@ export function MobileTableOfContents({ items }: MobileTableOfContentsProps) {
           </DrawerHeader>
           <nav className="px-4 pb-6 max-h-[60vh] overflow-y-auto">
             <ul className="space-y-1">
-              {items.map(item => (
+              {items.map((item) => (
                 <li key={item.id}>
                   <DrawerClose asChild>
                     <a
                       href={`#${item.id}`}
-                      onClick={e => {
+                      onClick={(e) => {
                         e.preventDefault();
                         setOpen(false);
                         setTimeout(() => {
                           const el = document.getElementById(item.id);
                           if (el) {
-                            el.scrollIntoView({ behavior: "smooth", block: "start" });
+                            el.scrollIntoView({
+                              behavior: "smooth",
+                              block: "start",
+                            });
                           }
                         }, 300);
                       }}

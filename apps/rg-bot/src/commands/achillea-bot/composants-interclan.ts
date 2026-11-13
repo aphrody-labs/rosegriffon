@@ -42,24 +42,39 @@ import {
   messagePourEtat,
   type DetailInterclan,
 } from "../../api/modules/achillea/interclans/messages";
-import { ETAT, ETATS_ANNULABLES, ROLE_CLAN } from "../../api/modules/achillea/interclans/regles";
-import type { AchilleaClientResult, ClientAchilleaDelegue } from "../../lib/achillea-api";
+import {
+  ETAT,
+  ETATS_ANNULABLES,
+  ROLE_CLAN,
+} from "../../api/modules/achillea/interclans/regles";
+import type {
+  AchilleaClientResult,
+  ClientAchilleaDelegue,
+} from "../../lib/achillea-api";
 import { lireApi } from "../../lib/achillea-ui";
 import { echec, refus, succes } from "../../lib/ui";
 import { chargeBrute } from "./interclan";
 
 /** Champs numériques d'un `custom_id` legacy `<prefixe>:<a>:<b>`. */
-export function champsNumeriques(customId: string, nombre: number): number[] | null {
+export function champsNumeriques(
+  customId: string,
+  nombre: number,
+): number[] | null {
   const parties = customId.split(":").slice(1);
   if (parties.length < nombre) return null;
   const valeurs = parties.slice(0, nombre).map(Number);
-  return valeurs.every(v => Number.isInteger(v) && v >= 0) ? valeurs : null;
+  return valeurs.every((v) => Number.isInteger(v) && v >= 0) ? valeurs : null;
 }
 
 /** Échec en message privé, sans toucher au message cliqué. */
-async function signaler(interaction: RepliableInteraction, titre: string, motif: string): Promise<void> {
+async function signaler(
+  interaction: RepliableInteraction,
+  titre: string,
+  motif: string,
+): Promise<void> {
   const charge = echec(titre, motif) as InteractionReplyOptions;
-  if (interaction.deferred || interaction.replied) await interaction.followUp(charge);
+  if (interaction.deferred || interaction.replied)
+    await interaction.followUp(charge);
   else await interaction.reply(charge);
 }
 
@@ -76,17 +91,25 @@ async function appel<T>(
 }
 
 /** Le lecteur dirige-t-il ce clan (Vice-Président+ ou administrateur) ? Vrai si l'API n'a pas rendu de lecteur. */
-export function dirige(detail: DetailInterclan, clanId: number, minimum: number = ROLE_CLAN.VICE_PRESIDENT): boolean {
+export function dirige(
+  detail: DetailInterclan,
+  clanId: number,
+  minimum: number = ROLE_CLAN.VICE_PRESIDENT,
+): boolean {
   const v = detail.viewer;
   if (!v) return true;
   return v.isAdmin || (v.clanId === clanId && (v.clanRole ?? -1) >= minimum);
 }
 
 /** Composition saisie dans la fenêtre : champs `lineup_member_1..5` non vides. */
-export function placementsSaisis(lire: (champ: string) => string): Array<{ userId: string; position: number }> {
+export function placementsSaisis(
+  lire: (champ: string) => string,
+): Array<{ userId: string; position: number }> {
   const placements: Array<{ userId: string; position: number }> = [];
   for (let position = 1; position <= 5; position++) {
-    const valeur = (lire(`lineup_member_${position}`) ?? "").trim().replace(/^<@!?(\d+)>$/u, "$1");
+    const valeur = (lire(`lineup_member_${position}`) ?? "")
+      .trim()
+      .replace(/^<@!?(\d+)>$/u, "$1");
     if (valeur !== "") placements.push({ userId: valeur, position });
   }
   return placements;
@@ -107,14 +130,23 @@ export class InterclanComposants {
     const [id, drapeau] = champsNumeriques(interaction.customId, 2) ?? [];
     if (id === undefined) return;
     const accepte = drapeau === 1;
-    const detail = await appel(interaction, c => c.interclans.respond(id, accepte), "Réponse impossible");
+    const detail = await appel(
+      interaction,
+      (c) => c.interclans.respond(id, accepte),
+      "Réponse impossible",
+    );
     if (!detail) return;
     await interaction.editReply(
       chargeBrute({
         embeds: [
           accepte
-            ? embedSucces("Vous avez accepté le défi. Les compositions se font dans le salon de l'interclan !")
-            : { color: 0xed4245, title: "❌ Vous avez refusé le défi. L'Interclan a été annulé." },
+            ? embedSucces(
+                "Vous avez accepté le défi. Les compositions se font dans le salon de l'interclan !",
+              )
+            : {
+                color: 0xed4245,
+                title: "❌ Vous avez refusé le défi. L'Interclan a été annulé.",
+              },
         ],
         components: [],
       }),
@@ -125,23 +157,40 @@ export class InterclanComposants {
   async composition(interaction: ButtonInteraction) {
     const [id, cote] = champsNumeriques(interaction.customId, 2) ?? [];
     if (id === undefined) return;
-    const detail = await appel(interaction, c => c.interclans.get(id), "Interclan introuvable");
+    const detail = await appel(
+      interaction,
+      (c) => c.interclans.get(id),
+      "Interclan introuvable",
+    );
     if (!detail) return;
     const lineup = compositionDe(detail, cote === 1 ? 1 : 0);
     const clan = cote === 1 ? detail.clanB : detail.clanA;
     if (!lineup) {
-      await interaction.reply(refus("Aucune lineup trouvée pour ce clan.") as InteractionReplyOptions);
+      await interaction.reply(
+        refus("Aucune lineup trouvée pour ce clan.") as InteractionReplyOptions,
+      );
       return;
     }
     if (!dirige(detail, clan.id)) {
-      await interaction.reply(refus(`Seul le staff du clan ${clan.name} peut effectuer cette action.`) as InteractionReplyOptions);
+      await interaction.reply(
+        refus(
+          `Seul le staff du clan ${clan.name} peut effectuer cette action.`,
+        ) as InteractionReplyOptions,
+      );
       return;
     }
     if (lineup.lockedIn || detail.state !== ETAT.ACCEPTE) {
-      await interaction.reply(refus("Cette lineup n'est plus modifiable.") as InteractionReplyOptions);
+      await interaction.reply(
+        refus("Cette lineup n'est plus modifiable.") as InteractionReplyOptions,
+      );
       return;
     }
-    await interaction.showModal(fenetreComposition(detail, cote === 1 ? 1 : 0) as unknown as ModalComponentData);
+    await interaction.showModal(
+      fenetreComposition(
+        detail,
+        cote === 1 ? 1 : 0,
+      ) as unknown as ModalComponentData,
+    );
   }
 
   @ModalComponent({ id: /^lineup_manager_modal:\d+:\d+$/ })
@@ -149,11 +198,20 @@ export class InterclanComposants {
     await interaction.deferUpdate();
     const [clanId, id] = champsNumeriques(interaction.customId, 2) ?? [];
     if (id === undefined || clanId === undefined) return;
-    const placements = placementsSaisis(champ => interaction.fields.getTextInputValue(champ));
-    const detail = await appel(interaction, c => c.interclans.setLineup(id, clanId, placements), "Lineup refusée");
+    const placements = placementsSaisis((champ) =>
+      interaction.fields.getTextInputValue(champ),
+    );
+    const detail = await appel(
+      interaction,
+      (c) => c.interclans.setLineup(id, clanId, placements),
+      "Lineup refusée",
+    );
     if (!detail) return;
     await interaction.editReply(chargeBrute(messagePourEtat(detail)));
-    await interaction.followUp({ embeds: [embedComposition(detail, clanId)], flags: 64 } as InteractionReplyOptions);
+    await interaction.followUp({
+      embeds: [embedComposition(detail, clanId)],
+      flags: 64,
+    } as InteractionReplyOptions);
   }
 
   @ButtonComponent({ id: /^lock_interclan_lineup:\d+:[01]$/ })
@@ -161,16 +219,26 @@ export class InterclanComposants {
     await interaction.deferUpdate();
     const [id, cote] = champsNumeriques(interaction.customId, 2) ?? [];
     if (id === undefined) return;
-    const avant = await appel(interaction, c => c.interclans.get(id), "Interclan introuvable");
+    const avant = await appel(
+      interaction,
+      (c) => c.interclans.get(id),
+      "Interclan introuvable",
+    );
     if (!avant) return;
     const clan = cote === 1 ? avant.clanB : avant.clanA;
-    const detail = await appel(interaction, c => c.interclans.lockLineup(id, clan.id), "Verrouillage impossible");
+    const detail = await appel(
+      interaction,
+      (c) => c.interclans.lockLineup(id, clan.id),
+      "Verrouillage impossible",
+    );
     if (!detail) return;
     await interaction.editReply(chargeBrute(messagePourEtat(detail)));
     await interaction.followUp(
       succes(
         "La lineup a été verrouillée !",
-        detail.state === ETAT.PRET ? "Les deux lineups sont verrouillées : l'interclan peut être lancé à l'heure prévue." : undefined,
+        detail.state === ETAT.PRET
+          ? "Les deux lineups sont verrouillées : l'interclan peut être lancé à l'heure prévue."
+          : undefined,
         { prive: true },
       ) as InteractionReplyOptions,
     );
@@ -181,15 +249,26 @@ export class InterclanComposants {
     await interaction.deferReply({ flags: 64 });
     const [id] = champsNumeriques(interaction.customId, 1) ?? [];
     if (id === undefined) return;
-    const detail = await appel(interaction, c => c.interclans.get(id), "Interclan introuvable");
+    const detail = await appel(
+      interaction,
+      (c) => c.interclans.get(id),
+      "Interclan introuvable",
+    );
     if (!detail) return;
-    if (!dirige(detail, detail.clanA.id, ROLE_CLAN.PRESIDENT) && !dirige(detail, detail.clanB.id, ROLE_CLAN.PRESIDENT)) {
+    if (
+      !dirige(detail, detail.clanA.id, ROLE_CLAN.PRESIDENT) &&
+      !dirige(detail, detail.clanB.id, ROLE_CLAN.PRESIDENT)
+    ) {
       await interaction.editReply(
         chargeBrute({
           embeds: [
             {
               color: 0xed4245,
-              title: `❌ Seuls les Présidents des clans ${detail.clanA.name} ou ${detail.clanB.name} peuvent annuler cet interclan.`.slice(0, 256),
+              title:
+                `❌ Seuls les Présidents des clans ${detail.clanA.name} ou ${detail.clanB.name} peuvent annuler cet interclan.`.slice(
+                  0,
+                  256,
+                ),
             },
           ],
         }),
@@ -212,7 +291,9 @@ export class InterclanComposants {
     await interaction.editReply(
       chargeBrute({
         content: "Souhaitez-vous annuler cet Interclan ?",
-        components: [boutonsAccepterRefuser("cancel_interclan_confirmation", id)],
+        components: [
+          boutonsAccepterRefuser("cancel_interclan_confirmation", id),
+        ],
       }),
     );
   }
@@ -226,10 +307,21 @@ export class InterclanComposants {
       await interaction.deleteReply();
       return;
     }
-    const detail = await appel(interaction, c => c.interclans.cancel(id), "Annulation impossible");
+    const detail = await appel(
+      interaction,
+      (c) => c.interclans.cancel(id),
+      "Annulation impossible",
+    );
     if (!detail) return;
     await interaction.editReply(
-      chargeBrute({ embeds: [embedSucces(`L'interclan ${detail.name} a été annulé. Les deux clans ont été prévenus.`)], components: [] }),
+      chargeBrute({
+        embeds: [
+          embedSucces(
+            `L'interclan ${detail.name} a été annulé. Les deux clans ont été prévenus.`,
+          ),
+        ],
+        components: [],
+      }),
     );
   }
 
@@ -238,7 +330,11 @@ export class InterclanComposants {
     await interaction.deferUpdate();
     const [id] = champsNumeriques(interaction.customId, 1) ?? [];
     if (id === undefined) return;
-    const detail = await appel(interaction, c => c.interclans.start(id), "Lancement impossible");
+    const detail = await appel(
+      interaction,
+      (c) => c.interclans.start(id),
+      "Lancement impossible",
+    );
     if (!detail) return;
     await interaction.editReply(chargeBrute(messagePourEtat(detail)));
   }
@@ -247,16 +343,28 @@ export class InterclanComposants {
   async ouvrirScore(interaction: ButtonInteraction) {
     const [id, lobbyId] = champsNumeriques(interaction.customId, 2) ?? [];
     if (id === undefined || lobbyId === undefined) return;
-    const detail = await appel(interaction, c => c.interclans.get(id), "Interclan introuvable");
+    const detail = await appel(
+      interaction,
+      (c) => c.interclans.get(id),
+      "Interclan introuvable",
+    );
     if (!detail) return;
-    const match = detail.matches.find(m => m.id === lobbyId);
+    const match = detail.matches.find((m) => m.id === lobbyId);
     const fenetre = match ? fenetreScore(match) : null;
     if (!match || !fenetre) {
-      await interaction.reply(refus(`⚠️ Impossible de trouver le match #${lobbyId}.`) as InteractionReplyOptions);
+      await interaction.reply(
+        refus(
+          `⚠️ Impossible de trouver le match #${lobbyId}.`,
+        ) as InteractionReplyOptions,
+      );
       return;
     }
     if (match.state === "Finished") {
-      await interaction.reply(refus(`Le score du match #${lobbyId} est déjà enregistré.`) as InteractionReplyOptions);
+      await interaction.reply(
+        refus(
+          `Le score du match #${lobbyId} est déjà enregistré.`,
+        ) as InteractionReplyOptions,
+      );
       return;
     }
     await interaction.showModal(fenetre as unknown as ModalComponentData);
@@ -270,20 +378,34 @@ export class InterclanComposants {
     const scoreA = scoreSaisi(interaction.fields.getTextInputValue("score_a"));
     const scoreB = scoreSaisi(interaction.fields.getTextInputValue("score_b"));
     if (scoreA === null || scoreB === null) {
-      await signaler(interaction, "Score refusé", "Les scores doivent être des nombres positifs (0 à 99).");
+      await signaler(
+        interaction,
+        "Score refusé",
+        "Les scores doivent être des nombres positifs (0 à 99).",
+      );
       return;
     }
-    const resultat = await appel(interaction, c => c.interclans.reportScore(lobbyId, scoreA, scoreB), "Score refusé");
+    const resultat = await appel(
+      interaction,
+      (c) => c.interclans.reportScore(lobbyId, scoreA, scoreB),
+      "Score refusé",
+    );
     if (!resultat) return;
     await interaction.editReply(
-      chargeBrute(resultat.termine ? { embeds: [embedScores(resultat.detail)], components: [] } : messagePourEtat(resultat.detail)),
+      chargeBrute(
+        resultat.termine
+          ? { embeds: [embedScores(resultat.detail)], components: [] }
+          : messagePourEtat(resultat.detail),
+      ),
     );
     const m = resultat.match;
     await interaction.followUp(
       succes(
         "Score mis à jour",
         `${m.joueurA} ${m.scoreA}–${m.scoreB} ${m.joueurB}` +
-          (resultat.termine ? "\nTous les matchs sont joués : le vote de validation est ouvert dans le salon." : ""),
+          (resultat.termine
+            ? "\nTous les matchs sont joués : le vote de validation est ouvert dans le salon."
+            : ""),
         { prive: true },
       ) as InteractionReplyOptions,
     );

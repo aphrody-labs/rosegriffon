@@ -32,30 +32,48 @@ describe("imports et cascade CSS d'auteur", () => {
     const css = await chargerCssAvecImports(
       origine,
       lire({
-        "/tokens/styles.css": '@import "./brands.css"; :root { --a: #222222; } @import "./brands.css";',
-        "/tokens/brands.css": '@import "./palette.css"; :root { --b: var(--a); }',
+        "/tokens/styles.css":
+          '@import "./brands.css"; :root { --a: #222222; } @import "./brands.css";',
+        "/tokens/brands.css":
+          '@import "./palette.css"; :root { --b: var(--a); }',
         "/tokens/palette.css": ":root { --a: #111111; }",
       }),
     );
     expect(cascaderTheme(analyserBlocs(css)).get("--a")).toBe("#111111");
-    expect(analyserBlocs(css).filter(b => b.declarations.has("--a"))).toHaveLength(3);
+    expect(
+      analyserBlocs(css).filter((b) => b.declarations.has("--a")),
+    ).toHaveLength(3);
   });
 
   test("ne suit ni commentaires ni import réseau, et signale les cycles et fichiers absents", async () => {
     expect(
       await chargerCssAvecImports(
         origine,
-        lire({ "/tokens/styles.css": '/* @import "./absent.css"; */ :root { --a: red; }' }),
+        lire({
+          "/tokens/styles.css":
+            '/* @import "./absent.css"; */ :root { --a: red; }',
+        }),
       ),
     ).not.toContain("@import");
     await expect(
-      chargerCssAvecImports(origine, lire({ "/tokens/styles.css": '@import "https://example.invalid/a.css";' })),
+      chargerCssAvecImports(
+        origine,
+        lire({
+          "/tokens/styles.css": '@import "https://example.invalid/a.css";',
+        }),
+      ),
     ).rejects.toThrow("non local");
     await expect(
-      chargerCssAvecImports(origine, lire({ "/tokens/styles.css": '@import "./absent.css";' })),
+      chargerCssAvecImports(
+        origine,
+        lire({ "/tokens/styles.css": '@import "./absent.css";' }),
+      ),
     ).rejects.toThrow("absente");
     await expect(
-      chargerCssAvecImports(origine, lire({ "/tokens/styles.css": '@import "./styles.css";' })),
+      chargerCssAvecImports(
+        origine,
+        lire({ "/tokens/styles.css": '@import "./styles.css";' }),
+      ),
     ).rejects.toThrow("cycle");
   });
 
@@ -68,7 +86,9 @@ describe("imports et cascade CSS d'auteur", () => {
         "/tokens/brands.css": ":root.theme-rg { --a: green; --b: green; }",
       }),
     );
-    expect(Object.fromEntries(cascaderTheme(analyserBlocs(css), "theme-rg"))).toEqual({
+    expect(
+      Object.fromEntries(cascaderTheme(analyserBlocs(css), "theme-rg")),
+    ).toEqual({
       "--a": "green",
       "--b": "green",
     });
@@ -80,10 +100,13 @@ describe("imports et cascade CSS d'auteur", () => {
       lire({
         "/tokens/styles.css":
           '@layer first, last; @import "./brands.css" layer(first); @layer last { .theme-rg { --a: red; --b: red !important; } } .theme-rg { --b: blue !important; }',
-        "/tokens/brands.css": ".theme-rg { --a: green; --b: green !important; --b: red; }",
+        "/tokens/brands.css":
+          ".theme-rg { --a: green; --b: green !important; --b: red; }",
       }),
     );
-    expect(Object.fromEntries(cascaderTheme(analyserBlocs(css), "theme-rg"))).toEqual({ "--a": "red", "--b": "green" });
+    expect(
+      Object.fromEntries(cascaderTheme(analyserBlocs(css), "theme-rg")),
+    ).toEqual({ "--a": "red", "--b": "green" });
   });
 });
 
@@ -115,20 +138,24 @@ describe("conversion oklch → sRGB", () => {
 describe("analyse de styles.css", () => {
   test("isole le bloc :root sans confondre avec :root.theme-roy", () => {
     const blocs = analyserBlocs(css);
-    const racines = blocs.filter(b => b.selecteurs.includes(":root"));
+    const racines = blocs.filter((b) => b.selecteurs.includes(":root"));
     expect(racines.length).toBe(1);
-    expect(racines[0]!.declarations.get("--rg-marine")).toBe("oklch(0.2 0.05 264)");
+    expect(racines[0]!.declarations.get("--rg-marine")).toBe(
+      "oklch(0.2 0.05 264)",
+    );
   });
 
   test("ne remonte pas les blocs @keyframes comme des jeux de tokens", () => {
     const blocs = analyserBlocs(css);
-    expect(blocs.some(b => b.selecteurs.some(s => s === "from" || s === "to"))).toBe(false);
+    expect(
+      blocs.some((b) => b.selecteurs.some((s) => s === "from" || s === "to")),
+    ).toBe(false);
   });
 
   test("descend dans @layer base pour trouver les thèmes", () => {
     const blocs = analyserBlocs(css);
     for (const nom of NOMS_THEMES) {
-      expect(blocs.some(b => b.selecteurs.includes(`.${nom}`))).toBe(true);
+      expect(blocs.some((b) => b.selecteurs.includes(`.${nom}`))).toBe(true);
     }
   });
 });
@@ -138,7 +165,9 @@ describe("résolution des var()", () => {
 
   test("cascade local puis :root", () => {
     expect(resoudreVar("var(--a)", new Map(), base)).toBe("#111111");
-    expect(resoudreVar("var(--a)", new Map([["--a", "#222222"]]), base)).toBe("#222222");
+    expect(resoudreVar("var(--a)", new Map([["--a", "#222222"]]), base)).toBe(
+      "#222222",
+    );
   });
 
   test("suit une chaîne d'indirections", () => {
@@ -158,7 +187,9 @@ describe("résolution des var()", () => {
   });
 
   test("utilise la valeur de repli", () => {
-    expect(resoudreVar("var(--inconnu, #abcdef)", new Map(), new Map())).toBe("#abcdef");
+    expect(resoudreVar("var(--inconnu, #abcdef)", new Map(), new Map())).toBe(
+      "#abcdef",
+    );
   });
 });
 
@@ -177,8 +208,10 @@ describe("tokens exposés", () => {
     // Les cinq thèmes du sélecteur portent les rôles calculés depuis leur graine.
     for (const [id, pack] of Object.entries(THEME_PACKS)) {
       const calcules = computeRoles(pack.seed);
-      const projetes: Record<string, string> = THEMES[`theme-${id}` as keyof typeof THEMES].md3;
-      for (const role of ROLE_NAMES) expect(projetes[versCamel(role)], `${id} ${role}`).toBe(calcules[role]);
+      const projetes: Record<string, string> =
+        THEMES[`theme-${id}` as keyof typeof THEMES].md3;
+      for (const role of ROLE_NAMES)
+        expect(projetes[versCamel(role)], `${id} ${role}`).toBe(calcules[role]);
     }
     expect(THEMES["theme-rg"].md3.primary).toBe("#8e4957");
     expect(THEMES["theme-rg-dark"].md3.primary).toBe("#ffb2be");
@@ -190,10 +223,13 @@ describe("tokens exposés", () => {
     const valeurs = [
       ...Object.values(MARQUE),
       ...Object.values(MARQUES_TIERCES),
-      ...NOMS_THEMES.flatMap(n => [...Object.values(THEMES[n].md3), ...Object.values(THEMES[n].shadcn)]),
+      ...NOMS_THEMES.flatMap((n) => [
+        ...Object.values(THEMES[n].md3),
+        ...Object.values(THEMES[n].shadcn),
+      ]),
     ];
-    expect(valeurs.filter(v => v.includes("oklch"))).toEqual([]);
-    expect(valeurs.filter(v => v.includes("var("))).toEqual([]);
+    expect(valeurs.filter((v) => v.includes("oklch"))).toEqual([]);
+    expect(valeurs.filter((v) => v.includes("var("))).toEqual([]);
   });
 
   test("les sept thèmes conservent les 36 rôles MD3 core et les extensions natives importées", () => {
@@ -202,7 +238,9 @@ describe("tokens exposés", () => {
     for (const nom of NOMS_THEMES) {
       const roles = Object.keys(THEMES[nom].md3).sort();
       expect(roles).toEqual(expect.arrayContaining(reference));
-      expect(roles.length).toBe(nom === "theme-roy" || nom === "theme-gaelle" ? 36 : 49);
+      expect(roles.length).toBe(
+        nom === "theme-roy" || nom === "theme-gaelle" ? 36 : 49,
+      );
     }
   });
 
@@ -213,14 +251,22 @@ describe("tokens exposés", () => {
     // thèmes Azalée de `--chart-*`.
     const blocs = analyserBlocs(css);
     const varsDuTheme = (nom: string) =>
-      [...new Set(blocs.filter(b => b.selecteurs.includes(`.${nom}`)).flatMap(b => [...b.declarations.keys()]))].sort();
+      [
+        ...new Set(
+          blocs
+            .filter((b) => b.selecteurs.includes(`.${nom}`))
+            .flatMap((b) => [...b.declarations.keys()]),
+        ),
+      ].sort();
 
     const reference = varsDuTheme(NOMS_THEMES[0]!);
     expect(reference.length).toBe(68);
     for (const nom of NOMS_THEMES) {
       const variables = varsDuTheme(nom);
       expect(variables).toEqual(expect.arrayContaining(reference));
-      expect(variables.length).toBe(nom === "theme-roy" || nom === "theme-gaelle" ? 68 : 89);
+      expect(variables.length).toBe(
+        nom === "theme-roy" || nom === "theme-gaelle" ? 68 : 89,
+      );
     }
   });
 
@@ -259,7 +305,9 @@ describe("tokens exposés", () => {
   });
 
   test("le pont shadcn est résolu, pas laissé en référence", () => {
-    expect(THEMES["theme-azalee-dark"].shadcn.card).toBe(THEMES["theme-azalee-dark"].md3.surfaceContainerLow);
+    expect(THEMES["theme-azalee-dark"].shadcn.card).toBe(
+      THEMES["theme-azalee-dark"].md3.surfaceContainerLow,
+    );
   });
 
   test("l'échelle de formes reprend les 7 corners M3", () => {
@@ -288,7 +336,11 @@ describe("non-dérive", () => {
   });
 
   test("src/themes.generated.css est bien la sortie du moteur de couleurs", async () => {
-    expect(await Bun.file(new URL("../src/themes.generated.css", import.meta.url)).text()).toBe(rendreThemesCss());
+    expect(
+      await Bun.file(
+        new URL("../src/themes.generated.css", import.meta.url),
+      ).text(),
+    ).toBe(rendreThemesCss());
   });
 
   test("le module généré reste pur (aucun import)", async () => {

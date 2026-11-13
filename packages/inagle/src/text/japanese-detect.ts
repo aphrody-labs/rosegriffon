@@ -9,7 +9,8 @@
  * Kana (U+3040-30FF), kanji étendus (U+3400-4DBF), kanji usuels (U+4E00-9FFF),
  * formes de compatibilité (U+F900-FAFF) et katakana demi-largeur (U+FF66-FF9F).
  */
-const JAPANESE_RANGES = /[\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff\uff66-\uff9f]/;
+const JAPANESE_RANGES =
+  /[\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff\uff66-\uff9f]/;
 
 /** Vrai si le texte contient au moins un caractère japonais. */
 export function containsJapanese(text: string): boolean {

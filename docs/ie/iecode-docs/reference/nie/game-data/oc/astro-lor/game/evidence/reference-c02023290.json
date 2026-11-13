@@ -138,14 +138,22 @@
             "format": "G4TX",
             "bytes": 5271872,
             "subtextures": 12,
-            "largest_subtexture": { "name": "c02023290_10", "width": 2048, "height": 1024 }
+            "largest_subtexture": {
+              "name": "c02023290_10",
+              "width": 2048,
+              "height": 1024
+            }
           },
           {
             "path": "data/dx11/chr/_face/02_IE2/c02023290/c02023290_03.g4tx",
             "format": "G4TX",
             "bytes": 5271920,
             "subtextures": 12,
-            "largest_subtexture": { "name": "c02023290_03_10", "width": 2048, "height": 1024 }
+            "largest_subtexture": {
+              "name": "c02023290_03_10",
+              "width": 2048,
+              "height": 1024
+            }
           }
         ]
       },
@@ -173,7 +181,17 @@
           "height": 352,
           "subtextures": 1,
           "texture_name": "mode_change_c02023290",
-          "locales": ["de", "en", "es", "fr", "it", "ja", "pt", "zh_hans", "zh_hant"],
+          "locales": [
+            "de",
+            "en",
+            "es",
+            "fr",
+            "it",
+            "ja",
+            "pt",
+            "zh_hans",
+            "zh_hant"
+          ],
           "path_template": "data/dx11/menu/220_img/telop_waza/<locale>/mode_change_c02023290.g4tx"
         }
       }

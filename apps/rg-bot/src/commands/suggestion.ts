@@ -103,7 +103,10 @@ export const COLONNES_SUGGESTION = sql`
 	decide_par, motif, cree_le
 `;
 
-export async function suggestionParNumero(guildId: string, numero: number): Promise<Suggestion | null> {
+export async function suggestionParNumero(
+  guildId: string,
+  numero: number,
+): Promise<Suggestion | null> {
   const lignes = await sql<LigneSuggestion[]>`
 		SELECT ${COLONNES_SUGGESTION} FROM bot_suggestions
 		 WHERE guild_id = ${guildId} AND numero = ${numero} LIMIT 1
@@ -130,21 +133,35 @@ export function composerSuggestion(
     intention: intentionEtatSuggestion(suggestion.statut),
     titre: `Suggestion ${referenceSuggestion(suggestion.numero)}`,
   });
-  embed.addFields({ name: "Proposée par", value: `<@${suggestion.auteurId}>`, inline: true });
+  embed.addFields({
+    name: "Proposée par",
+    value: `<@${suggestion.auteurId}>`,
+    inline: true,
+  });
   if (options.resultat) {
     embed.addFields({ name: "Vote", value: options.resultat, inline: true });
   }
   if (suggestion.motif) {
     embed.addFields({
-      name: suggestion.statut === "refusee" ? "Pourquoi c'est écarté" : "Réponse du staff",
+      name:
+        suggestion.statut === "refusee"
+          ? "Pourquoi c'est écarté"
+          : "Réponse du staff",
       value: suggestion.motif,
     });
   }
   if (suggestion.decidePar) {
-    embed.addFields({ name: "Tranché par", value: `<@${suggestion.decidePar}>`, inline: true });
+    embed.addFields({
+      name: "Tranché par",
+      value: `<@${suggestion.decidePar}>`,
+      inline: true,
+    });
   }
   return pied(embed, {
-    note: suggestion.statut === "ouverte" ? `${REACTION_POUR} pour · ${REACTION_CONTRE} contre` : "décision du staff",
+    note:
+      suggestion.statut === "ouverte"
+        ? `${REACTION_POUR} pour · ${REACTION_CONTRE} contre`
+        : "décision du staff",
   });
 }
 
@@ -156,7 +173,10 @@ export function lireScore(message: Message): ReturnType<typeof score> {
 }
 
 @Discord()
-@SlashGroup({ description: "Proposer une idée à la communauté", name: "suggestion" })
+@SlashGroup({
+  description: "Proposer une idée à la communauté",
+  name: "suggestion",
+})
 @SlashGroup("suggestion")
 export class SuggestionCommand {
   @Slash({ description: "Proposer une idée", name: "proposer" })
@@ -176,13 +196,19 @@ export class SuggestionCommand {
     await differerEnPrive(interaction);
     const guildId = interaction.guildId;
     if (!guildId) {
-      await repondre(interaction, echec("Hors serveur", "Une suggestion s'adresse à une communauté."));
+      await repondre(
+        interaction,
+        echec("Hors serveur", "Une suggestion s'adresse à une communauté."),
+      );
       return;
     }
 
     const validation = validerProposition(idee);
     if (!validation.ok) {
-      await repondre(interaction, attention("Suggestion refusée", validation.erreur, { prive: true }));
+      await repondre(
+        interaction,
+        attention("Suggestion refusée", validation.erreur, { prive: true }),
+      );
       return;
     }
 
@@ -199,9 +225,17 @@ export class SuggestionCommand {
         );
         return;
       }
-      const salon = (await interaction.client.channels.fetch(salonId).catch(() => null)) as TextBasedChannel | null;
+      const salon = (await interaction.client.channels
+        .fetch(salonId)
+        .catch(() => null)) as TextBasedChannel | null;
       if (!salon || !("send" in salon)) {
-        await repondre(interaction, echec("Salon illisible", `Le salon configuré (\`${salonId}\`) est introuvable.`));
+        await repondre(
+          interaction,
+          echec(
+            "Salon illisible",
+            `Le salon configuré (\`${salonId}\`) est introuvable.`,
+          ),
+        );
         return;
       }
 
@@ -219,7 +253,10 @@ export class SuggestionCommand {
       if (!ligne) {
         await repondre(
           interaction,
-          echec("Suggestion non enregistrée", "Réessaie : le numéro n'a pas pu être réservé."),
+          echec(
+            "Suggestion non enregistrée",
+            "Réessaie : le numéro n'a pas pu être réservé.",
+          ),
         );
         return;
       }
@@ -250,7 +287,13 @@ export class SuggestionCommand {
         ),
       );
     } catch (err) {
-      await repondre(interaction, echec("Publication impossible", err instanceof Error ? err.message : String(err)));
+      await repondre(
+        interaction,
+        echec(
+          "Publication impossible",
+          err instanceof Error ? err.message : String(err),
+        ),
+      );
     }
   }
 
@@ -270,7 +313,10 @@ export class SuggestionCommand {
     await differerEnPrive(interaction);
     const guildId = interaction.guildId;
     if (!guildId) {
-      await repondre(interaction, echec("Hors serveur", "Les suggestions vivent sur un serveur."));
+      await repondre(
+        interaction,
+        echec("Hors serveur", "Les suggestions vivent sur un serveur."),
+      );
       return;
     }
     try {
@@ -281,7 +327,13 @@ export class SuggestionCommand {
 				 LIMIT ${Math.min(25, Math.max(1, Math.floor(nombre ?? 10)))}
 			`;
       if (lignes.length === 0) {
-        await repondre(interaction, vide("Aucune suggestion en vote", "`/suggestion proposer` en ouvre une."));
+        await repondre(
+          interaction,
+          vide(
+            "Aucune suggestion en vote",
+            "`/suggestion proposer` en ouvre une.",
+          ),
+        );
         return;
       }
       const carte = fiche({
@@ -291,7 +343,7 @@ export class SuggestionCommand {
       carte.bloc(
         "En cours",
         lignes
-          .map(ligne => {
+          .map((ligne) => {
             const suggestion = versSuggestion(ligne);
             const lien = suggestion.messageId
               ? `https://discord.com/channels/${guildId}/${suggestion.salonId}/${suggestion.messageId}`
@@ -302,9 +354,17 @@ export class SuggestionCommand {
           .join("\n"),
         4,
       );
-      await interaction.editReply({ embeds: [piedDeCommande(carte.embed, interaction)] });
+      await interaction.editReply({
+        embeds: [piedDeCommande(carte.embed, interaction)],
+      });
     } catch (err) {
-      await repondre(interaction, echec("Liste illisible", err instanceof Error ? err.message : String(err)));
+      await repondre(
+        interaction,
+        echec(
+          "Liste illisible",
+          err instanceof Error ? err.message : String(err),
+        ),
+      );
     }
   }
 }

@@ -120,7 +120,10 @@ export function zukanGameToSeries(game?: string): string | null {
   if (game === "Inazuma Eleven Ares") return "Ares";
   if (game === "Inazuma Eleven Orion") return "Orion";
   if (game.startsWith("Inazuma Eleven GO Galaxy")) return "Galaxy";
-  if (game.startsWith("Inazuma Eleven GO Chrono Stones") || game.startsWith("Inazuma Eleven GO2"))
+  if (
+    game.startsWith("Inazuma Eleven GO Chrono Stones") ||
+    game.startsWith("Inazuma Eleven GO2")
+  )
     return "Chrono Stone";
   if (game.startsWith("Inazuma Eleven GO")) return "Inazuma Eleven GO";
   if (game.startsWith("Inazuma Eleven 3")) return "Inazuma Eleven 3";
@@ -245,12 +248,12 @@ export function descriptionSimilarity(a: string, b: string): number {
         .toLowerCase()
         .replace(/[^a-z0-9\s]/g, "")
         .split(/\s+/)
-        .filter(w => w.length > 2 && !STOP_WORDS.has(w)),
+        .filter((w) => w.length > 2 && !STOP_WORDS.has(w)),
     );
   const sa = tokenize(a);
   const sb = tokenize(b);
   if (sa.size === 0 || sb.size === 0) return 0;
-  const intersection = [...sa].filter(w => sb.has(w)).length;
+  const intersection = [...sa].filter((w) => sb.has(w)).length;
   const union = new Set([...sa, ...sb]).size;
   return intersection / union;
 }
@@ -390,13 +393,16 @@ export function matchGroupsStrict(
   dbGroup: ZukanMatchDbChar[],
   assigned: Map<string, string>,
 ) {
-  const unassignedDb = dbGroup.filter(c => !assigned.has(c.id));
+  const unassignedDb = dbGroup.filter((c) => !assigned.has(c.id));
   if (unassignedDb.length === 0) return;
 
-  const available = zukanGroup.filter(z => z.zukanHash && !ctx.usedHashes.has(z.zukanHash));
+  const available = zukanGroup.filter(
+    (z) => z.zukanHash && !ctx.usedHashes.has(z.zukanHash),
+  );
 
   // Build score matrix and assign greedily by best score
-  const pairs: { db: ZukanMatchDbChar; z: ZukanMatchEntry; score: number }[] = [];
+  const pairs: { db: ZukanMatchDbChar; z: ZukanMatchEntry; score: number }[] =
+    [];
   for (const db of unassignedDb) {
     for (const z of available) {
       const s = matchScore(z, db);
@@ -423,9 +429,9 @@ export function assignBest(
 ) {
   if (assigned.has(c.id)) return;
   const scored = candidates
-    .filter(z => z.zukanHash && !ctx.usedHashes.has(z.zukanHash))
-    .map(z => ({ z, score: matchScore(z, c) }))
-    .filter(p => p.score >= minScore)
+    .filter((z) => z.zukanHash && !ctx.usedHashes.has(z.zukanHash))
+    .map((z) => ({ z, score: matchScore(z, c) }))
+    .filter((p) => p.score >= minScore)
     .sort((a, b) => b.score - a.score);
   if (scored.length > 0) {
     assigned.set(c.id, scored[0].z.zukanHash!);

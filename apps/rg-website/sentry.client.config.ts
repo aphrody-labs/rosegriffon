@@ -40,7 +40,9 @@ if (process.env.NEXT_PUBLIC_SENTRY_DSN) {
       // Taguer les erreurs sidebar
       if (event.exception?.values?.[0]?.stacktrace?.frames) {
         const { frames } = event.exception.values[0].stacktrace;
-        const isSidebarError = frames.some(frame => frame.filename?.includes("sidebar"));
+        const isSidebarError = frames.some((frame) =>
+          frame.filename?.includes("sidebar"),
+        );
 
         if (isSidebarError) {
           event.tags = { ...event.tags, component: "sidebar" };

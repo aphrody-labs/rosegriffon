@@ -6,9 +6,15 @@ import { passkey } from "@better-auth/passkey";
 import { betterAuth } from "better-auth";
 import { createAuthMiddleware } from "better-auth/api";
 import { admin, bearer, genericOAuth, jwt } from "better-auth/plugins";
-import { type AccountEmailSender, createAccountOptions } from "./account-options";
+import {
+  type AccountEmailSender,
+  createAccountOptions,
+} from "./account-options";
 import { commonAuthOptions, ensureUserProfile, googleProvider } from "./core";
-import { ACHILLEA_SESSION_COOKIE_NAME, achilleaSessionCookieAttributes } from "./achillea-session";
+import {
+  ACHILLEA_SESSION_COOKIE_NAME,
+  achilleaSessionCookieAttributes,
+} from "./achillea-session";
 import { deuxFacteurs } from "./two-factor";
 import { resolveAuthSecret, resolveTrustedOrigins } from "./runtime-config";
 
@@ -59,10 +65,16 @@ export function createRoseGriffonAuth(options: RoseGriffonAuthOptions) {
   const patreon = options.patreon;
   const discordClientId = process.env.DISCORD_CLIENT_ID ?? "";
   const discordClientSecret = process.env.DISCORD_CLIENT_SECRET ?? "";
-  const twitchClientId = process.env.TWITCH_AUTH_CLIENT_ID ?? process.env.TWITCH_CLIENT_ID ?? "";
-  const twitchClientSecret = process.env.TWITCH_AUTH_CLIENT_SECRET ?? process.env.TWITCH_CLIENT_SECRET ?? "";
-  const githubClientId = process.env.GITHUB_CLIENT_ID ?? process.env.AUTH_GITHUB_ID ?? "";
-  const githubClientSecret = process.env.GITHUB_CLIENT_SECRET ?? process.env.AUTH_GITHUB_SECRET ?? "";
+  const twitchClientId =
+    process.env.TWITCH_AUTH_CLIENT_ID ?? process.env.TWITCH_CLIENT_ID ?? "";
+  const twitchClientSecret =
+    process.env.TWITCH_AUTH_CLIENT_SECRET ??
+    process.env.TWITCH_CLIENT_SECRET ??
+    "";
+  const githubClientId =
+    process.env.GITHUB_CLIENT_ID ?? process.env.AUTH_GITHUB_ID ?? "";
+  const githubClientSecret =
+    process.env.GITHUB_CLIENT_SECRET ?? process.env.AUTH_GITHUB_SECRET ?? "";
   const configuredSocialProviders = {
     ...(discordClientId && discordClientSecret
       ? {
@@ -79,7 +91,11 @@ export function createRoseGriffonAuth(options: RoseGriffonAuthOptions) {
           twitch: {
             clientId: twitchClientId,
             clientSecret: twitchClientSecret,
-            scope: ["user:read:email", "user:read:follows", "user:read:subscriptions"],
+            scope: [
+              "user:read:email",
+              "user:read:follows",
+              "user:read:subscriptions",
+            ],
           },
         }
       : {}),
@@ -91,7 +107,9 @@ export function createRoseGriffonAuth(options: RoseGriffonAuthOptions) {
           },
         }
       : {}),
-    ...(googleProvider.google.clientId && googleProvider.google.clientSecret ? googleProvider : {}),
+    ...(googleProvider.google.clientId && googleProvider.google.clientSecret
+      ? googleProvider
+      : {}),
   };
   const trustedSocialProviders = Object.keys(configuredSocialProviders);
   const plugins = [
@@ -100,7 +118,11 @@ export function createRoseGriffonAuth(options: RoseGriffonAuthOptions) {
       defaultPrefix: "rg_",
       requireName: true,
       enableMetadata: true,
-      rateLimit: { enabled: true, maxRequests: 1_000, timeWindow: 60 * 60 * 1_000 },
+      rateLimit: {
+        enabled: true,
+        maxRequests: 1_000,
+        timeWindow: 60 * 60 * 1_000,
+      },
     }) as unknown as ReturnType<typeof admin>,
     jwt(),
     oauthProvider({
@@ -112,17 +134,23 @@ export function createRoseGriffonAuth(options: RoseGriffonAuthOptions) {
     }),
     agentAuth({
       providerName: "Rose Griffon",
-      providerDescription: "Rose Griffon authentication and community capabilities.",
+      providerDescription:
+        "Rose Griffon authentication and community capabilities.",
       deviceAuthorizationPage: "/device/capabilities",
       capabilities: [
         {
           name: "profile.read",
           description: "Read the authenticated Rose Griffon profile.",
-          input: { type: "object", properties: {}, additionalProperties: false },
+          input: {
+            type: "object",
+            properties: {},
+            additionalProperties: false,
+          },
         },
       ],
       onExecute: async ({ capability, agentSession }) => {
-        if (capability !== "profile.read") throw new Error("Unsupported capability");
+        if (capability !== "profile.read")
+          throw new Error("Unsupported capability");
         return { user: agentSession.user };
       },
     }),
@@ -190,7 +218,10 @@ export function createRoseGriffonAuth(options: RoseGriffonAuthOptions) {
       encryptOAuthTokens: true,
       accountLinking: {
         enabled: true,
-        trustedProviders: [...trustedSocialProviders, ...(patreon ? ["patreon"] : [])],
+        trustedProviders: [
+          ...trustedSocialProviders,
+          ...(patreon ? ["patreon"] : []),
+        ],
       },
     },
     trustedOrigins: resolveTrustedOrigins(options.baseURL),
@@ -199,9 +230,12 @@ export function createRoseGriffonAuth(options: RoseGriffonAuthOptions) {
       // and is a stateless 30-day JWT: leaving the site must erase it too, or the
       // Achilléa API keeps answering for a member who signed out. Runs before the
       // plugin hooks, so `nextCookies` forwards it from server actions as well.
-      after: createAuthMiddleware(async ctx => {
+      after: createAuthMiddleware(async (ctx) => {
         if (ctx.path !== "/sign-out") return;
-        ctx.setCookie(ACHILLEA_SESSION_COOKIE_NAME, "", { ...achilleaSessionCookieAttributes(), maxAge: 0 });
+        ctx.setCookie(ACHILLEA_SESSION_COOKIE_NAME, "", {
+          ...achilleaSessionCookieAttributes(),
+          maxAge: 0,
+        });
       }),
     },
     advanced: {
@@ -214,12 +248,12 @@ export function createRoseGriffonAuth(options: RoseGriffonAuthOptions) {
     databaseHooks: {
       account: {
         create: {
-          after: async account => {
+          after: async (account) => {
             await patreon?.onAccountChanged?.(account);
           },
         },
         update: {
-          after: async account => {
+          after: async (account) => {
             await patreon?.onAccountChanged?.(account);
           },
         },
@@ -230,9 +264,13 @@ export function createRoseGriffonAuth(options: RoseGriffonAuthOptions) {
             try {
               // The hook receives the session ROW (`userId`, no `user`): passing
               // `session.user` made every sign-in throw before reaching the profile.
-              const user = await context?.context.internalAdapter.findUserById(session.userId);
+              const user = await context?.context.internalAdapter.findUserById(
+                session.userId,
+              );
               if (!user) return;
-              await ensureUserProfile(user, undefined, { appName: "Rose Griffon" });
+              await ensureUserProfile(user, undefined, {
+                appName: "Rose Griffon",
+              });
             } catch (error) {
               console.error("[auth] session profile sync failed", error);
             }
@@ -241,7 +279,7 @@ export function createRoseGriffonAuth(options: RoseGriffonAuthOptions) {
       },
       user: {
         create: {
-          after: async user => {
+          after: async (user) => {
             await ensureUserProfile(user);
           },
         },

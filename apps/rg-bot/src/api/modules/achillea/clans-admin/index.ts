@@ -9,9 +9,16 @@ import { Elysia, t } from "elysia";
 import { dbPlugin } from "../../../plugins/db";
 import { ClanModel } from "../clans/model";
 import { ClanService } from "../clans/service";
-import { chargerRoleEnBase, ROLE_STAFF, staff, type ChargeurRole } from "../staff";
+import {
+  chargerRoleEnBase,
+  ROLE_STAFF,
+  staff,
+  type ChargeurRole,
+} from "../staff";
 
-export function creerClansAdminController(options: { chargerRole?: ChargeurRole } = {}) {
+export function creerClansAdminController(
+  options: { chargerRole?: ChargeurRole } = {},
+) {
   const chargerRole = options.chargerRole ?? chargerRoleEnBase;
   return new Elysia({ prefix: "/admin/clans" }).use(dbPlugin).get(
     "/",
@@ -30,7 +37,12 @@ export function creerClansAdminController(options: { chargerRole?: ChargeurRole 
       response: {
         200: t.Object({
           data: t.Array(ClanModel.fullClan),
-          meta: t.Object({ page: t.Number(), limit: t.Number(), total: t.Number(), pageCount: t.Number() }),
+          meta: t.Object({
+            page: t.Number(),
+            limit: t.Number(),
+            total: t.Number(),
+            pageCount: t.Number(),
+          }),
         }),
         401: t.Object({ message: t.String() }),
         403: t.Object({ message: t.String() }),

@@ -24,21 +24,37 @@ describe("rappels de cast (parité legacy)", () => {
       footer: { text: "Achillea Cast — rappel J-2" },
     });
     expect(embed?.fields).toEqual([
-      { name: "Evenement", value: "Coupe des Clans (tournament)", inline: true },
+      {
+        name: "Evenement",
+        value: "Coupe des Clans (tournament)",
+        inline: true,
+      },
       { name: "Role", value: "caster_main", inline: true },
-      { name: "Date", value: `<t:${Math.floor(EVENEMENT.scheduledAt.getTime() / 1000)}:F>`, inline: false },
+      {
+        name: "Date",
+        value: `<t:${Math.floor(EVENEMENT.scheduledAt.getTime() / 1000)}:F>`,
+        inline: false,
+      },
       { name: "Twitch", value: "https://twitch.tv/achillea", inline: false },
     ]);
   });
 
   test("H-2 : rouge, « Verifie que tout est pret. », heure courte", () => {
-    const embed = reminderMessage("h2", { ...EVENEMENT, twitchUrl: null }, "observer").embeds?.[0];
+    const embed = reminderMessage(
+      "h2",
+      { ...EVENEMENT, twitchUrl: null },
+      "observer",
+    ).embeds?.[0];
     expect(embed).toMatchObject({
       title: "Rappel de cast — H-2 (dans 2h !)",
       color: 0xed_42_45,
       description: "Tu cast dans **2 heures** ! Verifie que tout est pret.",
       footer: { text: "Achillea Cast — rappel H-2" },
     });
-    expect((embed?.fields as Array<{ name: string }> | undefined)?.map(f => f.name)).toEqual(["Evenement", "Role", "Heure"]);
+    expect(
+      (embed?.fields as Array<{ name: string }> | undefined)?.map(
+        (f) => f.name,
+      ),
+    ).toEqual(["Evenement", "Role", "Heure"]);
   });
 });

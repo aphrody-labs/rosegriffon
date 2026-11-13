@@ -32,7 +32,8 @@ export interface ZukanSkill {
   videoUrl?: string;
 }
 
-type ZukanContentType = "character_list" | "skill_list" | "item_list" | "unknown";
+type ZukanContentType =
+  "character_list" | "skill_list" | "item_list" | "unknown";
 
 export interface ZukanResult {
   type: ZukanContentType;
@@ -93,8 +94,8 @@ function extractCharacters($: cheerio.CheerioAPI): ZukanCharacter[] {
   });
 
   return raw.characters
-    .filter(c => c.id && c.name)
-    .map(c => ({
+    .filter((c) => c.id && c.name)
+    .map((c) => ({
       id: c.id!,
       name: c.name!,
       nickname: c.nickname || undefined,
@@ -103,7 +104,11 @@ function extractCharacters($: cheerio.CheerioAPI): ZukanCharacter[] {
           ? c.detailUrl
           : `https://zukan.inazuma.jp${c.detailUrl}`
         : undefined,
-      image: c.image ? (c.image.startsWith("//") ? `https:${c.image}` : c.image) : undefined,
+      image: c.image
+        ? c.image.startsWith("//")
+          ? `https:${c.image}`
+          : c.image
+        : undefined,
       gender: c.gender || undefined,
       element: c.element || undefined,
       position: c.position || undefined,
@@ -140,17 +145,21 @@ function extractSkills($: cheerio.CheerioAPI): ZukanSkill[] {
   });
 
   return raw.skills
-    .filter(s => Boolean(s.name))
+    .filter((s) => Boolean(s.name))
     .map((s, i) => ({
       name: s.name!,
       type: typesByIndex[i]?.join(", ") || undefined,
-      videoUrl: s.videoUrl?.endsWith(".wmv") ? s.videoUrl.replace(".wmv", ".webm") : s.videoUrl || undefined,
+      videoUrl: s.videoUrl?.endsWith(".wmv")
+        ? s.videoUrl.replace(".wmv", ".webm")
+        : s.videoUrl || undefined,
     }));
 }
 
 // --- Public API ---
 
-export async function scrapeZukanPage(url: string): Promise<ZukanResult | null> {
+export async function scrapeZukanPage(
+  url: string,
+): Promise<ZukanResult | null> {
   console.log(`[Zukan] Scraping: ${url}`);
 
   try {
@@ -205,6 +214,7 @@ async function main() {
 const isDirectRun =
   import.meta.url.startsWith("file:") &&
   process.argv[1] &&
-  (process.argv[1] === import.meta.url.replace("file://", "") || process.argv[1].endsWith("zukan.ts"));
+  (process.argv[1] === import.meta.url.replace("file://", "") ||
+    process.argv[1].endsWith("zukan.ts"));
 
 if (isDirectRun) main();

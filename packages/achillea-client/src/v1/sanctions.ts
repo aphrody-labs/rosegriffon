@@ -10,13 +10,25 @@ import type {
   SanctionFilters,
   SanctionListResponse,
 } from "@rosegriffon/achillea-types/domain/sanction";
-import { SanctionIssuerType, SanctionType } from "@rosegriffon/achillea-types/enums/sanction";
+import {
+  SanctionIssuerType,
+  SanctionType,
+} from "@rosegriffon/achillea-types/enums/sanction";
 
 import { pagedListSchema } from "./common";
-import { AchilleaResource, encodePathSegment, type AchilleaClientResult, type QueryParams } from "./http";
+import {
+  AchilleaResource,
+  encodePathSegment,
+  type AchilleaClientResult,
+  type QueryParams,
+} from "./http";
 
-export const sanctionTypeSchema = z.enum(SanctionType) satisfies z.ZodType<SanctionType>;
-export const sanctionIssuerTypeSchema = z.enum(SanctionIssuerType) satisfies z.ZodType<SanctionIssuerType>;
+export const sanctionTypeSchema = z.enum(
+  SanctionType,
+) satisfies z.ZodType<SanctionType>;
+export const sanctionIssuerTypeSchema = z.enum(
+  SanctionIssuerType,
+) satisfies z.ZodType<SanctionIssuerType>;
 
 export const sanctionSchema = z.object({
   id: z.string(),
@@ -35,31 +47,47 @@ export const sanctionSchema = z.object({
   createdAt: z.string(),
 }) satisfies z.ZodType<Sanction>;
 
-export const sanctionListSchema = pagedListSchema(sanctionSchema) satisfies z.ZodType<SanctionListResponse>;
+export const sanctionListSchema = pagedListSchema(
+  sanctionSchema,
+) satisfies z.ZodType<SanctionListResponse>;
 
 /** 4 routes. */
 export class SanctionsResource extends AchilleaResource {
   /** `GET /sanctions` — liste paginée, filtrable par joueur, serveur, type, activité. */
-  list(filters: SanctionFilters = {}): Promise<AchilleaClientResult<SanctionListResponse>> {
-    return this.http.get("/sanctions", sanctionListSchema, { query: filters as QueryParams });
+  list(
+    filters: SanctionFilters = {},
+  ): Promise<AchilleaClientResult<SanctionListResponse>> {
+    return this.http.get("/sanctions", sanctionListSchema, {
+      query: filters as QueryParams,
+    });
   }
 
   /** `POST /sanctions` — émet une sanction (staff). */
-  create(payload: CreateSanctionPayload): Promise<AchilleaClientResult<Sanction>> {
+  create(
+    payload: CreateSanctionPayload,
+  ): Promise<AchilleaClientResult<Sanction>> {
     return this.http.post("/sanctions", sanctionSchema, payload);
   }
 
   /** `POST /sanctions/:id/revoke` — révoque une sanction active. */
   revoke(id: string, reason?: string): Promise<AchilleaClientResult<Sanction>> {
-    return this.http.post(`/sanctions/${encodePathSegment(id)}/revoke`, sanctionSchema, {
-      reason,
-    });
+    return this.http.post(
+      `/sanctions/${encodePathSegment(id)}/revoke`,
+      sanctionSchema,
+      {
+        reason,
+      },
+    );
   }
 
   /** `POST /sanctions/:id/appeal` — consigne un appel dans le journal de preuve. */
   appeal(id: string, message: string): Promise<AchilleaClientResult<Sanction>> {
-    return this.http.post(`/sanctions/${encodePathSegment(id)}/appeal`, sanctionSchema, {
-      message,
-    });
+    return this.http.post(
+      `/sanctions/${encodePathSegment(id)}/appeal`,
+      sanctionSchema,
+      {
+        message,
+      },
+    );
   }
 }

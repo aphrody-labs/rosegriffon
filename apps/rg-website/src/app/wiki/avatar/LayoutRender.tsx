@@ -25,10 +25,18 @@ function dessinable(o: LayoutObjet, w: number, h: number): boolean {
   return t.x >= 0 && t.x <= w && t.y >= 0 && t.y <= h;
 }
 
-export function LayoutRender({ layout, cdn, className }: { layout: Layout; cdn: string; className?: string }) {
+export function LayoutRender({
+  layout,
+  cdn,
+  className,
+}: {
+  layout: Layout;
+  cdn: string;
+  className?: string;
+}) {
   const { w, h } = layout.canvas;
   const objets = layout.objects
-    .filter(o => dessinable(o, w, h))
+    .filter((o) => dessinable(o, w, h))
     .slice()
     .sort((a, b) => (a.drawPriority ?? 0) - (b.drawPriority ?? 0));
 

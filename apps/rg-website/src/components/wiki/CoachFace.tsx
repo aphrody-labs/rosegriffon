@@ -25,12 +25,19 @@ interface CoachFaceProps {
  * retombe sur l'icône « sifflet » `ClipboardList` si le code est absent ou si
  * l'image échoue au chargement. Permet à `CoachDetail` (RSC) de rester serveur.
  */
-export function CoachFace({ internalCode, alt, iconSize = 40, className }: CoachFaceProps) {
+export function CoachFace({
+  internalCode,
+  alt,
+  iconSize = 40,
+  className,
+}: CoachFaceProps) {
   const [imageFailed, setImageFailed] = useState(false);
   const faceUrl = internalCode ? getCharacterFaceUrl(internalCode) : null;
 
   if (!faceUrl || imageFailed) {
-    return <ClipboardList size={iconSize} className={className} aria-hidden="true" />;
+    return (
+      <ClipboardList size={iconSize} className={className} aria-hidden="true" />
+    );
   }
 
   return (

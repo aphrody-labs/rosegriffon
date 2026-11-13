@@ -13,8 +13,13 @@ import type {
 
 const TEAM_CACHE_TTL_MS = 5 * 60_000;
 
-export async function getTeam(teamId: "staff" | "association" | "partenaires", role?: string) {
-  const cacheKey = role ? `team:${teamId}:role:${role.toLowerCase()}` : `team:${teamId}`;
+export async function getTeam(
+  teamId: "staff" | "association" | "partenaires",
+  role?: string,
+) {
+  const cacheKey = role
+    ? `team:${teamId}:role:${role.toLowerCase()}`
+    : `team:${teamId}`;
   return await cached(cacheKey, TEAM_CACHE_TTL_MS, async () => {
     if (role) {
       return await sql<TeamMember[]>`
@@ -67,7 +72,10 @@ export async function pseudoDuSite(discordId: string): Promise<string | null> {
     `;
     return rows[0]?.username ?? null;
   } catch (err) {
-    console.warn("[website] pseudo du site illisible :", err instanceof Error ? err.message : err);
+    console.warn(
+      "[website] pseudo du site illisible :",
+      err instanceof Error ? err.message : err,
+    );
     return null;
   }
 }
@@ -140,7 +148,14 @@ export async function getPlanning(day: number | null) {
 
 export type ArticleRow = Pick<
   Article,
-  "id" | "title" | "slug" | "excerpt" | "category" | "featured_image_url" | "published_at" | "app"
+  | "id"
+  | "title"
+  | "slug"
+  | "excerpt"
+  | "category"
+  | "featured_image_url"
+  | "published_at"
+  | "app"
 >;
 
 export async function azaleeLatest(limit: number, category?: string) {
@@ -172,6 +187,8 @@ export async function findMember(q: string) {
 }
 
 export async function getSetting<T = unknown>(key: string): Promise<T | null> {
-  const rows = await sql<{ value: T }[]>`SELECT value FROM settings WHERE key = ${key} LIMIT 1`;
+  const rows = await sql<
+    { value: T }[]
+  >`SELECT value FROM settings WHERE key = ${key} LIMIT 1`;
   return rows[0]?.value ?? null;
 }

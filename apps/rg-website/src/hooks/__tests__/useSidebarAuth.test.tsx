@@ -23,7 +23,9 @@ mock.module("@/lib/auth-client", () => ({
 
 mock.module("@/contexts/auth-context", () => ({
   useAuth: () => {
-    const session = mockUseSession() as { data?: { user?: unknown }; isPending?: boolean; error?: unknown } | undefined;
+    const session = mockUseSession() as
+      | { data?: { user?: unknown }; isPending?: boolean; error?: unknown }
+      | undefined;
     return {
       user: (session?.data?.user as never) ?? null,
       isLoading: session?.isPending ?? false,
@@ -107,7 +109,10 @@ describe("useSidebarAuth", () => {
     const mockUser = { email: "test@google.com", id: "user-123" };
     const mockProfile = { id: "user-123", username: "testuser" };
 
-    mockUseSession.mockReturnValue({ data: { user: mockUser }, isPending: false });
+    mockUseSession.mockReturnValue({
+      data: { user: mockUser },
+      isPending: false,
+    });
 
     mockGetCurrentProfile.mockResolvedValue(mockProfile);
 
@@ -133,7 +138,10 @@ describe("useSidebarAuth", () => {
 
   it("should handle error fetching user", async () => {
     const mockUser = { email: "test@google.com", id: "user-123" };
-    mockUseSession.mockReturnValue({ data: { user: mockUser }, isPending: false });
+    mockUseSession.mockReturnValue({
+      data: { user: mockUser },
+      isPending: false,
+    });
 
     mockGetCurrentProfile.mockRejectedValue(new Error("Network error"));
 

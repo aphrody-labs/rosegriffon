@@ -90,13 +90,20 @@ const absentes = new Map<string, number>();
  * 0,52 sur `/iergday`, audit du 5/11/2026). Connue morte au rendu, l'image n'est
  * tout simplement pas émise.
  */
-export const sonderImage = cache(async function sonderImage(url: string | null | undefined): Promise<SondageImage> {
-  if (typeof url !== "string" || !/^https?:\/\//.test(url)) return { absente: false, dimensions: null };
+export const sonderImage = cache(async function sonderImage(
+  url: string | null | undefined,
+): Promise<SondageImage> {
+  if (typeof url !== "string" || !/^https?:\/\//.test(url))
+    return { absente: false, dimensions: null };
   const absenteDepuis = absentes.get(url);
-  if (absenteDepuis !== undefined && Date.now() - absenteDepuis < DUREE_ABSENCE_MS) {
+  if (
+    absenteDepuis !== undefined &&
+    Date.now() - absenteDepuis < DUREE_ABSENCE_MS
+  ) {
     return { absente: true, dimensions: null };
   }
-  if (connues.has(url)) return { absente: false, dimensions: connues.get(url) ?? null };
+  if (connues.has(url))
+    return { absente: false, dimensions: connues.get(url) ?? null };
 
   let mesure: DimensionsImage | null = null;
   try {

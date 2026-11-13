@@ -18,16 +18,27 @@ import {
 import { Loader2, ShieldCheck } from "lucide-react";
 import { signalerEchec } from "@/lib/achillea/signaler";
 import type { AuditChainVerification } from "@rosegriffon/achillea-client";
-import { BoutonActualiser, Chargement, Erreur, Vide, formaterDate, useClientAchillea, useLecture } from "./etat";
+import {
+  BoutonActualiser,
+  Chargement,
+  Erreur,
+  Vide,
+  formaterDate,
+  useClientAchillea,
+  useLecture,
+} from "./etat";
 
 /** « Audit » — 80 dernières entrées du journal d'actions chaîné (SuperAdmin). */
 export function AuditTab() {
   const client = useClientAchillea();
   const journal = useLecture("admin/ops/audit", () => client.admin.audit(80));
   const lignes = journal.donnees?.data ?? [];
-  const [verification, setVerification] = useState<AuditChainVerification | null>(null);
+  const [verification, setVerification] =
+    useState<AuditChainVerification | null>(null);
   const [verificationEnCours, setVerificationEnCours] = useState(false);
-  const [erreurVerification, setErreurVerification] = useState<string | null>(null);
+  const [erreurVerification, setErreurVerification] = useState<string | null>(
+    null,
+  );
 
   const verifier = async () => {
     setVerificationEnCours(true);
@@ -36,7 +47,10 @@ export function AuditTab() {
     try {
       const resultat = await client.admin.verifyAudit();
       if (resultat.ok) setVerification(resultat.value);
-      else setErreurVerification(signalerEchec("admin/ops/audit/verify", resultat));
+      else
+        setErreurVerification(
+          signalerEchec("admin/ops/audit/verify", resultat),
+        );
     } finally {
       setVerificationEnCours(false);
     }
@@ -47,7 +61,9 @@ export function AuditTab() {
       <CardHeader className="flex flex-row items-center justify-between gap-4">
         <div className="space-y-1">
           <CardTitle className="text-base">Journal d&apos;audit</CardTitle>
-          <p className="text-xs text-muted-foreground">Actions staff signées et chaînées, de la plus récente.</p>
+          <p className="text-xs text-muted-foreground">
+            Actions staff signées et chaînées, de la plus récente.
+          </p>
         </div>
         <div className="flex flex-wrap gap-2">
           <Button
@@ -63,12 +79,22 @@ export function AuditTab() {
             )}
             Vérifier la chaîne
           </Button>
-          <BoutonActualiser enCours={journal.chargement} onClick={journal.recharger} />
+          <BoutonActualiser
+            enCours={journal.chargement}
+            onClick={journal.recharger}
+          />
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        {verificationEnCours && <Chargement lignes={1} libelle="Vérification de la chaîne…" />}
-        {erreurVerification && <Erreur message={erreurVerification} onReessayer={() => void verifier()} />}
+        {verificationEnCours && (
+          <Chargement lignes={1} libelle="Vérification de la chaîne…" />
+        )}
+        {erreurVerification && (
+          <Erreur
+            message={erreurVerification}
+            onReessayer={() => void verifier()}
+          />
+        )}
         {verification && (
           <p
             role={verification.valid ? "status" : "alert"}
@@ -83,7 +109,9 @@ export function AuditTab() {
               : `Chaîne rompue à l'entrée ${verification.broken_at ?? "inconnue"}`}
           </p>
         )}
-        {journal.erreur && <Erreur message={journal.erreur} onReessayer={journal.recharger} />}
+        {journal.erreur && (
+          <Erreur message={journal.erreur} onReessayer={journal.recharger} />
+        )}
         {journal.chargement && !journal.donnees ? (
           <Chargement lignes={5} />
         ) : lignes.length === 0 && !journal.erreur ? (
@@ -101,9 +129,11 @@ export function AuditTab() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {lignes.map(ligne => (
+                {lignes.map((ligne) => (
                   <TableRow key={ligne.id}>
-                    <TableCell className="whitespace-nowrap text-xs">{formaterDate(ligne.ts)}</TableCell>
+                    <TableCell className="whitespace-nowrap text-xs">
+                      {formaterDate(ligne.ts)}
+                    </TableCell>
                     <TableCell>
                       <Badge variant="secondary" className="font-mono">
                         {ligne.action}
@@ -113,8 +143,12 @@ export function AuditTab() {
                       {ligne.targetType}
                       {ligne.targetId ? ` · ${ligne.targetId}` : ""}
                     </TableCell>
-                    <TableCell className="font-mono text-xs text-muted-foreground">{ligne.actorId ?? "système"}</TableCell>
-                    <TableCell className="text-xs">{ligne.reason ?? "—"}</TableCell>
+                    <TableCell className="font-mono text-xs text-muted-foreground">
+                      {ligne.actorId ?? "système"}
+                    </TableCell>
+                    <TableCell className="text-xs">
+                      {ligne.reason ?? "—"}
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>

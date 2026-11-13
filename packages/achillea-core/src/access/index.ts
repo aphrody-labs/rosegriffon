@@ -22,7 +22,8 @@ import { AchilleaRole } from "../enums/access";
 export type AchilleaAction = "manage" | "moderate" | "cast" | "view";
 
 /** Sujets CASL Achilléa. */
-export type AchilleaSubject = "Sanction" | "CastEvent" | "Tournament" | "User" | "all";
+export type AchilleaSubject =
+  "Sanction" | "CastEvent" | "Tournament" | "User" | "all";
 
 export type AppAbility = MongoAbility<[AchilleaAction, AchilleaSubject]>;
 

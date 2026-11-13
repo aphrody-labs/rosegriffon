@@ -1,16 +1,32 @@
 import { describe, expect, test } from "bun:test";
-import { parseOfficialCategories, parseOfficialEpisodes, parseYoutubeAtom } from "./inazuma-tv";
+import {
+  parseOfficialCategories,
+  parseOfficialEpisodes,
+  parseYoutubeAtom,
+} from "./inazuma-tv";
 
 describe("Inazuma TV pure adapters", () => {
   test("reads official JSON-LD categories and episode numbers from URLs", () => {
     const html = `<script type="application/ld+json">${JSON.stringify({
       "@type": "ItemList",
       name: "Categories",
-      itemListElement: [{ position: 1, name: "Saison 1", url: "https://example.test/tv/saison1" }],
+      itemListElement: [
+        {
+          position: 1,
+          name: "Saison 1",
+          url: "https://example.test/tv/saison1",
+        },
+      ],
     })}</script><script type="application/ld+json">${JSON.stringify({
       "@type": "ItemList",
       name: "Episodes",
-      itemListElement: [{ position: 1, name: "Épisode 12 - Le match", url: "https://example.test/ep-12" }],
+      itemListElement: [
+        {
+          position: 1,
+          name: "Épisode 12 - Le match",
+          url: "https://example.test/ep-12",
+        },
+      ],
     })}</script>`;
     expect(parseOfficialCategories(html)[0]?.slug).toBe("saison1");
     expect(parseOfficialEpisodes(html)[0]?.number).toBe(12);

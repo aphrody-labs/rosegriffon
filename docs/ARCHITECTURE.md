@@ -4,13 +4,13 @@ One page for how Rose Griffon is laid out and operated: host roles, service modu
 data flow, and how to move a service or add a host. Everything below is driven by two
 manifests and one CLI; nothing else should name a machine, an address or a host path.
 
-| Source of truth | Owns |
-| --- | --- |
-| [`infra/hosts.toml`](../infra/hosts.toml) | roles -> hosts: ssh alias, public and mesh IP, cores, capabilities, `srv_root`, `stack_dir`, `env_file` |
-| [`infra/services.toml`](../infra/services.toml) | the service registry and the public apex domain |
-| [`packages/rg-config/infra.ts`](../packages/rg-config/infra.ts) (`@rosegriffon/config/infra`) | typed loader and resolvers for both manifests |
-| [`packages/rg-config/rg-urls.ts`](../packages/rg-config/rg-urls.ts) (`@rosegriffon/config/rg-urls`) | public origins derived from `RG_DOMAIN`, typed env parsing for service code |
-| [`infra/ops/cli.ts`](../infra/ops/cli.ts) | the verbs; `justfile` and `rg <verb>` are thin wrappers |
+| Source of truth                                                                                     | Owns                                                                                                    |
+| --------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| [`infra/hosts.toml`](../infra/hosts.toml)                                                           | roles -> hosts: ssh alias, public and mesh IP, cores, capabilities, `srv_root`, `stack_dir`, `env_file` |
+| [`infra/services.toml`](../infra/services.toml)                                                     | the service registry and the public apex domain                                                         |
+| [`packages/rg-config/infra.ts`](../packages/rg-config/infra.ts) (`@rosegriffon/config/infra`)       | typed loader and resolvers for both manifests                                                           |
+| [`packages/rg-config/rg-urls.ts`](../packages/rg-config/rg-urls.ts) (`@rosegriffon/config/rg-urls`) | public origins derived from `RG_DOMAIN`, typed env parsing for service code                             |
+| [`infra/ops/cli.ts`](../infra/ops/cli.ts)                                                           | the verbs; `justfile` and `rg <verb>` are thin wrappers                                                 |
 
 ## Roles and hosts
 
@@ -40,17 +40,17 @@ Overrides, for one command or a whole session:
 
 Every deployable unit has the same contract in `infra/services.toml`:
 
-| Field | Meaning |
-| --- | --- |
-| `entry` | source entry point |
-| `dockerfile` + `target` (or `image`) | how its image is built |
-| `compose` (+ `profile`) | compose file and service name; a profile makes it opt-in |
-| `port`, `health` | container port and HTTP health path |
-| `role` | host role it deploys to (overridable per verb with `--role`) |
-| `state` | directories under the host `srv_root` that belong to it (moved by `migrate`) |
-| `env` | configuration keys; values only in the host `env_file`, never in the repository |
-| `vhosts` | public names it answers (`@` = apex), used by `verify` |
-| `upstream` | nginx upstream rendered into `infra/docker/nginx/conf.d/00-upstreams.conf` |
+| Field                                | Meaning                                                                         |
+| ------------------------------------ | ------------------------------------------------------------------------------- |
+| `entry`                              | source entry point                                                              |
+| `dockerfile` + `target` (or `image`) | how its image is built                                                          |
+| `compose` (+ `profile`)              | compose file and service name; a profile makes it opt-in                        |
+| `port`, `health`                     | container port and HTTP health path                                             |
+| `role`                               | host role it deploys to (overridable per verb with `--role`)                    |
+| `state`                              | directories under the host `srv_root` that belong to it (moved by `migrate`)    |
+| `env`                                | configuration keys; values only in the host `env_file`, never in the repository |
+| `vhosts`                             | public names it answers (`@` = apex), used by `verify`                          |
+| `upstream`                           | nginx upstream rendered into `infra/docker/nginx/conf.d/00-upstreams.conf`      |
 
 Units: `website` (Next standalone on Bun), `core` (API, Discord bots, ranked, in-process
 cron), `cron` (profile `cron-split`), `model-serve` (static musl Rust), `nginx` (stack

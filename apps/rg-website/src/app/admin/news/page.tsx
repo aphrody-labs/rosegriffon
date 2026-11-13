@@ -33,7 +33,8 @@ export default async function NewsListPage({
   const rawParams = await searchParams;
   const params = parseSearchParams(rawParams);
   const { q, page: currentPage, status, view, sort, category } = params;
-  const authorParam = typeof rawParams.author === "string" ? rawParams.author : null;
+  const authorParam =
+    typeof rawParams.author === "string" ? rawParams.author : null;
   const itemsPerPage = (params.perPage as number | undefined) ?? 20;
   const client = createPostgresClient();
 
@@ -43,11 +44,18 @@ export default async function NewsListPage({
 
   // Validate category filter
   const validCategories = ["announcement", "event", "critique", "community"];
-  const categoryFilter = category && validCategories.includes(category) ? category : null;
+  const categoryFilter =
+    category && validCategories.includes(category) ? category : null;
 
   // Sort config — support all 4 sort options
-  const validSortFields = ["created_at", "published_at", "updated_at", "view_count"];
-  const sortField = sort && validSortFields.includes(sort) ? sort : "created_at";
+  const validSortFields = [
+    "created_at",
+    "published_at",
+    "updated_at",
+    "view_count",
+  ];
+  const sortField =
+    sort && validSortFields.includes(sort) ? sort : "created_at";
   const ascending = false;
 
   // Search term : full-text si on a des tokens utilisables, sinon ilike
@@ -74,11 +82,20 @@ export default async function NewsListPage({
   };
 
   const [countResult, dataResult, authorsResult] = await Promise.all([
-    applyFilters(client.from("articles").select("*", { count: "exact", head: true }).eq("app", "azalee")),
+    applyFilters(
+      client
+        .from("articles")
+        .select("*", { count: "exact", head: true })
+        .eq("app", "azalee"),
+    ),
     applyFilters(client.from("articles").select("*").eq("app", "azalee"))
       .order(sortField, { ascending })
       .range((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage - 1),
-    client.from("articles").select("author_id").eq("app", "azalee").not("author_id", "is", null),
+    client
+      .from("articles")
+      .select("author_id")
+      .eq("app", "azalee")
+      .not("author_id", "is", null),
   ]);
 
   const totalItems = countResult.count || 0;
@@ -98,10 +115,20 @@ export default async function NewsListPage({
     ),
   ] as string[];
 
-  let profileMap = new Map<string, { id: string; username: string; full_name: string }>();
+  let profileMap = new Map<
+    string,
+    { id: string; username: string; full_name: string }
+  >();
   if (allAuthorIds.length > 0) {
-    const { data: profiles } = await client.from("profiles").select("id, username, full_name").in("id", allAuthorIds);
-    profileMap = new Map((profiles || []).map((p: { id: string; username: string; full_name: string }) => [p.id, p]));
+    const { data: profiles } = await client
+      .from("profiles")
+      .select("id, username, full_name")
+      .in("id", allAuthorIds);
+    profileMap = new Map(
+      (profiles || []).map(
+        (p: { id: string; username: string; full_name: string }) => [p.id, p],
+      ),
+    );
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -115,7 +142,7 @@ export default async function NewsListPage({
   }
 
   const authorsList = [...profileMap.values()]
-    .map(p => ({ id: p.id, name: p.full_name || p.username || "Sans nom" }))
+    .map((p) => ({ id: p.id, name: p.full_name || p.username || "Sans nom" }))
     .toSorted((a, b) => a.name.localeCompare(b.name));
 
   const isListView = view === "list";
@@ -133,7 +160,10 @@ export default async function NewsListPage({
   return (
     <div className="space-y-6 sm:space-y-8">
       <DashboardPageHeader
-        breadcrumbs={[{ href: "/dashboard", label: "Tableau de bord" }, { label: "Actualités" }]}
+        breadcrumbs={[
+          { href: "/dashboard", label: "Tableau de bord" },
+          { label: "Actualités" },
+        ]}
         title="Actualités"
         subtitle={headerSubtitle}
         icon={<Icon name="newspaper" size={20} />}
@@ -155,7 +185,12 @@ export default async function NewsListPage({
         }
       />
 
-      <NewsFilters totalItems={totalItems} rangeStart={rangeStart} rangeEnd={rangeEnd} authors={authorsList} />
+      <NewsFilters
+        totalItems={totalItems}
+        rangeStart={rangeStart}
+        rangeEnd={rangeEnd}
+        authors={authorsList}
+      />
 
       {news && (news as unknown[]).length > 0 ? (
         <NewsListClient items={news as unknown[]} isListView={isListView} />
@@ -166,13 +201,24 @@ export default async function NewsListPage({
               variant="icon"
               className="size-16 rounded-[24px] bg-surface-container-high shadow-inner sm:size-20 sm:rounded-[32px]"
             >
-              <Icon name="description" size={36} className="text-on-surface-variant/50" />
+              <Icon
+                name="description"
+                size={36}
+                className="text-on-surface-variant/50"
+              />
             </EmptyMedia>
-            <EmptyTitle className="text-on-surface text-xl sm:text-2xl">Aucun article pour le moment</EmptyTitle>
-            <EmptyDescription className="max-w-md text-on-surface-variant">{emptySubtitle}</EmptyDescription>
+            <EmptyTitle className="text-on-surface text-xl sm:text-2xl">
+              Aucun article pour le moment
+            </EmptyTitle>
+            <EmptyDescription className="max-w-md text-on-surface-variant">
+              {emptySubtitle}
+            </EmptyDescription>
           </EmptyHeader>
           <EmptyContent>
-            <Button asChild className="h-12 rounded-full bg-primary px-6 text-on-primary hover:bg-primary/90 sm:px-8">
+            <Button
+              asChild
+              className="h-12 rounded-full bg-primary px-6 text-on-primary hover:bg-primary/90 sm:px-8"
+            >
               <Link href="/admin/news/new">
                 <Icon name="add" size={18} />
                 Créer un article
@@ -182,7 +228,11 @@ export default async function NewsListPage({
         </Empty>
       )}
 
-      <WikiPagination totalItems={totalItems} itemsPerPage={itemsPerPage} currentPage={currentPage} />
+      <WikiPagination
+        totalItems={totalItems}
+        itemsPerPage={itemsPerPage}
+        currentPage={currentPage}
+      />
     </div>
   );
 }

@@ -25,13 +25,21 @@ const LEGAL_LINKS = [
   { href: "/legal/confidentialite", label: "Confidentialité" },
 ] as const;
 
-export function Footer({ className, onGererCookies, libelleCookies }: FooterProps = {}) {
-
+export function Footer({
+  className,
+  onGererCookies,
+  libelleCookies,
+}: FooterProps = {}) {
   return (
-    <footer className={`mt-auto w-full border-t border-outline-variant/10 bg-surface-container ${className ?? ""}`}>
+    <footer
+      className={`mt-auto w-full border-t border-outline-variant/10 bg-surface-container ${className ?? ""}`}
+    >
       <div className="mx-auto flex w-full max-w-[1800px] flex-wrap items-center justify-between gap-x-5 gap-y-2 px-4 py-3 text-xs text-on-surface-variant md:px-8">
         <p>© {currentYear} Rose Griffon</p>
-        <nav aria-label="Informations légales" className="flex flex-wrap items-center gap-x-2 gap-y-1">
+        <nav
+          aria-label="Informations légales"
+          className="flex flex-wrap items-center gap-x-2 gap-y-1"
+        >
           {LEGAL_LINKS.map(({ href, label }) => (
             <Link
               key={href}

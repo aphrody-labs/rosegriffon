@@ -24,8 +24,16 @@ const ELEMENTS = [
   { icon: "blur_on", label: "Tous", value: "" },
   { commonSprite: "fire" as SpriteCommonKey, label: "Feu", value: "Fire" },
   { commonSprite: "wind" as SpriteCommonKey, label: "Vent", value: "Wind" },
-  { commonSprite: "forest" as SpriteCommonKey, label: "Forêt", value: "Forest" },
-  { commonSprite: "mountain" as SpriteCommonKey, label: "Montagne", value: "Mountain" },
+  {
+    commonSprite: "forest" as SpriteCommonKey,
+    label: "Forêt",
+    value: "Forest",
+  },
+  {
+    commonSprite: "mountain" as SpriteCommonKey,
+    label: "Montagne",
+    value: "Mountain",
+  },
   { icon: "blur_on", label: "Néant", value: "Void" },
 ];
 
@@ -94,8 +102,11 @@ export function AuraList({
 
         {/* Element Chips - same style as SkillFilterBar */}
         <div className="flex flex-wrap gap-2">
-          {ELEMENTS.map(f => {
-            const isActive = f.value === "" ? !element : element.toLowerCase() === f.value.toLowerCase();
+          {ELEMENTS.map((f) => {
+            const isActive =
+              f.value === ""
+                ? !element
+                : element.toLowerCase() === f.value.toLowerCase();
             return (
               <button
                 key={f.value}
@@ -129,10 +140,12 @@ export function AuraList({
 
       {auras.length > 0 ? (
         <FadeInStagger className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {auras.map(aura => {
+          {auras.map((aura) => {
             const sd = aura.sheetData || {};
             const passiveRaw = sd.passiveEffect;
-            const passiveFr = passiveRaw ? translatePassiveEffect(passiveRaw) : undefined;
+            const passiveFr = passiveRaw
+              ? translatePassiveEffect(passiveRaw)
+              : undefined;
             const hissatsuName = sd.hissatsu?.name || aura.hissatsu_name;
 
             return (
@@ -141,7 +154,10 @@ export function AuraList({
                   id={aura.id}
                   name={aura.name || "Inconnu"}
                   description={aura.passive}
-                  element={{ en: aura.element || undefined, fr: aura.element || undefined }}
+                  element={{
+                    en: aura.element || undefined,
+                    fr: aura.element || undefined,
+                  }}
                   image={aura.image_url || undefined}
                   assetCode={aura.assetCode || undefined}
                   subType={aura.type || undefined}
@@ -156,11 +172,17 @@ export function AuraList({
         </FadeInStagger>
       ) : (
         <div className="py-20 text-center rounded-[32px] border border-outline-variant bg-surface-container-low border-dashed">
-          <p className="text-on-surface-variant italic">Aucun résultat trouvé.</p>
+          <p className="text-on-surface-variant italic">
+            Aucun résultat trouvé.
+          </p>
         </div>
       )}
 
-      <WikiPagination totalItems={total} itemsPerPage={perPage} currentPage={page} />
+      <WikiPagination
+        totalItems={total}
+        itemsPerPage={perPage}
+        currentPage={page}
+      />
     </div>
   );
 }

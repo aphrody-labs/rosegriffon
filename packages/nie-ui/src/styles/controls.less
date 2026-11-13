@@ -5,10 +5,12 @@
 @controls-bg-color: var(--md-sys-color-surface-container-highest);
 @controls-pressed-bg-color: color-mix(
   in srgb,
-  var(--md-sys-color-on-surface) calc(var(--md-sys-state-pressed-state-layer-opacity) * 100%),
+  var(--md-sys-color-on-surface)
+    calc(var(--md-sys-state-pressed-state-layer-opacity) * 100%),
   var(--md-sys-color-surface-container-highest)
 );
-@controls-easing: var(--md-sys-motion-duration-medium4) var(--md-sys-motion-easing-emphasized-decelerate);
+@controls-easing: var(--md-sys-motion-duration-medium4)
+  var(--md-sys-motion-easing-emphasized-decelerate);
 
 #controls {
   font-size: 1.5em;

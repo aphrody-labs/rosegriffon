@@ -16,7 +16,12 @@ path = "src/bin/nie-pkg.rs"
 
 [dependencies]
 serde = { workspace = true }
-toml = { version = "1.2.1", default-features = false, features = ["parse", "display", "serde", "std"] }
+toml = { version = "1.2.1", default-features = false, features = [
+  "parse",
+  "display",
+  "serde",
+  "std",
+] }
 blake3 = { version = "1.8.7", default-features = false, features = ["std"] }
 thiserror = { workspace = true, features = ["std"] }
 clap = { workspace = true }

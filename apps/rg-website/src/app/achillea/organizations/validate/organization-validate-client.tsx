@@ -5,11 +5,22 @@ import Link from "@/components/shared/Link";
 import { useAchilleaAuth, createAchilleaClient } from "@/lib/achillea";
 import type { OrganizationDTO } from "@rosegriffon/achillea-types";
 import { OrganizationState } from "@rosegriffon/achillea-types/enums/organization";
-import { Building2, ArrowLeft, ShieldAlert, Loader2, ChevronRight } from "lucide-react";
+import {
+  Building2,
+  ArrowLeft,
+  ShieldAlert,
+  Loader2,
+  ChevronRight,
+} from "lucide-react";
 import { signalerException } from "@/lib/achillea/signaler";
 
 export default function OrganizationsPendingValidationPage() {
-  const { user, isAuthenticated, isLoading: authLoading, login } = useAchilleaAuth();
+  const {
+    user,
+    isAuthenticated,
+    isLoading: authLoading,
+    login,
+  } = useAchilleaAuth();
   const [orgs, setOrgs] = useState<OrganizationDTO[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -20,7 +31,9 @@ export default function OrganizationsPendingValidationPage() {
     user?.role,
   ]);
   if (
-    [authLoading, isAuthenticated, user?.role].some((value, position) => !Object.is(value, requestIdentity1[position]))
+    [authLoading, isAuthenticated, user?.role].some(
+      (value, position) => !Object.is(value, requestIdentity1[position]),
+    )
   ) {
     setRequestIdentity1([authLoading, isAuthenticated, user?.role]);
     (() => {
@@ -37,18 +50,25 @@ export default function OrganizationsPendingValidationPage() {
 
     client.organizations
       .list({ page: 1, pagination: 50, state: OrganizationState.Pending })
-      .then(res => {
+      .then((res) => {
         if (cancelled) return;
         if (res.ok) {
           setOrgs(res.value.data);
         } else {
-          setLoadError("Impossible de charger la file de validation des organisations.");
-          signalerException("organizations/validate", new Error(`${res.kind}: ${res.detail}`));
+          setLoadError(
+            "Impossible de charger la file de validation des organisations.",
+          );
+          signalerException(
+            "organizations/validate",
+            new Error(`${res.kind}: ${res.detail}`),
+          );
         }
       })
-      .catch(cause => {
+      .catch((cause) => {
         if (cancelled) return;
-        setLoadError("Impossible de charger la file de validation des organisations.");
+        setLoadError(
+          "Impossible de charger la file de validation des organisations.",
+        );
         signalerException("organizations/validate", cause);
       })
       .finally(() => {
@@ -74,19 +94,25 @@ export default function OrganizationsPendingValidationPage() {
           <span className="p-2 rounded-lg bg-warning/10 text-warning border border-warning/20">
             <Building2 className="w-5 h-5" />
           </span>
-          <h1 className="text-3xl font-bold tracking-tight">Organisations en Attente de Revue</h1>
+          <h1 className="text-3xl font-bold tracking-tight">
+            Organisations en Attente de Revue
+          </h1>
         </div>
       </div>
 
       {authLoading ? (
         <div className="py-20 text-center space-y-3">
           <Loader2 className="w-8 h-8 animate-spin mx-auto text-muted-foreground" />
-          <p className="text-sm text-muted-foreground">Vérification des droits…</p>
+          <p className="text-sm text-muted-foreground">
+            Vérification des droits…
+          </p>
         </div>
       ) : !isAuthenticated ? (
         <div className="py-16 text-center space-y-4">
           <ShieldAlert className="w-12 h-12 text-warning mx-auto" />
-          <p className="text-sm text-muted-foreground">Connectez-vous pour accéder à cette file de validation.</p>
+          <p className="text-sm text-muted-foreground">
+            Connectez-vous pour accéder à cette file de validation.
+          </p>
           <button
             type="button"
             onClick={() => login("/achillea/organizations/validate")}
@@ -98,12 +124,16 @@ export default function OrganizationsPendingValidationPage() {
       ) : (user?.role ?? 0) < 2 ? (
         <div className="py-16 text-center space-y-3">
           <ShieldAlert className="w-12 h-12 text-warning mx-auto" />
-          <p className="text-sm text-muted-foreground">Cette file est réservée aux administrateurs.</p>
+          <p className="text-sm text-muted-foreground">
+            Cette file est réservée aux administrateurs.
+          </p>
         </div>
       ) : loading ? (
         <div className="py-20 text-center space-y-3">
           <Loader2 className="w-8 h-8 animate-spin mx-auto text-muted-foreground" />
-          <p className="text-sm text-muted-foreground">Chargement des organisations...</p>
+          <p className="text-sm text-muted-foreground">
+            Chargement des organisations...
+          </p>
         </div>
       ) : loadError ? (
         <div
@@ -125,11 +155,16 @@ export default function OrganizationsPendingValidationPage() {
         </div>
       ) : (
         <div className="divide-y divide-border border border-border rounded-2xl bg-card overflow-hidden">
-          {orgs.map(org => (
-            <div key={org.id ?? org.name} className="p-4 flex items-center justify-between gap-4">
+          {orgs.map((org) => (
+            <div
+              key={org.id ?? org.name}
+              className="p-4 flex items-center justify-between gap-4"
+            >
               <div>
                 <div className="font-bold text-sm">{org.name}</div>
-                <div className="text-xs text-muted-foreground mt-0.5">{org.description}</div>
+                <div className="text-xs text-muted-foreground mt-0.5">
+                  {org.description}
+                </div>
               </div>
               <Link
                 href={`/achillea/admins/dashboard/organizations/validate/${org.id}`}

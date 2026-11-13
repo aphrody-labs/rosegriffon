@@ -23,9 +23,11 @@ export function DemoSkillsSection({
 }) {
   return (
     <section className="space-y-3">
-      <h2 className="text-fluid-headline-sm font-bold text-on-surface">Techniques ({skills.length})</h2>
+      <h2 className="text-fluid-headline-sm font-bold text-on-surface">
+        Techniques ({skills.length})
+      </h2>
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-        {skills.map(sk => {
+        {skills.map((sk) => {
           const active = sk.has3d && sk.eventIdName === activeEventId;
           return (
             <article
@@ -64,12 +66,16 @@ export function DemoSkillsSection({
                 </div>
                 <div>
                   <dt className="inline font-medium">TP </dt>
-                  <dd className="inline tabular-nums text-on-surface">{sk.consumeTp}</dd>
+                  <dd className="inline tabular-nums text-on-surface">
+                    {sk.consumeTp}
+                  </dd>
                 </div>
                 {sk.learnLevel > 0 && (
                   <div>
                     <dt className="inline font-medium">Niv. </dt>
-                    <dd className="inline tabular-nums text-on-surface">{sk.learnLevel}</dd>
+                    <dd className="inline tabular-nums text-on-surface">
+                      {sk.learnLevel}
+                    </dd>
                   </div>
                 )}
               </dl>
@@ -79,7 +85,8 @@ export function DemoSkillsSection({
                   onClick={() => onPlayCutin(sk)}
                   className="inline-flex items-center gap-1 rounded-full bg-primary px-3 py-1 text-xs font-medium text-on-primary hover:opacity-90"
                 >
-                  <Play className="size-3" /> {active ? "Dans la scène" : "Jouer dans la scène"}
+                  <Play className="size-3" />{" "}
+                  {active ? "Dans la scène" : "Jouer dans la scène"}
                 </button>
               ) : (
                 <p className="text-[11px] text-on-surface-variant/60">

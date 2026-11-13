@@ -30,11 +30,15 @@ import { CLE_REGLAGE_TWEETS, type FiltreTweets } from "../../lib/tweets-format";
  * réalité de la colonne, plutôt que de choisir laquelle mentir.
  */
 export const ROLES_ASSIGNABLES: readonly string[] = Object.freeze(
-  [...new Set<string>([...ALL_ROLES, "member"])].toSorted((a, b) => a.localeCompare(b, "fr")),
+  [...new Set<string>([...ALL_ROLES, "member"])].toSorted((a, b) =>
+    a.localeCompare(b, "fr"),
+  ),
 );
 
 /** Vrai si la valeur est un rôle que l'on accepte d'écrire dans `profiles.role`. */
-export function estRoleAssignable(valeur: unknown): valeur is RgRole | "member" {
+export function estRoleAssignable(
+  valeur: unknown,
+): valeur is RgRole | "member" {
   return typeof valeur === "string" && ROLES_ASSIGNABLES.includes(valeur);
 }
 
@@ -43,7 +47,10 @@ export const STATUTS_ARTICLE = ["published", "draft", "archived"] as const;
 export type StatutArticle = (typeof STATUTS_ARTICLE)[number];
 
 export function estStatutArticle(valeur: unknown): valeur is StatutArticle {
-  return typeof valeur === "string" && (STATUTS_ARTICLE as readonly string[]).includes(valeur);
+  return (
+    typeof valeur === "string" &&
+    (STATUTS_ARTICLE as readonly string[]).includes(valeur)
+  );
 }
 
 /**
@@ -64,7 +71,15 @@ export const EQUIPES_RG = [
 ] as const;
 
 /** Les sept jours, index `stream_schedules.day_of_week` (0 = dimanche). */
-export const JOURS_SEMAINE = ["Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"] as const;
+export const JOURS_SEMAINE = [
+  "Dimanche",
+  "Lundi",
+  "Mardi",
+  "Mercredi",
+  "Jeudi",
+  "Vendredi",
+  "Samedi",
+] as const;
 
 /**
  * Lit une date saisie à la main.
@@ -90,7 +105,10 @@ export function analyserDate(saisie: unknown): Date | null {
   // On n'accepte que les formes ancrées sur une date ISO : `01/05/2026` est
   // ambigu (jour/mois ou mois/jour), et `new Date` le résout différemment
   // selon la locale du moteur.
-  const forme = /^(\d{4})-(\d{2})-(\d{2})([T ]\d{2}:\d{2}(:\d{2})?(\.\d+)?(Z|[+-]\d{2}:?\d{2})?)?$/.exec(propre);
+  const forme =
+    /^(\d{4})-(\d{2})-(\d{2})([T ]\d{2}:\d{2}(:\d{2})?(\.\d+)?(Z|[+-]\d{2}:?\d{2})?)?$/.exec(
+      propre,
+    );
   if (!forme) {
     return null;
   }
@@ -136,7 +154,10 @@ export function analyserHeure(saisie: unknown): string | null {
 /** Vrai si la valeur a la forme d'un UUID (les clés primaires du site). */
 export function estUuid(valeur: unknown): boolean {
   return (
-    typeof valeur === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(valeur.trim())
+    typeof valeur === "string" &&
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+      valeur.trim(),
+    )
   );
 }
 
@@ -168,12 +189,17 @@ export type ReponseConfirmation = "oui" | "non";
  * largement, et reste unique même si deux personnes lancent la même action à la
  * même seconde.
  */
-export function construireIdConfirmation(reponse: ReponseConfirmation, graine: string): string {
+export function construireIdConfirmation(
+  reponse: ReponseConfirmation,
+  graine: string,
+): string {
   return `${PREFIXE_CONFIRMATION}|${reponse}|${graine}`;
 }
 
 /** Décompose un identifiant de bouton. Rend `null` sur tout ce qui n'est pas à nous. */
-export function analyserIdConfirmation(id: unknown): { reponse: ReponseConfirmation; graine: string } | null {
+export function analyserIdConfirmation(
+  id: unknown,
+): { reponse: ReponseConfirmation; graine: string } | null {
   if (typeof id !== "string") {
     return null;
   }
@@ -182,7 +208,11 @@ export function analyserIdConfirmation(id: unknown): { reponse: ReponseConfirmat
     return null;
   }
   const [, reponse, graine] = morceaux;
-  if ((reponse !== "oui" && reponse !== "non") || !graine || graine.length === 0) {
+  if (
+    (reponse !== "oui" && reponse !== "non") ||
+    !graine ||
+    graine.length === 0
+  ) {
     return null;
   }
   return { reponse, graine };
@@ -194,7 +224,11 @@ export function analyserIdConfirmation(id: unknown): { reponse: ReponseConfirmat
  * Écrit « avant → après » plutôt que le seul « après » : un journal qui ne dit
  * pas d'où l'on vient ne permet pas de revenir en arrière.
  */
-export function decrireChangement(avant: unknown, apres: unknown, limite = 120): string {
+export function decrireChangement(
+  avant: unknown,
+  apres: unknown,
+  limite = 120,
+): string {
   return `\`${bornerValeur(avant, limite)}\` → \`${bornerValeur(apres, limite)}\``;
 }
 
@@ -286,7 +320,10 @@ export function analyserValeurReglage(saisie: string): ValeurReglage {
  * LEVEL5_times, Azalee_IE, rose_griffon, relevé du 13/8/2026) disparaissent
  * sans un mot. La forme est donc vérifiée AVANT l'écriture, pas signalée après.
  */
-export function refusValeurReglage(cle: string, valeur: unknown): string | null {
+export function refusValeurReglage(
+  cle: string,
+  valeur: unknown,
+): string | null {
   if (cle !== CLE_REGLAGE_TWEETS) {
     return null;
   }
@@ -317,7 +354,10 @@ export function refusValeurReglage(cle: string, valeur: unknown): string | null 
  * clair (`http://`) fait rejeter l'embed ENTIER par l'API, donc une annonce
  * perdue plutôt qu'une image manquante.
  */
-export function urlIllustrationAbsolue(url: string | null | undefined, origine: string): string | null {
+export function urlIllustrationAbsolue(
+  url: string | null | undefined,
+  origine: string,
+): string | null {
   const propre = url?.trim() ?? "";
   if (propre.length === 0) {
     return null;
@@ -370,64 +410,100 @@ function clefCompte(valeur: string): string {
  * Elle refuse aussi silencieusement les doublons : ajouter `@Level5Hub` quand
  * `level5hub` est déjà suivi ne produit aucun changement, donc aucune écriture.
  */
-export function construirePatchVeille(avant: FiltreTweets, modifications: ModificationsVeille): PatchVeille {
+export function construirePatchVeille(
+  avant: FiltreTweets,
+  modifications: ModificationsVeille,
+): PatchVeille {
   const patch: Partial<FiltreTweets> = {};
   const changements: string[] = [];
 
-  if (modifications.actif !== undefined && modifications.actif !== avant.actif) {
+  if (
+    modifications.actif !== undefined &&
+    modifications.actif !== avant.actif
+  ) {
     patch.actif = modifications.actif;
     changements.push(
       `État : ${decrireChangement(avant.actif ? "active" : "coupée", modifications.actif ? "active" : "coupée")}`,
     );
   }
 
-  if (modifications.salon !== undefined && modifications.salon !== avant.salon) {
+  if (
+    modifications.salon !== undefined &&
+    modifications.salon !== avant.salon
+  ) {
     patch.salon = modifications.salon;
-    changements.push(`Salon : ${decrireChangement(avant.salon, modifications.salon)}`);
+    changements.push(
+      `Salon : ${decrireChangement(avant.salon, modifications.salon)}`,
+    );
   }
 
-  if (modifications.maxParLot !== undefined && modifications.maxParLot !== avant.max_par_lot) {
+  if (
+    modifications.maxParLot !== undefined &&
+    modifications.maxParLot !== avant.max_par_lot
+  ) {
     patch.max_par_lot = modifications.maxParLot;
-    changements.push(`Seuil de détail : ${decrireChangement(avant.max_par_lot, modifications.maxParLot)}`);
+    changements.push(
+      `Seuil de détail : ${decrireChangement(avant.max_par_lot, modifications.maxParLot)}`,
+    );
   }
 
   let comptes = [...avant.comptes];
   if (modifications.ajouter) {
     const propre = modifications.ajouter.trim().replace(/^@/, "");
-    if (propre.length > 0 && !comptes.some(compte => clefCompte(compte) === clefCompte(propre))) {
+    if (
+      propre.length > 0 &&
+      !comptes.some((compte) => clefCompte(compte) === clefCompte(propre))
+    ) {
       comptes.push(propre);
       changements.push(`Compte suivi en plus : \`@${propre}\``);
     }
   }
   if (modifications.retirer) {
     const cible = clefCompte(modifications.retirer);
-    const restants = comptes.filter(compte => clefCompte(compte) !== cible);
+    const restants = comptes.filter((compte) => clefCompte(compte) !== cible);
     if (restants.length !== comptes.length) {
       comptes = restants;
-      changements.push(`Compte retiré du suivi : \`@${modifications.retirer.trim().replace(/^@/, "")}\``);
+      changements.push(
+        `Compte retiré du suivi : \`@${modifications.retirer.trim().replace(/^@/, "")}\``,
+      );
     }
   }
-  if (comptes.length !== avant.comptes.length || comptes.some((c, i) => c !== avant.comptes[i])) {
+  if (
+    comptes.length !== avant.comptes.length ||
+    comptes.some((c, i) => c !== avant.comptes[i])
+  ) {
     patch.comptes = comptes;
   }
 
   let exclues = [...avant.categories_exclues];
   if (modifications.exclure) {
     const propre = modifications.exclure.trim();
-    if (propre.length > 0 && !exclues.some(categorie => categorie.toLowerCase() === propre.toLowerCase())) {
+    if (
+      propre.length > 0 &&
+      !exclues.some(
+        (categorie) => categorie.toLowerCase() === propre.toLowerCase(),
+      )
+    ) {
       exclues.push(propre);
       changements.push(`Catégorie exclue en plus : \`${propre}\``);
     }
   }
   if (modifications.inclure) {
     const cible = modifications.inclure.trim().toLowerCase();
-    const restantes = exclues.filter(categorie => categorie.toLowerCase() !== cible);
+    const restantes = exclues.filter(
+      (categorie) => categorie.toLowerCase() !== cible,
+    );
     if (restantes.length !== exclues.length) {
       exclues = restantes;
-      changements.push(`Catégorie de nouveau annoncée : \`${modifications.inclure.trim()}\``);
+      changements.push(
+        `Catégorie de nouveau annoncée : \`${modifications.inclure.trim()}\``,
+      );
     }
   }
-  if (exclues.length !== avant.categories_exclues.length || exclues.some((c, i) => c !== avant.categories_exclues[i])) {
+  if (
+    exclues.length !== avant.categories_exclues.length ||
+    exclues.some((c, i) => c !== avant.categories_exclues[i])
+  ) {
     patch.categories_exclues = exclues;
   }
 
@@ -484,7 +560,10 @@ export interface ResumeSynchronisation {
  * Le plancher de 20 évite qu'un serveur minuscule ne déclenche l'alerte au
  * moindre départ réel.
  */
-export function departSuspect(nbPartis: number, nbPresentsEnBase: number): boolean {
+export function departSuspect(
+  nbPartis: number,
+  nbPresentsEnBase: number,
+): boolean {
   if (nbPartis <= 0) {
     return false;
   }
@@ -495,7 +574,7 @@ export function comparerMembres(
   enBase: readonly EtatMembreEnBase[],
   presents: Iterable<string>,
 ): ResumeSynchronisation {
-  const connus = new Map(enBase.map(ligne => [ligne.discordId, ligne.parti]));
+  const connus = new Map(enBase.map((ligne) => [ligne.discordId, ligne.parti]));
   const surLeServeur = new Set(presents);
 
   const ajoutes: string[] = [];
@@ -532,21 +611,27 @@ export function comparerMembres(
  * donc l'anglais en base et on n'affiche que du français, au lieu de rendre
  * « draft » brut dans un salon comme le faisait `/rg-chronique-admin list`.
  */
-export const LIBELLES_STATUT_ARTICLE: Readonly<Record<StatutArticle, string>> = Object.freeze({
-  published: "publié",
-  draft: "brouillon",
-  archived: "archivé",
-});
+export const LIBELLES_STATUT_ARTICLE: Readonly<Record<StatutArticle, string>> =
+  Object.freeze({
+    published: "publié",
+    draft: "brouillon",
+    archived: "archivé",
+  });
 
 /** Pastille de l'état d'un article. Le libellé reste lisible sans la couleur. */
-export const BADGES_STATUT_ARTICLE: Readonly<Record<StatutArticle, string>> = Object.freeze({
-  published: "🟢",
-  draft: "📝",
-  archived: "📦",
-});
+export const BADGES_STATUT_ARTICLE: Readonly<Record<StatutArticle, string>> =
+  Object.freeze({
+    published: "🟢",
+    draft: "📝",
+    archived: "📦",
+  });
 
-export function libelleStatutArticle(statut: string | null | undefined): string {
-  return estStatutArticle(statut) ? LIBELLES_STATUT_ARTICLE[statut] : "état inconnu";
+export function libelleStatutArticle(
+  statut: string | null | undefined,
+): string {
+  return estStatutArticle(statut)
+    ? LIBELLES_STATUT_ARTICLE[statut]
+    : "état inconnu";
 }
 
 export function badgeStatutArticle(statut: string | null | undefined): string {
@@ -577,18 +662,26 @@ export const STATUTS_CRENEAU = ["active", "inactive", "coming_soon"] as const;
 export type StatutCreneau = (typeof STATUTS_CRENEAU)[number];
 
 export function estStatutCreneau(valeur: unknown): valeur is StatutCreneau {
-  return typeof valeur === "string" && (STATUTS_CRENEAU as readonly string[]).includes(valeur);
+  return (
+    typeof valeur === "string" &&
+    (STATUTS_CRENEAU as readonly string[]).includes(valeur)
+  );
 }
 
 /** Libellés repris tels quels de l'écran d'administration du site. */
-export const LIBELLES_STATUT_CRENEAU: Readonly<Record<StatutCreneau, string>> = Object.freeze({
-  active: "Actif",
-  inactive: "Inactif",
-  coming_soon: "À venir",
-});
+export const LIBELLES_STATUT_CRENEAU: Readonly<Record<StatutCreneau, string>> =
+  Object.freeze({
+    active: "Actif",
+    inactive: "Inactif",
+    coming_soon: "À venir",
+  });
 
-export function libelleStatutCreneau(statut: string | null | undefined): string {
-  return estStatutCreneau(statut) ? LIBELLES_STATUT_CRENEAU[statut] : "état inconnu";
+export function libelleStatutCreneau(
+  statut: string | null | undefined,
+): string {
+  return estStatutCreneau(statut)
+    ? LIBELLES_STATUT_CRENEAU[statut]
+    : "état inconnu";
 }
 
 /**
@@ -613,7 +706,12 @@ export const CHOIX_STATUT_CRENEAU = [
 
 /** Vrai si la valeur est un index de jour exploitable par `day_of_week`. */
 export function estJourSemaine(valeur: unknown): valeur is number {
-  return typeof valeur === "number" && Number.isInteger(valeur) && valeur >= 0 && valeur <= 6;
+  return (
+    typeof valeur === "number" &&
+    Number.isInteger(valeur) &&
+    valeur >= 0 &&
+    valeur <= 6
+  );
 }
 
 export function libelleJourSemaine(jour: unknown): string {
@@ -672,7 +770,9 @@ export interface ChampTextuel {
 }
 
 /** Lit une option textuelle facultative en distinguant « absente » de « à vider ». */
-export function lireChampTextuel(saisie: string | null | undefined): ChampTextuel {
+export function lireChampTextuel(
+  saisie: string | null | undefined,
+): ChampTextuel {
   if (typeof saisie !== "string") {
     return { fourni: false, valeur: null };
   }
@@ -773,7 +873,10 @@ export const COLONNES_PROFIL_AFFICHABLES: readonly string[] = Object.freeze([
 
 /** Vrai si cette colonne de `profiles` relève de la vie privée. */
 export function estColonneProfilPrivee(nom: unknown): boolean {
-  return typeof nom === "string" && COLONNES_PROFIL_PRIVEES.includes(nom.trim().toLowerCase());
+  return (
+    typeof nom === "string" &&
+    COLONNES_PROFIL_PRIVEES.includes(nom.trim().toLowerCase())
+  );
 }
 
 /** Le strict nécessaire pour nommer un profil dans une liste. */
@@ -805,7 +908,10 @@ export function nomAffichable(profil: ProfilAffichable): string {
  * celui de la base. On réutilise l'échappement déjà testé de `/staff`.
  */
 export function ligneProfil(profil: ProfilAffichable): string {
-  const morceaux = [`\`${profil.role ?? "user"}\``, `**${echapperMarkdown(bornerValeur(nomAffichable(profil), 40))}**`];
+  const morceaux = [
+    `\`${profil.role ?? "user"}\``,
+    `**${echapperMarkdown(bornerValeur(nomAffichable(profil), 40))}**`,
+  ];
   if (profil.username) {
     morceaux.push(`@${echapperMarkdown(bornerValeur(profil.username, 32))}`);
   }
@@ -827,7 +933,9 @@ export function ligneProfil(profil: ProfilAffichable): string {
  * obtiendrait le contrôle du site. Deux comptes le portent en production ;
  * ils se gèrent à la main, en base.
  */
-export const ROLES_INTOUCHABLES: readonly string[] = Object.freeze(["superadmin"]);
+export const ROLES_INTOUCHABLES: readonly string[] = Object.freeze([
+  "superadmin",
+]);
 
 export function estRoleIntouchable(role: unknown): boolean {
   return typeof role === "string" && ROLES_INTOUCHABLES.includes(role);
@@ -845,11 +953,13 @@ export function estRoleIntouchable(role: unknown): boolean {
  * moment d'écrire.
  */
 export const ROLES_ATTRIBUABLES: readonly string[] = Object.freeze(
-  ROLES_ASSIGNABLES.filter(role => !estRoleIntouchable(role)),
+  ROLES_ASSIGNABLES.filter((role) => !estRoleIntouchable(role)),
 );
 
 /** Autorisation accordée, ou refusée avec sa raison — jamais un simple booléen. */
-export type Verdict = { readonly autorise: true } | { readonly autorise: false; readonly raison: string };
+export type Verdict =
+  | { readonly autorise: true }
+  | { readonly autorise: false; readonly raison: string };
 
 /**
  * Décide si une action d'administration sur un profil est recevable.
@@ -922,18 +1032,19 @@ export function verifierActionSurProfil(params: {
  * Le bot insérait donc une ligne dont le `team_name` divergeait de ses dix
  * voisines. On écrit la valeur de la base, et on affiche la même partout.
  */
-export const NOM_EQUIPE_EN_BASE: Readonly<Record<string, string>> = Object.freeze({
-  bureauteam: "Bureau de l'Association",
-  assoteam: "Membres de l'Association",
-  loreteam: "Équipe Lore",
-  dessinateurteam: "Équipe Dessinateur",
-  productionteam: "Équipe Production",
-  socialteam: "Équipe Réseaux",
-  achilleateam: "Équipe Achilléa",
-  azaleeteam: "Équipe Azalée",
-  mediationteam: "Cellule de Médiation",
-  collabteam: "Partenaires & Collaborateurs",
-});
+export const NOM_EQUIPE_EN_BASE: Readonly<Record<string, string>> =
+  Object.freeze({
+    bureauteam: "Bureau de l'Association",
+    assoteam: "Membres de l'Association",
+    loreteam: "Équipe Lore",
+    dessinateurteam: "Équipe Dessinateur",
+    productionteam: "Équipe Production",
+    socialteam: "Équipe Réseaux",
+    achilleateam: "Équipe Achilléa",
+    azaleeteam: "Équipe Azalée",
+    mediationteam: "Cellule de Médiation",
+    collabteam: "Partenaires & Collaborateurs",
+  });
 
 /** Libellé d'une équipe ; on retombe sur l'identifiant brut si on ne le connaît pas. */
 export function libelleEquipeRg(valeur: unknown): string {
@@ -945,7 +1056,9 @@ export function libelleEquipeRg(valeur: unknown): string {
 
 /** Vrai si l'identifiant correspond à l'une des dix équipes. */
 export function estEquipeRg(valeur: unknown): boolean {
-  return typeof valeur === "string" && Object.hasOwn(NOM_EQUIPE_EN_BASE, valeur);
+  return (
+    typeof valeur === "string" && Object.hasOwn(NOM_EQUIPE_EN_BASE, valeur)
+  );
 }
 
 // ─── Validation des champs d'un membre d'équipe ─────────────────────────────
@@ -967,17 +1080,25 @@ export const LIMITES_MEMBRE_EQUIPE = Object.freeze({
 
 /** Valeur validée, ou refus motivé. */
 export type ResultatValidation<T> =
-  { readonly ok: true; readonly valeur: T } | { readonly ok: false; readonly raison: string };
+  | { readonly ok: true; readonly valeur: T }
+  | { readonly ok: false; readonly raison: string };
 
 /** Nom ou rôle affiché d'un membre : obligatoire, borné, sans espaces parasites. */
-export function validerTexteMembre(champ: "nom" | "role", saisie: unknown): ResultatValidation<string> {
+export function validerTexteMembre(
+  champ: "nom" | "role",
+  saisie: unknown,
+): ResultatValidation<string> {
   const propre = typeof saisie === "string" ? saisie.trim() : "";
-  const limite = champ === "nom" ? LIMITES_MEMBRE_EQUIPE.nom : LIMITES_MEMBRE_EQUIPE.role;
+  const limite =
+    champ === "nom" ? LIMITES_MEMBRE_EQUIPE.nom : LIMITES_MEMBRE_EQUIPE.role;
   if (propre.length === 0) {
     return { ok: false, raison: `Le ${champ} est obligatoire.` };
   }
   if (propre.length > limite) {
-    return { ok: false, raison: `Le ${champ} ne doit pas dépasser ${limite} caractères.` };
+    return {
+      ok: false,
+      raison: `Le ${champ} ne doit pas dépasser ${limite} caractères.`,
+    };
   }
   return { ok: true, valeur: propre };
 }
@@ -987,7 +1108,10 @@ export function validerTexteMembre(champ: "nom" | "role", saisie: unknown): Resu
  * c'est la convention du formulaire du site, et sans elle on ne peut jamais
  * retirer un lien devenu mort.
  */
-export function validerUrlMembre(champ: "image" | "lien", saisie: unknown): ResultatValidation<string | null> {
+export function validerUrlMembre(
+  champ: "image" | "lien",
+  saisie: unknown,
+): ResultatValidation<string | null> {
   if (saisie === null || saisie === undefined) {
     return { ok: true, valeur: null };
   }
@@ -995,24 +1119,39 @@ export function validerUrlMembre(champ: "image" | "lien", saisie: unknown): Resu
   if (propre.length === 0) {
     return { ok: true, valeur: null };
   }
-  const limite = champ === "image" ? LIMITES_MEMBRE_EQUIPE.image : LIMITES_MEMBRE_EQUIPE.lien;
+  const limite =
+    champ === "image"
+      ? LIMITES_MEMBRE_EQUIPE.image
+      : LIMITES_MEMBRE_EQUIPE.lien;
   if (propre.length > limite) {
-    return { ok: false, raison: `L'URL (${champ}) ne doit pas dépasser ${limite} caractères.` };
+    return {
+      ok: false,
+      raison: `L'URL (${champ}) ne doit pas dépasser ${limite} caractères.`,
+    };
   }
   if (!propre.startsWith("https://") && !propre.startsWith("http://")) {
-    return { ok: false, raison: `L'URL (${champ}) doit commencer par http:// ou https://.` };
+    return {
+      ok: false,
+      raison: `L'URL (${champ}) doit commencer par http:// ou https://.`,
+    };
   }
   return { ok: true, valeur: propre };
 }
 
 /** Ordre d'affichage (`display_index`, smallint). Vide = « laisse la base décider ». */
-export function validerOrdreAffichage(saisie: unknown): ResultatValidation<number | null> {
+export function validerOrdreAffichage(
+  saisie: unknown,
+): ResultatValidation<number | null> {
   if (saisie === null || saisie === undefined || saisie === "") {
     return { ok: true, valeur: null };
   }
-  const nombre = typeof saisie === "number" ? saisie : Number(String(saisie).trim());
+  const nombre =
+    typeof saisie === "number" ? saisie : Number(String(saisie).trim());
   if (!Number.isInteger(nombre)) {
-    return { ok: false, raison: "L'ordre d'affichage doit être un nombre entier." };
+    return {
+      ok: false,
+      raison: "L'ordre d'affichage doit être un nombre entier.",
+    };
   }
   if (nombre < 0 || nombre > LIMITES_MEMBRE_EQUIPE.ordreMax) {
     return {
@@ -1024,7 +1163,9 @@ export function validerOrdreAffichage(saisie: unknown): ResultatValidation<numbe
 }
 
 /** Identifiant Discord facultatif : soit un flocon, soit rien. */
-export function validerIdentifiantDiscordFacultatif(saisie: unknown): ResultatValidation<string | null> {
+export function validerIdentifiantDiscordFacultatif(
+  saisie: unknown,
+): ResultatValidation<string | null> {
   if (saisie === null || saisie === undefined) {
     return { ok: true, valeur: null };
   }
@@ -1035,7 +1176,8 @@ export function validerIdentifiantDiscordFacultatif(saisie: unknown): ResultatVa
   if (!estIdentifiantDiscord(propre)) {
     return {
       ok: false,
-      raison: "L'identifiant Discord doit être composé de 17 à 20 chiffres (clic droit › Copier l'identifiant).",
+      raison:
+        "L'identifiant Discord doit être composé de 17 à 20 chiffres (clic droit › Copier l'identifiant).",
     };
   }
   return { ok: true, valeur: propre };
@@ -1058,16 +1200,24 @@ export const LIMITE_CUSTOM_ID = 100;
  * l'appelant affiche alors la page sans boutons plutôt que de voir tout son
  * message refusé par l'API.
  */
-export function encoderEtatBouton(prefixe: string, champs: Readonly<Record<string, string | number>>): string | null {
+export function encoderEtatBouton(
+  prefixe: string,
+  champs: Readonly<Record<string, string | number>>,
+): string | null {
   const morceaux = Object.entries(champs)
-    .filter(([, valeur]) => valeur !== "" && valeur !== null && valeur !== undefined)
+    .filter(
+      ([, valeur]) => valeur !== "" && valeur !== null && valeur !== undefined,
+    )
     .map(([clef, valeur]) => `${clef}=${encodeURIComponent(String(valeur))}`);
   const id = [prefixe, ...morceaux].join("|");
   return id.length > LIMITE_CUSTOM_ID ? null : id;
 }
 
 /** Relit un `custom_id` produit par `encoderEtatBouton`. `null` = pas à nous. */
-export function decoderEtatBouton(prefixe: string, id: unknown): Record<string, string> | null {
+export function decoderEtatBouton(
+  prefixe: string,
+  id: unknown,
+): Record<string, string> | null {
   if (typeof id !== "string") {
     return null;
   }
@@ -1082,7 +1232,9 @@ export function decoderEtatBouton(prefixe: string, id: unknown): Record<string, 
       return null;
     }
     try {
-      champs[morceau.slice(0, separation)] = decodeURIComponent(morceau.slice(separation + 1));
+      champs[morceau.slice(0, separation)] = decodeURIComponent(
+        morceau.slice(separation + 1),
+      );
     } catch {
       // `decodeURIComponent` lève sur un `%` isolé : un identifiant forgé ne
       // doit pas faire tomber la commande.

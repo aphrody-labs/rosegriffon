@@ -36,12 +36,18 @@ export async function POST() {
     .eq("user_id", user.id);
 
   if (erreurComptes) {
-    console.error("[patreon/disconnect] lecture des comptes liés impossible", erreurComptes);
-    return NextResponse.json({ error: "Comptes liés illisibles." }, { status: 500 });
+    console.error(
+      "[patreon/disconnect] lecture des comptes liés impossible",
+      erreurComptes,
+    );
+    return NextResponse.json(
+      { error: "Comptes liés illisibles." },
+      { status: 500 },
+    );
   }
 
   const liés = (comptes ?? []) as Array<{ provider_id: string }>;
-  if (!liés.some(compte => compte.provider_id === "patreon")) {
+  if (!liés.some((compte) => compte.provider_id === "patreon")) {
     // Rien à dissocier : la réponse reste un succès, l'état demandé est atteint.
     await supabase.from("patreon_oauth_tokens").delete().eq("user_id", user.id);
     return NextResponse.json({ ok: true });
@@ -60,15 +66,22 @@ export async function POST() {
   // jeton (ce qui permet d'interroger l'API) et le mécénat (ce qui donne la
   // remise). En laisser une seule, c'est laisser la dissociation à moitié faite.
   const resultats = await Promise.all([
-    supabase.from("account").delete().eq("user_id", user.id).eq("provider_id", "patreon"),
+    supabase
+      .from("account")
+      .delete()
+      .eq("user_id", user.id)
+      .eq("provider_id", "patreon"),
     supabase.from("patreon_oauth_tokens").delete().eq("user_id", user.id),
     supabase.from("patreon_memberships").delete().eq("user_id", user.id),
   ]);
 
-  const echec = resultats.find(resultat => resultat.error);
+  const echec = resultats.find((resultat) => resultat.error);
   if (echec?.error) {
     console.error("[patreon/disconnect] dissociation incomplète", echec.error);
-    return NextResponse.json({ error: "Dissociation incomplète." }, { status: 500 });
+    return NextResponse.json(
+      { error: "Dissociation incomplète." },
+      { status: 500 },
+    );
   }
 
   return NextResponse.json({ ok: true });

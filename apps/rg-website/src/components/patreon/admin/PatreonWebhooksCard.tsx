@@ -65,7 +65,11 @@ export function PatreonWebhooksCard() {
             }}
             disabled={loading}
           >
-            {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Rafraîchir"}
+            {loading ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              "Rafraîchir"
+            )}
           </Button>
         </div>
 
@@ -84,14 +88,17 @@ export function PatreonWebhooksCard() {
 
         {!loading && webhooks.length === 0 && !error && (
           <p className="text-sm text-muted-foreground">
-            Aucun webhook configuré sur ce compte créateur. Créer un webhook depuis le portail Patreon avec l'URL :{" "}
-            <code className="rounded bg-muted px-1 py-0.5 text-xs">/api/auth/patreon/webhook</code>
+            Aucun webhook configuré sur ce compte créateur. Créer un webhook
+            depuis le portail Patreon avec l'URL :{" "}
+            <code className="rounded bg-muted px-1 py-0.5 text-xs">
+              /api/auth/patreon/webhook
+            </code>
           </p>
         )}
 
         {webhooks.length > 0 && (
           <div className="space-y-3">
-            {webhooks.map(w => {
+            {webhooks.map((w) => {
               const failing = (w.num_consecutive_times_failed ?? 0) > 0;
               return (
                 <div
@@ -116,12 +123,16 @@ export function PatreonWebhooksCard() {
                           Actif
                         </span>
                       )}
-                      <code className="truncate text-xs text-muted-foreground">id:{w.id}</code>
+                      <code className="truncate text-xs text-muted-foreground">
+                        id:{w.id}
+                      </code>
                     </div>
-                    <p className="break-all font-mono text-sm text-foreground">{w.uri ?? "—"}</p>
+                    <p className="break-all font-mono text-sm text-foreground">
+                      {w.uri ?? "—"}
+                    </p>
                     {w.triggers && w.triggers.length > 0 && (
                       <div className="flex flex-wrap gap-1">
-                        {w.triggers.map(t => (
+                        {w.triggers.map((t) => (
                           <span
                             key={t}
                             className="rounded bg-muted px-1.5 py-0.5 text-[10px] font-mono text-muted-foreground"
@@ -134,9 +145,13 @@ export function PatreonWebhooksCard() {
                     {w.last_attempted_at && (
                       <p className="text-xs text-muted-foreground/70">
                         Dernier appel :{" "}
-                        {format(new Date(w.last_attempted_at), "d MMM yyyy 'à' HH:mm", {
-                          locale: fr,
-                        })}
+                        {format(
+                          new Date(w.last_attempted_at),
+                          "d MMM yyyy 'à' HH:mm",
+                          {
+                            locale: fr,
+                          },
+                        )}
                       </p>
                     )}
                   </div>

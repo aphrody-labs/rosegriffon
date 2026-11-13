@@ -49,7 +49,9 @@ describe("formes", () => {
 
 describe("entrées", () => {
   test("une entrée valable est nettoyée, pas réécrite", () => {
-    expect(entreePropre({ emoji: "🔵", libelle: "  Bleu  ", roleId: R.bleu })).toEqual({
+    expect(
+      entreePropre({ emoji: "🔵", libelle: "  Bleu  ", roleId: R.bleu }),
+    ).toEqual({
       description: null,
       emoji: "🔵",
       libelle: "Bleu",
@@ -96,7 +98,9 @@ describe("identifiants de composants", () => {
       messageId: "1400000000000000001",
       roleId: null,
     });
-    expect(lireComposant(identifiantBouton("1400000000000000001", R.bleu))).toEqual({
+    expect(
+      lireComposant(identifiantBouton("1400000000000000001", R.bleu)),
+    ).toEqual({
       forme: "boutons",
       messageId: "1400000000000000001",
       roleId: R.bleu,
@@ -111,7 +115,9 @@ describe("identifiants de composants", () => {
   });
 
   test("les identifiants tiennent dans la limite dure de l'API", () => {
-    expect(identifiantBouton("1400000000000000001", R.bleu).length).toBeLessThanOrEqual(LIMITES.identifiantComposant);
+    expect(
+      identifiantBouton("1400000000000000001", R.bleu).length,
+    ).toBeLessThanOrEqual(LIMITES.identifiantComposant);
   });
 });
 
@@ -188,7 +194,11 @@ describe("bascule par bouton", () => {
 
 describe("résumé", () => {
   test("il dit ce qui a changé, et le nomme", () => {
-    const resume = resumeBascule({ aPoser: [R.bleu], aRetirer: [R.rouge], tropDeChoix: false });
+    const resume = resumeBascule({
+      aPoser: [R.bleu],
+      aRetirer: [R.rouge],
+      tropDeChoix: false,
+    });
     expect(resume).toContain(`<@&${R.bleu}>`);
     expect(resume).toContain(`<@&${R.rouge}>`);
   });

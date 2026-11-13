@@ -8,7 +8,12 @@
  * les polices système du VPS, comme les cartes du bot Rose Griffon.
  */
 
-import { GlobalFonts, loadImage, type Image, type SKRSContext2D } from "@aphrody/canvas";
+import {
+  GlobalFonts,
+  loadImage,
+  type Image,
+  type SKRSContext2D,
+} from "@aphrody/canvas";
 import { rgUrl } from "@rosegriffon/config/rg-urls";
 
 const FONTS: ReadonlyArray<{ file: string; alias: string }> = [
@@ -31,7 +36,11 @@ export function registerAchilleaFonts(): void {
   fontsRegistered = true;
   for (const { file, alias } of FONTS) {
     try {
-      const path = Bun.fileURLToPath(import.meta.resolve(`@rosegriffon/assets/public/achillea/fonts/${file}`));
+      const path = Bun.fileURLToPath(
+        import.meta.resolve(
+          `@rosegriffon/assets/public/achillea/fonts/${file}`,
+        ),
+      );
       GlobalFonts.registerFromPath(path, alias);
     } catch (err) {
       console.warn(`[achillea/images] police ${file} indisponible :`, err);
@@ -70,12 +79,15 @@ export const RANK_NAMES: readonly string[] = [
   "Légendaire",
 ];
 
-const RANK_THRESHOLDS: readonly number[] = [0, 50, 200, 400, 600, 800, 1000, 1200, 1400, 1700, 2100];
+const RANK_THRESHOLDS: readonly number[] = [
+  0, 50, 200, 400, 600, 800, 1000, 1200, 1400, 1700, 2100,
+];
 
 /** Index de rang (1 à 11) d'après l'ELO. */
 export function rankFromElo(elo: number): number {
   let index = 0;
-  for (const [i, threshold] of RANK_THRESHOLDS.entries()) if (elo >= threshold) index = i + 1;
+  for (const [i, threshold] of RANK_THRESHOLDS.entries())
+    if (elo >= threshold) index = i + 1;
   return Math.min(Math.max(index, 1), 11);
 }
 
@@ -104,7 +116,14 @@ export function hexWithAlpha(hex: string, alpha: number): string {
   return /^#[0-9a-f]{6}$/i.test(hex) ? `${hex}${a}` : hex;
 }
 
-export function roundRect(ctx: SKRSContext2D, x: number, y: number, w: number, h: number, r: number): void {
+export function roundRect(
+  ctx: SKRSContext2D,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+  r: number,
+): void {
   ctx.beginPath();
   ctx.moveTo(x + r, y);
   ctx.lineTo(x + w - r, y);
@@ -119,7 +138,12 @@ export function roundRect(ctx: SKRSContext2D, x: number, y: number, w: number, h
 }
 
 /** Hôtes autorisés pour les images distantes (avatars, logos de clan). */
-const REMOTE_IMAGE_HOSTS = [/(^|\.)discordapp\.com$/, /(^|\.)discordapp\.net$/, /(^|\.)supabase\.co$/, /(^|\.)rosegriffon\.fr$/];
+const REMOTE_IMAGE_HOSTS = [
+  /(^|\.)discordapp\.com$/,
+  /(^|\.)discordapp\.net$/,
+  /(^|\.)supabase\.co$/,
+  /(^|\.)rosegriffon\.fr$/,
+];
 const MAX_REMOTE_IMAGE_BYTES = 8 * 1024 * 1024;
 
 /**
@@ -127,7 +151,9 @@ const MAX_REMOTE_IMAGE_BYTES = 8 * 1024 * 1024;
  * sont suivis : l'URL vient de la base (avatar, logo saisi par un joueur), un
  * hôte arbitraire ferait de l'API un relais de requêtes (SSRF).
  */
-export async function fetchImage(url: string | null | undefined): Promise<Image | null> {
+export async function fetchImage(
+  url: string | null | undefined,
+): Promise<Image | null> {
   if (!url) return null;
   let parsed: URL;
   try {
@@ -135,16 +161,24 @@ export async function fetchImage(url: string | null | undefined): Promise<Image 
   } catch {
     return null;
   }
-  const extraHost = (process.env.ACHILLEA_IMAGE_HOSTS ?? "").split(",").map(h => h.trim()).filter(Boolean);
+  const extraHost = (process.env.ACHILLEA_IMAGE_HOSTS ?? "")
+    .split(",")
+    .map((h) => h.trim())
+    .filter(Boolean);
   const allowed =
     parsed.protocol === "https:" &&
-    (REMOTE_IMAGE_HOSTS.some(re => re.test(parsed.hostname)) || extraHost.includes(parsed.hostname));
+    (REMOTE_IMAGE_HOSTS.some((re) => re.test(parsed.hostname)) ||
+      extraHost.includes(parsed.hostname));
   if (!allowed) return null;
   try {
-    const response = await fetch(parsed, { signal: AbortSignal.timeout(5000), redirect: "error" });
+    const response = await fetch(parsed, {
+      signal: AbortSignal.timeout(5000),
+      redirect: "error",
+    });
     if (!response.ok) return null;
     const bytes = new Uint8Array(await response.arrayBuffer());
-    if (bytes.byteLength === 0 || bytes.byteLength > MAX_REMOTE_IMAGE_BYTES) return null;
+    if (bytes.byteLength === 0 || bytes.byteLength > MAX_REMOTE_IMAGE_BYTES)
+      return null;
     return await loadImage(bytes);
   } catch {
     return null;
@@ -190,6 +224,8 @@ export function websiteHost(): string {
   }
 }
 
-export const PNG_SIGNATURE = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a] as const;
+export const PNG_SIGNATURE = [
+  0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,
+] as const;
 
 export class ImageNotFoundError extends Error {}

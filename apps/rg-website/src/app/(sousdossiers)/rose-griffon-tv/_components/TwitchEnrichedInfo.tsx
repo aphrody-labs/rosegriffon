@@ -1,8 +1,23 @@
 "use client";
 
-import { Badge, Card, CardContent, Tabs, TabsContent, TabsList, TabsTrigger } from "@rosegriffon/ui";
+import {
+  Badge,
+  Card,
+  CardContent,
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@rosegriffon/ui";
 import { motion } from "motion/react";
-import { Calendar, Clock, Eye, Gamepad2, TrendingUp, Users } from "lucide-react";
+import {
+  Calendar,
+  Clock,
+  Eye,
+  Gamepad2,
+  TrendingUp,
+  Users,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 
@@ -34,7 +49,9 @@ export function TwitchEnrichedInfo() {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
-          <p className="text-muted-foreground mb-2">Impossible de charger les données Twitch</p>
+          <p className="text-muted-foreground mb-2">
+            Impossible de charger les données Twitch
+          </p>
           <button
             onClick={() => window.location.reload()}
             className="text-sm underline"
@@ -94,49 +111,87 @@ export function TwitchEnrichedInfo() {
     <div className="space-y-6">
       {/* Stats Overview */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-          <Card className="border-2" style={{ borderColor: `${colors.primary}40` }}>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+        >
+          <Card
+            className="border-2"
+            style={{ borderColor: `${colors.primary}40` }}
+          >
             <CardContent className="p-6">
               <div className="flex items-center gap-4">
-                <div className="p-3 rounded-full" style={{ backgroundColor: `${colors.primary}20` }}>
+                <div
+                  className="p-3 rounded-full"
+                  style={{ backgroundColor: `${colors.primary}20` }}
+                >
                   <Users className="size-6" style={{ color: colors.primary }} />
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Abonnés</p>
-                  <p className="text-2xl font-bold">{formatViews(twitchData.followers)}</p>
+                  <p className="text-2xl font-bold">
+                    {formatViews(twitchData.followers)}
+                  </p>
                 </div>
               </div>
             </CardContent>
           </Card>
         </motion.div>
 
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-          <Card className="border-2" style={{ borderColor: `${colors.primary}40` }}>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+        >
+          <Card
+            className="border-2"
+            style={{ borderColor: `${colors.primary}40` }}
+          >
             <CardContent className="p-6">
               <div className="flex items-center gap-4">
-                <div className="p-3 rounded-full" style={{ backgroundColor: `${colors.primary}20` }}>
+                <div
+                  className="p-3 rounded-full"
+                  style={{ backgroundColor: `${colors.primary}20` }}
+                >
                   <Eye className="size-6" style={{ color: colors.primary }} />
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Vues totales</p>
-                  <p className="text-2xl font-bold">{formatViews(twitchData.channelInfo?.totalViews || 0)}</p>
+                  <p className="text-2xl font-bold">
+                    {formatViews(twitchData.channelInfo?.totalViews || 0)}
+                  </p>
                 </div>
               </div>
             </CardContent>
           </Card>
         </motion.div>
 
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
-          <Card className="border-2" style={{ borderColor: `${colors.primary}40` }}>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+        >
+          <Card
+            className="border-2"
+            style={{ borderColor: `${colors.primary}40` }}
+          >
             <CardContent className="p-6">
               <div className="flex items-center gap-4">
-                <div className="p-3 rounded-full" style={{ backgroundColor: `${colors.primary}20` }}>
-                  <TrendingUp className="size-6" style={{ color: colors.primary }} />
+                <div
+                  className="p-3 rounded-full"
+                  style={{ backgroundColor: `${colors.primary}20` }}
+                >
+                  <TrendingUp
+                    className="size-6"
+                    style={{ color: colors.primary }}
+                  />
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Contenus</p>
                   <p className="text-2xl font-bold">
-                    {(twitchData.recentVideos?.length || 0) + (twitchData.topClips?.length || 0)}
+                    {(twitchData.recentVideos?.length || 0) +
+                      (twitchData.topClips?.length || 0)}
                   </p>
                 </div>
               </div>
@@ -148,8 +203,12 @@ export function TwitchEnrichedInfo() {
       {/* Content Tabs */}
       <Tabs defaultValue="vods" className="w-full">
         <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="vods">🎬 VODs ({twitchData.recentVideos?.length || 0})</TabsTrigger>
-          <TabsTrigger value="clips">✂️ Clips ({twitchData.topClips?.length || 0})</TabsTrigger>
+          <TabsTrigger value="vods">
+            🎬 VODs ({twitchData.recentVideos?.length || 0})
+          </TabsTrigger>
+          <TabsTrigger value="clips">
+            ✂️ Clips ({twitchData.topClips?.length || 0})
+          </TabsTrigger>
         </TabsList>
 
         {/* VODs Tab */}
@@ -173,7 +232,9 @@ export function TwitchEnrichedInfo() {
                   >
                     <div className="aspect-video relative overflow-hidden bg-black">
                       <Image
-                        src={video.thumbnail_url.replace("%{width}", "480").replace("%{height}", "270")}
+                        src={video.thumbnail_url
+                          .replace("%{width}", "480")
+                          .replace("%{height}", "270")}
                         alt={video.title}
                         fill
                         className="object-cover group-hover:scale-110 transition-transform duration-300"
@@ -183,13 +244,19 @@ export function TwitchEnrichedInfo() {
                         {formatDuration(video.duration)}
                       </div>
                       <div className="absolute top-2 left-2">
-                        <Badge variant="secondary" className="bg-red-600 text-white">
+                        <Badge
+                          variant="secondary"
+                          className="bg-red-600 text-white"
+                        >
                           VOD
                         </Badge>
                       </div>
                     </div>
                     <CardContent className="p-4">
-                      <h4 className="font-semibold line-clamp-2 mb-2" style={{ color: colors.text }}>
+                      <h4
+                        className="font-semibold line-clamp-2 mb-2"
+                        style={{ color: colors.text }}
+                      >
                         {video.title}
                       </h4>
                       <div className="flex items-center justify-between text-sm text-muted-foreground">
@@ -208,7 +275,10 @@ export function TwitchEnrichedInfo() {
               ))}
             </div>
           ) : (
-            <Card className="border-2 relative overflow-hidden" style={{ borderColor: `${colors.primary}20` }}>
+            <Card
+              className="border-2 relative overflow-hidden"
+              style={{ borderColor: `${colors.primary}20` }}
+            >
               <div
                 className="absolute inset-0 opacity-10 bg-cover bg-center"
                 style={{
@@ -217,9 +287,14 @@ export function TwitchEnrichedInfo() {
                 }}
               />
               <CardContent className="p-12 text-center relative z-10">
-                <Gamepad2 className="size-12 mx-auto mb-4 opacity-50" style={{ color: colors.primary }} />
+                <Gamepad2
+                  className="size-12 mx-auto mb-4 opacity-50"
+                  style={{ color: colors.primary }}
+                />
                 <h3 className="font-bold text-lg mb-2">Aucun VOD disponible</h3>
-                <p className="text-muted-foreground">Les derniers streams apparaîtront ici</p>
+                <p className="text-muted-foreground">
+                  Les derniers streams apparaîtront ici
+                </p>
               </CardContent>
             </Card>
           )}
@@ -252,7 +327,10 @@ export function TwitchEnrichedInfo() {
                         className="object-cover group-hover:scale-110 transition-transform duration-300"
                       />
                       <div className="absolute top-2 left-2">
-                        <Badge variant="secondary" className="bg-purple-600 text-white">
+                        <Badge
+                          variant="secondary"
+                          className="bg-purple-600 text-white"
+                        >
                           CLIP
                         </Badge>
                       </div>
@@ -261,7 +339,10 @@ export function TwitchEnrichedInfo() {
                       </div>
                     </div>
                     <CardContent className="p-4">
-                      <h4 className="font-semibold line-clamp-2 mb-2" style={{ color: colors.text }}>
+                      <h4
+                        className="font-semibold line-clamp-2 mb-2"
+                        style={{ color: colors.text }}
+                      >
                         {clip.title}
                       </h4>
                       <div className="flex items-center justify-between text-sm text-muted-foreground">
@@ -284,7 +365,10 @@ export function TwitchEnrichedInfo() {
               ))}
             </div>
           ) : (
-            <Card className="border-2 relative overflow-hidden" style={{ borderColor: `${colors.primary}20` }}>
+            <Card
+              className="border-2 relative overflow-hidden"
+              style={{ borderColor: `${colors.primary}20` }}
+            >
               <div
                 className="absolute inset-0 opacity-10 bg-cover bg-center"
                 style={{
@@ -293,9 +377,16 @@ export function TwitchEnrichedInfo() {
                 }}
               />
               <CardContent className="p-12 text-center relative z-10">
-                <TrendingUp className="size-12 mx-auto mb-4 opacity-50" style={{ color: colors.primary }} />
-                <h3 className="font-bold text-lg mb-2">Aucun clip cette semaine</h3>
-                <p className="text-muted-foreground">Les meilleurs moments seront capturés ici</p>
+                <TrendingUp
+                  className="size-12 mx-auto mb-4 opacity-50"
+                  style={{ color: colors.primary }}
+                />
+                <h3 className="font-bold text-lg mb-2">
+                  Aucun clip cette semaine
+                </h3>
+                <p className="text-muted-foreground">
+                  Les meilleurs moments seront capturés ici
+                </p>
               </CardContent>
             </Card>
           )}

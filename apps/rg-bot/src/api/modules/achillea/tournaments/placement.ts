@@ -1,11 +1,17 @@
-import { applyEloUpdate, DEFAULT_BASE_RATING, MatchMode, placementPrizeAp } from "@rosegriffon/achillea-core";
+import {
+  applyEloUpdate,
+  DEFAULT_BASE_RATING,
+  MatchMode,
+  placementPrizeAp,
+} from "@rosegriffon/achillea-core";
 import { Status } from "brackets-model";
 import { sql, type Kysely } from "kysely";
 import type { Database } from "@rosegriffon/db/schema";
 import { finalTournamentStandings } from "./bracket";
 
 export type PlacementPrizeResult =
-  { applied: true; deltas: Record<string, number>; tournamentSize: number } | { applied: false; reason: string };
+  | { applied: true; deltas: Record<string, number>; tournamentSize: number }
+  | { applied: false; reason: string };
 
 /**
  * Applique le bonus de classement dans une transaction idempotente.
@@ -26,7 +32,10 @@ export async function applyPlacementPrizes(
   if (!tournament) return { applied: false, reason: "tournoi_introuvable" };
   if (requireFinished && tournament.internal_state !== "Finished")
     return { applied: false, reason: "tournoi_non_termine" };
-  if (tournament.tournament_type !== "single_elimination" && tournament.tournament_type !== "double_elimination")
+  if (
+    tournament.tournament_type !== "single_elimination" &&
+    tournament.tournament_type !== "double_elimination"
+  )
     return { applied: false, reason: "format_non_eligible" };
   const alreadyApplied = await db
     .selectFrom("tournament_event")
@@ -65,9 +74,12 @@ export async function applyPlacementPrizes(
     .where("state", "=", "Active")
     .orderBy("starts_at", "desc")
     .executeTakeFirst();
-  const base = Number((season?.config as { baseRating?: number } | null)?.baseRating ?? DEFAULT_BASE_RATING);
+  const base = Number(
+    (season?.config as { baseRating?: number } | null)?.baseRating ??
+      DEFAULT_BASE_RATING,
+  );
   const deltas: Record<string, number> = {};
-  await db.transaction().execute(async trx => {
+  await db.transaction().execute(async (trx) => {
     for (const placement of placements) {
       const prize = placementPrizeAp(size, placement.rank);
       if (prize <= 0) continue;
@@ -84,7 +96,10 @@ export async function applyPlacementPrizes(
           .updateTable("user_elo")
           .set({
             elo: next.newElo,
-            peak_rating: Math.max(Number(current.peak_rating ?? previous), next.newElo),
+            peak_rating: Math.max(
+              Number(current.peak_rating ?? previous),
+              next.newElo,
+            ),
             updated_at: new Date(),
           })
           .where("user_id", "=", placement.userId)

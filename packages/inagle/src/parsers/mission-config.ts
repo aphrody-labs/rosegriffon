@@ -21,7 +21,9 @@ export function buildMissionDatabase(_dataPath: string) {
   const byId = new Map<string, ParsedMission>();
 
   if (!configPath) {
-    console.warn("[mission-config] No SQL/SQLite mission_config projection found.");
+    console.warn(
+      "[mission-config] No SQL/SQLite mission_config projection found.",
+    );
     return { missions, byId };
   }
 

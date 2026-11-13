@@ -47,7 +47,8 @@ export default function NotFound() {
       <div className="mb-8 flex max-w-lg flex-col items-center justify-center gap-2 text-xl text-muted-foreground sm:flex-row">
         <span>La page que vous cherchez n&apos;existe pas.</span>
         <span className="flex items-center gap-2">
-          Peut-être une mauvaise passe ? <RgEmote name="gaelle-perplexe" size={32} animated />
+          Peut-être une mauvaise passe ?{" "}
+          <RgEmote name="gaelle-perplexe" size={32} animated />
         </span>
       </div>
 

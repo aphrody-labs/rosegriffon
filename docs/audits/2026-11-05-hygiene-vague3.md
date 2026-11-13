@@ -8,12 +8,12 @@ redéployée au moment de la rédaction : l'état « après » en production res
 
 ## Commits
 
-| SHA | Objet |
-| --- | --- |
+| SHA        | Objet                                                                                                                                                                                    |
+| ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `e3dc4dd6` | `og:image` sur toutes les pages (`withDefaultOgImage`), titres de sondage bornés (test), U+FFFD : initiales en graphèmes, coupes sans paire de substitution cassée, nettoyage du texte X |
-| `71d80873` | Doublons « Instagram Instagram » / « X X » (puces de filtre `/feed`), note Patreon de `/nous-soutenir` |
-| `fe4ef170` | `/.well-known/security.txt` (RFC 9116) |
-| `95d7d265` | Objets de stockage absents : 404 au lieu de 400 (route Next + `infra/nginx/rg-core.conf`) |
+| `71d80873` | Doublons « Instagram Instagram » / « X X » (puces de filtre `/feed`), note Patreon de `/nous-soutenir`                                                                                   |
+| `fe4ef170` | `/.well-known/security.txt` (RFC 9116)                                                                                                                                                   |
+| `95d7d265` | Objets de stockage absents : 404 au lieu de 400 (route Next + `infra/nginx/rg-core.conf`)                                                                                                |
 
 ## 1. og:title / og:image (16 pages)
 
@@ -59,13 +59,13 @@ Rose Griffon » garde son suffixe. Aucun autre changement n'était nécessaire.
 
 ## 3. Mots doublés restants
 
-| Constat | Cause | Suite |
-| --- | --- | --- |
-| « Instagram Instagram », « X X », « TikTok TikTok », « YouTube YouTube » (`/feed`, 22 URL) | `BadgeReseau` rendait le nom du réseau en `sr-only` juste à côté du nom visible dans les puces de filtre | Nouveau prop `decoratif` (`aria-hidden`, sans `sr-only` ni `title`), utilisé dans `filtres.tsx`. Les autres usages, où aucun nom n'est écrit à côté, gardent leur nom accessible |
-| « Patreon Patreon » (`/nous-soutenir`) | Le bouton « Voir tous les paliers sur Patreon » était suivi d'une note qui commençait par « Patreon prélève… » | Note reformulée : « Sur chaque contribution, Patreon prélève 8 à 12 % de commission… » |
-| « Président Président » (`/achillea/guide`) | Faux positif : badges « Vice-Président » puis « Président », que l'heuristique coupe sur le trait d'union | Rien à corriger |
-| « Hyroto Hyroto » (`/community`) | Donnée : le rôle Discord de ce membre s'appelle « Hyroto », comme son pseudo (2e ligne de `membre-carte.tsx` = rôle) | Non modifié (pas de dédoublonnage de chaînes) |
-| Bureau, Critique, Chroniques, Staff, Tournoi | Déjà traités (`2026-11-05-textes-fixes.md`) | — |
+| Constat                                                                                    | Cause                                                                                                                | Suite                                                                                                                                                                            |
+| ------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| « Instagram Instagram », « X X », « TikTok TikTok », « YouTube YouTube » (`/feed`, 22 URL) | `BadgeReseau` rendait le nom du réseau en `sr-only` juste à côté du nom visible dans les puces de filtre             | Nouveau prop `decoratif` (`aria-hidden`, sans `sr-only` ni `title`), utilisé dans `filtres.tsx`. Les autres usages, où aucun nom n'est écrit à côté, gardent leur nom accessible |
+| « Patreon Patreon » (`/nous-soutenir`)                                                     | Le bouton « Voir tous les paliers sur Patreon » était suivi d'une note qui commençait par « Patreon prélève… »       | Note reformulée : « Sur chaque contribution, Patreon prélève 8 à 12 % de commission… »                                                                                           |
+| « Président Président » (`/achillea/guide`)                                                | Faux positif : badges « Vice-Président » puis « Président », que l'heuristique coupe sur le trait d'union            | Rien à corriger                                                                                                                                                                  |
+| « Hyroto Hyroto » (`/community`)                                                           | Donnée : le rôle Discord de ce membre s'appelle « Hyroto », comme son pseudo (2e ligne de `membre-carte.tsx` = rôle) | Non modifié (pas de dédoublonnage de chaînes)                                                                                                                                    |
+| Bureau, Critique, Chroniques, Staff, Tournoi                                               | Déjà traités (`2026-11-05-textes-fixes.md`)                                                                          | —                                                                                                                                                                                |
 
 ## 4. U+FFFD (« � »)
 

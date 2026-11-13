@@ -49,7 +49,9 @@ const COLONNES_PUBLIQUES =
   "id, updated_at, claimed_at, username, avatar_url, role, website, discord_id, bio, banner_url, twitter_handle, badges";
 
 /** Utilisé par `generateMetadata` — mêmes colonnes que l'ancien `.select("full_name, bio")`. */
-export async function getProfileMetaByUsername(username: string): Promise<ProfileMeta | null> {
+export async function getProfileMetaByUsername(
+  username: string,
+): Promise<ProfileMeta | null> {
   try {
     const pool = getPgPool();
     const { rows } = await pool.query<ProfileMeta>(
@@ -64,7 +66,9 @@ export async function getProfileMetaByUsername(username: string): Promise<Profil
 }
 
 /** Utilisé par la page — mêmes colonnes que l'ancien `.select("*")`. */
-export async function getProfileByUsername(username: string): Promise<ProfileRow | null> {
+export async function getProfileByUsername(
+  username: string,
+): Promise<ProfileRow | null> {
   try {
     const pool = getPgPool();
     const { rows } = await pool.query<ProfileRow>(

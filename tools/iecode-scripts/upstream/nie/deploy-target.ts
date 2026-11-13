@@ -1,7 +1,15 @@
 #!/usr/bin/env bun
 /* eslint-disable no-await-in-loop -- Target health polling and deployments are deliberately ordered. */
 
-import { chmod, copyFile, mkdir, readlink, rename, rm, symlink } from "node:fs/promises";
+import {
+  chmod,
+  copyFile,
+  mkdir,
+  readlink,
+  rename,
+  rm,
+  symlink,
+} from "node:fs/promises";
 import { resolve } from "node:path";
 
 const repositoryRoot = resolve(import.meta.dir, "../../..");
@@ -11,13 +19,17 @@ const repositoryRoot = resolve(import.meta.dir, "../../..");
  * builds and verifies the binaries. Units are installed from, and compared against, that
  * checkout. `APHRODY_INFRA_ROOT` overrides the sibling-checkout default.
  */
-const infraRoot = resolve(process.env["APHRODY_INFRA_ROOT"] || resolve(repositoryRoot, "..", "aphrody-infra"));
+const infraRoot = resolve(
+  process.env["APHRODY_INFRA_ROOT"] ||
+    resolve(repositoryRoot, "..", "aphrody-infra"),
+);
 const infraSystemdDirectory = `${infraRoot}/systemd`;
 
-process.env["NO_PROXY"] = `${process.env["NO_PROXY"] || ""},aphrody.com,.aphrody.com,127.0.0.1,localhost`.replace(
-  /^,/u,
-  "",
-);
+process.env["NO_PROXY"] =
+  `${process.env["NO_PROXY"] || ""},aphrody.com,.aphrody.com,127.0.0.1,localhost`.replace(
+    /^,/u,
+    "",
+  );
 process.env["no_proxy"] = process.env["NO_PROXY"];
 
 /**
@@ -74,9 +86,15 @@ function output(value: Uint8Array | string): string {
 }
 
 function capture(argv: string[]): string {
-  const result = Bun.spawnSync(argv, { cwd: repositoryRoot, stderr: "pipe", stdout: "pipe" });
+  const result = Bun.spawnSync(argv, {
+    cwd: repositoryRoot,
+    stderr: "pipe",
+    stdout: "pipe",
+  });
   if (result.exitCode !== 0) {
-    throw new Error(`${argv.join(" ")} failed: ${output(result.stderr).trim()}`);
+    throw new Error(
+      `${argv.join(" ")} failed: ${output(result.stderr).trim()}`,
+    );
   }
   return output(result.stdout).trim();
 }
@@ -84,27 +102,47 @@ function capture(argv: string[]): string {
 function assertDeadline(context: TargetContext): number {
   const remaining = context.deadline - Date.now();
   if (remaining <= 0) {
-    throw new Error(`${context.name} exceeded its ${context.timeoutMs / 1_000} second deadline.`);
+    throw new Error(
+      `${context.name} exceeded its ${context.timeoutMs / 1_000} second deadline.`,
+    );
   }
   return remaining;
 }
 
 async function appendLog(context: TargetContext, text: string): Promise<void> {
   const path = `${logDirectory}/${context.name}.log`;
-  const previous = (await Bun.file(path).exists()) ? await Bun.file(path).text() : "";
+  const previous = (await Bun.file(path).exists())
+    ? await Bun.file(path).text()
+    : "";
   await Bun.write(path, `${previous}${text}`);
   await chmod(path, 0o600);
 }
 
-async function run(context: TargetContext, argv: string[], cwd = repositoryRoot): Promise<string> {
-  const remainingSeconds = Math.max(0.1, assertDeadline(context) / 1_000).toFixed(3);
+async function run(
+  context: TargetContext,
+  argv: string[],
+  cwd = repositoryRoot,
+): Promise<string> {
+  const remainingSeconds = Math.max(
+    0.1,
+    assertDeadline(context) / 1_000,
+  ).toFixed(3);
   const rendered = `$ ${argv.join(" ")}\n`;
   process.stdout.write(`    ${rendered}`);
-  const child = Bun.spawn(["timeout", "--signal=TERM", "--kill-after=2s", `${remainingSeconds}s`, ...argv], {
-    cwd,
-    stderr: "pipe",
-    stdout: "pipe",
-  });
+  const child = Bun.spawn(
+    [
+      "timeout",
+      "--signal=TERM",
+      "--kill-after=2s",
+      `${remainingSeconds}s`,
+      ...argv,
+    ],
+    {
+      cwd,
+      stderr: "pipe",
+      stdout: "pipe",
+    },
+  );
   const [stdout, stderr, exitCode] = await Promise.all([
     new Response(child.stdout).text(),
     new Response(child.stderr).text(),
@@ -114,9 +152,12 @@ async function run(context: TargetContext, argv: string[], cwd = repositoryRoot)
   if (stdout) process.stdout.write(stdout);
   if (stderr) process.stderr.write(stderr);
   if (exitCode === 124 || exitCode === 137) {
-    throw new Error(`${context.name} exceeded its ${context.timeoutMs / 1_000} second deadline.`);
+    throw new Error(
+      `${context.name} exceeded its ${context.timeoutMs / 1_000} second deadline.`,
+    );
   }
-  if (exitCode !== 0) throw new Error(`${argv.join(" ")} failed with exit code ${exitCode}.`);
+  if (exitCode !== 0)
+    throw new Error(`${argv.join(" ")} failed with exit code ${exitCode}.`);
   assertDeadline(context);
   return stdout;
 }
@@ -128,7 +169,11 @@ async function atomicCopy(source: string, destination: string): Promise<void> {
   await rename(temporary, destination);
 }
 
-async function waitFor(context: TargetContext, url: string, validate: Validator): Promise<void> {
+async function waitFor(
+  context: TargetContext,
+  url: string,
+  validate: Validator,
+): Promise<void> {
   // Bounded by the validation window, NOT by whatever is left of the deadline. A target with a
   // long build budget would otherwise poll a broken deployment for minutes before rolling back,
   // and those minutes are served to users.
@@ -146,12 +191,20 @@ async function waitFor(context: TargetContext, url: string, validate: Validator)
       await Bun.sleep(250);
     }
   }
-  throw new Error(`${url} did not become ready within ${validationWindowMs / 1_000}s: ${lastError}`);
+  throw new Error(
+    `${url} did not become ready within ${validationWindowMs / 1_000}s: ${lastError}`,
+  );
 }
 
-function requireBudget(context: TargetContext, milliseconds: number, action: string): void {
+function requireBudget(
+  context: TargetContext,
+  milliseconds: number,
+  action: string,
+): void {
   if (context.deadline - Date.now() < milliseconds) {
-    throw new Error(`${context.name} has insufficient time left to ${action} safely.`);
+    throw new Error(
+      `${context.name} has insufficient time left to ${action} safely.`,
+    );
   }
 }
 
@@ -165,9 +218,14 @@ function requireJsonObject(body: string): Record<string, unknown> {
 
 function validateSiteHealth(body: string): void {
   const value = requireJsonObject(body);
-  if (value["api"] !== "v1") throw new Error("Site health does not report API v1.");
+  if (value["api"] !== "v1")
+    throw new Error("Site health does not report API v1.");
   const capabilities = value["capacites"];
-  if (!capabilities || typeof capabilities !== "object" || Array.isArray(capabilities)) {
+  if (
+    !capabilities ||
+    typeof capabilities !== "object" ||
+    Array.isArray(capabilities)
+  ) {
     throw new Error("Site health has no capability object.");
   }
   const ready = capabilities as Record<string, unknown>;
@@ -181,10 +239,15 @@ function validateSiteHealth(body: string): void {
   }
 }
 
-async function installUnit(context: TargetContext, unit: string): Promise<void> {
+async function installUnit(
+  context: TargetContext,
+  unit: string,
+): Promise<void> {
   const source = `${infraSystemdDirectory}/${unit}`;
   if (!(await Bun.file(source).exists())) {
-    throw new Error(`${source} is missing; set APHRODY_INFRA_ROOT to the aphrody-infra checkout.`);
+    throw new Error(
+      `${source} is missing; set APHRODY_INFRA_ROOT to the aphrody-infra checkout.`,
+    );
   }
   const installed = `/etc/systemd/system/${unit}`;
   const comparison = Bun.spawnSync(["cmp", "-s", source, installed]);
@@ -201,11 +264,25 @@ async function restartUnit(
 ): Promise<void> {
   requireBudget(context, validationWindowMs, `restart and validate ${unit}`);
   await installUnit(context, unit);
-  const oldPid = capture(["systemctl", "show", unit, "-p", "MainPID", "--value"]);
+  const oldPid = capture([
+    "systemctl",
+    "show",
+    unit,
+    "-p",
+    "MainPID",
+    "--value",
+  ]);
   await run(context, ["sudo", "systemctl", "restart", unit]);
   await waitFor(context, healthUrl, validate);
   await run(context, ["systemctl", "is-active", "--quiet", unit]);
-  const newPid = capture(["systemctl", "show", unit, "-p", "MainPID", "--value"]);
+  const newPid = capture([
+    "systemctl",
+    "show",
+    unit,
+    "-p",
+    "MainPID",
+    "--value",
+  ]);
   if (!newPid || newPid === "0" || newPid === oldPid) {
     throw new Error(`${unit} did not start a new process.`);
   }
@@ -250,7 +327,9 @@ async function buildBinary(
     await mkdir(`${context.releaseDirectory}/rollback`, { recursive: true });
     await copyFile(liveBinary, rollback);
     await chmod(rollback, 0o755);
-    rollbackHash = new Bun.CryptoHasher("sha256").update(await Bun.file(rollback).arrayBuffer()).digest("hex");
+    rollbackHash = new Bun.CryptoHasher("sha256")
+      .update(await Bun.file(rollback).arrayBuffer())
+      .digest("hex");
   }
   try {
     await ensureSharedReleaseBuild(context);
@@ -263,7 +342,9 @@ async function buildBinary(
     if (hadLiveBinary) {
       const current = Bun.file(liveBinary);
       const currentHash = (await current.exists())
-        ? new Bun.CryptoHasher("sha256").update(await current.arrayBuffer()).digest("hex")
+        ? new Bun.CryptoHasher("sha256")
+            .update(await current.arrayBuffer())
+            .digest("hex")
         : "";
       if (currentHash !== rollbackHash) await atomicCopy(rollback, liveBinary);
     }
@@ -304,8 +385,12 @@ async function deployWeb(context: TargetContext): Promise<void> {
   // module serves browsers without WebGPU: absent, they fall silently to the CPU rasteriser,
   // which works and is far slower — a degradation nothing else would report.
   for (const module of ["nie_wasm_bg.wasm", "nie_viewer_web_bg.wasm"]) {
-    if (!(await Bun.file(`apps/nie-web/public/static/game/${module}`).exists())) {
-      throw new Error(`The validated WebAssembly artifact ${module} is missing; deploy the wasm target first.`);
+    if (
+      !(await Bun.file(`apps/nie-web/public/static/game/${module}`).exists())
+    ) {
+      throw new Error(
+        `The validated WebAssembly artifact ${module} is missing; deploy the wasm target first.`,
+      );
     }
   }
   // A checkout fast-forwarded on the host has the new lockfile but not its packages. Without
@@ -324,28 +409,43 @@ async function deployWeb(context: TargetContext): Promise<void> {
   // pinned 6.4.3, 30 of its 252 emitted files carried a dash inside the hash and were served
   // `no-cache`. `vite.config.ts` now pins `hashCharacters: "hex"`, which is where the fix
   // belongs; pinning the version alone never addressed it.
-  await run(context, ["bunx", "vite", "build", "--outDir", bundle, "--emptyOutDir"], `${repositoryRoot}/apps/nie-web`);
+  await run(
+    context,
+    ["bunx", "vite", "build", "--outDir", bundle, "--emptyOutDir"],
+    `${repositoryRoot}/apps/nie-web`,
+  );
   await run(context, ["bun", "apps/nie-web/scripts/precompress.ts", bundle]);
   if (!(await Bun.file(`${bundle}/index.html`).exists())) {
     throw new Error("Web build did not produce index.html.");
   }
-  requireBudget(context, validationWindowMs, "switch and validate the web bundle");
+  requireBudget(
+    context,
+    validationWindowMs,
+    "switch and validate the web bundle",
+  );
   const previous = await readlink("apps/nie-web/dist").catch(() => undefined);
   // A `dist` that is NOT a link is a developer's build output, not a publication pointer. It is
   // moved aside instead of deleted: a first deploy on such a checkout stays reversible, and the
   // rollback below has something to put back.
-  const displaced = previous ? undefined : `apps/nie-web/dist.replaced-${runId}`;
-  if (displaced) await rename("apps/nie-web/dist", displaced).catch(() => undefined);
+  const displaced = previous
+    ? undefined
+    : `apps/nie-web/dist.replaced-${runId}`;
+  if (displaced)
+    await rename("apps/nie-web/dist", displaced).catch(() => undefined);
   const next = "apps/nie-web/dist.deploy-next";
   await rm(next, { force: true });
   await symlink(bundle, next);
   await rename(next, "apps/nie-web/dist");
   try {
-    await waitFor(context, "http://127.0.0.1:8085/api/v1/health", validateSiteHealth);
+    await waitFor(
+      context,
+      "http://127.0.0.1:8085/api/v1/health",
+      validateSiteHealth,
+    );
     // The public vhost (aphrody-infra `nginx/aphrody/aphrody.com.conf`) serves nie.aphrody.com
     // as a backend only — `/` answers 404 there — so the shell is checked on the loopback
     // origin that serves the bundle.
-    await waitFor(context, "http://127.0.0.1:8085/", body => {
+    await waitFor(context, "http://127.0.0.1:8085/", (body) => {
       if (!body.includes("/static/") || !body.includes('id="racine"')) {
         throw new Error("Site shell served from the bundle is incomplete.");
       }
@@ -362,7 +462,8 @@ async function deployWeb(context: TargetContext): Promise<void> {
       await rename(rollback, "apps/nie-web/dist");
     } else {
       await rm("apps/nie-web/dist", { force: true });
-      if (displaced) await rename(displaced, "apps/nie-web/dist").catch(() => undefined);
+      if (displaced)
+        await rename(displaced, "apps/nie-web/dist").catch(() => undefined);
     }
     throw error;
   }
@@ -371,8 +472,14 @@ async function deployWeb(context: TargetContext): Promise<void> {
 async function deployWasm(context: TargetContext): Promise<void> {
   const artifact = "apps/nie-web/public/static/game/nie_wasm_bg.wasm";
   const file = Bun.file(artifact);
-  if (!(await file.exists()) || file.size < 100_000 || file.size > 6 * 1024 * 1024) {
-    throw new Error("WebAssembly output is absent or outside the 100 KiB to 6 MiB production bound.");
+  if (
+    !(await file.exists()) ||
+    file.size < 100_000 ||
+    file.size > 6 * 1024 * 1024
+  ) {
+    throw new Error(
+      "WebAssembly output is absent or outside the 100 KiB to 6 MiB production bound.",
+    );
   }
   if (!WebAssembly.validate(await file.arrayBuffer())) {
     throw new Error("The staged WebAssembly artifact is invalid.");
@@ -389,7 +496,9 @@ async function publishNativeMcpAliases(): Promise<void> {
     await rm(destination, { force: true });
     await symlink(binary, destination);
     if ((await readlink(destination)) !== binary) {
-      throw new Error(`${destination} does not resolve to the native Rust MCP binary.`);
+      throw new Error(
+        `${destination} does not resolve to the native Rust MCP binary.`,
+      );
     }
   }
 }
@@ -398,9 +507,14 @@ const targets: Record<string, Target> = {
   ffi: {
     seconds: releaseBuildSeconds,
     description: "Rust FFI library used by Bun compatibility adapters",
-    deploy: async context => {
+    deploy: async (context) => {
       await buildBinary(context, "aphrody-nie-ffi", "libiecode.so");
-      const symbols = await run(context, ["nm", "-D", "--defined-only", "target/release/libiecode.so"]);
+      const symbols = await run(context, [
+        "nm",
+        "-D",
+        "--defined-only",
+        "target/release/libiecode.so",
+      ]);
       if (!symbols.includes("nie_wiki_json_out")) {
         throw new Error("Rust FFI library does not export nie_wiki_json_out.");
       }
@@ -409,7 +523,7 @@ const targets: Record<string, Target> = {
   cli: {
     seconds: releaseBuildSeconds,
     description: "Native nie CLI and stdio MCP host",
-    deploy: async context => {
+    deploy: async (context) => {
       await buildBinary(context, "aphrody-nie-cli", "nie");
       await run(context, ["target/release/nie", "--version"]);
       await run(context, ["target/release/nie", "mcp", "--help"]);
@@ -418,9 +532,17 @@ const targets: Record<string, Target> = {
   mcp: {
     seconds: releaseBuildSeconds,
     description: "Standalone native Rust MCP stdio server",
-    deploy: async context => {
+    deploy: async (context) => {
       await buildBinary(context, "aphrody-nie-mcp", "aphrody-nie-mcp");
-      await run(context, ["cargo", "test", "--locked", "-p", "aphrody-nie-mcp", "--test", "stdio_smoke"]);
+      await run(context, [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "aphrody-nie-mcp",
+        "--test",
+        "stdio_smoke",
+      ]);
       await publishNativeMcpAliases();
     },
   },
@@ -442,22 +564,23 @@ const targets: Record<string, Target> = {
   model: {
     seconds: releaseBuildSeconds,
     description: "Rust model and VFS asset server",
-    deploy: context =>
+    deploy: (context) =>
       deployBinaryService(
         context,
         "aphrody-nie-model-serve",
         "aphrody-nie-model-serve",
         "aphrody-nie-model-serve.service",
         "http://127.0.0.1:8790/health",
-        body => {
-          if (body.trim() !== "ok") throw new Error("Model health response is not ok.");
+        (body) => {
+          if (body.trim() !== "ok")
+            throw new Error("Model health response is not ok.");
         },
       ),
   },
   site: {
     seconds: releaseBuildSeconds,
     description: "Rust HTTP site and API host",
-    deploy: context =>
+    deploy: (context) =>
       deployBinaryService(
         context,
         "nie-site",
@@ -469,11 +592,19 @@ const targets: Record<string, Target> = {
   },
 };
 
-const orderedTargets = ["ffi", "cli", "mcp", "wasm", "web", "model", "site"] as const;
+const orderedTargets = [
+  "ffi",
+  "cli",
+  "mcp",
+  "wasm",
+  "web",
+  "model",
+  "site",
+] as const;
 
 function usage(): string {
   return `Usage: bun run deploy:target -- <target|--all|--list>\n\nEach target has an independent hard deadline, shown in seconds; whatever it publishes is\nrolled back if it has not answered its health check ${validationWindowMs / 1_000}s later.\n\n${orderedTargets
-    .map(name => {
+    .map((name) => {
       const target = targets[name] as Target;
       const seconds = target.seconds ?? defaultTimeoutMs / 1_000;
       return `  ${name.padEnd(14)} ${String(seconds).padStart(4)}s  ${target.description}`;
@@ -486,21 +617,32 @@ async function assertReleaseState(allowDirty = false): Promise<string> {
     throw new Error("Production deployment requires the main branch.");
   }
   if (!allowDirty) {
-    const status = capture(["git", "status", "--porcelain", "--untracked-files=all"]);
-    if (status) throw new Error("Production deployment requires a clean checkout.");
+    const status = capture([
+      "git",
+      "status",
+      "--porcelain",
+      "--untracked-files=all",
+    ]);
+    if (status)
+      throw new Error("Production deployment requires a clean checkout.");
     const commit = capture(["git", "rev-parse", "HEAD"]);
     const remote = capture(["git", "rev-parse", "origin/main"]);
-    if (commit !== remote) throw new Error("HEAD must equal origin/main before deployment.");
+    if (commit !== remote)
+      throw new Error("HEAD must equal origin/main before deployment.");
     return commit;
   }
   return capture(["git", "rev-parse", "HEAD"]);
 }
 
-async function deployTarget(name: string, commit: string): Promise<{ name: string; seconds: number }> {
+async function deployTarget(
+  name: string,
+  commit: string,
+): Promise<{ name: string; seconds: number }> {
   const target = targets[name];
   if (!target) throw new Error(`Unknown target: ${name}`);
   const startedAt = Date.now();
-  const timeoutMs = target.seconds === undefined ? defaultTimeoutMs : target.seconds * 1_000;
+  const timeoutMs =
+    target.seconds === undefined ? defaultTimeoutMs : target.seconds * 1_000;
   const context: TargetContext = {
     commit,
     deadline: startedAt + timeoutMs,
@@ -528,14 +670,21 @@ async function deployTarget(name: string, commit: string): Promise<{ name: strin
       2,
     )}\n`,
   );
-  process.stdout.write(`✓ ${name} deployed and validated in ${seconds.toFixed(1)}s\n`);
+  process.stdout.write(
+    `✓ ${name} deployed and validated in ${seconds.toFixed(1)}s\n`,
+  );
   return { name, seconds };
 }
 
 const requested = process.argv.slice(2);
-const allowDirty = requested.includes("--allow-dirty") || process.env["ALLOW_DIRTY"] === "1";
-const cleanRequested = requested.filter(arg => arg !== "--allow-dirty");
-if (cleanRequested.length !== 1 || cleanRequested[0] === "--help" || cleanRequested[0] === "-h") {
+const allowDirty =
+  requested.includes("--allow-dirty") || process.env["ALLOW_DIRTY"] === "1";
+const cleanRequested = requested.filter((arg) => arg !== "--allow-dirty");
+if (
+  cleanRequested.length !== 1 ||
+  cleanRequested[0] === "--help" ||
+  cleanRequested[0] === "-h"
+) {
   process.stdout.write(`${usage()}\n`);
   process.exit(cleanRequested.length === 1 ? 0 : 2);
 }
@@ -552,7 +701,12 @@ try {
   throw new Error(`Another target deployment owns ${lockDirectory}.`);
 }
 
-const concurrencyTiers = [["ffi", "cli", "mcp"], ["wasm"], ["web"], ["model", "site"]] as const;
+const concurrencyTiers = [
+  ["ffi", "cli", "mcp"],
+  ["wasm"],
+  ["web"],
+  ["model", "site"],
+] as const;
 
 try {
   const commit = await assertReleaseState(allowDirty);
@@ -561,7 +715,7 @@ try {
       ? [...orderedTargets]
       : argument
           .split(",")
-          .map(s => s.trim())
+          .map((s) => s.trim())
           .filter(Boolean);
 
   for (const targetName of selected) {
@@ -572,24 +726,31 @@ try {
 
   const results: { name: string; seconds?: number; error?: string }[] = [];
   for (const tier of concurrencyTiers) {
-    const tierTargets = tier.filter(name => selected.includes(name));
+    const tierTargets = tier.filter((name) => selected.includes(name));
     if (tierTargets.length === 0) continue;
-    process.stdout.write(`\n=== Tier: [${tierTargets.join(", ")}] (concurrent) ===\n`);
-    const tierResults = await Promise.allSettled(tierTargets.map(name => deployTarget(name, commit)));
+    process.stdout.write(
+      `\n=== Tier: [${tierTargets.join(", ")}] (concurrent) ===\n`,
+    );
+    const tierResults = await Promise.allSettled(
+      tierTargets.map((name) => deployTarget(name, commit)),
+    );
     for (let i = 0; i < tierTargets.length; i++) {
       const name = tierTargets[i]!;
       const res = tierResults[i]!;
       if (res.status === "fulfilled") {
         results.push(res.value);
       } else {
-        const message = res.reason instanceof Error ? res.reason.message : String(res.reason);
+        const message =
+          res.reason instanceof Error ? res.reason.message : String(res.reason);
         results.push({ error: message, name });
         process.stderr.write(`✗ ${name}: ${message}\n`);
       }
     }
   }
-  const failures = results.filter(result => result.error);
-  process.stdout.write(`\n${results.length - failures.length}/${results.length} targets deployed.\n`);
+  const failures = results.filter((result) => result.error);
+  process.stdout.write(
+    `\n${results.length - failures.length}/${results.length} targets deployed.\n`,
+  );
   if (failures.length > 0) process.exitCode = 1;
 } finally {
   await rm(lockDirectory, { recursive: true, force: true });

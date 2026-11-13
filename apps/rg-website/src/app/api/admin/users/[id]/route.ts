@@ -6,7 +6,10 @@ import { createPostgresClient } from "@rosegriffon/db/service";
 
 const VALID_ROLES = new Set(["admin", "staff", "user", "premium", "banned"]);
 
-export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
   const auth = await requireApiAdmin();
   if (!auth.ok) {
     return auth.response;
@@ -14,23 +17,45 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
 
   try {
     const { id } = await params;
-    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) {
-      return NextResponse.json({ error: "Identifiant utilisateur invalide", success: false }, { status: 400 });
+    if (
+      !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+        id,
+      )
+    ) {
+      return NextResponse.json(
+        { error: "Identifiant utilisateur invalide", success: false },
+        { status: 400 },
+      );
     }
     const body = await request.json();
     const { role, full_name, email_notifications } = body ?? {};
 
     if (role !== undefined && !VALID_ROLES.has(role)) {
-      return NextResponse.json({ error: "Rôle invalide", success: false }, { status: 400 });
+      return NextResponse.json(
+        { error: "Rôle invalide", success: false },
+        { status: 400 },
+      );
     }
     if (full_name !== undefined && typeof full_name !== "string") {
-      return NextResponse.json({ error: "full_name invalide", success: false }, { status: 400 });
+      return NextResponse.json(
+        { error: "full_name invalide", success: false },
+        { status: 400 },
+      );
     }
     if (full_name && full_name.length > 200) {
-      return NextResponse.json({ error: "full_name trop long", success: false }, { status: 400 });
+      return NextResponse.json(
+        { error: "full_name trop long", success: false },
+        { status: 400 },
+      );
     }
-    if (email_notifications !== undefined && typeof email_notifications !== "boolean") {
-      return NextResponse.json({ error: "email_notifications invalide", success: false }, { status: 400 });
+    if (
+      email_notifications !== undefined &&
+      typeof email_notifications !== "boolean"
+    ) {
+      return NextResponse.json(
+        { error: "email_notifications invalide", success: false },
+        { status: 400 },
+      );
     }
 
     const supabase = createPostgresClient();
@@ -53,10 +78,18 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     if (role !== undefined) profileUpdates.role = role;
     if (full_name !== undefined) profileUpdates.full_name = full_name;
 
-    const { data: user, error } = await supabase.from("profiles").update(profileUpdates).eq("id", id).select().single();
+    const { data: user, error } = await supabase
+      .from("profiles")
+      .update(profileUpdates)
+      .eq("id", id)
+      .select()
+      .single();
 
     if (error || !user) {
-      return NextResponse.json({ error: "Utilisateur non trouvé", success: false }, { status: 404 });
+      return NextResponse.json(
+        { error: "Utilisateur non trouvé", success: false },
+        { status: 404 },
+      );
     }
 
     return NextResponse.json({
@@ -76,7 +109,10 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
   }
 }
 
-export async function DELETE(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function DELETE(
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
   const auth = await requireApiAdmin();
   if (!auth.ok) {
     return auth.response;
@@ -84,8 +120,15 @@ export async function DELETE(_request: NextRequest, { params }: { params: Promis
 
   try {
     const { id } = await params;
-    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) {
-      return NextResponse.json({ error: "Identifiant utilisateur invalide", success: false }, { status: 400 });
+    if (
+      !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+        id,
+      )
+    ) {
+      return NextResponse.json(
+        { error: "Identifiant utilisateur invalide", success: false },
+        { status: 400 },
+      );
     }
     const supabase = createPostgresClient();
 
@@ -100,7 +143,10 @@ export async function DELETE(_request: NextRequest, { params }: { params: Promis
       .single();
 
     if (error || !user) {
-      return NextResponse.json({ error: "Utilisateur non trouvé", success: false }, { status: 404 });
+      return NextResponse.json(
+        { error: "Utilisateur non trouvé", success: false },
+        { status: 404 },
+      );
     }
 
     return NextResponse.json({

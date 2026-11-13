@@ -90,9 +90,10 @@ export function validateEnv(): Env {
     return envSchema.parse(process.env);
   } catch (error) {
     if (error instanceof z.ZodError) {
-      const missing = error.issues.map(e => e.path.join(".")).join(", ");
+      const missing = error.issues.map((e) => e.path.join(".")).join(", ");
       throw new Error(
-        `❌ Variables d'environnement manquantes ou invalides: ${missing}\n` + `Vérifiez votre fichier .env.local`,
+        `❌ Variables d'environnement manquantes ou invalides: ${missing}\n` +
+          `Vérifiez votre fichier .env.local`,
         { cause: error },
       );
     }

@@ -14,7 +14,12 @@ import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-import type { PostFeed, ProfilFeed, Reseau, SnapshotFeed } from "@rosegriffon/types/feed";
+import type {
+  PostFeed,
+  ProfilFeed,
+  Reseau,
+  SnapshotFeed,
+} from "@rosegriffon/types/feed";
 import { ErreurHttp } from "@rosegriffon/types/feed-lecture";
 
 import {
@@ -47,7 +52,12 @@ beforeEach(() => {
 
 const T0 = Date.parse("2026-10-22T12:00:00Z");
 
-function post(reseau: Reseau, id: string, compte: string, date: string): PostFeed {
+function post(
+  reseau: Reseau,
+  id: string,
+  compte: string,
+  date: string,
+): PostFeed {
   return {
     id: `${reseau}:${id}`,
     idOrigine: id,
@@ -61,7 +71,11 @@ function post(reseau: Reseau, id: string, compte: string, date: string): PostFee
   } as PostFeed;
 }
 
-const lecture = (reseau: Reseau, posts: PostFeed[], extra: Partial<LectureReseau> = {}): LectureReseau => ({
+const lecture = (
+  reseau: Reseau,
+  posts: PostFeed[],
+  extra: Partial<LectureReseau> = {},
+): LectureReseau => ({
   posts,
   profils: [],
   statut: { reseau, etat: posts.length > 0 ? "ok" : "vide" },
@@ -69,16 +83,29 @@ const lecture = (reseau: Reseau, posts: PostFeed[], extra: Partial<LectureReseau
   ...extra,
 });
 
-const reussit = (reseau: Reseau): LecteurReseau => async () => lecture(reseau, [post(reseau, "a", "c", "2026-10-21T00:00:00Z")]);
-const echoue = (motif: string): LecteurReseau => async () => {
-  throw new Error(motif);
-};
-const limite = (retryAfterMs?: number): LecteurReseau => async () => {
-  throw new ErreurHttp(429, "https://www.tiktok.com/embed/@rose_griffon", retryAfterMs);
-};
+const reussit =
+  (reseau: Reseau): LecteurReseau =>
+  async () =>
+    lecture(reseau, [post(reseau, "a", "c", "2026-10-21T00:00:00Z")]);
+const echoue =
+  (motif: string): LecteurReseau =>
+  async () => {
+    throw new Error(motif);
+  };
+const limite =
+  (retryAfterMs?: number): LecteurReseau =>
+  async () => {
+    throw new ErreurHttp(
+      429,
+      "https://www.tiktok.com/embed/@rose_griffon",
+      retryAfterMs,
+    );
+  };
 
 async function snapshotSurDisque(reseau: Reseau): Promise<SnapshotFeed | null> {
-  const f = Bun.file(join(racine, "assets", "feed", "snapshots", `${reseau}.json`));
+  const f = Bun.file(
+    join(racine, "assets", "feed", "snapshots", `${reseau}.json`),
+  );
   return (await f.exists()) ? ((await f.json()) as SnapshotFeed) : null;
 }
 
@@ -87,13 +114,17 @@ describe("une source en panne ne fait pas échouer le passage", () => {
     const r = await synchroniserFeed(
       {},
       {
-        lecteurs: { youtube: reussit("youtube"), tiktok: reussit("tiktok"), instagram: echoue("WebView.navigate: view is closed") },
+        lecteurs: {
+          youtube: reussit("youtube"),
+          tiktok: reussit("tiktok"),
+          instagram: echoue("WebView.navigate: view is closed"),
+        },
         maintenant: () => T0,
       },
     );
     expect(r.success).toBe(true);
     expect(r.partiel).toBe(true);
-    expect(r.reseaux.map(x => [x.reseau, x.etat])).toEqual([
+    expect(r.reseaux.map((x) => [x.reseau, x.etat])).toEqual([
       ["youtube", "ok"],
       ["tiktok", "ok"],
       ["instagram", "echec"],
@@ -107,33 +138,70 @@ describe("une source en panne ne fait pas échouer le passage", () => {
   test("tout est lu : succès complet, rien à signaler", async () => {
     const r = await synchroniserFeed(
       {},
-      { lecteurs: { youtube: reussit("youtube"), tiktok: reussit("tiktok"), instagram: reussit("instagram") }, maintenant: () => T0 },
+      {
+        lecteurs: {
+          youtube: reussit("youtube"),
+          tiktok: reussit("tiktok"),
+          instagram: reussit("instagram"),
+        },
+        maintenant: () => T0,
+      },
     );
-    expect(r).toMatchObject({ success: true, partiel: false, error: undefined });
+    expect(r).toMatchObject({
+      success: true,
+      partiel: false,
+      error: undefined,
+    });
   });
 
   test("toutes les sources en panne : échec", async () => {
     const r = await synchroniserFeed(
       {},
-      { lecteurs: { youtube: echoue("a"), tiktok: echoue("b"), instagram: echoue("c") }, maintenant: () => T0 },
+      {
+        lecteurs: {
+          youtube: echoue("a"),
+          tiktok: echoue("b"),
+          instagram: echoue("c"),
+        },
+        maintenant: () => T0,
+      },
     );
     expect(r.success).toBe(false);
     expect(r.error).toBe("youtube : a ; tiktok : b ; instagram : c");
   });
 
   test("panne durable : la tâche échoue au-delà du seuil de passages d'affilée, puis se rétablit", async () => {
-    const lecteurs = { youtube: reussit("youtube"), tiktok: reussit("tiktok"), instagram: echoue("en panne") };
+    const lecteurs = {
+      youtube: reussit("youtube"),
+      tiktok: reussit("tiktok"),
+      instagram: echoue("en panne"),
+    };
     for (let i = 1; i < SEUIL_ECHECS_DURABLES; i++) {
-      expect((await synchroniserFeed({}, { lecteurs, maintenant: () => T0 + i * 1800_000 })).success).toBe(true);
+      expect(
+        (
+          await synchroniserFeed(
+            {},
+            { lecteurs, maintenant: () => T0 + i * 1800_000 },
+          )
+        ).success,
+      ).toBe(true);
     }
-    const durable = await synchroniserFeed({}, { lecteurs, maintenant: () => T0 + SEUIL_ECHECS_DURABLES * 1800_000 });
+    const durable = await synchroniserFeed(
+      {},
+      { lecteurs, maintenant: () => T0 + SEUIL_ECHECS_DURABLES * 1800_000 },
+    );
     expect(durable.success).toBe(false);
-    expect(durable.error).toContain(`instagram : en échec ${SEUIL_ECHECS_DURABLES} passages d'affilée`);
+    expect(durable.error).toContain(
+      `instagram : en échec ${SEUIL_ECHECS_DURABLES} passages d'affilée`,
+    );
     // L'état survit à un redémarrage de rg-core (relu depuis le disque).
     oublierEtatsSources();
     const retabli = await synchroniserFeed(
       {},
-      { lecteurs: { ...lecteurs, instagram: reussit("instagram") }, maintenant: () => T0 + 99 * 1800_000 },
+      {
+        lecteurs: { ...lecteurs, instagram: reussit("instagram") },
+        maintenant: () => T0 + 99 * 1800_000,
+      },
     );
     expect(retabli).toMatchObject({ success: true, partiel: false });
   });
@@ -142,11 +210,18 @@ describe("une source en panne ne fait pas échouer le passage", () => {
     const r = await synchroniserFeed(
       { reseau: "youtube" },
       {
-        lecteurs: { youtube: async () => lecture("youtube", [], { comptesEnEchec: ["LEVEL5ch : HTTP 404"] }) },
+        lecteurs: {
+          youtube: async () =>
+            lecture("youtube", [], { comptesEnEchec: ["LEVEL5ch : HTTP 404"] }),
+        },
         maintenant: () => T0,
       },
     );
-    expect(r).toMatchObject({ success: true, partiel: true, error: "youtube : LEVEL5ch : HTTP 404" });
+    expect(r).toMatchObject({
+      success: true,
+      partiel: true,
+      error: "youtube : LEVEL5ch : HTTP 404",
+    });
     expect(r.reseaux[0]!.comptesEnEchec).toEqual(["LEVEL5ch : HTTP 404"]);
   });
 });
@@ -154,11 +229,14 @@ describe("une source en panne ne fait pas échouer le passage", () => {
 describe("TikTok 429 : différé avec attente croissante", () => {
   test("429 : différé (pas un échec), instantané gardé, plus relu avant l'échéance", async () => {
     let appels = 0;
-    const tiktok: LecteurReseau = async p => {
+    const tiktok: LecteurReseau = async (p) => {
       appels++;
       return limite()(p);
     };
-    const premier = await synchroniserFeed({ reseau: "tiktok" }, { lecteurs: { tiktok }, maintenant: () => T0 });
+    const premier = await synchroniserFeed(
+      { reseau: "tiktok" },
+      { lecteurs: { tiktok }, maintenant: () => T0 },
+    );
     expect(premier.success).toBe(true);
     expect(premier.partiel).toBe(true);
     expect(premier.reseaux[0]).toMatchObject({
@@ -170,22 +248,38 @@ describe("TikTok 429 : différé avec attente croissante", () => {
     expect(appels).toBe(1);
 
     // Passage suivant, avant l'échéance : TikTok n'est pas relu.
-    const saute = await synchroniserFeed({ reseau: "tiktok" }, { lecteurs: { tiktok }, maintenant: () => T0 + 60_000 });
+    const saute = await synchroniserFeed(
+      { reseau: "tiktok" },
+      { lecteurs: { tiktok }, maintenant: () => T0 + 60_000 },
+    );
     expect(saute.reseaux[0]!.etat).toBe("differe");
     expect(appels).toBe(1);
 
     // Après l'échéance : relu ; nouveau 429 → attente doublée.
     const t2 = T0 + ATTENTE_LIMITE_MIN_MS + 1;
-    const second = await synchroniserFeed({ reseau: "tiktok" }, { lecteurs: { tiktok }, maintenant: () => t2 });
+    const second = await synchroniserFeed(
+      { reseau: "tiktok" },
+      { lecteurs: { tiktok }, maintenant: () => t2 },
+    );
     expect(appels).toBe(2);
-    expect(second.reseaux[0]!.reprendreApres).toBe(new Date(t2 + 2 * ATTENTE_LIMITE_MIN_MS).toISOString());
+    expect(second.reseaux[0]!.reprendreApres).toBe(
+      new Date(t2 + 2 * ATTENTE_LIMITE_MIN_MS).toISOString(),
+    );
 
     // Rétabli : l'attente est oubliée.
     const t3 = t2 + 2 * ATTENTE_LIMITE_MIN_MS + 1;
-    const ok = await synchroniserFeed({ reseau: "tiktok" }, { lecteurs: { tiktok: reussit("tiktok") }, maintenant: () => t3 });
+    const ok = await synchroniserFeed(
+      { reseau: "tiktok" },
+      { lecteurs: { tiktok: reussit("tiktok") }, maintenant: () => t3 },
+    );
     expect(ok).toMatchObject({ success: true, partiel: false });
-    const apres = await synchroniserFeed({ reseau: "tiktok" }, { lecteurs: { tiktok }, maintenant: () => t3 + 1 });
-    expect(apres.reseaux[0]!.reprendreApres).toBe(new Date(t3 + 1 + ATTENTE_LIMITE_MIN_MS).toISOString());
+    const apres = await synchroniserFeed(
+      { reseau: "tiktok" },
+      { lecteurs: { tiktok }, maintenant: () => t3 + 1 },
+    );
+    expect(apres.reseaux[0]!.reprendreApres).toBe(
+      new Date(t3 + 1 + ATTENTE_LIMITE_MIN_MS).toISOString(),
+    );
   });
 
   test("Retry-After plus long que l'attente prévue : respecté", async () => {
@@ -193,17 +287,25 @@ describe("TikTok 429 : différé avec attente croissante", () => {
       { reseau: "tiktok" },
       { lecteurs: { tiktok: limite(2 * 3600_000) }, maintenant: () => T0 },
     );
-    expect(r.reseaux[0]!.reprendreApres).toBe(new Date(T0 + 2 * 3600_000).toISOString());
+    expect(r.reseaux[0]!.reprendreApres).toBe(
+      new Date(T0 + 2 * 3600_000).toISOString(),
+    );
   });
 
   test("passage « dry » : l'attente n'est pas retenue pour les passages suivants", async () => {
     let appels = 0;
-    const tiktok: LecteurReseau = async p => {
+    const tiktok: LecteurReseau = async (p) => {
       appels++;
       return limite()(p);
     };
-    await synchroniserFeed({ reseau: "tiktok", dry: true }, { lecteurs: { tiktok }, maintenant: () => T0 });
-    await synchroniserFeed({ reseau: "tiktok", dry: true }, { lecteurs: { tiktok }, maintenant: () => T0 + 1 });
+    await synchroniserFeed(
+      { reseau: "tiktok", dry: true },
+      { lecteurs: { tiktok }, maintenant: () => T0 },
+    );
+    await synchroniserFeed(
+      { reseau: "tiktok", dry: true },
+      { lecteurs: { tiktok }, maintenant: () => T0 + 1 },
+    );
     expect(appels).toBe(2);
   });
 
@@ -236,23 +338,50 @@ describe("comptes en échec : publications précédentes gardées", () => {
   test("la chaîne en panne garde ses vidéos et son profil ; les autres sont remplacées", () => {
     const lu = {
       posts: [post("youtube", "nouveau-rg", "UCrg", "2026-10-20T00:00:00Z")],
-      profils: [{ reseau: "youtube", pseudo: "UCrg", nom: "RG" }] as ProfilFeed[],
+      profils: [
+        { reseau: "youtube", pseudo: "UCrg", nom: "RG" },
+      ] as ProfilFeed[],
     };
     const r = conserverComptesEnEchec(lu, precedent, ["UCl5"]);
-    expect(r.posts.map(p => p.idOrigine)).toEqual(["nouveau-rg", "ancien-l5", "ancien-l5-bis"]);
-    expect(r.profils.map(p => p.pseudo)).toEqual(["UCrg", "UCl5"]);
+    expect(r.posts.map((p) => p.idOrigine)).toEqual([
+      "nouveau-rg",
+      "ancien-l5",
+      "ancien-l5-bis",
+    ]);
+    expect(r.profils.map((p) => p.pseudo)).toEqual(["UCrg", "UCl5"]);
   });
 
   test("sans comptes en échec ou sans instantané précédent : la lecture telle quelle", () => {
-    const lu = { posts: [post("youtube", "x", "UCrg", "2026-10-20T00:00:00Z")], profils: [] };
-    expect(conserverComptesEnEchec(lu, precedent, [])).toEqual({ posts: lu.posts, profils: [] });
-    expect(conserverComptesEnEchec(lu, null, ["UCl5"])).toEqual({ posts: lu.posts, profils: [] });
+    const lu = {
+      posts: [post("youtube", "x", "UCrg", "2026-10-20T00:00:00Z")],
+      profils: [],
+    };
+    expect(conserverComptesEnEchec(lu, precedent, [])).toEqual({
+      posts: lu.posts,
+      profils: [],
+    });
+    expect(conserverComptesEnEchec(lu, null, ["UCl5"])).toEqual({
+      posts: lu.posts,
+      profils: [],
+    });
   });
 
   test("bilan : un réseau différé seul reste un succès ; un seuil durable non", () => {
-    const differe = { reseau: "tiktok" as const, ok: true, etat: "differe" as const, posts: 0, vignettes: 0, erreur: "HTTP 429" };
-    expect(bilanFeedSync([differe])).toMatchObject({ success: true, partiel: true });
-    expect(bilanFeedSync([differe], ["tiktok : limité 6 fois d'affilée"]).success).toBe(false);
+    const differe = {
+      reseau: "tiktok" as const,
+      ok: true,
+      etat: "differe" as const,
+      posts: 0,
+      vignettes: 0,
+      erreur: "HTTP 429",
+    };
+    expect(bilanFeedSync([differe])).toMatchObject({
+      success: true,
+      partiel: true,
+    });
+    expect(
+      bilanFeedSync([differe], ["tiktok : limité 6 fois d'affilée"]).success,
+    ).toBe(false);
     expect(bilanFeedSync([]).success).toBe(false);
   });
 });

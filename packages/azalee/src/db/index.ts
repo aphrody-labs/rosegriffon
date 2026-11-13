@@ -5,7 +5,10 @@
  * sous-commandes d'extraction/dev et doivent être importés explicitement.
  */
 
-export { createPostgresClient, PostgresQueryBuilder } from "@rosegriffon/db/postgres-client";
+export {
+  createPostgresClient,
+  PostgresQueryBuilder,
+} from "@rosegriffon/db/postgres-client";
 export {
   createClient,
   hasDatabaseProvider,

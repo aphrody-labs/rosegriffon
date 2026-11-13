@@ -19,7 +19,9 @@ export async function POST(req: Request) {
     // Body optional
   }
   const days = Math.max(1, Math.floor(body.daysSincePending ?? 90));
-  const cutoff = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
+  const cutoff = new Date(
+    Date.now() - days * 24 * 60 * 60 * 1000,
+  ).toISOString();
 
   const { data, error } = await supabase
     .from("patreon_legacy_members")
@@ -30,7 +32,10 @@ export async function POST(req: Request) {
 
   if (error) {
     console.error("[admin/patreon/cleanup]", error);
-    return NextResponse.json({ error: error.message, ok: false }, { status: 500 });
+    return NextResponse.json(
+      { error: error.message, ok: false },
+      { status: 500 },
+    );
   }
 
   const expiredCount = await archiveExpiredTokens(supabase);
@@ -42,7 +47,9 @@ export async function POST(req: Request) {
   });
 }
 
-async function archiveExpiredTokens(supabase: ReturnType<typeof createPostgresClient>): Promise<number> {
+async function archiveExpiredTokens(
+  supabase: ReturnType<typeof createPostgresClient>,
+): Promise<number> {
   const cutoff = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
   const { data, error } = await supabase
     .from("patreon_oauth_tokens")

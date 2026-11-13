@@ -12,5 +12,10 @@ export {
   type SearchConfig,
 } from "../search/index.js";
 export * from "../characters/comparison-engine.js";
-export { initRomaji, toRomaji, toRomajiTitleCase, toKana } from "../utils/romaji.js";
+export {
+  initRomaji,
+  toRomaji,
+  toRomajiTitleCase,
+  toKana,
+} from "../utils/romaji.js";
 export * as Wiki from "../wiki/index.js";

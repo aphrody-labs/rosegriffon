@@ -99,10 +99,18 @@ interface DecodedWav {
 /** Parse un WAV (RIFF/WAVE) PCM int 8/16/24/32 ou IEEE float 32 → float32 planaire. */
 function decodeWav(wav: Uint8Array): DecodedWav {
   const view = new DataView(wav.buffer, wav.byteOffset, wav.byteLength);
-  if (view.getUint32(0, false) !== 0x52494646 /* "RIFF" */ || view.getUint32(8, false) !== 0x57415645 /* "WAVE" */) {
+  if (
+    view.getUint32(0, false) !== 0x52494646 /* "RIFF" */ ||
+    view.getUint32(8, false) !== 0x57415645 /* "WAVE" */
+  ) {
     throw new Error("WAV invalide (RIFF/WAVE attendu)");
   }
-  let fmt: { audioFormat: number; channels: number; sampleRate: number; bits: number } | null = null;
+  let fmt: {
+    audioFormat: number;
+    channels: number;
+    sampleRate: number;
+    bits: number;
+  } | null = null;
   let dataOffset = 0;
   let dataLength = 0;
   // Parcours des sous-chunks (fmt , data, …) — tolère LIST/fact entre les deux.
@@ -132,7 +140,10 @@ function decodeWav(wav: Uint8Array): DecodedWav {
   const bytesPerSample = bits >> 3;
   const frameSize = bytesPerSample * channels;
   const frames = Math.floor(dataLength / frameSize);
-  const out: Float32Array[] = Array.from({ length: channels }, () => new Float32Array(frames));
+  const out: Float32Array[] = Array.from(
+    { length: channels },
+    () => new Float32Array(frames),
+  );
   const isFloat = audioFormat === 3;
 
   for (let i = 0; i < frames; i++) {
@@ -168,7 +179,7 @@ function throwIfAborted(signal?: AbortSignal): void {
 
 /** Laisse respirer le thread principal entre deux frames (évite le freeze UI). */
 function nextTick(): Promise<void> {
-  return new Promise(resolve => setTimeout(resolve, 0));
+  return new Promise((resolve) => setTimeout(resolve, 0));
 }
 
 /**
@@ -186,7 +197,10 @@ async function encodeAudio(
   const numberOfChannels = channels.length;
   const startUs = Math.round((source.startSec ?? 0) * 1_000_000);
   // On ne dépasse pas la durée vidéo : un cut-in audio plus long que la timeline est tronqué.
-  const maxFrames = Math.min(decoded.frames, Math.round((durationSec - (source.startSec ?? 0)) * sampleRate));
+  const maxFrames = Math.min(
+    decoded.frames,
+    Math.round((durationSec - (source.startSec ?? 0)) * sampleRate),
+  );
   if (maxFrames <= 0) {
     return;
   }
@@ -194,7 +208,7 @@ async function encodeAudio(
   const errors: Error[] = [];
   const encoder = new AudioEncoder({
     output: (chunk, meta) => muxer.addAudioChunk(chunk, meta),
-    error: e => errors.push(e),
+    error: (e) => errors.push(e),
   });
   encoder.configure({
     codec: "mp4a.40.2", // AAC-LC
@@ -220,7 +234,10 @@ async function encodeAudio(
       numberOfFrames: count,
       numberOfChannels,
       timestamp: startUs + Math.round((start / sampleRate) * 1_000_000),
-      data: count === BLOCK ? interleaved : interleaved.subarray(0, count * numberOfChannels),
+      data:
+        count === BLOCK
+          ? interleaved
+          : interleaved.subarray(0, count * numberOfChannels),
     });
     encoder.encode(data);
     data.close();
@@ -245,17 +262,31 @@ async function encodeAudio(
  * @throws `DOMException("AbortError")` si `signal` est déclenché ; `Error` si WebCodecs indispo,
  *   si la config H.264/AAC n'est pas supportée, ou si l'encodage échoue.
  */
-export async function exportCutinVideo(options: CutinExportOptions): Promise<Blob> {
+export async function exportCutinVideo(
+  options: CutinExportOptions,
+): Promise<Blob> {
   if (!isVideoExportSupported()) {
-    throw new Error("WebCodecs (VideoEncoder/VideoFrame) indisponible dans ce navigateur");
+    throw new Error(
+      "WebCodecs (VideoEncoder/VideoFrame) indisponible dans ce navigateur",
+    );
   }
-  const { canvas, durationSec, fps = 30, renderAt, audio, onProgress, signal } = options;
+  const {
+    canvas,
+    durationSec,
+    fps = 30,
+    renderAt,
+    audio,
+    onProgress,
+    signal,
+  } = options;
 
   // Dimensions paires (H.264 exige des dimensions divisibles par 2).
   const width = canvas.width - (canvas.width % 2);
   const height = canvas.height - (canvas.height % 2);
   if (width === 0 || height === 0) {
-    throw new Error("Canvas de taille nulle — le rendu R3F doit être monté et dimensionné");
+    throw new Error(
+      "Canvas de taille nulle — le rendu R3F doit être monté et dimensionné",
+    );
   }
 
   const totalFrames = Math.max(1, Math.round(durationSec * fps));
@@ -272,7 +303,11 @@ export async function exportCutinVideo(options: CutinExportOptions): Promise<Blo
       ? {
           audio: (() => {
             const d = decodeWav(audio.wav);
-            return { codec: "aac" as const, numberOfChannels: d.channels.length, sampleRate: d.sampleRate };
+            return {
+              codec: "aac" as const,
+              numberOfChannels: d.channels.length,
+              sampleRate: d.sampleRate,
+            };
           })(),
         }
       : {}),
@@ -282,7 +317,7 @@ export async function exportCutinVideo(options: CutinExportOptions): Promise<Blo
   const errors: Error[] = [];
   const encoder = new VideoEncoder({
     output: (chunk, meta) => muxer.addVideoChunk(chunk, meta),
-    error: e => errors.push(e),
+    error: (e) => errors.push(e),
   });
   const config: VideoEncoderConfig = {
     codec: avcCodecString(width, height, fps),
@@ -296,7 +331,9 @@ export async function exportCutinVideo(options: CutinExportOptions): Promise<Blo
   // Vérifie le support avant de configurer (certaines combinaisons profil/niveau sont refusées).
   const supportCheck = await VideoEncoder.isConfigSupported(config);
   if (!supportCheck.supported) {
-    throw new Error(`Config H.264 non supportée: ${config.codec} ${width}x${height}`);
+    throw new Error(
+      `Config H.264 non supportée: ${config.codec} ${width}x${height}`,
+    );
   }
   encoder.configure(config);
 

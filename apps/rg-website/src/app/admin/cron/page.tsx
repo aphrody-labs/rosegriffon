@@ -1,6 +1,13 @@
 import { AlertTriangle, CheckCircle2, Timer, XCircle } from "lucide-react";
 
-import { AdminPageHeader, Card, CardContent, CardDescription, CardHeader, CardTitle } from "@rosegriffon/ui";
+import {
+  AdminPageHeader,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@rosegriffon/ui";
 
 import { requireAdmin } from "@/lib/auth-helpers";
 import { etatDuCron, historiqueDuCron } from "@/lib/bot/cron";
@@ -10,7 +17,8 @@ import { TableauTaches } from "./TableauTaches";
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  description: "Les tâches planifiées du registre rg-cron : planification, dernier état et lancement manuel.",
+  description:
+    "Les tâches planifiées du registre rg-cron : planification, dernier état et lancement manuel.",
   title: "Tâches planifiées — Administration",
 };
 
@@ -23,7 +31,9 @@ function duree(secondes: number): string {
     return `${minutes} min`;
   }
   const heures = Math.floor(minutes / 60);
-  return heures < 24 ? `${heures} h ${minutes % 60} min` : `${Math.floor(heures / 24)} j`;
+  return heures < 24
+    ? `${heures} h ${minutes % 60} min`
+    : `${Math.floor(heures / 24)} j`;
 }
 
 function dureeMs(millisecondes: number): string {
@@ -41,7 +51,10 @@ function dureeMs(millisecondes: number): string {
  */
 export default async function CronPage() {
   const { role } = await requireAdmin();
-  const [cron, historique] = await Promise.all([etatDuCron(), historiqueDuCron()]);
+  const [cron, historique] = await Promise.all([
+    etatDuCron(),
+    historiqueDuCron(),
+  ]);
 
   return (
     <div className="mx-auto max-w-7xl space-y-8 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
@@ -69,7 +82,8 @@ export default async function CronPage() {
           <CardDescription>
             {cron.joignable
               ? `En ligne · ${cron.bilan.total} tâches · ${cron.bilan.reussies} réussies à la dernière exécution · ${cron.bilan.enEchec} en échec · ${cron.bilan.jamaisExecutees} sans exécution connue.`
-              : (cron.erreur ?? "Injoignable. Les tâches ci-dessous sont celles du catalogue partagé.")}
+              : (cron.erreur ??
+                "Injoignable. Les tâches ci-dessous sont celles du catalogue partagé.")}
           </CardDescription>
         </CardHeader>
         {(cron.bilan.enEchec > 0 || !cron.historiqueDisponible) && (
@@ -84,19 +98,25 @@ export default async function CronPage() {
         )}
       </Card>
 
-      <TableauTaches taches={cron.taches} role={role} cronJoignable={cron.joignable} />
+      <TableauTaches
+        taches={cron.taches}
+        role={role}
+        cronJoignable={cron.joignable}
+      />
 
       <Card>
         <CardHeader>
           <CardTitle>Dernières exécutions</CardTitle>
           <CardDescription>
-            Historique persistant PostgreSQL, alimenté nativement par <code>rg-cron</code>.
+            Historique persistant PostgreSQL, alimenté nativement par{" "}
+            <code>rg-cron</code>.
           </CardDescription>
         </CardHeader>
         <CardContent>
           {historique.length === 0 ? (
             <p className="text-sm text-muted-foreground">
-              Aucune exécution disponible : vérifier la migration <code>cron_executions</code>.
+              Aucune exécution disponible : vérifier la migration{" "}
+              <code>cron_executions</code>.
             </p>
           ) : (
             <div className="overflow-x-auto">
@@ -111,12 +131,21 @@ export default async function CronPage() {
                 </thead>
                 <tbody>
                   {historique.map((execution, index) => (
-                    <tr key={`${execution.demarre_le}-${execution.tache}-${index}`} className="border-b last:border-0">
-                      <td className="px-2 py-2 font-mono text-xs">{execution.tache}</td>
-                      <td className={`px-2 py-2 ${execution.succes ? "text-succes" : "text-destructive"}`}>
+                    <tr
+                      key={`${execution.demarre_le}-${execution.tache}-${index}`}
+                      className="border-b last:border-0"
+                    >
+                      <td className="px-2 py-2 font-mono text-xs">
+                        {execution.tache}
+                      </td>
+                      <td
+                        className={`px-2 py-2 ${execution.succes ? "text-succes" : "text-destructive"}`}
+                      >
                         {execution.succes ? "Réussie" : "Échec"}
                       </td>
-                      <td className="px-2 py-2">{dureeMs(execution.duree_ms)}</td>
+                      <td className="px-2 py-2">
+                        {dureeMs(execution.duree_ms)}
+                      </td>
                       <td className="px-2 py-2 text-muted-foreground">
                         {new Date(execution.demarre_le).toLocaleString("fr-FR")}
                       </td>

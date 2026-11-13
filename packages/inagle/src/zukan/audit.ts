@@ -110,7 +110,10 @@ export function auditZukanGameToSeries(game?: string): string | null {
   if (game === "Inazuma Eleven: Victory Road") return "Victory Road";
   if (game === "Inazuma Eleven Ares") return "Ares";
   if (game.startsWith("Inazuma Eleven GO Galaxy")) return "Galaxy";
-  if (game.startsWith("Inazuma Eleven GO Chrono Stones") || game.startsWith("Inazuma Eleven GO2"))
+  if (
+    game.startsWith("Inazuma Eleven GO Chrono Stones") ||
+    game.startsWith("Inazuma Eleven GO2")
+  )
     return "Chrono Stone";
   if (game.startsWith("Inazuma Eleven GO")) return "Inazuma Eleven GO";
   if (game.startsWith("Inazuma Eleven 3")) return "Inazuma Eleven 3";
@@ -149,7 +152,8 @@ export function auditSpearmanCorrelation(a: number[], b: number[]): number {
 // Mismatch detection — critères partagés
 // ============================================================================
 
-export type AuditMismatchType = "STALE_HASH" | "NAME_MISMATCH" | "GENDER_MISMATCH" | "ATTR_MISMATCH";
+export type AuditMismatchType =
+  "STALE_HASH" | "NAME_MISMATCH" | "GENDER_MISMATCH" | "ATTR_MISMATCH";
 
 /** Résultat d'audit pour une ligne DB. */
 export interface AuditMismatch {
@@ -172,8 +176,13 @@ export interface AuditMismatch {
  *  - eraMismatch (ignoré pour Héros Ares) ;
  *  - corrélation de stats < 0.3 → raison "STATS".
  */
-export function evaluateRow(db: AuditDbRow, zukanByHash: Map<string, AuditZukanEntry[]>): AuditMismatch | null {
-  const zukanEntries = db.zukan_hash ? zukanByHash.get(db.zukan_hash) : undefined;
+export function evaluateRow(
+  db: AuditDbRow,
+  zukanByHash: Map<string, AuditZukanEntry[]>,
+): AuditMismatch | null {
+  const zukanEntries = db.zukan_hash
+    ? zukanByHash.get(db.zukan_hash)
+    : undefined;
   if (!zukanEntries || zukanEntries.length === 0) {
     return {
       type: "STALE_HASH",
@@ -192,7 +201,9 @@ export function evaluateRow(db: AuditDbRow, zukanByHash: Map<string, AuditZukanE
   const dbFirstFr = dbNameFr.split(/\s+/)[0];
 
   const isMixiMax = dbNameEn.includes("×") || dbNameEn.includes("+");
-  const dbBaseName = isMixiMax ? dbNameEn.split(/[×+]/)[0].trim().split(/\s+/)[0] : null;
+  const dbBaseName = isMixiMax
+    ? dbNameEn.split(/[×+]/)[0].trim().split(/\s+/)[0]
+    : null;
 
   const nameMatch =
     zukanName === dbNameEn ||
@@ -203,9 +214,17 @@ export function evaluateRow(db: AuditDbRow, zukanByHash: Map<string, AuditZukanE
     zukanName.includes(dbFirst) ||
     dbNameEn.includes(zukanFirst);
 
-  const posMismatch = z.position && db.position && auditNormPos(z.position) !== auditNormPos(db.position);
-  const elemMismatch = !isMixiMax && z.element && db.element && auditNormElem(z.element) !== auditNormElem(db.element);
-  const zGender = z.gender === "Male" ? "M" : z.gender === "Female" ? "F" : null;
+  const posMismatch =
+    z.position &&
+    db.position &&
+    auditNormPos(z.position) !== auditNormPos(db.position);
+  const elemMismatch =
+    !isMixiMax &&
+    z.element &&
+    db.element &&
+    auditNormElem(z.element) !== auditNormElem(db.element);
+  const zGender =
+    z.gender === "Male" ? "M" : z.gender === "Female" ? "F" : null;
   const genderMismatch = zGender && db.gender && zGender !== db.gender;
 
   const isAresHero = db.rarity_label === "Héros" && db.series === "Ares";
@@ -236,24 +255,27 @@ export function evaluateRow(db: AuditDbRow, zukanByHash: Map<string, AuditZukanE
     ];
     const zTotal = zArr.reduce((a, b) => a + b, 0);
     const dTotal = dArr.reduce((a, b) => a + b, 0);
-    if (zTotal > 0 && dTotal > 0) statCorrelation = auditSpearmanCorrelation(zArr, dArr);
+    if (zTotal > 0 && dTotal > 0)
+      statCorrelation = auditSpearmanCorrelation(zArr, dArr);
   }
 
   const reasons: string[] = [];
   if (!nameMatch) reasons.push(`NAME: zukan="${z.name}" ≠ db="${db.name_en}"`);
   if (posMismatch) reasons.push(`POS: zukan=${z.position} ≠ db=${db.position}`);
   if (elemMismatch) reasons.push(`ELEM: zukan=${z.element} ≠ db=${db.element}`);
-  if (genderMismatch) reasons.push(`GENDER: zukan=${z.gender} ≠ db=${db.gender}`);
-  if (eraMismatch) reasons.push(`ERA: zukan=${zSeries}(${zEra}) ≠ db=${db.series}(${dbEra})`);
+  if (genderMismatch)
+    reasons.push(`GENDER: zukan=${z.gender} ≠ db=${db.gender}`);
+  if (eraMismatch)
+    reasons.push(`ERA: zukan=${zSeries}(${zEra}) ≠ db=${db.series}(${dbEra})`);
   if (statCorrelation !== undefined && statCorrelation < 0.3) {
     reasons.push(`STATS: correlation=${statCorrelation.toFixed(2)} (very low)`);
   }
 
   if (reasons.length === 0) return null;
 
-  const type: AuditMismatchType = reasons.some(r => r.startsWith("NAME"))
+  const type: AuditMismatchType = reasons.some((r) => r.startsWith("NAME"))
     ? "NAME_MISMATCH"
-    : reasons.some(r => r.startsWith("GENDER"))
+    : reasons.some((r) => r.startsWith("GENDER"))
       ? "GENDER_MISMATCH"
       : "ATTR_MISMATCH";
 
@@ -261,7 +283,9 @@ export function evaluateRow(db: AuditDbRow, zukanByHash: Map<string, AuditZukanE
 }
 
 /** Index les entrées zukan par hash (toutes les entrées d'un même hash). */
-export function indexZukanByHash(entries: AuditZukanEntry[]): Map<string, AuditZukanEntry[]> {
+export function indexZukanByHash(
+  entries: AuditZukanEntry[],
+): Map<string, AuditZukanEntry[]> {
   const map = new Map<string, AuditZukanEntry[]>();
   for (const z of entries) {
     if (z.zukanHash) {
@@ -273,7 +297,9 @@ export function indexZukanByHash(entries: AuditZukanEntry[]): Map<string, AuditZ
 }
 
 /** Index la première entrée JA par hash (pour `zukanNameJa`). */
-export function indexZukanJaByHash(entries: AuditZukanEntry[]): Map<string, AuditZukanEntry> {
+export function indexZukanJaByHash(
+  entries: AuditZukanEntry[],
+): Map<string, AuditZukanEntry> {
   const map = new Map<string, AuditZukanEntry>();
   for (const z of entries) {
     if (z.zukanHash && !map.has(z.zukanHash)) map.set(z.zukanHash, z);
@@ -282,11 +308,14 @@ export function indexZukanJaByHash(entries: AuditZukanEntry[]): Map<string, Audi
 }
 
 /** Détecte les hashes partagés entre plusieurs noms distincts (duplicate_hash). */
-export function detectDuplicateHashes(rows: AuditDbRow[]): Map<string, Set<string>> {
+export function detectDuplicateHashes(
+  rows: AuditDbRow[],
+): Map<string, Set<string>> {
   const hashToNames = new Map<string, Set<string>>();
   for (const r of rows) {
     if (!r.zukan_hash) continue;
-    if (!hashToNames.has(r.zukan_hash)) hashToNames.set(r.zukan_hash, new Set());
+    if (!hashToNames.has(r.zukan_hash))
+      hashToNames.set(r.zukan_hash, new Set());
     hashToNames.get(r.zukan_hash)!.add(r.name_en || r.name_ja || "");
   }
   return hashToNames;

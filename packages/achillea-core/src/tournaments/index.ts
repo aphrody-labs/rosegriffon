@@ -78,8 +78,13 @@ export function circuitSizeWeight(size: number): number {
  * `denseRank` 1 → "1er", 2 → "2e", 3 → tranche 3-4, 4 → tranche 5-8, etc.
  * (tranche = éliminés au même tour, taille `2^(denseRank-2)`).
  */
-export function denseRankToTier(denseRank: number): { lo: number; hi: number; label: string } {
-  if (denseRank <= 0 || !Number.isFinite(denseRank)) return { lo: 0, hi: 0, label: "?" };
+export function denseRankToTier(denseRank: number): {
+  lo: number;
+  hi: number;
+  label: string;
+} {
+  if (denseRank <= 0 || !Number.isFinite(denseRank))
+    return { lo: 0, hi: 0, label: "?" };
   if (denseRank === 1) return { lo: 1, hi: 1, label: "1er" };
   if (denseRank === 2) return { lo: 2, hi: 2, label: "2e" };
   const tierSize = 2 ** (denseRank - 2);
@@ -162,7 +167,10 @@ export function circuitPointsToTier(points: number): CircuitTier {
  */
 export const GOAL_AVERAGE_PERFECT = 999;
 
-export function goalAverage(goalsScored: number, goalsConceded: number): number {
+export function goalAverage(
+  goalsScored: number,
+  goalsConceded: number,
+): number {
   if (goalsConceded > 0) return goalsScored / goalsConceded;
   return goalsScored > 0 ? GOAL_AVERAGE_PERFECT : 0;
 }

@@ -18,10 +18,12 @@ const SITE = process.env.NIE_SITE_BASE ?? "http://127.0.0.1:8085";
 // final, et `deps/` ne porte que les objets intermédiaires. Le chemin `deps/` de la première
 // version n'existait déjà plus au moment où ce script a servi.
 // Override explicitly when proving a shipped artifact instead of a local build.
-const WASM_PATH = process.env.NIE_LUA_WASM_PATH ?? new URL(
-  "../../../../target/wasm32-unknown-emscripten/release/aphrody_nie_lua_web.wasm",
-  import.meta.url,
-).pathname;
+const WASM_PATH =
+  process.env.NIE_LUA_WASM_PATH ??
+  new URL(
+    "../../../../target/wasm32-unknown-emscripten/release/aphrody_nie_lua_web.wasm",
+    import.meta.url,
+  ).pathname;
 
 interface SearchEntry {
   chemin: string;
@@ -40,7 +42,10 @@ async function searchAll(prefixe: string): Promise<SearchEntry[]> {
   for (;;) {
     const url = `${SITE}/api/v1/recherche?prefixe=${encodeURIComponent(prefixe)}&per_page=${perPage}&page=${page}`;
     const response = await fetch(url);
-    if (!response.ok) throw new Error(`recherche ${prefixe} page ${page}: HTTP ${response.status}`);
+    if (!response.ok)
+      throw new Error(
+        `recherche ${prefixe} page ${page}: HTTP ${response.status}`,
+      );
     const body = (await response.json()) as SearchResponse;
     out.push(...body.fichiers);
     if (out.length >= body.total || body.fichiers.length === 0) break;
@@ -71,25 +76,42 @@ function firstDifferingPath(a: unknown, b: unknown, path = "$"): string | null {
 }
 
 async function main() {
-  const manifestPath = new URL("../../../../data/menu/manifest.json", import.meta.url).pathname;
+  const manifestPath = new URL(
+    "../../../../data/menu/manifest.json",
+    import.meta.url,
+  ).pathname;
   const manifest = await Bun.file(manifestPath).json();
-  const screens: string[] = manifest.runtime_matrix.results.map((r: { screen: string }) => r.screen);
+  const screens: string[] = manifest.runtime_matrix.results.map(
+    (r: { screen: string }) => r.screen,
+  );
   console.log(`${screens.length} families from runtime_matrix.results`);
 
   console.log("Fetching wasm module...");
   const wasmBytes = await Bun.file(WASM_PATH).arrayBuffer();
-  console.log(JSON.stringify({ artifact: WASM_PATH, bytes: wasmBytes.byteLength,
-    sha256: new Bun.CryptoHasher("sha256").update(wasmBytes).digest("hex") }));
+  console.log(
+    JSON.stringify({
+      artifact: WASM_PATH,
+      bytes: wasmBytes.byteLength,
+      sha256: new Bun.CryptoHasher("sha256").update(wasmBytes).digest("hex"),
+    }),
+  );
   const runtime = await createLuaRuntime(wasmBytes);
 
-  console.log("Listing scripts (data/common/script/lua/) and menu configs (data/common/gamedata/menu/cfg/)...");
+  console.log(
+    "Listing scripts (data/common/script/lua/) and menu configs (data/common/gamedata/menu/cfg/)...",
+  );
   const [scripts, configs] = await Promise.all([
     searchAll("data/common/script/lua/"),
     searchAll("data/common/gamedata/menu/cfg/"),
   ]);
-  console.log(`  ${scripts.length} .lua.bin under scripts, ${configs.length} entries under menu/cfg`);
+  console.log(
+    `  ${scripts.length} .lua.bin under scripts, ${configs.length} entries under menu/cfg`,
+  );
 
-  const toLoad = [...scripts, ...configs.filter((entry) => entry.chemin.endsWith("_setting.cfg.bin"))];
+  const toLoad = [
+    ...scripts,
+    ...configs.filter((entry) => entry.chemin.endsWith("_setting.cfg.bin")),
+  ];
   let loaded = 0;
   for (const entry of toLoad) {
     try {
@@ -97,7 +119,9 @@ async function main() {
       runtime.loadScript(entry.chemin, bytes);
       loaded += 1;
     } catch (error) {
-      console.error(`  failed to fetch ${entry.chemin}: ${(error as Error).message}`);
+      console.error(
+        `  failed to fetch ${entry.chemin}: ${(error as Error).message}`,
+      );
     }
   }
   console.log(`Loaded ${loaded}/${toLoad.length} files into the wasm registry`);
@@ -108,8 +132,11 @@ async function main() {
   // là-dessus sans que la VM soit en cause.
   const menuText: Array<[number, string]> = [];
   for (let page = 1; ; page += 1) {
-    const body = await (await fetch(`${SITE}/api/v1/text/fr/menu_text?page=${page}&per_page=200`)).json();
-    for (const ligne of body.results?.elements ?? []) menuText.push([ligne.hash, ligne.text]);
+    const body = await (
+      await fetch(`${SITE}/api/v1/text/fr/menu_text?page=${page}&per_page=200`)
+    ).json();
+    for (const ligne of body.results?.elements ?? [])
+      menuText.push([ligne.hash, ligne.text]);
     if (page >= (body.results?.pages ?? 1)) break;
   }
   runtime.loadText(menuText);
@@ -123,24 +150,33 @@ async function main() {
     try {
       const raw = runtime.replay(screen, "{}");
       wasmJson = JSON.parse(raw);
-      if (wasmJson && typeof wasmJson === "object" && "error" in (wasmJson as object)) {
+      if (
+        wasmJson &&
+        typeof wasmJson === "object" &&
+        "error" in (wasmJson as object)
+      ) {
         wasmError = (wasmJson as { error: string }).error;
       }
     } catch (error) {
       wasmError = `wasm threw: ${(error as Error).message}`;
     }
 
-    const nativeResponse = await fetch(`${SITE}/api/v1/menu/runtime/${screen}`, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: "{}",
-    });
+    const nativeResponse = await fetch(
+      `${SITE}/api/v1/menu/runtime/${screen}`,
+      {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: "{}",
+      },
+    );
     const nativeText = await nativeResponse.text();
     let nativeJson: unknown;
     try {
       nativeJson = JSON.parse(nativeText);
     } catch {
-      nativeJson = { error: `non-JSON native response (HTTP ${nativeResponse.status})` };
+      nativeJson = {
+        error: `non-JSON native response (HTTP ${nativeResponse.status})`,
+      };
     }
 
     if (wasmError !== null) {
@@ -186,7 +222,9 @@ async function main() {
   // regard l'a vu. `NIE_DIFFERENTIAL_FLOOR` le relève quand le plancher monte.
   const plancher = Number(process.env.NIE_DIFFERENTIAL_FLOOR ?? 10);
   if (identical < plancher) {
-    console.error(`RÉGRESSION : ${identical} identiques pour un plancher de ${plancher}`);
+    console.error(
+      `RÉGRESSION : ${identical} identiques pour un plancher de ${plancher}`,
+    );
     process.exit(1);
   }
 }

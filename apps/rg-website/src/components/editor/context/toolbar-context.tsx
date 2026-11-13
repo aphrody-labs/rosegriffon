@@ -9,7 +9,10 @@ const Context = createContext<{
   $updateToolbar: () => void;
   blockType: string;
   setBlockType: (blockType: string) => void;
-  showModal: (title: string, showModal: (onClose: () => void) => JSX.Element) => void;
+  showModal: (
+    title: string,
+    showModal: (onClose: () => void) => JSX.Element,
+  ) => void;
   isBold: boolean;
   isItalic: boolean;
   isUnderline: boolean;
@@ -48,7 +51,10 @@ export function ToolbarContext({
   $updateToolbar: () => void;
   blockType: string;
   setBlockType: (blockType: string) => void;
-  showModal: (title: string, showModal: (onClose: () => void) => JSX.Element) => void;
+  showModal: (
+    title: string,
+    showModal: (onClose: () => void) => JSX.Element,
+  ) => void;
   isBold: boolean;
   isItalic: boolean;
   isUnderline: boolean;

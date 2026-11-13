@@ -18,7 +18,12 @@ import type { Database } from "@rosegriffon/db/schema";
 import { dbPlugin } from "../../../plugins/db";
 import { journaliserAudit } from "../audit";
 import { requireSession, ROLE_MODERATOR } from "../guards";
-import { IMAGE_ID_PATTERN, MAX_IMAGE_UPLOAD_BYTES, publicImageStorage, sniffImageMime } from "../storage";
+import {
+  IMAGE_ID_PATTERN,
+  MAX_IMAGE_UPLOAD_BYTES,
+  publicImageStorage,
+  sniffImageMime,
+} from "../storage";
 
 const FOLDER = "proxy";
 
@@ -50,14 +55,26 @@ export const proxyController = new Elysia({ prefix: "/proxy" })
       if (auth.error) return auth.error;
       const file = (body as { file?: unknown } | null)?.file;
       if (!(file instanceof Blob))
-        return status(400, { error: "No file uploaded", detail: "Champ multipart 'file' manquant" });
+        return status(400, {
+          error: "No file uploaded",
+          detail: "Champ multipart 'file' manquant",
+        });
       if (file.size > MAX_IMAGE_UPLOAD_BYTES)
-        return status(413, { error: "File too large", detail: `Taille max ${MAX_IMAGE_UPLOAD_BYTES / (1024 * 1024)} Mo` });
+        return status(413, {
+          error: "File too large",
+          detail: `Taille max ${MAX_IMAGE_UPLOAD_BYTES / (1024 * 1024)} Mo`,
+        });
       const bytes = new Uint8Array(await file.arrayBuffer());
       if (bytes.byteLength === 0 || !sniffImageMime(bytes))
-        return status(400, { error: "Upload rejected", detail: "Type d'image non supporté (png, jpeg, webp, gif uniquement)" });
+        return status(400, {
+          error: "Upload rejected",
+          detail: "Type d'image non supporté (png, jpeg, webp, gif uniquement)",
+        });
       const storage = publicImageStorage();
-      if (!storage) return status(503, { error: "Image upload disabled (stockage Supabase non configuré)" });
+      if (!storage)
+        return status(503, {
+          error: "Image upload disabled (stockage Supabase non configuré)",
+        });
 
       const images = imageDb(db);
       const hash = new Bun.CryptoHasher("md5").update(bytes).digest("hex");
@@ -87,7 +104,10 @@ export const proxyController = new Elysia({ prefix: "/proxy" })
           .execute();
         return { id, url };
       } catch (err) {
-        return status(500, { error: "Proxy upload failed", detail: err instanceof Error ? err.message : undefined });
+        return status(500, {
+          error: "Proxy upload failed",
+          detail: err instanceof Error ? err.message : undefined,
+        });
       }
     },
     {
@@ -106,7 +126,8 @@ export const proxyController = new Elysia({ prefix: "/proxy" })
     async ({ db, headers, params: { id } }) => {
       const auth = await requireSession(headers);
       if (auth.error) return auth.error;
-      if (!IMAGE_ID_PATTERN.test(id)) return status(400, { error: "Invalid image id" });
+      if (!IMAGE_ID_PATTERN.test(id))
+        return status(400, { error: "Invalid image id" });
       const images = imageDb(db);
       const row = await images
         .selectFrom("image")
@@ -116,27 +137,48 @@ export const proxyController = new Elysia({ prefix: "/proxy" })
         .executeTakeFirst();
       if (!row) return status(404, { error: "Image introuvable" });
       if (!row.tags?.includes(uploaderTag(auth.session.id))) {
-        const actor = await db.selectFrom("user").select("role").where("id", "=", auth.session.id).executeTakeFirst();
-        if ((actor?.role ?? 0) < ROLE_MODERATOR) return status(403, { error: "Réservé au déposant ou au staff" });
+        const actor = await db
+          .selectFrom("user")
+          .select("role")
+          .where("id", "=", auth.session.id)
+          .executeTakeFirst();
+        if ((actor?.role ?? 0) < ROLE_MODERATOR)
+          return status(403, { error: "Réservé au déposant ou au staff" });
       }
       const storage = publicImageStorage();
-      if (!storage) return status(503, { error: "Image deletion disabled (stockage Supabase non configuré)" });
+      if (!storage)
+        return status(503, {
+          error: "Image deletion disabled (stockage Supabase non configuré)",
+        });
       try {
         const ok = await storage.deleteImage(id, FOLDER);
         if (ok)
-          await images.transaction().execute(async trx => {
-            await trx.deleteFrom("image").where("file_name", "=", id).where("base_path", "=", FOLDER).execute();
+          await images.transaction().execute(async (trx) => {
+            await trx
+              .deleteFrom("image")
+              .where("file_name", "=", id)
+              .where("base_path", "=", FOLDER)
+              .execute();
             await journaliserAudit(trx as unknown as Kysely<Database>, {
               acteur: auth.session.id,
               action: "image.delete",
               cibleType: "image",
               cibleId: id,
-              charge: { folder: FOLDER, uploader: row.tags?.find(tag => tag.startsWith("uploader:"))?.slice(9) ?? null },
+              charge: {
+                folder: FOLDER,
+                uploader:
+                  row.tags
+                    ?.find((tag) => tag.startsWith("uploader:"))
+                    ?.slice(9) ?? null,
+              },
             });
           });
         return { success: ok };
       } catch (err) {
-        return status(500, { error: "Proxy delete failed", detail: err instanceof Error ? err.message : undefined });
+        return status(500, {
+          error: "Proxy delete failed",
+          detail: err instanceof Error ? err.message : undefined,
+        });
       }
     },
     {

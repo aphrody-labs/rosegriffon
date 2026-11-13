@@ -31,7 +31,8 @@ export const metadata: Metadata = {
   description:
     "Toutes les banques sonores d'Inazuma Eleven: Victory Road — voix des personnages, musiques, techniques et effets, décodées à la volée depuis les fichiers du jeu.",
   openGraph: withDefaultOgImage({
-    description: "Voix, musiques, techniques et effets d'Inazuma Eleven: Victory Road, décodés live depuis les CPK.",
+    description:
+      "Voix, musiques, techniques et effets d'Inazuma Eleven: Victory Road, décodés live depuis les CPK.",
     locale: "fr_FR",
     siteName: "Azalée - Inazuma Eleven Victory Road",
     title: "Sons & voix | Azalée",
@@ -49,7 +50,10 @@ const SOURCES = [
 ] as const;
 
 export default async function SonsPage() {
-  const [listings, index] = await Promise.all([Promise.all(SOURCES.map(s => lsOrNull(s.dir, 20_000))), ownerIndex()]);
+  const [listings, index] = await Promise.all([
+    Promise.all(SOURCES.map((s) => lsOrNull(s.dir, 20_000))),
+    ownerIndex(),
+  ]);
 
   const banks: BankEntry[] = [];
   for (const [i, listing] of listings.entries()) {
@@ -72,8 +76,8 @@ export default async function SonsPage() {
   }
   banks.sort((a, b) => a.name.localeCompare(b.name, "fr", { numeric: true }));
 
-  const indisponible = listings.every(l => l === null);
-  const nommees = banks.filter(b => b.owner).length;
+  const indisponible = listings.every((l) => l === null);
+  const nommees = banks.filter((b) => b.owner).length;
 
   return (
     <div className="w-full space-y-6">
@@ -85,7 +89,8 @@ export default async function SonsPage() {
 
       {indisponible ? (
         <MediaEmpty>
-          Le VFS du jeu est momentanément injoignable — la liste des banques ne peut pas être établie.
+          Le VFS du jeu est momentanément injoignable — la liste des banques ne
+          peut pas être établie.
         </MediaEmpty>
       ) : (
         <SoundGallery banks={banks} namedCount={nommees} />

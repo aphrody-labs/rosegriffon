@@ -25,11 +25,18 @@ type Recuperer = (url: string, init: RequestInit) => Promise<Response>;
 
 export async function imageServie(
   url: string | null | undefined,
-  { recuperer = fetch as Recuperer, delaiMs = DELAI_MS }: { recuperer?: Recuperer; delaiMs?: number } = {},
+  {
+    recuperer = fetch as Recuperer,
+    delaiMs = DELAI_MS,
+  }: { recuperer?: Recuperer; delaiMs?: number } = {},
 ): Promise<boolean> {
   if (typeof url !== "string" || !/^https?:\/\//.test(url)) return true;
   const connue = memoire.get(url);
-  if (connue && Date.now() - connue.at < (connue.servie ? DUREE_SUCCES_MS : DUREE_ECHEC_MS)) return connue.servie;
+  if (
+    connue &&
+    Date.now() - connue.at < (connue.servie ? DUREE_SUCCES_MS : DUREE_ECHEC_MS)
+  )
+    return connue.servie;
 
   let servie: boolean;
   try {
@@ -43,14 +50,17 @@ export async function imageServie(
     // Délai dépassé ou réseau : on ne conclut pas, et on ne mémorise pas.
     return true;
   }
-  if (memoire.size >= MAX_ENTREES) memoire.delete(memoire.keys().next().value as string);
+  if (memoire.size >= MAX_ENTREES)
+    memoire.delete(memoire.keys().next().value as string);
   memoire.set(url, { at: Date.now(), servie });
   return servie;
 }
 
 /** Remplace par `null` les URL d'image qui ne sont pas servies (sondées en parallèle). */
-export async function sansImagesMortes<T extends { image?: string | null }>(elements: T[]): Promise<T[]> {
-  const etats = await Promise.all(elements.map(e => imageServie(e.image)));
+export async function sansImagesMortes<T extends { image?: string | null }>(
+  elements: T[],
+): Promise<T[]> {
+  const etats = await Promise.all(elements.map((e) => imageServie(e.image)));
   return elements.map((e, i) => (etats[i] ? e : { ...e, image: null }));
 }
 

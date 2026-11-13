@@ -10,33 +10,38 @@ process.env.JWT_SECRET_KEY ||= "rg-clan-management-contract-test-secret-2026";
 describe("unified clan management reads", () => {
   it("rejects invite and application reads without the unified session", async () => {
     for (const path of ["/clans/invites", "/clans/applications"]) {
-      const response = await clanController.handle(new Request(`http://localhost${path}`));
+      const response = await clanController.handle(
+        new Request(`http://localhost${path}`),
+      );
       expect(response.status).toBe(401);
     }
   });
 
-  it.skipIf(!process.env.RG_TEST_DATABASE_URL)("rejects clan members below the management role", async () => {
-    const member = await db
-      .selectFrom("clan_member")
-      .select("user_id")
-      .where("role", "<", 2)
-      .limit(1)
-      .executeTakeFirst();
-    expect(member).toBeDefined();
-    if (!member) return;
-    const token = signAchilleaSessionToken(
-      { id: member.user_id, username: "contract-test", avatar: null },
-      process.env.JWT_SECRET_KEY!,
-    );
-    for (const path of ["/clans/invites", "/clans/applications"]) {
-      const response = await clanController.handle(
-        new Request(`http://localhost${path}`, {
-          headers: { authorization: `Bearer ${token}` },
-        }),
+  it.skipIf(!process.env.RG_TEST_DATABASE_URL)(
+    "rejects clan members below the management role",
+    async () => {
+      const member = await db
+        .selectFrom("clan_member")
+        .select("user_id")
+        .where("role", "<", 2)
+        .limit(1)
+        .executeTakeFirst();
+      expect(member).toBeDefined();
+      if (!member) return;
+      const token = signAchilleaSessionToken(
+        { id: member.user_id, username: "contract-test", avatar: null },
+        process.env.JWT_SECRET_KEY!,
       );
-      expect(response.status).toBe(403);
-    }
-  });
+      for (const path of ["/clans/invites", "/clans/applications"]) {
+        const response = await clanController.handle(
+          new Request(`http://localhost${path}`, {
+            headers: { authorization: `Bearer ${token}` },
+          }),
+        );
+        expect(response.status).toBe(403);
+      }
+    },
+  );
 
   it.skipIf(!process.env.RG_TEST_DATABASE_URL)(
     "serves Kysely-backed invite and application arrays to a clan manager",
@@ -65,12 +70,14 @@ describe("unified clan management reads", () => {
         {
           path: "/clans/invites",
           userId: inviteManager.user_id,
-          read: (userId: string) => ClanService.listInvitesForManager(db, userId),
+          read: (userId: string) =>
+            ClanService.listInvitesForManager(db, userId),
         },
         {
           path: "/clans/applications",
           userId: applicationManager.user_id,
-          read: (userId: string) => ClanService.listApplicationsForManager(db, userId),
+          read: (userId: string) =>
+            ClanService.listApplicationsForManager(db, userId),
         },
       ] as const;
       for (const contract of cases) {
@@ -88,7 +95,10 @@ describe("unified clan management reads", () => {
           }),
         );
         expect(response.status).toBe(200);
-        const payload = (await response.json()) as Array<{ user?: unknown; clan?: unknown }>;
+        const payload = (await response.json()) as Array<{
+          user?: unknown;
+          clan?: unknown;
+        }>;
         expect(payload.length).toBeGreaterThan(0);
         expect(payload[0]?.user).toBeDefined();
         expect(payload[0]?.clan).toBeDefined();

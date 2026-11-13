@@ -38,7 +38,10 @@ export interface RefreshedOAuthToken {
  * Vrai si le token reste valide au-delà de `marginMs` (marge de sécurité
  * pour ne pas servir un token sur le point d'expirer pendant un fetch).
  */
-export function isTokenFresh(expiresAt: Date | number, marginMs: number): boolean {
+export function isTokenFresh(
+  expiresAt: Date | number,
+  marginMs: number,
+): boolean {
   const at = typeof expiresAt === "number" ? expiresAt : expiresAt.getTime();
   return at - Date.now() > marginMs;
 }
@@ -47,7 +50,9 @@ export function isTokenFresh(expiresAt: Date | number, marginMs: number): boolea
  * Rafraîchit un token Patreon et normalise la réponse (calcul de `expiresAt`
  * inclus). Centralise l'appel au token endpoint + la conversion `expires_in`.
  */
-export async function refreshOAuthToken(refreshToken: string): Promise<RefreshedOAuthToken> {
+export async function refreshOAuthToken(
+  refreshToken: string,
+): Promise<RefreshedOAuthToken> {
   const refreshed = await refreshAccessToken(refreshToken);
   return {
     accessToken: refreshed.access_token,

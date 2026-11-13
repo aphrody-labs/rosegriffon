@@ -115,7 +115,8 @@ export const LuaConstantType = {
   NUMBER: 3,
   STRING: 4,
 } as const;
-export type LuaConstantType = (typeof LuaConstantType)[keyof typeof LuaConstantType];
+export type LuaConstantType =
+  (typeof LuaConstantType)[keyof typeof LuaConstantType];
 
 export interface LuaConstant {
   type: LuaConstantType;
@@ -239,12 +240,20 @@ export class LuaBytecodeReader {
     const bytes = this.readBytes(this.numberSize);
     if (this.numberSize === 8) {
       // IEEE 754 double
-      const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+      const view = new DataView(
+        bytes.buffer,
+        bytes.byteOffset,
+        bytes.byteLength,
+      );
       return view.getFloat64(0, this.littleEndian);
     }
     if (this.numberSize === 4) {
       // IEEE 754 float
-      const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+      const view = new DataView(
+        bytes.buffer,
+        bytes.byteOffset,
+        bytes.byteLength,
+      );
       return view.getFloat32(0, this.littleEndian);
     }
     throw new Error(`Unsupported number size: ${this.numberSize}`);
@@ -413,7 +422,9 @@ export class LuaBytecodeReader {
 
     const version = this.readByte();
     if (version !== 0x52) {
-      console.warn(`Warning: Expected Lua 5.2 (0x52), got 0x${version.toString(16)}`);
+      console.warn(
+        `Warning: Expected Lua 5.2 (0x52), got 0x${version.toString(16)}`,
+      );
     }
 
     const format = this.readByte();
@@ -496,7 +507,8 @@ export function disassemble(bytecode: LuaBytecode): string {
     if (proto.constants.length > 0) {
       lines.push(`${indent}; constants:`);
       proto.constants.forEach((c, i) => {
-        const val = c.type === LuaConstantType.STRING ? `"${c.value}"` : String(c.value);
+        const val =
+          c.type === LuaConstantType.STRING ? `"${c.value}"` : String(c.value);
         lines.push(`${indent};   [${i}] = ${val}`);
       });
     }
@@ -520,7 +532,10 @@ export function disassemble(bytecode: LuaBytecode): string {
   return lines.join("\n");
 }
 
-function formatInstruction(instr: LuaInstruction, constants: LuaConstant[]): string {
+function formatInstruction(
+  instr: LuaInstruction,
+  constants: LuaConstant[],
+): string {
   const { opcode, A, B, C, Bx, sBx } = instr;
 
   const getConstant = (idx: number): string => {
@@ -529,7 +544,9 @@ function formatInstruction(instr: LuaInstruction, constants: LuaConstant[]): str
       const realIdx = idx - 256;
       if (realIdx < constants.length) {
         const c = constants[realIdx];
-        return c.type === LuaConstantType.STRING ? `"${c.value}"` : String(c.value);
+        return c.type === LuaConstantType.STRING
+          ? `"${c.value}"`
+          : String(c.value);
       }
     }
     return String(idx);

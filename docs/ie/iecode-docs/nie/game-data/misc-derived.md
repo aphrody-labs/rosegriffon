@@ -81,7 +81,7 @@ Champs : `schema, table, policies` (compte de policies par table). Toutes les li
 
 ## entries/ — scrapes Twitter (compte @Azalee_IE)
 
-Trois scrapes du compte officiel FR **« Azalée  | Inazuma Eleven FR »** (`@Azalee_IE`). Contenu = annonces/news communautaires FR (équilibrage, patchs, DLC), pas des données de jeu binaires.
+Trois scrapes du compte officiel FR **« Azalée | Inazuma Eleven FR »** (`@Azalee_IE`). Contenu = annonces/news communautaires FR (équilibrage, patchs, DLC), pas des données de jeu binaires.
 
 ### twitter-azalee.json — 22 tweets (tweets unitaires)
 

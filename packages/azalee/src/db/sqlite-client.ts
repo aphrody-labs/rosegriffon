@@ -29,8 +29,8 @@ function sql(strings: TemplateStringsArray, ...values: unknown[]): SQL {
 sql.raw = (text: string) => new SQL(text);
 sql.join = (fragments: SQL[], separator: SQL) =>
   new SQL(
-    fragments.map(fragment => fragment.text).join(separator.text),
-    fragments.flatMap(fragment => fragment.params),
+    fragments.map((fragment) => fragment.text).join(separator.text),
+    fragments.flatMap((fragment) => fragment.params),
   );
 
 /**
@@ -246,9 +246,13 @@ export class SqliteQueryBuilder {
       this.wheres.push(sql`(${column} IS NULL OR ${column} = '\\\\N')`);
     } else if (typeof val === "boolean") {
       if (val) {
-        this.wheres.push(sql`(${column} = 1 OR ${column} = 't' OR ${column} = 'true')`);
+        this.wheres.push(
+          sql`(${column} = 1 OR ${column} = 't' OR ${column} = 'true')`,
+        );
       } else {
-        this.wheres.push(sql`(${column} = 0 OR ${column} = 'f' OR ${column} = 'false')`);
+        this.wheres.push(
+          sql`(${column} = 0 OR ${column} = 'f' OR ${column} = 'false')`,
+        );
       }
     } else {
       this.wheres.push(sql`${column} = ${val}`);
@@ -262,9 +266,13 @@ export class SqliteQueryBuilder {
       this.wheres.push(sql`(${column} IS NOT NULL AND ${column} != '\\\\N')`);
     } else if (typeof val === "boolean") {
       if (val) {
-        this.wheres.push(sql`(${column} != 1 AND ${column} != 't' AND ${column} != 'true')`);
+        this.wheres.push(
+          sql`(${column} != 1 AND ${column} != 't' AND ${column} != 'true')`,
+        );
       } else {
-        this.wheres.push(sql`(${column} != 0 AND ${column} != 'f' AND ${column} != 'false')`);
+        this.wheres.push(
+          sql`(${column} != 0 AND ${column} != 'f' AND ${column} != 'false')`,
+        );
       }
     } else {
       this.wheres.push(sql`${column} != ${val}`);
@@ -280,9 +288,13 @@ export class SqliteQueryBuilder {
       this.wheres.push(sql`${column} NOT LIKE ${val}`);
     } else if (typeof val === "boolean") {
       if (val) {
-        this.wheres.push(sql`(${column} != 1 AND ${column} != 't' AND ${column} != 'true')`);
+        this.wheres.push(
+          sql`(${column} != 1 AND ${column} != 't' AND ${column} != 'true')`,
+        );
       } else {
-        this.wheres.push(sql`(${column} != 0 AND ${column} != 'f' AND ${column} != 'false')`);
+        this.wheres.push(
+          sql`(${column} != 0 AND ${column} != 'f' AND ${column} != 'false')`,
+        );
       }
     } else {
       this.wheres.push(sql`${column} != ${val}`);
@@ -316,10 +328,12 @@ export class SqliteQueryBuilder {
       return this;
     }
     const column = this.cleanCol(col);
-    const bound = arr.map(val => (typeof val === "boolean" ? (val ? 1 : 0) : val));
+    const bound = arr.map((val) =>
+      typeof val === "boolean" ? (val ? 1 : 0) : val,
+    );
     // `sql.join` insère un placeholder `?` par valeur (binding paramétré).
     const list = sql.join(
-      bound.map(v => sql`${v}`),
+      bound.map((v) => sql`${v}`),
       sql`, `,
     );
     this.wheres.push(sql`${column} IN (${list})`);
@@ -413,9 +427,13 @@ export class SqliteQueryBuilder {
           break;
         case "eq":
           if (val === "true") {
-            conditions.push(sql`(${column} = 1 OR ${column} = 't' OR ${column} = 'true')`);
+            conditions.push(
+              sql`(${column} = 1 OR ${column} = 't' OR ${column} = 'true')`,
+            );
           } else if (val === "false") {
-            conditions.push(sql`(${column} = 0 OR ${column} = 'f' OR ${column} = 'false')`);
+            conditions.push(
+              sql`(${column} = 0 OR ${column} = 'f' OR ${column} = 'false')`,
+            );
           } else {
             conditions.push(sql`${column} = ${val}`);
           }
@@ -479,9 +497,13 @@ export class SqliteQueryBuilder {
     // >= 3.30) pour matcher la sémantique supabase-js, sinon les lignes à
     // valeur NULL (ex. zukan_order) remontent en tête et cassent l'ordre.
     if (options?.nullsFirst === true) {
-      this.orders.push(sql`CASE WHEN ${column} IS NULL OR ${column} = '\\\\N' THEN 0 ELSE 1 END, ${column} ${dir}`);
+      this.orders.push(
+        sql`CASE WHEN ${column} IS NULL OR ${column} = '\\\\N' THEN 0 ELSE 1 END, ${column} ${dir}`,
+      );
     } else if (options?.nullsFirst === false) {
-      this.orders.push(sql`CASE WHEN ${column} IS NULL OR ${column} = '\\\\N' THEN 1 ELSE 0 END, ${column} ${dir}`);
+      this.orders.push(
+        sql`CASE WHEN ${column} IS NULL OR ${column} = '\\\\N' THEN 1 ELSE 0 END, ${column} ${dir}`,
+      );
     } else {
       this.orders.push(sql`${column} ${dir}`);
     }
@@ -547,7 +569,9 @@ export class SqliteQueryBuilder {
   // projection (`this.selects`) reste une liste de colonnes PostgREST brute
   // (`*`, `id, name_fr`, …) émise via `sql.raw`.
   private compileSelect(): SQL {
-    const parts: SQL[] = [sql`SELECT ${sql.raw(this.selects)} FROM ${sql.raw(`"${this.table}"`)}`];
+    const parts: SQL[] = [
+      sql`SELECT ${sql.raw(this.selects)} FROM ${sql.raw(`"${this.table}"`)}`,
+    ];
     if (this.wheres.length > 0) {
       parts.push(sql`WHERE ${sql.join(this.wheres, sql` AND `)}`);
     }
@@ -566,13 +590,15 @@ export class SqliteQueryBuilder {
     return sql.join(parts, sql` `);
   }
 
-  private async execute(): Promise<Record<string, unknown> | Array<Record<string, unknown>> | null> {
+  private async execute(): Promise<
+    Record<string, unknown> | Array<Record<string, unknown>> | null
+  > {
     const query = this.compileSelect();
     const rawRows = getSqliteDb()
       .prepare(query.text)
       .all(...(query.params as never[])) as Array<Record<string, unknown>>;
 
-    const parsedRows = rawRows.map(r => this.parseRow(r));
+    const parsedRows = rawRows.map((r) => this.parseRow(r));
 
     if (this.isSingle) {
       if (parsedRows.length === 0) {
@@ -592,7 +618,9 @@ export class SqliteQueryBuilder {
     const projection = this.needsGrouping
       ? sql.raw(`COUNT(DISTINCT "name_fr") as count`)
       : sql.raw(`COUNT(*) as count`);
-    const parts: SQL[] = [sql`SELECT ${projection} FROM ${sql.raw(`"${this.table}"`)}`];
+    const parts: SQL[] = [
+      sql`SELECT ${projection} FROM ${sql.raw(`"${this.table}"`)}`,
+    ];
     if (this.wheres.length > 0) {
       parts.push(sql`WHERE ${sql.join(this.wheres, sql` AND `)}`);
     }
@@ -608,9 +636,16 @@ export class SqliteQueryBuilder {
     for (const [key, val] of Object.entries(row)) {
       if (estMarqueurNul(val)) {
         parsed[key] = null;
-      } else if (key === "zukan_order" && typeof val === "string" && /^-?\d+$/.test(val)) {
+      } else if (
+        key === "zukan_order" &&
+        typeof val === "string" &&
+        /^-?\d+$/.test(val)
+      ) {
         parsed[key] = parseInt(val, 10);
-      } else if (typeof val === "string" && (val.startsWith("{") || val.startsWith("["))) {
+      } else if (
+        typeof val === "string" &&
+        (val.startsWith("{") || val.startsWith("["))
+      ) {
         try {
           parsed[key] = JSON.parse(val);
         } catch {

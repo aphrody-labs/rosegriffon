@@ -12,7 +12,11 @@ import { wiki } from "@rosegriffon/app-shell";
 import { absoluteUrl } from "@/lib/site-url";
 import { wikiTitle, withDefaultOgImage } from "@/lib/seo";
 
-export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
   const { id } = await params;
   const tactic = await wikiService.getTactic(id);
 
@@ -34,7 +38,11 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   };
 }
 
-export default async function TacticDetailPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function TacticDetailPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const { id } = await params;
   const tactic = await wikiService.getTactic(id);
 
@@ -46,7 +54,12 @@ export default async function TacticDetailPage({ params }: { params: Promise<{ i
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", item: absoluteUrl(wiki("/")), name: "Accueil", position: 1 },
+      {
+        "@type": "ListItem",
+        item: absoluteUrl(wiki("/")),
+        name: "Accueil",
+        position: 1,
+      },
       {
         "@type": "ListItem",
         item: absoluteUrl(wiki("/tactic")),
@@ -59,11 +72,17 @@ export default async function TacticDetailPage({ params }: { params: Promise<{ i
 
   return (
     <div className="w-full space-y-8">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
 
       {/* Breadcrumb */}
       <div className="flex items-center gap-2 text-sm text-on-surface-variant font-medium">
-        <Link href="/wiki/tactic" className="hover:text-primary transition-colors">
+        <Link
+          href="/wiki/tactic"
+          className="hover:text-primary transition-colors"
+        >
           Tactiques
         </Link>
         <span className="opacity-30">/</span>

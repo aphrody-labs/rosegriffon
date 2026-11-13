@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 import { describe, expect, test } from "bun:test";
-import { NieWasmEngine, getNieWasmInstance } from "../src/lib/wasm/nie-wasm-core";
+import {
+  NieWasmEngine,
+  getNieWasmInstance,
+} from "../src/lib/wasm/nie-wasm-core";
 
 describe("NieWasmEngine Suite (WebAssembly in Next.js + Bun)", () => {
   const engine = new NieWasmEngine([
@@ -69,7 +72,9 @@ describe("NieWasmEngine Suite (WebAssembly in Next.js + Bun)", () => {
 
   test("valide les en-têtes de sauvegarde du jeu", () => {
     // 1. RDBN database file
-    const rdbnBytes = new Uint8Array([0x52, 0x44, 0x42, 0x4e, 0x00, 0x00, 0x00, 0x00, 0, 0, 0, 0, 0, 0, 0, 0]);
+    const rdbnBytes = new Uint8Array([
+      0x52, 0x44, 0x42, 0x4e, 0x00, 0x00, 0x00, 0x00, 0, 0, 0, 0, 0, 0, 0, 0,
+    ]);
     expect(engine.verifySaveHeader(rdbnBytes).headerType).toBe("RDBN");
 
     // 2. Mock 8KB save data

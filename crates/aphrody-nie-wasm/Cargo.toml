@@ -108,10 +108,24 @@ anyhow = { workspace = true, optional = true }
 
 # Browser entropy support for transitive getrandom 0.3 consumers.
 [target.'cfg(target_arch = "wasm32")'.dependencies]
-getrandom = { version = "0.3.4", default-features = false, features = ["wasm_js"] }
+getrandom = { version = "0.3.4", default-features = false, features = [
+  "wasm_js",
+] }
 web-sys = { workspace = true, optional = true, features = [
-    "HtmlCanvasElement", "Element", "HtmlElement", "Window", "Document", "Location", "Navigator",
-    "Gamepad", "GamepadButton", "Performance", "Event", "EventTarget", "KeyboardEvent", "console",
+  "HtmlCanvasElement",
+  "Element",
+  "HtmlElement",
+  "Window",
+  "Document",
+  "Location",
+  "Navigator",
+  "Gamepad",
+  "GamepadButton",
+  "Performance",
+  "Event",
+  "EventTarget",
+  "KeyboardEvent",
+  "console",
 ] }
 js-sys = { workspace = true, optional = true }
 
@@ -123,12 +137,12 @@ default = []
 # Rust-owned GPU presentation of the client (`gpu_client::NieGpuClient`): wgpu surface on the
 # canvas, instanced UI quads, GPU match scene, rAF loop and input in wasm.
 webgpu = [
-    "aphrody-nie-render3d/webgpu",
-    "dep:aphrody-gpu-backend",
-    "dep:bytemuck",
-    "dep:anyhow",
-    "dep:web-sys",
-    "dep:js-sys",
+  "aphrody-nie-render3d/webgpu",
+  "dep:aphrody-gpu-backend",
+  "dep:bytemuck",
+  "dep:anyhow",
+  "dep:web-sys",
+  "dep:js-sys",
 ]
 # CPU frame path (`NieClientRuntime::render_into`, RGBA8 buffer): golden tests and headless
 # captures only; the browser presents through `webgpu`.

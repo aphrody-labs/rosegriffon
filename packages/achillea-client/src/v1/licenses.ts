@@ -4,13 +4,23 @@
 
 import { z } from "zod";
 
-import type { License, LicenseVerifyReason, LicenseVerifyResult } from "@rosegriffon/achillea-types/domain/license";
+import type {
+  License,
+  LicenseVerifyReason,
+  LicenseVerifyResult,
+} from "@rosegriffon/achillea-types/domain/license";
 import { LicenseStatus } from "@rosegriffon/achillea-types/enums/license";
 
-import { AchilleaResource, encodePathSegment, type AchilleaClientResult } from "./http";
+import {
+  AchilleaResource,
+  encodePathSegment,
+  type AchilleaClientResult,
+} from "./http";
 import type { LicenseHolderResponse } from "./pending-contracts";
 
-export const licenseStatusSchema = z.enum(LicenseStatus) satisfies z.ZodType<LicenseStatus>;
+export const licenseStatusSchema = z.enum(
+  LicenseStatus,
+) satisfies z.ZodType<LicenseStatus>;
 
 export const licenseVerifyReasonSchema = z.enum([
   "not_found",
@@ -40,7 +50,9 @@ export const licenseVerifyResultSchema = z.object({
   reason: licenseVerifyReasonSchema.optional(),
   licenseNumber: z.string().optional(),
   validUntil: z.string().optional(),
-  holder: z.object({ displayName: z.string(), avatar: z.string().nullable() }).optional(),
+  holder: z
+    .object({ displayName: z.string(), avatar: z.string().nullable() })
+    .optional(),
 }) satisfies z.ZodType<LicenseVerifyResult>;
 
 /** 5 routes. */
@@ -52,12 +64,18 @@ export class LicensesResource extends AchilleaResource {
 
   /** `POST /licenses/issue/:userId` — émet une licence (administrateurs). */
   issue(userId: string): Promise<AchilleaClientResult<License>> {
-    return this.http.post(`/licenses/issue/${encodePathSegment(userId)}`, licenseSchema);
+    return this.http.post(
+      `/licenses/issue/${encodePathSegment(userId)}`,
+      licenseSchema,
+    );
   }
 
   /** `POST /licenses/:id/revoke` — révoque une licence (administrateurs). */
   revoke(id: string): Promise<AchilleaClientResult<License>> {
-    return this.http.post(`/licenses/${encodePathSegment(id)}/revoke`, licenseSchema);
+    return this.http.post(
+      `/licenses/${encodePathSegment(id)}/revoke`,
+      licenseSchema,
+    );
   }
 
   /** URL de `GET /licenses/:id.pdf` — PDF imprimable, route publique. */
@@ -74,6 +92,9 @@ export class LicensesResource extends AchilleaResource {
 
   /** `GET /licenses/verify/:qrSecret` — vérification publique, réponse assainie. */
   verify(qrSecret: string): Promise<AchilleaClientResult<LicenseVerifyResult>> {
-    return this.http.get(`/licenses/verify/${encodePathSegment(qrSecret)}`, licenseVerifyResultSchema);
+    return this.http.get(
+      `/licenses/verify/${encodePathSegment(qrSecret)}`,
+      licenseVerifyResultSchema,
+    );
   }
 }

@@ -24,7 +24,8 @@ export default async function QuetesPage({
   const raw = await searchParams;
   const q = typeof raw.q === "string" ? raw.q : "";
   const kindParam = typeof raw.kind === "string" ? raw.kind : "all";
-  const kind: QuestKind | "all" = kindParam === "main" || kindParam === "side" ? kindParam : "all";
+  const kind: QuestKind | "all" =
+    kindParam === "main" || kindParam === "side" ? kindParam : "all";
 
   const { quests, total, main, side } = await getQuestsList({ q, kind });
 
@@ -32,7 +33,11 @@ export default async function QuetesPage({
     "@context": "https://schema.org",
     "@type": "CollectionPage",
     description: `Liste complète des quêtes d'Inazuma Eleven: Victory Road — objectifs d'histoire principale et quêtes annexes.`,
-    isPartOf: { "@type": "WebSite", name: "Azalée", url: absoluteUrl(wiki("/")) },
+    isPartOf: {
+      "@type": "WebSite",
+      name: "Azalée",
+      url: absoluteUrl(wiki("/")),
+    },
     mainEntity: {
       "@type": "ItemList",
       itemListElement: quests.slice(0, 10).map((quest: any, i: number) => ({
@@ -50,19 +55,26 @@ export default async function QuetesPage({
 
   return (
     <div className="space-y-6">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionJsonLd) }} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionJsonLd) }}
+      />
 
       {/* En-tête */}
       <div className="space-y-1">
-        <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-on-surface font-display">Quêtes</h1>
+        <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-on-surface font-display">
+          Quêtes
+        </h1>
         <p className="text-sm text-on-surface-variant">
-          Liste complète des objectifs d&apos;histoire principale et des quêtes annexes.
+          Liste complète des objectifs d&apos;histoire principale et des quêtes
+          annexes.
         </p>
       </div>
 
       <div className="flex items-center justify-between text-xs font-medium text-on-surface-variant px-1 uppercase tracking-wider">
         <span>
-          {quests.length} quête{quests.length > 1 ? "s" : ""} ({main} principales · {side} annexes)
+          {quests.length} quête{quests.length > 1 ? "s" : ""} ({main}{" "}
+          principales · {side} annexes)
         </span>
       </div>
 
@@ -72,7 +84,7 @@ export default async function QuetesPage({
       {/* Grille */}
       {quests.length > 0 ? (
         <FadeInStagger className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {quests.map(quest => (
+          {quests.map((quest) => (
             <FadeInItem key={quest.id}>
               <QuestCard quest={quest} />
             </FadeInItem>
@@ -80,7 +92,11 @@ export default async function QuetesPage({
         </FadeInStagger>
       ) : (
         <div className="py-16 text-center">
-          <SearchX size={48} className="mb-4 block text-on-surface-variant/30" aria-hidden="true" />
+          <SearchX
+            size={48}
+            className="mb-4 block text-on-surface-variant/30"
+            aria-hidden="true"
+          />
           <p className="text-on-surface-variant">Aucune quête trouvée.</p>
         </div>
       )}

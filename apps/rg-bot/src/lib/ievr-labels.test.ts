@@ -63,7 +63,12 @@ describe("resoudreElement", () => {
 
 describe("resoudreCategorieTechnique", () => {
   test("rend les quatre valeurs françaises de la colonne `category`", () => {
-    expect(CATEGORIES_TECHNIQUE_FR).toEqual(["Tir", "Dribble", "Défense", "Arrêt"]);
+    expect(CATEGORIES_TECHNIQUE_FR).toEqual([
+      "Tir",
+      "Dribble",
+      "Défense",
+      "Arrêt",
+    ]);
   });
 
   test("traduit depuis l'anglais et le japonais", () => {
@@ -104,8 +109,12 @@ describe("resoudrePosition et resoudreRarete", () => {
 
 describe("iconeElementUrl", () => {
   test("rend les webp réellement servis par Azalée", () => {
-    expect(iconeElementUrl("Montagne")).toBe("https://azalee.rosegriffon.fr/spirit_type/mountain.webp");
-    expect(iconeElementUrl("Fire")).toBe("https://azalee.rosegriffon.fr/spirit_type/fire.webp");
+    expect(iconeElementUrl("Montagne")).toBe(
+      "https://azalee.rosegriffon.fr/spirit_type/mountain.webp",
+    );
+    expect(iconeElementUrl("Fire")).toBe(
+      "https://azalee.rosegriffon.fr/spirit_type/fire.webp",
+    );
   });
 
   test("le néant n'a pas d'icône, et une saisie inconnue non plus", () => {
@@ -117,7 +126,11 @@ describe("iconeElementUrl", () => {
 
 describe("suggerer", () => {
   test("les préfixes passent devant les simples occurrences", () => {
-    expect(suggerer(["Renfort", "Forêt", "Force"], "for")).toEqual(["Forêt", "Force", "Renfort"]);
+    expect(suggerer(["Renfort", "Forêt", "Force"], "for")).toEqual([
+      "Forêt",
+      "Force",
+      "Renfort",
+    ]);
   });
 
   test("une saisie vide rend le début de la liste", () => {

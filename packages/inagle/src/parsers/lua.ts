@@ -43,7 +43,7 @@ export async function computeSHA256(filePath: string): Promise<string | null> {
     const arr = await file.arrayBuffer();
     const hashBuffer = await crypto.subtle.digest("SHA-256", arr);
     const hashArray = Array.from(new Uint8Array(hashBuffer));
-    return hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
+    return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
   } catch {
     return null;
   }
@@ -52,7 +52,10 @@ export async function computeSHA256(filePath: string): Promise<string | null> {
 /**
  * Résout le chemin absolu du script Lua en fonction de son tier.
  */
-export function resolveLuaScriptPath(file: string, tier: string): string | null {
+export function resolveLuaScriptPath(
+  file: string,
+  tier: string,
+): string | null {
   const baseDir = join(DATA_ROOT, "lua_scripts/decompiled");
   if (tier && tier !== "root") {
     const path = join(baseDir, tier, file);

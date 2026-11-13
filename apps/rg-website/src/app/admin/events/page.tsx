@@ -1,4 +1,12 @@
-import { Button, Card, CardContent, CardHeader, CardTitle, AdminPageHeader, PaginationControls } from "@rosegriffon/ui";
+import {
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  AdminPageHeader,
+  PaginationControls,
+} from "@rosegriffon/ui";
 import { Calendar, Plus } from "lucide-react";
 import Link from "@/components/shared/Link";
 
@@ -57,9 +65,13 @@ export default async function EventsPage({ searchParams }: EventsPageProps) {
             <CardContent>
               <div className="flex items-center text-sm text-muted-foreground mb-4">
                 <Calendar className="size-4 mr-2" />
-                {event.start_time ? new Date(event.start_time).toLocaleDateString("fr-FR") : "Date inconnue"}
+                {event.start_time
+                  ? new Date(event.start_time).toLocaleDateString("fr-FR")
+                  : "Date inconnue"}
               </div>
-              <p className="text-sm line-clamp-3 mb-4 min-h-[60px]">{event.description || "Pas de description"}</p>
+              <p className="text-sm line-clamp-3 mb-4 min-h-[60px]">
+                {event.description || "Pas de description"}
+              </p>
               <Button variant="outline" className="w-full" asChild>
                 <Link href={`/admin/events/${event.id}/edit`}>Modifier</Link>
               </Button>
@@ -70,12 +82,18 @@ export default async function EventsPage({ searchParams }: EventsPageProps) {
           <div className="col-span-full text-center py-12 text-muted-foreground bg-muted/30 rounded-lg border-2 border-dashed">
             <Calendar className="size-12 mx-auto mb-4 text-muted-foreground/50" />
             <p>Aucun événement trouvé.</p>
-            <p className="text-sm">Synchronisez avec Google Calendar ou créez-en un manuellement.</p>
+            <p className="text-sm">
+              Synchronisez avec Google Calendar ou créez-en un manuellement.
+            </p>
           </div>
         )}
       </div>
 
-      <PaginationControls currentPage={page} totalPages={totalPages} baseUrl="/admin/events" />
+      <PaginationControls
+        currentPage={page}
+        totalPages={totalPages}
+        baseUrl="/admin/events"
+      />
     </div>
   );
 }

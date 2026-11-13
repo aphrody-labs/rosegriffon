@@ -23,7 +23,11 @@ import { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
-import { PageContainer, PageHero, SectionCard } from "@/components/shared/PageShell";
+import {
+  PageContainer,
+  PageHero,
+  SectionCard,
+} from "@/components/shared/PageShell";
 import { BreadcrumbSchema } from "@/components/shared/StructuredData";
 import { Mail } from "@/lib/icons-config";
 
@@ -51,13 +55,14 @@ export default function ContactPage() {
   // Utiliser TanStack Query pour la mutation
   const mutation = useMutation({
     mutationFn: sendContactEmail,
-    onError: error => {
+    onError: (error) => {
       console.error("Erreur lors de l'envoi du formulaire:", error);
       // Mettre à jour le toast en erreur
       if (toastIdRef.current) {
         toast.error("Erreur lors de l'envoi", {
           id: toastIdRef.current,
-          description: "Une erreur est survenue lors de l'envoi de votre message. Veuillez réessayer.",
+          description:
+            "Une erreur est survenue lors de l'envoi de votre message. Veuillez réessayer.",
         });
       }
     },
@@ -76,7 +81,8 @@ export default function ContactPage() {
       if (toastIdRef.current) {
         toast.success("Formulaire envoyé", {
           id: toastIdRef.current,
-          description: "Nous avons bien reçu votre message et reviendrons vers vous rapidement.",
+          description:
+            "Nous avons bien reçu votre message et reviendrons vers vous rapidement.",
         });
       }
       form.reset();
@@ -101,13 +107,21 @@ export default function ContactPage() {
       const formData = { ...data };
 
       // S'assurer que le fichier est bien un objet File s'il existe
-      if (formData.file !== null && formData.file !== undefined && !(formData.file instanceof File)) {
+      if (
+        formData.file !== null &&
+        formData.file !== undefined &&
+        !(formData.file instanceof File)
+      ) {
         // Supprimer le fichier s'il n'est pas valide
         formData.file = null;
       }
 
       // Vérifier une dernière fois la taille du fichier
-      if (formData.file && formData.file instanceof File && formData.file.size > MAX_FILE_SIZE) {
+      if (
+        formData.file &&
+        formData.file instanceof File &&
+        formData.file.size > MAX_FILE_SIZE
+      ) {
         toast.error("Fichier trop volumineux", {
           description: `La taille maximale autorisée est de ${formatFileSize(MAX_FILE_SIZE)}.`,
         });
@@ -118,7 +132,8 @@ export default function ContactPage() {
     } catch (error) {
       console.error("Erreur lors de l'envoi du formulaire:", error);
       toast.error("Erreur lors de l'envoi", {
-        description: "Une erreur est survenue lors de l'envoi de votre message. Veuillez réessayer.",
+        description:
+          "Une erreur est survenue lors de l'envoi de votre message. Veuillez réessayer.",
       });
     }
   }
@@ -134,7 +149,9 @@ export default function ContactPage() {
       />
 
       <PageHero
-        icon={<Mail className="size-7 shrink-0 text-rg-or md:size-8" aria-hidden />}
+        icon={
+          <Mail className="size-7 shrink-0 text-rg-or md:size-8" aria-hidden />
+        }
         eyebrow="Association Rose Griffon"
         title="Nous contacter"
         description="Une question, une suggestion ou une envie de collaborer ? Remplissez le formulaire ci-dessous : nous lisons chaque message et revenons vers vous dès que possible."
@@ -155,9 +172,14 @@ export default function ContactPage() {
                     <FormItem>
                       <FormLabel>Titre du message*</FormLabel>
                       <FormControl>
-                        <Input placeholder="Entrez le titre de votre message" {...field} />
+                        <Input
+                          placeholder="Entrez le titre de votre message"
+                          {...field}
+                        />
                       </FormControl>
-                      <FormDescription>Un titre concis qui résume votre demande.</FormDescription>
+                      <FormDescription>
+                        Un titre concis qui résume votre demande.
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -169,7 +191,10 @@ export default function ContactPage() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Sujet*</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Sélectionnez un sujet" />
@@ -179,18 +204,33 @@ export default function ContactPage() {
                           <SelectItem value="Information sur l'association">
                             Information sur l&apos;association
                           </SelectItem>
-                          <SelectItem value="Collaboration">Collaboration</SelectItem>
-                          <SelectItem value="Don et soutien">Don et soutien</SelectItem>
-                          <SelectItem value="Événements à venir">Événements à venir</SelectItem>
+                          <SelectItem value="Collaboration">
+                            Collaboration
+                          </SelectItem>
+                          <SelectItem value="Don et soutien">
+                            Don et soutien
+                          </SelectItem>
+                          <SelectItem value="Événements à venir">
+                            Événements à venir
+                          </SelectItem>
                           <SelectItem value="Adhésion">Adhésion</SelectItem>
                           <SelectItem value="Bénévolat">Bénévolat</SelectItem>
                           <SelectItem value="Témoignage">Témoignage</SelectItem>
-                          <SelectItem value="Demande de presse">Demande de presse</SelectItem>
-                          <SelectItem value="Support technique">Support technique</SelectItem>
-                          <SelectItem value="Autres">Autres (préciser dans le titre)</SelectItem>
+                          <SelectItem value="Demande de presse">
+                            Demande de presse
+                          </SelectItem>
+                          <SelectItem value="Support technique">
+                            Support technique
+                          </SelectItem>
+                          <SelectItem value="Autres">
+                            Autres (préciser dans le titre)
+                          </SelectItem>
                         </SelectContent>
                       </Select>
-                      <FormDescription>Choisissez le sujet qui correspond le mieux à votre demande.</FormDescription>
+                      <FormDescription>
+                        Choisissez le sujet qui correspond le mieux à votre
+                        demande.
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -211,7 +251,8 @@ export default function ContactPage() {
                       />
                     </FormControl>
                     <FormDescription>
-                      Décrivez votre demande en détail pour que nous puissions mieux vous aider.
+                      Décrivez votre demande en détail pour que nous puissions
+                      mieux vous aider.
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -224,14 +265,16 @@ export default function ContactPage() {
               name="file"
               // `value` est volontairement écarté : React refuse qu'on pilote la
               // valeur d'un `<input type="file">` (avertissement + valeur ignorée).
-              render={({ field: { onChange, value: _value, ...fieldProps } }) => (
+              render={({
+                field: { onChange, value: _value, ...fieldProps },
+              }) => (
                 <FormItem>
                   <FormLabel>Pièce jointe (optionnel)</FormLabel>
                   <FormControl>
                     <Input
                       type="file"
                       accept=".pdf,.docx,.txt,.jpg,.jpeg,.png,.gif"
-                      onChange={e => {
+                      onChange={(e) => {
                         const file = e.target.files?.[0];
                         if (file) {
                           setFileSize(file.size);
@@ -249,11 +292,15 @@ export default function ContactPage() {
                     />
                   </FormControl>
                   <FormDescription>
-                    Formats acceptés : PDF, DOCX, images (JPG, PNG, GIF) et TXT. Taille maximale :{" "}
-                    {formatFileSize(MAX_FILE_SIZE)}.
+                    Formats acceptés : PDF, DOCX, images (JPG, PNG, GIF) et TXT.
+                    Taille maximale : {formatFileSize(MAX_FILE_SIZE)}.
                     {fileSize > 0 && (
                       <span
-                        className={fileSize > MAX_FILE_SIZE ? "mt-1 block font-medium text-destructive" : "mt-1 block"}
+                        className={
+                          fileSize > MAX_FILE_SIZE
+                            ? "mt-1 block font-medium text-destructive"
+                            : "mt-1 block"
+                        }
                       >
                         Taille actuelle : {formatFileSize(fileSize)}.
                       </span>
@@ -265,7 +312,12 @@ export default function ContactPage() {
             />
 
             <div className="flex justify-center">
-              <Button type="submit" size="lg" className="h-12 w-full sm:w-auto sm:px-10" disabled={mutation.isPending}>
+              <Button
+                type="submit"
+                size="lg"
+                className="h-12 w-full sm:w-auto sm:px-10"
+                disabled={mutation.isPending}
+              >
                 {mutation.isPending ? "Envoi en cours…" : "Envoyer le message"}
               </Button>
             </div>

@@ -3,8 +3,15 @@
 import { useDroppable } from "@dnd-kit/core";
 import { Icon } from "@/components/ui/Icon";
 import { SafeImage } from "@/components/ui/SafeImage";
-import { BENCH_SLOTS, ROLE_COLORS, ROLE_LABELS } from "@rosegriffon/azalee/game/formations";
-import type { Formation, PositionCoord } from "@rosegriffon/azalee/game/formations";
+import {
+  BENCH_SLOTS,
+  ROLE_COLORS,
+  ROLE_LABELS,
+} from "@rosegriffon/azalee/game/formations";
+import type {
+  Formation,
+  PositionCoord,
+} from "@rosegriffon/azalee/game/formations";
 import type { TeamMember } from "@rosegriffon/azalee/game/team-types";
 import { cn } from "@/lib/utils";
 import { getCharacterImageUrl } from "@rosegriffon/azalee/images";
@@ -35,7 +42,12 @@ function PitchSVG() {
       xmlns="http://www.w3.org/2000/svg"
     >
       <defs>
-        <pattern id="mow" patternUnits="userSpaceOnUse" width="750" height="110">
+        <pattern
+          id="mow"
+          patternUnits="userSpaceOnUse"
+          width="750"
+          height="110"
+        >
           <rect width="750" height="55" fill="rgba(255,255,255,0.03)" />
           <rect y="55" width="750" height="55" fill="rgba(0,0,0,0.03)" />
         </pattern>
@@ -46,16 +58,62 @@ function PitchSVG() {
       </defs>
 
       <rect width="750" height="1320" fill="url(#mow)" />
-      <rect x="35" y="35" width="680" height="1250" rx="4" stroke="white" strokeWidth="2.5" strokeOpacity="0.35" />
-      <line x1="35" y1="660" x2="715" y2="660" stroke="white" strokeWidth="2" strokeOpacity="0.3" />
-      <circle cx="375" cy="660" r="110" stroke="white" strokeWidth="2" strokeOpacity="0.3" />
+      <rect
+        x="35"
+        y="35"
+        width="680"
+        height="1250"
+        rx="4"
+        stroke="white"
+        strokeWidth="2.5"
+        strokeOpacity="0.35"
+      />
+      <line
+        x1="35"
+        y1="660"
+        x2="715"
+        y2="660"
+        stroke="white"
+        strokeWidth="2"
+        strokeOpacity="0.3"
+      />
+      <circle
+        cx="375"
+        cy="660"
+        r="110"
+        stroke="white"
+        strokeWidth="2"
+        strokeOpacity="0.3"
+      />
       <circle cx="375" cy="660" r="5" fill="white" fillOpacity="0.4" />
 
       {/* Top penalty area */}
-      <rect x="150" y="35" width="450" height="200" stroke="white" strokeWidth="2" strokeOpacity="0.3" />
-      <rect x="240" y="35" width="270" height="75" stroke="white" strokeWidth="2" strokeOpacity="0.25" />
+      <rect
+        x="150"
+        y="35"
+        width="450"
+        height="200"
+        stroke="white"
+        strokeWidth="2"
+        strokeOpacity="0.3"
+      />
+      <rect
+        x="240"
+        y="35"
+        width="270"
+        height="75"
+        stroke="white"
+        strokeWidth="2"
+        strokeOpacity="0.25"
+      />
       <circle cx="375" cy="167" r="4" fill="white" fillOpacity="0.35" />
-      <path d="M 280 235 A 110 110 0 0 0 470 235" stroke="white" strokeWidth="1.5" strokeOpacity="0.2" fill="none" />
+      <path
+        d="M 280 235 A 110 110 0 0 0 470 235"
+        stroke="white"
+        strokeWidth="1.5"
+        strokeOpacity="0.2"
+        fill="none"
+      />
       <rect
         x="270"
         y="8"
@@ -67,14 +125,48 @@ function PitchSVG() {
         strokeOpacity="0.15"
         strokeDasharray="6 4"
       />
-      <path d="M 35 55 A 20 20 0 0 0 55 35" stroke="white" strokeWidth="1.5" strokeOpacity="0.2" fill="none" />
-      <path d="M 695 35 A 20 20 0 0 0 715 55" stroke="white" strokeWidth="1.5" strokeOpacity="0.2" fill="none" />
+      <path
+        d="M 35 55 A 20 20 0 0 0 55 35"
+        stroke="white"
+        strokeWidth="1.5"
+        strokeOpacity="0.2"
+        fill="none"
+      />
+      <path
+        d="M 695 35 A 20 20 0 0 0 715 55"
+        stroke="white"
+        strokeWidth="1.5"
+        strokeOpacity="0.2"
+        fill="none"
+      />
 
       {/* Bottom penalty area */}
-      <rect x="150" y="1085" width="450" height="200" stroke="white" strokeWidth="2" strokeOpacity="0.3" />
-      <rect x="240" y="1210" width="270" height="75" stroke="white" strokeWidth="2" strokeOpacity="0.25" />
+      <rect
+        x="150"
+        y="1085"
+        width="450"
+        height="200"
+        stroke="white"
+        strokeWidth="2"
+        strokeOpacity="0.3"
+      />
+      <rect
+        x="240"
+        y="1210"
+        width="270"
+        height="75"
+        stroke="white"
+        strokeWidth="2"
+        strokeOpacity="0.25"
+      />
       <circle cx="375" cy="1153" r="4" fill="white" fillOpacity="0.35" />
-      <path d="M 280 1085 A 110 110 0 0 1 470 1085" stroke="white" strokeWidth="1.5" strokeOpacity="0.2" fill="none" />
+      <path
+        d="M 280 1085 A 110 110 0 0 1 470 1085"
+        stroke="white"
+        strokeWidth="1.5"
+        strokeOpacity="0.2"
+        fill="none"
+      />
       <rect
         x="270"
         y="1284"
@@ -86,8 +178,20 @@ function PitchSVG() {
         strokeOpacity="0.15"
         strokeDasharray="6 4"
       />
-      <path d="M 35 1265 A 20 20 0 0 1 55 1285" stroke="white" strokeWidth="1.5" strokeOpacity="0.2" fill="none" />
-      <path d="M 695 1285 A 20 20 0 0 1 715 1265" stroke="white" strokeWidth="1.5" strokeOpacity="0.2" fill="none" />
+      <path
+        d="M 35 1265 A 20 20 0 0 1 55 1285"
+        stroke="white"
+        strokeWidth="1.5"
+        strokeOpacity="0.2"
+        fill="none"
+      />
+      <path
+        d="M 695 1285 A 20 20 0 0 1 715 1265"
+        stroke="white"
+        strokeWidth="1.5"
+        strokeOpacity="0.2"
+        fill="none"
+      />
 
       {/* Vignette */}
       <rect width="750" height="1320" fill="url(#vignette)" />
@@ -129,7 +233,11 @@ function DroppableSlot({
   const scaledTop = coord.top;
   const scaledLeft = coord.left;
 
-  const { status } = getPositionMatchFactor(member?.position || "", slotId, formation);
+  const { status } = getPositionMatchFactor(
+    member?.position || "",
+    slotId,
+    formation,
+  );
 
   return (
     <div
@@ -165,27 +273,40 @@ function DroppableSlot({
         <div
           className={cn(
             "absolute inset-0 rounded-xl overflow-hidden",
-            isSelected && "ring-2 ring-primary ring-offset-1 ring-offset-transparent",
+            isSelected &&
+              "ring-2 ring-primary ring-offset-1 ring-offset-transparent",
           )}
           role="presentation"
-          onClick={e => {
+          onClick={(e) => {
             e.stopPropagation();
             onMemberClick?.(slotId);
           }}
         >
           <div className="absolute -bottom-1 left-[10%] right-[10%] h-2 rounded-full bg-black/30 blur-sm" />
           <PlayerSlot member={member} onRemove={() => onRemove(slotId)} />
-          {isSelected && <div className="absolute inset-0 bg-primary/10 pointer-events-none rounded-xl" />}
+          {isSelected && (
+            <div className="absolute inset-0 bg-primary/10 pointer-events-none rounded-xl" />
+          )}
           {/* Position Mismatch Badge */}
           {status !== "match" && status !== "none" && (
             <div
               className={cn(
                 "absolute top-1 left-1 z-20 flex items-center justify-center size-4 sm:size-5 rounded-full border border-black/35 shadow-md",
-                status === "adjacent" ? "bg-amber-500 text-black" : "bg-red-500 text-white",
+                status === "adjacent"
+                  ? "bg-amber-500 text-black"
+                  : "bg-red-500 text-white",
               )}
-              title={status === "adjacent" ? "Malus de position : -15% de stats" : "Malus de position : -35% de stats"}
+              title={
+                status === "adjacent"
+                  ? "Malus de position : -15% de stats"
+                  : "Malus de position : -35% de stats"
+              }
             >
-              <Icon name={status === "adjacent" ? "warning" : "error"} size={10} className="sm:size-3" />
+              <Icon
+                name={status === "adjacent" ? "warning" : "error"}
+                size={10}
+                className="sm:size-3"
+              />
             </div>
           )}
         </div>
@@ -198,7 +319,9 @@ function DroppableSlot({
 
           className={cn(
             "flex flex-col items-center gap-0.5 rounded-xl w-full h-full justify-center cursor-pointer",
-            isOver ? "bg-white/15" : "bg-black/20 hover:bg-black/30 active:bg-white/10",
+            isOver
+              ? "bg-white/15"
+              : "bg-black/20 hover:bg-black/30 active:bg-white/10",
             isTargeted && "ring-2 ring-primary bg-primary/20 animate-pulse",
           )}
         >
@@ -258,7 +381,7 @@ function StaffSlot({
         <div
           className="w-full aspect-square rounded-xl overflow-hidden cursor-pointer"
           role="presentation"
-          onClick={e => {
+          onClick={(e) => {
             e.stopPropagation();
             onMemberClick?.(slotId);
           }}
@@ -267,7 +390,11 @@ function StaffSlot({
             <SafeImage
               src={member.imageUrl}
               zukanHash={member.zukanHash}
-              fallbackSrc={member.internalCode ? getCharacterImageUrl(member.internalCode) : undefined}
+              fallbackSrc={
+                member.internalCode
+                  ? getCharacterImageUrl(member.internalCode)
+                  : undefined
+              }
               alt={member.name}
               fill
               sizes="60px"
@@ -279,11 +406,11 @@ function StaffSlot({
               {member.name}
             </span>
             <button
-              onClick={e => {
+              onClick={(e) => {
                 e.stopPropagation();
                 onRemove(slotId);
               }}
-              onPointerDown={e => e.stopPropagation()}
+              onPointerDown={(e) => e.stopPropagation()}
               className="no-export absolute top-0 right-0 p-0.5 bg-red-600/90 rounded-bl-lg z-10 opacity-70 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
               aria-label={`Retirer ${member.name}`}
             >
@@ -308,7 +435,10 @@ function StaffSlot({
           <span style={{ color }} className="opacity-60">
             <Icon name={icon} size={14} />
           </span>
-          <span className="text-xs sm:text-[8px] font-bold opacity-50" style={{ color }}>
+          <span
+            className="text-xs sm:text-[8px] font-bold opacity-50"
+            style={{ color }}
+          >
             {label}
           </span>
         </button>
@@ -352,19 +482,28 @@ function BenchSlot({
         "aspect-square rounded-xl transition-all duration-150 flex flex-col items-center justify-center overflow-hidden",
         isOver && "ring-2 ring-primary scale-105 bg-primary/20",
         !isOver && member && "elevation-1",
-        !isOver && !member && "border border-dashed border-outline-variant/30 bg-surface-container-high/50",
+        !isOver &&
+          !member &&
+          "border border-dashed border-outline-variant/30 bg-surface-container-high/50",
       )}
     >
       {member ? (
         <div
-          className={cn("w-full h-full", isSelected && "ring-2 ring-primary rounded-xl")}
+          className={cn(
+            "w-full h-full",
+            isSelected && "ring-2 ring-primary rounded-xl",
+          )}
           role="presentation"
-          onClick={e => {
+          onClick={(e) => {
             e.stopPropagation();
             onMemberClick?.(slotId);
           }}
         >
-          <PlayerSlot member={member} onRemove={() => onRemove(slotId)} compact />
+          <PlayerSlot
+            member={member}
+            onRemove={() => onRemove(slotId)}
+            compact
+          />
         </div>
       ) : (
         <button
@@ -375,13 +514,17 @@ function BenchSlot({
 
           className={cn(
             "flex flex-col items-center gap-0.5 cursor-pointer w-full h-full justify-center",
-            isTargeted && "ring-2 ring-primary bg-primary/20 animate-pulse rounded-xl",
+            isTargeted &&
+              "ring-2 ring-primary bg-primary/20 animate-pulse rounded-xl",
           )}
         >
           <span className="opacity-30" style={{ color }}>
             <Icon name="add" size={12} />
           </span>
-          <span className="text-xs sm:text-[8px] font-bold opacity-30" style={{ color }}>
+          <span
+            className="text-xs sm:text-[8px] font-bold opacity-30"
+            style={{ color }}
+          >
             {label}
           </span>
         </button>
@@ -419,20 +562,45 @@ export function FormationField({
   links = [],
   activeSlotId,
 }: FormationFieldProps) {
-  const reserveCount = Object.keys(members).filter(k => k.startsWith("reserve-")).length;
+  const reserveCount = Object.keys(members).filter((k) =>
+    k.startsWith("reserve-"),
+  ).length;
 
   // Staff data for bottom-of-pitch slots
   const staffSlots = [
-    { color: "rgb(217,119,6)", icon: "sports", label: "COACH", slotId: "manager-0" },
-    { color: "rgb(59,130,246)", icon: "support_agent", label: "COORD", slotId: "support-0" },
-    { color: "rgb(59,130,246)", icon: "support_agent", label: "COORD", slotId: "support-1" },
-    { color: "rgb(59,130,246)", icon: "support_agent", label: "COORD", slotId: "support-2" },
+    {
+      color: "rgb(217,119,6)",
+      icon: "sports",
+      label: "COACH",
+      slotId: "manager-0",
+    },
+    {
+      color: "rgb(59,130,246)",
+      icon: "support_agent",
+      label: "COORD",
+      slotId: "support-0",
+    },
+    {
+      color: "rgb(59,130,246)",
+      icon: "support_agent",
+      label: "COORD",
+      slotId: "support-1",
+    },
+    {
+      color: "rgb(59,130,246)",
+      icon: "support_agent",
+      label: "COORD",
+      slotId: "support-2",
+    },
   ];
 
   return (
     <div ref={fieldRef} className="relative w-full select-none">
       {/* Pitch — full field with players + staff */}
-      <div className="relative w-full sm:rounded-2xl overflow-hidden" style={{ aspectRatio: "75/132" }}>
+      <div
+        className="relative w-full sm:rounded-2xl overflow-hidden"
+        style={{ aspectRatio: "75/132" }}
+      >
         <div className="absolute inset-0 bg-linear-to-b from-emerald-900 via-emerald-700 to-emerald-900" />
         <PitchSVG />
 
@@ -441,7 +609,14 @@ export function FormationField({
           <svg className="absolute inset-0 w-full h-full pointer-events-none z-5">
             <defs>
               {Object.entries(ELEMENT_COLORS).map(([el, color]) => (
-                <linearGradient id={`glow-${el}`} key={el} x1="0%" y1="0%" x2="100%" y2="100%">
+                <linearGradient
+                  id={`glow-${el}`}
+                  key={el}
+                  x1="0%"
+                  y1="0%"
+                  x2="100%"
+                  y2="100%"
+                >
                   <stop offset="0%" stopColor={color} stopOpacity="0.8" />
                   <stop offset="50%" stopColor="#ffffff" stopOpacity="0.9" />
                   <stop offset="100%" stopColor={color} stopOpacity="0.8" />
@@ -483,9 +658,10 @@ export function FormationField({
         )}
 
         {/* Field players (11 positions) */}
-        {formation.positions.map(coord => {
+        {formation.positions.map((coord) => {
           const slotId = `field-${coord.index}`;
-          const isSlotSelected = selectedMemberSlot === slotId || activeSlotId === slotId;
+          const isSlotSelected =
+            selectedMemberSlot === slotId || activeSlotId === slotId;
           return (
             <DroppableSlot
               key={slotId}
@@ -494,7 +670,10 @@ export function FormationField({
               member={members[slotId]}
               onRemove={onRemoveMember}
               onSlotTap={onSlotTap}
-              isTargeted={(Boolean(selectedCharaId) && !members[slotId]) || activeSlotId === slotId}
+              isTargeted={
+                (Boolean(selectedCharaId) && !members[slotId]) ||
+                activeSlotId === slotId
+              }
               onMemberClick={onMemberClick}
               isSelected={isSlotSelected}
               formation={formation}
@@ -504,8 +683,10 @@ export function FormationField({
 
         {/* Staff row — bottom of pitch (opponent half, sideline zone) */}
         <div className="absolute bottom-[16%] inset-x-[4%] flex items-center justify-center gap-[3%]">
-          {staffSlots.map(staff => {
-            const isSlotSelected = selectedMemberSlot === staff.slotId || activeSlotId === staff.slotId;
+          {staffSlots.map((staff) => {
+            const isSlotSelected =
+              selectedMemberSlot === staff.slotId ||
+              activeSlotId === staff.slotId;
             return (
               <div key={staff.slotId} className="w-[15%]">
                 <StaffSlot
@@ -516,7 +697,10 @@ export function FormationField({
                   onRemove={onRemoveMember}
                   color={staff.color}
                   onSlotTap={onSlotTap}
-                  isTargeted={(Boolean(selectedCharaId) && !members[staff.slotId]) || activeSlotId === staff.slotId}
+                  isTargeted={
+                    (Boolean(selectedCharaId) && !members[staff.slotId]) ||
+                    activeSlotId === staff.slotId
+                  }
                   onMemberClick={onMemberClick}
                   isSelected={isSlotSelected}
                 />
@@ -534,8 +718,12 @@ export function FormationField({
 
         {/* Export banner */}
         <div className="absolute bottom-[1%] inset-x-[5%] flex items-center justify-between px-3 py-1.5 rounded-lg bg-black/50 backdrop-blur-sm">
-          <span className="text-white font-bold text-[9px] sm:text-xs truncate">{teamName || "Mon Équipe"}</span>
-          <span className="text-white/60 text-[8px] sm:text-[10px] font-medium shrink-0 ml-2">{formation.name}</span>
+          <span className="text-white font-bold text-[9px] sm:text-xs truncate">
+            {teamName || "Mon Équipe"}
+          </span>
+          <span className="text-white/60 text-[8px] sm:text-[10px] font-medium shrink-0 ml-2">
+            {formation.name}
+          </span>
         </div>
       </div>
 
@@ -545,7 +733,9 @@ export function FormationField({
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-1.5">
               <Icon name="swap_horiz" size={14} className="text-emerald-500" />
-              <span className="text-[10px] sm:text-xs font-bold text-on-surface">Remplaçants</span>
+              <span className="text-[10px] sm:text-xs font-bold text-on-surface">
+                Remplaçants
+              </span>
             </div>
             <span className="text-[9px] font-bold text-on-surface-variant">
               {reserveCount}/{BENCH_SLOTS.reserves}
@@ -554,7 +744,8 @@ export function FormationField({
           <div className="grid grid-cols-4 sm:grid-cols-5 gap-1.5">
             {Array.from({ length: BENCH_SLOTS.reserves }, (_, i) => {
               const slotId = `reserve-${i}`;
-              const isSlotSelected = selectedMemberSlot === slotId || activeSlotId === slotId;
+              const isSlotSelected =
+                selectedMemberSlot === slotId || activeSlotId === slotId;
               return (
                 <BenchSlot
                   key={slotId}
@@ -564,7 +755,10 @@ export function FormationField({
                   onRemove={onRemoveMember}
                   color="rgb(16,185,129)"
                   onSlotTap={onSlotTap}
-                  isTargeted={(Boolean(selectedCharaId) && !members[slotId]) || activeSlotId === slotId}
+                  isTargeted={
+                    (Boolean(selectedCharaId) && !members[slotId]) ||
+                    activeSlotId === slotId
+                  }
                   onMemberClick={onMemberClick}
                   isSelected={isSlotSelected}
                 />

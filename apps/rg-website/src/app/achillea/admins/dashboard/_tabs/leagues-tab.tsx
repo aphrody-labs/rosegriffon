@@ -15,7 +15,14 @@ import {
   TableRow,
 } from "@rosegriffon/ui";
 import { ExternalLink } from "lucide-react";
-import { BoutonActualiser, Chargement, Erreur, Vide, useClientAchillea, useLecture } from "./etat";
+import {
+  BoutonActualiser,
+  Chargement,
+  Erreur,
+  Vide,
+  useClientAchillea,
+  useLecture,
+} from "./etat";
 
 /** « Ligues » — championnats déclarés et classement de l'Astral League. */
 export function LeaguesTab() {
@@ -23,7 +30,9 @@ export function LeaguesTab() {
   const ligues = useLecture("leagues", () => client.leagues.list());
   const astral = useLecture("leagues/astral", () => client.leagues.astral());
   const liste = ligues.donnees?.items ?? [];
-  const equipes = new Map((astral.donnees?.teams ?? []).map(equipe => [equipe.tag, equipe.name]));
+  const equipes = new Map(
+    (astral.donnees?.teams ?? []).map((equipe) => [equipe.tag, equipe.name]),
+  );
   const classement = astral.donnees?.standings ?? [];
 
   return (
@@ -40,7 +49,9 @@ export function LeaguesTab() {
           />
         </CardHeader>
         <CardContent className="space-y-4">
-          {ligues.erreur && <Erreur message={ligues.erreur} onReessayer={ligues.recharger} />}
+          {ligues.erreur && (
+            <Erreur message={ligues.erreur} onReessayer={ligues.recharger} />
+          )}
           {ligues.chargement && !ligues.donnees ? (
             <Chargement lignes={2} />
           ) : liste.length === 0 && !ligues.erreur ? (
@@ -58,12 +69,16 @@ export function LeaguesTab() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {liste.map(ligue => (
+                  {liste.map((ligue) => (
                     <TableRow key={ligue.id}>
-                      <TableCell className="font-medium">{ligue.name}</TableCell>
+                      <TableCell className="font-medium">
+                        {ligue.name}
+                      </TableCell>
                       <TableCell>{ligue.season}</TableCell>
                       <TableCell className="text-xs">{ligue.format}</TableCell>
-                      <TableCell className="text-right font-mono">{ligue.teamCount}</TableCell>
+                      <TableCell className="text-right font-mono">
+                        {ligue.teamCount}
+                      </TableCell>
                       <TableCell>{ligue.champion || "—"}</TableCell>
                     </TableRow>
                   ))}
@@ -76,7 +91,9 @@ export function LeaguesTab() {
 
       <Card className="border-border/60">
         <CardHeader className="flex flex-row items-center justify-between gap-4">
-          <CardTitle className="text-base">Astral League — classement</CardTitle>
+          <CardTitle className="text-base">
+            Astral League — classement
+          </CardTitle>
           <Button asChild variant="outline" className="min-h-11 gap-2">
             <Link href="/achillea/leagues/astral">
               <ExternalLink className="size-4" aria-hidden="true" />
@@ -85,7 +102,9 @@ export function LeaguesTab() {
           </Button>
         </CardHeader>
         <CardContent className="space-y-4">
-          {astral.erreur && <Erreur message={astral.erreur} onReessayer={astral.recharger} />}
+          {astral.erreur && (
+            <Erreur message={astral.erreur} onReessayer={astral.recharger} />
+          )}
           {astral.chargement && !astral.donnees ? (
             <Chargement lignes={3} />
           ) : classement.length === 0 && !astral.erreur ? (
@@ -102,12 +121,18 @@ export function LeaguesTab() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {classement.map(ligne => (
+                  {classement.map((ligne) => (
                     <TableRow key={ligne.teamId}>
                       <TableCell className="font-mono">{ligne.rank}</TableCell>
-                      <TableCell>{equipes.get(ligne.teamId) ?? ligne.teamId}</TableCell>
-                      <TableCell className="text-right font-mono">{ligne.played}</TableCell>
-                      <TableCell className="text-right font-mono font-semibold">{ligne.points}</TableCell>
+                      <TableCell>
+                        {equipes.get(ligne.teamId) ?? ligne.teamId}
+                      </TableCell>
+                      <TableCell className="text-right font-mono">
+                        {ligne.played}
+                      </TableCell>
+                      <TableCell className="text-right font-mono font-semibold">
+                        {ligne.points}
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>

@@ -8,7 +8,12 @@
 
 import { Elysia, status, t } from "elysia";
 import { dbPlugin } from "../../../plugins/db";
-import { isInternalCall, requireRole, requireSession, ROLE_ADMINISTRATOR } from "../guards";
+import {
+  isInternalCall,
+  requireRole,
+  requireSession,
+  ROLE_ADMINISTRATOR,
+} from "../guards";
 import { CastModel } from "./model";
 import { dispatchReminders, notifyAttributions } from "./notifications";
 import { castDb, CastService } from "./service";
@@ -22,8 +27,10 @@ function parseDate(value: string | undefined): Date | null | undefined {
   return Number.isNaN(date.getTime()) ? null : date;
 }
 
-const eventNotFound = (id: string) => status(404, { message: `CastEvent ${id} introuvable` });
-const attributionNotFound = (id: string) => status(404, { message: `CastAttribution ${id} introuvable` });
+const eventNotFound = (id: string) =>
+  status(404, { message: `CastEvent ${id} introuvable` });
+const attributionNotFound = (id: string) =>
+  status(404, { message: `CastAttribution ${id} introuvable` });
 
 export const castsController = new Elysia({ prefix: "/casts" })
   .use(dbPlugin)
@@ -42,7 +49,8 @@ export const castsController = new Elysia({ prefix: "/casts" })
       if (auth.error) return auth.error;
       const from = parseDate(query.from);
       const to = parseDate(query.to);
-      if (from === null || to === null) return status(400, { message: "Date invalide (from / to)" });
+      if (from === null || to === null)
+        return status(400, { message: "Date invalide (from / to)" });
       return CastService.listEvents(castDb(db), {
         status: query.status,
         from,
@@ -65,7 +73,10 @@ export const castsController = new Elysia({ prefix: "/casts" })
       const detail = await CastService.getEventDetail(castDb(db), id);
       return detail ?? eventNotFound(id);
     },
-    { params: CastModel.idParams, response: { 200: CastModel.detail, 401: message, 404: message } },
+    {
+      params: CastModel.idParams,
+      response: { 200: CastModel.detail, 401: message, 404: message },
+    },
   )
   .post(
     "/events",
@@ -75,7 +86,8 @@ export const castsController = new Elysia({ prefix: "/casts" })
       const scheduledAt = parseDate(body.scheduledAt);
       if (!scheduledAt) return status(400, { message: "scheduledAt invalide" });
       const tournamentId = body.tournamentId?.trim() || null;
-      if (tournamentId && !UUID.test(tournamentId)) return status(400, { message: "tournamentId invalide" });
+      if (tournamentId && !UUID.test(tournamentId))
+        return status(400, { message: "tournamentId invalide" });
       const event = await CastService.createEvent(castDb(db), {
         name: body.name.trim(),
         kind: body.kind,
@@ -91,7 +103,12 @@ export const castsController = new Elysia({ prefix: "/casts" })
     },
     {
       body: CastModel.createBody,
-      response: { 201: CastModel.event, 400: message, 401: message, 403: message },
+      response: {
+        201: CastModel.event,
+        400: message,
+        401: message,
+        403: message,
+      },
     },
   )
   .post(
@@ -100,14 +117,26 @@ export const castsController = new Elysia({ prefix: "/casts" })
       const auth = await requireRole(db, headers, ROLE_ADMINISTRATOR);
       if (auth.error) return auth.error;
       const casts = castDb(db);
-      const event = UUID.test(id) ? await CastService.findEvent(casts, id) : null;
+      const event = UUID.test(id)
+        ? await CastService.findEvent(casts, id)
+        : null;
       if (!event) return eventNotFound(id);
-      return CastService.openSurvey(casts, event, body.casterPool, auth.session.id);
+      return CastService.openSurvey(
+        casts,
+        event,
+        body.casterPool,
+        auth.session.id,
+      );
     },
     {
       params: CastModel.idParams,
       body: CastModel.surveyBody,
-      response: { 200: CastModel.surveyResult, 401: message, 403: message, 404: message },
+      response: {
+        200: CastModel.surveyResult,
+        401: message,
+        403: message,
+        404: message,
+      },
     },
   )
   .post(
@@ -116,7 +145,9 @@ export const castsController = new Elysia({ prefix: "/casts" })
       const auth = await requireSession(headers);
       if (auth.error) return auth.error;
       const casts = castDb(db);
-      const event = UUID.test(id) ? await CastService.findEvent(casts, id) : null;
+      const event = UUID.test(id)
+        ? await CastService.findEvent(casts, id)
+        : null;
       if (!event) return eventNotFound(id);
       return CastService.recordAvailability(casts, {
         userId: auth.session.id,
@@ -138,16 +169,28 @@ export const castsController = new Elysia({ prefix: "/casts" })
       const auth = await requireRole(db, headers, ROLE_ADMINISTRATOR);
       if (auth.error) return auth.error;
       const casts = castDb(db);
-      const event = UUID.test(id) ? await CastService.findEvent(casts, id) : null;
+      const event = UUID.test(id)
+        ? await CastService.findEvent(casts, id)
+        : null;
       if (!event) return eventNotFound(id);
-      const attributions = await CastService.autoAssign(casts, event, auth.session.id, body?.maxSlotsPerCaster);
+      const attributions = await CastService.autoAssign(
+        casts,
+        event,
+        auth.session.id,
+        body?.maxSlotsPerCaster,
+      );
       await notifyAttributions(casts, event, attributions);
       return { created: attributions.length, attributions };
     },
     {
       params: CastModel.idParams,
       body: CastModel.autoAssignBody,
-      response: { 200: CastModel.autoAssignResult, 401: message, 403: message, 404: message },
+      response: {
+        200: CastModel.autoAssignResult,
+        401: message,
+        403: message,
+        404: message,
+      },
     },
   )
   .patch(
@@ -157,7 +200,12 @@ export const castsController = new Elysia({ prefix: "/casts" })
       if (auth.error) return auth.error;
       if (!UUID.test(id)) return attributionNotFound(id);
       const casts = castDb(db);
-      const updated = await CastService.swap(casts, id, body.newCasterId.trim(), auth.session.id);
+      const updated = await CastService.swap(
+        casts,
+        id,
+        body.newCasterId.trim(),
+        auth.session.id,
+      );
       if (!updated) return attributionNotFound(id);
       const event = await CastService.findEventOfSlot(casts, updated.slotId);
       if (event) await notifyAttributions(casts, event, [updated]);
@@ -166,7 +214,12 @@ export const castsController = new Elysia({ prefix: "/casts" })
     {
       params: CastModel.idParams,
       body: CastModel.swapBody,
-      response: { 200: CastModel.attribution, 401: message, 403: message, 404: message },
+      response: {
+        200: CastModel.attribution,
+        401: message,
+        403: message,
+        404: message,
+      },
     },
   )
   .post(
@@ -175,16 +228,29 @@ export const castsController = new Elysia({ prefix: "/casts" })
       const auth = await requireSession(headers);
       if (auth.error) return auth.error;
       const casts = castDb(db);
-      const attribution = UUID.test(id) ? await CastService.findAttribution(casts, id) : null;
+      const attribution = UUID.test(id)
+        ? await CastService.findAttribution(casts, id)
+        : null;
       if (!attribution) return attributionNotFound(id);
       if (attribution.userId !== auth.session.id)
-        return status(403, { message: "Seul le caster assigné peut confirmer cette attribution" });
+        return status(403, {
+          message: "Seul le caster assigné peut confirmer cette attribution",
+        });
       const confirmed = await CastService.confirm(casts, id, auth.session.id);
-      return confirmed ?? status(409, { message: "Attribution modifiée entre-temps" });
+      return (
+        confirmed ??
+        status(409, { message: "Attribution modifiée entre-temps" })
+      );
     },
     {
       params: CastModel.idParams,
-      response: { 200: CastModel.attribution, 401: message, 403: message, 404: message, 409: message },
+      response: {
+        200: CastModel.attribution,
+        401: message,
+        403: message,
+        404: message,
+        409: message,
+      },
     },
   )
   // Rappels J-2 / H-2 (MP + récapitulatif staff). À appeler toutes les 15 min
@@ -199,7 +265,10 @@ export const castsController = new Elysia({ prefix: "/casts" })
       }
       const casts = castDb(db);
       const now = new Date();
-      return { j2: await dispatchReminders(casts, "j2", now), h2: await dispatchReminders(casts, "h2", now) };
+      return {
+        j2: await dispatchReminders(casts, "j2", now),
+        h2: await dispatchReminders(casts, "h2", now),
+      };
     },
     {
       response: {

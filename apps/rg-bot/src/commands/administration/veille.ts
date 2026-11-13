@@ -59,7 +59,9 @@ import "./racine";
 import { echec, piedTexte, repondre } from "../../lib/ui";
 
 /** Comptes X connus de l'archive — pour ne pas suivre un pseudo mal orthographié. */
-async function suggererComptes(interaction: AutocompleteInteraction): Promise<void> {
+async function suggererComptes(
+  interaction: AutocompleteInteraction,
+): Promise<void> {
   const saisie = String(interaction.options.getFocused() ?? "")
     .trim()
     .replace(/^@/, "")
@@ -68,9 +70,12 @@ async function suggererComptes(interaction: AutocompleteInteraction): Promise<vo
     const comptes = await auteursConnus();
     await interaction.respond(
       comptes
-        .filter(compte => saisie.length === 0 || compte.toLowerCase().includes(saisie))
+        .filter(
+          (compte) =>
+            saisie.length === 0 || compte.toLowerCase().includes(saisie),
+        )
         .slice(0, 25)
-        .map(compte => ({ name: `@${borner(compte, 98)}`, value: compte })),
+        .map((compte) => ({ name: `@${borner(compte, 98)}`, value: compte })),
     );
   } catch {
     await interaction.respond([]);
@@ -78,7 +83,9 @@ async function suggererComptes(interaction: AutocompleteInteraction): Promise<vo
 }
 
 /** Comptes actuellement suivis — la seule liste dans laquelle `retirer` a un sens. */
-async function suggererComptesSuivis(interaction: AutocompleteInteraction): Promise<void> {
+async function suggererComptesSuivis(
+  interaction: AutocompleteInteraction,
+): Promise<void> {
   const saisie = String(interaction.options.getFocused() ?? "")
     .trim()
     .replace(/^@/, "")
@@ -87,9 +94,12 @@ async function suggererComptesSuivis(interaction: AutocompleteInteraction): Prom
     const filtre = await lireFiltreNotification();
     await interaction.respond(
       filtre.comptes
-        .filter(compte => saisie.length === 0 || compte.toLowerCase().includes(saisie))
+        .filter(
+          (compte) =>
+            saisie.length === 0 || compte.toLowerCase().includes(saisie),
+        )
         .slice(0, 25)
-        .map(compte => ({ name: `@${borner(compte, 98)}`, value: compte })),
+        .map((compte) => ({ name: `@${borner(compte, 98)}`, value: compte })),
     );
   } catch {
     await interaction.respond([]);
@@ -97,7 +107,9 @@ async function suggererComptesSuivis(interaction: AutocompleteInteraction): Prom
 }
 
 /** Catégories réellement présentes dans `tweets.category` (colonne libre). */
-async function suggererCategories(interaction: AutocompleteInteraction): Promise<void> {
+async function suggererCategories(
+  interaction: AutocompleteInteraction,
+): Promise<void> {
   const saisie = String(interaction.options.getFocused() ?? "")
     .trim()
     .toLowerCase();
@@ -105,9 +117,15 @@ async function suggererCategories(interaction: AutocompleteInteraction): Promise
     const categories = await categoriesConnues();
     await interaction.respond(
       categories
-        .filter(categorie => saisie.length === 0 || categorie.toLowerCase().includes(saisie))
+        .filter(
+          (categorie) =>
+            saisie.length === 0 || categorie.toLowerCase().includes(saisie),
+        )
         .slice(0, 25)
-        .map(categorie => ({ name: borner(categorie, 100), value: categorie })),
+        .map((categorie) => ({
+          name: borner(categorie, 100),
+          value: categorie,
+        })),
     );
   } catch {
     await interaction.respond([]);
@@ -124,7 +142,8 @@ async function suggererCategories(interaction: AutocompleteInteraction): Promise
 export class AdministrationVeilleCommand {
   @Slash({
     name: "regler",
-    description: "Change la notification des posts X : salon, comptes, filtre, curseur (rôle admin)",
+    description:
+      "Change la notification des posts X : salon, comptes, filtre, curseur (rôle admin)",
   })
   async regler(
     @SlashOption({
@@ -144,7 +163,8 @@ export class AdministrationVeilleCommand {
     salon: GuildBasedChannel | undefined,
     @SlashOption({
       name: "max",
-      description: "Posts détaillés au maximum par lot ; au-delà, un embed de synthèse (1 à 50)",
+      description:
+        "Posts détaillés au maximum par lot ; au-delà, un embed de synthèse (1 à 50)",
       type: ApplicationCommandOptionType.Integer,
       required: false,
       minValue: 1,
@@ -185,7 +205,8 @@ export class AdministrationVeilleCommand {
     inclure: string | undefined,
     @SlashOption({
       name: "curseur",
-      description: "Replace le curseur à maintenant : l'arriéré ne sera pas annoncé",
+      description:
+        "Replace le curseur à maintenant : l'arriéré ne sera pas annoncé",
       type: ApplicationCommandOptionType.Boolean,
       required: false,
     })
@@ -206,11 +227,17 @@ export class AdministrationVeilleCommand {
       // qui ne se signalera que dans le journal du service. Le cas est réel —
       // `50001 Missing Access` quand le rôle du bot n'a pas « Voir le salon ».
       if (salon) {
-        const { salon: joignable, raison } = await resoudreSalon(interaction.client, salon.id);
+        const { salon: joignable, raison } = await resoudreSalon(
+          interaction.client,
+          salon.id,
+        );
         if (!joignable) {
           await repondre(
             interaction,
-            echec("Rien n'a été fait", `Rien n'a été enregistré. ${borner(raison ?? "Salon injoignable.", 1_500)}`),
+            echec(
+              "Rien n'a été fait",
+              `Rien n'a été enregistré. ${borner(raison ?? "Salon injoignable.", 1_500)}`,
+            ),
           );
           return;
         }
@@ -235,7 +262,8 @@ export class AdministrationVeilleCommand {
       if (curseur === true) {
         const position = await lireCurseur();
         if (!position) {
-          ligneCurseur = "Aucun curseur en base : il sera créé à `now()` au premier drain, sans rejouer l'archive.";
+          ligneCurseur =
+            "Aucun curseur en base : il sera créé à `now()` au premier drain, sans rejouer l'archive.";
         } else {
           const maintenant = new Date();
           const avance = await avancerCurseur(
@@ -288,7 +316,8 @@ export class AdministrationVeilleCommand {
         });
       }
 
-      const salonEffectif = apres.salon ?? Bun.env.DISCORD_NEWS_CHANNEL_ID ?? null;
+      const salonEffectif =
+        apres.salon ?? Bun.env.DISCORD_NEWS_CHANNEL_ID ?? null;
       // `changements` peut être VIDE alors qu'on arrive ici : c'est le cas quand
       // seul `curseur:true` a été demandé et que le curseur n'a pas bougé (aucune
       // ligne en base, ou un drain l'a déplacé entre-temps). Une description
@@ -296,10 +325,14 @@ export class AdministrationVeilleCommand {
       // et la personne verrait une panne au lieu d'une explication.
       const resume =
         changements.length > 0
-          ? changements.map(ligne => `• ${ligne}`).join("\n")
+          ? changements.map((ligne) => `• ${ligne}`).join("\n")
           : "Aucun champ du réglage n'a changé — voir le curseur ci-dessous.";
       const embed = rgEmbed()
-        .setTitle(changements.length > 0 ? "Notification X — réglage mis à jour" : "Notification X — réglage inchangé")
+        .setTitle(
+          changements.length > 0
+            ? "Notification X — réglage mis à jour"
+            : "Notification X — réglage inchangé",
+        )
         // Borné à 1 500 et non 4 000 : le total d'un embed est plafonné à 6 000
         // par Discord, et deux champs de 1 000 suivent.
         .setDescription(borner(resume, 1_500))
@@ -310,11 +343,16 @@ export class AdministrationVeilleCommand {
               `Notification : **${apres.actif ? "active" : "coupée"}**`,
               `Comptes suivis (${formaterNombre(apres.comptes.length)}) : ${
                 apres.comptes.length > 0
-                  ? borner(apres.comptes.map(compte => `@${compte}`).join(", "), 700)
+                  ? borner(
+                      apres.comptes.map((compte) => `@${compte}`).join(", "),
+                      700,
+                    )
                   : "*aucun* — rien ne sera annoncé"
               }`,
               `Catégories exclues : ${
-                apres.categories_exclues.length > 0 ? apres.categories_exclues.join(", ") : "*aucune*"
+                apres.categories_exclues.length > 0
+                  ? apres.categories_exclues.join(", ")
+                  : "*aucune*"
               } (+ leak, exclu en dur)`,
               `Seuil de détail : **${apres.max_par_lot}** posts par lot`,
               salonEffectif
@@ -324,14 +362,22 @@ export class AdministrationVeilleCommand {
             1_000,
           ),
         })
-        .setFooter(piedTexte({ note: "État complet et curseur : /staff veille suivi" }));
+        .setFooter(
+          piedTexte({ note: "État complet et curseur : /staff veille suivi" }),
+        );
 
       if (ligneCurseur !== null) {
-        embed.addFields({ name: "Curseur", value: borner(ligneCurseur, 1_000) });
+        embed.addFields({
+          name: "Curseur",
+          value: borner(ligneCurseur, 1_000),
+        });
       }
       await interaction.editReply({ embeds: [embed] });
     } catch (err) {
-      await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
+      await repondre(
+        interaction,
+        echec("Le service n'a pas répondu", messagePanne(err)),
+      );
     }
   }
 }

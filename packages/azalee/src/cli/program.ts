@@ -13,7 +13,10 @@
 
 import { Command } from "commander";
 
-import { registerAuditCommand, registerTestVariantsCommand } from "./commands/audit";
+import {
+  registerAuditCommand,
+  registerTestVariantsCommand,
+} from "./commands/audit";
 import { registerCharaCommand } from "./commands/chara";
 import { registerCompareCommand } from "./commands/compare";
 import { registerDataCommand } from "./commands/data";
@@ -46,7 +49,10 @@ export const CLI_NAME = "azalee";
 export function createAzaleeProgram(): Command {
   const program = new Command();
 
-  program.name(CLI_NAME).description("CLI d'Azalée pour Inazuma Eleven: Victory Road").version(CLI_VERSION);
+  program
+    .name(CLI_NAME)
+    .description("CLI d'Azalée pour Inazuma Eleven: Victory Road")
+    .version(CLI_VERSION);
 
   // Données & traduction
   registerTranslateCommand(program);

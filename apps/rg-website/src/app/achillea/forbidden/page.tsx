@@ -5,7 +5,8 @@ import { metadonneesAchillea } from "@/app/achillea/metadonnees";
 
 export const metadata = metadonneesAchillea({
   titre: "Accès refusé",
-  description: "Vous n'avez pas les autorisations requises pour afficher cette ressource.",
+  description:
+    "Vous n'avez pas les autorisations requises pour afficher cette ressource.",
   chemin: "/achillea/forbidden",
   indexable: false,
 });
@@ -19,9 +20,12 @@ export default function AchilleaForbiddenPage() {
         </div>
 
         <div className="space-y-2">
-          <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">Accès Refusé</h1>
+          <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">
+            Accès Refusé
+          </h1>
           <p className="text-sm text-muted-foreground">
-            Vous ne possédez pas les autorisations nécessaires pour accéder à cette page ou effectuer cette action.
+            Vous ne possédez pas les autorisations nécessaires pour accéder à
+            cette page ou effectuer cette action.
           </p>
         </div>
 

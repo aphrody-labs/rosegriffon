@@ -62,7 +62,13 @@ export const DEFAULT_THEMES: ThemeOption[] = [
   },
 ];
 
-export function ThemeToggle({ themes = DEFAULT_THEMES, className }: { themes?: ThemeOption[]; className?: string }) {
+export function ThemeToggle({
+  themes = DEFAULT_THEMES,
+  className,
+}: {
+  themes?: ThemeOption[];
+  className?: string;
+}) {
   const { setTheme, theme } = useTheme();
   const chemin = usePathname() ?? "/";
   const [reglageOuvert, setReglageOuvert] = useState(false);
@@ -82,7 +88,7 @@ export function ThemeToggle({ themes = DEFAULT_THEMES, className }: { themes?: T
     );
   }
 
-  const active = themes.find(entry => entry.id === theme) ?? themes[0]!;
+  const active = themes.find((entry) => entry.id === theme) ?? themes[0]!;
   // Le wiki et l’e-sport imposent leur thème à la zone de contenu : les
   // réglages y restent sans effet visible, il faut le dire dans le dialogue.
   const sectionImposee = domaineDeLaRoute(chemin) !== "association";
@@ -102,14 +108,21 @@ export function ThemeToggle({ themes = DEFAULT_THEMES, className }: { themes?: T
             {ActiveIcon ? (
               <ActiveIcon aria-hidden="true" />
             ) : active.image ? (
-              <Image src={active.image} alt="" width={24} height={24} unoptimized className="object-contain" />
+              <Image
+                src={active.image}
+                alt=""
+                width={24}
+                height={24}
+                unoptimized
+                className="object-contain"
+              />
             ) : (
               <Moon aria-hidden="true" />
             )}
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-48">
-          {themes.map(entry => {
+          {themes.map((entry) => {
             const Icon = entry.icon;
             return (
               <DropdownMenuItem
@@ -133,12 +146,21 @@ export function ThemeToggle({ themes = DEFAULT_THEMES, className }: { themes?: T
                   <Moon data-icon="inline-start" aria-hidden="true" />
                 )}
                 <span className="flex-1 truncate">{entry.label}</span>
-                {entry.id === active.id && <Check data-icon="inline-end" className="opacity-70" aria-hidden="true" />}
+                {entry.id === active.id && (
+                  <Check
+                    data-icon="inline-end"
+                    className="opacity-70"
+                    aria-hidden="true"
+                  />
+                )}
               </DropdownMenuItem>
             );
           })}
           <DropdownMenuSeparator />
-          <DropdownMenuItem onSelect={() => setReglageOuvert(true)} className="gap-2.5">
+          <DropdownMenuItem
+            onSelect={() => setReglageOuvert(true)}
+            className="gap-2.5"
+          >
             <SlidersHorizontal data-icon="inline-start" aria-hidden="true" />
             <span className="flex-1 truncate">Ajuster les couleurs…</span>
           </DropdownMenuItem>
@@ -148,10 +170,13 @@ export function ThemeToggle({ themes = DEFAULT_THEMES, className }: { themes?: T
         <DialogContent className="max-w-sm">
           <DialogHeader>
             <DialogTitle>Couleurs du thème {active.label}</DialogTitle>
-            <DialogDescription>Réglages enregistrés sur cet appareil, pour ce thème uniquement.</DialogDescription>
+            <DialogDescription>
+              Réglages enregistrés sur cet appareil, pour ce thème uniquement.
+            </DialogDescription>
             {sectionImposee && (
               <p className="text-sm text-on-surface-variant">
-                Cette section garde ses propres couleurs : vos réglages s’appliquent au reste du site.
+                Cette section garde ses propres couleurs : vos réglages
+                s’appliquent au reste du site.
               </p>
             )}
           </DialogHeader>

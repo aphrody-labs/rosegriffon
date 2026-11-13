@@ -78,7 +78,7 @@ export async function syncSiteTelemetryAggregates(
 ): Promise<number> {
   if (rows.length === 0) return 0;
   const syncedAt = new Date().toISOString();
-  const payload = rows.map(row => ({
+  const payload = rows.map((row) => ({
     host: row.host,
     window_start: row.windowStart,
     requests: row.requests,
@@ -101,9 +101,12 @@ export async function syncSiteTelemetryAggregates(
 }
 
 /** Site traffic over the last `hours` hours — replaces the former Redis summary. */
-export async function siteTelemetrySummary(
-  hours = 24,
-): Promise<{ hours: number; requests: number; complete: boolean; syncedAt: string | null }> {
+export async function siteTelemetrySummary(hours = 24): Promise<{
+  hours: number;
+  requests: number;
+  complete: boolean;
+  syncedAt: string | null;
+}> {
   const [row] = await discordMirrorSql()`
     SELECT count(DISTINCT window_start)::int AS hours,
            coalesce(sum(requests), 0)::bigint AS requests,
@@ -119,9 +122,11 @@ export async function siteTelemetrySummary(
   };
 }
 
-export async function syncOAuthLinkMetadata(rows: readonly OAuthLinkMetadata[]): Promise<number> {
+export async function syncOAuthLinkMetadata(
+  rows: readonly OAuthLinkMetadata[],
+): Promise<number> {
   const seenAt = new Date().toISOString();
-  const payload = rows.map(row => ({
+  const payload = rows.map((row) => ({
     account_id: row.id,
     user_id: row.userId,
     provider_id: row.providerId,
@@ -129,7 +134,7 @@ export async function syncOAuthLinkMetadata(rows: readonly OAuthLinkMetadata[]):
     linked_at: row.linkedAt,
     updated_at: row.updatedAt,
   }));
-  await discordMirrorSql().begin(async tx => {
+  await discordMirrorSql().begin(async (tx) => {
     if (payload.length > 0)
       await tx`
         INSERT INTO discord_mirror.rg_oauth_account_links
@@ -161,10 +166,14 @@ export async function oauthLinkSummary(): Promise<{
      WHERE active
      GROUP BY provider_id
      ORDER BY provider_id`) as { provider_id: string; count: number }[];
-  const [last] = await discordMirrorSql()`SELECT max(seen_at) AS seen_at FROM discord_mirror.rg_oauth_account_links`;
+  const [last] =
+    await discordMirrorSql()`SELECT max(seen_at) AS seen_at FROM discord_mirror.rg_oauth_account_links`;
   return {
     total: counts.reduce((sum, row) => sum + Number(row.count), 0),
-    counts: counts.map(row => ({ provider_id: row.provider_id, count: Number(row.count) })),
+    counts: counts.map((row) => ({
+      provider_id: row.provider_id,
+      count: Number(row.count),
+    })),
     syncedAt: last?.seen_at ? new Date(last.seen_at).toISOString() : null,
   };
 }
@@ -199,7 +208,10 @@ export async function discordSyncSummary(
 }
 
 /** A guild departure affects only the bot identity that observed it. */
-export async function markDiscordGuildLeft(source: DiscordSnapshotSource, guildId: string): Promise<void> {
+export async function markDiscordGuildLeft(
+  source: DiscordSnapshotSource,
+  guildId: string,
+): Promise<void> {
   await discordMirrorSql()`
     INSERT INTO discord_mirror.rg_discord_guild_presence (source_bot_id, guild_id, profile, present, changed_at)
     VALUES (${source.sourceBotId}, ${guildId}, ${source.profile}, false, now())
@@ -212,7 +224,9 @@ export async function markDiscordGuildLeft(source: DiscordSnapshotSource, guildI
  * Works without a gateway session; Discord answers 403 when the application
  * lacks the privileged GuildMembers intent, which keeps completeness honest.
  */
-export async function listGuildMembers(guild: Guild): Promise<Map<string, GuildMember>> {
+export async function listGuildMembers(
+  guild: Guild,
+): Promise<Map<string, GuildMember>> {
   const members = new Map<string, GuildMember>();
   let after: string | undefined;
   for (;;) {
@@ -238,11 +252,14 @@ function memberRow(member: GuildMember, sourceBotId: string) {
     global_name: member.user.globalName ?? null,
     nickname: member.nickname ?? null,
     avatar_url:
-      member.avatarURL({ size: 256, extension: "webp" }) ?? member.user.avatarURL({ size: 256, extension: "webp" }),
+      member.avatarURL({ size: 256, extension: "webp" }) ??
+      member.user.avatarURL({ size: 256, extension: "webp" }),
     joined_at: member.joinedAt?.toISOString() ?? null,
     premium_since: member.premiumSince?.toISOString() ?? null,
     is_bot: member.user.bot,
-    role_ids_json: [...member.roles.cache.keys()].filter(id => id !== member.guild.id),
+    role_ids_json: [...member.roles.cache.keys()].filter(
+      (id) => id !== member.guild.id,
+    ),
     source_bot_id: sourceBotId,
   };
 }
@@ -250,27 +267,36 @@ function memberRow(member: GuildMember, sourceBotId: string) {
 export async function syncDiscordGuildSnapshot(
   guild: Guild,
   source: DiscordSnapshotSource,
-  options: { members?: ReadonlyMap<string, GuildMember>; membersComplete?: boolean } = {},
+  options: {
+    members?: ReadonlyMap<string, GuildMember>;
+    membersComplete?: boolean;
+  } = {},
 ): Promise<DiscordGuildSnapshotReport> {
-  const [roles, channels, emojiResult, eventResult, threadResult] = await Promise.all([
-    guild.roles.fetch(),
-    guild.channels.fetch(),
-    guild.emojis
-      .fetch()
-      .then(value => ({ value, complete: true }))
-      .catch(() => ({ value: guild.emojis.cache, complete: false })),
-    guild.scheduledEvents
-      .fetch()
-      .then(value => ({ value, complete: true }))
-      .catch(() => ({ value: guild.scheduledEvents.cache, complete: false })),
-    guild.channels
-      .fetchActiveThreads()
-      .then(value => ({ value: value.threads, complete: true }))
-      .catch(() => ({ value: guild.channels.cache.filter(channel => channel.isThread()), complete: false })),
-  ]);
+  const [roles, channels, emojiResult, eventResult, threadResult] =
+    await Promise.all([
+      guild.roles.fetch(),
+      guild.channels.fetch(),
+      guild.emojis
+        .fetch()
+        .then((value) => ({ value, complete: true }))
+        .catch(() => ({ value: guild.emojis.cache, complete: false })),
+      guild.scheduledEvents
+        .fetch()
+        .then((value) => ({ value, complete: true }))
+        .catch(() => ({ value: guild.scheduledEvents.cache, complete: false })),
+      guild.channels
+        .fetchActiveThreads()
+        .then((value) => ({ value: value.threads, complete: true }))
+        .catch(() => ({
+          value: guild.channels.cache.filter((channel) => channel.isThread()),
+          complete: false,
+        })),
+    ]);
   // A missing GuildMembers intent cannot be treated as a complete roster.
-  const hasMembersIntent = guild.client.options.intents.has(GUILD_MEMBERS_INTENT);
-  let members: ReadonlyMap<string, GuildMember> = options.members ?? guild.members.cache;
+  const hasMembersIntent =
+    guild.client.options.intents.has(GUILD_MEMBERS_INTENT);
+  let members: ReadonlyMap<string, GuildMember> =
+    options.members ?? guild.members.cache;
   let membersComplete = false;
   if (options.members) {
     membersComplete = hasMembersIntent && options.membersComplete === true;
@@ -303,8 +329,10 @@ export async function syncDiscordGuildSnapshot(
     syncedAt,
   };
 
-  const memberRows = [...members.values()].map(member => memberRow(member, bot));
-  const roleRows = [...roles.values()].map(role => ({
+  const memberRows = [...members.values()].map((member) =>
+    memberRow(member, bot),
+  );
+  const roleRows = [...roles.values()].map((role) => ({
     role_id: role.id,
     name: role.name,
     color: role.color,
@@ -332,14 +360,14 @@ export async function syncDiscordGuildSnapshot(
         parent_id: thread.parentId,
         position: null,
       });
-  const emojiRows = [...emojiResult.value.values()].map(emoji => ({
+  const emojiRows = [...emojiResult.value.values()].map((emoji) => ({
     emoji_id: emoji.id,
     name: emoji.name,
     animated: Boolean(emoji.animated),
     available: Boolean(emoji.available),
     url: emoji.imageURL(),
   }));
-  const eventRows = [...eventResult.value.values()].map(event => ({
+  const eventRows = [...eventResult.value.values()].map((event) => ({
     event_id: event.id,
     name: event.name,
     description: event.description,
@@ -352,7 +380,7 @@ export async function syncDiscordGuildSnapshot(
   }));
   const memberCount = guild.memberCount ?? guild.approximateMemberCount ?? null;
 
-  await discordMirrorSql().begin(async tx => {
+  await discordMirrorSql().begin(async (tx) => {
     await tx`
       INSERT INTO discord_mirror.rg_discord_guilds
         (source_bot_id, profile, guild_id, name, icon_url, description, member_count, synced_at)

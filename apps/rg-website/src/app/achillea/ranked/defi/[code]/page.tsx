@@ -16,7 +16,11 @@ export const metadata = metadonneesAchillea({
   indexable: false,
 });
 
-export default async function RankedChallengePage({ params }: { params: Promise<{ code: string }> }) {
+export default async function RankedChallengePage({
+  params,
+}: {
+  params: Promise<{ code: string }>;
+}) {
   const { code } = await params;
   return <RankedChallengeClient code={code} />;
 }

@@ -54,7 +54,7 @@ const ExampleImage = "/ogVR.webp";
 
 const ImageCropperDialog = nextDynamic(
   () =>
-    import("@/components/image-cropper-dialog").then(mod => ({
+    import("@/components/image-cropper-dialog").then((mod) => ({
       default: mod.ImageCropperDialog,
     })),
   {
@@ -92,7 +92,11 @@ const UploadPlaceholder = ({
       <div className="absolute inset-0 rounded-lg overflow-hidden">
         <NextImage
           src={showPreviewImage === "vr" ? VRImage : IE1Image}
-          alt={showPreviewImage === "vr" ? "Victory Road Preview" : "Inazuma Eleven Preview"}
+          alt={
+            showPreviewImage === "vr"
+              ? "Victory Road Preview"
+              : "Inazuma Eleven Preview"
+          }
           fill
           sizes="(min-width: 1024px) 50vw, 100vw"
           className="object-cover opacity-10 blur-sm"
@@ -103,19 +107,30 @@ const UploadPlaceholder = ({
 
     <div className="relative z-10 flex flex-col items-center gap-4">
       <div className="relative">
-        <div className={cn("absolute inset-0 blur-xl opacity-30", colorClass)} />
-        <ImageIcon className={cn("size-16 sm:h-20 sm:w-20 relative", colorClass)} />
+        <div
+          className={cn("absolute inset-0 blur-xl opacity-30", colorClass)}
+        />
+        <ImageIcon
+          className={cn("size-16 sm:h-20 sm:w-20 relative", colorClass)}
+        />
       </div>
 
       <div className="text-center space-y-2">
-        <h3 className={cn("text-xl sm:text-2xl font-bold", colorClass)}>{title}</h3>
-        <Badge variant="outline" className={cn("text-xs sm:text-sm", colorClass)}>
+        <h3 className={cn("text-xl sm:text-2xl font-bold", colorClass)}>
+          {title}
+        </h3>
+        <Badge
+          variant="outline"
+          className={cn("text-xs sm:text-sm", colorClass)}
+        >
           {year}
         </Badge>
       </div>
 
       <div className="text-center space-y-1">
-        <p className="text-sm sm:text-base text-muted-foreground font-medium">Glissez-déposez votre image ici</p>
+        <p className="text-sm sm:text-base text-muted-foreground font-medium">
+          Glissez-déposez votre image ici
+        </p>
         <p className="text-xs text-muted-foreground">ou</p>
       </div>
 
@@ -123,7 +138,13 @@ const UploadPlaceholder = ({
         <label className="cursor-pointer">
           <CloudUpload className="mr-2 size-4" />
           Choisir une image
-          <input ref={inputRef} type="file" accept="image/*" onChange={onFileInput} className="sr-only" />
+          <input
+            ref={inputRef}
+            type="file"
+            accept="image/*"
+            onChange={onFileInput}
+            className="sr-only"
+          />
         </label>
       </Button>
 
@@ -142,11 +163,21 @@ interface ImagePreviewProps {
   inputRef: React.RefObject<HTMLInputElement>;
 }
 
-const ImagePreview = ({ image, title, year, colorClass, onFileInput, onRemoveImage, inputRef }: ImagePreviewProps) => (
+const ImagePreview = ({
+  image,
+  title,
+  year,
+  colorClass,
+  onFileInput,
+  onRemoveImage,
+  inputRef,
+}: ImagePreviewProps) => (
   <div className="flex flex-col gap-4 p-4">
     <div className="flex items-center justify-between mb-2">
       <div>
-        <h4 className={cn("text-base sm:text-lg font-semibold", colorClass)}>{title}</h4>
+        <h4 className={cn("text-base sm:text-lg font-semibold", colorClass)}>
+          {title}
+        </h4>
         <Badge variant="secondary" className="text-xs mt-1">
           {year}
         </Badge>
@@ -170,10 +201,21 @@ const ImagePreview = ({ image, title, year, colorClass, onFileInput, onRemoveIma
         <label className="cursor-pointer">
           <RefreshCw className="mr-2 size-4" />
           Changer
-          <input ref={inputRef} type="file" accept="image/*" onChange={onFileInput} className="sr-only" />
+          <input
+            ref={inputRef}
+            type="file"
+            accept="image/*"
+            onChange={onFileInput}
+            className="sr-only"
+          />
         </label>
       </Button>
-      <Button onClick={onRemoveImage} variant="destructive" size="sm" className="flex-1">
+      <Button
+        onClick={onRemoveImage}
+        variant="destructive"
+        size="sm"
+        className="flex-1"
+      >
         <Trash2 className="mr-2 size-4" />
         Supprimer
       </Button>
@@ -282,7 +324,8 @@ export default function NostalgieVR() {
   const handleOgCropComplete = (croppedImage: string) => {
     ogUpload.handleCropComplete(croppedImage);
     const img = new window.Image();
-    img.onload = () => setOgImageDimensions({ height: img.height, width: img.width });
+    img.onload = () =>
+      setOgImageDimensions({ height: img.height, width: img.width });
     img.src = croppedImage;
   };
 
@@ -311,8 +354,12 @@ export default function NostalgieVR() {
           <Scissors className="size-5" aria-hidden />
         </div>
         <div>
-          <h1 className="text-2xl font-bold tracking-tight min-[840px]:text-3xl">Projet Nostalgie</h1>
-          <p className="text-xs text-muted-foreground">Importer · Recadrer · Télécharger</p>
+          <h1 className="text-2xl font-bold tracking-tight min-[840px]:text-3xl">
+            Projet Nostalgie
+          </h1>
+          <p className="text-xs text-muted-foreground">
+            Importer · Recadrer · Télécharger
+          </p>
         </div>
       </header>
 
@@ -365,7 +412,10 @@ export default function NostalgieVR() {
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row justify-center items-stretch sm:items-center gap-3 mb-12">
             <Button
-              onClick={() => canCreateCollage && createCollage(ogUpload.image!, vrUpload.image!)}
+              onClick={() =>
+                canCreateCollage &&
+                createCollage(ogUpload.image!, vrUpload.image!)
+              }
               disabled={!canCreateCollage}
               size="lg"
               className="min-w-[200px] bg-rg-brique hover:bg-[#8a3f35] text-white shadow-lg hover:shadow-xl transition-all"
@@ -415,9 +465,15 @@ export default function NostalgieVR() {
                     <Label htmlFor="watermark-toggle" className="text-base">
                       Filigrane Rose Griffon
                     </Label>
-                    <p className="text-sm text-muted-foreground">Ajouter le logo en surimpression</p>
+                    <p className="text-sm text-muted-foreground">
+                      Ajouter le logo en surimpression
+                    </p>
                   </div>
-                  <Switch id="watermark-toggle" checked={watermarkEnabled} onCheckedChange={setWatermarkEnabled} />
+                  <Switch
+                    id="watermark-toggle"
+                    checked={watermarkEnabled}
+                    onCheckedChange={setWatermarkEnabled}
+                  />
                 </div>
 
                 {/* Position Filigrane */}
@@ -430,12 +486,20 @@ export default function NostalgieVR() {
                         { label: "Haut droite", value: "top-right" },
                         { label: "Bas gauche", value: "bottom-left" },
                         { label: "Bas droite", value: "bottom-right" },
-                      ].map(pos => (
+                      ].map((pos) => (
                         <Button
                           key={pos.value}
-                          variant={watermarkPosition === pos.value ? "default" : "outline"}
+                          variant={
+                            watermarkPosition === pos.value
+                              ? "default"
+                              : "outline"
+                          }
                           size="sm"
-                          onClick={() => setWatermarkPosition(pos.value as typeof watermarkPosition)}
+                          onClick={() =>
+                            setWatermarkPosition(
+                              pos.value as typeof watermarkPosition,
+                            )
+                          }
                         >
                           {pos.label}
                         </Button>
@@ -449,7 +513,12 @@ export default function NostalgieVR() {
                 {/* Format Export */}
                 <div className="space-y-2">
                   <Label>Format d&apos;export</Label>
-                  <Tabs value={exportFormat} onValueChange={value => setExportFormat(value as typeof exportFormat)}>
+                  <Tabs
+                    value={exportFormat}
+                    onValueChange={(value) =>
+                      setExportFormat(value as typeof exportFormat)
+                    }
+                  >
                     <TabsList className="grid w-full grid-cols-3">
                       <TabsTrigger value="jpg">JPG</TabsTrigger>
                       <TabsTrigger value="png">PNG</TabsTrigger>
@@ -462,11 +531,13 @@ export default function NostalgieVR() {
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <Label>Qualité d&apos;export</Label>
-                    <span className="text-sm text-muted-foreground">{Math.round(exportQuality * 100)}%</span>
+                    <span className="text-sm text-muted-foreground">
+                      {Math.round(exportQuality * 100)}%
+                    </span>
                   </div>
                   <Slider
                     value={[exportQuality]}
-                    onValueChange={value => {
+                    onValueChange={(value) => {
                       const val = value[0];
                       if (val !== undefined) {
                         setExportQuality(val);
@@ -491,34 +562,57 @@ export default function NostalgieVR() {
                   <Share2 className="size-5 text-primary" />
                   <CardTitle>Partager</CardTitle>
                 </div>
-                <CardDescription>Partagez votre création sur les réseaux</CardDescription>
+                <CardDescription>
+                  Partagez votre création sur les réseaux
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
-                <Button onClick={handleShareTwitter} variant="outline" className="w-full justify-start" size="lg">
+                <Button
+                  onClick={handleShareTwitter}
+                  variant="outline"
+                  className="w-full justify-start"
+                  size="lg"
+                >
                   <MessageCircle className="mr-2 size-5" />
                   Citer le tweet d&apos;origine
                 </Button>
 
-                <Button onClick={handleShareDiscord} variant="outline" className="w-full justify-start" size="lg">
+                <Button
+                  onClick={handleShareDiscord}
+                  variant="outline"
+                  className="w-full justify-start"
+                  size="lg"
+                >
                   <SiDiscord className="mr-2 size-5" />
                   Partager sur Discord
                 </Button>
 
-                <Button onClick={handleShareInstagram} variant="outline" className="w-full justify-start" size="lg">
+                <Button
+                  onClick={handleShareInstagram}
+                  variant="outline"
+                  className="w-full justify-start"
+                  size="lg"
+                >
                   <Instagram className="mr-2 size-5" />
                   Partager sur Instagram
                 </Button>
 
                 <Separator />
 
-                <Button onClick={handleCopyLink} variant="outline" className="w-full justify-start" size="lg">
+                <Button
+                  onClick={handleCopyLink}
+                  variant="outline"
+                  className="w-full justify-start"
+                  size="lg"
+                >
                   <Link2 className="mr-2 size-5" />
                   Copier le lien
                 </Button>
 
                 <div className="mt-4 p-3 rounded-lg bg-muted/50">
                   <p className="text-xs text-muted-foreground text-center">
-                    💡 Téléchargez votre montage puis partagez-le sur vos réseaux favoris !
+                    💡 Téléchargez votre montage puis partagez-le sur vos
+                    réseaux favoris !
                   </p>
                 </div>
               </CardContent>
@@ -530,7 +624,9 @@ export default function NostalgieVR() {
           {/* Example Section */}
           <div className="space-y-6 mt-12">
             <div className="text-center space-y-2">
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold">Exemple de Résultat</h2>
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold">
+                Exemple de Résultat
+              </h2>
               <p className="text-sm sm:text-base text-muted-foreground">
                 Aperçu d&apos;un montage généré avec cet outil
               </p>
@@ -570,7 +666,11 @@ export default function NostalgieVR() {
         onClose={vrUpload.handleCloseDialog}
         onCropComplete={vrUpload.handleCropComplete}
         title="Recadrer l'image Victory Road (2025)"
-        suggestedAspectRatio={ogImageDimensions ? ogImageDimensions.width / ogImageDimensions.height : undefined}
+        suggestedAspectRatio={
+          ogImageDimensions
+            ? ogImageDimensions.width / ogImageDimensions.height
+            : undefined
+        }
         freeAspect={!ogImageDimensions}
         outputWidth={800}
         quality={0.95}

@@ -54,7 +54,13 @@ function getRankImg(key?: string | null): string {
   return p.startsWith("/") ? p : `/${p}`;
 }
 
-export default function UserProfilePage({ id, titre }: { id: string; titre?: string }) {
+export default function UserProfilePage({
+  id,
+  titre,
+}: {
+  id: string;
+  titre?: string;
+}) {
   const { user: currentUser, isAuthenticated } = useAchilleaAuth();
 
   const [profile, setProfile] = useState<EnrichedUserDTO | null>(null);
@@ -80,7 +86,10 @@ export default function UserProfilePage({ id, titre }: { id: string; titre?: str
       const client = createAchilleaClient({ credentials: "include" });
 
       try {
-        const [userRes, circuitRes] = await Promise.all([client.users.get(id), client.tournaments.circuitPlayer(id)]);
+        const [userRes, circuitRes] = await Promise.all([
+          client.users.get(id),
+          client.tournaments.circuitPlayer(id),
+        ]);
 
         if (!isMounted) return;
 
@@ -123,7 +132,7 @@ export default function UserProfilePage({ id, titre }: { id: string; titre?: str
       });
 
       if (res.ok) {
-        setProfile(prev =>
+        setProfile((prev) =>
           prev
             ? {
                 ...prev,
@@ -152,7 +161,9 @@ export default function UserProfilePage({ id, titre }: { id: string; titre?: str
           <Skeleton className="size-20 rounded-full" />
           <div className="space-y-2">
             {titre ? (
-              <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">{titre}</h1>
+              <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">
+                {titre}
+              </h1>
             ) : (
               <Skeleton className="h-8 w-48" />
             )}
@@ -204,7 +215,9 @@ export default function UserProfilePage({ id, titre }: { id: string; titre?: str
             <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
               <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">
                 {profile.clan?.shortenedName && (
-                  <span className="text-primary font-mono mr-2">[{profile.clan.shortenedName}]</span>
+                  <span className="text-primary font-mono mr-2">
+                    [{profile.clan.shortenedName}]
+                  </span>
                 )}
                 {profile.username}
               </h1>
@@ -232,7 +245,9 @@ export default function UserProfilePage({ id, titre }: { id: string; titre?: str
                     />
                   )}
                   <span>{profile.clan.name}</span>
-                  {profile.clan.role === ClanMemberRole.Captain && <Crown className="size-3.5 text-warning" />}
+                  {profile.clan.role === ClanMemberRole.Captain && (
+                    <Crown className="size-3.5 text-warning" />
+                  )}
                 </Link>
               )}
             </div>
@@ -249,7 +264,10 @@ export default function UserProfilePage({ id, titre }: { id: string; titre?: str
               )}
 
               {profile.hasYoutube && (
-                <span className={`inline-flex items-center gap-1 ${MARQUE.youtube}`} title="YouTube lié">
+                <span
+                  className={`inline-flex items-center gap-1 ${MARQUE.youtube}`}
+                  title="YouTube lié"
+                >
                   <FaYoutube className="size-4" />
                 </span>
               )}
@@ -268,17 +286,31 @@ export default function UserProfilePage({ id, titre }: { id: string; titre?: str
               )}
             </div>
 
-            {profile.bio && <p className="text-sm text-foreground/80 max-w-2xl whitespace-pre-line">{profile.bio}</p>}
+            {profile.bio && (
+              <p className="text-sm text-foreground/80 max-w-2xl whitespace-pre-line">
+                {profile.bio}
+              </p>
+            )}
 
             {isOwnProfile && (
               <div className="flex flex-wrap gap-2 pt-2">
-                <Button asChild variant="outline" size="sm" className="gap-2 text-xs">
+                <Button
+                  asChild
+                  variant="outline"
+                  size="sm"
+                  className="gap-2 text-xs"
+                >
                   <Link href="/settings">
                     <Pencil className="size-3.5" />
                     Modifier mon compte
                   </Link>
                 </Button>
-                <Button variant="outline" size="sm" onClick={() => setEditOpen(true)} className="gap-2 text-xs">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setEditOpen(true)}
+                  className="gap-2 text-xs"
+                >
                   <Pencil className="size-3.5" />
                   Modifier mes infos e-sport
                 </Button>
@@ -292,7 +324,9 @@ export default function UserProfilePage({ id, titre }: { id: string; titre?: str
       <div className="space-y-4">
         <div className="flex items-center gap-3">
           <span className="h-px bg-border flex-1" />
-          <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">Ranked</h2>
+          <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
+            Ranked
+          </h2>
           <span className="h-px bg-border flex-1" />
         </div>
 
@@ -316,12 +350,21 @@ export default function UserProfilePage({ id, titre }: { id: string; titre?: str
                   />
                 </div>
                 <div className="space-y-1">
-                  <div className="text-xl font-bold">{profile.soloRank?.key ?? "Non classé"}</div>
-                  <div className="text-sm text-muted-foreground">
-                    Victoires: {profile.ranked?.solo?.wins ?? 0} · Défaites: {profile.ranked?.solo?.losses ?? 0} (
-                    {winrate(profile.ranked?.solo?.wins, profile.ranked?.solo?.losses)})
+                  <div className="text-xl font-bold">
+                    {profile.soloRank?.key ?? "Non classé"}
                   </div>
-                  <div className="text-xs text-muted-foreground">Nuls: {profile.ranked?.solo?.draws ?? 0}</div>
+                  <div className="text-sm text-muted-foreground">
+                    Victoires: {profile.ranked?.solo?.wins ?? 0} · Défaites:{" "}
+                    {profile.ranked?.solo?.losses ?? 0} (
+                    {winrate(
+                      profile.ranked?.solo?.wins,
+                      profile.ranked?.solo?.losses,
+                    )}
+                    )
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    Nuls: {profile.ranked?.solo?.draws ?? 0}
+                  </div>
                 </div>
               </div>
             </CardContent>
@@ -346,12 +389,21 @@ export default function UserProfilePage({ id, titre }: { id: string; titre?: str
                   />
                 </div>
                 <div className="space-y-1">
-                  <div className="text-xl font-bold">{profile.duoRank?.key ?? "Non classé"}</div>
-                  <div className="text-sm text-muted-foreground">
-                    Victoires: {profile.ranked?.duo?.wins ?? 0} · Défaites: {profile.ranked?.duo?.losses ?? 0} (
-                    {winrate(profile.ranked?.duo?.wins, profile.ranked?.duo?.losses)})
+                  <div className="text-xl font-bold">
+                    {profile.duoRank?.key ?? "Non classé"}
                   </div>
-                  <div className="text-xs text-muted-foreground">Nuls: {profile.ranked?.duo?.draws ?? 0}</div>
+                  <div className="text-sm text-muted-foreground">
+                    Victoires: {profile.ranked?.duo?.wins ?? 0} · Défaites:{" "}
+                    {profile.ranked?.duo?.losses ?? 0} (
+                    {winrate(
+                      profile.ranked?.duo?.wins,
+                      profile.ranked?.duo?.losses,
+                    )}
+                    )
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    Nuls: {profile.ranked?.duo?.draws ?? 0}
+                  </div>
                 </div>
               </div>
             </CardContent>
@@ -364,7 +416,9 @@ export default function UserProfilePage({ id, titre }: { id: string; titre?: str
         <div className="space-y-4">
           <div className="flex items-center gap-3">
             <span className="h-px bg-border flex-1" />
-            <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">Circuit Tournois</h2>
+            <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
+              Circuit Tournois
+            </h2>
             <span className="h-px bg-border flex-1" />
           </div>
 
@@ -373,14 +427,23 @@ export default function UserProfilePage({ id, titre }: { id: string; titre?: str
               <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-b border-border/40 pb-6">
                 <div className="flex items-center gap-4">
                   <div className="relative size-14 shrink-0">
-                    <Image src={getRankImg(circuit.tier)} alt={circuit.tier} fill className="object-contain" />
+                    <Image
+                      src={getRankImg(circuit.tier)}
+                      alt={circuit.tier}
+                      fill
+                      className="object-contain"
+                    />
                   </div>
                   <div>
                     <div className="text-2xl font-black">
                       {circuit.points} pts{" "}
-                      <span className="text-sm font-normal text-muted-foreground">· {circuit.tier}</span>
+                      <span className="text-sm font-normal text-muted-foreground">
+                        · {circuit.tier}
+                      </span>
                     </div>
-                    <div className="text-xs text-muted-foreground">Meilleur résultat : {circuit.bestRankLabel}</div>
+                    <div className="text-xs text-muted-foreground">
+                      Meilleur résultat : {circuit.bestRankLabel}
+                    </div>
                   </div>
                 </div>
 
@@ -396,15 +459,23 @@ export default function UserProfilePage({ id, titre }: { id: string; titre?: str
               {/* Grille stats circuit */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
                 <div className="p-3 rounded-lg bg-muted/30">
-                  <div className="text-xl font-bold">{circuit.tournamentsPlayed}</div>
-                  <div className="text-xs text-muted-foreground">Tournois joués</div>
+                  <div className="text-xl font-bold">
+                    {circuit.tournamentsPlayed}
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    Tournois joués
+                  </div>
                 </div>
                 <div className="p-3 rounded-lg bg-muted/30">
-                  <div className="text-xl font-bold text-warning">{circuit.wins}</div>
+                  <div className="text-xl font-bold text-warning">
+                    {circuit.wins}
+                  </div>
                   <div className="text-xs text-muted-foreground">Titres</div>
                 </div>
                 <div className="p-3 rounded-lg bg-muted/30">
-                  <div className="text-xl font-bold text-success">{circuit.podiums}</div>
+                  <div className="text-xl font-bold text-success">
+                    {circuit.podiums}
+                  </div>
                   <div className="text-xs text-muted-foreground">Podiums</div>
                 </div>
                 <div className="p-3 rounded-lg bg-muted/30">
@@ -415,19 +486,33 @@ export default function UserProfilePage({ id, titre }: { id: string; titre?: str
                   <div className="text-xl font-bold font-mono">
                     {circuit.goalsScored}-{circuit.goalsConceded}
                   </div>
-                  <div className="text-xs text-muted-foreground">Buts M - E</div>
+                  <div className="text-xs text-muted-foreground">
+                    Buts M - E
+                  </div>
                 </div>
                 <div className="p-3 rounded-lg bg-muted/30">
-                  <div className="text-xl font-bold font-mono">{formatGoalAverage(circuit.goalAverage)}</div>
-                  <div className="text-xs text-muted-foreground">Moyenne de buts</div>
+                  <div className="text-xl font-bold font-mono">
+                    {formatGoalAverage(circuit.goalAverage)}
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    Moyenne de buts
+                  </div>
                 </div>
                 <div className="p-3 rounded-lg bg-muted/30">
-                  <div className="text-xl font-bold font-mono">{circuit.bestStreak || "—"}</div>
-                  <div className="text-xs text-muted-foreground">Meilleure série</div>
+                  <div className="text-xl font-bold font-mono">
+                    {circuit.bestStreak || "—"}
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    Meilleure série
+                  </div>
                 </div>
                 <div className="p-3 rounded-lg bg-muted/30">
-                  <div className="text-xl font-bold">{circuit.bestRankLabel}</div>
-                  <div className="text-xs text-muted-foreground">Record rang</div>
+                  <div className="text-xl font-bold">
+                    {circuit.bestRankLabel}
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    Record rang
+                  </div>
                 </div>
               </div>
 
@@ -449,8 +534,11 @@ export default function UserProfilePage({ id, titre }: { id: string; titre?: str
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-border/40">
-                        {circuit.history.map(h => (
-                          <tr key={h.tournamentId} className="hover:bg-muted/20">
+                        {circuit.history.map((h) => (
+                          <tr
+                            key={h.tournamentId}
+                            className="hover:bg-muted/20"
+                          >
                             <td className="px-4 py-3 font-medium">
                               <Link
                                 href={`/achillea/tournaments/${h.tournamentId}`}
@@ -461,15 +549,22 @@ export default function UserProfilePage({ id, titre }: { id: string; titre?: str
                             </td>
                             <td className="px-4 py-3 text-muted-foreground text-xs">
                               {h.grandFinalAt
-                                ? new Date(h.grandFinalAt).toLocaleDateString("fr-FR", {
-                                    day: "numeric",
-                                    month: "short",
-                                    year: "numeric",
-                                  })
+                                ? new Date(h.grandFinalAt).toLocaleDateString(
+                                    "fr-FR",
+                                    {
+                                      day: "numeric",
+                                      month: "short",
+                                      year: "numeric",
+                                    },
+                                  )
                                 : "—"}
                             </td>
-                            <td className="px-4 py-3 text-right font-semibold">{h.rankLabel}</td>
-                            <td className="px-4 py-3 text-right font-mono text-primary font-bold">{h.points || "—"}</td>
+                            <td className="px-4 py-3 text-right font-semibold">
+                              {h.rankLabel}
+                            </td>
+                            <td className="px-4 py-3 text-right font-mono text-primary font-bold">
+                              {h.points || "—"}
+                            </td>
                             <td className="px-4 py-3 text-right font-mono text-xs text-muted-foreground">
                               {h.goalsScored}-{h.goalsConceded}
                             </td>
@@ -489,7 +584,9 @@ export default function UserProfilePage({ id, titre }: { id: string; titre?: str
       <div className="space-y-4">
         <div className="flex items-center gap-3">
           <span className="h-px bg-border flex-1" />
-          <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">Bilan Global</h2>
+          <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
+            Bilan Global
+          </h2>
           <span className="h-px bg-border flex-1" />
         </div>
 
@@ -502,28 +599,43 @@ export default function UserProfilePage({ id, titre }: { id: string; titre?: str
                   <Trophy className="size-5 text-warning" />
                   <h3 className="font-bold">Tournois</h3>
                 </div>
-                <Badge variant="outline">{profile.tournaments?.total ?? 0} tournoi(s)</Badge>
+                <Badge variant="outline">
+                  {profile.tournaments?.total ?? 0} tournoi(s)
+                </Badge>
               </div>
 
               <div className="grid grid-cols-3 gap-3 text-center">
                 <div className="p-2.5 rounded-lg bg-muted/20">
-                  <div className="text-lg font-bold">{profile.tournaments?.personalTotal ?? 0}</div>
+                  <div className="text-lg font-bold">
+                    {profile.tournaments?.personalTotal ?? 0}
+                  </div>
                   <div className="text-xs text-muted-foreground">Matchs</div>
                 </div>
                 <div className="p-2.5 rounded-lg bg-muted/20">
-                  <div className="text-lg font-bold text-success">{profile.tournaments?.personalWins ?? 0}</div>
+                  <div className="text-lg font-bold text-success">
+                    {profile.tournaments?.personalWins ?? 0}
+                  </div>
                   <div className="text-xs text-muted-foreground">Victoires</div>
                 </div>
                 <div className="p-2.5 rounded-lg bg-muted/20">
-                  <div className="text-lg font-bold text-destructive">{profile.tournaments?.personalLosses ?? 0}</div>
+                  <div className="text-lg font-bold text-destructive">
+                    {profile.tournaments?.personalLosses ?? 0}
+                  </div>
                   <div className="text-xs text-muted-foreground">Défaites</div>
                 </div>
               </div>
 
               <div className="text-xs text-muted-foreground flex justify-between pt-2">
-                <span>Winrate : {winrate(profile.tournaments?.personalWins, profile.tournaments?.personalLosses)}</span>
                 <span>
-                  Moy. buts : {profile.tournaments?.goalsScoredAvg?.toFixed(1) ?? 0} M /{" "}
+                  Winrate :{" "}
+                  {winrate(
+                    profile.tournaments?.personalWins,
+                    profile.tournaments?.personalLosses,
+                  )}
+                </span>
+                <span>
+                  Moy. buts :{" "}
+                  {profile.tournaments?.goalsScoredAvg?.toFixed(1) ?? 0} M /{" "}
                   {profile.tournaments?.goalsReceivedAvg?.toFixed(1) ?? 0} E
                 </span>
               </div>
@@ -538,28 +650,45 @@ export default function UserProfilePage({ id, titre }: { id: string; titre?: str
                   <Star className="size-5 text-primary" />
                   <h3 className="font-bold">Interclans</h3>
                 </div>
-                <Badge variant="outline">{profile.interclans?.total ?? 0} match(s)</Badge>
+                <Badge variant="outline">
+                  {profile.interclans?.total ?? 0} match(s)
+                </Badge>
               </div>
 
               <div className="grid grid-cols-3 gap-3 text-center">
                 <div className="p-2.5 rounded-lg bg-muted/20">
-                  <div className="text-lg font-bold">{profile.interclans?.wins ?? 0}</div>
-                  <div className="text-xs text-muted-foreground">Victoires clan</div>
+                  <div className="text-lg font-bold">
+                    {profile.interclans?.wins ?? 0}
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    Victoires clan
+                  </div>
                 </div>
                 <div className="p-2.5 rounded-lg bg-muted/20">
-                  <div className="text-lg font-bold text-success">{profile.interclans?.personalWins ?? 0}</div>
+                  <div className="text-lg font-bold text-success">
+                    {profile.interclans?.personalWins ?? 0}
+                  </div>
                   <div className="text-xs text-muted-foreground">Perso V</div>
                 </div>
                 <div className="p-2.5 rounded-lg bg-muted/20">
-                  <div className="text-lg font-bold text-destructive">{profile.interclans?.personalLosses ?? 0}</div>
+                  <div className="text-lg font-bold text-destructive">
+                    {profile.interclans?.personalLosses ?? 0}
+                  </div>
                   <div className="text-xs text-muted-foreground">Perso D</div>
                 </div>
               </div>
 
               <div className="text-xs text-muted-foreground flex justify-between pt-2">
-                <span>Winrate : {winrate(profile.interclans?.personalWins, profile.interclans?.personalLosses)}</span>
                 <span>
-                  Moy. buts : {profile.interclans?.goalsScoredAvg?.toFixed(1) ?? 0} M /{" "}
+                  Winrate :{" "}
+                  {winrate(
+                    profile.interclans?.personalWins,
+                    profile.interclans?.personalLosses,
+                  )}
+                </span>
+                <span>
+                  Moy. buts :{" "}
+                  {profile.interclans?.goalsScoredAvg?.toFixed(1) ?? 0} M /{" "}
                   {profile.interclans?.goalsReceivedAvg?.toFixed(1) ?? 0} E
                 </span>
               </div>
@@ -574,7 +703,8 @@ export default function UserProfilePage({ id, titre }: { id: string; titre?: str
           <DialogHeader>
             <DialogTitle>Modifier mon profil</DialogTitle>
             <DialogDescription>
-              Personnalise ta biographie et renseigne ta chaîne Twitch pour tes matchs castés.
+              Personnalise ta biographie et renseigne ta chaîne Twitch pour tes
+              matchs castés.
             </DialogDescription>
           </DialogHeader>
 
@@ -588,11 +718,13 @@ export default function UserProfilePage({ id, titre }: { id: string; titre?: str
                 rows={4}
                 maxLength={500}
                 value={bioInput}
-                onChange={e => setBioInput(e.target.value)}
+                onChange={(e) => setBioInput(e.target.value)}
                 placeholder="Quelques mots sur ton parcours, ton style de jeu..."
                 className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               />
-              <div className="text-xs text-muted-foreground text-right">{bioInput.length}/500</div>
+              <div className="text-xs text-muted-foreground text-right">
+                {bioInput.length}/500
+              </div>
             </div>
 
             <div className="space-y-1.5">
@@ -603,7 +735,7 @@ export default function UserProfilePage({ id, titre }: { id: string; titre?: str
                 id="twitch"
                 type="url"
                 value={twitchInput}
-                onChange={e => setTwitchInput(e.target.value)}
+                onChange={(e) => setTwitchInput(e.target.value)}
                 placeholder="https://twitch.tv/monpseudo"
                 className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               />
@@ -611,13 +743,25 @@ export default function UserProfilePage({ id, titre }: { id: string; titre?: str
           </div>
 
           <DialogFooter className="flex gap-2 sm:justify-end">
-            <Button variant="outline" onClick={() => setEditOpen(false)} disabled={saving}>
+            <Button
+              variant="outline"
+              onClick={() => setEditOpen(false)}
+              disabled={saving}
+            >
               Annuler
             </Button>
-            <Button onClick={handleSaveProfile} disabled={saving} className="gap-2">
+            <Button
+              onClick={handleSaveProfile}
+              disabled={saving}
+              className="gap-2"
+            >
               {saving && <Loader2 className="size-4 animate-spin" />}
               {saveSuccess && <Check className="size-4 text-success" />}
-              {saving ? "Enregistrement..." : saveSuccess ? "Enregistré !" : "Enregistrer"}
+              {saving
+                ? "Enregistrement..."
+                : saveSuccess
+                  ? "Enregistré !"
+                  : "Enregistrer"}
             </Button>
           </DialogFooter>
         </DialogContent>

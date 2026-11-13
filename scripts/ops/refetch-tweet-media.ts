@@ -14,7 +14,8 @@ const ROOT = process.env.RG_STORAGE_ROOT ?? "/var/www/rg-storage";
 const BUCKET = "tweets";
 const args = process.argv.slice(2);
 const DRY = args.includes("--dry");
-const LIMIT = Number(args[args.indexOf("--limit") + 1]) || Number.POSITIVE_INFINITY;
+const LIMIT =
+  Number(args[args.indexOf("--limit") + 1]) || Number.POSITIVE_INFINITY;
 const CONCURRENCY = Number(args[args.indexOf("--concurrency") + 1]) || 8;
 
 const sql = createBunSql();
@@ -48,7 +49,7 @@ const objects: Array<{ name: string }> =
   await sql`select name from storage.objects where bucket_id = ${BUCKET} order by name`;
 const tweets: Array<{ id: string; media: Media[] | null }> =
   await sql`select id, media from public.tweets where media is not null`;
-const mediaById = new Map(tweets.map(t => [t.id, t.media ?? []]));
+const mediaById = new Map(tweets.map((t) => [t.id, t.media ?? []]));
 
 const jobs: Array<{ name: string; source: string }> = [];
 let orphans = 0;
@@ -65,7 +66,10 @@ for (const { name } of objects) {
 }
 console.log(`objets_index=${objects.length} sans_source=${orphans}`);
 
-const todo = jobs.slice(0, LIMIT === Number.POSITIVE_INFINITY ? undefined : LIMIT);
+const todo = jobs.slice(
+  0,
+  LIMIT === Number.POSITIVE_INFINITY ? undefined : LIMIT,
+);
 console.log(`medias=${jobs.length} a_traiter=${todo.length} dry=${DRY}`);
 
 let ok = 0;
@@ -82,7 +86,9 @@ async function run(job: { name: string; source: string }) {
   if (DRY) return;
   try {
     const res = await fetch(job.source, {
-      headers: { "user-agent": "Mozilla/5.0 (compatible; rose-griffon-storage/1.0)" },
+      headers: {
+        "user-agent": "Mozilla/5.0 (compatible; rose-griffon-storage/1.0)",
+      },
       signal: AbortSignal.timeout(30_000),
     });
     if (!res.ok) {
@@ -114,5 +120,7 @@ for (let i = 0; i < todo.length; i += CONCURRENCY) {
   }
 }
 
-console.log(`termine ok=${ok} deja=${skipped} echec=${failed} mo=${(bytes / 1048576).toFixed(0)}`);
+console.log(
+  `termine ok=${ok} deja=${skipped} echec=${failed} mo=${(bytes / 1048576).toFixed(0)}`,
+);
 await sql.end();

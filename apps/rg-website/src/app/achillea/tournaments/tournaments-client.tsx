@@ -6,7 +6,15 @@ import { createAchilleaClient } from "@/lib/achillea";
 import { remainingTournamentPages } from "@/lib/achillea/tournament-pagination";
 import { TournamentTable } from "@/components/achillea/TournamentTable";
 import type { TournamentListItem } from "@rosegriffon/achillea-types/domain/tournament";
-import { Trophy, Plus, Search, Layers, Activity, CheckCircle2, Clock } from "lucide-react";
+import {
+  Trophy,
+  Plus,
+  Search,
+  Layers,
+  Activity,
+  CheckCircle2,
+  Clock,
+} from "lucide-react";
 import { signalerException } from "@/lib/achillea/signaler";
 
 const EMPTY_TOURNAMENTS: TournamentListItem[] = [];
@@ -18,12 +26,19 @@ export default function TournamentsListPage({
   initialTournaments?: TournamentListItem[];
   initialLoadError?: boolean;
 }) {
-  const [tournaments, setTournaments] = useState<TournamentListItem[]>(initialTournaments);
-  const [loading, setLoading] = useState<boolean>(initialTournaments.length === 0);
+  const [tournaments, setTournaments] =
+    useState<TournamentListItem[]>(initialTournaments);
+  const [loading, setLoading] = useState<boolean>(
+    initialTournaments.length === 0,
+  );
   const [searchQuery, setSearchQuery] = useState<string>("");
-  const [selectedTab, setSelectedTab] = useState<"all" | "open" | "ongoing" | "finished">("all");
+  const [selectedTab, setSelectedTab] = useState<
+    "all" | "open" | "ongoing" | "finished"
+  >("all");
   const [loadError, setLoadError] = useState<string | null>(
-    initialLoadError ? "Impossible de charger les tournois pour le moment." : null,
+    initialLoadError
+      ? "Impossible de charger les tournois pour le moment."
+      : null,
   );
 
   useEffect(() => {
@@ -32,27 +47,37 @@ export default function TournamentsListPage({
 
     client.tournaments
       .list({ page: 1, pageSize: 50 })
-      .then(res => {
+      .then((res) => {
         if (cancelled) return;
         if (res.ok && res.value) {
           const first = res.value;
           return Promise.all(
-            remainingTournamentPages(first.meta).map(page => client.tournaments.list({ page, pageSize: 50 })),
-          ).then(pages => {
+            remainingTournamentPages(first.meta).map((page) =>
+              client.tournaments.list({ page, pageSize: 50 }),
+            ),
+          ).then((pages) => {
             if (cancelled) return;
-            if (pages.some(page => !page.ok)) {
-              setLoadError("La liste complète des tournois est momentanément indisponible.");
+            if (pages.some((page) => !page.ok)) {
+              setLoadError(
+                "La liste complète des tournois est momentanément indisponible.",
+              );
               return;
             }
-            setTournaments([...first.data, ...pages.flatMap(page => (page.ok ? page.value.data : []))]);
+            setTournaments([
+              ...first.data,
+              ...pages.flatMap((page) => (page.ok ? page.value.data : [])),
+            ]);
             setLoadError(null);
           });
         } else if (!res.ok) {
           setLoadError("Impossible de charger les tournois pour le moment.");
         }
       })
-      .catch(cause => {
-        if (!cancelled) setLoadError("Le service des tournois est momentanément indisponible.");
+      .catch((cause) => {
+        if (!cancelled)
+          setLoadError(
+            "Le service des tournois est momentanément indisponible.",
+          );
         signalerException("tournaments", cause);
       })
       .finally(() => {
@@ -65,7 +90,7 @@ export default function TournamentsListPage({
   }, []);
 
   const filteredTournaments = useMemo(() => {
-    return tournaments.filter(t => {
+    return tournaments.filter((t) => {
       // Tab filtering
       if (selectedTab === "open" && t.status !== "Open") return false;
       if (selectedTab === "ongoing" && t.status !== "Ongoing") return false;
@@ -93,11 +118,13 @@ export default function TournamentsListPage({
             <span className="p-2 rounded-xl bg-warning/10 text-warning border border-warning/20">
               <Trophy className="w-5 h-5" />
             </span>
-            <h1 className="text-3xl font-bold tracking-tight">Tournois Officiels & Communautaires</h1>
+            <h1 className="text-3xl font-bold tracking-tight">
+              Tournois Officiels & Communautaires
+            </h1>
           </div>
           <p className="text-lg text-muted-foreground">
-            Participez aux tournois Inazuma Eleven: Victory Road, gagnez des cashprizes en AP et qualifiez-vous pour le
-            Circuit Achilléa.
+            Participez aux tournois Inazuma Eleven: Victory Road, gagnez des
+            cashprizes en AP et qualifiez-vous pour le Circuit Achilléa.
           </p>
         </div>
 
@@ -187,7 +214,7 @@ export default function TournamentsListPage({
             type="text"
             placeholder="Rechercher un tournoi..."
             value={searchQuery}
-            onChange={e => setSearchQuery(e.target.value)}
+            onChange={(e) => setSearchQuery(e.target.value)}
             className="min-h-11 w-full pl-9 pr-3 py-2 text-lg bg-surface-container/60 border border-outline-variant/15 rounded-2xl placeholder:text-muted-foreground focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-primary transition-colors"
           />
         </div>

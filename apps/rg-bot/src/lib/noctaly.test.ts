@@ -151,11 +151,17 @@ describe("lireQuota", () => {
   test("des en-têtes absents rendent null, pas zéro", () => {
     // La nuance compte : `restant: 0` déclenche une attente longue,
     // `restant: null` veut dire « on ne sait pas » et laisse la cadence faire.
-    expect(lireQuota(entetes({}))).toEqual({ dansSecondes: null, limite: null, restant: null });
+    expect(lireQuota(entetes({}))).toEqual({
+      dansSecondes: null,
+      limite: null,
+      restant: null,
+    });
   });
 
   test("une valeur non numérique est ignorée plutôt que propagée en NaN", () => {
-    expect(lireQuota(entetes({ "X-RateLimit-Remaining": "inconnu" })).restant).toBeNull();
+    expect(
+      lireQuota(entetes({ "X-RateLimit-Remaining": "inconnu" })).restant,
+    ).toBeNull();
   });
 });
 
@@ -177,7 +183,9 @@ describe("attenteAvantSuivante", () => {
    * l'import à attendre, en frôlant le 429 à chaque redémarrage de fenêtre.
    */
   test("la cadence par défaut est le régime permanent de la fenêtre mesurée", () => {
-    expect(CADENCE_DEFAUT).toBe(FENETRE_OBSERVEE.requetes / FENETRE_OBSERVEE.secondes);
+    expect(CADENCE_DEFAUT).toBe(
+      FENETRE_OBSERVEE.requetes / FENETRE_OBSERVEE.secondes,
+    );
     expect(CADENCE_DEFAUT).toBe(2);
     expect(attenteAvantSuivante(sansInfo)).toBe(500);
   });
@@ -185,29 +193,41 @@ describe("attenteAvantSuivante", () => {
   test("la documentation reste connue, mais comme borne haute seulement", () => {
     expect(PLAFOND_DOCUMENTE).toBeGreaterThan(CADENCE_DEFAUT);
     // Une cadence demandée au-delà du plafond documenté est ramenée à celui-ci.
-    expect(attenteAvantSuivante(sansInfo, 1_000)).toBe(Math.ceil(1_000 / PLAFOND_DOCUMENTE));
+    expect(attenteAvantSuivante(sansInfo, 1_000)).toBe(
+      Math.ceil(1_000 / PLAFOND_DOCUMENTE),
+    );
   });
 
   // Le cœur de la prudence : on n'attend pas d'être à 0, on attend d'être
   // à MARGE_QUOTA — une requête peut être en vol, son en-tête pas encore lu.
   test("au plancher du quota, on attend la remise à zéro annoncée", () => {
-    const attente = attenteAvantSuivante({ dansSecondes: 50, limite: 120, restant: MARGE_QUOTA }, 10);
+    const attente = attenteAvantSuivante(
+      { dansSecondes: 50, limite: 120, restant: MARGE_QUOTA },
+      10,
+    );
     expect(attente).toBe(50_000 + MARGE_ATTENTE_MS);
   });
 
   test("juste au-dessus de la marge, la cadence suffit encore", () => {
-    const attente = attenteAvantSuivante({ dansSecondes: 50, limite: 120, restant: MARGE_QUOTA + 1 }, 10);
+    const attente = attenteAvantSuivante(
+      { dansSecondes: 50, limite: 120, restant: MARGE_QUOTA + 1 },
+      10,
+    );
     expect(attente).toBe(100);
   });
 
   // Si l'API dit d'attendre, elle a raison même quand la cadence dirait moins.
   test("l'attente annoncée l'emporte sur la cadence, jamais l'inverse", () => {
-    expect(attenteAvantSuivante({ dansSecondes: 40, limite: 120, restant: 0 }, 50)).toBe(40_000 + MARGE_ATTENTE_MS);
+    expect(
+      attenteAvantSuivante({ dansSecondes: 40, limite: 120, restant: 0 }, 50),
+    ).toBe(40_000 + MARGE_ATTENTE_MS);
   });
 
   test("un quota au plancher sans délai annoncé retombe sur la cadence", () => {
     // Rien à attendre de précis : on ne peut pas inventer une durée.
-    expect(attenteAvantSuivante({ dansSecondes: null, limite: 120, restant: 0 }, 10)).toBe(100);
+    expect(
+      attenteAvantSuivante({ dansSecondes: null, limite: 120, restant: 0 }, 10),
+    ).toBe(100);
   });
 
   test("une cadence aberrante est ramenée entre 1 et le plafond documenté", () => {
@@ -250,7 +270,9 @@ describe("urlProfilEconomie", () => {
   });
 
   test("les catalogues de guilde sont des routes de guilde, pas de membre", () => {
-    expect(urlObjetsGuilde("1400000000000000000")).toBe("https://noctaly.com/api/v1/guilds/1400000000000000000/items");
+    expect(urlObjetsGuilde("1400000000000000000")).toBe(
+      "https://noctaly.com/api/v1/guilds/1400000000000000000/items",
+    );
     expect(urlCoffresGuilde("1400000000000000000")).toBe(
       "https://noctaly.com/api/v1/guilds/1400000000000000000/chests",
     );
@@ -265,7 +287,12 @@ describe("lireProfilEconomie", () => {
       chests: [{ id: "c" }],
       dailyStreak: { streak: 7 },
     });
-    expect(profil).toEqual({ coffres: 1, monnaie: 12500, objets: 2, serieQuotidienne: 7 });
+    expect(profil).toEqual({
+      coffres: 1,
+      monnaie: 12500,
+      objets: 2,
+      serieQuotidienne: 7,
+    });
   });
 
   // `money` est le seul champ garanti : les autres n'arrivent que si la query
@@ -283,7 +310,9 @@ describe("lireProfilEconomie", () => {
   // La documentation dit explicitement « null if they have never claimed » —
   // à distinguer d'une série à 0, qui n'existe pas.
   test("une série jamais réclamée reste null, pas zéro", () => {
-    expect(lireProfilEconomie({ money: 0, dailyStreak: null })?.serieQuotidienne).toBeNull();
+    expect(
+      lireProfilEconomie({ money: 0, dailyStreak: null })?.serieQuotidienne,
+    ).toBeNull();
   });
 
   test("un solde négatif est ramené à zéro plutôt que propagé", () => {
@@ -354,7 +383,12 @@ describe("distribution", () => {
   });
 
   test("une liste vide ne divise pas par zéro", () => {
-    expect(distribution([])).toEqual({ compte: 0, maximum: 0, median: 0, total: 0 });
+    expect(distribution([])).toEqual({
+      compte: 0,
+      maximum: 0,
+      median: 0,
+      total: 0,
+    });
   });
 
   test("l'entrée n'est pas modifiée", () => {
@@ -366,7 +400,13 @@ describe("distribution", () => {
 
 describe("resumerBilan", () => {
   test("les catégories vides n'apparaissent pas dans le résumé", () => {
-    const bilan = { ...bilanVide(), absents: 1_700, ecrits: 120, interroges: 1_834, vides: 14 };
+    const bilan = {
+      ...bilanVide(),
+      absents: 1_700,
+      ecrits: 120,
+      interroges: 1_834,
+      vides: 14,
+    };
     const texte = resumerBilan(bilan);
     expect(texte).toBe(
       "1834 membre(s) interrogé(s) · 120 profil(s) importé(s) · 14 sans XP · 1700 inconnu(s) de Noctaly",
@@ -376,7 +416,11 @@ describe("resumerBilan", () => {
   });
 
   test("économies et archives apparaissent dès qu'il y en a", () => {
-    const texte = resumerBilan({ ...bilanVide(), archives: 200, economies: 42 });
+    const texte = resumerBilan({
+      ...bilanVide(),
+      archives: 200,
+      economies: 42,
+    });
     expect(texte).toContain("42 économie(s)");
     expect(texte).toContain("200 archive(s) brute(s)");
   });
@@ -402,7 +446,9 @@ describe("classerReponse — module désactivé", () => {
    * poser mille huit cents fois une question dont la réponse est connue.
    */
   test("un 400 « module_disabled » n'est pas une panne", () => {
-    expect(classerReponse(400, { code: CODE_MODULE_DESACTIVE })).toBe("module-desactive");
+    expect(classerReponse(400, { code: CODE_MODULE_DESACTIVE })).toBe(
+      "module-desactive",
+    );
   });
 
   test("un 400 sans ce code reste une panne", () => {
@@ -451,18 +497,29 @@ const ENTREE_TYPE = {
 
 describe("urlClassementPublic", () => {
   test("sans tri, l'URL est nue", () => {
-    expect(urlClassementPublic("123")).toBe("https://noctaly.com/fr/leaderboard/123");
+    expect(urlClassementPublic("123")).toBe(
+      "https://noctaly.com/fr/leaderboard/123",
+    );
   });
 
   test("les quatre tris sont ceux que la page accepte", () => {
-    expect(TRIS_CLASSEMENT).toEqual(["level", "messages", "voice", "reactions"]);
-    expect(urlClassementPublic("123", "voice")).toBe("https://noctaly.com/fr/leaderboard/123?sort=voice");
+    expect(TRIS_CLASSEMENT).toEqual([
+      "level",
+      "messages",
+      "voice",
+      "reactions",
+    ]);
+    expect(urlClassementPublic("123", "voice")).toBe(
+      "https://noctaly.com/fr/leaderboard/123?sort=voice",
+    );
   });
 });
 
 describe("extraireFluxRsc", () => {
   test("les fragments sont recollés dans l'ordre", () => {
-    const html = '<script>self.__next_f.push([1,"deb"])</script>' + '<script>self.__next_f.push([1,"ut"])</script>';
+    const html =
+      '<script>self.__next_f.push([1,"deb"])</script>' +
+      '<script>self.__next_f.push([1,"ut"])</script>';
     expect(extraireFluxRsc(html)).toBe("debut");
   });
 
@@ -484,7 +541,9 @@ describe("extraireFluxRsc", () => {
   });
 
   test("un fragment illisible n'emporte pas les autres", () => {
-    const html = '<script>self.__next_f.push([1,"\\u"])</script>' + '<script>self.__next_f.push([1,"sain"])</script>';
+    const html =
+      '<script>self.__next_f.push([1,"\\u"])</script>' +
+      '<script>self.__next_f.push([1,"sain"])</script>';
     expect(extraireFluxRsc(html)).toContain("sain");
   });
 });
@@ -500,13 +559,18 @@ describe("extraireTableau", () => {
    * dans une chaîne — et le classement se lirait tronqué, sans erreur.
    */
   test("un crochet DANS un pseudo ne ferme pas le tableau", () => {
-    const source = '{"initProfiles":[{"username":"[RG] Yoyo"},{"username":"b]"}],"apres":1}';
-    expect(extraireTableau(source, "initProfiles")).toBe('[{"username":"[RG] Yoyo"},{"username":"b]"}]');
+    const source =
+      '{"initProfiles":[{"username":"[RG] Yoyo"},{"username":"b]"}],"apres":1}';
+    expect(extraireTableau(source, "initProfiles")).toBe(
+      '[{"username":"[RG] Yoyo"},{"username":"b]"}]',
+    );
   });
 
   test("un guillemet échappé dans un pseudo ne casse rien", () => {
     const source = String.raw`{"p":[{"username":"a\"b]"}]}`;
-    expect(JSON.parse(extraireTableau(source, "p")!)).toEqual([{ username: 'a"b]' }]);
+    expect(JSON.parse(extraireTableau(source, "p")!)).toEqual([
+      { username: 'a"b]' },
+    ]);
   });
 
   test("une clef absente ou un tableau non fermé rendent null", () => {
@@ -542,17 +606,28 @@ describe("lireClassement", () => {
   });
 
   test("une entrée sans identifiant valide est ignorée, pas fatale", () => {
-    const profils = lireClassement(pageClassement([{ ...ENTREE_TYPE, userID: "pas-un-flocon" }, ENTREE_TYPE]));
+    const profils = lireClassement(
+      pageClassement([
+        { ...ENTREE_TYPE, userID: "pas-un-flocon" },
+        ENTREE_TYPE,
+      ]),
+    );
     expect(profils).toHaveLength(1);
   });
 
   test("une entrée sans XP numérique est ignorée", () => {
-    expect(lireClassement(pageClassement([{ ...ENTREE_TYPE, xp: "beaucoup" }]))).toHaveLength(0);
-    expect(lireClassement(pageClassement([{ ...ENTREE_TYPE, xp: -1 }]))).toHaveLength(0);
+    expect(
+      lireClassement(pageClassement([{ ...ENTREE_TYPE, xp: "beaucoup" }])),
+    ).toHaveLength(0);
+    expect(
+      lireClassement(pageClassement([{ ...ENTREE_TYPE, xp: -1 }])),
+    ).toHaveLength(0);
   });
 
   test("un pseudo manquant retombe sur l'identifiant, jamais sur du vide", () => {
-    const [profil] = lireClassement(pageClassement([{ ...ENTREE_TYPE, username: null }]));
+    const [profil] = lireClassement(
+      pageClassement([{ ...ENTREE_TYPE, username: null }]),
+    );
     expect(profil?.pseudo).toBe("435479810731409408");
   });
 
@@ -615,7 +690,9 @@ describe("fusionnerClassements", () => {
       discordId: "222222222222222222",
       profil: { ...base.profil, xpTotale: 5 },
     };
-    expect(fusionnerClassements([[petit, base]]).map(p => p.profil.xpTotale)).toEqual([100, 5]);
+    expect(
+      fusionnerClassements([[petit, base]]).map((p) => p.profil.xpTotale),
+    ).toEqual([100, 5]);
   });
 
   test("aucune source rend une liste vide", () => {

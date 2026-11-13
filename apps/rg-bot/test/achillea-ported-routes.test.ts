@@ -1,5 +1,9 @@
 import { afterEach, describe, expect, it, spyOn } from "bun:test";
-import { CastAvailabilityStatus, CastSlotRole, SanctionType } from "@rosegriffon/achillea-core/enums";
+import {
+  CastAvailabilityStatus,
+  CastSlotRole,
+  SanctionType,
+} from "@rosegriffon/achillea-core/enums";
 import { signHmacSha256 } from "@rosegriffon/achillea-core/licenses";
 import { fakeDb, sessionToken } from "./achillea-fixtures";
 
@@ -8,22 +12,33 @@ import { fakeDb, sessionToken } from "./achillea-fixtures";
 process.env.DATABASE_URL ??= "postgres://localhost/rg_route_test";
 const { app } = await import("../src/api/server");
 const { requireRole } = await import("../src/api/modules/achillea/guards");
-const { buildChecklist, planAutoAssign } = await import("../src/api/modules/achillea/casts/service");
-const { dispatchReminders, attributionMessage } = await import("../src/api/modules/achillea/casts/notifications");
+const { buildChecklist, planAutoAssign } =
+  await import("../src/api/modules/achillea/casts/service");
+const { dispatchReminders, attributionMessage } =
+  await import("../src/api/modules/achillea/casts/notifications");
 const { castDb } = await import("../src/api/modules/achillea/casts/service");
-const { renderPlayerCard } = await import("../src/api/modules/achillea/images/player-card");
-const { renderClanPoster, clanColors } = await import("../src/api/modules/achillea/images/clan-poster");
-const { rankFromElo, sanitizeName, PNG_SIGNATURE } = await import("../src/api/modules/achillea/images/render");
-const { renderLicensePdf } = await import("../src/api/modules/achillea/licenses/pdf");
-const { LicenseService } = await import("../src/api/modules/achillea/licenses/service");
-const { relayToUsers, setRealtimeDelivery, rankedProofMessage } = await import(
-  "../src/api/modules/achillea/notifications/internal"
-);
-const { verifyCrossSyncSignature, validateCrossSync, applyCrossSync, CrossSyncError } = await import(
-  "../src/api/modules/achillea/moderation-sync"
-);
-const { PublicImageStorage, sniffImageMime } = await import("../src/api/modules/achillea/storage");
-const { resyncAvatars } = await import("../src/api/modules/achillea/users/avatar-resync");
+const { renderPlayerCard } =
+  await import("../src/api/modules/achillea/images/player-card");
+const { renderClanPoster, clanColors } =
+  await import("../src/api/modules/achillea/images/clan-poster");
+const { rankFromElo, sanitizeName, PNG_SIGNATURE } =
+  await import("../src/api/modules/achillea/images/render");
+const { renderLicensePdf } =
+  await import("../src/api/modules/achillea/licenses/pdf");
+const { LicenseService } =
+  await import("../src/api/modules/achillea/licenses/service");
+const { relayToUsers, setRealtimeDelivery, rankedProofMessage } =
+  await import("../src/api/modules/achillea/notifications/internal");
+const {
+  verifyCrossSyncSignature,
+  validateCrossSync,
+  applyCrossSync,
+  CrossSyncError,
+} = await import("../src/api/modules/achillea/moderation-sync");
+const { PublicImageStorage, sniffImageMime } =
+  await import("../src/api/modules/achillea/storage");
+const { resyncAvatars } =
+  await import("../src/api/modules/achillea/users/avatar-resync");
 
 const BASE = "http://localhost/v1/achillea";
 const EVENT_ID = "11111111-1111-4111-8111-111111111111";
@@ -41,8 +56,10 @@ function request(path: string, init: RequestInit & { json?: unknown } = {}) {
 }
 
 const PNG_1PX = Uint8Array.from(
-  atob("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=="),
-  c => c.charCodeAt(0),
+  atob(
+    "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==",
+  ),
+  (c) => c.charCodeAt(0),
 );
 
 afterEach(() => {
@@ -64,10 +81,18 @@ describe("authentification des routes portées", () => {
     ["GET", "/casts/events"],
     ["GET", `/casts/events/${EVENT_ID}`],
     ["POST", "/casts/events", validCreate],
-    ["POST", `/casts/events/${EVENT_ID}/survey`, { casterPool: ["123456789012345678"] }],
+    [
+      "POST",
+      `/casts/events/${EVENT_ID}/survey`,
+      { casterPool: ["123456789012345678"] },
+    ],
     ["POST", `/casts/events/${EVENT_ID}/availability`, { status: "available" }],
     ["POST", `/casts/events/${EVENT_ID}/auto-assign`, {}],
-    ["PATCH", `/casts/attributions/${ATTRIBUTION_ID}`, { newCasterId: "123456789012345678" }],
+    [
+      "PATCH",
+      `/casts/attributions/${ATTRIBUTION_ID}`,
+      { newCasterId: "123456789012345678" },
+    ],
     ["POST", `/casts/attributions/${ATTRIBUTION_ID}/confirm`],
     ["POST", "/casts/reminders/dispatch"],
     ["POST", "/licenses/issue/123456789012345678"],
@@ -87,7 +112,9 @@ describe("authentification des routes portées", () => {
   it("POST /proxy/upload → 401 sans session", async () => {
     const form = new FormData();
     form.append("file", new Blob([PNG_1PX], { type: "image/png" }), "a.png");
-    const response = await app.handle(new Request(`${BASE}/proxy/upload`, { method: "POST", body: form }));
+    const response = await app.handle(
+      new Request(`${BASE}/proxy/upload`, { method: "POST", body: form }),
+    );
     expect(response.status).toBe(401);
   });
 });
@@ -96,7 +123,12 @@ describe("validation", () => {
   it("refuse un type d'évènement inconnu", async () => {
     const response = await request("/casts/events", {
       method: "POST",
-      json: { name: "x", kind: "concert", scheduledAt: "2026-11-01", slots: [{ role: "caster_main" }] },
+      json: {
+        name: "x",
+        kind: "concert",
+        scheduledAt: "2026-11-01",
+        slots: [{ role: "caster_main" }],
+      },
     });
     expect(response.status).toBe(422);
   });
@@ -123,33 +155,57 @@ describe("validation", () => {
     const empty = new FormData();
     empty.append("other", "x");
     const missing = await app.handle(
-      new Request(`${BASE}/proxy/upload`, { method: "POST", body: empty, headers: { authorization } }),
+      new Request(`${BASE}/proxy/upload`, {
+        method: "POST",
+        body: empty,
+        headers: { authorization },
+      }),
     );
     expect(missing.status).toBe(400);
     const text = new FormData();
-    text.append("file", new Blob(["<svg onload=alert(1)>"], { type: "image/png" }), "x.png");
+    text.append(
+      "file",
+      new Blob(["<svg onload=alert(1)>"], { type: "image/png" }),
+      "x.png",
+    );
     const rejected = await app.handle(
-      new Request(`${BASE}/proxy/upload`, { method: "POST", body: text, headers: { authorization } }),
+      new Request(`${BASE}/proxy/upload`, {
+        method: "POST",
+        body: text,
+        headers: { authorization },
+      }),
     );
     expect(rejected.status).toBe(400);
   });
 
   it("suppression : identifiant d'image dangereux → 400", async () => {
     const authorization = `Bearer ${await sessionToken("123456789012345678")}`;
-    const response = await request("/proxy/delete/..%2F..%2Fsecret", { headers: { authorization } });
+    const response = await request("/proxy/delete/..%2F..%2Fsecret", {
+      headers: { authorization },
+    });
     expect(response.status).toBe(400);
   });
 });
 
 describe("rôles", () => {
-  const headers = async (id: string) => ({ authorization: `Bearer ${await sessionToken(id)}` });
+  const headers = async (id: string) => ({
+    authorization: `Bearer ${await sessionToken(id)}`,
+  });
 
   it("requireRole : 403 sous le rôle requis, accès au-dessus", async () => {
     const player = fakeDb(() => [{ role: 0 }]);
-    const denied = await requireRole(player.db, await headers("1000000000000001"), 2);
+    const denied = await requireRole(
+      player.db,
+      await headers("1000000000000001"),
+      2,
+    );
     expect(denied.error).not.toBeNull();
     const admin = fakeDb(() => [{ role: 2 }]);
-    const granted = await requireRole(admin.db, await headers("1000000000000002"), 2);
+    const granted = await requireRole(
+      admin.db,
+      await headers("1000000000000002"),
+      2,
+    );
     expect(granted.error).toBeNull();
     expect(granted.session?.id).toBe("1000000000000002");
   });
@@ -164,10 +220,17 @@ describe("rôles", () => {
 
 describe("routes internes", () => {
   it("refusent tout appel tant que RANKED_INTERNAL_SECRET n'est pas posé", async () => {
-    for (const path of ["/notifications/emit-match-found", "/notifications/emit-to-users"]) {
+    for (const path of [
+      "/notifications/emit-match-found",
+      "/notifications/emit-to-users",
+    ]) {
       const response = await request(path, {
         method: "POST",
-        json: { userIds: ["123456789012345678"], event: "rematch_offer", payload: {} },
+        json: {
+          userIds: ["123456789012345678"],
+          event: "rematch_offer",
+          payload: {},
+        },
       });
       expect(response.status).toBe(403);
     }
@@ -178,7 +241,11 @@ describe("routes internes", () => {
     const response = await request("/notifications/ranked-proof", {
       method: "POST",
       headers: { "x-internal-secret": "mauvais" },
-      json: { lobbyId: 3, userId: "123456789012345678", url: "https://x.supabase.co/p.png" },
+      json: {
+        lobbyId: 3,
+        userId: "123456789012345678",
+        url: "https://x.supabase.co/p.png",
+      },
     });
     expect(response.status).toBe(403);
   });
@@ -187,7 +254,10 @@ describe("routes internes", () => {
     process.env.RANKED_INTERNAL_SECRET = "s".repeat(32);
     process.env.ACHILLEA_DISCORD_BOT_TOKEN = "jeton-test";
     const calls: Array<{ url: string; body: any }> = [];
-    const spy = spyOn(globalThis, "fetch").mockImplementation((async (url: string, init?: RequestInit) => {
+    const spy = spyOn(globalThis, "fetch").mockImplementation((async (
+      url: string,
+      init?: RequestInit,
+    ) => {
       calls.push({ url: String(url), body: JSON.parse(String(init?.body)) });
       return Response.json({ id: "999" });
     }) as typeof fetch);
@@ -195,13 +265,21 @@ describe("routes internes", () => {
       const response = await request("/notifications/ranked-proof", {
         method: "POST",
         headers: { "x-internal-secret": "s".repeat(32) },
-        json: { lobbyId: 3, userId: "123456789012345678", url: "https://x.supabase.co/p.png" },
+        json: {
+          lobbyId: 3,
+          userId: "123456789012345678",
+          url: "https://x.supabase.co/p.png",
+        },
       });
       expect(response.status).toBe(200);
       expect(await response.json()).toEqual({ success: true });
-      expect(calls[0]?.url).toBe("https://discord.com/api/v10/channels/1436378680153608203/messages");
+      expect(calls[0]?.url).toBe(
+        "https://discord.com/api/v10/channels/1436378680153608203/messages",
+      );
       expect(calls[0]?.body.embeds[0].color).toBe(0x6d00ce);
-      expect(calls[0]?.body.embeds[0].image.url).toBe("https://x.supabase.co/p.png");
+      expect(calls[0]?.body.embeds[0].image.url).toBe(
+        "https://x.supabase.co/p.png",
+      );
     } finally {
       spy.mockRestore();
     }
@@ -210,13 +288,21 @@ describe("routes internes", () => {
   it("ranked-proof : échec Discord → 502", async () => {
     process.env.RANKED_INTERNAL_SECRET = "s".repeat(32);
     process.env.ACHILLEA_DISCORD_BOT_TOKEN = "jeton-test";
-    const spy = spyOn(globalThis, "fetch").mockImplementation((async () =>
-      new Response("Missing Access", { status: 403 })) as unknown as typeof fetch);
+    const spy = spyOn(globalThis, "fetch").mockImplementation(
+      (async () =>
+        new Response("Missing Access", {
+          status: 403,
+        })) as unknown as typeof fetch,
+    );
     try {
       const response = await request("/notifications/ranked-proof", {
         method: "POST",
         headers: { "x-internal-secret": "s".repeat(32) },
-        json: { lobbyId: 3, userId: "123456789012345678", url: "relative/path.png" },
+        json: {
+          lobbyId: 3,
+          userId: "123456789012345678",
+          url: "relative/path.png",
+        },
       });
       expect(response.status).toBe(502);
     } finally {
@@ -225,21 +311,35 @@ describe("routes internes", () => {
   });
 
   it("une preuve non absolue devient un champ, sans image", () => {
-    const message = rankedProofMessage(1, "123456789012345678", "local/proof.png");
+    const message = rankedProofMessage(
+      1,
+      "123456789012345678",
+      "local/proof.png",
+    );
     expect(message.embeds?.[0]?.image).toBeUndefined();
     expect(message.components).toBeUndefined();
   });
 
   it("relayToUsers : livraison temps réel puis boîte de réception (lue si livrée)", async () => {
-    setRealtimeDelivery(async ids => new Set(ids.filter(id => id === "100000000000000001")));
+    setRealtimeDelivery(
+      async (ids) => new Set(ids.filter((id) => id === "100000000000000001")),
+    );
     const { db, queries } = fakeDb(({ sql }) => {
-      if (sql.startsWith('select "id" from "user"')) return [{ id: "100000000000000001" }, { id: "100000000000000002" }];
+      if (sql.startsWith('select "id" from "user"'))
+        return [{ id: "100000000000000001" }, { id: "100000000000000002" }];
       if (sql.startsWith('insert into "notification"')) return [{ id: 42 }];
       return [];
     });
-    const result = await relayToUsers(db, ["100000000000000001", "100000000000000002"], "match_found", { lobbyId: 1 });
+    const result = await relayToUsers(
+      db,
+      ["100000000000000001", "100000000000000002"],
+      "match_found",
+      { lobbyId: 1 },
+    );
     expect(result).toEqual({ delivered: 1, stored: 2 });
-    const links = queries.find(q => q.sql.startsWith('insert into "user_notification"'));
+    const links = queries.find((q) =>
+      q.sql.startsWith('insert into "user_notification"'),
+    );
     expect(links?.parameters).toContain(true);
     expect(links?.parameters).toContain(false);
   });
@@ -251,11 +351,19 @@ describe("moderation/sync", () => {
     source_guild_id: "200000000000000001",
     source_bot_id: "300000000000000001",
     action: "create",
-    sanction: { id: "remote-1", userId: "100000000000000001", type: "ban", issuedBy: "400000000000000001" },
+    sanction: {
+      id: "remote-1",
+      userId: "100000000000000001",
+      type: "ban",
+      issuedBy: "400000000000000001",
+    },
   });
 
   it("403 sans en-têtes de signature", async () => {
-    const response = await request("/moderation/sync", { method: "POST", json: JSON.parse(body) });
+    const response = await request("/moderation/sync", {
+      method: "POST",
+      json: JSON.parse(body),
+    });
     expect(response.status).toBe(403);
   });
 
@@ -280,44 +388,81 @@ describe("moderation/sync", () => {
     const signature = await signHmacSha256(`${ts}.${body}`, "k");
     expect(await verifyCrossSyncSignature(ts, body, signature, "k")).toBe(true);
     const spaced = JSON.stringify(JSON.parse(body), null, 2);
-    expect(await verifyCrossSyncSignature(ts, spaced, signature, "k")).toBe(true);
-    expect(await verifyCrossSyncSignature(ts, body, signature, "autre")).toBe(false);
+    expect(await verifyCrossSyncSignature(ts, spaced, signature, "k")).toBe(
+      true,
+    );
+    expect(await verifyCrossSyncSignature(ts, body, signature, "autre")).toBe(
+      false,
+    );
     const old = String(Date.now() - 6 * 60 * 1000);
-    expect(await verifyCrossSyncSignature(old, body, await signHmacSha256(`${old}.${body}`, "k"), "k")).toBe(false);
+    expect(
+      await verifyCrossSyncSignature(
+        old,
+        body,
+        await signHmacSha256(`${old}.${body}`, "k"),
+        "k",
+      ),
+    ).toBe(false);
   });
 
   it("validation du message", () => {
     expect(() => validateCrossSync({ version: "2.0" })).toThrow(CrossSyncError);
-    expect(() => validateCrossSync({ ...JSON.parse(body), action: "delete" })).toThrow(/Unknown action/);
     expect(() =>
-      validateCrossSync({ ...JSON.parse(body), sanction: { userId: "1", type: "slap", issuedBy: "2" } }),
+      validateCrossSync({ ...JSON.parse(body), action: "delete" }),
+    ).toThrow(/Unknown action/);
+    expect(() =>
+      validateCrossSync({
+        ...JSON.parse(body),
+        sanction: { userId: "1", type: "slap", issuedBy: "2" },
+      }),
     ).toThrow(/Unknown sanction type/);
     expect(validateCrossSync(JSON.parse(body)).type).toBe(SanctionType.Ban);
   });
 
   it("création : sanction système, anti-boucle et audit dans la transaction", async () => {
     const { db, queries } = fakeDb(({ sql }) => {
-      if (sql.startsWith('insert into "sanction"')) return [{ id: "sanction-1" }];
+      if (sql.startsWith('insert into "sanction"'))
+        return [{ id: "sanction-1" }];
       if (sql.includes("INSERT INTO achillea.audit_log"))
-        return [{ id: "a", ts: new Date(), signature: "s", action: "sanction.sync.create" }];
+        return [
+          {
+            id: "a",
+            ts: new Date(),
+            signature: "s",
+            action: "sanction.sync.create",
+          },
+        ];
       return [];
     });
     const id = await applyCrossSync(db, validateCrossSync(JSON.parse(body)));
     expect(id).toBe("sanction-1");
-    const insert = queries.find(q => q.sql.startsWith('insert into "sanction"'));
+    const insert = queries.find((q) =>
+      q.sql.startsWith('insert into "sanction"'),
+    );
     expect(insert?.parameters).toContain("system");
-    expect(JSON.stringify(insert?.parameters)).toContain('"from":"300000000000000001"');
-    expect(queries.some(q => q.sql.includes("INSERT INTO achillea.audit_log"))).toBe(true);
+    expect(JSON.stringify(insert?.parameters)).toContain(
+      '"from":"300000000000000001"',
+    );
+    expect(
+      queries.some((q) => q.sql.includes("INSERT INTO achillea.audit_log")),
+    ).toBe(true);
   });
 
   it("révocation sans miroir : consigne une levée (unban)", async () => {
     const { db, queries } = fakeDb(({ sql }) => {
-      if (sql.startsWith('insert into "sanction"')) return [{ id: "sanction-2" }];
-      if (sql.includes("INSERT INTO achillea.audit_log")) return [{ id: "a", ts: new Date(), signature: "s" }];
+      if (sql.startsWith('insert into "sanction"'))
+        return [{ id: "sanction-2" }];
+      if (sql.includes("INSERT INTO achillea.audit_log"))
+        return [{ id: "a", ts: new Date(), signature: "s" }];
       return [];
     });
-    await applyCrossSync(db, validateCrossSync({ ...JSON.parse(body), action: "revoke" }));
-    const insert = queries.find(q => q.sql.startsWith('insert into "sanction"'));
+    await applyCrossSync(
+      db,
+      validateCrossSync({ ...JSON.parse(body), action: "revoke" }),
+    );
+    const insert = queries.find((q) =>
+      q.sql.startsWith('insert into "sanction"'),
+    );
     expect(insert?.parameters).toContain(SanctionType.Unban);
   });
 });
@@ -330,9 +475,21 @@ describe("cellule cast", () => {
         { id: "s2", role: CastSlotRole.Producer },
       ],
       [
-        { userId: "a", status: CastAvailabilityStatus.Available, preferredRoles: [CastSlotRole.Producer] },
-        { userId: "b", status: CastAvailabilityStatus.Maybe, preferredRoles: [CastSlotRole.CasterMain] },
-        { userId: "c", status: CastAvailabilityStatus.Available, preferredRoles: [CastSlotRole.CasterMain] },
+        {
+          userId: "a",
+          status: CastAvailabilityStatus.Available,
+          preferredRoles: [CastSlotRole.Producer],
+        },
+        {
+          userId: "b",
+          status: CastAvailabilityStatus.Maybe,
+          preferredRoles: [CastSlotRole.CasterMain],
+        },
+        {
+          userId: "c",
+          status: CastAvailabilityStatus.Available,
+          preferredRoles: [CastSlotRole.CasterMain],
+        },
       ],
       new Map([["c", 3]]),
       new Map(),
@@ -356,9 +513,18 @@ describe("cellule cast", () => {
     });
     const checklist = buildChecklist(
       [slot("s1"), slot("s2")],
-      [{ id: "a1", slotId: "s1", userId: "u", assignedAt: "x", assignedBy: "system", confirmedAt: "y" }],
+      [
+        {
+          id: "a1",
+          slotId: "s1",
+          userId: "u",
+          assignedAt: "x",
+          assignedBy: "system",
+          confirmedAt: "y",
+        },
+      ],
     );
-    expect(checklist.map(item => [item.casterId, item.confirmed])).toEqual([
+    expect(checklist.map((item) => [item.casterId, item.confirmed])).toEqual([
       ["u", true],
       [null, false],
     ]);
@@ -366,7 +532,12 @@ describe("cellule cast", () => {
 
   it("message d'attribution aux couleurs Achilléa", () => {
     const message = attributionMessage(
-      { id: EVENT_ID, name: "Finale", kind: "tournament" as never, scheduledAt: "2026-11-01T18:00:00.000Z" },
+      {
+        id: EVENT_ID,
+        name: "Finale",
+        kind: "tournament" as never,
+        scheduledAt: "2026-11-01T18:00:00.000Z",
+      },
       CastSlotRole.Producer,
     );
     expect(message.embeds?.[0]?.color).toBe(0x6d00ce);
@@ -380,17 +551,39 @@ describe("cellule cast", () => {
     const { db, queries } = fakeDb(({ sql }) =>
       sql.startsWith("select")
         ? [
-            { attribution_id: "a1", user_id: "100000000000000001", role: "caster_main", event_id: EVENT_ID, name: "Finale", kind: "tournament", scheduled_at: scheduled, twitch_url: null },
-            { attribution_id: "a2", user_id: "100000000000000002", role: "producer", event_id: EVENT_ID, name: "Finale", kind: "tournament", scheduled_at: scheduled, twitch_url: null },
+            {
+              attribution_id: "a1",
+              user_id: "100000000000000001",
+              role: "caster_main",
+              event_id: EVENT_ID,
+              name: "Finale",
+              kind: "tournament",
+              scheduled_at: scheduled,
+              twitch_url: null,
+            },
+            {
+              attribution_id: "a2",
+              user_id: "100000000000000002",
+              role: "producer",
+              event_id: EVENT_ID,
+              name: "Finale",
+              kind: "tournament",
+              scheduled_at: scheduled,
+              twitch_url: null,
+            },
           ]
         : [],
     );
     const urls: string[] = [];
-    const spy = spyOn(globalThis, "fetch").mockImplementation((async (url: string, init?: RequestInit) => {
+    const spy = spyOn(globalThis, "fetch").mockImplementation((async (
+      url: string,
+      init?: RequestInit,
+    ) => {
       urls.push(String(url));
       if (String(url).endsWith("/users/@me/channels")) {
         const recipient = JSON.parse(String(init?.body)).recipient_id;
-        if (recipient === "100000000000000002") return new Response("Cannot send messages", { status: 403 });
+        if (recipient === "100000000000000002")
+          return new Response("Cannot send messages", { status: 403 });
         return Response.json({ id: "dm-1" });
       }
       return Response.json({ id: "msg" });
@@ -398,10 +591,14 @@ describe("cellule cast", () => {
     try {
       const report = await dispatchReminders(castDb(db), "j2");
       expect(report).toEqual({ kind: "j2", events: 1, sent: 1, failed: 0 });
-      const update = queries.find(q => q.sql.startsWith('update "cast_attribution"'));
+      const update = queries.find((q) =>
+        q.sql.startsWith('update "cast_attribution"'),
+      );
       expect(update?.sql).toContain('"notified_j2"');
       expect(update?.parameters).toEqual(expect.arrayContaining(["a1", "a2"]));
-      expect(urls).toContain("https://discord.com/api/v10/channels/500000000000000001/messages");
+      expect(urls).toContain(
+        "https://discord.com/api/v10/channels/500000000000000001/messages",
+      );
     } finally {
       spy.mockRestore();
     }
@@ -412,7 +609,8 @@ describe("licences", () => {
   it("émission : numéro ACH-année-séquence, secret QR, URL de PDF et audit", async () => {
     const issuedAt = new Date("2026-10-22T10:00:00.000Z");
     const { db, queries } = fakeDb(({ sql, parameters }) => {
-      if (sql.startsWith('select "id" from "user"')) return [{ id: "100000000000000001" }];
+      if (sql.startsWith('select "id" from "user"'))
+        return [{ id: "100000000000000001" }];
       if (sql.startsWith("select count(*)")) return [{ count: "41" }];
       if (sql.startsWith('insert into "license"')) return [{ id: LICENSE_ID }];
       if (sql.startsWith('update "license"'))
@@ -430,16 +628,34 @@ describe("licences", () => {
             updated_at: issuedAt,
           },
         ];
-      if (sql.includes("INSERT INTO achillea.audit_log")) return [{ id: "a", ts: issuedAt, signature: "s" }];
+      if (sql.includes("INSERT INTO achillea.audit_log"))
+        return [{ id: "a", ts: issuedAt, signature: "s" }];
       return [];
     });
-    const license = await LicenseService.issue(db, "100000000000000001", "100000000000000009", issuedAt);
-    const insert = queries.find(q => q.sql.startsWith('insert into "license"'));
+    const license = await LicenseService.issue(
+      db,
+      "100000000000000001",
+      "100000000000000009",
+      issuedAt,
+    );
+    const insert = queries.find((q) =>
+      q.sql.startsWith('insert into "license"'),
+    );
     expect(insert?.parameters).toContain("ACH-2026-00042");
-    expect(insert?.parameters.some(p => typeof p === "string" && /^[0-9a-f]{64}$/.test(p))).toBe(true);
-    expect(queries.some(q => q.sql.includes("pg_advisory_xact_lock"))).toBe(true);
-    expect(license.pdfUrl).toBe(`https://ranked.rosegriffon.fr/api/licenses/${LICENSE_ID}.pdf`);
-    const audit = queries.find(q => q.sql.includes("INSERT INTO achillea.audit_log"));
+    expect(
+      insert?.parameters.some(
+        (p) => typeof p === "string" && /^[0-9a-f]{64}$/.test(p),
+      ),
+    ).toBe(true);
+    expect(queries.some((q) => q.sql.includes("pg_advisory_xact_lock"))).toBe(
+      true,
+    );
+    expect(license.pdfUrl).toBe(
+      `https://ranked.rosegriffon.fr/api/licenses/${LICENSE_ID}.pdf`,
+    );
+    const audit = queries.find((q) =>
+      q.sql.includes("INSERT INTO achillea.audit_log"),
+    );
     expect(audit?.parameters).toContain("license.issue");
   });
 
@@ -453,12 +669,16 @@ describe("licences", () => {
       holder: { displayName: "Ayane", avatar: null },
     });
     expect(new TextDecoder().decode(pdf.subarray(0, 5))).toBe("%PDF-");
-    expect((new TextDecoder("latin1").decode(pdf).match(/\/Type\s*\/Page\b/g) ?? []).length).toBe(2);
+    expect(
+      (new TextDecoder("latin1").decode(pdf).match(/\/Type\s*\/Page\b/g) ?? [])
+        .length,
+    ).toBe(2);
   });
 });
 
 describe("images générées", () => {
-  const isPng = (bytes: Uint8Array) => PNG_SIGNATURE.every((byte, i) => bytes[i] === byte);
+  const isPng = (bytes: Uint8Array) =>
+    PNG_SIGNATURE.every((byte, i) => bytes[i] === byte);
 
   it("carte joueur : PNG 1080×1350", async () => {
     const png = await renderPlayerCard(
@@ -484,7 +704,13 @@ describe("images générées", () => {
   it("affiche de clan : PNG 1080×1920, même sans membre", async () => {
     const png = await renderClanPoster(
       {
-        clan: { id: 7, name: "Les Griffons", shortenedName: "RG", avatarUrl: null, seed: "rg" },
+        clan: {
+          id: 7,
+          name: "Les Griffons",
+          shortenedName: "RG",
+          avatarUrl: null,
+          seed: "rg",
+        },
         members: [],
         averageElo: 0,
         membersCount: 0,
@@ -520,7 +746,9 @@ describe("stockage et avatars", () => {
             return { error: null };
           },
           remove: async () => ({ error: null }),
-          getPublicUrl: (path: string) => ({ data: { publicUrl: `https://cdn.test/${path}` } }),
+          getPublicUrl: (path: string) => ({
+            data: { publicUrl: `https://cdn.test/${path}` },
+          }),
         }),
       },
     });
@@ -535,20 +763,39 @@ describe("stockage et avatars", () => {
     const { db, queries } = fakeDb(({ sql }) =>
       sql.startsWith("select")
         ? [
-            { id: "100000000000000001", avatar: null, username: "old", display_name: "Old", normalized_display_name: "old" },
-            { id: "100000000000000002", avatar: "abc", username: "gone", display_name: "Gone", normalized_display_name: "gone" },
+            {
+              id: "100000000000000001",
+              avatar: null,
+              username: "old",
+              display_name: "Old",
+              normalized_display_name: "old",
+            },
+            {
+              id: "100000000000000002",
+              avatar: "abc",
+              username: "gone",
+              display_name: "Gone",
+              normalized_display_name: "gone",
+            },
           ]
         : [],
     );
-    const spy = spyOn(globalThis, "fetch").mockImplementation((async (url: string) => {
+    const spy = spyOn(globalThis, "fetch").mockImplementation((async (
+      url: string,
+    ) => {
       if (String(url).endsWith("/100000000000000001"))
-        return Response.json({ id: "100000000000000001", username: "ayane", global_name: "Ayane", avatar: "a_hash" });
+        return Response.json({
+          id: "100000000000000001",
+          username: "ayane",
+          global_name: "Ayane",
+          avatar: "a_hash",
+        });
       return new Response("", { status: 404 });
     }) as typeof fetch);
     try {
       const result = await resyncAvatars(db, "jeton", { pauseMs: 0 });
       expect(result).toEqual({ scanned: 2, updated: 2, failed: 0 });
-      const updates = queries.filter(q => q.sql.startsWith('update "user"'));
+      const updates = queries.filter((q) => q.sql.startsWith('update "user"'));
       expect(JSON.stringify(updates[0]?.parameters)).toContain("a_hash.gif");
       expect(updates[0]?.parameters).toContain("Ayane");
     } finally {

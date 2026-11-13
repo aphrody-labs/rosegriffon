@@ -24,7 +24,10 @@ export const UNRANKED_KEY = "Unranked";
  * Les paliers ne sont pas supposés triés ; le premier intervalle couvrant
  * l'Elo est renvoyé (les barèmes Achilléa sont disjoints).
  */
-export function eloToTier<T extends RankTier>(elo: number, tiers: readonly T[]): T | null {
+export function eloToTier<T extends RankTier>(
+  elo: number,
+  tiers: readonly T[],
+): T | null {
   for (const tier of tiers) {
     if (elo >= tier.minElo && elo <= tier.maxElo) return tier;
   }
@@ -46,7 +49,10 @@ export function eloToRankKey(elo: number, tiers: readonly RankTier[]): string {
  *
  * @returns `null` si le rang est inconnu ou s'il n'y a aucun joueur classé.
  */
-export function computePercentile(globalRank: number | null, totalPlayers: number): number | null {
+export function computePercentile(
+  globalRank: number | null,
+  totalPlayers: number,
+): number | null {
   if (!globalRank || totalPlayers <= 0) return null;
   return Math.max(0.1, Math.round((globalRank / totalPlayers) * 1000) / 10);
 }

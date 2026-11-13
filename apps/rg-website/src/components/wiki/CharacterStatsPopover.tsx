@@ -2,7 +2,12 @@
 
 import type { GameCharacterStats } from "@rosegriffon/inagle";
 import { BarChart3 } from "lucide-react";
-import { Button, Popover, PopoverContent, PopoverTrigger } from "@rosegriffon/ui";
+import {
+  Button,
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@rosegriffon/ui";
 import { cn } from "@/lib/utils";
 
 interface CharacterStatsPopoverProps {
@@ -22,7 +27,10 @@ const STAT_LABELS = {
 
 const MAX_STAT = 250; // Estimated max for lv50 visual scaling
 
-export function CharacterStatsPopover({ stats, name }: CharacterStatsPopoverProps) {
+export function CharacterStatsPopover({
+  stats,
+  name,
+}: CharacterStatsPopoverProps) {
   if (!stats) {
     return null;
   }
@@ -30,7 +38,11 @@ export function CharacterStatsPopover({ stats, name }: CharacterStatsPopoverProp
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant="ghost" size="icon" className="size-11 sm:size-8 text-on-surface-variant hover:text-primary">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="size-11 sm:size-8 text-on-surface-variant hover:text-primary"
+        >
           <BarChart3 className="size-4" />
           <span className="sr-only">Stats de {name}</span>
         </Button>
@@ -42,7 +54,9 @@ export function CharacterStatsPopover({ stats, name }: CharacterStatsPopoverProp
         <div className="space-y-4">
           <h4 className="font-medium text-on-surface flex items-center justify-between">
             <span>Stats (Niv. 50)</span>
-            <span className="text-xs font-normal text-on-surface-variant">Max estimé</span>
+            <span className="text-xs font-normal text-on-surface-variant">
+              Max estimé
+            </span>
           </h4>
 
           <div className="space-y-3">
@@ -58,11 +72,16 @@ export function CharacterStatsPopover({ stats, name }: CharacterStatsPopoverProp
                 <div key={key} className="space-y-1">
                   <div className="flex justify-between text-xs">
                     <span className="text-on-surface-variant">{config.fr}</span>
-                    <span className="font-medium text-on-surface font-mono tabular-nums">{value}</span>
+                    <span className="font-medium text-on-surface font-mono tabular-nums">
+                      {value}
+                    </span>
                   </div>
                   <div className="h-1.5 w-full bg-surface-container-highest rounded-full overflow-hidden">
                     <div
-                      className={cn("h-full rounded-full transition-all duration-500", config.color)}
+                      className={cn(
+                        "h-full rounded-full transition-all duration-500",
+                        config.color,
+                      )}
                       style={{ width: `${percentage}%` }}
                     />
                   </div>

@@ -21,7 +21,7 @@ export interface ResultatPaiementHebdomadaireAchillea {
 }
 
 export async function runAchilleaWeeklyPayout(): Promise<ResultatPaiementHebdomadaireAchillea> {
-  return sql.begin(async tx => {
+  return sql.begin(async (tx) => {
     // Les tables Achilléa ont conservé leurs RLS. SET LOCAL est limité à cette
     // transaction et ne peut donc jamais contaminer une connexion du pool.
     await tx`SET LOCAL ROLE service_role`;
@@ -66,7 +66,9 @@ export async function runAchilleaWeeklyPayout(): Promise<ResultatPaiementHebdoma
 			)
 			SELECT count(*)::int AS payes FROM versements`;
 
-    console.log(`[achillea] paiement hebdomadaire : ${resultat?.payes ?? 0} membre(s) crédité(s)`);
+    console.log(
+      `[achillea] paiement hebdomadaire : ${resultat?.payes ?? 0} membre(s) crédité(s)`,
+    );
     return { payes: resultat?.payes ?? 0, success: true };
   });
 }

@@ -141,16 +141,25 @@ export function dureeLisible(ms: number): string {
  * que « Rose Griffon » pour toutes les sanctions, et plus personne ne sait qui a
  * demandé quoi. Le résultat est borné à 512 caractères, limite de l'en-tête.
  */
-export function motifAudit(opts: { auteur: string; motif?: string | null }): string {
+export function motifAudit(opts: {
+  auteur: string;
+  motif?: string | null;
+}): string {
   const motif = opts.motif?.trim();
-  const base = motif && motif.length > 0 ? `${motif} — demandé par ${opts.auteur}` : `Demandé par ${opts.auteur}`;
-  return base.length > LIMITE_MOTIF_AUDIT ? `${base.slice(0, LIMITE_MOTIF_AUDIT - 1)}…` : base;
+  const base =
+    motif && motif.length > 0
+      ? `${motif} — demandé par ${opts.auteur}`
+      : `Demandé par ${opts.auteur}`;
+  return base.length > LIMITE_MOTIF_AUDIT
+    ? `${base.slice(0, LIMITE_MOTIF_AUDIT - 1)}…`
+    : base;
 }
 
 // ─── Hiérarchie ─────────────────────────────────────────────────────────────
 
 /** Ce qui empêche une action de modération d'aboutir, avant même de l'essayer. */
-export type EmpechementHierarchie = "soi-meme" | "le-bot" | "proprietaire" | "role-superieur" | "role-egal";
+export type EmpechementHierarchie =
+  "soi-meme" | "le-bot" | "proprietaire" | "role-superieur" | "role-egal";
 
 export interface ContexteHierarchie {
   /** Position du rôle le plus haut du bot. */
@@ -173,7 +182,9 @@ export interface ContexteHierarchie {
  * bloque — un rôle trop haut ne se répare pas de la même façon qu'une tentative
  * de bannir le propriétaire du serveur.
  */
-export function empechementHierarchie(contexte: ContexteHierarchie): EmpechementHierarchie | null {
+export function empechementHierarchie(
+  contexte: ContexteHierarchie,
+): EmpechementHierarchie | null {
   if (contexte.cibleEstAuteur) {
     return "soi-meme";
   }
@@ -193,7 +204,9 @@ export function empechementHierarchie(contexte: ContexteHierarchie): Empechement
 }
 
 /** Phrase expliquant un empêchement, telle qu'elle s'affiche dans un salon. */
-export function expliquerEmpechement(empechement: EmpechementHierarchie): string {
+export function expliquerEmpechement(
+  empechement: EmpechementHierarchie,
+): string {
   switch (empechement) {
     case "soi-meme":
       return "Tu ne peux pas appliquer cette action sur toi-même.";
@@ -236,7 +249,10 @@ const NOMS_PERMISSIONS = new Map<bigint, string>([
   [PermissionFlagsBits.ManageMessages, "Gérer les messages"],
   [PermissionFlagsBits.ManageNicknames, "Gérer les pseudos"],
   [PermissionFlagsBits.CreateInstantInvite, "Créer une invitation"],
-  [PermissionFlagsBits.ManageGuildExpressions, "Gérer les émojis et autocollants"],
+  [
+    PermissionFlagsBits.ManageGuildExpressions,
+    "Gérer les émojis et autocollants",
+  ],
   [PermissionFlagsBits.ViewAuditLog, "Voir le journal d'audit"],
   [PermissionFlagsBits.Administrator, "Administrateur"],
 ]);
@@ -251,12 +267,20 @@ export function nomPermission(drapeau: bigint): string {
  * `Administrator` couvre tout : le tester d'abord évite d'annoncer « il manque
  * Bannir des membres » à un bot qui est administrateur du serveur.
  */
-export function permissionsManquantes(possedees: PermissionsBitField | bigint, action: ActionDiscord): string[] {
+export function permissionsManquantes(
+  possedees: PermissionsBitField | bigint,
+  action: ActionDiscord,
+): string[] {
   const bits = typeof possedees === "bigint" ? possedees : possedees.bitfield;
-  if ((bits & PermissionFlagsBits.Administrator) === PermissionFlagsBits.Administrator) {
+  if (
+    (bits & PermissionFlagsBits.Administrator) ===
+    PermissionFlagsBits.Administrator
+  ) {
     return [];
   }
-  return PERMISSIONS_PAR_ACTION[action].filter(requise => (bits & requise) !== requise).map(nomPermission);
+  return PERMISSIONS_PAR_ACTION[action]
+    .filter((requise) => (bits & requise) !== requise)
+    .map(nomPermission);
 }
 
 // ─── Bornes de saisie ───────────────────────────────────────────────────────
@@ -317,7 +341,10 @@ export function partitionnerSuppression(
   maintenant: number,
   demande: number,
 ): { supprimables: number; tropAnciens: number; plafonne: boolean } {
-  const limite = Math.min(Math.max(Math.trunc(demande), 0), MAX_SUPPRESSION_MASSE);
+  const limite = Math.min(
+    Math.max(Math.trunc(demande), 0),
+    MAX_SUPPRESSION_MASSE,
+  );
   const candidats = horodatages.slice(0, limite);
   let supprimables = 0;
   let tropAnciens = 0;
@@ -328,7 +355,11 @@ export function partitionnerSuppression(
       tropAnciens += 1;
     }
   }
-  return { supprimables, tropAnciens, plafonne: demande > MAX_SUPPRESSION_MASSE };
+  return {
+    supprimables,
+    tropAnciens,
+    plafonne: demande > MAX_SUPPRESSION_MASSE,
+  };
 }
 
 // ─── Rôles : la palette de la charte ────────────────────────────────────────
@@ -382,11 +413,16 @@ export const COULEURS_ROLE: readonly CouleurRole[] = Object.freeze([
   couleurCharte("Blurple Discord", "discord", MARQUES_TIERCES.discord),
   couleurCharte("Rouge Patreon", "patreon", MARQUES_TIERCES.patreon),
   couleurCharte("Violet Twitch", "twitch", MARQUES_TIERCES.twitch),
-  { nom: "Aucune couleur (grise, héritée)", valeur: COULEUR_ROLE_AUCUNE, hex: "", entier: 0 },
+  {
+    nom: "Aucune couleur (grise, héritée)",
+    valeur: COULEUR_ROLE_AUCUNE,
+    hex: "",
+    entier: 0,
+  },
 ]);
 
 /** Choix Discord dérivés de la palette — jamais réécrits à la main. */
-export const CHOIX_COULEUR_ROLE = COULEURS_ROLE.map(couleur => ({
+export const CHOIX_COULEUR_ROLE = COULEURS_ROLE.map((couleur) => ({
   name: couleur.nom,
   value: couleur.valeur,
 }));
@@ -406,7 +442,7 @@ export function resoudreCouleurRole(saisie: unknown): CouleurRole | null {
     return null;
   }
   const cible = saisie.trim().toLowerCase();
-  return COULEURS_ROLE.find(couleur => couleur.valeur === cible) ?? null;
+  return COULEURS_ROLE.find((couleur) => couleur.valeur === cible) ?? null;
 }
 
 /**
@@ -441,7 +477,12 @@ export function normaliserNomRole(saisie: unknown): string | null {
 
 /** Ce qui met un rôle hors de portée du bot, avant même d'appeler l'API. */
 export type EmpechementRole =
-  "everyone" | "gere-par-integration" | "role-du-bot" | "administration" | "role-superieur" | "role-egal";
+  | "everyone"
+  | "gere-par-integration"
+  | "role-du-bot"
+  | "administration"
+  | "role-superieur"
+  | "role-egal";
 
 export interface ContexteRole {
   /** Le rôle est-il le `@everyone` du serveur ? */
@@ -481,7 +522,9 @@ export interface ContexteRole {
  * général un rôle `managed`, mais le message « le bot ne se scie pas la branche
  * sur laquelle il est assis » est plus utile que « rôle d'intégration ».
  */
-export function empechementRole(contexte: ContexteRole): EmpechementRole | null {
+export function empechementRole(
+  contexte: ContexteRole,
+): EmpechementRole | null {
   if (contexte.estEveryone) {
     return "everyone";
   }
@@ -699,7 +742,10 @@ const NOMS_PERMISSIONS_SUPPLEMENTAIRES: ReadonlyMap<bigint, string> = new Map([
   [PermissionFlagsBits.ManageWebhooks, "Gérer les webhooks"],
   [PermissionFlagsBits.ManageEvents, "Gérer les événements"],
   [PermissionFlagsBits.ManageThreads, "Gérer les fils"],
-  [PermissionFlagsBits.MentionEveryone, "Mentionner @everyone, @here et tous les rôles"],
+  [
+    PermissionFlagsBits.MentionEveryone,
+    "Mentionner @everyone, @here et tous les rôles",
+  ],
   [PermissionFlagsBits.ViewChannel, "Voir les salons"],
   [PermissionFlagsBits.SendMessages, "Envoyer des messages"],
   [PermissionFlagsBits.EmbedLinks, "Intégrer des liens"],
@@ -707,7 +753,10 @@ const NOMS_PERMISSIONS_SUPPLEMENTAIRES: ReadonlyMap<bigint, string> = new Map([
   [PermissionFlagsBits.ReadMessageHistory, "Lire l'historique des messages"],
   [PermissionFlagsBits.AddReactions, "Ajouter des réactions"],
   [PermissionFlagsBits.UseExternalEmojis, "Utiliser des émojis externes"],
-  [PermissionFlagsBits.UseApplicationCommands, "Utiliser les commandes d'application"],
+  [
+    PermissionFlagsBits.UseApplicationCommands,
+    "Utiliser les commandes d'application",
+  ],
   [PermissionFlagsBits.ViewGuildInsights, "Voir les statistiques du serveur"],
   [PermissionFlagsBits.MoveMembers, "Déplacer des membres en vocal"],
   [PermissionFlagsBits.MuteMembers, "Rendre muet en vocal"],
@@ -716,12 +765,17 @@ const NOMS_PERMISSIONS_SUPPLEMENTAIRES: ReadonlyMap<bigint, string> = new Map([
   [PermissionFlagsBits.BypassSlowmode, "Ignorer le mode lent"],
   [PermissionFlagsBits.SendPolls, "Créer des sondages"],
   [PermissionFlagsBits.CreateEvents, "Créer des événements"],
-  [PermissionFlagsBits.CreateGuildExpressions, "Créer des émojis et autocollants"],
+  [
+    PermissionFlagsBits.CreateGuildExpressions,
+    "Créer des émojis et autocollants",
+  ],
 ]);
 
 /** Nom français d'un drapeau, en s'appuyant d'abord sur la table de modération. */
 export function nomPermissionFr(drapeau: bigint): string {
-  return NOMS_PERMISSIONS_SUPPLEMENTAIRES.get(drapeau) ?? nomPermission(drapeau);
+  return (
+    NOMS_PERMISSIONS_SUPPLEMENTAIRES.get(drapeau) ?? nomPermission(drapeau)
+  );
 }
 
 /**
@@ -732,16 +786,26 @@ export function nomPermissionFr(drapeau: bigint): string {
  * réclame « Gérer le serveur », qui n'est l'action de personne — et sans cette
  * variante on ne saurait pas dire pourquoi Discord répond `50013`.
  */
-export function manquantesParmi(possedees: PermissionsBitField | bigint, requises: readonly bigint[]): string[] {
+export function manquantesParmi(
+  possedees: PermissionsBitField | bigint,
+  requises: readonly bigint[],
+): string[] {
   const bits = typeof possedees === "bigint" ? possedees : possedees.bitfield;
-  if ((bits & PermissionFlagsBits.Administrator) === PermissionFlagsBits.Administrator) {
+  if (
+    (bits & PermissionFlagsBits.Administrator) ===
+    PermissionFlagsBits.Administrator
+  ) {
     return [];
   }
-  return requises.filter(requise => (bits & requise) !== requise).map(nomPermissionFr);
+  return requises
+    .filter((requise) => (bits & requise) !== requise)
+    .map(nomPermissionFr);
 }
 
 /** Lire la liste des invitations du serveur exige « Gérer le serveur ». */
-export const PERMISSIONS_LECTURE_INVITATIONS: readonly bigint[] = Object.freeze([PermissionFlagsBits.ManageGuild]);
+export const PERMISSIONS_LECTURE_INVITATIONS: readonly bigint[] = Object.freeze(
+  [PermissionFlagsBits.ManageGuild],
+);
 
 /**
  * Les permissions qui changent ce qu'un rôle peut faire DU SERVEUR.
@@ -777,9 +841,13 @@ export const PERMISSIONS_SENSIBLES: readonly bigint[] = Object.freeze([
  * « Administrateur » — prétendre qu'il porte les quinze autres ferait croire
  * qu'on peut lui en retirer une pour le brider, ce qui est faux.
  */
-export function permissionsSensibles(possedees: PermissionsBitField | bigint): string[] {
+export function permissionsSensibles(
+  possedees: PermissionsBitField | bigint,
+): string[] {
   const bits = typeof possedees === "bigint" ? possedees : possedees.bitfield;
-  return PERMISSIONS_SENSIBLES.filter(drapeau => (bits & drapeau) === drapeau).map(nomPermissionFr);
+  return PERMISSIONS_SENSIBLES.filter(
+    (drapeau) => (bits & drapeau) === drapeau,
+  ).map(nomPermissionFr);
 }
 
 /**
@@ -805,25 +873,28 @@ export function permissionsSensibles(possedees: PermissionsBitField | bigint): s
  *
  * @param possedees permissions portées par le RÔLE (pas par le bot).
  */
-export function exigeRoleAdminRg(possedees: PermissionsBitField | bigint): boolean {
+export function exigeRoleAdminRg(
+  possedees: PermissionsBitField | bigint,
+): boolean {
   return permissionsSensibles(possedees).length > 0;
 }
 
 // ─── Diagnostic action par action ───────────────────────────────────────────
 
 /** Ce que chaque famille d'actions permet de faire, dite en clair. */
-export const LIBELLES_ACTION: Readonly<Record<ActionDiscord, string>> = Object.freeze({
-  bannir: "Bannir un membre",
-  expulser: "Expulser un membre",
-  exclure: "Exclure temporairement un membre (mise en retrait)",
-  role: "Distribuer ou retirer un rôle",
-  salon: "Créer, renommer, verrouiller un salon",
-  purger: "Supprimer des messages en masse",
-  pseudo: "Changer le pseudo d'un membre",
-  invitation: "Créer une invitation",
-  emoji: "Gérer les émojis et autocollants",
-  journal: "Lire le journal d'audit",
-});
+export const LIBELLES_ACTION: Readonly<Record<ActionDiscord, string>> =
+  Object.freeze({
+    bannir: "Bannir un membre",
+    expulser: "Expulser un membre",
+    exclure: "Exclure temporairement un membre (mise en retrait)",
+    role: "Distribuer ou retirer un rôle",
+    salon: "Créer, renommer, verrouiller un salon",
+    purger: "Supprimer des messages en masse",
+    pseudo: "Changer le pseudo d'un membre",
+    invitation: "Créer une invitation",
+    emoji: "Gérer les émojis et autocollants",
+    journal: "Lire le journal d'audit",
+  });
 
 export interface DiagnosticAction {
   readonly action: ActionDiscord;
@@ -840,16 +911,20 @@ export interface DiagnosticAction {
  * plutôt que de deviner laquelle des dix permissions manque, on les rend
  * toutes, avec leur verdict.
  */
-export function diagnostiquerActions(possedees: PermissionsBitField | bigint): DiagnosticAction[] {
-  return (Object.keys(PERMISSIONS_PAR_ACTION) as ActionDiscord[]).map(action => {
-    const manquantes = permissionsManquantes(possedees, action);
-    return {
-      action,
-      libelle: LIBELLES_ACTION[action],
-      possible: manquantes.length === 0,
-      manquantes,
-    };
-  });
+export function diagnostiquerActions(
+  possedees: PermissionsBitField | bigint,
+): DiagnosticAction[] {
+  return (Object.keys(PERMISSIONS_PAR_ACTION) as ActionDiscord[]).map(
+    (action) => {
+      const manquantes = permissionsManquantes(possedees, action);
+      return {
+        action,
+        libelle: LIBELLES_ACTION[action],
+        possible: manquantes.length === 0,
+        manquantes,
+      };
+    },
+  );
 }
 
 /**
@@ -860,7 +935,10 @@ export function diagnostiquerActions(possedees: PermissionsBitField | bigint): D
  * rend « role-egal »). Compter en `>` afficherait « 0 membre hors de portée »
  * sur un serveur où le staff partage le rang du bot.
  */
-export function compterHorsDePortee(positionsDesMembres: Iterable<number>, positionBot: number): number {
+export function compterHorsDePortee(
+  positionsDesMembres: Iterable<number>,
+  positionBot: number,
+): number {
   let total = 0;
   for (const position of positionsDesMembres) {
     if (position >= positionBot) {
@@ -880,110 +958,120 @@ export function compterHorsDePortee(positionsDesMembres: Iterable<number>, posit
  * lecture. La table est incomplète par construction (Discord en ajoute) : le
  * repli nomme l'entier plutôt que d'afficher un vide.
  */
-export const LIBELLES_EVENEMENT_AUDIT: Readonly<Record<number, string>> = Object.freeze({
-  [AuditLogEvent.GuildUpdate]: "Serveur modifié",
-  [AuditLogEvent.ChannelCreate]: "Salon créé",
-  [AuditLogEvent.ChannelUpdate]: "Salon modifié",
-  [AuditLogEvent.ChannelDelete]: "Salon supprimé",
-  [AuditLogEvent.ChannelOverwriteCreate]: "Permission de salon ajoutée",
-  [AuditLogEvent.ChannelOverwriteUpdate]: "Permission de salon modifiée",
-  [AuditLogEvent.ChannelOverwriteDelete]: "Permission de salon retirée",
-  [AuditLogEvent.MemberKick]: "Membre expulsé",
-  [AuditLogEvent.MemberPrune]: "Membres inactifs purgés",
-  [AuditLogEvent.MemberBanAdd]: "Membre banni",
-  [AuditLogEvent.MemberBanRemove]: "Bannissement levé",
-  [AuditLogEvent.MemberUpdate]: "Membre modifié (pseudo, exclusion)",
-  [AuditLogEvent.MemberRoleUpdate]: "Rôles d'un membre modifiés",
-  [AuditLogEvent.MemberMove]: "Membre déplacé en vocal",
-  [AuditLogEvent.MemberDisconnect]: "Membre déconnecté du vocal",
-  [AuditLogEvent.BotAdd]: "Bot ajouté",
-  [AuditLogEvent.RoleCreate]: "Rôle créé",
-  [AuditLogEvent.RoleUpdate]: "Rôle modifié",
-  [AuditLogEvent.RoleDelete]: "Rôle supprimé",
-  [AuditLogEvent.InviteCreate]: "Invitation créée",
-  [AuditLogEvent.InviteUpdate]: "Invitation modifiée",
-  [AuditLogEvent.InviteDelete]: "Invitation supprimée",
-  [AuditLogEvent.WebhookCreate]: "Webhook créé",
-  [AuditLogEvent.WebhookUpdate]: "Webhook modifié",
-  [AuditLogEvent.WebhookDelete]: "Webhook supprimé",
-  [AuditLogEvent.EmojiCreate]: "Émoji créé",
-  [AuditLogEvent.EmojiUpdate]: "Émoji modifié",
-  [AuditLogEvent.EmojiDelete]: "Émoji supprimé",
-  [AuditLogEvent.MessageDelete]: "Message supprimé",
-  [AuditLogEvent.MessageBulkDelete]: "Messages supprimés en masse",
-  [AuditLogEvent.MessagePin]: "Message épinglé",
-  [AuditLogEvent.MessageUnpin]: "Message désépinglé",
-  [AuditLogEvent.IntegrationCreate]: "Intégration ajoutée",
-  [AuditLogEvent.IntegrationUpdate]: "Intégration modifiée",
-  [AuditLogEvent.IntegrationDelete]: "Intégration retirée",
-  [AuditLogEvent.StageInstanceCreate]: "Conférence ouverte",
-  [AuditLogEvent.StageInstanceUpdate]: "Conférence modifiée",
-  [AuditLogEvent.StageInstanceDelete]: "Conférence fermée",
-  [AuditLogEvent.StickerCreate]: "Autocollant créé",
-  [AuditLogEvent.StickerUpdate]: "Autocollant modifié",
-  [AuditLogEvent.StickerDelete]: "Autocollant supprimé",
-  [AuditLogEvent.GuildScheduledEventCreate]: "Événement créé",
-  [AuditLogEvent.GuildScheduledEventUpdate]: "Événement modifié",
-  [AuditLogEvent.GuildScheduledEventDelete]: "Événement supprimé",
-  [AuditLogEvent.ThreadCreate]: "Fil créé",
-  [AuditLogEvent.ThreadUpdate]: "Fil modifié",
-  [AuditLogEvent.ThreadDelete]: "Fil supprimé",
-  [AuditLogEvent.ApplicationCommandPermissionUpdate]: "Droits d'une commande modifiés",
-  [AuditLogEvent.SoundboardSoundCreate]: "Son ajouté au sampler",
-  [AuditLogEvent.SoundboardSoundUpdate]: "Son du sampler modifié",
-  [AuditLogEvent.SoundboardSoundDelete]: "Son du sampler supprimé",
-  [AuditLogEvent.AutoModerationRuleCreate]: "Règle d'automodération créée",
-  [AuditLogEvent.AutoModerationRuleUpdate]: "Règle d'automodération modifiée",
-  [AuditLogEvent.AutoModerationRuleDelete]: "Règle d'automodération supprimée",
-  [AuditLogEvent.AutoModerationBlockMessage]: "Message bloqué par l'automodération",
-  [AuditLogEvent.AutoModerationFlagToChannel]: "Message signalé par l'automodération",
-  [AuditLogEvent.AutoModerationUserCommunicationDisabled]: "Membre exclu par l'automodération",
-  [AuditLogEvent.AutoModerationQuarantineUser]: "Membre mis en quarantaine",
-  [AuditLogEvent.CreatorMonetizationRequestCreated]: "Demande de monétisation",
-  [AuditLogEvent.CreatorMonetizationTermsAccepted]: "Conditions de monétisation acceptées",
-  [AuditLogEvent.OnboardingPromptCreate]: "Question d'accueil créée",
-  [AuditLogEvent.OnboardingPromptUpdate]: "Question d'accueil modifiée",
-  [AuditLogEvent.OnboardingPromptDelete]: "Question d'accueil supprimée",
-  [AuditLogEvent.OnboardingCreate]: "Accueil configuré",
-  [AuditLogEvent.OnboardingUpdate]: "Accueil modifié",
-  [AuditLogEvent.HomeSettingsCreate]: "Page d'accueil créée",
-  [AuditLogEvent.HomeSettingsUpdate]: "Page d'accueil modifiée",
-});
+export const LIBELLES_EVENEMENT_AUDIT: Readonly<Record<number, string>> =
+  Object.freeze({
+    [AuditLogEvent.GuildUpdate]: "Serveur modifié",
+    [AuditLogEvent.ChannelCreate]: "Salon créé",
+    [AuditLogEvent.ChannelUpdate]: "Salon modifié",
+    [AuditLogEvent.ChannelDelete]: "Salon supprimé",
+    [AuditLogEvent.ChannelOverwriteCreate]: "Permission de salon ajoutée",
+    [AuditLogEvent.ChannelOverwriteUpdate]: "Permission de salon modifiée",
+    [AuditLogEvent.ChannelOverwriteDelete]: "Permission de salon retirée",
+    [AuditLogEvent.MemberKick]: "Membre expulsé",
+    [AuditLogEvent.MemberPrune]: "Membres inactifs purgés",
+    [AuditLogEvent.MemberBanAdd]: "Membre banni",
+    [AuditLogEvent.MemberBanRemove]: "Bannissement levé",
+    [AuditLogEvent.MemberUpdate]: "Membre modifié (pseudo, exclusion)",
+    [AuditLogEvent.MemberRoleUpdate]: "Rôles d'un membre modifiés",
+    [AuditLogEvent.MemberMove]: "Membre déplacé en vocal",
+    [AuditLogEvent.MemberDisconnect]: "Membre déconnecté du vocal",
+    [AuditLogEvent.BotAdd]: "Bot ajouté",
+    [AuditLogEvent.RoleCreate]: "Rôle créé",
+    [AuditLogEvent.RoleUpdate]: "Rôle modifié",
+    [AuditLogEvent.RoleDelete]: "Rôle supprimé",
+    [AuditLogEvent.InviteCreate]: "Invitation créée",
+    [AuditLogEvent.InviteUpdate]: "Invitation modifiée",
+    [AuditLogEvent.InviteDelete]: "Invitation supprimée",
+    [AuditLogEvent.WebhookCreate]: "Webhook créé",
+    [AuditLogEvent.WebhookUpdate]: "Webhook modifié",
+    [AuditLogEvent.WebhookDelete]: "Webhook supprimé",
+    [AuditLogEvent.EmojiCreate]: "Émoji créé",
+    [AuditLogEvent.EmojiUpdate]: "Émoji modifié",
+    [AuditLogEvent.EmojiDelete]: "Émoji supprimé",
+    [AuditLogEvent.MessageDelete]: "Message supprimé",
+    [AuditLogEvent.MessageBulkDelete]: "Messages supprimés en masse",
+    [AuditLogEvent.MessagePin]: "Message épinglé",
+    [AuditLogEvent.MessageUnpin]: "Message désépinglé",
+    [AuditLogEvent.IntegrationCreate]: "Intégration ajoutée",
+    [AuditLogEvent.IntegrationUpdate]: "Intégration modifiée",
+    [AuditLogEvent.IntegrationDelete]: "Intégration retirée",
+    [AuditLogEvent.StageInstanceCreate]: "Conférence ouverte",
+    [AuditLogEvent.StageInstanceUpdate]: "Conférence modifiée",
+    [AuditLogEvent.StageInstanceDelete]: "Conférence fermée",
+    [AuditLogEvent.StickerCreate]: "Autocollant créé",
+    [AuditLogEvent.StickerUpdate]: "Autocollant modifié",
+    [AuditLogEvent.StickerDelete]: "Autocollant supprimé",
+    [AuditLogEvent.GuildScheduledEventCreate]: "Événement créé",
+    [AuditLogEvent.GuildScheduledEventUpdate]: "Événement modifié",
+    [AuditLogEvent.GuildScheduledEventDelete]: "Événement supprimé",
+    [AuditLogEvent.ThreadCreate]: "Fil créé",
+    [AuditLogEvent.ThreadUpdate]: "Fil modifié",
+    [AuditLogEvent.ThreadDelete]: "Fil supprimé",
+    [AuditLogEvent.ApplicationCommandPermissionUpdate]:
+      "Droits d'une commande modifiés",
+    [AuditLogEvent.SoundboardSoundCreate]: "Son ajouté au sampler",
+    [AuditLogEvent.SoundboardSoundUpdate]: "Son du sampler modifié",
+    [AuditLogEvent.SoundboardSoundDelete]: "Son du sampler supprimé",
+    [AuditLogEvent.AutoModerationRuleCreate]: "Règle d'automodération créée",
+    [AuditLogEvent.AutoModerationRuleUpdate]: "Règle d'automodération modifiée",
+    [AuditLogEvent.AutoModerationRuleDelete]:
+      "Règle d'automodération supprimée",
+    [AuditLogEvent.AutoModerationBlockMessage]:
+      "Message bloqué par l'automodération",
+    [AuditLogEvent.AutoModerationFlagToChannel]:
+      "Message signalé par l'automodération",
+    [AuditLogEvent.AutoModerationUserCommunicationDisabled]:
+      "Membre exclu par l'automodération",
+    [AuditLogEvent.AutoModerationQuarantineUser]: "Membre mis en quarantaine",
+    [AuditLogEvent.CreatorMonetizationRequestCreated]:
+      "Demande de monétisation",
+    [AuditLogEvent.CreatorMonetizationTermsAccepted]:
+      "Conditions de monétisation acceptées",
+    [AuditLogEvent.OnboardingPromptCreate]: "Question d'accueil créée",
+    [AuditLogEvent.OnboardingPromptUpdate]: "Question d'accueil modifiée",
+    [AuditLogEvent.OnboardingPromptDelete]: "Question d'accueil supprimée",
+    [AuditLogEvent.OnboardingCreate]: "Accueil configuré",
+    [AuditLogEvent.OnboardingUpdate]: "Accueil modifié",
+    [AuditLogEvent.HomeSettingsCreate]: "Page d'accueil créée",
+    [AuditLogEvent.HomeSettingsUpdate]: "Page d'accueil modifiée",
+  });
 
 export function libelleEvenementAudit(action: number): string {
   return LIBELLES_EVENEMENT_AUDIT[action] ?? `Action Discord n° ${action}`;
 }
 
 /** Types de salon, en français. Les valeurs sont celles de `ChannelType`. */
-export const LIBELLES_TYPE_SALON: Readonly<Record<number, string>> = Object.freeze({
-  [ChannelType.GuildText]: "Textuel",
-  [ChannelType.GuildVoice]: "Vocal",
-  [ChannelType.GuildCategory]: "Catégorie",
-  [ChannelType.GuildAnnouncement]: "Annonces",
-  [ChannelType.AnnouncementThread]: "Fil d'annonce",
-  [ChannelType.PublicThread]: "Fil public",
-  [ChannelType.PrivateThread]: "Fil privé",
-  [ChannelType.GuildStageVoice]: "Conférence",
-  [ChannelType.GuildDirectory]: "Annuaire",
-  [ChannelType.GuildForum]: "Forum",
-  [ChannelType.GuildMedia]: "Média",
-});
+export const LIBELLES_TYPE_SALON: Readonly<Record<number, string>> =
+  Object.freeze({
+    [ChannelType.GuildText]: "Textuel",
+    [ChannelType.GuildVoice]: "Vocal",
+    [ChannelType.GuildCategory]: "Catégorie",
+    [ChannelType.GuildAnnouncement]: "Annonces",
+    [ChannelType.AnnouncementThread]: "Fil d'annonce",
+    [ChannelType.PublicThread]: "Fil public",
+    [ChannelType.PrivateThread]: "Fil privé",
+    [ChannelType.GuildStageVoice]: "Conférence",
+    [ChannelType.GuildDirectory]: "Annuaire",
+    [ChannelType.GuildForum]: "Forum",
+    [ChannelType.GuildMedia]: "Média",
+  });
 
 export function libelleTypeSalon(type: number): string {
   return LIBELLES_TYPE_SALON[type] ?? `Type n° ${type}`;
 }
 
 /** Pictogramme d'un type de salon, pour lire une arborescence d'un coup d'œil. */
-export const PICTOS_TYPE_SALON: Readonly<Record<number, string>> = Object.freeze({
-  [ChannelType.GuildText]: "#",
-  [ChannelType.GuildVoice]: "🔊",
-  [ChannelType.GuildCategory]: "📂",
-  [ChannelType.GuildAnnouncement]: "📣",
-  [ChannelType.GuildStageVoice]: "🎙",
-  [ChannelType.GuildForum]: "💬",
-  [ChannelType.GuildMedia]: "🖼",
-  [ChannelType.GuildDirectory]: "🧭",
-});
+export const PICTOS_TYPE_SALON: Readonly<Record<number, string>> =
+  Object.freeze({
+    [ChannelType.GuildText]: "#",
+    [ChannelType.GuildVoice]: "🔊",
+    [ChannelType.GuildCategory]: "📂",
+    [ChannelType.GuildAnnouncement]: "📣",
+    [ChannelType.GuildStageVoice]: "🎙",
+    [ChannelType.GuildForum]: "💬",
+    [ChannelType.GuildMedia]: "🖼",
+    [ChannelType.GuildDirectory]: "🧭",
+  });
 
 export function pictoTypeSalon(type: number): string {
   return PICTOS_TYPE_SALON[type] ?? "•";
@@ -1031,45 +1119,46 @@ export function libelleNiveauVerification(niveau: number): string {
  * pas traduit retombe sur une forme lisible plutôt que sur du vide, parce que
  * Discord en ajoute sans prévenir.
  */
-export const LIBELLES_FONCTIONNALITE_GUILDE: Readonly<Record<string, string>> = Object.freeze({
-  ANIMATED_BANNER: "Bannière animée",
-  ANIMATED_ICON: "Icône animée",
-  AUTO_MODERATION: "Automodération",
-  BANNER: "Bannière",
-  COMMUNITY: "Serveur communautaire",
-  CREATOR_MONETIZABLE_PROVISIONAL: "Monétisation créateur (provisoire)",
-  CREATOR_STORE_PAGE: "Boutique créateur",
-  DEVELOPER_SUPPORT_SERVER: "Serveur de support développeur",
-  DISCOVERABLE: "Visible dans la découverte",
-  ENHANCED_ROLE_COLORS: "Couleurs de rôle avancées",
-  FEATURABLE: "Éligible à la mise en avant",
-  GUESTS_ENABLED: "Invités autorisés",
-  GUILD_TAGS: "Étiquettes de serveur",
-  HAS_DIRECTORY_ENTRY: "Inscrit dans un annuaire",
-  HUB: "Hub étudiant",
-  INVITES_DISABLED: "Invitations désactivées",
-  INVITE_SPLASH: "Visuel d'invitation",
-  LINKED_TO_HUB: "Rattaché à un hub",
-  MEMBER_VERIFICATION_GATE_ENABLED: "Écran de règles à l'entrée",
-  MONETIZATION_ENABLED: "Monétisation active",
-  MORE_SOUNDBOARD: "Sampler étendu",
-  MORE_STICKERS: "Autocollants supplémentaires",
-  NEWS: "Salons d'annonces",
-  PARTNERED: "Serveur partenaire",
-  PIN_PERMISSION_MIGRATION_COMPLETE: "Permission d'épinglage migrée",
-  PREVIEW_ENABLED: "Aperçu public",
-  PRIVATE_THREADS: "Fils privés",
-  RAID_ALERTS_DISABLED: "Alertes de raid désactivées",
-  ROLE_ICONS: "Icônes de rôle",
-  ROLE_SUBSCRIPTIONS_AVAILABLE_FOR_PURCHASE: "Abonnements de rôle en vente",
-  ROLE_SUBSCRIPTIONS_ENABLED: "Abonnements de rôle activés",
-  SOUNDBOARD: "Sampler",
-  TICKETED_EVENTS_ENABLED: "Événements payants",
-  VANITY_URL: "URL personnalisée",
-  VERIFIED: "Serveur vérifié",
-  VIP_REGIONS: "Régions vocales VIP",
-  WELCOME_SCREEN_ENABLED: "Écran d'accueil",
-});
+export const LIBELLES_FONCTIONNALITE_GUILDE: Readonly<Record<string, string>> =
+  Object.freeze({
+    ANIMATED_BANNER: "Bannière animée",
+    ANIMATED_ICON: "Icône animée",
+    AUTO_MODERATION: "Automodération",
+    BANNER: "Bannière",
+    COMMUNITY: "Serveur communautaire",
+    CREATOR_MONETIZABLE_PROVISIONAL: "Monétisation créateur (provisoire)",
+    CREATOR_STORE_PAGE: "Boutique créateur",
+    DEVELOPER_SUPPORT_SERVER: "Serveur de support développeur",
+    DISCOVERABLE: "Visible dans la découverte",
+    ENHANCED_ROLE_COLORS: "Couleurs de rôle avancées",
+    FEATURABLE: "Éligible à la mise en avant",
+    GUESTS_ENABLED: "Invités autorisés",
+    GUILD_TAGS: "Étiquettes de serveur",
+    HAS_DIRECTORY_ENTRY: "Inscrit dans un annuaire",
+    HUB: "Hub étudiant",
+    INVITES_DISABLED: "Invitations désactivées",
+    INVITE_SPLASH: "Visuel d'invitation",
+    LINKED_TO_HUB: "Rattaché à un hub",
+    MEMBER_VERIFICATION_GATE_ENABLED: "Écran de règles à l'entrée",
+    MONETIZATION_ENABLED: "Monétisation active",
+    MORE_SOUNDBOARD: "Sampler étendu",
+    MORE_STICKERS: "Autocollants supplémentaires",
+    NEWS: "Salons d'annonces",
+    PARTNERED: "Serveur partenaire",
+    PIN_PERMISSION_MIGRATION_COMPLETE: "Permission d'épinglage migrée",
+    PREVIEW_ENABLED: "Aperçu public",
+    PRIVATE_THREADS: "Fils privés",
+    RAID_ALERTS_DISABLED: "Alertes de raid désactivées",
+    ROLE_ICONS: "Icônes de rôle",
+    ROLE_SUBSCRIPTIONS_AVAILABLE_FOR_PURCHASE: "Abonnements de rôle en vente",
+    ROLE_SUBSCRIPTIONS_ENABLED: "Abonnements de rôle activés",
+    SOUNDBOARD: "Sampler",
+    TICKETED_EVENTS_ENABLED: "Événements payants",
+    VANITY_URL: "URL personnalisée",
+    VERIFIED: "Serveur vérifié",
+    VIP_REGIONS: "Régions vocales VIP",
+    WELCOME_SCREEN_ENABLED: "Écran d'accueil",
+  });
 
 export function libelleFonctionnaliteGuilde(code: string): string {
   const connu = LIBELLES_FONCTIONNALITE_GUILDE[code];
@@ -1078,7 +1167,9 @@ export function libelleFonctionnaliteGuilde(code: string): string {
   }
   // Repli lisible : `NEW_THING` devient « New thing » plutôt que de disparaître.
   const mots = code.toLowerCase().replaceAll("_", " ").trim();
-  return mots.length === 0 ? code : mots.charAt(0).toUpperCase() + mots.slice(1);
+  return mots.length === 0
+    ? code
+    : mots.charAt(0).toUpperCase() + mots.slice(1);
 }
 
 // ─── Pagination des listes d'inspection ─────────────────────────────────────
@@ -1087,7 +1178,10 @@ export function libelleFonctionnaliteGuilde(code: string): string {
 export const MAX_LIGNES_PAGE_INSPECTION = 25;
 
 /** Nombre de pages nécessaires. Toujours au moins 1, même pour une liste vide. */
-export function nombreDePagesInspection(total: number, parPage: number = MAX_LIGNES_PAGE_INSPECTION): number {
+export function nombreDePagesInspection(
+  total: number,
+  parPage: number = MAX_LIGNES_PAGE_INSPECTION,
+): number {
   if (!Number.isFinite(total) || total <= 0 || parPage <= 0) {
     return 1;
   }
@@ -1134,7 +1228,10 @@ export const BUDGET_DESCRIPTION_INSPECTION = 3_900;
  * affiche alors les astérisques restants tels quels, et toute la fin de la liste
  * part en gras. On referme donc le gras quand la coupe l'a laissé ouvert.
  */
-export function raccourcirLigneInspection(ligne: string, limite: number): string {
+export function raccourcirLigneInspection(
+  ligne: string,
+  limite: number,
+): string {
   if (limite <= 1) {
     return "…";
   }
@@ -1166,12 +1263,15 @@ export function assemblerPageInspection(
     return "";
   }
   const separateurs = lignes.length - 1;
-  const total = lignes.reduce((somme, ligne) => somme + ligne.length, 0) + separateurs;
+  const total =
+    lignes.reduce((somme, ligne) => somme + ligne.length, 0) + separateurs;
   if (total <= budget) {
     return lignes.join("\n");
   }
   const part = Math.max(8, Math.floor((budget - separateurs) / lignes.length));
-  return lignes.map(ligne => raccourcirLigneInspection(ligne, part)).join("\n");
+  return lignes
+    .map((ligne) => raccourcirLigneInspection(ligne, part))
+    .join("\n");
 }
 
 /** Préfixe des boutons de pagination de `/staff discord`. */
@@ -1199,7 +1299,9 @@ export interface EtatPageInspection {
  * Rend `null` au-delà de 100 caractères : l'appelant affiche alors la page sans
  * boutons plutôt que de voir son message ENTIER refusé par l'API.
  */
-export function construireIdPageInspection(etat: EtatPageInspection): string | null {
+export function construireIdPageInspection(
+  etat: EtatPageInspection,
+): string | null {
   if (etat.vue.includes("|") || etat.graine.includes("|")) {
     return null;
   }
@@ -1208,7 +1310,9 @@ export function construireIdPageInspection(etat: EtatPageInspection): string | n
 }
 
 /** Relit un identifiant produit ci-dessus. `null` = ce bouton n'est pas à nous. */
-export function analyserIdPageInspection(id: unknown): EtatPageInspection | null {
+export function analyserIdPageInspection(
+  id: unknown,
+): EtatPageInspection | null {
   if (typeof id !== "string") {
     return null;
   }
@@ -1296,7 +1400,10 @@ export function codeErreurDiscord(err: unknown): number | null {
  */
 export function estMembreAbsent(err: unknown): boolean {
   const code = codeErreurDiscord(err);
-  return code === RESTJSONErrorCodes.UnknownMember || code === RESTJSONErrorCodes.UnknownUser;
+  return (
+    code === RESTJSONErrorCodes.UnknownMember ||
+    code === RESTJSONErrorCodes.UnknownUser
+  );
 }
 
 /** Vrai si l'erreur signifie « ce compte n'est pas banni ». */
@@ -1323,25 +1430,31 @@ export function secondesPurgeBannissement(jours: unknown): number | null {
 // ─── Message privé envoyé à la personne sanctionnée ─────────────────────────
 
 /** Les quatre sanctions qui donnent lieu à une notification privée. */
-export type SanctionNotifiee = "bannissement" | "expulsion" | "exclusion" | "avertissement";
+export type SanctionNotifiee =
+  "bannissement" | "expulsion" | "exclusion" | "avertissement";
 
 /** Longueur maximale d'un message Discord ordinaire. */
 export const LIMITE_MESSAGE = 2_000;
 
-const LIBELLES_SANCTION: Readonly<Record<SanctionNotifiee, string>> = Object.freeze({
-  bannissement: "Tu as été banni du serveur",
-  expulsion: "Tu as été expulsé du serveur",
-  exclusion: "Tu as été exclu temporairement",
-  avertissement: "Tu reçois un avertissement",
-});
+const LIBELLES_SANCTION: Readonly<Record<SanctionNotifiee, string>> =
+  Object.freeze({
+    bannissement: "Tu as été banni du serveur",
+    expulsion: "Tu as été expulsé du serveur",
+    exclusion: "Tu as été exclu temporairement",
+    avertissement: "Tu reçois un avertissement",
+  });
 
-const SUITES_SANCTION: Readonly<Record<SanctionNotifiee, string>> = Object.freeze({
-  bannissement:
-    "Le bannissement est définitif tant qu'un membre du staff ne le lève pas. Tu peux répondre à ce message pour le contester.",
-  expulsion: "Une expulsion n'est pas un bannissement : tu peux revenir avec une nouvelle invitation.",
-  exclusion: "Pendant l'exclusion tu restes sur le serveur mais tu ne peux ni écrire, ni réagir, ni parler en vocal.",
-  avertissement: "Aucune sanction n'a été appliquée : c'est un rappel. Il est consigné dans le journal du staff.",
-});
+const SUITES_SANCTION: Readonly<Record<SanctionNotifiee, string>> =
+  Object.freeze({
+    bannissement:
+      "Le bannissement est définitif tant qu'un membre du staff ne le lève pas. Tu peux répondre à ce message pour le contester.",
+    expulsion:
+      "Une expulsion n'est pas un bannissement : tu peux revenir avec une nouvelle invitation.",
+    exclusion:
+      "Pendant l'exclusion tu restes sur le serveur mais tu ne peux ni écrire, ni réagir, ni parler en vocal.",
+    avertissement:
+      "Aucune sanction n'a été appliquée : c'est un rappel. Il est consigné dans le journal du staff.",
+  });
 
 /**
  * Compose la notification privée envoyée à la personne sanctionnée.
@@ -1367,14 +1480,22 @@ export function messageSanctionPrivee(opts: {
   const lignes = [
     `**${LIBELLES_SANCTION[opts.sanction]} ${opts.serveur}.**`,
     "",
-    motif && motif.length > 0 ? `Motif : ${motif}` : "Aucun motif n'a été précisé.",
+    motif && motif.length > 0
+      ? `Motif : ${motif}`
+      : "Aucun motif n'a été précisé.",
   ];
-  if (opts.sanction === "exclusion" && typeof opts.dureeMs === "number" && opts.dureeMs > 0) {
+  if (
+    opts.sanction === "exclusion" &&
+    typeof opts.dureeMs === "number" &&
+    opts.dureeMs > 0
+  ) {
     lignes.push(`Durée : ${dureeLisible(opts.dureeMs)}`);
   }
   lignes.push("", SUITES_SANCTION[opts.sanction]);
   const texte = lignes.join("\n");
-  return texte.length > LIMITE_MESSAGE ? `${texte.slice(0, LIMITE_MESSAGE - 1)}…` : texte;
+  return texte.length > LIMITE_MESSAGE
+    ? `${texte.slice(0, LIMITE_MESSAGE - 1)}…`
+    : texte;
 }
 
 // ─── Empêchements hors hiérarchie ───────────────────────────────────────────
@@ -1441,14 +1562,23 @@ export function filtrerBannis(
     if (retenus.length >= plafond) {
       break;
     }
-    if (cible.length > 0 && !banni.etiquette.toLowerCase().includes(cible) && !banni.id.includes(cible)) {
+    if (
+      cible.length > 0 &&
+      !banni.etiquette.toLowerCase().includes(cible) &&
+      !banni.id.includes(cible)
+    ) {
       continue;
     }
     const motif = banni.motif?.trim();
     const brut =
-      motif && motif.length > 0 ? `${banni.etiquette} (${banni.id}) — ${motif}` : `${banni.etiquette} (${banni.id})`;
+      motif && motif.length > 0
+        ? `${banni.etiquette} (${banni.id}) — ${motif}`
+        : `${banni.etiquette} (${banni.id})`;
     retenus.push({
-      name: brut.length > LIMITE_PROPOSITION ? `${brut.slice(0, LIMITE_PROPOSITION - 1)}…` : brut,
+      name:
+        brut.length > LIMITE_PROPOSITION
+          ? `${brut.slice(0, LIMITE_PROPOSITION - 1)}…`
+          : brut,
       value: banni.id.slice(0, LIMITE_PROPOSITION),
     });
   }
@@ -1505,7 +1635,10 @@ export interface TypeSalonCreable {
   /** Valeur choisie dans Discord. */
   readonly valeur: "textuel" | "vocal" | "annonce";
   readonly libelle: string;
-  readonly type: ChannelType.GuildText | ChannelType.GuildVoice | ChannelType.GuildAnnouncement;
+  readonly type:
+    | ChannelType.GuildText
+    | ChannelType.GuildVoice
+    | ChannelType.GuildAnnouncement;
   /**
    * Discord réécrit-il le nom en minuscules-avec-tirets ?
    *
@@ -1557,7 +1690,7 @@ export function lireTypeSalon(valeur: unknown): TypeSalonCreable | null {
     return null;
   }
   const cible = valeur.trim().toLowerCase();
-  return TYPES_SALON_CREABLES.find(type => type.valeur === cible) ?? null;
+  return TYPES_SALON_CREABLES.find((type) => type.valeur === cible) ?? null;
 }
 
 /**
@@ -1567,11 +1700,16 @@ export function lireTypeSalon(valeur: unknown): TypeSalonCreable | null {
  * caractères. Rend `null` quand il ne reste rien d'exploitable : « ??? » devient
  * une chaîne vide une fois normalisé, et l'API refuse alors la création.
  */
-export function nomSalonEffectif(saisie: unknown, type: TypeSalonCreable): string | null {
+export function nomSalonEffectif(
+  saisie: unknown,
+  type: TypeSalonCreable,
+): string | null {
   if (typeof saisie !== "string") {
     return null;
   }
-  const nom = type.nomNormalise ? normaliserNomSalon(saisie) : saisie.trim().slice(0, LIMITE_NOM);
+  const nom = type.nomNormalise
+    ? normaliserNomSalon(saisie)
+    : saisie.trim().slice(0, LIMITE_NOM);
   return nom.length === 0 ? null : nom;
 }
 
@@ -1592,7 +1730,8 @@ export function estEtatEnvoi(valeur: unknown): valeur is EtatEnvoi {
 
 /** Lit l'état depuis les deux masques d'une surcharge. `null` = aucune surcharge. */
 export function lireEtatEnvoi(
-  surcharge: { readonly autorise: boolean; readonly refuse: boolean } | null | undefined,
+  surcharge:
+    { readonly autorise: boolean; readonly refuse: boolean } | null | undefined,
 ): EtatEnvoi {
   if (!surcharge) {
     return "herite";
@@ -1605,11 +1744,12 @@ export function lireEtatEnvoi(
   return surcharge.autorise ? "autorise" : "herite";
 }
 
-export const LIBELLES_ETAT_ENVOI: Readonly<Record<EtatEnvoi, string>> = Object.freeze({
-  autorise: "explicitement autorisé",
-  refuse: "explicitement refusé",
-  herite: "hérité (aucune surcharge sur ce salon)",
-});
+export const LIBELLES_ETAT_ENVOI: Readonly<Record<EtatEnvoi, string>> =
+  Object.freeze({
+    autorise: "explicitement autorisé",
+    refuse: "explicitement refusé",
+    herite: "hérité (aucune surcharge sur ce salon)",
+  });
 
 export function libelleEtatEnvoi(etat: EtatEnvoi): string {
   return LIBELLES_ETAT_ENVOI[etat];
@@ -1692,9 +1832,13 @@ export function resumerPurge(bilan: BilanPurge): string {
     );
   }
   if (bilan.plafonne) {
-    phrases.push(`La demande a été ramenée au plafond de ${MAX_SUPPRESSION_MASSE} de l'API.`);
+    phrases.push(
+      `La demande a été ramenée au plafond de ${MAX_SUPPRESSION_MASSE} de l'API.`,
+    );
   }
-  phrases.push(`${bilan.examines} message${bilan.examines > 1 ? "s" : ""} parcouru${bilan.examines > 1 ? "s" : ""}.`);
+  phrases.push(
+    `${bilan.examines} message${bilan.examines > 1 ? "s" : ""} parcouru${bilan.examines > 1 ? "s" : ""}.`,
+  );
   if (bilan.tronque) {
     phrases.push(
       `La recherche s'est arrêtée après ${PAGES_MAX_PURGE} pages : il peut rester des messages plus anciens.`,
@@ -1727,6 +1871,8 @@ export function referencesSalon(
     return [];
   }
   return Object.entries(sources)
-    .filter(([, valeur]) => typeof valeur === "string" && valeur.trim() === cible)
+    .filter(
+      ([, valeur]) => typeof valeur === "string" && valeur.trim() === cible,
+    )
     .map(([nom]) => nom);
 }

@@ -5,7 +5,11 @@ const ACRONYM_RUN = /([A-Z]+)([A-Z][a-z])/gu;
 
 /** `clanAvatarUrl` → `clan_avatar_url`, `xUrl` → `x_url`, `x_url` → `x_url`. */
 export function toSnakeCase(name: string): string {
-  return name.replace(ACRONYM_RUN, "$1_$2").replace(ACRONYM_BOUNDARY, "$1_$2").replaceAll("-", "_").toLowerCase();
+  return name
+    .replace(ACRONYM_RUN, "$1_$2")
+    .replace(ACRONYM_BOUNDARY, "$1_$2")
+    .replaceAll("-", "_")
+    .toLowerCase();
 }
 
 /** `single_elimination` → `SingleElimination`, `BO1` → `Bo1`. */
@@ -13,7 +17,7 @@ export function toPascalCase(name: string): string {
   return toSnakeCase(name)
     .split("_")
     .filter(Boolean)
-    .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join("");
 }
 
@@ -180,10 +184,14 @@ export function kotlinFieldName(name: string): string {
 }
 
 /** Découpe un commentaire en lignes préfixées (`/// `, `// `, ...). */
-export function docComment(doc: string | undefined, prefix: string, indent = ""): string[] {
+export function docComment(
+  doc: string | undefined,
+  prefix: string,
+  indent = "",
+): string[] {
   if (!doc) return [];
   return doc
     .split("\n")
-    .map(line => `${indent}${prefix}${line.trimEnd()}`.trimEnd())
-    .filter(line => line.length > 0);
+    .map((line) => `${indent}${prefix}${line.trimEnd()}`.trimEnd())
+    .filter((line) => line.length > 0);
 }

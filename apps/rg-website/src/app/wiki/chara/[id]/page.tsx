@@ -10,7 +10,10 @@ import { CharacterSheetWithLevel } from "@/components/wiki/CharacterSheetWithLev
 import { HowToObtain } from "@/components/wiki/HowToObtain";
 import type { MovesetSkill } from "@/components/wiki/MovesetList";
 import { AuraCard } from "@/components/wiki/AuraCard";
-import { formatDescription, formatJapaneseName } from "@rosegriffon/azalee/text/format-description";
+import {
+  formatDescription,
+  formatJapaneseName,
+} from "@rosegriffon/azalee/text/format-description";
 import { resolveCharaStats } from "@/lib/wiki/chara-stats";
 import { wikiService } from "@/lib/wiki-service";
 import { compareVariants } from "@rosegriffon/inagle/characters/comparison-engine";
@@ -29,7 +32,9 @@ import { clampText, wikiTitle } from "@/lib/seo";
  * cas où une variante atypique (ex « Mark Evans » Milieu isolé parmi des Gardien)
  * devenait le défaut affiché à cause d'une stat plus haute.
  */
-function pickDominantPositionVariant<T extends { position?: string }>(variants: T[]): T | undefined {
+function pickDominantPositionVariant<T extends { position?: string }>(
+  variants: T[],
+): T | undefined {
   if (variants.length === 0) return undefined;
   const counts = new Map<string, number>();
   for (const v of variants) {
@@ -44,7 +49,7 @@ function pickDominantPositionVariant<T extends { position?: string }>(variants: 
       dominant = p;
     }
   }
-  return variants.find(v => (v.position || "") === dominant) ?? variants[0];
+  return variants.find((v) => (v.position || "") === dominant) ?? variants[0];
 }
 
 export async function generateStaticParams() {
@@ -58,7 +63,11 @@ export async function generateStaticParams() {
   }
 }
 
-export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
   const { id } = await params;
   const baseChar =
     (await wikiService.getCharacterByBaseSlug(id)) ||
@@ -83,8 +92,12 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     Mountain: "Montagne",
     Wind: "Vent",
   };
-  const pos = variant?.position ? posMap[variant.position] || variant.position : "";
-  const elem = variant?.element ? elemMap[variant.element] || variant.element : "";
+  const pos = variant?.position
+    ? posMap[variant.position] || variant.position
+    : "";
+  const elem = variant?.element
+    ? elemMap[variant.element] || variant.element
+    : "";
   const team = (baseChar as any).teams?.[0]?.names?.fr || "";
   const rarity = variant?.rarity || baseChar.bestRarity || "";
 
@@ -149,7 +162,11 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   };
 }
 
-export default async function PlayerDetailPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function PlayerDetailPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const { id } = await params;
   // 1. base_slug (name-c0xxxxx) — canonical static URL
   let baseChar = await wikiService.getCharacterByBaseSlug(id);
@@ -170,7 +187,7 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
   // base) on prend la variante de position DOMINANTE — évite qu'une variante atypique
   // (ex un « Mark Evans » Milieu isolé parmi 15 Gardien) devienne le défaut affiché.
   const variant =
-    baseChar.variants.find(v => v.charaParamId === id || v.slug === id) ||
+    baseChar.variants.find((v) => v.charaParamId === id || v.slug === id) ||
     pickDominantPositionVariant(baseChar.variants);
 
   if (!variant) {
@@ -188,7 +205,9 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
     internalCode: variant.internalCode || baseChar.internalCode,
     names: baseChar.names,
     teamId: (baseChar as any).teams?.[0]?.id as string | undefined,
-    teamName: (baseChar as any).teams?.[0]?.names?.fr || (baseChar as any).teams?.[0]?.names?.en,
+    teamName:
+      (baseChar as any).teams?.[0]?.names?.fr ||
+      (baseChar as any).teams?.[0]?.names?.en,
     zukanHash: variant.zukanHash || baseChar.zukanHash,
     // Ces métadonnées appartiennent au personnage de base et doivent suivre toutes
     // ses variantes, notamment pour les fiches d'OC.
@@ -201,17 +220,29 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
   if (player.internalCode && aphrodyCodes.has(player.internalCode)) {
     const codes = baseChar.variants.flatMap((v: any) =>
       (v.skills ?? [])
-        .map((skill: any) => skill.skillIdStr ?? skill.skill_id_str ?? skill.internalCode)
+        .map(
+          (skill: any) =>
+            skill.skillIdStr ?? skill.skill_id_str ?? skill.internalCode,
+        )
         .filter((code: unknown): code is string => typeof code === "string"),
     );
     const entries = await wikiService.getSkillCutins([...new Set(codes)]);
-    aphrodyCutins = Object.fromEntries(entries.map(entry => [entry.skill_id_str, entry]));
+    aphrodyCutins = Object.fromEntries(
+      entries.map((entry) => [entry.skill_id_str, entry]),
+    );
   }
 
   // Fetch all distinct forms of this character (same baseSlug/chara_id, different pos/elem/rarity)
   const sheetId = (player as any).sheetData?.sheetId;
-  const forms = await wikiService.getCharacterForms(baseChar.charaId, sheetId, baseChar.baseSlug || undefined);
-  const auras = await wikiService.getCharacterAuras(baseChar.charaId, variant.charaParamId);
+  const forms = await wikiService.getCharacterForms(
+    baseChar.charaId,
+    sheetId,
+    baseChar.baseSlug || undefined,
+  );
+  const auras = await wikiService.getCharacterAuras(
+    baseChar.charaId,
+    variant.charaParamId,
+  );
 
   // Build a map of skillId -> skillName for variant comparisons
   const variantSkillIds = new Set<string>();
@@ -220,9 +251,12 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
       if (sk.skillId) variantSkillIds.add(sk.skillId);
     }
   }
-  const skillPromises = Array.from(variantSkillIds).map(async skillId => {
+  const skillPromises = Array.from(variantSkillIds).map(async (skillId) => {
     const sk = await wikiService.getSkill(skillId);
-    return { id: skillId, name: sk?.displayName || sk?.name_FR || sk?.name_EN || skillId };
+    return {
+      id: skillId,
+      name: sk?.displayName || sk?.name_FR || sk?.name_EN || skillId,
+    };
   });
   const resolvedSkillsList = await Promise.all(skillPromises);
   const skillsMap = new Map<string, string>();
@@ -232,7 +266,7 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
 
   // Calculate comparisons against the youngest base variant
   const baseVariant = baseChar.variants[0];
-  const comparisons = baseChar.variants.map(v => {
+  const comparisons = baseChar.variants.map((v) => {
     return compareVariants(baseVariant as any, v as any, skillsMap);
   });
 
@@ -253,21 +287,34 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
   // via CDN /cfg). La DB ne porte que Lv1/Lv99 dans des colonnes scalaires ; les
   // paliers Lv30/Lv50 (et le total) sont résolus ici par
   // (position × growthPattern × rang de rareté). Repli silencieux si CDN KO.
-  const growthStats = await resolveCharaStats((variant as any).charaParamId || id, player.position, player.rarity);
+  const growthStats = await resolveCharaStats(
+    (variant as any).charaParamId || id,
+    player.position,
+    player.rarity,
+  );
 
   // --- Detect BASARA & Hero ---
-  const _isBasara = player.rarity === "BASARA" || (variant as any).rarityCode >= 20;
+  const _isBasara =
+    player.rarity === "BASARA" || (variant as any).rarityCode >= 20;
   const _isHero = player.rarity === "Héros";
 
   // --- Hero variant forms (Fire / Black / Pink) ---
-  const currentFormEntry = forms?.find(f => f.id === ((variant as any).charaParamId || id));
+  const currentFormEntry = forms?.find(
+    (f) => f.id === ((variant as any).charaParamId || id),
+  );
   const currentHeroType = currentFormEntry?.heroType;
   const pos = currentFormEntry?.position || player.position;
   const elem = currentFormEntry?.element || player.element;
   const heroForms =
     forms
-      ?.filter(f => f.rarity === "Héros" && f.heroType && f.position === pos && f.element === elem)
-      .map(f => ({ slug: f.slug, type: f.heroType! }))
+      ?.filter(
+        (f) =>
+          f.rarity === "Héros" &&
+          f.heroType &&
+          f.position === pos &&
+          f.element === elem,
+      )
+      .map((f) => ({ slug: f.slug, type: f.heroType! }))
       .toSorted((a, b) => {
         const order = ["fire", "black", "pink"];
         return order.indexOf(a.type) - order.indexOf(b.type);
@@ -278,10 +325,12 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
     const separator = raw.includes("\n") ? "\n" : ",";
     const moveNames = raw
       .split(separator)
-      .map(s => s.trim())
-      .filter(s => s && !s.startsWith("#N/A") && !s.startsWith("Mix "));
+      .map((s) => s.trim())
+      .filter((s) => s && !s.startsWith("#N/A") && !s.startsWith("Mix "));
 
-    const resolvedSkills = await Promise.all(moveNames.map(name => wikiService.getSkill(name)));
+    const resolvedSkills = await Promise.all(
+      moveNames.map((name) => wikiService.getSkill(name)),
+    );
 
     // Parallelize any aura searches for missing skills
     const auraPromises = resolvedSkills.map((skill, index) => {
@@ -375,9 +424,10 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
   const moveset: MovesetSkill[] = [];
   const altMoveset: MovesetSkill[] = [];
 
-  const movesetRaw = ((player as any).sheetData?.moveset || (baseChar as any).sheetData?.moveset) as string | undefined;
-  const altMovesetRaw = ((player as any).sheetData?.altMoveset || (baseChar as any).sheetData?.altMoveset) as
-    string | undefined;
+  const movesetRaw = ((player as any).sheetData?.moveset ||
+    (baseChar as any).sheetData?.moveset) as string | undefined;
+  const altMovesetRaw = ((player as any).sheetData?.altMoveset ||
+    (baseChar as any).sheetData?.altMoveset) as string | undefined;
 
   if (movesetRaw) {
     const resolved = await resolveSkillNames(movesetRaw);
@@ -394,20 +444,21 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
   //   LearnLevel = niveau d'apprentissage réel (ex: 1, 13, 20...)
   if (moveset.length === 0) {
     const vAny = variant as any;
-    const rawSkills: Array<{ learnLevel: number; skillId: string }> | string[] = vAny.skills || vAny.moves || [];
+    const rawSkills: Array<{ learnLevel: number; skillId: string }> | string[] =
+      vAny.skills || vAny.moves || [];
 
     // Filter out phantom skill IDs (aura-dependent special slot)
     const PHANTOM_IDS = new Set(["0xDBEDB6B8"]);
     const skillList = rawSkills
-      .map(s => {
+      .map((s) => {
         if (typeof s === "string") {
           return { skillId: s, learnLevel: 0 };
         }
         return s;
       })
-      .filter(s => !PHANTOM_IDS.has(s.skillId));
+      .filter((s) => !PHANTOM_IDS.has(s.skillId));
 
-    const skillPromises = skillList.map(s => wikiService.getSkill(s.skillId));
+    const skillPromises = skillList.map((s) => wikiService.getSkill(s.skillId));
     const fetchedSkills = await Promise.all(skillPromises);
 
     const unsorted: MovesetSkill[] = [];
@@ -444,7 +495,8 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
     moveset.push(...unsorted);
 
     // Fallback alt moveset from firstMoves
-    const firstMovesRaw = (player as any).sheetData?.firstMoves as string | undefined;
+    const firstMovesRaw = (player as any).sheetData?.firstMoves as
+      string | undefined;
     if (firstMovesRaw) {
       const resolved = await resolveSkillNames(firstMovesRaw);
       altMoveset.push(...resolved);
@@ -452,7 +504,7 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
 
     // Last resort: derive alt moveset from first 3 non-passive binary skills
     if (altMoveset.length === 0 && moveset.length > 0) {
-      const nonPassive = moveset.filter(s => !s.isPassive);
+      const nonPassive = moveset.filter((s) => !s.isPassive);
       const first3 = nonPassive.slice(0, 3);
       for (let i = 0; i < first3.length; i++) {
         altMoveset.push({ ...first3[i], slotNumber: i + 1 });
@@ -495,7 +547,8 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
   const limitedMoveset = moveset.slice(0, moveLimit);
   const limitedAltMoveset = altMoveset.slice(0, moveLimit);
 
-  const charName = player.names.fr || player.names.en || player.names.ja || "Personnage";
+  const charName =
+    player.names.fr || player.names.en || player.names.ja || "Personnage";
 
   const POSITION_FR: Record<string, string> = {
     Coach: "Entraîneur",
@@ -511,7 +564,9 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
     Wind: "Vent",
   };
 
-  const skillNames = limitedMoveset.filter(s => !s.isPassive).map(s => s.name);
+  const skillNames = limitedMoveset
+    .filter((s) => !s.isPassive)
+    .map((s) => s.name);
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -531,7 +586,9 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
     },
     jobTitle: POSITION_FR[player.position] || player.position,
     knowsAbout: skillNames.length > 0 ? skillNames : undefined,
-    memberOf: player.teamName ? { "@type": "SportsTeam", name: player.teamName } : undefined,
+    memberOf: player.teamName
+      ? { "@type": "SportsTeam", name: player.teamName }
+      : undefined,
     name: charName,
     url: absoluteUrl(wiki(`/chara/${baseChar.slug || id}`)),
   };
@@ -540,7 +597,12 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", item: absoluteUrl(wiki("/")), name: "Accueil", position: 1 },
+      {
+        "@type": "ListItem",
+        item: absoluteUrl(wiki("/")),
+        name: "Accueil",
+        position: 1,
+      },
       {
         "@type": "ListItem",
         item: absoluteUrl(wiki("/chara")),
@@ -553,12 +615,21 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
 
   return (
     <div className="w-full space-y-4 sm:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
 
       {/* Breadcrumb + Compare link */}
       <div className="flex items-center justify-between">
-        <nav aria-label="Fil d'Ariane" className="flex items-center gap-2 text-sm text-on-surface-variant">
+        <nav
+          aria-label="Fil d'Ariane"
+          className="flex items-center gap-2 text-sm text-on-surface-variant"
+        >
           <Link href="/wiki/chara" className="hover:underline">
             Joueurs
           </Link>
@@ -581,14 +652,23 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
         name={player.names.fr || player.names.en || "Nom inconnu"}
         names={player.names}
         nickname={formatJapaneseName(player.names.ja) || undefined}
-        description={formatDescription(player.descriptions?.fr || player.descriptions?.en, "fr")}
+        description={formatDescription(
+          player.descriptions?.fr || player.descriptions?.en,
+          "fr",
+        )}
         descriptions={player.descriptions}
         position={displayPosition as "ATT" | "MIL" | "DEF" | "GAR"}
         jerseyNumber={(player as any).uniformNumber ?? 10}
         rarity={player.rarity}
         element={player.element}
         series={playerSeries}
-        gender={(baseChar as any).gender === 1 ? "F" : (baseChar as any).gender === 2 ? "X" : "M"}
+        gender={
+          (baseChar as any).gender === 1
+            ? "F"
+            : (baseChar as any).gender === 2
+              ? "X"
+              : "M"
+        }
         stats={{
           agility: stats.agility,
           control: stats.control,
@@ -599,7 +679,11 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
           technique: stats.technique,
         }}
         skills={limitedMoveset}
-        altSkills={_isBasara && limitedAltMoveset.length > 0 ? limitedAltMoveset : undefined}
+        altSkills={
+          _isBasara && limitedAltMoveset.length > 0
+            ? limitedAltMoveset
+            : undefined
+        }
         avatarUrl={(player as any).image || player.internalCode}
         zukanHash={player.zukanHash}
         teamName={player.teamName}
@@ -613,18 +697,22 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
         currentFormId={(variant as any).charaParamId || id}
         slug={(variant as any).slug || baseChar.slug || id}
         basaraFormSlug={
-          !_isBasara && forms?.find(f => f.rarity === "BASARA")
-            ? forms.find(f => f.rarity === "BASARA")!.slug
+          !_isBasara && forms?.find((f) => f.rarity === "BASARA")
+            ? forms.find((f) => f.rarity === "BASARA")!.slug
             : undefined
         }
         normalFormSlug={
-          _isBasara && forms?.find(f => f.rarity !== "BASARA" && f.rarity !== "Héros")
-            ? forms.find(f => f.rarity !== "BASARA" && f.rarity !== "Héros")!.slug
+          _isBasara &&
+          forms?.find((f) => f.rarity !== "BASARA" && f.rarity !== "Héros")
+            ? forms.find((f) => f.rarity !== "BASARA" && f.rarity !== "Héros")!
+                .slug
             : undefined
         }
         heroForms={heroForms.length > 1 ? heroForms : undefined}
         currentHeroType={currentHeroType}
-        isControllable={(player as any).isControllable || (baseChar as any).isControllable}
+        isControllable={
+          (player as any).isControllable || (baseChar as any).isControllable
+        }
         statsLv1={
           player.stats.lv1
             ? {
@@ -674,13 +762,19 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
 
       {player.internalCode && (
         <div className="mt-6">
-          <CharaAssetsSection internalCode={player.internalCode} displayName={charName} />
+          <CharaAssetsSection
+            internalCode={player.internalCode}
+            displayName={charName}
+          />
         </div>
       )}
 
       {player.internalCode && (
         <div className="mt-6">
-          <AphrodyDossierSection internalCode={player.internalCode} cutins={aphrodyCutins} />
+          <AphrodyDossierSection
+            internalCode={player.internalCode}
+            cutins={aphrodyCutins}
+          />
         </div>
       )}
 
@@ -708,36 +802,37 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
         </div>
 
         {/* Game Appearances */}
-        {(baseChar as any).gameAppearances && (baseChar as any).gameAppearances.length > 0 && (
-          <div>
-            <h3 className="text-[10px] sm:text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1.5 sm:mb-2">
-              Apparitions
-            </h3>
-            <div className="flex flex-wrap gap-1 sm:gap-1.5">
-              {(baseChar as any).gameAppearances.map((g: string) => {
-                const labels: Record<string, string> = {
-                  ars: "Ares",
-                  go1: "GO",
-                  go2: "Chrono Stone",
-                  go3: "Galaxy",
-                  ie1: "IE 1",
-                  ie2: "IE 2",
-                  ie3: "IE 3",
-                  ori: "Orion",
-                  vic: "Victory Road",
-                };
-                return (
-                  <span
-                    key={g}
-                    className="inline-flex items-center px-2 py-0.5 sm:px-2.5 rounded-full text-[10px] sm:text-[11px] font-bold bg-surface-container-high text-on-surface-variant"
-                  >
-                    {labels[g] || g}
-                  </span>
-                );
-              })}
+        {(baseChar as any).gameAppearances &&
+          (baseChar as any).gameAppearances.length > 0 && (
+            <div>
+              <h3 className="text-[10px] sm:text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1.5 sm:mb-2">
+                Apparitions
+              </h3>
+              <div className="flex flex-wrap gap-1 sm:gap-1.5">
+                {(baseChar as any).gameAppearances.map((g: string) => {
+                  const labels: Record<string, string> = {
+                    ars: "Ares",
+                    go1: "GO",
+                    go2: "Chrono Stone",
+                    go3: "Galaxy",
+                    ie1: "IE 1",
+                    ie2: "IE 2",
+                    ie3: "IE 3",
+                    ori: "Orion",
+                    vic: "Victory Road",
+                  };
+                  return (
+                    <span
+                      key={g}
+                      className="inline-flex items-center px-2 py-0.5 sm:px-2.5 rounded-full text-[10px] sm:text-[11px] font-bold bg-surface-container-high text-on-surface-variant"
+                    >
+                      {labels[g] || g}
+                    </span>
+                  );
+                })}
+              </div>
             </div>
-          </div>
-        )}
+          )}
       </div>
 
       {/* Wiki Sections (History, Recruitment, etc.) */}
@@ -746,20 +841,21 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
 			    chaîne non vide a une `length`, passait donc la garde, puis tombait
 			    sur `.map is not a function` — au prerender, ce qui faisait échouer le
 			    build entier sur /chara/mark-evans. */}
-      {Array.isArray((player as any).wikiSections) && (player as any).wikiSections.length > 0 && (
-        <div className="bg-surface-container-low rounded-[20px] sm:rounded-[24px] border border-outline-variant/30 px-4 py-5 sm:px-8 sm:py-8 space-y-6 sm:space-y-10">
-          {(player as any).wikiSections.map((section: any, i: number) => (
-            <div key={i} className="space-y-2 sm:space-y-4">
-              <h3 className="text-lg sm:text-2xl font-bold font-grade-high text-on-surface border-b-2 border-primary/20 pb-1.5 sm:pb-2 inline-block">
-                {section.title}
-              </h3>
-              <div className="prose prose-sm sm:prose-lg dark:prose-invert max-w-none text-on-surface-variant leading-relaxed whitespace-pre-wrap font-medium">
-                {section.content}
+      {Array.isArray((player as any).wikiSections) &&
+        (player as any).wikiSections.length > 0 && (
+          <div className="bg-surface-container-low rounded-[20px] sm:rounded-[24px] border border-outline-variant/30 px-4 py-5 sm:px-8 sm:py-8 space-y-6 sm:space-y-10">
+            {(player as any).wikiSections.map((section: any, i: number) => (
+              <div key={i} className="space-y-2 sm:space-y-4">
+                <h3 className="text-lg sm:text-2xl font-bold font-grade-high text-on-surface border-b-2 border-primary/20 pb-1.5 sm:pb-2 inline-block">
+                  {section.title}
+                </h3>
+                <div className="prose prose-sm sm:prose-lg dark:prose-invert max-w-none text-on-surface-variant leading-relaxed whitespace-pre-wrap font-medium">
+                  {section.content}
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
-      )}
+            ))}
+          </div>
+        )}
 
       {/* Auras & Esprits Guerriers Section */}
       {auras && auras.length > 0 && (
@@ -768,10 +864,11 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
             Auras & Invocations associées
           </h3>
           <p className="text-sm text-on-surface-variant/80 font-medium">
-            Ces Esprits Guerriers, Totems ou Miximax sont spécifiquement liés à {charName} dans les données du jeu.
+            Ces Esprits Guerriers, Totems ou Miximax sont spécifiquement liés à{" "}
+            {charName} dans les données du jeu.
           </p>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 pt-2">
-            {auras.map(aura => (
+            {auras.map((aura) => (
               <AuraCard
                 key={aura.id}
                 id={aura.id}

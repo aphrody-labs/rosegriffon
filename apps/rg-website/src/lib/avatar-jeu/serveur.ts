@@ -6,7 +6,11 @@ import { listCharacterFaceCodes } from "@rosegriffon/azalee/images";
 import type { Catalogue } from "@/app/wiki/avatar/types";
 import { getInaglePgPool } from "@rosegriffon/db/pg";
 
-import { construireBanque, type LigneBanque, type PersonnageBanque } from "./banque";
+import {
+  construireBanque,
+  type LigneBanque,
+  type PersonnageBanque,
+} from "./banque";
 
 export const CDN = cdnOrigin(process.env.NEXT_PUBLIC_CDN_ORIGIN);
 

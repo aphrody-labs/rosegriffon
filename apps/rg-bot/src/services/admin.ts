@@ -57,7 +57,11 @@ export interface AdminUserRow {
   updated_at: Date | null;
 }
 
-export async function listUsers(query: string | null, role: string | null, limit = 20) {
+export async function listUsers(
+  query: string | null,
+  role: string | null,
+  limit = 20,
+) {
   const max = Math.min(Math.max(limit, 1), 50);
   if (query && role) {
     return await sql<AdminUserRow[]>`
@@ -99,7 +103,9 @@ export async function getUserById(id: string): Promise<AdminUserRow | null> {
   return rows[0] ?? null;
 }
 
-export async function getUserByDiscord(discordId: string): Promise<AdminUserRow | null> {
+export async function getUserByDiscord(
+  discordId: string,
+): Promise<AdminUserRow | null> {
   const rows = await sql<AdminUserRow[]>`
     SELECT p.id, p.username, p.full_name, p.email, p.role, p.avatar_url, p.discord_id, p.updated_at
     FROM account a
@@ -150,7 +156,10 @@ export async function listArticlesAdmin(status: string | null, limit = 10) {
   `;
 }
 
-export async function setArticleStatus(id: string, status: "published" | "draft" | "archived") {
+export async function setArticleStatus(
+  id: string,
+  status: "published" | "draft" | "archived",
+) {
   const publishedAt = status === "published" ? new Date() : null;
   await sql`
     UPDATE articles
@@ -179,7 +188,10 @@ export interface AdminEvent {
   updated_at: Date;
 }
 
-export async function listEventsAdmin(scope: "upcoming" | "past" | "all", limit = 10) {
+export async function listEventsAdmin(
+  scope: "upcoming" | "past" | "all",
+  limit = 10,
+) {
   const max = Math.min(Math.max(limit, 1), 25);
   if (scope === "upcoming") {
     return await sql<AdminEvent[]>`
@@ -300,18 +312,26 @@ export interface SettingRow {
 
 export async function listSettings() {
   return await cached(SETTINGS_KEY, SETTINGS_CACHE_TTL_MS, async () => {
-    return await sql<SettingRow[]>`SELECT key, value, description, updated_at FROM settings ORDER BY key`;
+    return await sql<
+      SettingRow[]
+    >`SELECT key, value, description, updated_at FROM settings ORDER BY key`;
   });
 }
 
-export async function getSettingDetail(key: string): Promise<SettingRow | null> {
+export async function getSettingDetail(
+  key: string,
+): Promise<SettingRow | null> {
   const rows = await sql<SettingRow[]>`
     SELECT key, value, description, updated_at FROM settings WHERE key = ${key} LIMIT 1
   `;
   return rows[0] ?? null;
 }
 
-export async function setSetting(key: string, value: unknown, description?: string) {
+export async function setSetting(
+  key: string,
+  value: unknown,
+  description?: string,
+) {
   // Pas de `JSON.stringify(value)` : Bun.SQL encode déjà en JSON une valeur
   // liée à un paramètre `::jsonb`. La stringifier avant coup double
   // l'encodage (la colonne reçoit une chaîne, pas un objet) — voir le même

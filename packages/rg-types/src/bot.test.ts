@@ -48,12 +48,18 @@ describe("lecture tolérante, écriture stricte", () => {
   });
 
   test("une écriture aberrante est refusée en disant pourquoi", () => {
-    expect(() => validerReglages({ niveaux: { annonce: "ailleurs" } })).toThrow();
-    expect(() => validerReglages({ tickets: { salonPanneau: "pas-un-flocon" } })).toThrow();
+    expect(() =>
+      validerReglages({ niveaux: { annonce: "ailleurs" } }),
+    ).toThrow();
+    expect(() =>
+      validerReglages({ tickets: { salonPanneau: "pas-un-flocon" } }),
+    ).toThrow();
   });
 
   test("les listes de flocons sont dédoublonnées", () => {
-    const doc = validerReglages({ niveaux: { salonsExclus: [SALON, SALON, AUTRE_SALON] } });
+    const doc = validerReglages({
+      niveaux: { salonsExclus: [SALON, SALON, AUTRE_SALON] },
+    });
     expect(doc.niveaux.salonsExclus).toEqual([SALON, AUTRE_SALON]);
   });
 });
@@ -78,7 +84,9 @@ describe("modification partielle", () => {
   });
 
   test("un patch ne porte QUE ce qu'il a reçu", () => {
-    expect(SchemaModificationReglages.parse({ niveaux: { actif: false } })).toEqual({
+    expect(
+      SchemaModificationReglages.parse({ niveaux: { actif: false } }),
+    ).toEqual({
       niveaux: { actif: false },
     });
   });
@@ -86,7 +94,9 @@ describe("modification partielle", () => {
   test("couper les niveaux ne perd ni le salon ni le palier", () => {
     const apres = fusionnerReglages(
       configure,
-      SchemaModificationReglages.parse({ niveaux: { actif: false } }) as ModificationReglages,
+      SchemaModificationReglages.parse({
+        niveaux: { actif: false },
+      }) as ModificationReglages,
     );
     expect(apres.niveaux.actif).toBe(false);
     expect(apres.niveaux.salonAnnonce).toBe(SALON);
@@ -101,11 +111,17 @@ describe("modification partielle", () => {
         niveaux: { gain: { delaiSecondes: 90 } },
       }) as ModificationReglages,
     );
-    expect(apres.niveaux.gain).toEqual({ minimum: 5, maximum: 7, delaiSecondes: 90 });
+    expect(apres.niveaux.gain).toEqual({
+      minimum: 5,
+      maximum: 7,
+      delaiSecondes: 90,
+    });
   });
 
   test("remplacer une liste la remplace, ne l'additionne pas", () => {
-    const apres = fusionnerReglages(configure, { niveaux: { salonsExclus: [SALON] } });
+    const apres = fusionnerReglages(configure, {
+      niveaux: { salonsExclus: [SALON] },
+    });
     expect(apres.niveaux.salonsExclus).toEqual([SALON]);
   });
 
@@ -116,8 +132,12 @@ describe("modification partielle", () => {
   });
 
   test("un champ inconnu est une erreur, pas un silence", () => {
-    expect(() => SchemaModificationReglages.parse({ niveaux: { inconnu: 1 } })).toThrow();
-    expect(() => SchemaModificationReglages.parse({ inexistant: {} })).toThrow();
+    expect(() =>
+      SchemaModificationReglages.parse({ niveaux: { inconnu: 1 } }),
+    ).toThrow();
+    expect(() =>
+      SchemaModificationReglages.parse({ inexistant: {} }),
+    ).toThrow();
   });
 });
 
@@ -137,7 +157,9 @@ describe("manques", () => {
         rolesStaff: [ROLE],
       },
     });
-    expect(manquesTickets(doc)).toEqual(["la catégorie Support (`categorie`), obligatoire en mode salon"]);
+    expect(manquesTickets(doc)).toEqual([
+      "la catégorie Support (`categorie`), obligatoire en mode salon",
+    ]);
   });
 
   test("une section désactivée ne réclame rien", () => {
@@ -151,18 +173,24 @@ describe("manques", () => {
   });
 
   test("une annonce « salon » sans salon est un manque", () => {
-    const doc = fusionnerReglages(REGLAGES_DEFAUT, { niveaux: { annonce: "salon" } });
+    const doc = fusionnerReglages(REGLAGES_DEFAUT, {
+      niveaux: { annonce: "salon" },
+    });
     expect(manquesParSection(doc).niveaux).toHaveLength(1);
   });
 
   test("le journal de modération réclame son salon tant qu'il n'en a pas", () => {
-    expect(manquesParSection(REGLAGES_DEFAUT).moderation).toEqual(["le salon du journal de modération"]);
+    expect(manquesParSection(REGLAGES_DEFAUT).moderation).toEqual([
+      "le salon du journal de modération",
+    ]);
     const branche = fusionnerReglages(REGLAGES_DEFAUT, {
       moderation: { salonJournal: "1073752409387573339" },
     });
     expect(manquesParSection(branche).moderation).toEqual([]);
     // Coupé volontairement, il ne réclame plus rien : ce n'est pas une panne.
-    const coupe = fusionnerReglages(REGLAGES_DEFAUT, { moderation: { actif: false } });
+    const coupe = fusionnerReglages(REGLAGES_DEFAUT, {
+      moderation: { actif: false },
+    });
     expect(manquesParSection(coupe).moderation).toEqual([]);
   });
 
@@ -186,7 +214,7 @@ describe("manques", () => {
 
 describe("profils", () => {
   test("les deux profils ont des ports d'administration distincts", () => {
-    const ports = TOUS_LES_PROFILS_BOT.map(p => p.portAdmin);
+    const ports = TOUS_LES_PROFILS_BOT.map((p) => p.portAdmin);
     expect(new Set(ports).size).toBe(ports.length);
   });
 

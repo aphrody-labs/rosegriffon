@@ -111,7 +111,7 @@ describe("statuts d'article", () => {
 
 describe("EQUIPES_RG et JOURS_SEMAINE", () => {
   test("les dix équipes portent les identifiants de la base", () => {
-    const valeurs = EQUIPES_RG.map(equipe => equipe.valeur);
+    const valeurs = EQUIPES_RG.map((equipe) => equipe.valeur);
     expect(valeurs).toContain("achilleateam");
     expect(valeurs).toContain("assoteam");
     expect(valeurs).toContain("dessinateurteam");
@@ -126,9 +126,15 @@ describe("EQUIPES_RG et JOURS_SEMAINE", () => {
 
 describe("analyserDate", () => {
   test("accepte les formes ISO ancrées", () => {
-    expect(analyserDate("2026-05-01")?.toISOString()).toBe("2026-05-01T00:00:00.000Z");
-    expect(analyserDate("2026-05-01T20:00:00Z")?.toISOString()).toBe("2026-05-01T20:00:00.000Z");
-    expect(analyserDate("2026-05-01T20:00:00+02:00")?.toISOString()).toBe("2026-05-01T18:00:00.000Z");
+    expect(analyserDate("2026-05-01")?.toISOString()).toBe(
+      "2026-05-01T00:00:00.000Z",
+    );
+    expect(analyserDate("2026-05-01T20:00:00Z")?.toISOString()).toBe(
+      "2026-05-01T20:00:00.000Z",
+    );
+    expect(analyserDate("2026-05-01T20:00:00+02:00")?.toISOString()).toBe(
+      "2026-05-01T18:00:00.000Z",
+    );
   });
 
   test("accepte l'espace à la place du T", () => {
@@ -179,7 +185,9 @@ describe("estUuid et estIdentifiantDiscord", () => {
 
 describe("abregerIdentifiant", () => {
   test("coupe à huit caractères", () => {
-    expect(abregerIdentifiant("3f2504e0-4f89-11d3-9a0c-0305e82c3301")).toBe("3f2504e0…");
+    expect(abregerIdentifiant("3f2504e0-4f89-11d3-9a0c-0305e82c3301")).toBe(
+      "3f2504e0…",
+    );
   });
 
   test("laisse passer ce qui est déjà court, et dit l'absence", () => {
@@ -199,12 +207,16 @@ describe("identifiants de bouton de confirmation", () => {
   });
 
   test("tient sous les 100 caractères imposés par Discord", () => {
-    expect(construireIdConfirmation("non", "1234567890123456789").length).toBeLessThanOrEqual(100);
+    expect(
+      construireIdConfirmation("non", "1234567890123456789").length,
+    ).toBeLessThanOrEqual(100);
   });
 
   test("rejette ce qui ne nous appartient pas", () => {
     expect(analyserIdConfirmation("tw|1|2|3")).toBeNull();
-    expect(analyserIdConfirmation(`${PREFIXE_CONFIRMATION}|peutetre|123`)).toBeNull();
+    expect(
+      analyserIdConfirmation(`${PREFIXE_CONFIRMATION}|peutetre|123`),
+    ).toBeNull();
     expect(analyserIdConfirmation(`${PREFIXE_CONFIRMATION}|oui|`)).toBeNull();
     expect(analyserIdConfirmation(`${PREFIXE_CONFIRMATION}|oui`)).toBeNull();
     expect(analyserIdConfirmation(null)).toBeNull();
@@ -213,11 +225,15 @@ describe("identifiants de bouton de confirmation", () => {
 
 describe("bornerValeur et decrireChangement", () => {
   test("aplatit une valeur composite sur une ligne", () => {
-    expect(bornerValeur({ actif: true, comptes: ["a"] })).toBe('{"actif":true,"comptes":["a"]}');
+    expect(bornerValeur({ actif: true, comptes: ["a"] })).toBe(
+      '{"actif":true,"comptes":["a"]}',
+    );
   });
 
   test("écrase les sauts de ligne, qui casseraient la ligne d'accusé", () => {
-    expect(bornerValeur("une\nvaleur\tmultiligne")).toBe("une valeur multiligne");
+    expect(bornerValeur("une\nvaleur\tmultiligne")).toBe(
+      "une valeur multiligne",
+    );
   });
 
   test("distingue absence et chaîne vide", () => {
@@ -261,7 +277,9 @@ describe("normaliserCleReglage", () => {
   });
 
   test("rogne et met en minuscules plutôt que de créer une clé jumelle", () => {
-    expect(normaliserCleReglage("  Tweets.Notification ")).toBe("tweets.notification");
+    expect(normaliserCleReglage("  Tweets.Notification ")).toBe(
+      "tweets.notification",
+    );
   });
 
   test("refuse ce qui ne peut pas être une clé", () => {
@@ -299,8 +317,12 @@ describe("analyserValeurReglage", () => {
 describe("refusValeurReglage", () => {
   test("laisse passer n'importe quelle valeur sur une clé ordinaire", () => {
     expect(refusValeurReglage("patreon.cutoff_days", 60)).toBeNull();
-    expect(refusValeurReglage("patreon.import_addresses_consent", true)).toBeNull();
-    expect(refusValeurReglage("patreon.incentive_offer", "1 mois offert")).toBeNull();
+    expect(
+      refusValeurReglage("patreon.import_addresses_consent", true),
+    ).toBeNull();
+    expect(
+      refusValeurReglage("patreon.incentive_offer", "1 mois offert"),
+    ).toBeNull();
   });
 
   test("laisse passer un objet sous tweets.notification", () => {
@@ -324,7 +346,9 @@ describe("refusValeurReglage", () => {
   });
 
   test("refuse aussi un tableau, qu'Array.isArray fait retomber sur les valeurs par défaut", () => {
-    expect(refusValeurReglage("tweets.notification", ["rose_griffon"])).toBeString();
+    expect(
+      refusValeurReglage("tweets.notification", ["rose_griffon"]),
+    ).toBeString();
   });
 
   test("la valeur réellement en base au 13/8/2026 reste acceptée", () => {
@@ -351,19 +375,27 @@ describe("construirePatchVeille", () => {
   });
 
   test("régler le seul salon ne réécrit PAS la liste des comptes", () => {
-    const resultat = construirePatchVeille(avant, { salon: "123456789012345678" });
+    const resultat = construirePatchVeille(avant, {
+      salon: "123456789012345678",
+    });
     expect(resultat.patch).toEqual({ salon: "123456789012345678" });
     expect(resultat.patch.comptes).toBeUndefined();
     expect(resultat.changements).toHaveLength(1);
   });
 
   test("un compte déjà suivi, à la casse près, ne change rien", () => {
-    expect(construirePatchVeille(avant, { ajouter: "@level5hub" }).patch).toEqual({});
+    expect(
+      construirePatchVeille(avant, { ajouter: "@level5hub" }).patch,
+    ).toEqual({});
   });
 
   test("ajoute un compte sans son arobase", () => {
     const resultat = construirePatchVeille(avant, { ajouter: "@Azalee_IE" });
-    expect(resultat.patch.comptes).toEqual(["inazuma_project", "Level5Hub", "Azalee_IE"]);
+    expect(resultat.patch.comptes).toEqual([
+      "inazuma_project",
+      "Level5Hub",
+      "Azalee_IE",
+    ]);
   });
 
   test("retire un compte quelle que soit la casse saisie", () => {
@@ -372,16 +404,26 @@ describe("construirePatchVeille", () => {
   });
 
   test("retirer un compte absent ne produit aucune écriture", () => {
-    expect(construirePatchVeille(avant, { retirer: "inconnu" }).patch).toEqual({});
+    expect(construirePatchVeille(avant, { retirer: "inconnu" }).patch).toEqual(
+      {},
+    );
   });
 
   test("une valeur identique à l'actuelle n'est pas un changement", () => {
-    expect(construirePatchVeille(avant, { actif: false, maxParLot: 5 }).patch).toEqual({});
+    expect(
+      construirePatchVeille(avant, { actif: false, maxParLot: 5 }).patch,
+    ).toEqual({});
   });
 
   test("exclut et réintègre une catégorie", () => {
-    expect(construirePatchVeille(avant, { exclure: "leak" }).patch.categories_exclues).toEqual(["fan-content", "leak"]);
-    expect(construirePatchVeille(avant, { inclure: "Fan-Content" }).patch.categories_exclues).toEqual([]);
+    expect(
+      construirePatchVeille(avant, { exclure: "leak" }).patch
+        .categories_exclues,
+    ).toEqual(["fan-content", "leak"]);
+    expect(
+      construirePatchVeille(avant, { inclure: "Fan-Content" }).patch
+        .categories_exclues,
+    ).toEqual([]);
   });
 
   test("chaque changement dit d'où l'on vient", () => {
@@ -427,13 +469,22 @@ describe("confidentialité des profils", () => {
   test("l'e-mail et l'adresse postale sont déclarés privés", () => {
     // Les six colonnes réellement présentes dans `profiles` (relevé du
     // 13/8/2026) et qui décrivent une personne hors de nos bases.
-    for (const colonne of ["email", "address_line1", "address_line2", "city", "postal_code", "country"]) {
+    for (const colonne of [
+      "email",
+      "address_line1",
+      "address_line2",
+      "city",
+      "postal_code",
+      "country",
+    ]) {
       expect(estColonneProfilPrivee(colonne)).toBe(true);
     }
   });
 
   test("aucune colonne privée n'est affichable", () => {
-    const intersection = COLONNES_PROFIL_AFFICHABLES.filter(colonne => COLONNES_PROFIL_PRIVEES.includes(colonne));
+    const intersection = COLONNES_PROFIL_AFFICHABLES.filter((colonne) =>
+      COLONNES_PROFIL_PRIVEES.includes(colonne),
+    );
     expect(intersection).toEqual([]);
   });
 
@@ -453,7 +504,10 @@ describe("confidentialité des profils", () => {
       full_name: "Yoyo",
       role: "superadmin",
       discord_id: "281114294152724491",
-      ...({ email: "secret@exemple.fr", address_line1: "1 rue Interdite" } as object),
+      ...({
+        email: "secret@exemple.fr",
+        address_line1: "1 rue Interdite",
+      } as object),
     });
     expect(ligne).not.toContain("@exemple.fr");
     expect(ligne).not.toContain("rue Interdite");
@@ -464,14 +518,22 @@ describe("confidentialité des profils", () => {
   test("les tirets bas d'un pseudo Discord sont neutralisés", () => {
     // `yoyo__goat` non échappé passe en souligné : le pseudo affiché n'est
     // alors plus celui de la base.
-    expect(ligneProfil({ id: "x", username: "yoyo__goat" })).toContain("yoyo\\_\\_goat");
+    expect(ligneProfil({ id: "x", username: "yoyo__goat" })).toContain(
+      "yoyo\\_\\_goat",
+    );
   });
 
   test("un profil sans nom retombe sur son identifiant, pas sur son e-mail", () => {
-    expect(nomAffichable({ id: "10d04c44-5fa2-5b74-822b-fb487264fa9d" })).toBe("10d04c44…");
-    expect(nomAffichable({ id: "x", username: "  ", full_name: null })).toBe("x");
+    expect(nomAffichable({ id: "10d04c44-5fa2-5b74-822b-fb487264fa9d" })).toBe(
+      "10d04c44…",
+    );
+    expect(nomAffichable({ id: "x", username: "  ", full_name: null })).toBe(
+      "x",
+    );
     expect(nomAffichable({ id: "x", username: "zeykyo" })).toBe("zeykyo");
-    expect(nomAffichable({ id: "x", username: "zeykyo", full_name: "Zey" })).toBe("Zey");
+    expect(
+      nomAffichable({ id: "x", username: "zeykyo", full_name: "Zey" }),
+    ).toBe("Zey");
   });
 });
 
@@ -589,19 +651,29 @@ describe("équipes", () => {
 
 describe("validation des champs d'un membre d'équipe", () => {
   test("le nom et le rôle sont obligatoires et bornés", () => {
-    expect(validerTexteMembre("nom", "  Kenway ")).toEqual({ ok: true, valeur: "Kenway" });
+    expect(validerTexteMembre("nom", "  Kenway ")).toEqual({
+      ok: true,
+      valeur: "Kenway",
+    });
     expect(validerTexteMembre("nom", "   ").ok).toBe(false);
-    expect(validerTexteMembre("role", "r".repeat(LIMITES_MEMBRE_EQUIPE.role + 1)).ok).toBe(false);
+    expect(
+      validerTexteMembre("role", "r".repeat(LIMITES_MEMBRE_EQUIPE.role + 1)).ok,
+    ).toBe(false);
   });
 
   test("une URL vide efface la valeur au lieu d'échouer", () => {
     expect(validerUrlMembre("lien", "")).toEqual({ ok: true, valeur: null });
-    expect(validerUrlMembre("lien", undefined)).toEqual({ ok: true, valeur: null });
+    expect(validerUrlMembre("lien", undefined)).toEqual({
+      ok: true,
+      valeur: null,
+    });
   });
 
   test("une URL sans schéma est refusée", () => {
     expect(validerUrlMembre("lien", "x.com/rosegriffon").ok).toBe(false);
-    expect(validerUrlMembre("image", "https://cdn.rosegriffon.fr/a.webp")).toEqual({
+    expect(
+      validerUrlMembre("image", "https://cdn.rosegriffon.fr/a.webp"),
+    ).toEqual({
       ok: true,
       valeur: "https://cdn.rosegriffon.fr/a.webp",
     });
@@ -622,7 +694,10 @@ describe("validation des champs d'un membre d'équipe", () => {
       ok: true,
       valeur: "228659693671677953",
     });
-    expect(validerIdentifiantDiscordFacultatif("")).toEqual({ ok: true, valeur: null });
+    expect(validerIdentifiantDiscordFacultatif("")).toEqual({
+      ok: true,
+      valeur: null,
+    });
     expect(validerIdentifiantDiscordFacultatif("@kenway").ok).toBe(false);
   });
 });
@@ -631,7 +706,11 @@ describe("état porté par un bouton", () => {
   test("un aller-retour rend exactement les mêmes valeurs", () => {
     const id = encoderEtatBouton("admusr", { q: "yo", r: "member", o: 20 });
     expect(id).not.toBeNull();
-    expect(decoderEtatBouton("admusr", id)).toEqual({ q: "yo", r: "member", o: "20" });
+    expect(decoderEtatBouton("admusr", id)).toEqual({
+      q: "yo",
+      r: "member",
+      o: "20",
+    });
   });
 
   test("les séparateurs d'une recherche ne cassent pas le découpage", () => {
@@ -644,7 +723,9 @@ describe("état porté par un bouton", () => {
   });
 
   test("au-delà des 100 caractères de Discord, on rend null plutôt qu'un envoi refusé", () => {
-    expect(encoderEtatBouton("admusr", { q: "z".repeat(LIMITE_CUSTOM_ID) })).toBeNull();
+    expect(
+      encoderEtatBouton("admusr", { q: "z".repeat(LIMITE_CUSTOM_ID) }),
+    ).toBeNull();
   });
 
   test("un identifiant qui n'est pas à nous n'est pas décodé", () => {
@@ -658,21 +739,31 @@ describe("état porté par un bouton", () => {
 describe("urlIllustrationAbsolue", () => {
   test("laisse passer une URL CDN déjà absolue", () => {
     // Valeur réelle de l'article `critique-communautaire-de-inazuma-eleven-victory-road`.
-    expect(urlIllustrationAbsolue("https://cdn.rosegriffon.fr/dx11/menu/220_img", "https://rosegriffon.fr")).toBe(
-      "https://cdn.rosegriffon.fr/dx11/menu/220_img",
-    );
+    expect(
+      urlIllustrationAbsolue(
+        "https://cdn.rosegriffon.fr/dx11/menu/220_img",
+        "https://rosegriffon.fr",
+      ),
+    ).toBe("https://cdn.rosegriffon.fr/dx11/menu/220_img");
   });
 
   test("préfixe un chemin relatif, que Discord ne résoudrait pas", () => {
     // Valeur réelle de l'article `mise-a-jour-du-site`.
-    expect(urlIllustrationAbsolue("/rgtv/jude.webp", "https://rosegriffon.fr")).toBe(
-      "https://rosegriffon.fr/rgtv/jude.webp",
-    );
+    expect(
+      urlIllustrationAbsolue("/rgtv/jude.webp", "https://rosegriffon.fr"),
+    ).toBe("https://rosegriffon.fr/rgtv/jude.webp");
   });
 
   test("refuse ce qui ferait rejeter l'embed entier", () => {
-    expect(urlIllustrationAbsolue("http://exemple.fr/a.png", "https://rosegriffon.fr")).toBeNull();
-    expect(urlIllustrationAbsolue("images/a.png", "https://rosegriffon.fr")).toBeNull();
+    expect(
+      urlIllustrationAbsolue(
+        "http://exemple.fr/a.png",
+        "https://rosegriffon.fr",
+      ),
+    ).toBeNull();
+    expect(
+      urlIllustrationAbsolue("images/a.png", "https://rosegriffon.fr"),
+    ).toBeNull();
     expect(urlIllustrationAbsolue(null, "https://rosegriffon.fr")).toBeNull();
     expect(urlIllustrationAbsolue("   ", "https://rosegriffon.fr")).toBeNull();
   });
@@ -708,7 +799,9 @@ describe("libellés d'état d'article", () => {
   test("les propositions Discord couvrent exactement les statuts de la base", () => {
     // Un choix qui ne serait pas dans `articles_status_check` ferait échouer
     // l'écriture APRÈS que le membre a validé la commande.
-    expect(CHOIX_STATUT_ARTICLE.map(choix => choix.value).toSorted()).toEqual([...STATUTS_ARTICLE].toSorted());
+    expect(CHOIX_STATUT_ARTICLE.map((choix) => choix.value).toSorted()).toEqual(
+      [...STATUTS_ARTICLE].toSorted(),
+    );
   });
 
   test("un état inconnu ne fait pas lever et se voit", () => {
@@ -730,7 +823,9 @@ describe("états d'un créneau de stream", () => {
   });
 
   test("les propositions Discord couvrent exactement ces trois états", () => {
-    expect(CHOIX_STATUT_CRENEAU.map(choix => choix.value).toSorted()).toEqual([...STATUTS_CRENEAU].toSorted());
+    expect(CHOIX_STATUT_CRENEAU.map((choix) => choix.value).toSorted()).toEqual(
+      [...STATUTS_CRENEAU].toSorted(),
+    );
   });
 
   test("seul « active » est visible du planning public", () => {
@@ -765,13 +860,17 @@ describe("jours de la semaine", () => {
 
   test("la semaine s'affiche du lundi au dimanche, pas l'inverse", () => {
     // Trier sur day_of_week brut mettait dimanche en tête du planning.
-    const ordonnes = [0, 1, 2, 3, 4, 5, 6].toSorted((a, b) => ordreAffichageJour(a) - ordreAffichageJour(b));
+    const ordonnes = [0, 1, 2, 3, 4, 5, 6].toSorted(
+      (a, b) => ordreAffichageJour(a) - ordreAffichageJour(b),
+    );
     expect(ordonnes).toEqual([1, 2, 3, 4, 5, 6, 0]);
   });
 
   test("les propositions Discord sont déjà dans cet ordre", () => {
-    expect(CHOIX_JOUR_SEMAINE.map(choix => choix.value)).toEqual([1, 2, 3, 4, 5, 6, 0]);
-    expect(CHOIX_JOUR_SEMAINE.map(choix => choix.name)).toEqual([
+    expect(CHOIX_JOUR_SEMAINE.map((choix) => choix.value)).toEqual([
+      1, 2, 3, 4, 5, 6, 0,
+    ]);
+    expect(CHOIX_JOUR_SEMAINE.map((choix) => choix.name)).toEqual([
       "Lundi",
       "Mardi",
       "Mercredi",
@@ -791,7 +890,10 @@ describe("jours de la semaine", () => {
 
 describe("lireChampTextuel", () => {
   test("une option absente laisse la colonne intacte", () => {
-    expect(lireChampTextuel(undefined)).toEqual({ fourni: false, valeur: null });
+    expect(lireChampTextuel(undefined)).toEqual({
+      fourni: false,
+      valeur: null,
+    });
     expect(lireChampTextuel(null)).toEqual({ fourni: false, valeur: null });
     expect(lireChampTextuel("   ")).toEqual({ fourni: false, valeur: null });
   });
@@ -814,7 +916,9 @@ describe("lireChampTextuel", () => {
     // « efface le lieu » : l'ancien /rg-event-admin edit les mélangeait.
     expect(lireChampTextuel(undefined).fourni).toBe(false);
     expect(lireChampTextuel("-").fourni).toBe(true);
-    expect(lireChampTextuel(undefined).valeur).toBe(lireChampTextuel("-").valeur);
+    expect(lireChampTextuel(undefined).valeur).toBe(
+      lireChampTextuel("-").valeur,
+    );
   });
 });
 
@@ -822,18 +926,25 @@ describe("verifierPlageTemporelle", () => {
   const debut = new Date("2026-09-01T18:00:00Z");
 
   test("une plage croissante passe", () => {
-    expect(verifierPlageTemporelle(debut, new Date("2026-09-01T21:00:00Z"))).toBeNull();
+    expect(
+      verifierPlageTemporelle(debut, new Date("2026-09-01T21:00:00Z")),
+    ).toBeNull();
   });
 
   test("une fin antérieure au début est refusée", () => {
-    const message = verifierPlageTemporelle(debut, new Date("2026-09-01T17:00:00Z"));
+    const message = verifierPlageTemporelle(
+      debut,
+      new Date("2026-09-01T17:00:00Z"),
+    );
     expect(message).toContain("ANTÉRIEURE");
   });
 
   test("une durée nulle est refusée aussi", () => {
     // `end_time` est NOT NULL mais rien n'empêche l'égalité : l'événement
     // serait alors invisible dès la seconde suivante.
-    expect(verifierPlageTemporelle(debut, new Date("2026-09-01T18:00:00Z"))).toContain("zéro");
+    expect(
+      verifierPlageTemporelle(debut, new Date("2026-09-01T18:00:00Z")),
+    ).toContain("zéro");
   });
 });
 
@@ -876,7 +987,9 @@ describe("ROLES_ATTRIBUABLES", () => {
     for (const role of ROLES_ATTRIBUABLES) {
       expect(ROLES_ASSIGNABLES).toContain(role);
     }
-    expect(ROLES_ATTRIBUABLES.length).toBe(ROLES_ASSIGNABLES.length - ROLES_INTOUCHABLES.length);
+    expect(ROLES_ATTRIBUABLES.length).toBe(
+      ROLES_ASSIGNABLES.length - ROLES_INTOUCHABLES.length,
+    );
     // `banned` DOIT y rester : c'est la valeur qu'écrit `/administration
     // utilisateur bannir`. L'en retirer rendrait la commande inopérante.
     expect(ROLES_ATTRIBUABLES).toContain("banned");

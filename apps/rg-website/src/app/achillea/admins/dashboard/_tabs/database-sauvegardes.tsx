@@ -26,8 +26,21 @@ import { ArchiveRestore, HardDriveDownload, Loader2 } from "lucide-react";
 import type { AchilleaClientResult } from "@rosegriffon/achillea-client";
 import type { z } from "zod";
 import { signalerEchec } from "@/lib/achillea/signaler";
-import { BoutonActualiser, Chargement, Erreur, Vide, formaterDate, useClientAchillea, useLecture } from "./etat";
-import { formaterOctets, messageRefusSauvegarde, sauvegardesSchema, tailleBaseSchema } from "./database-valeurs";
+import {
+  BoutonActualiser,
+  Chargement,
+  Erreur,
+  Vide,
+  formaterDate,
+  useClientAchillea,
+  useLecture,
+} from "./etat";
+import {
+  formaterOctets,
+  messageRefusSauvegarde,
+  sauvegardesSchema,
+  tailleBaseSchema,
+} from "./database-valeurs";
 
 /** Valide une réponse `unknown` du client contre le schéma attendu. */
 async function valider<T>(
@@ -40,13 +53,25 @@ async function valider<T>(
   const analyse = schema.safeParse(resultat.value);
   return analyse.success
     ? { ok: true, value: analyse.data }
-    : { ok: false, kind: "invalid_response", detail: analyse.error.message, path: chemin };
+    : {
+        ok: false,
+        kind: "invalid_response",
+        detail: analyse.error.message,
+        path: chemin,
+      };
 }
 
-function messageEchec(contexte: string, resultat: AchilleaClientResult<unknown>): string {
+function messageEchec(
+  contexte: string,
+  resultat: AchilleaClientResult<unknown>,
+): string {
   if (resultat.ok) return "";
   const generique = signalerEchec(contexte, resultat);
-  return (resultat.kind === "http" ? messageRefusSauvegarde(resultat.status) : null) ?? generique;
+  return (
+    (resultat.kind === "http"
+      ? messageRefusSauvegarde(resultat.status)
+      : null) ?? generique
+  );
 }
 
 /**
@@ -63,7 +88,9 @@ export function SauvegardesBase() {
     valider("/database/backups", sauvegardesSchema, client.admin.listBackups()),
   );
   const [sauvegarde, setSauvegarde] = useState(false);
-  const [message, setMessage] = useState<{ ok: boolean; texte: string } | null>(null);
+  const [message, setMessage] = useState<{ ok: boolean; texte: string } | null>(
+    null,
+  );
   const [aRestaurer, setARestaurer] = useState<string | null>(null);
   const [saisieNom, setSaisieNom] = useState("");
   const [restauration, setRestauration] = useState(false);
@@ -80,9 +107,18 @@ export function SauvegardesBase() {
       const resultat = await client.admin.createBackup();
       if (resultat.ok) {
         const nom = resultat.value.data?.snapshotName;
-        setMessage({ ok: true, texte: nom ? `${resultat.value.message} (${nom})` : resultat.value.message });
+        setMessage({
+          ok: true,
+          texte: nom
+            ? `${resultat.value.message} (${nom})`
+            : resultat.value.message,
+        });
         recharger();
-      } else setMessage({ ok: false, texte: messageEchec("database/backup", resultat) });
+      } else
+        setMessage({
+          ok: false,
+          texte: messageEchec("database/backup", resultat),
+        });
     } finally {
       setSauvegarde(false);
     }
@@ -108,7 +144,11 @@ export function SauvegardesBase() {
         setMessage({ ok: true, texte: resultat.value.message });
         setARestaurer(null);
         recharger();
-      } else setMessage({ ok: false, texte: messageEchec("database/restore", resultat) });
+      } else
+        setMessage({
+          ok: false,
+          texte: messageEchec("database/restore", resultat),
+        });
     } finally {
       setRestauration(false);
     }
@@ -121,22 +161,35 @@ export function SauvegardesBase() {
       <Card className="border-border/60">
         <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-3">
           <CardTitle className="text-sm">Taille de la base</CardTitle>
-          <BoutonActualiser enCours={taille.chargement || archives.chargement} onClick={recharger} />
+          <BoutonActualiser
+            enCours={taille.chargement || archives.chargement}
+            onClick={recharger}
+          />
         </CardHeader>
         <CardContent className="text-sm">
-          {taille.erreur && <Erreur message={taille.erreur} onReessayer={taille.recharger} />}
+          {taille.erreur && (
+            <Erreur message={taille.erreur} onReessayer={taille.recharger} />
+          )}
           {taille.chargement && !taille.donnees ? (
             <Chargement lignes={1} />
           ) : (
             taille.donnees && (
               <dl className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                 <div className="rounded-xl border border-border/60 p-3">
-                  <dt className="text-xs text-muted-foreground">Base complète</dt>
-                  <dd className="text-lg font-bold">{taille.donnees.database.pretty}</dd>
+                  <dt className="text-xs text-muted-foreground">
+                    Base complète
+                  </dt>
+                  <dd className="text-lg font-bold">
+                    {taille.donnees.database.pretty}
+                  </dd>
                 </div>
                 <div className="rounded-xl border border-border/60 p-3">
-                  <dt className="text-xs text-muted-foreground">Schéma {taille.donnees.schema.name}</dt>
-                  <dd className="text-lg font-bold">{taille.donnees.schema.pretty}</dd>
+                  <dt className="text-xs text-muted-foreground">
+                    Schéma {taille.donnees.schema.name}
+                  </dt>
+                  <dd className="text-lg font-bold">
+                    {taille.donnees.schema.pretty}
+                  </dd>
                 </div>
               </dl>
             )
@@ -147,14 +200,21 @@ export function SauvegardesBase() {
       <Card className="border-border/60">
         <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-3">
           <div className="space-y-1">
-            <CardTitle className="text-sm">Sauvegardes ({liste.length})</CardTitle>
+            <CardTitle className="text-sm">
+              Sauvegardes ({liste.length})
+            </CardTitle>
             {archives.donnees && (
               <p className="text-xs text-muted-foreground">
-                Les {archives.donnees.retention} archives les plus récentes sont conservées.
+                Les {archives.donnees.retention} archives les plus récentes sont
+                conservées.
               </p>
             )}
           </div>
-          <Button className="min-h-11 gap-2" onClick={() => void sauvegarder()} disabled={sauvegarde || restauration}>
+          <Button
+            className="min-h-11 gap-2"
+            onClick={() => void sauvegarder()}
+            disabled={sauvegarde || restauration}
+          >
             {sauvegarde ? (
               <Loader2 className="size-4 animate-spin" aria-hidden="true" />
             ) : (
@@ -176,7 +236,12 @@ export function SauvegardesBase() {
               {message.texte}
             </p>
           )}
-          {archives.erreur && <Erreur message={archives.erreur} onReessayer={archives.recharger} />}
+          {archives.erreur && (
+            <Erreur
+              message={archives.erreur}
+              onReessayer={archives.recharger}
+            />
+          )}
           {archives.chargement && !archives.donnees ? (
             <Chargement lignes={3} />
           ) : liste.length === 0 && !archives.erreur ? (
@@ -195,11 +260,17 @@ export function SauvegardesBase() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {liste.map(archive => (
+                  {liste.map((archive) => (
                     <TableRow key={archive.name}>
-                      <TableCell className="font-mono text-xs">{archive.name}</TableCell>
-                      <TableCell className="whitespace-nowrap text-xs">{formaterDate(archive.createdAt)}</TableCell>
-                      <TableCell className="text-right font-mono text-xs">{formaterOctets(archive.sizeBytes)}</TableCell>
+                      <TableCell className="font-mono text-xs">
+                        {archive.name}
+                      </TableCell>
+                      <TableCell className="whitespace-nowrap text-xs">
+                        {formaterDate(archive.createdAt)}
+                      </TableCell>
+                      <TableCell className="text-right font-mono text-xs">
+                        {formaterOctets(archive.sizeBytes)}
+                      </TableCell>
                       <TableCell className="text-right">
                         <Button
                           variant="ghost"
@@ -208,7 +279,10 @@ export function SauvegardesBase() {
                           onClick={() => demanderRestauration(archive.name)}
                           aria-label={`Restaurer l'archive ${archive.name}`}
                         >
-                          <ArchiveRestore className="size-4" aria-hidden="true" />
+                          <ArchiveRestore
+                            className="size-4"
+                            aria-hidden="true"
+                          />
                           Restaurer
                         </Button>
                       </TableCell>
@@ -221,14 +295,23 @@ export function SauvegardesBase() {
         </CardContent>
       </Card>
 
-      <Dialog open={aRestaurer !== null} onOpenChange={ouvert => !ouvert && !restauration && setARestaurer(null)}>
+      <Dialog
+        open={aRestaurer !== null}
+        onOpenChange={(ouvert) =>
+          !ouvert && !restauration && setARestaurer(null)
+        }
+      >
         <DialogContent className="sm:max-w-md">
-          <form onSubmit={event => void restaurer(event)} className="space-y-4">
+          <form
+            onSubmit={(event) => void restaurer(event)}
+            className="space-y-4"
+          >
             <DialogHeader>
               <DialogTitle>Confirmer la restauration</DialogTitle>
               <DialogDescription>
-                Seconde confirmation : ressaisis le nom exact de l&apos;archive <strong>{aRestaurer}</strong>. Les
-                données Achilléa écrites depuis cette sauvegarde seront perdues.
+                Seconde confirmation : ressaisis le nom exact de l&apos;archive{" "}
+                <strong>{aRestaurer}</strong>. Les données Achilléa écrites
+                depuis cette sauvegarde seront perdues.
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-1">
@@ -236,7 +319,7 @@ export function SauvegardesBase() {
               <Input
                 id="restauration-nom"
                 value={saisieNom}
-                onChange={event => setSaisieNom(event.target.value)}
+                onChange={(event) => setSaisieNom(event.target.value)}
                 autoComplete="off"
                 spellCheck={false}
                 className="min-h-11 font-mono text-xs"
@@ -259,7 +342,9 @@ export function SauvegardesBase() {
                 className="min-h-11 gap-2"
                 disabled={restauration || saisieNom !== aRestaurer}
               >
-                {restauration && <Loader2 className="size-4 animate-spin" aria-hidden="true" />}
+                {restauration && (
+                  <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+                )}
                 Restaurer {aRestaurer}
               </Button>
             </DialogFooter>

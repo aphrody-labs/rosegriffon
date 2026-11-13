@@ -13,7 +13,10 @@ const userEditSchema = z.object({
 
 type UserEditValues = z.infer<typeof userEditSchema>;
 
-export async function updateUserProfile(userId: string, values: UserEditValues) {
+export async function updateUserProfile(
+  userId: string,
+  values: UserEditValues,
+) {
   // 1. Check if current user is admin
   const user = await getServerUser();
 
@@ -22,7 +25,11 @@ export async function updateUserProfile(userId: string, values: UserEditValues) 
   }
 
   const db = createPostgresClient();
-  const { data: currentUserProfile } = await db.from("profiles").select("role").eq("id", user.id).single();
+  const { data: currentUserProfile } = await db
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
 
   // Cast explicite pour éviter l'erreur de type
   const role = (currentUserProfile as unknown as { role: string } | null)?.role;

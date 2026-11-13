@@ -23,12 +23,19 @@ interface SeriesNavigationProps {
   currentIndex: number;
 }
 
-export function SeriesNavigation({ series, articles, currentIndex }: SeriesNavigationProps) {
+export function SeriesNavigation({
+  series,
+  articles,
+  currentIndex,
+}: SeriesNavigationProps) {
   const router = useRouter();
-  const sorted = [...articles].toSorted((a, b) => (a.series_order ?? 0) - (b.series_order ?? 0));
+  const sorted = [...articles].toSorted(
+    (a, b) => (a.series_order ?? 0) - (b.series_order ?? 0),
+  );
   const total = sorted.length;
   const prevArticle = currentIndex > 0 ? sorted[currentIndex - 1] : null;
-  const nextArticle = currentIndex < total - 1 ? sorted[currentIndex + 1] : null;
+  const nextArticle =
+    currentIndex < total - 1 ? sorted[currentIndex + 1] : null;
 
   return (
     <div className="rounded-2xl bg-surface-container-low border border-outline-variant/10 overflow-hidden">
@@ -36,11 +43,17 @@ export function SeriesNavigation({ series, articles, currentIndex }: SeriesNavig
       <div className="p-4 border-b border-outline-variant/10">
         <div className="flex items-center gap-2 mb-1">
           <BookOpen className="size-4 text-primary shrink-0" />
-          <span className="text-xs font-bold uppercase tracking-wider text-on-surface-variant/60">Série</span>
+          <span className="text-xs font-bold uppercase tracking-wider text-on-surface-variant/60">
+            Série
+          </span>
         </div>
-        <p className="text-sm font-bold text-on-surface leading-snug">{series.title}</p>
+        <p className="text-sm font-bold text-on-surface leading-snug">
+          {series.title}
+        </p>
         {series.description && (
-          <p className="text-xs text-on-surface-variant/60 mt-1 line-clamp-2">{series.description}</p>
+          <p className="text-xs text-on-surface-variant/60 mt-1 line-clamp-2">
+            {series.description}
+          </p>
         )}
         <p className="text-xs text-on-surface-variant/50 mt-2">
           Article {currentIndex + 1} sur {total}
@@ -57,7 +70,9 @@ export function SeriesNavigation({ series, articles, currentIndex }: SeriesNavig
               href={`/news/${article.slug}`}
               className={cn(
                 "flex items-center gap-3 px-4 py-3 transition-colors",
-                isCurrent ? "bg-primary/10 cursor-default pointer-events-none" : "hover:bg-surface-container",
+                isCurrent
+                  ? "bg-primary/10 cursor-default pointer-events-none"
+                  : "hover:bg-surface-container",
               )}
             >
               <span
@@ -71,12 +86,16 @@ export function SeriesNavigation({ series, articles, currentIndex }: SeriesNavig
               <p
                 className={cn(
                   "text-xs font-medium line-clamp-2 leading-snug",
-                  isCurrent ? "text-primary" : "text-on-surface-variant hover:text-on-surface",
+                  isCurrent
+                    ? "text-primary"
+                    : "text-on-surface-variant hover:text-on-surface",
                 )}
               >
                 {article.title}
               </p>
-              {isCurrent && <span className="ml-auto shrink-0 size-1.5 rounded-full bg-primary" />}
+              {isCurrent && (
+                <span className="ml-auto shrink-0 size-1.5 rounded-full bg-primary" />
+              )}
             </Link>
           );
         })}
@@ -86,7 +105,9 @@ export function SeriesNavigation({ series, articles, currentIndex }: SeriesNavig
       {(prevArticle || nextArticle) && (
         <div className="flex border-t border-outline-variant/10">
           <button
-            onClick={() => prevArticle && router.push(`/news/${prevArticle.slug}`)}
+            onClick={() =>
+              prevArticle && router.push(`/news/${prevArticle.slug}`)
+            }
             disabled={!prevArticle}
             className={cn(
               "flex-1 flex items-center gap-1.5 px-3 py-3 text-xs font-medium transition-colors",
@@ -96,13 +117,17 @@ export function SeriesNavigation({ series, articles, currentIndex }: SeriesNavig
             )}
           >
             <ChevronLeft className="size-3.5 shrink-0" />
-            <span className="truncate">{prevArticle ? prevArticle.title : "Début"}</span>
+            <span className="truncate">
+              {prevArticle ? prevArticle.title : "Début"}
+            </span>
           </button>
 
           <div className="w-px bg-outline-variant/20" />
 
           <button
-            onClick={() => nextArticle && router.push(`/news/${nextArticle.slug}`)}
+            onClick={() =>
+              nextArticle && router.push(`/news/${nextArticle.slug}`)
+            }
             disabled={!nextArticle}
             className={cn(
               "flex-1 flex items-center justify-end gap-1.5 px-3 py-3 text-xs font-medium transition-colors",
@@ -111,7 +136,9 @@ export function SeriesNavigation({ series, articles, currentIndex }: SeriesNavig
                 : "text-on-surface-variant/30 cursor-not-allowed",
             )}
           >
-            <span className="truncate text-right">{nextArticle ? nextArticle.title : "Fin"}</span>
+            <span className="truncate text-right">
+              {nextArticle ? nextArticle.title : "Fin"}
+            </span>
             <ChevronRight className="size-3.5 shrink-0" />
           </button>
         </div>

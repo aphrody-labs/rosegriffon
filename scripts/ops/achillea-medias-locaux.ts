@@ -33,13 +33,16 @@ const COLONNES = [
 ] as const;
 
 /** Racine publique qui remplace le domaine cloud. */
-const BASE_PUBLIQUE = "https://achillea.rosegriffon.fr/storage/v1/object/public";
+const BASE_PUBLIQUE =
+  "https://achillea.rosegriffon.fr/storage/v1/object/public";
 
 /** Où les fichiers vivent réellement sur le disque. */
 const RACINE_DISQUE = "/var/www/achillea-storage";
 
 async function psql(sql: string): Promise<string> {
-  return (await $`sudo -u postgres psql -d rg -v ON_ERROR_STOP=1 -Atc ${sql}`.text()).trim();
+  return (
+    await $`sudo -u postgres psql -d rg -v ON_ERROR_STOP=1 -Atc ${sql}`.text()
+  ).trim();
 }
 
 /**
@@ -60,7 +63,11 @@ let reecrites = 0;
 let absentes = 0;
 
 for (const { table, colonne } of COLONNES) {
-  const lignes = (await psql(`select ${colonne} from achillea."${table}" where ${colonne} like '%supabase.co%'`))
+  const lignes = (
+    await psql(
+      `select ${colonne} from achillea."${table}" where ${colonne} like '%supabase.co%'`,
+    )
+  )
     .split("\n")
     .filter(Boolean);
 
@@ -81,7 +88,9 @@ for (const { table, colonne } of COLONNES) {
 
     const nouvelle = `${BASE_PUBLIQUE}/${chemin}`;
     if (appliquer) {
-      await psql(`update achillea."${table}" set ${colonne} = '${nouvelle}' where ${colonne} = '${url}'`);
+      await psql(
+        `update achillea."${table}" set ${colonne} = '${nouvelle}' where ${colonne} = '${url}'`,
+      );
     }
     reecrites++;
   }

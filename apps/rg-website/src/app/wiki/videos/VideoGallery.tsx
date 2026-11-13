@@ -68,7 +68,8 @@ function LecteurFilm({ film }: { film: FilmVue }) {
     const v = videoRef.current;
     const a = audioRef.current;
     if (!v || !a) return;
-    if (Math.abs(a.currentTime - v.currentTime) > DERIVE_MAX) a.currentTime = v.currentTime;
+    if (Math.abs(a.currentTime - v.currentTime) > DERIVE_MAX)
+      a.currentTime = v.currentTime;
   }, []);
 
   // Le son suit l'image : lecture, pause, saut, vitesse, volume.
@@ -119,7 +120,12 @@ function LecteurFilm({ film }: { film: FilmVue }) {
       />
       {avecSon && (
         // eslint-disable-next-line jsx-a11y/media-has-caption -- piste sonore seule, sans dialogue transcrit
-        <audio ref={audioRef} preload="auto" src={videoAudioUrl(film.chemin)} onError={() => setErreurSon(true)} />
+        <audio
+          ref={audioRef}
+          preload="auto"
+          src={videoAudioUrl(film.chemin)}
+          onError={() => setErreurSon(true)}
+        />
       )}
       {avecSon && erreurSon && (
         <p className="absolute bottom-1 left-1 rounded bg-black/70 px-1.5 py-0.5 text-[10px] text-white">
@@ -139,8 +145,12 @@ function Reperes({ film }: { film: FilmVue }) {
       {duree && <>{duree} · </>}
       {definition && <>{definition} · </>}
       {formatOctets(film.octetsServis)}
-      {film.variante === "haute" && <span title="Variante PC, débit supérieur"> · HD</span>}
-      {film.cadence != null && film.cadence > 0 && <> · {film.cadence.toFixed(0)} i/s</>}
+      {film.variante === "haute" && (
+        <span title="Variante PC, débit supérieur"> · HD</span>
+      )}
+      {film.cadence != null && film.cadence > 0 && (
+        <> · {film.cadence.toFixed(0)} i/s</>
+      )}
     </span>
   );
 }
@@ -163,11 +173,17 @@ function CarteFilm({ film }: { film: FilmVue }) {
             onClick={() => setActif(true)}
             disabled={!lisible}
             className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-on-surface-variant transition-colors hover:text-primary disabled:cursor-not-allowed disabled:hover:text-on-surface-variant"
-            aria-label={lisible ? `Lire ${film.titre}` : `${film.titre} — codec non lisible ici`}
+            aria-label={
+              lisible
+                ? `Lire ${film.titre}`
+                : `${film.titre} — codec non lisible ici`
+            }
           >
             <Icon name={lisible ? "play_circle" : "movie_off"} size={56} />
             <span className="px-3 text-center text-xs">
-              {lisible ? "Lire" : `${film.codec.toUpperCase()} — aucun navigateur ne le décode`}
+              {lisible
+                ? "Lire"
+                : `${film.codec.toUpperCase()} — aucun navigateur ne le décode`}
             </span>
           </button>
         )}
@@ -179,7 +195,11 @@ function CarteFilm({ film }: { film: FilmVue }) {
         {!actif && avecSon && (
           <span
             className="absolute right-2 top-2 rounded bg-black/60 px-1.5 py-0.5 text-[10px] text-white"
-            title={film.bandeSon ? `Bande-son ${film.bandeSon.cue} (anime_stream)` : "Bande-son dans le conteneur"}
+            title={
+              film.bandeSon
+                ? `Bande-son ${film.bandeSon.cue} (anime_stream)`
+                : "Bande-son dans le conteneur"
+            }
           >
             <Icon name="music_note" size={11} />
           </span>
@@ -187,7 +207,11 @@ function CarteFilm({ film }: { film: FilmVue }) {
       </div>
 
       <div className="min-w-0 p-2.5">
-        <MediaTitle title={film.titre} code={film.nom} context={film.contexte ?? undefined} />
+        <MediaTitle
+          title={film.titre}
+          code={film.nom}
+          context={film.contexte ?? undefined}
+        />
         <div className="mt-1 flex items-center justify-between gap-2">
           <Reperes film={film} />
           <span className="flex items-center gap-2">
@@ -234,20 +258,26 @@ export function VideoGallery({
   // Les rubriques viennent des films eux-mêmes, dans l'ordre du récit — pas de l'alphabet, qui
   // intercalerait « Chronicle » entre deux chapitres.
   const rubriques = useMemo(() => {
-    const vues = [...new Set(films.map(f => f.rubrique))];
-    return vues.toSorted((a, b) => ordreRubrique(a) - ordreRubrique(b) || a.localeCompare(b, "fr"));
+    const vues = [...new Set(films.map((f) => f.rubrique))];
+    return vues.toSorted(
+      (a, b) => ordreRubrique(a) - ordreRubrique(b) || a.localeCompare(b, "fr"),
+    );
   }, [films]);
 
   // Les langues réellement portées par le corpus, nommées par la table du jeu.
   const languesPresentes = useMemo(() => {
-    const codes = new Set(films.map(f => f.langue).filter((l): l is string => l != null));
-    const nom = new Map(langues.map(l => [l.code, l.nom]));
-    return [...codes].toSorted((a, b) => a.localeCompare(b, "fr")).map(code => ({ code, nom: nom.get(code) ?? code }));
+    const codes = new Set(
+      films.map((f) => f.langue).filter((l): l is string => l != null),
+    );
+    const nom = new Map(langues.map((l) => [l.code, l.nom]));
+    return [...codes]
+      .toSorted((a, b) => a.localeCompare(b, "fr"))
+      .map((code) => ({ code, nom: nom.get(code) ?? code }));
   }, [films, langues]);
 
   const visibles = useMemo(() => {
     const q = requete.trim().toLowerCase();
-    return films.filter(f => {
+    return films.filter((f) => {
       if (rubrique !== "toutes" && f.rubrique !== rubrique) return false;
       if (langue !== "toutes" && f.langue !== langue) return false;
       if (son === "avec" && !aDuSon(f)) return false;
@@ -273,7 +303,10 @@ export function VideoGallery({
       if (liste) liste.push(f);
       else par.set(f.rubrique, [f]);
     }
-    return [...par.entries()].toSorted(([a], [b]) => ordreRubrique(a) - ordreRubrique(b) || a.localeCompare(b, "fr"));
+    return [...par.entries()].toSorted(
+      ([a], [b]) =>
+        ordreRubrique(a) - ordreRubrique(b) || a.localeCompare(b, "fr"),
+    );
   }, [visibles]);
 
   const classeChip = (actif: boolean) =>
@@ -287,10 +320,14 @@ export function VideoGallery({
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-2">
         <div className="flex h-10 min-w-[12rem] flex-1 items-center gap-2 rounded-full bg-surface-container-highest px-3">
-          <Icon name="search" size={18} className="shrink-0 text-on-surface-variant" />
+          <Icon
+            name="search"
+            size={18}
+            className="shrink-0 text-on-surface-variant"
+          />
           <input
             value={requete}
-            onChange={e => setRequete(e.target.value)}
+            onChange={(e) => setRequete(e.target.value)}
             placeholder="Rechercher une vidéo…"
             className="min-w-0 flex-1 bg-transparent text-sm text-on-surface outline-none placeholder:text-on-surface-variant/60"
           />
@@ -299,12 +336,12 @@ export function VideoGallery({
         {languesPresentes.length > 0 && (
           <select
             value={langue}
-            onChange={e => setLangue(e.target.value)}
+            onChange={(e) => setLangue(e.target.value)}
             className="h-9 rounded-full bg-surface-container px-3 text-sm text-on-surface-variant"
             aria-label="Filtrer par langue"
           >
             <option value="toutes">Toutes les langues</option>
-            {languesPresentes.map(l => (
+            {languesPresentes.map((l) => (
               <option key={l.code} value={l.code}>
                 {l.nom}
               </option>
@@ -314,13 +351,25 @@ export function VideoGallery({
 
         {!degrade && (
           <div className="flex gap-1.5">
-            <button type="button" onClick={() => setSon("tous")} className={classeChip(son === "tous")}>
+            <button
+              type="button"
+              onClick={() => setSon("tous")}
+              className={classeChip(son === "tous")}
+            >
               Toutes
             </button>
-            <button type="button" onClick={() => setSon("avec")} className={classeChip(son === "avec")}>
+            <button
+              type="button"
+              onClick={() => setSon("avec")}
+              className={classeChip(son === "avec")}
+            >
               Avec son
             </button>
-            <button type="button" onClick={() => setSon("sans")} className={classeChip(son === "sans")}>
+            <button
+              type="button"
+              onClick={() => setSon("sans")}
+              className={classeChip(son === "sans")}
+            >
               Muettes
             </button>
           </div>
@@ -328,11 +377,20 @@ export function VideoGallery({
       </div>
 
       <div className="flex flex-wrap gap-1.5">
-        <button type="button" onClick={() => setRubrique("toutes")} className={classeChip(rubrique === "toutes")}>
+        <button
+          type="button"
+          onClick={() => setRubrique("toutes")}
+          className={classeChip(rubrique === "toutes")}
+        >
           Toutes les rubriques
         </button>
-        {rubriques.map(r => (
-          <button key={r} type="button" onClick={() => setRubrique(r)} className={classeChip(rubrique === r)}>
+        {rubriques.map((r) => (
+          <button
+            key={r}
+            type="button"
+            onClick={() => setRubrique(r)}
+            className={classeChip(rubrique === r)}
+          >
             {r}
           </button>
         ))}
@@ -340,22 +398,30 @@ export function VideoGallery({
 
       <MediaCount
         left={`${visibles.length.toLocaleString("fr")} vidéo${visibles.length > 1 ? "s" : ""}`}
-        right={visibles.length === films.length ? undefined : `sur ${films.length.toLocaleString("fr")}`}
+        right={
+          visibles.length === films.length
+            ? undefined
+            : `sur ${films.length.toLocaleString("fr")}`
+        }
       />
 
       {visibles.length === 0 ? (
-        <p className="p-8 text-center text-sm text-on-surface-variant">Aucune vidéo.</p>
+        <p className="p-8 text-center text-sm text-on-surface-variant">
+          Aucune vidéo.
+        </p>
       ) : (
         sections.map(([titre, liste]) => (
           <section key={titre} className="space-y-2">
             {sections.length > 1 && (
               <h2 className="px-1 text-sm font-semibold text-on-surface">
                 {titre}
-                <span className="ml-2 text-xs font-normal text-on-surface-variant">{liste.length}</span>
+                <span className="ml-2 text-xs font-normal text-on-surface-variant">
+                  {liste.length}
+                </span>
               </h2>
             )}
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {liste.map(f => (
+              {liste.map((f) => (
                 <CarteFilm key={f.chemin} film={f} />
               ))}
             </div>

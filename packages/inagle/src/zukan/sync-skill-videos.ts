@@ -75,7 +75,11 @@ export interface SyncZukanSkillVideosResult {
   /** Plans de peuplement retenus. */
   plans: SkillVideoPlan[];
   /** Techniques sans correspondance upstream — laissées NULL. */
-  unresolved: Array<{ internalCode: string | null; nameFr: string | null; nameEn: string | null }>;
+  unresolved: Array<{
+    internalCode: string | null;
+    nameFr: string | null;
+    nameEn: string | null;
+  }>;
   /** Lignes `inagle_skills` écrites (0 en audit). */
   skillsUpdated: number;
   /** Lignes `inagle_skill_videos` écrites (0 en audit). */
@@ -83,7 +87,12 @@ export interface SyncZukanSkillVideosResult {
   applied: boolean;
 }
 
-function planFor(row: SkillRow, skill: ZukanSkill, via: string, source: "zukan" | "dreamscape"): SkillVideoPlan | null {
+function planFor(
+  row: SkillRow,
+  skill: ZukanSkill,
+  via: string,
+  source: "zukan" | "dreamscape",
+): SkillVideoPlan | null {
   if (skill.videos.length === 0) return null;
   return {
     id: row.id,
@@ -112,18 +121,22 @@ export async function syncZukanSkillVideos(
 			order by internal_code
 		`) as unknown as SkillRow[];
 
-    const targets = options.onlyMissing ? rows.filter(r => !r.video_url) : rows;
+    const targets = options.onlyMissing
+      ? rows.filter((r) => !r.video_url)
+      : rows;
     const index = await fetchZukanSkillIndex();
 
     const plans: SkillVideoPlan[] = [];
     const planById = new Map<string, SkillVideoPlan>();
-    const byCode = new Map(rows.map(r => [r.internal_code ?? "", r]));
+    const byCode = new Map(rows.map((r) => [r.internal_code ?? "", r]));
     const pendingDreamscape: SkillRow[] = [];
     const unresolved: SyncZukanSkillVideosResult["unresolved"] = [];
 
     for (const row of targets) {
       // 1) nom EN
-      const en = row.name_en ? index.byNameEn.get(normalizeSkillName(row.name_en)) : undefined;
+      const en = row.name_en
+        ? index.byNameEn.get(normalizeSkillName(row.name_en))
+        : undefined;
       const planEn = en ? planFor(row, en, "name_en", "zukan") : null;
       if (planEn) {
         plans.push(planEn);
@@ -131,7 +144,9 @@ export async function syncZukanSkillVideos(
         continue;
       }
       // 2) nom JA
-      const ja = row.name_ja ? index.byNameJa.get(normalizeSkillName(row.name_ja)) : undefined;
+      const ja = row.name_ja
+        ? index.byNameJa.get(normalizeSkillName(row.name_ja))
+        : undefined;
       const planJa = ja ? planFor(row, ja, "name_ja", "zukan") : null;
       if (planJa) {
         plans.push(planJa);
@@ -143,11 +158,17 @@ export async function syncZukanSkillVideos(
 
     // 3) Dreamscape : reskins qui empruntent l'animation de leur move parent.
     for (const row of pendingDreamscape) {
-      const baseCode = row.internal_code ? DREAMSCAPE_BASE[row.internal_code] : undefined;
+      const baseCode = row.internal_code
+        ? DREAMSCAPE_BASE[row.internal_code]
+        : undefined;
       const base = baseCode ? byCode.get(baseCode) : undefined;
       const basePlan = base ? planById.get(base.id) : undefined;
-      const baseEn = !basePlan && base?.name_en ? index.byNameEn.get(normalizeSkillName(base.name_en)) : undefined;
-      const inherited = basePlan ?? (baseEn?.videos.length ? baseEn : undefined);
+      const baseEn =
+        !basePlan && base?.name_en
+          ? index.byNameEn.get(normalizeSkillName(base.name_en))
+          : undefined;
+      const inherited =
+        basePlan ?? (baseEn?.videos.length ? baseEn : undefined);
       if (!inherited) {
         unresolved.push({
           internalCode: row.internal_code,
@@ -208,7 +229,7 @@ export async function syncZukanSkillVideos(
       skillsUpdated,
       unresolved,
       videosUpserted,
-      zukanMulti: index.en.filter(s => s.videos.length > 1).length,
+      zukanMulti: index.en.filter((s) => s.videos.length > 1).length,
       zukanSkills: index.en.length,
     };
   } finally {

@@ -144,7 +144,9 @@ export function encodeTickInput(input: PlayerTickInput): Uint8Array {
  */
 export function decodeTickInput(bytes: Uint8Array): PlayerTickInput {
   if (bytes.length < 12) {
-    throw new Error(`Invalid tick packet length: ${bytes.length} bytes (expected >= 12)`);
+    throw new Error(
+      `Invalid tick packet length: ${bytes.length} bytes (expected >= 12)`,
+    );
   }
   const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
 

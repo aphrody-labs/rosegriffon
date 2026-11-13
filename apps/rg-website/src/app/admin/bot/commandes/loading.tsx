@@ -9,7 +9,10 @@ export default function ChargementBot() {
       </div>
       <div className="grid gap-4 lg:grid-cols-2">
         {[...Array(4)].map((_, i) => (
-          <div key={i} className="space-y-3 rounded-xl border border-border p-6">
+          <div
+            key={i}
+            className="space-y-3 rounded-xl border border-border p-6"
+          >
             <Skeleton className="h-5 w-40" />
             <Skeleton className="h-4 w-full" />
             <Skeleton className="h-4 w-2/3" />

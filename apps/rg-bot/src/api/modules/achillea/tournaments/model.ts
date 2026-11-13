@@ -1,7 +1,10 @@
 import { t } from "elysia";
 
 export const TournamentModel = {
-  scorePolicy: t.Object({ success: t.Literal(true), scoreReportPolicy: t.String() }),
+  scorePolicy: t.Object({
+    success: t.Literal(true),
+    scoreReportPolicy: t.String(),
+  }),
   participant: t.Object({
     id: t.Number(),
     tournamentId: t.Number(),
@@ -36,7 +39,11 @@ export const TournamentModel = {
     id: t.Number(),
     name: t.String(),
     description: t.String(),
-    type: t.Union([t.Literal("TOURNAMENT"), t.Literal("INTERCLAN"), t.Literal("RANKED")]),
+    type: t.Union([
+      t.Literal("TOURNAMENT"),
+      t.Literal("INTERCLAN"),
+      t.Literal("RANKED"),
+    ]),
     status: t.Nullable(t.String()),
     createdAt: t.String(),
     updatedAt: t.String(),
@@ -47,13 +54,22 @@ export const TournamentModel = {
         id: t.Number(),
         name: t.String(),
         description: t.String(),
-        type: t.Union([t.Literal("TOURNAMENT"), t.Literal("INTERCLAN"), t.Literal("RANKED")]),
+        type: t.Union([
+          t.Literal("TOURNAMENT"),
+          t.Literal("INTERCLAN"),
+          t.Literal("RANKED"),
+        ]),
         status: t.Nullable(t.String()),
         createdAt: t.String(),
         updatedAt: t.String(),
       }),
     ),
-    meta: t.Object({ page: t.Number(), limit: t.Number(), total: t.Number(), pageCount: t.Number() }),
+    meta: t.Object({
+      page: t.Number(),
+      limit: t.Number(),
+      total: t.Number(),
+      pageCount: t.Number(),
+    }),
   }),
   notFound: t.Object({
     message: t.Literal("Tournament not found"),

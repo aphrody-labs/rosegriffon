@@ -38,7 +38,9 @@ export interface ResultatSyncAchillea {
 }
 
 /** Guilde d'Achilléa : la seule dont le bot Achilléa a besoin. */
-const GUILDE_ACHILLEA = GUILDES_SUIVIES.find(guilde => guilde.cle === "achillea")?.id ?? "1055585286320554055";
+const GUILDE_ACHILLEA =
+  GUILDES_SUIVIES.find((guilde) => guilde.cle === "achillea")?.id ??
+  "1055585286320554055";
 
 export async function runAchilleaSync(): Promise<ResultatSyncAchillea> {
   try {
@@ -49,14 +51,16 @@ export async function runAchilleaSync(): Promise<ResultatSyncAchillea> {
     // On emprunte `service_role`, dont `rg` est membre, le temps de la
     // projection : c'est le rôle de service déjà utilisé pour toute écriture
     // qui doit traverser une RLS. SET LOCAL reste lié à cette transaction.
-    const resultat = await sql.begin(async tx => {
+    const resultat = await sql.begin(async (tx) => {
       await tx`SET LOCAL ROLE service_role`;
       const [source] = await tx`
 				SELECT count(*)::integer AS membres
 				  FROM public.discord_appartenances
 				 WHERE guild_id = ${GUILDE_ACHILLEA} AND left_at IS NULL`;
       if (!source || Number(source.membres) === 0) {
-        throw new Error("Aucune appartenance Achilléa active en source : projection annulée.");
+        throw new Error(
+          "Aucune appartenance Achilléa active en source : projection annulée.",
+        );
       }
 
       // La ligne de guilde doit exister avant ses rôles : `guild_role.guild_id`
@@ -130,7 +134,11 @@ export async function runAchilleaSync(): Promise<ResultatSyncAchillea> {
 			   AND (u.username IS DISTINCT FROM a.username OR u.avatar IS DISTINCT FROM a.avatar_url)
 			RETURNING u.id`;
 
-      return { comptes: comptes.length, membres: membres.length, roles: roles.length };
+      return {
+        comptes: comptes.length,
+        membres: membres.length,
+        roles: roles.length,
+      };
     });
 
     console.log(

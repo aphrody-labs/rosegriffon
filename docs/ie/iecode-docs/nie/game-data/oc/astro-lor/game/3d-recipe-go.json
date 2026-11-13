@@ -66,24 +66,54 @@
     { "role": "skin", "target": { "kind": "tex_slot", "slot": -94281841 } },
     {
       "role": "iris",
-      "target": { "kind": "tex_part_slot", "part": 1920501681, "slot": -795152863 }
+      "target": {
+        "kind": "tex_part_slot",
+        "part": 1920501681,
+        "slot": -795152863
+      }
     },
     {
       "role": "iris",
-      "target": { "kind": "tex_part_slot", "part": -750581687, "slot": -795152863 }
+      "target": {
+        "kind": "tex_part_slot",
+        "part": -750581687,
+        "slot": -795152863
+      }
     },
-    { "role": "hair_pale", "target": { "kind": "mdl_slot", "slot": 2044100479 } },
-    { "role": "hair_rust", "target": { "kind": "mdl_slot", "slot": -1490152083 } },
-    { "role": "jersey_primary", "target": { "kind": "mdl_slot", "slot": -164857417 } },
-    { "role": "shorts_white", "target": { "kind": "mdl_slot", "slot": 349143447 } }
+    {
+      "role": "hair_pale",
+      "target": { "kind": "mdl_slot", "slot": 2044100479 }
+    },
+    {
+      "role": "hair_rust",
+      "target": { "kind": "mdl_slot", "slot": -1490152083 }
+    },
+    {
+      "role": "jersey_primary",
+      "target": { "kind": "mdl_slot", "slot": -164857417 }
+    },
+    {
+      "role": "shorts_white",
+      "target": { "kind": "mdl_slot", "slot": 349143447 }
+    }
   ],
   "parts": [],
   "bones": [],
   "icons": [
     {
       "internal_code": "c99019020",
-      "first": { "sheet": "sheets/08-go-anatomy.jpg", "x": 578, "y": 46, "side": 878 },
-      "second": { "sheet": "sheets/06-go-outfit-casual.jpg", "x": 566, "y": 315, "side": 650 }
+      "first": {
+        "sheet": "sheets/08-go-anatomy.jpg",
+        "x": 578,
+        "y": 46,
+        "side": 878
+      },
+      "second": {
+        "sheet": "sheets/06-go-outfit-casual.jpg",
+        "x": 566,
+        "y": 315,
+        "side": 650
+      }
     }
   ]
 }

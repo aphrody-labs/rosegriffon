@@ -29,10 +29,23 @@ function registerAchilleaFonts() {
 }
 `;
 
-async function extract(file: string, method: string, signature: string, extra = ""): Promise<string> {
-  const src = (await Bun.file(join(LEGACY, "src/services", file)).text()).split(String.fromCharCode(13)).join("");
-  const consts = src.slice(src.indexOf("const CANVAS_WIDTH"), src.indexOf("export interface"));
-  const types = src.slice(src.indexOf("export interface"), src.indexOf("@singleton()"));
+async function extract(
+  file: string,
+  method: string,
+  signature: string,
+  extra = "",
+): Promise<string> {
+  const src = (await Bun.file(join(LEGACY, "src/services", file)).text())
+    .split(String.fromCharCode(13))
+    .join("");
+  const consts = src.slice(
+    src.indexOf("const CANVAS_WIDTH"),
+    src.indexOf("export interface"),
+  );
+  const types = src.slice(
+    src.indexOf("export interface"),
+    src.indexOf("@singleton()"),
+  );
   const start = src.indexOf(`private async ${method}(`);
   const open = src.indexOf("{", src.indexOf(")", start));
   let depth = 0;
@@ -48,7 +61,10 @@ async function extract(file: string, method: string, signature: string, extra = 
 /** Writes the legacy renderers under `dir` and returns their modules. */
 export async function legacyRenderers(dir: string) {
   await mkdir(dir, { recursive: true });
-  await Bun.write(join(dir, "legacy-card.ts"), await extract("PlayerCardService.ts", "renderCard", "data: PlayerCardData"));
+  await Bun.write(
+    join(dir, "legacy-card.ts"),
+    await extract("PlayerCardService.ts", "renderCard", "data: PlayerCardData"),
+  );
   await Bun.write(
     join(dir, "legacy-poster.ts"),
     await extract(
@@ -58,7 +74,11 @@ export async function legacyRenderers(dir: string) {
       "interface PosterClan { id: number; name: string; shortenedName: string; clanAvatarUrl: string; normalizedShortName: string; normalizedName: string; }\n",
     ),
   );
-  const card = (await import(join(dir, "legacy-card.ts"))) as { renderCard: (data: unknown) => Promise<Buffer> };
-  const poster = (await import(join(dir, "legacy-poster.ts"))) as { renderPoster: (data: unknown) => Promise<Buffer> };
+  const card = (await import(join(dir, "legacy-card.ts"))) as {
+    renderCard: (data: unknown) => Promise<Buffer>;
+  };
+  const poster = (await import(join(dir, "legacy-poster.ts"))) as {
+    renderPoster: (data: unknown) => Promise<Buffer>;
+  };
   return { renderCard: card.renderCard, renderPoster: poster.renderPoster };
 }

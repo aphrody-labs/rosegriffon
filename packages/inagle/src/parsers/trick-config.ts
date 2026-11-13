@@ -59,7 +59,8 @@ function parseContent(content: any): ParsedTrick[] {
   for (const list of content.lists) {
     if (list.name === "m_trickInfoList") {
       for (const val of list.values) {
-        const categoryName = TRICK_CATEGORY_MAP[val.trickCategory] || `Cat${val.trickCategory}`;
+        const categoryName =
+          TRICK_CATEGORY_MAP[val.trickCategory] || `Cat${val.trickCategory}`;
         tricks.push({
           id: val.trickID,
           name: val.trickName,
@@ -88,7 +89,9 @@ function parseContent(content: any): ParsedTrick[] {
 // Loaders
 // ============================================================================
 
-export async function loadTrickConfigAsync(dataPath: string = DATA_ROOT): Promise<ParsedTrick[] | null> {
+export async function loadTrickConfigAsync(
+  dataPath: string = DATA_ROOT,
+): Promise<ParsedTrick[] | null> {
   const filename = findConfigFile("skill", "trick_config");
   if (!filename) return null;
 
@@ -97,7 +100,9 @@ export async function loadTrickConfigAsync(dataPath: string = DATA_ROOT): Promis
   return content ? parseContent(content) : null;
 }
 
-export async function buildTrickDatabase(dataPath: string = DATA_ROOT): Promise<TrickDatabase> {
+export async function buildTrickDatabase(
+  dataPath: string = DATA_ROOT,
+): Promise<TrickDatabase> {
   const tricks = (await loadTrickConfigAsync(dataPath)) || [];
   const byId = new Map<string, ParsedTrick>();
   for (const t of tricks) byId.set(t.trickId, t);

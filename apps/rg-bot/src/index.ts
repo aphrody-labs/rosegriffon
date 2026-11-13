@@ -44,7 +44,11 @@ import {
   PROFIL_ANNONCEUR,
 } from "./lib/config";
 import { sql } from "./lib/db";
-import { brancherJournal, demarrerServeurAdmin, type ServeurAdmin } from "./lib/serveur-admin";
+import {
+  brancherJournal,
+  demarrerServeurAdmin,
+  type ServeurAdmin,
+} from "./lib/serveur-admin";
 import { startApiServer } from "./api/server";
 import { demarrerNotifieurTweets } from "./services/tweetsNotifier";
 
@@ -168,9 +172,12 @@ if (!isApiMode && !DISCORD_TOKEN && !isBotMode) {
     // les commandes inscrites par une version précédente (cas du profil Achilléa
     // tant que ses commandes ne sont pas toutes portées). Mieux vaut des
     // commandes qui répondent « inconnue » que des commandes disparues.
-    const arbreVide = MetadataStorage.instance.applicationCommandSlashesFlat.length === 0;
+    const arbreVide =
+      MetadataStorage.instance.applicationCommandSlashesFlat.length === 0;
     if (arbreVide) {
-      console.warn(`⚠ Profil « ${PROFIL.nom} » : aucune commande chargée, enregistrement Discord laissé intact.`);
+      console.warn(
+        `⚠ Profil « ${PROFIL.nom} » : aucune commande chargée, enregistrement Discord laissé intact.`,
+      );
     } else {
       await initApplicationCommandsSafe(client);
     }

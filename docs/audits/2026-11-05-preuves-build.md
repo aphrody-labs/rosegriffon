@@ -16,14 +16,14 @@ Résultat : code de sortie 0. Log complet dans `var/build-rg-website.log` (353 l
 NODE_ENV=production BETTER_AUTH_URL=https://rosegriffon.fr NEXT_PUBLIC_SITE_URL=https://rosegriffon.fr bun run start -- -p 3320
 ```
 
-| Route | HTTP | Temps | Erreur SSR (`Children.only`, « Switched to client rendering ») |
-|---|---|---|---|
-| `/` | 200 | 0,13 s | 0 |
-| `/legal/cgu` | 200 | 0,18 s | 0 |
-| `/achillea` | 200 | 0,02 s | 0 |
-| `/wiki` | 200 | 0,03 s | 0 |
-| `/news` | 200 | 2,36 s | 0 |
-| `/wiki/chara` | 200 | 1,99 s | 0 |
+| Route         | HTTP | Temps  | Erreur SSR (`Children.only`, « Switched to client rendering ») |
+| ------------- | ---- | ------ | -------------------------------------------------------------- |
+| `/`           | 200  | 0,13 s | 0                                                              |
+| `/legal/cgu`  | 200  | 0,18 s | 0                                                              |
+| `/achillea`   | 200  | 0,02 s | 0                                                              |
+| `/wiki`       | 200  | 0,03 s | 0                                                              |
+| `/news`       | 200  | 2,36 s | 0                                                              |
+| `/wiki/chara` | 200  | 1,99 s | 0                                                              |
 
 ## Navigateur (Chromium yolo-web, après chargement complet + 6 s)
 
@@ -52,15 +52,15 @@ Points ouverts transmis à l'agent de parité web Achilléa :
 
 ## Déploiements en prod (VPS RG, via `prod` → `vps`)
 
-| | Déploiement 1 | Déploiement 2 |
-|---|---|---|
-| Commit | `972fc663` | `a03fbe7a` |
-| rg-core | redémarré 09:50:53 UTC, `cmp` binaire = build, NRestarts 0 | redémarré 10:59:23 UTC, `cmp` binaire = build, NRestarts 0 |
-| rg-website BUILD_ID | `ekHHwPMKZgZb-p8jStMCl` (10:03:40 UTC) | `TFu-T1mdhusiRm6TvkhaB` (11:10:20 UTC) |
-| Pages | `/`, `/wiki`, `/feed`, `/achillea`, `/wiki/chara`, `/legal/cgu`, sitemap, robots : 200, bons titres, 0 erreur SSR | idem + `/community` 211 837 o (3,84 Mo avant), `/settings` noindex |
-| Bots | rg prêt, bot-azalee et bot-achillea 0 redémarrage | idem |
-| Cron | 13 tâches réussies, 0 échec | 16 tâches réussies, 0 échec |
-| Rollback | `/usr/local/bin/rg-core.63f281a4`, `apps/rg/old-cur` | `/usr/local/bin/rg-core.972fc663`, `apps/rg/old-cur` |
+|                     | Déploiement 1                                                                                                     | Déploiement 2                                                      |
+| ------------------- | ----------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| Commit              | `972fc663`                                                                                                        | `a03fbe7a`                                                         |
+| rg-core             | redémarré 09:50:53 UTC, `cmp` binaire = build, NRestarts 0                                                        | redémarré 10:59:23 UTC, `cmp` binaire = build, NRestarts 0         |
+| rg-website BUILD_ID | `ekHHwPMKZgZb-p8jStMCl` (10:03:40 UTC)                                                                            | `TFu-T1mdhusiRm6TvkhaB` (11:10:20 UTC)                             |
+| Pages               | `/`, `/wiki`, `/feed`, `/achillea`, `/wiki/chara`, `/legal/cgu`, sitemap, robots : 200, bons titres, 0 erreur SSR | idem + `/community` 211 837 o (3,84 Mo avant), `/settings` noindex |
+| Bots                | rg prêt, bot-azalee et bot-achillea 0 redémarrage                                                                 | idem                                                               |
+| Cron                | 13 tâches réussies, 0 échec                                                                                       | 16 tâches réussies, 0 échec                                        |
+| Rollback            | `/usr/local/bin/rg-core.63f281a4`, `apps/rg/old-cur`                                                              | `/usr/local/bin/rg-core.972fc663`, `apps/rg/old-cur`               |
 
 ## Données du wiki corrigées en prod (`rg-inagle-pg`)
 
@@ -76,14 +76,14 @@ Points ouverts transmis à l'agent de parité web Achilléa :
 
 ## Déploiements 3 et 4
 
-| | Déploiement 3 | Déploiement 4 |
-|---|---|---|
-| Commit | `c46860ba` | `a85cdedb` |
-| rg-core | redémarré 11:44:10 UTC, `cmp` = build | redémarré 20:09:37 UTC, `cmp` = build, NRestarts 0 |
-| rg-website BUILD_ID | `NBQTdKGMAmHmiobBBvJ_j` (11:53 UTC) | `4jmJfvtUOqqyh3TLvBCYl` (20:17:03 UTC) |
-| Pages publiques | 15 en 200, 0 erreur SSR, security.txt 200, plus de preconnect AdSense | 12 en 200 (dont `/design-system`), 0 erreur SSR |
+|                        | Déploiement 3                                                                                                                                          | Déploiement 4                                                  |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------- |
+| Commit                 | `c46860ba`                                                                                                                                             | `a85cdedb`                                                     |
+| rg-core                | redémarré 11:44:10 UTC, `cmp` = build                                                                                                                  | redémarré 20:09:37 UTC, `cmp` = build, NRestarts 0             |
+| rg-website BUILD_ID    | `NBQTdKGMAmHmiobBBvJ_j` (11:53 UTC)                                                                                                                    | `4jmJfvtUOqqyh3TLvBCYl` (20:17:03 UTC)                         |
+| Pages publiques        | 15 en 200, 0 erreur SSR, security.txt 200, plus de preconnect AdSense                                                                                  | 12 en 200 (dont `/design-system`), 0 erreur SSR                |
 | Stockage, objet absent | CDN 404 (nginx `rg-core.conf` installé, `nginx -t` OK, sauvegarde `~/backups/rg-core.conf.avant-404`) ; via le site : **504 après 120 s** (régression) | via le site : **404 en 1,65 s** ; objet existant 200 en 0,50 s |
-| Cron | n/a | 17 tâches réussies, 0 échec |
+| Cron                   | n/a                                                                                                                                                    | 17 tâches réussies, 0 échec                                    |
 
 Régression du déploiement 3 : la route de stockage attendait `body.cancel()` sur une branche du `tee()` que fait le `fetch` patché de Next ; cette promesse ne se résout qu'une fois l'autre branche annulée. Corrigé en `a72534b1` (test qui pend sans le correctif).
 

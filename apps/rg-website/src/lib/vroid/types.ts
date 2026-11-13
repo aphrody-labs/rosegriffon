@@ -133,7 +133,8 @@ export interface MetaVrm1 {
   commercialUsage?: "personalNonProfit" | "personalProfit" | "corporation";
   creditNotation?: "required" | "unnecessary";
   allowRedistribution?: boolean;
-  modification?: "prohibited" | "allowModification" | "allowModificationRedistribution";
+  modification?:
+    "prohibited" | "allowModification" | "allowModificationRedistribution";
   [cle: string]: unknown;
 }
 

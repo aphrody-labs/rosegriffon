@@ -27,7 +27,9 @@ export interface CommentWithProfile {
   profiles: CommentProfile | null;
 }
 
-export async function getPublicCommentProfile(userId: string): Promise<CommentProfile | null> {
+export async function getPublicCommentProfile(
+  userId: string,
+): Promise<CommentProfile | null> {
   const { data } = await createPostgresClient()
     .from("profiles")
     .select("username, avatar_url, role, badges")
@@ -69,7 +71,7 @@ export async function getCommentsAction(
       [targetId, targetType],
     );
 
-    const data: CommentWithProfile[] = rows.map(row => ({
+    const data: CommentWithProfile[] = rows.map((row) => ({
       content: row.content,
       created_at: row.created_at,
       id: row.id,
@@ -94,7 +96,11 @@ export async function getCommentsAction(
   }
 }
 
-export async function addCommentAction(targetId: string, targetType: string, content: string) {
+export async function addCommentAction(
+  targetId: string,
+  targetType: string,
+  content: string,
+) {
   const user = await getServerUser();
   if (!user) {
     return { error: "Vous devez être connecté pour publier un commentaire." };
@@ -159,14 +165,21 @@ export async function deleteCommentAction(commentId: string) {
   }
 
   if (comment.user_id !== user.id) {
-    const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).maybeSingle();
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .maybeSingle();
 
     if (profile?.role !== "admin" && profile?.role !== "staff") {
       return { error: "Vous n'êtes pas autorisé à supprimer ce commentaire." };
     }
   }
 
-  const { error } = await supabase.from("comments").delete().eq("id", commentId);
+  const { error } = await supabase
+    .from("comments")
+    .delete()
+    .eq("id", commentId);
 
   if (error) {
     console.error("Failed to delete comment:", error);
@@ -230,7 +243,9 @@ export async function getComments(
 
   const { data: rawComments, error } = await client
     .from("article_comments")
-    .select("id, content, is_edited, is_pinned, created_at, updated_at, parent_id, user_id")
+    .select(
+      "id, content, is_edited, is_pinned, created_at, updated_at, parent_id, user_id",
+    )
     .eq("article_id", articleId)
     .is("parent_id", null)
     .order("is_pinned", { ascending: false })
@@ -247,12 +262,19 @@ export async function getComments(
 
   const commentIds: string[] = rawComments.map((c: { id: string }) => c.id);
   const userIds: string[] = [
-    ...new Set<string>(rawComments.map((c: { user_id: string }) => c.user_id).filter(Boolean)),
+    ...new Set<string>(
+      rawComments.map((c: { user_id: string }) => c.user_id).filter(Boolean),
+    ),
   ];
 
   const profilesMap = new Map<
     string,
-    { id: string; username: string | null; full_name: string | null; avatar_url: string | null }
+    {
+      id: string;
+      username: string | null;
+      full_name: string | null;
+      avatar_url: string | null;
+    }
   >();
   if (userIds.length > 0) {
     const { data: profilesData } = await client
@@ -271,16 +293,22 @@ export async function getComments(
     }
   }
 
-  const { data: repliesData } = await client.from("article_comments").select("parent_id").in("parent_id", commentIds);
+  const { data: repliesData } = await client
+    .from("article_comments")
+    .select("parent_id")
+    .in("parent_id", commentIds);
 
   const replyCountMap = new Map<string, number>();
   if (repliesData) {
     for (const row of repliesData as Array<{ parent_id: string }>) {
-      replyCountMap.set(row.parent_id, (replyCountMap.get(row.parent_id) || 0) + 1);
+      replyCountMap.set(
+        row.parent_id,
+        (replyCountMap.get(row.parent_id) || 0) + 1,
+      );
     }
   }
 
-  const commentRefIds = commentIds.map(id => `comment:${id}`);
+  const commentRefIds = commentIds.map((id) => `comment:${id}`);
 
   const { data: likesData } = await client
     .from("article_reactions")
@@ -292,8 +320,14 @@ export async function getComments(
   const userLikedSet = new Set<string>();
 
   if (likesData) {
-    for (const row of likesData as Array<{ article_id: string; user_id: string }>) {
-      likesCountMap.set(row.article_id, (likesCountMap.get(row.article_id) || 0) + 1);
+    for (const row of likesData as Array<{
+      article_id: string;
+      user_id: string;
+    }>) {
+      likesCountMap.set(
+        row.article_id,
+        (likesCountMap.get(row.article_id) || 0) + 1,
+      );
       if (userId && row.user_id === userId) {
         userLikedSet.add(row.article_id);
       }
@@ -353,7 +387,9 @@ export async function getReplies(parentId: string): Promise<Reply[]> {
 
   const { data, error } = await client
     .from("article_comments")
-    .select("id, content, is_edited, is_pinned, created_at, updated_at, parent_id, user_id")
+    .select(
+      "id, content, is_edited, is_pinned, created_at, updated_at, parent_id, user_id",
+    )
     .eq("parent_id", parentId)
     .order("created_at", { ascending: true });
 
@@ -367,12 +403,21 @@ export async function getReplies(parentId: string): Promise<Reply[]> {
   }
 
   const userIds: string[] = [
-    ...new Set<string>((data as Array<{ user_id: string }>).map(c => c.user_id).filter(Boolean)),
+    ...new Set<string>(
+      (data as Array<{ user_id: string }>)
+        .map((c) => c.user_id)
+        .filter(Boolean),
+    ),
   ];
 
   const profilesMap = new Map<
     string,
-    { id: string; username: string | null; full_name: string | null; avatar_url: string | null }
+    {
+      id: string;
+      username: string | null;
+      full_name: string | null;
+      avatar_url: string | null;
+    }
   >();
   if (userIds.length > 0) {
     const { data: profilesData } = await client
@@ -402,7 +447,7 @@ export async function getReplies(parentId: string): Promise<Reply[]> {
       parent_id: string | null;
       user_id: string;
     }>
-  ).map(c => {
+  ).map((c) => {
     const prof = profilesMap.get(c.user_id);
     return {
       author: {
@@ -422,7 +467,11 @@ export async function getReplies(parentId: string): Promise<Reply[]> {
   });
 }
 
-export async function createComment(articleId: string, content: string, parentId?: string): Promise<Comment> {
+export async function createComment(
+  articleId: string,
+  content: string,
+  parentId?: string,
+): Promise<Comment> {
   const session = await getServerSession();
   if (!session?.user) {
     throw new Error("Non authentifié");
@@ -467,7 +516,9 @@ export async function createComment(articleId: string, content: string, parentId
       updated_at: now,
       user_id: userId,
     })
-    .select("id, content, is_edited, is_pinned, created_at, updated_at, parent_id, user_id")
+    .select(
+      "id, content, is_edited, is_pinned, created_at, updated_at, parent_id, user_id",
+    )
     .single();
 
   if (insertError || !inserted) {
@@ -512,7 +563,10 @@ export async function createComment(articleId: string, content: string, parentId
   };
 }
 
-export async function updateComment(commentId: string, content: string): Promise<Comment> {
+export async function updateComment(
+  commentId: string,
+  content: string,
+): Promise<Comment> {
   const session = await getServerSession();
   if (!session?.user) {
     throw new Error("Non authentifié");
@@ -549,7 +603,9 @@ export async function updateComment(commentId: string, content: string): Promise
       updated_at: new Date().toISOString(),
     })
     .eq("id", commentId)
-    .select("id, content, is_edited, is_pinned, created_at, updated_at, parent_id, user_id")
+    .select(
+      "id, content, is_edited, is_pinned, created_at, updated_at, parent_id, user_id",
+    )
     .single();
 
   if (updateError || !updated) {
@@ -558,8 +614,15 @@ export async function updateComment(commentId: string, content: string): Promise
   }
 
   const [{ count: replyCount }, { data: authorProfile }] = await Promise.all([
-    client.from("article_comments").select("id", { count: "exact", head: true }).eq("parent_id", commentId),
-    client.from("profiles").select("id, username, full_name, avatar_url").eq("id", userId).maybeSingle(),
+    client
+      .from("article_comments")
+      .select("id", { count: "exact", head: true })
+      .eq("parent_id", commentId),
+    client
+      .from("profiles")
+      .select("id, username, full_name, avatar_url")
+      .eq("id", userId)
+      .maybeSingle(),
   ]);
 
   const c = updated as {
@@ -615,14 +678,21 @@ export async function deleteComment(commentId: string): Promise<void> {
   }
 
   if (comment.user_id !== userId) {
-    const { data: profile } = await client.from("profiles").select("role").eq("id", userId).maybeSingle();
+    const { data: profile } = await client
+      .from("profiles")
+      .select("role")
+      .eq("id", userId)
+      .maybeSingle();
 
     if (!profile || !isAdminRole(profile.role)) {
       throw new Error("Non autorisé");
     }
   }
 
-  const { error: deleteError } = await client.from("article_comments").delete().eq("id", commentId);
+  const { error: deleteError } = await client
+    .from("article_comments")
+    .delete()
+    .eq("id", commentId);
 
   if (deleteError) {
     console.error("deleteComment error:", deleteError);
@@ -630,7 +700,9 @@ export async function deleteComment(commentId: string): Promise<void> {
   }
 }
 
-export async function pinComment(commentId: string): Promise<{ is_pinned: boolean }> {
+export async function pinComment(
+  commentId: string,
+): Promise<{ is_pinned: boolean }> {
   const session = await getServerSession();
   if (!session?.user) {
     throw new Error("Non authentifié");
@@ -641,7 +713,11 @@ export async function pinComment(commentId: string): Promise<{ is_pinned: boolea
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const client = supabase as any;
 
-  const { data: profile } = await client.from("profiles").select("role").eq("id", userId).maybeSingle();
+  const { data: profile } = await client
+    .from("profiles")
+    .select("role")
+    .eq("id", userId)
+    .maybeSingle();
 
   if (!profile || !isAdminRole(profile.role)) {
     throw new Error("Non autorisé");
@@ -691,7 +767,9 @@ export async function getCommentCount(articleId: string): Promise<number> {
   }
 }
 
-export async function getCommentCounts(articleIds: string[]): Promise<Record<string, number>> {
+export async function getCommentCounts(
+  articleIds: string[],
+): Promise<Record<string, number>> {
   if (articleIds.length === 0) {
     return {};
   }
@@ -720,7 +798,9 @@ export async function getCommentCounts(articleIds: string[]): Promise<Record<str
   }
 }
 
-export async function toggleCommentLike(commentId: string): Promise<{ liked: boolean; count: number }> {
+export async function toggleCommentLike(
+  commentId: string,
+): Promise<{ liked: boolean; count: number }> {
   const session = await getServerSession();
   if (!session?.user) {
     throw new Error("Non authentifié");

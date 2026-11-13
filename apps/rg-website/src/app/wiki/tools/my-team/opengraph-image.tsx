@@ -24,7 +24,8 @@ export default function OGImage() {
     <div
       style={{
         alignItems: "center",
-        background: "linear-gradient(135deg, #064e3b 0%, #065f46 50%, #047857 100%)",
+        background:
+          "linear-gradient(135deg, #064e3b 0%, #065f46 50%, #047857 100%)",
         display: "flex",
         flexDirection: "column",
         height: "100%",
@@ -90,7 +91,13 @@ export default function OGImage() {
         >
           Mon Équipe
         </div>
-        <div style={{ color: "rgba(255,255,255,0.6)", display: "flex", fontSize: 22 }}>
+        <div
+          style={{
+            color: "rgba(255,255,255,0.6)",
+            display: "flex",
+            fontSize: 22,
+          }}
+        >
           Créez votre équipe Inazuma Eleven idéale
         </div>
       </div>
@@ -104,7 +111,16 @@ export default function OGImage() {
           right: 60,
         }}
       >
-        <div style={{ color: "#F2A93B", display: "flex", fontSize: 28, fontWeight: 800 }}>Azalée</div>
+        <div
+          style={{
+            color: "#F2A93B",
+            display: "flex",
+            fontSize: 28,
+            fontWeight: 800,
+          }}
+        >
+          Azalée
+        </div>
       </div>
     </div>,
     { ...size },

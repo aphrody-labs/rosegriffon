@@ -50,7 +50,14 @@ import {
   type ChoixSondage,
   type ProjetSondage,
 } from "../../lib/sondage-creation";
-import { attention, echec, fiche, leJour, piedDeCommande, repondre } from "../../lib/ui";
+import {
+  attention,
+  echec,
+  fiche,
+  leJour,
+  piedDeCommande,
+  repondre,
+} from "../../lib/ui";
 import { differerEnPrive, exigerDroits, messagePanne } from "../staff/garde";
 import "./racine-gestion";
 
@@ -80,7 +87,9 @@ async function salonSuivi(salonId: string): Promise<boolean> {
 
 /** Un choix, tel que l'API des sondages l'attend. */
 function choixNatif(choix: ChoixSondage): PollData["answers"][number] {
-  return choix.emoji ? { emoji: choix.emoji.id ?? choix.emoji.name, text: choix.texte } : { text: choix.texte };
+  return choix.emoji
+    ? { emoji: choix.emoji.id ?? choix.emoji.name, text: choix.texte }
+    : { text: choix.texte };
 }
 
 /**
@@ -117,7 +126,11 @@ function recapitulatif(
   });
   carte.champ(
     "Choix",
-    projet.choix.map((choix, rang) => `**${rang + 1}.** ${choix.emojiTexte ?? ""} ${choix.texte}`.trim()).join("\n"),
+    projet.choix
+      .map((choix, rang) =>
+        `**${rang + 1}.** ${choix.emojiTexte ?? ""} ${choix.texte}`.trim(),
+      )
+      .join("\n"),
   );
   carte.champ("Clôture", leJour(clotureDe(projet), "F"), { enLigne: true });
   carte.champ("Vote", libelleRegleDeVote(projet), { enLigne: true });
@@ -129,7 +142,10 @@ function recapitulatif(
           "mais ne sera **jamais archivé** sur le site.",
   );
   if (avertissements.length > 0) {
-    carte.champ("Ajustements", avertissements.map(texte => `- ${texte}`).join("\n"));
+    carte.champ(
+      "Ajustements",
+      avertissements.map((texte) => `- ${texte}`).join("\n"),
+    );
   }
   return piedDeCommande(carte.embed, interaction);
 }
@@ -143,7 +159,8 @@ function recapitulatif(
 @SlashGroup("sondage", "gestion")
 export class GestionSondageCommand {
   @Slash({
-    description: "Publier un sondage natif Discord (archivé ensuite sur le site)",
+    description:
+      "Publier un sondage natif Discord (archivé ensuite sur le site)",
     name: "creer",
   })
   async creer(
@@ -157,7 +174,8 @@ export class GestionSondageCommand {
     })
     question: string,
     @SlashOption({
-      description: "Les choix, séparés par « ; » — un emoji en tête devient l'emoji du choix",
+      description:
+        "Les choix, séparés par « ; » — un emoji en tête devient l'emoji du choix",
       minLength: 1,
       name: "choix",
       required: true,
@@ -165,14 +183,16 @@ export class GestionSondageCommand {
     })
     choix: string,
     @SlashOption({
-      description: "Durée : 12h, 3j, 1 semaine… (24 h par défaut, 32 jours au maximum)",
+      description:
+        "Durée : 12h, 3j, 1 semaine… (24 h par défaut, 32 jours au maximum)",
       name: "duree",
       required: false,
       type: ApplicationCommandOptionType.String,
     })
     duree: string | undefined,
     @SlashOption({
-      description: "Autoriser plusieurs choix par personne (un seul par défaut)",
+      description:
+        "Autoriser plusieurs choix par personne (un seul par défaut)",
       name: "multiple",
       required: false,
       type: ApplicationCommandOptionType.Boolean,
@@ -196,14 +216,21 @@ export class GestionSondageCommand {
 
     const preparation = preparerSondage({ choix, duree, multiple, question });
     if (!preparation.ok) {
-      await repondre(interaction, echec("Sondage refusé", preparation.erreurs.map(erreur => `- ${erreur}`).join("\n")));
+      await repondre(
+        interaction,
+        echec(
+          "Sondage refusé",
+          preparation.erreurs.map((erreur) => `- ${erreur}`).join("\n"),
+        ),
+      );
       return;
     }
 
     // `interaction.channel` peut être `null` quand la commande est lancée
     // depuis un salon que le bot ne voit pas en cache ; on le dit plutôt que
     // de laisser un `Cannot read properties of null`.
-    const cible = salon ?? (interaction.channel as GuildTextBasedChannel | null);
+    const cible =
+      salon ?? (interaction.channel as GuildTextBasedChannel | null);
     if (!cible || !("send" in cible)) {
       await repondre(
         interaction,
@@ -216,7 +243,9 @@ export class GestionSondageCommand {
     }
 
     try {
-      const message = await cible.send({ poll: sondageNatif(preparation.projet) });
+      const message = await cible.send({
+        poll: sondageNatif(preparation.projet),
+      });
       const archive = await salonSuivi(cible.id).catch(() => false);
 
       await logAdminAction({
@@ -234,7 +263,15 @@ export class GestionSondageCommand {
       });
 
       await interaction.editReply({
-        embeds: [recapitulatif(interaction, preparation.projet, message, preparation.avertissements, archive)],
+        embeds: [
+          recapitulatif(
+            interaction,
+            preparation.projet,
+            message,
+            preparation.avertissements,
+            archive,
+          ),
+        ],
       });
     } catch (err) {
       await repondre(
@@ -254,7 +291,8 @@ export class GestionSondageCommand {
   })
   async cloturer(
     @SlashOption({
-      description: "Lien du message du sondage (clic droit → Copier le lien) ou son identifiant",
+      description:
+        "Lien du message du sondage (clic droit → Copier le lien) ou son identifiant",
       name: "message",
       required: true,
       type: ApplicationCommandOptionType.String,
@@ -298,7 +336,10 @@ export class GestionSondageCommand {
       if (!cible || !cible.isTextBased()) {
         await repondre(
           interaction,
-          echec("Salon illisible", "Ce salon n'est pas un salon textuel, ou le bot n'y a pas accès."),
+          echec(
+            "Salon illisible",
+            "Ce salon n'est pas un salon textuel, ou le bot n'y a pas accès.",
+          ),
         );
         return;
       }
@@ -359,7 +400,9 @@ export class GestionSondageCommand {
         titre: "Sondage clos",
         url: message.url,
       });
-      await interaction.editReply({ embeds: [piedDeCommande(carte.embed, interaction)] });
+      await interaction.editReply({
+        embeds: [piedDeCommande(carte.embed, interaction)],
+      });
     } catch (err) {
       await repondre(
         interaction,

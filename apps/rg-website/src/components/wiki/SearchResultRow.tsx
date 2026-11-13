@@ -8,7 +8,10 @@ import { Icon } from "@/components/ui/Icon";
 import { RarityBadge } from "@/components/ui/rarity-badge";
 import { SearchResultHighlight } from "@/components/wiki/SearchResultHighlight";
 import { getSkillElementIconUrl } from "@rosegriffon/azalee/images";
-import { LANG_BADGE_STYLES, TYPE_LABELS } from "@rosegriffon/azalee/search/search-ui-config";
+import {
+  LANG_BADGE_STYLES,
+  TYPE_LABELS,
+} from "@rosegriffon/azalee/search/search-ui-config";
 import { cn } from "@/lib/utils";
 
 interface SearchResultRowProps {
@@ -24,7 +27,12 @@ interface SearchResultRowProps {
  * In compact mode, renders as a <div> (for use inside CommandItem which is already interactive).
  * In normal mode, renders as a <button>.
  */
-export function SearchResultRow({ result, query, onClick, compact }: SearchResultRowProps) {
+export function SearchResultRow({
+  result,
+  query,
+  onClick,
+  compact,
+}: SearchResultRowProps) {
   const thumbSize = compact ? 36 : 40;
   const thumbClass = compact ? "size-9" : "size-10";
 
@@ -45,7 +53,7 @@ export function SearchResultRow({ result, query, onClick, compact }: SearchResul
             height={thumbSize}
             className={cn(thumbClass, "object-cover")}
             unoptimized
-            onError={e => {
+            onError={(e) => {
               const img = e.target as HTMLImageElement;
               img.style.display = "none";
               img.parentElement?.classList.add("search-img-fallback");
@@ -60,7 +68,11 @@ export function SearchResultRow({ result, query, onClick, compact }: SearchResul
             "bg-surface-container-high flex items-center justify-center shrink-0",
           )}
         >
-          <Icon name={result.icon} size={compact ? 18 : 20} className="text-primary" />
+          <Icon
+            name={result.icon}
+            size={compact ? 18 : 20}
+            className="text-primary"
+          />
         </div>
       )}
 
@@ -70,7 +82,9 @@ export function SearchResultRow({ result, query, onClick, compact }: SearchResul
           <span
             className={cn(
               "truncate",
-              compact ? "font-medium text-sm text-[var(--md-sys-color-on-surface)]" : "type-body-large text-on-surface",
+              compact
+                ? "font-medium text-sm text-[var(--md-sys-color-on-surface)]"
+                : "type-body-large text-on-surface",
             )}
           >
             <SearchResultHighlight text={result.title} query={query} />
@@ -102,7 +116,10 @@ export function SearchResultRow({ result, query, onClick, compact }: SearchResul
               alt={result.element}
               width={compact ? 12 : 14}
               height={compact ? 12 : 14}
-              className={cn(compact ? "size-3" : "size-3.5", "object-contain shrink-0")}
+              className={cn(
+                compact ? "size-3" : "size-3.5",
+                "object-contain shrink-0",
+              )}
               unoptimized
             />
           )}
@@ -130,14 +147,22 @@ export function SearchResultRow({ result, query, onClick, compact }: SearchResul
           className="shrink-0 text-[var(--md-sys-color-on-surface-variant)] opacity-0 group-data-[selected=true]:opacity-100 transition-opacity"
         />
       ) : (
-        <ArrowUpLeft size={18} aria-hidden="true" className="shrink-0 text-on-surface-variant/30" />
+        <ArrowUpLeft
+          size={18}
+          aria-hidden="true"
+          className="shrink-0 text-on-surface-variant/30"
+        />
       )}
     </>
   );
 
   // Compact mode: render as div (avoids nested button inside CommandItem)
   if (compact) {
-    return <div className="flex items-center gap-3 w-full text-left py-2.5 px-2">{content}</div>;
+    return (
+      <div className="flex items-center gap-3 w-full text-left py-2.5 px-2">
+        {content}
+      </div>
+    );
   }
 
   return (

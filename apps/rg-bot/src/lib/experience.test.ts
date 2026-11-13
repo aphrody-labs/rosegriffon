@@ -78,7 +78,9 @@ describe("courbe d'expérience", () => {
   test("cent paliers, strictement croissants", () => {
     expect(PALIERS_EXPERIENCE).toHaveLength(100);
     for (let index = 1; index < PALIERS_EXPERIENCE.length; index++) {
-      expect(PALIERS_EXPERIENCE[index]).toBeGreaterThan(PALIERS_EXPERIENCE[index - 1] as number);
+      expect(PALIERS_EXPERIENCE[index]).toBeGreaterThan(
+        PALIERS_EXPERIENCE[index - 1] as number,
+      );
     }
   });
 
@@ -160,7 +162,12 @@ describe("niveaux franchis", () => {
 
 describe("rangs", () => {
   test("les quatre libellés viennent des données FR du jeu", () => {
-    expect(RANGS.map(rang => rang.nom)).toEqual(["Normal", "Expérimenté", "Héros", "BASARA"]);
+    expect(RANGS.map((rang) => rang.nom)).toEqual([
+      "Normal",
+      "Expérimenté",
+      "Héros",
+      "BASARA",
+    ]);
   });
 
   test("chaque niveau tombe dans un rang, bornes comprises", () => {
@@ -209,7 +216,9 @@ describe("filtre d'annonce", () => {
     expect(meriteAnnonce(19, 20, { palier: 100 })).toBe(true);
     expect(meriteAnnonce(49, 50, { palier: 100 })).toBe(true);
     expect(meriteAnnonce(79, 80, { palier: 100 })).toBe(true);
-    expect(meriteAnnonce(19, 20, { annoncerRang: false, palier: 100 })).toBe(false);
+    expect(meriteAnnonce(19, 20, { annoncerRang: false, palier: 100 })).toBe(
+      false,
+    );
   });
 
   test("palier 1 rétablit l'annonce à chaque niveau", () => {
@@ -218,7 +227,9 @@ describe("filtre d'annonce", () => {
 
   test("un palier aberrant ne fait pas tout passer", () => {
     expect(meriteAnnonce(6, 7, { annoncerRang: false, palier: 0 })).toBe(true);
-    expect(meriteAnnonce(6, 7, { annoncerRang: false, palier: Number.NaN })).toBe(false);
+    expect(
+      meriteAnnonce(6, 7, { annoncerRang: false, palier: Number.NaN }),
+    ).toBe(false);
   });
 });
 
@@ -240,7 +251,9 @@ describe("gain d'un message", () => {
   });
 
   test("une fourchette inversée ne rend jamais moins que son minimum", () => {
-    expect(gainDeMessage({ delaiSecondes: 60, maximum: 5, minimum: 20 }, 0.9)).toBe(20);
+    expect(
+      gainDeMessage({ delaiSecondes: 60, maximum: 5, minimum: 20 }, 0.9),
+    ).toBe(20);
   });
 
   test("un tirage aberrant ne casse pas le gain", () => {
@@ -256,8 +269,12 @@ describe("gain d'un message", () => {
 
   test("le délai anti-spam se compte à la seconde près", () => {
     const maintenant = new Date("2026-08-14T12:01:00.000Z");
-    expect(messageEligible("2026-08-14T12:00:00.000Z", maintenant, 60)).toBe(true);
-    expect(messageEligible("2026-08-14T12:00:01.000Z", maintenant, 60)).toBe(false);
+    expect(messageEligible("2026-08-14T12:00:00.000Z", maintenant, 60)).toBe(
+      true,
+    );
+    expect(messageEligible("2026-08-14T12:00:01.000Z", maintenant, 60)).toBe(
+      false,
+    );
   });
 
   test("les points de montée croissent avec le niveau", () => {

@@ -22,7 +22,9 @@ import {
 } from "./achillea-format";
 import type { RoleAchillea, SalonAchillea } from "../services/achillea";
 
-const role = (p: Partial<RoleAchillea> & { id: string; name: string }): RoleAchillea => ({
+const role = (
+  p: Partial<RoleAchillea> & { id: string; name: string },
+): RoleAchillea => ({
   color: 0,
   hoist: false,
   managed: false,
@@ -32,7 +34,9 @@ const role = (p: Partial<RoleAchillea> & { id: string; name: string }): RoleAchi
   ...p,
 });
 
-const salon = (p: Partial<SalonAchillea> & { id: string; name: string; type: number }): SalonAchillea => ({
+const salon = (
+  p: Partial<SalonAchillea> & { id: string; name: string; type: number },
+): SalonAchillea => ({
   nsfw: false,
   parent_id: null,
   position: 0,
@@ -59,7 +63,7 @@ describe("rôles", () => {
       role({ id: "2".repeat(18), name: "Membre", position: 1 }),
       role({ id: "3".repeat(18), name: "Administrateur", position: 50 }),
     ]);
-    expect(liste.map(r => r.name)).toEqual(["Administrateur", "Membre"]);
+    expect(liste.map((r) => r.name)).toEqual(["Administrateur", "Membre"]);
   });
 
   test("les rôles d'intégration sont comptés à part", () => {
@@ -96,27 +100,42 @@ describe("salons", () => {
     const categorie = "4".repeat(18);
     const groupes = grouperParCategorie([
       salon({ id: categorie, name: "Informations", type: 4 }),
-      salon({ id: "5".repeat(18), name: "regles", type: 0, parent_id: categorie, position: 1 }),
-      salon({ id: "6".repeat(18), name: "annonces", type: 0, parent_id: categorie, position: 0 }),
+      salon({
+        id: "5".repeat(18),
+        name: "regles",
+        type: 0,
+        parent_id: categorie,
+        position: 1,
+      }),
+      salon({
+        id: "6".repeat(18),
+        name: "annonces",
+        type: 0,
+        parent_id: categorie,
+        position: 0,
+      }),
       salon({ id: "7".repeat(18), name: "bienvenue", type: 0 }),
     ]);
 
     // Les salons sans catégorie viennent en tête, comme dans Discord.
     expect(groupes[0]?.categorie).toBeNull();
-    expect(groupes[0]?.salons.map(s => s.name)).toEqual(["bienvenue"]);
+    expect(groupes[0]?.salons.map((s) => s.name)).toEqual(["bienvenue"]);
 
-    const info = groupes.find(g => g.categorie === "Informations");
+    const info = groupes.find((g) => g.categorie === "Informations");
     expect(info).toBeDefined();
     // Ordre interne = position, pas ordre d'arrivée.
-    expect(info?.salons.map(s => s.name)).toEqual(["annonces", "regles"]);
+    expect(info?.salons.map((s) => s.name)).toEqual(["annonces", "regles"]);
     // La catégorie ne se contient pas elle-même.
-    expect(groupes.some(g => g.salons.some(s => s.type === 4))).toBe(false);
+    expect(groupes.some((g) => g.salons.some((s) => s.type === 4))).toBe(false);
   });
 });
 
 describe("découpage pour un embed", () => {
   test("un bloc ne dépasse jamais la limite d'un champ, mention de troncature comprise", () => {
-    const lignes = Array.from({ length: 102 }, (_, i) => `#${i} ${"nom-de-role-assez-long".repeat(2)}`);
+    const lignes = Array.from(
+      { length: 102 },
+      (_, i) => `#${i} ${"nom-de-role-assez-long".repeat(2)}`,
+    );
     const bloc = bloquerLignes(lignes);
     expect(bloc.length).toBeLessThanOrEqual(LIMITE_CHAMP);
     // Et il DIT ce qu'il a coupé : un décompte de 102 dans le titre avec quarante

@@ -10,14 +10,20 @@
  */
 import { describe, expect, test } from "bun:test";
 
-import { CATALOGUE_TACHES, normaliserNomTache, TACHES_CRON } from "@rosegriffon/types/cron";
+import {
+  CATALOGUE_TACHES,
+  normaliserNomTache,
+  TACHES_CRON,
+} from "@rosegriffon/types/cron";
 import { REGISTRE_TACHES } from "./registry";
 
 const CLEFS = new Set(Object.keys(REGISTRE_TACHES).map(normaliserNomTache));
 
 describe("catalogue partagé vs registre", () => {
   test("toute tâche du catalogue a un exécutant dans le registre", () => {
-    const orphelines = TACHES_CRON.filter(nom => !CLEFS.has(normaliserNomTache(nom)));
+    const orphelines = TACHES_CRON.filter(
+      (nom) => !CLEFS.has(normaliserNomTache(nom)),
+    );
     expect(orphelines).toEqual([]);
   });
 
@@ -28,7 +34,9 @@ describe("catalogue partagé vs registre", () => {
   test("les entrées du registre absentes du catalogue sont connues et assumées", () => {
     const catalogue = new Set(TACHES_CRON.map(normaliserNomTache));
     const tolerees = new Set(["discord:archives", "x", "x:search"]);
-    const surplus = [...CLEFS].filter(nom => !catalogue.has(nom) && !tolerees.has(nom));
+    const surplus = [...CLEFS].filter(
+      (nom) => !catalogue.has(nom) && !tolerees.has(nom),
+    );
     expect(surplus).toEqual([]);
   });
 });

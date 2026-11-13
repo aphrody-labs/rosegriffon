@@ -8,8 +8,18 @@ import type { Database } from "@rosegriffon/db/schema";
 import { rebuildTournamentBracket, tournamentBracketData } from "./bracket";
 import { applyPlacementPrizes } from "./placement";
 import { demarrerTournoi } from "./start";
-import { finaliserPropagation, forfaiterLobbysOuverts, propagerDansTransaction, resumeSerie } from "./progression";
-import { circuitRanking, circuitStats, playerCircuitProfile, tournamentSummary } from "./circuit";
+import {
+  finaliserPropagation,
+  forfaiterLobbysOuverts,
+  propagerDansTransaction,
+  resumeSerie,
+} from "./progression";
+import {
+  circuitRanking,
+  circuitStats,
+  playerCircuitProfile,
+  tournamentSummary,
+} from "./circuit";
 import { verifyAdminBearerToken } from "@rosegriffon/achillea-core/auth";
 
 type LobbyAccess = {
@@ -36,7 +46,14 @@ async function lobbyAccess(
   const lobby = await db
     .selectFrom("lobby as l")
     .innerJoin("event as e", "e.id", "l.event_id")
-    .select(["l.id", "l.state", "l.event_id", "l.event_type", "e.score_report_policy", "e.organization_id"])
+    .select([
+      "l.id",
+      "l.state",
+      "l.event_id",
+      "l.event_type",
+      "e.score_report_policy",
+      "e.organization_id",
+    ])
     .where("l.id", "=", lobbyId)
     .executeTakeFirst();
   if (!lobby) return { notFound: true };
@@ -49,7 +66,11 @@ async function lobbyAccess(
   let isOrganizer = false;
   if (lobby.event_type === "TOURNAMENT" && lobby.organization_id !== null) {
     const [actor, manager, owner] = await Promise.all([
-      db.selectFrom("user").select("role").where("id", "=", session.id).executeTakeFirst(),
+      db
+        .selectFrom("user")
+        .select("role")
+        .where("id", "=", session.id)
+        .executeTakeFirst(),
       db
         .selectFrom("organization_manager")
         .select("organization_id")
@@ -73,10 +94,16 @@ function isLobbyFinished(state: string): boolean {
 }
 
 function canReport(access: LobbyAccess): boolean {
-  return access.isOrganizer || access.lobby.score_report_policy !== "staff_only";
+  return (
+    access.isOrganizer || access.lobby.score_report_policy !== "staff_only"
+  );
 }
 
-async function serializeLobby(db: Kysely<Database>, lobbyId: number, byBracket: boolean) {
+async function serializeLobby(
+  db: Kysely<Database>,
+  lobbyId: number,
+  byBracket: boolean,
+) {
   const lobby = await db
     .selectFrom("lobby")
     .selectAll()
@@ -87,28 +114,48 @@ async function serializeLobby(db: Kysely<Database>, lobbyId: number, byBracket: 
     db
       .selectFrom("lobby_user as lu")
       .innerJoin("user as u", "u.id", "lu.user_id")
-      .select(["lu.id", "lu.team", "lu.forfeit", "lu.state", "u.id as user_id", "u.display_name", "u.avatar"])
+      .select([
+        "lu.id",
+        "lu.team",
+        "lu.forfeit",
+        "lu.state",
+        "u.id as user_id",
+        "u.display_name",
+        "u.avatar",
+      ])
       .where("lu.lobby_id", "=", lobby.id)
       .orderBy("lu.team", "asc")
       .orderBy("lu.id", "asc")
       .execute(),
-    db.selectFrom("lobby_match").selectAll().where("lobby_id", "=", lobby.id).orderBy("game_number", "asc").execute(),
+    db
+      .selectFrom("lobby_match")
+      .selectAll()
+      .where("lobby_id", "=", lobby.id)
+      .orderBy("game_number", "asc")
+      .execute(),
   ]);
-  const host = lobby.host_user_id === null ? null : (users.find(user => user.id === lobby.host_user_id) ?? null);
+  const host =
+    lobby.host_user_id === null
+      ? null
+      : (users.find((user) => user.id === lobby.host_user_id) ?? null);
   return {
     id: Number(lobby.id),
     mode: Number(lobby.mode),
     state: lobby.state,
     bracketMatchId: lobby.bracket_match_id,
     matchFormat: lobby.match_format,
-    lobbyUsers: users.map(user => ({
+    lobbyUsers: users.map((user) => ({
       id: Number(user.id),
       team: Number(user.team),
       forfeit: user.forfeit,
       state: user.state,
-      user: { id: user.user_id, displayName: user.display_name, avatar: user.avatar ?? "" },
+      user: {
+        id: user.user_id,
+        displayName: user.display_name,
+        avatar: user.avatar ?? "",
+      },
     })),
-    lobbyMatches: matches.map(match => ({
+    lobbyMatches: matches.map((match) => ({
       id: Number(match.id),
       gameNumber: match.game_number,
       scoreTeam1: match.score_team1,
@@ -123,23 +170,46 @@ async function serializeLobby(db: Kysely<Database>, lobbyId: number, byBracket: 
           team: Number(host.team),
           forfeit: host.forfeit,
           state: host.state,
-          user: { id: host.user_id, displayName: host.display_name, avatar: host.avatar ?? "" },
+          user: {
+            id: host.user_id,
+            displayName: host.display_name,
+            avatar: host.avatar ?? "",
+          },
         }
       : null,
   };
 }
 
-async function organizer(db: Kysely<Database>, headers: { authorization?: string; cookie?: string }, id: number) {
+async function organizer(
+  db: Kysely<Database>,
+  headers: { authorization?: string; cookie?: string },
+  id: number,
+) {
   const session = await resolveAchilleaSession(headers);
-  if (!session) return { error: status(401, { message: "Authentication required" as const }) };
+  if (!session)
+    return {
+      error: status(401, { message: "Authentication required" as const }),
+    };
   const tournament = await db
     .selectFrom("event")
-    .select(["id", "organization_id", "internal_state", "type", "tournament_type", "participants_number"])
+    .select([
+      "id",
+      "organization_id",
+      "internal_state",
+      "type",
+      "tournament_type",
+      "participants_number",
+    ])
     .where("id", "=", id)
     .where("type", "=", "TOURNAMENT")
     .executeTakeFirst();
-  if (!tournament) return { error: status(404, { message: "Tournament not found" as const }) };
-  const actor = await db.selectFrom("user").select("role").where("id", "=", session.id).executeTakeFirst();
+  if (!tournament)
+    return { error: status(404, { message: "Tournament not found" as const }) };
+  const actor = await db
+    .selectFrom("user")
+    .select("role")
+    .where("id", "=", session.id)
+    .executeTakeFirst();
   const manager =
     tournament.organization_id === null
       ? null
@@ -165,7 +235,9 @@ async function organizer(db: Kysely<Database>, headers: { authorization?: string
     .where("user_id", "=", session.id)
     .executeTakeFirst();
   if (!actor || (actor.role < 2 && !manager && !owner && !eventManager))
-    return { error: status(403, { message: "Tournament organizer required" as const }) };
+    return {
+      error: status(403, { message: "Tournament organizer required" as const }),
+    };
   return { session, tournament };
 }
 
@@ -176,11 +248,16 @@ async function seedingTournament(db: Kysely<Database>, id: number) {
     .where("id", "=", id)
     .where("type", "=", "TOURNAMENT")
     .executeTakeFirst();
-  if (!tournament) return { error: status(404, { message: "Tournament not found" as const }) };
-  if (tournament.internal_state !== "Preregistering" && tournament.internal_state !== "Preparing")
+  if (!tournament)
+    return { error: status(404, { message: "Tournament not found" as const }) };
+  if (
+    tournament.internal_state !== "Preregistering" &&
+    tournament.internal_state !== "Preparing"
+  )
     return {
       error: status(400, {
-        message: "Seeding is only editable during registration or preparation" as const,
+        message:
+          "Seeding is only editable during registration or preparation" as const,
       }),
     };
   return { tournament };
@@ -209,22 +286,33 @@ async function activeParticipants(db: Kysely<Database>, tournamentId: number) {
   return db
     .selectFrom("tournament_participant as p")
     .innerJoin("user as u", "u.id", "p.user_id")
-    .select(["p.id", "p.user_id", "p.seed", "p.status", "u.display_name", "u.username"])
+    .select([
+      "p.id",
+      "p.user_id",
+      "p.seed",
+      "p.status",
+      "u.display_name",
+      "u.username",
+    ])
     .where("p.tournament_id", "=", tournamentId)
     .where("p.status", "=", "Active")
     .orderBy("p.id", "asc")
     .execute();
 }
 
-async function assignSeeds(db: Kysely<Database>, participants: Array<{ id: number }>, cap: number) {
-  await db.transaction().execute(async trx => {
+async function assignSeeds(
+  db: Kysely<Database>,
+  participants: Array<{ id: number }>,
+  cap: number,
+) {
+  await db.transaction().execute(async (trx) => {
     await trx
       .updateTable("tournament_participant")
       .set({ seed: null, updated_at: new Date() })
       .where(
         "id",
         "in",
-        participants.map(participant => participant.id),
+        participants.map((participant) => participant.id),
       )
       .execute();
     for (const [index, participant] of participants.entries()) {
@@ -280,7 +368,7 @@ export const tournamentController = new Elysia({ prefix: "/tournaments" })
         .where("registration_opens_at", "<=", now)
         .execute();
       for (const tournament of openDue) {
-        await db.transaction().execute(async trx => {
+        await db.transaction().execute(async (trx) => {
           const current = await trx
             .selectFrom("event")
             .select("internal_state")
@@ -304,7 +392,11 @@ export const tournamentController = new Elysia({ prefix: "/tournaments" })
               reason: null,
             })
             .execute();
-          transitions.push({ tournamentId: tournament.id, from: "Pending", to: "Preregistering" });
+          transitions.push({
+            tournamentId: tournament.id,
+            from: "Pending",
+            to: "Preregistering",
+          });
         });
       }
 
@@ -320,9 +412,11 @@ export const tournamentController = new Elysia({ prefix: "/tournaments" })
         // Bracket construction is already Kysely-owned by this module. The
         // state transition and event are committed only after a successful
         // rebuild, keeping retries idempotent.
-        const rebuilt = await rebuildTournamentBracket(db, tournament.id).catch(() => false);
+        const rebuilt = await rebuildTournamentBracket(db, tournament.id).catch(
+          () => false,
+        );
         if (!rebuilt && tournament.tournament_type !== "league") continue;
-        await db.transaction().execute(async trx => {
+        await db.transaction().execute(async (trx) => {
           const current = await trx
             .selectFrom("event")
             .select("internal_state")
@@ -346,7 +440,11 @@ export const tournamentController = new Elysia({ prefix: "/tournaments" })
               reason: null,
             })
             .execute();
-          transitions.push({ tournamentId: tournament.id, from: "Preregistering", to: "Preparing" });
+          transitions.push({
+            tournamentId: tournament.id,
+            from: "Preregistering",
+            to: "Preparing",
+          });
         });
       }
       const startCandidates = await db
@@ -358,17 +456,28 @@ export const tournamentController = new Elysia({ prefix: "/tournaments" })
         .where("starts_at", "is not", null)
         .where("starts_at", "<=", now)
         .execute();
-      return { transitions, startCandidates: startCandidates.map(({ id }) => id) };
+      return {
+        transitions,
+        startCandidates: startCandidates.map(({ id }) => id),
+      };
     },
     {
       body: t.Optional(t.Object({ now: t.Optional(t.String()) })),
       response: {
         200: t.Object({
-          transitions: t.Array(t.Object({ tournamentId: t.Number(), from: t.String(), to: t.String() })),
+          transitions: t.Array(
+            t.Object({
+              tournamentId: t.Number(),
+              from: t.String(),
+              to: t.String(),
+            }),
+          ),
           startCandidates: t.Array(t.Number()),
         }),
         400: t.Object({ message: t.Literal("Invalid transition timestamp") }),
-        401: t.Object({ message: t.Literal("Internal authentication required") }),
+        401: t.Object({
+          message: t.Literal("Internal authentication required"),
+        }),
       },
     },
   )
@@ -376,10 +485,13 @@ export const tournamentController = new Elysia({ prefix: "/tournaments" })
     "/create/achillea",
     async ({ db, headers, body }) => {
       const session = await resolveAchilleaSession(headers);
-      if (!session) return status(401, { message: "Authentication required" as const });
+      if (!session)
+        return status(401, { message: "Authentication required" as const });
       const input = body as Record<string, any>;
       const organizationId =
-        typeof input.organization === "number" ? input.organization : Number(input.organization?.id);
+        typeof input.organization === "number"
+          ? input.organization
+          : Number(input.organization?.id);
       if (!Number.isInteger(organizationId) || organizationId <= 0)
         return status(400, { message: "Organization is required" as const });
       const organization = await db
@@ -387,16 +499,26 @@ export const tournamentController = new Elysia({ prefix: "/tournaments" })
         .select(["id", "owner_id"])
         .where("id", "=", organizationId)
         .executeTakeFirst();
-      if (!organization) return status(404, { message: "Organization not found" as const });
-      const actor = await db.selectFrom("user").select("role").where("id", "=", session.id).executeTakeFirst();
+      if (!organization)
+        return status(404, { message: "Organization not found" as const });
+      const actor = await db
+        .selectFrom("user")
+        .select("role")
+        .where("id", "=", session.id)
+        .executeTakeFirst();
       const manager = await db
         .selectFrom("organization_manager")
         .select("organization_id")
         .where("organization_id", "=", organizationId)
         .where("user_id", "=", session.id)
         .executeTakeFirst();
-      if (!actor || (actor.role < 2 && organization.owner_id !== session.id && !manager))
-        return status(403, { message: "Organization manager required" as const });
+      if (
+        !actor ||
+        (actor.role < 2 && organization.owner_id !== session.id && !manager)
+      )
+        return status(403, {
+          message: "Organization manager required" as const,
+        });
       const startsAt = new Date(input.startsAt);
       const grandFinalAt = new Date(input.grandFinalAt);
       if (
@@ -438,8 +560,12 @@ export const tournamentController = new Elysia({ prefix: "/tournaments" })
           match_format: input.matchFormat ?? null,
           custom_format_child_count: input.customFormatChildCount ?? null,
           score_report_policy: input.scoreReportPolicy ?? "players",
-          registration_opens_at: input.registrationOpensAt ? new Date(input.registrationOpensAt) : null,
-          registration_closes_at: input.registrationClosesAt ? new Date(input.registrationClosesAt) : null,
+          registration_opens_at: input.registrationOpensAt
+            ? new Date(input.registrationOpensAt)
+            : null,
+          registration_closes_at: input.registrationClosesAt
+            ? new Date(input.registrationClosesAt)
+            : null,
           auto_start: Boolean(input.autoStart),
           discord_role_enabled: Boolean(input.discordRoleEnabled),
           discord_role_id: null,
@@ -452,7 +578,9 @@ export const tournamentController = new Elysia({ prefix: "/tournaments" })
         .executeTakeFirstOrThrow();
       const managerIds = Array.isArray(input.managers)
         ? input.managers
-            .map((manager: any) => (typeof manager === "string" ? manager : manager?.id))
+            .map((manager: any) =>
+              typeof manager === "string" ? manager : manager?.id,
+            )
             .filter((id: unknown): id is string => typeof id === "string")
         : [];
       if (!managerIds.includes(session.id)) managerIds.push(session.id);
@@ -460,12 +588,12 @@ export const tournamentController = new Elysia({ prefix: "/tournaments" })
         await db
           .insertInto("event_managers")
           .values(
-            managerIds.map(userId => ({
+            managerIds.map((userId) => ({
               event_id: row.id,
               user_id: userId,
             })) as any,
           )
-          .onConflict(oc => oc.doNothing())
+          .onConflict((oc) => oc.doNothing())
           .execute();
       return row;
     },
@@ -489,20 +617,26 @@ export const tournamentController = new Elysia({ prefix: "/tournaments" })
       if (editable.error) return editable.error;
       const input = (body as any)?.participant ?? body;
       const participantId = Number(input?.id);
-      if (!Number.isInteger(participantId)) return status(400, { message: "Participant id is required" as const });
+      if (!Number.isInteger(participantId))
+        return status(400, { message: "Participant id is required" as const });
       const participant = await db
         .selectFrom("tournament_participant")
         .select(["id", "user_id", "seed", "status"])
         .where("id", "=", participantId)
         .where("tournament_id", "=", id)
         .executeTakeFirst();
-      if (!participant) return status(404, { message: "Participant not found" as const });
-      if (participant.status !== "Active") return status(400, { message: "Participant is not active" as const });
+      if (!participant)
+        return status(404, { message: "Participant not found" as const });
+      if (participant.status !== "Active")
+        return status(400, { message: "Participant is not active" as const });
       const requested = Number(input?.seed);
-      const newSeed = Number.isInteger(requested) && requested > 0 ? requested : null;
+      const newSeed =
+        Number.isInteger(requested) && requested > 0 ? requested : null;
       const capacity = editable.tournament.participants_number ?? 0;
       if (newSeed !== null && (capacity <= 0 || newSeed > capacity))
-        return status(400, { message: "Seed is outside tournament capacity" as const });
+        return status(400, {
+          message: "Seed is outside tournament capacity" as const,
+        });
       let swappedWith: string | null = null;
       if (newSeed !== null) {
         const occupant = await db
@@ -527,7 +661,9 @@ export const tournamentController = new Elysia({ prefix: "/tournaments" })
         .set({ seed: newSeed, updated_at: new Date() })
         .where("id", "=", participant.id)
         .execute();
-      const bracketUpdated = await rebuildTournamentBracket(db, id).catch(() => false);
+      const bracketUpdated = await rebuildTournamentBracket(db, id).catch(
+        () => false,
+      );
       await recordSeedingEvent(db, id, auth.session.id, {
         mode: "manual",
         participantId,
@@ -553,7 +689,8 @@ export const tournamentController = new Elysia({ prefix: "/tournaments" })
       const editable = await seedingTournament(db, id);
       if (editable.error) return editable.error;
       const participants = await activeParticipants(db, id);
-      if (!participants.length) return status(400, { message: "No active participants" as const });
+      if (!participants.length)
+        return status(400, { message: "No active participants" as const });
       const eloRows = await db
         .selectFrom("user_elo")
         .select(["user_id", "elo"])
@@ -561,17 +698,28 @@ export const tournamentController = new Elysia({ prefix: "/tournaments" })
         .where(
           "user_id",
           "in",
-          participants.map(p => p.user_id),
+          participants.map((p) => p.user_id),
         )
         .execute();
-      const elo = new Map(eloRows.map(row => [row.user_id, Number(row.elo ?? 0)]));
+      const elo = new Map(
+        eloRows.map((row) => [row.user_id, Number(row.elo ?? 0)]),
+      );
       participants.sort(
         (a, b) =>
           (elo.get(b.user_id) ?? 0) - (elo.get(a.user_id) ?? 0) ||
-          (a.display_name || a.username || a.user_id).localeCompare(b.display_name || b.username || b.user_id, "fr"),
+          (a.display_name || a.username || a.user_id).localeCompare(
+            b.display_name || b.username || b.user_id,
+            "fr",
+          ),
       );
-      await assignSeeds(db, participants, editable.tournament.participants_number ?? 0);
-      const bracketUpdated = await rebuildTournamentBracket(db, id).catch(() => false);
+      await assignSeeds(
+        db,
+        participants,
+        editable.tournament.participants_number ?? 0,
+      );
+      const bracketUpdated = await rebuildTournamentBracket(db, id).catch(
+        () => false,
+      );
       await recordSeedingEvent(db, id, auth.session.id, {
         mode: "ranked",
         seeded: participants.length,
@@ -598,13 +746,23 @@ export const tournamentController = new Elysia({ prefix: "/tournaments" })
       const editable = await seedingTournament(db, id);
       if (editable.error) return editable.error;
       const participants = await activeParticipants(db, id);
-      if (!participants.length) return status(400, { message: "No active participants" as const });
+      if (!participants.length)
+        return status(400, { message: "No active participants" as const });
       for (let index = participants.length - 1; index > 0; index--) {
         const randomIndex = Math.floor(Math.random() * (index + 1));
-        [participants[index], participants[randomIndex]] = [participants[randomIndex], participants[index]];
+        [participants[index], participants[randomIndex]] = [
+          participants[randomIndex],
+          participants[index],
+        ];
       }
-      await assignSeeds(db, participants, editable.tournament.participants_number ?? 0);
-      const bracketUpdated = await rebuildTournamentBracket(db, id).catch(() => false);
+      await assignSeeds(
+        db,
+        participants,
+        editable.tournament.participants_number ?? 0,
+      );
+      const bracketUpdated = await rebuildTournamentBracket(db, id).catch(
+        () => false,
+      );
       await recordSeedingEvent(db, id, auth.session.id, {
         mode: "random",
         seeded: participants.length,
@@ -640,7 +798,9 @@ export const tournamentController = new Elysia({ prefix: "/tournaments" })
           .set({ seed: null, updated_at: new Date() })
           .where("tournament_id", "=", id)
           .execute();
-      const bracketUpdated = await rebuildTournamentBracket(db, id).catch(() => false);
+      const bracketUpdated = await rebuildTournamentBracket(db, id).catch(
+        () => false,
+      );
       await recordSeedingEvent(db, id, auth.session.id, {
         mode: "clear",
         cleared: participants.length,
@@ -659,8 +819,14 @@ export const tournamentController = new Elysia({ prefix: "/tournaments" })
       const auth = await organizer(db, headers, id);
       if (auth.error) return auth.error;
       const updated = await rebuildTournamentBracket(db, id);
-      if (!updated) return status(400, { message: "Bracket cannot be generated for this tournament" as const });
-      return { success: true as const, tournamentData: await tournamentBracketData(id) };
+      if (!updated)
+        return status(400, {
+          message: "Bracket cannot be generated for this tournament" as const,
+        });
+      return {
+        success: true as const,
+        tournamentData: await tournamentBracketData(id),
+      };
     },
     { params: t.Object({ id: t.Integer() }) },
   )
@@ -692,7 +858,10 @@ export const tournamentController = new Elysia({ prefix: "/tournaments" })
         ["discordRoleEnabled", "discord_role_enabled"],
       ] as const) {
         if (input[source] !== undefined)
-          patch[target] = source.endsWith("At") && input[source] ? new Date(input[source]) : input[source];
+          patch[target] =
+            source.endsWith("At") && input[source]
+              ? new Date(input[source])
+              : input[source];
       }
       return db
         .updateTable("event")
@@ -718,13 +887,18 @@ export const tournamentController = new Elysia({ prefix: "/tournaments" })
       const auth = await organizer(db, headers, id);
       if (auth.error) return auth.error;
       const ids = (Array.isArray(body) ? body : [])
-        .map((manager: any) => (typeof manager === "string" ? manager : manager?.id))
-        .filter((userId: unknown): userId is string => typeof userId === "string" && userId.length > 0);
+        .map((manager: any) =>
+          typeof manager === "string" ? manager : manager?.id,
+        )
+        .filter(
+          (userId: unknown): userId is string =>
+            typeof userId === "string" && userId.length > 0,
+        );
       if (ids.length)
         await db
           .insertInto("event_managers")
-          .values(ids.map(userId => ({ event_id: id, user_id: userId })))
-          .onConflict(oc => oc.doNothing())
+          .values(ids.map((userId) => ({ event_id: id, user_id: userId })))
+          .onConflict((oc) => oc.doNothing())
           .execute();
       return { success: true as const, added: ids.length };
     },
@@ -745,8 +919,13 @@ export const tournamentController = new Elysia({ prefix: "/tournaments" })
       const auth = await organizer(db, headers, id);
       if (auth.error) return auth.error;
       const userId = typeof body === "string" ? body : (body as any)?.id;
-      if (typeof userId !== "string" || !userId) return status(400, { message: "Manager id is required" as const });
-      await db.deleteFrom("event_managers").where("event_id", "=", id).where("user_id", "=", userId).execute();
+      if (typeof userId !== "string" || !userId)
+        return status(400, { message: "Manager id is required" as const });
+      await db
+        .deleteFrom("event_managers")
+        .where("event_id", "=", id)
+        .where("user_id", "=", userId)
+        .execute();
       return { success: true as const, removed: userId };
     },
     {
@@ -768,7 +947,11 @@ export const tournamentController = new Elysia({ prefix: "/tournaments" })
       if (auth.error) return auth.error;
       if (auth.tournament.internal_state !== "Pending")
         return status(400, { message: "Tournament is not pending" as const });
-      await db.updateTable("event").set({ internal_state: "Preregistering" }).where("id", "=", id).execute();
+      await db
+        .updateTable("event")
+        .set({ internal_state: "Preregistering" })
+        .where("id", "=", id)
+        .execute();
       await db
         .insertInto("tournament_event")
         .values({
@@ -780,7 +963,11 @@ export const tournamentController = new Elysia({ prefix: "/tournaments" })
           reason: null,
         })
         .execute();
-      return { success: true as const, id, internalState: "Preregistering" as const };
+      return {
+        success: true as const,
+        id,
+        internalState: "Preregistering" as const,
+      };
     },
     {
       params: t.Object({ id: t.Numeric() }),
@@ -803,7 +990,9 @@ export const tournamentController = new Elysia({ prefix: "/tournaments" })
       const auth = await organizer(db, headers, id);
       if (auth.error) return auth.error;
       if (auth.tournament.internal_state !== "Ongoing")
-        return status(400, { message: "Only an ongoing tournament can be closed" as const });
+        return status(400, {
+          message: "Only an ongoing tournament can be closed" as const,
+        });
       await db
         .updateTable("event")
         .set({ internal_state: "Finished", closed_at: new Date() })
@@ -850,11 +1039,18 @@ export const tournamentController = new Elysia({ prefix: "/tournaments" })
       const auth = await organizer(db, headers, id);
       if (auth.error) return auth.error;
       const reason = body.reason.trim();
-      if (reason.length < 3) return status(400, { message: "Cancellation reason is required" as const });
+      if (reason.length < 3)
+        return status(400, {
+          message: "Cancellation reason is required" as const,
+        });
       if (auth.tournament.internal_state === "Finished")
-        return status(400, { message: "Finished tournament cannot be canceled" as const });
+        return status(400, {
+          message: "Finished tournament cannot be canceled" as const,
+        });
       if (auth.tournament.internal_state === "Canceled")
-        return status(409, { message: "Tournament is already canceled" as const });
+        return status(409, {
+          message: "Tournament is already canceled" as const,
+        });
       await db
         .updateTable("event")
         .set({
@@ -904,13 +1100,25 @@ export const tournamentController = new Elysia({ prefix: "/tournaments" })
         .where("type", "=", "TOURNAMENT_CANCELED")
         .orderBy("created_at", "desc")
         .executeTakeFirst();
-      const previousState = (previous?.payload as { previousState?: string } | null)?.previousState;
-      const restored = ["Pending", "Preregistering", "Preparing", "Ongoing"].includes(previousState ?? "")
-        ? (previousState as "Pending" | "Preregistering" | "Preparing" | "Ongoing")
+      const previousState = (
+        previous?.payload as { previousState?: string } | null
+      )?.previousState;
+      const restored = [
+        "Pending",
+        "Preregistering",
+        "Preparing",
+        "Ongoing",
+      ].includes(previousState ?? "")
+        ? (previousState as
+            "Pending" | "Preregistering" | "Preparing" | "Ongoing")
         : "Pending";
       await db
         .updateTable("event")
-        .set({ internal_state: restored, cancel_reason: null, canceled_at: null })
+        .set({
+          internal_state: restored,
+          cancel_reason: null,
+          canceled_at: null,
+        })
         .where("id", "=", id)
         .execute();
       await db
@@ -949,7 +1157,12 @@ export const tournamentController = new Elysia({ prefix: "/tournaments" })
         return issue.status === 404
           ? status(404, { message: "Tournament not found" as const })
           : status(400, { message: issue.message });
-      return { success: true as const, internalState: "Ongoing" as const, phases: issue.phases, lobbies: issue.lobbies };
+      return {
+        success: true as const,
+        internalState: "Ongoing" as const,
+        phases: issue.phases,
+        lobbies: issue.lobbies,
+      };
     },
     {
       params: t.Object({ id: t.Numeric() }),
@@ -976,14 +1189,21 @@ export const tournamentController = new Elysia({ prefix: "/tournaments" })
         return issue.status === 404
           ? status(404, { message: "Tournament not found" as const })
           : status(400, { message: issue.message });
-      return { success: true as const, internalState: "Ongoing" as const, phases: issue.phases, lobbies: issue.lobbies };
+      return {
+        success: true as const,
+        internalState: "Ongoing" as const,
+        phases: issue.phases,
+        lobbies: issue.lobbies,
+      };
     },
     {
       params: t.Object({ id: t.Numeric() }),
       response: {
         200: TournamentModel.started,
         400: t.Object({ message: t.String() }),
-        401: t.Object({ message: t.Literal("Internal authentication required") }),
+        401: t.Object({
+          message: t.Literal("Internal authentication required"),
+        }),
         404: TournamentModel.notFound,
       },
     },
@@ -996,7 +1216,10 @@ export const tournamentController = new Elysia({ prefix: "/tournaments" })
       // Phase transitions are driven by the unified lifecycle worker. Keep this
       // command idempotent for legacy clients while making authorization and
       // state ownership API-side instead of bot-side.
-      return { success: true as const, internalState: auth.tournament.internal_state ?? "Pending" };
+      return {
+        success: true as const,
+        internalState: auth.tournament.internal_state ?? "Pending",
+      };
     },
     {
       params: t.Object({ id: t.Numeric() }),
@@ -1053,7 +1276,9 @@ export const tournamentController = new Elysia({ prefix: "/tournaments" })
           deltas: t.Optional(t.Record(t.String(), t.Number())),
           tournamentSize: t.Optional(t.Number()),
         }),
-        401: t.Object({ message: t.Literal("Internal authentication required") }),
+        401: t.Object({
+          message: t.Literal("Internal authentication required"),
+        }),
       },
     },
   )
@@ -1068,8 +1293,12 @@ export const tournamentController = new Elysia({ prefix: "/tournaments" })
         .where("tournament_id", "=", id)
         .where("user_id", "=", body.userId)
         .executeTakeFirst();
-      if (!participant) return status(404, { message: "Participant not found" as const });
-      await db.deleteFrom("tournament_participant").where("id", "=", participant.id).execute();
+      if (!participant)
+        return status(404, { message: "Participant not found" as const });
+      await db
+        .deleteFrom("tournament_participant")
+        .where("id", "=", participant.id)
+        .execute();
       await db
         .insertInto("tournament_event")
         .values({
@@ -1100,14 +1329,18 @@ export const tournamentController = new Elysia({ prefix: "/tournaments" })
       const auth = await organizer(db, headers, id);
       if (auth.error) return auth.error;
       const reason = body.reason.trim();
-      if (reason.length < 3) return status(400, { message: "Disqualification reason is required" as const });
+      if (reason.length < 3)
+        return status(400, {
+          message: "Disqualification reason is required" as const,
+        });
       const participant = await db
         .selectFrom("tournament_participant")
         .select(["id", "status"])
         .where("tournament_id", "=", id)
         .where("user_id", "=", body.userId)
         .executeTakeFirst();
-      if (!participant) return status(404, { message: "Participant not found" as const });
+      if (!participant)
+        return status(404, { message: "Participant not found" as const });
       await db
         .updateTable("tournament_participant")
         .set({
@@ -1132,8 +1365,15 @@ export const tournamentController = new Elysia({ prefix: "/tournaments" })
       // En cours de tournoi, ses matchs ouverts sont perdus par forfait et l'arbre avance
       // (legacy `forfeitOpenLobbiesOf`).
       const forfaitLobbys =
-        auth.tournament.internal_state === "Ongoing" ? await forfaiterLobbysOuverts(db, id, body.userId) : 0;
-      return { success: true as const, userId: body.userId, status: "Disqualified" as const, forfeitedLobbies: forfaitLobbys };
+        auth.tournament.internal_state === "Ongoing"
+          ? await forfaiterLobbysOuverts(db, id, body.userId)
+          : 0;
+      return {
+        success: true as const,
+        userId: body.userId,
+        status: "Disqualified" as const,
+        forfeitedLobbies: forfaitLobbys,
+      };
     },
     {
       params: t.Object({ id: t.Numeric() }),
@@ -1163,9 +1403,12 @@ export const tournamentController = new Elysia({ prefix: "/tournaments" })
         .where("tournament_id", "=", id)
         .where("user_id", "=", body.userId)
         .executeTakeFirst();
-      if (!participant) return status(404, { message: "Participant not found" as const });
+      if (!participant)
+        return status(404, { message: "Participant not found" as const });
       if (participant.status !== "Disqualified")
-        return status(400, { message: "Participant is not disqualified" as const });
+        return status(400, {
+          message: "Participant is not disqualified" as const,
+        });
       await db
         .updateTable("tournament_participant")
         .set({
@@ -1187,7 +1430,11 @@ export const tournamentController = new Elysia({ prefix: "/tournaments" })
           reason: null,
         })
         .execute();
-      return { success: true as const, userId: body.userId, status: "Active" as const };
+      return {
+        success: true as const,
+        userId: body.userId,
+        status: "Active" as const,
+      };
     },
     {
       params: t.Object({ id: t.Numeric() }),
@@ -1216,12 +1463,19 @@ export const tournamentController = new Elysia({ prefix: "/tournaments" })
         .where("tournament_id", "=", id)
         .where("user_id", "=", body.userId)
         .executeTakeFirst();
-      if (!participant) return status(404, { message: "Participant not found" as const });
+      if (!participant)
+        return status(404, { message: "Participant not found" as const });
       if (participant.status !== "Waitlisted")
-        return status(400, { message: "Participant is not waitlisted" as const });
+        return status(400, {
+          message: "Participant is not waitlisted" as const,
+        });
       await db
         .updateTable("tournament_participant")
-        .set({ status: "Active", status_actor_id: auth.session.id, status_changed_at: new Date() })
+        .set({
+          status: "Active",
+          status_actor_id: auth.session.id,
+          status_changed_at: new Date(),
+        })
         .where("id", "=", participant.id)
         .execute();
       await db
@@ -1235,7 +1489,11 @@ export const tournamentController = new Elysia({ prefix: "/tournaments" })
           reason: null,
         })
         .execute();
-      return { success: true as const, userId: body.userId, status: "Active" as const };
+      return {
+        success: true as const,
+        userId: body.userId,
+        status: "Active" as const,
+      };
     },
     {
       params: t.Object({ id: t.Numeric() }),
@@ -1257,7 +1515,8 @@ export const tournamentController = new Elysia({ prefix: "/tournaments" })
     "/:id/score-policy",
     async ({ db, headers, params: { id }, body }) => {
       const session = await resolveAchilleaSession(headers);
-      if (!session) return status(401, { message: "Authentication required" as const });
+      if (!session)
+        return status(401, { message: "Authentication required" as const });
       if (body.policy !== "players" && body.policy !== "staff_only")
         return status(400, { message: "Unknown score policy" as const });
       const tournament = await db
@@ -1266,8 +1525,13 @@ export const tournamentController = new Elysia({ prefix: "/tournaments" })
         .where("id", "=", id)
         .where("type", "=", "TOURNAMENT")
         .executeTakeFirst();
-      if (!tournament) return status(404, { message: "Tournament not found" as const });
-      const actor = await db.selectFrom("user").select("role").where("id", "=", session.id).executeTakeFirst();
+      if (!tournament)
+        return status(404, { message: "Tournament not found" as const });
+      const actor = await db
+        .selectFrom("user")
+        .select("role")
+        .where("id", "=", session.id)
+        .executeTakeFirst();
       const manager =
         tournament.organization_id === null
           ? null
@@ -1287,8 +1551,14 @@ export const tournamentController = new Elysia({ prefix: "/tournaments" })
               .where("owner_id", "=", session.id)
               .executeTakeFirst();
       if (!actor || (actor.role < 2 && !manager && !owner))
-        return status(403, { message: "Tournament organizer required" as const });
-      await db.updateTable("event").set({ score_report_policy: body.policy }).where("id", "=", id).execute();
+        return status(403, {
+          message: "Tournament organizer required" as const,
+        });
+      await db
+        .updateTable("event")
+        .set({ score_report_policy: body.policy })
+        .where("id", "=", id)
+        .execute();
       return { success: true as const, scoreReportPolicy: body.policy };
     },
     {
@@ -1307,8 +1577,9 @@ export const tournamentController = new Elysia({ prefix: "/tournaments" })
     "/participate/:id",
     async ({ db, headers, params: { id } }) => {
       const session = await resolveAchilleaSession(headers);
-      if (!session) return status(401, { message: "Authentication required" as const });
-      const result = await db.transaction().execute(async trx => {
+      if (!session)
+        return status(401, { message: "Authentication required" as const });
+      const result = await db.transaction().execute(async (trx) => {
         const tournament = await trx
           .selectFrom("event")
           .select(["id", "internal_state", "participants_number"])
@@ -1316,8 +1587,12 @@ export const tournamentController = new Elysia({ prefix: "/tournaments" })
           .where("type", "=", "TOURNAMENT")
           .forUpdate()
           .executeTakeFirst();
-        if (!tournament) return status(404, { message: "Tournament not found" as const });
-        if (tournament.internal_state !== "Preregistering" && tournament.internal_state !== "Preparing")
+        if (!tournament)
+          return status(404, { message: "Tournament not found" as const });
+        if (
+          tournament.internal_state !== "Preregistering" &&
+          tournament.internal_state !== "Preparing"
+        )
           return status(400, { message: "Registrations are closed" as const });
         const existing = await trx
           .selectFrom("tournament_participant")
@@ -1341,9 +1616,12 @@ export const tournamentController = new Elysia({ prefix: "/tournaments" })
           .where("status", "=", "Active")
           .executeTakeFirst();
         const waitlisted = Boolean(
-          tournament.participants_number && Number(active?.count ?? 0) >= tournament.participants_number,
+          tournament.participants_number &&
+          Number(active?.count ?? 0) >= tournament.participants_number,
         );
-        const statusValue = waitlisted ? ("Waitlisted" as const) : ("Active" as const);
+        const statusValue = waitlisted
+          ? ("Waitlisted" as const)
+          : ("Active" as const);
         const participant = await trx
           .insertInto("tournament_participant")
           .values({
@@ -1358,13 +1636,21 @@ export const tournamentController = new Elysia({ prefix: "/tournaments" })
             status_reason: null,
             status_actor_id: null,
           })
-          .returning(["id", "tournament_id", "user_id", "status", "registered_at"])
+          .returning([
+            "id",
+            "tournament_id",
+            "user_id",
+            "status",
+            "registered_at",
+          ])
           .executeTakeFirstOrThrow();
         await trx
           .insertInto("tournament_event")
           .values({
             tournament_id: id,
-            type: waitlisted ? "PARTICIPANT_WAITLISTED" : "PARTICIPANT_REGISTERED",
+            type: waitlisted
+              ? "PARTICIPANT_WAITLISTED"
+              : "PARTICIPANT_REGISTERED",
             actor_id: session.id,
             target_id: session.id,
             payload: null,
@@ -1377,7 +1663,11 @@ export const tournamentController = new Elysia({ prefix: "/tournaments" })
           tournament.participants_number &&
           Number(active?.count ?? 0) + 1 >= tournament.participants_number
         )
-          await trx.updateTable("event").set({ internal_state: "Preparing" }).where("id", "=", id).execute();
+          await trx
+            .updateTable("event")
+            .set({ internal_state: "Preparing" })
+            .where("id", "=", id)
+            .execute();
         return {
           id: participant.id,
           tournamentId: participant.tournament_id,
@@ -1403,8 +1693,9 @@ export const tournamentController = new Elysia({ prefix: "/tournaments" })
     "/unregister/:id",
     async ({ db, headers, params: { id } }) => {
       const session = await resolveAchilleaSession(headers);
-      if (!session) return status(401, { message: "Authentication required" as const });
-      return db.transaction().execute(async trx => {
+      if (!session)
+        return status(401, { message: "Authentication required" as const });
+      return db.transaction().execute(async (trx) => {
         const tournament = await trx
           .selectFrom("event")
           .select(["id", "internal_state"])
@@ -1412,8 +1703,12 @@ export const tournamentController = new Elysia({ prefix: "/tournaments" })
           .where("type", "=", "TOURNAMENT")
           .forUpdate()
           .executeTakeFirst();
-        if (!tournament) return status(404, { message: "Tournament not found" as const });
-        if (tournament.internal_state !== "Preregistering" && tournament.internal_state !== "Preparing")
+        if (!tournament)
+          return status(404, { message: "Tournament not found" as const });
+        if (
+          tournament.internal_state !== "Preregistering" &&
+          tournament.internal_state !== "Preparing"
+        )
           return status(400, { message: "Registrations are closed" as const });
         const participant = await trx
           .selectFrom("tournament_participant")
@@ -1422,9 +1717,13 @@ export const tournamentController = new Elysia({ prefix: "/tournaments" })
           .where("user_id", "=", session.id)
           .forUpdate()
           .executeTakeFirst();
-        if (!participant) return status(409, { message: "Not registered" as const });
+        if (!participant)
+          return status(409, { message: "Not registered" as const });
         const wasActive = participant.status === "Active";
-        await trx.deleteFrom("tournament_participant").where("id", "=", participant.id).execute();
+        await trx
+          .deleteFrom("tournament_participant")
+          .where("id", "=", participant.id)
+          .execute();
         if (wasActive) {
           const next = await trx
             .selectFrom("tournament_participant")
@@ -1437,7 +1736,11 @@ export const tournamentController = new Elysia({ prefix: "/tournaments" })
           if (next)
             await trx
               .updateTable("tournament_participant")
-              .set({ status: "Active", status_changed_at: new Date(), status_actor_id: session.id })
+              .set({
+                status: "Active",
+                status_changed_at: new Date(),
+                status_actor_id: session.id,
+              })
               .where("id", "=", next.id)
               .execute();
         }
@@ -1470,12 +1773,20 @@ export const tournamentController = new Elysia({ prefix: "/tournaments" })
     "/report-score",
     async ({ db, headers, body }) => {
       const access = await lobbyAccess(db, headers, body.lobbyId);
-      if ("unauthenticated" in access) return status(401, { message: "Authentication required" as const });
-      if ("notFound" in access) return status(404, { message: "Lobby not found" as const });
+      if ("unauthenticated" in access)
+        return status(401, { message: "Authentication required" as const });
+      if ("notFound" in access)
+        return status(404, { message: "Lobby not found" as const });
       if (isLobbyFinished(access.lobby.state))
-        return status(400, { message: "This lobby is already finished" as const });
-      if (!access.player && !access.isOrganizer) return status(403, { message: "Lobby participant required" as const });
-      if (!canReport(access)) return status(403, { message: "Only tournament organizers may report scores" as const });
+        return status(400, {
+          message: "This lobby is already finished" as const,
+        });
+      if (!access.player && !access.isOrganizer)
+        return status(403, { message: "Lobby participant required" as const });
+      if (!canReport(access))
+        return status(403, {
+          message: "Only tournament organizers may report scores" as const,
+        });
       const game = await db
         .selectFrom("lobby_match")
         .selectAll()
@@ -1484,8 +1795,10 @@ export const tournamentController = new Elysia({ prefix: "/tournaments" })
         .executeTakeFirst();
       if (!game) return status(404, { message: "Game not found" as const });
       if (game.admin_validated && !access.isOrganizer)
-        return status(409, { message: "Score already validated by an organizer" as const });
-      await db.transaction().execute(async trx => {
+        return status(409, {
+          message: "Score already validated by an organizer" as const,
+        });
+      await db.transaction().execute(async (trx) => {
         await trx
           .updateTable("lobby_match")
           .set({
@@ -1498,7 +1811,10 @@ export const tournamentController = new Elysia({ prefix: "/tournaments" })
           })
           .where("id", "=", game.id)
           .execute();
-        if (access.lobby.state === "Fresh" || access.lobby.state === "Ongoing") {
+        if (
+          access.lobby.state === "Fresh" ||
+          access.lobby.state === "Ongoing"
+        ) {
           await trx
             .updateTable("lobby")
             .set({ state: "Pending validation", updated_at: new Date() })
@@ -1523,7 +1839,11 @@ export const tournamentController = new Elysia({ prefix: "/tournaments" })
           })
           .execute();
       });
-      return { success: true as const, lobbyId: body.lobbyId, gameNumber: body.gameNumber };
+      return {
+        success: true as const,
+        lobbyId: body.lobbyId,
+        gameNumber: body.gameNumber,
+      };
     },
     {
       body: t.Object({
@@ -1533,7 +1853,11 @@ export const tournamentController = new Elysia({ prefix: "/tournaments" })
         score2: t.Integer({ minimum: 0, maximum: 99 }),
       }),
       response: {
-        200: t.Object({ success: t.Literal(true), lobbyId: t.Number(), gameNumber: t.Number() }),
+        200: t.Object({
+          success: t.Literal(true),
+          lobbyId: t.Number(),
+          gameNumber: t.Number(),
+        }),
         400: t.Object({ message: t.String() }),
         401: t.Object({ message: t.Literal("Authentication required") }),
         403: t.Object({ message: t.String() }),
@@ -1546,10 +1870,14 @@ export const tournamentController = new Elysia({ prefix: "/tournaments" })
     "/validate-score",
     async ({ db, headers, body }) => {
       const access = await lobbyAccess(db, headers, body.lobbyId);
-      if ("unauthenticated" in access) return status(401, { message: "Authentication required" as const });
-      if ("notFound" in access) return status(404, { message: "Lobby not found" as const });
+      if ("unauthenticated" in access)
+        return status(401, { message: "Authentication required" as const });
+      if ("notFound" in access)
+        return status(404, { message: "Lobby not found" as const });
       if (isLobbyFinished(access.lobby.state))
-        return status(400, { message: "This lobby is already finished" as const });
+        return status(400, {
+          message: "This lobby is already finished" as const,
+        });
       const game = await db
         .selectFrom("lobby_match")
         .selectAll()
@@ -1564,7 +1892,8 @@ export const tournamentController = new Elysia({ prefix: "/tournaments" })
           : access.player?.team === 2
             ? "TEAM_2"
             : null;
-      if (!side) return status(403, { message: "Lobby participant required" as const });
+      if (!side)
+        return status(403, { message: "Lobby participant required" as const });
       if (game.admin_validated || (game.team1validated && game.team2validated))
         return status(409, { message: "Game already validated" as const });
       const patch =
@@ -1576,7 +1905,7 @@ export const tournamentController = new Elysia({ prefix: "/tournaments" })
       // Validation, journal et propagation dans l'arbre : tout ou rien. Une
       // manche validée qui décide la série fait avancer le vainqueur et ouvre
       // les lobbys suivants (legacy `validateGame` → `checkAndPropagateLobbyResult`).
-      const brute = await db.transaction().execute(async trx => {
+      const brute = await db.transaction().execute(async (trx) => {
         await trx
           .updateTable("lobby_match")
           .set({ ...patch, updated_at: new Date() })
@@ -1599,17 +1928,29 @@ export const tournamentController = new Elysia({ prefix: "/tournaments" })
             reason: null,
           })
           .execute();
-        return access.lobby.event_type === "TOURNAMENT" ? propagerDansTransaction(trx, body.lobbyId) : null;
+        return access.lobby.event_type === "TOURNAMENT"
+          ? propagerDansTransaction(trx, body.lobbyId)
+          : null;
       });
-      const serie = brute ? await finaliserPropagation(db, access.lobby.event_id, brute) : null;
-      return { success: true as const, side, serie: serie ? resumeSerie(serie) : null };
+      const serie = brute
+        ? await finaliserPropagation(db, access.lobby.event_id, brute)
+        : null;
+      return {
+        success: true as const,
+        side,
+        serie: serie ? resumeSerie(serie) : null,
+      };
     },
     {
       body: t.Object({ lobbyId: t.Integer(), lobbyMatchId: t.Integer() }),
       response: {
         200: t.Object({
           success: t.Literal(true),
-          side: t.Union([t.Literal("ADMIN"), t.Literal("TEAM_1"), t.Literal("TEAM_2")]),
+          side: t.Union([
+            t.Literal("ADMIN"),
+            t.Literal("TEAM_1"),
+            t.Literal("TEAM_2"),
+          ]),
           serie: t.Nullable(TournamentModel.serie),
         }),
         400: t.Object({ message: t.String() }),
@@ -1624,10 +1965,14 @@ export const tournamentController = new Elysia({ prefix: "/tournaments" })
     "/unvalidate-score",
     async ({ db, headers, body }) => {
       const access = await lobbyAccess(db, headers, body.lobbyId);
-      if ("unauthenticated" in access) return status(401, { message: "Authentication required" as const });
-      if ("notFound" in access) return status(404, { message: "Lobby not found" as const });
+      if ("unauthenticated" in access)
+        return status(401, { message: "Authentication required" as const });
+      if ("notFound" in access)
+        return status(404, { message: "Lobby not found" as const });
       if (isLobbyFinished(access.lobby.state))
-        return status(400, { message: "This lobby is already finished" as const });
+        return status(400, {
+          message: "This lobby is already finished" as const,
+        });
       const game = await db
         .selectFrom("lobby_match")
         .selectAll()
@@ -1642,10 +1987,15 @@ export const tournamentController = new Elysia({ prefix: "/tournaments" })
           : access.player?.team === 2
             ? "TEAM_2"
             : null;
-      if (!side) return status(403, { message: "Lobby participant required" as const });
+      if (!side)
+        return status(403, { message: "Lobby participant required" as const });
       const patch =
         side === "ADMIN"
-          ? { admin_validated: false, team1validated: false, team2validated: false }
+          ? {
+              admin_validated: false,
+              team1validated: false,
+              team2validated: false,
+            }
           : side === "TEAM_1"
             ? { team1validated: false }
             : { team2validated: false };
@@ -1661,7 +2011,11 @@ export const tournamentController = new Elysia({ prefix: "/tournaments" })
       response: {
         200: t.Object({
           success: t.Literal(true),
-          side: t.Union([t.Literal("ADMIN"), t.Literal("TEAM_1"), t.Literal("TEAM_2")]),
+          side: t.Union([
+            t.Literal("ADMIN"),
+            t.Literal("TEAM_1"),
+            t.Literal("TEAM_2"),
+          ]),
         }),
         400: t.Object({ message: t.String() }),
         401: t.Object({ message: t.Literal("Authentication required") }),
@@ -1680,9 +2034,11 @@ export const tournamentController = new Elysia({ prefix: "/tournaments" })
         .orderBy("state", "asc")
         .orderBy("id", "asc")
         .execute();
-      return (await Promise.all(rows.map(row => serializeLobby(db, Number(row.id), false)))).filter(
-        (row): row is NonNullable<typeof row> => row !== null,
-      );
+      return (
+        await Promise.all(
+          rows.map((row) => serializeLobby(db, Number(row.id), false)),
+        )
+      ).filter((row): row is NonNullable<typeof row> => row !== null);
     },
     { params: t.Object({ id: t.Integer() }), response: t.Array(t.Any()) },
   )
@@ -1695,13 +2051,21 @@ export const tournamentController = new Elysia({ prefix: "/tournaments" })
     },
     {
       params: t.Object({ id: t.Integer() }),
-      response: { 200: t.Any(), 404: t.Object({ message: t.Literal("Lobby not found") }) },
+      response: {
+        200: t.Any(),
+        404: t.Object({ message: t.Literal("Lobby not found") }),
+      },
     },
   )
   .get(
     "/",
     async ({ db, query }) => {
-      const states = query.states === undefined ? [] : Array.isArray(query.states) ? query.states : [query.states];
+      const states =
+        query.states === undefined
+          ? []
+          : Array.isArray(query.states)
+            ? query.states
+            : [query.states];
       return await TournamentService.findAll(
         db,
         query.page,
@@ -1733,10 +2097,15 @@ export const tournamentController = new Elysia({ prefix: "/tournaments" })
         .where("id", "=", id)
         .where("type", "=", "TOURNAMENT")
         .executeTakeFirst();
-      if (!tournament) return status(404, { message: "Tournament not found" as const });
+      if (!tournament)
+        return status(404, { message: "Tournament not found" as const });
       let includeReasons = false;
       if (session && tournament.organization_id !== null) {
-        const actor = await db.selectFrom("user").select("role").where("id", "=", session.id).executeTakeFirst();
+        const actor = await db
+          .selectFrom("user")
+          .select("role")
+          .where("id", "=", session.id)
+          .executeTakeFirst();
         const managed = await db
           .selectFrom("organization_manager")
           .select("organization_id")
@@ -1749,7 +2118,9 @@ export const tournamentController = new Elysia({ prefix: "/tournaments" })
           .where("id", "=", tournament.organization_id)
           .where("owner_id", "=", session.id)
           .executeTakeFirst();
-        includeReasons = Boolean((actor && actor.role >= 2) || managed || owner);
+        includeReasons = Boolean(
+          (actor && actor.role >= 2) || managed || owner,
+        );
       }
       const rows = await db
         .selectFrom("tournament_event as event")
@@ -1774,7 +2145,7 @@ export const tournamentController = new Elysia({ prefix: "/tournaments" })
         .orderBy("event.created_at", "desc")
         .limit(200)
         .execute();
-      return rows.map(event => ({
+      return rows.map((event) => ({
         id: event.id,
         type: event.type,
         createdAt: event.created_at.toISOString(),
@@ -1800,7 +2171,10 @@ export const tournamentController = new Elysia({ prefix: "/tournaments" })
     },
     {
       params: t.Object({ id: t.Numeric() }),
-      response: { 200: t.Array(TournamentModel.event), 404: TournamentModel.notFound },
+      response: {
+        200: t.Array(TournamentModel.event),
+        404: TournamentModel.notFound,
+      },
     },
   )
   .get(

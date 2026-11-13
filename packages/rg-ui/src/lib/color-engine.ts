@@ -48,7 +48,11 @@ export interface ThemeAdjustments {
   contrast: number;
 }
 
-export const DEFAULT_ADJUSTMENTS: Readonly<ThemeAdjustments> = Object.freeze({ hueShift: 0, chroma: 1, contrast: 0 });
+export const DEFAULT_ADJUSTMENTS: Readonly<ThemeAdjustments> = Object.freeze({
+  hueShift: 0,
+  chroma: 1,
+  contrast: 0,
+});
 
 export const ROLE_NAMES = [
   "primary",
@@ -119,8 +123,8 @@ export const CONTRAST_PAIRS: ReadonlyArray<readonly [Role, Role]> = [
   ["on-error-container", "error-container"],
   ["on-background", "background"],
   ["inverse-on-surface", "inverse-surface"],
-  ...SURFACES.map(s => ["on-surface", s] as const),
-  ...SURFACES.map(s => ["on-surface-variant", s] as const),
+  ...SURFACES.map((s) => ["on-surface", s] as const),
+  ...SURFACES.map((s) => ["on-surface-variant", s] as const),
 ];
 
 // ─── Tables de tons ────────────────────────────────────────────────────────
@@ -131,7 +135,13 @@ interface Ton {
   c: number;
 }
 
-type Famille = "primary" | "secondary" | "tertiary" | "error" | "neutral" | "neutral-variant";
+type Famille =
+  | "primary"
+  | "secondary"
+  | "tertiary"
+  | "error"
+  | "neutral"
+  | "neutral-variant";
 
 const FAMILLE: Record<Role, Famille> = {
   primary: "primary",
@@ -172,14 +182,22 @@ const FAMILLE: Record<Role, Famille> = {
   "outline-variant": "neutral-variant",
 };
 
-const accent = (l: number, on: number, container: number, onContainer: number) => ({
+const accent = (
+  l: number,
+  on: number,
+  container: number,
+  onContainer: number,
+) => ({
   role: { l, c: 1 },
   on: { l: on, c: 0.12 },
   container: { l: container, c: 0.45 },
   onContainer: { l: onContainer, c: 0.85 },
 });
 
-function tableAccents(a: ReturnType<typeof accent>, famille: "primary" | "secondary" | "tertiary" | "error") {
+function tableAccents(
+  a: ReturnType<typeof accent>,
+  famille: "primary" | "secondary" | "tertiary" | "error",
+) {
   return {
     [famille]: a.role,
     [`on-${famille}`]: a.on,
@@ -266,7 +284,11 @@ const FOND_DE: Partial<Record<Role, Role>> = {
 // ─── Conversions ───────────────────────────────────────────────────────────
 
 /** OKLCH → sRGB linéaire (matrices de Björn Ottosson). */
-function oklchVersLineaire(l: number, c: number, h: number): [number, number, number] {
+function oklchVersLineaire(
+  l: number,
+  c: number,
+  h: number,
+): [number, number, number] {
   const radians = (h * Math.PI) / 180;
   const a = c * Math.cos(radians);
   const b = c * Math.sin(radians);
@@ -283,7 +305,7 @@ function oklchVersLineaire(l: number, c: number, h: number): [number, number, nu
 const EPSILON_GAMUT = 1e-6;
 
 function dansGamut([r, g, b]: [number, number, number]): boolean {
-  return [r, g, b].every(v => v >= -EPSILON_GAMUT && v <= 1 + EPSILON_GAMUT);
+  return [r, g, b].every((v) => v >= -EPSILON_GAMUT && v <= 1 + EPSILON_GAMUT);
 }
 
 function versGamma(v: number): number {
@@ -313,7 +335,7 @@ export function oklchToHex(l: number, c: number, h: number): string {
   const lb = Math.min(1, Math.max(0, l));
   const rgb = oklchVersLineaire(lb, chromaEnGamut(lb, Math.max(0, c), h), h);
   return `#${rgb
-    .map(v =>
+    .map((v) =>
       Math.round(versGamma(v) * 255)
         .toString(16)
         .padStart(2, "0"),
@@ -323,7 +345,9 @@ export function oklchToHex(l: number, c: number, h: number): string {
 
 function hexVersLineaire(hex: string): [number, number, number] {
   const n = Number.parseInt(hex.slice(1), 16);
-  return [(n >> 16) & 255, (n >> 8) & 255, n & 255].map(v => versLineaire(v / 255)) as [number, number, number];
+  return [(n >> 16) & 255, (n >> 8) & 255, n & 255].map((v) =>
+    versLineaire(v / 255),
+  ) as [number, number, number];
 }
 
 /** `#rrggbb` → OKLCH. */
@@ -336,7 +360,8 @@ export function hexToOklch(hex: string): { l: number; c: number; h: number } {
   const A = 1.9779984951 * l - 2.428592205 * m + 0.4505937099 * s;
   const B = 0.0259040371 * l + 0.7827717662 * m - 0.808675766 * s;
   const c = Math.hypot(A, B);
-  const h = c < 1e-4 ? 0 : (((Math.atan2(B, A) * 180) / Math.PI) % 360 + 360) % 360;
+  const h =
+    c < 1e-4 ? 0 : ((((Math.atan2(B, A) * 180) / Math.PI) % 360) + 360) % 360;
   return { l: L, c, h };
 }
 
@@ -355,10 +380,13 @@ export function contrastRatio(a: string, b: string): number {
 
 // ─── Calcul ────────────────────────────────────────────────────────────────
 
-const borner = (v: number, min: number, max: number) => (Number.isFinite(v) ? Math.min(max, Math.max(min, v)) : min);
+const borner = (v: number, min: number, max: number) =>
+  Number.isFinite(v) ? Math.min(max, Math.max(min, v)) : min;
 
 /** Ramène des réglages quelconques (stockage, URL) dans leurs bornes. */
-export function clampAdjustments(adj: Partial<ThemeAdjustments> | null | undefined): ThemeAdjustments {
+export function clampAdjustments(
+  adj: Partial<ThemeAdjustments> | null | undefined,
+): ThemeAdjustments {
   return {
     hueShift: borner(adj?.hueShift ?? 0, -180, 180),
     chroma: borner(adj?.chroma ?? 1, 0, 2),
@@ -373,14 +401,20 @@ export function contrastTarget(contrast: number): number {
 
 const PAS = 0.005;
 
-export function computeRoles(seed: ThemeSeed, adjustments?: Partial<ThemeAdjustments>): RoleMap {
+export function computeRoles(
+  seed: ThemeSeed,
+  adjustments?: Partial<ThemeAdjustments>,
+): RoleMap {
   const adj = clampAdjustments(adjustments);
   const tons = TONS[seed.mode];
   const teinte = (((seed.hue + adj.hueShift) % 360) + 360) % 360;
   const chroma = seed.chroma * adj.chroma;
   const neutre = seed.neutralChroma ?? Math.min(chroma * 0.1, 0.03);
   const secondaire = seed.secondary
-    ? { h: (((seed.secondary.hue + adj.hueShift) % 360) + 360) % 360, c: seed.secondary.chroma * adj.chroma }
+    ? {
+        h: (((seed.secondary.hue + adj.hueShift) % 360) + 360) % 360,
+        c: seed.secondary.chroma * adj.chroma,
+      }
     : { h: (teinte + 180) % 360, c: chroma * 0.6 };
   const familles: Record<Famille, { h: number; c: number }> = {
     primary: { h: teinte, c: chroma },
@@ -401,10 +435,17 @@ export function computeRoles(seed: ThemeSeed, adjustments?: Partial<ThemeAdjustm
     const sens = tons[texte].l >= tons[fond].l ? 1 : -1;
     const ecart = Math.abs(tons[texte].l - tons[fond].l);
     const reste = sens > 0 ? 1 - tons[texte].l : tons[texte].l;
-    const delta = adj.contrast >= 0 ? adj.contrast * 0.7 * reste : adj.contrast * ecart * 0.3;
+    const delta =
+      adj.contrast >= 0
+        ? adj.contrast * 0.7 * reste
+        : adj.contrast * ecart * 0.3;
     clartes[texte] = borner(tons[texte].l + sens * delta, 0, 1);
     if (FAMILLE[fond] !== "neutral" || fond === "inverse-surface")
-      clartes[fond] = borner(tons[fond].l - sens * Math.max(0, adj.contrast) * 0.04, 0, 1);
+      clartes[fond] = borner(
+        tons[fond].l - sens * Math.max(0, adj.contrast) * 0.04,
+        0,
+        1,
+      );
   }
 
   const couleur = (role: Role) => {
@@ -417,10 +458,16 @@ export function computeRoles(seed: ThemeSeed, adjustments?: Partial<ThemeAdjustm
   // Plancher WCAG : on pousse le texte vers l'extrême, puis le fond à l'opposé.
   const cible = contrastTarget(adj.contrast);
   const fondsDe = new Map<Role, Role[]>();
-  for (const [texte, fond] of CONTRAST_PAIRS) fondsDe.set(texte, [...(fondsDe.get(texte) ?? []), fond]);
+  for (const [texte, fond] of CONTRAST_PAIRS)
+    fondsDe.set(texte, [...(fondsDe.get(texte) ?? []), fond]);
   for (const [texte, fonds] of fondsDe) {
     for (let garde = 0; garde < 400; garde++) {
-      const pire = fonds.reduce((a, b) => (contrastRatio(roles[texte], roles[b]) < contrastRatio(roles[texte], roles[a]) ? b : a));
+      const pire = fonds.reduce((a, b) =>
+        contrastRatio(roles[texte], roles[b]) <
+        contrastRatio(roles[texte], roles[a])
+          ? b
+          : a,
+      );
       if (contrastRatio(roles[texte], roles[pire]) >= cible) break;
       const sens = clartes[texte] >= clartes[pire] ? 1 : -1;
       const extreme = sens > 0 ? clartes[texte] >= 1 : clartes[texte] <= 0;

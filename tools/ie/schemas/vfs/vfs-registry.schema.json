@@ -69,7 +69,17 @@
         },
         "category": {
           "type": "string",
-          "enum": ["texture", "model", "container", "config", "audio", "video", "script", "system", "collision"]
+          "enum": [
+            "texture",
+            "model",
+            "container",
+            "config",
+            "audio",
+            "video",
+            "script",
+            "system",
+            "collision"
+          ]
         },
         "endianness": {
           "type": "string",
@@ -88,7 +98,13 @@
           "type": "array",
           "items": {
             "type": "object",
-            "required": ["offsetHex", "offsetDec", "type", "name", "description"],
+            "required": [
+              "offsetHex",
+              "offsetDec",
+              "type",
+              "name",
+              "description"
+            ],
             "properties": {
               "offsetHex": { "type": "string" },
               "offsetDec": { "type": "integer" },

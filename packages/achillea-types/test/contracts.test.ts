@@ -17,8 +17,17 @@ import { ClanState as DirectClanState } from "@rosegriffon/achillea-types/enums/
 
 describe("@rosegriffon/achillea-types runtime contracts", () => {
   test("keeps the numeric enum values used by persisted contracts", () => {
-    expect(ClanState).toMatchObject({ Creating: 0, PendingReview: 1, Approved: 2 });
-    expect(ClanMemberRole).toMatchObject({ Trial: 0, Member: 1, SubCaptain: 2, Captain: 3 });
+    expect(ClanState).toMatchObject({
+      Creating: 0,
+      PendingReview: 1,
+      Approved: 2,
+    });
+    expect(ClanMemberRole).toMatchObject({
+      Trial: 0,
+      Member: 1,
+      SubCaptain: 2,
+      Captain: 3,
+    });
     expect(UserRole).toMatchObject({
       User: 0,
       Moderator: 1,
@@ -35,7 +44,9 @@ describe("@rosegriffon/achillea-types runtime contracts", () => {
     expect(String(ParticipantStatus.DISQUALIFIED)).toBe("Disqualified");
     expect(String(ScoreReportPolicy.STAFF_ONLY)).toBe("staff_only");
     expect(String(StageType.double_elimination)).toBe("double_elimination");
-    expect(String(ClanMemberDistinction.ContentCreator)).toBe("Créateur de contenu");
+    expect(String(ClanMemberDistinction.ContentCreator)).toBe(
+      "Créateur de contenu",
+    );
   });
 
   test("resolves the public enum subpath", () => {

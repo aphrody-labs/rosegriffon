@@ -10,18 +10,26 @@ Tout ce qui suit vit dans **`apps/bot/src/lib/ui/`** et n'a qu'un point
 d'entrée :
 
 ```ts
-import { fiche, differer, succes, echec, vide, pied, rangeePagination } from "../lib/ui";
+import {
+  fiche,
+  differer,
+  succes,
+  echec,
+  vide,
+  pied,
+  rangeePagination,
+} from "../lib/ui";
 ```
 
-| Module | Rôle | `discord.js` ? |
-| --- | --- | --- |
-| `theme.ts` | couleurs, icônes, marque du profil, limites de l'API | non |
-| `texte.ts` | bornage, échappement, assemblage, horodatage natif | non |
-| `nombres.ts` | entiers, pourcentages, octets, latences, durées | non |
-| `etat.ts` | comptage des pages, grammaire du `customId` | non |
-| `embed.ts` | `creerEmbed`, `pied`, `piedTexte`, classe `Fiche` | oui |
-| `pagination.ts` | rangée de boutons normalisée, bouton de lien | oui |
-| `reponse.ts` | différer, charges `succes`/`echec`/`vide`, gardes | oui |
+| Module          | Rôle                                                 | `discord.js` ? |
+| --------------- | ---------------------------------------------------- | -------------- |
+| `theme.ts`      | couleurs, icônes, marque du profil, limites de l'API | non            |
+| `texte.ts`      | bornage, échappement, assemblage, horodatage natif   | non            |
+| `nombres.ts`    | entiers, pourcentages, octets, latences, durées      | non            |
+| `etat.ts`       | comptage des pages, grammaire du `customId`          | non            |
+| `embed.ts`      | `creerEmbed`, `pied`, `piedTexte`, classe `Fiche`    | oui            |
+| `pagination.ts` | rangée de boutons normalisée, bouton de lien         | oui            |
+| `reponse.ts`    | différer, charges `succes`/`echec`/`vide`, gardes    | oui            |
 
 C'est l'équivalent Discord de ce qu'est `@rose-griffon/ui` pour les deux apps
 Next : **aucune commande n'écrit une couleur, une émoji d'état ou une limite
@@ -57,8 +65,8 @@ async fiche(@SlashOption({ … }) recherche: string, interaction: ChatInputComma
    `/administration`, sans option pour les surfaces de communauté.
 2. **Lire.** Tout le calcul vit dans un module pur (`lib/*-format.ts`), testé
    sans bot ni base.
-3. **Peindre avec `fiche()`.** Elle tient le budget des 6 000 caractères *à
-   l'ajout* : un champ qui ne rentre plus n'est pas posé (et `tronquee` passe à
+3. **Peindre avec `fiche()`.** Elle tient le budget des 6 000 caractères _à
+   l'ajout_ : un champ qui ne rentre plus n'est pas posé (et `tronquee` passe à
    `true`) au lieu de faire refuser le message entier.
 4. **Poser le pied.** `piedDeCommande(embed, interaction)` écrit
    `/agenda semaine · page 2/5 · Rose Griffon · rosegriffon.fr` avec l'icône de
@@ -68,14 +76,14 @@ async fiche(@SlashOption({ … }) recherche: string, interaction: ChatInputComma
 
 ## Couleurs
 
-| Intention | Emploi | Valeur |
-| --- | --- | --- |
-| `marque` | réponse normale (l'écrasante majorité) | couleur du profil (`#a14b3f` / `#F89C5A`) |
-| `succes` | une action a abouti | `#3BA55D` |
-| `attention` | résultat partiel, donnée périmée, limite atteinte | `#FAA61A` |
-| `echec` | l'action a échoué | `#ED4245` |
-| `info` | rappel de syntaxe, renvoi vers une autre commande | `#5865F2` |
-| `muet` | vrai mais accessoire, liste vide | `#2B2D31` |
+| Intention   | Emploi                                            | Valeur                                    |
+| ----------- | ------------------------------------------------- | ----------------------------------------- |
+| `marque`    | réponse normale (l'écrasante majorité)            | couleur du profil (`#a14b3f` / `#F89C5A`) |
+| `succes`    | une action a abouti                               | `#3BA55D`                                 |
+| `attention` | résultat partiel, donnée périmée, limite atteinte | `#FAA61A`                                 |
+| `echec`     | l'action a échoué                                 | `#ED4245`                                 |
+| `info`      | rappel de syntaxe, renvoi vers une autre commande | `#5865F2`                                 |
+| `muet`      | vrai mais accessoire, liste vide                  | `#2B2D31`                                 |
 
 Les quatre couleurs d'état sont celles du client Discord : le membre les a déjà
 apprises ailleurs. La couleur ne porte jamais l'information seule — le texte
@@ -113,16 +121,16 @@ compris.
 
 ## Limites de l'API (dures)
 
-| Champ | Limite |
-| --- | --- |
-| titre | 256 |
-| description | 4 096 |
-| nom / valeur de champ | 256 / 1 024 |
-| champs par embed | 25 |
-| pied | 2 048 |
-| **total d'un embed** | **6 000** |
-| contenu texte d'un message | 2 000 |
-| `customId` | 100 |
+| Champ                         | Limite              |
+| ----------------------------- | ------------------- |
+| titre                         | 256                 |
+| description                   | 4 096               |
+| nom / valeur de champ         | 256 / 1 024         |
+| champs par embed              | 25                  |
+| pied                          | 2 048               |
+| **total d'un embed**          | **6 000**           |
+| contenu texte d'un message    | 2 000               |
+| `customId`                    | 100                 |
 | propositions d'autocomplétion | 25 × 100 caractères |
 
 Un dépassement ne tronque pas : l'API **refuse le message entier**, et le membre

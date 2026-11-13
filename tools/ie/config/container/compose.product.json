@@ -3,7 +3,10 @@
   "services": {
     "product": {
       "image": "${IECODE_PRODUCT_IMAGE:?Use the sealed immutable IECODE image}",
-      "labels": { "io.aphrody.profile": "ie", "io.aphrody.workspace": "iecode" },
+      "labels": {
+        "io.aphrody.profile": "ie",
+        "io.aphrody.workspace": "iecode"
+      },
       "read_only": true,
       "init": true,
       "cap_drop": ["ALL"],

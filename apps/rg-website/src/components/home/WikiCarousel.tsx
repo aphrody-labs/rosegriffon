@@ -95,15 +95,18 @@ export function WikiCarousel({ stats }: WikiCarouselProps) {
       <div className="mb-5 md:mb-6 px-0 md:px-8 lg:px-12">
         <h2 className="text-xl md:text-3xl font-black text-on-surface font-expressive-title flex items-center gap-3">
           <span className="w-2 h-8 rounded-full bg-secondary" />
-          <span className="hidden sm:inline">Wiki — Base de données Inazuma Eleven: Victory Road</span>
+          <span className="hidden sm:inline">
+            Wiki — Base de données Inazuma Eleven: Victory Road
+          </span>
           <span className="sm:hidden">Wiki Victory Road</span>
         </h2>
       </div>
 
       {/* Single responsive render: horizontal scroll on mobile, grid on desktop */}
       <div className="flex overflow-x-auto snap-x snap-proximity gap-3 -mx-4 px-4 pb-1 scrollbar-hide md:grid md:grid-cols-2 lg:grid-cols-4 md:gap-4 lg:gap-6 md:mx-0 md:px-8 lg:px-12 md:overflow-visible md:snap-none md:pb-0">
-        {WIKI_SECTIONS.map(section => {
-          const count = section.statKey && stats ? stats[section.statKey] : undefined;
+        {WIKI_SECTIONS.map((section) => {
+          const count =
+            section.statKey && stats ? stats[section.statKey] : undefined;
 
           return (
             <Link
@@ -136,7 +139,11 @@ export function WikiCarousel({ stats }: WikiCarouselProps) {
                     className="filter grayscale contrast-125 brightness-75 dark:brightness-125"
                   />
                 ) : section.icon ? (
-                  <Icon name={section.icon} size={42} className="text-on-surface" />
+                  <Icon
+                    name={section.icon}
+                    size={42}
+                    className="text-on-surface"
+                  />
                 ) : null}
               </div>
             </Link>

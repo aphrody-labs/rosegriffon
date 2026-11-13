@@ -16,7 +16,7 @@ import { absoluteUrl } from "@/lib/site-url";
 export default async function PartenairesSection() {
   const response = await getTeamMembers("collabteam");
   const collaborateurs = response
-    .map(member => ({
+    .map((member) => ({
       name: member.metadata.memberName,
       role: member.metadata.memberRole,
       index: member.metadata.memberIndex,
@@ -31,11 +31,14 @@ export default async function PartenairesSection() {
         <TeamStructuredData
           pageName="Nos Partenaires"
           url={absoluteUrl("/community")}
-          members={collaborateurs.map(member => ({
+          members={collaborateurs.map((member) => ({
             name: member.name,
             role: member.role || undefined,
             image: member.image || undefined,
-            sameAs: member.link && member.link.startsWith("http") ? [member.link] : undefined,
+            sameAs:
+              member.link && member.link.startsWith("http")
+                ? [member.link]
+                : undefined,
           }))}
         />
       )}
@@ -44,15 +47,17 @@ export default async function PartenairesSection() {
           Nos Partenaires
         </h1>
         <p className="text-lg lg:text-xl text-gray-700 dark:text-gray-300 leading-relaxed">
-          Découvrez les partenaires qui contribuent à enrichir l&apos;univers de Rose Griffon par leur expertise et leur
-          créativité.
+          Découvrez les partenaires qui contribuent à enrichir l&apos;univers de
+          Rose Griffon par leur expertise et leur créativité.
         </p>
         <div className="w-24 h-1 bg-linear-to-r from-gaelle-blue to-gaelle-blue-light mx-auto rounded-full" />
       </div>
 
       {collaborateurs.length === 0 ? (
         <div className="text-center py-12">
-          <p className="text-gray-500 dark:text-gray-400">Aucun partenaire à afficher pour le moment.</p>
+          <p className="text-gray-500 dark:text-gray-400">
+            Aucun partenaire à afficher pour le moment.
+          </p>
         </div>
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6 lg:gap-8 mt-6">
@@ -80,7 +85,11 @@ export default async function PartenairesSection() {
                   {member.role}
                 </p>
                 {member.link && member.link.trim() !== "" && (
-                  <Link href={member.link} target="_blank" rel="noopener noreferrer">
+                  <Link
+                    href={member.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
                     <Button
                       variant="outline"
                       size="sm"

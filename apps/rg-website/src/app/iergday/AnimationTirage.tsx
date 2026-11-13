@@ -101,8 +101,8 @@ function CanvasConfettis({ actif }: { actif: boolean }) {
       styles.getPropertyValue("--color-tertiary"),
       styles.getPropertyValue("--color-on-surface"),
     ]
-      .map(valeur => valeur.trim())
-      .filter(valeur => valeur.length > 0);
+      .map((valeur) => valeur.trim())
+      .filter((valeur) => valeur.length > 0);
     if (palette.length === 0) palette.push(styles.color);
 
     const dpr = Math.min(2, window.devicePixelRatio || 1);
@@ -117,7 +117,8 @@ function CanvasConfettis({ actif }: { actif: boolean }) {
     const h = () => canvas.height;
     const pieces: Confetti[] = Array.from({ length: 110 }, () => ({
       angle: Math.random() * Math.PI * 2,
-      couleur: palette[Math.floor(Math.random() * palette.length)] ?? styles.color,
+      couleur:
+        palette[Math.floor(Math.random() * palette.length)] ?? styles.color,
       taille: (6 + Math.random() * 8) * dpr,
       vitesseAngle: (Math.random() - 0.5) * 0.24,
       vx: (Math.random() - 0.5) * 3.2 * dpr,
@@ -157,7 +158,13 @@ function CanvasConfettis({ actif }: { actif: boolean }) {
   }, [actif, reduit]);
 
   if (!actif || reduit) return null;
-  return <canvas ref={canvasRef} aria-hidden className="pointer-events-none absolute inset-0 size-full" />;
+  return (
+    <canvas
+      ref={canvasRef}
+      aria-hidden
+      className="pointer-events-none absolute inset-0 size-full"
+    />
+  );
 }
 
 /* ──────────────────────────── ANIMATION ──────────────────────────────────── */
@@ -178,20 +185,29 @@ export function AnimationTirage({
   const reduit = useReducedMotion();
   const initialWinner = gagnants[0];
   const initialWinnerIndex = initialWinner?.cleCreation
-    ? posts.findIndex(post => clePost(post) === initialWinner.cleCreation)
+    ? posts.findIndex((post) => clePost(post) === initialWinner.cleCreation)
     : -1;
-  const initialImmediate = reduit || initialWinnerIndex < 0 || posts.length === 0;
+  const initialImmediate =
+    reduit || initialWinnerIndex < 0 || posts.length === 0;
   const [phase, setPhase] = useState<Phase>(
-    ouvert && initialWinner ? (initialImmediate ? "revelation" : "balayage") : "attente",
+    ouvert && initialWinner
+      ? initialImmediate
+        ? "revelation"
+        : "balayage"
+      : "attente",
   );
   const [surligne, setSurligne] = useState<number | null>(
-    ouvert && initialImmediate && initialWinnerIndex >= 0 ? initialWinnerIndex : null,
+    ouvert && initialImmediate && initialWinnerIndex >= 0
+      ? initialWinnerIndex
+      : null,
   );
   const [rangCourant, setRangCourant] = useState(0);
 
   const cles = useMemo(() => posts.map(clePost), [posts]);
   const gagnant = gagnants[rangCourant] ?? null;
-  const indexGagnant = gagnant?.cleCreation ? cles.indexOf(gagnant.cleCreation) : -1;
+  const indexGagnant = gagnant?.cleCreation
+    ? cles.indexOf(gagnant.cleCreation)
+    : -1;
   const dialogue = useRef<HTMLDialogElement>(null);
   const [animationIdentity, setAnimationIdentity] = useState({
     ouvert,
@@ -207,7 +223,13 @@ export function AnimationTirage({
     animationIdentity.count !== posts.length ||
     animationIdentity.reduit !== reduit
   ) {
-    setAnimationIdentity({ ouvert, gagnant, indexGagnant, count: posts.length, reduit });
+    setAnimationIdentity({
+      ouvert,
+      gagnant,
+      indexGagnant,
+      count: posts.length,
+      reduit,
+    });
     if (!ouvert) {
       setPhase("attente");
       setSurligne(null);
@@ -244,7 +266,7 @@ export function AnimationTirage({
         return;
       }
       // On balaie en évitant de retomber deux fois de suite au même endroit.
-      setSurligne(precedent => {
+      setSurligne((precedent) => {
         let suivant = Math.floor(Math.random() * posts.length);
         if (posts.length > 1 && suivant === precedent) {
           suivant = (suivant + 1) % posts.length;
@@ -262,7 +284,10 @@ export function AnimationTirage({
   useEffect(() => {
     if (phase !== "revelation") return;
     if (rangCourant >= gagnants.length - 1) return;
-    const minuteur = setTimeout(() => setRangCourant(r => r + 1), reduit ? 2600 : PAUSE_ENTRE_GAGNANTS_MS);
+    const minuteur = setTimeout(
+      () => setRangCourant((r) => r + 1),
+      reduit ? 2600 : PAUSE_ENTRE_GAGNANTS_MS,
+    );
     return () => clearTimeout(minuteur);
   }, [phase, rangCourant, gagnants.length, reduit]);
 
@@ -289,7 +314,7 @@ export function AnimationTirage({
   return (
     <dialog
       ref={dialogue}
-      onCancel={event => {
+      onCancel={(event) => {
         event.preventDefault();
         fermer();
       }}
@@ -302,9 +327,16 @@ export function AnimationTirage({
       <div className="relative mx-auto flex min-h-full w-full max-w-6xl flex-col gap-6 p-4 sm:p-6">
         <div className="flex items-center justify-between gap-4">
           <Badge variant="secondary" className="text-sm">
-            {gagnants.length > 1 ? `Gagnant ${rangCourant + 1} sur ${gagnants.length}` : "Tirage au sort"}
+            {gagnants.length > 1
+              ? `Gagnant ${rangCourant + 1} sur ${gagnants.length}`
+              : "Tirage au sort"}
           </Badge>
-          <Button variant="ghost" size="icon" onClick={fermer} aria-label="Fermer">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={fermer}
+            aria-label="Fermer"
+          >
             <X className="size-5" aria-hidden />
           </Button>
         </div>
@@ -315,7 +347,11 @@ export function AnimationTirage({
          * apprendre le résultat par cette région — pas en devinant quelle carte
          * est nette.
          */}
-        <div aria-live="polite" aria-atomic="true" className="min-h-16 text-center">
+        <div
+          aria-live="polite"
+          aria-atomic="true"
+          className="min-h-16 text-center"
+        >
           <AnimatePresence mode="wait">
             {enRevelation && gagnant && (
               <motion.div
@@ -325,7 +361,9 @@ export function AnimationTirage({
                 exit={reduit ? undefined : { opacity: 0, y: -12 }}
                 transition={{ duration: 0.45, ease: "easeOut" }}
               >
-                <p className="text-fluid-headline-md font-bold text-on-surface">Bravo {gagnant.pseudoAffichage} !</p>
+                <p className="text-fluid-headline-md font-bold text-on-surface">
+                  Bravo {gagnant.pseudoAffichage} !
+                </p>
                 {gagnant.lot && (
                   <p className="mt-1 text-fluid-body-md text-on-surface-variant">
                     Lot {gagnant.rang} — {gagnant.lot}
@@ -386,7 +424,11 @@ export function AnimationTirage({
                     scale: estSurlignee ? 1.06 : 1,
                   }}
                   transition={{ duration: reduit ? 0 : 0.28, ease: "easeOut" }}
-                  style={estSurlignee ? { boxShadow: "0 0 0 3px var(--color-primary)" } : undefined}
+                  style={
+                    estSurlignee
+                      ? { boxShadow: "0 0 0 3px var(--color-primary)" }
+                      : undefined
+                  }
                 >
                   <PostCarte post={post} priorite={false} onOuvrir={() => {}} />
                 </motion.div>

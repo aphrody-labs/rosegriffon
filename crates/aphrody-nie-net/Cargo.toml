@@ -12,7 +12,13 @@ workspace = true
 
 [features]
 default = ["transport"]
-transport = ["dep:tokio", "dep:futures-util", "dep:tokio-tungstenite", "dep:uuid", "dep:anyhow"]
+transport = [
+  "dep:tokio",
+  "dep:futures-util",
+  "dep:tokio-tungstenite",
+  "dep:uuid",
+  "dep:anyhow",
+]
 
 [dependencies]
 aphrody-nie-runtime = { path = "../aphrody-nie-runtime", version = "1.4.8", default-features = false }

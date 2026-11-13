@@ -430,7 +430,14 @@
       "date": "2026-09-07",
       "status": "passed",
       "description": "A sibling pipeline delivered by Codex in parallel, over the same data/menu/manifest.json + *_setting.cfg.bin corpus, exposing menu settings as typed data (FFI/WASM/catalog) rather than as design tokens (nie-ui's lane). No file overlap with the nie-ui/inacord-ui/nie-web lane.",
-      "commits": ["be1eaa11", "5679b238", "78eac842", "08c6db76", "c720d9b0", "d05f10e7"],
+      "commits": [
+        "be1eaa11",
+        "5679b238",
+        "78eac842",
+        "08c6db76",
+        "c720d9b0",
+        "d05f10e7"
+      ],
       "nie_cli_mode_coverage_strict": {
         "command": "nie mode coverage --strict",
         "modes": 12,

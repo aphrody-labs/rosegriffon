@@ -15,7 +15,8 @@ export const PATRON_DISCOUNT_PERCENT = 20;
  *
  * Surcharger via `STRIPE_COUPON_PATRON` si l'ID Stripe diffère par environnement.
  */
-export const PATRON_STRIPE_COUPON_ID = process.env.STRIPE_COUPON_PATRON ?? "kVTx74qC";
+export const PATRON_STRIPE_COUPON_ID =
+  process.env.STRIPE_COUPON_PATRON ?? "kVTx74qC";
 
 export interface PatronDiscount {
   active: boolean;
@@ -51,7 +52,9 @@ export const REMISE_ABSENTE: PatronDiscount = {
  * `declined_patron` et `former_patron` sont des adhésions qui ont existé, pas
  * des adhésions en cours.
  */
-export function remiseDepuisAdhesion(ligne: LigneAdhesionPatreon | null): PatronDiscount {
+export function remiseDepuisAdhesion(
+  ligne: LigneAdhesionPatreon | null,
+): PatronDiscount {
   if (!ligne) {
     return REMISE_ABSENTE;
   }
@@ -73,7 +76,9 @@ export function remiseDepuisAdhesion(ligne: LigneAdhesionPatreon | null): Patron
  * - On retourne aussi le tier et le montant pour permettre à l'UI d'afficher
  *   un badge contextuel ("Patron Niveau Evans → -20%").
  */
-export async function getPatronDiscount(userId: string): Promise<PatronDiscount> {
+export async function getPatronDiscount(
+  userId: string,
+): Promise<PatronDiscount> {
   const empty = REMISE_ABSENTE;
 
   const { data, error } = await createPostgresClient()
@@ -96,7 +101,9 @@ export async function getPatronDiscount(userId: string): Promise<PatronDiscount>
  * Stripe. Renvoie l'ID coupon à passer à `stripe.checkout.sessions.create`,
  * ou `null` si pas de réduction.
  */
-export async function getStripeCouponForUser(userId: string): Promise<string | null> {
+export async function getStripeCouponForUser(
+  userId: string,
+): Promise<string | null> {
   const d = await getPatronDiscount(userId);
   return d.active ? d.stripeCouponId : null;
 }

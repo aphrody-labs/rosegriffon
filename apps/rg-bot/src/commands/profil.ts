@@ -38,9 +38,17 @@ import {
 import { getCharacterFaceUrl, resolveAssetUrl } from "@rosegriffon/azalee";
 
 import { formaterJetons } from "../lib/kizuna";
-import { renderCarteClassement, renderCarteProfil } from "../lib/canvas/communaute";
+import {
+  renderCarteClassement,
+  renderCarteProfil,
+} from "../lib/canvas/communaute";
 import { libelleCompletion, resumerCollection } from "../lib/collection";
-import { NIVEAU_MAX, prochainRang, progression, rangDe } from "../lib/experience";
+import {
+  NIVEAU_MAX,
+  prochainRang,
+  progression,
+  rangDe,
+} from "../lib/experience";
 import {
   classement,
   fichesPersonnages,
@@ -52,7 +60,15 @@ import {
   totalPersonnages,
   type ProfilCommunaute,
 } from "../services/communaute";
-import { boutonLien, differer, echec, entierLisible, fiche, piedDeCommande, repondre } from "../lib/ui";
+import {
+  boutonLien,
+  differer,
+  echec,
+  entierLisible,
+  fiche,
+  piedDeCommande,
+  repondre,
+} from "../lib/ui";
 import { rgUrl } from "../lib/embeds";
 import { pseudoDuSite } from "../services/website";
 
@@ -66,7 +82,8 @@ function guildeDe(interaction: ChatInputCommandInteraction): string | null {
   return interaction.guildId;
 }
 
-const HORS_GUILDE = "Cette commande n'a de sens que sur un serveur : la progression est propre à chaque communauté.";
+const HORS_GUILDE =
+  "Cette commande n'a de sens que sur un serveur : la progression est propre à chaque communauté.";
 
 /** URL du portrait du joueur fétiche, `null` si le code de modèle manque. */
 function portraitDe(code: string | null): string | null {
@@ -85,7 +102,7 @@ async function plaqueDe(profil: ProfilCommunaute): Promise<string | null> {
     return null;
   }
   const catalogue = await plaques();
-  const plaque = catalogue.find(entree => entree.id === profil.plaque);
+  const plaque = catalogue.find((entree) => entree.id === profil.plaque);
   return plaque?.cheminImage ? resolveAssetUrl(plaque.cheminImage) : null;
 }
 
@@ -125,30 +142,43 @@ export class ProfilCommand {
       const avancement = progression(profil.xp);
       const rang = rangDe(avancement.niveau);
 
-      const [position, total, collection, recense, plaqueUrl, pseudoSite] = await Promise.all([
-        rangClassement(guildId, cible.id),
-        nombreClasses(guildId),
-        personnagesPossedes(guildId, cible.id),
-        totalPersonnages(),
-        plaqueDe(profil),
-        // Le membre a-t-il une page publique ? Elle porte la MÊME progression,
-        // affichée sur sa carte de joueur — d'où le bouton plutôt qu'un simple
-        // rappel : les deux surfaces montrent le même niveau, il n'y a aucune
-        // raison de les laisser s'ignorer.
-        pseudoDuSite(cible.id),
-      ]);
+      const [position, total, collection, recense, plaqueUrl, pseudoSite] =
+        await Promise.all([
+          rangClassement(guildId, cible.id),
+          nombreClasses(guildId),
+          personnagesPossedes(guildId, cible.id),
+          totalPersonnages(),
+          plaqueDe(profil),
+          // Le membre a-t-il une page publique ? Elle porte la MÊME progression,
+          // affichée sur sa carte de joueur — d'où le bouton plutôt qu'un simple
+          // rappel : les deux surfaces montrent le même niveau, il n'y a aucune
+          // raison de les laisser s'ignorer.
+          pseudoDuSite(cible.id),
+        ]);
 
       const favoriId = profil.persoFavori;
-      const favori = favoriId ? (await fichesPersonnages([favoriId]))[0] : undefined;
+      const favori = favoriId
+        ? (await fichesPersonnages([favoriId]))[0]
+        : undefined;
       const resume = resumerCollection(
-        collection.map(entree => ({ objetId: entree.id, rarete: entree.rarete })),
+        collection.map((entree) => ({
+          objetId: entree.id,
+          rarete: entree.rarete,
+        })),
         recense,
       );
 
       const image = await renderCarteProfil({
         avatarUrl: cible.displayAvatarURL({ extension: "png", size: 256 }),
-        collection: collection.length > 0 ? libelleCompletion(resume, recense) : null,
-        favori: favori ? { nom: favori.nom, portraitUrl: portraitDe(favori.code), rarete: favori.rarete } : null,
+        collection:
+          collection.length > 0 ? libelleCompletion(resume, recense) : null,
+        favori: favori
+          ? {
+              nom: favori.nom,
+              portraitUrl: portraitDe(favori.code),
+              rarete: favori.rarete,
+            }
+          : null,
         messages: profil.messagesComptes,
         plaqueUrl,
         jetons: profil.jetons,
@@ -163,9 +193,16 @@ export class ProfilCommand {
       // Les mêmes chiffres en texte : une image ne se lit pas par un lecteur
       // d'écran, et Discord ne la charge pas toujours.
       const suivant = prochainRang(avancement.niveau);
-      const carte = fiche({ icone: "niveau", titre: `Profil de ${cible.displayName}` });
+      const carte = fiche({
+        icone: "niveau",
+        titre: `Profil de ${cible.displayName}`,
+      });
       carte
-        .champ("Niveau", `**${avancement.niveau}** / ${NIVEAU_MAX} · ${rang.nom}`, { enLigne: true })
+        .champ(
+          "Niveau",
+          `**${avancement.niveau}** / ${NIVEAU_MAX} · ${rang.nom}`,
+          { enLigne: true },
+        )
         .champ(
           "Expérience",
           avancement.auMaximum
@@ -173,16 +210,36 @@ export class ProfilCommand {
             : `${entierLisible(avancement.xpDansNiveau)} / ${entierLisible(avancement.xpDuNiveau)} XP`,
           { enLigne: true },
         )
-        .champ("Jetons Kizuna", formaterJetons(profil.jetons), { enLigne: true })
-        .champ("Classement", position ? `${entierLisible(position.rang)}ᵉ sur ${entierLisible(total)}` : "non classé", {
+        .champ("Jetons Kizuna", formaterJetons(profil.jetons), {
           enLigne: true,
         })
-        .champ("Prochain rang", suivant ? `${suivant.nom} au niveau ${suivant.depuis}` : "le plus haut est atteint", {
-          enLigne: true,
-        })
-        .champ("Collection", collection.length > 0 ? libelleCompletion(resume, recense) : "aucun joueur recruté", {
-          enLigne: true,
-        });
+        .champ(
+          "Classement",
+          position
+            ? `${entierLisible(position.rang)}ᵉ sur ${entierLisible(total)}`
+            : "non classé",
+          {
+            enLigne: true,
+          },
+        )
+        .champ(
+          "Prochain rang",
+          suivant
+            ? `${suivant.nom} au niveau ${suivant.depuis}`
+            : "le plus haut est atteint",
+          {
+            enLigne: true,
+          },
+        )
+        .champ(
+          "Collection",
+          collection.length > 0
+            ? libelleCompletion(resume, recense)
+            : "aucun joueur recruté",
+          {
+            enLigne: true,
+          },
+        );
 
       // Un bouton de style `Link` n'a pas d'identifiant et ne déclenche aucune
       // interaction : il survit intact au redémarrage du bot, contrairement à
@@ -201,10 +258,18 @@ export class ProfilCommand {
       await interaction.editReply({
         components: versLeSite,
         embeds: [piedDeCommande(carte.embed, interaction)],
-        files: [new AttachmentBuilder(image, { name: `profil-${cible.id}.png` })],
+        files: [
+          new AttachmentBuilder(image, { name: `profil-${cible.id}.png` }),
+        ],
       });
     } catch (err) {
-      await repondre(interaction, echec("Profil illisible", err instanceof Error ? err.message : String(err)));
+      await repondre(
+        interaction,
+        echec(
+          "Profil illisible",
+          err instanceof Error ? err.message : String(err),
+        ),
+      );
     }
   }
 
@@ -267,8 +332,10 @@ export class ProfilCommand {
       // l'identifiant — un classement sans nom reste un classement.
       const guilde = interaction.guild;
       const membres = await Promise.all(
-        lignes.map(async ligne => {
-          const membre = guilde ? await guilde.members.fetch(ligne.discordId).catch(() => null) : null;
+        lignes.map(async (ligne) => {
+          const membre = guilde
+            ? await guilde.members.fetch(ligne.discordId).catch(() => null)
+            : null;
           return { ligne, membre };
         }),
       );
@@ -276,7 +343,8 @@ export class ProfilCommand {
       const image = await renderCarteClassement(
         surJetons ? "Classement des jetons Kizuna" : "Classement des niveaux",
         membres.map(({ ligne, membre }, index) => ({
-          avatarUrl: membre?.displayAvatarURL({ extension: "png", size: 128 }) ?? null,
+          avatarUrl:
+            membre?.displayAvatarURL({ extension: "png", size: 128 }) ?? null,
           moi: ligne.discordId === interaction.user.id,
           niveau: ligne.niveau,
           position: decalage + index + 1,
@@ -290,10 +358,16 @@ export class ProfilCommand {
         },
       );
 
-      const maPosition = await rangClassement(guildId, interaction.user.id, surJetons ? "jetons_gagnes" : "xp");
+      const maPosition = await rangClassement(
+        guildId,
+        interaction.user.id,
+        surJetons ? "jetons_gagnes" : "xp",
+      );
       const carte = fiche({
         icone: "classement",
-        titre: surJetons ? "Classement des jetons Kizuna" : "Classement des niveaux",
+        titre: surJetons
+          ? "Classement des jetons Kizuna"
+          : "Classement des niveaux",
       });
       carte.champ(
         "Ta position",
@@ -308,7 +382,13 @@ export class ProfilCommand {
         files: [new AttachmentBuilder(image, { name: "classement.png" })],
       });
     } catch (err) {
-      await repondre(interaction, echec("Classement illisible", err instanceof Error ? err.message : String(err)));
+      await repondre(
+        interaction,
+        echec(
+          "Classement illisible",
+          err instanceof Error ? err.message : String(err),
+        ),
+      );
     }
   }
 }

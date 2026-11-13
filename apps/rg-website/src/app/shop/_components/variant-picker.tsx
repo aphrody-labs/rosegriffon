@@ -13,8 +13,9 @@ export function VariantPickerWithCta({ product }: { product: Product }) {
   const variants = product.variants ?? [];
   const [selected, setSelected] = useState<string | undefined>();
   const [, startTransition] = useTransition();
-  const selectedVariant = variants.find(v => v.id === selected);
-  const displayPrice = selectedVariant?.priceCentsOverride ?? product.priceCents;
+  const selectedVariant = variants.find((v) => v.id === selected);
+  const displayPrice =
+    selectedVariant?.priceCentsOverride ?? product.priceCents;
 
   const handleMobileAdd = () => {
     if (variants.length > 0 && !selected) {
@@ -28,9 +29,14 @@ export function VariantPickerWithCta({ product }: { product: Product }) {
   if (variants.length === 0) {
     return (
       <div className="flex flex-col gap-4">
-        <p className="text-3xl font-extrabold text-white">{formatEuros(product.priceCents)}</p>
+        <p className="text-3xl font-extrabold text-white">
+          {formatEuros(product.priceCents)}
+        </p>
         <AddToCart product={product} size="lg" />
-        <MobileStickyCta priceCents={product.priceCents} onAdd={handleMobileAdd} />
+        <MobileStickyCta
+          priceCents={product.priceCents}
+          onAdd={handleMobileAdd}
+        />
       </div>
     );
   }
@@ -38,9 +44,15 @@ export function VariantPickerWithCta({ product }: { product: Product }) {
   return (
     <div className="flex flex-col gap-5">
       <div>
-        <h3 className="mb-3 text-xs font-bold uppercase tracking-widest text-rg-or">Choisis ta variante</h3>
-        <div role="radiogroup" aria-label="Variantes du produit" className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-          {variants.map(v => {
+        <h3 className="mb-3 text-xs font-bold uppercase tracking-widest text-rg-or">
+          Choisis ta variante
+        </h3>
+        <div
+          role="radiogroup"
+          aria-label="Variantes du produit"
+          className="grid grid-cols-1 gap-2 sm:grid-cols-2"
+        >
+          {variants.map((v) => {
             const isActive = v.id === selected;
             const price = v.priceCentsOverride ?? product.priceCents;
             return (
@@ -60,8 +72,12 @@ export function VariantPickerWithCta({ product }: { product: Product }) {
                   onChange={() => setSelected(v.id)}
                   className="sr-only"
                 />
-                <span className="text-sm font-semibold text-white">{v.label}</span>
-                <span className={`text-sm font-bold ${isActive ? "text-rg-or" : "text-white/70"}`}>
+                <span className="text-sm font-semibold text-white">
+                  {v.label}
+                </span>
+                <span
+                  className={`text-sm font-bold ${isActive ? "text-rg-or" : "text-white/70"}`}
+                >
                   {formatEuros(price)}
                 </span>
               </label>
@@ -72,8 +88,12 @@ export function VariantPickerWithCta({ product }: { product: Product }) {
 
       <div className="flex items-end justify-between gap-4 border-t border-rg-or/30 pt-4">
         <div>
-          <span className="block text-[10px] font-bold uppercase tracking-widest text-rg-or">Total</span>
-          <span className="block text-3xl font-extrabold text-white">{formatEuros(displayPrice)}</span>
+          <span className="block text-[10px] font-bold uppercase tracking-widest text-rg-or">
+            Total
+          </span>
+          <span className="block text-3xl font-extrabold text-white">
+            {formatEuros(displayPrice)}
+          </span>
         </div>
       </div>
 

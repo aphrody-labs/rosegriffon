@@ -23,53 +23,85 @@ import { basename, dirname, join, resolve } from "node:path";
 const here = dirname(import.meta.path);
 const modRoot = resolve(here, "..");
 const repoRoot = resolve(modRoot, "..", "..");
-const themeJson = resolve(process.argv[2] ?? join(repoRoot, "var", "ie-work", "rg-build", "theme.json"));
-const inventory = resolve(process.argv[3] ?? join(repoRoot, "var", "ie-inventory", "ievr-inventory.sqlite"));
-const bunre = process.env.BUNRE ?? join(repoRoot, "target", "release", "bunre.exe");
+const themeJson = resolve(
+  process.argv[2] ?? join(repoRoot, "var", "ie-work", "rg-build", "theme.json"),
+);
+const inventory = resolve(
+  process.argv[3] ??
+    join(repoRoot, "var", "ie-inventory", "ievr-inventory.sqlite"),
+);
+const bunre =
+  process.env.BUNRE ?? join(repoRoot, "target", "release", "bunre.exe");
 const gameDir = process.env.NIE_GAME_DIR;
 const probeDir = join(repoRoot, "var", "ie-work", "rg-build", "game");
 
-type Asset = { name: string; path: string | null; from: "package" | "cdn" | "missing" } | null | undefined;
+type Asset =
+  | { name: string; path: string | null; from: "package" | "cdn" | "missing" }
+  | null
+  | undefined;
 const t = await Bun.file(themeJson).json();
 const s = t.scheme as Record<string, string>;
 const role = (r: string) => {
   if (!s[r]) throw new Error(`theme.json: no md3 role "${r}"`);
   return s[r];
 };
-const file = (a: Asset) => (a && a.from !== "missing" && a.path ? a.path : null);
+const file = (a: Asset) =>
+  a && a.from !== "missing" && a.path ? a.path : null;
 
 const db = new Database(inventory, { readonly: true });
 const present = (folder: string) =>
-  (db.query("SELECT 1 FROM entry WHERE path LIKE ? LIMIT 1").get(`data/${folder}/%`) ?? null) !== null;
-if (!present("dx11/menu")) throw new Error(`${inventory}: no dx11/menu entries; run var/ie-inventory/inventory.ts first`);
+  (db
+    .query("SELECT 1 FROM entry WHERE path LIKE ? LIMIT 1")
+    .get(`data/${folder}/%`) ?? null) !== null;
+if (!present("dx11/menu"))
+  throw new Error(
+    `${inventory}: no dx11/menu entries; run var/ie-inventory/inventory.ts first`,
+  );
 
 const run = (cmd: string[]) => {
   const p = Bun.spawnSync(cmd, { stdout: "pipe", stderr: "pipe" });
-  if (p.exitCode !== 0) throw new Error(`${cmd[0]} ${cmd[1]} ${cmd[2] ?? ""}: ${p.stderr.toString().trim()}`);
+  if (p.exitCode !== 0)
+    throw new Error(
+      `${cmd[0]} ${cmd[1]} ${cmd[2] ?? ""}: ${p.stderr.toString().trim()}`,
+    );
   return p.stdout.toString();
 };
 const magick = (...args: string[]) => run(["magick", ...args]);
 
 /** A member of the real game's packs, extracted once under var/ie-work/rg-build/game and inspected with bunre. */
 function gameInspect(member: string) {
-  const row = db.query("SELECT pack FROM entry WHERE path = ? LIMIT 1").get(member) as { pack: string } | null;
-  if (!row) throw new Error(`${member}: not in the game packs (inventory ${inventory})`);
+  const row = db
+    .query("SELECT pack FROM entry WHERE path = ? LIMIT 1")
+    .get(member) as { pack: string } | null;
+  if (!row)
+    throw new Error(
+      `${member}: not in the game packs (inventory ${inventory})`,
+    );
   const pack = join(gameDir!, "data", "packs", row.pack);
-  if (!existsSync(pack)) throw new Error(`${pack}: pack missing from the install`);
+  if (!existsSync(pack))
+    throw new Error(`${pack}: pack missing from the install`);
   const out = join(probeDir, basename(member));
   mkdirSync(probeDir, { recursive: true });
-  if (!existsSync(out)) run([bunre, "formats", "cpk-extract", pack, member, out]);
+  if (!existsSync(out))
+    run([bunre, "formats", "cpk-extract", pack, member, out]);
   return JSON.parse(run([bunre, "formats", "inspect", out])).data;
 }
 
 // Minimal TOML writer for the value shapes used here.
 const v = (x: unknown): string =>
-  typeof x === "string" ? JSON.stringify(x)
-  : typeof x === "number" || typeof x === "boolean" ? String(x)
-  : Array.isArray(x) ? `[${x.map(v).join(", ")}]`
-  : `{ ${Object.entries(x as object).map(([k, y]) => `${k} = ${v(y)}`).join(", ")} }`;
+  typeof x === "string"
+    ? JSON.stringify(x)
+    : typeof x === "number" || typeof x === "boolean"
+      ? String(x)
+      : Array.isArray(x)
+        ? `[${x.map(v).join(", ")}]`
+        : `{ ${Object.entries(x as object)
+            .map(([k, y]) => `${k} = ${v(y)}`)
+            .join(", ")} }`;
 const table = (name: string, obj: Record<string, unknown>) =>
-  `[${name}]\n${Object.entries(obj).map(([k, y]) => `${k} = ${v(y)}`).join("\n")}\n`;
+  `[${name}]\n${Object.entries(obj)
+    .map(([k, y]) => `${k} = ${v(y)}`)
+    .join("\n")}\n`;
 
 const titleDir = join(modRoot, "content", "images", "menu", "50_title");
 const artDir = join(titleDir, "title_art");
@@ -91,28 +123,55 @@ const WALL = {
 const wallpaper = file(t.assets?.wallpaper);
 let wallInfo = "no";
 if (!wallpaper) {
-  console.warn(`no wallpaper: theme.json assets.wallpaper is ${t.assets?.wallpaper?.from ?? "absent"}`);
+  console.warn(
+    `no wallpaper: theme.json assets.wallpaper is ${t.assets?.wallpaper?.from ?? "absent"}`,
+  );
 } else if (!gameDir) {
-  console.warn("no wallpaper: set NIE_GAME_DIR to read the retail background size from the game");
+  console.warn(
+    "no wallpaper: set NIE_GAME_DIR to read the retail background size from the game",
+  );
 } else {
-  const tex = gameInspect(WALL.texture).textures.find((x: { name: string }) => x.name === WALL.name);
+  const tex = gameInspect(WALL.texture).textures.find(
+    (x: { name: string }) => x.name === WALL.name,
+  );
   const pose = gameInspect(WALL.layout).world_pose_by_name?.[WALL.bone];
-  if (!tex || !pose) throw new Error(`${WALL.texture}: no ${WALL.name} texture or ${WALL.bone} layer`);
+  if (!tex || !pose)
+    throw new Error(
+      `${WALL.texture}: no ${WALL.name} texture or ${WALL.bone} layer`,
+    );
   const [W, H] = [tex.width as number, tex.height as number];
-  if (pose.scale_x !== W || pose.scale_y !== H) throw new Error(`${WALL.bone}: drawn ${pose.scale_x}x${pose.scale_y}, texture ${W}x${H}`);
+  if (pose.scale_x !== W || pose.scale_y !== H)
+    throw new Error(
+      `${WALL.bone}: drawn ${pose.scale_x}x${pose.scale_y}, texture ${W}x${H}`,
+    );
   // Visible window inside the texture (top-left convention: x, -y).
   const [vx, vy] = [-pose.x, pose.y];
   const [sw, sh] = WALL.screen;
   const out = join(artDir, "rg_wallpaper.png");
-  const [fw, fh] = magick(wallpaper, "-format", "%w %h", "info:").trim().split(" ").map(Number);
+  const [fw, fh] = magick(wallpaper, "-format", "%w %h", "info:")
+    .trim()
+    .split(" ")
+    .map(Number);
   const figH = sh; // full screen height, feet on the bottom edge
   const figW = Math.round((fw * figH) / fh);
   const figX = vx + sw - figW - Math.round(sw * 0.04); // right side, 4 % margin
   magick(
-    "-size", `${W}x${H}`, `gradient:${role("surface")}-${role("primaryContainer")}`,
-    "(", wallpaper, "-resize", `x${figH}`, ")",
-    "-geometry", `+${figX}+${vy + sh - figH}`, "-composite",
-    "-alpha", "off", "-depth", "8", out,
+    "-size",
+    `${W}x${H}`,
+    `gradient:${role("surface")}-${role("primaryContainer")}`,
+    "(",
+    wallpaper,
+    "-resize",
+    `x${figH}`,
+    ")",
+    "-geometry",
+    `+${figX}+${vy + sh - figH}`,
+    "-composite",
+    "-alpha",
+    "off",
+    "-depth",
+    "8",
+    out,
   );
   const recipe = [
     `schema = "VRFW.image/1"`,
@@ -135,12 +194,18 @@ if (!wallpaper) {
 // illustrations, minimaps, maps, gallery, title key art, and the mode-menu background once the wallpaper replaces it).
 // Each must exist in the packs.
 const KEEP_COLOURS = [
-  "dx11/menu/200_icon", "dx11/menu/220_img", "dx11/menu/210_minimap", "dx11/menu/13_map",
-  "dx11/menu/90_map", "dx11/menu/112_gallery", "dx11/menu/50_title/title00",
+  "dx11/menu/200_icon",
+  "dx11/menu/220_img",
+  "dx11/menu/210_minimap",
+  "dx11/menu/13_map",
+  "dx11/menu/90_map",
+  "dx11/menu/112_gallery",
+  "dx11/menu/50_title/title00",
   ...(wallInfo !== "no" ? ["dx11/menu/50_title/title02/title02_00"] : []),
 ];
 const exclude = KEEP_COLOURS.filter(present);
-for (const f of KEEP_COLOURS.filter((f) => !exclude.includes(f))) console.warn(`not in the game packs, skipped: ${f}`);
+for (const f of KEEP_COLOURS.filter((f) => !exclude.includes(f)))
+  console.warn(`not in the game packs, skipped: ${f}`);
 
 // Accents: the md3 role families of the Rose Griffon theme, labelled by role.
 const ROLE_LABEL = {
@@ -153,7 +218,10 @@ const accents = (["primary", "secondary", "tertiary"] as const).map((r, i) => ({
   id: `rg_${r}`,
   value: 11 + i, // 11..13: values 1..3 of the ui_theme row are VRFW's dark theme accents (one shared row)
   text: `ui_theme_rg_${r}`,
-  name: { en: `${t.title} (${ROLE_LABEL[r].en})`, fr: `${t.title} (${ROLE_LABEL[r].fr})` },
+  name: {
+    en: `${t.title} (${ROLE_LABEL[r].en})`,
+    fr: `${t.title} (${ROLE_LABEL[r].fr})`,
+  },
   accent: role(r),
   accent_hi: role(`${r}Container`),
   accent_dark: role(`on${cap(r)}Container`),
@@ -181,7 +249,12 @@ const themeToml = [
     text2: role("onSurfaceVariant"),
     key: role("surfaceContainerHigh"),
   }),
-  ...accents.map((a) => `[[accent]]\n${Object.entries(a).map(([k, y]) => `${k} = ${v(y)}`).join("\n")}\n`),
+  ...accents.map(
+    (a) =>
+      `[[accent]]\n${Object.entries(a)
+        .map(([k, y]) => `${k} = ${v(y)}`)
+        .join("\n")}\n`,
+  ),
 ].join("\n");
 db.close();
 
@@ -194,7 +267,18 @@ await Bun.write(join(themesDir, "rose_griffon.toml"), themeToml);
 const titleAsset = file(t.assets?.title) ? t.assets.title : t.assets?.logo;
 const title = file(titleAsset);
 if (title) {
-  magick(title, "-resize", "1500x1100", "-background", "none", "-gravity", "center", "-extent", "1600x1200", join(artDir, "logo.png"));
+  magick(
+    title,
+    "-resize",
+    "1500x1100",
+    "-background",
+    "none",
+    "-gravity",
+    "center",
+    "-extent",
+    "1600x1200",
+    join(artDir, "logo.png"),
+  );
   const ATLASES = [
     "#/menu/50_title/title00/title00_03_02/<LG>/title00_03_02.g4tx", // press-start logo
     "#/menu/50_title/title02/title02_01/<LG>/title02_01.g4tx", // mode-menu logo
@@ -206,7 +290,8 @@ if (title) {
     "",
     ...ATLASES.flatMap((atlas) =>
       ["", ["de", "es", "en", "fr", "it", "pt", "zh_hans", "zh_hant"]].map(
-        (lang) => `[[sprite]]\natlas = ${v(atlas)}\nname = "logo02"\npng = "title_art/logo.png"\nlang = ${v(lang)}\n`,
+        (lang) =>
+          `[[sprite]]\natlas = ${v(atlas)}\nname = "logo02"\npng = "title_art/logo.png"\nlang = ${v(lang)}\n`,
       ),
     ),
   ].join("\n");

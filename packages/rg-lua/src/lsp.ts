@@ -1,7 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
 // Embedded Lua 5.2 Language Server Protocol (LSP) Engine & Diagnostics for RoseGriffon
 
-import { analyzeLua52Source, type Lua52AstSummary, type LuaSymbol } from "./ast";
+import {
+  analyzeLua52Source,
+  type Lua52AstSummary,
+  type LuaSymbol,
+} from "./ast";
 
 export interface LspPosition {
   line: number;
@@ -65,7 +69,10 @@ export class Lua52LanguageServer {
     return this.astCache.get(uri)?.symbols || [];
   }
 
-  public getCompletions(uri: string, _position: LspPosition): LspCompletionItem[] {
+  public getCompletions(
+    uri: string,
+    _position: LspPosition,
+  ): LspCompletionItem[] {
     const ast = this.astCache.get(uri);
     const items: LspCompletionItem[] = [
       // Lua 5.2 Keywords
@@ -76,13 +83,21 @@ export class Lua52LanguageServer {
       { label: "then", kind: 14, detail: "keyword" },
       { label: "end", kind: 14, detail: "keyword" },
       // Lua 5.2 Standard Libraries
-      { label: "bit32", kind: 9, detail: "PUC-Rio Lua 5.2 32-bit bitwise library" },
+      {
+        label: "bit32",
+        kind: 9,
+        detail: "PUC-Rio Lua 5.2 32-bit bitwise library",
+      },
       { label: "bit32.band", kind: 3, detail: "bit32.band(...): number" },
       { label: "bit32.bxor", kind: 3, detail: "bit32.bxor(...): number" },
       { label: "bit32.bor", kind: 3, detail: "bit32.bor(...): number" },
       { label: "bit32.bnot", kind: 3, detail: "bit32.bnot(x): number" },
       { label: "table.pack", kind: 3, detail: "table.pack(...): table" },
-      { label: "table.unpack", kind: 3, detail: "table.unpack(list [, i [, j]]): ..." },
+      {
+        label: "table.unpack",
+        kind: 3,
+        detail: "table.unpack(list [, i [, j]]): ...",
+      },
       { label: "_ENV", kind: 6, detail: "Lexical environment table" },
     ];
 
@@ -90,7 +105,12 @@ export class Lua52LanguageServer {
       for (const sym of ast.symbols) {
         items.push({
           label: sym.name,
-          kind: sym.kind === "function" || sym.kind === "method" ? 3 : sym.kind === "module" ? 9 : 6,
+          kind:
+            sym.kind === "function" || sym.kind === "method"
+              ? 3
+              : sym.kind === "module"
+                ? 9
+                : 6,
           detail: sym.signature || `${sym.kind} ${sym.name}`,
         });
       }
@@ -115,7 +135,8 @@ export class Lua52LanguageServer {
         return {
           contents: {
             kind: "markdown",
-            value: "### `bit32`\nStandard PUC-Rio Lua 5.2 bitwise manipulation library operating on unsigned 32-bit integers.",
+            value:
+              "### `bit32`\nStandard PUC-Rio Lua 5.2 bitwise manipulation library operating on unsigned 32-bit integers.",
           },
         };
       }
@@ -123,7 +144,8 @@ export class Lua52LanguageServer {
         return {
           contents: {
             kind: "markdown",
-            value: "### `table.pack(...)`\nReturns a new table with all arguments stored into keys 1, 2, etc. and with a field `n` with the total number of arguments.",
+            value:
+              "### `table.pack(...)`\nReturns a new table with all arguments stored into keys 1, 2, etc. and with a field `n` with the total number of arguments.",
           },
         };
       }
@@ -131,7 +153,8 @@ export class Lua52LanguageServer {
         return {
           contents: {
             kind: "markdown",
-            value: "### `_ENV`\nLexical environment table introduced in Lua 5.2 to replace global tables and `setfenv`/`getfenv`.",
+            value:
+              "### `_ENV`\nLexical environment table introduced in Lua 5.2 to replace global tables and `setfenv`/`getfenv`.",
           },
         };
       }
@@ -143,7 +166,8 @@ export class Lua52LanguageServer {
   public static generateLuarcConfig(): string {
     return JSON.stringify(
       {
-        $schema: "https://raw.githubusercontent.com/LuaLS/vscode-lua/master/setting/schema.json",
+        $schema:
+          "https://raw.githubusercontent.com/LuaLS/vscode-lua/master/setting/schema.json",
         "runtime.version": "Lua 5.2",
         "runtime.builtin": {
           bit32: "enable",
@@ -153,7 +177,7 @@ export class Lua52LanguageServer {
         "workspace.checkThirdParty": false,
       },
       null,
-      2
+      2,
     );
   }
 }

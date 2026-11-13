@@ -26,7 +26,11 @@
 import { existsSync } from "node:fs";
 
 import { hasDatabaseProvider } from "../db/provider";
-import { hasPostgresConfiguration, resolveDataDir, resolveMirrorPath } from "../config";
+import {
+  hasPostgresConfiguration,
+  resolveDataDir,
+  resolveMirrorPath,
+} from "../config";
 import {
   type AzaleeClient,
   type AzaleeClientOptions,
@@ -82,7 +86,10 @@ export function inspectLocalData(): AzaleeLocalAvailability {
 }
 
 /** Options de `createAzaleeData`. */
-export interface AzaleeDataOptions extends Omit<AzaleeClientOptions, "transport"> {
+export interface AzaleeDataOptions extends Omit<
+  AzaleeClientOptions,
+  "transport"
+> {
   /** Stratégie de sélection (défaut : `"auto"`). */
   mode?: AzaleeSourceMode;
   /**
@@ -126,13 +133,19 @@ function basePathPrefix(baseUrl: string): string {
  * réseau. L'hôte est ignoré ; seuls le chemin (dépréfixé) et la chaîne de
  * requête comptent.
  */
-function localTransport(prefix: string, cors: boolean | string): AzaleeTransport {
-  return request => {
+function localTransport(
+  prefix: string,
+  cors: boolean | string,
+): AzaleeTransport {
+  return (request) => {
     const url = new URL(request.url);
     if (prefix && url.pathname.startsWith(prefix)) {
       url.pathname = url.pathname.slice(prefix.length) || "/";
     }
-    return handleAzaleeRequest(new Request(`http://azalee.local${url.pathname}${url.search}`, request), { cors });
+    return handleAzaleeRequest(
+      new Request(`http://azalee.local${url.pathname}${url.search}`, request),
+      { cors },
+    );
   };
 }
 
@@ -151,7 +164,7 @@ function fallbackTransport(
   remote: AzaleeTransport,
   state: { degraded: boolean },
 ): AzaleeTransport {
-  return async request => {
+  return async (request) => {
     if (state.degraded) return remote(request);
     let response: Response;
     try {
@@ -184,12 +197,26 @@ function fallbackTransport(
  * messages d'erreur : aucune requête réseau n'est émise.
  */
 export function createAzaleeData(options: AzaleeDataOptions = {}): AzaleeData {
-  const { mode = "auto", fallbackOnError, cors = false, ...clientOptions } = options;
+  const {
+    mode = "auto",
+    fallbackOnError,
+    cors = false,
+    ...clientOptions
+  } = options;
   const local = inspectLocalData();
-  const unifiedApiConfigured = Boolean(process.env.AZALEE_UNIFIED_API_URL || process.env.NEXT_PUBLIC_AZALEE_API_URL);
+  const unifiedApiConfigured = Boolean(
+    process.env.AZALEE_UNIFIED_API_URL ||
+    process.env.NEXT_PUBLIC_AZALEE_API_URL,
+  );
 
   const source: AzaleeSourceKind =
-    mode === "auto" ? (unifiedApiConfigured ? "remote" : local.available ? "local" : "remote") : mode;
+    mode === "auto"
+      ? unifiedApiConfigured
+        ? "remote"
+        : local.available
+          ? "local"
+          : "remote"
+      : mode;
   const reason =
     mode === "auto"
       ? local.available
@@ -204,14 +231,20 @@ export function createAzaleeData(options: AzaleeDataOptions = {}): AzaleeData {
   // La base d'URL reste toujours la distante : elle sert d'adresse de repli
   // et rend les messages d'erreur lisibles même en mode local.
   const baseUrl = resolveAzaleeApiUrl(
-    clientOptions.baseUrl ?? process.env.AZALEE_UNIFIED_API_URL ?? process.env.NEXT_PUBLIC_AZALEE_API_URL,
+    clientOptions.baseUrl ??
+      process.env.AZALEE_UNIFIED_API_URL ??
+      process.env.NEXT_PUBLIC_AZALEE_API_URL,
   );
 
   let transport: AzaleeTransport | undefined;
   if (source === "local") {
     const direct = localTransport(basePathPrefix(baseUrl), cors);
     transport = allowFallback
-      ? fallbackTransport(direct, request => (clientOptions.fetch ?? globalThis.fetch)(request), state)
+      ? fallbackTransport(
+          direct,
+          (request) => (clientOptions.fetch ?? globalThis.fetch)(request),
+          state,
+        )
       : direct;
   }
 

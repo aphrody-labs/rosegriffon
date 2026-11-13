@@ -40,22 +40,35 @@ export default async function PageAudit() {
       />
       {rows.length === 0 ? (
         <Card>
-          <CardContent className="p-6 text-muted-foreground">Aucune action enregistrée pour le moment.</CardContent>
+          <CardContent className="p-6 text-muted-foreground">
+            Aucune action enregistrée pour le moment.
+          </CardContent>
         </Card>
       ) : (
         <ul className="space-y-2">
-          {rows.map(ligne => (
+          {rows.map((ligne) => (
             <li key={ligne.id}>
               <Card>
                 <CardContent className="flex flex-wrap items-baseline gap-x-3 gap-y-1 p-4">
                   <Badge variant="secondary">{ligne.action}</Badge>
-                  <span className="font-medium">{ligne.pseudo ?? "Compte supprimé"}</span>
-                  <time dateTime={new Date(ligne.created_at).toISOString()} className="text-sm text-muted-foreground">
+                  <span className="font-medium">
+                    {ligne.pseudo ?? "Compte supprimé"}
+                  </span>
+                  <time
+                    dateTime={new Date(ligne.created_at).toISOString()}
+                    className="text-sm text-muted-foreground"
+                  >
                     {new Date(ligne.created_at).toLocaleString("fr-FR")}
                   </time>
-                  {ligne.ip_address && <span className="text-sm text-muted-foreground">{ligne.ip_address}</span>}
+                  {ligne.ip_address && (
+                    <span className="text-sm text-muted-foreground">
+                      {ligne.ip_address}
+                    </span>
+                  )}
                   {ligne.details && Object.keys(ligne.details).length > 0 && (
-                    <code className="w-full break-all text-xs text-muted-foreground">{JSON.stringify(ligne.details)}</code>
+                    <code className="w-full break-all text-xs text-muted-foreground">
+                      {JSON.stringify(ligne.details)}
+                    </code>
                   )}
                 </CardContent>
               </Card>

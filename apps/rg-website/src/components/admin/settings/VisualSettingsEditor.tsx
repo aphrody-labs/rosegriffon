@@ -28,7 +28,7 @@ export interface Setting {
   description?: string;
 }
 const getVal = (settings: Setting[], key: string, fallback: string) =>
-  settings.find(setting => setting.key === key)?.value ?? fallback;
+  settings.find((setting) => setting.key === key)?.value ?? fallback;
 
 function Field({
   label,
@@ -63,14 +63,14 @@ function Field({
           <Textarea
             id={settingKey}
             value={value}
-            onChange={event => setLocal(settingKey, event.target.value)}
+            onChange={(event) => setLocal(settingKey, event.target.value)}
             className="min-h-24 text-lg"
           />
         ) : (
           <Input
             id={settingKey}
             value={value}
-            onChange={event => setLocal(settingKey, event.target.value)}
+            onChange={(event) => setLocal(settingKey, event.target.value)}
             className="text-lg"
           />
         )}
@@ -80,26 +80,40 @@ function Field({
           disabled={!changed || loading !== null}
           aria-label={`Enregistrer ${label}`}
         >
-          {loading === settingKey ? <Loader2 className="size-5 animate-spin" /> : <Save className="size-5" />}
+          {loading === settingKey ? (
+            <Loader2 className="size-5 animate-spin" />
+          ) : (
+            <Save className="size-5" />
+          )}
         </Button>
       </div>
     </div>
   );
 }
 
-export function VisualSettingsEditor({ settings: initialSettings }: { settings: Setting[] }) {
+export function VisualSettingsEditor({
+  settings: initialSettings,
+}: {
+  settings: Setting[];
+}) {
   const [settings, setSettings] = useState(initialSettings);
   const [savedSettings, setSavedSettings] = useState(initialSettings);
   const [loading, setLoading] = useState<string | null>(null);
   const setLocal = (key: string, value: string) =>
-    setSettings(current => [...current.filter(setting => setting.key !== key), { key, value }]);
+    setSettings((current) => [
+      ...current.filter((setting) => setting.key !== key),
+      { key, value },
+    ]);
   async function save(key: string, value: string) {
     setLoading(key);
     try {
       const result = await updateSetting(key, value);
       if (result.message.startsWith("Erreur")) toast.error(result.message);
       else {
-        setSavedSettings(current => [...current.filter(setting => setting.key !== key), { key, value }]);
+        setSavedSettings((current) => [
+          ...current.filter((setting) => setting.key !== key),
+          { key, value },
+        ]);
         toast.success("Paramètre enregistré");
       }
     } catch {
@@ -108,7 +122,13 @@ export function VisualSettingsEditor({ settings: initialSettings }: { settings: 
       setLoading(null);
     }
   }
-  const fieldProps = { settings, initialSettings: savedSettings, loading, setLocal, save };
+  const fieldProps = {
+    settings,
+    initialSettings: savedSettings,
+    loading,
+    setLocal,
+    save,
+  };
   return (
     <Tabs defaultValue="rg" className="w-full space-y-6">
       <TabsList className="h-auto flex-wrap gap-2">
@@ -123,7 +143,9 @@ export function VisualSettingsEditor({ settings: initialSettings }: { settings: 
         <Card>
           <CardHeader>
             <CardTitle>Présentation du site</CardTitle>
-            <CardDescription>Contenu affiché sur la page d'accueil Rose Griffon.</CardDescription>
+            <CardDescription>
+              Contenu affiché sur la page d'accueil Rose Griffon.
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-5">
             <Field
@@ -152,12 +174,25 @@ export function VisualSettingsEditor({ settings: initialSettings }: { settings: 
             <CardTitle>Aperçu</CardTitle>
           </CardHeader>
           <CardContent>
-            <FusionBlock isImageLeft image={getVal(settings, "home_intro_image", "/RG_screens_twitch_ethan.webp")}>
+            <FusionBlock
+              isImageLeft
+              image={getVal(
+                settings,
+                "home_intro_image",
+                "/RG_screens_twitch_ethan.webp",
+              )}
+            >
               <div className="space-y-4 p-4">
                 <h2 className="text-2xl font-bold">
-                  {getVal(settings, "home_intro_title", "Qu'est-ce que Rose Griffon ?")}
+                  {getVal(
+                    settings,
+                    "home_intro_title",
+                    "Qu'est-ce que Rose Griffon ?",
+                  )}
                 </h2>
-                <p className="text-lg">{getVal(settings, "home_intro_text", "")}</p>
+                <p className="text-lg">
+                  {getVal(settings, "home_intro_text", "")}
+                </p>
               </div>
             </FusionBlock>
           </CardContent>
@@ -167,7 +202,9 @@ export function VisualSettingsEditor({ settings: initialSettings }: { settings: 
         <Card className="max-w-3xl">
           <CardHeader>
             <CardTitle>Informations publiques Achilléa</CardTitle>
-            <CardDescription>Valeurs exposées par l'API publique Achilléa.</CardDescription>
+            <CardDescription>
+              Valeurs exposées par l'API publique Achilléa.
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-5">
             <Field

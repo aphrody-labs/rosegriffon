@@ -59,7 +59,8 @@ export {
 // ============================================================================
 
 function parseVars(raw: unknown): number[] {
-  if (Array.isArray(raw)) return raw.filter((v): v is number => typeof v === "number");
+  if (Array.isArray(raw))
+    return raw.filter((v): v is number => typeof v === "number");
   if (typeof raw === "string") {
     try {
       const parsed = JSON.parse(raw);
@@ -120,7 +121,9 @@ function mapCapsuleRow(row: CapsuleRow): CapsulePrize {
  * Le filtre/pagination sur `pool` se fait en mémoire (le poolRef vit dans le JSON
  * `prize_data`, non indexé en colonne) : on charge l'ensemble (740 lignes, léger).
  */
-export async function getCapsuleList(params: CapsuleListParams = {}): Promise<CapsuleListResult> {
+export async function getCapsuleList(
+  params: CapsuleListParams = {},
+): Promise<CapsuleListResult> {
   const page = Math.max(1, params.page ?? 1);
   const limit = Math.min(200, Math.max(1, params.limit ?? 48));
   const q = (params.q ?? "").trim().toLowerCase();
@@ -128,7 +131,10 @@ export async function getCapsuleList(params: CapsuleListParams = {}): Promise<Ca
 
   let rows: CapsuleRow[];
   try {
-    rows = await sql.selectFrom("inagle_capsules").select(["id", "prize_data"]).execute();
+    rows = await sql
+      .selectFrom("inagle_capsules")
+      .select(["id", "prize_data"])
+      .execute();
   } catch {
     return { data: [], total: 0, page, limit, pools: [] };
   }
@@ -145,9 +151,13 @@ export async function getCapsuleList(params: CapsuleListParams = {}): Promise<Ca
     .sort((a, b) => b.count - a.count);
 
   let filtered = all;
-  if (pool) filtered = filtered.filter(p => p.poolRef === pool);
+  if (pool) filtered = filtered.filter((p) => p.poolRef === pool);
   if (q) {
-    filtered = filtered.filter(p => p.id.toLowerCase().includes(q) || p.contentRef.toLowerCase().includes(q));
+    filtered = filtered.filter(
+      (p) =>
+        p.id.toLowerCase().includes(q) ||
+        p.contentRef.toLowerCase().includes(q),
+    );
   }
 
   const total = filtered.length;
@@ -158,7 +168,9 @@ export async function getCapsuleList(params: CapsuleListParams = {}): Promise<Ca
 }
 
 /** Détail d'un lot par hash. Retourne `null` si introuvable. */
-export async function getCapsulePrize(id: string): Promise<CapsulePrize | null> {
+export async function getCapsulePrize(
+  id: string,
+): Promise<CapsulePrize | null> {
   const row = await sql
     .selectFrom("inagle_capsules")
     .select(["id", "prize_data"])
@@ -170,9 +182,14 @@ export async function getCapsulePrize(id: string): Promise<CapsulePrize | null> 
 /**
  * Tous les lots d'un même pool (pour afficher la composition d'un pool en détail).
  */
-export async function getCapsulePoolPrizes(poolRef: string): Promise<CapsulePrize[]> {
-  const rows = await sql.selectFrom("inagle_capsules").select(["id", "prize_data"]).execute();
-  return rows.map(mapCapsuleRow).filter(p => p.poolRef === poolRef);
+export async function getCapsulePoolPrizes(
+  poolRef: string,
+): Promise<CapsulePrize[]> {
+  const rows = await sql
+    .selectFrom("inagle_capsules")
+    .select(["id", "prize_data"])
+    .execute();
+  return rows.map(mapCapsuleRow).filter((p) => p.poolRef === poolRef);
 }
 
 // ============================================================================
@@ -201,7 +218,9 @@ function mapCostumeRow(row: CostumeRow): Costume {
 }
 
 /** Liste paginée des costumes, avec recherche et filtre par type. */
-export async function getCostumeList(params: CostumeListParams = {}): Promise<CostumeListResult> {
+export async function getCostumeList(
+  params: CostumeListParams = {},
+): Promise<CostumeListResult> {
   const page = Math.max(1, params.page ?? 1);
   const limit = Math.min(200, Math.max(1, params.limit ?? 48));
   const q = (params.q ?? "").trim().toLowerCase();
@@ -221,17 +240,21 @@ export async function getCostumeList(params: CostumeListParams = {}): Promise<Co
 
   // Recensement des types (avant filtrage).
   const typeCounts = new Map<number, number>();
-  for (const c of all) typeCounts.set(c.type, (typeCounts.get(c.type) ?? 0) + 1);
+  for (const c of all)
+    typeCounts.set(c.type, (typeCounts.get(c.type) ?? 0) + 1);
   const types = Array.from(typeCounts.entries())
     .map(([type, count]) => ({ type, label: costumeTypeLabel(type), count }))
     .sort((a, b) => a.type - b.type);
 
   let filtered = all;
   if (typeof typeFilter === "number" && Number.isFinite(typeFilter)) {
-    filtered = filtered.filter(c => c.type === typeFilter);
+    filtered = filtered.filter((c) => c.type === typeFilter);
   }
   if (q) {
-    filtered = filtered.filter(c => String(c.index).includes(q) || c.modelRef.toLowerCase().includes(q));
+    filtered = filtered.filter(
+      (c) =>
+        String(c.index).includes(q) || c.modelRef.toLowerCase().includes(q),
+    );
   }
 
   const total = filtered.length;
@@ -249,12 +272,15 @@ export async function getGachaCounts(): Promise<GachaCounts> {
   const [capsuleRow, costumeRow] = await Promise.all([
     sql
       .selectFrom("inagle_capsules")
-      .select(eb => eb.fn.countAll<number>().as("count"))
+      .select((eb) => eb.fn.countAll<number>().as("count"))
       .executeTakeFirst(),
     sql
       .selectFrom("inagle_costumes")
-      .select(eb => eb.fn.countAll<number>().as("count"))
+      .select((eb) => eb.fn.countAll<number>().as("count"))
       .executeTakeFirst(),
   ]);
-  return { capsules: Number(capsuleRow?.count ?? 0), costumes: Number(costumeRow?.count ?? 0) };
+  return {
+    capsules: Number(capsuleRow?.count ?? 0),
+    costumes: Number(costumeRow?.count ?? 0),
+  };
 }

@@ -32,7 +32,10 @@
       "init": true,
       "restart": "unless-stopped",
       "shm_size": "1gb",
-      "security_opt": ["apparmor=iecode-steam-client", "seccomp=seccomp-steam-client.json"],
+      "security_opt": [
+        "apparmor=iecode-steam-client",
+        "seccomp=seccomp-steam-client.json"
+      ],
       "ports": [
         {
           "target": 6080,
@@ -57,7 +60,13 @@
         }
       ],
       "healthcheck": {
-        "test": ["CMD", "curl", "--fail", "--silent", "http://127.0.0.1:6080/vnc.html"],
+        "test": [
+          "CMD",
+          "curl",
+          "--fail",
+          "--silent",
+          "http://127.0.0.1:6080/vnc.html"
+        ],
         "interval": "30s",
         "timeout": "5s",
         "retries": 3,
@@ -77,7 +86,11 @@
       }
     },
     "ie-steam-state": {
-      "labels": { "io.aphrody.profile": "ie", "io.aphrody.workspace": "iecode", "io.aphrody.store": "steam-auth" }
+      "labels": {
+        "io.aphrody.profile": "ie",
+        "io.aphrody.workspace": "iecode",
+        "io.aphrody.store": "steam-auth"
+      }
     },
     "ie-steam-client-state": {
       "labels": {

@@ -12,12 +12,19 @@ import { wiki } from "@rosegriffon/app-shell";
 import { absoluteUrl } from "@/lib/site-url";
 import { withDefaultOgImage } from "@/lib/seo";
 
-const SUBTYPE_INFO: Record<string, { label: string; icon: string; color: string }> = {
+const SUBTYPE_INFO: Record<
+  string,
+  { label: string; icon: string; color: string }
+> = {
   Aura: { color: "text-primary", icon: "wifi_tethering", label: "Aura" },
   Awakening: { color: "text-secondary", icon: "wb_twilight", label: "Éveil" },
   Keshin: { color: "text-primary", icon: "flash_on", label: "Esprit Guerrier" },
   Miximax: { color: "text-blue-500", icon: "group_work", label: "Miximax" },
-  ModeChange: { color: "text-error", icon: "transform", label: "Changement de Mode" },
+  ModeChange: {
+    color: "text-error",
+    icon: "transform",
+    label: "Changement de Mode",
+  },
   Soul: { color: "text-tertiary", icon: "pets", label: "Totem" },
 };
 
@@ -40,7 +47,8 @@ export async function generateMetadata({
 
   const name = aura?.displayName || "Hyper Technique";
   const categoryLabel = CATEGORY_LABELS[category] || category;
-  const description = aura?.desc_FR || `${categoryLabel} - Détails et statistiques.`;
+  const description =
+    aura?.desc_FR || `${categoryLabel} - Détails et statistiques.`;
   const title = `${name} | ${categoryLabel} - Azalée`;
 
   return {
@@ -63,7 +71,11 @@ export async function generateMetadata({
   };
 }
 
-export default async function AuraDetailPage({ params }: { params: Promise<{ category: string; id: string }> }) {
+export default async function AuraDetailPage({
+  params,
+}: {
+  params: Promise<{ category: string; id: string }>;
+}) {
   const { id, category } = await params;
   const aura = await wikiService.getAura(id, category);
 
@@ -78,7 +90,12 @@ export default async function AuraDetailPage({ params }: { params: Promise<{ cat
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", item: absoluteUrl(wiki("/")), name: "Accueil", position: 1 },
+      {
+        "@type": "ListItem",
+        item: absoluteUrl(wiki("/")),
+        name: "Accueil",
+        position: 1,
+      },
       {
         "@type": "ListItem",
         item: absoluteUrl(wiki("/aura")),
@@ -97,22 +114,37 @@ export default async function AuraDetailPage({ params }: { params: Promise<{ cat
 
   return (
     <div className="w-full space-y-8">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
 
       {/* Breadcrumb */}
       <div className="flex items-center gap-2 text-sm text-on-surface-variant font-medium">
-        <Link href="/wiki/aura" className="hover:text-primary transition-colors">
+        <Link
+          href="/wiki/aura"
+          className="hover:text-primary transition-colors"
+        >
           Hyper Techniques
         </Link>
         <span className="opacity-30">/</span>
-        <Link href={`/wiki/aura/${category}`} className="hover:text-primary transition-colors">
+        <Link
+          href={`/wiki/aura/${category}`}
+          className="hover:text-primary transition-colors"
+        >
           {categoryLabel}
         </Link>
         <span className="opacity-30">/</span>
         <span className="text-on-surface">{aura.displayName}</span>
       </div>
 
-      <AuraDetail aura={aura} category={category} subTypeInfo={subTypeInfo} prevAura={null} nextAura={null} />
+      <AuraDetail
+        aura={aura}
+        category={category}
+        subTypeInfo={subTypeInfo}
+        prevAura={null}
+        nextAura={null}
+      />
     </div>
   );
 }

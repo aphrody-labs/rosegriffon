@@ -30,7 +30,16 @@
           ]
         },
         "stage": {
-          "enum": ["acquire", "identify", "unpack", "analyze", "lift", "decompile", "rebuild", "verify"],
+          "enum": [
+            "acquire",
+            "identify",
+            "unpack",
+            "analyze",
+            "lift",
+            "decompile",
+            "rebuild",
+            "verify"
+          ],
           "type": "string"
         },
         "status": {
@@ -38,7 +47,15 @@
           "type": "string"
         }
       },
-      "required": ["id", "stage", "kind", "owner", "handles", "status", "reason"],
+      "required": [
+        "id",
+        "stage",
+        "kind",
+        "owner",
+        "handles",
+        "status",
+        "reason"
+      ],
       "type": "object"
     },
     "identifyOutput": {
@@ -72,7 +89,20 @@
           "type": "string"
         },
         "kind": {
-          "enum": ["pe", "elf", "macho", "apk", "zip", "iso", "uefi", "bios", "rom", "fdt", "compressed", "raw"],
+          "enum": [
+            "pe",
+            "elf",
+            "macho",
+            "apk",
+            "zip",
+            "iso",
+            "uefi",
+            "bios",
+            "rom",
+            "fdt",
+            "compressed",
+            "raw"
+          ],
           "type": "string"
         },
         "liftable": {
@@ -95,7 +125,16 @@
           ]
         }
       },
-      "required": ["kind", "format", "arch", "platform", "entry", "liftable", "container", "notes"],
+      "required": [
+        "kind",
+        "format",
+        "arch",
+        "platform",
+        "entry",
+        "liftable",
+        "container",
+        "notes"
+      ],
       "type": "object"
     }
   },
@@ -154,7 +193,16 @@
             "description": "Stage payload: AcquireOutput, IdentifyOutput, UnpackOutput, TriageReport, LiftOutput or VerifyOutput."
           },
           "stage": {
-            "enum": ["acquire", "identify", "unpack", "analyze", "lift", "decompile", "rebuild", "verify"],
+            "enum": [
+              "acquire",
+              "identify",
+              "unpack",
+              "analyze",
+              "lift",
+              "decompile",
+              "rebuild",
+              "verify"
+            ],
             "type": "string"
           },
           "status": {
@@ -162,7 +210,15 @@
             "type": "string"
           }
         },
-        "required": ["stage", "adapter", "status", "detail", "artifacts", "metrics", "output"],
+        "required": [
+          "stage",
+          "adapter",
+          "status",
+          "detail",
+          "artifacts",
+          "metrics",
+          "output"
+        ],
         "type": "object"
       },
       "type": "array"
@@ -176,7 +232,14 @@
       "type": "string"
     }
   },
-  "required": ["schema_version", "input", "target", "outdir", "stages", "summary"],
+  "required": [
+    "schema_version",
+    "input",
+    "target",
+    "outdir",
+    "stages",
+    "summary"
+  ],
   "title": "Bun OS RE pipeline report",
   "type": "object"
 }

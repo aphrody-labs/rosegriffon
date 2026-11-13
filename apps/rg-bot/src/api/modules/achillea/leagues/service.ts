@@ -18,18 +18,26 @@ export abstract class LeagueService {
    */
   static findSeason(id: string) {
     const wanted = id.trim().toLowerCase();
-    const known = [ASYTRAL_LEAGUE_META.id, ...ASYTRAL_LEAGUE_META.aliases].map(alias => alias.toLowerCase());
+    const known = [ASYTRAL_LEAGUE_META.id, ...ASYTRAL_LEAGUE_META.aliases].map(
+      (alias) => alias.toLowerCase(),
+    );
     return known.includes(wanted) ? LeagueService.getAstralSeason() : null;
   }
 
   static getAstralSeason() {
-    const teamIds = ASYTRAL_TEAMS.map(team => team.tag);
+    const teamIds = ASYTRAL_TEAMS.map((team) => team.tag);
     return {
-      meta: { ...ASYTRAL_LEAGUE_META, champion: ASYTRAL_CHAMPION, aliases: [...ASYTRAL_LEAGUE_META.aliases] },
+      meta: {
+        ...ASYTRAL_LEAGUE_META,
+        champion: ASYTRAL_CHAMPION,
+        aliases: [...ASYTRAL_LEAGUE_META.aliases],
+      },
       format: ASTRAL_FORMAT,
-      teams: ASYTRAL_TEAMS.map(team => ({ ...team })),
+      teams: ASYTRAL_TEAMS.map((team) => ({ ...team })),
       pointsConfig: { ...ASYTRAL_POINTS },
-      standings: [...computeLeagueTable(teamIds, ASYTRAL_REGULAR_RESULTS, ASYTRAL_POINTS)],
+      standings: [
+        ...computeLeagueTable(teamIds, ASYTRAL_REGULAR_RESULTS, ASYTRAL_POINTS),
+      ],
       results: [...ASYTRAL_REGULAR_RESULTS],
       playoffs: [...ASYTRAL_PLAYOFF_RESULTS],
       schedule: [...generateSingleRoundRobin(teamIds)],

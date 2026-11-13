@@ -51,17 +51,30 @@ export interface DropRateRow {
 
 interface ListConfig {
   version?: number;
-  lists?: { name: string; typeName?: string; values: Record<string, unknown>[] }[];
+  lists?: {
+    name: string;
+    typeName?: string;
+    values: Record<string, unknown>[];
+  }[];
 }
 interface TreeConfig {
   entries: ConfigNode[];
 }
 
-function loadDropConfig<T>(category: string, prefix: string, filename: string): T | null {
+function loadDropConfig<T>(
+  category: string,
+  prefix: string,
+  filename: string,
+): T | null {
   const resolved =
-    filename === prefix + "0.00.00.cfg.bin.json" ? (findConfigFile(category, prefix) ?? filename) : filename;
+    filename === prefix + "0.00.00.cfg.bin.json"
+      ? (findConfigFile(category, prefix) ?? filename)
+      : filename;
   const data = loadConfigData<T>(category, resolved);
-  if (!data) console.warn(`[DropRates] Projection SQL/SQLite introuvable : ${category}/${resolved}`);
+  if (!data)
+    console.warn(
+      `[DropRates] Projection SQL/SQLite introuvable : ${category}/${resolved}`,
+    );
   return data;
 }
 
@@ -73,11 +86,19 @@ function loadDropConfig<T>(category: string, prefix: string, filename: string): 
 export function loadItemEmissionRates(
   filename = "item_emission_rarity_table_config_0.00.00.cfg.bin.json",
 ): DropRateRow[] {
-  const cfg = loadDropConfig<ListConfig>("item", "item_emission_rarity_table_config_", filename);
+  const cfg = loadDropConfig<ListConfig>(
+    "item",
+    "item_emission_rarity_table_config_",
+    filename,
+  );
   if (!cfg?.lists) return [];
 
-  const info = cfg.lists.find(l => l.name === "m_itemEmissionRarityTableConfigInfoList")?.values;
-  const items = cfg.lists.find(l => l.name === "m_itemEmissionRarityTableConfigList")?.values;
+  const info = cfg.lists.find(
+    (l) => l.name === "m_itemEmissionRarityTableConfigInfoList",
+  )?.values;
+  const items = cfg.lists.find(
+    (l) => l.name === "m_itemEmissionRarityTableConfigList",
+  )?.values;
   if (!info || !items) return [];
 
   const rows: DropRateRow[] = [];
@@ -108,23 +129,33 @@ export function loadItemEmissionRates(
  * Une ligne par (dropRarity × rarity) → weight (float). sourceId = "spirit"
  * (l'aiguillage table→tranche est dans m_spiritDropTableList, hors-taux).
  */
-export function loadSpiritDropRates(filename = "soccer_drop_config_5.00.27.00.cfg.bin.json"): DropRateRow[] {
-  const cfg = loadDropConfig<ListConfig>("soccer", "soccer_drop_config_", filename);
+export function loadSpiritDropRates(
+  filename = "soccer_drop_config_5.00.27.00.cfg.bin.json",
+): DropRateRow[] {
+  const cfg = loadDropConfig<ListConfig>(
+    "soccer",
+    "soccer_drop_config_",
+    filename,
+  );
   if (!cfg?.lists) return [];
 
-  const spirit = cfg.lists.find(l => l.name === "m_spiritDropDataList")?.values;
+  const spirit = cfg.lists.find(
+    (l) => l.name === "m_spiritDropDataList",
+  )?.values;
   if (!spirit) return [];
 
   // Attribue chaque ligne de m_spiritDropDataList à sa table propriétaire
   // (m_spiritDropTableList.data = [offset,count]) : chaque ligne est référencée
   // EXACTEMENT une fois → sourceId = crc de la table d'esprit (vérifié réel).
   const ownerById = new Map<number, string>();
-  const tables = cfg.lists.find(l => l.name === "m_spiritDropTableList")?.values ?? [];
+  const tables =
+    cfg.lists.find((l) => l.name === "m_spiritDropTableList")?.values ?? [];
   for (const t of tables) {
     const data = t.data as [number, number] | undefined;
     if (!Array.isArray(data)) continue;
     const [offset, count] = data;
-    for (let j = offset; j < offset + count; j++) ownerById.set(j, String(t.id));
+    for (let j = offset; j < offset + count; j++)
+      ownerById.set(j, String(t.id));
   }
 
   // dropRarity (0/10/20/21) et rarity (1..5) sont les DEUX dimensions du taux.
@@ -145,8 +176,14 @@ export function loadSpiritDropRates(filename = "soccer_drop_config_5.00.27.00.cf
  * tranche par coffre via ITBL_BASE_n + son frère ITBL_BASE_REF_ITEMS_n [off,count].
  * itemId encodé en Int signé → toHex le repasse en crc unsigned 32-bit.
  */
-export function loadWinTreasureRates(filename = "win_treasure_lot_table_config_0.00.00.cfg.bin.json"): DropRateRow[] {
-  const cfg = loadDropConfig<TreeConfig>("item", "win_treasure_lot_table_config_", filename);
+export function loadWinTreasureRates(
+  filename = "win_treasure_lot_table_config_0.00.00.cfg.bin.json",
+): DropRateRow[] {
+  const cfg = loadDropConfig<TreeConfig>(
+    "item",
+    "win_treasure_lot_table_config_",
+    filename,
+  );
   if (!cfg?.entries) return [];
 
   const flat: { itemId: string; weight: number }[] = [];
@@ -155,7 +192,10 @@ export function loadWinTreasureRates(filename = "win_treasure_lot_table_config_0
   for (const root of cfg.entries) {
     if (root.name.startsWith("ITBL_ITEMS_LIST_BEG")) {
       for (const leaf of root.children ?? []) {
-        if (leaf.name.startsWith("ITBL_ITEMS_") && !leaf.name.includes("LIST")) {
+        if (
+          leaf.name.startsWith("ITBL_ITEMS_") &&
+          !leaf.name.includes("LIST")
+        ) {
           const v = leaf.variables;
           if (v.length >= 3) {
             flat.push({
@@ -174,7 +214,11 @@ export function loadWinTreasureRates(filename = "win_treasure_lot_table_config_0
   let ord = 0;
   for (let i = 0; i < baseRoot.length; i++) {
     const node = baseRoot[i];
-    if (node.name.startsWith("ITBL_BASE_") && !node.name.includes("REF") && !node.name.includes("LIST")) {
+    if (
+      node.name.startsWith("ITBL_BASE_") &&
+      !node.name.includes("REF") &&
+      !node.name.includes("LIST")
+    ) {
       const ref = baseRoot[i + 1];
       if (!ref || !ref.name.startsWith("ITBL_BASE_REF_ITEMS_")) continue;
       const coffreId = toHex(parseInt(node.variables[0].value, 10));
@@ -198,5 +242,9 @@ export function loadWinTreasureRates(filename = "win_treasure_lot_table_config_0
 
 /** Charge et concatène les trois sources de taux de drop réelles. */
 export function loadAllDropRates(): DropRateRow[] {
-  return [...loadItemEmissionRates(), ...loadSpiritDropRates(), ...loadWinTreasureRates()];
+  return [
+    ...loadItemEmissionRates(),
+    ...loadSpiritDropRates(),
+    ...loadWinTreasureRates(),
+  ];
 }

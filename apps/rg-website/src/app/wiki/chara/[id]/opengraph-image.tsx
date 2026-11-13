@@ -3,7 +3,8 @@ import { wikiService } from "@/lib/wiki-service";
 import { SITE_URL } from "@/lib/site-url";
 
 const SUPABASE_URL =
-  process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_URL.startsWith("http")
+  process.env.NEXT_PUBLIC_SUPABASE_URL &&
+  process.env.NEXT_PUBLIC_SUPABASE_URL.startsWith("http")
     ? process.env.NEXT_PUBLIC_SUPABASE_URL
     : SITE_URL;
 
@@ -43,7 +44,11 @@ const POSITION_LABELS: Record<string, string> = {
   MF: "Milieu",
 };
 
-export default async function Image({ params }: { params: Promise<{ id: string }> }) {
+export default async function Image({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const { id } = await params;
 
   let baseChar = await wikiService.getCharacter(id);
@@ -73,7 +78,8 @@ export default async function Image({ params }: { params: Promise<{ id: string }
   }
 
   const variant = baseChar.variants[0];
-  const name = baseChar.names.fr || baseChar.names.en || baseChar.names.ja || "Inconnu";
+  const name =
+    baseChar.names.fr || baseChar.names.en || baseChar.names.ja || "Inconnu";
   const nameJa = baseChar.names.ja || "";
   const position = variant?.position || "";
   const element = variant?.element || "";
@@ -88,7 +94,8 @@ export default async function Image({ params }: { params: Promise<{ id: string }
   return new ImageResponse(
     <div
       style={{
-        background: "linear-gradient(135deg, #1A120D 0%, #2D1F14 50%, #1A120D 100%)",
+        background:
+          "linear-gradient(135deg, #1A120D 0%, #2D1F14 50%, #1A120D 100%)",
         color: "white",
         display: "flex",
         fontFamily: "sans-serif",
@@ -286,7 +293,7 @@ export default async function Image({ params }: { params: Promise<{ id: string }
               { color: "#FF9800", label: "PHY", value: stats.physical },
               { color: "#FDD835", label: "AGI", value: stats.agility },
               { color: "#AB47BC", label: "INT", value: stats.intelligence },
-            ].map(s => (
+            ].map((s) => (
               <div
                 key={s.label}
                 style={{

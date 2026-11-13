@@ -17,13 +17,24 @@ import {
 } from "discord.js";
 
 import { appelApi } from "../../lib/achillea-ui";
-import { horodatage, libelleMode, lienCapture, signe, utilisateurDe } from "../../lib/achillea-moderation";
+import {
+  horodatage,
+  libelleMode,
+  lienCapture,
+  signe,
+  utilisateurDe,
+} from "../../lib/achillea-moderation";
 import { COULEURS_LEGACY, finirCommeLegacy } from "../../lib/achillea-legacy";
 import { echapper, fiche } from "../../lib/ui";
 
 /** Origine publique du ranked, qui sert les captures de litige (`/storage/disputes/*`). */
-export function origineRanked(env: Record<string, string | undefined> = Bun.env): string {
-  return (env.RANKED_PUBLIC_URL ?? "https://ranked.rosegriffon.fr").replace(/\/$/u, "");
+export function origineRanked(
+  env: Record<string, string | undefined> = Bun.env,
+): string {
+  return (env.RANKED_PUBLIC_URL ?? "https://ranked.rosegriffon.fr").replace(
+    /\/$/u,
+    "",
+  );
 }
 
 /**
@@ -35,23 +46,40 @@ export function deltasElo(delta: unknown): [string, string] {
   if (typeof delta === "number") return [signe(delta), "—"];
   if (delta && typeof delta === "object") {
     const { p1, p2 } = delta as { p1?: unknown; p2?: unknown };
-    return [typeof p1 === "number" ? signe(p1) : "—", typeof p2 === "number" ? signe(p2) : "—"];
+    return [
+      typeof p1 === "number" ? signe(p1) : "—",
+      typeof p2 === "number" ? signe(p2) : "—",
+    ];
   }
   return ["—", "—"];
 }
 
 @Discord()
-@SlashGroup({ name: "ranked-admin", description: "Arbitrage des matchs classés (staff)" })
+@SlashGroup({
+  name: "ranked-admin",
+  description: "Arbitrage des matchs classés (staff)",
+})
 @SlashGroup("ranked-admin")
 export class CommandeRankedAdmin {
-  @Slash({ name: "litiges", description: "Lister les litiges ranked en attente d'arbitrage" })
+  @Slash({
+    name: "litiges",
+    description: "Lister les litiges ranked en attente d'arbitrage",
+  })
   async litiges(interaction: ChatInputCommandInteraction): Promise<void> {
     await interaction.deferReply({ flags: MessageFlags.Ephemeral });
-    const litiges = await appelApi(interaction, c => c.ranked.adminDisputes(), "Litiges illisibles");
+    const litiges = await appelApi(
+      interaction,
+      (c) => c.ranked.adminDisputes(),
+      "Litiges illisibles",
+    );
     if (!litiges) return;
     if (litiges.length === 0) {
       const embed = finirCommeLegacy(
-        fiche({ icone: "🎖️", titre: "Litiges ranked", description: "Aucun litige en attente. ✅" }),
+        fiche({
+          icone: "🎖️",
+          titre: "Litiges ranked",
+          description: "Aucun litige en attente. ✅",
+        }),
         COULEURS_LEGACY.vert,
       );
       await interaction.editReply({ embeds: [embed] });
@@ -62,14 +90,18 @@ export class CommandeRankedAdmin {
     const embed = fiche({
       icone: "🎖️",
       titre: `Litiges ranked en attente (${litiges.length})`,
-      description: "Utilisez `/ranked-admin valider` ou `/ranked-admin annuler` avec l'ID du lobby.",
+      description:
+        "Utilisez `/ranked-admin valider` ou `/ranked-admin annuler` avec l'ID du lobby.",
     });
     for (const litige of vus) {
       const joueur = (p: (typeof litige)["player1"]) =>
         `**${echapper(p.displayName)}** (<@${p.userId}>)\n→ a annoncé **${p.submittedScore}** · adverse réclamé **${p.claimedOpponentScore ?? "—"}** · ${lienCapture(p.screenshotUrl, origine)}`;
       embed.champ(
         `🆔 Lobby #${litige.lobbyId} — ${libelleMode(litige.mode)}`,
-        `${joueur(litige.player1)}\n${joueur(litige.player2)}\nCréé ${horodatage(litige.createdAt, "R")}`.slice(0, 1024),
+        `${joueur(litige.player1)}\n${joueur(litige.player2)}\nCréé ${horodatage(litige.createdAt, "R")}`.slice(
+          0,
+          1024,
+        ),
       );
     }
     await interaction.editReply({
@@ -77,21 +109,51 @@ export class CommandeRankedAdmin {
         finirCommeLegacy(
           embed,
           COULEURS_LEGACY.orange,
-          litiges.length > vus.length ? `… et ${litiges.length - vus.length} autre(s) litige(s) non affiché(s).` : null,
+          litiges.length > vus.length
+            ? `… et ${litiges.length - vus.length} autre(s) litige(s) non affiché(s).`
+            : null,
         ),
       ],
     });
   }
 
-  @Slash({ name: "valider", description: "Trancher un litige : appliquer un score et l'ELO" })
+  @Slash({
+    name: "valider",
+    description: "Trancher un litige : appliquer un score et l'ELO",
+  })
   async valider(
-    @SlashOption({ name: "lobby", description: "ID du lobby à trancher", type: ApplicationCommandOptionType.Integer, required: true, minValue: 1 })
+    @SlashOption({
+      name: "lobby",
+      description: "ID du lobby à trancher",
+      type: ApplicationCommandOptionType.Integer,
+      required: true,
+      minValue: 1,
+    })
     lobbyId: number,
-    @SlashOption({ name: "score1", description: "Score de l'équipe 1 (joueur 1)", type: ApplicationCommandOptionType.Integer, required: true, minValue: 0, maxValue: 99 })
+    @SlashOption({
+      name: "score1",
+      description: "Score de l'équipe 1 (joueur 1)",
+      type: ApplicationCommandOptionType.Integer,
+      required: true,
+      minValue: 0,
+      maxValue: 99,
+    })
     score1: number,
-    @SlashOption({ name: "score2", description: "Score de l'équipe 2 (joueur 2)", type: ApplicationCommandOptionType.Integer, required: true, minValue: 0, maxValue: 99 })
+    @SlashOption({
+      name: "score2",
+      description: "Score de l'équipe 2 (joueur 2)",
+      type: ApplicationCommandOptionType.Integer,
+      required: true,
+      minValue: 0,
+      maxValue: 99,
+    })
     score2: number,
-    @SlashOption({ name: "forfait", description: "Joueur déclaré forfait (optionnel)", type: ApplicationCommandOptionType.User, required: false })
+    @SlashOption({
+      name: "forfait",
+      description: "Joueur déclaré forfait (optionnel)",
+      type: ApplicationCommandOptionType.User,
+      required: false,
+    })
     forfait: User | GuildMember | undefined,
     interaction: ChatInputCommandInteraction,
   ): Promise<void> {
@@ -99,7 +161,7 @@ export class CommandeRankedAdmin {
     const forfeitUserId = forfait ? utilisateurDe(forfait).id : undefined;
     const resultat = await appelApi(
       interaction,
-      c =>
+      (c) =>
         c.ranked.adminValidateLobby(lobbyId, {
           scoreTeam1: score1,
           scoreTeam2: score2,
@@ -111,7 +173,9 @@ export class CommandeRankedAdmin {
     const [delta1, delta2] = deltasElo(resultat.eloDelta);
     const embed = finirCommeLegacy(
       fiche({ icone: "✅", titre: `Litige tranché — Lobby #${lobbyId}` })
-        .champ("Score appliqué", `**${score1}** — **${score2}**`, { enLigne: true })
+        .champ("Score appliqué", `**${score1}** — **${score2}**`, {
+          enLigne: true,
+        })
         .champ("ΔELO joueur 1", delta1, { enLigne: true })
         .champ("ΔELO joueur 2", delta2, { enLigne: true })
         .champ("Forfait", forfeitUserId ? `<@${forfeitUserId}>` : "Aucun")
@@ -121,14 +185,27 @@ export class CommandeRankedAdmin {
     await interaction.editReply({ embeds: [embed] });
   }
 
-  @Slash({ name: "annuler", description: "Annuler un match (aucun ELO appliqué)" })
+  @Slash({
+    name: "annuler",
+    description: "Annuler un match (aucun ELO appliqué)",
+  })
   async annuler(
-    @SlashOption({ name: "lobby", description: "ID du lobby à annuler", type: ApplicationCommandOptionType.Integer, required: true, minValue: 1 })
+    @SlashOption({
+      name: "lobby",
+      description: "ID du lobby à annuler",
+      type: ApplicationCommandOptionType.Integer,
+      required: true,
+      minValue: 1,
+    })
     lobbyId: number,
     interaction: ChatInputCommandInteraction,
   ): Promise<void> {
     await interaction.deferReply({ flags: MessageFlags.Ephemeral });
-    const resultat = await appelApi(interaction, c => c.ranked.adminCancelLobby(lobbyId), `Annulation du lobby #${lobbyId} refusée`);
+    const resultat = await appelApi(
+      interaction,
+      (c) => c.ranked.adminCancelLobby(lobbyId),
+      `Annulation du lobby #${lobbyId} refusée`,
+    );
     if (!resultat) return;
     const embed = finirCommeLegacy(
       fiche({
@@ -141,9 +218,18 @@ export class CommandeRankedAdmin {
     await interaction.editReply({ embeds: [embed] });
   }
 
-  @Slash({ name: "logs", description: "Consulter le journal des événements ranked" })
+  @Slash({
+    name: "logs",
+    description: "Consulter le journal des événements ranked",
+  })
   async logs(
-    @SlashOption({ name: "lobby", description: "Filtrer par ID de lobby (optionnel)", type: ApplicationCommandOptionType.Integer, required: false, minValue: 1 })
+    @SlashOption({
+      name: "lobby",
+      description: "Filtrer par ID de lobby (optionnel)",
+      type: ApplicationCommandOptionType.Integer,
+      required: false,
+      minValue: 1,
+    })
     lobbyId: number | undefined,
     interaction: ChatInputCommandInteraction,
   ): Promise<void> {
@@ -151,23 +237,40 @@ export class CommandeRankedAdmin {
     const limite = 15;
     const evenements = await appelApi(
       interaction,
-      c => c.ranked.adminTelemetry({ limit: limite, ...(lobbyId != null ? { lobbyId } : {}) }),
+      (c) =>
+        c.ranked.adminTelemetry({
+          limit: limite,
+          ...(lobbyId != null ? { lobbyId } : {}),
+        }),
       "Journal ranked illisible",
     );
     if (!evenements) return;
     const portee = lobbyId != null ? ` — Lobby #${lobbyId}` : "";
-    const lignes = evenements.slice(0, limite).map(e => {
-      const acteur = e.displayName ? echapper(e.displayName) : e.userId ? `<@${e.userId}>` : "système";
-      const lobby = lobbyId == null && e.lobbyId != null ? ` · lobby #${e.lobbyId}` : "";
+    const lignes = evenements.slice(0, limite).map((e) => {
+      const acteur = e.displayName
+        ? echapper(e.displayName)
+        : e.userId
+          ? `<@${e.userId}>`
+          : "système";
+      const lobby =
+        lobbyId == null && e.lobbyId != null ? ` · lobby #${e.lobbyId}` : "";
       return `${horodatage(e.createdAt, "t")} · \`${e.type}\` · ${acteur}${lobby}`;
     });
     const embed = fiche({
       icone: "📜",
       titre: `Journal ranked${portee}`,
-      description: lignes.length ? lignes.join("\n").slice(0, 4000) : "Aucun événement.",
+      description: lignes.length
+        ? lignes.join("\n").slice(0, 4000)
+        : "Aucun événement.",
     });
     await interaction.editReply({
-      embeds: [finirCommeLegacy(embed, COULEURS_LEGACY.bleu, lignes.length ? `${evenements.length} dernier(s) événement(s)` : null)],
+      embeds: [
+        finirCommeLegacy(
+          embed,
+          COULEURS_LEGACY.bleu,
+          lignes.length ? `${evenements.length} dernier(s) événement(s)` : null,
+        ),
+      ],
     });
   }
 }

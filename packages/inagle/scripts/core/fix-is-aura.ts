@@ -6,7 +6,9 @@
 import { readFileSync, existsSync } from "node:fs";
 import { resolve } from "node:path";
 
-const DB = new Bun.SQL("postgres://postgres:***REMOVED***@127.0.0.1:54330/postgres");
+const DB = new Bun.SQL(
+  "postgres://postgres:***REMOVED***@127.0.0.1:54330/postgres",
+);
 
 function toHex(value: string): string {
   const n = parseInt(value, 10);
@@ -16,7 +18,10 @@ function toHex(value: string): string {
 
 // Extraire les hashes de skills liés aux auras depuis aura_skill_config
 function getAuraSkillHashes(): Set<string> {
-  const path = resolve(import.meta.dir, "../../data/common/gamedata/skill/aura_skill_config_1.04.09.00.cfg.bin.json");
+  const path = resolve(
+    import.meta.dir,
+    "../../data/common/gamedata/skill/aura_skill_config_1.04.09.00.cfg.bin.json",
+  );
   if (!existsSync(path)) return new Set();
   const data = JSON.parse(readFileSync(path, "utf-8"));
   const hashes = new Set<string>();
@@ -85,14 +90,20 @@ async function main() {
   // 5. Mettre à jour is_aura = true
   if (auraSkillIds.length > 0) {
     const placeholders = auraSkillIds.map((_, i) => `$${i + 1}`).join(", ");
-    await DB.query(`UPDATE inagle_skills SET is_aura = true WHERE id IN (${placeholders})`, auraSkillIds);
+    await DB.query(
+      `UPDATE inagle_skills SET is_aura = true WHERE id IN (${placeholders})`,
+      auraSkillIds,
+    );
     console.log(`${auraSkillIds.length} skills marqués is_aura = true`);
   }
 
   // 6. Remettre is_aura = false pour les non-aura (en cas de re-run)
   if (normalSkillIds.length > 0) {
     const placeholders = normalSkillIds.map((_, i) => `$${i + 1}`).join(", ");
-    await DB.query(`UPDATE inagle_skills SET is_aura = false WHERE id IN (${placeholders})`, normalSkillIds);
+    await DB.query(
+      `UPDATE inagle_skills SET is_aura = false WHERE id IN (${placeholders})`,
+      normalSkillIds,
+    );
   }
 
   // 7. Vérification

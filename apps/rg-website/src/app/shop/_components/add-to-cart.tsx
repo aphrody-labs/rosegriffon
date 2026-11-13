@@ -13,7 +13,12 @@ interface AddToCartProps {
   className?: string;
 }
 
-export function AddToCart({ product, variantId, size = "default", className = "" }: AddToCartProps) {
+export function AddToCart({
+  product,
+  variantId,
+  size = "default",
+  className = "",
+}: AddToCartProps) {
   const [pending, startTransition] = useTransition();
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -47,7 +52,9 @@ export function AddToCart({ product, variantId, size = "default", className = ""
         aria-label={`Ajouter ${product.name} au panier`}
       >
         {pending ? (
-          <Loader2 className={`animate-spin ${isLarge ? "size-5" : "size-4"}`} />
+          <Loader2
+            className={`animate-spin ${isLarge ? "size-5" : "size-4"}`}
+          />
         ) : success ? (
           <>
             <Check className={isLarge ? "size-5" : "size-4"} />
@@ -55,12 +62,24 @@ export function AddToCart({ product, variantId, size = "default", className = ""
           </>
         ) : (
           <>
-            {isLarge ? <ShoppingBag className="size-5" /> : <Plus className="size-4" />}
-            <span>{disabled ? "Choisis une option" : isLarge ? "Ajouter au panier" : "Au panier"}</span>
+            {isLarge ? (
+              <ShoppingBag className="size-5" />
+            ) : (
+              <Plus className="size-4" />
+            )}
+            <span>
+              {disabled
+                ? "Choisis une option"
+                : isLarge
+                  ? "Ajouter au panier"
+                  : "Au panier"}
+            </span>
           </>
         )}
       </button>
-      {error && <p className="mt-2 text-xs font-semibold text-rg-brique">{error}</p>}
+      {error && (
+        <p className="mt-2 text-xs font-semibold text-rg-brique">{error}</p>
+      )}
     </div>
   );
 }

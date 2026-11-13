@@ -60,8 +60,8 @@ SQLite est la base de données la plus optimisée de Bun en raison de son intég
 - **Interface JavaScript** (`src/js/bun/sqlite.ts`) : La classe `Database` de Bun charge le constructeur C++ natif à l'aide d'une macro interne `$cpp` :
   ```typescript
   ({ 0: SQL, 1: internalFieldTuple } = $cpp(
-  	"JSSQLStatement.cpp",
-  	"createJSSQLStatementConstructor"
+    "JSSQLStatement.cpp",
+    "createJSSQLStatementConstructor",
   ));
   ```
 

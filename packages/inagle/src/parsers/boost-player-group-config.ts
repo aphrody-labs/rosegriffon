@@ -54,7 +54,8 @@ function parseEntries(entries: ConfigNode[]) {
 
     if (entry.name.startsWith("BOOST_PLAYER_GRP_SPRIT_TABLE_INFO_LIST_BEG")) {
       for (const child of children) {
-        if (!child.name.startsWith("BOOST_PLAYER_GRP_SPRIT_TABLE_INFO_")) continue;
+        if (!child.name.startsWith("BOOST_PLAYER_GRP_SPRIT_TABLE_INFO_"))
+          continue;
         const vars = child.variables;
         if (vars.length < 2) continue;
         spiritTable.push({
@@ -83,14 +84,22 @@ function parseEntries(entries: ConfigNode[]) {
 // Loaders
 // ============================================================================
 
-export async function loadBoostPlayerGroupConfigAsync(dataPath: string = DATA_ROOT) {
-  const path = join(dataPath, "common/gamedata/boost_grp", "boost_player_group_config_0.00.00.cfg.bin.json");
+export async function loadBoostPlayerGroupConfigAsync(
+  dataPath: string = DATA_ROOT,
+) {
+  const path = join(
+    dataPath,
+    "common/gamedata/boost_grp",
+    "boost_player_group_config_0.00.00.cfg.bin.json",
+  );
   const content = await loadJsonAsync<{ entries: ConfigNode[] }>(path);
   if (!content?.entries) return null;
   return parseEntries(content.entries);
 }
 
-export async function buildBoostPlayerGroupDatabase(dataPath: string = DATA_ROOT): Promise<BoostPlayerGroupDatabase> {
+export async function buildBoostPlayerGroupDatabase(
+  dataPath: string = DATA_ROOT,
+): Promise<BoostPlayerGroupDatabase> {
   const result = await loadBoostPlayerGroupConfigAsync(dataPath);
   const spiritTable = result?.spiritTable || [];
   const configs = result?.configs || [];

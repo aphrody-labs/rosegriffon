@@ -3431,7 +3431,10 @@
     }
   ],
   "additional_duplicate_opcode_table": {
-    "paths": ["crates/aphrody-aarch64/src/a64.inc", "crates/emu/ruzu/rdynarmic/src/frontend/a64/a64.inc"],
+    "paths": [
+      "crates/aphrody-aarch64/src/a64.inc",
+      "crates/emu/ruzu/rdynarmic/src/frontend/a64/a64.inc"
+    ],
     "redundant_bytes": 101402
   },
   "checks": [

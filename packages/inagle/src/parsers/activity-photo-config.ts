@@ -50,7 +50,10 @@ function toHex(value: number): string {
 // Parser
 // ============================================================================
 
-function parseContent(content: any): { basePath: string; rewards: ParsedTrophyReward[] } {
+function parseContent(content: any): {
+  basePath: string;
+  rewards: ParsedTrophyReward[];
+} {
   let basePath = "";
   const rewards: ParsedTrophyReward[] = [];
 
@@ -113,7 +116,9 @@ export async function loadActivityPhotoConfigAsync(
   return content ? parseContent(content) : null;
 }
 
-export async function buildActivityPhotoDatabase(dataPath: string = DATA_ROOT): Promise<ActivityPhotoDatabase> {
+export async function buildActivityPhotoDatabase(
+  dataPath: string = DATA_ROOT,
+): Promise<ActivityPhotoDatabase> {
   const result = await loadActivityPhotoConfigAsync(dataPath);
   const basePath = result?.basePath || "220_img/activity_photo/fr/";
   const rewards = result?.rewards || [];

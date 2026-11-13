@@ -13,11 +13,27 @@
 
 import CATALOG from "./catalog.json";
 import ZUKAN_HASHES from "./zukan-hashes.json";
-import { cpkAssetUrl, cpkAudioUrl, cpkRawUrl, cpkThumbUrl, cpkVideoUrl, CDN_BASE } from "../cpk/shared.js";
-import { getItemCategoryLabel, ITEM_CATEGORY_LABELS_FR } from "../game/item-categories.js";
+import {
+  cpkAssetUrl,
+  cpkAudioUrl,
+  cpkRawUrl,
+  cpkThumbUrl,
+  cpkVideoUrl,
+  CDN_BASE,
+} from "../cpk/shared.js";
+import {
+  getItemCategoryLabel,
+  ITEM_CATEGORY_LABELS_FR,
+} from "../game/item-categories.js";
 import { normalizeImagePath } from "./parser.js";
 import { normalizeSkillName } from "./skill-videos.js";
-import type { GameKey, ZukanCharacter, ZukanItem, ZukanSkill, ZukanSkillVideo } from "./types.js";
+import type {
+  GameKey,
+  ZukanCharacter,
+  ZukanItem,
+  ZukanSkill,
+  ZukanSkillVideo,
+} from "./types.js";
 
 // ============================================================================
 // Types & Contracts
@@ -514,7 +530,17 @@ export function resolveCharacterVoiceVfs(codeOrModelId: string): string {
 /** Derives VFS cut-in assets structure from event ID name. */
 export function resolveSkillCutinVfs(eventIdName: string): FusedSkillCutin {
   const clean = eventIdName.trim();
-  const langs = ["ja", "en", "fr", "de", "es", "it", "pt", "zh_hans", "zh_hant"];
+  const langs = [
+    "ja",
+    "en",
+    "fr",
+    "de",
+    "es",
+    "it",
+    "pt",
+    "zh_hans",
+    "zh_hant",
+  ];
   const telopByLang: Record<string, string> = {};
   for (const lang of langs) {
     telopByLang[lang] = `data/dx11/telop/${clean}_${lang}.g4tx`;
@@ -537,9 +563,13 @@ export function resolveCharacterFaceUrl(char: {
   modelId?: string | null;
   id?: string | null;
 }): string {
-  const hash = char.zukanHash || (char.id ? ZUKAN_HASH_MAP[char.id] : undefined);
+  const hash =
+    char.zukanHash || (char.id ? ZUKAN_HASH_MAP[char.id] : undefined);
   if (hash) {
-    return normalizeImagePath(hash) || `https://dxi4wb638ujep.cloudfront.net/1/${hash}.png`;
+    return (
+      normalizeImagePath(hash) ||
+      `https://dxi4wb638ujep.cloudfront.net/1/${hash}.png`
+    );
   }
 
   if (char.modelId) {
@@ -552,7 +582,9 @@ export function resolveCharacterFaceUrl(char: {
 }
 
 /** Resolves glTF/GLB 3D model CDN URL for character viewer. */
-export function resolveCharacterModelUrl(modelId?: string | null): string | null {
+export function resolveCharacterModelUrl(
+  modelId?: string | null,
+): string | null {
   if (!modelId) return null;
   return `${CDN_BASE}/model-full/${encodeURIComponent(modelId)}.glb`;
 }
@@ -579,14 +611,30 @@ export function calculateCharacterStats(stats?: {
   const physical = stats.physical ?? 0;
   const agility = stats.agility ?? 0;
   const intelligence = stats.intelligence ?? 0;
-  const total = kick + control + technique + pressure + physical + agility + intelligence;
+  const total =
+    kick + control + technique + pressure + physical + agility + intelligence;
 
-  return { kick, control, technique, pressure, physical, agility, intelligence, total };
+  return {
+    kick,
+    control,
+    technique,
+    pressure,
+    physical,
+    agility,
+    intelligence,
+    total,
+  };
 }
 
 /** Merges an individual Zukan character record with VFS CPK assets. */
-export function fuseZukanCharacter(char: Partial<ZukanCharacter> & { id?: string; code?: string; game?: string }): FusedCharacter {
-  const id = char.id || (char.name ? char.name.toLowerCase().replace(/[^a-z0-9]/g, "_") : "unknown");
+export function fuseZukanCharacter(
+  char: Partial<ZukanCharacter> & { id?: string; code?: string; game?: string },
+): FusedCharacter {
+  const id =
+    char.id ||
+    (char.name
+      ? char.name.toLowerCase().replace(/[^a-z0-9]/g, "_")
+      : "unknown");
   const modelId = char.modelId || char.code || null;
   const zukanHash = char.zukanHash || ZUKAN_HASH_MAP[id] || null;
 
@@ -596,7 +644,9 @@ export function fuseZukanCharacter(char: Partial<ZukanCharacter> & { id?: string
 
   const faceCdnUrl = resolveCharacterFaceUrl({ id, modelId, zukanHash });
   const modelCdnUrl = resolveCharacterModelUrl(modelId);
-  const zukanImageUrl = zukanHash ? `https://dxi4wb638ujep.cloudfront.net/1/${zukanHash}.png` : null;
+  const zukanImageUrl = zukanHash
+    ? `https://dxi4wb638ujep.cloudfront.net/1/${zukanHash}.png`
+    : null;
 
   return {
     id,
@@ -633,11 +683,15 @@ export function fuseZukanSkill(
     tpCost?: number;
   },
 ): FusedSkill {
-  const id = skill.id || (skill.name ? normalizeSkillName(skill.name) : "unknown");
-  const eventIdName = skill.eventIdName || (skill.internalCode ? `ev_${skill.internalCode}` : null);
+  const id =
+    skill.id || (skill.name ? normalizeSkillName(skill.name) : "unknown");
+  const eventIdName =
+    skill.eventIdName ||
+    (skill.internalCode ? `ev_${skill.internalCode}` : null);
 
   const cutin = eventIdName ? resolveSkillCutinVfs(eventIdName) : null;
-  const primaryVideo = skill.videos && skill.videos.length > 0 ? skill.videos[0] : null;
+  const primaryVideo =
+    skill.videos && skill.videos.length > 0 ? skill.videos[0] : null;
 
   const videoUrl = skill.videoUrl || primaryVideo?.videoUrl || null;
   const posterUrl = skill.posterUrl || primaryVideo?.posterUrl || null;
@@ -659,11 +713,15 @@ export function fuseZukanSkill(
     thumbnailUrl,
     videos: skill.videos ?? [],
     cutin,
-    vfsTelopPath: cutin ? cutin.telopByLang.fr ?? cutin.telopByLang.en ?? null : null,
+    vfsTelopPath: cutin
+      ? (cutin.telopByLang.fr ?? cutin.telopByLang.en ?? null)
+      : null,
     vfsModelPath: cutin?.modelG4md ?? null,
     vfsSoundPath: cutin?.soundCfg ?? null,
     vfsEffectsDir: cutin?.effectsDir ?? null,
-    vfsIconPath: skill.internalCode ? `data/dx11/menu/010_skill/${skill.internalCode}.g4tx` : null,
+    vfsIconPath: skill.internalCode
+      ? `data/dx11/menu/010_skill/${skill.internalCode}.g4tx`
+      : null,
   };
 }
 
@@ -705,7 +763,11 @@ export const CATEGORY_TO_ICON_KEY: Record<string, string> = {
 
 /** Merges an item record with inventory sprite atlas cells and localized labels. */
 export function fuseZukanItem(item: Partial<ZukanItem>): FusedItem {
-  const id = item.id || (item.name ? item.name.toLowerCase().replace(/[^a-z0-9]/g, "_") : "unknown");
+  const id =
+    item.id ||
+    (item.name
+      ? item.name.toLowerCase().replace(/[^a-z0-9]/g, "_")
+      : "unknown");
   const category = (item.category || "consume").toLowerCase();
   const categoryLabelFr = getItemCategoryLabel(category) ?? "Objet";
 
@@ -770,20 +832,26 @@ export function buildFusionDataset(): FusionDataset {
 
   // Calculate metrics
   const totalCharacters = characters.length;
-  const zukanHashCoverage = characters.filter(c => Boolean(c.zukanHash)).length;
-  const zukanHashPercent = totalCharacters > 0 ? (zukanHashCoverage / totalCharacters) * 100 : 0;
+  const zukanHashCoverage = characters.filter((c) =>
+    Boolean(c.zukanHash),
+  ).length;
+  const zukanHashPercent =
+    totalCharacters > 0 ? (zukanHashCoverage / totalCharacters) * 100 : 0;
 
   // Build canonical items list from registered categories
-  const items: FusedItem[] = Object.keys(ITEM_CATEGORY_LABELS_FR).map(catKey =>
-    fuseZukanItem({
-      id: catKey,
-      name: ITEM_CATEGORY_LABELS_FR[catKey] ?? catKey,
-      category: catKey,
-    }),
+  const items: FusedItem[] = Object.keys(ITEM_CATEGORY_LABELS_FR).map(
+    (catKey) =>
+      fuseZukanItem({
+        id: catKey,
+        name: ITEM_CATEGORY_LABELS_FR[catKey] ?? catKey,
+        category: catKey,
+      }),
   );
 
   // Default initial skills catalogue (seeded with core Hissatsu moves)
-  const seedSkills: Array<Partial<ZukanSkill> & { internalCode?: string; eventIdName?: string }> = [
+  const seedSkills: Array<
+    Partial<ZukanSkill> & { internalCode?: string; eventIdName?: string }
+  > = [
     {
       id: "fire_tornado",
       internalCode: "whs00030",
@@ -795,8 +863,10 @@ export function buildFusionDataset(): FusionDataset {
         {
           label: "Shot",
           position: 0,
-          videoUrl: "https://dxi4wb638ujep.cloudfront.net/1/m/s/msb8o6v1p4w.webm",
-          posterUrl: "https://dxi4wb638ujep.cloudfront.net/1/m/s/msb8o6v1p4w.jpg",
+          videoUrl:
+            "https://dxi4wb638ujep.cloudfront.net/1/m/s/msb8o6v1p4w.webm",
+          posterUrl:
+            "https://dxi4wb638ujep.cloudfront.net/1/m/s/msb8o6v1p4w.jpg",
         },
       ],
     },
@@ -811,8 +881,10 @@ export function buildFusionDataset(): FusionDataset {
         {
           label: "Catch",
           position: 0,
-          videoUrl: "https://dxi4wb638ujep.cloudfront.net/1/m/k/mkc7o8x2z1q.webm",
-          posterUrl: "https://dxi4wb638ujep.cloudfront.net/1/m/k/mkc7o8x2z1q.jpg",
+          videoUrl:
+            "https://dxi4wb638ujep.cloudfront.net/1/m/k/mkc7o8x2z1q.webm",
+          posterUrl:
+            "https://dxi4wb638ujep.cloudfront.net/1/m/k/mkc7o8x2z1q.jpg",
         },
       ],
     },
@@ -827,14 +899,16 @@ export function buildFusionDataset(): FusionDataset {
         {
           label: "Block",
           position: 0,
-          videoUrl: "https://dxi4wb638ujep.cloudfront.net/1/m/d/mde4l1q9w0r.webm",
-          posterUrl: "https://dxi4wb638ujep.cloudfront.net/1/m/d/mde4l1q9w0r.jpg",
+          videoUrl:
+            "https://dxi4wb638ujep.cloudfront.net/1/m/d/mde4l1q9w0r.webm",
+          posterUrl:
+            "https://dxi4wb638ujep.cloudfront.net/1/m/d/mde4l1q9w0r.jpg",
         },
       ],
     },
   ];
 
-  const skills = seedSkills.map(s => fuseZukanSkill(s));
+  const skills = seedSkills.map((s) => fuseZukanSkill(s));
 
   cachedFusionDataset = {
     characters,
@@ -846,7 +920,7 @@ export function buildFusionDataset(): FusionDataset {
       zukanHashCoverage,
       zukanHashPercent: Math.round(zukanHashPercent * 100) / 100,
       totalSkills: skills.length,
-      skillsWithVideos: skills.filter(s => Boolean(s.videoUrl)).length,
+      skillsWithVideos: skills.filter((s) => Boolean(s.videoUrl)).length,
       totalItems: items.length,
       totalIcons: Object.keys(REFRESHED_GAME_ICONS).length,
     },
@@ -869,31 +943,41 @@ export interface CharacterFilterCriteria {
 }
 
 /** Queries fused characters with composite filtering. */
-export function queryFusedCharacters(criteria: CharacterFilterCriteria = {}): FusedCharacter[] {
+export function queryFusedCharacters(
+  criteria: CharacterFilterCriteria = {},
+): FusedCharacter[] {
   const dataset = buildFusionDataset();
   let results = dataset.characters;
 
   if (criteria.search) {
     const q = criteria.search.trim().toLowerCase();
     results = results.filter(
-      c => c.name.toLowerCase().includes(q) || (c.nickname && c.nickname.toLowerCase().includes(q)),
+      (c) =>
+        c.name.toLowerCase().includes(q) ||
+        (c.nickname && c.nickname.toLowerCase().includes(q)),
     );
   }
 
   if (criteria.position) {
-    results = results.filter(c => c.position === criteria.position);
+    results = results.filter((c) => c.position === criteria.position);
   }
 
   if (criteria.element) {
-    results = results.filter(c => c.element?.toLowerCase() === criteria.element?.toLowerCase());
+    results = results.filter(
+      (c) => c.element?.toLowerCase() === criteria.element?.toLowerCase(),
+    );
   }
 
   if (criteria.gender) {
-    results = results.filter(c => c.gender?.toLowerCase() === criteria.gender?.toLowerCase());
+    results = results.filter(
+      (c) => c.gender?.toLowerCase() === criteria.gender?.toLowerCase(),
+    );
   }
 
   if (criteria.game) {
-    results = results.filter(c => c.game?.toLowerCase() === criteria.game?.toLowerCase());
+    results = results.filter(
+      (c) => c.game?.toLowerCase() === criteria.game?.toLowerCase(),
+    );
   }
 
   if (criteria.limit && criteria.limit > 0) {

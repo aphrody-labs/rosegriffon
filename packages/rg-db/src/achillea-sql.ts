@@ -24,7 +24,9 @@ export interface AchilleaSqlOptions {
 // only for the runtime cache, never for query construction.
 const clients = new Map<string, Kysely<never>>();
 
-export function createAchilleaSql<DB extends object = never>(options: AchilleaSqlOptions = {}): Kysely<DB> {
+export function createAchilleaSql<DB extends object = never>(
+  options: AchilleaSqlOptions = {},
+): Kysely<DB> {
   const url = options.url ?? getAchilleaDatabaseUrl();
   // Undefined defers to `DATABASE_POOL_MAX` (capped at 4 by `createPgPool`): a
   // serverless instance must not open more than a handful of pooler sessions.
@@ -33,7 +35,9 @@ export function createAchilleaSql<DB extends object = never>(options: AchilleaSq
   const existing = clients.get(key);
   if (existing) return existing as unknown as Kysely<DB>;
 
-  const sslConfig = url.includes("sslmode=disable") ? false : { rejectUnauthorized: false };
+  const sslConfig = url.includes("sslmode=disable")
+    ? false
+    : { rejectUnauthorized: false };
 
   const pool = createPgPool(url, {
     applicationName: "rosegriffon-achillea",
@@ -54,5 +58,5 @@ export function createAchilleaSql<DB extends object = never>(options: AchilleaSq
 export async function destroyAchilleaSql(): Promise<void> {
   const openClients = [...clients.values()];
   clients.clear();
-  await Promise.all(openClients.map(client => client.destroy()));
+  await Promise.all(openClients.map((client) => client.destroy()));
 }

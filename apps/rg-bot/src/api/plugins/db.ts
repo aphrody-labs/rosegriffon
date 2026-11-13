@@ -11,4 +11,7 @@ export function setTestDb(mockDb: Kysely<Database>) {
   db = mockDb;
 }
 
-export const dbPlugin = new Elysia({ name: "db" }).derive({ as: "global" }, () => ({ db, inagleDb }));
+export const dbPlugin = new Elysia({ name: "db" }).derive(
+  { as: "global" },
+  () => ({ db, inagleDb }),
+);

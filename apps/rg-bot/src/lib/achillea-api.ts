@@ -68,7 +68,10 @@ export function baseApiAchillea(env: EnvApiAchillea = Bun.env): string {
   const surcharge = valeur(env, "ACHILLEA_API_INTERNAL_URL");
   if (surcharge) return surcharge.replace(/\/+$/u, "");
   const port = Number(valeur(env, "RG_CORE_PORT") ?? PORT_RG_CORE_DEFAUT);
-  const portValide = Number.isInteger(port) && port > 0 && port < 65_536 ? port : PORT_RG_CORE_DEFAUT;
+  const portValide =
+    Number.isInteger(port) && port > 0 && port < 65_536
+      ? port
+      : PORT_RG_CORE_DEFAUT;
   return `http://127.0.0.1:${portValide}/api`;
 }
 
@@ -92,7 +95,9 @@ export function jetonSessionDiscord(
     );
   }
   if (!/^\d{5,25}$/u.test(identite.id)) {
-    throw new ConfigurationApiAchillea(`Identifiant Discord invalide : « ${identite.id} ».`);
+    throw new ConfigurationApiAchillea(
+      `Identifiant Discord invalide : « ${identite.id} ».`,
+    );
   }
   return signAchilleaSessionToken(
     {
@@ -108,7 +113,8 @@ export function jetonSessionDiscord(
 
 /** Motif lisible extrait d'un corps d'erreur JSON de l'API (`message`, `error`, `erreur`, `detail`). */
 export function motifDuCorps(corps: unknown): string | null {
-  if (typeof corps === "string") return corps.trim() === "" ? null : corps.trim().slice(0, 500);
+  if (typeof corps === "string")
+    return corps.trim() === "" ? null : corps.trim().slice(0, 500);
   if (!corps || typeof corps !== "object") return null;
   const objet = corps as Record<string, unknown>;
   for (const cle of ["message", "error", "erreur", "detail", "reason"]) {
@@ -147,14 +153,22 @@ export class ClientAchilleaDelegue extends AchilleaClient {
   constructor(options: OptionsClientAchillea = {}) {
     const env = options.env ?? Bun.env;
     const base = (options.baseUrl ?? baseApiAchillea(env)).replace(/\/+$/u, "");
-    const jeton = options.jeton ?? (options.identite ? jetonSessionDiscord(options.identite, env) : null);
+    const jeton =
+      options.jeton ??
+      (options.identite ? jetonSessionDiscord(options.identite, env) : null);
     const motifs = new Map<string, string>();
-    const fetchBrut: AchilleaFetch = options.fetch ?? globalThis.fetch.bind(globalThis);
+    const fetchBrut: AchilleaFetch =
+      options.fetch ?? globalThis.fetch.bind(globalThis);
 
     const fetchLisant: AchilleaFetch = async (entree, init) => {
       const reponse = await fetchBrut(entree, init);
       if (!reponse.ok) {
-        const url = typeof entree === "string" ? entree : entree instanceof URL ? entree.href : entree.url;
+        const url =
+          typeof entree === "string"
+            ? entree
+            : entree instanceof URL
+              ? entree.href
+              : entree.url;
         const chemin = url.startsWith(base) ? url.slice(base.length) : url;
         const texte = await reponse
           .clone()
@@ -201,7 +215,10 @@ export class ClientAchilleaDelegue extends AchilleaClient {
  * QUOI faire (« Le joueur est déjà dans un clan »). Le statut ne sert qu'à
  * choisir la tournure quand l'API n'a rien dit.
  */
-export function decrireEchec(echec: AchilleaClientFailure, motifApi: string | null = null): string {
+export function decrireEchec(
+  echec: AchilleaClientFailure,
+  motifApi: string | null = null,
+): string {
   switch (echec.kind) {
     case "unreachable": {
       return `L'API Achilléa est injoignable (${echec.detail}). Réessaie dans un instant ; si cela dure, préviens le staff.`;
@@ -217,23 +234,33 @@ export function decrireEchec(echec: AchilleaClientFailure, motifApi: string | nu
           return `Session refusée par l'API${suffixe}. Le secret de signature du bot ne correspond pas à celui de l'API.`;
         }
         case 403: {
-          return motifApi ?? "Tu n'as pas les droits nécessaires pour cette action.";
+          return (
+            motifApi ?? "Tu n'as pas les droits nécessaires pour cette action."
+          );
         }
         case 404: {
           return motifApi ?? "Élément introuvable.";
         }
         case 409: {
-          return motifApi ?? "Conflit : l'état a changé entre-temps, recharge et réessaie.";
+          return (
+            motifApi ??
+            "Conflit : l'état a changé entre-temps, recharge et réessaie."
+          );
         }
         case 400:
         case 422: {
-          return motifApi ? `Demande invalide : ${motifApi}` : "Demande invalide.";
+          return motifApi
+            ? `Demande invalide : ${motifApi}`
+            : "Demande invalide.";
         }
         case 429: {
           return "Trop de demandes d'un coup : patiente quelques secondes.";
         }
         case 503: {
-          return motifApi ?? "Service momentanément indisponible (maintenance ou bot hors ligne).";
+          return (
+            motifApi ??
+            "Service momentanément indisponible (maintenance ou bot hors ligne)."
+          );
         }
         default: {
           return `L'API Achilléa a répondu HTTP ${echec.status}${suffixe}.`;
@@ -245,17 +272,24 @@ export function decrireEchec(echec: AchilleaClientFailure, motifApi: string | nu
 
 /** Vrai si l'échec est un refus de droits (403) — utile pour distinguer « pas le droit » de « en panne ». */
 export function estRefus(echec: AchilleaClientFailure): boolean {
-  return echec.kind === "http" && (echec.status === 401 || echec.status === 403);
+  return (
+    echec.kind === "http" && (echec.status === 401 || echec.status === 403)
+  );
 }
 
 /** Fabrique des clients des commandes Discord. Remplaçable en test, jamais ailleurs. */
-export type FabriqueClientAchillea = (identite: IdentiteDiscord) => ClientAchilleaDelegue;
+export type FabriqueClientAchillea = (
+  identite: IdentiteDiscord,
+) => ClientAchilleaDelegue;
 
-const fabriqueParDefaut: FabriqueClientAchillea = identite => new ClientAchilleaDelegue({ identite });
+const fabriqueParDefaut: FabriqueClientAchillea = (identite) =>
+  new ClientAchilleaDelegue({ identite });
 let fabrique: FabriqueClientAchillea = fabriqueParDefaut;
 
 /** Client Achilléa au nom de cet utilisateur Discord. */
-export function clientAchilleaPour(identite: IdentiteDiscord): ClientAchilleaDelegue {
+export function clientAchilleaPour(
+  identite: IdentiteDiscord,
+): ClientAchilleaDelegue {
   return fabrique(identite);
 }
 
@@ -263,7 +297,9 @@ export function clientAchilleaPour(identite: IdentiteDiscord): ClientAchilleaDel
  * Remplace la fabrique (tests). Rend la fonction qui restaure la précédente.
  * Aucune commande n'a à l'appeler.
  */
-export function remplacerFabriqueClientAchillea(nouvelle: FabriqueClientAchillea): () => void {
+export function remplacerFabriqueClientAchillea(
+  nouvelle: FabriqueClientAchillea,
+): () => void {
   const precedente = fabrique;
   fabrique = nouvelle;
   return () => {
@@ -272,6 +308,14 @@ export function remplacerFabriqueClientAchillea(nouvelle: FabriqueClientAchillea
 }
 
 /** Identité tirée d'un `User` discord.js (seuls `id`, `username`, `avatar` sont lus). */
-export function identiteDe(utilisateur: { id: string; username?: string | null; avatar?: string | null }): IdentiteDiscord {
-  return { id: utilisateur.id, username: utilisateur.username ?? null, avatar: utilisateur.avatar ?? null };
+export function identiteDe(utilisateur: {
+  id: string;
+  username?: string | null;
+  avatar?: string | null;
+}): IdentiteDiscord {
+  return {
+    id: utilisateur.id,
+    username: utilisateur.username ?? null,
+    avatar: utilisateur.avatar ?? null,
+  };
 }

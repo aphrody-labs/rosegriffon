@@ -46,7 +46,9 @@ function jeton(): string | null {
 function base(profil: ProfilBotPublic): string {
   const variable = `BOT_ADMIN_URL_${profil.nom.toUpperCase()}`;
   const surcharge = (process.env[variable] ?? "").trim();
-  return (surcharge === "" ? `http://127.0.0.1:${profil.portAdmin}` : surcharge).replace(/\/+$/, "");
+  return (
+    surcharge === "" ? `http://127.0.0.1:${profil.portAdmin}` : surcharge
+  ).replace(/\/+$/, "");
 }
 
 export class BotInjoignableError extends Error {
@@ -67,7 +69,11 @@ export class BotInjoignableError extends Error {
  * tâche de fond — mieux vaut afficher « injoignable » en trois secondes que la
  * vérité en trente.
  */
-export async function appelerBot<T>(profil: NomProfilBot, chemin: string, init: RequestInit = {}): Promise<T> {
+export async function appelerBot<T>(
+  profil: NomProfilBot,
+  chemin: string,
+  init: RequestInit = {},
+): Promise<T> {
   const secret = jeton();
   if (!secret) {
     throw new BotInjoignableError(
@@ -110,7 +116,9 @@ export async function appelerBot<T>(profil: NomProfilBot, chemin: string, init: 
 }
 
 /** État d'un profil, erreur comprise — ne lève jamais. */
-export async function etatDuProfil(profil: NomProfilBot): Promise<EtatBotAgrege> {
+export async function etatDuProfil(
+  profil: NomProfilBot,
+): Promise<EtatBotAgrege> {
   const description = PROFILS_BOT[profil];
   const debut = Date.now();
   try {
@@ -135,7 +143,9 @@ export async function etatDuProfil(profil: NomProfilBot): Promise<EtatBotAgrege>
 
 /** État des deux profils, sondés en parallèle. */
 export async function etatDesBots(): Promise<EtatBotAgrege[]> {
-  return await Promise.all(TOUS_LES_PROFILS_BOT.map(p => etatDuProfil(p.nom)));
+  return await Promise.all(
+    TOUS_LES_PROFILS_BOT.map((p) => etatDuProfil(p.nom)),
+  );
 }
 
 /**
@@ -154,9 +164,12 @@ export async function commandesDesBots(): Promise<{
   const indisponibles: { profil: ProfilBotPublic; erreur: string }[] = [];
 
   await Promise.all(
-    TOUS_LES_PROFILS_BOT.map(async description => {
+    TOUS_LES_PROFILS_BOT.map(async (description) => {
       try {
-        const charge = await appelerBot<{ commandes: CommandeBot[] }>(description.nom, "/commandes");
+        const charge = await appelerBot<{ commandes: CommandeBot[] }>(
+          description.nom,
+          "/commandes",
+        );
         commandes.push(...charge.commandes);
       } catch (erreur) {
         indisponibles.push({
@@ -207,8 +220,14 @@ export async function annuaireGuilde(guildId: string): Promise<{
   for (const description of TOUS_LES_PROFILS_BOT) {
     try {
       const [salons, roles] = await Promise.all([
-        appelerBot<{ salons: SalonGuilde[] }>(description.nom, `/guildes/${guildId}/salons`),
-        appelerBot<{ roles: RoleGuilde[] }>(description.nom, `/guildes/${guildId}/roles`),
+        appelerBot<{ salons: SalonGuilde[] }>(
+          description.nom,
+          `/guildes/${guildId}/salons`,
+        ),
+        appelerBot<{ roles: RoleGuilde[] }>(
+          description.nom,
+          `/guildes/${guildId}/roles`,
+        ),
       ]);
       return {
         salons: salons.salons,
@@ -234,12 +253,16 @@ export async function annuaireGuilde(guildId: string): Promise<{
  * base, elle, a réussi. Rend la liste des profils prévenus, pour que
  * l'interface puisse dire « le bot Azalée était arrêté » plutôt que de mentir.
  */
-export async function invaliderReglagesBots(guildId: string): Promise<NomProfilBot[]> {
+export async function invaliderReglagesBots(
+  guildId: string,
+): Promise<NomProfilBot[]> {
   const prevenus: NomProfilBot[] = [];
   await Promise.all(
-    TOUS_LES_PROFILS_BOT.map(async description => {
+    TOUS_LES_PROFILS_BOT.map(async (description) => {
       try {
-        await appelerBot(description.nom, `/reglages/${guildId}/invalider`, { method: "POST" });
+        await appelerBot(description.nom, `/reglages/${guildId}/invalider`, {
+          method: "POST",
+        });
         prevenus.push(description.nom);
       } catch {
         // Un bot arrêté n'a pas de cache à vider.

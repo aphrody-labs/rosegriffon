@@ -49,14 +49,24 @@ export const STAT_KEYS: ReadonlyArray<{
 
 /** Somme des 7 stats. */
 export function statTotal(s: CharaStats): number {
-  return s.kick + s.control + s.technique + s.pressure + s.physical + s.agility + s.intelligence;
+  return (
+    s.kick +
+    s.control +
+    s.technique +
+    s.pressure +
+    s.physical +
+    s.agility +
+    s.intelligence
+  );
 }
 
 /**
  * Position (texte FR de la DB ou code court) → `mainPosition` de la table de
  * croissance. 1=GK, 2=FW, 3=MF, 4=DF, 0=Coach (sans stats de croissance).
  */
-export function positionToMainPosition(position: string | null | undefined): number | null {
+export function positionToMainPosition(
+  position: string | null | undefined,
+): number | null {
   if (!position) return null;
   switch (position.trim().toLowerCase()) {
     case "gardien":
@@ -87,7 +97,9 @@ export function positionToMainPosition(position: string | null | undefined): num
  * croissance. Reproduit `rarityToGrowthRank` d'inagle : N→0, Expérimenté→2,
  * Émérite→3, Légendaire→5, Héros/BASARA → stats UR (rang 5).
  */
-export function rarityLabelToGrowthRank(label: string | null | undefined): number {
+export function rarityLabelToGrowthRank(
+  label: string | null | undefined,
+): number {
   switch ((label ?? "").trim()) {
     case "En progression":
       return 1;

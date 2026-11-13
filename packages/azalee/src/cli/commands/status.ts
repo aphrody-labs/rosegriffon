@@ -46,7 +46,9 @@ interface GitStatus {
 export function registerStatusCommand(program: Command): void {
   program
     .command("status")
-    .description("Affiche le statut de santé des services locaux (SQLite, Redis, système)")
+    .description(
+      "Affiche le statut de santé des services locaux (SQLite, Redis, système)",
+    )
     .option("-j, --json", "Format de sortie en JSON brute")
     .action(async (options: StatusOptions) => {
       suppressLogs(!!options.json);
@@ -65,15 +67,22 @@ export function registerStatusCommand(program: Command): void {
           try {
             const db = openReadonlyDatabase(dbPath);
             const stat = statSync(dbPath);
-            sqliteStatus.fileSize = (stat.size / (1024 * 1024)).toFixed(2) + " MB";
+            sqliteStatus.fileSize =
+              (stat.size / (1024 * 1024)).toFixed(2) + " MB";
 
-            const tablesResult = db.query("SELECT count(*) as count FROM sqlite_master WHERE type='table'").get() as {
+            const tablesResult = db
+              .query(
+                "SELECT count(*) as count FROM sqlite_master WHERE type='table'",
+              )
+              .get() as {
               count: number;
             };
             sqliteStatus.tables = tablesResult.count;
 
             try {
-              const charResult = db.query("SELECT count(*) as count FROM inagle_characters").get() as {
+              const charResult = db
+                .query("SELECT count(*) as count FROM inagle_characters")
+                .get() as {
                 count: number;
               };
               sqliteStatus.characterCount = charResult.count;
@@ -109,20 +118,27 @@ export function registerStatusCommand(program: Command): void {
         };
         try {
           const git = (args: string[]) =>
-            Bun.spawnSync(["git", ...args], { stdout: "pipe", stderr: "ignore" })
+            Bun.spawnSync(["git", ...args], {
+              stdout: "pipe",
+              stderr: "ignore",
+            })
               .stdout.toString()
               .trim();
-          gitStatus.branch = git(["rev-parse", "--abbrev-ref", "HEAD"]) || "unknown";
+          gitStatus.branch =
+            git(["rev-parse", "--abbrev-ref", "HEAD"]) || "unknown";
           gitStatus.commit = git(["rev-parse", "--short", "HEAD"]) || "unknown";
           gitStatus.clean = git(["status", "--porcelain"]) === "";
         } catch {}
 
-        const sysMemTotal = (os.totalmem() / (1024 * 1024 * 1024)).toFixed(2) + " GB";
-        const sysMemFree = (os.freemem() / (1024 * 1024 * 1024)).toFixed(2) + " GB";
+        const sysMemTotal =
+          (os.totalmem() / (1024 * 1024 * 1024)).toFixed(2) + " GB";
+        const sysMemFree =
+          (os.freemem() / (1024 * 1024 * 1024)).toFixed(2) + " GB";
         const uptime = process.uptime().toFixed(1) + "s";
 
         const memory = process.memoryUsage();
-        const processHeapUsed = (memory.heapUsed / (1024 * 1024)).toFixed(2) + " MB";
+        const processHeapUsed =
+          (memory.heapUsed / (1024 * 1024)).toFixed(2) + " MB";
         const processRss = (memory.rss / (1024 * 1024)).toFixed(2) + " MB";
 
         const report = {
@@ -149,17 +165,23 @@ export function registerStatusCommand(program: Command): void {
         if (options.json) {
           console.log(JSON.stringify(report, null, 2));
         } else {
-          console.log(`${colors.cyan}=== Diagnostic de santé Azalée ===${colors.reset}\n`);
+          console.log(
+            `${colors.cyan}=== Diagnostic de santé Azalée ===${colors.reset}\n`,
+          );
 
           console.log(`${colors.bold}${colors.blue}[SQLite]${colors.reset}`);
           if (sqliteStatus.healthy) {
-            console.log(`  Statut     : ${colors.green}Disponible${colors.reset}`);
+            console.log(
+              `  Statut     : ${colors.green}Disponible${colors.reset}`,
+            );
             console.log(`  Base       : ${sqliteStatus.path}`);
             console.log(`  Taille     : ${sqliteStatus.fileSize}`);
             console.log(`  Tables     : ${sqliteStatus.tables}`);
             console.log(`  Personnages: ${sqliteStatus.characterCount}`);
           } else {
-            console.log(`  Statut     : ${colors.red}Hors-ligne / Erreur${colors.reset}`);
+            console.log(
+              `  Statut     : ${colors.red}Hors-ligne / Erreur${colors.reset}`,
+            );
             if (sqliteStatus.error) {
               console.log(`  Erreur     : ${sqliteStatus.error}`);
             }
@@ -167,28 +189,40 @@ export function registerStatusCommand(program: Command): void {
 
           console.log(`\n${colors.bold}${colors.blue}[Redis]${colors.reset}`);
           if (redisStatus.healthy) {
-            console.log(`  Statut     : ${colors.green}Disponible${colors.reset}`);
+            console.log(
+              `  Statut     : ${colors.green}Disponible${colors.reset}`,
+            );
             console.log(`  Latence    : ${redisStatus.latency}`);
           } else {
-            console.log(`  Statut     : ${colors.red}Hors-ligne / Erreur${colors.reset}`);
+            console.log(
+              `  Statut     : ${colors.red}Hors-ligne / Erreur${colors.reset}`,
+            );
             if (redisStatus.error) {
               console.log(`  Erreur     : ${redisStatus.error}`);
             }
           }
 
-          console.log(`\n${colors.bold}${colors.blue}[Git / Version]${colors.reset}`);
+          console.log(
+            `\n${colors.bold}${colors.blue}[Git / Version]${colors.reset}`,
+          );
           console.log(`  Branche    : ${gitStatus.branch}`);
           console.log(`  Commit     : ${gitStatus.commit}`);
           console.log(
             `  Propre     : ${gitStatus.clean ? colors.green + "Oui" : colors.yellow + "Modifications locales en cours"}${colors.reset}`,
           );
 
-          console.log(`\n${colors.bold}${colors.blue}[Processus & Système]${colors.reset}`);
+          console.log(
+            `\n${colors.bold}${colors.blue}[Processus & Système]${colors.reset}`,
+          );
           console.log(`  Uptime CLI : ${report.process.uptime}`);
           console.log(`  Heap Utilisé: ${report.process.memory.heapUsed}`);
           console.log(`  RSS Process: ${report.process.memory.rss}`);
-          console.log(`  OS Mémoire : ${report.system.freeMemory} libres / ${report.system.totalMemory} total`);
-          console.log(`  Plateforme : ${report.system.platform} (${report.system.arch})`);
+          console.log(
+            `  OS Mémoire : ${report.system.freeMemory} libres / ${report.system.totalMemory} total`,
+          );
+          console.log(
+            `  Plateforme : ${report.system.platform} (${report.system.arch})`,
+          );
         }
       } catch (e) {
         reportError(

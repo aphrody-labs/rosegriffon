@@ -78,7 +78,10 @@ export async function POST(req: Request): Promise<Response> {
   }
 
   if (!Array.isArray(body.ids)) {
-    return Response.json({ error: "`ids` doit être un tableau." }, { status: 400 });
+    return Response.json(
+      { error: "`ids` doit être un tableau." },
+      { status: 400 },
+    );
   }
 
   // Normalise + dédoublonne (en préservant l'ordre d'apparition).
@@ -128,7 +131,7 @@ export async function POST(req: Request): Promise<Response> {
 
     // Reconstruit dans l'ordre d'entrée ; les inconnus restent visibles (name null).
     const resolved: ResolvedChara[] = ids.map(
-      id =>
+      (id) =>
         byId.get(id) ?? {
           id,
           name: null,
@@ -138,7 +141,7 @@ export async function POST(req: Request): Promise<Response> {
           rarity: null,
         },
     );
-    const matched = resolved.filter(r => r.name !== null).length;
+    const matched = resolved.filter((r) => r.name !== null).length;
 
     return Response.json({ resolved, matched, total: ids.length });
   } catch (e) {

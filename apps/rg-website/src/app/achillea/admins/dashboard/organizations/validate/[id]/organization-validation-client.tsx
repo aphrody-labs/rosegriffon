@@ -34,8 +34,14 @@ export default function OrganizationValidationPage({ id }: { id: string }) {
   const [rejectDialogOpen, setRejectDialogOpen] = useState<boolean>(false);
   const [rejectReason, setRejectReason] = useState<string>("");
 
-  const [requestIdentity1, setRequestIdentity1] = useState<readonly unknown[]>([orgId]);
-  if ([orgId].some((value, position) => !Object.is(value, requestIdentity1[position]))) {
+  const [requestIdentity1, setRequestIdentity1] = useState<readonly unknown[]>([
+    orgId,
+  ]);
+  if (
+    [orgId].some(
+      (value, position) => !Object.is(value, requestIdentity1[position]),
+    )
+  ) {
     setRequestIdentity1([orgId]);
     (() => {
       setLoading(true);
@@ -48,7 +54,7 @@ export default function OrganizationValidationPage({ id }: { id: string }) {
 
     client.organizations
       .get(orgId)
-      .then(res => {
+      .then((res) => {
         if (cancelled) return;
         if (res.ok && res.value?.data) {
           setOrg(res.value.data);
@@ -105,7 +111,9 @@ export default function OrganizationValidationPage({ id }: { id: string }) {
     return (
       <div className="max-w-2xl mx-auto px-4 py-20 text-center space-y-3">
         <Loader2 className="w-8 h-8 animate-spin mx-auto text-muted-foreground" />
-        <p className="text-sm text-muted-foreground">Chargement des données de l'organisation...</p>
+        <p className="text-sm text-muted-foreground">
+          Chargement des données de l'organisation...
+        </p>
       </div>
     );
   }
@@ -126,9 +134,12 @@ export default function OrganizationValidationPage({ id }: { id: string }) {
             <Building2 className="w-6 h-6" />
           </span>
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Validation d'Organisation</h1>
+            <h1 className="text-3xl font-bold tracking-tight">
+              Validation d'Organisation
+            </h1>
             <p className="text-sm text-muted-foreground mt-0.5">
-              Vérification de la conformité et arbitrage de la demande de structure esport.
+              Vérification de la conformité et arbitrage de la demande de
+              structure esport.
             </p>
           </div>
         </div>
@@ -150,7 +161,7 @@ export default function OrganizationValidationPage({ id }: { id: string }) {
                 src={org.logo}
                 alt={org.name}
                 className="w-16 h-16 rounded-xl object-cover bg-muted border border-border shrink-0 shadow-sm"
-                onError={e => {
+                onError={(e) => {
                   (e.target as HTMLElement).style.display = "none";
                 }}
               />
@@ -166,7 +177,9 @@ export default function OrganizationValidationPage({ id }: { id: string }) {
                 <span className="px-2 py-0.5 rounded text-xs font-mono font-bold bg-muted text-muted-foreground border border-border">
                   {typeof org.origin === "string"
                     ? org.origin.toUpperCase()
-                    : ((org.origin as any)?.name ?? (org.origin as any)?.code ?? "FR")}
+                    : ((org.origin as any)?.name ??
+                      (org.origin as any)?.code ??
+                      "FR")}
                 </span>
               </div>
               <p className="text-xs text-muted-foreground leading-relaxed whitespace-pre-line">
@@ -178,14 +191,20 @@ export default function OrganizationValidationPage({ id }: { id: string }) {
           {/* Metadata Grid */}
           <div className="grid grid-cols-2 gap-3 text-xs">
             <div className="p-3 rounded-xl bg-background border border-border">
-              <div className="text-muted-foreground">Propriétaire déclarant</div>
+              <div className="text-muted-foreground">
+                Propriétaire déclarant
+              </div>
               <div className="font-bold text-foreground mt-0.5">
-                {typeof org.owner === "string" ? org.owner : (org.owner?.username ?? "Inconnu")}
+                {typeof org.owner === "string"
+                  ? org.owner
+                  : (org.owner?.username ?? "Inconnu")}
               </div>
             </div>
             <div className="p-3 rounded-xl bg-background border border-border">
               <div className="text-muted-foreground">Slug officiel</div>
-              <div className="font-bold font-mono text-foreground mt-0.5">{org.normalizedName ?? orgId}</div>
+              <div className="font-bold font-mono text-foreground mt-0.5">
+                {org.normalizedName ?? orgId}
+              </div>
             </div>
           </div>
 
@@ -244,7 +263,11 @@ export default function OrganizationValidationPage({ id }: { id: string }) {
               disabled={actionRunning}
               className="inline-flex items-center gap-1.5 px-6 py-2 bg-success hover:bg-success/90 text-success-foreground rounded-xl text-xs font-bold transition shadow-sm disabled:opacity-50"
             >
-              {actionRunning ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+              {actionRunning ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Check className="w-4 h-4" />
+              )}
               Approuver et valider la structure
             </button>
           </div>
@@ -260,8 +283,8 @@ export default function OrganizationValidationPage({ id }: { id: string }) {
               <span>Confirmer le rejet de l'organisation</span>
             </div>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              Êtes-vous sûr de vouloir rejeter cette demande ? L'organisation ne pourra pas héberger de tournoi ni
-              aligner d'équipe officielle.
+              Êtes-vous sûr de vouloir rejeter cette demande ? L'organisation ne
+              pourra pas héberger de tournoi ni aligner d'équipe officielle.
             </p>
 
             <div className="space-y-1 text-xs">
@@ -276,7 +299,7 @@ export default function OrganizationValidationPage({ id }: { id: string }) {
                 rows={3}
                 placeholder="Précisez la raison (logo inapproprié, usurpation, informations erronées)..."
                 value={rejectReason}
-                onChange={e => setRejectReason(e.target.value)}
+                onChange={(e) => setRejectReason(e.target.value)}
                 className="w-full px-3 py-2 bg-background border border-border rounded-xl focus:outline-none focus:ring-1 focus:ring-primary"
               />
             </div>
@@ -295,7 +318,11 @@ export default function OrganizationValidationPage({ id }: { id: string }) {
                 disabled={actionRunning}
                 className="inline-flex items-center gap-1.5 px-4 py-2 bg-destructive text-destructive-foreground font-bold text-xs rounded-xl hover:bg-destructive/90 transition shadow-sm disabled:opacity-50"
               >
-                {actionRunning ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <X className="w-3.5 h-3.5" />}
+                {actionRunning ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  <X className="w-3.5 h-3.5" />
+                )}
                 Confirmer le refus
               </button>
             </div>

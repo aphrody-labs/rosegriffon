@@ -27,7 +27,15 @@ export function ficheFactice(surcharge: Record<string, unknown> = {}) {
     origin: "FR",
     guildId: null,
     president: { id: PRESIDENT_TEST, name: "Chef" },
-    members: [{ id: PRESIDENT_TEST, name: "Chef", role: 3, distinctions: ["Staff"], joinedAt: "2026-01-01T00:00:00.000Z" }],
+    members: [
+      {
+        id: PRESIDENT_TEST,
+        name: "Chef",
+        role: 3,
+        distinctions: ["Staff"],
+        joinedAt: "2026-01-01T00:00:00.000Z",
+      },
+    ],
     ...surcharge,
   };
 }
@@ -41,7 +49,16 @@ export function carriereFactice(role: number | null) {
     current:
       role === null
         ? []
-        : [{ clanId: 42, clanName: "Paris Griffon", shortName: "PSG", emojiId: "", role, joinedAt: "2026-02-01T00:00:00.000Z" }],
+        : [
+            {
+              clanId: 42,
+              clanName: "Paris Griffon",
+              shortName: "PSG",
+              emojiId: "",
+              role,
+              joinedAt: "2026-02-01T00:00:00.000Z",
+            },
+          ],
     past: [],
   };
 }

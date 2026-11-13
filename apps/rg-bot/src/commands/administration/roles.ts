@@ -20,7 +20,15 @@
  * publiquement chaque prise de rôle produirait plus de bruit que les
  * conversations.
  */
-import { ButtonComponent, Discord, SelectMenuComponent, Slash, SlashChoice, SlashGroup, SlashOption } from "discordx";
+import {
+  ButtonComponent,
+  Discord,
+  SelectMenuComponent,
+  Slash,
+  SlashChoice,
+  SlashGroup,
+  SlashOption,
+} from "discordx";
 import {
   ActionRowBuilder,
   ApplicationCommandOptionType,
@@ -55,7 +63,18 @@ import {
   type EntreeMenu,
   type FormeMenu,
 } from "../../lib/menus-roles";
-import { attention, creerEmbed, echec, fiche, ilYA, pied, piedDeCommande, repondre, succes, vide } from "../../lib/ui";
+import {
+  attention,
+  creerEmbed,
+  echec,
+  fiche,
+  ilYA,
+  pied,
+  piedDeCommande,
+  repondre,
+  succes,
+  vide,
+} from "../../lib/ui";
 import { differerEnPrive, exigerDroits, messagePanne } from "../staff/garde";
 import "./racine-gestion";
 
@@ -145,8 +164,12 @@ export function composerPanneau(menu: MenuRoles): {
       menu.entrees.length === 0
         ? "*Aucun rôle proposé pour l'instant.*"
         : menu.entrees
-            .map(entree =>
-              [entree.emoji, `**${entree.libelle}**`, entree.description ? `— ${entree.description}` : null]
+            .map((entree) =>
+              [
+                entree.emoji,
+                `**${entree.libelle}**`,
+                entree.description ? `— ${entree.description}` : null,
+              ]
                 .filter(Boolean)
                 .join(" "),
             )
@@ -160,7 +183,9 @@ export function composerPanneau(menu: MenuRoles): {
     icone: "reglage",
     titre: menu.titre,
   });
-  pied(embed, { note: "clique pour prendre ou rendre — la réponse n'est visible que de toi" });
+  pied(embed, {
+    note: "clique pour prendre ou rendre — la réponse n'est visible que de toi",
+  });
 
   if (menu.entrees.length === 0) {
     return { components: [], embeds: [embed] };
@@ -168,7 +193,7 @@ export function composerPanneau(menu: MenuRoles): {
 
   if (menu.forme === "boutons") {
     const rangee = new ActionRowBuilder<ButtonBuilder>().addComponents(
-      menu.entrees.slice(0, ROLES_MAX.boutons).map(entree => {
+      menu.entrees.slice(0, ROLES_MAX.boutons).map((entree) => {
         const bouton = new ButtonBuilder()
           .setCustomId(identifiantBouton(menu.messageId, entree.roleId))
           .setLabel(entree.libelle.slice(0, 80))
@@ -189,11 +214,15 @@ export function composerPanneau(menu: MenuRoles): {
     // exige au moins une option et un membre ne peut jamais tout retirer.
     .setMinValues(0)
     .setMaxValues(
-      menu.choixMax > 0 ? Math.min(menu.choixMax, menu.entrees.length) : Math.min(ROLES_MAX.menu, menu.entrees.length),
+      menu.choixMax > 0
+        ? Math.min(menu.choixMax, menu.entrees.length)
+        : Math.min(ROLES_MAX.menu, menu.entrees.length),
     )
     .addOptions(
-      menu.entrees.slice(0, ROLES_MAX.menu).map(entree => {
-        const option = new StringSelectMenuOptionBuilder().setLabel(entree.libelle).setValue(entree.roleId);
+      menu.entrees.slice(0, ROLES_MAX.menu).map((entree) => {
+        const option = new StringSelectMenuOptionBuilder()
+          .setLabel(entree.libelle)
+          .setValue(entree.roleId);
         if (entree.description) {
           option.setDescription(entree.description);
         }
@@ -204,13 +233,18 @@ export function composerPanneau(menu: MenuRoles): {
       }),
     );
   return {
-    components: [new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(deroulant)],
+    components: [
+      new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(deroulant),
+    ],
     embeds: [embed],
   };
 }
 
 /** Republie le message d'un menu après modification. Ne lève jamais. */
-async function rafraichirPanneau(interaction: ChatInputCommandInteraction, menu: MenuRoles): Promise<boolean> {
+async function rafraichirPanneau(
+  interaction: ChatInputCommandInteraction,
+  menu: MenuRoles,
+): Promise<boolean> {
   try {
     const salon = await interaction.client.channels.fetch(menu.salonId);
     if (!salon || !salon.isTextBased()) {
@@ -220,7 +254,10 @@ async function rafraichirPanneau(interaction: ChatInputCommandInteraction, menu:
     await message.edit(composerPanneau(menu));
     return true;
   } catch (err) {
-    console.warn(`[roles] panneau ${menu.messageId} non rafraîchi :`, err instanceof Error ? err.message : err);
+    console.warn(
+      `[roles] panneau ${menu.messageId} non rafraîchi :`,
+      err instanceof Error ? err.message : err,
+    );
     return false;
   }
 }
@@ -307,7 +344,10 @@ export class GestionRolesCommand {
     }
     const guildId = interaction.guildId;
     if (!guildId) {
-      await repondre(interaction, echec("Hors serveur", "Un menu de rôles vit sur un serveur."));
+      await repondre(
+        interaction,
+        echec("Hors serveur", "Un menu de rôles vit sur un serveur."),
+      );
       return;
     }
     try {
@@ -340,12 +380,17 @@ export class GestionRolesCommand {
         await message.delete().catch(() => undefined);
         await repondre(
           interaction,
-          echec("Menu non enregistré", "Le panneau a été retiré : un menu sans ligne ne répond pas."),
+          echec(
+            "Menu non enregistré",
+            "Le panneau a été retiré : un menu sans ligne ne répond pas.",
+          ),
         );
         return;
       }
       // Le message porte l'identifiant définitif dans ses composants.
-      await message.edit(composerPanneau(versMenu(ligne))).catch(() => undefined);
+      await message
+        .edit(composerPanneau(versMenu(ligne)))
+        .catch(() => undefined);
 
       await logAdminAction({
         action: "roles.menu.creer",
@@ -357,17 +402,25 @@ export class GestionRolesCommand {
       });
       await repondre(
         interaction,
-        succes("Menu créé", `${message.url}\nAjoute-y des rôles avec \`/gestion roles ajouter\`.`, { prive: true }),
+        succes(
+          "Menu créé",
+          `${message.url}\nAjoute-y des rôles avec \`/gestion roles ajouter\`.`,
+          { prive: true },
+        ),
       );
     } catch (err) {
-      await repondre(interaction, echec("Création impossible", messagePanne(err)));
+      await repondre(
+        interaction,
+        echec("Création impossible", messagePanne(err)),
+      );
     }
   }
 
   @Slash({ description: "Ajouter un rôle à un menu existant", name: "ajouter" })
   async ajouter(
     @SlashOption({
-      description: "Identifiant du message du menu (clic droit → Copier l'identifiant)",
+      description:
+        "Identifiant du message du menu (clic droit → Copier l'identifiant)",
       name: "menu",
       required: true,
       type: ApplicationCommandOptionType.String,
@@ -414,9 +467,15 @@ export class GestionRolesCommand {
 
     // LE VERROU. Un menu de rôles est en libre-service : la même règle que les
     // récompenses de niveau s'y applique, en plus strict encore.
-    const verdict = verifierAttributionAutomatique(faitsDe(role), faitsBotDe(role));
+    const verdict = verifierAttributionAutomatique(
+      faitsDe(role),
+      faitsBotDe(role),
+    );
     if (!verdict.ok) {
-      await repondre(interaction, attention("Rôle refusé", verdict.motif, { prive: true }));
+      await repondre(
+        interaction,
+        attention("Rôle refusé", verdict.motif, { prive: true }),
+      );
       return;
     }
 
@@ -445,10 +504,14 @@ export class GestionRolesCommand {
         );
         return;
       }
-      if (menu.entrees.some(entree => entree.roleId === role.id)) {
+      if (menu.entrees.some((entree) => entree.roleId === role.id)) {
         await repondre(
           interaction,
-          attention("Déjà proposé", `${role.toString()} est déjà dans ce menu.`, { prive: true }),
+          attention(
+            "Déjà proposé",
+            `${role.toString()} est déjà dans ce menu.`,
+            { prive: true },
+          ),
         );
         return;
       }
@@ -460,7 +523,10 @@ export class GestionRolesCommand {
         roleId: role.id,
       });
       if (!entree) {
-        await repondre(interaction, echec("Entrée invalide", "Le libellé ne peut pas être vide."));
+        await repondre(
+          interaction,
+          echec("Entrée invalide", "Le libellé ne peut pas être vide."),
+        );
         return;
       }
 
@@ -470,7 +536,10 @@ export class GestionRolesCommand {
 				   SET roles = ${entrees}::jsonb, maj_le = NOW()
 				 WHERE id = ${menu.id}
 			`;
-      const rafraichi = await rafraichirPanneau(interaction, { ...menu, entrees });
+      const rafraichi = await rafraichirPanneau(interaction, {
+        ...menu,
+        entrees,
+      });
 
       await logAdminAction({
         action: "roles.menu.ajouter",
@@ -486,7 +555,9 @@ export class GestionRolesCommand {
           "Rôle ajouté",
           [
             `${role.toString()} est proposé dans « ${menu.titre} ».`,
-            rafraichi ? null : "⚠️ Le panneau n'a pas pu être rafraîchi : republie-le.",
+            rafraichi
+              ? null
+              : "⚠️ Le panneau n'a pas pu être rafraîchi : republie-le.",
           ]
             .filter(Boolean)
             .join("\n"),
@@ -524,16 +595,25 @@ export class GestionRolesCommand {
     try {
       const menu = await menuDuMessage(messageId.trim());
       if (!menu || menu.guildId !== interaction.guildId) {
-        await repondre(interaction, echec("Menu introuvable", "Vérifie l'identifiant du message."));
+        await repondre(
+          interaction,
+          echec("Menu introuvable", "Vérifie l'identifiant du message."),
+        );
         return;
       }
-      const entrees = menu.entrees.filter(entree => entree.roleId !== role.id);
+      const entrees = menu.entrees.filter(
+        (entree) => entree.roleId !== role.id,
+      );
       if (entrees.length === menu.entrees.length) {
         await repondre(
           interaction,
-          attention("Rien à retirer", `${role.toString()} n'était pas dans ce menu.`, {
-            prive: true,
-          }),
+          attention(
+            "Rien à retirer",
+            `${role.toString()} n'était pas dans ce menu.`,
+            {
+              prive: true,
+            },
+          ),
         );
         return;
       }
@@ -560,7 +640,10 @@ export class GestionRolesCommand {
         ),
       );
     } catch (err) {
-      await repondre(interaction, echec("Retrait impossible", messagePanne(err)));
+      await repondre(
+        interaction,
+        echec("Retrait impossible", messagePanne(err)),
+      );
     }
   }
 
@@ -572,16 +655,25 @@ export class GestionRolesCommand {
     }
     const guildId = interaction.guildId;
     if (!guildId) {
-      await repondre(interaction, echec("Hors serveur", "Les menus vivent sur un serveur."));
+      await repondre(
+        interaction,
+        echec("Hors serveur", "Les menus vivent sur un serveur."),
+      );
       return;
     }
     try {
       const menus = await menusDe(guildId);
       if (menus.length === 0) {
-        await repondre(interaction, vide("Aucun menu", "`/gestion roles creer` en pose un premier."));
+        await repondre(
+          interaction,
+          vide("Aucun menu", "`/gestion roles creer` en pose un premier."),
+        );
         return;
       }
-      const carte = fiche({ icone: "reglage", titre: `${menus.length} menu(s) de rôles` });
+      const carte = fiche({
+        icone: "reglage",
+        titre: `${menus.length} menu(s) de rôles`,
+      });
       for (const menu of menus) {
         carte.champ(
           menu.titre,
@@ -594,12 +686,15 @@ export class GestionRolesCommand {
             ]
               .filter(Boolean)
               .join(" · "),
-            menu.entrees.map(entree => `<@&${entree.roleId}>`).join(" ") || "*vide*",
+            menu.entrees.map((entree) => `<@&${entree.roleId}>`).join(" ") ||
+              "*vide*",
             `créé ${ilYA(menu.creeLe)}`,
           ].join("\n"),
         );
       }
-      await interaction.editReply({ embeds: [piedDeCommande(carte.embed, interaction)] });
+      await interaction.editReply({
+        embeds: [piedDeCommande(carte.embed, interaction)],
+      });
     } catch (err) {
       await repondre(interaction, echec("Liste illisible", messagePanne(err)));
     }
@@ -633,12 +728,18 @@ export class GestionRolesCommand {
       if (!supprime) {
         await repondre(
           interaction,
-          attention("Rien à supprimer", "Aucun menu ne porte cet identifiant.", { prive: true }),
+          attention(
+            "Rien à supprimer",
+            "Aucun menu ne porte cet identifiant.",
+            { prive: true },
+          ),
         );
         return;
       }
       try {
-        const salon = await interaction.client.channels.fetch(supprime.salon_id);
+        const salon = await interaction.client.channels.fetch(
+          supprime.salon_id,
+        );
         if (salon?.isTextBased()) {
           const message = await salon.messages.fetch(supprime.message_id);
           await message.delete();
@@ -656,12 +757,19 @@ export class GestionRolesCommand {
       });
       await repondre(
         interaction,
-        succes("Menu supprimé", "Les rôles déjà pris restent en place : supprimer un menu ne dépouille personne.", {
-          prive: true,
-        }),
+        succes(
+          "Menu supprimé",
+          "Les rôles déjà pris restent en place : supprimer un menu ne dépouille personne.",
+          {
+            prive: true,
+          },
+        ),
       );
     } catch (err) {
-      await repondre(interaction, echec("Suppression impossible", messagePanne(err)));
+      await repondre(
+        interaction,
+        echec("Suppression impossible", messagePanne(err)),
+      );
     }
   }
 }
@@ -689,9 +797,14 @@ async function appliquer(
       refuses.push(roleId);
       continue;
     }
-    const verdict = verifierAttributionAutomatique(faitsDe(role), faitsBotDe(role));
+    const verdict = verifierAttributionAutomatique(
+      faitsDe(role),
+      faitsBotDe(role),
+    );
     if (!verdict.ok) {
-      console.warn(`[roles] libre-service refusé sur ${role.name} : ${verdict.motif}`);
+      console.warn(
+        `[roles] libre-service refusé sur ${role.name} : ${verdict.motif}`,
+      );
       refuses.push(roleId);
       continue;
     }
@@ -699,7 +812,10 @@ async function appliquer(
       await membre.roles.add(roleId, raison);
       poses.push(roleId);
     } catch (err) {
-      console.warn(`[roles] pose de ${roleId} impossible :`, err instanceof Error ? err.message : err);
+      console.warn(
+        `[roles] pose de ${roleId} impossible :`,
+        err instanceof Error ? err.message : err,
+      );
       refuses.push(roleId);
     }
   }
@@ -712,7 +828,10 @@ async function appliquer(
       await membre.roles.remove(roleId, raison);
       retires.push(roleId);
     } catch (err) {
-      console.warn(`[roles] retrait de ${roleId} impossible :`, err instanceof Error ? err.message : err);
+      console.warn(
+        `[roles] retrait de ${roleId} impossible :`,
+        err instanceof Error ? err.message : err,
+      );
     }
   }
   return { poses, refuses, retires };
@@ -729,19 +848,38 @@ export class MenusRolesComposants {
       const menu = composant ? await menuDuMessage(composant.messageId) : null;
       const membre = interaction.member as GuildMember | null;
       if (!menu || !membre) {
-        await interaction.editReply(echec("Menu introuvable", "Ce panneau n'est plus rattaché à aucun menu."));
-        return;
-      }
-
-      const plan = planDeBascule(menu.entrees, interaction.values, [...membre.roles.cache.keys()], menu.choixMax);
-      if (plan.tropDeChoix) {
         await interaction.editReply(
-          attention("Trop de rôles", `Ce menu en autorise ${menu.choixMax} au maximum.`, { prive: true }),
+          echec(
+            "Menu introuvable",
+            "Ce panneau n'est plus rattaché à aucun menu.",
+          ),
         );
         return;
       }
 
-      const resultat = await appliquer(membre, plan.aPoser, plan.aRetirer, `Menu de rôles « ${menu.titre} »`);
+      const plan = planDeBascule(
+        menu.entrees,
+        interaction.values,
+        [...membre.roles.cache.keys()],
+        menu.choixMax,
+      );
+      if (plan.tropDeChoix) {
+        await interaction.editReply(
+          attention(
+            "Trop de rôles",
+            `Ce menu en autorise ${menu.choixMax} au maximum.`,
+            { prive: true },
+          ),
+        );
+        return;
+      }
+
+      const resultat = await appliquer(
+        membre,
+        plan.aPoser,
+        plan.aRetirer,
+        `Menu de rôles « ${menu.titre} »`,
+      );
       await interaction.editReply(
         succes(
           "Rôles à jour",
@@ -757,7 +895,12 @@ export class MenusRolesComposants {
         ),
       );
     } catch (err) {
-      await interaction.editReply(echec("Changement impossible", err instanceof Error ? err.message : String(err)));
+      await interaction.editReply(
+        echec(
+          "Changement impossible",
+          err instanceof Error ? err.message : String(err),
+        ),
+      );
     }
   }
 
@@ -769,12 +912,27 @@ export class MenusRolesComposants {
       const menu = composant ? await menuDuMessage(composant.messageId) : null;
       const membre = interaction.member as GuildMember | null;
       if (!menu || !membre || !composant?.roleId) {
-        await interaction.editReply(echec("Menu introuvable", "Ce bouton n'est plus rattaché à aucun menu."));
+        await interaction.editReply(
+          echec(
+            "Menu introuvable",
+            "Ce bouton n'est plus rattaché à aucun menu.",
+          ),
+        );
         return;
       }
 
-      const plan = planDeBouton(menu.entrees, composant.roleId, [...membre.roles.cache.keys()], menu.choixMax);
-      const resultat = await appliquer(membre, plan.aPoser, plan.aRetirer, `Menu de rôles « ${menu.titre} »`);
+      const plan = planDeBouton(
+        menu.entrees,
+        composant.roleId,
+        [...membre.roles.cache.keys()],
+        menu.choixMax,
+      );
+      const resultat = await appliquer(
+        membre,
+        plan.aPoser,
+        plan.aRetirer,
+        `Menu de rôles « ${menu.titre} »`,
+      );
       await interaction.editReply(
         succes(
           "Rôles à jour",
@@ -787,7 +945,12 @@ export class MenusRolesComposants {
         ),
       );
     } catch (err) {
-      await interaction.editReply(echec("Changement impossible", err instanceof Error ? err.message : String(err)));
+      await interaction.editReply(
+        echec(
+          "Changement impossible",
+          err instanceof Error ? err.message : String(err),
+        ),
+      );
     }
   }
 }

@@ -20,7 +20,9 @@ export async function loadAbilityLearningConfig(_dataPath: string = DATA_ROOT) {
   const filename = findConfigFile("skill", "ability_learning_config");
   if (!filename) return null;
 
-  const content = { entries: loadConfig("skill", filename).children as ConfigNode[] };
+  const content = {
+    entries: loadConfig("skill", filename).children as ConfigNode[],
+  };
 
   const effects = new Map<number, AbilityBoardEffect>();
   const boards = new Map<string, number[]>();
@@ -30,7 +32,10 @@ export async function loadAbilityLearningConfig(_dataPath: string = DATA_ROOT) {
       // Parse Effects
       if (entry.name === "ABILITY_LEARNING_BOARD_EFFECT_LIST_BEG_0") {
         for (const child of entry.children || []) {
-          const id = parseInt(child.name.replace("ABILITY_LEARNING_BOARD_EFFECT_", ""), 10);
+          const id = parseInt(
+            child.name.replace("ABILITY_LEARNING_BOARD_EFFECT_", ""),
+            10,
+          );
           const vars = child.variables;
           effects.set(id, {
             id,
@@ -44,13 +49,22 @@ export async function loadAbilityLearningConfig(_dataPath: string = DATA_ROOT) {
       // Parse Board Info (Links boards to effects)
       if (entry.name === "ABILITY_LEARNING_BOARD_INFO_LIST_BEG_0") {
         for (const child of entry.children || []) {
-          if (child.name.startsWith("ABILITY_LEARNING_BOARD_INFO_REF_EFFECT_")) {
-            const id = parseInt(child.name.replace("ABILITY_LEARNING_BOARD_INFO_REF_EFFECT_", ""), 10);
+          if (
+            child.name.startsWith("ABILITY_LEARNING_BOARD_INFO_REF_EFFECT_")
+          ) {
+            const id = parseInt(
+              child.name.replace("ABILITY_LEARNING_BOARD_INFO_REF_EFFECT_", ""),
+              10,
+            );
             const vars = child.variables;
             // Find the corresponding BOARD_INFO (it has the same index)
-            const boardNode = (entry.children || []).find(c => c.name === `ABILITY_LEARNING_BOARD_INFO_${id}`);
+            const boardNode = (entry.children || []).find(
+              (c) => c.name === `ABILITY_LEARNING_BOARD_INFO_${id}`,
+            );
             if (boardNode) {
-              const boardId = toHex(parseInt(boardNode.variables[0]?.value || "0", 10));
+              const boardId = toHex(
+                parseInt(boardNode.variables[0]?.value || "0", 10),
+              );
               if (!boards.has(boardId)) boards.set(boardId, []);
               boards.get(boardId)!.push(parseInt(vars[0]?.value || "0", 10));
             }

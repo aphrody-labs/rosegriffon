@@ -20,7 +20,11 @@ export async function GET() {
         error.message.includes("Non autorisé") ||
         error.message.includes("redirect"));
     return NextResponse.json(
-      { error: isAuthError ? "Non autorisé" : "Erreur lors de l'export des statistiques" },
+      {
+        error: isAuthError
+          ? "Non autorisé"
+          : "Erreur lors de l'export des statistiques",
+      },
       { status: isAuthError ? 403 : 500 },
     );
   }

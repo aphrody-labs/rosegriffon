@@ -6,16 +6,28 @@ describe("NieAssetOptimizer Suite", () => {
   const optimizer = new NieAssetOptimizer("https://cdn.rosegriffon.fr");
 
   test("résout les textures G4TX vers les endpoints CDN optimisés WebP/PNG", () => {
-    const webpUrl = optimizer.resolveOptimizedTextureUrl("data/dx11/menu/001_chara/c01000010.g4tx", "webp");
-    expect(webpUrl).toBe("https://cdn.rosegriffon.fr/dx11/menu/001_chara/c01000010.webp");
+    const webpUrl = optimizer.resolveOptimizedTextureUrl(
+      "data/dx11/menu/001_chara/c01000010.g4tx",
+      "webp",
+    );
+    expect(webpUrl).toBe(
+      "https://cdn.rosegriffon.fr/dx11/menu/001_chara/c01000010.webp",
+    );
 
-    const pngUrl = optimizer.resolveOptimizedTextureUrl("data/dx11/menu/002_emblem/emb_001.g4tx", "png");
-    expect(pngUrl).toBe("https://cdn.rosegriffon.fr/dx11/menu/002_emblem/emb_001.png");
+    const pngUrl = optimizer.resolveOptimizedTextureUrl(
+      "data/dx11/menu/002_emblem/emb_001.g4tx",
+      "png",
+    );
+    expect(pngUrl).toBe(
+      "https://cdn.rosegriffon.fr/dx11/menu/002_emblem/emb_001.png",
+    );
   });
 
   test("résout les modèles 3D vers le format GLB assemblé", () => {
     const modelUrl = optimizer.resolveOptimizedModelUrl("c01000010");
-    expect(modelUrl).toBe("https://cdn.rosegriffon.fr/model-full/c01000010.glb");
+    expect(modelUrl).toBe(
+      "https://cdn.rosegriffon.fr/model-full/c01000010.glb",
+    );
   });
 
   test("génère un atlas CSS Sprite pour l'exploitation sans requête réseau multiple", () => {
@@ -24,9 +36,30 @@ describe("NieAssetOptimizer Suite", () => {
       512,
       512,
       [
-        { id: "boots_01", name: "Crampons Foudre", category: "item", col: 0, row: 0, size: 64 },
-        { id: "glove_01", name: "Gants Majin", category: "item", col: 1, row: 0, size: 64 },
-        { id: "chara_endou", name: "Endou Mamoru", category: "character", col: 0, row: 1, size: 64 },
+        {
+          id: "boots_01",
+          name: "Crampons Foudre",
+          category: "item",
+          col: 0,
+          row: 0,
+          size: 64,
+        },
+        {
+          id: "glove_01",
+          name: "Gants Majin",
+          category: "item",
+          col: 1,
+          row: 0,
+          size: 64,
+        },
+        {
+          id: "chara_endou",
+          name: "Endou Mamoru",
+          category: "character",
+          col: 0,
+          row: 1,
+          size: 64,
+        },
       ],
     );
 
@@ -51,7 +84,7 @@ describe("NieAssetOptimizer Suite", () => {
   test("fournit les fonds d'écran et décors de stade pour l'interface immersive", () => {
     const wallpapers = optimizer.getCuratedWallpapers();
     expect(wallpapers.length).toBeGreaterThanOrEqual(4);
-    expect(wallpapers.some(w => w.id === "nagumohara-coast")).toBe(true);
-    expect(wallpapers.some(w => w.id === "odaiba-arena-night")).toBe(true);
+    expect(wallpapers.some((w) => w.id === "nagumohara-coast")).toBe(true);
+    expect(wallpapers.some((w) => w.id === "odaiba-arena-night")).toBe(true);
   });
 });

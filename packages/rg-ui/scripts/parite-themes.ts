@@ -14,8 +14,16 @@ import { THEME_PACKS } from "../src/lib/themes";
 export const ANCIENNES: Record<ThemeId, Partial<Record<Role, string>>> = {
   roy: { primary: "#0e5794", surface: "#f9f4ee", "on-surface": "#03172c" },
   gaelle: { primary: "#b32228", surface: "#ffe8e0", "on-surface": "#550000" },
-  "azalee-light": { primary: "#8b5023", surface: "#fff8f5", "on-surface": "#221a15" },
-  "azalee-dark": { primary: "#ffb786", surface: "#19120d", "on-surface": "#f0dfd7" },
+  "azalee-light": {
+    primary: "#8b5023",
+    surface: "#fff8f5",
+    "on-surface": "#221a15",
+  },
+  "azalee-dark": {
+    primary: "#ffb786",
+    surface: "#19120d",
+    "on-surface": "#f0dfd7",
+  },
   achillea: { primary: "#d7bafb", surface: "#151218", "on-surface": "#e7e0e8" },
 };
 
@@ -32,14 +40,21 @@ export interface Ecart {
 
 export function ecarts(): Ecart[] {
   const sortie: Ecart[] = [];
-  for (const [theme, roles] of Object.entries(ANCIENNES) as [ThemeId, Partial<Record<Role, string>>][]) {
+  for (const [theme, roles] of Object.entries(ANCIENNES) as [
+    ThemeId,
+    Partial<Record<Role, string>>,
+  ][]) {
     const calcules = computeRoles(THEME_PACKS[theme].seed);
     for (const [role, avant] of Object.entries(roles) as [Role, string][]) {
       const a = hexToOklch(avant);
       const b = hexToOklch(calcules[role]);
       const dH = ((b.h - a.h + 540) % 360) - 180;
-      const da = b.c * Math.cos((b.h * Math.PI) / 180) - a.c * Math.cos((a.h * Math.PI) / 180);
-      const db = b.c * Math.sin((b.h * Math.PI) / 180) - a.c * Math.sin((a.h * Math.PI) / 180);
+      const da =
+        b.c * Math.cos((b.h * Math.PI) / 180) -
+        a.c * Math.cos((a.h * Math.PI) / 180);
+      const db =
+        b.c * Math.sin((b.h * Math.PI) / 180) -
+        a.c * Math.sin((a.h * Math.PI) / 180);
       sortie.push({
         theme,
         role,

@@ -61,7 +61,9 @@ export const GUILD_ID = resolveGuildId(ENV);
  */
 export const GUILD_IDS: readonly string[] = guildesDuProfil(PROFIL, ENV);
 
-export const SYNC_INTERVAL_MS = Number(Bun.env.SYNC_INTERVAL_MS ?? 30 * 60 * 1000);
+export const SYNC_INTERVAL_MS = Number(
+  Bun.env.SYNC_INTERVAL_MS ?? 30 * 60 * 1000,
+);
 
 /**
  * Partage des responsabilités avec `rg-cron.service`.

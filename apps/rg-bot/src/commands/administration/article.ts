@@ -53,7 +53,11 @@ import {
 
 import { logAdminAction } from "../../lib/audit";
 import { cached, invalidate } from "../../lib/cache";
-import { dateCourte, siteArticle, urlArticle } from "../../lib/communaute-format";
+import {
+  dateCourte,
+  siteArticle,
+  urlArticle,
+} from "../../lib/communaute-format";
 import { sql } from "../../lib/db";
 import { rgEmbed, truncate } from "../../lib/embeds";
 import { differerEnPrive, exigerDroits, messagePanne } from "../staff/garde";
@@ -105,7 +109,11 @@ const CHOIX_SITE = [
  * prédicat quand le paramètre est nul, et évite trois variantes de requête à
  * maintenir en parallèle (l'ancien `services/admin.ts` en gardait quatre).
  */
-async function listerArticles(statut: string | null, app: string | null, limite: number): Promise<ArticleAdmin[]> {
+async function listerArticles(
+  statut: string | null,
+  app: string | null,
+  limite: number,
+): Promise<ArticleAdmin[]> {
   return await sql<ArticleAdmin[]>`
 		SELECT id::text, title::text, slug::text, app, status::text,
 		       category::text, published_at, updated_at
@@ -124,7 +132,9 @@ async function listerArticles(statut: string | null, app: string | null, limite:
  * à une saisie libre fait lever Postgres (« invalid input syntax for type
  * uuid ») dès qu'on tape un slug, et l'erreur remontait brute dans le salon.
  */
-async function resoudreArticle(reference: string): Promise<ArticleAdmin | null> {
+async function resoudreArticle(
+  reference: string,
+): Promise<ArticleAdmin | null> {
   const lignes = await sql<ArticleAdmin[]>`
 		SELECT id::text, title::text, slug::text, app, status::text,
 		       category::text, published_at, updated_at
@@ -143,7 +153,10 @@ async function resoudreArticle(reference: string): Promise<ArticleAdmin | null> 
  * jour à la main — il n'existe aucun déclencheur sur `articles` (vérifié :
  * `pg_trigger` ne rend aucune ligne non interne pour cette table).
  */
-async function ecrireStatut(id: string, statut: StatutArticle): Promise<ArticleAdmin | null> {
+async function ecrireStatut(
+  id: string,
+  statut: StatutArticle,
+): Promise<ArticleAdmin | null> {
   const lignes = await sql<ArticleAdmin[]>`
 		UPDATE articles
 		   SET status = ${statut},
@@ -250,10 +263,15 @@ export class AdministrationArticleCommand {
       return;
     }
     try {
-      const articles = await listerArticles(statut ?? null, site ?? null, nombre ?? 10);
-      const portee = [statut ? libelleStatutArticle(statut) : null, site ? siteArticle(site).libelle : null].filter(
-        (morceau): morceau is string => morceau !== null,
+      const articles = await listerArticles(
+        statut ?? null,
+        site ?? null,
+        nombre ?? 10,
       );
+      const portee = [
+        statut ? libelleStatutArticle(statut) : null,
+        site ? siteArticle(site).libelle : null,
+      ].filter((morceau): morceau is string => morceau !== null);
 
       if (articles.length === 0) {
         await interaction.editReply({
@@ -273,12 +291,17 @@ export class AdministrationArticleCommand {
         parEtat.set(etat, (parEtat.get(etat) ?? 0) + 1);
       }
       const repartition = [...parEtat.entries()]
-        .map(([etat, nb]) => `${badgeStatutArticle(etat)} ${nb} ${libelleStatutArticle(etat)}`)
+        .map(
+          ([etat, nb]) =>
+            `${badgeStatutArticle(etat)} ${nb} ${libelleStatutArticle(etat)}`,
+        )
         .join(" · ");
 
       const filtre = portee.length > 0 ? ` — ${portee.join(" · ")}` : "";
       const embed = rgEmbed()
-        .setTitle(`${articles.length} article${articles.length > 1 ? "s" : ""}${filtre}`)
+        .setTitle(
+          `${articles.length} article${articles.length > 1 ? "s" : ""}${filtre}`,
+        )
         .setDescription(descriptionListe(articles))
         .setFooter(
           piedTexte({
@@ -287,11 +310,17 @@ export class AdministrationArticleCommand {
         );
       await interaction.editReply({ embeds: [embed] });
     } catch (err) {
-      await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
+      await repondre(
+        interaction,
+        echec("Le service n'a pas répondu", messagePanne(err)),
+      );
     }
   }
 
-  @Slash({ name: "publier", description: "Rendre un article visible du public" })
+  @Slash({
+    name: "publier",
+    description: "Rendre un article visible du public",
+  })
   async publier(
     @SlashOption({
       name: "article",
@@ -364,14 +393,16 @@ export class AdministrationArticleCommand {
       if (!avant) {
         await interaction.editReply({
           content:
-            `Aucun article sous « ${truncate(saisie, 80)} ». ` + "Utilise l'autocomplétion, ou passe le slug exact.",
+            `Aucun article sous « ${truncate(saisie, 80)} ». ` +
+            "Utilise l'autocomplétion, ou passe le slug exact.",
         });
         return;
       }
       if (avant.status === cible) {
         await interaction.editReply({
           content:
-            `**${truncate(avant.title, 120)}** est déjà ${libelleStatutArticle(cible)} — ` + "rien n'a été écrit.",
+            `**${truncate(avant.title, 120)}** est déjà ${libelleStatutArticle(cible)} — ` +
+            "rien n'a été écrit.",
         });
         return;
       }
@@ -379,7 +410,8 @@ export class AdministrationArticleCommand {
       const apres = await ecrireStatut(avant.id, cible);
       if (!apres) {
         await interaction.editReply({
-          content: "L'article a disparu entre la lecture et l'écriture. Rien n'a été modifié.",
+          content:
+            "L'article a disparu entre la lecture et l'écriture. Rien n'a été modifié.",
         });
         return;
       }
@@ -406,17 +438,25 @@ export class AdministrationArticleCommand {
 
       const site = siteArticle(apres.app);
       const embed = rgEmbed()
-        .setTitle(`${badgeStatutArticle(apres.status)} ${truncate(apres.title, 240)}`)
+        .setTitle(
+          `${badgeStatutArticle(apres.status)} ${truncate(apres.title, 240)}`,
+        )
         .setURL(urlArticle(apres.app, apres.slug))
         .setDescription(
           `État : ${decrireChangement(libelleStatutArticle(avant.status), libelleStatutArticle(apres.status))}`,
         )
         .addFields(
           { name: "Site", value: site.libelle, inline: true },
-          { name: "Slug", value: `\`${truncate(apres.slug, 90)}\``, inline: true },
+          {
+            name: "Slug",
+            value: `\`${truncate(apres.slug, 90)}\``,
+            inline: true,
+          },
           {
             name: "Publié le",
-            value: apres.published_at ? dateCourte(apres.published_at) : "jamais",
+            value: apres.published_at
+              ? dateCourte(apres.published_at)
+              : "jamais",
             inline: true,
           },
         )
@@ -430,7 +470,10 @@ export class AdministrationArticleCommand {
         );
       await interaction.editReply({ embeds: [embed] });
     } catch (err) {
-      await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
+      await repondre(
+        interaction,
+        echec("Le service n'a pas répondu", messagePanne(err)),
+      );
     }
   }
 }
@@ -443,7 +486,9 @@ export class AdministrationArticleCommand {
  * lève laisse le champ figé sur « chargement… » : on répond une liste vide
  * plutôt que rien.
  */
-async function proposerArticles(interaction: AutocompleteInteraction): Promise<void> {
+async function proposerArticles(
+  interaction: AutocompleteInteraction,
+): Promise<void> {
   try {
     const saisie = String(interaction.options.getFocused() ?? "")
       .trim()
@@ -451,12 +496,15 @@ async function proposerArticles(interaction: AutocompleteInteraction): Promise<v
     const index = await indexArticles();
     const retenus = index
       .filter(
-        article => saisie.length === 0 || article.title.toLowerCase().includes(saisie) || article.slug.includes(saisie),
+        (article) =>
+          saisie.length === 0 ||
+          article.title.toLowerCase().includes(saisie) ||
+          article.slug.includes(saisie),
       )
       // Discord refuse au-delà de 25 propositions, et 100 caractères par champ.
       .slice(0, 25);
     await interaction.respond(
-      retenus.map(article => ({
+      retenus.map((article) => ({
         name: truncate(
           `${badgeStatutArticle(article.status)} ${article.title} — ${siteArticle(article.app).libelle}`,
           100,

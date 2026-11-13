@@ -4,7 +4,10 @@ import { Radio as RadioPrimitive } from "@base-ui/react/radio";
 import { CircleIcon } from "lucide-react";
 import { childRender, type PrimitiveProps } from "../lib/render";
 import { cn } from "../lib/utils";
-type RadioGroupProps = Omit<PrimitiveProps<typeof RadioGroupPrimitive>, "value" | "defaultValue" | "onValueChange"> & {
+type RadioGroupProps = Omit<
+  PrimitiveProps<typeof RadioGroupPrimitive>,
+  "value" | "defaultValue" | "onValueChange"
+> & {
   value?: string;
   defaultValue?: string;
   onValueChange?: (value: string) => void;
@@ -26,19 +29,29 @@ function RadioGroup({
       aria-orientation={orientation}
       render={childRender(asChild, children)}
       className={cn("grid gap-2", className)}
-      onKeyDownCapture={event => {
+      onKeyDownCapture={(event) => {
         onKeyDownCapture?.(event);
         if (event.defaultPrevented || !event.key.startsWith("Arrow")) return;
-        const horizontal = event.key === "ArrowLeft" || event.key === "ArrowRight";
+        const horizontal =
+          event.key === "ArrowLeft" || event.key === "ArrowRight";
         if (orientation && horizontal !== (orientation === "horizontal")) {
           event.preventDefault();
           return;
         }
         if (!loop) {
-          const radios = [...event.currentTarget.querySelectorAll<HTMLElement>('[role="radio"]:not([data-disabled])')];
+          const radios = [
+            ...event.currentTarget.querySelectorAll<HTMLElement>(
+              '[role="radio"]:not([data-disabled])',
+            ),
+          ];
           const index = radios.indexOf(event.target as HTMLElement);
-          const backwards = event.key === "ArrowLeft" || event.key === "ArrowUp";
-          if ((backwards && index === 0) || (!backwards && index === radios.length - 1)) event.preventDefault();
+          const backwards =
+            event.key === "ArrowLeft" || event.key === "ArrowUp";
+          if (
+            (backwards && index === 0) ||
+            (!backwards && index === radios.length - 1)
+          )
+            event.preventDefault();
         }
       }}
       {...props}
@@ -47,7 +60,12 @@ function RadioGroup({
     </RadioGroupPrimitive>
   );
 }
-function RadioGroupItem({ className, asChild, children, ...props }: PrimitiveProps<typeof RadioPrimitive.Root>) {
+function RadioGroupItem({
+  className,
+  asChild,
+  children,
+  ...props
+}: PrimitiveProps<typeof RadioPrimitive.Root>) {
   return (
     <RadioPrimitive.Root
       data-slot="radio-group-item"
@@ -58,7 +76,10 @@ function RadioGroupItem({ className, asChild, children, ...props }: PrimitivePro
       )}
       {...props}
     >
-      <RadioPrimitive.Indicator data-slot="radio-group-indicator" className="flex items-center justify-center">
+      <RadioPrimitive.Indicator
+        data-slot="radio-group-indicator"
+        className="flex items-center justify-center"
+      >
         <CircleIcon className="size-2.5 fill-current text-current" />
       </RadioPrimitive.Indicator>
     </RadioPrimitive.Root>

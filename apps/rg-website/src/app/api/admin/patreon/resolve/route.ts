@@ -19,13 +19,23 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "invalid json" }, { status: 400 });
   }
   if (!body.memberId || !body.userId) {
-    return NextResponse.json({ error: "memberId and userId required" }, { status: 400 });
+    return NextResponse.json(
+      { error: "memberId and userId required" },
+      { status: 400 },
+    );
   }
   try {
-    const result = await reconcileLegacyMember(body.memberId, body.userId, "manual");
+    const result = await reconcileLegacyMember(
+      body.memberId,
+      body.userId,
+      "manual",
+    );
     return NextResponse.json({ ok: true, result });
   } catch (error) {
     console.error("[admin/patreon/resolve]", error);
-    return NextResponse.json({ ok: false, error: String(error) }, { status: 500 });
+    return NextResponse.json(
+      { ok: false, error: String(error) },
+      { status: 500 },
+    );
   }
 }

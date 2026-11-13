@@ -37,7 +37,12 @@
  */
 import { GatewayIntentBits } from "discord.js";
 
-import { ACHILLEA_GUILD_ID, AZALEE_GUILD_ID, RG_GUILD_ID, resolveGuildIds } from "@rosegriffon/types/discord";
+import {
+  ACHILLEA_GUILD_ID,
+  AZALEE_GUILD_ID,
+  RG_GUILD_ID,
+  resolveGuildIds,
+} from "@rosegriffon/types/discord";
 
 /**
  * Vue lisible de l'environnement.
@@ -409,7 +414,11 @@ export const PROFILS: Readonly<Record<NomProfil, Profil>> = Object.freeze({
     // privilégié que ces applications n'ont pas et ne demanderont pas. On compte
     // les messages sans jamais les lire, et ce n'est pas une promesse : c'est ce
     // que Discord nous envoie.
-    intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildMessages],
+    intents: [
+      GatewayIntentBits.Guilds,
+      GatewayIntentBits.GuildMembers,
+      GatewayIntentBits.GuildMessages,
+    ],
     modules: MODULES_RG,
     marque: {
       couleurHex: "#a14b3f" as const,
@@ -487,7 +496,11 @@ export const PROFILS: Readonly<Record<NomProfil, Profil>> = Object.freeze({
     // 22/10/2026) ; `resolveGrantedIntents` le retire de lui-même s'il ne l'est plus.
     // `GuildVoiceStates` (non privilégié) livre `voiceStateUpdate` : sans lui,
     // l'alerte du vocal « Aide Ranked » (`events/achillea/aide-ranked.ts`) reste muette.
-    intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildVoiceStates],
+    intents: [
+      GatewayIntentBits.Guilds,
+      GatewayIntentBits.GuildMembers,
+      GatewayIntentBits.GuildVoiceStates,
+    ],
     modules: MODULES_ACHILLEA,
     marque: {
       couleurHex: "#6d00ce" as const,
@@ -549,7 +562,10 @@ export function profilActif(env: EnvLisible = Bun.env as EnvLisible): Profil {
  * et les hériter ferait enregistrer les commandes du bot Azalée sur le serveur
  * principal — exactement le doublon qu'on veut éviter.
  */
-export function guildesDuProfil(profil: Profil, env: EnvLisible): readonly string[] {
+export function guildesDuProfil(
+  profil: Profil,
+  env: EnvLisible,
+): readonly string[] {
   if (profil.nom === "rg") {
     return resolveGuildIds(env);
   }
@@ -563,7 +579,10 @@ export function guildesDuProfil(profil: Profil, env: EnvLisible): readonly strin
  * L'environnement l'emporte sur le registre : déplacer une annonce de salon ne
  * doit pas demander un déploiement.
  */
-export function salonAnnonceDuProfil(profil: Profil, env: EnvLisible): string | null {
+export function salonAnnonceDuProfil(
+  profil: Profil,
+  env: EnvLisible,
+): string | null {
   const annonce = profil.annoncePosts;
   if (!annonce) {
     return null;
@@ -579,14 +598,20 @@ export function salonAnnonceDuProfil(profil: Profil, env: EnvLisible): string | 
 /** Racine des liens publics du profil. */
 export function urlBaseDuProfil(profil: Profil, env: EnvLisible): string {
   const depuisEnv = (env[profil.marque.variableUrlBase] ?? "").trim();
-  return depuisEnv === "" || depuisEnv.startsWith("$") ? profil.marque.urlBase : depuisEnv;
+  return depuisEnv === "" || depuisEnv.startsWith("$")
+    ? profil.marque.urlBase
+    : depuisEnv;
 }
 
 /** Couleur d'embed (entier 24 bits) à partir de l'hexadécimal de la marque. */
 export function couleurDeMarque(couleurHex: string): number {
-  const chiffres = couleurHex.startsWith("#") ? couleurHex.slice(1) : couleurHex;
+  const chiffres = couleurHex.startsWith("#")
+    ? couleurHex.slice(1)
+    : couleurHex;
   if (!/^[0-9a-fA-F]{6}$/.test(chiffres)) {
-    throw new Error(`[profil] couleur de marque invalide : "${couleurHex}" (attendu #RRGGBB).`);
+    throw new Error(
+      `[profil] couleur de marque invalide : "${couleurHex}" (attendu #RRGGBB).`,
+    );
   }
   return Number.parseInt(chiffres, 16);
 }
@@ -605,7 +630,10 @@ export function couleurDeMarque(couleurHex: string): number {
  *   - une référence shell non substituée (`$AUTRE_VARIABLE`), Bun ne faisant pas
  *     l'expansion dans `.env`.
  */
-export function jetonDuProfil(profil: Profil, env: EnvLisible = Bun.env as EnvLisible): string {
+export function jetonDuProfil(
+  profil: Profil,
+  env: EnvLisible = Bun.env as EnvLisible,
+): string {
   const candidates = [profil.variableJeton, ...profil.variablesJetonSecours];
   for (const variable of candidates) {
     const valeur = (env[variable] ?? "").trim();

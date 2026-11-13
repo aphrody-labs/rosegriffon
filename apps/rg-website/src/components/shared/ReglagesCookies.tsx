@@ -11,7 +11,11 @@ export function ReglagesCookies() {
   return (
     <p className="mt-4 flex flex-wrap items-center gap-3">
       <span>{t("consent.policy.intro")}</span>
-      <Button variant="outline" className="min-h-11" onClick={ouvrirReglagesConsentement}>
+      <Button
+        variant="outline"
+        className="min-h-11"
+        onClick={ouvrirReglagesConsentement}
+      >
         {t("consent.manage")}
       </Button>
     </p>

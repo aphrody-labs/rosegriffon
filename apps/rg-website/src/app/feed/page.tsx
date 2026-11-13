@@ -1,7 +1,11 @@
 import { Search } from "lucide-react";
 import { Suspense } from "react";
 
-import { comptesDuFiltre, lireFiltre, parametresDuFiltre } from "@/lib/feed/comptes";
+import {
+  comptesDuFiltre,
+  lireFiltre,
+  parametresDuFiltre,
+} from "@/lib/feed/comptes";
 import { lireFil, rechercherX } from "@/lib/feed";
 
 import { SquelettePosts } from "./carte-post";
@@ -23,10 +27,12 @@ const BUDGET_SERVEUR_MS = 2000;
 
 function auPlus<T>(promesse: Promise<T>, ms: number): Promise<T | null> {
   let minuteur: ReturnType<typeof setTimeout> | undefined;
-  const delai = new Promise<null>(resoudre => {
+  const delai = new Promise<null>((resoudre) => {
     minuteur = setTimeout(() => resoudre(null), ms);
   });
-  return Promise.race([promesse.catch(() => null), delai]).finally(() => clearTimeout(minuteur));
+  return Promise.race([promesse.catch(() => null), delai]).finally(() =>
+    clearTimeout(minuteur),
+  );
 }
 
 async function ListeInitiale({
@@ -41,7 +47,10 @@ async function ListeInitiale({
   parametres: string;
 }) {
   // Le client retente seul ; la page reste utile sans les données du serveur.
-  const initial: PageFeed | null = await auPlus<PageFeed>(q ? rechercherX(q) : lireFil(filtre), BUDGET_SERVEUR_MS);
+  const initial: PageFeed | null = await auPlus<PageFeed>(
+    q ? rechercherX(q) : lireFil(filtre),
+    BUDGET_SERVEUR_MS,
+  );
   return q ? (
     <ResultatsRecherche key={q} q={q} initial={initial} />
   ) : (
@@ -65,11 +74,21 @@ export const metadata = {
 export default async function PageFeedInazuma({
   searchParams,
 }: {
-  searchParams: Promise<{ reseau?: string; groupe?: string; compte?: string; q?: string }>;
+  searchParams: Promise<{
+    reseau?: string;
+    groupe?: string;
+    compte?: string;
+    q?: string;
+  }>;
 }) {
   const brut = await searchParams;
   const q = brut.q?.trim().slice(0, 200) ?? "";
-  const filtre = lireFiltre({ get: nom => (nom in brut ? ((brut as Record<string, string | undefined>)[nom] ?? null) : null) });
+  const filtre = lireFiltre({
+    get: (nom) =>
+      nom in brut
+        ? ((brut as Record<string, string | undefined>)[nom] ?? null)
+        : null,
+  });
   const compte = filtre.compte ? comptesDuFiltre(filtre)[0] : undefined;
 
   const parametres = parametresDuFiltre(filtre);
@@ -78,51 +97,74 @@ export default async function PageFeedInazuma({
       <div className="mx-auto w-full max-w-[640px]">
         {!compte && (
           <header className="mb-4">
-            <h1 className="text-2xl leading-8 font-extrabold text-on-surface">Feed Inazuma Eleven</h1>
+            <h1 className="text-2xl leading-8 font-extrabold text-on-surface">
+              Feed Inazuma Eleven
+            </h1>
             <p className="text-sm leading-6 text-on-surface-variant">
-              Rose Griffon, les comptes officiels du jeu et LEVEL-5, sur X, Instagram, TikTok et YouTube.
+              Rose Griffon, les comptes officiels du jeu et LEVEL-5, sur X,
+              Instagram, TikTok et YouTube.
             </p>
           </header>
         )}
-        <search className="mb-3 block"><form action="/feed">
-          <label htmlFor="feed-recherche" className="sr-only">
-            Rechercher sur X
-          </label>
-          <div className="flex min-h-11 items-center gap-3 rounded-full border border-outline-variant bg-surface-container px-4 focus-within:ring-2 focus-within:ring-primary">
-            <Search className="size-[18px] shrink-0 text-on-surface-variant" aria-hidden />
-            <input
-              id="feed-recherche"
-              name="q"
-              type="search"
-              defaultValue={q}
-              placeholder="Rechercher sur X"
-              autoComplete="off"
-              maxLength={200}
-              className="min-h-11 min-w-0 flex-1 bg-transparent text-[15px] text-on-surface outline-none placeholder:text-on-surface-variant"
-            />
-          </div>
-        </form></search>
+        <search className="mb-3 block">
+          <form action="/feed">
+            <label htmlFor="feed-recherche" className="sr-only">
+              Rechercher sur X
+            </label>
+            <div className="flex min-h-11 items-center gap-3 rounded-full border border-outline-variant bg-surface-container px-4 focus-within:ring-2 focus-within:ring-primary">
+              <Search
+                className="size-[18px] shrink-0 text-on-surface-variant"
+                aria-hidden
+              />
+              <input
+                id="feed-recherche"
+                name="q"
+                type="search"
+                defaultValue={q}
+                placeholder="Rechercher sur X"
+                autoComplete="off"
+                maxLength={200}
+                className="min-h-11 min-w-0 flex-1 bg-transparent text-[15px] text-on-surface outline-none placeholder:text-on-surface-variant"
+              />
+            </div>
+          </form>
+        </search>
         <div className="mb-4">
           <Filtres filtre={filtre} />
         </div>
-        {q && <h2 className="mb-3 text-lg leading-6 font-bold text-on-surface">Résultats pour « {q} » sur X</h2>}
+        {q && (
+          <h2 className="mb-3 text-lg leading-6 font-bold text-on-surface">
+            Résultats pour « {q} » sur X
+          </h2>
+        )}
         <Suspense key={q || parametres} fallback={<SquelettePosts />}>
-          <ListeInitiale q={q} filtre={filtre} compte={compte} parametres={parametres} />
+          <ListeInitiale
+            q={q}
+            filtre={filtre}
+            compte={compte}
+            parametres={parametres}
+          />
         </Suspense>
         <details className="mt-6 rounded-2xl border border-outline-variant bg-surface-container-low text-sm leading-6 text-on-surface-variant">
           <summary className="flex min-h-11 cursor-pointer items-center px-4 font-medium text-on-surface">
             À propos des sources
           </summary>
           <div className="space-y-2 px-4 pb-4">
-            <p>X est relu en direct toutes les 30 secondes : profils, fils, recherche et conversations.</p>
             <p>
-              YouTube (flux public des chaînes), TikTok (les dernières vidéos publiques) et Instagram (la grille publique
-              des profils) sont synchronisés en tâche de fond toutes les 30 minutes. Sans connexion, TikTok et Instagram
-              se limitent à leurs publications les plus récentes, sans likes ni commentaires pour Instagram.
+              X est relu en direct toutes les 30 secondes : profils, fils,
+              recherche et conversations.
             </p>
             <p>
-              Aucun compte officiel d&apos;Inazuma Eleven ou de LEVEL-5 n&apos;est référencé sur Instagram ni TikTok ; leurs
-              vidéos officielles sont sur la chaîne YouTube LEVEL5ch.
+              YouTube (flux public des chaînes), TikTok (les dernières vidéos
+              publiques) et Instagram (la grille publique des profils) sont
+              synchronisés en tâche de fond toutes les 30 minutes. Sans
+              connexion, TikTok et Instagram se limitent à leurs publications
+              les plus récentes, sans likes ni commentaires pour Instagram.
+            </p>
+            <p>
+              Aucun compte officiel d&apos;Inazuma Eleven ou de LEVEL-5
+              n&apos;est référencé sur Instagram ni TikTok ; leurs vidéos
+              officielles sont sur la chaîne YouTube LEVEL5ch.
             </p>
           </div>
         </details>

@@ -13,17 +13,30 @@
  * `next/headers` and the RG session reader are replaced; the API is an
  * intercepted `fetch`; secrets are generated here.
  */
-import { afterAll, beforeAll, beforeEach, describe, expect, mock, test } from "bun:test";
+import {
+  afterAll,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  mock,
+  test,
+} from "bun:test";
 import { randomBytes } from "node:crypto";
 import { readFileSync } from "node:fs";
 
-type CookieWrite = { name: string; value: string; options: Record<string, unknown> };
+type CookieWrite = {
+  name: string;
+  value: string;
+  options: Record<string, unknown>;
+};
 const writes: CookieWrite[] = [];
 let rgSession: { user: { id: string } } | null = null;
 
 mock.module("next/headers", () => ({
   cookies: async () => ({
-    set: (name: string, value: string, options: Record<string, unknown>) => void writes.push({ name, value, options }),
+    set: (name: string, value: string, options: Record<string, unknown>) =>
+      void writes.push({ name, value, options }),
   }),
   headers: async () => new Headers(),
 }));
@@ -47,7 +60,12 @@ let apiResponse: () => Response = () => new Response(null, { status: 500 });
 let route: typeof import("./route");
 
 beforeAll(async () => {
-  for (const key of ["API_ADMIN_TOKEN", "ACHILLEA_API_URL", "NEXT_PUBLIC_ACHILLEA_API_URL"]) previous[key] = process.env[key];
+  for (const key of [
+    "API_ADMIN_TOKEN",
+    "ACHILLEA_API_URL",
+    "NEXT_PUBLIC_ACHILLEA_API_URL",
+  ])
+    previous[key] = process.env[key];
   process.env.API_ADMIN_TOKEN = ADMIN_TOKEN;
   process.env.ACHILLEA_API_URL = "https://api.test";
   delete process.env.NEXT_PUBLIC_ACHILLEA_API_URL;
@@ -82,29 +100,55 @@ describe("RG -> Achilléa bridge", () => {
 
   test("an RG session is exchanged by the API (internal bearer) and stored as the `token` cookie", async () => {
     rgSession = { user: { id: "rg-user-1" } };
-    apiResponse = () => Response.json({ token: "achillea.jwt.fixture", expiresIn: 2_592_000, user: { id: "223344556677889900" } });
+    apiResponse = () =>
+      Response.json({
+        token: "achillea.jwt.fixture",
+        expiresIn: 2_592_000,
+        user: { id: "223344556677889900" },
+      });
     const response = await route.POST();
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual({ id: "223344556677889900" });
     expect(apiCalls).toHaveLength(1);
     expect(apiCalls[0]!.url).toBe("https://api.test/v1/auth/session/exchange");
-    expect(new Headers(apiCalls[0]!.init?.headers).get("authorization")).toBe(`Bearer ${ADMIN_TOKEN}`);
-    expect(JSON.parse(String(apiCalls[0]!.init?.body))).toEqual({ betterAuthUserId: "rg-user-1" });
+    expect(new Headers(apiCalls[0]!.init?.headers).get("authorization")).toBe(
+      `Bearer ${ADMIN_TOKEN}`,
+    );
+    expect(JSON.parse(String(apiCalls[0]!.init?.body))).toEqual({
+      betterAuthUserId: "rg-user-1",
+    });
     expect(writes).toEqual([
       {
         name: "token",
         value: "achillea.jwt.fixture",
-        options: { domain: undefined, httpOnly: true, path: "/", sameSite: "lax", secure: false, maxAge: 2_592_000 },
+        options: {
+          domain: undefined,
+          httpOnly: true,
+          path: "/",
+          sameSite: "lax",
+          secure: false,
+          maxAge: 2_592_000,
+        },
       },
     ]);
   });
 
   test("an RG account without Discord: 409 and any stale Achilléa cookie is erased", async () => {
     rgSession = { user: { id: "rg-email-only" } };
-    apiResponse = () => Response.json({ message: "Discord account is not linked" }, { status: 409 });
+    apiResponse = () =>
+      Response.json(
+        { message: "Discord account is not linked" },
+        { status: 409 },
+      );
     const response = await route.POST();
     expect(response.status).toBe(409);
-    expect(writes).toEqual([{ name: "token", value: "", options: expect.objectContaining({ maxAge: 0, path: "/" }) }]);
+    expect(writes).toEqual([
+      {
+        name: "token",
+        value: "",
+        options: expect.objectContaining({ maxAge: 0, path: "/" }),
+      },
+    ]);
   });
 
   test("an API failure opens no Achilléa session", async () => {
@@ -128,12 +172,17 @@ describe("RG -> Achilléa bridge", () => {
   test("DELETE erases only the Achilléa cookie", async () => {
     const response = await route.DELETE();
     expect(response.status).toBe(200);
-    expect(writes.map(write => [write.name, write.value, write.options.maxAge])).toEqual([["token", "", 0]]);
+    expect(
+      writes.map((write) => [write.name, write.value, write.options.maxAge]),
+    ).toEqual([["token", "", 0]]);
   });
 });
 
 test("regression: the Patreon admin page advertises the callback Better Auth 1.7 really uses", () => {
-  const page = readFileSync(new URL("../../../admin/patreon/page.tsx", import.meta.url), "utf8");
+  const page = readFileSync(
+    new URL("../../../admin/patreon/page.tsx", import.meta.url),
+    "utf8",
+  );
   expect(page).toContain('absoluteUrl("/api/auth/callback/patreon")');
   expect(page).not.toContain("/api/auth/oauth2/callback/patreon");
 });

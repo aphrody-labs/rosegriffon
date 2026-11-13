@@ -15,7 +15,12 @@
 
 import { afterEach, describe, expect, test } from "bun:test";
 
-import { configureAzalee, hasPostgresConfiguration, resetAzaleeConfig, resolveMirrorPath } from "../src/config";
+import {
+  configureAzalee,
+  hasPostgresConfiguration,
+  resetAzaleeConfig,
+  resolveMirrorPath,
+} from "../src/config";
 import { createAzaleeData, inspectLocalData } from "../src/server/source";
 import { setDatabaseProvider } from "../src/db/provider";
 import type { AzaleeTeamList } from "../src/remote/index";
@@ -24,7 +29,9 @@ import type { AzaleeTeamList } from "../src/remote/index";
 const REMOTE = "https://api.example.test/azalee";
 
 /** Charge utile renvoyée par le double de `fetch`, reconnaissable dans les assertions. */
-const REMOTE_TEAMS = [{ id: "0xDISTANT", name: "Équipe distante" }] as unknown as AzaleeTeamList;
+const REMOTE_TEAMS = [
+  { id: "0xDISTANT", name: "Équipe distante" },
+] as unknown as AzaleeTeamList;
 
 /** Double de `fetch` qui enregistre les URL appelées et répond du JSON canné. */
 function stubFetch(payload: unknown = REMOTE_TEAMS): {
@@ -33,7 +40,13 @@ function stubFetch(payload: unknown = REMOTE_TEAMS): {
 } {
   const urls: string[] = [];
   const impl = (input: Request | string | URL) => {
-    urls.push(typeof input === "string" ? input : input instanceof URL ? input.href : input.url);
+    urls.push(
+      typeof input === "string"
+        ? input
+        : input instanceof URL
+          ? input.href
+          : input.url,
+    );
     return Promise.resolve(Response.json(payload));
   };
   return { fetch: impl as unknown as typeof globalThis.fetch, urls };
@@ -56,7 +69,9 @@ describe("inspectLocalData — état des sources locales", () => {
     const local = inspectLocalData();
     expect(typeof local.available).toBe("boolean");
     expect(local.reason).toBeString();
-    expect(local.mirror === null || local.mirror.endsWith(".sqlite")).toBe(true);
+    expect(local.mirror === null || local.mirror.endsWith(".sqlite")).toBe(
+      true,
+    );
     expect(local.available).toBe(local.injectedProvider || hasPostgres);
   });
 
@@ -79,36 +94,57 @@ describe("inspectLocalData — état des sources locales", () => {
 });
 
 describe("createAzaleeData — données locales présentes", () => {
-  test.skipIf(!hasPostgres)("mode auto : source locale, zéro appel réseau", async () => {
-    const data = createAzaleeData({
-      baseUrl: REMOTE,
-      fetch: forbiddenFetch,
-      fallbackOnError: false,
-    });
-    expect(data.source).toBe("local");
-    expect(data.reason).toContain("source locale retenue");
-    const health = await data.health();
-    expect(health.ok).toBe(true);
-    expect(health.mirror).toBe(resolveMirrorPath());
-    expect(data.isDegraded()).toBe(false);
-  });
+  test.skipIf(!hasPostgres)(
+    "mode auto : source locale, zéro appel réseau",
+    async () => {
+      const data = createAzaleeData({
+        baseUrl: REMOTE,
+        fetch: forbiddenFetch,
+        fallbackOnError: false,
+      });
+      expect(data.source).toBe("local");
+      expect(data.reason).toContain("source locale retenue");
+      const health = await data.health();
+      expect(health.ok).toBe(true);
+      expect(health.mirror).toBe(resolveMirrorPath());
+      expect(data.isDegraded()).toBe(false);
+    },
+  );
 
-  test.skipIf(!hasPostgres)("le préfixe de chemin de la base distante est retiré côté local", async () => {
-    // `https://api.example.test/azalee` → la passerelle retire `/azalee` ;
-    // sans ce retrait, la route locale cherchée serait `/azalee/api/teams`.
-    const data = createAzaleeData({ mode: "local", baseUrl: REMOTE, fetch: forbiddenFetch });
-    const teams = await data.teams();
-    expect(Array.isArray(teams)).toBe(true);
-    expect(teams.length).toBeGreaterThan(100);
-  });
+  test.skipIf(!hasPostgres)(
+    "le préfixe de chemin de la base distante est retiré côté local",
+    async () => {
+      // `https://api.example.test/azalee` → la passerelle retire `/azalee` ;
+      // sans ce retrait, la route locale cherchée serait `/azalee/api/teams`.
+      const data = createAzaleeData({
+        mode: "local",
+        baseUrl: REMOTE,
+        fetch: forbiddenFetch,
+      });
+      const teams = await data.teams();
+      expect(Array.isArray(teams)).toBe(true);
+      expect(teams.length).toBeGreaterThan(100);
+    },
+  );
 
-  test.skipIf(!hasPostgres)("la surface de lecture est celle du client distant", () => {
-    const data = createAzaleeData({ mode: "local" });
-    for (const method of ["characters", "skills", "teams", "cpkList", "text", "search", "health"] as const) {
-      expect(typeof data[method]).toBe("function");
-    }
-    expect(data.baseUrl).toBeString();
-  });
+  test.skipIf(!hasPostgres)(
+    "la surface de lecture est celle du client distant",
+    () => {
+      const data = createAzaleeData({ mode: "local" });
+      for (const method of [
+        "characters",
+        "skills",
+        "teams",
+        "cpkList",
+        "text",
+        "search",
+        "health",
+      ] as const) {
+        expect(typeof data[method]).toBe("function");
+      }
+      expect(data.baseUrl).toBeString();
+    },
+  );
 });
 
 describe("createAzaleeData — données locales absentes", () => {
@@ -125,7 +161,11 @@ describe("createAzaleeData — données locales absentes", () => {
 
   test("mode remote imposé : la source locale n'est jamais consultée", async () => {
     const stub = stubFetch();
-    const data = createAzaleeData({ mode: "remote", baseUrl: REMOTE, fetch: stub.fetch });
+    const data = createAzaleeData({
+      mode: "remote",
+      baseUrl: REMOTE,
+      fetch: stub.fetch,
+    });
     expect(data.source).toBe("remote");
     expect(data.reason).toContain("imposée par l'appelant");
     await data.characters({ q: "Mark", limit: 2 });
@@ -141,7 +181,11 @@ describe("createAzaleeData — base locale hors ligne", () => {
     }) as never);
 
     const stub = stubFetch();
-    const data = createAzaleeData({ baseUrl: REMOTE, fetch: stub.fetch, attempts: 1 });
+    const data = createAzaleeData({
+      baseUrl: REMOTE,
+      fetch: stub.fetch,
+      attempts: 1,
+    });
 
     expect(data.source).toBe("local");
     expect(data.isDegraded()).toBe(false);

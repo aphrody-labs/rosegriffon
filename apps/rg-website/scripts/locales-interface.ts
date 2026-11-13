@@ -10,7 +10,16 @@ import { join } from "node:path";
 import { cleInterface } from "../src/lib/i18n/cles";
 
 const racine = join(import.meta.dir, "..");
-const complet = (await Bun.file(join(racine, "public/locales/fr.json")).json()) as Record<string, string>;
-const interfaceSeule = Object.fromEntries(Object.entries(complet).filter(([cle]) => cleInterface(cle)));
-await Bun.write(join(racine, "src/lib/i18n/fr-interface.json"), `${JSON.stringify(interfaceSeule, null, "\t")}\n`);
-console.log(`fr-interface.json : ${Object.keys(interfaceSeule).length} clés sur ${Object.keys(complet).length}`);
+const complet = (await Bun.file(
+  join(racine, "public/locales/fr.json"),
+).json()) as Record<string, string>;
+const interfaceSeule = Object.fromEntries(
+  Object.entries(complet).filter(([cle]) => cleInterface(cle)),
+);
+await Bun.write(
+  join(racine, "src/lib/i18n/fr-interface.json"),
+  `${JSON.stringify(interfaceSeule, null, "\t")}\n`,
+);
+console.log(
+  `fr-interface.json : ${Object.keys(interfaceSeule).length} clés sur ${Object.keys(complet).length}`,
+);

@@ -5,7 +5,12 @@ import { RG_GUILD_ID } from "@rosegriffon/types/discord";
 import { getPgPool } from "@/lib/db/pg";
 import { SITE_URL } from "@/lib/site-url";
 
-import { API_DISCORD, type GagnantAnnonce, imageAbsolue, origine } from "./annonce-discord-charge";
+import {
+  API_DISCORD,
+  type GagnantAnnonce,
+  imageAbsolue,
+  origine,
+} from "./annonce-discord-charge";
 import type { SourceTirage } from "./tirage";
 import { urlMessageDiscord, urlPostX } from "./types";
 
@@ -41,7 +46,7 @@ export {
 } from "./annonce-discord-charge";
 
 function dormir(ms: number): Promise<void> {
-  return new Promise(resoudre => setTimeout(resoudre, ms));
+  return new Promise((resoudre) => setTimeout(resoudre, ms));
 }
 
 /**
@@ -56,7 +61,10 @@ function dormir(ms: number): Promise<void> {
  * réessayer à l'aveugle et se faire fermer la route — et une seule réémission
  * suffit, l'admin étant le seul écrivain de ce salon.
  */
-export async function posterAnnonce(salonId: string, charge: Record<string, unknown>): Promise<{ id: string }> {
+export async function posterAnnonce(
+  salonId: string,
+  charge: Record<string, unknown>,
+): Promise<{ id: string }> {
   const jeton = process.env.DISCORD_BOT_TOKEN;
   if (!jeton) {
     throw new Error(
@@ -79,20 +87,28 @@ export async function posterAnnonce(salonId: string, charge: Record<string, unkn
 
   let reponse = await envoyer();
   if (reponse.status === 429) {
-    const corps = (await reponse.json().catch(() => ({}))) as { retry_after?: number };
+    const corps = (await reponse.json().catch(() => ({}))) as {
+      retry_after?: number;
+    };
     // `retry_after` est en secondes décimales ; la marge de 250 ms évite d'être
     // refusé une seconde fois pour quelques millisecondes d'avance.
-    await dormir(Math.min(8000, Math.ceil((corps.retry_after ?? 1) * 1000) + 250));
+    await dormir(
+      Math.min(8000, Math.ceil((corps.retry_after ?? 1) * 1000) + 250),
+    );
     reponse = await envoyer();
   }
 
   if (!reponse.ok) {
     const texte = await reponse.text().catch(() => "");
-    throw new Error(`Discord a refusé l'annonce (${reponse.status}) : ${texte.slice(0, 300)}`);
+    throw new Error(
+      `Discord a refusé l'annonce (${reponse.status}) : ${texte.slice(0, 300)}`,
+    );
   }
   const cree = (await reponse.json()) as { id?: string };
   if (!cree.id) {
-    throw new Error("Discord a accepté l'annonce sans rendre d'identifiant de message : état incertain.");
+    throw new Error(
+      "Discord a accepté l'annonce sans rendre d'identifiant de message : état incertain.",
+    );
   }
   return { id: cree.id };
 }
@@ -130,7 +146,9 @@ export async function verifierSalonAnnonce(
   salonTest: string,
 ): Promise<SalonAnnonce> {
   if (!/^\d{15,25}$/.test(salonId)) {
-    throw new Error(`« ${salonId} » n'est pas un identifiant de salon Discord.`);
+    throw new Error(
+      `« ${salonId} » n'est pas un identifiant de salon Discord.`,
+    );
   }
   if (salonId === salonTest) {
     // Le salon de test n'est PAS sous veille (il n'est pas dans
@@ -169,7 +187,12 @@ export async function verifierSalonAnnonce(
         `(type = ${String(salon.type)}, suivi = ${String(salon.suivi)}) : annonce refusée.`,
     );
   }
-  return { estTest: false, guildId: salon.guild_id, id: salon.channel_id, nom: salon.name };
+  return {
+    estTest: false,
+    guildId: salon.guild_id,
+    id: salon.channel_id,
+    nom: salon.name,
+  };
 }
 
 /* ── RASSEMBLEMENT DES GAGNANTS ───────────────────────────────────────────── */
@@ -207,69 +230,112 @@ export async function rassemblerGagnantsAnnonce(
     return [];
   }
   const pool = getPgPool();
-  const idsX = gagnants.filter(g => g.creation.source === "x").map(g => g.creation.identifiant);
-  const idsDiscord = gagnants.filter(g => g.creation.source === "discord").map(g => g.creation.identifiant);
-  const idsInstagram = gagnants.filter(g => g.creation.source === "instagram").map(g => g.creation.identifiant);
-  const oeuvreIds = gagnants.map(g => g.oeuvreId).filter((id): id is string => Boolean(id));
-  const cles = gagnants.map(g => g.cle);
+  const idsX = gagnants
+    .filter((g) => g.creation.source === "x")
+    .map((g) => g.creation.identifiant);
+  const idsDiscord = gagnants
+    .filter((g) => g.creation.source === "discord")
+    .map((g) => g.creation.identifiant);
+  const idsInstagram = gagnants
+    .filter((g) => g.creation.source === "instagram")
+    .map((g) => g.creation.identifiant);
+  const oeuvreIds = gagnants
+    .map((g) => g.oeuvreId)
+    .filter((id): id is string => Boolean(id));
+  const cles = gagnants.map((g) => g.cle);
 
-  const [postsX, postsDiscord, postsInstagram, oeuvres, participants] = await Promise.all([
-    idsX.length === 0
-      ? Promise.resolve({ rows: [] as Array<{ tweet_id: string; author_username: string | null }> })
-      : pool.query<{ tweet_id: string; author_username: string | null }>(
-          `select p.tweet_id, t.author_username
+  const [postsX, postsDiscord, postsInstagram, oeuvres, participants] =
+    await Promise.all([
+      idsX.length === 0
+        ? Promise.resolve({
+            rows: [] as Array<{
+              tweet_id: string;
+              author_username: string | null;
+            }>,
+          })
+        : pool.query<{ tweet_id: string; author_username: string | null }>(
+            `select p.tweet_id, t.author_username
 					   from public.x_campagne_posts p
 					   join public.tweets t on t.id = p.tweet_id
 					  where p.campagne_slug = $1 and p.tweet_id = any($2::text[]) and not p.masque`,
-          [slug, idsX],
-        ),
-    idsDiscord.length === 0
-      ? Promise.resolve({ rows: [] as Array<{ message_id: string; channel_id: string; guild_id: string | null }> })
-      : pool.query<{ message_id: string; channel_id: string; guild_id: string | null }>(
-          `select d.message_id, m.channel_id, m.guild_id
+            [slug, idsX],
+          ),
+      idsDiscord.length === 0
+        ? Promise.resolve({
+            rows: [] as Array<{
+              message_id: string;
+              channel_id: string;
+              guild_id: string | null;
+            }>,
+          })
+        : pool.query<{
+            message_id: string;
+            channel_id: string;
+            guild_id: string | null;
+          }>(
+            `select d.message_id, m.channel_id, m.guild_id
 					   from public.campagne_creations_discord d
 					   join public.discord_messages m on m.message_id = d.message_id
 					   join public.discord_channels s on s.channel_id = m.channel_id
 					  where d.campagne_slug = $1 and d.message_id = any($2::text[])
 					    and not d.masque and m.deleted_at is null and s.suivi`,
-          [slug, idsDiscord],
-        ),
-    idsInstagram.length === 0
-      ? Promise.resolve({ rows: [] as Array<{ shortcode: string; permalink: string | null }> })
-      : pool.query<{ shortcode: string; permalink: string | null }>(
-          `select i.shortcode, i.permalink
+            [slug, idsDiscord],
+          ),
+      idsInstagram.length === 0
+        ? Promise.resolve({
+            rows: [] as Array<{ shortcode: string; permalink: string | null }>,
+          })
+        : pool.query<{ shortcode: string; permalink: string | null }>(
+            `select i.shortcode, i.permalink
 					   from public.campagne_creations_instagram i
 					  where i.campagne_slug = $1 and i.shortcode = any($2::text[]) and not i.masque`,
-          [slug, idsInstagram],
-        ),
-    oeuvreIds.length === 0
-      ? Promise.resolve({
-          rows: [] as Array<{ oeuvre_id: string; image_master_url: string | null; image_master_chemin: string | null }>,
-        })
-      : pool.query<{ oeuvre_id: string; image_master_url: string | null; image_master_chemin: string | null }>(
-          `select o.oeuvre_id, o.image_master_url, o.image_master_chemin
+            [slug, idsInstagram],
+          ),
+      oeuvreIds.length === 0
+        ? Promise.resolve({
+            rows: [] as Array<{
+              oeuvre_id: string;
+              image_master_url: string | null;
+              image_master_chemin: string | null;
+            }>,
+          })
+        : pool.query<{
+            oeuvre_id: string;
+            image_master_url: string | null;
+            image_master_chemin: string | null;
+          }>(
+            `select o.oeuvre_id, o.image_master_url, o.image_master_chemin
 					   from public.x_campagne_oeuvres o
 					  where o.campagne_slug = $1 and o.oeuvre_id = any($2::text[])`,
-          [slug, oeuvreIds],
-        ),
-    pool.query<{ cle: string; identifiants: unknown }>(
-      `select p.cle, p.identifiants
+            [slug, oeuvreIds],
+          ),
+      pool.query<{ cle: string; identifiants: unknown }>(
+        `select p.cle, p.identifiants
 			   from public.x_campagne_participants p
 			  where p.campagne_slug = $1 and p.cle = any($2::text[])`,
-      [slug, cles],
-    ),
-  ]);
+        [slug, cles],
+      ),
+    ]);
 
-  const pseudoX = new Map(postsX.rows.map(l => [l.tweet_id, l.author_username]));
-  const salonDiscord = new Map(postsDiscord.rows.map(l => [l.message_id, l]));
-  const permalienInstagram = new Map(postsInstagram.rows.map(l => [l.shortcode, l.permalink]));
+  const pseudoX = new Map(
+    postsX.rows.map((l) => [l.tweet_id, l.author_username]),
+  );
+  const salonDiscord = new Map(postsDiscord.rows.map((l) => [l.message_id, l]));
+  const permalienInstagram = new Map(
+    postsInstagram.rows.map((l) => [l.shortcode, l.permalink]),
+  );
   const masterParOeuvre = new Map(postsMaster(oeuvres.rows));
-  const floconParCle = new Map(participants.rows.map(l => [l.cle, floconDiscord(l.cle, l.identifiants)]));
+  const floconParCle = new Map(
+    participants.rows.map((l) => [l.cle, floconDiscord(l.cle, l.identifiants)]),
+  );
 
   return gagnants
-    .map(gagnant => ({
-      discordId: floconParCle.get(gagnant.cle) ?? floconDiscord(gagnant.cle, null),
-      image: gagnant.oeuvreId ? (masterParOeuvre.get(gagnant.oeuvreId) ?? null) : null,
+    .map((gagnant) => ({
+      discordId:
+        floconParCle.get(gagnant.cle) ?? floconDiscord(gagnant.cle, null),
+      image: gagnant.oeuvreId
+        ? (masterParOeuvre.get(gagnant.oeuvreId) ?? null)
+        : null,
       lien: lienCreation(gagnant, pseudoX, salonDiscord, permalienInstagram),
       lot: gagnant.lot,
       pseudo: gagnant.pseudoAffichage,
@@ -280,9 +346,16 @@ export async function rassemblerGagnantsAnnonce(
 }
 
 function postsMaster(
-  lignes: ReadonlyArray<{ oeuvre_id: string; image_master_url: string | null; image_master_chemin: string | null }>,
+  lignes: ReadonlyArray<{
+    oeuvre_id: string;
+    image_master_url: string | null;
+    image_master_chemin: string | null;
+  }>,
 ): Array<[string, string | null]> {
-  return lignes.map(ligne => [ligne.oeuvre_id, imageAbsolue(ligne.image_master_url, ligne.image_master_chemin)]);
+  return lignes.map((ligne) => [
+    ligne.oeuvre_id,
+    imageAbsolue(ligne.image_master_url, ligne.image_master_chemin),
+  ]);
 }
 
 /**
@@ -298,7 +371,11 @@ function floconDiscord(cle: string, identifiants: unknown): string | null {
     const flocon = cle.slice("discord:".length);
     return /^\d{15,25}$/.test(flocon) ? flocon : null;
   }
-  if (identifiants && typeof identifiants === "object" && !Array.isArray(identifiants)) {
+  if (
+    identifiants &&
+    typeof identifiants === "object" &&
+    !Array.isArray(identifiants)
+  ) {
     const brut = (identifiants as Record<string, unknown>).discord_id;
     if (typeof brut === "string" && /^\d{15,25}$/.test(brut)) {
       return brut;
@@ -319,19 +396,28 @@ function floconDiscord(cle: string, identifiants: unknown): string | null {
 function lienCreation(
   gagnant: GagnantATrouver,
   pseudoX: ReadonlyMap<string, string | null>,
-  salonDiscord: ReadonlyMap<string, { channel_id: string; guild_id: string | null }>,
+  salonDiscord: ReadonlyMap<
+    string,
+    { channel_id: string; guild_id: string | null }
+  >,
   permalienInstagram: ReadonlyMap<string, string | null>,
 ): string {
   const { identifiant, source } = gagnant.creation;
   switch (source) {
     case "x": {
       const pseudo = pseudoX.get(identifiant);
-      return pseudo ? urlPostX(pseudo, identifiant) : `https://x.com/i/status/${identifiant}`;
+      return pseudo
+        ? urlPostX(pseudo, identifiant)
+        : `https://x.com/i/status/${identifiant}`;
     }
     case "discord": {
       const salon = salonDiscord.get(identifiant);
       return salon
-        ? urlMessageDiscord(salon.guild_id ?? RG_GUILD_ID, salon.channel_id, identifiant)
+        ? urlMessageDiscord(
+            salon.guild_id ?? RG_GUILD_ID,
+            salon.channel_id,
+            identifiant,
+          )
         : `${origine()}/iergday`;
     }
     case "instagram": {

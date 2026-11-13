@@ -37,7 +37,12 @@ export function apiSuccess<T>(data: T, status = 200) {
 /**
  * Crée une réponse d'erreur standardisée
  */
-export function apiError(message: string, status = 500, code?: string, details?: unknown) {
+export function apiError(
+  message: string,
+  status = 500,
+  code?: string,
+  details?: unknown,
+) {
   return NextResponse.json<ApiErrorResponse>(
     {
       error: {
@@ -61,7 +66,10 @@ export function handleApiError(error: unknown) {
 
   if (error instanceof Error) {
     // Ne pas exposer les détails des erreurs en production
-    const message = process.env.NODE_ENV === "development" ? error.message : "Une erreur est survenue";
+    const message =
+      process.env.NODE_ENV === "development"
+        ? error.message
+        : "Une erreur est survenue";
 
     return apiError(message, 500, "INTERNAL_ERROR", error.stack);
   }
@@ -72,7 +80,9 @@ export function handleApiError(error: unknown) {
 /**
  * Wrapper pour gérer les erreurs dans les routes API
  */
-export function withErrorHandler<T extends unknown[]>(handler: (...args: T) => Promise<NextResponse>) {
+export function withErrorHandler<T extends unknown[]>(
+  handler: (...args: T) => Promise<NextResponse>,
+) {
   return async (...args: T): Promise<NextResponse> => {
     try {
       return await handler(...args);

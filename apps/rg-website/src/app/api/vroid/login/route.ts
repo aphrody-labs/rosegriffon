@@ -10,7 +10,12 @@
  */
 import { NextResponse } from "next/server";
 import { lireConfigVroid } from "@/lib/vroid/config";
-import { genererCodeChallenge, genererCodeVerifier, genererState, urlAutorisation } from "@/lib/vroid/oauth";
+import {
+  genererCodeChallenge,
+  genererCodeVerifier,
+  genererState,
+  urlAutorisation,
+} from "@/lib/vroid/oauth";
 import { poserFluxAutorisation } from "@/lib/vroid/session";
 
 export const runtime = "nodejs";
@@ -25,7 +30,10 @@ function retourSur(brut: string | null): string {
 export async function GET(requete: Request): Promise<Response> {
   const config = lireConfigVroid();
   if (!config) {
-    return NextResponse.json({ erreur: "VRoid Hub n'est pas configuré sur cette instance." }, { status: 503 });
+    return NextResponse.json(
+      { erreur: "VRoid Hub n'est pas configuré sur cette instance." },
+      { status: 503 },
+    );
   }
 
   const url = new URL(requete.url);
@@ -38,5 +46,7 @@ export async function GET(requete: Request): Promise<Response> {
     retourVers: retourSur(url.searchParams.get("retour")),
   });
 
-  return NextResponse.redirect(urlAutorisation(config, state, await genererCodeChallenge(codeVerifier)));
+  return NextResponse.redirect(
+    urlAutorisation(config, state, await genererCodeChallenge(codeVerifier)),
+  );
 }

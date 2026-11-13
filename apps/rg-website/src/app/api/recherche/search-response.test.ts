@@ -6,12 +6,15 @@ describe("GET /api/recherche", () => {
     const logError = console.error;
     console.error = mock(() => {});
     try {
-      const response = await respondreRecherche(new Request("http://localhost/api/recherche?q=axel"), {
-        rg: async () => {
-          throw new Error("database unavailable");
+      const response = await respondreRecherche(
+        new Request("http://localhost/api/recherche?q=axel"),
+        {
+          rg: async () => {
+            throw new Error("database unavailable");
+          },
+          inagle: async () => [],
         },
-        inagle: async () => [],
-      });
+      );
       expect(response.status).toBe(503);
       expect(await response.json()).toMatchObject({
         erreur: "Recherche temporairement indisponible",
@@ -23,10 +26,13 @@ describe("GET /api/recherche", () => {
 
   test("une requête trop courte retourne une liste vide sans interroger la base", async () => {
     const executer = mock(async () => []);
-    const response = await respondreRecherche(new Request("http://localhost/api/recherche?q=a"), {
-      rg: executer,
-      inagle: executer,
-    });
+    const response = await respondreRecherche(
+      new Request("http://localhost/api/recherche?q=a"),
+      {
+        rg: executer,
+        inagle: executer,
+      },
+    );
     expect(response.status).toBe(200);
     expect(await response.json()).toMatchObject({ resultats: [] });
     expect(executer).not.toHaveBeenCalled();

@@ -80,26 +80,26 @@ Le pipeline unifié est une chaîne unique. Pour chaque étape, l'implémentatio
 - Le miroir wiki et l'invalidation ISR sont désormais explicitement séparés :
   `niers` publie le fichier, Azalée invalide ses pages via une route protégée.
 
-| Capacité | Référence actuelle | Portage Rust (niers) | Statut |
-| --- | --- | --- | --- |
-| Téléchargement Steam natif | iecode `Steam/Content/` (SteamKit2) | `nie-steam` (steamroom) | FAIT (33 tests, fidélité C# vérifiée) |
-| CPK / @UTF / CRILAYLA | iecode `Formats/Criware/CriFs/` | `nie-formats` cpk.rs/crilayla.rs | FAIT (validé byte-à-byte, 300/300 g4tx) |
-| g4tx/g4md/g4mg/g4pk/g4ra/g4sk | iecode `Formats/Level5/` | `nie-formats` g4*.rs | FAIT (g4mg TODO `G4mgParser.cs:253` côté C#) |
-| nxtch deswizzle (Tegra X1 GOB) | iecode `Formats/Level5/` NXTCH | `nie-formats` nxtch.rs | INCOMPLET (off-by-4, hallucination documentée) |
-| cfg.bin RDBN (binaire chiffré) | iecode `Formats/Level5/CfgBin` + Rdbn | `nie-formats` cfgbin.rs | FAIT |
-| cfg.bin (JSON déjà extrait) | inagle `core/parser.ts`, `cfgbin-db.ts` | `nie-data` cfgbin.rs | port (vues minimales sur JSON) |
-| Modèles données (skill/item/growth/exp/passive) | inagle `src/parsers/*` | `nie-data` skill/item/growth/exp/passive.rs | 5/7 FAIT (validés byte) |
-| chara_param + aura | projections SQL `inagle_characters` + `inagle_*` aura | `nie-data` chara_param.rs / aura.rs | runtime SQL unifié ; port Rust encore séparé |
-| Calcul de stats (croissance 3 segments) | inagle `stat-calculator.ts` | `nie-core` stats.rs/growth.rs/exp.rs **ET** `nie-data` growth.rs/exp.rs | FAIT mais **triple implémentation** (TS + nie-core + nie-data) |
-| Logique de match/gameplay | (pas de C#/TS — RE Ghidra) | `nie-core` (13 modules) | partiel (porté du C décompilé) |
-| GameData persos/skills/passives | iecode `GameData/`/`Game/` **et** inagle (domaine riche) | `nie-data` | iecode délègue à inagle (reconnu) ; 7 types max en C# |
-| Catalogue de formats (magics/champs) | iecode `FormatCatalog` (SOURCE) | `nie-seed` format_catalog.rs (ingest) **+** formats.rs (codé-en-dur redondant) | SOURCE iecode ; doublon à supprimer côté niers |
-| Audio Criware (HCA/ACB/AWB/ADX/USM) | iecode `Audio/` | aucun module | NON PORTÉ |
-| Shaders DXBC / FXBIN | iecode `Formats/` shaders | aucun module | NON PORTÉ |
-| Lua (désasm bytecode, runtime) | iecode `Scripting/Lua/`, `Formats/Lua/` | aucun module | NON PORTÉ |
-| Menu G4PKM / OBJB | iecode `Formats/Menu/` | aucun module | NON PORTÉ |
-| Export PNG menu pour CDN | iecode `Cdn/MenuPngService` | aucun module | NON PORTÉ (prod C#) |
-| Push Supabase (tables inagle_*) | inagle `cli-push.ts` (+ push-categories/lua) | aucun module | NON PORTÉ (prod TS, seul producteur) |
+| Capacité                                        | Référence actuelle                                       | Portage Rust (niers)                                                           | Statut                                                         |
+| ----------------------------------------------- | -------------------------------------------------------- | ------------------------------------------------------------------------------ | -------------------------------------------------------------- |
+| Téléchargement Steam natif                      | iecode `Steam/Content/` (SteamKit2)                      | `nie-steam` (steamroom)                                                        | FAIT (33 tests, fidélité C# vérifiée)                          |
+| CPK / @UTF / CRILAYLA                           | iecode `Formats/Criware/CriFs/`                          | `nie-formats` cpk.rs/crilayla.rs                                               | FAIT (validé byte-à-byte, 300/300 g4tx)                        |
+| g4tx/g4md/g4mg/g4pk/g4ra/g4sk                   | iecode `Formats/Level5/`                                 | `nie-formats` g4*.rs                                                           | FAIT (g4mg TODO `G4mgParser.cs:253` côté C#)                   |
+| nxtch deswizzle (Tegra X1 GOB)                  | iecode `Formats/Level5/` NXTCH                           | `nie-formats` nxtch.rs                                                         | INCOMPLET (off-by-4, hallucination documentée)                 |
+| cfg.bin RDBN (binaire chiffré)                  | iecode `Formats/Level5/CfgBin` + Rdbn                    | `nie-formats` cfgbin.rs                                                        | FAIT                                                           |
+| cfg.bin (JSON déjà extrait)                     | inagle `core/parser.ts`, `cfgbin-db.ts`                  | `nie-data` cfgbin.rs                                                           | port (vues minimales sur JSON)                                 |
+| Modèles données (skill/item/growth/exp/passive) | inagle `src/parsers/*`                                   | `nie-data` skill/item/growth/exp/passive.rs                                    | 5/7 FAIT (validés byte)                                        |
+| chara_param + aura                              | projections SQL `inagle_characters` + `inagle_*` aura    | `nie-data` chara_param.rs / aura.rs                                            | runtime SQL unifié ; port Rust encore séparé                   |
+| Calcul de stats (croissance 3 segments)         | inagle `stat-calculator.ts`                              | `nie-core` stats.rs/growth.rs/exp.rs **ET** `nie-data` growth.rs/exp.rs        | FAIT mais **triple implémentation** (TS + nie-core + nie-data) |
+| Logique de match/gameplay                       | (pas de C#/TS — RE Ghidra)                               | `nie-core` (13 modules)                                                        | partiel (porté du C décompilé)                                 |
+| GameData persos/skills/passives                 | iecode `GameData/`/`Game/` **et** inagle (domaine riche) | `nie-data`                                                                     | iecode délègue à inagle (reconnu) ; 7 types max en C#          |
+| Catalogue de formats (magics/champs)            | iecode `FormatCatalog` (SOURCE)                          | `nie-seed` format_catalog.rs (ingest) **+** formats.rs (codé-en-dur redondant) | SOURCE iecode ; doublon à supprimer côté niers                 |
+| Audio Criware (HCA/ACB/AWB/ADX/USM)             | iecode `Audio/`                                          | aucun module                                                                   | NON PORTÉ                                                      |
+| Shaders DXBC / FXBIN                            | iecode `Formats/` shaders                                | aucun module                                                                   | NON PORTÉ                                                      |
+| Lua (désasm bytecode, runtime)                  | iecode `Scripting/Lua/`, `Formats/Lua/`                  | aucun module                                                                   | NON PORTÉ                                                      |
+| Menu G4PKM / OBJB                               | iecode `Formats/Menu/`                                   | aucun module                                                                   | NON PORTÉ                                                      |
+| Export PNG menu pour CDN                        | iecode `Cdn/MenuPngService`                              | aucun module                                                                   | NON PORTÉ (prod C#)                                            |
+| Push Supabase (tables inagle_*)                 | inagle `cli-push.ts` (+ push-categories/lua)             | aucun module                                                                   | NON PORTÉ (prod TS, seul producteur)                           |
 
 ### Duplications internes (à résoudre avant tout schéma partagé)
 

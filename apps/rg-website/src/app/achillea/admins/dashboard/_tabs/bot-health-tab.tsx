@@ -1,10 +1,30 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
-import { Button, Card, CardContent, CardHeader, CardTitle } from "@rosegriffon/ui";
-import { AlertTriangle, CheckCircle2, FileText, Loader2, Power, XCircle } from "lucide-react";
+import {
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@rosegriffon/ui";
+import {
+  AlertTriangle,
+  CheckCircle2,
+  FileText,
+  Loader2,
+  Power,
+  XCircle,
+} from "lucide-react";
 import { signalerEchec } from "@/lib/achillea/signaler";
-import { BoutonActualiser, Chargement, Erreur, Vide, useClientAchillea, useLecture } from "./etat";
+import {
+  BoutonActualiser,
+  Chargement,
+  Erreur,
+  Vide,
+  useClientAchillea,
+  useLecture,
+} from "./etat";
 
 /**
  * Durée de fonctionnement du bot.
@@ -13,8 +33,11 @@ import { BoutonActualiser, Chargement, Erreur, Vide, useClientAchillea, useLectu
  * `/health/check` et `/health/monitoring`, en millisecondes : cet onglet ne
  * lit que la première).
  */
-export function formaterUptimeSecondes(duree: number | null | undefined): string {
-  if (typeof duree !== "number" || !Number.isFinite(duree) || duree < 0) return "—";
+export function formaterUptimeSecondes(
+  duree: number | null | undefined,
+): string {
+  if (typeof duree !== "number" || !Number.isFinite(duree) || duree < 0)
+    return "—";
   const secondes = Math.floor(duree);
   const jours = Math.floor(secondes / 86_400);
   const heures = Math.floor((secondes % 86_400) / 3_600);
@@ -35,7 +58,13 @@ function formaterLatence(latence: unknown): string {
   return typeof ping === "number" && ping >= 0 ? `${Math.round(ping)} ms` : "—";
 }
 
-function Ligne({ libelle, children }: { libelle: string; children: ReactNode }) {
+function Ligne({
+  libelle,
+  children,
+}: {
+  libelle: string;
+  children: ReactNode;
+}) {
   return (
     <div className="flex items-center justify-between gap-4 border-b border-border/40 py-2 last:border-b-0">
       <dt className="text-muted-foreground">{libelle}</dt>
@@ -48,9 +77,13 @@ function Ligne({ libelle, children }: { libelle: string; children: ReactNode }) 
 export function BotHealthTab() {
   const client = useClientAchillea();
   const sante = useLecture("admin/ops/health", () => client.admin.health());
-  const metriques = useLecture("admin/ops/metrics-summary", () => client.admin.metricsSummary());
+  const metriques = useLecture("admin/ops/metrics-summary", () =>
+    client.admin.metricsSummary(),
+  );
   const totaux = useLecture("stats/totals", () => client.stats.totals());
-  const topCommandes = useLecture("stats/commands/top", () => client.stats.topCommands());
+  const topCommandes = useLecture("stats/commands/top", () =>
+    client.stats.topCommands(),
+  );
 
   const [logs, setLogs] = useState<string[] | null>(null);
   const [logsChargement, setLogsChargement] = useState(false);
@@ -88,7 +121,9 @@ export function BotHealthTab() {
   };
 
   const bot = sante.donnees?.bot;
-  const compteurs = Object.entries(metriques.donnees?.counters ?? {}).toSorted(([a], [b]) => a.localeCompare(b));
+  const compteurs = Object.entries(metriques.donnees?.counters ?? {}).toSorted(
+    ([a], [b]) => a.localeCompare(b),
+  );
   const stats = totaux.donnees?.stats;
 
   return (
@@ -116,7 +151,9 @@ export function BotHealthTab() {
             ) : (
               <Power className="size-4" aria-hidden="true" />
             )}
-            {bot?.maintenance ? "Désactiver la maintenance" : "Passer en maintenance"}
+            {bot?.maintenance
+              ? "Désactiver la maintenance"
+              : "Passer en maintenance"}
           </Button>
         </div>
       </div>
@@ -128,7 +165,9 @@ export function BotHealthTab() {
             <CardTitle className="text-sm">Bot Discord Achilléa</CardTitle>
           </CardHeader>
           <CardContent className="text-sm">
-            {sante.erreur && <Erreur message={sante.erreur} onReessayer={sante.recharger} />}
+            {sante.erreur && (
+              <Erreur message={sante.erreur} onReessayer={sante.recharger} />
+            )}
             {sante.chargement && !sante.donnees ? (
               <Chargement lignes={3} />
             ) : (
@@ -137,22 +176,29 @@ export function BotHealthTab() {
                   <Ligne libelle="Passerelle Discord">
                     {bot.online ? (
                       <span className="flex items-center gap-1 text-success">
-                        <CheckCircle2 className="size-4" aria-hidden="true" /> Connecté
+                        <CheckCircle2 className="size-4" aria-hidden="true" />{" "}
+                        Connecté
                       </span>
                     ) : (
                       <span className="flex items-center gap-1 text-destructive">
-                        <XCircle className="size-4" aria-hidden="true" /> Déconnecté
+                        <XCircle className="size-4" aria-hidden="true" />{" "}
+                        Déconnecté
                       </span>
                     )}
                   </Ligne>
                   <Ligne libelle="Compte">{bot.username ?? "—"}</Ligne>
-                  <Ligne libelle="Temps de fonctionnement">{formaterUptimeSecondes(bot.uptime)}</Ligne>
+                  <Ligne libelle="Temps de fonctionnement">
+                    {formaterUptimeSecondes(bot.uptime)}
+                  </Ligne>
                   <Ligne libelle="Serveurs">{bot.guilds}</Ligne>
-                  <Ligne libelle="Latence websocket">{formaterLatence(sante.donnees?.latency)}</Ligne>
+                  <Ligne libelle="Latence websocket">
+                    {formaterLatence(sante.donnees?.latency)}
+                  </Ligne>
                   <Ligne libelle="Maintenance">
                     {bot.maintenance ? (
                       <span className="flex items-center gap-1 text-warning">
-                        <AlertTriangle className="size-4" aria-hidden="true" /> Active
+                        <AlertTriangle className="size-4" aria-hidden="true" />{" "}
+                        Active
                       </span>
                     ) : (
                       "Inactive"
@@ -169,25 +215,40 @@ export function BotHealthTab() {
             <CardTitle className="text-sm">Usage du bot</CardTitle>
           </CardHeader>
           <CardContent className="text-sm">
-            {totaux.erreur && <Erreur message={totaux.erreur} onReessayer={totaux.recharger} />}
+            {totaux.erreur && (
+              <Erreur message={totaux.erreur} onReessayer={totaux.recharger} />
+            )}
             {totaux.chargement && !totaux.donnees ? (
               <Chargement lignes={3} />
             ) : (
               stats && (
                 <dl>
-                  <Ligne libelle="Comptes en base">{stats.totalActiveUsers}</Ligne>
-                  <Ligne libelle="Commandes lancées">{stats.totalCommands}</Ligne>
-                  <Ligne libelle="Serveurs (cache Discord)">{stats.totalGuilds}</Ligne>
-                  <Ligne libelle="Membres (cache Discord)">{stats.totalUsers}</Ligne>
+                  <Ligne libelle="Comptes en base">
+                    {stats.totalActiveUsers}
+                  </Ligne>
+                  <Ligne libelle="Commandes lancées">
+                    {stats.totalCommands}
+                  </Ligne>
+                  <Ligne libelle="Serveurs (cache Discord)">
+                    {stats.totalGuilds}
+                  </Ligne>
+                  <Ligne libelle="Membres (cache Discord)">
+                    {stats.totalUsers}
+                  </Ligne>
                 </dl>
               )
             )}
             {topCommandes.donnees && topCommandes.donnees.length > 0 && (
               <div className="mt-4 space-y-2">
-                <h3 className="text-xs font-semibold uppercase text-muted-foreground">Commandes les plus utilisées</h3>
+                <h3 className="text-xs font-semibold uppercase text-muted-foreground">
+                  Commandes les plus utilisées
+                </h3>
                 <ol className="space-y-1">
-                  {topCommandes.donnees.slice(0, 8).map(ligne => (
-                    <li key={`${ligne.type}:${ligne.name}`} className="flex justify-between gap-2 font-mono text-xs">
+                  {topCommandes.donnees.slice(0, 8).map((ligne) => (
+                    <li
+                      key={`${ligne.type}:${ligne.name}`}
+                      className="flex justify-between gap-2 font-mono text-xs"
+                    >
                       <span className="truncate">/{ligne.name ?? "?"}</span>
                       <span>{ligne.count}</span>
                     </li>
@@ -206,7 +267,11 @@ export function BotHealthTab() {
         <CardContent>
           {sante.donnees ? (
             <pre className="max-h-72 overflow-auto rounded-lg bg-muted/40 p-3 text-xs">
-              {JSON.stringify({ host: sante.donnees.host, pid: sante.donnees.pid }, null, 2)}
+              {JSON.stringify(
+                { host: sante.donnees.host, pid: sante.donnees.pid },
+                null,
+                2,
+              )}
             </pre>
           ) : (
             !sante.chargement && <Vide message="Aucune mesure de l'hôte." />
@@ -217,11 +282,19 @@ export function BotHealthTab() {
       <Card className="border-border/60">
         <CardHeader>
           <CardTitle className="text-sm">
-            Métriques{metriques.donnees ? ` (${compteurs.length} compteurs, ${metriques.donnees.rawLines} lignes)` : ""}
+            Métriques
+            {metriques.donnees
+              ? ` (${compteurs.length} compteurs, ${metriques.donnees.rawLines} lignes)`
+              : ""}
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {metriques.erreur && <Erreur message={metriques.erreur} onReessayer={metriques.recharger} />}
+          {metriques.erreur && (
+            <Erreur
+              message={metriques.erreur}
+              onReessayer={metriques.recharger}
+            />
+          )}
           {metriques.chargement && !metriques.donnees ? (
             <Chargement lignes={2} />
           ) : compteurs.length === 0 && !metriques.erreur ? (
@@ -230,7 +303,9 @@ export function BotHealthTab() {
             <dl className="grid grid-cols-1 gap-x-6 text-xs sm:grid-cols-2">
               {compteurs.map(([nom, valeur]) => (
                 <Ligne key={nom} libelle={nom}>
-                  <span className="font-mono">{valeur.toLocaleString("fr-FR")}</span>
+                  <span className="font-mono">
+                    {valeur.toLocaleString("fr-FR")}
+                  </span>
                 </Ligne>
               ))}
             </dl>
@@ -256,7 +331,12 @@ export function BotHealthTab() {
           </Button>
         </CardHeader>
         <CardContent>
-          {logsErreur && <Erreur message={logsErreur} onReessayer={() => void chargerLogs()} />}
+          {logsErreur && (
+            <Erreur
+              message={logsErreur}
+              onReessayer={() => void chargerLogs()}
+            />
+          )}
           {logs &&
             (logs.length === 0 ? (
               <Vide message="Aucune ligne de log." />

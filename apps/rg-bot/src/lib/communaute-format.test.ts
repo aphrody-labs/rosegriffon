@@ -67,13 +67,23 @@ describe("articles — une table, deux sites", () => {
   });
 
   test("URL publique d'un article du site (vérifiée 200)", () => {
-    expect(urlArticle("website", "victory-road-france-un-pigeonnage-communautaire-qui-termine-bien")).toBe(
+    expect(
+      urlArticle(
+        "website",
+        "victory-road-france-un-pigeonnage-communautaire-qui-termine-bien",
+      ),
+    ).toBe(
       "https://rosegriffon.fr/chroniques/victory-road-france-un-pigeonnage-communautaire-qui-termine-bien",
     );
   });
 
   test("URL publique d'un article du wiki (vérifiée 200)", () => {
-    expect(urlArticle("azalee", "critique-communautaire-de-inazuma-eleven-victory-road")).toBe(
+    expect(
+      urlArticle(
+        "azalee",
+        "critique-communautaire-de-inazuma-eleven-victory-road",
+      ),
+    ).toBe(
       "https://azalee.rosegriffon.fr/news/critique-communautaire-de-inazuma-eleven-victory-road",
     );
   });
@@ -92,19 +102,23 @@ describe("articles — une table, deux sites", () => {
 
   test("libellé de portée", () => {
     expect(libellePortee(["azalee"])).toBe("Azalée");
-    expect(libellePortee(["website", "azalee"])).toBe("rosegriffon.fr + Azalée");
+    expect(libellePortee(["website", "azalee"])).toBe(
+      "rosegriffon.fr + Azalée",
+    );
   });
 });
 
 describe("nettoyerHtml", () => {
   test("retire les balises et rend les entités", () => {
-    expect(nettoyerHtml("<p>Victory&nbsp;Road &amp; les <b>Rose Griffon</b></p>")).toBe(
-      "Victory Road & les Rose Griffon",
-    );
+    expect(
+      nettoyerHtml("<p>Victory&nbsp;Road &amp; les <b>Rose Griffon</b></p>"),
+    ).toBe("Victory Road & les Rose Griffon");
   });
 
   test("les blocs script et style disparaissent avec leur contenu", () => {
-    expect(nettoyerHtml("<style>.a{color:red}</style><p>Texte</p>")).toBe("Texte");
+    expect(nettoyerHtml("<style>.a{color:red}</style><p>Texte</p>")).toBe(
+      "Texte",
+    );
     expect(nettoyerHtml("<script>alert('x')</script>Suite")).toBe("Suite");
   });
 
@@ -136,11 +150,15 @@ describe("resumeArticle", () => {
   };
 
   test("l'excerpt prime quand il existe", () => {
-    expect(resumeArticle({ ...base, excerpt: "Un résumé court." })).toBe("Un résumé court.");
+    expect(resumeArticle({ ...base, excerpt: "Un résumé court." })).toBe(
+      "Un résumé court.",
+    );
   });
 
   test("sans excerpt, on retombe sur le contenu nettoyé", () => {
-    expect(resumeArticle({ ...base, content: "<p>Le <i>site</i> évolue.</p>" })).toBe("Le site évolue.");
+    expect(
+      resumeArticle({ ...base, content: "<p>Le <i>site</i> évolue.</p>" }),
+    ).toBe("Le site évolue.");
   });
 
   test("sans excerpt ni contenu, une chaîne vide (jamais « null »)", () => {
@@ -215,7 +233,9 @@ describe("planning des streams", () => {
       category: "Stream",
       notes: null,
     };
-    expect(ligneStream(row)).toBe("• **Ishido** · à partir de 21:00 · *Stream*");
+    expect(ligneStream(row)).toBe(
+      "• **Ishido** · à partir de 21:00 · *Stream*",
+    );
   });
 
   test("une note est rendue sur sa propre ligne", () => {
@@ -227,11 +247,13 @@ describe("planning des streams", () => {
       category: null,
       notes: "Une semaine sur deux",
     };
-    expect(ligneStream(row)).toBe("• **Ishido** · à partir de 21:00\n  Une semaine sur deux");
+    expect(ligneStream(row)).toBe(
+      "• **Ishido** · à partir de 21:00\n  Une semaine sur deux",
+    );
   });
 
   test("la semaine commence lundi, pas dimanche", () => {
-    const lignes: LigneStream[] = [0, 6, 1].map(j => ({
+    const lignes: LigneStream[] = [0, 6, 1].map((j) => ({
       day_of_week: j,
       streamer_name: `S${j}`,
       start_time: "20:00:00",
@@ -239,7 +261,11 @@ describe("planning des streams", () => {
       category: null,
       notes: null,
     }));
-    expect(grouperParJour(lignes).map(s => s.libelle)).toEqual(["Lundi", "Samedi", "Dimanche"]);
+    expect(grouperParJour(lignes).map((s) => s.libelle)).toEqual([
+      "Lundi",
+      "Samedi",
+      "Dimanche",
+    ]);
   });
 
   test("les deux streams du samedi réel sont triés par heure", () => {
@@ -263,7 +289,10 @@ describe("planning des streams", () => {
     ];
     const sections = grouperParJour(lignes);
     expect(sections).toHaveLength(1);
-    expect(sections[0]!.lignes.map(l => l.streamer_name)).toEqual(["Bri", "Shozuma"]);
+    expect(sections[0]!.lignes.map((l) => l.streamer_name)).toEqual([
+      "Bri",
+      "Shozuma",
+    ]);
   });
 
   test("un jour hors bornes reste lisible", () => {
@@ -314,7 +343,7 @@ const AGENDA_REEL: EvenementCalendrier[] = [
 ];
 
 function agendaNormalise() {
-  return AGENDA_REEL.map(normaliserEvenement).filter(e => e !== null);
+  return AGENDA_REEL.map(normaliserEvenement).filter((e) => e !== null);
 }
 
 describe("événements de l'agenda", () => {
@@ -330,16 +359,25 @@ describe("événements de l'agenda", () => {
 
   test("une entrée sans début est écartée, pas rendue vide", () => {
     expect(normaliserEvenement({ summary: "Sans date" })).toBeNull();
-    expect(normaliserEvenement({ summary: "Bancale", start: { date: "n'importe quoi" } })).toBeNull();
+    expect(
+      normaliserEvenement({
+        summary: "Bancale",
+        start: { date: "n'importe quoi" },
+      }),
+    ).toBeNull();
   });
 
   test("un titre absent reçoit un libellé, jamais « undefined »", () => {
-    expect(normaliserEvenement({ start: { date: "2026-09-01" } })?.titre).toBe("Événement Rose Griffon");
+    expect(normaliserEvenement({ start: { date: "2026-09-01" } })?.titre).toBe(
+      "Événement Rose Griffon",
+    );
   });
 
   test("la fin d'une journée entière est exclusive : Japan Expo finit le 6, pas le 7", () => {
     const japan = agendaNormalise()[1]!;
-    expect(formaterPlageEvenement(japan)).toBe("du 03 juillet 2025 au 06 juillet 2025");
+    expect(formaterPlageEvenement(japan)).toBe(
+      "du 03 juillet 2025 au 06 juillet 2025",
+    );
   });
 
   test("une journée entière d'un seul jour ne s'affiche pas en plage", () => {
@@ -353,7 +391,9 @@ describe("événements de l'agenda", () => {
 
   test("un événement horaire du même jour affiche l'heure de fin seule", () => {
     const inabikari = agendaNormalise()[2]!;
-    expect(formaterPlageEvenement(inabikari)).toBe("le 26 octobre 2025 à 13:00 → 22:00");
+    expect(formaterPlageEvenement(inabikari)).toBe(
+      "le 26 octobre 2025 à 13:00 → 22:00",
+    );
   });
 
   test("sans fin, seule la date de début est rendue", () => {
@@ -361,20 +401,29 @@ describe("événements de l'agenda", () => {
       summary: "Live",
       start: { dateTime: "2026-09-01T20:00:00+02:00" },
     })!;
-    expect(formaterPlageEvenement(sansFin)).toBe("le 01 septembre 2026 à 20:00");
+    expect(formaterPlageEvenement(sansFin)).toBe(
+      "le 01 septembre 2026 à 20:00",
+    );
     expect(finEffective(sansFin).getTime()).toBe(sansFin.debut.getTime());
   });
 
   test("les 5 événements réels sont tous passés au 13/8/2026", () => {
-    expect(agendaNormalise().filter(e => estAVenir(e, MAINTENANT))).toHaveLength(0);
+    expect(
+      agendaNormalise().filter((e) => estAVenir(e, MAINTENANT)),
+    ).toHaveLength(0);
   });
 
   test("« à venir » sans rien à venir bascule sur les derniers passés, et le signale", () => {
-    const choix = choisirEvenements(agendaNormalise(), "a-venir", 3, MAINTENANT);
+    const choix = choisirEvenements(
+      agendaNormalise(),
+      "a-venir",
+      3,
+      MAINTENANT,
+    );
     expect(choix.repli).toBe(true);
     expect(choix.periode).toBe("passes");
     expect(choix.total).toBe(5);
-    expect(choix.evenements.map(e => e.titre)).toEqual([
+    expect(choix.evenements.map((e) => e.titre)).toEqual([
       "Epitanime -  La nocturne Saint Valentin 2026",
       "Japan Touch Lyon",
       "Inabikari",
@@ -387,16 +436,21 @@ describe("événements de l'agenda", () => {
       start: { date: "2026-09-10" },
       end: { date: "2026-09-14" },
     })!;
-    const choix = choisirEvenements([...agendaNormalise(), futur], "a-venir", 5, MAINTENANT);
+    const choix = choisirEvenements(
+      [...agendaNormalise(), futur],
+      "a-venir",
+      5,
+      MAINTENANT,
+    );
     expect(choix.repli).toBe(false);
     expect(choix.periode).toBe("a-venir");
-    expect(choix.evenements.map(e => e.titre)).toEqual(["Japan Expo 2026"]);
+    expect(choix.evenements.map((e) => e.titre)).toEqual(["Japan Expo 2026"]);
   });
 
   test("« passés » est explicite : ni repli, ni ordre croissant", () => {
     const choix = choisirEvenements(agendaNormalise(), "passes", 2, MAINTENANT);
     expect(choix.repli).toBe(false);
-    expect(choix.evenements.map(e => e.titre)).toEqual([
+    expect(choix.evenements.map((e) => e.titre)).toEqual([
       "Epitanime -  La nocturne Saint Valentin 2026",
       "Japan Touch Lyon",
     ]);
@@ -404,7 +458,7 @@ describe("événements de l'agenda", () => {
 
   test("« tous » rend l'agenda entier, du plus récent au plus ancien", () => {
     const choix = choisirEvenements(agendaNormalise(), "tous", 99, MAINTENANT);
-    expect(choix.evenements.map(e => e.titre)).toEqual([
+    expect(choix.evenements.map((e) => e.titre)).toEqual([
       "Epitanime -  La nocturne Saint Valentin 2026",
       "Japan Touch Lyon",
       "Inabikari",
@@ -421,7 +475,9 @@ describe("événements de l'agenda", () => {
   });
 
   test("une limite nulle ou négative rend quand même un événement", () => {
-    expect(choisirEvenements(agendaNormalise(), "tous", 0, MAINTENANT).evenements).toHaveLength(1);
+    expect(
+      choisirEvenements(agendaNormalise(), "tous", 0, MAINTENANT).evenements,
+    ).toHaveLength(1);
   });
 
   test("un événement en cours compte comme à venir", () => {
@@ -522,12 +578,21 @@ describe("rôles Discord", () => {
   const index = indexerRoles(ROLES_REELS);
 
   test("les noms sortent du plus haut au plus bas, comme dans Discord", () => {
-    const resolus = resoudreRoles(["1089154031353610335", "1089273878674690090", "1089171148287250463"], index);
-    expect(resolus.map(r => r.name)).toEqual(["Médaille Traduction", "Booster Riche", "UnbelievaBoat"]);
+    const resolus = resoudreRoles(
+      ["1089154031353610335", "1089273878674690090", "1089171148287250463"],
+      index,
+    );
+    expect(resolus.map((r) => r.name)).toEqual([
+      "Médaille Traduction",
+      "Booster Riche",
+      "UnbelievaBoat",
+    ]);
   });
 
   test("un identifiant inconnu est ignoré plutôt qu'affiché brut", () => {
-    expect(resoudreRoles(["999", "1089154031353610335"], index).map(r => r.name)).toEqual(["UnbelievaBoat"]);
+    expect(
+      resoudreRoles(["999", "1089154031353610335"], index).map((r) => r.name),
+    ).toEqual(["UnbelievaBoat"]);
   });
 
   test("aucun rôle ne lève pas", () => {
@@ -551,7 +616,9 @@ describe("rôles Discord", () => {
   });
 
   test("juste sous la borne, pas de « +N »", () => {
-    expect(listerRoles(ROLES_REELS, 3)).toBe("UnbelievaBoat, Booster Riche, Médaille Traduction");
+    expect(listerRoles(ROLES_REELS, 3)).toBe(
+      "UnbelievaBoat, Booster Riche, Médaille Traduction",
+    );
   });
 });
 
@@ -569,14 +636,22 @@ describe("membres", () => {
   };
 
   test("le surnom de serveur prime sur le nom affiché, puis sur le pseudo", () => {
-    expect(nomAffiche({ nickname: "Kolt", display_name: "Kolti", username: "koltilasko" })).toBe("Kolt");
+    expect(
+      nomAffiche({
+        nickname: "Kolt",
+        display_name: "Kolti",
+        username: "koltilasko",
+      }),
+    ).toBe("Kolt");
     expect(nomAffiche(kolti)).toBe("Kolti");
     expect(nomAffiche({ username: "koltilasko" })).toBe("koltilasko");
     expect(nomAffiche({})).toBe("Membre inconnu");
   });
 
   test("les blancs seuls ne comptent pas pour un nom", () => {
-    expect(nomAffiche({ nickname: "   ", display_name: "Kolti" })).toBe("Kolti");
+    expect(nomAffiche({ nickname: "   ", display_name: "Kolti" })).toBe(
+      "Kolti",
+    );
   });
 
   test("ancienneté d'un membre réel arrivé le 08/2/2023", () => {
@@ -599,12 +674,18 @@ describe("membres", () => {
   });
 
   test("ligne de recherche, avec et sans compte lié", () => {
-    expect(ligneMembreDiscord(kolti, true)).toBe("• **Kolti** · `koltilasko` · 20 rôles · compte lié");
-    expect(ligneMembreDiscord({ ...kolti, roles: ["1"] }, false)).toBe("• **Kolti** · `koltilasko` · 1 rôle");
+    expect(ligneMembreDiscord(kolti, true)).toBe(
+      "• **Kolti** · `koltilasko` · 20 rôles · compte lié",
+    );
+    expect(ligneMembreDiscord({ ...kolti, roles: ["1"] }, false)).toBe(
+      "• **Kolti** · `koltilasko` · 1 rôle",
+    );
   });
 
   test("un départ du serveur est dit explicitement", () => {
-    expect(ligneMembreDiscord({ ...kolti, left_at: "2026-01-01T00:00:00Z" }, false)).toContain("a quitté le serveur");
+    expect(
+      ligneMembreDiscord({ ...kolti, left_at: "2026-01-01T00:00:00Z" }, false),
+    ).toContain("a quitté le serveur");
   });
 });
 
@@ -644,7 +725,7 @@ describe("équipes", () => {
       "mediationteam",
       "collabteam",
     ]) {
-      expect(EQUIPES.some(e => e.id === id)).toBe(true);
+      expect(EQUIPES.some((e) => e.id === id)).toBe(true);
     }
   });
 
@@ -660,7 +741,9 @@ describe("équipes", () => {
 
   test("la troncature à 24 cartes est annoncée, filtre ou pas", () => {
     expect(sousTitreEquipe(28, 24, null)).toBe("28 membres — 24 affichés");
-    expect(sousTitreEquipe(28, 24, "modérateur")).toBe("Filtré : modérateur · 28 membres — 24 affichés");
+    expect(sousTitreEquipe(28, 24, "modérateur")).toBe(
+      "Filtré : modérateur · 28 membres — 24 affichés",
+    );
   });
 
   test("sans troncature, on annonce le simple décompte", () => {

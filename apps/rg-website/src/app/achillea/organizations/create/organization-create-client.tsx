@@ -6,8 +6,23 @@ import Link from "@/components/shared/Link";
 import { useAchilleaAuth, createAchilleaClient } from "@/lib/achillea";
 import { absoluteUrl } from "@/lib/site-url";
 import { normalizeNames } from "@rosegriffon/achillea-core/names";
-import { SocialMedia, type SocialMediaDTO } from "@rosegriffon/achillea-types/domain/common";
-import { AlertCircle, ArrowLeft, Building2, Check, FileText, Globe, Image as ImageIcon, Loader2, Radio, Share2, ShieldAlert } from "lucide-react";
+import {
+  SocialMedia,
+  type SocialMediaDTO,
+} from "@rosegriffon/achillea-types/domain/common";
+import {
+  AlertCircle,
+  ArrowLeft,
+  Building2,
+  Check,
+  FileText,
+  Globe,
+  Image as ImageIcon,
+  Loader2,
+  Radio,
+  Share2,
+  ShieldAlert,
+} from "lucide-react";
 import { MARQUE } from "@/components/achillea/couleurs-donnees";
 
 const COUNTRY_OPTIONS = [
@@ -52,11 +67,15 @@ export default function OrganizationCreationPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if ([...name.trim()].length < 3 || [...name.trim()].length > 30) {
-      setError("Le nom de l'organisation doit comporter entre 3 et 30 caractères.");
+      setError(
+        "Le nom de l'organisation doit comporter entre 3 et 30 caractères.",
+      );
       return;
     }
     if (!normalizedName || normalizedName !== normalizeNames(name.trim())) {
-      setError("L'identifiant normalisé ne correspond pas au nom de l'organisation.");
+      setError(
+        "L'identifiant normalisé ne correspond pas au nom de l'organisation.",
+      );
       return;
     }
 
@@ -104,7 +123,9 @@ export default function OrganizationCreationPage() {
       broadcastMedias.push({
         platform: SocialMedia.Youtube,
         username: handle,
-        canonicalUrl: handle.startsWith("http") ? handle : `https://youtube.com/@${handle.replace(/^@/, "")}`,
+        canonicalUrl: handle.startsWith("http")
+          ? handle
+          : `https://youtube.com/@${handle.replace(/^@/, "")}`,
       });
     }
 
@@ -112,7 +133,8 @@ export default function OrganizationCreationPage() {
       const res = await client.organizations.create({
         name: name.trim(),
         normalizedName: normalizedName.trim(),
-        description: description.trim() || "Organisation esport officielle Achilléa.",
+        description:
+          description.trim() || "Organisation esport officielle Achilléa.",
         logo: logo.trim() || absoluteUrl("/achillea/achillea.png"),
         origin: origin,
         orgManagers: [],
@@ -123,7 +145,9 @@ export default function OrganizationCreationPage() {
       if (res.ok) {
         router.push("/achillea/tournaments");
       } else {
-        setError(res.detail || "Impossible de soumettre la demande d'organisation.");
+        setError(
+          res.detail || "Impossible de soumettre la demande d'organisation.",
+        );
       }
     } catch {
       setError("Une erreur inattendue est survenue lors de l'enregistrement.");
@@ -147,7 +171,8 @@ export default function OrganizationCreationPage() {
         <ShieldAlert className="w-12 h-12 text-warning mx-auto" />
         <h2 className="text-xl font-bold">Connexion requise</h2>
         <p className="text-sm text-muted-foreground">
-          Connectez-vous pour enregistrer votre structure officielle sur Achilléa.
+          Connectez-vous pour enregistrer votre structure officielle sur
+          Achilléa.
         </p>
         <button
           type="button"
@@ -176,16 +201,22 @@ export default function OrganizationCreationPage() {
             <Building2 className="w-6 h-6" />
           </span>
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Déclarer une Organisation</h1>
+            <h1 className="text-3xl font-bold tracking-tight">
+              Déclarer une Organisation
+            </h1>
             <p className="text-sm text-muted-foreground mt-0.5">
-              Enregistrez votre structure pour organiser des tournois officiels et engager des équipes en championnat.
+              Enregistrez votre structure pour organiser des tournois officiels
+              et engager des équipes en championnat.
             </p>
           </div>
         </div>
       </div>
 
       {/* Form */}
-      <form onSubmit={handleSubmit} className="border border-border bg-card rounded-2xl p-6 md:p-8 space-y-6">
+      <form
+        onSubmit={handleSubmit}
+        className="border border-border bg-card rounded-2xl p-6 md:p-8 space-y-6"
+      >
         {error && (
           <div className="p-4 rounded-xl bg-destructive/10 border border-destructive/20 text-destructive text-xs font-semibold flex items-center gap-2">
             <AlertCircle className="w-4 h-4 shrink-0" />
@@ -208,7 +239,7 @@ export default function OrganizationCreationPage() {
               type="text"
               placeholder="Ex: Solary, Vitality, Chrono Storm..."
               value={name}
-              onChange={e => handleNameChange(e.target.value)}
+              onChange={(e) => handleNameChange(e.target.value)}
               className="w-full px-3.5 py-2.5 text-sm bg-background border border-border rounded-xl placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
               required
             />
@@ -222,14 +253,18 @@ export default function OrganizationCreationPage() {
             >
               Identifiant unique
             </label>
-            <p className="text-xs text-muted-foreground">Généré selon le nom de la structure.</p>
+            <p className="text-xs text-muted-foreground">
+              Généré selon le nom de la structure.
+            </p>
             <div className="flex items-center gap-2">
-              <span className="text-xs font-mono text-muted-foreground">ACHILLÉA</span>
+              <span className="text-xs font-mono text-muted-foreground">
+                ACHILLÉA
+              </span>
               <input
                 id="route-create-organization-create-client-tsx-2"
                 type="text"
                 value={normalizedName}
-                onChange={e => setNormalizedName(e.target.value)}
+                onChange={(e) => setNormalizedName(e.target.value)}
                 className="flex-1 px-3 py-2 text-xs font-mono bg-background border border-border rounded-xl placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
                 required
               />
@@ -250,7 +285,7 @@ export default function OrganizationCreationPage() {
               rows={3}
               placeholder="Présentez brièvement la structure, son palmarès et ses ambitions sur Inazuma Eleven..."
               value={description}
-              onChange={e => setDescription(e.target.value)}
+              onChange={(e) => setDescription(e.target.value)}
               className="w-full px-3.5 py-2.5 text-sm bg-background border border-border rounded-xl placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
             />
           </div>
@@ -270,7 +305,7 @@ export default function OrganizationCreationPage() {
                   src={logo}
                   alt="Aperçu logo structure"
                   className="w-12 h-12 rounded-xl object-cover bg-muted border border-border shrink-0 shadow-sm"
-                  onError={e => {
+                  onError={(e) => {
                     (e.target as HTMLElement).style.display = "none";
                   }}
                 />
@@ -284,7 +319,7 @@ export default function OrganizationCreationPage() {
                 type="url"
                 placeholder="https://.../logo.png"
                 value={logo}
-                onChange={e => setLogo(e.target.value)}
+                onChange={(e) => setLogo(e.target.value)}
                 className="flex-1 px-3.5 py-2.5 text-sm bg-background border border-border rounded-xl placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
               />
             </div>
@@ -302,10 +337,10 @@ export default function OrganizationCreationPage() {
             <select
               id="route-create-organization-create-client-tsx-5"
               value={origin}
-              onChange={e => setOrigin(e.target.value)}
+              onChange={(e) => setOrigin(e.target.value)}
               className="w-full px-3.5 py-2.5 text-sm bg-background border border-border rounded-xl focus:outline-none focus:ring-1 focus:ring-primary"
             >
-              {COUNTRY_OPTIONS.map(c => (
+              {COUNTRY_OPTIONS.map((c) => (
                 <option key={c.code} value={c.code}>
                   {c.name}
                 </option>
@@ -322,7 +357,10 @@ export default function OrganizationCreationPage() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
               <div className="space-y-1">
-                <label htmlFor="route-create-organization-create-client-tsx-6" className="text-muted-foreground">
+                <label
+                  htmlFor="route-create-organization-create-client-tsx-6"
+                  className="text-muted-foreground"
+                >
                   Compte X (Twitter)
                 </label>
                 <input
@@ -330,13 +368,16 @@ export default function OrganizationCreationPage() {
                   type="text"
                   placeholder="@Structure"
                   value={twitter}
-                  onChange={e => setTwitter(e.target.value)}
+                  onChange={(e) => setTwitter(e.target.value)}
                   className="w-full px-3 py-2 bg-card border border-border rounded-lg focus:outline-none focus:ring-1 focus:ring-primary"
                 />
               </div>
 
               <div className="space-y-1">
-                <label htmlFor="route-create-organization-create-client-tsx-7" className="text-muted-foreground">
+                <label
+                  htmlFor="route-create-organization-create-client-tsx-7"
+                  className="text-muted-foreground"
+                >
                   Compte Instagram
                 </label>
                 <input
@@ -344,13 +385,16 @@ export default function OrganizationCreationPage() {
                   type="text"
                   placeholder="@structure_esport"
                   value={instagram}
-                  onChange={e => setInstagram(e.target.value)}
+                  onChange={(e) => setInstagram(e.target.value)}
                   className="w-full px-3 py-2 bg-card border border-border rounded-lg focus:outline-none focus:ring-1 focus:ring-primary"
                 />
               </div>
 
               <div className="space-y-1">
-                <label htmlFor="route-create-organization-create-client-tsx-8" className="text-muted-foreground">
+                <label
+                  htmlFor="route-create-organization-create-client-tsx-8"
+                  className="text-muted-foreground"
+                >
                   Compte TikTok
                 </label>
                 <input
@@ -358,7 +402,7 @@ export default function OrganizationCreationPage() {
                   type="text"
                   placeholder="@structure"
                   value={tiktok}
-                  onChange={e => setTiktok(e.target.value)}
+                  onChange={(e) => setTiktok(e.target.value)}
                   className="w-full px-3 py-2 bg-card border border-border rounded-lg focus:outline-none focus:ring-1 focus:ring-primary"
                 />
               </div>
@@ -376,13 +420,16 @@ export default function OrganizationCreationPage() {
                   type="text"
                   placeholder="structure_tv"
                   value={twitch}
-                  onChange={e => setTwitch(e.target.value)}
+                  onChange={(e) => setTwitch(e.target.value)}
                   className="w-full px-3 py-2 bg-card border border-border rounded-lg focus:outline-none focus:ring-1 focus:ring-primary"
                 />
               </div>
 
               <div className="space-y-1 sm:col-span-2">
-                <label htmlFor="route-create-organization-create-client-tsx-10" className="text-muted-foreground">
+                <label
+                  htmlFor="route-create-organization-create-client-tsx-10"
+                  className="text-muted-foreground"
+                >
                   Chaîne YouTube
                 </label>
                 <input
@@ -390,7 +437,7 @@ export default function OrganizationCreationPage() {
                   type="text"
                   placeholder="@StructureEsport ou URL complète"
                   value={youtube}
-                  onChange={e => setYoutube(e.target.value)}
+                  onChange={(e) => setYoutube(e.target.value)}
                   className="w-full px-3 py-2 bg-card border border-border rounded-lg focus:outline-none focus:ring-1 focus:ring-primary"
                 />
               </div>
@@ -410,7 +457,11 @@ export default function OrganizationCreationPage() {
             disabled={submitting}
             className="inline-flex items-center gap-2 px-6 py-2.5 bg-primary text-primary-foreground font-bold text-xs rounded-xl hover:bg-primary/90 transition shadow-sm disabled:opacity-50"
           >
-            {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+            {submitting ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <Check className="w-4 h-4" />
+            )}
             Déposer la demande officielle
           </button>
         </div>

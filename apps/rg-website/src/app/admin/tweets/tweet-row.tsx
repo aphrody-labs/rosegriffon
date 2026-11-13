@@ -44,15 +44,27 @@ export function TweetRow({ tweet }: { tweet: any }) {
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-1">
-          <span className="font-bold text-on-surface text-sm">@{tweet.author_username}</span>
+          <span className="font-bold text-on-surface text-sm">
+            @{tweet.author_username}
+          </span>
           <span className="text-xs text-on-surface-variant">
-            {format(new Date(tweet.created_at), "d MMM yyyy HH:mm", { locale: fr })}
+            {format(new Date(tweet.created_at), "d MMM yyyy HH:mm", {
+              locale: fr,
+            })}
           </span>
         </div>
-        <p className="text-sm text-on-surface line-clamp-3 whitespace-pre-wrap">{tweet.text}</p>
+        <p className="text-sm text-on-surface line-clamp-3 whitespace-pre-wrap">
+          {tweet.text}
+        </p>
       </div>
       <div className="flex flex-col gap-2 shrink-0">
-        <Button asChild size="icon" variant="ghost" className="rounded-full" aria-label="Modifier le tweet">
+        <Button
+          asChild
+          size="icon"
+          variant="ghost"
+          className="rounded-full"
+          aria-label="Modifier le tweet"
+        >
           <Link href={`/admin/tweets/${tweet.id}`}>
             <Edit className="size-4" />
           </Link>

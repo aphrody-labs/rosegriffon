@@ -33,7 +33,11 @@ export type CastTables = {
     event_id: string;
     role: string;
     required: Generated<boolean>;
-    defrayment_amount: ColumnType<string | number | null, string | null, string | null>;
+    defrayment_amount: ColumnType<
+      string | number | null,
+      string | null,
+      string | null
+    >;
     defrayment_currency: string | null;
     defrayment_reason: string | null;
     notes: string | null;
@@ -131,7 +135,11 @@ export const CastModel = {
   list: t.Object({
     data: t.Array(event),
     total: t.Number(),
-    meta: t.Object({ page: t.Number(), pageSize: t.Number(), pageCount: t.Number() }),
+    meta: t.Object({
+      page: t.Number(),
+      pageSize: t.Number(),
+      pageCount: t.Number(),
+    }),
   }),
   idParams: t.Object({ id }),
   listQuery: t.Object({
@@ -149,20 +157,34 @@ export const CastModel = {
     tournamentId: t.Optional(t.Nullable(t.String({ maxLength: 64 }))),
     twitchUrl: t.Optional(t.Nullable(t.String({ maxLength: 512 }))),
     description: t.Optional(t.Nullable(t.String({ maxLength: 4000 }))),
-    slots: t.Array(t.Object({ role: slotRole, required: t.Optional(t.Boolean()) }), { minItems: 1, maxItems: 32 }),
+    slots: t.Array(
+      t.Object({ role: slotRole, required: t.Optional(t.Boolean()) }),
+      { minItems: 1, maxItems: 32 },
+    ),
   }),
-  surveyBody: t.Object({ casterPool: t.Array(userId, { minItems: 1, maxItems: 200 }) }),
+  surveyBody: t.Object({
+    casterPool: t.Array(userId, { minItems: 1, maxItems: 200 }),
+  }),
   availabilityBody: t.Object({
     status: availabilityStatus,
     preferredRoles: t.Optional(t.Nullable(t.Array(slotRole, { maxItems: 6 }))),
     notes: t.Optional(t.Nullable(t.String({ maxLength: 1000 }))),
   }),
   autoAssignBody: t.Optional(
-    t.Object({ maxSlotsPerCaster: t.Optional(t.Integer({ minimum: 1, maximum: 50 })) }),
+    t.Object({
+      maxSlotsPerCaster: t.Optional(t.Integer({ minimum: 1, maximum: 50 })),
+    }),
   ),
   swapBody: t.Object({ newCasterId: userId }),
-  surveyResult: t.Object({ success: t.Boolean(), eventId: t.String(), poolSize: t.Number() }),
-  autoAssignResult: t.Object({ created: t.Number(), attributions: t.Array(attribution) }),
+  surveyResult: t.Object({
+    success: t.Boolean(),
+    eventId: t.String(),
+    poolSize: t.Number(),
+  }),
+  autoAssignResult: t.Object({
+    created: t.Number(),
+    attributions: t.Array(attribution),
+  }),
   reminderReport: t.Object({
     kind: t.Union([t.Literal("j2"), t.Literal("h2")]),
     events: t.Number(),

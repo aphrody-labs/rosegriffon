@@ -85,7 +85,10 @@ const COPIES_GARDÉES = 7;
 const COPIES_FICHIERS_GARDÉES = 3;
 
 const drapeaux = new Set(process.argv.slice(2));
-const horodatage = new Date().toISOString().replaceAll(/[:.]/gu, "-").slice(0, 16);
+const horodatage = new Date()
+  .toISOString()
+  .replaceAll(/[:.]/gu, "-")
+  .slice(0, 16);
 
 let échecs = 0;
 const log = (message: string) => process.stdout.write(`${message}\n`);
@@ -95,7 +98,13 @@ const erreur = (message: string) => {
 };
 
 /** `psql`/`pg_dump` tournent sous l'identité `postgres` : authentification par pair, zéro secret. */
-const enTantQuePostgres = (commande: string[]) => ["sudo", "-n", "-u", "postgres", ...commande];
+const enTantQuePostgres = (commande: string[]) => [
+  "sudo",
+  "-n",
+  "-u",
+  "postgres",
+  ...commande,
+];
 
 async function bases(): Promise<string[]> {
   const sortie = await $`${enTantQuePostgres([
@@ -106,8 +115,8 @@ async function bases(): Promise<string[]> {
   ])}`.text();
   return sortie
     .split("\n")
-    .map(ligne => ligne.trim())
-    .filter(nom => nom.length > 0 && !BASES_IGNORÉES.has(nom));
+    .map((ligne) => ligne.trim())
+    .filter((nom) => nom.length > 0 && !BASES_IGNORÉES.has(nom));
 }
 
 const mio = (octets: number) => `${(octets / 1024 / 1024).toFixed(1)} Mio`;
@@ -115,7 +124,10 @@ const mio = (octets: number) => `${(octets / 1024 / 1024).toFixed(1)} Mio`;
 /** Les rôles et leurs droits : sans eux, une base restaurée n'accepte plus personne. */
 async function sauverRôles(): Promise<void> {
   const cible = `${DESTINATION}/roles-${horodatage}.sql`;
-  const résultat = await $`${enTantQuePostgres(["pg_dumpall", "--globals-only"])} > ${cible}`.nothrow().quiet();
+  const résultat =
+    await $`${enTantQuePostgres(["pg_dumpall", "--globals-only"])} > ${cible}`
+      .nothrow()
+      .quiet();
   if (résultat.exitCode !== 0) {
     erreur(`rôles : ${résultat.stderr.toString().slice(0, 300)}`);
     return;
@@ -154,14 +166,17 @@ async function relire(archive: string): Promise<number> {
   return résultat.stdout
     .toString()
     .split("\n")
-    .filter(ligne => ligne.includes("TABLE DATA")).length;
+    .filter((ligne) => ligne.includes("TABLE DATA")).length;
 }
 
 /**
  * La seule preuve qui vaille : rejouer l'archive dans une base neuve et compter ce qui en
  * ressort. Une archive qui se liste bien peut encore refuser de se restaurer.
  */
-async function restaurationDeContrôle(archive: string, base: string): Promise<void> {
+async function restaurationDeContrôle(
+  archive: string,
+  base: string,
+): Promise<void> {
   const témoin = `verif_restauration_${Date.now().toString(36)}`;
   try {
     await $`${enTantQuePostgres(["createdb", témoin])}`.quiet();
@@ -203,15 +218,24 @@ async function restaurationDeContrôle(archive: string, base: string): Promise<v
     ).trim();
 
     if (Number(tables) === 0) {
-      erreur(`${base} : restauration de contrôle vide — la sauvegarde ne vaut rien`);
+      erreur(
+        `${base} : restauration de contrôle vide — la sauvegarde ne vaut rien`,
+      );
     } else {
-      const réserve = restauration.exitCode === 0 ? "" : " (avec avertissements)";
-      log(`  ✓ restauration   ${base} → ${tables} tables, ${lignes} lignes${réserve}`);
+      const réserve =
+        restauration.exitCode === 0 ? "" : " (avec avertissements)";
+      log(
+        `  ✓ restauration   ${base} → ${tables} tables, ${lignes} lignes${réserve}`,
+      );
     }
   } catch (error) {
-    erreur(`${base} : restauration de contrôle impossible — ${String(error).slice(0, 200)}`);
+    erreur(
+      `${base} : restauration de contrôle impossible — ${String(error).slice(0, 200)}`,
+    );
   } finally {
-    await $`${enTantQuePostgres(["dropdb", "--if-exists", témoin])}`.nothrow().quiet();
+    await $`${enTantQuePostgres(["dropdb", "--if-exists", témoin])}`
+      .nothrow()
+      .quiet();
   }
 }
 
@@ -247,7 +271,9 @@ async function rotation(): Promise<void> {
  */
 async function sauverFichiersUtilisateurs(): Promise<void> {
   if (!HÔTE_FROID) {
-    log("  · pas d'archive froide déclarée — les fichiers utilisateurs restent sur ce disque");
+    log(
+      "  · pas d'archive froide déclarée — les fichiers utilisateurs restent sur ce disque",
+    );
     return;
   }
   // `Bun.file(...).exists()` répond FAUX sur un répertoire : la première version de
@@ -256,15 +282,20 @@ async function sauverFichiersUtilisateurs(): Promise<void> {
   // sauvegarde du tout — on croit être couvert. D'où `stat` et un test de répertoire.
   const source = await stat(FICHIERS_UTILISATEURS).catch(() => null);
   if (!source?.isDirectory()) {
-    erreur(`${FICHIERS_UTILISATEURS} introuvable ou n'est pas un répertoire — rien n'est copié`);
+    erreur(
+      `${FICHIERS_UTILISATEURS} introuvable ou n'est pas un répertoire — rien n'est copié`,
+    );
     return;
   }
   const cible = `${FICHIERS_FROID}/${horodatage}`;
-  const préparation = await $`ssh -o BatchMode=yes -o ConnectTimeout=8 ${HÔTE_FROID} mkdir -p ${FICHIERS_FROID}`
-    .nothrow()
-    .quiet();
+  const préparation =
+    await $`ssh -o BatchMode=yes -o ConnectTimeout=8 ${HÔTE_FROID} mkdir -p ${FICHIERS_FROID}`
+      .nothrow()
+      .quiet();
   if (préparation.exitCode !== 0) {
-    erreur(`archive froide injoignable — les fichiers utilisateurs ne sont copiés NULLE PART`);
+    erreur(
+      `archive froide injoignable — les fichiers utilisateurs ne sont copiés NULLE PART`,
+    );
     return;
   }
 
@@ -273,7 +304,9 @@ async function sauverFichiersUtilisateurs(): Promise<void> {
       .nothrow()
       .quiet();
   if (envoi.exitCode !== 0) {
-    erreur(`copie des fichiers utilisateurs en échec : ${envoi.stderr.toString().slice(0, 300)}`);
+    erreur(
+      `copie des fichiers utilisateurs en échec : ${envoi.stderr.toString().slice(0, 300)}`,
+    );
     return;
   }
 
@@ -289,7 +322,9 @@ async function sauverFichiersUtilisateurs(): Promise<void> {
     .quiet();
 
   const mesure = (
-    await $`ssh -o BatchMode=yes ${HÔTE_FROID} ${`du -sh ${FICHIERS_FROID} && du -sh ${cible}`}`.nothrow().quiet()
+    await $`ssh -o BatchMode=yes ${HÔTE_FROID} ${`du -sh ${FICHIERS_FROID} && du -sh ${cible}`}`
+      .nothrow()
+      .quiet()
   ).stdout
     .toString()
     .trim()
@@ -299,24 +334,36 @@ async function sauverFichiersUtilisateurs(): Promise<void> {
 
 async function envoyerHorsMachine(): Promise<void> {
   if (!HÔTE_FROID) {
-    log("  · pas d'archive froide déclarée (RG_ARCHIVE_HOTE) — sauvegardes locales seules");
+    log(
+      "  · pas d'archive froide déclarée (RG_ARCHIVE_HOTE) — sauvegardes locales seules",
+    );
     return;
   }
-  const joignable = await $`ssh -o BatchMode=yes -o ConnectTimeout=8 ${HÔTE_FROID} mkdir -p ${DOSSIER_FROID}`
-    .nothrow()
-    .quiet();
+  const joignable =
+    await $`ssh -o BatchMode=yes -o ConnectTimeout=8 ${HÔTE_FROID} mkdir -p ${DOSSIER_FROID}`
+      .nothrow()
+      .quiet();
   if (joignable.exitCode !== 0) {
-    erreur(`archive froide injoignable (${HÔTE_FROID}) — les sauvegardes ne sont QUE sur ce disque`);
+    erreur(
+      `archive froide injoignable (${HÔTE_FROID}) — les sauvegardes ne sont QUE sur ce disque`,
+    );
     return;
   }
-  const envoi = await $`rsync -a --delete-after --timeout=120 ${DESTINATION}/ ${HÔTE_FROID}:${DOSSIER_FROID}/`
-    .nothrow()
-    .quiet();
+  const envoi =
+    await $`rsync -a --delete-after --timeout=120 ${DESTINATION}/ ${HÔTE_FROID}:${DOSSIER_FROID}/`
+      .nothrow()
+      .quiet();
   if (envoi.exitCode !== 0) {
-    erreur(`envoi vers l'archive froide en échec : ${envoi.stderr.toString().slice(0, 300)}`);
+    erreur(
+      `envoi vers l'archive froide en échec : ${envoi.stderr.toString().slice(0, 300)}`,
+    );
     return;
   }
-  const distant = (await $`ssh -o BatchMode=yes ${HÔTE_FROID} du -sh ${DOSSIER_FROID}`.nothrow().quiet()).stdout
+  const distant = (
+    await $`ssh -o BatchMode=yes ${HÔTE_FROID} du -sh ${DOSSIER_FROID}`
+      .nothrow()
+      .quiet()
+  ).stdout
     .toString()
     .trim();
   log(`  ✓ hors machine   ${distant || DOSSIER_FROID}`);
@@ -326,18 +373,24 @@ async function envoyerHorsMachine(): Promise<void> {
 
 await mkdir(DESTINATION, { recursive: true }).catch(async () => {
   await $`sudo -n mkdir -p ${DESTINATION}`.nothrow().quiet();
-  await $`sudo -n chown ${process.env.USER ?? "ubuntu"} ${DESTINATION}`.nothrow().quiet();
+  await $`sudo -n chown ${process.env.USER ?? "ubuntu"} ${DESTINATION}`
+    .nothrow()
+    .quiet();
 });
 
 const liste = await bases();
 log(`sauvegarde postgres — ${horodatage} — bases : ${liste.join(", ")}`);
 
 if (drapeaux.has("--verifier")) {
-  const archives = (await readdir(DESTINATION)).filter(nom => nom.endsWith(".dump")).toSorted();
+  const archives = (await readdir(DESTINATION))
+    .filter((nom) => nom.endsWith(".dump"))
+    .toSorted();
   // Une archive par base, la plus récente. Prendre les N derniers noms triés alphabétiquement
   // vérifierait deux fois la même base et jamais celle qui porte la production.
   for (const base of liste) {
-    const dernière = archives.filter(nom => nom.startsWith(`${base}-`)).at(-1);
+    const dernière = archives
+      .filter((nom) => nom.startsWith(`${base}-`))
+      .at(-1);
     if (!dernière) {
       erreur(`${base} : aucune archive sur le disque`);
       continue;
@@ -376,5 +429,9 @@ if (drapeaux.has("--verifier")) {
   }
 }
 
-log(échecs === 0 ? "\n\u001B[32m✓ sauvegarde vérifiée\u001B[0m" : `\n\u001B[31m${échecs} échec(s)\u001B[0m`);
+log(
+  échecs === 0
+    ? "\n\u001B[32m✓ sauvegarde vérifiée\u001B[0m"
+    : `\n\u001B[31m${échecs} échec(s)\u001B[0m`,
+);
 process.exit(échecs === 0 ? 0 : 1);

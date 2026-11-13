@@ -30,9 +30,17 @@ export const LicenseModel = {
   }),
   verify: t.Object({
     valid: t.Boolean(),
-    reason: t.Optional(t.Union([t.Literal("not_found"), t.Literal("revoked"), t.Literal("expired")])),
+    reason: t.Optional(
+      t.Union([
+        t.Literal("not_found"),
+        t.Literal("revoked"),
+        t.Literal("expired"),
+      ]),
+    ),
     licenseNumber: t.Optional(t.String()),
     validUntil: t.Optional(t.String()),
-    holder: t.Optional(t.Object({ displayName: t.String(), avatar: t.Nullable(t.String()) })),
+    holder: t.Optional(
+      t.Object({ displayName: t.String(), avatar: t.Nullable(t.String()) }),
+    ),
   }),
 };

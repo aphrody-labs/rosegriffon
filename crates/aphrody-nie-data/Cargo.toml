@@ -16,7 +16,9 @@ serde = ["dep:serde"]
 std = ["serde_json/std"]
 
 [dependencies]
-serde_json = { version = "1.0.154", default-features = false, features = ["alloc"] }
+serde_json = { version = "1.0.154", default-features = false, features = [
+  "alloc",
+] }
 serde = { version = "1.0.228", default-features = false, features = ["alloc", "derive"], optional = true }
 
 [[bin]]

@@ -53,7 +53,9 @@ describe("démarrage sans phase — règles du legacy `generateLobbies`", () => 
       { id: 1, opponent1: { id: 10 }, opponent2: { id: 13 } },
       { id: 2, opponent1: { id: "11" }, opponent2: { id: "12" } },
     ];
-    expect(lobbysAOuvrir(matchs, joueurs, new Set([1]))).toEqual([{ matchId: 2, equipe1: "u2", equipe2: "u3" }]);
+    expect(lobbysAOuvrir(matchs, joueurs, new Set([1]))).toEqual([
+      { matchId: 2, equipe1: "u2", equipe2: "u3" },
+    ]);
   });
 
   test("messages de refus explicites", () => {
@@ -64,7 +66,9 @@ describe("démarrage sans phase — règles du legacy `generateLobbies`", () => 
 
 describe("routes de démarrage", () => {
   test("PUT /start/:id sans session → 401", async () => {
-    const reponse = await tournamentController.handle(new Request("http://localhost/tournaments/start/12", { method: "PUT" }));
+    const reponse = await tournamentController.handle(
+      new Request("http://localhost/tournaments/start/12", { method: "PUT" }),
+    );
     expect(reponse.status).toBe(401);
   });
 
@@ -72,12 +76,19 @@ describe("routes de démarrage", () => {
     const precedent = process.env.API_ADMIN_TOKEN;
     process.env.API_ADMIN_TOKEN = "jeton-interne-de-test";
     try {
-      for (const entetes of [{}, { authorization: "Bearer mauvais" }] as Array<Record<string, string>>) {
+      for (const entetes of [{}, { authorization: "Bearer mauvais" }] as Array<
+        Record<string, string>
+      >) {
         const reponse = await tournamentController.handle(
-          new Request("http://localhost/tournaments/internal/12/start", { method: "POST", headers: entetes }),
+          new Request("http://localhost/tournaments/internal/12/start", {
+            method: "POST",
+            headers: entetes,
+          }),
         );
         expect(reponse.status).toBe(401);
-        expect(await reponse.json()).toEqual({ message: "Internal authentication required" });
+        expect(await reponse.json()).toEqual({
+          message: "Internal authentication required",
+        });
       }
     } finally {
       if (precedent === undefined) delete process.env.API_ADMIN_TOKEN;

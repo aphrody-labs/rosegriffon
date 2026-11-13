@@ -57,7 +57,15 @@ function parseContent(content: any) {
   const actionPlays: any[] = [];
   const actionData: any[] = [];
 
-  if (!content?.lists) return { habitats, observations, params, actionIds, actionPlays, actionData };
+  if (!content?.lists)
+    return {
+      habitats,
+      observations,
+      params,
+      actionIds,
+      actionPlays,
+      actionData,
+    };
 
   for (const list of content.lists) {
     if (list.name === "m_HabitatList") {
@@ -99,7 +107,9 @@ export async function loadDictionaryConfigAsync(dataPath: string = DATA_ROOT) {
   return content ? parseContent(content) : null;
 }
 
-export async function buildDictionaryDatabase(dataPath: string = DATA_ROOT): Promise<DictionaryDatabase> {
+export async function buildDictionaryDatabase(
+  dataPath: string = DATA_ROOT,
+): Promise<DictionaryDatabase> {
   const result = await loadDictionaryConfigAsync(dataPath);
   const habitats = result?.habitats || [];
   const observations = result?.observations || [];
@@ -111,5 +121,13 @@ export async function buildDictionaryDatabase(dataPath: string = DATA_ROOT): Pro
   const byHabitatId = new Map<string, DictionaryHabitat>();
   for (const h of habitats) byHabitatId.set(h.habitatId, h);
 
-  return { habitats, observations, params, actionIds, actionPlays, actionData, byHabitatId };
+  return {
+    habitats,
+    observations,
+    params,
+    actionIds,
+    actionPlays,
+    actionData,
+    byHabitatId,
+  };
 }

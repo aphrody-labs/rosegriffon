@@ -7,7 +7,10 @@
  * observation, pas une décision.
  */
 
-import type { PlayerNoteCategory, PlayerNoteSeverity } from "../enums/eventEnums";
+import type {
+  PlayerNoteCategory,
+  PlayerNoteSeverity,
+} from "../enums/eventEnums";
 
 import type { PageQuery } from "./common";
 

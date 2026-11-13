@@ -1,24 +1,41 @@
 import { describe, expect, test } from "bun:test";
 
-import { chargerPacks, cheminPublic, convertirPack, oklchVersTeinteChroma } from "../scripts/charger-packs";
+import {
+  chargerPacks,
+  cheminPublic,
+  convertirPack,
+  oklchVersTeinteChroma,
+} from "../scripts/charger-packs";
 import type { ThemeSeed } from "../src/lib/color-engine";
 import { THEME_PACKS } from "../src/lib/themes";
 
 describe("charger-packs", () => {
   test("oklch() donne teinte et chroma", () => {
-    expect(oklchVersTeinteChroma("oklch(0.55 0.267 297)")).toEqual({ hue: 297, chroma: 0.267 });
-    expect(oklchVersTeinteChroma("oklch(55% 0.1 34deg)")).toEqual({ hue: 34, chroma: 0.1 });
+    expect(oklchVersTeinteChroma("oklch(0.55 0.267 297)")).toEqual({
+      hue: 297,
+      chroma: 0.267,
+    });
+    expect(oklchVersTeinteChroma("oklch(55% 0.1 34deg)")).toEqual({
+      hue: 34,
+      chroma: 0.1,
+    });
     expect(() => oklchVersTeinteChroma("#fff")).toThrow();
   });
 
   test("cheminPublic retire la racine publique", () => {
-    expect(cheminPublic("packages/rg-assets/public/emote/a.webp")).toBe("/emote/a.webp");
-    expect(cheminPublic("apps/rg-website/public/emote/b.webp")).toBe("/emote/b.webp");
+    expect(cheminPublic("packages/rg-assets/public/emote/a.webp")).toBe(
+      "/emote/a.webp",
+    );
+    expect(cheminPublic("apps/rg-website/public/emote/b.webp")).toBe(
+      "/emote/b.webp",
+    );
     expect(() => cheminPublic("autre/x.webp")).toThrow();
   });
 
   test("une clé inconnue est refusée (deny_unknown_fields)", () => {
-    expect(() => convertirPack({ id: "x", name: "X", extra: 1 })).toThrow(/clé inconnue "extra"/);
+    expect(() => convertirPack({ id: "x", name: "X", extra: 1 })).toThrow(
+      /clé inconnue "extra"/,
+    );
   });
 
   test("chaque theme.toml correspond à THEME_PACKS", async () => {
@@ -37,13 +54,17 @@ describe("charger-packs", () => {
       expect(pack.seed.chroma, `${id} chroma`).toBe(seed.chroma);
       expect(pack.seed.mode, `${id} mode`).toBe(seed.mode);
       expect(pack.seed.secondary, `${id} secondary`).toEqual(seed.secondary);
-      expect(pack.seed.neutralChroma, `${id} neutralChroma`).toBe(seed.neutralChroma);
+      expect(pack.seed.neutralChroma, `${id} neutralChroma`).toBe(
+        seed.neutralChroma,
+      );
     }
   });
 
   test("chaque fond porte la licence propriétaire Rose Griffon", async () => {
     for (const id of Object.keys(THEME_PACKS)) {
-      const toml = await Bun.file(new URL(`../themes/${id}/theme.toml`, import.meta.url)).text();
+      const toml = await Bun.file(
+        new URL(`../themes/${id}/theme.toml`, import.meta.url),
+      ).text();
       expect(toml).toContain('license = "LicenseRef-RoseGriffon-Proprietary"');
       expect(toml).not.toContain("pending");
     }

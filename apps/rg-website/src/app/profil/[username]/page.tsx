@@ -349,10 +349,10 @@ export default async function UserProfilePage({
   classementServeur = niveauPart?.classementServeur ?? null;
   fiche = {
     ...ficheBase,
-    ...(rolePart?.fiche ?? {}),
-    ...(achilleaPart?.fiche ?? {}),
-    ...(membrePart?.fiche ?? {}),
-    ...(niveauPart?.fiche ?? {}),
+    ...rolePart?.fiche,
+    ...achilleaPart?.fiche,
+    ...membrePart?.fiche,
+    ...niveauPart?.fiche,
   };
   const activities: Chronicle[] = activitiesResult;
   const staffMember: StaffMember | null = staffResult;

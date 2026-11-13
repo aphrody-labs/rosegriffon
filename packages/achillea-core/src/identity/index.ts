@@ -49,10 +49,18 @@ export function resolveDiscordAvatarUrl(
   }
 
   // Un avatar animé servi en .webp reste figé : forcer .gif.
-  const fixed = raw.replace(/(\/avatars\/\d+\/a_[a-f0-9]+)\.(webp|png|jpg|jpeg)(\?[^#]*)?$/iu, "$1.gif$3");
+  const fixed = raw.replace(
+    /(\/avatars\/\d+\/a_[a-f0-9]+)\.(webp|png|jpg|jpeg)(\?[^#]*)?$/iu,
+    "$1.gif$3",
+  );
 
-  if (/cdn\.discordapp\.com\/avatars\//iu.test(fixed) && !/[?&]size=/u.test(fixed)) {
-    return fixed.includes("?") ? `${fixed}&size=${width}` : `${fixed}?size=${width}`;
+  if (
+    /cdn\.discordapp\.com\/avatars\//iu.test(fixed) &&
+    !/[?&]size=/u.test(fixed)
+  ) {
+    return fixed.includes("?")
+      ? `${fixed}&size=${width}`
+      : `${fixed}?size=${width}`;
   }
 
   return fixed;
@@ -85,14 +93,19 @@ export const DEFAULT_RANK_SLUG = "fer";
 /** Slug d'image pour une clé de rang, insensible à la casse et aux accents. */
 export function rankImageSlug(key: string | null | undefined): string {
   if (!key) return DEFAULT_RANK_SLUG;
-  return RANK_IMAGE_SLUG[key.toLowerCase().normalize("NFKC")] ?? DEFAULT_RANK_SLUG;
+  return (
+    RANK_IMAGE_SLUG[key.toLowerCase().normalize("NFKC")] ?? DEFAULT_RANK_SLUG
+  );
 }
 
 /**
  * Chemin de l'image de rang, relatif par défaut (`ranks/or.webp`).
  * Passer `basePath` pour préfixer avec un CDN ou une route absolue.
  */
-export function rankImagePath(key: string | null | undefined, basePath = "ranks"): string {
+export function rankImagePath(
+  key: string | null | undefined,
+  basePath = "ranks",
+): string {
   const base = basePath.replace(/\/$/u, "");
   return `${base}/${rankImageSlug(key)}.webp`;
 }

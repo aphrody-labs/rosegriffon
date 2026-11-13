@@ -60,7 +60,12 @@ import { invalidate } from "./cache";
 import { GUILD_IDS, PROFIL } from "./config";
 
 /** Racines dont toutes les commandes sont réservées à l'exploitation. */
-const RACINES_RESERVEES = new Set(["administration", "staff", "gestion", "moderation"]);
+const RACINES_RESERVEES = new Set([
+  "administration",
+  "staff",
+  "gestion",
+  "moderation",
+]);
 
 /**
  * Libellés des types d'option Discord.
@@ -84,7 +89,12 @@ const TYPES_OPTION: Readonly<Record<number, string>> = Object.freeze({
 });
 
 /** Une option telle que discordx la porte, réduite à ce qu'on affiche. */
-type OptionBrute = { name: string; description: string; type: number; required: boolean };
+type OptionBrute = {
+  name: string;
+  description: string;
+  type: number;
+  required: boolean;
+};
 
 function decrireOptions(options: readonly OptionBrute[]): OptionCommandeBot[] {
   return (
@@ -92,8 +102,8 @@ function decrireOptions(options: readonly OptionBrute[]): OptionCommandeBot[] {
       // Les sous-commandes et les groupes sont des NŒUDS de l'arbre, pas des
       // paramètres : les compter comme options ferait dire à l'interface que
       // `/administration` prend vingt-trois arguments.
-      .filter(option => option.type !== 1 && option.type !== 2)
-      .map(option => ({
+      .filter((option) => option.type !== 1 && option.type !== 2)
+      .map((option) => ({
         nom: option.name,
         description: option.description,
         type: TYPES_OPTION[option.type] ?? `type ${option.type}`,
@@ -125,7 +135,9 @@ export function catalogueCommandes(): CommandeBot[] {
         groupe,
         sousCommande,
         description: commande.description,
-        options: decrireOptions(commande.options as unknown as readonly OptionBrute[]),
+        options: decrireOptions(
+          commande.options as unknown as readonly OptionBrute[],
+        ),
         profil: PROFIL.nom,
         source: nomDeClasse(commande),
         reservee: RACINES_RESERVEES.has(racine),
@@ -142,7 +154,8 @@ export function catalogueCommandes(): CommandeBot[] {
  * est une réponse, un nom inventé ne l'est pas.
  */
 function nomDeClasse(commande: unknown): string | null {
-  const depuis = (commande as { discord?: { from?: { name?: string } } }).discord?.from?.name;
+  const depuis = (commande as { discord?: { from?: { name?: string } } })
+    .discord?.from?.name;
   return typeof depuis === "string" && depuis.length > 0 ? depuis : null;
 }
 
@@ -175,9 +188,18 @@ export function brancherJournal(): void {
   for (const niveau of ["log", "info", "warn", "error"] as const) {
     const original = console[niveau].bind(console);
     console[niveau] = (...args: unknown[]) => {
-      const texte = args.map(a => (a instanceof Error ? (a.stack ?? a.message) : typeof a === "string" ? a : Bun.inspect(a))).join(" ");
+      const texte = args
+        .map((a) =>
+          a instanceof Error
+            ? (a.stack ?? a.message)
+            : typeof a === "string"
+              ? a
+              : Bun.inspect(a),
+        )
+        .join(" ");
       journal.push(`${new Date().toISOString()} [${niveau}] ${texte}`);
-      if (journal.length > TAILLE_JOURNAL) journal.splice(0, journal.length - TAILLE_JOURNAL);
+      if (journal.length > TAILLE_JOURNAL)
+        journal.splice(0, journal.length - TAILLE_JOURNAL);
       original(...args);
     };
   }
@@ -195,21 +217,31 @@ export function lignesJournal(): readonly string[] {
  * invitation » est souvent retirée aux bots, et ce n'est pas une panne.
  */
 export async function inviterDans(guild: Guild): Promise<string | null> {
-  const moi = guild.members.me ?? (await guild.members.fetchMe().catch(() => null));
+  const moi =
+    guild.members.me ?? (await guild.members.fetchMe().catch(() => null));
   if (!moi) return null;
   const salons = await guild.channels.fetch();
   const candidats = [...salons.values()]
-    .filter(salon => salon !== null)
+    .filter((salon) => salon !== null)
     .filter(
-      salon =>
+      (salon) =>
         salon.type === ChannelType.GuildText ||
         salon.type === ChannelType.GuildVoice ||
         salon.type === ChannelType.GuildAnnouncement,
     )
-    .filter(salon => moi.permissionsIn(salon).has(PermissionFlagsBits.CreateInstantInvite))
+    .filter((salon) =>
+      moi.permissionsIn(salon).has(PermissionFlagsBits.CreateInstantInvite),
+    )
     .toSorted((a, b) => a.rawPosition - b.rawPosition);
   for (const salon of candidats) {
-    const invitation = await salon.createInvite({ maxAge: 3600, maxUses: 1, unique: true, reason: "Back-office Achilléa" }).catch(() => null);
+    const invitation = await salon
+      .createInvite({
+        maxAge: 3600,
+        maxUses: 1,
+        unique: true,
+        reason: "Back-office Achilléa",
+      })
+      .catch(() => null);
     if (invitation) return invitation.url;
   }
   return null;
@@ -218,7 +250,7 @@ export async function inviterDans(guild: Guild): Promise<string | null> {
 /** L'état d'exécution, mesuré à l'instant de l'appel. */
 export function etatDuBot(client: Client): EtatBot {
   const guildes = [...client.guilds.cache.values()].map(decrireGuilde);
-  const rejointes = new Set(guildes.map(g => g.id));
+  const rejointes = new Set(guildes.map((g) => g.id));
   return {
     profil: PROFIL.nom,
     titre: PROFIL.titre,
@@ -227,8 +259,9 @@ export function etatDuBot(client: Client): EtatBot {
     uptimeSecondes: Math.round(process.uptime()),
     latenceMs: Math.round(client.ws.ping),
     guildes,
-    guildesAbsentes: GUILD_IDS.filter(id => !rejointes.has(id)),
-    nombreCommandes: MetadataStorage.instance.applicationCommandSlashesFlat.length,
+    guildesAbsentes: GUILD_IDS.filter((id) => !rejointes.has(id)),
+    nombreCommandes:
+      MetadataStorage.instance.applicationCommandSlashesFlat.length,
     modulesCharges: PROFIL.modules.length,
     memoireOctets: process.memoryUsage().rss,
     mesureLe: new Date().toISOString(),
@@ -239,20 +272,22 @@ export function etatDuBot(client: Client): EtatBot {
 function salonsDe(guild: Guild) {
   return [...guild.channels.cache.values()]
     .filter(
-      salon =>
+      (salon) =>
         salon.type === ChannelType.GuildText ||
         salon.type === ChannelType.GuildAnnouncement ||
         salon.type === ChannelType.GuildForum ||
         salon.type === ChannelType.GuildCategory,
     )
-    .map(salon => ({
+    .map((salon) => ({
       id: salon.id,
       nom: salon.name,
       categorie: salon.type === ChannelType.GuildCategory,
       parent: "parentId" in salon ? (salon.parentId ?? null) : null,
       position: "position" in salon ? salon.position : 0,
     }))
-    .toSorted((a, b) => a.position - b.position || a.nom.localeCompare(b.nom, "fr"));
+    .toSorted(
+      (a, b) => a.position - b.position || a.nom.localeCompare(b.nom, "fr"),
+    );
 }
 
 /**
@@ -264,8 +299,8 @@ function salonsDe(guild: Guild) {
  */
 function rolesDe(guild: Guild) {
   return [...guild.roles.cache.values()]
-    .filter(role => role.id !== guild.id)
-    .map(role => ({
+    .filter((role) => role.id !== guild.id)
+    .map((role) => ({
       id: role.id,
       nom: role.name,
       couleurHex: role.hexColor,
@@ -300,7 +335,10 @@ export function demarrerServeurAdmin(client: Client): ServeurAdmin | null {
   }
 
   const portDemande = Number(Bun.env.BOT_ADMIN_PORT);
-  const port = Number.isInteger(portDemande) && portDemande > 0 ? portDemande : PROFILS_BOT[PROFIL.nom].portAdmin;
+  const port =
+    Number.isInteger(portDemande) && portDemande > 0
+      ? portDemande
+      : PROFILS_BOT[PROFIL.nom].portAdmin;
 
   const serveur = Bun.serve({
     hostname: "127.0.0.1",
@@ -334,11 +372,16 @@ export function demarrerServeurAdmin(client: Client): ServeurAdmin | null {
       }
 
       if (chemin === "/commandes" && requete.method === "GET") {
-        return Response.json({ profil: PROFIL.nom, commandes: catalogueCommandes() });
+        return Response.json({
+          profil: PROFIL.nom,
+          commandes: catalogueCommandes(),
+        });
       }
 
       if (chemin === "/guildes" && requete.method === "GET") {
-        const guildes = [...client.guilds.cache.values()].map(decrireGuilde).toSorted((a, b) => b.membres - a.membres);
+        const guildes = [...client.guilds.cache.values()]
+          .map(decrireGuilde)
+          .toSorted((a, b) => b.membres - a.membres);
         return Response.json({ profil: PROFIL.nom, guildes });
       }
 
@@ -347,20 +390,34 @@ export function demarrerServeurAdmin(client: Client): ServeurAdmin | null {
       }
 
       if (chemin === "/identite" && requete.method === "GET") {
-        const application = client.application?.owner ? client.application : await client.application?.fetch().catch(() => null);
+        const application = client.application?.owner
+          ? client.application
+          : await client.application?.fetch().catch(() => null);
         const proprietaire = application?.owner ?? null;
         return Response.json({
-          user: client.user ? { ...client.user.toJSON() as object, iconURL: client.user.displayAvatarURL(), bannerURL: client.user.bannerURL() ?? null } : null,
+          user: client.user
+            ? {
+                ...(client.user.toJSON() as object),
+                iconURL: client.user.displayAvatarURL(),
+                bannerURL: client.user.bannerURL() ?? null,
+              }
+            : null,
           owner: proprietaire ? (proprietaire.toJSON() as object) : null,
         });
       }
 
       if (chemin === "/commandes/brutes" && requete.method === "GET") {
-        return Response.json(MetadataStorage.instance.applicationCommands.map(commande => commande.toJSON()));
+        return Response.json(
+          MetadataStorage.instance.applicationCommands.map((commande) =>
+            commande.toJSON(),
+          ),
+        );
       }
 
       if (chemin === "/utilisateurs/cache" && requete.method === "GET") {
-        return Response.json(client.users.cache.map(utilisateur => utilisateur.toJSON()));
+        return Response.json(
+          client.users.cache.map((utilisateur) => utilisateur.toJSON()),
+        );
       }
 
       // Membres EN CACHE de toutes les guildes, dédoublonnés. Pas de `members.fetch()`
@@ -371,7 +428,11 @@ export function demarrerServeurAdmin(client: Client): ServeurAdmin | null {
         for (const guild of client.guilds.cache.values()) {
           for (const membre of guild.members.cache.values()) {
             if (!vus.has(membre.id)) {
-              vus.set(membre.id, { ...(membre.user.toJSON() as object), iconURL: membre.user.displayAvatarURL(), bannerURL: membre.user.bannerURL() ?? null });
+              vus.set(membre.id, {
+                ...(membre.user.toJSON() as object),
+                iconURL: membre.user.displayAvatarURL(),
+                bannerURL: membre.user.bannerURL() ?? null,
+              });
             }
           }
         }
@@ -380,23 +441,47 @@ export function demarrerServeurAdmin(client: Client): ServeurAdmin | null {
 
       const utilisateur = chemin.match(/^\/utilisateurs\/(\d{15,25})$/);
       if (utilisateur && requete.method === "GET") {
-        const brut = await client.users.fetch(utilisateur[1]!).catch(() => null);
-        if (!brut) return Response.json({ erreur: "Utilisateur introuvable" }, { status: 404 });
-        return Response.json({ ...(brut.toJSON() as object), iconURL: brut.displayAvatarURL(), bannerURL: brut.bannerURL() ?? null });
+        const brut = await client.users
+          .fetch(utilisateur[1]!)
+          .catch(() => null);
+        if (!brut)
+          return Response.json(
+            { erreur: "Utilisateur introuvable" },
+            { status: 404 },
+          );
+        return Response.json({
+          ...(brut.toJSON() as object),
+          iconURL: brut.displayAvatarURL(),
+          bannerURL: brut.bannerURL() ?? null,
+        });
       }
 
       const detail = chemin.match(/^\/guildes\/(\d{15,25})\/detail$/);
       if (detail && requete.method === "GET") {
         const guild = await client.guilds.fetch(detail[1]!).catch(() => null);
-        if (!guild) return Response.json({ erreur: "Guilde inconnue de ce profil" }, { status: 404 });
-        return Response.json({ ...(guild.toJSON() as object), iconURL: guild.iconURL(), bannerURL: guild.bannerURL() });
+        if (!guild)
+          return Response.json(
+            { erreur: "Guilde inconnue de ce profil" },
+            { status: 404 },
+          );
+        return Response.json({
+          ...(guild.toJSON() as object),
+          iconURL: guild.iconURL(),
+          bannerURL: guild.bannerURL(),
+        });
       }
 
       const quitter = chemin.match(/^\/guildes\/(\d{15,25})\/quitter$/);
       if (quitter && requete.method === "POST") {
         const guild = client.guilds.cache.get(quitter[1]!);
-        if (!guild) return Response.json({ erreur: "Guilde inconnue de ce profil" }, { status: 404 });
-        console.warn(`⚠ [serveur-admin] départ demandé de « ${guild.name} » (${guild.id})`);
+        if (!guild)
+          return Response.json(
+            { erreur: "Guilde inconnue de ce profil" },
+            { status: 404 },
+          );
+        console.warn(
+          `⚠ [serveur-admin] départ demandé de « ${guild.name} » (${guild.id})`,
+        );
         await guild.leave();
         return Response.json({ success: true, message: "Guild deleted" });
       }
@@ -405,19 +490,28 @@ export function demarrerServeurAdmin(client: Client): ServeurAdmin | null {
       if (invitation && requete.method === "POST") {
         const guild = client.guilds.cache.get(invitation[1]!);
         if (!guild) {
-          return Response.json({ erreur: "Guilde inconnue de ce profil" }, { status: 404 });
+          return Response.json(
+            { erreur: "Guilde inconnue de ce profil" },
+            { status: 404 },
+          );
         }
         const url = await inviterDans(guild);
         return url
           ? Response.json({ url })
-          : Response.json({ erreur: "Aucun salon où le bot peut créer une invitation" }, { status: 409 });
+          : Response.json(
+              { erreur: "Aucun salon où le bot peut créer une invitation" },
+              { status: 409 },
+            );
       }
 
       const salons = chemin.match(/^\/guildes\/(\d{15,25})\/salons$/);
       if (salons && requete.method === "GET") {
         const guild = client.guilds.cache.get(salons[1]!);
         if (!guild) {
-          return Response.json({ erreur: "Guilde inconnue de ce profil" }, { status: 404 });
+          return Response.json(
+            { erreur: "Guilde inconnue de ce profil" },
+            { status: 404 },
+          );
         }
         return Response.json({ salons: salonsDe(guild) });
       }
@@ -426,7 +520,10 @@ export function demarrerServeurAdmin(client: Client): ServeurAdmin | null {
       if (roles && requete.method === "GET") {
         const guild = client.guilds.cache.get(roles[1]!);
         if (!guild) {
-          return Response.json({ erreur: "Guilde inconnue de ce profil" }, { status: 404 });
+          return Response.json(
+            { erreur: "Guilde inconnue de ce profil" },
+            { status: 404 },
+          );
         }
         return Response.json({ roles: rolesDe(guild) });
       }
@@ -445,7 +542,9 @@ export function demarrerServeurAdmin(client: Client): ServeurAdmin | null {
     },
   });
 
-  console.log(`🔧 Serveur d'administration du profil « ${PROFIL.nom} » à l'écoute sur 127.0.0.1:${port}`);
+  console.log(
+    `🔧 Serveur d'administration du profil « ${PROFIL.nom} » à l'écoute sur 127.0.0.1:${port}`,
+  );
 
   return {
     port,

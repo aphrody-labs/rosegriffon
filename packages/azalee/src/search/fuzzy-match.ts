@@ -12,7 +12,7 @@ function romajiToKatakanaCache(input: string): string | null {
   if (kata.length === 0) {
     return null;
   }
-  const allKana = [...kata].every(c => isKana(c) || c === "ー");
+  const allKana = [...kata].every((c) => isKana(c) || c === "ー");
   return allKana ? kata : null;
 }
 
@@ -114,8 +114,14 @@ export function findClosestMatch(
 /**
  * Extract all searchable text variations from multilingual name object
  */
-export function getNameVariations(names: { fr?: string | null; en?: string | null; ja?: string | null }): string[] {
-  return [names.fr, names.en, names.ja].filter((name): name is string => Boolean(name)).map(normalizeText);
+export function getNameVariations(names: {
+  fr?: string | null;
+  en?: string | null;
+  ja?: string | null;
+}): string[] {
+  return [names.fr, names.en, names.ja]
+    .filter((name): name is string => Boolean(name))
+    .map(normalizeText);
 }
 
 /**
@@ -168,7 +174,10 @@ export function detectMatchedLanguage(
  * Highlight matching parts of text (for UI rendering)
  * Returns array of { text: string, highlight: boolean }
  */
-export function highlightMatches(text: string, query: string): Array<{ text: string; highlight: boolean }> {
+export function highlightMatches(
+  text: string,
+  query: string,
+): Array<{ text: string; highlight: boolean }> {
   if (!query) {
     return [{ text, highlight: false }];
   }

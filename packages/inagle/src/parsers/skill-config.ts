@@ -31,9 +31,9 @@ function findAllSkillConfigFiles(dir: string): string[] {
   if (!existsSync(dir)) return [];
   const files = readdirSync(dir);
   return files
-    .filter(f => f.startsWith("skill_config_") && f.endsWith(".cfg.bin.json"))
+    .filter((f) => f.startsWith("skill_config_") && f.endsWith(".cfg.bin.json"))
     .sort()
-    .map(f => join(dir, f));
+    .map((f) => join(dir, f));
 }
 
 export async function buildSkillDatabaseAsync(dataPath: string) {
@@ -42,9 +42,13 @@ export async function buildSkillDatabaseAsync(dataPath: string) {
     process.env.INAGLE_DATA_SOURCE === "postgres"
       ? findAllSkillConfigFiles(skillDir)
       : gameVfsPaths()
-          .filter(path => /^data\/common\/gamedata\/skill\/skill_config_[0-9].*\.cfg\.bin$/.test(path))
+          .filter((path) =>
+            /^data\/common\/gamedata\/skill\/skill_config_[0-9].*\.cfg\.bin$/.test(
+              path,
+            ),
+          )
           .sort()
-          .map(path => path + ".json");
+          .map((path) => path + ".json");
 
   const skills: ParsedSkill[] = [];
   const byId = new Map<string, ParsedSkill>();
@@ -82,7 +86,9 @@ export async function buildSkillDatabaseAsync(dataPath: string) {
       const content = await loadJsonAsync<any>(configPath);
 
       if (content?.lists) {
-        const infoList = content.lists.find((l: any) => l.name === "m_skillInfoList");
+        const infoList = content.lists.find(
+          (l: any) => l.name === "m_skillInfoList",
+        );
         if (infoList?.values) {
           let added = 0;
           for (const entry of infoList.values) {
@@ -90,13 +96,19 @@ export async function buildSkillDatabaseAsync(dataPath: string) {
             const nameId = entry.skillNameId;
             const descId = entry.skillDescId;
 
-            const skillIdHex = skillId.startsWith("0x") ? skillId : toHex(Number(skillId));
+            const skillIdHex = skillId.startsWith("0x")
+              ? skillId
+              : toHex(Number(skillId));
 
             // Skip if already loaded from an earlier version (later versions override)
             if (byId.has(skillIdHex)) continue;
 
-            const nameIdHex = nameId.startsWith("0x") ? nameId : toHex(Number(nameId));
-            const descIdHex = descId.startsWith("0x") ? descId : toHex(Number(descId));
+            const nameIdHex = nameId.startsWith("0x")
+              ? nameId
+              : toHex(Number(nameId));
+            const descIdHex = descId.startsWith("0x")
+              ? descId
+              : toHex(Number(descId));
 
             const nameFr = textFr.get(nameIdHex);
             const nameEn = textEn.get(nameIdHex);
@@ -137,7 +149,9 @@ export async function buildSkillDatabaseAsync(dataPath: string) {
               added++;
             }
           }
-          console.log(`[SkillParser] Loaded ${added} skills from ${configPath.split("/").pop()}`);
+          console.log(
+            `[SkillParser] Loaded ${added} skills from ${configPath.split("/").pop()}`,
+          );
         }
       }
     } catch (e) {

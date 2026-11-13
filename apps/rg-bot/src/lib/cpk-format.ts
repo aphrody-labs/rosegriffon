@@ -129,8 +129,8 @@ export function normaliserChemin(saisie: string): string {
   const segments = saisie
     .replaceAll("\\", "/")
     .split("/")
-    .map(s => s.trim())
-    .filter(s => s.length > 0 && s !== "." && s !== "..");
+    .map((s) => s.trim())
+    .filter((s) => s.length > 0 && s !== "." && s !== "..");
   if (segments.length === 0) {
     return "";
   }
@@ -175,7 +175,12 @@ export function filAriane(chemin: string): EtapeAriane[] {
   let cumul = "";
   for (const [index, segment] of segments.entries()) {
     cumul = cumul === "" ? segment : `${cumul}/${segment}`;
-    const libelle = index === 0 ? segment : index === 1 ? topLabel(segment) : segLabel(segment);
+    const libelle =
+      index === 0
+        ? segment
+        : index === 1
+          ? topLabel(segment)
+          : segLabel(segment);
     etapes.push({ libelle, chemin: cumul });
   }
   return etapes;
@@ -184,7 +189,7 @@ export function filAriane(chemin: string): EtapeAriane[] {
 /** Fil d'Ariane rendu en une ligne. */
 export function ligneAriane(chemin: string): string {
   return filAriane(chemin)
-    .map(e => e.libelle)
+    .map((e) => e.libelle)
     .join(" › ");
 }
 
@@ -218,12 +223,17 @@ export function nombreDePages(total: number, parPage: number): number {
  * SQLite une tranche au-delà de la fin : réponse vide, page blanche, et le
  * membre conclut que le dossier s'est vidé.
  */
-export function bornerOffset(offset: number, total: number, parPage: number): number {
+export function bornerOffset(
+  offset: number,
+  total: number,
+  parPage: number,
+): number {
   if (!Number.isFinite(offset) || parPage <= 0) {
     return 0;
   }
   const dernier = (nombreDePages(total, parPage) - 1) * parPage;
-  const aligne = Math.floor(Math.max(0, Math.trunc(offset)) / parPage) * parPage;
+  const aligne =
+    Math.floor(Math.max(0, Math.trunc(offset)) / parPage) * parPage;
   return Math.min(aligne, Math.max(0, dernier));
 }
 
@@ -256,14 +266,22 @@ export interface TranchePage {
  * bien plus que ce qu'un embed peut porter. On pagine donc sur la concaténation
  * des deux, ce qui reste cohérent avec l'ordre affiché.
  */
-export function tranchePage(nbDossiers: number, nbFichiers: number, offset: number, parPage: number): TranchePage {
+export function tranchePage(
+  nbDossiers: number,
+  nbFichiers: number,
+  offset: number,
+  parPage: number,
+): TranchePage {
   const total = Math.max(0, nbDossiers) + Math.max(0, nbFichiers);
   const debut = bornerOffset(offset, total, parPage);
   const debutDossiers = Math.min(debut, Math.max(0, nbDossiers));
   const finDossiers = Math.min(debut + parPage, Math.max(0, nbDossiers));
   const prisDossiers = Math.max(0, finDossiers - debutDossiers);
   const offsetFichiers = Math.max(0, debut - Math.max(0, nbDossiers));
-  const limiteFichiers = offsetFichiers >= Math.max(0, nbFichiers) ? 0 : Math.max(0, parPage - prisDossiers);
+  const limiteFichiers =
+    offsetFichiers >= Math.max(0, nbFichiers)
+      ? 0
+      : Math.max(0, parPage - prisDossiers);
   return { debutDossiers, finDossiers, offsetFichiers, limiteFichiers };
 }
 
@@ -293,7 +311,10 @@ export interface EtatRecherche {
  * reste néanmoins possible : le membre peut taper un chemin plus long.
  */
 export function encoderParcours(etat: EtatParcours): string | null {
-  return encoderEtat(PREFIXE_BOUTON_PARCOURS, [Math.max(0, Math.trunc(etat.offset)), etat.chemin]);
+  return encoderEtat(PREFIXE_BOUTON_PARCOURS, [
+    Math.max(0, Math.trunc(etat.offset)),
+    etat.chemin,
+  ]);
 }
 
 /** Décode un `customId` produit par `encoderParcours`. `null` si ce n'en est pas un. */
@@ -311,7 +332,10 @@ export function decoderParcours(customId: string): EtatParcours | null {
 
 /** Encode l'état d'une recherche dans un `customId` (`null` si le motif est trop long). */
 export function encoderRecherche(etat: EtatRecherche): string | null {
-  return encoderEtat(PREFIXE_BOUTON_RECHERCHE, [Math.max(0, Math.trunc(etat.offset)), etat.motif]);
+  return encoderEtat(PREFIXE_BOUTON_RECHERCHE, [
+    Math.max(0, Math.trunc(etat.offset)),
+    etat.motif,
+  ]);
 }
 
 /** Décode un `customId` produit par `encoderRecherche`. */
@@ -389,7 +413,11 @@ export function octetsLisibles(octets: number | null | undefined): string {
 
 /** Vrai si un contenu de cette taille peut partir en pièce jointe Discord. */
 export function tientEnPieceJointe(octets: number | null | undefined): boolean {
-  return typeof octets === "number" && octets > 0 && octets <= SEUIL_PIECE_JOINTE_OCTETS;
+  return (
+    typeof octets === "number" &&
+    octets > 0 &&
+    octets <= SEUIL_PIECE_JOINTE_OCTETS
+  );
 }
 
 /**
@@ -475,9 +503,16 @@ const ORIGINE_CDN = "https://cdn.rosegriffon.fr";
  * lien relatif ne mène nulle part — c'est ce que les aperçus CPK du bot
  * publiaient. On ne réécrit que l'ORIGINE, jamais le chemin.
  */
-export function urlCdnAbsolue(url: string, env: Record<string, string | undefined> = Bun.env): string {
+export function urlCdnAbsolue(
+  url: string,
+  env: Record<string, string | undefined> = Bun.env,
+): string {
   if (!url.startsWith("/")) return url;
-  const origine = (env.NIE_CDN_BASE || env.MODEL_SERVE_URL || ORIGINE_CDN).replace(/\/+$/, "");
+  const origine = (
+    env.NIE_CDN_BASE ||
+    env.MODEL_SERVE_URL ||
+    ORIGINE_CDN
+  ).replace(/\/+$/, "");
   return `${origine}${url}`;
 }
 
@@ -520,7 +555,11 @@ function apercuCpkRelatif(entree: EntreeApercu): ApercuCpk {
     };
   }
   if (famille === "model") {
-    return { ...base, contenu: cpkAssetUrl(entree.path, entree.ext) ?? brut, image: null };
+    return {
+      ...base,
+      contenu: cpkAssetUrl(entree.path, entree.ext) ?? brut,
+      image: null,
+    };
   }
   if (famille === "config") {
     return { ...base, contenu: cpkCfgUrl(entree.path), image: null };
@@ -569,36 +608,48 @@ export function resumerConfig(valeur: unknown): string | null {
   if (typeof valeur !== "object" || valeur === null) {
     return null;
   }
-  const objet = valeur as { format?: unknown; lists?: unknown; entries?: unknown };
+  const objet = valeur as {
+    format?: unknown;
+    lists?: unknown;
+    entries?: unknown;
+  };
   const format = typeof objet.format === "string" ? objet.format : null;
 
   if (Array.isArray(objet.lists)) {
     const listes = objet.lists as Array<{ name?: unknown; count?: unknown }>;
     const lignes = listes
       .slice(0, 8)
-      .map(liste => {
+      .map((liste) => {
         const nom = typeof liste.name === "string" ? liste.name : "(sans nom)";
         const compte = typeof liste.count === "number" ? liste.count : 0;
         return `• \`${nom}\` — ${entierLisible(compte)} ligne${compte > 1 ? "s" : ""}`;
       })
       .join("\n");
-    const reste = listes.length > 8 ? `\n… et ${listes.length - 8} autres listes` : "";
+    const reste =
+      listes.length > 8 ? `\n… et ${listes.length - 8} autres listes` : "";
     return `Format **${format ?? "rdbn"}** · ${entierLisible(listes.length)} liste${
       listes.length > 1 ? "s" : ""
     }\n${lignes}${reste}`;
   }
 
   if (Array.isArray(objet.entries)) {
-    const entrees = objet.entries as Array<{ name?: unknown; children?: unknown }>;
+    const entrees = objet.entries as Array<{
+      name?: unknown;
+      children?: unknown;
+    }>;
     const lignes = entrees
       .slice(0, 8)
-      .map(entree => {
-        const nom = typeof entree.name === "string" ? entree.name : "(sans nom)";
-        const enfants = Array.isArray(entree.children) ? entree.children.length : 0;
+      .map((entree) => {
+        const nom =
+          typeof entree.name === "string" ? entree.name : "(sans nom)";
+        const enfants = Array.isArray(entree.children)
+          ? entree.children.length
+          : 0;
         return `• \`${nom}\` — ${entierLisible(enfants)} enfant${enfants > 1 ? "s" : ""}`;
       })
       .join("\n");
-    const reste = entrees.length > 8 ? `\n… et ${entrees.length - 8} autres blocs` : "";
+    const reste =
+      entrees.length > 8 ? `\n… et ${entrees.length - 8} autres blocs` : "";
     return `Format **${format ?? "T2b"}** · ${entierLisible(entrees.length)} bloc${
       entrees.length > 1 ? "s" : ""
     } racine\n${lignes}${reste}`;
@@ -613,11 +664,18 @@ export function resumerConfig(valeur: unknown): string | null {
  * Le bloc DOIT être fermé même après troncature : un ``` orphelin transforme le
  * reste de l'embed en code et rend la fiche illisible.
  */
-export function blocCode(texte: string, langage = "", maxContenu = CARACTERES_EXTRAIT): string {
+export function blocCode(
+  texte: string,
+  langage = "",
+  maxContenu = CARACTERES_EXTRAIT,
+): string {
   const ouverture = `\`\`\`${langage}\n`;
   const fermeture = "\n```";
   const propre = texte.replaceAll("```", "'''");
-  const contenu = propre.length > maxContenu ? `${propre.slice(0, Math.max(0, maxContenu - 1))}…` : propre;
+  const contenu =
+    propre.length > maxContenu
+      ? `${propre.slice(0, Math.max(0, maxContenu - 1))}…`
+      : propre;
   return `${ouverture}${contenu}${fermeture}`;
 }
 

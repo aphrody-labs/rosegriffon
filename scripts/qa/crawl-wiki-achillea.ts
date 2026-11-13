@@ -25,7 +25,8 @@ export interface CrawlResult {
   contentLength: number;
 }
 
-const EMOJI_REGEX = /[\p{Extended_Pictographic}\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu;
+const EMOJI_REGEX =
+  /[\p{Extended_Pictographic}\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu;
 
 const SLOP_WORDS = [
   "révolutionnaire",
@@ -97,7 +98,10 @@ export const CRAWL_ROUTES = [
   "/achillea/guide",
 ];
 
-export async function crawlRoute(baseUrl: string, route: string): Promise<CrawlResult> {
+export async function crawlRoute(
+  baseUrl: string,
+  route: string,
+): Promise<CrawlResult> {
   const url = `${baseUrl.replace(/\/+$/, "")}${route}`;
   const start = performance.now();
   let status = 0;
@@ -106,8 +110,10 @@ export async function crawlRoute(baseUrl: string, route: string): Promise<CrawlR
   try {
     const res = await fetch(url, {
       headers: {
-        "User-Agent": "RoseGriffon-Sovereign-Auditor/2026 (Bun/1.4.4; Linux/x86_64)",
-        Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "User-Agent":
+          "RoseGriffon-Sovereign-Auditor/2026 (Bun/1.4.4; Linux/x86_64)",
+        Accept:
+          "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
       },
     });
     status = res.status;
@@ -141,14 +147,18 @@ export async function crawlRoute(baseUrl: string, route: string): Promise<CrawlR
   const hasCanonical = /<link[^>]+rel=["']canonical["']/i.test(text);
 
   // Check M3 container tokens
-  const hasM3Container = text.includes("surface-container") || text.includes("bg-surface");
+  const hasM3Container =
+    text.includes("surface-container") || text.includes("bg-surface");
 
   // Anti-slop / Emojis check in visible rendered text (strip tags and scripts)
-  const bodyOnly = text.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
+  const bodyOnly = text
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
     .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, "")
     .replace(/<[^>]+>/g, " ");
 
-  const emojiMatches = Array.from(bodyOnly.matchAll(EMOJI_REGEX)).map((m) => m[0]);
+  const emojiMatches = Array.from(bodyOnly.matchAll(EMOJI_REGEX)).map(
+    (m) => m[0],
+  );
   const emojiCount = emojiMatches.length;
 
   const slopMatches: string[] = [];
@@ -190,18 +200,30 @@ export async function runCrawler(baseUrl: string = "https://rosegriffon.fr") {
     const res = await crawlRoute(baseUrl, route);
     results.push(res);
 
-    const isOk = res.status >= 200 && res.status < 400 && res.emojiCount === 0 && res.slopCount === 0;
+    const isOk =
+      res.status >= 200 &&
+      res.status < 400 &&
+      res.emojiCount === 0 &&
+      res.slopCount === 0;
     if (isOk) {
       passed++;
-      console.log(`[PASS] ${res.route.padEnd(32)} ${res.status} | ${res.latencyMs}ms | ${res.contentLength} bytes`);
+      console.log(
+        `[PASS] ${res.route.padEnd(32)} ${res.status} | ${res.latencyMs}ms | ${res.contentLength} bytes`,
+      );
     } else {
       failed++;
-      console.log(`[WARN] ${res.route.padEnd(32)} ${res.status} | ${res.latencyMs}ms | Emojis: ${res.emojiCount} | Slop: ${res.slopCount} (${res.slopMatches.join(", ")})`);
+      console.log(
+        `[WARN] ${res.route.padEnd(32)} ${res.status} | ${res.latencyMs}ms | Emojis: ${res.emojiCount} | Slop: ${res.slopCount} (${res.slopMatches.join(", ")})`,
+      );
     }
   }
 
-  console.log(`\n-------------------------------------------------------------`);
-  console.log(`[Crawler Summary] Total: ${results.length} | Pass: ${passed} | Fail/Warn: ${failed}`);
+  console.log(
+    `\n-------------------------------------------------------------`,
+  );
+  console.log(
+    `[Crawler Summary] Total: ${results.length} | Pass: ${passed} | Fail/Warn: ${failed}`,
+  );
   console.log(`-------------------------------------------------------------`);
 
   return results;

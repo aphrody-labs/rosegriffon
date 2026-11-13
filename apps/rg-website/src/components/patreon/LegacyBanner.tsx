@@ -38,13 +38,16 @@ export async function LegacyBanner({ userId }: Props) {
             {legacy.tier_titles?.[0] ? (
               <>
                 {" "}
-                <span className="text-[#a08540] dark:text-[#c9a958]">({texteSansDecor(legacy.tier_titles[0])})</span>
+                <span className="text-[#a08540] dark:text-[#c9a958]">
+                  ({texteSansDecor(legacy.tier_titles[0])})
+                </span>
               </>
             ) : null}{" "}
             🌹
           </p>
           <p className="mt-1 text-sm text-muted-foreground">
-            Lancez votre soutien direct et conservez votre tarif pendant 12 mois.
+            Lancez votre soutien direct et conservez votre tarif pendant 12
+            mois.
           </p>
         </div>
         <PatreonConnectButton variant="reactivate" redirect="/dashboard" />

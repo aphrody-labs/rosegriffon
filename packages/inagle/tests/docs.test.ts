@@ -69,19 +69,23 @@ describe("@aphrody/inagle/docs", () => {
     it("should contain all essential CRI CPK pack rules", () => {
       expect(VFS_PACK_RULES.length).toBeGreaterThanOrEqual(8);
 
-      const commonPack = VFS_PACK_RULES.find(p => p.packName === "common.cpk");
+      const commonPack = VFS_PACK_RULES.find(
+        (p) => p.packName === "common.cpk",
+      );
       expect(commonPack).toBeDefined();
       expect(commonPack?.keyDerivation).toBe("filename-crc32");
       expect(commonPack?.mountPriority).toBe(100);
 
-      const cpkList = VFS_PACK_RULES.find(p => p.packName === "cpk_list.cfg.bin");
+      const cpkList = VFS_PACK_RULES.find(
+        (p) => p.packName === "cpk_list.cfg.bin",
+      );
       expect(cpkList).toBeDefined();
       expect(cpkList?.keyDerivation).toBe("viola-fixed");
     });
 
     it("should define top-level directory topologies", () => {
       expect(VFS_DIRECTORIES.length).toBeGreaterThanOrEqual(6);
-      const commonDir = VFS_DIRECTORIES.find(d => d.path === "data/common/");
+      const commonDir = VFS_DIRECTORIES.find((d) => d.path === "data/common/");
       expect(commonDir).toBeDefined();
       expect(commonDir?.primaryExtension).toBe(".cfg.bin");
     });
@@ -99,37 +103,49 @@ describe("@aphrody/inagle/docs", () => {
     });
 
     it("should include verified cryptographic constants", () => {
-      const viola = NIE_CRYPTO_CONSTANTS.find(c => c.name === "VIOLA_FIXED_KEY");
+      const viola = NIE_CRYPTO_CONSTANTS.find(
+        (c) => c.name === "VIOLA_FIXED_KEY",
+      );
       expect(viola).toBeDefined();
       expect(viola?.hexValue).toBe("0x1717E18E");
       expect(viola?.intValue).toBe(0x1717e18e);
       expect(viola?.verifiedInGameDump).toBe(true);
 
-      const crc = NIE_CRYPTO_CONSTANTS.find(c => c.name === "LEVEL5_CRC32_POLYNOMIAL");
+      const crc = NIE_CRYPTO_CONSTANTS.find(
+        (c) => c.name === "LEVEL5_CRC32_POLYNOMIAL",
+      );
       expect(crc).toBeDefined();
       expect(crc?.hexValue).toBe("0xEDB88320");
       expect(crc?.intValue).toBe(0xedb88320);
 
-      const steam = NIE_CRYPTO_CONSTANTS.find(c => c.name === "STEAM_APP_ID");
+      const steam = NIE_CRYPTO_CONSTANTS.find((c) => c.name === "STEAM_APP_ID");
       expect(steam?.intValue).toBe(2799860);
     });
 
     it("should include all 8 critical function offsets", () => {
       expect(NIE_CRITICAL_OFFSETS.length).toBe(8);
 
-      const tickLoop = NIE_CRITICAL_OFFSETS.find(o => o.symbol === "GameTickLoop");
+      const tickLoop = NIE_CRITICAL_OFFSETS.find(
+        (o) => o.symbol === "GameTickLoop",
+      );
       expect(tickLoop).toBeDefined();
       expect(tickLoop?.addressHex).toBe("0x1406d5840");
       expect(tickLoop?.subsystem).toBe("game-loop");
 
-      const charaCtrl = NIE_CRITICAL_OFFSETS.find(o => o.symbol === "CharaControllerUpdate");
+      const charaCtrl = NIE_CRITICAL_OFFSETS.find(
+        (o) => o.symbol === "CharaControllerUpdate",
+      );
       expect(charaCtrl).toBeDefined();
       expect(charaCtrl?.addressHex).toBe("0x1404ecd60");
 
-      const cpkDecrypt = NIE_CRITICAL_OFFSETS.find(o => o.symbol === "CriFsStreamDecryptBlock");
+      const cpkDecrypt = NIE_CRITICAL_OFFSETS.find(
+        (o) => o.symbol === "CriFsStreamDecryptBlock",
+      );
       expect(cpkDecrypt?.addressHex).toBe("0x1405a1120");
 
-      const crilayla = NIE_CRITICAL_OFFSETS.find(o => o.symbol === "CriLaylaDecompressStream");
+      const crilayla = NIE_CRITICAL_OFFSETS.find(
+        (o) => o.symbol === "CriLaylaDecompressStream",
+      );
       expect(crilayla?.addressHex).toBe("0x1405b3890");
     });
 
@@ -188,7 +204,9 @@ describe("@aphrody/inagle/docs", () => {
       expect(txt.startsWith("# @aphrody/inagle")).toBe(true);
       expect(txt).toContain("> Universal Game Data API");
       expect(txt).toContain("## Documentation");
-      expect(txt).toContain("[Cross-Language Architecture](docs/CROSS-LANGUAGE-ARCHITECTURE.md)");
+      expect(txt).toContain(
+        "[Cross-Language Architecture](docs/CROSS-LANGUAGE-ARCHITECTURE.md)",
+      );
       expect(txt).toContain("[VFS Specification](docs/VFS-SPECIFICATION.md)");
       expect(txt).toContain("0x1717E18E");
       expect(txt).toContain("0xEDB88320");
@@ -198,11 +216,17 @@ describe("@aphrody/inagle/docs", () => {
       const full = generateLlmsFullTxt();
       expect(full).toContain("SYSTEM ARCHITECTURE & CROSS-LANGUAGE RUNTIME");
       expect(full).toContain("Rust C-ABI Export Symbols (libiecode.so):");
-      expect(full).toContain(".NET 10 NativeAOT C-ABI Export Symbols (IECODE.Ffi.so):");
-      expect(full).toContain("VICTORY ROAD VIRTUAL FILE SYSTEM (VFS) SPECIFICATION");
+      expect(full).toContain(
+        ".NET 10 NativeAOT C-ABI Export Symbols (IECODE.Ffi.so):",
+      );
+      expect(full).toContain(
+        "VICTORY ROAD VIRTUAL FILE SYSTEM (VFS) SPECIFICATION",
+      );
       expect(full).toContain("All 28 Recognized Authoritative Binary Formats:");
       expect(full).toContain("CRILAYLA Reverse Bitstream LZSS");
-      expect(full).toContain("NIE.EXE REVERSE ENGINEERING DISASSEMBLY REFERENCE");
+      expect(full).toContain(
+        "NIE.EXE REVERSE ENGINEERING DISASSEMBLY REFERENCE",
+      );
       expect(full).toContain("117,068");
       expect(full).toContain("GameTickLoop");
       expect(full).toContain("BonePalette (0x600 / 1536 bytes)");
@@ -212,7 +236,9 @@ describe("@aphrody/inagle/docs", () => {
   describe("Markdown Generators & File Exporter", () => {
     it("should generate markdown documents without errors", () => {
       const vfsMd = generateVfsSpecificationMarkdown();
-      expect(vfsMd).toContain("# Victory Road Virtual File System (VFS) Specification");
+      expect(vfsMd).toContain(
+        "# Victory Road Virtual File System (VFS) Specification",
+      );
       expect(vfsMd).toContain("G4TX");
 
       const nieMd = generateNieReMarkdown();

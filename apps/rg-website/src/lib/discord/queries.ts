@@ -10,8 +10,15 @@ import "server-only";
 
 import { getPgPool } from "@/lib/db/pg";
 
-import { type ContexteMentions, extraireIdentifiantsMentionnes } from "./markdown-ast";
-import { type MessageDiscord, type SalonDiscord, normaliserMessage } from "./types";
+import {
+  type ContexteMentions,
+  extraireIdentifiantsMentionnes,
+} from "./markdown-ast";
+import {
+  type MessageDiscord,
+  type SalonDiscord,
+  normaliserMessage,
+} from "./types";
 import { couleurDiscord } from "./url";
 
 /** Nombre de messages chargés par page (borne dure, y compris via l'API). */
@@ -30,13 +37,15 @@ const COLONNES_MESSAGE = `
 /** Salons republiés publiquement, dans l'ordre du serveur Discord. */
 export async function listerSalonsSuivis(): Promise<SalonDiscord[]> {
   try {
-    const { rows } = await getPgPool().query<SalonDiscord & { position: number | null }>(
+    const { rows } = await getPgPool().query<
+      SalonDiscord & { position: number | null }
+    >(
       `SELECT channel_id, name, type, topic, icon_emoji, position
 			 FROM discord_channels
 			 WHERE suivi = true
 			 ORDER BY position NULLS LAST, name`,
     );
-    return rows.map(ligne => ({
+    return rows.map((ligne) => ({
       channel_id: ligne.channel_id,
       icon_emoji: ligne.icon_emoji,
       name: ligne.name,
@@ -105,7 +114,9 @@ export async function listerMessages({
 			LIMIT $3`,
       [channelId, before ?? null, taille],
     );
-    return rows.map(ligne => normaliserMessage(ligne)).filter((message): message is MessageDiscord => message !== null);
+    return rows
+      .map((ligne) => normaliserMessage(ligne))
+      .filter((message): message is MessageDiscord => message !== null);
   } catch (error) {
     console.error("[discord] lecture des messages impossible", error);
     return [];
@@ -113,7 +124,9 @@ export async function listerMessages({
 }
 
 /** Un message précis, à condition qu'il soit visible et dans un salon suivi. */
-export async function lireMessage(messageId: string): Promise<MessageDiscord | null> {
+export async function lireMessage(
+  messageId: string,
+): Promise<MessageDiscord | null> {
   try {
     const { rows } = await getPgPool().query<Record<string, unknown>>(
       `SELECT ${COLONNES_MESSAGE}
@@ -133,8 +146,14 @@ export async function lireMessage(messageId: string): Promise<MessageDiscord | n
  * Résout EN UNE FOIS, côté serveur, les pseudos / rôles / salons mentionnés
  * dans un lot de messages. Le navigateur ne fait aucune requête de résolution.
  */
-export async function construireContexteMentions(messages: MessageDiscord[]): Promise<ContexteMentions> {
-  const contexte: ContexteMentions = { roles: {}, salons: {}, utilisateurs: {} };
+export async function construireContexteMentions(
+  messages: MessageDiscord[],
+): Promise<ContexteMentions> {
+  const contexte: ContexteMentions = {
+    roles: {},
+    salons: {},
+    utilisateurs: {},
+  };
 
   // Les mentions peuvent aussi vivre dans le texte des encarts (sondages EasyPoll).
   const textes: string[] = [];
@@ -150,7 +169,11 @@ export async function construireContexteMentions(messages: MessageDiscord[]): Pr
   }
 
   const ids = extraireIdentifiantsMentionnes(textes);
-  if (ids.utilisateurs.length === 0 && ids.roles.length === 0 && ids.salons.length === 0) {
+  if (
+    ids.utilisateurs.length === 0 &&
+    ids.roles.length === 0 &&
+    ids.salons.length === 0
+  ) {
     return contexte;
   }
 
@@ -184,7 +207,8 @@ export async function construireContexteMentions(messages: MessageDiscord[]): Pr
     ]);
 
     for (const ligne of utilisateurs?.rows ?? []) {
-      contexte.utilisateurs[ligne.discord_id] = ligne.nickname ?? ligne.display_name ?? ligne.username;
+      contexte.utilisateurs[ligne.discord_id] =
+        ligne.nickname ?? ligne.display_name ?? ligne.username;
     }
     for (const ligne of roles?.rows ?? []) {
       contexte.roles[ligne.role_id] = {
@@ -205,7 +229,10 @@ export async function construireContexteMentions(messages: MessageDiscord[]): Pr
 }
 
 /** Fusionne deux contextes de mentions (page initiale + recharges du client). */
-export function fusionnerContextes(base: ContexteMentions, ajout: ContexteMentions): ContexteMentions {
+export function fusionnerContextes(
+  base: ContexteMentions,
+  ajout: ContexteMentions,
+): ContexteMentions {
   return {
     roles: { ...base.roles, ...ajout.roles },
     salons: { ...base.salons, ...ajout.salons },

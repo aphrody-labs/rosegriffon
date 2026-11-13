@@ -38,13 +38,26 @@ export default async function UsersPage({ searchParams }: UsersPageProps) {
   const thirtyDaysAgo = await getRequestTime();
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-  const [{ data: profiles, error, count }, { count: adminCount }, { count: moderatorCount }, { count: newUsersCount }] =
-    await Promise.all([
-      usersQuery,
-      db.from("profiles").select("*", { count: "exact", head: true }).eq("role", "admin"),
-      db.from("profiles").select("*", { count: "exact", head: true }).eq("role", "moderator"),
-      db.from("profiles").select("*", { count: "exact", head: true }).gt("updated_at", thirtyDaysAgo.toISOString()),
-    ]);
+  const [
+    { data: profiles, error, count },
+    { count: adminCount },
+    { count: moderatorCount },
+    { count: newUsersCount },
+  ] = await Promise.all([
+    usersQuery,
+    db
+      .from("profiles")
+      .select("*", { count: "exact", head: true })
+      .eq("role", "admin"),
+    db
+      .from("profiles")
+      .select("*", { count: "exact", head: true })
+      .eq("role", "moderator"),
+    db
+      .from("profiles")
+      .select("*", { count: "exact", head: true })
+      .gt("updated_at", thirtyDaysAgo.toISOString()),
+  ]);
 
   if (error) {
     console.error("Erreur chargement profiles:", error);
@@ -70,7 +83,11 @@ export default async function UsersPage({ searchParams }: UsersPageProps) {
 
       <UsersTable users={users} />
 
-      <PaginationControls currentPage={page} totalPages={totalPages} baseUrl="/admin/users" />
+      <PaginationControls
+        currentPage={page}
+        totalPages={totalPages}
+        baseUrl="/admin/users"
+      />
     </div>
   );
 }

@@ -17,7 +17,8 @@ async function ensureWasm(): Promise<void> {
 /** Fetch asset and gunzip to raw Uint8Array. */
 async function fetchGzipped(url: string): Promise<Uint8Array> {
   const res = await fetch(url);
-  if (!res.ok || res.body === null) throw new Error(`${url} -> HTTP ${res.status}`);
+  if (!res.ok || res.body === null)
+    throw new Error(`${url} -> HTTP ${res.status}`);
   const stream = res.body.pipeThrough(new DecompressionStream("gzip"));
   return new Uint8Array(await new Response(stream).arrayBuffer());
 }
@@ -58,22 +59,26 @@ export interface GameHandle {
 /** Loads the complete WebAssembly IEVR game engine + fonts. */
 export async function loadGame(): Promise<GameHandle> {
   await ensureWasm();
-  const [cfg, g4tx] = await Promise.all([fetchGzipped(FONT_CFG_URL), fetchGzipped(FONT_G4TX_URL)]);
+  const [cfg, g4tx] = await Promise.all([
+    fetchGzipped(FONT_CFG_URL),
+    fetchGzipped(FONT_G4TX_URL),
+  ]);
   const game = new WasmGame(cfg, g4tx);
   const w = game.width;
   const h = game.height;
-  const toImage = (rgba: Uint8Array): ImageData => new ImageData(new Uint8ClampedArray(rgba), w, h);
+  const toImage = (rgba: Uint8Array): ImageData =>
+    new ImageData(new Uint8ClampedArray(rgba), w, h);
 
   return {
     width: w,
     height: h,
-    input: cmd => game.input(cmd),
+    input: (cmd) => game.input(cmd),
     setMatchInput: (dx, dy, shoot) => {
       if (typeof (game as any).set_match_input === "function") {
         (game as any).set_match_input(dx, dy, shoot);
       }
     },
-    update: dt => game.update(dt),
+    update: (dt) => game.update(dt),
     frame: () => toImage(game.render()),
     score: () => {
       const s = game.score();

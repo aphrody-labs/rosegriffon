@@ -33,8 +33,18 @@ import {
 import { getCharacterFaceUrl, resolveAssetUrl } from "@rosegriffon/azalee";
 
 import { formaterJetons, verifierDepense } from "../lib/kizuna";
-import { CASES_PAR_CARTE, renderCarteCollection, renderCarteTirage } from "../lib/canvas/communaute";
-import { libelleCompletion, ordreRarete, rareteDe, resumerCollection, TARIFS } from "../lib/collection";
+import {
+  CASES_PAR_CARTE,
+  renderCarteCollection,
+  renderCarteTirage,
+} from "../lib/canvas/communaute";
+import {
+  libelleCompletion,
+  ordreRarete,
+  rareteDe,
+  resumerCollection,
+  TARIFS,
+} from "../lib/collection";
 import {
   acheter,
   equiper,
@@ -63,7 +73,8 @@ import {
   vide,
 } from "../lib/ui";
 
-const HORS_GUILDE = "Cette commande n'a de sens que sur un serveur : la collection est propre à chaque communauté.";
+const HORS_GUILDE =
+  "Cette commande n'a de sens que sur un serveur : la collection est propre à chaque communauté.";
 
 /** URL de portrait exploitable, ou `null` (la lib rend un chemin local de repli). */
 function portraitDe(code: string | null): string | null {
@@ -83,7 +94,9 @@ function portraitDe(code: string | null): string | null {
  * pas, et l'appel échouerait ensuite sans que le membre comprenne pourquoi. La
  * liste proposée est donc exactement la liste des choix valables.
  */
-async function completerFavori(interaction: AutocompleteInteraction): Promise<void> {
+async function completerFavori(
+  interaction: AutocompleteInteraction,
+): Promise<void> {
   try {
     const guildId = interaction.guildId;
     if (!guildId) {
@@ -93,11 +106,14 @@ async function completerFavori(interaction: AutocompleteInteraction): Promise<vo
     const saisie = String(interaction.options.getFocused() ?? "").toLowerCase();
     const collection = await personnagesPossedes(guildId, interaction.user.id);
     const retenus = collection
-      .filter(joueur => saisie.length === 0 || joueur.nom.toLowerCase().includes(saisie))
+      .filter(
+        (joueur) =>
+          saisie.length === 0 || joueur.nom.toLowerCase().includes(saisie),
+      )
       .toSorted((a, b) => ordreRarete(b.rarete) - ordreRarete(a.rarete))
       .slice(0, 25);
     await interaction.respond(
-      retenus.map(joueur => ({
+      retenus.map((joueur) => ({
         name: borner(`${joueur.nom} · ${rareteDe(joueur.rarete).nom}`, 100),
         value: joueur.id,
       })),
@@ -109,7 +125,9 @@ async function completerFavori(interaction: AutocompleteInteraction): Promise<vo
 }
 
 /** Les plaques possédées — même règle que pour les joueurs. */
-async function completerPlaquePossedee(interaction: AutocompleteInteraction): Promise<void> {
+async function completerPlaquePossedee(
+  interaction: AutocompleteInteraction,
+): Promise<void> {
   try {
     const guildId = interaction.guildId;
     if (!guildId) {
@@ -121,19 +139,28 @@ async function completerPlaquePossedee(interaction: AutocompleteInteraction): Pr
       plaques(),
       inventaireDe(guildId, interaction.user.id, "plaque"),
     ]);
-    const possedees = new Set(inventaire.map(entree => entree.objetId));
+    const possedees = new Set(inventaire.map((entree) => entree.objetId));
     const retenus = catalogue
-      .filter(plaque => possedees.has(plaque.id))
-      .filter(plaque => saisie.length === 0 || String(plaque.rang).includes(saisie))
+      .filter((plaque) => possedees.has(plaque.id))
+      .filter(
+        (plaque) => saisie.length === 0 || String(plaque.rang).includes(saisie),
+      )
       .slice(0, 25);
-    await interaction.respond(retenus.map(plaque => ({ name: `Plaque n° ${plaque.rang}`, value: plaque.id })));
+    await interaction.respond(
+      retenus.map((plaque) => ({
+        name: `Plaque n° ${plaque.rang}`,
+        value: plaque.id,
+      })),
+    );
   } catch {
     await interaction.respond([]).catch(() => undefined);
   }
 }
 
 /** Les plaques ACHETABLES — celles qu'on n'a pas encore. */
-async function completerPlaqueAAcheter(interaction: AutocompleteInteraction): Promise<void> {
+async function completerPlaqueAAcheter(
+  interaction: AutocompleteInteraction,
+): Promise<void> {
   try {
     const guildId = interaction.guildId;
     if (!guildId) {
@@ -145,14 +172,19 @@ async function completerPlaqueAAcheter(interaction: AutocompleteInteraction): Pr
       plaques(),
       inventaireDe(guildId, interaction.user.id, "plaque"),
     ]);
-    const possedees = new Set(inventaire.map(entree => entree.objetId));
+    const possedees = new Set(inventaire.map((entree) => entree.objetId));
     const retenus = catalogue
-      .filter(plaque => !possedees.has(plaque.id))
-      .filter(plaque => saisie.length === 0 || String(plaque.rang).includes(saisie))
+      .filter((plaque) => !possedees.has(plaque.id))
+      .filter(
+        (plaque) => saisie.length === 0 || String(plaque.rang).includes(saisie),
+      )
       .slice(0, 25);
     await interaction.respond(
-      retenus.map(plaque => ({
-        name: borner(`Plaque n° ${plaque.rang} — ${entierLisible(plaque.prix)} pts`, 100),
+      retenus.map((plaque) => ({
+        name: borner(
+          `Plaque n° ${plaque.rang} — ${entierLisible(plaque.prix)} pts`,
+          100,
+        ),
         value: plaque.id,
       })),
     );
@@ -203,7 +235,10 @@ export class CollectionCommand {
     }
     const cible = membre ?? interaction.user;
     try {
-      const [collection, recense] = await Promise.all([personnagesPossedes(guildId, cible.id), totalPersonnages()]);
+      const [collection, recense] = await Promise.all([
+        personnagesPossedes(guildId, cible.id),
+        totalPersonnages(),
+      ]);
       if (collection.length === 0) {
         await repondre(
           interaction,
@@ -218,7 +253,10 @@ export class CollectionCommand {
       }
 
       const resume = resumerCollection(
-        collection.map(joueur => ({ objetId: joueur.id, rarete: joueur.rarete })),
+        collection.map((joueur) => ({
+          objetId: joueur.id,
+          rarete: joueur.rarete,
+        })),
         recense,
       );
 
@@ -226,15 +264,20 @@ export class CollectionCommand {
       // lequel on regarde une collection, et le seul qui rende la grille
       // lisible d'un coup d'œil.
       const trie = collection.toSorted(
-        (a, b) => ordreRarete(b.rarete) - ordreRarete(a.rarete) || a.nom.localeCompare(b.nom, "fr"),
+        (a, b) =>
+          ordreRarete(b.rarete) - ordreRarete(a.rarete) ||
+          a.nom.localeCompare(b.nom, "fr"),
       );
       const pages = Math.max(1, Math.ceil(trie.length / CASES_PAR_CARTE));
       const numero = Math.min(pages, Math.max(1, Math.floor(page ?? 1)));
-      const tranche = trie.slice((numero - 1) * CASES_PAR_CARTE, numero * CASES_PAR_CARTE);
+      const tranche = trie.slice(
+        (numero - 1) * CASES_PAR_CARTE,
+        numero * CASES_PAR_CARTE,
+      );
 
       const image = await renderCarteCollection(
         cible.displayName,
-        tranche.map(joueur => ({
+        tranche.map((joueur) => ({
           element: joueur.element,
           nom: joueur.nom,
           portraitUrl: portraitDe(joueur.code),
@@ -254,15 +297,27 @@ export class CollectionCommand {
         titre: `Collection de ${cible.displayName}`,
       });
       for (const entree of resume.parRarete.toReversed()) {
-        carte.champ(entree.rarete.nom, entierLisible(entree.nombre), { enLigne: true });
+        carte.champ(entree.rarete.nom, entierLisible(entree.nombre), {
+          enLigne: true,
+        });
       }
 
       await interaction.editReply({
-        embeds: [piedDeCommande(carte.embed, interaction, { page: numero, pages })],
-        files: [new AttachmentBuilder(image, { name: `collection-${cible.id}.png` })],
+        embeds: [
+          piedDeCommande(carte.embed, interaction, { page: numero, pages }),
+        ],
+        files: [
+          new AttachmentBuilder(image, { name: `collection-${cible.id}.png` }),
+        ],
       });
     } catch (err) {
-      await repondre(interaction, echec("Collection illisible", err instanceof Error ? err.message : String(err)));
+      await repondre(
+        interaction,
+        echec(
+          "Collection illisible",
+          err instanceof Error ? err.message : String(err),
+        ),
+      );
     }
   }
 
@@ -291,11 +346,19 @@ export class CollectionCommand {
       const profil = await profilDe(guildId, interaction.user.id);
       const paiement = verifierDepense(profil.jetons, TARIFS.tirage);
       if (!paiement.ok) {
-        await repondre(interaction, attention("Pas assez de jetons Kizuna", paiement.erreur, { prive: true }));
+        await repondre(
+          interaction,
+          attention("Pas assez de jetons Kizuna", paiement.erreur, {
+            prive: true,
+          }),
+        );
         return;
       }
 
-      const garantie = await prochainTirageGaranti(guildId, interaction.user.id);
+      const garantie = await prochainTirageGaranti(
+        guildId,
+        interaction.user.id,
+      );
       const resultat = await tirage(guildId, interaction.user.id, {
         garantie,
         prix: TARIFS.tirage,
@@ -311,7 +374,8 @@ export class CollectionCommand {
         return;
       }
 
-      const solde = paiement.soldeApres + (resultat.doublon ? resultat.rembourse : 0);
+      const solde =
+        paiement.soldeApres + (resultat.doublon ? resultat.rembourse : 0);
       const image = await renderCarteTirage({
         doublon: resultat.doublon,
         element: resultat.personnage.element,
@@ -348,7 +412,13 @@ export class CollectionCommand {
         files: [new AttachmentBuilder(image, { name: "recrutement.png" })],
       });
     } catch (err) {
-      await repondre(interaction, echec("Recrutement impossible", err instanceof Error ? err.message : String(err)));
+      await repondre(
+        interaction,
+        echec(
+          "Recrutement impossible",
+          err instanceof Error ? err.message : String(err),
+        ),
+      );
     }
   }
 
@@ -377,7 +447,7 @@ export class CollectionCommand {
         inventaireDe(guildId, interaction.user.id, "plaque"),
         profilDe(guildId, interaction.user.id),
       ]);
-      const possedees = new Set(inventaire.map(entree => entree.objetId));
+      const possedees = new Set(inventaire.map((entree) => entree.objetId));
 
       const parPage = 12;
       const numero = Math.max(1, Math.floor(page ?? 1));
@@ -394,15 +464,25 @@ export class CollectionCommand {
       for (const plaque of tranche) {
         carte.champ(
           `Plaque n° ${plaque.rang}`,
-          possedees.has(plaque.id) ? "✅ possédée" : `${entierLisible(plaque.prix)} pts — \`/collection acheter\``,
+          possedees.has(plaque.id)
+            ? "✅ possédée"
+            : `${entierLisible(plaque.prix)} pts — \`/collection acheter\``,
           { enLigne: true },
         );
       }
       await interaction.editReply({
-        embeds: [piedDeCommande(carte.embed, interaction, { page: numero, pages })],
+        embeds: [
+          piedDeCommande(carte.embed, interaction, { page: numero, pages }),
+        ],
       });
     } catch (err) {
-      await repondre(interaction, echec("Catalogue illisible", err instanceof Error ? err.message : String(err)));
+      await repondre(
+        interaction,
+        echec(
+          "Catalogue illisible",
+          err instanceof Error ? err.message : String(err),
+        ),
+      );
     }
   }
 
@@ -426,11 +506,14 @@ export class CollectionCommand {
     }
     try {
       const catalogue = await plaques();
-      const plaque = catalogue.find(entree => entree.id === plaqueId);
+      const plaque = catalogue.find((entree) => entree.id === plaqueId);
       if (!plaque) {
         await repondre(
           interaction,
-          echec("Plaque inconnue", "Choisis-la dans la liste proposée par l'autocomplétion."),
+          echec(
+            "Plaque inconnue",
+            "Choisis-la dans la liste proposée par l'autocomplétion.",
+          ),
         );
         return;
       }
@@ -438,17 +521,30 @@ export class CollectionCommand {
       const profil = await profilDe(guildId, interaction.user.id);
       const paiement = verifierDepense(profil.jetons, plaque.prix);
       if (!paiement.ok) {
-        await repondre(interaction, attention("Pas assez de jetons", paiement.erreur, { prive: true }));
+        await repondre(
+          interaction,
+          attention("Pas assez de jetons", paiement.erreur, { prive: true }),
+        );
         return;
       }
 
-      const achat = await acheter(guildId, interaction.user.id, "plaque", plaque.id, plaque.prix);
+      const achat = await acheter(
+        guildId,
+        interaction.user.id,
+        "plaque",
+        plaque.id,
+        plaque.prix,
+      );
       if (!achat) {
         await repondre(
           interaction,
-          info("Déjà à toi", "Tu possèdes déjà cette plaque : rien n'a été débité.", {
-            prive: true,
-          }),
+          info(
+            "Déjà à toi",
+            "Tu possèdes déjà cette plaque : rien n'a été débité.",
+            {
+              prive: true,
+            },
+          ),
         );
         return;
       }
@@ -463,9 +559,17 @@ export class CollectionCommand {
         intention: "succes",
         titre: `Plaque n° ${plaque.rang} achetée`,
       });
-      await interaction.editReply({ embeds: [piedDeCommande(carte.embed, interaction)] });
+      await interaction.editReply({
+        embeds: [piedDeCommande(carte.embed, interaction)],
+      });
     } catch (err) {
-      await repondre(interaction, echec("Achat impossible", err instanceof Error ? err.message : String(err)));
+      await repondre(
+        interaction,
+        echec(
+          "Achat impossible",
+          err instanceof Error ? err.message : String(err),
+        ),
+      );
     }
   }
 }
@@ -477,7 +581,10 @@ export class CollectionCommand {
 })
 @SlashGroup("personnaliser")
 export class PersonnaliserCommand {
-  @Slash({ description: "Le joueur affiché sur ta carte de profil", name: "favori" })
+  @Slash({
+    description: "Le joueur affiché sur ta carte de profil",
+    name: "favori",
+  })
   async favori(
     @SlashOption({
       autocomplete: completerFavori,
@@ -498,7 +605,12 @@ export class PersonnaliserCommand {
     try {
       if (!joueurId) {
         await equiper(guildId, interaction.user.id, "perso_favori", null);
-        await repondre(interaction, succes("Joueur fétiche retiré", "Ta carte n'en affiche plus.", { prive: true }));
+        await repondre(
+          interaction,
+          succes("Joueur fétiche retiré", "Ta carte n'en affiche plus.", {
+            prive: true,
+          }),
+        );
         return;
       }
       if (!(await possede(guildId, interaction.user.id, "perso", joueurId))) {
@@ -515,17 +627,30 @@ export class PersonnaliserCommand {
       await equiper(guildId, interaction.user.id, "perso_favori", joueurId);
       await repondre(
         interaction,
-        succes("Joueur fétiche posé", `**${joueur?.nom ?? "Joueur"}** apparaît désormais sur ta carte de profil.`, {
-          miniature: portraitDe(joueur?.code ?? null),
-          prive: true,
-        }),
+        succes(
+          "Joueur fétiche posé",
+          `**${joueur?.nom ?? "Joueur"}** apparaît désormais sur ta carte de profil.`,
+          {
+            miniature: portraitDe(joueur?.code ?? null),
+            prive: true,
+          },
+        ),
       );
     } catch (err) {
-      await repondre(interaction, echec("Changement impossible", err instanceof Error ? err.message : String(err)));
+      await repondre(
+        interaction,
+        echec(
+          "Changement impossible",
+          err instanceof Error ? err.message : String(err),
+        ),
+      );
     }
   }
 
-  @Slash({ description: "La plaque de nom en fond de ta carte", name: "plaque" })
+  @Slash({
+    description: "La plaque de nom en fond de ta carte",
+    name: "plaque",
+  })
   async plaque(
     @SlashOption({
       autocomplete: completerPlaquePossedee,
@@ -546,25 +671,48 @@ export class PersonnaliserCommand {
     try {
       if (!plaqueId) {
         await equiper(guildId, interaction.user.id, "plaque", null);
-        await repondre(interaction, succes("Plaque retirée", "Ta carte reprend son fond par défaut.", { prive: true }));
+        await repondre(
+          interaction,
+          succes("Plaque retirée", "Ta carte reprend son fond par défaut.", {
+            prive: true,
+          }),
+        );
         return;
       }
       if (!(await possede(guildId, interaction.user.id, "plaque", plaqueId))) {
-        await repondre(interaction, echec("Pas dans ta collection", "Achète-la d'abord avec `/collection acheter`."));
+        await repondre(
+          interaction,
+          echec(
+            "Pas dans ta collection",
+            "Achète-la d'abord avec `/collection acheter`.",
+          ),
+        );
         return;
       }
       const catalogue = await plaques();
-      const plaque = catalogue.find(entree => entree.id === plaqueId);
+      const plaque = catalogue.find((entree) => entree.id === plaqueId);
       await equiper(guildId, interaction.user.id, "plaque", plaqueId);
       await repondre(
         interaction,
-        succes("Plaque posée", `La plaque n° ${plaque?.rang ?? "?"} est en fond de ta carte de profil.`, {
-          image: plaque?.cheminImage ? resolveAssetUrl(plaque.cheminImage) : null,
-          prive: true,
-        }),
+        succes(
+          "Plaque posée",
+          `La plaque n° ${plaque?.rang ?? "?"} est en fond de ta carte de profil.`,
+          {
+            image: plaque?.cheminImage
+              ? resolveAssetUrl(plaque.cheminImage)
+              : null,
+            prive: true,
+          },
+        ),
       );
     } catch (err) {
-      await repondre(interaction, echec("Changement impossible", err instanceof Error ? err.message : String(err)));
+      await repondre(
+        interaction,
+        echec(
+          "Changement impossible",
+          err instanceof Error ? err.message : String(err),
+        ),
+      );
     }
   }
 }

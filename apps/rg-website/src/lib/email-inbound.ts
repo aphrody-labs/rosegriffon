@@ -1,7 +1,8 @@
 import { getPgPool } from "@/lib/db/pg";
 import { sendEmail } from "@/lib/email";
 
-export type EmailCategory = "mediation" | "tournament" | "support" | "partnership" | "general";
+export type EmailCategory =
+  "mediation" | "tournament" | "support" | "partnership" | "general";
 export type EmailStatus = "unread" | "read" | "processed" | "archived" | "spam";
 
 export interface InboundEmailAttachment {
@@ -41,15 +42,25 @@ export interface ProcessedInboundEmail {
 /**
  * Catégorise un email entrant selon ses destinataires et son objet.
  */
-export function categorizeEmail(recipients: string[], subject = ""): EmailCategory {
-  const recips = recipients.map(r => r.toLowerCase().trim());
+export function categorizeEmail(
+  recipients: string[],
+  subject = "",
+): EmailCategory {
+  const recips = recipients.map((r) => r.toLowerCase().trim());
   const subj = subject.toLowerCase().trim();
 
-  if (recips.some(r => r.includes("mediation")) || subj.includes("médiation") || subj.includes("mediation")) {
+  if (
+    recips.some((r) => r.includes("mediation")) ||
+    subj.includes("médiation") ||
+    subj.includes("mediation")
+  ) {
     return "mediation";
   }
   if (
-    recips.some(r => r.includes("tournoi") || r.includes("esport") || r.includes("achillea")) ||
+    recips.some(
+      (r) =>
+        r.includes("tournoi") || r.includes("esport") || r.includes("achillea"),
+    ) ||
     subj.includes("tournoi") ||
     subj.includes("match") ||
     subj.includes("ranked") ||
@@ -57,11 +68,17 @@ export function categorizeEmail(recipients: string[], subject = ""): EmailCatego
   ) {
     return "tournament";
   }
-  if (recips.some(r => r.includes("partenariat") || r.includes("sponsor")) || subj.includes("partenariat")) {
+  if (
+    recips.some((r) => r.includes("partenariat") || r.includes("sponsor")) ||
+    subj.includes("partenariat")
+  ) {
     return "partnership";
   }
   if (
-    recips.some(r => r.includes("support") || r.includes("aide") || r.includes("technique")) ||
+    recips.some(
+      (r) =>
+        r.includes("support") || r.includes("aide") || r.includes("technique"),
+    ) ||
     subj.includes("bug") ||
     subj.includes("erreur") ||
     subj.includes("problème")
@@ -75,7 +92,10 @@ export function categorizeEmail(recipients: string[], subject = ""): EmailCatego
 /**
  * Nettoie et extrait une adresse email simple depuis un format "Nom <user@domaine.fr>"
  */
-export function extractEmailAddress(raw: string): { email: string; name?: string } {
+export function extractEmailAddress(raw: string): {
+  email: string;
+  name?: string;
+} {
   if (!raw) return { email: "" };
   const match = raw.match(/^(.*?)\s*<([^>]+)>$/);
   if (match) {
@@ -90,7 +110,9 @@ export function extractEmailAddress(raw: string): { email: string; name?: string
  * Parse un payload webhook entrant provenant de différents fournisseurs
  * (Resend, Postmark, SendGrid, ou format générique JSON).
  */
-export function parseInboundWebhook(payload: Record<string, any>): InboundEmailData {
+export function parseInboundWebhook(
+  payload: Record<string, any>,
+): InboundEmailData {
   // 1. Format Resend (type: "email.created" / "email.received" ou payload direct)
   if (payload.type === "email.created" || payload.type === "email.received") {
     const data = payload.data || {};
@@ -99,12 +121,17 @@ export function parseInboundWebhook(payload: Record<string, any>): InboundEmailD
       messageId: data.email_id || data.id,
       from: fromInfo.email,
       fromName: fromInfo.name,
-      to: Array.isArray(data.to) ? data.to : [data.to || "contact@rosegriffon.fr"],
+      to: Array.isArray(data.to)
+        ? data.to
+        : [data.to || "contact@rosegriffon.fr"],
       replyTo: data.reply_to?.[0],
       subject: data.subject || "(sans objet)",
       text: data.text,
       html: data.html,
-      category: categorizeEmail(Array.isArray(data.to) ? data.to : [data.to || ""], data.subject),
+      category: categorizeEmail(
+        Array.isArray(data.to) ? data.to : [data.to || ""],
+        data.subject,
+      ),
       attachments: (data.attachments || []).map((att: any) => ({
         filename: att.filename || "piece-jointe",
         contentType: att.content_type || "application/octet-stream",
@@ -116,11 +143,15 @@ export function parseInboundWebhook(payload: Record<string, any>): InboundEmailD
   }
 
   // 2. Format Postmark (From, To, Subject, TextBody, HtmlBody, MessageID)
-  if (payload.From && payload.To && (payload.Subject !== undefined || payload.MessageID)) {
+  if (
+    payload.From &&
+    payload.To &&
+    (payload.Subject !== undefined || payload.MessageID)
+  ) {
     const fromInfo = extractEmailAddress(payload.From);
     const toAddresses = String(payload.To)
       .split(",")
-      .map(addr => extractEmailAddress(addr).email)
+      .map((addr) => extractEmailAddress(addr).email)
       .filter(Boolean);
 
     return {
@@ -148,7 +179,7 @@ export function parseInboundWebhook(payload: Record<string, any>): InboundEmailD
     const fromInfo = extractEmailAddress(payload.from);
     const toAddresses = String(payload.to)
       .split(",")
-      .map(addr => extractEmailAddress(addr).email)
+      .map((addr) => extractEmailAddress(addr).email)
       .filter(Boolean);
 
     return {
@@ -184,7 +215,9 @@ export function parseInboundWebhook(payload: Record<string, any>): InboundEmailD
     subject,
     text: payload.text || payload.body || payload.message,
     html: payload.html,
-    category: (payload.category as EmailCategory) || categorizeEmail(toAddresses, subject),
+    category:
+      (payload.category as EmailCategory) ||
+      categorizeEmail(toAddresses, subject),
     attachments: payload.attachments,
     metadata: { provider: "generic", ...payload.metadata },
   };
@@ -197,7 +230,8 @@ export async function processInboundEmail(
   emailData: InboundEmailData,
   options: { sendAutoReply?: boolean } = {},
 ): Promise<ProcessedInboundEmail> {
-  const category = emailData.category || categorizeEmail(emailData.to, emailData.subject);
+  const category =
+    emailData.category || categorizeEmail(emailData.to, emailData.subject);
   const recipient = emailData.to[0] || "contact@rosegriffon.fr";
   const receivedAt = new Date();
 
@@ -233,7 +267,10 @@ export async function processInboundEmail(
       insertedId = result.rows[0].id;
     }
   } catch (error) {
-    console.warn("[inbound-email] Erreur insertion SQL (mode mémoire repli):", error);
+    console.warn(
+      "[inbound-email] Erreur insertion SQL (mode mémoire repli):",
+      error,
+    );
   }
 
   // Envoi d'un accusé de réception automatique optionnel
@@ -271,7 +308,10 @@ export async function processInboundEmail(
 </body></html>`,
       });
     } catch (e) {
-      console.warn("[inbound-email] Impossible d'envoyer l'accusé de réception:", e);
+      console.warn(
+        "[inbound-email] Impossible d'envoyer l'accusé de réception:",
+        e,
+      );
     }
   }
 
@@ -319,7 +359,9 @@ export async function getInboundEmails(
     params.push(offset);
     const offsetIdx = params.length;
 
-    const whereClause = conditions.length ? `WHERE ${conditions.join(" AND ")}` : "";
+    const whereClause = conditions.length
+      ? `WHERE ${conditions.join(" AND ")}`
+      : "";
     const { rows } = await pool.query<any>(
       `SELECT id, message_id AS "messageId", sender, sender_name AS "senderName",
 			        recipient, subject, category, status, created_at AS "receivedAt"

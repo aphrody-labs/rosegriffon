@@ -110,7 +110,7 @@ export default async function PageCircuit() {
 
   return (
     <ol>
-      {classement.value.leaderboard.map(joueur => (
+      {classement.value.leaderboard.map((joueur) => (
         <li key={joueur.userId}>
           {joueur.displayName} — {joueur.points} pts
         </li>
@@ -141,7 +141,7 @@ export function CarteRanked() {
   const [profil, setProfil] = useState<RankedProfile | null>(null);
 
   useEffect(() => {
-    void achillea.ranked.me().then(r => setProfil(r.ok ? r.value : null));
+    void achillea.ranked.me().then((r) => setProfil(r.ok ? r.value : null));
   }, []);
 
   if (!profil) return null;
