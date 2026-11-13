@@ -1,13 +1,21 @@
 # SPDX-License-Identifier: Apache-2.0
-# Unattended depot update of the game into /srv/rosegriffon/game (storage role host).
-# Exit 2 = no Steam token stored yet (run `steam-depot login` once): not a failure.
+# Unattended depot update of the game into /srv/rosegriffon/game/ievr (storage role host: prd only).
+# Needs the refresh token stored by `steam-depot login-qr` (scripts/steam-login.ts --qr): app
+# 2799860's main depot is refused to anonymous sessions, so a host without the token is skipped
+# (Condition) instead of failing every hour. Exit 2 = token expired or revoked: log in again.
+# prd load rule: heavy lock, nice 19, idle I/O, 8 parallel downloads.
 [Unit]
 Description=rosegriffon steam-depot update
 Wants=network-online.target
 After=network-online.target docker.service
+ConditionPathExists=/srv/rosegriffon/steam/steam-tokens.json
 
 [Service]
 Type=oneshot
 WorkingDirectory=/root/src/rosegriffon-stack
-ExecStart=/usr/bin/docker compose --profile tools run --rm -T steam-depot update
+Nice=19
+IOSchedulingClass=idle
+CPUWeight=10
+IOWeight=10
+ExecStart=/usr/bin/flock -w 7200 /var/lock/aphrody-heavy.lock /usr/bin/docker compose --profile tools run --rm -T -e STEAM_MAX_DOWNLOADS=8 steam-depot update
 SuccessExitStatus=2
