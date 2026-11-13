@@ -145,6 +145,8 @@ export function deployScript(
   if (longRunning.length)
     lines.push(
       `docker compose${profileFlags(longRunning)} up -d --wait --wait-timeout 300${ship ? " --no-build" : ""} ${all ? "--remove-orphans" : targetsOf(longRunning)}`,
+      // Belt and braces: a recreated upstream gets a new IP; reload re-resolves it even if nginx itself was not recreated.
+      `docker compose exec -T nginx nginx -s reload </dev/null || true`,
     );
   for (const t of tools)
     lines.push(

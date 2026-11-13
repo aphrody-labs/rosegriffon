@@ -301,7 +301,7 @@ export function renderUpstreams(infra: Infra): string {
     .filter((s) => s.upstream && s.port)
     .map(
       (s) =>
-        `upstream ${s.upstream!.name} {\n    server ${s.name}:${s.port};\n    keepalive ${s.upstream!.keepalive};\n}\n`,
+        `upstream ${s.upstream!.name} {\n    zone ${s.upstream!.name} 64k;\n    server ${s.name}:${s.port} resolve;\n    keepalive ${s.upstream!.keepalive};\n}\n`,
     );
   return [
     "# SPDX-License-Identifier: Apache-2.0",

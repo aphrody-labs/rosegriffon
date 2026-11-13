@@ -57,7 +57,7 @@ test("upstreams are rendered from the registry", () => {
   const out = renderUpstreams(infra);
   for (const s of services(infra).filter((x) => x.upstream))
     expect(out).toContain(
-      `upstream ${s.upstream!.name} {\n    server ${s.name}:${s.port};`,
+      `upstream ${s.upstream!.name} {\n    zone ${s.upstream!.name} 64k;\n    server ${s.name}:${s.port} resolve;`,
     );
 });
 
