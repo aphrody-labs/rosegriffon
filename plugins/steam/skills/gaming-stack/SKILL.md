@@ -30,7 +30,7 @@ One owner per function (map: `docs/gaming/OWNERSHIP.md` in aphrody-labs/src):
 4. DirectX: `ay gaming dx` (DXGI adapters and D3D12 runtime files on Windows, Agility SDK
    `D3D12/D3D12Core.dll` per installed game).
 5. Headless Proton on Linux (prd, fr1), reproducible:
-   - `ay gaming steamcmd install` (official bootstrap from `infra/gaming/downloads.toml`, size checked);
+   - `ay gaming steamcmd install` (official bootstrap from `packages/gaming/src/downloads.toml`, size and sha256 checked);
    - `ay gaming steamcmd app-update proton-experimental --dir /srv/steam/proton-exp` (`--user <account>`
      uses steamcmd's cached login; no password on the command line; `--dry-run` prints the script);
    - `ay gaming run <exe> --prefix /srv/pfx/<app> --tool-path /srv/steam/proton-exp [--app <id>] [-- args]`:
@@ -52,4 +52,4 @@ One owner per function (map: `docs/gaming/OWNERSHIP.md` in aphrody-labs/src):
 - `third_party/umu-launcher/README.md` (WINEPREFIX, GAMEID, STORE, PROTONPATH)
 - `third_party/Proton/proton` (`waitforexitandrun`), `third_party/Proton/Makefile` (files/lib/wine/dxvk, vkd3d-proton)
 - `third_party/Vulkan-Loader/docs/LoaderLayerInterface.md`, `LoaderDriverInterface.md` (manifest search paths)
-- `crates/steam-depot/src/proton.rs` (VALVE_PROTON_APPS, launch plan), `infra/gaming/downloads.toml`
+- `crates/steam-depot/src/proton.rs` (VALVE_PROTON_APPS, launch plan), `packages/gaming/src/downloads.toml`
