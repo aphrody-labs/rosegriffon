@@ -1,7 +1,7 @@
 {
   "name": "@aphrody/hyperframes",
   "version": "1.4.7",
-  "private": false,
+  "private": true,
   "description": "Aphrody's vendorized HyperFrames engine: zero-download byte-range streaming, ISOBMFF atom parsing, and on-demand frame decoding.",
   "homepage": "https://dragonballfr.com",
   "license": "Apache-2.0",

@@ -1,7 +1,7 @@
 {
   "name": "@aphrody/remotion",
   "version": "1.4.7",
-  "private": false,
+  "private": true,
   "description": "Aphrody's vendorized, zero-overhead Remotion composition and timeline engine, optimized for Bun and streaming video.",
   "homepage": "https://dragonballfr.com",
   "license": "Apache-2.0",

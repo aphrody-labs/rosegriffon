@@ -23,7 +23,7 @@
   },
   "publishConfig": {
     "access": "public",
-    "registry": "https://registry.npmjs.org"
+    "registry": "https://registry.npmjs.org/"
   },
   "scripts": {
     "dev": "bun --watch src/index.ts",
@@ -84,7 +84,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/aphrody-dev/rosegriffon.git",
+    "url": "git+https://github.com/aphrody-labs/rosegriffon.git",
     "directory": "apps/rg-bot"
   },
   "homepage": "https://github.com/aphrody-dev/rosegriffon/tree/main/apps/rg-bot#readme",

@@ -31,7 +31,7 @@
   },
   "publishConfig": {
     "access": "public",
-    "registry": "https://registry.npmjs.org"
+    "registry": "https://registry.npmjs.org/"
   },
   "scripts": {
     "predev": "bun ../../packages/rg-assets/scripts/sync-website-public.ts --to public",
@@ -178,7 +178,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/aphrody-dev/rosegriffon.git",
+    "url": "git+https://github.com/aphrody-labs/rosegriffon.git",
     "directory": "apps/rg-website"
   },
   "homepage": "https://github.com/aphrody-dev/rosegriffon/tree/main/apps/rg-website#readme",

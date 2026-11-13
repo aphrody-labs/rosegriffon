@@ -5,7 +5,7 @@
   "description": "Configs partagées : TypeScript, bun lint et Tailwind preset",
   "repository": {
     "type": "git",
-    "url": "https://github.com/aphrody-dev/rosegriffon.git",
+    "url": "git+https://github.com/aphrody-labs/rosegriffon.git",
     "directory": "packages/rg-config"
   },
   "files": [
@@ -34,7 +34,7 @@
   },
   "publishConfig": {
     "access": "public",
-    "registry": "https://registry.npmjs.org"
+    "registry": "https://registry.npmjs.org/"
   },
   "scripts": {
     "lint": "oxlint -c ./oxlintrc.json .",

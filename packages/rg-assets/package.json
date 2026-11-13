@@ -10,7 +10,7 @@
   },
   "publishConfig": {
     "access": "public",
-    "registry": "https://registry.npmjs.org"
+    "registry": "https://registry.npmjs.org/"
   },
   "engines": {
     "bun": ">=1.4.4"
@@ -27,7 +27,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/aphrody-dev/rosegriffon.git",
+    "url": "git+https://github.com/aphrody-labs/rosegriffon.git",
     "directory": "packages/rg-assets"
   },
   "homepage": "https://github.com/aphrody-dev/rosegriffon/tree/main/packages/rg-assets#readme",

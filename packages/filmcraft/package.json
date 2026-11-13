@@ -1,7 +1,7 @@
 {
   "name": "@aphrody/filmcraft",
   "version": "1.4.7",
-  "private": false,
+  "private": true,
   "description": "Aphrody's vendorized FilmCraft NLE video editing automation engine, CLI, and MCP tool suite.",
   "homepage": "https://dragonballfr.com",
   "license": "Apache-2.0",

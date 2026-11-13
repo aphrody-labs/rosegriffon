@@ -43,11 +43,11 @@
   ],
   "publishConfig": {
     "access": "public",
-    "registry": "https://registry.npmjs.org"
+    "registry": "https://registry.npmjs.org/"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/aphrody-dev/rosegriffon.git",
+    "url": "git+https://github.com/aphrody-labs/rosegriffon.git",
     "directory": "packages/rg-app-shell"
   },
   "homepage": "https://github.com/aphrody-dev/rosegriffon/tree/main/packages/rg-app-shell#readme",
