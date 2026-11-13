@@ -13,7 +13,7 @@ Prefer the plugin MCP tools before shelling out:
 - `app_paths`: resolve install dir, manifest, compatdata/userdata paths for one app id.
 - `read_vdf`: parse a text VDF/ACF or binary KV file into JSON.
 
-They are implemented in `plugins/steam/servers/steam-mcp.ts` over `plugins/steam/lib/steam.ts` (text KV, binary KV and appinfo.vdf v39 to v41). Credential files that `read_vdf` refuses: [`../steam-local-inspect/SKILL.md`](../steam-local-inspect/SKILL.md) (Rules). The Rust equivalents live in `crates/steam-depot/src/vdf.rs` and `crates/steam-depot/src/install.rs`.
+They are implemented in `plugins/steam/servers/steam-mcp.ts` over `packages/gaming`, which runs the Rust parsers of `crates/steam-depot/src/vdf.rs` (text KV, binary KV and appinfo.vdf v39 to v41) through `ay steam`. Credential files that `read_vdf` refuses: [`../steam-local-inspect/SKILL.md`](../steam-local-inspect/SKILL.md) (Rules). The Rust equivalents live in `crates/steam-depot/src/vdf.rs` and `crates/steam-depot/src/install.rs`.
 
 ## 1. Locate the install
 

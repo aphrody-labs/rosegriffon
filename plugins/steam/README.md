@@ -7,12 +7,15 @@ monorepo `AGENTS.md`), and from any MCP client.
 ## Components
 
 - `skills/`: steam-web-api, steam-auth, steam-ids-and-urls, steam-content-cdn,
-  steam-client-windows, steam-linux-proton, steam-community-tools, steam-local-inspect.
+  steam-client-windows, steam-linux-proton, steam-community-tools, steam-local-inspect,
+  gaming-stack.
 - `agents/steam-expert.md`: deep debugging agent (Proton, depots, auth).
-- `servers/steam-mcp.ts`: dependency-free MCP stdio server started with `bun run`. Tools:
+- `servers/steam-mcp.ts`: MCP stdio server without npm dependencies started with `bun run`. Tools:
   `web_api_call`, `store_appdetails`, `resolve_steamid`, `local_apps`, `read_vdf`,
-  `app_paths`, `openid_login_url`, `openid_verify`, `steamdb_link`.
-- `scripts/steam-inspect.ts`: CLI over the same library (`lib/steam.ts`).
+  `compat_tools`, `launch_env`, `app_paths`, `openid_login_url`, `openid_verify`, `steamdb_link`.
+- CLI: `ay steam` (Steam data as JSON, Rust parsers of `crates/steam-depot`) and `ay gaming`
+  (status, Proton, Vulkan layers, DirectX, steamcmd and Proton wrappers), both from aphrody-labs/src.
+  The server imports its helpers from `packages/gaming/src/steam.ts` of the same checkout.
 
 ## Environment
 

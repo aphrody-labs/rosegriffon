@@ -2,7 +2,7 @@
 
 Run in order on the Linux host. Stop at the first step that explains the failure.
 
-1. Resolve paths with `app_paths <appid>`: install dir and `steamapps/compatdata/<appid>/pfx` (`plugins/steam/lib/steam.ts` `appPaths`).
+1. Resolve paths with `app_paths <appid>`: install dir and `steamapps/compatdata/<appid>/pfx` (`packages/gaming/src/steam.ts` `appPaths`).
 2. Confirm the manifest is installed: `read_vdf` on `appmanifest_<appid>.acf`, then decode `StateFlags` with the bit table in [../../steam-local-inspect/references/layout.md](../../steam-local-inspect/references/layout.md).
 3. Confirm the tool and its runtime are installed: each Proton version needs its Steam Linux Runtime (mapping and app ids in [../SKILL.md](../SKILL.md), section 2).
 4. Set `PROTON_LOG=1 %command%`, launch once, read the tail of `~/steam-<appid>.log` (or `$PROTON_LOG_DIR`). Search for `err:`, missing DLLs, and Vulkan device creation errors.

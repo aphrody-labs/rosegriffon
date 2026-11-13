@@ -66,8 +66,7 @@ authentication problems from primary sources and from evidence on the machine.
 ## Process
 
 1. Restate the symptom and collect facts: run
-   `bun run ${CLAUDE_PLUGIN_ROOT}/scripts/steam-inspect.ts app <appid>` and
-   `paths <appid>`; read the relevant logs (`<Steam>/logs/content_log.txt`,
+   `ay steam apps --filter <appid>`, the MCP tool `app_paths` and `ay gaming status`; read the relevant logs (`<Steam>/logs/content_log.txt`,
    `connection_log.txt`, `bootstrap_log.txt`, Proton logs).
 2. Rank hypotheses by likelihood. Confirm each one against a primary source or file
    evidence before stating it.

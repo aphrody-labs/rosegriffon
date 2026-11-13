@@ -16,7 +16,7 @@ Treat each ID type as a distinct namespace. Never assume two IDs of different ty
 - **ManifestID / GID** (uint64): one immutable snapshot of a depot. Its proto type is in [`../steam-content-cdn/references/manifest-format.md`](../steam-content-cdn/references/manifest-format.md). Handle it as a 64-bit unsigned value or a string; a JavaScript `number` loses precision.
 - **PackageID / SubID** (uint32): the "Steam package/subscription ID" keying each entry of `appcache/packageinfo.vdf` (`third_party/steamappinfo/README.md`).
 - **BuildID** (uint32): a build uploaded through SteamPipe; a build sets one manifest per depot and is assigned to branches (https://partner.steamgames.com/doc/sdk/uploading).
-- **Branches**: `public` is the default; other branches are betas, optionally protected by a password. Branch data appears under `depots.branches.<name>` in appinfo; for the test app 2799860 the `public` entry has keys `buildid`, `timeupdated`, `timebuildupdated`, and `depots.privatebranches` is `"1"` (`plugins/steam/scripts/steam-inspect.ts` (`appinfo 2799860`, 2026-11-12), 2026-11-12). Other branches may carry more keys; read a real dump.
+- **Branches**: `public` is the default; other branches are betas, optionally protected by a password. Branch data appears under `depots.branches.<name>` in appinfo; for the test app 2799860 the `public` entry has keys `buildid`, `timeupdated`, `timebuildupdated`, and `depots.privatebranches` is `"1"` (`appinfo 2799860` read with the former plugins/steam/scripts/steam-inspect.ts, 2026-11-12; today `ay steam vdf <steam>/appcache/appinfo.vdf --app 2799860`). Other branches may carry more keys; read a real dump.
 
 ## SteamID layout
 

@@ -1,44 +1,45 @@
 ---
 name: steam-local-inspect
 description: This skill should be used when the user asks to "inspect my Steam install", "where is Steam installed", "list my Steam games", "find the install folder, compatdata prefix or shadercache of appid X", "which manifest or buildid is installed", "decode StateFlags", or "show the cached appinfo entry of an installed app". For layout and format explanations, steam-client-windows applies.
-argument-hint: "[root|apps|app|paths|appinfo|libraries|vdf] [appid|filter|file]"
+argument-hint: "[root|libraries|apps|vdf|compat|env] [appid|filter|file]"
 allowed-tools: Bash, Read
 ---
 
 # Inspect the local Steam install
 
 Read-only inspection of the Steam client on this machine (Windows, Linux, Flatpak, Snap,
-macOS) through `${CLAUDE_PLUGIN_ROOT}/scripts/steam-inspect.ts`. The script uses Bun
-built-ins only and shares its parsers with the `steam` MCP server (`plugins/steam/lib/steam.ts`).
+macOS) through `ay steam` (JSON from the Rust parsers of `crates/steam-depot`, the only VDF,
+ACF and appinfo parsers of the monorepo) and `ay gaming` (`packages/gaming`). The `steam` MCP
+server calls the same code (docs/gaming/OWNERSHIP.md in aphrody-labs/src).
 
 ## Procedure
 
-1. Locate Steam: `bun run ${CLAUDE_PLUGIN_ROOT}/scripts/steam-inspect.ts root`.
-   `--steam-path <dir>` overrides the lookup; otherwise the order in
-   [`references/layout.md`](references/layout.md) applies.
-2. List libraries (`libraries`) and installed apps (`apps [filter]`). Apps come from
-   `steamapps/appmanifest_<appid>.acf` in every library listed in
-   `steamapps/libraryfolders.vdf`.
-3. For one app, run `app <appid>` (full ACF, decoded StateFlags, installed depots and
-   manifest ids) and `paths <appid> [accountid]` (install dir, depotcache manifests,
-   shadercache, workshop, compatdata/pfx, librarycache, userdata remote and screenshots).
-4. For the PICS metadata cached by the client, run `appinfo <appid>` (parses
-   `appcache/appinfo.vdf` v39 to v41, including the v41 string table).
-5. To read any other KeyValues file as JSON, run `vdf <file>` (detects text or binary,
-   e.g. `userdata/<accountid>/config/shortcuts.vdf`).
+1. Locate Steam: `ay steam root`. `--root <dir>` or `STEAM_PATH` overrides the lookup;
+   otherwise the order in [`references/layout.md`](references/layout.md) applies.
+2. List libraries (`ay steam libraries`) and installed apps (`ay steam apps [--filter <text>]`).
+   Apps come from `steamapps/appmanifest_<appid>.acf` in every library listed in
+   `steamapps/libraryfolders.vdf`, with decoded StateFlags and installed depots.
+3. For one app: `ay steam vdf <library>/steamapps/appmanifest_<appid>.acf` (full ACF) and the
+   MCP tool `app_paths` (install dir, depotcache manifests, shadercache, workshop, compatdata/pfx,
+   librarycache, userdata remote and screenshots).
+4. For the PICS metadata cached by the client: `ay steam vdf <root>/appcache/appinfo.vdf --app <appid>`
+   (appinfo.vdf v39 to v41, including the v41 string table).
+5. Any other KeyValues file: `ay steam vdf <file>` (detects text or binary, e.g.
+   `userdata/<accountid>/config/shortcuts.vdf`; `--format text|binary|appinfo` forces one).
+6. Host summary (compat tools, Vulkan layers, DirectX, steamcmd): `ay gaming status`.
 
-Output is JSON on stdout. Exit code 2 means a usage error or no Steam install found;
-exit code 1 means `app` found no such installed app or `vdf` refused the file; `paths` and `appinfo` report a missing app in their JSON (`installed: false`, no `app` entry) with exit code 0.
+Output is JSON on stdout (`ay gaming` adds `--json`). Exit code 1 means no Steam install found,
+a parse error or a refused file; 2 is a usage error.
 
 ## Rules
 
 - Never read or print `config/config.vdf`, `config/loginusers.vdf`,
   `userdata/<accountid>/config/local.vdf` or `ssfn*` files: they hold login tokens or machine
-  auth. The script and the `read_vdf` MCP tool refuse them (`isSecretFile` in
-  `plugins/steam/lib/steam.ts`, `read_vdf` description in `plugins/steam/servers/steam-mcp.ts`).
+  auth. `ay steam vdf` and the `read_vdf` MCP tool refuse them (`is_secret_file` in
+  `crates/ay/src/low/steam.rs`, `isSecretFile` in `packages/gaming/src/steam.ts`).
 - Treat everything as read-only. Close Steam before editing any file it owns.
 - Prefer the MCP tools when the `steam` server is connected: `local_apps`, `app_paths`,
-  `read_vdf`. They return the same data.
+  `read_vdf`, `compat_tools`, `launch_env`. They return the same data.
 - To decode a depot manifest found by `paths`, use the offline manifest commands in
   [`../steam-community-tools/references/tools.md`](../steam-community-tools/references/tools.md).
 
@@ -48,7 +49,7 @@ The verified IEVR example (AppID 2799860) is in [`references/layout.md`](referen
 
 ## Additional Resources
 
-- `references/layout.md`: files the script reads, field meanings and StateFlags bits.
+- `references/layout.md`: files `ay steam` reads, field meanings and StateFlags bits.
 - Related skills: steam-client-windows (full layout, binary formats), steam-linux-proton
   (compatdata and prefixes), steam-content-cdn (manifests and chunks).
 

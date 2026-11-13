@@ -4,7 +4,7 @@
 
 - Tokens: quoted string, unquoted token, `{`, `}`. A key followed by a string is a leaf; a key followed by `{` opens an object.
 - `//` starts a line comment. Escapes inside quotes: `\\`, `\"`, `\n`, `\r`, `\t`; any other escaped character is kept as is (tokenizer in `crates/steam-depot/src/vdf.rs`: quoted-string escape match and `//` line-comment skip).
-- Keys may repeat. bun-steam keeps duplicates in order as an ordered entry list (`crates/steam-depot/src/vdf.rs` `VdfValue`); the plugin's `parseVdf` (`plugins/steam/lib/steam.ts`) keeps only the last value, so `read_vdf` output shows one value per key.
+- Keys may repeat. bun-steam keeps duplicates in order as an ordered entry list (`crates/steam-depot/src/vdf.rs` `VdfValue`); its JSON view (`VdfValue::to_json`, used by `ay steam vdf` and `read_vdf`) keeps only the last value, so the JSON shows one value per key.
 - Parser: `parse_vdf` in `crates/steam-depot/src/vdf.rs`; Rust alternative `third_party/vdf-rs`; .NET `third_party/valvekeyvalue`.
 
 ## Binary KeyValues

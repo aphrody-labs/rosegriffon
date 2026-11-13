@@ -1,23 +1,26 @@
 #!/usr/bin/env bun
 // Minimal MCP stdio server (JSON-RPC 2.0, newline-delimited) for the steam plugin.
-// No dependencies: implements initialize, tools/list, tools/call and ping per the
+// No npm dependencies: implements initialize, tools/list, tools/call and ping per the
 // MCP specification (https://modelcontextprotocol.io/specification). Logs go to stderr.
+// Steam helpers come from the monorepo's single owner, packages/gaming (@aphrody/gaming), whose
+// local-install readers run the Rust parsers of crates/steam-depot through `ay steam`
+// (docs/gaming/OWNERSHIP.md). The plugin is used from the aphrody-labs/src checkout.
 
 import {
   appPaths,
+  compatTools,
   findSteamRoot,
-  listApps,
-  listLibraries,
-  parseBinaryVdf,
-  parseSteamId,
-  parseVdf,
-  readAppInfo,
-  steamdbLinks,
-  vanityOf,
-  decodeStateFlags,
   isSecretFile,
   isUnder,
-} from "../lib/steam.ts";
+  launchEnv,
+  listApps,
+  listLibraries,
+  parseSteamId,
+  readVdf,
+  steamdbLinks,
+  vanityOf,
+  type VdfFormat,
+} from "../../../../../packages/gaming/src/steam.ts";
 
 const PROTOCOL = "2025-06-18";
 const SUPPORTED_PROTOCOLS = ["2025-06-18", "2025-03-26", "2024-11-05"];
@@ -239,12 +242,7 @@ const tools: Tool[] = [
     run: async (a) => {
       const r = root(a);
       const f = a.filter ? String(a.filter).toLowerCase() : "";
-      const apps = (await listApps(r))
-        .filter(
-          (x) =>
-            !f || String(x.appid) === f || x.name.toLowerCase().includes(f),
-        )
-        .map((x) => ({ ...x, state: decodeStateFlags(x.stateFlags) }));
+      const apps = await listApps(r, f || undefined);
       return {
         steamRoot: r,
         libraries: await listLibraries(r),
@@ -291,27 +289,44 @@ const tools: Tool[] = [
         throw new Error(
           "path is outside the Steam root and its library folders",
         );
-      const buf = new Uint8Array(await Bun.file(path).arrayBuffer());
-      let fmt = String(a.format ?? "auto");
-      if (fmt === "auto")
-        fmt =
-          base === "appinfo.vdf"
-            ? "appinfo"
-            : buf[0] === 0x00 || buf.subarray(0, 512).includes(0)
-              ? "binary"
-              : "text";
-      let out: unknown;
-      if (fmt === "appinfo")
-        out = readAppInfo(
-          buf,
-          a.appid === undefined ? undefined : Number(a.appid),
-        );
-      else if (fmt === "binary") out = parseBinaryVdf(buf).value;
-      else out = parseVdf(new TextDecoder().decode(buf));
+      let out: unknown = readVdf(
+        path,
+        String(a.format ?? "auto") as VdfFormat,
+        a.appid === undefined ? undefined : Number(a.appid),
+      );
       if (a.key_path)
         for (const k of String(a.key_path).split("/")) out = (out as Json)?.[k];
       return out;
     },
+  },
+  {
+    name: "compat_tools",
+    description:
+      "Compatibility tools of the local Steam install: Valve Proton and Steam Linux Runtime (steamapps/common), compatibilitytools.d (GE-Proton, proton-cachyos, umu) with kind, source and version file.",
+    inputSchema: {
+      type: "object",
+      properties: { steam_path: { type: "string" } },
+    },
+    run: async (a) => compatTools(root(a)),
+  },
+  {
+    name: "launch_env",
+    description:
+      "Proton launch environment for an app outside the client (proton run, umu): STEAM_COMPAT_* variables, ntsync, shader caches, gamemoderun wrapper and the equivalent Steam launch options. No secrets.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        appid: { type: "integer" },
+        prefix: { type: "string", description: "Proton prefix (default: compatdata/<appid>)" },
+        steam_path: { type: "string" },
+      },
+      required: ["appid"],
+    },
+    run: async (a) =>
+      launchEnv(Number(a.appid), {
+        root: a.steam_path ? String(a.steam_path) : undefined,
+        prefix: a.prefix ? String(a.prefix) : undefined,
+      }),
   },
   {
     name: "app_paths",
