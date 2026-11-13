@@ -37,7 +37,7 @@ The `<accountid>` directory name is the 32-bit account id; see
 
 ## StateFlags bits
 
-Per `third_party/steam-ecosystem/steamlocate-rs/src/app.rs` (`StateFlag::from_bit_offset`):
+Per `third_party/steamlocate-rs/src/app.rs` (`StateFlag::from_bit_offset`):
 
 | Bit | Value   | Name           |
 | --- | ------- | -------------- |

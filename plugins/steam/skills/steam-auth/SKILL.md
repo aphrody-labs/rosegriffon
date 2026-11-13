@@ -56,7 +56,7 @@ Details: [`references/tickets.md`](references/tickets.md).
 ### Account login (IAuthenticationService)
 
 Account login uses the `Authentication` service (credentials or QR, Steam Guard, refresh and
-access tokens); the RPC sequence and what `apps/rosegriffon/aphrody-dev/steam-depot (src crates/steam-depot)` implements:
+access tokens); the RPC sequence and what `crates/steam-depot` implements:
 [`references/sessions.md`](references/sessions.md).
 
 ## Additional Resources
@@ -78,6 +78,6 @@ access tokens); the RPC sequence and what `apps/rosegriffon/aphrody-dev/steam-de
 - https://partner.steamgames.com/doc/webapi/ISteamUserAuth
 - https://partner.steamgames.com/doc/api/ISteamUser
 - https://openid.net/specs/openid-authentication-2_0.html
-- `third_party/steam-ecosystem/steam-protobufs/steam/steammessages_auth.steamclient.proto`
-- `third_party/steam-ecosystem/node-steam-session` (README and src)
-- `apps/rosegriffon/aphrody-dev/steam-depot (src crates/steam-depot)/src/depot/auth.rs`, `apps/rosegriffon/aphrody-dev/steam-depot (src crates/steam-depot)/src/depot/token_store.rs`
+- `third_party/steam-protobufs/steam/steammessages_auth.steamclient.proto`
+- `third_party/node-steam-session` (README and src)
+- `crates/steam-depot/src/depot/auth.rs`, `crates/steam-depot/src/depot/token_store.rs`

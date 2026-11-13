@@ -10,7 +10,7 @@ https://partner.steamgames.com/doc/api/ISteamUser.
    `pchIdentity` is a free string naming the receiving service (for example
    `"my-backend"`). Declared in the SDK header `isteamuser.h` as
    `virtual HAuthTicket GetAuthTicketForWebApi( const char *pchIdentity )`
-   (`third_party/steam-ecosystem/steamworks-rs/steamworks-sys/lib/steam/public/steam/isteamuser.h` line 136).
+   (`third_party/steamworks-rs/steamworks-sys/lib/steam/public/steam/isteamuser.h` line 136).
 2. Client sends the hex-encoded ticket to the backend over its own channel (HTTPS).
 3. Backend: `GET https://partner.steam-api.com/ISteamUserAuth/AuthenticateUserTicket/v1/`
    with a publisher key, or `https://api.steampowered.com/` with a user Web API key (rate
@@ -20,13 +20,13 @@ https://partner.steamgames.com/doc/api/ISteamUser.
    (https://partner.steamgames.com/doc/webapi/ISteamUserAuth, fetched 2026-11-12).
 4. Response: `response.params` with `result`, `steamid`, `ownersteamid`, `vacbanned` and
    `publisherbanned` (field names from
-   `third_party/steam-ecosystem/steam-rs/src/steam_user_auth/authenticate_user_ticket.rs`).
+   `third_party/steam-rs/src/steam_user_auth/authenticate_user_ticket.rs`).
 5. When the session ends, the client calls `ISteamUser::CancelAuthTicket(hTicket)`.
 
 ## Game server and P2P tickets
 
 Signatures below are from the Steamworks SDK headers vendored in
-`third_party/steam-ecosystem/steamworks-rs/steamworks-sys/lib/steam/public/steam/`.
+`third_party/steamworks-rs/steamworks-sys/lib/steam/public/steam/`.
 
 - Sender: `GetAuthSessionTicket(void *pTicket, int cbMaxTicket, uint32 *pcbTicket, const SteamNetworkingIdentity *)`
   on `ISteamUser` (isteamuser.h line 131) or `ISteamGameServer` (isteamgameserver.h line 157).

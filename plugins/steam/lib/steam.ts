@@ -1,8 +1,8 @@
 // Shared Steam helpers for the steam plugin: install discovery, text and binary
 // KeyValues (VDF) parsing, SteamID conversion and link builders. Bun built-ins only.
 //
-// Formats follow third_party/steam-ecosystem/valvekeyvalue (KV1 text and binary),
-// steamlocate-rs (library discovery) and aphrody-dev/steam-depot (src crates/steam-depot)/src/{vdf,install}.rs.
+// Formats follow third_party/valvekeyvalue (KV1 text and binary),
+// steamlocate-rs (library discovery) and crates/steam-depot/src/{vdf,install}.rs.
 
 import { existsSync, readdirSync, statSync } from "node:fs";
 import { homedir } from "node:os";
@@ -153,7 +153,7 @@ export function parseBinaryVdf(
 }
 
 /** Header-level summary of appcache/appinfo.vdf (v39-v41, magic 0x07564427/28/29, per
- * third_party/steam-ecosystem/steamappinfo). Optionally extracts one app. */
+ * third_party/steamappinfo). Optionally extracts one app. */
 export function readAppInfo(
   buf: Uint8Array,
   wantApp?: number,
@@ -360,7 +360,7 @@ function acfToApp(doc: Vdf, library: string, manifest: string): InstalledApp {
   };
 }
 
-/** StateFlags bits, per third_party/steam-ecosystem/steamlocate-rs/src/app.rs (StateFlag::from_bit_offset). */
+/** StateFlags bits, per third_party/steamlocate-rs/src/app.rs (StateFlag::from_bit_offset). */
 export const APP_STATE_FLAGS: Record<number, string> = {
   1: "Uninstalled",
   2: "UpdateRequired",

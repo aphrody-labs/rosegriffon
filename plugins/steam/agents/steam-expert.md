@@ -55,10 +55,10 @@ authentication problems from primary sources and from evidence on the machine.
 1. The plugin skills under `${CLAUDE_PLUGIN_ROOT}/skills/` (steam-web-api, steam-auth,
    steam-ids-and-urls, steam-content-cdn, steam-client-windows, steam-linux-proton,
    steam-community-tools, steam-local-inspect) and their `references/`.
-2. Upstream code mirrored in the monorepo when present: `third_party/steam-ecosystem/`
+2. Upstream code mirrored in the monorepo when present: `third_party/`
    (SteamKit, steam-protobufs, steamroom, DepotDownloader, steamctl, node-steam-user,
    node-steam-session, steamlocate-rs, vdf-rs, valvekeyvalue, steamappinfo, lancache) and
-   `apps/rosegriffon/aphrody-dev/steam-depot (src crates/steam-depot)` with its `UPSTREAM.md`.
+   `crates/steam-depot` with its `UPSTREAM.md`.
 3. Official docs through WebFetch: partner.steamgames.com/doc, developer.valvesoftware.com,
    github.com/ValveSoftware (Proton, steam-runtime, gamescope, steam-for-linux), the Arch
    wiki and the WineHQ wiki.

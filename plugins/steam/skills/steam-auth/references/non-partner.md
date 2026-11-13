@@ -51,6 +51,6 @@ Details and the SDK calls: [`tickets.md`](tickets.md).
 A tool that must act as an account logs in once with `BeginAuthSessionViaCredentials` or
 `BeginAuthSessionViaQR`, keeps the refresh token, and renews access tokens with
 `GenerateAccessTokenForApp`. bun-steam implements the renewal and the token store
-(`apps/rosegriffon/aphrody-dev/steam-depot (src crates/steam-depot)/src/depot/auth.rs`, `apps/rosegriffon/aphrody-dev/steam-depot (src crates/steam-depot)/src/depot/token_store.rs`); the interactive first login is
+(`crates/steam-depot/src/depot/auth.rs`, `crates/steam-depot/src/depot/token_store.rs`); the interactive first login is
 done with node-steam-session. Store the refresh token as a secret (`apps/rosegriffon/.env.example` lists `STEAM_REFRESH_TOKEN` and the `STEAM_TOKEN_STORE` backends). Details:
 [`sessions.md`](sessions.md).

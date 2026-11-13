@@ -20,13 +20,13 @@ Decky Loader, ProtonDB, protontricks, steam-tui and steam-lancache-prefill.
 2. Get data from Steam itself instead: anonymous PICS and CDN access through steamroom,
    DepotDownloader, steamctl or a CM client library, as the SteamDB FAQ itself recommends
    (SteamKit or Steam Web APIs).
-3. Check the license before reusing code. `apps/rosegriffon/aphrody-dev/steam-depot (src crates/steam-depot)` is Apache-2.0. GPL-2.0
+3. Check the license before reusing code. `crates/steam-depot` is Apache-2.0. GPL-2.0
    (DepotDownloader) and LGPL-2.1 (SteamKit2) code is reference only and must not enter
    `bun-steam`; MIT and MIT/Apache-2.0 sources may be ported with attribution
-   (`apps/rosegriffon/aphrody-dev/steam-depot (src crates/steam-depot)/UPSTREAM.md`).
+   (`crates/steam-depot/UPSTREAM.md`).
 4. Run heavy downloads on `vps`, not on the local Windows host; the tools installed there are listed in [`references/tools.md`](references/tools.md).
 5. Prefer anonymous login. Content of a paid app needs an account that owns a license
-   (`apps/rosegriffon/aphrody-dev/steam-depot (src crates/steam-depot)/UPSTREAM.md`: `-manifest-only` resolves AppInfo anonymously, content needs a license).
+   (`crates/steam-depot/UPSTREAM.md`: `-manifest-only` resolves AppInfo anonymously, content needs a license).
 
 ## SteamDB links: use `steamdb_link`
 
@@ -34,7 +34,7 @@ Use the plugin MCP tool `steamdb_link` to produce SteamDB URLs. It only builds l
 requests the site. Hand the link to the user; do not read the page on their behalf. URL patterns
 and their verification: [`references/tools.md`](references/tools.md) (SteamDB). For the related
 tracking data (client and web resources), use the local mirror
-`third_party/steam-ecosystem/steamtracking` (sparse, root files only, no license stated).
+`third_party/steamtracking` (sparse, root files only, no license stated).
 
 ## Workflow: inspect or download depot content
 
@@ -92,7 +92,7 @@ steamctl `apps idle-games` / `idle-cards` carry the same caveat.
 ## Installed on vps for this repository
 
 Tool versions and install locations on `vps` are listed once in [`references/tools.md`](references/tools.md).
-Sources of every library above are mirrored under `third_party/steam-ecosystem/`.
+Sources of every library above are mirrored under `third_party/`.
 
 ## Additional Resources
 
@@ -101,8 +101,8 @@ Sources of every library above are mirrored under `third_party/steam-ecosystem/`
 
 ## Sources
 
-- `apps/rosegriffon/aphrody-dev/steam-depot (src crates/steam-depot)/UPSTREAM.md`
-- `third_party/steam-ecosystem/{depotdownloader,steamroom,steamctl,steamkit,node-steam-user,node-steam-session,valvepython-steam,steam-vent,steamworks-rs,steam-lancache-prefill,steamtracking,vdf-rs,steamlocate-rs}/`
+- `crates/steam-depot/UPSTREAM.md`
+- `third_party/{depotdownloader,steamroom,steamctl,steamkit,node-steam-user,node-steam-session,valvepython-steam,steam-vent,steamworks-rs,steam-lancache-prefill,steamtracking,vdf-rs,steamlocate-rs}/`
 - https://steamdb.info/faq/
 - https://developer.valvesoftware.com/wiki/SteamCMD (read in Chrome, accessed 2026-11-12)
 - https://store.steampowered.com/subscriber_agreement/ (sections 4.C, 4.D)

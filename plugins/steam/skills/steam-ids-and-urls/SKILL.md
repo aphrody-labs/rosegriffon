@@ -14,7 +14,7 @@ Treat each ID type as a distinct namespace. Never assume two IDs of different ty
 - **AppID** (uint32): a product (game, DLC, tool, soundtrack). Examples below use AppID 2799860, the test app of [`../steam-local-inspect/references/layout.md`](../steam-local-inspect/references/layout.md).
 - **DepotID** (uint32): a content bundle owned by an app. The first content depot is often `appid + 1` (worked example in [`../steam-local-inspect/references/layout.md`](../steam-local-inspect/references/layout.md)). Treat this as a convention only; read the real list from PICS appinfo `depots` or the Steamworks depot settings (https://partner.steamgames.com/doc/store/application/depots).
 - **ManifestID / GID** (uint64): one immutable snapshot of a depot. Its proto type is in [`../steam-content-cdn/references/manifest-format.md`](../steam-content-cdn/references/manifest-format.md). Handle it as a 64-bit unsigned value or a string; a JavaScript `number` loses precision.
-- **PackageID / SubID** (uint32): the "Steam package/subscription ID" keying each entry of `appcache/packageinfo.vdf` (`third_party/steam-ecosystem/steamappinfo/README.md`).
+- **PackageID / SubID** (uint32): the "Steam package/subscription ID" keying each entry of `appcache/packageinfo.vdf` (`third_party/steamappinfo/README.md`).
 - **BuildID** (uint32): a build uploaded through SteamPipe; a build sets one manifest per depot and is assigned to branches (https://partner.steamgames.com/doc/sdk/uploading).
 - **Branches**: `public` is the default; other branches are betas, optionally protected by a password. Branch data appears under `depots.branches.<name>` in appinfo; for the test app 2799860 the `public` entry has keys `buildid`, `timeupdated`, `timebuildupdated`, and `depots.privatebranches` is `"1"` (`plugins/steam/scripts/steam-inspect.ts` (`appinfo 2799860`, 2026-11-12), 2026-11-12). Other branches may carry more keys; read a real dump.
 
@@ -59,11 +59,11 @@ Steam clients connect to Connection Manager (CM) servers, discovered with the ke
 
 ## Sources
 
-- `third_party/steam-ecosystem/steamkit/SteamKit2/SteamKit2/Types/SteamID.cs`
-- `third_party/steam-ecosystem/steam-protobufs/steam/content_manifest.proto`
+- `third_party/steamkit/SteamKit2/SteamKit2/Types/SteamID.cs`
+- `third_party/steam-protobufs/steam/content_manifest.proto`
 - https://developer.valvesoftware.com/wiki/SteamID
 - https://developer.valvesoftware.com/wiki/Steam_browser_protocol (via https://web.archive.org/web/20261020182138/, accessed 2026-11-12)
-- `third_party/steam-ecosystem/steamkit/SteamKit2/SteamKit2/Networking/Steam3/WebSocketContext.cs`
+- `third_party/steamkit/SteamKit2/SteamKit2/Networking/Steam3/WebSocketContext.cs`
 - https://store.steampowered.com/api/appdetails?appids=2799860 (fetched 2026-11-12)
 - https://api.steampowered.com/ISteamDirectory/GetCMListForConnect/v1/?cellid=0 (fetched 2026-11-12)
 - https://partner.steamgames.com/doc/store/application/depots

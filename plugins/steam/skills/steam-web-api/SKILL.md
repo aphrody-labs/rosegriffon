@@ -54,7 +54,7 @@ Rules that save time:
 
 - Use IStoreService/GetAppList for the app list; ISteamApps/GetAppList/v2 is deprecated ([`references/interfaces.md`](references/interfaces.md)).
 - Use IUserReviewsService/GetAppReviews for reviews; the storefront `appreviews` endpoint is deprecated ([`references/store-api.md`](references/store-api.md)).
-- Private profiles return empty or missing data on GetOwnedGames, GetFriendList, and GetPlayerAchievements. GetOwnedGames returns games only "if their owned games/game details are visible to you" (https://partner.steamgames.com/doc/webapi/IPlayerService); GetFriendList returns HTTP 401 for a private friend list (https://partner.steamgames.com/doc/webapi/ISteamUser). Check `communityvisibilitystate` from GetPlayerSummaries first. The partner sample shows values 1 and 3 without defining them; `third_party/steam-ecosystem/steam-rs/src/steam_user/get_player_summaries.rs` documents 1 as private.
+- Private profiles return empty or missing data on GetOwnedGames, GetFriendList, and GetPlayerAchievements. GetOwnedGames returns games only "if their owned games/game details are visible to you" (https://partner.steamgames.com/doc/webapi/IPlayerService); GetFriendList returns HTTP 401 for a private friend list (https://partner.steamgames.com/doc/webapi/ISteamUser). Check `communityvisibilitystate` from GetPlayerSummaries first. The partner sample shows values 1 and 3 without defining them; `third_party/steam-rs/src/steam_user/get_player_summaries.rs` documents 1 as private.
 - Resolve a vanity name or profile URL to a SteamID64 before calling any per-user method.
 
 ## Store endpoints (undocumented)
@@ -98,4 +98,4 @@ If a call fails, report the HTTP status and the error body. Do not retry the sam
 - https://partner.steamgames.com/doc/webapi/ISteamRemoteStorage
 - https://partner.steamgames.com/doc/webapi/IPublishedFileService
 - https://partner.steamgames.com/doc/webapi/IUserReviewsService
-- Local typed client: `third_party/steam-ecosystem/steam-rs/src/lib.rs` (base `https://api.steampowered.com`)
+- Local typed client: `third_party/steam-rs/src/lib.rs` (base `https://api.steampowered.com`)

@@ -1,6 +1,6 @@
 # Steam Cloud
 
-Source: https://partner.steamgames.com/doc/features/cloud (fetched 2026-11-12), `third_party/steam-ecosystem/steam-protobufs/steam/steammessages_cloud.steamclient.proto`.
+Source: https://partner.steamgames.com/doc/features/cloud (fetched 2026-11-12), `third_party/steam-protobufs/steam/steammessages_cloud.steamclient.proto`.
 
 ## Auto-Cloud roots
 

@@ -92,39 +92,50 @@ if (!flag("qr")) {
 
 const page = join(tmpdir(), `rg-steam-qr-${process.pid}.html`);
 process.on("exit", () => rmSync(page, { force: true }));
-const proc = Bun.spawn(
-  [
-    "ssh",
-    "-o",
-    "BatchMode=yes",
-    "-n",
-    host.ssh,
-    `${compose} run --rm -T steam-depot login-qr`,
-  ],
-  { stdout: "pipe", stderr: "inherit" },
-);
-let buf = "";
-const decoder = new TextDecoder();
-for await (const chunk of proc.stdout) {
-  buf += decoder.decode(chunk);
-  let nl: number;
-  while ((nl = buf.indexOf("\n")) >= 0) {
-    const line = buf.slice(0, nl);
-    buf = buf.slice(nl + 1);
-    if (line.startsWith("svg ")) {
-      writeFileSync(
-        page,
-        `<!doctype html><meta charset="utf-8"><title>Steam - Rose Griffon</title>` +
-          `<body style="margin:0;display:grid;place-items:center;height:100vh;background:#171a21;color:#c7d5e0;font:16px system-ui">` +
-          `<div style="text-align:center"><div style="background:#fff;padding:16px;border-radius:8px">${line.slice(4)}</div>` +
-          `<p>Steam app &gt; Steam Guard &gt; scan this code.</p></div>`,
-      );
-      Bun.spawn([CHROME, `--app=file:///${page.replaceAll("\\", "/")}`], {
-        stdout: "ignore",
-        stderr: "ignore",
-      });
-      console.log("steam: QR shown in Chrome, waiting for approval");
-    } else if (line.startsWith("store=")) console.log(`steam: ${line}`);
+// A Steam QR challenge expires after a few minutes: issue a new one until approval or the deadline
+// (RG_STEAM_QR_MINUTES, default 30). The page reloads itself, so one Chrome window follows every code.
+const deadline = Date.now() + Number(process.env.RG_STEAM_QR_MINUTES ?? 30) * 60_000;
+let opened = false;
+let code = 1;
+while (Date.now() < deadline) {
+  const proc = Bun.spawn(
+    ["ssh", "-o", "BatchMode=yes", "-n", host.ssh, `${compose} run --rm -T steam-depot login-qr`],
+    { stdout: "pipe", stderr: "pipe" },
+  );
+  let buf = "";
+  let stored = false;
+  const decoder = new TextDecoder();
+  for await (const chunk of proc.stdout) {
+    buf += decoder.decode(chunk);
+    let nl: number;
+    while ((nl = buf.indexOf("\n")) >= 0) {
+      const line = buf.slice(0, nl);
+      buf = buf.slice(nl + 1);
+      if (line.startsWith("svg ")) {
+        writeFileSync(
+          page,
+          `<!doctype html><meta charset="utf-8"><meta http-equiv="refresh" content="5"><title>Steam - Rose Griffon</title>` +
+            `<body style="margin:0;display:grid;place-items:center;height:100vh;background:#171a21;color:#c7d5e0;font:16px system-ui">` +
+            `<div style="text-align:center"><div style="background:#fff;padding:16px;border-radius:8px">${line.slice(4)}</div>` +
+            `<p>Steam app &gt; Steam Guard &gt; scan this code.</p></div>`,
+        );
+        if (!opened) {
+          Bun.spawn([CHROME, `--app=file:///${page.replaceAll("\\", "/")}`], { stdout: "ignore", stderr: "ignore" });
+          opened = true;
+          console.log("steam: QR shown in Chrome, waiting for approval");
+        } else console.log("steam: QR renewed");
+      } else if (line.startsWith("store=")) {
+        stored = /account=(?!-)\S+.*expired=false/.test(line);
+        console.log(`steam: ${line}`);
+      }
+    }
+  }
+  const err = await new Response(proc.stderr).text();
+  code = await proc.exited;
+  if (code === 0 && stored) break;
+  if (!/Expired/i.test(err)) {
+    process.stderr.write(err);
+    break;
   }
 }
-process.exit(await proc.exited);
+process.exit(code);

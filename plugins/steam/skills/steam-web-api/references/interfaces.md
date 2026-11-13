@@ -20,7 +20,7 @@ Source: https://partner.steamgames.com/doc/webapi/ISteamUser
 | GetAppPriceInfo          | v1                                                   | GET  | publisher                                                                      | `steamid`, `appids` (max 100)                                          |
 | GetDeletedSteamIDs       | v1                                                   | GET  | publisher                                                                      | `rowversion`                                                           |
 
-ResolveVanityURL returns `response.success` (1 = match) and `response.steamid` on success, and `response.success` 42 with `response.message` when nothing matches. The partner page does not document the response; source: `third_party/steam-ecosystem/steam-rs/src/steam_user/resolve_vanity_url.rs`. A keyless call returns HTTP 400 with an HTML body "Required parameter 'key' is missing" (tested 2026-11-12).
+ResolveVanityURL returns `response.success` (1 = match) and `response.steamid` on success, and `response.success` 42 with `response.message` when nothing matches. The partner page does not document the response; source: `third_party/steam-rs/src/steam_user/resolve_vanity_url.rs`. A keyless call returns HTTP 400 with an HTML body "Required parameter 'key' is missing" (tested 2026-11-12).
 
 ## IPlayerService
 
@@ -109,7 +109,7 @@ QueryFiles v1 (GET, user key) parameters:
 - `search_text`
 - `filetype`
 
-GetDetails and GetUserFiles exist as service methods in `third_party/steam-ecosystem/steam-protobufs/steam/steammessages_publishedfile.steamclient.proto`. Neither appears in the keyless `ISteamWebAPIUtil/GetSupportedAPIList/v1/` response (2026-11-12), so neither is callable without a key. The only keyless IPublishedFileService method is GetUserVoteSummary v1. The same keyless response also lists IStoreService GetGamesFollowed, GetGamesFollowedCount and GetRecommendedTagsForUser v1, and IWishlistService GetWishlist, GetWishlistItemCount and GetWishlistSortedFiltered v1.
+GetDetails and GetUserFiles exist as service methods in `third_party/steam-protobufs/steam/steammessages_publishedfile.steamclient.proto`. Neither appears in the keyless `ISteamWebAPIUtil/GetSupportedAPIList/v1/` response (2026-11-12), so neither is callable without a key. The only keyless IPublishedFileService method is GetUserVoteSummary v1. The same keyless response also lists IStoreService GetGamesFollowed, GetGamesFollowedCount and GetRecommendedTagsForUser v1, and IWishlistService GetWishlist, GetWishlistItemCount and GetWishlistSortedFiltered v1.
 
 ## IUserReviewsService
 
@@ -144,7 +144,7 @@ Call GetSupportedAPIList before concluding that a method exists or does not exis
 ## ISteamEconomy and IEconService
 
 - ISteamEconomy v1 (source: https://partner.steamgames.com/doc/webapi/ISteamEconomy). GetAssetClassInfo (`appid`, `class_count`, `classid0`, optional `instanceid0` and `language`) and GetAssetPrices (`appid`, optional `currency` and `language`) take a user key on `api.steampowered.com`. CanTrade, StartTrade, StartAssetTransaction, FinalizeAssetTransaction, GetExportedAssetsForUser, and GetMarketPrices need a publisher key on `partner.steam-api.com`.
-- IEconService GetTradeOffers, GetTradeOffer, GetTradeHistory, GetTradeOffersSummary (v1): implemented in `third_party/steam-ecosystem/steam-rs/src/econ_service/`.
+- IEconService GetTradeOffers, GetTradeOffer, GetTradeHistory, GetTradeOffersSummary (v1): implemented in `third_party/steam-rs/src/econ_service/`.
 
 ## ISteamDirectory
 
