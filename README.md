@@ -31,7 +31,7 @@ Bun OS (`aphrody-labs/bun-distribution`, with nie and iecode) and consumed here 
 
 ## Toolchain
 
-- [Aphrody Bun](https://github.com/aphrody-dev/bun) 1.4.4 or newer (`packageManager: bun@1.4.4`).
+- [Aphrody Bun](https://github.com/aphrody-labs/bun) 1.4.4 or newer (`packageManager: bun@1.4.4`).
   Type checking, lint and format use its native `bun check`, `bun lint` and `bun fmt`.
 
 ```sh
