@@ -37,7 +37,8 @@
   "type": "module",
   "types": "./src/index.ts",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./scopes": "./src/rest/v2/oauth2/scopes.ts"
   },
   "publishConfig": {
     "access": "public",
