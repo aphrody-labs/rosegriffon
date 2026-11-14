@@ -65,6 +65,18 @@ export function createRoseGriffonAuth(options: RoseGriffonAuthOptions) {
   const patreon = options.patreon;
   const discordClientId = process.env.DISCORD_CLIENT_ID ?? "";
   const discordClientSecret = process.env.DISCORD_CLIENT_SECRET ?? "";
+  const achilleaDiscordClientId =
+    process.env.ACHILLEA_DISCORD_CLIENT_ID ??
+    process.env.ACHILLEA_DISCORD_APP_ID ??
+    "";
+  const achilleaDiscordClientSecret =
+    process.env.ACHILLEA_DISCORD_CLIENT_SECRET ?? "";
+  const azaleeDiscordClientId =
+    process.env.AZALEE_DISCORD_CLIENT_ID ??
+    process.env.AZALEE_DISCORD_APPLICATION_ID ??
+    "";
+  const azaleeDiscordClientSecret =
+    process.env.AZALEE_DISCORD_CLIENT_SECRET ?? "";
   const twitchClientId =
     process.env.TWITCH_AUTH_CLIENT_ID ?? process.env.TWITCH_CLIENT_ID ?? "";
   const twitchClientSecret =
@@ -112,6 +124,48 @@ export function createRoseGriffonAuth(options: RoseGriffonAuthOptions) {
       : {}),
   };
   const trustedSocialProviders = Object.keys(configuredSocialProviders);
+  const oauthProviders = [
+    ...(patreon
+      ? [
+          {
+            authorizationUrl: patreon.authorizationUrl,
+            clientId: patreon.clientId,
+            clientSecret: patreon.clientSecret,
+            getUserInfo: patreon.getUserInfo as any,
+            providerId: "patreon",
+            scopes: [...patreon.scopes],
+            tokenUrl: patreon.tokenUrl,
+          },
+        ]
+      : []),
+    ...(achilleaDiscordClientId && achilleaDiscordClientSecret
+      ? [
+          {
+            authorizationUrl: "https://discord.com/api/oauth2/authorize",
+            clientId: achilleaDiscordClientId,
+            clientSecret: achilleaDiscordClientSecret,
+            providerId: "discord-achillea",
+            scopes: ["identify", "email"],
+            tokenUrl: "https://discord.com/api/oauth2/token",
+            userInfoUrl: "https://discord.com/api/users/@me",
+          },
+        ]
+      : []),
+    ...(azaleeDiscordClientId && azaleeDiscordClientSecret
+      ? [
+          {
+            authorizationUrl: "https://discord.com/api/oauth2/authorize",
+            clientId: azaleeDiscordClientId,
+            clientSecret: azaleeDiscordClientSecret,
+            providerId: "discord-azalee",
+            scopes: ["identify", "email"],
+            tokenUrl: "https://discord.com/api/oauth2/token",
+            userInfoUrl: "https://discord.com/api/users/@me",
+          },
+        ]
+      : []),
+  ];
+
   const plugins = [
     admin({ defaultRole: "user", adminRoles: ["admin"] }),
     apiKey({
@@ -157,20 +211,10 @@ export function createRoseGriffonAuth(options: RoseGriffonAuthOptions) {
     deuxFacteurs("Rose Griffon"),
     bearer(),
     ...(options.passkey ? [passkey(options.passkey)] : []),
-    ...(patreon
+    ...(oauthProviders.length > 0
       ? [
           genericOAuth({
-            config: [
-              {
-                authorizationUrl: patreon.authorizationUrl,
-                clientId: patreon.clientId,
-                clientSecret: patreon.clientSecret,
-                getUserInfo: patreon.getUserInfo as any,
-                providerId: "patreon",
-                scopes: [...patreon.scopes],
-                tokenUrl: patreon.tokenUrl,
-              },
-            ],
+            config: oauthProviders,
           }),
         ]
       : []),
