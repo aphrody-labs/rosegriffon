@@ -7,6 +7,8 @@
     "jsx": "preserve",
     "rootDir": "..",
     "paths": {
+      "@rosegriffon/config": ["../rg-config"],
+      "@rosegriffon/config/*": ["../rg-config/*"],
       "@rosegriffon/db": ["./src/index.ts"],
       "@rosegriffon/db/*": ["./src/*"],
       "@rosegriffon/types": ["../rg-types/src/index.ts"],

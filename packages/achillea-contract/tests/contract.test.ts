@@ -240,11 +240,12 @@ describe("casse", () => {
 });
 
 describe("génération", () => {
-  test("les quatre cibles sont produites et non vides", () => {
+  test("les cinq cibles sont produites et non vides", () => {
     const { files } = generateContract({ root: TYPES_ROOT });
     expect(files.map((f) => f.file)).toEqual([
       "achillea.schema.json",
       "achillea.rs",
+      "achillea.h",
       "Achillea.swift",
       "Achillea.kt",
     ]);

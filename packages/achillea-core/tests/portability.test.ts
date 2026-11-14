@@ -79,6 +79,7 @@ describe("portabilité", () => {
     expect(Object.keys(manifest.dependencies ?? {}).sort()).toEqual([
       "@casl/ability",
       "@rosegriffon/achillea-types",
+      "@rosegriffon/config",
       "@sindresorhus/transliterate",
     ]);
   });

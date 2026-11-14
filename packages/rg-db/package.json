@@ -43,6 +43,7 @@
   },
   "dependencies": {
     "@aphrody/sql": "catalog:",
+    "@rosegriffon/config": "workspace:*",
     "@rosegriffon/types": "workspace:*",
     "@supabase/ssr": "catalog:",
     "kysely": "catalog:",

@@ -1,3 +1,4 @@
+import { isContractStaffRole } from "@rosegriffon/config/contract";
 import { PUBLIC_PROFILE_COLUMNS, type PublicProfile } from "@rosegriffon/db";
 import { createPostgresClient } from "@rosegriffon/db/service";
 import { ADMIN_ROLES } from "@rosegriffon/types";
@@ -74,7 +75,7 @@ export function isAdmin(role: string | null | undefined): boolean {
  * Check if a role is considered 'staff' in the RG ecosystem.
  */
 export function isStaff(role: string | null | undefined): boolean {
-  return role === "admin" || role === "staff";
+  return isContractStaffRole(role);
 }
 
 /**

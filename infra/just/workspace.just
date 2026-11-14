@@ -27,8 +27,8 @@ test:
 
 [parallel]
 [group('workspace')]
-[doc("Full gate: check, lint, test in parallel, then workspace build.")]
-ci: check lint test
+[doc("Full gate: contract-check, c-test, check, lint, test in parallel, then workspace build.")]
+ci: contract-check c-test check lint test
     bun run build
 
 [group('workspace')]

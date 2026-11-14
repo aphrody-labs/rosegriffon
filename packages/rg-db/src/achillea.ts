@@ -9,9 +9,12 @@
  * transaction.
  */
 
+import { STACK_CONTRACT } from "@rosegriffon/config/contract";
+import { rgDefaultUrl } from "@rosegriffon/config/rg-urls";
 import { getDatabaseURL } from "./pg";
 
-export const ACHILLEA_SCHEMA = "achillea" as const;
+export const ACHILLEA_SCHEMA =
+  STACK_CONTRACT.database.primary.achilleaSchema;
 
 export function getAchilleaDatabaseUrl(): string {
   return getDatabaseURL();
@@ -21,6 +24,6 @@ export function getAchilleaApiUrl(): string {
   return (
     process.env["NEXT_PUBLIC_ACHILLEA_API_URL"] ||
     process.env["ACHILLEA_API_URL"] ||
-    "https://api.rosegriffon.fr"
+    rgDefaultUrl(process.env, "api")
   );
 }

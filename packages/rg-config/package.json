@@ -10,10 +10,12 @@
   },
   "files": [
     "README.md",
+    "contract.ts",
+    "contract-ffi.ts",
+    "contract.generated.ts",
     "infra.ts",
     "rg-urls.ts",
     "oxlintrc.json",
-    "public-urls.ts",
     "tailwind-preset.ts",
     "rg-m3.json",
     "tsconfig-base.json",
@@ -23,9 +25,10 @@
   ],
   "type": "module",
   "exports": {
+    "./contract": "./contract.ts",
+    "./contract-ffi": "./contract-ffi.ts",
     "./infra": "./infra.ts",
     "./rg-urls": "./rg-urls.ts",
-    "./public-urls": "./public-urls.ts",
     "./tsconfig-base.json": "./tsconfig-base.json",
     "./tsconfig-nextjs.json": "./tsconfig-nextjs.json",
     "./tsconfig-bun.json": "./tsconfig-bun.json",
@@ -37,7 +40,10 @@
     "registry": "https://registry.npmjs.org/"
   },
   "scripts": {
+    "contract:sync": "bun scripts/sync-contract.ts",
+    "contract:check": "bun scripts/sync-contract.ts --check",
     "lint": "oxlint -c ./oxlintrc.json .",
+    "test": "bun test test",
     "typecheck": "bun check --noEmit"
   },
   "engines": {

@@ -1,0 +1,151 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rosegriffon.fr/schemas/stack.schema.json",
+  "title": "Rose Griffon Unified Polyglot Stack Contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "project",
+    "http",
+    "auth",
+    "database",
+    "ui",
+    "platforms"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "type": "integer",
+      "const": 1
+    },
+    "project": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "version", "license", "domain", "cookieDomain", "repoUrl"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "version": { "type": "string", "minLength": 1 },
+        "license": { "type": "string", "minLength": 1 },
+        "domain": { "type": "string", "minLength": 3 },
+        "cookieDomain": { "type": "string", "minLength": 3 },
+        "repoUrl": { "type": "string", "minLength": 8 }
+      }
+    },
+    "http": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["healthPath", "docsPath", "apiPrefix", "legacyApiPrefix", "defaultPorts", "origins", "cors", "trustedOrigins", "routes"],
+      "properties": {
+        "healthPath": { "type": "string", "pattern": "^/" },
+        "docsPath": { "type": "string", "pattern": "^/" },
+        "apiPrefix": { "type": "string", "pattern": "^/" },
+        "legacyApiPrefix": { "type": "string", "pattern": "^/" },
+        "defaultPorts": {
+          "type": "object",
+          "additionalProperties": { "type": "integer", "minimum": 1, "maximum": 65535 }
+        },
+        "origins": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["label", "path"],
+            "properties": {
+              "label": { "type": "string" },
+              "path": { "type": "string" }
+            }
+          }
+        },
+        "cors": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["methods", "allowedHeaders", "credentials"],
+          "properties": {
+            "methods": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+            "allowedHeaders": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+            "credentials": { "type": "boolean" }
+          }
+        },
+        "trustedOrigins": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["prod", "native", "dev"],
+          "properties": {
+            "prod": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+            "native": { "type": "array", "items": { "type": "string" } },
+            "dev": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "routes": {
+          "type": "object",
+          "additionalProperties": { "type": "string", "pattern": "^/" }
+        }
+      }
+    },
+    "auth": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["provider", "issuer", "audiences", "cookieName", "ttlSeconds", "passwordMinLength", "requireEmailVerification", "apiKeyPrefix", "secretMinLength", "defaultRole", "roles"],
+      "properties": {
+        "provider": { "type": "string" },
+        "issuer": { "type": "string" },
+        "audiences": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["session", "realtime"],
+          "properties": {
+            "session": { "type": "string" },
+            "realtime": { "type": "string" }
+          }
+        },
+        "cookieName": { "type": "string" },
+        "ttlSeconds": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["session", "realtime"],
+          "properties": {
+            "session": { "type": "integer", "minimum": 60 },
+            "realtime": { "type": "integer", "minimum": 30 }
+          }
+        },
+        "passwordMinLength": { "type": "integer", "minimum": 8 },
+        "requireEmailVerification": { "type": "boolean" },
+        "apiKeyPrefix": { "type": "string" },
+        "secretMinLength": { "type": "integer", "minimum": 16 },
+        "defaultRole": { "type": "string" },
+        "roles": {
+          "type": "object",
+          "additionalProperties": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+          "required": ["all", "admin", "userManagement", "botAdmin", "moderator", "staff"]
+        }
+      }
+    },
+    "database": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["primary", "gameplay", "mirror", "cache"],
+      "properties": {
+        "primary": { "type": "object" },
+        "gameplay": { "type": "object" },
+        "mirror": { "type": "object" },
+        "cache": { "type": "object" }
+      }
+    },
+    "ui": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["framework", "primitives", "tokensManifest", "defaultTheme", "themes"],
+      "properties": {
+        "framework": { "type": "string" },
+        "primitives": { "type": "string" },
+        "tokensManifest": { "type": "string" },
+        "defaultTheme": { "type": "string" },
+        "themes": { "type": "array", "minItems": 1 }
+      }
+    },
+    "platforms": {
+      "type": "object",
+      "required": ["vps", "cloudflare", "vercel"]
+    }
+  }
+}

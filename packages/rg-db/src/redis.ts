@@ -4,13 +4,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { STACK_CONTRACT } from "@rosegriffon/config/contract";
 import { redactUrl } from "@aphrody/sql/env";
 import { createRedisClient } from "@aphrody/sql/redis";
 import type { RedisClient } from "bun";
 
+const CACHE_CONTRACT = STACK_CONTRACT.database.cache;
+
 // Initialisation globale avec auto-reconnect et gestion des queues hors-ligne
 // `||` volontaire (contrat historique) : toute valeur non vide est utilisée telle quelle.
-const REDIS_URL = process.env.REDIS_URL || "redis://127.0.0.1:6379";
+const REDIS_URL = process.env.REDIS_URL || CACHE_CONTRACT.defaultUrl;
 
 let clientInstance: RedisClient | null = null;
 
@@ -21,10 +24,10 @@ export function getRedisClient(): RedisClient {
   if (!clientInstance) {
     try {
       clientInstance = createRedisClient(REDIS_URL, {
-        connectionTimeout: 5000,
-        idleTimeout: 300000, // 5 minutes to avoid idle timeouts during crawls
+        connectionTimeout: CACHE_CONTRACT.connectTimeoutMs,
+        idleTimeout: CACHE_CONTRACT.idleTimeoutMs,
         autoReconnect: true,
-        maxRetries: 10,
+        maxRetries: CACHE_CONTRACT.maxRetries,
         enableOfflineQueue: true,
         enableAutoPipelining: true,
       });

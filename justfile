@@ -15,6 +15,7 @@ set windows-shell := ["powershell.exe", "-NoProfile", "-Command"]
 ops := "bun infra/ops/cli.ts"
 
 import 'infra/just/workspace.just'
+import 'infra/just/native.just'
 import 'infra/just/rust.just'
 import 'infra/just/cloud.just'
 import 'infra/just/qa.just'

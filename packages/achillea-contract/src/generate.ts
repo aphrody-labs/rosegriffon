@@ -4,6 +4,7 @@
  * Volontairement séparé de la CLI pour être testable sans toucher au disque.
  */
 
+import { emitC23 } from "./emit-c23";
 import { emitJsonSchema } from "./emit-json-schema";
 import { emitKotlin } from "./emit-kotlin";
 import { emitRust } from "./emit-rust";
@@ -26,6 +27,7 @@ export const CONTRACT_TARGETS: readonly ContractTarget[] = [
       `${JSON.stringify(emitJsonSchema(contract), null, 2)}\n`,
   },
   { file: "achillea.rs", language: "Rust (serde)", render: emitRust },
+  { file: "achillea.h", language: "Pure C23 (LLVM ABI)", render: emitC23 },
   { file: "Achillea.swift", language: "Swift (Codable)", render: emitSwift },
   {
     file: "Achillea.kt",

@@ -1,3 +1,10 @@
+import { statSync } from "node:fs";
+import { join, resolve } from "node:path";
+import {
+  getInagleDatabaseURL,
+  isInagleDatabaseConfigured,
+} from "@rosegriffon/db/pg";
+
 export type InagleDataSource = "vfs" | "sqlite" | "postgres";
 export type InagleDataSourceOption = InagleDataSource | "auto";
 
@@ -6,27 +13,19 @@ export function configuredDataSource(): string | undefined {
 }
 
 export function ownedPostgresUrl(): string {
-  const value = (
-    process.env.INAGLE_DATABASE_URL ?? process.env.NIE_PG_URL
-  )?.trim();
-  if (!value)
+  try {
+    return getInagleDatabaseURL();
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    if (message.includes("must identify")) {
+      throw new Error(
+        "INAGLE_DATABASE_URL must identify an IECODE PostgreSQL host and database",
+      );
+    }
     throw new Error(
       "INAGLE_DATABASE_URL is required for the selected IECODE PostgreSQL source",
     );
-  try {
-    const url = new URL(value);
-    if (
-      !["postgres:", "postgresql:"].includes(url.protocol) ||
-      !url.hostname ||
-      url.pathname === "/"
-    )
-      throw new Error();
-  } catch {
-    throw new Error(
-      "INAGLE_DATABASE_URL must identify an IECODE PostgreSQL host and database",
-    );
   }
-  return value;
 }
 
 export function localMirrorPath(): string | undefined {
@@ -49,9 +48,7 @@ export function localMirrorPath(): string | undefined {
 
 /** Whether the Neon gameplay database (INAGLE_DATABASE_URL or its alias NIE_PG_URL) is configured. */
 export function postgresConfigured(): boolean {
-  return Boolean(
-    (process.env.INAGLE_DATABASE_URL ?? process.env.NIE_PG_URL)?.trim(),
-  );
+  return isInagleDatabaseConfigured();
 }
 
 /**
@@ -75,5 +72,3 @@ export function selectDataSource(options: {
   if (options.postgresAvailable && !options.postgresDisabled) return "postgres";
   return options.sqliteAvailable ? "sqlite" : "vfs";
 }
-import { statSync } from "node:fs";
-import { join, resolve } from "node:path";

@@ -7,11 +7,13 @@
   },
   "include": [
     "tailwind-preset.ts",
-    "public-urls.ts",
-    "test/public-urls.test.ts",
+    "contract.generated.ts",
+    "contract.ts",
+    "contract-ffi.ts",
     "infra.ts",
     "test/infra.test.ts",
     "rg-urls.ts",
-    "test/rg-urls.test.ts"
+    "test/rg-urls.test.ts",
+    "test/contract.test.ts"
   ]
 }

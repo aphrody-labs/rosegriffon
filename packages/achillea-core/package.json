@@ -53,6 +53,7 @@
   "dependencies": {
     "@casl/ability": "catalog:",
     "@rosegriffon/achillea-types": "workspace:*",
+    "@rosegriffon/config": "workspace:*",
     "@sindresorhus/transliterate": "catalog:"
   },
   "devDependencies": {

@@ -1,7 +1,14 @@
+import {
+  isUsableEnvValue,
+  isValidPostgresUrl,
+  STACK_CONTRACT,
+} from "@rosegriffon/config/contract";
 import { Client, Pool } from "pg";
 import { PostgresDialect } from "kysely";
 
 export type { PoolClient, QueryResultRow } from "pg";
+
+const POOL_DEFAULTS = STACK_CONTRACT.database.primary.pool;
 
 export interface PgPoolOptions {
   applicationName?: string;
@@ -12,28 +19,15 @@ export interface PgPoolOptions {
 }
 
 function requireDatabaseURL(name: string, url: string | undefined): string {
-  if (
-    !url ||
-    url.startsWith("eyJ2Ijo") ||
-    url === "undefined" ||
-    url === "null"
-  ) {
+  if (!isUsableEnvValue(url)) {
     throw new Error(
       `${name} absent ou corrompu : une chaîne Postgres valide est requise.`,
     );
   }
-  try {
-    const parsed = new URL(url);
-    if (
-      !["postgres:", "postgresql:"].includes(parsed.protocol) ||
-      !parsed.hostname ||
-      parsed.pathname.length <= 1
-    )
-      throw new Error();
-  } catch {
+  if (!isValidPostgresUrl(url)) {
     throw new Error(`${name} must identify a PostgreSQL host and database`);
   }
-  return url;
+  return url.trim();
 }
 
 /** Supabase PostgreSQL owns RG, Achillea and Better Auth. */
@@ -85,12 +79,15 @@ export function createPgPool(
     10,
   );
   const max =
-    options.max ?? (configuredMax > 0 ? Math.min(configuredMax, 4) : 4);
+    options.max ??
+    (configuredMax > 0
+      ? Math.min(configuredMax, POOL_DEFAULTS.ceiling)
+      : POOL_DEFAULTS.defaultMax);
   const pool = new Pool({
-    application_name: options.applicationName ?? "rosegriffon",
+    application_name: options.applicationName ?? STACK_CONTRACT.project.name,
     connectionString,
-    connectionTimeoutMillis: 5_000,
-    idleTimeoutMillis: 30_000,
+    connectionTimeoutMillis: POOL_DEFAULTS.pgConnectTimeoutMs,
+    idleTimeoutMillis: POOL_DEFAULTS.idleTimeoutSec * 1000,
     keepAlive: options.keepAlive,
     max,
     options: options.searchPath

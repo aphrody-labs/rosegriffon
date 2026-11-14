@@ -1,4 +1,8 @@
 import { randomBytes } from "node:crypto";
+import {
+  contractTrustedOrigins,
+  STACK_CONTRACT,
+} from "@rosegriffon/config/contract";
 
 type AuthEnvironment = {
   BETTER_AUTH_SECRET?: string;
@@ -21,15 +25,16 @@ export function resolveAuthSecret(
 ): string {
   const secret = configured?.trim();
   const production = environment.NODE_ENV === "production";
+  const minLen = STACK_CONTRACT.auth.secretMinLength;
   if (secret) {
     if (
       production &&
-      (secret.length < 32 ||
+      (secret.length < minLen ||
         secret.includes("build-placeholder-secret") ||
         WEAK_PLACEHOLDER_SECRETS.has(secret.toLowerCase()))
     ) {
       throw new Error(
-        "BETTER_AUTH_SECRET must be a private, high-entropy secret of at least 32 characters",
+        `BETTER_AUTH_SECRET must be a private, high-entropy secret of at least ${minLen} characters`,
       );
     }
     return secret;
@@ -68,25 +73,8 @@ export function resolveTrustedOrigins(
     );
   }
   const origins = [
-    "https://rg.aphrody.com",
-    "https://rosegriffon.fr",
-    "https://www.rosegriffon.fr",
-    "https://achillea.rosegriffon.fr",
-    "https://ranked.rosegriffon.fr",
-    "https://azalee.rosegriffon.fr",
-    "https://dragonballfr.com",
-    "https://www.dragonballfr.com",
-    "tauri://localhost",
-    "http://tauri.localhost",
+    ...contractTrustedOrigins(production),
     base.origin,
-    ...(!production
-      ? [
-          "http://localhost:3000",
-          "http://localhost:3001",
-          "http://localhost:5011",
-          "http://127.0.0.1:5011",
-        ]
-      : []),
   ];
   return [...new Set(origins)];
 }

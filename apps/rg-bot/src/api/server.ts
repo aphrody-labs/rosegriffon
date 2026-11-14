@@ -12,13 +12,13 @@ import { authController } from "./modules/auth";
 import { dbPlugin } from "./plugins/db";
 import { publicCache } from "./plugins/public-cache";
 import { elysiaAuth } from "@rosegriffon/auth/elysia";
+import { contractTrustedOrigins, STACK_CONTRACT } from "@rosegriffon/config/contract";
 import { handleAnnounceHttp, handleCronHttp } from "@rosegriffon/cron";
 
 const allowedOrigins = new Set(
   [
     process.env.WEBSITE_URL,
-    "https://rosegriffon.fr",
-    "https://www.rosegriffon.fr",
+    ...contractTrustedOrigins(process.env.NODE_ENV === "production"),
     ...(process.env.WEB_ALLOWED_ORIGINS ?? "").split(","),
   ]
     .map((origin) => origin?.trim().replace(/\/$/, ""))
@@ -35,21 +35,16 @@ export const app = new Elysia()
         const origin = request.headers.get("origin");
         return !origin || allowedOrigins.has(origin);
       },
-      methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-      allowedHeaders: [
-        "Content-Type",
-        "Authorization",
-        "X-Api-Key",
-        "X-Internal-Secret",
-      ],
-      credentials: true,
+      methods: [...STACK_CONTRACT.http.cors.methods],
+      allowedHeaders: [...STACK_CONTRACT.http.cors.allowedHeaders],
+      credentials: STACK_CONTRACT.http.cors.credentials,
     }),
   )
   // CDN caching of the anonymous public reads (free-tier guardrail).
   .use(publicCache)
   .use(
     swagger({
-      path: "/docs",
+      path: STACK_CONTRACT.http.docsPath,
       documentation: {
         info: {
           title: "Rose Griffon Unified API",
@@ -64,10 +59,10 @@ export const app = new Elysia()
   // à la racine : monté sur `/`, il recevait toute URL inconnue et interrogeait la base pour
   // répondre — 500 au lieu de 404 dès que Postgres manquait. Les routes explicites de
   // `authController` (`/v1/auth/realtime-token`, `/v1/auth/logout`…) restent prioritaires.
-  .all("/v1/auth/*", ({ request }) => elysiaAuth.handler(request), {
+  .all(`${STACK_CONTRACT.http.routes.authPrefix}/*`, ({ request }) => elysiaAuth.handler(request), {
     parse: "none",
   })
-  .all("/.well-known/*", ({ request }) => elysiaAuth.handler(request), {
+  .all(`${STACK_CONTRACT.http.routes.wellKnownPrefix}/*`, ({ request }) => elysiaAuth.handler(request), {
     parse: "none",
   })
   .get("/.well-known/agent-configuration", ({ request }) =>
@@ -79,7 +74,7 @@ export const app = new Elysia()
       }
     ).getAgentConfiguration({ headers: request.headers }),
   )
-  .get("/health", () => ({
+  .get(STACK_CONTRACT.http.routes.health, () => ({
     status: "ok",
     service: "rg-api",
     uptime: process.uptime(),
@@ -88,7 +83,7 @@ export const app = new Elysia()
   // Tâches planifiées (appelées par pg_cron) et annonces Discord du site : Bearer, corps lu par le handler.
   // `?attendre=1` : pas d'`idleTimeout` (10 s) pendant que la tâche tourne (cf. `core.ts`).
   .all(
-    "/v1/cron/*",
+    `${STACK_CONTRACT.http.routes.cronPrefix}/*`,
     ({ request, server }) => {
       if (new URL(request.url).searchParams.get("attendre") === "1")
         server?.timeout(request, 0);
@@ -96,10 +91,10 @@ export const app = new Elysia()
     },
     { parse: "none" },
   )
-  .post("/v1/discord/announce", ({ request }) => handleAnnounceHttp(request), {
+  .post(STACK_CONTRACT.http.routes.discordAnnounce, ({ request }) => handleAnnounceHttp(request), {
     parse: "none",
   })
-  .group("/v1", (v1) =>
+  .group(STACK_CONTRACT.http.apiPrefix, (v1) =>
     v1
       .use(achilleaModule)
       .use(wikiController)
@@ -121,7 +116,9 @@ export const app = new Elysia()
       ),
   );
 
-const PORT = Number(process.env.API_PORT ?? 8800);
+const PORT = Number(
+  process.env.API_PORT ?? STACK_CONTRACT.http.defaultPorts.api,
+);
 const HOST = process.env.API_HOST ?? "0.0.0.0";
 
 export function startApiServer(port = PORT, host = HOST) {

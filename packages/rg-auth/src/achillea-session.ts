@@ -1,4 +1,5 @@
 import { createHmac } from "node:crypto";
+import { STACK_CONTRACT } from "@rosegriffon/config/contract";
 import {
   ACHILLEA_AUTH_ISSUER,
   ACHILLEA_REALTIME_AUDIENCE,
@@ -36,7 +37,7 @@ export function achilleaSessionCookieAttributes(
   production = process.env.NODE_ENV === "production",
 ) {
   return {
-    domain: production ? ".rosegriffon.fr" : undefined,
+    domain: production ? STACK_CONTRACT.project.cookieDomain : undefined,
     httpOnly: true,
     path: "/",
     sameSite: "lax",

@@ -1,0 +1,230 @@
+# SPDX-License-Identifier: Apache-2.0
+# Canonical Rose Griffon polyglot stack contract.
+# Language-independent & CLI-independent source of truth for HTTP, Auth,
+# Database/SQL/Postgres/ORM, UI, and Deployment Platforms.
+# Regenerate derived JSON / C23 / TypeScript / Rust targets with:
+#   just contract
+
+schemaVersion: 1
+
+project:
+  name: rosegriffon
+  version: "1.4.4"
+  license: Apache-2.0
+  domain: rosegriffon.fr
+  cookieDomain: ".rosegriffon.fr"
+  repoUrl: "https://github.com/aphrody-labs/rosegriffon.git"
+
+http:
+  healthPath: /health
+  docsPath: /docs
+  apiPrefix: /v1
+  legacyApiPrefix: /api
+  defaultPorts:
+    website: 3000
+    api: 8800
+    core: 8810
+    cron: 8811
+    modelServe: 8792
+  origins:
+    site:
+      label: ""
+      path: ""
+    api:
+      label: api
+      path: ""
+    ranked:
+      label: ranked
+      path: ""
+    rankedApi:
+      label: ranked
+      path: /api
+    cdn:
+      label: cdn
+      path: ""
+    bot:
+      label: bot
+      path: ""
+    achillea:
+      label: achillea
+      path: ""
+    azalee:
+      label: azalee
+      path: ""
+  cors:
+    methods:
+      - GET
+      - POST
+      - PUT
+      - PATCH
+      - DELETE
+      - OPTIONS
+    allowedHeaders:
+      - Content-Type
+      - Authorization
+      - X-Api-Key
+      - X-Internal-Secret
+    credentials: true
+  trustedOrigins:
+    prod:
+      - https://rg.aphrody.com
+      - https://rosegriffon.fr
+      - https://www.rosegriffon.fr
+      - https://api.rosegriffon.fr
+      - https://achillea.rosegriffon.fr
+      - https://ranked.rosegriffon.fr
+      - https://azalee.rosegriffon.fr
+      - https://cdn.rosegriffon.fr
+      - https://bot.rosegriffon.fr
+    native:
+      - tauri://localhost
+      - http://tauri.localhost
+    dev:
+      - http://localhost:3000
+      - http://localhost:3001
+      - http://localhost:5011
+      - http://127.0.0.1:5011
+  routes:
+    health: /health
+    docs: /docs
+    authPrefix: /v1/auth
+    wellKnownPrefix: /.well-known
+    cronPrefix: /v1/cron
+    discordAnnounce: /v1/discord/announce
+    discordInteractions: /v1/discord/interactions/execute
+
+auth:
+  provider: better-auth
+  issuer: achillea
+  audiences:
+    session: achillea-web
+    realtime: achillea-realtime
+  cookieName: token
+  ttlSeconds:
+    session: 2592000
+    realtime: 300
+  passwordMinLength: 12
+  requireEmailVerification: true
+  apiKeyPrefix: rg_
+  secretMinLength: 32
+  defaultRole: user
+  roles:
+    all:
+      - admin
+      - superadmin
+      - editor
+      - moderator
+      - staff
+      - premium
+      - user
+      - banned
+    admin:
+      - admin
+      - superadmin
+      - editor
+      - moderator
+    userManagement:
+      - admin
+      - superadmin
+    botAdmin:
+      - admin
+      - staff
+    moderator:
+      - admin
+      - superadmin
+      - moderator
+    staff:
+      - admin
+      - staff
+
+database:
+  primary:
+    engine: postgresql
+    schema: public
+    achilleaSchema: achillea
+    orm: kysely
+    drivers:
+      - bun-sql
+      - pg
+      - tokio-postgres
+    envVars:
+      - RG_DATABASE_URL
+      - DATABASE_URL
+      - ROSE_GRIFFON_DATABASE_URL
+    pool:
+      defaultMax: 4
+      ceiling: 4
+      idleTimeoutSec: 30
+      maxLifetimeSec: 1800
+      connectTimeoutSec: 10
+      pgConnectTimeoutMs: 5000
+  gameplay:
+    engine: postgresql
+    schema: public
+    orm: kysely|drizzle
+    drivers:
+      - bun-sql
+      - pg
+      - tokio-postgres
+    envVars:
+      - INAGLE_DATABASE_URL
+      - NIE_PG_URL
+  mirror:
+    engine: sqlite
+    orm: drizzle
+    drivers:
+      - bun:sqlite
+      - rusqlite
+    defaultRelPath: var/mirror.sqlite
+  cache:
+    engine: redis
+    defaultUrl: redis://127.0.0.1:6379
+    connectTimeoutMs: 5000
+    idleTimeoutMs: 300000
+    maxRetries: 10
+
+ui:
+  framework: next+react+base-ui+tailwindcss
+  primitives: "@base-ui/react"
+  tokensManifest: packages/rg-config/rg-m3.json
+  defaultTheme: rosegriffon-light
+  themes:
+    - id: rosegriffon-light
+      seed: "#e91e63"
+      dark: false
+    - id: rosegriffon-dark
+      seed: "#e91e63"
+      dark: true
+    - id: achillea
+      seed: "#6d00ce"
+      dark: true
+    - id: azalee-light
+      seed: "#f89c5a"
+      dark: false
+    - id: azalee-dark
+      seed: "#f89c5a"
+      dark: true
+
+platforms:
+  vps:
+    kind: self-host
+    freeRequestsPerDay: -1
+    freeBandwidthGb: -1
+    cpuMs: -1
+    commercial: true
+    stateful: true
+  cloudflare:
+    kind: edge
+    freeRequestsPerDay: 100000
+    freeBandwidthGb: -1
+    cpuMs: 10
+    commercial: true
+    stateful: false
+  vercel:
+    kind: serverless
+    freeRequestsPerDay: 33000
+    freeBandwidthGb: 100
+    cpuMs: 300000
+    maxBuildsPerWeek: 1
+    commercial: false
+    stateful: false

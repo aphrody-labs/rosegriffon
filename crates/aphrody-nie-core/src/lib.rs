@@ -82,6 +82,7 @@ pub mod byte_keyed_table;
 pub mod category_lookup;
 pub mod command_effect;
 pub mod comparaison;
+pub mod contract_generated;
 pub mod crand;
 pub mod ecs;
 pub mod effect_obj_ctor;
@@ -204,5 +205,10 @@ mod tests {
         assert_eq!(BALL_SCALE_DEFAULT.to_bits(), 0x3F80_0000);
         assert_eq!(DISTANCE_UNINIT.to_bits(), 0xBF80_0000);
         assert_eq!(KEEPER_SAVE_RADIUS_DEFAULT.to_bits(), 0x3F80_0000);
+        assert_eq!(contract_generated::CONTRACT_SCHEMA_VERSION, 1);
+        assert_eq!(contract_generated::DEFAULT_DOMAIN, "rosegriffon.fr");
+        assert_eq!(contract_generated::ACHILLEA_SCHEMA, "achillea");
+        assert_eq!(contract_generated::DB_POOL_CEILING, 4);
+        assert_eq!(contract_generated::VERCEL_MAX_BUILDS_PER_WEEK, 1);
     }
 }

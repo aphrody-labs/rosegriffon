@@ -59,6 +59,7 @@
     "@rosegriffon/assets": "workspace:*",
     "@rosegriffon/auth": "workspace:*",
     "@rosegriffon/azalee": "workspace:*",
+    "@rosegriffon/config": "workspace:*",
     "@rosegriffon/cron": "workspace:*",
     "@rosegriffon/db": "workspace:*",
     "@rosegriffon/types": "workspace:*",
@@ -75,7 +76,6 @@
     "zod": "catalog:"
   },
   "devDependencies": {
-    "@rosegriffon/config": "workspace:*",
     "@types/bun": "catalog:",
     "@vercel/config": "catalog:"
   },

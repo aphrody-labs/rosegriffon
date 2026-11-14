@@ -29,6 +29,7 @@
     "@better-auth/oauth-provider": "catalog:",
     "@better-auth/passkey": "catalog:",
     "@rosegriffon/achillea-core": "workspace:*",
+    "@rosegriffon/config": "workspace:*",
     "@rosegriffon/db": "workspace:*",
     "@rosegriffon/types": "workspace:*",
     "better-auth": "catalog:",

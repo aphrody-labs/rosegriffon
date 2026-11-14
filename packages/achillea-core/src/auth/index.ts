@@ -5,12 +5,19 @@
  * contains no Node APIs, so browser, edge, bot, API, ranked, and realtime
  * consumers share the same purpose-bound contract.
  */
-export const ACHILLEA_AUTH_ISSUER = "achillea";
-export const ACHILLEA_SESSION_AUDIENCE = "achillea-web";
-export const ACHILLEA_REALTIME_AUDIENCE = "achillea-realtime";
-export const ACHILLEA_SESSION_COOKIE_NAME = "token";
-export const ACHILLEA_SESSION_TTL_SECONDS = 30 * 24 * 60 * 60;
-export const ACHILLEA_REALTIME_TTL_SECONDS = 5 * 60;
+import { STACK_CONTRACT } from "@rosegriffon/config/contract";
+
+export const ACHILLEA_AUTH_ISSUER: string = STACK_CONTRACT.auth.issuer;
+export const ACHILLEA_SESSION_AUDIENCE: string =
+  STACK_CONTRACT.auth.audiences.session;
+export const ACHILLEA_REALTIME_AUDIENCE: string =
+  STACK_CONTRACT.auth.audiences.realtime;
+export const ACHILLEA_SESSION_COOKIE_NAME: string =
+  STACK_CONTRACT.auth.cookieName;
+export const ACHILLEA_SESSION_TTL_SECONDS: number =
+  STACK_CONTRACT.auth.ttlSeconds.session;
+export const ACHILLEA_REALTIME_TTL_SECONDS: number =
+  STACK_CONTRACT.auth.ttlSeconds.realtime;
 
 export interface AchilleaSessionIdentity {
   id: string;

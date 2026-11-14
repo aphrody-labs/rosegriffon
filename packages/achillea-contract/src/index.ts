@@ -17,6 +17,7 @@ export type { ExtractOptions } from "./extract";
 export { emitJsonSchema, resolveFields } from "./emit-json-schema";
 export type { JsonSchemaDocument } from "./emit-json-schema";
 
+export { emitC23 } from "./emit-c23";
 export { emitRust } from "./emit-rust";
 export { emitSwift } from "./emit-swift";
 export { emitKotlin } from "./emit-kotlin";

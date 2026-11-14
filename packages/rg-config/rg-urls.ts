@@ -12,20 +12,15 @@
  * `NEXT_PUBLIC_*`, which is only inlined on literal access).
  */
 
+import { STACK_CONTRACT } from "./contract.generated.ts";
+
 export type RgEnv = Readonly<Record<string, string | undefined>>;
 
-/** Apex used when `RG_DOMAIN` is unset. The only spelling of the domain in source code. */
-export const RG_DEFAULT_DOMAIN = "rosegriffon.fr";
+/** Apex used when `RG_DOMAIN` is unset. Sourced from `contract/stack.yml`. */
+export const RG_DEFAULT_DOMAIN = STACK_CONTRACT.project.domain;
 
-/** Public surfaces: subdomain label ("" = apex) and path suffix. */
-export const RG_ORIGINS = {
-  site: { label: "", path: "" },
-  api: { label: "api", path: "" },
-  ranked: { label: "ranked", path: "" },
-  rankedApi: { label: "ranked", path: "/api" },
-  cdn: { label: "cdn", path: "" },
-  bot: { label: "bot", path: "" },
-} as const;
+/** Public surfaces derived from the unified stack contract. */
+export const RG_ORIGINS = STACK_CONTRACT.http.origins;
 
 export type RgOrigin = keyof typeof RG_ORIGINS;
 
