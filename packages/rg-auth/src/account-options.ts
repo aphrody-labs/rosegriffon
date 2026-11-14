@@ -44,6 +44,15 @@ export interface AccountOptionsInput {
   executerSql?: (requete: string, parametres: unknown[]) => Promise<unknown>;
 }
 
+function escapeHtml(value: string): string {
+  return value
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
+
 /** Gabarit sobre commun : un titre, un paragraphe, un bouton, une mise en garde. */
 function template(options: {
   appName: string;
@@ -62,15 +71,15 @@ function template(options: {
     <tr><td align="center">
       <table role="presentation" width="100%" style="max-width:480px;background:#ffffff;border-radius:16px;overflow:hidden">
         <tr><td style="padding:32px 28px 16px">
-          <h1 style="margin:0 0 12px;font-size:20px;font-weight:700">${title}</h1>
+          <h1 style="margin:0 0 12px;font-size:20px;font-weight:700">${escapeHtml(title)}</h1>
           <p style="margin:0;font-size:15px;line-height:1.55;color:#4a4a4a">${intro}</p>
         </td></tr>
         <tr><td style="padding:0 28px 28px" align="center">
-          <a href="${url}" style="display:inline-block;padding:13px 32px;background:#a14b3f;color:#ffffff;font-size:15px;font-weight:600;text-decoration:none;border-radius:999px">${cta}</a>
-          <p style="margin:18px 0 0;font-size:12px;line-height:1.5;color:#8a8a8a">${footer}</p>
+          <a href="${escapeHtml(url)}" style="display:inline-block;padding:13px 32px;background:#a14b3f;color:#ffffff;font-size:15px;font-weight:600;text-decoration:none;border-radius:999px">${escapeHtml(cta)}</a>
+          <p style="margin:18px 0 0;font-size:12px;line-height:1.5;color:#8a8a8a">${escapeHtml(footer)}</p>
         </td></tr>
         <tr><td style="padding:14px 28px;border-top:1px solid #ececec" align="center">
-          <p style="margin:0;font-size:11px;color:#8a8a8a">${appName} — Rose Griffon</p>
+          <p style="margin:0;font-size:11px;color:#8a8a8a">${escapeHtml(appName)} — Rose Griffon</p>
         </td></tr>
       </table>
     </td></tr>
@@ -115,7 +124,7 @@ export function createAccountOptions({
             appName,
             cta: "Confirmer le changement",
             footer: `Lien valable une heure. Si tu n'es pas à l'origine de cette demande, ignore ce message : ton adresse reste ${user.email}.`,
-            intro: `Tu as demandé à remplacer <strong>${user.email}</strong> par <strong>${newEmail}</strong>.`,
+            intro: `Tu as demandé à remplacer <strong>${escapeHtml(user.email)}</strong> par <strong>${escapeHtml(newEmail)}</strong>.`,
             title: "Confirme ta nouvelle adresse",
             url,
           }),

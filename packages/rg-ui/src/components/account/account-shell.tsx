@@ -91,7 +91,7 @@ export function AccountShell({
               <TabsTrigger
                 key={id}
                 value={id}
-                className="flex min-h-11 shrink-0 snap-start items-center justify-center gap-2 rounded-full px-4 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground sm:min-h-9 sm:rounded-md"
+                className="flex min-h-11 shrink-0 snap-start items-center justify-center gap-2 rounded-full px-4 text-sm data-active:bg-primary data-active:text-primary-foreground sm:min-h-9 sm:rounded-md"
               >
                 <meta.icon className="size-4 shrink-0" aria-hidden />
                 <span>{meta.label}</span>

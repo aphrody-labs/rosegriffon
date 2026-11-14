@@ -15,7 +15,7 @@ import type {
 
 import type { AdditionalKeys } from "../../../utils";
 
-import { ListRequestPayload } from "../internals/list";
+import type { ListRequestPayload } from "../internals/list";
 import type { RequestPayload } from "../internals/request";
 
 import type { AnyToCamelCase } from "./capitalize";

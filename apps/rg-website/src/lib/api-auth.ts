@@ -17,6 +17,8 @@ export interface ApiAuthSuccess {
 export type ApiAuthResult =
   { ok: true; data: ApiAuthSuccess } | { ok: false; response: NextResponse };
 
+const NO_STORE_HEADERS = { "Cache-Control": "no-store" } as const;
+
 /**
  * API-route equivalent of `requireAuth()` — returns 401 JSON instead of redirecting.
  */
@@ -27,7 +29,7 @@ export async function requireApiAuth(): Promise<ApiAuthResult> {
       ok: false,
       response: NextResponse.json(
         { error: "Non authentifié" },
-        { status: 401 },
+        { headers: NO_STORE_HEADERS, status: 401 },
       ),
     };
   }
@@ -61,7 +63,10 @@ export async function requireApiAdmin(): Promise<ApiAuthResult> {
   if (!isAdmin(role)) {
     return {
       ok: false,
-      response: NextResponse.json({ error: "Forbidden" }, { status: 403 }),
+      response: NextResponse.json(
+        { error: "Forbidden" },
+        { headers: NO_STORE_HEADERS, status: 403 },
+      ),
     };
   }
 
@@ -82,7 +87,10 @@ export async function requireApiPatreonCreator(): Promise<ApiAuthResult> {
   if (!allowed) {
     return {
       ok: false,
-      response: NextResponse.json({ error: "Forbidden" }, { status: 403 }),
+      response: NextResponse.json(
+        { error: "Forbidden" },
+        { headers: NO_STORE_HEADERS, status: 403 },
+      ),
     };
   }
   return authed;

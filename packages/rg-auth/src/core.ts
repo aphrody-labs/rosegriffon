@@ -162,8 +162,9 @@ export async function ensureUserProfile(
       }
 
       // Update avatar/name/provider IDs if changed
-      const hasAvatarChanged = user.image !== existing.avatar_url;
-      const hasNameChanged = user.name !== existing.full_name;
+      const hasAvatarChanged =
+        (user.image ?? null) !== (existing.avatar_url ?? null);
+      const hasNameChanged = (user.name ?? "") !== (existing.full_name ?? "");
       const hasDiscordChanged = discordId && discordId !== existing.discord_id;
       const hasPatreonChanged = patreonId && patreonId !== existing.patreon_id;
 
@@ -380,7 +381,11 @@ export const commonAuthOptions = {
       enabled: false,
     },
     ipAddress: {
-      ipAddressHeaders: ["x-forwarded-for", "x-real-ip"] as string[],
+      ipAddressHeaders: [
+        "cf-connecting-ip",
+        "x-forwarded-for",
+        "x-real-ip",
+      ] as string[],
     },
     defaultCookieAttributes: {
       httpOnly: true,

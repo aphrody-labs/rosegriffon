@@ -1,129 +1,108 @@
 # Rose Griffon
 
-Monorepo of [Rose Griffon](https://rosegriffon.fr): the website, the Discord bots, the
-unified API, the Achillea ranked platform, and Azalee. Pure Bun v1.4.4 workspaces.
+Monorepo of [Rose Griffon](https://rosegriffon.fr): Next.js 16 website, separated Discord gateways (`rg`, `achillea`, `azalee`), unified Elysia API, Achilléa ranked Colyseus server, Azalée wiki & CLI, and the Inazuma Eleven: Victory Road (`nie`) Rust/Bevy/Taffy/WebGPU engine and studio.
 
-History is preserved from `aphrody-labs/rg`, then `aphrody-labs/iecode` and
-`aphrody-labs/bun-distribution` (Bun OS), rewritten to the flat layout below.
+Pure **Bun v1.4.4+** workspaces (25 packages, 6 apps) + **Rust 2024** workspace (42 crates).
 
-## Layout
+## Monorepo Layout
 
-| Path                          | Package                                                                                                                                | Role                                                                                                                   |
-| ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `apps/rg-website`             | `@rosegriffon/website`                                                                                                                 | Next.js site (rosegriffon.fr)                                                                                          |
-| `apps/rg-bot`                 | `@rosegriffon/bot`                                                                                                                     | Discord gateways (profiles `rg`, `azalee`), unified Elysia API, Achillea ranked Colyseus server, `rg-core` VPS service |
-| `packages/achillea-*`         | `@rosegriffon/achillea-{client,contract,core,types}`                                                                                   | Achillea esport domain, API contract and client                                                                        |
-| `packages/azalee`             | `@rosegriffon/azalee`                                                                                                                  | Azalee library and CLI                                                                                                 |
-| `packages/nie-ui`             | `@aphrody/nie-ui`                                                                                                                      | Unified NIE Studio, Save Editor, Mod Manager, 3D Chara & Emulator UI                                                   |
-| `packages/filmcraft`          | `@aphrody/filmcraft`                                                                                                                   | FilmCraft NLE timeline engine, multi-track cuts and video export                                                       |
-| `packages/hyperframes`        | `@aphrody/hyperframes`                                                                                                                 | Zero-download HTTP byte-range ISOBMFF parser and frame decoder                                                         |
-| `packages/remotion`           | `@aphrody/remotion`                                                                                                                    | Zero-dependency React/Bun remotion timeline composition                                                                |
-| `crates/aphrody-nie-headless` | `aphrody-nie-headless`                                                                                                                 | Headless IEVR simulation, save editor, menu capture & core memory dump                                                 |
-| `packages/rg-*`               | `@rosegriffon/{app-shell,assets,auth,config,cron,db,discord-sync,i18n,identity,preferences,search,types}`, `@rosegriffon/ui` (private) | shared site, data and service packages                                                                                 |
-| `supabase/`                   | —                                                                                                                                      | Supabase CLI config and migrations of the `rg` project                                                                 |
-| `scripts/`                    | —                                                                                                                                      | build, deploy, operations and campaign scripts                                                                         |
-| `infra/`                      | —                                                                                                                                      | systemd units, nginx sites, cloud descriptors, VPS helper scripts                                                      |
-| `docs/`                       | —                                                                                                                                      | architecture notes (`docs/rg/` holds the historical documentation)                                                     |
+### Apps (`apps/`)
 
-`@rosegriffon/inagle` and `@rosegriffon/inagle-cross` (IEVR game data) are owned by
-Bun OS (`aphrody-labs/bun-distribution`, with nie and iecode) and consumed here from npm.
-`@aphrody/*` packages come from npm as well.
+| Path                 | Package                | Role                                                                                        |
+| -------------------- | ---------------------- | ------------------------------------------------------------------------------------------- |
+| `apps/rg-website`    | `@rosegriffon/website` | Next.js 16.5 site (`rosegriffon.fr`, shadcn `base-nova` + `@base-ui/react`, Better Auth)    |
+| `apps/rg-bot`        | `@rosegriffon/bot`     | Discord gateways (`rg`, `achillea`, `azalee`), unified Elysia API, Achilléa Colyseus ranked |
+| `apps/cli`           | `@rosegriffon/cli`     | Unified Bun CLI (`ie`, `rg`, `rosegriffon`) routing all JS/TS, Rust, and `infra/ops` CLIs   |
+| `apps/rosegriffon`   | `@rosegriffon/server`  | Self-hostable `rosegriffon` server binary (`serve`, `site`, `api`, `bot`, `ranked`, `cron`) |
+| `apps/mcp`           | `@rosegriffon/mcp`     | Rose Griffon Model Context Protocol server                                                  |
+| `apps/iecode-dotnet` | —                      | .NET interop, FFI, CLI, and GUI tooling for IEVR assets                                     |
 
-## Toolchain
+### Packages (`packages/`)
 
-- [Aphrody Bun](https://github.com/aphrody-labs/bun) 1.4.4 or newer (`packageManager: bun@1.4.4`).
-  Type checking, lint and format use its native `bun check`, `bun lint` and `bun fmt`.
+| Scope                        | Packages                                                                                                          |
+| ---------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| **Achilléa**                 | `achillea-client` (with `achillea` CLI), `achillea-contract`, `achillea-core`, `achillea-types`                   |
+| **Azalée & Game Data**       | `azalee`, `inagle`, `ieverse`, `bun-engine-formats`, `iecode-homebrew`                                            |
+| **NIE Studio & Media**       | `nie-ui`, `nie-web`, `filmcraft`, `hyperframes`, `remotion`                                                       |
+| **Shared Platform (`rg-*`)** | `rg-app-shell`, `rg-assets`, `rg-auth`, `rg-config`, `rg-cron`, `rg-db`, `rg-i18n`, `rg-lua`, `rg-types`, `rg-ui` |
+| **Integrations**             | `patreon-bun`                                                                                                     |
+
+### Rust Workspace (`crates/`, 42 crates)
+
+- **Engine & UI**: `aphrody-nie-bevy` (`bevy 0.20.1`), `aphrody-nie-ui` (`taffy 0.15.1`), `aphrody-nie-wasm` (`wasm32` WebGPU/WebGL), `aphrody-nie-render3d`, `aphrody-nie-camera`, `aphrody-nie-game`, `aphrody-nie-app`, `aphrody-nie-launcher`, `aphrody-nie-editor`
+- **Core, Formats & Simulation**: `aphrody-nie-core`, `aphrody-nie-formats`, `aphrody-nie-data`, `aphrody-nie-save`, `aphrody-nie-headless`, `aphrody-nie-viola`, `aphrody-nie-zukan`, `aphrody-nie-wiki`, `aphrody-nie-inventory`, `aphrody-nie-ocgen`
+- **Services, CLI, MCP & RE**: `aphrody-nie-model-serve` (CDN assets & catalogs), `aphrody-nie-cli`, `aphrody-nie-mcp`, `aphrody-nie-ffi`, `aphrody-nie-computer-use`, `aphrody-nie-lua`, `aphrody-nie-lua-web`, `aphrody-nie-net`, `aphrody-nie-pe`, `aphrody-nie-pg`, `aphrody-nie-sql`, `aphrody-nie-queue`, `aphrody-nie-tasks`, `aphrody-nie-trace`, `aphrody-nie-index`, `aphrody-nie-seed`, `aphrody-nie-forge`, `aphrody-nie-explore`, `aphrody-nie-bench`, `aphrody-nie-identity-source`, `nie-pkg`, `re`, `yolo-re-core`
+
+## Unified CLI
+
+`apps/cli` (`ie` / `rg` / `rosegriffon`) exposes every CLI in one entrypoint:
+
+```sh
+bun apps/cli/src/index.ts --help
+bun apps/cli/src/index.ts inagle <args...>        # IEVR data & Zukan CLI
+bun apps/cli/src/index.ts azalee <args...>        # Azalee DB, sync, audit
+bun apps/cli/src/index.ts achillea <args...>      # Full 19-resource Achilléa v1 API CLI
+bun apps/cli/src/index.ts nie <args...>           # Rust aphrody-nie-cli
+bun apps/cli/src/index.ts contract <args...>      # Achilléa schema/contract generator
+bun apps/cli/src/index.ts formats <args...>       # Console ROM/binary formats
+bun apps/cli/src/index.ts homebrew <args...>      # DS/3DS homebrew toolchain
+bun apps/cli/src/index.ts serve|site|api|bot|ranked|cron
+bun apps/cli/src/index.ts build|deploy|verify <service|all>
+```
+
+Standalone Achilléa client CLI:
+
+```sh
+bun packages/achillea-client/src/cli.ts resources
+bun packages/achillea-client/src/cli.ts ranked leaderboard
+```
+
+## Toolchain & Verification
 
 ```sh
 bun install
-bun run typecheck          # bun run --filter '*' typecheck
-bun run lint               # bun run --filter '*' lint
-bun run build              # bun run --filter '*' build
-bun run --filter '@rosegriffon/cron' typecheck
+bun fmt
+bun --filter @rosegriffon/ui tokens
+bun --filter @rosegriffon/achillea-contract generate
+bun run typecheck
+bun run lint
+bun run test
+cargo check --workspace --all-targets
 ```
 
-### just
+### `just` & Production Fleet
 
-The root `justfile` drives the same workspace tasks (`just` lists them):
-`just install` (`bun install --ignore-scripts`), `just check`, `just lint`, `just test`,
-`just fmt`, `just ci` (check, lint, test, workspace build), `just compile [args]`, `just tokens`
-(rg-ui themes and tokens). Host verbs are uniform over the service registry:
-`just build|deploy|verify <service|all> [--role R]`, `just rollback <tag> [service]`,
-`just migrate <service> --to <role|host> [--apply]`, plus `just host <role>`, `just ssh <role>`,
-`just services` and `just render`. Roles, services, data flow and migration:
-[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
-
-## VPS Service: `rg-core` executable
-
-`bun run compile` links `apps/rg-bot/src/core.ts` into a single file, `dist/rg-core-<target>[.exe]`.
+`justfile` and `infra/ops/cli.ts` drive builds, deployments, and verification across hosts (`infra/hosts.toml`, `infra/services.toml`):
 
 ```sh
-bun run compile                                # host target
-bun run compile --target linux-x64
-bun run compile --target windows-x64
+just ci
+just build all
+just deploy all
+just verify all
 ```
 
-```text
-rg-core                        service complet sur RG_CORE_PORT (défaut 8810)
-rg-core bot                    seule la passerelle Discord du profil RG_PROFIL_BOT
-```
+Production runs Docker Compose (`compose.yaml`) behind Nginx/Cloudflare on `prd`:
 
-Configuration comes from one dotenv file: `./.env` next to the working directory or
-`--env-file <path>` (repeatable); the process environment wins. `.env.example` lists every
-variable. `aphrody-nie-model-serve` is a Bun OS product and is never embedded: set
-`NIE_MODEL_SERVE_URL` to relay an external instance, or `NIE_MODEL_SERVE_BIN` and
-`NIE_GAME_DIR` to let `serve` supervise a local binary.
+- **Website**: `https://rosegriffon.fr` (`apps/rg-website`)
+- **API & Bots**: `https://api.rosegriffon.fr` (`apps/rg-bot` — separated Discord gateways `rg`, `achillea`, `azalee` and Better Auth providers `discord`, `discord-achillea`, `discord-azalee`)
+- **Ranked**: `https://ranked.rosegriffon.fr` (Colyseus + Achilléa API)
+- **CDN**: `https://cdn.rosegriffon.fr` (`aphrody-nie-model-serve`)
 
-A VPS install is the executable, an env file and a systemd unit; `infra/systemd` and
-`infra/nginx` hold the production units and the nginx site for `rosegriffon.fr`.
+## AI Agents, Skills & MCP Plugin
 
-## NIE Studio & Headless Simulation Engine
+Project-scoped tooling is consolidated in:
 
-Inazuma Eleven: Victory Road (`nie.exe` Level-5 "Lives" engine) reverse-engineering and studio capabilities are exposed via:
+- `.mcp.json`: `nie`, `rosegriffon`, `shadcn`, `next-devtools`, `better-auth`, `context7`
+- `.agents/skills/` & `.claude/skills/` (kept in sync via `bun run skills:sync`)
+- `.claude-plugin/plugin.json`: plugin manifest referencing `./.claude/skills` and `./.mcp.json`
 
-1. **Headless Engine (`crates/aphrody-nie-headless`)**:
-   - `detect`: Identifies Level-5 / Criware binary structures (`CPK`, `@UTF`, `CRILAYLA`, `G4TX`, `G4MD`, `RDBN`).
-   - `match`: Deterministic 90-minute football match simulation.
-   - `save-edit`: Encrypted XOR stream cipher manipulation with CRC32 recalculation.
-   - `capture-menus`: Captures all game menu screens (boot, title, main menu, save editor, match UI, formation) as PNG sequences + `timeline.json`.
-   - `memory-dump`: Full structured JSON memory map and binary core image matching `nie.exe` PE sections.
-   - `pipeline`: Automated end-to-end run combining save editing, core dumping, and menu capture.
+## Documentation
 
-2. **Unified Studio Package (`@aphrody/nie-ui/studio`)**:
-   - Save Editor, Mod Manager with VFS path overlays, CPK Explorer, and 3D Character Editor with morphological tuning.
-   - NLE Timeline and video processing through `@aphrody/filmcraft`, `@aphrody/hyperframes`, and `@aphrody/remotion`.
-   - Multimodal RAG dataset ingestion with SigLIP vision embeddings on RTX 4070 (`sm_89`).
-
-3. **Technical Specs & Roadmap**:
-   - [Roadmap 2026-2027](file:///C:/src/apps/rosegriffon/docs/ROADMAP-2026-2027.md)
-   - [Architecture Studio NIE](file:///C:/src/apps/rosegriffon/docs/ARCHITECTURE-NIE-STUDIO.md)
-
-## Cloud topology
-
-| Surface                           | Host                                                                              | Configuration                                                                                           |
-| --------------------------------- | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| Website                           | Vercel (Fluid Compute, Bun runtime), prebuilt deploys                             | `apps/rg-website/vercel.ts`                                                                             |
-| Unified API                       | Vercel Function (Bun), prebuilt Build Output                                      | `apps/rg-bot/vercel.ts`, `apps/rg-bot/src/scripts/build-vercel.ts`                                      |
-| Postgres, Auth, Storage, Realtime | Supabase project `rg` (ref `xzwfnxzkxtcpgmtqulbh`)                                | `supabase/config.toml`, `supabase/migrations`                                                           |
-| Game data mirror                  | Neon project `inagle` (pooled endpoint, `INAGLE_DATABASE_URL`)                    | schema owned by `@rosegriffon/inagle` in Bun OS                                                         |
-| Long-running services             | compose stack on the `prod` role host (`core`, `website`, `model-serve`, `nginx`) | `infra/hosts.toml`, `infra/services.toml`, `compose.yaml`, [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) |
-| Models                            | `aphrody-nie-model-serve` (Bun OS), relayed by rg-core                            | `NIE_MODEL_SERVE_*`                                                                                     |
-
-Supabase: `supabase link --project-ref xzwfnxzkxtcpgmtqulbh`, then `supabase db push` from the
-repository root. Gameplay reads stay on the Neon pooler; Supabase keeps the site, auth and
-community data. Credentials live in Vercel project environments, the VPS env file (mode 0600)
-and GitHub secrets, never in the repository.
-
-## Releases
-
-- **npm**: bump the package `version` and run `bun run release` (`scripts/publish.ts`), which
-  publishes every public `@rosegriffon/*` package whose version is not on npm (`bun pm pack`,
-  then `npm publish --provenance`). The `@rosegriffon/inagle*` packages are skipped.
-- **Executables**: push a `v*` tag (or run `rosegriffon binaries` manually) to build and
-  attach `rosegriffon-linux-x64` and `rosegriffon-windows-x64.exe` with `SHA256SUMS`.
+- [Documentation Index](docs/README.md)
+- [Architecture & Services](docs/ARCHITECTURE.md)
+- [Plan & Design System](PLAN.md)
+- [Production Status](docs/PROD-STATUS.md)
 
 ## License
 
-Each package declares its license: Apache-2.0 for most Rose Griffon packages, MIT for
-`packages/azalee` and `crates/aphrody-rg-server`, with their `LICENSE` files. Repository-level
-tooling is available under MIT (`LICENSE`) or Apache-2.0 (`LICENSE-APACHE`).
+Packages declare their license in `package.json` / `Cargo.toml` (primarily `Apache-2.0` or `MIT`, see `LICENSE` and `LICENSE-APACHE`).

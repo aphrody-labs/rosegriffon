@@ -9,8 +9,10 @@
  *   achillea health
  */
 import { AchilleaClient, type AchilleaFetch } from "./v1";
+import { z } from "zod";
 
-export const ACHILLEA_DEFAULT_BASE_URL = "https://api.rosegriffon.fr/v1/achillea";
+export const ACHILLEA_DEFAULT_BASE_URL =
+  "https://api.rosegriffon.fr/v1/achillea";
 
 export type AchilleaResourceName =
   | "admin"
@@ -159,11 +161,15 @@ export async function runAchilleaCli(
   });
   const surface = describeAchilleaSurface(client);
 
-  if (parsed.positionals.length === 0 || (parsed.help && parsed.positionals.length === 0)) {
+  if (
+    parsed.positionals.length === 0 ||
+    (parsed.help && parsed.positionals.length === 0)
+  ) {
     io.stdout(
       JSON.stringify(
         {
-          usage: "achillea [--url <url>] [--token <bearer>] <resource> <action> [args...]",
+          usage:
+            "achillea [--url <url>] [--token <bearer>] <resource> <action> [args...]",
           baseUrl: parsed.baseUrl,
           resources: surface,
         },
@@ -182,7 +188,7 @@ export async function runAchilleaCli(
   }
 
   if (resourceArg === "health") {
-    const res = await client.http.get("/health");
+    const res = await client.http.get("/health", z.unknown());
     io.stdout(JSON.stringify(res, null, 2));
     return res.ok ? 0 : 1;
   }

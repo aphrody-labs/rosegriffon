@@ -8,19 +8,19 @@ import { shouldIncludeRequestBody } from "../../../rest/v2/oauth2/rest/client";
 import {
     type ItemType,
     QueryBuilder,
-    RelationshipFields,
-    RelationshipMap,
+    type RelationshipFields,
+    type RelationshipMap,
     Type,
-    WriteResourcePayload,
-    WriteResourceResponse,
-    WriteResourceType,
+    type WriteResourcePayload,
+    type WriteResourceResponse,
+    type WriteResourceType,
 } from "../../../schemas/v2/";
 
 import { CacheStore, type CacheStoreOptions } from "../cache/";
 
 import {
     PatreonMockData,
-    PatreonMockDataAttributes,
+    type PatreonMockDataAttributes,
     type PatreonMockDataOptions,
     type PatreonMockDataQuery,
 } from "./data";
@@ -349,8 +349,9 @@ export class PatreonMock {
         });
 
         return options && "responseStatus" in options
-            ? options.responseStatus
+            ? (options.responseStatus ?? 200)
             : "response" in route &&
+                route.response &&
                 "status" in route.response &&
                 typeof route.response.status === "number"
               ? route.response.status

@@ -43,22 +43,20 @@ export const RelationshipsUtils = {
     stringify<T extends ItemType, F extends RelationshipFields<T>>(
         relationships: Relationship<T, F>["relationships"],
     ): StringifiedRelationships<T, F> {
-        return Object.entries<Relationship<T, F>["relationships"]>(
-            relationships,
-        ).reduce((output, [key, value]) => {
+        const output: Record<string, string | string[] | null> = {};
+        for (const [key, value] of Object.entries<
+            Relationship<T, F>["relationships"]
+        >(relationships)) {
             // ignore the links attributes
             const data = (<{ data: RelationshipData<T, F> }>value)["data"];
-
-            return {
-                ...output,
-                [key]:
-                    data == null
-                        ? null
-                        : Array.isArray(data)
-                          ? data.map((d) => d.id)
-                          : data.id,
-            };
-        }, {});
+            output[key] =
+                data == null
+                    ? null
+                    : Array.isArray(data)
+                      ? data.map((d) => d.id)
+                      : data.id;
+        }
+        return output as StringifiedRelationships<T, F>;
     },
     parse<T extends ItemType, F extends RelationshipFields<T>>(
         type: T,

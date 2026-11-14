@@ -16,26 +16,32 @@ import {
   CardTitle,
 } from "@rosegriffon/ui";
 import { ElementChartLoader } from "./ElementChartLoader";
-import { apiClient } from "@/lib/api-client";
 import { createPostgresClient } from "@rosegriffon/db/service";
 import { Icon } from "@/components/ui/Icon";
 
 export default async function DatabasePage() {
   const supabase = createPostgresClient();
 
-  // Fetch real counts concurrently
-  const [characters, skills, teams, items, keshinsCount] = await Promise.all([
-    apiClient.inagle.getAllCharacters(),
-    apiClient.inagle.getSkills(),
-    apiClient.inagle.getTeams(),
-    apiClient.inagle.getItems(),
+  const countTable = (table: string) =>
     supabase
-      .from("inagle_keshins_clean")
+      .from(table)
       .select("*", { count: "exact", head: true })
-      .not("asset_code", "ilike", "wa%")
-      .not("asset_code", "ilike", "wkt%")
-      .then((res: any) => res.count || 0),
-  ]);
+      .then((res: any) => res.count || 0);
+
+  // Fetch real counts concurrently without loading full >2MB tables into memory/cache
+  const [charactersCount, skillsCount, teamsCount, itemsCount, keshinsCount] =
+    await Promise.all([
+      countTable("inagle_characters"),
+      countTable("inagle_skills"),
+      countTable("inagle_teams"),
+      countTable("inagle_items"),
+      supabase
+        .from("inagle_keshins_clean")
+        .select("*", { count: "exact", head: true })
+        .not("asset_code", "ilike", "wa%")
+        .not("asset_code", "ilike", "wkt%")
+        .then((res: any) => res.count || 0),
+    ]);
 
   // Fetch Element Stats directly from DB for speed
   const { data: charElements } = await supabase
@@ -67,7 +73,7 @@ export default async function DatabasePage() {
   }> = [
     {
       color: "bg-primary",
-      count: characters.length,
+      count: charactersCount,
       href: "/admin/database/inagle_characters",
       icon: User,
       name: "Joueurs",
@@ -75,7 +81,7 @@ export default async function DatabasePage() {
     },
     {
       color: "bg-secondary",
-      count: skills.length,
+      count: skillsCount,
       href: "/admin/database/inagle_skills",
       icon: Zap,
       name: "Techniques",
@@ -83,7 +89,7 @@ export default async function DatabasePage() {
     },
     {
       color: "bg-tertiary",
-      count: teams.length,
+      count: teamsCount,
       href: "/admin/database/inagle_teams",
       icon: Users,
       name: "Équipes",
@@ -91,7 +97,7 @@ export default async function DatabasePage() {
     },
     {
       color: "bg-success",
-      count: items.length,
+      count: itemsCount,
       href: "/admin/database/inagle_items",
       icon: Backpack,
       name: "Objets",

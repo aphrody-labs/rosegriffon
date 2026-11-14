@@ -193,7 +193,7 @@ export function NewsFilters({
               key={f.status || "all"}
               value={f.status}
               aria-label={f.label}
-              className="h-10 shrink-0 gap-1.5 whitespace-nowrap rounded-full border border-outline-variant/50 px-3 font-medium text-xs data-[state=on]:bg-secondary-container data-[state=on]:text-on-secondary-container data-[state=on]:shadow-sm sm:px-4"
+              className="h-10 shrink-0 gap-1.5 whitespace-nowrap rounded-full border border-outline-variant/50 px-3 font-medium text-xs data-pressed:bg-secondary-container data-pressed:text-on-secondary-container data-pressed:shadow-sm sm:px-4"
             >
               <Icon name={f.icon} size={16} className="opacity-80" />
               <span>{f.label}</span>
@@ -212,14 +212,14 @@ export function NewsFilters({
           <ToggleGroupItem
             value="grid"
             aria-label="Vue grille"
-            className="size-9 rounded-full data-[state=on]:bg-surface-container-highest"
+            className="size-9 rounded-full data-pressed:bg-surface-container-highest"
           >
             <Icon name="grid_view" size={18} />
           </ToggleGroupItem>
           <ToggleGroupItem
             value="list"
             aria-label="Vue liste"
-            className="size-9 rounded-full data-[state=on]:bg-surface-container-highest"
+            className="size-9 rounded-full data-pressed:bg-surface-container-highest"
           >
             <Icon name="view_list" size={18} />
           </ToggleGroupItem>

@@ -1,8 +1,10 @@
 {
   "name": "rosegriffon",
   "version": "1.4.8",
-  "description": "Rose Griffon & NIE Model Context Protocol, autonomous reverse-engineering and gaming skills plugin.",
+  "description": "Rose Griffon & NIE unified plugin: Model Context Protocol servers (nie, rosegriffon, shadcn, next-devtools, better-auth, context7) and consolidated project skills.",
   "author": {
     "name": "Rose Griffon"
-  }
+  },
+  "skills": "./.claude/skills",
+  "mcpServers": "./.mcp.json"
 }

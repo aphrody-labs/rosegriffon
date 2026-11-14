@@ -1,6 +1,10 @@
 import { describe, expect, test } from "bun:test";
 
-import { describeAchilleaSurface, parseCliValue, runAchilleaCli } from "../src/cli";
+import {
+  describeAchilleaSurface,
+  parseCliValue,
+  runAchilleaCli,
+} from "../src/cli";
 
 describe("Achillea CLI", () => {
   test("exposes all 19 client resources and their methods", () => {
@@ -29,7 +33,14 @@ describe("Achillea CLI", () => {
     let authHeader: string | null = null;
 
     const code = await runAchilleaCli(
-      ["--url", "http://achillea.test/v1/achillea", "--token", "tok123", "ranked", "leaderboard"],
+      [
+        "--url",
+        "http://achillea.test/v1/achillea",
+        "--token",
+        "tok123",
+        "ranked",
+        "leaderboard",
+      ],
       {
         stdout: (t) => out.push(t),
         stderr: (t) => err.push(t),
@@ -47,8 +58,10 @@ describe("Achillea CLI", () => {
 
     expect(err).toEqual([]);
     expect(code).toBe(0);
-    expect(authHeader).toBe("Bearer tok123");
-    expect(requestedUrl).toContain("http://achillea.test/v1/achillea/ranked/leaderboard");
+    expect(String(authHeader)).toBe("Bearer tok123");
+    expect(requestedUrl).toContain(
+      "http://achillea.test/v1/achillea/ranked/leaderboard",
+    );
     expect(JSON.parse(out.join("\n")).ok).toBe(true);
   });
 

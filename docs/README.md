@@ -35,26 +35,25 @@ dans `.gitignore`.
 
 ## Exploitation
 
-| Doc                                                                                                 | Portée                                                                                                                                                           |
-| --------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [PROD-STATUS.md](PROD-STATUS.md)                                                                    | État vérifié de la production et surfaces retirées.                                                                                                              |
-| [ARCHITECTURE.md](ARCHITECTURE.md)                                                                  | Rôles d'hôtes, services, flux de données, déploiement et migration.                                                                                              |
-| [deploiement-sans-coupure.md](deploiement-sans-coupure.md)                                          | Publication bleu/vert : slots, versions, prévisualisation, et les trois pièges qui cassent une prod pendant un déploiement.                                      |
-| [self-host-supabase.md](self-host-supabase.md)                                                      | Sortie de Supabase : PostgreSQL local, PostgREST, Storage et Realtime auto-hébergés.                                                                             |
-| [bot-azalee.md](bot-azalee.md)                                                                      | Second bot Discord (serveur Azalée) sur le même code que le bot Rose Griffon : profils, jeton, invitation, curseur d'annonce.                                    |
-| [bot-communaute.md](bot-communaute.md)                                                              | Niveaux sur la courbe du jeu, jetons Kizuna, collection de joueurs, tickets en fils privés. Hiérarchie stricte des récompenses de rôle et discrétion par défaut. |
-| [bot-multicomptes.md](bot-multicomptes.md)                                                          | Rapprochement des comptes d'une même personne : indices observables, poids, seuils, verdicts du staff, et ce qui a été volontairement écarté.                    |
-| [bot-format.md](bot-format.md)                                                                      | Charte de présentation des deux bots : trousse `lib/ui`, couleurs, icônes, pagination, limites de l'API, patron d'une commande.                                  |
-| [bot-commandes.md](bot-commandes.md)                                                                | Catalogue définitif des slash commandes des deux bots : inventaire complet, bots tiers du serveur, convention de nommage, plan de bascule.                       |
-| [bot-administration.md](bot-administration.md)                                                      | Surface web du bot : contrat de types partagé, serveur d'administration en boucle locale, API et pages `/admin/bot` + `/admin/cron`.                             |
-| [campagnes-hashtag.md](campagnes-hashtag.md)                                                        | Campagnes à hashtag : récolte X + Discord, tolérance aux fautes de frappe, relais vers le salon de suivi.                                                        |
-| [insta.md](insta.md)                                                                                | Instagram : pourquoi aucune récolte automatique n'est possible, la vérification oEmbed, le dépôt manuel et la table dédiée.                                      |
-| [stockage-secondaire.md](../../aphrody-infra/docs/ops/stockage-secondaire.md) (dépôt aphrody-infra) | Archive froide sur le second VPS : pourquoi elle a existé, ce qui en est revenu le 21/8/2026, et ce qui ne doit jamais être déporté.                             |
-| [achillea-services.md](achillea-services.md)                                                        | Topologie, secrets hors Git, ports, sondes et contrat d'upload Supabase d'Achillea.                                                                              |
-| [achillea-storage-migration.md](achillea-storage-migration.md)                                      | Runbook sûr et reprenable pour migrer les octets Storage Cloud d'Achillea vers sa pile locale isolée.                                                            |
-| [achillea-modulaire.md](achillea-modulaire.md)                                                      | Architecture portable d'Achilléa : contrat, métier, client isomorphe, export Rust/Swift/Kotlin — et ce qu'il reste à faire pour migrer le front.                 |
-| [achillea-bracket-validation.md](achillea-bracket-validation.md)                                    | Contrat des brackets et preuves à relever en session réelle, sans inventer de résultats.                                                                         |
-| [achillea-migration-next.md](achillea-migration-next.md)                                            | Plan de migration du front Achilléa (Angular) vers `apps/website` (Next) : routes, phases, gardes et risques.                                                    |
+| Doc                                                              | Portée                                                                                                                                                           |
+| ---------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [PROD-STATUS.md](PROD-STATUS.md)                                 | État vérifié de la production et surfaces retirées.                                                                                                              |
+| [ARCHITECTURE.md](ARCHITECTURE.md)                               | Rôles d'hôtes, services, flux de données, déploiement et migration.                                                                                              |
+| [deploiement-sans-coupure.md](deploiement-sans-coupure.md)       | Publication bleu/vert : slots, versions, prévisualisation, et les trois pièges qui cassent une prod pendant un déploiement.                                      |
+| [self-host-supabase.md](self-host-supabase.md)                   | Sortie de Supabase : PostgreSQL local, PostgREST, Storage et Realtime auto-hébergés.                                                                             |
+| [bot-azalee.md](bot-azalee.md)                                   | Second bot Discord (serveur Azalée) sur le même code que le bot Rose Griffon : profils, jeton, invitation, curseur d'annonce.                                    |
+| [bot-communaute.md](bot-communaute.md)                           | Niveaux sur la courbe du jeu, jetons Kizuna, collection de joueurs, tickets en fils privés. Hiérarchie stricte des récompenses de rôle et discrétion par défaut. |
+| [bot-multicomptes.md](bot-multicomptes.md)                       | Rapprochement des comptes d'une même personne : indices observables, poids, seuils, verdicts du staff, et ce qui a été volontairement écarté.                    |
+| [bot-format.md](bot-format.md)                                   | Charte de présentation des deux bots : trousse `lib/ui`, couleurs, icônes, pagination, limites de l'API, patron d'une commande.                                  |
+| [bot-commandes.md](bot-commandes.md)                             | Catalogue définitif des slash commandes des deux bots : inventaire complet, bots tiers du serveur, convention de nommage, plan de bascule.                       |
+| [bot-administration.md](bot-administration.md)                   | Surface web du bot : contrat de types partagé, serveur d'administration en boucle locale, API et pages `/admin/bot` + `/admin/cron`.                             |
+| [campagnes-hashtag.md](campagnes-hashtag.md)                     | Campagnes à hashtag : récolte X + Discord, tolérance aux fautes de frappe, relais vers le salon de suivi.                                                        |
+| [insta.md](insta.md)                                             | Instagram : pourquoi aucune récolte automatique n'est possible, la vérification oEmbed, le dépôt manuel et la table dédiée.                                      |
+| [achillea-services.md](achillea-services.md)                     | Topologie, secrets hors Git, ports, sondes et contrat d'upload Supabase d'Achillea.                                                                              |
+| [achillea-storage-migration.md](achillea-storage-migration.md)   | Runbook sûr et reprenable pour migrer les octets Storage Cloud d'Achillea vers sa pile locale isolée.                                                            |
+| [achillea-modulaire.md](achillea-modulaire.md)                   | Architecture portable d'Achilléa : contrat, métier, client isomorphe, export Rust/Swift/Kotlin — et ce qu'il reste à faire pour migrer le front.                 |
+| [achillea-bracket-validation.md](achillea-bracket-validation.md) | Contrat des brackets et preuves à relever en session réelle, sans inventer de résultats.                                                                         |
+| [achillea-migration-next.md](achillea-migration-next.md)         | Plan de migration du front Achilléa (Angular) vers `apps/website` (Next) : routes, phases, gardes et risques.                                                    |
 
 ## Écosystème
 
@@ -64,10 +63,8 @@ dans `.gitignore`.
 | [assets-cdn.md](assets-cdn.md)             | Contrat unique des assets partagés, des URL CDN et de leur publication.                                                 |
 | [cloud-deployment.md](cloud-deployment.md) | Déploiement portable de Website sur Vercel, Fly.io ou Cloud Run, avec Supabase Cloud ou Neon.                           |
 
-## Vérifier la documentation
+## Vérifier et formater la documentation
 
 ```bash
-bun run docs:check-links   # liens internes cassés
-bun run docs:lint          # markdownlint
-bun run docs:build         # les trois d'affilée
+bun fmt docs README.md PLAN.md
 ```

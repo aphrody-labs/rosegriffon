@@ -4,7 +4,6 @@ import type {
   MultiLevelStats,
   Skill,
 } from "@rosegriffon/inagle";
-import { unstable_cache } from "next/cache";
 import { getInaglePgPool, getPgPool } from "@rosegriffon/db/pg";
 import {
   getMiximaxImageUrl,
@@ -13,6 +12,37 @@ import {
 } from "@rosegriffon/azalee/images";
 
 const CACHE_TTL = 3600 * 24;
+
+/**
+ * In-memory TTL cache with in-flight deduplication for large datasets (>2MB)
+ * that exceed Next.js `unstable_cache` data cache size limits.
+ */
+function createTtlCache<T>(
+  ttlMs: number,
+  loader: () => Promise<T>,
+): () => Promise<T> {
+  let cached: { value: T; expiresAt: number } | null = null;
+  let inflight: Promise<T> | null = null;
+  return () => {
+    const now = Date.now();
+    if (cached && now < cached.expiresAt) {
+      return Promise.resolve(cached.value);
+    }
+    if (!inflight) {
+      inflight = loader()
+        .then((value) => {
+          cached = { expiresAt: Date.now() + ttlMs, value };
+          inflight = null;
+          return value;
+        })
+        .catch((err) => {
+          inflight = null;
+          throw err;
+        });
+    }
+    return inflight;
+  };
+}
 
 type InagleCharacter = {
   id: string;
@@ -172,7 +202,8 @@ async function fetchTable<T>(table: string): Promise<T[]> {
 
 // --- API Methods ---
 
-const getRawCharacters = unstable_cache(
+const getRawCharacters = createTtlCache(
+  CACHE_TTL * 1000,
   async (): Promise<InagleCharacter[]> => {
     let allData: InagleCharacter[] = [];
     let from = 0;
@@ -197,8 +228,6 @@ const getRawCharacters = unstable_cache(
     }
     return allData;
   },
-  ["all-raw-characters"],
-  { revalidate: CACHE_TTL, tags: ["characters"] },
 );
 
 const getCharacters = async (): Promise<BaseCharacter[]> => {
@@ -206,10 +235,9 @@ const getCharacters = async (): Promise<BaseCharacter[]> => {
   return raw.map(mapToBaseCharacter);
 };
 
-const getItems = unstable_cache(
+const getItems = createTtlCache(
+  CACHE_TTL * 1000,
   async (): Promise<InagleItem[]> => fetchTable<InagleItem>("inagle_items"),
-  ["all-items"],
-  { revalidate: CACHE_TTL, tags: ["items"] },
 );
 
 // Map raw aura DB row → EnrichedAuraSkill format
@@ -297,64 +325,57 @@ const AURA_TABLES = [
   "inagle_auras",
 ];
 
-const getAuras = unstable_cache(
-  async (): Promise<any[]> => {
-    const results = await Promise.all(
-      AURA_TABLES.map((t) => fetchTable<any>(t)),
-    );
-    const allRows = results.flat();
+const getAuras = createTtlCache(CACHE_TTL * 1000, async (): Promise<any[]> => {
+  const results = await Promise.all(AURA_TABLES.map((t) => fetchTable<any>(t)));
+  const allRows = results.flat();
 
-    // Collect skill_ids to fetch video URLs in one batch
-    const skillIds = [
-      ...new Set(allRows.map((r) => r.skill_id).filter(Boolean)),
-    ] as string[];
-    const skillVideoMap = new Map<
-      string,
-      { video_url: string | null; internal_code: string | null }
-    >();
-    if (skillIds.length > 0) {
-      const { rows: skills } = await getInaglePgPool().query<{
-        id: string;
-        video_url: string | null;
-        internal_code: string | null;
-      }>(
-        "select id, video_url, internal_code from public.inagle_skills where id = any($1::text[])",
-        [skillIds],
-      );
-      if (skills) {
-        for (const s of skills) {
-          skillVideoMap.set(s.id, {
-            internal_code: s.internal_code,
-            video_url: s.video_url,
-          });
-        }
+  // Collect skill_ids to fetch video URLs in one batch
+  const skillIds = [
+    ...new Set(allRows.map((r) => r.skill_id).filter(Boolean)),
+  ] as string[];
+  const skillVideoMap = new Map<
+    string,
+    { video_url: string | null; internal_code: string | null }
+  >();
+  if (skillIds.length > 0) {
+    const { rows: skills } = await getInaglePgPool().query<{
+      id: string;
+      video_url: string | null;
+      internal_code: string | null;
+    }>(
+      "select id, video_url, internal_code from public.inagle_skills where id = any($1::text[])",
+      [skillIds],
+    );
+    if (skills) {
+      for (const s of skills) {
+        skillVideoMap.set(s.id, {
+          internal_code: s.internal_code,
+          video_url: s.video_url,
+        });
       }
     }
+  }
 
-    return allRows.map((row) => {
-      const mapped = mapAuraRow(row);
-      if (row.skill_id) {
-        const skillInfo = skillVideoMap.get(row.skill_id);
-        mapped.skillId = row.skill_id;
-        mapped.skillVideoUrl = skillInfo?.video_url || null;
-        mapped.skillInternalCode = skillInfo?.internal_code || null;
-      }
-      return mapped;
-    });
-  },
-  ["all-auras"],
-  { revalidate: CACHE_TTL, tags: ["auras"] },
-);
+  return allRows.map((row) => {
+    const mapped = mapAuraRow(row);
+    if (row.skill_id) {
+      const skillInfo = skillVideoMap.get(row.skill_id);
+      mapped.skillId = row.skill_id;
+      mapped.skillVideoUrl = skillInfo?.video_url || null;
+      mapped.skillInternalCode = skillInfo?.internal_code || null;
+    }
+    return mapped;
+  });
+});
 
 // Les "hissatsu" (techniques) vivent dans `inagle_skills` ; la table/vue
 // `inagle_hissatsu` n'existe pas dans PostgreSQL. L'ancien
 // `fetchTable("inagle_hissatsu")` levait "no such table" → catch → [] → le
 // compteur "Techniques" du dashboard affichait 0 (au lieu de ~1002).
-const getRawSkills = unstable_cache(
+const getRawSkills = createTtlCache(
+  CACHE_TTL * 1000,
   async (): Promise<Array<Record<string, unknown>>> =>
     fetchTable<Record<string, unknown>>("inagle_skills"),
-  ["all-skills"],
-  { revalidate: CACHE_TTL, tags: ["skills"] },
 );
 
 const getSkills = async (): Promise<Skill[]> => {

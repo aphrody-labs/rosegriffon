@@ -4226,11 +4226,17 @@ mod request_flags {
 use request_flags::{IS_HEAD, IS_PRIVATE};
 
 /// `Cache-Control` of the response being written on this worker thread.
-fn cache_control() -> &'static str {
+///
+/// Only `2xx` responses on public routes may be cached as `immutable`; error responses
+/// (`404`, `500`, `503`, etc.) must return `no-store` so Cloudflare edge never caches
+/// transient errors for 1 year.
+fn cache_control_for_status(status: u16) -> &'static str {
     if IS_PRIVATE.with(std::cell::Cell::get) {
         "private, no-store"
-    } else {
+    } else if (200..300).contains(&status) {
         "public, max-age=31536000, immutable"
+    } else {
+        "no-store"
     }
 }
 
@@ -4289,7 +4295,7 @@ fn respond(stream: &mut TcpStream, status: u16, reason: &str, content_type: &str
          Connection: close\r\n\
          \r\n",
         body.len(),
-        cache_control()
+        cache_control_for_status(status)
     );
     let _ = stream.write_all(headers.as_bytes());
     if !is_head {
@@ -4422,7 +4428,7 @@ fn respond_download(stream: &mut TcpStream, content_type: &str, nom: &str, body:
          Connection: close\r\n\
          \r\n",
         body.len(),
-        cache_control()
+        cache_control_for_status(200)
     );
     let _ = stream.write_all(headers.as_bytes());
     let _ = stream.write_all(body);
@@ -4494,7 +4500,7 @@ fn respond_ranged(stream: &mut TcpStream, content_type: &str, body: &[u8], range
              Content-Length: {}\r\n\
              Content-Range: bytes {start}-{end}/{}\r\n\
              Accept-Ranges: bytes\r\n\
-             Cache-Control: public, max-age=31536000, immutable\r\n\
+             Cache-Control: {}\r\n\
              Access-Control-Allow-Origin: *\r\n\
              Access-Control-Allow-Methods: GET, HEAD, OPTIONS\r\n\
              Access-Control-Allow-Headers: *\r\n\
@@ -4504,6 +4510,7 @@ fn respond_ranged(stream: &mut TcpStream, content_type: &str, body: &[u8], range
              \r\n",
             slice.len(),
             body.len(),
+            cache_control_for_status(206),
         );
         let _ = stream.write_all(headers.as_bytes());
         if !is_head {
@@ -4516,7 +4523,7 @@ fn respond_ranged(stream: &mut TcpStream, content_type: &str, body: &[u8], range
          Content-Type: {content_type}\r\n\
          Content-Length: {}\r\n\
          Accept-Ranges: bytes\r\n\
-         Cache-Control: public, max-age=31536000, immutable\r\n\
+         Cache-Control: {}\r\n\
          Access-Control-Allow-Origin: *\r\n\
          Access-Control-Allow-Methods: GET, HEAD, OPTIONS\r\n\
          Access-Control-Allow-Headers: *\r\n\
@@ -4525,6 +4532,7 @@ fn respond_ranged(stream: &mut TcpStream, content_type: &str, body: &[u8], range
          Connection: close\r\n\
          \r\n",
         body.len(),
+        cache_control_for_status(200),
     );
     let _ = stream.write_all(headers.as_bytes());
     if !is_head {
@@ -7324,6 +7332,27 @@ mod tests {
             .count();
         assert_eq!(temporary_count, 0);
         std::fs::remove_dir_all(directory).unwrap();
+    }
+
+    #[test]
+    fn cache_control_is_immutable_only_for_public_2xx_and_no_store_for_errors() {
+        super::IS_PRIVATE.with(|flag| flag.set(false));
+        assert_eq!(
+            super::cache_control_for_status(200),
+            "public, max-age=31536000, immutable"
+        );
+        assert_eq!(
+            super::cache_control_for_status(206),
+            "public, max-age=31536000, immutable"
+        );
+        assert_eq!(super::cache_control_for_status(404), "no-store");
+        assert_eq!(super::cache_control_for_status(500), "no-store");
+        assert_eq!(super::cache_control_for_status(503), "no-store");
+
+        super::IS_PRIVATE.with(|flag| flag.set(true));
+        assert_eq!(super::cache_control_for_status(200), "private, no-store");
+        assert_eq!(super::cache_control_for_status(404), "private, no-store");
+        super::IS_PRIVATE.with(|flag| flag.set(false));
     }
 
     #[test]

@@ -44,8 +44,9 @@ Available Commands:
   formats       Console formats inspection, disasm, and identification
   homebrew      Homebrew DS / 3DS toolchain runner
   contract      Achillea cross-language contract generator
-  achillea      Achilléa headless API client runner
-  server        Rose Griffon self-hosted server supervisor
+  achillea      Achilléa headless API client runner (all 19 v1 resources & raw)
+  nie           NIE Rust CLI (detect, match, save-edit, capture-menus, memory-dump)
+  server        Rose Griffon self-hosted server supervisor (serve, site, api, bot, ranked, cron)
 
 Ops (infra/ops/cli.ts, roles from infra/hosts.toml, services from infra/services.toml):
   host <role> [field] | ssh <role> [-- cmd] | env <role> | services | render [--check]
@@ -161,12 +162,57 @@ async function main() {
     }
 
     case "achillea": {
+      const first = subArgs[0];
+      // Dot-notation (`ranked.leaderboard`), `raw`, `list`, or `help` -> apps/rosegriffon server achillea runner;
+      // space-separated (`ranked leaderboard`, `resources`, `health`) -> @rosegriffon/achillea-client CLI.
+      const useServerRunner =
+        first === "list" ||
+        first === "raw" ||
+        first === "help" ||
+        (first?.includes(".") ?? false);
+      const achilleaEntry = resolve(
+        import.meta.dir,
+        useServerRunner
+          ? "../../../apps/rosegriffon/src/main.ts"
+          : "../../../packages/achillea-client/src/cli.ts",
+      );
+      const args = useServerRunner ? ["achillea", ...subArgs] : subArgs;
+      const proc = Bun.spawn([process.execPath, achilleaEntry, ...args], {
+        stdin: "inherit",
+        stdout: "inherit",
+        stderr: "inherit",
+      });
+      process.exit(await proc.exited);
+      break;
+    }
+
+    case "nie": {
+      const proc = Bun.spawn(
+        ["cargo", "run", "--quiet", "-p", "aphrody-nie-cli", "--", ...subArgs],
+        {
+          cwd: resolve(import.meta.dir, "../../.."),
+          env: { ...process.env, RUSTC_WRAPPER: "" },
+          stdin: "inherit",
+          stdout: "inherit",
+          stderr: "inherit",
+        },
+      );
+      process.exit(await proc.exited);
+      break;
+    }
+
+    case "serve":
+    case "site":
+    case "api":
+    case "bot":
+    case "ranked":
+    case "cron": {
       const serverEntry = resolve(
         import.meta.dir,
         "../../../apps/rosegriffon/src/main.ts",
       );
       const proc = Bun.spawn(
-        [process.execPath, serverEntry, "achillea", ...subArgs],
+        [process.execPath, serverEntry, command!, ...subArgs],
         {
           stdin: "inherit",
           stdout: "inherit",

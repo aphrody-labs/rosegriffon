@@ -23,7 +23,7 @@ import type {
     RelationshipMap,
 } from "../relationships";
 
-import { QueryBuilder, QueryRequestOptions } from "../query";
+import { QueryBuilder, type QueryRequestOptions } from "../query";
 
 import { findAPIPath } from "./paths";
 

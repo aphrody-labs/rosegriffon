@@ -152,7 +152,7 @@ export function EditorHeader({
           <TabsTrigger
             value="content"
             className={cn(
-              "rounded-full px-4 sm:px-5 text-xs font-medium transition-all data-[state=active]:bg-secondary-container data-[state=active]:text-on-secondary-container data-[state=active]:shadow-none",
+              "rounded-full px-4 sm:px-5 text-xs font-medium transition-all data-active:bg-secondary-container data-active:text-on-secondary-container data-active:shadow-none",
               activeTab !== "content" && "text-on-surface-variant",
             )}
           >
@@ -162,7 +162,7 @@ export function EditorHeader({
           <TabsTrigger
             value="metadata"
             className={cn(
-              "rounded-full px-4 sm:px-5 text-xs font-medium transition-all data-[state=active]:bg-secondary-container data-[state=active]:text-on-secondary-container data-[state=active]:shadow-none",
+              "rounded-full px-4 sm:px-5 text-xs font-medium transition-all data-active:bg-secondary-container data-active:text-on-secondary-container data-active:shadow-none",
               activeTab !== "metadata" && "text-on-surface-variant",
             )}
           >

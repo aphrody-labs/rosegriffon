@@ -5,7 +5,13 @@ import { oauthProvider } from "@better-auth/oauth-provider";
 import { passkey } from "@better-auth/passkey";
 import { betterAuth } from "better-auth";
 import { createAuthMiddleware } from "better-auth/api";
-import { admin, bearer, genericOAuth, jwt } from "better-auth/plugins";
+import {
+  admin,
+  bearer,
+  genericOAuth,
+  type GenericOAuthConfig,
+  jwt,
+} from "better-auth/plugins";
 import {
   type AccountEmailSender,
   createAccountOptions,
@@ -55,6 +61,17 @@ export interface RoseGriffonAuthOptions {
   passkey?: { rpID?: string; origin?: string };
 }
 
+type GenericOAuthUserInfo = NonNullable<GenericOAuthConfig["getUserInfo"]>;
+
+function escapeHtmlAttr(value: string): string {
+  return value
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
+
 /**
  * Single source of truth for the Rose Griffon website Better Auth instance.
  * App-specific transports are injected so this package stays independent of
@@ -63,6 +80,7 @@ export interface RoseGriffonAuthOptions {
 export function createRoseGriffonAuth(options: RoseGriffonAuthOptions) {
   const secret = resolveAuthSecret(process.env, options.secret);
   const patreon = options.patreon;
+  const hasPatreonOAuth = Boolean(patreon?.clientId && patreon?.clientSecret);
   const discordClientId = process.env.DISCORD_CLIENT_ID ?? "";
   const discordClientSecret = process.env.DISCORD_CLIENT_SECRET ?? "";
   const achilleaDiscordClientId =
@@ -124,14 +142,14 @@ export function createRoseGriffonAuth(options: RoseGriffonAuthOptions) {
       : {}),
   };
   const trustedSocialProviders = Object.keys(configuredSocialProviders);
-  const oauthProviders = [
-    ...(patreon
+  const oauthProviders: GenericOAuthConfig[] = [
+    ...(hasPatreonOAuth && patreon
       ? [
           {
             authorizationUrl: patreon.authorizationUrl,
             clientId: patreon.clientId,
             clientSecret: patreon.clientSecret,
-            getUserInfo: patreon.getUserInfo as any,
+            getUserInfo: patreon.getUserInfo as GenericOAuthUserInfo,
             providerId: "patreon",
             scopes: [...patreon.scopes],
             tokenUrl: patreon.tokenUrl,
@@ -144,6 +162,7 @@ export function createRoseGriffonAuth(options: RoseGriffonAuthOptions) {
             authorizationUrl: "https://discord.com/api/oauth2/authorize",
             clientId: achilleaDiscordClientId,
             clientSecret: achilleaDiscordClientSecret,
+            pkce: true,
             providerId: "discord-achillea",
             scopes: ["identify", "email"],
             tokenUrl: "https://discord.com/api/oauth2/token",
@@ -157,6 +176,7 @@ export function createRoseGriffonAuth(options: RoseGriffonAuthOptions) {
             authorizationUrl: "https://discord.com/api/oauth2/authorize",
             clientId: azaleeDiscordClientId,
             clientSecret: azaleeDiscordClientSecret,
+            pkce: true,
             providerId: "discord-azalee",
             scopes: ["identify", "email"],
             tokenUrl: "https://discord.com/api/oauth2/token",
@@ -165,6 +185,10 @@ export function createRoseGriffonAuth(options: RoseGriffonAuthOptions) {
         ]
       : []),
   ];
+
+  type BetterAuthPlugins = NonNullable<
+    Parameters<typeof betterAuth>[0]["plugins"]
+  >;
 
   const plugins = [
     admin({ defaultRole: "user", adminRoles: ["admin"] }),
@@ -177,7 +201,7 @@ export function createRoseGriffonAuth(options: RoseGriffonAuthOptions) {
         maxRequests: 1_000,
         timeWindow: 60 * 60 * 1_000,
       },
-    }) as unknown as ReturnType<typeof admin>,
+    }),
     jwt(),
     oauthProvider({
       loginPage: "/login",
@@ -219,7 +243,7 @@ export function createRoseGriffonAuth(options: RoseGriffonAuthOptions) {
         ]
       : []),
     ...(options.nextCookiesPlugin ? [options.nextCookiesPlugin] : []),
-  ] as any[];
+  ] as unknown as BetterAuthPlugins;
 
   return betterAuth({
     ...commonAuthOptions,
@@ -242,7 +266,7 @@ export function createRoseGriffonAuth(options: RoseGriffonAuthOptions) {
         await options.sendEmail({
           to: user.email,
           subject: "Réinitialiser ton mot de passe — Rose Griffon",
-          html: `<p>Utilise ce lien pour réinitialiser ton mot de passe :</p><p><a href="${url}">Continuer</a></p>`,
+          html: `<p>Utilise ce lien pour réinitialiser ton mot de passe :</p><p><a href="${escapeHtmlAttr(url)}">Continuer</a></p>`,
         });
       },
     },
@@ -251,7 +275,7 @@ export function createRoseGriffonAuth(options: RoseGriffonAuthOptions) {
         await options.sendEmail({
           to: user.email,
           subject: "Confirme ton adresse — Rose Griffon",
-          html: `<p>Confirme ton adresse email :</p><p><a href="${url}">Vérifier mon adresse</a></p>`,
+          html: `<p>Confirme ton adresse email :</p><p><a href="${escapeHtmlAttr(url)}">Vérifier mon adresse</a></p>`,
         });
       },
     },
@@ -264,7 +288,7 @@ export function createRoseGriffonAuth(options: RoseGriffonAuthOptions) {
         enabled: true,
         trustedProviders: [
           ...trustedSocialProviders,
-          ...(patreon ? ["patreon"] : []),
+          ...(hasPatreonOAuth ? ["patreon"] : []),
         ],
       },
     },
@@ -293,12 +317,16 @@ export function createRoseGriffonAuth(options: RoseGriffonAuthOptions) {
       account: {
         create: {
           after: async (account) => {
-            await patreon?.onAccountChanged?.(account);
+            if (account.providerId === "patreon") {
+              await patreon?.onAccountChanged?.(account);
+            }
           },
         },
         update: {
           after: async (account) => {
-            await patreon?.onAccountChanged?.(account);
+            if (account.providerId === "patreon") {
+              await patreon?.onAccountChanged?.(account);
+            }
           },
         },
       },

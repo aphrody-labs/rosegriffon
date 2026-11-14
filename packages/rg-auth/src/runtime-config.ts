@@ -2,13 +2,22 @@ import { randomBytes } from "node:crypto";
 
 type AuthEnvironment = {
   BETTER_AUTH_SECRET?: string;
+  AUTH_SECRET?: string;
+  BETTER_AUTH_TRUSTED_ORIGINS?: string;
   NODE_ENV?: string;
   NEXT_PHASE?: string;
 };
 
+const WEAK_PLACEHOLDER_SECRETS = new Set([
+  "better-auth-secret",
+  "secret",
+  "changeme",
+  "your-secret-here",
+]);
+
 export function resolveAuthSecret(
   environment: AuthEnvironment = process.env,
-  configured = environment.BETTER_AUTH_SECRET,
+  configured = environment.BETTER_AUTH_SECRET ?? environment.AUTH_SECRET,
 ): string {
   const secret = configured?.trim();
   const production = environment.NODE_ENV === "production";
@@ -17,7 +26,7 @@ export function resolveAuthSecret(
       production &&
       (secret.length < 32 ||
         secret.includes("build-placeholder-secret") ||
-        secret === "better-auth-secret")
+        WEAK_PLACEHOLDER_SECRETS.has(secret.toLowerCase()))
     ) {
       throw new Error(
         "BETTER_AUTH_SECRET must be a private, high-entropy secret of at least 32 characters",

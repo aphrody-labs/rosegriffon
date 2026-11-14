@@ -1,6 +1,6 @@
 import { ImageResponse } from "next/og";
 
-export const runtime = "edge";
+export const runtime = "nodejs";
 export const alt = "Mon Équipe — Azalée";
 export const size = { height: 630, width: 1200 };
 export const contentType = "image/png";

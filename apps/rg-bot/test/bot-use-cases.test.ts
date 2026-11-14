@@ -274,6 +274,8 @@ describe("cas d'usage reels du bot (Achillea + Azalee)", () => {
     const chargeTech = JSON.stringify(reponsesTech);
     expect(chargeTech).toContain("Main Celeste");
     expect(chargeTech).toContain("Montagne");
-    expect(chargeTech).toContain("https://azalee.rosegriffon.fr/skill/god-hand");
+    expect(chargeTech).toContain(
+      "https://azalee.rosegriffon.fr/skill/god-hand",
+    );
   });
 });

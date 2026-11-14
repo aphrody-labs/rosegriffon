@@ -36,4 +36,6 @@ test("Unified Bun CLI (ie / rg) reports help and version", async () => {
   expect(stdoutHelp).toContain("homebrew");
   expect(stdoutHelp).toContain("contract");
   expect(stdoutHelp).toContain("achillea");
+  expect(stdoutHelp).toContain("nie");
+  expect(stdoutHelp).toContain("server");
 });

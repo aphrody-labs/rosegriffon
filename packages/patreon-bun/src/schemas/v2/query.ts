@@ -1,5 +1,5 @@
 /* eslint-disable jsdoc/require-returns */
-import { RequestPayload } from "../../payloads/v2/internals/request";
+import type { RequestPayload } from "../../payloads/v2/internals/request";
 
 import type {
     RelationshipFields,
@@ -11,7 +11,7 @@ import type {
 
 import * as SchemaResourcesData from "./generated/schemas";
 
-import { ItemMap, ItemType, Type } from "./item";
+import { type ItemMap, type ItemType, Type } from "./item";
 
 import type { If } from "../../utils/";
 

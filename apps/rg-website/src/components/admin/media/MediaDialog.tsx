@@ -134,14 +134,14 @@ export function MediaDialog({
             <TabsList className="w-full justify-start bg-transparent p-0 h-auto gap-6">
               <TabsTrigger
                 value="upload"
-                className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-rg-rose rounded-none px-0 py-2"
+                className="data-active:bg-transparent data-active:shadow-none data-active:border-b-2 data-active:border-rg-rose rounded-none px-0 py-2"
               >
                 <Upload className="size-4 mr-2" />
                 Téléverser
               </TabsTrigger>
               <TabsTrigger
                 value="emotes"
-                className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-rg-rose rounded-none px-0 py-2"
+                className="data-active:bg-transparent data-active:shadow-none data-active:border-b-2 data-active:border-rg-rose rounded-none px-0 py-2"
               >
                 <Smile className="size-4 mr-2" />
                 Emotes

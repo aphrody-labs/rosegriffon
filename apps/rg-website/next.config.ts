@@ -668,15 +668,6 @@ const nextConfig: NextConfig = {
         ],
         source: "/api/public/:path*",
       },
-      {
-        headers: [
-          {
-            key: "Cache-Control",
-            value: "public, max-age=31536000, immutable",
-          },
-        ],
-        source: "/_next/static/:path*",
-      },
     ];
   },
   images: {
@@ -734,7 +725,14 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default withBun(bundleAnalyzer(withLua(nextConfig)), {
+const luaConfig = withLua(nextConfig);
+if (luaConfig.experimental && "turbo" in luaConfig.experimental) {
+  const { turbo: _turbo, ...restExperimental } =
+    luaConfig.experimental as Record<string, unknown>;
+  luaConfig.experimental = restExperimental;
+}
+
+export default withBun(bundleAnalyzer(luaConfig), {
   projectDir: process.cwd(),
   bundler: "turbopack",
 });
