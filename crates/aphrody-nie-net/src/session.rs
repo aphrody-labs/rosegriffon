@@ -4,7 +4,7 @@
 //! predicts unconfirmed frames, and executes instant rollbacks when late packets arrive.
 
 use crate::protocol::{PlayerSlot, PlayerTickInput, ROLLBACK_MAX_FRAMES, TICK_DT};
-use aphrody_nie_geom::Vec3;
+use aphrody_nie_core::geom::Vec3;
 use aphrody_nie_runtime::World;
 use std::collections::{BTreeMap, VecDeque};
 

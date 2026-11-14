@@ -34,7 +34,7 @@ import {
 import { MatchMode } from "@rosegriffon/achillea-types/enums/eventEnums";
 import { UserRole } from "@rosegriffon/achillea-types/enums/userRole";
 
-import type { ApiEnvelope, SuccessResponse } from "./pending-contracts";
+import type { ApiEnvelope, SuccessResponse } from "@rosegriffon/achillea-types";
 
 /** Horodatage ISO renvoyé par l'API, normalisé en `Date` côté client. */
 export const apiDateSchema = z.coerce.date();

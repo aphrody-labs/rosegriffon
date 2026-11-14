@@ -10,10 +10,10 @@ pub mod memory;
 
 /// Atlas — index unique de toutes les surfaces RE du dépôt (fichiers, crates, docs,
 /// digest de la base de connaissance, unités de forge, outils, métriques, écarts).
-#[cfg(feature = "host")]
+#[cfg(all(feature = "host", not(all(target_arch = "wasm32", target_os = "unknown"))))]
 pub mod atlas;
 
-#[cfg(feature = "host")]
+#[cfg(all(feature = "host", not(all(target_arch = "wasm32", target_os = "unknown"))))]
 mod host {
     use std::path::{Path, PathBuf};
 
@@ -653,5 +653,5 @@ mod host {
     }
 }
 
-#[cfg(feature = "host")]
+#[cfg(all(feature = "host", not(all(target_arch = "wasm32", target_os = "unknown"))))]
 pub use host::*;

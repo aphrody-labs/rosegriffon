@@ -187,10 +187,11 @@ pub const TACTICS_MAX_PRIORITY: u16 = 7;
 /// RE incertain: signification enum (0=off, 1=défensif, 2=normal, 3=offensif?).
 pub const TACTICS_DEFAULT_MODE: u64 = 2;
 
-/// `Vec3` flottant (x, y, z) — **source unique** `aphrody_nie_geom::Vec3` (dédup Phase 2).
+pub mod geom;
+/// `Vec3` flottant (x, y, z) — **source unique** `crate::geom::Vec3` (dédup Phase 2).
 /// Convention IEVR de aphrody-nie-core : `y` = hauteur (portée dans le CODE ; le type est axis-agnostique).
 /// ⚠ Ne pas convertir vers/depuis `aphrody_nie_runtime::V3` (z=hauteur) — cf. `docs/nie/ARCHITECTURE.md` landmine #4.
-pub use aphrody_nie_geom::Vec3;
+pub use geom::Vec3;
 
 #[cfg(test)]
 mod tests {

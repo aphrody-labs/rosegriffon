@@ -37,7 +37,7 @@ import type {
   ImageGenerationResult,
   NewClanResponse,
   SuccessResponse,
-} from "./pending-contracts";
+} from "@rosegriffon/achillea-types";
 
 export const clanStateSchema = z.enum(ClanState) satisfies z.ZodType<ClanState>;
 

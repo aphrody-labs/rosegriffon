@@ -63,11 +63,11 @@ impl GameScreen {
 
 /// Supported video codecs when compiling captured frames via aphrody-nie-video.
 #[must_use]
-pub const fn supported_video_codecs() -> &'static [aphrody_nie_video::Codec] {
+pub const fn supported_video_codecs() -> &'static [aphrody_nie_render3d::video::Codec] {
     &[
-        aphrody_nie_video::Codec::H264,
-        aphrody_nie_video::Codec::Vp9,
-        aphrody_nie_video::Codec::Av1,
+        aphrody_nie_render3d::video::Codec::H264,
+        aphrody_nie_render3d::video::Codec::Vp9,
+        aphrody_nie_render3d::video::Codec::Av1,
     ]
 }
 

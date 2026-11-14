@@ -14,18 +14,18 @@
 #![allow(clippy::pedantic)]
 
 pub mod format_catalog;
-#[cfg(feature = "host")]
+#[cfg(all(feature = "host", not(all(target_arch = "wasm32", target_os = "unknown"))))]
 pub mod formats;
-#[cfg(feature = "host")]
+#[cfg(all(feature = "host", not(all(target_arch = "wasm32", target_os = "unknown"))))]
 pub mod inagle;
-#[cfg(feature = "host")]
+#[cfg(all(feature = "host", not(all(target_arch = "wasm32", target_os = "unknown"))))]
 pub mod nie_index_json;
-#[cfg(feature = "host")]
+#[cfg(all(feature = "host", not(all(target_arch = "wasm32", target_os = "unknown"))))]
 pub mod rtti_classes;
-#[cfg(feature = "host")]
+#[cfg(all(feature = "host", not(all(target_arch = "wasm32", target_os = "unknown"))))]
 pub mod ui_names;
 
-#[cfg(feature = "host")]
+#[cfg(all(feature = "host", not(all(target_arch = "wasm32", target_os = "unknown"))))]
 use std::path::Path;
 
 /// Statistiques d'une passe d'ingestion.
@@ -70,7 +70,7 @@ pub fn version() -> &'static str {
 /// Retourne une erreur agrégée si l'une des étapes critiques échoue. L'ingestion du
 /// catalogue JSON et celle d'inagle sont tolérantes : une erreur y est journalisée
 /// sans interrompre la passe.
-#[cfg(feature = "host")]
+#[cfg(all(feature = "host", not(all(target_arch = "wasm32", target_os = "unknown"))))]
 pub fn ingest_all(
     db: &mut aphrody_nie_index::Db,
     binary_id: i64,

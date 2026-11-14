@@ -10,7 +10,7 @@ import { absoluteUrl, SITE_URL } from "@/lib/site-url";
 import { DeferredThirdParties } from "@/components/shared/DeferredThirdParties";
 
 import { resolveLocale } from "@rosegriffon/i18n";
-import { isLocaleId } from "@rosegriffon/preferences";
+import { isLocaleId } from "@rosegriffon/types/preferences";
 import { ADSENSE_CLIENT } from "@rosegriffon/ui";
 import { TUNE_BOOT_SNIPPET } from "@rosegriffon/ui/lib/theme-tune";
 

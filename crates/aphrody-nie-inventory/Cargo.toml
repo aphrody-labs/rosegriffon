@@ -23,7 +23,7 @@ default = []
 
 [dependencies]
 anyhow = { workspace = true }
-aphrody-nie-pe-inspect = { path = "../aphrody-nie-pe-inspect" }
+aphrody-re = { workspace = true, default-features = false }
 aphrody-nie-formats = { workspace = true, features = ["std", "serde"] }
 serde = { workspace = true, features = ["std", "derive"] }
 serde_json = { workspace = true }

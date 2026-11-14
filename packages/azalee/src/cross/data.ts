@@ -16,7 +16,7 @@ import {
   crossExtractionStatus as statusJson,
   crossSchema as schemaJson,
   crossTypeSchema as typeSchemaJson,
-} from "@rosegriffon/inagle-cross";
+} from "./inagle-cross";
 import type {
   CrossAudioManifest,
   CrossEnums,

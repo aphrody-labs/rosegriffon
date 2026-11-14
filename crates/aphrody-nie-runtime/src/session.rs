@@ -14,7 +14,7 @@
 //! ballon et se dépense en techniques, un duel à choix simultané, un ralenti devant les cages),
 //! pas des constantes extraites de `nie.exe` : aucune n'a été mesurée dans le binaire.
 
-use aphrody_nie_geom::{Vec2 as V2, Vec3 as V3};
+use aphrody_nie_core::geom::{Vec2 as V2, Vec3 as V3};
 
 use crate::open_world::{InteractionOutcome, OpenWorldState};
 use crate::pad::{PadButton, PadFrame};

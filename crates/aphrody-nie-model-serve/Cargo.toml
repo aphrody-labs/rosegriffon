@@ -24,14 +24,12 @@ host = [
   "dep:sha2",
   "dep:tracing",
   "dep:tracing-subscriber",
-  "dep:serde",
   "aphrody-nie-formats/audio-decode",
   "aphrody-nie-formats/images",
 ]
 real-audio = ["host"]
 
 [dependencies]
-aphrody-nie-model-core = { path = "../aphrody-nie-model-core", version = "1.4.8" }
 aphrody-nie-formats = { path = "../aphrody-nie-formats", version = "1.4.8", default-features = false, features = ["std", "serde", "textures"] }
 aphrody-nie-data = { path = "../aphrody-nie-data", version = "1.4.8", default-features = false, optional = true, features = ["serde", "std"] }
 aphrody-nie-explore = { path = "../aphrody-nie-explore", version = "1.4.8", optional = true }
@@ -39,7 +37,10 @@ aphrody-nie-sql = { path = "../aphrody-nie-sql", version = "1.4.8", optional = t
 anyhow = { version = "1.0.104", default-features = false, optional = true }
 clap = { version = "4.5", default-features = false, features = ["derive", "color", "env", "std"], optional = true }
 serde_json = { version = "1.0.154", default-features = false, features = ["std"], optional = true }
-serde = { version = "1.0.228", default-features = false, features = ["std", "derive"], optional = true }
+serde = { version = "1.0.228", default-features = false, features = [
+  "std",
+  "derive",
+] }
 rusqlite = { workspace = true, optional = true }
 tokio = { version = "1.49", default-features = false, features = ["rt", "net", "time", "sync"], optional = true }
 sha2 = { version = "0.10", optional = true }

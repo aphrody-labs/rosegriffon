@@ -11,7 +11,7 @@ use aphrody_nie_core::world_move::{
     MapPlacementConfig, MoveAnimState, RpgScenePhase,
 };
 use aphrody_nie_formats::navm::Navm;
-use aphrody_nie_geom::Vec3;
+use aphrody_nie_core::geom::Vec3;
 use serde::{Deserialize, Serialize};
 
 use crate::TICK_DT;

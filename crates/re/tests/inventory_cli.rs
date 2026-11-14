@@ -182,7 +182,7 @@ fn emb_cli_extracts_entries_to_a_new_directory_without_overwriting() {
 
 #[test]
 fn cpk_cli_extracts_to_a_new_directory_and_rejects_traversal() {
-    use shenron_re::fs::cpk::CpkArchive;
+    use bun_re::fs::cpk::CpkArchive;
 
     let temp = tempfile::tempdir().unwrap();
     let input = temp.path().join("sample.cpk");

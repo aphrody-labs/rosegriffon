@@ -56,14 +56,15 @@ export function codeValide(code: string): boolean {
 export function urlPortrait(cdn: string, code: string, largeur = 200): string {
   if (!codeValide(code)) throw new Error("Code de personnage invalide.");
   const hote = cdn.replace(/\/+$/, "");
-  return `${hote}/dx11/menu/200_icon/10_icon_chr/face/${code}_l.g4tx/${code}_1_l00.png?w=${largeur}&format=webp`;
+  return `${hote}/dx11/menu/200_icon/10_icon_chr/face/${code}_l.png?w=${largeur}&format=webp`;
 }
 
 /** Code du personnage dont l'URL de portrait est donnée, ou `null` (photo téléversée, etc.). */
 export function codeDepuisUrl(url: string | null | undefined): string | null {
-  const m = /\/10_icon_chr\/face\/(c\d{8})_l\.g4tx\/\1_1_l00\.png(?:\?|$)/.exec(
-    url ?? "",
-  );
+  const m =
+    /\/10_icon_chr\/face\/(c\d{8})_l(?:\.png|\.g4tx\/\1_1_l00\.png)(?:\?|$)/.exec(
+      url ?? "",
+    );
   return m?.[1] ?? null;
 }
 

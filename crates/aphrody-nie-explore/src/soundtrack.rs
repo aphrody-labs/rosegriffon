@@ -357,51 +357,58 @@ mod tests {
     /// charger les 654 Mo de la banque.
     #[test]
     fn bande_son_reelle_d_une_cinematique() {
-        let racine = aphrody_nie_formats::vfs::resolve_game_dir();
-        let mut vfs = aphrody_nie_formats::vfs::Vfs::new();
-        if vfs.init(racine.join("data")).is_err() {
-            eprintln!("SAUTÉ : VFS réel indisponible (corpus du jeu absent)");
-            return;
-        }
-        if vfs.read(BANQUE_ANIME).is_err() {
-            eprintln!("SAUTÉ : {BANQUE_ANIME} absent du VFS monté");
-            return;
-        }
+        std::thread::Builder::new()
+            .stack_size(8 * 1024 * 1024)
+            .spawn(|| {
+                let racine = aphrody_nie_formats::vfs::resolve_game_dir();
+                let mut vfs = aphrody_nie_formats::vfs::Vfs::new();
+                if vfs.init(racine.join("data")).is_err() {
+                    eprintln!("SAUTÉ : VFS réel indisponible (corpus du jeu absent)");
+                    return;
+                }
+                if vfs.read(BANQUE_ANIME).is_err() {
+                    eprintln!("SAUTÉ : {BANQUE_ANIME} absent du VFS monté");
+                    return;
+                }
 
-        let piste = piste_de_film(&vfs, "ev01_00050", Some(93.55), Some(0xD075_0D09))
-            .expect("bande-son de ev01_00050");
-        // La cue au nom NU existe mais ne porte aucune forme d'onde : c'est le stem `_bgm` qui
-        // en a une. La résolution doit donc désigner un nom DÉRIVÉ du film, pas exactement le
-        // sien — et surtout pas celui d'un autre film.
-        assert!(
-            piste.cue.starts_with("ev01_00050"),
-            "cue inattendue : {}",
-            piste.cue
-        );
-        assert!(
-            piste.confirme_par_hash,
-            "le bgmName du gamedata doit confirmer le film"
-        );
-        assert_eq!(piste.codec, "hca");
-        assert!(
-            piste.frequence >= 8000,
-            "fréquence douteuse : {}",
-            piste.frequence
-        );
+                let piste = piste_de_film(&vfs, "ev01_00050", Some(93.55), Some(0xD075_0D09))
+                    .expect("bande-son de ev01_00050");
+                // La cue au nom NU existe mais ne porte aucune forme d'onde : c'est le stem `_bgm` qui
+                // en a une. La résolution doit donc désigner un nom DÉRIVÉ du film, pas exactement le
+                // sien — et surtout pas celui d'un autre film.
+                assert!(
+                    piste.cue.starts_with("ev01_00050"),
+                    "cue inattendue : {}",
+                    piste.cue
+                );
+                assert!(
+                    piste.confirme_par_hash,
+                    "le bgmName du gamedata doit confirmer le film"
+                );
+                assert_eq!(piste.codec, "hca");
+                assert!(
+                    piste.frequence >= 8000,
+                    "fréquence douteuse : {}",
+                    piste.frequence
+                );
 
-        // Un film qui n'existe pas ne doit se voir attribuer AUCUNE piste.
-        assert!(piste_de_film(&vfs, "film_qui_n_existe_pas", None, None).is_none());
+                // Un film qui n'existe pas ne doit se voir attribuer AUCUNE piste.
+                assert!(piste_de_film(&vfs, "film_qui_n_existe_pas", None, None).is_none());
 
-        let cache = std::env::temp_dir().join("nie-bande-son-test");
-        let wav = wav_de_la_cue(&vfs, &cache, piste.awb_id).expect("décodage WAV");
-        assert_eq!(&wav[..4], b"RIFF", "en-tête WAV attendu");
-        assert_eq!(&wav[8..12], b"WAVE");
-        // Une bande-son de 93 s en 16 bits stéréo pèse des mégaoctets : un WAV d'en-tête seul
-        // (44 octets) passerait un test de magic mais pas celui-ci.
-        assert!(
-            wav.len() > 1_000_000,
-            "WAV trop court : {} octets",
-            wav.len()
-        );
+                let cache = std::env::temp_dir().join("nie-bande-son-test");
+                let wav = wav_de_la_cue(&vfs, &cache, piste.awb_id).expect("décodage WAV");
+                assert_eq!(&wav[..4], b"RIFF", "en-tête WAV attendu");
+                assert_eq!(&wav[8..12], b"WAVE");
+                // Une bande-son de 93 s en 16 bits stéréo pèse des mégaoctets : un WAV d'en-tête seul
+                // (44 octets) passerait un test de magic mais pas celui-ci.
+                assert!(
+                    wav.len() > 1_000_000,
+                    "WAV trop court : {} octets",
+                    wav.len()
+                );
+            })
+            .expect("spawn bande_son_reelle_d_une_cinematique")
+            .join()
+            .expect("bande_son_reelle_d_une_cinematique panicked");
     }
 }

@@ -14,7 +14,7 @@ import {
   LIBELLES_TYPES_RECHERCHE,
   type DomaineRecherche,
   type ResultatRecherche,
-} from "@rosegriffon/search";
+} from "@/lib/search/engine";
 
 const DOMAINES = {
   association: {

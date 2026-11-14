@@ -473,14 +473,14 @@ fn main() -> Result<()> {
 
     // Les trames partent directement dans l'encodeur : ni PNG intermédiaire, ni répertoire
     // temporaire. `aphrody_nie_video` est le propriétaire unique de cette chaîne (cf. sa doc de module).
-    let params = aphrody_nie_video::Params {
+    let params = aphrody_nie_render3d::video::Params {
         largeur: cli.width,
         hauteur: cli.height,
         fps: cli.fps,
-        codec: aphrody_nie_video::Codec::H264,
+        codec: aphrody_nie_render3d::video::Codec::H264,
         crf: 18,
     };
-    let mut encodeur = aphrody_nie_video::ouvrir(&params, &cli.out)?;
+    let mut encodeur = aphrody_nie_render3d::video::ouvrir(&params, &cli.out)?;
     for _ in 0..cli.frames {
         let (flat, inst) = frame_scene(&world);
         let rgba = render_scene(

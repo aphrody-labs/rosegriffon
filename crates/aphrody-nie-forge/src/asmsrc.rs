@@ -13,7 +13,7 @@
 //! lisibles au fil des vagues de portage.
 
 use anyhow::{Context, bail};
-use aphrody_nie_asm::Insn;
+use aphrody_nie_pe::asm::Insn;
 use std::collections::BTreeMap;
 use std::path::Path;
 
@@ -42,7 +42,7 @@ impl AsmSource {
             let a = addr.trim().trim_start_matches("0x");
             let va = u64::from_str_radix(a, 16)
                 .with_context(|| format!("{origin}:{} — adresse invalide `{addr}`", n + 1))?;
-            let insns = aphrody_nie_asm::parse_line(body)
+            let insns = aphrody_nie_pe::asm::parse_line(body)
                 .map_err(|e| anyhow::anyhow!("{origin}:{} — {e}", n + 1))?;
             if insns.is_empty() {
                 bail!("{origin}:{} — corps vide", n + 1);
@@ -119,7 +119,7 @@ impl AsmSource {
             if let Some(n) = names.get(va) {
                 out.push_str(&format!("# {n}\n"));
             }
-            out.push_str(&format!("{va:#x}: {}\n", aphrody_nie_asm::to_line(insns)));
+            out.push_str(&format!("{va:#x}: {}\n", aphrody_nie_pe::asm::to_line(insns)));
         }
         std::fs::write(path, out).with_context(|| format!("écriture de {}", path.display()))?;
         Ok(())
@@ -132,7 +132,7 @@ impl AsmSource {
         // sont résolus depuis la position réelle du corps.
         self.bodies
             .get(&va)
-            .map(|i| aphrody_nie_asm::encode_at(i, va))
+            .map(|i| aphrody_nie_pe::asm::encode_at(i, va))
     }
 
     /// Nombre de corps.

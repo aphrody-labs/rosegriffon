@@ -2067,9 +2067,11 @@ export const wikiService = {
       query = condition(query);
       countQuery = condition(countQuery);
     }
-    if (params.category) {
-      query = query.where("category", "=", params.category);
-      countQuery = countQuery.where("category", "=", params.category);
+    if (params.category && params.category !== "all") {
+      const normalized = params.category.toLowerCase().replace(/_/g, "");
+      const catFilter = sql<boolean>`LOWER(REPLACE(category, '_', '')) = ${normalized}`;
+      query = query.where(catFilter);
+      countQuery = countQuery.where(catFilter);
     }
 
     try {

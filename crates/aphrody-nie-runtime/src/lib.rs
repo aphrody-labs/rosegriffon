@@ -30,7 +30,7 @@ use aphrody_nie_core::BALL_GRAVITY;
 // Vecteurs : SOURCE UNIQUE `aphrody_nie_geom` (dédup Phase 2). Alias V2/V3 pour préserver le code local.
 // Convention aphrody-nie-runtime : `z` = hauteur (vit dans le code ; le type est axis-agnostique).
 // ⚠ Ne pas convertir vers/depuis `aphrody_nie_core::Vec3` (y=hauteur) — cf. `docs/nie/ARCHITECTURE.md` landmine #4.
-use aphrody_nie_geom::{Vec2 as V2, Vec3 as V3};
+use aphrody_nie_core::geom::{Vec2 as V2, Vec3 as V3};
 
 // ── Cadence de simulation ───────────────────────────────────────────────────────
 //

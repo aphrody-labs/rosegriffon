@@ -29,12 +29,14 @@
 
 /// Échantillonnage d'une animation de caméra vers un état, à une frame fractionnaire.
 pub mod anim;
+#[cfg(feature = "bevy")]
+pub mod bevy;
 pub mod config;
 pub mod ctrl;
-#[cfg(feature = "host")]
+#[cfg(all(feature = "host", not(all(target_arch = "wasm32", target_os = "unknown"))))]
 pub mod db;
 pub mod g4cm;
-#[cfg(feature = "host")]
+#[cfg(all(feature = "host", not(all(target_arch = "wasm32", target_os = "unknown"))))]
 pub mod live;
 pub mod map;
 pub mod model;

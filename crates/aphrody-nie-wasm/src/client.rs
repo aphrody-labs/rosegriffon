@@ -618,6 +618,7 @@ impl NieClientRuntime {
         }
     }
 
+    #[cfg_attr(not(any(test, feature = "cpu-frame", feature = "webgpu")), allow(dead_code))]
     fn compose(&self, ids: &[&str], focused: &[&str], canvas: &mut dyn Painter) {
         let scenes: Vec<&Scene> = ids.iter().filter_map(|id| self.scene(id)).collect();
         let pulse = (self.time * 2.0).fract();
@@ -625,6 +626,7 @@ impl NieClientRuntime {
             .compose_scenes_on(&scenes, focused, pulse, canvas, true);
     }
 
+    #[cfg_attr(not(any(test, feature = "cpu-frame", feature = "webgpu")), allow(dead_code))]
     fn footer(&self, prompts: &[FooterPrompt<'_>], canvas: &mut dyn Painter) {
         let y = canvas.size().1 as i32 - 34;
         draw_footer_bar_on(&self.compositor, self.family, prompts, y, canvas);
@@ -766,6 +768,7 @@ pub(crate) struct MatchFrame<'a> {
 impl NieClientRuntime {
     /// Paints every 2D layer of the current frame on `out` (CPU raster or GPU quad recorder).
     /// In `Stage::Match` only the HUD is painted: the 3D view is drawn underneath by the caller.
+    #[cfg_attr(not(any(test, feature = "cpu-frame", feature = "webgpu")), allow(dead_code))]
     pub(crate) fn paint_ui(&self, out: &mut dyn Painter) {
         match self.stage {
             Stage::EacLauncher { .. } => {

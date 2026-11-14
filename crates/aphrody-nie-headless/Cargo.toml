@@ -17,8 +17,9 @@ host = [
   "dep:aphrody-nie-core",
   "dep:aphrody-nie-data",
   "dep:aphrody-nie-save",
-  "dep:aphrody-nie-pe-inspect",
-  "dep:aphrody-nie-video",
+  "dep:aphrody-re",
+  "dep:aphrody-nie-render3d",
+  "aphrody-nie-render3d/video",
   "dep:png",
 ]
 
@@ -30,8 +31,8 @@ aphrody-nie-formats = { workspace = true, default-features = true }
 aphrody-nie-data = { workspace = true, optional = true }
 aphrody-nie-core = { workspace = true, optional = true }
 aphrody-nie-save = { path = "../aphrody-nie-save", optional = true }
-aphrody-nie-pe-inspect = { path = "../aphrody-nie-pe-inspect", optional = true }
-aphrody-nie-video = { path = "../aphrody-nie-video", optional = true }
+aphrody-re = { workspace = true, default-features = false, optional = true }
+aphrody-nie-render3d = { workspace = true, default-features = false, optional = true }
 png = { workspace = true, optional = true }
 clap = { workspace = true, optional = true, features = [
   "derive",

@@ -95,12 +95,15 @@ pub fn detect_cpu() -> CpuInfo {
     let mut features = Vec::new();
     let mut vendor = "Generic".to_string();
     let mut brand = "Generic Processor".to_string();
+    #[allow(unused_assignments)]
     let mut level = MicroarchitectureLevel::Generic;
     let mut vector_width = 128;
     #[allow(unused_mut)] // reassigned only under some target cfg
     let mut gpr_count = 16;
 
+    #[allow(unused_assignments)]
     let mut has_avx2 = false;
+    #[allow(unused_assignments)]
     let mut has_avx512f = false;
     let mut has_avx512_vnni = false;
     #[allow(unused_mut)] // reassigned only under some target cfg

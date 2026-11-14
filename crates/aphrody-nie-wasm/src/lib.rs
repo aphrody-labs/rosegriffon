@@ -90,6 +90,8 @@
 #![forbid(unsafe_code)]
 #![allow(clippy::pedantic)]
 
+#[cfg(feature = "bevy")]
+pub mod bevy;
 pub mod client;
 #[cfg(feature = "webgpu")]
 pub mod gpu_client;
@@ -185,10 +187,10 @@ pub fn vfs_content_summary(path: &str, bytes: &[u8]) -> String {
 
 fn binary_triage_impl(bytes: &[u8], strings_limit: u32) -> Result<String, String> {
     let limit = usize::try_from(strings_limit)
-        .unwrap_or(aphrody_nie_pe_inspect::STRINGS_SAMPLE_LIMIT)
+        .unwrap_or(aphrody_re::STRINGS_SAMPLE_LIMIT)
         .min(256);
     let report =
-        aphrody_nie_pe_inspect::triage_bounded(bytes, limit).map_err(|error| error.to_string())?;
+        aphrody_re::triage_bounded(bytes, limit).map_err(|error| error.to_string())?;
     serde_json::to_string(&report).map_err(|error| error.to_string())
 }
 
@@ -216,13 +218,13 @@ fn assemble_x64_impl(source: &str, virtual_address: u64) -> Result<Vec<u8>, Stri
             "assembly source exceeds {MAX_ASSEMBLY_SOURCE_BYTES} bytes"
         ));
     }
-    let instructions = aphrody_nie_asm::parse_line(source).map_err(|error| error.to_string())?;
+    let instructions = aphrody_nie_pe::asm::parse_line(source).map_err(|error| error.to_string())?;
     if instructions.len() > MAX_ASSEMBLY_INSTRUCTIONS {
         return Err(format!(
             "assembly source exceeds {MAX_ASSEMBLY_INSTRUCTIONS} instructions"
         ));
     }
-    let bytes = aphrody_nie_asm::encode_at(&instructions, virtual_address);
+    let bytes = aphrody_nie_pe::asm::encode_at(&instructions, virtual_address);
     if bytes.len() > MAX_ASSEMBLY_OUTPUT_BYTES {
         return Err(format!(
             "assembly output exceeds {MAX_ASSEMBLY_OUTPUT_BYTES} bytes"
@@ -333,7 +335,7 @@ pub fn minidump_summary_json(bytes: &[u8]) -> Result<String, String> {
 }
 
 fn ievr_pe_inspect_impl(bytes: &[u8]) -> Result<String, String> {
-    aphrody_nie_pe_inspect::pe::inspect_bytes_json(bytes).map_err(|error| error.to_string())
+    aphrody_re::pe::inspect_bytes_json(bytes).map_err(|error| error.to_string())
 }
 
 /// Produces a bounded detailed PE report with sections, imports, and named exports.

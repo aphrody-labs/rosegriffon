@@ -62,7 +62,11 @@
 
 /// Bounded executable, archive, firmware, bytecode and asset-header classification extracted from
 /// the Bun Engine ingestion API. The source crate retains its GPL-3.0-or-later license.
-pub use yolo_re_bin_format as bun_engine_binary;
+pub mod bun_engine_binary;
+
+/// Bounded PE/COFF inspector for Windows binaries (`.exe`, `.dll`, `.sys`, ...).
+pub mod pe_inspect;
+pub use pe_inspect as pe;
 
 /// Adobe application directory mapper — forensic inventory of an Adobe
 /// application install dir (Photoshop, Illustrator, …) into structured JSON.

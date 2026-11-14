@@ -519,7 +519,7 @@ fn main() -> Result<()> {
         // croire que le rendu coûte ce que coûte la sortie. Le second poste n'est plus une
         // compression PNG mais une écriture vers l'encodeur — c'est justement le coût qui a
         // disparu en passant au flux, et le mesurer le dit.
-        let mut encodeur = aphrody_nie_video::ouvrir(&video_params(&cli), &cli.out)?;
+        let mut encodeur = aphrody_nie_render3d::video::ouvrir(&video_params(&cli), &cli.out)?;
         let (mut t_rendu, mut t_sortie) = (std::time::Duration::ZERO, std::time::Duration::ZERO);
         for i in 0..cli.frames {
             let angle = std::f32::consts::TAU * (i as f32) / (cli.frames as f32);
@@ -552,7 +552,7 @@ fn main() -> Result<()> {
     }
 
     // Même ventilation rendu/sortie que le chemin GPU, et pour la même raison.
-    let mut encodeur = aphrody_nie_video::ouvrir(&video_params(&cli), &cli.out)?;
+    let mut encodeur = aphrody_nie_render3d::video::ouvrir(&video_params(&cli), &cli.out)?;
     let (mut t_rendu, mut t_sortie) = (std::time::Duration::ZERO, std::time::Duration::ZERO);
     for i in 0..cli.frames {
         let angle = std::f32::consts::TAU * (i as f32) / (cli.frames as f32);
@@ -578,12 +578,12 @@ fn main() -> Result<()> {
 }
 
 /// Les paramètres vidéo dérivés de la ligne de commande — un seul endroit pour les deux chemins.
-fn video_params(cli: &Cli) -> aphrody_nie_video::Params {
-    aphrody_nie_video::Params {
+fn video_params(cli: &Cli) -> aphrody_nie_render3d::video::Params {
+    aphrody_nie_render3d::video::Params {
         largeur: cli.width,
         hauteur: cli.height,
         fps: cli.fps,
-        codec: aphrody_nie_video::Codec::H264,
+        codec: aphrody_nie_render3d::video::Codec::H264,
         crf: 18,
     }
 }

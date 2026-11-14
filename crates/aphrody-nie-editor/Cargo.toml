@@ -16,15 +16,21 @@ required-features = ["host"]
 
 [features]
 default = ["host"]
-host = ["dep:clap", "dep:eframe", "aphrody-nie-render3d/gpu"]
+bevy = [
+  "dep:bevy",
+  "dep:aphrody-nie-bevy",
+  "aphrody-nie-bevy/bevy",
+  "aphrody-nie-render3d/bevy",
+]
+host = ["dep:clap", "bevy"]
 
 [lints]
 workspace = true
 
 [dependencies]
 aphrody-nie-render3d.workspace = true
-# Version follows the root egui/wgpu 30 catalog.
-eframe = { workspace = true, features = ["default_fonts", "wgpu", "x11", "wayland"], optional = true }
+aphrody-nie-ui = { path = "../aphrody-nie-ui", version = "1.4.8" }
+aphrody-nie-bevy = { path = "../aphrody-nie-bevy", version = "1.4.7", optional = true }
 serde_json = { workspace = true }
 
 anyhow = { workspace = true }
@@ -32,4 +38,17 @@ clap = { workspace = true, optional = true, features = [
   "derive",
   "color",
   "env",
+] }
+bevy = { workspace = true, optional = true, features = [
+  "async_executor",
+  "multi_threaded",
+  "bevy_asset",
+  "bevy_camera",
+  "bevy_core_pipeline",
+  "bevy_pbr",
+  "bevy_render",
+  "bevy_window",
+  "bevy_winit",
+  "x11",
+  "wayland",
 ] }

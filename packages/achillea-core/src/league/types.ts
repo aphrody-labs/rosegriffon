@@ -1,11 +1,6 @@
+import type { LeagueMatchRow } from "@rosegriffon/achillea-types";
+
 /** Un match de championnat (résultat d'équipe). */
-export interface LeagueMatchResult {
-  homeId: string;
-  awayId: string;
-  homeScore: number;
-  awayScore: number;
-  matchday: number;
-  overtime?: boolean;
-  winnerId?: string | null;
+export interface LeagueMatchResult extends LeagueMatchRow {
   playedAt?: string | Date | null;
 }

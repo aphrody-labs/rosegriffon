@@ -6,7 +6,7 @@
  * des assets distants une fois le CDN de Level-5 débloqué (Phase 1).
  */
 
-import { crossAudioManifest as audioManifest } from "@rosegriffon/inagle-cross";
+import { crossAudioManifest as audioManifest } from "./inagle-cross";
 
 export const CROSS_CDN_BASE = "https://cdn.rosegriffon.fr/cross";
 

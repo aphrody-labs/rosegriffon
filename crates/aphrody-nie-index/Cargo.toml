@@ -23,12 +23,14 @@ host = [
 ]
 
 [dependencies]
+serde = { workspace = true }
+thiserror = { workspace = true }
+
+[target.'cfg(not(all(target_arch = "wasm32", target_os = "unknown")))'.dependencies]
 ignore = { version = "0.4", optional = true }
 rusqlite = { version = "0.40", optional = true, features = ["bundled"] }
 sha2 = { version = "0.10", optional = true }
-serde = { workspace = true }
 serde_json = { workspace = true, optional = true }
-thiserror = { workspace = true }
 tracing = { workspace = true, optional = true }
 r2d2 = { version = "0.8", optional = true }
 redis = { version = "0.27", optional = true, features = ["r2d2"] }

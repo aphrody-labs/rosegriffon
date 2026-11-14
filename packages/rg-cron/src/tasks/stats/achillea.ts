@@ -23,7 +23,7 @@ import { dirname } from "node:path";
 import {
   syncSiteTelemetryAggregates,
   type SiteTelemetryAggregate,
-} from "@rosegriffon/discord-sync";
+} from "../../lib/discord-sync";
 
 /** Où la page de statistiques du site va lire le résultat. */
 export const CHEMIN_CACHE = "/var/lib/rg/achillea-audience.json";

@@ -1627,14 +1627,17 @@ fn run_bevy_window(host: AppFenetre, title: &str) -> Result<()> {
     let width = host.tex_width;
     let height = host.tex_height;
     let mut app = App::new();
-    app.add_plugins(DefaultPlugins.set(WindowPlugin {
-        primary_window: Some(Window {
-            title: title.to_owned(),
-            resolution: (width, height).into(),
+    app.add_plugins((
+        DefaultPlugins.set(WindowPlugin {
+            primary_window: Some(Window {
+                title: title.to_owned(),
+                resolution: (width, height).into(),
+                ..Default::default()
+            }),
             ..Default::default()
         }),
-        ..Default::default()
-    }))
+        aphrody_nie_bevy::NieAssetPlugin::default(),
+    ))
     .insert_resource(WinitSettings::continuous())
     .insert_non_send(host)
     .add_systems(Startup, setup_bevy_frame)

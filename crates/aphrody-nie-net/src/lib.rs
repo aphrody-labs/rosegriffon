@@ -26,14 +26,14 @@ pub mod session;
 pub mod state_machine;
 pub mod tournament;
 
-#[cfg(feature = "transport")]
+#[cfg(all(feature = "transport", not(all(target_arch = "wasm32", target_os = "unknown"))))]
 pub mod client;
-#[cfg(feature = "transport")]
+#[cfg(all(feature = "transport", not(all(target_arch = "wasm32", target_os = "unknown"))))]
 pub mod server;
 
-#[cfg(feature = "transport")]
+#[cfg(all(feature = "transport", not(all(target_arch = "wasm32", target_os = "unknown"))))]
 pub use client::NetClient;
-#[cfg(feature = "transport")]
+#[cfg(all(feature = "transport", not(all(target_arch = "wasm32", target_os = "unknown"))))]
 pub use server::{DEFAULT_BIND, NetServer, ServerState};
 
 pub use clans::{Clan, ClanMember, ClanMemberRole, ClanRegistry};

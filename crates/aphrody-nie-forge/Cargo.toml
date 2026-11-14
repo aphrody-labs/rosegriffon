@@ -22,7 +22,6 @@ redb = ["dep:clap", "dep:rusqlite"]
 
 [dependencies]
 aphrody-nie-pe = { path = "../aphrody-nie-pe", default-features = true }
-aphrody-nie-asm = { path = "../aphrody-nie-asm", default-features = true }
 iced-x86 = "1.21"
 anyhow = { workspace = true }
 clap = { version = "4.5", optional = true, features = [

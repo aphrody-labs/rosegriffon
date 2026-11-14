@@ -87,12 +87,12 @@ fn main() -> Result<()> {
     let mut encodeur = if cli.no_video {
         None
     } else {
-        Some(aphrody_nie_video::ouvrir(
-            &aphrody_nie_video::Params {
+        Some(aphrody_nie_render3d::video::ouvrir(
+            &aphrody_nie_render3d::video::Params {
                 largeur: width,
                 hauteur: height,
                 fps,
-                codec: aphrody_nie_video::Codec::H264,
+                codec: aphrody_nie_render3d::video::Codec::H264,
                 crf: 18,
             },
             &cli.out,

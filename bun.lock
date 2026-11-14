@@ -127,8 +127,6 @@
         "@rosegriffon/inagle": "workspace:*",
         "@rosegriffon/lua-plugin": "workspace:*",
         "@rosegriffon/patreon-bun": "catalog:",
-        "@rosegriffon/preferences": "workspace:*",
-        "@rosegriffon/search": "workspace:*",
         "@rosegriffon/types": "workspace:*",
         "@rosegriffon/ui": "workspace:*",
         "@sentry/nextjs": "catalog:",
@@ -280,7 +278,6 @@
       "dependencies": {
         "@rosegriffon/db": "workspace:*",
         "@rosegriffon/inagle": "workspace:*",
-        "@rosegriffon/inagle-cross": "catalog:",
         "commander": "catalog:",
         "wanakana": "catalog:",
       },
@@ -365,16 +362,6 @@
       "optionalPeers": [
         "@aphrody/agent-browser",
       ],
-    },
-    "packages/inagle-cross": {
-      "name": "@rosegriffon/inagle-cross",
-      "version": "1.4.7",
-      "dependencies": {
-        "zod": "catalog:",
-      },
-      "devDependencies": {
-        "@types/node": "catalog:",
-      },
     },
     "packages/nie-ui": {
       "name": "@aphrody/nie-ui",
@@ -470,7 +457,6 @@
         "@aphrody/x": "catalog:",
         "@rosegriffon/assets": "workspace:*",
         "@rosegriffon/db": "workspace:*",
-        "@rosegriffon/discord-sync": "workspace:*",
         "@rosegriffon/inagle": "workspace:*",
         "@rosegriffon/types": "workspace:*",
         "@vercel/functions": "catalog:",
@@ -496,14 +482,6 @@
         "kysely-supabase": "catalog:",
       },
     },
-    "packages/rg-discord-sync": {
-      "name": "@rosegriffon/discord-sync",
-      "version": "1.4.4",
-      "dependencies": {
-        "@rosegriffon/db": "workspace:*",
-        "discord.js": "catalog:",
-      },
-    },
     "packages/rg-i18n": {
       "name": "@rosegriffon/i18n",
       "version": "1.4.4",
@@ -511,14 +489,6 @@
     "packages/rg-lua": {
       "name": "@rosegriffon/lua-plugin",
       "version": "1.5.0",
-    },
-    "packages/rg-preferences": {
-      "name": "@rosegriffon/preferences",
-      "version": "1.4.4",
-    },
-    "packages/rg-search": {
-      "name": "@rosegriffon/search",
-      "version": "1.4.4",
     },
     "packages/rg-types": {
       "name": "@rosegriffon/types",
@@ -542,7 +512,6 @@
         "@base-ui/react": "catalog:",
         "@hookform/resolvers": "catalog:",
         "@rosegriffon/db": "workspace:*",
-        "@rosegriffon/preferences": "workspace:*",
         "@rosegriffon/types": "workspace:*",
         "@tanstack/react-table": "catalog:",
         "class-variance-authority": "catalog:",
@@ -1509,25 +1478,17 @@
 
     "@rosegriffon/db": ["@rosegriffon/db@workspace:packages/rg-db"],
 
-    "@rosegriffon/discord-sync": ["@rosegriffon/discord-sync@workspace:packages/rg-discord-sync"],
-
     "@rosegriffon/i18n": ["@rosegriffon/i18n@workspace:packages/rg-i18n"],
 
     "@rosegriffon/ieverse": ["@rosegriffon/ieverse@workspace:packages/ieverse"],
 
     "@rosegriffon/inagle": ["@rosegriffon/inagle@workspace:packages/inagle"],
 
-    "@rosegriffon/inagle-cross": ["@rosegriffon/inagle-cross@workspace:packages/inagle-cross"],
-
     "@rosegriffon/lua-plugin": ["@rosegriffon/lua-plugin@workspace:packages/rg-lua"],
 
     "@rosegriffon/mcp": ["@rosegriffon/mcp@workspace:apps/mcp"],
 
     "@rosegriffon/patreon-bun": ["@rosegriffon/patreon-bun@workspace:packages/patreon-bun"],
-
-    "@rosegriffon/preferences": ["@rosegriffon/preferences@workspace:packages/rg-preferences"],
-
-    "@rosegriffon/search": ["@rosegriffon/search@workspace:packages/rg-search"],
 
     "@rosegriffon/server": ["@rosegriffon/server@workspace:apps/rosegriffon"],
 
@@ -3154,8 +3115,6 @@
     "@rollup/plugin-commonjs/magic-string": ["magic-string@0.30.21", "", { "dependencies": { "@jridgewell/sourcemap-codec": "^1.5.5" } }, "sha512-vd2F4YUyEXKGcLHoq+TEyCjxueSeHnFxyyjNp80yg0XV4vUhnDer/lvvlqM/arB5bXQN5K2/3oinyCRyx8T2CQ=="],
 
     "@rollup/pluginutils/estree-walker": ["estree-walker@2.0.2", "", {}, "sha512-Rfkk/Mp/DL7JVje3u18FxFujQlTNR2q6QfMSMB7AvCBx91NGj/ba3kCfza0f6dVDbw7YlRf/nDrn7pQrCCyQ/w=="],
-
-    "@rosegriffon/azalee/@rosegriffon/inagle-cross": ["@rosegriffon/inagle-cross@1.0.7", "", { "dependencies": { "zod": "^4.6.5" } }, "sha512-4ZPv7ScjYQZWA1hAL7C7n6RfrSzgj4IO4GqKiHtEIOh+Ay7jaRYaBETpr8efMiG/MJXunNEMk4d4evG0Cefvkw=="],
 
     "@rosegriffon/inagle/@types/bun": ["@types/bun@1.4.2", "", { "dependencies": { "bun-types": "1.4.2" } }, "sha512-GimotNn7+ZV0uVArItBbriZsR1oNf0+WTzPkdcFrzShI7k2norL0uzEaJT8T33dWr7O/c9ZDuAFQrctKCi72oQ=="],
 

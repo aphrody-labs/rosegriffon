@@ -4,4 +4,4 @@
 //! L'implémentation vit dans `aphrody-softraster` (propriétaire : `aphrody-ui`), le rastériseur
 //! CPU partagé avec la pile 3D Aphrody ; ce module n'en garde que les noms internes.
 
-pub(crate) use aphrody_softraster::{V3, cross, dot, normv, sub};
+pub(crate) use crate::softraster::{V3, cross, dot, normv, sub};

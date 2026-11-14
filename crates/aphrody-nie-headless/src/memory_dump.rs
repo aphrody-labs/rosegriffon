@@ -83,7 +83,7 @@ pub fn execute_memory_dump(options: &MemoryDumpOptions) -> Result<ProcessMemoryM
     if let Some(ref pe_path) = options.target_pe {
         if pe_path.is_file() {
             if let Ok(bytes) = std::fs::read(pe_path) {
-                if let Ok(report) = aphrody_nie_pe_inspect::triage(&bytes) {
+                if let Ok(report) = aphrody_re::triage(&bytes) {
                     for sec in report.sections {
                         regions.push(MemoryRegion {
                             name: sec.name.clone(),

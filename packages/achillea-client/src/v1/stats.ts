@@ -13,7 +13,7 @@ import type {
   CommandUsageRow,
   DailyCountRow,
   UsersAndGuildsResponse,
-} from "./pending-contracts";
+} from "@rosegriffon/achillea-types";
 
 export const botTotalsResponseSchema = z.object({
   stats: z.object({

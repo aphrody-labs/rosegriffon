@@ -9,9 +9,9 @@
 use std::collections::{HashSet, VecDeque};
 use std::fmt;
 
-#[cfg(feature = "host")]
+#[cfg(all(feature = "host", not(all(target_arch = "wasm32", target_os = "unknown"))))]
 use redis::{Commands, RedisError};
-#[cfg(feature = "host")]
+#[cfg(all(feature = "host", not(all(target_arch = "wasm32", target_os = "unknown"))))]
 use thiserror::Error;
 
 /// Validated resource limits for an in-memory frontier.
@@ -267,7 +267,7 @@ impl Default for MemoryFrontier {
     }
 }
 
-#[cfg(feature = "host")]
+#[cfg(all(feature = "host", not(all(target_arch = "wasm32", target_os = "unknown"))))]
 #[derive(Debug, Error)]
 pub enum QueueError {
     /// Redis connection or command failure.
@@ -275,18 +275,18 @@ pub enum QueueError {
     Redis(#[from] RedisError),
 }
 
-#[cfg(feature = "host")]
+#[cfg(all(feature = "host", not(all(target_arch = "wasm32", target_os = "unknown"))))]
 pub type Result<T> = std::result::Result<T, QueueError>;
 
 /// Shared Redis BFS frontier for one binary (key prefix: `nie:<binary>`).
-#[cfg(feature = "host")]
+#[cfg(all(feature = "host", not(all(target_arch = "wasm32", target_os = "unknown"))))]
 pub struct Frontier {
     conn: redis::Connection,
     seen_key: String,
     list_key: String,
 }
 
-#[cfg(feature = "host")]
+#[cfg(all(feature = "host", not(all(target_arch = "wasm32", target_os = "unknown"))))]
 impl Frontier {
     /// Connects to Redis and selects the key namespace for `tag`, such as a short binary hash.
     pub fn connect(url: &str, tag: &str) -> Result<Self> {

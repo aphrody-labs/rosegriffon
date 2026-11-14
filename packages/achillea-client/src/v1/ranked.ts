@@ -43,7 +43,7 @@ import type {
   RankedChallengeAccepted,
   RankedLadderResetResult,
   RankedProofUploaded,
-} from "./pending-contracts";
+} from "@rosegriffon/achillea-types";
 
 // ── Schémas ─────────────────────────────────────────────────────────────────
 

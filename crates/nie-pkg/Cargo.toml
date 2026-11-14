@@ -14,6 +14,17 @@ workspace = true
 name = "nie-pkg"
 path = "src/bin/nie-pkg.rs"
 
+[[bin]]
+name = "nie-pkg-ui"
+path = "src/bin/nie-pkg-ui.rs"
+required-features = ["ui"]
+
+[features]
+default = []
+ui = ["dep:taffy"]
+desktop = ["ui"]
+web = ["ui"]
+
 [dependencies]
 serde = { workspace = true }
 toml = { version = "1.2.1", default-features = false, features = [
@@ -25,6 +36,7 @@ toml = { version = "1.2.1", default-features = false, features = [
 blake3 = { version = "1.8.7", default-features = false, features = ["std"] }
 thiserror = { workspace = true, features = ["std"] }
 clap = { workspace = true }
+taffy = { workspace = true, optional = true }
 
 [dev-dependencies]
 tempfile = { workspace = true }

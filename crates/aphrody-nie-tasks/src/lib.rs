@@ -302,7 +302,7 @@ fn validate_required_text(value: &str, max: usize, is_id: bool) -> Result<(), Ta
     Ok(())
 }
 
-#[cfg(feature = "host")]
+#[cfg(all(feature = "host", not(all(target_arch = "wasm32", target_os = "unknown"))))]
 mod host {
     use std::collections::HashMap;
     use std::sync::{Arc, Mutex};
@@ -703,7 +703,7 @@ mod host {
     }
 }
 
-#[cfg(feature = "host")]
+#[cfg(all(feature = "host", not(all(target_arch = "wasm32", target_os = "unknown"))))]
 pub use host::*;
 
 #[cfg(test)]

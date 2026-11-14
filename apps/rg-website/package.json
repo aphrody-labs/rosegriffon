@@ -88,8 +88,6 @@
     "@rosegriffon/inagle": "workspace:*",
     "@rosegriffon/lua-plugin": "workspace:*",
     "@rosegriffon/patreon-bun": "catalog:",
-    "@rosegriffon/preferences": "workspace:*",
-    "@rosegriffon/search": "workspace:*",
     "@rosegriffon/types": "workspace:*",
     "@rosegriffon/ui": "workspace:*",
     "@sentry/nextjs": "catalog:",

@@ -1,6 +1,6 @@
 {
-  "dir": "nie/wasm/955b874277ce4044",
+  "dir": "nie/wasm/51d0dbb96d09dbff",
   "js": "aphrody_nie_wasm.js",
   "wasm": "aphrody_nie_wasm_bg.wasm",
-  "wasmBytes": 8156338
+  "wasmBytes": 22645171
 }

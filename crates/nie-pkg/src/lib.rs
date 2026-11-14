@@ -11,6 +11,8 @@
 mod model;
 mod registry;
 mod store;
+#[cfg(feature = "ui")]
+pub mod ui;
 
 pub use model::{Ecosystem, Feature, Game, Platform, Release, Support};
 pub use registry::{Registry, RegistryError};

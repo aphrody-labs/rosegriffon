@@ -18,7 +18,7 @@ import {
   listGuildMembers,
   syncDiscordGuildSnapshot,
   syncOAuthLinkMetadata,
-} from "@rosegriffon/discord-sync";
+} from "../lib/discord-sync";
 
 /**
  * Synchronisation Discord — TOUS les serveurs suivis.

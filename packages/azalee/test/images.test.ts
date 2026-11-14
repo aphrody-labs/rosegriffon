@@ -344,9 +344,9 @@ describe("uniformes — texture `_1` nommée (le `_2` est un masque d'emblème, 
 // ---------------------------------------------------------------------------
 
 describe("URLs CDN — visages, emblèmes, illustrations", () => {
-  test("getCharacterFaceUrl : texture nommée `_1_l00` (le 1:1 servirait `_2_l00`)", () => {
+  test("getCharacterFaceUrl : fichier 1:1 `_l.png` (la forme `.g4tx/_1_l00` 404 sur le CDN)", () => {
     expect(getCharacterFaceUrl("c01000010")).toBe(
-      `${CHR}/face/c01000010_l.g4tx/c01000010_1_l00.png`,
+      `${CHR}/face/c01000010_l.png`,
     );
     // Le suffixe de variante (_5000/_5100…) est retiré : le dump n'a que la base.
     expect(getCharacterFaceUrl("c01000010_5000")).toBe(

@@ -85,76 +85,75 @@ pub fn render_match_hud_on(
         return;
     }
 
+    let score_txt = format!("{} - {}", view.home_score, view.away_score);
+    let score_w = compositor.measure_text_height(&score_txt, 24.0);
+    let away_w = compositor.measure_text_height(view.away_name, 17.0);
+    let mins = view.match_seconds / 60;
+    let secs = view.match_seconds % 60;
+    let clock_txt = format!("MT{}  {:02}:{:02}   CAM {}", view.half, mins, secs, view.camera_label);
+    let clock_w = compositor.measure_text_height(&clock_txt, 13.0);
+
+    let hud = crate::layout::match_hud_layout(
+        w,
+        h,
+        score_w as f32,
+        away_w as f32,
+        clock_w as f32,
+    );
+
     // 1. Tableau d'affichage supérieur centré (couleurs officielles Raimon Or/Bleu vs Rouge).
-    let sb_w = 460i32;
-    let sb_h = 54i32;
-    let sb_x = (w as i32 - sb_w) / 2;
-    let sb_y = 16i32;
+    let (sb_x, sb_y, sb_w, sb_h) = (
+        hud.scoreboard.ix(),
+        hud.scoreboard.iy(),
+        hud.scoreboard.iw(),
+        hud.scoreboard.ih(),
+    );
     canvas.fill_rect(sb_x, sb_y, sb_w, sb_h, [10, 18, 34, 224]);
     let _ = compositor.blit_named_region_on(
         HUD_CMN_ASSET,
         "cmd_press_btn_base_on01",
         sb_x,
         sb_y,
-        sb_w as u32,
-        sb_h as u32,
+        hud.scoreboard.uw(),
+        hud.scoreboard.uh(),
         72,
         canvas,
     );
     canvas.fill_rect(sb_x, sb_y, 6, sb_h, [54, 142, 255, 255]);
-    canvas.fill_rect(sb_x + sb_w - 6,
-        sb_y,
-        6,
-        sb_h,
-        [236, 72, 72, 255],
-    );
-    canvas.stroke_rect(sb_x,
-        sb_y,
-        sb_w,
-        sb_h,
-        1,
-        [102, 168, 236, 190],
-    );
+    canvas.fill_rect(sb_x + sb_w - 6, sb_y, 6, sb_h, [236, 72, 72, 255]);
+    canvas.stroke_rect(sb_x, sb_y, sb_w, sb_h, 1, [102, 168, 236, 190]);
 
     let _ = compositor.draw_text_height_on(
         view.home_name,
-        sb_x + 18,
-        sb_y + 9,
+        hud.scoreboard_home.ix(),
+        hud.scoreboard_home.iy(),
         17.0,
         [232, 242, 255, 255],
         true,
         canvas,
     );
-    let score_txt = format!("{} - {}", view.home_score, view.away_score);
-    let score_w = compositor.measure_text_height(&score_txt, 24.0);
     let _ = compositor.draw_text_height_on(
         &score_txt,
-        sb_x + (sb_w - score_w) / 2,
-        sb_y + 5,
+        hud.scoreboard_score.ix(),
+        hud.scoreboard_score.iy(),
         24.0,
         [255, 218, 68, 255],
         true,
         canvas,
     );
-    let away_w = compositor.measure_text_height(view.away_name, 17.0);
     let _ = compositor.draw_text_height_on(
         view.away_name,
-        sb_x + sb_w - away_w - 18,
-        sb_y + 9,
+        hud.scoreboard_away.ix(),
+        hud.scoreboard_away.iy(),
         17.0,
         [255, 226, 226, 255],
         true,
         canvas,
     );
-
-    let mins = view.match_seconds / 60;
-    let secs = view.match_seconds % 60;
-    let clock_txt = format!("MT{}  {:02}:{:02}   CAM {}", view.half, mins, secs, view.camera_label);
-    let clock_w = compositor.measure_text_height(&clock_txt, 13.0);
     let _ = compositor.draw_text_height_on(
         &clock_txt,
-        sb_x + (sb_w - clock_w) / 2,
-        sb_y + 34,
+        hud.scoreboard_clock.ix(),
+        hud.scoreboard_clock.iy(),
         13.0,
         [168, 214, 255, 255],
         false,
@@ -162,27 +161,25 @@ pub fn render_match_hud_on(
     );
 
     // 2. Fiche du joueur contrôlé + Endurance + Jauge de Tension (bas-gauche).
-    let card_x = 24i32;
-    let card_y = h as i32 - 134;
-    let card_w = 308i32;
-    let card_h = 84i32;
-    canvas.fill_rect(card_x,
-        card_y,
-        card_w,
-        card_h,
+    canvas.fill_rect(
+        hud.player_card.ix(),
+        hud.player_card.iy(),
+        hud.player_card.iw(),
+        hud.player_card.ih(),
         [10, 18, 34, 216],
     );
-    canvas.stroke_rect(card_x,
-        card_y,
-        card_w,
-        card_h,
+    canvas.stroke_rect(
+        hud.player_card.ix(),
+        hud.player_card.iy(),
+        hud.player_card.iw(),
+        hud.player_card.ih(),
         1,
         [82, 162, 240, 180],
     );
     let _ = compositor.draw_text_height_on(
         view.controlled_player_name,
-        card_x + 14,
-        card_y + 10,
+        hud.player_name.ix(),
+        hud.player_name.iy(),
         17.0,
         [255, 255, 255, 255],
         true,
@@ -191,25 +188,28 @@ pub fn render_match_hud_on(
 
     // Barre d'endurance (PE).
     let stam = view.stamina_ratio.clamp(0.0, 1.0);
-    canvas.fill_rect(card_x + 14,
-        card_y + 36,
-        280,
-        10,
+    canvas.fill_rect(
+        hud.stamina_bar.ix(),
+        hud.stamina_bar.iy(),
+        hud.stamina_bar.iw(),
+        hud.stamina_bar.ih(),
         [28, 40, 58, 255],
     );
-    canvas.fill_rect(card_x + 14,
-        card_y + 36,
-        (280.0 * stam).round() as i32,
-        10,
+    canvas.fill_rect(
+        hud.stamina_bar.ix(),
+        hud.stamina_bar.iy(),
+        (hud.stamina_bar.width * stam).round() as i32,
+        hud.stamina_bar.ih(),
         [72, 224, 132, 255],
     );
 
     // Barre de Tension d'équipe (nécessaire aux techniques Hissatsu : seuil 40%).
     let tens = (view.home_tension / 100.0).clamp(0.0, 1.0);
-    canvas.fill_rect(card_x + 14,
-        card_y + 56,
-        280,
-        14,
+    canvas.fill_rect(
+        hud.tension_bar.ix(),
+        hud.tension_bar.iy(),
+        hud.tension_bar.iw(),
+        hud.tension_bar.ih(),
         [34, 28, 18, 255],
     );
     let tens_col = if view.home_tension >= 40.0 {
@@ -217,17 +217,18 @@ pub fn render_match_hud_on(
     } else {
         [188, 128, 42, 255]
     };
-    canvas.fill_rect(card_x + 14,
-        card_y + 56,
-        (280.0 * tens).round() as i32,
-        14,
+    canvas.fill_rect(
+        hud.tension_bar.ix(),
+        hud.tension_bar.iy(),
+        (hud.tension_bar.width * tens).round() as i32,
+        hud.tension_bar.ih(),
         tens_col,
     );
     let tens_label = format!("TENSION {:3.0}%", view.home_tension.clamp(0.0, 100.0));
     let _ = compositor.draw_text_height_on(
         &tens_label,
-        card_x + 20,
-        card_y + 56,
+        hud.tension_bar.ix() + 6,
+        hud.tension_bar.iy(),
         12.0,
         [18, 18, 24, 255],
         false,
@@ -235,10 +236,12 @@ pub fn render_match_hud_on(
     );
 
     // 3. Mini-carte radar tactique (bas-droite).
-    let map_w = 216i32;
-    let map_h = 132i32;
-    let map_x = w as i32 - map_w - 24;
-    let map_y = h as i32 - map_h - 50;
+    let (map_x, map_y, map_w, map_h) = (
+        hud.minimap.ix(),
+        hud.minimap.iy(),
+        hud.minimap.iw(),
+        hud.minimap.ih(),
+    );
     canvas.fill_rect(map_x,
         map_y,
         map_w,
@@ -281,10 +284,23 @@ pub fn render_match_hud_on(
 
     // 4. Superpositions contextuelles Focus Battle / Zone / Hissatsu / But.
     if view.in_focus_duel {
-        let fx = (w as i32 - 480) / 2;
-        let fy = 92;
-        canvas.fill_rect(fx, fy, 480, 62, [14, 28, 56, 228]);
-        canvas.stroke_rect(fx, fy, 480, 62, 2, [58, 214, 255, 255]);
+        let fx = hud.focus_overlay.ix();
+        let fy = hud.focus_overlay.iy();
+        canvas.fill_rect(
+            fx,
+            fy,
+            hud.focus_overlay.iw(),
+            hud.focus_overlay.ih(),
+            [14, 28, 56, 228],
+        );
+        canvas.stroke_rect(
+            fx,
+            fy,
+            hud.focus_overlay.iw(),
+            hud.focus_overlay.ih(),
+            2,
+            [58, 214, 255, 255],
+        );
         let _ = compositor.draw_text_height_on(
             "DUEL FOCUS",
             fx + 18,
@@ -313,13 +329,27 @@ pub fn render_match_hud_on(
             canvas,
         );
     } else if view.in_zone {
-        let zx = (w as i32 - 320) / 2;
-        canvas.fill_rect(zx, 90, 320, 38, [48, 22, 74, 210]);
-        canvas.stroke_rect(zx, 90, 320, 38, 2, [255, 214, 68, 255]);
+        let zx = hud.zone_overlay.ix();
+        let zy = hud.zone_overlay.iy();
+        canvas.fill_rect(
+            zx,
+            zy,
+            hud.zone_overlay.iw(),
+            hud.zone_overlay.ih(),
+            [48, 22, 74, 210],
+        );
+        canvas.stroke_rect(
+            zx,
+            zy,
+            hud.zone_overlay.iw(),
+            hud.zone_overlay.ih(),
+            2,
+            [255, 214, 68, 255],
+        );
         let _ = compositor.draw_text_height_on(
             "ZONE DE TIR ACTIVE",
             zx + 54,
-            99,
+            zy + 9,
             18.0,
             [255, 226, 92, 255],
             true,
@@ -328,14 +358,16 @@ pub fn render_match_hud_on(
     }
 
     if let Some(tech) = view.active_hissatsu {
-        let hy = h as i32 / 2 - 140;
-        canvas.fill_rect(0, hy, w as i32, 58, [18, 32, 68, 226]);
-        canvas.fill_rect(0, hy, w as i32, 3, [255, 212, 52, 255]);
-        canvas.fill_rect(0, hy + 55, w as i32, 3, [255, 212, 52, 255]);
+        let hy = hud.hissatsu_banner.iy();
+        let hw = hud.hissatsu_banner.iw();
+        let hh = hud.hissatsu_banner.ih();
+        canvas.fill_rect(0, hy, hw, hh, [18, 32, 68, 226]);
+        canvas.fill_rect(0, hy, hw, 3, [255, 212, 52, 255]);
+        canvas.fill_rect(0, hy + hh - 3, hw, 3, [255, 212, 52, 255]);
         let tw = compositor.measure_text_height(tech, 28.0);
         let _ = compositor.draw_text_height_on(
             tech,
-            (w as i32 - tw) / 2,
+            (hw - tw) / 2,
             hy + 14,
             28.0,
             [255, 232, 92, 255],
@@ -345,13 +377,15 @@ pub fn render_match_hud_on(
     }
 
     if let Some(goal_txt) = view.goal_banner {
-        let gy = h as i32 / 2 - 46;
-        canvas.fill_rect(0, gy, w as i32, 92, [12, 24, 52, 236]);
-        canvas.stroke_rect(0, gy, w as i32, 92, 3, [255, 214, 64, 255]);
+        let gy = hud.goal_banner.iy();
+        let gw_full = hud.goal_banner.iw();
+        let gh = hud.goal_banner.ih();
+        canvas.fill_rect(0, gy, gw_full, gh, [12, 24, 52, 236]);
+        canvas.stroke_rect(0, gy, gw_full, gh, 3, [255, 214, 64, 255]);
         let gw = compositor.measure_text_height(goal_txt, 42.0);
         let _ = compositor.draw_text_height_on(
             goal_txt,
-            (w as i32 - gw) / 2,
+            (gw_full - gw) / 2,
             gy + 24,
             42.0,
             [255, 224, 72, 255],
@@ -402,26 +436,28 @@ pub fn render_match_hud_on(
     // 6. Fenêtre Pause (`win04_01.g4tx`) si active.
     if view.paused {
         canvas.fill_rect(0, 0, w as i32, h as i32, [4, 8, 16, 178]);
-        let pw = 460i32;
-        let ph = 310i32;
-        let px = (w as i32 - pw) / 2;
-        let py = (h as i32 - ph) / 2;
+        let (px, py, pw, ph) = (
+            hud.pause_dialog.ix(),
+            hud.pause_dialog.iy(),
+            hud.pause_dialog.iw(),
+            hud.pause_dialog.ih(),
+        );
         canvas.fill_rect(px, py, pw, ph, [14, 24, 44, 244]);
         let _ = compositor.blit_named_region_on(
             HUD_WIN_ASSET,
             "win_base01",
             px,
             py,
-            pw as u32,
-            ph as u32,
+            hud.pause_dialog.uw(),
+            hud.pause_dialog.uh(),
             190,
             canvas,
         );
         canvas.stroke_rect(px, py, pw, ph, 2, [96, 178, 255, 230]);
         let _ = compositor.draw_text_height_on(
             "PAUSE",
-            px + 32,
-            py + 24,
+            hud.pause_title.ix(),
+            hud.pause_title.iy(),
             26.0,
             [255, 224, 72, 255],
             true,
@@ -435,27 +471,28 @@ pub fn render_match_hud_on(
             "Retour au menu principal",
         ];
         for (idx, item) in items.iter().enumerate() {
-            let iy = py + 78 + (idx as i32) * 50;
+            let slot = hud.pause_items[idx];
             let sel = idx == view.pause_index;
             let bg = if sel {
                 [38, 108, 206, 235]
             } else {
                 [22, 36, 62, 195]
             };
-            canvas.fill_rect(px + 28, iy, pw - 56, 40, bg);
+            canvas.fill_rect(slot.ix(), slot.iy(), slot.iw(), slot.ih(), bg);
             if sel {
-                canvas.stroke_rect(px + 28,
-                    iy,
-                    pw - 56,
-                    40,
+                canvas.stroke_rect(
+                    slot.ix(),
+                    slot.iy(),
+                    slot.iw(),
+                    slot.ih(),
                     2,
                     [255, 222, 76, 255],
                 );
             }
             let _ = compositor.draw_text_height_on(
                 item,
-                px + 46,
-                iy + 10,
+                slot.ix() + 18,
+                slot.iy() + 10,
                 18.0,
                 [245, 248, 255, 255],
                 true,

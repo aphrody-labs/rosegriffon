@@ -16,7 +16,7 @@ import {
   encodePathSegment,
   type AchilleaClientResult,
 } from "./http";
-import type { LicenseHolderResponse } from "./pending-contracts";
+import type { LicenseHolderResponse } from "@rosegriffon/achillea-types";
 
 export const licenseStatusSchema = z.enum(
   LicenseStatus,

@@ -3,7 +3,7 @@ import {
   grouperParDomaine,
   rechercherPartout,
   type ExecuteursSql,
-} from "@rosegriffon/search";
+} from "@/lib/search/engine";
 import { cachePublic } from "@/lib/cache-public";
 
 /** Réponse HTTP de la recherche unifiée, avec exécuteur SQL injecté. */

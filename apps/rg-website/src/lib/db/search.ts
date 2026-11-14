@@ -1,5 +1,5 @@
 import { getInaglePgPool, getPgPool } from "@rosegriffon/db/pg";
-import type { ExecuteursSql } from "@rosegriffon/search";
+import type { ExecuteursSql } from "@/lib/search/engine";
 
 export const searchExecutors: ExecuteursSql = {
   rg: async (text, parameters) =>

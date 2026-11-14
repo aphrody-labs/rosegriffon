@@ -6,7 +6,7 @@
 //! authoring/runtime primitive and is not presented as the semantics of an unresolved G4RA/G4MT
 //! field.
 
-use aphrody_nie_geom::Vec3;
+use crate::geom::Vec3;
 
 /// Stable identity of a skeleton in a runtime scene.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]

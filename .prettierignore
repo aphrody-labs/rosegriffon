@@ -3,3 +3,8 @@
 **/nginx/**/*.conf
 infra/docker/**/*.conf
 infra/nginx/**
+
+# Generated or whitespace-sensitive test fixtures
+packages/rg-cron/src/tasks/ie-crawl/__fixtures__/**
+packages/rg-ui/src/tokens.ts
+packages/rg-ui/src/themes.generated.css

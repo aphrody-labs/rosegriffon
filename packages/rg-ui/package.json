@@ -39,7 +39,6 @@
     "@base-ui/react": "catalog:",
     "@hookform/resolvers": "catalog:",
     "@rosegriffon/db": "workspace:*",
-    "@rosegriffon/preferences": "workspace:*",
     "@rosegriffon/types": "workspace:*",
     "@tanstack/react-table": "catalog:",
     "class-variance-authority": "catalog:",

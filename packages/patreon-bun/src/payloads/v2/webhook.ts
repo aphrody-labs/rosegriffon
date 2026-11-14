@@ -22,7 +22,8 @@ export type CompletePayload<T extends Type> = RequestPayload<
 
 export type WebhookPayloadMap = {
     [P in PatreonWebhookMemberTrigger]: CompletePayload<Type.Member>;
-} & { [P in PatreonWebhookPledgeTrigger]: CompletePayload<Type.Member> } & { // "In API v2, pledge has been deprecated and member is the resource of record"
+} & { [P in PatreonWebhookPledgeTrigger]: CompletePayload<Type.Member> } & {
+    // "In API v2, pledge has been deprecated and member is the resource of record"
     [P in PatreonWebhookPostTrigger]: CompletePayload<Type.Post>;
 };
 

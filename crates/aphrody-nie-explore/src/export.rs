@@ -712,29 +712,36 @@ mod tests {
     /// Audio réel → WAV. Séparé : il passe par un décodeur indépendant (`cri_audio`, clé IEVR).
     #[test]
     fn conversion_reelle_audio() {
-        // `resolve_game_dir` : `NIE_GAME_DIR`, sinon un ancêtre du répertoire courant portant
-        // `data/cpk_list.cfg.bin`. Le cwd d'un `cargo test` est le dossier de la CRATE, pas la
-        // racine du dépôt — sans la remontée d'ancêtres, le corpus réel serait toujours « absent »
-        // et ces deux tests passeraient en sautant, pour toujours.
-        let racine = aphrody_nie_formats::vfs::resolve_game_dir();
-        let mut vfs = aphrody_nie_formats::vfs::Vfs::new();
-        if vfs.init(racine.join("data")).is_err() {
-            eprintln!("SAUTÉ : VFS réel indisponible (corpus du jeu absent)");
-            return;
-        }
-        // `.awb` et non `.hca` : le jeu n'expose pas de HCA autonome, ils vivent tous dans un banc
-        // AWB — c'est donc le vrai chemin d'export audio de l'explorateur.
-        let Some(son) = vfs
-            .iter()
-            .map(|(p, _)| p.to_string())
-            .find(|p| p.ends_with(".awb"))
-        else {
-            eprintln!("SAUTÉ : aucun .awb dans le VFS monté");
-            return;
-        };
-        let data = vfs.read(&son).expect("lecture awb");
-        let wav = produire(&son, data, "wav").expect("export WAV");
-        assert_eq!(&wav[..4], b"RIFF", "WAV attendu");
-        assert_eq!(&wav[8..12], b"WAVE");
+        std::thread::Builder::new()
+            .stack_size(8 * 1024 * 1024)
+            .spawn(|| {
+                // `resolve_game_dir` : `NIE_GAME_DIR`, sinon un ancêtre du répertoire courant portant
+                // `data/cpk_list.cfg.bin`. Le cwd d'un `cargo test` est le dossier de la CRATE, pas la
+                // racine du dépôt — sans la remontée d'ancêtres, le corpus réel serait toujours « absent »
+                // et ces deux tests passeraient en sautant, pour toujours.
+                let racine = aphrody_nie_formats::vfs::resolve_game_dir();
+                let mut vfs = aphrody_nie_formats::vfs::Vfs::new();
+                if vfs.init(racine.join("data")).is_err() {
+                    eprintln!("SAUTÉ : VFS réel indisponible (corpus du jeu absent)");
+                    return;
+                }
+                // `.awb` et non `.hca` : le jeu n'expose pas de HCA autonome, ils vivent tous dans un banc
+                // AWB — c'est donc le vrai chemin d'export audio de l'explorateur.
+                let Some(son) = vfs
+                    .iter()
+                    .map(|(p, _)| p.to_string())
+                    .find(|p| p.ends_with(".awb"))
+                else {
+                    eprintln!("SAUTÉ : aucun .awb dans le VFS monté");
+                    return;
+                };
+                let data = vfs.read(&son).expect("lecture awb");
+                let wav = produire(&son, data, "wav").expect("export WAV");
+                assert_eq!(&wav[..4], b"RIFF", "WAV attendu");
+                assert_eq!(&wav[8..12], b"WAVE");
+            })
+            .expect("spawn conversion_reelle_audio")
+            .join()
+            .expect("conversion_reelle_audio panicked");
     }
 }

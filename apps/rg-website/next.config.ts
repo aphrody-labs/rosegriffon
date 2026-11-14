@@ -64,7 +64,6 @@ const nextConfig: NextConfig = {
   },
   transpilePackages: [
     "@rosegriffon/inagle",
-    "@rosegriffon/inagle-cross",
     "@rosegriffon/azalee",
     "@rosegriffon/ui",
     "@rosegriffon/app-shell",

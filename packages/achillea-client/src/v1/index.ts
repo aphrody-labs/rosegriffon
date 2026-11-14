@@ -2,12 +2,78 @@
  * Contrat runtime `v1` du client Achilléa.
  *
  * Organisation : `http.ts` porte le transport, un module par ressource porte
- * ses routes et ses schémas zod, `client.ts` les agrège. `pending-contracts.ts`
- * héberge les formes encore absentes de `@rosegriffon/achillea-types`.
+ * ses routes et ses schémas zod, `client.ts` les agrège.
  */
 
 export * from "./http";
-export * from "./pending-contracts";
+export type {
+  AdminAuditRow,
+  AdminGuildRow,
+  AdminHealthResponse,
+  AdminInviteResponse,
+  AdminMetricsSummary,
+  AdminOpsOverview,
+  AdminRoleUpdateResult,
+  AdminTransactionRow,
+  AdminUserRow,
+  AdminWalletAdjustResult,
+  AdminWalletRow,
+  AdminWalletsResponse,
+  ApiEnvelope,
+  BotMonitoringResponse,
+  BotTotalsResponse,
+  CancelTournamentResult,
+  CastAutoAssignResult,
+  CastSurveyResult,
+  ClanApplicationResult,
+  ClanMemberLimits,
+  ClanRoleResponse,
+  CloseTournamentResult,
+  CommandUsageRow,
+  DailyCountRow,
+  DatabaseBackupResult,
+  DbColumn,
+  DbMutationResult,
+  DbQueryResult,
+  DbRowsPage,
+  DbTableRow,
+  DisqualifyResult,
+  EntityRef,
+  HealthCheckResponse,
+  ImageGenerationResult,
+  LeagueListResponse,
+  LeagueMatchRow,
+  LeaguePointsConfig,
+  LeagueSeasonPayload,
+  LeagueStandingRow,
+  LeagueSummary,
+  LeagueTeam,
+  LicenseHolderResponse,
+  MaintenanceResponse,
+  ModerationSyncResult,
+  NewClanResponse,
+  OpenRegistrationsResult,
+  ParticipantMutationResult,
+  PlacementPrizesResult,
+  PlayerNoteFiltersExtra,
+  PlayerNoteSummary,
+  RankedAdminValidateResult,
+  RankedChallengeAccepted,
+  RankedLadderResetResult,
+  RankedProofUploaded,
+  RealtimeTokenResponse,
+  RestoreTournamentResult,
+  ScorePolicyResult,
+  SeedBatchResult,
+  SeedingResult,
+  SuccessResponse,
+  TournamentDetail,
+  UploadedImage,
+  UsersAndGuildsResponse,
+  WireParticipant,
+  WireTournament,
+  WireTournamentSeries,
+} from "@rosegriffon/achillea-types";
 export * from "./common";
 
 export * from "./admin";

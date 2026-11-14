@@ -16,6 +16,7 @@ import {
   cpkAudioUrl,
   cpkThumbUrl,
 } from "@rosegriffon/azalee/cpk/shared";
+import { getSkillImageUrl, PLACEHOLDERS } from "@rosegriffon/azalee/images";
 import { wikiService } from "@/lib/wiki-service";
 import { DemoExperience } from "@/components/wiki/demo/DemoExperience";
 import type {
@@ -101,14 +102,17 @@ const d = dossier as unknown as {
   dialogues: { lines?: { fr?: string; ja?: string; mentions?: boolean }[] }[];
 };
 
-/** URL du telop FR d'une liste `[langue, chemin]` (repli en/1ère langue), ou `null`. */
-function telopFrUrl(pairs: string[][] | undefined): string | null {
-  if (!pairs?.length) return null;
-  const chosen =
-    pairs.find(([l]) => l === "fr") ??
-    pairs.find(([l]) => l === "en") ??
-    pairs[0];
-  return chosen ? cpkAssetUrl(chosen[1]) : null;
+/** URL du telop FR/EN si présente dans le manifeste CDN (évite les 404 sur les codes sans telop). */
+function resolveGatedTelopUrl(
+  skillId: string,
+  pairs: string[][] | undefined,
+): string | null {
+  const gated = getSkillImageUrl(skillId);
+  if (gated && gated !== PLACEHOLDERS.skill) {
+    return gated;
+  }
+  void pairs;
+  return null;
 }
 
 /** Construit le {@link DemoData} sérialisable depuis le dossier (exécuté côté serveur). */
@@ -180,7 +184,7 @@ async function buildDemoData(): Promise<DemoData> {
       consumeTp: info.consume_tp,
       growthType: info.growth_type ?? entry?.growth_type ?? 0,
       learnLevel,
-      telopUrl: telopFrUrl(cutin?.telop_by_lang),
+      telopUrl: resolveGatedTelopUrl(info.skill_id_str, cutin?.telop_by_lang),
       textureUrl: cutin?.texture_g4tx ? cpkAssetUrl(cutin.texture_g4tx) : null,
       wazaGlbUrl: `${CDN}/model-chr/waza/${event}.glb`,
       has3d: servedEvents.has(event),

@@ -6,7 +6,7 @@
  *
  * Usage : `bun packages/rg-ui/scripts/parite-themes.ts`
  */
-import type { ThemeId } from "@rosegriffon/preferences";
+import type { ThemeId } from "@rosegriffon/types/preferences";
 import { computeRoles, hexToOklch, type Role } from "../src/lib/color-engine";
 import { THEME_PACKS } from "../src/lib/themes";
 

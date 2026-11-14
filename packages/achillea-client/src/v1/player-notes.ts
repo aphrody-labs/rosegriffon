@@ -31,7 +31,7 @@ import type {
   PlayerNoteFiltersExtra,
   PlayerNoteSummary,
   SuccessResponse,
-} from "./pending-contracts";
+} from "@rosegriffon/achillea-types";
 
 export const playerNoteCategorySchema = z.enum(
   PlayerNoteCategory,

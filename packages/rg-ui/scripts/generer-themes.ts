@@ -11,7 +11,7 @@
  * Usage : `bun packages/rg-ui/scripts/generer-themes.ts`, puis
  * `bun packages/rg-ui/scripts/generer-tokens.ts` (projection `tokens.ts`).
  */
-import type { ThemeId } from "@rosegriffon/preferences";
+import type { ThemeId } from "@rosegriffon/types/preferences";
 import { computeRoles, roleVariables } from "../src/lib/color-engine";
 import { THEME_PACKS } from "../src/lib/themes";
 

@@ -50,7 +50,7 @@ pub mod assets;
 pub mod loader;
 #[cfg(feature = "bevy")]
 pub mod plugin;
-#[cfg(feature = "bevy")]
+#[cfg(all(feature = "bevy", not(target_arch = "wasm32")))]
 pub mod vfs_source;
 
 pub use error::NieAssetError;
@@ -61,5 +61,5 @@ pub use assets::{image_from_g4tx, mesh_from_g4md_g4mg, meshes_from_g4md_g4mg};
 pub use loader::{G4mdLoader, G4txLoader, NieModel};
 #[cfg(feature = "bevy")]
 pub use plugin::NieAssetPlugin;
-#[cfg(feature = "bevy")]
+#[cfg(all(feature = "bevy", not(target_arch = "wasm32")))]
 pub use vfs_source::{VFS_SOURCE, VfsAssetReader, register_vfs_source};

@@ -102,45 +102,6 @@ const fakeDb = new Kysely<Database>({
 });
 import { db as originalDb, setTestDb } from "../../plugins/db";
 
-const dbModuleUrl = import.meta.resolve("../../plugins/db");
-const dbModuleResolved = require.resolve("../../plugins/db");
-mock.module(dbModuleUrl, () => {
-  const { Elysia } = require("elysia") as typeof import("elysia");
-  return {
-    db: fakeDb,
-    inagleDb: fakeDb,
-    setTestDb: () => {},
-    dbPlugin: new Elysia({ name: "db" }).derive(() => ({
-      db: fakeDb,
-      inagleDb: fakeDb,
-    })),
-  };
-});
-mock.module(dbModuleResolved, () => {
-  const { Elysia } = require("elysia") as typeof import("elysia");
-  return {
-    db: fakeDb,
-    inagleDb: fakeDb,
-    setTestDb: () => {},
-    dbPlugin: new Elysia({ name: "db" }).derive(() => ({
-      db: fakeDb,
-      inagleDb: fakeDb,
-    })),
-  };
-});
-mock.module("../../plugins/db", () => {
-  const { Elysia } = require("elysia") as typeof import("elysia");
-  return {
-    db: fakeDb,
-    inagleDb: fakeDb,
-    setTestDb: () => {},
-    dbPlugin: new Elysia({ name: "db" }).derive(() => ({
-      db: fakeDb,
-      inagleDb: fakeDb,
-    })),
-  };
-});
-
 const JWT_SECRET = process.env.JWT_SECRET_KEY!;
 const ADMIN_TOKEN = randomBytes(24).toString("hex");
 const RG_SECRET = randomBytes(32).toString("base64url");

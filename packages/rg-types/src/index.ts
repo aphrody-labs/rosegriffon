@@ -15,3 +15,4 @@ export * from "./stream";
 export * from "./team";
 export * from "./instagram";
 export * from "./schemas";
+export * from "./preferences";

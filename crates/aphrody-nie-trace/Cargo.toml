@@ -16,7 +16,6 @@ host = ["dep:libc", "dep:windows-sys"]
 
 [dependencies]
 thiserror = { workspace = true, features = ["std"] }
-bun-steam = { workspace = true }
 
 [target.'cfg(target_os = "linux")'.dependencies]
 libc = { version = "0.2", optional = true }

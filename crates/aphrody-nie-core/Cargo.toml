@@ -12,12 +12,11 @@ workspace = true
 
 [features]
 default = ["data"]
-serde = ["dep:serde", "aphrody-nie-geom/serde"]
-data = ["dep:serde", "dep:serde_json", "aphrody-nie-geom/serde"]
+serde = ["dep:serde"]
+data = ["dep:serde", "dep:serde_json"]
 
 [dependencies]
 thiserror = { version = "2.0.21", default-features = false }
 serde = { version = "1.0.228", default-features = false, features = ["derive", "alloc"], optional = true }
 serde_json = { version = "1.0.154", default-features = false, features = ["std"], optional = true }
 aphrody-nie-data = { workspace = true, features = ["serde", "std"] }
-aphrody-nie-geom = { workspace = true, features = ["std"] }

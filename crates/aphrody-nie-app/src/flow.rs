@@ -232,7 +232,7 @@ impl Screen {
         match self {
             Screen::Match { world } => {
                 world.input = aphrody_nie_runtime::Input {
-                    dir: aphrody_nie_geom::Vec2::new(dx, dy),
+                    dir: aphrody_nie_core::geom::Vec2::new(dx, dy),
                     shoot,
                 };
             }

@@ -2,7 +2,6 @@
 resolver = "2"
 members = [
   "crates/aphrody-nie-app",
-  "crates/aphrody-nie-asm",
   "crates/aphrody-nie-bench",
   "crates/aphrody-nie-bevy",
   "crates/aphrody-nie-camera",
@@ -16,7 +15,6 @@ members = [
   "crates/aphrody-nie-forge",
   "crates/aphrody-nie-formats",
   "crates/aphrody-nie-game",
-  "crates/aphrody-nie-geom",
   "crates/aphrody-nie-headless",
   "crates/aphrody-nie-identity-source",
   "crates/aphrody-nie-index",
@@ -24,17 +22,12 @@ members = [
   "crates/aphrody-nie-launcher",
   "crates/aphrody-nie-lua",
   "crates/aphrody-nie-lua-web",
-  "crates/aphrody-nie-mcp",
-  "crates/aphrody-nie-model-core",
   "crates/aphrody-nie-model-serve",
   "crates/aphrody-nie-net",
   "crates/aphrody-nie-ocgen",
   "crates/aphrody-nie-pe",
-  "crates/aphrody-nie-pe-inspect",
   "crates/aphrody-nie-pg",
-  "crates/aphrody-nie-play",
   "crates/aphrody-nie-queue",
-  "crates/aphrody-nie-render",
   "crates/aphrody-nie-render3d",
   "crates/aphrody-nie-runtime",
   "crates/aphrody-nie-save",
@@ -43,18 +36,13 @@ members = [
   "crates/aphrody-nie-tasks",
   "crates/aphrody-nie-trace",
   "crates/aphrody-nie-ui",
-  "crates/aphrody-nie-video",
   "crates/aphrody-nie-viola",
   "crates/aphrody-nie-wasm",
   "crates/aphrody-nie-wiki",
   "crates/aphrody-nie-zukan",
-  "crates/aphrody-softraster",
   "crates/nie-pkg",
-  "crates/nie-pkg-ui",
   "crates/re",
-  "crates/yolo-re-bin-format",
   "crates/yolo-re-core",
-  "crates/yre-worker",
 ]
 
 [workspace.package]
@@ -82,13 +70,9 @@ perf = { level = "warn", priority = -1 }
 [workspace.dependencies]
 serde-wasm-bindgen = "0.6"
 
-vello = "0.11.0"
-
 anyhow = { version = "1.0.104", default-features = false }
 base64 = { version = "0.22.1", default-features = false, features = ["alloc"] }
-eframe = { version = "0.36.2", default-features = false }
 libc = { version = "0.2.190", default-features = false }
-log = { version = "0.4.34", default-features = false }
 png = { version = "0.18.1", default-features = false }
 rayon = { version = "1.12.0", default-features = false }
 serde = { version = "1.0.228", default-features = false, features = [
@@ -104,7 +88,6 @@ tempfile = { version = "3.27.0", default-features = false, features = [
 ] }
 thiserror = { version = "2.0.21", default-features = false }
 tracing = { version = "0.1.44", default-features = false }
-windows = { version = "0.62.2", default-features = false }
 
 # Vendored crates carried by PdfCraft (patch notes in apps/pdfcraft/vendor/README.md).
 # DesignCraft's former winit git patch (skylartaylor/winit 3d51077) is superseded by this vendored copy.
@@ -120,16 +103,6 @@ bevy_math = { version = "0.20.1", default-features = false }
 bevy_mesh = { version = "0.20.1", default-features = false }
 bevy_reflect = { version = "0.20.1", default-features = false }
 bevy-wgpu-types = { package = "wgpu-types", version = "30.0.1", default-features = false }
-wgpu = { version = "30.0.1", default-features = false, features = [
-  "std",
-  "wgsl",
-  "vulkan",
-  "gles",
-  "dx12",
-  "metal",
-  "web",
-  "webgpu",
-] }
 bun-steam = { git = "https://github.com/aphrody-dev/steam-depot", rev = "d098b41687a63767ee5eee3a351b2936a1d902e6", package = "steam-depot", default-features = false }
 parking_lot = "0.12.3"
 bytemuck = { version = "1.0", features = [
@@ -150,13 +123,10 @@ web-time = "1.1"
 crc32fast = { version = "1.5", default-features = false }
 cridecoder = { version = "0.2.3", default-features = false }
 aphrody-re = { package = "yolo-re-core", path = "crates/yolo-re-core", version = "1.4.8" }
-aphrody-nie-geom = { path = "crates/aphrody-nie-geom", version = "1.4.7" }
 aphrody-nie-tasks = { default-features = false, path = "crates/aphrody-nie-tasks", version = "1.4.7" }
-aphrody-nie-pe-inspect = { path = "crates/aphrody-nie-pe-inspect", version = "1.4.7" }
 image_dds = { version = "0.7", default-features = false }
 memmap2 = { version = "0.9" }
 aphrody-nie-app = { default-features = false, path = "crates/aphrody-nie-app", version = "1.4.7" }
-aphrody-nie-asm = { default-features = false, path = "crates/aphrody-nie-asm", version = "1.4.7" }
 aphrody-nie-bench = { default-features = false, path = "crates/aphrody-nie-bench", version = "1.4.7" }
 aphrody-nie-camera = { default-features = false, path = "crates/aphrody-nie-camera", version = "1.4.7" }
 aphrody-nie-computer-use = { default-features = false, path = "crates/aphrody-nie-computer-use", version = "1.4.7" }
@@ -182,6 +152,7 @@ aphrody-nie-wiki = { path = "crates/aphrody-nie-wiki", version = "1.4.7" }
 aphrody-nie-zukan = { default-features = false, path = "crates/aphrody-nie-zukan", version = "1.4.7" }
 aphrody-nie-ui = { path = "crates/aphrody-nie-ui", version = "1.4.7" }
 lz4_flex = "0.14"
+taffy = "0.15.1"
 
 [patch.crates-io]
 zip = { git = "https://github.com/zip-rs/zip2", tag = "v8.6.0" }

@@ -17,6 +17,7 @@ required-features = ["host"]
 
 [features]
 default = ["host"]
+bevy = ["dep:bevy_ecs", "dep:bevy_math"]
 host = [
   "dep:anyhow",
   "dep:clap",
@@ -28,7 +29,6 @@ host = [
 
 [dependencies]
 aphrody-nie-formats = { path = "../aphrody-nie-formats", version = "1.4.8", default-features = true }
-aphrody-nie-data = { path = "../aphrody-nie-data", version = "1.4.8", features = ["std"] }
 aphrody-nie-trace = { path = "../aphrody-nie-trace", version = "1.4.8", optional = true, default-features = true }
 aphrody-nie-index = { path = "../aphrody-nie-index", version = "1.4.8", optional = true, default-features = true }
 sha2 = { version = "0.10", optional = true }
@@ -41,3 +41,5 @@ clap = { version = "4.5", optional = true, features = [
   "color",
   "env",
 ] }
+bevy_ecs = { workspace = true, optional = true }
+bevy_math = { workspace = true, optional = true }

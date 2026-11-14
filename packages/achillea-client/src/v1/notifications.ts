@@ -21,7 +21,7 @@ import {
   encodePathSegment,
   type AchilleaClientResult,
 } from "./http";
-import type { ApiEnvelope, SuccessResponse } from "./pending-contracts";
+import type { ApiEnvelope, SuccessResponse } from "@rosegriffon/achillea-types";
 
 export const notificationTypeSchema = z.enum(
   NotificationType,

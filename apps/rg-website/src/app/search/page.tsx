@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { rechercherPartout } from "@rosegriffon/search";
+import { rechercherPartout } from "@/lib/search/engine";
 
 import { searchExecutors } from "@/lib/db/search";
 import { absoluteUrl } from "@/lib/site-url";

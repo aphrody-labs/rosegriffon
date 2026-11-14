@@ -24,7 +24,7 @@
 
 /// Mode de chargement d'un chunk, réexporté de `mlua` : les consommateurs (nie-explorer) n'ont
 /// pas à déclarer `mlua` en dépendance directe juste pour nommer `Binary`/`Text`.
-#[cfg(feature = "vm")]
+#[cfg(all(feature = "vm", not(all(target_arch = "wasm32", target_os = "unknown"))))]
 pub use mlua::ChunkMode;
 
 pub mod bytecode;
@@ -32,17 +32,17 @@ pub mod inspection;
 pub mod menu_scene;
 pub mod menu_state;
 pub use menu_state::{MenuLayerState, MenuListItem, MenuObjectState, MenuState};
-#[cfg(feature = "vm")]
+#[cfg(all(feature = "vm", not(all(target_arch = "wasm32", target_os = "unknown"))))]
 pub mod host;
-#[cfg(feature = "vm")]
+#[cfg(all(feature = "vm", not(all(target_arch = "wasm32", target_os = "unknown"))))]
 pub mod menu_runtime;
-#[cfg(feature = "vm")]
+#[cfg(all(feature = "vm", not(all(target_arch = "wasm32", target_os = "unknown"))))]
 pub mod runtime;
-#[cfg(feature = "vm")]
+#[cfg(all(feature = "vm", not(all(target_arch = "wasm32", target_os = "unknown"))))]
 pub mod session;
-#[cfg(feature = "vm")]
+#[cfg(all(feature = "vm", not(all(target_arch = "wasm32", target_os = "unknown"))))]
 pub use runtime::RuntimeContext;
-#[cfg(feature = "vm")]
+#[cfg(all(feature = "vm", not(all(target_arch = "wasm32", target_os = "unknown"))))]
 pub use session::{
     CallbackArg, MenuCallback, MenuEvent, MenuEventReport, build_menu_runtime_events,
 };
@@ -51,35 +51,35 @@ pub use session::{
 /// Elle est optionnelle parce qu'elle tire `tree-sitter` (code C) : `aphrody-nie-formats`, qui n'a
 /// besoin que du décodeur [`bytecode`] pour brancher les `.lua.bin` sur `decode`, la coupe et
 /// reste ainsi en Rust pur.
-#[cfg(feature = "analysis")]
+#[cfg(all(feature = "analysis", not(all(target_arch = "wasm32", target_os = "unknown"))))]
 pub mod static_analysis;
-#[cfg(feature = "analysis")]
+#[cfg(all(feature = "analysis", not(all(target_arch = "wasm32", target_os = "unknown"))))]
 pub use static_analysis::{
     FunctionKind, LuaAnalysis, LuaAssignment, LuaCall, LuaFunction, LuaSyntaxError, LuaTable,
     LuaTableField, StaticAnalysisError, SyntaxErrorKind, ValueKind, analyze, analyze_dir,
     analyze_file, collect_lua_files,
 };
-#[cfg(feature = "vm")]
+#[cfg(all(feature = "vm", not(all(target_arch = "wasm32", target_os = "unknown"))))]
 pub mod menu_host;
-#[cfg(feature = "vm")]
+#[cfg(all(feature = "vm", not(all(target_arch = "wasm32", target_os = "unknown"))))]
 pub use menu_host::{
     DriveReport, HeaderTab, drive_menu, drive_menu_for_frames, enumerate_header_tabs,
     install_menu_host, run_menu,
 };
 
-#[cfg(feature = "vm")]
+#[cfg(all(feature = "vm", not(all(target_arch = "wasm32", target_os = "unknown"))))]
 use std::cell::RefCell;
-#[cfg(feature = "vm")]
+#[cfg(all(feature = "vm", not(all(target_arch = "wasm32", target_os = "unknown"))))]
 use std::collections::BTreeMap;
-#[cfg(feature = "vm")]
+#[cfg(all(feature = "vm", not(all(target_arch = "wasm32", target_os = "unknown"))))]
 use std::rc::Rc;
-#[cfg(feature = "vm")]
+#[cfg(all(feature = "vm", not(all(target_arch = "wasm32", target_os = "unknown"))))]
 use thiserror::Error;
 
 /// Signature d'un chunk de bytecode Lua 5.2 PUC-Rio : `1B 4C 75 61` (`\x1bLua`) + `0x52`.
 pub const LUA52_BYTECODE_SIGNATURE: [u8; 5] = [0x1B, 0x4C, 0x75, 0x61, 0x52];
 
-#[cfg(feature = "vm")]
+#[cfg(all(feature = "vm", not(all(target_arch = "wasm32", target_os = "unknown"))))]
 /// Erreurs de chargement/exécution d'un script du jeu.
 #[derive(Debug, Error)]
 pub enum LuaError {
@@ -106,7 +106,7 @@ pub fn is_lua52_bytecode(data: &[u8]) -> bool {
     data.len() >= 5 && data[..5] == LUA52_BYTECODE_SIGNATURE
 }
 
-#[cfg(feature = "vm")]
+#[cfg(all(feature = "vm", not(all(target_arch = "wasm32", target_os = "unknown"))))]
 /// Valide un chunk binaire avec le décodeur partagé avant de le remettre à la VM.
 ///
 /// Les chunks texte sont laissés à mlua ; les `.lua.bin` passent tous par le parseur Lua 5.2
@@ -118,7 +118,7 @@ pub fn validate_bytecode(data: &[u8]) -> Result<(), LuaError> {
     Ok(())
 }
 
-#[cfg(feature = "vm")]
+#[cfg(all(feature = "vm", not(all(target_arch = "wasm32", target_os = "unknown"))))]
 /// CRC32 IEEE utilisé par les scripts Level-5 (`CRC32("nom")`).
 ///
 /// Même polynôme réfléchi et même finalisation que `aphrody-nie-formats::cfgbin::crc32`, gardé ici pour
@@ -139,7 +139,7 @@ pub fn crc32(data: &[u8]) -> u32 {
     !crc
 }
 
-#[cfg(feature = "vm")]
+#[cfg(all(feature = "vm", not(all(target_arch = "wasm32", target_os = "unknown"))))]
 /// Crée une VM Lua 5.2 capable de charger du bytecode (bibliothèques non sandboxées).
 ///
 /// Note : `Lua::unsafe_new` est requis pour `ChunkMode::Binary`.
@@ -150,7 +150,7 @@ pub fn new_vm() -> mlua::Lua {
     unsafe { mlua::Lua::unsafe_new() }
 }
 
-#[cfg(feature = "vm")]
+#[cfg(all(feature = "vm", not(all(target_arch = "wasm32", target_os = "unknown"))))]
 /// **Charge** (compile) un chunk de bytecode `.lua.bin` du jeu dans `lua`, sans l'exécuter.
 ///
 /// Prouve que la VM accepte le bytecode du jeu (= même implémentation Lua). Retourne la
@@ -176,7 +176,7 @@ pub fn load_bytecode(lua: &mlua::Lua, data: &[u8], name: &str) -> Result<mlua::F
     Ok(func)
 }
 
-#[cfg(feature = "vm")]
+#[cfg(all(feature = "vm", not(all(target_arch = "wasm32", target_os = "unknown"))))]
 /// Installe la fonction hôte `INCLUDE(name)` — le **système de modules** du moteur : le
 /// script appelle `INCLUDE("…")`, l'hôte résout le nom en bytecode `.lua.bin` (via `resolver`)
 /// et l'exécute dans la MÊME VM. Renvoie les valeurs du module inclus (ou rien si introuvable,
@@ -195,7 +195,7 @@ where
 
 /// Variante interne de [`install_include`] qui mesure les instructions des includes binaires
 /// effectivement décodés avant leur exécution.
-#[cfg(feature = "vm")]
+#[cfg(all(feature = "vm", not(all(target_arch = "wasm32", target_os = "unknown"))))]
 pub(crate) fn install_include_with_trace<F>(
     lua: &mlua::Lua,
     resolver: F,
@@ -291,7 +291,7 @@ pub fn script_logical_base(basename: &str) -> String {
 /// Gatée comme son unique appelant (`index_script_paths`, feature `vm`) : sans ce `cfg`, un
 /// consommateur qui coupe la VM — `nie-site` le fait pour n'embarquer aucun interpréteur —
 /// compile un `dead_code` de fond, et un avertissement permanent finit par masquer les vrais.
-#[cfg(feature = "vm")]
+#[cfg(all(feature = "vm", not(all(target_arch = "wasm32", target_os = "unknown"))))]
 fn script_version_key(path: &str) -> Vec<u64> {
     let basename = path.rsplit('/').next().unwrap_or(path);
     let without_ext = basename
@@ -313,13 +313,13 @@ fn script_version_key(path: &str) -> Vec<u64> {
         .collect()
 }
 
-#[cfg(feature = "vm")]
+#[cfg(all(feature = "vm", not(all(target_arch = "wasm32", target_os = "unknown"))))]
 /// Indexe les chemins de scripts du VFS par nom physique et par nom logique versionless.
 ///
 /// Le jeu ne demande pas nécessairement le basename physique : ses scripts utilisent des noms
 /// logiques (`LUA_MAIN_MENU_INC`) tandis que le VFS porte une version (`main_menu_inc_3.00.01.00.lua.bin`).
 /// Le type VFS reste volontairement hors de cette crate ; l'appelant ne lui fournit que ses chemins.
-#[cfg(feature = "vm")]
+#[cfg(all(feature = "vm", not(all(target_arch = "wasm32", target_os = "unknown"))))]
 pub fn index_script_paths<'a, I>(
     paths: I,
 ) -> (
@@ -364,7 +364,7 @@ where
 }
 
 /// Résout un nom `INCLUDE` dans les index produits par [`index_script_paths`].
-#[cfg(feature = "vm")]
+#[cfg(all(feature = "vm", not(all(target_arch = "wasm32", target_os = "unknown"))))]
 pub fn resolve_script_path<'a>(
     name: &str,
     by_name: &'a std::collections::HashMap<String, String>,
@@ -382,7 +382,7 @@ pub fn resolve_script_path<'a>(
         .or_else(|| by_logical.get(&include_logical_base(basename)))
 }
 
-#[cfg(feature = "vm")]
+#[cfg(all(feature = "vm", not(all(target_arch = "wasm32", target_os = "unknown"))))]
 /// Exécute un script `.lua.bin` du jeu dans une VM instrumentée et retourne la liste TRIÉE
 /// des **globals hôtes** qu'il référence (fonctions/tables fournies par le moteur C++).
 ///
@@ -424,7 +424,7 @@ pub fn discover_host_calls(data: &[u8], name: &str) -> Result<Vec<String>, LuaEr
     Ok(names)
 }
 
-#[cfg(all(test, feature = "vm"))]
+#[cfg(all(test, feature = "vm", not(all(target_arch = "wasm32", target_os = "unknown"))))]
 mod tests {
     use super::*;
 

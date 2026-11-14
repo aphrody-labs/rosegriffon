@@ -66,22 +66,17 @@ pub fn render_eac_launcher_on(
     }
     canvas.clear([5, 7, 12, 255]);
 
-    // The 520x300 floor keeps the native window legible on large canvases, but it must
-    // never exceed the canvas itself, otherwise the status band and progress bar are
-    // painted off-screen on small viewports.
-    let (cw, ch) = (w as i32, h as i32);
-    let win_w = (cw * 62 / 100).clamp(520.min(cw), 800.min(cw));
-    let win_h = (win_w * 9 / 16).clamp(300.min(ch), 450.min(ch));
-    let wx = (cw - win_w) / 2;
-    let wy = (ch - win_h) / 2;
+    let clamped = progress.clamp(0.02, 1.0);
+    let eac = crate::layout::eac_launcher_layout(w, h, clamped);
+    let (wx, wy, win_w, win_h) = (
+        eac.window.ix(),
+        eac.window.iy(),
+        eac.window.iw(),
+        eac.window.ih(),
+    );
 
     // Ombre portée de la fenêtre native EACLauncher.
-    canvas.fill_rect(wx + 10,
-        wy + 14,
-        win_w,
-        win_h,
-        [0, 0, 0, 180],
-    );
+    canvas.fill_rect(wx + 10, wy + 14, win_w, win_h, [0, 0, 0, 180]);
     canvas.fill_rect(wx, wy, win_w, win_h, [13, 19, 30, 255]);
 
     // Blit de la vraie texture `EasyAntiCheat/SplashScreen.png` dès qu'elle est disponible.
@@ -90,41 +85,34 @@ pub fn render_eac_launcher_on(
         "SplashScreen",
         wx,
         wy,
-        win_w as u32,
-        win_h as u32,
+        eac.window.uw(),
+        eac.window.uh(),
         255,
         canvas,
     );
 
     // Bandeau inférieur officiel Easy Anti-Cheat (statut + barre de progression cyan).
-    let bar_zone_h = 68;
-    let by = wy + win_h - bar_zone_h;
-    canvas.fill_rect(wx, by, win_w, bar_zone_h, [8, 12, 20, 226]);
+    canvas.fill_rect(
+        eac.bottom_bar.ix(),
+        eac.bottom_bar.iy(),
+        eac.bottom_bar.iw(),
+        eac.bottom_bar.ih(),
+        [8, 12, 20, 226],
+    );
 
     // Logo / badge vectoriel EAC (bouclier bleu/cyan) à gauche du bandeau.
-    let bx = wx + 20;
-    let shield_y = by + 14;
-    canvas.fill_rect(bx, shield_y, 28, 30, [0, 168, 232, 255]);
-    canvas.fill_rect(bx + 4,
-        shield_y + 4,
-        20,
-        22,
-        [10, 22, 38, 255],
-    );
-    canvas.fill_rect(bx + 8,
-        shield_y + 9,
-        12,
-        12,
-        [46, 229, 255, 255],
-    );
+    let bx = eac.shield.ix();
+    let shield_y = eac.shield.iy();
+    canvas.fill_rect(bx, shield_y, eac.shield.iw(), eac.shield.ih(), [0, 168, 232, 255]);
+    canvas.fill_rect(bx + 4, shield_y + 4, 20, 22, [10, 22, 38, 255]);
+    canvas.fill_rect(bx + 8, shield_y + 9, 12, 12, [46, 229, 255, 255]);
 
-    let clamped = progress.clamp(0.02, 1.0);
     let stage = EacBootStage::from_progress(clamped);
 
     let _ = compositor.draw_text_height_on(
         EAC_PRODUCT_TITLE,
-        bx + 40,
-        by + 11,
+        eac.title.ix(),
+        eac.title.iy(),
         15.0,
         [235, 242, 252, 255],
         true,
@@ -144,8 +132,8 @@ pub fn render_eac_launcher_on(
     };
     let _ = compositor.draw_text_height_on(
         &status,
-        bx + 40,
-        by + 32,
+        eac.status.ix(),
+        eac.status.iy(),
         12.0,
         [126, 208, 248, 255],
         false,
@@ -153,14 +141,18 @@ pub fn render_eac_launcher_on(
     );
 
     // Piste et jauge de progression EAC en bas de la fenêtre.
-    let track_h = 6;
-    let track_y = wy + win_h - track_h;
-    canvas.fill_rect(wx, track_y, win_w, track_h, [22, 34, 52, 255]);
-    let fill_w = ((win_w as f32) * clamped).round() as i32;
-    canvas.fill_rect(wx,
-        track_y,
-        fill_w.clamp(4, win_w),
-        track_h,
+    canvas.fill_rect(
+        eac.progress_track.ix(),
+        eac.progress_track.iy(),
+        eac.progress_track.iw(),
+        eac.progress_track.ih(),
+        [22, 34, 52, 255],
+    );
+    canvas.fill_rect(
+        eac.progress_fill.ix(),
+        eac.progress_fill.iy(),
+        eac.progress_fill.iw().clamp(4, win_w),
+        eac.progress_fill.ih(),
         [0, 186, 255, 255],
     );
 

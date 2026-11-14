@@ -5,7 +5,7 @@
  * sont réutilisés entre les cinq thèmes. `RG_Reika_zukan.webp` est l'icône
  * zukan de Reika, la mascotte d'Azalée.
  */
-import type { ThemeId } from "@rosegriffon/preferences";
+import type { ThemeId } from "@rosegriffon/types/preferences";
 
 import type { ThemeSeed } from "./color-engine";
 

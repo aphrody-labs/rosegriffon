@@ -42,8 +42,13 @@ describe("Aphrody Web CDP integration", () => {
       const page = await WebCdpPage.connect();
       try {
         await page.goto("https://google.com");
-        expect(await page.title()).toBe("Example Domain");
-        expect(await page.content()).toContain("Example Domain");
+        let title = await page.title();
+        for (let i = 0; i < 20 && !title; i++) {
+          await Bun.sleep(150);
+          title = await page.title();
+        }
+        expect(title).toContain("Google");
+        expect(await page.content()).toContain("Google");
       } finally {
         await page.close().catch(() => undefined);
       }

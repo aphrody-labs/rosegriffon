@@ -105,13 +105,21 @@ pub fn draw_footer_bar_on(
     canvas.fill_rect(0, y - 6, w as i32, 40, [8, 13, 24, 196]);
     canvas.stroke_rect(0, y - 6, w as i32, 1, 1, [70, 128, 190, 140]);
 
-    let mut total_w = 0i32;
-    for p in prompts {
-        total_w += 30 + compositor.measure_text_height(p.label, 16.0) + 26;
-    }
-    let mut cx = ((w as i32) - total_w - 28).max(24);
-    for p in prompts {
-        cx += draw_prompt_chip_on(compositor, family, p.button, p.label, cx, y, canvas) + 22;
+    let chip_widths: Vec<f32> = prompts
+        .iter()
+        .map(|p| (30 + compositor.measure_text_height(p.label, 16.0) + 10) as f32)
+        .collect();
+    let slots = crate::layout::footer_bar_layout(w, y, &chip_widths);
+    for (p, slot) in prompts.iter().zip(slots.iter()) {
+        let _ = draw_prompt_chip_on(
+            compositor,
+            family,
+            p.button,
+            p.label,
+            slot.ix(),
+            slot.iy(),
+            canvas,
+        );
     }
 }
 

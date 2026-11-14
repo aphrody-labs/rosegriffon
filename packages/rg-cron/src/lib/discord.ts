@@ -10,7 +10,7 @@ import {
   type Guild,
   type GuildMember,
 } from "discord.js";
-import { listGuildMembers } from "@rosegriffon/discord-sync";
+import { listGuildMembers } from "./discord-sync";
 import { sql } from "./db.js";
 import { resolveGuildId } from "@rosegriffon/types/discord";
 

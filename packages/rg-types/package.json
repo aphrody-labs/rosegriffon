@@ -26,7 +26,8 @@
     "./feed-normalisation": "./src/feed-normalisation.ts",
     "./feed-lecture": "./src/feed-lecture.ts",
     "./schemas": "./src/schemas.ts",
-    "./shop": "./src/shop.ts"
+    "./shop": "./src/shop.ts",
+    "./preferences": "./src/preferences.ts"
   },
   "publishConfig": {
     "access": "public",

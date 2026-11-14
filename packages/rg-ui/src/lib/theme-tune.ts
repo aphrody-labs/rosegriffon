@@ -11,7 +11,7 @@
  * Module pur côté import (aucun accès DOM au chargement) : le stockage et la
  * racine sont injectables pour les tests.
  */
-import type { ThemeId } from "@rosegriffon/preferences";
+import type { ThemeId } from "@rosegriffon/types/preferences";
 
 import {
   clampAdjustments,

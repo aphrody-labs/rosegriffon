@@ -7,7 +7,7 @@ import {
   directionForLocale,
   type DateValue,
 } from "@rosegriffon/i18n";
-import type { LocaleId } from "@rosegriffon/preferences";
+import type { LocaleId } from "@rosegriffon/types/preferences";
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 // Import default locale directly to prevent hydration mismatch and flash of keys.

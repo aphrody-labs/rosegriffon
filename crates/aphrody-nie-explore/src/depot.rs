@@ -59,7 +59,7 @@ fn fichier_sensible(nom: &str) -> bool {
     if bas.starts_with(".env") {
         return true;
     }
-    const SUFFIXES: &[&str] = &[".key", ".pem", ".p12", ".pfx", ".keystore", ".jks", ".asc"];
+    const SUFFIXES: &[&str] = &[".env", ".key", ".pem", ".p12", ".pfx", ".keystore", ".jks", ".asc"];
     if SUFFIXES.iter().any(|s| bas.ends_with(s)) {
         return true;
     }
@@ -658,10 +658,10 @@ pub fn construire_globs(globs: &[String], exts: &[String]) -> Result<Option<Glob
 mod tests {
     use super::*;
 
-    /// Racine du dépôt déduite du crate : `<dépôt>/crates/nie/aphrody-nie-explore` -> `<dépôt>`.
+    /// Racine du dépôt déduite du crate : `<dépôt>/crates/aphrody-nie-explore` -> `<dépôt>`.
     fn depot() -> Depot {
         let crate_dir = Path::new(env!("CARGO_MANIFEST_DIR"));
-        let racine = crate_dir.join("..").join("..").join("..");
+        let racine = crate_dir.join("..").join("..");
         Depot::ouvrir(racine).expect("racine du dépôt")
     }
 
@@ -669,11 +669,11 @@ mod tests {
     fn lit_un_fichier_du_depot() {
         let d = depot();
         let f = d
-            .lire("crates/nie/aphrody-nie-explore/Cargo.toml", None)
+            .lire("crates/aphrody-nie-explore/Cargo.toml", None)
             .expect("lecture");
         assert!(!f.binaire, "un Cargo.toml n'est pas binaire");
         assert!(f.contenu.expect("contenu").contains("aphrody-nie-explore"));
-        assert_eq!(f.chemin, "crates/nie/aphrody-nie-explore/Cargo.toml");
+        assert_eq!(f.chemin, "crates/aphrody-nie-explore/Cargo.toml");
     }
 
     #[test]
@@ -711,7 +711,7 @@ mod tests {
     fn trouve_par_extension() {
         let d = depot();
         let o = OptionsParcours {
-            sous_dossier: "crates/nie/aphrody-nie-explore".to_string(),
+            sous_dossier: "crates/aphrody-nie-explore".to_string(),
             extensions: vec!["rs".to_string()],
             limite: 50,
             ..Default::default()
@@ -728,7 +728,7 @@ mod tests {
     fn cherche_dans_le_contenu() {
         let d = depot();
         let o = OptionsParcours {
-            sous_dossier: "crates/nie/aphrody-nie-explore/src".to_string(),
+            sous_dossier: "crates/aphrody-nie-explore/src".to_string(),
             extensions: vec!["rs".to_string()],
             limite: 20,
             ..Default::default()

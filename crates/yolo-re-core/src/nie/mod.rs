@@ -21,31 +21,32 @@
 //! `nie` feature. Label propagation is [`crate::propagate`].
 #![allow(clippy::pedantic)]
 
-#[cfg(feature = "nie")]
+#[cfg(all(feature = "nie", not(all(target_arch = "wasm32", target_os = "unknown"))))]
 pub mod adjacency;
-#[cfg(feature = "nie")]
+#[cfg(all(feature = "nie", not(all(target_arch = "wasm32", target_os = "unknown"))))]
 pub mod anchors;
-#[cfg(feature = "nie")]
+#[cfg(all(feature = "nie", not(all(target_arch = "wasm32", target_os = "unknown"))))]
 pub mod disasm;
 pub mod dump;
-#[cfg(feature = "nie")]
+#[cfg(all(feature = "nie", not(all(target_arch = "wasm32", target_os = "unknown"))))]
 pub mod funclua;
-#[cfg(feature = "nie")]
+#[cfg(all(feature = "nie", not(all(target_arch = "wasm32", target_os = "unknown"))))]
 pub mod ghidra_import;
-#[cfg(feature = "nie")]
+#[cfg(all(feature = "nie", not(all(target_arch = "wasm32", target_os = "unknown"))))]
 pub mod indexer;
-#[cfg(feature = "nie")]
+#[cfg(all(feature = "nie", not(all(target_arch = "wasm32", target_os = "unknown"))))]
 pub mod loop_db;
+#[cfg(not(all(target_arch = "wasm32", target_os = "unknown")))]
 pub mod pdata;
-#[cfg(feature = "nie")]
+#[cfg(all(feature = "nie", not(all(target_arch = "wasm32", target_os = "unknown"))))]
 pub mod recover;
-#[cfg(feature = "nie")]
+#[cfg(all(feature = "nie", not(all(target_arch = "wasm32", target_os = "unknown"))))]
 pub mod rtti;
-#[cfg(feature = "nie")]
+#[cfg(all(feature = "nie", not(all(target_arch = "wasm32", target_os = "unknown"))))]
 pub mod strref;
-#[cfg(feature = "nie")]
+#[cfg(all(feature = "nie", not(all(target_arch = "wasm32", target_os = "unknown"))))]
 pub mod vtable;
-#[cfg(feature = "nie")]
+#[cfg(all(feature = "nie", not(all(target_arch = "wasm32", target_os = "unknown"))))]
 pub mod vtable_anon;
-#[cfg(feature = "nie")]
+#[cfg(all(feature = "nie", not(all(target_arch = "wasm32", target_os = "unknown"))))]
 pub mod workflow;

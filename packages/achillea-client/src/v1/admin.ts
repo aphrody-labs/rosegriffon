@@ -43,7 +43,7 @@ import type {
   MaintenanceResponse,
   ModerationSyncResult,
   UploadedImage,
-} from "./pending-contracts";
+} from "@rosegriffon/achillea-types";
 
 // ── Hub ops ─────────────────────────────────────────────────────────────────
 

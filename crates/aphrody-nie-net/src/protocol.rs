@@ -3,7 +3,7 @@
 //! Mirrors Level-5 EOS attributes (`NET_VER_2_3_0`, `SESSION_TYPE_GAME`, `SESSION_TYPE_TOWN`,
 //! `MODE_2V2`) and defines the deterministic lockstep/rollback packet format.
 
-use aphrody_nie_geom::Vec2;
+use aphrody_nie_core::geom::Vec2;
 use aphrody_nie_runtime::Input as RuntimeInput;
 use serde::{Deserialize, Serialize};
 

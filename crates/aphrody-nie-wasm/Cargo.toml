@@ -48,10 +48,6 @@ aphrody-nie-camera = { workspace = true, default-features = false }
 # Shared VFS content dispatcher. Native filesystem search and the Lua VM remain behind
 # aphrody-nie-explore's disabled `host` feature; browser bytes use the same portable parsers as the CLI.
 aphrody-nie-explore = { workspace = true, default-features = false }
-# Pure-Rust PE/ELF triage used to inspect a user-supplied executable entirely in the browser.
-aphrody-nie-pe-inspect.workspace = true
-# Pure-Rust MSVC-dialect x86-64 assembler used by the browser inspection/forge surface.
-aphrody-nie-asm.workspace = true
 # Byte-exact executable comparison from the PE forge, without its optional serde surface.
 aphrody-nie-pe.workspace = true
 # Bounded x86-64 lifting and blocker diagnostics from the executable forge. Database-backed
@@ -64,6 +60,10 @@ aphrody-re.workspace = true
 # Credential-free Steam depot selection/collision planning; the `depot` client feature (network,
 # token cache) stays disabled.
 bun-steam = { workspace = true }
+bevy_app = { workspace = true, optional = true }
+bevy_asset = { workspace = true, optional = true }
+bevy_ecs = { workspace = true, optional = true }
+aphrody-nie-bevy = { path = "../aphrody-nie-bevy", version = "1.4.7", optional = true }
 # Portable AOB scanning only; live process memory and patching remain behind the host feature.
 aphrody-nie-trace = { workspace = true, default-features = false }
 # Pure official-encyclopedia matching; network, SQLite and CLI dependencies stay host-only.
@@ -111,6 +111,8 @@ anyhow = { workspace = true, optional = true }
 getrandom = { version = "0.3.4", default-features = false, features = [
   "wasm_js",
 ] }
+getrandom_02 = { package = "getrandom", version = "0.2.17", default-features = false, features = ["js"] }
+getrandom_04 = { package = "getrandom", version = "0.4.3", default-features = false, features = ["wasm_js"] }
 web-sys = { workspace = true, optional = true, features = [
   "HtmlCanvasElement",
   "Element",
@@ -149,3 +151,15 @@ webgpu = [
 cpu-frame = []
 # WebGL2 fallback when the browser has no WebGPU (+~2 MiB).
 webgl = ["webgpu", "aphrody-nie-render3d/webgl"]
+# Bevy 0.20.1 ECS/App/Asset plugin integration for browser targets.
+bevy = [
+  "dep:bevy_app",
+  "dep:bevy_asset",
+  "dep:bevy_ecs",
+  "aphrody-nie-bevy",
+  "aphrody-nie-bevy/bevy",
+  "aphrody-nie-render3d/bevy",
+]
+
+[package.metadata.wasm-pack.profile.release]
+wasm-opt = false

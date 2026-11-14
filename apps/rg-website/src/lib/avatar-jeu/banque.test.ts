@@ -48,7 +48,7 @@ describe("codes et URL", () => {
 
   test("urlPortrait vise la texture nommée du conteneur et refuse un code forgé", () => {
     expect(urlPortrait("https://cdn.rosegriffon.fr/", "c01000010", 160)).toBe(
-      "https://cdn.rosegriffon.fr/dx11/menu/200_icon/10_icon_chr/face/c01000010_l.g4tx/c01000010_1_l00.png?w=160&format=webp",
+      "https://cdn.rosegriffon.fr/dx11/menu/200_icon/10_icon_chr/face/c01000010_l.png?w=160&format=webp",
     );
     expect(() =>
       urlPortrait("https://cdn.rosegriffon.fr", "../etc", 160),

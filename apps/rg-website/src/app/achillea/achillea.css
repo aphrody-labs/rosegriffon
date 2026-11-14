@@ -394,18 +394,22 @@
   text-decoration: none;
 }
 .achillea-home__other-events span {
+  grid-column: 1;
+  grid-row: 1;
   overflow: hidden;
-  font-size: 1.125rem;
+  font-size: 0.9375rem;
   font-weight: 700;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 .achillea-home__other-events small {
-  font-size: 1.125rem;
+  grid-column: 1;
+  grid-row: 2;
+  font-size: 0.8125rem;
   color: rgba(243, 237, 247, 0.8);
 }
 .achillea-home__other-events svg {
-  grid-row: span 2;
+  grid-row: 1 / span 2;
   grid-column: 2;
   width: 1.125rem;
   height: 1.125rem;

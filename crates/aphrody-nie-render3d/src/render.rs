@@ -208,8 +208,8 @@ pub fn render(model: &Model, angle: f32, w: u32, h: u32) -> Vec<u8> {
 }
 
 /// Vue empruntée d'une [`Texture`] pour le rastériseur partagé `aphrody-softraster`.
-fn view(t: &Texture) -> aphrody_softraster::TextureView<'_> {
-    aphrody_softraster::TextureView {
+fn view(t: &Texture) -> crate::softraster::TextureView<'_> {
+    crate::softraster::TextureView {
         width: t.width,
         height: t.height,
         rgba: &t.rgba,
@@ -218,7 +218,7 @@ fn view(t: &Texture) -> aphrody_softraster::TextureView<'_> {
 
 /// Échantillonnage nearest d'une texture en UV [0,1] (CLAMP_TO_EDGE) → RGBA.
 pub(crate) fn sample(t: &Texture, u: f32, v: f32) -> [u8; 4] {
-    aphrody_softraster::sample_nearest(&view(t), u, v)
+    crate::softraster::sample_nearest(&view(t), u, v)
 }
 
 /// Couleur argile (avant `shade`) des primitives non texturées.
@@ -242,7 +242,7 @@ fn fill_triangle(
     shade: f32,
 ) {
     let tex = tex.map(view);
-    aphrody_softraster::fill_triangle(px, zbuf, w, h, a, b, c, uv, tex.as_ref(), shade, ARGILE);
+    crate::softraster::fill_triangle(px, zbuf, w, h, a, b, c, uv, tex.as_ref(), shade, ARGILE);
 }
 
 #[cfg(test)]

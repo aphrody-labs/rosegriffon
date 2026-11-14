@@ -33,7 +33,7 @@ import {
 import type {
   CastAutoAssignResult,
   CastSurveyResult,
-} from "./pending-contracts";
+} from "@rosegriffon/achillea-types";
 
 export const castEventKindSchema = z.enum(
   CastEventKind,

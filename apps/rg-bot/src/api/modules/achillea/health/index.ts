@@ -20,6 +20,7 @@ import {
 } from "node:os";
 import { Elysia } from "elysia";
 import { sql } from "kysely";
+import { activeChallengeCount } from "@rosegriffon/achillea-core/ranked";
 import { dbPlugin } from "../../../plugins/db";
 import {
   appelBotParDefaut,
@@ -106,6 +107,19 @@ export function creerHealthController(options: OptionsHealth = {}) {
   return (
     new Elysia({ prefix: "/health" })
       .use(dbPlugin)
+      .get("/", async ({ db }) => {
+        let ok = true;
+        try {
+          await sql`SELECT 1`.execute(db);
+        } catch {
+          ok = false;
+        }
+        return {
+          ok,
+          ts: Date.now(),
+          activeChallenges: activeChallengeCount(),
+        };
+      })
       // Publique, comme dans le legacy.
       .get("/check", async ({ db }) => {
         const etat = await lireBot<EtatBot>(appelBot, "/etat");

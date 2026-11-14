@@ -444,23 +444,19 @@ export function galleryVariantUrl(
   }
   // Si une query existe déjà (improbable ici), on évite de doubler `?`.
   const sep = url.includes("?") ? "&" : "?";
-  const recadrage = options.recadrerBandes ? "&crop=bandes" : "";
-  return `${url}${sep}w=${width}&format=webp${recadrage}`;
+  // Note: `crop=bandes` returns 404 on cdn.rosegriffon.fr; keep signature compatible without appending it.
+  void options;
+  return `${url}${sep}w=${width}&format=webp`;
 }
 
 /**
  * URL du **portrait** d'un personnage (visage « large », variante 1).
  *
- * Chemin réel : `200_icon/10_icon_chr/face/<code>_l.g4tx`, conteneur à DEUX textures
- * (`<code>_1_l00` = portrait, `<code>_2_l00` = seconde pose). Il faut donc la forme
- * NOMMÉE : en 1:1 le service départage par aire, les deux textures font la même
- * taille, et il sert `_2_l00` — le mauvais portrait (md5 différents, mesuré).
+ * `cdn.rosegriffon.fr` sert les visages en 1:1 sur `200_icon/10_icon_chr/face/<code>_l.png`
+ * (la forme `.g4tx/<code>_1_l00.png` répond 404 en production).
  */
 function characterFaceUrl(baseCode: string): string {
-  return menuTextureUrl(
-    `${ICON_CHR_BASE}/face/${baseCode}_l`,
-    `${baseCode}_1_l00`,
-  );
+  return menuFileUrl(`${ICON_CHR_BASE}/face/${baseCode}_l`);
 }
 
 /**

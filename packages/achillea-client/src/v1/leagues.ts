@@ -18,7 +18,7 @@ import type {
   LeagueStandingRow,
   LeagueSummary,
   LeagueTeam,
-} from "./pending-contracts";
+} from "@rosegriffon/achillea-types";
 
 export const leagueSummarySchema = z.object({
   id: z.string(),

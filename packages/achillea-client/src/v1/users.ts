@@ -32,7 +32,7 @@ import {
   encodePathSegment,
   type AchilleaClientResult,
 } from "./http";
-import type { ImageGenerationResult } from "./pending-contracts";
+import type { ImageGenerationResult } from "@rosegriffon/achillea-types";
 import {
   leaderboardPageSchema,
   rankedHistoryEntrySchema,

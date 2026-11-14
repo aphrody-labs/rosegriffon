@@ -43,16 +43,16 @@
 //! ce module récupère le savoir COMPLET d'iecode, y compris le layout des champs
 //! d'en-tête, sans dupliquer la connaissance dans le code Rust.
 
-#[cfg(feature = "host")]
+#[cfg(all(feature = "host", not(all(target_arch = "wasm32", target_os = "unknown"))))]
 use std::path::Path;
 
-#[cfg(feature = "host")]
+#[cfg(all(feature = "host", not(all(target_arch = "wasm32", target_os = "unknown"))))]
 use anyhow::{Context, Result, bail};
-#[cfg(feature = "host")]
+#[cfg(all(feature = "host", not(all(target_arch = "wasm32", target_os = "unknown"))))]
 use aphrody_nie_index::{Db, ingest};
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
-#[cfg(feature = "host")]
+#[cfg(all(feature = "host", not(all(target_arch = "wasm32", target_os = "unknown"))))]
 use tracing::debug;
 
 /// Version de schéma supportée par cet ingesteur. Doit correspondre au
@@ -369,7 +369,7 @@ pub struct CatalogStats {
 ///
 /// Retourne une erreur si le fichier est introuvable/illisible, si le JSON est
 /// invalide, ou si la `schema_version` n'est pas supportée.
-#[cfg(feature = "host")]
+#[cfg(all(feature = "host", not(all(target_arch = "wasm32", target_os = "unknown"))))]
 pub fn ingest_format_catalog(db: &mut Db, path: &Path) -> Result<CatalogStats> {
     let raw = std::fs::read_to_string(path)
         .with_context(|| format!("lecture du catalogue iecode : {}", path.display()))?;
@@ -445,11 +445,11 @@ pub fn ingest_format_catalog(db: &mut Db, path: &Path) -> Result<CatalogStats> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    #[cfg(feature = "host")]
+    #[cfg(all(feature = "host", not(all(target_arch = "wasm32", target_os = "unknown"))))]
     use std::io::Write;
 
     /// Écrit un catalogue JSON minimal dans un fichier temporaire et renvoie son chemin.
-    #[cfg(feature = "host")]
+    #[cfg(all(feature = "host", not(all(target_arch = "wasm32", target_os = "unknown"))))]
     fn write_catalog(json: &str) -> std::path::PathBuf {
         let mut path = std::env::temp_dir();
         let unique = format!(
@@ -580,7 +580,7 @@ mod tests {
     }
 
     #[test]
-    #[cfg(feature = "host")]
+    #[cfg(all(feature = "host", not(all(target_arch = "wasm32", target_os = "unknown"))))]
     fn ingest_sample_catalogue() {
         let path = write_catalog(SAMPLE);
         let mut db = Db::open_in_memory().unwrap();
@@ -621,7 +621,7 @@ mod tests {
     }
 
     #[test]
-    #[cfg(feature = "host")]
+    #[cfg(all(feature = "host", not(all(target_arch = "wasm32", target_os = "unknown"))))]
     fn ingest_is_idempotent() {
         let path = write_catalog(SAMPLE);
         let mut db = Db::open_in_memory().unwrap();
@@ -647,7 +647,7 @@ mod tests {
     }
 
     #[test]
-    #[cfg(feature = "host")]
+    #[cfg(all(feature = "host", not(all(target_arch = "wasm32", target_os = "unknown"))))]
     fn rejette_schema_version_inconnue() {
         let path = write_catalog(r#"{ "schema_version": 999, "formats": [] }"#);
         let mut db = Db::open_in_memory().unwrap();

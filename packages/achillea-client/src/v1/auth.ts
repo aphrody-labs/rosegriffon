@@ -11,7 +11,7 @@ import type { SessionUserDTO } from "@rosegriffon/achillea-types/domain/user";
 
 import { okResponseSchema, userDtoSchema } from "./common";
 import { AchilleaResource, type AchilleaClientResult } from "./http";
-import type { RealtimeTokenResponse } from "./pending-contracts";
+import type { RealtimeTokenResponse } from "@rosegriffon/achillea-types";
 
 /**
  * Origine publique du site Rose Griffon. Ce paquet est consommé côté navigateur

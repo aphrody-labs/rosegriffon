@@ -84,7 +84,7 @@ import type {
   WireParticipant,
   WireTournament,
   WireTournamentSeries,
-} from "./pending-contracts";
+} from "@rosegriffon/achillea-types";
 
 // ── Enums ───────────────────────────────────────────────────────────────────
 

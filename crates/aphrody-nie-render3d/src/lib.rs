@@ -37,6 +37,8 @@
 
 #![forbid(unsafe_code)]
 
+#[cfg(feature = "bevy")]
+pub mod bevy;
 pub mod document;
 pub mod gizmo;
 pub mod glb;
@@ -45,6 +47,9 @@ pub mod gpu;
 pub mod pick;
 pub mod render;
 pub mod scene;
+pub mod softraster;
 mod vecmath;
+#[cfg(feature = "video")]
+pub mod video;
 #[cfg(feature = "webgpu")]
 pub mod web;

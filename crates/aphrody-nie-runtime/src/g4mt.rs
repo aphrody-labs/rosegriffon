@@ -9,7 +9,7 @@ use aphrody_nie_core::animation::{
     SkeletonId,
 };
 use aphrody_nie_formats::g4mt::DecodedMotionClip;
-use aphrody_nie_geom::Vec3;
+use aphrody_nie_core::geom::Vec3;
 
 /// Failure while adapting an already decoded G4MT clip for runtime playback.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

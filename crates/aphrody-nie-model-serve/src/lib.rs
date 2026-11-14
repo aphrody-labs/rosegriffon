@@ -2,5 +2,6 @@
 
 #![forbid(unsafe_code)]
 
-pub use aphrody_nie_model_core::{catalog, menu};
+pub mod catalog;
+pub mod menu;
 pub mod sprite_sheet;

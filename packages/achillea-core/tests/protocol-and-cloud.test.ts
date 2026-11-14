@@ -7,7 +7,7 @@ import {
   TICK_DT,
   Inacode,
   SessionType,
-  MatchMode,
+  ProtocolMatchMode,
   PlayerSlot,
   getTeamIndex,
   encodeTickInput,
@@ -31,9 +31,9 @@ describe("Achillea Online Protocol & Cloud Sync Suite", () => {
     expect(TICK_DT).toBeCloseTo(0.0166666, 4);
     expect(SessionType.Game).toBe("Game");
     expect(SessionType.Town).toBe("Town");
-    expect(MatchMode.Casual).toBe("Casual");
-    expect(MatchMode.Ranked).toBe("Ranked");
-    expect(MatchMode.Mode2v2).toBe("Mode2v2");
+    expect(ProtocolMatchMode.Casual).toBe("Casual");
+    expect(ProtocolMatchMode.Ranked).toBe("Ranked");
+    expect(ProtocolMatchMode.Mode2v2).toBe("Mode2v2");
   });
 
   test("Inacode formats and seed generation", () => {

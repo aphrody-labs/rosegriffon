@@ -25,7 +25,7 @@ import {
   encodePathSegment,
   type AchilleaClientResult,
 } from "./http";
-import type { ApiEnvelope } from "./pending-contracts";
+import type { ApiEnvelope } from "@rosegriffon/achillea-types";
 
 export const organizationStateSchema = z.enum(
   OrganizationState,

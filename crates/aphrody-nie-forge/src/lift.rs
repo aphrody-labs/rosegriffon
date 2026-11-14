@@ -1,16 +1,16 @@
 //! Relevé : des octets d'origine vers la **source assembleur** du dépôt.
 //!
 //! C'est l'étape de reverse-engineering, isolée et explicite : on désassemble un
-//! corps du binaire (iced-x86), on le traduit dans le dialecte de [`aphrody_nie_asm`],
+//! corps du binaire (iced-x86), on le traduit dans le dialecte de [`aphrody_nie_pe::asm`],
 //! puis — c'est le point non négociable — on **ré-encode** et on exige l'égalité
 //! byte-à-byte avec l'original. Si l'encodeur ne retrouve pas exactement les
 //! octets de MSVC, le relevé est rejeté : rien n'entre dans la source qui ne se
 //! régénère à l'identique.
 //!
 //! Une fois la source écrite, la construction du binaire n'utilise plus que
-//! [`aphrody_nie_asm::encode_at`] : les octets sont **produits**, pas recopiés.
+//! [`aphrody_nie_pe::asm::encode_at`] : les octets sont **produits**, pas recopiés.
 
-use aphrody_nie_asm::{
+use aphrody_nie_pe::asm::{
     Alu, BitOp, Cond, CvtOp, Insn, Mem, NoOp, Reg, Rm, ShiftOp, Size, SseMaskOp, SseOp, SseShiftOp,
     UnOp, VexOp, Xmm, XmmRm, Ymm, YmmRm,
 };
@@ -66,8 +66,8 @@ fn mem_of(i: &iced_x86::Instruction) -> Option<Mem> {
     // hors dialecte.
     let seg = match i.segment_prefix() {
         Register::None => None,
-        Register::FS => Some(aphrody_nie_asm::Seg::Fs),
-        Register::GS => Some(aphrody_nie_asm::Seg::Gs),
+        Register::FS => Some(aphrody_nie_pe::asm::Seg::Fs),
+        Register::GS => Some(aphrody_nie_pe::asm::Seg::Gs),
         _ => return None,
     };
     if i.is_ip_rel_memory_operand() {
@@ -540,7 +540,7 @@ fn insn_of(i: &iced_x86::Instruction, raw: &[u8]) -> Option<Insn> {
             Mnemonic::Stosq => Size::Q,
             _ => Size::D,
         };
-        return Some(Insn::StringOp(aphrody_nie_asm::RepOp::Stos, sz));
+        return Some(Insn::StringOp(aphrody_nie_pe::asm::RepOp::Stos, sz));
     }
     // `bsf`/`bsr` et `lock xadd`.
     if matches!(i.mnemonic(), Mnemonic::Bsf | Mnemonic::Bsr) {
@@ -641,10 +641,10 @@ fn insn_of(i: &iced_x86::Instruction, raw: &[u8]) -> Option<Insn> {
     if i.has_rep_prefix() {
         let op = match i.mnemonic() {
             Mnemonic::Stosb | Mnemonic::Stosw | Mnemonic::Stosd | Mnemonic::Stosq => {
-                aphrody_nie_asm::RepOp::Stos
+                aphrody_nie_pe::asm::RepOp::Stos
             }
             Mnemonic::Movsb | Mnemonic::Movsw | Mnemonic::Movsd | Mnemonic::Movsq => {
-                aphrody_nie_asm::RepOp::Movs
+                aphrody_nie_pe::asm::RepOp::Movs
             }
             _ => return None,
         };
@@ -1082,16 +1082,16 @@ pub fn lift_body(bytes: &[u8], va: u64) -> Option<Vec<Insn>> {
     if consumed != bytes.len() {
         return None;
     }
-    if aphrody_nie_asm::encode_at(&out, va) != bytes {
+    if aphrody_nie_pe::asm::encode_at(&out, va) != bytes {
         return None;
     }
     // Le relevé n'est acquis que si la **source textuelle** se relit et redonne
     // les mêmes octets : c'est elle qui sera commitée et rejouée, pas la
     // structure en mémoire. Sans ce tour complet, un corps pourrait entrer dans
     // la source sans pouvoir en ressortir.
-    let line = aphrody_nie_asm::to_line(&out);
-    let back = aphrody_nie_asm::parse_line(&line).ok()?;
-    (aphrody_nie_asm::encode_at(&back, va) == bytes).then_some(out)
+    let line = aphrody_nie_pe::asm::to_line(&out);
+    let back = aphrody_nie_pe::asm::parse_line(&line).ok()?;
+    (aphrody_nie_pe::asm::encode_at(&back, va) == bytes).then_some(out)
 }
 
 /// Ce qui empêche un corps d'être relevé — la liste de courses du prochain lot.
@@ -1136,7 +1136,7 @@ pub struct LiftedBody {
     pub byte_len: usize,
     /// Number of decoded x86-64 instructions.
     pub instruction_count: usize,
-    /// One-line source accepted by `aphrody_nie_asm::parse_line`.
+    /// One-line source accepted by `aphrody_nie_pe::asm::parse_line`.
     pub source: String,
 }
 
@@ -1197,7 +1197,7 @@ pub fn lift_body_text(bytes: &[u8], va: u64) -> Result<LiftedBody, Blockage> {
     Ok(LiftedBody {
         byte_len: bytes.len(),
         instruction_count,
-        source: aphrody_nie_asm::to_line(&instructions),
+        source: aphrody_nie_pe::asm::to_line(&instructions),
     })
 }
 
@@ -1261,7 +1261,7 @@ pub fn blocking_detail(bytes: &[u8], va: u64) -> Option<Blockage> {
     }
     // Toutes les instructions sont traduites : c'est le ré-encodage qui diverge.
     // On isole l'instruction fautive en comparant octet par octet.
-    let got = aphrody_nie_asm::encode_at(&out, va);
+    let got = aphrody_nie_pe::asm::encode_at(&out, va);
     if got == bytes {
         return None;
     }
@@ -1269,7 +1269,7 @@ pub fn blocking_detail(bytes: &[u8], va: u64) -> Option<Blockage> {
     let mut off = 0usize;
     for insn in &out {
         let i = d.decode();
-        let mine = aphrody_nie_asm::encode_at(core::slice::from_ref(insn), va + off as u64);
+        let mine = aphrody_nie_pe::asm::encode_at(core::slice::from_ref(insn), va + off as u64);
         if bytes.get(off..off + i.len()) != Some(&mine[..]) {
             return Some(Blockage {
                 // Ventiler par mnémonique : « encodage » global ne dit pas quelle
@@ -1342,8 +1342,8 @@ mod tests {
         assert_eq!(lifted.byte_len, bytes.len());
         assert_eq!(lifted.instruction_count, 2);
         assert_eq!(lifted.source, "mov al, 0x1 ; ret");
-        let parsed = aphrody_nie_asm::parse_line(&lifted.source).expect("parse lifted source");
-        assert_eq!(aphrody_nie_asm::encode_at(&parsed, 0x1_4004_d750), bytes);
+        let parsed = aphrody_nie_pe::asm::parse_line(&lifted.source).expect("parse lifted source");
+        assert_eq!(aphrody_nie_pe::asm::encode_at(&parsed, 0x1_4004_d750), bytes);
     }
 
     #[test]
@@ -1393,11 +1393,11 @@ mod tests {
         for (bytes, va) in cases {
             let insns = lift_body(bytes, va)
                 .unwrap_or_else(|| panic!("relevé impossible pour {bytes:02x?}"));
-            assert_eq!(aphrody_nie_asm::encode_at(&insns, va), bytes);
-            let line = aphrody_nie_asm::to_line(&insns);
-            let back = aphrody_nie_asm::parse_line(&line).expect("relecture");
+            assert_eq!(aphrody_nie_pe::asm::encode_at(&insns, va), bytes);
+            let line = aphrody_nie_pe::asm::to_line(&insns);
+            let back = aphrody_nie_pe::asm::parse_line(&line).expect("relecture");
             assert_eq!(
-                aphrody_nie_asm::encode_at(&back, va),
+                aphrody_nie_pe::asm::encode_at(&back, va),
                 bytes,
                 "aller-retour de `{line}`"
             );
@@ -1418,15 +1418,15 @@ mod tests {
         ];
         let va = 0x1_4000_1000;
         let insns = lift_body(bytes, va).expect("relevé du prologue complet");
-        assert_eq!(aphrody_nie_asm::encode_at(&insns, va), bytes);
-        let line = aphrody_nie_asm::to_line(&insns);
+        assert_eq!(aphrody_nie_pe::asm::encode_at(&insns, va), bytes);
+        let line = aphrody_nie_pe::asm::to_line(&insns);
         assert!(line.contains("push rdi"), "{line}");
         assert!(line.contains("sub rsp, 0x20"), "{line}");
         assert!(line.contains("call 0x140002012"), "{line}");
         assert!(line.contains("lea rcx, [rip 0x14000201e]"), "{line}");
         // Aller-retour texte, encodé à la même adresse.
-        let back = aphrody_nie_asm::parse_line(&line).expect("relecture");
-        assert_eq!(aphrody_nie_asm::encode_at(&back, va), bytes);
+        let back = aphrody_nie_pe::asm::parse_line(&line).expect("relecture");
+        assert_eq!(aphrody_nie_pe::asm::encode_at(&back, va), bytes);
     }
 
     #[test]
@@ -1447,7 +1447,7 @@ mod tests {
             vec![0x48, 0x03, 0xCA, 0xC3],   // add rcx, rdx  (03, forme MSVC)
         ] {
             let insns = lift_body(&bytes, 0x140_0000).expect("relevable");
-            assert_eq!(aphrody_nie_asm::encode_at(&insns, 0x140_0000), bytes);
+            assert_eq!(aphrody_nie_pe::asm::encode_at(&insns, 0x140_0000), bytes);
         }
     }
 }
@@ -1556,7 +1556,7 @@ mod disp32_diag2 {
         let ins = insn_of(&i, &bytes);
         eprintln!("insn_of = {ins:?}");
         if let Some(ins) = ins {
-            let enc = aphrody_nie_asm::encode_at(&[ins], 0x140000000);
+            let enc = aphrody_nie_pe::asm::encode_at(&[ins], 0x140000000);
             eprintln!("encoded = {enc:02x?}");
         }
     }

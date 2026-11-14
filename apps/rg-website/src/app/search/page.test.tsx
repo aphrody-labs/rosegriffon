@@ -6,7 +6,7 @@ import {
   formaterLigne,
   type LigneBrute,
   type ResultatRecherche,
-} from "@rosegriffon/search";
+} from "@/lib/search/engine";
 
 import { SearchPageContent } from "./search-page";
 

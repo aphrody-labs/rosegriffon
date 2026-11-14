@@ -27,7 +27,6 @@
     "@aphrody/x": "catalog:",
     "@rosegriffon/assets": "workspace:*",
     "@rosegriffon/db": "workspace:*",
-    "@rosegriffon/discord-sync": "workspace:*",
     "@rosegriffon/inagle": "workspace:*",
     "@rosegriffon/types": "workspace:*",
     "@vercel/functions": "catalog:",

@@ -12,9 +12,10 @@ workspace = true
 
 [features]
 default = []
-host = ["dep:redis", "dep:thiserror", "dep:tracing"]
+host = ["dep:redis", "dep:thiserror"]
 
 [dependencies]
+
+[target.'cfg(not(all(target_arch = "wasm32", target_os = "unknown")))'.dependencies]
 redis = { version = "0.27.6", optional = true, features = ["r2d2"] }
 thiserror = { workspace = true, optional = true }
-tracing = { workspace = true, optional = true }

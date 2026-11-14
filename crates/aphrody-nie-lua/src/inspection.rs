@@ -24,7 +24,7 @@ pub struct ChunkInfo {
 }
 
 /// An execution result suitable for a host-neutral inspector.
-#[cfg(feature = "vm")]
+#[cfg(all(feature = "vm", not(all(target_arch = "wasm32", target_os = "unknown"))))]
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct ExecutionResult {
     pub stdout: Vec<String>,
@@ -35,7 +35,7 @@ pub struct ExecutionResult {
 }
 
 /// A Lua global exposed by the values inspector.
-#[cfg(feature = "vm")]
+#[cfg(all(feature = "vm", not(all(target_arch = "wasm32", target_os = "unknown"))))]
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct Global {
     pub name: String,
@@ -91,7 +91,7 @@ fn collect_strings(prototype: &crate::bytecode::Prototype, output: &mut Vec<Stri
 }
 
 /// Execute source or game bytecode in a new VM for inspection.
-#[cfg(feature = "vm")]
+#[cfg(all(feature = "vm", not(all(target_arch = "wasm32", target_os = "unknown"))))]
 pub fn execute(
     data: &[u8],
     chunk_name: &str,
@@ -115,7 +115,7 @@ pub fn execute(
 }
 
 /// Execute a chunk in a new VM, then list the globals it left behind.
-#[cfg(feature = "vm")]
+#[cfg(all(feature = "vm", not(all(target_arch = "wasm32", target_os = "unknown"))))]
 pub fn globals_after_run(
     data: &[u8],
     chunk_name: &str,
@@ -166,7 +166,7 @@ pub fn globals_after_run(
 }
 
 /// Evaluate an expression after a source or bytecode chunk ran in a new VM.
-#[cfg(feature = "vm")]
+#[cfg(all(feature = "vm", not(all(target_arch = "wasm32", target_os = "unknown"))))]
 pub fn eval(
     data: &[u8],
     chunk_name: &str,
