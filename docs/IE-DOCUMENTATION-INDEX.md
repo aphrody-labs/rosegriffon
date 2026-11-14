@@ -8,7 +8,7 @@ Cet index structure et référence l'ensemble de la documentation technique, d'a
 
 - [Architecture Unifiée IEVR](file:///C:/src/apps/rosegriffon/docs/architecture-unifiee-ievr.md) : Modèle complet de convergence du jeu, du runtime Wasm et des APIs.
 - [Spécifications Générales NIE](file:///C:/src/apps/rosegriffon/docs/ie/iecode-docs/nie/ARCHITECTURE.md) : Conception du moteur, pipeline de simulation déterministe, et intégration VFS.
-- [Conventions du Monorepo](file:///C:/src/apps/rosegriffon/docs/ie/iecode-docs/architecture/MONOREPO-CONVENTIONS.md) : Organisation stricte Rust 2024 et Bun v1.4.4.
+- [Conventions du Monorepo](file:///C:/src/apps/rosegriffon/docs/ie/iecode-docs/architecture/MONOREPO-CONVENTIONS.md) : Organisation stricte Rust 2024 et Bun v1.4.5.
 - [Cartographie des Capacités NIE](file:///C:/src/apps/rosegriffon/docs/ie/iecode-docs/nie/NIE-CAPABILITY-MAP.md) : Matrice des 47 sous-commandes de la forge et du CLI.
 
 ---
@@ -37,7 +37,6 @@ Cet index structure et référence l'ensemble de la documentation technique, d'a
 - [IECODE C++](file:///C:/src/apps/rosegriffon/tools/iecode-cpp) : Implémentations natives des parseurs et bindings haute performance.
 - [IECODE .NET C#](file:///C:/src/apps/rosegriffon/apps/iecode-dotnet) : Solution `IECODE.sln` (.NET 9 / C# 13), CLI, Core, GUI et pont FFI.
 - [IECODE Homebrew](file:///C:/src/apps/rosegriffon/packages/iecode-homebrew) : Toolchain homebrew DS/3DS et compilateurs de formats consoles.
-- [IECODE Scripts](file:///C:/src/apps/rosegriffon/tools/iecode-scripts) : Automatisation et ingestion de dumps.
 - [CLI unifié IECODE](file:///C:/src/apps/rosegriffon/docs/ie/iecode-docs/cli-ie.md) : Guide de commande exhaustif.
 
 ---

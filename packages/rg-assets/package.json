@@ -13,7 +13,7 @@
     "registry": "https://registry.npmjs.org/"
   },
   "engines": {
-    "bun": ">=1.4.4"
+    "bun": ">=1.4.5"
   },
   "license": "Apache-2.0",
   "files": [

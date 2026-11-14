@@ -8,9 +8,9 @@
     "type": "git",
     "url": "https://github.com/aphrody-dev/rosegriffon.git"
   },
-  "packageManager": "bun@1.4.4",
+  "packageManager": "bun@1.4.5",
   "engines": {
-    "bun": ">=1.4.4"
+    "bun": ">=1.4.5"
   },
   "workspaces": [
     "apps/*",

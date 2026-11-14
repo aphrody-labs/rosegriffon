@@ -1,0 +1,17 @@
+{
+  "$schema": "../../../node_modules/wrangler/config-schema.json",
+  "name": "rosegriffon-edge",
+  "main": "worker.ts",
+  "compatibility_date": "2026-10-12",
+  "workers_dev": true,
+  "r2_buckets": [
+    {
+      "binding": "CDN_BUCKET",
+      "bucket_name": "rosegriffon-cdn"
+    }
+  ],
+  "observability": {
+    "enabled": true,
+    "traces": { "enabled": true, "head_sampling_rate": 0.1 }
+  }
+}

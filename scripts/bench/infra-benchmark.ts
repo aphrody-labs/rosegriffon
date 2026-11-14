@@ -65,7 +65,7 @@ async function run() {
     "================================================================================",
   );
   console.info(
-    " Rose Griffon Infrastructure & Sovereign Performance Benchmark Suite (Bun v1.4.4)",
+    " Rose Griffon Infrastructure & Sovereign Performance Benchmark Suite (Bun v1.4.5)",
   );
   console.info(
     "================================================================================",

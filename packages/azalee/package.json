@@ -29,7 +29,6 @@
     "scripts",
     "src",
     "test",
-    "tests",
     "tsconfig.build.json",
     "tsconfig.json",
     "types"
@@ -97,7 +96,7 @@
     "@types/pg": "catalog:"
   },
   "engines": {
-    "bun": ">=1.4.4"
+    "bun": ">=1.4.5"
   },
   "bugs": {
     "url": "https://github.com/aphrody-dev/rosegriffon/issues"

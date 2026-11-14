@@ -88,7 +88,7 @@ gha-creds-*.json
 # build de production. Elle n'est pas conservée dans l'arborescence d'exploitation.
 /public/inazuma-cross/audio/
 
-# Generated from @rosegriffon/assets (packages/rg/assets/website-public.json) by predev and scripts/rg/next-build.sh; the package is the single source.
+# Generated from @rosegriffon/assets (packages/rg-assets/website-public.json) by predev and scripts/next-build.ts; the package is the single source.
 /public/RG_Achillea_blanc.webp
 /public/RG_Azalee_logo_blanc.webp
 /public/RG_Logo_V2.5.webp
@@ -158,3 +158,6 @@ gha-creds-*.json
 /public/twitch-extension/config.html
 /public/twitch-extension/panel.html
 /public/victory.webp
+
+.vercel
+.env*

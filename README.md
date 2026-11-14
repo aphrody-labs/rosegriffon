@@ -2,7 +2,7 @@
 
 Monorepo of [Rose Griffon](https://rosegriffon.fr): Next.js 16 website, separated Discord gateways (`rg`, `achillea`, `azalee`), unified Elysia API, Achilléa ranked Colyseus server, Azalée wiki & CLI, and the Inazuma Eleven: Victory Road (`nie`) Rust/Bevy/Taffy/WebGPU engine and studio.
 
-Pure **Bun v1.4.4+** workspaces (25 packages, 6 apps) + **Rust 2024** workspace (42 crates).
+Pure **Bun v1.4.5+** workspaces (25 packages, 6 apps) + **Rust 2024** workspace (42 crates).
 
 ## Monorepo Layout
 

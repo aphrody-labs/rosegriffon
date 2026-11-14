@@ -1,6 +1,6 @@
 # rosegriffon — Claude Operating Guidelines
 
-> **Doctrine**: No Human In The Loop (NHITL) | 100% Upstream Bun v1.4.4+ & Rust 2024
+> **Doctrine**: No Human In The Loop (NHITL) | 100% Upstream Bun v1.4.5+ & Rust 2024
 
 ## Autonomous NHITL Agent & Context / Token Optimization Best Practices (24/7 Operations)
 
@@ -14,5 +14,5 @@
 ### 2. Autonomous Execution (NHITL - No Human In The Loop)
 
 - **Continuous Grind & Auto-Goal**: Independently identify objectives, resolve compile errors, apply fixes, format (`bun fmt`), lint (`bun lint`), typecheck (`bun check`), test (`bun test` / `cargo test`), commit, and push.
-- **Pure Tech Stack**: 100% Upstream Bun v1.4.4+, Rust 2024, Python uv v0.13.7+, Go 1.27+. Zero Node.js, npm, yarn, or pnpm.
+- **Pure Tech Stack**: 100% Upstream Bun v1.4.5+, Rust 2024, Python uv v0.13.7+, Go 1.27+. Zero Node.js, npm, yarn, or pnpm.
 - **Strict Isolation & Safe Execution**: Heavy Rust builds run on vps (12 cores) with sccache under shared lock; web and fast tests run on bunos or local Bun.

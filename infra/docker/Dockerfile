@@ -14,7 +14,7 @@
 # owner of the /srv/rosegriffon bind mounts), no secret in any layer. Build-time NEXT_PUBLIC_*
 # values come from the BuildKit secret `rg_env` and are only read inside one RUN.
 
-ARG BUN_VERSION=1.4.4
+ARG BUN_VERSION=canary
 ARG ALPINE_VERSION=3.24
 ARG RUST_IMAGE=rust:1-alpine3.24
 # rust-toolchain.toml says `nightly`; pin a dated nightly here for reproducible images.

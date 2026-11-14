@@ -119,6 +119,7 @@
 import type { XClient } from "../../lib/x-natif";
 import { WebService } from "@aphrody/agent-browser/service";
 import { WebCdpPage } from "../../lib/web-cdp";
+import { obscuraFetch } from "../../lib/obscura";
 import { loadXCookieHeader } from "./x-accounts";
 
 // ─── Bornes de charge ────────────────────────────────────────────────────────
@@ -183,10 +184,7 @@ export class ErreurScrape extends Error {
  */
 export function nettoyerMessage(message: string): string {
   return message
-    .replace(
-      /(auth_token|ct0|csrf_token|token|api[_-]?key|password)=([^;&\s"']+)/gi,
-      "$1=***",
-    )
+    .replace(/(auth_token|ct0|csrf_token|token|api[_-]?key|password)=([^;&\s"']+)/gi, "$1=***")
     .replace(/Bearer\s+[A-Za-z0-9._%-]+/gi, "Bearer ***")
     .replace(/(gt|guest_id|kdt|twid)=([^;&\s"']+)/gi, "$1=***")
     .slice(0, 400);
@@ -205,16 +203,8 @@ export function bornerTexte(valeur: string, limite: number): string {
 }
 
 /** Ramène un entier dans `[min, max]`, avec repli sur `defaut` si absent/illisible. */
-export function bornerEntier(
-  valeur: unknown,
-  defaut: number,
-  min: number,
-  max: number,
-): number {
-  const nombre =
-    typeof valeur === "number"
-      ? valeur
-      : Number.parseInt(String(valeur ?? ""), 10);
+export function bornerEntier(valeur: unknown, defaut: number, min: number, max: number): number {
+  const nombre = typeof valeur === "number" ? valeur : Number.parseInt(String(valeur ?? ""), 10);
   if (!Number.isFinite(nombre)) {
     return defaut;
   }
@@ -246,10 +236,7 @@ function estAdressePrivee(hote: string): boolean {
   }
   const sansCrochets = hote.replace(/^\[|\]$/g, "").toLowerCase();
   // ULA (fc00::/7) et lien-local IPv6 (fe80::/10).
-  return (
-    /^f[cd][0-9a-f]{2}:/.test(sansCrochets) ||
-    /^fe[89ab][0-9a-f]:/.test(sansCrochets)
-  );
+  return /^f[cd][0-9a-f]{2}:/.test(sansCrochets) || /^fe[89ab][0-9a-f]:/.test(sansCrochets);
 }
 
 /**
@@ -298,10 +285,7 @@ export function validerUrl(brut: unknown): URL {
 /** Valide une requête textuelle (recherche web, recherche X). */
 export function validerRequete(brut: unknown, minimum = 2): string {
   if (typeof brut !== "string") {
-    throw new ErreurScrape(
-      "requete_invalide",
-      "Il manque la requête de recherche.",
-    );
+    throw new ErreurScrape("requete_invalide", "Il manque la requête de recherche.");
   }
   const texte = brut.trim();
   if (texte.length < minimum) {
@@ -316,10 +300,7 @@ export function validerRequete(brut: unknown, minimum = 2): string {
 /** Normalise un pseudo X : retire le `@`, l'URL complète, et valide la forme. */
 export function validerPseudo(brut: unknown): string {
   if (typeof brut !== "string") {
-    throw new ErreurScrape(
-      "requete_invalide",
-      "Il manque le pseudo du compte X.",
-    );
+    throw new ErreurScrape("requete_invalide", "Il manque le pseudo du compte X.");
   }
   const nettoye = brut
     .trim()
@@ -443,11 +424,7 @@ export function estVerbeScrape(verbe: string): boolean {
  * la main à l'appelant Discord, qui n'a que 15 minutes de jeton d'interaction et
  * beaucoup moins de patience.
  */
-async function avecDelai<T>(
-  promesse: Promise<T>,
-  delaiMs: number,
-  quoi: string,
-): Promise<T> {
+async function avecDelai<T>(promesse: Promise<T>, delaiMs: number, quoi: string): Promise<T> {
   let minuteur: ReturnType<typeof setTimeout> | undefined;
   try {
     return await Promise.race([
@@ -510,12 +487,9 @@ export function charsetDepuisTypeContenu(typeContenu: string | null): string {
  * `charsetDepuisTypeContenu` se sert pour retomber sur `utf-8`.
  */
 function creerDecodeur(etiquette: string): TextDecoder {
-  return new TextDecoder(
-    etiquette as ConstructorParameters<typeof TextDecoder>[0],
-    {
-      fatal: false,
-    },
-  );
+  return new TextDecoder(etiquette as ConstructorParameters<typeof TextDecoder>[0], {
+    fatal: false,
+  });
 }
 
 export interface CorpsLu {
@@ -535,10 +509,7 @@ export interface CorpsLu {
  * plafond et on annule le flux — la connexion est libérée sans télécharger le
  * reste.
  */
-export async function lireCorpsBorne(
-  reponse: Response,
-  maxOctets: number,
-): Promise<CorpsLu> {
+export async function lireCorpsBorne(reponse: Response, maxOctets: number): Promise<CorpsLu> {
   const flux = reponse.body;
   if (!flux) {
     return { texte: "", octets: 0, tronque: false };
@@ -579,15 +550,11 @@ export async function lireCorpsBorne(
   }
   // `creerDecodeur` pose `fatal: false` : un dernier morceau coupé au milieu
   // d'un caractère ne doit pas faire échouer tout le diagnostic.
-  const decodeur = creerDecodeur(
-    charsetDepuisTypeContenu(reponse.headers.get("content-type")),
-  );
+  const decodeur = creerDecodeur(charsetDepuisTypeContenu(reponse.headers.get("content-type")));
   // Sur une lecture tronquée, les 4 derniers octets peuvent être un caractère
   // incomplet : on les écarte plutôt que de rendre un « caractère de
   // remplacement » en fin de texte.
-  const texte = decodeur.decode(
-    tronque ? assemble.subarray(0, Math.max(0, octets - 4)) : assemble,
-  );
+  const texte = decodeur.decode(tronque ? assemble.subarray(0, Math.max(0, octets - 4)) : assemble);
   return { texte, octets, tronque };
 }
 
@@ -699,10 +666,7 @@ const SIGNATURES: readonly SignatureTechno[] = [
  * Détecte les technologies d'une page à partir de ses en-têtes et de son HTML.
  * Renvoie une liste triée, sans doublon.
  */
-export function detecterTechnologies(
-  entetes: Record<string, string>,
-  html: string,
-): string[] {
+export function detecterTechnologies(entetes: Record<string, string>, html: string): string[] {
   const enMinuscules: Record<string, string> = {};
   for (const [clef, valeur] of Object.entries(entetes)) {
     enMinuscules[clef.toLowerCase()] = valeur;
@@ -721,8 +685,7 @@ export function detecterTechnologies(
       trouvees.add(signature.nom);
     }
   }
-  const generateur =
-    /<meta[^>]+name=["']generator["'][^>]+content=["']([^"']+)["']/i.exec(html);
+  const generateur = /<meta[^>]+name=["']generator["'][^>]+content=["']([^"']+)["']/i.exec(html);
   if (generateur?.[1]) {
     trouvees.add(bornerTexte(generateur[1], 60));
   }
@@ -749,11 +712,7 @@ export function extraireLiens(html: string, base: string): ResumeLiens {
   }
   for (const trouve of html.matchAll(/<a\b[^>]*\bhref=["']([^"']+)["']/gi)) {
     const brut = trouve[1]?.trim();
-    if (
-      !brut ||
-      brut.startsWith("#") ||
-      /^(?:javascript|mailto|tel|data):/i.test(brut)
-    ) {
+    if (!brut || brut.startsWith("#") || /^(?:javascript|mailto|tel|data):/i.test(brut)) {
       continue;
     }
     let absolu: string;
@@ -776,9 +735,7 @@ export function extraireLiens(html: string, base: string): ResumeLiens {
     total: vus.size,
     internes,
     externes,
-    exemples: [...vus]
-      .slice(0, LIMITE_LIENS_EXEMPLES)
-      .map((u) => bornerTexte(u, 180)),
+    exemples: [...vus].slice(0, LIMITE_LIENS_EXEMPLES).map((u) => bornerTexte(u, 180)),
   };
 }
 
@@ -837,16 +794,11 @@ const ENTITES_NOMMEES: Record<string, string> = {
 /** Décode une entité HTML nommée ou numérique. `&amp;` est traité en dernier. */
 function decoderEntites(texte: string): string {
   return texte
-    .replace(/&#(\d+);/g, (_, code: string) =>
-      String.fromCodePoint(Number(code)),
-    )
+    .replace(/&#(\d+);/g, (_, code: string) => String.fromCodePoint(Number(code)))
     .replace(/&#x([0-9a-f]+);/gi, (_, code: string) =>
       String.fromCodePoint(Number.parseInt(code, 16)),
     )
-    .replace(
-      /&([a-z]+);/gi,
-      (entier, nom: string) => ENTITES_NOMMEES[nom.toLowerCase()] ?? entier,
-    )
+    .replace(/&([a-z]+);/gi, (entier, nom: string) => ENTITES_NOMMEES[nom.toLowerCase()] ?? entier)
     .replace(/&amp;/g, "&");
 }
 
@@ -865,10 +817,7 @@ function texteBrut(fragment: string): string {
  * extrait dans `<a class="result__snippet">`. Les publicités portent la classe
  * `result--ad` ET une cible `duckduckgo.com/y.js` : les deux sont écartées.
  */
-export function analyserSerpDuckDuckGo(
-  html: string,
-  limite: number,
-): ResultatRecherche[] {
+export function analyserSerpDuckDuckGo(html: string, limite: number): ResultatRecherche[] {
   const resultats: ResultatRecherche[] = [];
   const blocs = html.split(/<div class="result\b/);
   for (const bloc of blocs.slice(1)) {
@@ -879,10 +828,7 @@ export function analyserSerpDuckDuckGo(
     if (/result--ad/.test(enTeteBloc)) {
       continue;
     }
-    const lien =
-      /<a[^>]*class="result__a"[^>]*href="([^"]+)"[^>]*>([\s\S]*?)<\/a>/i.exec(
-        bloc,
-      );
+    const lien = /<a[^>]*class="result__a"[^>]*href="([^"]+)"[^>]*>([\s\S]*?)<\/a>/i.exec(bloc);
     if (!lien) {
       continue;
     }
@@ -899,9 +845,7 @@ export function analyserSerpDuckDuckGo(
     if (hote.endsWith("duckduckgo.com")) {
       continue; // redirection publicitaire `y.js`
     }
-    const extrait = /<a[^>]*class="result__snippet"[^>]*>([\s\S]*?)<\/a>/i.exec(
-      bloc,
-    );
+    const extrait = /<a[^>]*class="result__snippet"[^>]*>([\s\S]*?)<\/a>/i.exec(bloc);
     resultats.push({
       titre: bornerTexte(texteBrut(lien[2] ?? "") || hote, 160),
       url: bornerTexte(url, 300),
@@ -962,10 +906,7 @@ export function dateXVersIso(brut: unknown): string | null {
  * contrat visible de tsc pour `@aphrody/x`. Les champs lus sont ceux
  * qu'utilise le paquet (`core` d'abord, `legacy` en repli).
  */
-export function ficheDepuisResultatX(
-  resultat: unknown,
-  pseudoDemande: string,
-): FicheX | null {
+export function ficheDepuisResultatX(resultat: unknown, pseudoDemande: string): FicheX | null {
   if (!resultat || typeof resultat !== "object") {
     return null;
   }
@@ -990,8 +931,7 @@ export function ficheDepuisResultatX(
     (typeof legacy.name === "string" && legacy.name) ||
     pseudo;
   const avatar =
-    (typeof legacy.profile_image_url_https === "string" &&
-      legacy.profile_image_url_https) ||
+    (typeof legacy.profile_image_url_https === "string" && legacy.profile_image_url_https) ||
     (typeof avatarObjet.image_url === "string" && avatarObjet.image_url) ||
     null;
 
@@ -1003,12 +943,8 @@ export function ficheDepuisResultatX(
       typeof legacy.description === "string" ? legacy.description : "",
       LIMITE_DESCRIPTION,
     ),
-    abonnes:
-      typeof legacy.followers_count === "number"
-        ? legacy.followers_count
-        : null,
-    abonnements:
-      typeof legacy.friends_count === "number" ? legacy.friends_count : null,
+    abonnes: typeof legacy.followers_count === "number" ? legacy.followers_count : null,
+    abonnements: typeof legacy.friends_count === "number" ? legacy.friends_count : null,
     certifie: brut.is_blue_verified === true,
     avatar,
     creeLe: dateXVersIso(legacy.created_at ?? core.created_at),
@@ -1031,10 +967,7 @@ export interface PostX {
 }
 
 /** Met un post X (forme `Tweet` du paquet) à la forme bornée qui traverse la socket. */
-export function bornerPostX(
-  brut: unknown,
-  pseudoParDefaut: string,
-): PostX | null {
+export function bornerPostX(brut: unknown, pseudoParDefaut: string): PostX | null {
   if (!brut || typeof brut !== "object") {
     return null;
   }
@@ -1053,15 +986,9 @@ export function bornerPostX(
     id,
     url: `https://x.com/${auteur}/status/${id}`,
     auteur,
-    auteurNom:
-      typeof auteurObjet.name === "string" && auteurObjet.name
-        ? auteurObjet.name
-        : auteur,
+    auteurNom: typeof auteurObjet.name === "string" && auteurObjet.name ? auteurObjet.name : auteur,
     date: dateXVersIso(tweet.created_at),
-    texte: bornerTexte(
-      typeof tweet.text === "string" ? tweet.text : "",
-      LIMITE_TEXTE_POST,
-    ),
+    texte: bornerTexte(typeof tweet.text === "string" ? tweet.text : "", LIMITE_TEXTE_POST),
     likes: typeof tweet.like_count === "number" ? tweet.like_count : 0,
     retweets: typeof tweet.retweet_count === "number" ? tweet.retweet_count : 0,
     reponses: typeof tweet.reply_count === "number" ? tweet.reply_count : 0,
@@ -1086,8 +1013,7 @@ async function clientX(): Promise<XClient> {
       "Les identifiants X ne sont pas disponibles sur cet hôte (cookies absents ou incomplets).",
     );
   }
-  const { XClient: ClasseXClient, XSession } =
-    await import("../../lib/x-natif");
+  const { XClient: ClasseXClient, XSession } = await import("../../lib/x-natif");
   try {
     return new ClasseXClient(XSession.fromCookieString(cookie));
   } catch (err) {
@@ -1100,9 +1026,7 @@ async function clientX(): Promise<XClient> {
 
 // ─── Verbes ──────────────────────────────────────────────────────────────────
 
-async function verbeScrapePage(
-  requete: Record<string, unknown>,
-): Promise<ReponseScrape> {
+async function verbeScrapePage(requete: Record<string, unknown>): Promise<ReponseScrape> {
   const url = validerUrl(requete.url);
   if (requete.profil !== undefined) {
     throw new ErreurScrape(
@@ -1114,18 +1038,24 @@ async function verbeScrapePage(
   let page: WebCdpPage;
   try {
     page = await WebCdpPage.connect();
-  } catch (error) {
-    throw new ErreurScrape(
-      "moteur_indisponible",
-      `Serveur Aphrody Web CDP indisponible : ${nettoyerMessage(error instanceof Error ? error.message : String(error))}`,
-    );
+  } catch {
+    const res = await obscuraFetch(url.toString(), { dump: "markdown" });
+    return {
+      success: res.ok,
+      url: url.toString(),
+      statut: res.status,
+      titre: bornerTexte(url.hostname, 200),
+      markdown: bornerTexte(res.content, LIMITE_MARKDOWN),
+      tronque: res.content.length > LIMITE_MARKDOWN,
+      octets: tailleOctets(res.content),
+      rendu: `obscura-${res.mode}`,
+      ms: Math.round((Bun.nanoseconds() - debut) / 1e6),
+    };
   }
   try {
     const navigation = await page.goto(url.toString());
     const html: string = await page.content();
-    const markdownComplet: string = await page.evaluate<string>(
-      'document.body?.innerText ?? ""',
-    );
+    const markdownComplet: string = await page.evaluate<string>('document.body?.innerText ?? ""');
     const titre: string = await page.title();
     return {
       success: true,
@@ -1148,10 +1078,7 @@ async function verbeScrapePage(
 }
 
 /** DuckDuckGo result parsing; Aphrody Web owns page acquisition and rendering. */
-async function chercherDuckDuckGo(
-  requete: string,
-  limite: number,
-): Promise<ResultatRecherche[]> {
+async function chercherDuckDuckGo(requete: string, limite: number): Promise<ResultatRecherche[]> {
   const url = new URL("https://html.duckduckgo.com/html/");
   url.searchParams.set("q", requete);
   url.searchParams.set("kl", "fr-fr");
@@ -1170,9 +1097,7 @@ async function chercherDuckDuckGo(
   }
 }
 
-async function verbeScrapeGoogle(
-  requete: Record<string, unknown>,
-): Promise<ReponseScrape> {
+async function verbeScrapeGoogle(requete: Record<string, unknown>): Promise<ReponseScrape> {
   const texte = validerRequete(requete.requete);
   const limite = bornerEntier(requete.limite, 5, 1, 8);
   const debut = Bun.nanoseconds();
@@ -1195,9 +1120,7 @@ async function verbeScrapeGoogle(
   };
 }
 
-async function verbeScrapeRecon(
-  requete: Record<string, unknown>,
-): Promise<ReponseScrape> {
+async function verbeScrapeRecon(requete: Record<string, unknown>): Promise<ReponseScrape> {
   const url = validerUrl(requete.url);
   const debut = Bun.nanoseconds();
 
@@ -1239,9 +1162,7 @@ async function verbeScrapeRecon(
   };
 }
 
-async function verbeXProfil(
-  requete: Record<string, unknown>,
-): Promise<ReponseScrape> {
+async function verbeXProfil(requete: Record<string, unknown>): Promise<ReponseScrape> {
   const pseudo = validerPseudo(requete.pseudo);
   const debut = Bun.nanoseconds();
   const client = await clientX();
@@ -1264,10 +1185,7 @@ async function verbeXProfil(
   const conteneur = (brut ?? {}) as { data?: { user?: { result?: unknown } } };
   const fiche = ficheDepuisResultatX(conteneur.data?.user?.result, pseudo);
   if (!fiche) {
-    throw new ErreurScrape(
-      "introuvable",
-      `Aucun compte X ne répond au pseudo @${pseudo}.`,
-    );
+    throw new ErreurScrape("introuvable", `Aucun compte X ne répond au pseudo @${pseudo}.`);
   }
   return {
     success: true,
@@ -1276,9 +1194,7 @@ async function verbeXProfil(
   };
 }
 
-async function verbeXPosts(
-  requete: Record<string, unknown>,
-): Promise<ReponseScrape> {
+async function verbeXPosts(requete: Record<string, unknown>): Promise<ReponseScrape> {
   const pseudo = validerPseudo(requete.pseudo);
   const limite = bornerEntier(requete.limite, 5, 1, 10);
   const debut = Bun.nanoseconds();
@@ -1294,10 +1210,7 @@ async function verbeXPosts(
     );
   }
   if (!identifiant) {
-    throw new ErreurScrape(
-      "introuvable",
-      `Aucun compte X ne répond au pseudo @${pseudo}.`,
-    );
+    throw new ErreurScrape("introuvable", `Aucun compte X ne répond au pseudo @${pseudo}.`);
   }
 
   // X sert la chronologie avec ses épingles et ses réponses : on demande large
@@ -1316,20 +1229,13 @@ async function verbeXPosts(
   };
 }
 
-async function verbeXRecherche(
-  requete: Record<string, unknown>,
-): Promise<ReponseScrape> {
+async function verbeXRecherche(requete: Record<string, unknown>): Promise<ReponseScrape> {
   const texte = validerRequete(requete.requete);
   const limite = bornerEntier(requete.limite, 5, 1, 10);
   const debut = Bun.nanoseconds();
   const client = await clientX();
 
-  const page = await client.search(
-    texte,
-    Math.max(limite * 2, 20),
-    undefined,
-    "Latest",
-  );
+  const page = await client.search(texte, Math.max(limite * 2, 20), undefined, "Latest");
   const posts = page.tweets
     .map((tweet) => bornerPostX(tweet, ""))
     .filter((post): post is PostX => post !== null && post.auteur.length > 0)
@@ -1407,9 +1313,7 @@ export function enReponse(err: unknown): ReponseScrape {
   if (err instanceof ErreurScrape) {
     return { success: false, error: err.message, code: err.code };
   }
-  const message = nettoyerMessage(
-    err instanceof Error ? err.message : String(err),
-  );
+  const message = nettoyerMessage(err instanceof Error ? err.message : String(err));
   return {
     success: false,
     error: message || "Échec du scraping.",

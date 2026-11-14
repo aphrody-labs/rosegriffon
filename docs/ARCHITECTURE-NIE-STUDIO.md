@@ -11,7 +11,7 @@ La suite logicielle unifie les outils de reverse-engineering, l'émulation, l'é
 
 ```
 [ Tier A : Interface Web Applicative ]
-  - Stack : Next.js 15, Bun v1.4.4, tokens de design typed aphrody-nie-ui
+  - Stack : Next.js 15, Bun v1.4.5, tokens de design typed aphrody-nie-ui
   - Responsabilité : Sauvegardes, gestionnaire de mods, inventaire Zukan, interface FilmCraft NLE
 
 [ Tier B : Station de Travail Native Desktop ]

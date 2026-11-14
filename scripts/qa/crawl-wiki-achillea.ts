@@ -111,7 +111,7 @@ export async function crawlRoute(
     const res = await fetch(url, {
       headers: {
         "User-Agent":
-          "RoseGriffon-Sovereign-Auditor/2026 (Bun/1.4.4; Linux/x86_64)",
+          "RoseGriffon-Sovereign-Auditor/2026 (Bun/1.4.5; Linux/x86_64)",
         Accept:
           "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
       },
