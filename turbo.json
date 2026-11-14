@@ -8,6 +8,11 @@
     "CI",
     "VERCEL",
     "VERCEL_ENV",
+    "VERCEL_URL",
+    "CLOUDFLARE*",
+    "OBSCURA_*",
+    "RG_API_URL",
+    "PUBLIC_API_URL",
     "NEXT_PUBLIC_*",
     "SUPABASE_*"
   ],
