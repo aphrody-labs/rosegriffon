@@ -3,16 +3,27 @@
 // Mikro-ORM convertit camelCase TS → snake_case SQL : `Lobby` → table `lobby`,
 // `LobbyMatch.scoreTeam1` → colonne `score_team1`, etc.
 
-import { createBunSql } from "@rosegriffon/db/bun-sql";
+import { STACK_CONTRACT } from "@rosegriffon/config/contract";
+import { createBunSql, createLazyBunSql } from "@rosegriffon/db/bun-sql";
 import { getAchilleaDatabaseUrl } from "@rosegriffon/db/achillea";
 
-// Ranked shares the RG database and explicitly selects its Achillea schema.
-export const sql = createBunSql({
-  url: getAchilleaDatabaseUrl(),
-  max: Number(process.env.BUN_SQL_MAX ?? "5"),
-  idleTimeout: Number(process.env.BUN_SQL_IDLE_TIMEOUT ?? "30"),
-  connectionTimeout: Number(process.env.BUN_SQL_CONNECT_TIMEOUT ?? "10"),
-});
+const POOL = STACK_CONTRACT.database.primary.pool;
+
+// Ranked shares the RG database and explicitly selects its Achillea schema lazily on first query.
+export const sql = createLazyBunSql(() =>
+  createBunSql({
+    url: getAchilleaDatabaseUrl(),
+    max: process.env.BUN_SQL_MAX
+      ? Number(process.env.BUN_SQL_MAX)
+      : POOL.defaultMax,
+    idleTimeout: process.env.BUN_SQL_IDLE_TIMEOUT
+      ? Number(process.env.BUN_SQL_IDLE_TIMEOUT)
+      : POOL.idleTimeoutSec,
+    connectionTimeout: process.env.BUN_SQL_CONNECT_TIMEOUT
+      ? Number(process.env.BUN_SQL_CONNECT_TIMEOUT)
+      : POOL.connectTimeoutSec,
+  }),
+).sql;
 
 export interface UserEloRow {
   user_id: string;

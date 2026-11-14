@@ -1,7 +1,7 @@
 /**
  * Client HTTP typé de l'API Azalée.
  *
- * Une méthode par route de `src/server/serve.ts` (41), typée par les fonctions
+ * Une méthode par route de `src/server/serve.ts` (42), typée par les fonctions
  * serveur elles-mêmes (voir `./types`). Le client est **client-safe** : il ne
  * dépend que de `fetch`, `Request`, `URL` et `AbortSignal`, et se bundle donc
  * dans une webview Tauri, un navigateur ou un worker.
@@ -88,6 +88,8 @@ import type {
 export interface AzaleeClient extends AzaleeDataSource {
   /** Base d'URL réellement utilisée, sans `/` final. */
   readonly baseUrl: string;
+  /** Retourne la spécification OpenAPI 3.2.1 exposée sur `/openapi.json`. */
+  openapi(options?: AzaleeRequestOptions): Promise<unknown>;
   /**
    * Appelle une route arbitraire. Échappatoire pour une route ajoutée au
    * serveur avant d'avoir sa méthode dédiée ici.
@@ -134,6 +136,7 @@ export function createAzaleeClient(
 
     index: (o) => get<AzaleeIndex>("/", undefined, o),
     health: (o) => get<AzaleeHealth>("/health", undefined, o),
+    openapi: (o) => get<unknown>("/openapi.json", undefined, o),
 
     characters: (p, o) =>
       get<AzaleeCharacterList>("/api/characters", listQuery(p), o),

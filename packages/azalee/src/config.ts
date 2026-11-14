@@ -19,6 +19,7 @@
 import { existsSync } from "node:fs";
 import path from "node:path";
 import { isInagleDatabaseConfigured } from "@rosegriffon/db/pg";
+import { resolveMirrorSqlitePath } from "@rosegriffon/db/sqlite";
 
 /** Options de configuration explicites (priorité maximale). */
 export interface AzaleeConfig {
@@ -126,23 +127,11 @@ export function resolveMirrorPath(): string | null {
   if (explicit.mirrorPath) return explicit.mirrorPath;
   if (process.env.SQLITE_DB_PATH)
     return path.resolve(process.env.SQLITE_DB_PATH);
-  if (process.env.NIERS_MIRROR) {
-    const configured = path.resolve(process.env.NIERS_MIRROR);
-    return existsSync(configured) ? configured : null;
-  }
 
-  const root = packageRoot();
-  const repoRoot = path.resolve(root, "../..");
-  const candidates = [
-    process.env.NIERS_MIRROR,
-    path.resolve(repoRoot, "var/mirror.sqlite"),
-    process.env.IECODE_DATA_DIR
-      ? path.resolve(process.env.IECODE_DATA_DIR, "../var/mirror.sqlite")
-      : undefined,
-  ].filter((p): p is string => Boolean(p));
-
-  for (const candidate of candidates) {
-    if (existsSync(candidate)) return candidate;
-  }
-  return null;
+  const repoRoot = path.resolve(packageRoot(), "../..");
+  return resolveMirrorSqlitePath({
+    baseDirs: [repoRoot],
+    envVars: ["NIERS_MIRROR"],
+    requireNonEmptyFile: false,
+  });
 }

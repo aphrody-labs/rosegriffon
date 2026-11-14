@@ -4705,8 +4705,18 @@ fn handle_connection(mut stream: TcpStream, state: Arc<State>) {
     let path = path.split('?').next().unwrap_or(path);
 
     // Routing.
-    if path == "/health" {
+    if path == aphrody_nie_core::contract_generated::HEALTH_PATH {
         respond_text(&mut stream, 200, "OK", "ok");
+        return;
+    }
+    if path == aphrody_nie_core::contract_generated::OPENAPI_PATH {
+        respond(
+            &mut stream,
+            200,
+            "OK",
+            "application/json",
+            include_bytes!("../../../contract/openapi.json"),
+        );
         return;
     }
 

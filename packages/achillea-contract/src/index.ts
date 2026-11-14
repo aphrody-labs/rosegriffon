@@ -17,6 +17,13 @@ export type { ExtractOptions } from "./extract";
 export { emitJsonSchema, resolveFields } from "./emit-json-schema";
 export type { JsonSchemaDocument } from "./emit-json-schema";
 
+export {
+  ACHILLEA_JSON_SCHEMA_DIALECT,
+  ACHILLEA_OPENAPI_VERSION,
+  emitOpenApi,
+} from "./emit-openapi";
+export type { AchilleaOpenApiDocument } from "./emit-openapi";
+
 export { emitC23 } from "./emit-c23";
 export { emitRust } from "./emit-rust";
 export { emitSwift } from "./emit-swift";

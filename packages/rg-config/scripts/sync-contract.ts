@@ -28,6 +28,7 @@ interface StackContract {
   http: {
     healthPath: string;
     docsPath: string;
+    openapiPath: string;
     apiPrefix: string;
     legacyApiPrefix: string;
     defaultPorts: Record<string, number>;
@@ -76,6 +77,7 @@ interface StackContract {
       schema: string;
       achilleaSchema: string;
       orm: string;
+      pgSchemes: string[];
       drivers: string[];
       envVars: string[];
       pool: {
@@ -99,6 +101,8 @@ interface StackContract {
       orm: string;
       drivers: string[];
       defaultRelPath: string;
+      envVars: string[];
+      snapshotDirs: string[];
     };
     cache: {
       engine: string;
@@ -107,6 +111,12 @@ interface StackContract {
       idleTimeoutMs: number;
       maxRetries: number;
     };
+  };
+  openapi: {
+    version: string;
+    dialect: string;
+    yamlRelPath: string;
+    jsonRelPath: string;
   };
   ui: {
     framework: string;
@@ -161,6 +171,12 @@ function validateContract(data: unknown): asserts data is StackContract {
   if (!c.database?.primary?.pool?.ceiling || !c.database.cache?.defaultUrl) {
     throw new Error("database.primary.pool.ceiling and database.cache.defaultUrl are required");
   }
+  if (!c.database.mirror?.envVars?.length || !c.database.mirror.snapshotDirs?.length) {
+    throw new Error("database.mirror.envVars and database.mirror.snapshotDirs are required");
+  }
+  if (!c.openapi?.version || !c.openapi.dialect) {
+    throw new Error("openapi.version and openapi.dialect are required");
+  }
   if (!c.platforms?.vps || !c.platforms.cloudflare || !c.platforms.vercel) {
     throw new Error("platforms.{vps,cloudflare,vercel} are required");
   }
@@ -207,6 +223,12 @@ function renderC23Header(contract: StackContract, compactJson: string): string {
   const staffRoles = contract.auth.roles.staff
     .map((r) => `  ${cEscape(r)},`)
     .join("\n");
+  const mirrorEnvVars = contract.database.mirror.envVars
+    .map((v) => `  ${cEscape(v)},`)
+    .join("\n");
+  const portRows = Object.entries(contract.http.defaultPorts)
+    .map(([key, port]) => `  { ${cEscape(key)}, ${port} },`)
+    .join("\n");
 
   return `/* Auto-generated from contract/stack.yml — DO NOT EDIT.
  * Regenerate via: bun packages/rg-config/scripts/sync-contract.ts
@@ -221,6 +243,10 @@ function renderC23Header(contract: StackContract, compactJson: string): string {
 #define RG_CONTRACT_VERSION ${cEscape(contract.project.version)}
 #define RG_DEFAULT_DOMAIN ${cEscape(contract.project.domain)}
 #define RG_COOKIE_DOMAIN ${cEscape(contract.project.cookieDomain)}
+#define RG_OPENAPI_VERSION ${cEscape(contract.openapi.version)}
+#define RG_OPENAPI_DIALECT ${cEscape(contract.openapi.dialect)}
+#define RG_OPENAPI_PATH ${cEscape(contract.http.openapiPath)}
+#define RG_MIRROR_DEFAULT_REL_PATH ${cEscape(contract.database.mirror.defaultRelPath)}
 
 #define RG_ACHILLEA_SCHEMA ${cEscape(contract.database.primary.achilleaSchema)}
 #define RG_ACHILLEA_ISSUER ${cEscape(contract.auth.issuer)}
@@ -247,10 +273,25 @@ typedef struct {
   const char *path;
 } rg_origin_spec_t;
 
+typedef struct {
+  const char *key;
+  int32_t port;
+} rg_port_spec_t;
+
 static const rg_origin_spec_t RG_ORIGIN_SPECS[] = {
 ${originRows}
 };
 static const size_t RG_ORIGIN_SPECS_COUNT = sizeof(RG_ORIGIN_SPECS) / sizeof(RG_ORIGIN_SPECS[0]);
+
+static const rg_port_spec_t RG_DEFAULT_PORTS[] = {
+${portRows}
+};
+static const size_t RG_DEFAULT_PORTS_COUNT = sizeof(RG_DEFAULT_PORTS) / sizeof(RG_DEFAULT_PORTS[0]);
+
+static const char *const RG_MIRROR_ENV_VARS[] = {
+${mirrorEnvVars}
+};
+static const size_t RG_MIRROR_ENV_VARS_COUNT = sizeof(RG_MIRROR_ENV_VARS) / sizeof(RG_MIRROR_ENV_VARS[0]);
 
 static const char *const RG_TRUSTED_ORIGINS_PROD[] = {
 ${prodOrigins}
@@ -311,6 +352,23 @@ pub const CONTRACT_VERSION: &str = ${JSON.stringify(contract.project.version)};
 pub const DEFAULT_DOMAIN: &str = ${JSON.stringify(contract.project.domain)};
 pub const COOKIE_DOMAIN: &str = ${JSON.stringify(contract.project.cookieDomain)};
 
+pub const OPENAPI_VERSION: &str = ${JSON.stringify(contract.openapi.version)};
+pub const OPENAPI_DIALECT: &str = ${JSON.stringify(contract.openapi.dialect)};
+pub const OPENAPI_PATH: &str = ${JSON.stringify(contract.http.openapiPath)};
+pub const HEALTH_PATH: &str = ${JSON.stringify(contract.http.healthPath)};
+pub const DOCS_PATH: &str = ${JSON.stringify(contract.http.docsPath)};
+
+pub const PORT_WEBSITE: u16 = ${contract.http.defaultPorts.website ?? 3000};
+pub const PORT_RANKED: u16 = ${contract.http.defaultPorts.ranked ?? 4002};
+pub const PORT_MODEL_SERVE: u16 = ${contract.http.defaultPorts.modelServe ?? 8792};
+pub const PORT_API: u16 = ${contract.http.defaultPorts.api ?? 8800};
+pub const PORT_AZALEE: u16 = ${contract.http.defaultPorts.azalee ?? 8807};
+pub const ORIGIN_API: &str = "https://api.${contract.project.domain}";
+pub const ORIGIN_CDN: &str = "https://cdn.${contract.project.domain}";
+pub const ORIGIN_AZALEE: &str = "https://azalee.${contract.project.domain}";
+pub const ORIGIN_ACHILLEA: &str = "https://achillea.${contract.project.domain}";
+pub const ORIGIN_RANKED: &str = "https://ranked.${contract.project.domain}";
+
 pub const ACHILLEA_SCHEMA: &str = ${JSON.stringify(contract.database.primary.achilleaSchema)};
 pub const ACHILLEA_ISSUER: &str = ${JSON.stringify(contract.auth.issuer)};
 pub const ACHILLEA_SESSION_AUDIENCE: &str = ${JSON.stringify(contract.auth.audiences.session)};
@@ -325,6 +383,17 @@ pub const DB_IDLE_TIMEOUT_SEC: u64 = ${contract.database.primary.pool.idleTimeou
 pub const DB_MAX_LIFETIME_SEC: u64 = ${contract.database.primary.pool.maxLifetimeSec};
 pub const DB_CONNECT_TIMEOUT_SEC: u64 = ${contract.database.primary.pool.connectTimeoutSec};
 pub const REDIS_DEFAULT_URL: &str = ${JSON.stringify(contract.database.cache.defaultUrl)};
+
+pub const MIRROR_DEFAULT_REL_PATH: &str = ${JSON.stringify(contract.database.mirror.defaultRelPath)};
+pub const MIRROR_ENV_VARS: &[&str] = &[
+${rustStrArray(contract.database.mirror.envVars)}
+];
+pub const MIRROR_SNAPSHOT_DIRS: &[&str] = &[
+${rustStrArray(contract.database.mirror.snapshotDirs)}
+];
+pub const PG_SCHEMES: &[&str] = &[
+${rustStrArray(contract.database.primary.pgSchemes)}
+];
 
 pub const VERCEL_MAX_BUILDS_PER_WEEK: u32 = ${contract.platforms.vercel.maxBuildsPerWeek ?? 1};
 pub const CLOUDFLARE_CPU_MS: i32 = ${contract.platforms.cloudflare.cpuMs};
@@ -343,6 +412,92 @@ ${rustStrArray(contract.auth.roles.staff)}
 `;
 }
 
+interface OpenApiLike {
+  openapi: string;
+  $self?: string;
+  jsonSchemaDialect?: string;
+  info: Record<string, unknown>;
+  servers?: Array<Record<string, unknown>>;
+  tags?: Array<Record<string, unknown>>;
+  paths: Record<string, Record<string, unknown>>;
+  components?: {
+    schemas?: Record<string, unknown>;
+    parameters?: Record<string, unknown>;
+    securitySchemes?: Record<string, unknown>;
+  };
+}
+
+async function readJsonIfExists<T>(absPath: string): Promise<T | null> {
+  const f = Bun.file(absPath);
+  if (!(await f.exists())) return null;
+  return (await f.json()) as T;
+}
+
+async function buildMergedOpenApi(
+  root: string,
+  contract: StackContract,
+): Promise<OpenApiLike> {
+  const baseYaml = await Bun.file(join(root, contract.openapi.yamlRelPath)).text();
+  const base = Bun.YAML.parse(baseYaml) as OpenApiLike;
+  if (base.openapi !== contract.openapi.version) {
+    throw new Error(
+      `contract/openapi.yml version "${base.openapi}" !== stack.yml "${contract.openapi.version}"`,
+    );
+  }
+  base.jsonSchemaDialect = contract.openapi.dialect;
+  base.info = {
+    ...base.info,
+    version: contract.project.version,
+  };
+
+  const achilleaDoc = await readJsonIfExists<OpenApiLike>(
+    join(root, "packages/achillea-contract/generated/achillea.openapi.json"),
+  );
+  const inagleDoc = await readJsonIfExists<OpenApiLike>(
+    join(root, "packages/inagle/docs/OPENAPI.json"),
+  );
+
+  const mergedSchemas: Record<string, unknown> = {
+    ...base.components?.schemas,
+    ...achilleaDoc?.components?.schemas,
+    ...inagleDoc?.components?.schemas,
+  };
+
+  const mergedPaths: Record<string, Record<string, unknown>> = {
+    ...base.paths,
+  };
+  for (const [pathKey, pathItem] of Object.entries(inagleDoc?.paths ?? {})) {
+    if (!mergedPaths[pathKey]) {
+      mergedPaths[pathKey] = pathItem;
+    }
+  }
+
+  return {
+    ...base,
+    paths: mergedPaths,
+    components: {
+      ...base.components,
+      schemas: mergedSchemas,
+    },
+  };
+}
+
+function renderOpenApiTypeScript(doc: OpenApiLike): string {
+  const pathCount = Object.keys(doc.paths).length;
+  const schemaCount = Object.keys(doc.components?.schemas ?? {}).length;
+  return `// Auto-generated from contract/openapi.yml + Achilléa + Inagle — DO NOT EDIT.
+// Regenerate via: just contract
+
+export const OPENAPI_VERSION = ${JSON.stringify(doc.openapi)} as const;
+export const OPENAPI_DIALECT = ${JSON.stringify(doc.jsonSchemaDialect ?? "")} as const;
+export const OPENAPI_PATH_COUNT = ${pathCount} as const;
+export const OPENAPI_SCHEMA_COUNT = ${schemaCount} as const;
+
+export const MONOREPO_OPENAPI = ${JSON.stringify(doc, null, 2)} as const;
+export type MonorepoOpenApi = typeof MONOREPO_OPENAPI;
+`;
+}
+
 async function main(): Promise<number> {
   const root = repoRoot();
   const check = process.argv.includes("--check");
@@ -351,11 +506,18 @@ async function main(): Promise<number> {
   const parsed = Bun.YAML.parse(yamlText);
   validateContract(parsed);
 
+  const mergedOpenApi = await buildMergedOpenApi(root, parsed);
   const prettyJson = `${JSON.stringify(parsed, null, 2)}\n`;
   const compactJson = JSON.stringify(parsed);
+  const prettyOpenApiJson = `${JSON.stringify(mergedOpenApi, null, 2)}\n`;
 
   const outputs = [
     { rel: "contract/stack.json", content: prettyJson },
+    { rel: parsed.openapi.jsonRelPath, content: prettyOpenApiJson },
+    {
+      rel: "packages/rg-config/openapi.generated.ts",
+      content: renderOpenApiTypeScript(mergedOpenApi),
+    },
     {
       rel: "native/c/include/rg_contract_generated.h",
       content: renderC23Header(parsed, compactJson),

@@ -11,6 +11,8 @@ description = "Explore IEVR game data from the SQLite mirror"
 workspace = true
 
 [dependencies]
+aphrody-nie-core = { path = "../aphrody-nie-core", version = "1.4.8", default-features = false }
+aphrody-nie-sql = { path = "../aphrody-nie-sql", version = "1.4.8" }
 anyhow = "1.0.104"
 thiserror = "2.0.21"
 serde = { version = "1.0.228", features = ["std", "derive"] }

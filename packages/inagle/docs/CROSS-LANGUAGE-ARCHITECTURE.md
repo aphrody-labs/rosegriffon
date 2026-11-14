@@ -20,7 +20,7 @@
 +------------------v------------------+   +------------------v------------------+
 |           BUN FFI CLIENT            |   |         .NET NATIVEAOT / C-ABI      |
 |    `packages/inagle/src/ffi/nie.ts`  |   |   `apps/iecode-dotnet/Ffi/bin/Release/net10.0/<RID>/publish` |
-|   - Borrowed input / copied output buffers       |   |   - CriFs CPK Container Engine      |
+|   - Zero-copy buffer exchange       |   |   - CriFs CPK Container Engine      |
 |   - Safe memory pointer unwrapping  |   |   - UnmanagedCallersOnly exports    |
 |   - Multi-platform library loader   |   |   - Node-API JSExport layer         |
 +------------------+------------------+   +------------------+------------------+
@@ -41,27 +41,12 @@
 ## 2. ABI Contracts & Memory Management
 
 ### 2.1 Rust C-ABI (`libiecode.so`)
-
-- **Owner**: `crates/aphrody-nie-ffi`, library target `iecode`.
-
-* **Symbol prefix**: `nie_*`; Rust source defines each signature and sentinel.
-* **Dynamic output**: use `_out` functions with a writable `NieBytes` slot
-  (`ptr`, `len`, `cap`; 24 bytes on the 64-bit targets supported by this bridge).
-  Copy returned bytes into JavaScript-owned memory and free the original exactly
-  once with `nie_bytes_free_fields`. Never pass the struct by value through Bun.
-* **Static strings**: `nie_version` and format names are borrowed C strings and
-  must not be freed. There is no `nie_free_string` symbol in this ABI.
-* **Failures**: null/empty/sentinel results depend on the called function;
-  `nie_last_error_out` provides diagnostics. The ABI does not use a universal
-  negative status-code table.
-* **Native availability**: `isNativeAvailable()` and `getNativeLoadError()` expose
-  loader state. Only documented pure functions have TypeScript fallbacks;
-  successful fallback tests do not qualify native execution.
-
-See the [current bridge contract](../../../docs/development/INAGLE-NIE-FFI.md).
+- **Symbol Prefix**: `nie_*`
+- **Calling Convention**: System V AMD64 ABI (Linux) / Microsoft x64 ABI (Windows)
+- **String Management**: Output strings allocated by Rust are freed via `nie_free_string(char* ptr)`.
+- **Status Codes**: Functions return `0` on success, negative integers on error (`-1` Invalid Argument, `-2` Buffer Too Small, `-3` Corrupt Data).
 
 ### 2.2 .NET 10 NativeAOT (`IECODE.Ffi.so`)
-
 - **Symbol Prefix**: `iecode_*`
 - **Compiler**: `dotnet publish /p:PublishAot=true` producing self-contained native `.so` without external runtime dependency.
 - **Node-API**: Compliant with Node.js N-API v8 and Bun native addon loader.
@@ -72,11 +57,7 @@ See the [current bridge contract](../../../docs/development/INAGLE-NIE-FFI.md).
 
 ```typescript
 import { Inagle } from "@aphrody/inagle";
-import {
-  nieCrc32,
-  nieDecompressCrilayla,
-  nieProbeHeader,
-} from "@aphrody/inagle/ffi";
+import { nieCrc32, nieDecompressCrilayla, nieProbeHeader } from "@aphrody/inagle/ffi";
 import { IecodeDotnet } from "@aphrody/inagle/dotnet";
 
 // 1. Instant header probe

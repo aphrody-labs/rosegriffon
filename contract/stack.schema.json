@@ -10,6 +10,7 @@
     "http",
     "auth",
     "database",
+    "openapi",
     "ui",
     "platforms"
   ],
@@ -34,10 +35,11 @@
     "http": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["healthPath", "docsPath", "apiPrefix", "legacyApiPrefix", "defaultPorts", "origins", "cors", "trustedOrigins", "routes"],
+      "required": ["healthPath", "docsPath", "openapiPath", "apiPrefix", "legacyApiPrefix", "defaultPorts", "origins", "cors", "trustedOrigins", "routes"],
       "properties": {
         "healthPath": { "type": "string", "pattern": "^/" },
         "docsPath": { "type": "string", "pattern": "^/" },
+        "openapiPath": { "type": "string", "pattern": "^/" },
         "apiPrefix": { "type": "string", "pattern": "^/" },
         "legacyApiPrefix": { "type": "string", "pattern": "^/" },
         "defaultPorts": {
@@ -129,6 +131,17 @@
         "gameplay": { "type": "object" },
         "mirror": { "type": "object" },
         "cache": { "type": "object" }
+      }
+    },
+    "openapi": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["version", "dialect", "yamlRelPath", "jsonRelPath"],
+      "properties": {
+        "version": { "type": "string", "const": "3.2.1" },
+        "dialect": { "type": "string", "minLength": 1 },
+        "yamlRelPath": { "type": "string", "minLength": 1 },
+        "jsonRelPath": { "type": "string", "minLength": 1 }
       }
     },
     "ui": {

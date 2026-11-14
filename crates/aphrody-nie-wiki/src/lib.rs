@@ -31,7 +31,7 @@ pub(crate) fn cdn_base() -> String {
         .ok()
         .map(|v| v.trim().trim_end_matches('/').to_string())
         .filter(|v| !v.is_empty())
-        .unwrap_or_else(|| "https://cdn.rosegriffon.fr".to_string())
+        .unwrap_or_else(|| aphrody_nie_core::contract_generated::ORIGIN_CDN.to_string())
 }
 
 pub mod desktop;

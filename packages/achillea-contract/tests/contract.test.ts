@@ -240,16 +240,30 @@ describe("casse", () => {
 });
 
 describe("génération", () => {
-  test("les cinq cibles sont produites et non vides", () => {
+  test("les six cibles sont produites et non vides", () => {
     const { files } = generateContract({ root: TYPES_ROOT });
     expect(files.map((f) => f.file)).toEqual([
       "achillea.schema.json",
+      "achillea.openapi.json",
       "achillea.rs",
       "achillea.h",
       "Achillea.swift",
       "Achillea.kt",
     ]);
     for (const file of files) expect(file.content.length).toBeGreaterThan(1000);
+    const openapiFile = files.find((f) => f.file === "achillea.openapi.json");
+    const openapiDoc = JSON.parse(openapiFile?.content ?? "{}") as {
+      openapi?: string;
+      jsonSchemaDialect?: string;
+      components?: { schemas?: Record<string, unknown> };
+    };
+    expect(openapiDoc.openapi).toBe("3.2.1");
+    expect(openapiDoc.jsonSchemaDialect).toBe(
+      "https://spec.openapis.org/oas/3.2/dialect/2025-09-19",
+    );
+    expect(Object.keys(openapiDoc.components?.schemas ?? {}).length).toBeGreaterThan(
+      100,
+    );
   });
 
   test("les fichiers versionnés dans generated/ sont à jour", async () => {

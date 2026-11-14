@@ -131,6 +131,38 @@ RG_CAPI const char *rg_contract_json(void) {
   return RG_CONTRACT_EMBEDDED_JSON;
 }
 
+RG_CAPI const char *rg_contract_openapi_version(void) {
+  return RG_OPENAPI_VERSION;
+}
+
+RG_CAPI const char *rg_contract_openapi_dialect(void) {
+  return RG_OPENAPI_DIALECT;
+}
+
+RG_CAPI int32_t rg_default_port(const char *service_key) {
+  if (service_key == nullptr) {
+    return -1;
+  }
+  for (size_t i = 0; i < RG_DEFAULT_PORTS_COUNT; ++i) {
+    if (c_strcmp(RG_DEFAULT_PORTS[i].key, service_key) == 0) {
+      return RG_DEFAULT_PORTS[i].port;
+    }
+  }
+  return -1;
+}
+
+RG_CAPI bool rg_is_mirror_env_var(const char *name) {
+  if (name == nullptr) {
+    return false;
+  }
+  for (size_t i = 0; i < RG_MIRROR_ENV_VARS_COUNT; ++i) {
+    if (c_strcmp(RG_MIRROR_ENV_VARS[i], name) == 0) {
+      return true;
+    }
+  }
+  return false;
+}
+
 RG_CAPI int32_t rg_resolve_origin_url(
     const char *domain_override,
     const char *origin_key,

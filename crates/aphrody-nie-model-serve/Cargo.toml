@@ -15,6 +15,7 @@ default = []
 host = [
   "dep:anyhow",
   "dep:clap",
+  "dep:aphrody-nie-core",
   "dep:aphrody-nie-data",
   "dep:aphrody-nie-explore",
   "dep:aphrody-nie-sql",
@@ -30,6 +31,7 @@ host = [
 real-audio = ["host"]
 
 [dependencies]
+aphrody-nie-core = { path = "../aphrody-nie-core", version = "1.4.8", default-features = false, optional = true }
 aphrody-nie-formats = { path = "../aphrody-nie-formats", version = "1.4.8", default-features = false, features = ["std", "serde", "textures"] }
 aphrody-nie-data = { path = "../aphrody-nie-data", version = "1.4.8", default-features = false, optional = true, features = ["serde", "std"] }
 aphrody-nie-explore = { path = "../aphrody-nie-explore", version = "1.4.8", optional = true }

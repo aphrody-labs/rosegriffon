@@ -13,6 +13,7 @@
     "contract.ts",
     "contract-ffi.ts",
     "contract.generated.ts",
+    "openapi.generated.ts",
     "infra.ts",
     "rg-urls.ts",
     "oxlintrc.json",
@@ -27,6 +28,7 @@
   "exports": {
     "./contract": "./contract.ts",
     "./contract-ffi": "./contract-ffi.ts",
+    "./openapi": "./openapi.generated.ts",
     "./infra": "./infra.ts",
     "./rg-urls": "./rg-urls.ts",
     "./tsconfig-base.json": "./tsconfig-base.json",

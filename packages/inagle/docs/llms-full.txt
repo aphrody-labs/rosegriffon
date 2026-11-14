@@ -9,13 +9,13 @@ The IECODE ecosystem unifies three high-performance runtimes into a single coher
    - Fast user-facing CLI (inagle vfs, inagle format, inagle zukan, inagle wiki).
    - High-throughput web API and wiki query engine.
    - Dynamic FFI bindings via `bun:ffi` communicating with both Rust and .NET.
-2. Rust NIE C-ABI (crates/nie/aphrody-nie-ffi -> target/release/libiecode.so):
+2. Rust NIE C-ABI (crates/aphrody-nie-ffi -> the Cargo target directory's release library):
    - High-efficiency SIMD-accelerated CRILAYLA decompression and compression.
    - CRI position-aware XOR stream cipher and Viola fixed-key decrypter.
    - Relational database binary (RDBN / T2B cfg.bin) parsing into zero-copy JSON strings.
    - G4TX Level-5 texture decoding into raw RGBA8 pixel buffers and PNG streams.
    - Level-5 Lives save container (002AB8F4-*) decrypt/encrypt with CRC32 block checksums.
-3. C# .NET 10 NativeAOT (src/IECODE/Ffi -> IECODE.Ffi.so):
+3. C# .NET 10 NativeAOT (apps/iecode-dotnet/Ffi -> bin/Release/net10.0/<RID>/publish):
    - CriFs CPK container builder and unpacker with comprehensive TOC/@UTF rebuilding.
    - NativeAOT unmanaged exports via [UnmanagedCallersOnly] attribute.
    - Full Node-API [JSExport] support for native Node.js / Bun addon loading.

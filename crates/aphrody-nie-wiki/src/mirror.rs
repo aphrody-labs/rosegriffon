@@ -11,7 +11,7 @@
 
 use std::path::{Path, PathBuf};
 
-use anyhow::{Context, bail};
+use anyhow::Context;
 use rusqlite::{Connection, OpenFlags};
 
 /// Open the resolved SQLite mirror in read-only mode.
@@ -32,66 +32,19 @@ pub fn open(db_override: Option<&Path>) -> anyhow::Result<Connection> {
     Ok(conn)
 }
 
-/// Return the resolved SQLite mirror path.
+/// Return the resolved SQLite mirror path via `aphrody-nie-sql`.
 pub fn resolve(db_override: Option<&Path>) -> anyhow::Result<PathBuf> {
-    // 1. Explicit --db path.
     if let Some(p) = db_override {
-        if p.exists() {
-            return Ok(p.to_path_buf());
-        }
-        bail!("specified database does not exist: {}", p.display());
+        return aphrody_nie_sql::resolve_mirror_path(Some(p))
+            .ok_or_else(|| anyhow::anyhow!("specified database does not exist: {}", p.display()));
     }
 
-    // 2. Environment variables.
-    for var in &["NIE_WIKI_DB", "SQLITE_DB_PATH"] {
-        if let Ok(v) = std::env::var(var) {
-            let p = PathBuf::from(&v);
-            if p.exists() {
-                return Ok(p);
-            }
-        }
-    }
-
-    // 3. Repository-local game mirror and inagle snapshots.
-    let primary = PathBuf::from("var/mirror.sqlite");
-    if primary.is_file() && primary.metadata().is_ok_and(|m| m.len() > 0) {
-        return Ok(primary);
-    }
-    let mut candidates = Vec::new();
-    for dir in [PathBuf::from("var/miroir"), PathBuf::from("data/backups")] {
-        if dir.is_dir() {
-            candidates.extend(latest_sqlite_in(&dir));
-        }
-    }
-    if let Some(latest) = candidates.into_iter().max() {
-        return Ok(latest);
-    }
-
-    bail!(
-        "no game SQLite mirror found — use --db, NIE_WIKI_DB, var/mirror.sqlite, or place an \
-         inagle-*.sqlite snapshot in data/backups"
-    )
-}
-
-/// Find non-empty `inagle-*.sqlite` snapshots.
-///
-/// Zero-byte files still being created are ignored.
-fn latest_sqlite_in(dir: &Path) -> Option<PathBuf> {
-    let mut entries: Vec<PathBuf> = std::fs::read_dir(dir)
-        .ok()?
-        .flatten()
-        .map(|e| e.path())
-        .filter(|p| {
-            p.extension().is_some_and(|ext| ext == "sqlite")
-                && p.file_name()
-                    .and_then(|n| n.to_str())
-                    .is_some_and(|n| n.starts_with("inagle-"))
-                // Ignore empty files that are still being created.
-                && p.metadata().is_ok_and(|m| m.len() > 0)
-        })
-        .collect();
-    entries.sort();
-    entries.into_iter().next_back()
+    aphrody_nie_sql::resolve_mirror_path(None).ok_or_else(|| {
+        anyhow::anyhow!(
+            "no game SQLite mirror found — use --db, NIE_WIKI_DB, var/mirror.sqlite, or place an \
+             inagle-*.sqlite snapshot in data/backups"
+        )
+    })
 }
 
 /// Execute a query that maps rows into caller-defined values.

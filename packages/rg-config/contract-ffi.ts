@@ -24,6 +24,10 @@ export interface NativeContract {
   readonly path: string;
   schemaVersion(): number;
   domain(): string;
+  openapiVersion(): string;
+  openapiDialect(): string;
+  defaultPort(serviceKey: string): number;
+  isMirrorEnvVar(name: string): boolean;
   contractJson(): string;
   resolveOriginUrl(originKey: string, domainOverride?: string | null): string | null;
   isTrustedOrigin(origin: string, production: boolean): boolean;
@@ -48,6 +52,10 @@ export function loadNativeContract(
   const lib = dlopen(path, {
     rg_contract_schema_version: { args: [], returns: FFIType.u32 },
     rg_contract_domain: { args: [], returns: FFIType.cstring },
+    rg_contract_openapi_version: { args: [], returns: FFIType.cstring },
+    rg_contract_openapi_dialect: { args: [], returns: FFIType.cstring },
+    rg_default_port: { args: [FFIType.ptr], returns: FFIType.i32 },
+    rg_is_mirror_env_var: { args: [FFIType.ptr], returns: FFIType.bool },
     rg_contract_json: { args: [], returns: FFIType.cstring },
     rg_resolve_origin_url: {
       args: [FFIType.ptr, FFIType.ptr, FFIType.ptr, FFIType.u64],
@@ -75,6 +83,10 @@ export function loadNativeContract(
     path,
     schemaVersion: () => s.rg_contract_schema_version(),
     domain: () => s.rg_contract_domain()?.toString() ?? "",
+    openapiVersion: () => s.rg_contract_openapi_version()?.toString() ?? "",
+    openapiDialect: () => s.rg_contract_openapi_dialect()?.toString() ?? "",
+    defaultPort: (serviceKey: string) => s.rg_default_port(cstr(serviceKey)),
+    isMirrorEnvVar: (name: string) => s.rg_is_mirror_env_var(cstr(name)),
     contractJson: () => s.rg_contract_json()?.toString() ?? "{}",
     resolveOriginUrl(originKey: string, domainOverride?: string | null) {
       const buf = new Uint8Array(512);

@@ -3,7 +3,8 @@ import type { OpenAPIV3_1 } from "openapi-types";
 import { APIVersion } from "../../../v2";
 
 export default {
-    openapi: "3.1.0",
+    openapi: "3.2.1",
+    jsonSchemaDialect: "https://spec.openapis.org/oas/3.2/dialect/2025-09-19",
     info: {
         title: "Patreon API",
         version: `${APIVersion}`,

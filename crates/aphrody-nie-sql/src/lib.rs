@@ -58,7 +58,10 @@ impl DatabaseUrl {
                 path: PathBuf::from(path),
             });
         }
-        if value.starts_with("postgres://") || value.starts_with("postgresql://") {
+        if aphrody_nie_core::contract_generated::PG_SCHEMES
+            .iter()
+            .any(|scheme| value.starts_with(scheme))
+        {
             let authority = value
                 .split_once("://")
                 .map(|(_, rest)| rest)
@@ -83,6 +86,57 @@ impl DatabaseUrl {
             Self::PostgreSql { .. } => Backend::PostgreSql,
         }
     }
+}
+
+/// Resolves the canonical local SQLite mirror (`var/mirror.sqlite`) using the
+/// environment variables and fallback paths declared in `contract/stack.yml`.
+pub fn resolve_mirror_path(explicit: Option<&Path>) -> Option<PathBuf> {
+    if let Some(path) = explicit {
+        return path.exists().then(|| path.to_path_buf());
+    }
+
+    for var in aphrody_nie_core::contract_generated::MIRROR_ENV_VARS {
+        if let Ok(value) = std::env::var(var) {
+            let trimmed = value.trim();
+            if !trimmed.is_empty() && trimmed != "undefined" && trimmed != "null" {
+                let path = PathBuf::from(trimmed);
+                if path.exists() {
+                    return Some(path);
+                }
+            }
+        }
+    }
+
+    let primary = PathBuf::from(aphrody_nie_core::contract_generated::MIRROR_DEFAULT_REL_PATH);
+    if primary.is_file() && primary.metadata().is_ok_and(|m| m.len() > 0) {
+        return Some(primary);
+    }
+
+    aphrody_nie_core::contract_generated::MIRROR_SNAPSHOT_DIRS
+        .iter()
+        .filter_map(|dir| latest_nonempty_sqlite(Path::new(dir)))
+        .max()
+}
+
+fn latest_nonempty_sqlite(dir: &Path) -> Option<PathBuf> {
+    if !dir.is_dir() {
+        return None;
+    }
+    let mut entries: Vec<PathBuf> = std::fs::read_dir(dir)
+        .ok()?
+        .flatten()
+        .map(|entry| entry.path())
+        .filter(|path| {
+            path.extension().is_some_and(|ext| ext == "sqlite")
+                && path
+                    .file_name()
+                    .and_then(|n| n.to_str())
+                    .is_some_and(|n| n.starts_with("inagle-"))
+                && path.metadata().is_ok_and(|meta| meta.len() > 0)
+        })
+        .collect();
+    entries.sort();
+    entries.into_iter().next_back()
 }
 
 /// Values exchanged through the portable query contract.

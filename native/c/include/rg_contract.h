@@ -37,6 +37,18 @@ RG_CAPI const char *rg_contract_domain(void);
 /** Returns canonical contract JSON embedded at compile time. Static lifetime. */
 RG_CAPI const char *rg_contract_json(void);
 
+/** Returns canonical OpenAPI Specification version (e.g. "3.2.1"). Static lifetime. */
+RG_CAPI const char *rg_contract_openapi_version(void);
+
+/** Returns canonical OpenAPI JSON Schema dialect URI. Static lifetime. */
+RG_CAPI const char *rg_contract_openapi_dialect(void);
+
+/** Returns default port for a service ("website", "api", "azalee", "ranked", "modelServe", "core", "cron"), or -1. */
+RG_CAPI int32_t rg_default_port(const char *service_key);
+
+/** Returns true if `name` is a canonical SQLite mirror environment variable. */
+RG_CAPI bool rg_is_mirror_env_var(const char *name);
+
 /**
  * Resolves an origin URL ("site", "api", "ranked", "rankedApi", "cdn", "bot",
  * "achillea", "azalee") using `domain_override` if non-empty, else default domain.

@@ -14,14 +14,17 @@ export const STACK_CONTRACT = {
   "http": {
     "healthPath": "/health",
     "docsPath": "/docs",
+    "openapiPath": "/openapi.json",
     "apiPrefix": "/v1",
     "legacyApiPrefix": "/api",
     "defaultPorts": {
       "website": 3000,
+      "ranked": 4002,
+      "modelServe": 8792,
       "api": 8800,
+      "azalee": 8807,
       "core": 8810,
-      "cron": 8811,
-      "modelServe": 8792
+      "cron": 8811
     },
     "origins": {
       "site": {
@@ -166,6 +169,10 @@ export const STACK_CONTRACT = {
       "schema": "public",
       "achilleaSchema": "achillea",
       "orm": "kysely",
+      "pgSchemes": [
+        "postgres://",
+        "postgresql://"
+      ],
       "drivers": [
         "bun-sql",
         "pg",
@@ -206,7 +213,17 @@ export const STACK_CONTRACT = {
         "bun:sqlite",
         "rusqlite"
       ],
-      "defaultRelPath": "var/mirror.sqlite"
+      "defaultRelPath": "var/mirror.sqlite",
+      "envVars": [
+        "NIE_WIKI_DB",
+        "NIE_MIRROR_DB",
+        "SQLITE_DB_PATH",
+        "NIERS_MIRROR"
+      ],
+      "snapshotDirs": [
+        "var/miroir",
+        "data/backups"
+      ]
     },
     "cache": {
       "engine": "redis",
@@ -215,6 +232,12 @@ export const STACK_CONTRACT = {
       "idleTimeoutMs": 300000,
       "maxRetries": 10
     }
+  },
+  "openapi": {
+    "version": "3.2.1",
+    "dialect": "https://spec.openapis.org/oas/3.2/dialect/2025-09-19",
+    "yamlRelPath": "contract/openapi.yml",
+    "jsonRelPath": "contract/openapi.json"
   },
   "ui": {
     "framework": "next+react+base-ui+tailwindcss",

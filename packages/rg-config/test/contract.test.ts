@@ -9,6 +9,13 @@ import {
   STACK_CONTRACT,
 } from "../contract.ts";
 import { loadNativeContract } from "../contract-ffi.ts";
+import {
+  MONOREPO_OPENAPI,
+  OPENAPI_DIALECT,
+  OPENAPI_PATH_COUNT,
+  OPENAPI_SCHEMA_COUNT,
+  OPENAPI_VERSION,
+} from "../openapi.generated.ts";
 
 const ROOT = resolve(import.meta.dir, "../../..");
 
@@ -20,6 +27,21 @@ describe("unified polyglot stack contract", () => {
     const jsonObj = await Bun.file(join(ROOT, "contract/stack.json")).json();
     expect(jsonObj).toEqual(yamlObj);
     expect(STACK_CONTRACT).toEqual(jsonObj);
+  });
+
+  test("contract/openapi.json satisfies OpenAPI 3.2.1 across all monorepo domains", async () => {
+    const openapiJson = await Bun.file(join(ROOT, "contract/openapi.json")).json();
+    expect(OPENAPI_VERSION).toBe("3.2.1");
+    expect(OPENAPI_DIALECT).toBe("https://spec.openapis.org/oas/3.2/dialect/2025-09-19");
+    expect(openapiJson).toEqual(MONOREPO_OPENAPI);
+    expect(OPENAPI_PATH_COUNT).toBeGreaterThanOrEqual(25);
+    expect(OPENAPI_SCHEMA_COUNT).toBeGreaterThanOrEqual(150);
+    expect(MONOREPO_OPENAPI.paths["/health"]).toBeDefined();
+    expect(MONOREPO_OPENAPI.paths["/v1/tournaments"]).toBeDefined();
+    expect(MONOREPO_OPENAPI.paths["/api/ranked/challenge"]).toBeDefined();
+    expect(MONOREPO_OPENAPI.paths["/api/characters"]).toBeDefined();
+    expect(MONOREPO_OPENAPI.paths["/model-full/{code}.glb"]).toBeDefined();
+    expect(MONOREPO_OPENAPI.paths["/api/openapi.json"]).toBeDefined();
   });
 
   test("TS contract helpers enforce auth, roles, and Postgres URL invariants", () => {
@@ -54,6 +76,16 @@ describe("unified polyglot stack contract", () => {
     try {
       expect(native.schemaVersion()).toBe(STACK_CONTRACT.schemaVersion);
       expect(native.domain()).toBe(STACK_CONTRACT.project.domain);
+      expect(native.openapiVersion()).toBe(STACK_CONTRACT.openapi.version);
+      expect(native.openapiDialect()).toBe(STACK_CONTRACT.openapi.dialect);
+      expect(native.defaultPort("api")).toBe(STACK_CONTRACT.http.defaultPorts.api);
+      expect(native.defaultPort("azalee")).toBe(STACK_CONTRACT.http.defaultPorts.azalee);
+      expect(native.defaultPort("ranked")).toBe(STACK_CONTRACT.http.defaultPorts.ranked);
+      expect(native.defaultPort("modelServe")).toBe(
+        STACK_CONTRACT.http.defaultPorts.modelServe,
+      );
+      expect(native.isMirrorEnvVar("NIE_WIKI_DB")).toBe(true);
+      expect(native.isMirrorEnvVar("UNKNOWN_ENV")).toBe(false);
       expect(JSON.parse(native.contractJson())).toEqual(STACK_CONTRACT);
 
       expect(native.resolveOriginUrl("api")).toBe("https://api.rosegriffon.fr");

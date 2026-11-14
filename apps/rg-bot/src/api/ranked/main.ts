@@ -59,9 +59,15 @@ import {
 } from "./persistence";
 import { listMatchEvents, logMatchEvent } from "./telemetry";
 import { resolveRankedProofUrl, uploadRankedProof } from "./storage";
+import { STACK_CONTRACT } from "@rosegriffon/config/contract";
+import { MONOREPO_OPENAPI } from "@rosegriffon/config/openapi";
 import { rgUrl } from "@rosegriffon/config/rg-urls";
 
-const PORT = Number(process.env.PORT ?? process.env.RANKED_PORT ?? 4002);
+const PORT = Number(
+  process.env.PORT ??
+    process.env.RANKED_PORT ??
+    STACK_CONTRACT.http.defaultPorts.ranked,
+);
 const HOST = process.env.RANKED_HOST ?? "127.0.0.1";
 const STORAGE_DIR =
   process.env.RANKED_STORAGE_DIR ??
@@ -529,13 +535,17 @@ const server = defineServer({
 /** Routes REST du ranked, dans l'ordre d'évaluation (la première qui répond l'emporte). */
 function monterRoutes(app: RouteurRanked): void {
   {
-    // Healthcheck
+    // Healthcheck & OpenAPI 3.2.1 contract
     app.get("/api/health", (_req, res) => {
       res.json({
         ok: true,
         ts: Date.now(),
         activeChallenges: activeChallengeCount(),
       });
+    });
+
+    app.get(STACK_CONTRACT.http.openapiPath, (_req, res) => {
+      res.json(MONOREPO_OPENAPI);
     });
 
     // POST /api/ranked/challenge — crée un lien de défi partageable. Body : { mode, ranked,

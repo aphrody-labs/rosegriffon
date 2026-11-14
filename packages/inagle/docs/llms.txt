@@ -7,7 +7,7 @@
 - [VFS Specification](docs/VFS-SPECIFICATION.md): Complete specification of CriFs CPK containers, @UTF metadata, CRILAYLA decompression, and directory maps.
 - [nie.exe Reverse Engineering](docs/NIE-EXE-REVERSE-ENGINEERING.md): Authoritative PE32+ disassembly reference: 117,068 functions, 8 critical offsets, RTTI tree, and memory structs.
 - [OpenAPI 3.1 Specification (JSON)](docs/OPENAPI.json): REST & VFS API endpoints covering characters, skills, teams, format probe, and save decryption.
-- [OpenAPI 3.1 Specification (YAML)](docs/OPENAPI.yaml): YAML equivalent of the canonical OpenAPI 3.1.0 specification.
+- [OpenAPI 3.1 Specification (YAML)](docs/OPENAPI.yaml): YAML equivalent of the canonical OpenAPI 3.2.1 specification.
 - [Complete Full Knowledge Base (llms-full.txt)](docs/llms-full.txt): Single-pass token-efficient ingestion context containing all schemas, offsets, format tables, and C-ABI symbols.
 
 ## Core Repositories & Crates

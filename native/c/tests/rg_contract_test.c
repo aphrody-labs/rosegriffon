@@ -10,6 +10,16 @@
 int main(void) {
   assert(rg_contract_schema_version() == 1u);
   assert(strcmp(rg_contract_domain(), "rosegriffon.fr") == 0);
+  assert(strcmp(rg_contract_openapi_version(), "3.2.1") == 0);
+  assert(strstr(rg_contract_openapi_dialect(), "oas/3.2/dialect") != nullptr);
+  assert(rg_default_port("api") == 8800);
+  assert(rg_default_port("azalee") == 8807);
+  assert(rg_default_port("ranked") == 4002);
+  assert(rg_default_port("modelServe") == 8792);
+  assert(rg_default_port("nonexistent") == -1);
+  assert(rg_is_mirror_env_var("NIE_WIKI_DB"));
+  assert(rg_is_mirror_env_var("NIERS_MIRROR"));
+  assert(!rg_is_mirror_env_var("RANDOM_VAR"));
   const char *json = rg_contract_json();
   assert(json != nullptr && json[0] == '{' && strstr(json, "\"rosegriffon.fr\"") != nullptr);
 

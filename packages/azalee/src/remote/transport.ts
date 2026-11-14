@@ -7,13 +7,14 @@
  * navigateur. Aucun `node:*`, aucun `bun:*`, aucune référence nue à `process`.
  */
 
+import { rgDefaultUrl } from "@rosegriffon/config/rg-urls";
 import { AzaleeRemoteError, isAzaleeRetriable } from "./errors";
 
 /**
  * Base d'URL publique de l'API unifiée. L'ancien préfixe `/azalee` reste
  * utilisable via `AZALEE_API_URL` pendant la bascule Nginx.
  */
-export const AZALEE_DEFAULT_API_URL = "https://api.rosegriffon.fr/v1/azalee";
+export const AZALEE_DEFAULT_API_URL = `${rgDefaultUrl({}, "api")}/v1/azalee`;
 
 /**
  * Base d'URL du sidecar local (`azalee serve`), l'adresse qu'une application
@@ -22,8 +23,7 @@ export const AZALEE_DEFAULT_API_URL = "https://api.rosegriffon.fr/v1/azalee";
 export const AZALEE_SIDECAR_API_URL = "http://127.0.0.1:3010";
 
 /** En-tête d'identification par défaut (ignoré par les navigateurs, honoré par Bun/Node/Tauri). */
-export const AZALEE_USER_AGENT =
-  "@rosegriffon/azalee (+https://azalee.rosegriffon.fr)";
+export const AZALEE_USER_AGENT = `@rosegriffon/azalee (+${rgDefaultUrl({}, "azalee")})`;
 
 /**
  * Transport bas niveau : `Request` → `Response`. Par défaut le `fetch` global,

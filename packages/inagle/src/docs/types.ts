@@ -1,12 +1,12 @@
 /**
  * @file types.ts
  * @description Types and schemas for @aphrody/inagle/docs.
- * Covers OpenAPI 3.1.0 specifications, VFS architecture catalog,
+ * Covers OpenAPI 3.2.1 specifications, VFS architecture catalog,
  * nie.exe reverse engineering mappings, and Answer.AI llms.txt models.
  */
 
 // ============================================================================
-// 1. OpenAPI 3.1.0 Models
+// 1. OpenAPI 3.2.1 Models
 // ============================================================================
 
 export interface OpenApiInfo {
@@ -104,8 +104,18 @@ export interface OpenApiSchema {
   example?: unknown;
 }
 
+export interface OpenApiTag {
+  name: string;
+  summary?: string;
+  description?: string;
+  parent?: string;
+  kind?: string;
+}
+
 export interface OpenApiDocument {
-  openapi: "3.1.0";
+  openapi: "3.2.1";
+  $self?: string;
+  jsonSchemaDialect?: string;
   info: OpenApiInfo;
   servers?: OpenApiServer[];
   paths: Record<string, OpenApiPathItem>;
@@ -115,7 +125,7 @@ export interface OpenApiDocument {
     parameters?: Record<string, OpenApiParameter>;
     securitySchemes?: Record<string, unknown>;
   };
-  tags?: Array<{ name: string; description?: string }>;
+  tags?: OpenApiTag[];
 }
 
 // ============================================================================

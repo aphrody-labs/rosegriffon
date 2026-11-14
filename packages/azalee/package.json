@@ -84,6 +84,7 @@
     "typecheck": "bun check --noEmit"
   },
   "dependencies": {
+    "@rosegriffon/config": "workspace:*",
     "@rosegriffon/db": "workspace:*",
     "@rosegriffon/inagle": "workspace:*",
     "commander": "catalog:",

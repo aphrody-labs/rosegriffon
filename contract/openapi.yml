@@ -1,0 +1,663 @@
+# SPDX-License-Identifier: Apache-2.0
+# Canonical monorepo OpenAPI 3.2.1 specification source.
+# Merged with generated schemas from `@rosegriffon/achillea-contract` and
+# `@rosegriffon/inagle` by `packages/rg-config/scripts/sync-contract.ts` into:
+#   - contract/openapi.json
+#   - packages/rg-config/openapi.generated.ts
+
+openapi: "3.2.1"
+$self: "https://api.rosegriffon.fr/openapi.json"
+jsonSchemaDialect: "https://spec.openapis.org/oas/3.2/dialect/2025-09-19"
+
+info:
+  title: Rose Griffon Monorepo Unified API
+  version: "1.4.4"
+  summary: Contrat OpenAPI 3.2.1 unifié de tout le monorepo (RG, Achilléa, Ranked, Azalée, Inagle, NIE, Website)
+  description: |
+    Spécification canonique OpenAPI 3.2.1 couvrant tous les services HTTP/REST du monorepo Rose Griffon :
+    - **rg-bot Unified API** (`api.rosegriffon.fr`, port 8800)
+    - **Achilléa & Ranked Arena** (`ranked.rosegriffon.fr`, port 4002)
+    - **Azalée Wiki & Game Data** (`azalee.rosegriffon.fr`, port 8807)
+    - **Inagle Game Data & VFS** (`inagle`)
+    - **aphrody-nie-model-serve** (`cdn.rosegriffon.fr`, port 8792)
+    - **rg-website Next.js API** (`rosegriffon.fr`, port 3000)
+  license:
+    name: Apache-2.0
+    url: "https://www.apache.org/licenses/LICENSE-2.0"
+
+servers:
+  - url: "https://api.rosegriffon.fr"
+    description: Production Unified API (Elysia / Bun)
+  - url: "https://rosegriffon.fr"
+    description: Production Website (Next.js App Router)
+  - url: "https://ranked.rosegriffon.fr"
+    description: Production Ranked Lobby & Matchmaking Server
+  - url: "https://azalee.rosegriffon.fr"
+    description: Production Azalée Headless Wiki Server
+  - url: "https://cdn.rosegriffon.fr"
+    description: Production NIE Model & Asset Serve (Rust)
+  - url: "http://127.0.0.1:8800"
+    description: Local Unified API
+  - url: "http://127.0.0.1:3000"
+    description: Local Website
+
+tags:
+  - name: platform
+    summary: Santé, découverte OpenAPI, agent configuration et tâches planifiées
+    kind: platform
+  - name: auth
+    summary: Authentification Better Auth, sessions, tokens temps réel et Discord/Patreon/VRoid
+    kind: domain
+  - name: achillea
+    summary: Tournois, circuits, équipes, profils, portefeuille et sanctions
+    kind: domain
+  - name: ranked
+    summary: Défis, lobbies, télémetrie, saisons et litiges classés
+    parent: achillea
+    kind: resource
+  - name: azalee
+    summary: Encyclopédie Inazuma Eleven Victory Road et bridge Azalée
+    kind: domain
+  - name: inagle
+    summary: Données de jeu Inagle, BASARA, formats VFS, constantes nie.exe et sauvegardes
+    kind: domain
+  - name: nie
+    summary: Serveur Rust natif de modèles 3D GLB, textures G4TX, polices, VFS et audio
+    parent: inagle
+    kind: resource
+  - name: wiki
+    summary: Endpoints wiki communautaires exposés sur /v1/wiki
+    parent: azalee
+    kind: resource
+  - name: community
+    summary: Équipe, événements calendrier, partenaires, streams et recrutement
+    kind: domain
+  - name: content
+    summary: Articles, galerie, flux sociaux, statistiques d'émotes et recherche
+    kind: domain
+  - name: billing
+    summary: Webhooks Stripe et checkout
+    kind: domain
+  - name: website
+    summary: Routes API Next.js de apps/rg-website
+    kind: service
+
+paths:
+  /health:
+    get:
+      tags: [platform]
+      operationId: getPlatformHealth
+      summary: Vérifier la santé du service HTTP
+      responses:
+        "200":
+          description: Service opérationnel
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+  /openapi.json:
+    get:
+      tags: [platform]
+      operationId: getOpenApiSpec
+      summary: Document OpenAPI 3.2.1 canonique du monorepo
+      responses:
+        "200":
+          description: Spécification OpenAPI 3.2.1 au format JSON
+          content:
+            application/json:
+              schema:
+                type: object
+  /docs:
+    get:
+      tags: [platform]
+      operationId: getApiDocsUi
+      summary: Interface interactive Swagger / Scalar
+      responses:
+        "200":
+          description: Page HTML de documentation interactive
+  /.well-known/agent-configuration:
+    get:
+      tags: [auth]
+      operationId: getAgentConfiguration
+      summary: Métadonnées agent Better Auth
+      responses:
+        "200":
+          description: Configuration agent JSON
+  /v1/cron/{job}:
+    post:
+      tags: [platform]
+      operationId: runCronJob
+      summary: Déclencher une tâche planifiée via Bearer secret
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: job
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: attendre
+          in: query
+          schema:
+            type: string
+            enum: ["0", "1"]
+      responses:
+        "200":
+          description: Résultat d'exécution de la tâche
+  /v1/discord/announce:
+    post:
+      tags: [platform]
+      operationId: postDiscordAnnounce
+      summary: Publier une annonce Discord depuis le site
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Annonce transmise
+  /v1/discord/interactions/execute:
+    post:
+      tags: [platform]
+      operationId: executeDiscordInteraction
+      summary: Exécuter une interaction Discord transmise par aphrody-rg-server
+      responses:
+        "200":
+          description: Réponse d'interaction Discord
+
+  /v1/auth/realtime-token:
+    get:
+      tags: [auth]
+      operationId: issueRealtimeToken
+      summary: Émettre un JWT temps réel pour Achilléa / Ranked
+      responses:
+        "200":
+          description: Jeton temps réel
+  /v1/auth/me:
+    get:
+      tags: [auth]
+      operationId: getCurrentAuthSession
+      summary: Lire la session et le profil courant
+      responses:
+        "200":
+          description: Session authentifiée
+  /v1/auth/logout:
+    post:
+      tags: [auth]
+      operationId: logoutSession
+      summary: Fermer la session courante
+      responses:
+        "200":
+          description: Déconnecté
+
+  /v1/tournaments:
+    get:
+      tags: [achillea]
+      operationId: listV1Tournaments
+      summary: Lister les tournois Achilléa
+      responses:
+        "200":
+          description: Liste des tournois
+  /v1/tournaments/circuit/ranking:
+    get:
+      tags: [achillea]
+      operationId: getV1CircuitRanking
+      summary: Classement du circuit Achilléa
+      responses:
+        "200":
+          description: Classement du circuit
+  /v1/tournaments/circuit/stats:
+    get:
+      tags: [achillea]
+      operationId: getV1CircuitStats
+      summary: Statistiques globales du circuit Achilléa
+      responses:
+        "200":
+          description: Statistiques du circuit
+  /v1/tournaments/{id}/summary:
+    get:
+      tags: [achillea]
+      operationId: getV1TournamentSummary
+      summary: Résumé d'un tournoi Achilléa
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Résumé du tournoi
+  /v1/users/me:
+    get:
+      tags: [achillea]
+      operationId: getAchilleaCurrentUser
+      summary: Profil joueur Achilléa courant
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Profil Achilléa
+  /v1/wallet/balance:
+    get:
+      tags: [achillea]
+      operationId: getAchilleaWalletBalance
+      summary: Solde du portefeuille Achilléa
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Solde et historique récent
+  /v1/sanctions:
+    get:
+      tags: [achillea]
+      operationId: listAchilleaSanctions
+      summary: Lister les sanctions compétitives
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Liste des sanctions
+
+  /api/ranked/challenge:
+    post:
+      tags: [ranked]
+      operationId: createRankedChallenge
+      summary: Créer un défi classé
+      security:
+        - bearerAuth: []
+      responses:
+        "201":
+          description: Défi créé
+  /api/ranked/challenge/{code}:
+    get:
+      tags: [ranked]
+      operationId: getRankedChallenge
+      summary: Consulter un défi classé
+      parameters:
+        - name: code
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Détail du défi
+    delete:
+      tags: [ranked]
+      operationId: cancelRankedChallenge
+      summary: Annuler un défi classé
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: code
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Défi annulé
+  /api/ranked/challenge/{code}/accept:
+    post:
+      tags: [ranked]
+      operationId: acceptRankedChallenge
+      summary: Accepter un défi classé
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: code
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Lobby créé
+  /api/admin/ranked/overview:
+    get:
+      tags: [ranked]
+      operationId: getRankedAdminOverview
+      summary: Vue d'ensemble des lobbies et saisons classées
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Vue admin classée
+
+  /api/characters:
+    get:
+      tags: [azalee, inagle]
+      operationId: listAzaleeCharacters
+      summary: Rechercher et paginer les personnages d'IEVR
+      parameters:
+        - $ref: "#/components/parameters/SearchQ"
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/Limit"
+      responses:
+        "200":
+          description: Catalogue paginé des personnages
+  /api/characters/{slug}:
+    get:
+      tags: [azalee, inagle]
+      operationId: getAzaleeCharacter
+      summary: Fiche détaillée d'un personnage (baseSlug, slug ou id)
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Personnage détaillé
+        "404":
+          description: Personnage introuvable
+  /api/skills:
+    get:
+      tags: [azalee, inagle]
+      operationId: listAzaleeSkills
+      summary: Lister les techniques spéciales (Hissatsu)
+      parameters:
+        - $ref: "#/components/parameters/SearchQ"
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/Limit"
+      responses:
+        "200":
+          description: Liste des techniques
+  /api/skills/{id}:
+    get:
+      tags: [azalee, inagle]
+      operationId: getAzaleeSkill
+      summary: Fiche technique d'un hissatsu
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Technique trouvée
+  /api/items:
+    get:
+      tags: [azalee]
+      operationId: listAzaleeItems
+      summary: Lister les objets du jeu
+      responses:
+        "200":
+          description: Liste paginée d'objets
+  /api/teams:
+    get:
+      tags: [azalee]
+      operationId: listAzaleeTeams
+      summary: Lister les équipes d'IEVR
+      responses:
+        "200":
+          description: Liste des équipes
+  /api/passives:
+    get:
+      tags: [azalee]
+      operationId: listAzaleePassives
+      summary: Lister les passifs d'équipe et joueurs
+      responses:
+        "200":
+          description: Liste des passifs
+  /api/formations:
+    get:
+      tags: [azalee]
+      operationId: listAzaleeFormations
+      summary: Lister les formations tactiques
+      responses:
+        "200":
+          description: Liste des formations
+  /api/tactics:
+    get:
+      tags: [azalee]
+      operationId: listAzaleeTactics
+      summary: Lister les tactiques spéciales
+      responses:
+        "200":
+          description: Liste des tactiques
+  /api/cpk/search:
+    get:
+      tags: [azalee, inagle]
+      operationId: searchCpkEntries
+      summary: Rechercher dans l'index CPK
+      parameters:
+        - $ref: "#/components/parameters/SearchQ"
+      responses:
+        "200":
+          description: Entrées CPK correspondantes
+  /api/cross/stats:
+    get:
+      tags: [azalee]
+      operationId: getAzaleeCrossStats
+      summary: Statistiques du catalogue croisé
+      responses:
+        "200":
+          description: Compteurs cross-catalog
+
+  /v1/inagle/health:
+    get:
+      tags: [inagle]
+      operationId: getInagleHealth
+      summary: Santé du module Inagle dans rg-api
+      responses:
+        "200":
+          description: Module Inagle actif
+  /v1/wiki/characters:
+    get:
+      tags: [wiki]
+      operationId: listWikiCharacters
+      summary: Lister les personnages via /v1/wiki
+      responses:
+        "200":
+          description: Catalogue personnages
+  /v1/community/team:
+    get:
+      tags: [community]
+      operationId: listCommunityTeam
+      summary: Membres de l'équipe Rose Griffon
+      responses:
+        "200":
+          description: Liste des membres
+  /v1/content/articles:
+    get:
+      tags: [content]
+      operationId: listContentArticles
+      summary: Articles publiés Rose Griffon
+      responses:
+        "200":
+          description: Articles paginés
+  /v1/billing/webhook:
+    post:
+      tags: [billing]
+      operationId: handleStripeWebhook
+      summary: Réception des événements webhook Stripe
+      responses:
+        "200":
+          description: Événement traité
+
+  /vfs/ls:
+    get:
+      tags: [nie]
+      operationId: listNieVfsDirectory
+      summary: Lister un répertoire du VFS natif IEVR
+      parameters:
+        - name: path
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+        - name: offset
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Contenu du répertoire et rôle catalogué
+  /vfs/find:
+    get:
+      tags: [nie]
+      operationId: findNieVfsFiles
+      summary: Rechercher des fichiers dans le VFS natif IEVR
+      parameters:
+        - $ref: "#/components/parameters/SearchQ"
+        - name: ext
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Résultats paginés du VFS
+  /vfs/digest:
+    get:
+      tags: [nie]
+      operationId: getNieVfsDigest
+      summary: En-tête content-addressed du manifeste VFS logique
+      responses:
+        "200":
+          description: Empreinte et compteur VFS
+  /model-full/{code}.glb:
+    get:
+      tags: [nie]
+      operationId: getNieFullModelGlb
+      summary: Servir un modèle 3D glTF/GLB complet assemblé depuis G4MD/G4MG/G4TX
+      parameters:
+        - name: code
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Binaire glTF 2.0 (model/gltf-binary)
+          content:
+            model/gltf-binary:
+              schema:
+                type: string
+                format: binary
+  /tex-info/{path}:
+    get:
+      tags: [nie]
+      operationId: getNieTextureInfo
+      summary: Catalogue JSON ou feuille CSS d'un conteneur G4TX
+      parameters:
+        - name: path
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Métadonnées de textures
+  /ui/text.png:
+    get:
+      tags: [nie]
+      operationId: renderNieGameTextPng
+      summary: Rendu PNG d'un texte avec la police bitmap du jeu
+      parameters:
+        - name: t
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Image PNG rendue
+
+  /api/health:
+    get:
+      tags: [website, platform]
+      operationId: getWebsiteHealth
+      summary: Santé du site Next.js et connectivité PostgreSQL
+      responses:
+        "200":
+          description: Site sain
+        "503":
+          description: Base dégradée
+  /api/openapi.json:
+    get:
+      tags: [website, platform]
+      operationId: getWebsiteOpenApiJson
+      summary: Exposer le document OpenAPI 3.2.1 unifié depuis rg-website
+      responses:
+        "200":
+          description: Spécification OpenAPI 3.2.1 JSON
+  /api/recherche:
+    get:
+      tags: [website, content]
+      operationId: searchWebsiteContent
+      summary: Recherche unifiée articles, personnages et pages du site
+      parameters:
+        - $ref: "#/components/parameters/SearchQ"
+      responses:
+        "200":
+          description: Résultats de recherche
+  /api/public/achillea/info:
+    get:
+      tags: [website, achillea]
+      operationId: getPublicAchilleaInfo
+      summary: Résumé public Achilléa pour le site vitrine
+      responses:
+        "200":
+          description: Informations publiques Achilléa
+  /api/public/azalee/latest:
+    get:
+      tags: [website, azalee]
+      operationId: getPublicAzaleeLatest
+      summary: Dernières fiches et statistiques publiques Azalée
+      responses:
+        "200":
+          description: Aperçu public Azalée
+
+components:
+  parameters:
+    SearchQ:
+      name: q
+      in: query
+      description: Terme de recherche textuelle
+      schema:
+        type: string
+    Page:
+      name: page
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+    Limit:
+      name: limit
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 500
+        default: 50
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [ok, degraded]
+        service:
+          type: string
+        uptime:
+          type: number
+        timestamp:
+          type: integer
+      required: [status]
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Jeton JWT Achilléa ou Bearer secret cron/admin
+    cookieSession:
+      type: apiKey
+      in: cookie
+      name: better-auth.session_token
+      description: Cookie de session Better Auth (.rosegriffon.fr)

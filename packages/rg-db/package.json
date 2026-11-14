@@ -25,6 +25,7 @@
     "./inagle": "./src/inagle.ts",
     "./inagle-sql": "./src/inagle-sql.ts",
     "./pg": "./src/pg.ts",
+    "./sqlite": "./src/sqlite.ts",
     "./bun-sql": "./src/bun-sql.ts",
     "./postgres-client": "./src/postgres-client.ts",
     "./kysely-types": "./src/kysely-types.ts",

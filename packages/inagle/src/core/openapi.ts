@@ -1,19 +1,12 @@
 /**
- * OpenAPI 3.1.0 Specification Generator
+ * OpenAPI 3.2.1 Specification Generator
  *
- * Generates OpenAPI spec from Zod 4 schemas automatically.
- * This provides accurate, always-in-sync API documentation.
- *
- * @example
- * ```typescript
- * import { generateOpenAPI } from '@aphrody/inagle/openapi'
- *
- * const spec = generateOpenAPI({ characters, skills })
- * // Serve at /openapi.json
- * ```
+ * Generates OpenAPI spec from Zod 4 schemas automatically, sharing the
+ * canonical YAML serializer from `../docs/openapi.js`.
  */
 
 import type { z } from "zod";
+import { toYaml } from "../docs/openapi.js";
 import {
   BasaraSchema,
   EnrichedCharacterSchema,
@@ -125,7 +118,7 @@ function objectToParameters(
 // ============================================================================
 
 /**
- * Generate complete OpenAPI 3.1.0 specification
+ * Generate complete OpenAPI 3.2.1 specification
  */
 export function generateOpenAPI(config: OpenAPIConfig = {}): object {
   const info = { ...DEFAULT_INFO, ...config.info };
@@ -133,7 +126,8 @@ export function generateOpenAPI(config: OpenAPIConfig = {}): object {
   const stats = config.stats ?? {};
 
   return {
-    openapi: "3.1.0",
+    openapi: "3.2.1",
+    jsonSchemaDialect: "https://spec.openapis.org/oas/3.2/dialect/2025-09-19",
     info,
     servers,
     tags: [
@@ -455,12 +449,10 @@ export function generateOpenAPI(config: OpenAPIConfig = {}): object {
 }
 
 /**
- * Generate OpenAPI YAML string (requires js-yaml)
+ * Generate OpenAPI YAML string via the canonical serializer in `docs/openapi`.
  */
 export function generateOpenAPIYAML(config: OpenAPIConfig = {}): string {
-  const spec = generateOpenAPI(config);
-  // Simple YAML serialization for basic cases
-  return JSON.stringify(spec, null, 2).replace(/^/gm, "");
+  return toYaml(generateOpenAPI(config));
 }
 
 export type { OpenAPIConfig, OpenAPIInfo, OpenAPIServer };

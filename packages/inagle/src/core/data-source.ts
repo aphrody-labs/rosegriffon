@@ -1,9 +1,8 @@
-import { statSync } from "node:fs";
-import { join, resolve } from "node:path";
 import {
   getInagleDatabaseURL,
   isInagleDatabaseConfigured,
 } from "@rosegriffon/db/pg";
+import { resolveMirrorSqlitePath } from "@rosegriffon/db/sqlite";
 
 export type InagleDataSource = "vfs" | "sqlite" | "postgres";
 export type InagleDataSourceOption = InagleDataSource | "auto";
@@ -29,21 +28,13 @@ export function ownedPostgresUrl(): string {
 }
 
 export function localMirrorPath(): string | undefined {
-  const explicit = process.env.NIE_WIKI_DB || process.env.NIE_MIRROR_DB;
-  const path =
-    explicit ??
-    join(process.env.IECODE_ROOT || process.cwd(), "var", "mirror.sqlite");
-  try {
-    const info = statSync(path);
-    if (info.isFile() && info.size > 0) return resolve(path);
-  } catch {
-    // Discovery does not create an empty database or search another profile.
-  }
-  if (explicit)
-    throw new Error(
-      "The explicitly selected Inagle SQLite mirror is unavailable",
-    );
-  return undefined;
+  return (
+    resolveMirrorSqlitePath({
+      envVars: ["NIE_WIKI_DB", "NIE_MIRROR_DB"],
+      requireNonEmptyFile: true,
+      strictExplicit: true,
+    }) ?? undefined
+  );
 }
 
 /** Whether the Neon gameplay database (INAGLE_DATABASE_URL or its alias NIE_PG_URL) is configured. */

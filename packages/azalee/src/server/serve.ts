@@ -11,6 +11,8 @@
  * s'embarque aussi bien dans `Bun.serve` que dans un autre routeur.
  */
 
+import { STACK_CONTRACT } from "@rosegriffon/config/contract";
+import { MONOREPO_OPENAPI } from "@rosegriffon/config/openapi";
 import { fileMeta, listDirPaged, searchFiles, totalFiles } from "../cpk/index";
 import { getCrossCatalogStats, getCrossTables } from "../cross/data";
 import { categoryStats, searchText } from "../game-text/index";
@@ -34,7 +36,7 @@ import { wikiService } from "../wiki/service";
  * (`api.rosegriffon.fr` : n2b 8802, shai 8803, cdn 8804, cdn-variants 8805,
  * azalee-api **8807**). 3010 est déjà pris par un autre service.
  */
-export const DEFAULT_AZALEE_PORT = 8807;
+export const DEFAULT_AZALEE_PORT = STACK_CONTRACT.http.defaultPorts.azalee;
 
 /** Options du serveur headless. */
 export interface AzaleeServerOptions {
@@ -150,6 +152,8 @@ route("health", async () => ({
   dataDir: resolveDataDir(),
   cpkFiles: await safeAsync(() => totalFiles(), 0),
 }));
+
+route(STACK_CONTRACT.http.openapiPath.replace(/^\//, ""), () => MONOREPO_OPENAPI);
 
 route("api/characters", ({ query }) =>
   wikiService.getCharactersList(listParams(query) as never),

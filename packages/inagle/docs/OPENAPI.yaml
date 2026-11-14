@@ -1,10 +1,12 @@
-openapi: 3.1.0
+openapi: 3.2.1
+$self: "https://api.rosegriffon.fr/v1/inagle/openapi.json"
+jsonSchemaDialect: "https://spec.openapis.org/oas/3.2/dialect/2025-09-19"
 info:
   title: "Inagle Universal Game Data & Reverse Engineering API"
-  version: 2.0.4
-  description: "Authoritative OpenAPI 3.1 specification for Inazuma Eleven: Victory Road game data, VFS virtual file system, and nie.exe reverse-engineering services across Bun, Rust NIE crates, and C# IECODE.Core."
+  version: 2.0.5
+  description: "Authoritative OpenAPI 3.2.1 specification for Inazuma Eleven: Victory Road game data, VFS virtual file system, and nie.exe reverse-engineering services across Bun, Rust NIE crates, and C# IECODE.Core."
   contact:
-    name: "Aphrody Code Team"
+    name: Aphrody Code Team
     url: "https://inagle.google.com"
     email: "contact@aphrody.com"
   license:

@@ -7,7 +7,7 @@
  * - SQL projections: durable game-data access through PostgreSQL
  * - hash: Hash computation and lookup utilities
  * - images: Image path resolution and indexing
- * - openapi: OpenAPI 3.1.0 spec generator from Zod schemas
+ * - openapi: OpenAPI 3.2.1 spec generator from Zod schemas
  * - paths: Data file paths configuration
  * - config-parser: Raw cfg.bin.json parser
  * - data-loader: Central data loading with caching

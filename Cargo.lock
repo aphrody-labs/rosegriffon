@@ -774,6 +774,7 @@ name = "aphrody-nie-model-serve"
 version = "1.4.8"
 dependencies = [
  "anyhow",
+ "aphrody-nie-core",
  "aphrody-nie-data",
  "aphrody-nie-explore",
  "aphrody-nie-formats",
@@ -917,6 +918,7 @@ dependencies = [
 name = "aphrody-nie-sql"
 version = "1.4.8"
 dependencies = [
+ "aphrody-nie-core",
  "bytes",
  "rusqlite",
  "rustls",
@@ -1031,6 +1033,8 @@ name = "aphrody-nie-wiki"
 version = "1.4.8"
 dependencies = [
  "anyhow",
+ "aphrody-nie-core",
+ "aphrody-nie-sql",
  "rand 0.10.3",
  "redis",
  "rusqlite",

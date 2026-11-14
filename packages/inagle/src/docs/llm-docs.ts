@@ -78,25 +78,25 @@ export function getLlmIndexDocument(): LlmIndexDocument {
       ],
       Api: [
         {
-          title: "OpenAPI 3.1.0 Specification (JSON)",
+          title: "OpenAPI 3.2.1 Specification (JSON)",
           url: "docs/OPENAPI.json",
           summary:
             "REST & VFS API endpoints covering characters, skills, teams, format probe, and save decryption.",
           tokensEstimate: 3100,
           keyConcepts: [
-            "OpenAPI 3.1",
+            "OpenAPI 3.2.1",
             "/api/vfs/probe",
             "/api/characters",
             "/api/saves/decrypt",
           ],
         },
         {
-          title: "OpenAPI 3.1.0 Specification (YAML)",
+          title: "OpenAPI 3.2.1 Specification (YAML)",
           url: "docs/OPENAPI.yaml",
           summary:
-            "YAML equivalent of the canonical OpenAPI 3.1.0 specification.",
+            "YAML equivalent of the canonical OpenAPI 3.2.1 specification.",
           tokensEstimate: 2900,
-          keyConcepts: ["OpenAPI 3.1", "YAML"],
+          keyConcepts: ["OpenAPI 3.2.1", "YAML"],
         },
       ],
     },

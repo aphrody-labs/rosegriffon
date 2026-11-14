@@ -1,6 +1,6 @@
 /**
  * @file openapi.ts
- * @description OpenAPI 3.1.0 specification generator and serializers for @aphrody/inagle.
+ * @description OpenAPI 3.2.1 specification generator and serializers for @aphrody/inagle.
  * Documents REST and RPC endpoints for game data, VFS virtual file system,
  * binary format inspection, and nie.exe reverse-engineering services.
  */
@@ -14,7 +14,7 @@ import {
 } from "./nie-re-map.js";
 
 /**
- * Builds the canonical OpenAPI 3.1.0 document.
+ * Builds the canonical OpenAPI 3.2.1 document.
  */
 export function generateOpenApiSpec(): OpenApiDocument {
   const schemaVfsFormat: OpenApiSchema = {
@@ -217,12 +217,14 @@ export function generateOpenApiSpec(): OpenApiDocument {
   };
 
   return {
-    openapi: "3.1.0",
+    openapi: "3.2.1",
+    $self: "https://api.rosegriffon.fr/v1/inagle/openapi.json",
+    jsonSchemaDialect: "https://spec.openapis.org/oas/3.2/dialect/2025-09-19",
     info: {
       title: "Inagle Universal Game Data & Reverse Engineering API",
       version: "2.0.5",
       description:
-        "Authoritative OpenAPI 3.1 specification for Inazuma Eleven: Victory Road game data, VFS virtual file system, and nie.exe reverse-engineering services across Bun, Rust NIE crates, and C# IECODE.Core.",
+        "Authoritative OpenAPI 3.2.1 specification for Inazuma Eleven: Victory Road game data, VFS virtual file system, and nie.exe reverse-engineering services across Bun, Rust NIE crates, and C# IECODE.Core.",
       contact: {
         name: "Aphrody Code Team",
         url: "https://inagle.google.com",

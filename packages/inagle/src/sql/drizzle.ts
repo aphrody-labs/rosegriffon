@@ -6,8 +6,9 @@
  */
 
 import { Database } from "bun:sqlite";
-import { localMirrorPath, ownedPostgresUrl } from "../core/data-source.js";
-import { SQL } from "bun";
+import { createBunSql, createInagleBunSql } from "@rosegriffon/db/bun-sql";
+import { localMirrorPath } from "../core/data-source.js";
+import type { SQL } from "bun";
 import { drizzle as drizzleSqlite } from "drizzle-orm/bun-sqlite";
 import { drizzle as drizzlePg } from "drizzle-orm/bun-sql";
 import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
@@ -323,9 +324,9 @@ export function createDrizzlePg(sqlOrUrl?: SQL | string) {
   const client =
     typeof sqlOrUrl === "object" && sqlOrUrl !== null
       ? sqlOrUrl
-      : new SQL({
-          url: typeof sqlOrUrl === "string" ? sqlOrUrl : ownedPostgresUrl(),
-        });
+      : typeof sqlOrUrl === "string"
+        ? createBunSql({ url: sqlOrUrl })
+        : createInagleBunSql();
   return drizzlePg(client, {
     schema: {
       characters: pgCharacters,

@@ -7,6 +7,7 @@
 import { emitC23 } from "./emit-c23";
 import { emitJsonSchema } from "./emit-json-schema";
 import { emitKotlin } from "./emit-kotlin";
+import { emitOpenApi } from "./emit-openapi";
 import { emitRust } from "./emit-rust";
 import { emitSwift } from "./emit-swift";
 import { extractContract, type ExtractOptions } from "./extract";
@@ -25,6 +26,12 @@ export const CONTRACT_TARGETS: readonly ContractTarget[] = [
     language: "JSON Schema 2020-12",
     render: (contract) =>
       `${JSON.stringify(emitJsonSchema(contract), null, 2)}\n`,
+  },
+  {
+    file: "achillea.openapi.json",
+    language: "OpenAPI 3.2.1",
+    render: (contract) =>
+      `${JSON.stringify(emitOpenApi(contract), null, 2)}\n`,
   },
   { file: "achillea.rs", language: "Rust (serde)", render: emitRust },
   { file: "achillea.h", language: "Pure C23 (LLVM ABI)", render: emitC23 },

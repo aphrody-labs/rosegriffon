@@ -13,6 +13,7 @@ import { dbPlugin } from "./plugins/db";
 import { publicCache } from "./plugins/public-cache";
 import { elysiaAuth } from "@rosegriffon/auth/elysia";
 import { contractTrustedOrigins, STACK_CONTRACT } from "@rosegriffon/config/contract";
+import { MONOREPO_OPENAPI } from "@rosegriffon/config/openapi";
 import { handleAnnounceHttp, handleCronHttp } from "@rosegriffon/cron";
 
 const allowedOrigins = new Set(
@@ -46,15 +47,17 @@ export const app = new Elysia()
     swagger({
       path: STACK_CONTRACT.http.docsPath,
       documentation: {
+        openapi: STACK_CONTRACT.openapi.version,
         info: {
-          title: "Rose Griffon Unified API",
-          version: "3.0.0",
+          title: MONOREPO_OPENAPI.info.title,
+          version: STACK_CONTRACT.project.version,
           description:
-            "API unique du monorepo Rose Griffon (ElysiaJS + Kysely + Bun)",
+            "API unique du monorepo Rose Griffon (OpenAPI 3.2.1 · ElysiaJS + Kysely + Bun)",
         },
       },
     }),
   )
+  .get(STACK_CONTRACT.http.openapiPath, () => MONOREPO_OPENAPI)
   // Better Auth sur SON préfixe (`basePath: "/v1/auth"`) et ses métadonnées `/.well-known`, pas
   // à la racine : monté sur `/`, il recevait toute URL inconnue et interrogeait la base pour
   // répondre — 500 au lieu de 404 dès que Postgres manquait. Les routes explicites de

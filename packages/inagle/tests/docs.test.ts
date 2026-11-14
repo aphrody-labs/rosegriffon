@@ -159,10 +159,13 @@ describe("@aphrody/inagle/docs", () => {
     });
   });
 
-  describe("OpenAPI 3.1.0 Generator", () => {
-    it("should generate a valid OpenAPI 3.1.0 document", () => {
+  describe("OpenAPI 3.2.1 Generator", () => {
+    it("should generate a valid OpenAPI 3.2.1 document", () => {
       const doc = generateOpenApiSpec();
-      expect(doc.openapi).toBe("3.1.0");
+      expect(doc.openapi).toBe("3.2.1");
+      expect(doc.jsonSchemaDialect).toBe(
+        "https://spec.openapis.org/oas/3.2/dialect/2025-09-19",
+      );
       expect(doc.info.title).toContain("Inagle Universal Game Data");
       expect(doc.info.version).toBe("2.0.5");
       expect(Object.keys(doc.paths).length).toBeGreaterThanOrEqual(8);
@@ -177,14 +180,14 @@ describe("@aphrody/inagle/docs", () => {
       const jsonStr = generateOpenApiJson(true);
       expect(typeof jsonStr).toBe("string");
       const parsed = JSON.parse(jsonStr);
-      expect(parsed.openapi).toBe("3.1.0");
+      expect(parsed.openapi).toBe("3.2.1");
       expect(parsed.info.version).toBe("2.0.5");
     });
 
     it("should serialize to valid YAML text", () => {
       const yamlStr = generateOpenApiYaml();
       expect(typeof yamlStr).toBe("string");
-      expect(yamlStr).toContain("openapi: 3.1.0");
+      expect(yamlStr).toContain("openapi: 3.2.1");
       expect(yamlStr).toContain("/api/characters:");
       expect(yamlStr).toContain("/api/vfs/formats:");
     });
