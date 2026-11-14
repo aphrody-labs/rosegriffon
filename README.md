@@ -59,18 +59,42 @@ bun packages/achillea-client/src/cli.ts ranked leaderboard
 
 ## Toolchain & Verification
 
+Global tools: `just 1.59.0`, `just-bash`, `obscura 0.2.7`, `tree-sitter 0.27.2`, `scriptc`, `tsc-ts`.
+
+### Self-host Mode
+
 ```sh
 bun install
 bun fmt
 bun --filter @rosegriffon/ui tokens
 bun --filter @rosegriffon/achillea-contract generate
-bun run typecheck
-bun run lint
-bun run test
+bun run --filter '*' typecheck
+bun run --filter '*' lint
+bun run --filter '*' test
 cargo check --workspace --all-targets
 ```
 
-### `just` & Production Fleet
+`justfile` and `infra/ops/cli.ts` drive builds, deployments, and verification across hosts (`infra/hosts.toml`, `infra/services.toml`), with `obscura.service` managing the self-hosted runtime:
+
+```sh
+just ci
+just build all
+just deploy all
+just verify all
+```
+
+### Cloud Mode (Vercel / Cloudflare)
+
+```sh
+bun run turbo:typecheck
+bun run turbo:lint
+bun run turbo:build
+wrangler deploy
+```
+
+Vercel deployments use `--prebuilt` (1 build/week max).
+
+### Production Fleet
 
 `justfile` and `infra/ops/cli.ts` drive builds, deployments, and verification across hosts (`infra/hosts.toml`, `infra/services.toml`):
 

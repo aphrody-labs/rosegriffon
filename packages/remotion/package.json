@@ -13,6 +13,7 @@
     "./subtitles": "./src/subtitles.ts"
   },
   "scripts": {
+    "lint": "oxlint src",
     "typecheck": "bun check --project tsconfig.json",
     "test": "bun test"
   },

@@ -18,6 +18,7 @@
   },
   "scripts": {
     "homebrew": "bun ./src/cli.ts",
+    "lint": "oxlint src",
     "typecheck": "bun check --noEmit",
     "test": "bun test"
   },

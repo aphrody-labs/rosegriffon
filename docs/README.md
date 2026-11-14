@@ -63,6 +63,12 @@ dans `.gitignore`.
 | [assets-cdn.md](assets-cdn.md)             | Contrat unique des assets partagés, des URL CDN et de leur publication.                                                 |
 | [cloud-deployment.md](cloud-deployment.md) | Déploiement portable de Website sur Vercel, Fly.io ou Cloud Run, avec Supabase Cloud ou Neon.                           |
 
+## Modes d'exécution et outils globaux
+
+- **Self-host** : `bun --filter '*' ...`, `just ci`, `just deploy all`, `obscura.service`
+- **Cloud** : `bun run turbo:typecheck`, `bun run turbo:build`, `wrangler deploy`, 1 build Vercel `--prebuilt` / semaine max
+- **Outils globaux** : `just 1.59.0`, `just-bash`, `obscura 0.2.7`, `tree-sitter 0.27.2`, `scriptc`, `tsc-ts`
+
 ## Vérifier et formater la documentation
 
 ```bash

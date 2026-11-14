@@ -19,21 +19,27 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": [".next/**", "!.next/cache/**", "dist/**"]
+      "inputs": ["$TURBO_DEFAULT$", "!**/*.md", "!**/*.test.*"],
+      "outputs": [".next/**", "!.next/cache/**", "!.next/dev/**", "dist/**"]
     },
     "compile": {
       "dependsOn": ["^build"],
+      "inputs": ["$TURBO_DEFAULT$", "!**/*.md", "!**/*.test.*"],
       "outputs": ["dist/**"],
       "cache": false
     },
     "typecheck": {
       "dependsOn": ["^typecheck"],
+      "inputs": ["$TURBO_DEFAULT$", "!**/*.md"],
       "outputs": []
     },
     "lint": {
+      "dependsOn": [],
+      "inputs": ["$TURBO_DEFAULT$", "!**/*.md"],
       "outputs": []
     },
     "test": {
+      "inputs": ["$TURBO_DEFAULT$", "!**/*.md"],
       "cache": false
     },
     "dev": {

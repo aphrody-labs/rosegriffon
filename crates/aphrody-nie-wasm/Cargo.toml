@@ -98,7 +98,6 @@ serde_json = { workspace = true }
 wasm-bindgen.workspace = true
 wasm-bindgen-futures.workspace = true
 console_error_panic_hook.workspace = true
-web-time.workspace = true
 parking_lot.workspace = true
 # GPU presentation (feature `webgpu`): wgpu through the shared backend, instance bytes.
 aphrody-gpu-backend = { version = "1.4.7", optional = true }

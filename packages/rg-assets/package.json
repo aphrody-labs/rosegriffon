@@ -23,6 +23,7 @@
     "website-public.json"
   ],
   "scripts": {
+    "lint": "oxlint src",
     "typecheck": "bun check -p tsconfig.json --noEmit"
   },
   "repository": {

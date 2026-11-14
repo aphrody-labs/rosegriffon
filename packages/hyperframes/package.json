@@ -13,6 +13,7 @@
     "./dragonball": "./src/dragonball.ts"
   },
   "scripts": {
+    "lint": "oxlint src",
     "typecheck": "bun check --project tsconfig.json",
     "test": "bun test"
   },

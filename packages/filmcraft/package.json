@@ -16,6 +16,7 @@
     "./mcp": "./src/mcp.ts"
   },
   "scripts": {
+    "lint": "oxlint src",
     "typecheck": "bun check --project tsconfig.json",
     "test": "bun test"
   },
